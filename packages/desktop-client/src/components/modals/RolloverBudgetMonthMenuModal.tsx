@@ -1,6 +1,8 @@
 // @ts-strict-ignore
 import React, { useState } from 'react';
 
+import { css } from 'glamor';
+
 import * as monthUtils from 'loot-core/src/shared/months';
 
 import { useNotes } from '../../hooks/useNotes';
@@ -117,15 +119,15 @@ export function RolloverBudgetMonthMenuModal({
               <View>
                 <Button
                   variant="bare"
-                  style={({ isPressed, isHovered }) => ({
-                    ...buttonStyle,
-                    ...(isPressed || isHovered
-                      ? {
-                          backgroundColor: 'transparent',
-                          color: buttonStyle.color,
-                        }
-                      : {}),
-                  })}
+                  className={String(
+                    css({
+                      ...buttonStyle,
+                      '&[data-pressed], &[data-hovered]': {
+                        backgroundColor: 'transparent',
+                        color: buttonStyle.color,
+                      },
+                    }),
+                  )}
                   onPress={onShowMore}
                 >
                   {!showMore ? (

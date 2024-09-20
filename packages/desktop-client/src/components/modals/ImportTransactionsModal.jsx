@@ -590,7 +590,7 @@ function SelectField({
       ]}
       value={value === null ? 'choose-field' : value}
       onChange={onChange}
-      buttonStyle={style}
+      style={style}
     />
   );
 }

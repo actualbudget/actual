@@ -134,7 +134,7 @@ export function Header({
               }
               value={end}
               options={allMonths.map(({ name, pretty }) => [name, pretty])}
-              buttonStyle={{ marginRight: 10 }}
+              style={{ marginRight: 10 }}
             />
           </View>
 

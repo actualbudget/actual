@@ -240,7 +240,7 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                 options={allIntervals.map(
                   ({ name, pretty }) => [name, pretty] as const,
                 )}
-                buttonStyle={{ width: 150 }}
+                style={{ width: 150 }}
                 popoverStyle={{ width: 150 }}
               />
               <Text>
@@ -262,7 +262,7 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                       ]
                 }
                 disabled={reportMode !== 'single-month'}
-                buttonStyle={{ width: 150 }}
+                style={{ width: 150 }}
                 popoverStyle={{ width: 150 }}
               />
             </View>
