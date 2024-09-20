@@ -1,9 +1,14 @@
-import React, { forwardRef, type ElementType, type HTMLProps } from 'react';
+import React, {
+  forwardRef,
+  type ElementType,
+  type HTMLProps,
+  type CSSProperties,
+} from 'react';
 
 import { css } from '@emotion/css';
 
 import { AnimatedLoading } from '../../icons/AnimatedLoading';
-import { type CSSProperties, styles, theme } from '../../style';
+import { styles, theme } from '../../style';
 
 import { View } from './View';
 
@@ -153,7 +158,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     };
 
     const Component = as;
-    const buttonStyle = {
+    const buttonStyle: CSSProperties = {
       alignItems: 'center',
       justifyContent: 'center',
       flexShrink: 0,
@@ -168,8 +173,8 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       transition: 'box-shadow .25s',
       WebkitAppRegion: 'no-drag',
       ...styles.smallText,
-      ':hover': !disabled && hoveredStyle,
-      ':active': !disabled && activeStyle,
+      ':hover': !disabled ? hoveredStyle : {},
+      ':active': !disabled ? activeStyle : {},
       ...(hover && hoveredStyle),
       ...(pressed && activeStyle),
       ...style,

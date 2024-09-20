@@ -5,9 +5,10 @@ import {
   useState,
   type ComponentType,
   type SVGProps,
+  type CSSProperties,
 } from 'react';
 
-import { type CSSProperties, theme } from '../../style';
+import { theme } from '../../style';
 
 import { Text } from './Text';
 import { Toggle } from './Toggle';

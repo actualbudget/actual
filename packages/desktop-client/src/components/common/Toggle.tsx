@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { type CSSProperties } from 'react';
 
 import { css } from '@emotion/css';
 
-import { theme, type CSSProperties } from '../../style';
+import { theme } from '../../style';
 
 type ToggleProps = {
   id: string;
@@ -52,7 +52,8 @@ export const Toggle = ({
         <span
           className={css([
             {
-              content: '',
+              // eslint-disable-next-line rulesdir/typography
+              content: '" "',
               position: 'absolute',
               top: '2px',
               left: '2px',

@@ -1,10 +1,10 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, type CSSProperties } from 'react';
 
 import type { Theme } from 'loot-core/src/types/prefs';
 
 import { SvgMoonStars, SvgSun, SvgSystem } from '../icons/v2';
 import { useResponsive } from '../ResponsiveProvider';
-import { type CSSProperties, themeOptions, useTheme } from '../style';
+import { themeOptions, useTheme } from '../style';
 
 import { Button } from './common/Button2';
 import { Menu } from './common/Menu';

@@ -1,9 +1,9 @@
-import React, { useState, type ReactNode } from 'react';
+import React, { useState, type ReactNode, type CSSProperties } from 'react';
 import { useLocation } from 'react-router-dom';
 
 import { css } from '@emotion/css';
 
-import { type CSSProperties, theme } from '../../style';
+import { theme } from '../../style';
 import { tokens } from '../../tokens';
 import { Link } from '../common/Link';
 import { View } from '../common/View';

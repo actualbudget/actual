@@ -1,4 +1,8 @@
-import React, { type RefObject, type UIEventHandler } from 'react';
+import React, {
+  type RefObject,
+  type UIEventHandler,
+  type CSSProperties,
+} from 'react';
 import { useTranslation } from 'react-i18next';
 
 import {
@@ -7,7 +11,6 @@ import {
 } from 'loot-core/src/types/models/reports';
 
 import { theme } from '../../../../style';
-import { type CSSProperties } from '../../../../style/types';
 import { View } from '../../../common/View';
 import { Row, Cell } from '../../../table';
 import { ReportOptions } from '../../ReportOptions';

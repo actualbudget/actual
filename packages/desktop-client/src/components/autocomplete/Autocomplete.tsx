@@ -11,8 +11,8 @@ import React, {
   type ChangeEvent,
 } from 'react';
 
-import Downshift, { type StateChangeTypes } from 'downshift';
 import { css, cx } from '@emotion/css';
+import Downshift, { type StateChangeTypes } from 'downshift';
 
 import { getNormalisedString } from 'loot-core/src/shared/normalisation';
 
@@ -442,7 +442,10 @@ function SingleAutocomplete<T extends Item>({
         // Super annoying but it works best to return a div so we
         // can't use a View here, but we can fake it be using the
         // className
-        <div className={cx('view', css({ display: 'flex' }))} {...containerProps}>
+        <div
+          className={cx('view', css({ display: 'flex' }))}
+          {...containerProps}
+        >
           <View ref={triggerRef} style={{ flexShrink: 0 }}>
             {renderInput(
               getInputProps({

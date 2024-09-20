@@ -2,6 +2,7 @@ import React, {
   type MouseEventHandler,
   type ComponentProps,
   type ReactNode,
+  type CSSProperties,
 } from 'react';
 import { NavLink, useMatch } from 'react-router-dom';
 
@@ -10,7 +11,7 @@ import { css } from '@emotion/css';
 import { type CustomReportEntity } from 'loot-core/types/models/reports';
 
 import { useNavigate } from '../../hooks/useNavigate';
-import { type CSSProperties, styles } from '../../style';
+import { styles } from '../../style';
 import { theme } from '../../style/theme';
 
 import { Button } from './Button2';
@@ -128,11 +129,7 @@ const InternalLink = ({
     <NavLink
       to={path}
       state={report ? { report } : {}}
-      className={css([
-        styles.smallText,
-        style,
-        match ? activeStyle : null,
-      ])}
+      className={css([styles.smallText, style, match ? activeStyle : null])}
     >
       {children}
     </NavLink>

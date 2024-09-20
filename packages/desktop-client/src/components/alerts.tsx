@@ -1,8 +1,12 @@
 // @ts-strict-ignore
-import React, { type ComponentType, type ReactNode } from 'react';
+import React, {
+  type ComponentType,
+  type ReactNode,
+  type CSSProperties,
+} from 'react';
 
 import { SvgExclamationOutline, SvgInformationOutline } from '../icons/v1';
-import { styles, theme, type CSSProperties } from '../style';
+import { styles, theme } from '../style';
 
 import { Text } from './common/Text';
 import { View } from './common/View';

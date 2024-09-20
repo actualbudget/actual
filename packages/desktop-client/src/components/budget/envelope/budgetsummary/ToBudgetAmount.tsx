@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { type CSSProperties } from 'react';
 
 import { css } from '@emotion/css';
 
 import { envelopeBudget } from 'loot-core/src/client/queries';
 
-import { theme, styles, type CSSProperties } from '../../../../style';
+import { theme, styles } from '../../../../style';
 import { Block } from '../../../common/Block';
 import { Tooltip } from '../../../common/Tooltip';
 import { View } from '../../../common/View';

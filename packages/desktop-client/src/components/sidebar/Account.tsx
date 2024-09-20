@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React from 'react';
+import React, { type CSSProperties } from 'react';
 
 import { css, cx } from '@emotion/css';
 
@@ -7,7 +7,7 @@ import * as Platform from 'loot-core/client/platform';
 import { type AccountEntity } from 'loot-core/src/types/models';
 
 import { useNotes } from '../../hooks/useNotes';
-import { styles, theme, type CSSProperties } from '../../style';
+import { styles, theme } from '../../style';
 import { AlignedText } from '../common/AlignedText';
 import { Link } from '../common/Link';
 import { Text } from '../common/Text';

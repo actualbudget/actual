@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { useState } from 'react';
+import React, { useState, type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { css } from '@emotion/css';
@@ -27,7 +27,7 @@ import { useAccounts } from '../../../hooks/useAccounts';
 import { useCategories } from '../../../hooks/useCategories';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { usePrivacyMode } from '../../../hooks/usePrivacyMode';
-import { theme, type CSSProperties } from '../../../style';
+import { theme } from '../../../style';
 import { AlignedText } from '../../common/AlignedText';
 import { Container } from '../Container';
 import { getCustomTick } from '../getCustomTick';

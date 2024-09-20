@@ -3,9 +3,10 @@ import React, {
   type ComponentType,
   type MouseEventHandler,
   type SVGProps,
+  type CSSProperties,
 } from 'react';
 
-import { theme, type CSSProperties } from '../../style';
+import { theme } from '../../style';
 import { Block } from '../common/Block';
 import { View } from '../common/View';
 

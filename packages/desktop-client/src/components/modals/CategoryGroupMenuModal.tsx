@@ -1,5 +1,10 @@
 // @ts-strict-ignore
-import React, { type ComponentProps, useRef, useState } from 'react';
+import React, {
+  type ComponentProps,
+  useRef,
+  useState,
+  type CSSProperties,
+} from 'react';
 
 import { type CategoryGroupEntity } from 'loot-core/src/types/models';
 
@@ -7,7 +12,7 @@ import { useCategories } from '../../hooks/useCategories';
 import { useNotes } from '../../hooks/useNotes';
 import { SvgDotsHorizontalTriple, SvgAdd, SvgTrash } from '../../icons/v1';
 import { SvgNotesPaper, SvgViewHide, SvgViewShow } from '../../icons/v2';
-import { type CSSProperties, styles, theme } from '../../style';
+import { styles, theme } from '../../style';
 import { Button } from '../common/Button2';
 import { Menu } from '../common/Menu';
 import {

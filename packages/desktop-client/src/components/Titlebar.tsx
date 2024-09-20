@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, type CSSProperties } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { Routes, Route, useLocation } from 'react-router-dom';
 
@@ -22,7 +22,7 @@ import {
   SvgViewShow,
 } from '../icons/v2';
 import { useResponsive } from '../ResponsiveProvider';
-import { theme, type CSSProperties, styles } from '../style';
+import { theme, styles } from '../style';
 
 import { AccountSyncCheck } from './accounts/AccountSyncCheck';
 import { AnimatedRefresh } from './AnimatedRefresh';

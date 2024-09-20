@@ -15,6 +15,7 @@ import React, {
   type ReactElement,
   type Ref,
   type MutableRefObject,
+  type CSSProperties,
 } from 'react';
 import { useStore } from 'react-redux';
 import AutoSizer from 'react-virtualized-auto-sizer';
@@ -27,7 +28,7 @@ import { useSelectedItems } from '../hooks/useSelected';
 import { AnimatedLoading } from '../icons/AnimatedLoading';
 import { SvgDelete, SvgExpandArrow } from '../icons/v0';
 import { SvgCheckmark } from '../icons/v1';
-import { type CSSProperties, styles, theme } from '../style';
+import { styles, theme } from '../style';
 
 import { Button } from './common/Button2';
 import { Input } from './common/Input';
@@ -1074,7 +1075,6 @@ export const Table = forwardRef(
             zIndex: editing || selected ? 101 : 'auto',
             transform: 'translateY(var(--pos))',
           }}
-          // @ts-expect-error not a recognised style attribute
           nativeStyle={{ '--pos': `${style.top - 1}px` }}
           data-focus-key={item.id}
         >

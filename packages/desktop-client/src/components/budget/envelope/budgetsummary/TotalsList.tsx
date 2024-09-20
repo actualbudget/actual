@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { type CSSProperties } from 'react';
 
 import { envelopeBudget } from 'loot-core/src/client/queries';
 
-import { styles, type CSSProperties } from '../../../../style';
+import { styles } from '../../../../style';
 import { AlignedText } from '../../../common/AlignedText';
 import { Block } from '../../../common/Block';
 import { Tooltip } from '../../../common/Tooltip';

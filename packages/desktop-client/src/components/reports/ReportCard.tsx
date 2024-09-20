@@ -3,6 +3,7 @@ import React, {
   useState,
   type ComponentProps,
   type ReactNode,
+  type CSSProperties,
 } from 'react';
 
 import { type CustomReportEntity } from 'loot-core/src/types/models';
@@ -10,7 +11,7 @@ import { type CustomReportEntity } from 'loot-core/src/types/models';
 import { useIsInViewport } from '../../hooks/useIsInViewport';
 import { useNavigate } from '../../hooks/useNavigate';
 import { useResponsive } from '../../ResponsiveProvider';
-import { type CSSProperties, theme } from '../../style';
+import { theme } from '../../style';
 import { Menu } from '../common/Menu';
 import { MenuButton } from '../common/MenuButton';
 import { Popover } from '../common/Popover';

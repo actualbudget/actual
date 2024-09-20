@@ -2,11 +2,12 @@ import React, {
   type ComponentPropsWithRef,
   forwardRef,
   type ReactNode,
+  type CSSProperties,
 } from 'react';
 
 import { css } from '@emotion/css';
 
-import { theme, styles, type CSSProperties } from '../../style';
+import { theme, styles } from '../../style';
 import { Button } from '../common/Button';
 import { Input } from '../common/Input';
 import { Text } from '../common/Text';
