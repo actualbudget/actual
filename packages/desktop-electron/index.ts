@@ -236,8 +236,8 @@ app.on('ready', async () => {
 
     if (parsedUrl.host !== 'actual') {
       return new Response(null, {
-        status: 105,
-        statusText: 'Name Not Resolved',
+        status: 404,
+        statusText: 'Host Not Resolved',
       });
     }
 
@@ -248,6 +248,16 @@ app.on('ready', async () => {
     if (pathname.startsWith('/static')) {
       // static assets
       filePath = path.normalize(`${__dirname}/client-build${pathname}`);
+      const resolvedPath = path.resolve(filePath);
+      const clientBuildPath = path.resolve(__dirname, 'client-build');
+
+      // Ensure filePath is within client-build directory - prevents directory traversal vulnerability
+      if (!resolvedPath.startsWith(clientBuildPath)) {
+        return new Response(null, {
+          status: 403,
+          statusText: 'Forbidden',
+        });
+      }
     }
 
     return net.fetch(`file:///${filePath}`);
@@ -301,8 +311,11 @@ ipcMain.on('get-bootstrap-data', event => {
 });
 
 ipcMain.handle('restart-server', () => {
-  serverProcess.kill();
-  serverProcess = null;
+  if (serverProcess) {
+    serverProcess.kill();
+    serverProcess = null;
+  }
+
   createBackgroundProcess();
 });
 
