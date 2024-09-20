@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { useState } from 'react';
+import React  from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 
@@ -60,14 +60,14 @@ export function AccountGroup<FieldName extends SheetFields<'account'>>({
     setCollapsedGroupsPref(c);
   };
 
-/*
+  /*
   const accountGroupStyle = {
     background: 'var(--color-tableBackground)',
     borderRadius: '10px',
     margin: '10px',
     border: '2px solid var(--color-tableBorder)',
   };
-*/
+  */
 
   return (
     <View style={{ flexShrink: 0, padding: '5px 0', ...style }}>
@@ -93,8 +93,7 @@ export function AccountGroup<FieldName extends SheetFields<'account'>>({
             query={queries.accountBalance(account)}
             onDrop={onReorder}
           />
-        ))
-      }
+        ))}
     </View>
   );
 }

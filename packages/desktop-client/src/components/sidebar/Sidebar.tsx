@@ -165,7 +165,7 @@ export function Sidebar() {
               title: t('Payees'),
               Icon: SvgStoreFront,
               to: '/payees',
-              hidable: true
+              hidable: true,
             },
             { title: t('Rules'), Icon: SvgTuning, to: '/rules', hidable: true },
           ]}
