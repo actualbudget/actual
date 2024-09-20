@@ -3,6 +3,7 @@ import Module from 'module';
 import path from 'path';
 
 import {
+  net,
   app,
   ipcMain,
   BrowserWindow,
@@ -17,8 +18,6 @@ import {
   SaveDialogOptions,
 } from 'electron';
 import isDev from 'electron-is-dev';
-// @ts-strict-ignore
-import fetch from 'node-fetch';
 import promiseRetry from 'promise-retry';
 
 import { getMenu } from './menu';
@@ -36,8 +35,6 @@ Module.globalPaths.push(__dirname + '/..');
 protocol.registerSchemesAsPrivileged([
   { scheme: 'app', privileges: { standard: true } },
 ]);
-
-global.fetch = fetch;
 
 if (!isDev || !process.env.ACTUAL_DOCUMENT_DIR) {
   process.env.ACTUAL_DOCUMENT_DIR = app.getPath('documents');
@@ -111,6 +108,7 @@ async function createWindow() {
       preload: __dirname + '/preload.js',
     },
   });
+
   win.setBackgroundColor('#E8ECF0');
 
   if (isDev) {
@@ -220,34 +218,39 @@ app.on('ready', async () => {
   // Install an `app://` protocol that always returns the base HTML
   // file no matter what URL it is. This allows us to use react-router
   // on the frontend
-  protocol.registerFileProtocol('app', (request, callback) => {
+  protocol.handle('app', request => {
     if (request.method !== 'GET') {
-      callback({ error: -322 }); // METHOD_NOT_SUPPORTED from chromium/src/net/base/net_error_list.h
-      return null;
+      return new Response(null, {
+        status: 405,
+        statusText: 'Method Not Allowed',
+      });
     }
 
     const parsedUrl = new URL(request.url);
     if (parsedUrl.protocol !== 'app:') {
-      callback({ error: -302 }); // UNKNOWN_URL_SCHEME
-      return;
+      return new Response(null, {
+        status: 404,
+        statusText: 'Unknown URL Scheme',
+      });
     }
 
     if (parsedUrl.host !== 'actual') {
-      callback({ error: -105 }); // NAME_NOT_RESOLVED
-      return;
+      return new Response(null, {
+        status: 105,
+        statusText: 'Name Not Resolved',
+      });
     }
 
     const pathname = parsedUrl.pathname;
 
+    let filePath = path.normalize(`${__dirname}/client-build/index.html`); // default web path
+
     if (pathname.startsWith('/static')) {
-      callback({
-        path: path.normalize(`${__dirname}/client-build${pathname}`),
-      });
-    } else {
-      callback({
-        path: path.normalize(`${__dirname}/client-build/index.html`),
-      });
+      // static assets
+      filePath = path.normalize(`${__dirname}/client-build${pathname}`);
     }
+
+    return net.fetch(`file:///${filePath}`);
   });
 
   if (process.argv[1] !== '--server') {
