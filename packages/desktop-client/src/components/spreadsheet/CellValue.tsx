@@ -3,6 +3,7 @@ import React, { type ComponentPropsWithoutRef, type ReactNode } from 'react';
 
 import { type CSSProperties, styles } from '../../style';
 import { Text } from '../common/Text';
+import { PrivacyFilter } from '../PrivacyFilter';
 
 import { type FormatType, useFormat } from './useFormat';
 import { useSheetName } from './useSheetName';
@@ -87,7 +88,13 @@ export function CellValueText<
       data-cellname={name}
       {...props}
     >
-      {formatter ? formatter(value, type) : format(value, type)}
+      <PrivacyFilter
+        activationFilters={[
+          type === 'financial' || type === 'financial-with-sign',
+        ]}
+      >
+        {formatter ? formatter(value, type) : format(value, type)}
+      </PrivacyFilter>
     </Text>
   );
 }
