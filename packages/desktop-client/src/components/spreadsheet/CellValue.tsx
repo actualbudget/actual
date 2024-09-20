@@ -52,6 +52,8 @@ export function CellValue<
   );
 }
 
+const PRIVACY_FILTER_TYPES = ['financial', 'financial-with-sign'];
+
 type CellValueTextProps<
   SheetName extends SheetNames,
   FieldName extends SheetFields<SheetName>,
@@ -88,11 +90,7 @@ export function CellValueText<
       data-cellname={name}
       {...props}
     >
-      <PrivacyFilter
-        activationFilters={[
-          type === 'financial' || type === 'financial-with-sign',
-        ]}
-      >
+      <PrivacyFilter activationFilters={[PRIVACY_FILTER_TYPES.includes(type)]}>
         {formatter ? formatter(value, type) : format(value, type)}
       </PrivacyFilter>
     </Text>
