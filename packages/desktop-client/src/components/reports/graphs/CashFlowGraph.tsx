@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import * as d from 'date-fns';
 import { css } from '@emotion/css';
+import * as d from 'date-fns';
 import {
   Bar,
   CartesianGrid,
@@ -22,7 +22,7 @@ import {
 } from 'loot-core/src/shared/util';
 
 import { usePrivacyMode } from '../../../hooks/usePrivacyMode';
-import { type CSSProperties, theme } from '../../../style';
+import { theme } from '../../../style';
 import { AlignedText } from '../../common/AlignedText';
 import { chartTheme } from '../chart-theme';
 import { Container } from '../Container';

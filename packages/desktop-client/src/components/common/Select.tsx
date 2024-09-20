@@ -1,9 +1,8 @@
-import { useRef, useState } from 'react';
+import { useRef, useState, type CSSProperties } from 'react';
 
 import { css } from 'glamor';
 
 import { SvgExpandArrow } from '../../icons/v0';
-import { type CSSProperties } from '../../style';
 
 import { Button } from './Button2';
 import { Menu } from './Menu';

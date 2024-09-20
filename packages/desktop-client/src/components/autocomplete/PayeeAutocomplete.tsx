@@ -9,6 +9,7 @@ import React, {
   type SVGProps,
   type ComponentPropsWithoutRef,
   type ReactElement,
+  type CSSProperties,
 } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
@@ -27,7 +28,7 @@ import { useAccounts } from '../../hooks/useAccounts';
 import { useCommonPayees, usePayees } from '../../hooks/usePayees';
 import { SvgAdd, SvgBookmark } from '../../icons/v1';
 import { useResponsive } from '../../ResponsiveProvider';
-import { type CSSProperties, theme, styles } from '../../style';
+import { theme, styles } from '../../style';
 import { Button } from '../common/Button';
 import { TextOneLine } from '../common/TextOneLine';
 import { View } from '../common/View';
@@ -606,7 +607,7 @@ function PayeeItem({
       // * https://github.com/WebKit/WebKit/blob/58956cf59ba01267644b5e8fe766efa7aa6f0c5c/Source/WebKit/WebProcess/WebPage/ios/WebPageIOS.mm#L783
       role="button"
       className={cx(
-        className, 
+        className,
         css({
           backgroundColor: highlighted
             ? theme.menuAutoCompleteBackgroundHover

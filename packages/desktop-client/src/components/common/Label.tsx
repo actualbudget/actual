@@ -1,6 +1,6 @@
-import { forwardRef, type ReactNode } from 'react';
+import { forwardRef, type ReactNode, type CSSProperties } from 'react';
 
-import { type CSSProperties, theme, styles } from '../../style';
+import { theme, styles } from '../../style';
 
 import { Text } from './Text';
 

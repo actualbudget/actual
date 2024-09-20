@@ -1,12 +1,12 @@
 // @ts-strict-ignore
-import React, { type ReactNode } from 'react';
+import React, { type ReactNode, type CSSProperties } from 'react';
 
 import { numberFormats } from 'loot-core/src/shared/util';
 import { type SyncedPrefs } from 'loot-core/src/types/prefs';
 
 import { useDateFormat } from '../../hooks/useDateFormat';
 import { useSyncedPref } from '../../hooks/useSyncedPref';
-import { type CSSProperties, theme } from '../../style';
+import { theme } from '../../style';
 import { tokens } from '../../tokens';
 import { Select } from '../common/Select';
 import { Text } from '../common/Text';

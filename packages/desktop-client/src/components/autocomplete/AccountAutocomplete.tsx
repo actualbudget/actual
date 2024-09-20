@@ -4,6 +4,7 @@ import React, {
   type ComponentProps,
   type ComponentPropsWithoutRef,
   type ReactElement,
+  type CSSProperties,
 } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -13,7 +14,7 @@ import { type AccountEntity } from 'loot-core/src/types/models';
 
 import { useAccounts } from '../../hooks/useAccounts';
 import { useResponsive } from '../../ResponsiveProvider';
-import { type CSSProperties, theme, styles } from '../../style';
+import { theme, styles } from '../../style';
 import { TextOneLine } from '../common/TextOneLine';
 import { View } from '../common/View';
 
@@ -221,7 +222,7 @@ function AccountItem({
           paddingLeft: 20,
           borderRadius: embedded ? 4 : 0,
           ...narrowStyle,
-        })
+        }),
       )}
       data-testid={`${item.name}-account-item`}
       data-highlighted={highlighted || undefined}

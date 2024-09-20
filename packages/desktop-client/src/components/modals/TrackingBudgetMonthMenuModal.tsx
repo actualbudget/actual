@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { useState } from 'react';
+import React, { useState, type CSSProperties } from 'react';
 
 import { css } from 'glamor';
 
@@ -9,7 +9,7 @@ import { useNotes } from '../../hooks/useNotes';
 import { useUndo } from '../../hooks/useUndo';
 import { SvgCheveronDown, SvgCheveronUp } from '../../icons/v1';
 import { SvgNotesPaper } from '../../icons/v2';
-import { type CSSProperties, styles, theme } from '../../style';
+import { styles, theme } from '../../style';
 import { BudgetMonthMenu } from '../budget/tracking/budgetsummary/BudgetMonthMenu';
 import { Button } from '../common/Button2';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';

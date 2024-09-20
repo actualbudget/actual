@@ -1,4 +1,6 @@
 // @ts-strict-ignore
+import { type CSSProperties } from 'react';
+
 import { keyframes } from '@emotion/css';
 
 import * as Platform from 'loot-core/src/client/platform';
@@ -6,7 +8,6 @@ import * as Platform from 'loot-core/src/client/platform';
 import { tokens } from '../tokens';
 
 import { theme } from './theme';
-import { type CSSProperties } from './types';
 
 const MOBILE_MIN_HEIGHT = 40;
 

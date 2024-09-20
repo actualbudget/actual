@@ -2,17 +2,15 @@ import React, {
   forwardRef,
   type HTMLProps,
   type Ref,
-  type StyleHTMLAttributes,
+  type CSSProperties,
 } from 'react';
 
 import { css, cx } from '@emotion/css';
 
-import { type CSSProperties } from '../../style';
-
 type ViewProps = HTMLProps<HTMLDivElement> & {
   className?: string;
   style?: CSSProperties;
-  nativeStyle?: StyleHTMLAttributes<HTMLDivElement>;
+  nativeStyle?: CSSProperties;
   innerRef?: Ref<HTMLDivElement>;
 };
 

@@ -6,6 +6,7 @@ import React, {
   type ReactNode,
   type ComponentPropsWithoutRef,
   type ComponentPropsWithRef,
+  type CSSProperties,
 } from 'react';
 import {
   ModalOverlay as ReactAriaModalOverlay,
@@ -21,7 +22,7 @@ import { useModalState } from '../../hooks/useModalState';
 import { AnimatedLoading } from '../../icons/AnimatedLoading';
 import { SvgLogo } from '../../icons/logo';
 import { SvgDelete } from '../../icons/v0';
-import { type CSSProperties, styles, theme } from '../../style';
+import { styles, theme } from '../../style';
 import { tokens } from '../../tokens';
 
 import { Button } from './Button2';

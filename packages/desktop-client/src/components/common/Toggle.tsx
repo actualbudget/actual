@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { type CSSProperties } from 'react';
 
 import { css } from '@emotion/css';
 
-import { type CSSProperties, theme } from '../../style';
+import { theme } from '../../style';
 
 import { View } from './View';
 
@@ -61,27 +61,25 @@ export const Toggle = ({
         <span
           data-toggle
           data-on={isOn}
-          className={String(
-            css(
-              {
-                content: ' ',
-                position: 'absolute',
-                top: '2px',
-                left: '2px',
-                width: '12px',
-                height: '12px',
-                borderRadius: '100px',
-                transition: '0.2s',
-                boxShadow: '0 0 2px 0 rgba(10, 10, 10, 0.29)',
-                backgroundColor: isDisabled
-                  ? theme.checkboxToggleDisabled
-                  : '#fff',
-              },
-              isOn && {
-                left: 'calc(100% - 2px)',
-                transform: 'translateX(-100%)',
-              },
-            ),
+          className={css(
+            {
+              content: ' ',
+              position: 'absolute',
+              top: '2px',
+              left: '2px',
+              width: '12px',
+              height: '12px',
+              borderRadius: '100px',
+              transition: '0.2s',
+              boxShadow: '0 0 2px 0 rgba(10, 10, 10, 0.29)',
+              backgroundColor: isDisabled
+                ? theme.checkboxToggleDisabled
+                : '#fff',
+            },
+            isOn && {
+              left: 'calc(100% - 2px)',
+              transform: 'translateX(-100%)',
+            },
           )}
         />
       </label>

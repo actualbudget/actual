@@ -7,6 +7,7 @@ import React, {
   type ComponentType,
   type ComponentPropsWithoutRef,
   type ReactElement,
+  type CSSProperties,
   useCallback,
 } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
@@ -25,7 +26,7 @@ import { useCategories } from '../../hooks/useCategories';
 import { useSyncedPref } from '../../hooks/useSyncedPref';
 import { SvgSplit } from '../../icons/v0';
 import { useResponsive } from '../../ResponsiveProvider';
-import { type CSSProperties, theme, styles } from '../../style';
+import { theme, styles } from '../../style';
 import { useEnvelopeSheetValue } from '../budget/envelope/EnvelopeBudgetComponents';
 import { makeAmountFullStyle } from '../budget/util';
 import { Text } from '../common/Text';
@@ -374,10 +375,10 @@ function CategoryItem({
   const { isNarrowWidth } = useResponsive();
   const narrowStyle = isNarrowWidth
     ? {
-      ...styles.mobileMenuItem,
-      borderRadius: 0,
-      borderTop: `1px solid ${theme.pillBorder}`,
-    }
+        ...styles.mobileMenuItem,
+        borderRadius: 0,
+        borderTop: `1px solid ${theme.pillBorder}`,
+      }
     : {};
   const [budgetType = 'rollover'] = useSyncedPref('budgetType');
 
@@ -411,7 +412,7 @@ function CategoryItem({
           paddingLeft: 20,
           borderRadius: embedded ? 4 : 0,
           ...narrowStyle,
-        })
+        }),
       )}
       data-testid={`${item.name}-category-item`}
       data-highlighted={highlighted || undefined}

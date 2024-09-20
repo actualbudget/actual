@@ -1,8 +1,8 @@
-import React, { type ReactNode } from 'react';
+import React, { type ReactNode, type CSSProperties } from 'react';
 
 import { css } from '@emotion/css';
 
-import { type CSSProperties, theme } from '../../style';
+import { theme } from '../../style';
 import { Button } from '../common/Button2';
 
 type ModeButtonProps = {

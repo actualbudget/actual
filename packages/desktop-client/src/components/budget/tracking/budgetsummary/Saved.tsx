@@ -1,11 +1,11 @@
-import React from 'react';
+import React, { type CSSProperties } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { css } from '@emotion/css';
 
 import { trackingBudget } from 'loot-core/src/client/queries';
 
-import { theme, type CSSProperties, styles } from '../../../../style';
+import { theme, styles } from '../../../../style';
 import { AlignedText } from '../../../common/AlignedText';
 import { Text } from '../../../common/Text';
 import { Tooltip } from '../../../common/Tooltip';

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { css } from '@emotion/css';
@@ -23,7 +23,7 @@ import {
 } from 'loot-core/src/types/models/reports';
 
 import { usePrivacyMode } from '../../../hooks/usePrivacyMode';
-import { theme, type CSSProperties } from '../../../style';
+import { theme } from '../../../style';
 import { AlignedText } from '../../common/AlignedText';
 import { Container } from '../Container';
 
