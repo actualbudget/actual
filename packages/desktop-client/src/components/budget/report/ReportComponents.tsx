@@ -308,8 +308,6 @@ export const CategoryMonth = memo(function CategoryMonth({
       onMouseEnter={handlePointerEnter}
       onMouseLeave={handlePointerLeave}
       style={{
-        borderBottomWidth: 0,
-        borderColor: 'transparent',
         flex: 1,
         backgroundColor: monthUtils.isCurrentMonth(month)
           ? theme.budgetCurrentMonth
@@ -344,6 +342,7 @@ export const CategoryMonth = memo(function CategoryMonth({
                 alignItems: 'center',
                 justifyContent: 'center',
                 borderTopWidth: 1,
+                borderBottomWidth: showProgress ? 0 : 1,
                 borderColor: theme.tableBorder,
               }}
             >
@@ -413,7 +412,7 @@ export const CategoryMonth = memo(function CategoryMonth({
             width="flex"
             onExpose={() => onEdit(category.id, month)}
             style={{
-              borderBottomWidth: 0,
+              borderBottomWidth: showProgress ? 0 : 1,
               ...(editing && { zIndex: 100 }),
               ...styles.tnum,
             }}
@@ -459,7 +458,7 @@ export const CategoryMonth = memo(function CategoryMonth({
           name="spent"
           width="flex"
           style={{
-            borderBottomWidth: 0,
+            borderBottomWidth: showProgress ? 0 : 1,
             textAlign: 'right',
           }}
         >
@@ -492,7 +491,7 @@ export const CategoryMonth = memo(function CategoryMonth({
             name="balance"
             width="flex"
             style={{
-              borderBottomWidth: 0,
+              borderBottomWidth: showProgress ? 0 : 1,
               paddingRight: styles.monthRightPadding,
               textAlign: 'right',
             }}

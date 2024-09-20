@@ -298,8 +298,6 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
       onMouseEnter={handlePointerEnter}
       onMouseLeave={handlePointerLeave}
       style={{
-        borderBottomWidth: 0,
-        borderColor: 'transparent',
         flex: 1,
         backgroundColor: monthUtils.isCurrentMonth(month)
           ? theme.budgetCurrentMonth
@@ -334,6 +332,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
                 alignItems: 'center',
                 justifyContent: 'center',
                 borderTopWidth: 1,
+                borderBottomWidth: showProgress ? 0 : 1,
                 borderColor: theme.tableBorder,
               }}
             >
@@ -404,7 +403,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
             width="flex"
             onExpose={() => onEdit(category.id, month)}
             style={{
-              borderBottomWidth: 0,
+              borderBottomWidth: showProgress ? 0 : 1,
               ...(editing && { zIndex: 100 }),
               ...styles.tnum,
             }}
@@ -450,7 +449,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
           name="spent"
           width="flex"
           style={{
-            borderBottomWidth: 0,
+            borderBottomWidth: showProgress ? 0 : 1,
             textAlign: 'right',
           }}
         >
@@ -479,7 +478,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
           name="balance"
           width="flex"
           style={{
-            borderBottomWidth: 0,
+            borderBottomWidth: showProgress ? 0 : 1,
             paddingRight: styles.monthRightPadding,
             textAlign: 'right',
           }}
