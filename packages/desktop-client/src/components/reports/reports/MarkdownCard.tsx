@@ -131,7 +131,7 @@ export function MarkdownCard({
             }}
           />
         ) : (
-          <Text {...markdownStyles}>
+          <Text className={markdownStyles}>
             <ReactMarkdown linkTarget="_blank">{meta.content}</ReactMarkdown>
           </Text>
         )}
