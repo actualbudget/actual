@@ -35,15 +35,15 @@ export function ActionButtons({ buttons }: ActionButtonsProps) {
 
   return (
     <View style={{ padding: '5px 0', flexShrink: 0 }}>
-      {buttons.map(item => (
-        (item.hidable ? (
+      {buttons.map(item =>
+        item.hidable ? (
           expanded && (
-          <Item
-            key={item.title}
-            title={item.title}
-            Icon={item.Icon}
-            to={item.to}
-          />
+            <Item
+              key={item.title}
+              title={item.title}
+              Icon={item.Icon}
+              to={item.to}
+            />
           )
         ) : (
           <Item
@@ -52,8 +52,8 @@ export function ActionButtons({ buttons }: ActionButtonsProps) {
             Icon={item.Icon}
             to={item.to}
           />
-        ))
-      ))}
+        ),
+      )}
       <SecondaryItem
         title={expanded ? t('less') : t('more')}
         Icon={expanded ? SvgCheveronUp : SvgCheveronDown}

@@ -52,7 +52,7 @@ export function AccountGroupName<FieldName extends SheetFields<'account'>>({
   };
 
   return (
-    <View style={{ flexShrink: 0, ...outerStyle }} >
+    <View style={{ flexShrink: 0, ...outerStyle }}>
       <View
         style={{
           flexDirection: 'row',

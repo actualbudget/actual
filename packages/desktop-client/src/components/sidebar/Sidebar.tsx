@@ -161,7 +161,12 @@ export function Sidebar() {
             { title: t('Budget'), Icon: SvgWallet, to: '/budget' },
             { title: t('Reports'), Icon: SvgReports, to: '/reports' },
             { title: t('Schedules'), Icon: SvgCalendar, to: '/schedules' },
-            { title: t('Payees'), Icon: SvgStoreFront, to: '/payees', hidable: true },
+            {
+              title: t('Payees'),
+              Icon: SvgStoreFront,
+              to: '/payees',
+              hidable: true
+            },
             { title: t('Rules'), Icon: SvgTuning, to: '/rules', hidable: true },
           ]}
         />
