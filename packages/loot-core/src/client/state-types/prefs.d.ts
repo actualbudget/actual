@@ -1,20 +1,20 @@
-import type { GlobalPrefs, LocalPrefs, MetadataPrefs } from '../../types/prefs';
+import type { GlobalPrefs, MetadataPrefs } from '../../types/prefs';
 import type * as constants from '../constants';
 
 export type PrefsState = {
-  local: LocalPrefs & MetadataPrefs;
+  local: MetadataPrefs;
   global: GlobalPrefs;
 };
 
 export type SetPrefsAction = {
   type: typeof constants.SET_PREFS;
-  prefs: LocalPrefs & MetadataPrefs;
+  prefs: MetadataPrefs;
   globalPrefs: GlobalPrefs;
 };
 
 export type MergeLocalPrefsAction = {
   type: typeof constants.MERGE_LOCAL_PREFS;
-  prefs: LocalPrefs & MetadataPrefs;
+  prefs: MetadataPrefs;
 };
 
 export type MergeGlobalPrefsAction = {
