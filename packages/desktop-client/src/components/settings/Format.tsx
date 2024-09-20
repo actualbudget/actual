@@ -1,5 +1,7 @@
 // @ts-strict-ignore
-import React, { type ReactNode, type CSSProperties } from 'react';
+import React, { type ReactNode } from 'react';
+
+import { css } from '@emotion/css';
 
 import { numberFormats } from 'loot-core/src/shared/util';
 import { type SyncedPrefs } from 'loot-core/src/types/prefs';
@@ -64,11 +66,11 @@ export function FormatSettings() {
   const numberFormat = _numberFormat || 'comma-dot';
   const [hideFraction, setHideFractionPref] = useSyncedPref('hideFraction');
 
-  const selectButtonStyle: CSSProperties = {
-    ':hover': {
+  const selectButtonClassName = css({
+    '&[data-hovered]': {
       backgroundColor: theme.buttonNormalBackgroundHover,
     },
-  };
+  });
 
   return (
     <Setting
@@ -96,7 +98,7 @@ export function FormatSettings() {
                 f.value,
                 String(hideFraction) === 'true' ? f.labelNoFraction : f.label,
               ])}
-              style={selectButtonStyle}
+              className={selectButtonClassName}
             />
 
             <Text style={{ display: 'flex' }}>
@@ -116,7 +118,7 @@ export function FormatSettings() {
               value={dateFormat}
               onChange={format => setDateFormatPref(format)}
               options={dateFormats.map(f => [f.value, f.label])}
-              style={selectButtonStyle}
+              className={selectButtonClassName}
             />
           </Column>
 
@@ -125,7 +127,7 @@ export function FormatSettings() {
               value={firstDayOfWeekIdx}
               onChange={idx => setFirstDayOfWeekIdxPref(idx)}
               options={daysOfWeek.map(f => [f.value, f.label])}
-              style={selectButtonStyle}
+              className={selectButtonClassName}
             />
           </Column>
         </View>

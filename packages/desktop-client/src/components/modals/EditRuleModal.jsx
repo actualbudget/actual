@@ -7,6 +7,7 @@ import React, {
 } from 'react';
 import { useDispatch } from 'react-redux';
 
+import { css } from '@emotion/css';
 import { v4 as uuid } from 'uuid';
 
 import {
@@ -97,10 +98,10 @@ export function FieldSelect({ fields, style, value, onChange }) {
         options={fields}
         value={value}
         onChange={onChange}
-        style={{
+        className={css({
           color: theme.pageTextPositive,
           '&[data-hovered]': { color: theme.pageTextPositive },
-        }}
+        })}
       />
     </View>
   );

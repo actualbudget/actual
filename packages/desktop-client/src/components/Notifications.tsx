@@ -8,7 +8,7 @@ import React, {
 } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { css } from 'glamor';
+import { css } from '@emotion/css';
 
 import { removeNotification } from 'loot-core/client/actions';
 import { type State } from 'loot-core/src/client/state-types';
@@ -203,29 +203,27 @@ function Notification({
                 onRemove();
                 setLoading(false);
               }}
-              className={String(
-                css({
-                  backgroundColor: 'transparent',
-                  border: `1px solid ${
-                    positive
-                      ? theme.noticeBorder
-                      : error
-                        ? theme.errorBorder
-                        : theme.warningBorder
-                  }`,
-                  color: 'currentColor',
-                  ...styles.mediumText,
-                  flexShrink: 0,
-                  '&[data-hovered], &[data-pressed]': {
-                    backgroundColor: positive
-                      ? theme.noticeBackground
-                      : error
-                        ? theme.errorBackground
-                        : theme.warningBackground,
-                  },
-                  ...narrowStyle,
-                }),
-              )}
+              className={css({
+                backgroundColor: 'transparent',
+                border: `1px solid ${
+                  positive
+                    ? theme.noticeBorder
+                    : error
+                      ? theme.errorBorder
+                      : theme.warningBorder
+                }`,
+                color: 'currentColor',
+                ...styles.mediumText,
+                flexShrink: 0,
+                '&[data-hovered], &[data-pressed]': {
+                  backgroundColor: positive
+                    ? theme.noticeBackground
+                    : error
+                      ? theme.errorBackground
+                      : theme.warningBackground,
+                },
+                ...narrowStyle,
+              })}
             >
               {button.title}
             </ButtonWithLoading>

@@ -2,7 +2,7 @@ import React, { useState, useEffect, type CSSProperties } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { Routes, Route, useLocation } from 'react-router-dom';
 
-import { css } from 'glamor';
+import { css } from '@emotion/css';
 
 import * as Platform from 'loot-core/src/client/platform';
 import * as queries from 'loot-core/src/client/queries';
@@ -202,23 +202,21 @@ function SyncButton({ style, isMobile = false }: SyncButtonProps) {
     <Button
       variant="bare"
       aria-label="Sync"
-      className={String(
-        css({
-          ...(isMobile
-            ? {
-                ...style,
-                WebkitAppRegion: 'none',
-                ...mobileIconStyle,
-              }
-            : {
-                ...style,
-                WebkitAppRegion: 'none',
-                color: desktopColor,
-              }),
-          '&[data-hovered]': hoveredStyle,
-          '&[data-pressed]': activeStyle,
-        }),
-      )}
+      className={css({
+        ...(isMobile
+          ? {
+              ...style,
+              WebkitAppRegion: 'none',
+              ...mobileIconStyle,
+            }
+          : {
+              ...style,
+              WebkitAppRegion: 'none',
+              color: desktopColor,
+            }),
+        '&[data-hovered]': hoveredStyle,
+        '&[data-pressed]': activeStyle,
+      })}
       onPress={sync}
     >
       {isMobile ? (
