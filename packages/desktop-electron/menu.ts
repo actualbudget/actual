@@ -179,7 +179,7 @@ export function getMenu(
           click: function (_menuItem, focusedWin) {
             if (focusedWin) {
               focusedWin.webContents.executeJavaScript(
-                'window.__actionsForMenu && window.__actionsForMenu.pushModal("keyboard-shortcuts")',
+                'window.__actionsForMenu && !window.__actionsForMenu.inputFocused() && window.__actionsForMenu.pushModal("keyboard-shortcuts")',
               );
             }
           },

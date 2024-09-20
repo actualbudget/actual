@@ -1,10 +1,11 @@
-import React, { memo, useRef, useState } from 'react';
+import React, { type ComponentProps, memo, useRef, useState } from 'react';
 
 import { rolloverBudget } from 'loot-core/src/client/queries';
 import { evalArithmetic } from 'loot-core/src/shared/arithmetic';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToCurrency, amountToInteger } from 'loot-core/src/shared/util';
 
+import { useUndo } from '../../../hooks/useUndo';
 import { SvgCheveronDown } from '../../../icons/v1';
 import { styles, theme, type CSSProperties } from '../../../style';
 import { Button } from '../../common/Button2';
@@ -12,8 +13,7 @@ import { Popover } from '../../common/Popover';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
 import { type Binding, type SheetFields } from '../../spreadsheet';
-import { CellValue, type CellValueProps } from '../../spreadsheet/CellValue';
-import { useFormat } from '../../spreadsheet/useFormat';
+import { CellValue, CellValueText } from '../../spreadsheet/CellValue';
 import { useSheetName } from '../../spreadsheet/useSheetName';
 import { useSheetValue } from '../../spreadsheet/useSheetValue';
 import { Row, Field, SheetCell, type SheetCellProps } from '../../table';
@@ -38,7 +38,7 @@ export function useRolloverSheetValue<
 export const RolloverCellValue = <
   FieldName extends SheetFields<'rollover-budget'>,
 >(
-  props: CellValueProps<'rollover-budget', FieldName>,
+  props: ComponentProps<typeof CellValue<'rollover-budget', FieldName>>,
 ) => {
   return <CellValue {...props} />;
 };
@@ -55,8 +55,12 @@ const headerLabelStyle: CSSProperties = {
   textAlign: 'right',
 };
 
+const cellStyle: CSSProperties = {
+  color: theme.tableHeaderText,
+  fontWeight: 600,
+};
+
 export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
-  const format = useFormat();
   return (
     <View
       style={{
@@ -72,27 +76,26 @@ export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
         <RolloverCellValue
           binding={rolloverBudget.totalBudgeted}
           type="financial"
-          style={{ color: theme.tableHeaderText, fontWeight: 600 }}
-          formatter={value => {
-            return format(-parseFloat(value || '0'), 'financial');
-          }}
-        />
+        >
+          {props => (
+            <CellValueText {...props} value={-props.value} style={cellStyle} />
+          )}
+        </RolloverCellValue>
       </View>
       <View style={headerLabelStyle}>
         <Text style={{ color: theme.tableHeaderText }}>Spent</Text>
-        <RolloverCellValue
-          binding={rolloverBudget.totalSpent}
-          type="financial"
-          style={{ color: theme.tableHeaderText, fontWeight: 600 }}
-        />
+        <RolloverCellValue binding={rolloverBudget.totalSpent} type="financial">
+          {props => <CellValueText {...props} style={cellStyle} />}
+        </RolloverCellValue>
       </View>
       <View style={headerLabelStyle}>
         <Text style={{ color: theme.tableHeaderText }}>Balance</Text>
         <RolloverCellValue
           binding={rolloverBudget.totalBalance}
           type="financial"
-          style={{ color: theme.tableHeaderText, fontWeight: 600 }}
-        />
+        >
+          {props => <CellValueText {...props} style={cellStyle} />}
+        </RolloverCellValue>
       </View>
     </View>
   );
@@ -195,12 +198,13 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
   const balanceMenuTriggerRef = useRef(null);
   const [budgetMenuOpen, setBudgetMenuOpen] = useState(false);
   const [balanceMenuOpen, setBalanceMenuOpen] = useState(false);
-  const [hover, setHover] = useState(false);
 
   const onMenuAction = (...args: Parameters<typeof onBudgetAction>) => {
     onBudgetAction(...args);
     setBudgetMenuOpen(false);
   };
+
+  const { showUndoNotification } = useUndo();
 
   return (
     <View
@@ -224,16 +228,14 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
           flex: 1,
           flexDirection: 'row',
         }}
-        onMouseOverCapture={() => setHover(true)}
-        onMouseLeave={() => {
-          setHover(false);
-        }}
       >
-        {!editing && (hover || budgetMenuOpen) ? (
+        {!editing && (
           <View
             style={{
+              flexDirection: 'row',
               flexShrink: 1,
               paddingLeft: 3,
+              alignItems: 'center',
               justifyContent: 'center',
               borderTopWidth: 1,
               borderBottomWidth: 1,
@@ -268,6 +270,9 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
                   onMenuAction(month, 'copy-single-last', {
                     category: category.id,
                   });
+                  showUndoNotification({
+                    message: `Budget set to last month’s budget.`,
+                  });
                 }}
                 onSetMonthsAverage={numberOfMonths => {
                   if (
@@ -281,16 +286,22 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
                   onMenuAction(month, `set-single-${numberOfMonths}-avg`, {
                     category: category.id,
                   });
+                  showUndoNotification({
+                    message: `Budget set to ${numberOfMonths}-month average.`,
+                  });
                 }}
                 onApplyBudgetTemplate={() => {
                   onMenuAction(month, 'apply-single-category-template', {
                     category: category.id,
                   });
+                  showUndoNotification({
+                    message: `Budget template applied.`,
+                  });
                 }}
               />
             </Popover>
           </View>
-        ) : null}
+        )}
         <RolloverSheetCell
           name="budget"
           exposed={editing}
@@ -344,12 +355,18 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
           <RolloverCellValue
             binding={rolloverBudget.catSumAmount(category.id)}
             type="financial"
-            getStyle={makeAmountGrey}
-            style={{
-              cursor: 'pointer',
-              ':hover': { textDecoration: 'underline' },
-            }}
-          />
+          >
+            {props => (
+              <CellValueText
+                {...props}
+                style={{
+                  cursor: 'pointer',
+                  ':hover': { textDecoration: 'underline' },
+                  ...makeAmountGrey(props.value),
+                }}
+              />
+            )}
+          </RolloverCellValue>
         </span>
       </Field>
       <Field
@@ -367,9 +384,6 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
             goal={rolloverBudget.catGoal(category.id)}
             budgeted={rolloverBudget.catBudgeted(category.id)}
             longGoal={rolloverBudget.catLongGoal(category.id)}
-            style={{
-              ':hover': { textDecoration: 'underline' },
-            }}
           />
         </span>
 
@@ -454,11 +468,17 @@ export function IncomeCategoryMonth({
           <RolloverCellValue
             binding={rolloverBudget.catSumAmount(category.id)}
             type="financial"
-            style={{
-              cursor: 'pointer',
-              ':hover': { textDecoration: 'underline' },
-            }}
-          />
+          >
+            {props => (
+              <CellValueText
+                {...props}
+                style={{
+                  cursor: 'pointer',
+                  ':hover': { textDecoration: 'underline' },
+                }}
+              />
+            )}
+          </RolloverCellValue>
         </span>
       </Field>
     </View>

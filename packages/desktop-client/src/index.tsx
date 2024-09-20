@@ -70,7 +70,7 @@ handleGlobalEvents(boundActions, store);
 declare global {
   // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
   interface Window {
-    __actionsForMenu: BoundActions;
+    __actionsForMenu: BoundActions & { inputFocused: typeof inputFocused };
 
     $send: typeof send;
     $query: typeof runQuery;
@@ -78,8 +78,16 @@ declare global {
   }
 }
 
+function inputFocused() {
+  return (
+    window.document.activeElement.tagName === 'INPUT' ||
+    window.document.activeElement.tagName === 'TEXTAREA' ||
+    (window.document.activeElement as HTMLElement).isContentEditable
+  );
+}
+
 // Expose this to the main process to menu items can access it
-window.__actionsForMenu = boundActions;
+window.__actionsForMenu = { ...boundActions, inputFocused };
 
 // Expose send for fun!
 window.$send = send;

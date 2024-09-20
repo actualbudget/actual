@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { memo, useRef, useState } from 'react';
+import React, { type ComponentProps, memo, useRef, useState } from 'react';
 import { Trans } from 'react-i18next';
 
 import { reportBudget } from 'loot-core/src/client/queries';
@@ -7,6 +7,7 @@ import { evalArithmetic } from 'loot-core/src/shared/arithmetic';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToCurrency, amountToInteger } from 'loot-core/src/shared/util';
 
+import { useUndo } from '../../../hooks/useUndo';
 import { SvgCheveronDown } from '../../../icons/v1';
 import { styles, theme, type CSSProperties } from '../../../style';
 import { Button } from '../../common/Button2';
@@ -14,8 +15,7 @@ import { Popover } from '../../common/Popover';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
 import { type Binding, type SheetFields } from '../../spreadsheet';
-import { CellValue, type CellValueProps } from '../../spreadsheet/CellValue';
-import { useFormat } from '../../spreadsheet/useFormat';
+import { CellValue, CellValueText } from '../../spreadsheet/CellValue';
 import { useSheetValue } from '../../spreadsheet/useSheetValue';
 import { Field, SheetCell, type SheetCellProps } from '../../table';
 import { BalanceWithCarryover } from '../BalanceWithCarryover';
@@ -33,7 +33,7 @@ export const useReportSheetValue = <
 };
 
 const ReportCellValue = <FieldName extends SheetFields<'report-budget'>>(
-  props: CellValueProps<'report-budget', FieldName>,
+  props: ComponentProps<typeof CellValue<'report-budget', FieldName>>,
 ) => {
   return <CellValue {...props} />;
 };
@@ -49,8 +49,13 @@ const headerLabelStyle: CSSProperties = {
   padding: '0 5px',
   textAlign: 'right',
 };
+
+const cellStyle: CSSProperties = {
+  color: theme.pageTextLight,
+  fontWeight: 600,
+};
+
 export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
-  const format = useFormat();
   return (
     <View
       style={{
@@ -68,31 +73,25 @@ export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
         <ReportCellValue
           binding={reportBudget.totalBudgetedExpense}
           type="financial"
-          style={{ color: theme.pageTextLight, fontWeight: 600 }}
-          formatter={value => {
-            return format(parseFloat(value || '0'), 'financial');
-          }}
-        />
+        >
+          {props => <CellValueText {...props} style={cellStyle} />}
+        </ReportCellValue>
       </View>
       <View style={headerLabelStyle}>
         <Text style={{ color: theme.pageTextLight }}>
           <Trans>Spent</Trans>
         </Text>
-        <ReportCellValue
-          binding={reportBudget.totalSpent}
-          type="financial"
-          style={{ color: theme.pageTextLight, fontWeight: 600 }}
-        />
+        <ReportCellValue binding={reportBudget.totalSpent} type="financial">
+          {props => <CellValueText {...props} style={cellStyle} />}
+        </ReportCellValue>
       </View>
       <View style={headerLabelStyle}>
         <Text style={{ color: theme.pageTextLight }}>
           <Trans>Balance</Trans>
         </Text>
-        <ReportCellValue
-          binding={reportBudget.totalLeftover}
-          type="financial"
-          style={{ color: theme.pageTextLight, fontWeight: 600 }}
-        />
+        <ReportCellValue binding={reportBudget.totalLeftover} type="financial">
+          {props => <CellValueText {...props} style={cellStyle} />}
+        </ReportCellValue>
       </View>
     </View>
   );
@@ -203,7 +202,6 @@ export const CategoryMonth = memo(function CategoryMonth({
   onShowActivity,
 }: CategoryMonthProps) {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [hover, setHover] = useState(false);
   const triggerRef = useRef(null);
 
   const [balanceMenuOpen, setBalanceMenuOpen] = useState(false);
@@ -214,6 +212,8 @@ export const CategoryMonth = memo(function CategoryMonth({
     setBalanceMenuOpen(false);
     setMenuOpen(false);
   };
+
+  const { showUndoNotification } = useUndo();
 
   return (
     <View
@@ -237,16 +237,14 @@ export const CategoryMonth = memo(function CategoryMonth({
           flex: 1,
           flexDirection: 'row',
         }}
-        onMouseOverCapture={() => setHover(true)}
-        onMouseLeave={() => {
-          setHover(false);
-        }}
       >
-        {!editing && (hover || menuOpen) && (
+        {!editing && (
           <View
             style={{
+              flexDirection: 'row',
               flexShrink: 0,
               paddingLeft: 3,
+              alignItems: 'center',
               justifyContent: 'center',
               borderTopWidth: 1,
               borderBottomWidth: 1,
@@ -280,6 +278,9 @@ export const CategoryMonth = memo(function CategoryMonth({
                   onMenuAction(month, 'copy-single-last', {
                     category: category.id,
                   });
+                  showUndoNotification({
+                    message: `Budget set to last month’s budget.`,
+                  });
                 }}
                 onSetMonthsAverage={numberOfMonths => {
                   if (
@@ -293,10 +294,16 @@ export const CategoryMonth = memo(function CategoryMonth({
                   onMenuAction(month, `set-single-${numberOfMonths}-avg`, {
                     category: category.id,
                   });
+                  showUndoNotification({
+                    message: `Budget set to ${numberOfMonths}-month average.`,
+                  });
                 }}
                 onApplyBudgetTemplate={() => {
                   onMenuAction(month, 'apply-single-category-template', {
                     category: category.id,
+                  });
+                  showUndoNotification({
+                    message: `Budget template applied.`,
                   });
                 }}
               />
@@ -356,14 +363,20 @@ export const CategoryMonth = memo(function CategoryMonth({
           <ReportCellValue
             binding={reportBudget.catSumAmount(category.id)}
             type="financial"
-            getStyle={makeAmountGrey}
-            style={{
-              cursor: 'pointer',
-              ':hover': {
-                textDecoration: 'underline',
-              },
-            }}
-          />
+          >
+            {props => (
+              <CellValueText
+                {...props}
+                style={{
+                  cursor: 'pointer',
+                  ':hover': {
+                    textDecoration: 'underline',
+                  },
+                  ...makeAmountGrey(props.value),
+                }}
+              />
+            )}
+          </ReportCellValue>
         </span>
       </Field>
 
@@ -375,9 +388,7 @@ export const CategoryMonth = memo(function CategoryMonth({
         >
           <span
             ref={triggerBalanceMenuRef}
-            {...(category.is_income
-              ? {}
-              : { onClick: () => setBalanceMenuOpen(true) })}
+            onClick={() => !category.is_income && setBalanceMenuOpen(true)}
           >
             <BalanceWithCarryover
               disabled={category.is_income}
@@ -386,9 +397,6 @@ export const CategoryMonth = memo(function CategoryMonth({
               goal={reportBudget.catGoal(category.id)}
               budgeted={reportBudget.catBudgeted(category.id)}
               longGoal={reportBudget.catLongGoal(category.id)}
-              style={{
-                ':hover': { textDecoration: 'underline' },
-              }}
             />
           </span>
 

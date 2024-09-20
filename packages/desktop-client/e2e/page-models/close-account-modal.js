@@ -12,4 +12,8 @@ export class CloseAccountModal {
   async closeAccount() {
     await this.page.getByRole('button', { name: 'Close account' }).click();
   }
+
+  async forceCloseAccount() {
+    await this.page.getByLabel('Force close').click();
+  }
 }

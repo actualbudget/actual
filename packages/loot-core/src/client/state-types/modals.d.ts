@@ -39,7 +39,7 @@ type FinanceModals = {
   };
   'select-linked-accounts': {
     accounts: unknown[];
-    requisitionId: string;
+    requisitionId?: string;
     upgradingAccountId?: string;
     syncSource?: AccountSyncSource;
   };
@@ -54,7 +54,7 @@ type FinanceModals = {
   'manage-rules': { payeeId?: string };
   'edit-rule': {
     rule: RuleEntity | NewRuleEntity;
-    onSave: (rule: RuleEntity) => void;
+    onSave?: (rule: RuleEntity) => void;
   };
   'merge-unused-payees': {
     payeeIds: string[];
@@ -225,6 +225,7 @@ type FinanceModals = {
   };
   transfer: {
     title: string;
+    categoryId?: CategoryEntity['id'];
     month: string;
     amount: number;
     onSubmit: (amount: number, toCategoryId: string) => void;
@@ -232,6 +233,7 @@ type FinanceModals = {
   };
   cover: {
     title: string;
+    categoryId?: CategoryEntity['id'];
     month: string;
     showToBeBudgeted?: boolean;
     onSubmit: (fromCategoryId: string) => void;
@@ -269,6 +271,10 @@ type FinanceModals = {
   'confirm-transaction-delete': {
     message?: string;
     onConfirm: () => void;
+  };
+  'confirm-unlink-account': {
+    accountName: string;
+    onUnlink: () => void;
   };
 };
 

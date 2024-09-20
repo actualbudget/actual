@@ -1,15 +1,18 @@
 // @ts-strict-ignore
 import React, { useState } from 'react';
 
+import { css } from 'glamor';
+
 import * as monthUtils from 'loot-core/src/shared/months';
 
 import { useNotes } from '../../hooks/useNotes';
+import { useUndo } from '../../hooks/useUndo';
 import { SvgCheveronDown, SvgCheveronUp } from '../../icons/v1';
 import { SvgNotesPaper } from '../../icons/v2';
 import { type CSSProperties, styles, theme } from '../../style';
 import { BudgetMonthMenu } from '../budget/rollover/budgetsummary/BudgetMonthMenu';
 import { Button } from '../common/Button2';
-import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal2';
+import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { View } from '../common/View';
 import { Notes } from '../Notes';
 
@@ -25,6 +28,7 @@ export function RolloverBudgetMonthMenuModal({
   onEditNotes,
 }: RolloverBudgetMonthMenuModalProps) {
   const originalNotes = useNotes(`budget-${month}`);
+  const { showUndoNotification } = useUndo();
 
   const _onEditNotes = () => {
     onEditNotes?.(month);
@@ -51,6 +55,8 @@ export function RolloverBudgetMonthMenuModal({
     setShowMore(!showMore);
   };
 
+  const displayMonth = monthUtils.format(month, 'MMMM ‘yy');
+
   return (
     <Modal
       name="rollover-budget-month-menu"
@@ -61,8 +67,8 @@ export function RolloverBudgetMonthMenuModal({
       {({ state: { close } }) => (
         <>
           <ModalHeader
-            title={monthUtils.format(month, 'MMMM ‘yy')}
-            rightContent={<ModalCloseButton onClick={close} />}
+            title={displayMonth}
+            rightContent={<ModalCloseButton onPress={close} />}
           />
           <View
             style={{
@@ -113,15 +119,15 @@ export function RolloverBudgetMonthMenuModal({
               <View>
                 <Button
                   variant="bare"
-                  style={({ isPressed, isHovered }) => ({
-                    ...buttonStyle,
-                    ...(isPressed || isHovered
-                      ? {
-                          backgroundColor: 'transparent',
-                          color: buttonStyle.color,
-                        }
-                      : {}),
-                  })}
+                  className={String(
+                    css({
+                      ...buttonStyle,
+                      '&[data-pressed], &[data-hovered]': {
+                        backgroundColor: 'transparent',
+                        color: buttonStyle.color,
+                      },
+                    }),
+                  )}
                   onPress={onShowMore}
                 >
                   {!showMore ? (
@@ -148,14 +154,23 @@ export function RolloverBudgetMonthMenuModal({
                 onCopyLastMonthBudget={() => {
                   onBudgetAction(month, 'copy-last');
                   close();
+                  showUndoNotification({
+                    message: `${displayMonth} budgets have all been set to last month’s budgeted amounts.`,
+                  });
                 }}
                 onSetBudgetsToZero={() => {
                   onBudgetAction(month, 'set-zero');
                   close();
+                  showUndoNotification({
+                    message: `${displayMonth} budgets have all been set to zero.`,
+                  });
                 }}
                 onSetMonthsAverage={numberOfMonths => {
                   onBudgetAction(month, `set-${numberOfMonths}-avg`);
                   close();
+                  showUndoNotification({
+                    message: `${displayMonth} budgets have all been set to ${numberOfMonths === 12 ? 'yearly' : `${numberOfMonths} month`} average.`,
+                  });
                 }}
                 onCheckTemplates={() => {
                   onBudgetAction(month, 'check-templates');
@@ -164,14 +179,23 @@ export function RolloverBudgetMonthMenuModal({
                 onApplyBudgetTemplates={() => {
                   onBudgetAction(month, 'apply-goal-template');
                   close();
+                  showUndoNotification({
+                    message: `${displayMonth} budget templates have been applied.`,
+                  });
                 }}
                 onOverwriteWithBudgetTemplates={() => {
                   onBudgetAction(month, 'overwrite-goal-template');
                   close();
+                  showUndoNotification({
+                    message: `${displayMonth} budget templates have been overwritten.`,
+                  });
                 }}
                 onEndOfMonthCleanup={() => {
                   onBudgetAction(month, 'cleanup-goal-template');
                   close();
+                  showUndoNotification({
+                    message: `${displayMonth} end-of-month cleanup templates have been applied.`,
+                  });
                 }}
               />
             )}

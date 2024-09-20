@@ -1,42 +1,37 @@
-import { type numberFormats } from '../shared/util';
-
-import { spendingReportTimeType } from './models/reports';
+import { spendingReportModeType } from './models/reports';
 
 export type FeatureFlag =
   | 'dashboards'
   | 'reportBudget'
   | 'goalTemplatesEnabled'
-  | 'spendingReport'
-  | 'simpleFinSync';
+  | 'spendingReport';
 
 /**
  * Cross-device preferences. These sync across devices when they are changed.
  */
 export type SyncedPrefs = Partial<
-  {
-    firstDayOfWeekIdx: `${0 | 1 | 2 | 3 | 4 | 5 | 6}`;
-    dateFormat:
-      | 'MM/dd/yyyy'
-      | 'dd/MM/yyyy'
-      | 'yyyy-MM-dd'
-      | 'MM.dd.yyyy'
-      | 'dd.MM.yyyy';
-    numberFormat: (typeof numberFormats)[number]['value'];
-    hideFraction: boolean;
-    isPrivacyEnabled: boolean;
-    [key: `show-extra-balances-${string}`]: boolean;
-    [key: `hide-cleared-${string}`]: boolean;
-    [key: `hide-reconciled-${string}`]: boolean;
+  Record<
+    | 'budgetType'
+    | 'firstDayOfWeekIdx'
+    | 'dateFormat'
+    | 'numberFormat'
+    | 'hideFraction'
+    | 'isPrivacyEnabled'
+    | `show-balances-${string}`
+    | `show-extra-balances-${string}`
+    | `hide-cleared-${string}`
+    | `hide-reconciled-${string}`
     // TODO: pull from src/components/modals/ImportTransactions.js
-    [key: `parse-date-${string}-${'csv' | 'qif'}`]: string;
-    [key: `csv-mappings-${string}`]: string;
-    [key: `csv-delimiter-${string}`]: ',' | ';' | '\t';
-    [key: `csv-skip-lines-${string}`]: number;
-    [key: `csv-has-header-${string}`]: boolean;
-    [key: `ofx-fallback-missing-payee-${string}`]: boolean;
-    [key: `flip-amount-${string}-${'csv' | 'qif'}`]: boolean;
-    budgetType: 'report' | 'rollover';
-  } & Record<`flags.${FeatureFlag}`, boolean>
+    | `parse-date-${string}-${'csv' | 'qif'}`
+    | `csv-mappings-${string}`
+    | `csv-delimiter-${string}`
+    | `csv-skip-lines-${string}`
+    | `csv-has-header-${string}`
+    | `ofx-fallback-missing-payee-${string}`
+    | `flip-amount-${string}-${'csv' | 'qif'}`
+    | `flags.${FeatureFlag}`,
+    string
+  >
 >;
 
 /**
@@ -58,11 +53,10 @@ export type MetadataPrefs = Partial<{
 
 /**
  * Local preferences applicable to a single device. Stored in local storage.
- * TODO: eventually `LocalPrefs` type should not use `SyncedPrefs` or `MetadataPrefs`;
+ * TODO: eventually `LocalPrefs` type should not use `MetadataPrefs`;
  * this is only a stop-gap solution.
  */
-export type LocalPrefs = SyncedPrefs &
-  MetadataPrefs &
+export type LocalPrefs = MetadataPrefs &
   Partial<{
     'ui.showClosedAccounts': boolean;
     'expand-splits': boolean;
@@ -75,18 +69,21 @@ export type LocalPrefs = SyncedPrefs &
     reportsViewSummary: boolean;
     reportsViewLabel: boolean;
     spendingReportFilter: string;
-    spendingReportTime: spendingReportTimeType;
-    spendingReportCompare: spendingReportTimeType;
+    spendingReportMode: spendingReportModeType;
+    spendingReportCompare: string;
+    spendingReportCompareTo: string;
     sidebarWidth: number;
     'mobile.showSpentColumn': boolean;
   }>;
 
 export type Theme = 'light' | 'dark' | 'auto' | 'midnight' | 'development';
+export type DarkTheme = 'dark' | 'midnight';
 export type GlobalPrefs = Partial<{
   floatingSidebar: boolean;
   maxMonths: number;
   keyId?: string;
   theme: Theme;
+  preferredDarkTheme: DarkTheme;
   documentDir: string; // Electron only
   serverSelfSignedCert: string; // Electron only
 }>;

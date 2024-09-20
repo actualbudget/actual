@@ -8,7 +8,7 @@ import {
   Modal,
   ModalTitle,
   ModalHeader,
-} from '../common/Modal2';
+} from '../common/Modal';
 import { View } from '../common/View';
 import { SectionLabel } from '../forms';
 
@@ -50,7 +50,7 @@ export function AccountAutocompleteModal({
               }
               rightContent={
                 <ModalCloseButton
-                  onClick={close}
+                  onPress={close}
                   style={{ color: theme.menuAutoCompleteText }}
                 />
               }

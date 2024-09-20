@@ -44,6 +44,7 @@ export function BalanceMovementMenu({
 
       {menu === 'transfer' && (
         <TransferMenu
+          categoryId={categoryId}
           initialAmount={catBalance}
           showToBeBudgeted={true}
           onClose={onClose}
@@ -59,7 +60,7 @@ export function BalanceMovementMenu({
 
       {menu === 'cover' && (
         <CoverMenu
-          category={categoryId}
+          categoryId={categoryId}
           onClose={onClose}
           onSubmit={fromCategoryId => {
             onBudgetAction(month, 'cover-overspending', {
