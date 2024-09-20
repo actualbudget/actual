@@ -210,7 +210,7 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
               variant={isLive ? 'primary' : 'normal'}
               onPress={() => setIsLive(state => !state)}
             >
-              {isLive ? 'Live' : 'Static'}
+              {isLive ? t('Live') : t('Static')}
             </Button>
 
             <View
