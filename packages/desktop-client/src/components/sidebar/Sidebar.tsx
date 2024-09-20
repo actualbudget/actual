@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { type CSSProperties, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 
@@ -103,11 +103,11 @@ export function Sidebar() {
             opacity: isFloating ? 1 : 0,
             transition: 'opacity .25s, width .25s',
             width: hasWindowButtons || isFloating ? null : 0,
-          },
+          } as CSSProperties,
           '&:hover .float': {
             opacity: 1,
             width: hasWindowButtons ? null : 'auto',
-          },
+          } as CSSProperties,
           flex: 1,
           ...styles.darkScrollbar,
         })}
