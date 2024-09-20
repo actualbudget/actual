@@ -44,7 +44,7 @@ export function AccountGroupName<FieldName extends SheetFields<'account'>>({
     paddingTop: 4,
     paddingBottom: 4,
     paddingRight: 15,
-    paddingLeft: (toggleAccounts ? 25 : 10),
+    paddingLeft: toggleAccounts ? 25 : 10,
     textDecoration: 'none',
     color: theme.sidebarItemText,
     ':hover': { backgroundColor: theme.sidebarItemBackgroundHover },
@@ -52,9 +52,7 @@ export function AccountGroupName<FieldName extends SheetFields<'account'>>({
   };
 
   return (
-    <View
-      style={{ flexShrink: 0, ...outerStyle }}
-    >
+    <View style={{ flexShrink: 0, ...outerStyle }} >
       <View
         style={{
           flexDirection: 'row',
@@ -62,7 +60,7 @@ export function AccountGroupName<FieldName extends SheetFields<'account'>>({
           position: 'relative',
         }}
       >
-        {toggleAccounts && 
+        {toggleAccounts && (
           <SvgExpandArrow
             width={12}
             height={12}
@@ -80,7 +78,7 @@ export function AccountGroupName<FieldName extends SheetFields<'account'>>({
               transform: collapsed ? 'rotate(-90deg)' : '',
             }}
           />
-        }
+        )}
         <Link
           variant="internal"
           to={to || '#'}
@@ -132,13 +130,13 @@ export function AccountGroupName<FieldName extends SheetFields<'account'>>({
 
           <AlignedText
             style={
-              (!collapsed && {
+              !collapsed && {
                 borderBottom: `1.5px solid rgba(255,255,255,0.4)`,
                 paddingBottom: '3px',
-              })
+              }
             }
             left={groupName}
-            right={(query && <CellValue binding={query} type="financial" />)}
+            right={query && <CellValue binding={query} type="financial" />}
           />
         </Link>
       </View>

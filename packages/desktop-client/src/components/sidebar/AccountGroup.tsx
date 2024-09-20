@@ -83,7 +83,7 @@ export function AccountGroup<FieldName extends SheetFields<'account'>>({
         collapsed={collapsed?.[groupName.replace(/\s/g, "")]}
       />
 
-      {!collapsed?.[groupName.replace(/\s/g, "")] && accountList?.map((account, i) => (
+      {!collapsed?.[groupName.replace(/\s/g, "")] && accountList?.map(account => (
         <Account
           key={account.id}
           name={account.name}

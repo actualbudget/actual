@@ -18,7 +18,6 @@ type BottomButtonsProps = {
 };
 
 export function BottomButtons({ buttons }: BottomButtonsProps) {
-
   return (
     <View
       style={{

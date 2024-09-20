@@ -10,9 +10,9 @@ import { useAccounts } from '../../hooks/useAccounts';
 import { useBudgetedAccounts } from '../../hooks/useBudgetedAccounts';
 import { useClosedAccounts } from '../../hooks/useClosedAccounts';
 import { useOffBudgetAccounts } from '../../hooks/useOffBudgetAccounts';
-
 import { styles } from '../../style';
 import { View } from '../common/View';
+
 import { AccountGroup } from './AccountGroup';
 import { AccountGroupName } from './AccountGroupName';
 
@@ -62,17 +62,17 @@ export function Accounts() {
   ];
 
   return (
-    <View style={{ flexGrow: 1, }}>
+    <View style={{ flexGrow: 1 }}>
       <AccountGroupName
         groupName={t('All accounts')}
         query={queries.allAccountBalance()}
-        to='/accounts'
-        style={{...styles.mediumText}}
+        to="/accounts"
+        style={{ ...styles.mediumText }}
         outerStyle={{ margin: '5px 0', marginRight: 5 }}
       />
 
       <View style={{ overflowY: 'scroll' }}>
-        {groups?.map((group) => (
+        {groups?.map(group => (
           <AccountGroup
             key={group.name}
             groupName={group.name}

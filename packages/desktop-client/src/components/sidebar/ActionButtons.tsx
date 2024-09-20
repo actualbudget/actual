@@ -1,12 +1,12 @@
 // @ts-strict-ignore
-import React, { type ComponentType, type SVGProps, } from 'react';
+import React, { type ComponentType, type SVGProps } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useLocalPref } from '../../hooks/useLocalPref';
 import { SvgCheveronDown, SvgCheveronUp } from '../../icons/v1';
 import { styles } from '../../style';
-
 import { View } from '../common/View';
+
 import { Item } from './Item';
 import { SecondaryItem } from './SecondaryItem';
 
@@ -35,11 +35,24 @@ export function ActionButtons({ buttons }: ActionButtonsProps) {
 
   return (
     <View style={{ padding: '5px 0', flexShrink: 0 }}>
-      {buttons.map((item) => (
-        (item.hidable ?
-          (expanded && <Item key={item.title} title={item.title} Icon={item.Icon} to={item.to} />) :
-          <Item key={item.title} title={item.title} Icon={item.Icon} to={item.to} />
-        )
+      {buttons.map(item => (
+        (item.hidable ? (
+          expanded && (
+          <Item
+            key={item.title}
+            title={item.title}
+            Icon={item.Icon}
+            to={item.to}
+          />
+          )
+        ) : (
+          <Item
+            key={item.title}
+            title={item.title}
+            Icon={item.Icon}
+            to={item.to}
+          />
+        ))
       ))}
       <SecondaryItem
         title={expanded ? t('less') : t('more')}
