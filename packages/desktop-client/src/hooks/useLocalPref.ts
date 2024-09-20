@@ -29,15 +29,14 @@ export function useLocalPref<K extends keyof LocalPrefs>(
 
   // Migrate from old pref storage location (metadata.json) to local storage
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [metadataPref, setMetadataPref] = useMetadataPref(prefName as any);
+  const [metadataPref] = useMetadataPref(prefName as any);
   useEffect(() => {
     if (value !== undefined || metadataPref === undefined) {
       return;
     }
 
     setValue(metadataPref);
-    setMetadataPref(undefined);
-  }, [value, metadataPref, setValue, setMetadataPref]);
+  }, [value, metadataPref, setValue]);
 
   return [value, setValue];
 }
