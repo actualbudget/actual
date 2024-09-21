@@ -26,6 +26,7 @@ type AccountMenuModalProps = {
   onReopenAccount: (accountId: string) => void;
   onEditNotes: (id: string) => void;
   onClose?: () => void;
+  onReconcileAccount: () => void;
 };
 
 export function AccountMenuModal({
@@ -35,6 +36,7 @@ export function AccountMenuModal({
   onReopenAccount,
   onEditNotes,
   onClose,
+  onReconcileAccount,
 }: AccountMenuModalProps) {
   const account = useAccount(accountId);
   const originalNotes = useNotes(`account-${accountId}`);
@@ -90,6 +92,7 @@ export function AccountMenuModal({
                 account={account}
                 onClose={onCloseAccount}
                 onReopen={onReopenAccount}
+                onReconcile={onReconcileAccount}
               />
             }
             title={
@@ -160,12 +163,14 @@ type AdditionalAccountMenuProps = {
   account: AccountEntity;
   onClose?: (accountId: string) => void;
   onReopen?: (accountId: string) => void;
+  onReconcile?: () => void;
 };
 
 function AdditionalAccountMenu({
   account,
   onClose,
   onReopen,
+  onReconcile,
 }: AdditionalAccountMenuProps) {
   const triggerRef = useRef(null);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -203,6 +208,10 @@ function AdditionalAccountMenu({
           <Menu
             getItemStyle={getItemStyle}
             items={[
+              {
+                name: 'reconcile',
+                text: 'Reconcile',
+              },
               account.closed
                 ? {
                     name: 'reopen',
@@ -220,6 +229,9 @@ function AdditionalAccountMenu({
             onMenuSelect={name => {
               setMenuOpen(false);
               switch (name) {
+                case 'reconcile':
+                  onReconcile?.();
+                  break;
                 case 'close':
                   onClose?.(account.id);
                   break;

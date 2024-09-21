@@ -8,7 +8,7 @@ import { theme } from '../../../style';
 import { Button } from '../../common/Button2';
 
 type AddTransactionButtonProps = {
-  to: string;
+  to?: string;
   accountId?: string;
   categoryId?: string;
 };

@@ -126,7 +126,7 @@ export const styles = {
       overflow: 'hidden',
       textOverflow: 'ellipsis',
       wordBreak: 'break-word',
-    };
+    } as const;
   },
   tooltip: {
     padding: 5,

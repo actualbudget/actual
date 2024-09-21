@@ -64,6 +64,7 @@ import { PostsOfflineNotification } from './schedules/PostsOfflineNotification';
 import { ScheduleDetails } from './schedules/ScheduleDetails';
 import { ScheduleLink } from './schedules/ScheduleLink';
 import { NamespaceContext } from './spreadsheet/NamespaceContext';
+import { ReconcileModal } from './modals/ReconcileModal';
 
 export function Modals() {
   const location = useLocation();
@@ -363,6 +364,7 @@ export function Modals() {
               onCloseAccount={options.onCloseAccount}
               onReopenAccount={options.onReopenAccount}
               onClose={options.onClose}
+              onReconcileAccount={options.onReconcileAccount}
             />
           );
 
@@ -584,6 +586,15 @@ export function Modals() {
               budgetId={options.budgetId}
               backupDisabled={true}
               watchUpdates={false}
+            />
+          );
+        case 'reconcile':
+          return (
+            <ReconcileModal
+              key={name}
+              accountId={options.accountId}
+              clearedBalance={options.clearedBalance}
+              onReconcile={options.onReconcile}
             />
           );
 

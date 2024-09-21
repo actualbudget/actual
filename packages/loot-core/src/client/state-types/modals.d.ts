@@ -147,6 +147,7 @@ type FinanceModals = {
     onReopenAccount: (accountId: string) => void;
     onEditNotes: (id: string) => void;
     onClose?: () => void;
+    onReconcileAccount: (amount: number) => void;
   };
   'category-menu': {
     categoryId: string;
@@ -275,6 +276,11 @@ type FinanceModals = {
   'confirm-unlink-account': {
     accountName: string;
     onUnlink: () => void;
+  };
+  reconcile: {
+    accountId: string;
+    clearedBalance: number;
+    onReconcile: (amount: number) => void;
   };
 };
 

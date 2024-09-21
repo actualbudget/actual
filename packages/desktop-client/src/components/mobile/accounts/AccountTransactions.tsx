@@ -24,9 +24,14 @@ import {
   useDefaultSchedulesQueryTransform,
 } from 'loot-core/client/data-hooks/schedules';
 import * as queries from 'loot-core/client/queries';
-import { pagedQuery } from 'loot-core/client/query-helpers';
+import { pagedQuery, runQuery } from 'loot-core/client/query-helpers';
 import { listen, send } from 'loot-core/platform/client/fetch';
-import { isPreviewId } from 'loot-core/shared/transactions';
+import {
+  isPreviewId,
+  realizeTempTransactions,
+  ungroupTransactions,
+  updateTransaction,
+} from 'loot-core/shared/transactions';
 
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import { useNavigate } from '../../../hooks/useNavigate';
@@ -38,15 +43,40 @@ import { MobilePageHeader, Page } from '../../Page';
 import { MobileBackButton } from '../MobileBackButton';
 import { AddTransactionButton } from '../transactions/AddTransactionButton';
 import { TransactionListWithBalances } from '../transactions/TransactionListWithBalances';
+import { q, Query } from 'loot-core/shared/query';
+import { currentDay } from 'loot-core/shared/months';
+import { t } from 'i18next';
+import { AccountEntity, TransactionEntity } from 'loot-core/types/models';
+import { applyChanges } from 'loot-core/shared/util';
+import { useSheetValue } from '../../spreadsheet/useSheetValue';
 
-export function AccountTransactions({ account, pending, failed }) {
+type AccountTransactionsProps = {
+  account: AccountEntity;
+  pending: number;
+  failed: number;
+};
+
+export function AccountTransactions({
+  account,
+  pending,
+  failed,
+}: AccountTransactionsProps) {
+  const [reconcileAmount, setReconcileAmount] = useState<number | null>(null);
+
   const schedulesTransform = useDefaultSchedulesQueryTransform(account.id);
   return (
     <Page
       header={
         <MobilePageHeader
           title={
-            <AccountName account={account} pending={pending} failed={failed} />
+            <AccountName
+              account={account}
+              pending={pending}
+              failed={failed}
+              onReconcile={v => {
+                setReconcileAmount(v);
+              }}
+            />
           }
           leftContent={<MobileBackButton />}
           rightContent={<AddTransactionButton accountId={account.id} />}
@@ -55,13 +85,49 @@ export function AccountTransactions({ account, pending, failed }) {
       padding={0}
     >
       <SchedulesProvider transform={schedulesTransform}>
-        <TransactionListWithPreviews account={account} />
+        <TransactionListWithPreviews
+          account={account}
+          reconcileAmount={reconcileAmount}
+          onDoneReconciling={async () => {
+            const { data } = await runQuery(
+              q('transactions')
+                .filter({
+                  cleared: true,
+                  reconciled: false,
+                  account: account.id,
+                })
+                .select('*')
+                .options({ splits: 'grouped' }),
+            );
+            let transactions = ungroupTransactions(data);
+
+            const changes: { updated: Array<Partial<TransactionEntity>> } = {
+              updated: [],
+            };
+
+            transactions.forEach(trans => {
+              const { diff } = updateTransaction(transactions, {
+                ...trans,
+                reconciled: true,
+              });
+
+              transactions = applyChanges(diff, transactions);
+
+              changes.updated = changes.updated
+                ? changes.updated.concat(diff.updated)
+                : diff.updated;
+            });
+
+            await send('transactions-batch-update', changes);
+            setReconcileAmount(null);
+          }}
+        />
       </SchedulesProvider>
     </Page>
   );
 }
 
-function AccountName({ account, pending, failed }) {
+function AccountName({ account, pending, failed, onReconcile }) {
   const dispatch = useDispatch();
 
   const onSave = account => {
@@ -90,6 +156,20 @@ function AccountName({ account, pending, failed }) {
     dispatch(reopenAccount(account.id));
   };
 
+  const clearedAmount = useSheetValue(
+    queries.accountBalanceCleared(account) as any,
+  );
+
+  const onReconcileAccount = () => {
+    dispatch(
+      pushModal('reconcile', {
+        accountId: account.id,
+        clearedBalance: clearedAmount,
+        onReconcile,
+      }),
+    );
+  };
+
   const onClick = () => {
     dispatch(
       pushModal('account-menu', {
@@ -98,6 +178,7 @@ function AccountName({ account, pending, failed }) {
         onEditNotes,
         onCloseAccount,
         onReopenAccount,
+        onReconcileAccount,
       }),
     );
   };
@@ -139,12 +220,22 @@ function AccountName({ account, pending, failed }) {
   );
 }
 
-function TransactionListWithPreviews({ account }) {
-  const [currentQuery, setCurrentQuery] = useState();
+type TransactionListWithPreviewsProps = {
+  account: AccountEntity;
+  reconcileAmount: number | null;
+  onDoneReconciling: () => void;
+};
+
+function TransactionListWithPreviews({
+  account,
+  reconcileAmount,
+  onDoneReconciling,
+}: TransactionListWithPreviewsProps) {
+  const [currentQuery, setCurrentQuery] = useState<Query>();
   const [isSearching, setIsSearching] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [transactions, setTransactions] = useState([]);
-  const prependTransactions = usePreviewTransactions();
+  const prependTransactions = usePreviewTransactions(() => {});
   const allTransactions = useMemo(
     () =>
       !isSearching ? prependTransactions.concat(transactions) : transactions,
@@ -279,6 +370,28 @@ function TransactionListWithPreviews({ account }) {
       onSearch={onSearch}
       onOpenTransaction={onOpenTransaction}
       onRefresh={onRefresh}
+      reconcileAmount={reconcileAmount}
+      onDoneReconciling={onDoneReconciling}
+      onCreateReconciliationTransaction={async diff => {
+        const reconciliationTransactions = realizeTempTransactions([
+          {
+            id: 'temp',
+            account: account.id,
+            cleared: true,
+            reconciled: false,
+            amount: diff,
+            date: currentDay(),
+            notes: t('Reconciliation balance adjustment'),
+          },
+        ]);
+
+        setTransactions([...reconciliationTransactions, ...transactions]);
+
+        // sync the reconciliation transaction
+        await send('transactions-batch-update', {
+          added: reconciliationTransactions,
+        });
+      }}
     />
   );
 }
