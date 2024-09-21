@@ -42,7 +42,7 @@ export function AccountGroup<FieldName extends SheetFields<'account'>>({
     (state: State) => state.account.accountsSyncing,
   );
 
-  const getAccountPath = account => `/accounts/${account.id}`;
+  const getAccountPath = (account: AccountEntity) => `/accounts/${account.id}`;
 
   const [collapsed, setCollapsedGroupsPref] = useLocalPref(
     'ui.collapsedAccountGroups',
