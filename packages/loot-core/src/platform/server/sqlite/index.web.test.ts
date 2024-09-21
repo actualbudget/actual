@@ -16,7 +16,18 @@ beforeAll(() => {
 
 const initSQL = `
 CREATE TABLE numbers (id TEXT PRIMARY KEY, number INTEGER);
+CREATE TABLE textstrings (id TEXT PRIMARY KEY, string TEXT);
 `;
+
+interface NumberRowType {
+  id: string;
+  number: number;
+}
+
+interface StringRowType {
+  id: string;
+  string: string;
+}
 
 describe('Web sqlite', () => {
   it('should rollback transactions', async () => {
@@ -27,8 +38,7 @@ describe('Web sqlite', () => {
 
     let rows = runQuery(db, 'SELECT * FROM numbers', null, true);
     expect(rows.length).toBe(1);
-    // @ts-expect-error Property 'number' does not exist on type 'unknown'
-    expect(rows[0].number).toBe(4);
+    expect((rows[0] as NumberRowType).number).toBe(4);
 
     const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
     expect(() => {
@@ -44,8 +54,7 @@ describe('Web sqlite', () => {
     // Nothing should have changed in the db
     rows = runQuery(db, 'SELECT * FROM numbers', null, true);
     expect(rows.length).toBe(1);
-    // @ts-expect-error Property 'number' does not exist on type 'unknown'
-    expect(rows[0].number).toBe(4);
+    expect((rows[0] as NumberRowType).number).toBe(4);
   });
 
   it('should support nested transactions', async () => {
@@ -56,8 +65,7 @@ describe('Web sqlite', () => {
 
     let rows = runQuery(db, 'SELECT * FROM numbers', null, true);
     expect(rows.length).toBe(1);
-    // @ts-expect-error Property 'number' does not exist on type 'unknown'
-    expect(rows[0].number).toBe(4);
+    expect((rows[0] as NumberRowType).number).toBe(4);
 
     transaction(db, () => {
       runQuery(db, "INSERT INTO numbers (id, number) VALUES ('id2', 5)");
@@ -78,11 +86,28 @@ describe('Web sqlite', () => {
     // Nothing should have changed in the db
     rows = runQuery(db, 'SELECT * FROM numbers', null, true);
     expect(rows.length).toBe(3);
-    // @ts-expect-error Property 'number' does not exist on type 'unknown'
-    expect(rows[0].number).toBe(4);
-    // @ts-expect-error Property 'number' does not exist on type 'unknown'
-    expect(rows[1].number).toBe(5);
-    // @ts-expect-error Property 'number' does not exist on type 'unknown'
-    expect(rows[2].number).toBe(6);
+    expect((rows[0] as NumberRowType).number).toBe(4);
+    expect((rows[1] as NumberRowType).number).toBe(5);
+    expect((rows[2] as NumberRowType).number).toBe(6);
+  });
+
+  it('should match regex on text fields', async () => {
+    const db = await openDatabase();
+    execQuery(db, initSQL);
+
+    runQuery(
+      db,
+      "INSERT INTO textstrings (id, string) VALUES ('id1', 'not empty string')",
+    );
+    runQuery(db, "INSERT INTO textstrings (id) VALUES ('id2')");
+
+    const rows = runQuery(
+      db,
+      'SELECT id FROM textstrings where REGEXP("n.", string)',
+      null,
+      true,
+    );
+    expect(rows.length).toBe(1);
+    expect((rows[0] as StringRowType).id).toBe('id1');
   });
 });
