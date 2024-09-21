@@ -225,6 +225,7 @@ type FinanceModals = {
   };
   transfer: {
     title: string;
+    categoryId?: CategoryEntity['id'];
     month: string;
     amount: number;
     onSubmit: (amount: number, toCategoryId: string) => void;
@@ -232,6 +233,7 @@ type FinanceModals = {
   };
   cover: {
     title: string;
+    categoryId?: CategoryEntity['id'];
     month: string;
     showToBeBudgeted?: boolean;
     onSubmit: (fromCategoryId: string) => void;

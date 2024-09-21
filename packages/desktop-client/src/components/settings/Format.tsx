@@ -96,7 +96,7 @@ export function FormatSettings() {
                 f.value,
                 String(hideFraction) === 'true' ? f.labelNoFraction : f.label,
               ])}
-              buttonStyle={selectButtonStyle}
+              style={selectButtonStyle}
             />
 
             <Text style={{ display: 'flex' }}>
@@ -116,7 +116,7 @@ export function FormatSettings() {
               value={dateFormat}
               onChange={format => setDateFormatPref(format)}
               options={dateFormats.map(f => [f.value, f.label])}
-              buttonStyle={selectButtonStyle}
+              style={selectButtonStyle}
             />
           </Column>
 
@@ -125,7 +125,7 @@ export function FormatSettings() {
               value={firstDayOfWeekIdx}
               onChange={idx => setFirstDayOfWeekIdxPref(idx)}
               options={daysOfWeek.map(f => [f.value, f.label])}
-              buttonStyle={selectButtonStyle}
+              style={selectButtonStyle}
             />
           </Column>
         </View>
