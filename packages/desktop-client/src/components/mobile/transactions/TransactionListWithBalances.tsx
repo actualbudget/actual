@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux';
 import { SelectedProvider, useSelected } from '../../../hooks/useSelected';
 import { SvgSearchAlternate } from '../../../icons/v2';
 import { styles, theme } from '../../../style';
+import { Button } from '../../common/Button2';
 import { InputWithContent } from '../../common/InputWithContent';
 import { Label } from '../../common/Label';
 import { View } from '../../common/View';
@@ -12,7 +13,6 @@ import { useSheetValue } from '../../spreadsheet/useSheetValue';
 import { PullToRefresh } from '../PullToRefresh';
 
 import { TransactionList } from './TransactionList';
-import { Button } from '../../common/Button2';
 
 function TransactionSearchInput({ placeholder, onSearch }) {
   const [text, setText] = useState('');
@@ -200,7 +200,7 @@ export function TransactionListWithBalances({
                       textAlign: 'center',
                       fontWeight: '500',
                       color:
-                        reconcileDifference != 0
+                        reconcileDifference !== 0
                           ? theme.errorText
                           : theme.pillTextHighlighted,
                     }}

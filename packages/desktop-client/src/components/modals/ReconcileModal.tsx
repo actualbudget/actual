@@ -1,25 +1,20 @@
-import { type ComponentProps, useRef, useState } from 'react';
+import { useState } from 'react';
+import { useDispatch } from 'react-redux';
 
-import { type AccountEntity } from 'loot-core/types/models';
+import { collapseModals } from 'loot-core/client/actions';
+import { amountToInteger, integerToAmount } from 'loot-core/shared/util';
 
-import { useAccount } from '../../hooks/useAccount';
-import { SvgClose, SvgDotsHorizontalTriple, SvgLockOpen } from '../../icons/v1';
-import { type CSSProperties, styles, theme } from '../../style';
+import { styles } from '../../style';
 import { Button } from '../common/Button2';
-import { Menu } from '../common/Menu';
 import {
   Modal,
   ModalCloseButton,
   ModalHeader,
   ModalTitle,
 } from '../common/Modal';
-import { Popover } from '../common/Popover';
 import { View } from '../common/View';
 import { FieldLabel } from '../mobile/MobileForms';
 import { FocusableAmountInput } from '../mobile/transactions/FocusableAmountInput';
-import { amountToInteger, integerToAmount } from 'loot-core/shared/util';
-import { useDispatch } from 'react-redux';
-import { collapseModals } from 'loot-core/client/actions';
 
 type AccountMenuModalProps = {
   accountId: string;
@@ -28,11 +23,9 @@ type AccountMenuModalProps = {
 };
 
 export function ReconcileModal({
-  accountId,
   clearedBalance,
   onReconcile,
 }: AccountMenuModalProps) {
-  const account = useAccount(accountId);
   const dispatch = useDispatch();
   const [amountFocused, setAmountFocused] = useState(false);
   const [reconcileAmount, setReconcileAmount] = useState(clearedBalance);
@@ -42,7 +35,7 @@ export function ReconcileModal({
       {({ state: { close } }) => (
         <>
           <ModalHeader
-            title={<ModalTitle title={'Reconcile'} />}
+            title={<ModalTitle title="Reconcile" />}
             rightContent={<ModalCloseButton onPress={close} />}
           />
           <View

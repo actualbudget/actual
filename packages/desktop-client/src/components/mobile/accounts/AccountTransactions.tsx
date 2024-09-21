@@ -7,6 +7,7 @@ import React, {
 } from 'react';
 import { useDispatch } from 'react-redux';
 
+import { t } from 'i18next';
 import { useDebounceCallback } from 'usehooks-ts';
 
 import {
@@ -26,12 +27,19 @@ import {
 import * as queries from 'loot-core/client/queries';
 import { pagedQuery, runQuery } from 'loot-core/client/query-helpers';
 import { listen, send } from 'loot-core/platform/client/fetch';
+import { currentDay } from 'loot-core/shared/months';
+import { q, type Query } from 'loot-core/shared/query';
 import {
   isPreviewId,
   realizeTempTransactions,
   ungroupTransactions,
   updateTransaction,
 } from 'loot-core/shared/transactions';
+import { applyChanges } from 'loot-core/shared/util';
+import {
+  type AccountEntity,
+  type TransactionEntity,
+} from 'loot-core/types/models';
 
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import { useNavigate } from '../../../hooks/useNavigate';
@@ -40,15 +48,11 @@ import { styles, theme } from '../../../style';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
 import { MobilePageHeader, Page } from '../../Page';
+import { type Binding } from '../../spreadsheet';
+import { useSheetValue } from '../../spreadsheet/useSheetValue';
 import { MobileBackButton } from '../MobileBackButton';
 import { AddTransactionButton } from '../transactions/AddTransactionButton';
 import { TransactionListWithBalances } from '../transactions/TransactionListWithBalances';
-import { q, Query } from 'loot-core/shared/query';
-import { currentDay } from 'loot-core/shared/months';
-import { t } from 'i18next';
-import { AccountEntity, TransactionEntity } from 'loot-core/types/models';
-import { applyChanges } from 'loot-core/shared/util';
-import { useSheetValue } from '../../spreadsheet/useSheetValue';
 
 type AccountTransactionsProps = {
   account: AccountEntity;
@@ -157,7 +161,10 @@ function AccountName({ account, pending, failed, onReconcile }) {
   };
 
   const clearedAmount = useSheetValue(
-    queries.accountBalanceCleared(account) as any,
+    queries.accountBalanceCleared(account) as Binding<
+      'account',
+      'balanceCleared'
+    >,
   );
 
   const onReconcileAccount = () => {
