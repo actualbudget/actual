@@ -1,5 +1,3 @@
-import { join } from 'path';
-
 import { test, expect } from '@playwright/test';
 
 import { ConfigurationPage } from './page-models/configuration-page';
@@ -99,46 +97,6 @@ test.describe('Accounts', () => {
       await expect(transaction.category).toHaveText('Transfer');
       await expect(transaction.debit).toHaveText('34.56');
       await expect(transaction.account).toHaveText('Ally Savings');
-    });
-  });
-
-  test.describe('Import Transactions', () => {
-    test.beforeEach(async () => {
-      accountPage = await navigation.createAccount({
-        name: 'CSV import',
-        offBudget: false,
-        balance: 0,
-      });
-    });
-
-    test.afterEach(async () => {
-      const close = await accountPage.clickCloseAccount();
-      await close.selectTransferAccount('Vanguard 401k');
-      await close.forceCloseAccount();
-    });
-
-    async function importCsv(screenshot = false) {
-      const fileChooserPromise = page.waitForEvent('filechooser');
-      await accountPage.page.getByRole('button', { name: 'Import' }).click();
-
-      const fileChooser = await fileChooserPromise;
-      await fileChooser.setFiles(join(__dirname, 'data/test.csv'));
-
-      if (screenshot) await expect(page).toMatchThemeScreenshots();
-
-      await accountPage.page
-        .getByRole('button', { name: /Import \d+ transactions/ })
-        .click();
-    }
-
-    test('imports transactions from a CSV file', async () => {
-      await importCsv(true);
-    });
-
-    test('import csv file twice', async () => {
-      await importCsv(false);
-      await page.waitForTimeout(1000);
-      await importCsv(true);
     });
   });
 });

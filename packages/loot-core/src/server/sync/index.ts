@@ -13,7 +13,7 @@ import * as connection from '../../platform/server/connection';
 import { logger } from '../../platform/server/log';
 import { sequential, once } from '../../shared/async';
 import { setIn, getIn } from '../../shared/util';
-import { LocalPrefs } from '../../types/prefs';
+import { type MetadataPrefs } from '../../types/prefs';
 import { triggerBudgetChanges, setType as setBudgetType } from '../budget/base';
 import * as db from '../db';
 import { PostError, SyncError } from '../errors';
@@ -304,7 +304,7 @@ export const applyMessages = sequential(async (messages: Message[]) => {
     return data;
   }
 
-  const prefsToSet: LocalPrefs = {};
+  const prefsToSet: MetadataPrefs = {};
   const oldData = await fetchData();
 
   undo.appendMessages(messages, oldData);
