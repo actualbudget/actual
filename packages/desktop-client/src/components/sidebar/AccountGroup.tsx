@@ -48,15 +48,11 @@ export function AccountGroup<FieldName extends SheetFields<'account'>>({
     'ui.collapsedAccountGroups',
   );
 
-  if (!collapsed || !Object.hasOwn(collapsed, groupName.replace(/\s/g, ''))) {
-    const c = collapsed ? { ...collapsed } : {};
-    c[groupName.replace(/\s/g, '')] = false;
-    setCollapsedGroupsPref(c);
-  }
-
   const toggleAccounts = () => {
-    const c = { ...collapsed };
-    c[groupName.replace(/\s/g, '')] = !collapsed[groupName.replace(/\s/g, '')];
+    const c = collapsed ? { ...collapsed } : {};
+    c[groupName.replace(/\s/g, '')] = !collapsed || !Object.hasOwn(collapsed, groupName.replace(/\s/g, '')) ?
+      true :
+      !collapsed[groupName.replace(/\s/g, '')];
     setCollapsedGroupsPref(c);
   };
 
