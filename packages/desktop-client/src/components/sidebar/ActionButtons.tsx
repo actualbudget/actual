@@ -55,7 +55,7 @@ export function ActionButtons({ buttons }: ActionButtonsProps) {
         ),
       )}
       <SecondaryItem
-        title={expanded ? t('less') : t('more')}
+        title={expanded ? t('Less') : t('More')}
         Icon={expanded ? SvgCheveronUp : SvgCheveronDown}
         onClick={onToggle}
         style={{ ...styles.verySmallText }}
