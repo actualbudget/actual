@@ -213,8 +213,11 @@ function updateMenu(budgetId?: string) {
   }
 }
 
-app.commandLine.appendSwitch('in-process-gpu'); // Does this fix mac?
 app.setAppUserModelId('com.actualbudget.actual');
+
+// Uncomment this to try it
+// app.commandLine.appendSwitch('in-process-gpu'); // This fixes the mas build crashing immediately
+app.commandLine.appendSwitch('no-sandbox'); // does this solve the network issue?
 
 app.on('ready', async () => {
   // Install an `app://` protocol that always returns the base HTML
