@@ -1,9 +1,9 @@
 import React, { type ComponentPropsWithoutRef } from 'react';
 
-import { rolloverBudget } from 'loot-core/client/queries';
+import { envelopeBudget } from 'loot-core/client/queries';
 
 import { Menu } from '../../../common/Menu';
-import { useRolloverSheetValue } from '../RolloverComponents';
+import { useEnvelopeSheetValue } from '../EnvelopeBudgetComponents';
 
 type ToBudgetMenuProps = Omit<
   ComponentPropsWithoutRef<typeof Menu>,
@@ -21,8 +21,8 @@ export function ToBudgetMenu({
   onResetHoldBuffer,
   ...props
 }: ToBudgetMenuProps) {
-  const toBudget = useRolloverSheetValue(rolloverBudget.toBudget) ?? 0;
-  const forNextMonth = useRolloverSheetValue(rolloverBudget.forNextMonth);
+  const toBudget = useEnvelopeSheetValue(envelopeBudget.toBudget) ?? 0;
+  const forNextMonth = useEnvelopeSheetValue(envelopeBudget.forNextMonth);
   const items = [
     ...(toBudget > 0
       ? [

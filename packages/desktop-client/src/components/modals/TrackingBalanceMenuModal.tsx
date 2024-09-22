@@ -1,6 +1,6 @@
 import React, { type ComponentPropsWithoutRef } from 'react';
 
-import { rolloverBudget } from 'loot-core/client/queries';
+import { trackingBudget } from 'loot-core/client/queries';
 
 import { useCategory } from '../../hooks/useCategory';
 import { type CSSProperties, theme, styles } from '../../style';
@@ -8,7 +8,7 @@ import {
   BalanceWithCarryover,
   CarryoverIndicator,
 } from '../budget/BalanceWithCarryover';
-import { BalanceMenu } from '../budget/rollover/BalanceMenu';
+import { BalanceMenu } from '../budget/tracking/BalanceMenu';
 import {
   Modal,
   ModalCloseButton,
@@ -19,16 +19,14 @@ import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { CellValueText } from '../spreadsheet/CellValue';
 
-type RolloverBalanceMenuModalProps = ComponentPropsWithoutRef<
+type TrackingBalanceMenuModalProps = ComponentPropsWithoutRef<
   typeof BalanceMenu
 >;
 
-export function RolloverBalanceMenuModal({
+export function TrackingBalanceMenuModal({
   categoryId,
   onCarryover,
-  onTransfer,
-  onCover,
-}: RolloverBalanceMenuModalProps) {
+}: TrackingBalanceMenuModalProps) {
   const defaultMenuItemStyle: CSSProperties = {
     ...styles.mobileMenuItem,
     color: theme.menuItemText,
@@ -43,7 +41,7 @@ export function RolloverBalanceMenuModal({
   }
 
   return (
-    <Modal name="rollover-balance-menu">
+    <Modal name="tracking-balance-menu">
       {({ state: { close } }) => (
         <>
           <ModalHeader
@@ -67,11 +65,11 @@ export function RolloverBalanceMenuModal({
             </Text>
             <BalanceWithCarryover
               disabled
-              carryover={rolloverBudget.catCarryover(categoryId)}
-              balance={rolloverBudget.catBalance(categoryId)}
-              goal={rolloverBudget.catGoal(categoryId)}
-              budgeted={rolloverBudget.catBudgeted(categoryId)}
-              longGoal={rolloverBudget.catLongGoal(categoryId)}
+              carryover={trackingBudget.catCarryover(categoryId)}
+              balance={trackingBudget.catBalance(categoryId)}
+              goal={trackingBudget.catGoal(categoryId)}
+              budgeted={trackingBudget.catBudgeted(categoryId)}
+              longGoal={trackingBudget.catLongGoal(categoryId)}
               CarryoverIndicator={({ style }) => (
                 <CarryoverIndicator
                   style={{
@@ -99,8 +97,6 @@ export function RolloverBalanceMenuModal({
             categoryId={categoryId}
             getItemStyle={() => defaultMenuItemStyle}
             onCarryover={onCarryover}
-            onTransfer={onTransfer}
-            onCover={onCover}
           />
         </>
       )}

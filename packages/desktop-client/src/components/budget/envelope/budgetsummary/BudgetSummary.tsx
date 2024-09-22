@@ -1,6 +1,4 @@
-// @ts-strict-ignore
 import React, { useRef, useState } from 'react';
-import { useTranslation } from 'react-i18next';
 
 import { css } from 'glamor';
 
@@ -11,28 +9,26 @@ import { SvgArrowButtonDown1, SvgArrowButtonUp1 } from '../../../../icons/v2';
 import { theme, styles } from '../../../../style';
 import { Button } from '../../../common/Button2';
 import { Popover } from '../../../common/Popover';
-import { Stack } from '../../../common/Stack';
 import { View } from '../../../common/View';
 import { NotesButton } from '../../../NotesButton';
 import { NamespaceContext } from '../../../spreadsheet/NamespaceContext';
-import { useReport } from '../ReportContext';
+import { useEnvelopeBudget } from '../EnvelopeBudgetContext';
 
 import { BudgetMonthMenu } from './BudgetMonthMenu';
-import { ExpenseTotal } from './ExpenseTotal';
-import { IncomeTotal } from './IncomeTotal';
-import { Saved } from './Saved';
+import { ToBudget } from './ToBudget';
+import { TotalsList } from './TotalsList';
 
 type BudgetSummaryProps = {
-  month?: string;
+  month: string;
+  isGoalTemplatesEnabled?: boolean;
 };
 export function BudgetSummary({ month }: BudgetSummaryProps) {
-  const { t } = useTranslation();
   const {
     currentMonth,
     summaryCollapsed: collapsed,
     onBudgetAction,
     onToggleSummaryCollapse,
-  } = useReport();
+  } = useEnvelopeBudget();
 
   const [menuOpen, setMenuOpen] = useState(false);
   const triggerRef = useRef(null);
@@ -45,12 +41,15 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
     setMenuOpen(false);
   }
 
+  const prevMonthName = monthUtils.format(monthUtils.prevMonth(month), 'MMM');
+
   const ExpandOrCollapseIcon = collapsed
     ? SvgArrowButtonDown1
     : SvgArrowButtonUp1;
 
   return (
     <View
+      data-testid="budget-summary"
       style={{
         backgroundColor:
           month === currentMonth
@@ -90,11 +89,7 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
           >
             <Button
               variant="bare"
-              aria-label={
-                collapsed
-                  ? t('Expand month summary')
-                  : t('Collapse month summary')
-              }
+              aria-label={`${collapsed ? 'Expand' : 'Collapse'} month summary`}
               className="hover-visible"
               onPress={onToggleSummaryCollapse}
             >
@@ -102,7 +97,7 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
                 width={13}
                 height={13}
                 // The margin is to make it the exact same size as the dots button
-                style={{ color: theme.pageTextSubdued, margin: 1 }}
+                style={{ color: theme.tableTextLight, margin: 1 }}
               />
             </Button>
           </View>
@@ -116,6 +111,7 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
                 fontWeight: 500,
                 textDecorationSkip: 'ink',
               },
+              currentMonth === month && { fontWeight: 'bold' },
             ])}`}
           >
             {monthUtils.format(month, 'MMMM')}
@@ -136,14 +132,14 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
                 width={15}
                 height={15}
                 tooltipPosition="bottom right"
-                defaultColor={theme.pageTextLight}
+                defaultColor={theme.tableTextLight}
               />
             </View>
-            <View style={{ userSelect: 'none' }}>
+            <View style={{ userSelect: 'none', marginLeft: 2 }}>
               <Button
                 ref={triggerRef}
                 variant="bare"
-                aria-label={t('Menu')}
+                aria-label="Menu"
                 onPress={onMenuOpen}
               >
                 <SvgDotsHorizontalTriple
@@ -183,27 +179,15 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
                     onBudgetAction(month, 'overwrite-goal-template');
                     onMenuClose();
                   }}
+                  onEndOfMonthCleanup={() => {
+                    onBudgetAction(month, 'cleanup-goal-template');
+                    onMenuClose();
+                  }}
                 />
               </Popover>
             </View>
           </View>
         </View>
-
-        {!collapsed && (
-          <Stack
-            spacing={2}
-            style={{
-              alignSelf: 'center',
-              backgroundColor: theme.tableRowHeaderBackground,
-              borderRadius: 4,
-              padding: '10px 15px',
-              marginTop: 13,
-            }}
-          >
-            <IncomeTotal />
-            <ExpenseTotal />
-          </Stack>
-        )}
 
         {collapsed ? (
           <View
@@ -211,17 +195,38 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
               alignItems: 'center',
               padding: '10px 20px',
               justifyContent: 'space-between',
-              backgroundColor: theme.tableRowHeaderBackground,
+              backgroundColor: theme.tableBackground,
               borderTop: '1px solid ' + theme.tableBorder,
             }}
           >
-            <Saved projected={month >= currentMonth} />
+            <ToBudget
+              prevMonthName={prevMonthName}
+              month={month}
+              onBudgetAction={onBudgetAction}
+              isCollapsed
+            />
           </View>
         ) : (
-          <Saved
-            projected={month >= currentMonth}
-            style={{ marginTop: 13, marginBottom: 20 }}
-          />
+          <>
+            <TotalsList
+              prevMonthName={prevMonthName}
+              style={{
+                padding: '5px 0',
+                marginTop: 17,
+                backgroundColor: theme.tableRowHeaderBackground,
+                borderTopWidth: 1,
+                borderBottomWidth: 1,
+                borderColor: theme.tableBorder,
+              }}
+            />
+            <View style={{ margin: '23px 0' }}>
+              <ToBudget
+                prevMonthName={prevMonthName}
+                month={month}
+                onBudgetAction={onBudgetAction}
+              />
+            </View>
+          </>
         )}
       </NamespaceContext.Provider>
     </View>

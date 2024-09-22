@@ -3,7 +3,7 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { css } from 'glamor';
 
-import { reportBudget } from 'loot-core/src/client/queries';
+import { trackingBudget } from 'loot-core/src/client/queries';
 
 import { theme, type CSSProperties, styles } from '../../../../style';
 import { AlignedText } from '../../../common/AlignedText';
@@ -13,7 +13,7 @@ import { View } from '../../../common/View';
 import { PrivacyFilter } from '../../../PrivacyFilter';
 import { useFormat } from '../../../spreadsheet/useFormat';
 import { makeAmountFullStyle } from '../../util';
-import { useReportSheetValue } from '../ReportComponents';
+import { useTrackingSheetValue } from '../TrackingBudgetComponents';
 
 type SavedProps = {
   projected: boolean;
@@ -22,8 +22,8 @@ type SavedProps = {
 export function Saved({ projected, style }: SavedProps) {
   const { t } = useTranslation();
   const budgetedSaved =
-    useReportSheetValue(reportBudget.totalBudgetedSaved) || 0;
-  const totalSaved = useReportSheetValue(reportBudget.totalSaved) || 0;
+    useTrackingSheetValue(trackingBudget.totalBudgetedSaved) || 0;
+  const totalSaved = useTrackingSheetValue(trackingBudget.totalSaved) || 0;
   const format = useFormat();
   const saved = projected ? budgetedSaved : totalSaved;
   const isNegative = saved < 0;
