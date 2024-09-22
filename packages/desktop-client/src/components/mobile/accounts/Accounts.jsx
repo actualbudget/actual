@@ -1,4 +1,3 @@
-import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { css } from 'glamor';
@@ -162,6 +161,8 @@ function AccountList({
   const syncingAccountIds = useSelector(state => state.account.accountsSyncing);
   const budgetedAccounts = accounts.filter(account => account.offbudget === 0);
   const offbudgetAccounts = accounts.filter(account => account.offbudget === 1);
+
+  sessionStorage.removeItem('reconcile-amount');
 
   return (
     <Page

@@ -59,7 +59,6 @@ export function AccountTransactions({
   pending,
   failed,
 }: AccountTransactionsProps) {
-  const navigate = useNavigate();
   const [reconcileAmount, setReconcileAmount] = useSessionStorage<
     number | null
   >('reconcile-amount', null);
@@ -112,14 +111,7 @@ export function AccountTransactions({
               }}
             />
           }
-          leftContent={
-            <MobileBackButton
-              onPress={() => {
-                setReconcileAmount(null);
-                navigate(-1);
-              }}
-            />
-          }
+          leftContent={<MobileBackButton />}
           rightContent={<AddTransactionButton accountId={account.id} />}
         />
       }
