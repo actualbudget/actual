@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 
-import { rolloverBudget } from 'loot-core/client/queries';
+import { envelopeBudget } from 'loot-core/client/queries';
 
 import { styles } from '../../style';
-import { useRolloverSheetValue } from '../budget/rollover/RolloverComponents';
+import { useEnvelopeSheetValue } from '../budget/envelope/EnvelopeBudgetComponents';
 import { Button } from '../common/Button2';
 import { InitialFocus } from '../common/InitialFocus';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
@@ -17,7 +17,7 @@ type HoldBufferModalProps = {
 };
 
 export function HoldBufferModal({ onSubmit }: HoldBufferModalProps) {
-  const available = useRolloverSheetValue(rolloverBudget.toBudget) ?? 0;
+  const available = useEnvelopeSheetValue(envelopeBudget.toBudget) ?? 0;
   const [amount, setAmount] = useState<number>(0);
 
   const _onSubmit = (newAmount: number) => {

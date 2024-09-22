@@ -1,27 +1,42 @@
-import { useCallback } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useEffect } from 'react';
 
-import { savePrefs } from 'loot-core/src/client/actions';
-import { type State } from 'loot-core/src/client/state-types';
+import { useLocalStorage } from 'usehooks-ts';
+
 import { type LocalPrefs } from 'loot-core/src/types/prefs';
+
+import { useMetadataPref } from './useMetadataPref';
 
 type SetLocalPrefAction<K extends keyof LocalPrefs> = (
   value: LocalPrefs[K],
 ) => void;
 
+/**
+ * Local preferences are scoped to a specific budget file.
+ */
 export function useLocalPref<K extends keyof LocalPrefs>(
   prefName: K,
 ): [LocalPrefs[K], SetLocalPrefAction<K>] {
-  const dispatch = useDispatch();
-  const setLocalPref = useCallback<SetLocalPrefAction<K>>(
-    value => {
-      dispatch(savePrefs({ [prefName]: value } as LocalPrefs));
+  const [budgetId] = useMetadataPref('id');
+
+  const [value, setValue] = useLocalStorage<LocalPrefs[K]>(
+    `${budgetId}-${prefName}`,
+    undefined,
+    {
+      deserializer: JSON.parse,
+      serializer: JSON.stringify,
     },
-    [prefName, dispatch],
-  );
-  const localPref = useSelector(
-    (state: State) => state.prefs.local?.[prefName] as LocalPrefs[K],
   );
 
-  return [localPref, setLocalPref];
+  // Migrate from old pref storage location (metadata.json) to local storage
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [metadataPref] = useMetadataPref(prefName as any);
+  useEffect(() => {
+    if (value !== undefined || metadataPref === undefined) {
+      return;
+    }
+
+    setValue(metadataPref);
+  }, [value, metadataPref, setValue]);
+
+  return [value, setValue];
 }

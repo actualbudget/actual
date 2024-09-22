@@ -166,7 +166,7 @@ export async function prewarmMonth(
   month: string,
 ) {
   const method: keyof Handlers =
-    budgetType === 'report' ? 'report-budget-month' : 'rollover-budget-month';
+    budgetType === 'report' ? 'tracking-budget-month' : 'envelope-budget-month';
 
   const values = await send(method, { month });
 

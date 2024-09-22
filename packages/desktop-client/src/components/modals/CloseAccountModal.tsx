@@ -230,7 +230,6 @@ export function CloseAccountModal({
                         close();
                       }}
                       style={{ color: theme.errorText }}
-                      aria-label="Force close"
                     >
                       force close
                     </Link>{' '}
