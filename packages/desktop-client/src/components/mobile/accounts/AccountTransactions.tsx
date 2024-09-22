@@ -1,14 +1,8 @@
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { t } from 'i18next';
-import { useDebounceCallback } from 'usehooks-ts';
+import { useDebounceCallback, useSessionStorage } from 'usehooks-ts';
 
 import {
   collapseModals,
@@ -65,9 +59,46 @@ export function AccountTransactions({
   pending,
   failed,
 }: AccountTransactionsProps) {
-  const [reconcileAmount, setReconcileAmount] = useState<number | null>(null);
+  const navigate = useNavigate();
+  const [reconcileAmount, setReconcileAmount] = useSessionStorage<number>(
+    'reconcile-amount',
+    null,
+  );
 
   const schedulesTransform = useDefaultSchedulesQueryTransform(account.id);
+  const onDoneReconciling = async () => {
+    const { data } = await runQuery(
+      q('transactions')
+        .filter({
+          cleared: true,
+          reconciled: false,
+          account: account.id,
+        })
+        .select('*')
+        .options({ splits: 'grouped' }),
+    );
+    let transactions = ungroupTransactions(data);
+
+    const changes: { updated: Array<Partial<TransactionEntity>> } = {
+      updated: [],
+    };
+
+    transactions.forEach(trans => {
+      const { diff } = updateTransaction(transactions, {
+        ...trans,
+        reconciled: true,
+      });
+
+      transactions = applyChanges(diff, transactions);
+
+      changes.updated = changes.updated
+        ? changes.updated.concat(diff.updated)
+        : diff.updated;
+    });
+
+    await send('transactions-batch-update', changes);
+    setReconcileAmount(null);
+  };
   return (
     <Page
       header={
@@ -82,7 +113,14 @@ export function AccountTransactions({
               }}
             />
           }
-          leftContent={<MobileBackButton />}
+          leftContent={
+            <MobileBackButton
+              onPress={() => {
+                setReconcileAmount(null);
+                navigate(-1);
+              }}
+            />
+          }
           rightContent={<AddTransactionButton accountId={account.id} />}
         />
       }
@@ -92,39 +130,7 @@ export function AccountTransactions({
         <TransactionListWithPreviews
           account={account}
           reconcileAmount={reconcileAmount}
-          onDoneReconciling={async () => {
-            const { data } = await runQuery(
-              q('transactions')
-                .filter({
-                  cleared: true,
-                  reconciled: false,
-                  account: account.id,
-                })
-                .select('*')
-                .options({ splits: 'grouped' }),
-            );
-            let transactions = ungroupTransactions(data);
-
-            const changes: { updated: Array<Partial<TransactionEntity>> } = {
-              updated: [],
-            };
-
-            transactions.forEach(trans => {
-              const { diff } = updateTransaction(transactions, {
-                ...trans,
-                reconciled: true,
-              });
-
-              transactions = applyChanges(diff, transactions);
-
-              changes.updated = changes.updated
-                ? changes.updated.concat(diff.updated)
-                : diff.updated;
-            });
-
-            await send('transactions-batch-update', changes);
-            setReconcileAmount(null);
-          }}
+          onDoneReconciling={onDoneReconciling}
         />
       </SchedulesProvider>
     </Page>
@@ -373,6 +379,27 @@ function TransactionListWithPreviews({
     paged.current?.fetchNext();
   };
 
+  const onCreateReconciliationTransaction = async (diff: number) => {
+    const reconciliationTransactions = realizeTempTransactions([
+      {
+        id: 'temp',
+        account: account.id,
+        cleared: true,
+        reconciled: false,
+        amount: diff,
+        date: currentDay(),
+        notes: t('Reconciliation balance adjustment'),
+      },
+    ]);
+
+    setTransactions([...reconciliationTransactions, ...transactions]);
+
+    // sync the reconciliation transaction
+    await send('transactions-batch-update', {
+      added: reconciliationTransactions,
+    });
+  };
+
   const balance = queries.accountBalance(account);
   const balanceCleared = queries.accountBalanceCleared(account);
   const balanceUncleared = queries.accountBalanceUncleared(account);
@@ -391,26 +418,7 @@ function TransactionListWithPreviews({
       onRefresh={onRefresh}
       reconcileAmount={reconcileAmount}
       onDoneReconciling={onDoneReconciling}
-      onCreateReconciliationTransaction={async diff => {
-        const reconciliationTransactions = realizeTempTransactions([
-          {
-            id: 'temp',
-            account: account.id,
-            cleared: true,
-            reconciled: false,
-            amount: diff,
-            date: currentDay(),
-            notes: t('Reconciliation balance adjustment'),
-          },
-        ]);
-
-        setTransactions([...reconciliationTransactions, ...transactions]);
-
-        // sync the reconciliation transaction
-        await send('transactions-batch-update', {
-          added: reconciliationTransactions,
-        });
-      }}
+      onCreateReconciliationTransaction={onCreateReconciliationTransaction}
     />
   );
 }
