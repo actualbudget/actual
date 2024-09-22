@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useSelector } from 'react-redux';
+
+import { type TransactionEntity } from 'loot-core/types/models';
 
 import { SelectedProvider, useSelected } from '../../../hooks/useSelected';
 import { SvgSearchAlternate } from '../../../icons/v2';
@@ -8,13 +10,22 @@ import { Button } from '../../common/Button2';
 import { InputWithContent } from '../../common/InputWithContent';
 import { Label } from '../../common/Label';
 import { View } from '../../common/View';
+import { type Binding } from '../../spreadsheet';
 import { CellValue, CellValueText } from '../../spreadsheet/CellValue';
 import { useSheetValue } from '../../spreadsheet/useSheetValue';
 import { PullToRefresh } from '../PullToRefresh';
 
 import { TransactionList } from './TransactionList';
 
-function TransactionSearchInput({ placeholder, onSearch }) {
+type TransactionSearchInputProps = {
+  placeholder: string;
+  onSearch: (text: string) => void;
+};
+
+function TransactionSearchInput({
+  placeholder,
+  onSearch,
+}: TransactionSearchInputProps) {
   const [text, setText] = useState('');
 
   return (
@@ -57,6 +68,22 @@ function TransactionSearchInput({ placeholder, onSearch }) {
   );
 }
 
+type TransactionListWithBalancesProps = {
+  isLoading: boolean;
+  transactions: TransactionEntity[];
+  balance: Binding<'account', 'balance'>;
+  balanceCleared: Binding<'account', 'balanceCleared'>;
+  balanceUncleared: Binding<'account', 'balanceUncleared'>;
+  searchPlaceholder?: string;
+  onSearch: (text: string) => void;
+  onLoadMore: () => void;
+  onOpenTransaction: (transaction: TransactionEntity) => void;
+  onRefresh: () => Promise<unknown>;
+  reconcileAmount: number | null;
+  onDoneReconciling: () => void;
+  onCreateReconciliationTransaction: (amount: number) => void;
+};
+
 export function TransactionListWithBalances({
   isLoading,
   transactions,
@@ -71,17 +98,17 @@ export function TransactionListWithBalances({
   reconcileAmount,
   onDoneReconciling,
   onCreateReconciliationTransaction,
-}) {
+}: TransactionListWithBalancesProps) {
   const newTransactions = useSelector(state => state.queries.newTransactions);
 
-  const isNewTransaction = id => {
+  const isNewTransaction = (id: string) => {
     return newTransactions.includes(id);
   };
 
   const clearedAmount = useSheetValue(balanceCleared);
   const unclearedAmount = useSheetValue(balanceUncleared);
   const selectedInst = useSelected('transactions', transactions, []);
-  const reconcileDifference = reconcileAmount - clearedAmount;
+  const reconcileDifference = (reconcileAmount ?? 0) - clearedAmount;
 
   return (
     <SelectedProvider instance={selectedInst}>

@@ -131,18 +131,30 @@ export function AccountTransactions({
   );
 }
 
-function AccountName({ account, pending, failed, onReconcile }) {
+type AccountNameProps = {
+  account: AccountEntity;
+  pending: number;
+  failed: number;
+  onReconcile: (amount: number) => void;
+};
+
+function AccountName({
+  account,
+  pending,
+  failed,
+  onReconcile,
+}: AccountNameProps) {
   const dispatch = useDispatch();
 
-  const onSave = account => {
+  const onSave = (account: AccountEntity) => {
     dispatch(updateAccount(account));
   };
 
-  const onSaveNotes = async (id, notes) => {
+  const onSaveNotes = async (id: string, notes: string) => {
     await send('notes-save', { id, note: notes });
   };
 
-  const onEditNotes = id => {
+  const onEditNotes = (id: string) => {
     dispatch(
       pushModal('notes', {
         id: `account-${id}`,
@@ -195,7 +207,7 @@ function AccountName({ account, pending, failed, onReconcile }) {
         flexDirection: 'row',
       }}
     >
-      {account.bankId && (
+      {(account as typeof account & { bankId?: string }).bankId && (
         <div
           style={{
             margin: 'auto',
@@ -241,7 +253,7 @@ function TransactionListWithPreviews({
   const [currentQuery, setCurrentQuery] = useState<Query>();
   const [isSearching, setIsSearching] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [transactions, setTransactions] = useState([]);
+  const [transactions, setTransactions] = useState<TransactionEntity[]>([]);
   const prependTransactions = usePreviewTransactions(() => {});
   const allTransactions = useMemo(
     () =>
@@ -262,14 +274,14 @@ function TransactionListWithPreviews({
     [account.id],
   );
 
-  const paged = useRef(null);
+  const paged = useRef<ReturnType<typeof pagedQuery> | null>(null);
 
-  const updateQuery = useCallback(query => {
+  const updateQuery = useCallback((query: Query) => {
     paged.current?.unsubscribe();
     setIsLoading(true);
     paged.current = pagedQuery(
       query.options({ splits: 'none' }).select('*'),
-      data => {
+      (data: TransactionEntity[]) => {
         setTransactions(data);
         setIsLoading(false);
       },
@@ -331,11 +343,11 @@ function TransactionListWithPreviews({
     150,
   );
 
-  const onSearch = text => {
+  const onSearch = (text: string) => {
     updateSearchQuery(text);
   };
 
-  const onOpenTransaction = transaction => {
+  const onOpenTransaction = (transaction: TransactionEntity) => {
     if (!isPreviewId(transaction.id)) {
       navigate(`/transactions/${transaction.id}`);
     } else {
