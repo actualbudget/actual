@@ -24,7 +24,7 @@
     "@actual-app/web": "24.9.0",
     "bcrypt": "^5.1.1",
     "better-sqlite3": "^9.6.0",
-    "body-parser": "^1.20.1",
+    "body-parser": "^1.20.3",
     "cors": "^2.8.5",
     "date-fns": "^2.30.0",
     "debug": "^4.3.4",
