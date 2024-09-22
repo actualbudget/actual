@@ -25,7 +25,7 @@ async function loadState() {
       ),
     );
   } catch (e) {
-    console.log('Could not load window state');
+    console.log('Could not load window state', e);
   }
 
   return validateState(state);
