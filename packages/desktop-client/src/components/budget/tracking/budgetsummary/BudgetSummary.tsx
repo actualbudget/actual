@@ -15,7 +15,7 @@ import { Stack } from '../../../common/Stack';
 import { View } from '../../../common/View';
 import { NotesButton } from '../../../NotesButton';
 import { NamespaceContext } from '../../../spreadsheet/NamespaceContext';
-import { useReport } from '../ReportContext';
+import { useTrackingBudget } from '../TrackingBudgetContext';
 
 import { BudgetMonthMenu } from './BudgetMonthMenu';
 import { ExpenseTotal } from './ExpenseTotal';
@@ -32,7 +32,7 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
     summaryCollapsed: collapsed,
     onBudgetAction,
     onToggleSummaryCollapse,
-  } = useReport();
+  } = useTrackingBudget();
 
   const [menuOpen, setMenuOpen] = useState(false);
   const triggerRef = useRef(null);

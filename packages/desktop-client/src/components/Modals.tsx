@@ -50,14 +50,14 @@ import { ManageRulesModal } from './modals/ManageRulesModal';
 import { MergeUnusedPayeesModal } from './modals/MergeUnusedPayeesModal';
 import { NotesModal } from './modals/NotesModal';
 import { PayeeAutocompleteModal } from './modals/PayeeAutocompleteModal';
-import { ReportBalanceMenuModal } from './modals/ReportBalanceMenuModal';
-import { ReportBudgetMenuModal } from './modals/ReportBudgetMenuModal';
-import { ReportBudgetMonthMenuModal } from './modals/ReportBudgetMonthMenuModal';
-import { ReportBudgetSummaryModal } from './modals/ReportBudgetSummaryModal';
 import { ScheduledTransactionMenuModal } from './modals/ScheduledTransactionMenuModal';
 import { SelectLinkedAccountsModal } from './modals/SelectLinkedAccountsModal';
 import { SimpleFinInitialiseModal } from './modals/SimpleFinInitialiseModal';
 import { SingleInputModal } from './modals/SingleInputModal';
+import { TrackingBalanceMenuModal } from './modals/TrackingBalanceMenuModal';
+import { TrackingBudgetMenuModal } from './modals/TrackingBudgetMenuModal';
+import { TrackingBudgetMonthMenuModal } from './modals/TrackingBudgetMonthMenuModal';
+import { TrackingBudgetSummaryModal } from './modals/TrackingBudgetSummaryModal';
 import { TransferModal } from './modals/TransferModal';
 import { DiscoverSchedules } from './schedules/DiscoverSchedules';
 import { PostsOfflineNotification } from './schedules/PostsOfflineNotification';
@@ -324,8 +324,10 @@ export function Modals() {
             </NamespaceContext.Provider>
           );
 
-        case 'report-budget-summary':
-          return <ReportBudgetSummaryModal key={name} month={options.month} />;
+        case 'tracking-budget-summary':
+          return (
+            <TrackingBudgetSummaryModal key={name} month={options.month} />
+          );
 
         case 'schedule-edit':
           return (
@@ -395,13 +397,13 @@ export function Modals() {
             </NamespaceContext.Provider>
           );
 
-        case 'report-budget-menu':
+        case 'tracking-budget-menu':
           return (
             <NamespaceContext.Provider
               key={name}
               value={monthUtils.sheetForMonth(options.month)}
             >
-              <ReportBudgetMenuModal
+              <TrackingBudgetMenuModal
                 categoryId={options.categoryId}
                 onUpdateBudget={options.onUpdateBudget}
                 onCopyLastMonthAverage={options.onCopyLastMonthAverage}
@@ -479,13 +481,13 @@ export function Modals() {
             </NamespaceContext.Provider>
           );
 
-        case 'report-balance-menu':
+        case 'tracking-balance-menu':
           return (
             <NamespaceContext.Provider
               key={name}
               value={monthUtils.sheetForMonth(options.month)}
             >
-              <ReportBalanceMenuModal
+              <TrackingBalanceMenuModal
                 categoryId={options.categoryId}
                 onCarryover={options.onCarryover}
               />
@@ -551,13 +553,13 @@ export function Modals() {
             </NamespaceContext.Provider>
           );
 
-        case 'report-budget-month-menu':
+        case 'tracking-budget-month-menu':
           return (
             <NamespaceContext.Provider
               key={name}
               value={monthUtils.sheetForMonth(options.month)}
             >
-              <ReportBudgetMonthMenuModal
+              <TrackingBudgetMonthMenuModal
                 month={options.month}
                 onBudgetAction={options.onBudgetAction}
                 onEditNotes={options.onEditNotes}

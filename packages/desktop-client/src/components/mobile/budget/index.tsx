@@ -97,7 +97,7 @@ export function Budget() {
   const onShowBudgetSummary = useCallback(() => {
     if (budgetType === 'report') {
       dispatch(
-        pushModal('report-budget-summary', {
+        pushModal('tracking-budget-summary', {
           month: startMonth,
         }),
       );
@@ -447,7 +447,7 @@ export function Budget() {
     month => {
       dispatch(
         pushModal(
-          `${budgetType === 'report' ? 'report' : 'envelope'}-budget-month-menu`,
+          `${budgetType === 'report' ? 'tracking' : 'envelope'}-budget-month-menu`,
           {
             month,
             onBudgetAction,

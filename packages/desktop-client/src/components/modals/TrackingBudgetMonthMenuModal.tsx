@@ -10,23 +10,23 @@ import { useUndo } from '../../hooks/useUndo';
 import { SvgCheveronDown, SvgCheveronUp } from '../../icons/v1';
 import { SvgNotesPaper } from '../../icons/v2';
 import { type CSSProperties, styles, theme } from '../../style';
-import { BudgetMonthMenu } from '../budget/report/budgetsummary/BudgetMonthMenu';
+import { BudgetMonthMenu } from '../budget/tracking/budgetsummary/BudgetMonthMenu';
 import { Button } from '../common/Button2';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { View } from '../common/View';
 import { Notes } from '../Notes';
 
-type ReportBudgetMonthMenuModalProps = {
+type TrackingBudgetMonthMenuModalProps = {
   month: string;
   onBudgetAction: (month: string, action: string, arg?: unknown) => void;
   onEditNotes: (month: string) => void;
 };
 
-export function ReportBudgetMonthMenuModal({
+export function TrackingBudgetMonthMenuModal({
   month,
   onBudgetAction,
   onEditNotes,
-}: ReportBudgetMonthMenuModalProps) {
+}: TrackingBudgetMonthMenuModalProps) {
   const originalNotes = useNotes(`budget-${month}`);
   const { showUndoNotification } = useUndo();
 
@@ -59,7 +59,7 @@ export function ReportBudgetMonthMenuModal({
 
   return (
     <Modal
-      name="report-budget-month-menu"
+      name="tracking-budget-month-menu"
       containerProps={{
         style: { height: '50vh' },
       }}

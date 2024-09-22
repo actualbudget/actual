@@ -66,7 +66,7 @@ export interface ServerHandlers {
     }[]
   >;
 
-  'report-budget-month': (arg: { month }) => Promise<
+  'tracking-budget-month': (arg: { month }) => Promise<
     {
       value: string | number | boolean;
       name: string;

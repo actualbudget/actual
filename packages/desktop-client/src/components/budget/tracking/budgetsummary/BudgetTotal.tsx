@@ -13,18 +13,18 @@ import { type SheetFields, type Binding } from '../../../spreadsheet';
 import { CellValue, CellValueText } from '../../../spreadsheet/CellValue';
 
 type BudgetTotalProps<
-  CurrentField extends SheetFields<'report-budget'>,
-  TargetField extends SheetFields<'report-budget'>,
+  CurrentField extends SheetFields<'tracking-budget'>,
+  TargetField extends SheetFields<'tracking-budget'>,
 > = {
   title: ReactNode;
-  current: Binding<'report-budget', CurrentField>;
-  target: Binding<'report-budget', TargetField>;
+  current: Binding<'tracking-budget', CurrentField>;
+  target: Binding<'tracking-budget', TargetField>;
   ProgressComponent: ComponentType<{ current; target }>;
   style?: CSSProperties;
 };
 export function BudgetTotal<
-  CurrentField extends SheetFields<'report-budget'>,
-  TargetField extends SheetFields<'report-budget'>,
+  CurrentField extends SheetFields<'tracking-budget'>,
+  TargetField extends SheetFields<'tracking-budget'>,
 >({
   title,
   current,

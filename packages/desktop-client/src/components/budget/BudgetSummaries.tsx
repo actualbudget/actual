@@ -16,10 +16,10 @@ import { View } from '../common/View';
 
 import { type BudgetSummary as EnvelopeBudgetSummary } from './envelope/budgetsummary/BudgetSummary';
 import { MonthsContext } from './MonthsContext';
-import { type BudgetSummary as ReportBudgetSummary } from './report/budgetsummary/BudgetSummary';
+import { type BudgetSummary as TrackingBudgetSummary } from './tracking/budgetsummary/BudgetSummary';
 
 type BudgetSummariesProps = {
-  SummaryComponent: typeof ReportBudgetSummary | typeof EnvelopeBudgetSummary;
+  SummaryComponent: typeof TrackingBudgetSummary | typeof EnvelopeBudgetSummary;
 };
 
 export function BudgetSummaries({ SummaryComponent }: BudgetSummariesProps) {

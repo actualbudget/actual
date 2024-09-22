@@ -13,7 +13,7 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { css } from 'glamor';
 
-import { reportBudget, envelopeBudget } from 'loot-core/client/queries';
+import { trackingBudget, envelopeBudget } from 'loot-core/client/queries';
 import { integerToCurrency } from 'loot-core/shared/util';
 import { getNormalisedString } from 'loot-core/src/shared/normalisation';
 import {
@@ -384,9 +384,9 @@ function CategoryItem({
   const balanceBinding =
     budgetType === 'rollover'
       ? envelopeBudget.catBalance(item.id)
-      : reportBudget.catBalance(item.id);
+      : trackingBudget.catBalance(item.id);
   const balance = useSheetValue<
-    'envelope-budget' | 'report-budget',
+    'envelope-budget' | 'tracking-budget',
     typeof balanceBinding
   >(balanceBinding);
 

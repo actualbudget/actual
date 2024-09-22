@@ -2,7 +2,7 @@
 import React, { type ComponentProps, memo, useRef, useState } from 'react';
 import { Trans } from 'react-i18next';
 
-import { reportBudget } from 'loot-core/src/client/queries';
+import { trackingBudget } from 'loot-core/src/client/queries';
 import { evalArithmetic } from 'loot-core/src/shared/arithmetic';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToCurrency, amountToInteger } from 'loot-core/src/shared/util';
@@ -24,22 +24,22 @@ import { makeAmountGrey } from '../util';
 import { BalanceMenu } from './BalanceMenu';
 import { BudgetMenu } from './BudgetMenu';
 
-export const useReportSheetValue = <
-  FieldName extends SheetFields<'report-budget'>,
+export const useTrackingSheetValue = <
+  FieldName extends SheetFields<'tracking-budget'>,
 >(
-  binding: Binding<'report-budget', FieldName>,
+  binding: Binding<'tracking-budget', FieldName>,
 ) => {
   return useSheetValue(binding);
 };
 
-const ReportCellValue = <FieldName extends SheetFields<'report-budget'>>(
-  props: ComponentProps<typeof CellValue<'report-budget', FieldName>>,
+const TrackingCellValue = <FieldName extends SheetFields<'tracking-budget'>>(
+  props: ComponentProps<typeof CellValue<'tracking-budget', FieldName>>,
 ) => {
   return <CellValue {...props} />;
 };
 
-const ReportSheetCell = <FieldName extends SheetFields<'report-budget'>>(
-  props: SheetCellProps<'report-budget', FieldName>,
+const TrackingSheetCell = <FieldName extends SheetFields<'tracking-budget'>>(
+  props: SheetCellProps<'tracking-budget', FieldName>,
 ) => {
   return <SheetCell {...props} />;
 };
@@ -70,28 +70,31 @@ export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
         <Text style={{ color: theme.pageTextLight }}>
           <Trans>Budgeted</Trans>
         </Text>
-        <ReportCellValue
-          binding={reportBudget.totalBudgetedExpense}
+        <TrackingCellValue
+          binding={trackingBudget.totalBudgetedExpense}
           type="financial"
         >
           {props => <CellValueText {...props} style={cellStyle} />}
-        </ReportCellValue>
+        </TrackingCellValue>
       </View>
       <View style={headerLabelStyle}>
         <Text style={{ color: theme.pageTextLight }}>
           <Trans>Spent</Trans>
         </Text>
-        <ReportCellValue binding={reportBudget.totalSpent} type="financial">
+        <TrackingCellValue binding={trackingBudget.totalSpent} type="financial">
           {props => <CellValueText {...props} style={cellStyle} />}
-        </ReportCellValue>
+        </TrackingCellValue>
       </View>
       <View style={headerLabelStyle}>
         <Text style={{ color: theme.pageTextLight }}>
           <Trans>Balance</Trans>
         </Text>
-        <ReportCellValue binding={reportBudget.totalLeftover} type="financial">
+        <TrackingCellValue
+          binding={trackingBudget.totalLeftover}
+          type="financial"
+        >
           {props => <CellValueText {...props} style={cellStyle} />}
-        </ReportCellValue>
+        </TrackingCellValue>
       </View>
     </View>
   );
@@ -140,28 +143,28 @@ export const GroupMonth = memo(function GroupMonth({
           : theme.budgetHeaderOtherMonth,
       }}
     >
-      <ReportSheetCell
+      <TrackingSheetCell
         name="budgeted"
         width="flex"
         textAlign="right"
         style={{ fontWeight: 600, ...styles.tnum }}
         valueProps={{
-          binding: reportBudget.groupBudgeted(id),
+          binding: trackingBudget.groupBudgeted(id),
           type: 'financial',
         }}
       />
-      <ReportSheetCell
+      <TrackingSheetCell
         name="spent"
         width="flex"
         textAlign="right"
         style={{ fontWeight: 600, ...styles.tnum }}
         valueProps={{
-          binding: reportBudget.groupSumAmount(id),
+          binding: trackingBudget.groupSumAmount(id),
           type: 'financial',
         }}
       />
       {!group.is_income && (
-        <ReportSheetCell
+        <TrackingSheetCell
           name="balance"
           width="flex"
           textAlign="right"
@@ -171,7 +174,7 @@ export const GroupMonth = memo(function GroupMonth({
             ...styles.tnum,
           }}
           valueProps={{
-            binding: reportBudget.groupBalance(id),
+            binding: trackingBudget.groupBalance(id),
             type: 'financial',
             privacyFilter: {
               style: {
@@ -310,7 +313,7 @@ export const CategoryMonth = memo(function CategoryMonth({
             </Popover>
           </View>
         )}
-        <ReportSheetCell
+        <TrackingSheetCell
           name="budget"
           exposed={editing}
           focused={editing}
@@ -329,7 +332,7 @@ export const CategoryMonth = memo(function CategoryMonth({
             },
           }}
           valueProps={{
-            binding: reportBudget.catBudgeted(category.id),
+            binding: trackingBudget.catBudgeted(category.id),
             type: 'financial',
             getValueStyle: makeAmountGrey,
             formatExpr: expr => {
@@ -360,8 +363,8 @@ export const CategoryMonth = memo(function CategoryMonth({
           data-testid="category-month-spent"
           onClick={() => onShowActivity(category.id, month)}
         >
-          <ReportCellValue
-            binding={reportBudget.catSumAmount(category.id)}
+          <TrackingCellValue
+            binding={trackingBudget.catSumAmount(category.id)}
             type="financial"
           >
             {props => (
@@ -376,7 +379,7 @@ export const CategoryMonth = memo(function CategoryMonth({
                 }}
               />
             )}
-          </ReportCellValue>
+          </TrackingCellValue>
         </span>
       </Field>
 
@@ -392,11 +395,11 @@ export const CategoryMonth = memo(function CategoryMonth({
           >
             <BalanceWithCarryover
               disabled={category.is_income}
-              carryover={reportBudget.catCarryover(category.id)}
-              balance={reportBudget.catBalance(category.id)}
-              goal={reportBudget.catGoal(category.id)}
-              budgeted={reportBudget.catBudgeted(category.id)}
-              longGoal={reportBudget.catLongGoal(category.id)}
+              carryover={trackingBudget.catCarryover(category.id)}
+              balance={trackingBudget.catBalance(category.id)}
+              goal={trackingBudget.catGoal(category.id)}
+              budgeted={trackingBudget.catBudgeted(category.id)}
+              longGoal={trackingBudget.catLongGoal(category.id)}
             />
           </span>
 

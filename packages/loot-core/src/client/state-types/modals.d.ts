@@ -165,7 +165,7 @@ type FinanceModals = {
     onSetMonthsAverage: (numberOfMonths: number) => void;
     onApplyBudgetTemplate: () => void;
   };
-  'report-budget-menu': {
+  'tracking-budget-menu': {
     categoryId: string;
     month: string;
     onUpdateBudget: (amount: number) => void;
@@ -187,7 +187,7 @@ type FinanceModals = {
     name: string;
     onSave: (id: string, notes: string) => void;
   };
-  'report-budget-summary': { month: string };
+  'tracking-budget-summary': { month: string };
   'envelope-budget-summary': {
     month: string;
     onBudgetAction: (
@@ -218,7 +218,7 @@ type FinanceModals = {
     onHoldBuffer: () => void;
     onResetHoldBuffer: () => void;
   };
-  'report-balance-menu': {
+  'tracking-balance-menu': {
     categoryId: string;
     month: string;
     onCarryover: (carryover: boolean) => void;
@@ -257,7 +257,7 @@ type FinanceModals = {
     onBudgetAction: (month: string, action: string, arg?: unknown) => void;
     onEditNotes: (month: string) => void;
   };
-  'report-budget-month-menu': {
+  'tracking-budget-month-menu': {
     month: string;
     onBudgetAction: (month: string, action: string, arg?: unknown) => void;
     onEditNotes: (month: string) => void;

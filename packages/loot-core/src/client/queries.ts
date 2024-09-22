@@ -26,7 +26,7 @@ type BudgetType<SheetName extends SheetNames> = Record<
 
 const accountParametrizedField = parametrizedField<'account'>();
 const envelopeParametrizedField = parametrizedField<'envelope-budget'>();
-const reportParametrizedField = parametrizedField<'report-budget'>();
+const trackingParametrizedField = parametrizedField<'tracking-budget'>();
 
 export function getAccountFilter(accountId?: string, field = 'account') {
   if (accountId) {
@@ -270,7 +270,7 @@ export const envelopeBudget = {
   catLongGoal: envelopeParametrizedField('long-goal'),
 } satisfies BudgetType<'envelope-budget'>;
 
-export const reportBudget = {
+export const trackingBudget = {
   totalBudgetedExpense: 'total-budgeted',
   totalBudgetedIncome: 'total-budget-income',
   totalBudgetedSaved: 'total-saved',
@@ -280,16 +280,16 @@ export const reportBudget = {
   totalSaved: 'real-saved',
 
   totalLeftover: 'total-leftover',
-  groupSumAmount: reportParametrizedField('group-sum-amount'),
+  groupSumAmount: trackingParametrizedField('group-sum-amount'),
   groupIncomeReceived: 'total-income',
 
-  groupBudgeted: reportParametrizedField('group-budget'),
-  groupBalance: reportParametrizedField('group-leftover'),
+  groupBudgeted: trackingParametrizedField('group-budget'),
+  groupBalance: trackingParametrizedField('group-leftover'),
 
-  catBudgeted: reportParametrizedField('budget'),
-  catSumAmount: reportParametrizedField('sum-amount'),
-  catBalance: reportParametrizedField('leftover'),
-  catCarryover: reportParametrizedField('carryover'),
-  catGoal: reportParametrizedField('goal'),
-  catLongGoal: reportParametrizedField('long-goal'),
-} satisfies BudgetType<'report-budget'>;
+  catBudgeted: trackingParametrizedField('budget'),
+  catSumAmount: trackingParametrizedField('sum-amount'),
+  catBalance: trackingParametrizedField('leftover'),
+  catCarryover: trackingParametrizedField('carryover'),
+  catGoal: trackingParametrizedField('goal'),
+  catLongGoal: trackingParametrizedField('long-goal'),
+} satisfies BudgetType<'tracking-budget'>;

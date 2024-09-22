@@ -1,6 +1,6 @@
 import React, { type ComponentPropsWithoutRef } from 'react';
 
-import { reportBudget } from 'loot-core/client/queries';
+import { trackingBudget } from 'loot-core/client/queries';
 
 import { useCategory } from '../../hooks/useCategory';
 import { type CSSProperties, theme, styles } from '../../style';
@@ -8,7 +8,7 @@ import {
   BalanceWithCarryover,
   CarryoverIndicator,
 } from '../budget/BalanceWithCarryover';
-import { BalanceMenu } from '../budget/report/BalanceMenu';
+import { BalanceMenu } from '../budget/tracking/BalanceMenu';
 import {
   Modal,
   ModalCloseButton,
@@ -19,12 +19,14 @@ import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { CellValueText } from '../spreadsheet/CellValue';
 
-type ReportBalanceMenuModalProps = ComponentPropsWithoutRef<typeof BalanceMenu>;
+type TrackingBalanceMenuModalProps = ComponentPropsWithoutRef<
+  typeof BalanceMenu
+>;
 
-export function ReportBalanceMenuModal({
+export function TrackingBalanceMenuModal({
   categoryId,
   onCarryover,
-}: ReportBalanceMenuModalProps) {
+}: TrackingBalanceMenuModalProps) {
   const defaultMenuItemStyle: CSSProperties = {
     ...styles.mobileMenuItem,
     color: theme.menuItemText,
@@ -39,7 +41,7 @@ export function ReportBalanceMenuModal({
   }
 
   return (
-    <Modal name="report-balance-menu">
+    <Modal name="tracking-balance-menu">
       {({ state: { close } }) => (
         <>
           <ModalHeader
@@ -63,11 +65,11 @@ export function ReportBalanceMenuModal({
             </Text>
             <BalanceWithCarryover
               disabled
-              carryover={reportBudget.catCarryover(categoryId)}
-              balance={reportBudget.catBalance(categoryId)}
-              goal={reportBudget.catGoal(categoryId)}
-              budgeted={reportBudget.catBudgeted(categoryId)}
-              longGoal={reportBudget.catLongGoal(categoryId)}
+              carryover={trackingBudget.catCarryover(categoryId)}
+              balance={trackingBudget.catBalance(categoryId)}
+              goal={trackingBudget.catGoal(categoryId)}
+              budgeted={trackingBudget.catBudgeted(categoryId)}
+              longGoal={trackingBudget.catLongGoal(categoryId)}
               CarryoverIndicator={({ style }) => (
                 <CarryoverIndicator
                   style={{

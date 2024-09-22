@@ -4,13 +4,13 @@ import React, {
   useEffect,
 } from 'react';
 
-import { reportBudget } from 'loot-core/client/queries';
+import { trackingBudget } from 'loot-core/client/queries';
 import { amountToInteger, integerToAmount } from 'loot-core/shared/util';
 
 import { useCategory } from '../../hooks/useCategory';
 import { type CSSProperties, theme, styles } from '../../style';
-import { BudgetMenu } from '../budget/report/BudgetMenu';
-import { useReportSheetValue } from '../budget/report/ReportComponents';
+import { BudgetMenu } from '../budget/tracking/BudgetMenu';
+import { useTrackingSheetValue } from '../budget/tracking/TrackingBudgetComponents';
 import {
   Modal,
   ModalCloseButton,
@@ -21,20 +21,20 @@ import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { FocusableAmountInput } from '../mobile/transactions/FocusableAmountInput';
 
-type ReportBudgetMenuModalProps = ComponentPropsWithoutRef<
+type TrackingBudgetMenuModalProps = ComponentPropsWithoutRef<
   typeof BudgetMenu
 > & {
   categoryId: string;
   onUpdateBudget: (amount: number) => void;
 };
 
-export function ReportBudgetMenuModal({
+export function TrackingBudgetMenuModal({
   categoryId,
   onUpdateBudget,
   onCopyLastMonthAverage,
   onSetMonthsAverage,
   onApplyBudgetTemplate,
-}: ReportBudgetMenuModalProps) {
+}: TrackingBudgetMenuModalProps) {
   const defaultMenuItemStyle: CSSProperties = {
     ...styles.mobileMenuItem,
     color: theme.menuItemText,
@@ -42,7 +42,9 @@ export function ReportBudgetMenuModal({
     borderTop: `1px solid ${theme.pillBorder}`,
   };
 
-  const budgeted = useReportSheetValue(reportBudget.catBudgeted(categoryId));
+  const budgeted = useTrackingSheetValue(
+    trackingBudget.catBudgeted(categoryId),
+  );
   const category = useCategory(categoryId);
   const [amountFocused, setAmountFocused] = useState(false);
 
@@ -59,7 +61,7 @@ export function ReportBudgetMenuModal({
   }
 
   return (
-    <Modal name="report-budget-menu">
+    <Modal name="tracking-budget-menu">
       {({ state: { close } }) => (
         <>
           <ModalHeader
