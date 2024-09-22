@@ -54,7 +54,7 @@ if (isDev) {
 }
 
 function createBackgroundProcess() {
-  const defaultOptions = { stdio: 'pipe', allowLoadingUnsignedLibraries: true };
+  const defaultOptions = { stdio: 'pipe' }; // , allowLoadingUnsignedLibraries: true
   serverProcess = utilityProcess.fork(
     __dirname + '/server.js',
     ['--subprocess', app.getVersion()],
@@ -276,7 +276,7 @@ app.on('ready', async () => {
     console.log('Suspending', new Date());
   });
 
-  createBackgroundProcess();
+  // createBackgroundProcess();
 });
 
 app.on('window-all-closed', () => {
