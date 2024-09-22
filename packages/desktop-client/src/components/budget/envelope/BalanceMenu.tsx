@@ -70,7 +70,7 @@ export function BalanceMenu({
           name: 'carryover',
           text: carryover
             ? t('Remove overspending rollover')
-            : t('Envelope overspending'),
+            : t('Rollover overspending'),
         },
       ]}
     />
