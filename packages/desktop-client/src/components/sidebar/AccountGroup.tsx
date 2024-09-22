@@ -44,15 +44,18 @@ export function AccountGroup<FieldName extends SheetFields<'account'>>({
 
   const getAccountPath = (account: AccountEntity) => `/accounts/${account.id}`;
 
+  function onDragChange() {}
+
   const [collapsed, setCollapsedGroupsPref] = useLocalPref(
     'ui.collapsedAccountGroups',
   );
 
   const toggleAccounts = () => {
     const c = collapsed ? { ...collapsed } : {};
-    c[groupName.replace(/\s/g, '')] = !collapsed || !Object.hasOwn(collapsed, groupName.replace(/\s/g, '')) ?
-      true :
-      !collapsed[groupName.replace(/\s/g, '')];
+    c[groupName.replace(/\s/g, '')] =
+      !collapsed || !Object.hasOwn(collapsed, groupName.replace(/\s/g, ''))
+        ? true
+        : !collapsed[groupName.replace(/\s/g, '')];
     setCollapsedGroupsPref(c);
   };
 
@@ -87,6 +90,7 @@ export function AccountGroup<FieldName extends SheetFields<'account'>>({
             updated={updatedAccounts?.includes(account.id)}
             to={getAccountPath(account)}
             query={queries.accountBalance(account)}
+            onDragChange={onDragChange}
             onDrop={onReorder}
           />
         ))}
