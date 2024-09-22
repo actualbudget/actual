@@ -57,10 +57,11 @@ if (isDev) {
 }
 
 function createBackgroundProcess() {
+  const defaultOptions = { stdio: 'pipe', allowLoadingUnsignedLibraries: true };
   serverProcess = utilityProcess.fork(
     __dirname + '/server.js',
     ['--subprocess', app.getVersion()],
-    isDev ? { execArgv: ['--inspect'], stdio: 'pipe' } : { stdio: 'pipe' },
+    isDev ? { ...defaultOptions, execArgv: ['--inspect'] } : defaultOptions,
   );
 
   serverProcess.stdout.on('data', (chunk: Buffer) => {
