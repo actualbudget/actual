@@ -213,6 +213,7 @@ function updateMenu(budgetId?: string) {
   }
 }
 
+app.commandLine.appendSwitch('in-process-gpu'); // Does this fix mac?
 app.setAppUserModelId('com.actualbudget.actual');
 
 app.on('ready', async () => {
