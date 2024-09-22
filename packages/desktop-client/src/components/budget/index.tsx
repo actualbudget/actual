@@ -37,7 +37,7 @@ import * as trackingBudget from './tracking/TrackingBudgetComponents';
 import { TrackingBudgetProvider } from './tracking/TrackingBudgetContext';
 import { prewarmAllMonths, prewarmMonth } from './util';
 
-type ReportComponents = {
+type TrackingReportComponents = {
   SummaryComponent: typeof trackingBudget.BudgetSummary;
   ExpenseCategoryComponent: typeof trackingBudget.ExpenseCategoryMonth;
   ExpenseGroupComponent: typeof trackingBudget.ExpenseGroupMonth;
@@ -47,7 +47,7 @@ type ReportComponents = {
   IncomeHeaderComponent: typeof trackingBudget.IncomeHeaderMonth;
 };
 
-type EnvelopeComponents = {
+type EnvelopeBudgetComponents = {
   SummaryComponent: typeof EnvelopeBudgetSummary;
   ExpenseCategoryComponent: typeof envelopeBudget.ExpenseCategoryMonth;
   ExpenseGroupComponent: typeof envelopeBudget.ExpenseGroupMonth;
@@ -59,8 +59,8 @@ type EnvelopeComponents = {
 
 type BudgetInnerProps = {
   accountId?: string;
-  trackingComponents: ReportComponents;
-  envelopeComponents: EnvelopeComponents;
+  trackingComponents: TrackingReportComponents;
+  envelopeComponents: EnvelopeBudgetComponents;
 };
 
 function BudgetInner(props: BudgetInnerProps) {
@@ -391,7 +391,7 @@ const EnvelopeBudgetSummary = memo<{ month: string }>(props => {
 EnvelopeBudgetSummary.displayName = 'EnvelopeBudgetSummary';
 
 export function Budget() {
-  const trackingComponents = useMemo<ReportComponents>(
+  const trackingComponents = useMemo<TrackingReportComponents>(
     () => ({
       SummaryComponent: trackingBudget.BudgetSummary,
       ExpenseCategoryComponent: trackingBudget.ExpenseCategoryMonth,
@@ -404,7 +404,7 @@ export function Budget() {
     [trackingBudget],
   );
 
-  const envelopeComponents = useMemo<EnvelopeComponents>(
+  const envelopeComponents = useMemo<EnvelopeBudgetComponents>(
     () => ({
       SummaryComponent: EnvelopeBudgetSummary,
       ExpenseCategoryComponent: envelopeBudget.ExpenseCategoryMonth,
