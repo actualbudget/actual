@@ -181,9 +181,17 @@ export function calculateTimeRange(
     return getFullRange(start);
   }
   if (mode === 'sliding-window') {
-    return getLatestRange(
-      Math.abs(monthUtils.differenceInCalendarMonths(end, start)),
-    );
+    const offset = monthUtils.differenceInCalendarMonths(end, start);
+
+    if (start > end) {
+      return [
+        monthUtils.currentMonth(),
+        monthUtils.subMonths(monthUtils.currentMonth(), -offset),
+        'sliding-window',
+      ];
+    }
+
+    return getLatestRange(offset);
   }
 
   return [start, end, 'static'] as const;
