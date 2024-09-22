@@ -3,8 +3,11 @@ import { type useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { type Handlers } from 'loot-core/src/types/handlers';
-import { type CategoryGroupEntity } from 'loot-core/src/types/models';
-import { type MetadataPrefs } from 'loot-core/src/types/prefs';
+import {
+  type CategoryEntity,
+  type CategoryGroupEntity,
+} from 'loot-core/src/types/models';
+import { type SyncedPrefs } from 'loot-core/src/types/prefs';
 
 import { type CSSProperties, styles, theme } from '../../style';
 import { type DropPosition } from '../sort';
@@ -30,6 +33,23 @@ export function addToBeBudgetedGroup(groups: CategoryGroupEntity[]) {
     },
     ...groups,
   ];
+}
+
+export function removeCategoriesFromGroups(
+  categoryGroups: CategoryGroupEntity[],
+  ...categoryIds: CategoryEntity['id'][]
+) {
+  if (!categoryIds || categoryIds.length === 0) return categoryGroups;
+
+  const categoryIdsSet = new Set(categoryIds);
+
+  return categoryGroups
+    .map(group => ({
+      ...group,
+      categories:
+        group.categories?.filter(cat => !categoryIdsSet.has(cat.id)) ?? [],
+    }))
+    .filter(group => group.categories?.length);
 }
 
 export function separateGroups(categoryGroups: CategoryGroupEntity[]) {
@@ -141,7 +161,7 @@ export function getScrollbarWidth() {
 }
 
 export async function prewarmMonth(
-  budgetType: MetadataPrefs['budgetType'],
+  budgetType: SyncedPrefs['budgetType'],
   spreadsheet: ReturnType<typeof useSpreadsheet>,
   month: string,
 ) {
@@ -156,7 +176,7 @@ export async function prewarmMonth(
 }
 
 export async function prewarmAllMonths(
-  budgetType: MetadataPrefs['budgetType'],
+  budgetType: SyncedPrefs['budgetType'],
   spreadsheet: ReturnType<typeof useSpreadsheet>,
   bounds: { start: string; end: string },
   startMonth: string,
@@ -173,18 +193,4 @@ export async function prewarmAllMonths(
   await Promise.all(
     months.map(month => prewarmMonth(budgetType, spreadsheet, month)),
   );
-}
-
-export async function switchBudgetType(
-  newBudgetType: MetadataPrefs['budgetType'],
-  spreadsheet: ReturnType<typeof useSpreadsheet>,
-  bounds: { start: string; end: string },
-  startMonth: string,
-  onSuccess: () => Promise<void> | undefined,
-) {
-  spreadsheet.disableObservers();
-  await send('budget-set-type', { type: newBudgetType });
-  await prewarmAllMonths(newBudgetType, spreadsheet, bounds, startMonth);
-  spreadsheet.enableObservers();
-  await onSuccess?.();
 }

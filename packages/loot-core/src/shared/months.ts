@@ -100,6 +100,14 @@ export function weekFromDate(
   );
 }
 
+export function firstDayOfMonth(date: DateLike): string {
+  return dayFromDate(d.startOfMonth(_parse(date)));
+}
+
+export function lastDayOfMonth(date: DateLike): string {
+  return dayFromDate(d.endOfMonth(_parse(date)));
+}
+
 export function dayFromDate(date: DateLike): string {
   return d.format(_parse(date), 'yyyy-MM-dd');
 }

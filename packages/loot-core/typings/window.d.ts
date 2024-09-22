@@ -16,6 +16,7 @@ declare global {
       ) => Promise<string[]>;
       relaunch: () => void;
       reload: (() => Promise<void>) | undefined;
+      restartElectronServer: () => void;
     };
 
     __navigate?: import('react-router').NavigateFunction;

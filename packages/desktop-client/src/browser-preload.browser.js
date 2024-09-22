@@ -67,6 +67,8 @@ global.Actual = {
       });
   },
 
+  restartElectronServer: () => {},
+
   openFileDialog: async ({ filters = [] }) => {
     return new Promise(resolve => {
       let createdElement = false;
