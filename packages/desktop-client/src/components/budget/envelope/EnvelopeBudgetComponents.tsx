@@ -1,6 +1,6 @@
 import React, { type ComponentProps, memo, useRef, useState } from 'react';
 
-import { rolloverBudget } from 'loot-core/src/client/queries';
+import { envelopeBudget } from 'loot-core/src/client/queries';
 import { evalArithmetic } from 'loot-core/src/shared/arithmetic';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToCurrency, amountToInteger } from 'loot-core/src/shared/util';
@@ -23,28 +23,28 @@ import { makeAmountGrey } from '../util';
 import { BalanceMovementMenu } from './BalanceMovementMenu';
 import { BudgetMenu } from './BudgetMenu';
 
-export function useRolloverSheetName<
-  FieldName extends SheetFields<'rollover-budget'>,
->(binding: Binding<'rollover-budget', FieldName>) {
+export function useEnvelopeSheetName<
+  FieldName extends SheetFields<'envelope-budget'>,
+>(binding: Binding<'envelope-budget', FieldName>) {
   return useSheetName(binding);
 }
 
-export function useRolloverSheetValue<
-  FieldName extends SheetFields<'rollover-budget'>,
->(binding: Binding<'rollover-budget', FieldName>) {
+export function useEnvelopeSheetValue<
+  FieldName extends SheetFields<'envelope-budget'>,
+>(binding: Binding<'envelope-budget', FieldName>) {
   return useSheetValue(binding);
 }
 
-export const RolloverCellValue = <
-  FieldName extends SheetFields<'rollover-budget'>,
+export const EnvelopeCellValue = <
+  FieldName extends SheetFields<'envelope-budget'>,
 >(
-  props: ComponentProps<typeof CellValue<'rollover-budget', FieldName>>,
+  props: ComponentProps<typeof CellValue<'envelope-budget', FieldName>>,
 ) => {
   return <CellValue {...props} />;
 };
 
-const RolloverSheetCell = <FieldName extends SheetFields<'rollover-budget'>>(
-  props: SheetCellProps<'rollover-budget', FieldName>,
+const EnvelopeSheetCell = <FieldName extends SheetFields<'envelope-budget'>>(
+  props: SheetCellProps<'envelope-budget', FieldName>,
 ) => {
   return <SheetCell {...props} />;
 };
@@ -73,29 +73,29 @@ export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
     >
       <View style={headerLabelStyle}>
         <Text style={{ color: theme.tableHeaderText }}>Budgeted</Text>
-        <RolloverCellValue
-          binding={rolloverBudget.totalBudgeted}
+        <EnvelopeCellValue
+          binding={envelopeBudget.totalBudgeted}
           type="financial"
         >
           {props => (
             <CellValueText {...props} value={-props.value} style={cellStyle} />
           )}
-        </RolloverCellValue>
+        </EnvelopeCellValue>
       </View>
       <View style={headerLabelStyle}>
         <Text style={{ color: theme.tableHeaderText }}>Spent</Text>
-        <RolloverCellValue binding={rolloverBudget.totalSpent} type="financial">
+        <EnvelopeCellValue binding={envelopeBudget.totalSpent} type="financial">
           {props => <CellValueText {...props} style={cellStyle} />}
-        </RolloverCellValue>
+        </EnvelopeCellValue>
       </View>
       <View style={headerLabelStyle}>
         <Text style={{ color: theme.tableHeaderText }}>Balance</Text>
-        <RolloverCellValue
-          binding={rolloverBudget.totalBalance}
+        <EnvelopeCellValue
+          binding={envelopeBudget.totalBalance}
           type="financial"
         >
           {props => <CellValueText {...props} style={cellStyle} />}
-        </RolloverCellValue>
+        </EnvelopeCellValue>
       </View>
     </View>
   );
@@ -135,27 +135,27 @@ export const ExpenseGroupMonth = memo(function ExpenseGroupMonth({
           : theme.budgetHeaderOtherMonth,
       }}
     >
-      <RolloverSheetCell
+      <EnvelopeSheetCell
         name="budgeted"
         width="flex"
         textAlign="right"
         style={{ fontWeight: 600, ...styles.tnum }}
         valueProps={{
-          binding: rolloverBudget.groupBudgeted(id),
+          binding: envelopeBudget.groupBudgeted(id),
           type: 'financial',
         }}
       />
-      <RolloverSheetCell
+      <EnvelopeSheetCell
         name="spent"
         width="flex"
         textAlign="right"
         style={{ fontWeight: 600, ...styles.tnum }}
         valueProps={{
-          binding: rolloverBudget.groupSumAmount(id),
+          binding: envelopeBudget.groupSumAmount(id),
           type: 'financial',
         }}
       />
-      <RolloverSheetCell
+      <EnvelopeSheetCell
         name="balance"
         width="flex"
         textAlign="right"
@@ -165,7 +165,7 @@ export const ExpenseGroupMonth = memo(function ExpenseGroupMonth({
           ...styles.tnum,
         }}
         valueProps={{
-          binding: rolloverBudget.groupBalance(id),
+          binding: envelopeBudget.groupBalance(id),
           type: 'financial',
           privacyFilter: {
             style: {
@@ -302,7 +302,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
             </Popover>
           </View>
         )}
-        <RolloverSheetCell
+        <EnvelopeSheetCell
           name="budget"
           exposed={editing}
           focused={editing}
@@ -321,7 +321,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
             },
           }}
           valueProps={{
-            binding: rolloverBudget.catBudgeted(category.id),
+            binding: envelopeBudget.catBudgeted(category.id),
             type: 'financial',
             getValueStyle: makeAmountGrey,
             formatExpr: expr => {
@@ -352,8 +352,8 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
           data-testid="category-month-spent"
           onClick={() => onShowActivity(category.id, month)}
         >
-          <RolloverCellValue
-            binding={rolloverBudget.catSumAmount(category.id)}
+          <EnvelopeCellValue
+            binding={envelopeBudget.catSumAmount(category.id)}
             type="financial"
           >
             {props => (
@@ -366,7 +366,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
                 }}
               />
             )}
-          </RolloverCellValue>
+          </EnvelopeCellValue>
         </span>
       </Field>
       <Field
@@ -379,11 +379,11 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
           onClick={() => setBalanceMenuOpen(true)}
         >
           <BalanceWithCarryover
-            carryover={rolloverBudget.catCarryover(category.id)}
-            balance={rolloverBudget.catBalance(category.id)}
-            goal={rolloverBudget.catGoal(category.id)}
-            budgeted={rolloverBudget.catBudgeted(category.id)}
-            longGoal={rolloverBudget.catLongGoal(category.id)}
+            carryover={envelopeBudget.catCarryover(category.id)}
+            balance={envelopeBudget.catBalance(category.id)}
+            goal={envelopeBudget.catGoal(category.id)}
+            budgeted={envelopeBudget.catBudgeted(category.id)}
+            longGoal={envelopeBudget.catLongGoal(category.id)}
           />
         </span>
 
@@ -412,7 +412,7 @@ type IncomeGroupMonthProps = {
 export function IncomeGroupMonth({ month }: IncomeGroupMonthProps) {
   return (
     <View style={{ flex: 1 }}>
-      <RolloverSheetCell
+      <EnvelopeSheetCell
         name="received"
         width="flex"
         textAlign="right"
@@ -425,7 +425,7 @@ export function IncomeGroupMonth({ month }: IncomeGroupMonthProps) {
             : theme.budgetHeaderOtherMonth,
         }}
         valueProps={{
-          binding: rolloverBudget.groupIncomeReceived,
+          binding: envelopeBudget.groupIncomeReceived,
           type: 'financial',
           privacyFilter: {
             style: {
@@ -465,8 +465,8 @@ export function IncomeCategoryMonth({
         }}
       >
         <span onClick={() => onShowActivity(category.id, month)}>
-          <RolloverCellValue
-            binding={rolloverBudget.catSumAmount(category.id)}
+          <EnvelopeCellValue
+            binding={envelopeBudget.catSumAmount(category.id)}
             type="financial"
           >
             {props => (
@@ -478,7 +478,7 @@ export function IncomeCategoryMonth({
                 }}
               />
             )}
-          </RolloverCellValue>
+          </EnvelopeCellValue>
         </span>
       </Field>
     </View>

@@ -12,7 +12,7 @@ import { Popover } from '../../../common/Popover';
 import { View } from '../../../common/View';
 import { NotesButton } from '../../../NotesButton';
 import { NamespaceContext } from '../../../spreadsheet/NamespaceContext';
-import { useRollover } from '../RolloverContext';
+import { useEnvelopeBudget } from '../EnvelopeBudgetContext';
 
 import { BudgetMonthMenu } from './BudgetMonthMenu';
 import { ToBudget } from './ToBudget';
@@ -28,7 +28,7 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
     summaryCollapsed: collapsed,
     onBudgetAction,
     onToggleSummaryCollapse,
-  } = useRollover();
+  } = useEnvelopeBudget();
 
   const [menuOpen, setMenuOpen] = useState(false);
   const triggerRef = useRef(null);

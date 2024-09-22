@@ -63,11 +63,11 @@ type BalanceWithCarryoverProps = Omit<
   ComponentPropsWithoutRef<typeof CellValue>,
   'binding'
 > & {
-  carryover: Binding<'rollover-budget', 'carryover'>;
-  balance: Binding<'rollover-budget', 'leftover'>;
-  goal: Binding<'rollover-budget', 'goal'>;
-  budgeted: Binding<'rollover-budget', 'budget'>;
-  longGoal: Binding<'rollover-budget', 'long-goal'>;
+  carryover: Binding<'envelope-budget', 'carryover'>;
+  balance: Binding<'envelope-budget', 'leftover'>;
+  goal: Binding<'envelope-budget', 'goal'>;
+  budgeted: Binding<'envelope-budget', 'budget'>;
+  longGoal: Binding<'envelope-budget', 'long-goal'>;
   disabled?: boolean;
   CarryoverIndicator?: ComponentType<CarryoverIndicatorProps>;
 };

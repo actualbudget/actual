@@ -76,7 +76,7 @@ function ReportBudgetFeature() {
     <FeatureToggle
       flag="reportBudget"
       disableToggle={blockToggleOff}
-      error={t('Switch to a rollover budget before turning off this feature')}
+      error={t('Switch to a envelope budget before turning off this feature')}
       feedbackLink="https://github.com/actualbudget/actual/issues/2999"
     >
       <Trans>Budget mode toggle</Trans>

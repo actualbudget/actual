@@ -103,7 +103,7 @@ export function Budget() {
       );
     } else {
       dispatch(
-        pushModal('rollover-budget-summary', {
+        pushModal('envelope-budget-summary', {
           month: startMonth,
           onBudgetAction,
         }),
@@ -446,11 +446,14 @@ export function Budget() {
   const onOpenBudgetMonthMenu = useCallback(
     month => {
       dispatch(
-        pushModal(`${budgetType}-budget-month-menu`, {
-          month,
-          onBudgetAction,
-          onEditNotes: onOpenBudgetMonthNotesModal,
-        }),
+        pushModal(
+          `${budgetType === 'report' ? 'report' : 'envelope'}-budget-month-menu`,
+          {
+            month,
+            onBudgetAction,
+            onEditNotes: onOpenBudgetMonthNotesModal,
+          },
+        ),
       );
     },
     [budgetType, dispatch, onBudgetAction, onOpenBudgetMonthNotesModal],

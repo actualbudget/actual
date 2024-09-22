@@ -59,7 +59,7 @@ export interface ServerHandlers {
 
   'get-budget-bounds': () => Promise<{ start: string; end: string }>;
 
-  'rollover-budget-month': (arg: { month }) => Promise<
+  'envelope-budget-month': (arg: { month }) => Promise<
     {
       value: string | number | boolean;
       name: string;

@@ -1,6 +1,6 @@
 import React, { type ComponentPropsWithoutRef } from 'react';
 
-import { rolloverBudget } from 'loot-core/client/queries';
+import { envelopeBudget } from 'loot-core/client/queries';
 
 import { useCategory } from '../../hooks/useCategory';
 import { type CSSProperties, theme, styles } from '../../style';
@@ -8,7 +8,7 @@ import {
   BalanceWithCarryover,
   CarryoverIndicator,
 } from '../budget/BalanceWithCarryover';
-import { BalanceMenu } from '../budget/rollover/BalanceMenu';
+import { BalanceMenu } from '../budget/envelope/BalanceMenu';
 import {
   Modal,
   ModalCloseButton,
@@ -19,16 +19,16 @@ import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { CellValueText } from '../spreadsheet/CellValue';
 
-type RolloverBalanceMenuModalProps = ComponentPropsWithoutRef<
+type EnvelopeBalanceMenuModalProps = ComponentPropsWithoutRef<
   typeof BalanceMenu
 >;
 
-export function RolloverBalanceMenuModal({
+export function EnvelopeBalanceMenuModal({
   categoryId,
   onCarryover,
   onTransfer,
   onCover,
-}: RolloverBalanceMenuModalProps) {
+}: EnvelopeBalanceMenuModalProps) {
   const defaultMenuItemStyle: CSSProperties = {
     ...styles.mobileMenuItem,
     color: theme.menuItemText,
@@ -43,7 +43,7 @@ export function RolloverBalanceMenuModal({
   }
 
   return (
-    <Modal name="rollover-balance-menu">
+    <Modal name="envelope-balance-menu">
       {({ state: { close } }) => (
         <>
           <ModalHeader
@@ -67,11 +67,11 @@ export function RolloverBalanceMenuModal({
             </Text>
             <BalanceWithCarryover
               disabled
-              carryover={rolloverBudget.catCarryover(categoryId)}
-              balance={rolloverBudget.catBalance(categoryId)}
-              goal={rolloverBudget.catGoal(categoryId)}
-              budgeted={rolloverBudget.catBudgeted(categoryId)}
-              longGoal={rolloverBudget.catLongGoal(categoryId)}
+              carryover={envelopeBudget.catCarryover(categoryId)}
+              balance={envelopeBudget.catBalance(categoryId)}
+              goal={envelopeBudget.catGoal(categoryId)}
+              budgeted={envelopeBudget.catBudgeted(categoryId)}
+              longGoal={envelopeBudget.catLongGoal(categoryId)}
               CarryoverIndicator={({ style }) => (
                 <CarryoverIndicator
                   style={{

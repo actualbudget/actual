@@ -2,7 +2,7 @@ import React from 'react';
 
 import { css } from 'glamor';
 
-import { rolloverBudget } from 'loot-core/src/client/queries';
+import { envelopeBudget } from 'loot-core/src/client/queries';
 
 import { theme, styles, type CSSProperties } from '../../../../style';
 import { Block } from '../../../common/Block';
@@ -11,9 +11,9 @@ import { View } from '../../../common/View';
 import { PrivacyFilter } from '../../../PrivacyFilter';
 import { useFormat } from '../../../spreadsheet/useFormat';
 import {
-  useRolloverSheetName,
-  useRolloverSheetValue,
-} from '../RolloverComponents';
+  useEnvelopeSheetName,
+  useEnvelopeSheetValue,
+} from '../EnvelopeBudgetComponents';
 
 import { TotalsList } from './TotalsList';
 
@@ -32,9 +32,9 @@ export function ToBudgetAmount({
   onClick,
   isTotalsListTooltipDisabled = false,
 }: ToBudgetAmountProps) {
-  const sheetName = useRolloverSheetName(rolloverBudget.toBudget);
-  const sheetValue = useRolloverSheetValue({
-    name: rolloverBudget.toBudget,
+  const sheetName = useEnvelopeSheetName(envelopeBudget.toBudget);
+  const sheetValue = useEnvelopeSheetValue({
+    name: envelopeBudget.toBudget,
     value: 0,
   });
   const format = useFormat();

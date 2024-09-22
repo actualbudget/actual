@@ -13,7 +13,7 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { css } from 'glamor';
 
-import { reportBudget, rolloverBudget } from 'loot-core/client/queries';
+import { reportBudget, envelopeBudget } from 'loot-core/client/queries';
 import { integerToCurrency } from 'loot-core/shared/util';
 import { getNormalisedString } from 'loot-core/src/shared/normalisation';
 import {
@@ -26,7 +26,7 @@ import { useSyncedPref } from '../../hooks/useSyncedPref';
 import { SvgSplit } from '../../icons/v0';
 import { useResponsive } from '../../ResponsiveProvider';
 import { type CSSProperties, theme, styles } from '../../style';
-import { useRolloverSheetValue } from '../budget/rollover/RolloverComponents';
+import { useEnvelopeSheetValue } from '../budget/envelope/EnvelopeBudgetComponents';
 import { makeAmountFullStyle } from '../budget/util';
 import { Text } from '../common/Text';
 import { TextOneLine } from '../common/TextOneLine';
@@ -383,15 +383,15 @@ function CategoryItem({
 
   const balanceBinding =
     budgetType === 'rollover'
-      ? rolloverBudget.catBalance(item.id)
+      ? envelopeBudget.catBalance(item.id)
       : reportBudget.catBalance(item.id);
   const balance = useSheetValue<
-    'rollover-budget' | 'report-budget',
+    'envelope-budget' | 'report-budget',
     typeof balanceBinding
   >(balanceBinding);
 
   const isToBeBudgetedItem = item.id === 'to-be-budgeted';
-  const toBudget = useRolloverSheetValue(rolloverBudget.toBudget) ?? 0;
+  const toBudget = useEnvelopeSheetValue(envelopeBudget.toBudget) ?? 0;
 
   return (
     <div

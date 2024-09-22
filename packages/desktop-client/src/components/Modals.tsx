@@ -29,6 +29,11 @@ import { CreateEncryptionKeyModal } from './modals/CreateEncryptionKeyModal';
 import { CreateLocalAccountModal } from './modals/CreateLocalAccountModal';
 import { EditFieldModal } from './modals/EditFieldModal';
 import { EditRuleModal } from './modals/EditRuleModal';
+import { EnvelopeBalanceMenuModal } from './modals/EnvelopeBalanceMenuModal';
+import { EnvelopeBudgetMenuModal } from './modals/EnvelopeBudgetMenuModal';
+import { EnvelopeBudgetMonthMenuModal } from './modals/EnvelopeBudgetMonthMenuModal';
+import { EnvelopeBudgetSummaryModal } from './modals/EnvelopeBudgetSummaryModal';
+import { EnvelopeToBudgetMenuModal } from './modals/EnvelopeToBudgetMenuModal';
 import { FixEncryptionKeyModal } from './modals/FixEncryptionKeyModal';
 import { GoCardlessExternalMsgModal } from './modals/GoCardlessExternalMsgModal';
 import { GoCardlessInitialiseModal } from './modals/GoCardlessInitialiseModal';
@@ -49,11 +54,6 @@ import { ReportBalanceMenuModal } from './modals/ReportBalanceMenuModal';
 import { ReportBudgetMenuModal } from './modals/ReportBudgetMenuModal';
 import { ReportBudgetMonthMenuModal } from './modals/ReportBudgetMonthMenuModal';
 import { ReportBudgetSummaryModal } from './modals/ReportBudgetSummaryModal';
-import { RolloverBalanceMenuModal } from './modals/RolloverBalanceMenuModal';
-import { RolloverBudgetMenuModal } from './modals/RolloverBudgetMenuModal';
-import { RolloverBudgetMonthMenuModal } from './modals/RolloverBudgetMonthMenuModal';
-import { RolloverBudgetSummaryModal } from './modals/RolloverBudgetSummaryModal';
-import { RolloverToBudgetMenuModal } from './modals/RolloverToBudgetMenuModal';
 import { ScheduledTransactionMenuModal } from './modals/ScheduledTransactionMenuModal';
 import { SelectLinkedAccountsModal } from './modals/SelectLinkedAccountsModal';
 import { SimpleFinInitialiseModal } from './modals/SimpleFinInitialiseModal';
@@ -310,13 +310,13 @@ export function Modals() {
             />
           );
 
-        case 'rollover-budget-summary':
+        case 'envelope-budget-summary':
           return (
             <NamespaceContext.Provider
               key={name}
               value={monthUtils.sheetForMonth(options.month)}
             >
-              <RolloverBudgetSummaryModal
+              <EnvelopeBudgetSummaryModal
                 key={name}
                 month={options.month}
                 onBudgetAction={options.onBudgetAction}
@@ -379,13 +379,13 @@ export function Modals() {
             />
           );
 
-        case 'rollover-budget-menu':
+        case 'envelope-budget-menu':
           return (
             <NamespaceContext.Provider
               key={name}
               value={monthUtils.sheetForMonth(options.month)}
             >
-              <RolloverBudgetMenuModal
+              <EnvelopeBudgetMenuModal
                 categoryId={options.categoryId}
                 onUpdateBudget={options.onUpdateBudget}
                 onCopyLastMonthAverage={options.onCopyLastMonthAverage}
@@ -436,13 +436,13 @@ export function Modals() {
             />
           );
 
-        case 'rollover-balance-menu':
+        case 'envelope-balance-menu':
           return (
             <NamespaceContext.Provider
               key={name}
               value={monthUtils.sheetForMonth(options.month)}
             >
-              <RolloverBalanceMenuModal
+              <EnvelopeBalanceMenuModal
                 categoryId={options.categoryId}
                 onCarryover={options.onCarryover}
                 onTransfer={options.onTransfer}
@@ -451,13 +451,13 @@ export function Modals() {
             </NamespaceContext.Provider>
           );
 
-        case 'rollover-summary-to-budget-menu':
+        case 'envelope-summary-to-budget-menu':
           return (
             <NamespaceContext.Provider
               key={name}
               value={monthUtils.sheetForMonth(options.month)}
             >
-              <RolloverToBudgetMenuModal
+              <EnvelopeToBudgetMenuModal
                 onTransfer={options.onTransfer}
                 onCover={options.onCover}
                 onHoldBuffer={options.onHoldBuffer}
@@ -537,13 +537,13 @@ export function Modals() {
             />
           );
 
-        case 'rollover-budget-month-menu':
+        case 'envelope-budget-month-menu':
           return (
             <NamespaceContext.Provider
               key={name}
               value={monthUtils.sheetForMonth(options.month)}
             >
-              <RolloverBudgetMonthMenuModal
+              <EnvelopeBudgetMonthMenuModal
                 month={options.month}
                 onBudgetAction={options.onBudgetAction}
                 onEditNotes={options.onEditNotes}

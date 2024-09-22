@@ -1,13 +1,13 @@
 import React, { useRef, useState } from 'react';
 
-import { rolloverBudget } from 'loot-core/src/client/queries';
+import { envelopeBudget } from 'loot-core/src/client/queries';
 
 import { type CSSProperties } from '../../../../style';
 import { Popover } from '../../../common/Popover';
 import { View } from '../../../common/View';
 import { CoverMenu } from '../CoverMenu';
+import { useEnvelopeSheetValue } from '../EnvelopeBudgetComponents';
 import { HoldMenu } from '../HoldMenu';
-import { useRolloverSheetValue } from '../RolloverComponents';
 import { TransferMenu } from '../TransferMenu';
 
 import { ToBudgetAmount } from './ToBudgetAmount';
@@ -31,8 +31,8 @@ export function ToBudget({
 }: ToBudgetProps) {
   const [menuOpen, setMenuOpen] = useState<string | null>(null);
   const triggerRef = useRef(null);
-  const sheetValue = useRolloverSheetValue({
-    name: rolloverBudget.toBudget,
+  const sheetValue = useEnvelopeSheetValue({
+    name: envelopeBudget.toBudget,
     value: 0,
   });
   const availableValue = sheetValue;

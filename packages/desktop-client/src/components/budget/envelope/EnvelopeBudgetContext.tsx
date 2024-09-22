@@ -2,14 +2,14 @@ import React, { type ReactNode, createContext, useContext } from 'react';
 
 import * as monthUtils from 'loot-core/src/shared/months';
 
-type RolloverContextDefinition = {
+type EnvelopeBudgetContextDefinition = {
   summaryCollapsed: boolean;
   onBudgetAction: (month: string, action: string, arg?: unknown) => void;
   onToggleSummaryCollapse: () => void;
   currentMonth: string;
 };
 
-const RolloverContext = createContext<RolloverContextDefinition>({
+const EnvelopeBudgetContext = createContext<EnvelopeBudgetContextDefinition>({
   summaryCollapsed: false,
   onBudgetAction: () => {
     throw new Error('Unitialised context method called: onBudgetAction');
@@ -22,19 +22,22 @@ const RolloverContext = createContext<RolloverContextDefinition>({
   currentMonth: 'unknown',
 });
 
-type RolloverProviderProps = Omit<RolloverContextDefinition, 'currentMonth'> & {
+type EnvelopeBudgetProviderProps = Omit<
+  EnvelopeBudgetContextDefinition,
+  'currentMonth'
+> & {
   children: ReactNode;
 };
-export function RolloverProvider({
+export function EnvelopeBudgetProvider({
   summaryCollapsed,
   onBudgetAction,
   onToggleSummaryCollapse,
   children,
-}: RolloverProviderProps) {
+}: EnvelopeBudgetProviderProps) {
   const currentMonth = monthUtils.currentMonth();
 
   return (
-    <RolloverContext.Provider
+    <EnvelopeBudgetContext.Provider
       value={{
         currentMonth,
         summaryCollapsed,
@@ -43,10 +46,10 @@ export function RolloverProvider({
       }}
     >
       {children}
-    </RolloverContext.Provider>
+    </EnvelopeBudgetContext.Provider>
   );
 }
 
-export function useRollover() {
-  return useContext(RolloverContext);
+export function useEnvelopeBudget() {
+  return useContext(EnvelopeBudgetContext);
 }
