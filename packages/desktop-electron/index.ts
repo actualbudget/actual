@@ -26,7 +26,7 @@ import {
   listen as listenToWindowState,
 } from './window-state';
 
-import './security';
+// import './security';=
 
 Module.globalPaths.push(__dirname + '/..');
 
@@ -49,7 +49,7 @@ if (!isDev || !process.env.ACTUAL_DATA_DIR) {
 let clientWin: BrowserWindow | null;
 let serverProcess: UtilityProcess | null;
 
-if (isDev) {
+if (true) {
   process.traceProcessWarnings = true;
 }
 
@@ -58,7 +58,7 @@ function createBackgroundProcess() {
   serverProcess = utilityProcess.fork(
     __dirname + '/server.js',
     ['--subprocess', app.getVersion()],
-    isDev ? { ...defaultOptions, execArgv: ['--inspect'] } : defaultOptions,
+    true ? { ...defaultOptions, execArgv: ['--inspect'] } : defaultOptions,
   );
 
   serverProcess.stdout?.on('data', (chunk: Buffer) => {
@@ -112,7 +112,7 @@ async function createWindow() {
 
   win.setBackgroundColor('#E8ECF0');
 
-  if (isDev) {
+  if (true) {
     win.webContents.openDevTools();
   }
 
