@@ -60,10 +60,9 @@ export function AccountTransactions({
   failed,
 }: AccountTransactionsProps) {
   const navigate = useNavigate();
-  const [reconcileAmount, setReconcileAmount] = useSessionStorage<number>(
-    'reconcile-amount',
-    null,
-  );
+  const [reconcileAmount, setReconcileAmount] = useSessionStorage<
+    number | null
+  >('reconcile-amount', null);
 
   const schedulesTransform = useDefaultSchedulesQueryTransform(account.id);
   const onDoneReconciling = async () => {
