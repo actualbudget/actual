@@ -191,7 +191,7 @@ We can now see the budget numbers to be used for the month of August in the Aver
 
 It's important to note that this method  only works correctly if you use a debit or credit card for all your purchases. 
 As a result, your actual *start date* for your budget is in the past. We will reiterate our warning on
-[how to set up acounts](#how-to-setup-accounts): going to far back, might make your budget completely
+[how to set up accounts](#how-to-setup-accounts): going to far back, might make your budget completely
 out of wack.  It's crucial to avoid this, as you can easily spend more time trying to find out what's 
 wrong with your budget and spent numbers as "nothing adds up" anymore.
 

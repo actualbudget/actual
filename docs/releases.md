@@ -430,7 +430,7 @@ The release has the following notable improvements:
 - [#2754](https://github.com/actualbudget/actual/pull/2754) Do not remember last entered category in mobile transaction entry. — thanks @joel-jeremy
 - [#2765](https://github.com/actualbudget/actual/pull/2765) Do not use underlines for emphasis. — thanks @psybers
 - [#2768](https://github.com/actualbudget/actual/pull/2768) Creating a callback for the table totals to fix a bug that created duplicate columns while rendering. — thanks @carkom
-- [#2769](https://github.com/actualbudget/actual/pull/2769) Updating date range element to catch any incorrectly formated dates. Current state crashes app when dates are invalid. — thanks @carkom
+- [#2769](https://github.com/actualbudget/actual/pull/2769) Updating date range element to catch any incorrectly formatted dates. Current state crashes app when dates are invalid. — thanks @carkom
 - [#2773](https://github.com/actualbudget/actual/pull/2773) Fix notes icon changing size/position with long category or group names. — thanks @jpelgrom
 - [#2774](https://github.com/actualbudget/actual/pull/2774) Move the rollover arrow into view. — thanks @Tigatok
 - [#2775](https://github.com/actualbudget/actual/pull/2775) Adds income on left and expense on right always. Hide bar if value is 0. — thanks @Tigatok

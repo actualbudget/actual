@@ -1,6 +1,6 @@
 # Building on Windows
 
-Many of the build scripts are bash scripts and not natively invokable in Windows. To solve this, you can build the project using Git Bash.
+Many of the build scripts are bash scripts and not natively invocable in Windows. To solve this, you can build the project using Git Bash.
 
 1. Install [Git & Git Bash for Windows](https://git-scm.com/downloads)
 2. Ensure you have activated [Developer Mode](https://docs.microsoft.com/en-us/windows/apps/get-started/enable-your-device-for-development)

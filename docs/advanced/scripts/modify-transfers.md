@@ -25,7 +25,7 @@ This process will only apply when the below conditions are met
 
 1. Create a second copy of the backup
 2. Extract the backup
-3. Open the `db.sqlite` file with your preferred tool [sqlite3 cli](https://www.sqlite.org/cli.html), [heidiSQL](https://www.heidisql.com/), ect
+3. Open the `db.sqlite` file with your preferred tool [sqlite3 cli](https://www.sqlite.org/cli.html), [heidiSQL](https://www.heidisql.com/), etc.
 4. Run the below query to first view the impacted transactions
 
    ```sql

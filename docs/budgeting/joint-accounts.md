@@ -129,7 +129,7 @@ Situation: I am using Actual to keep track of my budget and finances, but I shar
 
 Each month you will add a transfer of your share to the joint account from one of your on-budget accounts. You don't need a category for your contribution since it is just a transfer from one of your accounts to another.
 
-![Screenshot of joint accounts in a personcal Acutal Budget file](/img/joint-accounts/jointaccount-2.png)
+![Screenshot of joint accounts in a personal Actual Budget file](/img/joint-accounts/jointaccount-2.png)
 
 #### Partner contribution
 
@@ -137,13 +137,13 @@ Each month you will add a transfer of your share to the joint account from one o
 
 When your partner makes a contribution to the joint account, use the **Income Category** you created as the category. By having a separate category for this contribution, it will be easier to filter out when doing reports later since this isn't true income, though it is income to the budget.
 
-![Screenshot of joint accounts in a personal Acutal Budget file - option 1](/img/joint-accounts/jointaccount-3.png)
+![Screenshot of joint accounts in a personal Actual Budget file - option 1](/img/joint-accounts/jointaccount-3.png)
 
 ##### Option 2
 
 If option 1 doesn't seem right to you, the same result could be achieved by treating the new income like a return to a store. In this case, you can assign your partners deposit directly to the shared categories. The deposit should be made into the **Joint Account** ledger. As you can see, you can fund each shared category using the **split transaction** option.
 
-![Screenshot of joint accounts in a personal Acutal Budget file - option 2](/img/joint-accounts/jointaccount-5.png)
+![Screenshot of joint accounts in a personal Actual Budget file - option 2](/img/joint-accounts/jointaccount-5.png)
 
 ### Budgeting
 

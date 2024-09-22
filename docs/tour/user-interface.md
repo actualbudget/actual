@@ -5,7 +5,7 @@ The user interface is divided into three parts:
 Standard on most screens:
 
 * On the left, we have the sidebar, which lets you easily switch between the various views, such as Budget, Reports, and Accounts.
-* The server and synch status (if used) are shown in the red box in the upper right corner.
+* The server and sync status (if used) are shown in the red box in the upper right corner.
 * The content of the rest of the interface depends on the functionality you have chosen in the sidebar. This screenshot shows an example of a Budget view.
 
 ![](/static/img/a-tour-of-actual/tour-overview-of-user-interface.png)

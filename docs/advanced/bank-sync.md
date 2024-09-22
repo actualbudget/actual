@@ -82,7 +82,7 @@ Here are a couple of considerations to know about before making the decision to 
 
 2. Select the Link your bank account button
 
-![Add acount dialog](/static/img/connecting-your-bank/connecting-your-bank-03.png)
+![Add account dialog](/static/img/connecting-your-bank/connecting-your-bank-03.png)
 
 3. Select your country and bank from the list and click the Link bank in browser button
 
@@ -106,7 +106,7 @@ Here are a couple of considerations to know about before making the decision to 
 
 8. Once the connection has been made, there will be a list of your accounts that you can choose from
 
-![Select bank acount you want to link](/static/img/connecting-your-bank/connecting-your-bank-09.png)
+![Select bank account you want to link](/static/img/connecting-your-bank/connecting-your-bank-09.png)
 
 9. The final step is to select the account you want to sync and click Link account
 
