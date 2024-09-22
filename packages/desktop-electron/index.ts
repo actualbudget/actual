@@ -54,6 +54,7 @@ if (true) {
 }
 
 function createBackgroundProcess() {
+  return; // testing
   const defaultOptions = { stdio: 'pipe' }; // , allowLoadingUnsignedLibraries: true
   serverProcess = utilityProcess.fork(
     __dirname + '/server.js',
@@ -229,6 +230,7 @@ app.on('ready', async () => {
   // file no matter what URL it is. This allows us to use react-router
   // on the frontend
   console.info('app ready - we here');
+  return;
   protocol.handle('app', request => {
     console.info('handling app request');
     if (request.method !== 'GET') {
