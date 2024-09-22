@@ -49,11 +49,15 @@ function updateState(win: BrowserWindow, state: WindowState) {
 async function saveState(win: BrowserWindow, state: WindowState) {
   const backend = await getBackend();
   updateState(win, state);
-  fs.writeFileSync(
-    path.join(backend.lib.getDataDir(), 'window.json'),
-    JSON.stringify(state),
-    'utf8',
-  );
+  try {
+    fs.writeFileSync(
+      path.join(backend.lib.getDataDir(), 'window.json'),
+      JSON.stringify(state),
+      'utf8',
+    );
+  } catch (e) {
+    console.error('Failed to save the window state to window.json', e);
+  }
 }
 
 export function listen(win: BrowserWindow, state: WindowState) {
