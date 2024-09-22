@@ -92,14 +92,15 @@ function createBackgroundProcess() {
 }
 
 async function createWindow() {
-  const windowState = await getWindowState();
+  console.info('createWindow');
+  // const windowState = await getWindowState();
 
   // Create the browser window.
   const win = new BrowserWindow({
-    x: windowState.x,
-    y: windowState.y,
-    width: windowState.width,
-    height: windowState.height,
+    // x: windowState.x,
+    // y: windowState.y,
+    // width: windowState.width,
+    // height: windowState.height,
     title: 'Actual',
     webPreferences: {
       nodeIntegration: false,
@@ -110,13 +111,14 @@ async function createWindow() {
     },
   });
 
+  console.info('createWindow made');
   win.setBackgroundColor('#E8ECF0');
 
   if (true) {
     win.webContents.openDevTools();
   }
 
-  const unlistenToState = listenToWindowState(win, windowState);
+  // const unlistenToState = listenToWindowState(win, windowState);
 
   if (isDev) {
     win.loadURL(`file://${__dirname}/loading.html`);
@@ -125,13 +127,15 @@ async function createWindow() {
       promiseRetry(retry => win.loadURL('http://localhost:3001/').catch(retry));
     }, 3000);
   } else {
+    console.info('loadurl');
     win.loadURL(`app://actual/`);
+    console.info('url loaded');
   }
 
   win.on('closed', () => {
     clientWin = null;
     updateMenu();
-    unlistenToState();
+    // unlistenToState();
   });
 
   win.on('unresponsive', () => {
@@ -221,7 +225,9 @@ app.on('ready', async () => {
   // Install an `app://` protocol that always returns the base HTML
   // file no matter what URL it is. This allows us to use react-router
   // on the frontend
+  console.info('app ready - we here');
   protocol.handle('app', request => {
+    console.info('handling app request');
     if (request.method !== 'GET') {
       return new Response(null, {
         status: 405,
