@@ -2,18 +2,18 @@ import React from 'react';
 
 import { theme } from '../../../../style';
 import { type Binding } from '../../../spreadsheet';
-import { useReportSheetValue } from '../ReportComponents';
+import { useTrackingSheetValue } from '../TrackingBudgetComponents';
 
 import { fraction } from './fraction';
 import { PieProgress } from './PieProgress';
 
 type ExpenseProgressProps = {
-  current: Binding<'report-budget', 'total-spent'>;
-  target: Binding<'report-budget', 'total-budgeted'>;
+  current: Binding<'tracking-budget', 'total-spent'>;
+  target: Binding<'tracking-budget', 'total-budgeted'>;
 };
 export function ExpenseProgress({ current, target }: ExpenseProgressProps) {
-  let totalSpent = useReportSheetValue(current) || 0;
-  const totalBudgeted = useReportSheetValue(target) || 0;
+  let totalSpent = useTrackingSheetValue(current) || 0;
+  const totalBudgeted = useTrackingSheetValue(target) || 0;
 
   // Reverse total spent, and also set a bottom boundary of 0 (in case
   // income goes into an expense category and it's "positive", don't

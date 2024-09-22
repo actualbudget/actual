@@ -1,11 +1,11 @@
 import React, { type ComponentPropsWithoutRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { rolloverBudget } from 'loot-core/src/client/queries';
+import { envelopeBudget } from 'loot-core/src/client/queries';
 
 import { Menu } from '../../common/Menu';
 
-import { useRolloverSheetValue } from './RolloverComponents';
+import { useEnvelopeSheetValue } from './EnvelopeBudgetComponents';
 
 type BalanceMenuProps = Omit<
   ComponentPropsWithoutRef<typeof Menu>,
@@ -26,10 +26,10 @@ export function BalanceMenu({
 }: BalanceMenuProps) {
   const { t } = useTranslation();
 
-  const carryover = useRolloverSheetValue(
-    rolloverBudget.catCarryover(categoryId),
+  const carryover = useEnvelopeSheetValue(
+    envelopeBudget.catCarryover(categoryId),
   );
-  const balance = useRolloverSheetValue(rolloverBudget.catBalance(categoryId));
+  const balance = useEnvelopeSheetValue(envelopeBudget.catBalance(categoryId));
 
   return (
     <Menu

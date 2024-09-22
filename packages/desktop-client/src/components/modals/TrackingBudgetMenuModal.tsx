@@ -4,13 +4,13 @@ import React, {
   useEffect,
 } from 'react';
 
-import { rolloverBudget } from 'loot-core/client/queries';
+import { trackingBudget } from 'loot-core/client/queries';
 import { amountToInteger, integerToAmount } from 'loot-core/shared/util';
 
 import { useCategory } from '../../hooks/useCategory';
 import { type CSSProperties, theme, styles } from '../../style';
-import { BudgetMenu } from '../budget/rollover/BudgetMenu';
-import { useRolloverSheetValue } from '../budget/rollover/RolloverComponents';
+import { BudgetMenu } from '../budget/tracking/BudgetMenu';
+import { useTrackingSheetValue } from '../budget/tracking/TrackingBudgetComponents';
 import {
   Modal,
   ModalCloseButton,
@@ -21,20 +21,20 @@ import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { FocusableAmountInput } from '../mobile/transactions/FocusableAmountInput';
 
-type RolloverBudgetMenuModalProps = ComponentPropsWithoutRef<
+type TrackingBudgetMenuModalProps = ComponentPropsWithoutRef<
   typeof BudgetMenu
 > & {
   categoryId: string;
   onUpdateBudget: (amount: number) => void;
 };
 
-export function RolloverBudgetMenuModal({
+export function TrackingBudgetMenuModal({
   categoryId,
   onUpdateBudget,
   onCopyLastMonthAverage,
   onSetMonthsAverage,
   onApplyBudgetTemplate,
-}: RolloverBudgetMenuModalProps) {
+}: TrackingBudgetMenuModalProps) {
   const defaultMenuItemStyle: CSSProperties = {
     ...styles.mobileMenuItem,
     color: theme.menuItemText,
@@ -42,8 +42,8 @@ export function RolloverBudgetMenuModal({
     borderTop: `1px solid ${theme.pillBorder}`,
   };
 
-  const budgeted = useRolloverSheetValue(
-    rolloverBudget.catBudgeted(categoryId),
+  const budgeted = useTrackingSheetValue(
+    trackingBudget.catBudgeted(categoryId),
   );
   const category = useCategory(categoryId);
   const [amountFocused, setAmountFocused] = useState(false);
@@ -61,7 +61,7 @@ export function RolloverBudgetMenuModal({
   }
 
   return (
-    <Modal name="rollover-budget-menu">
+    <Modal name="tracking-budget-menu">
       {({ state: { close } }) => (
         <>
           <ModalHeader

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
-import { rolloverBudget } from 'loot-core/src/client/queries';
+import { envelopeBudget } from 'loot-core/src/client/queries';
 
 import { styles, type CSSProperties } from '../../../../style';
 import { AlignedText } from '../../../common/AlignedText';
@@ -10,7 +10,7 @@ import { Tooltip } from '../../../common/Tooltip';
 import { View } from '../../../common/View';
 import { CellValueText } from '../../../spreadsheet/CellValue';
 import { useFormat } from '../../../spreadsheet/useFormat';
-import { RolloverCellValue } from '../RolloverComponents';
+import { EnvelopeCellValue } from '../EnvelopeBudgetComponents';
 
 type TotalsListProps = {
   prevMonthName: string;
@@ -45,8 +45,8 @@ export function TotalsList({ prevMonthName, style }: TotalsListProps) {
               <AlignedText
                 left={t('Income:')}
                 right={
-                  <RolloverCellValue
-                    binding={rolloverBudget.totalIncome}
+                  <EnvelopeCellValue
+                    binding={envelopeBudget.totalIncome}
                     type="financial"
                   />
                 }
@@ -54,8 +54,8 @@ export function TotalsList({ prevMonthName, style }: TotalsListProps) {
               <AlignedText
                 left={t('From Last Month:')}
                 right={
-                  <RolloverCellValue
-                    binding={rolloverBudget.fromLastMonth}
+                  <EnvelopeCellValue
+                    binding={envelopeBudget.fromLastMonth}
                     type="financial"
                   />
                 }
@@ -64,16 +64,16 @@ export function TotalsList({ prevMonthName, style }: TotalsListProps) {
           }
           placement="bottom end"
         >
-          <RolloverCellValue
-            binding={rolloverBudget.incomeAvailable}
+          <EnvelopeCellValue
+            binding={envelopeBudget.incomeAvailable}
             type="financial"
           >
             {props => <CellValueText {...props} style={{ fontWeight: 600 }} />}
-          </RolloverCellValue>
+          </EnvelopeCellValue>
         </Tooltip>
 
-        <RolloverCellValue
-          binding={rolloverBudget.lastMonthOverspent}
+        <EnvelopeCellValue
+          binding={envelopeBudget.lastMonthOverspent}
           type="financial"
         >
           {props => (
@@ -86,10 +86,10 @@ export function TotalsList({ prevMonthName, style }: TotalsListProps) {
               }}
             />
           )}
-        </RolloverCellValue>
+        </EnvelopeCellValue>
 
-        <RolloverCellValue
-          binding={rolloverBudget.totalBudgeted}
+        <EnvelopeCellValue
+          binding={envelopeBudget.totalBudgeted}
           type="financial"
         >
           {props => (
@@ -102,10 +102,10 @@ export function TotalsList({ prevMonthName, style }: TotalsListProps) {
               }}
             />
           )}
-        </RolloverCellValue>
+        </EnvelopeCellValue>
 
-        <RolloverCellValue
-          binding={rolloverBudget.forNextMonth}
+        <EnvelopeCellValue
+          binding={envelopeBudget.forNextMonth}
           type="financial"
         >
           {props => (
@@ -118,7 +118,7 @@ export function TotalsList({ prevMonthName, style }: TotalsListProps) {
               }}
             />
           )}
-        </RolloverCellValue>
+        </EnvelopeCellValue>
       </View>
 
       <View>

@@ -10,23 +10,23 @@ import { useUndo } from '../../hooks/useUndo';
 import { SvgCheveronDown, SvgCheveronUp } from '../../icons/v1';
 import { SvgNotesPaper } from '../../icons/v2';
 import { type CSSProperties, styles, theme } from '../../style';
-import { BudgetMonthMenu } from '../budget/report/budgetsummary/BudgetMonthMenu';
+import { BudgetMonthMenu } from '../budget/envelope/budgetsummary/BudgetMonthMenu';
 import { Button } from '../common/Button2';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { View } from '../common/View';
 import { Notes } from '../Notes';
 
-type ReportBudgetMonthMenuModalProps = {
+type EnvelopeBudgetMonthMenuModalProps = {
   month: string;
   onBudgetAction: (month: string, action: string, arg?: unknown) => void;
   onEditNotes: (month: string) => void;
 };
 
-export function ReportBudgetMonthMenuModal({
+export function EnvelopeBudgetMonthMenuModal({
   month,
   onBudgetAction,
   onEditNotes,
-}: ReportBudgetMonthMenuModalProps) {
+}: EnvelopeBudgetMonthMenuModalProps) {
   const originalNotes = useNotes(`budget-${month}`);
   const { showUndoNotification } = useUndo();
 
@@ -59,7 +59,7 @@ export function ReportBudgetMonthMenuModal({
 
   return (
     <Modal
-      name="report-budget-month-menu"
+      name="envelope-budget-month-menu"
       containerProps={{
         style: { height: '50vh' },
       }}
@@ -188,6 +188,13 @@ export function ReportBudgetMonthMenuModal({
                   close();
                   showUndoNotification({
                     message: `${displayMonth} budget templates have been overwritten.`,
+                  });
+                }}
+                onEndOfMonthCleanup={() => {
+                  onBudgetAction(month, 'cleanup-goal-template');
+                  close();
+                  showUndoNotification({
+                    message: `${displayMonth} end-of-month cleanup templates have been applied.`,
                   });
                 }}
               />

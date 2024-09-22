@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 
-import { rolloverBudget } from 'loot-core/src/client/queries';
+import { envelopeBudget } from 'loot-core/src/client/queries';
 
 import { BalanceMenu } from './BalanceMenu';
 import { CoverMenu } from './CoverMenu';
-import { useRolloverSheetValue } from './RolloverComponents';
+import { useEnvelopeSheetValue } from './EnvelopeBudgetComponents';
 import { TransferMenu } from './TransferMenu';
 
 type BalanceMovementMenuProps = {
@@ -20,8 +20,8 @@ export function BalanceMovementMenu({
   onBudgetAction,
   onClose = () => {},
 }: BalanceMovementMenuProps) {
-  const catBalance = useRolloverSheetValue(
-    rolloverBudget.catBalance(categoryId),
+  const catBalance = useEnvelopeSheetValue(
+    envelopeBudget.catBalance(categoryId),
   );
   const [menu, setMenu] = useState('menu');
 

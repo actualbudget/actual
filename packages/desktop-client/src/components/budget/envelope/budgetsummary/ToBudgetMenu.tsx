@@ -1,10 +1,10 @@
 import React, { type ComponentPropsWithoutRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { rolloverBudget } from 'loot-core/client/queries';
+import { envelopeBudget } from 'loot-core/client/queries';
 
 import { Menu } from '../../../common/Menu';
-import { useRolloverSheetValue } from '../RolloverComponents';
+import { useEnvelopeSheetValue } from '../EnvelopeBudgetComponents';
 
 type ToBudgetMenuProps = Omit<
   ComponentPropsWithoutRef<typeof Menu>,

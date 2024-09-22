@@ -5,18 +5,18 @@ import * as monthUtils from 'loot-core/src/shared/months';
 
 const Context = createContext(null);
 
-type ReportProviderProps = {
+type TrackingBudgetProviderProps = {
   summaryCollapsed: boolean;
   onBudgetAction: (month: string, action: string, arg: unknown) => void;
   onToggleSummaryCollapse: () => void;
   children: ReactNode;
 };
-export function ReportProvider({
+export function TrackingBudgetProvider({
   summaryCollapsed,
   onBudgetAction,
   onToggleSummaryCollapse,
   children,
-}: ReportProviderProps) {
+}: TrackingBudgetProviderProps) {
   const currentMonth = monthUtils.currentMonth();
 
   return (
@@ -33,6 +33,6 @@ export function ReportProvider({
   );
 }
 
-export function useReport() {
+export function useTrackingBudget() {
   return useContext(Context);
 }

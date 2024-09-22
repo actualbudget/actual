@@ -176,7 +176,7 @@ handlers['get-budget-bounds'] = async function () {
   return budget.createAllBudgets();
 };
 
-handlers['rollover-budget-month'] = async function ({ month }) {
+handlers['envelope-budget-month'] = async function ({ month }) {
   const groups = await db.getCategoriesGrouped();
   const sheetName = monthUtils.sheetForMonth(month);
 
@@ -226,7 +226,7 @@ handlers['rollover-budget-month'] = async function ({ month }) {
   return values;
 };
 
-handlers['report-budget-month'] = async function ({ month }) {
+handlers['tracking-budget-month'] = async function ({ month }) {
   const groups = await db.getCategoriesGrouped();
   const sheetName = monthUtils.sheetForMonth(month);
 

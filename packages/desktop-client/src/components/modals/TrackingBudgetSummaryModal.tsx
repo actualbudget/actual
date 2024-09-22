@@ -4,23 +4,23 @@ import { sheetForMonth } from 'loot-core/src/shared/months';
 import * as monthUtils from 'loot-core/src/shared/months';
 
 import { styles } from '../../style';
-import { ExpenseTotal } from '../budget/report/budgetsummary/ExpenseTotal';
-import { IncomeTotal } from '../budget/report/budgetsummary/IncomeTotal';
-import { Saved } from '../budget/report/budgetsummary/Saved';
+import { ExpenseTotal } from '../budget/tracking/budgetsummary/ExpenseTotal';
+import { IncomeTotal } from '../budget/tracking/budgetsummary/IncomeTotal';
+import { Saved } from '../budget/tracking/budgetsummary/Saved';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { Stack } from '../common/Stack';
 import { NamespaceContext } from '../spreadsheet/NamespaceContext';
 
-type ReportBudgetSummaryModalProps = {
+type TrackingBudgetSummaryModalProps = {
   month: string;
 };
 
-export function ReportBudgetSummaryModal({
+export function TrackingBudgetSummaryModal({
   month,
-}: ReportBudgetSummaryModalProps) {
+}: TrackingBudgetSummaryModalProps) {
   const currentMonth = monthUtils.currentMonth();
   return (
-    <Modal name="report-budget-summary">
+    <Modal name="tracking-budget-summary">
       {({ state: { close } }) => (
         <>
           <ModalHeader

@@ -2,33 +2,33 @@ import React from 'react';
 import { useDispatch } from 'react-redux';
 
 import { collapseModals, pushModal } from 'loot-core/client/actions';
-import { rolloverBudget } from 'loot-core/client/queries';
+import { envelopeBudget } from 'loot-core/client/queries';
 import { groupById, integerToCurrency } from 'loot-core/shared/util';
 import { format, sheetForMonth, prevMonth } from 'loot-core/src/shared/months';
 
 import { useCategories } from '../../hooks/useCategories';
 import { useUndo } from '../../hooks/useUndo';
 import { styles } from '../../style';
-import { ToBudgetAmount } from '../budget/rollover/budgetsummary/ToBudgetAmount';
-import { TotalsList } from '../budget/rollover/budgetsummary/TotalsList';
-import { useRolloverSheetValue } from '../budget/rollover/RolloverComponents';
+import { ToBudgetAmount } from '../budget/envelope/budgetsummary/ToBudgetAmount';
+import { TotalsList } from '../budget/envelope/budgetsummary/TotalsList';
+import { useEnvelopeSheetValue } from '../budget/envelope/EnvelopeBudgetComponents';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { NamespaceContext } from '../spreadsheet/NamespaceContext';
 
-type RolloverBudgetSummaryModalProps = {
+type EnvelopeBudgetSummaryModalProps = {
   onBudgetAction: (month: string, action: string, arg?: unknown) => void;
   month: string;
 };
 
-export function RolloverBudgetSummaryModal({
+export function EnvelopeBudgetSummaryModal({
   month,
   onBudgetAction,
-}: RolloverBudgetSummaryModalProps) {
+}: EnvelopeBudgetSummaryModalProps) {
   const dispatch = useDispatch();
   const prevMonthName = format(prevMonth(month), 'MMM');
   const sheetValue =
-    useRolloverSheetValue({
-      name: rolloverBudget.toBudget,
+    useEnvelopeSheetValue({
+      name: envelopeBudget.toBudget,
       value: 0,
     }) ?? 0;
 
@@ -94,7 +94,7 @@ export function RolloverBudgetSummaryModal({
 
   const onClick = ({ close }: { close: () => void }) => {
     dispatch(
-      pushModal('rollover-summary-to-budget-menu', {
+      pushModal('envelope-summary-to-budget-menu', {
         month,
         onTransfer: openTransferAvailableModal,
         onCover: openCoverOverbudgetedModal,
@@ -108,7 +108,7 @@ export function RolloverBudgetSummaryModal({
   };
 
   return (
-    <Modal name="rollover-budget-summary">
+    <Modal name="envelope-budget-summary">
       {({ state: { close } }) => (
         <>
           <ModalHeader

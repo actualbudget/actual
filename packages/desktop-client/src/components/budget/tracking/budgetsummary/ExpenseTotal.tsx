@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { reportBudget } from 'loot-core/src/client/queries';
+import { trackingBudget } from 'loot-core/src/client/queries';
 
 import { type CSSProperties } from '../../../../style';
 
@@ -16,8 +16,8 @@ export function ExpenseTotal({ style }: ExpenseTotalProps) {
   return (
     <BudgetTotal
       title={t('Expenses')}
-      current={reportBudget.totalSpent}
-      target={reportBudget.totalBudgetedExpense}
+      current={trackingBudget.totalSpent}
+      target={trackingBudget.totalBudgetedExpense}
       ProgressComponent={ExpenseProgress}
       style={style}
     />

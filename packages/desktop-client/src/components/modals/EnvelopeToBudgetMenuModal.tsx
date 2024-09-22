@@ -1,19 +1,19 @@
 import React, { type ComponentPropsWithoutRef } from 'react';
 
 import { type CSSProperties, theme, styles } from '../../style';
-import { ToBudgetMenu } from '../budget/rollover/budgetsummary/ToBudgetMenu';
+import { ToBudgetMenu } from '../budget/envelope/budgetsummary/ToBudgetMenu';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 
-type RolloverToBudgetMenuModalProps = ComponentPropsWithoutRef<
+type EnvelopeToBudgetMenuModalProps = ComponentPropsWithoutRef<
   typeof ToBudgetMenu
 >;
 
-export function RolloverToBudgetMenuModal({
+export function EnvelopeToBudgetMenuModal({
   onTransfer,
   onCover,
   onHoldBuffer,
   onResetHoldBuffer,
-}: RolloverToBudgetMenuModalProps) {
+}: EnvelopeToBudgetMenuModalProps) {
   const defaultMenuItemStyle: CSSProperties = {
     ...styles.mobileMenuItem,
     color: theme.menuItemText,
@@ -22,7 +22,7 @@ export function RolloverToBudgetMenuModal({
   };
 
   return (
-    <Modal name="rollover-summary-to-budget-menu">
+    <Modal name="envelope-summary-to-budget-menu">
       {({ state: { close } }) => (
         <>
           <ModalHeader
