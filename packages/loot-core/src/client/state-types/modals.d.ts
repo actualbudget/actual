@@ -157,7 +157,7 @@ type FinanceModals = {
     onBudgetAction: (month: string, action: string, args?: unknown) => void;
     onClose?: () => void;
   };
-  'rollover-budget-menu': {
+  'envelope-budget-menu': {
     categoryId: string;
     month: string;
     onUpdateBudget: (amount: number) => void;
@@ -165,7 +165,7 @@ type FinanceModals = {
     onSetMonthsAverage: (numberOfMonths: number) => void;
     onApplyBudgetTemplate: () => void;
   };
-  'report-budget-menu': {
+  'tracking-budget-menu': {
     categoryId: string;
     month: string;
     onUpdateBudget: (amount: number) => void;
@@ -187,8 +187,8 @@ type FinanceModals = {
     name: string;
     onSave: (id: string, notes: string) => void;
   };
-  'report-budget-summary': { month: string };
-  'rollover-budget-summary': {
+  'tracking-budget-summary': { month: string };
+  'envelope-budget-summary': {
     month: string;
     onBudgetAction: (
       month: string,
@@ -204,21 +204,21 @@ type FinanceModals = {
     onValidate?: (value: string) => string;
     onSubmit: (value: string) => Promise<void>;
   };
-  'rollover-balance-menu': {
+  'envelope-balance-menu': {
     categoryId: string;
     month: string;
     onCarryover: (carryover: boolean) => void;
     onTransfer: () => void;
     onCover: () => void;
   };
-  'rollover-summary-to-budget-menu': {
+  'envelope-summary-to-budget-menu': {
     month: string;
     onTransfer: () => void;
     onCover: () => void;
     onHoldBuffer: () => void;
     onResetHoldBuffer: () => void;
   };
-  'report-balance-menu': {
+  'tracking-balance-menu': {
     categoryId: string;
     month: string;
     onCarryover: (carryover: boolean) => void;
@@ -252,12 +252,12 @@ type FinanceModals = {
     onToggleHiddenCategories: () => void;
     onSwitchBudgetFile: () => void;
   };
-  'rollover-budget-month-menu': {
+  'envelope-budget-month-menu': {
     month: string;
     onBudgetAction: (month: string, action: string, arg?: unknown) => void;
     onEditNotes: (month: string) => void;
   };
-  'report-budget-month-menu': {
+  'tracking-budget-month-menu': {
     month: string;
     onBudgetAction: (month: string, action: string, arg?: unknown) => void;
     onEditNotes: (month: string) => void;
