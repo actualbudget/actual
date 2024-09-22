@@ -21,12 +21,12 @@ import isDev from 'electron-is-dev';
 import promiseRetry from 'promise-retry';
 
 import { getMenu } from './menu';
-import {
-  get as getWindowState,
-  listen as listenToWindowState,
-} from './window-state';
+// import {
+//   get as getWindowState,
+//   listen as listenToWindowState,
+// } from './window-state';
 
-// import './security';=
+// import './security';
 
 Module.globalPaths.push(__dirname + '/..');
 
@@ -92,6 +92,7 @@ function createBackgroundProcess() {
 }
 
 async function createWindow() {
+  return; // testing
   console.info('createWindow');
   // const windowState = await getWindowState();
 
@@ -116,6 +117,7 @@ async function createWindow() {
 
   if (true) {
     win.webContents.openDevTools();
+    console.info('opened devtools');
   }
 
   // const unlistenToState = listenToWindowState(win, windowState);
@@ -148,6 +150,7 @@ async function createWindow() {
     if (clientWin) {
       const url = clientWin.webContents.getURL();
       if (url.includes('app://') || url.includes('localhost:')) {
+        console.info('focused on win');
         clientWin.webContents.executeJavaScript('__actionsForMenu.focused()');
       }
     }
@@ -273,7 +276,7 @@ app.on('ready', async () => {
   });
 
   if (process.argv[1] !== '--server') {
-    await createWindow();
+    // await createWindow();
   }
 
   // This is mainly to aid debugging Sentry errors - it will add a
@@ -301,7 +304,9 @@ app.on('before-quit', () => {
 
 app.on('activate', () => {
   if (clientWin === null) {
+    console.info('creating window');
     createWindow();
+    console.info('window created');
   }
 });
 
