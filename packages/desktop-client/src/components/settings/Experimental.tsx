@@ -36,7 +36,7 @@ function FeatureToggle({
       <Checkbox
         checked={enabled}
         onChange={() => {
-          setFlagPref(!enabled);
+          setFlagPref(String(!enabled));
         }}
         disabled={disableToggle}
       />
@@ -103,12 +103,6 @@ export function ExperimentalFeatures() {
 
             <FeatureToggle flag="goalTemplatesEnabled">
               <Trans>Goal templates</Trans>
-            </FeatureToggle>
-            <FeatureToggle
-              flag="simpleFinSync"
-              feedbackLink="https://github.com/actualbudget/actual/issues/2272"
-            >
-              <Trans>SimpleFIN sync</Trans>
             </FeatureToggle>
             <FeatureToggle
               flag="dashboards"

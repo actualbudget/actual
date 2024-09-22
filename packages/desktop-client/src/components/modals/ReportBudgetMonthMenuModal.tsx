@@ -1,6 +1,8 @@
 // @ts-strict-ignore
 import React, { useState } from 'react';
 
+import { css } from 'glamor';
+
 import * as monthUtils from 'loot-core/src/shared/months';
 
 import { useNotes } from '../../hooks/useNotes';
@@ -10,7 +12,7 @@ import { SvgNotesPaper } from '../../icons/v2';
 import { type CSSProperties, styles, theme } from '../../style';
 import { BudgetMonthMenu } from '../budget/report/budgetsummary/BudgetMonthMenu';
 import { Button } from '../common/Button2';
-import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal2';
+import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { View } from '../common/View';
 import { Notes } from '../Notes';
 
@@ -66,7 +68,7 @@ export function ReportBudgetMonthMenuModal({
         <>
           <ModalHeader
             title={displayMonth}
-            rightContent={<ModalCloseButton onClick={close} />}
+            rightContent={<ModalCloseButton onPress={close} />}
           />
           <View
             style={{
@@ -117,15 +119,15 @@ export function ReportBudgetMonthMenuModal({
               <View>
                 <Button
                   variant="bare"
-                  style={({ isPressed, isHovered }) => ({
-                    ...buttonStyle,
-                    ...(isPressed || isHovered
-                      ? {
-                          backgroundColor: 'transparent',
-                          color: buttonStyle.color,
-                        }
-                      : {}),
-                  })}
+                  className={String(
+                    css({
+                      ...buttonStyle,
+                      '&[data-pressed], &[data-hovered]': {
+                        backgroundColor: 'transparent',
+                        color: buttonStyle.color,
+                      },
+                    }),
+                  )}
                   onPress={onShowMore}
                 >
                   {!showMore ? (

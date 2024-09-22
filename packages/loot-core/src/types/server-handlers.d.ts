@@ -17,7 +17,7 @@ import {
   RuleEntity,
   PayeeEntity,
 } from './models';
-import { GlobalPrefs, LocalPrefs } from './prefs';
+import { GlobalPrefs, MetadataPrefs } from './prefs';
 import { Query } from './query';
 import { EmptyObject } from './util';
 
@@ -72,8 +72,6 @@ export interface ServerHandlers {
       name: string;
     }[]
   >;
-
-  'budget-set-type': (arg: { type }) => Promise<unknown>;
 
   'category-create': (arg: {
     name;
@@ -241,7 +239,7 @@ export interface ServerHandlers {
 
   'save-prefs': (prefsToSet) => Promise<'ok'>;
 
-  'load-prefs': () => Promise<LocalPrefs | null>;
+  'load-prefs': () => Promise<MetadataPrefs | null>;
 
   'sync-reset': () => Promise<{ error?: { reason: string; meta?: unknown } }>;
 

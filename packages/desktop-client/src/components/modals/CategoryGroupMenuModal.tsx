@@ -15,7 +15,7 @@ import {
   ModalCloseButton,
   ModalHeader,
   ModalTitle,
-} from '../common/Modal2';
+} from '../common/Modal';
 import { Popover } from '../common/Popover';
 import { View } from '../common/View';
 import { Notes } from '../Notes';
@@ -45,7 +45,7 @@ export function CategoryGroupMenuModal({
   const notes = useNotes(group.id);
 
   const onRename = newName => {
-    if (newName !== group.name) {
+    if (newName && newName !== group.name) {
       onSave?.({
         ...group,
         name: newName,
@@ -106,7 +106,7 @@ export function CategoryGroupMenuModal({
                 onTitleUpdate={onRename}
               />
             }
-            rightContent={<ModalCloseButton onClick={close} />}
+            rightContent={<ModalCloseButton onPress={close} />}
           />
           <View
             style={{

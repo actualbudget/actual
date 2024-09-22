@@ -4,7 +4,7 @@ import { useLocation } from 'react-router-dom';
 
 import { isNonProductionEnvironment } from 'loot-core/src/shared/environment';
 
-import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal2';
+import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { ManageRules } from '../ManageRules';
 
 type ManageRulesModalProps = {
@@ -28,7 +28,7 @@ export function ManageRulesModal({ payeeId }: ManageRulesModalProps) {
         <>
           <ModalHeader
             title="Rules"
-            rightContent={<ModalCloseButton onClick={close} />}
+            rightContent={<ModalCloseButton onPress={close} />}
           />
           <ManageRules isModal payeeId={payeeId} setLoading={setLoading} />
         </>

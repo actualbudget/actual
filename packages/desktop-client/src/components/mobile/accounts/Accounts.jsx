@@ -1,6 +1,8 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
+import { css } from 'glamor';
+
 import { replaceModal, syncAndDownload } from 'loot-core/src/client/actions';
 import * as queries from 'loot-core/src/client/queries';
 
@@ -17,7 +19,7 @@ import { Text } from '../../common/Text';
 import { TextOneLine } from '../../common/TextOneLine';
 import { View } from '../../common/View';
 import { MobilePageHeader, Page } from '../../Page';
-import { CellValue } from '../../spreadsheet/CellValue';
+import { CellValue, CellValueText } from '../../spreadsheet/CellValue';
 import { MOBILE_NAV_HEIGHT } from '../MobileNavTabs';
 import { PullToRefresh } from '../PullToRefresh';
 
@@ -45,11 +47,11 @@ function AccountHeader({ name, amount, style = {} }) {
           {name}
         </Text>
       </View>
-      <CellValue
-        binding={amount}
-        style={{ ...styles.text, fontSize: 14 }}
-        type="financial"
-      />
+      <CellValue binding={amount} type="financial">
+        {props => (
+          <CellValueText {...props} style={{ ...styles.text, fontSize: 14 }} />
+        )}
+      </CellValue>
     </View>
   );
 }
@@ -64,84 +66,73 @@ function AccountCard({
   onSelect,
 }) {
   return (
-    <View
+    <Button
+      onPress={() => onSelect(account.id)}
       style={{
-        flex: 1,
-        flexDirection: 'row',
-        backgroundColor: theme.tableBackground,
-        boxShadow: `0 1px 1px ${theme.mobileAccountShadow}`,
+        border: `1px solid ${theme.pillBorder}`,
         borderRadius: 6,
+        boxShadow: `0 1px 1px ${theme.mobileAccountShadow}`,
         marginTop: 10,
-        marginRight: 10,
-        width: '100%',
       }}
       data-testid="account"
     >
-      <Button
-        onPress={() => onSelect(account.id)}
-        style={({ isPressed }) => ({
-          flexDirection: 'row',
-          border: '1px solid ' + theme.pillBorder,
+      <View
+        style={{
           flex: 1,
-          alignItems: 'center',
-          borderRadius: 6,
-          ...(isPressed && {
-            opacity: 0.1,
-          }),
-        })}
+          margin: '10px 0',
+        }}
       >
         <View
           style={{
-            flex: 1,
-            margin: '10px 0',
+            flexDirection: 'row',
+            alignItems: 'center',
           }}
         >
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-            }}
-          >
-            {account.bankId && (
-              <View
-                style={{
-                  backgroundColor: pending
-                    ? theme.sidebarItemBackgroundPending
-                    : failed
-                      ? theme.sidebarItemBackgroundFailed
-                      : theme.sidebarItemBackgroundPositive,
-                  marginRight: '8px',
-                  width: 8,
-                  flexShrink: 0,
-                  height: 8,
-                  borderRadius: 8,
-                  opacity: connected ? 1 : 0,
-                }}
-              />
-            )}
-            <TextOneLine
+          {account.bankId && (
+            <View
               style={{
-                ...styles.text,
-                fontSize: 17,
-                fontWeight: 600,
-                color: updated ? theme.mobileAccountText : theme.pillText,
-                paddingRight: 30,
+                backgroundColor: pending
+                  ? theme.sidebarItemBackgroundPending
+                  : failed
+                    ? theme.sidebarItemBackgroundFailed
+                    : theme.sidebarItemBackgroundPositive,
+                marginRight: '8px',
+                width: 8,
+                flexShrink: 0,
+                height: 8,
+                borderRadius: 8,
+                opacity: connected ? 1 : 0,
               }}
-              data-testid="account-name"
-            >
-              {account.name}
-            </TextOneLine>
-          </View>
+            />
+          )}
+          <TextOneLine
+            style={{
+              ...styles.text,
+              fontSize: 17,
+              fontWeight: 600,
+              color: updated ? theme.mobileAccountText : theme.pillText,
+              paddingRight: 30,
+            }}
+            data-testid="account-name"
+          >
+            {account.name}
+          </TextOneLine>
         </View>
-        <CellValue
-          binding={getBalanceQuery(account)}
-          type="financial"
-          style={{ fontSize: 16, color: 'inherit' }}
-          getStyle={makeAmountFullStyle}
-          data-testid="account-balance"
-        />
-      </Button>
-    </View>
+      </View>
+      <CellValue binding={getBalanceQuery(account)} type="financial">
+        {props => (
+          <CellValueText
+            {...props}
+            style={{
+              fontSize: 16,
+              color: 'inherit',
+              ...makeAmountFullStyle(props.value),
+            }}
+            data-testid="account-balance"
+          />
+        )}
+      </CellValue>
+    </Button>
   );
 }
 
@@ -171,10 +162,6 @@ function AccountList({
   const syncingAccountIds = useSelector(state => state.account.accountsSyncing);
   const budgetedAccounts = accounts.filter(account => account.offbudget === 0);
   const offbudgetAccounts = accounts.filter(account => account.offbudget === 1);
-  const noBackgroundColorStyle = {
-    backgroundColor: 'transparent',
-    color: 'white',
-  };
 
   return (
     <Page
@@ -184,11 +171,18 @@ function AccountList({
           rightContent={
             <Button
               variant="bare"
-              style={({ isHovered, isPressed }) => ({
-                color: theme.mobileHeaderText,
-                margin: 10,
-                ...(isHovered || isPressed ? noBackgroundColorStyle : {}),
-              })}
+              aria-label="Add account"
+              className={String(
+                css({
+                  justifyContent: 'center',
+                  color: theme.mobileHeaderText,
+                  margin: 10,
+                  ':hover': {
+                    color: theme.mobileHeaderText,
+                    background: theme.mobileHeaderTextHover,
+                  },
+                }),
+              )}
               onPress={onAddAccount}
             >
               <SvgAdd width={20} height={20} />
@@ -251,7 +245,7 @@ export function Accounts() {
   const updatedAccounts = useSelector(state => state.queries.updatedAccounts);
   const [_numberFormat] = useSyncedPref('numberFormat');
   const numberFormat = _numberFormat || 'comma-dot';
-  const [hideFraction = false] = useSyncedPref('hideFraction');
+  const [hideFraction] = useSyncedPref('hideFraction');
 
   const navigate = useNavigate();
 
