@@ -8,6 +8,9 @@
     <key>com.apple.security.files.user-selected.read-write</key><true/>
     <key>com.apple.security.network.client</key><true/>
 
+    <!-- This shouldn't be needed - adding it for a test. DELETE ME -->
+    <key>com.apple.security.network.server</key><true/>
+
     <!-- https://github.com/electron/electron-notarize#prerequisites -->
     <key>com.apple.security.cs.allow-jit</key><true/>
     <key>com.apple.security.cs.allow-unsigned-executable-memory</key><true/>

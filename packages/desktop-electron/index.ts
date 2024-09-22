@@ -215,9 +215,7 @@ function updateMenu(budgetId?: string) {
 
 app.setAppUserModelId('com.actualbudget.actual');
 
-// Uncomment this to try it
-// app.commandLine.appendSwitch('in-process-gpu'); // This fixes the mas build crashing immediately
-app.commandLine.appendSwitch('no-sandbox'); // does this solve the network issue?
+app.commandLine.appendSwitch('in-process-gpu'); // This fixes the mas package crashing - https://github.com/electron/electron/issues/37862
 
 app.on('ready', async () => {
   // Install an `app://` protocol that always returns the base HTML
