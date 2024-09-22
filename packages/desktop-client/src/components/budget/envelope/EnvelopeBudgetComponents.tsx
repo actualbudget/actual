@@ -299,6 +299,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
       onMouseLeave={handlePointerLeave}
       style={{
         flex: 1,
+        borderBottom: showProgress ? `1px solid ${theme.tableBorder}` : 0,
         backgroundColor: monthUtils.isCurrentMonth(month)
           ? theme.budgetCurrentMonth
           : theme.budgetOtherMonth,
