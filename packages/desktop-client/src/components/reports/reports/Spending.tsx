@@ -10,9 +10,10 @@ import { useWidget } from 'loot-core/client/data-hooks/widget';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { amountToCurrency } from 'loot-core/src/shared/util';
-import { type SpendingWidget } from 'loot-core/types/models';
+import { type TimeFrame, type SpendingWidget } from 'loot-core/types/models';
 import { type RuleConditionEntity } from 'loot-core/types/models/rule';
 
+import { useFeatureFlag } from '../../../hooks/useFeatureFlag';
 import { useFilters } from '../../../hooks/useFilters';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { useResponsive } from '../../../ResponsiveProvider';
@@ -38,6 +39,12 @@ import { createSpendingSpreadsheet } from '../spreadsheets/spending-spreadsheet'
 import { useReport } from '../useReport';
 import { fromDateRepr } from '../util';
 
+export const defaultTimeFrame = {
+  start: monthUtils.currentMonth(),
+  end: monthUtils.subMonths(monthUtils.currentMonth(), 1),
+  mode: 'sliding-window',
+} satisfies TimeFrame;
+
 export function Spending() {
   const params = useParams();
   const { data: widget, isLoading } = useWidget<SpendingWidget>(
@@ -57,6 +64,7 @@ type SpendingInternalProps = {
 };
 
 function SpendingInternal({ widget }: SpendingInternalProps) {
+  const isDashboardsFeatureEnabled = useFeatureFlag('dashboards');
   const dispatch = useDispatch();
   const { t } = useTranslation();
 
@@ -76,11 +84,14 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
   const [allIntervals, setAllIntervals] = useState(emptyIntervals);
 
   const initialReportMode = widget?.meta?.mode ?? 'single-month';
-  const [initialCompare, initialCompareTo, initialMode] = calculateTimeRange({
-    start: widget?.meta?.compare,
-    end: widget?.meta?.compareTo,
-    mode: widget?.meta?.isLive ? 'sliding-window' : 'static',
-  });
+  const [initialCompare, initialCompareTo, initialMode] = calculateTimeRange(
+    {
+      start: widget?.meta?.compare,
+      end: widget?.meta?.compareTo,
+      mode: (widget?.meta?.isLive ?? true) ? 'sliding-window' : 'static',
+    },
+    defaultTimeFrame,
+  );
   const [compare, setCompare] = useState(initialCompare);
   const [compareTo, setCompareTo] = useState(initialCompareTo);
   const [isLive, setIsLive] = useState(initialMode === 'sliding-window');
@@ -206,22 +217,26 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
               flexShrink: 0,
             }}
           >
-            <Button
-              variant={isLive ? 'primary' : 'normal'}
-              onPress={() => setIsLive(state => !state)}
-            >
-              {isLive ? t('Live') : t('Static')}
-            </Button>
+            {isDashboardsFeatureEnabled && (
+              <>
+                <Button
+                  variant={isLive ? 'primary' : 'normal'}
+                  onPress={() => setIsLive(state => !state)}
+                >
+                  {isLive ? t('Live') : t('Static')}
+                </Button>
 
-            <View
-              style={{
-                width: 1,
-                height: 28,
-                backgroundColor: theme.pillBorderDark,
-                marginRight: 10,
-                marginLeft: 10,
-              }}
-            />
+                <View
+                  style={{
+                    width: 1,
+                    height: 28,
+                    backgroundColor: theme.pillBorderDark,
+                    marginRight: 10,
+                    marginLeft: 10,
+                  }}
+                />
+              </>
+            )}
 
             <View
               style={{

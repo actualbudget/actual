@@ -21,6 +21,7 @@ import { createSpendingSpreadsheet } from '../spreadsheets/spending-spreadsheet'
 import { useReport } from '../useReport';
 
 import { MissingReportCard } from './MissingReportCard';
+import { defaultTimeFrame } from './Spending';
 
 type SpendingCardProps = {
   widgetId: string;
@@ -40,11 +41,14 @@ export function SpendingCard({
   const isDashboardsFeatureEnabled = useFeatureFlag('dashboards');
   const { t } = useTranslation();
 
-  const [compare, compareTo] = calculateTimeRange({
-    start: meta?.compare,
-    end: meta?.compareTo,
-    mode: meta?.isLive ? 'sliding-window' : 'static',
-  });
+  const [compare, compareTo] = calculateTimeRange(
+    {
+      start: meta?.compare,
+      end: meta?.compareTo,
+      mode: (meta?.isLive ?? true) ? 'sliding-window' : 'static',
+    },
+    defaultTimeFrame,
+  );
 
   const [isCardHovered, setIsCardHovered] = useState(false);
   const spendingReportMode = meta?.mode ?? 'single-month';

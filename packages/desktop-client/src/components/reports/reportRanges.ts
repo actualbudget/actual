@@ -188,7 +188,7 @@ export function calculateTimeRange(
         monthUtils.currentMonth(),
         monthUtils.subMonths(monthUtils.currentMonth(), -offset),
         'sliding-window',
-      ];
+      ] as const;
     }
 
     return getLatestRange(offset);
