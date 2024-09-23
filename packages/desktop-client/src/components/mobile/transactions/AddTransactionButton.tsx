@@ -1,10 +1,7 @@
 import React from 'react';
 
-import { css } from 'glamor';
-
 import { useNavigate } from '../../../hooks/useNavigate';
 import { SvgAdd } from '../../../icons/v1';
-import { theme } from '../../../style';
 import { Button } from '../../common/Button2';
 
 type AddTransactionButtonProps = {

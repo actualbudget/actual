@@ -1,10 +1,8 @@
 import React, { type ComponentPropsWithoutRef } from 'react';
 
-import { css } from 'glamor';
-
 import { useNavigate } from '../../hooks/useNavigate';
 import { SvgCheveronLeft } from '../../icons/v1';
-import { styles, theme } from '../../style';
+import { styles } from '../../style';
 import { Button } from '../common/Button2';
 import { Text } from '../common/Text';
 
