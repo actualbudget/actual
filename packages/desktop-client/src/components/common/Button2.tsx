@@ -1,6 +1,6 @@
 import React, {
   forwardRef,
-  useCallback,
+  useMemo,
   type ComponentPropsWithoutRef,
   type ComponentType,
   type ReactNode,
@@ -154,8 +154,8 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     const variantWithDisabled: ButtonVariant | `${ButtonVariant}Disabled` =
       props.isDisabled ? `${variant}Disabled` : variant;
 
-    const defaultButtonClassName: ReactAriaButtonClassNameFn = useCallback(
-      renderProps =>
+    const defaultButtonClassName: string = useMemo(
+      () =>
         String(
           css({
             alignItems: 'center',
@@ -172,42 +172,27 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
             transition: 'box-shadow .25s',
             WebkitAppRegion: 'no-drag',
             ...styles.smallText,
-            ...(renderProps.isDisabled
-              ? {}
-              : {
-                  '&[data-hovered]': _getHoveredStyles(variant),
-                  '&[data-pressed]': _getActiveStyles(variant, bounce),
-                }),
+            '&[data-hovered]': _getHoveredStyles(variant),
+            '&[data-pressed]': _getActiveStyles(variant, bounce),
             ...(Icon ? { paddingLeft: 0 } : {}),
           }),
         ),
       [Icon, bounce, variant, variantWithDisabled],
     );
 
-    const className = props.className;
-    const buttonClassName: ReactAriaButtonClassNameFn = useCallback(
-      (
-        renderProps: ReactAriaButtonRenderProps & {
-          defaultClassName: string | undefined;
-        },
-      ) =>
-        typeof className === 'function'
-          ? className(renderProps)
-          : className || '',
-      [className],
-    );
+    const className = restProps.className;
 
     return (
       <ReactAriaButton
         ref={ref}
         {...restProps}
-        className={renderProps =>
-          `${renderProps.defaultClassName} ${defaultButtonClassName(renderProps)} ${buttonClassName(renderProps)}`
+        className={
+          typeof className === 'function'
+            ? renderProps =>
+                `${defaultButtonClassName} ${className(renderProps)}`
+            : `${defaultButtonClassName} ${className || ''}`
         }
       >
-        {Icon && (
-          <Icon style={{ height: 15, paddingLeft: 5, paddingRight: 3 }} />
-        )}
         {children}
       </ReactAriaButton>
     );
@@ -263,10 +248,3 @@ export const ButtonWithLoading = forwardRef<
 });
 
 ButtonWithLoading.displayName = 'ButtonWithLoading';
-
-type ReactAriaButtonClassNameFn = Extract<
-  ComponentPropsWithoutRef<typeof ReactAriaButton>['className'],
-  (
-    renderProps: ReactAriaButtonRenderProps & { defaultClassName: string },
-  ) => string
->;

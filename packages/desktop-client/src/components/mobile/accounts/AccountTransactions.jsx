@@ -127,18 +127,7 @@ function AccountName({ account, pending, failed }) {
           }}
         />
       )}
-      <Button
-        variant="bare"
-        className={String(
-          css({
-            color: theme.mobileHeaderText,
-            '&[data-pressed]': {
-              backgroundColor: theme.mobileHeaderTextHover,
-            },
-          }),
-        )}
-        onPress={onClick}
-      >
+      <Button variant="bare" onPress={onClick}>
         <Text
           style={{
             fontSize: 17,

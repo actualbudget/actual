@@ -172,17 +172,7 @@ function AccountList({
             <Button
               variant="bare"
               aria-label="Add account"
-              className={String(
-                css({
-                  justifyContent: 'center',
-                  color: theme.mobileHeaderText,
-                  margin: 10,
-                  '&[data-pressed]': {
-                    color: theme.mobileHeaderText,
-                    backgroundColor: theme.mobileHeaderTextHover,
-                  },
-                }),
-              )}
+              style={{ margin: 10 }}
               onPress={onAddAccount}
             >
               <SvgAdd width={20} height={20} />

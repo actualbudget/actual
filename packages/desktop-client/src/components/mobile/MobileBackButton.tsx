@@ -19,20 +19,10 @@ export function MobileBackButton({
   return (
     <Button
       variant="bare"
-      className={String(
-        css({
-          color: theme.mobileHeaderText,
-          justifyContent: 'center',
-          margin: 10,
-          paddingLeft: 5,
-          paddingRight: 3,
-          '&[data-pressed]': {
-            color: theme.mobileHeaderText,
-            backgroundColor: theme.mobileHeaderTextHover,
-          },
-          ...style,
-        }),
-      )}
+      style={{
+        margin: 10,
+        ...style,
+      }}
       onPress={onPress || (() => navigate(-1))}
       {...props}
     >

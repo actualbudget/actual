@@ -1602,16 +1602,7 @@ export function BudgetTable({
           leftContent={
             <Button
               variant="bare"
-              className={String(
-                css({
-                  color: theme.mobileHeaderText,
-                  margin: 10,
-                  '&[data-pressed]': {
-                    color: theme.mobileHeaderText,
-                    backgroundColor: theme.mobileHeaderTextHover,
-                  },
-                }),
-              )}
+              style={{ margin: 10 }}
               onPress={onOpenBudgetPageMenu}
             >
               <SvgLogo
