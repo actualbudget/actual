@@ -177,9 +177,9 @@ function AccountList({
                   justifyContent: 'center',
                   color: theme.mobileHeaderText,
                   margin: 10,
-                  ':hover': {
+                  '&[data-pressed]': {
                     color: theme.mobileHeaderText,
-                    background: theme.mobileHeaderTextHover,
+                    backgroundColor: theme.mobileHeaderTextHover,
                   },
                 }),
               )}

@@ -26,9 +26,9 @@ export function MobileBackButton({
           margin: 10,
           paddingLeft: 5,
           paddingRight: 3,
-          '&[data-hovered]': {
+          '&[data-pressed]': {
             color: theme.mobileHeaderText,
-            background: theme.mobileHeaderTextHover,
+            backgroundColor: theme.mobileHeaderTextHover,
           },
           ...style,
         }),

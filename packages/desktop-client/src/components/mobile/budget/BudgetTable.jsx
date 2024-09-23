@@ -628,7 +628,6 @@ const ExpenseCategory = memo(function ExpenseCategory({
         </View>
         <View
           style={{
-            ...styles.noTapHighlight,
             width: columnWidth,
             justifyContent: 'center',
             alignItems: 'flex-end',
@@ -789,8 +788,7 @@ const ExpenseGroupHeader = memo(function ExpenseGroupHeader({
             css({
               flexShrink: 0,
               color: theme.pageTextSubdued,
-              ...styles.noTapHighlight,
-              '&[data-hovered], &[data-pressed]': {
+              '&[data-pressed]': {
                 backgroundColor: 'transparent',
               },
             }),
@@ -985,8 +983,7 @@ const IncomeGroupHeader = memo(function IncomeGroupHeader({
             css({
               flexShrink: 0,
               color: theme.pageTextSubdued,
-              ...styles.noTapHighlight,
-              '&[data-hovered], &[data-pressed]': {
+              '&[data-pressed]': {
                 backgroundColor: 'transparent',
               },
             }),
@@ -1587,10 +1584,6 @@ export function BudgetTable({
   const [showHiddenCategories = false] = useLocalPref(
     'budget.showHiddenCategories',
   );
-  const noBackgroundColorStyle = {
-    backgroundColor: 'transparent',
-    color: 'white',
-  };
 
   return (
     <Page
@@ -1613,12 +1606,19 @@ export function BudgetTable({
                 css({
                   color: theme.mobileHeaderText,
                   margin: 10,
-                  '&[data-hovered], &[data-pressed]': noBackgroundColorStyle,
+                  '&[data-pressed]': {
+                    color: theme.mobileHeaderText,
+                    backgroundColor: theme.mobileHeaderTextHover,
+                  },
                 }),
               )}
               onPress={onOpenBudgetPageMenu}
             >
-              <SvgLogo width="20" height="20" />
+              <SvgLogo
+                style={{ color: theme.mobileHeaderText }}
+                width="20"
+                height="20"
+              />
               <SvgCheveronRight
                 style={{ flexShrink: 0, color: theme.mobileHeaderTextSubdued }}
                 width="14"
@@ -1926,36 +1926,41 @@ function MonthSelector({
         }}
         className={String(
           css({
-            ...styles.noTapHighlight,
             ...arrowButtonStyle,
             opacity: prevEnabled ? 1 : 0.6,
             color: theme.mobileHeaderText,
-            '&[data-hovered]': {
+            '&[data-pressed]': {
               color: theme.mobileHeaderText,
-              background: theme.mobileHeaderTextHover,
+              backgroundColor: theme.mobileHeaderTextHover,
             },
           }),
         )}
       >
         <SvgArrowThinLeft width="15" height="15" style={{ margin: -5 }} />
       </Button>
-      <Text
-        style={{
-          color: theme.mobileHeaderText,
-          textAlign: 'center',
-          fontSize: 16,
-          fontWeight: 500,
-          margin: '0 5px',
-          userSelect: 'none',
-          ...styles.underlinedText,
-        }}
-        onPointerUp={e => {
-          e.stopPropagation();
+      <Button
+        variant="bare"
+        className={String(
+          css({
+            color: theme.mobileHeaderText,
+            textAlign: 'center',
+            fontSize: 16,
+            fontWeight: 500,
+            margin: '0 5px',
+            '&[data-pressed]': {
+              color: theme.mobileHeaderText,
+              backgroundColor: theme.mobileHeaderTextHover,
+            },
+          }),
+        )}
+        onPress={() => {
           onOpenMonthMenu?.(month);
         }}
       >
-        {monthUtils.format(month, 'MMMM ‘yy')}
-      </Text>
+        <Text style={styles.underlinedText}>
+          {monthUtils.format(month, 'MMMM ‘yy')}
+        </Text>
+      </Button>
       <Button
         variant="bare"
         onPress={() => {
@@ -1965,13 +1970,12 @@ function MonthSelector({
         }}
         className={String(
           css({
-            ...styles.noTapHighlight,
             ...arrowButtonStyle,
             opacity: nextEnabled ? 1 : 0.6,
             color: theme.mobileHeaderText,
-            '&[data-hovered]': {
+            '&[data-pressed]': {
               color: theme.mobileHeaderText,
-              background: theme.mobileHeaderTextHover,
+              backgroundColor: theme.mobileHeaderTextHover,
             },
           }),
         )}

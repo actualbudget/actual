@@ -7,6 +7,7 @@ import React, {
 } from 'react';
 import { useDispatch } from 'react-redux';
 
+import { css } from 'glamor';
 import { useDebounceCallback } from 'usehooks-ts';
 
 import {
@@ -32,6 +33,7 @@ import { useDateFormat } from '../../../hooks/useDateFormat';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { usePreviewTransactions } from '../../../hooks/usePreviewTransactions';
 import { styles, theme } from '../../../style';
+import { Button } from '../../common/Button2';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
 import { MobilePageHeader, Page } from '../../Page';
@@ -125,16 +127,29 @@ function AccountName({ account, pending, failed }) {
           }}
         />
       )}
-      <Text
-        style={{
-          userSelect: 'none',
-          ...styles.underlinedText,
-          ...styles.lineClamp(2),
-        }}
-        onClick={onClick}
+      <Button
+        variant="bare"
+        className={String(
+          css({
+            color: theme.mobileHeaderText,
+            '&[data-pressed]': {
+              backgroundColor: theme.mobileHeaderTextHover,
+            },
+          }),
+        )}
+        onPress={onClick}
       >
-        {`${account.closed ? 'Closed: ' : ''}${account.name}`}
-      </Text>
+        <Text
+          style={{
+            fontSize: 17,
+            fontWeight: 500,
+            ...styles.underlinedText,
+            ...styles.lineClamp(2),
+          }}
+        >
+          {`${account.closed ? 'Closed: ' : ''}${account.name}`}
+        </Text>
+      </Button>
     </View>
   );
 }
