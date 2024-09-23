@@ -10,7 +10,7 @@ import { useWidget } from 'loot-core/client/data-hooks/widget';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { amountToCurrency } from 'loot-core/src/shared/util';
-import { type TimeFrame, type SpendingWidget } from 'loot-core/types/models';
+import { type SpendingWidget } from 'loot-core/types/models';
 import { type RuleConditionEntity } from 'loot-core/types/models/rule';
 
 import { useFeatureFlag } from '../../../hooks/useFeatureFlag';
@@ -34,16 +34,10 @@ import { PrivacyFilter } from '../../PrivacyFilter';
 import { SpendingGraph } from '../graphs/SpendingGraph';
 import { LoadingIndicator } from '../LoadingIndicator';
 import { ModeButton } from '../ModeButton';
-import { calculateTimeRange } from '../reportRanges';
+import { calculateSpendingReportTimeRange } from '../reportRanges';
 import { createSpendingSpreadsheet } from '../spreadsheets/spending-spreadsheet';
 import { useReport } from '../useReport';
 import { fromDateRepr } from '../util';
-
-export const defaultTimeFrame = {
-  start: monthUtils.currentMonth(),
-  end: monthUtils.subMonths(monthUtils.currentMonth(), 1),
-  mode: 'sliding-window',
-} satisfies TimeFrame;
 
 export function Spending() {
   const params = useParams();
@@ -84,17 +78,12 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
   const [allIntervals, setAllIntervals] = useState(emptyIntervals);
 
   const initialReportMode = widget?.meta?.mode ?? 'single-month';
-  const [initialCompare, initialCompareTo, initialMode] = calculateTimeRange(
-    {
-      start: widget?.meta?.compare,
-      end: widget?.meta?.compareTo,
-      mode: (widget?.meta?.isLive ?? true) ? 'sliding-window' : 'static',
-    },
-    defaultTimeFrame,
+  const [initialCompare, initialCompareTo] = calculateSpendingReportTimeRange(
+    widget?.meta ?? {},
   );
   const [compare, setCompare] = useState(initialCompare);
   const [compareTo, setCompareTo] = useState(initialCompareTo);
-  const [isLive, setIsLive] = useState(initialMode === 'sliding-window');
+  const [isLive, setIsLive] = useState(widget?.meta?.isLive ?? true);
 
   const [reportMode, setReportMode] = useState(initialReportMode);
 
@@ -312,7 +301,6 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
               <ModeButton
                 selected={reportMode === 'budget'}
                 onSelect={() => {
-                  setCompare(monthUtils.currentMonth());
                   setReportMode('budget');
                 }}
                 style={{
@@ -324,7 +312,6 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
               <ModeButton
                 selected={reportMode === 'average'}
                 onSelect={() => {
-                  setCompare(monthUtils.currentMonth());
                   setReportMode('average');
                 }}
                 style={{

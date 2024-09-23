@@ -16,12 +16,11 @@ import { SpendingGraph } from '../graphs/SpendingGraph';
 import { LoadingIndicator } from '../LoadingIndicator';
 import { ReportCard } from '../ReportCard';
 import { ReportCardName } from '../ReportCardName';
-import { calculateTimeRange } from '../reportRanges';
+import { calculateSpendingReportTimeRange } from '../reportRanges';
 import { createSpendingSpreadsheet } from '../spreadsheets/spending-spreadsheet';
 import { useReport } from '../useReport';
 
 import { MissingReportCard } from './MissingReportCard';
-import { defaultTimeFrame } from './Spending';
 
 type SpendingCardProps = {
   widgetId: string;
@@ -41,14 +40,7 @@ export function SpendingCard({
   const isDashboardsFeatureEnabled = useFeatureFlag('dashboards');
   const { t } = useTranslation();
 
-  const [compare, compareTo] = calculateTimeRange(
-    {
-      start: meta?.compare,
-      end: meta?.compareTo,
-      mode: (meta?.isLive ?? true) ? 'sliding-window' : 'static',
-    },
-    defaultTimeFrame,
-  );
+  const [compare, compareTo] = calculateSpendingReportTimeRange(meta ?? {});
 
   const [isCardHovered, setIsCardHovered] = useState(false);
   const spendingReportMode = meta?.mode ?? 'single-month';

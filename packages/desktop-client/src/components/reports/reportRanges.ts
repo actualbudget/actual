@@ -196,3 +196,33 @@ export function calculateTimeRange(
 
   return [start, end, 'static'] as const;
 }
+
+export function calculateSpendingReportTimeRange({
+  compare,
+  compareTo,
+  isLive = true,
+  mode = 'single-month',
+}: {
+  compare?: string;
+  compareTo?: string;
+  isLive?: boolean;
+  mode?: 'budget' | 'average' | 'single-month';
+}): [string, string] {
+  if (['budget', 'average'].includes(mode) && isLive) {
+    return [monthUtils.currentMonth(), monthUtils.currentMonth()];
+  }
+
+  const [start, end] = calculateTimeRange(
+    {
+      start: compare,
+      end: compareTo,
+      mode: (isLive ?? true) ? 'sliding-window' : 'static',
+    },
+    {
+      start: monthUtils.currentMonth(),
+      end: monthUtils.subMonths(monthUtils.currentMonth(), 1),
+      mode: 'sliding-window',
+    },
+  );
+  return [start, end];
+}
