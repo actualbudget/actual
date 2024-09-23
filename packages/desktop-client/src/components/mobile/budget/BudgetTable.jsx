@@ -225,7 +225,7 @@ function BudgetCell({
   const format = useFormat();
   const { showUndoNotification } = useUndo();
   const [budgetType = 'rollover'] = useSyncedPref('budgetType');
-  const modalBudgetType = budgetType === 'rollover' ? 'envelope' : budgetType;
+  const modalBudgetType = budgetType === 'rollover' ? 'envelope' : 'tracking';
 
   const categoryBudgetMenuModal = `${modalBudgetType}-budget-menu`;
   const categoryNotes = useNotes(category.id);
@@ -387,7 +387,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
   const goalValue = isGoalTemplatesEnabled ? goalTemp : null;
 
   const [budgetType = 'rollover'] = useSyncedPref('budgetType');
-  const modalBudgetType = budgetType === 'rollover' ? 'envelope' : budgetType;
+  const modalBudgetType = budgetType === 'rollover' ? 'envelope' : 'tracking';
   const dispatch = useDispatch();
   const { showUndoNotification } = useUndo();
   const { list: categories } = useCategories();
