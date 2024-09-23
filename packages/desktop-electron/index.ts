@@ -53,242 +53,242 @@ if (true) {
   process.traceProcessWarnings = true;
 }
 
-function createBackgroundProcess() {
-  return; // testing
-  const defaultOptions = { stdio: 'pipe' }; // , allowLoadingUnsignedLibraries: true
-  serverProcess = utilityProcess.fork(
-    __dirname + '/server.js',
-    ['--subprocess', app.getVersion()],
-    true ? { ...defaultOptions, execArgv: ['--inspect'] } : defaultOptions,
-  );
+// function createBackgroundProcess() {
+//   return; // testing
+//   const defaultOptions = { stdio: 'pipe' }; // , allowLoadingUnsignedLibraries: true
+//   serverProcess = utilityProcess.fork(
+//     __dirname + '/server.js',
+//     ['--subprocess', app.getVersion()],
+//     true ? { ...defaultOptions, execArgv: ['--inspect'] } : defaultOptions,
+//   );
 
-  serverProcess.stdout?.on('data', (chunk: Buffer) => {
-    // Send the Server console.log messages to the main browser window
-    clientWin?.webContents.executeJavaScript(`
-      console.info('Server Log:', ${JSON.stringify(chunk.toString('utf8'))})`);
-  });
+//   serverProcess.stdout?.on('data', (chunk: Buffer) => {
+//     // Send the Server console.log messages to the main browser window
+//     clientWin?.webContents.executeJavaScript(`
+//       console.info('Server Log:', ${JSON.stringify(chunk.toString('utf8'))})`);
+//   });
 
-  serverProcess.stderr?.on('data', (chunk: Buffer) => {
-    // Send the Server console.error messages out to the main browser window
-    clientWin?.webContents.executeJavaScript(`
-      console.error('Server Log:', ${JSON.stringify(chunk.toString('utf8'))})`);
-  });
+//   serverProcess.stderr?.on('data', (chunk: Buffer) => {
+//     // Send the Server console.error messages out to the main browser window
+//     clientWin?.webContents.executeJavaScript(`
+//       console.error('Server Log:', ${JSON.stringify(chunk.toString('utf8'))})`);
+//   });
 
-  serverProcess.on('message', msg => {
-    switch (msg.type) {
-      case 'captureEvent':
-      case 'captureBreadcrumb':
-        break;
-      case 'reply':
-      case 'error':
-      case 'push':
-        if (clientWin) {
-          clientWin.webContents.send('message', msg);
-        }
-        break;
-      default:
-        console.log('Unknown server message: ' + msg.type);
-    }
-  });
-}
+//   serverProcess.on('message', msg => {
+//     switch (msg.type) {
+//       case 'captureEvent':
+//       case 'captureBreadcrumb':
+//         break;
+//       case 'reply':
+//       case 'error':
+//       case 'push':
+//         if (clientWin) {
+//           clientWin.webContents.send('message', msg);
+//         }
+//         break;
+//       default:
+//         console.log('Unknown server message: ' + msg.type);
+//     }
+//   });
+// }
 
-async function createWindow() {
-  return; // testing
-  console.info('createWindow');
-  // const windowState = await getWindowState();
+// async function createWindow() {
+//   return; // testing
+//   console.info('createWindow');
+//   // const windowState = await getWindowState();
 
-  // Create the browser window.
-  const win = new BrowserWindow({
-    // x: windowState.x,
-    // y: windowState.y,
-    // width: windowState.width,
-    // height: windowState.height,
-    title: 'Actual',
-    webPreferences: {
-      nodeIntegration: false,
-      nodeIntegrationInWorker: false,
-      nodeIntegrationInSubFrames: false,
-      contextIsolation: true,
-      preload: __dirname + '/preload.js',
-    },
-  });
+//   // Create the browser window.
+//   const win = new BrowserWindow({
+//     // x: windowState.x,
+//     // y: windowState.y,
+//     // width: windowState.width,
+//     // height: windowState.height,
+//     title: 'Actual',
+//     webPreferences: {
+//       nodeIntegration: false,
+//       nodeIntegrationInWorker: false,
+//       nodeIntegrationInSubFrames: false,
+//       contextIsolation: true,
+//       preload: __dirname + '/preload.js',
+//     },
+//   });
 
-  console.info('createWindow made');
-  win.setBackgroundColor('#E8ECF0');
+//   console.info('createWindow made');
+//   win.setBackgroundColor('#E8ECF0');
 
-  if (true) {
-    win.webContents.openDevTools();
-    console.info('opened devtools');
-  }
+//   if (true) {
+//     win.webContents.openDevTools();
+//     console.info('opened devtools');
+//   }
 
-  // const unlistenToState = listenToWindowState(win, windowState);
+//   // const unlistenToState = listenToWindowState(win, windowState);
 
-  if (isDev) {
-    win.loadURL(`file://${__dirname}/loading.html`);
-    // Wait for the development server to start
-    setTimeout(() => {
-      promiseRetry(retry => win.loadURL('http://localhost:3001/').catch(retry));
-    }, 3000);
-  } else {
-    console.info('loadurl');
-    win.loadURL(`app://actual/`);
-    console.info('url loaded');
-  }
+//   if (isDev) {
+//     win.loadURL(`file://${__dirname}/loading.html`);
+//     // Wait for the development server to start
+//     setTimeout(() => {
+//       promiseRetry(retry => win.loadURL('http://localhost:3001/').catch(retry));
+//     }, 3000);
+//   } else {
+//     console.info('loadurl');
+//     win.loadURL(`app://actual/`);
+//     console.info('url loaded');
+//   }
 
-  win.on('closed', () => {
-    clientWin = null;
-    updateMenu();
-    // unlistenToState();
-  });
+//   win.on('closed', () => {
+//     clientWin = null;
+//     updateMenu();
+//     // unlistenToState();
+//   });
 
-  win.on('unresponsive', () => {
-    console.log(
-      'browser window went unresponsive (maybe because of a modal though)',
-    );
-  });
+//   win.on('unresponsive', () => {
+//     console.log(
+//       'browser window went unresponsive (maybe because of a modal though)',
+//     );
+//   });
 
-  win.on('focus', async () => {
-    if (clientWin) {
-      const url = clientWin.webContents.getURL();
-      if (url.includes('app://') || url.includes('localhost:')) {
-        console.info('focused on win');
-        clientWin.webContents.executeJavaScript('__actionsForMenu.focused()');
-      }
-    }
-  });
+//   win.on('focus', async () => {
+//     if (clientWin) {
+//       const url = clientWin.webContents.getURL();
+//       if (url.includes('app://') || url.includes('localhost:')) {
+//         console.info('focused on win');
+//         clientWin.webContents.executeJavaScript('__actionsForMenu.focused()');
+//       }
+//     }
+//   });
 
-  // hit when middle-clicking buttons or <a href/> with a target set to _blank
-  // always deny, optionally redirect to browser
-  win.webContents.setWindowOpenHandler(({ url }) => {
-    if (isExternalUrl(url)) {
-      shell.openExternal(url);
-    }
+//   // hit when middle-clicking buttons or <a href/> with a target set to _blank
+//   // always deny, optionally redirect to browser
+//   win.webContents.setWindowOpenHandler(({ url }) => {
+//     if (isExternalUrl(url)) {
+//       shell.openExternal(url);
+//     }
 
-    return { action: 'deny' };
-  });
+//     return { action: 'deny' };
+//   });
 
-  // hit when clicking <a href/> with no target
-  // optionally redirect to browser
-  win.webContents.on('will-navigate', (event, url) => {
-    if (isExternalUrl(url)) {
-      shell.openExternal(url);
-      event.preventDefault();
-    }
-  });
+//   // hit when clicking <a href/> with no target
+//   // optionally redirect to browser
+//   win.webContents.on('will-navigate', (event, url) => {
+//     if (isExternalUrl(url)) {
+//       shell.openExternal(url);
+//       event.preventDefault();
+//     }
+//   });
 
-  if (process.platform === 'win32') {
-    Menu.setApplicationMenu(null);
-    win.setMenu(getMenu(isDev, createWindow));
-  } else {
-    Menu.setApplicationMenu(getMenu(isDev, createWindow));
-  }
+//   if (process.platform === 'win32') {
+//     Menu.setApplicationMenu(null);
+//     win.setMenu(getMenu(isDev, createWindow));
+//   } else {
+//     Menu.setApplicationMenu(getMenu(isDev, createWindow));
+//   }
 
-  clientWin = win;
-}
+//   clientWin = win;
+// }
 
-function isExternalUrl(url: string) {
-  return !url.includes('localhost:') && !url.includes('app://');
-}
+// function isExternalUrl(url: string) {
+//   return !url.includes('localhost:') && !url.includes('app://');
+// }
 
-function updateMenu(budgetId?: string) {
-  const isBudgetOpen = !!budgetId;
-  const menu = getMenu(isDev, createWindow, budgetId);
-  const file = menu.items.filter(item => item.label === 'File')[0];
-  const fileItems = file.submenu?.items || [];
-  fileItems
-    .filter(item => item.label === 'Load Backup...')
-    .forEach(item => {
-      item.enabled = isBudgetOpen;
-    });
+// function updateMenu(budgetId?: string) {
+//   const isBudgetOpen = !!budgetId;
+//   const menu = getMenu(isDev, createWindow, budgetId);
+//   const file = menu.items.filter(item => item.label === 'File')[0];
+//   const fileItems = file.submenu?.items || [];
+//   fileItems
+//     .filter(item => item.label === 'Load Backup...')
+//     .forEach(item => {
+//       item.enabled = isBudgetOpen;
+//     });
 
-  const tools = menu.items.filter(item => item.label === 'Tools')[0];
-  tools.submenu?.items.forEach(item => {
-    item.enabled = isBudgetOpen;
-  });
+//   const tools = menu.items.filter(item => item.label === 'Tools')[0];
+//   tools.submenu?.items.forEach(item => {
+//     item.enabled = isBudgetOpen;
+//   });
 
-  const edit = menu.items.filter(item => item.label === 'Edit')[0];
-  const editItems = edit.submenu?.items || [];
-  editItems
-    .filter(item => item.label === 'Undo' || item.label === 'Redo')
-    .map(item => (item.enabled = isBudgetOpen));
+//   const edit = menu.items.filter(item => item.label === 'Edit')[0];
+//   const editItems = edit.submenu?.items || [];
+//   editItems
+//     .filter(item => item.label === 'Undo' || item.label === 'Redo')
+//     .map(item => (item.enabled = isBudgetOpen));
 
-  if (process.platform === 'win32') {
-    if (clientWin) {
-      clientWin.setMenu(menu);
-    }
-  } else {
-    Menu.setApplicationMenu(menu);
-  }
-}
+//   if (process.platform === 'win32') {
+//     if (clientWin) {
+//       clientWin.setMenu(menu);
+//     }
+//   } else {
+//     Menu.setApplicationMenu(menu);
+//   }
+// }
 
 // app.setAppUserModelId('com.actualbudget.actual');
 
 app.commandLine.appendSwitch('in-process-gpu'); // This fixes the mas package crashing - https://github.com/electron/electron/issues/37862
 
-app.on('ready', async () => {
-  // Install an `app://` protocol that always returns the base HTML
-  // file no matter what URL it is. This allows us to use react-router
-  // on the frontend
-  console.info('app ready - we here');
-  return;
-  protocol.handle('app', request => {
-    console.info('handling app request');
-    if (request.method !== 'GET') {
-      return new Response(null, {
-        status: 405,
-        statusText: 'Method Not Allowed',
-      });
-    }
+// app.on('ready', async () => {
+//   // Install an `app://` protocol that always returns the base HTML
+//   // file no matter what URL it is. This allows us to use react-router
+//   // on the frontend
+//   console.info('app ready - we here');
+//   return;
+//   protocol.handle('app', request => {
+//     console.info('handling app request');
+//     if (request.method !== 'GET') {
+//       return new Response(null, {
+//         status: 405,
+//         statusText: 'Method Not Allowed',
+//       });
+//     }
 
-    const parsedUrl = new URL(request.url);
-    if (parsedUrl.protocol !== 'app:') {
-      return new Response(null, {
-        status: 404,
-        statusText: 'Unknown URL Scheme',
-      });
-    }
+//     const parsedUrl = new URL(request.url);
+//     if (parsedUrl.protocol !== 'app:') {
+//       return new Response(null, {
+//         status: 404,
+//         statusText: 'Unknown URL Scheme',
+//       });
+//     }
 
-    if (parsedUrl.host !== 'actual') {
-      return new Response(null, {
-        status: 404,
-        statusText: 'Host Not Resolved',
-      });
-    }
+//     if (parsedUrl.host !== 'actual') {
+//       return new Response(null, {
+//         status: 404,
+//         statusText: 'Host Not Resolved',
+//       });
+//     }
 
-    const pathname = parsedUrl.pathname;
+//     const pathname = parsedUrl.pathname;
 
-    let filePath = path.normalize(`${__dirname}/client-build/index.html`); // default web path
+//     let filePath = path.normalize(`${__dirname}/client-build/index.html`); // default web path
 
-    if (pathname.startsWith('/static')) {
-      // static assets
-      filePath = path.normalize(`${__dirname}/client-build${pathname}`);
-      const resolvedPath = path.resolve(filePath);
-      const clientBuildPath = path.resolve(__dirname, 'client-build');
+//     if (pathname.startsWith('/static')) {
+//       // static assets
+//       filePath = path.normalize(`${__dirname}/client-build${pathname}`);
+//       const resolvedPath = path.resolve(filePath);
+//       const clientBuildPath = path.resolve(__dirname, 'client-build');
 
-      // Ensure filePath is within client-build directory - prevents directory traversal vulnerability
-      if (!resolvedPath.startsWith(clientBuildPath)) {
-        return new Response(null, {
-          status: 403,
-          statusText: 'Forbidden',
-        });
-      }
-    }
+//       // Ensure filePath is within client-build directory - prevents directory traversal vulnerability
+//       if (!resolvedPath.startsWith(clientBuildPath)) {
+//         return new Response(null, {
+//           status: 403,
+//           statusText: 'Forbidden',
+//         });
+//       }
+//     }
 
-    return net.fetch(`file:///${filePath}`);
-  });
+//     return net.fetch(`file:///${filePath}`);
+//   });
 
-  if (process.argv[1] !== '--server') {
-    // await createWindow();
-  }
+//   if (process.argv[1] !== '--server') {
+//     // await createWindow();
+//   }
 
-  // This is mainly to aid debugging Sentry errors - it will add a
-  // breadcrumb
-  powerMonitor.on('suspend', () => {
-    console.log('Suspending', new Date());
-  });
+//   // This is mainly to aid debugging Sentry errors - it will add a
+//   // breadcrumb
+//   powerMonitor.on('suspend', () => {
+//     console.log('Suspending', new Date());
+//   });
 
-  // createBackgroundProcess();
-});
+//   // createBackgroundProcess();
+// });
 
 // app.on('window-all-closed', () => {
 //   // On macOS, closing all windows shouldn't exit the process
