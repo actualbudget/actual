@@ -96,7 +96,10 @@ export function FieldSelect({ fields, style, value, onChange }) {
         options={fields}
         value={value}
         onChange={onChange}
-        buttonStyle={{ color: theme.pageTextPositive }}
+        style={{
+          color: theme.pageTextPositive,
+          '&[data-hovered]': { color: theme.pageTextPositive },
+        }}
       />
     </View>
   );
@@ -136,7 +139,7 @@ export function OpSelect({
         options={opOptions}
         value={value}
         onChange={value => onChange('op', value)}
-        buttonStyle={style}
+        style={style}
       />
     </View>
   );

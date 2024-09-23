@@ -62,8 +62,8 @@ export function ThemeSettings() {
               }}
               value={theme}
               options={themeOptions}
-              buttonStyle={{
-                ':hover': {
+              style={{
+                '&[data-hovered]': {
                   backgroundColor: themeStyle.buttonNormalBackgroundHover,
                 },
               }}
@@ -77,8 +77,8 @@ export function ThemeSettings() {
                 }}
                 value={darkTheme}
                 options={darkThemeOptions}
-                buttonStyle={{
-                  ':hover': {
+                style={{
+                  '&[data-hovered]': {
                     backgroundColor: themeStyle.buttonNormalBackgroundHover,
                   },
                 }}

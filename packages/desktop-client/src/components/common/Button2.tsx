@@ -173,8 +173,12 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           transition: 'box-shadow .25s',
           WebkitAppRegion: 'no-drag',
           ...styles.smallText,
-          ...(renderProps.isDisabled ? {} : { ':hover': hoveredStyle }),
-          ...(renderProps.isDisabled ? {} : { ':active': activeStyle }),
+          ...(renderProps.isDisabled
+            ? {}
+            : {
+                '&[data-hovered]': hoveredStyle,
+                '&[data-pressed]': activeStyle,
+              }),
           ...(Icon ? { paddingLeft: 0 } : {}),
         }),
       );

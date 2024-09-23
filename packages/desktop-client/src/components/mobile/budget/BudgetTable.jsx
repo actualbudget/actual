@@ -2,11 +2,12 @@ import React, { memo, useCallback, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { AutoTextSize } from 'auto-text-size';
+import { css } from 'glamor';
 import memoizeOne from 'memoize-one';
 
 import { collapseModals, pushModal } from 'loot-core/client/actions';
 import { groupById, integerToCurrency } from 'loot-core/shared/util';
-import { rolloverBudget, reportBudget } from 'loot-core/src/client/queries';
+import { envelopeBudget, trackingBudget } from 'loot-core/src/client/queries';
 import * as monthUtils from 'loot-core/src/shared/months';
 
 import { useCategories } from '../../../hooks/useCategories';
@@ -123,8 +124,8 @@ function ToBudget({ toBudget, onPress, show3Cols }) {
 
 function Saved({ projected, onPress, show3Cols }) {
   const binding = projected
-    ? reportBudget.totalBudgetedSaved
-    : reportBudget.totalSaved;
+    ? trackingBudget.totalBudgetedSaved
+    : trackingBudget.totalSaved;
 
   const saved = useSheetValue(binding) || 0;
   const format = useFormat();
@@ -403,8 +404,8 @@ const ExpenseCategory = memo(function ExpenseCategory({
 
   const catBalance = useSheetValue(
     type === 'rollover'
-      ? rolloverBudget.catBalance(category.id)
-      : reportBudget.catBalance(category.id),
+      ? envelopeBudget.catBalance(category.id)
+      : trackingBudget.catBalance(category.id),
   );
   const budgetedtmp = useSheetValue(budgeted);
   const balancetmp = useSheetValue(balance);
@@ -419,6 +420,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
     dispatch(
       pushModal('transfer', {
         title: category.name,
+        categoryId: category.id,
         month,
         amount: catBalance,
         onSubmit: (amount, toCategoryId) => {
@@ -452,7 +454,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
       pushModal('cover', {
         title: category.name,
         month,
-        category: category.id,
+        categoryId: category.id,
         onSubmit: fromCategoryId => {
           onBudgetAction(month, 'cover-overspending', {
             to: category.id,
@@ -780,14 +782,16 @@ const ExpenseGroupHeader = memo(function ExpenseGroupHeader({
       >
         <Button
           variant="bare"
-          style={({ isPressed, isHovered }) => ({
-            flexShrink: 0,
-            color: theme.pageTextSubdued,
-            ...styles.noTapHighlight,
-            ...(isPressed || isHovered
-              ? { backgroundColor: 'transparent' }
-              : {}),
-          })}
+          className={String(
+            css({
+              flexShrink: 0,
+              color: theme.pageTextSubdued,
+              ...styles.noTapHighlight,
+              '&[data-hovered], &[data-pressed]': {
+                backgroundColor: 'transparent',
+              },
+            }),
+          )}
           onPress={() => onToggleCollapse?.(group.id)}
         >
           <SvgExpandArrow
@@ -974,14 +978,16 @@ const IncomeGroupHeader = memo(function IncomeGroupHeader({
       >
         <Button
           variant="bare"
-          style={({ isPressed, isHovered }) => ({
-            flexShrink: 0,
-            color: theme.pageTextSubdued,
-            ...styles.noTapHighlight,
-            ...(isPressed || isHovered
-              ? { backgroundColor: 'transparent' }
-              : {}),
-          })}
+          className={String(
+            css({
+              flexShrink: 0,
+              color: theme.pageTextSubdued,
+              ...styles.noTapHighlight,
+              '&[data-hovered], &[data-pressed]': {
+                backgroundColor: 'transparent',
+              },
+            }),
+          )}
           onPress={() => onToggleCollapse?.(group.id)}
         >
           <SvgExpandArrow
@@ -1279,18 +1285,18 @@ const ExpenseGroup = memo(function ExpenseGroup({
         showBudgetedCol={showBudgetedCol}
         budgeted={
           type === 'report'
-            ? reportBudget.groupBudgeted(group.id)
-            : rolloverBudget.groupBudgeted(group.id)
+            ? trackingBudget.groupBudgeted(group.id)
+            : envelopeBudget.groupBudgeted(group.id)
         }
         spent={
           type === 'report'
-            ? reportBudget.groupSumAmount(group.id)
-            : rolloverBudget.groupSumAmount(group.id)
+            ? trackingBudget.groupSumAmount(group.id)
+            : envelopeBudget.groupSumAmount(group.id)
         }
         balance={
           type === 'report'
-            ? reportBudget.groupBalance(group.id)
-            : rolloverBudget.groupBalance(group.id)
+            ? trackingBudget.groupBalance(group.id)
+            : envelopeBudget.groupBalance(group.id)
         }
         show3Cols={show3Cols}
         editMode={editMode}
@@ -1316,33 +1322,33 @@ const ExpenseGroup = memo(function ExpenseGroup({
               isHidden={!!category.hidden || group.hidden}
               goal={
                 type === 'report'
-                  ? reportBudget.catGoal(category.id)
-                  : rolloverBudget.catGoal(category.id)
+                  ? trackingBudget.catGoal(category.id)
+                  : envelopeBudget.catGoal(category.id)
               }
               longGoal={
                 type === 'report'
-                  ? reportBudget.catLongGoal(category.id)
-                  : rolloverBudget.catLongGoal(category.id)
+                  ? trackingBudget.catLongGoal(category.id)
+                  : envelopeBudget.catLongGoal(category.id)
               }
               budgeted={
                 type === 'report'
-                  ? reportBudget.catBudgeted(category.id)
-                  : rolloverBudget.catBudgeted(category.id)
+                  ? trackingBudget.catBudgeted(category.id)
+                  : envelopeBudget.catBudgeted(category.id)
               }
               spent={
                 type === 'report'
-                  ? reportBudget.catSumAmount(category.id)
-                  : rolloverBudget.catSumAmount(category.id)
+                  ? trackingBudget.catSumAmount(category.id)
+                  : envelopeBudget.catSumAmount(category.id)
               }
               balance={
                 type === 'report'
-                  ? reportBudget.catBalance(category.id)
-                  : rolloverBudget.catBalance(category.id)
+                  ? trackingBudget.catBalance(category.id)
+                  : envelopeBudget.catBalance(category.id)
               }
               carryover={
                 type === 'report'
-                  ? reportBudget.catCarryover(category.id)
-                  : rolloverBudget.catCarryover(category.id)
+                  ? trackingBudget.catCarryover(category.id)
+                  : envelopeBudget.catCarryover(category.id)
               }
               style={{
                 backgroundColor: theme.tableBackground,
@@ -1397,12 +1403,12 @@ function IncomeGroup({
         <IncomeGroupHeader
           group={group}
           budgeted={
-            type === 'report' ? reportBudget.groupBudgeted(group.id) : null
+            type === 'report' ? trackingBudget.groupBudgeted(group.id) : null
           }
           balance={
             type === 'report'
-              ? reportBudget.groupSumAmount(group.id)
-              : rolloverBudget.groupSumAmount(group.id)
+              ? trackingBudget.groupSumAmount(group.id)
+              : envelopeBudget.groupSumAmount(group.id)
           }
           onAddCategory={onAddCategory}
           editMode={editMode}
@@ -1426,13 +1432,13 @@ function IncomeGroup({
                 type={type}
                 budgeted={
                   type === 'report'
-                    ? reportBudget.catBudgeted(category.id)
+                    ? trackingBudget.catBudgeted(category.id)
                     : null
                 }
                 balance={
                   type === 'report'
-                    ? reportBudget.catSumAmount(category.id)
-                    : rolloverBudget.catSumAmount(category.id)
+                    ? trackingBudget.catSumAmount(category.id)
+                    : envelopeBudget.catSumAmount(category.id)
                 }
                 style={{
                   backgroundColor: theme.tableBackground,
@@ -1600,11 +1606,13 @@ export function BudgetTable({
           leftContent={
             <Button
               variant="bare"
-              style={({ isPressed, isHovered }) => ({
-                color: theme.mobileHeaderText,
-                margin: 10,
-                ...(isPressed || isHovered ? noBackgroundColorStyle : {}),
-              })}
+              className={String(
+                css({
+                  color: theme.mobileHeaderText,
+                  margin: 10,
+                  '&[data-hovered], &[data-pressed]': noBackgroundColorStyle,
+                }),
+              )}
               onPress={onOpenBudgetPageMenu}
             >
               <SvgLogo width="20" height="20" />
@@ -1714,7 +1722,7 @@ function BudgetTableHeader({
           />
         ) : (
           <ToBudget
-            toBudget={rolloverBudget.toBudget}
+            toBudget={envelopeBudget.toBudget}
             onPress={onShowBudgetSummary}
             show3Cols={show3Cols}
           />
@@ -1731,8 +1739,8 @@ function BudgetTableHeader({
           <CellValue
             binding={
               type === 'report'
-                ? reportBudget.totalBudgetedExpense
-                : rolloverBudget.totalBudgeted
+                ? trackingBudget.totalBudgetedExpense
+                : envelopeBudget.totalBudgeted
             }
             type="financial"
           >
@@ -1790,8 +1798,8 @@ function BudgetTableHeader({
           <CellValue
             binding={
               type === 'report'
-                ? reportBudget.totalSpent
-                : rolloverBudget.totalSpent
+                ? trackingBudget.totalSpent
+                : envelopeBudget.totalSpent
             }
             type="financial"
           >
@@ -1848,8 +1856,8 @@ function BudgetTableHeader({
         <CellValue
           binding={
             type === 'report'
-              ? reportBudget.totalLeftover
-              : rolloverBudget.totalBalance
+              ? trackingBudget.totalLeftover
+              : envelopeBudget.totalBalance
           }
           type="financial"
         >
@@ -1913,18 +1921,18 @@ function MonthSelector({
             onPrevMonth();
           }
         }}
-        style={({ isHovered }) => ({
-          ...styles.noTapHighlight,
-          ...arrowButtonStyle,
-          opacity: prevEnabled ? 1 : 0.6,
-          color: theme.mobileHeaderText,
-          ...(isHovered
-            ? {
-                color: theme.mobileHeaderText,
-                background: theme.mobileHeaderTextHover,
-              }
-            : {}),
-        })}
+        className={String(
+          css({
+            ...styles.noTapHighlight,
+            ...arrowButtonStyle,
+            opacity: prevEnabled ? 1 : 0.6,
+            color: theme.mobileHeaderText,
+            '&[data-hovered]': {
+              color: theme.mobileHeaderText,
+              background: theme.mobileHeaderTextHover,
+            },
+          }),
+        )}
       >
         <SvgArrowThinLeft width="15" height="15" style={{ margin: -5 }} />
       </Button>
@@ -1952,18 +1960,18 @@ function MonthSelector({
             onNextMonth();
           }
         }}
-        style={({ isHovered }) => ({
-          ...styles.noTapHighlight,
-          ...arrowButtonStyle,
-          opacity: nextEnabled ? 1 : 0.6,
-          color: theme.mobileHeaderText,
-          ...(isHovered
-            ? {
-                color: theme.mobileHeaderText,
-                background: theme.mobileHeaderTextHover,
-              }
-            : {}),
-        })}
+        className={String(
+          css({
+            ...styles.noTapHighlight,
+            ...arrowButtonStyle,
+            opacity: nextEnabled ? 1 : 0.6,
+            color: theme.mobileHeaderText,
+            '&[data-hovered]': {
+              color: theme.mobileHeaderText,
+              background: theme.mobileHeaderTextHover,
+            },
+          }),
+        )}
       >
         <SvgArrowThinRight width="15" height="15" style={{ margin: -5 }} />
       </Button>
