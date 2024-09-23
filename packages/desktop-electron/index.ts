@@ -32,9 +32,9 @@ Module.globalPaths.push(__dirname + '/..');
 
 // This allows relative URLs to be resolved to app:// which makes
 // local assets load correctly
-protocol.registerSchemesAsPrivileged([
-  { scheme: 'app', privileges: { standard: true } },
-]);
+// protocol.registerSchemesAsPrivileged([
+//   { scheme: 'app', privileges: { standard: true } },
+// ]);
 
 if (!isDev || !process.env.ACTUAL_DOCUMENT_DIR) {
   process.env.ACTUAL_DOCUMENT_DIR = app.getPath('documents');
@@ -221,7 +221,7 @@ function updateMenu(budgetId?: string) {
   }
 }
 
-app.setAppUserModelId('com.actualbudget.actual');
+// app.setAppUserModelId('com.actualbudget.actual');
 
 app.commandLine.appendSwitch('in-process-gpu'); // This fixes the mas package crashing - https://github.com/electron/electron/issues/37862
 
@@ -290,70 +290,70 @@ app.on('ready', async () => {
   // createBackgroundProcess();
 });
 
-app.on('window-all-closed', () => {
-  // On macOS, closing all windows shouldn't exit the process
-  if (process.platform !== 'darwin') {
-    app.quit();
-  }
-});
+// app.on('window-all-closed', () => {
+//   // On macOS, closing all windows shouldn't exit the process
+//   if (process.platform !== 'darwin') {
+//     app.quit();
+//   }
+// });
 
-app.on('before-quit', () => {
-  if (serverProcess) {
-    serverProcess.kill();
-    serverProcess = null;
-  }
-});
+// app.on('before-quit', () => {
+//   if (serverProcess) {
+//     serverProcess.kill();
+//     serverProcess = null;
+//   }
+// });
 
-app.on('activate', () => {
-  if (clientWin === null) {
-    console.info('creating window');
-    createWindow();
-    console.info('window created');
-  }
-});
+// app.on('activate', () => {
+//   if (clientWin === null) {
+//     console.info('creating window');
+//     createWindow();
+//     console.info('window created');
+//   }
+// });
 
 export type GetBootstrapDataPayload = {
   version: string;
   isDev: boolean;
 };
 
-ipcMain.on('get-bootstrap-data', event => {
-  const payload: GetBootstrapDataPayload = {
-    version: app.getVersion(),
-    isDev,
-  };
+// ipcMain.on('get-bootstrap-data', event => {
+//   const payload: GetBootstrapDataPayload = {
+//     version: app.getVersion(),
+//     isDev,
+//   };
 
-  event.returnValue = payload;
-});
+//   event.returnValue = payload;
+// });
 
-ipcMain.handle('restart-server', () => {
-  if (serverProcess) {
-    serverProcess.kill();
-    serverProcess = null;
-  }
+// ipcMain.handle('restart-server', () => {
+//   if (serverProcess) {
+//     serverProcess.kill();
+//     serverProcess = null;
+//   }
 
-  createBackgroundProcess();
-});
+//   createBackgroundProcess();
+// });
 
-ipcMain.handle('relaunch', () => {
-  app.relaunch();
-  app.exit();
-});
+// ipcMain.handle('relaunch', () => {
+//   app.relaunch();
+//   app.exit();
+// });
 
 export type OpenFileDialogPayload = {
   properties: OpenDialogSyncOptions['properties'];
   filters?: OpenDialogSyncOptions['filters'];
 };
 
-ipcMain.handle(
-  'open-file-dialog',
-  (_event, { filters, properties }: OpenFileDialogPayload) => {
-    return dialog.showOpenDialogSync({
-      properties: properties || ['openFile'],
-      filters,
-    });
-  },
-);
+// ipcMain.handle(
+//   'open-file-dialog',
+//   (_event, { filters, properties }: OpenFileDialogPayload) => {
+//     return dialog.showOpenDialogSync({
+//       properties: properties || ['openFile'],
+//       filters,
+//     });
+//   },
+// );
 
 export type SaveFileDialogPayload = {
   title: SaveDialogOptions['title'];
@@ -361,57 +361,57 @@ export type SaveFileDialogPayload = {
   fileContents: string | NodeJS.ArrayBufferView;
 };
 
-ipcMain.handle(
-  'save-file-dialog',
-  async (
-    _event,
-    { title, defaultPath, fileContents }: SaveFileDialogPayload,
-  ) => {
-    const fileLocation = await dialog.showSaveDialog({ title, defaultPath });
+// ipcMain.handle(
+//   'save-file-dialog',
+//   async (
+//     _event,
+//     { title, defaultPath, fileContents }: SaveFileDialogPayload,
+//   ) => {
+//     const fileLocation = await dialog.showSaveDialog({ title, defaultPath });
 
-    return new Promise<void>((resolve, reject) => {
-      if (fileLocation) {
-        fs.writeFile(fileLocation.filePath, fileContents, error => {
-          return reject(error);
-        });
-      }
-      resolve();
-    });
-  },
-);
+//     return new Promise<void>((resolve, reject) => {
+//       if (fileLocation) {
+//         fs.writeFile(fileLocation.filePath, fileContents, error => {
+//           return reject(error);
+//         });
+//       }
+//       resolve();
+//     });
+//   },
+// );
 
-ipcMain.handle('open-external-url', (event, url) => {
-  shell.openExternal(url);
-});
+// ipcMain.handle('open-external-url', (event, url) => {
+//   shell.openExternal(url);
+// });
 
-ipcMain.on('message', (_event, msg) => {
-  if (!serverProcess) {
-    return;
-  }
+// ipcMain.on('message', (_event, msg) => {
+//   if (!serverProcess) {
+//     return;
+//   }
 
-  serverProcess.postMessage(msg.args);
-});
+//   serverProcess.postMessage(msg.args);
+// });
 
-ipcMain.on('screenshot', () => {
-  if (isDev) {
-    const width = 1100;
+// ipcMain.on('screenshot', () => {
+//   if (isDev) {
+//     const width = 1100;
 
-    // This is for the main screenshot inside the frame
-    if (clientWin) {
-      clientWin.setSize(width, Math.floor(width * (427 / 623)));
-    }
-  }
-});
+//     // This is for the main screenshot inside the frame
+//     if (clientWin) {
+//       clientWin.setSize(width, Math.floor(width * (427 / 623)));
+//     }
+//   }
+// });
 
-ipcMain.on('update-menu', (_event, budgetId?: string) => {
-  updateMenu(budgetId);
-});
+// ipcMain.on('update-menu', (_event, budgetId?: string) => {
+//   updateMenu(budgetId);
+// });
 
-ipcMain.on('set-theme', (_event, theme: string) => {
-  const obj = { theme };
-  if (clientWin) {
-    clientWin.webContents.executeJavaScript(
-      `window.__actionsForMenu && window.__actionsForMenu.saveGlobalPrefs(${JSON.stringify(obj)})`,
-    );
-  }
-});
+// ipcMain.on('set-theme', (_event, theme: string) => {
+//   const obj = { theme };
+//   if (clientWin) {
+//     clientWin.webContents.executeJavaScript(
+//       `window.__actionsForMenu && window.__actionsForMenu.saveGlobalPrefs(${JSON.stringify(obj)})`,
+//     );
+//   }
+// });
