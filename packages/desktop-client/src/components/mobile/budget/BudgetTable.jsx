@@ -782,16 +782,18 @@ const ExpenseGroupHeader = memo(function ExpenseGroupHeader({
       >
         <Button
           variant="bare"
-          className={String(
-            css({
-              flexShrink: 0,
-              color: theme.pageTextSubdued,
-              ...styles.noTapHighlight,
-              '&[data-hovered], &[data-pressed]': {
-                backgroundColor: 'transparent',
-              },
-            }),
-          )}
+          className={() =>
+            String(
+              css({
+                flexShrink: 0,
+                color: theme.pageTextSubdued,
+                ...styles.noTapHighlight,
+                '&[data-hovered], &[data-pressed]': {
+                  backgroundColor: 'transparent',
+                },
+              }),
+            )
+          }
           onPress={() => onToggleCollapse?.(group.id)}
         >
           <SvgExpandArrow
@@ -978,16 +980,18 @@ const IncomeGroupHeader = memo(function IncomeGroupHeader({
       >
         <Button
           variant="bare"
-          className={String(
-            css({
-              flexShrink: 0,
-              color: theme.pageTextSubdued,
-              ...styles.noTapHighlight,
-              '&[data-hovered], &[data-pressed]': {
-                backgroundColor: 'transparent',
-              },
-            }),
-          )}
+          className={() =>
+            String(
+              css({
+                flexShrink: 0,
+                color: theme.pageTextSubdued,
+                ...styles.noTapHighlight,
+                '&[data-hovered], &[data-pressed]': {
+                  backgroundColor: 'transparent',
+                },
+              }),
+            )
+          }
           onPress={() => onToggleCollapse?.(group.id)}
         >
           <SvgExpandArrow
@@ -1606,13 +1610,15 @@ export function BudgetTable({
           leftContent={
             <Button
               variant="bare"
-              className={String(
-                css({
-                  color: theme.mobileHeaderText,
-                  margin: 10,
-                  '&[data-hovered], &[data-pressed]': noBackgroundColorStyle,
-                }),
-              )}
+              className={() =>
+                String(
+                  css({
+                    color: `${theme.mobileHeaderText} !important`,
+                    margin: 10,
+                    '&[data-hovered], &[data-pressed]': noBackgroundColorStyle,
+                  }),
+                )
+              }
               onPress={onOpenBudgetPageMenu}
             >
               <SvgLogo width="20" height="20" />
@@ -1921,18 +1927,20 @@ function MonthSelector({
             onPrevMonth();
           }
         }}
-        className={String(
-          css({
-            ...styles.noTapHighlight,
-            ...arrowButtonStyle,
-            opacity: prevEnabled ? 1 : 0.6,
-            color: theme.mobileHeaderText,
-            '&[data-hovered]': {
+        className={() =>
+          String(
+            css({
+              ...styles.noTapHighlight,
+              ...arrowButtonStyle,
+              opacity: prevEnabled ? 1 : 0.6,
               color: theme.mobileHeaderText,
-              background: theme.mobileHeaderTextHover,
-            },
-          }),
-        )}
+              '&[data-hovered]': {
+                color: theme.mobileHeaderText,
+                background: theme.mobileHeaderTextHover,
+              },
+            }),
+          )
+        }
       >
         <SvgArrowThinLeft width="15" height="15" style={{ margin: -5 }} />
       </Button>
@@ -1960,18 +1968,20 @@ function MonthSelector({
             onNextMonth();
           }
         }}
-        className={String(
-          css({
-            ...styles.noTapHighlight,
-            ...arrowButtonStyle,
-            opacity: nextEnabled ? 1 : 0.6,
-            color: theme.mobileHeaderText,
-            '&[data-hovered]': {
+        className={() =>
+          String(
+            css({
+              ...styles.noTapHighlight,
+              ...arrowButtonStyle,
+              opacity: nextEnabled ? 1 : 0.6,
               color: theme.mobileHeaderText,
-              background: theme.mobileHeaderTextHover,
-            },
-          }),
-        )}
+              '&[data-hovered]': {
+                color: theme.mobileHeaderText,
+                background: theme.mobileHeaderTextHover,
+              },
+            }),
+          )
+        }
       >
         <SvgArrowThinRight width="15" height="15" style={{ margin: -5 }} />
       </Button>
