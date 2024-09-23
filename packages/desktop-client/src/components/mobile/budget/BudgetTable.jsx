@@ -1915,35 +1915,18 @@ function MonthSelector({
             onPrevMonth();
           }
         }}
-        className={String(
-          css({
-            ...arrowButtonStyle,
-            opacity: prevEnabled ? 1 : 0.6,
-            color: theme.mobileHeaderText,
-            '&[data-pressed]': {
-              color: theme.mobileHeaderText,
-              backgroundColor: theme.mobileHeaderTextHover,
-            },
-          }),
-        )}
+        style={{ ...arrowButtonStyle, opacity: prevEnabled ? 1 : 0.6 }}
       >
         <SvgArrowThinLeft width="15" height="15" style={{ margin: -5 }} />
       </Button>
       <Button
         variant="bare"
-        className={String(
-          css({
-            color: theme.mobileHeaderText,
-            textAlign: 'center',
-            fontSize: 16,
-            fontWeight: 500,
-            margin: '0 5px',
-            '&[data-pressed]': {
-              color: theme.mobileHeaderText,
-              backgroundColor: theme.mobileHeaderTextHover,
-            },
-          }),
-        )}
+        style={{
+          textAlign: 'center',
+          fontSize: 16,
+          fontWeight: 500,
+          margin: '0 5px',
+        }}
         onPress={() => {
           onOpenMonthMenu?.(month);
         }}
@@ -1959,17 +1942,7 @@ function MonthSelector({
             onNextMonth();
           }
         }}
-        className={String(
-          css({
-            ...arrowButtonStyle,
-            opacity: nextEnabled ? 1 : 0.6,
-            color: theme.mobileHeaderText,
-            '&[data-pressed]': {
-              color: theme.mobileHeaderText,
-              backgroundColor: theme.mobileHeaderTextHover,
-            },
-          }),
-        )}
+        style={{ ...arrowButtonStyle, opacity: nextEnabled ? 1 : 0.6 }}
       >
         <SvgArrowThinRight width="15" height="15" style={{ margin: -5 }} />
       </Button>
