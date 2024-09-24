@@ -116,7 +116,7 @@ export const BudgetTotals = memo(function BudgetTotals({
           triggerRef={triggerRef}
           isOpen={menuOpen}
           onOpenChange={() => setMenuOpen(false)}
-          style={{ width: 215 }}
+          style={{ width: 230 }}
         >
           <Menu
             onMenuSelect={type => {
