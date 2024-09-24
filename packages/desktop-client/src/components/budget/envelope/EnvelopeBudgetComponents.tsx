@@ -7,6 +7,8 @@ import React, {
   useCallback,
 } from 'react';
 
+import { css } from 'glamor';
+
 import { envelopeBudget } from 'loot-core/src/client/queries';
 import { evalArithmetic } from 'loot-core/src/shared/arithmetic';
 import * as monthUtils from 'loot-core/src/shared/months';
@@ -465,11 +467,13 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
               {props => (
                 <CellValueText
                   {...props}
-                  style={{
-                    cursor: 'pointer',
-                    ':hover': { textDecoration: 'underline' },
-                    ...makeAmountGrey(props.value),
-                  }}
+                  className={String(
+                    css({
+                      cursor: 'pointer',
+                      ':hover': { textDecoration: 'underline' },
+                      ...makeAmountGrey(props.value),
+                    }),
+                  )}
                 />
               )}
             </EnvelopeCellValue>
@@ -595,10 +599,12 @@ export function IncomeCategoryMonth({
             {props => (
               <CellValueText
                 {...props}
-                style={{
-                  cursor: 'pointer',
-                  ':hover': { textDecoration: 'underline' },
-                }}
+                className={String(
+                  css({
+                    cursor: 'pointer',
+                    ':hover': { textDecoration: 'underline' },
+                  }),
+                )}
               />
             )}
           </EnvelopeCellValue>
