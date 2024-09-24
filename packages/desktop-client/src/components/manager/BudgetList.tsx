@@ -12,7 +12,10 @@ import {
   loadBudget,
   pushModal,
 } from 'loot-core/client/actions';
-import { isNonProductionEnvironment } from 'loot-core/src/shared/environment';
+import {
+  isElectron,
+  isNonProductionEnvironment,
+} from 'loot-core/src/shared/environment';
 import {
   type File,
   type LocalFile,
@@ -26,6 +29,7 @@ import { AnimatedLoading } from '../../icons/AnimatedLoading';
 import {
   SvgCloudCheck,
   SvgCloudDownload,
+  SvgCog,
   SvgDotsHorizontalTriple,
   SvgFileDouble,
 } from '../../icons/v1';
@@ -330,12 +334,31 @@ function RefreshButton({
   );
 }
 
+function SettingsButton({ onOpenSettings }: { onOpenSettings: () => void }) {
+  return (
+    <View>
+      <Button
+        variant="bare"
+        aria-label="Menu"
+        onPress={() => {
+          onOpenSettings();
+        }}
+        style={{ padding: 10 }}
+      >
+        <SvgCog style={{ width: 18, height: 18 }} />
+      </Button>
+    </View>
+  );
+}
+
 function BudgetListHeader({
   quickSwitchMode,
   onRefresh,
+  onOpenSettings,
 }: {
   quickSwitchMode: boolean;
   onRefresh: () => void;
+  onOpenSettings: () => void;
 }) {
   return (
     <View
@@ -352,7 +375,17 @@ function BudgetListHeader({
       >
         <Trans>Files</Trans>
       </Text>
-      {!quickSwitchMode && <RefreshButton onRefresh={onRefresh} />}
+      {!quickSwitchMode && (
+        <View
+          style={{
+            flexDirection: 'row',
+            gap: '0.2rem',
+          }}
+        >
+          <RefreshButton onRefresh={onRefresh} />
+          {isElectron() && <SettingsButton onOpenSettings={onOpenSettings} />}
+        </View>
+      )}
     </View>
   );
 }
@@ -431,6 +464,7 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
         <BudgetListHeader
           quickSwitchMode={quickSwitchMode}
           onRefresh={refresh}
+          onOpenSettings={() => dispatch(pushModal('files-settings'))}
         />
       )}
       <BudgetFiles

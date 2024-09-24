@@ -86,6 +86,8 @@ type FinanceModals = {
 
   'import-actual': null;
 
+  'files-settings': null;
+
   'create-encryption-key': { recreate?: boolean };
   'fix-encryption-key': {
     hasExistingKey?: boolean;

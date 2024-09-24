@@ -3,7 +3,6 @@ import React, { type ReactNode, useEffect } from 'react';
 import { media } from 'glamor';
 
 import { listen } from 'loot-core/src/platform/client/fetch';
-import { isElectron } from 'loot-core/src/shared/environment';
 
 import { useActions } from '../../hooks/useActions';
 import { useFeatureFlag } from '../../hooks/useFeatureFlag';
@@ -30,7 +29,6 @@ import { ExperimentalFeatures } from './Experimental';
 import { ExportBudget } from './Export';
 import { FixSplits } from './FixSplits';
 import { FormatSettings } from './Format';
-import { GlobalSettings } from './Global';
 import { ResetCache, ResetSync } from './Reset';
 import { ThemeSettings } from './Themes';
 import { AdvancedToggle, Setting } from './UI';
@@ -173,7 +171,6 @@ export function Settings() {
           </View>
         )}
         <About />
-        {isElectron() && <GlobalSettings />}
         <ThemeSettings />
         <FormatSettings />
         <EncryptionSettings />
