@@ -257,40 +257,54 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
   );
   const carryover = catBalance - catSumAmount - catBudgeted;
   const overSpent = Math.abs(catSumAmount) > catBudgeted + carryover;
+  
+  const isCarryoverNegative = carryover < 0;
+  const absCatSumAmount = Math.abs(catSumAmount);
+  const totalBudget = catBudgeted + carryover;
+  
+  // Calculate carryoverSpent
+  const carryoverSpent = isCarryoverNegative
+  ? null
+  : absCatSumAmount < carryover
+    ? absCatSumAmount
+    : carryover;
+
+  // Calculate carryoverRemaining
+  const carryoverRemaining =
+    absCatSumAmount < carryover ? carryover + catSumAmount : null;
+
+  // Calculate spent
+  const spent = isCarryoverNegative
+  ? absCatSumAmount > catBudgeted
+    ? null
+    : absCatSumAmount < totalBudget
+      ? absCatSumAmount
+      : totalBudget
+  : absCatSumAmount < carryover
+    ? null
+    : absCatSumAmount < totalBudget
+      ? absCatSumAmount - carryover
+      : catBudgeted;
+
+  // Calculate remaining
+  const remaining = isCarryoverNegative
+  ? absCatSumAmount > catBudgeted
+    ? null
+    : !overSpent && catBudgeted + catSumAmount + carryover
+  : absCatSumAmount < carryover
+    ? catBudgeted
+    : !overSpent && catBudgeted + catSumAmount + carryover
+
   const data: barGraphBudgetCategory[] = [
     {
       name: category.name,
       budget: catBudgeted,
       carryover,
-      carryoverSpent:
-        carryover < 0
-          ? null
-          : Math.abs(catSumAmount) < carryover
-            ? Math.abs(catSumAmount)
-            : carryover,
-      carryoverRemaining:
-        Math.abs(catSumAmount) < carryover && carryover + catSumAmount,
-      carryoverNegative: carryover < 0 && carryover,
-      spent:
-        carryover < 0
-          ? Math.abs(carryover) > catBudgeted
-            ? null
-            : Math.abs(catSumAmount) < catBudgeted + carryover
-              ? Math.abs(catSumAmount)
-              : catBudgeted + carryover
-          : Math.abs(catSumAmount) < carryover
-            ? null
-            : Math.abs(catSumAmount) < catBudgeted + carryover
-              ? Math.abs(catSumAmount) - carryover
-              : catBudgeted,
-      remaining:
-        carryover < 0
-          ? Math.abs(carryover) > catBudgeted
-            ? null
-            : !overSpent && catBudgeted + catSumAmount + carryover
-          : Math.abs(catSumAmount) < carryover
-            ? catBudgeted
-            : !overSpent && catBudgeted + catSumAmount + carryover,
+      carryoverSpent,
+      carryoverRemaining,
+      carryoverNegative: isCarryoverNegative && carryover,
+      spent,
+      remaining,
       overBudget: overSpent && Math.abs(catBudgeted + carryover + catSumAmount),
     },
   ];
