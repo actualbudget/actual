@@ -1,10 +1,7 @@
 import React from 'react';
 
-import { css } from 'glamor';
-
 import { useNavigate } from '../../../hooks/useNavigate';
 import { SvgAdd } from '../../../icons/v1';
-import { theme } from '../../../style';
 import { Button } from '../../common/Button2';
 
 type AddTransactionButtonProps = {
@@ -23,17 +20,7 @@ export function AddTransactionButton({
     <Button
       variant="bare"
       aria-label="Add transaction"
-      className={String(
-        css({
-          justifyContent: 'center',
-          color: theme.mobileHeaderText,
-          margin: 10,
-          ':hover': {
-            color: theme.mobileHeaderText,
-            background: theme.mobileHeaderTextHover,
-          },
-        }),
-      )}
+      style={{ margin: 10 }}
       onPress={() => {
         navigate(to, { state: { accountId, categoryId } });
       }}
