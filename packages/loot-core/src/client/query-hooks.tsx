@@ -82,7 +82,7 @@ export function useQuery<Response = unknown>(
   makeQuery: () => Query,
   deps: DependencyList,
 ): {
-  data: Response;
+  data: null | Response;
   overrideData: (newData: Response) => void;
   isLoading: boolean;
 } {

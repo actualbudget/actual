@@ -294,7 +294,7 @@ function MonthlyPatterns({
                 value: parsePatternValue(value),
               })
             }
-            buttonStyle={{ flex: 1, marginRight: 10 }}
+            style={{ flex: 1, marginRight: 10 }}
           />
           <Select
             options={[
@@ -311,7 +311,7 @@ function MonthlyPatterns({
                 value,
               });
             }}
-            buttonStyle={{ flex: 1, marginRight: 10 }}
+            style={{ flex: 1, marginRight: 10 }}
           />
           <Button
             variant="bare"
@@ -457,7 +457,7 @@ function RecurringScheduleTooltip({
           options={FREQUENCY_OPTIONS.map(opt => [opt.id, opt.name])}
           value={config.frequency}
           onChange={value => updateField('frequency', value)}
-          buttonStyle={{ marginRight: 5 }}
+          style={{ marginRight: 5 }}
         />
         {config.frequency === 'monthly' &&
         (config.patterns == null || config.patterns.length === 0) ? (

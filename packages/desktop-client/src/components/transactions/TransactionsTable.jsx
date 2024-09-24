@@ -18,6 +18,7 @@ import {
   parseISO,
   isValid as isDateValid,
 } from 'date-fns';
+import { css } from 'glamor';
 
 import { pushModal } from 'loot-core/client/actions';
 import { useCachedSchedules } from 'loot-core/src/client/data-hooks/schedules';
@@ -2614,18 +2615,20 @@ function notesTagFormatter(notes, onNotesTagClick) {
                 <Button
                   variant="bare"
                   key={i}
-                  style={({ isHovered }) => ({
-                    display: 'inline-flex',
-                    padding: '3px 7px',
-                    borderRadius: 16,
-                    userSelect: 'none',
-                    backgroundColor: theme.noteTagBackground,
-                    color: theme.noteTagText,
-                    cursor: 'pointer',
-                    ...(isHovered
-                      ? { backgroundColor: theme.noteTagBackgroundHover }
-                      : {}),
-                  })}
+                  className={String(
+                    css({
+                      display: 'inline-flex',
+                      padding: '3px 7px',
+                      borderRadius: 16,
+                      userSelect: 'none',
+                      backgroundColor: theme.noteTagBackground,
+                      color: theme.noteTagText,
+                      cursor: 'pointer',
+                      '&[data-hovered]': {
+                        backgroundColor: theme.noteTagBackgroundHover,
+                      },
+                    }),
+                  )}
                   onPress={() => {
                     onNotesTagClick?.(validTag);
                   }}

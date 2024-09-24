@@ -4,7 +4,6 @@ import { Trans, useTranslation } from 'react-i18next';
 import type { FeatureFlag } from 'loot-core/src/types/prefs';
 
 import { useFeatureFlag } from '../../hooks/useFeatureFlag';
-import { useMetadataPref } from '../../hooks/useMetadataPref';
 import { useSyncedPref } from '../../hooks/useSyncedPref';
 import { theme } from '../../style';
 import { Link } from '../common/Link';
@@ -68,16 +67,16 @@ function FeatureToggle({
   );
 }
 
-function ReportBudgetFeature() {
+function TrackingBudgetFeature() {
   const { t } = useTranslation();
-  const [budgetType = 'rollover'] = useMetadataPref('budgetType');
+  const [budgetType = 'rollover'] = useSyncedPref('budgetType');
   const enabled = useFeatureFlag('reportBudget');
   const blockToggleOff = budgetType === 'report' && enabled;
   return (
     <FeatureToggle
       flag="reportBudget"
       disableToggle={blockToggleOff}
-      error={t('Switch to a rollover budget before turning off this feature')}
+      error={t('Switch to a envelope budget before turning off this feature')}
       feedbackLink="https://github.com/actualbudget/actual/issues/2999"
     >
       <Trans>Budget mode toggle</Trans>
@@ -100,16 +99,10 @@ export function ExperimentalFeatures() {
               <Trans>Monthly spending report</Trans>
             </FeatureToggle>
 
-            <ReportBudgetFeature />
+            <TrackingBudgetFeature />
 
             <FeatureToggle flag="goalTemplatesEnabled">
               <Trans>Goal templates</Trans>
-            </FeatureToggle>
-            <FeatureToggle
-              flag="simpleFinSync"
-              feedbackLink="https://github.com/actualbudget/actual/issues/2272"
-            >
-              <Trans>SimpleFIN sync</Trans>
             </FeatureToggle>
             <FeatureToggle
               flag="dashboards"

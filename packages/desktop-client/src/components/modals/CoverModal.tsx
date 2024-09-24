@@ -2,66 +2,48 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { pushModal } from 'loot-core/client/actions';
-import {
-  type CategoryGroupEntity,
-  type CategoryEntity,
-} from 'loot-core/src/types/models';
+import { type CategoryEntity } from 'loot-core/src/types/models';
 
 import { useCategories } from '../../hooks/useCategories';
 import { styles } from '../../style';
-import { addToBeBudgetedGroup } from '../budget/util';
+import {
+  addToBeBudgetedGroup,
+  removeCategoriesFromGroups,
+} from '../budget/util';
 import { Button } from '../common/Button2';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { View } from '../common/View';
 import { FieldLabel, TapField } from '../mobile/MobileForms';
 
-function removeSelectedCategory(
-  categoryGroups: CategoryGroupEntity[],
-  category?: CategoryEntity['id'],
-) {
-  if (!category) return categoryGroups;
-
-  return categoryGroups
-    .map(group => ({
-      ...group,
-      categories: group.categories?.filter(cat => cat.id !== category),
-    }))
-    .filter(group => group.categories?.length);
-}
-
 type CoverModalProps = {
   title: string;
+  categoryId?: CategoryEntity['id'];
   month: string;
   showToBeBudgeted?: boolean;
-  category?: CategoryEntity['id'];
-  onSubmit: (categoryId: string) => void;
+  onSubmit: (categoryId: CategoryEntity['id']) => void;
 };
 
 export function CoverModal({
   title,
+  categoryId,
   month,
   showToBeBudgeted = true,
-  category,
   onSubmit,
 }: CoverModalProps) {
   const { grouped: originalCategoryGroups } = useCategories();
   const [categoryGroups, categories] = useMemo(() => {
-    const filteredCategoryGroups = originalCategoryGroups.filter(
-      g => !g.is_income,
+    const expenseGroups = originalCategoryGroups.filter(g => !g.is_income);
+    const categoryGroups = showToBeBudgeted
+      ? addToBeBudgetedGroup(expenseGroups)
+      : expenseGroups;
+    const filteredCategoryGroups = categoryId
+      ? removeCategoriesFromGroups(categoryGroups, categoryId)
+      : categoryGroups;
+    const filteredCategoryies = filteredCategoryGroups.flatMap(
+      g => g.categories || [],
     );
-
-    const expenseGroups = showToBeBudgeted
-      ? addToBeBudgetedGroup(filteredCategoryGroups)
-      : filteredCategoryGroups;
-
-    const expenseCategories = expenseGroups.flatMap(g => g.categories || []);
-    return [expenseGroups, expenseCategories];
-  }, [originalCategoryGroups, showToBeBudgeted]);
-
-  const filteredCategoryGroups = useMemo(
-    () => removeSelectedCategory(categoryGroups, category),
-    [categoryGroups, category],
-  );
+    return [filteredCategoryGroups, filteredCategoryies];
+  }, [categoryId, originalCategoryGroups, showToBeBudgeted]);
 
   const [fromCategoryId, setFromCategoryId] = useState<string | null>(null);
   const dispatch = useDispatch();
@@ -69,14 +51,14 @@ export function CoverModal({
   const onCategoryClick = useCallback(() => {
     dispatch(
       pushModal('category-autocomplete', {
-        categoryGroups: filteredCategoryGroups,
+        categoryGroups,
         month,
         onSelect: categoryId => {
           setFromCategoryId(categoryId);
         },
       }),
     );
-  }, [filteredCategoryGroups, dispatch, month]);
+  }, [categoryGroups, dispatch, month]);
 
   const _onSubmit = (categoryId: string | null) => {
     if (categoryId) {
