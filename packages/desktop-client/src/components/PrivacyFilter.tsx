@@ -1,7 +1,5 @@
 // @ts-strict-ignore
 import React, {
-  useState,
-  useCallback,
   Children,
   type ComponentPropsWithRef,
   type ReactNode,
@@ -79,12 +77,13 @@ function PrivacyOverlay({ children, ...props }) {
         [
           {
             display: 'inline-flex',
+            flexGrow: 1,
             position: 'relative',
             ' > div:first-child': {
               opacity: 0,
             },
             ' > div:nth-child(2)': {
-              display: 'block',
+              display: 'flex',
             },
             '&:hover': {
               ' > div:first-child': {
@@ -100,22 +99,31 @@ function PrivacyOverlay({ children, ...props }) {
       )}`}
       {...restProps}
     >
-      <div>
-        <View>{children}</View>
+      <div
+        className={`${css([
+          {
+            display: 'flex',
+            flexGrow: 1,
+          },
+        ])}`}
+      >
+        {children}
       </div>
 
       <div
         aria-hidden="true"
         className={`${css({
+          flexDirection: 'column',
           fontFamily: 'Redacted Script',
           height: '100%',
           inset: 0,
+          justifyContent: 'center',
           pointerEvents: 'none',
           position: 'absolute',
           width: '100%',
         })}`}
       >
-        <View>{children}</View>
+        {children}
       </div>
     </View>
   );
