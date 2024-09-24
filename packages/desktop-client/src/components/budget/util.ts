@@ -1,4 +1,6 @@
 // @ts-strict-ignore
+import { t } from 'i18next';
+
 import { type useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
@@ -14,10 +16,7 @@ import { type DropPosition } from '../sort';
 
 import { getValidMonthBounds } from './MonthsContext';
 
-export function addToBeBudgetedGroup(
-  groups: CategoryGroupEntity[],
-  t: (key: string) => string,
-) {
+export function addToBeBudgetedGroup(groups: CategoryGroupEntity[]) {
   return [
     {
       id: 'to-be-budgeted',

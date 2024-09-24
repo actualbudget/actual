@@ -33,7 +33,7 @@ export function ChangePassword() {
     }
   }
 
-  async function onSetPassword(password, t: (key: string) => string) {
+  async function onSetPassword(password) {
     setError(null);
     const { error } = await send('subscribe-change-password', { password });
 
