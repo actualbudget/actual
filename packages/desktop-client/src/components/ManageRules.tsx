@@ -35,7 +35,11 @@ import { RulesList } from './rules/RulesList';
 import { SchedulesQuery } from './rules/SchedulesQuery';
 import { SimpleTable } from './rules/SimpleTable';
 
-function mapValue(field, value, { payees, categories, accounts }) {
+function mapValue(
+  field,
+  value,
+  { payees = [], categories = [], accounts = [] },
+) {
   if (!value) return '';
 
   let object = null;

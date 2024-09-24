@@ -256,7 +256,7 @@ export const FocusableAmountInput = memo(function FocusableAmountInput({
             css({
               ...(buttonProps && buttonProps.style),
               ...(focused && { display: 'none' }),
-              ':hover': {
+              '&[data-pressed]': {
                 backgroundColor: 'transparent',
               },
             }),
