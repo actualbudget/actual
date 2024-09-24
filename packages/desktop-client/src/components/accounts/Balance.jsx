@@ -174,21 +174,19 @@ export function Balances({
       >
         <CellValue binding={{ ...balanceQuery, value: 0 }} type="financial">
           {props => (
-            <PrivacyFilter blurIntensity={5}>
-              <CellValueText
-                {...props}
-                style={{
-                  fontSize: 22,
-                  fontWeight: 400,
-                  color:
-                    props.value < 0
-                      ? theme.errorText
-                      : props.value > 0
-                        ? theme.noticeTextLight
-                        : theme.pageTextSubdued,
-                }}
-              />
-            </PrivacyFilter>
+            <CellValueText
+              {...props}
+              style={{
+                fontSize: 22,
+                fontWeight: 400,
+                color:
+                  props.value < 0
+                    ? theme.errorText
+                    : props.value > 0
+                      ? theme.noticeTextLight
+                      : theme.pageTextSubdued,
+              }}
+            />
           )}
         </CellValue>
 
