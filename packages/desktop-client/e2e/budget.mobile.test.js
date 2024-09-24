@@ -51,41 +51,57 @@ test.describe('Mobile Budget [Envelope]', () => {
 
   test('checks that clicking the budgeted cell opens the budget menu modal', async () => {
     const budgetPage = await navigation.goToBudgetPage();
+    await expect(budgetPage.budgetTable).toBeVisible();
 
     await budgetPage.openBudgetMenu('Food');
 
+    const budgetMenuModal = page.getByTestId('envelope-budget-menu-modal');
+    await expect(budgetMenuModal).toBeVisible();
     await expect(page).toMatchThemeScreenshots();
   });
 
   test('checks that clicking spent cell redirects to the category transactions page', async () => {
     const budgetPage = await navigation.goToBudgetPage();
+    await expect(budgetPage.budgetTable).toBeVisible();
 
-    await budgetPage.openSpentPage('Food');
+    const accountPage = await budgetPage.openSpentPage('Food');
 
+    await expect(accountPage.transactionList).toBeVisible();
     await expect(page).toMatchThemeScreenshots();
   });
 
   test('checks that clicking the balance button opens the balance menu modal', async () => {
     const budgetPage = await navigation.goToBudgetPage();
+    await expect(budgetPage.budgetTable).toBeVisible();
 
     await budgetPage.openBalanceMenu('Food');
 
+    const balanceMenuModal = page.getByTestId('envelope-balance-menu-modal');
+    await expect(balanceMenuModal).toBeVisible();
     await expect(page).toMatchThemeScreenshots();
   });
 
   test('checks that clicking the month in the page header opens the month menu modal', async () => {
     const budgetPage = await navigation.goToBudgetPage();
+    await expect(budgetPage.budgetTable).toBeVisible();
 
     await budgetPage.openMonthMenu();
 
+    const monthMenuModal = page.getByTestId('envelope-budget-month-menu-modal');
+    await expect(monthMenuModal).toBeVisible();
     await expect(page).toMatchThemeScreenshots();
   });
 
   test('updates the budgeted amount', async () => {
     const budgetPage = await navigation.goToBudgetPage();
+    await expect(budgetPage.budgetTable).toBeVisible();
 
     // Set to 100.00
     await budgetPage.setBudget('Food', 10000);
+
+    const budgetedButton = await budgetPage.getBudgetedButton('Food');
+
+    await expect(budgetedButton).toHaveText('100.00');
 
     await expect(page).toMatchThemeScreenshots();
   });
@@ -95,6 +111,8 @@ test.describe('Mobile Budget [Envelope]', () => {
 
     await budgetPage.openEnvelopeBudgetSummaryMenu();
 
+    const summaryModal = page.getByTestId('envelope-budget-summary-modal');
+    await expect(summaryModal).toBeVisible();
     await expect(page).toMatchThemeScreenshots();
   });
 });
@@ -157,9 +175,12 @@ test.describe('Mobile Budget [Tracking]', () => {
     await setBudgetType('tracking');
 
     const budgetPage = await navigation.goToBudgetPage();
+    await expect(budgetPage.budgetTable).toBeVisible();
 
     await budgetPage.openBudgetMenu('Food');
 
+    const budgetMenuModal = page.getByTestId('tracking-budget-menu-modal');
+    await expect(budgetMenuModal).toBeVisible();
     await expect(page).toMatchThemeScreenshots();
   });
 
@@ -167,9 +188,11 @@ test.describe('Mobile Budget [Tracking]', () => {
     await setBudgetType('tracking');
 
     const budgetPage = await navigation.goToBudgetPage();
+    await expect(budgetPage.budgetTable).toBeVisible();
 
-    await budgetPage.openSpentPage('Food');
+    const accountPage = await budgetPage.openSpentPage('Food');
 
+    await expect(accountPage.transactionList).toBeVisible();
     await expect(page).toMatchThemeScreenshots();
   });
 
@@ -177,9 +200,12 @@ test.describe('Mobile Budget [Tracking]', () => {
     await setBudgetType('tracking');
 
     const budgetPage = await navigation.goToBudgetPage();
+    await expect(budgetPage.budgetTable).toBeVisible();
 
     await budgetPage.openBalanceMenu('Food');
 
+    const balanceMenuModal = page.getByTestId('tracking-balance-menu-modal');
+    await expect(balanceMenuModal).toBeVisible();
     await expect(page).toMatchThemeScreenshots();
   });
 
@@ -187,9 +213,12 @@ test.describe('Mobile Budget [Tracking]', () => {
     await setBudgetType('tracking');
 
     const budgetPage = await navigation.goToBudgetPage();
+    await expect(budgetPage.budgetTable).toBeVisible();
 
     await budgetPage.openMonthMenu();
 
+    const monthMenuModal = page.getByTestId('tracking-budget-month-menu-modal');
+    await expect(monthMenuModal).toBeVisible();
     await expect(page).toMatchThemeScreenshots();
   });
 
@@ -197,6 +226,7 @@ test.describe('Mobile Budget [Tracking]', () => {
     await setBudgetType('tracking');
 
     const budgetPage = await navigation.goToBudgetPage();
+    await expect(budgetPage.budgetTable).toBeVisible();
 
     // Set to 100.00
     await budgetPage.setBudget('Food', 10000);
@@ -212,9 +242,12 @@ test.describe('Mobile Budget [Tracking]', () => {
     await setBudgetType('tracking');
 
     const budgetPage = await navigation.goToBudgetPage();
+    await expect(budgetPage.budgetTable).toBeVisible();
 
     await budgetPage.openTrackingBudgetSummaryMenu();
 
+    const summaryModal = page.getByTestId('tracking-budget-summary-modal');
+    await expect(summaryModal).toBeVisible();
     await expect(page).toMatchThemeScreenshots();
   });
 });

@@ -1,3 +1,4 @@
+import { MobileAccountPage } from './mobile-account-page';
 import { MobileNavigation } from './mobile-navigation';
 
 export class MobileBudgetPage {
@@ -8,35 +9,37 @@ export class MobileBudgetPage {
       .getByTestId('budget-groups')
       .getByTestId('category-name');
 
+    this.budgetTableHeader = page.getByTestId('budget-table-header');
+    this.budgetTable = page.getByTestId('budget-table');
     this.navigation = new MobileNavigation(page);
   }
 
   async toggleVisibleColumns() {
-    // await this.page.getByTestId('toggle-budget-table-columns').click();
-    const budgetTableHeader = this.page.getByTestId('budget-table-header');
-    const budgetedHeaderButton = budgetTableHeader
-      .getByRole('button', {
-        name: 'Budgeted',
-      })
-      .locator('visible=true');
+    const budgetedHeaderButton = this.budgetTableHeader.getByRole('button', {
+      name: 'Budgeted',
+    });
 
     if ((await budgetedHeaderButton.count()) > 0) {
       await budgetedHeaderButton.click();
       return;
     }
 
-    const spentHeaderButton = this.page
-      .getByRole('button', { name: 'Spent' })
-      .locator('visible=true');
-    await spentHeaderButton.click();
+    const spentHeaderButton = this.page.getByRole('button', { name: 'Spent' });
+
+    if ((await spentHeaderButton.count()) > 0) {
+      await spentHeaderButton.click();
+      return;
+    }
+
+    throw new Error('Budgeted/Spent columns could not be located');
   }
 
   async getBudgetedButton(categoryName) {
-    let budgetedButton = this.page
-      .getByTestId(`budgeted-${categoryName}-button`)
-      .locator('visible=true');
+    let budgetedButton = this.page.getByTestId(
+      `budgeted-${categoryName}-button`,
+    );
 
-    if ((await budgetedButton.count()) === 0) {
+    if (!(await budgetedButton.isVisible())) {
       await this.toggleVisibleColumns();
       budgetedButton = await this.getBudgetedButton(categoryName);
     }
@@ -58,11 +61,9 @@ export class MobileBudgetPage {
   }
 
   async getSpentButton(categoryName) {
-    let budgetedButton = this.page
-      .getByTestId(`spent-${categoryName}-button`)
-      .locator('visible=true');
+    let budgetedButton = this.page.getByTestId(`spent-${categoryName}-button`);
 
-    if ((await budgetedButton.count()) === 0) {
+    if (!(await budgetedButton.isVisible())) {
       await this.toggleVisibleColumns();
       budgetedButton = await this.getSpentButton(categoryName);
     }
@@ -73,6 +74,8 @@ export class MobileBudgetPage {
   async openSpentPage(categoryName) {
     const spentButton = await this.getSpentButton(categoryName);
     await spentButton.click();
+
+    return new MobileAccountPage(this.page);
   }
 
   async openBalanceMenu(categoryName) {
@@ -89,8 +92,8 @@ export class MobileBudgetPage {
 
   async openEnvelopeBudgetSummaryMenu() {
     const toBudgetButton = this.page.getByRole('button', { name: 'To Budget' });
-    const toBudgetButtonExists = (await toBudgetButton.count()) > 0;
-    if (toBudgetButtonExists) {
+
+    if ((await toBudgetButton.count()) > 0) {
       await toBudgetButton.click();
       return;
     }
@@ -98,8 +101,8 @@ export class MobileBudgetPage {
     const overbudgetedButton = this.page.getByRole('button', {
       name: 'Overbudgeted',
     });
-    const overbudgetedButtonExists = (await overbudgetedButton.count()) > 0;
-    if (overbudgetedButtonExists) {
+
+    if ((await overbudgetedButton.count()) > 0) {
       await overbudgetedButton.click();
       return;
     }
@@ -107,8 +110,8 @@ export class MobileBudgetPage {
 
   async openTrackingBudgetSummaryMenu() {
     const savedButton = this.page.getByRole('button', { name: 'Saved' });
-    const savedButtonExists = (await savedButton.count()) > 0;
-    if (savedButtonExists) {
+
+    if ((await savedButton.count()) > 0) {
       await savedButton.click();
       return;
     }
@@ -116,9 +119,8 @@ export class MobileBudgetPage {
     const projectedSavingsButton = this.page.getByRole('button', {
       name: 'Projected Savings',
     });
-    const projectedSavingsButtonExists =
-      (await projectedSavingsButton.count()) > 0;
-    if (projectedSavingsButtonExists) {
+
+    if ((await projectedSavingsButton.count()) > 0) {
       await projectedSavingsButton.click();
       return;
     }
@@ -126,8 +128,8 @@ export class MobileBudgetPage {
     const overspentButton = this.page.getByRole('button', {
       name: 'Overspent',
     });
-    const overspentButtonExists = (await overspentButton.count()) > 0;
-    if (overspentButtonExists) {
+
+    if ((await overspentButton.count()) > 0) {
       await overspentButton.click();
       return;
     }

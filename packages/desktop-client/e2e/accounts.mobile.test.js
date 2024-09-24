@@ -40,13 +40,13 @@ test.describe('Mobile Accounts', () => {
     const accountPage = await accountsPage.openNthAccount(0);
 
     await expect(accountPage.heading).toHaveText('Bank of America');
-    expect(await accountPage.getBalance()).toBeGreaterThan(0);
-
-    await expect(accountPage.noTransactionsFoundError).not.toBeVisible();
+    await expect(accountPage.transactionList).toBeVisible();
+    await expect(await accountPage.getBalance()).toBeGreaterThan(0);
+    await expect(accountPage.noTransactionsMessage).not.toBeVisible();
     await expect(page).toMatchThemeScreenshots();
 
     await accountPage.searchByText('nothing should be found');
-    await expect(accountPage.noTransactionsFoundError).toBeVisible();
+    await expect(accountPage.noTransactionsMessage).toBeVisible();
     await expect(accountPage.transactions).toHaveCount(0);
     await expect(page).toMatchThemeScreenshots();
 
