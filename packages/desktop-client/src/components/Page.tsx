@@ -54,11 +54,16 @@ export function MobilePageHeader({
     <View
       style={{
         alignItems: 'center',
-        backgroundColor: theme.mobileHeaderBackground,
-        color: theme.mobileHeaderText,
         flexDirection: 'row',
         flexShrink: 0,
         height: HEADER_HEIGHT,
+        backgroundColor: theme.mobileHeaderBackground,
+        '& *': {
+          color: theme.mobileHeaderText,
+        },
+        '& button[data-pressed]': {
+          backgroundColor: theme.mobileHeaderTextHover,
+        },
         ...style,
       }}
     >
