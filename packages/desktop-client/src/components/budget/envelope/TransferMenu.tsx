@@ -13,7 +13,6 @@ import { Input } from '../../common/Input';
 import { View } from '../../common/View';
 import { addToBeBudgetedGroup, removeCategoriesFromGroups } from '../util';
 
-
 type TransferMenuProps = {
   categoryId?: CategoryEntity['id'];
   initialAmount?: number;
