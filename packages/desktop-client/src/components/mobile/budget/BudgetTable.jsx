@@ -225,8 +225,9 @@ function BudgetCell({
   const format = useFormat();
   const { showUndoNotification } = useUndo();
   const [budgetType = 'rollover'] = useSyncedPref('budgetType');
+  const modalBudgetType = budgetType === 'rollover' ? 'envelope' : 'tracking';
 
-  const categoryBudgetMenuModal = `${budgetType}-budget-menu`;
+  const categoryBudgetMenuModal = `${modalBudgetType}-budget-menu`;
   const categoryNotes = useNotes(category.id);
 
   const onOpenCategoryBudgetMenu = () => {
@@ -386,6 +387,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
   const goalValue = isGoalTemplatesEnabled ? goalTemp : null;
 
   const [budgetType = 'rollover'] = useSyncedPref('budgetType');
+  const modalBudgetType = budgetType === 'rollover' ? 'envelope' : 'tracking';
   const dispatch = useDispatch();
   const { showUndoNotification } = useUndo();
   const { list: categories } = useCategories();
@@ -397,9 +399,9 @@ const ExpenseCategory = memo(function ExpenseCategory({
         category: category.id,
         flag: carryover,
       });
-      dispatch(collapseModals(`${budgetType}-balance-menu`));
+      dispatch(collapseModals(`${modalBudgetType}-balance-menu`));
     },
-    [budgetType, category.id, dispatch, month, onBudgetAction],
+    [modalBudgetType, category.id, dispatch, month, onBudgetAction],
   );
 
   const catBalance = useSheetValue(
@@ -429,7 +431,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
             from: category.id,
             to: toCategoryId,
           });
-          dispatch(collapseModals(`${budgetType}-balance-menu`));
+          dispatch(collapseModals(`${modalBudgetType}-balance-menu`));
           showUndoNotification({
             message: `Transferred ${integerToCurrency(amount)} from ${category.name} to ${categoriesById[toCategoryId].name}.`,
           });
@@ -438,7 +440,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
       }),
     );
   }, [
-    budgetType,
+    modalBudgetType,
     catBalance,
     categoriesById,
     category.id,
@@ -460,7 +462,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
             to: category.id,
             from: fromCategoryId,
           });
-          dispatch(collapseModals(`${budgetType}-balance-menu`));
+          dispatch(collapseModals(`${modalBudgetType}-balance-menu`));
           showUndoNotification({
             message: `Covered ${category.name} overspending from ${categoriesById[fromCategoryId].name}.`,
           });
@@ -468,7 +470,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
       }),
     );
   }, [
-    budgetType,
+    modalBudgetType,
     categoriesById,
     category.id,
     category.name,
@@ -480,7 +482,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
 
   const onOpenBalanceMenu = useCallback(() => {
     dispatch(
-      pushModal(`${budgetType}-balance-menu`, {
+      pushModal(`${modalBudgetType}-balance-menu`, {
         categoryId: category.id,
         month,
         onCarryover,
@@ -488,6 +490,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
       }),
     );
   }, [
+    modalBudgetType,
     budgetType,
     category.id,
     dispatch,

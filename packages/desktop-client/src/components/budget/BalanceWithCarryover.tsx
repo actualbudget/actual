@@ -6,6 +6,8 @@ import React, {
 } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { css } from 'glamor';
+
 import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { SvgArrowThinRight } from '../../icons/v1';
 import { type CSSProperties, theme, styles } from '../../style';
@@ -177,16 +179,18 @@ export function BalanceWithCarryover({
                 type={type}
                 name={name}
                 value={balanceValue}
-                style={{
-                  ...getBalanceStyle(balanceValue),
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  textAlign: 'right',
-                  ...(!disabled && {
-                    cursor: 'pointer',
+                className={String(
+                  css({
+                    ...getBalanceStyle(balanceValue),
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    textAlign: 'right',
+                    ...(!disabled && {
+                      cursor: 'pointer',
+                    }),
+                    ':hover': { textDecoration: 'underline' },
                   }),
-                  ':hover': { textDecoration: 'underline' },
-                }}
+                )}
               />
             </Tooltip>
           )}
