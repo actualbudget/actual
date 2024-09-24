@@ -2,9 +2,7 @@ import React, {
   forwardRef,
   useMemo,
   type ComponentPropsWithoutRef,
-  type ComponentType,
   type ReactNode,
-  type SVGProps,
 } from 'react';
 import {
   type ButtonRenderProps as ReactAriaButtonRenderProps,
@@ -135,7 +133,6 @@ const _getActiveStyles = (
 type ButtonProps = ComponentPropsWithoutRef<typeof ReactAriaButton> & {
   variant?: ButtonVariant;
   bounce?: boolean;
-  Icon?: ComponentType<SVGProps<SVGSVGElement>>;
   children?: ReactNode;
 };
 
@@ -143,13 +140,7 @@ type ButtonVariant = 'normal' | 'primary' | 'bare' | 'menu' | 'menuSelected';
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   (props, ref) => {
-    const {
-      children,
-      variant = 'normal',
-      bounce = true,
-      Icon,
-      ...restProps
-    } = props;
+    const { children, variant = 'normal', bounce = true, ...restProps } = props;
 
     const variantWithDisabled: ButtonVariant | `${ButtonVariant}Disabled` =
       props.isDisabled ? `${variant}Disabled` : variant;
@@ -174,10 +165,9 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
             ...styles.smallText,
             '&[data-hovered]': _getHoveredStyles(variant),
             '&[data-pressed]': _getActiveStyles(variant, bounce),
-            ...(Icon ? { paddingLeft: 0 } : {}),
           }),
         ),
-      [Icon, bounce, variant, variantWithDisabled],
+      [bounce, variant, variantWithDisabled],
     );
 
     const className = restProps.className;
