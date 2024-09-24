@@ -39,12 +39,20 @@ export class MobileBudgetPage {
       `budgeted-${categoryName}-button`,
     );
 
-    if (!(await budgetedButton.isVisible())) {
-      await this.toggleVisibleColumns();
-      budgetedButton = await this.getBudgetedButton(categoryName);
+    if ((await budgetedButton.count()) > 0) {
+      return budgetedButton;
     }
 
-    return budgetedButton;
+    await this.toggleVisibleColumns();
+    budgetedButton = await this.getBudgetedButton(categoryName);
+
+    if ((await budgetedButton.count()) > 0) {
+      return budgetedButton;
+    }
+
+    throw new Error(
+      `Budget button for category ${categoryName} could not be located`,
+    );
   }
 
   async openBudgetMenu(categoryName) {
@@ -61,14 +69,22 @@ export class MobileBudgetPage {
   }
 
   async getSpentButton(categoryName) {
-    let budgetedButton = this.page.getByTestId(`spent-${categoryName}-button`);
+    let spentButton = this.page.getByTestId(`spent-${categoryName}-button`);
 
-    if (!(await budgetedButton.isVisible())) {
-      await this.toggleVisibleColumns();
-      budgetedButton = await this.getSpentButton(categoryName);
+    if ((await spentButton.count()) > 0) {
+      return spentButton;
     }
 
-    return budgetedButton;
+    await this.toggleVisibleColumns();
+    spentButton = await this.getSpentButton(categoryName);
+
+    if ((await spentButton.count()) > 0) {
+      return spentButton;
+    }
+
+    throw new Error(
+      `Spent button for category ${categoryName} could not be located`,
+    );
   }
 
   async openSpentPage(categoryName) {
