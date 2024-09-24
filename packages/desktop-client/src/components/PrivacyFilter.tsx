@@ -71,10 +71,6 @@ export function PrivacyFilter({
 }
 
 function PrivacyOverlay({ children, ...props }) {
-  const [hovered, setHovered] = useState(false);
-  const onHover = useCallback(() => setHovered(true), [setHovered]);
-  const onHoverEnd = useCallback(() => setHovered(false), [setHovered]);
-
   const { style, ...restProps } = props;
 
   return (
@@ -85,17 +81,23 @@ function PrivacyOverlay({ children, ...props }) {
             display: 'inline-flex',
             position: 'relative',
             ' > div:first-child': {
-              opacity: hovered ? 1 : 0,
+              opacity: 0,
             },
             ' > div:nth-child(2)': {
-              display: hovered ? 'none' : 'block',
+              display: 'block',
+            },
+            '&:hover': {
+              ' > div:first-child': {
+                opacity: 1,
+              },
+              ' > div:nth-child(2)': {
+                display: 'none',
+              },
             },
           },
         ],
         style,
       )}`}
-      onPointerEnter={onHover}
-      onPointerLeave={onHoverEnd}
       {...restProps}
     >
       <div>
