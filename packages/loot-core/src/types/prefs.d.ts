@@ -1,5 +1,3 @@
-import { spendingReportModeType } from './models/reports';
-
 export type FeatureFlag =
   | 'dashboards'
   | 'reportBudget'
@@ -65,10 +63,6 @@ export type LocalPrefs = Partial<{
   reportsViewLegend: boolean;
   reportsViewSummary: boolean;
   reportsViewLabel: boolean;
-  spendingReportFilter: string;
-  spendingReportMode: spendingReportModeType;
-  spendingReportCompare: string;
-  spendingReportCompareTo: string;
   sidebarWidth: number;
   'mobile.showSpentColumn': boolean;
 }>;
