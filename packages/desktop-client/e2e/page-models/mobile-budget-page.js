@@ -46,7 +46,10 @@ export class MobileBudgetPage {
     await this.toggleVisibleColumns();
     budgetedButton = await this.getBudgetedButton(categoryName);
 
-    if ((await budgetedButton.count()) > 0) {
+    if (
+      (await budgetedButton.count()) > 0 &&
+      (await budgetedButton.isVisible())
+    ) {
       return budgetedButton;
     }
 
@@ -71,7 +74,7 @@ export class MobileBudgetPage {
   async getSpentButton(categoryName) {
     let spentButton = this.page.getByTestId(`spent-${categoryName}-button`);
 
-    if ((await spentButton.count()) > 0) {
+    if ((await spentButton.count()) > 0 && (await spentButton.isVisible())) {
       return spentButton;
     }
 
