@@ -226,7 +226,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
   const handlePointerEnter = useCallback(() => {
     const timeout = setTimeout(() => {
       setIsHover(true);
-    });
+    }, 0);
 
     hoverTimeoutRef.current = timeout;
   }, []);

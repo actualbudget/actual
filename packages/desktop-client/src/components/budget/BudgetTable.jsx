@@ -37,7 +37,7 @@ export function BudgetTable(props) {
   const { grouped: categoryGroups } = useCategories();
   const [collapsedGroupIds = [], setCollapsedGroupIdsPref] =
     useLocalPref('budget.collapsed');
-  const [showHiddenCategories, setShowHiddenCategories] = useLocalPref(
+  const [showHiddenCategories = false, setShowHiddenCategories] = useLocalPref(
     'budget.showHiddenCategories',
   );
   const [editing, setEditing] = useState(null);
