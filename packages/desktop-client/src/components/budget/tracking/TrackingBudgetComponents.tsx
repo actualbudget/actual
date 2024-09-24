@@ -240,7 +240,7 @@ export const CategoryMonth = memo(function CategoryMonth({
   const handlePointerEnter = useCallback(() => {
     const timeout = setTimeout(() => {
       setIsHover(true);
-    }, 0);
+    }, 1);
 
     hoverTimeoutRef.current = timeout;
   }, []);
