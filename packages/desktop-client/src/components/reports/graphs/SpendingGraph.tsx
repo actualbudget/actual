@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { type ComponentProps } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { css } from 'glamor';
@@ -32,22 +32,19 @@ type PayloadItem = {
     totalDebts: number | string;
     totalTotals: number | string;
     day: string;
-    months: Record<
-      string,
-      {
-        date: string;
-        cumulative: number;
-      }
-    >;
+    months: {
+      date: string;
+      cumulative: number | string;
+    };
   };
 };
 
 type CustomTooltipProps = {
   active?: boolean;
   payload?: PayloadItem[];
-  balanceTypeOp: 'cumulative';
-  selection: string | 'budget' | 'average';
-  compare: string;
+  balanceTypeOp?: string;
+  selection?: string;
+  compare?: string;
 };
 
 const CustomTooltip = ({
@@ -62,7 +59,7 @@ const CustomTooltip = ({
   if (active && payload && payload.length) {
     const comparison = ['average', 'budget'].includes(selection)
       ? payload[0].payload[selection] * -1
-      : payload[0].payload.months[selection]?.cumulative * -1;
+      : payload[0].payload.months[selection].cumulative * -1;
     return (
       <div
         className={`${css({
@@ -85,11 +82,11 @@ const CustomTooltip = ({
             </strong>
           </div>
           <div style={{ lineHeight: 1.5 }}>
-            {payload[0].payload.months[compare]?.cumulative ? (
+            {payload[0].payload.months[compare].cumulative ? (
               <AlignedText
                 left={t('Compare:')}
                 right={amountToCurrency(
-                  payload[0].payload.months[compare]?.cumulative * -1,
+                  payload[0].payload.months[compare].cumulative * -1,
                 )}
               />
             ) : null}
@@ -105,11 +102,11 @@ const CustomTooltip = ({
                 right={amountToCurrency(comparison)}
               />
             )}
-            {payload[0].payload.months[compare]?.cumulative ? (
+            {payload[0].payload.months[compare].cumulative ? (
               <AlignedText
                 left={t('Difference:')}
                 right={amountToCurrency(
-                  payload[0].payload.months[compare]?.cumulative * -1 -
+                  payload[0].payload.months[compare].cumulative * -1 -
                     comparison,
                 )}
               />
@@ -125,7 +122,7 @@ type SpendingGraphProps = {
   style?: CSSProperties;
   data: SpendingEntity;
   compact?: boolean;
-  mode: 'single-month' | 'budget' | 'average';
+  mode: string;
   compare: string;
   compareTo: string;
 };
@@ -141,30 +138,27 @@ export function SpendingGraph({
   const privacyMode = usePrivacyMode();
   const balanceTypeOp = 'cumulative';
 
-  const selection = mode === 'single-month' ? compareTo : mode;
+  const selection = mode === 'singleMonth' ? compareTo : mode;
 
   const thisMonthMax = data.intervalData.reduce((a, b) =>
-    a.months[compare]?.[balanceTypeOp] < b.months[compare]?.[balanceTypeOp]
-      ? a
-      : b,
-  ).months[compare]?.[balanceTypeOp];
+    a.months[compare][balanceTypeOp] < b.months[compare][balanceTypeOp] ? a : b,
+  ).months[compare][balanceTypeOp];
   const selectionMax = ['average', 'budget'].includes(selection)
     ? data.intervalData[27][selection]
     : data.intervalData.reduce((a, b) =>
-        a.months[selection]?.[balanceTypeOp] <
-        b.months[selection]?.[balanceTypeOp]
+        a.months[selection][balanceTypeOp] < b.months[selection][balanceTypeOp]
           ? a
           : b,
-      ).months[selection]?.[balanceTypeOp];
+      ).months[selection][balanceTypeOp];
   const maxYAxis = selectionMax > thisMonthMax;
   const dataMax = Math.max(
-    ...data.intervalData.map(i => i.months[compare]?.cumulative),
+    ...data.intervalData.map(i => i.months[compare].cumulative),
   );
   const dataMin = Math.min(
-    ...data.intervalData.map(i => i.months[compare]?.cumulative),
+    ...data.intervalData.map(i => i.months[compare].cumulative),
   );
 
-  const tickFormatter: ComponentProps<typeof YAxis>['tickFormatter'] = tick => {
+  const tickFormatter = tick => {
     if (!privacyMode) return `${amountToCurrencyNoDecimal(tick)}`; // Formats the tick values as strings with commas
     return '...';
   };
@@ -185,7 +179,7 @@ export function SpendingGraph({
       return obj[month] && -1 * obj[month];
     } else {
       return (
-        obj.months[month]?.[balanceTypeOp] &&
+        obj.months[month][balanceTypeOp] &&
         -1 * obj.months[month][balanceTypeOp]
       );
     }

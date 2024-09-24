@@ -1,7 +1,8 @@
 // @ts-strict-ignore
 import * as monthUtils from '../../shared/months';
-import { integerToCurrency, safeNumber } from '../../shared/util';
+import { safeNumber } from '../../shared/util';
 import * as db from '../db';
+import * as prefs from '../prefs';
 import * as sheet from '../sheet';
 import { batchMessages } from '../sync';
 
@@ -27,14 +28,12 @@ function calcBufferedAmount(
 }
 
 function getBudgetTable(): string {
-  return isReflectBudget() ? 'reflect_budgets' : 'zero_budgets';
+  const { budgetType } = prefs.getPrefs() || {};
+  return budgetType === 'report' ? 'reflect_budgets' : 'zero_budgets';
 }
 
 export function isReflectBudget(): boolean {
-  const budgetType =
-    db.firstSync(`SELECT value FROM preferences WHERE id = ?`, [
-      'budgetType',
-    ]) ?? 'rollover';
+  const { budgetType } = prefs.getPrefs();
   return budgetType === 'report';
 }
 
@@ -371,20 +370,7 @@ export async function coverOverspending({
     });
   }
 
-  await batchMessages(async () => {
-    await setBudget({
-      category: to,
-      month,
-      amount: toBudgeted + amountCovered,
-    });
-
-    await addMovementNotes({
-      month,
-      amount: amountCovered,
-      to,
-      from,
-    });
-  });
+  await setBudget({ category: to, month, amount: toBudgeted + amountCovered });
 }
 
 export async function transferAvailable({
@@ -415,17 +401,7 @@ export async function coverOverbudgeted({
   const toBudget = await getSheetValue(sheetName, 'to-budget');
 
   const categoryBudget = await getSheetValue(sheetName, 'budget-' + category);
-
-  await batchMessages(async () => {
-    await setBudget({ category, month, amount: categoryBudget + toBudget });
-
-    await addMovementNotes({
-      month,
-      amount: -toBudget,
-      from: category,
-      to: 'overbudgeted',
-    });
-  });
+  await setBudget({ category, month, amount: categoryBudget + toBudget });
 }
 
 export async function transferCategory({
@@ -442,23 +418,14 @@ export async function transferCategory({
   const sheetName = monthUtils.sheetForMonth(month);
   const fromBudgeted = await getSheetValue(sheetName, 'budget-' + from);
 
-  await batchMessages(async () => {
-    await setBudget({ category: from, month, amount: fromBudgeted - amount });
+  await setBudget({ category: from, month, amount: fromBudgeted - amount });
 
-    // If we are simply moving it back into available cash to budget,
-    // don't do anything else
-    if (to !== 'to-be-budgeted') {
-      const toBudgeted = await getSheetValue(sheetName, 'budget-' + to);
-      await setBudget({ category: to, month, amount: toBudgeted + amount });
-    }
-
-    await addMovementNotes({
-      month,
-      amount,
-      to,
-      from,
-    });
-  });
+  // If we are simply moving it back into available cash to budget,
+  // don't do anything else
+  if (to !== 'to-be-budgeted') {
+    const toBudgeted = await getSheetValue(sheetName, 'budget-' + to);
+    await setBudget({ category: to, month, amount: toBudgeted + amount });
+  }
 }
 
 export async function setCategoryCarryover({
@@ -477,54 +444,5 @@ export async function setCategoryCarryover({
     for (const month of months) {
       setCarryover(table, category, dbMonth(month).toString(), flag);
     }
-  });
-}
-
-function addNewLine(notes?: string) {
-  return !notes ? '' : `${notes}${notes && '\n'}`;
-}
-
-async function addMovementNotes({
-  month,
-  amount,
-  to,
-  from,
-}: {
-  month: string;
-  amount: number;
-  to: 'to-be-budgeted' | 'overbudgeted' | string;
-  from: 'to-be-budgeted' | string;
-}) {
-  const displayAmount = integerToCurrency(amount);
-
-  const monthBudgetNotesId = `budget-${month}`;
-  const existingMonthBudgetNotes = addNewLine(
-    db.firstSync(`SELECT n.note FROM notes n WHERE n.id = ?`, [
-      monthBudgetNotesId,
-    ])?.note,
-  );
-
-  const displayDay = monthUtils.format(monthUtils.currentDate(), 'MMMM dd');
-  const categories = await db.getCategories(
-    [from, to].filter(c => c !== 'to-be-budgeted' && c !== 'overbudgeted'),
-  );
-
-  const fromCategoryName =
-    from === 'to-be-budgeted'
-      ? 'To Budget'
-      : categories.find(c => c.id === from)?.name;
-
-  const toCategoryName =
-    to === 'to-be-budgeted'
-      ? 'To Budget'
-      : to === 'overbudgeted'
-        ? 'Overbudgeted'
-        : categories.find(c => c.id === to)?.name;
-
-  const note = `Reassigned ${displayAmount} from ${fromCategoryName} → ${toCategoryName} on ${displayDay}`;
-
-  await db.update('notes', {
-    id: monthBudgetNotesId,
-    note: `${existingMonthBudgetNotes}- ${note}`,
   });
 }

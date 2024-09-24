@@ -166,7 +166,7 @@ export function getLatestRange(offset: number) {
 }
 
 export function calculateTimeRange(
-  timeFrame?: Partial<TimeFrame>,
+  timeFrame?: TimeFrame,
   defaultTimeFrame?: TimeFrame,
 ) {
   const start =
@@ -181,48 +181,8 @@ export function calculateTimeRange(
     return getFullRange(start);
   }
   if (mode === 'sliding-window') {
-    const offset = monthUtils.differenceInCalendarMonths(end, start);
-
-    if (start > end) {
-      return [
-        monthUtils.currentMonth(),
-        monthUtils.subMonths(monthUtils.currentMonth(), -offset),
-        'sliding-window',
-      ] as const;
-    }
-
-    return getLatestRange(offset);
+    return getLatestRange(monthUtils.differenceInCalendarMonths(end, start));
   }
 
   return [start, end, 'static'] as const;
-}
-
-export function calculateSpendingReportTimeRange({
-  compare,
-  compareTo,
-  isLive = true,
-  mode = 'single-month',
-}: {
-  compare?: string;
-  compareTo?: string;
-  isLive?: boolean;
-  mode?: 'budget' | 'average' | 'single-month';
-}): [string, string] {
-  if (['budget', 'average'].includes(mode) && isLive) {
-    return [monthUtils.currentMonth(), monthUtils.currentMonth()];
-  }
-
-  const [start, end] = calculateTimeRange(
-    {
-      start: compare,
-      end: compareTo,
-      mode: (isLive ?? true) ? 'sliding-window' : 'static',
-    },
-    {
-      start: monthUtils.currentMonth(),
-      end: monthUtils.subMonths(monthUtils.currentMonth(), 1),
-      mode: 'sliding-window',
-    },
-  );
-  return [start, end];
 }

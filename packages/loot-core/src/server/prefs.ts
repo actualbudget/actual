@@ -28,6 +28,19 @@ export async function loadPrefs(id?: string): Promise<MetadataPrefs> {
     prefs = { id, budgetName: id };
   }
 
+  // delete released feature flags
+  const releasedFeatures = ['syncAccount'];
+  for (const feature of releasedFeatures) {
+    delete prefs[`flags.${feature}`];
+  }
+
+  // delete legacy notifications
+  for (const key of Object.keys(prefs)) {
+    if (key.startsWith('notifications.')) {
+      delete prefs[key];
+    }
+  }
+
   // No matter what is in `id` field, force it to be the current id.
   // This makes it resilient to users moving around folders, etc
   prefs.id = id;
@@ -44,7 +57,7 @@ export async function savePrefs(
     // Sync whitelisted prefs
     const messages: Message[] = Object.keys(prefsToSet)
       .map(key => {
-        if (key === 'budgetName') {
+        if (key === 'budgetType' || key === 'budgetName') {
           return {
             dataset: 'prefs',
             row: key,

@@ -208,7 +208,3 @@ export const budgetHeaderCurrentMonth = tableHeaderBackground;
 export const floatingActionBarBackground = colorPalette.gray900;
 export const floatingActionBarBorder = colorPalette.purple300;
 export const floatingActionBarText = colorPalette.purple200;
-
-export const tooltipText = colorPalette.gray100;
-export const tooltipBackground = colorPalette.gray800;
-export const tooltipBorder = colorPalette.gray600;

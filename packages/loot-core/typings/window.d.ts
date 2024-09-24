@@ -15,7 +15,6 @@ declare global {
         opts: Parameters<import('electron').Dialog['showOpenDialogSync']>[0],
       ) => Promise<string[]>;
       relaunch: () => void;
-      restartElectronServer: () => void;
     };
 
     __navigate?: import('react-router').NavigateFunction;

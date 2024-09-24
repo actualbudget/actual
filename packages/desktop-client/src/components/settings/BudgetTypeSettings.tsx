@@ -1,27 +1,58 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useDispatch } from 'react-redux';
 
-import { useSyncedPref } from '../../hooks/useSyncedPref';
-import { Button } from '../common/Button2';
+import { loadPrefs } from 'loot-core/src/client/actions';
+import { useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
+import * as monthUtils from 'loot-core/src/shared/months';
+
+import { useLocalPref } from '../../hooks/useLocalPref';
+import { useMetadataPref } from '../../hooks/useMetadataPref';
+import { switchBudgetType } from '../budget/util';
+import { ButtonWithLoading } from '../common/Button2';
 import { Link } from '../common/Link';
 import { Text } from '../common/Text';
 
 import { Setting } from './UI';
 
 export function BudgetTypeSettings() {
-  const [budgetType = 'rollover', setBudgetType] = useSyncedPref('budgetType');
+  const dispatch = useDispatch();
+  const [budgetType = 'rollover'] = useMetadataPref('budgetType');
+  const [loading, setLoading] = useState(false);
+
+  const currentMonth = monthUtils.currentMonth();
+  const [startMonthPref] = useLocalPref('budget.startMonth');
+  const startMonth = startMonthPref || currentMonth;
+  const spreadsheet = useSpreadsheet();
 
   function onSwitchType() {
-    const newBudgetType = budgetType === 'rollover' ? 'report' : 'rollover';
-    setBudgetType(newBudgetType);
+    setLoading(true);
+
+    if (!loading) {
+      const newBudgetType = budgetType === 'rollover' ? 'report' : 'rollover';
+
+      switchBudgetType(
+        newBudgetType,
+        spreadsheet,
+        {
+          start: startMonth,
+          end: startMonth,
+        },
+        startMonth,
+        async () => {
+          dispatch(loadPrefs());
+          setLoading(false);
+        },
+      );
+    }
   }
 
   return (
     <Setting
       primaryAction={
-        <Button onPress={onSwitchType}>
+        <ButtonWithLoading isLoading={loading} onPress={onSwitchType}>
           Switch to {budgetType === 'report' ? 'envelope' : 'tracking'}{' '}
           budgeting
-        </Button>
+        </ButtonWithLoading>
       }
     >
       <Text>
@@ -44,7 +75,7 @@ export function BudgetTypeSettings() {
         relying on current available funds.{' '}
         <Link
           variant="external"
-          to="https://actualbudget.org/docs/experimental/tracking-budget"
+          to="https://actualbudget.org/docs/experimental/report-budget"
           linkColor="purple"
         >
           Learn more…

@@ -30,6 +30,8 @@ export type balanceTypeOpType =
   | 'netAssets'
   | 'netDebts';
 
+export type spendingReportModeType = 'singleMonth' | 'average' | 'budget';
+
 export type SpendingMonthEntity = Record<
   string | number,
   {

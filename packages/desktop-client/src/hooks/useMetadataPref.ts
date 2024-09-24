@@ -1,9 +1,6 @@
-import { useCallback } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { type MetadataPrefs } from 'loot-core/src/types/prefs';
 
-import { savePrefs } from 'loot-core/client/actions';
-import { type State } from 'loot-core/client/state-types';
-import { type MetadataPrefs } from 'loot-core/types/prefs';
+import { useLocalPref } from './useLocalPref';
 
 type SetMetadataPrefAction<K extends keyof MetadataPrefs> = (
   value: MetadataPrefs[K],
@@ -12,16 +9,7 @@ type SetMetadataPrefAction<K extends keyof MetadataPrefs> = (
 export function useMetadataPref<K extends keyof MetadataPrefs>(
   prefName: K,
 ): [MetadataPrefs[K], SetMetadataPrefAction<K>] {
-  const dispatch = useDispatch();
-  const setLocalPref = useCallback<SetMetadataPrefAction<K>>(
-    value => {
-      dispatch(savePrefs({ [prefName]: value }));
-    },
-    [prefName, dispatch],
-  );
-  const localPref = useSelector(
-    (state: State) => state.prefs.local?.[prefName],
-  );
-
-  return [localPref, setLocalPref];
+  // TODO: implement logic for fetching the pref exclusively from the
+  // metadata.json file (in follow-up PR)
+  return useLocalPref(prefName);
 }

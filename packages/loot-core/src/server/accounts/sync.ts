@@ -54,13 +54,6 @@ function getAccountBalance(account) {
   }
 }
 
-async function updateAccountBalance(id, balance) {
-  await db.runQuery('UPDATE accounts SET balance_current = ? WHERE id = ?', [
-    amountToInteger(balance),
-    id,
-  ]);
-}
-
 export async function getGoCardlessAccounts(userId, userKey, id) {
   const userToken = await asyncStorage.getItem('user-token');
   if (!userToken) return;
@@ -701,7 +694,7 @@ export async function syncAccount(
       );
     }
 
-    const { transactions: originalTransactions, accountBalance } = download;
+    const { transactions: originalTransactions } = download;
 
     if (originalTransactions.length === 0) {
       return { added: [], updated: [] };
@@ -719,8 +712,6 @@ export async function syncAccount(
         true,
         useStrictIdChecking,
       );
-
-      if (accountBalance) await updateAccountBalance(id, accountBalance);
 
       return result;
     });

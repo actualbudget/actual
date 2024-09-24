@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 import { ConfigurationPage } from './page-models/configuration-page';
 import { Navigation } from './page-models/navigation';
 
-test.describe.parallel('Reports', () => {
+test.describe('Reports', () => {
   let page;
   let navigation;
   let reportsPage;
@@ -42,67 +42,5 @@ test.describe.parallel('Reports', () => {
   test('loads cash flow graph and checks visuals', async () => {
     await reportsPage.goToCashFlowPage();
     await expect(page).toMatchThemeScreenshots();
-  });
-
-  test.describe.parallel('custom reports', () => {
-    let customReportPage;
-
-    test.beforeEach(async () => {
-      customReportPage = await reportsPage.goToCustomReportPage();
-    });
-
-    test('Switches to Data Table and checks the visuals', async () => {
-      await customReportPage.selectMode('time');
-      await customReportPage.selectViz('Data Table');
-      await expect(page).toMatchThemeScreenshots();
-    });
-
-    test('Switches to Bar Graph and checks the visuals', async () => {
-      await customReportPage.selectMode('time');
-      await customReportPage.selectViz('Bar Graph');
-      await expect(page).toMatchThemeScreenshots();
-    });
-
-    test('Switches to Line Graph and checks the visuals', async () => {
-      await customReportPage.selectMode('time');
-      await customReportPage.selectViz('Line Graph');
-      await expect(page).toMatchThemeScreenshots();
-    });
-
-    test('Switches to Area Graph and checks the visuals', async () => {
-      await customReportPage.selectMode('total');
-      await customReportPage.selectViz('Area Graph');
-      await expect(page).toMatchThemeScreenshots();
-    });
-
-    test('Switches to Donut Graph and checks the visuals', async () => {
-      await customReportPage.selectMode('total');
-      await customReportPage.selectViz('Donut Graph');
-      await expect(page).toMatchThemeScreenshots();
-    });
-
-    test('Validates that "show legend" button shows the legend side-bar', async () => {
-      await customReportPage.selectViz('Bar Graph');
-      await customReportPage.showLegendButton.click();
-      await expect(page).toMatchThemeScreenshots();
-
-      await customReportPage.showLegendButton.click();
-    });
-
-    test('Validates that "show summary" button shows the summary', async () => {
-      await customReportPage.selectViz('Bar Graph');
-      await customReportPage.showSummaryButton.click();
-      await expect(page).toMatchThemeScreenshots();
-
-      await customReportPage.showSummaryButton.click();
-    });
-
-    test('Validates that "show labels" button shows the labels', async () => {
-      await customReportPage.selectViz('Bar Graph');
-      await customReportPage.showLabelsButton.click();
-      await expect(page).toMatchThemeScreenshots();
-
-      await customReportPage.showLabelsButton.click();
-    });
   });
 });

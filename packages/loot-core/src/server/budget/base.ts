@@ -6,8 +6,8 @@ import * as sheet from '../sheet';
 import { resolveName } from '../spreadsheet/util';
 
 import * as budgetActions from './actions';
-import * as envelopeBudget from './envelope';
 import * as report from './report';
+import * as rollover from './rollover';
 import { sumAmounts } from './util';
 
 export function getBudgetType() {
@@ -56,7 +56,7 @@ function createCategory(cat, sheetName, prevSheetName, start, end) {
   });
 
   if (getBudgetType() === 'rollover') {
-    envelopeBudget.createCategory(cat, sheetName, prevSheetName);
+    rollover.createCategory(cat, sheetName, prevSheetName);
   } else {
     report.createCategory(cat, sheetName, prevSheetName);
   }
@@ -193,7 +193,7 @@ function handleCategoryChange(months, oldValue, newValue) {
     (!oldValue || oldValue.tombstone === 1)
   ) {
     if (budgetType === 'rollover') {
-      envelopeBudget.createBlankCategory(newValue, months);
+      rollover.createBlankCategory(newValue, months);
     }
 
     months.forEach(month => {
@@ -400,7 +400,7 @@ export async function createBudget(months) {
   const budgetType = getBudgetType();
 
   if (budgetType === 'rollover') {
-    envelopeBudget.createBudget(meta, categories, months);
+    rollover.createBudget(meta, categories, months);
   }
 
   months.forEach(month => {
@@ -418,12 +418,7 @@ export async function createBudget(months) {
       });
 
       if (budgetType === 'rollover') {
-        envelopeBudget.createSummary(
-          groups,
-          categories,
-          prevSheetName,
-          sheetName,
-        );
+        rollover.createSummary(groups, categories, prevSheetName, sheetName);
       } else {
         report.createSummary(groups, categories, sheetName);
       }

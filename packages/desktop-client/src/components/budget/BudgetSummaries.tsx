@@ -14,12 +14,12 @@ import { addMonths, subMonths } from 'loot-core/src/shared/months';
 import { useResizeObserver } from '../../hooks/useResizeObserver';
 import { View } from '../common/View';
 
-import { type BudgetSummary as EnvelopeBudgetSummary } from './envelope/budgetsummary/BudgetSummary';
 import { MonthsContext } from './MonthsContext';
-import { type BudgetSummary as TrackingBudgetSummary } from './tracking/budgetsummary/BudgetSummary';
+import { type BudgetSummary as ReportBudgetSummary } from './report/budgetsummary/BudgetSummary';
+import { type BudgetSummary as RolloverBudgetSummary } from './rollover/budgetsummary/BudgetSummary';
 
 type BudgetSummariesProps = {
-  SummaryComponent: typeof TrackingBudgetSummary | typeof EnvelopeBudgetSummary;
+  SummaryComponent: typeof ReportBudgetSummary | typeof RolloverBudgetSummary;
 };
 
 export function BudgetSummaries({ SummaryComponent }: BudgetSummariesProps) {

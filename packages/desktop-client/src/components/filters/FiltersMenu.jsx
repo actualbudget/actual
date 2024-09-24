@@ -1,9 +1,9 @@
 import React, { useState, useRef, useEffect, useReducer } from 'react';
-import { FocusScope } from 'react-aria';
 import { Form } from 'react-aria-components';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { FocusScope } from '@react-aria/focus';
 import {
   parse as parseDate,
   format as formatDate,

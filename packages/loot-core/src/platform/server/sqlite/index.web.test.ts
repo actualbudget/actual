@@ -16,7 +16,6 @@ beforeAll(() => {
 
 const initSQL = `
 CREATE TABLE numbers (id TEXT PRIMARY KEY, number INTEGER);
-CREATE TABLE textstrings (id TEXT PRIMARY KEY, string TEXT);
 `;
 
 describe('Web sqlite', () => {
@@ -85,26 +84,5 @@ describe('Web sqlite', () => {
     expect(rows[1].number).toBe(5);
     // @ts-expect-error Property 'number' does not exist on type 'unknown'
     expect(rows[2].number).toBe(6);
-  });
-
-  it('should match regex on text fields', async () => {
-    const db = await openDatabase();
-    execQuery(db, initSQL);
-
-    runQuery(
-      db,
-      "INSERT INTO textstrings (id, string) VALUES ('id1', 'not empty string')",
-    );
-    runQuery(db, "INSERT INTO textstrings (id) VALUES ('id2')");
-
-    const rows = runQuery(
-      db,
-      'SELECT id FROM textstrings where REGEXP("n.", string)',
-      null,
-      true,
-    );
-    expect(rows.length).toBe(1);
-    // @ts-expect-error Property 'id' does not exist on type 'unknown'
-    expect(rows[0].id).toBe('id1');
   });
 });

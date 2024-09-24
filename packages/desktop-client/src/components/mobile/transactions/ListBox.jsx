@@ -1,6 +1,7 @@
 import React, { useRef } from 'react';
-import { useListBox } from 'react-aria';
-import { useListState } from 'react-stately';
+
+import { useListBox } from '@react-aria/listbox';
+import { useListState } from '@react-stately/list';
 
 import { usePrevious } from '../../../hooks/usePrevious';
 import { useScroll } from '../../ScrollProvider';

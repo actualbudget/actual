@@ -23,6 +23,7 @@ import * as monthUtils from 'loot-core/src/shared/months';
 
 import { useCategories } from '../../../hooks/useCategories';
 import { useLocalPref } from '../../../hooks/useLocalPref';
+import { useMetadataPref } from '../../../hooks/useMetadataPref';
 import { useSetThemeColor } from '../../../hooks/useSetThemeColor';
 import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { AnimatedLoading } from '../../../icons/AnimatedLoading';
@@ -42,7 +43,7 @@ export function Budget() {
   useSetThemeColor(theme.mobileViewTheme);
 
   const { list: categories, grouped: categoryGroups } = useCategories();
-  const [budgetTypePref] = useSyncedPref('budgetType');
+  const [budgetTypePref] = useMetadataPref('budgetType');
   const budgetType = isBudgetType(budgetTypePref) ? budgetTypePref : 'rollover';
   const spreadsheet = useSpreadsheet();
 
@@ -97,13 +98,13 @@ export function Budget() {
   const onShowBudgetSummary = useCallback(() => {
     if (budgetType === 'report') {
       dispatch(
-        pushModal('tracking-budget-summary', {
+        pushModal('report-budget-summary', {
           month: startMonth,
         }),
       );
     } else {
       dispatch(
-        pushModal('envelope-budget-summary', {
+        pushModal('rollover-budget-summary', {
           month: startMonth,
           onBudgetAction,
         }),
@@ -446,14 +447,11 @@ export function Budget() {
   const onOpenBudgetMonthMenu = useCallback(
     month => {
       dispatch(
-        pushModal(
-          `${budgetType === 'report' ? 'tracking' : 'envelope'}-budget-month-menu`,
-          {
-            month,
-            onBudgetAction,
-            onEditNotes: onOpenBudgetMonthNotesModal,
-          },
-        ),
+        pushModal(`${budgetType}-budget-month-menu`, {
+          month,
+          onBudgetAction,
+          onEditNotes: onOpenBudgetMonthNotesModal,
+        }),
       );
     },
     [budgetType, dispatch, onBudgetAction, onOpenBudgetMonthNotesModal],

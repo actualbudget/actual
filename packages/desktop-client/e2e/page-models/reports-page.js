@@ -1,5 +1,3 @@
-import { CustomReportPage } from './custom-report-page';
-
 export class ReportsPage {
   constructor(page) {
     this.page = page;
@@ -18,13 +16,6 @@ export class ReportsPage {
   async goToCashFlowPage() {
     await this.pageContent.getByRole('button', { name: /^Cash/ }).click();
     return new ReportsPage(this.page);
-  }
-
-  async goToCustomReportPage() {
-    await this.pageContent
-      .getByRole('button', { name: 'Create new custom report' })
-      .click();
-    return new CustomReportPage(this.page);
   }
 
   async getAvailableReportList() {

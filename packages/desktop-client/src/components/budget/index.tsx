@@ -24,43 +24,43 @@ import * as monthUtils from 'loot-core/src/shared/months';
 import { useCategories } from '../../hooks/useCategories';
 import { useGlobalPref } from '../../hooks/useGlobalPref';
 import { useLocalPref } from '../../hooks/useLocalPref';
+import { useMetadataPref } from '../../hooks/useMetadataPref';
 import { useNavigate } from '../../hooks/useNavigate';
-import { useSyncedPref } from '../../hooks/useSyncedPref';
 import { styles } from '../../style';
 import { View } from '../common/View';
 import { NamespaceContext } from '../spreadsheet/NamespaceContext';
 
 import { DynamicBudgetTable } from './DynamicBudgetTable';
-import * as envelopeBudget from './envelope/EnvelopeBudgetComponents';
-import { EnvelopeBudgetProvider } from './envelope/EnvelopeBudgetContext';
-import * as trackingBudget from './tracking/TrackingBudgetComponents';
-import { TrackingBudgetProvider } from './tracking/TrackingBudgetContext';
+import * as report from './report/ReportComponents';
+import { ReportProvider } from './report/ReportContext';
+import * as rollover from './rollover/RolloverComponents';
+import { RolloverProvider } from './rollover/RolloverContext';
 import { prewarmAllMonths, prewarmMonth } from './util';
 
-type TrackingReportComponents = {
-  SummaryComponent: typeof trackingBudget.BudgetSummary;
-  ExpenseCategoryComponent: typeof trackingBudget.ExpenseCategoryMonth;
-  ExpenseGroupComponent: typeof trackingBudget.ExpenseGroupMonth;
-  IncomeCategoryComponent: typeof trackingBudget.IncomeCategoryMonth;
-  IncomeGroupComponent: typeof trackingBudget.IncomeGroupMonth;
-  BudgetTotalsComponent: typeof trackingBudget.BudgetTotalsMonth;
-  IncomeHeaderComponent: typeof trackingBudget.IncomeHeaderMonth;
+type ReportComponents = {
+  SummaryComponent: typeof report.BudgetSummary;
+  ExpenseCategoryComponent: typeof report.ExpenseCategoryMonth;
+  ExpenseGroupComponent: typeof report.ExpenseGroupMonth;
+  IncomeCategoryComponent: typeof report.IncomeCategoryMonth;
+  IncomeGroupComponent: typeof report.IncomeGroupMonth;
+  BudgetTotalsComponent: typeof report.BudgetTotalsMonth;
+  IncomeHeaderComponent: typeof report.IncomeHeaderMonth;
 };
 
-type EnvelopeBudgetComponents = {
-  SummaryComponent: typeof EnvelopeBudgetSummary;
-  ExpenseCategoryComponent: typeof envelopeBudget.ExpenseCategoryMonth;
-  ExpenseGroupComponent: typeof envelopeBudget.ExpenseGroupMonth;
-  IncomeCategoryComponent: typeof envelopeBudget.IncomeCategoryMonth;
-  IncomeGroupComponent: typeof envelopeBudget.IncomeGroupMonth;
-  BudgetTotalsComponent: typeof envelopeBudget.BudgetTotalsMonth;
-  IncomeHeaderComponent: typeof envelopeBudget.IncomeHeaderMonth;
+type RolloverComponents = {
+  SummaryComponent: typeof RolloverBudgetSummary;
+  ExpenseCategoryComponent: typeof rollover.ExpenseCategoryMonth;
+  ExpenseGroupComponent: typeof rollover.ExpenseGroupMonth;
+  IncomeCategoryComponent: typeof rollover.IncomeCategoryMonth;
+  IncomeGroupComponent: typeof rollover.IncomeGroupMonth;
+  BudgetTotalsComponent: typeof rollover.BudgetTotalsMonth;
+  IncomeHeaderComponent: typeof rollover.IncomeHeaderMonth;
 };
 
 type BudgetInnerProps = {
   accountId?: string;
-  trackingComponents: TrackingReportComponents;
-  envelopeComponents: EnvelopeBudgetComponents;
+  reportComponents: ReportComponents;
+  rolloverComponents: RolloverComponents;
 };
 
 function BudgetInner(props: BudgetInnerProps) {
@@ -78,7 +78,7 @@ function BudgetInner(props: BudgetInnerProps) {
     start: startMonth,
     end: startMonth,
   });
-  const [budgetType = 'rollover'] = useSyncedPref('budgetType');
+  const [budgetType = 'rollover'] = useMetadataPref('budgetType');
   const [maxMonthsPref] = useGlobalPref('maxMonths');
   const maxMonths = maxMonthsPref || 1;
   const [initialized, setInitialized] = useState(false);
@@ -316,7 +316,7 @@ function BudgetInner(props: BudgetInnerProps) {
     setSummaryCollapsedPref(!summaryCollapsed);
   };
 
-  const { trackingComponents, envelopeComponents } = props;
+  const { reportComponents, rolloverComponents } = props;
 
   if (!initialized || !categoryGroups) {
     return null;
@@ -325,7 +325,7 @@ function BudgetInner(props: BudgetInnerProps) {
   let table;
   if (budgetType === 'report') {
     table = (
-      <TrackingBudgetProvider
+      <ReportProvider
         summaryCollapsed={summaryCollapsed}
         onBudgetAction={onBudgetAction}
         onToggleSummaryCollapse={onToggleCollapse}
@@ -336,7 +336,7 @@ function BudgetInner(props: BudgetInnerProps) {
           startMonth={startMonth}
           monthBounds={bounds}
           maxMonths={maxMonths}
-          dataComponents={trackingComponents}
+          dataComponents={reportComponents}
           onMonthSelect={onMonthSelect}
           onDeleteCategory={onDeleteCategory}
           onDeleteGroup={onDeleteGroup}
@@ -347,11 +347,11 @@ function BudgetInner(props: BudgetInnerProps) {
           onReorderCategory={onReorderCategory}
           onReorderGroup={onReorderGroup}
         />
-      </TrackingBudgetProvider>
+      </ReportProvider>
     );
   } else {
     table = (
-      <EnvelopeBudgetProvider
+      <RolloverProvider
         summaryCollapsed={summaryCollapsed}
         onBudgetAction={onBudgetAction}
         onToggleSummaryCollapse={onToggleCollapse}
@@ -362,7 +362,7 @@ function BudgetInner(props: BudgetInnerProps) {
           startMonth={startMonth}
           monthBounds={bounds}
           maxMonths={maxMonths}
-          dataComponents={envelopeComponents}
+          dataComponents={rolloverComponents}
           onMonthSelect={onMonthSelect}
           onDeleteCategory={onDeleteCategory}
           onDeleteGroup={onDeleteGroup}
@@ -373,7 +373,7 @@ function BudgetInner(props: BudgetInnerProps) {
           onReorderCategory={onReorderCategory}
           onReorderGroup={onReorderGroup}
         />
-      </EnvelopeBudgetProvider>
+      </RolloverProvider>
     );
   }
 
@@ -384,37 +384,37 @@ function BudgetInner(props: BudgetInnerProps) {
   );
 }
 
-const EnvelopeBudgetSummary = memo<{ month: string }>(props => {
-  return <envelopeBudget.BudgetSummary {...props} />;
+const RolloverBudgetSummary = memo<{ month: string }>(props => {
+  return <rollover.BudgetSummary {...props} />;
 });
 
-EnvelopeBudgetSummary.displayName = 'EnvelopeBudgetSummary';
+RolloverBudgetSummary.displayName = 'RolloverBudgetSummary';
 
 export function Budget() {
-  const trackingComponents = useMemo<TrackingReportComponents>(
+  const reportComponents = useMemo<ReportComponents>(
     () => ({
-      SummaryComponent: trackingBudget.BudgetSummary,
-      ExpenseCategoryComponent: trackingBudget.ExpenseCategoryMonth,
-      ExpenseGroupComponent: trackingBudget.ExpenseGroupMonth,
-      IncomeCategoryComponent: trackingBudget.IncomeCategoryMonth,
-      IncomeGroupComponent: trackingBudget.IncomeGroupMonth,
-      BudgetTotalsComponent: trackingBudget.BudgetTotalsMonth,
-      IncomeHeaderComponent: trackingBudget.IncomeHeaderMonth,
+      SummaryComponent: report.BudgetSummary,
+      ExpenseCategoryComponent: report.ExpenseCategoryMonth,
+      ExpenseGroupComponent: report.ExpenseGroupMonth,
+      IncomeCategoryComponent: report.IncomeCategoryMonth,
+      IncomeGroupComponent: report.IncomeGroupMonth,
+      BudgetTotalsComponent: report.BudgetTotalsMonth,
+      IncomeHeaderComponent: report.IncomeHeaderMonth,
     }),
-    [trackingBudget],
+    [report],
   );
 
-  const envelopeComponents = useMemo<EnvelopeBudgetComponents>(
+  const rolloverComponents = useMemo<RolloverComponents>(
     () => ({
-      SummaryComponent: EnvelopeBudgetSummary,
-      ExpenseCategoryComponent: envelopeBudget.ExpenseCategoryMonth,
-      ExpenseGroupComponent: envelopeBudget.ExpenseGroupMonth,
-      IncomeCategoryComponent: envelopeBudget.IncomeCategoryMonth,
-      IncomeGroupComponent: envelopeBudget.IncomeGroupMonth,
-      BudgetTotalsComponent: envelopeBudget.BudgetTotalsMonth,
-      IncomeHeaderComponent: envelopeBudget.IncomeHeaderMonth,
+      SummaryComponent: RolloverBudgetSummary,
+      ExpenseCategoryComponent: rollover.ExpenseCategoryMonth,
+      ExpenseGroupComponent: rollover.ExpenseGroupMonth,
+      IncomeCategoryComponent: rollover.IncomeCategoryMonth,
+      IncomeGroupComponent: rollover.IncomeGroupMonth,
+      BudgetTotalsComponent: rollover.BudgetTotalsMonth,
+      IncomeHeaderComponent: rollover.IncomeHeaderMonth,
     }),
-    [envelopeBudget],
+    [rollover],
   );
 
   // In a previous iteration, the wrapper needs `overflow: hidden` for
@@ -431,8 +431,8 @@ export function Budget() {
       }}
     >
       <BudgetInner
-        trackingComponents={trackingComponents}
-        envelopeComponents={envelopeComponents}
+        reportComponents={reportComponents}
+        rolloverComponents={rolloverComponents}
       />
     </View>
   );

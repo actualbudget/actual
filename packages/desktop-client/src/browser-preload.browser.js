@@ -51,8 +51,6 @@ global.Actual = {
     window.location.reload();
   },
 
-  restartElectronServer: () => {},
-
   openFileDialog: async ({ filters = [] }) => {
     return new Promise(resolve => {
       let createdElement = false;

@@ -6,7 +6,8 @@ import React, {
   useState,
 } from 'react';
 import { useDispatch } from 'react-redux';
-import { Item, Section } from 'react-stately';
+
+import { Item, Section } from '@react-stately/collections';
 
 import { setNotificationInset } from 'loot-core/client/actions';
 import { groupById, integerToCurrency } from 'loot-core/shared/util';
@@ -27,7 +28,7 @@ import { AnimatedLoading } from '../../../icons/AnimatedLoading';
 import { SvgDelete } from '../../../icons/v0';
 import { SvgDotsHorizontalTriple } from '../../../icons/v1';
 import { styles, theme } from '../../../style';
-import { Button } from '../../common/Button2';
+import { Button } from '../../common/Button';
 import { Menu } from '../../common/Menu';
 import { Popover } from '../../common/Popover';
 import { Text } from '../../common/Text';
@@ -259,10 +260,10 @@ function SelectedTransactionsFloatingActionBar({ transactions, style }) {
           }}
         >
           <Button
-            variant="bare"
+            type="bare"
             {...buttonProps}
             style={{ ...buttonProps.style, marginRight: 4 }}
-            onPress={() => {
+            onClick={() => {
               if (selectedTransactions.size > 0) {
                 dispatchSelected({ type: 'select-none' });
               }
@@ -284,10 +285,10 @@ function SelectedTransactionsFloatingActionBar({ transactions, style }) {
           }}
         >
           <Button
-            variant="bare"
+            type="bare"
             ref={editMenuTriggerRef}
             aria-label="Edit fields"
-            onPress={() => {
+            onClick={() => {
               setIsEditMenuOpen(true);
             }}
             {...buttonProps}
@@ -393,10 +394,10 @@ function SelectedTransactionsFloatingActionBar({ transactions, style }) {
           </Popover>
 
           <Button
-            variant="bare"
+            type="bare"
             ref={moreOptionsMenuTriggerRef}
             aria-label="More options"
-            onPress={() => {
+            onClick={() => {
               setIsMoreOptionsMenuOpen(true);
             }}
             {...buttonProps}

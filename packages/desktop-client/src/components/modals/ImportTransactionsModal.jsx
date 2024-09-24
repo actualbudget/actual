@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 
 import * as d from 'date-fns';
-import deepEqual from 'deep-equal';
 
 import { format as formatDate_ } from 'loot-core/src/shared/months';
 import {
@@ -590,7 +589,7 @@ function SelectField({
       ]}
       value={value === null ? 'choose-field' : value}
       onChange={onChange}
-      style={style}
+      buttonStyle={style}
     />
   );
 }
@@ -862,6 +861,7 @@ export function ImportTransactionsModal({ options }) {
   const [flipAmount, setFlipAmount] = useState(false);
   const [multiplierEnabled, setMultiplierEnabled] = useState(false);
   const [reconcile, setReconcile] = useState(true);
+  const [previewTrigger, setPreviewTrigger] = useState(0);
   const { accountId, categories, onImported } = options;
 
   // This cannot be set after parsing the file, because changing it
@@ -922,8 +922,8 @@ export function ImportTransactionsModal({ options }) {
           );
           break;
         }
-        if (trans.payee_name == null || typeof trans.payee_name !== 'string') {
-          console.log(`Unable·to·parse·payee·${trans.payee_name || '(empty)'}`);
+        if (trans.payee == null || !(trans.payee instanceof String)) {
+          console.log(`Unable·to·parse·payee·${trans.payee || '(empty)'}`);
           break;
         }
 
@@ -1367,7 +1367,7 @@ export function ImportTransactionsModal({ options }) {
     close();
   }
 
-  const runImportPreview = useCallback(async () => {
+  const runImportPreviewCallback = useCallback(async () => {
     const transactionPreview = await getImportPreview(
       transactions,
       filetype,
@@ -1379,10 +1379,7 @@ export function ImportTransactionsModal({ options }) {
       outValue,
       multiplierAmount,
     );
-
-    if (!deepEqual(transactions, transactionPreview)) {
-      setTransactions(transactionPreview);
-    }
+    setTransactions(transactionPreview);
   }, [
     getImportPreview,
     transactions,
@@ -1395,6 +1392,14 @@ export function ImportTransactionsModal({ options }) {
     outValue,
     multiplierAmount,
   ]);
+
+  useEffect(() => {
+    runImportPreviewCallback();
+  }, [previewTrigger, runImportPreviewCallback]);
+
+  function runImportPreview() {
+    setPreviewTrigger(value => value + 1);
+  }
 
   const headers = [
     { name: 'Date', width: 200 },

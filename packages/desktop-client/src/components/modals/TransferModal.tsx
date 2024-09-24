@@ -1,16 +1,12 @@
 import React, { useMemo, useState } from 'react';
-import { Trans } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 
 import { pushModal } from 'loot-core/client/actions';
-import { type CategoryEntity } from 'loot-core/types/models';
 
 import { useCategories } from '../../hooks/useCategories';
 import { styles } from '../../style';
-import {
-  addToBeBudgetedGroup,
-  removeCategoriesFromGroups,
-} from '../budget/util';
+import { addToBeBudgetedGroup } from '../budget/util';
 import { Button } from '../common/Button2';
 import { InitialFocus } from '../common/InitialFocus';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
@@ -20,16 +16,14 @@ import { AmountInput } from '../util/AmountInput';
 
 type TransferModalProps = {
   title: string;
-  categoryId?: CategoryEntity['id'];
   month: string;
   amount: number;
   showToBeBudgeted: boolean;
-  onSubmit: (amount: number, toCategoryId: CategoryEntity['id']) => void;
+  onSubmit: (amount: number, toCategoryId: string) => void;
 };
 
 export function TransferModal({
   title,
-  categoryId,
   month,
   amount: initialAmount,
   showToBeBudgeted,
@@ -39,19 +33,15 @@ export function TransferModal({
 
   const { grouped: originalCategoryGroups } = useCategories();
   const [categoryGroups, categories] = useMemo(() => {
-    const expenseGroups = originalCategoryGroups.filter(g => !g.is_income);
-    const categoryGroups = showToBeBudgeted
-      ? addToBeBudgetedGroup(expenseGroups)
-      : expenseGroups;
-
-    const filteredCategoryGroups = categoryId
-      ? removeCategoriesFromGroups(categoryGroups, categoryId)
-      : categoryGroups;
-    const filteredCategories = filteredCategoryGroups.flatMap(
-      g => g.categories || [],
+    const filteredCategoryGroups = originalCategoryGroups.filter(
+      g => !g.is_income,
     );
-    return [filteredCategoryGroups, filteredCategories];
-  }, [categoryId, originalCategoryGroups, showToBeBudgeted]);
+    const expenseGroups = showToBeBudgeted
+      ? addToBeBudgetedGroup(filteredCategoryGroups, t)
+      : filteredCategoryGroups;
+    const expenseCategories = expenseGroups.flatMap(g => g.categories || []);
+    return [expenseGroups, expenseCategories];
+  }, [originalCategoryGroups, showToBeBudgeted, t]);
 
   const [amount, setAmount] = useState<number>(0);
   const [toCategoryId, setToCategoryId] = useState<string | null>(null);
@@ -136,7 +126,7 @@ export function TransferModal({
                   close();
                 }}
               >
-                <Trans>Transfer</Trans>
+                Transfer
               </Button>
             </View>
           </View>

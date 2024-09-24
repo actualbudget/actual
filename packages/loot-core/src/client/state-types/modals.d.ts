@@ -157,7 +157,7 @@ type FinanceModals = {
     onBudgetAction: (month: string, action: string, args?: unknown) => void;
     onClose?: () => void;
   };
-  'envelope-budget-menu': {
+  'rollover-budget-menu': {
     categoryId: string;
     month: string;
     onUpdateBudget: (amount: number) => void;
@@ -165,7 +165,7 @@ type FinanceModals = {
     onSetMonthsAverage: (numberOfMonths: number) => void;
     onApplyBudgetTemplate: () => void;
   };
-  'tracking-budget-menu': {
+  'report-budget-menu': {
     categoryId: string;
     month: string;
     onUpdateBudget: (amount: number) => void;
@@ -187,8 +187,8 @@ type FinanceModals = {
     name: string;
     onSave: (id: string, notes: string) => void;
   };
-  'tracking-budget-summary': { month: string };
-  'envelope-budget-summary': {
+  'report-budget-summary': { month: string };
+  'rollover-budget-summary': {
     month: string;
     onBudgetAction: (
       month: string,
@@ -204,28 +204,27 @@ type FinanceModals = {
     onValidate?: (value: string) => string;
     onSubmit: (value: string) => Promise<void>;
   };
-  'envelope-balance-menu': {
+  'rollover-balance-menu': {
     categoryId: string;
     month: string;
     onCarryover: (carryover: boolean) => void;
     onTransfer: () => void;
     onCover: () => void;
   };
-  'envelope-summary-to-budget-menu': {
+  'rollover-summary-to-budget-menu': {
     month: string;
     onTransfer: () => void;
     onCover: () => void;
     onHoldBuffer: () => void;
     onResetHoldBuffer: () => void;
   };
-  'tracking-balance-menu': {
+  'report-balance-menu': {
     categoryId: string;
     month: string;
     onCarryover: (carryover: boolean) => void;
   };
   transfer: {
     title: string;
-    categoryId?: CategoryEntity['id'];
     month: string;
     amount: number;
     onSubmit: (amount: number, toCategoryId: string) => void;
@@ -233,7 +232,6 @@ type FinanceModals = {
   };
   cover: {
     title: string;
-    categoryId?: CategoryEntity['id'];
     month: string;
     showToBeBudgeted?: boolean;
     onSubmit: (fromCategoryId: string) => void;
@@ -252,12 +250,12 @@ type FinanceModals = {
     onToggleHiddenCategories: () => void;
     onSwitchBudgetFile: () => void;
   };
-  'envelope-budget-month-menu': {
+  'rollover-budget-month-menu': {
     month: string;
     onBudgetAction: (month: string, action: string, arg?: unknown) => void;
     onEditNotes: (month: string) => void;
   };
-  'tracking-budget-month-menu': {
+  'report-budget-month-menu': {
     month: string;
     onBudgetAction: (month: string, action: string, arg?: unknown) => void;
     onEditNotes: (month: string) => void;

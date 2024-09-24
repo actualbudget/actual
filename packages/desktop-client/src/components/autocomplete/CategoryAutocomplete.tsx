@@ -13,7 +13,7 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { css } from 'glamor';
 
-import { trackingBudget, envelopeBudget } from 'loot-core/client/queries';
+import { reportBudget, rolloverBudget } from 'loot-core/client/queries';
 import { integerToCurrency } from 'loot-core/shared/util';
 import { getNormalisedString } from 'loot-core/src/shared/normalisation';
 import {
@@ -22,11 +22,11 @@ import {
 } from 'loot-core/src/types/models';
 
 import { useCategories } from '../../hooks/useCategories';
-import { useSyncedPref } from '../../hooks/useSyncedPref';
+import { useMetadataPref } from '../../hooks/useMetadataPref';
 import { SvgSplit } from '../../icons/v0';
 import { useResponsive } from '../../ResponsiveProvider';
 import { type CSSProperties, theme, styles } from '../../style';
-import { useEnvelopeSheetValue } from '../budget/envelope/EnvelopeBudgetComponents';
+import { useRolloverSheetValue } from '../budget/rollover/RolloverComponents';
 import { makeAmountFullStyle } from '../budget/util';
 import { Text } from '../common/Text';
 import { TextOneLine } from '../common/TextOneLine';
@@ -379,19 +379,19 @@ function CategoryItem({
         borderTop: `1px solid ${theme.pillBorder}`,
       }
     : {};
-  const [budgetType = 'rollover'] = useSyncedPref('budgetType');
+  const [budgetType = 'rollover'] = useMetadataPref('budgetType');
 
   const balanceBinding =
     budgetType === 'rollover'
-      ? envelopeBudget.catBalance(item.id)
-      : trackingBudget.catBalance(item.id);
+      ? rolloverBudget.catBalance(item.id)
+      : reportBudget.catBalance(item.id);
   const balance = useSheetValue<
-    'envelope-budget' | 'tracking-budget',
+    'rollover-budget' | 'report-budget',
     typeof balanceBinding
   >(balanceBinding);
 
   const isToBeBudgetedItem = item.id === 'to-be-budgeted';
-  const toBudget = useEnvelopeSheetValue(envelopeBudget.toBudget) ?? 0;
+  const toBudget = useRolloverSheetValue(rolloverBudget.toBudget) ?? 0;
 
   return (
     <div

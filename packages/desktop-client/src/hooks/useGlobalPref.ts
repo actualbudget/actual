@@ -11,21 +11,13 @@ type SetGlobalPrefAction<K extends keyof GlobalPrefs> = (
 
 export function useGlobalPref<K extends keyof GlobalPrefs>(
   prefName: K,
-  onSaveGlobalPrefs?: () => void,
 ): [GlobalPrefs[K], SetGlobalPrefAction<K>] {
   const dispatch = useDispatch();
   const setGlobalPref = useCallback<SetGlobalPrefAction<K>>(
     value => {
-      dispatch(
-        saveGlobalPrefs(
-          {
-            [prefName]: value,
-          } as GlobalPrefs,
-          onSaveGlobalPrefs,
-        ),
-      );
+      dispatch(saveGlobalPrefs({ [prefName]: value } as GlobalPrefs));
     },
-    [prefName, dispatch, onSaveGlobalPrefs],
+    [prefName, dispatch],
   );
   const globalPref = useSelector(
     (state: State) => state.prefs.global?.[prefName] as GlobalPrefs[K],

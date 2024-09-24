@@ -6,6 +6,7 @@ import { pushModal } from 'loot-core/client/actions';
 import { send } from 'loot-core/src/platform/client/fetch';
 
 import { authorizeBank } from '../../gocardless';
+import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { useGoCardlessStatus } from '../../hooks/useGoCardlessStatus';
 import { useSimpleFinStatus } from '../../hooks/useSimpleFinStatus';
 import { useSyncServerStatus } from '../../hooks/useSyncServerStatus';
@@ -179,6 +180,8 @@ export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
     title = 'Link Account';
   }
 
+  const simpleFinSyncFeatureFlag = useFeatureFlag('simpleFinSync');
+
   return (
     <Modal name="add-account">
       {({ state: { close } }) => (
@@ -287,73 +290,77 @@ export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
                     to automatically download transactions. GoCardless provides
                     reliable, up-to-date information from hundreds of banks.
                   </Text>
-
-                  <View
-                    style={{
-                      flexDirection: 'row',
-                      gap: 10,
-                      marginTop: '18px',
-                      alignItems: 'center',
-                    }}
-                  >
-                    <ButtonWithLoading
-                      isDisabled={syncServerStatus !== 'online'}
-                      isLoading={loadingSimpleFinAccounts}
-                      style={{
-                        padding: '10px 0',
-                        fontSize: 15,
-                        fontWeight: 600,
-                        flex: 1,
-                      }}
-                      onPress={onConnectSimpleFin}
-                    >
-                      {isSimpleFinSetupComplete
-                        ? 'Link bank account with SimpleFIN'
-                        : 'Set up SimpleFIN for bank sync'}
-                    </ButtonWithLoading>
-                    {isSimpleFinSetupComplete && (
-                      <>
-                        <Button
-                          ref={triggerRef}
-                          variant="bare"
-                          onPress={() => setSimplefinMenuOpen(true)}
-                          aria-label="SimpleFIN menu"
+                  {simpleFinSyncFeatureFlag === true && (
+                    <>
+                      <View
+                        style={{
+                          flexDirection: 'row',
+                          gap: 10,
+                          marginTop: '18px',
+                          alignItems: 'center',
+                        }}
+                      >
+                        <ButtonWithLoading
+                          isDisabled={syncServerStatus !== 'online'}
+                          isLoading={loadingSimpleFinAccounts}
+                          style={{
+                            padding: '10px 0',
+                            fontSize: 15,
+                            fontWeight: 600,
+                            flex: 1,
+                          }}
+                          onPress={onConnectSimpleFin}
                         >
-                          <SvgDotsHorizontalTriple
-                            width={15}
-                            height={15}
-                            style={{ transform: 'rotateZ(90deg)' }}
-                          />
-                        </Button>
-                        <Popover
-                          triggerRef={triggerRef}
-                          isOpen={menuSimplefinOpen}
-                          onOpenChange={() => setSimplefinMenuOpen(false)}
-                        >
-                          <Menu
-                            onMenuSelect={item => {
-                              if (item === 'reconfigure') {
-                                onSimpleFinReset();
-                              }
-                            }}
-                            items={[
-                              {
-                                name: 'reconfigure',
-                                text: 'Reset SimpleFIN credentials',
-                              },
-                            ]}
-                          />
-                        </Popover>
-                      </>
-                    )}
-                  </View>
-                  <Text style={{ lineHeight: '1.4em', fontSize: 15 }}>
-                    <strong>
-                      Link a <em>North American</em> bank account
-                    </strong>{' '}
-                    to automatically download transactions. SimpleFIN provides
-                    reliable, up-to-date information from hundreds of banks.
-                  </Text>
+                          {isSimpleFinSetupComplete
+                            ? 'Link bank account with SimpleFIN'
+                            : 'Set up SimpleFIN for bank sync'}
+                        </ButtonWithLoading>
+                        {isSimpleFinSetupComplete && (
+                          <>
+                            <Button
+                              ref={triggerRef}
+                              variant="bare"
+                              onPress={() => setSimplefinMenuOpen(true)}
+                              aria-label="SimpleFIN menu"
+                            >
+                              <SvgDotsHorizontalTriple
+                                width={15}
+                                height={15}
+                                style={{ transform: 'rotateZ(90deg)' }}
+                              />
+                            </Button>
+                            <Popover
+                              triggerRef={triggerRef}
+                              isOpen={menuSimplefinOpen}
+                              onOpenChange={() => setSimplefinMenuOpen(false)}
+                            >
+                              <Menu
+                                onMenuSelect={item => {
+                                  if (item === 'reconfigure') {
+                                    onSimpleFinReset();
+                                  }
+                                }}
+                                items={[
+                                  {
+                                    name: 'reconfigure',
+                                    text: 'Reset SimpleFIN credentials',
+                                  },
+                                ]}
+                              />
+                            </Popover>
+                          </>
+                        )}
+                      </View>
+                      <Text style={{ lineHeight: '1.4em', fontSize: 15 }}>
+                        <strong>
+                          Link a <em>North American</em> bank account
+                        </strong>{' '}
+                        to automatically download transactions. SimpleFIN
+                        provides reliable, up-to-date information from hundreds
+                        of banks.
+                      </Text>
+                    </>
+                  )}
                 </>
               ) : (
                 <>

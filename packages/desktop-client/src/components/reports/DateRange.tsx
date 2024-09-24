@@ -40,14 +40,7 @@ export function DateRange({ start, end, type }: DateRangeProps): ReactElement {
   }
 
   let content: string | ReactElement;
-  if (['budget', 'average'].includes(type || '')) {
-    content = (
-      <div>
-        Compare {d.format(startDate, 'MMM yyyy')} to{' '}
-        {type === 'budget' ? 'budgeted' : 'average'}
-      </div>
-    );
-  } else if (startDate.getFullYear() !== endDate.getFullYear()) {
+  if (startDate.getFullYear() !== endDate.getFullYear()) {
     content = (
       <div>
         {type && 'Compare '}

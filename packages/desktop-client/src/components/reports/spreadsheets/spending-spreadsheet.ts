@@ -18,6 +18,7 @@ import { makeQuery } from './makeQuery';
 type createSpendingSpreadsheetProps = {
   conditions?: RuleConditionEntity[];
   conditionsOp?: string;
+  setDataCheck?: (value: boolean) => void;
   compare?: string;
   compareTo?: string;
 };
@@ -25,6 +26,7 @@ type createSpendingSpreadsheetProps = {
 export function createSpendingSpreadsheet({
   conditions = [],
   conditionsOp,
+  setDataCheck,
   compare,
   compareTo,
 }: createSpendingSpreadsheetProps) {
@@ -254,5 +256,6 @@ export function createSpendingSpreadsheet({
       totalAssets: integerToAmount(totalAssets),
       totalTotals: integerToAmount(totalAssets + totalDebts),
     });
+    setDataCheck?.(true);
   };
 }

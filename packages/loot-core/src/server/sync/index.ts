@@ -13,7 +13,7 @@ import * as connection from '../../platform/server/connection';
 import { logger } from '../../platform/server/log';
 import { sequential, once } from '../../shared/async';
 import { setIn, getIn } from '../../shared/util';
-import { type MetadataPrefs } from '../../types/prefs';
+import { LocalPrefs } from '../../types/prefs';
 import { triggerBudgetChanges, setType as setBudgetType } from '../budget/base';
 import * as db from '../db';
 import { PostError, SyncError } from '../errors';
@@ -304,7 +304,7 @@ export const applyMessages = sequential(async (messages: Message[]) => {
     return data;
   }
 
-  const prefsToSet: MetadataPrefs = {};
+  const prefsToSet: LocalPrefs = {};
   const oldData = await fetchData();
 
   undo.appendMessages(messages, oldData);
@@ -359,11 +359,6 @@ export const applyMessages = sequential(async (messages: Message[]) => {
 
         currentMerkle = merkle.insert(currentMerkle, timestamp);
       }
-
-      // Special treatment for some synced prefs
-      if (dataset === 'preferences' && row === 'budgetType') {
-        setBudgetType(value);
-      }
     }
 
     if (checkSyncingMode('enabled')) {
@@ -389,6 +384,11 @@ export const applyMessages = sequential(async (messages: Message[]) => {
   // Save any synced prefs
   if (Object.keys(prefsToSet).length > 0) {
     prefs.savePrefs(prefsToSet, { avoidSync: true });
+
+    if (prefsToSet.budgetType) {
+      setBudgetType(prefsToSet.budgetType);
+    }
+
     connection.send('prefs-updated');
   }
 

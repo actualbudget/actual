@@ -53,7 +53,6 @@ import { mutator, runHandler } from './mutators';
 import { app as notesApp } from './notes/app';
 import * as Platform from './platform';
 import { get, post } from './post';
-import { app as preferencesApp } from './preferences/app';
 import * as prefs from './prefs';
 import { app as reportsApp } from './reports/app';
 import { app as rulesApp } from './rules/app';
@@ -176,7 +175,7 @@ handlers['get-budget-bounds'] = async function () {
   return budget.createAllBudgets();
 };
 
-handlers['envelope-budget-month'] = async function ({ month }) {
+handlers['rollover-budget-month'] = async function ({ month }) {
   const groups = await db.getCategoriesGrouped();
   const sheetName = monthUtils.sheetForMonth(month);
 
@@ -226,7 +225,7 @@ handlers['envelope-budget-month'] = async function ({ month }) {
   return values;
 };
 
-handlers['tracking-budget-month'] = async function ({ month }) {
+handlers['report-budget-month'] = async function ({ month }) {
   const groups = await db.getCategoriesGrouped();
   const sheetName = monthUtils.sheetForMonth(month);
 
@@ -266,6 +265,20 @@ handlers['tracking-budget-month'] = async function ({ month }) {
   }
 
   return values;
+};
+
+handlers['budget-set-type'] = async function ({ type }) {
+  if (!prefs.BUDGET_TYPES.includes(type)) {
+    throw new Error('Invalid budget type: ' + type);
+  }
+
+  // It's already the same; don't do anything
+  if (type === prefs.getPrefs().budgetType) {
+    return;
+  }
+
+  // Save prefs
+  return prefs.savePrefs({ budgetType: type });
 };
 
 handlers['category-create'] = mutator(async function ({
@@ -1977,11 +1990,7 @@ async function loadBudget(id) {
   }
 
   // This is a bit leaky, but we need to set the initial budget type
-  const { value: budgetType = 'rollover' } =
-    (await db.first('SELECT value from preferences WHERE id = ?', [
-      'budgetType',
-    ])) ?? {};
-  sheet.get().meta().budgetType = budgetType;
+  sheet.get().meta().budgetType = prefs.getPrefs().budgetType;
   await budget.createAllBudgets();
 
   // Load all the in-memory state
@@ -2070,7 +2079,6 @@ app.combine(
   budgetApp,
   dashboardApp,
   notesApp,
-  preferencesApp,
   toolsApp,
   filtersApp,
   reportsApp,

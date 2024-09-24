@@ -1,5 +1,8 @@
 import React, { useRef } from 'react';
-import { useFocusRing, useOption, mergeProps } from 'react-aria';
+
+import { useFocusRing } from '@react-aria/focus';
+import { useOption } from '@react-aria/listbox';
+import { mergeProps } from '@react-aria/utils';
 
 import { theme } from '../../../style';
 

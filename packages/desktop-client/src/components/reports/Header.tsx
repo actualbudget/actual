@@ -73,7 +73,7 @@ export function Header({
         flexShrink: 0,
       }}
     >
-      {!['/reports/custom'].includes(path) && (
+      {!['/reports/custom', '/reports/spending'].includes(path) && (
         <View
           style={{
             flexDirection: isNarrowWidth ? 'column' : 'row',
@@ -134,7 +134,7 @@ export function Header({
               }
               value={end}
               options={allMonths.map(({ name, pretty }) => [name, pretty])}
-              style={{ marginRight: 10 }}
+              buttonStyle={{ marginRight: 10 }}
             />
           </View>
 

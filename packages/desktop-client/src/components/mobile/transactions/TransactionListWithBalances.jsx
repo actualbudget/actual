@@ -7,7 +7,7 @@ import { styles, theme } from '../../../style';
 import { InputWithContent } from '../../common/InputWithContent';
 import { Label } from '../../common/Label';
 import { View } from '../../common/View';
-import { CellValue, CellValueText } from '../../spreadsheet/CellValue';
+import { CellValue } from '../../spreadsheet/CellValue';
 import { useSheetValue } from '../../spreadsheet/useSheetValue';
 import { PullToRefresh } from '../PullToRefresh';
 
@@ -101,38 +101,32 @@ export function TransactionListWithBalances({
               title="Cleared"
               style={{ textAlign: 'center', fontSize: 12 }}
             />
-            <CellValue binding={balanceCleared} type="financial">
-              {props => (
-                <CellValueText
-                  {...props}
-                  style={{
-                    fontSize: 12,
-                    textAlign: 'center',
-                    fontWeight: '500',
-                  }}
-                />
-              )}
-            </CellValue>
+            <CellValue
+              binding={balanceCleared}
+              type="financial"
+              style={{
+                fontSize: 12,
+                textAlign: 'center',
+                fontWeight: '500',
+              }}
+              data-testid="transactions-balance-cleared"
+            />
           </View>
           <View style={{ flexBasis: '33%' }}>
             <Label title="Balance" style={{ textAlign: 'center' }} />
-            <CellValue binding={balance} type="financial">
-              {props => (
-                <CellValueText
-                  {...props}
-                  style={{
-                    fontSize: 18,
-                    textAlign: 'center',
-                    fontWeight: '500',
-                    color:
-                      props.value < 0
-                        ? theme.errorText
-                        : theme.pillTextHighlighted,
-                  }}
-                  data-testid="transactions-balance"
-                />
-              )}
-            </CellValue>
+            <CellValue
+              binding={balance}
+              type="financial"
+              style={{
+                fontSize: 18,
+                textAlign: 'center',
+                fontWeight: '500',
+              }}
+              getStyle={value => ({
+                color: value < 0 ? theme.errorText : theme.pillTextHighlighted,
+              })}
+              data-testid="transactions-balance"
+            />
           </View>
           <View
             style={{
@@ -144,19 +138,16 @@ export function TransactionListWithBalances({
               title="Uncleared"
               style={{ textAlign: 'center', fontSize: 12 }}
             />
-            <CellValue binding={balanceUncleared} type="financial">
-              {props => (
-                <CellValueText
-                  {...props}
-                  style={{
-                    fontSize: 12,
-                    textAlign: 'center',
-                    fontWeight: '500',
-                  }}
-                  data-testid="transactions-balance-uncleared"
-                />
-              )}
-            </CellValue>
+            <CellValue
+              binding={balanceUncleared}
+              type="financial"
+              style={{
+                fontSize: 12,
+                textAlign: 'center',
+                fontWeight: '500',
+              }}
+              data-testid="transactions-balance-uncleared"
+            />
           </View>
         </View>
         <TransactionSearchInput

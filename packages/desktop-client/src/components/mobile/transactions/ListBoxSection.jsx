@@ -1,6 +1,6 @@
 import React from 'react';
-import { useListBoxSection } from 'react-aria';
 
+import { useListBoxSection } from '@react-aria/listbox';
 import { css } from 'glamor';
 
 import { styles, theme } from '../../../style';
