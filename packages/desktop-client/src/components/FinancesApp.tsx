@@ -1,5 +1,6 @@
 // @ts-strict-ignore
 import React, { type ReactElement, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   Route,
@@ -9,12 +10,12 @@ import {
   useHref,
 } from 'react-router-dom';
 
-import { sync } from 'loot-core/client/actions';
+import { addNotification, sync } from 'loot-core/client/actions';
 import { type State } from 'loot-core/src/client/state-types';
-import { checkForUpdateNotification } from 'loot-core/src/client/update-notification';
 import * as undo from 'loot-core/src/platform/client/undo';
 
 import { useAccounts } from '../hooks/useAccounts';
+import { useLocalPref } from '../hooks/useLocalPref';
 import { useNavigate } from '../hooks/useNavigate';
 import { useResponsive } from '../ResponsiveProvider';
 import { theme } from '../style';
@@ -88,19 +89,52 @@ function RouterBehaviors() {
 
 export function FinancesApp() {
   const dispatch = useDispatch();
+  const { t } = useTranslation();
+
+  const [lastUsedVersion, setLastUsedVersion] = useLocalPref(
+    'flags.updateNotificationShownForVersion',
+  );
+
   useEffect(() => {
     // Wait a little bit to make sure the sync button will get the
     // sync start event. This can be improved later.
     setTimeout(async () => {
       await dispatch(sync());
-
-      await checkForUpdateNotification(
-        dispatch,
-        getIsOutdated,
-        getLatestVersion,
-      );
     }, 100);
   }, []);
+
+  useEffect(() => {
+    async function run() {
+      const latestVersion = await getLatestVersion();
+      const isOutdated = await getIsOutdated(latestVersion);
+
+      if (isOutdated && lastUsedVersion !== latestVersion) {
+        dispatch(
+          addNotification({
+            type: 'message',
+            title: t('A new version of Actual is available!'),
+            message: t(
+              'Version {{latestVersion}} of Actual was recently released.',
+              { latestVersion },
+            ),
+            sticky: true,
+            id: 'update-notification',
+            button: {
+              title: t('Open changelog'),
+              action: () => {
+                window.open('https://actualbudget.org/docs/releases');
+              },
+            },
+            onClose: () => {
+              setLastUsedVersion(latestVersion);
+            },
+          }),
+        );
+      }
+    }
+
+    run();
+  }, [lastUsedVersion, setLastUsedVersion]);
 
   return (
     <View style={{ height: '100%' }}>

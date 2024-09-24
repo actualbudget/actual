@@ -25,8 +25,8 @@ type BudgetType<SheetName extends SheetNames> = Record<
 >;
 
 const accountParametrizedField = parametrizedField<'account'>();
-const rolloverParametrizedField = parametrizedField<'rollover-budget'>();
-const reportParametrizedField = parametrizedField<'report-budget'>();
+const envelopeParametrizedField = parametrizedField<'envelope-budget'>();
+const trackingParametrizedField = parametrizedField<'tracking-budget'>();
 
 export function getAccountFilter(accountId?: string, field = 'account') {
   if (accountId) {
@@ -244,7 +244,7 @@ export function uncategorizedCount<SheetName extends SheetNames>() {
   } satisfies Binding<SheetName, 'uncategorized-amount'>;
 }
 
-export const rolloverBudget = {
+export const envelopeBudget = {
   incomeAvailable: 'available-funds',
   lastMonthOverspent: 'last-month-overspent',
   forNextMonth: 'buffered',
@@ -256,21 +256,21 @@ export const rolloverBudget = {
   totalSpent: 'total-spent',
   totalBalance: 'total-leftover',
 
-  groupSumAmount: rolloverParametrizedField('group-sum-amount'),
+  groupSumAmount: envelopeParametrizedField('group-sum-amount'),
   groupIncomeReceived: 'total-income',
 
-  groupBudgeted: rolloverParametrizedField('group-budget'),
-  groupBalance: rolloverParametrizedField('group-leftover'),
+  groupBudgeted: envelopeParametrizedField('group-budget'),
+  groupBalance: envelopeParametrizedField('group-leftover'),
 
-  catBudgeted: rolloverParametrizedField('budget'),
-  catSumAmount: rolloverParametrizedField('sum-amount'),
-  catBalance: rolloverParametrizedField('leftover'),
-  catCarryover: rolloverParametrizedField('carryover'),
-  catGoal: rolloverParametrizedField('goal'),
-  catLongGoal: rolloverParametrizedField('long-goal'),
-} satisfies BudgetType<'rollover-budget'>;
+  catBudgeted: envelopeParametrizedField('budget'),
+  catSumAmount: envelopeParametrizedField('sum-amount'),
+  catBalance: envelopeParametrizedField('leftover'),
+  catCarryover: envelopeParametrizedField('carryover'),
+  catGoal: envelopeParametrizedField('goal'),
+  catLongGoal: envelopeParametrizedField('long-goal'),
+} satisfies BudgetType<'envelope-budget'>;
 
-export const reportBudget = {
+export const trackingBudget = {
   totalBudgetedExpense: 'total-budgeted',
   totalBudgetedIncome: 'total-budget-income',
   totalBudgetedSaved: 'total-saved',
@@ -280,16 +280,16 @@ export const reportBudget = {
   totalSaved: 'real-saved',
 
   totalLeftover: 'total-leftover',
-  groupSumAmount: reportParametrizedField('group-sum-amount'),
+  groupSumAmount: trackingParametrizedField('group-sum-amount'),
   groupIncomeReceived: 'total-income',
 
-  groupBudgeted: reportParametrizedField('group-budget'),
-  groupBalance: reportParametrizedField('group-leftover'),
+  groupBudgeted: trackingParametrizedField('group-budget'),
+  groupBalance: trackingParametrizedField('group-leftover'),
 
-  catBudgeted: reportParametrizedField('budget'),
-  catSumAmount: reportParametrizedField('sum-amount'),
-  catBalance: reportParametrizedField('leftover'),
-  catCarryover: reportParametrizedField('carryover'),
-  catGoal: reportParametrizedField('goal'),
-  catLongGoal: reportParametrizedField('long-goal'),
-} satisfies BudgetType<'report-budget'>;
+  catBudgeted: trackingParametrizedField('budget'),
+  catSumAmount: trackingParametrizedField('sum-amount'),
+  catBalance: trackingParametrizedField('leftover'),
+  catCarryover: trackingParametrizedField('carryover'),
+  catGoal: trackingParametrizedField('goal'),
+  catLongGoal: trackingParametrizedField('long-goal'),
+} satisfies BudgetType<'tracking-budget'>;
