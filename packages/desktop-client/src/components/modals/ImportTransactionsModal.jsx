@@ -590,7 +590,7 @@ function SelectField({
       ]}
       value={value === null ? 'choose-field' : value}
       onChange={onChange}
-      buttonStyle={style}
+      style={style}
     />
   );
 }
@@ -862,7 +862,6 @@ export function ImportTransactionsModal({ options }) {
   const [flipAmount, setFlipAmount] = useState(false);
   const [multiplierEnabled, setMultiplierEnabled] = useState(false);
   const [reconcile, setReconcile] = useState(true);
-  const [previewTrigger, setPreviewTrigger] = useState(0);
   const { accountId, categories, onImported } = options;
 
   // This cannot be set after parsing the file, because changing it
@@ -1368,7 +1367,7 @@ export function ImportTransactionsModal({ options }) {
     close();
   }
 
-  const runImportPreviewCallback = useCallback(async () => {
+  const runImportPreview = useCallback(async () => {
     const transactionPreview = await getImportPreview(
       transactions,
       filetype,
@@ -1396,14 +1395,6 @@ export function ImportTransactionsModal({ options }) {
     outValue,
     multiplierAmount,
   ]);
-
-  useEffect(() => {
-    runImportPreviewCallback();
-  }, [previewTrigger, runImportPreviewCallback]);
-
-  function runImportPreview() {
-    setPreviewTrigger(value => value + 1);
-  }
 
   const headers = [
     { name: 'Date', width: 200 },
