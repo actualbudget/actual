@@ -1100,21 +1100,16 @@ const Transaction = memo(function Transaction({
       >
         <TransactionMenu
           transaction={transaction}
-          onDelete={() => onDelete && onDelete(transaction.id)}
-          onDuplicate={() => onDuplicate && onDuplicate(transaction.id)}
-          onLinkSchedule={() =>
-            onLinkSchedule && onLinkSchedule(transaction.id)
-          }
-          onUnlinkSchedule={() =>
-            onUnlinkSchedule && onUnlinkSchedule(transaction.id)
-          }
-          onCreateRule={() => onCreateRule && onCreateRule(transaction.id)}
+          onDelete={() => onDelete?.(transaction.id)}
+          onDuplicate={() => onDuplicate?.(transaction.id)}
+          onLinkSchedule={() => onLinkSchedule?.(transaction.id)}
+          onUnlinkSchedule={() => onUnlinkSchedule?.(transaction.id)}
+          onCreateRule={() => onCreateRule?.(transaction.id)}
           onScheduleAction={action =>
-            onScheduleAction && onScheduleAction(action, transaction.id)
+            onScheduleAction?.(action, transaction.id)
           }
           onMakeAsNonSplitTransactions={() =>
-            onMakeAsNonSplitTransactions &&
-            onMakeAsNonSplitTransactions(transaction.id)
+            onMakeAsNonSplitTransactions?.(transaction.id)
           }
           closeMenu={() => setMenuOpen(false)}
         />
