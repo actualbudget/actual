@@ -387,6 +387,7 @@ export function CustomReport() {
   ]);
 
   const getGraphData = useMemo(() => {
+    // TODO: fix me - state mutations should not happen inside `useMemo`
     setDataCheck(false);
     return createCustomSpreadsheet({
       startDate,
@@ -454,6 +455,16 @@ export function CustomReport() {
   const navigate = useNavigate();
   const [, setScrollWidth] = useState(0);
 
+  useEffect(() => {
+    if (disabledLegendLabel(mode, graphType, 'disableLegend')) {
+      setViewLegendPref(false);
+    }
+
+    if (disabledLegendLabel(mode, graphType, 'disableLabel')) {
+      setViewLabelsPref(false);
+    }
+  }, [setViewLegendPref, setViewLabelsPref, mode, graphType]);
+
   if (!allIntervals || !data) {
     return null;
   }
@@ -516,15 +527,9 @@ export function CustomReport() {
   const isItemDisabled = (type: string) => {
     switch (type) {
       case 'ShowLegend': {
-        if (disabledLegendLabel(mode, graphType, 'disableLegend')) {
-          setViewLegendPref(false);
-        }
         return disabledLegendLabel(mode, graphType, 'disableLegend') || false;
       }
       case 'ShowLabels': {
-        if (disabledLegendLabel(mode, graphType, 'disableLabel')) {
-          setViewLabelsPref(false);
-        }
         return disabledLegendLabel(mode, graphType, 'disableLabel') || false;
       }
       default:

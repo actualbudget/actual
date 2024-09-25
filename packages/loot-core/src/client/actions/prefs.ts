@@ -1,6 +1,5 @@
-// @ts-strict-ignore
 import { send } from '../../platform/client/fetch';
-import type * as prefs from '../../types/prefs';
+import { type GlobalPrefs, type MetadataPrefs } from '../../types/prefs';
 import * as constants from '../constants';
 
 import { closeModal } from './modals';
@@ -26,7 +25,7 @@ export function loadPrefs() {
   };
 }
 
-export function savePrefs(prefs: prefs.LocalPrefs) {
+export function savePrefs(prefs: MetadataPrefs) {
   return async (dispatch: Dispatch) => {
     await send('save-prefs', prefs);
     dispatch({
@@ -48,12 +47,16 @@ export function loadGlobalPrefs() {
   };
 }
 
-export function saveGlobalPrefs(prefs: prefs.GlobalPrefs) {
+export function saveGlobalPrefs(
+  prefs: GlobalPrefs,
+  onSaveGlobalPrefs?: () => void,
+) {
   return async (dispatch: Dispatch) => {
     await send('save-global-prefs', prefs);
     dispatch({
       type: constants.MERGE_GLOBAL_PREFS,
       globalPrefs: prefs,
     });
+    onSaveGlobalPrefs?.();
   };
 }

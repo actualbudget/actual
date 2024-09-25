@@ -99,7 +99,7 @@ export async function asyncTransaction(
 }
 
 function regexp(regex: string, text: string | null) {
-  return new RegExp(regex).test(text) ? 1 : 0;
+  return new RegExp(regex).test(text || '') ? 1 : 0;
 }
 
 export function openDatabase(pathOrBuffer: string | Buffer) {

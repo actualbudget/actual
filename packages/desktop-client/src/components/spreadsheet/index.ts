@@ -15,12 +15,12 @@ export type Spreadsheets = {
     balanceCleared: number;
     balanceUncleared: number;
   };
-  'rollover-budget': {
+  'envelope-budget': {
     // Common fields
     'uncategorized-amount': number;
     'uncategorized-balance': number;
 
-    // Rollover fields
+    // Envelope budget fields
     'available-funds': number;
     'last-month-overspent': number;
     buffered: number;
@@ -40,12 +40,12 @@ export type Spreadsheets = {
     goal: number;
     'long-goal': number;
   };
-  'report-budget': {
+  'tracking-budget': {
     // Common fields
     'uncategorized-amount': number;
     'uncategorized-balance': number;
 
-    // Report fields
+    // Tracking budget fields
     'total-budgeted': number;
     'total-budget-income': number;
     'total-saved': number;
