@@ -7,7 +7,11 @@ import memoizeOne from 'memoize-one';
 
 import { collapseModals, pushModal } from 'loot-core/client/actions';
 import { groupById, integerToCurrency } from 'loot-core/shared/util';
-import { envelopeBudget, trackingBudget } from 'loot-core/src/client/queries';
+import {
+  envelopeBudget,
+  trackingBudget,
+  uncategorizedCount,
+} from 'loot-core/src/client/queries';
 import * as monthUtils from 'loot-core/src/shared/months';
 
 import { useCategories } from '../../../hooks/useCategories';
@@ -33,6 +37,7 @@ import { makeAmountGrey, makeBalanceAmountStyle } from '../../budget/util';
 import { Button } from '../../common/Button2';
 import { Card } from '../../common/Card';
 import { Label } from '../../common/Label';
+import { Link } from '../../common/Link';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
 import { MobilePageHeader, Page } from '../../Page';
@@ -1454,6 +1459,38 @@ function IncomeGroup({
   );
 }
 
+function UncategorizedButton() {
+  const count = useSheetValue(uncategorizedCount());
+  if (count === null || count <= 0) {
+    return null;
+  }
+
+  return (
+    <View
+      style={{
+        padding: 5,
+        paddingBottom: 2,
+      }}
+    >
+      <Link
+        variant="button"
+        type="button"
+        buttonVariant="primary"
+        to="/accounts/uncategorized"
+        style={{
+          border: 0,
+          justifyContent: 'flex-start',
+          padding: '1.25em',
+        }}
+      >
+        {count} uncategorized {count === 1 ? 'transaction' : 'transactions'}
+        <View style={{ flex: 1 }} />
+        <SvgArrowThinRight width="15" height="15" />
+      </Link>
+    </View>
+  );
+}
+
 function BudgetGroups({
   type,
   categoryGroups,
@@ -1636,6 +1673,7 @@ export function BudgetTable({
             paddingBottom: MOBILE_NAV_HEIGHT,
           }}
         >
+          <UncategorizedButton />
           <BudgetGroups
             type={type}
             categoryGroups={categoryGroups}
