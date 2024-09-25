@@ -5,7 +5,7 @@ import { inspect } from 'util';
 
 import { goCardlessService } from './services/gocardless-service.js';
 import {
-  AccountNotLinedToRequisition,
+  AccountNotLinkedToRequisition,
   GenericGoCardlessError,
   RateLimitError,
   RequisitionNotLinked,
@@ -214,7 +214,7 @@ app.post(
               'Access to account has expired as set in End User Agreement',
           });
           break;
-        case error instanceof AccountNotLinedToRequisition:
+        case error instanceof AccountNotLinkedToRequisition:
           sendErrorResponse({
             error_type: 'INVALID_INPUT',
             error_code: 'INVALID_ACCESS_TOKEN',

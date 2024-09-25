@@ -1,7 +1,7 @@
 import { jest } from '@jest/globals';
 import {
   AccessDeniedError,
-  AccountNotLinedToRequisition,
+  AccountNotLinkedToRequisition,
   GenericGoCardlessError,
   InvalidInputDataError,
   InvalidGoCardlessTokenError,
@@ -215,7 +215,7 @@ describe('goCardlessService', () => {
       );
     });
 
-    it('throws AccountNotLinedToRequisition error if requisition accounts not includes requested account', async () => {
+    it('throws AccountNotLinkedToRequisition error if requisition accounts not includes requested account', async () => {
       jest
         .spyOn(goCardlessService, 'getLinkedRequisition')
         .mockResolvedValue(mockRequisition);
@@ -227,7 +227,7 @@ describe('goCardlessService', () => {
           startDate: undefined,
           endDate: undefined,
         }),
-      ).rejects.toThrow(AccountNotLinedToRequisition);
+      ).rejects.toThrow(AccountNotLinkedToRequisition);
     });
   });
 

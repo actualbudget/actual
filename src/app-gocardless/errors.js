@@ -5,7 +5,7 @@ export class RequisitionNotLinked extends Error {
   }
 }
 
-export class AccountNotLinedToRequisition extends Error {
+export class AccountNotLinkedToRequisition extends Error {
   constructor(accountId, requisitionId) {
     super('Provided account id is not linked to given requisition');
     this.details = {

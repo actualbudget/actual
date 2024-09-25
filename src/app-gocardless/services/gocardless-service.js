@@ -1,7 +1,7 @@
 import BankFactory, { BANKS_WITH_LIMITED_HISTORY } from '../bank-factory.js';
 import {
   AccessDeniedError,
-  AccountNotLinedToRequisition,
+  AccountNotLinkedToRequisition,
   GenericGoCardlessError,
   InvalidInputDataError,
   InvalidGoCardlessTokenError,
@@ -181,7 +181,7 @@ export const goCardlessService = {
    * @param accountId
    * @param startDate
    * @param endDate
-   * @throws {AccountNotLinedToRequisition} Will throw an error if requisition not includes provided account id
+   * @throws {AccountNotLinkedToRequisition} Will throw an error if requisition not includes provided account id
    * @throws {RequisitionNotLinked} Will throw an error if requisition is not in Linked
    * @throws {InvalidInputDataError}
    * @throws {InvalidGoCardlessTokenError}
@@ -203,7 +203,7 @@ export const goCardlessService = {
       await goCardlessService.getLinkedRequisition(requisitionId);
 
     if (!accountIds.includes(accountId)) {
-      throw new AccountNotLinedToRequisition(accountId, requisitionId);
+      throw new AccountNotLinkedToRequisition(accountId, requisitionId);
     }
 
     const [normalizedTransactions, accountBalance] = await Promise.all([
@@ -239,7 +239,7 @@ export const goCardlessService = {
    * @param accountId
    * @param startDate
    * @param endDate
-   * @throws {AccountNotLinedToRequisition} Will throw an error if requisition not includes provided account id
+   * @throws {AccountNotLinkedToRequisition} Will throw an error if requisition not includes provided account id
    * @throws {RequisitionNotLinked} Will throw an error if requisition is not in Linked
    * @throws {InvalidInputDataError}
    * @throws {InvalidGoCardlessTokenError}
@@ -261,7 +261,7 @@ export const goCardlessService = {
       await goCardlessService.getLinkedRequisition(requisitionId);
 
     if (!accountIds.includes(accountId)) {
-      throw new AccountNotLinedToRequisition(accountId, requisitionId);
+      throw new AccountNotLinkedToRequisition(accountId, requisitionId);
     }
 
     const transactions = await goCardlessService.getTransactions({
