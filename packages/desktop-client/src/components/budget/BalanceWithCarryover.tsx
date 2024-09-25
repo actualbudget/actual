@@ -170,7 +170,7 @@ export function BalanceWithCarryover({
                 </span>
                 <GoalTooltipRow>
                   <div>{t('Goal Type:')}</div>
-                  <div>{longGoalValue === 1 ? 'Long' : 'Template'}</div>
+                  <div>{longGoalValue === 1 ? t('Long') : t('Template')}</div>
                 </GoalTooltipRow>
                 <GoalTooltipRow>
                   <div>{t('Goal:')}</div>
