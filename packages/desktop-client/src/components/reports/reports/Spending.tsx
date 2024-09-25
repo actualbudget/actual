@@ -441,6 +441,7 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                   <LegendItem
                     color={theme.reportsGreen}
                     label={monthUtils.format(compare, 'MMM, yyyy')}
+                    style={{ padding: 0, paddingBottom: 10 }}
                   />
                   <LegendItem
                     color={theme.reportsGray}
@@ -451,6 +452,7 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                           ? 'Budgeted'
                           : 'Average'
                     }
+                    style={{ padding: 0, paddingBottom: 10 }}
                   />
                 </View>
                 <View style={{ flex: 1 }} />

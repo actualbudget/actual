@@ -1,15 +1,25 @@
 import React from 'react';
 
+import { type CSSProperties } from '../../style/types';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 
-export function LegendItem({ color, label }: { color: string; label: string }) {
+export function LegendItem({
+  color,
+  label,
+  style,
+}: {
+  color: string;
+  label: string;
+  style?: CSSProperties;
+}) {
   return (
     <View
       style={{
-        paddingBottom: 10,
+        padding: 10,
         flexDirection: 'row',
         alignItems: 'center',
+        ...style,
       }}
     >
       <View
