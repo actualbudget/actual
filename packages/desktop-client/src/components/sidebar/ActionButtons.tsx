@@ -1,8 +1,7 @@
 // @ts-strict-ignore
-import React, { type ComponentType, type SVGProps } from 'react';
+import React, { useState, type ComponentType, type SVGProps } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { useLocalPref } from '../../hooks/useLocalPref';
 import { SvgCheveronDown, SvgCheveronUp } from '../../icons/v1';
 import { styles } from '../../style';
 import { View } from '../common/View';
@@ -26,9 +25,8 @@ type ActionButtonsProps = {
 export function ActionButtons({ buttons }: ActionButtonsProps) {
   const { t } = useTranslation();
 
-  const [expanded, setExpandedActionButtonsPref] = useLocalPref(
-    'ui.expandActionButtons',
-  );
+  const [expanded, setExpandedActionButtonsPref] = useState(false);
+
   const onToggle = () => {
     setExpandedActionButtonsPref(!expanded);
   };

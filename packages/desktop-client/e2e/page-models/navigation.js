@@ -43,11 +43,11 @@ export class Navigation {
   }
 
   async goToSettingsPage() {
-    const settingsLink = this.page.getByRole('link', { name: 'Settings' });
+    const settingsLink = this.page.getByRole('button', { name: 'Settings' });
 
-    // Expand the "more" menu only if it is not already expanded
+    // Expand the menu only if it is not already expanded
     if (!(await settingsLink.isVisible())) {
-      await this.page.getByRole('button', { name: 'More' }).click();
+      await this.page.getByRole('button', { name: 'Test Budget' }).click();
     }
 
     await settingsLink.click();
