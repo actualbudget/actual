@@ -31,11 +31,11 @@ import { TransactionEdit } from './mobile/transactions/TransactionEdit';
 import { Notifications } from './Notifications';
 import { ManagePayeesPage } from './payees/ManagePayeesPage';
 import { Reports } from './reports';
+import { LoadingIndicator } from './reports/LoadingIndicator';
 import { NarrowAlternate, WideComponent } from './responsive';
 import { Settings } from './settings';
 import { FloatableSidebar } from './sidebar';
 import { Titlebar } from './Titlebar';
-import { LoadingIndicator } from './reports/LoadingIndicator';
 
 function NarrowNotSupported({
   redirectTo = '/budget',
