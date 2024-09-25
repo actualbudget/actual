@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import { useGlobalPref } from '../../../hooks/useGlobalPref';
 import { theme } from '../../../style';
@@ -78,6 +78,63 @@ function FileLocationSettings() {
     </View>
   );
 }
+
+function SelfSignedCertLocationSettings() {
+  const [serverSelfSignedCertPref, _setServerSelfSignedCertPref] =
+    useGlobalPref('serverSelfSignedCert');
+
+  const dirScrolled = useRef<HTMLSpanElement>(null);
+
+  useEffect(() => {
+    if (dirScrolled.current) {
+      dirScrolled.current.scrollTo(10000, 0);
+    }
+  }, []);
+
+  if (!serverSelfSignedCertPref) {
+    return;
+  }
+
+  return (
+    <View
+      style={{
+        gap: 15,
+        backgroundColor: theme.pillBackground,
+        alignSelf: 'flex-start',
+        alignItems: 'flex-start',
+        padding: 15,
+        borderRadius: 4,
+        border: '1px solid ' + theme.pillBorderDark,
+        width: '100%',
+      }}
+    >
+      <Text>
+        <strong>Server self-signed certificate</strong>{' '}
+        <small style={{ marginLeft: '0.5rem' }}>
+          <i>enables a secure connection</i>
+        </small>
+      </Text>
+      <View style={{ flexDirection: 'row', gap: '0.5rem', width: '100%' }}>
+        <Text
+          innerRef={dirScrolled}
+          title={serverSelfSignedCertPref}
+          style={{
+            backgroundColor: theme.pageBackground,
+            padding: '7px 10px',
+            borderRadius: 4,
+            overflow: 'auto',
+            whiteSpace: 'nowrap',
+            width: '100%',
+            '::-webkit-scrollbar': { display: 'none' }, // Removes the scrollbar
+          }}
+        >
+          {serverSelfSignedCertPref}
+        </Text>
+      </View>
+    </View>
+  );
+}
+
 function BackupSettings() {
   return (
     <View
@@ -98,11 +155,11 @@ function BackupSettings() {
           <i>automated backups</i>
         </small>
         <p>
-          Backups are taken once every 15 minutes. Backups are stored in{' '}
+          Backups are created every 15 minutes and stored in{' '}
           <strong>
             <i>Actual’s data directory</i>
           </strong>
-          . A maximum of 10 backups are stored at any time.
+          . The system retains a maximum of 10 backups at any time.
         </p>
       </Text>
     </View>
@@ -129,6 +186,7 @@ export function FilesSettingsModal() {
             }}
           >
             <FileLocationSettings />
+            <SelfSignedCertLocationSettings />
             <BackupSettings />
             <Button
               variant="primary"
