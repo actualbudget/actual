@@ -10,6 +10,7 @@ import { css } from 'glamor';
 
 import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { SvgArrowThinRight } from '../../icons/v1';
+import { useResponsive } from '../../ResponsiveProvider';
 import { type CSSProperties, theme, styles } from '../../style';
 import { Tooltip } from '../common/Tooltip';
 import { View } from '../common/View';
@@ -95,6 +96,7 @@ export function BalanceWithCarryover({
   ...props
 }: BalanceWithCarryoverProps) {
   const { t } = useTranslation();
+  const { isNarrowWidth } = useResponsive();
   const carryoverValue = useSheetValue(carryover);
   const goalValue = useSheetValue(goal);
   const budgetedValue = useSheetValue(budgeted);
@@ -195,7 +197,7 @@ export function BalanceWithCarryover({
             placement="bottom"
             triggerProps={{
               delay: 750,
-              isDisabled: !isGoalTemplatesEnabled || goalValue == null,
+              isDisabled: !isGoalTemplatesEnabled || goalValue == null || isNarrowWidth,
             }}
           >
             {children ? (
