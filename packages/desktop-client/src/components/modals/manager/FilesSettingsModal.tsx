@@ -1,19 +1,22 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { useDispatch } from 'react-redux';
+
+import { loadAllFiles, pushModal } from 'loot-core/client/actions';
 
 import { useGlobalPref } from '../../../hooks/useGlobalPref';
 import { theme } from '../../../style';
-import { Information } from '../../alerts';
 import { Button } from '../../common/Button2';
 import { Modal, ModalCloseButton, ModalHeader } from '../../common/Modal';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
 
 function FileLocationSettings() {
-  const [documentDir, setDocumentDirPref] = useGlobalPref('documentDir');
+  const [documentDir, _setDocumentDirPref] = useGlobalPref('documentDir');
 
-  const [documentDirChanged, setDirChanged] = useState(false);
+  const [_documentDirChanged, setDirChanged] = useState(false);
   const dirScrolled = useRef<HTMLSpanElement>(null);
 
+  const dispatch = useDispatch();
   useEffect(() => {
     if (dirScrolled.current) {
       dirScrolled.current.scrollTo(10000, 0);
@@ -25,9 +28,14 @@ function FileLocationSettings() {
       properties: ['openDirectory'],
     });
 
-    if (chosenDirectory) {
-      setDocumentDirPref(chosenDirectory[0]);
+    if (chosenDirectory && chosenDirectory[0] !== documentDir) {
       setDirChanged(true);
+      dispatch(
+        pushModal('confirm-change-document-dir', {
+          currentBudgetDirectory: documentDir,
+          newDirectory: chosenDirectory[0],
+        }),
+      );
     }
   }
 
@@ -68,13 +76,6 @@ function FileLocationSettings() {
         </Text>
         <Button onPress={onChooseDocumentDir}>Change location</Button>
       </View>
-
-      {documentDirChanged && (
-        <Information>
-          <strong>Remember</strong> to copy your budget(s) into the new folder.{' '}
-          <br />A restart is required for this change to take effect.
-        </Information>
-      )}
     </View>
   );
 }
@@ -135,45 +136,23 @@ function SelfSignedCertLocationSettings() {
   );
 }
 
-function BackupSettings() {
-  return (
-    <View
-      style={{
-        gap: 15,
-        backgroundColor: theme.pillBackground,
-        alignSelf: 'flex-start',
-        alignItems: 'flex-start',
-        padding: 15,
-        borderRadius: 4,
-        border: '1px solid ' + theme.pillBorderDark,
-        width: '100%',
-      }}
-    >
-      <Text>
-        <strong>Backups</strong>
-        <small style={{ marginLeft: '0.5rem' }}>
-          <i>automated backups</i>
-        </small>
-        <p>
-          Backups are created every 15 minutes and stored in{' '}
-          <strong>
-            <i>Actual’s data directory</i>
-          </strong>
-          . The system retains a maximum of 10 backups at any time.
-        </p>
-      </Text>
-    </View>
-  );
-}
-
 export function FilesSettingsModal() {
+  const dispatch = useDispatch();
+
+  function closeModal(close: () => void) {
+    dispatch(loadAllFiles());
+    close();
+  }
+
   return (
     <Modal name="files-settings">
       {({ state: { close } }) => (
         <>
           <ModalHeader
             title="Settings"
-            rightContent={<ModalCloseButton onPress={close} />}
+            rightContent={
+              <ModalCloseButton onPress={() => closeModal(close)} />
+            }
           />
           <View
             style={{
@@ -187,14 +166,14 @@ export function FilesSettingsModal() {
           >
             <FileLocationSettings />
             <SelfSignedCertLocationSettings />
-            <BackupSettings />
             <Button
               variant="primary"
               style={{
                 padding: '10px 30px',
                 fontSize: 14,
+                alignSelf: 'center',
               }}
-              onPress={close}
+              onPress={() => closeModal(close)}
             >
               OK
             </Button>

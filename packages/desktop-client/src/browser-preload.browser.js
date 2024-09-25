@@ -135,6 +135,8 @@ global.Actual = {
   setTheme: theme => {
     window.__actionsForMenu.saveGlobalPrefs({ theme });
   },
+
+  moveBudgetDirectory: () => {},
 };
 
 function inputFocused(e) {

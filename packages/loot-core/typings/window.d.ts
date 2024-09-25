@@ -16,6 +16,10 @@ declare global {
       ) => Promise<string[]>;
       relaunch: () => void;
       restartElectronServer: () => void;
+      moveBudgetDirectory: (
+        currentBudgetDirectory: string,
+        newDirectory: string,
+      ) => Promise<void>;
     };
 
     __navigate?: import('react-router').NavigateFunction;

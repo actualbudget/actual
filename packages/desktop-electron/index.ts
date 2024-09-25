@@ -18,6 +18,7 @@ import {
   SaveDialogOptions,
 } from 'electron';
 import isDev from 'electron-is-dev';
+import { copy, remove } from 'fs-extra';
 import promiseRetry from 'promise-retry';
 
 import { getMenu } from './menu';
@@ -399,3 +400,18 @@ ipcMain.on('set-theme', (_event, theme: string) => {
     );
   }
 });
+
+ipcMain.handle(
+  'move-budget-directory',
+  async (_event, currentBudgetDirectory: string, newDirectory: string) => {
+    try {
+      await copy(currentBudgetDirectory, newDirectory, {
+        overwrite: true,
+      });
+      await remove(currentBudgetDirectory);
+    } catch (error) {
+      console.error('There was an error moving your directory', error);
+      return Promise.reject(error);
+    }
+  },
+);

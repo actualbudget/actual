@@ -2,6 +2,7 @@ import React, { type ReactNode, useEffect } from 'react';
 
 import { media } from 'glamor';
 
+import { isElectron } from 'loot-core/shared/environment';
 import { listen } from 'loot-core/src/platform/client/fetch';
 
 import { useActions } from '../../hooks/useActions';
@@ -23,6 +24,7 @@ import { MOBILE_NAV_HEIGHT } from '../mobile/MobileNavTabs';
 import { Page } from '../Page';
 import { useServerVersion } from '../ServerContext';
 
+import { Backups } from './Backups';
 import { BudgetTypeSettings } from './BudgetTypeSettings';
 import { EncryptionSettings } from './Encryption';
 import { ExperimentalFeatures } from './Experimental';
@@ -175,6 +177,7 @@ export function Settings() {
         <FormatSettings />
         <EncryptionSettings />
         {useFeatureFlag('reportBudget') && <BudgetTypeSettings />}
+        {isElectron && <Backups />}
         <ExportBudget />
         <AdvancedToggle>
           <AdvancedAbout />
