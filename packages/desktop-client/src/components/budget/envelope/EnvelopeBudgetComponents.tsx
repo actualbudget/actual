@@ -223,21 +223,11 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
 
   const [isHovered, setIsHover] = useState(false);
 
-  const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
-
   const handlePointerEnter = useCallback(() => {
-    const timeout = setTimeout(() => {
-      setIsHover(true);
-    }, 1);
-
-    hoverTimeoutRef.current = timeout;
+    setIsHover(true);
   }, []);
 
   const handlePointerLeave = useCallback(() => {
-    if (hoverTimeoutRef.current) {
-      clearTimeout(hoverTimeoutRef.current);
-    }
-
     setIsHover(false);
   }, []);
 
