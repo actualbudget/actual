@@ -47,8 +47,12 @@ function RuleButton({ ruleCount, focused, onEdit, onClick }: RuleButtonProps) {
       >
         <Text style={{ paddingRight: 5 }}>
           {ruleCount > 0 ? (
-            <Trans>
-              {ruleCount} associated {ruleCount === 1 ? 'rule' : 'rules'}
+            <Trans
+              i18nKey="associatedRule"
+              count={ruleCount}
+              values={{ ruleCount }}
+            >
+              {{ ruleCount }} associated rule
             </Trans>
           ) : (
             <Trans>Create rule</Trans>

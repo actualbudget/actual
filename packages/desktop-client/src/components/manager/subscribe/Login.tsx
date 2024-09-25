@@ -163,7 +163,7 @@ export function Login() {
           )}
           {!error && (
             <span>
-              <Trans>Checking Header Token Login ... </Trans>
+              <Trans>Checking Header Token Login ...</Trans>{' '}
               <AnimatedLoading style={{ width: 20, height: 20 }} />
             </span>
           )}
