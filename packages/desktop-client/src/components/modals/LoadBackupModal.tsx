@@ -12,11 +12,20 @@ import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { Row, Cell } from '../table';
+import { type Backup } from 'loot-core/server/backups';
 
-class BackupTable extends Component {
+type BackupTableProps = {
+  backups: Backup[];
+  onSelect: (backupId: string) => void;
+};
+type BackupTableState = {
+  hoveredBackup: null | string;
+};
+
+class BackupTable extends Component<BackupTableProps, BackupTableState> {
   state = { hoveredBackup: null };
 
-  onHover = id => {
+  onHover = (id: BackupTableState['hoveredBackup']) => {
     this.setState({ hoveredBackup: id });
   };
 
@@ -33,7 +42,6 @@ class BackupTable extends Component {
           <Row
             key={backup.id}
             collapsed={idx !== 0}
-            focused={hoveredBackup === backup.id}
             onMouseEnter={() => this.onHover(backup.id)}
             onClick={() => onSelect(backup.id)}
             style={{ cursor: 'pointer' }}
@@ -50,11 +58,21 @@ class BackupTable extends Component {
   }
 }
 
-export function LoadBackupModal({ budgetId, watchUpdates, backupDisabled }) {
+type LoadBackupModalProps = {
+  budgetId: string;
+  watchUpdates: boolean;
+  backupDisabled: boolean;
+};
+
+export function LoadBackupModal({
+  budgetId,
+  watchUpdates,
+  backupDisabled,
+}: LoadBackupModalProps) {
   const dispatch = useDispatch();
-  const [backups, setBackups] = useState([]);
+  const [backups, setBackups] = useState<Backup[]>([]);
   const [prefsBudgetId] = useMetadataPref('id');
-  const budgetIdToLoad = budgetId || prefsBudgetId;
+  const budgetIdToLoad = budgetId ?? prefsBudgetId;
 
   useEffect(() => {
     send('backups-get', { id: budgetIdToLoad }).then(setBackups);
@@ -63,12 +81,16 @@ export function LoadBackupModal({ budgetId, watchUpdates, backupDisabled }) {
   useEffect(() => {
     if (watchUpdates) {
       listen('backups-updated', setBackups);
-      return () => unlisten('backups-updated', setBackups);
+      return () => unlisten('backups-updated');
     }
   }, [watchUpdates]);
 
-  const latestBackup = backups.find(backup => backup.isLatest);
-  const previousBackups = backups.filter(backup => !backup.isLatest);
+  const latestBackup = backups.find(backup =>
+    'isLatest' in backup ? backup.isLatest : false,
+  );
+  const previousBackups = backups.filter(
+    backup => !('isLatest' in backup ? backup.isLatest : false),
+  );
 
   return (
     <Modal name="load-backup" containerProps={{ style: { maxWidth: '30vw' } }}>
