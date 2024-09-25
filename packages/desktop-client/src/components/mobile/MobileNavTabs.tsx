@@ -199,7 +199,7 @@ export function MobileNavTabs() {
       <View>
         <div
           style={{
-            background: theme.pillBorder,
+            backgroundColor: theme.pillBorder,
             borderRadius: 10,
             width: 30,
             marginTop: 5,
