@@ -18,4 +18,5 @@ export interface ServerEvents {
   'start-load': unknown;
   'sync-event': { type; subtype; meta; tables; syncDisabled };
   'undo-event': UndoState;
+  'api-fetch-redirected': unknown;
 }
