@@ -9,8 +9,6 @@ import React, {
 
 import { css } from 'glamor';
 
-import { css } from 'glamor';
-
 import { envelopeBudget } from 'loot-core/src/client/queries';
 import { evalArithmetic } from 'loot-core/src/shared/arithmetic';
 import * as monthUtils from 'loot-core/src/shared/months';
@@ -259,17 +257,17 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
   );
   const carryover = catBalance - catSumAmount - catBudgeted;
   const overSpent = Math.abs(catSumAmount) > catBudgeted + carryover;
-  
+
   const isCarryoverNegative = carryover < 0;
   const absCatSumAmount = Math.abs(catSumAmount);
   const totalBudget = catBudgeted + carryover;
-  
+
   // Calculate carryoverSpent
   const carryoverSpent = isCarryoverNegative
-  ? null
-  : absCatSumAmount < carryover
-    ? absCatSumAmount
-    : carryover;
+    ? null
+    : absCatSumAmount < carryover
+      ? absCatSumAmount
+      : carryover;
 
   // Calculate carryoverRemaining
   const carryoverRemaining =
@@ -277,25 +275,25 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
 
   // Calculate spent
   const spent = isCarryoverNegative
-  ? absCatSumAmount > catBudgeted
-    ? null
-    : absCatSumAmount < totalBudget
-      ? absCatSumAmount
-      : totalBudget
-  : absCatSumAmount < carryover
-    ? null
-    : absCatSumAmount < totalBudget
-      ? absCatSumAmount - carryover
-      : catBudgeted;
+    ? absCatSumAmount > catBudgeted
+      ? null
+      : absCatSumAmount < totalBudget
+        ? absCatSumAmount
+        : totalBudget
+    : absCatSumAmount < carryover
+      ? null
+      : absCatSumAmount < totalBudget
+        ? absCatSumAmount - carryover
+        : catBudgeted;
 
   // Calculate remaining
   const remaining = isCarryoverNegative
-  ? absCatSumAmount > catBudgeted
-    ? null
-    : !overSpent && catBudgeted + catSumAmount + carryover
-  : absCatSumAmount < carryover
-    ? catBudgeted
-    : !overSpent && catBudgeted + catSumAmount + carryover
+    ? absCatSumAmount > catBudgeted
+      ? null
+      : !overSpent && catBudgeted + catSumAmount + carryover
+    : absCatSumAmount < carryover
+      ? catBudgeted
+      : !overSpent && catBudgeted + catSumAmount + carryover;
 
   const data: barGraphBudgetCategory[] = [
     {

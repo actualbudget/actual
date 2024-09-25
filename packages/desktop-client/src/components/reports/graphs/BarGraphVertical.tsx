@@ -11,7 +11,7 @@ export type barGraphBudgetCategory = {
   budget: number;
   carryover: number | false;
   carryoverSpent: number | null;
-  carryoverRemaining: number | false;
+  carryoverRemaining: number | null;
   carryoverNegative: number | false;
   spent: number | null;
   remaining: number | false | null;

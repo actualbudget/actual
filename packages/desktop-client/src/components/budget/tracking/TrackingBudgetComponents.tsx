@@ -269,17 +269,17 @@ export const CategoryMonth = memo(function CategoryMonth({
   );
   const carryover = catBalance - catSumAmount - catBudgeted;
   const overSpent = Math.abs(catSumAmount) > catBudgeted + carryover;
-  
+
   const isCarryoverNegative = carryover < 0;
   const absCatSumAmount = Math.abs(catSumAmount);
   const totalBudget = catBudgeted + carryover;
-  
+
   // Calculate carryoverSpent
   const carryoverSpent = isCarryoverNegative
-  ? null
-  : absCatSumAmount < carryover
-    ? absCatSumAmount
-    : carryover;
+    ? null
+    : absCatSumAmount < carryover
+      ? absCatSumAmount
+      : carryover;
 
   // Calculate carryoverRemaining
   const carryoverRemaining =
@@ -287,25 +287,25 @@ export const CategoryMonth = memo(function CategoryMonth({
 
   // Calculate spent
   const spent = isCarryoverNegative
-  ? absCatSumAmount > catBudgeted
-    ? null
-    : absCatSumAmount < totalBudget
-      ? absCatSumAmount
-      : totalBudget
-  : absCatSumAmount < carryover
-    ? null
-    : absCatSumAmount < totalBudget
-      ? absCatSumAmount - carryover
-      : catBudgeted;
+    ? absCatSumAmount > catBudgeted
+      ? null
+      : absCatSumAmount < totalBudget
+        ? absCatSumAmount
+        : totalBudget
+    : absCatSumAmount < carryover
+      ? null
+      : absCatSumAmount < totalBudget
+        ? absCatSumAmount - carryover
+        : catBudgeted;
 
   // Calculate remaining
   const remaining = isCarryoverNegative
-  ? absCatSumAmount > catBudgeted
-    ? null
-    : !overSpent && catBudgeted + catSumAmount + carryover
-  : absCatSumAmount < carryover
-    ? catBudgeted
-    : !overSpent && catBudgeted + catSumAmount + carryover
+    ? absCatSumAmount > catBudgeted
+      ? null
+      : !overSpent && catBudgeted + catSumAmount + carryover
+    : absCatSumAmount < carryover
+      ? catBudgeted
+      : !overSpent && catBudgeted + catSumAmount + carryover;
 
   const data: barGraphBudgetCategory[] = [
     {
