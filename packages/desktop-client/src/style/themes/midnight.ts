@@ -193,6 +193,7 @@ export const pillTextSubdued = colorPalette.gray500;
 export const reportsRed = colorPalette.red300;
 export const reportsBlue = colorPalette.blue400;
 export const reportsGreen = colorPalette.green400;
+export const reportsGray = colorPalette.gray400;
 export const reportsLabel = pageText;
 export const reportsInnerLabel = colorPalette.navy800;
 
@@ -208,3 +209,7 @@ export const budgetHeaderCurrentMonth = tableHeaderBackground;
 export const floatingActionBarBackground = colorPalette.gray900;
 export const floatingActionBarBorder = colorPalette.purple300;
 export const floatingActionBarText = colorPalette.purple200;
+
+export const tooltipText = colorPalette.gray100;
+export const tooltipBackground = colorPalette.gray800;
+export const tooltipBorder = colorPalette.gray600;

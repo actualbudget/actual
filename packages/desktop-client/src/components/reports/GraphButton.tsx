@@ -37,6 +37,7 @@ export const GraphButton = ({
         }}
         onPress={onSelect}
         isDisabled={disabled}
+        aria-label={title}
       >
         {children}
       </Button>
