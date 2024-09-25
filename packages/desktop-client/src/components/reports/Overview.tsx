@@ -80,7 +80,6 @@ export function Overview() {
   sessionStorage.setItem('url', location.pathname);
 
   const isDashboardsFeatureEnabled = useFeatureFlag('dashboards');
-  const spendingReportFeatureFlag = useFeatureFlag('spendingReport');
 
   const baseLayout = widgets.map(widget => ({
     i: widget.id,
@@ -94,7 +93,6 @@ export function Overview() {
   }));
 
   const layout =
-    spendingReportFeatureFlag &&
     !isDashboardsFeatureEnabled &&
     !baseLayout.find(({ type }) => type === 'spending-card')
       ? [
@@ -403,14 +401,10 @@ export function Overview() {
                               name: 'net-worth-card' as const,
                               text: t('Net worth graph'),
                             },
-                            ...(spendingReportFeatureFlag
-                              ? [
-                                  {
-                                    name: 'spending-card' as const,
-                                    text: t('Spending analysis'),
-                                  },
-                                ]
-                              : []),
+                            {
+                              name: 'spending-card' as const,
+                              text: t('Spending analysis'),
+                            },
                             {
                               name: 'markdown-card' as const,
                               text: t('Text widget'),
