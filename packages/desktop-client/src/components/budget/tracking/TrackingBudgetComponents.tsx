@@ -2,6 +2,8 @@
 import React, { type ComponentProps, memo, useRef, useState } from 'react';
 import { Trans } from 'react-i18next';
 
+import { css } from 'glamor';
+
 import { trackingBudget } from 'loot-core/src/client/queries';
 import { evalArithmetic } from 'loot-core/src/shared/arithmetic';
 import * as monthUtils from 'loot-core/src/shared/months';
@@ -370,13 +372,15 @@ export const CategoryMonth = memo(function CategoryMonth({
             {props => (
               <CellValueText
                 {...props}
-                style={{
-                  cursor: 'pointer',
-                  ':hover': {
-                    textDecoration: 'underline',
-                  },
-                  ...makeAmountGrey(props.value),
-                }}
+                className={String(
+                  css({
+                    cursor: 'pointer',
+                    ':hover': {
+                      textDecoration: 'underline',
+                    },
+                    ...makeAmountGrey(props.value),
+                  }),
+                )}
               />
             )}
           </TrackingCellValue>
