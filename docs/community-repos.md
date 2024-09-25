@@ -21,7 +21,6 @@ The following are implementations of bank syncing using the Actual API. For inst
 * **Monobank bank sync** - https://github.com/dnullproject/mono-to-actualbudget
 * **Norwegian Trumf Visa PDF invoice to Actual Budget friendly CSV converter** - https://github.com/RubenOlsen/TrumfVisa2ActualBudget
 * **Plaid bank sync** - https://github.com/youngcw/actualplaid
-* **SimpleFIN bank sync** - https://github.com/duplaja/actual-simplefin-sync/
 
 
 ## Budget Migration
