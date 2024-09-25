@@ -32,6 +32,7 @@ import { MobileBackButton } from '../../mobile/MobileBackButton';
 import { MobilePageHeader, Page, PageHeader } from '../../Page';
 import { PrivacyFilter } from '../../PrivacyFilter';
 import { SpendingGraph } from '../graphs/SpendingGraph';
+import { LegendItem } from '../LegendItem';
 import { LoadingIndicator } from '../LoadingIndicator';
 import { ModeButton } from '../ModeButton';
 import { calculateSpendingReportTimeRange } from '../reportRanges';
@@ -437,62 +438,20 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                 }}
               >
                 <View>
-                  <View
-                    style={{
-                      paddingBottom: 10,
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                    }}
-                  >
-                    <View
-                      style={{
-                        marginRight: 5,
-                        borderRadius: 1000,
-                        width: 14,
-                        height: 14,
-                        backgroundColor: theme.reportsGreen,
-                      }}
-                    />
-                    <Text
-                      style={{
-                        whiteSpace: 'nowrap',
-                        textOverflow: 'ellipsis',
-                        flexShrink: 0,
-                      }}
-                    >
-                      {monthUtils.format(compare, 'MMM, yyyy')}
-                    </Text>
-                  </View>
-                  <View
-                    style={{
-                      paddingBottom: 10,
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                    }}
-                  >
-                    <View
-                      style={{
-                        marginRight: 5,
-                        borderRadius: 1000,
-                        width: 14,
-                        height: 14,
-                        backgroundColor: theme.reportsGray,
-                      }}
-                    />
-                    <Text
-                      style={{
-                        whiteSpace: 'nowrap',
-                        textOverflow: 'ellipsis',
-                        flexShrink: 0,
-                      }}
-                    >
-                      {reportMode === 'single-month'
+                  <LegendItem
+                    color={theme.reportsGreen}
+                    label={monthUtils.format(compare, 'MMM, yyyy')}
+                  />
+                  <LegendItem
+                    color={theme.reportsGray}
+                    label={
+                      reportMode === 'single-month'
                         ? monthUtils.format(compareTo, 'MMM, yyyy')
-                        : reportMode.charAt(0).toUpperCase() +
-                          reportMode.slice(1)}
-                      {reportMode === 'budget' && 'ed'}
-                    </Text>
-                  </View>
+                        : reportMode === 'budget'
+                          ? 'Budgeted'
+                          : 'Average'
+                    }
+                  />
                 </View>
                 <View style={{ flex: 1 }} />
                 <View
