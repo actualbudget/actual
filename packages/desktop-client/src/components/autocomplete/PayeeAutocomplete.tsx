@@ -309,7 +309,7 @@ export function PayeeAutocomplete({
       return filteredSuggestions;
     }
 
-    return [{ id: 'new', favorite: false, name: '' }, ...filteredSuggestions];
+    return [{ id: 'new', favorite: 0, name: '' }, ...filteredSuggestions];
   }, [commonPayees, payees, focusTransferPayees, accounts, hasPayeeInput]);
 
   const dispatch = useDispatch();

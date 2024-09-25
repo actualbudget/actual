@@ -1,7 +1,8 @@
-import React, { Component, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { loadBackup, makeBackup } from 'loot-core/client/actions';
+import { type Backup } from 'loot-core/server/backups';
 import { send, listen, unlisten } from 'loot-core/src/platform/client/fetch';
 
 import { useMetadataPref } from '../../hooks/useMetadataPref';
@@ -12,50 +13,31 @@ import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { Row, Cell } from '../table';
-import { type Backup } from 'loot-core/server/backups';
 
 type BackupTableProps = {
   backups: Backup[];
   onSelect: (backupId: string) => void;
 };
-type BackupTableState = {
-  hoveredBackup: null | string;
-};
 
-class BackupTable extends Component<BackupTableProps, BackupTableState> {
-  state = { hoveredBackup: null };
-
-  onHover = (id: BackupTableState['hoveredBackup']) => {
-    this.setState({ hoveredBackup: id });
-  };
-
-  render() {
-    const { backups, onSelect } = this.props;
-    const { hoveredBackup } = this.state;
-
-    return (
-      <View
-        style={{ flex: 1, maxHeight: 200, overflow: 'auto' }}
-        onMouseLeave={() => this.onHover(null)}
-      >
-        {backups.map((backup, idx) => (
-          <Row
-            key={backup.id}
-            collapsed={idx !== 0}
-            onMouseEnter={() => this.onHover(backup.id)}
-            onClick={() => onSelect(backup.id)}
-            style={{ cursor: 'pointer' }}
-          >
-            <Cell
-              width="flex"
-              value={backup.date ? backup.date : 'Revert to Latest'}
-              valueStyle={{ paddingLeft: 20 }}
-            />
-          </Row>
-        ))}
-      </View>
-    );
-  }
+function BackupTable({ backups, onSelect }: BackupTableProps) {
+  return (
+    <View style={{ flex: 1, maxHeight: 200, overflow: 'auto' }}>
+      {backups.map((backup, idx) => (
+        <Row
+          key={backup.id}
+          collapsed={idx !== 0}
+          onClick={() => onSelect(backup.id)}
+          style={{ cursor: 'pointer' }}
+        >
+          <Cell
+            width="flex"
+            value={backup.date ? backup.date : 'Revert to Latest'}
+            valueStyle={{ paddingLeft: 20 }}
+          />
+        </Row>
+      ))}
+    </View>
+  );
 }
 
 type LoadBackupModalProps = {
