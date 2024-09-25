@@ -177,7 +177,7 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
     Math.abs(data.intervalData[27].compare) > 0;
 
   const title = widget?.meta?.name ?? t('Monthly Spending');
-  
+
   return (
     <Page
       header={
@@ -486,10 +486,11 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                         flexShrink: 0,
                       }}
                     >
-                      {mode === 'singleMonth'
+                      {reportMode === 'single-month'
                         ? monthUtils.format(compareTo, 'MMM, yyyy')
-                        : mode.charAt(0).toUpperCase() + mode.slice(1)}
-                      {mode === 'budget' && 'ed'}
+                        : reportMode.charAt(0).toUpperCase() +
+                          reportMode.slice(1)}
+                      {reportMode === 'budget' && 'ed'}
                     </Text>
                   </View>
                 </View>
