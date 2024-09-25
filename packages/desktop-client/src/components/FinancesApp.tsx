@@ -35,6 +35,7 @@ import { NarrowAlternate, WideComponent } from './responsive';
 import { Settings } from './settings';
 import { FloatableSidebar } from './sidebar';
 import { Titlebar } from './Titlebar';
+import { LoadingIndicator } from './reports/LoadingIndicator';
 
 function NarrowNotSupported({
   redirectTo = '/budget',
@@ -65,19 +66,6 @@ function WideNotSupported({ children, redirectTo = '/budget' }) {
 }
 
 function RouterBehaviors() {
-  const navigate = useNavigate();
-  const accounts = useAccounts();
-  const accountsLoaded = useSelector(
-    (state: State) => state.queries.accountsLoaded,
-  );
-  useEffect(() => {
-    // If there are no accounts, we want to redirect the user to
-    // the All Accounts screen which will prompt them to add an account
-    if (accountsLoaded && accounts.length === 0) {
-      navigate('/accounts');
-    }
-  }, [accountsLoaded, accounts]);
-
   const location = useLocation();
   const href = useHref(location);
   useEffect(() => {
@@ -90,6 +78,11 @@ function RouterBehaviors() {
 export function FinancesApp() {
   const dispatch = useDispatch();
   const { t } = useTranslation();
+
+  const accounts = useAccounts();
+  const accountsLoaded = useSelector(
+    (state: State) => state.queries.accountsLoaded,
+  );
 
   const [lastUsedVersion, setLastUsedVersion] = useLocalPref(
     'flags.updateNotificationShownForVersion',
@@ -180,7 +173,22 @@ export function FinancesApp() {
             <BankSyncStatus />
 
             <Routes>
-              <Route path="/" element={<Navigate to="/budget" replace />} />
+              <Route
+                path="/"
+                element={
+                  accountsLoaded ? (
+                    accounts.length > 0 ? (
+                      <Navigate to="/budget" replace />
+                    ) : (
+                      // If there are no accounts, we want to redirect the user to
+                      // the All Accounts screen which will prompt them to add an account
+                      <Navigate to="/accounts" replace />
+                    )
+                  ) : (
+                    <LoadingIndicator />
+                  )
+                }
+              />
 
               <Route path="/reports/*" element={<Reports />} />
 
