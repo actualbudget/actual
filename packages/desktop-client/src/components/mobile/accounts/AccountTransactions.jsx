@@ -32,6 +32,7 @@ import { useDateFormat } from '../../../hooks/useDateFormat';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { usePreviewTransactions } from '../../../hooks/usePreviewTransactions';
 import { styles, theme } from '../../../style';
+import { Button } from '../../common/Button2';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
 import { MobilePageHeader, Page } from '../../Page';
@@ -125,16 +126,18 @@ function AccountName({ account, pending, failed }) {
           }}
         />
       )}
-      <Text
-        style={{
-          userSelect: 'none',
-          ...styles.underlinedText,
-          ...styles.lineClamp(2),
-        }}
-        onClick={onClick}
-      >
-        {`${account.closed ? 'Closed: ' : ''}${account.name}`}
-      </Text>
+      <Button variant="bare" onPress={onClick}>
+        <Text
+          style={{
+            fontSize: 17,
+            fontWeight: 500,
+            ...styles.underlinedText,
+            ...styles.lineClamp(2),
+          }}
+        >
+          {`${account.closed ? 'Closed: ' : ''}${account.name}`}
+        </Text>
+      </Button>
     </View>
   );
 }

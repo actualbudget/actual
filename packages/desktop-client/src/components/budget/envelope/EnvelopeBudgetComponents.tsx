@@ -9,6 +9,8 @@ import React, {
 
 import { css } from 'glamor';
 
+import { css } from 'glamor';
+
 import { envelopeBudget } from 'loot-core/src/client/queries';
 import { evalArithmetic } from 'loot-core/src/shared/arithmetic';
 import * as monthUtils from 'loot-core/src/shared/months';

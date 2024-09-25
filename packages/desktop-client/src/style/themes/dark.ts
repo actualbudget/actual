@@ -195,6 +195,7 @@ export const reportsGreen = colorPalette.green400;
 export const reportsLightGreen = colorPalette.green200;
 export const reportsPurple = colorPalette.purple200;
 export const reportsLightPurple = colorPalette.purple150;
+export const reportsGray = colorPalette.gray400;
 export const reportsLabel = pageText;
 export const reportsInnerLabel = colorPalette.navy800;
 

@@ -28,6 +28,7 @@ type SelectProps<Value> = {
   disabled?: boolean;
   disabledKeys?: Value[];
   style?: CSSProperties;
+  popoverStyle?: CSSProperties;
 };
 
 /**
@@ -53,6 +54,7 @@ export function Select<const Value = string>({
   disabled = false,
   disabledKeys = [],
   style = {},
+  popoverStyle = {},
 }: SelectProps<Value>) {
   const targetOption = options
     .filter(isValueOption)
@@ -108,6 +110,7 @@ export function Select<const Value = string>({
         placement="bottom start"
         isOpen={isOpen}
         onOpenChange={() => setIsOpen(false)}
+        style={popoverStyle}
       >
         <Menu
           onMenuSelect={item => {
