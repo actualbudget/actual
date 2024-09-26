@@ -423,7 +423,7 @@ export type Transaction = {
   /**
    * Proprietary bank transaction code as used within a community or within an financial institution
    */
-  proprietaryBank?: string;
+  proprietaryBankTransactionCode?: string;
 
   /**
    * Conditional
