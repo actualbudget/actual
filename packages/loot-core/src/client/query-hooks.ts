@@ -23,6 +23,7 @@ export function useQuery<Response = unknown>(
 } {
   const [data, setData] = useState<null | Response>(null);
   const [isLoading, setIsLoading] = useState(true);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const query = useMemo(makeQuery, deps);
 
   useEffect(() => {
