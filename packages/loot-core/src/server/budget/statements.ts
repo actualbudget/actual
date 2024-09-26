@@ -34,6 +34,7 @@ export async function getCategoriesWithTemplateNotes(): Promise<
       FROM notes n
              JOIN categories c ON n.id = c.id
       WHERE c.id = n.id
+        AND c.tombstone = 0
         AND (lower(note) LIKE '%${TEMPLATE_PREFIX}%'
         OR lower(note) LIKE '%${GOAL_PREFIX}%')
     `,
