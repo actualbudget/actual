@@ -530,7 +530,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
         opacity: isHidden ? 0.5 : undefined,
         ...style,
       }}
-      data-testid="row"
+      data-testid="category-row"
       innerRef={listItemRef}
     >
       <View
@@ -788,7 +788,7 @@ const ExpenseGroupHeader = memo(function ExpenseGroupHeader({
         opacity: !!group.hidden ? 0.5 : undefined,
         paddingLeft: 0,
       }}
-      data-testid={`expense-group-header-${group.name}`}
+      data-testid="category-group-row"
       innerRef={listItemRef}
     >
       <View
@@ -844,7 +844,7 @@ const ExpenseGroupHeader = memo(function ExpenseGroupHeader({
                 ...styles.smallText,
                 fontWeight: '500',
               }}
-              data-testid="group-name"
+              data-testid="category-group-name"
             >
               {group.name}
             </Text>
@@ -984,7 +984,7 @@ const IncomeGroupHeader = memo(function IncomeGroupHeader({
         paddingLeft: 0,
       }}
       innerRef={listItemRef}
-      data-testid={`income-group-header-${group.name}`}
+      data-testid="category-group-row"
     >
       <View
         style={{
@@ -1038,7 +1038,7 @@ const IncomeGroupHeader = memo(function IncomeGroupHeader({
                 textAlign: 'left',
                 ...styles.smallText,
               }}
-              data-testid="group-name"
+              data-testid="category-group-name"
             >
               {group.name}
             </Text>
@@ -1144,7 +1144,7 @@ const IncomeCategory = memo(function IncomeCategory({
         opacity: !!category.hidden ? 0.5 : undefined,
         ...style,
       }}
-      data-testid="row"
+      data-testid="category-row"
       innerRef={listItemRef}
     >
       <View

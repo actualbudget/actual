@@ -4,9 +4,19 @@ export class MobileBudgetPage {
   constructor(page) {
     this.page = page;
 
-    this.categoryNames = page
+    this.categoryRows = page
       .getByTestId('budget-groups')
-      .getByTestId('category-name');
+      .getByTestId('category-row');
+
+    this.categoryNames = this.categoryRows.getByTestId('category-name');
+
+    this.categoryGroupRows = page
+      .getByTestId('budget-groups')
+      .getByTestId('category-group-row');
+
+    this.categoryGroupNames = this.categoryGroupRows.getByTestId(
+      'category-group-name',
+    );
 
     this.heading = page.getByRole('heading');
     this.selectedBudgetMonthButton = this.heading.getByLabel(
@@ -15,6 +25,7 @@ export class MobileBudgetPage {
 
     this.budgetTableHeader = page.getByTestId('budget-table-header');
 
+    // Envelope budget summary buttons
     this.toBudgetButton = this.budgetTableHeader.getByRole('button', {
       name: 'To Budget',
     });
@@ -22,6 +33,7 @@ export class MobileBudgetPage {
       name: 'Overbudgeted',
     });
 
+    // Tracking budget summary buttons
     this.savedButton = this.budgetTableHeader.getByRole('button', {
       name: 'Saved',
     });
@@ -35,7 +47,9 @@ export class MobileBudgetPage {
     this.budgetedHeaderButton = this.budgetTableHeader.getByRole('button', {
       name: 'Budgeted',
     });
-    this.spentHeaderButton = this.page.getByRole('button', { name: 'Spent' });
+    this.spentHeaderButton = this.budgetTableHeader.getByRole('button', {
+      name: 'Spent',
+    });
 
     this.budgetTable = page.getByTestId('budget-table');
     this.budgetType =
@@ -60,8 +74,39 @@ export class MobileBudgetPage {
     throw new Error('Budgeted/Spent columns could not be located on the page');
   }
 
+  async getCategoryGroupNameForRow(idx) {
+    return this.categoryGroupNames.nth(idx).textContent();
+  }
+
+  getCategoryGroupButton(categoryGroupName) {
+    return this.categoryGroupRows.getByRole('button', {
+      name: categoryGroupName,
+    });
+  }
+
+  async openCategoryGroupMenu(categoryGroupName) {
+    const categoryGroupButton =
+      await this.getCategoryGroupButton(categoryGroupName);
+    await categoryGroupButton.click();
+  }
+
+  async getCategoryNameForRow(idx) {
+    return this.categoryNames.nth(idx).textContent();
+  }
+
+  getCategoryButton(categoryName) {
+    return this.categoryRows.getByRole('button', {
+      name: categoryName,
+    });
+  }
+
+  async openCategoryMenu(categoryName) {
+    const categoryButton = await this.getCategoryButton(categoryName);
+    await categoryButton.click();
+  }
+
   async getBudgetedButton(categoryName) {
-    let budgetedButton = this.page.getByTestId(
+    let budgetedButton = this.budgetTable.getByTestId(
       `budgeted-${categoryName}-button`,
     );
 
@@ -95,16 +140,18 @@ export class MobileBudgetPage {
   }
 
   async getSpentButton(categoryName) {
-    let spentButton = this.page.getByTestId(`spent-${categoryName}-button`);
+    let spentButton = this.budgetTable.getByTestId(
+      `spent-${categoryName}-button`,
+    );
 
-    if ((await spentButton.count()) > 0 && (await spentButton.isVisible())) {
+    if (await spentButton.isVisible()) {
       return spentButton;
     }
 
     await this.toggleVisibleColumns();
     spentButton = await this.getSpentButton(categoryName);
 
-    if ((await spentButton.count()) > 0) {
+    if (await spentButton.isVisible()) {
       return spentButton;
     }
 
@@ -121,7 +168,7 @@ export class MobileBudgetPage {
   }
 
   async openBalanceMenu(categoryName) {
-    const balanceButton = this.page.getByTestId(
+    const balanceButton = this.budgetTable.getByTestId(
       `balance-${categoryName}-button`,
     );
     await balanceButton.click();

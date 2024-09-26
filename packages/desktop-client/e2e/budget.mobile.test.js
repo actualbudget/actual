@@ -75,13 +75,47 @@ budgetTypes.forEach(budgetType => {
       await expect(page).toMatchThemeScreenshots();
     });
 
+    test('checks that clicking the category group name opens the category group menu modal', async () => {
+      const budgetPage = await navigation.goToBudgetPage();
+      await expect(budgetPage.budgetTable).toBeVisible({
+        timeout: 10000,
+      });
+
+      const categoryGroupName = await budgetPage.getCategoryGroupNameForRow(0);
+      await budgetPage.openCategoryGroupMenu(categoryGroupName);
+
+      const categoryMenuModal = page.getByRole('dialog');
+      const categoryMenuModalTitle =
+        categoryMenuModal.getByLabel('Modal title');
+
+      await expect(categoryMenuModalTitle).toHaveText(categoryGroupName);
+      await expect(page).toMatchThemeScreenshots();
+    });
+
+    test('checks that clicking the category name opens the category menu modal', async () => {
+      const budgetPage = await navigation.goToBudgetPage();
+      await expect(budgetPage.budgetTable).toBeVisible({
+        timeout: 10000,
+      });
+
+      const categoryName = await budgetPage.getCategoryNameForRow(0);
+      await budgetPage.openCategoryMenu(categoryName);
+
+      const categoryMenuModal = page.getByRole('dialog');
+      const categoryMenuModalTitle =
+        categoryMenuModal.getByLabel('Modal title');
+
+      await expect(categoryMenuModalTitle).toHaveText(categoryName);
+      await expect(page).toMatchThemeScreenshots();
+    });
+
     test('checks that clicking the budgeted cell opens the budget menu modal', async () => {
       const budgetPage = await navigation.goToBudgetPage();
       await expect(budgetPage.budgetTable).toBeVisible({
         timeout: 10000,
       });
 
-      const categoryName = 'Food';
+      const categoryName = await budgetPage.getCategoryNameForRow(0);
       await budgetPage.openBudgetMenu(categoryName);
 
       const budgetMenuModal = page.getByRole('dialog');
@@ -97,7 +131,7 @@ budgetTypes.forEach(budgetType => {
         timeout: 10000,
       });
 
-      const categoryName = 'Food';
+      const categoryName = await budgetPage.getCategoryNameForRow(0);
       const accountPage = await budgetPage.openSpentPage(categoryName);
 
       await expect(accountPage.heading).toContainText(categoryName);
@@ -105,13 +139,13 @@ budgetTypes.forEach(budgetType => {
       await expect(page).toMatchThemeScreenshots();
     });
 
-    test('checks that clicking the balance button opens the balance menu modal', async () => {
+    test('checks that clicking the balance cell opens the balance menu modal', async () => {
       const budgetPage = await navigation.goToBudgetPage();
       await expect(budgetPage.budgetTable).toBeVisible({
         timeout: 10000,
       });
 
-      const categoryName = 'Food';
+      const categoryName = await budgetPage.getCategoryNameForRow(0);
       await budgetPage.openBalanceMenu(categoryName);
 
       const balanceMenuModal = page.getByRole('dialog');
@@ -144,7 +178,7 @@ budgetTypes.forEach(budgetType => {
         timeout: 10000,
       });
 
-      const categoryName = 'Food';
+      const categoryName = await budgetPage.getCategoryNameForRow(0);
 
       // Set to 100.00
       await budgetPage.setBudget(categoryName, 10000);
