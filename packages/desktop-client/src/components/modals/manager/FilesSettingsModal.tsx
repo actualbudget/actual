@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Trans } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 
 import { loadAllFiles, pushModal } from 'loot-core/client/actions';
@@ -46,10 +47,12 @@ function FileLocationSettings() {
       }}
     >
       <Text>
-        <strong>Actual’s data directory</strong>{' '}
-        <small style={{ marginLeft: '0.5rem' }}>
-          <i>where your files are stored</i>
-        </small>
+        <Trans>
+          <strong>Actual’s data directory</strong>{' '}
+          <small style={{ marginLeft: '0.5rem' }}>
+            <i>where your files are stored</i>
+          </small>
+        </Trans>
       </Text>
       <View style={{ flexDirection: 'row', gap: '0.5rem', width: '100%' }}>
         <Text
@@ -69,7 +72,9 @@ function FileLocationSettings() {
         >
           {documentDir}
         </Text>
-        <Button onPress={onChooseDocumentDir}>Change location</Button>
+        <Button onPress={onChooseDocumentDir}>
+          <Trans>Change location</Trans>
+        </Button>
       </View>
     </View>
   );
@@ -97,9 +102,13 @@ function SelfSignedCertLocationSettings() {
       }}
     >
       <Text>
-        <strong>Server self-signed certificate</strong>{' '}
+        <strong>
+          <Trans>Server self-signed certificate</Trans>
+        </strong>{' '}
         <small style={{ marginLeft: '0.5rem' }}>
-          <i>enables a secure connection</i>
+          <i>
+            <Trans>enables a secure connection</Trans>
+          </i>
         </small>
       </Text>
       <View style={{ flexDirection: 'row', gap: '0.5rem', width: '100%' }}>
@@ -164,7 +173,7 @@ export function FilesSettingsModal() {
               }}
               onPress={() => closeModal(close)}
             >
-              OK
+              <Trans>OK</Trans>
             </Button>
           </View>
         </>

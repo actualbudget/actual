@@ -335,11 +335,13 @@ function RefreshButton({
 }
 
 function SettingsButton({ onOpenSettings }: { onOpenSettings: () => void }) {
+  const { t } = useTranslation();
+
   return (
     <View>
       <Button
         variant="bare"
-        aria-label="Menu"
+        aria-label={t('Menu')}
         onPress={() => {
           onOpenSettings();
         }}

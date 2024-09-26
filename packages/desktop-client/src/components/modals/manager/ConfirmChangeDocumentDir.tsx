@@ -1,4 +1,5 @@
 import React, { useCallback, useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { useGlobalPref } from '../../../hooks/useGlobalPref';
 import { theme, styles } from '../../../style';
@@ -42,6 +43,7 @@ export function ConfirmChangeDocumentDirModal({
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [moveFiles, setMoveFiles] = useState(false);
+  const { t } = useTranslation();
 
   const restartElectronServer = useCallback(() => {
     globalThis.window.Actual?.restartElectronServer();
@@ -68,7 +70,9 @@ export function ConfirmChangeDocumentDirModal({
     } catch (error) {
       console.error('There was an error changing your directory', error);
       setError(
-        'There was an error changing your directory, please check the directory and try again.',
+        t(
+          'There was an error changing your directory, please check the directory and try again.',
+        ),
       );
     } finally {
       setLoading(false);
@@ -80,7 +84,7 @@ export function ConfirmChangeDocumentDirModal({
       {({ state: { close } }) => (
         <>
           <ModalHeader
-            title="Are you sure?"
+            title={t('Are you sure?')}
             rightContent={<ModalCloseButton onPress={close} />}
           />
           <View
@@ -93,9 +97,13 @@ export function ConfirmChangeDocumentDirModal({
               lineHeight: '1.5em',
             }}
           >
-            <Text>You are about to move the contents of:</Text>
+            <Text>
+              <Trans>Changing Actual’s data directory from:</Trans>
+            </Text>
             <DirectoryDisplay directory={currentBudgetDirectory} />
-            <Text>To the following folder:</Text>
+            <Text>
+              <Trans>To:</Trans>
+            </Text>
             <DirectoryDisplay directory={newDirectory} />
             <label
               htmlFor="moveFiles"
@@ -113,12 +121,14 @@ export function ConfirmChangeDocumentDirModal({
                 checked={moveFiles}
                 onChange={() => setMoveFiles(!moveFiles)}
               />
-              Move files to new directory
+              <Trans>Move files to new directory</Trans>
             </label>
             {moveFiles && (
               <Text style={{ color: theme.warningText }}>
-                If the destination folder contains files with the same name,
-                they will be overridden.
+                <Trans>
+                  Files in the destination folder with the same name will be
+                  overwritten.
+                </Trans>
               </Text>
             )}
 
@@ -141,7 +151,7 @@ export function ConfirmChangeDocumentDirModal({
               }}
               onPress={close}
             >
-              Cancel
+              <Trans>Cancel</Trans>
             </Button>
             <ButtonWithLoading
               variant="primary"
@@ -153,7 +163,7 @@ export function ConfirmChangeDocumentDirModal({
               }}
               onPress={() => moveDirectory(close)}
             >
-              Change Directory
+              <Trans>Change Directory</Trans>
             </ButtonWithLoading>
           </View>
         </>
