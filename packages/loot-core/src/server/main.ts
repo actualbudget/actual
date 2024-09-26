@@ -218,6 +218,8 @@ handlers['envelope-budget-month'] = async function ({ month }) {
           value(`sum-amount-${cat.id}`),
           value(`leftover-${cat.id}`),
           value(`carryover-${cat.id}`),
+          value(`goal-${cat.id}`),
+          value(`long-goal-${cat.id}`)
         ]);
       }
     }
