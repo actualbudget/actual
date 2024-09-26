@@ -1981,7 +1981,7 @@ function MonthSelector({
         onPress={() => {
           onOpenMonthMenu?.(month);
         }}
-        data-testid="page-header-month-button"
+        aria-label="Selected budget month"
       >
         <Text style={styles.underlinedText}>
           {monthUtils.format(month, 'MMMM ‘yy')}

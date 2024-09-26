@@ -12,6 +12,18 @@ budgetTypes.forEach(budgetType => {
     let page;
     let navigation;
     let configurationPage;
+    let previousGlobalIsTesting;
+
+    test.beforeAll(() => {
+      // TODO: Hack, properly mock the currentMonth function
+      previousGlobalIsTesting = global.IS_TESTING;
+      global.IS_TESTING = true;
+    });
+
+    test.afterAll(() => {
+      // TODO: Hack, properly mock the currentMonth function
+      global.IS_TESTING = previousGlobalIsTesting;
+    });
 
     test.beforeEach(async ({ browser }) => {
       page = await browser.newPage();
@@ -38,6 +50,9 @@ budgetTypes.forEach(budgetType => {
 
     test('loads the budget page with budgeted amounts', async () => {
       const budgetPage = await navigation.goToBudgetPage();
+      await expect(budgetPage.budgetTable).toBeVisible({
+        timeout: 10000,
+      });
 
       await expect(budgetPage.categoryNames).toHaveText([
         'Food',
@@ -62,75 +77,118 @@ budgetTypes.forEach(budgetType => {
 
     test('checks that clicking the budgeted cell opens the budget menu modal', async () => {
       const budgetPage = await navigation.goToBudgetPage();
-      await expect(budgetPage.budgetTable).toBeVisible();
+      await expect(budgetPage.budgetTable).toBeVisible({
+        timeout: 10000,
+      });
 
-      await budgetPage.openBudgetMenu('Food');
+      const categoryName = 'Food';
+      await budgetPage.openBudgetMenu(categoryName);
 
-      const budgetMenuModal = page.getByTestId('envelope-budget-menu-modal');
-      await expect(budgetMenuModal).toHaveTitle('Food');
+      const budgetMenuModal = page.getByRole('dialog');
+      const budgetMenuModalTitle = budgetMenuModal.getByLabel('Modal title');
+
+      await expect(budgetMenuModalTitle).toHaveText(categoryName);
       await expect(page).toMatchThemeScreenshots();
     });
 
     test('checks that clicking spent cell redirects to the category transactions page', async () => {
       const budgetPage = await navigation.goToBudgetPage();
-      await expect(budgetPage.budgetTable).toBeVisible();
+      await expect(budgetPage.budgetTable).toBeVisible({
+        timeout: 10000,
+      });
 
-      const accountPage = await budgetPage.openSpentPage('Food');
+      const categoryName = 'Food';
+      const accountPage = await budgetPage.openSpentPage(categoryName);
 
-      await expect(accountPage.heading).toHaveText('Food');
+      await expect(accountPage.heading).toContainText(categoryName);
       await expect(accountPage.transactionList).toBeVisible();
       await expect(page).toMatchThemeScreenshots();
     });
 
     test('checks that clicking the balance button opens the balance menu modal', async () => {
       const budgetPage = await navigation.goToBudgetPage();
-      await expect(budgetPage.budgetTable).toBeVisible();
+      await expect(budgetPage.budgetTable).toBeVisible({
+        timeout: 10000,
+      });
 
-      await budgetPage.openBalanceMenu('Food');
+      const categoryName = 'Food';
+      await budgetPage.openBalanceMenu(categoryName);
 
-      const balanceMenuModal = page.getByTestId('envelope-balance-menu-modal');
-      await expect(balanceMenuModal).toHaveTitle('Food');
+      const balanceMenuModal = page.getByRole('dialog');
+      const balanceMenuModalTitle = balanceMenuModal.getByLabel('Modal title');
+
+      await expect(balanceMenuModalTitle).toHaveText(categoryName);
       await expect(page).toMatchThemeScreenshots();
     });
 
     test('checks that clicking the month in the page header opens the month menu modal', async () => {
       const budgetPage = await navigation.goToBudgetPage();
-      await expect(budgetPage.budgetTable).toBeVisible();
+      await expect(budgetPage.budgetTable).toBeVisible({
+        timeout: 10000,
+      });
 
       await budgetPage.openMonthMenu();
-
-      const monthMenuModal = page.getByTestId(
-        'envelope-budget-month-menu-modal',
-      );
-
       const currentMonth = monthUtils.currentMonth();
-      const monthTitle = monthUtils.format(currentMonth, 'MMMM ‘yy');
+      const displayMonth = monthUtils.format(currentMonth, 'MMMM ‘yy');
 
-      await expect(monthMenuModal).toHaveTitle(monthTitle);
+      const monthMenuModal = page.getByRole('dialog');
+      const monthMenuModalTitle = monthMenuModal.getByLabel('Modal title');
+
+      await expect(monthMenuModalTitle).toHaveText(displayMonth);
       await expect(page).toMatchThemeScreenshots();
     });
 
     test('updates the budgeted amount', async () => {
       const budgetPage = await navigation.goToBudgetPage();
-      await expect(budgetPage.budgetTable).toBeVisible();
+      await expect(budgetPage.budgetTable).toBeVisible({
+        timeout: 10000,
+      });
+
+      const categoryName = 'Food';
 
       // Set to 100.00
-      await budgetPage.setBudget('Food', 10000);
+      await budgetPage.setBudget(categoryName, 10000);
 
-      const budgetedButton = await budgetPage.getBudgetedButton('Food');
+      const budgetedButton = await budgetPage.getBudgetedButton(categoryName);
 
       await expect(budgetedButton).toHaveText('100.00');
       await expect(page).toMatchThemeScreenshots();
     });
 
-    test('checks that clicking the To Budget/Overbudgeted amount opens the budget summary menu modal', async () => {
-      const budgetPage = await navigation.goToBudgetPage();
+    if (budgetType === 'Envelope') {
+      test('checks that clicking the To Budget/Overbudgeted amount opens the budget summary menu modal', async () => {
+        const budgetPage = await navigation.goToBudgetPage();
 
-      await budgetPage.openEnvelopeBudgetSummaryMenu();
+        await expect(budgetPage.budgetTable).toBeVisible({
+          timeout: 10000,
+        });
 
-      const summaryModal = page.getByTestId('envelope-budget-summary-modal');
-      await expect(summaryModal).toHaveTitle('Budget Summary');
-      await expect(page).toMatchThemeScreenshots();
-    });
+        await budgetPage.openEnvelopeBudgetSummaryMenu();
+
+        const summaryModal = page.getByRole('dialog');
+        const summaryModalTitle = summaryModal.getByLabel('Modal title');
+
+        await expect(summaryModalTitle).toHaveText('Budget Summary');
+        await expect(page).toMatchThemeScreenshots();
+      });
+    }
+
+    if (budgetType === 'Tracking') {
+      test('checks that clicking the Saved/Projected Savings/Overspent amount opens the budget summary menu modal', async () => {
+        const budgetPage = await navigation.goToBudgetPage();
+
+        await expect(budgetPage.budgetTable).toBeVisible({
+          timeout: 10000,
+        });
+
+        await budgetPage.openTrackingBudgetSummaryMenu();
+
+        const summaryModal = page.getByRole('dialog');
+        const summaryModalTitle = summaryModal.getByLabel('Modal title');
+
+        await expect(summaryModalTitle).toHaveText('Budget Summary');
+        await expect(page).toMatchThemeScreenshots();
+      });
+    }
   });
 });

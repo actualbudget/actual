@@ -9,24 +9,51 @@ export class MobileBudgetPage {
       .getByTestId('category-name');
 
     this.heading = page.getByRole('heading');
+    this.selectedBudgetMonthButton = this.heading.getByLabel(
+      'Selected budget month',
+    );
+
     this.budgetTableHeader = page.getByTestId('budget-table-header');
+
+    this.toBudgetButton = this.budgetTableHeader.getByRole('button', {
+      name: 'To Budget',
+    });
+    this.overbudgetedButton = this.budgetTableHeader.getByRole('button', {
+      name: 'Overbudgeted',
+    });
+
+    this.savedButton = this.budgetTableHeader.getByRole('button', {
+      name: 'Saved',
+    });
+    this.projectedSavingsButton = this.budgetTableHeader.getByRole('button', {
+      name: 'Projected Savings',
+    });
+    this.overspentButton = this.budgetTableHeader.getByRole('button', {
+      name: 'Overspent',
+    });
+
+    this.budgetedHeaderButton = this.budgetTableHeader.getByRole('button', {
+      name: 'Budgeted',
+    });
+    this.spentHeaderButton = this.page.getByRole('button', { name: 'Spent' });
+
     this.budgetTable = page.getByTestId('budget-table');
+    this.budgetType =
+      this.getEnvelopeBudgetSummaryButton({
+        throwIfNotFound: false,
+      }) !== null
+        ? 'Envelope'
+        : 'Tracking';
   }
 
   async toggleVisibleColumns() {
-    const budgetedHeaderButton = this.budgetTableHeader.getByRole('button', {
-      name: 'Budgeted',
-    });
-
-    if (await budgetedHeaderButton.isVisible()) {
-      await budgetedHeaderButton.click();
+    if (await this.budgetedHeaderButton.isVisible()) {
+      await this.budgetedHeaderButton.click();
       return;
     }
 
-    const spentHeaderButton = this.page.getByRole('button', { name: 'Spent' });
-
-    if (await spentHeaderButton.isVisible()) {
-      await spentHeaderButton.click();
+    if (await this.spentHeaderButton.isVisible()) {
+      await this.spentHeaderButton.click();
       return;
     }
 
@@ -101,25 +128,20 @@ export class MobileBudgetPage {
   }
 
   async openMonthMenu() {
-    const monthButton = this.page.getByTestId('page-header-month-button');
-    await monthButton.click();
+    await this.selectedBudgetMonthButton.click();
   }
 
-  async openEnvelopeBudgetSummaryMenu() {
-    const toBudgetButton = this.page.getByRole('button', { name: 'To Budget' });
-
-    if (await toBudgetButton.isVisible()) {
-      await toBudgetButton.click();
-      return;
+  async getEnvelopeBudgetSummaryButton({ throwIfNotFound = true } = {}) {
+    if (await this.toBudgetButton.isVisible()) {
+      return this.toBudgetButton;
     }
 
-    const overbudgetedButton = this.page.getByRole('button', {
-      name: 'Overbudgeted',
-    });
+    if (await this.overbudgetedButton.isVisible()) {
+      return this.overbudgetedButton;
+    }
 
-    if (await overbudgetedButton.isVisible()) {
-      await overbudgetedButton.click();
-      return;
+    if (!throwIfNotFound) {
+      return null;
     }
 
     throw new Error(
@@ -127,34 +149,35 @@ export class MobileBudgetPage {
     );
   }
 
-  async openTrackingBudgetSummaryMenu() {
-    const savedButton = this.page.getByRole('button', { name: 'Saved' });
+  async openEnvelopeBudgetSummaryMenu() {
+    const budgetSummaryButton = await this.getEnvelopeBudgetSummaryButton();
+    await budgetSummaryButton.click();
+  }
 
-    if ((await savedButton.count()) > 0) {
-      await savedButton.click();
-      return;
+  async getTrackingBudgetSummaryButton({ throwIfNotFound = true } = {}) {
+    if (await this.savedButton.isVisible()) {
+      return this.savedButton;
     }
 
-    const projectedSavingsButton = this.page.getByRole('button', {
-      name: 'Projected Savings',
-    });
-
-    if ((await projectedSavingsButton.count()) > 0) {
-      await projectedSavingsButton.click();
-      return;
+    if (await this.projectedSavingsButton.isVisible()) {
+      return this.projectedSavingsButton;
     }
 
-    const overspentButton = this.page.getByRole('button', {
-      name: 'Overspent',
-    });
+    if (await this.overspentButton.isVisible()) {
+      return this.overspentButton;
+    }
 
-    if ((await overspentButton.count()) > 0) {
-      await overspentButton.click();
-      return;
+    if (!throwIfNotFound) {
+      return null;
     }
 
     throw new Error(
       'Saved/Projected Savings/Overspent button could not be located on the page',
     );
+  }
+
+  async openTrackingBudgetSummaryMenu() {
+    const budgetSummaryButton = await this.getTrackingBudgetSummaryButton();
+    await budgetSummaryButton.click();
   }
 }

@@ -418,6 +418,7 @@ export function ModalTitle({
       {shrinkOnOverflow ? (
         <AutoTextSize
           as={Text}
+          aria-label="Modal title"
           minFontSizePx={15}
           maxFontSizePx={25}
           onClick={onTitleClick}
@@ -433,6 +434,7 @@ export function ModalTitle({
         </AutoTextSize>
       ) : (
         <TextOneLine
+          aria-label="Modal title"
           onClick={onTitleClick}
           style={{
             fontSize: 25,
