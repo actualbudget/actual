@@ -7,7 +7,7 @@ the manual for detailed information on how to work with this view.
 
 ## The Account Header
 
-To rename the account, click on the pencil icon. Clicking on the note icon lets you add a note. Actual fully support 
+To rename the account, click on the pencil icon. Clicking on the note icon lets you add a note. Actual fully supports 
 Markdown and the note will be rendered according to your Markdown when the cursor is hovering over the note.
 
 
