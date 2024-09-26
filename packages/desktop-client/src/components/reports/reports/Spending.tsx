@@ -55,7 +55,7 @@ export function Spending() {
 }
 
 type SpendingInternalProps = {
-  widget: SpendingWidget;
+  widget?: SpendingWidget;
 };
 
 function SpendingInternal({ widget }: SpendingInternalProps) {
@@ -133,8 +133,12 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
   const { isNarrowWidth } = useResponsive();
 
   async function onSaveWidget() {
+    if (!widget) {
+      throw new Error('No widget that could be saved.');
+    }
+
     await send('dashboard-update-widget', {
-      id: widget?.id,
+      id: widget.id,
       meta: {
         ...(widget.meta ?? {}),
         conditions,
