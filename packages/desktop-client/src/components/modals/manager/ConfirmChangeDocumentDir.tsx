@@ -3,6 +3,7 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { useGlobalPref } from '../../../hooks/useGlobalPref';
 import { theme, styles } from '../../../style';
+import { Information } from '../../alerts';
 import { Button, ButtonWithLoading } from '../../common/Button2';
 import { Modal, ModalCloseButton, ModalHeader } from '../../common/Modal';
 import { Text } from '../../common/Text';
@@ -138,12 +139,21 @@ export function ConfirmChangeDocumentDirModal({
                 <Trans>Move files to new directory</Trans>
               </label>
               {moveFiles && (
-                <Text style={{ color: theme.warningText }}>
+                <Information style={{ color: theme.warningText, padding: 0 }}>
                   <Trans>
                     Files in the destination folder with the same name will be
                     overwritten.
                   </Trans>
-                </Text>
+                </Information>
+              )}
+
+              {!moveFiles && (
+                <Information style={{ padding: 0 }}>
+                  <Trans>
+                    Your files won’t be moved. You can manually move them to the
+                    folder.
+                  </Trans>
+                </Information>
               )}
 
               {error && <Text style={{ color: theme.errorText }}>{error}</Text>}
