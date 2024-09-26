@@ -1,10 +1,10 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { loadAllFiles, pushModal } from 'loot-core/client/actions';
 
 import { useGlobalPref } from '../../../hooks/useGlobalPref';
-import { theme } from '../../../style';
+import { theme, styles } from '../../../style';
 import { Button } from '../../common/Button2';
 import { Modal, ModalCloseButton, ModalHeader } from '../../common/Modal';
 import { Text } from '../../common/Text';
@@ -12,16 +12,8 @@ import { View } from '../../common/View';
 
 function FileLocationSettings() {
   const [documentDir, _setDocumentDirPref] = useGlobalPref('documentDir');
-
   const [_documentDirChanged, setDirChanged] = useState(false);
-  const dirScrolled = useRef<HTMLSpanElement>(null);
-
   const dispatch = useDispatch();
-  useEffect(() => {
-    if (dirScrolled.current) {
-      dirScrolled.current.scrollTo(10000, 0);
-    }
-  }, []);
 
   async function onChooseDocumentDir() {
     const chosenDirectory = await window.Actual?.openFileDialog({
@@ -60,16 +52,18 @@ function FileLocationSettings() {
       </Text>
       <View style={{ flexDirection: 'row', gap: '0.5rem', width: '100%' }}>
         <Text
-          innerRef={dirScrolled}
           title={documentDir}
           style={{
             backgroundColor: theme.pageBackground,
-            padding: '7px 10px',
+            padding: '5px 10px',
             borderRadius: 4,
             overflow: 'auto',
             whiteSpace: 'nowrap',
             width: '100%',
-            '::-webkit-scrollbar': { display: 'none' }, // Removes the scrollbar
+            ...styles.horizontalScrollbar,
+            '::-webkit-scrollbar': {
+              height: '8px',
+            },
           }}
         >
           {documentDir}
@@ -84,16 +78,8 @@ function SelfSignedCertLocationSettings() {
   const [serverSelfSignedCertPref, _setServerSelfSignedCertPref] =
     useGlobalPref('serverSelfSignedCert');
 
-  const dirScrolled = useRef<HTMLSpanElement>(null);
-
-  useEffect(() => {
-    if (dirScrolled.current) {
-      dirScrolled.current.scrollTo(10000, 0);
-    }
-  }, []);
-
   if (!serverSelfSignedCertPref) {
-    return;
+    return null;
   }
 
   return (
@@ -117,16 +103,18 @@ function SelfSignedCertLocationSettings() {
       </Text>
       <View style={{ flexDirection: 'row', gap: '0.5rem', width: '100%' }}>
         <Text
-          innerRef={dirScrolled}
           title={serverSelfSignedCertPref}
           style={{
             backgroundColor: theme.pageBackground,
-            padding: '7px 10px',
+            padding: '5px 10px',
             borderRadius: 4,
             overflow: 'auto',
             whiteSpace: 'nowrap',
             width: '100%',
-            '::-webkit-scrollbar': { display: 'none' }, // Removes the scrollbar
+            ...styles.horizontalScrollbar,
+            '::-webkit-scrollbar': {
+              height: '8px',
+            },
           }}
         >
           {serverSelfSignedCertPref}

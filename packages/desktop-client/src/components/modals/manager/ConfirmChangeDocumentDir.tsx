@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from 'react';
 
 import { useGlobalPref } from '../../../hooks/useGlobalPref';
-import { theme } from '../../../style';
+import { theme, styles } from '../../../style';
 import { Button, ButtonWithLoading } from '../../common/Button2';
 import { Modal, ModalCloseButton, ModalHeader } from '../../common/Modal';
 import { Text } from '../../common/Text';
@@ -15,12 +15,15 @@ function DirectoryDisplay({ directory }: { directory: string }) {
         title={directory}
         style={{
           backgroundColor: theme.pageBackground,
-          padding: '7px 10px',
+          padding: '5px 10px',
           borderRadius: 4,
           overflow: 'auto',
           whiteSpace: 'nowrap',
           width: '100%',
-          '::-webkit-scrollbar': { display: 'none' }, // Removes the scrollbar
+          ...styles.horizontalScrollbar,
+          '::-webkit-scrollbar': {
+            height: '8px',
+          },
         }}
       >
         {directory}
@@ -41,7 +44,7 @@ export function ConfirmChangeDocumentDirModal({
   const [moveFiles, setMoveFiles] = useState(false);
 
   const restartElectronServer = useCallback(() => {
-    globalThis.window.Actual.restartElectronServer();
+    globalThis.window.Actual?.restartElectronServer();
   }, []);
 
   const [_documentDir, setDocumentDirPref] = useGlobalPref(
@@ -54,7 +57,7 @@ export function ConfirmChangeDocumentDirModal({
     setLoading(true);
     try {
       if (moveFiles) {
-        await globalThis.window.Actual.moveBudgetDirectory(
+        await globalThis.window.Actual?.moveBudgetDirectory(
           currentBudgetDirectory,
           newDirectory,
         );
