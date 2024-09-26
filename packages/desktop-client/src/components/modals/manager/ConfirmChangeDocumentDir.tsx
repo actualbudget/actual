@@ -93,78 +93,92 @@ export function ConfirmChangeDocumentDirModal({
               gap: 15,
               paddingTop: 0,
               paddingBottom: 25,
-              maxWidth: 500,
+              maxWidth: 550,
               lineHeight: '1.5em',
             }}
           >
-            <Text>
-              <Trans>Changing Actual’s data directory from:</Trans>
-            </Text>
-            <DirectoryDisplay directory={currentBudgetDirectory} />
-            <Text>
-              <Trans>To:</Trans>
-            </Text>
-            <DirectoryDisplay directory={newDirectory} />
-            <label
-              htmlFor="moveFiles"
+            <View
               style={{
-                userSelect: 'none',
-                flexDirection: 'row',
-                gap: '0.5rem',
-                display: 'flex',
-                alignItems: 'center',
+                gap: 15,
+                backgroundColor: theme.pillBackground,
+                alignSelf: 'flex-start',
+                alignItems: 'flex-start',
+                padding: 15,
+                borderRadius: 4,
+                border: '1px solid ' + theme.pillBorderDark,
+                width: '100%',
               }}
             >
-              <Checkbox
-                id="moveFiles"
-                name="moveFiles"
-                checked={moveFiles}
-                onChange={() => setMoveFiles(!moveFiles)}
-              />
-              <Trans>Move files to new directory</Trans>
-            </label>
-            {moveFiles && (
-              <Text style={{ color: theme.warningText }}>
+              <Text>
                 <Trans>
-                  Files in the destination folder with the same name will be
-                  overwritten.
+                  You are about to change Actual’s data directory from:
                 </Trans>
               </Text>
-            )}
+              <DirectoryDisplay directory={currentBudgetDirectory} />
+              <Text>
+                <Trans>To:</Trans>
+              </Text>
+              <DirectoryDisplay directory={newDirectory} />
+              <label
+                htmlFor="moveFiles"
+                style={{
+                  userSelect: 'none',
+                  flexDirection: 'row',
+                  gap: '0.5rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                }}
+              >
+                <Checkbox
+                  id="moveFiles"
+                  name="moveFiles"
+                  checked={moveFiles}
+                  onChange={() => setMoveFiles(!moveFiles)}
+                />
+                <Trans>Move files to new directory</Trans>
+              </label>
+              {moveFiles && (
+                <Text style={{ color: theme.warningText }}>
+                  <Trans>
+                    Files in the destination folder with the same name will be
+                    overwritten.
+                  </Trans>
+                </Text>
+              )}
 
-            {error && <Text style={{ color: theme.errorText }}>{error}</Text>}
-          </View>
-
-          <View
-            style={{
-              gap: '1rem',
-              flexDirection: 'row',
-              justifyContent: 'center',
-            }}
-          >
-            <Button
-              variant="normal"
+              {error && <Text style={{ color: theme.errorText }}>{error}</Text>}
+            </View>
+            <View
               style={{
-                padding: '10px 30px',
-                fontSize: 14,
-                alignSelf: 'center',
+                gap: '1rem',
+                flexDirection: 'row',
+                justifyContent: 'center',
               }}
-              onPress={close}
             >
-              <Trans>Cancel</Trans>
-            </Button>
-            <ButtonWithLoading
-              variant="primary"
-              isLoading={loading}
-              style={{
-                padding: '10px 30px',
-                fontSize: 14,
-                alignSelf: 'center',
-              }}
-              onPress={() => moveDirectory(close)}
-            >
-              <Trans>Change Directory</Trans>
-            </ButtonWithLoading>
+              <Button
+                variant="normal"
+                style={{
+                  padding: '10px 30px',
+                  fontSize: 14,
+                  alignSelf: 'center',
+                }}
+                onPress={close}
+              >
+                <Trans>Cancel</Trans>
+              </Button>
+              <ButtonWithLoading
+                variant="primary"
+                isLoading={loading}
+                style={{
+                  padding: '10px 30px',
+                  fontSize: 14,
+                  alignSelf: 'center',
+                }}
+                onPress={() => moveDirectory(close)}
+              >
+                <Trans>Change Directory</Trans>
+              </ButtonWithLoading>
+            </View>
           </View>
         </>
       )}

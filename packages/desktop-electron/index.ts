@@ -18,7 +18,7 @@ import {
   SaveDialogOptions,
 } from 'electron';
 import isDev from 'electron-is-dev';
-import { copy, remove } from 'fs-extra';
+import { copy, exists, remove } from 'fs-extra';
 import promiseRetry from 'promise-retry';
 
 import { getMenu } from './menu';
@@ -405,13 +405,27 @@ ipcMain.handle(
   'move-budget-directory',
   async (_event, currentBudgetDirectory: string, newDirectory: string) => {
     try {
+      if (!currentBudgetDirectory || !newDirectory) {
+        throw new Error('The from and to directories must be provided');
+      }
+
+      if (newDirectory.startsWith(currentBudgetDirectory)) {
+        throw new Error(
+          'The destination must not be a subdirectory of the current directory',
+        );
+      }
+
+      if (!(await exists(newDirectory))) {
+        throw new Error('The destination directory does not exist');
+      }
+
       await copy(currentBudgetDirectory, newDirectory, {
         overwrite: true,
       });
       await remove(currentBudgetDirectory);
     } catch (error) {
       console.error('There was an error moving your directory', error);
-      return Promise.reject(error);
+      throw error;
     }
   },
 );
