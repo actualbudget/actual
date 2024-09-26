@@ -197,7 +197,8 @@ export function BalanceWithCarryover({
             placement="bottom"
             triggerProps={{
               delay: 750,
-              isDisabled: !isGoalTemplatesEnabled || goalValue == null || isNarrowWidth,
+              isDisabled:
+                !isGoalTemplatesEnabled || goalValue == null || isNarrowWidth,
             }}
           >
             {children ? (
