@@ -20,15 +20,13 @@ function FileLocationSettings() {
       properties: ['openDirectory'],
     });
 
-    if (chosenDirectory && chosenDirectory[0] !== documentDir) {
+    if (chosenDirectory && documentDir && chosenDirectory[0] !== documentDir) {
       setDirChanged(true);
-      const currentBudgetDirectory: string = documentDir;
-      const newDirectory: string = chosenDirectory[0];
 
       dispatch(
         pushModal('confirm-change-document-dir', {
-          currentBudgetDirectory,
-          newDirectory,
+          currentBudgetDirectory: documentDir,
+          newDirectory: chosenDirectory[0],
         }),
       );
     }
