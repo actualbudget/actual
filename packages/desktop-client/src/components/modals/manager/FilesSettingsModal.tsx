@@ -22,10 +22,13 @@ function FileLocationSettings() {
 
     if (chosenDirectory && chosenDirectory[0] !== documentDir) {
       setDirChanged(true);
+      const currentBudgetDirectory: string = documentDir;
+      const newDirectory: string = chosenDirectory[0];
+
       dispatch(
         pushModal('confirm-change-document-dir', {
-          currentBudgetDirectory: documentDir,
-          newDirectory: chosenDirectory[0],
+          currentBudgetDirectory,
+          newDirectory,
         }),
       );
     }
