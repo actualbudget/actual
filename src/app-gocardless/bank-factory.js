@@ -23,6 +23,7 @@ import SandboxfinanceSfin0000 from './banks/sandboxfinance-sfin0000.js';
 import SparNordSpNoDK22 from './banks/sparnord-spnodk22.js';
 import SpkKarlsruhekarsde66 from './banks/spk-karlsruhe-karsde66.js';
 import SpkMarburgBiedenkopfHeladef1mar from './banks/spk-marburg-biedenkopf-heladef1mar.js';
+import SpkWormsAlzeyRiedMalade51wor from './banks/spk-worms-alzey-ried-malade51wor.js';
 import VirginNrnbgb22 from './banks/virgin_nrnbgb22.js';
 import NbgEthngraaxxx from './banks/nbg_ethngraaxxx.js';
 
@@ -51,6 +52,7 @@ export const banks = [
   SparNordSpNoDK22,
   SpkKarlsruhekarsde66,
   SpkMarburgBiedenkopfHeladef1mar,
+  SpkWormsAlzeyRiedMalade51wor,
   VirginNrnbgb22,
   NbgEthngraaxxx,
 ];
