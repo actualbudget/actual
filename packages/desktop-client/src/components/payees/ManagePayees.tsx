@@ -6,7 +6,6 @@ import {
   type ComponentProps,
 } from 'react';
 
-import { type CSSProperties } from 'glamor';
 import memoizeOne from 'memoize-one';
 
 import { getNormalisedString } from 'loot-core/src/shared/normalisation';
@@ -65,34 +64,15 @@ function PayeeTableHeader() {
   );
 }
 
-type EmptyMessageProps = {
-  text: string;
-  style: CSSProperties;
-};
-
-function EmptyMessage({ text, style }: EmptyMessageProps) {
-  return (
-    <View
-      style={{
-        textAlign: 'center',
-        color: theme.pageTextSubdued,
-        fontStyle: 'italic',
-        fontSize: 13,
-        marginTop: 5,
-        style,
-      }}
-    >
-      {text}
-    </View>
-  );
-}
-
 type ManagePayeesProps = {
   payees: PayeeEntity[];
   ruleCounts: ComponentProps<typeof PayeeTable>['ruleCounts'];
   orphanedPayees: PayeeEntity[];
   initialSelectedIds: string[];
-  onBatchChange: (arg: { deleted?: unknown[]; updated?: unknown[] }) => void;
+  onBatchChange: (arg: {
+    deleted?: Array<{ id: string }>;
+    updated?: Array<{ id: string; name?: string; favorite?: 0 | 1 }>;
+  }) => void;
   onViewRules: ComponentProps<typeof PayeeTable>['onViewRules'];
   onCreateRule: ComponentProps<typeof PayeeTable>['onCreateRule'];
   onMerge: (ids: string[]) => Promise<void>;
@@ -137,7 +117,11 @@ export const ManagePayees = ({
   }
 
   const onUpdate = useCallback(
-    (id: PayeeEntity['id'], name: 'name' | 'favorite', value: unknown) => {
+    <T extends 'name' | 'favorite'>(
+      id: PayeeEntity['id'],
+      name: T,
+      value: PayeeEntity[T],
+    ) => {
       const payee = payees.find(p => p.id === id);
       if (payee && payee[name] !== value) {
         onBatchChange({ updated: [{ id, [name]: value }] });
@@ -272,7 +256,17 @@ export const ManagePayees = ({
         >
           <PayeeTableHeader />
           {filteredPayees.length === 0 ? (
-            <EmptyMessage text="No payees" style={{ marginTop: 15 }} />
+            <View
+              style={{
+                textAlign: 'center',
+                color: theme.pageTextSubdued,
+                fontStyle: 'italic',
+                fontSize: 13,
+                marginTop: 5,
+              }}
+            >
+              No payees
+            </View>
           ) : (
             <PayeeTable
               ref={table}
