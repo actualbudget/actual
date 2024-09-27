@@ -1,6 +1,5 @@
-import React from 'react';
+import React, { CSSProperties } from 'react';
 
-import { type CSSProperties } from '../../style/types';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 
