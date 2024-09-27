@@ -7,12 +7,15 @@ export class MobileBudgetPage {
     this.initializePageHeaderLocators(page);
     this.initializeBudgetTableLocators(page);
 
-    this.budgetType =
-      this.getEnvelopeBudgetSummaryButton({
-        throwIfNotFound: false,
-      }) !== null
-        ? 'Envelope'
-        : 'Tracking';
+    this.budgetType = this.determineBudgetType();
+  }
+
+  determineBudgetType() {
+    return this.getEnvelopeBudgetSummaryButton({
+      throwIfNotFound: false,
+    }) !== null
+      ? 'Envelope'
+      : 'Tracking';
   }
 
   initializeBudgetTableLocators(page) {
@@ -81,15 +84,17 @@ export class MobileBudgetPage {
     await this.budgetTable.waitFor();
   }
 
-  async toggleVisibleColumns() {
-    if (await this.budgetedHeaderButton.isVisible()) {
-      await this.budgetedHeaderButton.click();
-      return;
-    }
-
-    if (await this.spentHeaderButton.isVisible()) {
-      await this.spentHeaderButton.click();
-      return;
+  async toggleVisibleColumns(maxAttempts = 3) {
+    for (let i = 0; i < maxAttempts; i++) {
+      if (await this.budgetedHeaderButton.isVisible()) {
+        await this.budgetedHeaderButton.click();
+        return;
+      }
+      if (await this.spentHeaderButton.isVisible()) {
+        await this.spentHeaderButton.click();
+        return;
+      }
+      await this.page.waitForTimeout(1000);
     }
 
     throw new Error('Budgeted/Spent columns could not be located on the page');
@@ -136,25 +141,36 @@ export class MobileBudgetPage {
     await categoryButton.click();
   }
 
-  async getBudgetCellButton(categoryName) {
-    let budgetedButton = this.budgetTable.getByRole('button', {
-      name: `Open budget menu for ${categoryName} category`,
-    });
+  async getCellButton(buttonType, categoryName) {
+    const buttonSelector =
+      buttonType === 'Budgeted'
+        ? `Open budget menu for ${categoryName} category`
+        : `Show transactions for ${categoryName} category`;
 
-    if (await budgetedButton.isVisible()) {
-      return budgetedButton;
+    let button = this.budgetTable.getByRole('button', { name: buttonSelector });
+
+    if (await button.isVisible()) {
+      return button;
     }
 
     await this.toggleVisibleColumns();
-    budgetedButton = await this.getBudgetCellButton(categoryName);
+    button = this.budgetTable.getByRole('button', { name: buttonSelector });
 
-    if (await budgetedButton.isVisible()) {
-      return budgetedButton;
+    if (await button.isVisible()) {
+      return button;
     }
 
     throw new Error(
-      `Budget button for category ${categoryName} could not be located on the page`,
+      `${buttonType} button for category ${categoryName} could not be located on the page`,
     );
+  }
+
+  async getBudgetCellButton(categoryName) {
+    return this.getCellButton('Budgeted', categoryName);
+  }
+
+  async getSpentCellButton(categoryName) {
+    return this.getCellButton('Spent', categoryName);
   }
 
   async openBudgetMenu(categoryName) {
@@ -170,27 +186,6 @@ export class MobileBudgetPage {
     await this.page.keyboard.press('Enter');
   }
 
-  async getSpentCellButton(categoryName) {
-    let spentButton = this.budgetTable.getByRole('button', {
-      name: `Show transactions for ${categoryName} category`,
-    });
-
-    if (await spentButton.isVisible()) {
-      return spentButton;
-    }
-
-    await this.toggleVisibleColumns();
-    spentButton = await this.getSpentCellButton(categoryName);
-
-    if (await spentButton.isVisible()) {
-      return spentButton;
-    }
-
-    throw new Error(
-      `Spent button for category ${categoryName} could not be located on the page`,
-    );
-  }
-
   async openSpentPage(categoryName) {
     const spentButton = await this.getSpentCellButton(categoryName);
     await spentButton.click();
@@ -202,7 +197,14 @@ export class MobileBudgetPage {
     const balanceButton = this.budgetTable.getByRole('button', {
       name: `Open balance menu for ${categoryName} category`,
     });
-    await balanceButton.click();
+
+    if (await balanceButton.isVisible()) {
+      await balanceButton.click();
+    } else {
+      throw new Error(
+        `Balance button for category ${categoryName} not found or not visible`,
+      );
+    }
   }
 
   async goToPreviousMonth() {
@@ -231,7 +233,7 @@ export class MobileBudgetPage {
     }
 
     throw new Error(
-      'To Budget/Overbudgeted button could not be located on the page',
+      'Neither “To Budget” nor “Overbudgeted” button could be located on the page',
     );
   }
 
@@ -258,7 +260,7 @@ export class MobileBudgetPage {
     }
 
     throw new Error(
-      'Saved/Projected Savings/Overspent button could not be located on the page',
+      'None of “Saved”, “Projected Savings”, or “Overspent” buttons could be located on the page',
     );
   }
 
