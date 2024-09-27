@@ -5,7 +5,7 @@ import React, {
   type ReactNode,
 } from 'react';
 
-import { css } from 'glamor';
+import { css } from '@emotion/css';
 
 import { usePrivacyMode } from '../hooks/usePrivacyMode';
 import { useResponsive } from '../ResponsiveProvider';
@@ -73,7 +73,7 @@ function PrivacyOverlay({ children, ...props }) {
 
   return (
     <View
-      className={`${css(
+      className={css(
         [
           {
             display: 'inline-flex',
@@ -96,23 +96,23 @@ function PrivacyOverlay({ children, ...props }) {
           },
         ],
         style,
-      )}`}
+      )}
       {...restProps}
     >
       <div
-        className={`${css([
+        className={css([
           {
             display: 'flex',
             flexGrow: 1,
           },
-        ])}`}
+        ])}
       >
         {children}
       </div>
 
       <div
         aria-hidden="true"
-        className={`${css({
+        className={css({
           flexDirection: 'column',
           fontFamily: 'Redacted Script',
           height: '100%',
@@ -121,7 +121,7 @@ function PrivacyOverlay({ children, ...props }) {
           pointerEvents: 'none',
           position: 'absolute',
           width: '100%',
-        })}`}
+        })}
       >
         {children}
       </div>
