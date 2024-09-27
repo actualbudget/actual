@@ -1986,7 +1986,6 @@ function MonthSelector({
         onPress={() => {
           onOpenMonthMenu?.(month);
         }}
-        aria-label="Selected budget month"
         data-month={month}
       >
         <Text style={styles.underlinedText}>

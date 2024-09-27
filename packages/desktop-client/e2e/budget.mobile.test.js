@@ -82,10 +82,8 @@ budgetTypes.forEach(budgetType => {
       await budgetPage.openBudgetPageMenu();
 
       const budgetPageMenuModal = page.getByRole('dialog');
-      const budgetPageMenuModalTitle =
-        budgetPageMenuModal.getByLabel('Modal logo');
 
-      await expect(budgetPageMenuModalTitle).toBeVisible();
+      await expect(budgetPageMenuModal).toBeVisible();
       await expect(page).toMatchThemeScreenshots();
     });
 
@@ -94,14 +92,20 @@ budgetTypes.forEach(budgetType => {
       await budgetPage.waitForBudgetTable();
 
       let selectedMonth = await budgetPage.getSelectedMonth();
-      let displayMonth = monthUtils.format(selectedMonth, 'MMMM ‘yy');
+      let displayMonth = monthUtils.format(
+        selectedMonth,
+        budgetPage.MONTH_HEADER_DATE_FORMAT,
+      );
 
       await expect(budgetPage.heading).toHaveText(displayMonth);
 
       await budgetPage.goToPreviousMonth();
 
       selectedMonth = await budgetPage.getSelectedMonth();
-      displayMonth = monthUtils.format(selectedMonth, 'MMMM ‘yy');
+      displayMonth = monthUtils.format(
+        selectedMonth,
+        budgetPage.MONTH_HEADER_DATE_FORMAT,
+      );
 
       await expect(budgetPage.heading).toHaveText(displayMonth);
       await expect(page).toMatchThemeScreenshots();
@@ -116,10 +120,13 @@ budgetTypes.forEach(budgetType => {
       await budgetPage.openMonthMenu();
 
       const monthMenuModal = page.getByRole('dialog');
-      const monthMenuModalTitle = monthMenuModal.getByLabel('Modal title');
+      const monthMenuModalHeading = monthMenuModal.getByRole('heading');
 
-      const displayMonth = monthUtils.format(selectedMonth, 'MMMM ‘yy');
-      await expect(monthMenuModalTitle).toHaveText(displayMonth);
+      const displayMonth = monthUtils.format(
+        selectedMonth,
+        budgetPage.MONTH_HEADER_DATE_FORMAT,
+      );
+      await expect(monthMenuModalHeading).toHaveText(displayMonth);
       await expect(page).toMatchThemeScreenshots();
     });
 
@@ -128,14 +135,20 @@ budgetTypes.forEach(budgetType => {
       await budgetPage.waitForBudgetTable();
 
       let selectedMonth = await budgetPage.getSelectedMonth();
-      let displayMonth = monthUtils.format(selectedMonth, 'MMMM ‘yy');
+      let displayMonth = monthUtils.format(
+        selectedMonth,
+        budgetPage.MONTH_HEADER_DATE_FORMAT,
+      );
 
       await expect(budgetPage.heading).toHaveText(displayMonth);
 
       await budgetPage.goToNextMonth();
 
       selectedMonth = await budgetPage.getSelectedMonth();
-      displayMonth = monthUtils.format(selectedMonth, 'MMMM ‘yy');
+      displayMonth = monthUtils.format(
+        selectedMonth,
+        budgetPage.MONTH_HEADER_DATE_FORMAT,
+      );
 
       await expect(budgetPage.heading).toHaveText(displayMonth);
       await expect(page).toMatchThemeScreenshots();
@@ -150,11 +163,11 @@ budgetTypes.forEach(budgetType => {
       const categoryGroupName = await budgetPage.getCategoryGroupNameForRow(0);
       await budgetPage.openCategoryGroupMenu(categoryGroupName);
 
-      const categoryMenuModal = page.getByRole('dialog');
-      const categoryMenuModalTitle =
-        categoryMenuModal.getByLabel('Modal title');
+      const categoryMenuModalHeading = page
+        .getByRole('dialog')
+        .getByRole('heading');
 
-      await expect(categoryMenuModalTitle).toHaveText(categoryGroupName);
+      await expect(categoryMenuModalHeading).toHaveText(categoryGroupName);
       await expect(page).toMatchThemeScreenshots();
     });
 
@@ -165,11 +178,11 @@ budgetTypes.forEach(budgetType => {
       const categoryName = await budgetPage.getCategoryNameForRow(0);
       await budgetPage.openCategoryMenu(categoryName);
 
-      const categoryMenuModal = page.getByRole('dialog');
-      const categoryMenuModalTitle =
-        categoryMenuModal.getByLabel('Modal title');
+      const categoryMenuModalHeading = page
+        .getByRole('dialog')
+        .getByRole('heading');
 
-      await expect(categoryMenuModalTitle).toHaveText(categoryName);
+      await expect(categoryMenuModalHeading).toHaveText(categoryName);
       await expect(page).toMatchThemeScreenshots();
     });
 
@@ -182,10 +195,11 @@ budgetTypes.forEach(budgetType => {
       const categoryName = await budgetPage.getCategoryNameForRow(0);
       await budgetPage.openBudgetMenu(categoryName);
 
-      const budgetMenuModal = page.getByRole('dialog');
-      const budgetMenuModalTitle = budgetMenuModal.getByLabel('Modal title');
+      const budgetMenuModalHeading = page
+        .getByRole('dialog')
+        .getByRole('heading');
 
-      await expect(budgetMenuModalTitle).toHaveText(categoryName);
+      await expect(budgetMenuModalHeading).toHaveText(categoryName);
       await expect(page).toMatchThemeScreenshots();
     });
 
@@ -227,10 +241,11 @@ budgetTypes.forEach(budgetType => {
       const categoryName = await budgetPage.getCategoryNameForRow(0);
       await budgetPage.openBalanceMenu(categoryName);
 
-      const balanceMenuModal = page.getByRole('dialog');
-      const balanceMenuModalTitle = balanceMenuModal.getByLabel('Modal title');
+      const balanceMenuModalHeading = page
+        .getByRole('dialog')
+        .getByRole('heading');
 
-      await expect(balanceMenuModalTitle).toHaveText(categoryName);
+      await expect(balanceMenuModalHeading).toHaveText(categoryName);
       await expect(page).toMatchThemeScreenshots();
     });
 
@@ -241,10 +256,11 @@ budgetTypes.forEach(budgetType => {
 
         await budgetPage.openEnvelopeBudgetSummaryMenu();
 
-        const summaryModal = page.getByRole('dialog');
-        const summaryModalTitle = summaryModal.getByLabel('Modal title');
+        const summaryModalHeading = page
+          .getByRole('dialog')
+          .getByRole('heading');
 
-        await expect(summaryModalTitle).toHaveText('Budget Summary');
+        await expect(summaryModalHeading).toHaveText('Budget Summary');
         await expect(page).toMatchThemeScreenshots();
       });
     }
@@ -256,10 +272,11 @@ budgetTypes.forEach(budgetType => {
 
         await budgetPage.openTrackingBudgetSummaryMenu();
 
-        const summaryModal = page.getByRole('dialog');
-        const summaryModalTitle = summaryModal.getByLabel('Modal title');
+        const summaryModalHeading = page
+          .getByRole('dialog')
+          .getByRole('heading');
 
-        await expect(summaryModalTitle).toHaveText('Budget Summary');
+        await expect(summaryModalHeading).toHaveText('Budget Summary');
         await expect(page).toMatchThemeScreenshots();
       });
     }

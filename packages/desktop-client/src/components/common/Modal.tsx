@@ -290,7 +290,7 @@ export function ModalHeader({
 }: ModalHeaderProps) {
   return (
     <View
-      aria-label="Modal header"
+      role="heading"
       style={{
         justifyContent: 'center',
         alignItems: 'center',
@@ -419,7 +419,6 @@ export function ModalTitle({
       {shrinkOnOverflow ? (
         <AutoTextSize
           as={Text}
-          aria-label="Modal title"
           minFontSizePx={15}
           maxFontSizePx={25}
           onClick={onTitleClick}
@@ -435,7 +434,6 @@ export function ModalTitle({
         </AutoTextSize>
       ) : (
         <TextOneLine
-          aria-label="Modal title"
           onClick={onTitleClick}
           style={{
             fontSize: 25,

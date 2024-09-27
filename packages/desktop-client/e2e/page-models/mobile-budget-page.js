@@ -1,6 +1,10 @@
+import * as monthUtils from 'loot-core/src/shared/months';
+
 import { MobileAccountPage } from './mobile-account-page';
 
 export class MobileBudgetPage {
+  MONTH_HEADER_DATE_FORMAT = 'MMMM ‘yy';
+
   constructor(page) {
     this.page = page;
 
@@ -64,13 +68,16 @@ export class MobileBudgetPage {
     );
   }
 
-  initializePageHeaderLocators(page) {
+  async initializePageHeaderLocators(page) {
     this.heading = page.getByRole('heading');
     this.previousMonthButton = this.heading.getByRole('button', {
       name: 'Previous month',
     });
     this.selectedBudgetMonthButton = this.heading.getByRole('button', {
-      name: 'Selected budget month',
+      name: monthUtils.format(
+        await this.getSelectedMonth(),
+        this.MONTH_HEADER_DATE_FORMAT,
+      ),
     });
     this.nextMonthButton = this.heading.getByRole('button', {
       name: 'Next month',
@@ -100,8 +107,8 @@ export class MobileBudgetPage {
     throw new Error('Budgeted/Spent columns could not be located on the page');
   }
 
-  async getSelectedMonth() {
-    return this.selectedBudgetMonthButton.getAttribute('data-month');
+  getSelectedMonth() {
+    return this.heading.locator('[data-month]').getAttribute('data-month');
   }
 
   async openBudgetPageMenu() {
