@@ -4,26 +4,18 @@ export class MobileBudgetPage {
   constructor(page) {
     this.page = page;
 
-    this.categoryRows = page
-      .getByTestId('budget-groups')
-      .getByTestId('category-row');
+    this.initializePageHeaderLocators(page);
+    this.initializeBudgetTableLocators(page);
 
-    this.categoryNames = this.categoryRows.getByTestId('category-name');
+    this.budgetType =
+      this.getEnvelopeBudgetSummaryButton({
+        throwIfNotFound: false,
+      }) !== null
+        ? 'Envelope'
+        : 'Tracking';
+  }
 
-    this.categoryGroupRows = page
-      .getByTestId('budget-groups')
-      .getByTestId('category-group-row');
-
-    this.categoryGroupNames = this.categoryGroupRows.getByTestId(
-      'category-group-name',
-    );
-
-    this.heading = page.getByRole('heading');
-    this.selectedBudgetMonthButton = this.heading.getByLabel(
-      'Selected budget month',
-    );
-    this.budgetPageMenuButton = page.getByLabel('Budget page menu');
-
+  initializeBudgetTableLocators(page) {
     this.budgetTableHeader = page.getByTestId('budget-table-header');
 
     // Envelope budget summary buttons
@@ -53,12 +45,40 @@ export class MobileBudgetPage {
     });
 
     this.budgetTable = page.getByTestId('budget-table');
-    this.budgetType =
-      this.getEnvelopeBudgetSummaryButton({
-        throwIfNotFound: false,
-      }) !== null
-        ? 'Envelope'
-        : 'Tracking';
+
+    this.categoryRows = page
+      .getByTestId('budget-groups')
+      .getByTestId('category-row');
+
+    this.categoryNames = this.categoryRows.getByTestId('category-name');
+
+    this.categoryGroupRows = page
+      .getByTestId('budget-groups')
+      .getByTestId('category-group-row');
+
+    this.categoryGroupNames = this.categoryGroupRows.getByTestId(
+      'category-group-name',
+    );
+  }
+
+  initializePageHeaderLocators(page) {
+    this.heading = page.getByRole('heading');
+    this.previousMonthButton = this.heading.getByRole('button', {
+      name: 'Previous month',
+    });
+    this.selectedBudgetMonthButton = this.heading.getByRole('button', {
+      name: 'Selected budget month',
+    });
+    this.nextMonthButton = this.heading.getByRole('button', {
+      name: 'Next month',
+    });
+    this.budgetPageMenuButton = page.getByRole('button', {
+      name: 'Budget page menu',
+    });
+  }
+
+  async waitForBudgetTable() {
+    await this.budgetTable.waitFor();
   }
 
   async toggleVisibleColumns() {
@@ -75,6 +95,10 @@ export class MobileBudgetPage {
     throw new Error('Budgeted/Spent columns could not be located on the page');
   }
 
+  async getSelectedMonth() {
+    return this.selectedBudgetMonthButton.getAttribute('data-month');
+  }
+
   async openBudgetPageMenu() {
     await this.budgetPageMenuButton.click();
   }
@@ -86,6 +110,7 @@ export class MobileBudgetPage {
   getCategoryGroupButton(categoryGroupName) {
     return this.categoryGroupRows.getByRole('button', {
       name: categoryGroupName,
+      exact: true,
     });
   }
 
@@ -102,6 +127,7 @@ export class MobileBudgetPage {
   getCategoryButton(categoryName) {
     return this.categoryRows.getByRole('button', {
       name: categoryName,
+      exact: true,
     });
   }
 
@@ -110,17 +136,17 @@ export class MobileBudgetPage {
     await categoryButton.click();
   }
 
-  async getBudgetedButton(categoryName) {
-    let budgetedButton = this.budgetTable.getByTestId(
-      `budgeted-${categoryName}-button`,
-    );
+  async getBudgetCellButton(categoryName) {
+    let budgetedButton = this.budgetTable.getByRole('button', {
+      name: `Open budget menu for ${categoryName} category`,
+    });
 
     if (await budgetedButton.isVisible()) {
       return budgetedButton;
     }
 
     await this.toggleVisibleColumns();
-    budgetedButton = await this.getBudgetedButton(categoryName);
+    budgetedButton = await this.getBudgetCellButton(categoryName);
 
     if (await budgetedButton.isVisible()) {
       return budgetedButton;
@@ -132,29 +158,29 @@ export class MobileBudgetPage {
   }
 
   async openBudgetMenu(categoryName) {
-    const budgetedButton = await this.getBudgetedButton(categoryName);
+    const budgetedButton = await this.getBudgetCellButton(categoryName);
     await budgetedButton.click();
   }
 
   async setBudget(categoryName, newAmount) {
-    const budgetedButton = await this.getBudgetedButton(categoryName);
+    const budgetedButton = await this.getBudgetCellButton(categoryName);
     await budgetedButton.click();
 
     await this.page.keyboard.type(String(newAmount));
     await this.page.keyboard.press('Enter');
   }
 
-  async getSpentButton(categoryName) {
-    let spentButton = this.budgetTable.getByTestId(
-      `spent-${categoryName}-button`,
-    );
+  async getSpentCellButton(categoryName) {
+    let spentButton = this.budgetTable.getByRole('button', {
+      name: `Show transactions for ${categoryName} category`,
+    });
 
     if (await spentButton.isVisible()) {
       return spentButton;
     }
 
     await this.toggleVisibleColumns();
-    spentButton = await this.getSpentButton(categoryName);
+    spentButton = await this.getSpentCellButton(categoryName);
 
     if (await spentButton.isVisible()) {
       return spentButton;
@@ -166,21 +192,29 @@ export class MobileBudgetPage {
   }
 
   async openSpentPage(categoryName) {
-    const spentButton = await this.getSpentButton(categoryName);
+    const spentButton = await this.getSpentCellButton(categoryName);
     await spentButton.click();
 
     return new MobileAccountPage(this.page);
   }
 
   async openBalanceMenu(categoryName) {
-    const balanceButton = this.budgetTable.getByTestId(
-      `balance-${categoryName}-button`,
-    );
+    const balanceButton = this.budgetTable.getByRole('button', {
+      name: `Open balance menu for ${categoryName} category`,
+    });
     await balanceButton.click();
+  }
+
+  async goToPreviousMonth() {
+    await this.previousMonthButton.click();
   }
 
   async openMonthMenu() {
     await this.selectedBudgetMonthButton.click();
+  }
+
+  async goToNextMonth() {
+    await this.nextMonthButton.click();
   }
 
   async getEnvelopeBudgetSummaryButton({ throwIfNotFound = true } = {}) {
