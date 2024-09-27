@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import { useEffect, useState } from 'react';
+import { useLayoutEffect, useState } from 'react';
 
 import { isNonProductionEnvironment } from 'loot-core/src/shared/environment';
 import type { DarkTheme, Theme } from 'loot-core/src/types/prefs';
@@ -52,7 +52,7 @@ export function ThemeStyle() {
     | undefined
   >(undefined);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (theme === 'auto') {
       const darkTheme = themes[darkThemePreference];
 
