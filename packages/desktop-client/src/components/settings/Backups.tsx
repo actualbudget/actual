@@ -8,6 +8,7 @@ import { Setting } from './UI';
 export function Backups() {
   const BACKUP_FREQUENCY_MINS = 15;
   const MAX_BACKUPS = 10;
+
   return (
     <Setting>
       <Text>
@@ -16,12 +17,12 @@ export function Backups() {
         </strong>
         <p>
           <Trans>
-            Backups are taken every {BACKUP_FREQUENCY_MINS} minutes and stored
-            in{' '}
+            Backups are taken every {{ BACKUP_FREQUENCY_MINS }} minutes and
+            stored in{' '}
             <strong>
               <i>Actual’s data directory</i>
             </strong>
-            . Actual retains a maximum of {MAX_BACKUPS} backups at any time.
+            . Actual retains a maximum of {{ MAX_BACKUPS }} backups at any time.
           </Trans>
         </p>
       </Text>
