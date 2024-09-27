@@ -259,6 +259,8 @@ handlers['tracking-budget-month'] = async function ({ month }) {
         value(`budget-${cat.id}`),
         value(`sum-amount-${cat.id}`),
         value(`leftover-${cat.id}`),
+        value(`goal-${cat.id}`),
+        value(`long-goal-${cat.id}`)
       ]);
 
       if (!group.is_income) {
