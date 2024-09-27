@@ -64,7 +64,7 @@ test.describe('Mobile', () => {
     const accountPage = await accountsPage.openNthAccount(0);
 
     await expect(accountPage.heading).toHaveText('Bank of America');
-    expect(await accountPage.getBalance()).toBeGreaterThan(0);
+    await expect(accountPage.balance).toHaveText('190.00');
 
     await expect(accountPage.noTransactionsFoundError).not.toBeVisible();
     await expect(page).toMatchThemeScreenshots();

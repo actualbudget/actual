@@ -16,13 +16,6 @@ export class MobileAccountPage {
   }
 
   /**
-   * Retrieve the balance of the account as a number
-   */
-  async getBalance() {
-    return parseInt(await this.balance.textContent(), 10);
-  }
-
-  /**
    * Search by the given term
    */
   async searchByText(term) {
