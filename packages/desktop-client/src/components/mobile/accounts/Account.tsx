@@ -3,7 +3,6 @@ import { useParams } from 'react-router-dom';
 
 import { useAccount } from '../../../hooks/useAccount';
 import { useSyncedPref } from '../../../hooks/useSyncedPref';
-import { theme } from '../../../style';
 
 import { AccountTransactions } from './AccountTransactions';
 
