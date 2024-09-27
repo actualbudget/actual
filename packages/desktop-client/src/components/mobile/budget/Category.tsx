@@ -4,14 +4,11 @@ import { useParams, useSearchParams } from 'react-router-dom';
 import * as monthUtils from 'loot-core/src/shared/months';
 
 import { useCategories } from '../../../hooks/useCategories';
-import { useSetThemeColor } from '../../../hooks/useSetThemeColor';
 import { useSyncedPref } from '../../../hooks/useSyncedPref';
-import { theme } from '../../../style';
 
 import { CategoryTransactions } from './CategoryTransactions';
 
 export function Category() {
-  useSetThemeColor(theme.mobileViewTheme);
   const [_numberFormat] = useSyncedPref('numberFormat');
   const numberFormat = _numberFormat || 'comma-dot';
   const [hideFraction] = useSyncedPref('hideFraction');
