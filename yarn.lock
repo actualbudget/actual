@@ -59,8 +59,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@actual-app/web@workspace:packages/desktop-client"
   dependencies:
-    "@fontsource/redacted-script": "npm:^5.0.21"
     "@emotion/css": "npm:^11.13.0"
+    "@fontsource/redacted-script": "npm:^5.0.21"
     "@juggle/resize-observer": "npm:^3.4.0"
     "@playwright/test": "npm:1.41.1"
     "@rollup/plugin-inject": "npm:^5.0.5"
