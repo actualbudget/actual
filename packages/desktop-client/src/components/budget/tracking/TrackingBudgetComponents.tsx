@@ -178,11 +178,6 @@ export const GroupMonth = memo(function GroupMonth({
           valueProps={{
             binding: trackingBudget.groupBalance(id),
             type: 'financial',
-            privacyFilter: {
-              style: {
-                paddingRight: styles.monthRightPadding,
-              },
-            },
           }}
         />
       )}
