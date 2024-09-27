@@ -16,12 +16,12 @@ export function Backups() {
         </strong>
         <p>
           <Trans>
-            Backups are created every {BACKUP_FREQUENCY_MINS} minutes and stored
+            Backups are taken every {BACKUP_FREQUENCY_MINS} minutes and stored
             in{' '}
             <strong>
               <i>Actual’s data directory</i>
             </strong>
-            . The system retains a maximum of {MAX_BACKUPS} backups at any time.
+            . Actual retains a maximum of {MAX_BACKUPS} backups at any time.
           </Trans>
         </p>
       </Text>
