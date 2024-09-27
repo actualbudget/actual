@@ -1652,6 +1652,7 @@ export function BudgetTable({
               variant="bare"
               style={{ margin: 10 }}
               onPress={onOpenBudgetPageMenu}
+              aria-label="Budget page menu"
             >
               <SvgLogo
                 style={{ color: theme.mobileHeaderText }}

@@ -22,6 +22,7 @@ export class MobileBudgetPage {
     this.selectedBudgetMonthButton = this.heading.getByLabel(
       'Selected budget month',
     );
+    this.budgetPageMenuButton = page.getByLabel('Budget page menu');
 
     this.budgetTableHeader = page.getByTestId('budget-table-header');
 
@@ -72,6 +73,10 @@ export class MobileBudgetPage {
     }
 
     throw new Error('Budgeted/Spent columns could not be located on the page');
+  }
+
+  async openBudgetPageMenu() {
+    await this.budgetPageMenuButton.click();
   }
 
   async getCategoryGroupNameForRow(idx) {

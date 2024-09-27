@@ -318,6 +318,7 @@ export function ModalHeader({
         >
           {showLogo && (
             <SvgLogo
+              aria-label="Modal logo"
               width={30}
               height={30}
               style={{ justifyContent: 'center', alignSelf: 'center' }}

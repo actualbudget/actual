@@ -75,6 +75,22 @@ budgetTypes.forEach(budgetType => {
       await expect(page).toMatchThemeScreenshots();
     });
 
+    test('checks that clicking the Actual logo in the page header opens the budget page menu', async () => {
+      const budgetPage = await navigation.goToBudgetPage();
+      await expect(budgetPage.budgetTable).toBeVisible({
+        timeout: 10000,
+      });
+
+      await budgetPage.openBudgetPageMenu();
+
+      const budgetPageMenuModal = page.getByRole('dialog');
+      const budgetPageMenuModalTitle =
+        budgetPageMenuModal.getByLabel('Modal logo');
+
+      await expect(budgetPageMenuModalTitle).toBeVisible();
+      await expect(page).toMatchThemeScreenshots();
+    });
+
     test('checks that clicking the category group name opens the category group menu modal', async () => {
       const budgetPage = await navigation.goToBudgetPage();
       await expect(budgetPage.budgetTable).toBeVisible({
