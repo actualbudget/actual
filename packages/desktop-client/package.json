@@ -6,8 +6,8 @@
     "build"
   ],
   "devDependencies": {
-    "@fontsource/redacted-script": "^5.0.21",
     "@emotion/css": "^11.13.0",
+    "@fontsource/redacted-script": "^5.0.21",
     "@juggle/resize-observer": "^3.4.0",
     "@playwright/test": "1.41.1",
     "@rollup/plugin-inject": "^5.0.5",
