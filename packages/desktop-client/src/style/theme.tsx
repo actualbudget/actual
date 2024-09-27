@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import { useLayoutEffect, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useState } from 'react';
 
 import { isNonProductionEnvironment } from 'loot-core/src/shared/environment';
 import type { DarkTheme, Theme } from 'loot-core/src/types/prefs';
@@ -52,42 +52,49 @@ export function ThemeStyle() {
     | undefined
   >(undefined);
 
+  const darkThemeMediaQueryListener = useCallback(
+    (event: MediaQueryListEvent) => {
+      if (event.matches) {
+        setThemeColors(themes[darkThemePreference].colors);
+      } else {
+        setThemeColors(themes['light'].colors);
+      }
+    },
+    [darkThemePreference],
+  );
+
   useLayoutEffect(() => {
     if (theme === 'auto') {
-      const darkTheme = themes[darkThemePreference];
-
-      function darkThemeMediaQueryListener(event: MediaQueryListEvent) {
-        if (event.matches) {
-          setThemeColors(darkTheme.colors);
-        } else {
-          setThemeColors(themes['light'].colors);
-        }
-      }
       const darkThemeMediaQuery = window.matchMedia(
         '(prefers-color-scheme: dark)',
       );
+      if (darkThemeMediaQuery.matches) {
+        setThemeColors(themes[darkThemePreference].colors);
+      } else {
+        setThemeColors(themes['light'].colors);
+      }
+    } else {
+      setThemeColors(themes[theme].colors);
+    }
+  }, [theme, darkThemePreference]);
 
+  useEffect(() => {
+    if (theme === 'auto') {
+      const darkThemeMediaQuery = window.matchMedia(
+        '(prefers-color-scheme: dark)',
+      );
       darkThemeMediaQuery.addEventListener(
         'change',
         darkThemeMediaQueryListener,
       );
-
-      if (darkThemeMediaQuery.matches) {
-        setThemeColors(darkTheme.colors);
-      } else {
-        setThemeColors(themes['light'].colors);
-      }
-
       return () => {
         darkThemeMediaQuery.removeEventListener(
           'change',
           darkThemeMediaQueryListener,
         );
       };
-    } else {
-      setThemeColors(themes[theme].colors);
     }
-  }, [theme, darkThemePreference]);
+  }, [theme, darkThemeMediaQueryListener]);
 
   if (!themeColors) return null;
 
