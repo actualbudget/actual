@@ -58,7 +58,7 @@ export function CashFlow() {
 }
 
 type CashFlowInnerProps = {
-  widget: CashFlowWidget;
+  widget?: CashFlowWidget;
 };
 
 function CashFlowInner({ widget }: CashFlowInnerProps) {
@@ -142,8 +142,12 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
   const { isNarrowWidth } = useResponsive();
 
   async function onSaveWidget() {
+    if (!widget) {
+      throw new Error('No widget that could be saved.');
+    }
+
     await send('dashboard-update-widget', {
-      id: widget?.id,
+      id: widget.id,
       meta: {
         ...(widget.meta ?? {}),
         conditions,

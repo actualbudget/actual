@@ -55,7 +55,7 @@ export function Spending() {
 }
 
 type SpendingInternalProps = {
-  widget: SpendingWidget;
+  widget?: SpendingWidget;
 };
 
 function SpendingInternal({ widget }: SpendingInternalProps) {
@@ -133,8 +133,12 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
   const { isNarrowWidth } = useResponsive();
 
   async function onSaveWidget() {
+    if (!widget) {
+      throw new Error('No widget that could be saved.');
+    }
+
     await send('dashboard-update-widget', {
-      id: widget?.id,
+      id: widget.id,
       meta: {
         ...(widget.meta ?? {}),
         conditions,
@@ -474,7 +478,7 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                         }
                         right={
                           <Text style={{ fontWeight: 600 }}>
-                            <PrivacyFilter blurIntensity={5}>
+                            <PrivacyFilter>
                               {amountToCurrency(
                                 Math.abs(data.intervalData[todayDay].compare),
                               )}
@@ -494,7 +498,7 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                         }
                         right={
                           <Text style={{ fontWeight: 600 }}>
-                            <PrivacyFilter blurIntensity={5}>
+                            <PrivacyFilter>
                               {amountToCurrency(
                                 Math.abs(data.intervalData[todayDay].compareTo),
                               )}
@@ -515,7 +519,7 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                       }
                       right={
                         <Text style={{ fontWeight: 600 }}>
-                          <PrivacyFilter blurIntensity={5}>
+                          <PrivacyFilter>
                             {amountToCurrency(
                               Math.abs(data.intervalData[todayDay].budget),
                             )}
@@ -535,7 +539,7 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                       }
                       right={
                         <Text style={{ fontWeight: 600 }}>
-                          <PrivacyFilter blurIntensity={5}>
+                          <PrivacyFilter>
                             {amountToCurrency(
                               Math.abs(data.intervalData[todayDay].average),
                             )}
