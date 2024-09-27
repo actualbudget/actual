@@ -6,6 +6,8 @@ import { Text } from '../common/Text';
 import { Setting } from './UI';
 
 export function Backups() {
+  const BACKUP_FREQUENCY_MINS = 15;
+  const MAX_BACKUPS = 10;
   return (
     <Setting>
       <Text>
@@ -14,11 +16,12 @@ export function Backups() {
         </strong>
         <p>
           <Trans>
-            Backups are created every 15 minutes and stored in{' '}
+            Backups are created every {BACKUP_FREQUENCY_MINS} minutes and stored
+            in{' '}
             <strong>
               <i>Actual’s data directory</i>
             </strong>
-            . The system retains a maximum of 10 backups at any time.
+            . The system retains a maximum of {MAX_BACKUPS} backups at any time.
           </Trans>
         </p>
       </Text>
