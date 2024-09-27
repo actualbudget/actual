@@ -7,7 +7,7 @@ import React, {
 } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { css } from 'glamor';
+import { css } from '@emotion/css';
 
 import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { SvgArrowThinRight } from '../../icons/v1';
@@ -125,18 +125,16 @@ export function BalanceWithCarryover({
 
   const getDefaultClassName = useCallback(
     (balanceValue: number) =>
-      String(
-        css({
-          ...getBalanceAmountStyle(balanceValue),
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          textAlign: 'right',
-          ...(!isDisabled && {
-            cursor: 'pointer',
-          }),
-          ':hover': { textDecoration: 'underline' },
+      css({
+        ...getBalanceAmountStyle(balanceValue),
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        textAlign: 'right',
+        ...(!isDisabled && {
+          cursor: 'pointer',
         }),
-      ),
+        ':hover': { textDecoration: 'underline' },
+      }),
     [getBalanceAmountStyle, isDisabled],
   );
 
