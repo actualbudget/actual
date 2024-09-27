@@ -223,7 +223,7 @@ function EditableBudgetName() {
       <InitialFocus>
         <Input
           style={{
-            width: 160,
+            maxWidth: 'calc(100% - 23px)',
             fontSize: 16,
             fontWeight: 500,
           }}
@@ -273,7 +273,7 @@ function EditableBudgetName() {
 
       <Button
         variant="bare"
-        aria-label={t('Edit account name')}
+        aria-label={t('Edit budget name')}
         className="hover-visible"
         onPress={() => setEditing(true)}
       >
