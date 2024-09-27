@@ -804,7 +804,7 @@ export function CustomReport() {
                       left={<Block>{balanceType}:</Block>}
                       right={
                         <Text>
-                          <PrivacyFilter blurIntensity={5}>
+                          <PrivacyFilter>
                             {amountToCurrency(data[balanceTypeOp])}
                           </PrivacyFilter>
                         </Text>

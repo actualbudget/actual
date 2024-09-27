@@ -474,7 +474,7 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                         }
                         right={
                           <Text style={{ fontWeight: 600 }}>
-                            <PrivacyFilter blurIntensity={5}>
+                            <PrivacyFilter>
                               {amountToCurrency(
                                 Math.abs(data.intervalData[todayDay].compare),
                               )}
@@ -494,7 +494,7 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                         }
                         right={
                           <Text style={{ fontWeight: 600 }}>
-                            <PrivacyFilter blurIntensity={5}>
+                            <PrivacyFilter>
                               {amountToCurrency(
                                 Math.abs(data.intervalData[todayDay].compareTo),
                               )}
@@ -515,7 +515,7 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                       }
                       right={
                         <Text style={{ fontWeight: 600 }}>
-                          <PrivacyFilter blurIntensity={5}>
+                          <PrivacyFilter>
                             {amountToCurrency(
                               Math.abs(data.intervalData[todayDay].budget),
                             )}
@@ -535,7 +535,7 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                       }
                       right={
                         <Text style={{ fontWeight: 600 }}>
-                          <PrivacyFilter blurIntensity={5}>
+                          <PrivacyFilter>
                             {amountToCurrency(
                               Math.abs(data.intervalData[todayDay].average),
                             )}
