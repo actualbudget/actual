@@ -64,7 +64,7 @@ export function TrackingBalanceMenuModal({
               Balance
             </Text>
             <BalanceWithCarryover
-              disabled
+              isDisabled
               carryover={trackingBudget.catCarryover(categoryId)}
               balance={trackingBudget.catBalance(categoryId)}
               goal={trackingBudget.catGoal(categoryId)}

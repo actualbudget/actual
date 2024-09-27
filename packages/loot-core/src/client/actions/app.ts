@@ -46,3 +46,9 @@ export function focused() {
     return send('app-focused');
   };
 }
+
+export function reloadApp() {
+  return () => {
+    global.Actual.reload();
+  };
+}

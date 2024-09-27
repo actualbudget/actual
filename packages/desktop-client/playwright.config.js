@@ -18,7 +18,7 @@ expect.extend({
     };
 
     // Check lightmode
-    await locator.evaluate(() => window.Actual.setTheme('light'));
+    await locator.evaluate(() => window.Actual.setTheme('auto'));
     const lightmode = await expect(locator).toHaveScreenshot(config);
 
     if (lightmode && !lightmode.pass) {
@@ -44,7 +44,7 @@ expect.extend({
     }
 
     // Switch back to lightmode
-    await locator.evaluate(() => window.Actual.setTheme('light'));
+    await locator.evaluate(() => window.Actual.setTheme('auto'));
     return {
       message: () => 'pass',
       pass: true,
