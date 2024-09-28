@@ -45,12 +45,14 @@ export async function authorizeBank(
 ) {
   _authorize(dispatch, upgradingAccountId, {
     onSuccess: async data => {
-      pushModal('select-linked-accounts', {
-        accounts: data.accounts,
-        requisitionId: data.id,
-        upgradingAccountId,
-        syncSource: 'goCardless',
-      });
+      dispatch(
+        pushModal('select-linked-accounts', {
+          accounts: data.accounts,
+          requisitionId: data.id,
+          upgradingAccountId,
+          syncSource: 'goCardless',
+        }),
+      );
     },
   });
 }
