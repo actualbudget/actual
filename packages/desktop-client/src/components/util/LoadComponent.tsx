@@ -56,7 +56,7 @@ function LoadComponentInner<K extends string>({
       {
         retries: 5,
       },
-    ).catch((e) => {
+    ).catch(e => {
       setFailedToLoad(true);
       setFailedToLoadException(e);
     });
