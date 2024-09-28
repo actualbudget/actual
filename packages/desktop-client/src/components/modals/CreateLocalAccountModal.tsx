@@ -27,6 +27,7 @@ import {
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { Checkbox } from '../forms';
+import { validateAccountName } from '../util/accountValidation';
 
 function accountNameIsInUse(accountName: string, accounts: AccountEntity[]) {
   return accounts.map(a => a.name).includes(accountName);
@@ -58,7 +59,10 @@ export function CreateLocalAccountModal() {
   };
 
   const validateAndSetName = (name: string) => {
-    if (validateName(name)) {
+    const nameError = validateAccountName(name, '', accounts);
+    if (nameError) {
+      setNameError(nameError);
+    } else {
       setName(name);
       setNameError(null);
     }
@@ -105,7 +109,9 @@ export function CreateLocalAccountModal() {
                 </InitialFocus>
               </InlineField>
               {nameError && (
-                <FormError style={{ marginLeft: 75 }}>{nameError}</FormError>
+                <FormError style={{ marginLeft: 75, color: theme.warningText }}>
+                  {nameError}
+                </FormError>
               )}
 
               <View

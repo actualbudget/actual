@@ -10,6 +10,7 @@ import { useNotes } from '../../hooks/useNotes';
 import { styles, theme, type CSSProperties } from '../../style';
 import { AlignedText } from '../common/AlignedText';
 import { Link } from '../common/Link';
+import { Text } from '../common/Text';
 import { Tooltip } from '../common/Tooltip';
 import { View } from '../common/View';
 import { Notes } from '../Notes';
@@ -175,6 +176,15 @@ export function Account<FieldName extends SheetFields<'account'>>({
             padding: 10,
           }}
         >
+          <Text
+            style={{
+              fontWeight: 'bold',
+              borderBottom: accountNote ? `1px solid ${theme.tableBorder}` : 0,
+              marginBottom: accountNote ? '0.5rem' : 0,
+            }}
+          >
+            {name}
+          </Text>
           {accountNote && (
             <Notes
               getStyle={() => ({

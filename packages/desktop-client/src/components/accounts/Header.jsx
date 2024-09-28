@@ -16,7 +16,6 @@ import {
   SvgPencil1,
 } from '../../icons/v2';
 import { theme, styles } from '../../style';
-import { Warning } from '../alerts';
 import { AnimatedRefresh } from '../AnimatedRefresh';
 import { Button } from '../common/Button2';
 import { InitialFocus } from '../common/InitialFocus';
@@ -443,7 +442,9 @@ function AccountNameField({
             }}
           />
         </InitialFocus>
-        {saveNameError && <Warning>{saveNameError}</Warning>}
+        {saveNameError && (
+          <View style={{ color: theme.warningText }}>{saveNameError}</View>
+        )}
       </Fragment>
     );
   } else {
