@@ -6,7 +6,6 @@ import { amountToCurrency } from 'loot-core/src/shared/util';
 import { type SpendingWidget } from 'loot-core/src/types/models';
 
 import { useFeatureFlag } from '../../../hooks/useFeatureFlag';
-import { useLocalPref } from '../../../hooks/useLocalPref';
 import { styles } from '../../../style/styles';
 import { theme } from '../../../style/theme';
 import { Block } from '../../common/Block';
@@ -17,12 +16,14 @@ import { SpendingGraph } from '../graphs/SpendingGraph';
 import { LoadingIndicator } from '../LoadingIndicator';
 import { ReportCard } from '../ReportCard';
 import { ReportCardName } from '../ReportCardName';
+import { calculateSpendingReportTimeRange } from '../reportRanges';
 import { createSpendingSpreadsheet } from '../spreadsheets/spending-spreadsheet';
 import { useReport } from '../useReport';
 
 import { MissingReportCard } from './MissingReportCard';
 
 type SpendingCardProps = {
+  widgetId: string;
   isEditing?: boolean;
   meta?: SpendingWidget['meta'];
   onMetaChange: (newMeta: SpendingWidget['meta']) => void;
@@ -30,50 +31,36 @@ type SpendingCardProps = {
 };
 
 export function SpendingCard({
+  widgetId,
   isEditing,
-  meta,
+  meta = {},
   onMetaChange,
   onRemove,
 }: SpendingCardProps) {
+  const isDashboardsFeatureEnabled = useFeatureFlag('dashboards');
   const { t } = useTranslation();
 
+  const [compare, compareTo] = calculateSpendingReportTimeRange(meta ?? {});
+
   const [isCardHovered, setIsCardHovered] = useState(false);
-  const [spendingReportFilter = ''] = useLocalPref('spendingReportFilter');
-  const [spendingReportMode = 'singleMonth'] =
-    useLocalPref('spendingReportMode');
-  const [spendingReportCompare = monthUtils.currentMonth()] = useLocalPref(
-    'spendingReportCompare',
-  );
-  const [spendingReportCompareTo = monthUtils.currentMonth()] = useLocalPref(
-    'spendingReportCompareTo',
-  );
+  const spendingReportMode = meta?.mode ?? 'single-month';
 
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
 
   const selection =
-    spendingReportMode === 'singleMonth' ? 'compareTo' : spendingReportMode;
-  const parseFilter = spendingReportFilter && JSON.parse(spendingReportFilter);
-  const isDateValid = monthUtils.parseDate(spendingReportCompare);
+    spendingReportMode === 'single-month' ? 'compareTo' : spendingReportMode;
   const getGraphData = useMemo(() => {
     return createSpendingSpreadsheet({
-      conditions: parseFilter.conditions,
-      conditionsOp: parseFilter.conditionsOp,
-      compare:
-        isDateValid.toString() === 'Invalid Date'
-          ? monthUtils.currentMonth()
-          : spendingReportCompare,
-      compareTo: spendingReportCompareTo,
+      conditions: meta?.conditions,
+      conditionsOp: meta?.conditionsOp,
+      compare,
+      compareTo,
     });
-  }, [
-    parseFilter,
-    spendingReportCompare,
-    spendingReportCompareTo,
-    isDateValid,
-  ]);
+  }, [meta?.conditions, meta?.conditionsOp, compare, compareTo]);
 
   const data = useReport('default', getGraphData);
   const todayDay =
-    spendingReportCompare !== monthUtils.currentMonth()
+    compare !== monthUtils.currentMonth()
       ? 27
       : monthUtils.getDay(monthUtils.currentDay()) - 1 >= 28
         ? 27
@@ -82,7 +69,6 @@ export function SpendingCard({
     data &&
     data.intervalData[todayDay][selection] -
       data.intervalData[todayDay].compare;
-  const showCompareTo = data && Math.abs(data.intervalData[27].compareTo) > 0;
 
   const spendingReportFeatureFlag = useFeatureFlag('spendingReport');
 
@@ -98,7 +84,11 @@ export function SpendingCard({
   return (
     <ReportCard
       isEditing={isEditing}
-      to="/reports/spending"
+      to={
+        isDashboardsFeatureEnabled
+          ? `/reports/spending/${widgetId}`
+          : '/reports/spending'
+      }
       menuItems={[
         {
           name: 'rename',
@@ -142,12 +132,12 @@ export function SpendingCard({
               onClose={() => setNameMenuOpen(false)}
             />
             <DateRange
-              start={spendingReportCompare}
-              end={spendingReportCompareTo}
+              start={compare}
+              end={compareTo}
               type={spendingReportMode}
             />
           </View>
-          {data && showCompareTo && (
+          {data && (
             <View style={{ textAlign: 'right' }}>
               <Block
                 style={{
@@ -170,23 +160,17 @@ export function SpendingCard({
             </View>
           )}
         </View>
-        {!showCompareTo || isDateValid.toString() === 'Invalid Date' ? (
-          <View style={{ padding: 5 }}>
-            <p style={{ margin: 0, textAlign: 'center' }}>
-              <Trans>Additional data required to generate graph</Trans>
-            </p>
-          </View>
-        ) : data ? (
+        {data ? (
           <SpendingGraph
             style={{ flex: 1 }}
             compact={true}
             data={data}
             mode={spendingReportMode}
-            compare={spendingReportCompare}
-            compareTo={spendingReportCompareTo}
+            compare={compare}
+            compareTo={compareTo}
           />
         ) : (
-          <LoadingIndicator message={t('Loading report...')} />
+          <LoadingIndicator />
         )}
       </View>
     </ReportCard>

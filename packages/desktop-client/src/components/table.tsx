@@ -197,11 +197,6 @@ export function Cell({
         privacyFilter={mergeConditionalPrivacyFilterProps(
           {
             activationFilters: [!focused, !exposed],
-            style: {
-              position: 'absolute',
-              width: '100%',
-              height: '100%',
-            },
           },
           privacyFilter,
         )}

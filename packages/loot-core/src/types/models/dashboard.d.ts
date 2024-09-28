@@ -41,7 +41,15 @@ export type CashFlowWidget = AbstractWidget<
 >;
 export type SpendingWidget = AbstractWidget<
   'spending-card',
-  { name?: string } | null
+  {
+    name?: string;
+    conditions?: RuleConditionEntity[];
+    conditionsOp?: 'and' | 'or';
+    compare?: string;
+    compareTo?: string;
+    isLive?: boolean;
+    mode?: 'single-month' | 'budget' | 'average';
+  } | null
 >;
 export type CustomReportWidget = AbstractWidget<
   'custom-report',
