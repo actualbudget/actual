@@ -15,15 +15,13 @@ expect.extend({
       // eslint-disable-next-line rulesdir/typography
       mask: [locator.locator('[data-vrt-mask="true"]')],
       maxDiffPixels: 5,
-    };
-
-    let activeTheme = 'auto';
+    }
 
     // Check lightmode
-    await locator.evaluate(() => window.Actual.setTheme(activeTheme));
+    await locator.evaluate(() => window.Actual.setTheme('auto'));
     await expect(locator.locator('[data-theme]')).toHaveAttribute(
       'data-theme',
-      activeTheme,
+      'auto',
     );
     const lightmode = await expect(locator).toHaveScreenshot(config);
 
@@ -31,12 +29,11 @@ expect.extend({
       return lightmode;
     }
 
-    activeTheme = 'dark';
     // Switch to darkmode and check
-    await locator.evaluate(() => window.Actual.setTheme(activeTheme));
+    await locator.evaluate(() => window.Actual.setTheme('dark'));
     await expect(locator.locator('[data-theme]')).toHaveAttribute(
       'data-theme',
-      activeTheme,
+      'dark',
     );
     const darkmode = await expect(locator).toHaveScreenshot(config);
 
@@ -45,12 +42,11 @@ expect.extend({
       return darkmode;
     }
 
-    activeTheme = 'midnight';
     // Switch to midnight theme and check
-    await locator.evaluate(() => window.Actual.setTheme(activeTheme));
+    await locator.evaluate(() => window.Actual.setTheme('midnight'));
     await expect(locator.locator('[data-theme]')).toHaveAttribute(
       'data-theme',
-      activeTheme,
+      'midnight',
     );
     const midnightMode = await expect(locator).toHaveScreenshot(config);
 
