@@ -345,7 +345,7 @@ class AccountInternal extends PureComponent<
       showCleared: props.showCleared,
       showReconciled: props.showReconciled,
       editingName: false,
-      nameError: null,
+      nameError: '',
       isAdding: false,
       sort: null,
       filteredAmount: null,
@@ -718,7 +718,7 @@ class AccountInternal extends PureComponent<
         account => account.id === this.props.accountId,
       );
       this.props.updateAccount({ ...account, name });
-      this.setState({ editingName: false, nameError: null });
+      this.setState({ editingName: false, nameError: '' });
     }
   };
 

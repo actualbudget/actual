@@ -6,7 +6,7 @@ export function validateAccountName(
   newAccountName: string,
   accountId: string,
   accounts: AccountEntity[],
-) {
+): string {
   newAccountName = newAccountName.trim();
   if (newAccountName.length) {
     const duplicateNamedAccounts = accounts.filter(
@@ -15,7 +15,7 @@ export function validateAccountName(
     if (duplicateNamedAccounts.length) {
       return t('Name {{ newAccountName }} must be unique.', { newAccountName });
     } else {
-      return null;
+      return '';
     }
   } else {
     return t('Name cannot be blank.');

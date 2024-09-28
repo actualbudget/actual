@@ -20,6 +20,7 @@ import { Popover } from '../common/Popover';
 import { View } from '../common/View';
 import { Notes } from '../Notes';
 import { validateAccountName } from '../util/accountValidation';
+import { t } from 'i18next';
 
 type AccountMenuModalProps = {
   accountId: string;
@@ -41,13 +42,20 @@ export function AccountMenuModal({
   const account = useAccount(accountId);
   const accounts = useAccounts();
   const originalNotes = useNotes(`account-${accountId}`);
-  const [accountNameError, setAccountNameError] = useState(null);
-  const [currentAccountName, setCurrentAccountName] = useState(account.name);
+  const [accountNameError, setAccountNameError] = useState('');
+  const [currentAccountName, setCurrentAccountName] = useState(
+    account?.name || t('New Account'),
+  );
 
   const onRename = (newName: string) => {
-    setCurrentAccountName(newName);
+    newName = newName.trim();
     if (!account) {
       return;
+    }
+    if (!newName) {
+      setCurrentAccountName(t('Account'));
+    } else {
+      setCurrentAccountName(newName);
     }
 
     if (newName !== account.name) {
@@ -59,7 +67,7 @@ export function AccountMenuModal({
       if (renameAccountError) {
         setAccountNameError(renameAccountError);
       } else {
-        setAccountNameError(null);
+        setAccountNameError('');
         onSave?.({
           ...account,
           name: newName,
@@ -115,9 +123,11 @@ export function AccountMenuModal({
                   title={currentAccountName}
                   onTitleUpdate={onRename}
                 />
-                <View style={{ color: theme.warningText }}>
-                  {accountNameError}
-                </View>
+                {accountNameError && (
+                  <View style={{ color: theme.warningText }}>
+                    {accountNameError}
+                  </View>
+                )}
               </Fragment>
             }
             rightContent={<ModalCloseButton onPress={close} />}
