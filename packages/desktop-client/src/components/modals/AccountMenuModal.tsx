@@ -1,5 +1,7 @@
 import React, { type ComponentProps, Fragment, useRef, useState } from 'react';
 
+import { t } from 'i18next';
+
 import { type AccountEntity } from 'loot-core/types/models';
 
 import { useAccount } from '../../hooks/useAccount';
@@ -20,7 +22,6 @@ import { Popover } from '../common/Popover';
 import { View } from '../common/View';
 import { Notes } from '../Notes';
 import { validateAccountName } from '../util/accountValidation';
-import { t } from 'i18next';
 
 type AccountMenuModalProps = {
   accountId: string;
