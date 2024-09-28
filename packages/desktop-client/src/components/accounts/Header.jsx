@@ -179,7 +179,7 @@ export function AccountHeader({
             {!!account?.bank && (
               <AccountSyncSidebar
                 account={account}
-                failedAccount={failedAccounts}
+                failedAccounts={failedAccounts}
                 accountsSyncing={accountsSyncing}
               />
             )}
