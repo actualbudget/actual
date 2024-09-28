@@ -1,11 +1,14 @@
 // @ts-strict-ignore
-import React, { type FormEvent, useState } from 'react';
+import { type FormEvent, useState } from 'react';
 import { Form } from 'react-aria-components';
+import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 
 import { closeModal, createAccount } from 'loot-core/client/actions';
 import { toRelaxedNumber } from 'loot-core/src/shared/util';
+import { type AccountEntity } from 'loot-core/types/models';
 
+import * as useAccounts from '../../hooks/useAccounts';
 import { useNavigate } from '../../hooks/useNavigate';
 import { theme } from '../../style';
 import { Button } from '../common/Button2';
@@ -25,23 +28,46 @@ import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { Checkbox } from '../forms';
 
+function accountNameIsInUse(accountName: string, accounts: AccountEntity[]) {
+  return accounts.map(a => a.name).includes(accountName);
+}
+
 export function CreateLocalAccountModal() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const accounts = useAccounts.useAccounts();
   const [name, setName] = useState('');
   const [offbudget, setOffbudget] = useState(false);
   const [balance, setBalance] = useState('0');
 
-  const [nameError, setNameError] = useState(false);
+  const [nameError, setNameError] = useState(null);
   const [balanceError, setBalanceError] = useState(false);
 
   const validateBalance = balance => !isNaN(parseFloat(balance));
+  const { t } = useTranslation();
+
+  const validateName = (name: string): boolean => {
+    if (!name) {
+      setNameError(t('Name is required'));
+      return false;
+    } else if (accountNameIsInUse(name, accounts)) {
+      setNameError(t('Name {{ name }} must be unique.', { name }));
+      return false;
+    }
+    return true;
+  };
+
+  const validateAndSetName = (name: string) => {
+    if (validateName(name)) {
+      setName(name);
+      setNameError(null);
+    }
+  };
 
   const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    const nameError = !name;
-    setNameError(nameError);
+    validateName(name);
 
     const balanceError = !validateBalance(balance);
     setBalanceError(balanceError);
@@ -72,19 +98,14 @@ export function CreateLocalAccountModal() {
                     onChange={event => setName(event.target.value)}
                     onBlur={event => {
                       const name = event.target.value.trim();
-                      setName(name);
-                      if (name && nameError) {
-                        setNameError(false);
-                      }
+                      validateAndSetName(name);
                     }}
                     style={{ flex: 1 }}
                   />
                 </InitialFocus>
               </InlineField>
               {nameError && (
-                <FormError style={{ marginLeft: 75 }}>
-                  Name is required
-                </FormError>
+                <FormError style={{ marginLeft: 75 }}>{nameError}</FormError>
               )}
 
               <View

@@ -1,8 +1,9 @@
-import React, { type ComponentProps, useRef, useState } from 'react';
+import React, { type ComponentProps, Fragment, useRef, useState } from 'react';
 
 import { type AccountEntity } from 'loot-core/types/models';
 
 import { useAccount } from '../../hooks/useAccount';
+import { useAccounts } from '../../hooks/useAccounts';
 import { useNotes } from '../../hooks/useNotes';
 import { SvgClose, SvgDotsHorizontalTriple, SvgLockOpen } from '../../icons/v1';
 import { SvgNotesPaper } from '../../icons/v2';
@@ -18,6 +19,7 @@ import {
 import { Popover } from '../common/Popover';
 import { View } from '../common/View';
 import { Notes } from '../Notes';
+import { validateAccountName } from '../util/accountValidation';
 
 type AccountMenuModalProps = {
   accountId: string;
@@ -37,7 +39,9 @@ export function AccountMenuModal({
   onClose,
 }: AccountMenuModalProps) {
   const account = useAccount(accountId);
+  const accounts = useAccounts();
   const originalNotes = useNotes(`account-${accountId}`);
+  const [accountNameError, setAccountNameError] = useState(null);
 
   const onRename = (newName: string) => {
     if (!account) {
@@ -45,10 +49,20 @@ export function AccountMenuModal({
     }
 
     if (newName !== account.name) {
-      onSave?.({
-        ...account,
-        name: newName,
-      });
+      const renameAccountError = validateAccountName(
+        newName,
+        accountId,
+        accounts,
+      );
+      if (renameAccountError) {
+        setAccountNameError(renameAccountError);
+      } else {
+        setAccountNameError(null);
+        onSave?.({
+          ...account,
+          name: newName,
+        });
+      }
     }
   };
 
@@ -93,11 +107,16 @@ export function AccountMenuModal({
               />
             }
             title={
-              <ModalTitle
-                isEditable
-                title={account.name}
-                onTitleUpdate={onRename}
-              />
+              <Fragment>
+                <ModalTitle
+                  isEditable
+                  title={account.name}
+                  onTitleUpdate={onRename}
+                />
+                <View style={{ color: theme.warningText }}>
+                  {accountNameError}
+                </View>
+              </Fragment>
             }
             rightContent={<ModalCloseButton onPress={close} />}
           />
