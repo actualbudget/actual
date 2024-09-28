@@ -1,12 +1,10 @@
 // @ts-strict-ignore
 import { type FormEvent, useState } from 'react';
 import { Form } from 'react-aria-components';
-import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 
 import { closeModal, createAccount } from 'loot-core/client/actions';
 import { toRelaxedNumber } from 'loot-core/src/shared/util';
-import { type AccountEntity } from 'loot-core/types/models';
 
 import * as useAccounts from '../../hooks/useAccounts';
 import { useNavigate } from '../../hooks/useNavigate';
@@ -29,10 +27,6 @@ import { View } from '../common/View';
 import { Checkbox } from '../forms';
 import { validateAccountName } from '../util/accountValidation';
 
-function accountNameIsInUse(accountName: string, accounts: AccountEntity[]) {
-  return accounts.map(a => a.name).includes(accountName);
-}
-
 export function CreateLocalAccountModal() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -45,18 +39,6 @@ export function CreateLocalAccountModal() {
   const [balanceError, setBalanceError] = useState(false);
 
   const validateBalance = balance => !isNaN(parseFloat(balance));
-  const { t } = useTranslation();
-
-  const validateName = (name: string): boolean => {
-    if (!name) {
-      setNameError(t('Name is required'));
-      return false;
-    } else if (accountNameIsInUse(name, accounts)) {
-      setNameError(t('Name {{ name }} must be unique.', { name }));
-      return false;
-    }
-    return true;
-  };
 
   const validateAndSetName = (name: string) => {
     const nameError = validateAccountName(name, '', accounts);
@@ -71,7 +53,7 @@ export function CreateLocalAccountModal() {
   const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    validateName(name);
+    const nameError = validateAccountName(name, '', accounts);
 
     const balanceError = !validateBalance(balance);
     setBalanceError(balanceError);
