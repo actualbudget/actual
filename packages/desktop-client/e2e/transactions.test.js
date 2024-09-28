@@ -38,13 +38,12 @@ test.describe('Transactions', () => {
 
     test('by date', async () => {
       const filterTooltip = await accountPage.filterBy('Date');
-      await expect(page).toMatchThemeScreenshots();
+      await expect(filterTooltip.page).toMatchThemeScreenshots();
 
       // Open datepicker
       await page.keyboard.press('Space');
-
       const datepicker = page.getByTestId('date-select-tooltip');
-      await expect(page).toMatchThemeScreenshots();
+      await expect(datepicker).toMatchThemeScreenshots();
 
       // Select "is xxxxx"
       await datepicker.getByText('20', { exact: true }).click();
@@ -57,11 +56,11 @@ test.describe('Transactions', () => {
 
     test('by category', async () => {
       const filterTooltip = await accountPage.filterBy('Category');
-      await expect(page).toMatchThemeScreenshots();
+      await expect(filterTooltip.page).toMatchThemeScreenshots();
 
-      // Open autocomplete
-      await page.keyboard.type('Cloth');
-      await expect(page).toMatchThemeScreenshots();
+      // Type in the autocomplete box
+      const autocomplete = page.getByTestId('autocomplete');
+      await expect(autocomplete).toMatchThemeScreenshots();
 
       // Select the active item
       await page.getByTestId('Clothing-category-item').click();
