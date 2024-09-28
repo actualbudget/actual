@@ -15,7 +15,7 @@ expect.extend({
       // eslint-disable-next-line rulesdir/typography
       mask: [locator.locator('[data-vrt-mask="true"]')],
       maxDiffPixels: 5,
-    }
+    };
 
     // Check lightmode
     await locator.evaluate(() => window.Actual.setTheme('auto'));
