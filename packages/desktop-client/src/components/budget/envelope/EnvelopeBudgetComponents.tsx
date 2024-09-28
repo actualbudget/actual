@@ -181,11 +181,6 @@ export const ExpenseGroupMonth = memo(function ExpenseGroupMonth({
         valueProps={{
           binding: envelopeBudget.groupBalance(id),
           type: 'financial',
-          privacyFilter: {
-            style: {
-              paddingRight: styles.monthRightPadding,
-            },
-          },
         }}
       />
     </View>
@@ -558,11 +553,6 @@ export function IncomeGroupMonth({ month }: IncomeGroupMonthProps) {
         valueProps={{
           binding: envelopeBudget.groupIncomeReceived,
           type: 'financial',
-          privacyFilter: {
-            style: {
-              paddingRight: styles.monthRightPadding,
-            },
-          },
         }}
       />
     </View>

@@ -66,7 +66,7 @@ export function EnvelopeBalanceMenuModal({
               Balance
             </Text>
             <BalanceWithCarryover
-              disabled
+              isDisabled
               carryover={envelopeBudget.catCarryover(categoryId)}
               balance={envelopeBudget.catBalance(categoryId)}
               goal={envelopeBudget.catGoal(categoryId)}

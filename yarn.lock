@@ -59,6 +59,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@actual-app/web@workspace:packages/desktop-client"
   dependencies:
+    "@fontsource/redacted-script": "npm:^5.0.21"
     "@juggle/resize-observer": "npm:^3.4.0"
     "@playwright/test": "npm:1.41.1"
     "@rollup/plugin-inject": "npm:^5.0.5"
@@ -1843,6 +1844,13 @@ __metadata:
   version: 8.57.0
   resolution: "@eslint/js@npm:8.57.0"
   checksum: 10/3c501ce8a997cf6cbbaf4ed358af5492875e3550c19b9621413b82caa9ae5382c584b0efa79835639e6e0ddaa568caf3499318e5bdab68643ef4199dce5eb0a0
+  languageName: node
+  linkType: hard
+
+"@fontsource/redacted-script@npm:^5.0.21":
+  version: 5.0.21
+  resolution: "@fontsource/redacted-script@npm:5.0.21"
+  checksum: 10/93f506c9e8df827ab1872d433a09079c592f3a20a1c36b9a168e68377967d3d1d282fffd51bee973c2ecb253316ff4641d244f8f05242e4aa968a1eb14d065eb
   languageName: node
   linkType: hard
 
