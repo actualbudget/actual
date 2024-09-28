@@ -42,8 +42,10 @@ export function AccountMenuModal({
   const accounts = useAccounts();
   const originalNotes = useNotes(`account-${accountId}`);
   const [accountNameError, setAccountNameError] = useState(null);
+  const [currentAccountName, setCurrentAccountName] = useState(account.name);
 
   const onRename = (newName: string) => {
+    setCurrentAccountName(newName);
     if (!account) {
       return;
     }
@@ -110,7 +112,7 @@ export function AccountMenuModal({
               <Fragment>
                 <ModalTitle
                   isEditable
-                  title={account.name}
+                  title={currentAccountName}
                   onTitleUpdate={onRename}
                 />
                 <View style={{ color: theme.warningText }}>
