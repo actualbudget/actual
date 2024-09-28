@@ -17,16 +17,27 @@ expect.extend({
       maxDiffPixels: 5,
     };
 
+    let activeTheme = 'auto';
+
     // Check lightmode
-    await locator.evaluate(() => window.Actual.setTheme('auto'));
+    await locator.evaluate(() => window.Actual.setTheme(activeTheme));
+    await expect(locator.locator('[data-theme]')).toHaveAttribute(
+      'data-theme',
+      activeTheme,
+    );
     const lightmode = await expect(locator).toHaveScreenshot(config);
 
     if (lightmode && !lightmode.pass) {
       return lightmode;
     }
 
+    activeTheme = 'dark';
     // Switch to darkmode and check
-    await locator.evaluate(() => window.Actual.setTheme('dark'));
+    await locator.evaluate(() => window.Actual.setTheme(activeTheme));
+    await expect(locator.locator('[data-theme]')).toHaveAttribute(
+      'data-theme',
+      activeTheme,
+    );
     const darkmode = await expect(locator).toHaveScreenshot(config);
 
     // Assert on
@@ -34,8 +45,13 @@ expect.extend({
       return darkmode;
     }
 
+    activeTheme = 'midnight';
     // Switch to midnight theme and check
-    await locator.evaluate(() => window.Actual.setTheme('midnight'));
+    await locator.evaluate(() => window.Actual.setTheme(activeTheme));
+    await expect(locator.locator('[data-theme]')).toHaveAttribute(
+      'data-theme',
+      activeTheme,
+    );
     const midnightMode = await expect(locator).toHaveScreenshot(config);
 
     // Assert on
