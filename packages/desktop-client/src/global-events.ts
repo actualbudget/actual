@@ -142,4 +142,8 @@ export function handleGlobalEvents(actions: BoundActions, store: Store<State>) {
     actions.closeBudgetUI();
     actions.setAppState({ loadingText: null });
   });
+
+  listen('api-fetch-redirected', () => {
+    actions.reloadApp();
+  });
 }
