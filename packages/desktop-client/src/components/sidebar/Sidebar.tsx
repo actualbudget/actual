@@ -105,6 +105,7 @@ export function Sidebar() {
           color: theme.sidebarItemText,
           height: '100%',
           backgroundColor: theme.sidebarBackground,
+          userSelect: 'none',
           '& .float': {
             opacity: isFloating ? 1 : 0,
             transition: 'opacity .25s, width .25s',
