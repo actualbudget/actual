@@ -18,13 +18,13 @@ import {
 } from '../table';
 
 type RuleButtonProps = {
-  ruleCount: number;
+  count: number;
   focused: boolean;
   onEdit: () => void;
   onClick: () => void;
 };
 
-function RuleButton({ ruleCount, focused, onEdit, onClick }: RuleButtonProps) {
+function RuleButton({ count, focused, onEdit, onClick }: RuleButtonProps) {
   return (
     <Cell
       name="rule-count"
@@ -46,14 +46,8 @@ function RuleButton({ ruleCount, focused, onEdit, onClick }: RuleButtonProps) {
         onSelect={onClick}
       >
         <Text style={{ paddingRight: 5 }}>
-          {ruleCount > 0 ? (
-            <Trans
-              i18nKey="associatedRule"
-              count={ruleCount}
-              values={{ ruleCount }}
-            >
-              {{ ruleCount }} associated rule
-            </Trans>
+          {count > 0 ? (
+            <Trans count={count}>{{ count }} associated rules</Trans>
           ) : (
             <Trans>Create rule</Trans>
           )}
@@ -176,7 +170,7 @@ export const PayeeTableRow = memo(
           inputProps={{ readOnly: !!payee.transfer_acct }}
         />
         <RuleButton
-          ruleCount={ruleCount}
+          count={ruleCount}
           focused={focusedField === 'rule-count'}
           onEdit={() => onEdit(id, 'rule-count')}
           onClick={() =>
