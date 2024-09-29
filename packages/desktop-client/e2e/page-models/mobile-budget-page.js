@@ -107,8 +107,10 @@ export class MobileBudgetPage {
     throw new Error('Budgeted/Spent columns could not be located on the page');
   }
 
-  getSelectedMonth() {
-    return this.heading.locator('[data-month]').getAttribute('data-month');
+  async getSelectedMonth() {
+    return await this.heading
+      .locator('[data-month]')
+      .getAttribute('data-month');
   }
 
   async openBudgetPageMenu() {
