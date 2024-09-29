@@ -69,7 +69,7 @@ export function AccountGroup<FieldName extends SheetFields<'account'>>({
   */
 
   return (
-    <View style={{ flexShrink: 0, padding: '5px 0', ...style }}>
+    accountList?.length > 0 && <View style={{ flexShrink: 0, padding: '5px 0', ...style }}>
       <AccountGroupName
         groupName={t(groupName)}
         to={groupTo}
