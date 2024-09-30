@@ -2,9 +2,7 @@ import React from 'react';
 import { useParams } from 'react-router-dom';
 
 import { useAccount } from '../../../hooks/useAccount';
-import { useSetThemeColor } from '../../../hooks/useSetThemeColor';
 import { useSyncedPref } from '../../../hooks/useSyncedPref';
-import { theme } from '../../../style';
 
 import { AccountTransactions } from './AccountTransactions';
 
@@ -14,8 +12,6 @@ export function Account() {
   const [hideFraction] = useSyncedPref('hideFraction');
 
   const { id: accountId } = useParams();
-
-  useSetThemeColor(theme.mobileViewTheme);
 
   const account = useAccount(accountId!);
 
