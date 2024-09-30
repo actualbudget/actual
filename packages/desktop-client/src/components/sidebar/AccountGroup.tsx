@@ -69,31 +69,33 @@ export function AccountGroup<FieldName extends SheetFields<'account'>>({
   */
 
   return (
-    accountList?.length > 0 && <View style={{ flexShrink: 0, padding: '5px 0', ...style }}>
-      <AccountGroupName
-        groupName={t(groupName)}
-        to={groupTo}
-        query={groupQuery}
-        toggleAccounts={toggleAccounts}
-        collapsed={collapsed?.[groupName.replace(/\s/g, '')]}
-      />
+    accountList?.length > 0 && (
+      <View style={{ flexShrink: 0, padding: '5px 0', ...style }}>
+        <AccountGroupName
+          groupName={t(groupName)}
+          to={groupTo}
+          query={groupQuery}
+          toggleAccounts={toggleAccounts}
+          collapsed={collapsed?.[groupName.replace(/\s/g, '')]}
+        />
 
-      {!collapsed?.[groupName.replace(/\s/g, '')] &&
-        accountList?.map(account => (
-          <Account
-            key={account.id}
-            name={account.name}
-            account={account}
-            connected={!!account.bank}
-            pending={syncingAccountIds.includes(account.id)}
-            failed={failedAccounts?.has(account.id)}
-            updated={updatedAccounts?.includes(account.id)}
-            to={getAccountPath(account)}
-            query={queries.accountBalance(account)}
-            onDragChange={onDragChange}
-            onDrop={onReorder}
-          />
-        ))}
-    </View>
+        {!collapsed?.[groupName.replace(/\s/g, '')] &&
+          accountList?.map(account => (
+            <Account
+              key={account.id}
+              name={account.name}
+              account={account}
+              connected={!!account.bank}
+              pending={syncingAccountIds.includes(account.id)}
+              failed={failedAccounts?.has(account.id)}
+              updated={updatedAccounts?.includes(account.id)}
+              to={getAccountPath(account)}
+              query={queries.accountBalance(account)}
+              onDragChange={onDragChange}
+              onDrop={onReorder}
+            />
+          ))}
+      </View>
+    )
   );
 }
