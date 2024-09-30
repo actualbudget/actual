@@ -7,8 +7,9 @@ Module.globalPaths.push(__dirname + '/..');
 global.fetch = fetch;
 
 const lazyLoadBackend = async (isDev: boolean) => {
-  // eslint-disable-next-line import/extensions
-  const bundle = await import('loot-core/lib-dist/bundle.desktop.js');
+  const bundle = await import(
+    process.env.ACTUAL_DATA_DIR + '/Releases/v23.9.0/lib-dist/bundle.desktop.js'
+  );
   bundle.initApp(isDev);
 };
 

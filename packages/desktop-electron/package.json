@@ -88,6 +88,7 @@
     "npmRebuild": false
   },
   "dependencies": {
+    "adm-zip": "^0.5.10",
     "electron-is-dev": "2.0.0",
     "electron-log": "4.4.8",
     "loot-core": "*",

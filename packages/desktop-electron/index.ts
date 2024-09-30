@@ -2,6 +2,7 @@ import fs from 'fs';
 import Module from 'module';
 import path from 'path';
 
+import AdmZip from 'adm-zip';
 import {
   net,
   app,
@@ -27,6 +28,7 @@ import {
 } from './window-state';
 
 import './security';
+const { writeFile } = require('fs/promises');
 
 Module.globalPaths.push(__dirname + '/..');
 
@@ -51,6 +53,33 @@ let serverProcess: UtilityProcess | null;
 
 if (isDev) {
   process.traceProcessWarnings = true;
+}
+
+async function downloadElectronBuild(releaseVersion: string) {
+  const downloadUrl = `https://github.com/MikesGlitch/actual/releases/download/${releaseVersion}/desktop-electron-dist.zip`;
+  const res = await fetch(downloadUrl);
+  const arrBuffer = await res.arrayBuffer();
+  const zipped = new AdmZip(Buffer.from(arrBuffer));
+  console.info(
+    'electron version will be installed here:',
+    process.env.ACTUAL_DATA_DIR,
+  );
+  // const entries = zipped.getEntries();
+  await zipped.extractAllToAsync(
+    process.env.ACTUAL_DATA_DIR + '/Releases',
+    true,
+    false,
+    (err?: Error) => {
+      if (!err) {
+        console.info('successfully extracted zip!');
+        return;
+      }
+
+      console.info(err);
+    },
+  );
+
+  return '';
 }
 
 function createBackgroundProcess() {
@@ -215,6 +244,8 @@ function updateMenu(budgetId?: string) {
 app.setAppUserModelId('com.actualbudget.actual');
 
 app.on('ready', async () => {
+  // await downloadElectronBuild('v23.9.0');
+
   // Install an `app://` protocol that always returns the base HTML
   // file no matter what URL it is. This allows us to use react-router
   // on the frontend
@@ -243,13 +274,20 @@ app.on('ready', async () => {
 
     const pathname = parsedUrl.pathname;
 
-    let filePath = path.normalize(`${__dirname}/client-build/index.html`); // default web path
+    let filePath = path.normalize(
+      `${process.env.ACTUAL_DATA_DIR}/Releases/v23.9.0/client-build/index.html`,
+    ); // default web path
 
     if (pathname.startsWith('/static')) {
       // static assets
-      filePath = path.normalize(`${__dirname}/client-build${pathname}`);
+      filePath = path.normalize(
+        `${process.env.ACTUAL_DATA_DIR}/Releases/v23.9.0/client-build${pathname}`,
+      );
       const resolvedPath = path.resolve(filePath);
-      const clientBuildPath = path.resolve(__dirname, 'client-build');
+      const clientBuildPath = path.resolve(
+        `${process.env.ACTUAL_DATA_DIR}/Releases/v23.9.0`,
+        'client-build',
+      );
 
       // Ensure filePath is within client-build directory - prevents directory traversal vulnerability
       if (!resolvedPath.startsWith(clientBuildPath)) {
@@ -273,7 +311,7 @@ app.on('ready', async () => {
     console.log('Suspending', new Date());
   });
 
-  createBackgroundProcess();
+  // createBackgroundProcess();
 });
 
 app.on('window-all-closed', () => {
