@@ -16,6 +16,7 @@ import * as undo from 'loot-core/src/platform/client/undo';
 
 import { useAccounts } from '../hooks/useAccounts';
 import { useLocalPref } from '../hooks/useLocalPref';
+import { useMetaThemeColor } from '../hooks/useMetaThemeColor';
 import { useNavigate } from '../hooks/useNavigate';
 import { useResponsive } from '../ResponsiveProvider';
 import { theme } from '../style';
@@ -76,6 +77,9 @@ function RouterBehaviors() {
 }
 
 export function FinancesApp() {
+  const { isNarrowWidth } = useResponsive();
+  useMetaThemeColor(isNarrowWidth ? theme.mobileViewTheme : null);
+
   const dispatch = useDispatch();
   const { t } = useTranslation();
 
