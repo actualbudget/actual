@@ -65,8 +65,9 @@ export function AccountGroupName<FieldName extends SheetFields<'account'>>({
             width={12}
             height={12}
             onClick={toggleAccounts}
-            style={{
+            className={`${css({
               position: 'absolute',
+              borderRadius: 5,
               zIndex: 99999,
               marginTop: collapsed ? 2 : -2,
               marginBottom: 5,
@@ -76,7 +77,8 @@ export function AccountGroupName<FieldName extends SheetFields<'account'>>({
               padding: 3,
               transition: 'transform .1s',
               transform: collapsed ? 'rotate(-90deg)' : '',
-            }}
+              ':hover': { backgroundColor: theme.sidebarItemBackgroundHover },
+            })}`}
           />
         )}
         <Link
