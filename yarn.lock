@@ -8404,11 +8404,7 @@ __metadata:
     "@electron/notarize": "npm:2.4.0"
     "@electron/rebuild": "npm:3.6.0"
     "@types/copyfiles": "npm:^2"
-<<<<<<< Updated upstream
-=======
-    "@types/fs-extra": "npm:^11"
     adm-zip: "npm:^0.5.10"
->>>>>>> Stashed changes
     copyfiles: "npm:^2.4.1"
     cross-env: "npm:^7.0.3"
     electron: "npm:30.0.6"
