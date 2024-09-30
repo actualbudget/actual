@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { useState, type ComponentType, type SVGProps } from 'react';
+import React, { useEffect, useState, type ComponentType, type SVGProps } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { SvgCheveronDown, SvgCheveronUp } from '../../icons/v1';
@@ -19,39 +19,53 @@ type ActionButtonItems = {
 };
 
 type ActionButtonsProps = {
+  collapseSpeed?: Number;
   buttons: Array<ActionButtonItems>;
 };
 
-export function ActionButtons({ buttons }: ActionButtonsProps) {
+export function ActionButtons({
+  collapseSpeed = 0.4,
+  buttons
+}: ActionButtonsProps) {
   const { t } = useTranslation();
 
   const [expanded, setExpandedActionButtonsPref] = useState(false);
+  const initLengthRef = React.useRef(0);
+  const divRef = React.useRef(null);
 
   const onToggle = () => {
     setExpandedActionButtonsPref(!expanded);
   };
 
+  useEffect(() => {
+    const expndDiv = divRef.current;
+    if (!initLengthRef.current) {
+      const height = divRef.current.style.height;
+      initLengthRef.current = height;
+    }
+    if (!expanded && initLengthRef.current) {
+      expndDiv.style.height = initLengthRef.current;
+    } else {
+      expndDiv.style.height = expndDiv.scrollHeight + "px";
+    }
+  });
+
   return (
     <View style={{ padding: '5px 0', flexShrink: 0 }}>
-      {buttons.map(item =>
-        item.hidable ? (
-          expanded && (
-            <Item
-              key={item.title}
-              title={item.title}
-              Icon={item.Icon}
-              to={item.to}
-            />
-          )
-        ) : (
+      <View
+        ref={divRef}
+        style={{ overflow: 'hidden', transition: 'height ' + collapseSpeed + 's ease-in-out' }}
+      > 
+        {buttons.map(item =>
           <Item
             key={item.title}
             title={item.title}
             Icon={item.Icon}
             to={item.to}
+            style={(item.hidable && !expanded && { display: 'none' })}
           />
-        ),
-      )}
+        )}
+      </View>
       <SecondaryItem
         title={expanded ? t('Less') : t('More')}
         Icon={expanded ? SvgCheveronUp : SvgCheveronDown}
