@@ -1,5 +1,3 @@
-import * as monthUtils from 'loot-core/src/shared/months';
-
 import { MobileAccountPage } from './mobile-account-page';
 
 export class MobileBudgetPage {
@@ -68,17 +66,12 @@ export class MobileBudgetPage {
     );
   }
 
-  async initializePageHeaderLocators(page) {
+  initializePageHeaderLocators(page) {
     this.heading = page.getByRole('heading');
     this.previousMonthButton = this.heading.getByRole('button', {
       name: 'Previous month',
     });
-    this.selectedBudgetMonthButton = this.heading.getByRole('button', {
-      name: monthUtils.format(
-        await this.getSelectedMonth(),
-        this.MONTH_HEADER_DATE_FORMAT,
-      ),
-    });
+    this.selectedBudgetMonthButton = this.heading.locator('button[data-month]');
     this.nextMonthButton = this.heading.getByRole('button', {
       name: 'Next month',
     });
