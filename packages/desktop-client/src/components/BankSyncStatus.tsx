@@ -15,14 +15,18 @@ export function BankSyncStatus() {
   const accountsSyncing = useSelector(
     (state: State) => state.account.accountsSyncing,
   );
-  const count = accountsSyncing.length;
+  const accountsSyncingCount = accountsSyncing.length;
+  const count = accountsSyncingCount;
 
-  const transitions = useTransition(count > 0 ? 'syncing' : null, {
-    from: { opacity: 0, transform: 'translateY(-100px)' },
-    enter: { opacity: 1, transform: 'translateY(0)' },
-    leave: { opacity: 0, transform: 'translateY(-100px)' },
-    unique: true,
-  });
+  const transitions = useTransition(
+    accountsSyncingCount > 0 ? 'syncing' : null,
+    {
+      from: { opacity: 0, transform: 'translateY(-100px)' },
+      enter: { opacity: 1, transform: 'translateY(0)' },
+      leave: { opacity: 0, transform: 'translateY(-100px)' },
+      unique: true,
+    },
+  );
 
   return (
     <View
@@ -58,11 +62,11 @@ export function BankSyncStatus() {
                 <Text style={{ marginLeft: 5 }}>
                   <Trans
                     i18nKey="syncingAccounts"
-                    count={count}
-                    values={{ count }}
+                    count={accountsSyncingCount}
+                    values={{ accountsSyncingCount }}
                   >
-                    <Trans count={count}>
-                      Syncing... {{ count }} account remaining
+                    <Trans count={accountsSyncingCount}>
+                      Syncing... {{ count }} accounts remaining
                     </Trans>
                   </Trans>
                 </Text>
