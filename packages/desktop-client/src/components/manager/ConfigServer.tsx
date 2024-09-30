@@ -10,7 +10,6 @@ import {
 import { useActions } from '../../hooks/useActions';
 import { useGlobalPref } from '../../hooks/useGlobalPref';
 import { useNavigate } from '../../hooks/useNavigate';
-import { useSetThemeColor } from '../../hooks/useSetThemeColor';
 import { theme } from '../../style';
 import { Button, ButtonWithLoading } from '../common/Button2';
 import { BigInput } from '../common/Input';
@@ -22,7 +21,6 @@ import { useServerURL, useSetServerURL } from '../ServerContext';
 import { Title } from './subscribe/common';
 
 export function ConfigServer() {
-  useSetThemeColor(theme.mobileConfigServerViewTheme);
   const { t } = useTranslation();
   const { createBudget, signOut, loggedIn } = useActions();
   const navigate = useNavigate();
