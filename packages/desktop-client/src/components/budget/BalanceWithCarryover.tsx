@@ -33,6 +33,7 @@ export function CarryoverIndicator({ style }: CarryoverIndicatorProps) {
         position: 'absolute',
         right: '-4px',
         alignSelf: 'center',
+        justifyContent: 'center',
         top: 0,
         bottom: 0,
         ...style,
