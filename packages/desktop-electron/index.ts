@@ -28,7 +28,6 @@ import {
 } from './window-state';
 
 import './security';
-const { writeFile } = require('fs/promises');
 
 Module.globalPaths.push(__dirname + '/..');
 
@@ -55,31 +54,23 @@ if (isDev) {
   process.traceProcessWarnings = true;
 }
 
-async function downloadElectronBuild(releaseVersion: string) {
+async function downloadActualRelease(releaseVersion: string) {
   const downloadUrl = `https://github.com/MikesGlitch/actual/releases/download/${releaseVersion}/desktop-electron-dist.zip`;
-  const res = await fetch(downloadUrl);
-  const arrBuffer = await res.arrayBuffer();
-  const zipped = new AdmZip(Buffer.from(arrBuffer));
-  console.info(
-    'electron version will be installed here:',
-    process.env.ACTUAL_DATA_DIR,
-  );
-  // const entries = zipped.getEntries();
-  await zipped.extractAllToAsync(
-    process.env.ACTUAL_DATA_DIR + '/Releases',
-    true,
-    false,
-    (err?: Error) => {
-      if (!err) {
-        console.info('successfully extracted zip!');
-        return;
-      }
 
-      console.info(err);
-    },
-  );
-
-  return '';
+  try {
+    const res = await fetch(downloadUrl);
+    const arrBuffer = await res.arrayBuffer();
+    const zipped = new AdmZip(Buffer.from(arrBuffer));
+    console.info(
+      'electron version will be installed here:',
+      process.env.ACTUAL_DATA_DIR,
+    );
+    zipped.extractAllTo(process.env.ACTUAL_DATA_DIR + '/Releases', true, false);
+    return { error: undefined };
+  } catch (error) {
+    console.error('Error retrieving Actual:', error);
+    return { error };
+  }
 }
 
 function createBackgroundProcess() {
@@ -244,7 +235,7 @@ function updateMenu(budgetId?: string) {
 app.setAppUserModelId('com.actualbudget.actual');
 
 app.on('ready', async () => {
-  // await downloadElectronBuild('v23.9.0');
+  // await downloadActualRelease('v23.9.0');
 
   // Install an `app://` protocol that always returns the base HTML
   // file no matter what URL it is. This allows us to use react-router
