@@ -8,14 +8,12 @@ export class MobileBudgetPage {
 
     this.#initializePageHeaderLocators(page);
     this.#initializeBudgetTableLocators(page);
-
-    this.budgetType = this.determineBudgetType();
   }
 
-  determineBudgetType() {
-    return this.#getButtonForEnvelopeBudgetSummary({
+  async determineBudgetType() {
+    return (await this.#getButtonForEnvelopeBudgetSummary({
       throwIfNotFound: false,
-    }) !== null
+    })) !== null
       ? 'Envelope'
       : 'Tracking';
   }
@@ -51,13 +49,13 @@ export class MobileBudgetPage {
 
     this.budgetTable = page.getByTestId('budget-table');
 
-    this.categoryRows = page
+    this.categoryRows = this.budgetTable
       .getByTestId('budget-groups')
       .getByTestId('category-row');
 
     this.categoryNames = this.categoryRows.getByTestId('category-name');
 
-    this.categoryGroupRows = page
+    this.categoryGroupRows = this.budgetTable
       .getByTestId('budget-groups')
       .getByTestId('category-group-row');
 
@@ -167,21 +165,21 @@ export class MobileBudgetPage {
     );
   }
 
-  async #getButtonForBudgeted(categoryName) {
-    return this.#getButtonForCell('Budgeted', categoryName);
+  async getButtonForBudgeted(categoryName) {
+    return await this.#getButtonForCell('Budgeted', categoryName);
   }
 
-  async #getButtonForSpent(categoryName) {
-    return this.#getButtonForCell('Spent', categoryName);
+  async getButtonForSpent(categoryName) {
+    return await this.#getButtonForCell('Spent', categoryName);
   }
 
   async openBudgetMenu(categoryName) {
-    const budgetedButton = await this.#getButtonForBudgeted(categoryName);
+    const budgetedButton = await this.getButtonForBudgeted(categoryName);
     await budgetedButton.click();
   }
 
   async setBudget(categoryName, newAmount) {
-    const budgetedButton = await this.#getButtonForBudgeted(categoryName);
+    const budgetedButton = await this.getButtonForBudgeted(categoryName);
     await budgetedButton.click();
 
     await this.page.keyboard.type(String(newAmount));
@@ -189,7 +187,7 @@ export class MobileBudgetPage {
   }
 
   async openSpentPage(categoryName) {
-    const spentButton = await this.#getButtonForSpent(categoryName);
+    const spentButton = await this.getButtonForSpent(categoryName);
     await spentButton.click();
 
     return new MobileAccountPage(this.page);
@@ -251,7 +249,7 @@ export class MobileBudgetPage {
       currentMonth,
       maxAttempts,
       errorMessage:
-        'Failed to navigate to the previous month after maximum attempts',
+        'Failed to navigate to the next month after maximum attempts',
     });
   }
 

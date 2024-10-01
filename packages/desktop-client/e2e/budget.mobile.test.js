@@ -208,7 +208,8 @@ budgetTypes.forEach(budgetType => {
       // Set to 100.00
       await budgetPage.setBudget(categoryName, 10000);
 
-      const budgetedButton = await budgetPage.getBudgetCellButton(categoryName);
+      const budgetedButton =
+        await budgetPage.getButtonForBudgeted(categoryName);
 
       await expect(budgetedButton).toHaveText('100.00');
       await expect(page).toMatchThemeScreenshots();
