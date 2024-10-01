@@ -91,23 +91,21 @@ budgetTypes.forEach(budgetType => {
       const budgetPage = await navigation.goToBudgetPage();
       await budgetPage.waitForBudgetTable();
 
-      let selectedMonth = await budgetPage.getSelectedMonth();
-      let displayMonth = monthUtils.format(
+      const selectedMonth = await budgetPage.getSelectedMonth();
+      const displayMonth = monthUtils.format(
         selectedMonth,
         budgetPage.MONTH_HEADER_DATE_FORMAT,
       );
 
       await expect(budgetPage.heading).toHaveText(displayMonth);
 
-      await budgetPage.goToPreviousMonth();
-
-      selectedMonth = await budgetPage.getSelectedMonth();
-      displayMonth = monthUtils.format(
-        selectedMonth,
+      const previousMonth = await budgetPage.goToPreviousMonth();
+      const previousDisplayMonth = monthUtils.format(
+        previousMonth,
         budgetPage.MONTH_HEADER_DATE_FORMAT,
       );
 
-      await expect(budgetPage.heading).toHaveText(displayMonth);
+      await expect(budgetPage.heading).toHaveText(previousDisplayMonth);
       await expect(page).toMatchThemeScreenshots();
     });
 
@@ -134,23 +132,21 @@ budgetTypes.forEach(budgetType => {
       const budgetPage = await navigation.goToBudgetPage();
       await budgetPage.waitForBudgetTable();
 
-      let selectedMonth = await budgetPage.getSelectedMonth();
-      let displayMonth = monthUtils.format(
+      const selectedMonth = await budgetPage.getSelectedMonth();
+      const displayMonth = monthUtils.format(
         selectedMonth,
         budgetPage.MONTH_HEADER_DATE_FORMAT,
       );
 
       await expect(budgetPage.heading).toHaveText(displayMonth);
 
-      await budgetPage.goToNextMonth();
-
-      selectedMonth = await budgetPage.getSelectedMonth();
-      displayMonth = monthUtils.format(
-        selectedMonth,
+      const nextMonth = await budgetPage.goToNextMonth();
+      const nextDisplayMonth = monthUtils.format(
+        nextMonth,
         budgetPage.MONTH_HEADER_DATE_FORMAT,
       );
 
-      await expect(budgetPage.heading).toHaveText(displayMonth);
+      await expect(budgetPage.heading).toHaveText(nextDisplayMonth);
       await expect(page).toMatchThemeScreenshots();
     });
 

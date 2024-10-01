@@ -6,21 +6,21 @@ export class MobileBudgetPage {
   constructor(page) {
     this.page = page;
 
-    this.initializePageHeaderLocators(page);
-    this.initializeBudgetTableLocators(page);
+    this.#initializePageHeaderLocators(page);
+    this.#initializeBudgetTableLocators(page);
 
     this.budgetType = this.determineBudgetType();
   }
 
   determineBudgetType() {
-    return this.getEnvelopeBudgetSummaryButton({
+    return this.#getButtonForEnvelopeBudgetSummary({
       throwIfNotFound: false,
     }) !== null
       ? 'Envelope'
       : 'Tracking';
   }
 
-  initializeBudgetTableLocators(page) {
+  #initializeBudgetTableLocators(page) {
     this.budgetTableHeader = page.getByTestId('budget-table-header');
 
     // Envelope budget summary buttons
@@ -66,7 +66,7 @@ export class MobileBudgetPage {
     );
   }
 
-  initializePageHeaderLocators(page) {
+  #initializePageHeaderLocators(page) {
     this.heading = page.getByRole('heading');
     this.previousMonthButton = this.heading.getByRole('button', {
       name: 'Previous month',
@@ -114,7 +114,7 @@ export class MobileBudgetPage {
     return this.categoryGroupNames.nth(idx).textContent();
   }
 
-  getCategoryGroupButton(categoryGroupName) {
+  #getButtonForCategoryGroup(categoryGroupName) {
     return this.categoryGroupRows.getByRole('button', {
       name: categoryGroupName,
       exact: true,
@@ -123,7 +123,7 @@ export class MobileBudgetPage {
 
   async openCategoryGroupMenu(categoryGroupName) {
     const categoryGroupButton =
-      await this.getCategoryGroupButton(categoryGroupName);
+      await this.#getButtonForCategoryGroup(categoryGroupName);
     await categoryGroupButton.click();
   }
 
@@ -131,7 +131,7 @@ export class MobileBudgetPage {
     return this.categoryNames.nth(idx).textContent();
   }
 
-  getCategoryButton(categoryName) {
+  #getButtonForCategory(categoryName) {
     return this.categoryRows.getByRole('button', {
       name: categoryName,
       exact: true,
@@ -139,11 +139,11 @@ export class MobileBudgetPage {
   }
 
   async openCategoryMenu(categoryName) {
-    const categoryButton = await this.getCategoryButton(categoryName);
+    const categoryButton = await this.#getButtonForCategory(categoryName);
     await categoryButton.click();
   }
 
-  async getCellButton(buttonType, categoryName) {
+  async #getButtonForCell(buttonType, categoryName) {
     const buttonSelector =
       buttonType === 'Budgeted'
         ? `Open budget menu for ${categoryName} category`
@@ -167,21 +167,21 @@ export class MobileBudgetPage {
     );
   }
 
-  async getBudgetCellButton(categoryName) {
-    return this.getCellButton('Budgeted', categoryName);
+  async #getButtonForBudgeted(categoryName) {
+    return this.#getButtonForCell('Budgeted', categoryName);
   }
 
-  async getSpentCellButton(categoryName) {
-    return this.getCellButton('Spent', categoryName);
+  async #getButtonForSpent(categoryName) {
+    return this.#getButtonForCell('Spent', categoryName);
   }
 
   async openBudgetMenu(categoryName) {
-    const budgetedButton = await this.getBudgetCellButton(categoryName);
+    const budgetedButton = await this.#getButtonForBudgeted(categoryName);
     await budgetedButton.click();
   }
 
   async setBudget(categoryName, newAmount) {
-    const budgetedButton = await this.getBudgetCellButton(categoryName);
+    const budgetedButton = await this.#getButtonForBudgeted(categoryName);
     await budgetedButton.click();
 
     await this.page.keyboard.type(String(newAmount));
@@ -189,7 +189,7 @@ export class MobileBudgetPage {
   }
 
   async openSpentPage(categoryName) {
-    const spentButton = await this.getSpentCellButton(categoryName);
+    const spentButton = await this.#getButtonForSpent(categoryName);
     await spentButton.click();
 
     return new MobileAccountPage(this.page);
@@ -209,19 +209,53 @@ export class MobileBudgetPage {
     }
   }
 
-  async goToPreviousMonth() {
+  async #waitForNewMonthToLoad({
+    currentMonth,
+    errorMessage,
+    maxAttempts = 3,
+  } = {}) {
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+      const newMonth = await this.getSelectedMonth();
+      if (newMonth !== currentMonth) {
+        return newMonth;
+      }
+      await this.page.waitForTimeout(500);
+    }
+
+    throw new Error(errorMessage);
+  }
+
+  async goToPreviousMonth({ maxAttempts = 3 } = {}) {
+    const currentMonth = await this.getSelectedMonth();
+
     await this.previousMonthButton.click();
+
+    return await this.#waitForNewMonthToLoad({
+      currentMonth,
+      maxAttempts,
+      errorMessage:
+        'Failed to navigate to the previous month after maximum attempts',
+    });
   }
 
   async openMonthMenu() {
     await this.selectedBudgetMonthButton.click();
   }
 
-  async goToNextMonth() {
+  async goToNextMonth({ maxAttempts = 3 } = {}) {
+    const currentMonth = await this.getSelectedMonth();
+
     await this.nextMonthButton.click();
+
+    return await this.#waitForNewMonthToLoad({
+      currentMonth,
+      maxAttempts,
+      errorMessage:
+        'Failed to navigate to the previous month after maximum attempts',
+    });
   }
 
-  async getEnvelopeBudgetSummaryButton({ throwIfNotFound = true } = {}) {
+  async #getButtonForEnvelopeBudgetSummary({ throwIfNotFound = true } = {}) {
     if (await this.toBudgetButton.isVisible()) {
       return this.toBudgetButton;
     }
@@ -240,11 +274,11 @@ export class MobileBudgetPage {
   }
 
   async openEnvelopeBudgetSummaryMenu() {
-    const budgetSummaryButton = await this.getEnvelopeBudgetSummaryButton();
+    const budgetSummaryButton = await this.#getButtonForEnvelopeBudgetSummary();
     await budgetSummaryButton.click();
   }
 
-  async getTrackingBudgetSummaryButton({ throwIfNotFound = true } = {}) {
+  async #getButtonForTrackingBudgetSummary({ throwIfNotFound = true } = {}) {
     if (await this.savedButton.isVisible()) {
       return this.savedButton;
     }
@@ -267,7 +301,7 @@ export class MobileBudgetPage {
   }
 
   async openTrackingBudgetSummaryMenu() {
-    const budgetSummaryButton = await this.getTrackingBudgetSummaryButton();
+    const budgetSummaryButton = await this.#getButtonForTrackingBudgetSummary();
     await budgetSummaryButton.click();
   }
 }
