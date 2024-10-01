@@ -1,9 +1,63 @@
 import { test, expect } from '@playwright/test';
 
+import { amountToCurrency, currencyToAmount } from 'loot-core/shared/util';
 import * as monthUtils from 'loot-core/src/shared/months';
 
 import { ConfigurationPage } from './page-models/configuration-page';
 import { MobileNavigation } from './page-models/mobile-navigation';
+
+const copyLastMonthBudget = async (budgetPage, categoryName) => {
+  const budgetMenuModal = await budgetPage.openBudgetMenu(categoryName);
+  await budgetMenuModal.copyLastMonthBudget();
+  await budgetMenuModal.close();
+};
+
+const setTo3MonthAverage = async (budgetPage, categoryName) => {
+  const budgetMenuModal = await budgetPage.openBudgetMenu(categoryName);
+  await budgetMenuModal.setTo3MonthAverage();
+  await budgetMenuModal.close();
+};
+
+const setTo6MonthAverage = async (budgetPage, categoryName) => {
+  const budgetMenuModal = await budgetPage.openBudgetMenu(categoryName);
+  await budgetMenuModal.setTo6MonthAverage();
+  await budgetMenuModal.close();
+};
+
+const setToYearlyAverage = async (budgetPage, categoryName) => {
+  const budgetMenuModal = await budgetPage.openBudgetMenu(categoryName);
+  await budgetMenuModal.setToYearlyAverage();
+  await budgetMenuModal.close();
+};
+
+async function setBudgetAverage(
+  budgetPage,
+  categoryName,
+  numberOfMonths,
+  setBudgetAverage,
+) {
+  const spentButton = await budgetPage.getButtonForSpent(categoryName);
+
+  let totalSpent = 0;
+
+  for (let i = 0; i < numberOfMonths; i++) {
+    await budgetPage.goToPreviousMonth();
+    const spent = await spentButton.textContent();
+    totalSpent += currencyToAmount(spent);
+  }
+
+  // Calculate average amount
+  const averageSpent = totalSpent / numberOfMonths;
+
+  // Go back to the current month
+  for (let i = 0; i < numberOfMonths; i++) {
+    await budgetPage.goToNextMonth();
+  }
+
+  await setBudgetAverage(budgetPage, categoryName, numberOfMonths);
+
+  return averageSpent;
+}
 
 const budgetTypes = ['Envelope', 'Tracking'];
 
@@ -206,35 +260,62 @@ budgetTypes.forEach(budgetType => {
       const categoryName = await budgetPage.getCategoryNameForRow(0);
       const budgetMenuModal = await budgetPage.openBudgetMenu(categoryName);
 
-      // Set to 100.00
-      await budgetMenuModal.setBudgetAmount('10000');
+      // Set to 123.00
+      await budgetMenuModal.setBudgetAmount('12300');
 
       const budgetedButton =
         await budgetPage.getButtonForBudgeted(categoryName);
 
-      await expect(budgetedButton).toHaveText('100.00');
+      await expect(budgetedButton).toHaveText('123.00');
       await expect(page).toMatchThemeScreenshots();
     });
 
-    test("copies last month's budget", async () => {
+    test(`copies last month's budget`, async () => {
       const budgetPage = await navigation.goToBudgetPage();
       await budgetPage.waitForBudgetTable();
 
-      const categoryName = await budgetPage.getCategoryNameForRow(0);
-
-      await budgetPage.goToPreviousMonth();
+      const categoryName = await budgetPage.getCategoryNameForRow(3);
       const budgetedButton =
         await budgetPage.getButtonForBudgeted(categoryName);
+
+      await budgetPage.goToPreviousMonth();
 
       const lastMonthBudget = await budgetedButton.textContent();
 
       await budgetPage.goToNextMonth();
-      const budgetMenuModal = await budgetPage.openBudgetMenu(categoryName);
-      await budgetMenuModal.copyLastMonthBudget();
-      await budgetMenuModal.close();
+
+      await copyLastMonthBudget(budgetPage, categoryName);
 
       await expect(budgetedButton).toHaveText(lastMonthBudget);
       await expect(page).toMatchThemeScreenshots();
+    });
+
+    [
+      [3, setTo3MonthAverage],
+      [6, setTo6MonthAverage],
+      [12, setToYearlyAverage],
+    ].forEach(([numberOfMonths, setBudgetAverageFn]) => {
+      test(`set budget to ${numberOfMonths} month average`, async () => {
+        const budgetPage = await navigation.goToBudgetPage();
+        await budgetPage.waitForBudgetTable();
+
+        const categoryName = await budgetPage.getCategoryNameForRow(3);
+
+        const averageSpent = await setBudgetAverage(
+          budgetPage,
+          categoryName,
+          numberOfMonths,
+          setBudgetAverageFn,
+        );
+
+        const budgetedButton =
+          await budgetPage.getButtonForBudgeted(categoryName);
+
+        await expect(budgetedButton).toHaveText(
+          amountToCurrency(Math.abs(averageSpent)),
+        );
+        await expect(page).toMatchThemeScreenshots();
+      });
     });
 
     // Spent Cell Tests
