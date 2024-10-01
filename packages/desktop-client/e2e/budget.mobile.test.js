@@ -204,14 +204,36 @@ budgetTypes.forEach(budgetType => {
       await budgetPage.waitForBudgetTable();
 
       const categoryName = await budgetPage.getCategoryNameForRow(0);
+      const budgetMenuModal = await budgetPage.openBudgetMenu(categoryName);
 
       // Set to 100.00
-      await budgetPage.setBudget(categoryName, 10000);
+      await budgetMenuModal.setBudgetAmount('10000');
 
       const budgetedButton =
         await budgetPage.getButtonForBudgeted(categoryName);
 
       await expect(budgetedButton).toHaveText('100.00');
+      await expect(page).toMatchThemeScreenshots();
+    });
+
+    test("copies last month's budget", async () => {
+      const budgetPage = await navigation.goToBudgetPage();
+      await budgetPage.waitForBudgetTable();
+
+      const categoryName = await budgetPage.getCategoryNameForRow(0);
+
+      await budgetPage.goToPreviousMonth();
+      const budgetedButton =
+        await budgetPage.getButtonForBudgeted(categoryName);
+
+      const lastMonthBudget = await budgetedButton.textContent();
+
+      await budgetPage.goToNextMonth();
+      const budgetMenuModal = await budgetPage.openBudgetMenu(categoryName);
+      await budgetMenuModal.copyLastMonthBudget();
+      await budgetMenuModal.close();
+
+      await expect(budgetedButton).toHaveText(lastMonthBudget);
       await expect(page).toMatchThemeScreenshots();
     });
 

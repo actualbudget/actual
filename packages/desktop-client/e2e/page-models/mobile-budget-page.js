@@ -1,4 +1,5 @@
 import { MobileAccountPage } from './mobile-account-page';
+import { BudgetMenuModal } from './mobile-budget-menu-modal';
 
 export class MobileBudgetPage {
   MONTH_HEADER_DATE_FORMAT = 'MMMM ‘yy';
@@ -176,14 +177,8 @@ export class MobileBudgetPage {
   async openBudgetMenu(categoryName) {
     const budgetedButton = await this.getButtonForBudgeted(categoryName);
     await budgetedButton.click();
-  }
 
-  async setBudget(categoryName, newAmount) {
-    const budgetedButton = await this.getButtonForBudgeted(categoryName);
-    await budgetedButton.click();
-
-    await this.page.keyboard.type(String(newAmount));
-    await this.page.keyboard.press('Enter');
+    return new BudgetMenuModal(this.page, this.page.getByRole('dialog'));
   }
 
   async openSpentPage(categoryName) {
