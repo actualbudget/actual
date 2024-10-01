@@ -30,7 +30,7 @@ type ActionButtonsProps = {
 };
 
 export function ActionButtons({
-  collapseSpeed = 0.4,
+  collapseSpeed = 0.15,
   buttons,
 }: ActionButtonsProps) {
   const { t } = useTranslation();
