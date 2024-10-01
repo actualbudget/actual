@@ -52,6 +52,11 @@ let serverProcess: UtilityProcess | null;
 
 if (isDev) {
   process.traceProcessWarnings = true;
+
+  if (process.env.ACTUAL_DATA_DIR) {
+    // ensure any developer-given data dir is an absolute path
+    process.env.ACTUAL_DATA_DIR = path.resolve(process.env.ACTUAL_DATA_DIR);
+  }
 }
 
 async function downloadActualRelease(releaseVersion: string) {
@@ -302,7 +307,7 @@ app.on('ready', async () => {
     console.log('Suspending', new Date());
   });
 
-  // createBackgroundProcess();
+  createBackgroundProcess();
 });
 
 app.on('window-all-closed', () => {

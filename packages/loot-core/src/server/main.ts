@@ -2121,6 +2121,7 @@ async function setupDocumentsDir() {
 
 // eslint-disable-next-line import/no-unused-modules
 export async function initApp(isDev, socketName) {
+  console.info('initApp running');
   await sqlite.init();
   await Promise.all([asyncStorage.init(), fs.init()]);
   await setupDocumentsDir();

@@ -8411,7 +8411,6 @@ __metadata:
     electron-builder: "npm:24.13.3"
     electron-is-dev: "npm:2.0.0"
     electron-log: "npm:4.4.8"
-    loot-core: "npm:*"
     node-fetch: "npm:^2.7.0"
     promise-retry: "npm:^2.0.1"
     typescript: "npm:^5.5.4"
@@ -13104,7 +13103,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"loot-core@npm:*, loot-core@workspace:packages/loot-core":
+"loot-core@workspace:packages/loot-core":
   version: 0.0.0-use.local
   resolution: "loot-core@workspace:packages/loot-core"
   dependencies:

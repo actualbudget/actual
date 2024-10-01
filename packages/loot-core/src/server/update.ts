@@ -8,6 +8,7 @@ import * as migrations from './migrate/migrations';
 // Managing the init/update process
 
 async function runMigrations() {
+  console.info('migrating');
   await migrations.migrate(db.getDatabase());
 }
 
