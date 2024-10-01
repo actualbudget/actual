@@ -60,7 +60,7 @@ if (isDev) {
 }
 
 async function downloadActualRelease(releaseVersion: string) {
-  const downloadUrl = `https://github.com/MikesGlitch/actual/releases/download/${releaseVersion}/desktop-electron-dist.zip`;
+  const downloadUrl = `https://github.com/MikesGlitch/actual/releases/download/${releaseVersion}/v23.9.0-electron-dist.zip`;
 
   try {
     const res = await fetch(downloadUrl);
