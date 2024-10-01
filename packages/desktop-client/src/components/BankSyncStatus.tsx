@@ -60,14 +60,8 @@ export function BankSyncStatus() {
                   iconStyle={{ color: theme.pillTextSelected }}
                 />
                 <Text style={{ marginLeft: 5 }}>
-                  <Trans
-                    i18nKey="syncingAccounts"
-                    count={accountsSyncingCount}
-                    values={{ accountsSyncingCount }}
-                  >
-                    <Trans count={accountsSyncingCount}>
-                      Syncing... {{ count }} accounts remaining
-                    </Trans>
+                  <Trans count={accountsSyncingCount}>
+                    Syncing... {{ count }} accounts remaining
                   </Trans>
                 </Text>
               </View>
