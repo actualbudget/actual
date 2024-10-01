@@ -34,14 +34,13 @@ async function setBudgetAverage(
   budgetPage,
   categoryName,
   numberOfMonths,
-  setBudgetAverage,
+  setBudgetAverageFn,
 ) {
-  const spentButton = await budgetPage.getButtonForSpent(categoryName);
-
   let totalSpent = 0;
 
   for (let i = 0; i < numberOfMonths; i++) {
     await budgetPage.goToPreviousMonth();
+    const spentButton = await budgetPage.getButtonForSpent(categoryName);
     const spent = await spentButton.textContent();
     totalSpent += currencyToAmount(spent);
   }
@@ -54,7 +53,7 @@ async function setBudgetAverage(
     await budgetPage.goToNextMonth();
   }
 
-  await setBudgetAverage(budgetPage, categoryName, numberOfMonths);
+  await setBudgetAverageFn(budgetPage, categoryName, numberOfMonths);
 
   return averageSpent;
 }
