@@ -127,8 +127,8 @@ export class AccountPage {
     await this.accountMenuButton.click();
     await this.page.getByRole('button', { name: 'Close Account' }).click();
     return new CloseAccountModal(
-      this.page.getByTestId('close-account-modal'),
       this.page,
+      this.page.getByTestId('close-account-modal'),
     );
   }
 

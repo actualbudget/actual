@@ -150,7 +150,7 @@ const AmountInput = memo(function AmountInput({
           pointerEvents: 'none',
           ...textStyle,
         }}
-        data-testid="amount-fake-input"
+        data-testid="amount-input-text"
       >
         {editing ? text : amountToCurrency(value)}
       </Text>
