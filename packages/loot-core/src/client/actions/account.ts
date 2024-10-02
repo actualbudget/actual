@@ -55,8 +55,17 @@ export function unlinkAccount(id: string) {
   };
 }
 
-export function linkAccount(requisitionId, account, upgradingId, offBudget) {
+export function linkAccount(
+  requisitionId: string,
+  account: unknown,
+  upgradingId?: string,
+  offBudget?: boolean,
+) {
   return async (dispatch: Dispatch) => {
+    if (upgradingId) {
+      await dispatch(setAccountsSyncing([upgradingId]));
+    }
+
     await send('gocardless-accounts-link', {
       requisitionId,
       account,
@@ -68,8 +77,16 @@ export function linkAccount(requisitionId, account, upgradingId, offBudget) {
   };
 }
 
-export function linkAccountSimpleFin(externalAccount, upgradingId, offBudget) {
+export function linkAccountSimpleFin(
+  externalAccount: unknown,
+  upgradingId?: string,
+  offBudget?: boolean,
+) {
   return async (dispatch: Dispatch) => {
+    if (upgradingId) {
+      await dispatch(setAccountsSyncing([upgradingId]));
+    }
+
     await send('simplefin-accounts-link', {
       externalAccount,
       upgradingId,
