@@ -110,9 +110,7 @@ export const styles = {
     animationDelay: '0.5s',
   },
   underlinedText: {
-    textDecoration: 'underline',
-    textDecorationThickness: 2,
-    textDecorationColor: theme.pillBorder,
+    borderBottom: `2px solid`,
   },
   noTapHighlight: {
     WebkitTapHighlightColor: 'transparent',
@@ -133,10 +131,18 @@ export const styles = {
   tooltip: {
     padding: 5,
     ...shadowLarge,
+    borderWidth: 2,
     borderRadius: 4,
+    borderStyle: 'solid',
+    borderColor: theme.tooltipBorder,
+    backgroundColor: theme.tooltipBackground,
+    color: theme.tooltipText,
+    overflow: 'auto',
+  },
+  popover: {
+    border: 'none',
     backgroundColor: theme.menuBackground,
     color: theme.menuItemText,
-    overflow: 'auto',
   },
   // Dynamically set
   horizontalScrollbar: null as CSSProperties | null,

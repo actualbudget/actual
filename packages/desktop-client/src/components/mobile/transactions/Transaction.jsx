@@ -1,11 +1,11 @@
 import React, { memo } from 'react';
+import { mergeProps } from 'react-aria';
 
 import {
   PressResponder,
   usePress,
   useLongPress,
 } from '@react-aria/interactions';
-import { mergeProps } from '@react-aria/utils';
 
 import { getScheduledAmount } from 'loot-core/src/shared/schedules';
 import { isPreviewId } from 'loot-core/src/shared/transactions';
@@ -76,7 +76,6 @@ export const Transaction = memo(function Transaction({
   const payee = usePayee(payeeId);
   const account = useAccount(accountId);
   const transferAcct = useAccount(payee?.transfer_acct);
-
   const isPreview = isPreviewId(id);
 
   const { longPressProps } = useLongPress({

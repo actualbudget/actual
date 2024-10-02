@@ -73,13 +73,7 @@ export function getNextDate(
 ) {
   start = d.startOfDay(start);
 
-  const cond = new Condition(
-    dateCond.op,
-    'date',
-    dateCond.value,
-    null,
-    new Map(Object.entries({ date: 'date' })),
-  );
+  const cond = new Condition(dateCond.op, 'date', dateCond.value, null);
   const value = cond.getValue();
 
   if (value.type === 'date') {

@@ -36,7 +36,7 @@ function FeatureToggle({
       <Checkbox
         checked={enabled}
         onChange={() => {
-          setFlagPref(!enabled);
+          setFlagPref(String(!enabled));
         }}
         disabled={disableToggle}
       />
@@ -67,7 +67,7 @@ function FeatureToggle({
   );
 }
 
-function ReportBudgetFeature() {
+function TrackingBudgetFeature() {
   const { t } = useTranslation();
   const [budgetType = 'rollover'] = useSyncedPref('budgetType');
   const enabled = useFeatureFlag('reportBudget');
@@ -76,7 +76,7 @@ function ReportBudgetFeature() {
     <FeatureToggle
       flag="reportBudget"
       disableToggle={blockToggleOff}
-      error={t('Switch to a rollover budget before turning off this feature')}
+      error={t('Switch to a envelope budget before turning off this feature')}
       feedbackLink="https://github.com/actualbudget/actual/issues/2999"
     >
       <Trans>Budget mode toggle</Trans>
@@ -99,16 +99,10 @@ export function ExperimentalFeatures() {
               <Trans>Monthly spending report</Trans>
             </FeatureToggle>
 
-            <ReportBudgetFeature />
+            <TrackingBudgetFeature />
 
             <FeatureToggle flag="goalTemplatesEnabled">
               <Trans>Goal templates</Trans>
-            </FeatureToggle>
-            <FeatureToggle
-              flag="simpleFinSync"
-              feedbackLink="https://github.com/actualbudget/actual/issues/2272"
-            >
-              <Trans>SimpleFIN sync</Trans>
             </FeatureToggle>
             <FeatureToggle
               flag="dashboards"
