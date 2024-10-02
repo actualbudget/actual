@@ -18,4 +18,17 @@ const savePreferences = async ({
   await db.update('preferences', { id, value });
 };
 
+const getPreferences = async (): Promise<SyncedPrefs> => {
+  const prefs = (await db.all('SELECT id, value FROM preferences')) as Array<{
+    id: string;
+    value: string;
+  }>;
+
+  return prefs.reduce<SyncedPrefs>(
+    (carry, { value, id }) => ({ ...carry, [id]: value }),
+    {},
+  );
+};
+
 app.method('preferences/save', mutator(undoable(savePreferences)));
+app.method('preferences/get', getPreferences);
