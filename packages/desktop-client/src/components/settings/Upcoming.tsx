@@ -48,7 +48,7 @@ export function UpcomingLengthSettings() {
               options={options.map(x => [x.value || '7', x.label])}
               value={upcomingLength}
               onChange={newValue => setUpcomingLength(newValue)}
-              buttonStyle={selectButtonStyle}
+              style={selectButtonStyle}
             />
           </Column>
         </View>
