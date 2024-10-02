@@ -24,10 +24,10 @@ const getPreferences = async (): Promise<SyncedPrefs> => {
     value: string;
   }>;
 
-  return prefs.reduce<SyncedPrefs>(
-    (carry, { value, id }) => ({ ...carry, [id]: value }),
-    {},
-  );
+  return prefs.reduce<SyncedPrefs>((carry, { value, id }) => {
+    carry[id as keyof SyncedPrefs] = value;
+    return carry;
+  }, {});
 };
 
 app.method('preferences/save', mutator(undoable(savePreferences)));
