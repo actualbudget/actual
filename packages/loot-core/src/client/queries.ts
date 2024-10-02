@@ -28,7 +28,7 @@ const accountParametrizedField = parametrizedField<'account'>();
 const rolloverParametrizedField = parametrizedField<'rollover-budget'>();
 const reportParametrizedField = parametrizedField<'report-budget'>();
 
-export function getAccountFilter(accountId: string, field = 'account') {
+export function getAccountFilter(accountId?: string, field = 'account') {
   if (accountId) {
     if (accountId === 'budgeted') {
       return {
@@ -64,7 +64,7 @@ export function getAccountFilter(accountId: string, field = 'account') {
   return null;
 }
 
-export function makeTransactionsQuery(accountId: string) {
+export function makeTransactionsQuery(accountId?: string) {
   let query = q('transactions').options({ splits: 'grouped' });
 
   const filter = getAccountFilter(accountId);
@@ -115,73 +115,61 @@ export function makeTransactionSearchQuery(
   });
 }
 
-export function accountBalance(
-  acct: AccountEntity,
-): Binding<'account', 'balance'> {
+export function accountBalance(acct: AccountEntity) {
   return {
     name: accountParametrizedField('balance')(acct.id),
     query: q('transactions')
       .filter({ account: acct.id })
       .options({ splits: 'none' })
       .calculate({ $sum: '$amount' }),
-  };
+  } satisfies Binding<'account', 'balance'>;
 }
 
-export function accountBalanceCleared(
-  acct: AccountEntity,
-): Binding<'account', 'balanceCleared'> {
+export function accountBalanceCleared(acct: AccountEntity) {
   return {
     name: accountParametrizedField('balanceCleared')(acct.id),
     query: q('transactions')
       .filter({ account: acct.id, cleared: true })
       .options({ splits: 'none' })
       .calculate({ $sum: '$amount' }),
-  };
+  } satisfies Binding<'account', 'balanceCleared'>;
 }
 
-export function accountBalanceUncleared(
-  acct: AccountEntity,
-): Binding<'account', 'balanceUncleared'> {
+export function accountBalanceUncleared(acct: AccountEntity) {
   return {
     name: accountParametrizedField('balanceUncleared')(acct.id),
     query: q('transactions')
       .filter({ account: acct.id, cleared: false })
       .options({ splits: 'none' })
       .calculate({ $sum: '$amount' }),
-  };
+  } satisfies Binding<'account', 'balanceUncleared'>;
 }
 
-export function allAccountBalance(): Binding<'account', 'accounts-balance'> {
+export function allAccountBalance() {
   return {
     query: q('transactions')
       .filter({ 'account.closed': false })
       .calculate({ $sum: '$amount' }),
     name: 'accounts-balance',
-  };
+  } satisfies Binding<'account', 'accounts-balance'>;
 }
 
-export function budgetedAccountBalance(): Binding<
-  'account',
-  'budgeted-accounts-balance'
-> {
+export function budgetedAccountBalance() {
   return {
     name: `budgeted-accounts-balance`,
     query: q('transactions')
       .filter({ 'account.offbudget': false, 'account.closed': false })
       .calculate({ $sum: '$amount' }),
-  };
+  } satisfies Binding<'account', 'budgeted-accounts-balance'>;
 }
 
-export function offbudgetAccountBalance(): Binding<
-  'account',
-  'offbudget-accounts-balance'
-> {
+export function offbudgetAccountBalance() {
   return {
     name: `offbudget-accounts-balance`,
     query: q('transactions')
       .filter({ 'account.offbudget': true, 'account.closed': false })
       .calculate({ $sum: '$amount' }),
-  };
+  } satisfies Binding<'account', 'offbudget-accounts-balance'>;
 }
 
 export function categoryBalance(category: CategoryEntity, month: string) {
@@ -249,14 +237,11 @@ export function uncategorizedBalance() {
   };
 }
 
-export function uncategorizedCount<SheetName extends SheetNames>(): Binding<
-  SheetName,
-  'uncategorized-amount'
-> {
+export function uncategorizedCount<SheetName extends SheetNames>() {
   return {
     name: 'uncategorized-amount',
     query: uncategorizedQuery.calculate({ $count: '$id' }),
-  };
+  } satisfies Binding<SheetName, 'uncategorized-amount'>;
 }
 
 export const rolloverBudget = {

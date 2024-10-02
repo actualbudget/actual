@@ -80,6 +80,7 @@ const exportModel = {
           'cash-flow-card',
           'spending-card',
           'custom-report',
+          'markdown-card',
         ].includes(widget.type)
       ) {
         throw new ValidationError(

@@ -1,4 +1,5 @@
 import React, { useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { useHover } from 'usehooks-ts';
 
@@ -42,6 +43,8 @@ function DetailedBalance({ name, balance, isExactBalance = true }) {
 }
 
 function SelectedBalance({ selectedItems, account }) {
+  const { t } = useTranslation();
+
   const name = `selected-balance-${[...selectedItems].join('-')}`;
 
   const rows = useSheetValue({
@@ -99,7 +102,7 @@ function SelectedBalance({ selectedItems, account }) {
 
   return (
     <DetailedBalance
-      name="Selected balance:"
+      name={t('Selected balance:')}
       balance={balance}
       isExactBalance={isExactBalance}
     />
@@ -107,9 +110,11 @@ function SelectedBalance({ selectedItems, account }) {
 }
 
 function FilteredBalance({ filteredAmount }) {
+  const { t } = useTranslation();
+
   return (
     <DetailedBalance
-      name="Filtered balance:"
+      name={t('Filtered balance:')}
       balance={filteredAmount || 0}
       isExactBalance={true}
     />
@@ -117,6 +122,8 @@ function FilteredBalance({ filteredAmount }) {
 }
 
 function MoreBalances({ balanceQuery }) {
+  const { t } = useTranslation();
+
   const cleared = useSheetValue({
     name: balanceQuery.name + '-cleared',
     query: balanceQuery.query.filter({ cleared: true }),
@@ -128,8 +135,8 @@ function MoreBalances({ balanceQuery }) {
 
   return (
     <View style={{ flexDirection: 'row' }}>
-      <DetailedBalance name="Cleared total:" balance={cleared} />
-      <DetailedBalance name="Uncleared total:" balance={uncleared} />
+      <DetailedBalance name={t('Cleared total:')} balance={cleared} />
+      <DetailedBalance name={t('Uncleared total:')} balance={uncleared} />
     </View>
   );
 }

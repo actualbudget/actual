@@ -75,6 +75,9 @@ const markdownStyles = css({
   '& td': {
     padding: '0.25rem 0.75rem',
   },
+  '& h3': {
+    fontSize: 15,
+  },
 });
 
 type NotesProps = {

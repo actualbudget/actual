@@ -24,7 +24,7 @@ export function FiltersStack({
   onConditionsOpChange,
 }: {
   conditions: RuleConditionEntity[];
-  conditionsOp: string;
+  conditionsOp: 'and' | 'or';
   onUpdateFilter: (
     filter: RuleConditionEntity,
     newFilter: RuleConditionEntity,
