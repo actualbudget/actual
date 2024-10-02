@@ -5,22 +5,22 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { captureBreadcrumb } from '../../platform/exceptions';
 import * as connection from '../../platform/server/connection';
-import { dayFromDate, currentDay, parseDate } from '../../shared/months';
+import { currentDay, dayFromDate, parseDate } from '../../shared/months';
 import { q } from '../../shared/query';
 import {
   extractScheduleConds,
-  recurConfigToRSchedule,
   getHasTransactionsQuery,
-  getStatus,
   getScheduledAmount,
+  getStatus,
+  recurConfigToRSchedule,
 } from '../../shared/schedules';
-import { Rule, Condition } from '../accounts/rules';
+import { Condition, Rule } from '../accounts/rules';
 import { addTransactions } from '../accounts/sync';
 import {
-  insertRule,
-  updateRule,
   getRules,
+  insertRule,
   ruleModel,
+  updateRule,
 } from '../accounts/transaction-rules';
 import { createApp } from '../app';
 import { runQuery as aqlQuery } from '../aql';
@@ -481,12 +481,18 @@ async function advanceSchedulesService(syncSuccess) {
   const failedToPost = [];
   let didPost = false;
 
+  const { data: upcomingLength } = await aqlQuery(
+    q('preferences')
+      .filter({ id: 'upcomingScheduledTransactionLength' })
+      .select('value'),
+  );
+
   for (const schedule of schedules) {
     const status = getStatus(
       schedule.next_date,
       schedule.completed,
       hasTrans.has(schedule.id),
-      prefs.getPrefs(),
+      upcomingLength[0]?.value,
     );
 
     if (status === 'paid') {
