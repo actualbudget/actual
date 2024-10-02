@@ -19,7 +19,7 @@ import {
   getFieldError,
   unparse,
   FIELD_TYPES,
-  TYPE_INFO,
+  getValidOps,
 } from 'loot-core/src/shared/rules';
 import { titleFirst } from 'loot-core/src/shared/util';
 
@@ -77,7 +77,7 @@ function ConfigureField({
   }, [op]);
 
   const type = FIELD_TYPES.get(field);
-  let ops = TYPE_INFO[type].ops.filter(op => op !== 'isbetween');
+  let ops = getValidOps(field).filter(op => op !== 'isbetween');
 
   // Month and year fields are quite hacky right now! Figure out how
   // to clean this up later
@@ -259,7 +259,7 @@ export function FilterButton({ onApply, compact, hover, exclude }) {
         case 'configure': {
           const { field } = deserializeField(action.field);
           const type = FIELD_TYPES.get(field);
-          const ops = TYPE_INFO[type].ops;
+          const ops = getValidOps(field);
           return {
             ...state,
             fieldsOpen: false,
