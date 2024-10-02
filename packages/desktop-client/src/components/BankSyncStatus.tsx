@@ -35,7 +35,7 @@ export function BankSyncStatus() {
         right: 0,
         marginTop: 5,
         alignItems: 'center',
-        zIndex: 501,
+        zIndex: 1000,
       }}
     >
       {transitions(
