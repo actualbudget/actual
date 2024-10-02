@@ -16,6 +16,7 @@ import * as undo from 'loot-core/src/platform/client/undo';
 
 import { useAccounts } from '../hooks/useAccounts';
 import { useLocalPref } from '../hooks/useLocalPref';
+import { useMetaThemeColor } from '../hooks/useMetaThemeColor';
 import { useNavigate } from '../hooks/useNavigate';
 import { useResponsive } from '../ResponsiveProvider';
 import { theme } from '../style';
@@ -31,6 +32,7 @@ import { TransactionEdit } from './mobile/transactions/TransactionEdit';
 import { Notifications } from './Notifications';
 import { ManagePayeesPage } from './payees/ManagePayeesPage';
 import { Reports } from './reports';
+import { LoadingIndicator } from './reports/LoadingIndicator';
 import { NarrowAlternate, WideComponent } from './responsive';
 import { Settings } from './settings';
 import { FloatableSidebar } from './sidebar';
@@ -65,19 +67,6 @@ function WideNotSupported({ children, redirectTo = '/budget' }) {
 }
 
 function RouterBehaviors() {
-  const navigate = useNavigate();
-  const accounts = useAccounts();
-  const accountsLoaded = useSelector(
-    (state: State) => state.queries.accountsLoaded,
-  );
-  useEffect(() => {
-    // If there are no accounts, we want to redirect the user to
-    // the All Accounts screen which will prompt them to add an account
-    if (accountsLoaded && accounts.length === 0) {
-      navigate('/accounts');
-    }
-  }, [accountsLoaded, accounts]);
-
   const location = useLocation();
   const href = useHref(location);
   useEffect(() => {
@@ -88,8 +77,16 @@ function RouterBehaviors() {
 }
 
 export function FinancesApp() {
+  const { isNarrowWidth } = useResponsive();
+  useMetaThemeColor(isNarrowWidth ? theme.mobileViewTheme : null);
+
   const dispatch = useDispatch();
   const { t } = useTranslation();
+
+  const accounts = useAccounts();
+  const accountsLoaded = useSelector(
+    (state: State) => state.queries.accountsLoaded,
+  );
 
   const [lastUsedVersion, setLastUsedVersion] = useLocalPref(
     'flags.updateNotificationShownForVersion',
@@ -180,7 +177,22 @@ export function FinancesApp() {
             <BankSyncStatus />
 
             <Routes>
-              <Route path="/" element={<Navigate to="/budget" replace />} />
+              <Route
+                path="/"
+                element={
+                  accountsLoaded ? (
+                    accounts.length > 0 ? (
+                      <Navigate to="/budget" replace />
+                    ) : (
+                      // If there are no accounts, we want to redirect the user to
+                      // the All Accounts screen which will prompt them to add an account
+                      <Navigate to="/accounts" replace />
+                    )
+                  ) : (
+                    <LoadingIndicator />
+                  )
+                }
+              />
 
               <Route path="/reports/*" element={<Reports />} />
 

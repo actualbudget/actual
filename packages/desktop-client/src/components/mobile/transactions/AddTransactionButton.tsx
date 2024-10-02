@@ -5,7 +5,7 @@ import { SvgAdd } from '../../../icons/v1';
 import { Button } from '../../common/Button2';
 
 type AddTransactionButtonProps = {
-  to: string;
+  to?: string;
   accountId?: string;
   categoryId?: string;
 };

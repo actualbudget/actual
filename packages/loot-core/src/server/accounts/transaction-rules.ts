@@ -6,11 +6,7 @@ import {
   parseDate,
   dayFromDate,
 } from '../../shared/months';
-import {
-  FIELD_TYPES,
-  sortNumbers,
-  getApproxNumberThreshold,
-} from '../../shared/rules';
+import { sortNumbers, getApproxNumberThreshold } from '../../shared/rules';
 import { ungroupTransaction } from '../../shared/transactions';
 import { partitionByField, fastSetMerge } from '../../shared/util';
 import {
@@ -157,10 +153,7 @@ export const ruleModel = {
 export function makeRule(data) {
   let rule;
   try {
-    rule = new Rule({
-      ...ruleModel.toJS(data),
-      fieldTypes: FIELD_TYPES,
-    });
+    rule = new Rule(ruleModel.toJS(data));
   } catch (e) {
     console.warn('Invalid rule', e);
     if (e instanceof RuleError) {
@@ -308,13 +301,7 @@ export function conditionsToAQL(conditions, { recurDateBounds = 100 } = {}) {
       }
 
       try {
-        return new Condition(
-          cond.op,
-          cond.field,
-          cond.value,
-          cond.options,
-          FIELD_TYPES,
-        );
+        return new Condition(cond.op, cond.field, cond.value, cond.options);
       } catch (e) {
         errors.push(e.type || 'internal');
         console.log('conditionsToAQL: invalid condition: ' + e.message);
@@ -524,20 +511,14 @@ export async function applyActions(
 
       try {
         if (action.op === 'set-split-amount') {
-          return new Action(
-            action.op,
-            null,
-            action.value,
-            action.options,
-            FIELD_TYPES,
-          );
+          return new Action(action.op, null, action.value, action.options);
         } else if (action.op === 'link-schedule') {
-          return new Action(action.op, null, action.value, null, FIELD_TYPES);
+          return new Action(action.op, null, action.value, null);
         } else if (
           action.op === 'prepend-notes' ||
           action.op === 'append-notes'
         ) {
-          return new Action(action.op, null, action.value, null, FIELD_TYPES);
+          return new Action(action.op, null, action.value, null);
         }
 
         return new Action(
@@ -545,7 +526,6 @@ export async function applyActions(
           action.field,
           action.value,
           action.options,
-          FIELD_TYPES,
         );
       } catch (e) {
         console.log('Action error', e);
@@ -665,7 +645,6 @@ export async function updatePayeeRenameRule(fromNames: string[], to: string) {
       conditionsOp: 'and',
       conditions: [{ op: 'oneOf', field: 'imported_payee', value: fromNames }],
       actions: [{ op: 'set', field: 'payee', value: to }],
-      fieldTypes: FIELD_TYPES,
     });
     return insertRule(rule.serialize());
   }
@@ -774,7 +753,6 @@ export async function updateCategoryRules(transactions) {
           conditionsOp: 'and',
           conditions: [{ op: 'is', field: 'payee', value: payeeId }],
           actions: [{ op: 'set', field: 'category', value: category }],
-          fieldTypes: FIELD_TYPES,
         });
         await insertRule(newRule.serialize());
       }

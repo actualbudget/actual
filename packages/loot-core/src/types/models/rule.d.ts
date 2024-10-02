@@ -37,6 +37,8 @@ type FieldValueTypes = {
   payee: string;
   imported_payee: string;
   saved: string;
+  cleared: boolean;
+  reconciled: boolean;
 };
 
 type BaseConditionEntity<

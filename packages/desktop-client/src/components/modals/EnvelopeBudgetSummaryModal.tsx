@@ -132,6 +132,7 @@ export function EnvelopeBudgetSummaryModal({
                 ...styles.underlinedText,
               }}
               onClick={() => onClick({ close })}
+              isTotalsListTooltipDisabled={true}
             />
           </NamespaceContext.Provider>
         </>
