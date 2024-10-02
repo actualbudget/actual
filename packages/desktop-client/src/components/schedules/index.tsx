@@ -12,7 +12,7 @@ import { View } from '../common/View';
 import { Page } from '../Page';
 import { UpcomingLengthSettings } from '../settings/Upcoming';
 
-import { SchedulesTable, type ScheduleItemAction } from './SchedulesTable';
+import { type ScheduleItemAction, SchedulesTable } from './SchedulesTable';
 
 export function Schedules() {
   const { pushModal } = useActions();
@@ -75,6 +75,15 @@ export function Schedules() {
       >
         <View
           style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            padding: '15px 0 0',
+          }}
+        >
+          <UpcomingLengthSettings />
+        </View>
+        <View
+          style={{
             flex: 1,
             flexDirection: 'row',
             justifyContent: 'flex-end',
@@ -110,15 +119,6 @@ export function Schedules() {
         <Button variant="primary" onPress={onAdd}>
           Add new schedule
         </Button>
-      </View>
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          padding: '0 0 15px',
-        }}
-      >
-        <UpcomingLengthSettings />
       </View>
     </Page>
   );

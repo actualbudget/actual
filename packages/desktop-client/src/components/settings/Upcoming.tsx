@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useLocation } from 'react-router-dom';
 
 import { Column } from 'glamor/jsxstyle';
 
@@ -6,6 +7,7 @@ import { type SyncedPrefs } from 'loot-core/types/prefs';
 
 import { useSyncedPref } from '../../hooks/useSyncedPref';
 import { type CSSProperties, theme } from '../../style';
+import { Button } from '../common/Button';
 import { Select } from '../common/Select';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
@@ -34,7 +36,10 @@ export function UpcomingLengthSettings() {
     },
   };
 
-  return (
+  const location = useLocation();
+  const [expanded, setExpanded] = useState(location.hash === '#upcomingLength');
+
+  return expanded ? (
     <Setting
       primaryAction={
         <View style={{ flexDirection: 'row', gap: '1em' }}>
@@ -49,10 +54,22 @@ export function UpcomingLengthSettings() {
         </View>
       }
     >
-      <Text>
-        <strong>Upcoming Length</strong> does not affect how budget data is
-        stored, and can be changed at any time.
-      </Text>
+      <View style={{ flexDirection: 'row', gap: 20 }}>
+        <Text>
+          <strong>Upcoming Length</strong> does not affect how budget data is
+          stored, and can be changed at any time.
+        </Text>
+        <Button onClick={() => setExpanded(false)}>Close</Button>
+      </View>
+    </Setting>
+  ) : (
+    <Setting>
+      <View style={{ flexDirection: 'row', gap: 20 }}>
+        <Text style={{ fontSize: '1.25rem' }}>
+          <strong>Upcoming Length</strong>
+        </Text>
+        <Button onClick={() => setExpanded(true)}>Edit</Button>
+      </View>
     </Setting>
   );
 }
