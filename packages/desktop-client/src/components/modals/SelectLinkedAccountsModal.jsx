@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 
 import {
+  closeModal,
   linkAccount,
   linkAccountSimpleFin,
   unlinkAccount,
@@ -90,6 +91,8 @@ export function SelectLinkedAccountsModal({
         }
       },
     );
+
+    dispatch(closeModal());
   }
 
   const unlinkedAccounts = localAccounts.filter(
@@ -176,10 +179,7 @@ export function SelectLinkedAccountsModal({
           >
             <Button
               variant="primary"
-              onPress={() => {
-                onNext();
-                close();
-              }}
+              onPress={onNext}
               isDisabled={!Object.keys(chosenAccounts).length}
             >
               Link accounts
