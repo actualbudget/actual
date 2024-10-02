@@ -19,7 +19,7 @@ export function useSyncedPref<K extends keyof SyncedPrefs>(
     },
     [prefName, dispatch],
   );
-  const pref = useSelector((state: State) => state.prefs.synced?.[prefName]);
+  const pref = useSelector((state: State) => state.prefs.synced[prefName]);
 
   return [pref, setPref];
 }

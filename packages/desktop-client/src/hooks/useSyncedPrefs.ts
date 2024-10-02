@@ -10,13 +10,13 @@ type SetSyncedPrefsAction = (value: Partial<SyncedPrefs>) => void;
 /** @deprecated: please use `useSyncedPref` (singular) */
 export function useSyncedPrefs(): [SyncedPrefs, SetSyncedPrefsAction] {
   const dispatch = useDispatch();
-  const setPref = useCallback<SetSyncedPrefsAction>(
+  const setPrefs = useCallback<SetSyncedPrefsAction>(
     newValue => {
       dispatch(saveSyncedPrefs(newValue));
     },
     [dispatch],
   );
-  const pref = useSelector((state: State) => state.prefs.synced);
+  const prefs = useSelector((state: State) => state.prefs.synced);
 
-  return [pref, setPref];
+  return [prefs, setPrefs];
 }
