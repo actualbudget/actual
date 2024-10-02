@@ -56,6 +56,9 @@ describe('schedules', () => {
     beforeEach(() => {
       MockDate.set(new Date(2021, 4, 14));
     });
+    afterEach(() => {
+      MockDate.reset();
+    });
 
     it('describes weekly interval', () => {
       expect(
