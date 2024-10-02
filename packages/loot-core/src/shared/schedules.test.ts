@@ -1,7 +1,5 @@
 import MockDate from 'mockdate';
 
-import { LocalPrefs } from '../types/prefs';
-
 import * as monthUtils from './months';
 import { getRecurringDescription, getStatus } from './schedules';
 
@@ -10,50 +8,45 @@ describe('schedules', () => {
   const dateFormat = 'yyyy-MM-dd';
   const todayString = monthUtils.format(today, dateFormat);
   describe('getStatus', () => {
-    let prefs: LocalPrefs;
-    beforeEach(() => {
-      prefs = {
-        upcomingScheduledTransactionLength: '7',
-      };
-    });
     it('returns completed if completed', () => {
-      expect(getStatus(todayString, true, false, prefs)).toBe('completed');
+      expect(getStatus(todayString, true, false, '7')).toBe('completed');
     });
 
     it('returns paid if has transactions', () => {
-      expect(getStatus(todayString, false, true, prefs)).toBe('paid');
+      expect(getStatus(todayString, false, true, '7')).toBe('paid');
     });
 
     it('returns due if today', () => {
-      expect(getStatus(todayString, false, false, prefs)).toBe('due');
+      expect(getStatus(todayString, false, false, '7')).toBe('due');
     });
 
     it.each(['1', '7', '14', '30'])(
       'returns upcoming if within upcoming range %s',
       (upcomingLength: string) => {
-        prefs.upcomingScheduledTransactionLength = upcomingLength as
-          | '1'
-          | '7'
-          | '14'
-          | '30';
         const daysOut = parseInt(upcomingLength);
         const tomorrow = monthUtils.addDays(today, 1);
         const upcomingDate = monthUtils.addDays(today, daysOut);
         const scheduledDate = monthUtils.addDays(today, daysOut + 1);
-        expect(getStatus(tomorrow, false, false, prefs)).toBe('upcoming');
-        expect(getStatus(upcomingDate, false, false, prefs)).toBe('upcoming');
-        expect(getStatus(scheduledDate, false, false, prefs)).toBe('scheduled');
+        expect(getStatus(tomorrow, false, false, upcomingLength)).toBe(
+          'upcoming',
+        );
+        expect(getStatus(upcomingDate, false, false, upcomingLength)).toBe(
+          'upcoming',
+        );
+        expect(getStatus(scheduledDate, false, false, upcomingLength)).toBe(
+          'scheduled',
+        );
       },
     );
 
     it('returns missed if past', () => {
-      expect(
-        getStatus(monthUtils.addDays(today, -1), false, false, prefs),
-      ).toBe('missed');
+      expect(getStatus(monthUtils.addDays(today, -1), false, false, '7')).toBe(
+        'missed',
+      );
     });
 
     it('returns scheduled if not due, upcoming, or missed', () => {
-      expect(getStatus(monthUtils.addDays(today, 8), false, false, prefs)).toBe(
+      expect(getStatus(monthUtils.addDays(today, 8), false, false, '7')).toBe(
         'scheduled',
       );
     });

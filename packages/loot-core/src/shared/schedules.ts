@@ -1,8 +1,6 @@
 // @ts-strict-ignore
 import type { IRuleOptions } from '@rschedule/core';
 
-import { LocalPrefs } from '../types/prefs';
-
 import * as monthUtils from './months';
 import { q } from './query';
 
@@ -10,10 +8,9 @@ export function getStatus(
   nextDate: string,
   completed: boolean,
   hasTrans: boolean,
-  prefs: LocalPrefs,
+  upcomingLength: string,
 ) {
   const today = monthUtils.currentDay();
-
   if (completed) {
     return 'completed';
   } else if (hasTrans) {
@@ -22,11 +19,7 @@ export function getStatus(
     return 'due';
   } else if (
     nextDate > today &&
-    nextDate <=
-      monthUtils.addDays(
-        today,
-        parseInt(prefs.upcomingScheduledTransactionLength ?? '7'),
-      )
+    nextDate <= monthUtils.addDays(today, parseInt(upcomingLength ?? '7'))
   ) {
     return 'upcoming';
   } else if (nextDate < today) {

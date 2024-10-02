@@ -1,19 +1,19 @@
 // @ts-strict-ignore
 import React, {
   createContext,
-  useEffect,
-  useState,
   useContext,
+  useEffect,
   useMemo,
+  useState,
 } from 'react';
-import { useSelector } from 'react-redux';
+
+import { useSyncedPref } from '@actual-app/web/src/hooks/useSyncedPref';
 
 import { q, type Query } from '../../shared/query';
-import { getStatus, getHasTransactionsQuery } from '../../shared/schedules';
+import { getHasTransactionsQuery, getStatus } from '../../shared/schedules';
 import { type ScheduleEntity } from '../../types/models';
 import { getAccountFilter } from '../queries';
 import { liveQuery } from '../query-helpers';
-import { type State } from '../state-types';
 
 export type ScheduleStatusType = ReturnType<typeof getStatus>;
 export type ScheduleStatuses = Map<ScheduleEntity['id'], ScheduleStatusType>;
@@ -43,7 +43,7 @@ export function useSchedules({
   transform,
 }: UseSchedulesArgs = {}): UseSchedulesResult {
   const [data, setData] = useState<UseSchedulesResult>(null);
-  const prefs = useSelector((state: State) => state.prefs.local);
+  const upcomingLength = useSyncedPref('upcomingScheduledTransactionLength')[0];
   useEffect(() => {
     const query = q('schedules').select('*');
     let statusQuery;
@@ -58,7 +58,7 @@ export function useSchedules({
           statusQuery = loadStatuses(
             schedules,
             (statuses: ScheduleStatuses) => setData({ schedules, statuses }),
-            prefs,
+            upcomingLength,
           );
         }
       },
@@ -72,7 +72,7 @@ export function useSchedules({
         statusQuery.unsubscribe();
       }
     };
-  }, [prefs, transform]);
+  }, [upcomingLength, transform]);
 
   return data;
 }
