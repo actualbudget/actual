@@ -54,6 +54,12 @@ contextBridge.exposeInMainWorld('Actual', {
     });
   },
 
+  changeClientVersion: async (releaseVersion: string) => {
+    await ipcRenderer.invoke('change-client-version', {
+      releaseVersion,
+    });
+  },
+
   openURLInBrowser: (url: string) => {
     ipcRenderer.invoke('open-external-url', url);
   },

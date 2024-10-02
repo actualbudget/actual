@@ -160,7 +160,6 @@ function checkDatabaseValidity(
 
 export async function migrate(db: Database): Promise<string[]> {
   await patchBadMigrations(db);
-  console.info('migrating');
   const appliedIds = await getAppliedMigrations(db);
   const available = await getMigrationList(MIGRATIONS_DIR);
 
@@ -170,7 +169,6 @@ export async function migrate(db: Database): Promise<string[]> {
   console.info('pending migrations', pending);
 
   for (const migration of pending) {
-    console.info('applying migration', migration);
     await applyMigration(db, migration, MIGRATIONS_DIR);
   }
 

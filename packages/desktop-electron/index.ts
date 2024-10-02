@@ -50,6 +50,11 @@ if (!isDev || !process.env.ACTUAL_DATA_DIR) {
 let clientWin: BrowserWindow | null;
 let serverProcess: UtilityProcess | null;
 
+const usingRelease = path.resolve(
+  `${process.env.ACTUAL_DATA_DIR}/ActualReleases/v23.9.0`,
+); // read from global.json
+// const usingRelease = undefined;
+
 if (isDev) {
   process.traceProcessWarnings = true;
 
@@ -59,29 +64,10 @@ if (isDev) {
   }
 }
 
-async function downloadActualRelease(releaseVersion: string) {
-  const downloadUrl = `https://github.com/MikesGlitch/actual/releases/download/${releaseVersion}/v23.9.0-electron-dist.zip`;
-
-  try {
-    const res = await fetch(downloadUrl);
-    const arrBuffer = await res.arrayBuffer();
-    const zipped = new AdmZip(Buffer.from(arrBuffer));
-    console.info(
-      'electron version will be installed here:',
-      process.env.ACTUAL_DATA_DIR,
-    );
-    zipped.extractAllTo(process.env.ACTUAL_DATA_DIR + '/Releases', true, false);
-    return { error: undefined };
-  } catch (error) {
-    console.error('Error retrieving Actual:', error);
-    return { error };
-  }
-}
-
 function createBackgroundProcess() {
   serverProcess = utilityProcess.fork(
     __dirname + '/server.js',
-    ['--subprocess', app.getVersion()],
+    ['--subprocess', app.getVersion(), usingRelease || ''],
     isDev ? { execArgv: ['--inspect'], stdio: 'pipe' } : { stdio: 'pipe' },
   );
 
@@ -240,8 +226,6 @@ function updateMenu(budgetId?: string) {
 app.setAppUserModelId('com.actualbudget.actual');
 
 app.on('ready', async () => {
-  // await downloadActualRelease('v23.9.0');
-
   // Install an `app://` protocol that always returns the base HTML
   // file no matter what URL it is. This allows us to use react-router
   // on the frontend
@@ -269,21 +253,14 @@ app.on('ready', async () => {
     }
 
     const pathname = parsedUrl.pathname;
-
-    let filePath = path.normalize(
-      `${process.env.ACTUAL_DATA_DIR}/Releases/v23.9.0/client-build/index.html`,
-    ); // default web path
+    const pathPrefix = usingRelease ? usingRelease : `${__dirname}`; // path to the release we want to use
+    let filePath = path.normalize(`${pathPrefix}/client-build/index.html`); // default web path
 
     if (pathname.startsWith('/static')) {
       // static assets
-      filePath = path.normalize(
-        `${process.env.ACTUAL_DATA_DIR}/Releases/v23.9.0/client-build${pathname}`,
-      );
+      filePath = path.normalize(`${pathPrefix}/client-build${pathname}`);
       const resolvedPath = path.resolve(filePath);
-      const clientBuildPath = path.resolve(
-        `${process.env.ACTUAL_DATA_DIR}/Releases/v23.9.0`,
-        'client-build',
-      );
+      const clientBuildPath = path.resolve(`${pathPrefix}`, 'client-build');
 
       // Ensure filePath is within client-build directory - prevents directory traversal vulnerability
       if (!resolvedPath.startsWith(clientBuildPath)) {
@@ -401,6 +378,33 @@ ipcMain.handle(
 ipcMain.handle('open-external-url', (event, url) => {
   shell.openExternal(url);
 });
+
+ipcMain.handle(
+  'change-client-version',
+  async (_event, payload: { releaseVersion: string }) => {
+    console.info({ payload });
+    const downloadUrl = `https://github.com/MikesGlitch/actual/releases/download/${payload.releaseVersion}/${payload.releaseVersion}-electron-dist.zip`;
+
+    try {
+      const res = await fetch(downloadUrl);
+      const arrBuffer = await res.arrayBuffer();
+      const zipped = new AdmZip(Buffer.from(arrBuffer));
+      console.info(
+        'electron version will be installed here:',
+        process.env.ACTUAL_DATA_DIR,
+      );
+      zipped.extractAllTo(
+        process.env.ACTUAL_DATA_DIR + '/ActualReleases',
+        true,
+        false,
+      );
+      return { error: undefined };
+    } catch (error) {
+      console.error('Error retrieving Actual:', error);
+      return { error };
+    }
+  },
+);
 
 ipcMain.on('message', (_event, msg) => {
   if (!serverProcess) {

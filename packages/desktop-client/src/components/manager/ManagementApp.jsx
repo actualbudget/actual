@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { Navigate, Route, Routes } from 'react-router-dom';
 
@@ -8,9 +9,11 @@ import {
   setAppState,
 } from 'loot-core/client/actions';
 
+import { SvgPencil1 } from '../../icons/v2';
 import { theme } from '../../style';
 import { tokens } from '../../tokens';
 import { AppBackground } from '../AppBackground';
+import { Button } from '../common/Button2';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { LoggedInUser } from '../LoggedInUser';
@@ -29,6 +32,14 @@ import { WelcomeScreen } from './WelcomeScreen';
 function Version() {
   const version = useServerVersion();
 
+  const { t } = useTranslation();
+
+  const changeClientVersion = async () => {
+    console.info('changeClientVersion');
+    await globalThis.window.Actual.changeClientVersion('v23.9.0');
+    console.info('changeClientVersion done');
+  };
+
   return (
     <Text
       style={{
@@ -36,6 +47,8 @@ function Version() {
         ':hover': { color: theme.pageText },
         margin: 15,
         marginLeft: 17,
+        display: 'flex',
+        alignItems: 'center',
         [`@media (min-width: ${tokens.breakpoint_small})`]: {
           position: 'absolute',
           bottom: 0,
@@ -46,7 +59,22 @@ function Version() {
         },
       }}
     >
-      {`App: v${window.Actual?.ACTUAL_VERSION} | Server: ${version}`}
+      {`App: v${window.Actual?.ACTUAL_VERSION}`}
+      <Button
+        variant="bare"
+        aria-label={t('Change client version')}
+        style={{ margin: '0px 5px', color: 'inherit' }}
+        className="hover-visible"
+        onPress={changeClientVersion}
+      >
+        <SvgPencil1
+          style={{
+            width: 11,
+            height: 11,
+          }}
+        />
+      </Button>
+      {` | Server: ${version}`}
     </Text>
   );
 }

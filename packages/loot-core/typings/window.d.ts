@@ -6,6 +6,7 @@ declare global {
       IS_FAKE_WEB: boolean;
       ACTUAL_VERSION: string;
       openURLInBrowser: (url: string) => void;
+      changeClientVersion: (releaseVersion: string) => void;
       saveFile: (
         contents: string | Buffer,
         filename: string,
