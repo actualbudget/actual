@@ -30,12 +30,12 @@ import { CreateLocalAccountModal } from './modals/CreateLocalAccountModal';
 import { EditUserAccess } from './modals/EditAccess';
 import { EditFieldModal } from './modals/EditFieldModal';
 import { EditRuleModal } from './modals/EditRuleModal';
+import { EditUserFinanceApp } from './modals/EditUser';
 import { EnvelopeBalanceMenuModal } from './modals/EnvelopeBalanceMenuModal';
 import { EnvelopeBudgetMenuModal } from './modals/EnvelopeBudgetMenuModal';
 import { EnvelopeBudgetMonthMenuModal } from './modals/EnvelopeBudgetMonthMenuModal';
 import { EnvelopeBudgetSummaryModal } from './modals/EnvelopeBudgetSummaryModal';
 import { EnvelopeToBudgetMenuModal } from './modals/EnvelopeToBudgetMenuModal';
-import { EditUserFinanceApp } from './modals/EditUser';
 import { FixEncryptionKeyModal } from './modals/FixEncryptionKeyModal';
 import { GoCardlessExternalMsgModal } from './modals/GoCardlessExternalMsgModal';
 import { GoCardlessInitialiseModal } from './modals/GoCardlessInitialiseModal';
@@ -602,7 +602,6 @@ export function Modals() {
               onSave={options.onSave}
             />
           );
-
 
         case 'edit-access':
           return (

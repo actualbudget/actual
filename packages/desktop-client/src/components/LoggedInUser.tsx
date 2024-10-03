@@ -10,6 +10,7 @@ import { useAuth } from '../auth/AuthProvider';
 import { Permissions } from '../auth/types';
 import { useActions } from '../hooks/useActions';
 import { useLocalPref } from '../hooks/useLocalPref';
+import { useMetadataPref } from '../hooks/useMetadataPref';
 import { useNavigate } from '../hooks/useNavigate';
 import { theme, styles, type CSSProperties } from '../style';
 
@@ -19,7 +20,6 @@ import { Popover } from './common/Popover';
 import { Text } from './common/Text';
 import { View } from './common/View';
 import { useMultiuserEnabled, useServerURL } from './ServerContext';
-import { useMetadataPref } from '../hooks/useMetadataPref';
 
 type LoggedInUserProps = {
   hideIfNoServer?: boolean;
@@ -183,7 +183,10 @@ export function LoggedInUser({
       budgetId &&
       location.pathname !== '/user-access'
     ) {
-      adminMenu.push({ name: 'user-access', text: t('User Access Management') });
+      adminMenu.push({
+        name: 'user-access',
+        text: t('User Access Management'),
+      });
     }
 
     if (adminMenu.length > 0) {

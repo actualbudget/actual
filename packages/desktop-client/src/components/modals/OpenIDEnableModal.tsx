@@ -10,7 +10,7 @@ import { theme, styles } from '../../style';
 import { Error } from '../alerts';
 import { Button } from '../common/Button2';
 import { Label } from '../common/Label';
-import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal2';
+import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { View } from '../common/View';
 import { OpenIdForm } from '../manager/subscribe/OpenIdForm';
 import { useRefreshLoginMethods } from '../ServerContext';
@@ -45,7 +45,7 @@ export function OpenIDEnableModal({
         <>
           <ModalHeader
             title="Enable OpenID"
-            rightContent={<ModalCloseButton onClick={close} />}
+            rightContent={<ModalCloseButton onPress={close} />}
           />
 
           <View style={{ flexDirection: 'column' }}>

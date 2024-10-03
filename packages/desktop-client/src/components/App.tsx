@@ -9,7 +9,7 @@ import {
 } from 'react-error-boundary';
 import { HotkeysProvider } from 'react-hotkeys-hook';
 import { useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { BrowserRouter } from 'react-router-dom';
 
 import {
@@ -20,6 +20,7 @@ import {
   sync,
 } from 'loot-core/client/actions';
 import { SpreadsheetProvider } from 'loot-core/client/SpreadsheetProvider';
+import { type State } from 'loot-core/client/state-types';
 import * as Platform from 'loot-core/src/client/platform';
 import {
   init as initConnection,

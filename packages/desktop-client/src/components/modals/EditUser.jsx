@@ -7,12 +7,7 @@ import { useActions } from '../../hooks/useActions';
 import { styles, theme } from '../../style';
 import { Button } from '../common/Button2';
 import { Input } from '../common/Input';
-import { Modal } from '../common/Modal';
-import {
-  Modal as Modal2,
-  ModalCloseButton,
-  ModalHeader,
-} from '../common/Modal2';
+import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { Select } from '../common/Select';
 import { Stack } from '../common/Stack';
 import { Text } from '../common/Text';
@@ -97,7 +92,7 @@ export function EditUserManagementApp({
 
 export function EditUserFinanceApp({ defaultUser, onSave: originalOnSave }) {
   return (
-    <Modal2 name="edit-user">
+    <Modal name="edit-user">
       {({ state: { close } }) => (
         <>
           <ModalHeader
@@ -115,7 +110,7 @@ export function EditUserFinanceApp({ defaultUser, onSave: originalOnSave }) {
           />
         </>
       )}
-    </Modal2>
+    </Modal>
   );
 }
 

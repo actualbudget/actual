@@ -17,6 +17,7 @@ import { type UserAvailable } from 'loot-core/types/models';
 import { type UserAccessEntity } from 'loot-core/types/models/userAccess';
 
 import { useLocalPref } from '../../../hooks/useLocalPref';
+import { useMetadataPref } from '../../../hooks/useMetadataPref';
 import { SvgDotsHorizontalTriple, SvgLockOpen } from '../../../icons/v1';
 import { SvgLockClosed } from '../../../icons/v2';
 import { styles, theme } from '../../../style';
@@ -43,7 +44,7 @@ function UserAccessContent({
   const [allAccess, setAllAccess] = useState([]);
   const [page, setPage] = useState(0);
   const [filter, setFilter] = useState('');
-  const [cloudFileId] = useLocalPref('cloudFileId');
+  const [cloudFileId] = useMetadataPref('cloudFileId');
   const dispatch = useDispatch();
   const [ownerName, setOwnerName] = useState('unknown');
   const triggerRef = useRef(null);

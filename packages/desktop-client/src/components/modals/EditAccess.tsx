@@ -7,7 +7,7 @@ import { type UserAccessEntity } from 'loot-core/types/models/userAccess';
 import { useActions } from '../../hooks/useActions';
 import { styles, theme } from '../../style';
 import { Button } from '../common/Button2';
-import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal2';
+import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { Select } from '../common/Select';
 import { Stack } from '../common/Stack';
 import { Text } from '../common/Text';
@@ -85,7 +85,7 @@ export function EditUserAccess({
         <>
           <ModalHeader
             title="User Access"
-            rightContent={<ModalCloseButton onClick={close} />}
+            rightContent={<ModalCloseButton onPress={close} />}
           />
           <Stack direction="row" style={{ marginTop: 10 }}>
             <FormField style={{ flex: 1 }}>

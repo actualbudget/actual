@@ -8,9 +8,10 @@ import { type UserEntity } from 'loot-core/types/models';
 
 import { useActions } from '../../hooks/useActions';
 import { useLocalPref } from '../../hooks/useLocalPref';
+import { useMetadataPref } from '../../hooks/useMetadataPref';
 import { styles, theme } from '../../style';
 import { Button } from '../common/Button2';
-import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal2';
+import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { Select } from '../common/Select';
 import { Stack } from '../common/Stack';
 import { Text } from '../common/Text';
@@ -29,7 +30,7 @@ export function TransferOwnership({
   const [userId, setUserId] = useState('');
   const [error, setSetError] = useState<string | null>(null);
   const [availableUsers, setAvailableUsers] = useState<[string, string][]>([]);
-  const [cloudFileId] = useLocalPref('cloudFileId');
+  const [cloudFileId] = useMetadataPref('cloudFileId');
 
   useEffect(() => {
     send('users-get').then((users: UserEntity[]) =>
@@ -69,7 +70,7 @@ export function TransferOwnership({
         <>
           <ModalHeader
             title="Transfer ownership"
-            rightContent={<ModalCloseButton onClick={close} />}
+            rightContent={<ModalCloseButton onPress={close} />}
           />
           <Stack direction="row" style={{ marginTop: 10 }}>
             <FormField style={{ flex: 1 }}>

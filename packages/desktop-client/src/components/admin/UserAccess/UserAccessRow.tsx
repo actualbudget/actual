@@ -7,6 +7,7 @@ import { type UserAvailable } from 'loot-core/types/models';
 
 import { useActions } from '../../../hooks/useActions';
 import { useLocalPref } from '../../../hooks/useLocalPref';
+import { useMetadataPref } from '../../../hooks/useMetadataPref';
 import { theme } from '../../../style';
 import { View } from '../../common/View';
 import { Checkbox } from '../../forms';
@@ -24,7 +25,7 @@ export const UserAccessRow = memo(
     const [marked, setMarked] = useState(
       access.owner === 1 ? access.owner === 1 : access.haveAccess === 1,
     );
-    const [cloudFileId] = useLocalPref('cloudFileId');
+    const [cloudFileId] = useMetadataPref('cloudFileId');
     const actions = useActions();
 
     return (
