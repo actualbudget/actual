@@ -90,7 +90,12 @@ export const UserAccessRow = memo(
                 );
 
                 if (someDeletionsFailed) {
-                  alert('Some access were not revoked');
+                  actions.addNotification({
+                    type: 'error',
+                    title: 'Access Revocation Incomplete',
+                    message: 'Some access permissions were not revoked successfully.',
+                    sticky: true,
+                  });
                 }
               }
               setMarked(newValue);
