@@ -5,8 +5,7 @@ import electron, { BrowserWindow } from 'electron';
 
 const backend = undefined;
 const getBackend = async () =>
-  // eslint-disable-next-line import/extensions
-  backend || (await import('loot-core/lib-dist/bundle.desktop.js'));
+  backend || (await import(process.env.lootCoreScript));
 
 type WindowState = Electron.Rectangle & {
   isMaximized?: boolean;
