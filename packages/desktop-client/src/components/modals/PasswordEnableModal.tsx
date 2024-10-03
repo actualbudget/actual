@@ -5,7 +5,7 @@ import * as asyncStorage from 'loot-core/src/platform/server/asyncStorage';
 
 import { useActions } from '../../hooks/useActions';
 import { theme, styles } from '../../style';
-import { Error } from '../alerts';
+import { Error as ErrorAlert } from '../alerts';
 import { Button } from '../common/Button2';
 import { Label } from '../common/Label';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
@@ -34,19 +34,15 @@ export function PasswordEnableModal({
   const availableLoginMethods = useAvailableLoginMethods();
   const refreshLoginMethods = useRefreshLoginMethods();
 
+  const errorMessages = {
+    'invalid-password': 'Invalid Password',
+    'password-match': 'Passwords do not match',
+    'network-failure': 'Unable to contact the server',
+    'unable-to-change-file-config-enabled': 'Unable to disable OpenID. Please update the config.json file in this case.',
+  };
+  
   function getErrorMessage(error: string): string {
-    switch (error) {
-      case 'invalid-password':
-        return 'Invalid Password';
-      case 'password-match':
-        return 'Passwords do not match';
-      case 'network-failure':
-        return 'Unable to contact the server';
-      case 'unable-to-change-file-config-enabled':
-        return 'Unable to disable OpenID. Please update the config.json file in this case.';
-      default:
-        return 'Internal server error';
-    }
+    return errorMessages[error as keyof typeof errorMessages] || 'Internal server error';
   }
 
   async function onSetPassword(password: string) {
@@ -124,7 +120,7 @@ export function PasswordEnableModal({
                 title="Multi-user will not work after disabling"
               />
             )}
-            {error && <Error>{error}</Error>}
+            {error && <ErrorAlert>{error}</ErrorAlert>}
           </View>
         </>
       )}

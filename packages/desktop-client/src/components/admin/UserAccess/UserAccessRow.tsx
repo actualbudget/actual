@@ -21,9 +21,7 @@ type UserAccessProps = {
 export const UserAccessRow = memo(
   ({ access, hovered, onHover }: UserAccessProps) => {
     const backgroundFocus = hovered;
-    const [marked, setMarked] = useState(
-      access.owner === 1 ? access.owner === 1 : access.haveAccess === 1,
-    );
+    const [marked, setMarked] = useState(access.owner === 1 || access.haveAccess === 1);
     const [cloudFileId] = useMetadataPref('cloudFileId');
     const actions = useActions();
 

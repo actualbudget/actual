@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
 import { send } from 'loot-core/platform/client/fetch';
-import { PossibleRoles } from 'loot-core/src/types/models/user';
+import { PossibleRoles, UserEntity } from 'loot-core/src/types/models/user';
 
 import { useActions } from '../../hooks/useActions';
 import { styles, theme } from '../../style';
@@ -14,7 +14,22 @@ import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { Checkbox, FormField, FormLabel } from '../forms';
 
-function getUserDirectoryErrors(reason) {
+interface EditUserProps {
+  defaultUser: UserEntity;
+  onSave: (
+    method: 'user-add' | 'user-update',
+    user: UserEntity,
+    setError: (error: string) => void,
+    actions: any,
+  ) => Promise<void>;
+}
+
+interface EditUserFinanceAppProps {
+  defaultUser: UserEntity;
+  onSave: (user: UserEntity) => void;
+}
+
+function getUserDirectoryErrors(reason: string): string {
   switch (reason) {
     case 'unauthorized':
       return 'You are not logged in.';
@@ -35,7 +50,12 @@ function getUserDirectoryErrors(reason) {
   }
 }
 
-async function saveUser(method, user, setError, actions) {
+async function saveUser(
+  method: 'user-add' | 'user-update',
+  user: UserEntity,
+  setError: (error: string) => void,
+  actions: any,
+): Promise<boolean> {
   const { error, id: newId } = (await send(method, user)) || {};
   if (!error) {
     if (newId) {
@@ -65,14 +85,17 @@ async function saveUser(method, user, setError, actions) {
   return true;
 }
 
-export function EditUserFinanceApp({ defaultUser, onSave: originalOnSave }) {
+export function EditUserFinanceApp({
+  defaultUser,
+  onSave: originalOnSave,
+}: EditUserFinanceAppProps) {
   return (
     <Modal name="edit-user">
       {({ state: { close } }) => (
         <>
           <ModalHeader
             title="User"
-            rightContent={<ModalCloseButton onClick={close} />}
+            rightContent={<ModalCloseButton onPress={close} />}
           />
           <EditUser
             defaultUser={defaultUser}
@@ -89,18 +112,20 @@ export function EditUserFinanceApp({ defaultUser, onSave: originalOnSave }) {
   );
 }
 
-function EditUser({ defaultUser, onSave: originalOnSave }) {
+function EditUser({ defaultUser, onSave: originalOnSave }: EditUserProps) {
   const actions = useActions();
-  const [userName, setUserName] = useState(defaultUser.userName ?? '');
-  const [displayName, setDisplayName] = useState(defaultUser.displayName ?? '');
-  const [enabled, setEnabled] = useState(defaultUser.enabled);
-  const [role, setRole] = useState(
-    defaultUser.role ?? 'e87fa1f1-ac8c-4913-b1b5-1096bdb1eacc',
+  const [userName, setUserName] = useState<string>(defaultUser.userName ?? '');
+  const [displayName, setDisplayName] = useState<string>(
+    defaultUser.displayName ?? '',
   );
-  const [error, setError] = useState('');
+  const [enabled, setEnabled] = useState<boolean>(defaultUser.enabled);
+  const [role, setRole] = useState<string>(
+    defaultUser.role ?? PossibleRoles.Admin,
+  );
+  const [error, setError] = useState<string>('');
 
   async function onSave() {
-    const user = {
+    const user: UserEntity = {
       ...defaultUser,
       userName,
       displayName,
@@ -109,7 +134,7 @@ function EditUser({ defaultUser, onSave: originalOnSave }) {
     };
 
     const method = user.id ? 'user-update' : 'user-add';
-    await originalOnSave(method, user, setError, originalOnSave, actions);
+    await originalOnSave(method, user, setError, actions);
   }
 
   return (
@@ -198,7 +223,6 @@ function EditUser({ defaultUser, onSave: originalOnSave }) {
             options={Object.entries(PossibleRoles)}
             value={role}
             onChange={newValue => setRole(newValue)}
-            buttonStyle={{ color: theme.pageTextPositive }}
           />
         </FormField>
       </Stack>
@@ -226,7 +250,7 @@ function EditUser({ defaultUser, onSave: originalOnSave }) {
   );
 }
 
-const RoleDescription = () => {
+const RoleDescription: React.FC = () => {
   return (
     <View style={{ paddingTop: 10 }}>
       <Text
