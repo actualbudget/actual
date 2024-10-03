@@ -531,11 +531,13 @@ const TransactionEditInner = memo(function TransactionEditInner({
 
   const getCategory = useCallback(
     (trans, isOffBudget) => {
-      return isOffBudget
-        ? 'Off Budget'
-        : isBudgetTransfer(trans)
-          ? 'Transfer'
-          : lookupName(categories, trans.category);
+      if (isOffBudget) {
+        return 'Off Budget';
+      } else if (isBudgetTransfer(trans)) {
+        return 'Transfer';
+      } else {
+        return lookupName(categories, trans.category);
+      }
     },
     [categories, isBudgetTransfer],
   );
