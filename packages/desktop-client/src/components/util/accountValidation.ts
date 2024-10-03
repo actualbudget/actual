@@ -13,7 +13,7 @@ export function validateAccountName(
       account => account.name === newAccountName && account.id !== accountId,
     );
     if (duplicateNamedAccounts.length) {
-      return t('Name {{ newAccountName }} must be unique.', { newAccountName });
+      return t('Name {{ newAccountName }} already exists.', { newAccountName });
     } else {
       return '';
     }
