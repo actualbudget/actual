@@ -511,7 +511,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
 
   const getPrettyPayee = useCallback(
     trans => {
-      if (trans && trans.is_parent) {
+      if (trans?.is_parent) {
         return 'Split';
       }
       const transPayee = trans && getPayee(trans);
