@@ -32,6 +32,7 @@ import { MobileBackButton } from '../../mobile/MobileBackButton';
 import { MobilePageHeader, Page, PageHeader } from '../../Page';
 import { PrivacyFilter } from '../../PrivacyFilter';
 import { SpendingGraph } from '../graphs/SpendingGraph';
+import { LegendItem } from '../LegendItem';
 import { LoadingIndicator } from '../LoadingIndicator';
 import { ModeButton } from '../ModeButton';
 import { calculateSpendingReportTimeRange } from '../reportRanges';
@@ -54,7 +55,7 @@ export function Spending() {
 }
 
 type SpendingInternalProps = {
-  widget: SpendingWidget;
+  widget?: SpendingWidget;
 };
 
 function SpendingInternal({ widget }: SpendingInternalProps) {
@@ -132,8 +133,12 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
   const { isNarrowWidth } = useResponsive();
 
   async function onSaveWidget() {
+    if (!widget) {
+      throw new Error('No widget that could be saved.');
+    }
+
     await send('dashboard-update-widget', {
-      id: widget?.id,
+      id: widget.id,
       meta: {
         ...(widget.meta ?? {}),
         conditions,
@@ -169,7 +174,12 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
         ? 27
         : monthUtils.getDay(monthUtils.currentDay()) - 1;
 
-  const showCompareTo = Math.abs(data.intervalData[27].compareTo) > 0;
+  const showCompareTo =
+    compareTo === monthUtils.currentMonth() ||
+    Math.abs(data.intervalData[27].compareTo) > 0;
+  const showCompare =
+    compare === monthUtils.currentMonth() ||
+    Math.abs(data.intervalData[27].compare) > 0;
 
   const title = widget?.meta?.name ?? t('Monthly Spending');
 
@@ -431,6 +441,24 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                   flexDirection: 'row',
                 }}
               >
+                <View>
+                  <LegendItem
+                    color={theme.reportsGreen}
+                    label={monthUtils.format(compare, 'MMM, yyyy')}
+                    style={{ padding: 0, paddingBottom: 10 }}
+                  />
+                  <LegendItem
+                    color={theme.reportsGray}
+                    label={
+                      reportMode === 'single-month'
+                        ? monthUtils.format(compareTo, 'MMM, yyyy')
+                        : reportMode === 'budget'
+                          ? 'Budgeted'
+                          : 'Average'
+                    }
+                    style={{ padding: 0, paddingBottom: 10 }}
+                  />
+                </View>
                 <View style={{ flex: 1 }} />
                 <View
                   style={{
@@ -439,7 +467,7 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                   }}
                 >
                   <View>
-                    {showCompareTo && (
+                    {showCompare && (
                       <AlignedText
                         style={{ marginBottom: 5, minWidth: 210 }}
                         left={
@@ -450,7 +478,7 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                         }
                         right={
                           <Text style={{ fontWeight: 600 }}>
-                            <PrivacyFilter blurIntensity={5}>
+                            <PrivacyFilter>
                               {amountToCurrency(
                                 Math.abs(data.intervalData[todayDay].compare),
                               )}
@@ -459,17 +487,18 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                         }
                       />
                     )}
-                    {reportMode === 'single-month' && (
+                    {reportMode === 'single-month' && showCompareTo && (
                       <AlignedText
                         style={{ marginBottom: 5, minWidth: 210 }}
                         left={
                           <Block>
-                            Spent {monthUtils.format(compareTo, 'MMM, yyyy')}:
+                            Spent {monthUtils.format(compareTo, 'MMM, yyyy')}
+                            {compare === monthUtils.currentMonth() && ' MTD'}:
                           </Block>
                         }
                         right={
                           <Text style={{ fontWeight: 600 }}>
-                            <PrivacyFilter blurIntensity={5}>
+                            <PrivacyFilter>
                               {amountToCurrency(
                                 Math.abs(data.intervalData[todayDay].compareTo),
                               )}
@@ -479,24 +508,26 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                       />
                     )}
                   </View>
-                  <AlignedText
-                    style={{ marginBottom: 5, minWidth: 210 }}
-                    left={
-                      <Block>
-                        Budgeted
-                        {compare === monthUtils.currentMonth() && ' MTD'}:
-                      </Block>
-                    }
-                    right={
-                      <Text style={{ fontWeight: 600 }}>
-                        <PrivacyFilter blurIntensity={5}>
-                          {amountToCurrency(
-                            Math.abs(data.intervalData[todayDay].budget),
-                          )}
-                        </PrivacyFilter>
-                      </Text>
-                    }
-                  />
+                  {Math.abs(data.intervalData[todayDay].budget) > 0 && (
+                    <AlignedText
+                      style={{ marginBottom: 5, minWidth: 210 }}
+                      left={
+                        <Block>
+                          Budgeted
+                          {compare === monthUtils.currentMonth() && ' MTD'}:
+                        </Block>
+                      }
+                      right={
+                        <Text style={{ fontWeight: 600 }}>
+                          <PrivacyFilter>
+                            {amountToCurrency(
+                              Math.abs(data.intervalData[todayDay].budget),
+                            )}
+                          </PrivacyFilter>
+                        </Text>
+                      }
+                    />
+                  )}
                   {showAverage && (
                     <AlignedText
                       style={{ marginBottom: 5, minWidth: 210 }}
@@ -508,7 +539,7 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                       }
                       right={
                         <Text style={{ fontWeight: 600 }}>
-                          <PrivacyFilter blurIntensity={5}>
+                          <PrivacyFilter>
                             {amountToCurrency(
                               Math.abs(data.intervalData[todayDay].average),
                             )}
