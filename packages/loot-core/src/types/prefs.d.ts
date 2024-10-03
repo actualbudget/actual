@@ -2,8 +2,8 @@ export type FeatureFlag =
   | 'dashboards'
   | 'reportBudget'
   | 'goalTemplatesEnabled'
-  | 'openidAuth'
-  | 'spendingReport';
+  | 'spendingReport'
+  | 'openidAuth';
 
 /**
  * Cross-device preferences. These sync across devices when they are changed.

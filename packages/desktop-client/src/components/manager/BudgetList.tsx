@@ -165,12 +165,17 @@ function FileState({
       break;
     case 'remote':
       Icon = SvgCloudDownload;
-      ownerName = isOpenID ? getOwnerDisplayName() : '';
       status = t('Available for download');
+      ownerName = isOpenID ? getOwnerDisplayName() : '';
       break;
     case 'local':
       Icon = SvgFileDouble;
       status = 'Local';
+      break;
+    case 'broken':
+      ownerName = 'unknown';
+      Icon = SvgFileDouble;
+      status = t('Local');
       break;
 
     case 'broken':
@@ -180,8 +185,8 @@ function FileState({
       break;
     default:
       Icon = SvgCloudCheck;
-      ownerName = isOpenID ? getOwnerDisplayName() : '';
       status = t('Syncing');
+      ownerName = isOpenID ? getOwnerDisplayName() : '';
       break;
   }
 

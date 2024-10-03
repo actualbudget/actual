@@ -10,6 +10,8 @@ import { type State } from 'loot-core/src/client/state-types';
 import { useAuth } from '../auth/AuthProvider';
 import { Permissions } from '../auth/types';
 import { useActions } from '../hooks/useActions';
+import { useLocalPref } from '../hooks/useLocalPref';
+import { useMetadataPref } from '../hooks/useMetadataPref';
 import { useNavigate } from '../hooks/useNavigate';
 import { theme, styles, type CSSProperties } from '../style';
 
@@ -40,7 +42,8 @@ export function LoggedInUser({
   const serverUrl = useServerURL();
   const triggerRef = useRef<HTMLButtonElement>(null);
   const navigate = useNavigate();
-  const { cloudFileId } = getPrefs();
+  const [budgetId] = useMetadataPref('id');
+  const [cloudFileId] = useMetadataPref('cloudFileId');
   const location = useLocation();
   const { hasPermission } = useAuth();
   const [isOwner, setIsOwner] = useState(false);
@@ -107,11 +110,17 @@ export function LoggedInUser({
     }
   };
 
-  const serverMessage = () => {
-    if (!serverUrl) return t('No server');
-    if (userData?.offline) return t('Server offline');
+  function serverMessage() {
+    if (!serverUrl) {
+      return t('No server');
+    }
+
+    if (userData?.offline) {
+      return t('Server offline');
+    }
+
     return t('Server online');
-  };
+  }
 
   if (hideIfNoServer && !serverUrl) return null;
 
@@ -156,7 +165,7 @@ export function LoggedInUser({
 
     const adminMenu: (MenuItem | typeof Menu.line)[] = [];
     if (multiuserEnabled && isAdmin) {
-      if (!cloudFileId && location.pathname !== '/') {
+      if (!budgetId && location.pathname !== '/') {
         adminMenu.push({ name: 'index', text: t('View file list') });
       } else if (
         serverUrl &&

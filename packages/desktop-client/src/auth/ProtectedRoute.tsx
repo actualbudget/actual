@@ -4,6 +4,8 @@ import { send } from 'loot-core/platform/client/fetch';
 import { getPrefs } from 'loot-core/server/prefs';
 
 import { View } from '../components/common/View';
+import { useLocalPref } from '../hooks/useLocalPref';
+import { useMetadataPref } from '../hooks/useMetadataPref';
 
 import { useAuth } from './AuthProvider';
 import { type Permissions } from './types';
@@ -21,8 +23,7 @@ export const ProtectedRoute = ({
 }: ProtectedRouteProps) => {
   const { hasPermission } = useAuth();
   const [permissionGranted, setPermissionGranted] = useState(false);
-
-  const { cloudFileId } = getPrefs();
+  const [cloudFileId] = useMetadataPref('cloudFileId');
 
   useEffect(() => {
     if (permissionGranted) {

@@ -135,8 +135,8 @@ const _getActiveStyles = (
 type ButtonProps = ComponentPropsWithoutRef<typeof ReactAriaButton> & {
   variant?: ButtonVariant;
   bounce?: boolean;
-  permission?: Permissions;
   children?: ReactNode;
+  permission?: Permissions;
 };
 
 type ButtonVariant = 'normal' | 'primary' | 'bare' | 'menu' | 'menuSelected';

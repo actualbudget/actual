@@ -8,6 +8,8 @@ import { getUserAccessErrors } from 'loot-core/shared/errors';
 import { type UserEntity } from 'loot-core/types/models';
 
 import { useActions } from '../../hooks/useActions';
+import { useLocalPref } from '../../hooks/useLocalPref';
+import { useMetadataPref } from '../../hooks/useMetadataPref';
 import { styles, theme } from '../../style';
 import { Button } from '../common/Button2';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
@@ -29,7 +31,7 @@ export function TransferOwnership({
   const [userId, setUserId] = useState('');
   const [error, setSetError] = useState<string | null>(null);
   const [availableUsers, setAvailableUsers] = useState<[string, string][]>([]);
-  const { cloudFileId } = getPrefs();
+  const [cloudFileId] = useMetadataPref('cloudFileId');
 
   useEffect(() => {
     send('users-get').then((users: UserEntity[]) =>
