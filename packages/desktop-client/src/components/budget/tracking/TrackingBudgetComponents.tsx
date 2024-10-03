@@ -2,6 +2,8 @@
 import React, { type ComponentProps, memo, useRef, useState } from 'react';
 import { Trans } from 'react-i18next';
 
+import { css } from 'glamor';
+
 import { trackingBudget } from 'loot-core/src/client/queries';
 import { evalArithmetic } from 'loot-core/src/shared/arithmetic';
 import * as monthUtils from 'loot-core/src/shared/months';
@@ -176,11 +178,6 @@ export const GroupMonth = memo(function GroupMonth({
           valueProps={{
             binding: trackingBudget.groupBalance(id),
             type: 'financial',
-            privacyFilter: {
-              style: {
-                paddingRight: styles.monthRightPadding,
-              },
-            },
           }}
         />
       )}
@@ -370,13 +367,15 @@ export const CategoryMonth = memo(function CategoryMonth({
             {props => (
               <CellValueText
                 {...props}
-                style={{
-                  cursor: 'pointer',
-                  ':hover': {
-                    textDecoration: 'underline',
-                  },
-                  ...makeAmountGrey(props.value),
-                }}
+                className={String(
+                  css({
+                    cursor: 'pointer',
+                    ':hover': {
+                      textDecoration: 'underline',
+                    },
+                    ...makeAmountGrey(props.value),
+                  }),
+                )}
               />
             )}
           </TrackingCellValue>
@@ -394,7 +393,7 @@ export const CategoryMonth = memo(function CategoryMonth({
             onClick={() => !category.is_income && setBalanceMenuOpen(true)}
           >
             <BalanceWithCarryover
-              disabled={category.is_income}
+              isDisabled={category.is_income}
               carryover={trackingBudget.catCarryover(category.id)}
               balance={trackingBudget.catBalance(category.id)}
               goal={trackingBudget.catGoal(category.id)}

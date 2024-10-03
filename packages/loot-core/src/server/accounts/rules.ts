@@ -13,7 +13,12 @@ import {
   format,
   currentDay,
 } from '../../shared/months';
-import { sortNumbers, getApproxNumberThreshold } from '../../shared/rules';
+import {
+  sortNumbers,
+  getApproxNumberThreshold,
+  isValidOp,
+  FIELD_TYPES,
+} from '../../shared/rules';
 import { recurConfigToRSchedule } from '../../shared/schedules';
 import {
   addSplitTransaction,
@@ -223,6 +228,12 @@ const CONDITION_TYPES = {
         return value.filter(Boolean).map(val => val.toLowerCase());
       }
 
+      assert(
+        typeof value === 'string',
+        'not-string',
+        `Invalid string value (field: ${fieldName})`,
+      );
+
       if (
         op === 'contains' ||
         op === 'matches' ||
@@ -230,41 +241,7 @@ const CONDITION_TYPES = {
         op === 'hasTags'
       ) {
         assert(
-          typeof value === 'string' && value.length > 0,
-          'no-empty-string',
-          `contains must have non-empty string (field: ${fieldName})`,
-        );
-      }
-
-      return value.toLowerCase();
-    },
-  },
-  imported_payee: {
-    ops: [
-      'is',
-      'contains',
-      'matches',
-      'oneOf',
-      'isNot',
-      'doesNotContain',
-      'notOneOf',
-    ],
-    nullable: true,
-    parse(op, value, fieldName) {
-      if (op === 'oneOf' || op === 'notOneOf') {
-        assert(
-          Array.isArray(value),
-          'no-empty-array',
-          `${op} must have an array value (field: ${fieldName}): ${JSON.stringify(
-            value,
-          )}`,
-        );
-        return value.filter(Boolean).map(val => val.toLowerCase());
-      }
-
-      if (op === 'contains' || op === 'matches' || op === 'doesNotContain') {
-        assert(
-          typeof value === 'string' && value.length > 0,
+          value.length > 0,
           'no-empty-string',
           `${op} must have non-empty string (field: ${fieldName})`,
         );
@@ -331,8 +308,8 @@ export class Condition {
   unparsedValue;
   value;
 
-  constructor(op, field, value, options, fieldTypes) {
-    const typeName = fieldTypes.get(field);
+  constructor(op, field, value, options) {
+    const typeName = FIELD_TYPES.get(field);
     assert(typeName, 'internal', 'Invalid condition field: ' + field);
 
     const type = CONDITION_TYPES[typeName];
@@ -345,7 +322,7 @@ export class Condition {
       `Invalid condition type: ${typeName} (field: ${field})`,
     );
     assert(
-      type.ops.includes(op),
+      isValidOp(field, op),
       'internal',
       `Invalid condition operator: ${op} (type: ${typeName}, field: ${field})`,
     );
@@ -570,7 +547,7 @@ export class Action {
 
   private handlebarsTemplate?: Handlebars.TemplateDelegate;
 
-  constructor(op: ActionOperator, field, value, options, fieldTypes) {
+  constructor(op: ActionOperator, field, value, options) {
     assert(
       ACTION_OPS.includes(op),
       'internal',
@@ -578,7 +555,7 @@ export class Action {
     );
 
     if (op === 'set') {
-      const typeName = fieldTypes.get(field);
+      const typeName = FIELD_TYPES.get(field);
       assert(typeName, 'internal', `Invalid field for action: ${field}`);
       this.field = field;
       this.type = typeName;
@@ -822,23 +799,21 @@ export class Rule {
     conditionsOp,
     conditions,
     actions,
-    fieldTypes,
   }: {
     id?: string;
     stage?;
     conditionsOp;
     conditions;
     actions;
-    fieldTypes;
   }) {
     this.id = id;
     this.stage = stage;
     this.conditionsOp = conditionsOp;
     this.conditions = conditions.map(
-      c => new Condition(c.op, c.field, c.value, c.options, fieldTypes),
+      c => new Condition(c.op, c.field, c.value, c.options),
     );
     this.actions = actions.map(
-      a => new Action(a.op, a.field, a.value, a.options, fieldTypes),
+      a => new Action(a.op, a.field, a.value, a.options),
     );
   }
 

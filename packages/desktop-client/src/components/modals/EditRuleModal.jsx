@@ -26,8 +26,9 @@ import {
   unparse,
   makeValue,
   FIELD_TYPES,
-  TYPE_INFO,
   ALLOCATION_METHODS,
+  isValidOp,
+  getValidOps,
 } from 'loot-core/src/shared/rules';
 import {
   integerToCurrency,
@@ -610,14 +611,15 @@ function ConditionsList({
           if (
             (prevType === 'string' || prevType === 'number') &&
             prevType === newCond.type &&
-            cond.op !== 'isbetween'
+            cond.op !== 'isbetween' &&
+            isValidOp(newCond.field, cond.op)
           ) {
             // Don't clear the value & op if the type is string/number and
             // the type hasn't changed
             newCond.op = cond.op;
             return newInput(makeValue(cond.value, newCond));
           } else {
-            newCond.op = TYPE_INFO[newCond.type].ops[0];
+            newCond.op = getValidOps(newCond.field)[0];
             return newInput(makeValue(null, newCond));
           }
         } else if (field === 'op') {
@@ -684,7 +686,7 @@ function ConditionsList({
   ) : (
     <Stack spacing={2} data-testid="condition-list">
       {conditions.map((cond, i) => {
-        let ops = TYPE_INFO[cond.type].ops;
+        let ops = getValidOps(cond.field);
 
         // Hack for now, these ops should be the only ones available
         // for recurring dates

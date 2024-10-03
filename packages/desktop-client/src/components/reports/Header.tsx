@@ -73,7 +73,7 @@ export function Header({
         flexShrink: 0,
       }}
     >
-      {!['/reports/custom', '/reports/spending'].includes(path) && (
+      {!['/reports/custom'].includes(path) && (
         <View
           style={{
             flexDirection: isNarrowWidth ? 'column' : 'row',

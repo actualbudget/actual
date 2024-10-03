@@ -85,9 +85,7 @@ export function Saved({ projected, style }: SavedProps) {
             },
           ])}`}
         >
-          <PrivacyFilter blurIntensity={7}>
-            {format(saved, 'financial')}
-          </PrivacyFilter>
+          <PrivacyFilter>{format(saved, 'financial')}</PrivacyFilter>
         </View>
       </Tooltip>
     </View>
