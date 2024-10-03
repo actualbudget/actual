@@ -186,11 +186,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     return (
       <ReactAriaButton
         ref={ref}
-        isDisabled={
-          restProps.isDisabled
-            ? restProps.isDisabled
-            : !hasPermission(permission)
-        }
+        isDisabled={restProps.isDisabled || !hasPermission(permission)}
         {...restProps}
         className={
           typeof className === 'function'
