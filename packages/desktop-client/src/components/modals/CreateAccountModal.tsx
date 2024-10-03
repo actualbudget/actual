@@ -1,16 +1,16 @@
 // @ts-strict-ignore
 import React, { useEffect, useRef, useState } from 'react';
+import { useDispatch } from 'react-redux';
 
+import { pushModal } from 'loot-core/client/actions';
 import { send } from 'loot-core/src/platform/client/fetch';
 
 import { useAuth } from '../../auth/AuthProvider';
 import { Permissions } from '../../auth/types';
 import { authorizeBank } from '../../gocardless';
-import { useActions } from '../../hooks/useActions';
-import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { useGoCardlessStatus } from '../../hooks/useGoCardlessStatus';
 import { useSimpleFinStatus } from '../../hooks/useSimpleFinStatus';
-import { type SyncServerStatus } from '../../hooks/useSyncServerStatus';
+import { useSyncServerStatus } from '../../hooks/useSyncServerStatus';
 import { SvgDotsHorizontalTriple } from '../../icons/v1';
 import { theme } from '../../style';
 import { Warning } from '../alerts';
@@ -18,7 +18,7 @@ import { Button, ButtonWithLoading } from '../common/Button2';
 import { InitialFocus } from '../common/InitialFocus';
 import { Link } from '../common/Link';
 import { Menu } from '../common/Menu';
-import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal2';
+import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { Paragraph } from '../common/Paragraph';
 import { Popover } from '../common/Popover';
 import { Text } from '../common/Text';
@@ -26,15 +26,12 @@ import { View } from '../common/View';
 import { useMultiuserEnabled } from '../ServerContext';
 
 type CreateAccountProps = {
-  syncServerStatus: SyncServerStatus;
   upgradingAccountId?: string;
 };
 
-export function CreateAccountModal({
-  syncServerStatus,
-  upgradingAccountId,
-}: CreateAccountProps) {
-  const actions = useActions();
+export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
+  const syncServerStatus = useSyncServerStatus();
+  const dispatch = useDispatch();
   const [isGoCardlessSetupComplete, setIsGoCardlessSetupComplete] =
     useState(null);
   const [isSimpleFinSetupComplete, setIsSimpleFinSetupComplete] =
@@ -52,9 +49,9 @@ export function CreateAccountModal({
     }
 
     if (upgradingAccountId == null) {
-      authorizeBank(actions.pushModal);
+      authorizeBank(dispatch);
     } else {
-      authorizeBank(actions.pushModal, {
+      authorizeBank(dispatch, {
         upgradingAccountId,
       });
     }
@@ -102,30 +99,38 @@ export function CreateAccountModal({
         newAccounts.push(newAccount);
       }
 
-      actions.pushModal('select-linked-accounts', {
-        accounts: newAccounts,
-        syncSource: 'simpleFin',
-      });
+      dispatch(
+        pushModal('select-linked-accounts', {
+          accounts: newAccounts,
+          syncSource: 'simpleFin',
+        }),
+      );
     } catch (err) {
       console.error(err);
-      actions.pushModal('simplefin-init', {
-        onSuccess: () => setIsSimpleFinSetupComplete(true),
-      });
+      dispatch(
+        pushModal('simplefin-init', {
+          onSuccess: () => setIsSimpleFinSetupComplete(true),
+        }),
+      );
     }
 
     setLoadingSimpleFinAccounts(false);
   };
 
   const onGoCardlessInit = () => {
-    actions.pushModal('gocardless-init', {
-      onSuccess: () => setIsGoCardlessSetupComplete(true),
-    });
+    dispatch(
+      pushModal('gocardless-init', {
+        onSuccess: () => setIsGoCardlessSetupComplete(true),
+      }),
+    );
   };
 
   const onSimpleFinInit = () => {
-    actions.pushModal('simplefin-init', {
-      onSuccess: () => setIsSimpleFinSetupComplete(true),
-    });
+    dispatch(
+      pushModal('simplefin-init', {
+        onSuccess: () => setIsSimpleFinSetupComplete(true),
+      }),
+    );
   };
 
   const onGoCardlessReset = () => {
@@ -159,7 +164,7 @@ export function CreateAccountModal({
   };
 
   const onCreateLocalAccount = () => {
-    actions.pushModal('add-local-account');
+    dispatch(pushModal('add-local-account'));
   };
 
   const { configuredGoCardless } = useGoCardlessStatus();
@@ -180,8 +185,6 @@ export function CreateAccountModal({
     title = 'Link Account';
   }
 
-  const simpleFinSyncFeatureFlag = useFeatureFlag('simpleFinSync');
-
   const canSetSecrets =
     !multiuserEnabled || hasPermission(Permissions.ADMINISTRATOR);
 
@@ -191,7 +194,7 @@ export function CreateAccountModal({
         <>
           <ModalHeader
             title={title}
-            rightContent={<ModalCloseButton onClick={close} />}
+            rightContent={<ModalCloseButton onPress={close} />}
           />
           <View style={{ maxWidth: 500, gap: 30, color: theme.pageText }}>
             {upgradingAccountId == null && (
@@ -301,8 +304,7 @@ export function CreateAccountModal({
                       </Text>
                     </>
                   )}
-                  {(canSetSecrets || isSimpleFinSetupComplete) &&
-                    simpleFinSyncFeatureFlag === true && (
+                  {(canSetSecrets || isSimpleFinSetupComplete) && (
                       <>
                         <View
                           style={{
@@ -377,8 +379,7 @@ export function CreateAccountModal({
                         </Text>
                       </>
                     )}
-                  {(!isGoCardlessSetupComplete ||
-                    (simpleFinSyncFeatureFlag && !isSimpleFinSetupComplete)) &&
+                  {(!isGoCardlessSetupComplete || !isSimpleFinSetupComplete) &&
                     !canSetSecrets && (
                       <Warning>
                         You don&apos;t have the required permissions to set up

@@ -1,5 +1,7 @@
 // @ts-strict-ignore
 import React, { useEffect, useState } from 'react';
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
 import {
   ErrorBoundary,
   useErrorBoundary,
@@ -7,7 +9,8 @@ import {
 } from 'react-error-boundary';
 import { HotkeysProvider } from 'react-hotkeys-hook';
 import { useTranslation } from 'react-i18next';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
+import { BrowserRouter } from 'react-router-dom';
 
 import {
   closeBudget,
@@ -16,8 +19,8 @@ import {
   setAppState,
   sync,
 } from 'loot-core/client/actions';
+import { SpreadsheetProvider } from 'loot-core/client/SpreadsheetProvider';
 import * as Platform from 'loot-core/src/client/platform';
-import { type State } from 'loot-core/src/client/state-types';
 import {
   init as initConnection,
   send,
@@ -27,26 +30,26 @@ import { useActions } from '../hooks/useActions';
 import { useMetadataPref } from '../hooks/useMetadataPref';
 import { installPolyfills } from '../polyfills';
 import { ResponsiveProvider } from '../ResponsiveProvider';
-import { styles, hasHiddenScrollbars, ThemeStyle } from '../style';
+import { styles, hasHiddenScrollbars, ThemeStyle, useTheme } from '../style';
+import { ExposeNavigate } from '../util/router-tools';
 
 import { AppBackground } from './AppBackground';
+import { BudgetMonthCountProvider } from './budget/BudgetMonthCountContext';
 import { View } from './common/View';
 import { DevelopmentTopBar } from './DevelopmentTopBar';
 import { FatalError } from './FatalError';
 import { FinancesApp } from './FinancesApp';
 import { ManagementApp } from './manager/ManagementApp';
+import { Modals } from './Modals';
+import { ScrollProvider } from './ScrollProvider';
+import { SidebarProvider } from './sidebar/SidebarProvider';
 import { UpdateNotification } from './UpdateNotification';
 
-type AppInnerProps = {
-  budgetId: string;
-  cloudFileId: string;
-};
-
-function AppInner({ budgetId, cloudFileId }: AppInnerProps) {
+function AppInner() {
+  const [budgetId] = useMetadataPref('id');
+  const [cloudFileId] = useMetadataPref('cloudFileId');
   const { t } = useTranslation();
-  const [initializing, setInitializing] = useState(true);
   const { showBoundary: showErrorBoundary } = useErrorBoundary();
-  const loadingText = useSelector((state: State) => state.app.loadingText);
   const dispatch = useDispatch();
   const userData = useSelector((state: State) => state.user.data);
   const { signOut, addNotification } = useActions();
@@ -77,9 +80,7 @@ function AppInner({ budgetId, cloudFileId }: AppInnerProps) {
     );
     const budgetId = await send('get-last-opened-backup');
     if (budgetId) {
-      await dispatch(
-        loadBudget(budgetId, t('Loading the last budget file...')),
-      );
+      await dispatch(loadBudget(budgetId));
 
       // Check to see if this file has been remotely deleted (but
       // don't block on this in case they are offline or something)
@@ -102,12 +103,7 @@ function AppInner({ budgetId, cloudFileId }: AppInnerProps) {
   useEffect(() => {
     async function initAll() {
       await Promise.all([installPolyfills(), init()]);
-      setInitializing(false);
-      dispatch(
-        setAppState({
-          loadingText: null,
-        }),
-      );
+      dispatch(setAppState({ loadingText: null }));
     }
 
     initAll().catch(showErrorBoundary);
@@ -135,21 +131,25 @@ function AppInner({ budgetId, cloudFileId }: AppInnerProps) {
     }
   }, [userData, userData?.tokenExpired]);
 
-  return (
-    <>
-      {(initializing || !budgetId) && (
-        <AppBackground initializing={initializing} loadingText={loadingText} />
-      )}
-      {!initializing &&
-        (budgetId ? (
-          <FinancesApp />
-        ) : (
-          <ManagementApp isLoading={loadingText != null} />
-        ))}
+  useEffect(() => {
+    if (userData?.tokenExpired) {
+      addNotification({
+        type: 'error',
+        id: 'login-expired',
+        title: 'Login expired',
+        sticky: true,
+        message: 'Login expired, please login again.',
+        button: {
+          title: 'Go to login',
+          action: () => {
+            signOut();
+          },
+        },
+      });
+    }
+  }, [userData, userData?.tokenExpired]);
 
-      <UpdateNotification />
-    </>
-  );
+  return budgetId ? <FinancesApp /> : <ManagementApp />;
 }
 
 function ErrorFallback({ error }: FallbackProps) {
@@ -162,8 +162,6 @@ function ErrorFallback({ error }: FallbackProps) {
 }
 
 export function App() {
-  const [budgetId] = useMetadataPref('id');
-  const [cloudFileId] = useMetadataPref('cloudFileId');
   const [hiddenScrollbars, setHiddenScrollbars] = useState(
     hasHiddenScrollbars(),
   );
@@ -196,30 +194,53 @@ export function App() {
     };
   }, [dispatch]);
 
+  const [theme] = useTheme();
+
   return (
-    <HotkeysProvider initiallyActiveScopes={['*']}>
-      <ResponsiveProvider>
-        <View
-          style={{ height: '100%', display: 'flex', flexDirection: 'column' }}
-        >
-          <View
-            key={hiddenScrollbars ? 'hidden-scrollbars' : 'scrollbars'}
-            style={{
-              flexGrow: 1,
-              overflow: 'hidden',
-              ...styles.lightScrollbar,
-            }}
-          >
-            <ErrorBoundary FallbackComponent={ErrorFallback}>
-              {process.env.REACT_APP_REVIEW_ID && !Platform.isPlaywright && (
-                <DevelopmentTopBar />
-              )}
-              <AppInner budgetId={budgetId} cloudFileId={cloudFileId} />
-            </ErrorBoundary>
-            <ThemeStyle />
-          </View>
-        </View>
-      </ResponsiveProvider>
-    </HotkeysProvider>
+    <BrowserRouter>
+      <ExposeNavigate />
+      <HotkeysProvider initiallyActiveScopes={['*']}>
+        <ResponsiveProvider>
+          <SpreadsheetProvider>
+            <SidebarProvider>
+              <BudgetMonthCountProvider>
+                <DndProvider backend={HTML5Backend}>
+                  <ScrollProvider>
+                    <View
+                      data-theme={theme}
+                      style={{
+                        height: '100%',
+                        display: 'flex',
+                        flexDirection: 'column',
+                      }}
+                    >
+                      <View
+                        key={
+                          hiddenScrollbars ? 'hidden-scrollbars' : 'scrollbars'
+                        }
+                        style={{
+                          flexGrow: 1,
+                          overflow: 'hidden',
+                          ...styles.lightScrollbar,
+                        }}
+                      >
+                        <ErrorBoundary FallbackComponent={ErrorFallback}>
+                          {process.env.REACT_APP_REVIEW_ID &&
+                            !Platform.isPlaywright && <DevelopmentTopBar />}
+                          <AppInner />
+                        </ErrorBoundary>
+                        <ThemeStyle />
+                        <Modals />
+                        <UpdateNotification />
+                      </View>
+                    </View>
+                  </ScrollProvider>
+                </DndProvider>
+              </BudgetMonthCountProvider>
+            </SidebarProvider>
+          </SpreadsheetProvider>
+        </ResponsiveProvider>
+      </HotkeysProvider>
+    </BrowserRouter>
   );
 }

@@ -1,4 +1,9 @@
-import React, { forwardRef, type ComponentPropsWithoutRef } from 'react';
+import React, {
+  forwardRef,
+  useMemo,
+  type ComponentPropsWithoutRef,
+  type ReactNode,
+} from 'react';
 import {
   type ButtonRenderProps as ReactAriaButtonRenderProps,
   Button as ReactAriaButton,
@@ -100,6 +105,13 @@ const _getPadding = (variant: ButtonVariant): string => {
   }
 };
 
+const _getHoveredStyles = (variant: ButtonVariant): CSSProperties => ({
+  ...(variant !== 'bare' && styles.shadow),
+  backgroundColor: backgroundColorHover[variant],
+  color: textColorHover[variant],
+  cursor: 'pointer',
+});
+
 const _getActiveStyles = (
   variant: ButtonVariant,
   bounce: boolean,
@@ -124,6 +136,7 @@ type ButtonProps = ComponentPropsWithoutRef<typeof ReactAriaButton> & {
   variant?: ButtonVariant;
   bounce?: boolean;
   permission?: Permissions;
+  children?: ReactNode;
 };
 
 type ButtonVariant = 'normal' | 'primary' | 'bare' | 'menu' | 'menuSelected';
@@ -143,42 +156,32 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     const variantWithDisabled: ButtonVariant | `${ButtonVariant}Disabled` =
       props.isDisabled ? `${variant}Disabled` : variant;
 
-    const hoveredStyle = {
-      ...(variant !== 'bare' && styles.shadow),
-      backgroundColor: backgroundColorHover[variant],
-      color: textColorHover[variant],
-      cursor: 'pointer',
-    };
-    const activeStyle = {
-      ..._getActiveStyles(variant, bounce),
-    };
+    const defaultButtonClassName: string = useMemo(
+      () =>
+        String(
+          css({
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0,
+            padding: _getPadding(variant),
+            margin: 0,
+            overflow: 'hidden',
+            display: 'flex',
+            borderRadius: 4,
+            backgroundColor: backgroundColor[variantWithDisabled],
+            border: _getBorder(variant, variantWithDisabled),
+            color: textColor[variantWithDisabled],
+            transition: 'box-shadow .25s',
+            WebkitAppRegion: 'no-drag',
+            ...styles.smallText,
+            '&[data-hovered]': _getHoveredStyles(variant),
+            '&[data-pressed]': _getActiveStyles(variant, bounce),
+          }),
+        ),
+      [bounce, variant, variantWithDisabled],
+    );
 
-    const defaultButtonClassName: ReactAriaButtonClassNameFn = renderProps =>
-      String(
-        css({
-          alignItems: 'center',
-          justifyContent: 'center',
-          flexShrink: 0,
-          padding: _getPadding(variant),
-          margin: 0,
-          overflow: 'hidden',
-          display: 'flex',
-          borderRadius: 4,
-          backgroundColor: backgroundColor[variantWithDisabled],
-          border: _getBorder(variant, variantWithDisabled),
-          color: textColor[variantWithDisabled],
-          transition: 'box-shadow .25s',
-          WebkitAppRegion: 'no-drag',
-          ...styles.smallText,
-          ...(renderProps.isDisabled ? {} : { ':hover': hoveredStyle }),
-          ...(renderProps.isDisabled ? {} : { ':active': activeStyle }),
-        }),
-      );
-
-    const buttonClassName: ReactAriaButtonClassNameFn = renderProps =>
-      typeof props.className === 'function'
-        ? props.className(renderProps)
-        : props.className || '';
+    const className = restProps.className;
 
     return (
       <ReactAriaButton
@@ -189,8 +192,11 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
             : !hasPermission(permission)
         }
         {...restProps}
-        className={renderProps =>
-          `${renderProps.defaultClassName} ${defaultButtonClassName(renderProps)} ${buttonClassName(renderProps)}`
+        className={
+          typeof className === 'function'
+            ? renderProps =>
+                `${defaultButtonClassName} ${className(renderProps)}`
+            : `${defaultButtonClassName} ${className || ''}`
         }
       >
         {children}
@@ -219,43 +225,32 @@ export const ButtonWithLoading = forwardRef<
         ...(typeof style === 'function' ? style(buttonRenderProps) : style),
       })}
     >
-      {renderProps => (
-        <>
-          {isLoading && (
-            <View
-              style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              <AnimatedLoading style={{ width: 20, height: 20 }} />
-            </View>
-          )}
-          <View
-            style={{
-              opacity: isLoading ? 0 : 1,
-              flexDirection: 'row',
-              alignItems: 'center',
-            }}
-          >
-            {typeof children === 'function' ? children(renderProps) : children}
-          </View>
-        </>
+      {isLoading && (
+        <View
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <AnimatedLoading style={{ width: 20, height: 20 }} />
+        </View>
       )}
+      <View
+        style={{
+          opacity: isLoading ? 0 : 1,
+          flexDirection: 'row',
+          alignItems: 'center',
+        }}
+      >
+        {children}
+      </View>
     </Button>
   );
 });
 
 ButtonWithLoading.displayName = 'ButtonWithLoading';
-
-type ReactAriaButtonClassNameFn = Extract<
-  ComponentPropsWithoutRef<typeof ReactAriaButton>['className'],
-  (
-    renderProps: ReactAriaButtonRenderProps & { defaultClassName: string },
-  ) => string
->;

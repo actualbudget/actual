@@ -30,7 +30,7 @@ export function ServerURL() {
           <strong>No server configured</strong>
         )}
       </Text>
-      <Link to="/config-server" style={{ marginLeft: 15 }}>
+      <Link variant="internal" to="/config-server" style={{ marginLeft: 15 }}>
         Change
       </Link>
     </View>

@@ -528,6 +528,7 @@ export function Overview() {
               <div key={item.i}>
                 {item.type === 'net-worth-card' ? (
                   <NetWorthCard
+                    widgetId={item.i}
                     isEditing={isEditing}
                     accounts={accounts}
                     meta={item.meta}
@@ -536,6 +537,7 @@ export function Overview() {
                   />
                 ) : item.type === 'cash-flow-card' ? (
                   <CashFlowCard
+                    widgetId={item.i}
                     isEditing={isEditing}
                     meta={item.meta}
                     onMetaChange={newMeta => onMetaChange(item, newMeta)}
@@ -543,6 +545,7 @@ export function Overview() {
                   />
                 ) : item.type === 'spending-card' ? (
                   <SpendingCard
+                    widgetId={item.i}
                     isEditing={isEditing}
                     meta={item.meta}
                     onMetaChange={newMeta => onMetaChange(item, newMeta)}

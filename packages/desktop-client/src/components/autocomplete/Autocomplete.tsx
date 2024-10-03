@@ -576,6 +576,7 @@ function SingleAutocomplete<T extends Item>({
                 isNonModal
                 style={{
                   ...styles.darkScrollbar,
+                  ...styles.popover,
                   backgroundColor: theme.menuAutoCompleteBackground,
                   color: theme.menuAutoCompleteText,
                   minWidth: 200,

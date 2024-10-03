@@ -5,7 +5,7 @@ import { type RuleConditionEntity } from 'loot-core/types/models';
 import { theme } from '../../style';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
-import { FieldSelect } from '../modals/EditRule';
+import { FieldSelect } from '../modals/EditRuleModal';
 
 export function ConditionsOpMenu({
   conditionsOp,

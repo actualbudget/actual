@@ -9,17 +9,6 @@ import * as undo from 'loot-core/src/platform/client/undo';
 import { type BoundActions } from './hooks/useActions';
 
 export function handleGlobalEvents(actions: BoundActions, store: Store<State>) {
-  global.Actual.onEventFromMain('update-downloaded', (event, updateInfo) => {
-    actions.setAppState({ updateInfo });
-  });
-
-  global.Actual.onEventFromMain('update-error', () => {
-    // Ignore errors. We don't want to constantly bug the user if they
-    // always have a flaky connection or have intentionally disabled
-    // updates. They will see the error in the about page if they try
-    // to update.
-  });
-
   listen('server-error', () => {
     actions.addGenericErrorNotification();
   });
@@ -152,5 +141,9 @@ export function handleGlobalEvents(actions: BoundActions, store: Store<State>) {
   listen('show-budgets', () => {
     actions.closeBudgetUI();
     actions.setAppState({ loadingText: null });
+  });
+
+  listen('api-fetch-redirected', () => {
+    actions.reloadApp();
   });
 }
