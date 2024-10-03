@@ -257,29 +257,29 @@ export function FinancesApp() {
                   </WideNotSupported>
                 }
               />
-                {multiuserEnabled && (
-                  <Route
-                    path="/user-directory"
-                    element={
-                      <ProtectedRoute
-                        permission={Permissions.ADMINISTRATOR}
-                        element={<UserDirectoryPage />}
-                      />
-                    }
-                  />
-                )}
-                {multiuserEnabled && (
-                  <Route
-                    path="/user-access"
-                    element={
-                      <ProtectedRoute
-                        permission={Permissions.ADMINISTRATOR}
-                        validateOwner={true}
-                        element={<UserAccessPage />}
-                      />
-                    }
-                  />
-                )}
+              {multiuserEnabled && (
+                <Route
+                  path="/user-directory"
+                  element={
+                    <ProtectedRoute
+                      permission={Permissions.ADMINISTRATOR}
+                      element={<UserDirectoryPage />}
+                    />
+                  }
+                />
+              )}
+              {multiuserEnabled && (
+                <Route
+                  path="/user-access"
+                  element={
+                    <ProtectedRoute
+                      permission={Permissions.ADMINISTRATOR}
+                      validateOwner={true}
+                      element={<UserAccessPage />}
+                    />
+                  }
+                />
+              )}
               {/* redirect all other traffic to the budget page */}
               <Route path="/*" element={<Navigate to="/budget" replace />} />
             </Routes>

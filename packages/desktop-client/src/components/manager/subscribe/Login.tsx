@@ -172,7 +172,7 @@ function HeaderLogin({ error }) {
       {error ? (
         <Link
           variant="button"
-          type="primary"
+          type="button"
           style={{ fontSize: 15 }}
           to={'/login/password?error=' + error}
         >

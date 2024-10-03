@@ -10,13 +10,13 @@ import React, {
 } from 'react';
 import { useDispatch } from 'react-redux';
 
+import { getPrefs } from 'loot-core/server/prefs';
 import { pushModal } from 'loot-core/src/client/actions/modals';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as undo from 'loot-core/src/platform/client/undo';
 import { type UserAvailable } from 'loot-core/types/models';
 import { type UserAccessEntity } from 'loot-core/types/models/userAccess';
 
-import { useLocalPref } from '../../../hooks/useLocalPref';
 import { SvgDotsHorizontalTriple, SvgLockOpen } from '../../../icons/v1';
 import { SvgLockClosed } from '../../../icons/v2';
 import { styles, theme } from '../../../style';
@@ -43,7 +43,7 @@ function UserAccessContent({
   const [allAccess, setAllAccess] = useState([]);
   const [page, setPage] = useState(0);
   const [filter, setFilter] = useState('');
-  const [cloudFileId] = useLocalPref('cloudFileId');
+  const { cloudFileId } = getPrefs();
   const dispatch = useDispatch();
   const [ownerName, setOwnerName] = useState('unknown');
   const triggerRef = useRef(null);
@@ -76,7 +76,7 @@ function UserAccessContent({
     setLoading(true);
     const users: UserAvailable[] = await send(
       'access-get-available-users',
-      cloudFileId,
+      cloudFileId as string,
     );
 
     const loadedAccess = users
@@ -104,7 +104,7 @@ function UserAccessContent({
   }, [cloudFileId, setLoading]);
 
   const loadOwner = useCallback(async () => {
-    const owner = (await send('file-owner-get', cloudFileId)) ?? {};
+    const owner = (await send('file-owner-get', cloudFileId as string)) ?? {};
     return owner;
   }, [cloudFileId]);
 

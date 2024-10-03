@@ -4,12 +4,12 @@ import { useSelector } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 
 import { send } from 'loot-core/platform/client/fetch';
+import { getPrefs } from 'loot-core/server/prefs';
 import { type State } from 'loot-core/src/client/state-types';
 
 import { useAuth } from '../auth/AuthProvider';
 import { Permissions } from '../auth/types';
 import { useActions } from '../hooks/useActions';
-import { useLocalPref } from '../hooks/useLocalPref';
 import { useNavigate } from '../hooks/useNavigate';
 import { theme, styles, type CSSProperties } from '../style';
 
@@ -40,8 +40,7 @@ export function LoggedInUser({
   const serverUrl = useServerURL();
   const triggerRef = useRef<HTMLButtonElement>(null);
   const navigate = useNavigate();
-  const [budgetId] = useLocalPref('id');
-  const [cloudFileId] = useLocalPref('cloudFileId');
+  const { cloudFileId } = getPrefs();
   const location = useLocation();
   const { hasPermission } = useAuth();
   const [isOwner, setIsOwner] = useState(false);
@@ -157,7 +156,7 @@ export function LoggedInUser({
 
     const adminMenu: (MenuItem | typeof Menu.line)[] = [];
     if (multiuserEnabled && isAdmin) {
-      if (!budgetId && location.pathname !== '/') {
+      if (!cloudFileId && location.pathname !== '/') {
         adminMenu.push({ name: 'index', text: t('View file list') });
       } else if (
         serverUrl &&
@@ -173,10 +172,13 @@ export function LoggedInUser({
       (isOwner || isAdmin) &&
       serverUrl &&
       !userData?.offline &&
-      budgetId &&
+      cloudFileId &&
       location.pathname !== '/user-access'
     ) {
-      adminMenu.push({ name: 'user-access', text: t('User Access Management') });
+      adminMenu.push({
+        name: 'user-access',
+        text: t('User Access Management'),
+      });
     }
 
     if (adminMenu.length > 0) {

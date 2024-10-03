@@ -8,7 +8,6 @@ import { theme } from '../../../style';
 import { Button } from '../../common/Button2';
 import { View } from '../../common/View';
 import { Checkbox } from '../../forms';
-import { BlurredOverlay } from '../../PrivacyFilter';
 import { SelectCell, Row, Cell } from '../../table';
 
 type UserDirectoryProps = {
@@ -75,9 +74,7 @@ export const UserDirectoryRow = memo(
               padding: '3px 5px',
             }}
           >
-            <BlurredOverlay blurIntensity="0.15rem">
-              <span>{user.userName}</span>
-            </BlurredOverlay>
+            <span>{user.userName}</span>
           </View>
         </Cell>
 

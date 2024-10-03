@@ -2,11 +2,11 @@
 import React, { memo, useState } from 'react';
 
 import { send } from 'loot-core/platform/client/fetch';
+import { getPrefs } from 'loot-core/server/prefs';
 import { getUserAccessErrors } from 'loot-core/shared/errors';
 import { type UserAvailable } from 'loot-core/types/models';
 
 import { useActions } from '../../../hooks/useActions';
-import { useLocalPref } from '../../../hooks/useLocalPref';
 import { theme } from '../../../style';
 import { View } from '../../common/View';
 import { Checkbox } from '../../forms';
@@ -24,7 +24,7 @@ export const UserAccessRow = memo(
     const [marked, setMarked] = useState(
       access.owner === 1 ? access.owner === 1 : access.haveAccess === 1,
     );
-    const [cloudFileId] = useLocalPref('cloudFileId');
+    const { cloudFileId } = getPrefs();
     const actions = useActions();
 
     return (
@@ -52,7 +52,7 @@ export const UserAccessRow = memo(
               const newValue = !marked;
               if (newValue) {
                 const { error } = await send('access-add', {
-                  fileId: cloudFileId,
+                  fileId: cloudFileId as string,
                   userId: access.userId,
                 });
 
@@ -84,7 +84,7 @@ export const UserAccessRow = memo(
                 const { someDeletionsFailed } = await send(
                   'access-delete-all',
                   {
-                    fileId: cloudFileId,
+                    fileId: cloudFileId as string,
                     ids: [access.userId],
                   },
                 );

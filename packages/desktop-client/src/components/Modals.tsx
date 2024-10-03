@@ -28,9 +28,9 @@ import { CreateAccountModal } from './modals/CreateAccountModal';
 import { CreateEncryptionKeyModal } from './modals/CreateEncryptionKeyModal';
 import { CreateLocalAccountModal } from './modals/CreateLocalAccountModal';
 import { EditUserAccess } from './modals/EditAccess';
-import { EditUserFinanceApp } from './modals/EditUser';
 import { EditFieldModal } from './modals/EditFieldModal';
 import { EditRuleModal } from './modals/EditRuleModal';
+import { EditUserFinanceApp } from './modals/EditUser';
 import { EnvelopeBalanceMenuModal } from './modals/EnvelopeBalanceMenuModal';
 import { EnvelopeBudgetMenuModal } from './modals/EnvelopeBudgetMenuModal';
 import { EnvelopeBudgetMonthMenuModal } from './modals/EnvelopeBudgetMonthMenuModal';
@@ -593,33 +593,6 @@ export function Modals() {
               watchUpdates={false}
             />
           );
-
-        case 'edit-access':
-          return (
-            <EditUserAccess
-              key={name}
-              defaultUserAccess={options.access}
-              onSave={options.onSave}
-            />
-          );
-
-        case 'edit-user':
-          return (
-            <EditUserFinanceApp
-              key={name}
-              defaultUser={options.user}
-              onSave={options.onSave}
-            />
-          );
-
-        case 'transfer-ownership':
-          return <TransferOwnership key={name} onSave={options.onSave} />;
-
-        case 'enable-openid':
-          return <OpenIDEnableModal key={name} onSave={options.onSave} />;
-
-        case 'enable-password-auth':
-          return <PasswordEnableModal key={name} onSave={options.onSave} />;
 
         case 'edit-access':
           return (
