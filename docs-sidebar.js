@@ -180,7 +180,18 @@ const sidebars = {
             'accounts/reconciliation',
             'transactions/payees',
             'transactions/bulk-editing',
-            'advanced/bank-sync',
+            {
+              type: 'category',
+              label: 'Connecting Your Bank',
+              link: {
+                type: 'doc',
+                id: 'advanced/bank-sync',
+              },
+              items: [
+                'advanced/bank-sync/gocardless',
+                'advanced/bank-sync/simplefin',
+              ],
+            },
             'advanced/scripts/modify-transfers',
           ],
         },
@@ -216,7 +227,6 @@ const sidebars = {
             'experimental/goal-templates',
             'experimental/monthly-cleanup',
             'experimental/tracking-budget',
-            'experimental/simplefin-sync',
           ],
         },
         'getting-started/tips-tricks',
