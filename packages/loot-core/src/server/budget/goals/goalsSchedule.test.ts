@@ -82,4 +82,68 @@ describe('goalsSchedule', () => {
     expect(result.remainder).toBe(0);
     expect(result.scheduleFlag).toBe(true);
   });
+
+  it('should return correct budget when yearly recurring schedule set and balance is greater than target', async () => {
+    // Given
+    const scheduleFlag = false;
+    const template_lines = [{ type: 'schedule', name: 'Test Schedule' }];
+    const current_month = '2024-09-01';
+    const balance = 12000;
+    const remainder = 0;
+    const last_month_balance = 12000;
+    const to_budget = 0;
+    const errors: string[] = [];
+    const category = { id: 1, name: 'Test Category' };
+
+    (db.first as jest.Mock).mockResolvedValue({ id: 1, completed: 0 });
+    (getRuleForSchedule as jest.Mock).mockResolvedValue({
+      serialize: () => ({
+        conditions: [
+          {
+            op: 'is',
+            field: 'date',
+            value: {
+              start: '2024-08-01',
+              interval: 1,
+              frequency: 'yearly',
+              patterns: [],
+              skipWeekend: false,
+              weekendSolveMode: 'before',
+              endMode: 'never',
+              endOccurrences: 1,
+              endDate: '2024-08-04',
+            },
+            type: 'date',
+          },
+          {
+            op: 'is',
+            field: 'amount',
+            value: -12000,
+            type: 'number',
+          },
+        ],
+      }),
+      execActions: () => ({ amount: -12000, subtransactions: [] }),
+    });
+    (isReflectBudget as jest.Mock).mockReturnValue(false);
+
+    // When
+    const result = await goalsSchedule(
+      scheduleFlag,
+      template_lines,
+      current_month,
+      balance,
+      remainder,
+      last_month_balance,
+      to_budget,
+      errors,
+      category,
+    );
+
+    // Then
+    expect(result.to_budget).toBe(1000);
+    expect(result.errors).toHaveLength(0);
+    expect(result.remainder).toBe(0);
+    expect(result.scheduleFlag).toBe(true);
+  });
 });
