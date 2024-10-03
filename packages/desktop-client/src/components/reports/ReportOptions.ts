@@ -1,3 +1,5 @@
+import { t } from 'i18next';
+
 import * as monthUtils from 'loot-core/src/shared/months';
 import {
   type CustomReportEntity,
@@ -16,11 +18,11 @@ export const defaultReport: CustomReportEntity = {
   startDate,
   endDate,
   isDateStatic: false,
-  dateRange: 'Last 6 months',
+  dateRange: t('Last 6 months'),
   mode: 'total',
-  groupBy: 'Category',
-  interval: 'Monthly',
-  balanceType: 'Payment',
+  groupBy: t('Category'),
+  interval: t('Monthly'),
+  balanceType: t('Payment'),
   showEmpty: false,
   showOffBudget: false,
   showHiddenCategories: false,
@@ -32,19 +34,19 @@ export const defaultReport: CustomReportEntity = {
 };
 
 const balanceTypeOptions = [
-  { description: 'Payment', format: 'totalDebts' as const },
-  { description: 'Deposit', format: 'totalAssets' as const },
-  { description: 'Net', format: 'totalTotals' as const },
-  { description: 'Net Payment', format: 'netDebts' as const },
-  { description: 'Net Deposit', format: 'netAssets' as const },
+  { description: t('Payment'), format: 'totalDebts' as const },
+  { description: t('Deposit'), format: 'totalAssets' as const },
+  { description: t('Net'), format: 'totalTotals' as const },
+  { description: t('Net Payment'), format: 'netDebts' as const },
+  { description: t('Net Deposit'), format: 'netAssets' as const },
 ];
 
 const groupByOptions = [
-  { description: 'Category' },
-  { description: 'Group' },
-  { description: 'Payee' },
-  { description: 'Account' },
-  { description: 'Interval' },
+  { description: t('Category') },
+  { description: t('Group') },
+  { description: t('Payee') },
+  { description: t('Account') },
+  { description: t('Interval') },
 ];
 
 export type dateRangeProps = {
@@ -59,90 +61,90 @@ export type dateRangeProps = {
 
 const dateRangeOptions: dateRangeProps[] = [
   {
-    description: 'This week',
+    description: t('This week'),
     name: 0,
-    type: 'Week',
+    type: t('Week'),
     Daily: true,
     Weekly: true,
     Monthly: false,
     Yearly: false,
   },
   {
-    description: 'Last week',
+    description: t('Last week'),
     name: 1,
-    type: 'Week',
+    type: t('Week'),
     Daily: true,
     Weekly: true,
     Monthly: false,
     Yearly: false,
   },
   {
-    description: 'This month',
+    description: t('This month'),
     name: 0,
-    type: 'Month',
+    type: t('Month'),
     Daily: true,
     Weekly: true,
     Monthly: true,
     Yearly: false,
   },
   {
-    description: 'Last month',
+    description: t('Last month'),
     name: 1,
-    type: 'Month',
+    type: t('Month'),
     Daily: true,
     Weekly: true,
     Monthly: true,
     Yearly: false,
   },
   {
-    description: 'Last 3 months',
+    description: t('Last 3 months'),
     name: 3,
-    type: 'Month',
+    type: t('Month'),
     Daily: true,
     Weekly: true,
     Monthly: true,
     Yearly: false,
   },
   {
-    description: 'Last 6 months',
+    description: t('Last 6 months'),
     name: 6,
-    type: 'Month',
+    type: t('Month'),
     Daily: false,
     Weekly: false,
     Monthly: true,
     Yearly: false,
   },
   {
-    description: 'Last 12 months',
+    description: t('Last 12 months'),
     name: 12,
-    type: 'Month',
+    type: t('Month'),
     Daily: false,
     Weekly: false,
     Monthly: true,
     Yearly: false,
   },
   {
-    description: 'Year to date',
+    description: t('Year to date'),
     name: 'yearToDate',
-    type: 'Month',
+    type: t('Month'),
     Daily: false,
     Weekly: true,
     Monthly: true,
     Yearly: true,
   },
   {
-    description: 'Last year',
+    description: t('Last year'),
     name: 'lastYear',
-    type: 'Month',
+    type: t('Month'),
     Daily: false,
     Weekly: true,
     Monthly: true,
     Yearly: true,
   },
   {
-    description: 'All time',
+    description: t('All time'),
     name: 'allTime',
-    type: 'Month',
+    type: t('Month'),
     Daily: false,
     Weekly: true,
     Monthly: true,
@@ -163,28 +165,28 @@ type intervalOptionsProps = {
 
 const intervalOptions: intervalOptionsProps[] = [
   {
-    description: 'Daily',
-    name: 'Day',
+    description: t('Daily'),
+    name: t('Day'),
     format: 'yy-MM-dd',
     range: 'dayRangeInclusive',
   },
   {
-    description: 'Weekly',
-    name: 'Week',
+    description: t('Weekly'),
+    name: t('Week'),
     format: 'yy-MM-dd',
     range: 'weekRangeInclusive',
   },
   //{ value: 3, description: 'Fortnightly', name: 3},
   {
-    description: 'Monthly',
-    name: 'Month',
+    description: t('Monthly'),
+    name: t('Month'),
     // eslint-disable-next-line rulesdir/typography
     format: "MMM ''yy",
     range: 'rangeInclusive',
   },
   {
-    description: 'Yearly',
-    name: 'Year',
+    description: t('Yearly'),
+    name: t('Year'),
     format: 'yyyy',
     range: 'yearRangeInclusive',
   },
@@ -251,7 +253,7 @@ export type UncategorizedEntity = Pick<
 
 const uncategorizedCategory: UncategorizedEntity = {
   id: '',
-  name: 'Uncategorized',
+  name: t('Uncategorized'),
   uncategorized_id: '1',
   hidden: false,
   is_off_budget: false,
@@ -260,7 +262,7 @@ const uncategorizedCategory: UncategorizedEntity = {
 };
 const transferCategory: UncategorizedEntity = {
   id: '',
-  name: 'Transfers',
+  name: t('Transfers'),
   uncategorized_id: '2',
   hidden: false,
   is_off_budget: false,
@@ -269,7 +271,7 @@ const transferCategory: UncategorizedEntity = {
 };
 const offBudgetCategory: UncategorizedEntity = {
   id: '',
-  name: 'Off Budget',
+  name: t('Off Budget'),
   uncategorized_id: '3',
   hidden: false,
   is_off_budget: true,
@@ -285,7 +287,7 @@ type UncategorizedGroupEntity = Pick<
 };
 
 const uncategorizedGroup: UncategorizedGroupEntity = {
-  name: 'Uncategorized & Off Budget',
+  name: t('Uncategorized & Off Budget'),
   id: 'uncategorized',
   hidden: false,
   categories: [uncategorizedCategory, transferCategory, offBudgetCategory],
@@ -302,7 +304,7 @@ export const categoryLists = (categories: {
       const catGroupB = categories.grouped.find(f => f.id === b.cat_group);
       //initial check that both a and b have a sort_order and category group
       return a.sort_order && b.sort_order && catGroupA && catGroupB
-        ? /*sorting by "is_income" because sort_order for this group is 
+        ? /*sorting by "is_income" because sort_order for this group is
         separate from other groups*/
           Number(catGroupA.is_income) - Number(catGroupB.is_income) ||
             //Next, sorting by group sort_order
@@ -336,34 +338,34 @@ export const groupBySelections = (
   let groupByList: UncategorizedEntity[];
   let groupByLabel: 'category' | 'categoryGroup' | 'payee' | 'account';
   switch (groupBy) {
-    case 'Category':
+    case t('Category'):
       groupByList = categoryList;
       groupByLabel = 'category';
       break;
-    case 'Group':
+    case t('Group'):
       groupByList = categoryGroup.map(group => {
         return { id: group.id, name: group.name, hidden: group.hidden };
       });
       groupByLabel = 'categoryGroup';
       break;
-    case 'Payee':
+    case t('Payee'):
       groupByList = payees.map(payee => {
         return { id: payee.id, name: payee.name, hidden: false };
       });
       groupByLabel = 'payee';
       break;
-    case 'Account':
+    case t('Account'):
       groupByList = accounts.map(account => {
         return { id: account.id, name: account.name, hidden: false };
       });
       groupByLabel = 'account';
       break;
-    case 'Interval':
+    case t('Interval'):
       groupByList = categoryList;
       groupByLabel = 'category';
       break;
     default:
-      throw new Error('Error loading data into the spreadsheet.');
+      throw new Error(t('Error loading data into the spreadsheet.'));
   }
   return [groupByList, groupByLabel];
 };

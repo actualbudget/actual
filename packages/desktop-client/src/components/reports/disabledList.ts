@@ -1,41 +1,43 @@
+import { t } from 'i18next';
+
 const intervalOptions = [
   {
-    description: 'Daily',
-    defaultRange: 'This month',
+    description: t('Daily'),
+    defaultRange: t('This month'),
   },
   {
-    description: 'Weekly',
-    defaultRange: 'Last 3 months',
+    description: t('Weekly'),
+    defaultRange: t('Last 3 months'),
   },
   {
-    description: 'Monthly',
-    defaultRange: 'Last 6 months',
+    description: t('Monthly'),
+    defaultRange: t('Last 6 months'),
   },
   {
-    description: 'Yearly',
-    defaultRange: 'Year to date',
+    description: t('Yearly'),
+    defaultRange: t('Year to date'),
   },
 ];
 
 const currentIntervalOptions = [
   {
-    description: 'This week',
+    description: t('This week'),
     disableInclude: true,
   },
   {
-    description: 'This month',
+    description: t('This month'),
     disableInclude: true,
   },
   {
-    description: 'Year to date',
+    description: t('Year to date'),
     disableInclude: true,
   },
   {
-    description: 'Last year',
+    description: t('Last year'),
     disableInclude: true,
   },
   {
-    description: 'All time',
+    description: t('All time'),
     disableInclude: true,
   },
 ];
@@ -53,33 +55,33 @@ const totalGraphOptions: graphOptions[] = [
   {
     description: 'TableGraph',
     disabledSplit: [],
-    defaultSplit: 'Category',
+    defaultSplit: t('Category'),
     disabledType: [],
-    defaultType: 'Payment',
+    defaultType: t('Payment'),
     disableLegend: true,
     disableLabel: true,
   },
   {
     description: 'BarGraph',
     disabledSplit: [],
-    defaultSplit: 'Category',
+    defaultSplit: t('Category'),
     disabledType: [],
-    defaultType: 'Payment',
+    defaultType: t('Payment'),
   },
   {
     description: 'AreaGraph',
-    disabledSplit: ['Category', 'Group', 'Payee', 'Account'],
-    defaultSplit: 'Interval',
+    disabledSplit: [t('Category'), t('Group'), t('Payee'), t('Account')],
+    defaultSplit: t('Interval'),
     disabledType: [],
-    defaultType: 'Payment',
+    defaultType: t('Payment'),
     disableLegend: true,
   },
   {
     description: 'DonutGraph',
     disabledSplit: [],
-    defaultSplit: 'Category',
+    defaultSplit: t('Category'),
     disabledType: ['Net'],
-    defaultType: 'Payment',
+    defaultType: t('Payment'),
   },
 ];
 
@@ -87,25 +89,25 @@ const timeGraphOptions: graphOptions[] = [
   {
     description: 'TableGraph',
     disabledSplit: ['Interval'],
-    defaultSplit: 'Category',
-    disabledType: ['Net Payment', 'Net Deposit'],
-    defaultType: 'Payment',
+    defaultSplit: t('Category'),
+    disabledType: [t('Net Payment'), t('Net Deposit')],
+    defaultType: t('Payment'),
     disableLegend: true,
     disableLabel: true,
   },
   {
     description: 'StackedBarGraph',
-    disabledSplit: ['Interval'],
-    defaultSplit: 'Category',
+    disabledSplit: [t('Interval')],
+    defaultSplit: t('Category'),
     disabledType: [],
-    defaultType: 'Payment',
+    defaultType: t('Payment'),
   },
   {
     description: 'LineGraph',
-    disabledSplit: ['Interval'],
-    defaultSplit: 'Category',
+    disabledSplit: [t('Interval')],
+    defaultSplit: t('Category'),
     disabledType: [],
-    defaultType: 'Payment',
+    defaultType: t('Payment'),
     disableLegend: false,
     disableLabel: true,
   },
