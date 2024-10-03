@@ -7,7 +7,11 @@ import memoizeOne from 'memoize-one';
 
 import { collapseModals, pushModal } from 'loot-core/client/actions';
 import { groupById, integerToCurrency } from 'loot-core/shared/util';
-import { envelopeBudget, trackingBudget } from 'loot-core/src/client/queries';
+import {
+  envelopeBudget,
+  trackingBudget,
+  uncategorizedCount,
+} from 'loot-core/src/client/queries';
 import * as monthUtils from 'loot-core/src/shared/months';
 
 import { useCategories } from '../../../hooks/useCategories';
@@ -33,6 +37,7 @@ import { makeAmountGrey, makeBalanceAmountStyle } from '../../budget/util';
 import { Button } from '../../common/Button2';
 import { Card } from '../../common/Card';
 import { Label } from '../../common/Label';
+import { Link } from '../../common/Link';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
 import { MobilePageHeader, Page } from '../../Page';
@@ -628,7 +633,6 @@ const ExpenseCategory = memo(function ExpenseCategory({
         </View>
         <View
           style={{
-            ...styles.noTapHighlight,
             width: columnWidth,
             justifyContent: 'center',
             alignItems: 'flex-end',
@@ -789,8 +793,7 @@ const ExpenseGroupHeader = memo(function ExpenseGroupHeader({
             css({
               flexShrink: 0,
               color: theme.pageTextSubdued,
-              ...styles.noTapHighlight,
-              '&[data-hovered], &[data-pressed]': {
+              '&[data-pressed]': {
                 backgroundColor: 'transparent',
               },
             }),
@@ -985,8 +988,7 @@ const IncomeGroupHeader = memo(function IncomeGroupHeader({
             css({
               flexShrink: 0,
               color: theme.pageTextSubdued,
-              ...styles.noTapHighlight,
-              '&[data-hovered], &[data-pressed]': {
+              '&[data-pressed]': {
                 backgroundColor: 'transparent',
               },
             }),
@@ -1457,6 +1459,38 @@ function IncomeGroup({
   );
 }
 
+function UncategorizedButton() {
+  const count = useSheetValue(uncategorizedCount());
+  if (count === null || count <= 0) {
+    return null;
+  }
+
+  return (
+    <View
+      style={{
+        padding: 5,
+        paddingBottom: 2,
+      }}
+    >
+      <Link
+        variant="button"
+        type="button"
+        buttonVariant="primary"
+        to="/accounts/uncategorized"
+        style={{
+          border: 0,
+          justifyContent: 'flex-start',
+          padding: '1.25em',
+        }}
+      >
+        {count} uncategorized {count === 1 ? 'transaction' : 'transactions'}
+        <View style={{ flex: 1 }} />
+        <SvgArrowThinRight width="15" height="15" />
+      </Link>
+    </View>
+  );
+}
+
 function BudgetGroups({
   type,
   categoryGroups,
@@ -1587,10 +1621,6 @@ export function BudgetTable({
   const [showHiddenCategories = false] = useLocalPref(
     'budget.showHiddenCategories',
   );
-  const noBackgroundColorStyle = {
-    backgroundColor: 'transparent',
-    color: 'white',
-  };
 
   return (
     <Page
@@ -1609,16 +1639,14 @@ export function BudgetTable({
           leftContent={
             <Button
               variant="bare"
-              className={String(
-                css({
-                  color: theme.mobileHeaderText,
-                  margin: 10,
-                  '&[data-hovered], &[data-pressed]': noBackgroundColorStyle,
-                }),
-              )}
+              style={{ margin: 10 }}
               onPress={onOpenBudgetPageMenu}
             >
-              <SvgLogo width="20" height="20" />
+              <SvgLogo
+                style={{ color: theme.mobileHeaderText }}
+                width="20"
+                height="20"
+              />
               <SvgCheveronRight
                 style={{ flexShrink: 0, color: theme.mobileHeaderTextSubdued }}
                 width="14"
@@ -1645,6 +1673,7 @@ export function BudgetTable({
             paddingBottom: MOBILE_NAV_HEIGHT,
           }}
         >
+          <UncategorizedButton />
           <BudgetGroups
             type={type}
             categoryGroups={categoryGroups}
@@ -1924,38 +1953,26 @@ function MonthSelector({
             onPrevMonth();
           }
         }}
-        className={String(
-          css({
-            ...styles.noTapHighlight,
-            ...arrowButtonStyle,
-            opacity: prevEnabled ? 1 : 0.6,
-            color: theme.mobileHeaderText,
-            '&[data-hovered]': {
-              color: theme.mobileHeaderText,
-              background: theme.mobileHeaderTextHover,
-            },
-          }),
-        )}
+        style={{ ...arrowButtonStyle, opacity: prevEnabled ? 1 : 0.6 }}
       >
         <SvgArrowThinLeft width="15" height="15" style={{ margin: -5 }} />
       </Button>
-      <Text
+      <Button
+        variant="bare"
         style={{
-          color: theme.mobileHeaderText,
           textAlign: 'center',
           fontSize: 16,
           fontWeight: 500,
           margin: '0 5px',
-          userSelect: 'none',
-          ...styles.underlinedText,
         }}
-        onPointerUp={e => {
-          e.stopPropagation();
+        onPress={() => {
           onOpenMonthMenu?.(month);
         }}
       >
-        {monthUtils.format(month, 'MMMM ‘yy')}
-      </Text>
+        <Text style={styles.underlinedText}>
+          {monthUtils.format(month, 'MMMM ‘yy')}
+        </Text>
+      </Button>
       <Button
         variant="bare"
         onPress={() => {
@@ -1963,18 +1980,7 @@ function MonthSelector({
             onNextMonth();
           }
         }}
-        className={String(
-          css({
-            ...styles.noTapHighlight,
-            ...arrowButtonStyle,
-            opacity: nextEnabled ? 1 : 0.6,
-            color: theme.mobileHeaderText,
-            '&[data-hovered]': {
-              color: theme.mobileHeaderText,
-              background: theme.mobileHeaderTextHover,
-            },
-          }),
-        )}
+        style={{ ...arrowButtonStyle, opacity: nextEnabled ? 1 : 0.6 }}
       >
         <SvgArrowThinRight width="15" height="15" style={{ margin: -5 }} />
       </Button>

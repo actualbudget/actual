@@ -1,15 +1,12 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { css } from 'glamor';
-
 import { replaceModal, syncAndDownload } from 'loot-core/src/client/actions';
 import * as queries from 'loot-core/src/client/queries';
 
 import { useAccounts } from '../../../hooks/useAccounts';
 import { useFailedAccounts } from '../../../hooks/useFailedAccounts';
 import { useNavigate } from '../../../hooks/useNavigate';
-import { useSetThemeColor } from '../../../hooks/useSetThemeColor';
 import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { SvgAdd } from '../../../icons/v1';
 import { theme, styles } from '../../../style';
@@ -172,17 +169,7 @@ function AccountList({
             <Button
               variant="bare"
               aria-label="Add account"
-              className={String(
-                css({
-                  justifyContent: 'center',
-                  color: theme.mobileHeaderText,
-                  margin: 10,
-                  ':hover': {
-                    color: theme.mobileHeaderText,
-                    background: theme.mobileHeaderTextHover,
-                  },
-                }),
-              )}
+              style={{ margin: 10 }}
               onPress={onAddAccount}
             >
               <SvgAdd width={20} height={20} />
@@ -260,8 +247,6 @@ export function Accounts() {
   const onSync = () => {
     dispatch(syncAndDownload());
   };
-
-  useSetThemeColor(theme.mobileViewTheme);
 
   return (
     <View style={{ flex: 1 }}>

@@ -218,6 +218,8 @@ handlers['envelope-budget-month'] = async function ({ month }) {
           value(`sum-amount-${cat.id}`),
           value(`leftover-${cat.id}`),
           value(`carryover-${cat.id}`),
+          value(`goal-${cat.id}`),
+          value(`long-goal-${cat.id}`),
         ]);
       }
     }
@@ -257,6 +259,8 @@ handlers['tracking-budget-month'] = async function ({ month }) {
         value(`budget-${cat.id}`),
         value(`sum-amount-${cat.id}`),
         value(`leftover-${cat.id}`),
+        value(`goal-${cat.id}`),
+        value(`long-goal-${cat.id}`),
       ]);
 
       if (!group.is_income) {
@@ -280,7 +284,7 @@ handlers['category-create'] = mutator(async function ({
     }
 
     return db.insertCategory({
-      name,
+      name: name.trim(),
       cat_group: groupId,
       is_income: isIncome ? 1 : 0,
       hidden: hidden ? 1 : 0,
@@ -291,7 +295,10 @@ handlers['category-create'] = mutator(async function ({
 handlers['category-update'] = mutator(async function (category) {
   return withUndo(async () => {
     try {
-      await db.updateCategory(category);
+      await db.updateCategory({
+        ...category,
+        name: category.name.trim(),
+      });
     } catch (e) {
       if (e.message.toLowerCase().includes('unique constraint')) {
         return { error: { type: 'category-exists' } };

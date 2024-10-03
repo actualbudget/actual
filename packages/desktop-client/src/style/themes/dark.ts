@@ -191,6 +191,7 @@ export const pillTextSubdued = colorPalette.navy500;
 export const reportsRed = colorPalette.red300;
 export const reportsBlue = colorPalette.blue400;
 export const reportsGreen = colorPalette.green400;
+export const reportsGray = colorPalette.gray400;
 export const reportsLabel = pageText;
 export const reportsInnerLabel = colorPalette.navy800;
 

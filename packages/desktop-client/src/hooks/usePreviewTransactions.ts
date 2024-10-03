@@ -11,7 +11,7 @@ import { type ScheduleEntity } from 'loot-core/types/models';
 import { type TransactionEntity } from '../../../loot-core/src/types/models/transaction.d';
 
 export function usePreviewTransactions(
-  collapseTransactions: (ids: string[]) => void,
+  collapseTransactions?: (ids: string[]) => void,
 ) {
   const scheduleData = useCachedSchedules();
   const [previousScheduleData, setPreviousScheduleData] =
@@ -53,7 +53,9 @@ export function usePreviewTransactions(
           })),
         }));
         setPreviewTransactions(ungroupTransactions(withDefaults));
-        collapseTransactions(withDefaults.map(t => t.id));
+        if (collapseTransactions) {
+          collapseTransactions(withDefaults.map(t => t.id));
+        }
       });
     }
 
