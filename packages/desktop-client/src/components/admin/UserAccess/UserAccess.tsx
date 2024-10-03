@@ -10,6 +10,8 @@ import React, {
 } from 'react';
 import { useDispatch } from 'react-redux';
 
+import { css } from 'glamor';
+
 import { pushModal } from 'loot-core/src/client/actions/modals';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as undo from 'loot-core/src/platform/client/undo';
@@ -79,27 +81,21 @@ function UserAccessContent({
       cloudFileId as string,
     );
 
+    const sortUsers = (a: UserAvailable, b: UserAvailable) => {
+      if ((a.owner ?? 0) !== (b.owner ?? 0)) {
+        return (b.owner ?? 0) - (a.owner ?? 0);
+      }
+      return (a.displayName ?? '').localeCompare(b.displayName ?? '');
+    };
+
     const loadedAccess = users
       .map(user => ({
         ...user,
-        displayName: user.displayName ? user.displayName : user.userName,
+        displayName: user.displayName || user.userName,
       }))
-      .sort((a, b) => {
-        if ((a.owner ?? 0) !== (b.owner ?? 0)) {
-          return (b.owner ?? 0) - (a.owner ?? 0);
-        }
+      .sort(sortUsers);
 
-        if (a.displayName && b.displayName) {
-          return a.displayName.localeCompare(b.displayName);
-        }
-
-        if (!a.displayName) return 1;
-        if (!b.displayName) return -1;
-
-        return 0;
-      });
     setAllAccess(loadedAccess);
-
     return loadedAccess;
   }, [cloudFileId, setLoading]);
 
@@ -110,12 +106,17 @@ function UserAccessContent({
 
   useEffect(() => {
     async function loadData() {
-      await loadAccess();
-      const owner = await loadOwner();
-      if (owner) {
-        setOwnerName(owner?.displayName ?? owner?.userName);
+      try {
+        await loadAccess();
+        const owner = await loadOwner();
+        if (owner) {
+          setOwnerName(owner?.displayName ?? owner?.userName);
+        }
+      } catch (error) {
+        console.error('Error loading user access data:', error);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     }
 
     loadData();
@@ -307,16 +308,29 @@ function UserAccessList({
   );
 }
 
-const LockToggle = props => {
-  const [isHovered, setIsHovered] = useState(false);
+const wrapperStyle = css({
+  display: 'inline-block',
+  ':hover .default-icon': {
+    display: 'none',
+  },
+  ':hover .hover-icon': {
+    display: 'inline',
+  },
+});
 
-  return (
-    <div
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      style={{ display: 'inline-block' }}
-    >
-      {isHovered ? <SvgLockOpen {...props} /> : <SvgLockClosed {...props} />}
+const iconStyle = css({
+  '&.hover-icon': {
+    display: 'none',
+  },
+});
+
+const LockToggle = props => (
+  <div {...wrapperStyle}>
+    <div className={`${iconStyle} default-icon`}>
+      <SvgLockClosed {...props} />
     </div>
-  );
-};
+    <div className={`${iconStyle} hover-icon`}>
+      <SvgLockOpen {...props} />
+    </div>
+  </div>
+);

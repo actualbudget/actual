@@ -27,6 +27,60 @@ export const UserAccessRow = memo(
     const [cloudFileId] = useMetadataPref('cloudFileId');
     const actions = useActions();
 
+    const handleAccessToggle = async () => {
+      const newValue = !marked;
+      if (newValue) {
+        const { error } = await send('access-add', {
+          fileId: cloudFileId as string,
+          userId: access.userId,
+        });
+
+        if (error) {
+          handleError(error);
+        }
+      } else {
+        const { someDeletionsFailed } = await send('access-delete-all', {
+          fileId: cloudFileId as string,
+          ids: [access.userId],
+        });
+
+        if (someDeletionsFailed) {
+          actions.addNotification({
+            type: 'error',
+            title: 'Access Revocation Incomplete',
+            message: 'Some access permissions were not revoked successfully.',
+            sticky: true,
+          });
+        }
+      }
+      setMarked(newValue);
+    };
+
+    const handleError = (error: string) => {
+      if (error === 'token-expired') {
+        actions.addNotification({
+          type: 'error',
+          id: 'login-expired',
+          title: 'Login expired',
+          sticky: true,
+          message: getUserAccessErrors(error),
+          button: {
+            title: 'Go to login',
+            action: () => {
+              actions.signOut();
+            },
+          },
+        });
+      } else {
+        actions.addNotification({
+          type: 'error',
+          title: 'Something happened while editing access',
+          sticky: true,
+          message: getUserAccessErrors(error),
+        });
+      }
+    };
+
     return (
       <Row
         height="auto"
@@ -48,53 +102,7 @@ export const UserAccessRow = memo(
           <Checkbox
             defaultChecked={marked}
             disabled={access.owner === 1}
-            onClick={async () => {
-              const newValue = !marked;
-              if (newValue) {
-                const { error } = await send('access-add', {
-                  fileId: cloudFileId as string,
-                  userId: access.userId,
-                });
-
-                if (error) {
-                  if (error === 'token-expired') {
-                    actions.addNotification({
-                      type: 'error',
-                      id: 'login-expired',
-                      title: 'Login expired',
-                      sticky: true,
-                      message: getUserAccessErrors(error),
-                      button: {
-                        title: 'Go to login',
-                        action: () => {
-                          actions.signOut();
-                        },
-                      },
-                    });
-                  } else {
-                    actions.addNotification({
-                      type: 'error',
-                      title: 'Something happened while editing access',
-                      sticky: true,
-                      message: getUserAccessErrors(error),
-                    });
-                  }
-                }
-              } else {
-                const { someDeletionsFailed } = await send(
-                  'access-delete-all',
-                  {
-                    fileId: cloudFileId as string,
-                    ids: [access.userId],
-                  },
-                );
-
-                if (someDeletionsFailed) {
-                  alert('Some access were not revoked');
-                }
-              }
-              setMarked(newValue);
-            }}
+            onClick={handleAccessToggle}
           />
         </Cell>
         <Cell

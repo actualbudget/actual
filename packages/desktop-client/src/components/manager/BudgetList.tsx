@@ -1,4 +1,10 @@
-import React, { useState, useRef, useEffect, type CSSProperties } from 'react';
+import React, {
+  useState,
+  useRef,
+  useEffect,
+  type CSSProperties,
+  useCallback,
+} from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -472,28 +478,46 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
   );
   const multiuserEnabled = useMultiuserEnabled();
 
-  useEffect(() => {
-    if (multiuserEnabled) {
-      if (!userData?.offline) {
-        send('users-get').then((data: UserEntity[]) => {
-          setUsers(data);
-          setCurrentUserId(userData?.userId ?? '');
-        });
-        send(
-          'users-get-access',
-          allFiles
-            .filter(file => !isLocalFile(file))
-            .map(
-              file =>
-                (file as RemoteFile | SyncedLocalFile | SyncableLocalFile)
-                  .cloudFileId,
-            ),
-        ).then((data: Map<string, UserAccessEntity[]>) => {
-          setUsersPerFile(data);
-        });
-      }
+  const fetchUsers = useCallback(async () => {
+    try {
+      const data: UserEntity[] = await send('users-get');
+      setUsers(data);
+      setCurrentUserId(userData?.userId ?? '');
+    } catch (error) {
+      console.error('Failed to fetch users:', error);
     }
-  }, [multiuserEnabled, userData?.offline, allFiles, userData?.userId]);
+  }, [userData?.userId]);
+
+  const fetchFileAccess = useCallback(async () => {
+    try {
+      const fileIds = allFiles
+        .filter(file => !isLocalFile(file))
+        .map(
+          file =>
+            (file as RemoteFile | SyncedLocalFile | SyncableLocalFile)
+              .cloudFileId,
+        );
+      const data: Map<string, UserAccessEntity[]> = await send(
+        'users-get-access',
+        fileIds,
+      );
+      setUsersPerFile(data);
+    } catch (error) {
+      console.error('Failed to fetch file access:', error);
+    }
+  }, [allFiles]);
+
+  useEffect(() => {
+    if (multiuserEnabled && !userData?.offline) {
+      fetchUsers();
+    }
+  }, [multiuserEnabled, userData?.offline, fetchUsers]);
+
+  useEffect(() => {
+    if (multiuserEnabled && !userData?.offline) {
+      fetchFileAccess();
+    }
+  }, [multiuserEnabled, userData?.offline, fetchFileAccess]);
 
   // Remote files do not have the 'id' field
   function isNonRemoteFile(

@@ -24,26 +24,17 @@ export const ProtectedRoute = ({
   const [cloudFileId] = useMetadataPref('cloudFileId');
 
   useEffect(() => {
-    if (permissionGranted) {
-      return;
-    }
+    const hasRequiredPermission = hasPermission(permission);
+    setPermissionGranted(hasRequiredPermission);
 
-    setPermissionGranted(hasPermission(permission));
-
-    if (!permissionGranted && validateOwner) {
+    if (!hasRequiredPermission && validateOwner) {
       send('check-file-access', cloudFileId).then(
         ({ granted }: { granted: boolean }) => {
           setPermissionGranted(granted);
         },
       );
     }
-  }, [
-    cloudFileId,
-    permission,
-    validateOwner,
-    hasPermission,
-    permissionGranted,
-  ]);
+  }, [cloudFileId, permission, validateOwner, hasPermission]);
 
   return permissionGranted ? (
     element
