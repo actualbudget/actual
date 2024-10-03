@@ -1,9 +1,12 @@
 import { useState } from 'react';
 
 import { send } from 'loot-core/platform/client/fetch';
-import { PossibleRoles, UserEntity } from 'loot-core/src/types/models/user';
+import {
+  PossibleRoles,
+  type UserEntity,
+} from 'loot-core/src/types/models/user';
 
-import { useActions } from '../../hooks/useActions';
+import { type BoundActions, useActions } from '../../hooks/useActions';
 import { styles, theme } from '../../style';
 import { Button } from '../common/Button2';
 import { Input } from '../common/Input';
@@ -14,20 +17,22 @@ import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { Checkbox, FormField, FormLabel } from '../forms';
 
-interface EditUserProps {
-  defaultUser: UserEntity;
+type User = UserEntity;
+
+type EditUserProps = {
+  defaultUser: User;
   onSave: (
     method: 'user-add' | 'user-update',
-    user: UserEntity,
+    user: User,
     setError: (error: string) => void,
-    actions: any,
+    actions: BoundActions,
   ) => Promise<void>;
-}
+};
 
-interface EditUserFinanceAppProps {
-  defaultUser: UserEntity;
-  onSave: (user: UserEntity) => void;
-}
+type EditUserFinanceAppProps = {
+  defaultUser: User;
+  onSave: (user: User) => void;
+};
 
 function getUserDirectoryErrors(reason: string): string {
   switch (reason) {
@@ -52,9 +57,9 @@ function getUserDirectoryErrors(reason: string): string {
 
 async function saveUser(
   method: 'user-add' | 'user-update',
-  user: UserEntity,
+  user: User,
   setError: (error: string) => void,
-  actions: any,
+  actions: BoundActions,
 ): Promise<boolean> {
   const { error, id: newId } = (await send(method, user)) || {};
   if (!error) {
@@ -120,12 +125,12 @@ function EditUser({ defaultUser, onSave: originalOnSave }: EditUserProps) {
   );
   const [enabled, setEnabled] = useState<boolean>(defaultUser.enabled);
   const [role, setRole] = useState<string>(
-    defaultUser.role ?? PossibleRoles.Admin,
+    defaultUser.role ?? '213733c1-5645-46ad-8784-a7b20b400f93',
   );
   const [error, setError] = useState<string>('');
 
   async function onSave() {
-    const user: UserEntity = {
+    const user: User = {
       ...defaultUser,
       userName,
       displayName,
@@ -250,7 +255,7 @@ function EditUser({ defaultUser, onSave: originalOnSave }: EditUserProps) {
   );
 }
 
-const RoleDescription: React.FC = () => {
+const RoleDescription = () => {
   return (
     <View style={{ paddingTop: 10 }}>
       <Text

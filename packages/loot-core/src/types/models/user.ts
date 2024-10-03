@@ -1,7 +1,7 @@
 export interface NewUserEntity {
   userName: string;
   displayName: string;
-  role: UserRole;
+  role: string;
   enabled: boolean;
 }
 
@@ -24,9 +24,7 @@ export interface UserAvailable {
   owner?: number;
 }
 
-export type UserRole = 'Admin' | 'Basic';
-
-export const PossibleRoles: Record<UserRole, string> = {
-  Admin: '213733c1-5645-46ad-8784-a7b20b400f93',
-  Basic: 'e87fa1f1-ac8c-4913-b1b5-1096bdb1eacc',
+export const PossibleRoles = {
+  '213733c1-5645-46ad-8784-a7b20b400f93': 'Admin',
+  'e87fa1f1-ac8c-4913-b1b5-1096bdb1eacc': 'Basic',
 };

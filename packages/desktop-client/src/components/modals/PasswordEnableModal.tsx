@@ -38,11 +38,15 @@ export function PasswordEnableModal({
     'invalid-password': 'Invalid Password',
     'password-match': 'Passwords do not match',
     'network-failure': 'Unable to contact the server',
-    'unable-to-change-file-config-enabled': 'Unable to disable OpenID. Please update the config.json file in this case.',
+    'unable-to-change-file-config-enabled':
+      'Unable to disable OpenID. Please update the config.json file in this case.',
   };
-  
+
   function getErrorMessage(error: string): string {
-    return errorMessages[error as keyof typeof errorMessages] || 'Internal server error';
+    return (
+      errorMessages[error as keyof typeof errorMessages] ||
+      'Internal server error'
+    );
   }
 
   async function onSetPassword(password: string) {
