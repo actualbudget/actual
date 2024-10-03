@@ -4,6 +4,7 @@ import React, {
   useEffect,
   type ChangeEvent,
 } from 'react';
+import { Trans } from 'react-i18next';
 
 import { useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
 import { evalArithmetic } from 'loot-core/src/shared/arithmetic';
@@ -47,7 +48,9 @@ export function HoldMenu({ onSubmit, onClose }: HoldMenuProps) {
 
   return (
     <View style={{ padding: 10 }}>
-      <View style={{ marginBottom: 5 }}>Hold this amount:</View>
+      <View style={{ marginBottom: 5 }}>
+        <Trans>Hold this amount:</Trans>
+      </View>
       <View>
         <InitialFocus>
           <Input
@@ -74,7 +77,7 @@ export function HoldMenu({ onSubmit, onClose }: HoldMenuProps) {
           }}
           onPress={() => submit(amount)}
         >
-          Hold
+          <Trans>Hold</Trans>
         </Button>
       </View>
     </View>

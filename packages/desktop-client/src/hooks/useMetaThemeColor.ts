@@ -3,9 +3,11 @@ import { useEffect } from 'react';
 
 const VAR_STRING_REGEX = /^var\((--.*)\)$/;
 
-export function useSetThemeColor(color: string) {
+export function useMetaThemeColor(color?: string) {
   useEffect(() => {
-    setThemeColor(getPropertyValueFromVarString(color));
+    if (color) {
+      setThemeColor(getPropertyValueFromVarString(color));
+    }
   }, [color]);
 }
 

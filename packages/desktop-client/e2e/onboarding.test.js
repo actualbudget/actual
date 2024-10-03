@@ -93,7 +93,9 @@ test.describe('Onboarding', () => {
 
   test('navigates back to start page by clicking on “no server” in an empty budget file', async () => {
     await configurationPage.clickOnNoServer();
-    await configurationPage.startFresh();
+    const accountPage = await configurationPage.startFresh();
+
+    await expect(accountPage.transactionTable).toBeVisible();
 
     await navigation.clickOnNoServer();
     await page.getByRole('button', { name: 'Start using a server' }).click();

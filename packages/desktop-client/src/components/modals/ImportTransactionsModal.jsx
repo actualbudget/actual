@@ -1021,7 +1021,7 @@ export function ImportTransactionsModal({ options }) {
       setFilename(filename);
       setFileType(filetype);
 
-      const { errors, transactions: parsedTransactions } =
+      const { errors, transactions: parsedTransactions = [] } =
         await parseTransactions(filename, options);
 
       let index = 0;
