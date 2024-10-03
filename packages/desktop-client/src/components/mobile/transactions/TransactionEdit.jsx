@@ -556,7 +556,12 @@ const TransactionEditInner = memo(function TransactionEditInner({
       if (adding || hasAccountChanged.current) {
         const { account: accountId } = unserializedTransaction;
         const account = accountsById?.[accountId];
-        navigate(`/accounts/${account.id}`);
+        if (account) {
+          navigate(`/accounts/${account.id}`);
+        } else {
+          // Handle the case where account is undefined
+          navigate(-1);
+        }
       } else {
         navigate(-1);
       }
