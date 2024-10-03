@@ -1,5 +1,6 @@
 // @ts-strict-ignore
 import React from 'react';
+import { Trans } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 
 import { useNavigate } from '../../../hooks/useNavigate';
@@ -38,7 +39,7 @@ export function Error() {
         {getErrorMessage(error)}
       </Text>
       <Button onPress={onTryAgain} style={{ marginTop: 20 }}>
-        Try again
+        <Trans>Try again</Trans>
       </Button>
     </View>
   );

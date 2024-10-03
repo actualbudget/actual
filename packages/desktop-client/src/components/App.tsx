@@ -29,7 +29,7 @@ import {
 import { useMetadataPref } from '../hooks/useMetadataPref';
 import { installPolyfills } from '../polyfills';
 import { ResponsiveProvider } from '../ResponsiveProvider';
-import { styles, hasHiddenScrollbars, ThemeStyle } from '../style';
+import { styles, hasHiddenScrollbars, ThemeStyle, useTheme } from '../style';
 import { ExposeNavigate } from '../util/router-tools';
 
 import { AppBackground } from './AppBackground';
@@ -155,6 +155,8 @@ export function App() {
     };
   }, [dispatch]);
 
+  const [theme] = useTheme();
+
   return (
     <BrowserRouter>
       <ExposeNavigate />
@@ -166,6 +168,7 @@ export function App() {
                 <DndProvider backend={HTML5Backend}>
                   <ScrollProvider>
                     <View
+                      data-theme={theme}
                       style={{
                         height: '100%',
                         display: 'flex',

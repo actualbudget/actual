@@ -166,7 +166,11 @@ async function getSinkingBaseContributionTotal(t) {
   //return only the base contribution of each schedule
   let total = 0;
   for (let ll = 0; ll < t.length; ll++) {
-    total += t[ll].target / t[ll].target_interval;
+    let monthlyAmount = t[ll].target / t[ll].target_interval;
+    if (t[ll].target_frequency === 'yearly') {
+      monthlyAmount /= 12;
+    }
+    total += monthlyAmount;
   }
   return total;
 }

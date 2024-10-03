@@ -45,7 +45,6 @@ import { useCategories } from '../../../hooks/useCategories';
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { usePayees } from '../../../hooks/usePayees';
-import { useSetThemeColor } from '../../../hooks/useSetThemeColor';
 import {
   SingleActiveEditFormProvider,
   useSingleActiveEditForm,
@@ -1015,7 +1014,6 @@ function TransactionEditUnconnected({
   const [fetchedTransactions, setFetchedTransactions] = useState([]);
   const adding = useRef(false);
   const deleted = useRef(false);
-  useSetThemeColor(theme.mobileViewTheme);
 
   useEffect(() => {
     async function fetchTransaction() {
