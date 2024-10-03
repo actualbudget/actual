@@ -1190,7 +1190,7 @@ class AccountInternal extends PureComponent<
     } satisfies RuleConditionEntity;
 
     const rule = {
-      stage: 'default',
+      stage: null,
       conditionsOp: 'and',
       conditions: [payeeCondition, amountCondition],
       actions: [
@@ -1357,6 +1357,18 @@ class AccountInternal extends PureComponent<
 
   onApplyFilter = async (conditionOrSavedFilter: ConditionEntity) => {
     let filterConditions = this.state.filterConditions;
+
+    if (
+      'customName' in conditionOrSavedFilter &&
+      conditionOrSavedFilter.customName
+    ) {
+      filterConditions = filterConditions.filter(
+        c =>
+          !isTransactionFilterEntity(c) &&
+          c.customName !== conditionOrSavedFilter.customName,
+      );
+    }
+
     if (isTransactionFilterEntity(conditionOrSavedFilter)) {
       // A saved filter was passed in.
       const savedFilter = conditionOrSavedFilter;
@@ -1366,12 +1378,6 @@ class AccountInternal extends PureComponent<
       this.setState({ filterConditionsOp: savedFilter.conditionsOp });
       this.applyFilters([...savedFilter.conditions]);
     } else {
-      filterConditions = filterConditions.filter(
-        c =>
-          !isTransactionFilterEntity(c) &&
-          c.customName !== conditionOrSavedFilter.customName,
-      );
-
       // A condition was passed in.
       const condition = conditionOrSavedFilter;
       this.setState({
@@ -1836,7 +1842,7 @@ export function Account() {
   const payees = usePayees();
   const failedAccounts = useFailedAccounts();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
-  const [hideFraction = false] = useSyncedPref('hideFraction');
+  const [hideFraction] = useSyncedPref('hideFraction');
   const [expandSplits] = useLocalPref('expand-splits');
   const [showBalances, setShowBalances] = useSyncedPref(
     `show-balances-${params.id}`,
@@ -1871,16 +1877,20 @@ export function Account() {
           accounts={accounts}
           failedAccounts={failedAccounts}
           dateFormat={dateFormat}
-          hideFraction={hideFraction}
+          hideFraction={String(hideFraction) === 'true'}
           expandSplits={expandSplits}
-          showBalances={showBalances}
-          setShowBalances={setShowBalances}
-          showCleared={!hideCleared}
-          setShowCleared={val => setHideCleared(!val)}
-          showReconciled={!hideReconciled}
-          setShowReconciled={val => setHideReconciled(!val)}
-          showExtraBalances={showExtraBalances}
-          setShowExtraBalances={setShowExtraBalances}
+          showBalances={String(showBalances) === 'true'}
+          setShowBalances={showBalances =>
+            setShowBalances(String(showBalances))
+          }
+          showCleared={String(hideCleared) !== 'true'}
+          setShowCleared={val => setHideCleared(String(!val))}
+          showReconciled={String(hideReconciled) !== 'true'}
+          setShowReconciled={val => setHideReconciled(String(!val))}
+          showExtraBalances={String(showExtraBalances) === 'true'}
+          setShowExtraBalances={extraBalances =>
+            setShowExtraBalances(String(extraBalances))
+          }
           payees={payees}
           modalShowing={modalShowing}
           accountsSyncing={accountsSyncing}

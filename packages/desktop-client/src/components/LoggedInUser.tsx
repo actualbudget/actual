@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 
@@ -18,6 +19,7 @@ import { Popover } from './common/Popover';
 import { Text } from './common/Text';
 import { View } from './common/View';
 import { useMultiuserEnabled, useServerURL } from './ServerContext';
+import { useMetadataPref } from '../hooks/useMetadataPref';
 
 type LoggedInUserProps = {
   hideIfNoServer?: boolean;
@@ -30,6 +32,8 @@ export function LoggedInUser({
   style,
   color,
 }: LoggedInUserProps) {
+  const { t } = useTranslation();
+
   const userData = useSelector((state: State) => state.user.data);
   const { getUserData, signOut, closeBudget } = useActions();
   const [loading, setLoading] = useState(true);
@@ -37,8 +41,8 @@ export function LoggedInUser({
   const serverUrl = useServerURL();
   const triggerRef = useRef<HTMLButtonElement>(null);
   const navigate = useNavigate();
-  const [budgetId] = useLocalPref('id');
-  const [cloudFileId] = useLocalPref('cloudFileId');
+  const [budgetId] = useMetadataPref('id');
+  const [cloudFileId] = useMetadataPref('cloudFileId');
   const location = useLocation();
   const { hasPermission } = useAuth();
   const [isOwner, setIsOwner] = useState(false);
@@ -105,11 +109,17 @@ export function LoggedInUser({
     }
   };
 
-  const serverMessage = () => {
-    if (!serverUrl) return 'No server';
-    if (userData?.offline) return 'Server offline';
-    return 'Server online';
-  };
+  function serverMessage() {
+    if (!serverUrl) {
+      return t('No server');
+    }
+
+    if (userData?.offline) {
+      return t('Server offline');
+    }
+
+    return t('Server online');
+  }
 
   if (hideIfNoServer && !serverUrl) return null;
 
@@ -123,7 +133,7 @@ export function LoggedInUser({
           ...style,
         }}
       >
-        Connecting...
+        <Trans>Connecting...</Trans>
       </Text>
     );
   }
@@ -142,26 +152,26 @@ export function LoggedInUser({
       !userData?.offline &&
       userData?.loginMethod === 'password'
     ) {
-      baseMenu.push({ name: 'change-password', text: 'Change password' });
+      baseMenu.push({ name: 'change-password', text: t('Change password') });
     }
     if (serverUrl) {
-      baseMenu.push({ name: 'sign-out', text: 'Sign out' });
+      baseMenu.push({ name: 'sign-out', text: t('Sign out') });
     }
     baseMenu.push({
       name: 'config-server',
-      text: serverUrl ? 'Change server URL' : 'Start using a server',
+      text: serverUrl ? 'Change server URL' : t('Start using a server'),
     });
 
     const adminMenu: (MenuItem | typeof Menu.line)[] = [];
     if (multiuserEnabled && isAdmin) {
       if (!budgetId && location.pathname !== '/') {
-        adminMenu.push({ name: 'index', text: 'View file list' });
+        adminMenu.push({ name: 'index', text: t('View file list') });
       } else if (
         serverUrl &&
         !userData?.offline &&
         location.pathname !== '/user-directory'
       ) {
-        adminMenu.push({ name: 'user-directory', text: 'User Directory' });
+        adminMenu.push({ name: 'user-directory', text: t('User Directory') });
       }
     }
 
@@ -173,7 +183,7 @@ export function LoggedInUser({
       budgetId &&
       location.pathname !== '/user-access'
     ) {
-      adminMenu.push({ name: 'user-access', text: 'User Access Management' });
+      adminMenu.push({ name: 'user-access', text: t('User Access Management') });
     }
 
     if (adminMenu.length > 0) {

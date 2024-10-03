@@ -10,7 +10,6 @@ import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { useGlobalPref } from '../../hooks/useGlobalPref';
 import { useLatestVersion, useIsOutdated } from '../../hooks/useLatestVersion';
 import { useMetadataPref } from '../../hooks/useMetadataPref';
-import { useSetThemeColor } from '../../hooks/useSetThemeColor';
 import { useResponsive } from '../../ResponsiveProvider';
 import { theme } from '../../style';
 import { tokens } from '../../tokens';
@@ -140,7 +139,6 @@ export function Settings() {
 
   const { isNarrowWidth } = useResponsive();
 
-  useSetThemeColor(theme.mobileViewTheme);
   return (
     <Page
       header="Settings"

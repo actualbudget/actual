@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, type CSSProperties } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 
 import {
@@ -46,19 +47,19 @@ import { Tooltip } from '../common/Tooltip';
 import { View } from '../common/View';
 import { useMultiuserEnabled } from '../ServerContext';
 
-function getFileDescription(file: File) {
+function getFileDescription(file: File, t: (key: string) => string) {
   if (file.state === 'unknown') {
-    return (
+    return t(
       'This is a cloud-based file but its state is unknown because you ' +
-      'are offline.'
+        'are offline.',
     );
   }
 
   if (file.encryptKeyId) {
     if (file.hasKey) {
-      return 'This file is encrypted and you have key to access it.';
+      return t('This file is encrypted and you have key to access it.');
     }
-    return 'This file is encrypted and you do not have the key for it.';
+    return t('This file is encrypted and you do not have the key for it.');
   }
 
   return null;
@@ -86,7 +87,9 @@ function FileMenu({
     }
   }
 
-  const items = [{ name: 'delete', text: 'Delete' }];
+  const { t } = useTranslation();
+
+  const items = [{ name: 'delete', text: t('Delete') }];
   const { isNarrowWidth } = useResponsive();
 
   const defaultMenuItemStyle = isNarrowWidth
@@ -146,6 +149,8 @@ function FileState({
   currentUserId: string;
   isOpenID: boolean;
 }) {
+  const { t } = useTranslation();
+
   let Icon;
   let status;
   let color;
@@ -154,28 +159,33 @@ function FileState({
   switch (file.state) {
     case 'unknown':
       Icon = SvgCloudUnknown;
-      status = 'Network unavailable';
+      status = t('Network unavailable');
       color = theme.buttonNormalDisabledText;
       ownerName = 'unknown';
       break;
     case 'remote':
       Icon = SvgCloudDownload;
-      status = 'Available for download';
+      status = t('Available for download');
       ownerName = isOpenID ? getOwnerDisplayName() : '';
       break;
     case 'local':
       Icon = SvgFileDouble;
       status = 'Local';
       break;
+    case 'broken':
+      ownerName = 'unknown';
+      Icon = SvgFileDouble;
+      status = t('Local');
+      break;
 
     case 'broken':
       ownerName = 'unknown';
       Icon = SvgFileDouble;
-      status = 'Local';
+      status = t('Local');
       break;
     default:
       Icon = SvgCloudCheck;
-      status = 'Syncing';
+      status = t('Syncing');
       ownerName = isOpenID ? getOwnerDisplayName() : '';
       break;
   }
@@ -263,6 +273,8 @@ function FileItem({
   usersPerFile: Map<string, UserAccessEntity[]>;
   isOpenID: boolean;
 }) {
+  const { t } = useTranslation();
+
   const selecting = useRef(false);
 
   async function _onSelect(file: File) {
@@ -278,7 +290,7 @@ function FileItem({
   return (
     <View
       onClick={() => _onSelect(file)}
-      title={getFileDescription(file) || ''}
+      title={getFileDescription(file, t) || ''}
       style={{
         flexDirection: 'row',
         justifyContent: 'space-between',
@@ -377,7 +389,7 @@ function BudgetFiles({
             color: theme.pageTextSubdued,
           }}
         >
-          No budget files
+          <Trans>No budget files</Trans>
         </Text>
       ) : (
         files.map(file => (
@@ -447,7 +459,7 @@ function BudgetListHeader({
           ...styles.veryLargeText,
         }}
       >
-        Files
+        <Trans>Files</Trans>
       </Text>
       {!quickSwitchMode && <RefreshButton onRefresh={onRefresh} />}
     </View>
@@ -523,19 +535,19 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
     refresh();
   }
 
-  const onSelect = (file: File): void => {
+  const onSelect = async (file: File): Promise<void> => {
     const isRemoteFile = file.state === 'remote';
 
     if (!id) {
       if (isRemoteFile) {
-        dispatch(downloadBudget(file.cloudFileId));
+        await dispatch(downloadBudget(file.cloudFileId));
       } else {
-        dispatch(loadBudget(file.id));
+        await dispatch(loadBudget(file.id));
       }
     } else if (!isRemoteFile && file.id !== id) {
-      dispatch(closeAndLoadBudget(file.id));
+      await dispatch(closeAndLoadBudget(file.id));
     } else if (isRemoteFile) {
-      dispatch(closeAndDownloadBudget(file.cloudFileId));
+      await dispatch(closeAndDownloadBudget(file.cloudFileId));
     }
   };
 
@@ -591,7 +603,7 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
               dispatch(pushModal('import'));
             }}
           >
-            Import file
+            <Trans>Import file</Trans>
           </Button>
 
           <Button
@@ -602,7 +614,7 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
               marginLeft: 10,
             }}
           >
-            Create new file
+            <Trans>Create new file</Trans>
           </Button>
 
           {isNonProductionEnvironment() && (
@@ -614,7 +626,7 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
                 marginLeft: 10,
               }}
             >
-              Create test file
+              <Trans>Create test file</Trans>
             </Button>
           )}
         </View>

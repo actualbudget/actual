@@ -6,7 +6,7 @@ import { type TransactionFilterEntity } from 'loot-core/types/models';
 import { type RuleConditionEntity } from 'loot-core/types/models/rule';
 
 import { SvgExpandArrow } from '../../icons/v0';
-import { Button } from '../common/Button';
+import { Button } from '../common/Button2';
 import { Popover } from '../common/Popover';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
@@ -163,9 +163,9 @@ export function SavedFilterMenuButton({
       {conditions.length > 0 && (
         <Button
           ref={triggerRef}
-          type="bare"
+          variant="bare"
           style={{ marginTop: 10 }}
-          onClick={() => {
+          onPress={() => {
             setMenuOpen(true);
           }}
         >
