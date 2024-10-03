@@ -4,8 +4,13 @@ import path from 'path';
 import electron, { BrowserWindow } from 'electron';
 
 const backend = undefined;
-const getBackend = async () =>
-  backend || (await import(process.env.lootCoreScript));
+const getBackend = async () => {
+  if (!process.env.lootCoreScript) {
+    throw new Error('lootCoreScript not set');
+  }
+
+  return backend || (await import(process.env.lootCoreScript));
+};
 
 type WindowState = Electron.Rectangle & {
   isMaximized?: boolean;

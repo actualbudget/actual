@@ -1,5 +1,4 @@
 import fs from 'fs';
-import Module from 'module';
 import path from 'path';
 
 import {
