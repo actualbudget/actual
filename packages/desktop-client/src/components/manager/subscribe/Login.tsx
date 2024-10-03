@@ -54,6 +54,7 @@ function PasswordLogin({ setError, dispatch }) {
         type="password"
         onChangeValue={newValue => setPassword(newValue)}
         style={{ flex: 1, marginRight: 10 }}
+        onEnter={onSubmitPassword}
       />
       <ButtonWithLoading
         variant="primary"
