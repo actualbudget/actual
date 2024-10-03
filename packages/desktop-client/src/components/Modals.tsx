@@ -603,15 +603,6 @@ export function Modals() {
             />
           );
 
-        case 'edit-access':
-          return (
-            <EditUserAccess
-              key={name}
-              defaultUserAccess={options.access}
-              onSave={options.onSave}
-            />
-          );
-
         case 'edit-user':
           return (
             <EditUserFinanceApp

@@ -3,12 +3,10 @@ import { useSelector } from 'react-redux';
 
 import { type State } from 'loot-core/client/state-types';
 import { send } from 'loot-core/platform/client/fetch';
-import { getPrefs } from 'loot-core/server/prefs';
 import { getUserAccessErrors } from 'loot-core/shared/errors';
 import { type UserEntity } from 'loot-core/types/models';
 
 import { useActions } from '../../hooks/useActions';
-import { useLocalPref } from '../../hooks/useLocalPref';
 import { useMetadataPref } from '../../hooks/useMetadataPref';
 import { styles, theme } from '../../style';
 import { Button } from '../common/Button2';

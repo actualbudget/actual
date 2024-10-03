@@ -177,12 +177,6 @@ function FileState({
       Icon = SvgFileDouble;
       status = t('Local');
       break;
-
-    case 'broken':
-      ownerName = 'unknown';
-      Icon = SvgFileDouble;
-      status = t('Local');
-      break;
     default:
       Icon = SvgCloudCheck;
       status = t('Syncing');

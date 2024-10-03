@@ -10,14 +10,12 @@ import React, {
 } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { getPrefs } from 'loot-core/server/prefs';
 import { pushModal } from 'loot-core/src/client/actions/modals';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as undo from 'loot-core/src/platform/client/undo';
 import { type UserAvailable } from 'loot-core/types/models';
 import { type UserAccessEntity } from 'loot-core/types/models/userAccess';
 
-import { useLocalPref } from '../../../hooks/useLocalPref';
 import { useMetadataPref } from '../../../hooks/useMetadataPref';
 import { SvgDotsHorizontalTriple, SvgLockOpen } from '../../../icons/v1';
 import { SvgLockClosed } from '../../../icons/v2';

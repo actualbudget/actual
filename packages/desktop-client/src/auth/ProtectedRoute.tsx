@@ -1,10 +1,8 @@
 import { useEffect, useState, type ReactElement } from 'react';
 
 import { send } from 'loot-core/platform/client/fetch';
-import { getPrefs } from 'loot-core/server/prefs';
 
 import { View } from '../components/common/View';
-import { useLocalPref } from '../hooks/useLocalPref';
 import { useMetadataPref } from '../hooks/useMetadataPref';
 
 import { useAuth } from './AuthProvider';

@@ -2,12 +2,10 @@
 import React, { memo, useState } from 'react';
 
 import { send } from 'loot-core/platform/client/fetch';
-import { getPrefs } from 'loot-core/server/prefs';
 import { getUserAccessErrors } from 'loot-core/shared/errors';
 import { type UserAvailable } from 'loot-core/types/models';
 
 import { useActions } from '../../../hooks/useActions';
-import { useLocalPref } from '../../../hooks/useLocalPref';
 import { useMetadataPref } from '../../../hooks/useMetadataPref';
 import { theme } from '../../../style';
 import { View } from '../../common/View';

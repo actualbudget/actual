@@ -4,13 +4,11 @@ import { useSelector } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 
 import { send } from 'loot-core/platform/client/fetch';
-import { getPrefs } from 'loot-core/server/prefs';
 import { type State } from 'loot-core/src/client/state-types';
 
 import { useAuth } from '../auth/AuthProvider';
 import { Permissions } from '../auth/types';
 import { useActions } from '../hooks/useActions';
-import { useLocalPref } from '../hooks/useLocalPref';
 import { useMetadataPref } from '../hooks/useMetadataPref';
 import { useNavigate } from '../hooks/useNavigate';
 import { theme, styles, type CSSProperties } from '../style';
