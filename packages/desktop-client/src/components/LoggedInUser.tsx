@@ -158,7 +158,7 @@ export function LoggedInUser({
     }
     baseMenu.push({
       name: 'config-server',
-      text: serverUrl ? 'Change server URL' : t('Start using a server'),
+      text: serverUrl ? t('Change server URL') : t('Start using a server'),
     });
 
     const adminMenu: (MenuItem | typeof Menu.line)[] = [];
