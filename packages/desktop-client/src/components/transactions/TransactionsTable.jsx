@@ -1731,6 +1731,7 @@ function NewTransaction({
           style={{ marginRight: 10, padding: '4px 10px' }}
           onPress={() => onClose()}
           data-testid="cancel-button"
+          focused={focusedField === 'cancel'}
         >
           Cancel
         </Button>
@@ -1750,6 +1751,7 @@ function NewTransaction({
             style={{ padding: '4px 10px' }}
             onPress={onAdd}
             data-testid="add-button"
+            focused={focusedField === 'add'}
           >
             Add
           </Button>
@@ -2108,10 +2110,10 @@ export const TransactionTable = forwardRef((props, ref) => {
     }
   }, [prevSplitsExpanded.current]);
 
-  const newNavigator = useTableNavigator(newTransactions, getFields);
+  const newNavigator = useTableNavigator(newTransactions, getFieldsNewTransaction);
   const tableNavigator = useTableNavigator(
     transactionsWithExpandedSplits,
-    getFields,
+    getFieldsTableTransaction,
   );
   const shouldAdd = useRef(false);
   const latestState = useRef({ newTransactions, newNavigator, tableNavigator });
@@ -2176,7 +2178,26 @@ export const TransactionTable = forwardRef((props, ref) => {
     savePending.current = false;
   }, [newTransactions, props.transactions]);
 
-  function getFields(item) {
+
+  function getFieldsNewTransaction(item){
+    let fields = [
+      'select',
+      'date',
+      'account',
+      'payee',
+      'notes',
+      'category',
+      'debit',
+      'credit',
+      'cleared',
+      'cancel',
+      'add'
+    ];
+
+    return getFields(item, fields);
+  }
+
+  function getFieldsTableTransaction(item){
     let fields = [
       'select',
       'date',
@@ -2189,6 +2210,10 @@ export const TransactionTable = forwardRef((props, ref) => {
       'cleared',
     ];
 
+    return getFields(item, fields);
+  }
+
+  function getFields(item, fields) {
     fields = item.is_child
       ? ['select', 'payee', 'notes', 'category', 'debit', 'credit']
       : fields.filter(
