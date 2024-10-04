@@ -6,15 +6,34 @@ import { SectionLabel } from '../../forms';
 
 import { SelectField } from './SelectField';
 import { SubLabel } from './SubLabel';
+import { type FieldMapping, type ImportTransaction } from './utils';
+
+type FieldMappingsProps = {
+  transactions: ImportTransaction[];
+  mappings?: FieldMapping;
+  onChange: (field: keyof FieldMapping, newValue: string) => void;
+  splitMode: boolean;
+  inOutMode: boolean;
+  hasHeaderRow: boolean;
+};
 
 export function FieldMappings({
   transactions,
-  mappings,
+  mappings = {
+    date: null,
+    amount: null,
+    payee: null,
+    notes: null,
+    inOut: null,
+    category: null,
+    outflow: null,
+    inflow: null,
+  },
   onChange,
   splitMode,
   inOutMode,
   hasHeaderRow,
-}) {
+}: FieldMappingsProps) {
   if (transactions.length === 0) {
     return null;
   }
@@ -22,7 +41,6 @@ export function FieldMappings({
   const { existing, ignored, selected, selected_merge, trx_id, ...trans } =
     transactions[0];
   const options = Object.keys(trans);
-  mappings = mappings || {};
 
   return (
     <View>
