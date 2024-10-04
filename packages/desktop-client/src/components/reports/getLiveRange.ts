@@ -1,5 +1,3 @@
-import { t } from 'i18next';
-
 import * as monthUtils from 'loot-core/src/shared/months';
 import { type TimeFrame } from 'loot-core/types/models';
 import { type SyncedPrefs } from 'loot-core/types/prefs';
@@ -42,7 +40,7 @@ export function getLiveRange(
       if (typeof rangeName === 'number') {
         [dateStart, dateEnd] = getSpecificRange(
           rangeName,
-          [t('This month'), t('This week')].includes(cond)
+          ['This month', 'This week'].includes(cond)
             ? null
             : rangeName - (includeCurrentInterval ? 0 : 1),
           ReportOptions.dateRangeType.get(cond),
