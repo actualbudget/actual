@@ -9,14 +9,19 @@ type WindowState = Electron.Rectangle & {
   displayBounds?: Electron.Rectangle;
 };
 
+const getDataDir = () => {
+  if (!process.env.ACTUAL_DATA_DIR) {
+    throw new Error('ACTUAL_DATA_DIR is not set');
+  }
+
+  return process.env.ACTUAL_DATA_DIR;
+};
+
 async function loadState() {
   let state: WindowState | undefined = undefined;
   try {
     state = JSON.parse(
-      fs.readFileSync(
-        path.join(process.env.ACTUAL_DATA_DIR, 'window.json'),
-        'utf8',
-      ),
+      fs.readFileSync(path.join(getDataDir(), 'window.json'), 'utf8'),
     );
   } catch (e) {
     console.log('Could not load window state');
@@ -43,7 +48,7 @@ function updateState(win: BrowserWindow, state: WindowState) {
 async function saveState(win: BrowserWindow, state: WindowState) {
   updateState(win, state);
   fs.writeFileSync(
-    path.join(process.env.ACTUAL_DATA_DIR, 'window.json'),
+    path.join(getDataDir(), 'window.json'),
     JSON.stringify(state),
     'utf8',
   );
