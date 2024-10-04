@@ -31,7 +31,7 @@ import { RuleConditionEntity } from '../../types/models';
 import { RuleError } from '../errors';
 import { Schedule as RSchedule } from '../util/rschedule';
 
-void (function registerHandlebarsHelpers() {
+function registerHandlebarsHelpers() {
   const regexTest = /^\/(.*)\/([gimuy]*)$/;
 
   function mathHelper(fn: (a: number, b: number) => number) {
@@ -68,8 +68,8 @@ void (function registerHandlebarsHelpers() {
     ceil: (a: unknown) => Math.ceil(Number(a)),
     round: (a: unknown) => Math.round(Number(a)),
     abs: (a: unknown) => Math.abs(Number(a)),
-    min: mathHelper(Math.min),
-    max: mathHelper(Math.max),
+    min: mathHelper((a, b) => Math.min(a, b)),
+    max: mathHelper((a, b) => Math.max(a, b)),
     fixed: (a: unknown, digits: unknown) => Number(a).toFixed(Number(digits)),
     day: (date: string) => format(date, 'd'),
     month: (date: string) => format(date, 'M'),
@@ -80,7 +80,9 @@ void (function registerHandlebarsHelpers() {
   for (const [name, fn] of Object.entries(helpers)) {
     Handlebars.registerHelper(name, fn);
   }
-})();
+}
+
+registerHandlebarsHelpers();
 
 function assert(test, type, msg) {
   if (!test) {
@@ -564,6 +566,7 @@ export class Action {
         try {
           this.handlebarsTemplate({});
         } catch (e) {
+          console.debug(e);
           assert(false, 'invalid-template', `Invalid Handlebars template`);
         }
       }
