@@ -28,8 +28,8 @@ import {
 import './security';
 
 process.env.lootCoreScript = isDev
-  ? 'loot-core/lib-dist/bundle.desktop.js' // serve from node_modules for hot reload
-  : path.resolve(__dirname, 'loot-core/lib-dist/bundle.desktop.js'); // serve from build for production
+  ? 'loot-core/lib-dist/bundle.desktop.js' // serve from local output in development (provides hot-reloading)
+  : path.resolve(__dirname, 'loot-core/lib-dist/bundle.desktop.js'); // serve from build in production
 
 // This allows relative URLs to be resolved to app:// which makes
 // local assets load correctly

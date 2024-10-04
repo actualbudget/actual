@@ -3,15 +3,6 @@ import path from 'path';
 
 import electron, { BrowserWindow } from 'electron';
 
-const backend = undefined;
-const getBackend = async () => {
-  if (!process.env.lootCoreScript) {
-    throw new Error('lootCoreScript not set');
-  }
-
-  return backend || (await import(process.env.lootCoreScript));
-};
-
 type WindowState = Electron.Rectangle & {
   isMaximized?: boolean;
   isFullScreen?: boolean;
@@ -20,11 +11,10 @@ type WindowState = Electron.Rectangle & {
 
 async function loadState() {
   let state: WindowState | undefined = undefined;
-  const backend = await getBackend();
   try {
     state = JSON.parse(
       fs.readFileSync(
-        path.join(backend.lib.getDataDir(), 'window.json'),
+        path.join(process.env.ACTUAL_DATA_DIR, 'window.json'),
         'utf8',
       ),
     );
@@ -51,10 +41,9 @@ function updateState(win: BrowserWindow, state: WindowState) {
 }
 
 async function saveState(win: BrowserWindow, state: WindowState) {
-  const backend = await getBackend();
   updateState(win, state);
   fs.writeFileSync(
-    path.join(backend.lib.getDataDir(), 'window.json'),
+    path.join(process.env.ACTUAL_DATA_DIR, 'window.json'),
     JSON.stringify(state),
     'utf8',
   );
