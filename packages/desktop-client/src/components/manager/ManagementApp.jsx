@@ -8,6 +8,8 @@ import {
   setAppState,
 } from 'loot-core/client/actions';
 
+import { useMetaThemeColor } from '../../hooks/useMetaThemeColor';
+import { useResponsive } from '../../ResponsiveProvider';
 import { theme } from '../../style';
 import { tokens } from '../../tokens';
 import { AppBackground } from '../AppBackground';
@@ -52,6 +54,9 @@ function Version() {
 }
 
 export function ManagementApp() {
+  const { isNarrowWidth } = useResponsive();
+  useMetaThemeColor(isNarrowWidth ? theme.mobileConfigServerViewTheme : null);
+
   const files = useSelector(state => state.budgets.allFiles);
   const isLoading = useSelector(state => state.app.loadingText !== null);
   const userData = useSelector(state => state.user.data);

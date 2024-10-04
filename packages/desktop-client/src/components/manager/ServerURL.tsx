@@ -1,4 +1,5 @@
 import React from 'react';
+import { Trans } from 'react-i18next';
 
 import { Link } from '../common/Link';
 import { Text } from '../common/Text';
@@ -23,15 +24,17 @@ export function ServerURL() {
     >
       <Text>
         {url ? (
-          <>
+          <Trans>
             Using server: <strong>{url}</strong>
-          </>
+          </Trans>
         ) : (
-          <strong>No server configured</strong>
+          <Trans>
+            <strong>No server configured</strong>
+          </Trans>
         )}
       </Text>
       <Link variant="internal" to="/config-server" style={{ marginLeft: 15 }}>
-        Change
+        <Trans>Change</Trans>
       </Link>
     </View>
   );
