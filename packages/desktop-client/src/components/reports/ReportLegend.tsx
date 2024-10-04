@@ -1,5 +1,4 @@
 import React from 'react';
-import { useTranslation } from 'react-i18next';
 
 import { theme, styles } from '../../style';
 import { Text } from '../common/Text';
@@ -15,8 +14,6 @@ type ReportLegendProps = {
 };
 
 export function ReportLegend({ legend, groupBy, interval }: ReportLegendProps) {
-  const { t } = useTranslation();
-
   return (
     <View
       style={{
@@ -35,7 +32,7 @@ export function ReportLegend({ legend, groupBy, interval }: ReportLegendProps) {
           paddingTop: 10,
         }}
       >
-        {groupBy === t('Interval')
+        {groupBy === 'Interval'
           ? ReportOptions.intervalMap.get(interval)
           : groupBy}
       </Text>
