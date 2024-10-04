@@ -114,8 +114,8 @@ export function Accounts() {
             account={account}
             connected={!!account.bank}
             pending={syncingAccountIds.includes(account.id)}
-            failed={failedAccounts && failedAccounts.has(account.id)}
-            updated={updatedAccounts && updatedAccounts.includes(account.id)}
+            failed={failedAccounts?.has(account.id)}
+            updated={updatedAccounts?.includes(account.id)}
             to={getAccountPath(account)}
             query={queries.accountBalance(account)}
             onDragChange={onDragChange}
