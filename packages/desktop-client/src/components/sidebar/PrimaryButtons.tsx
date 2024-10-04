@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, { useState, useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
@@ -6,15 +7,18 @@ import {
   SvgCheveronDown,
   SvgCheveronRight,
   SvgCog,
+  SvgReports,
   SvgStoreFront,
   SvgTuning,
+  SvgWallet,
 } from '../../icons/v1';
+import { SvgCalendar } from '../../icons/v2';
 import { View } from '../common/View';
 
 import { Item } from './Item';
 import { SecondaryItem } from './SecondaryItem';
 
-export function Tools() {
+export function PrimaryButtons() {
   const { t } = useTranslation();
   const [isOpen, setOpen] = useState(false);
   const onToggle = useCallback(() => setOpen(open => !open), []);
@@ -28,10 +32,13 @@ export function Tools() {
     if (isActive) {
       setOpen(true);
     }
-  }, [location.pathname]);
+  }, [isActive, location.pathname]);
 
   return (
     <View style={{ flexShrink: 0 }}>
+      <Item title={t('Budget')} Icon={SvgWallet} to="/budget" />
+      <Item title={t('Reports')} Icon={SvgReports} to="/reports" />
+      <Item title={t('Schedules')} Icon={SvgCalendar} to="/schedules" />
       <Item
         title="More"
         Icon={isOpen ? SvgCheveronDown : SvgCheveronRight}
