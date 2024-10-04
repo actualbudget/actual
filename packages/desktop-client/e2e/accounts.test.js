@@ -11,7 +11,7 @@ test.describe('Accounts', () => {
   let configurationPage;
   let accountPage;
 
-  test.beforeAll(async ({ browser }) => {
+  test.beforeEach(async ({ browser }) => {
     page = await browser.newPage();
     navigation = new Navigation(page);
     configurationPage = new ConfigurationPage(page);
@@ -20,7 +20,7 @@ test.describe('Accounts', () => {
     await configurationPage.createTestFile();
   });
 
-  test.afterAll(async () => {
+  test.afterEach(async () => {
     await page.close();
   });
 
