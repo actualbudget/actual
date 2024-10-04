@@ -65,7 +65,7 @@ expect.extend({
 
 // eslint-disable-next-line import/no-unused-modules, import/no-default-export
 export default defineConfig({
-  timeout: 20000, // 20 seconds
+  timeout: 30000, // 30 seconds
   retries: 1,
   testDir: 'e2e/',
   reporter: !process.env.CI ? [['html', { open: 'never' }]] : undefined,

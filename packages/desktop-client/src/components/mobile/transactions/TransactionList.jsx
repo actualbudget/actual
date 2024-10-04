@@ -91,6 +91,7 @@ export function TransactionList({
   if (isLoading) {
     return (
       <View
+        aria-label="Loading..."
         style={{
           flex: 1,
           justifyContent: 'center',
@@ -107,7 +108,7 @@ export function TransactionList({
       {scrollProps.ListHeaderComponent}
       <ListBox
         {...scrollProps}
-        aria-label="transaction list"
+        aria-label="Transaction list"
         label=""
         loadMore={onLoadMore}
         selectionMode="none"
