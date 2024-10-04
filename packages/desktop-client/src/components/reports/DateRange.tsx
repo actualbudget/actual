@@ -1,7 +1,8 @@
 import React, { type ReactElement } from 'react';
-import { useTranslation, Trans } from 'react-i18next';
+import { Trans } from 'react-i18next';
 
 import * as d from 'date-fns';
+import { t } from 'i18next';
 
 import { theme } from '../../style';
 import { styles } from '../../style/styles';
@@ -16,7 +17,7 @@ type DateRangeProps = {
 
 function checkDate(date: string) {
   const dateParsed = new Date(date);
-  if (dateParsed.toString() !== 'Invalid Date') {
+  if (dateParsed.toString() !== t('Invalid Date')) {
     return d.format(dateParsed, 'yyyy-MM-dd');
   } else {
     return null;
@@ -26,8 +27,6 @@ function checkDate(date: string) {
 export function DateRange({ start, end, type }: DateRangeProps): ReactElement {
   const checkStart = checkDate(start);
   const checkEnd = checkDate(end);
-
-  const { t } = useTranslation();
 
   let startDate;
   let endDate;
@@ -42,40 +41,50 @@ export function DateRange({ start, end, type }: DateRangeProps): ReactElement {
     );
   }
 
+  const formattedStartDate = d.format(startDate, 'MMM yyyy');
+  const formattedEndDate = d.format(endDate, 'MMM yyyy');
+  const typeOrFormattedEndDate = ['budget', 'average'].includes(type)
+    ? type
+    : formattedEndDate;
+
   let content: string | ReactElement;
   if (['budget', 'average'].includes(type || '')) {
     content = (
       <div>
-        <Trans>
-          Compare {d.format(startDate, 'MMM yyyy')} to{' '}
-          {type === 'budget' ? 'budgeted' : 'average'}
+        <Trans
+          values={{
+            startDate: formattedStartDate,
+            endDate: typeOrFormattedEndDate,
+          }}
+        >
+          Compare {{ startDate }} to {{ endDate }}
         </Trans>
       </div>
     );
-  } else if (startDate.getFullYear() !== endDate.getFullYear()) {
+  } else if (
+    startDate.getFullYear() !== endDate.getFullYear() ||
+    startDate.getMonth() !== endDate.getMonth()
+  ) {
     content = (
       <div>
-        {type && t('Compare ')}
-        {d.format(startDate, 'MMM yyyy')}
-        {type ? t(' to ') : ' - '}
-        {['budget', 'average'].includes(type || '')
-          ? type
-          : d.format(endDate, 'MMM yyyy')}
-      </div>
-    );
-  } else if (startDate.getMonth() !== endDate.getMonth()) {
-    content = (
-      <div>
-        {type && t('Compare ')}
-        {d.format(startDate, 'MMM yyyy')}
-        {type ? t(' to ') : ' - '}
-        {['budget', 'average'].includes(type || '')
-          ? type
-          : d.format(endDate, 'MMM yyyy')}
+        {type ? (
+          <Trans
+            values={{
+              formattedStartDate,
+              endDate: typeOrFormattedEndDate,
+            }}
+          >
+            Compare {{ formattedStartDate }} to {{ endDate }}
+          </Trans>
+        ) : (
+          <Trans>
+            {{ formattedStartDate }} - {{ formattedEndDate }}
+          </Trans>
+        )}
       </div>
     );
   } else {
-    content = d.format(endDate, 'MMMM yyyy');
+    content = formattedEndDate;
   }
 
   return <Block style={{ color: theme.pageTextSubdued }}>{content}</Block>;
