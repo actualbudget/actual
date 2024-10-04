@@ -12,12 +12,12 @@ import {
 
 import { css } from 'glamor';
 
+import { useMergedRefs } from '../../hooks/useMergedRefs';
+import { useProperFocus } from '../../hooks/useProperFocus';
 import { AnimatedLoading } from '../../icons/AnimatedLoading';
 import { type CSSProperties, styles, theme } from '../../style';
 
 import { View } from './View';
-import { useProperFocus } from '../../hooks/useProperFocus';
-import { useMergedRefs } from '../../hooks/useMergedRefs';
 
 const backgroundColor: {
   [key in ButtonVariant | `${ButtonVariant}Disabled`]?: string;
@@ -144,11 +144,16 @@ type ButtonVariant = 'normal' | 'primary' | 'bare' | 'menu' | 'menuSelected';
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   (props, buttonRef) => {
-    const { children, variant = 'normal', bounce = true, focused = false, ...restProps } = props;
+    const {
+      children,
+      variant = 'normal',
+      bounce = true,
+      focused = false,
+      ...restProps
+    } = props;
 
     const ref = useRef<HTMLButtonElement>(null);
     useProperFocus(ref, focused);
-    
     const mergedRef = useMergedRefs<HTMLButtonElement>(ref, buttonRef);
 
     const variantWithDisabled: ButtonVariant | `${ButtonVariant}Disabled` =

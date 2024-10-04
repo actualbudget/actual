@@ -2110,7 +2110,11 @@ export const TransactionTable = forwardRef((props, ref) => {
     }
   }, [prevSplitsExpanded.current]);
 
-  const newNavigator = useTableNavigator(newTransactions, getFieldsNewTransaction);
+  const newNavigator = useTableNavigator(
+    newTransactions,
+    getFieldsNewTransaction,
+  );
+
   const tableNavigator = useTableNavigator(
     transactionsWithExpandedSplits,
     getFieldsTableTransaction,
@@ -2178,9 +2182,8 @@ export const TransactionTable = forwardRef((props, ref) => {
     savePending.current = false;
   }, [newTransactions, props.transactions]);
 
-
-  function getFieldsNewTransaction(item){
-    let fields = [
+  function getFieldsNewTransaction(item) {
+    const fields = [
       'select',
       'date',
       'account',
@@ -2191,14 +2194,14 @@ export const TransactionTable = forwardRef((props, ref) => {
       'credit',
       'cleared',
       'cancel',
-      'add'
+      'add',
     ];
 
     return getFields(item, fields);
   }
 
-  function getFieldsTableTransaction(item){
-    let fields = [
+  function getFieldsTableTransaction(item) {
+    const fields = [
       'select',
       'date',
       'account',
