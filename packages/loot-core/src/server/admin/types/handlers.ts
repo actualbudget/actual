@@ -55,5 +55,5 @@ export interface AdminHandlers {
 
   'multiuser-get': () => Promise<boolean | null>;
 
-  'master-created': () => Promise<boolean>;
+  'owner-created': () => Promise<boolean>;
 }

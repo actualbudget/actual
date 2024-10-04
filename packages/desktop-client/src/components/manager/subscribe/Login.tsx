@@ -86,7 +86,7 @@ function OpenIdLogin({ setError }) {
   }
 
   useEffect(() => {
-    send('master-created').then(created => setWarnMasterCreation(!created));
+    send('owner-created').then(created => setWarnMasterCreation(!created));
   }, []);
 
   async function onSubmitOpenId() {

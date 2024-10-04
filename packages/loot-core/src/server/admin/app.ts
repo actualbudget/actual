@@ -274,8 +274,8 @@ app.method('multiuser-get', async function () {
   return null;
 });
 
-app.method('master-created', async function () {
-  const res = await get(getServer().BASE_SERVER + '/admin/masterCreated/');
+app.method('owner-created', async function () {
+  const res = await get(getServer().BASE_SERVER + '/admin/ownerCreated/');
 
   if (res) {
     return JSON.parse(res) as boolean;
