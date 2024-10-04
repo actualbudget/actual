@@ -99,6 +99,7 @@ export function TrackingBudgetMenuModal({
               }}
               textStyle={{ ...styles.veryLargeText, textAlign: 'center' }}
               onUpdateAmount={_onUpdateBudget}
+              data-testid="budget-amount"
             />
           </View>
           <BudgetMenu
