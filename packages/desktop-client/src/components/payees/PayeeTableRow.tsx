@@ -1,6 +1,7 @@
 // @ts-strict-ignore
 import { memo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { type PayeeEntity } from 'loot-core/src/types/models';
 
@@ -27,6 +28,8 @@ type RuleButtonProps = {
 };
 
 function RuleButton({ ruleCount, focused, onEdit, onClick }: RuleButtonProps) {
+  const count = ruleCount;
+
   return (
     <Cell
       name="rule-count"
@@ -49,11 +52,9 @@ function RuleButton({ ruleCount, focused, onEdit, onClick }: RuleButtonProps) {
       >
         <Text style={{ paddingRight: 5 }}>
           {ruleCount > 0 ? (
-            <>
-              {ruleCount} associated {ruleCount === 1 ? 'rule' : 'rules'}
-            </>
+            <Trans count={ruleCount}>{{ count }} associated rules</Trans>
           ) : (
-            <>Create rule</>
+            <Trans>Create rule</Trans>
           )}
         </Text>
         <SvgArrowThinRight style={{ width: 8, height: 8 }} />
@@ -100,6 +101,8 @@ export const PayeeTableRow = memo(
     onUpdate,
     style,
   }: PayeeTableRowProps) => {
+    const { t } = useTranslation();
+
     const { id } = payee;
     const dispatchSelected = useSelectedDispatch();
     const borderColor = selected
@@ -217,7 +220,7 @@ export const PayeeTableRow = memo(
           }}
         </CustomCell>
         <InputCell
-          value={(payee.transfer_acct ? 'Transfer: ' : '') + payee.name}
+          value={(payee.transfer_acct ? t('Transfer: ') : '') + payee.name}
           valueStyle={
             (!selected &&
               payee.transfer_acct && { color: theme.pageTextSubdued }) ||

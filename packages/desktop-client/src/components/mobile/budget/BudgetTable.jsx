@@ -284,7 +284,12 @@ function BudgetCell({
   };
 
   return (
-    <CellValue binding={binding} type="financial" data-testid={name} {...props}>
+    <CellValue
+      binding={binding}
+      type="financial"
+      aria-label={`Budgeted amount for ${category.name} category`}
+      {...props}
+    >
       {({ type, name, value }) =>
         children?.({
           type,
@@ -300,6 +305,7 @@ function BudgetCell({
               ...makeAmountGrey(value),
             }}
             onPress={onOpenCategoryBudgetMenu}
+            aria-label={`Open budget menu for ${category.name} category`}
           >
             <View>
               <PrivacyFilter>
@@ -524,7 +530,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
         opacity: isHidden ? 0.5 : undefined,
         ...style,
       }}
-      data-testid="row"
+      data-testid="category-row"
       innerRef={listItemRef}
     >
       <View
@@ -585,7 +591,6 @@ const ExpenseCategory = memo(function ExpenseCategory({
         >
           <BudgetCell
             key={`${show3Cols}|${showBudgetedCol}`}
-            name="budgeted"
             binding={budgeted}
             type="financial"
             category={category}
@@ -601,7 +606,11 @@ const ExpenseCategory = memo(function ExpenseCategory({
             alignItems: 'flex-end',
           }}
         >
-          <CellValue name="spent" binding={spent} type="financial">
+          <CellValue
+            binding={spent}
+            type="financial"
+            aria-label={`Spent amount for ${category.name} category`}
+          >
             {({ type, value }) => (
               <Button
                 variant="bare"
@@ -609,6 +618,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
                   ...PILL_STYLE,
                 }}
                 onPress={onShowActivity}
+                aria-label={`Show transactions for ${category.name} category`}
               >
                 <PrivacyFilter>
                   <AutoTextSize
@@ -639,6 +649,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
           }}
         >
           <BalanceWithCarryover
+            aria-label={`Balance for ${category.name} category`}
             type="financial"
             carryover={carryover}
             balance={balance}
@@ -671,6 +682,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
                   maxWidth: columnWidth,
                 }}
                 onPress={onOpenBalanceMenu}
+                aria-label={`Open balance menu for ${category.name} category`}
               >
                 <PrivacyFilter>
                   <AutoTextSize
@@ -776,7 +788,7 @@ const ExpenseGroupHeader = memo(function ExpenseGroupHeader({
         opacity: !!group.hidden ? 0.5 : undefined,
         paddingLeft: 0,
       }}
-      data-testid={`expense-group-header-${group.name}`}
+      data-testid="category-group-row"
       innerRef={listItemRef}
     >
       <View
@@ -832,7 +844,7 @@ const ExpenseGroupHeader = memo(function ExpenseGroupHeader({
                 ...styles.smallText,
                 fontWeight: '500',
               }}
-              data-testid="group-name"
+              data-testid="category-group-name"
             >
               {group.name}
             </Text>
@@ -972,7 +984,7 @@ const IncomeGroupHeader = memo(function IncomeGroupHeader({
         paddingLeft: 0,
       }}
       innerRef={listItemRef}
-      data-testid={`income-group-header-${group.name}`}
+      data-testid="category-group-row"
     >
       <View
         style={{
@@ -1026,7 +1038,7 @@ const IncomeGroupHeader = memo(function IncomeGroupHeader({
                 textAlign: 'left',
                 ...styles.smallText,
               }}
-              data-testid="group-name"
+              data-testid="category-group-name"
             >
               {group.name}
             </Text>
@@ -1132,7 +1144,7 @@ const IncomeCategory = memo(function IncomeCategory({
         opacity: !!category.hidden ? 0.5 : undefined,
         ...style,
       }}
-      data-testid="row"
+      data-testid="category-row"
       innerRef={listItemRef}
     >
       <View
@@ -1192,7 +1204,6 @@ const IncomeCategory = memo(function IncomeCategory({
             }}
           >
             <BudgetCell
-              name="budgeted"
               binding={budgeted}
               type="financial"
               category={category}
@@ -1201,7 +1212,11 @@ const IncomeCategory = memo(function IncomeCategory({
             />
           </View>
         )}
-        <CellValue binding={balance} type="financial">
+        <CellValue
+          binding={balance}
+          type="financial"
+          aria-label={`Balance for ${category.name} category`}
+        >
           {({ type, value }) => (
             <View>
               <PrivacyFilter>
@@ -1641,6 +1656,7 @@ export function BudgetTable({
               variant="bare"
               style={{ margin: 10 }}
               onPress={onOpenBudgetPageMenu}
+              aria-label="Budget page menu"
             >
               <SvgLogo
                 style={{ color: theme.mobileHeaderText }}
@@ -1726,6 +1742,7 @@ function BudgetTableHeader({
 
   return (
     <View
+      data-testid="budget-table-header"
       style={{
         flexDirection: 'row',
         justifyContent: 'space-between',
@@ -1947,6 +1964,7 @@ function MonthSelector({
       }}
     >
       <Button
+        aria-label="Previous month"
         variant="bare"
         onPress={() => {
           if (prevEnabled) {
@@ -1968,12 +1986,14 @@ function MonthSelector({
         onPress={() => {
           onOpenMonthMenu?.(month);
         }}
+        data-month={month}
       >
         <Text style={styles.underlinedText}>
           {monthUtils.format(month, 'MMMM ‘yy')}
         </Text>
       </Button>
       <Button
+        aria-label="Next month"
         variant="bare"
         onPress={() => {
           if (nextEnabled) {
