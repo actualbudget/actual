@@ -1,4 +1,5 @@
 import React from 'react';
+import { Trans } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useTransition, animated } from 'react-spring';
 
@@ -15,6 +16,7 @@ export function BankSyncStatus() {
     (state: State) => state.account.accountsSyncing,
   );
   const accountsSyncingCount = accountsSyncing.length;
+  const count = accountsSyncingCount;
 
   const transitions = useTransition(
     accountsSyncingCount > 0 ? 'syncing' : null,
@@ -59,8 +61,9 @@ export function BankSyncStatus() {
                   iconStyle={{ color: theme.pillTextSelected }}
                 />
                 <Text style={{ marginLeft: 5 }}>
-                  Syncing... {accountsSyncingCount} account
-                  {accountsSyncingCount > 1 && 's'} remaining
+                  <Trans count={accountsSyncingCount}>
+                    Syncing... {{ count }} accounts remaining
+                  </Trans>
                 </Text>
               </View>
             </animated.div>
