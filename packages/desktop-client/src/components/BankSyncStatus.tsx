@@ -31,11 +31,12 @@ export function BankSyncStatus() {
       style={{
         position: 'absolute',
         top: 0,
-        left: 0,
-        right: 0,
+        left: '50%',
+        transform: 'translate(-50%)',
         marginTop: 5,
         alignItems: 'center',
         zIndex: 1000,
+        whiteSpace: 'nowrap',
       }}
     >
       {transitions(
