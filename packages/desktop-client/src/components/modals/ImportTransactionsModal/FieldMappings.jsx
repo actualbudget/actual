@@ -33,45 +33,41 @@ export function FieldMappings({
         spacing={1}
         style={{ marginTop: 5 }}
       >
-        <View style={{ flex: 1 }}>
+        <View style={{ flex: 1, marginRight: 10 }}>
           <SubLabel title="Date" />
           <SelectField
             options={options}
             value={mappings.date}
-            style={{ marginRight: 5 }}
             onChange={name => onChange('date', name)}
             hasHeaderRow={hasHeaderRow}
             firstTransaction={transactions[0]}
           />
         </View>
-        <View style={{ flex: 1 }}>
+        <View style={{ flex: 1, marginRight: 10 }}>
           <SubLabel title="Payee" />
           <SelectField
             options={options}
             value={mappings.payee}
-            style={{ marginRight: 5 }}
             onChange={name => onChange('payee', name)}
             hasHeaderRow={hasHeaderRow}
             firstTransaction={transactions[0]}
           />
         </View>
-        <View style={{ flex: 1 }}>
+        <View style={{ flex: 1, marginRight: 10 }}>
           <SubLabel title="Notes" />
           <SelectField
             options={options}
             value={mappings.notes}
-            style={{ marginRight: 5 }}
             onChange={name => onChange('notes', name)}
             hasHeaderRow={hasHeaderRow}
             firstTransaction={transactions[0]}
           />
         </View>
-        <View style={{ flex: 1 }}>
+        <View style={{ flex: 1, marginRight: 10 }}>
           <SubLabel title="Category" />
           <SelectField
             options={options}
             value={mappings.category}
-            style={{ marginRight: 5 }}
             onChange={name => onChange('category', name)}
             hasHeaderRow={hasHeaderRow}
             firstTransaction={transactions[0]}
