@@ -1,5 +1,6 @@
 // @ts-strict-ignore
 import React, { useState, useEffect } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 import { useParams, useSearchParams } from 'react-router-dom';
 
@@ -18,6 +19,8 @@ import { View } from '../../common/View';
 import { useBootstrapped, Title } from './common';
 
 export function Login() {
+  const { t } = useTranslation();
+
   const dispatch = useDispatch();
   const { method = 'password' } = useParams();
   const [searchParams, _setSearchParams] = useSearchParams();
@@ -93,7 +96,7 @@ export function Login() {
 
   return (
     <View style={{ maxWidth: 450, marginTop: -30, color: theme.pageText }}>
-      <Title text="Sign in to this Actual instance" />
+      <Title text={t('Sign in to this Actual instance')} />
       <Text
         style={{
           fontSize: 16,
@@ -101,8 +104,10 @@ export function Login() {
           lineHeight: 1.4,
         }}
       >
-        If you lost your password, you likely still have access to your server
-        to manually reset it.
+        <Trans>
+          If you lost your password, you likely still have access to your server
+          to manually reset it.
+        </Trans>
       </Text>
 
       {error && (
@@ -122,7 +127,7 @@ export function Login() {
         <View style={{ display: 'flex', flexDirection: 'row', marginTop: 30 }}>
           <BigInput
             autoFocus={true}
-            placeholder="Password"
+            placeholder={t('Password')}
             type="password"
             onChangeValue={setPassword}
             style={{ flex: 1, marginRight: 10 }}
@@ -134,7 +139,7 @@ export function Login() {
             style={{ fontSize: 15 }}
             onPress={onSubmit}
           >
-            Sign in
+            <Trans>Sign in</Trans>
           </ButtonWithLoading>
         </View>
       )}
@@ -153,12 +158,12 @@ export function Login() {
               style={{ fontSize: 15 }}
               to={'/login/password?error=' + error}
             >
-              Login with Password
+              <Trans>Login with Password</Trans>
             </Link>
           )}
           {!error && (
             <span>
-              Checking Header Token Login ...{' '}
+              <Trans>Checking Header Token Login ...</Trans>{' '}
               <AnimatedLoading style={{ width: 20, height: 20 }} />
             </span>
           )}
@@ -176,7 +181,7 @@ export function Login() {
           style={{ fontSize: 15, color: theme.pageTextLink, marginLeft: 10 }}
           onPress={onDemo}
         >
-          Try Demo &rarr;
+          <Trans>Try Demo &rarr;</Trans>
         </Button>
       </View>
     </View>
