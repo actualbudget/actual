@@ -20,7 +20,7 @@ export const defaultReport: CustomReportEntity = {
   isDateStatic: false,
   dateRange: t('Last 6 months'),
   mode: 'total',
-  groupBy: t('Category'),
+  groupBy: 'Category',
   interval: t('Monthly'),
   balanceType: t('Payment'),
   showEmpty: false,
@@ -42,11 +42,11 @@ const balanceTypeOptions = [
 ];
 
 const groupByOptions = [
-  { description: t('Category') },
-  { description: t('Group') },
-  { description: t('Payee') },
-  { description: t('Account') },
-  { description: t('Interval') },
+  { description: 'Category' },
+  { description: 'Group' },
+  { description: 'Payee' },
+  { description: 'Account' },
+  { description: 'Interval' },
 ];
 
 export type dateRangeProps = {
@@ -63,7 +63,7 @@ const dateRangeOptions: dateRangeProps[] = [
   {
     description: t('This week'),
     name: 0,
-    type: t('Week'),
+    type: 'Week',
     Daily: true,
     Weekly: true,
     Monthly: false,
@@ -72,7 +72,7 @@ const dateRangeOptions: dateRangeProps[] = [
   {
     description: t('Last week'),
     name: 1,
-    type: t('Week'),
+    type: 'Week',
     Daily: true,
     Weekly: true,
     Monthly: false,
@@ -81,7 +81,7 @@ const dateRangeOptions: dateRangeProps[] = [
   {
     description: t('This month'),
     name: 0,
-    type: t('Month'),
+    type: 'Month',
     Daily: true,
     Weekly: true,
     Monthly: true,
@@ -90,7 +90,7 @@ const dateRangeOptions: dateRangeProps[] = [
   {
     description: t('Last month'),
     name: 1,
-    type: t('Month'),
+    type: 'Month',
     Daily: true,
     Weekly: true,
     Monthly: true,
@@ -99,7 +99,7 @@ const dateRangeOptions: dateRangeProps[] = [
   {
     description: t('Last 3 months'),
     name: 3,
-    type: t('Month'),
+    type: 'Month',
     Daily: true,
     Weekly: true,
     Monthly: true,
@@ -108,7 +108,7 @@ const dateRangeOptions: dateRangeProps[] = [
   {
     description: t('Last 6 months'),
     name: 6,
-    type: t('Month'),
+    type: 'Month',
     Daily: false,
     Weekly: false,
     Monthly: true,
@@ -117,7 +117,7 @@ const dateRangeOptions: dateRangeProps[] = [
   {
     description: t('Last 12 months'),
     name: 12,
-    type: t('Month'),
+    type: 'Month',
     Daily: false,
     Weekly: false,
     Monthly: true,
@@ -126,7 +126,7 @@ const dateRangeOptions: dateRangeProps[] = [
   {
     description: t('Year to date'),
     name: 'yearToDate',
-    type: t('Month'),
+    type: 'Month',
     Daily: false,
     Weekly: true,
     Monthly: true,
@@ -135,7 +135,7 @@ const dateRangeOptions: dateRangeProps[] = [
   {
     description: t('Last year'),
     name: 'lastYear',
-    type: t('Month'),
+    type: 'Month',
     Daily: false,
     Weekly: true,
     Monthly: true,
@@ -144,7 +144,7 @@ const dateRangeOptions: dateRangeProps[] = [
   {
     description: t('All time'),
     name: 'allTime',
-    type: t('Month'),
+    type: 'Month',
     Daily: false,
     Weekly: true,
     Monthly: true,
@@ -166,27 +166,27 @@ type intervalOptionsProps = {
 const intervalOptions: intervalOptionsProps[] = [
   {
     description: t('Daily'),
-    name: t('Day'),
+    name: 'Day',
     format: 'yy-MM-dd',
     range: 'dayRangeInclusive',
   },
   {
     description: t('Weekly'),
-    name: t('Week'),
+    name: 'Week',
     format: 'yy-MM-dd',
     range: 'weekRangeInclusive',
   },
   //{ value: 3, description: 'Fortnightly', name: 3},
   {
     description: t('Monthly'),
-    name: t('Month'),
+    name: 'Month',
     // eslint-disable-next-line rulesdir/typography
     format: "MMM ''yy",
     range: 'rangeInclusive',
   },
   {
     description: t('Yearly'),
-    name: t('Year'),
+    name: 'Year',
     format: 'yyyy',
     range: 'yearRangeInclusive',
   },
@@ -338,29 +338,29 @@ export const groupBySelections = (
   let groupByList: UncategorizedEntity[];
   let groupByLabel: 'category' | 'categoryGroup' | 'payee' | 'account';
   switch (groupBy) {
-    case t('Category'):
+    case 'Category':
       groupByList = categoryList;
       groupByLabel = 'category';
       break;
-    case t('Group'):
+    case 'Group':
       groupByList = categoryGroup.map(group => {
         return { id: group.id, name: group.name, hidden: group.hidden };
       });
       groupByLabel = 'categoryGroup';
       break;
-    case t('Payee'):
+    case 'Payee':
       groupByList = payees.map(payee => {
         return { id: payee.id, name: payee.name, hidden: false };
       });
       groupByLabel = 'payee';
       break;
-    case t('Account'):
+    case 'Account':
       groupByList = accounts.map(account => {
         return { id: account.id, name: account.name, hidden: false };
       });
       groupByLabel = 'account';
       break;
-    case t('Interval'):
+    case 'Interval':
       groupByList = categoryList;
       groupByLabel = 'category';
       break;
