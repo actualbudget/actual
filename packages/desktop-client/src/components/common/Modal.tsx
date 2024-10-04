@@ -290,7 +290,7 @@ export function ModalHeader({
 }: ModalHeaderProps) {
   return (
     <View
-      aria-label="Modal header"
+      role="heading"
       style={{
         justifyContent: 'center',
         alignItems: 'center',
@@ -318,6 +318,7 @@ export function ModalHeader({
         >
           {showLogo && (
             <SvgLogo
+              aria-label="Modal logo"
               width={30}
               height={30}
               style={{ justifyContent: 'center', alignSelf: 'center' }}
