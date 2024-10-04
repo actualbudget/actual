@@ -111,12 +111,6 @@ test.describe('Accounts', () => {
       });
     });
 
-    test.afterEach(async () => {
-      const close = await accountPage.clickCloseAccount();
-      await close.selectTransferAccount('Vanguard 401k');
-      await close.forceCloseAccount();
-    });
-
     async function importCsv(screenshot = false) {
       const fileChooserPromise = page.waitForEvent('filechooser');
       await accountPage.page.getByRole('button', { name: 'Import' }).click();
@@ -126,9 +120,12 @@ test.describe('Accounts', () => {
 
       if (screenshot) await expect(page).toMatchThemeScreenshots();
 
-      await accountPage.page
-        .getByRole('button', { name: /Import \d+ transactions/ })
-        .click();
+      let importButton = accountPage.page.getByRole('button', {
+        name: /Import \d+ transactions/,
+      });
+      await importButton.click();
+
+      await expect(importButton).not.toBeVisible();
     }
 
     test('imports transactions from a CSV file', async () => {
@@ -137,7 +134,6 @@ test.describe('Accounts', () => {
 
     test('import csv file twice', async () => {
       await importCsv(false);
-      await page.waitForTimeout(1000);
       await importCsv(true);
     });
   });
