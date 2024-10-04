@@ -8432,6 +8432,7 @@ __metadata:
     "@electron/rebuild": "npm:3.6.0"
     "@types/copyfiles": "npm:^2"
     "@types/fs-extra": "npm:^11"
+    better-sqlite3: "npm:^9.6.0"
     copyfiles: "npm:^2.4.1"
     cross-env: "npm:^7.0.3"
     electron: "npm:30.0.6"
@@ -8439,7 +8440,6 @@ __metadata:
     electron-is-dev: "npm:2.0.0"
     electron-log: "npm:4.4.8"
     fs-extra: "npm:^11.2.0"
-    loot-core: "npm:*"
     node-fetch: "npm:^2.7.0"
     promise-retry: "npm:^2.0.1"
     typescript: "npm:^5.5.4"
@@ -13132,7 +13132,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"loot-core@npm:*, loot-core@workspace:packages/loot-core":
+"loot-core@workspace:packages/loot-core":
   version: 0.0.0-use.local
   resolution: "loot-core@workspace:packages/loot-core"
   dependencies:
