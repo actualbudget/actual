@@ -120,7 +120,7 @@ test.describe('Accounts', () => {
 
       if (screenshot) await expect(page).toMatchThemeScreenshots();
 
-      let importButton = accountPage.page.getByRole('button', {
+      const importButton = accountPage.page.getByRole('button', {
         name: /Import \d+ transactions/,
       });
       await importButton.click();
