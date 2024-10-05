@@ -22,7 +22,6 @@ import { useResponsive } from '../ResponsiveProvider';
 import { theme } from '../style';
 import { getIsOutdated, getLatestVersion } from '../util/versions';
 
-import { BankSyncStatus } from './BankSyncStatus';
 import { View } from './common/View';
 import { GlobalKeys } from './GlobalKeys';
 import { ManageRulesPage } from './ManageRulesPage';
@@ -174,7 +173,6 @@ export function FinancesApp() {
               }}
             />
             <Notifications />
-            <BankSyncStatus />
 
             <Routes>
               <Route

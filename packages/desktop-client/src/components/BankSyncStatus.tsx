@@ -21,9 +21,9 @@ export function BankSyncStatus() {
   const transitions = useTransition(
     accountsSyncingCount > 0 ? 'syncing' : null,
     {
-      from: { opacity: 0, transform: 'translateY(-100px)' },
-      enter: { opacity: 1, transform: 'translateY(0)' },
-      leave: { opacity: 0, transform: 'translateY(-100px)' },
+      from: { opacity: 0 },
+      enter: { opacity: 1 },
+      leave: { opacity: 0 },
       unique: true,
     },
   );
@@ -31,13 +31,10 @@ export function BankSyncStatus() {
   return (
     <View
       style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        marginTop: 5,
-        alignItems: 'center',
         zIndex: 501,
+        flexDirection: 'row',
+        overflow: 'hidden',
+        textWrap: 'nowrap',
       }}
     >
       {transitions(

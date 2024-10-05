@@ -26,6 +26,7 @@ import { theme, type CSSProperties, styles } from '../style';
 
 import { AccountSyncCheck } from './accounts/AccountSyncCheck';
 import { AnimatedRefresh } from './AnimatedRefresh';
+import { BankSyncStatus } from './BankSyncStatus';
 import { MonthCountSelector } from './budget/MonthCountSelector';
 import { Button } from './common/Button2';
 import { Link } from './common/Link';
@@ -332,6 +333,7 @@ export function Titlebar({ style }: TitlebarProps) {
         <Route path="*" element={null} />
       </Routes>
       <View style={{ flex: 1 }} />
+      <BankSyncStatus />
       <UncategorizedButton />
       {isDevelopmentEnvironment() && !Platform.isPlaywright && (
         <ThemeSelector style={{ marginLeft: 10 }} />
