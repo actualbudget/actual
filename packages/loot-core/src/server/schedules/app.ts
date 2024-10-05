@@ -73,13 +73,7 @@ export function getNextDate(
 ) {
   start = d.startOfDay(start);
 
-  const cond = new Condition(
-    dateCond.op,
-    'date',
-    dateCond.value,
-    null,
-    new Map(Object.entries({ date: 'date' })),
-  );
+  const cond = new Condition(dateCond.op, 'date', dateCond.value, null);
   const value = cond.getValue();
 
   if (value.type === 'date') {
@@ -374,21 +368,17 @@ async function getUpcomingDates({ config, count }) {
   const rules = recurConfigToRSchedule(config);
 
   try {
-    // @ts-expect-error fix me
     const schedule = new RSchedule({ rrules: rules });
 
-    return (
-      schedule
-        // @ts-expect-error fix me
-        .occurrences({ start: d.startOfDay(new Date()), take: count })
-        .toArray()
-        .map(date =>
-          config.skipWeekend
-            ? getDateWithSkippedWeekend(date.date, config.weekendSolveMode)
-            : date.date,
-        )
-        .map(date => dayFromDate(date))
-    );
+    return schedule
+      .occurrences({ start: d.startOfDay(new Date()), take: count })
+      .toArray()
+      .map(date =>
+        config.skipWeekend
+          ? getDateWithSkippedWeekend(date.date, config.weekendSolveMode)
+          : date.date,
+      )
+      .map(date => dayFromDate(date));
   } catch (err) {
     captureBreadcrumb(config);
     throw err;

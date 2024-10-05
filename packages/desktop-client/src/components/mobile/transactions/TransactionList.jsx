@@ -6,8 +6,7 @@ import React, {
   useState,
 } from 'react';
 import { useDispatch } from 'react-redux';
-
-import { Item, Section } from '@react-stately/collections';
+import { Item, Section } from 'react-stately';
 
 import { setNotificationInset } from 'loot-core/client/actions';
 import { groupById, integerToCurrency } from 'loot-core/shared/util';
@@ -28,7 +27,7 @@ import { AnimatedLoading } from '../../../icons/AnimatedLoading';
 import { SvgDelete } from '../../../icons/v0';
 import { SvgDotsHorizontalTriple } from '../../../icons/v1';
 import { styles, theme } from '../../../style';
-import { Button } from '../../common/Button';
+import { Button } from '../../common/Button2';
 import { Menu } from '../../common/Menu';
 import { Popover } from '../../common/Popover';
 import { Text } from '../../common/Text';
@@ -92,6 +91,7 @@ export function TransactionList({
   if (isLoading) {
     return (
       <View
+        aria-label="Loading..."
         style={{
           flex: 1,
           justifyContent: 'center',
@@ -108,7 +108,7 @@ export function TransactionList({
       {scrollProps.ListHeaderComponent}
       <ListBox
         {...scrollProps}
-        aria-label="transaction list"
+        aria-label="Transaction list"
         label=""
         loadMore={onLoadMore}
         selectionMode="none"
@@ -260,10 +260,10 @@ function SelectedTransactionsFloatingActionBar({ transactions, style }) {
           }}
         >
           <Button
-            type="bare"
+            variant="bare"
             {...buttonProps}
             style={{ ...buttonProps.style, marginRight: 4 }}
-            onClick={() => {
+            onPress={() => {
               if (selectedTransactions.size > 0) {
                 dispatchSelected({ type: 'select-none' });
               }
@@ -285,10 +285,10 @@ function SelectedTransactionsFloatingActionBar({ transactions, style }) {
           }}
         >
           <Button
-            type="bare"
+            variant="bare"
             ref={editMenuTriggerRef}
             aria-label="Edit fields"
-            onClick={() => {
+            onPress={() => {
               setIsEditMenuOpen(true);
             }}
             {...buttonProps}
@@ -394,10 +394,10 @@ function SelectedTransactionsFloatingActionBar({ transactions, style }) {
           </Popover>
 
           <Button
-            type="bare"
+            variant="bare"
             ref={moreOptionsMenuTriggerRef}
             aria-label="More options"
-            onClick={() => {
+            onPress={() => {
               setIsMoreOptionsMenuOpen(true);
             }}
             {...buttonProps}

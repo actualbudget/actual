@@ -1,8 +1,8 @@
 import fs from 'fs';
-import Module from 'module';
 import path from 'path';
 
 import {
+  net,
   app,
   ipcMain,
   BrowserWindow,
@@ -17,8 +17,6 @@ import {
   SaveDialogOptions,
 } from 'electron';
 import isDev from 'electron-is-dev';
-// @ts-strict-ignore
-import fetch from 'node-fetch';
 import promiseRetry from 'promise-retry';
 
 import i18n from './i18n';
@@ -31,15 +29,15 @@ import {
 import './security';
 const backend = require('i18next-electron-fs-backend');
 
-Module.globalPaths.push(__dirname + '/..');
+process.env.lootCoreScript = isDev
+  ? 'loot-core/lib-dist/bundle.desktop.js' // serve from local output in development (provides hot-reloading)
+  : path.resolve(__dirname, 'loot-core/lib-dist/bundle.desktop.js'); // serve from build in production
 
 // This allows relative URLs to be resolved to app:// which makes
 // local assets load correctly
 protocol.registerSchemesAsPrivileged([
   { scheme: 'app', privileges: { standard: true } },
 ]);
-
-global.fetch = fetch;
 
 if (!isDev || !process.env.ACTUAL_DOCUMENT_DIR) {
   process.env.ACTUAL_DOCUMENT_DIR = app.getPath('documents');
@@ -65,13 +63,13 @@ function createBackgroundProcess() {
     isDev ? { execArgv: ['--inspect'], stdio: 'pipe' } : { stdio: 'pipe' },
   );
 
-  serverProcess.stdout.on('data', (chunk: Buffer) => {
+  serverProcess.stdout?.on('data', (chunk: Buffer) => {
     // Send the Server console.log messages to the main browser window
     clientWin?.webContents.executeJavaScript(`
       console.info('Server Log:', ${JSON.stringify(chunk.toString('utf8'))})`);
   });
 
-  serverProcess.stderr.on('data', (chunk: Buffer) => {
+  serverProcess.stderr?.on('data', (chunk: Buffer) => {
     // Send the Server console.error messages out to the main browser window
     clientWin?.webContents.executeJavaScript(`
       console.error('Server Log:', ${JSON.stringify(chunk.toString('utf8'))})`);
@@ -113,6 +111,7 @@ async function createWindow() {
       preload: __dirname + '/preload.js',
     },
   });
+
   win.setBackgroundColor('#E8ECF0');
 
   backend.mainBindings(ipcMain, win, fs);
@@ -149,7 +148,9 @@ async function createWindow() {
     if (clientWin) {
       const url = clientWin.webContents.getURL();
       if (url.includes('app://') || url.includes('localhost:')) {
-        clientWin.webContents.executeJavaScript('__actionsForMenu.focused()');
+        clientWin.webContents.executeJavaScript(
+          'window.__actionsForMenu.focused()',
+        );
       }
     }
   });
@@ -226,34 +227,49 @@ app.on('ready', async () => {
   // Install an `app://` protocol that always returns the base HTML
   // file no matter what URL it is. This allows us to use react-router
   // on the frontend
-  protocol.registerFileProtocol('app', (request, callback) => {
+  protocol.handle('app', request => {
     if (request.method !== 'GET') {
-      callback({ error: -322 }); // METHOD_NOT_SUPPORTED from chromium/src/net/base/net_error_list.h
-      return null;
+      return new Response(null, {
+        status: 405,
+        statusText: 'Method Not Allowed',
+      });
     }
 
     const parsedUrl = new URL(request.url);
     if (parsedUrl.protocol !== 'app:') {
-      callback({ error: -302 }); // UNKNOWN_URL_SCHEME
-      return;
+      return new Response(null, {
+        status: 404,
+        statusText: 'Unknown URL Scheme',
+      });
     }
 
     if (parsedUrl.host !== 'actual') {
-      callback({ error: -105 }); // NAME_NOT_RESOLVED
-      return;
+      return new Response(null, {
+        status: 404,
+        statusText: 'Host Not Resolved',
+      });
     }
 
     const pathname = parsedUrl.pathname;
 
+    let filePath = path.normalize(`${__dirname}/client-build/index.html`); // default web path
+
     if (pathname.startsWith('/static')) {
-      callback({
-        path: path.normalize(`${__dirname}/client-build${pathname}`),
-      });
-    } else {
-      callback({
-        path: path.normalize(`${__dirname}/client-build/index.html`),
-      });
+      // static assets
+      filePath = path.normalize(`${__dirname}/client-build${pathname}`);
+      const resolvedPath = path.resolve(filePath);
+      const clientBuildPath = path.resolve(__dirname, 'client-build');
+
+      // Ensure filePath is within client-build directory - prevents directory traversal vulnerability
+      if (!resolvedPath.startsWith(clientBuildPath)) {
+        return new Response(null, {
+          status: 403,
+          statusText: 'Forbidden',
+        });
+      }
     }
+
+    return net.fetch(`file:///${filePath}`);
   });
 
   if (process.argv[1] !== '--server') {
@@ -303,6 +319,15 @@ ipcMain.on('get-bootstrap-data', event => {
   };
 
   event.returnValue = payload;
+});
+
+ipcMain.handle('restart-server', () => {
+  if (serverProcess) {
+    serverProcess.kill();
+    serverProcess = null;
+  }
+
+  createBackgroundProcess();
 });
 
 ipcMain.handle('relaunch', () => {

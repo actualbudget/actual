@@ -1,10 +1,14 @@
 import React, { useRef, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { Trans } from 'react-i18next';
+import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
+
+import { t } from 'i18next';
+
+import { unlinkAccount } from 'loot-core/client/actions';
 
 import { authorizeBank } from '../../gocardless';
 import { useAccounts } from '../../hooks/useAccounts';
-import { useActions } from '../../hooks/useActions';
 import { SvgExclamationOutline } from '../../icons/v1';
 import { theme } from '../../style';
 import { Button } from '../common/Button2';
@@ -17,9 +21,13 @@ function getErrorMessage(type, code) {
     case 'ITEM_ERROR':
       switch (code.toUpperCase()) {
         case 'NO_ACCOUNTS':
-          return 'No open accounts could be found. Did you close the account? If so, unlink the account.';
+          return t(
+            'No open accounts could be found. Did you close the account? If so, unlink the account.',
+          );
         case 'ITEM_LOGIN_REQUIRED':
-          return 'Your password or something else has changed with your bank and you need to login again.';
+          return t(
+            'Your password or something else has changed with your bank and you need to login again.',
+          );
         default:
       }
       break;
@@ -27,47 +35,48 @@ function getErrorMessage(type, code) {
     case 'INVALID_INPUT':
       switch (code.toUpperCase()) {
         case 'INVALID_ACCESS_TOKEN':
-          return 'Item is no longer authorized. You need to login again.';
+          return t('Item is no longer authorized. You need to login again.');
         default:
       }
       break;
 
     case 'RATE_LIMIT_EXCEEDED':
-      return 'Rate limit exceeded for this item. Please try again later.';
+      return t('Rate limit exceeded for this item. Please try again later.');
 
     case 'INVALID_ACCESS_TOKEN':
-      return 'Your SimpleFIN Access Token is no longer valid. Please reset and generate a new token.';
+      return t(
+        'Your SimpleFIN Access Token is no longer valid. Please reset and generate a new token.',
+      );
 
     case 'ACCOUNT_NEEDS_ATTENTION':
       return (
-        <>
+        <Trans>
           The account needs your attention at{' '}
           <Link variant="external" to="https://bridge.simplefin.org/auth/login">
             SimpleFIN
           </Link>
           .
-        </>
+        </Trans>
       );
 
     default:
   }
 
   return (
-    <>
+    <Trans>
       An internal error occurred. Try to login again, or get{' '}
       <Link variant="external" to="https://actualbudget.org/contact/">
         in touch
       </Link>{' '}
       for support.
-    </>
+    </Trans>
   );
 }
 
 export function AccountSyncCheck() {
   const accounts = useAccounts();
   const failedAccounts = useSelector(state => state.account.failedAccounts);
-  const { unlinkAccount, pushModal } = useActions();
-
+  const dispatch = useDispatch();
   const { id } = useParams();
   const [open, setOpen] = useState(false);
   const triggerRef = useRef(null);
@@ -90,11 +99,11 @@ export function AccountSyncCheck() {
   function reauth() {
     setOpen(false);
 
-    authorizeBank(pushModal, { upgradingAccountId: account.account_id });
+    authorizeBank(dispatch, { upgradingAccountId: account.account_id });
   }
 
   async function unlink() {
-    unlinkAccount(account.id);
+    dispatch(unlinkAccount(account.id));
     setOpen(false);
   }
 
@@ -116,7 +125,9 @@ export function AccountSyncCheck() {
         <SvgExclamationOutline
           style={{ width: 14, height: 14, marginRight: 5 }}
         />{' '}
-        This account is experiencing connection problems. Let’s fix it.
+        <Trans>
+          This account is experiencing connection problems. Let’s fix it.
+        </Trans>
       </Button>
 
       <Popover
@@ -127,7 +138,7 @@ export function AccountSyncCheck() {
         style={{ fontSize: 14, padding: 15, maxWidth: 400 }}
       >
         <div style={{ marginBottom: '1.15em' }}>
-          The server returned the following error:
+          <Trans>The server returned the following error:</Trans>
         </div>
 
         <div style={{ marginBottom: '1.25em', color: theme.errorText }}>
@@ -137,18 +148,22 @@ export function AccountSyncCheck() {
         <View style={{ justifyContent: 'flex-end', flexDirection: 'row' }}>
           {showAuth ? (
             <>
-              <Button onPress={unlink}>Unlink</Button>
+              <Button onPress={unlink}>
+                <Trans>Unlink</Trans>
+              </Button>
               <Button
                 variant="primary"
                 autoFocus
                 onPress={reauth}
                 style={{ marginLeft: 5 }}
               >
-                Reauthorize
+                <Trans>Reauthorize</Trans>
               </Button>
             </>
           ) : (
-            <Button onPress={unlink}>Unlink account</Button>
+            <Button onPress={unlink}>
+              <Trans>Unlink account</Trans>
+            </Button>
           )}
         </View>
       </Popover>

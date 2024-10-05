@@ -2,20 +2,44 @@
 import { v4 as uuidv4 } from 'uuid';
 
 import * as monthUtils from '../shared/months';
-import type { TransactionEntity } from '../types/models';
+import type {
+  _SyncFields,
+  AccountEntity,
+  TransactionEntity,
+} from '../types/models';
 
 import { random } from './random';
 
-export function generateAccount(name, isConnected, offbudget) {
+export function generateAccount(
+  name,
+  isConnected,
+  offbudget,
+): AccountEntity & { bankId: number; bankName: string } {
   return {
     id: uuidv4(),
     name,
     balance_current: isConnected ? Math.floor(random() * 100000) : null,
-    bank: isConnected ? Math.floor(random() * 10000) : null,
     bankId: isConnected ? Math.floor(random() * 10000) : null,
     bankName: isConnected ? 'boa' : null,
+    bank: isConnected ? Math.floor(random() * 10000).toString() : null,
     offbudget: offbudget ? 1 : 0,
+    sort_order: 0,
+    tombstone: 0,
     closed: 0,
+    ...emptySyncFields(),
+  };
+}
+
+function emptySyncFields(): _SyncFields<false> {
+  return {
+    account_id: null,
+    bank: null,
+    mask: null,
+    official_name: null,
+    balance_current: null,
+    balance_available: null,
+    balance_limit: null,
+    account_sync_source: null,
   };
 }
 

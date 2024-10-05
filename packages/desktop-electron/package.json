@@ -3,26 +3,25 @@
   "author": "Actual",
   "productName": "Actual",
   "description": "A simple and powerful personal finance system",
-  "version": "24.8.3",
+  "version": "24.10.0",
   "scripts": {
     "clean": "rm -rf dist",
     "update-client": "bin/update-client",
     "build": "yarn build:dist && electron-builder",
     "build:dist": "tsc --p tsconfig.dist.json && yarn copy-static-assets",
-    "copy-static-assets": "copyfiles --exclude 'build/**/*' **/*.html icons/**/* appx/**/* build",
+    "copy-static-assets": "copyfiles --exclude 'build/**/*' **/*.html icons/**/* build",
     "watch": "yarn build:dist && cross-env ACTUAL_DOCUMENT_DIR=\"../../data\" ACTUAL_DATA_DIR=\"../../data\" electron ."
   },
   "main": "build/index.js",
   "build": {
     "appId": "com.actualbudget.actual",
     "files": [
-      "!node_modules/loot-core/src{,/**/*}",
-      "!node_modules/loot-core/lib-dist/{browser,bundle.mobile*}",
-      "!**/*.js.map",
-      "!node_modules/@jlongster/sql.js",
-      "!node_modules/absurd-sql",
+      "build",
       "!node_modules/better-sqlite3/{benchmark,src,bin,docs,deps,build/Release/obj,build/Release/sqlite3.a,build/Release/test_extension.node}",
-      "build"
+      "!**/*.js.map",
+      "!**/stats.json",
+      "!build/client-build/sql-wasm.wasm",
+      "!build/loot-core/lib-dist/{browser,bundle.mobile*}"
     ],
     "beforePack": "./build/beforePackHook.js",
     "mac": {
@@ -86,6 +85,7 @@
     "npmRebuild": false
   },
   "dependencies": {
+    "better-sqlite3": "^9.6.0",
     "electron-is-dev": "2.0.0",
     "electron-log": "4.4.8",
     "i18next": "^23.12.6",

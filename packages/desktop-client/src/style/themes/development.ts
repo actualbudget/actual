@@ -190,6 +190,7 @@ export const pillTextSubdued = colorPalette.navy200;
 export const reportsRed = colorPalette.red300;
 export const reportsBlue = colorPalette.blue400;
 export const reportsGreen = colorPalette.green400;
+export const reportsGray = colorPalette.gray400;
 export const reportsLabel = colorPalette.navy900;
 export const reportsInnerLabel = colorPalette.navy800;
 
@@ -205,3 +206,7 @@ export const budgetHeaderOtherMonth = colorPalette.gray80;
 export const floatingActionBarBackground = colorPalette.purple400;
 export const floatingActionBarBorder = floatingActionBarBackground;
 export const floatingActionBarText = colorPalette.navy50;
+
+export const tooltipText = colorPalette.navy900;
+export const tooltipBackground = colorPalette.navy50;
+export const tooltipBorder = colorPalette.navy150;

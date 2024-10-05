@@ -2,11 +2,10 @@ import React from 'react';
 
 import { useNavigate } from '../../../hooks/useNavigate';
 import { SvgAdd } from '../../../icons/v1';
-import { theme } from '../../../style';
-import { Button } from '../../common/Button';
+import { Button } from '../../common/Button2';
 
 type AddTransactionButtonProps = {
-  to: string;
+  to?: string;
   accountId?: string;
   categoryId?: string;
 };
@@ -19,18 +18,10 @@ export function AddTransactionButton({
   const navigate = useNavigate();
   return (
     <Button
-      type="bare"
+      variant="bare"
       aria-label="Add transaction"
-      style={{
-        justifyContent: 'center',
-        color: theme.mobileHeaderText,
-        margin: 10,
-      }}
-      hoveredStyle={{
-        color: theme.mobileHeaderText,
-        background: theme.mobileHeaderTextHover,
-      }}
-      onClick={() => {
+      style={{ margin: 10 }}
+      onPress={() => {
         navigate(to, { state: { accountId, categoryId } });
       }}
     >

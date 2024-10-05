@@ -38,6 +38,10 @@ contextBridge.exposeInMainWorld('Actual', {
     ipcRenderer.invoke('relaunch');
   },
 
+  restartElectronServer: () => {
+    ipcRenderer.invoke('restart-server');
+  },
+
   openFileDialog: (opts: OpenFileDialogPayload) => {
     return ipcRenderer.invoke('open-file-dialog', opts);
   },

@@ -69,14 +69,14 @@ export function Item({
           ...(forceHover ? hoverStyle : {}),
           ':hover': hoverStyle,
         }}
-        to={to}
-        onClick={onClick}
+        forceActive={forceActive}
         activeStyle={{
           borderLeft: '4px solid ' + theme.sidebarItemTextSelected,
           paddingLeft: 19 + indent - 4,
           color: theme.sidebarItemTextSelected,
         }}
-        forceActive={forceActive}
+        to={to}
+        onClick={onClick}
       >
         {content}
       </ItemContent>

@@ -31,11 +31,33 @@ vi.mock('loot-core/src/platform/client/fetch');
 vi.mock('../../hooks/useFeatureFlag', () => ({
   default: vi.fn().mockReturnValue(false),
 }));
+vi.mock('../../hooks/useSyncedPref', () => ({
+  useSyncedPref: vi.fn().mockReturnValue([undefined, vi.fn()]),
+}));
 
 const accounts = [generateAccount('Bank of America')];
 const payees = [
-  { id: 'payed-to', favorite: true, name: 'Payed To' },
-  { id: 'guy', favorite: false, name: 'This guy on the side of the road' },
+  {
+    id: 'bob-id',
+    name: 'Bob',
+    favorite: true,
+    transfer_acct: null,
+    category: null,
+  },
+  {
+    id: 'alice-id',
+    name: 'Alice',
+    favorite: true,
+    transfer_acct: null,
+    category: null,
+  },
+  {
+    id: 'guy',
+    favorite: false,
+    transfer_acct: null,
+    category: null,
+    name: 'This guy on the side of the road',
+  },
 ];
 const categoryGroups = generateCategoryGroups([
   {
@@ -64,6 +86,7 @@ function generateTransactions(count, splitAtIndexes = [], showError = false) {
       generateTransaction(
         {
           account: accounts[0].id,
+          payee: 'alice-id',
           category:
             i === 0
               ? null
@@ -280,6 +303,41 @@ function editField(container, name, rowIndex) {
   const field = queryField(container, name, '', rowIndex);
   return _editField(field, container);
 }
+
+expect.extend({
+  payeesToHaveFavoriteStars(container, validPayeeListWithFavorite) {
+    const incorrectStarList = [];
+    const foundStarList = [];
+    validPayeeListWithFavorite.forEach(payeeItem => {
+      const shouldHaveFavorite = payeeItem != null;
+      let found = false;
+      if (container[0].querySelectorAll('svg').length === 1) {
+        found = true;
+        foundStarList.push(payeeItem);
+      }
+      if (shouldHaveFavorite !== found) {
+        incorrectStarList.push(payeeItem);
+      }
+    });
+    if (
+      foundStarList.length !== validPayeeListWithFavorite.length ||
+      incorrectStarList.length > 0
+    ) {
+      return {
+        message: () =>
+          `Expected ${validPayeeListWithFavorite.join(', ')} to have favorite stars.` +
+          `Received ${foundStarList.length} items with favorite stars. Incorrect: ${incorrectStarList.join(', ')}`,
+        pass: false,
+      };
+    } else {
+      return {
+        message: () =>
+          `Expected ${validPayeeListWithFavorite} to have favorite stars`,
+        pass: true,
+      };
+    }
+  },
+});
 
 function expectToBeEditingField(container, name, rowIndex, isNew) {
   let field;
@@ -587,6 +645,54 @@ describe('Transactions', () => {
     );
   });
 
+  test('dropdown payee displays on new transaction with account list column', async () => {
+    const { container, updateProps, queryByTestId } = renderTransactions({
+      currentAccountId: null,
+    });
+    updateProps({ isAdding: true });
+    expect(queryByTestId('new-transaction')).toBeTruthy();
+
+    await editNewField(container, 'payee');
+
+    const renderedPayees = screen
+      .getByTestId('autocomplete')
+      .querySelectorAll('[data-testid$="payee-item"]');
+
+    expect(
+      Array.from(renderedPayees.values()).map(p =>
+        p.getAttribute('data-testid'),
+      ),
+    ).toStrictEqual([
+      'Alice-payee-item',
+      'Bob-payee-item',
+      'This guy on the side of the road-payee-item',
+    ]);
+    expect(renderedPayees).payeesToHaveFavoriteStars([
+      'Alice-payee-item',
+      'Bob-payee-item',
+    ]);
+  });
+
+  test('dropdown payee displays on existing non-transfer transaction', async () => {
+    const { container } = renderTransactions();
+
+    await editField(container, 'payee', 2);
+
+    const renderedPayees = screen
+      .getByTestId('autocomplete')
+      .querySelectorAll('[data-testid$="payee-item"]');
+
+    expect(
+      Array.from(renderedPayees.values()).map(p =>
+        p.getAttribute('data-testid'),
+      ),
+    ).toStrictEqual([
+      'Alice-payee-item',
+      'Bob-payee-item',
+      'This guy on the side of the road-payee-item',
+    ]);
+  });
+
   // TODO: fix this test
   test.skip('dropdown invalid value resets correctly', async () => {
     const { container, getTransactions } = renderTransactions();
@@ -863,7 +969,7 @@ describe('Transactions', () => {
         id: expect.any(String),
         is_parent: true,
         notes: 'Notes',
-        payee: 'payed-to',
+        payee: 'alice-id',
         sort_order: 0,
       },
       {
@@ -876,7 +982,7 @@ describe('Transactions', () => {
         id: expect.any(String),
         is_child: true,
         parent_id: parentId,
-        payee: 'payed-to',
+        payee: 'alice-id',
         sort_order: -1,
         starting_balance_flag: null,
       },
@@ -890,7 +996,7 @@ describe('Transactions', () => {
         id: expect.any(String),
         is_child: true,
         parent_id: parentId,
-        payee: 'payed-to',
+        payee: 'alice-id',
         sort_order: -2,
         starting_balance_flag: null,
       },
