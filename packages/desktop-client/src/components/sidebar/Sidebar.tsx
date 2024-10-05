@@ -127,6 +127,8 @@ export function Sidebar() {
         >
           <EditableBudgetName />
 
+          <View style={{ flex: 1, flexDirection: 'row' }} />
+
           {!sidebar.alwaysFloats && (
             <ToggleButton isFloating={isFloating} onFloat={onFloat} />
           )}
