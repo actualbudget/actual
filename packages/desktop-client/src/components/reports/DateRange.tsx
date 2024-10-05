@@ -2,7 +2,6 @@ import React, { type ReactElement } from 'react';
 import { Trans } from 'react-i18next';
 
 import * as d from 'date-fns';
-import { t } from 'i18next';
 
 import { theme } from '../../style';
 import { styles } from '../../style/styles';
@@ -17,7 +16,7 @@ type DateRangeProps = {
 
 function checkDate(date: string) {
   const dateParsed = new Date(date);
-  if (dateParsed.toString() !== t('Invalid Date')) {
+  if (dateParsed.toString() !== 'Invalid Date') {
     return d.format(dateParsed, 'yyyy-MM-dd');
   } else {
     return null;
@@ -46,7 +45,7 @@ export function DateRange({ start, end, type }: DateRangeProps): ReactElement {
   let typeOrFormattedEndDate: string;
 
   if (type && ['budget', 'average'].includes(type)) {
-    typeOrFormattedEndDate = type;
+    typeOrFormattedEndDate = type === 'budget' ? 'budgeted' : type;
   } else {
     typeOrFormattedEndDate = formattedEndDate;
   }
@@ -55,13 +54,8 @@ export function DateRange({ start, end, type }: DateRangeProps): ReactElement {
   if (['budget', 'average'].includes(type || '')) {
     content = (
       <div>
-        <Trans
-          values={{
-            startDate: formattedStartDate,
-            endDate: typeOrFormattedEndDate,
-          }}
-        >
-          Compare {{ startDate }} to {{ endDate }}
+        <Trans>
+          Compare {{ formattedStartDate }} to {{ typeOrFormattedEndDate }}
         </Trans>
       </div>
     );
@@ -72,13 +66,8 @@ export function DateRange({ start, end, type }: DateRangeProps): ReactElement {
     content = (
       <div>
         {type ? (
-          <Trans
-            values={{
-              formattedStartDate,
-              endDate: typeOrFormattedEndDate,
-            }}
-          >
-            Compare {{ formattedStartDate }} to {{ endDate }}
+          <Trans>
+            Compare {{ formattedStartDate }} to {{ typeOrFormattedEndDate }}
           </Trans>
         ) : (
           <Trans>
