@@ -136,6 +136,7 @@ export function SelectLinkedAccountsModal({
           >
             <TableHeader
               headers={[
+                { name: 'Financial Institution', width: 200 },
                 { name: 'Bank Account To Sync', width: 200 },
                 { name: 'Balance', width: 80 },
                 { name: 'Account in Actual', width: 'flex' },
@@ -208,6 +209,7 @@ function TableRow({
 
   return (
     <Row style={{ backgroundColor: theme.tableBackground }}>
+      <Field width={200}>{externalAccount.org?.name}</Field>
       <Field width={200}>{externalAccount.name}</Field>
       <Field width={80}>
         <PrivacyFilter>{externalAccount.balance}</PrivacyFilter>
