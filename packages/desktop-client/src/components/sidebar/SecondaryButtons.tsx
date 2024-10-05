@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import React, { type ComponentType, type SVGProps } from 'react';
 
 import { View } from '../common/View';
