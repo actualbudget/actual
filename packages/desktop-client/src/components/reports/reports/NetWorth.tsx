@@ -46,11 +46,11 @@ export function NetWorth() {
   return <NetWorthInner widget={widget} />;
 }
 
-type CashFlowInnerProps = {
+type NetWorthInnerProps = {
   widget?: NetWorthWidget;
 };
 
-function NetWorthInner({ widget }: CashFlowInnerProps) {
+function NetWorthInner({ widget }: NetWorthInnerProps) {
   const dispatch = useDispatch();
   const { t } = useTranslation();
 
