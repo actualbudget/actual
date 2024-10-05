@@ -365,7 +365,7 @@ export const groupBySelections = (
       groupByLabel = 'category';
       break;
     default:
-      throw new Error(t('Error loading data into the spreadsheet.'));
+      throw new Error('Error loading data into the spreadsheet.');
   }
   return [groupByList, groupByLabel];
 };
