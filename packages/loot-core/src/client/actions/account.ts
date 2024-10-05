@@ -97,6 +97,52 @@ export function linkAccountSimpleFin(
   };
 }
 
+function handleSyncResponse(accountId, res, dispatch) {
+  const { errors, newTransactions, matchedTransactions, updatedAccounts } = res;
+
+  // Mark the account as failed or succeeded (depending on sync output)
+  const [error] = errors;
+  if (error) {
+    // We only want to mark the account as having problem if it
+    // was a real syncing error.
+    if (error.type === 'SyncError') {
+      dispatch(markAccountFailed(accountId, error.category, error.code));
+    }
+  } else {
+    dispatch(markAccountSuccess(accountId));
+  }
+
+  // Dispatch errors (if any)
+  errors.forEach(error => {
+    if (error.type === 'SyncError') {
+      dispatch(
+        addNotification({
+          type: 'error',
+          message: error.message,
+        }),
+      );
+    } else {
+      dispatch(
+        addNotification({
+          type: 'error',
+          message: error.message,
+          internal: error.internal,
+        }),
+      );
+    }
+  });
+
+  // Set new transactions
+  dispatch({
+    type: constants.SET_NEW_TRANSACTIONS,
+    newTransactions,
+    matchedTransactions,
+    updatedAccounts,
+  });
+
+  return newTransactions.length > 0 || matchedTransactions.length > 0;
+}
+
 export function syncAccounts(id?: string) {
   return async (dispatch: Dispatch, getState: GetState) => {
     // Disallow two parallel sync operations
@@ -104,9 +150,11 @@ export function syncAccounts(id?: string) {
       return false;
     }
 
+    const batchSync = !id;
+
     // Build an array of IDs for accounts to sync.. if no `id` provided
     // then we assume that all accounts should be synced
-    const accountIdsToSync = id
+    let accountIdsToSync = !batchSync
       ? [id]
       : getState()
           .queries.accounts.filter(
@@ -121,64 +169,50 @@ export function syncAccounts(id?: string) {
 
     dispatch(setAccountsSyncing(accountIdsToSync));
 
+    const accountsData = await send('accounts-get');
+    const simpleFinAccounts = accountsData.filter(
+      a => a.account_sync_source === 'simpleFin',
+    );
+
     let isSyncSuccess = false;
+
+    if (batchSync && simpleFinAccounts.length) {
+      console.log('Using SimpleFin batch sync');
+
+      const res = await send('simplefin-batch-sync', {
+        ids: simpleFinAccounts.map(a => a.id),
+      });
+
+      let isSyncSuccess = false;
+      for (const account of res) {
+        const success = handleSyncResponse(
+          account.accountId,
+          account.res,
+          dispatch,
+        );
+        if (success) isSyncSuccess = true;
+      }
+
+      accountIdsToSync = accountIdsToSync.filter(
+        id => !simpleFinAccounts.find(sfa => sfa.id === id),
+      );
+    }
 
     // Loop through the accounts and perform sync operation.. one by one
     for (let idx = 0; idx < accountIdsToSync.length; idx++) {
       const accountId = accountIdsToSync[idx];
 
       // Perform sync operation
-      const { errors, newTransactions, matchedTransactions, updatedAccounts } =
-        await send('accounts-bank-sync', {
-          id: accountId,
-        });
-
-      // Mark the account as failed or succeeded (depending on sync output)
-      const [error] = errors;
-      if (error) {
-        // We only want to mark the account as having problem if it
-        // was a real syncing error.
-        if (error.type === 'SyncError') {
-          dispatch(markAccountFailed(accountId, error.category, error.code));
-        }
-      } else {
-        dispatch(markAccountSuccess(accountId));
-      }
-
-      // Dispatch errors (if any)
-      errors.forEach(error => {
-        if (error.type === 'SyncError') {
-          dispatch(
-            addNotification({
-              type: 'error',
-              message: error.message,
-            }),
-          );
-        } else {
-          dispatch(
-            addNotification({
-              type: 'error',
-              message: error.message,
-              internal: error.internal,
-            }),
-          );
-        }
+      const res = await send('accounts-bank-sync', {
+        id: accountId,
       });
 
-      // Set new transactions
-      dispatch({
-        type: constants.SET_NEW_TRANSACTIONS,
-        newTransactions,
-        matchedTransactions,
-        updatedAccounts,
-      });
+      const success = handleSyncResponse(accountId, res, dispatch);
+
+      if (success) isSyncSuccess = true;
 
       // Dispatch the ids for the accounts that are yet to be synced
       dispatch(setAccountsSyncing(accountIdsToSync.slice(idx + 1)));
-
-      if (newTransactions.length > 0 || matchedTransactions.length > 0) {
-        isSyncSuccess = true;
-      }
     }
 
     // Rest the sync state back to empty (fallback in case something breaks

@@ -76,6 +76,8 @@ import { app as toolsApp } from './tools/app';
 import { withUndo, clearUndo, undo, redo } from './undo';
 import { updateVersion } from './update';
 import { uniqueFileName, idFromFileName } from './util/budget-name';
+import { AccountTransactions } from '../../../desktop-client/src/components/mobile/accounts/AccountTransactions';
+import { closeAndDownloadBudget } from 'loot-core/client/actions';
 
 const DEMO_BUDGET_ID = '_demo-budget';
 const TEST_BUDGET_ID = '_test-budget';
@@ -1056,6 +1058,51 @@ handlers['gocardless-create-web-token'] = async function ({
   }
 };
 
+function handleSyncResponse(
+  res,
+  acct,
+  newTransactions,
+  matchedTransactions,
+  updatedAccounts,
+) {
+  const { added, updated } = res;
+
+  newTransactions = newTransactions.concat(added);
+  matchedTransactions = matchedTransactions.concat(updated);
+
+  if (added.length > 0 || updated.length > 0) {
+    updatedAccounts = updatedAccounts.concat(acct.id);
+  }
+}
+
+function handleSyncError(err, acct) {
+  if (err.type === 'BankSyncError') {
+    return {
+      type: 'SyncError',
+      accountId: acct.id,
+      message: 'Failed syncing account “' + acct.name + '.”',
+      category: err.category,
+      code: err.code,
+    };
+  }
+
+  if (err instanceof PostError && err.reason !== 'internal') {
+    return {
+      accountId: acct.id,
+      message: err.reason
+        ? err.reason
+        : `Account “${acct.name}” is not linked properly. Please link it again.`,
+    };
+  }
+
+  return {
+    accountId: acct.id,
+    message:
+      'There was an internal error. Please get in touch https://actualbudget.org/contact for support.',
+    internal: err.stack,
+  };
+}
+
 handlers['accounts-bank-sync'] = async function ({ id }) {
   const [[, userId], [, userKey]] = await asyncStorage.multiGet([
     'user-id',
@@ -1088,39 +1135,15 @@ handlers['accounts-bank-sync'] = async function ({ id }) {
           acct.bankId,
         );
 
-        const { added, updated } = res;
-
-        newTransactions = newTransactions.concat(added);
-        matchedTransactions = matchedTransactions.concat(updated);
-
-        if (added.length > 0 || updated.length > 0) {
-          updatedAccounts = updatedAccounts.concat(acct.id);
-        }
+        handleSyncResponse(
+          res,
+          acct,
+          newTransactions,
+          matchedTransactions,
+          updatedAccounts,
+        );
       } catch (err) {
-        if (err.type === 'BankSyncError') {
-          errors.push({
-            type: 'SyncError',
-            accountId: acct.id,
-            message: 'Failed syncing account “' + acct.name + '.”',
-            category: err.category,
-            code: err.code,
-          });
-        } else if (err instanceof PostError && err.reason !== 'internal') {
-          errors.push({
-            accountId: acct.id,
-            message: err.reason
-              ? err.reason
-              : `Account “${acct.name}” is not linked properly. Please link it again.`,
-          });
-        } else {
-          errors.push({
-            accountId: acct.id,
-            message:
-              'There was an internal error. Please get in touch https://actualbudget.org/contact for support.',
-            internal: err.stack,
-          });
-        }
-
+        errors.push(handleSyncError(err, acct));
         err.message = 'Failed syncing account “' + acct.name + '.”';
         captureException(err);
       } finally {
@@ -1137,6 +1160,67 @@ handlers['accounts-bank-sync'] = async function ({ id }) {
   }
 
   return { errors, newTransactions, matchedTransactions, updatedAccounts };
+};
+
+handlers['simplefin-batch-sync'] = async function ({ ids }) {
+  const [[, userId], [, userKey]] = await asyncStorage.multiGet([
+    'user-id',
+    'user-key',
+  ]);
+
+  const accounts = await db.runQuery(
+    `SELECT a.*, b.bank_id as bankId FROM accounts a
+         LEFT JOIN banks b ON a.bank = b.id
+         WHERE a.tombstone = 0 AND a.closed = 0 ${ids.length ? `AND a.id IN (${ids.map(() => '?').join(', ')})` : ''}
+         ORDER BY a.offbudget, a.sort_order`,
+    ids.length ? ids : [],
+    true,
+  );
+
+  let res;
+  try {
+    console.group('Bank Sync operation for all accounts');
+    res = await bankSync.SimpleFinBatchSync(
+      userId,
+      userKey,
+      accounts.map(a => ({
+        id: a.id,
+        accountId: a.account_id,
+      })),
+    );
+  } catch (e) {
+    console.error(e);
+  }
+
+  let retVal = [];
+  for (const account of res) {
+    const errors = [];
+    let newTransactions = [];
+    let matchedTransactions = [];
+    let updatedAccounts = [];
+
+    handleSyncResponse(
+      account.res,
+      accounts.find(a => a.id === account.accountId),
+      newTransactions,
+      matchedTransactions,
+      updatedAccounts,
+    );
+
+    retVal.push({
+      accountId: account.accountId,
+      res: { errors, newTransactions, matchedTransactions, updatedAccounts },
+    });
+  }
+
+  if (!retVal.some(a => a.res.updatedAccounts.length < 1)) {
+    connection.send('sync-event', {
+      type: 'success',
+      tables: ['transactions'],
+    });
+  }
+
+  return retVal;
 };
 
 handlers['transactions-import'] = mutator(function ({
