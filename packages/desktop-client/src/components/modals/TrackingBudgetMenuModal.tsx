@@ -81,7 +81,7 @@ export function TrackingBudgetMenuModal({
                 fontWeight: 400,
               }}
             >
-              Budget
+              Budgeted
             </Text>
             <FocusableAmountInput
               value={integerToAmount(budgeted || 0)}

@@ -81,7 +81,7 @@ export function EnvelopeBudgetMenuModal({
                 fontWeight: 400,
               }}
             >
-              Budget
+              Budgeted
             </Text>
             <FocusableAmountInput
               value={integerToAmount(budgeted || 0)}
