@@ -186,11 +186,9 @@ function BudgetInner(props: BudgetInnerProps) {
   const onSaveCategory = async category => {
     const cats = await send('get-categories');
     const exists =
-      cats.grouped
-        .filter(g => g.id === category.cat_group)[0]
-        .categories.filter(
-          c => c.name.toUpperCase() === category.name.toUpperCase(),
-        )
+      cats.list
+        .filter(c => c.group === category.cat_group)
+        .filter(c => c.name.toUpperCase() === category.name.toUpperCase())
         .filter(c => (category.id === 'new' ? true : c.id !== category.id))
         .length > 0;
 
@@ -234,7 +232,7 @@ function BudgetInner(props: BudgetInnerProps) {
 
   const onSaveGroup = group => {
     if (group.id === 'new') {
-      dispatch(createGroup(group.name));
+      dispatch(createGroup(group.name, group.parent_id));
     } else {
       dispatch(updateGroup(group));
     }

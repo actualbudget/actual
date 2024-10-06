@@ -40,6 +40,7 @@ export const BudgetCategories = memo(
 
     const [isAddingGroup, setIsAddingGroup] = useState(false);
     const [newCategoryForGroup, setNewCategoryForGroup] = useState(null);
+    const [newGroupForGroup, setNewGroupForGroup] = useState(null);
     const items = useMemo(() => {
       const [expenseGroups, incomeGroup] = separateGroups(categoryGroups);
 
@@ -62,6 +63,10 @@ export const BudgetCategories = memo(
           items.push({ type: 'new-category', depth });
         }
 
+        if (isAddingGroup && newGroupForGroup === group.id) {
+          items.push({ type: 'new-group' });
+        }
+
         return [
           ...items,
           ...(collapsedGroupIds.includes(group.id)
@@ -81,7 +86,7 @@ export const BudgetCategories = memo(
 
       let items = expenseGroups.flatMap(group => expandGroup(group, 0));
 
-      if (isAddingGroup) {
+      if (isAddingGroup && newGroupForGroup == null) {
         items.push({ type: 'new-group' });
       }
 
@@ -90,6 +95,7 @@ export const BudgetCategories = memo(
           [
             { type: 'income-separator' },
             { type: 'income-group', value: incomeGroup },
+            //TODO add income sub groups!
             newCategoryForGroup === incomeGroup.id && { type: 'new-category' },
             ...(collapsedGroupIds.includes(incomeGroup.id)
               ? []
@@ -155,12 +161,14 @@ export const BudgetCategories = memo(
       }
     }
 
-    function onShowNewGroup() {
+    function onShowNewGroup(parentId) {
       setIsAddingGroup(true);
+      setNewGroupForGroup(parentId);
     }
 
     function onHideNewGroup() {
       setIsAddingGroup(false);
+      setNewGroupForGroup(null);
     }
 
     function _onSaveGroup(group) {
@@ -206,7 +214,7 @@ export const BudgetCategories = memo(
                   style={{ backgroundColor: theme.tableRowHeaderBackground }}
                 >
                   <SidebarGroup
-                    group={{ id: 'new', name: '' }}
+                    group={{ id: 'new', name: '', parent_id: newGroupForGroup }}
                     editing={true}
                     onSave={_onSaveGroup}
                     onHideNewGroup={onHideNewGroup}
@@ -252,6 +260,7 @@ export const BudgetCategories = memo(
                   onReorderCategory={onReorderCategory}
                   onToggleCollapse={onToggleCollapse}
                   onShowNewCategory={onShowNewCategory}
+                  onShowNewGroup={onShowNewGroup}
                   depth={item.depth}
                 />
               );
@@ -302,6 +311,7 @@ export const BudgetCategories = memo(
                   onSave={_onSaveGroup}
                   onToggleCollapse={onToggleCollapse}
                   onShowNewCategory={onShowNewCategory}
+                  onShowNewGroup={onShowNewGroup}
                 />
               );
               break;
