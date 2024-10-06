@@ -341,7 +341,7 @@ export function Overview() {
             >
               {currentBreakpoint === 'desktop' && (
                 <>
-                  {isEditing ? (
+                  {isDashboardsFeatureEnabled && (
                     <>
                       <Button
                         ref={triggerRef}
@@ -350,12 +350,6 @@ export function Overview() {
                         onPress={() => setMenuOpen(true)}
                       >
                         <Trans>Add new widget</Trans>
-                      </Button>
-                      <Button
-                        isDisabled={isImporting}
-                        onPress={() => setIsEditing(false)}
-                      >
-                        <Trans>Finish editing dashboard</Trans>
                       </Button>
 
                       <Popover
@@ -430,24 +424,30 @@ export function Overview() {
                         />
                       </Popover>
                     </>
+                  )}
+
+                  {isEditing ? (
+                    <Button
+                      isDisabled={isImporting}
+                      onPress={() => setIsEditing(false)}
+                    >
+                      <Trans>Finish editing dashboard</Trans>
+                    </Button>
+                  ) : isDashboardsFeatureEnabled ? (
+                    <Button
+                      isDisabled={isImporting}
+                      onPress={() => setIsEditing(true)}
+                    >
+                      <Trans>Edit dashboard</Trans>
+                    </Button>
                   ) : (
-                    <>
-                      <Button
-                        variant="primary"
-                        isDisabled={isImporting}
-                        onPress={() => navigate('/reports/custom')}
-                      >
-                        <Trans>Create new custom report</Trans>
-                      </Button>
-                      {isDashboardsFeatureEnabled && (
-                        <Button
-                          isDisabled={isImporting}
-                          onPress={() => setIsEditing(true)}
-                        >
-                          <Trans>Edit dashboard</Trans>
-                        </Button>
-                      )}
-                    </>
+                    <Button
+                      variant="primary"
+                      isDisabled={isImporting}
+                      onPress={() => navigate('/reports/custom')}
+                    >
+                      <Trans>Create new custom report</Trans>
+                    </Button>
                   )}
 
                   {isDashboardsFeatureEnabled && (
