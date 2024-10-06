@@ -82,24 +82,8 @@ function FileMenu({
   const { t } = useTranslation();
 
   const items = [{ name: 'delete', text: t('Delete') }];
-  const { isNarrowWidth } = useResponsive();
 
-  const defaultMenuItemStyle = isNarrowWidth
-    ? {
-        ...styles.mobileMenuItem,
-        color: theme.menuItemText,
-        borderRadius: 0,
-        borderTop: `1px solid ${theme.pillBorder}`,
-      }
-    : {};
-
-  return (
-    <Menu
-      getItemStyle={() => defaultMenuItemStyle}
-      onMenuSelect={onMenuSelect}
-      items={items}
-    />
-  );
+  return <Menu onMenuSelect={onMenuSelect} items={items} />;
 }
 
 function FileMenuButton({ onDelete }: { onDelete: () => void }) {
@@ -206,50 +190,60 @@ function FileItem({
   }
 
   return (
-    <View
-      onClick={() => _onSelect(file)}
-      title={getFileDescription(file, t) || ''}
+    <Button
+      onPress={() => _onSelect(file)}
       style={{
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
         ...styles.shadow,
         margin: 10,
         padding: '12px 15px',
-        backgroundColor: theme.buttonNormalBackground,
-        borderRadius: 6,
-        flexShrink: 0,
         cursor: 'pointer',
-        ':hover': {
-          backgroundColor: theme.menuItemBackgroundHover,
-        },
+        borderRadius: 6,
+        borderColor: 'transparent',
       }}
     >
-      <View style={{ alignItems: 'flex-start' }}>
-        <Text style={{ fontSize: 16, fontWeight: 700 }}>{file.name}</Text>
-
-        <FileState file={file} />
-      </View>
-
       <View
-        style={{ flex: '0 0 auto', flexDirection: 'row', alignItems: 'center' }}
+        style={{
+          flexDirection: 'row',
+          flex: 1,
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}
       >
-        {file.encryptKeyId && (
-          <SvgKey
-            style={{
-              width: 13,
-              height: 13,
-              marginRight: 8,
-              color: file.hasKey
-                ? theme.formLabelText
-                : theme.buttonNormalDisabledText,
-            }}
-          />
-        )}
+        <View
+          title={getFileDescription(file, t) || ''}
+          style={{ alignItems: 'flex-start' }}
+        >
+          <Text style={{ fontSize: 16, fontWeight: 700 }}>{file.name}</Text>
 
-        {!quickSwitchMode && <FileMenuButton onDelete={() => onDelete(file)} />}
+          <FileState file={file} />
+        </View>
+
+        <View
+          style={{
+            flex: '0 0 auto',
+            flexDirection: 'row',
+            alignItems: 'center',
+          }}
+        >
+          {file.encryptKeyId && (
+            <SvgKey
+              style={{
+                width: 13,
+                height: 13,
+                marginRight: 8,
+                color: file.hasKey
+                  ? theme.formLabelText
+                  : theme.buttonNormalDisabledText,
+              }}
+            />
+          )}
+
+          {!quickSwitchMode && (
+            <FileMenuButton onDelete={() => onDelete(file)} />
+          )}
+        </View>
       </View>
-    </View>
+    </Button>
   );
 }
 
