@@ -134,7 +134,9 @@ export function Sidebar() {
           )}
         </View>
 
-        <View style={{ ...(height < 480 && { overflowY: 'scroll' }) }}>
+        <View
+          style={{ flexGrow: 1, ...(height < 480 && { overflowY: 'auto' }) }}
+        >
           <PrimaryButtons />
 
           <Accounts />
