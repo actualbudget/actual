@@ -36,7 +36,7 @@ export function Sidebar() {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const sidebar = useSidebar();
-  const { width } = useResponsive();
+  const { width, height } = useResponsive();
   const [isFloating = false, setFloatingSidebarPref] =
     useGlobalPref('floatingSidebar');
 
@@ -134,15 +134,17 @@ export function Sidebar() {
           )}
         </View>
 
-        <PrimaryButtons />
+        <View style={{ ...(height < 480 && { overflowY: 'scroll' }) }}>
+          <PrimaryButtons />
 
-        <Accounts />
+          <Accounts />
 
-        <SecondaryButtons
-          buttons={[
-            { title: t('Add account'), Icon: SvgAdd, onClick: onAddAccount },
-          ]}
-        />
+          <SecondaryButtons
+            buttons={[
+              { title: t('Add account'), Icon: SvgAdd, onClick: onAddAccount },
+            ]}
+          />
+        </View>
       </View>
     </Resizable>
   );
