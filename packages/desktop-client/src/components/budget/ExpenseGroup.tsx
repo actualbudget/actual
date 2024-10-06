@@ -15,6 +15,7 @@ import { Row, ROW_HEIGHT } from '../table';
 
 import { RenderMonths } from './RenderMonths';
 import { SidebarGroup } from './SidebarGroup';
+import * as colorPalette from '../../style/palette';
 
 type ExpenseGroupProps = {
   group: ComponentProps<typeof SidebarGroup>['group'];
@@ -32,6 +33,7 @@ type ExpenseGroupProps = {
   onReorderCategory: OnDropCallback;
   onToggleCollapse?: ComponentProps<typeof SidebarGroup>['onToggleCollapse'];
   onShowNewCategory?: ComponentProps<typeof SidebarGroup>['onShowNewCategory'];
+  depth?: number;
 };
 
 export function ExpenseGroup({
@@ -48,6 +50,7 @@ export function ExpenseGroup({
   onReorderCategory,
   onToggleCollapse,
   onShowNewCategory,
+  depth,
 }: ExpenseGroupProps) {
   const dragging = dragState && dragState.item === group;
 
@@ -81,7 +84,8 @@ export function ExpenseGroup({
       style={{
         fontWeight: 600,
         opacity: group.hidden ? 0.33 : undefined,
-        backgroundColor: theme.tableRowHeaderBackground,
+        backgroundColor:
+          depth > 0 ? theme.tableRowHeaderBackground : colorPalette.navy900,
       }}
     >
       {dragState && !dragState.preview && dragState.type === 'group' && (
@@ -126,6 +130,7 @@ export function ExpenseGroup({
           onSave={onSave}
           onDelete={onDelete}
           onShowNewCategory={onShowNewCategory}
+          depth={depth}
         />
         <RenderMonths component={MonthComponent} args={{ group }} />
       </View>

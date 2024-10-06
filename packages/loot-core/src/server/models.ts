@@ -78,7 +78,7 @@ export const categoryModel = {
 
 export const categoryGroupModel = {
   validate(
-    categoryGroup: CategoryGroupEntity,
+    categoryGroup: Partial<CategoryGroupEntity>,
     { update }: { update?: boolean } = {},
   ) {
     requiredFields(
@@ -89,7 +89,13 @@ export const categoryGroupModel = {
     );
 
     const { sort_order, ...rest } = categoryGroup;
-    return { ...rest, hidden: rest.hidden ? 1 : 0 };
+    return {
+      ...rest,
+      hidden: rest.hidden ? 1 : 0,
+      ...(rest.is_income !== undefined && {
+        is_income: rest.is_income ? 1 : 0,
+      }),
+    };
   },
 };
 

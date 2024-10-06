@@ -35,6 +35,7 @@ type SidebarGroupProps = {
   onShowNewCategory?: (groupId: string) => void;
   onHideNewGroup?: () => void;
   onToggleCollapse?: (id: string) => void;
+  depth?: number;
 };
 
 export function SidebarGroup({
@@ -50,6 +51,7 @@ export function SidebarGroup({
   onShowNewCategory,
   onHideNewGroup,
   onToggleCollapse,
+  depth,
 }: SidebarGroupProps) {
   const { t } = useTranslation();
 
@@ -64,6 +66,7 @@ export function SidebarGroup({
         alignItems: 'center',
         userSelect: 'none',
         WebkitUserSelect: 'none',
+        paddingLeft: (depth ?? 0) * 13,
       }}
       onClick={() => {
         onToggleCollapse(group.id);
