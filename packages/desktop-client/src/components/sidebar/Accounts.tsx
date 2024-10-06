@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
@@ -45,7 +44,7 @@ export function Accounts() {
     'ui.showClosedAccounts',
   );
 
-  function onDragChange(drag) {
+  function onDragChange(drag: { state: string }) {
     setIsDragging(drag.state === 'start');
   }
 
