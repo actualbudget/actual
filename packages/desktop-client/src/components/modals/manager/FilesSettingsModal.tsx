@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 
 import { loadAllFiles, pushModal } from 'loot-core/client/actions';
@@ -10,10 +10,12 @@ import { Button } from '../../common/Button2';
 import { Modal, ModalCloseButton, ModalHeader } from '../../common/Modal';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
+import { SvgPencil1 } from '../../../icons/v2';
 
 function FileLocationSettings() {
   const [documentDir, _setDocumentDirPref] = useGlobalPref('documentDir');
   const [_documentDirChanged, setDirChanged] = useState(false);
+  const { t } = useTranslation();
   const dispatch = useDispatch();
 
   async function onChooseDocumentDir() {
@@ -72,8 +74,13 @@ function FileLocationSettings() {
         >
           {documentDir}
         </Text>
-        <Button onPress={onChooseDocumentDir}>
-          <Trans>Change location</Trans>
+        <Button onPress={onChooseDocumentDir} aria-label={t('Change location')}>
+          <SvgPencil1
+            style={{
+              width: 11,
+              height: 11,
+            }}
+          />
         </Button>
       </View>
     </View>
