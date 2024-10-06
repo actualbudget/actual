@@ -120,7 +120,7 @@ async function createReport(report: CustomReportEntity) {
 
   const nameExists = await reportNameExists(item.name, item.id ?? '', true);
   if (nameExists) {
-    throw new Error('There is already a filter named ' + item.name);
+    throw new Error('There is already a report named ' + item.name);
   }
 
   // Create the report here based on the info
@@ -140,10 +140,27 @@ async function updateReport(item: CustomReportEntity) {
 
   const nameExists = await reportNameExists(item.name, item.id, false);
   if (nameExists) {
-    throw new Error('There is already a filter named ' + item.name);
+    throw new Error('There is already a report named ' + item.name);
   }
 
   await db.updateWithSchema('custom_reports', reportModel.fromJS(item));
+}
+
+async function renameReport(item: Pick<CustomReportEntity, 'id' | 'name'>) {
+  if (!item.name) {
+    throw new Error('Report name is required');
+  }
+
+  if (!item.id) {
+    throw new Error('Report recall error');
+  }
+
+  const nameExists = await reportNameExists(item.name, item.id, false);
+  if (nameExists) {
+    throw new Error('There is already a report named ' + item.name);
+  }
+
+  await db.updateWithSchema('custom_reports', item);
 }
 
 async function deleteReport(id: string) {
@@ -155,4 +172,5 @@ export const app = createApp<ReportsHandlers>();
 
 app.method('report/create', mutator(undoable(createReport)));
 app.method('report/update', mutator(undoable(updateReport)));
+app.method('report/rename', mutator(undoable(renameReport)));
 app.method('report/delete', mutator(undoable(deleteReport)));
