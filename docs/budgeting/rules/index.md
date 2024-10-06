@@ -33,9 +33,10 @@ While ranking works for the most part, you might want to say "this rule _always_
 
 Conditions can use the following fields:
 
-- account
 - imported payee
 - payee
+- account
+- category
 - date
 - notes
 - amount
@@ -50,13 +51,15 @@ All strings are matched case-insensitive. An `imported payee` of "PuBlix" will m
 
 Actions can set the following fields:
 
+- category
 - payee
 - notes
+- cleared
+- account
 - date
 - amount
-- category
-- account
-- cleared
+
+Actions can also prepend or append text to the `notes` field.
 
 ## Automatic rules
 
