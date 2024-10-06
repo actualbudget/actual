@@ -36,7 +36,7 @@ export function Sidebar() {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const sidebar = useSidebar();
-  const { width, height } = useResponsive();
+  const { width } = useResponsive();
   const [isFloating = false, setFloatingSidebarPref] =
     useGlobalPref('floatingSidebar');
 
@@ -135,7 +135,12 @@ export function Sidebar() {
         </View>
 
         <View
-          style={{ flexGrow: 1, ...(height < 480 && { overflowY: 'auto' }) }}
+          style={{
+            flexGrow: 1,
+            '@media screen and (max-height: 480px)': {
+              overflowY: 'auto',
+            },
+          }}
         >
           <PrimaryButtons />
 

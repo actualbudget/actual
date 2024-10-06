@@ -14,7 +14,6 @@ import { useFailedAccounts } from '../../hooks/useFailedAccounts';
 import { useLocalPref } from '../../hooks/useLocalPref';
 import { useOffBudgetAccounts } from '../../hooks/useOffBudgetAccounts';
 import { useUpdatedAccounts } from '../../hooks/useUpdatedAccounts';
-import { useResponsive } from '../../ResponsiveProvider';
 import { theme } from '../../style';
 import { View } from '../common/View';
 
@@ -26,7 +25,6 @@ const fontWeight = 600;
 export function Accounts() {
   const { t } = useTranslation();
   const dispatch = useDispatch();
-  const { height } = useResponsive();
   const [isDragging, setIsDragging] = useState(false);
   const accounts = useAccounts();
   const failedAccounts = useFailedAccounts();
@@ -77,7 +75,14 @@ export function Accounts() {
   };
 
   return (
-    <View style={{ flexGrow: 1, ...(height < 480 && { minHeight: 'auto' }) }}>
+    <View
+      style={{
+        flexGrow: 1,
+        '@media screen and (max-height: 480px)': {
+          minHeight: 'auto',
+        },
+      }}
+    >
       <View
         style={{
           height: 1,
