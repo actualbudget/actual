@@ -5,9 +5,5 @@ export interface ReportsHandlers {
 
   'report/update': (report: CustomReportEntity) => Promise<void>;
 
-  'report/rename': (
-    report: Pick<CustomReportEntity, 'id' | 'name'>,
-  ) => Promise<void>;
-
   'report/delete': (id: string) => Promise<void>;
 }
