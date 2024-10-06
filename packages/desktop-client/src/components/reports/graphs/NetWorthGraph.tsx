@@ -23,15 +23,28 @@ import { numberFormatterTooltip } from '../numberFormatter';
 
 type NetWorthGraphProps = {
   style?: CSSProperties;
-  graphData;
-  compact: boolean;
+  graphData: {
+    data: Array<{
+      x: string;
+      y: number;
+      assets: string;
+      debt: string;
+      change: string;
+      networth: string;
+      date: string;
+    }>;
+    hasNegative: boolean;
+    start: string;
+    end: string;
+  };
+  compact?: boolean;
   showTooltip?: boolean;
 };
 
 export function NetWorthGraph({
   style,
   graphData,
-  compact,
+  compact = false,
   showTooltip = true,
 }: NetWorthGraphProps) {
   const { t } = useTranslation();
