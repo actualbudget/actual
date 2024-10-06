@@ -335,7 +335,7 @@ function SettingsButton({ onOpenSettings }: { onOpenSettings: () => void }) {
     <View>
       <Button
         variant="bare"
-        aria-label={t('Menu')}
+        aria-label={t('Settings')}
         onPress={() => {
           onOpenSettings();
         }}
