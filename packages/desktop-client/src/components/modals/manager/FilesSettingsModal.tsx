@@ -5,12 +5,12 @@ import { useDispatch } from 'react-redux';
 import { loadAllFiles, pushModal } from 'loot-core/client/actions';
 
 import { useGlobalPref } from '../../../hooks/useGlobalPref';
+import { SvgPencil1 } from '../../../icons/v2';
 import { theme, styles } from '../../../style';
 import { Button } from '../../common/Button2';
 import { Modal, ModalCloseButton, ModalHeader } from '../../common/Modal';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
-import { SvgPencil1 } from '../../../icons/v2';
 
 function FileLocationSettings() {
   const [documentDir, _setDocumentDirPref] = useGlobalPref('documentDir');
