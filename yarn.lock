@@ -8437,7 +8437,6 @@ __metadata:
     cross-env: "npm:^7.0.3"
     electron: "npm:30.0.6"
     electron-builder: "npm:24.13.3"
-    electron-is-dev: "npm:2.0.0"
     electron-log: "npm:4.4.8"
     fs-extra: "npm:^11.2.0"
     node-fetch: "npm:^2.7.0"
@@ -8760,13 +8759,6 @@ __metadata:
     electron-builder: cli.js
     install-app-deps: install-app-deps.js
   checksum: 10/d210e787cd1763c108f4600184a02860a3d00553278ef7c9d3a23b46d1646cdbcfa7514f774effb917de17f037a53773b5a6159819fc19da764ad2a3235b1c0f
-  languageName: node
-  linkType: hard
-
-"electron-is-dev@npm:2.0.0":
-  version: 2.0.0
-  resolution: "electron-is-dev@npm:2.0.0"
-  checksum: 10/7393f46f06153d70a427ea904c60a092e50fbf1015c26c342cebb8324ada8c9e0c0f1f02867af56d9cc76f47be17da8cb311ea6bdc83343e7ebd2323ec4014c8
   languageName: node
   linkType: hard
 
