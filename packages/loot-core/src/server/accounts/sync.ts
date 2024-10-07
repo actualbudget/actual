@@ -197,30 +197,21 @@ async function downloadSimpleFinTransactions(acctId, since) {
     throw BankSyncError(res.error_type, res.error_code);
   }
 
-  let accounts = res;
-  if (!batchSync) {
-    accounts = {
-      placeholder: res,
-    };
-  }
-
   let retVal = {};
-  for (const [accountId, data] of Object.entries(accounts) as [string, any][]) {
-    const {
-      transactions: { all },
-      balances,
-      startingBalance,
-    } = data;
-
-    retVal[accountId] = {
-      transactions: all,
-      accountBalance: balances,
-      startingBalance,
+  if (batchSync) {
+    for (const [accountId, data] of Object.entries(res) as [string, any][]) {
+      retVal[accountId] = {
+        transactions: data.transactions.all,
+        accountBalance: data.balances,
+        startingBalance: data.startingBalance,
+      };
+    }
+  } else {
+    retVal = {
+      transactions: res.transactions.all,
+      accountBalance: res.balances,
+      startingBalance: res.startingBalance,
     };
-  }
-
-  if (retVal['placeholder']) {
-    retVal = retVal['placeholder'];
   }
 
   console.log('Response:', retVal);
