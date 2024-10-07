@@ -1,4 +1,5 @@
 import { MobileAccountPage } from './mobile-account-page';
+import { BalanceMenuModal } from './mobile-balance-menu-modal';
 import { BudgetMenuModal } from './mobile-budget-menu-modal';
 import { CategoryMenuModal } from './mobile-category-menu-modal';
 
@@ -198,6 +199,7 @@ export class MobileBudgetPage {
 
     if (await balanceButton.isVisible()) {
       await balanceButton.click();
+      return new BalanceMenuModal(this.page, this.page.getByRole('dialog'));
     } else {
       throw new Error(
         `Balance button for category ${categoryName} not found or not visible`,
