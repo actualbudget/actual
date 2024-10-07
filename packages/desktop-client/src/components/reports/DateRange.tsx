@@ -77,7 +77,7 @@ export function DateRange({ start, end, type }: DateRangeProps): ReactElement {
       </div>
     );
   } else {
-    content = formattedEndDate;
+    content = d.format(endDate, 'MMMM yyyy');
   }
 
   return <Block style={{ color: theme.pageTextSubdued }}>{content}</Block>;
