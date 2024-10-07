@@ -3,7 +3,7 @@ import * as asyncStorage from '../../platform/server/asyncStorage';
 import { UserAvailable, UserEntity } from '../../types/models/user';
 import { UserAccessEntity } from '../../types/models/userAccess';
 import { createApp } from '../app';
-import { get, patch, post } from '../post';
+import { del, get, patch, post } from '../post';
 import { getServer } from '../server-config';
 
 import { AdminHandlers } from './types/handlers';
@@ -109,27 +109,6 @@ app.method('user-update', async function (user) {
   return null;
 });
 
-app.method('check-file-access', async function (fileId) {
-  const userToken = await asyncStorage.getItem('user-token');
-
-  if (userToken) {
-    const res = await get(
-      `${getServer().BASE_SERVER + '/admin/access/check-access'}?fileId=${fileId}`,
-      {
-        headers: {
-          'X-ACTUAL-TOKEN': userToken,
-        },
-      },
-    );
-
-    if (res) {
-      return JSON.parse(res) as { granted: boolean };
-    }
-  }
-
-  return { granted: false };
-});
-
 app.method('access-get', async function (fileId) {
   const userToken = await asyncStorage.getItem('user-token');
 
@@ -173,8 +152,8 @@ app.method('access-delete-all', async function ({ fileId, ids }) {
   const userToken = await asyncStorage.getItem('user-token');
   if (userToken) {
     try {
-      const res = await post(
-        getServer().BASE_SERVER + `/admin/access/delete-all?fileId=${fileId}`,
+      const res = await del(
+        getServer().BASE_SERVER + `/admin/access?fileId=${fileId}`,
         {
           token: userToken,
           ids,
@@ -249,16 +228,6 @@ app.method('file-owner-get', async function (fileId) {
     if (res) {
       return JSON.parse(res) as UserEntity;
     }
-  }
-
-  return null;
-});
-
-app.method('auth-mode', async function () {
-  const res = await get(getServer().BASE_SERVER + '/admin/auth-mode/');
-
-  if (res) {
-    return (JSON.parse(res)?.method as string) || '';
   }
 
   return null;
