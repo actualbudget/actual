@@ -86,7 +86,6 @@
   },
   "dependencies": {
     "better-sqlite3": "^9.6.0",
-    "electron-log": "4.4.8",
     "fs-extra": "^11.2.0",
     "node-fetch": "^2.7.0",
     "promise-retry": "^2.0.1"
