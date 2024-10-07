@@ -10,6 +10,7 @@ import { useWidget } from 'loot-core/src/client/data-hooks/widget';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToCurrency } from 'loot-core/src/shared/util';
+import { type TimeFrame, type NetWorthWidget } from 'loot-core/types/models';
 
 import { useAccounts } from '../../../hooks/useAccounts';
 import { useFilters } from '../../../hooks/useFilters';
@@ -33,7 +34,7 @@ import { fromDateRepr } from '../util';
 
 export function NetWorth() {
   const params = useParams();
-  const { data: widget, isLoading } = useWidget(
+  const { data: widget, isLoading } = useWidget<NetWorthWidget>(
     params.id ?? '',
     'net-worth-card',
   );
@@ -45,14 +46,17 @@ export function NetWorth() {
   return <NetWorthInner widget={widget} />;
 }
 
-function NetWorthInner({ widget }) {
+type NetWorthInnerProps = {
+  widget?: NetWorthWidget;
+};
+
+function NetWorthInner({ widget }: NetWorthInnerProps) {
   const dispatch = useDispatch();
   const { t } = useTranslation();
 
   const accounts = useAccounts();
   const {
     conditions,
-    saved,
     conditionsOp,
     onApply: onApplyFilter,
     onDelete: onDeleteFilter,
@@ -60,7 +64,10 @@ function NetWorthInner({ widget }) {
     onConditionsOpChange,
   } = useFilters(widget?.meta?.conditions, widget?.meta?.conditionsOp);
 
-  const [allMonths, setAllMonths] = useState(null);
+  const [allMonths, setAllMonths] = useState<Array<{
+    name: string;
+    pretty: string;
+  }> | null>(null);
 
   const [initialStart, initialEnd, initialMode] = calculateTimeRange(
     widget?.meta?.timeFrame,
@@ -103,15 +110,19 @@ function NetWorthInner({ widget }) {
     run();
   }, []);
 
-  function onChangeDates(start, end, mode) {
+  function onChangeDates(start: string, end: string, mode: TimeFrame['mode']) {
     setStart(start);
     setEnd(end);
     setMode(mode);
   }
 
   async function onSaveWidget() {
+    if (!widget) {
+      throw new Error('No widget that could be saved.');
+    }
+
     await send('dashboard-update-widget', {
-      id: widget?.id,
+      id: widget.id,
       meta: {
         ...(widget.meta ?? {}),
         conditions,
@@ -163,7 +174,6 @@ function NetWorthInner({ widget }) {
         mode={mode}
         onChangeDates={onChangeDates}
         filters={conditions}
-        saved={saved}
         onApply={onApplyFilter}
         onUpdateFilter={onUpdateFilter}
         onDeleteFilter={onDeleteFilter}
@@ -203,12 +213,7 @@ function NetWorthInner({ widget }) {
         </View>
 
         <NetWorthGraph
-          start={start}
-          end={end}
           graphData={data.graphData}
-          domain={{
-            y: [data.lowestNetWorth * 0.99, data.highestNetWorth * 1.01],
-          }}
           showTooltip={!isNarrowWidth}
         />
 
