@@ -52,7 +52,7 @@ If you are experiencing bugs relating to split transactions and the “Reset bud
 
 Be careful with this section; you might encounter irrecoverable errors if you enable these settings. But if you want to test out some bleeding-edge features, here's your place to do it. We _highly_ recommend backing up your budget before continuing, just in case. As of the [latest release](../releases.md), the current available experimental features are:
 
-- Monthly spending
-- Budget mode toggle
-- Goal templates
-- SimpleFIN sync
+- Monthly spending report
+- [Budget mode toggle](../experimental/tracking-budget.md)
+- [Goal templates](../experimental/goal-templates.md)
+- Customizable reports page (dashboards)
