@@ -1161,11 +1161,6 @@ handlers['accounts-bank-sync'] = async function ({ id }) {
 };
 
 handlers['simplefin-batch-sync'] = async function ({ ids }) {
-  const [[, userId], [, userKey]] = await asyncStorage.multiGet([
-    'user-id',
-    'user-key',
-  ]);
-
   const accounts = await db.runQuery(
     `SELECT a.*, b.bank_id as bankId FROM accounts a
          LEFT JOIN banks b ON a.bank = b.id
@@ -1179,8 +1174,6 @@ handlers['simplefin-batch-sync'] = async function ({ ids }) {
   try {
     console.group('Bank Sync operation for all accounts');
     res = await bankSync.SimpleFinBatchSync(
-      userId,
-      userKey,
       accounts.map(a => ({
         id: a.id,
         accountId: a.account_id,

@@ -13,6 +13,7 @@ import {
   amountToInteger,
   integerToAmount,
 } from '../../shared/util';
+import { AccountEntity } from '../../types/models';
 import * as db from '../db';
 import { runMutator } from '../mutators';
 import { post } from '../post';
@@ -23,6 +24,28 @@ import { getStartingBalancePayee } from './payees';
 import { title } from './title';
 import { runRules } from './transaction-rules';
 import { batchUpdateTransactions } from './transactions';
+
+// TODO - add types for bank sync transaction data
+interface BankSyncData {
+  transactions: {
+    all: any[]; // eslint-disable-line
+    booked: any[]; // eslint-disable-line
+    pending: any[]; // eslint-disable-line
+  };
+  balances: {
+    balanceAmount: {
+      amount: string;
+      currency: string;
+    };
+    balanceType: string;
+    referenceDate: string;
+  }[];
+  startingBalance: number;
+}
+
+interface SimpleFinBatchSyncResponse {
+  [accountId: AccountEntity['account_id']]: BankSyncData;
+}
 
 function BankSyncError(type: string, code: string) {
   return { type: 'BankSyncError', category: type, code };
@@ -199,7 +222,9 @@ async function downloadSimpleFinTransactions(acctId, since) {
 
   let retVal = {};
   if (batchSync) {
-    for (const [accountId, data] of Object.entries(res) as [string, any][]) {
+    for (const [accountId, data] of Object.entries(
+      res as SimpleFinBatchSyncResponse,
+    )) {
       retVal[accountId] = {
         transactions: data.transactions.all,
         accountBalance: data.balances,
@@ -207,10 +232,11 @@ async function downloadSimpleFinTransactions(acctId, since) {
       };
     }
   } else {
+    const singleRes = res as BankSyncData;
     retVal = {
-      transactions: res.transactions.all,
-      accountBalance: res.balances,
-      startingBalance: res.startingBalance,
+      transactions: singleRes.transactions.all,
+      accountBalance: singleRes.balances,
+      startingBalance: singleRes.startingBalance,
     };
   }
 
@@ -808,9 +834,10 @@ export async function syncAccount(
 }
 
 export async function SimpleFinBatchSync(
-  userId: string,
-  userKey: string,
-  accounts: { id: string; accountId: string }[],
+  accounts: {
+    id: AccountEntity['id'];
+    accountId: AccountEntity['account_id'];
+  }[],
 ) {
   const startDates = await Promise.all(
     accounts.map(async a => getAccountSyncStartDate(a.id)),
