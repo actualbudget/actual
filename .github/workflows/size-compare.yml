@@ -61,6 +61,7 @@ jobs:
           workflow: build.yml
           name: build-stats
           path: head
+          allow_forks: true
 
       - name: Strip content hashes from stats files
         run: |
