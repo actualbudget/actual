@@ -225,13 +225,9 @@ budgetTypes.forEach(budgetType => {
       await budgetPage.waitForBudgetTable();
 
       const categoryName = await budgetPage.getCategoryNameForRow(0);
-      await budgetPage.openCategoryMenu(categoryName);
+      const categoryMenuModal = await budgetPage.openCategoryMenu(categoryName);
 
-      const categoryMenuModalHeading = page
-        .getByRole('dialog')
-        .getByRole('heading');
-
-      await expect(categoryMenuModalHeading).toHaveText(categoryName);
+      await expect(categoryMenuModal.heading).toHaveText(categoryName);
       await expect(page).toMatchThemeScreenshots();
     });
 
