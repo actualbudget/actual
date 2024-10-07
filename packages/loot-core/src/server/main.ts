@@ -1172,7 +1172,7 @@ handlers['simplefin-batch-sync'] = async function ({ ids }) {
 
   let res;
   try {
-    console.group('Bank Sync operation for all accounts');
+    console.group('Bank Sync operation for all SimpleFin accounts');
     res = await bankSync.SimpleFinBatchSync(
       accounts.map(a => ({
         id: a.id,
