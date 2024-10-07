@@ -64,7 +64,7 @@ function EditableBudgetName() {
   const [budgetName, setBudgetNamePref] = useMetadataPref('budgetName');
   const [editing, setEditing] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const triggerRef = useRef(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
 
   function onMenuSelect(type: string) {
     setMenuOpen(false);
@@ -99,7 +99,7 @@ function EditableBudgetName() {
             fontWeight: 500,
           }}
           defaultValue={budgetName}
-          onEnter={async e => {
+          onEnter={e => {
             const inputEl = e.target as HTMLInputElement;
             const newBudgetName = inputEl.value;
             if (newBudgetName.trim() !== '') {
