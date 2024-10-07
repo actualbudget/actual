@@ -1211,7 +1211,7 @@ handlers['simplefin-batch-sync'] = async function ({ ids }) {
     });
   }
 
-  if (!retVal.some(a => a.res.updatedAccounts.length < 1)) {
+  if (retVal.some(a => a.res.updatedAccounts.length > 0)) {
     connection.send('sync-event', {
       type: 'success',
       tables: ['transactions'],
