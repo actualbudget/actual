@@ -1933,6 +1933,9 @@ async function loadBudget(id) {
   }
 
   try {
+    // check here if server and if server version is compatible
+    // if server version is different, then if the server had less migrations than we do, block it
+    // if server version is same or higher, then migrate
     await updateVersion();
   } catch (e) {
     console.warn('Error updating', e);

@@ -57,7 +57,9 @@ export function loadBudget(id: string, options = {}) {
 
     if (error) {
       const message = getSyncError(error, id);
-      if (error === 'out-of-sync-migrations' || error === 'out-of-sync-data') {
+      if (error === 'out-of-sync-migrations') {
+        dispatch(pushModal('out-of-sync-migrations', { budgetId: id }));
+      } else if (error === 'out-of-sync-data') {
         // confirm is not available on iOS
         if (typeof window.confirm !== 'undefined') {
           const showBackups = window.confirm(
