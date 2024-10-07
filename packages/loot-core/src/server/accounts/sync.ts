@@ -809,10 +809,6 @@ export async function syncAccount(
   const syncFromDate =
     latestTransaction ?? monthUtils.subDays(monthUtils.currentDay(), 90);
 
-  console.log(latestTransaction);
-  console.log(syncFromBlank);
-  console.log(syncFromDate);
-
   let download;
   if (acctRow.account_sync_source === 'simpleFin') {
     download = await downloadSimpleFinTransactions(acctId, syncFromDate);
