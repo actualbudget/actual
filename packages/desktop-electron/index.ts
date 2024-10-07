@@ -16,7 +16,6 @@ import {
   OpenDialogSyncOptions,
   SaveDialogOptions,
 } from 'electron';
-import isDev from 'electron-is-dev';
 import promiseRetry from 'promise-retry';
 
 import { getMenu } from './menu';
@@ -26,6 +25,8 @@ import {
 } from './window-state';
 
 import './security';
+
+const isDev = !app.isPackaged; // dev mode if not packaged
 
 process.env.lootCoreScript = isDev
   ? 'loot-core/lib-dist/bundle.desktop.js' // serve from local output in development (provides hot-reloading)
