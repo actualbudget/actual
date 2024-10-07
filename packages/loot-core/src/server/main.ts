@@ -76,8 +76,6 @@ import { app as toolsApp } from './tools/app';
 import { withUndo, clearUndo, undo, redo } from './undo';
 import { updateVersion } from './update';
 import { uniqueFileName, idFromFileName } from './util/budget-name';
-import { AccountTransactions } from '../../../desktop-client/src/components/mobile/accounts/AccountTransactions';
-import { closeAndDownloadBudget } from 'loot-core/client/actions';
 
 const DEMO_BUDGET_ID = '_demo-budget';
 const TEST_BUDGET_ID = '_test-budget';

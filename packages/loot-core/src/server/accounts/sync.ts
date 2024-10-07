@@ -23,8 +23,6 @@ import { getStartingBalancePayee } from './payees';
 import { title } from './title';
 import { runRules } from './transaction-rules';
 import { batchUpdateTransactions } from './transactions';
-import { SimpleFinAccount } from 'loot-core/types/models';
-import { RevByMonthOfYearRule } from '@rschedule/core/rules/ByMonthOfYear';
 
 function BankSyncError(type: string, code: string) {
   return { type: 'BankSyncError', category: type, code };
