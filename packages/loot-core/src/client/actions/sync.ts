@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import { send } from '../../platform/client/fetch';
 import { getUploadError } from '../../shared/errors';
 
@@ -32,7 +31,6 @@ export function resetSync() {
       }
     } else {
       await dispatch(sync());
-      await dispatch(loadPrefs());
     }
   };
 }
@@ -45,8 +43,12 @@ export function sync() {
       if ('error' in result) {
         return { error: result.error };
       }
-      return {};
+
+      // Update the prefs
+      await dispatch(loadPrefs());
     }
+
+    return {};
   };
 }
 

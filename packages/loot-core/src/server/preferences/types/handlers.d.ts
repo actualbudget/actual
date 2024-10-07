@@ -5,4 +5,6 @@ export interface PreferencesHandlers {
     id: keyof SyncedPrefs;
     value: string | undefined;
   }) => Promise<void>;
+
+  'preferences/get': () => Promise<SyncedPrefs>;
 }
