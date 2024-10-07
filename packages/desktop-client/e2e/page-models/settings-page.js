@@ -14,4 +14,25 @@ export class SettingsPage {
 
     await switchBudgetTypeButton.click();
   }
+
+  async enableExperimentalFeature(featureName) {
+    const advancedSettingsButton = this.page.getByTestId('advanced-settings');
+    if (await advancedSettingsButton.isVisible()) {
+      await advancedSettingsButton.click();
+    }
+
+    const experimentalSettingsButton = this.page.getByTestId(
+      'experimental-settings',
+    );
+    if (await experimentalSettingsButton.isVisible()) {
+      await experimentalSettingsButton.click();
+    }
+
+    const featureCheckbox = this.page.getByRole('checkbox', {
+      name: featureName,
+    });
+    if (!(await featureCheckbox.isChecked())) {
+      await featureCheckbox.click();
+    }
+  }
 }
