@@ -777,50 +777,34 @@ export async function syncAccount(
   bankId: string,
 ) {
   const acctRow = await db.select('accounts', id);
-  const startDate = await getAccountSyncStartDate(id);
 
-  if (startDate !== null) {
-    let download;
+  const latestTransaction = await getAccountSyncStartDate(id);
+  const syncFromBlank = latestTransaction === null;
+  const syncFromDate =
+    latestTransaction ?? monthUtils.subDays(monthUtils.currentDay(), 90);
 
-    if (acctRow.account_sync_source === 'simpleFin') {
-      download = await downloadSimpleFinTransactions(acctId, startDate);
-    } else if (acctRow.account_sync_source === 'goCardless') {
-      download = await downloadGoCardlessTransactions(
-        userId,
-        userKey,
-        acctId,
-        bankId,
-        startDate,
-        false,
-      );
-    } else {
-      throw new Error(
-        `Unrecognized bank-sync provider: ${acctRow.account_sync_source}`,
-      );
-    }
+  console.log(latestTransaction);
+  console.log(syncFromBlank);
+  console.log(syncFromDate);
 
-    return processBankSyncDownload(download, id, acctRow);
+  let download;
+  if (acctRow.account_sync_source === 'simpleFin') {
+    download = await downloadSimpleFinTransactions(acctId, syncFromDate);
+  } else if (acctRow.account_sync_source === 'goCardless') {
+    download = await downloadGoCardlessTransactions(
+      userId,
+      userKey,
+      acctId,
+      bankId,
+      syncFromBlank,
+    );
   } else {
-    let download;
-
-    // Otherwise, download transaction for the past 90 days
-    const startingDay = monthUtils.subDays(monthUtils.currentDay(), 90);
-
-    if (acctRow.account_sync_source === 'simpleFin') {
-      download = await downloadSimpleFinTransactions(acctId, startingDay);
-    } else if (acctRow.account_sync_source === 'goCardless') {
-      download = await downloadGoCardlessTransactions(
-        userId,
-        userKey,
-        acctId,
-        bankId,
-        startingDay,
-        true,
-      );
-    }
-
-    return processBankSyncDownload(download, id, acctRow, true);
+    throw new Error(
+      `Unrecognized bank-sync provider: ${acctRow.account_sync_source}`,
+    );
   }
+
+  return processBankSyncDownload(download, id, acctRow, syncFromBlank);
 }
 
 export async function SimpleFinBatchSync(
@@ -845,15 +829,13 @@ export async function SimpleFinBatchSync(
 
     const acctRow = await db.select('accounts', account.id);
 
-    let promise;
-    if (startDate !== null) {
-      promise = processBankSyncDownload(download, account.id, acctRow);
-    } else {
-      promise = processBankSyncDownload(download, account.id, acctRow, true);
-    }
-
     promises.push(
-      promise.then(res => ({
+      processBankSyncDownload(
+        download,
+        account.id,
+        acctRow,
+        startDate === null,
+      ).then(res => ({
         accountId: account.id,
         res,
       })),
