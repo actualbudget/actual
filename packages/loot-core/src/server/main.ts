@@ -1944,7 +1944,7 @@ handlers['enable-openid'] = async function (loginConfig) {
       return { error: 'unauthorized' };
     }
 
-    await post(getServer().SIGNUP_SERVER + '/enable-openid', loginConfig, {
+    await post(getServer().BASE_SERVER + '/openid/enable', loginConfig, {
       'X-ACTUAL-TOKEN': userToken,
     });
   } catch (err) {
@@ -1961,7 +1961,7 @@ handlers['enable-password'] = async function (loginConfig) {
       return { error: 'unauthorized' };
     }
 
-    await post(getServer().SIGNUP_SERVER + '/enable-password', loginConfig, {
+    await post(getServer().BASE_SERVER + '/openid/disable', loginConfig, {
       'X-ACTUAL-TOKEN': userToken,
     });
   } catch (err) {
@@ -1971,7 +1971,7 @@ handlers['enable-password'] = async function (loginConfig) {
 };
 
 handlers['get-openid-config'] = async function () {
-  const res = await get(getServer().SIGNUP_SERVER + '/openid-config');
+  const res = await get(getServer().BASE_SERVER + '/openid/config');
 
   if (res) {
     return JSON.parse(res) as OpenIdConfig;
