@@ -19,16 +19,22 @@ export class SettingsPage {
 
   async enableExperimentalFeature(featureName) {
     const advancedSettingsButton = this.page.getByTestId('advanced-settings');
-    await advancedSettingsButton.click();
+    if (await advancedSettingsButton.isVisible()) {
+      await advancedSettingsButton.click();
+    }
 
     const experimentalSettingsButton = this.page.getByTestId(
       'experimental-settings',
     );
-    await experimentalSettingsButton.click();
+    if (await experimentalSettingsButton.isVisible()) {
+      await experimentalSettingsButton.click();
+    }
 
     const featureCheckbox = this.page.getByRole('checkbox', {
       name: featureName,
     });
-    await featureCheckbox.click();
+    if (!(await featureCheckbox.isChecked())) {
+      await featureCheckbox.click();
+    }
   }
 }

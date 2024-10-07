@@ -1,5 +1,9 @@
-// @ts-strict-ignore
-import React, { type ComponentType, useEffect } from 'react';
+import React, {
+  type ComponentType,
+  useCallback,
+  useEffect,
+  useState,
+} from 'react';
 import { NavLink } from 'react-router-dom';
 import { useSpring, animated, config } from 'react-spring';
 
@@ -29,6 +33,9 @@ export const MOBILE_NAV_HEIGHT = ROW_HEIGHT + PILL_HEIGHT;
 export function MobileNavTabs() {
   const { isNarrowWidth } = useResponsive();
   const { scrollY } = useScroll();
+  const [navbarState, setNavbarState] = useState<
+    'default' | 'open' | 'hidden'
+  >();
 
   const navTabStyle = {
     flex: `1 1 ${100 / COLUMN_COUNT}%`,
@@ -93,37 +100,49 @@ export function MobileNavTabs() {
   ));
 
   const totalHeight = ROW_HEIGHT * COLUMN_COUNT;
-  const openY = 0;
-  const closeY = totalHeight - ROW_HEIGHT;
+  const openFullY = 1;
+  const openDefaultY = totalHeight - ROW_HEIGHT;
   const hiddenY = totalHeight;
 
   const [{ y }, api] = useSpring(() => ({ y: totalHeight }));
 
-  const open = ({ canceled }) => {
-    // when cancel is true, it means that the user passed the upwards threshold
-    // so we change the spring config to create a nice wobbly effect
-    api.start({
-      y: openY,
-      immediate: false,
-      config: canceled ? config.wobbly : config.stiff,
-    });
-  };
+  const openFull = useCallback(
+    ({ canceled }: { canceled: boolean }) => {
+      setNavbarState('open');
+      // when cancel is true, it means that the user passed the upwards threshold
+      // so we change the spring config to create a nice wobbly effect
+      api.start({
+        y: openFullY,
+        immediate: false,
+        config: canceled ? config.wobbly : config.stiff,
+      });
+    },
+    [api, openFullY],
+  );
 
-  const close = (velocity = 0) => {
-    api.start({
-      y: closeY,
-      immediate: false,
-      config: { ...config.stiff, velocity },
-    });
-  };
+  const openDefault = useCallback(
+    (velocity = 0) => {
+      setNavbarState('default');
+      api.start({
+        y: openDefaultY,
+        immediate: false,
+        config: { ...config.stiff, velocity },
+      });
+    },
+    [api, openDefaultY],
+  );
 
-  const hide = (velocity = 0) => {
-    api.start({
-      y: hiddenY,
-      immediate: false,
-      config: { ...config.stiff, velocity },
-    });
-  };
+  const hide = useCallback(
+    (velocity = 0) => {
+      setNavbarState('hidden');
+      api.start({
+        y: hiddenY,
+        immediate: false,
+        config: { ...config.stiff, velocity },
+      });
+    },
+    [api, hiddenY],
+  );
 
   const previousScrollY = usePrevious(scrollY);
 
@@ -136,7 +155,7 @@ export function MobileNavTabs() {
     ) {
       hide();
     } else {
-      close();
+      openDefault();
     }
   }, [scrollY]);
 
@@ -159,9 +178,9 @@ export function MobileNavTabs() {
       // the threshold for it to close, or if we reset it to its open position
       if (last) {
         if (oy > ROW_HEIGHT * 0.5 || (vy > 0.5 && dy > 0)) {
-          close(vy);
+          openDefault(vy);
         } else {
-          open({ canceled });
+          openFull({ canceled });
         }
       } else {
         // when the user keeps dragging, we just move the sheet according to
@@ -195,6 +214,7 @@ export function MobileNavTabs() {
         bottom: 0,
         ...(!isNarrowWidth && { display: 'none' }),
       }}
+      data-navbar-state={navbarState}
     >
       <View>
         <div
@@ -247,6 +267,7 @@ function NavTab({ Icon: TabIcon, name, path, style }: NavTabProps) {
         flexDirection: 'column',
         textDecoration: 'none',
         textAlign: 'center',
+        userSelect: 'none',
         ...style,
       })}
     >
