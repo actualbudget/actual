@@ -130,7 +130,11 @@ function EditableBudgetName() {
         <Text style={{ whiteSpace: 'nowrap', overflow: 'hidden' }}>
           {budgetName || t('A budget has no name')}
         </Text>
-        <SvgExpandArrow width={7} height={7} style={{ marginLeft: 5 }} />
+        <SvgExpandArrow
+          width={7}
+          height={7}
+          style={{ flexShrink: 0, marginLeft: 5 }}
+        />
       </Button>
 
       <Popover
