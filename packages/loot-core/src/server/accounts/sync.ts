@@ -845,7 +845,7 @@ export async function SimpleFinBatchSync(
     startDates,
   );
 
-  let promises = [];
+  const promises = [];
   for (let i = 0; i < startDates.length; i++) {
     const startDate = startDates[i];
     const account = accounts[i];

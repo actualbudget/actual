@@ -183,7 +183,6 @@ export function syncAccounts(id?: string) {
         ids: simpleFinAccounts.map(a => a.id),
       });
 
-      let isSyncSuccess = false;
       for (const account of res) {
         const success = handleSyncResponse(
           account.accountId,

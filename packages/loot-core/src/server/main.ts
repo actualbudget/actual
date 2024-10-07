@@ -1065,11 +1065,11 @@ function handleSyncResponse(
 ) {
   const { added, updated } = res;
 
-  newTransactions = newTransactions.concat(added);
-  matchedTransactions = matchedTransactions.concat(updated);
+  newTransactions.push(...added);
+  matchedTransactions.push(...updated);
 
   if (added.length > 0 || updated.length > 0) {
-    updatedAccounts = updatedAccounts.concat(acct.id);
+    updatedAccounts.push(acct.id);
   }
 }
 
@@ -1116,9 +1116,9 @@ handlers['accounts-bank-sync'] = async function ({ id }) {
   );
 
   const errors = [];
-  let newTransactions = [];
-  let matchedTransactions = [];
-  let updatedAccounts = [];
+  const newTransactions = [];
+  const matchedTransactions = [];
+  const updatedAccounts = [];
 
   for (let i = 0; i < accounts.length; i++) {
     const acct = accounts[i];
@@ -1190,12 +1190,12 @@ handlers['simplefin-batch-sync'] = async function ({ ids }) {
     console.error(e);
   }
 
-  let retVal = [];
+  const retVal = [];
   for (const account of res) {
     const errors = [];
-    let newTransactions = [];
-    let matchedTransactions = [];
-    let updatedAccounts = [];
+    const newTransactions = [];
+    const matchedTransactions = [];
+    const updatedAccounts = [];
 
     handleSyncResponse(
       account.res,
