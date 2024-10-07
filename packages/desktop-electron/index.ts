@@ -1,5 +1,4 @@
 import fs from 'fs';
-import Module from 'module';
 import path from 'path';
 
 import {
@@ -17,7 +16,7 @@ import {
   OpenDialogSyncOptions,
   SaveDialogOptions,
 } from 'electron';
-import isDev from 'electron-is-dev';
+import { copy, exists, remove } from 'fs-extra';
 import promiseRetry from 'promise-retry';
 
 import { getMenu } from './menu';
@@ -28,7 +27,11 @@ import {
 
 import './security';
 
-Module.globalPaths.push(__dirname + '/..');
+const isDev = !app.isPackaged; // dev mode if not packaged
+
+process.env.lootCoreScript = isDev
+  ? 'loot-core/lib-dist/bundle.desktop.js' // serve from local output in development (provides hot-reloading)
+  : path.resolve(__dirname, 'loot-core/lib-dist/bundle.desktop.js'); // serve from build in production
 
 // This allows relative URLs to be resolved to app:// which makes
 // local assets load correctly
@@ -143,7 +146,9 @@ async function createWindow() {
     if (clientWin) {
       const url = clientWin.webContents.getURL();
       if (url.includes('app://') || url.includes('localhost:')) {
-        clientWin.webContents.executeJavaScript('__actionsForMenu.focused()');
+        clientWin.webContents.executeJavaScript(
+          'window.__actionsForMenu.focused()',
+        );
       }
     }
   });
@@ -399,3 +404,32 @@ ipcMain.on('set-theme', (_event, theme: string) => {
     );
   }
 });
+
+ipcMain.handle(
+  'move-budget-directory',
+  async (_event, currentBudgetDirectory: string, newDirectory: string) => {
+    try {
+      if (!currentBudgetDirectory || !newDirectory) {
+        throw new Error('The from and to directories must be provided');
+      }
+
+      if (newDirectory.startsWith(currentBudgetDirectory)) {
+        throw new Error(
+          'The destination must not be a subdirectory of the current directory',
+        );
+      }
+
+      if (!(await exists(newDirectory))) {
+        throw new Error('The destination directory does not exist');
+      }
+
+      await copy(currentBudgetDirectory, newDirectory, {
+        overwrite: true,
+      });
+      await remove(currentBudgetDirectory);
+    } catch (error) {
+      console.error('There was an error moving your directory', error);
+      throw error;
+    }
+  },
+);

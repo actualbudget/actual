@@ -66,9 +66,9 @@ export const Information = ({ style, children }: ScopedAlertProps) => {
       color={theme.pageTextLight}
       backgroundColor="transparent"
       style={{
-        ...style,
         boxShadow: 'none',
         padding: 5,
+        ...style,
       }}
     >
       {children}
