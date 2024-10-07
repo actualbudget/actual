@@ -2,6 +2,8 @@ import { MobileAccountPage } from './mobile-account-page';
 import { BalanceMenuModal } from './mobile-balance-menu-modal';
 import { BudgetMenuModal } from './mobile-budget-menu-modal';
 import { CategoryMenuModal } from './mobile-category-menu-modal';
+import { EnvelopeBudgetSummaryModal } from './mobile-envelope-budget-summary-modal';
+import { TrackingBudgetSummaryModal } from './mobile-tracking-budget-summary-modal';
 
 export class MobileBudgetPage {
   MONTH_HEADER_DATE_FORMAT = 'MMMM ‘yy';
@@ -271,9 +273,14 @@ export class MobileBudgetPage {
     );
   }
 
-  async openEnvelopeBudgetSummaryMenu() {
+  async openEnvelopeBudgetSummary() {
     const budgetSummaryButton = await this.#getButtonForEnvelopeBudgetSummary();
     await budgetSummaryButton.click();
+
+    return new EnvelopeBudgetSummaryModal(
+      this.page,
+      this.page.getByRole('dialog'),
+    );
   }
 
   async #getButtonForTrackingBudgetSummary({ throwIfNotFound = true } = {}) {
@@ -298,8 +305,13 @@ export class MobileBudgetPage {
     );
   }
 
-  async openTrackingBudgetSummaryMenu() {
+  async openTrackingBudgetSummary() {
     const budgetSummaryButton = await this.#getButtonForTrackingBudgetSummary();
     await budgetSummaryButton.click();
+
+    return new TrackingBudgetSummaryModal(
+      this.page,
+      this.page.getByRole('dialog'),
+    );
   }
 }

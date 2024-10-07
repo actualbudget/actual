@@ -372,13 +372,12 @@ budgetTypes.forEach(budgetType => {
         const budgetPage = await navigation.goToBudgetPage();
         await budgetPage.waitForBudgetTable();
 
-        await budgetPage.openEnvelopeBudgetSummaryMenu();
+        const envelopeBudgetSummaryModal =
+          await budgetPage.openEnvelopeBudgetSummary();
 
-        const summaryModalHeading = page
-          .getByRole('dialog')
-          .getByRole('heading');
-
-        await expect(summaryModalHeading).toHaveText('Budget Summary');
+        await expect(envelopeBudgetSummaryModal.heading).toHaveText(
+          'Budget Summary',
+        );
         await expect(page).toMatchThemeScreenshots();
       });
     }
@@ -388,13 +387,12 @@ budgetTypes.forEach(budgetType => {
         const budgetPage = await navigation.goToBudgetPage();
         await budgetPage.waitForBudgetTable();
 
-        await budgetPage.openTrackingBudgetSummaryMenu();
+        const trackingBudgetSummaryModal =
+          await budgetPage.openTrackingBudgetSummary();
 
-        const summaryModalHeading = page
-          .getByRole('dialog')
-          .getByRole('heading');
-
-        await expect(summaryModalHeading).toHaveText('Budget Summary');
+        await expect(trackingBudgetSummaryModal.heading).toHaveText(
+          'Budget Summary',
+        );
         await expect(page).toMatchThemeScreenshots();
       });
     }
