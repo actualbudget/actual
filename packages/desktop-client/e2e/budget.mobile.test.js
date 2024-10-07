@@ -259,13 +259,15 @@ budgetTypes.forEach(budgetType => {
       const categoryName = await budgetPage.getCategoryNameForRow(0);
       const budgetMenuModal = await budgetPage.openBudgetMenu(categoryName);
 
+      const budgetAmount = 123;
+
       // Set to 123.00
-      await budgetMenuModal.setBudgetAmount('12300');
+      await budgetMenuModal.setBudgetAmount(`${budgetAmount}00`);
 
       const budgetedButton =
         await budgetPage.getButtonForBudgeted(categoryName);
 
-      await expect(budgetedButton).toHaveText('123.00');
+      await expect(budgetedButton).toHaveText(amountToCurrency(budgetAmount));
       await expect(page).toMatchThemeScreenshots();
     });
 
@@ -315,6 +317,35 @@ budgetTypes.forEach(budgetType => {
         );
         await expect(page).toMatchThemeScreenshots();
       });
+    });
+
+    test(`applies budget template`, async () => {
+      const settingsPage = await navigation.goToSettingsPage();
+      await settingsPage.enableExperimentalFeature('Goal templates');
+
+      const budgetPage = await navigation.goToBudgetPage();
+      await budgetPage.waitForBudgetTable();
+
+      const categoryName = await budgetPage.getCategoryNameForRow(1);
+
+      const amountToTemplate = 123;
+
+      const categoryMenuModal = await budgetPage.openCategoryMenu(categoryName);
+      const editNotesModal = await categoryMenuModal.editNotes();
+      await editNotesModal.updateNotes(`#template ${amountToTemplate}`);
+      await editNotesModal.close();
+
+      const budgetedButton =
+        await budgetPage.getButtonForBudgeted(categoryName);
+
+      const budgetMenuModal = await budgetPage.openBudgetMenu(categoryName);
+      await budgetMenuModal.applyBudgetTemplate();
+      await budgetMenuModal.close();
+
+      await expect(budgetedButton).toHaveText(
+        amountToCurrency(amountToTemplate),
+      );
+      await expect(page).toMatchThemeScreenshots();
     });
 
     // Spent Cell Tests

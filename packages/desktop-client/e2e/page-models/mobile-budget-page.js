@@ -1,5 +1,6 @@
 import { MobileAccountPage } from './mobile-account-page';
 import { BudgetMenuModal } from './mobile-budget-menu-modal';
+import { CategoryMenuModal } from './mobile-category-menu-modal';
 
 export class MobileBudgetPage {
   MONTH_HEADER_DATE_FORMAT = 'MMMM ‘yy';
@@ -140,6 +141,8 @@ export class MobileBudgetPage {
   async openCategoryMenu(categoryName) {
     const categoryButton = await this.#getButtonForCategory(categoryName);
     await categoryButton.click();
+
+    return new CategoryMenuModal(this.page, this.page.getByRole('dialog'));
   }
 
   async #getButtonForCell(buttonType, categoryName) {
