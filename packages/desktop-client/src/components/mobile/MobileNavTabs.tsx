@@ -35,7 +35,7 @@ export function MobileNavTabs() {
   const { scrollY } = useScroll();
   const [navbarState, setNavbarState] = useState<
     'default' | 'open' | 'hidden'
-  >();
+  >('default');
 
   const navTabStyle = {
     flex: `1 1 ${100 / COLUMN_COUNT}%`,
