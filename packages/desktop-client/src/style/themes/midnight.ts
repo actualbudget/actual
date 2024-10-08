@@ -174,10 +174,12 @@ export const formInputTextSelection = colorPalette.gray800;
 export const formInputShadowSelected = colorPalette.purple400;
 export const formInputTextHighlight = colorPalette.purple200;
 export const checkboxText = tableText;
-export const checkboxToggleBackground = colorPalette.gray400;
 export const checkboxBackgroundSelected = colorPalette.purple300;
 export const checkboxBorderSelected = colorPalette.purple300;
 export const checkboxShadowSelected = colorPalette.purple500;
+export const checkboxToggleBackground = colorPalette.gray400;
+export const checkboxToggleBackgroundSelected = colorPalette.purple300;
+export const checkboxToggleDisabled = colorPalette.gray700;
 
 export const pillBackground = colorPalette.gray500;
 export const pillBackgroundLight = colorPalette.gray900;
