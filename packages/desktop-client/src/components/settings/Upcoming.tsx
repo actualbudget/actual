@@ -59,7 +59,12 @@ export function UpcomingLengthSettings() {
           <strong>Upcoming Length</strong> does not affect how budget data is
           stored, and can be changed at any time.
         </Text>
-        <Button onClick={() => setExpanded(false)}>Close</Button>
+        <Button
+          onClick={() => setExpanded(false)}
+          aria-label="Close upcoming length settings"
+        >
+          Close
+        </Button>
       </View>
     </Setting>
   ) : (
@@ -68,7 +73,12 @@ export function UpcomingLengthSettings() {
         <Text style={{ fontSize: '1.25rem' }}>
           <strong>Upcoming Length</strong>
         </Text>
-        <Button onClick={() => setExpanded(true)}>Edit</Button>
+        <Button
+          onClick={() => setExpanded(true)}
+          aria-label="Edit upcoming length settings"
+        >
+          Edit
+        </Button>
       </View>
     </Setting>
   );
