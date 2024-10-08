@@ -17,18 +17,15 @@ import * as sqlite from '../platform/server/sqlite';
 import { isNonProductionEnvironment } from '../shared/environment';
 import * as monthUtils from '../shared/months';
 import { dayFromDate } from '../shared/months';
-import { q, Query } from '../shared/query';
+import { q } from '../shared/query';
 import { amountToInteger, stringToInteger } from '../shared/util';
 import { type Budget } from '../types/budget';
 import { Handlers } from '../types/handlers';
 
-import { exportToCSV, exportQueryToCSV } from './accounts/export-to-csv';
 import * as link from './accounts/link';
-import { parseFile } from './accounts/parse-file';
 import { getStartingBalancePayee } from './accounts/payees';
 import * as bankSync from './accounts/sync';
 import * as rules from './accounts/transaction-rules';
-import { batchUpdateTransactions } from './accounts/transactions';
 import { installAPI } from './api';
 import { runQuery as aqlQuery } from './aql';
 import {
@@ -45,7 +42,7 @@ import { app as dashboardApp } from './dashboard/app';
 import * as db from './db';
 import * as mappings from './db/mappings';
 import * as encryption from './encryption';
-import { APIError, TransactionError, PostError } from './errors';
+import { APIError, PostError } from './errors';
 import { app as filtersApp } from './filters/app';
 import { handleBudgetImport } from './importers';
 import { app } from './main-app';
@@ -73,6 +70,7 @@ import {
 } from './sync';
 import * as syncMigrations from './sync/migrate';
 import { app as toolsApp } from './tools/app';
+import { app as transactionsApp } from './transactions/app';
 import { withUndo, clearUndo, undo, redo } from './undo';
 import { updateVersion } from './update';
 import { uniqueFileName, idFromFileName } from './util/budget-name';
@@ -103,56 +101,6 @@ handlers['undo'] = mutator(async function () {
 handlers['redo'] = mutator(function () {
   return redo();
 });
-
-handlers['transactions-batch-update'] = mutator(async function ({
-  added,
-  deleted,
-  updated,
-  learnCategories,
-}) {
-  return withUndo(async () => {
-    const result = await batchUpdateTransactions({
-      added,
-      updated,
-      deleted,
-      learnCategories,
-    });
-
-    return result;
-  });
-});
-
-handlers['transaction-add'] = mutator(async function (transaction) {
-  await handlers['transactions-batch-update']({ added: [transaction] });
-  return {};
-});
-
-handlers['transaction-update'] = mutator(async function (transaction) {
-  await handlers['transactions-batch-update']({ updated: [transaction] });
-  return {};
-});
-
-handlers['transaction-delete'] = mutator(async function (transaction) {
-  await handlers['transactions-batch-update']({ deleted: [transaction] });
-  return {};
-});
-
-handlers['transactions-parse-file'] = async function ({ filepath, options }) {
-  return parseFile(filepath, options);
-};
-
-handlers['transactions-export'] = async function ({
-  transactions,
-  accounts,
-  categoryGroups,
-  payees,
-}) {
-  return exportToCSV(transactions, accounts, categoryGroups, payees);
-};
-
-handlers['transactions-export-query'] = async function ({ query: queryState }) {
-  return exportQueryToCSV(new Query(queryState));
-};
 
 handlers['get-categories'] = async function () {
   return {
@@ -1139,39 +1087,6 @@ handlers['accounts-bank-sync'] = async function ({ id }) {
   return { errors, newTransactions, matchedTransactions, updatedAccounts };
 };
 
-handlers['transactions-import'] = mutator(function ({
-  accountId,
-  transactions,
-  isPreview,
-}) {
-  return withUndo(async () => {
-    if (typeof accountId !== 'string') {
-      throw APIError('transactions-import: accountId must be an id');
-    }
-
-    try {
-      return await bankSync.reconcileTransactions(
-        accountId,
-        transactions,
-        false,
-        true,
-        isPreview,
-      );
-    } catch (err) {
-      if (err instanceof TransactionError) {
-        return {
-          errors: [{ message: err.message }],
-          added: [],
-          updated: [],
-          updatedPreview: [],
-        };
-      }
-
-      throw err;
-    }
-  });
-});
-
 handlers['account-unlink'] = mutator(async function ({ id }) {
   const { bank: bankId } = await db.first(
     'SELECT bank FROM accounts WHERE id = ?',
@@ -2085,6 +2000,7 @@ app.combine(
   filtersApp,
   reportsApp,
   rulesApp,
+  transactionsApp,
 );
 
 function getDefaultDocumentDir() {
