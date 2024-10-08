@@ -6,6 +6,7 @@ Array [
     "actions": Array [
       Action {
         "field": "category",
+        "handlebarsTemplate": undefined,
         "op": "set",
         "options": undefined,
         "rawValue": "food",
@@ -32,6 +33,7 @@ Array [
     "actions": Array [
       Action {
         "field": "category",
+        "handlebarsTemplate": undefined,
         "op": "set",
         "options": undefined,
         "rawValue": "food",
@@ -58,6 +60,7 @@ Array [
     "actions": Array [
       Action {
         "field": "category",
+        "handlebarsTemplate": undefined,
         "op": "set",
         "options": undefined,
         "rawValue": "beer",
@@ -89,6 +92,7 @@ Array [
     "actions": Array [
       Action {
         "field": "category",
+        "handlebarsTemplate": undefined,
         "op": "set",
         "options": undefined,
         "rawValue": "beer",
@@ -115,6 +119,7 @@ Array [
     "actions": Array [
       Action {
         "field": "category",
+        "handlebarsTemplate": undefined,
         "op": "set",
         "options": undefined,
         "rawValue": "beer",
@@ -141,6 +146,7 @@ Array [
     "actions": Array [
       Action {
         "field": "category",
+        "handlebarsTemplate": undefined,
         "op": "set",
         "options": undefined,
         "rawValue": "beer",
