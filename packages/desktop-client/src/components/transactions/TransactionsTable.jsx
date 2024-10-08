@@ -1811,8 +1811,11 @@ function TransactionTableInner({
 
   // Don't render reconciled transactions if we're hiding them.
   const transactionsToRender = useMemo(
-    () => props.showReconciled ? props.transactions : props.transactions.filter(t => !t.reconciled),
-    [props.transactions, props.showReconciled]
+    () =>
+      props.showReconciled
+        ? props.transactions
+        : props.transactions.filter(t => !t.reconciled),
+    [props.transactions, props.showReconciled],
   );
 
   const renderRow = ({ item, index, editing }) => {

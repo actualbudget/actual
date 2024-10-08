@@ -488,7 +488,10 @@ class AccountInternal extends PureComponent<
 
     // Filter out reconciled transactions if they are hidden
     // and we're not showing balances.
-    if (!this.state.showReconciled && (!this.state.showBalances || !this.canCalculateBalance())) {
+    if (
+      !this.state.showReconciled &&
+      (!this.state.showBalances || !this.canCalculateBalance())
+    ) {
       query = query.filter({ reconciled: { $eq: false } });
     }
 
