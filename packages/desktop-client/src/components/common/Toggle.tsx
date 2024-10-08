@@ -17,8 +17,8 @@ type ToggleProps = {
 
 export const Toggle = ({
   id,
-  isOn: checked,
-  isDisabled: disabled,
+  isOn,
+  isDisabled = false,
   onToggle,
   className,
   style,
@@ -27,8 +27,8 @@ export const Toggle = ({
     <View style={style} className={className}>
       <input
         id={id}
-        checked={checked}
-        disabled={disabled}
+        checked={isOn}
+        disabled={isDisabled}
         onChange={e => onToggle?.(e.target.checked)}
         className={`${css({
           height: 0,
@@ -39,7 +39,7 @@ export const Toggle = ({
       />
       <label
         data-toggle-container
-        data-on={checked}
+        data-on={isOn}
         className={`${css({
           display: 'flex',
           alignItems: 'center',
@@ -50,7 +50,7 @@ export const Toggle = ({
           borderRadius: '100px',
           position: 'relative',
           transition: 'background-color .2s',
-          background: checked
+          background: isOn
             ? theme.checkboxToggleBackgroundSelected
             : theme.checkboxToggleBackground,
         })}`}
@@ -58,7 +58,7 @@ export const Toggle = ({
       >
         <span
           data-toggle
-          data-on={checked}
+          data-on={isOn}
           className={`${css(
             {
               content: ' ',
@@ -70,9 +70,9 @@ export const Toggle = ({
               borderRadius: '100px',
               transition: '0.2s',
               boxShadow: '0 0 2px 0 rgba(10, 10, 10, 0.29)',
-              background: disabled ? theme.checkboxToggleDisabled : '#fff',
+              background: isDisabled ? theme.checkboxToggleDisabled : '#fff',
             },
-            checked && {
+            isOn && {
               left: 'calc(100% - 2px)',
               transform: 'translateX(-100%)',
             },
