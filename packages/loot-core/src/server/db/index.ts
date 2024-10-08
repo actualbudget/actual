@@ -580,22 +580,29 @@ export function getCommonPayees() {
   `);
 }
 
+const orphanedPayeesQuery = `
+  SELECT p.id
+  FROM payees p
+    LEFT JOIN payee_mapping pm ON pm.id = p.id
+    LEFT JOIN v_transactions_internal_alive t ON t.payee = pm.targetId
+  WHERE p.tombstone = 0
+    AND p.transfer_acct IS NULL
+    AND t.id IS NULL
+    AND NOT EXISTS (
+        SELECT 1
+        FROM rules r,
+        json_each(r.conditions) as cond
+        WHERE json_extract(cond.value, '$.field') = 'description'
+        AND json_extract(cond.value, '$.value') = pm.targetId
+    );
+`;
+
 export function syncGetOrphanedPayees() {
-  return all(`
-  SELECT p.id FROM payees p
-  LEFT JOIN payee_mapping pm ON pm.id = p.id
-  LEFT JOIN v_transactions_internal_alive t ON t.payee = pm.targetId
-  WHERE p.tombstone = 0 AND p.transfer_acct IS NULL AND t.id IS NULL
-`);
+  return all(orphanedPayeesQuery);
 }
 
 export async function getOrphanedPayees() {
-  const rows = await all(`
-    SELECT p.id FROM payees p
-    LEFT JOIN payee_mapping pm ON pm.id = p.id
-    LEFT JOIN v_transactions_internal_alive t ON t.payee = pm.targetId
-    WHERE p.tombstone = 0 AND p.transfer_acct IS NULL AND t.id IS NULL
-  `);
+  const rows = await all(orphanedPayeesQuery);
   return rows.map(row => row.id);
 }
 
