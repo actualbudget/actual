@@ -1834,7 +1834,7 @@ function BudgetTableHeader({
                           paddingRight: 4,
                         }}
                       >
-                        {format(value, type)}
+                        {format(-value, type)}
                       </AutoTextSize>
                     </PrivacyFilter>
                   </View>
