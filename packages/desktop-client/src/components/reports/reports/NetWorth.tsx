@@ -20,6 +20,7 @@ import { theme, styles } from '../../../style';
 import { Button } from '../../common/Button2';
 import { Paragraph } from '../../common/Paragraph';
 import { View } from '../../common/View';
+import { EditablePageHeaderTitle } from '../../EditablePageHeaderTitle';
 import { MobileBackButton } from '../../mobile/MobileBackButton';
 import { MobilePageHeader, Page, PageHeader } from '../../Page';
 import { PrivacyFilter } from '../../PrivacyFilter';
@@ -145,7 +146,21 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
   const navigate = useNavigate();
   const { isNarrowWidth } = useResponsive();
 
-  const title = widget?.meta?.name ?? t('Net Worth');
+  const title = widget?.meta?.name || t('Net Worth');
+  const onSaveWidgetName = async (newName: string) => {
+    if (!widget) {
+      throw new Error('No widget that could be saved.');
+    }
+
+    const name = newName || t('Net Worth');
+    await send('dashboard-update-widget', {
+      id: widget.id,
+      meta: {
+        ...(widget.meta ?? {}),
+        name,
+      },
+    });
+  };
 
   if (!allMonths || !data) {
     return null;
@@ -162,7 +177,18 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
             }
           />
         ) : (
-          <PageHeader title={title} />
+          <PageHeader
+            title={
+              widget ? (
+                <EditablePageHeaderTitle
+                  title={title}
+                  onSave={onSaveWidgetName}
+                />
+              ) : (
+                title
+              )
+            }
+          />
         )
       }
       padding={0}
