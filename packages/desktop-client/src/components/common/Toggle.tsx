@@ -8,17 +8,17 @@ import { View } from './View';
 
 type ToggleProps = {
   id: string;
-  checked: boolean;
-  disabled?: boolean;
-  onToggle?: (on: boolean) => void;
+  isOn: boolean;
+  isDisabled?: boolean;
+  onToggle?: (isOn: boolean) => void;
   className?: string;
   style?: CSSProperties;
 };
 
 export const Toggle = ({
   id,
-  checked,
-  disabled,
+  isOn: checked,
+  isDisabled: disabled,
   onToggle,
   className,
   style,
