@@ -92,7 +92,7 @@ function serializeTransaction(transaction, showZeroInDeposit) {
   let { amount, date } = transaction;
 
   if (isPreviewId(transaction.id)) {
-    amount = (transaction._inverse ? -1 : 1) * getScheduledAmount(amount);
+    amount = getScheduledAmount(amount, transaction._inverse);
   }
 
   let debit = amount < 0 ? -amount : null;
@@ -744,6 +744,16 @@ function PayeeCell({
   );
 }
 
+const payeeIconButtonStyle = {
+  marginLeft: -5,
+  marginRight: 2,
+  width: 23,
+  height: 23,
+  color: 'inherit',
+};
+const scheduleIconStyle = { width: 13, height: 13 };
+const transferIconStyle = { width: 10, height: 10 };
+
 function PayeeIcons({
   transaction,
   transferAccount,
@@ -757,27 +767,13 @@ function PayeeIcons({
       ? scheduleData.schedules.find(s => s.id === scheduleId)
       : null;
 
-  const buttonStyle = useMemo(
-    () => ({
-      marginLeft: -5,
-      marginRight: 2,
-      width: 23,
-      height: 23,
-      color: 'inherit',
-    }),
-    [],
-  );
-
-  const scheduleIconStyle = useMemo(() => ({ width: 13, height: 13 }), []);
-
-  const transferIconStyle = useMemo(() => ({ width: 10, height: 10 }), []);
-
   if (schedule == null && transferAccount == null) {
     // Neither a valid scheduled transaction nor a transfer.
     return null;
   }
 
   const recurring = schedule && schedule._date && !!schedule._date.frequency;
+  const isDeposit = (transaction._inverse ? -1 : 1) * transaction.amount > 0;
 
   return (
     <>
@@ -785,7 +781,7 @@ function PayeeIcons({
         <Button
           variant="bare"
           aria-label="See schedule details"
-          style={buttonStyle}
+          style={payeeIconButtonStyle}
           onPress={() => {
             onNavigateToSchedule(scheduleId);
           }}
@@ -801,14 +797,14 @@ function PayeeIcons({
         <Button
           variant="bare"
           aria-label="See transfer account"
-          style={buttonStyle}
+          style={payeeIconButtonStyle}
           onPress={() => {
             if (!isTemporaryId(transaction.id)) {
               onNavigateToTransferAccount(transferAccount.id);
             }
           }}
         >
-          {(transaction._inverse ? -1 : 1) * transaction.amount > 0 ? (
+          {isDeposit ? (
             <SvgLeftArrow2 style={transferIconStyle} />
           ) : (
             <SvgRightArrow2 style={transferIconStyle} />

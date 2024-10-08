@@ -32,7 +32,7 @@ export interface ScheduleEntity {
   // underlying rule
   _payee: PayeeEntity['id'];
   _account: AccountEntity['id'];
-  _amount: unknown;
+  _amount: number | { num1: number; num2: number };
   _amountOp: string;
   _date: RecurConfig;
   _conditions: unknown;
