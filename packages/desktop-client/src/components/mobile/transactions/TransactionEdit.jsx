@@ -63,7 +63,7 @@ import { View } from '../../common/View';
 import { MobilePageHeader, Page } from '../../Page';
 import { AmountInput } from '../../util/AmountInput';
 import { MobileBackButton } from '../MobileBackButton';
-import { FieldLabel, TapField, InputField } from '../MobileForms';
+import { FieldLabel, TapField, InputField, ToggleField } from '../MobileForms';
 
 import { FocusableAmountInput } from './FocusableAmountInput';
 
@@ -963,27 +963,15 @@ const TransactionEditInner = memo(function TransactionEditInner({
           {transaction.reconciled ? (
             <View style={{ alignItems: 'center' }}>
               <FieldLabel title="Reconciled" />
-              <Toggle id="reconciled" checked disabled />
+              <Toggle id="Reconciled" isOn isDisabled />
             </View>
           ) : (
             <View style={{ alignItems: 'center' }}>
               <FieldLabel title="Cleared" />
-              <Toggle
+              <ToggleField
                 id="cleared"
-                checked={transaction.cleared}
+                isOn={transaction.cleared}
                 onToggle={on => onUpdateInner(transaction, 'cleared', on)}
-                className={String(
-                  css({
-                    '& [data-toggle-container]': {
-                      width: 50,
-                      height: 24,
-                    },
-                    '& [data-toggle]': {
-                      width: 20,
-                      height: 20,
-                    },
-                  }),
-                )}
               />
             </View>
           )}

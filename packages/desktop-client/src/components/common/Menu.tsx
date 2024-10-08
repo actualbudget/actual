@@ -220,7 +220,7 @@ export function Menu<const NameType = string>({
                 </label>
                 <Toggle
                   id={String(item.name)}
-                  checked={item.toggle}
+                  isOn={item.toggle}
                   style={{ marginLeft: 5 }}
                   onToggle={() =>
                     !item.disabled &&

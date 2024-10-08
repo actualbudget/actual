@@ -1,4 +1,5 @@
 import React, {
+  type ComponentPropsWithoutRef,
   type ComponentPropsWithRef,
   forwardRef,
   type ReactNode,
@@ -10,6 +11,7 @@ import { theme, styles, type CSSProperties } from '../../style';
 import { Button } from '../common/Button';
 import { Input } from '../common/Input';
 import { Text } from '../common/Text';
+import { Toggle } from '../common/Toggle';
 import { View } from '../common/View';
 
 type FieldLabelProps = {
@@ -131,55 +133,38 @@ export const TapField = forwardRef<HTMLButtonElement, TapFieldProps>(
 
 TapField.displayName = 'TapField';
 
-type BooleanFieldProps = {
-  checked: boolean;
-  disabled?: boolean;
-  onUpdate?: (checked: boolean) => void;
-  style?: CSSProperties;
-};
+type ToggleFieldProps = ComponentPropsWithoutRef<typeof Toggle>;
 
-export function BooleanField({
-  checked,
-  onUpdate,
+export function ToggleField({
+  id,
+  isOn,
+  onToggle,
   style,
-  disabled = false,
-}: BooleanFieldProps) {
+  className,
+  isDisabled: disabled = false,
+}: ToggleFieldProps) {
   return (
-    <input
-      disabled={disabled ? true : undefined}
-      type="checkbox"
-      checked={checked}
-      onChange={e => onUpdate?.(e.target.checked)}
-      className={`${css([
-        {
-          marginInline: styles.mobileEditingPadding,
-          flexShrink: 0,
-          appearance: 'none',
-          outline: 0,
-          border: '1px solid ' + theme.formInputBorder,
-          borderRadius: 4,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          color: theme.checkboxText,
-          backgroundColor: theme.tableBackground,
-          ':checked': {
-            border: '1px solid ' + theme.checkboxBorderSelected,
-            backgroundColor: theme.checkboxBackgroundSelected,
-            '::after': {
-              display: 'block',
-              background:
-                theme.checkboxBackgroundSelected +
-                // eslint-disable-next-line rulesdir/typography
-                ' url(\'data:image/svg+xml; utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path fill="white" d="M0 11l2-2 5 5L18 3l2 2L7 18z"/></svg>\') 15px 15px',
-              width: 15,
-              height: 15,
-              content: ' ',
+    <Toggle
+      id={id}
+      isOn={isOn}
+      isDisabled={disabled}
+      onToggle={onToggle}
+      style={style}
+      className={String(
+        css([
+          {
+            '& [data-toggle-container]': {
+              width: 50,
+              height: 24,
+            },
+            '& [data-toggle]': {
+              width: 20,
+              height: 20,
             },
           },
-        },
-        style,
-      ])}`}
+          className,
+        ]),
+      )}
     />
   );
 }
