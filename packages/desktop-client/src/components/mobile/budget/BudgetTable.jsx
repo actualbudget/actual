@@ -1824,7 +1824,7 @@ function BudgetTableHeader({
                   <View>
                     <PrivacyFilter>
                       <AutoTextSize
-                        key={value}
+                        key={-value}
                         as={Text}
                         minFontSizePx={6}
                         maxFontSizePx={12}
