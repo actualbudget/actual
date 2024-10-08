@@ -75,6 +75,9 @@ function registerHandlebarsHelpers() {
     month: (date: string) => format(date, 'M'),
     year: (date: string) => format(date, 'yyyy'),
     format: (date: string, f: string) => format(date, f),
+    debug: (value: unknown) => {
+      console.log(value);
+    },
   };
 
   for (const [name, fn] of Object.entries(helpers)) {

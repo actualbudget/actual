@@ -397,6 +397,17 @@ describe('Action', () => {
       testHelper('{{year "2002-07-25"}}', '2002');
       testHelper('{{format "2002-07-25" "MM yyyy d"}}', '07 2002 25');
     });
+
+    test('{{debug}} should log the item', () => {
+      const action = new Action('set', 'notes', '', {
+        template: '{{debug notes}}',
+      });
+      const item = { notes: 'Sarah' };
+      const spy = jest.spyOn(console, 'log').mockImplementation();
+      action.exec(item);
+      expect(spy).toHaveBeenCalledWith('Sarah');
+      spy.mockRestore();
+    });
   });
 });
 
