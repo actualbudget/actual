@@ -20,22 +20,22 @@ describe('schedules', () => {
       expect(getStatus(todayString, false, false, '7')).toBe('due');
     });
 
-    it.each(['1', '7', '14', '30'])(
-      'returns upcoming if within upcoming range %s',
-      (upcomingLength: string) => {
-        const daysOut = parseInt(upcomingLength);
+    it.each([1, 7, 14, 30])(
+      'returns upcoming if within upcoming range %n',
+      (upcomingLength: number) => {
+        const daysOut = upcomingLength;
         const tomorrow = monthUtils.addDays(today, 1);
         const upcomingDate = monthUtils.addDays(today, daysOut);
         const scheduledDate = monthUtils.addDays(today, daysOut + 1);
-        expect(getStatus(tomorrow, false, false, upcomingLength)).toBe(
-          'upcoming',
-        );
-        expect(getStatus(upcomingDate, false, false, upcomingLength)).toBe(
-          'upcoming',
-        );
-        expect(getStatus(scheduledDate, false, false, upcomingLength)).toBe(
-          'scheduled',
-        );
+        expect(
+          getStatus(tomorrow, false, false, upcomingLength.toString()),
+        ).toBe('upcoming');
+        expect(
+          getStatus(upcomingDate, false, false, upcomingLength.toString()),
+        ).toBe('upcoming');
+        expect(
+          getStatus(scheduledDate, false, false, upcomingLength.toString()),
+        ).toBe('scheduled');
       },
     );
 
