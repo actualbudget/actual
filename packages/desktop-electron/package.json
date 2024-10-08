@@ -86,8 +86,7 @@
   },
   "dependencies": {
     "better-sqlite3": "^9.6.0",
-    "electron-is-dev": "2.0.0",
-    "electron-log": "4.4.8",
+    "fs-extra": "^11.2.0",
     "node-fetch": "^2.7.0",
     "promise-retry": "^2.0.1"
   },
@@ -95,6 +94,7 @@
     "@electron/notarize": "2.4.0",
     "@electron/rebuild": "3.6.0",
     "@types/copyfiles": "^2",
+    "@types/fs-extra": "^11",
     "copyfiles": "^2.4.1",
     "cross-env": "^7.0.3",
     "electron": "30.0.6",
