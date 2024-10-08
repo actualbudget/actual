@@ -26,6 +26,7 @@ import { Button } from '../../common/Button2';
 import { Paragraph } from '../../common/Paragraph';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
+import { EditablePageHeaderTitle } from '../../EditablePageHeaderTitle';
 import { MobileBackButton } from '../../mobile/MobileBackButton';
 import { MobilePageHeader, Page, PageHeader } from '../../Page';
 import { PrivacyFilter } from '../../PrivacyFilter';
@@ -167,12 +168,27 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
     );
   }
 
+  const title = widget?.meta?.name || t('Cash Flow');
+  const onSaveWidgetName = async (newName: string) => {
+    if (!widget) {
+      throw new Error('No widget that could be saved.');
+    }
+
+    const name = newName || t('Cash Flow');
+    await send('dashboard-update-widget', {
+      id: widget.id,
+      meta: {
+        ...(widget.meta ?? {}),
+        name,
+      },
+    });
+  };
+
   if (!allMonths || !data) {
     return null;
   }
 
   const { graphData, totalExpenses, totalIncome, totalTransfers } = data;
-  const title = widget?.meta?.name ?? t('Cash Flow');
 
   return (
     <Page
@@ -185,7 +201,18 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
             }
           />
         ) : (
-          <PageHeader title={title} />
+          <PageHeader
+            title={
+              widget ? (
+                <EditablePageHeaderTitle
+                  title={title}
+                  onSave={onSaveWidgetName}
+                />
+              ) : (
+                title
+              )
+            }
+          />
         )
       }
       padding={0}
