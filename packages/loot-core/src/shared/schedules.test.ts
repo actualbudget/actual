@@ -7,6 +7,14 @@ describe('schedules', () => {
   const today = new Date(2017, 0, 1); // Global date when testing is set to 2017-01-01 per monthUtils.currentDay()
   const dateFormat = 'yyyy-MM-dd';
   const todayString = monthUtils.format(today, dateFormat);
+
+  beforeEach(() => {
+    MockDate.set(new Date(2021, 4, 14));
+  });
+  afterEach(() => {
+    MockDate.reset();
+  });
+
   describe('getStatus', () => {
     it('returns completed if completed', () => {
       expect(getStatus(todayString, true, false, '7')).toBe('completed');
@@ -53,13 +61,6 @@ describe('schedules', () => {
   });
 
   describe('getRecurringDescription', () => {
-    beforeEach(() => {
-      MockDate.set(new Date(2021, 4, 14));
-    });
-    afterEach(() => {
-      MockDate.reset();
-    });
-
     it('describes weekly interval', () => {
       expect(
         getRecurringDescription(
