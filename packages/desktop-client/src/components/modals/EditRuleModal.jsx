@@ -253,6 +253,7 @@ function ConditionEditor({
   } else {
     valueEditor = (
       <GenericInput
+        key={condition.inputKey}
         field={field}
         type={type}
         value={value}
@@ -547,7 +548,7 @@ function StageButton({ selected, children, style, onSelect }) {
 }
 
 function newInput(item) {
-  return { ...item, inputKey: '' + Math.random() };
+  return { ...item, inputKey: uuid() };
 }
 
 function ConditionsList({
@@ -579,6 +580,7 @@ function ConditionsList({
       field,
       op: 'is',
       value: null,
+      inputKey: uuid(),
     });
     onChangeConditions(copy);
   }
@@ -742,7 +744,7 @@ const conditionFields = [
 
 export function EditRuleModal({ defaultRule, onSave: originalOnSave }) {
   const [conditions, setConditions] = useState(
-    defaultRule.conditions.map(parse),
+    defaultRule.conditions.map(parse).map(c => ({ ...c, inputKey: uuid() })),
   );
   const [actionSplits, setActionSplits] = useState(() => {
     const parsedActions = defaultRule.actions.map(parse);
