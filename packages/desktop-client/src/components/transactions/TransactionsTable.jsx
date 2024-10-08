@@ -1809,6 +1809,12 @@ function TransactionTableInner({
     }
   }, [isAddingPrev, props.isAdding, newNavigator]);
 
+  // Don't render reconciled transactions if we're hiding them.
+  const transactionsToRender = useMemo(
+    () => props.showReconciled ? props.transactions : props.transactions.filter(t => !t.reconciled),
+    [props.transactions, props.showReconciled]
+  );
+
   const renderRow = ({ item, index, editing }) => {
     const {
       transactions,
@@ -1982,7 +1988,7 @@ function TransactionTableInner({
           navigator={tableNavigator}
           ref={tableRef}
           listContainerRef={listContainerRef}
-          items={props.transactions}
+          items={transactionsToRender}
           renderItem={renderRow}
           renderEmpty={renderEmpty}
           loadMore={props.loadMoreTransactions}
