@@ -14,16 +14,37 @@ export class MobileNavigation {
     this.navbarSelector = '[role=navigation]';
   }
 
-  NAVBAR_ROWS = 3;
+  static #NAVBAR_ROWS = 3;
+  static #NAV_LINKS_HIDDEN_BY_DEFAULT = [
+    'Reports',
+    'Schedules',
+    'Payees',
+    'Rules',
+    'Settings',
+  ];
+  static #ROUTES_BY_PAGE = {
+    Budget: '/budget',
+    Accounts: '/accounts',
+    Transactions: '/transactions/new',
+    Reports: '/reports',
+    Settings: '/settings',
+  };
 
   async dragNavbarUp() {
-    const boundingBox = await this.page
+    const mainContentBoundingBox = await this.page
       .locator(this.mainContentSelector)
+      .boundingBox();
+
+    const navbarBoundingBox = await this.page
+      .locator(this.navbarSelector)
       .boundingBox();
 
     await this.page.dragAndDrop(this.navbarSelector, this.mainContentSelector, {
       sourcePosition: { x: 1, y: 0 },
-      targetPosition: { x: 1, y: boundingBox.height / 2 },
+      targetPosition: {
+        x: 1,
+        y: mainContentBoundingBox.height - navbarBoundingBox.height,
+      },
     });
   }
 
@@ -37,7 +58,7 @@ export class MobileNavigation {
       targetPosition: {
         x: 1,
         // Only scroll until bottom of screen i.e. bottom of first navbar row.
-        y: boundingBox.height / this.NAVBAR_ROWS,
+        y: boundingBox.height / MobileNavigation.#NAVBAR_ROWS,
       },
     });
   }
@@ -52,33 +73,19 @@ export class MobileNavigation {
     return states.includes(dataNavbarState);
   }
 
-  NAV_LINKS_HIDDEN_BY_DEFAULT = [
-    'Reports',
-    'Schedules',
-    'Payees',
-    'Rules',
-    'Settings',
-  ];
-
-  ROUTES_BY_PAGE = {
-    Budget: '/budget',
-    Accounts: '/accounts',
-    Transactions: '/transactions/new',
-    Reports: '/reports',
-    Settings: '/settings',
-  };
-
   async navigateToPage(pageName, pageModelFactory) {
     const pageInstance = pageModelFactory();
 
-    if (this.page.url().endsWith(this.ROUTES_BY_PAGE[pageName])) {
+    if (this.page.url().endsWith(MobileNavigation.#ROUTES_BY_PAGE[pageName])) {
       // Already on the page.
       return pageInstance;
     }
 
     await this.navbar.waitFor();
 
-    const navbarStates = this.NAV_LINKS_HIDDEN_BY_DEFAULT.includes(pageName)
+    const navbarStates = MobileNavigation.#NAV_LINKS_HIDDEN_BY_DEFAULT.includes(
+      pageName,
+    )
       ? ['default', 'hidden']
       : ['hidden'];
 
