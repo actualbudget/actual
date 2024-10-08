@@ -48,7 +48,10 @@ export function loadAllFiles() {
   };
 }
 
-export function loadBudget(id: string, options = {}) {
+export function loadBudget(
+  id: string,
+  options: { allowOutOfSyncMigrations?: boolean } = {},
+) {
   return async (dispatch: Dispatch) => {
     dispatch(setAppState({ loadingText: t('Loading...') }));
 
@@ -58,7 +61,7 @@ export function loadBudget(id: string, options = {}) {
     if (error) {
       const message = getSyncError(error, id);
       if (error === 'out-of-sync-migrations') {
-        dispatch(pushModal('out-of-sync-migrations', { budgetId: id }));
+        dispatch(pushModal('out-of-sync-migrations'));
       } else if (error === 'out-of-sync-data') {
         // confirm is not available on iOS
         if (typeof window.confirm !== 'undefined') {

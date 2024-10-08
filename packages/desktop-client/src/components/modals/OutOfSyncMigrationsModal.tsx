@@ -2,7 +2,7 @@ import React from 'react';
 import { Trans } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 
-import { closeBudget } from 'loot-core/src/client/actions';
+import { loadBudget, closeBudget } from 'loot-core/client/actions';
 
 import { theme } from '../../style';
 import { Button } from '../common/Button2';
@@ -11,10 +11,17 @@ import { Paragraph } from '../common/Paragraph';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 
-export function OutOfSyncMigrationsModal() {
+type OutOfSyncMigrationsModalProps = {
+  budgetId: string;
+};
+
+export function OutOfSyncMigrationsModal({
+  budgetId,
+}: OutOfSyncMigrationsModalProps) {
   const dispatch = useDispatch();
   const acceptAndContinue = (close: () => void) => {
     // Logic here to allow the user to continue with the outdated version
+    dispatch(loadBudget(budgetId, { allowOutOfSyncMigrations: true }));
     close();
   };
 

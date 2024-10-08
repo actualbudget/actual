@@ -305,7 +305,10 @@ export interface ServerHandlers {
     error?: { message: string; reason: string; meta: unknown };
   }>;
 
-  'load-budget': (arg: { id: string }) => Promise<{ error }>;
+  'load-budget': (arg: {
+    id: string;
+    allowOutOfSyncMigrations?: boolean;
+  }) => Promise<{ error }>;
 
   'create-demo-budget': () => Promise<unknown>;
 
