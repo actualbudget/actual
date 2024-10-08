@@ -23,8 +23,6 @@ export interface AdminHandlers {
     user: Omit<UserEntity, 'id'>,
   ) => Promise<{ error?: string } | { id: string }>;
 
-  'check-file-access': (fileId: string) => Promise<{ granted: boolean }>;
-
   'access-add': (
     user: NewUserAccessEntity,
   ) => Promise<{ error?: string } | Record<string, never>>;

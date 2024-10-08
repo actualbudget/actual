@@ -68,6 +68,7 @@ function reconcileFiles(
             hasKey: remote.hasKey,
             state: 'synced',
             owner: remote.owner,
+            usersWithAccess: remote.usersWithAccess,
           };
         } else {
           return {
@@ -80,6 +81,7 @@ function reconcileFiles(
             hasKey: remote.hasKey,
             state: 'detached',
             owner: remote.owner,
+            usersWithAccess: remote.usersWithAccess,
           };
         }
       } else {
@@ -113,6 +115,7 @@ function reconcileFiles(
               hasKey: f.hasKey,
               state: 'remote',
               owner: f.owner,
+              usersWithAccess: f.usersWithAccess,
             };
           }),
       )

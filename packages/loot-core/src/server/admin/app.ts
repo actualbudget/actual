@@ -152,6 +152,7 @@ app.method('access-delete-all', async function ({ fileId, ids }) {
   const userToken = await asyncStorage.getItem('user-token');
   if (userToken) {
     try {
+      debugger;
       const res = await del(
         getServer().BASE_SERVER + `/admin/access?fileId=${fileId}`,
         {

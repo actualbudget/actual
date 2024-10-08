@@ -1,3 +1,5 @@
+import { UsersWithAccess } from '../server/cloud-storage';
+
 import { Budget } from './budget';
 
 export type FileState =
@@ -28,6 +30,7 @@ export type SyncedLocalFile = Budget & {
   hasKey: boolean;
   state: 'synced' | 'detached';
   owner: string;
+  usersWithAccess: UsersWithAccess[];
 };
 
 export type RemoteFile = {
@@ -38,6 +41,7 @@ export type RemoteFile = {
   hasKey: boolean;
   state: 'remote';
   owner: string;
+  usersWithAccess: UsersWithAccess[];
 };
 
 export type File = LocalFile | SyncableLocalFile | SyncedLocalFile | RemoteFile;

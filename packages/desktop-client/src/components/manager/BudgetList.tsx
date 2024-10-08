@@ -18,7 +18,6 @@ import {
   loadBudget,
   pushModal,
 } from 'loot-core/client/actions';
-import { send } from 'loot-core/platform/client/fetch';
 import { isNonProductionEnvironment } from 'loot-core/src/shared/environment';
 import {
   type RemoteFile,
@@ -27,8 +26,6 @@ import {
   type SyncableLocalFile,
   type SyncedLocalFile,
 } from 'loot-core/types/file';
-import { type UserEntity } from 'loot-core/types/models';
-import { type UserAccessEntity } from 'loot-core/types/models/userAccess';
 
 import { useInitialMount } from '../../hooks/useInitialMount';
 import { useMetadataPref } from '../../hooks/useMetadataPref';
@@ -146,16 +143,13 @@ function FileMenuButton({ onDelete }: { onDelete: () => void }) {
 
 function FileState({
   file,
-  users,
   currentUserId,
-  isOpenID,
 }: {
   file: File;
-  users: UserEntity[];
   currentUserId: string;
-  isOpenID: boolean;
 }) {
   const { t } = useTranslation();
+  const multiuserEnabled = useMultiuserEnabled();
 
   let Icon;
   let status;
@@ -172,7 +166,7 @@ function FileState({
     case 'remote':
       Icon = SvgCloudDownload;
       status = t('Available for download');
-      ownerName = isOpenID ? getOwnerDisplayName() : '';
+      ownerName = multiuserEnabled ? getOwnerDisplayName() : '';
       break;
     case 'local':
       Icon = SvgFileDouble;
@@ -186,15 +180,11 @@ function FileState({
     default:
       Icon = SvgCloudCheck;
       status = t('Syncing');
-      ownerName = isOpenID ? getOwnerDisplayName() : '';
+      ownerName = multiuserEnabled ? getOwnerDisplayName() : '';
       break;
   }
 
-  const showOwnerContent =
-    isOpenID &&
-    ownerName !== null &&
-    !isLocalFile(file) &&
-    file.owner !== currentUserId;
+  const showOwnerContent = multiuserEnabled && file.owner !== currentUserId;
 
   return (
     <View style={{ width: '100%' }}>
@@ -245,12 +235,18 @@ function FileState({
   );
 
   function getOwnerDisplayName() {
-    const userFiltered = users.filter(item => item.id === file.owner);
-
-    if (userFiltered.length > 0) {
-      return userFiltered[0].displayName ?? userFiltered[0].userName;
+    if (
+      !(
+        file.state === 'remote' ||
+        file.state === 'synced' ||
+        file.state === 'detached'
+      )
+    ) {
+      return '';
     }
-    return null;
+
+    const userFound = file.usersWithAccess?.find(f => f.userId === file.owner);
+    return userFound?.displayName ?? userFound?.userName ?? 'unknown';
   }
 }
 
@@ -259,21 +255,16 @@ function FileItem({
   quickSwitchMode,
   onSelect,
   onDelete,
-  users,
   currentUserId,
-  usersPerFile,
-  isOpenID,
 }: {
   file: File;
   quickSwitchMode: boolean;
   onSelect: (file: File) => void;
   onDelete: (file: File) => void;
-  users: UserEntity[];
   currentUserId: string;
-  usersPerFile: Map<string, UserAccessEntity[]>;
-  isOpenID: boolean;
 }) {
   const { t } = useTranslation();
+  const multiuserEnabled = useMultiuserEnabled();
 
   const selecting = useRef(false);
 
@@ -310,22 +301,16 @@ function FileItem({
       <View style={{ alignItems: 'flex-start', width: '100%' }}>
         <View style={{ flexDirection: 'row', width: '100%' }}>
           <Text style={{ fontSize: 16, fontWeight: 700 }}>{file.name}</Text>
-          {isOpenID && (
+          {multiuserEnabled && (
             <UserAccessForFile
               fileId={(file as RemoteFile).cloudFileId}
               ownerId={file.owner}
               currentUserId={currentUserId}
-              usersPerFile={usersPerFile}
             />
           )}
         </View>
 
-        <FileState
-          file={file}
-          users={users}
-          currentUserId={currentUserId}
-          isOpenID={isOpenID}
-        />
+        <FileState file={file} currentUserId={currentUserId} />
       </View>
 
       <View
@@ -355,19 +340,13 @@ function BudgetFiles({
   quickSwitchMode,
   onSelect,
   onDelete,
-  users,
   currentUserId,
-  usersPerFile,
-  isOpenID,
 }: {
   files: File[];
   quickSwitchMode: boolean;
   onSelect: (file: File) => void;
   onDelete: (file: File) => void;
-  users: UserEntity[];
   currentUserId: string;
-  usersPerFile: Map<string, UserAccessEntity[]>;
-  isOpenID: boolean;
 }) {
   return (
     <View
@@ -396,13 +375,10 @@ function BudgetFiles({
           <FileItem
             key={isLocalFile(file) ? file.id : file.cloudFileId}
             file={file}
-            users={users}
             currentUserId={currentUserId}
-            usersPerFile={usersPerFile}
             quickSwitchMode={quickSwitchMode}
             onSelect={onSelect}
             onDelete={onDelete}
-            isOpenID={isOpenID}
           />
         ))
       )}
@@ -469,43 +445,18 @@ function BudgetListHeader({
 export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
   const dispatch = useDispatch();
   const allFiles = useSelector(state => state.budgets.allFiles || []);
+  const multiuserEnabled = useMultiuserEnabled();
   const [id] = useMetadataPref('id');
-  const [users, setUsers] = useState<UserEntity[]>([]);
   const [currentUserId, setCurrentUserId] = useState('');
   const userData = useSelector(state => state.user.data);
-  const [usersPerFile, setUsersPerFile] = useState(
-    new Map<string, UserAccessEntity[]>(),
-  );
-  const multiuserEnabled = useMultiuserEnabled();
 
   const fetchUsers = useCallback(async () => {
     try {
-      const data: UserEntity[] = await send('users-get');
-      setUsers(data);
       setCurrentUserId(userData?.userId ?? '');
     } catch (error) {
       console.error('Failed to fetch users:', error);
     }
   }, [userData?.userId]);
-
-  const fetchFileAccess = useCallback(async () => {
-    try {
-      const fileIds = allFiles
-        .filter(file => !isLocalFile(file))
-        .map(
-          file =>
-            (file as RemoteFile | SyncedLocalFile | SyncableLocalFile)
-              .cloudFileId,
-        );
-      const data: Map<string, UserAccessEntity[]> = await send(
-        'users-get-access',
-        fileIds,
-      );
-      setUsersPerFile(data);
-    } catch (error) {
-      console.error('Failed to fetch file access:', error);
-    }
-  }, [allFiles]);
 
   useEffect(() => {
     if (multiuserEnabled && !userData?.offline) {
@@ -513,18 +464,13 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
     }
   }, [multiuserEnabled, userData?.offline, fetchUsers]);
 
-  useEffect(() => {
-    if (multiuserEnabled && !userData?.offline) {
-      fetchFileAccess();
-    }
-  }, [multiuserEnabled, userData?.offline, fetchFileAccess]);
-
   // Remote files do not have the 'id' field
   function isNonRemoteFile(
     file: File,
   ): file is LocalFile | SyncableLocalFile | SyncedLocalFile {
     return file.state !== 'remote';
   }
+
   const nonRemoteFiles = allFiles.filter(isNonRemoteFile);
   const files = id ? nonRemoteFiles.filter(f => f.id !== id) : allFiles;
 
@@ -593,11 +539,8 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
       )}
       <BudgetFiles
         files={files}
-        users={users}
-        usersPerFile={usersPerFile}
         currentUserId={currentUserId}
         quickSwitchMode={quickSwitchMode}
-        isOpenID={multiuserEnabled}
         onSelect={onSelect}
         onDelete={file => dispatch(pushModal('delete-budget', { file }))}
       />
@@ -657,16 +600,21 @@ type UserAccessForFileProps = {
   fileId: string;
   currentUserId: string;
   ownerId?: string;
-  usersPerFile: Map<string, UserAccessEntity[]>;
 };
 
 function UserAccessForFile({
   fileId,
   currentUserId,
   ownerId,
-  usersPerFile,
 }: UserAccessForFileProps) {
-  let usersAccess = usersPerFile?.has(fileId) ? usersPerFile.get(fileId) : [];
+  const allFiles = useSelector(state => state.budgets.allFiles || []);
+  const remoteFiles = allFiles.filter(
+    f => f.state === 'remote' || f.state === 'synced' || f.state === 'detached',
+  ) as (SyncedLocalFile | RemoteFile)[];
+  const currentFile = remoteFiles.find(f => f.cloudFileId === fileId);
+  const multiuserEnabled = useMultiuserEnabled();
+
+  let usersAccess = currentFile?.usersWithAccess ?? [];
   usersAccess = usersAccess?.filter(user => user.userId !== ownerId) ?? [];
 
   const sortedUsersAccess = [...usersAccess].sort((a, b) => {
@@ -679,7 +627,7 @@ function UserAccessForFile({
 
   return (
     <View>
-      {usersAccess.length > 0 && (
+      {multiuserEnabled && usersAccess.length > 0 && (
         <View
           style={{
             marginLeft: '5px',

@@ -3,8 +3,8 @@ import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 
-import { send } from 'loot-core/platform/client/fetch';
 import { type State } from 'loot-core/src/client/state-types';
+import { type RemoteFile, type SyncedLocalFile } from 'loot-core/types/file';
 
 import { useAuth } from '../auth/AuthProvider';
 import { Permissions } from '../auth/types';
@@ -46,6 +46,11 @@ export function LoggedInUser({
   const { hasPermission } = useAuth();
   const [isOwner, setIsOwner] = useState(false);
   const multiuserEnabled = useMultiuserEnabled();
+  const allFiles = useSelector(state => state.budgets.allFiles || []);
+  const remoteFiles = allFiles.filter(
+    f => f.state === 'remote' || f.state === 'synced' || f.state === 'detached',
+  ) as (SyncedLocalFile | RemoteFile)[];
+  const currentFile = remoteFiles.find(f => f.cloudFileId === cloudFileId);
 
   useEffect(() => {
     if (getUserData) {
@@ -54,9 +59,9 @@ export function LoggedInUser({
   }, [getUserData]);
 
   useEffect(() => {
-    if (cloudFileId) {
-      send('check-file-access', cloudFileId).then(
-        ({ granted }: { granted: boolean }) => setIsOwner(granted),
+    if (cloudFileId && currentFile) {
+      setIsOwner(
+        currentFile.usersWithAccess.some(u => u.userId === userData?.userId),
       );
     }
   }, [cloudFileId]);
