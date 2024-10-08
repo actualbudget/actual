@@ -1,31 +1,46 @@
 export class SettingsPage {
   constructor(page) {
     this.page = page;
+    this.settings = page.getByTestId('settings');
+    this.exportDataButton = this.settings.getByRole('button', {
+      name: 'Export data',
+    });
+    this.switchBudgetTypeButton = this.settings.getByRole('button', {
+      name: /Switch to (envelope|tracking) budgeting/i,
+    });
+    this.advancedSettingsButton =
+      this.settings.getByTestId('advanced-settings');
+    this.experimentalSettingsButton = this.settings.getByTestId(
+      'experimental-settings',
+    );
+  }
+
+  async waitFor(options) {
+    await this.settings.waitFor(options);
   }
 
   async exportData() {
-    await this.page.getByRole('button', { name: 'Export data' }).click();
+    await this.exportDataButton.click();
   }
 
   async useBudgetType(budgetType) {
-    const switchBudgetTypeButton = this.page.getByRole('button', {
-      name: `Switch to ${budgetType} budgeting`,
-    });
+    await this.enableExperimentalFeature('Budget mode toggle');
 
-    await switchBudgetTypeButton.click();
+    await this.switchBudgetTypeButton.waitFor();
+
+    const buttonText = await this.switchBudgetTypeButton.textContent();
+    if (buttonText.includes(budgetType.toLowerCase())) {
+      await this.switchBudgetTypeButton.click();
+    }
   }
 
   async enableExperimentalFeature(featureName) {
-    const advancedSettingsButton = this.page.getByTestId('advanced-settings');
-    if (await advancedSettingsButton.isVisible()) {
-      await advancedSettingsButton.click();
+    if (await this.advancedSettingsButton.isVisible()) {
+      await this.advancedSettingsButton.click();
     }
 
-    const experimentalSettingsButton = this.page.getByTestId(
-      'experimental-settings',
-    );
-    if (await experimentalSettingsButton.isVisible()) {
-      await experimentalSettingsButton.click();
+    if (await this.experimentalSettingsButton.isVisible()) {
+      await this.experimentalSettingsButton.click();
     }
 
     const featureCheckbox = this.page.getByRole('checkbox', {

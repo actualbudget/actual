@@ -3,10 +3,17 @@ import { MobileAccountPage } from './mobile-account-page';
 export class MobileTransactionEntryPage {
   constructor(page) {
     this.page = page;
-
     this.header = page.getByRole('heading');
-    this.amountField = page.getByTestId('amount-input');
-    this.add = page.getByRole('button', { name: 'Add transaction' });
+    this.transactionForm = page.getByTestId('transaction-form');
+    this.amountField = this.transactionForm.getByTestId('amount-input');
+    this.footer = page.getByTestId('transaction-form-footer');
+    this.addTransactionButton = this.footer.getByRole('button', {
+      name: 'Add transaction',
+    });
+  }
+
+  async waitFor(options) {
+    await this.transactionForm.waitFor(options);
   }
 
   async fillField(fieldLocator, content) {
@@ -16,7 +23,7 @@ export class MobileTransactionEntryPage {
   }
 
   async createTransaction() {
-    await this.add.click();
+    await this.addTransactionButton.click();
 
     return new MobileAccountPage(this.page);
   }
