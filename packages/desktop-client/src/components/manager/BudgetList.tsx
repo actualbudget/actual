@@ -416,6 +416,7 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
   };
 
   const refresh = () => {
+    dispatch(pushModal('out-of-sync-migrations'));
     dispatch(getUserData());
     dispatch(loadAllFiles());
   };

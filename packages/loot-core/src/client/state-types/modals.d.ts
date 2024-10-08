@@ -86,7 +86,7 @@ type FinanceModals = {
 
   'import-actual': null;
 
-  'out-of-sync-migrations': { budgetId: string };
+  'out-of-sync-migrations': null;
 
   'files-settings': null;
 

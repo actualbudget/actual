@@ -602,9 +602,7 @@ export function Modals() {
             />
           );
         case 'out-of-sync-migrations':
-          return (
-            <OutOfSyncMigrationsModal key={name} budgetId={options.budgetId} />
-          );
+          return <OutOfSyncMigrationsModal key={name} />;
 
         default:
           throw new Error('Unknown modal');
