@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Trans } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 
 import { Column } from 'glamor/jsxstyle';
@@ -7,7 +8,7 @@ import { type SyncedPrefs } from 'loot-core/types/prefs';
 
 import { useSyncedPref } from '../../hooks/useSyncedPref';
 import { type CSSProperties, theme } from '../../style';
-import { Button } from '../common/Button';
+import { Button } from '../common/Button2';
 import { Select } from '../common/Select';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
@@ -60,7 +61,7 @@ export function UpcomingLengthSettings() {
           stored, and can be changed at any time.
         </Text>
         <Button
-          onClick={() => setExpanded(false)}
+          onPress={() => setExpanded(false)}
           aria-label="Close upcoming length settings"
         >
           Close
@@ -68,18 +69,17 @@ export function UpcomingLengthSettings() {
       </View>
     </Setting>
   ) : (
-    <Setting>
-      <View style={{ flexDirection: 'row', gap: 20 }}>
-        <Text style={{ fontSize: '1.25rem' }}>
-          <strong>Upcoming Length</strong>
-        </Text>
-        <Button
-          onClick={() => setExpanded(true)}
-          aria-label="Edit upcoming length settings"
-        >
-          Edit
-        </Button>
-      </View>
-    </Setting>
+    <View>
+      <Button
+        aria-label="Edit upcoming length settings"
+        variant="primary"
+        onPress={() => setExpanded(true)}
+      >
+        <Trans>
+          Edit Upcoming Length (
+          {options.find(x => x.value === upcomingLength)?.label ?? '1 Week'})
+        </Trans>
+      </Button>
+    </View>
   );
 }
