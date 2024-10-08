@@ -141,13 +141,13 @@ export function ToggleField({
   onToggle,
   style,
   className,
-  isDisabled: disabled = false,
+  isDisabled = false,
 }: ToggleFieldProps) {
   return (
     <Toggle
       id={id}
       isOn={isOn}
-      isDisabled={disabled}
+      isDisabled={isDisabled}
       onToggle={onToggle}
       style={style}
       className={String(
