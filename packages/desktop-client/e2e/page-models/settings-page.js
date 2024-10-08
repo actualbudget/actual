@@ -6,7 +6,7 @@ export class SettingsPage {
       name: 'Export data',
     });
     this.switchBudgetTypeButton = this.settings.getByRole('button', {
-      name: /Switch to (envelope|tracking) budgeting/i,
+      name: /^Switch to (envelope|tracking) budgeting$/i,
     });
     this.advancedSettingsButton =
       this.settings.getByTestId('advanced-settings');
