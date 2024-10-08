@@ -83,8 +83,8 @@ export class MobileBudgetPage {
     });
   }
 
-  async waitForBudgetTable() {
-    await this.budgetTable.waitFor();
+  async waitFor(options) {
+    await this.budgetTable.waitFor(options);
   }
 
   async toggleVisibleColumns(maxAttempts = 3) {

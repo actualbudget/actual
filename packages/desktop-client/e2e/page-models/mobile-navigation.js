@@ -1,6 +1,7 @@
 import { MobileAccountPage } from './mobile-account-page';
 import { MobileAccountsPage } from './mobile-accounts-page';
 import { MobileBudgetPage } from './mobile-budget-page';
+import { MobileReportsPage } from './mobile-reports-page';
 import { MobileTransactionEntryPage } from './mobile-transaction-entry-page';
 import { SettingsPage } from './settings-page';
 
@@ -30,9 +31,13 @@ export class MobileNavigation {
   }
 
   async goToBudgetPage() {
+    const budgetPage = new MobileBudgetPage(this.page);
+
     if (this.page.url().endsWith('/budget')) {
-      return new MobileBudgetPage(this.page);
+      return budgetPage;
     }
+
+    await this.navbar.waitFor();
 
     if (await this.hasNavbarState('hidden')) {
       await this.dragNavbarUp();
@@ -41,17 +46,23 @@ export class MobileNavigation {
     const link = this.page.getByRole('link', { name: 'Budget' });
     await link.click();
 
+    await budgetPage.waitFor();
+
     if (await this.hasNavbarState('open')) {
       await this.dragNavbarDown();
     }
 
-    return new MobileBudgetPage(this.page);
+    return budgetPage;
   }
 
   async goToAccountsPage() {
+    const accountsPage = new MobileAccountsPage(this.page);
+
     if (this.page.url().endsWith('/accounts')) {
-      return new MobileAccountsPage(this.page);
+      return accountsPage;
     }
+
+    await this.navbar.waitFor();
 
     if (await this.hasNavbarState('hidden')) {
       await this.dragNavbarUp();
@@ -60,11 +71,13 @@ export class MobileNavigation {
     const link = this.page.getByRole('link', { name: 'Accounts' });
     await link.click();
 
+    await accountsPage.waitFor();
+
     if (await this.hasNavbarState('open')) {
       await this.dragNavbarDown();
     }
 
-    return new MobileAccountsPage(this.page);
+    return accountsPage;
   }
 
   async goToUncategorizedPage() {
@@ -75,9 +88,13 @@ export class MobileNavigation {
   }
 
   async goToTransactionEntryPage() {
+    const transactionEntryPage = new MobileTransactionEntryPage(this.page);
+
     if (this.page.url().endsWith('/transactions/new')) {
-      return new MobileTransactionEntryPage(this.page);
+      return transactionEntryPage;
     }
+
+    await this.navbar.waitFor();
 
     if (await this.hasNavbarState('hidden')) {
       await this.dragNavbarUp();
@@ -86,13 +103,18 @@ export class MobileNavigation {
     const link = this.navbar.getByRole('link', { name: 'Transaction' });
     await link.click();
 
-    return new MobileTransactionEntryPage(this.page);
+    await transactionEntryPage.waitFor();
+
+    return transactionEntryPage;
   }
 
   async goToReportsPage() {
+    const reportsPage = new MobileReportsPage(this.page);
     if (this.page.url().endsWith('/reports')) {
-      return new MobileTransactionEntryPage(this.page);
+      return reportsPage;
     }
+
+    await this.navbar.waitFor();
 
     if (await this.hasNavbarState('hidden')) {
       await this.dragNavbarUp();
@@ -101,13 +123,22 @@ export class MobileNavigation {
     const link = this.navbar.getByRole('link', { name: 'Reports' });
     await link.click();
 
-    return new MobileTransactionEntryPage(this.page);
+    await reportsPage.waitFor();
+
+    if (await this.hasNavbarState('open')) {
+      await this.dragNavbarDown();
+    }
+
+    return reportsPage;
   }
 
   async goToSettingsPage() {
+    const settingsPage = new SettingsPage(this.page);
     if (this.page.url().endsWith('/settings')) {
-      return new SettingsPage(this.page);
+      return settingsPage;
     }
+
+    await this.navbar.waitFor();
 
     if (await this.hasNavbarState('default', 'hidden')) {
       await this.dragNavbarUp();
@@ -116,10 +147,12 @@ export class MobileNavigation {
     const link = this.navbar.getByRole('link', { name: 'Settings' });
     await link.click();
 
+    await settingsPage.waitFor();
+
     if (await this.hasNavbarState('open')) {
       await this.dragNavbarDown();
     }
 
-    return new SettingsPage(this.page);
+    return settingsPage;
   }
 }

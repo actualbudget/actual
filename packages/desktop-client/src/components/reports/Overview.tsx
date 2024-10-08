@@ -481,7 +481,7 @@ export function Overview() {
       {isImporting ? (
         <LoadingIndicator message={t('Import is running...')} />
       ) : (
-        <View style={{ userSelect: 'none' }}>
+        <View data-testid="reports-overview" style={{ userSelect: 'none' }}>
           <ResponsiveGridLayout
             breakpoints={{ desktop: breakpoints.medium, mobile: 1 }}
             layouts={{ desktop: layout, mobile: layout }}
