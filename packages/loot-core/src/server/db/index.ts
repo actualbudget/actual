@@ -590,10 +590,10 @@ const orphanedPayeesQuery = `
     AND p.transfer_acct IS NULL
     AND t.id IS NULL
     AND NOT EXISTS (
-        SELECT 1
-        FROM rules r,
-        json_each(r.conditions) as cond
-        WHERE json_extract(cond.value, '$.field') = 'description'
+      SELECT 1
+      FROM rules r,
+      json_each(r.conditions) as cond
+      WHERE json_extract(cond.value, '$.field') = 'description'
         AND json_extract(cond.value, '$.value') = pm.targetId
     );
 `;
