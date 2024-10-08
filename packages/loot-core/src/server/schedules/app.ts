@@ -487,7 +487,7 @@ async function advanceSchedulesService(syncSuccess) {
       .select('value'),
   );
 
-  const upcomingLengthValue = upcomingLength[0]?.value ?? 7; // Default to 7 days if not set
+  const upcomingLengthValue = upcomingLength[0]?.value ?? '7'; // Default to 7 days if not set
 
   for (const schedule of schedules) {
     const status = getStatus(
