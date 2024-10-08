@@ -50,3 +50,6 @@ bundle.mobile.js.map
 
 # Local Netlify folder
 .netlify
+
+# build output
+package.tgz
