@@ -116,7 +116,7 @@ export class MobileNavigation {
 
     await this.navbar.waitFor();
 
-    if (await this.hasNavbarState('hidden')) {
+    if (await this.hasNavbarState('default', 'hidden')) {
       await this.dragNavbarUp();
     }
 

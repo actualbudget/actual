@@ -309,7 +309,8 @@ budgetTypes.forEach(budgetType => {
 
       const categoryMenuModal = await budgetPage.openCategoryMenu(categoryName);
       const editNotesModal = await categoryMenuModal.editNotes();
-      await editNotesModal.updateNotes(`#template ${amountToTemplate}`);
+      const templateNotes = `#template ${amountToTemplate}`;
+      await editNotesModal.updateNotes(templateNotes);
       await editNotesModal.close();
 
       const budgetedButton =
@@ -322,6 +323,8 @@ budgetTypes.forEach(budgetType => {
       await expect(budgetedButton).toHaveText(
         amountToCurrency(amountToTemplate),
       );
+      const notification = page.getByRole('alert');
+      await expect(notification).toContainText(templateNotes);
       await expect(page).toMatchThemeScreenshots();
     });
 
