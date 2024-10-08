@@ -1,5 +1,21 @@
 # Release Notes
 
+## 24.10.1
+
+The primary intent of this release is to patch a performance regression in user preferences that can cause faulty views displayed in accounts or for goal templates.
+
+### Actual
+
+#### Enhancements
+
+- [#3573](https://github.com/actualbudget/actual/pull/3573) [Mobile] Update Budget to Budgeted to match the column name in mobile budget table — thanks @joel-jeremy
+
+#### Bugfix
+
+- [#3544](https://github.com/actualbudget/actual/pull/3544) SyncedPrefs: preload in redux state and fetch from there; improved performance. — thanks @MatissJanis
+- [#3566](https://github.com/actualbudget/actual/pull/3566) Reports: fix old reports page having empty blocks. — thanks @MatissJanis
+- [#3574](https://github.com/actualbudget/actual/pull/3574) [Mobile] Fix budget list on mobile auto selecting a budget file under the Switch budget file menu — thanks @joel-jeremy
+
 ## 24.10.0
 
 The release has the following notable improvements:
