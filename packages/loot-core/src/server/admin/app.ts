@@ -15,8 +15,8 @@ app.method('user-delete-all', async function (ids) {
   const userToken = await asyncStorage.getItem('user-token');
   if (userToken) {
     try {
-      const res = await post(
-        getServer().BASE_SERVER + '/admin/users/delete-all',
+      const res = await del(
+        getServer().BASE_SERVER + '/admin/users',
         {
           token: userToken,
           ids,
