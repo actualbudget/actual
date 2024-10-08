@@ -10,74 +10,103 @@ export class MobileNavigation {
     this.page = page;
     this.heading = page.getByRole('heading');
     this.navbar = page.getByRole('navigation');
+    this.mainContentSelector = '[role=main]';
+    this.navbarSelector = '[role=navigation]';
   }
 
-  ROW_HEIGHT = 70;
+  NAVBAR_ROWS = 3;
 
   async dragNavbarUp() {
-    await this.navbar.dragTo(this.heading);
+    const boundingBox = await this.page
+      .locator(this.mainContentSelector)
+      .boundingBox();
+
+    await this.page.dragAndDrop(this.navbarSelector, this.mainContentSelector, {
+      sourcePosition: { x: 1, y: 0 },
+      targetPosition: { x: 1, y: boundingBox.height / 2 },
+    });
   }
 
   async dragNavbarDown() {
-    await this.navbar.dragTo(this.navbar, {
+    const boundingBox = await this.page
+      .locator(this.navbarSelector)
+      .boundingBox();
+
+    await this.page.dragAndDrop(this.navbarSelector, this.navbarSelector, {
       sourcePosition: { x: 1, y: 0 },
-      targetPosition: { x: 1, y: this.ROW_HEIGHT },
+      targetPosition: {
+        x: 1,
+        // Only scroll until bottom of screen i.e. bottom of first navbar row.
+        y: boundingBox.height / this.NAVBAR_ROWS,
+      },
     });
   }
 
   async hasNavbarState(...states) {
+    if ((await this.navbar.count()) === 0) {
+      // No navbar on page.
+      return false;
+    }
+
     const dataNavbarState = await this.navbar.getAttribute('data-navbar-state');
     return states.includes(dataNavbarState);
   }
 
-  async goToBudgetPage() {
-    const budgetPage = new MobileBudgetPage(this.page);
+  NAV_LINKS_HIDDEN_BY_DEFAULT = [
+    'Reports',
+    'Schedules',
+    'Payees',
+    'Rules',
+    'Settings',
+  ];
 
-    if (this.page.url().endsWith('/budget')) {
-      return budgetPage;
+  ROUTES_BY_PAGE = {
+    Budget: '/budget',
+    Accounts: '/accounts',
+    Transactions: '/transactions/new',
+    Reports: '/reports',
+    Settings: '/settings',
+  };
+
+  async navigateToPage(pageName, pageModelFactory) {
+    const pageInstance = pageModelFactory();
+
+    if (this.page.url().endsWith(this.ROUTES_BY_PAGE[pageName])) {
+      // Already on the page.
+      return pageInstance;
     }
 
     await this.navbar.waitFor();
 
-    if (await this.hasNavbarState('hidden')) {
+    const navbarStates = this.NAV_LINKS_HIDDEN_BY_DEFAULT.includes(pageName)
+      ? ['default', 'hidden']
+      : ['hidden'];
+
+    if (await this.hasNavbarState(...navbarStates)) {
       await this.dragNavbarUp();
     }
 
-    const link = this.page.getByRole('link', { name: 'Budget' });
+    const link = this.navbar.getByRole('link', { name: pageName });
     await link.click();
 
-    await budgetPage.waitFor();
+    await pageInstance.waitFor();
 
     if (await this.hasNavbarState('open')) {
       await this.dragNavbarDown();
     }
 
-    return budgetPage;
+    return pageInstance;
+  }
+
+  async goToBudgetPage() {
+    return this.navigateToPage('Budget', () => new MobileBudgetPage(this.page));
   }
 
   async goToAccountsPage() {
-    const accountsPage = new MobileAccountsPage(this.page);
-
-    if (this.page.url().endsWith('/accounts')) {
-      return accountsPage;
-    }
-
-    await this.navbar.waitFor();
-
-    if (await this.hasNavbarState('hidden')) {
-      await this.dragNavbarUp();
-    }
-
-    const link = this.page.getByRole('link', { name: 'Accounts' });
-    await link.click();
-
-    await accountsPage.waitFor();
-
-    if (await this.hasNavbarState('open')) {
-      await this.dragNavbarDown();
-    }
-
-    return accountsPage;
+    return this.navigateToPage(
+      'Accounts',
+      () => new MobileAccountsPage(this.page),
+    );
   }
 
   async goToUncategorizedPage() {
@@ -88,71 +117,20 @@ export class MobileNavigation {
   }
 
   async goToTransactionEntryPage() {
-    const transactionEntryPage = new MobileTransactionEntryPage(this.page);
-
-    if (this.page.url().endsWith('/transactions/new')) {
-      return transactionEntryPage;
-    }
-
-    await this.navbar.waitFor();
-
-    if (await this.hasNavbarState('hidden')) {
-      await this.dragNavbarUp();
-    }
-
-    const link = this.navbar.getByRole('link', { name: 'Transaction' });
-    await link.click();
-
-    await transactionEntryPage.waitFor();
-
-    return transactionEntryPage;
+    return this.navigateToPage(
+      'Transaction',
+      () => new MobileTransactionEntryPage(this.page),
+    );
   }
 
   async goToReportsPage() {
-    const reportsPage = new MobileReportsPage(this.page);
-    if (this.page.url().endsWith('/reports')) {
-      return reportsPage;
-    }
-
-    await this.navbar.waitFor();
-
-    if (await this.hasNavbarState('default', 'hidden')) {
-      await this.dragNavbarUp();
-    }
-
-    const link = this.navbar.getByRole('link', { name: 'Reports' });
-    await link.click();
-
-    await reportsPage.waitFor();
-
-    if (await this.hasNavbarState('open')) {
-      await this.dragNavbarDown();
-    }
-
-    return reportsPage;
+    return this.navigateToPage(
+      'Reports',
+      () => new MobileReportsPage(this.page),
+    );
   }
 
   async goToSettingsPage() {
-    const settingsPage = new SettingsPage(this.page);
-    if (this.page.url().endsWith('/settings')) {
-      return settingsPage;
-    }
-
-    await this.navbar.waitFor();
-
-    if (await this.hasNavbarState('default', 'hidden')) {
-      await this.dragNavbarUp();
-    }
-
-    const link = this.navbar.getByRole('link', { name: 'Settings' });
-    await link.click();
-
-    await settingsPage.waitFor();
-
-    if (await this.hasNavbarState('open')) {
-      await this.dragNavbarDown();
-    }
-
-    return settingsPage;
+    return this.navigateToPage('Settings', () => new SettingsPage(this.page));
   }
 }
