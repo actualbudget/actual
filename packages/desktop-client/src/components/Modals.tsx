@@ -592,15 +592,6 @@ export function Modals() {
           return <ImportYNAB5Modal key={name} />;
         case 'import-actual':
           return <ImportActualModal key={name} />;
-        case 'manager-load-backup':
-          return (
-            <LoadBackupModal
-              key={name}
-              budgetId={options.budgetId}
-              backupDisabled={true}
-              watchUpdates={false}
-            />
-          );
         case 'out-of-sync-migrations':
           return <OutOfSyncMigrationsModal key={name} />;
 
