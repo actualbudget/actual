@@ -1793,7 +1793,7 @@ function BudgetTableHeader({
             }
             type="financial"
           >
-            {({ type, value }) => (
+            {({ type: formatType, value }) => (
               <Button
                 variant="bare"
                 isDisabled={show3Cols}
@@ -1824,7 +1824,7 @@ function BudgetTableHeader({
                   <View>
                     <PrivacyFilter>
                       <AutoTextSize
-                        key={-value}
+                        key={value}
                         as={Text}
                         minFontSizePx={6}
                         maxFontSizePx={12}
@@ -1834,7 +1834,7 @@ function BudgetTableHeader({
                           paddingRight: 4,
                         }}
                       >
-                        {format(-value, type)}
+                        {format(type === 'report' ? value : -value, formatType)}
                       </AutoTextSize>
                     </PrivacyFilter>
                   </View>
