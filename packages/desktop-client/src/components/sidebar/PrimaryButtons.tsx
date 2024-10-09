@@ -1,72 +1,96 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, {
+  useEffect,
+  useRef,
+  type ComponentType,
+  type SVGProps,
+} from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 
-import {
-  SvgCheveronDown,
-  SvgCheveronRight,
-  SvgCog,
-  SvgReports,
-  SvgStoreFront,
-  SvgTuning,
-  SvgWallet,
-} from '../../icons/v1';
-import { SvgCalendar } from '../../icons/v2';
+import { useLocalPref } from '../../hooks/useLocalPref';
+import { SvgCheveronDown, SvgCheveronUp } from '../../icons/v1';
+import { styles } from '../../style';
 import { View } from '../common/View';
 
 import { Item } from './Item';
 import { SecondaryItem } from './SecondaryItem';
 
-export function PrimaryButtons() {
-  const { t } = useTranslation();
-  const [isOpen, setOpen] = useState(false);
-  const onToggle = useCallback(() => setOpen(open => !open), []);
-  const location = useLocation();
+type PrimaryButtonItems = {
+  title: string;
+  Icon:
+    | ComponentType<SVGProps<SVGElement>>
+    | ComponentType<SVGProps<SVGSVGElement>>;
+  to: string;
+  hidable?: boolean;
+};
 
-  const isActive = ['/payees', '/rules', '/settings', '/tools'].some(route =>
-    location.pathname.startsWith(route),
+type PrimaryButtonsProps = {
+  collapseSpeed?: number;
+  buttons: Array<PrimaryButtonItems>;
+};
+
+export function PrimaryButtons({
+  collapseSpeed = 0.15,
+  buttons,
+}: PrimaryButtonsProps) {
+  const { t } = useTranslation();
+  const divRef = useRef<HTMLDivElement>(null);
+  const itemsRef = useRef<HTMLDivElement>(null);
+  const location = useLocation();
+  const [expanded, setExpandedActionButtonsPref] = useLocalPref(
+    'ui.expandPrimaryButtons',
   );
 
+  const onToggle = () => {
+    setExpandedActionButtonsPref(!expanded);
+  };
+
   useEffect(() => {
-    if (isActive) {
-      setOpen(true);
+    if (divRef?.current && itemsRef?.current) {
+      divRef.current.style.height = itemsRef.current.scrollHeight + 'px';
     }
-  }, [isActive, location.pathname]);
+  }, [expanded, location.pathname]);
 
   return (
-    <View style={{ flexShrink: 0 }}>
-      <Item title={t('Budget')} Icon={SvgWallet} to="/budget" />
-      <Item title={t('Reports')} Icon={SvgReports} to="/reports" />
-      <Item title={t('Schedules')} Icon={SvgCalendar} to="/schedules" />
-      <Item
-        title="More"
-        Icon={isOpen ? SvgCheveronDown : SvgCheveronRight}
+    <View style={{ padding: '5px 0', flexShrink: 0 }}>
+      <View
+        ref={divRef}
+        style={{
+          overflow: 'hidden',
+          transition: 'height ' + collapseSpeed + 's ease-in-out',
+        }}
+      >
+        <View
+          ref={itemsRef}
+          style={{
+            flexShrink: 0,
+            height: 'auto',
+          }}
+        >
+          {buttons.map(item => {
+            const isActive = location.pathname.startsWith(item.to);
+            return (
+              <Item
+                key={item.title}
+                title={item.title}
+                Icon={item.Icon}
+                to={item.to}
+                style={{
+                  ...(item.hidable &&
+                    !expanded &&
+                    !isActive && { display: 'none' }),
+                }}
+              />
+            );
+          })}
+        </View>
+      </View>
+      <SecondaryItem
+        title={expanded ? t('Less') : t('More')}
+        Icon={expanded ? SvgCheveronUp : SvgCheveronDown}
         onClick={onToggle}
-        style={{ marginBottom: isOpen ? 8 : 0 }}
-        forceActive={!isOpen && isActive}
+        style={{ ...styles.verySmallText }}
       />
-      {isOpen && (
-        <>
-          <SecondaryItem
-            title={t('Payees')}
-            Icon={SvgStoreFront}
-            to="/payees"
-            indent={15}
-          />
-          <SecondaryItem
-            title={t('Rules')}
-            Icon={SvgTuning}
-            to="/rules"
-            indent={15}
-          />
-          <SecondaryItem
-            title={t('Settings')}
-            Icon={SvgCog}
-            to="/settings"
-            indent={15}
-          />
-        </>
-      )}
     </View>
   );
 }
