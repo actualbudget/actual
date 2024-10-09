@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 
 import { send, listen } from 'loot-core/src/platform/client/fetch';
@@ -21,7 +21,6 @@ export function ManagePayeesWithData({ initialSelectedIds }) {
   const [payees, setPayees] = useState(initialPayees);
   const [ruleCounts, setRuleCounts] = useState({ value: new Map() });
   const [orphans, setOrphans] = useState({ value: new Map() });
-  const payeesRef = useRef();
 
   async function refetchOrphanedPayees() {
     const orphs = await send('payees-get-orphaned');
@@ -120,7 +119,6 @@ export function ManagePayeesWithData({ initialSelectedIds }) {
 
   return (
     <ManagePayees
-      ref={payeesRef}
       payees={payees}
       ruleCounts={ruleCounts.value}
       orphanedPayees={orphans}

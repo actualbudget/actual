@@ -27,7 +27,7 @@ import {
   ungroupTransaction,
 } from '../../shared/transactions';
 import { fastSetMerge } from '../../shared/util';
-import { RuleConditionEntity } from '../../types/models';
+import { RuleConditionEntity, RuleEntity } from '../../types/models';
 import { RuleError } from '../errors';
 import { Schedule as RSchedule } from '../util/rschedule';
 
@@ -87,7 +87,7 @@ function registerHandlebarsHelpers() {
 
 registerHandlebarsHelpers();
 
-function assert(test, type, msg) {
+function assert(test: unknown, type: string, msg: string): asserts test {
   if (!test) {
     throw new RuleError(type, msg);
   }
@@ -443,12 +443,12 @@ export class Condition {
         if (fieldValue === null) {
           return false;
         }
-        return fieldValue.indexOf(this.value) !== -1;
+        return String(fieldValue).indexOf(this.value) !== -1;
       case 'doesNotContain':
         if (fieldValue === null) {
           return false;
         }
-        return fieldValue.indexOf(this.value) === -1;
+        return String(fieldValue).indexOf(this.value) === -1;
       case 'oneOf':
         if (fieldValue === null) {
           return false;
@@ -459,7 +459,7 @@ export class Condition {
         if (fieldValue === null) {
           return false;
         }
-        return fieldValue.indexOf(this.value) !== -1;
+        return String(fieldValue).indexOf(this.value) !== -1;
 
       case 'notOneOf':
         if (fieldValue === null) {
@@ -793,11 +793,11 @@ export function execActions(actions: Action[], transaction) {
 }
 
 export class Rule {
-  actions;
-  conditions;
+  actions: Action[];
+  conditions: Condition[];
   conditionsOp;
-  id;
-  stage;
+  id?: string;
+  stage: 'pre' | null | 'post';
 
   constructor({
     id,
@@ -807,13 +807,13 @@ export class Rule {
     actions,
   }: {
     id?: string;
-    stage?;
+    stage?: 'pre' | null | 'post';
     conditionsOp;
     conditions;
     actions;
   }) {
     this.id = id;
-    this.stage = stage;
+    this.stage = stage ?? null;
     this.conditionsOp = conditionsOp;
     this.conditions = conditions.map(
       c => new Condition(c.op, c.field, c.value, c.options),
@@ -823,7 +823,7 @@ export class Rule {
     );
   }
 
-  evalConditions(object) {
+  evalConditions(object): boolean {
     if (this.conditions.length === 0) {
       return false;
     }
@@ -860,11 +860,11 @@ export class Rule {
     return Object.assign({}, object, changes);
   }
 
-  getId() {
+  getId(): string | undefined {
     return this.id;
   }
 
-  serialize() {
+  serialize(): RuleEntity {
     return {
       id: this.id,
       stage: this.stage,
@@ -876,9 +876,9 @@ export class Rule {
 }
 
 export class RuleIndexer {
-  field;
-  method;
-  rules;
+  field: string;
+  method?: string;
+  rules: Map<string, Set<Rule>>;
 
   constructor({ field, method }: { field: string; method?: string }) {
     this.field = field;
@@ -886,18 +886,18 @@ export class RuleIndexer {
     this.rules = new Map();
   }
 
-  getIndex(key) {
+  getIndex(key: string | null): Set<Rule> {
     if (!this.rules.has(key)) {
       this.rules.set(key, new Set());
     }
     return this.rules.get(key);
   }
 
-  getIndexForValue(value) {
+  getIndexForValue(value: unknown): Set<Rule> {
     return this.getIndex(this.getKey(value) || '*');
   }
 
-  getKey(value) {
+  getKey(value: unknown): string | null {
     if (typeof value === 'string' && value !== '') {
       if (this.method === 'firstchar') {
         return value[0].toLowerCase();
@@ -907,7 +907,7 @@ export class RuleIndexer {
     return null;
   }
 
-  getIndexes(rule) {
+  getIndexes(rule: Rule): Set<Rule>[] {
     const cond = rule.conditions.find(cond => cond.field === this.field);
     const indexes = [];
 
@@ -930,21 +930,21 @@ export class RuleIndexer {
     return indexes;
   }
 
-  index(rule) {
+  index(rule: Rule): void {
     const indexes = this.getIndexes(rule);
     indexes.forEach(index => {
       index.add(rule);
     });
   }
 
-  remove(rule) {
+  remove(rule: Rule): void {
     const indexes = this.getIndexes(rule);
     indexes.forEach(index => {
       index.delete(rule);
     });
   }
 
-  getApplicableRules(object) {
+  getApplicableRules(object): Set<Rule> {
     let indexedRules;
     if (this.field in object) {
       const key = this.getKey(object[this.field]);
@@ -977,7 +977,7 @@ const OP_SCORES: Record<RuleConditionEntity['op'], number> = {
   hasTags: 0,
 };
 
-function computeScore(rule) {
+function computeScore(rule: Rule): number {
   const initialScore = rule.conditions.reduce((score, condition) => {
     if (OP_SCORES[condition.op] == null) {
       console.log(`Found invalid operation while ranking: ${condition.op}`);
@@ -1002,7 +1002,7 @@ function computeScore(rule) {
   return initialScore;
 }
 
-function _rankRules(rules) {
+function _rankRules(rules: Rule[]): Rule[] {
   const scores = new Map();
   rules.forEach(rule => {
     scores.set(rule, computeScore(rule));
@@ -1026,7 +1026,7 @@ function _rankRules(rules) {
   });
 }
 
-export function rankRules(rules) {
+export function rankRules(rules: Iterable<Rule>): Rule[] {
   let pre = [];
   let normal = [];
   let post = [];
@@ -1051,7 +1051,7 @@ export function rankRules(rules) {
   return pre.concat(normal).concat(post);
 }
 
-export function migrateIds(rule, mappings) {
+export function migrateIds(rule: Rule, mappings: Map<string, string>): void {
   // Go through the in-memory rules and patch up ids that have been
   // "migrated" to other ids. This is a little tricky, but a lot
   // easier than trying to keep an up-to-date mapping in the db. This
@@ -1103,7 +1103,11 @@ export function migrateIds(rule, mappings) {
 }
 
 // This finds all the rules that reference the `id`
-export function iterateIds(rules, fieldName, func) {
+export function iterateIds(
+  rules: Rule[],
+  fieldName: string,
+  func: (rule: Rule, id: string) => void | boolean,
+): void {
   let i;
 
   ruleiter: for (i = 0; i < rules.length; i++) {

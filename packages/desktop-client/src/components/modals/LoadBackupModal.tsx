@@ -1,7 +1,8 @@
-import React, { Component, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { loadBackup, makeBackup } from 'loot-core/client/actions';
+import { type Backup } from 'loot-core/server/backups';
 import { send, listen, unlisten } from 'loot-core/src/platform/client/fetch';
 
 import { useMetadataPref } from '../../hooks/useMetadataPref';
@@ -13,48 +14,47 @@ import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { Row, Cell } from '../table';
 
-class BackupTable extends Component {
-  state = { hoveredBackup: null };
+type BackupTableProps = {
+  backups: Backup[];
+  onSelect: (backupId: string) => void;
+};
 
-  onHover = id => {
-    this.setState({ hoveredBackup: id });
-  };
-
-  render() {
-    const { backups, onSelect } = this.props;
-    const { hoveredBackup } = this.state;
-
-    return (
-      <View
-        style={{ flex: 1, maxHeight: 200, overflow: 'auto' }}
-        onMouseLeave={() => this.onHover(null)}
-      >
-        {backups.map((backup, idx) => (
-          <Row
-            key={backup.id}
-            collapsed={idx !== 0}
-            focused={hoveredBackup === backup.id}
-            onMouseEnter={() => this.onHover(backup.id)}
-            onClick={() => onSelect(backup.id)}
-            style={{ cursor: 'pointer' }}
-          >
-            <Cell
-              width="flex"
-              value={backup.date ? backup.date : 'Revert to Latest'}
-              valueStyle={{ paddingLeft: 20 }}
-            />
-          </Row>
-        ))}
-      </View>
-    );
-  }
+function BackupTable({ backups, onSelect }: BackupTableProps) {
+  return (
+    <View style={{ flex: 1, maxHeight: 200, overflow: 'auto' }}>
+      {backups.map((backup, idx) => (
+        <Row
+          key={backup.id}
+          collapsed={idx !== 0}
+          onClick={() => onSelect(backup.id)}
+          style={{ cursor: 'pointer' }}
+        >
+          <Cell
+            width="flex"
+            value={backup.date ? backup.date : 'Revert to Latest'}
+            valueStyle={{ paddingLeft: 20 }}
+          />
+        </Row>
+      ))}
+    </View>
+  );
 }
 
-export function LoadBackupModal({ budgetId, watchUpdates, backupDisabled }) {
+type LoadBackupModalProps = {
+  budgetId: string;
+  watchUpdates: boolean;
+  backupDisabled: boolean;
+};
+
+export function LoadBackupModal({
+  budgetId,
+  watchUpdates,
+  backupDisabled,
+}: LoadBackupModalProps) {
   const dispatch = useDispatch();
-  const [backups, setBackups] = useState([]);
+  const [backups, setBackups] = useState<Backup[]>([]);
   const [prefsBudgetId] = useMetadataPref('id');
-  const budgetIdToLoad = budgetId || prefsBudgetId;
+  const budgetIdToLoad = budgetId ?? prefsBudgetId;
 
   useEffect(() => {
     send('backups-get', { id: budgetIdToLoad }).then(setBackups);
@@ -63,12 +63,16 @@ export function LoadBackupModal({ budgetId, watchUpdates, backupDisabled }) {
   useEffect(() => {
     if (watchUpdates) {
       listen('backups-updated', setBackups);
-      return () => unlisten('backups-updated', setBackups);
+      return () => unlisten('backups-updated');
     }
   }, [watchUpdates]);
 
-  const latestBackup = backups.find(backup => backup.isLatest);
-  const previousBackups = backups.filter(backup => !backup.isLatest);
+  const latestBackup = backups.find(backup =>
+    'isLatest' in backup ? backup.isLatest : false,
+  );
+  const previousBackups = backups.filter(
+    backup => !('isLatest' in backup ? backup.isLatest : false),
+  );
 
   return (
     <Modal name="load-backup" containerProps={{ style: { maxWidth: '30vw' } }}>
