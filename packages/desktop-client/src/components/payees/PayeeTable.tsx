@@ -26,7 +26,7 @@ type PayeeTableProps = {
   navigator: TableNavigator<PayeeWithId>;
 } & Pick<
   ComponentProps<typeof PayeeTableRow>,
-  'onUpdate' | 'onViewRules' | 'onCreateRule'
+  'onUpdate' | 'onDelete' | 'onViewRules' | 'onCreateRule'
 >;
 
 export const PayeeTable = forwardRef<
@@ -34,7 +34,15 @@ export const PayeeTable = forwardRef<
   PayeeTableProps
 >(
   (
-    { payees, ruleCounts, navigator, onUpdate, onViewRules, onCreateRule },
+    {
+      payees,
+      ruleCounts,
+      navigator,
+      onUpdate,
+      onDelete,
+      onViewRules,
+      onCreateRule,
+    },
     ref,
   ) => {
     const [hovered, setHovered] = useState(null);
@@ -70,6 +78,7 @@ export const PayeeTable = forwardRef<
                 onHover={onHover}
                 onEdit={onEdit}
                 onUpdate={onUpdate}
+                onDelete={onDelete}
                 onViewRules={onViewRules}
                 onCreateRule={onCreateRule}
               />

@@ -62,6 +62,10 @@ export function SidebarCategory({
         opacity: category.hidden || categoryGroup?.hidden ? 0.33 : undefined,
         backgroundColor: 'transparent',
       }}
+      onContextMenu={e => {
+        e.preventDefault();
+        setMenuOpen(true);
+      }}
     >
       <div
         data-testid="category-name"
@@ -94,6 +98,7 @@ export function SidebarCategory({
           isOpen={menuOpen}
           onOpenChange={() => setMenuOpen(false)}
           style={{ width: 200 }}
+          isNonModal
         >
           <Menu
             onMenuSelect={type => {

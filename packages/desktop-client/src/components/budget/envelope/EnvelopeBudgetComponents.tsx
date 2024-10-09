@@ -232,6 +232,11 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
           flex: 1,
           flexDirection: 'row',
         }}
+        onContextMenu={e => {
+          if (editing) return;
+          e.preventDefault();
+          setBudgetMenuOpen(true);
+        }}
       >
         {!editing && (
           <View
@@ -268,6 +273,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
               isOpen={budgetMenuOpen}
               onOpenChange={() => setBudgetMenuOpen(false)}
               style={{ width: 200 }}
+              isNonModal
             >
               <BudgetMenu
                 onCopyLastMonthAverage={() => {
@@ -386,6 +392,10 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
         <span
           ref={balanceMenuTriggerRef}
           onClick={() => setBalanceMenuOpen(true)}
+          onContextMenu={e => {
+            e.preventDefault();
+            setBalanceMenuOpen(true);
+          }}
         >
           <BalanceWithCarryover
             carryover={envelopeBudget.catCarryover(category.id)}
@@ -402,6 +412,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
           isOpen={balanceMenuOpen}
           onOpenChange={() => setBalanceMenuOpen(false)}
           style={{ width: 200 }}
+          isNonModal
         >
           <BalanceMovementMenu
             categoryId={category.id}

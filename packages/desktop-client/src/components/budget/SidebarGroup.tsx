@@ -68,6 +68,10 @@ export function SidebarGroup({
       onClick={() => {
         onToggleCollapse(group.id);
       }}
+      onContextMenu={e => {
+        e.preventDefault();
+        setMenuOpen(true);
+      }}
     >
       {!dragPreview && (
         <SvgExpandArrow
@@ -111,6 +115,7 @@ export function SidebarGroup({
               isOpen={menuOpen}
               onOpenChange={() => setMenuOpen(false)}
               style={{ width: 200 }}
+              isNonModal
             >
               <Menu
                 onMenuSelect={type => {

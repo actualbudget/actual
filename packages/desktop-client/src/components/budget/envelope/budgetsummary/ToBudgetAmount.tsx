@@ -71,6 +71,10 @@ export function ToBudgetAmount({
           >
             <Block
               onClick={onClick}
+              onContextMenu={e => {
+                e.preventDefault();
+                onClick();
+              }}
               data-cellname={sheetName}
               className={`${css([
                 styles.veryLargeText,
