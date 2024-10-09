@@ -61,8 +61,12 @@ export function LoggedInUser({
   useEffect(() => {
     if (cloudFileId && currentFile) {
       setIsOwner(
-        currentFile.usersWithAccess.some(u => u.userId === userData?.userId),
+        currentFile.usersWithAccess.some(
+          u => u.userId === userData?.userId && u.owner,
+        ),
       );
+    } else {
+      setIsOwner(false);
     }
   }, [cloudFileId]);
 

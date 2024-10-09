@@ -26,6 +26,7 @@ export interface UsersWithAccess {
   userId: string;
   userName: string;
   displayName: string;
+  owner: boolean;
 }
 export interface RemoteFile {
   deleted: boolean;

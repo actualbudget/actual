@@ -41,7 +41,7 @@ export const UserDirectoryRow = memo(
         onMouseEnter={() => onHover && onHover(user.id)}
         onMouseLeave={() => onHover && onHover(null)}
       >
-        {!user.master && (
+        {!user.owner && (
           <SelectCell
             exposed={hovered || selected}
             focused={true}
@@ -55,7 +55,7 @@ export const UserDirectoryRow = memo(
             selected={selected}
           />
         )}
-        {user.master && (
+        {user.owner && (
           <Cell
             width={20}
             style={{ alignItems: 'center', userSelect: 'none' }}
@@ -118,7 +118,7 @@ export const UserDirectoryRow = memo(
           plain
           style={{ padding: '0 15px', paddingLeft: 5 }}
         >
-          <Checkbox checked={user.master} disabled={true} />
+          <Checkbox checked={user.owner} disabled={true} />
         </Cell>
 
         <Cell

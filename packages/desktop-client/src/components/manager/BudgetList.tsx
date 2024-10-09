@@ -245,7 +245,7 @@ function FileState({
       return '';
     }
 
-    const userFound = file.usersWithAccess?.find(f => f.userId === file.owner);
+    const userFound = file.usersWithAccess?.find(f => f.owner);
     return userFound?.displayName ?? userFound?.userName ?? 'unknown';
   }
 }
@@ -304,7 +304,6 @@ function FileItem({
           {multiuserEnabled && (
             <UserAccessForFile
               fileId={(file as RemoteFile).cloudFileId}
-              ownerId={file.owner}
               currentUserId={currentUserId}
             />
           )}
@@ -599,14 +598,9 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
 type UserAccessForFileProps = {
   fileId: string;
   currentUserId: string;
-  ownerId?: string;
 };
 
-function UserAccessForFile({
-  fileId,
-  currentUserId,
-  ownerId,
-}: UserAccessForFileProps) {
+function UserAccessForFile({ fileId, currentUserId }: UserAccessForFileProps) {
   const allFiles = useSelector(state => state.budgets.allFiles || []);
   const remoteFiles = allFiles.filter(
     f => f.state === 'remote' || f.state === 'synced' || f.state === 'detached',
@@ -615,7 +609,7 @@ function UserAccessForFile({
   const multiuserEnabled = useMultiuserEnabled();
 
   let usersAccess = currentFile?.usersWithAccess ?? [];
-  usersAccess = usersAccess?.filter(user => user.userId !== ownerId) ?? [];
+  usersAccess = usersAccess?.filter(user => user.userName !== '') ?? [];
 
   const sortedUsersAccess = [...usersAccess].sort((a, b) => {
     const textA =

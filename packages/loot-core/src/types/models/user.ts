@@ -7,7 +7,7 @@ export interface NewUserEntity {
 
 export interface UserEntity extends NewUserEntity {
   id: string;
-  master: boolean;
+  owner: boolean;
 }
 
 export interface UserEntityDropdown {

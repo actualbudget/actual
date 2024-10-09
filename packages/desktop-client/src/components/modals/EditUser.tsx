@@ -169,9 +169,9 @@ function EditUser({ defaultUser, onSave: originalOnSave }: EditUserProps) {
           <Checkbox
             id="enabled-field"
             checked={enabled}
-            disabled={defaultUser.master}
+            disabled={defaultUser.owner}
             style={{
-              color: defaultUser.master ? theme.pageTextSubdued : 'inherit',
+              color: defaultUser.owner ? theme.pageTextSubdued : 'inherit',
             }}
             onChange={() => setEnabled(!enabled)}
           />
@@ -180,7 +180,7 @@ function EditUser({ defaultUser, onSave: originalOnSave }: EditUserProps) {
           </label>
         </View>
       </Stack>
-      {defaultUser.master && (
+      {defaultUser.owner && (
         <label
           style={{
             ...styles.verySmallText,
@@ -224,7 +224,7 @@ function EditUser({ defaultUser, onSave: originalOnSave }: EditUserProps) {
         <FormField style={{ flex: 1 }}>
           <FormLabel title="Role" htmlFor="name-field" />
           <Select
-            disabled={defaultUser.master}
+            disabled={defaultUser.owner}
             options={Object.entries(PossibleRoles)}
             value={role}
             onChange={newValue => setRole(newValue)}

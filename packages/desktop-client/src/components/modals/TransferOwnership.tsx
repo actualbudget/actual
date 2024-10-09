@@ -1,9 +1,12 @@
 import { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
+import { closeAndLoadBudget } from 'loot-core/client/actions';
 import { type State } from 'loot-core/client/state-types';
 import { send } from 'loot-core/platform/client/fetch';
 import { getUserAccessErrors } from 'loot-core/shared/errors';
+import { type Budget } from 'loot-core/types/budget';
+import { type RemoteFile, type SyncedLocalFile } from 'loot-core/types/file';
 import { type UserEntity } from 'loot-core/types/models';
 
 import { useActions } from '../../hooks/useActions';
@@ -30,12 +33,18 @@ export function TransferOwnership({
   const [error, setSetError] = useState<string | null>(null);
   const [availableUsers, setAvailableUsers] = useState<[string, string][]>([]);
   const [cloudFileId] = useMetadataPref('cloudFileId');
+  const allFiles = useSelector(state => state.budgets.allFiles || []);
+  const remoteFiles = allFiles.filter(
+    f => f.state === 'remote' || f.state === 'synced' || f.state === 'detached',
+  ) as (SyncedLocalFile | RemoteFile)[];
+  const currentFile = remoteFiles.find(f => f.cloudFileId === cloudFileId);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     send('users-get').then((users: UserEntity[]) =>
       setAvailableUsers(
         users
-          .filter(user => userData?.userId !== user.id)
+          .filter(f => currentFile?.owner !== f.id)
           .map(user => [
             user.id,
             user.displayName
@@ -44,7 +53,7 @@ export function TransferOwnership({
           ]),
       ),
     );
-  }, [userData?.userId]);
+  }, [userData?.userId, currentFile?.owner]);
 
   async function onSave() {
     if (cloudFileId) {
@@ -138,7 +147,15 @@ export function TransferOwnership({
             <Button style={{ marginRight: 10 }} onPress={actions.popModal}>
               Cancel
             </Button>
-            <Button isDisabled={availableUsers.length === 0} onPress={onSave}>
+            <Button
+              isDisabled={availableUsers.length === 0}
+              onPress={async () => {
+                await onSave();
+                close();
+
+                await dispatch(closeAndLoadBudget((currentFile as Budget).id));
+              }}
+            >
               Transfer ownership
             </Button>
           </Stack>
