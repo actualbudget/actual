@@ -1,5 +1,4 @@
 import { type ComponentProps, type ReactNode } from 'react';
-import { useLocation } from 'react-router-dom';
 
 import * as monthUtils from 'loot-core/src/shared/months';
 import {
@@ -61,8 +60,6 @@ export function Header({
   children,
 }: HeaderProps) {
   const isDashboardsFeatureEnabled = useFeatureFlag('dashboards');
-  const location = useLocation();
-  const path = location.pathname;
   const { isNarrowWidth } = useResponsive();
 
   return (
@@ -73,141 +70,140 @@ export function Header({
         flexShrink: 0,
       }}
     >
-      {!['/reports/custom'].includes(path) && (
+      <View
+        style={{
+          flexDirection: isNarrowWidth ? 'column' : 'row',
+          alignItems: isNarrowWidth ? 'flex-start' : 'center',
+          marginTop: 15,
+          gap: 15,
+        }}
+      >
+        {isDashboardsFeatureEnabled && mode && (
+          <Button
+            variant={mode === 'static' ? 'normal' : 'primary'}
+            onPress={() => {
+              const newMode = mode === 'static' ? 'sliding-window' : 'static';
+              const [newStart, newEnd] = calculateTimeRange({
+                start,
+                end,
+                mode: newMode,
+              });
+
+              onChangeDates(newStart, newEnd, newMode);
+            }}
+          >
+            {mode === 'static' ? 'Static' : 'Live'}
+          </Button>
+        )}
+
         <View
           style={{
-            flexDirection: isNarrowWidth ? 'column' : 'row',
-            alignItems: isNarrowWidth ? 'flex-start' : 'center',
-            marginTop: 15,
-            gap: 15,
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 5,
           }}
         >
-          {isDashboardsFeatureEnabled && mode && (
-            <Button
-              variant={mode === 'static' ? 'normal' : 'primary'}
-              onPress={() => {
-                const newMode = mode === 'static' ? 'sliding-window' : 'static';
-                const [newStart, newEnd] = calculateTimeRange({
-                  start,
+          <Select
+            onChange={newValue =>
+              onChangeDates(
+                ...validateStart(
+                  allMonths[allMonths.length - 1].name,
+                  newValue,
                   end,
-                  mode: newMode,
-                });
+                ),
+              )
+            }
+            value={start}
+            defaultLabel={monthUtils.format(start, 'MMMM, yyyy')}
+            options={allMonths.map(({ name, pretty }) => [name, pretty])}
+          />
+          <View>to</View>
+          <Select
+            onChange={newValue =>
+              onChangeDates(
+                ...validateEnd(
+                  allMonths[allMonths.length - 1].name,
+                  start,
+                  newValue,
+                ),
+              )
+            }
+            value={end}
+            options={allMonths.map(({ name, pretty }) => [name, pretty])}
+            style={{ marginRight: 10 }}
+          />
+        </View>
 
-                onChangeDates(newStart, newEnd, newMode);
-              }}
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 15,
+            flexWrap: 'wrap',
+          }}
+        >
+          {show1Month && (
+            <Button
+              variant="bare"
+              onPress={() => onChangeDates(...getLatestRange(1))}
             >
-              {mode === 'static' ? 'Static' : 'Live'}
+              1 month
             </Button>
           )}
-
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              gap: 5,
-            }}
+          <Button
+            variant="bare"
+            onPress={() => onChangeDates(...getLatestRange(2))}
           >
-            <Select
-              onChange={newValue =>
-                onChangeDates(
-                  ...validateStart(
-                    allMonths[allMonths.length - 1].name,
-                    newValue,
-                    end,
-                  ),
-                )
-              }
-              value={start}
-              defaultLabel={monthUtils.format(start, 'MMMM, yyyy')}
-              options={allMonths.map(({ name, pretty }) => [name, pretty])}
-            />
-            <View>to</View>
-            <Select
-              onChange={newValue =>
-                onChangeDates(
-                  ...validateEnd(
-                    allMonths[allMonths.length - 1].name,
-                    start,
-                    newValue,
-                  ),
-                )
-              }
-              value={end}
-              options={allMonths.map(({ name, pretty }) => [name, pretty])}
-              style={{ marginRight: 10 }}
-            />
-          </View>
-
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              gap: 15,
-              flexWrap: 'wrap',
-            }}
+            3 months
+          </Button>
+          <Button
+            variant="bare"
+            onPress={() => onChangeDates(...getLatestRange(5))}
           >
-            {show1Month && (
-              <Button
-                variant="bare"
-                onPress={() => onChangeDates(...getLatestRange(1))}
-              >
-                1 month
-              </Button>
-            )}
-            <Button
-              variant="bare"
-              onPress={() => onChangeDates(...getLatestRange(2))}
-            >
-              3 months
-            </Button>
-            <Button
-              variant="bare"
-              onPress={() => onChangeDates(...getLatestRange(5))}
-            >
-              6 months
-            </Button>
-            <Button
-              variant="bare"
-              onPress={() => onChangeDates(...getLatestRange(11))}
-            >
-              1 Year
-            </Button>
-            <Button
-              variant="bare"
-              onPress={() =>
-                onChangeDates(
-                  ...getFullRange(allMonths[allMonths.length - 1].name),
-                )
-              }
-            >
-              All Time
-            </Button>
+            6 months
+          </Button>
+          <Button
+            variant="bare"
+            onPress={() => onChangeDates(...getLatestRange(11))}
+          >
+            1 Year
+          </Button>
+          <Button
+            variant="bare"
+            onPress={() =>
+              onChangeDates(
+                ...getFullRange(allMonths[allMonths.length - 1].name),
+              )
+            }
+          >
+            All Time
+          </Button>
 
-            {filters && (
-              <FilterButton
-                compact={isNarrowWidth}
-                onApply={onApply}
-                hover={false}
-                exclude={undefined}
-              />
-            )}
-          </View>
-
-          {children ? (
-            <View
-              style={{
-                flex: 1,
-                flexDirection: 'row',
-                justifyContent: 'flex-end',
-              }}
-            >
-              {children}
-            </View>
-          ) : (
-            <View style={{ flex: 1 }} />
+          {filters && (
+            <FilterButton
+              compact={isNarrowWidth}
+              onApply={onApply}
+              hover={false}
+              exclude={undefined}
+            />
           )}
         </View>
-      )}
+
+        {children ? (
+          <View
+            style={{
+              flex: 1,
+              flexDirection: 'row',
+              justifyContent: 'flex-end',
+            }}
+          >
+            {children}
+          </View>
+        ) : (
+          <View style={{ flex: 1 }} />
+        )}
+      </View>
+
       {filters && filters.length > 0 && (
         <View style={{ marginTop: 5 }}>
           <AppliedFilters
