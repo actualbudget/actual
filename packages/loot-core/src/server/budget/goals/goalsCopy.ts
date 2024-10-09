@@ -1,8 +1,7 @@
 // @ts-strict-ignore
 import * as monthUtils from '../../../shared/months';
-import { getSheetValue } from '../actions';
-
 import { amountToInteger } from '../../../shared/util';
+import { getSheetValue } from '../actions';
 
 export async function goalsCopy(
   template,
@@ -28,7 +27,7 @@ export async function goalsCopy(
   let increment = 0;
   if (template.lookBack) {
     const sheetName = monthUtils.sheetForMonth(
-      monthUtils.subMonths(month,template.lookBack)
+      monthUtils.subMonths(month, template.lookBack),
     );
     increment = await getSheetValue(sheetName, `budget-${category.id}`);
   } else {

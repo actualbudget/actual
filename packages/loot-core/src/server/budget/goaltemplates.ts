@@ -8,13 +8,13 @@ import { batchMessages } from '../sync';
 import { getSheetValue, isReflectBudget, setBudget, setGoal } from './actions';
 import { goalsAverage } from './goals/goalsAverage';
 import { goalsBy } from './goals/goalsBy';
+import { goalsCopy } from './goals/goalsCopy';
 import { goalsPercentage } from './goals/goalsPercentage';
 import { findRemainder, goalsRemainder } from './goals/goalsRemainder';
 import { goalsSchedule } from './goals/goalsSchedule';
 import { goalsSimple } from './goals/goalsSimple';
 import { goalsSpend } from './goals/goalsSpend';
 import { goalsWeek } from './goals/goalsWeek';
-import { goalsCopy } from './goals/goalsCopy';
 import { checkTemplates, storeTemplates } from './template-notes';
 
 const TEMPLATE_PREFIX = '#template';
