@@ -148,6 +148,9 @@ test.describe('Accounts', () => {
       });
 
       await expect(importButton).toBeDisabled();
+      await expect(await importButton.innerText()).toMatch(
+        /Import 0 transactions/,
+      );
 
       await accountPage.page.getByRole('button', { name: 'Close' }).click();
 
