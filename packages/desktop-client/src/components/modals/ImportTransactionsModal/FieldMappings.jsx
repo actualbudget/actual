@@ -6,7 +6,6 @@ import { SectionLabel } from '../../forms';
 
 import { SelectField } from './SelectField';
 import { SubLabel } from './SubLabel';
-
 import { stripCsvImportTransaction } from './utils';
 
 export function FieldMappings({
