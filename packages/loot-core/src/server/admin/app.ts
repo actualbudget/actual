@@ -15,13 +15,10 @@ app.method('user-delete-all', async function (ids) {
   const userToken = await asyncStorage.getItem('user-token');
   if (userToken) {
     try {
-      const res = await del(
-        getServer().BASE_SERVER + '/admin/users',
-        {
-          token: userToken,
-          ids,
-        },
-      );
+      const res = await del(getServer().BASE_SERVER + '/admin/users', {
+        token: userToken,
+        ids,
+      });
 
       if (res) {
         return res;
