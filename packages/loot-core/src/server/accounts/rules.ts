@@ -384,12 +384,12 @@ export class Condition {
         if (fieldValue === null) {
           return false;
         }
-        return `${fieldValue}`.indexOf(this.value) !== -1;
+        return String(fieldValue).indexOf(this.value) !== -1;
       case 'doesNotContain':
         if (fieldValue === null) {
           return false;
         }
-        return `${fieldValue}`.indexOf(this.value) === -1;
+        return String(fieldValue).indexOf(this.value) === -1;
       case 'oneOf':
         if (fieldValue === null) {
           return false;
@@ -400,7 +400,7 @@ export class Condition {
         if (fieldValue === null) {
           return false;
         }
-        return `${fieldValue}`.indexOf(this.value) !== -1;
+        return String(fieldValue).indexOf(this.value) !== -1;
 
       case 'notOneOf':
         if (fieldValue === null) {
