@@ -26,6 +26,7 @@ import { Select } from '../../common/Select';
 import { Text } from '../../common/Text';
 import { Tooltip } from '../../common/Tooltip';
 import { View } from '../../common/View';
+import { EditablePageHeaderTitle } from '../../EditablePageHeaderTitle';
 import { AppliedFilters } from '../../filters/AppliedFilters';
 import { FilterButton } from '../../filters/FiltersMenu';
 import { MobileBackButton } from '../../mobile/MobileBackButton';
@@ -55,7 +56,7 @@ export function Spending() {
 }
 
 type SpendingInternalProps = {
-  widget: SpendingWidget;
+  widget?: SpendingWidget;
 };
 
 function SpendingInternal({ widget }: SpendingInternalProps) {
@@ -133,8 +134,12 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
   const { isNarrowWidth } = useResponsive();
 
   async function onSaveWidget() {
+    if (!widget) {
+      throw new Error('No widget that could be saved.');
+    }
+
     await send('dashboard-update-widget', {
-      id: widget?.id,
+      id: widget.id,
       meta: {
         ...(widget.meta ?? {}),
         conditions,
@@ -177,7 +182,21 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
     compare === monthUtils.currentMonth() ||
     Math.abs(data.intervalData[27].compare) > 0;
 
-  const title = widget?.meta?.name ?? t('Monthly Spending');
+  const title = widget?.meta?.name || t('Monthly Spending');
+  const onSaveWidgetName = async (newName: string) => {
+    if (!widget) {
+      throw new Error('No widget that could be saved.');
+    }
+
+    const name = newName || t('Monthly Spending');
+    await send('dashboard-update-widget', {
+      id: widget.id,
+      meta: {
+        ...(widget.meta ?? {}),
+        name,
+      },
+    });
+  };
 
   return (
     <Page
@@ -190,7 +209,18 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
             }
           />
         ) : (
-          <PageHeader title={title} />
+          <PageHeader
+            title={
+              widget ? (
+                <EditablePageHeaderTitle
+                  title={title}
+                  onSave={onSaveWidgetName}
+                />
+              ) : (
+                title
+              )
+            }
+          />
         )
       }
       padding={0}
@@ -474,7 +504,7 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                         }
                         right={
                           <Text style={{ fontWeight: 600 }}>
-                            <PrivacyFilter blurIntensity={5}>
+                            <PrivacyFilter>
                               {amountToCurrency(
                                 Math.abs(data.intervalData[todayDay].compare),
                               )}
@@ -494,7 +524,7 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                         }
                         right={
                           <Text style={{ fontWeight: 600 }}>
-                            <PrivacyFilter blurIntensity={5}>
+                            <PrivacyFilter>
                               {amountToCurrency(
                                 Math.abs(data.intervalData[todayDay].compareTo),
                               )}
@@ -515,7 +545,7 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                       }
                       right={
                         <Text style={{ fontWeight: 600 }}>
-                          <PrivacyFilter blurIntensity={5}>
+                          <PrivacyFilter>
                             {amountToCurrency(
                               Math.abs(data.intervalData[todayDay].budget),
                             )}
@@ -535,7 +565,7 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                       }
                       right={
                         <Text style={{ fontWeight: 600 }}>
-                          <PrivacyFilter blurIntensity={5}>
+                          <PrivacyFilter>
                             {amountToCurrency(
                               Math.abs(data.intervalData[todayDay].average),
                             )}

@@ -2,15 +2,14 @@ import React, { type ReactNode, useEffect } from 'react';
 
 import { media } from 'glamor';
 
+import { isElectron } from 'loot-core/shared/environment';
 import { listen } from 'loot-core/src/platform/client/fetch';
-import { isElectron } from 'loot-core/src/shared/environment';
 
 import { useActions } from '../../hooks/useActions';
 import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { useGlobalPref } from '../../hooks/useGlobalPref';
 import { useLatestVersion, useIsOutdated } from '../../hooks/useLatestVersion';
 import { useMetadataPref } from '../../hooks/useMetadataPref';
-import { useSetThemeColor } from '../../hooks/useSetThemeColor';
 import { useResponsive } from '../../ResponsiveProvider';
 import { theme } from '../../style';
 import { tokens } from '../../tokens';
@@ -24,13 +23,13 @@ import { MOBILE_NAV_HEIGHT } from '../mobile/MobileNavTabs';
 import { Page } from '../Page';
 import { useServerVersion } from '../ServerContext';
 
+import { Backups } from './Backups';
 import { BudgetTypeSettings } from './BudgetTypeSettings';
 import { EncryptionSettings } from './Encryption';
 import { ExperimentalFeatures } from './Experimental';
 import { ExportBudget } from './Export';
 import { FixSplits } from './FixSplits';
 import { FormatSettings } from './Format';
-import { GlobalSettings } from './Global';
 import { ResetCache, ResetSync } from './Reset';
 import { ThemeSettings } from './Themes';
 import { AdvancedToggle, Setting } from './UI';
@@ -139,7 +138,6 @@ export function Settings() {
 
   const { isNarrowWidth } = useResponsive();
 
-  useSetThemeColor(theme.mobileViewTheme);
   return (
     <Page
       header="Settings"
@@ -173,11 +171,11 @@ export function Settings() {
           </View>
         )}
         <About />
-        {isElectron() && <GlobalSettings />}
         <ThemeSettings />
         <FormatSettings />
         <EncryptionSettings />
         {useFeatureFlag('reportBudget') && <BudgetTypeSettings />}
+        {isElectron() && <Backups />}
         <ExportBudget />
         <AdvancedToggle>
           <AdvancedAbout />

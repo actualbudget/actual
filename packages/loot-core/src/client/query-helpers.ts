@@ -184,7 +184,7 @@ export class LiveQuery<Response = unknown> {
 }
 
 // Paging
-class PagedQuery extends LiveQuery {
+export class PagedQuery extends LiveQuery {
   done;
   onPageData;
   pageCount;

@@ -1,4 +1,5 @@
 import React, { type ComponentProps, memo, useRef, useState } from 'react';
+import { useTranslation, Trans } from 'react-i18next';
 
 import { css } from 'glamor';
 
@@ -74,7 +75,9 @@ export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
       }}
     >
       <View style={headerLabelStyle}>
-        <Text style={{ color: theme.tableHeaderText }}>Budgeted</Text>
+        <Text style={{ color: theme.tableHeaderText }}>
+          <Trans>Budgeted</Trans>
+        </Text>
         <EnvelopeCellValue
           binding={envelopeBudget.totalBudgeted}
           type="financial"
@@ -112,7 +115,9 @@ export function IncomeHeaderMonth() {
         paddingRight: 10,
       }}
     >
-      <View style={{ flex: 1, textAlign: 'right' }}>Received</View>
+      <View style={{ flex: 1, textAlign: 'right' }}>
+        <Trans>Received</Trans>
+      </View>
     </Row>
   );
 }
@@ -169,11 +174,6 @@ export const ExpenseGroupMonth = memo(function ExpenseGroupMonth({
         valueProps={{
           binding: envelopeBudget.groupBalance(id),
           type: 'financial',
-          privacyFilter: {
-            style: {
-              paddingRight: styles.monthRightPadding,
-            },
-          },
         }}
       />
     </View>
@@ -196,6 +196,8 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
   onBudgetAction,
   onShowActivity,
 }: ExpenseCategoryMonthProps) {
+  const { t } = useTranslation();
+
   const budgetMenuTriggerRef = useRef(null);
   const balanceMenuTriggerRef = useRef(null);
   const [budgetMenuOpen, setBudgetMenuOpen] = useState(false);
@@ -273,7 +275,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
                     category: category.id,
                   });
                   showUndoNotification({
-                    message: `Budget set to last month’s budget.`,
+                    message: t(`Budget set to last month’s budget.`),
                   });
                 }}
                 onSetMonthsAverage={numberOfMonths => {
@@ -289,7 +291,10 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
                     category: category.id,
                   });
                   showUndoNotification({
-                    message: `Budget set to ${numberOfMonths}-month average.`,
+                    message: t(
+                      'Budget set to {{numberOfMonths}}-month average.',
+                      { numberOfMonths },
+                    ),
                   });
                 }}
                 onApplyBudgetTemplate={() => {
@@ -297,7 +302,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
                     category: category.id,
                   });
                   showUndoNotification({
-                    message: `Budget template applied.`,
+                    message: t(`Budget template applied.`),
                   });
                 }}
               />
@@ -431,11 +436,6 @@ export function IncomeGroupMonth({ month }: IncomeGroupMonthProps) {
         valueProps={{
           binding: envelopeBudget.groupIncomeReceived,
           type: 'financial',
-          privacyFilter: {
-            style: {
-              paddingRight: styles.monthRightPadding,
-            },
-          },
         }}
       />
     </View>

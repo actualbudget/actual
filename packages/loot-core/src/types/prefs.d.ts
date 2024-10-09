@@ -1,7 +1,8 @@
 export type FeatureFlag =
   | 'dashboards'
   | 'reportBudget'
-  | 'goalTemplatesEnabled';
+  | 'goalTemplatesEnabled'
+  | 'actionTemplating';
 
 /**
  * Cross-device preferences. These sync across devices when they are changed.

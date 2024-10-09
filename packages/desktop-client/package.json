@@ -1,11 +1,12 @@
 {
   "name": "@actual-app/web",
-  "version": "24.9.0",
+  "version": "24.10.1",
   "license": "MIT",
   "files": [
     "build"
   ],
   "devDependencies": {
+    "@fontsource/redacted-script": "^5.0.21",
     "@juggle/resize-observer": "^3.4.0",
     "@playwright/test": "1.41.1",
     "@rollup/plugin-inject": "^5.0.5",
