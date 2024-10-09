@@ -29,6 +29,7 @@ import {
   dateFormats,
   parseAmountFields,
   parseDate,
+  stripCsvImportTransaction,
 } from './utils';
 
 function getFileType(filepath) {
@@ -59,7 +60,7 @@ function getInitialMappings(transactions) {
     return {};
   }
 
-  const transaction = transactions[0];
+  const transaction = stripCsvImportTransaction(transactions[0]);
   const fields = Object.entries(transaction);
 
   function key(entry) {
