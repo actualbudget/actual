@@ -14,6 +14,7 @@ import { goalsSchedule } from './goals/goalsSchedule';
 import { goalsSimple } from './goals/goalsSimple';
 import { goalsSpend } from './goals/goalsSpend';
 import { goalsWeek } from './goals/goalsWeek';
+import { goalsCopy } from './goals/goalsCopy';
 import { checkTemplates, storeTemplates } from './template-notes';
 
 const TEMPLATE_PREFIX = '#template';
@@ -520,6 +521,24 @@ async function applyCategoryTemplate(
           hold,
           to_budget,
           last_month_balance,
+        );
+        to_budget = goalsReturn.to_budget;
+        errors = goalsReturn.errors;
+        limit = goalsReturn.limit;
+        limitCheck = goalsReturn.limitCheck;
+        hold = goalsReturn.hold;
+        break;
+      }
+      case 'copy': {
+        const goalsReturn = await goalsCopy(
+          template,
+          month,
+          category,
+          limitCheck,
+          errors,
+          limit,
+          hold,
+          to_budget,
         );
         to_budget = goalsReturn.to_budget;
         errors = goalsReturn.errors;
