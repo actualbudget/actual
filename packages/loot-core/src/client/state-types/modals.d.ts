@@ -50,6 +50,7 @@ type FinanceModals = {
   );
 
   'load-backup': EmptyObject;
+  'manager-load-backup': { budgetId: string };
 
   'manage-rules': { payeeId?: string };
   'edit-rule': {

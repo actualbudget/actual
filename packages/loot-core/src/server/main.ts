@@ -1731,10 +1731,7 @@ handlers['sync-budget'] = async function () {
   return result;
 };
 
-handlers['load-budget'] = async function ({
-  id,
-  allowOutOfSyncMigrations = false,
-}) {
+handlers['load-budget'] = async function ({ id }) {
   const currentPrefs = prefs.getPrefs();
 
   if (currentPrefs) {
@@ -1747,7 +1744,7 @@ handlers['load-budget'] = async function ({
     }
   }
 
-  const res = await loadBudget(id, allowOutOfSyncMigrations);
+  const res = await loadBudget(id);
 
   return res;
 };
@@ -1900,10 +1897,7 @@ handlers['export-budget'] = async function () {
   }
 };
 
-async function loadBudget(
-  id: string,
-  allowOutOfSyncMigrations: boolean = false,
-) {
+async function loadBudget(id: string) {
   let dir;
   try {
     dir = fs.getBudgetDir(id);
@@ -1942,6 +1936,7 @@ async function loadBudget(
     // check here if server and if server version is compatible
     // if server version is different, then if the server had less migrations than we do, block it
     // if server version is same or higher, then migrate
+    console.info('loading migrations from server file');
     await updateVersion();
   } catch (e) {
     console.warn('Error updating', e);
@@ -1957,12 +1952,8 @@ async function loadBudget(
       result = { error: 'loading-budget' };
     }
 
-    if (result.error === 'out-of-sync-migrations' && allowOutOfSyncMigrations) {
-      console.info('Allowing out of sync migrations');
-    } else {
-      await handlers['close-budget']();
-      return result;
-    }
+    await handlers['close-budget']();
+    return result;
   }
 
   await db.loadClock();

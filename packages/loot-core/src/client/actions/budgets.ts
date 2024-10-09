@@ -48,15 +48,13 @@ export function loadAllFiles() {
   };
 }
 
-export function loadBudget(
-  id: string,
-  options: { allowOutOfSyncMigrations?: boolean } = {},
-) {
+export function loadBudget(id: string, options = {}) {
   return async (dispatch: Dispatch) => {
     dispatch(setAppState({ loadingText: t('Loading...') }));
 
     // Loading a budget may fail
-    const { error } = await send('load-budget', { id, ...options });
+    let { error } = await send('load-budget', { id, ...options });
+    error = 'out-of-sync-migrations';
 
     if (error) {
       const message = getSyncError(error, id);
