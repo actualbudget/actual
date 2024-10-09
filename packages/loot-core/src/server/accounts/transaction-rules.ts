@@ -780,7 +780,9 @@ export async function prepareTransactionForRules(
   const r: TransactionForRules = { ...trans };
   if (trans.payee) {
     const payee = await getPayee(trans.payee);
-    r.payee_name = payee?.name;
+    if (payee) {
+      r.payee_name = payee.name;
+    }
   }
 
   return r;
