@@ -593,7 +593,8 @@ const orphanedPayeesQuery = `
       SELECT 1
       FROM rules r,
       json_each(r.conditions) as cond
-      WHERE json_extract(cond.value, '$.field') = 'description'
+      WHERE r.tombstone = 0
+        AND json_extract(cond.value, '$.field') = 'description'
         AND json_extract(cond.value, '$.value') = pm.targetId
     );
 `;
