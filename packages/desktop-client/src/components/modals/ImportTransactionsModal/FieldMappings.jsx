@@ -6,6 +6,7 @@ import { SectionLabel } from '../../forms';
 
 import { SelectField } from './SelectField';
 import { SubLabel } from './SubLabel';
+import { stripCsvImportTransaction } from './utils';
 
 export function FieldMappings({
   transactions,
@@ -19,8 +20,7 @@ export function FieldMappings({
     return null;
   }
 
-  const { existing, ignored, selected, selected_merge, trx_id, ...trans } =
-    transactions[0];
+  const trans = stripCsvImportTransaction(transactions[0]);
   const options = Object.keys(trans);
   mappings = mappings || {};
 
