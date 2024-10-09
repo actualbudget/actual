@@ -9,6 +9,15 @@ import { Message, sendMessages } from './sync';
 export const BUDGET_TYPES = ['report', 'rollover'] as const;
 export type BudgetType = (typeof BUDGET_TYPES)[number];
 
+export const UPCOMING_SCHEDULED_TRANSACTION_LENGTHS = [
+  '1',
+  '7',
+  '14',
+  '30',
+] as const;
+export type UpcomingScheduledTransactionLength =
+  (typeof UPCOMING_SCHEDULED_TRANSACTION_LENGTHS)[number];
+
 let prefs: MetadataPrefs = null;
 
 export async function loadPrefs(id?: string): Promise<MetadataPrefs> {

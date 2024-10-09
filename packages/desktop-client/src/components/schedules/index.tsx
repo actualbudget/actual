@@ -11,8 +11,9 @@ import { Button } from '../common/Button2';
 import { Search } from '../common/Search';
 import { View } from '../common/View';
 import { Page } from '../Page';
+import { UpcomingLengthSettings } from '../settings/Upcoming';
 
-import { SchedulesTable, type ScheduleItemAction } from './SchedulesTable';
+import { type ScheduleItemAction, SchedulesTable } from './SchedulesTable';
 
 export function Schedules() {
   const { t } = useTranslation();
@@ -75,6 +76,15 @@ export function Schedules() {
           padding: '0 0 15px',
         }}
       >
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            padding: '15px 0 0',
+          }}
+        >
+          <UpcomingLengthSettings />
+        </View>
         <View
           style={{
             flex: 1,

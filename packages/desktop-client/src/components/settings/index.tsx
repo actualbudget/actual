@@ -8,7 +8,7 @@ import { listen } from 'loot-core/src/platform/client/fetch';
 import { useActions } from '../../hooks/useActions';
 import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { useGlobalPref } from '../../hooks/useGlobalPref';
-import { useLatestVersion, useIsOutdated } from '../../hooks/useLatestVersion';
+import { useIsOutdated, useLatestVersion } from '../../hooks/useLatestVersion';
 import { useMetadataPref } from '../../hooks/useMetadataPref';
 import { useResponsive } from '../../ResponsiveProvider';
 import { theme } from '../../style';
