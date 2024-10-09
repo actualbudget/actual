@@ -1897,7 +1897,7 @@ handlers['export-budget'] = async function () {
   }
 };
 
-async function loadBudget(id: string) {
+async function loadBudget(id) {
   let dir;
   try {
     dir = fs.getBudgetDir(id);
@@ -1933,10 +1933,6 @@ async function loadBudget(id: string) {
   }
 
   try {
-    // check here if server and if server version is compatible
-    // if server version is different, then if the server had less migrations than we do, block it
-    // if server version is same or higher, then migrate
-    console.info('loading migrations from server file');
     await updateVersion();
   } catch (e) {
     console.warn('Error updating', e);
