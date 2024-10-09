@@ -238,7 +238,7 @@ async function normalizeTransactions(
     trans.account = acctId;
     trans.payee = await resolvePayee(trans, payee_name, payeesToCreate);
 
-    trans.category = trans.category || null;
+    trans.category = trans.category ?? null;
 
     normalized.push({
       payee_name,
@@ -296,7 +296,7 @@ async function normalizeBankSyncTransactions(transactions, acctId) {
         account: trans.account,
         date: trans.date,
         notes: notes.trim().replace('#', '##'),
-        category: trans.category || null,
+        category: trans.category ?? null,
         imported_id: trans.transactionId,
         imported_payee: trans.imported_payee,
         cleared: trans.cleared,
