@@ -4,25 +4,26 @@ import { useDispatch } from 'react-redux';
 
 import { Resizable } from 're-resizable';
 
-import { moveAccount, replaceModal } from 'loot-core/src/client/actions';
+import { replaceModal } from 'loot-core/src/client/actions';
 import * as Platform from 'loot-core/src/client/platform';
 
-import { useAccounts } from '../../hooks/useAccounts';
 import { useGlobalPref } from '../../hooks/useGlobalPref';
 import { useLocalPref } from '../../hooks/useLocalPref';
 import { useResizeObserver } from '../../hooks/useResizeObserver';
 import { SvgReports, SvgWallet } from '../../icons/v1';
 import { SvgCalendar } from '../../icons/v2';
+import { SvgExpandArrow } from '../../icons/v0';
+import { SvgAdd } from '../../icons/v1';
 import { useResponsive } from '../../ResponsiveProvider';
 import { styles, theme } from '../../style';
 import { View } from '../common/View';
 
 import { Accounts } from './Accounts';
 import { BudgetName } from './BudgetName';
-import { Item } from './Item';
+import { PrimaryButtons } from './PrimaryButtons';
+import { SecondaryButtons } from './SecondaryButtons';
 import { useSidebar } from './SidebarProvider';
 import { ToggleButton } from './ToggleButton';
-import { Tools } from './Tools';
 
 export function Sidebar() {
   const hasWindowButtons = !Platform.isBrowser && Platform.OS === 'mac';
@@ -30,11 +31,7 @@ export function Sidebar() {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const sidebar = useSidebar();
-  const accounts = useAccounts();
   const { width } = useResponsive();
-  const [showClosedAccounts, setShowClosedAccountsPref] = useLocalPref(
-    'ui.showClosedAccounts',
-  );
   const [isFloating = false, setFloatingSidebarPref] =
     useGlobalPref('floatingSidebar');
 
@@ -58,30 +55,12 @@ export function Sidebar() {
     setSidebarWidthLocalPref(sidebarWidth);
   };
 
-  async function onReorder(
-    id: string,
-    dropPos: 'top' | 'bottom',
-    targetId: unknown,
-  ) {
-    let targetIdToMove = targetId;
-    if (dropPos === 'bottom') {
-      const idx = accounts.findIndex(a => a.id === targetId) + 1;
-      targetIdToMove = idx < accounts.length ? accounts[idx].id : null;
-    }
-
-    dispatch(moveAccount(id, targetIdToMove));
-  }
-
   const onFloat = () => {
     setFloatingSidebarPref(!isFloating);
   };
 
   const onAddAccount = () => {
     dispatch(replaceModal('add-account'));
-  };
-
-  const onToggleClosedAccounts = () => {
-    setShowClosedAccountsPref(!showClosedAccounts);
   };
 
   const containerRef = useResizeObserver(rect => {
@@ -139,27 +118,22 @@ export function Sidebar() {
           )}
         </BudgetName>
 
-        <View style={{ overflow: 'auto' }}>
-          <Item title={t('Budget')} Icon={SvgWallet} to="/budget" />
-          <Item title={t('Reports')} Icon={SvgReports} to="/reports" />
+        <View
+          style={{
+            flexGrow: 1,
+            '@media screen and (max-height: 480px)': {
+              overflowY: 'auto',
+            },
+          }}
+        >
+          <PrimaryButtons />
 
-          <Item title={t('Schedules')} Icon={SvgCalendar} to="/schedules" />
+          <Accounts />
 
-          <Tools />
-
-          <View
-            style={{
-              height: 1,
-              backgroundColor: theme.sidebarItemBackgroundHover,
-              marginTop: 15,
-              flexShrink: 0,
-            }}
-          />
-
-          <Accounts
-            onAddAccount={onAddAccount}
-            onToggleClosedAccounts={onToggleClosedAccounts}
-            onReorder={onReorder}
+          <SecondaryButtons
+            buttons={[
+              { title: t('Add account'), Icon: SvgAdd, onClick: onAddAccount },
+            ]}
           />
         </View>
       </View>
