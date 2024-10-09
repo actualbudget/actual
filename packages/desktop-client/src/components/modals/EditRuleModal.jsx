@@ -37,9 +37,10 @@ import {
 } from 'loot-core/src/shared/util';
 
 import { useDateFormat } from '../../hooks/useDateFormat';
+import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { useSelected, SelectedProvider } from '../../hooks/useSelected';
 import { SvgDelete, SvgAdd, SvgSubtract } from '../../icons/v0';
-import { SvgInformationOutline } from '../../icons/v1';
+import { SvgAlignLeft, SvgCode, SvgInformationOutline } from '../../icons/v1';
 import { styles, theme } from '../../style';
 import { Button } from '../common/Button2';
 import { Menu } from '../common/Menu';
@@ -368,6 +369,11 @@ function ActionEditor({ action, editorStyle, onChange, onDelete, onAdd }) {
     options,
   } = action;
 
+  const templated = options?.template !== undefined;
+
+  // Even if the feature flag is disabled, we still want to be able to turn off templating
+  const isTemplatingEnabled = useFeatureFlag('actionTemplating') || templated;
+
   return (
     <Editor style={editorStyle} error={error}>
       {op === 'set' ? (
@@ -388,13 +394,37 @@ function ActionEditor({ action, editorStyle, onChange, onDelete, onAdd }) {
             <GenericInput
               key={inputKey}
               field={field}
-              type={type}
+              type={templated ? 'string' : type}
               op={op}
-              value={value}
+              value={options?.template ?? value}
               onChange={v => onChange('value', v)}
               numberFormatType="currency"
             />
           </View>
+          {/*Due to that these fields have id's as value it is not helpful to have templating here*/}
+          {isTemplatingEnabled &&
+            ['payee', 'category', 'account'].indexOf(field) === -1 && (
+              <Button
+                variant="bare"
+                style={{
+                  padding: 5,
+                }}
+                aria-label={
+                  templated ? 'Disable templating' : 'Enable templating'
+                }
+                onPress={() => onChange('template', !templated)}
+              >
+                {templated ? (
+                  <SvgCode
+                    style={{ width: 12, height: 12, color: 'inherit' }}
+                  />
+                ) : (
+                  <SvgAlignLeft
+                    style={{ width: 12, height: 12, color: 'inherit' }}
+                  />
+                )}
+              </Button>
+            )}
         </>
       ) : op === 'set-split-amount' ? (
         <>
@@ -821,18 +851,31 @@ export function EditRuleModal({ defaultRule, onSave: originalOnSave }) {
         id,
         actions: updateValue(actions, action, () => {
           const a = { ...action };
+
           if (field === 'method') {
             a.options = { ...a.options, method: value };
+          } else if (field === 'template') {
+            if (value) {
+              a.options = { ...a.options, template: a.value };
+            } else {
+              a.options = { ...a.options, template: undefined };
+              if (a.type !== 'string') a.value = null;
+            }
           } else {
             a[field] = value;
+            if (a.options?.template !== undefined) {
+              a.options.template = value;
+            }
 
             if (field === 'field') {
               a.type = FIELD_TYPES.get(a.field);
               a.value = null;
+              a.options = { ...a.options, template: undefined };
               return newInput(a);
             } else if (field === 'op') {
               a.value = null;
               a.inputKey = '' + Math.random();
+              a.options = { ...a.options, template: undefined };
               return newInput(a);
             }
           }
