@@ -5,13 +5,21 @@ import { View } from '../../common/View';
 
 import { CheckboxOption } from './CheckboxOption';
 
+type InOutOptionProps = {
+  inOutMode: boolean;
+  outValue: string;
+  disabled: boolean;
+  onToggle: () => void;
+  onChangeText: (newValue: string) => void;
+};
+
 export function InOutOption({
   inOutMode,
   outValue,
   disabled,
   onToggle,
   onChangeText,
-}) {
+}: InOutOptionProps) {
   return (
     <View style={{ flexDirection: 'row', gap: 10, height: 28 }}>
       <CheckboxOption
