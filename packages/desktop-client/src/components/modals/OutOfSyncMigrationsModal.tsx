@@ -37,9 +37,9 @@ export function OutOfSyncMigrationsModal() {
             <Text>
               <Paragraph style={{ fontSize: 16 }}>
                 It looks like you&apos;re using an outdated version of the
-                Actual. Your data has been updated, but your client hasn&apos;t.
-                To ensure the best experience, please update Actual to the
-                latest version.
+                Actual. Your budget data has been updated by another client, but
+                this client is still on the old verison. For the best
+                experience, please update Actual to the latest version.
               </Paragraph>
             </Text>
 
@@ -49,11 +49,12 @@ export function OutOfSyncMigrationsModal() {
               }}
             >
               <Trans>
-                If you can&apos;t update Actual at this time but need to use it
-                you can find the latest release at{' '}
+                If you can&apos;t update Actual at this time you can find the
+                latest release at{' '}
                 <Link variant="external" to="https://app.actualbudget.org">
                   app.actualbudget.org
                 </Link>
+                . You can use it until your client is updated.
               </Trans>
             </Paragraph>
 

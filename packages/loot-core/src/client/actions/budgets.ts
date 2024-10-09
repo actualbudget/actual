@@ -53,8 +53,7 @@ export function loadBudget(id: string, options = {}) {
     dispatch(setAppState({ loadingText: t('Loading...') }));
 
     // Loading a budget may fail
-    let { error } = await send('load-budget', { id, ...options });
-    error = 'out-of-sync-migrations';
+    const { error } = await send('load-budget', { id, ...options });
 
     if (error) {
       const message = getSyncError(error, id);
