@@ -1,3 +1,5 @@
+import { join } from 'path';
+
 import { test, expect } from '@playwright/test';
 
 import { ConfigurationPage } from './page-models/configuration-page';
@@ -9,7 +11,7 @@ test.describe('Accounts', () => {
   let configurationPage;
   let accountPage;
 
-  test.beforeAll(async ({ browser }) => {
+  test.beforeEach(async ({ browser }) => {
     page = await browser.newPage();
     navigation = new Navigation(page);
     configurationPage = new ConfigurationPage(page);
@@ -18,7 +20,7 @@ test.describe('Accounts', () => {
     await configurationPage.createTestFile();
   });
 
-  test.afterAll(async () => {
+  test.afterEach(async () => {
     await page.close();
   });
 
@@ -97,6 +99,42 @@ test.describe('Accounts', () => {
       await expect(transaction.category).toHaveText('Transfer');
       await expect(transaction.debit).toHaveText('34.56');
       await expect(transaction.account).toHaveText('Ally Savings');
+    });
+  });
+
+  test.describe('Import Transactions', () => {
+    test.beforeEach(async () => {
+      accountPage = await navigation.createAccount({
+        name: 'CSV import',
+        offBudget: false,
+        balance: 0,
+      });
+    });
+
+    async function importCsv(screenshot = false) {
+      const fileChooserPromise = page.waitForEvent('filechooser');
+      await accountPage.page.getByRole('button', { name: 'Import' }).click();
+
+      const fileChooser = await fileChooserPromise;
+      await fileChooser.setFiles(join(__dirname, 'data/test.csv'));
+
+      if (screenshot) await expect(page).toMatchThemeScreenshots();
+
+      const importButton = accountPage.page.getByRole('button', {
+        name: /Import \d+ transactions/,
+      });
+      await importButton.click();
+
+      await expect(importButton).not.toBeVisible();
+    }
+
+    test('imports transactions from a CSV file', async () => {
+      await importCsv(true);
+    });
+
+    test('import csv file twice', async () => {
+      await importCsv(false);
+      await importCsv(true);
     });
   });
 });
