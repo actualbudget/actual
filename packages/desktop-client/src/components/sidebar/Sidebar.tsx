@@ -13,7 +13,14 @@ import { useMetadataPref } from '../../hooks/useMetadataPref';
 import { useNavigate } from '../../hooks/useNavigate';
 import { useResizeObserver } from '../../hooks/useResizeObserver';
 import { SvgExpandArrow } from '../../icons/v0';
-import { SvgAdd } from '../../icons/v1';
+import {
+  SvgAdd,
+  SvgReports,
+  SvgStoreFront,
+  SvgTuning,
+  SvgWallet,
+} from '../../icons/v1';
+import { SvgCalendar } from '../../icons/v2';
 import { useResponsive } from '../../ResponsiveProvider';
 import { styles, theme } from '../../style';
 import { Button } from '../common/Button2';
@@ -71,6 +78,14 @@ export function Sidebar() {
   const containerRef = useResizeObserver(rect => {
     setSidebarWidth(rect.width);
   });
+
+  const primaryButtonConfigs = [
+    { title: t('Budget'), Icon: SvgWallet, to: '/budget' },
+    { title: t('Reports'), Icon: SvgReports, to: '/reports' },
+    { title: t('Schedules'), Icon: SvgCalendar, to: '/schedules' },
+    { title: t('Payees'), Icon: SvgStoreFront, to: '/payees', hidable: true },
+    { title: t('Rules'), Icon: SvgTuning, to: '/rules', hidable: true },
+  ];
 
   return (
     <Resizable
@@ -142,7 +157,7 @@ export function Sidebar() {
             },
           }}
         >
-          <PrimaryButtons />
+          <PrimaryButtons buttons={primaryButtonConfigs} />
 
           <Accounts />
 
