@@ -79,6 +79,14 @@ export function Sidebar() {
     setSidebarWidth(rect.width);
   });
 
+  const primaryButtonConfigs = [
+    { title: t('Budget'), Icon: SvgWallet, to: '/budget' },
+    { title: t('Reports'), Icon: SvgReports, to: '/reports' },
+    { title: t('Schedules'), Icon: SvgCalendar, to: '/schedules' },
+    { title: t('Payees'), Icon: SvgStoreFront, to: '/payees', hidable: true },
+    { title: t('Rules'), Icon: SvgTuning, to: '/rules', hidable: true },
+  ];
+
   return (
     <Resizable
       defaultSize={{
@@ -150,23 +158,7 @@ export function Sidebar() {
           }}
         >
           <PrimaryButtons
-            buttons={[
-              { title: t('Budget'), Icon: SvgWallet, to: '/budget' },
-              { title: t('Reports'), Icon: SvgReports, to: '/reports' },
-              { title: t('Schedules'), Icon: SvgCalendar, to: '/schedules' },
-              {
-                title: t('Payees'),
-                Icon: SvgStoreFront,
-                to: '/payees',
-                hidable: true,
-              },
-              {
-                title: t('Rules'),
-                Icon: SvgTuning,
-                to: '/rules',
-                hidable: true,
-              },
-            ]}
+            buttons={primaryButtonConfigs}
           />
 
           <Accounts />

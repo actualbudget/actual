@@ -57,6 +57,7 @@ export function PrimaryButtons({
           overflow: 'hidden',
           transition: 'height ' + collapseSpeed + 's ease-in-out',
         }}
+        aria-expanded={expanded}
       >
         <View
           ref={itemsRef}
@@ -67,6 +68,7 @@ export function PrimaryButtons({
         >
           {buttons.map(item => {
             const isActive = location.pathname.startsWith(item.to);
+            const shouldHide = item.hidable && !expanded && !isActive;
             return (
               <Item
                 key={item.title}
@@ -74,9 +76,7 @@ export function PrimaryButtons({
                 Icon={item.Icon}
                 to={item.to}
                 style={{
-                  ...(item.hidable &&
-                    !expanded &&
-                    !isActive && { display: 'none' }),
+                  ...(shouldHide && { display: 'none' }),
                 }}
               />
             );
