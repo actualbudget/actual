@@ -227,12 +227,14 @@ export const ManagePayees = ({
               onPress={() => setOrphanedOnly(prev => !prev)}
             >
               {orphanedOnly
-              ? t('Show all payees')
-              : t(`Show ${
-                orphanedPayees.length === 1
-                  ? '1 unused payee'
-                  : `${orphanedPayees.length} unused payees`
-                }`)}
+                ? t('Show all payees')
+                : t(
+                    `Show ${
+                      orphanedPayees.length === 1
+                        ? '1 unused payee'
+                        : `${orphanedPayees.length} unused payees`
+                    }`,
+                  )}
             </Button>
           )}
         </View>
