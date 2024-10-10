@@ -40,43 +40,49 @@ export const Toggle = ({
       <label
         data-toggle-container
         data-on={isOn}
-        className={`${css({
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          cursor: 'pointer',
-          width: '32px',
-          height: '16px',
-          borderRadius: '100px',
-          position: 'relative',
-          transition: 'background-color .2s',
-          background: isOn
-            ? theme.checkboxToggleBackgroundSelected
-            : theme.checkboxToggleBackground,
-        })}`}
+        className={String(
+          css({
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            cursor: 'pointer',
+            width: '32px',
+            height: '16px',
+            borderRadius: '100px',
+            position: 'relative',
+            transition: 'background-color .2s',
+            backgroundColor: isOn
+              ? theme.checkboxToggleBackgroundSelected
+              : theme.checkboxToggleBackground,
+          }),
+        )}
         htmlFor={id}
       >
         <span
           data-toggle
           data-on={isOn}
-          className={`${css(
-            {
-              content: ' ',
-              position: 'absolute',
-              top: '2px',
-              left: '2px',
-              width: '12px',
-              height: '12px',
-              borderRadius: '100px',
-              transition: '0.2s',
-              boxShadow: '0 0 2px 0 rgba(10, 10, 10, 0.29)',
-              background: isDisabled ? theme.checkboxToggleDisabled : '#fff',
-            },
-            isOn && {
-              left: 'calc(100% - 2px)',
-              transform: 'translateX(-100%)',
-            },
-          )}`}
+          className={String(
+            css(
+              {
+                content: ' ',
+                position: 'absolute',
+                top: '2px',
+                left: '2px',
+                width: '12px',
+                height: '12px',
+                borderRadius: '100px',
+                transition: '0.2s',
+                boxShadow: '0 0 2px 0 rgba(10, 10, 10, 0.29)',
+                backgroundColor: isDisabled
+                  ? theme.checkboxToggleDisabled
+                  : '#fff',
+              },
+              isOn && {
+                left: 'calc(100% - 2px)',
+                transform: 'translateX(-100%)',
+              },
+            ),
+          )}
         />
       </label>
     </View>

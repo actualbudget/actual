@@ -176,7 +176,7 @@ export const checkboxBackgroundSelected = colorPalette.blue500;
 export const checkboxBorderSelected = colorPalette.blue500;
 export const checkboxShadowSelected = colorPalette.blue300;
 export const checkboxToggleBackground = colorPalette.gray400;
-export const checkboxToggleBackgroundSelected = colorPalette.blue500;
+export const checkboxToggleBackgroundSelected = colorPalette.purple600;
 export const checkboxToggleDisabled = colorPalette.gray200;
 
 export const pillBackground = colorPalette.navy150;
