@@ -17,9 +17,7 @@ import { SecondaryItem } from './SecondaryItem';
 
 type PrimaryButtonItems = {
   title: string;
-  Icon:
-    | ComponentType<SVGProps<SVGElement>>
-    | ComponentType<SVGProps<SVGSVGElement>>;
+  Icon: ComponentType<SVGProps<SVGSVGElement>>;
   to: string;
   hidable?: boolean;
 };
