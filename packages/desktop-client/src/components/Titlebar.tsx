@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, type SetStateAction } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { Routes, Route, useLocation } from 'react-router-dom';
 
@@ -98,16 +98,22 @@ function PrivacyButton({ style }: PrivacyButtonProps) {
 
 type SyncButtonProps = {
   style?: CSSProperties;
+  syncState: string | null;
+  setSyncState: (
+    state: SetStateAction<null | 'offline' | 'local' | 'disabled' | 'error'>,
+  ) => void;
   isMobile?: boolean;
 };
-function SyncButton({ style, isMobile = false }: SyncButtonProps) {
+function SyncButton({
+  style,
+  syncState,
+  setSyncState,
+  isMobile = false,
+}: SyncButtonProps) {
   const [cloudFileId] = useMetadataPref('cloudFileId');
   const { sync } = useActions();
 
   const [syncing, setSyncing] = useState(false);
-  const [syncState, setSyncState] = useState<
-    null | 'offline' | 'local' | 'disabled' | 'error'
-  >(null);
 
   useEffect(() => {
     const unlisten = listen('sync-event', ({ type, subtype, syncDisabled }) => {
@@ -267,6 +273,9 @@ export function Titlebar({ style }: TitlebarProps) {
   const { isNarrowWidth } = useResponsive();
   const serverURL = useServerURL();
   const [floatingSidebar] = useGlobalPref('floatingSidebar');
+  const [syncState, setSyncState] = useState<
+    null | 'offline' | 'local' | 'disabled' | 'error'
+  >(null);
 
   return isNarrowWidth ? null : (
     <View
@@ -337,8 +346,14 @@ export function Titlebar({ style }: TitlebarProps) {
         <ThemeSelector style={{ marginLeft: 10 }} />
       )}
       <PrivacyButton style={{ marginLeft: 10 }} />
-      {serverURL ? <SyncButton style={{ marginLeft: 10 }} /> : null}
-      <LoggedInUser style={{ marginLeft: 10 }} />
+      {serverURL ? (
+        <SyncButton
+          syncState={syncState}
+          setSyncState={setSyncState}
+          style={{ marginLeft: 10 }}
+        />
+      ) : null}
+      <LoggedInUser syncState={syncState} style={{ marginLeft: 10 }} />
     </View>
   );
 }
