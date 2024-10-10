@@ -374,6 +374,7 @@ ipcMain.handle('open-external-url', (event, url) => {
   shell.openExternal(url);
 });
 
+// NOTE: We could just bundle it in the package, but it would be a large download - consider it though...
 ipcMain.handle(
   'download-actual-server',
   async (_event, payload: { releaseVersion: string }) => {
