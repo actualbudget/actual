@@ -393,10 +393,9 @@ ipcMain.handle(
         true,
         false,
       );
-      return { error: undefined };
     } catch (error) {
       console.error('Error retrieving actual-server:', error);
-      return { error };
+      throw error;
     }
   },
 );
