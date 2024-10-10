@@ -1,8 +1,6 @@
-import { type HTMLProps, type Ref } from 'react';
+import { type HTMLProps, type Ref, type CSSProperties } from 'react';
 
-import { css } from 'glamor';
-
-import { type CSSProperties } from '../../style';
+import { css, cx } from '@emotion/css';
 
 type BlockProps = HTMLProps<HTMLDivElement> & {
   innerRef?: Ref<HTMLDivElement>;
@@ -12,10 +10,6 @@ type BlockProps = HTMLProps<HTMLDivElement> & {
 export function Block(props: BlockProps) {
   const { className = '', style, innerRef, ...restProps } = props;
   return (
-    <div
-      {...restProps}
-      ref={innerRef}
-      className={`${className} ${css(style)}`}
-    />
+    <div {...restProps} ref={innerRef} className={cx(className, css(style))} />
   );
 }

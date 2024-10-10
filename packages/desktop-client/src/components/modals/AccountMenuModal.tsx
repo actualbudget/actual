@@ -1,4 +1,9 @@
-import React, { type ComponentProps, useRef, useState } from 'react';
+import React, {
+  type ComponentProps,
+  useRef,
+  useState,
+  type CSSProperties,
+} from 'react';
 
 import { type AccountEntity } from 'loot-core/types/models';
 
@@ -6,7 +11,7 @@ import { useAccount } from '../../hooks/useAccount';
 import { useNotes } from '../../hooks/useNotes';
 import { SvgClose, SvgDotsHorizontalTriple, SvgLockOpen } from '../../icons/v1';
 import { SvgNotesPaper } from '../../icons/v2';
-import { type CSSProperties, styles, theme } from '../../style';
+import { styles, theme } from '../../style';
 import { Button } from '../common/Button2';
 import { Menu } from '../common/Menu';
 import {

@@ -5,12 +5,12 @@ import React, {
   useEffect,
   type FocusEventHandler,
   type FocusEvent,
+  type CSSProperties,
 } from 'react';
 
 import { evalArithmetic } from 'loot-core/src/shared/arithmetic';
 
 import { useMergedRefs } from '../../hooks/useMergedRefs';
-import { type CSSProperties } from '../../style';
 import { Input } from '../common/Input';
 import { useFormat } from '../spreadsheet/useFormat';
 

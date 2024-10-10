@@ -1,8 +1,7 @@
-import React, { type ReactNode } from 'react';
+import React, { type ReactNode, type CSSProperties } from 'react';
 
 import { type GroupedEntity } from 'loot-core/src/types/models/reports';
 
-import { type CSSProperties } from '../../../../style';
 import { View } from '../../../common/View';
 
 import { type renderRowProps } from './ReportTable';

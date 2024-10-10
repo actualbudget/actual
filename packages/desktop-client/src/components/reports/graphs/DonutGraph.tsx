@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { useState } from 'react';
+import React, { useState, type CSSProperties } from 'react';
 
 import { PieChart, Pie, Cell, Sector, ResponsiveContainer } from 'recharts';
 
@@ -13,7 +13,7 @@ import { type RuleConditionEntity } from 'loot-core/types/models/rule';
 import { useAccounts } from '../../../hooks/useAccounts';
 import { useCategories } from '../../../hooks/useCategories';
 import { useNavigate } from '../../../hooks/useNavigate';
-import { theme, type CSSProperties } from '../../../style';
+import { theme } from '../../../style';
 import { PrivacyFilter } from '../../PrivacyFilter';
 import { Container } from '../Container';
 

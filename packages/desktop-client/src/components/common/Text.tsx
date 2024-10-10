@@ -3,11 +3,10 @@ import React, {
   type Ref,
   type ReactNode,
   forwardRef,
+  type CSSProperties,
 } from 'react';
 
-import { css } from 'glamor';
-
-import { type CSSProperties } from '../../style';
+import { css, cx } from '@emotion/css';
 
 type TextProps = HTMLProps<HTMLSpanElement> & {
   innerRef?: Ref<HTMLSpanElement>;
@@ -22,7 +21,7 @@ export const Text = forwardRef<HTMLSpanElement, TextProps>((props, ref) => {
     <span
       {...restProps}
       ref={innerRef ?? ref}
-      className={`${className} ${css(style)}`}
+      className={cx(className, css(style))}
     />
   );
 });

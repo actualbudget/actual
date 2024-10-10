@@ -6,11 +6,10 @@ import {
   type Ref,
   type MutableRefObject,
   type UIEvent,
+  type CSSProperties,
 } from 'react';
 
 import memoizeOne from 'memoize-one';
-
-import { type CSSProperties } from '../style';
 
 import { View } from './common/View';
 

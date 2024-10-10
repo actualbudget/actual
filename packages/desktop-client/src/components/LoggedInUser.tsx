@@ -1,12 +1,12 @@
 // @ts-strict-ignore
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, type CSSProperties } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 
 import { type State } from 'loot-core/src/client/state-types';
 
 import { useActions } from '../hooks/useActions';
-import { theme, styles, type CSSProperties } from '../style';
+import { theme, styles } from '../style';
 
 import { Button } from './common/Button2';
 import { Menu } from './common/Menu';

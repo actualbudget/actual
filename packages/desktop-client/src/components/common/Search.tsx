@@ -72,7 +72,7 @@ export function Search({
           transition: 'color .25s',
         },
         ':focus': isInModal
-          ? null
+          ? {}
           : {
               '::placeholder': {
                 color: theme.formInputTextPlaceholderSelected,

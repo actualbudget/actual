@@ -6,9 +6,10 @@ import React, {
   useEffect,
   useRef,
   useState,
+  type CSSProperties,
 } from 'react';
 
-import { css } from 'glamor';
+import { css } from '@emotion/css';
 
 import {
   amountToCurrency,
@@ -18,7 +19,7 @@ import {
 
 import { useMergedRefs } from '../../../hooks/useMergedRefs';
 import { useSyncedPref } from '../../../hooks/useSyncedPref';
-import { type CSSProperties, theme } from '../../../style';
+import { theme } from '../../../style';
 import { makeAmountFullStyle } from '../../budget/util';
 import { Button } from '../../common/Button2';
 import { Text } from '../../common/Text';
@@ -252,15 +253,13 @@ export const FocusableAmountInput = memo(function FocusableAmountInput({
           // Defines how far touch can start away from the button
           // hitSlop={{ top: 5, bottom: 5, left: 5, right: 5 }}
           {...buttonProps}
-          className={String(
-            css({
-              ...(buttonProps && buttonProps.style),
-              ...(focused && { display: 'none' }),
-              '&[data-pressed]': {
-                backgroundColor: 'transparent',
-              },
-            }),
-          )}
+          className={css({
+            ...(buttonProps && buttonProps.style),
+            ...(focused && { display: 'none' }),
+            '&[data-pressed]': {
+              backgroundColor: 'transparent',
+            },
+          })}
           variant="bare"
         >
           <View

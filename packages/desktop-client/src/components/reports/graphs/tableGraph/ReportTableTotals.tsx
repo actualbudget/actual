@@ -3,6 +3,7 @@ import React, {
   useLayoutEffect,
   useState,
   type RefObject,
+  type CSSProperties,
 } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -13,7 +14,6 @@ import {
 
 import { theme } from '../../../../style';
 import { styles } from '../../../../style/styles';
-import { type CSSProperties } from '../../../../style/types';
 import { View } from '../../../common/View';
 
 import { type renderTotalsProps } from './ReportTable';

@@ -1,7 +1,11 @@
 // @ts-strict-ignore
-import React, { type ComponentPropsWithoutRef, type ReactNode } from 'react';
+import React, {
+  type ComponentPropsWithoutRef,
+  type ReactNode,
+  type CSSProperties,
+} from 'react';
 
-import { type CSSProperties, styles } from '../../style';
+import { styles } from '../../style';
 import { Text } from '../common/Text';
 import { PrivacyFilter } from '../PrivacyFilter';
 

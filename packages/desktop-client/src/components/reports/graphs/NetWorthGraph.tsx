@@ -1,8 +1,8 @@
 // @ts-strict-ignore
-import React from 'react';
+import React, { type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { css } from 'glamor';
+import { css } from '@emotion/css';
 import {
   AreaChart,
   Area,
@@ -16,7 +16,7 @@ import {
 import { amountToCurrencyNoDecimal } from 'loot-core/shared/util';
 
 import { usePrivacyMode } from '../../../hooks/usePrivacyMode';
-import { theme, type CSSProperties } from '../../../style';
+import { theme } from '../../../style';
 import { AlignedText } from '../../common/AlignedText';
 import { Container } from '../Container';
 import { numberFormatterTooltip } from '../numberFormatter';
@@ -94,7 +94,7 @@ export function NetWorthGraph({
     if (active && payload && payload.length) {
       return (
         <div
-          className={`${css(
+          className={css([
             {
               zIndex: 1000,
               pointerEvents: 'none',
@@ -105,7 +105,7 @@ export function NetWorthGraph({
               padding: 10,
             },
             style,
-          )}`}
+          ])}
         >
           <div>
             <div style={{ marginBottom: 10 }}>

@@ -1,7 +1,11 @@
 // @ts-strict-ignore
-import React, { type ReactNode, type UIEvent, useRef } from 'react';
+import React, {
+  type ReactNode,
+  type UIEvent,
+  useRef,
+  type CSSProperties,
+} from 'react';
 
-import { type CSSProperties } from '../../style';
 import { View } from '../common/View';
 
 type SimpleTableProps = {
