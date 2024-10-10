@@ -33,8 +33,10 @@ type SidebarGroupProps = {
   onSave?: (group: object) => Promise<void>;
   onDelete?: (id: string) => Promise<void>;
   onShowNewCategory?: (groupId: string) => void;
+  onShowNewGroup?: (parent?: string) => void;
   onHideNewGroup?: () => void;
   onToggleCollapse?: (id: string) => void;
+  depth?: number;
 };
 
 export function SidebarGroup({
@@ -48,8 +50,10 @@ export function SidebarGroup({
   onSave,
   onDelete,
   onShowNewCategory,
+  onShowNewGroup,
   onHideNewGroup,
   onToggleCollapse,
+  depth,
 }: SidebarGroupProps) {
   const { t } = useTranslation();
 
@@ -64,6 +68,7 @@ export function SidebarGroup({
         alignItems: 'center',
         userSelect: 'none',
         WebkitUserSelect: 'none',
+        paddingLeft: (depth ?? 0) * 13,
       }}
       onClick={() => {
         onToggleCollapse(group.id);
@@ -118,6 +123,8 @@ export function SidebarGroup({
                     onEdit(group.id);
                   } else if (type === 'add-category') {
                     onShowNewCategory(group.id);
+                  } else if (type === 'add-group') {
+                    onShowNewGroup(group.id);
                   } else if (type === 'delete') {
                     onDelete(group.id);
                   } else if (type === 'toggle-visibility') {
@@ -127,6 +134,7 @@ export function SidebarGroup({
                 }}
                 items={[
                   { name: 'add-category', text: t('Add category') },
+                  { name: 'add-group', text: t('Add group') },
                   { name: 'rename', text: t('Rename') },
                   !group.is_income && {
                     name: 'toggle-visibility',
@@ -190,10 +198,10 @@ export function SidebarGroup({
             if (value === '') {
               onHideNewGroup();
             } else if (value !== '') {
-              onSave({ id: group.id, name: value });
+              onSave({ ...group, id: group.id, name: value });
             }
           } else {
-            onSave({ id: group.id, name: value });
+            onSave({ ...group, id: group.id, name: value });
           }
         }}
         onBlur={() => onEdit(null)}

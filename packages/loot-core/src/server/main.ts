@@ -367,11 +367,13 @@ handlers['get-category-groups'] = async function () {
 handlers['category-group-create'] = mutator(async function ({
   name,
   isIncome,
+  parentId,
 }) {
   return withUndo(async () => {
     return db.insertCategoryGroup({
       name,
-      is_income: isIncome ? 1 : 0,
+      is_income: isIncome ?? false,
+      parent_id: parentId ?? null,
     });
   });
 });

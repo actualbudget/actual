@@ -37,6 +37,7 @@ import {
 import { sendMessages, batchMessages } from '../sync';
 
 import { shoveSortOrders, SORT_INCREMENT } from './sort';
+import { WithRequired } from 'loot-core/types/util';
 
 export { toDateRepr, fromDateRepr } from '../models';
 
@@ -313,15 +314,32 @@ export async function getCategoriesGrouped(
     ? await all(categoryQuery, [...ids])
     : await all(categoryQuery);
 
-  return groups.map(group => {
+  const mappedGroups = groups.map(group => {
     return {
       ...group,
       categories: categories.filter(c => c.cat_group === group.id),
+      children: [],
     };
   });
+
+  for (const group of mappedGroups) {
+    if (group.parent_id) {
+      const parent = mappedGroups.find(g => g.id === group.parent_id);
+      if (parent) {
+        parent.children.push(group);
+      }
+    }
+  }
+
+  return mappedGroups.filter(g => !g.parent_id);
 }
 
-export async function insertCategoryGroup(group) {
+export async function insertCategoryGroup(group: {
+  id?: string;
+  name: string;
+  is_income?: boolean;
+  parent_id?: string;
+}) {
   // Don't allow duplicate group
   const existingGroup = await first(
     `SELECT id, name, hidden FROM category_groups WHERE UPPER(name) = ? and tombstone = 0 LIMIT 1`,
@@ -338,16 +356,16 @@ export async function insertCategoryGroup(group) {
   `);
   const sort_order = (lastGroup ? lastGroup.sort_order : 0) + SORT_INCREMENT;
 
-  group = {
+  const validated = {
     ...categoryGroupModel.validate(group),
     sort_order,
   };
-  return insertWithUUID('category_groups', group);
+  return insertWithUUID('category_groups', validated);
 }
 
-export function updateCategoryGroup(group) {
-  group = categoryGroupModel.validate(group, { update: true });
-  return update('category_groups', group);
+export function updateCategoryGroup(group: Partial<CategoryGroupEntity>) {
+  const validated = categoryGroupModel.validate(group, { update: true });
+  return update('category_groups', validated);
 }
 
 export async function moveCategoryGroup(id, targetId) {
@@ -363,6 +381,16 @@ export async function moveCategoryGroup(id, targetId) {
 }
 
 export async function deleteCategoryGroup(group, transferId?: string) {
+  const children = await all(
+    'SELECT * FROM category_groups WHERE parent_id = ?',
+    [group.id],
+  );
+
+  // Delete all the children
+  await Promise.all(
+    children.map(child => deleteCategoryGroup(child, transferId)),
+  );
+
   const categories = await all('SELECT * FROM categories WHERE cat_group = ?', [
     group.id,
   ]);

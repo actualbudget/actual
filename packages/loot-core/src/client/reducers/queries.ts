@@ -111,11 +111,17 @@ export const getPayeesById = memoizeOne((payees: PayeeEntity[]) =>
 );
 export const getCategoriesById = memoizeOne(categoryGroups => {
   const res = {};
-  categoryGroups.forEach(group => {
-    group.categories.forEach(cat => {
-      res[cat.id] = cat;
+  function addGroups(groups) {
+    groups.forEach(group => {
+      group.categories.forEach(cat => {
+        res[cat.id] = cat;
+      });
+      if (group.children) {
+        addGroups(group.children);
+      }
     });
-  });
+  }
+  addGroups(categoryGroups);
   return res;
 });
 

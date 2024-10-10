@@ -208,9 +208,9 @@ export function moveCategoryGroup(id, targetId) {
   };
 }
 
-export function createGroup(name) {
+export function createGroup(name: string, parentId?: string) {
   return async (dispatch: Dispatch) => {
-    const id = await send('category-group-create', { name });
+    const id = await send('category-group-create', { name, parentId });
     dispatch(getCategories());
     return id;
   };
