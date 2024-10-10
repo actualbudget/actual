@@ -969,9 +969,16 @@ class AccountInternal extends PureComponent<
       transactions: [...reconciliationTransactions, ...this.state.transactions],
     });
 
+    // run rules on the reconciliation transaction
+    const ruledTransactions = await Promise.all(
+      reconciliationTransactions.map(transaction =>
+        send('rules-run', { transaction }),
+      ),
+    );
+
     // sync the reconciliation transaction
     await send('transactions-batch-update', {
-      added: reconciliationTransactions,
+      added: ruledTransactions,
     });
     await this.refetchTransactions();
   };
