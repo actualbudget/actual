@@ -64,7 +64,9 @@ export const FormField = ({ style, children }: FormFieldProps) => {
 
 // Custom inputs
 
-type CheckboxProps = ComponentProps<'input'>;
+type CheckboxProps = ComponentProps<'input'> & {
+  style?: CSSProperties;
+};
 
 export const Checkbox = (props: CheckboxProps) => {
   return (

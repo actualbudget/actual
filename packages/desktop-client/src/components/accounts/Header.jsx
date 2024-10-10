@@ -287,38 +287,37 @@ export function AccountHeader({
           align="center"
           style={{ marginTop: 12 }}
         >
-          {((account && !account.closed) || canSync) && (
+          {canSync && (
             <Button
               variant="bare"
-              onPress={canSync ? onSync : onImport}
-              isDisabled={canSync && isServerOffline}
+              onPress={onSync}
+              isDisabled={isServerOffline}
             >
-              {canSync ? (
-                <>
-                  <AnimatedRefresh
-                    width={13}
-                    height={13}
-                    animating={
-                      account
-                        ? accountsSyncing.includes(account.id)
-                        : accountsSyncing.length > 0
-                    }
-                    style={{ marginRight: 4 }}
-                  />{' '}
-                  {isServerOffline ? t('Bank Sync Offline') : t('Bank Sync')}
-                </>
-              ) : (
-                <>
-                  <SvgDownloadThickBottom
-                    width={13}
-                    height={13}
-                    style={{ marginRight: 4 }}
-                  />{' '}
-                  <Trans>Import</Trans>
-                </>
-              )}
+              <AnimatedRefresh
+                width={13}
+                height={13}
+                animating={
+                  account
+                    ? accountsSyncing.includes(account.id)
+                    : accountsSyncing.length > 0
+                }
+                style={{ marginRight: 4 }}
+              />{' '}
+              {isServerOffline ? t('Bank Sync Offline') : t('Bank Sync')}
             </Button>
           )}
+
+          {account && !account.closed && (
+            <Button variant="bare" onPress={onImport}>
+              <SvgDownloadThickBottom
+                width={13}
+                height={13}
+                style={{ marginRight: 4 }}
+              />{' '}
+              <Trans>Import</Trans>
+            </Button>
+          )}
+
           {!showEmptyMessage && (
             <Button variant="bare" onPress={onAddTransaction}>
               <SvgAdd width={10} height={10} style={{ marginRight: 3 }} />
