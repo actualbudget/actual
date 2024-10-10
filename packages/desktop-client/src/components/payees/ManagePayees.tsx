@@ -8,6 +8,8 @@ import {
 
 import memoizeOne from 'memoize-one';
 
+import { useTranslation } from 'react-i18next';
+
 import { getNormalisedString } from 'loot-core/src/shared/normalisation';
 import { groupById } from 'loot-core/src/shared/util';
 import { type PayeeEntity } from 'loot-core/types/models';
@@ -92,6 +94,7 @@ export const ManagePayees = ({
   const table = useRef(null);
   const triggerRef = useRef(null);
   const [orphanedOnly, setOrphanedOnly] = useState(false);
+  const { t } = useTranslation();
 
   const filteredPayees = useMemo(() => {
     let filtered = payees;
@@ -188,10 +191,10 @@ export const ManagePayees = ({
             onPress={() => setMenuOpen(true)}
           >
             {buttonsDisabled
-              ? 'No payees selected'
+              ? t('No payees selected')
               : selected.items.size +
                 ' ' +
-                plural(selected.items.size, 'payee', 'payees')}
+                t(plural(selected.items.size, 'payee', 'payees'))}
             <SvgExpandArrow width={8} height={8} style={{ marginLeft: 5 }} />
           </Button>
 
@@ -221,24 +224,21 @@ export const ManagePayees = ({
             <Button
               variant="bare"
               style={{ marginRight: 10 }}
-              onPress={() => {
-                setOrphanedOnly(!orphanedOnly);
-                applyFilter(filter);
-              }}
+              onPress={() => setOrphanedOnly(prev => !prev)}
             >
               {orphanedOnly
-                ? 'Show all payees'
-                : `Show ${
-                    orphanedPayees.length === 1
-                      ? '1 unused payee'
-                      : `${orphanedPayees.length} unused payees`
-                  }`}
+              ? t('Show all payees')
+              : t(`Show ${
+                orphanedPayees.length === 1
+                  ? '1 unused payee'
+                  : `${orphanedPayees.length} unused payees`
+                }`)}
             </Button>
           )}
         </View>
         <View style={{ flex: 1 }} />
         <Search
-          placeholder="Filter payees..."
+          placeholder={t('Filter payees...')}
           value={filter}
           onChange={applyFilter}
         />
