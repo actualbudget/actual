@@ -1,8 +1,6 @@
 import React, { useState, useRef, Fragment } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
-import { Trans } from 'react-i18next';
-
-import { t } from 'i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { useLocalPref } from '../../hooks/useLocalPref';
 import { useSplitsExpanded } from '../../hooks/useSplitsExpanded';
@@ -92,6 +90,7 @@ export function AccountHeader({
   onMakeAsSplitTransaction,
   onMakeAsNonSplitTransactions,
 }) {
+  const { t } = useTranslation();
   const [menuOpen, setMenuOpen] = useState(false);
   const searchInput = useRef(null);
   const triggerRef = useRef(null);
@@ -421,6 +420,8 @@ function AccountNameField({
   onSaveName,
   onExposeName,
 }) {
+  const { t } = useTranslation();
+
   if (editingName) {
     return (
       <Fragment>
@@ -527,6 +528,7 @@ function AccountMenu({
   onReconcile,
   onMenuSelect,
 }) {
+  const { t } = useTranslation();
   const [tooltip, setTooltip] = useState('default');
   const syncServerStatus = useSyncServerStatus();
 

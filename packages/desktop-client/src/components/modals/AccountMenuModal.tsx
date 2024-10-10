@@ -1,6 +1,5 @@
-import React, { type ComponentProps, Fragment, useRef, useState } from 'react';
-
-import { t } from 'i18next';
+import { type ComponentProps, Fragment, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { type AccountEntity } from 'loot-core/types/models';
 
@@ -40,6 +39,7 @@ export function AccountMenuModal({
   onEditNotes,
   onClose,
 }: AccountMenuModalProps) {
+  const { t } = useTranslation();
   const account = useAccount(accountId);
   const accounts = useAccounts();
   const originalNotes = useNotes(`account-${accountId}`);
