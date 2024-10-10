@@ -157,9 +157,7 @@ export function Sidebar() {
             },
           }}
         >
-          <PrimaryButtons
-            buttons={primaryButtonConfigs}
-          />
+          <PrimaryButtons buttons={primaryButtonConfigs} />
 
           <Accounts />
 
