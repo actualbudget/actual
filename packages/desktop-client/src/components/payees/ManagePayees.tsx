@@ -5,7 +5,6 @@ import {
   useCallback,
   type ComponentProps,
 } from 'react';
-
 import { useTranslation } from 'react-i18next';
 
 import memoizeOne from 'memoize-one';
