@@ -1,4 +1,5 @@
-import React, { useMemo, useState } from 'react';
+import React, { type FormEvent, useCallback, useMemo, useState } from 'react';
+import { Form } from 'react-aria-components';
 import { Trans, useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 
@@ -12,7 +13,6 @@ import {
   removeCategoriesFromGroups,
 } from '../budget/util';
 import { Button } from '../common/Button2';
-import { InitialFocus } from '../common/InitialFocus';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { View } from '../common/View';
 import { FieldLabel, TapField } from '../mobile/MobileForms';
@@ -57,7 +57,7 @@ export function TransferModal({
   const [toCategoryId, setToCategoryId] = useState<string | null>(null);
   const dispatch = useDispatch();
 
-  const openCategoryModal = () => {
+  const openCategoryModal = useCallback(() => {
     dispatch(
       pushModal('category-autocomplete', {
         categoryGroups,
@@ -68,13 +68,24 @@ export function TransferModal({
         },
       }),
     );
-  };
+  }, [categoryGroups, month, dispatch]);
 
-  const _onSubmit = (newAmount: number, categoryId: string | null) => {
-    if (newAmount && categoryId) {
-      onSubmit?.(newAmount, categoryId);
-    }
-  };
+  const _onSubmit = useCallback(
+    (e: FormEvent<HTMLFormElement>, { close }: { close: () => void }) => {
+      e.preventDefault();
+
+      if (!toCategoryId) {
+        openCategoryModal();
+        return;
+      }
+
+      if (amount && toCategoryId) {
+        onSubmit?.(amount, toCategoryId);
+      }
+      close();
+    },
+    [toCategoryId, amount, openCategoryModal, onSubmit],
+  );
 
   const toCategory = categories.find(c => c.id === toCategoryId);
 
@@ -86,10 +97,10 @@ export function TransferModal({
             title={title}
             rightContent={<ModalCloseButton onPress={close} />}
           />
-          <View>
+          <Form onSubmit={e => _onSubmit(e, { close })}>
             <View>
-              <FieldLabel title={t('Transfer this amount:')} />
-              <InitialFocus>
+              <View>
+                <FieldLabel title={t('Transfer this amount:')} />
                 <AmountInput
                   value={initialAmount}
                   autoDecimals={true}
@@ -101,45 +112,39 @@ export function TransferModal({
                     height: styles.mobileMinHeight,
                   }}
                   onUpdate={setAmount}
-                  onEnter={() => {
-                    if (!toCategoryId) {
-                      openCategoryModal();
-                    }
-                  }}
+                  autoFocus
+                  autoSelect
                 />
-              </InitialFocus>
-            </View>
+              </View>
 
-            <FieldLabel title="To:" />
-            <TapField
-              tabIndex={0}
-              value={toCategory?.name}
-              onClick={openCategoryModal}
-            />
+              <FieldLabel title="To:" />
+              <TapField
+                tabIndex={0}
+                value={toCategory?.name}
+                onClick={openCategoryModal}
+              />
 
-            <View
-              style={{
-                justifyContent: 'center',
-                alignItems: 'center',
-                paddingTop: 10,
-              }}
-            >
-              <Button
-                variant="primary"
+              <View
                 style={{
-                  height: styles.mobileMinHeight,
-                  marginLeft: styles.mobileEditingPadding,
-                  marginRight: styles.mobileEditingPadding,
-                }}
-                onPress={() => {
-                  _onSubmit(amount, toCategoryId);
-                  close();
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  paddingTop: 10,
                 }}
               >
-                <Trans>Transfer</Trans>
-              </Button>
+                <Button
+                  variant="primary"
+                  type="submit"
+                  style={{
+                    height: styles.mobileMinHeight,
+                    marginLeft: styles.mobileEditingPadding,
+                    marginRight: styles.mobileEditingPadding,
+                  }}
+                >
+                  <Trans>Transfer</Trans>
+                </Button>
+              </View>
             </View>
-          </View>
+          </Form>
         </>
       )}
     </Modal>

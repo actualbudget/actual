@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { type FormEvent, useCallback } from 'react';
+import { Form } from 'react-aria-components';
 
 import { styles } from '../../style';
 import { Button } from '../common/Button2';
-import { InitialFocus } from '../common/InitialFocus';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { Paragraph } from '../common/Paragraph';
 import { View } from '../common/View';
@@ -24,6 +24,15 @@ export function ConfirmTransactionDeleteModal({
       }
     : {};
 
+  const onSubmit = useCallback(
+    (e: FormEvent<HTMLFormElement>, { close }: { close: () => void }) => {
+      e.preventDefault();
+      onConfirm();
+      close();
+    },
+    [onConfirm],
+  );
+
   return (
     <Modal name="confirm-transaction-delete">
       {({ state: { close } }) => (
@@ -32,37 +41,35 @@ export function ConfirmTransactionDeleteModal({
             title="Confirm Delete"
             rightContent={<ModalCloseButton onPress={close} />}
           />
-          <View style={{ lineHeight: 1.5 }}>
-            <Paragraph>{message}</Paragraph>
-            <View
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'flex-end',
-              }}
-            >
-              <Button
+          <Form onSubmit={e => onSubmit(e, { close })}>
+            <View style={{ lineHeight: 1.5 }}>
+              <Paragraph>{message}</Paragraph>
+              <View
                 style={{
-                  marginRight: 10,
-                  ...narrowButtonStyle,
+                  flexDirection: 'row',
+                  justifyContent: 'flex-end',
                 }}
-                onPress={close}
               >
-                Cancel
-              </Button>
-              <InitialFocus>
+                <Button
+                  style={{
+                    marginRight: 10,
+                    ...narrowButtonStyle,
+                  }}
+                  onPress={close}
+                >
+                  Cancel
+                </Button>
                 <Button
                   variant="primary"
+                  type="submit"
                   style={narrowButtonStyle}
-                  onPress={() => {
-                    onConfirm();
-                    close();
-                  }}
+                  autoFocus
                 >
                   Delete
                 </Button>
-              </InitialFocus>
+              </View>
             </View>
-          </View>
+          </Form>
         </>
       )}
     </Modal>

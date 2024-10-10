@@ -1,11 +1,11 @@
 // @ts-strict-ignore
-import React, { useState } from 'react';
+import React, { type FormEvent, useCallback, useState } from 'react';
+import { Form } from 'react-aria-components';
 
 import { send } from 'loot-core/src/platform/client/fetch';
 
 import { Error } from '../alerts';
 import { ButtonWithLoading } from '../common/Button2';
-import { InitialFocus } from '../common/InitialFocus';
 import { Input } from '../common/Input';
 import { Link } from '../common/Link';
 import {
@@ -30,29 +30,34 @@ export const GoCardlessInitialiseModal = ({
   const [isValid, setIsValid] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
 
-  const onSubmit = async (close: () => void) => {
-    if (!secretId || !secretKey) {
-      setIsValid(false);
-      return;
-    }
+  const onSubmit = useCallback(
+    async (e: FormEvent<HTMLFormElement>, { close }: { close: () => void }) => {
+      e.preventDefault();
 
-    setIsLoading(true);
+      if (!secretId || !secretKey) {
+        setIsValid(false);
+        return;
+      }
 
-    await Promise.all([
-      send('secret-set', {
-        name: 'gocardless_secretId',
-        value: secretId,
-      }),
-      send('secret-set', {
-        name: 'gocardless_secretKey',
-        value: secretKey,
-      }),
-    ]);
+      setIsLoading(true);
 
-    onSuccess();
-    setIsLoading(false);
-    close();
-  };
+      await Promise.all([
+        send('secret-set', {
+          name: 'gocardless_secretId',
+          value: secretId,
+        }),
+        send('secret-set', {
+          name: 'gocardless_secretKey',
+          value: secretKey,
+        }),
+      ]);
+
+      onSuccess();
+      setIsLoading(false);
+      close();
+    },
+    [onSuccess, secretId, secretKey],
+  );
 
   return (
     <Modal name="gocardless-init" containerProps={{ style: { width: '30vw' } }}>
@@ -62,24 +67,24 @@ export const GoCardlessInitialiseModal = ({
             title="Set-up GoCardless"
             rightContent={<ModalCloseButton onPress={close} />}
           />
-          <View style={{ display: 'flex', gap: 10 }}>
-            <Text>
-              In order to enable bank-sync via GoCardless (only for EU banks)
-              you will need to create access credentials. This can be done by
-              creating an account with{' '}
-              <Link
-                variant="external"
-                to="https://actualbudget.org/docs/advanced/bank-sync/"
-                linkColor="purple"
-              >
-                GoCardless
-              </Link>
-              .
-            </Text>
+          <Form onSubmit={e => onSubmit(e, { close })}>
+            <View style={{ display: 'flex', gap: 10 }}>
+              <Text>
+                In order to enable bank-sync via GoCardless (only for EU banks)
+                you will need to create access credentials. This can be done by
+                creating an account with{' '}
+                <Link
+                  variant="external"
+                  to="https://actualbudget.org/docs/advanced/bank-sync/"
+                  linkColor="purple"
+                >
+                  GoCardless
+                </Link>
+                .
+              </Text>
 
-            <FormField>
-              <FormLabel title="Secret ID:" htmlFor="secret-id-field" />
-              <InitialFocus>
+              <FormField>
+                <FormLabel title="Secret ID:" htmlFor="secret-id-field" />
                 <Input
                   id="secret-id-field"
                   type="password"
@@ -88,41 +93,41 @@ export const GoCardlessInitialiseModal = ({
                     setSecretId(value);
                     setIsValid(true);
                   }}
+                  autoFocus
+                  autoSelect
                 />
-              </InitialFocus>
-            </FormField>
+              </FormField>
 
-            <FormField>
-              <FormLabel title="Secret Key:" htmlFor="secret-key-field" />
-              <Input
-                id="secret-key-field"
-                type="password"
-                value={secretKey}
-                onChangeValue={value => {
-                  setSecretKey(value);
-                  setIsValid(true);
-                }}
-              />
-            </FormField>
+              <FormField>
+                <FormLabel title="Secret Key:" htmlFor="secret-key-field" />
+                <Input
+                  id="secret-key-field"
+                  type="password"
+                  value={secretKey}
+                  onChangeValue={value => {
+                    setSecretKey(value);
+                    setIsValid(true);
+                  }}
+                />
+              </FormField>
 
-            {!isValid && (
-              <Error>
-                It is required to provide both the secret id and secret key.
-              </Error>
-            )}
-          </View>
+              {!isValid && (
+                <Error>
+                  It is required to provide both the secret id and secret key.
+                </Error>
+              )}
+            </View>
 
-          <ModalButtons>
-            <ButtonWithLoading
-              variant="primary"
-              isLoading={isLoading}
-              onPress={() => {
-                onSubmit(close);
-              }}
-            >
-              Save and continue
-            </ButtonWithLoading>
-          </ModalButtons>
+            <ModalButtons>
+              <ButtonWithLoading
+                variant="primary"
+                type="submit"
+                isLoading={isLoading}
+              >
+                Save and continue
+              </ButtonWithLoading>
+            </ModalButtons>
+          </Form>
         </>
       )}
     </Modal>

@@ -10,6 +10,7 @@ import {
   type SheetFields,
   type SheetNames,
   type Binding,
+  type SheetResult,
 } from '.';
 
 export function useSheetValue<
@@ -17,7 +18,7 @@ export function useSheetValue<
   FieldName extends SheetFields<SheetName>,
 >(
   binding: Binding<SheetName, FieldName>,
-  onChange?: (result) => void,
+  onChange?: (result: SheetResult<SheetName, FieldName>) => void,
 ): Spreadsheets[SheetName][FieldName] {
   const { sheetName, fullSheetName } = useSheetName(binding);
 

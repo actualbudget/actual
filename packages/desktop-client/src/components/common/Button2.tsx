@@ -177,7 +177,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         className={
           typeof className === 'function'
             ? renderProps =>
-                `${defaultButtonClassName} ${className(renderProps)}`
+                `${defaultButtonClassName} ${className(renderProps) || ''}`
             : `${defaultButtonClassName} ${className || ''}`
         }
       >

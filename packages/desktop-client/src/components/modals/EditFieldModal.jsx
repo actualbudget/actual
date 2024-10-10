@@ -45,7 +45,7 @@ export function EditFieldModal({ name, onSubmit, onClose }) {
   const { isNarrowWidth } = useResponsive();
   let label, editor, minWidth;
   const inputStyle = {
-    ':focus': { boxShadow: 0 },
+    '&[data-focused]': { boxShadow: 0 },
     ...(isNarrowWidth && itemStyle),
   };
 
@@ -60,7 +60,7 @@ export function EditFieldModal({ name, onSubmit, onClose }) {
         <DateSelect
           value={formatDate(parseISO(today), dateFormat)}
           dateFormat={dateFormat}
-          focused={true}
+          autoFocus={true}
           embedded={true}
           onUpdate={() => {}}
           onSelect={date => {
@@ -186,7 +186,6 @@ export function EditFieldModal({ name, onSubmit, onClose }) {
           <Input
             id="noteInput"
             autoFocus
-            focused={true}
             onEnter={e => {
               onSelectNote(e.target.value, noteAmend);
               close();
@@ -201,7 +200,7 @@ export function EditFieldModal({ name, onSubmit, onClose }) {
       label = 'Amount';
       editor = ({ close }) => (
         <Input
-          focused={true}
+          autoFocus
           onEnter={e => {
             onSelect(e.target.value);
             close();

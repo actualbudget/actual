@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { type FormEvent, useCallback, useRef, useState } from 'react';
+import { Form } from 'react-aria-components';
 import { Trans } from 'react-i18next';
 
 import * as queries from 'loot-core/src/client/queries';
@@ -9,7 +10,6 @@ import { type AccountEntity } from 'loot-core/types/models';
 import { SvgCheckCircle1 } from '../../icons/v2';
 import { styles, theme } from '../../style';
 import { Button } from '../common/Button2';
-import { InitialFocus } from '../common/InitialFocus';
 import { Input } from '../common/Input';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
@@ -124,43 +124,49 @@ export function ReconcileMenu({
   });
   const format = useFormat();
   const [inputValue, setInputValue] = useState<string | null>(null);
-  const [inputFocused, setInputFocused] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  function onSubmit() {
-    if (inputValue === '') {
-      setInputFocused(true);
-      return;
-    }
+  const onSubmit = useCallback(
+    (e: FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
 
-    const amount =
-      inputValue != null ? currencyToInteger(inputValue) : clearedBalance;
+      if (inputValue === '') {
+        inputRef.current?.focus();
+        return;
+      }
 
-    onReconcile(amount);
-    onClose();
-  }
+      const amount =
+        inputValue != null ? currencyToInteger(inputValue) : clearedBalance;
+
+      onReconcile(amount);
+      onClose();
+    },
+    [clearedBalance, inputValue, onClose, onReconcile],
+  );
 
   return (
-    <View style={{ padding: '5px 8px' }}>
-      <Text>
-        <Trans>
-          Enter the current balance of your bank account that you want to
-          reconcile with:
-        </Trans>
-      </Text>
-      {clearedBalance != null && (
-        <InitialFocus>
+    <Form onSubmit={onSubmit}>
+      <View style={{ padding: '5px 8px' }}>
+        <Text>
+          <Trans>
+            Enter the current balance of your bank account that you want to
+            reconcile with:
+          </Trans>
+        </Text>
+        {clearedBalance != null && (
           <Input
+            ref={inputRef}
             defaultValue={format(clearedBalance, 'financial')}
             onChangeValue={setInputValue}
             style={{ margin: '7px 0' }}
-            focused={inputFocused}
-            onEnter={onSubmit}
+            autoFocus
+            autoSelect
           />
-        </InitialFocus>
-      )}
-      <Button variant="primary" onPress={onSubmit}>
-        <Trans>Reconcile</Trans>
-      </Button>
-    </View>
+        )}
+        <Button variant="primary" type="submit">
+          <Trans>Reconcile</Trans>
+        </Button>
+      </View>
+    </Form>
   );
 }

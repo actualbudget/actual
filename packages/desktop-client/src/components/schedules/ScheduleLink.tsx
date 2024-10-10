@@ -14,7 +14,6 @@ import {
 
 import { SvgAdd } from '../../icons/v0';
 import { Button } from '../common/Button2';
-import { InitialFocus } from '../common/InitialFocus';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { Search } from '../common/Search';
 import { Text } from '../common/Text';
@@ -96,16 +95,16 @@ export function ScheduleLink({
                 { count: ids?.length ?? 0 },
               )}
             </Text>
-            <InitialFocus>
-              <Search
-                inputRef={searchInput}
-                isInModal
-                width={300}
-                placeholder={t('Filter schedules…')}
-                value={filter}
-                onChange={setFilter}
-              />
-            </InitialFocus>
+            <Search
+              ref={searchInput}
+              isInModal
+              width={300}
+              placeholder={t('Filter schedules…')}
+              value={filter}
+              onChangeValue={setFilter}
+              autoFocus
+              autoSelect
+            />
             {ids.length === 1 && (
               <Button
                 variant="primary"

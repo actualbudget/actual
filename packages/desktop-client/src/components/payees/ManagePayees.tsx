@@ -243,7 +243,7 @@ export const ManagePayees = ({
         <Search
           placeholder={t('Filter payees...')}
           value={filter}
-          onChange={applyFilter}
+          onChangeValue={applyFilter}
         />
       </View>
 

@@ -2,7 +2,6 @@ import React from 'react';
 
 import { styles } from '../../style';
 import { Block } from '../common/Block';
-import { InitialFocus } from '../common/InitialFocus';
 import { Input } from '../common/Input';
 
 import { NON_DRAGGABLE_AREA_CLASS_NAME } from './constants';
@@ -22,22 +21,22 @@ export const ReportCardName = ({
 }: ReportCardNameProps) => {
   if (isEditing) {
     return (
-      <InitialFocus>
-        <Input
-          className={NON_DRAGGABLE_AREA_CLASS_NAME}
-          defaultValue={name}
-          onEnter={e => onChange(e.currentTarget.value)}
-          onUpdate={onChange}
-          onEscape={onClose}
-          style={{
-            ...styles.mediumText,
-            marginTop: -6,
-            marginBottom: -1,
-            marginLeft: -6,
-            width: Math.max(20, name.length) + 'ch',
-          }}
-        />
-      </InitialFocus>
+      <Input
+        className={NON_DRAGGABLE_AREA_CLASS_NAME}
+        defaultValue={name}
+        onEnter={e => onChange(e.currentTarget.value)}
+        onUpdate={onChange}
+        onEscape={onClose}
+        style={{
+          ...styles.mediumText,
+          marginTop: -6,
+          marginBottom: -1,
+          marginLeft: -6,
+          width: Math.max(20, name.length) + 'ch',
+        }}
+        autoFocus
+        autoSelect
+      />
     );
   }
 

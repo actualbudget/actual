@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { useState } from 'react';
+import React, { type FormEvent, useCallback, useState } from 'react';
 import { Form } from 'react-aria-components';
 
 import { type FinanceModals } from 'loot-core/src/client/state-types/modals';
@@ -8,7 +8,6 @@ import { getTestKeyError } from 'loot-core/src/shared/errors';
 
 import { styles, theme } from '../../style';
 import { Button, ButtonWithLoading } from '../common/Button2';
-import { InitialFocus } from '../common/InitialFocus';
 import { Input } from '../common/Input';
 import { Link } from '../common/Link';
 import {
@@ -37,25 +36,36 @@ export function FixEncryptionKeyModal({
   const [showPassword, setShowPassword] = useState(false);
   const { isNarrowWidth } = useResponsive();
 
-  async function onUpdateKey(close: () => void) {
-    if (password !== '' && !loading) {
-      setLoading(true);
-      setError(null);
+  const onUpdateKey = useCallback(
+    async ({ close }: { close: () => void }) => {
+      if (password !== '' && !loading) {
+        setLoading(true);
+        setError(null);
 
-      const { error } = await send('key-test', {
-        password,
-        fileId: cloudFileId,
-      });
-      if (error) {
-        setError(getTestKeyError(error));
-        setLoading(false);
-        return;
+        const { error } = await send('key-test', {
+          password,
+          fileId: cloudFileId,
+        });
+        if (error) {
+          setError(getTestKeyError(error));
+          setLoading(false);
+          return;
+        }
+
+        onSuccess?.();
+        close();
       }
+    },
+    [cloudFileId, loading, onSuccess, password],
+  );
 
-      onSuccess?.();
-      close();
-    }
-  }
+  const onSubmit = useCallback(
+    (e: FormEvent<HTMLFormElement>, { close }: { close: () => void }) => {
+      e.preventDefault();
+      onUpdateKey({ close });
+    },
+    [onUpdateKey],
+  );
 
   return (
     <Modal name="fix-encryption-key">
@@ -69,45 +79,40 @@ export function FixEncryptionKeyModal({
             }
             rightContent={<ModalCloseButton onPress={close} />}
           />
-          <View
-            style={{
-              maxWidth: 500,
-              overflowX: 'hidden',
-              overflowY: 'auto',
-              flex: 1,
-            }}
-          >
-            {hasExistingKey ? (
-              <Paragraph>
-                This file was encrypted with a different key than you are
-                currently using. This probably means you changed your password.
-                Enter your current password to update your key.{' '}
-                <Link
-                  variant="external"
-                  to="https://actualbudget.org/docs/getting-started/sync/#end-to-end-encryption"
-                >
-                  Learn more
-                </Link>
-              </Paragraph>
-            ) : (
-              <Paragraph>
-                We don’t have a key that encrypts or decrypts this file. Enter
-                the password for this file to create the key for encryption.{' '}
-                <Link
-                  variant="external"
-                  to="https://actualbudget.org/docs/getting-started/sync/#end-to-end-encryption"
-                >
-                  Learn more
-                </Link>
-              </Paragraph>
-            )}
-          </View>
-          <Form
-            onSubmit={e => {
-              e.preventDefault();
-              onUpdateKey(close);
-            }}
-          >
+          <Form onSubmit={e => onSubmit(e, { close })}>
+            <View
+              style={{
+                maxWidth: 500,
+                overflowX: 'hidden',
+                overflowY: 'auto',
+                flex: 1,
+              }}
+            >
+              {hasExistingKey ? (
+                <Paragraph>
+                  This file was encrypted with a different key than you are
+                  currently using. This probably means you changed your
+                  password. Enter your current password to update your key.{' '}
+                  <Link
+                    variant="external"
+                    to="https://actualbudget.org/docs/getting-started/sync/#end-to-end-encryption"
+                  >
+                    Learn more
+                  </Link>
+                </Paragraph>
+              ) : (
+                <Paragraph>
+                  We don’t have a key that encrypts or decrypts this file. Enter
+                  the password for this file to create the key for encryption.{' '}
+                  <Link
+                    variant="external"
+                    to="https://actualbudget.org/docs/getting-started/sync/#end-to-end-encryption"
+                  >
+                    Learn more
+                  </Link>
+                </Paragraph>
+              )}
+            </View>
             <View
               style={{
                 marginTop: 15,
@@ -128,16 +133,16 @@ export function FixEncryptionKeyModal({
                   {error}
                 </View>
               )}
-              <InitialFocus>
-                <Input
-                  type={showPassword ? 'text' : 'password'}
-                  style={{
-                    width: isNarrowWidth ? '100%' : '50%',
-                    height: isNarrowWidth ? styles.mobileMinHeight : undefined,
-                  }}
-                  onChange={e => setPassword(e.target.value)}
-                />
-              </InitialFocus>
+              <Input
+                type={showPassword ? 'text' : 'password'}
+                style={{
+                  width: isNarrowWidth ? '100%' : '50%',
+                  height: isNarrowWidth ? styles.mobileMinHeight : undefined,
+                }}
+                onChangeValue={value => setPassword(value)}
+                autoFocus
+                autoSelect
+              />
               <Text style={{ marginTop: 5 }}>
                 <label style={{ userSelect: 'none' }}>
                   <input

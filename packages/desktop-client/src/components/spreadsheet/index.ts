@@ -88,6 +88,16 @@ export type Binding<
       value?: Spreadsheets[SheetName][SheetFieldName];
       query?: Query;
     };
+
+export type SheetResult<
+  SheetName extends SheetNames,
+  FieldName extends SheetFields<SheetName>,
+> = {
+  name: string;
+  value: Spreadsheets[SheetName][FieldName];
+  query?: Query;
+};
+
 export const parametrizedField =
   <SheetName extends SheetNames>() =>
   <SheetFieldName extends SheetFields<SheetName>>(field: SheetFieldName) =>

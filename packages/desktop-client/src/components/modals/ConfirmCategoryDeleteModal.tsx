@@ -1,5 +1,6 @@
 // @ts-strict-ignore
-import React, { useState } from 'react';
+import React, { type FormEvent, useCallback, useState } from 'react';
+import { Form } from 'react-aria-components';
 
 import { useCategories } from '../../hooks/useCategories';
 import { theme } from '../../style';
@@ -27,7 +28,7 @@ export function ConfirmCategoryDeleteModal({
   const group = categoryGroups.find(g => g.id === groupId);
   const category = categories.find(c => c.id === categoryId);
 
-  const renderError = (error: string) => {
+  const renderError = useCallback((error: string) => {
     let msg: string;
 
     switch (error) {
@@ -48,9 +49,23 @@ export function ConfirmCategoryDeleteModal({
         {msg}
       </Text>
     );
-  };
+  }, []);
 
   const isIncome = !!(category || group).is_income;
+
+  const onSubmit = useCallback(
+    (e: FormEvent<HTMLFormElement>, { close }: { close: () => void }) => {
+      e.preventDefault();
+
+      if (!transferCategory) {
+        setError('required-transfer');
+      } else {
+        onDelete(transferCategory);
+        close();
+      }
+    },
+    [onDelete, transferCategory],
+  );
 
   return (
     <Modal
@@ -63,82 +78,75 @@ export function ConfirmCategoryDeleteModal({
             title="Confirm Delete"
             rightContent={<ModalCloseButton onPress={close} />}
           />
-          <View style={{ lineHeight: 1.5 }}>
-            {group ? (
-              <Block>
-                Categories in the group <strong>{group.name}</strong> are used
-                by existing transactions
-                {!isIncome &&
-                  ' or it has a positive leftover balance currently'}
-                . <strong>Are you sure you want to delete it?</strong> If so,
-                you must select another category to transfer existing
-                transactions and balance to.
-              </Block>
-            ) : (
-              <Block>
-                <strong>{category.name}</strong> is used by existing
-                transactions
-                {!isIncome &&
-                  ' or it has a positive leftover balance currently'}
-                . <strong>Are you sure you want to delete it?</strong> If so,
-                you must select another category to transfer existing
-                transactions and balance to.
-              </Block>
-            )}
+          <Form onSubmit={e => onSubmit(e, { close })}>
+            <View style={{ lineHeight: 1.5 }}>
+              {group ? (
+                <Block>
+                  Categories in the group <strong>{group.name}</strong> are used
+                  by existing transactions
+                  {!isIncome &&
+                    ' or it has a positive leftover balance currently'}
+                  . <strong>Are you sure you want to delete it?</strong> If so,
+                  you must select another category to transfer existing
+                  transactions and balance to.
+                </Block>
+              ) : (
+                <Block>
+                  <strong>{category.name}</strong> is used by existing
+                  transactions
+                  {!isIncome &&
+                    ' or it has a positive leftover balance currently'}
+                  . <strong>Are you sure you want to delete it?</strong> If so,
+                  you must select another category to transfer existing
+                  transactions and balance to.
+                </Block>
+              )}
 
-            {error && renderError(error)}
+              {error && renderError(error)}
 
-            <View
-              style={{
-                marginTop: 20,
-                flexDirection: 'row',
-                justifyContent: 'flex-start',
-                alignItems: 'center',
-              }}
-            >
-              <Text>Transfer to:</Text>
-
-              <View style={{ flex: 1, marginLeft: 10, marginRight: 30 }}>
-                <CategoryAutocomplete
-                  categoryGroups={
-                    group
-                      ? categoryGroups.filter(
-                          g => g.id !== group.id && !!g.is_income === isIncome,
-                        )
-                      : categoryGroups
-                          .filter(g => !!g.is_income === isIncome)
-                          .map(g => ({
-                            ...g,
-                            categories: g.categories.filter(
-                              c => c.id !== category.id,
-                            ),
-                          }))
-                  }
-                  value={transferCategory}
-                  focused={true}
-                  inputProps={{
-                    placeholder: 'Select category...',
-                  }}
-                  onSelect={category => setTransferCategory(category)}
-                  showHiddenCategories={true}
-                />
-              </View>
-
-              <Button
-                variant="primary"
-                onPress={() => {
-                  if (!transferCategory) {
-                    setError('required-transfer');
-                  } else {
-                    onDelete(transferCategory);
-                    close();
-                  }
+              <View
+                style={{
+                  marginTop: 20,
+                  flexDirection: 'row',
+                  justifyContent: 'flex-start',
+                  alignItems: 'center',
                 }}
               >
-                Delete
-              </Button>
+                <Text>Transfer to:</Text>
+
+                <View style={{ flex: 1, marginLeft: 10, marginRight: 30 }}>
+                  <CategoryAutocomplete
+                    categoryGroups={
+                      group
+                        ? categoryGroups.filter(
+                            g =>
+                              g.id !== group.id && !!g.is_income === isIncome,
+                          )
+                        : categoryGroups
+                            .filter(g => !!g.is_income === isIncome)
+                            .map(g => ({
+                              ...g,
+                              categories: g.categories.filter(
+                                c => c.id !== category.id,
+                              ),
+                            }))
+                    }
+                    value={transferCategory}
+                    autoFocus={true}
+                    inputProps={{
+                      placeholder: 'Select category...',
+                    }}
+                    onSelect={category => setTransferCategory(category)}
+                    showHiddenCategories={true}
+                  />
+                </View>
+
+                <Button variant="primary" type="submit">
+                  Delete
+                </Button>
+              </View>
             </View>
-          </View>
+          </Form>
         </>
       )}
     </Modal>

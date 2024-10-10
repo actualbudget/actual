@@ -1,5 +1,6 @@
 // @ts-strict-ignore
-import React, { useState } from 'react';
+import React, { type FormEvent, useCallback, useState } from 'react';
+import { Form } from 'react-aria-components';
 
 import { send } from 'loot-core/src/platform/client/fetch';
 
@@ -28,23 +29,28 @@ export const SimpleFinInitialiseModal = ({
   const [isValid, setIsValid] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
 
-  const onSubmit = async (close: () => void) => {
-    if (!token) {
-      setIsValid(false);
-      return;
-    }
+  const onSubmit = useCallback(
+    async (e: FormEvent<HTMLFormElement>, { close }: { close: () => void }) => {
+      e.preventDefault();
 
-    setIsLoading(true);
+      if (!token) {
+        setIsValid(false);
+        return;
+      }
 
-    await send('secret-set', {
-      name: 'simplefin_token',
-      value: token,
-    });
+      setIsLoading(true);
 
-    onSuccess();
-    setIsLoading(false);
-    close();
-  };
+      await send('secret-set', {
+        name: 'simplefin_token',
+        value: token,
+      });
+
+      onSuccess();
+      setIsLoading(false);
+      close();
+    },
+    [onSuccess, token],
+  );
 
   return (
     <Modal name="simplefin-init" containerProps={{ style: { width: 300 } }}>
@@ -54,49 +60,49 @@ export const SimpleFinInitialiseModal = ({
             title="Set-up SimpleFIN"
             rightContent={<ModalCloseButton onPress={close} />}
           />
-          <View style={{ display: 'flex', gap: 10 }}>
-            <Text>
-              In order to enable bank-sync via SimpleFIN (only for North
-              American banks) you will need to create a token. This can be done
-              by creating an account with{' '}
-              <Link
-                variant="external"
-                to="https://bridge.simplefin.org/"
-                linkColor="purple"
+          <Form onSubmit={e => onSubmit(e, { close })}>
+            <View style={{ display: 'flex', gap: 10 }}>
+              <Text>
+                In order to enable bank-sync via SimpleFIN (only for North
+                American banks) you will need to create a token. This can be
+                done by creating an account with{' '}
+                <Link
+                  variant="external"
+                  to="https://bridge.simplefin.org/"
+                  linkColor="purple"
+                >
+                  SimpleFIN
+                </Link>
+                .
+              </Text>
+
+              <FormField>
+                <FormLabel title="Token:" htmlFor="token-field" />
+                <Input
+                  id="token-field"
+                  type="password"
+                  value={token}
+                  onChangeValue={value => {
+                    setToken(value);
+                    setIsValid(true);
+                  }}
+                />
+              </FormField>
+
+              {!isValid && <Error>It is required to provide a token.</Error>}
+            </View>
+
+            <ModalButtons>
+              <ButtonWithLoading
+                variant="primary"
+                type="submit"
+                autoFocus
+                isLoading={isLoading}
               >
-                SimpleFIN
-              </Link>
-              .
-            </Text>
-
-            <FormField>
-              <FormLabel title="Token:" htmlFor="token-field" />
-              <Input
-                id="token-field"
-                type="password"
-                value={token}
-                onChangeValue={value => {
-                  setToken(value);
-                  setIsValid(true);
-                }}
-              />
-            </FormField>
-
-            {!isValid && <Error>It is required to provide a token.</Error>}
-          </View>
-
-          <ModalButtons>
-            <ButtonWithLoading
-              variant="primary"
-              autoFocus
-              isLoading={isLoading}
-              onPress={() => {
-                onSubmit(close);
-              }}
-            >
-              Save and continue
-            </ButtonWithLoading>
-          </ModalButtons>
+                Save and continue
+              </ButtonWithLoading>
+            </ModalButtons>
+          </Form>
         </>
       )}
     </Modal>

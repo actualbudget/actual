@@ -1,45 +1,48 @@
-import React, {
-  useState,
-  useContext,
-  useEffect,
-  type ChangeEvent,
-} from 'react';
+import React, { useState, useCallback, type FormEvent, useRef } from 'react';
+import { Form } from 'react-aria-components';
 import { Trans } from 'react-i18next';
 
-import { useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
+import { envelopeBudget } from 'loot-core/client/queries';
 import { evalArithmetic } from 'loot-core/src/shared/arithmetic';
 import { integerToCurrency, amountToInteger } from 'loot-core/src/shared/util';
 
 import { Button } from '../../common/Button2';
-import { InitialFocus } from '../../common/InitialFocus';
 import { Input } from '../../common/Input';
 import { View } from '../../common/View';
-import { NamespaceContext } from '../../spreadsheet/NamespaceContext';
+
+import { useEnvelopeSheetValue } from './EnvelopeBudgetComponents';
 
 type HoldMenuProps = {
   onSubmit: (amount: number) => void;
   onClose: () => void;
 };
 export function HoldMenu({ onSubmit, onClose }: HoldMenuProps) {
-  const spreadsheet = useSpreadsheet();
-  const sheetName = useContext(NamespaceContext);
+  const [amount, setAmount] = useState<string>(
+    integerToCurrency(
+      useEnvelopeSheetValue(envelopeBudget.toBudget, result => {
+        setAmount(integerToCurrency(result?.value ?? 0));
+      }) ?? 0,
+    ),
+  );
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  const [amount, setAmount] = useState<string | null>(null);
+  const onSubmitInner = useCallback(
+    (e: FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
 
-  useEffect(() => {
-    (async () => {
-      const node = await spreadsheet.get(sheetName, 'to-budget');
-      setAmount(integerToCurrency(Math.max(node.value as number, 0)));
-    })();
-  }, []);
+      if (amount === '') {
+        inputRef.current?.focus();
+        return;
+      }
 
-  function submit(newAmount: string) {
-    const parsedAmount = evalArithmetic(newAmount);
-    if (parsedAmount) {
-      onSubmit(amountToInteger(parsedAmount));
-    }
-    onClose();
-  }
+      const parsedAmount = evalArithmetic(amount);
+      if (parsedAmount) {
+        onSubmit(amountToInteger(parsedAmount));
+      }
+      onClose();
+    },
+    [amount, onSubmit, onClose],
+  );
 
   if (amount === null) {
     // See `TransferMenu` for more info about this
@@ -47,39 +50,37 @@ export function HoldMenu({ onSubmit, onClose }: HoldMenuProps) {
   }
 
   return (
-    <View style={{ padding: 10 }}>
-      <View style={{ marginBottom: 5 }}>
-        <Trans>Hold this amount:</Trans>
-      </View>
-      <View>
-        <InitialFocus>
-          <Input
-            value={amount}
-            onChange={(e: ChangeEvent<HTMLInputElement>) =>
-              setAmount(e.target.value)
-            }
-            onEnter={() => submit(amount)}
-          />
-        </InitialFocus>
-      </View>
-      <View
-        style={{
-          alignItems: 'flex-end',
-          marginTop: 10,
-        }}
-      >
-        <Button
-          variant="primary"
+    <Form onSubmit={onSubmitInner}>
+      <View style={{ padding: 10 }}>
+        <View style={{ marginBottom: 5 }}>
+          <Trans>Hold this amount:</Trans>
+        </View>
+        <Input
+          ref={inputRef}
+          value={amount}
+          onChangeValue={(value: string) => setAmount(value)}
+          autoFocus
+          autoSelect
+        />
+        <View
           style={{
-            fontSize: 12,
-            paddingTop: 3,
-            paddingBottom: 3,
+            alignItems: 'flex-end',
+            marginTop: 10,
           }}
-          onPress={() => submit(amount)}
         >
-          <Trans>Hold</Trans>
-        </Button>
+          <Button
+            variant="primary"
+            type="submit"
+            style={{
+              fontSize: 12,
+              paddingTop: 3,
+              paddingBottom: 3,
+            }}
+          >
+            <Trans>Hold</Trans>
+          </Button>
+        </View>
       </View>
-    </View>
+    </Form>
   );
 }

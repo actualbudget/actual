@@ -22,7 +22,11 @@ import { Button } from '../../common/Button2';
 import { Popover } from '../../common/Popover';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
-import { type Binding, type SheetFields } from '../../spreadsheet';
+import {
+  type SheetResult,
+  type Binding,
+  type SheetFields,
+} from '../../spreadsheet';
 import { CellValue, CellValueText } from '../../spreadsheet/CellValue';
 import { useSheetName } from '../../spreadsheet/useSheetName';
 import { useSheetValue } from '../../spreadsheet/useSheetValue';
@@ -41,8 +45,11 @@ export function useEnvelopeSheetName<
 
 export function useEnvelopeSheetValue<
   FieldName extends SheetFields<'envelope-budget'>,
->(binding: Binding<'envelope-budget', FieldName>) {
-  return useSheetValue(binding);
+>(
+  binding: Binding<'envelope-budget', FieldName>,
+  onChange?: (result: SheetResult<'envelope-budget', FieldName>) => void,
+) {
+  return useSheetValue(binding, onChange);
 }
 
 export const EnvelopeCellValue = <

@@ -207,7 +207,7 @@ function ConfigureField({
       >
         {type !== 'boolean' && (
           <GenericInput
-            inputRef={inputRef}
+            ref={inputRef}
             field={field}
             subfield={subfield}
             type={

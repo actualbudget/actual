@@ -4,7 +4,6 @@ import { SvgPencil1 } from '../icons/v2';
 import { theme } from '../style';
 
 import { Button } from './common/Button2';
-import { InitialFocus } from './common/InitialFocus';
 import { Input } from './common/Input';
 import { View } from './common/View';
 
@@ -33,24 +32,24 @@ export function EditablePageHeaderTitle({
 
   if (isEditing) {
     return (
-      <InitialFocus>
-        <Input
-          defaultValue={title}
-          onEnter={e => onSaveValue(e.currentTarget.value)}
-          onBlur={e => onSaveValue(e.target.value)}
-          onEscape={() => setIsEditing(false)}
-          style={{
-            fontSize: 25,
-            fontWeight: 500,
-            marginTop: -3,
-            marginBottom: -3,
-            marginLeft: -6,
-            paddingTop: 2,
-            paddingBottom: 2,
-            width: Math.max(20, title.length) + 'ch',
-          }}
-        />
-      </InitialFocus>
+      <Input
+        autoFocus
+        autoSelect
+        defaultValue={title}
+        onEnter={e => onSaveValue(e.currentTarget.value)}
+        onBlur={e => onSaveValue(e.target.value)}
+        onEscape={() => setIsEditing(false)}
+        style={{
+          fontSize: 25,
+          fontWeight: 500,
+          marginTop: -3,
+          marginBottom: -3,
+          marginLeft: -6,
+          paddingTop: 2,
+          paddingBottom: 2,
+          width: Math.max(20, title.length) + 'ch',
+        }}
+      />
     );
   }
 

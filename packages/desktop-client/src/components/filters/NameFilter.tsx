@@ -56,7 +56,7 @@ export function NameFilter({
               />
               <Input
                 id="name-field"
-                inputRef={inputRef}
+                ref={inputRef}
                 defaultValue={name || ''}
                 onChangeValue={setName}
               />

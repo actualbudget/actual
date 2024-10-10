@@ -1,4 +1,5 @@
-import React, { useMemo, useState } from 'react';
+import React, { type FormEvent, useCallback, useMemo, useState } from 'react';
+import { Form } from 'react-aria-components';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { type CategoryEntity } from 'loot-core/src/types/models';
@@ -6,7 +7,6 @@ import { type CategoryEntity } from 'loot-core/src/types/models';
 import { useCategories } from '../../../hooks/useCategories';
 import { CategoryAutocomplete } from '../../autocomplete/CategoryAutocomplete';
 import { Button } from '../../common/Button2';
-import { InitialFocus } from '../../common/InitialFocus';
 import { View } from '../../common/View';
 import { addToBeBudgetedGroup, removeCategoriesFromGroups } from '../util';
 
@@ -39,52 +39,55 @@ export function CoverMenu({
       : categoryGroups;
   }, [categoryId, showToBeBudgeted, originalCategoryGroups]);
 
-  function submit() {
-    if (fromCategoryId) {
-      onSubmit(fromCategoryId);
-    }
-    onClose();
-  }
+  const onSubmitInner = useCallback(
+    (e: FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+
+      if (fromCategoryId) {
+        onSubmit(fromCategoryId);
+      }
+      onClose();
+    },
+    [fromCategoryId, onSubmit, onClose],
+  );
+
   return (
-    <View style={{ padding: 10 }}>
-      <View style={{ marginBottom: 5 }}>
-        <Trans>Cover from category:</Trans>
-      </View>
+    <Form onSubmit={onSubmitInner}>
+      <View style={{ padding: 10 }}>
+        <View style={{ marginBottom: 5 }}>
+          <Trans>Cover from category:</Trans>
+        </View>
 
-      <InitialFocus>
-        {node => (
-          <CategoryAutocomplete
-            categoryGroups={filteredCategoryGroups}
-            value={null}
-            openOnFocus={true}
-            onSelect={(id: string | undefined) => setFromCategoryId(id || null)}
-            inputProps={{
-              inputRef: node,
-              onEnter: event => !event.defaultPrevented && submit(),
-              placeholder: t('(none)'),
-            }}
-            showHiddenCategories={false}
-          />
-        )}
-      </InitialFocus>
-
-      <View
-        style={{
-          alignItems: 'flex-end',
-          marginTop: 10,
-        }}
-      >
-        <Button
-          variant="primary"
-          style={{
-            fontSize: 12,
-            paddingTop: 3,
+        <CategoryAutocomplete
+          categoryGroups={filteredCategoryGroups}
+          value={null}
+          openOnFocus={true}
+          onSelect={(id: string | undefined) => setFromCategoryId(id || null)}
+          inputProps={{
+            placeholder: t('(none)'),
           }}
-          onPress={submit}
+          showHiddenCategories={false}
+          autoFocus
+        />
+
+        <View
+          style={{
+            alignItems: 'flex-end',
+            marginTop: 10,
+          }}
         >
-          <Trans>Transfer</Trans>
-        </Button>
+          <Button
+            variant="primary"
+            type="submit"
+            style={{
+              fontSize: 12,
+              paddingTop: 3,
+            }}
+          >
+            <Trans>Transfer</Trans>
+          </Button>
+        </View>
       </View>
-    </View>
+    </Form>
   );
 }

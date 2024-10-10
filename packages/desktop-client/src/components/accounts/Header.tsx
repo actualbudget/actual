@@ -30,7 +30,6 @@ import {
 import { theme, styles } from '../../style';
 import { AnimatedRefresh } from '../AnimatedRefresh';
 import { Button } from '../common/Button2';
-import { InitialFocus } from '../common/InitialFocus';
 import { Input } from '../common/Input';
 import { Menu } from '../common/Menu';
 import { MenuButton } from '../common/MenuButton';
@@ -345,8 +344,8 @@ export function AccountHeader({
           <Search
             placeholder={t('Search')}
             value={search}
-            onChange={onSearch}
-            inputRef={searchInput}
+            onChangeValue={onSearch}
+            ref={searchInput}
           />
           {workingHard ? (
             <View>
@@ -574,24 +573,24 @@ function AccountNameField({
   if (editingName) {
     return (
       <Fragment>
-        <InitialFocus>
-          <Input
-            defaultValue={accountName}
-            onEnter={e => onSaveName(e.currentTarget.value)}
-            onBlur={e => onSaveName(e.target.value)}
-            onEscape={() => onExposeName(false)}
-            style={{
-              fontSize: 25,
-              fontWeight: 500,
-              marginTop: -3,
-              marginBottom: -4,
-              marginLeft: -6,
-              paddingTop: 2,
-              paddingBottom: 2,
-              width: Math.max(20, accountName.length) + 'ch',
-            }}
-          />
-        </InitialFocus>
+        <Input
+          autoFocus
+          autoSelect
+          defaultValue={accountName}
+          onEnter={e => onSaveName(e.target.value)}
+          onBlur={e => onSaveName(e.target.value)}
+          onEscape={() => onExposeName(false)}
+          style={{
+            fontSize: 25,
+            fontWeight: 500,
+            marginTop: -3,
+            marginBottom: -4,
+            marginLeft: -6,
+            paddingTop: 2,
+            paddingBottom: 2,
+            width: Math.max(20, accountName.length) + 'ch',
+          }}
+        />
         {saveNameError && (
           <View style={{ color: theme.warningText }}>{saveNameError}</View>
         )}

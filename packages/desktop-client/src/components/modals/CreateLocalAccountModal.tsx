@@ -11,7 +11,6 @@ import { useNavigate } from '../../hooks/useNavigate';
 import { theme } from '../../style';
 import { Button } from '../common/Button2';
 import { FormError } from '../common/FormError';
-import { InitialFocus } from '../common/InitialFocus';
 import { InlineField } from '../common/InlineField';
 import { Input } from '../common/Input';
 import { Link } from '../common/Link';
@@ -77,18 +76,18 @@ export function CreateLocalAccountModal() {
           <View>
             <Form onSubmit={onSubmit}>
               <InlineField label="Name" width="100%">
-                <InitialFocus>
-                  <Input
-                    name="name"
-                    value={name}
-                    onChange={event => setName(event.target.value)}
-                    onBlur={event => {
-                      const name = event.target.value.trim();
-                      validateAndSetName(name);
-                    }}
-                    style={{ flex: 1 }}
-                  />
-                </InitialFocus>
+                <Input
+                  name="name"
+                  value={name}
+                  onChangeValue={setName}
+                  onBlur={event => {
+                    const name = event.target.value.trim();
+                    validateAndSetName(name);
+                  }}
+                  style={{ flex: 1 }}
+                  autoFocus
+                  autoSelect
+                />
               </InlineField>
               {nameError && (
                 <FormError style={{ marginLeft: 75, color: theme.warningText }}>
@@ -155,7 +154,7 @@ export function CreateLocalAccountModal() {
                   name="balance"
                   inputMode="decimal"
                   value={balance}
-                  onChange={event => setBalance(event.target.value)}
+                  onChangeValue={value => setBalance(value)}
                   onBlur={event => {
                     const balance = event.target.value.trim();
                     setBalance(balance);

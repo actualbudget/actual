@@ -17,7 +17,6 @@ import { useDateFormat } from '../../hooks/useDateFormat';
 import { SvgAdd, SvgSubtract } from '../../icons/v0';
 import { theme } from '../../style';
 import { Button } from '../common/Button2';
-import { InitialFocus } from '../common/InitialFocus';
 import { Input } from '../common/Input';
 import { Menu } from '../common/Menu';
 import { Popover } from '../common/Popover';
@@ -393,16 +392,16 @@ function RecurringScheduleTooltip({
     <>
       <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
         <label htmlFor="start">From</label>
-        <InitialFocus>
-          <DateSelect
-            id="start"
-            inputProps={{ placeholder: 'Start Date' }}
-            value={config.start}
-            onSelect={value => updateField('start', value)}
-            containerProps={{ style: { width: 100 } }}
-            dateFormat={dateFormat}
-          />
-        </InitialFocus>
+        <DateSelect
+          id="start"
+          inputProps={{ placeholder: 'Start Date' }}
+          value={config.start}
+          onSelect={value => updateField('start', value)}
+          containerProps={{ style: { width: 100 } }}
+          dateFormat={dateFormat}
+          autoFocus
+          autoSelect
+        />
         <Select
           id="repeat_end_dropdown"
           options={[
@@ -420,7 +419,7 @@ function RecurringScheduleTooltip({
               style={{ width: 40 }}
               type="number"
               min={1}
-              onChange={e => updateField('endOccurrences', e.target.value)}
+              onChangeValue={value => updateField('endOccurrences', value)}
               defaultValue={config.endOccurrences || 1}
             />
             <Text>occurrence{config.endOccurrences === '1' ? '' : 's'}</Text>
@@ -450,7 +449,7 @@ function RecurringScheduleTooltip({
           style={{ width: 40 }}
           type="number"
           min={1}
-          onChange={e => updateField('interval', e.target.value)}
+          onChangeValue={value => updateField('interval', value)}
           defaultValue={config.interval || 1}
         />
         <Select

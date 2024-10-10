@@ -17,7 +17,6 @@ import { SvgExpandArrow } from '../../icons/v0';
 import { SvgAdd } from '../../icons/v1';
 import { styles, theme } from '../../style';
 import { Button } from '../common/Button2';
-import { InitialFocus } from '../common/InitialFocus';
 import { Input } from '../common/Input';
 import { Menu } from '../common/Menu';
 import { Popover } from '../common/Popover';
@@ -195,25 +194,25 @@ function EditableBudgetName() {
 
   if (editing) {
     return (
-      <InitialFocus>
-        <Input
-          style={{
-            width: 160,
-            fontSize: 16,
-            fontWeight: 500,
-          }}
-          defaultValue={budgetName}
-          onEnter={async e => {
-            const inputEl = e.target as HTMLInputElement;
-            const newBudgetName = inputEl.value;
-            if (newBudgetName.trim() !== '') {
-              setBudgetNamePref(newBudgetName);
-              setEditing(false);
-            }
-          }}
-          onBlur={() => setEditing(false)}
-        />
-      </InitialFocus>
+      <Input
+        style={{
+          width: 160,
+          fontSize: 16,
+          fontWeight: 500,
+        }}
+        defaultValue={budgetName}
+        onEnter={async e => {
+          const inputEl = e.target as HTMLInputElement;
+          const newBudgetName = inputEl.value;
+          if (newBudgetName.trim() !== '') {
+            setBudgetNamePref(newBudgetName);
+            setEditing(false);
+          }
+        }}
+        onBlur={() => setEditing(false)}
+        autoFocus
+        autoSelect
+      />
     );
   }
 

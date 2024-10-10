@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { type FormEvent, useCallback, useState } from 'react';
+import { Form } from 'react-aria-components';
 
 import { envelopeBudget } from 'loot-core/client/queries';
 
 import { styles } from '../../style';
 import { useEnvelopeSheetValue } from '../budget/envelope/EnvelopeBudgetComponents';
 import { Button } from '../common/Button2';
-import { InitialFocus } from '../common/InitialFocus';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { View } from '../common/View';
 import { FieldLabel } from '../mobile/MobileForms';
@@ -20,11 +20,16 @@ export function HoldBufferModal({ onSubmit }: HoldBufferModalProps) {
   const available = useEnvelopeSheetValue(envelopeBudget.toBudget) ?? 0;
   const [amount, setAmount] = useState<number>(0);
 
-  const _onSubmit = (newAmount: number) => {
-    if (newAmount) {
-      onSubmit?.(newAmount);
-    }
-  };
+  const _onSubmit = useCallback(
+    (e: FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+
+      if (amount) {
+        onSubmit?.(amount);
+      }
+    },
+    [amount, onSubmit],
+  );
 
   return (
     <Modal name="hold-buffer">
@@ -34,9 +39,9 @@ export function HoldBufferModal({ onSubmit }: HoldBufferModalProps) {
             title="Hold Buffer"
             rightContent={<ModalCloseButton onPress={close} />}
           />
-          <View>
-            <FieldLabel title="Hold this amount:" />
-            <InitialFocus>
+          <Form onSubmit={_onSubmit}>
+            <View>
+              <FieldLabel title="Hold this amount:" />
               <AmountInput
                 value={available}
                 autoDecimals={true}
@@ -48,32 +53,30 @@ export function HoldBufferModal({ onSubmit }: HoldBufferModalProps) {
                   height: styles.mobileMinHeight,
                 }}
                 onUpdate={setAmount}
-                onEnter={() => {
-                  _onSubmit(amount);
-                  close();
-                }}
+                autoFocus
+                autoSelect
               />
-            </InitialFocus>
-          </View>
-          <View
-            style={{
-              justifyContent: 'center',
-              alignItems: 'center',
-              paddingTop: 10,
-            }}
-          >
-            <Button
-              variant="primary"
+            </View>
+            <View
               style={{
-                height: styles.mobileMinHeight,
-                marginLeft: styles.mobileEditingPadding,
-                marginRight: styles.mobileEditingPadding,
+                justifyContent: 'center',
+                alignItems: 'center',
+                paddingTop: 10,
               }}
-              onPress={() => _onSubmit(amount)}
             >
-              Hold
-            </Button>
-          </View>
+              <Button
+                variant="primary"
+                type="submit"
+                style={{
+                  height: styles.mobileMinHeight,
+                  marginLeft: styles.mobileEditingPadding,
+                  marginRight: styles.mobileEditingPadding,
+                }}
+              >
+                Hold
+              </Button>
+            </View>
+          </Form>
         </>
       )}
     </Modal>

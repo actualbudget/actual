@@ -95,7 +95,7 @@ export function Schedules() {
           <Search
             placeholder={t('Filter schedules…')}
             value={filter}
-            onChange={setFilter}
+            onChangeValue={setFilter}
           />
         </View>
       </View>

@@ -340,7 +340,8 @@ const ChildTransactionEdit = forwardRef(
                 editingField &&
                 editingField !== getFieldName(transaction.id, 'amount')
               }
-              focused={amountFocused}
+              autoFocus={amountFocused}
+              autoSelect={amountFocused}
               value={amountToInteger(transaction.amount)}
               zeroSign={amountSign}
               style={{ marginRight: 8 }}

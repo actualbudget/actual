@@ -294,7 +294,7 @@ export function ManageRules({
           <Search
             placeholder="Filter rules..."
             value={filter}
-            onChange={onSearchChange}
+            onChangeValue={onSearchChange}
           />
         </View>
         <View style={{ flex: 1 }}>

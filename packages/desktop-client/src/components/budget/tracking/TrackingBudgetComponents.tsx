@@ -22,7 +22,11 @@ import { Button } from '../../common/Button2';
 import { Popover } from '../../common/Popover';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
-import { type Binding, type SheetFields } from '../../spreadsheet';
+import {
+  type SheetResult,
+  type Binding,
+  type SheetFields,
+} from '../../spreadsheet';
 import { CellValue, CellValueText } from '../../spreadsheet/CellValue';
 import { useSheetValue } from '../../spreadsheet/useSheetValue';
 import { Field, SheetCell, type SheetCellProps } from '../../table';
@@ -36,8 +40,9 @@ export const useTrackingSheetValue = <
   FieldName extends SheetFields<'tracking-budget'>,
 >(
   binding: Binding<'tracking-budget', FieldName>,
+  onChange?: (result: SheetResult<'tracking-budget', FieldName>) => void,
 ) => {
-  return useSheetValue(binding);
+  return useSheetValue(binding, onChange);
 };
 
 const TrackingCellValue = <FieldName extends SheetFields<'tracking-budget'>>(

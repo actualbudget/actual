@@ -10,7 +10,6 @@ import React, {
   useState,
   type ComponentProps,
   type KeyboardEvent,
-  type MutableRefObject,
 } from 'react';
 
 import { css } from '@emotion/css';
@@ -27,6 +26,7 @@ import {
   currentDate,
 } from 'loot-core/src/shared/months';
 
+import { useMergedRefs } from '../../hooks/useMergedRefs';
 import { useSyncedPref } from '../../hooks/useSyncedPref';
 import { styles, theme } from '../../style';
 import { Input } from '../common/Input';
@@ -185,232 +185,235 @@ type DateSelectProps = {
   isOpen?: boolean;
   embedded?: boolean;
   dateFormat: string;
-  focused?: boolean;
+  autoFocus?: boolean;
+  autoSelect?: boolean;
   openOnFocus?: boolean;
-  inputRef?: MutableRefObject<HTMLInputElement>;
   shouldSaveFromKey?: (e: KeyboardEvent<HTMLInputElement>) => boolean;
   clearOnBlur?: boolean;
   onUpdate?: (selectedDate: string) => void;
   onSelect: (selectedDate: string) => void;
 };
 
-export function DateSelect({
-  id,
-  containerProps,
-  inputProps,
-  value: defaultValue,
-  isOpen,
-  embedded,
-  dateFormat = 'yyyy-MM-dd',
-  focused,
-  openOnFocus = true,
-  inputRef: originalInputRef,
-  shouldSaveFromKey = defaultShouldSaveFromKey,
-  clearOnBlur = true,
-  onUpdate,
-  onSelect,
-}: DateSelectProps) {
-  const parsedDefaultValue = useMemo(() => {
-    if (defaultValue) {
-      const date = parseISO(defaultValue);
-      if (isValid(date)) {
-        return format(date, dateFormat);
+export const DateSelect = forwardRef<HTMLInputElement, DateSelectProps>(
+  (
+    {
+      id,
+      containerProps,
+      inputProps,
+      value: defaultValue,
+      isOpen,
+      embedded,
+      dateFormat = 'yyyy-MM-dd',
+      autoFocus,
+      autoSelect,
+      openOnFocus = true,
+      shouldSaveFromKey = defaultShouldSaveFromKey,
+      clearOnBlur = true,
+      onUpdate,
+      onSelect,
+    },
+    ref,
+  ) => {
+    const parsedDefaultValue = useMemo(() => {
+      if (defaultValue) {
+        const date = parseISO(defaultValue);
+        if (isValid(date)) {
+          return format(date, dateFormat);
+        }
       }
-    }
-    return '';
-  }, [defaultValue, dateFormat]);
+      return '';
+    }, [defaultValue, dateFormat]);
 
-  const picker = useRef(null);
-  const [value, setValue] = useState(parsedDefaultValue);
-  const [open, setOpen] = useState(embedded || isOpen || false);
-  const inputRef = useRef(null);
+    const picker = useRef(null);
+    const [value, setValue] = useState(parsedDefaultValue);
+    const [open, setOpen] = useState(embedded || isOpen || false);
+    const inputRef = useRef(null);
+    const mergedRef = useMergedRefs(ref, inputRef);
 
-  useLayoutEffect(() => {
-    if (originalInputRef) {
-      originalInputRef.current = inputRef.current;
-    }
-  }, []);
+    // This is confusing, so let me explain: `selectedValue` should be
+    // renamed to `currentValue`. It represents the current highlighted
+    // value in the date select and always changes as the user moves
+    // around. `userSelectedValue` represents the last value that the
+    // user actually selected (with enter or click). Having both allows
+    // us to make various UX decisions
+    const [selectedValue, setSelectedValue] = useState(value);
+    const userSelectedValue = useRef(selectedValue);
 
-  // This is confusing, so let me explain: `selectedValue` should be
-  // renamed to `currentValue`. It represents the current highlighted
-  // value in the date select and always changes as the user moves
-  // around. `userSelectedValue` represents the last value that the
-  // user actually selected (with enter or click). Having both allows
-  // us to make various UX decisions
-  const [selectedValue, setSelectedValue] = useState(value);
-  const userSelectedValue = useRef(selectedValue);
+    const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
+    const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
 
-  const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
-  const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
+    useEffect(() => {
+      userSelectedValue.current = value;
+    }, [value]);
 
-  useEffect(() => {
-    userSelectedValue.current = value;
-  }, [value]);
+    useEffect(() => setValue(parsedDefaultValue), [parsedDefaultValue]);
 
-  useEffect(() => setValue(parsedDefaultValue), [parsedDefaultValue]);
-
-  useEffect(() => {
-    if (getDayMonthRegex(dateFormat).test(value)) {
-      // Support only entering the month and day (4/5). This is complex
-      // because of the various date formats - we need to derive
-      // the right day/month format from it
-      const test = parse(value, getDayMonthFormat(dateFormat), new Date());
-      if (isValid(test)) {
-        onUpdate?.(format(test, 'yyyy-MM-dd'));
-        setSelectedValue(format(test, dateFormat));
-      }
-    } else if (getShortYearRegex(dateFormat).test(value)) {
-      // Support entering the year as only two digits (4/5/19)
-      const test = parse(value, getShortYearFormat(dateFormat), new Date());
-      if (isValid(test)) {
-        onUpdate?.(format(test, 'yyyy-MM-dd'));
-        setSelectedValue(format(test, dateFormat));
-      }
-    } else {
-      const test = parse(value, dateFormat, new Date());
-      if (isValid(test)) {
-        const date = format(test, 'yyyy-MM-dd');
-        onUpdate?.(date);
-        setSelectedValue(value);
-      }
-    }
-  }, [value]);
-
-  function onKeyDown(e: KeyboardEvent<HTMLInputElement>) {
-    if (
-      ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key) &&
-      !e.shiftKey &&
-      !e.metaKey &&
-      !e.altKey &&
-      open
-    ) {
-      picker.current.handleInputKeyDown(e);
-    } else if (e.key === 'Escape') {
-      setValue(parsedDefaultValue);
-      setSelectedValue(parsedDefaultValue);
-
-      if (parsedDefaultValue === value) {
-        if (open) {
-          if (!embedded) {
-            e.stopPropagation();
-          }
-
-          setOpen(false);
+    useEffect(() => {
+      if (getDayMonthRegex(dateFormat).test(value)) {
+        // Support only entering the month and day (4/5). This is complex
+        // because of the various date formats - we need to derive
+        // the right day/month format from it
+        const test = parse(value, getDayMonthFormat(dateFormat), new Date());
+        if (isValid(test)) {
+          onUpdate?.(format(test, 'yyyy-MM-dd'));
+          setSelectedValue(format(test, dateFormat));
+        }
+      } else if (getShortYearRegex(dateFormat).test(value)) {
+        // Support entering the year as only two digits (4/5/19)
+        const test = parse(value, getShortYearFormat(dateFormat), new Date());
+        if (isValid(test)) {
+          onUpdate?.(format(test, 'yyyy-MM-dd'));
+          setSelectedValue(format(test, dateFormat));
         }
       } else {
+        const test = parse(value, dateFormat, new Date());
+        if (isValid(test)) {
+          const date = format(test, 'yyyy-MM-dd');
+          onUpdate?.(date);
+          setSelectedValue(value);
+        }
+      }
+    }, [value]);
+
+    function onKeyDown(e: KeyboardEvent<HTMLInputElement>) {
+      if (
+        ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key) &&
+        !e.shiftKey &&
+        !e.metaKey &&
+        !e.altKey &&
+        open
+      ) {
+        picker.current.handleInputKeyDown(e);
+      } else if (e.key === 'Escape') {
+        setValue(parsedDefaultValue);
+        setSelectedValue(parsedDefaultValue);
+
+        if (parsedDefaultValue === value) {
+          if (open) {
+            if (!embedded) {
+              e.stopPropagation();
+            }
+
+            setOpen(false);
+          }
+        } else {
+          setOpen(true);
+          onUpdate?.(defaultValue);
+        }
+      } else if (shouldSaveFromKey(e)) {
+        setValue(selectedValue);
+        setOpen(false);
+
+        const date = parse(selectedValue, dateFormat, new Date());
+        onSelect(format(date, 'yyyy-MM-dd'));
+
+        if (open && e.key === 'Enter') {
+          // This stops the event from propagating up
+          e.stopPropagation();
+          e.preventDefault();
+        }
+
+        const { onKeyDown } = inputProps || {};
+        onKeyDown?.(e);
+      } else if (!open) {
         setOpen(true);
-        onUpdate?.(defaultValue);
-      }
-    } else if (shouldSaveFromKey(e)) {
-      setValue(selectedValue);
-      setOpen(false);
-
-      const date = parse(selectedValue, dateFormat, new Date());
-      onSelect(format(date, 'yyyy-MM-dd'));
-
-      if (open && e.key === 'Enter') {
-        // This stops the event from propagating up
-        e.stopPropagation();
-        e.preventDefault();
-      }
-
-      const { onKeyDown } = inputProps || {};
-      onKeyDown?.(e);
-    } else if (!open) {
-      setOpen(true);
-      if (inputRef.current) {
-        inputRef.current.setSelectionRange(0, 10000);
+        if (inputRef.current) {
+          inputRef.current.setSelectionRange(0, 10000);
+        }
       }
     }
-  }
 
-  function onChange(e) {
-    setValue(e.target.value);
-  }
-
-  const maybeWrapTooltip = content => {
-    if (embedded) {
-      return open ? content : null;
+    function onChange(e) {
+      setValue(e.target.value);
     }
+
+    const maybeWrapTooltip = content => {
+      if (embedded) {
+        return open ? content : null;
+      }
+
+      return (
+        <Popover
+          triggerRef={inputRef}
+          placement="bottom start"
+          offset={2}
+          isOpen={open}
+          isNonModal
+          onOpenChange={() => setOpen(false)}
+          style={{ ...styles.popover, minWidth: 225 }}
+          data-testid="date-select-tooltip"
+        >
+          {content}
+        </Popover>
+      );
+    };
 
     return (
-      <Popover
-        triggerRef={inputRef}
-        placement="bottom start"
-        offset={2}
-        isOpen={open}
-        isNonModal
-        onOpenChange={() => setOpen(false)}
-        style={{ ...styles.popover, minWidth: 225 }}
-        data-testid="date-select-tooltip"
-      >
-        {content}
-      </Popover>
-    );
-  };
+      <View {...containerProps}>
+        <Input
+          id={id}
+          {...inputProps}
+          autoFocus={autoFocus}
+          autoSelect={autoSelect}
+          ref={mergedRef}
+          value={value}
+          onPointerUp={() => {
+            if (!embedded) {
+              setOpen(true);
+            }
+          }}
+          onKeyDown={onKeyDown}
+          onChange={onChange}
+          onFocus={e => {
+            if (!embedded && openOnFocus) {
+              setOpen(true);
+            }
+            inputProps?.onFocus?.(e);
+          }}
+          onBlur={e => {
+            if (!embedded) {
+              setOpen(false);
+            }
+            inputProps?.onBlur?.(e);
 
-  return (
-    <View {...containerProps}>
-      <Input
-        id={id}
-        focused={focused}
-        {...inputProps}
-        inputRef={inputRef}
-        value={value}
-        onPointerUp={() => {
-          if (!embedded) {
-            setOpen(true);
-          }
-        }}
-        onKeyDown={onKeyDown}
-        onChange={onChange}
-        onFocus={e => {
-          if (!embedded && openOnFocus) {
-            setOpen(true);
-          }
-          inputProps?.onFocus?.(e);
-        }}
-        onBlur={e => {
-          if (!embedded) {
-            setOpen(false);
-          }
-          inputProps?.onBlur?.(e);
+            if (clearOnBlur) {
+              // If value is empty, that drives what gets selected.
+              // Otherwise the input is reset to whatever is already
+              // selected
+              if (value === '') {
+                setSelectedValue(null);
+                onSelect(null);
+              } else {
+                setValue(selectedValue || '');
 
-          if (clearOnBlur) {
-            // If value is empty, that drives what gets selected.
-            // Otherwise the input is reset to whatever is already
-            // selected
-            if (value === '') {
-              setSelectedValue(null);
-              onSelect(null);
-            } else {
-              setValue(selectedValue || '');
-
-              const date = parse(selectedValue, dateFormat, new Date());
-              if (date instanceof Date && !isNaN(date.valueOf())) {
-                onSelect(format(date, 'yyyy-MM-dd'));
+                const date = parse(selectedValue, dateFormat, new Date());
+                if (date instanceof Date && !isNaN(date.valueOf())) {
+                  onSelect(format(date, 'yyyy-MM-dd'));
+                }
               }
             }
-          }
-        }}
-      />
-      {maybeWrapTooltip(
-        <DatePicker
-          ref={picker}
-          value={selectedValue}
-          firstDayOfWeekIdx={firstDayOfWeekIdx}
-          dateFormat={dateFormat}
-          onUpdate={date => {
-            setSelectedValue(format(date, dateFormat));
-            onUpdate?.(format(date, 'yyyy-MM-dd'));
           }}
-          onSelect={date => {
-            setValue(format(date, dateFormat));
-            onSelect(format(date, 'yyyy-MM-dd'));
-            setOpen(false);
-          }}
-        />,
-      )}
-    </View>
-  );
-}
+        />
+        {maybeWrapTooltip(
+          <DatePicker
+            ref={picker}
+            value={selectedValue}
+            firstDayOfWeekIdx={firstDayOfWeekIdx}
+            dateFormat={dateFormat}
+            onUpdate={date => {
+              setSelectedValue(format(date, dateFormat));
+              onUpdate?.(format(date, 'yyyy-MM-dd'));
+            }}
+            onSelect={date => {
+              setValue(format(date, dateFormat));
+              onSelect(format(date, 'yyyy-MM-dd'));
+              setOpen(false);
+            }}
+          />,
+        )}
+      </View>
+    );
+  },
+);
+
+DateSelect.displayName = 'DateSelect';

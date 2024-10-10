@@ -66,7 +66,7 @@ export function PayeeAutocompleteModal({
           <PayeeAutocomplete
             payees={payees}
             accounts={accounts}
-            focused={true}
+            autoFocus={true}
             embedded={true}
             closeOnBlur={false}
             onClose={close}
