@@ -789,7 +789,7 @@ export function execActions(actions: Action[], transaction) {
   // Remove that entry from the subtransactions.
   update.subtransactions = update.subtransactions.slice(1);
 
-  return update;
+  return recalculateSplit(update);
 }
 
 export class Rule {
