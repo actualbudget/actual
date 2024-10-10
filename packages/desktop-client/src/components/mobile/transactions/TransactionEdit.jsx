@@ -16,7 +16,6 @@ import {
   parseISO,
   isValid as isValidDate,
 } from 'date-fns';
-import { css } from 'glamor';
 
 import { pushModal, setLastTransaction } from 'loot-core/client/actions';
 import { runQuery } from 'loot-core/src/client/query-helpers';
