@@ -58,6 +58,12 @@ contextBridge.exposeInMainWorld('Actual', {
     ipcRenderer.invoke('open-external-url', url);
   },
 
+  downloadActualServer: (releaseVersion: string) => {
+    return ipcRenderer.invoke('download-actual-server', {
+      releaseVersion,
+    });
+  },
+
   onEventFromMain: (type: string, handler: (...args: unknown[]) => void) => {
     ipcRenderer.on(type, handler);
   },

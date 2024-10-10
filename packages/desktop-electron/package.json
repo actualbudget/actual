@@ -85,6 +85,7 @@
     "npmRebuild": false
   },
   "dependencies": {
+    "adm-zip": "^0.5.10",
     "better-sqlite3": "^9.6.0",
     "fs-extra": "^11.2.0",
     "node-fetch": "^2.7.0",

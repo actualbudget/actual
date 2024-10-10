@@ -8432,6 +8432,7 @@ __metadata:
     "@electron/rebuild": "npm:3.6.0"
     "@types/copyfiles": "npm:^2"
     "@types/fs-extra": "npm:^11"
+    adm-zip: "npm:^0.5.10"
     better-sqlite3: "npm:^9.6.0"
     copyfiles: "npm:^2.4.1"
     cross-env: "npm:^7.0.3"
