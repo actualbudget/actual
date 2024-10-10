@@ -6,6 +6,7 @@ declare global {
       IS_FAKE_WEB: boolean;
       ACTUAL_VERSION: string;
       openURLInBrowser: (url: string) => void;
+      downloadActualServer: (releaseVersion: string) => Promise<void>;
       saveFile: (
         contents: string | Buffer,
         filename: string,

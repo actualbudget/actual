@@ -26,6 +26,7 @@ import {
 } from './window-state';
 
 import './security';
+import AdmZip from 'adm-zip';
 
 const isDev = !app.isPackaged; // dev mode if not packaged
 
@@ -372,6 +373,33 @@ ipcMain.handle(
 ipcMain.handle('open-external-url', (event, url) => {
   shell.openExternal(url);
 });
+
+ipcMain.handle(
+  'download-actual-server',
+  async (_event, payload: { releaseVersion: string }) => {
+    console.info({ payload });
+    const downloadUrl = `https://github.com/MikesGlitch/actual-server/releases/download/${payload.releaseVersion}/${payload.releaseVersion}-server-sync-dist.zip`;
+
+    try {
+      const res = await fetch(downloadUrl);
+      const arrBuffer = await res.arrayBuffer();
+      const zipped = new AdmZip(Buffer.from(arrBuffer));
+      console.info(
+        'actual-server will be installed here:',
+        process.env.ACTUAL_DATA_DIR,
+      );
+      zipped.extractAllTo(
+        process.env.ACTUAL_DATA_DIR + '/actual-server-releases',
+        true,
+        false,
+      );
+      return { error: undefined };
+    } catch (error) {
+      console.error('Error retrieving actual-server:', error);
+      return { error };
+    }
+  },
+);
 
 ipcMain.on('message', (_event, msg) => {
   if (!serverProcess) {
