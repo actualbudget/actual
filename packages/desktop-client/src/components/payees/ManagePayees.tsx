@@ -6,9 +6,9 @@ import {
   type ComponentProps,
 } from 'react';
 
-import memoizeOne from 'memoize-one';
-
 import { useTranslation } from 'react-i18next';
+
+import memoizeOne from 'memoize-one';
 
 import { getNormalisedString } from 'loot-core/src/shared/normalisation';
 import { groupById } from 'loot-core/src/shared/util';
