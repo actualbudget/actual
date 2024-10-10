@@ -16,6 +16,7 @@ import {
 } from '../../types/models';
 import { schemaConfig } from '../aql';
 import * as db from '../db';
+import { getPayee, getPayeeByName, insertPayee } from '../db';
 import { getMappings } from '../db/mappings';
 import { RuleError } from '../errors';
 import { requiredFields, toDateRepr } from '../models';
@@ -273,8 +274,8 @@ function onApplySync(oldValues, newValues) {
 }
 
 // Runner
-export function runRules(trans) {
-  let finalTrans = { ...trans };
+export async function runRules(trans) {
+  let finalTrans = await prepareTransactionForRules({ ...trans });
 
   const rules = rankRules(
     fastSetMerge(
@@ -287,7 +288,7 @@ export function runRules(trans) {
     finalTrans = rules[i].apply(finalTrans);
   }
 
-  return finalTrans;
+  return await finalizeTransactionForRules(finalTrans);
 }
 
 // This does the inverse: finds all the transactions matching a rule
@@ -539,11 +540,20 @@ export async function applyActions(
     return null;
   }
 
-  const updated = transactions.flatMap(trans => {
+  const transactionsForRules = await Promise.all(
+    transactions.map(prepareTransactionForRules),
+  );
+
+  const updated = transactionsForRules.flatMap(trans => {
     return ungroupTransaction(execActions(parsedActions, trans));
   });
 
-  return batchUpdateTransactions({ updated });
+  const finalized: TransactionEntity[] = [];
+  for (const trans of updated) {
+    finalized.push(await finalizeTransactionForRules(trans));
+  }
+
+  return batchUpdateTransactions({ updated: finalized });
 }
 
 export function getRulesForPayee(payeeId) {
@@ -758,4 +768,43 @@ export async function updateCategoryRules(transactions) {
       }
     }
   });
+}
+
+export type TransactionForRules = TransactionEntity & {
+  payee_name?: string;
+};
+
+export async function prepareTransactionForRules(
+  trans: TransactionEntity,
+): Promise<TransactionForRules> {
+  const r: TransactionForRules = { ...trans };
+  if (trans.payee) {
+    const payee = await getPayee(trans.payee);
+    if (payee) {
+      r.payee_name = payee.name;
+    }
+  }
+
+  return r;
+}
+
+export async function finalizeTransactionForRules(
+  trans: TransactionEntity | TransactionForRules,
+): Promise<TransactionEntity> {
+  if ('payee_name' in trans) {
+    if (trans.payee_name) {
+      let payeeId = (await getPayeeByName(trans.payee_name))?.id;
+      payeeId ??= await insertPayee({
+        name: trans.payee_name,
+      });
+
+      trans.payee = payeeId;
+    } else {
+      trans.payee = null;
+    }
+
+    delete trans.payee_name;
+  }
+
+  return trans;
 }
