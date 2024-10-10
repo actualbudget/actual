@@ -1,5 +1,5 @@
 import React from 'react';
-import { Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 
 import { closeBudget } from 'loot-core/client/actions';
@@ -14,6 +14,8 @@ import { View } from '../common/View';
 export function OutOfSyncMigrationsModal() {
   const dispatch = useDispatch();
 
+  const { t } = useTranslation();
+
   const closeBudgetAndModal = (close: () => void) => {
     dispatch(closeBudget());
     close();
@@ -23,7 +25,9 @@ export function OutOfSyncMigrationsModal() {
     <Modal name="out-of-sync-migrations">
       {({ state: { close } }) => (
         <>
-          <ModalHeader title={<ModalTitle title="Please update Actual!" />} />
+          <ModalHeader
+            title={<ModalTitle title={t('Please update Actual!')} />}
+          />
           <View
             style={{
               padding: 15,
@@ -36,10 +40,12 @@ export function OutOfSyncMigrationsModal() {
           >
             <Text>
               <Paragraph style={{ fontSize: 16 }}>
-                It looks like you&apos;re using an outdated version of the
-                Actual. Your budget data has been updated by another client, but
-                this client is still on the old verison. For the best
-                experience, please update Actual to the latest version.
+                <Trans>
+                  It looks like you&apos;re using an outdated version of the
+                  Actual client. Your budget data has been updated by another
+                  client, but this client is still on the old verison. For the
+                  best experience, please update Actual to the latest version.
+                </Trans>
               </Paragraph>
             </Text>
 
