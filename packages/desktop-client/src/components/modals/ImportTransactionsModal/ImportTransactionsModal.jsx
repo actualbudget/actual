@@ -1045,8 +1045,9 @@ export function ImportTransactionsModal({ options }) {
                 variant="primary"
                 autoFocus
                 isDisabled={
-                  transactions?.filter(trans => !trans.isMatchedTransaction)
-                    .length === 0
+                  transactions?.filter(
+                    trans => !trans.isMatchedTransaction && trans.selected,
+                  ).length === 0
                 }
                 isLoading={loadingState === 'importing'}
                 onPress={() => {
@@ -1055,8 +1056,9 @@ export function ImportTransactionsModal({ options }) {
               >
                 Import{' '}
                 {
-                  transactions?.filter(trans => !trans.isMatchedTransaction)
-                    .length
+                  transactions?.filter(
+                    trans => !trans.isMatchedTransaction && trans.selected,
+                  ).length
                 }{' '}
                 transactions
               </ButtonWithLoading>
