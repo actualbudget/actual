@@ -194,7 +194,7 @@ async function importDashboard({ filepath }: { filepath: string }) {
             y: widget.y,
             meta: isExportedCustomReportWidget(widget)
               ? { id: widget.meta.id }
-              : null,
+              : widget.meta,
           }),
         ),
 
