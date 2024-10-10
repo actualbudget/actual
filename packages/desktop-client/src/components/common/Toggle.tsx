@@ -2,29 +2,34 @@ import React from 'react';
 
 import { css } from 'glamor';
 
-import { theme, type CSSProperties } from '../../style';
+import { type CSSProperties, theme } from '../../style';
+
+import { View } from './View';
 
 type ToggleProps = {
   id: string;
-  checked: boolean;
-  onToggle?: () => void;
-  onColor?: string;
+  isOn: boolean;
+  isDisabled?: boolean;
+  onToggle?: (isOn: boolean) => void;
+  className?: string;
   style?: CSSProperties;
 };
 
 export const Toggle = ({
   id,
-  checked,
+  isOn,
+  isDisabled = false,
   onToggle,
-  onColor,
+  className,
   style,
 }: ToggleProps) => {
   return (
-    <div style={{ marginTop: -20, ...style }}>
+    <View style={style} className={className}>
       <input
         id={id}
-        checked={checked}
-        onChange={onToggle}
+        checked={isOn}
+        disabled={isDisabled}
+        onChange={e => onToggle?.(e.target.checked)}
         className={`${css({
           height: 0,
           width: 0,
@@ -33,9 +38,8 @@ export const Toggle = ({
         type="checkbox"
       />
       <label
-        style={{
-          background: checked ? onColor : theme.checkboxToggleBackground,
-        }}
+        data-toggle-container
+        data-on={isOn}
         className={`${css({
           display: 'flex',
           alignItems: 'center',
@@ -46,13 +50,18 @@ export const Toggle = ({
           borderRadius: '100px',
           position: 'relative',
           transition: 'background-color .2s',
+          background: isOn
+            ? theme.checkboxToggleBackgroundSelected
+            : theme.checkboxToggleBackground,
         })}`}
         htmlFor={id}
       >
         <span
+          data-toggle
+          data-on={isOn}
           className={`${css(
             {
-              content: '',
+              content: ' ',
               position: 'absolute',
               top: '2px',
               left: '2px',
@@ -60,16 +69,16 @@ export const Toggle = ({
               height: '12px',
               borderRadius: '100px',
               transition: '0.2s',
-              background: '#fff',
               boxShadow: '0 0 2px 0 rgba(10, 10, 10, 0.29)',
+              background: isDisabled ? theme.checkboxToggleDisabled : '#fff',
             },
-            checked && {
+            isOn && {
               left: 'calc(100% - 2px)',
               transform: 'translateX(-100%)',
             },
           )}`}
         />
       </label>
-    </div>
+    </View>
   );
 };

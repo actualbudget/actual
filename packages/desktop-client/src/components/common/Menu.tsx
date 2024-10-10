@@ -207,15 +207,20 @@ export function Menu<const NameType = string>({
                 <View style={{ flex: 1 }} />
               </>
             ) : (
-              <>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  flex: 1,
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                }}
+              >
                 <label htmlFor={String(item.name)} title={item.tooltip}>
                   {item.text}
                 </label>
-                <View style={{ flex: 1 }} />
                 <Toggle
                   id={String(item.name)}
-                  checked={item.toggle}
-                  onColor={theme.pageTextPositive}
+                  isOn={item.toggle}
                   style={{ marginLeft: 5 }}
                   onToggle={() =>
                     !item.disabled &&
@@ -224,7 +229,7 @@ export function Menu<const NameType = string>({
                     onMenuSelect?.(item.name)
                   }
                 />
-              </>
+              </View>
             )}
             {item.key && <Keybinding keyName={item.key} />}
           </View>
