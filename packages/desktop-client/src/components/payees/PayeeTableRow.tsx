@@ -71,10 +71,10 @@ type PayeeTableRowProps = {
   focusedField: string;
   onHover?: (id: PayeeEntity['id']) => void;
   onEdit: (id: PayeeEntity['id'], field: string) => void;
-  onUpdate: (
+  onUpdate: <T extends EditablePayeeFields>(
     id: PayeeEntity['id'],
-    field: EditablePayeeFields,
-    value: unknown,
+    field: T,
+    value: PayeeEntity[T],
   ) => void;
   onViewRules: (id: PayeeEntity['id']) => void;
   onCreateRule: (id: PayeeEntity['id']) => void;

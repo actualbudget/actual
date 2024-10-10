@@ -1,8 +1,11 @@
 import { parseDate } from './utils';
 
-describe('Import transactions', function () {
-  describe('date parsing', function () {
-    const invalidInputs = [
+describe('Import transactions', () => {
+  describe('date parsing', () => {
+    const invalidInputs: Array<{
+      str: Parameters<typeof parseDate>[0];
+      order: Parameters<typeof parseDate>[1];
+    }> = [
       { str: '', order: 'yyyy mm dd' },
       { str: null, order: 'yyyy mm dd' },
       { str: 42, order: 'yyyy mm dd' },
@@ -37,7 +40,10 @@ describe('Import transactions', function () {
       },
     );
 
-    const validInputs = [
+    const validInputs: Array<{
+      order: Parameters<typeof parseDate>[1];
+      cases: [Parameters<typeof parseDate>[0], ReturnType<typeof parseDate>][];
+    }> = [
       {
         order: 'yyyy mm dd',
         cases: [
