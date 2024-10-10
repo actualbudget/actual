@@ -49,7 +49,10 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
 
     useEffect(() => {
       if (autoSelect) {
-        inputRef.current?.select();
+        // Select on mount does not work properly for inputs that are inside a dialog.
+        // See https://github.com/facebook/react/issues/23301#issuecomment-1656908450
+        // for the reason why we need to use setTimeout here.
+        setTimeout(() => inputRef.current?.select());
       }
     }, [autoSelect]);
 
@@ -107,17 +110,24 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
 
 Input.displayName = 'Input';
 
-export function BigInput(props: InputProps) {
-  return (
-    <Input
-      {...props}
-      className={`${css({
-        padding: 10,
-        fontSize: 15,
-        border: 'none',
-        ...styles.shadow,
-        '&[data-focused]': { border: 'none', ...styles.shadow },
-      })} ${props.className}`}
-    />
-  );
-}
+type BigInputProps = InputProps;
+
+export const BigInput = forwardRef<HTMLInputElement, BigInputProps>(
+  (props, ref) => {
+    return (
+      <Input
+        ref={ref}
+        {...props}
+        className={`${css({
+          padding: 10,
+          fontSize: 15,
+          border: 'none',
+          ...styles.shadow,
+          '&[data-focused]': { border: 'none', ...styles.shadow },
+        })} ${props.className}`}
+      />
+    );
+  },
+);
+
+BigInput.displayName = 'BigInput';
