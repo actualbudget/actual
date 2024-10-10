@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useCallback } from 'react';
-import { useTranslation } from 'react-i18next';
-
+import { Trans, useTranslation } from 'react-i18next';
+import * as d from 'date-fns';
 import { Bar, BarChart, LabelList, ResponsiveContainer } from 'recharts';
 
 import { integerToCurrency } from 'loot-core/src/shared/util';
@@ -20,7 +20,11 @@ import { ReportCardName } from '../ReportCardName';
 import { calculateTimeRange } from '../reportRanges';
 import { simpleCashFlow } from '../spreadsheets/cash-flow-spreadsheet';
 import { useReport } from '../useReport';
-
+import { CashFlowGraph } from '../graphs/CashFlowGraph';
+import { AlignedText } from '../../common/AlignedText';
+import { Block } from '../../common/Block';
+import { Text } from '../../common/Text';
+import { cashFlowByDate } from '../spreadsheets/cash-flow-spreadsheet';
 import { defaultTimeFrame } from './CashFlow';
 
 type CustomLabelProps = {
@@ -83,6 +87,127 @@ function CustomLabel({
   );
 }
 
+function retViewCondensed (isCardHovered, income, expenses) {
+  console.log(income, expenses);
+  return <View style={{ textAlign: 'right' }}>
+      <PrivacyFilter activationFilters={[!isCardHovered]}>
+        <Change amount={income - expenses} />
+      </PrivacyFilter>
+    </View>;
+}
+
+function retChartCondensed (width, height, income, expenses, t){
+ console.log(width, height, income, expenses);
+
+  return <BarChart
+            width={width}
+            height={height}
+            data={[
+              {
+                income,
+                expenses,
+              },
+            ]}
+            margin={{
+              top: 10,
+              bottom: 0,
+            }}
+          >
+            <Bar
+              dataKey="income"
+              fill={chartTheme.colors.blue}
+              barSize={14}
+            >
+              <LabelList
+                dataKey="income"
+                position="left"
+                content={<CustomLabel name={t('Income')} />}
+              />
+            </Bar>
+
+            <Bar
+              dataKey="expenses"
+              fill={chartTheme.colors.red}
+              barSize={14}
+            >
+              <LabelList
+                dataKey="expenses"
+                position="right"
+                content={<CustomLabel name={t('Expenses')} />}
+              />
+            </Bar>
+          </BarChart>;
+}
+
+function retViewDetailed(totalIncome, totalExpenses, totalTransfers, isCardHovered) {
+ return <View
+        style={{
+          paddingTop: 20,
+          alignItems: 'flex-end',
+          color: theme.pageText,
+        }}
+        >
+        <AlignedText
+          style={{ marginBottom: 5, minWidth: 160 }}
+          left={
+            <Block>
+              <Trans>Income:</Trans>
+            </Block>
+          }
+          right={
+            <Text style={{ fontWeight: 600 }}>
+              <PrivacyFilter>{integerToCurrency(totalIncome)}</PrivacyFilter>
+            </Text>
+          }
+        />
+
+        <AlignedText
+          style={{ marginBottom: 5, minWidth: 160 }}
+          left={
+            <Block>
+              <Trans>Expenses:</Trans>
+            </Block>
+          }
+          right={
+            <Text style={{ fontWeight: 600 }}>
+              <PrivacyFilter>
+                {integerToCurrency(totalExpenses)}
+              </PrivacyFilter>
+            </Text>
+          }
+        />
+
+        <AlignedText
+          style={{ marginBottom: 5, minWidth: 160 }}
+          left={
+            <Block>
+              <Trans>Transfers:</Trans>
+            </Block>
+          }
+          right={
+            <Text style={{ fontWeight: 600 }}>
+              <PrivacyFilter>
+                {integerToCurrency(totalTransfers)}
+              </PrivacyFilter>
+            </Text>
+          }
+        />
+        <Text style={{ fontWeight: 600 }}>
+          <PrivacyFilter activationFilters={[!isCardHovered]}>
+            <Change amount={totalIncome + totalExpenses + totalTransfers} />
+          </PrivacyFilter>
+        </Text>
+      </View>;
+}
+
+function retChartDetailed(graphData, isConcise){
+  return <CashFlowGraph
+      graphData={graphData}
+      isConcise={isConcise}
+      showBalance={true}
+    />;
+}
+
 type CashFlowCardProps = {
   widgetId: string;
   isEditing?: boolean;
@@ -104,20 +229,43 @@ export function CashFlowCard({
   const [start, end] = calculateTimeRange(meta?.timeFrame, defaultTimeFrame);
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
 
-  const params = useMemo(
-    () => simpleCashFlow(start, end, meta?.conditions, meta?.conditionsOp),
-    [start, end, meta?.conditions, meta?.conditionsOp],
-  );
-  const data = useReport('cash_flow_simple', params);
-
+  const isConcise = (() => {
+    const numDays = d.differenceInCalendarDays(
+      d.parseISO(end),
+      d.parseISO(start),
+    );
+    return numDays > 31 * 3;
+  })();
+  
   const [isCardHovered, setIsCardHovered] = useState(false);
   const onCardHover = useCallback(() => setIsCardHovered(true), []);
   const onCardHoverEnd = useCallback(() => setIsCardHovered(false), []);
+  
+  let data, graphData, totalExpenses, totalIncome, totalTransfers, expenses, income;
 
-  const { graphData } = data || {};
-  const expenses = -(graphData?.expense || 0);
-  const income = graphData?.income || 0;
-
+  if(meta?.isCondensed){
+    const params = useMemo(
+      () => simpleCashFlow(start, end, meta?.conditions, meta?.conditionsOp),
+      [start, end, meta?.conditions, meta?.conditionsOp],
+    );
+    data = useReport('cash_flow_simple', params);
+    
+    graphData = data?.graphData || {};
+    income = (graphData?.income || 0);     
+    expenses = -(graphData?.expense || 0);     
+  }else{    
+    const params = useMemo(
+      () => cashFlowByDate(start, end, isConcise, meta?.conditions, meta?.conditionsOp),
+      [start, end, isConcise, meta?.conditions, meta?.conditionsOp],
+    );
+    data = useReport('cash_flow', params);
+  
+    graphData = data?.graphData || {};
+    totalExpenses = data?.totalExpenses || 0;
+    totalIncome = data?.totalIncome || 0;
+    totalTransfers = data?.totalTransfers || 0;
+  }
+  
   return (
     <ReportCard
       isEditing={isEditing}
@@ -171,11 +319,7 @@ export function CashFlowCard({
             <DateRange start={start} end={end} />
           </View>
           {data && (
-            <View style={{ textAlign: 'right' }}>
-              <PrivacyFilter activationFilters={[!isCardHovered]}>
-                <Change amount={income - expenses} />
-              </PrivacyFilter>
-            </View>
+            meta?.isCondensed ? retViewCondensed(isCardHovered, income, expenses) : retViewDetailed(totalIncome, totalExpenses, totalTransfers, isCardHovered)
           )}
         </View>
 
@@ -183,44 +327,7 @@ export function CashFlowCard({
           <Container style={{ height: 'auto', flex: 1 }}>
             {(width, height) => (
               <ResponsiveContainer>
-                <BarChart
-                  width={width}
-                  height={height}
-                  data={[
-                    {
-                      income,
-                      expenses,
-                    },
-                  ]}
-                  margin={{
-                    top: 10,
-                    bottom: 0,
-                  }}
-                >
-                  <Bar
-                    dataKey="income"
-                    fill={chartTheme.colors.blue}
-                    barSize={14}
-                  >
-                    <LabelList
-                      dataKey="income"
-                      position="left"
-                      content={<CustomLabel name={t('Income')} />}
-                    />
-                  </Bar>
-
-                  <Bar
-                    dataKey="expenses"
-                    fill={chartTheme.colors.red}
-                    barSize={14}
-                  >
-                    <LabelList
-                      dataKey="expenses"
-                      position="right"
-                      content={<CustomLabel name={t('Expenses')} />}
-                    />
-                  </Bar>
-                </BarChart>
+                   { meta?.isCondensed ? retChartCondensed(width, height, income, expenses, t) : retChartDetailed(graphData, isConcise) }    
               </ResponsiveContainer>
             )}
           </Container>

@@ -91,6 +91,7 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
   const [end, setEnd] = useState(initialEnd);
   const [mode, setMode] = useState(initialMode);
   const [showBalance, setShowBalance] = useState(true);
+  const [isCondensed, setIsCondensed] = useState(widget?.meta?.isCondensed ?? false);
 
   const [isConcise, setIsConcise] = useState(() => {
     const numDays = d.differenceInCalendarDays(
@@ -158,6 +159,7 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
           end,
           mode,
         },
+        isCondensed
       },
     });
     dispatch(
@@ -234,6 +236,10 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
         <View style={{ flexDirection: 'row', gap: 10 }}>
           <Button onPress={() => setShowBalance(state => !state)}>
             {showBalance ? t('Hide balance') : t('Show balance')}
+          </Button>
+          
+          <Button onPress={ () => setIsCondensed(state => !state) }>
+            {isCondensed ? t('Set detailed view') : t('Set condensed view')}
           </Button>
 
           {widget && (
