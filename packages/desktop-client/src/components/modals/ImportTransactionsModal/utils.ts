@@ -10,18 +10,27 @@ export const dateFormats = [
   { format: 'mm dd yy', label: 'MM DD YY' },
   { format: 'dd mm yyyy', label: 'DD MM YYYY' },
   { format: 'dd mm yy', label: 'DD MM YY' },
-];
+] as const;
 
-export function parseDate(str, order) {
+export function parseDate(
+  str: string | number | null | Array<unknown> | object,
+  order:
+    | 'yyyy mm dd'
+    | 'yy mm dd'
+    | 'mm dd yyyy'
+    | 'mm dd yy'
+    | 'dd mm yyyy'
+    | 'dd mm yy',
+) {
   if (typeof str !== 'string') {
     return null;
   }
 
-  function pad(v) {
+  function pad(v: string) {
     return v && v.length === 1 ? '0' + v : v;
   }
 
-  const dateGroups = (a, b) => str => {
+  const dateGroups = (a: number, b: number) => (str: string) => {
     const parts = str
       .replace(/\bjan(\.|uary)?\b/i, '01')
       .replace(/\bfeb(\.|ruary)?\b/i, '02')
@@ -48,7 +57,7 @@ export function parseDate(str, order) {
   const yearFirst = dateGroups(4, 2);
   const twoDig = dateGroups(2, 2);
 
-  let parts, year, month, day;
+  let parts: string[], year: string, month: string, day: string;
   switch (order) {
     case 'dd mm yyyy':
       parts = twoDig(str);
@@ -95,7 +104,10 @@ export function parseDate(str, order) {
   return parsed;
 }
 
-export function formatDate(date, format) {
+export function formatDate(
+  date: Parameters<typeof formatDate_>[0] | null,
+  format: Parameters<typeof formatDate_>[1],
+) {
   if (!date) {
     return null;
   }
@@ -105,14 +117,36 @@ export function formatDate(date, format) {
   return null;
 }
 
-export function applyFieldMappings(transaction, mappings) {
-  const result = {};
-  for (const [originalField, target] of Object.entries(mappings)) {
-    let field = originalField;
-    if (field === 'payee') {
-      field = 'payee_name';
-    }
+export type ImportTransaction = {
+  trx_id: string;
+  existing: boolean;
+  ignored: boolean;
+  selected: boolean;
+  selected_merge: boolean;
+  amount: number;
+  inflow: number;
+  outflow: number;
+  inOut: number;
+} & Record<string, string>;
 
+export type FieldMapping = {
+  date: string | null;
+  amount: string | null;
+  payee: string | null;
+  notes: string | null;
+  inOut: string | null;
+  category: string | null;
+  outflow: string | null;
+  inflow: string | null;
+};
+
+export function applyFieldMappings(
+  transaction: ImportTransaction,
+  mappings: FieldMapping,
+) {
+  const result: Partial<ImportTransaction> = {};
+  for (const [originalField, target] of Object.entries(mappings)) {
+    const field = originalField === 'payee' ? 'payee_name' : originalField;
     result[field] = transaction[target || field];
   }
   // Keep preview fields on the mapped transactions
@@ -121,10 +155,14 @@ export function applyFieldMappings(transaction, mappings) {
   result.ignored = transaction.ignored;
   result.selected = transaction.selected;
   result.selected_merge = transaction.selected_merge;
-  return result;
+  return result as ImportTransaction;
 }
 
-function parseAmount(amount, mapper, multiplier) {
+function parseAmount(
+  amount: number | string | undefined | null,
+  mapper: (parsed: number) => number,
+  multiplier: number,
+) {
   if (amount == null) {
     return null;
   }
@@ -140,12 +178,12 @@ function parseAmount(amount, mapper, multiplier) {
 }
 
 export function parseAmountFields(
-  trans,
-  splitMode,
-  inOutMode,
-  outValue,
-  flipAmount,
-  multiplierAmount,
+  trans: Partial<ImportTransaction>,
+  splitMode: boolean,
+  inOutMode: boolean,
+  outValue: number,
+  flipAmount: boolean,
+  multiplierAmount: string,
 ) {
   const multiplier = parseFloat(multiplierAmount) || 1.0;
 
@@ -186,7 +224,7 @@ export function parseAmountFields(
   };
 }
 
-export function stripCsvImportTransaction(transaction) {
+export function stripCsvImportTransaction(transaction: ImportTransaction) {
   const { existing, ignored, selected, selected_merge, trx_id, ...trans } =
     transaction;
 

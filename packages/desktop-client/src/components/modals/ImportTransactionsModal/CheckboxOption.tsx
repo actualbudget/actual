@@ -1,8 +1,17 @@
-import React from 'react';
+import React, { type ComponentProps, type ReactNode } from 'react';
 
-import { theme } from '../../../style';
+import { type CSSProperties, theme } from '../../../style';
 import { View } from '../../common/View';
 import { Checkbox } from '../../forms';
+
+type CheckboxOptionProps = {
+  id: string;
+  checked?: ComponentProps<typeof Checkbox>['checked'];
+  disabled?: ComponentProps<typeof Checkbox>['disabled'];
+  onChange?: ComponentProps<typeof Checkbox>['onChange'];
+  children: ReactNode;
+  style?: CSSProperties;
+};
 
 export function CheckboxOption({
   id,
@@ -11,7 +20,7 @@ export function CheckboxOption({
   onChange,
   children,
   style,
-}) {
+}: CheckboxOptionProps) {
   return (
     <View
       style={{
@@ -33,7 +42,7 @@ export function CheckboxOption({
         htmlFor={id}
         style={{
           userSelect: 'none',
-          color: disabled ? theme.pageTextSubdued : null,
+          color: disabled ? theme.pageTextSubdued : undefined,
         }}
       >
         {children}
