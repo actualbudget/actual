@@ -133,7 +133,7 @@ export const Modal = ({
               }}
             >
               <View style={{ paddingTop: 0, flex: 1, flexShrink: 0 }}>
-                <FocusScope autoFocus restoreFocus contain>
+                <FocusScope autoFocus restoreFocus>
                   {typeof children === 'function'
                     ? children(modalProps)
                     : children}
