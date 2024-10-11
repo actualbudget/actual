@@ -148,7 +148,9 @@ export function diffItems<T extends { id: string }>(
   return { added, updated, deleted };
 }
 
-export function groupById<T extends { id: string }>(data: T[]) {
+export function groupById<T extends { id: string }>(
+  data: T[],
+): Record<string, T> {
   const res: { [key: string]: T } = {};
   for (let i = 0; i < data.length; i++) {
     const item = data[i];

@@ -28,6 +28,7 @@
     "csv-stringify": "^5.6.5",
     "date-fns": "^2.30.0",
     "deep-equal": "^2.2.3",
+    "handlebars": "^4.7.8",
     "lru-cache": "^5.1.1",
     "md5": "^2.3.0",
     "memoize-one": "^6.0.0",

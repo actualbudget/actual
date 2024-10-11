@@ -110,6 +110,12 @@ export function ExperimentalFeatures() {
             >
               <Trans>Customizable reports page (dashboards)</Trans>
             </FeatureToggle>
+            <FeatureToggle
+              flag="actionTemplating"
+              feedbackLink="https://github.com/actualbudget/actual/issues/3606"
+            >
+              <Trans>Rule action templating</Trans>
+            </FeatureToggle>
           </View>
         ) : (
           <Link

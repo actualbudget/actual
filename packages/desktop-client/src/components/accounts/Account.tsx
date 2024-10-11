@@ -489,8 +489,12 @@ class AccountInternal extends PureComponent<
       this.paged.unsubscribe();
     }
 
-    // Filter out reconciled transactions if necessary.
-    if (!this.state.showReconciled) {
+    // Filter out reconciled transactions if they are hidden
+    // and we're not showing balances.
+    if (
+      !this.state.showReconciled &&
+      (!this.state.showBalances || !this.canCalculateBalance())
+    ) {
       query = query.filter({ reconciled: { $eq: false } });
     }
 
@@ -1756,6 +1760,7 @@ class AccountInternal extends PureComponent<
                   payees={payees}
                   balances={allBalances}
                   showBalances={!!allBalances}
+                  showReconciled={showReconciled}
                   showCleared={showCleared}
                   showAccount={
                     !accountId ||
