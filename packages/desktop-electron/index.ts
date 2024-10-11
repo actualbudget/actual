@@ -410,7 +410,7 @@ ipcMain.handle(
     );
 
     const actualServerProcess = utilityProcess.fork(
-      __dirname + '/actualServer.js',
+      serverReleaseDir + '/app.js',
       ['--subprocess', serverReleaseDir],
       isDev ? { execArgv: ['--inspect'], stdio: 'pipe' } : { stdio: 'pipe' },
     );
