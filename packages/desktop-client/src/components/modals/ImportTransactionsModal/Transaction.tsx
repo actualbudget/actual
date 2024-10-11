@@ -1,6 +1,7 @@
-import React, { useMemo } from 'react';
+import React, { type ComponentProps, useMemo } from 'react';
 
 import { amountToCurrency } from 'loot-core/src/shared/util';
+import { type CategoryEntity } from 'loot-core/types/models';
 
 import { SvgDownAndRightArrow } from '../../../icons/v2';
 import { theme, styles } from '../../../style';
@@ -11,7 +12,29 @@ import { Checkbox } from '../../forms';
 import { Row, Field } from '../../table';
 
 import { ParsedDate } from './ParsedDate';
-import { applyFieldMappings, formatDate, parseAmountFields } from './utils';
+import {
+  applyFieldMappings,
+  type FieldMapping,
+  formatDate,
+  type ImportTransaction,
+  parseAmountFields,
+} from './utils';
+
+type TransactionProps = {
+  transaction: ImportTransaction;
+  fieldMappings: FieldMapping;
+  showParsed: boolean;
+  parseDateFormat: ComponentProps<typeof ParsedDate>['parseDateFormat'];
+  dateFormat: ComponentProps<typeof ParsedDate>['dateFormat'];
+  splitMode: boolean;
+  inOutMode: boolean;
+  outValue: number;
+  flipAmount: boolean;
+  multiplierAmount: string;
+  categories: CategoryEntity[];
+  onCheckTransaction: (transactionId: string) => void;
+  reconcile: boolean;
+};
 
 export function Transaction({
   transaction: rawTransaction,
@@ -27,7 +50,7 @@ export function Transaction({
   categories,
   onCheckTransaction,
   reconcile,
-}) {
+}: TransactionProps) {
   const categoryList = categories.map(category => category.name);
   const transaction = useMemo(
     () =>
@@ -37,23 +60,34 @@ export function Transaction({
     [rawTransaction, fieldMappings],
   );
 
-  let amount, outflow, inflow;
-  if (rawTransaction.isMatchedTransaction) {
-    amount = rawTransaction.amount;
-    if (splitMode) {
-      outflow = amount < 0 ? -amount : 0;
-      inflow = amount > 0 ? amount : 0;
+  const { amount, outflow, inflow } = useMemo(() => {
+    if (rawTransaction.isMatchedTransaction) {
+      const amount = rawTransaction.amount;
+
+      return {
+        amount,
+        outflow: splitMode ? (amount < 0 ? -amount : 0) : null,
+        inflow: splitMode ? (amount > 0 ? amount : 0) : null,
+      };
     }
-  } else {
-    ({ amount, outflow, inflow } = parseAmountFields(
+
+    return parseAmountFields(
       transaction,
       splitMode,
       inOutMode,
       outValue,
       flipAmount,
       multiplierAmount,
-    ));
-  }
+    );
+  }, [
+    rawTransaction,
+    transaction,
+    splitMode,
+    inOutMode,
+    outValue,
+    flipAmount,
+    multiplierAmount,
+  ]);
 
   return (
     <Row
@@ -214,7 +248,11 @@ export function Transaction({
             <Field
               width={90}
               contentStyle={{ textAlign: 'left', ...styles.tnum }}
-              title={transaction.inOut}
+              title={
+                transaction.inOut === undefined
+                  ? undefined
+                  : String(transaction.inOut)
+              }
             >
               {transaction.inOut}
             </Field>
