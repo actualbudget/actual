@@ -1,11 +1,12 @@
 // @ts-strict-ignore
-import React, { type FormEvent, useState } from 'react';
+import { type FormEvent, useState } from 'react';
 import { Form } from 'react-aria-components';
 import { useDispatch } from 'react-redux';
 
 import { closeModal, createAccount } from 'loot-core/client/actions';
 import { toRelaxedNumber } from 'loot-core/src/shared/util';
 
+import * as useAccounts from '../../hooks/useAccounts';
 import { useNavigate } from '../../hooks/useNavigate';
 import { theme } from '../../style';
 import { Button } from '../common/Button2';
@@ -24,24 +25,35 @@ import {
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { Checkbox } from '../forms';
+import { validateAccountName } from '../util/accountValidation';
 
 export function CreateLocalAccountModal() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const accounts = useAccounts.useAccounts();
   const [name, setName] = useState('');
   const [offbudget, setOffbudget] = useState(false);
   const [balance, setBalance] = useState('0');
 
-  const [nameError, setNameError] = useState(false);
+  const [nameError, setNameError] = useState(null);
   const [balanceError, setBalanceError] = useState(false);
 
   const validateBalance = balance => !isNaN(parseFloat(balance));
 
+  const validateAndSetName = (name: string) => {
+    const nameError = validateAccountName(name, '', accounts);
+    if (nameError) {
+      setNameError(nameError);
+    } else {
+      setName(name);
+      setNameError(null);
+    }
+  };
+
   const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    const nameError = !name;
-    setNameError(nameError);
+    const nameError = validateAccountName(name, '', accounts);
 
     const balanceError = !validateBalance(balance);
     setBalanceError(balanceError);
@@ -72,18 +84,15 @@ export function CreateLocalAccountModal() {
                     onChange={event => setName(event.target.value)}
                     onBlur={event => {
                       const name = event.target.value.trim();
-                      setName(name);
-                      if (name && nameError) {
-                        setNameError(false);
-                      }
+                      validateAndSetName(name);
                     }}
                     style={{ flex: 1 }}
                   />
                 </InitialFocus>
               </InlineField>
               {nameError && (
-                <FormError style={{ marginLeft: 75 }}>
-                  Name is required
+                <FormError style={{ marginLeft: 75, color: theme.warningText }}>
+                  {nameError}
                 </FormError>
               )}
 
