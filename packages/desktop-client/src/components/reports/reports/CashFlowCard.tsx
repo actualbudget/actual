@@ -297,12 +297,7 @@ export function CashFlowCard({
     expenses: number = 0,
     income: number = 0;
 
-  if (meta?.isCondensed) {
-    const graphData = dataCondensed?.graphData || null;
-    income = graphData?.income || 0;
-    expenses = -(graphData?.expense || 0);
-    dataOk = graphData ? true : false;
-  } else {
+  if (meta && meta?.isCondensed !== undefined && meta?.isCondensed === false) {
     graphDataDetailed = dataDetailed?.graphData || {
       expenses: [{ x: new Date(), y: 0 }],
       income: [{ x: new Date(), y: 0 }],
@@ -313,6 +308,11 @@ export function CashFlowCard({
     totalIncome = dataDetailed?.totalIncome || 0;
     totalTransfers = dataDetailed?.totalTransfers || 0;
     dataOk = dataDetailed ? true : false;
+  } else {
+    const graphData = dataCondensed?.graphData || null;
+    income = graphData?.income || 0;
+    expenses = -(graphData?.expense || 0);
+    dataOk = graphData ? true : false;
   }
 
   return (
@@ -368,7 +368,7 @@ export function CashFlowCard({
             <DateRange start={start} end={end} />
           </View>
           {dataOk &&
-            (meta?.isCondensed
+            (meta?.isCondensed || meta?.isCondensed === undefined
               ? retViewCondensed(isCardHovered, income, expenses)
               : retViewDetailed(
                   totalIncome,
@@ -382,7 +382,7 @@ export function CashFlowCard({
           <Container style={{ height: 'auto', flex: 1 }}>
             {(width, height) => (
               <ResponsiveContainer>
-                {meta?.isCondensed
+                {meta?.isCondensed || meta?.isCondensed === undefined
                   ? retChartCondensed(width, height, income, expenses, t)
                   : retChartDetailed(graphDataDetailed, isConcise)}
               </ResponsiveContainer>
