@@ -52,6 +52,7 @@ if (!isDev || !process.env.ACTUAL_DATA_DIR) {
 // be closed automatically when the JavaScript object is garbage collected.
 let clientWin: BrowserWindow | null;
 let serverProcess: UtilityProcess | null;
+let actualServerProcess: UtilityProcess | null;
 
 if (isDev) {
   process.traceProcessWarnings = true;
@@ -398,6 +399,33 @@ ipcMain.handle(
       console.error('Error retrieving actual-server:', error);
       throw error;
     }
+  },
+);
+
+ipcMain.handle(
+  'start-actual-server',
+  async (_event, payload: { releaseVersion: string }) => {
+    const serverReleaseDir = path.resolve(
+      `${process.env.ACTUAL_DATA_DIR}/actual-server/${payload.releaseVersion}`,
+    );
+
+    const actualServerProcess = utilityProcess.fork(
+      __dirname + '/actualServer.js',
+      ['--subprocess', serverReleaseDir],
+      isDev ? { execArgv: ['--inspect'], stdio: 'pipe' } : { stdio: 'pipe' },
+    );
+
+    actualServerProcess.stdout?.on('data', (chunk: Buffer) => {
+      // Send the Server console.log messages to the main browser window
+      clientWin?.webContents.executeJavaScript(`
+        console.info('Server Log:', ${JSON.stringify(chunk.toString('utf8'))})`);
+    });
+
+    actualServerProcess.stderr?.on('data', (chunk: Buffer) => {
+      // Send the Server console.error messages out to the main browser window
+      clientWin?.webContents.executeJavaScript(`
+        console.error('Server Log:', ${JSON.stringify(chunk.toString('utf8'))})`);
+    });
   },
 );
 

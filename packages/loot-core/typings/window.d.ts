@@ -7,6 +7,7 @@ declare global {
       ACTUAL_VERSION: string;
       openURLInBrowser: (url: string) => void;
       downloadActualServer: (releaseVersion: string) => Promise<void>;
+      startActualServer: (releaseVersion: string) => Promise<void>;
       saveFile: (
         contents: string | Buffer,
         filename: string,

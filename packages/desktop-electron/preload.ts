@@ -64,6 +64,12 @@ contextBridge.exposeInMainWorld('Actual', {
     });
   },
 
+  startActualServer: (releaseVersion: string) => {
+    return ipcRenderer.invoke('start-actual-server', {
+      releaseVersion,
+    });
+  },
+
   onEventFromMain: (type: string, handler: (...args: unknown[]) => void) => {
     ipcRenderer.on(type, handler);
   },
