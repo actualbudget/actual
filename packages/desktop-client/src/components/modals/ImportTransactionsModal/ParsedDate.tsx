@@ -5,7 +5,17 @@ import { Text } from '../../common/Text';
 
 import { formatDate, parseDate } from './utils';
 
-export function ParsedDate({ parseDateFormat, dateFormat, date }) {
+type ParsedDateProps = {
+  parseDateFormat?: Parameters<typeof parseDate>[1];
+  dateFormat: Parameters<typeof parseDate>[1];
+  date?: string;
+};
+
+export function ParsedDate({
+  parseDateFormat,
+  dateFormat,
+  date,
+}: ParsedDateProps) {
   const parsed =
     date &&
     formatDate(

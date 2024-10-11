@@ -231,7 +231,15 @@ function ConditionEditor({
   onDelete,
   onAdd,
 }) {
-  const { field: originalField, op, value, type, options, error } = condition;
+  const {
+    field: originalField,
+    op,
+    value,
+    type,
+    options,
+    error,
+    inputKey,
+  } = condition;
 
   let field = originalField;
   if (field === 'amount' && options) {
@@ -246,6 +254,7 @@ function ConditionEditor({
   if (type === 'number' && op === 'isbetween') {
     valueEditor = (
       <BetweenAmountInput
+        key={inputKey}
         defaultValue={value}
         onChange={v => onChange('value', v)}
       />
@@ -253,7 +262,7 @@ function ConditionEditor({
   } else {
     valueEditor = (
       <GenericInput
-        key={condition.inputKey}
+        key={inputKey}
         field={field}
         type={type}
         value={value}
