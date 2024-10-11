@@ -565,7 +565,9 @@ export class Action {
       this.field = field;
       this.type = typeName;
       if (options?.template) {
-        this.handlebarsTemplate = Handlebars.compile(options.template);
+        this.handlebarsTemplate = Handlebars.compile(options.template, {
+          noEscape: true,
+        });
         try {
           this.handlebarsTemplate({});
         } catch (e) {
