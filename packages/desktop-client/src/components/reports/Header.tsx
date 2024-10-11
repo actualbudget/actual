@@ -67,6 +67,7 @@ export function Header({
     <View
       style={{
         padding: 20,
+        paddingTop: 15,
         flexShrink: 0,
       }}
     >
