@@ -9,43 +9,40 @@ export function filterHiddenItems(
   showOffBudget?: boolean,
   showHiddenCategories?: boolean,
   showUncategorized?: boolean,
+  groupByCategory?: boolean,
 ) {
   const showHide = data
-    .filter(e =>
-      !showHiddenCategories
-        ? e.categoryHidden === false && e.categoryGroupHidden === false
-        : true,
+    .filter(
+      e =>
+        showHiddenCategories ||
+        (e.categoryHidden === false && e.categoryGroupHidden === false),
     )
-    .filter(f =>
-      showOffBudget
-        ? showUncategorized
-          ? //true,true
-            true
-          : //true,false
-            f.category !== null ||
-            f.accountOffBudget !== false ||
-            f.transferAccount !== null
-        : showUncategorized
-          ? //false, true
-            f.accountOffBudget === false &&
-            (f.transferAccount === null || f.category !== null)
-          : //false false
-            f.category !== null && f.accountOffBudget === false,
-    );
+    .filter(e => showOffBudget || e.accountOffBudget === false)
+    .filter(e => showUncategorized || e.category !== null);
 
   return showHide.filter(query => {
-    if (!item.uncategorized_id) {
-      return true;
+    if (!groupByCategory) return true;
+
+    const hasCategory = !!query.category;
+    const isOffBudget = query.accountOffBudget;
+    const isTransfer = !!query.transferAccount;
+
+    if (hasCategory && !isOffBudget) {
+      return item.uncategorized_id == null;
     }
 
-    const isTransfer = item.is_transfer
-      ? query.transferAccount
-      : !query.transferAccount;
-    const isHidden = item.has_category ? true : !query.category;
-    const isOffBudget = item.is_off_budget
-      ? query.accountOffBudget
-      : !query.accountOffBudget;
-
-    return isTransfer && isHidden && isOffBudget;
+    switch (item.uncategorized_id) {
+      case 'off_budget':
+        return isOffBudget;
+      case 'transfer':
+        return isTransfer && !isOffBudget;
+      case 'other':
+        return !isOffBudget && !isTransfer;
+      case 'all':
+        console.log('all');
+        return true;
+      default:
+        return false;
+    }
   });
 }
