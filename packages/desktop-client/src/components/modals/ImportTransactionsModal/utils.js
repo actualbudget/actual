@@ -185,3 +185,10 @@ export function parseAmountFields(
     inflow: null,
   };
 }
+
+export function stripCsvImportTransaction(transaction) {
+  const { existing, ignored, selected, selected_merge, trx_id, ...trans } =
+    transaction;
+
+  return trans;
+}
