@@ -9,7 +9,7 @@ import { css } from '@emotion/css';
 
 import { theme } from '../../style';
 
-import { Input, defaultInputStyle } from './Input';
+import { Input } from './Input';
 import { View } from './View';
 
 type InputWithContentProps = ComponentPropsWithRef<typeof Input> & {
@@ -24,7 +24,6 @@ export const InputWithContent = forwardRef<
   return (
     <View
       style={{
-        ...defaultInputStyle,
         padding: 0,
         flexDirection: 'row',
         alignItems: 'center',
@@ -47,9 +46,16 @@ export const InputWithContent = forwardRef<
         ref={ref}
         {...props}
         style={{
-          width: '100%',
-          flex: 1,
-          ...inputStyle,
+          outline: 0,
+          backgroundColor: theme.tableBackground,
+          color: theme.formInputText,
+          margin: 0,
+          borderRadius: 4,
+          border: '1px solid ' + theme.formInputBorder,
+          padding: 0,
+          flexDirection: 'row',
+          alignItems: 'center',
+          ...style,
         }}
       />
       {rightContent}

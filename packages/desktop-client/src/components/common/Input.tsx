@@ -4,7 +4,7 @@ import React, {
   forwardRef,
   useEffect,
   useRef,
-  useMemo,
+  useCallback,
 } from 'react';
 import { Input as ReactAriaInput } from 'react-aria-components';
 
@@ -12,16 +12,6 @@ import { css, cx } from '@emotion/css';
 
 import { useMergedRefs } from '../../hooks/useMergedRefs';
 import { styles, theme } from '../../style';
-
-export const defaultInputStyle = {
-  outline: 0,
-  backgroundColor: theme.tableBackground,
-  color: theme.formInputText,
-  margin: 0,
-  padding: 5,
-  borderRadius: 4,
-  border: '1px solid ' + theme.formInputBorder,
-};
 
 type InputProps = ComponentPropsWithRef<typeof ReactAriaInput> & {
   autoSelect?: boolean;
@@ -56,11 +46,17 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
       }
     }, [autoSelect]);
 
-    const defaultInputClassName: string = useMemo(
+    const defaultButtonClassName = useCallback(
       () =>
         css(
-          defaultInputStyle,
           {
+            outline: 0,
+            backgroundColor: theme.tableBackground,
+            color: theme.formInputText,
+            margin: 0,
+            padding: 5,
+            borderRadius: 4,
+            border: '1px solid ' + theme.formInputBorder,
             whiteSpace: 'nowrap',
             overflow: 'hidden',
             flexShrink: 0,
@@ -81,8 +77,9 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
         {...props}
         className={
           typeof className === 'function'
-            ? renderProps => cx(defaultInputClassName, className(renderProps))
-            : cx(defaultInputClassName, className)
+            ? renderProps =>
+                cx(defaultButtonClassName(), className(renderProps))
+            : cx(defaultButtonClassName(), className)
         }
         onKeyDown={e => {
           props.onKeyDown?.(e);
@@ -113,18 +110,27 @@ Input.displayName = 'Input';
 type BigInputProps = InputProps;
 
 export const BigInput = forwardRef<HTMLInputElement, BigInputProps>(
-  (props, ref) => {
+  ({ className, ...props }, ref) => {
+    const defaultClassName = useCallback(
+      () =>
+        String(
+          css({
+            padding: 10,
+            fontSize: 15,
+            '&, &[data-focused]': { border: 'none', ...styles.shadow },
+          }),
+        ),
+      [],
+    );
     return (
       <Input
         ref={ref}
         {...props}
-        className={`${css({
-          padding: 10,
-          fontSize: 15,
-          border: 'none',
-          ...styles.shadow,
-          '&[data-focused]': { border: 'none', ...styles.shadow },
-        })} ${props.className}`}
+        className={renderProps =>
+          typeof className === 'function'
+            ? `${defaultClassName()} ${className(renderProps)}`
+            : `${defaultClassName()}  ${className}`
+        }
       />
     );
   },
