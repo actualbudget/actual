@@ -26,6 +26,7 @@ import { Block } from '../../common/Block';
 import { Text } from '../../common/Text';
 import { cashFlowByDate } from '../spreadsheets/cash-flow-spreadsheet';
 import { defaultTimeFrame } from './CashFlow';
+import { TFunction } from 'i18next';
 
 type CustomLabelProps = {
   value?: number;
@@ -87,8 +88,7 @@ function CustomLabel({
   );
 }
 
-function retViewCondensed (isCardHovered, income, expenses) {
-  console.log(income, expenses);
+function retViewCondensed (isCardHovered: boolean, income: number, expenses: number) {
   return <View style={{ textAlign: 'right' }}>
       <PrivacyFilter activationFilters={[!isCardHovered]}>
         <Change amount={income - expenses} />
@@ -96,9 +96,8 @@ function retViewCondensed (isCardHovered, income, expenses) {
     </View>;
 }
 
-function retChartCondensed (width, height, income, expenses, t){
- console.log(width, height, income, expenses);
-
+function retChartCondensed (width: number, height: number, income: number, expenses: number, t: TFunction<"translation", undefined>){
+ 
   return <BarChart
             width={width}
             height={height}
@@ -139,7 +138,7 @@ function retChartCondensed (width, height, income, expenses, t){
           </BarChart>;
 }
 
-function retViewDetailed(totalIncome, totalExpenses, totalTransfers, isCardHovered) {
+function retViewDetailed(totalIncome: number, totalExpenses: number, totalTransfers: number, isCardHovered: boolean) {
  return <View
         style={{
           paddingTop: 20,
@@ -200,7 +199,7 @@ function retViewDetailed(totalIncome, totalExpenses, totalTransfers, isCardHover
       </View>;
 }
 
-function retChartDetailed(graphData, isConcise){
+function retChartDetailed(graphData: { expenses: { x: Date; y: number; }[]; income: { x: Date; y: number; }[]; balances: { x: Date; y: number; }[]; transfers: { x: Date; y: number; }[]; }, isConcise: boolean){
   return <CashFlowGraph
       graphData={graphData}
       isConcise={isConcise}
@@ -241,29 +240,49 @@ export function CashFlowCard({
   const onCardHover = useCallback(() => setIsCardHovered(true), []);
   const onCardHoverEnd = useCallback(() => setIsCardHovered(false), []);
   
-  let data, graphData, totalExpenses, totalIncome, totalTransfers, expenses, income;
+  let dataOk: boolean = false, 
+  graphData_detailed = {
+    expenses: [{ x: new Date(), y: 0 }],
+    income: [{ x: new Date(), y: 0 }],
+    balances: [{ x: new Date(), y: 0 }],
+    transfers: [{ x: new Date(), y: 0 }]
+  },
+  totalExpenses: number = 0, totalIncome: number = 0, totalTransfers: number = 0, expenses: number = 0, income: number = 0;
 
   if(meta?.isCondensed){
     const params = useMemo(
-      () => simpleCashFlow(start, end, meta?.conditions, meta?.conditionsOp),
+      () => simpleCashFlow(start, end, meta?.conditions, meta?.conditionsOp ?? 'and'),
       [start, end, meta?.conditions, meta?.conditionsOp],
     );
-    data = useReport('cash_flow_simple', params);
+    const data = useReport('cash_flow_simple', params);
     
-    graphData = data?.graphData || {};
-    income = (graphData?.income || 0);     
-    expenses = -(graphData?.expense || 0);     
+    const graphData_condensed = data?.graphData || null;
+    income = (graphData_condensed?.income || 0);     
+    expenses = -(graphData_condensed?.expense || 0);
+    
+    if(data){
+      dataOk = true;
+    }     
   }else{    
     const params = useMemo(
-      () => cashFlowByDate(start, end, isConcise, meta?.conditions, meta?.conditionsOp),
+      () => cashFlowByDate(start, end, isConcise, meta?.conditions, meta?.conditionsOp ?? 'and'),
       [start, end, isConcise, meta?.conditions, meta?.conditionsOp],
     );
-    data = useReport('cash_flow', params);
+    const data = useReport('cash_flow', params);
   
-    graphData = data?.graphData || {};
+    graphData_detailed = data?.graphData || {
+        expenses: [{ x: new Date(), y: 0 }],
+        income: [{ x: new Date(), y: 0 }],
+        balances: [{ x: new Date(), y: 0 }],
+        transfers: [{ x: new Date(), y: 0 }]
+      };
     totalExpenses = data?.totalExpenses || 0;
     totalIncome = data?.totalIncome || 0;
     totalTransfers = data?.totalTransfers || 0;
+
+    if(data){
+      dataOk = true;
+    }
   }
   
   return (
@@ -318,16 +337,16 @@ export function CashFlowCard({
             />
             <DateRange start={start} end={end} />
           </View>
-          {data && (
+          {dataOk && (
             meta?.isCondensed ? retViewCondensed(isCardHovered, income, expenses) : retViewDetailed(totalIncome, totalExpenses, totalTransfers, isCardHovered)
           )}
         </View>
 
-        {data ? (
+        {dataOk ? (
           <Container style={{ height: 'auto', flex: 1 }}>
             {(width, height) => (
               <ResponsiveContainer>
-                   { meta?.isCondensed ? retChartCondensed(width, height, income, expenses, t) : retChartDetailed(graphData, isConcise) }    
+                   { meta?.isCondensed ? retChartCondensed(width, height, income, expenses, t) : retChartDetailed(graphData_detailed, isConcise) }    
               </ResponsiveContainer>
             )}
           </Container>
