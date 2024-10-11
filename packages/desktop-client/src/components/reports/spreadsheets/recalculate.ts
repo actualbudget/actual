@@ -104,8 +104,6 @@ export function recalculate({
     [],
   );
 
-  console.log(item, intervalData);
-
   const totalTotals = totalAssets + totalDebts;
 
   return {

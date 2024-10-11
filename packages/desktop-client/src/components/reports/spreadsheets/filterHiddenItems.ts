@@ -39,7 +39,6 @@ export function filterHiddenItems(
       case 'other':
         return !isOffBudget && !isTransfer;
       case 'all':
-        console.log('all');
         return true;
       default:
         return false;
