@@ -11,7 +11,7 @@ type PayeeMenuProps = {
   selectedPayees: Set<PayeeEntity['id']>;
   onDelete: () => void;
   onMerge: () => Promise<void>;
-  onFavorite: () => Promise<void>;
+  onFavorite: () => void;
   onClose: () => void;
 };
 

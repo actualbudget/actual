@@ -4,14 +4,25 @@ import { Select } from '../../common/Select';
 import { View } from '../../common/View';
 import { SectionLabel } from '../../forms';
 
-import { dateFormats } from './utils';
+import {
+  dateFormats,
+  type ImportTransaction,
+  type FieldMapping,
+} from './utils';
+
+type DateFormatSelectProps = {
+  transactions: ImportTransaction[];
+  fieldMappings: FieldMapping;
+  parseDateFormat?: string;
+  onChange: (newValue: string) => void;
+};
 
 export function DateFormatSelect({
   transactions,
   fieldMappings,
   parseDateFormat,
   onChange,
-}) {
+}: DateFormatSelectProps) {
   // We don't actually care about the delimiter, but we try to render
   // it based on the data we have so far. Look in a transaction and
   // try to figure out what delimiter the date is using, and default
