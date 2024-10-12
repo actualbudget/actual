@@ -40,22 +40,23 @@ export function UpcomingLengthSettings() {
 
   const location = useLocation();
   const [expanded, setExpanded] = useState(location.hash === '#upcomingLength');
-  const [infoExpanded, setInfoExpanded] = useState(location.hash === '#info');
 
   return expanded ? (
     <Setting
       primaryAction={
         <View style={{ flexDirection: 'row', gap: '1em' }}>
-          <Column title="Upcoming Length">
+          <Column>
             <View
               style={{ flexDirection: 'row', alignItems: 'center', gap: 20 }}
             >
-              <Select
-                options={options.map(x => [x.value || '7', x.label])}
-                value={upcomingLength}
-                onChange={newValue => setUpcomingLength(newValue)}
-                style={selectButtonStyle}
-              />
+              <View title="Upcoming Length">
+                <Select
+                  options={options.map(x => [x.value || '7', x.label])}
+                  value={upcomingLength}
+                  onChange={newValue => setUpcomingLength(newValue)}
+                  style={selectButtonStyle}
+                />
+              </View>
               <InfoCircle />
             </View>
           </Column>
