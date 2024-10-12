@@ -31,6 +31,7 @@ export default {
     return {
       ...transaction,
       payeeName: formatPayeeName(transaction),
+      date: transaction.bookingDate || transaction.valueDate,
     };
   },
 };

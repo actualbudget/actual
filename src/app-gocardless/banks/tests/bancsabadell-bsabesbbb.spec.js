@@ -9,6 +9,7 @@ describe('BancSabadell', () => {
           remittanceInformationUnstructuredArray: ['some-creditor-name'],
           internalTransactionId: 'd7dca139cf31d9',
           transactionId: '04704109322',
+          bookingDate: '2022-05-01',
         };
         const normalizedTransaction = Sabadell.normalizeTransaction(
           transaction,
@@ -26,6 +27,7 @@ describe('BancSabadell', () => {
           remittanceInformationUnstructuredArray: ['some-debtor-name'],
           internalTransactionId: 'd7dca139cf31d9',
           transactionId: '04704109322',
+          bookingDate: '2022-05-01',
         };
         const normalizedTransaction = Sabadell.normalizeTransaction(
           transaction,
@@ -34,6 +36,22 @@ describe('BancSabadell', () => {
         expect(normalizedTransaction.debtorName).toEqual('some-debtor-name');
         expect(normalizedTransaction.creditorName).toEqual(null);
       });
+    });
+
+    it('extract date', () => {
+      const transaction = {
+        transactionAmount: { amount: '-100', currency: 'EUR' },
+        remittanceInformationUnstructuredArray: ['some-creditor-name'],
+        internalTransactionId: 'd7dca139cf31d9',
+        transactionId: '04704109322',
+        bookingDate: '2024-10-02',
+        valueDate: '2024-10-05',
+      };
+      const normalizedTransaction = Sabadell.normalizeTransaction(
+        transaction,
+        true,
+      );
+      expect(normalizedTransaction.date).toEqual('2024-10-02');
     });
   });
 });
