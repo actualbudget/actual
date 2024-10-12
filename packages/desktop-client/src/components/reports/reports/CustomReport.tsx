@@ -727,7 +727,6 @@ export function CustomReport() {
                 marginLeft: 5,
                 marginRight: 5,
                 gap: 10,
-                alignItems: 'flex-start',
                 flexShrink: 0,
               }}
             >
