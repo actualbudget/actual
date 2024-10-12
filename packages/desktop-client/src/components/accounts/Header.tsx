@@ -189,7 +189,7 @@ export function AccountHeader({
   const isServerOffline = syncServerStatus === 'offline';
   const [_, setExpandSplitsPref] = useLocalPref('expand-splits');
 
-  let canSync = !!(account && account.account_id && isUsingServer);
+  let canSync = !!(account?.account_id && isUsingServer);
   if (!account) {
     // All accounts - check for any syncable account
     canSync = !!accounts.find(account => !!account.account_id) && isUsingServer;
