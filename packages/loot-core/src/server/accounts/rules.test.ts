@@ -516,6 +516,167 @@ describe('Rule', () => {
     });
   });
 
+  describe('split actions', () => {
+    const fixedAmountRule = new Rule({
+      conditionsOp: 'and',
+      conditions: [{ op: 'is', field: 'imported_payee', value: 'James' }],
+      actions: [
+        {
+          op: 'set-split-amount',
+          field: 'amount',
+          value: 100,
+          options: { splitIndex: 1, method: 'fixed-amount' },
+        },
+        {
+          op: 'set-split-amount',
+          field: 'amount',
+          value: 100,
+          options: { splitIndex: 2, method: 'fixed-amount' },
+        },
+      ],
+    });
+
+    test('basic fixed-amount', () => {
+      expect(
+        fixedAmountRule.exec({ imported_payee: 'James', amount: 200 }),
+      ).toMatchObject({
+        error: null,
+        subtransactions: [{ amount: 100 }, { amount: 100 }],
+      });
+    });
+
+    test('basic fixed-percent', () => {
+      const rule = new Rule({
+        conditionsOp: 'and',
+        conditions: [{ op: 'is', field: 'imported_payee', value: 'James' }],
+        actions: [
+          {
+            op: 'set-split-amount',
+            field: 'amount',
+            value: 50,
+            options: { splitIndex: 1, method: 'fixed-percent' },
+          },
+          {
+            op: 'set-split-amount',
+            field: 'amount',
+            value: 50,
+            options: { splitIndex: 2, method: 'fixed-percent' },
+          },
+        ],
+      });
+
+      expect(rule.exec({ imported_payee: 'James', amount: 200 })).toMatchObject(
+        {
+          error: null,
+          subtransactions: [{ amount: 100 }, { amount: 100 }],
+        },
+      );
+    });
+
+    test('basic remainder', () => {
+      const rule = new Rule({
+        conditionsOp: 'and',
+        conditions: [{ op: 'is', field: 'imported_payee', value: 'James' }],
+        actions: [
+          {
+            op: 'set-split-amount',
+            field: 'amount',
+            options: { splitIndex: 1, method: 'remainder' },
+          },
+          {
+            op: 'set-split-amount',
+            field: 'amount',
+            options: { splitIndex: 2, method: 'remainder' },
+          },
+        ],
+      });
+
+      expect(rule.exec({ imported_payee: 'James', amount: 200 })).toMatchObject(
+        {
+          error: null,
+          subtransactions: [{ amount: 100 }, { amount: 100 }],
+        },
+      );
+    });
+
+    const prioritizationRule = new Rule({
+      conditionsOp: 'and',
+      conditions: [{ op: 'is', field: 'imported_payee', value: 'James' }],
+      actions: [
+        {
+          op: 'set-split-amount',
+          field: 'amount',
+          value: 100,
+          options: { splitIndex: 1, method: 'fixed-amount' },
+        },
+        {
+          op: 'set-split-amount',
+          field: 'amount',
+          value: 50,
+          options: { splitIndex: 2, method: 'fixed-percent' },
+        },
+        {
+          op: 'set-split-amount',
+          field: 'amount',
+          options: { splitIndex: 3, method: 'remainder' },
+        },
+      ],
+    });
+
+    test('percent is of the post-fixed-amount total', () => {
+      // Percent is a percent of the amount pre-remainder
+      expect(
+        prioritizationRule.exec({ imported_payee: 'James', amount: 200 }),
+      ).toMatchObject({
+        error: null,
+        subtransactions: [{ amount: 100 }, { amount: 50 }, { amount: 50 }],
+      });
+    });
+
+    test('remainder/percent goes negative if less than expected after fixed amounts', () => {
+      // Remainder/percent goes negative if less than expected after fixed amounts
+      expect(
+        prioritizationRule.exec({ imported_payee: 'James', amount: 50 }),
+      ).toMatchObject({
+        error: null,
+        subtransactions: [{ amount: 100 }, { amount: -25 }, { amount: -25 }],
+      });
+    });
+
+    test('remainder zeroes out if nothing left', () => {
+      const rule = new Rule({
+        conditionsOp: 'and',
+        conditions: [{ op: 'is', field: 'imported_payee', value: 'James' }],
+        actions: [
+          {
+            op: 'set-split-amount',
+            field: 'amount',
+            value: 100,
+            options: { splitIndex: 1, method: 'fixed-amount' },
+          },
+          {
+            op: 'set-split-amount',
+            field: 'amount',
+            value: 100,
+            options: { splitIndex: 2, method: 'fixed-percent' },
+          },
+          {
+            op: 'set-split-amount',
+            field: 'amount',
+            options: { splitIndex: 3, method: 'remainder' },
+          },
+        ],
+      });
+
+      expect(rule.exec({ imported_payee: 'James', amount: 150 })).toMatchObject(
+        {
+          error: null,
+          subtransactions: [{ amount: 100 }, { amount: 50 }, { amount: 0 }],
+        },
+      );
+    });
+  });
+
   test('rules are deterministically ranked', () => {
     const rule = (id, conditions) =>
       new Rule({
