@@ -219,14 +219,32 @@ function retChartDetailed(
     transfers: { x: Date; y: number }[];
   },
   isConcise: boolean,
+  height: number,
 ) {
-  return (
-    <CashFlowGraph
-      graphData={graphData}
-      isConcise={isConcise}
-      showBalance={true}
-    />
-  );
+  if (height < 290) {
+    return (
+      <Text
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          textAlign: 'center',
+          fontWeight: 600,
+          justifyContent: 'center',
+          height: '100%',
+        }}
+      >
+        <Trans>Additional widget height required to display chart, edit dashboard to increase widget height</Trans>
+      </Text>
+    );
+  } else {
+    return (
+      <CashFlowGraph
+        graphData={graphData}
+        isConcise={isConcise}
+        showBalance={true}
+      />
+    );
+  }
 }
 
 type CashFlowCardProps = {
@@ -297,7 +315,11 @@ export function CashFlowCard({
     expenses: number = 0,
     income: number = 0;
 
-  if (meta && meta?.isCondensed !== undefined && meta?.isCondensed === false) {
+  if (
+    meta &&
+    meta?.isSimpleView !== undefined &&
+    meta?.isSimpleView === false
+  ) {
     graphDataDetailed = dataDetailed?.graphData || {
       expenses: [{ x: new Date(), y: 0 }],
       income: [{ x: new Date(), y: 0 }],
@@ -368,7 +390,7 @@ export function CashFlowCard({
             <DateRange start={start} end={end} />
           </View>
           {dataOk &&
-            (meta?.isCondensed || meta?.isCondensed === undefined
+            (meta?.isSimpleView || meta?.isSimpleView === undefined
               ? retViewCondensed(isCardHovered, income, expenses)
               : retViewDetailed(
                   totalIncome,
@@ -382,9 +404,9 @@ export function CashFlowCard({
           <Container style={{ height: 'auto', flex: 1 }}>
             {(width, height) => (
               <ResponsiveContainer>
-                {meta?.isCondensed || meta?.isCondensed === undefined
+                {meta?.isSimpleView || meta?.isSimpleView === undefined
                   ? retChartCondensed(width, height, income, expenses, t)
-                  : retChartDetailed(graphDataDetailed, isConcise)}
+                  : retChartDetailed(graphDataDetailed, isConcise, height)}
               </ResponsiveContainer>
             )}
           </Container>

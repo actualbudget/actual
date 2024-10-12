@@ -25,6 +25,7 @@ import { Block } from '../../common/Block';
 import { Button } from '../../common/Button2';
 import { Paragraph } from '../../common/Paragraph';
 import { Text } from '../../common/Text';
+import { Toggle } from '../../common/Toggle';
 import { View } from '../../common/View';
 import { EditablePageHeaderTitle } from '../../EditablePageHeaderTitle';
 import { MobileBackButton } from '../../mobile/MobileBackButton';
@@ -91,8 +92,8 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
   const [end, setEnd] = useState(initialEnd);
   const [mode, setMode] = useState(initialMode);
   const [showBalance, setShowBalance] = useState(true);
-  const [isCondensed, setIsCondensed] = useState(
-    widget?.meta?.isCondensed ?? true,
+  const [isSimpleView, setisSimpleView] = useState(
+    widget?.meta?.isSimpleView ?? true,
   );
 
   const [isConcise, setIsConcise] = useState(() => {
@@ -161,7 +162,7 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
           end,
           mode,
         },
-        isCondensed,
+        isSimpleView,
       },
     });
     dispatch(
@@ -241,9 +242,26 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
           </Button>
 
           {widget && (
-            <Button onPress={() => setIsCondensed(state => !state)}>
-              {isCondensed ? t('Set detailed view') : t('Set condensed view')}
-            </Button>
+            <View
+              style={{
+                cursor: 'default',
+                flexDirection: 'row',
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}
+            >
+              <label htmlFor="toggleChart">
+                <Trans>Simple view</Trans>
+              </label>
+              <View style={{ flex: 1 }} />
+              <Toggle
+                id="toggleChart"
+                style={{ marginLeft: 5, marginTop: -15 }}
+                checked={isSimpleView}
+                onColor={theme.pageTextPositive}
+                onToggle={() => setisSimpleView(!isSimpleView)}
+              />
+            </View>
           )}
 
           {widget && (
