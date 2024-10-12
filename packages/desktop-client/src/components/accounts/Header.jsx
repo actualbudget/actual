@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, Fragment } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { Trans, useTranslation } from 'react-i18next';
 
@@ -67,6 +67,7 @@ export function AccountHeader({
   onCreateReconciliationTransaction,
   onToggleExtraBalances,
   onSaveName,
+  saveNameError,
   onExposeName,
   onSync,
   onImport,
@@ -90,7 +91,6 @@ export function AccountHeader({
   onMakeAsNonSplitTransactions,
 }) {
   const { t } = useTranslation();
-
   const [menuOpen, setMenuOpen] = useState(false);
   const searchInput = useRef(null);
   const triggerRef = useRef(null);
@@ -176,99 +176,21 @@ export function AccountHeader({
             }}
           >
             {!!account?.bank && (
-              <View
-                style={{
-                  backgroundColor: accountsSyncing.includes(account.id)
-                    ? theme.sidebarItemBackgroundPending
-                    : failedAccounts.has(account.id)
-                      ? theme.sidebarItemBackgroundFailed
-                      : theme.sidebarItemBackgroundPositive,
-                  marginRight: '4px',
-                  width: 8,
-                  height: 8,
-                  borderRadius: 8,
-                }}
+              <AccountSyncSidebar
+                account={account}
+                failedAccounts={failedAccounts}
+                accountsSyncing={accountsSyncing}
               />
             )}
-            {editingName ? (
-              <InitialFocus>
-                <Input
-                  defaultValue={accountName}
-                  onEnter={e => onSaveName(e.target.value)}
-                  onBlur={e => onSaveName(e.target.value)}
-                  onEscape={() => onExposeName(false)}
-                  style={{
-                    fontSize: 25,
-                    fontWeight: 500,
-                    marginTop: -3,
-                    marginBottom: -4,
-                    marginLeft: -6,
-                    paddingTop: 2,
-                    paddingBottom: 2,
-                    width: Math.max(20, accountName.length) + 'ch',
-                  }}
-                />
-              </InitialFocus>
-            ) : isNameEditable ? (
-              <View
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  gap: 3,
-                  '& .hover-visible': {
-                    opacity: 0,
-                    transition: 'opacity .25s',
-                  },
-                  '&:hover .hover-visible': {
-                    opacity: 1,
-                  },
-                }}
-              >
-                <View
-                  style={{
-                    fontSize: 25,
-                    fontWeight: 500,
-                    marginRight: 5,
-                    marginBottom: -1,
-                  }}
-                  data-testid="account-name"
-                >
-                  {account && account.closed
-                    ? t('Closed: {{ accountName }}', { accountName })
-                    : accountName}
-                </View>
-
-                {account && (
-                  <NotesButton
-                    id={`account-${account.id}`}
-                    defaultColor={theme.pageTextSubdued}
-                  />
-                )}
-                <Button
-                  variant="bare"
-                  aria-label={t('Edit account name')}
-                  className="hover-visible"
-                  onPress={() => onExposeName(true)}
-                >
-                  <SvgPencil1
-                    style={{
-                      width: 11,
-                      height: 11,
-                      color: theme.pageTextSubdued,
-                    }}
-                  />
-                </Button>
-              </View>
-            ) : (
-              <View
-                style={{ fontSize: 25, fontWeight: 500, marginBottom: -1 }}
-                data-testid="account-name"
-              >
-                {account && account.closed
-                  ? t('Closed: {{ accountName }}', { accountName })
-                  : accountName}
-              </View>
-            )}
+            <AccountNameField
+              account={account}
+              accountName={accountName}
+              isNameEditable={isNameEditable}
+              editingName={editingName}
+              saveNameError={saveNameError}
+              onSaveName={onSaveName}
+              onExposeName={onExposeName}
+            />
           </View>
         </View>
 
@@ -470,6 +392,129 @@ export function AccountHeader({
   );
 }
 
+function AccountSyncSidebar({ account, failedAccounts, accountsSyncing }) {
+  return (
+    <View
+      style={{
+        backgroundColor: accountsSyncing.includes(account.id)
+          ? theme.sidebarItemBackgroundPending
+          : failedAccounts.has(account.id)
+            ? theme.sidebarItemBackgroundFailed
+            : theme.sidebarItemBackgroundPositive,
+        marginRight: '4px',
+        width: 8,
+        height: 8,
+        borderRadius: 8,
+      }}
+    />
+  );
+}
+
+function AccountNameField({
+  account,
+  accountName,
+  isNameEditable,
+  editingName,
+  saveNameError,
+  onSaveName,
+  onExposeName,
+}) {
+  const { t } = useTranslation();
+
+  if (editingName) {
+    return (
+      <Fragment>
+        <InitialFocus>
+          <Input
+            defaultValue={accountName}
+            onEnter={e => onSaveName(e.target.value)}
+            onBlur={e => onSaveName(e.target.value)}
+            onEscape={() => onExposeName(false)}
+            style={{
+              fontSize: 25,
+              fontWeight: 500,
+              marginTop: -3,
+              marginBottom: -4,
+              marginLeft: -6,
+              paddingTop: 2,
+              paddingBottom: 2,
+              width: Math.max(20, accountName.length) + 'ch',
+            }}
+          />
+        </InitialFocus>
+        {saveNameError && (
+          <View style={{ color: theme.warningText }}>{saveNameError}</View>
+        )}
+      </Fragment>
+    );
+  } else {
+    if (isNameEditable) {
+      return (
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 3,
+            '& .hover-visible': {
+              opacity: 0,
+              transition: 'opacity .25s',
+            },
+            '&:hover .hover-visible': {
+              opacity: 1,
+            },
+          }}
+        >
+          <View
+            style={{
+              fontSize: 25,
+              fontWeight: 500,
+              marginRight: 5,
+              marginBottom: -1,
+            }}
+            data-testid="account-name"
+          >
+            {account && account.closed
+              ? t('Closed: {{ accountName }}', { accountName })
+              : accountName}
+          </View>
+
+          {account && (
+            <NotesButton
+              id={`account-${account.id}`}
+              defaultColor={theme.pageTextSubdued}
+            />
+          )}
+          <Button
+            variant="bare"
+            aria-label={t('Edit account name')}
+            className="hover-visible"
+            onPress={() => onExposeName(true)}
+          >
+            <SvgPencil1
+              style={{
+                width: 11,
+                height: 11,
+                color: theme.pageTextSubdued,
+              }}
+            />
+          </Button>
+        </View>
+      );
+    } else {
+      return (
+        <View
+          style={{ fontSize: 25, fontWeight: 500, marginBottom: -1 }}
+          data-testid="account-name"
+        >
+          {account && account.closed
+            ? t('Closed: {{ accountName }}', { accountName })
+            : accountName}
+        </View>
+      );
+    }
+  }
+}
+
 function AccountMenu({
   account,
   canSync,
@@ -483,7 +528,6 @@ function AccountMenu({
   onMenuSelect,
 }) {
   const { t } = useTranslation();
-
   const [tooltip, setTooltip] = useState('default');
   const syncServerStatus = useSyncServerStatus();
 
