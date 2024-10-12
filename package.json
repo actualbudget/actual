@@ -21,6 +21,7 @@
     "start": "yarn start:browser",
     "start:desktop": "yarn rebuild-electron && npm-run-all --parallel 'start:desktop-*'",
     "start:desktop-node": "yarn workspace loot-core watch:node",
+    "start:desktop-server-deps": "yarn workspace @actual-app/crdt build",
     "start:desktop-client": "yarn workspace @actual-app/web watch",
     "start:desktop-electron": "yarn workspace desktop-electron watch",
     "start:electron": "yarn start:desktop",

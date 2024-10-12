@@ -37,6 +37,7 @@ fi
 yarn workspace loot-core build:node
 
 yarn workspace @actual-app/web build --mode=desktop
+yarn workspace @actual-app/crdt build --mode=desktop
 
 yarn workspace desktop-electron update-client
 
