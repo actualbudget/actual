@@ -79,6 +79,6 @@
     "webpack": "^5.90.0",
     "webpack-bundle-analyzer": "^4.10.1",
     "webpack-cli": "^5.1.4",
-    "yargs": "^9.0.1"
+    "yargs": "^17.6.2"
   }
 }
