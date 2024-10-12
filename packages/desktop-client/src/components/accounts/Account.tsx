@@ -1307,7 +1307,7 @@ class AccountInternal extends PureComponent<
   onReloadSavedFilter = (savedFilter: SavedFilter, item: string) => {
     if (item === 'reload') {
       const [savedFilter] = this.props.savedFilters.filter(
-        f => f.id === this.state.filterId.id,
+        f => f.id === this.state.filterId?.id,
       );
       this.setState({ filterConditionsOp: savedFilter.conditionsOp ?? 'and' });
       this.applyFilters([...savedFilter.conditions]);

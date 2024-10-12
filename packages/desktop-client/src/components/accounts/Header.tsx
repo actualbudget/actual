@@ -54,7 +54,7 @@ type AccountHeaderProps = {
   workingHard: boolean;
   accountName: string;
   account: AccountEntity;
-  filterId: SavedFilter;
+  filterId?: SavedFilter;
   savedFilters: TransactionFilterEntity[];
   accountsSyncing: string[];
   failedAccounts: AccountSyncSidebarProps['failedAccounts'];
