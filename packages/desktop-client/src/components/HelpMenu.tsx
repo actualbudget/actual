@@ -16,6 +16,8 @@ import { Popover } from './common/Popover';
 import { SpaceBetween } from './common/SpaceBetween';
 import { View } from './common/View';
 
+type HelpMenuItem = 'docs' | 'keyboard-shortcuts';
+
 type HelpButtonProps = {
   onPress?: () => void;
 };
@@ -74,7 +76,7 @@ export const HelpMenu = () => {
   const dispatch = useDispatch();
   const page = useLocation().pathname;
 
-  const handleItemSelect = (item: string) => {
+  const handleItemSelect = (item: HelpMenuItem) => {
     switch (item) {
       case 'docs':
         window.open(getPageDocs(page), '_blank');
