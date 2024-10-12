@@ -676,7 +676,7 @@ describe('Rule', () => {
       );
     });
 
-    test('generate errors on fixed amounts less than total', () => {
+    test('generate errors when fixed amounts exceed the total', () => {
       expect(
         fixedAmountRule.exec({ imported_payee: 'James', amount: 100 }),
       ).toMatchObject({
@@ -689,7 +689,7 @@ describe('Rule', () => {
       });
     });
 
-    test('generate errors on fixed amounts more than total', () => {
+    test('generate errors when fixed amounts undershoot the total', () => {
       expect(
         fixedAmountRule.exec({ imported_payee: 'James', amount: 300 }),
       ).toMatchObject({
