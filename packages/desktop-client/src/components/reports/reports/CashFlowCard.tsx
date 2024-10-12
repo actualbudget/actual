@@ -233,7 +233,10 @@ function retChartDetailed(
           height: '100%',
         }}
       >
-        <Trans>Additional widget height required to display chart, edit dashboard to increase widget height</Trans>
+        <Trans>
+          Additional widget height required to display chart, edit dashboard to
+          increase widget height
+        </Trans>
       </Text>
     );
   } else {
