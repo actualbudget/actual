@@ -409,22 +409,39 @@ ipcMain.handle(
       `${process.env.ACTUAL_DATA_DIR}/actual-server/${payload.releaseVersion}`,
     );
 
-    const actualServerProcess = utilityProcess.fork(
-      serverReleaseDir + '/app.js',
-      ['--subprocess', serverReleaseDir],
-      isDev ? { execArgv: ['--inspect'], stdio: 'pipe' } : { stdio: 'pipe' },
+    // actualServerProcess = utilityProcess.fork(
+    //   serverReleaseDir + '/app.js', // if bundling it ourselves and manually including it
+    //   ['--subprocess'],
+    //   isDev ? { execArgv: ['--inspect'], stdio: 'pipe' } : { stdio: 'pipe' },
+    // );
+
+    const serverPath = path.resolve(
+      __dirname,
+      '../../../node_modules/actual-sync/app.js', // if letting electron-builder bundle it (needs to be in our workspace)
     );
+
+    // NOTE: config.json parameters will be relative to THIS directory at the moment - may need a fix?
+    // Or we can override the config.json location when starting the process
+    try {
+      actualServerProcess = utilityProcess.fork(
+        serverPath, // This requires actual-server depencies (crdt) to be built before running electron - they need to be manually specified because actual-server doesn't get bundled
+        [],
+        isDev ? { execArgv: ['--inspect'], stdio: 'pipe' } : { stdio: 'pipe' },
+      );
+    } catch (error) {
+      console.error(error);
+    }
 
     actualServerProcess.stdout?.on('data', (chunk: Buffer) => {
       // Send the Server console.log messages to the main browser window
       clientWin?.webContents.executeJavaScript(`
-        console.info('Server Log:', ${JSON.stringify(chunk.toString('utf8'))})`);
+          console.info('Server Log:', ${JSON.stringify(chunk.toString('utf8'))})`);
     });
 
     actualServerProcess.stderr?.on('data', (chunk: Buffer) => {
       // Send the Server console.error messages out to the main browser window
       clientWin?.webContents.executeJavaScript(`
-        console.error('Server Log:', ${JSON.stringify(chunk.toString('utf8'))})`);
+            console.error('Server Log:', ${JSON.stringify(chunk.toString('utf8'))})`);
     });
   },
 );

@@ -57,19 +57,9 @@
     "win": {
       "target": [
         {
-          "target": "appx",
-          "arch": [
-            "ia32",
-            "x64",
-            "arm64"
-          ]
-        },
-        {
           "target": "nsis",
           "arch": [
-            "ia32",
-            "x64",
-            "arm64"
+            "x64"
           ]
         }
       ],
@@ -85,6 +75,7 @@
     "npmRebuild": false
   },
   "dependencies": {
+    "actual-sync": "file:../../../actual-server",
     "adm-zip": "^0.5.10",
     "better-sqlite3": "^9.6.0",
     "fs-extra": "^11.2.0",
