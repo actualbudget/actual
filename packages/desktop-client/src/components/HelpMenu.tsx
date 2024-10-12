@@ -9,12 +9,12 @@ import { useToggle } from 'usehooks-ts';
 import { pushModal } from 'loot-core/client/actions/modals';
 
 import { SvgHelp } from '../icons/v2/Help';
+import { openUrl } from '../util/router-tools';
 
 import { Button } from './common/Button2';
 import { Menu } from './common/Menu';
 import { Popover } from './common/Popover';
 import { SpaceBetween } from './common/SpaceBetween';
-import { View } from './common/View';
 
 type HelpMenuItem = 'docs' | 'keyboard-shortcuts';
 
@@ -24,24 +24,21 @@ type HelpButtonProps = {
 
 const HelpButton = forwardRef<HTMLButtonElement, HelpButtonProps>(
   ({ onPress }, ref) => {
-    const { t } = useTranslation();
     const size = 15;
     return (
-      <View title={t('Get help')}>
-        <Button
-          variant="bare"
-          ref={ref}
-          onPress={onPress}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 4,
-          }}
-        >
-          <SvgHelp width={size} height={size} />
-          <Trans>Help</Trans>
-        </Button>
-      </View>
+      <Button
+        variant="bare"
+        ref={ref}
+        onPress={onPress}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 4,
+        }}
+      >
+        <SvgHelp width={size} height={size} />
+        <Trans>Help</Trans>
+      </Button>
     );
   },
 );
@@ -79,7 +76,7 @@ export const HelpMenu = () => {
   const handleItemSelect = (item: HelpMenuItem) => {
     switch (item) {
       case 'docs':
-        window.open(getPageDocs(page), '_blank');
+        openUrl(getPageDocs(page));
         break;
       case 'keyboard-shortcuts':
         dispatch(pushModal('keyboard-shortcuts'));
