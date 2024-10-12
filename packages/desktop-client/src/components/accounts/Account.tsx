@@ -68,6 +68,7 @@ import { styles, theme } from '../../style';
 import { Button } from '../common/Button2';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
+import { type SavedFilter } from '../filters/SavedFilterMenuButton';
 import { TransactionList } from '../transactions/TransactionList';
 import { validateAccountName } from '../util/accountValidation';
 
@@ -283,7 +284,7 @@ type AccountInternalProps = {
 type AccountInternalState = {
   search: string;
   filterConditions: ConditionEntity[];
-  filterId: Record<string, unknown>;
+  filterId?: SavedFilter;
   filterConditionsOp: 'and' | 'or';
   loading: boolean;
   workingHard: boolean;
@@ -309,6 +310,14 @@ type AccountInternalState = {
   filteredAmount: null | number;
 };
 
+export type TableRef = MutableRefObject<{
+  edit: (updatedId: string | null, op?: string, someBool?: boolean) => void;
+  setRowAnimation: (animation: boolean) => void;
+  scrollTo: (focusId: string) => void;
+  scrollToTop: () => void;
+  getScrolledItem: () => string;
+} | null>;
+
 class AccountInternal extends PureComponent<
   AccountInternalProps,
   AccountInternalState
@@ -316,12 +325,7 @@ class AccountInternal extends PureComponent<
   paged: ReturnType<typeof pagedQuery> | null;
   rootQuery: Query;
   currentQuery: Query;
-  table: MutableRefObject<{
-    edit: (updatedId: string | null, op?: string, someBool?: boolean) => void;
-    setRowAnimation: (animation: boolean) => void;
-    scrollTo: (focusId: string) => void;
-    scrollToTop: () => void;
-  } | null>;
+  table: TableRef;
   unlisten?: () => void;
   dispatchSelected?: (action: Actions) => void;
 
@@ -333,7 +337,7 @@ class AccountInternal extends PureComponent<
     this.state = {
       search: '',
       filterConditions: props.filterConditions || [],
-      filterId: {},
+      filterId: undefined,
       filterConditionsOp: 'and',
       loading: true,
       workingHard: false,
@@ -859,7 +863,7 @@ class AccountInternal extends PureComponent<
     return {
       name: `balance-query-${id}`,
       query: this.makeRootQuery().calculate({ $sum: '$amount' }),
-    };
+    } as const;
   }
 
   getFilteredAmount = async () => {
@@ -1300,10 +1304,7 @@ class AccountInternal extends PureComponent<
     }
   };
 
-  onReloadSavedFilter = (
-    savedFilter: TransactionFilterEntity & { status?: string },
-    item: string,
-  ) => {
+  onReloadSavedFilter = (savedFilter: SavedFilter, item: string) => {
     if (item === 'reload') {
       const [savedFilter] = this.props.savedFilters.filter(
         f => f.id === this.state.filterId.id,
@@ -1323,7 +1324,7 @@ class AccountInternal extends PureComponent<
 
   onClearFilters = () => {
     this.setState({ filterConditionsOp: 'and' });
-    this.setState({ filterId: {} });
+    this.setState({ filterId: undefined });
     this.applyFilters([]);
     if (this.state.search !== '') {
       this.onSearch(this.state.search);
@@ -1353,7 +1354,7 @@ class AccountInternal extends PureComponent<
   onDeleteFilter = (condition: RuleConditionEntity) => {
     this.applyFilters(this.state.filterConditions.filter(c => c !== condition));
     if (this.state.filterConditions.length === 1) {
-      this.setState({ filterId: {} });
+      this.setState({ filterId: undefined });
       this.setState({ filterConditionsOp: 'and' });
     } else {
       this.setState({
@@ -1708,9 +1709,9 @@ class AccountInternal extends PureComponent<
                 isSorted={this.state.sort !== null}
                 reconcileAmount={reconcileAmount}
                 search={this.state.search}
+                // @ts-expect-error fix me
                 filterConditions={this.state.filterConditions}
                 filterConditionsOp={this.state.filterConditionsOp}
-                pushModal={this.props.pushModal}
                 onSearch={this.onSearch}
                 onShowTransactions={this.onShowTransactions}
                 onMenuSelect={this.onMenuSelect}

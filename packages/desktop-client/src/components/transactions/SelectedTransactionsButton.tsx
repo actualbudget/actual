@@ -6,10 +6,39 @@ import { useDispatch } from 'react-redux';
 import { pushModal } from 'loot-core/client/actions';
 import { isPreviewId } from 'loot-core/shared/transactions';
 import { validForTransfer } from 'loot-core/src/client/transfer';
+import { type TransactionEntity } from 'loot-core/types/models';
 
 import { useSelectedItems } from '../../hooks/useSelected';
-import { Menu } from '../common/Menu';
 import { SelectedItemsButton } from '../table';
+
+type SelectedTransactionsButtonProps = {
+  getTransaction: (id: string) => TransactionEntity | undefined;
+  onShow: (selectedIds: string[]) => void;
+  onDuplicate: (selectedIds: string[]) => void;
+  onDelete: (selectedIds: string[]) => void;
+  onEdit: (
+    type:
+      | 'date'
+      | 'amount'
+      | 'account'
+      | 'payee'
+      | 'notes'
+      | 'category'
+      | 'cleared',
+    selectedIds: string[],
+  ) => void;
+  onLinkSchedule: (selectedIds: string[]) => void;
+  onUnlinkSchedule: (selectedIds: string[]) => void;
+  onCreateRule: (selectedIds: string[]) => void;
+  onSetTransfer: (selectedIds: string[]) => void;
+  onScheduleAction: (
+    action: 'post-transaction' | 'skip',
+    selectedIds: string[],
+  ) => void;
+  showMakeTransfer: boolean;
+  onMakeAsSplitTransaction: (selectedIds: string[]) => void;
+  onMakeAsNonSplitTransactions: (selectedIds: string[]) => void;
+};
 
 export function SelectedTransactionsButton({
   getTransaction,
@@ -25,7 +54,7 @@ export function SelectedTransactionsButton({
   showMakeTransfer,
   onMakeAsSplitTransaction,
   onMakeAsNonSplitTransactions,
-}) {
+}: SelectedTransactionsButtonProps) {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const selectedItems = useSelectedItems();
@@ -82,8 +111,8 @@ export function SelectedTransactionsButton({
     const areAllSameDateAndAccount = transactions.every(
       tx =>
         tx &&
-        tx.date === firstTransaction.date &&
-        tx.account === firstTransaction.account,
+        tx.date === firstTransaction?.date &&
+        tx.account === firstTransaction?.account,
     );
     const areNoSplitTransactions = transactions.every(
       tx => tx && !tx.is_parent && !tx.is_child,
@@ -180,18 +209,25 @@ export function SelectedTransactionsButton({
       items={[
         ...(!types.trans
           ? [
-              { name: 'view-schedule', text: t('View schedule'), key: 'S' },
-              { name: 'post-transaction', text: t('Post transaction') },
-              { name: 'skip', text: t('Skip scheduled date') },
+              {
+                name: 'view-schedule',
+                text: t('View schedule'),
+                key: 'S',
+              } as const,
+              {
+                name: 'post-transaction',
+                text: t('Post transaction'),
+              } as const,
+              { name: 'skip', text: t('Skip scheduled date') } as const,
             ]
           : [
-              { name: 'show', text: t('Show'), key: 'F' },
+              { name: 'show', text: t('Show'), key: 'F' } as const,
               {
                 name: 'duplicate',
                 text: t('Duplicate'),
                 disabled: ambiguousDuplication,
-              },
-              { name: 'delete', text: t('Delete'), key: 'D' },
+              } as const,
+              { name: 'delete', text: t('Delete'), key: 'D' } as const,
               ...(linked
                 ? [
                     {
@@ -199,19 +235,22 @@ export function SelectedTransactionsButton({
                       text: t('View schedule'),
                       key: 'S',
                       disabled: selectedIds.length > 1,
-                    },
-                    { name: 'unlink-schedule', text: t('Unlink schedule') },
+                    } as const,
+                    {
+                      name: 'unlink-schedule',
+                      text: t('Unlink schedule'),
+                    } as const,
                   ]
                 : [
                     {
                       name: 'link-schedule',
                       text: t('Link schedule'),
                       key: 'S',
-                    },
+                    } as const,
                     {
                       name: 'create-rule',
                       text: t('Create rule'),
-                    },
+                    } as const,
                   ]),
               ...(showMakeTransfer
                 ? [
@@ -219,7 +258,7 @@ export function SelectedTransactionsButton({
                       name: 'set-transfer',
                       text: t('Make transfer'),
                       disabled: !canBeTransfer,
-                    },
+                    } as const,
                   ]
                 : []),
               ...(canMakeAsSplitTransaction
@@ -227,7 +266,7 @@ export function SelectedTransactionsButton({
                     {
                       name: 'make-as-split-transaction',
                       text: t('Make as split transaction'),
-                    },
+                    } as const,
                   ]
                 : []),
               ...(canUnsplitTransactions
@@ -237,18 +276,18 @@ export function SelectedTransactionsButton({
                       text: t('Unsplit {{count}} transactions', {
                         count: selectedIds.length,
                       }),
-                    },
+                    } as const,
                   ]
                 : []),
-              Menu.line,
-              { type: Menu.label, name: t('Edit field') },
-              { name: 'date', text: t('Date') },
-              { name: 'account', text: t('Account'), key: 'A' },
-              { name: 'payee', text: t('Payee'), key: 'P' },
-              { name: 'notes', text: t('Notes'), key: 'N' },
-              { name: 'category', text: t('Category'), key: 'C' },
-              { name: 'amount', text: t('Amount') },
-              { name: 'cleared', text: t('Cleared'), key: 'L' },
+              // Menu.line as any, // TODO
+              // { type: Menu.label, name: t('Edit field'), text: '' } as const,
+              { name: 'date', text: t('Date') } as const,
+              { name: 'account', text: t('Account'), key: 'A' } as const,
+              { name: 'payee', text: t('Payee'), key: 'P' } as const,
+              { name: 'notes', text: t('Notes'), key: 'N' } as const,
+              { name: 'category', text: t('Category'), key: 'C' } as const,
+              { name: 'amount', text: t('Amount') } as const,
+              { name: 'cleared', text: t('Cleared'), key: 'L' } as const,
             ]),
       ]}
       onSelect={name => {
