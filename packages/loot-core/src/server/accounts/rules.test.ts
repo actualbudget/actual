@@ -675,6 +675,32 @@ describe('Rule', () => {
         },
       );
     });
+
+    test('generate errors on fixed amounts less than total', () => {
+      expect(
+        fixedAmountRule.exec({ imported_payee: 'James', amount: 100 }),
+      ).toMatchObject({
+        error: {
+          difference: -100,
+          type: 'SplitTransactionError',
+          version: 1,
+        },
+        subtransactions: [{ amount: 100 }, { amount: 100 }],
+      });
+    });
+
+    test('generate errors on fixed amounts more than total', () => {
+      expect(
+        fixedAmountRule.exec({ imported_payee: 'James', amount: 300 }),
+      ).toMatchObject({
+        error: {
+          difference: 100,
+          type: 'SplitTransactionError',
+          version: 1,
+        },
+        subtransactions: [{ amount: 100 }, { amount: 100 }],
+      });
+    });
   });
 
   test('rules are deterministically ranked', () => {
