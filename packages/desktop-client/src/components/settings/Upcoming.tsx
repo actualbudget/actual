@@ -100,6 +100,7 @@ function InfoCircle() {
       <SvgInformationCircle
         style={{ height: '15px', cursor: 'pointer' }}
         onClick={() => setVisible(false)}
+        onMouseLeave={() => setVisible(false)}
       />
       <View
         style={{
@@ -128,6 +129,7 @@ function InfoCircle() {
       <SvgInformationCircle
         style={{ height: '15px', cursor: 'pointer' }}
         onClick={() => setVisible(true)}
+        onMouseOver={() => setTimeout(() => setVisible(true), 500)}
       />
     </View>
   );
