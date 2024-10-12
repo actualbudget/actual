@@ -9,6 +9,7 @@ import { validForTransfer } from 'loot-core/src/client/transfer';
 import { type TransactionEntity } from 'loot-core/types/models';
 
 import { useSelectedItems } from '../../hooks/useSelected';
+import { Menu } from '../common/Menu';
 import { SelectedItemsButton } from '../table';
 
 type SelectedTransactionsButtonProps = {
@@ -206,6 +207,7 @@ export function SelectedTransactionsButton({
     <SelectedItemsButton
       id="transactions"
       name={count => t('{{count}} transactions', { count })}
+      // @ts-expect-error fix me
       items={[
         ...(!types.trans
           ? [
@@ -279,8 +281,8 @@ export function SelectedTransactionsButton({
                     } as const,
                   ]
                 : []),
-              // Menu.line as any, // TODO
-              // { type: Menu.label, name: t('Edit field'), text: '' } as const,
+              Menu.line,
+              { type: Menu.label, name: t('Edit field'), text: '' } as const,
               { name: 'date', text: t('Date') } as const,
               { name: 'account', text: t('Account'), key: 'A' } as const,
               { name: 'payee', text: t('Payee'), key: 'P' } as const,
@@ -327,6 +329,7 @@ export function SelectedTransactionsButton({
             onSetTransfer(selectedIds);
             break;
           default:
+            // @ts-expect-error fix me
             onEdit(name, selectedIds);
         }
       }}
