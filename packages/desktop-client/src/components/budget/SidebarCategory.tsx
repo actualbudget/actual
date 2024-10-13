@@ -61,7 +61,9 @@ export function SidebarCategory({
         WebkitUserSelect: 'none',
         opacity: category.hidden || categoryGroup?.hidden ? 0.33 : undefined,
         backgroundColor: 'transparent',
+        height: 20,
       }}
+      ref={triggerRef}
       onContextMenu={e => {
         e.preventDefault();
         setMenuOpen(true);
@@ -78,7 +80,7 @@ export function SidebarCategory({
       >
         {category.name}
       </div>
-      <View style={{ flexShrink: 0, marginLeft: 5 }} ref={triggerRef}>
+      <View style={{ flexShrink: 0, marginLeft: 5 }}>
         <Button
           variant="bare"
           className="hover-visible"
