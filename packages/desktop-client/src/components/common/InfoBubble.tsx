@@ -36,7 +36,7 @@ export function InfoBubble({ label, textWidth }: InfoBubbleProps) {
           borderRadius: 4,
           border: '1px solid ' + theme.buttonNormalBorder,
           zIndex: 300,
-          boxShadow: theme.buttonNormalShadow,
+          boxShadow: theme.buttonPrimaryShadow,
         }}
       >
         <Text
