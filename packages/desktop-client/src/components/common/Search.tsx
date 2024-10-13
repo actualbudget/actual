@@ -1,4 +1,5 @@
 import { type Ref } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { SvgRemove, SvgSearchAlternate } from '../../icons/v2';
 import { theme } from '../../style';
@@ -24,6 +25,7 @@ export function Search({
   isInModal = false,
   width = 250,
 }: SearchProps) {
+  const { t } = useTranslation();
   return (
     <InputWithContent
       inputRef={inputRef}
@@ -55,7 +57,7 @@ export function Search({
       }
       rightContent={
         value && (
-          <View title="Clear search term">
+          <View title={t('Clear search term')}>
             <Button
               variant="bare"
               style={{ padding: 8 }}
