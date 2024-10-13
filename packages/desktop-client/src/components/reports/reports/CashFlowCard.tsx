@@ -10,6 +10,7 @@ import { type CashFlowWidget } from 'loot-core/src/types/models';
 
 import { useFeatureFlag } from '../../../hooks/useFeatureFlag';
 import { theme } from '../../../style';
+import { Warning } from '../../alerts';
 import { AlignedText } from '../../common/AlignedText';
 import { Block } from '../../common/Block';
 import { Text } from '../../common/Text';
@@ -223,21 +224,10 @@ function retChartDetailed(
 ) {
   if (height < 290) {
     return (
-      <Text
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          textAlign: 'center',
-          fontWeight: 600,
-          justifyContent: 'center',
-          height: '100%',
-        }}
-      >
-        <Trans>
-          Additional widget height required to display chart, edit dashboard to
-          increase widget height
-        </Trans>
-      </Text>
+      <Warning style={{ paddingTop: 5, paddingBottom: 5 }}>
+        Additional widget height required to display chart, edit dashboard to
+        increase widget height
+      </Warning>
     );
   } else {
     return (
@@ -350,6 +340,10 @@ export function CashFlowCard({
       }
       menuItems={[
         {
+          name: 'changeView',
+          text: t('Change view'),
+        },
+        {
           name: 'rename',
           text: t('Rename'),
         },
@@ -360,6 +354,13 @@ export function CashFlowCard({
       ]}
       onMenuSelect={item => {
         switch (item) {
+          case 'changeView':
+            const newValue = !meta?.isSimpleView;
+            onMetaChange({
+              ...meta,
+              isSimpleView: newValue,
+            });
+            break;
           case 'rename':
             setNameMenuOpen(true);
             break;

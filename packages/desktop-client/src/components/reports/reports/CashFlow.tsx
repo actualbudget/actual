@@ -25,7 +25,6 @@ import { Block } from '../../common/Block';
 import { Button } from '../../common/Button2';
 import { Paragraph } from '../../common/Paragraph';
 import { Text } from '../../common/Text';
-import { Toggle } from '../../common/Toggle';
 import { View } from '../../common/View';
 import { EditablePageHeaderTitle } from '../../EditablePageHeaderTitle';
 import { MobileBackButton } from '../../mobile/MobileBackButton';
@@ -92,9 +91,6 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
   const [end, setEnd] = useState(initialEnd);
   const [mode, setMode] = useState(initialMode);
   const [showBalance, setShowBalance] = useState(true);
-  const [isSimpleView, setisSimpleView] = useState(
-    widget?.meta?.isSimpleView ?? true,
-  );
 
   const [isConcise, setIsConcise] = useState(() => {
     const numDays = d.differenceInCalendarDays(
@@ -162,7 +158,6 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
           end,
           mode,
         },
-        isSimpleView,
       },
     });
     dispatch(
@@ -240,29 +235,6 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
           <Button onPress={() => setShowBalance(state => !state)}>
             {showBalance ? t('Hide balance') : t('Show balance')}
           </Button>
-
-          {widget && (
-            <View
-              style={{
-                cursor: 'default',
-                flexDirection: 'row',
-                justifyContent: 'center',
-                alignItems: 'center',
-              }}
-            >
-              <label htmlFor="toggleChart">
-                <Trans>Simple view</Trans>
-              </label>
-              <View style={{ flex: 1 }} />
-              <Toggle
-                id="toggleChart"
-                style={{ marginLeft: 5, marginTop: -15 }}
-                checked={isSimpleView}
-                onColor={theme.pageTextPositive}
-                onToggle={() => setisSimpleView(!isSimpleView)}
-              />
-            </View>
-          )}
 
           {widget && (
             <Button variant="primary" onPress={onSaveWidget}>
