@@ -1,6 +1,7 @@
 import { ipcRenderer, contextBridge, IpcRenderer } from 'electron';
 
 import {
+  ExposeActualServerPayload,
   GetBootstrapDataPayload,
   OpenFileDialogPayload,
   SaveFileDialogPayload,
@@ -68,6 +69,10 @@ contextBridge.exposeInMainWorld('Actual', {
     return ipcRenderer.invoke('start-actual-server', {
       releaseVersion,
     });
+  },
+
+  exposeActualServer: (settings: ExposeActualServerPayload) => {
+    return ipcRenderer.invoke('expose-actual-server', settings);
   },
 
   onEventFromMain: (type: string, handler: (...args: unknown[]) => void) => {

@@ -8,6 +8,10 @@ declare global {
       openURLInBrowser: (url: string) => void;
       downloadActualServer: (releaseVersion: string) => Promise<void>;
       startActualServer: (releaseVersion: string) => Promise<void>;
+      exposeActualServer: (settings: {
+        region: 'us' | 'eu' | 'au' | 'ap' | 'sa' | 'jp' | 'in';
+        port: number;
+      }) => Promise<string | undefined>;
       saveFile: (
         contents: string | Buffer,
         filename: string,

@@ -8683,6 +8683,7 @@ __metadata:
     electron: "npm:30.0.6"
     electron-builder: "npm:24.13.3"
     fs-extra: "npm:^11.2.0"
+    ngrok: "npm:^5.0.0-beta.2"
     node-fetch: "npm:^2.7.0"
     promise-retry: "npm:^2.0.1"
     typescript: "npm:^5.5.4"
@@ -11346,6 +11347,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"hpagent@npm:^0.1.2":
+  version: 0.1.2
+  resolution: "hpagent@npm:0.1.2"
+  checksum: 10/bd033b3700bb523edc9a805f8683c71fddd622df901e73842b5e3357136ce062c2ddb2ab5e9f5b3d84e0977bfe439f5cdc51d755a11e99376eb95e4624312f0a
+  languageName: node
+  linkType: hard
+
 "html-encoding-sniffer@npm:^2.0.1":
   version: 2.0.1
   resolution: "html-encoding-sniffer@npm:2.0.1"
@@ -13593,6 +13601,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"lodash.clonedeep@npm:^4.5.0":
+  version: 4.5.0
+  resolution: "lodash.clonedeep@npm:4.5.0"
+  checksum: 10/957ed243f84ba6791d4992d5c222ffffca339a3b79dbe81d2eaf0c90504160b500641c5a0f56e27630030b18b8e971ea10b44f928a977d5ced3c8948841b555f
+  languageName: node
+  linkType: hard
+
 "lodash.debounce@npm:^4.0.8":
   version: 4.0.8
   resolution: "lodash.debounce@npm:4.0.8"
@@ -14942,6 +14957,25 @@ __metadata:
   version: 2.6.2
   resolution: "neo-async@npm:2.6.2"
   checksum: 10/1a7948fea86f2b33ec766bc899c88796a51ba76a4afc9026764aedc6e7cde692a09067031e4a1bf6db4f978ccd99e7f5b6c03fe47ad9865c3d4f99050d67e002
+  languageName: node
+  linkType: hard
+
+"ngrok@npm:^5.0.0-beta.2":
+  version: 5.0.0-beta.2
+  resolution: "ngrok@npm:5.0.0-beta.2"
+  dependencies:
+    extract-zip: "npm:^2.0.1"
+    got: "npm:^11.8.5"
+    hpagent: "npm:^0.1.2"
+    lodash.clonedeep: "npm:^4.5.0"
+    uuid: "npm:^7.0.0 || ^8.0.0"
+    yaml: "npm:^2.2.2"
+  dependenciesMeta:
+    hpagent:
+      optional: true
+  bin:
+    ngrok: bin/ngrok
+  checksum: 10/46712d4e59cc8bc9d3bbfa8c327ed12f5ea218991c26fddf22d9c9d4eea59d2caeb6463790a8daceaafe76223c07ecd27297ce7fc31cd88d9cea788945f315b7
   languageName: node
   linkType: hard
 
@@ -19878,6 +19912,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"uuid@npm:^7.0.0 || ^8.0.0":
+  version: 8.3.2
+  resolution: "uuid@npm:8.3.2"
+  bin:
+    uuid: dist/bin/uuid
+  checksum: 10/9a5f7aa1d6f56dd1e8d5f2478f855f25c645e64e26e347a98e98d95781d5ed20062d6cca2eecb58ba7c84bc3910be95c0451ef4161906abaab44f9cb68ffbdd1
+  languageName: node
+  linkType: hard
+
 "uuid@npm:^9.0.0, uuid@npm:^9.0.1":
   version: 9.0.1
   resolution: "uuid@npm:9.0.1"
@@ -20985,6 +21028,15 @@ __metadata:
   version: 4.0.0
   resolution: "yallist@npm:4.0.0"
   checksum: 10/4cb02b42b8a93b5cf50caf5d8e9beb409400a8a4d85e83bb0685c1457e9ac0b7a00819e9f5991ac25ffabb56a78e2f017c1acc010b3a1babfe6de690ba531abd
+  languageName: node
+  linkType: hard
+
+"yaml@npm:^2.2.2":
+  version: 2.6.0
+  resolution: "yaml@npm:2.6.0"
+  bin:
+    yaml: bin.mjs
+  checksum: 10/f4369f667c7626c216ea81b5840fe9b530cdae4cff2d84d166ec1239e54bf332dbfac4a71bf60d121f8e85e175364a4e280a520292269b6cf9d074368309adf9
   languageName: node
   linkType: hard
 

@@ -17,6 +17,7 @@ import {
   SaveDialogOptions,
 } from 'electron';
 import { copy, exists, remove } from 'fs-extra';
+import ngrok from 'ngrok';
 import promiseRetry from 'promise-retry';
 
 import { getMenu } from './menu';
@@ -405,9 +406,9 @@ ipcMain.handle(
 ipcMain.handle(
   'start-actual-server',
   async (_event, payload: { releaseVersion: string }) => {
-    const serverReleaseDir = path.resolve(
-      `${process.env.ACTUAL_DATA_DIR}/actual-server/${payload.releaseVersion}`,
-    );
+    // const serverReleaseDir = path.resolve(
+    //   `${process.env.ACTUAL_DATA_DIR}/actual-server/${payload.releaseVersion}`,
+    // );
 
     // actualServerProcess = utilityProcess.fork(
     //   serverReleaseDir + '/app.js', // if bundling it ourselves and manually including it
@@ -443,6 +444,43 @@ ipcMain.handle(
       clientWin?.webContents.executeJavaScript(`
             console.error('Server Log:', ${JSON.stringify(chunk.toString('utf8'))})`);
     });
+
+    const url = ngrok.connect({
+      proto: 'http',
+      addr: 5006,
+      region: 'us',
+    });
+
+    return url;
+  },
+);
+
+export type ExposeActualServerPayload = {
+  region: 'us' | 'eu' | 'au' | 'ap' | 'sa' | 'jp' | 'in';
+  port: number;
+};
+
+ipcMain.handle(
+  'expose-actual-server',
+  async (
+    _event,
+    payload: ExposeActualServerPayload = {
+      region: 'eu',
+      port: 5006,
+    },
+  ) => {
+    try {
+      const url = await ngrok.connect({
+        scheme: 'https',
+        addr: payload.port,
+        region: payload.region,
+      });
+
+      console.info(`Exposing actual server on url: ${url}`);
+      return url;
+    } catch (error) {
+      console.error('Unable to run ngrok', error);
+    }
   },
 );
 

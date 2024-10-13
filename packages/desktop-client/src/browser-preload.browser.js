@@ -141,6 +141,7 @@ global.Actual = {
   },
   downloadActualServer: () => {},
   startActualServer: () => {},
+  exposeActualServer: () => {},
   onEventFromMain: () => {},
   applyAppUpdate: () => {},
   updateAppMenu: () => {},

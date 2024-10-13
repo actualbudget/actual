@@ -445,6 +445,10 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
     await globalThis.Actual.startActualServer('v24.10.1');
   };
 
+  const exposeActualServer = async () => {
+    await globalThis.Actual.exposeActualServer();
+  };
+
   return (
     <View
       style={{
@@ -527,7 +531,17 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
               marginLeft: 10,
             }}
           >
-            Start Electron Server
+            Start Server
+          </Button>
+          <Button
+            variant="primary"
+            onPress={exposeActualServer}
+            style={{
+              ...narrowButtonStyle,
+              marginLeft: 10,
+            }}
+          >
+            Expose Server
           </Button>
         </View>
       )}
