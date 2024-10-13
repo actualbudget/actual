@@ -66,11 +66,7 @@ export function Schedules() {
     [],
   );
 
-  const {
-    isLoading: isSchedulesLoading,
-    schedules,
-    statuses,
-  } = useSchedules();
+  const { isLoading: isSchedulesLoading, schedules, statuses } = useSchedules();
 
   if (isSchedulesLoading) {
     return null;
