@@ -1,9 +1,9 @@
 // @ts-strict-ignore
-import { useMemo } from 'react';
+import { useMemo, useCallback } from 'react';
 
 import { q } from '../../shared/query';
 import { type TransactionFilterEntity } from '../../types/models';
-import { useLiveQuery } from '../query-hooks';
+import { useQuery } from '../query-hooks';
 
 function toJS(rows) {
   const filters = rows.map(row => {
@@ -20,16 +20,16 @@ function toJS(rows) {
 }
 
 export function useFilters(): TransactionFilterEntity[] {
-  const filters = toJS(
-    useLiveQuery(() => q('transaction_filters').select('*'), []) || [],
+  const { data } = useQuery<TransactionFilterEntity>(() =>
+    q('transaction_filters').select('*'),
   );
 
   /** Sort filters by alphabetical order */
-  function sort(filters) {
+  const sort = useCallback(filters => {
     return filters.sort((a, b) =>
       a.name.trim().localeCompare(b.name.trim(), { ignorePunctuation: true }),
     );
-  }
+  }, []);
 
-  return useMemo(() => sort(filters), [filters]);
+  return useMemo(() => sort(toJS(data ? [...data] : [])), [data, sort]);
 }

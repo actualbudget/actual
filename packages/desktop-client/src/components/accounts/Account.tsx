@@ -19,10 +19,14 @@ import { type UndoState } from 'loot-core/server/undo';
 import { useFilters } from 'loot-core/src/client/data-hooks/filters';
 import {
   SchedulesProvider,
-  useDefaultSchedulesQueryTransform,
+  useDefaultSchedulesQueryBuilder,
 } from 'loot-core/src/client/data-hooks/schedules';
 import * as queries from 'loot-core/src/client/queries';
-import { runQuery, pagedQuery } from 'loot-core/src/client/query-helpers';
+import {
+  runQuery,
+  pagedQuery,
+  type PagedQuery,
+} from 'loot-core/src/client/query-helpers';
 import { send, listen } from 'loot-core/src/platform/client/fetch';
 import { currentDay } from 'loot-core/src/shared/months';
 import { q, type Query } from 'loot-core/src/shared/query';
@@ -240,7 +244,7 @@ function getField(field?: string) {
 }
 
 type AccountInternalProps = {
-  accountId?: string;
+  accountId?: AccountEntity['id'] | 'budgeted' | 'offbudget' | 'uncategorized';
   filterConditions: RuleConditionEntity[];
   showBalances?: boolean;
   setShowBalances: (newValue: boolean) => void;
@@ -322,7 +326,7 @@ class AccountInternal extends PureComponent<
   AccountInternalProps,
   AccountInternalState
 > {
-  paged: ReturnType<typeof pagedQuery> | null;
+  paged: PagedQuery<TransactionEntity> | null;
   rootQuery: Query;
   currentQuery: Query;
   table: TableRef;
@@ -472,7 +476,7 @@ class AccountInternal extends PureComponent<
   };
 
   fetchTransactions = (filterConditions?: ConditionEntity[]) => {
-    const query = this.makeRootQuery();
+    const query = this.makeRootTransactionsQuery();
     this.rootQuery = this.currentQuery = query;
     if (filterConditions) this.applyFilters(filterConditions);
     else this.updateQuery(query);
@@ -482,10 +486,10 @@ class AccountInternal extends PureComponent<
     }
   };
 
-  makeRootQuery = () => {
+  makeRootTransactionsQuery = () => {
     const accountId = this.props.accountId;
 
-    return queries.makeTransactionsQuery(accountId);
+    return queries.transactions(accountId);
   };
 
   updateQuery(query: Query, isFiltered: boolean = false) {
@@ -504,10 +508,8 @@ class AccountInternal extends PureComponent<
 
     this.paged = pagedQuery(
       query.select('*'),
-      async (
-        data: TransactionEntity[],
-        prevData: TransactionEntity[] | null,
-      ) => {
+      async (groupedData, prevData) => {
+        const data = ungroupTransactions([...groupedData]);
         const firstLoad = prevData == null;
 
         if (firstLoad) {
@@ -552,7 +554,6 @@ class AccountInternal extends PureComponent<
       {
         pageCount: 150,
         onlySync: true,
-        mapper: ungroupTransactions,
       },
     );
   }
@@ -590,7 +591,7 @@ class AccountInternal extends PureComponent<
       );
     } else {
       this.updateQuery(
-        queries.makeTransactionSearchQuery(
+        queries.transactionsSearch(
           this.currentQuery,
           this.state.search,
           this.props.dateFormat,
@@ -652,27 +653,19 @@ class AccountInternal extends PureComponent<
     );
   };
 
-  onTransactionsChange = (
-    newTransaction: TransactionEntity,
-    data: TransactionEntity[],
-  ) => {
+  onTransactionsChange = (updatedTransaction: TransactionEntity) => {
     // Apply changes to pagedQuery data
-    this.paged?.optimisticUpdate(
-      (data: TransactionEntity[]) => {
-        if (newTransaction._deleted) {
-          return data.filter(t => t.id !== newTransaction.id);
-        } else {
-          return data.map(t => {
-            return t.id === newTransaction.id ? newTransaction : t;
-          });
-        }
-      },
-      () => {
-        return data;
-      },
-    );
+    this.paged?.optimisticUpdate(data => {
+      if (updatedTransaction._deleted) {
+        return data.filter(t => t.id !== updatedTransaction.id);
+      } else {
+        return data.map(t => {
+          return t.id === updatedTransaction.id ? updatedTransaction : t;
+        });
+      }
+    });
 
-    this.props.updateNewTransactions(newTransaction.id);
+    this.props.updateNewTransactions(updatedTransaction.id);
   };
 
   canCalculateBalance = () => {
@@ -862,7 +855,7 @@ class AccountInternal extends PureComponent<
   getBalanceQuery(id?: string) {
     return {
       name: `balance-query-${id}`,
-      query: this.makeRootQuery().calculate({ $sum: '$amount' }),
+      query: this.makeRootTransactionsQuery().calculate({ $sum: '$amount' }),
     } as const;
   }
 
@@ -1887,10 +1880,10 @@ export function Account() {
   const savedFiters = useFilters();
   const actionCreators = useActions();
 
-  const transform = useDefaultSchedulesQueryTransform(params.id);
+  const queryBuilder = useDefaultSchedulesQueryBuilder(params.id);
 
   return (
-    <SchedulesProvider transform={transform}>
+    <SchedulesProvider queryBuilder={queryBuilder}>
       <SplitsExpandedProvider
         initialMode={expandSplits ? 'collapse' : 'expand'}
       >

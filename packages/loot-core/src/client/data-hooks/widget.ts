@@ -2,19 +2,18 @@ import { useMemo } from 'react';
 
 import { q } from '../../shared/query';
 import { type Widget } from '../../types/models';
-import { useLiveQuery } from '../query-hooks';
+import { useQuery } from '../query-hooks';
 
-export function useWidget<W extends Widget>(id: string, type: W['type']) {
-  const data = useLiveQuery<W[]>(
-    () => q('dashboard').filter({ id, type }).select('*'),
-    [id],
+export function useWidget<W extends Widget>(id: W['id'], type: W['type']) {
+  const { data = [], isLoading } = useQuery<W>(() =>
+    q('dashboard').filter({ id, type }).select('*'),
   );
 
   return useMemo(
     () => ({
-      isLoading: data === null,
+      isLoading,
       data: data?.[0],
     }),
-    [data],
+    [data, isLoading],
   );
 }

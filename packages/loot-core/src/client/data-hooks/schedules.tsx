@@ -5,51 +5,77 @@ import React, {
   useEffect,
   useMemo,
   useState,
+  type PropsWithChildren,
 } from 'react';
 
 import { useSyncedPref } from '@actual-app/web/src/hooks/useSyncedPref';
 
 import { q, type Query } from '../../shared/query';
 import { getHasTransactionsQuery, getStatus } from '../../shared/schedules';
-import { type ScheduleEntity } from '../../types/models';
-import { getAccountFilter } from '../queries';
+import {
+  type TransactionEntity,
+  type ScheduleEntity,
+  type AccountEntity,
+} from '../../types/models';
+import { accountFilter } from '../queries';
 import { liveQuery } from '../query-helpers';
 
 export type ScheduleStatusType = ReturnType<typeof getStatus>;
 export type ScheduleStatuses = Map<ScheduleEntity['id'], ScheduleStatusType>;
 
-function loadStatuses(schedules: ScheduleEntity[], onData, prefs) {
-  return liveQuery(getHasTransactionsQuery(schedules), onData, {
-    mapper: data => {
+function loadStatuses(
+  schedules: readonly ScheduleEntity[],
+  onData: (data: ScheduleStatuses) => void,
+  upcomingLength: string,
+) {
+  return liveQuery<TransactionEntity>(
+    getHasTransactionsQuery(schedules),
+    data => {
       const hasTrans = new Set(data.filter(Boolean).map(row => row.schedule));
 
-      return new Map(
+      const scheduleStatuses = new Map(
         schedules.map(s => [
           s.id,
-          getStatus(s.next_date, s.completed, hasTrans.has(s.id), prefs),
+          getStatus(
+            s.next_date,
+            s.completed,
+            hasTrans.has(s.id),
+            upcomingLength,
+          ),
         ]),
-      );
+      ) as ScheduleStatuses;
+
+      onData?.(scheduleStatuses);
     },
-  });
+  );
 }
 
-type UseSchedulesArgs = { transform?: (q: Query) => Query };
-type UseSchedulesResult = {
-  schedules: ScheduleEntity[];
+type UseSchedulesArgs = { queryBuilder?: (q: Query) => Query };
+type ScheduleData = {
+  schedules: readonly ScheduleEntity[];
   statuses: ScheduleStatuses;
-} | null;
+};
+type UseSchedulesResult = ScheduleData & {
+  readonly isLoading: boolean;
+};
 
 export function useSchedules({
-  transform,
+  queryBuilder,
 }: UseSchedulesArgs = {}): UseSchedulesResult {
-  const [data, setData] = useState<UseSchedulesResult>(null);
-  const upcomingLength = useSyncedPref('upcomingScheduledTransactionLength')[0];
+  const [isLoading, setIsLoading] = useState(true);
+  const [data, setData] = useState<ScheduleData>();
+  const [upcomingLength] = useSyncedPref('upcomingScheduledTransactionLength');
   useEffect(() => {
+    let isUnmounted = false;
+
     const query = q('schedules').select('*');
     let statusQuery;
-    const scheduleQuery = liveQuery(
-      transform ? transform(query) : query,
-      async (schedules: ScheduleEntity[]) => {
+
+    setIsLoading(true);
+
+    const scheduleQuery = liveQuery<ScheduleEntity>(
+      queryBuilder ? queryBuilder(query) : query,
+      async schedules => {
         if (scheduleQuery) {
           if (statusQuery) {
             statusQuery.unsubscribe();
@@ -57,7 +83,12 @@ export function useSchedules({
 
           statusQuery = loadStatuses(
             schedules,
-            (statuses: ScheduleStatuses) => setData({ schedules, statuses }),
+            (statuses: ScheduleStatuses) => {
+              if (!isUnmounted) {
+                setIsLoading(false);
+                setData({ schedules, statuses });
+              }
+            },
             upcomingLength,
           );
         }
@@ -65,6 +96,8 @@ export function useSchedules({
     );
 
     return () => {
+      isUnmounted = true;
+
       if (scheduleQuery) {
         scheduleQuery.unsubscribe();
       }
@@ -72,19 +105,31 @@ export function useSchedules({
         statusQuery.unsubscribe();
       }
     };
-  }, [upcomingLength, transform]);
+  }, [upcomingLength, queryBuilder]);
 
-  return data;
+  return {
+    isLoading,
+    ...data,
+  };
 }
 
 type SchedulesContextValue = UseSchedulesResult;
 
-const SchedulesContext = createContext<SchedulesContextValue | undefined>(
-  undefined,
-);
+const SchedulesContext = createContext<SchedulesContextValue>({
+  isLoading: true,
+  schedules: [],
+  statuses: new Map(),
+});
 
-export function SchedulesProvider({ transform, children }) {
-  const data = useSchedules({ transform });
+type SchedulesProviderProps = PropsWithChildren<{
+  queryBuilder?: UseSchedulesArgs['queryBuilder'];
+}>;
+
+export function SchedulesProvider({
+  queryBuilder,
+  children,
+}: SchedulesProviderProps) {
+  const data = useSchedules({ queryBuilder });
   return (
     <SchedulesContext.Provider value={data}>
       {children}
@@ -96,10 +141,12 @@ export function useCachedSchedules() {
   return useContext(SchedulesContext);
 }
 
-export function useDefaultSchedulesQueryTransform(accountId) {
+export function useDefaultSchedulesQueryBuilder(
+  accountId: AccountEntity['id'] | 'budgeted' | 'offbudget' | 'uncategorized',
+) {
   return useMemo(() => {
-    const filterByAccount = getAccountFilter(accountId, '_account');
-    const filterByPayee = getAccountFilter(accountId, '_payee.transfer_acct');
+    const filterByAccount = accountFilter(accountId, '_account');
+    const filterByPayee = accountFilter(accountId, '_payee.transfer_acct');
 
     return (q: Query) => {
       q = q.filter({
