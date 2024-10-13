@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { Trans } from 'react-i18next';
 
 import { evalArithmetic } from 'loot-core/src/shared/arithmetic';
 import { integerToCurrency, amountToInteger } from 'loot-core/src/shared/util';
@@ -55,7 +56,9 @@ export function TransferMenu({
 
   return (
     <View style={{ padding: 10 }}>
-      <View style={{ marginBottom: 5 }}>Transfer this amount:</View>
+      <View style={{ marginBottom: 5 }}>
+        <Trans>Transfer this amount:</Trans>
+      </View>
       <View>
         <InitialFocus>
           <Input
@@ -95,7 +98,7 @@ export function TransferMenu({
           }}
           onPress={() => _onSubmit(amount, toCategoryId)}
         >
-          Transfer
+          <Trans>Transfer</Trans>
         </Button>
       </View>
     </View>

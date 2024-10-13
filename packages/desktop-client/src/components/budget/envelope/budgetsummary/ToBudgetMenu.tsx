@@ -1,4 +1,5 @@
 import React, { type ComponentPropsWithoutRef } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { envelopeBudget } from 'loot-core/client/queries';
 
@@ -21,6 +22,8 @@ export function ToBudgetMenu({
   onResetHoldBuffer,
   ...props
 }: ToBudgetMenuProps) {
+  const { t } = useTranslation();
+
   const toBudget = useEnvelopeSheetValue(envelopeBudget.toBudget) ?? 0;
   const forNextMonth = useEnvelopeSheetValue(envelopeBudget.forNextMonth);
   const items = [
@@ -28,11 +31,11 @@ export function ToBudgetMenu({
       ? [
           {
             name: 'transfer',
-            text: 'Move to a category',
+            text: t('Move to a category'),
           },
           {
             name: 'buffer',
-            text: 'Hold for next month',
+            text: t('Hold for next month'),
           },
         ]
       : []),
@@ -40,7 +43,7 @@ export function ToBudgetMenu({
       ? [
           {
             name: 'cover',
-            text: 'Cover from a category',
+            text: t('Cover from a category'),
           },
         ]
       : []),
@@ -48,7 +51,7 @@ export function ToBudgetMenu({
       ? [
           {
             name: 'reset-buffer',
-            text: 'Reset next month’s buffer',
+            text: t('Reset next month’s buffer'),
           },
         ]
       : []),
@@ -81,7 +84,7 @@ export function ToBudgetMenu({
           : [
               {
                 name: 'none',
-                text: 'No actions available',
+                text: t('No actions available'),
                 disabled: true,
               },
             ]

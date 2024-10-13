@@ -86,6 +86,15 @@ type FinanceModals = {
 
   'import-actual': null;
 
+  'out-of-sync-migrations': null;
+
+  'files-settings': null;
+
+  'confirm-change-document-dir': {
+    currentBudgetDirectory: string;
+    newDirectory: string;
+  };
+
   'create-encryption-key': { recreate?: boolean };
   'fix-encryption-key': {
     hasExistingKey?: boolean;

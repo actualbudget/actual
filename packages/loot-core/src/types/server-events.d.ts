@@ -1,7 +1,8 @@
+import { type Backup } from '../server/backups';
 import { type UndoState } from '../server/undo';
 
 export interface ServerEvents {
-  'backups-updated': unknown;
+  'backups-updated': Backup[];
   'cells-changed': Array<{ name }>;
   'fallback-write-error': unknown;
   'finish-import': unknown;

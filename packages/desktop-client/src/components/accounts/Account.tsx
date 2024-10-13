@@ -69,6 +69,7 @@ import { Button } from '../common/Button2';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { TransactionList } from '../transactions/TransactionList';
+import { validateAccountName } from '../util/accountValidation';
 
 import { AccountHeader } from './Header';
 
@@ -296,6 +297,7 @@ type AccountInternalState = {
   prevShowCleared?: boolean;
   showReconciled: boolean;
   editingName: boolean;
+  nameError: string;
   isAdding: boolean;
   modalShowing?: boolean;
   sort: {
@@ -343,6 +345,7 @@ class AccountInternal extends PureComponent<
       showCleared: props.showCleared,
       showReconciled: props.showReconciled,
       editingName: false,
+      nameError: '',
       isAdding: false,
       sort: null,
       filteredAmount: null,
@@ -486,8 +489,12 @@ class AccountInternal extends PureComponent<
       this.paged.unsubscribe();
     }
 
-    // Filter out reconciled transactions if necessary.
-    if (!this.state.showReconciled) {
+    // Filter out reconciled transactions if they are hidden
+    // and we're not showing balances.
+    if (
+      !this.state.showReconciled &&
+      (!this.state.showBalances || !this.canCalculateBalance())
+    ) {
       query = query.filter({ reconciled: { $eq: false } });
     }
 
@@ -703,13 +710,19 @@ class AccountInternal extends PureComponent<
   };
 
   onSaveName = (name: string) => {
-    if (name.trim().length) {
-      const accountId = this.props.accountId;
+    const accountNameError = validateAccountName(
+      name,
+      this.props.accountId,
+      this.props.accounts,
+    );
+    if (accountNameError) {
+      this.setState({ nameError: accountNameError });
+    } else {
       const account = this.props.accounts.find(
-        account => account.id === accountId,
-      )!;
+        account => account.id === this.props.accountId,
+      );
       this.props.updateAccount({ ...account, name });
-      this.setState({ editingName: false });
+      this.setState({ editingName: false, nameError: '' });
     }
   };
 
@@ -965,9 +978,16 @@ class AccountInternal extends PureComponent<
       transactions: [...reconciliationTransactions, ...this.state.transactions],
     });
 
+    // run rules on the reconciliation transaction
+    const ruledTransactions = await Promise.all(
+      reconciliationTransactions.map(transaction =>
+        send('rules-run', { transaction }),
+      ),
+    );
+
     // sync the reconciliation transaction
     await send('transactions-batch-update', {
-      added: reconciliationTransactions,
+      added: ruledTransactions,
     });
     await this.refetchTransactions();
   };
@@ -1704,6 +1724,7 @@ class AccountInternal extends PureComponent<
                 onAddTransaction={this.onAddTransaction}
                 onToggleExtraBalances={this.onToggleExtraBalances}
                 onSaveName={this.onSaveName}
+                saveNameError={this.state.nameError}
                 onExposeName={this.onExposeName}
                 onReconcile={this.onReconcile}
                 onDoneReconciling={this.onDoneReconciling}
@@ -1746,6 +1767,7 @@ class AccountInternal extends PureComponent<
                   payees={payees}
                   balances={allBalances}
                   showBalances={!!allBalances}
+                  showReconciled={showReconciled}
                   showCleared={showCleared}
                   showAccount={
                     !accountId ||

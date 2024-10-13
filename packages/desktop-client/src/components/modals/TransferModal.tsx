@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 
 import { pushModal } from 'loot-core/client/actions';
@@ -34,6 +35,8 @@ export function TransferModal({
   showToBeBudgeted,
   onSubmit,
 }: TransferModalProps) {
+  const { t } = useTranslation();
+
   const { grouped: originalCategoryGroups } = useCategories();
   const [categoryGroups, categories] = useMemo(() => {
     const expenseGroups = originalCategoryGroups.filter(g => !g.is_income);
@@ -85,7 +88,7 @@ export function TransferModal({
           />
           <View>
             <View>
-              <FieldLabel title="Transfer this amount:" />
+              <FieldLabel title={t('Transfer this amount:')} />
               <InitialFocus>
                 <AmountInput
                   value={initialAmount}
@@ -133,7 +136,7 @@ export function TransferModal({
                   close();
                 }}
               >
-                Transfer
+                <Trans>Transfer</Trans>
               </Button>
             </View>
           </View>
