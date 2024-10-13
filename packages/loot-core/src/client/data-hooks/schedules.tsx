@@ -67,6 +67,7 @@ export function useSchedules({
   const [isLoading, setIsLoading] = useState(true);
   const [data, setData] = useState<ScheduleData>();
   const [upcomingLength] = useSyncedPref('upcomingScheduledTransactionLength');
+
   useEffect(() => {
     let isUnmounted = false;
 
@@ -144,7 +145,7 @@ export function useCachedSchedules() {
 }
 
 export function useDefaultSchedulesQueryBuilder(
-  accountId: AccountEntity['id'] | 'budgeted' | 'offbudget' | 'uncategorized',
+  accountId?: AccountEntity['id'] | 'budgeted' | 'offbudget' | 'uncategorized',
 ) {
   return useMemo(() => {
     const filterByAccount = accountFilter(accountId, '_account');

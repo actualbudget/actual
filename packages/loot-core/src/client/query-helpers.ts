@@ -190,7 +190,7 @@ export class LiveQuery<TResponse = unknown> {
     }
 
     // Only fire events if this hasn't been cancelled and if we're
-    // still subscribed (`this._subscribe` will exist)
+    // still subscribed (`this.unsubscribeSyncEvent` will exist)
     if (this.inflightRequestId === reqId && this.unsubscribeSyncEvent) {
       const previousData = this.data;
       this.data = data;
