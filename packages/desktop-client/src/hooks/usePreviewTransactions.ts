@@ -10,15 +10,23 @@ import { type ScheduleEntity } from 'loot-core/types/models';
 
 import { type TransactionEntity } from '../../../loot-core/src/types/models/transaction.d';
 
+/**
+ * @deprecated Please use `useTransactions` hook from `loot-core/client/data-hooks/transactions` instead.
+ */
 export function usePreviewTransactions(
   collapseTransactions?: (ids: string[]) => void,
 ) {
-  const scheduleData = useCachedSchedules();
-  const [previousScheduleData, setPreviousScheduleData] =
-    useState<ReturnType<typeof useCachedSchedules>>(scheduleData);
+  const [previousScheduleData, setPreviousScheduleData] = useState<ReturnType<
+    typeof useCachedSchedules
+  > | null>(null);
   const [previewTransactions, setPreviewTransactions] = useState<
     TransactionEntity[]
   >([]);
+
+  const scheduleData = useCachedSchedules();
+  if (scheduleData?.isLoading) {
+    return [];
+  }
 
   if (scheduleData !== previousScheduleData) {
     setPreviousScheduleData(scheduleData);

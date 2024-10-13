@@ -39,7 +39,7 @@ export function ScheduleLink({
   const [filter, setFilter] = useState(accountName || '');
 
   const scheduleData = useSchedules({
-    transform: useCallback((q: Query) => q.filter({ completed: false }), []),
+    queryBuilder: useCallback((q: Query) => q.filter({ completed: false }), []),
   });
 
   const searchInput = useRef(null);

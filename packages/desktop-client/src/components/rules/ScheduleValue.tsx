@@ -1,11 +1,11 @@
 import React from 'react';
 
+import { useSchedules } from 'loot-core/client/data-hooks/schedules';
 import { getPayeesById } from 'loot-core/src/client/reducers/queries';
 import { describeSchedule } from 'loot-core/src/shared/schedules';
 import { type ScheduleEntity } from 'loot-core/src/types/models';
 
 import { usePayees } from '../../hooks/usePayees';
-import { useSchedules } from '../../hooks/useSchedules';
 
 import { Value } from './Value';
 
@@ -16,7 +16,11 @@ type ScheduleValueProps = {
 export function ScheduleValue({ value }: ScheduleValueProps) {
   const payees = usePayees();
   const byId = getPayeesById(payees);
-  const { data: schedules } = useSchedules();
+  const { schedules = [], isLoading } = useSchedules();
+
+  if (isLoading) {
+    return null;
+  }
 
   return (
     <Value

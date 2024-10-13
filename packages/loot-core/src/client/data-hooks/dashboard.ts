@@ -2,19 +2,18 @@ import { useMemo } from 'react';
 
 import { q } from '../../shared/query';
 import { type Widget } from '../../types/models';
-import { useLiveQuery } from '../query-hooks';
+import { useQuery } from '../query-hooks';
 
 export function useDashboard() {
-  const queryData = useLiveQuery<Widget[]>(
-    () => q('dashboard').select('*'),
-    [],
+  const { data: queryData, isLoading } = useQuery<Widget>(() =>
+    q('dashboard').select('*'),
   );
 
   return useMemo(
     () => ({
-      isLoading: queryData === null,
+      isLoading,
       data: queryData || [],
     }),
-    [queryData],
+    [isLoading, queryData],
   );
 }

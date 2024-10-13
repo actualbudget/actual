@@ -5,7 +5,7 @@ import {
   type CustomReportData,
   type CustomReportEntity,
 } from '../../types/models';
-import { useLiveQuery } from '../query-hooks';
+import { useQuery } from '../query-hooks';
 
 function toJS(rows: CustomReportData[]) {
   const reports: CustomReportEntity[] = rows.map(row => {
@@ -36,9 +36,8 @@ function toJS(rows: CustomReportData[]) {
 }
 
 export function useReports() {
-  const queryData = useLiveQuery<CustomReportData[]>(
-    () => q('custom_reports').select('*'),
-    [],
+  const { data: queryData, isLoading } = useQuery<CustomReportData>(() =>
+    q('custom_reports').select('*'),
   );
 
   // Sort reports by alphabetical order
@@ -54,9 +53,9 @@ export function useReports() {
 
   return useMemo(
     () => ({
-      isLoading: queryData === null,
-      data: sort(toJS(queryData || [])),
+      isLoading,
+      data: sort(toJS(queryData ? [...queryData] : [])),
     }),
-    [queryData],
+    [isLoading, queryData],
   );
 }
