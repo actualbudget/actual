@@ -30,6 +30,7 @@ import { SecondaryButtons } from './SecondaryButtons';
 import { useSidebar } from './SidebarProvider';
 import { ToggleButton } from './ToggleButton';
 import { MonetaryUnit } from 'loot-core/shared/currency/MonetaryUnit';
+import { getCurrencyList, getCurrency, integerToMonetaryUnit } from 'loot-core/shared/currency';
 
 export function Sidebar() {
   const hasWindowButtons = !Platform.isBrowser && Platform.OS === 'mac';
@@ -74,6 +75,11 @@ export function Sidebar() {
   });
 
   console.log(MonetaryUnit);
+  console.log({
+    getCurrencyList,
+    getCurrency,
+    integerToMonetaryUnit,
+  });
 
   return (
     <Resizable
