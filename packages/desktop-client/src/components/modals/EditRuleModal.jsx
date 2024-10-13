@@ -309,20 +309,24 @@ function formatAmount(amount) {
 
 function ScheduleDescription({ id }) {
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
-  const scheduleData = useSchedules({
-    transform: useCallback(q => q.filter({ id }), [id]),
+  const {
+    schedules,
+    statuses: scheduleStatuses,
+    isLoading: isSchedulesLoading,
+  } = useSchedules({
+    queryBuilder: useCallback(q => q.filter({ id }), [id]),
   });
 
-  if (scheduleData == null) {
+  if (isSchedulesLoading) {
     return null;
   }
 
-  if (scheduleData.schedules.length === 0) {
+  if (schedules.length === 0) {
     return <View style={{ flex: 1 }}>{id}</View>;
   }
 
-  const [schedule] = scheduleData.schedules;
-  const status = schedule && scheduleData.statuses.get(schedule.id);
+  const [schedule] = schedules;
+  const status = schedule && scheduleStatuses.get(schedule.id);
 
   return (
     <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>

@@ -1,11 +1,11 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { useDebounceCallback } from 'usehooks-ts';
 
 import { getPayees } from 'loot-core/client/actions';
+import { useTransactions } from 'loot-core/client/data-hooks/transactions';
 import * as queries from 'loot-core/client/queries';
-import { pagedQuery } from 'loot-core/client/query-helpers';
 import { listen } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
@@ -23,13 +23,8 @@ import { TransactionListWithBalances } from '../transactions/TransactionListWith
 export function CategoryTransactions({ category, month }) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const [isLoading, setIsLoading] = useState(true);
-  const [currentQuery, setCurrentQuery] = useState();
-  const [transactions, setTransactions] = useState([]);
 
-  const dateFormat = useDateFormat() || 'MM/dd/yyyy';
-
-  const makeRootQuery = useCallback(
+  const baseTransactionsQuery = useCallback(
     () =>
       q('transactions')
         .options({ splits: 'inline' })
@@ -37,84 +32,68 @@ export function CategoryTransactions({ category, month }) {
     [category, month],
   );
 
-  const paged = useRef(null);
+  const {
+    transactions,
+    isLoading,
+    loadMore: loadMoreTransactions,
+    reload: reloadTransactions,
+    updateQuery: updateTransactionsQuery,
+  } = useTransactions({
+    queryBuilder: () => baseTransactionsQuery().select('*'),
+  });
 
-  const updateQuery = useCallback(query => {
-    paged.current?.unsubscribe();
-    setIsLoading(true);
-    paged.current = pagedQuery(
-      query.options({ splits: 'inline' }).select('*'),
-      data => {
-        setTransactions(data);
-        setIsLoading(false);
-      },
-      { pageCount: 50 },
-    );
-  }, []);
-
-  const fetchTransactions = useCallback(async () => {
-    const query = makeRootQuery();
-    setCurrentQuery(query);
-    updateQuery(query);
-  }, [makeRootQuery, updateQuery]);
+  const dateFormat = useDateFormat() || 'MM/dd/yyyy';
 
   useEffect(() => {
-    function setup() {
-      return listen('sync-event', ({ type, tables }) => {
-        if (type === 'applied') {
-          if (
-            tables.includes('transactions') ||
-            tables.includes('category_mapping') ||
-            tables.includes('payee_mapping')
-          ) {
-            paged.current?.run();
-          }
-
-          if (tables.includes('payees') || tables.includes('payee_mapping')) {
-            dispatch(getPayees());
-          }
+    return listen('sync-event', ({ type, tables }) => {
+      if (type === 'applied') {
+        if (
+          tables.includes('transactions') ||
+          tables.includes('category_mapping') ||
+          tables.includes('payee_mapping')
+        ) {
+          reloadTransactions?.();
         }
-      });
-    }
 
-    fetchTransactions();
-    return setup();
-  }, [dispatch, fetchTransactions]);
+        if (tables.includes('payees') || tables.includes('payee_mapping')) {
+          dispatch(getPayees());
+        }
+      }
+    });
+  }, [dispatch, reloadTransactions]);
 
   const updateSearchQuery = useDebounceCallback(
     useCallback(
       searchText => {
-        if (searchText === '' && currentQuery) {
-          updateQuery(currentQuery);
-        } else if (searchText && currentQuery) {
-          updateQuery(
-            queries.makeTransactionSearchQuery(
-              currentQuery,
-              searchText,
-              dateFormat,
-            ),
+        if (searchText === '') {
+          updateTransactionsQuery(() => baseTransactionsQuery().select('*'));
+        } else if (searchText) {
+          updateTransactionsQuery(currentQuery =>
+            queries.transactionsSearch(currentQuery, searchText, dateFormat),
           );
         }
       },
-      [currentQuery, dateFormat, updateQuery],
+      [updateTransactionsQuery, baseTransactionsQuery, dateFormat],
     ),
     150,
   );
 
-  const onSearch = text => {
-    updateSearchQuery(text);
-  };
+  const onSearch = useCallback(
+    text => {
+      updateSearchQuery(text);
+    },
+    [updateSearchQuery],
+  );
 
-  const onLoadMore = () => {
-    paged.current?.fetchNext();
-  };
-
-  const onOpenTranasction = transaction => {
-    // details of how the native app used to handle preview transactions here can be found at commit 05e58279
-    if (!isPreviewId(transaction.id)) {
-      navigate(`/transactions/${transaction.id}`);
-    }
-  };
+  const onOpenTranasction = useCallback(
+    transaction => {
+      // details of how the native app used to handle preview transactions here can be found at commit 05e58279
+      if (!isPreviewId(transaction.id)) {
+        navigate(`/transactions/${transaction.id}`);
+      }
+    },
+    [navigate],
+  );
 
   const balance = queries.categoryBalance(category, month);
   const balanceCleared = queries.categoryBalanceCleared(category, month);
@@ -146,7 +125,7 @@ export function CategoryTransactions({ category, month }) {
         balanceUncleared={balanceUncleared}
         searchPlaceholder={`Search ${category.name}`}
         onSearch={onSearch}
-        onLoadMore={onLoadMore}
+        onLoadMore={loadMoreTransactions}
         onOpenTransaction={onOpenTranasction}
       />
     </Page>
