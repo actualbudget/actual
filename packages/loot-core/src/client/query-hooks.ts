@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, type DependencyList } from 'react';
+import { type DependencyList, useState, useEffect, useMemo } from 'react';
 
 import { type Query } from '../shared/query';
 
