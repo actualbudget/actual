@@ -36,8 +36,9 @@ function toJS(rows: CustomReportData[]) {
 }
 
 export function useReports() {
-  const { data: queryData, isLoading } = useQuery<CustomReportData>(() =>
-    q('custom_reports').select('*'),
+  const { data: queryData, isLoading } = useQuery<CustomReportData>(
+    () => q('custom_reports').select('*'),
+    [],
   );
 
   // Sort reports by alphabetical order

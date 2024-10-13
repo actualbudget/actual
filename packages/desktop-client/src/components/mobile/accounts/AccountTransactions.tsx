@@ -208,7 +208,7 @@ function TransactionListWithPreviews({
   } = useTransactions({
     queryBuilder: () => baseTransactionsQuery().select('*'),
     options: {
-      loadPreviewTransactions: !isSearching,
+      includePreviewTransactions: !isSearching,
       filterPreviewTransactions: transactions =>
         transactions.filter(t => t.account === account?.id),
     },
