@@ -8,28 +8,23 @@
  * @param {number} [maxWidth=0] - The maximum width of the text after which it will be split into multiple lines. `0` will not split.
  */
 export function getTextWidth(text: string, maxWidth: number = 0): number {
-  const font = '13px Inter var';
-  const textWidth = getStringWidth(text, font);
+  const textWidth = getStringWidth(text);
 
   if (maxWidth && textWidth > maxWidth) {
     const words = text.split(' ');
     const half = Math.ceil(words.length / 2);
     const firstHalf = words.slice(0, half).join(' ');
     const secondHalf = words.slice(half).join(' ');
-    return Math.ceil(
-      Math.max(
-        getStringWidth(firstHalf, font),
-        getStringWidth(secondHalf, font),
-      ),
-    );
+
+    return Math.max(getStringWidth(firstHalf), getStringWidth(secondHalf));
   }
   return textWidth;
 }
 
-function getStringWidth(text: string, font: string): number {
+export function getStringWidth(text: string): number {
   const canvas = document.createElement('canvas');
   const context = canvas.getContext('2d')!;
-  context.font = font || getComputedStyle(document.body).font;
+  context.font = getComputedStyle(document.body).font;
 
   return Math.ceil(context.measureText(text).width);
 }
