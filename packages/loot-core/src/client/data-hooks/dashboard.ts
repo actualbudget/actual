@@ -5,8 +5,9 @@ import { type Widget } from '../../types/models';
 import { useQuery } from '../query-hooks';
 
 export function useDashboard() {
-  const { data: queryData, isLoading } = useQuery<Widget>(() =>
-    q('dashboard').select('*'),
+  const { data: queryData, isLoading } = useQuery<Widget>(
+    () => q('dashboard').select('*'),
+    [],
   );
 
   return useMemo(

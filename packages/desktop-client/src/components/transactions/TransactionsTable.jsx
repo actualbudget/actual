@@ -751,7 +751,6 @@ function PayeeIcons({
   onNavigateToSchedule,
 }) {
   const scheduleId = transaction.schedule;
-  const { isLoading, schedules = [] } = useCachedSchedules();
 
   const buttonStyle = useMemo(
     () => ({
@@ -768,9 +767,15 @@ function PayeeIcons({
 
   const transferIconStyle = useMemo(() => ({ width: 10, height: 10 }), []);
 
+  const { isLoading, schedules = [] } = useCachedSchedules();
+
+  if (isLoading) {
+    return null;
+  }
+
   const schedule = scheduleId ? schedules.find(s => s.id === scheduleId) : null;
 
-  if (isLoading || (schedule == null && transferAccount == null)) {
+  if (schedule == null && transferAccount == null) {
     // Neither a valid scheduled transaction nor a transfer.
     return null;
   }
