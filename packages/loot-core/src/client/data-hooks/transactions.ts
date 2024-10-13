@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 
 import { send } from '../../platform/client/fetch';
 import { q, type Query } from '../../shared/query';
@@ -9,16 +9,18 @@ import {
 } from '../../types/models';
 import { type PagedQuery, pagedQuery } from '../query-helpers';
 
-import { type ScheduleStatuses, useSchedules } from './schedules';
+import {
+  type ScheduleStatuses,
+  useDefaultSchedulesQueryBuilder,
+  useSchedules,
+} from './schedules';
 
 type UseTransactionsProps = {
   queryBuilder: (query: Query) => Query;
   options?: {
     pageCount?: number;
     includePreviewTransactions?: boolean;
-    filterPreviewTransactions?: (
-      transactions: ReadonlyArray<TransactionEntity>,
-    ) => ReadonlyArray<TransactionEntity>;
+    schedulesQueryBuilder?: (query: Query) => Query;
   };
 };
 
@@ -52,9 +54,12 @@ export function useTransactions({
   const optionsRef = useRef(options);
   optionsRef.current = options;
 
+  const defaultSchedulesQueryBuilder = useDefaultSchedulesQueryBuilder();
   const { data: previewTransactions, isLoading: isPreviewTransactionsLoading } =
     usePreviewTransactions({
-      isDisabled: !optionsRef.current.includePreviewTransactions,
+      queryBuilder:
+        optionsRef.current.schedulesQueryBuilder ??
+        defaultSchedulesQueryBuilder,
     });
 
   useEffect(() => {
@@ -79,16 +84,6 @@ export function useTransactions({
     };
   }, [query]);
 
-  const filteredPreviewTransactions = useMemo(
-    () =>
-      isPreviewTransactionsLoading
-        ? null
-        : (optionsRef.current.filterPreviewTransactions?.(
-            previewTransactions,
-          ) ?? previewTransactions),
-    [isPreviewTransactionsLoading, previewTransactions],
-  );
-
   const updateQuery = useCallback(
     (queryBuilder: (currentQuery: Query) => Query) =>
       setQuery(queryBuilder?.(query) ?? query),
@@ -96,8 +91,8 @@ export function useTransactions({
   );
 
   return {
-    transactions: filteredPreviewTransactions?.length
-      ? filteredPreviewTransactions.concat(transactions)
+    transactions: optionsRef.current.includePreviewTransactions
+      ? previewTransactions.concat(transactions)
       : transactions,
     previewTransactions,
     isLoading: isLoading || isPreviewTransactionsLoading,
@@ -107,19 +102,30 @@ export function useTransactions({
   };
 }
 
-export function usePreviewTransactions({
-  isDisabled = false,
-}: {
-  isDisabled?: boolean;
-} = {}) {
+type UsePreviewTransactionsProps = {
+  queryBuilder: (query: Query) => Query;
+};
+
+type UsePreviewTransactionsResult = {
+  data: ReadonlyArray<TransactionEntity>;
+  isLoading: boolean;
+};
+
+function usePreviewTransactions({
+  queryBuilder,
+}: UsePreviewTransactionsProps): UsePreviewTransactionsResult {
   const [previewTransactions, setPreviewTransactions] = useState<
     TransactionEntity[]
   >([]);
-  const { isLoading: isSchedulesLoading, schedules, statuses } = useSchedules();
+  const {
+    isLoading: isSchedulesLoading,
+    schedules,
+    statuses,
+  } = useSchedules({ queryBuilder });
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    if (isDisabled || isSchedulesLoading) {
+    if (isSchedulesLoading) {
       return;
     }
 
@@ -129,7 +135,7 @@ export function usePreviewTransactions({
 
     // Kick off an async rules application
     const schedulesForPreview =
-      schedules.filter(s => isForPreview(s, statuses)) || [];
+      schedules?.filter(s => isForPreview(s, statuses)) || [];
 
     const baseTransactions = schedulesForPreview.map(schedule => ({
       id: 'preview/' + schedule.id,
@@ -140,30 +146,36 @@ export function usePreviewTransactions({
       schedule: schedule.id,
     }));
 
-    Promise.all(
-      baseTransactions.map(transaction => send('rules-run', { transaction })),
-    ).then(newTrans => {
-      if (!isUnmounted) {
-        const withDefaults = newTrans.map(t => ({
-          ...t,
-          category: statuses.get(t.schedule),
-          schedule: t.schedule,
-          subtransactions: t.subtransactions?.map((st: TransactionEntity) => ({
-            ...st,
-            id: 'preview/' + st.id,
+    if (baseTransactions?.length) {
+      Promise.all(
+        baseTransactions.map(transaction => send('rules-run', { transaction })),
+      ).then(newTrans => {
+        if (!isUnmounted) {
+          const withDefaults = newTrans.map(t => ({
+            ...t,
+            category: statuses.get(t.schedule),
             schedule: t.schedule,
-          })),
-        }));
+            subtransactions: t.subtransactions?.map(
+              (st: TransactionEntity) => ({
+                ...st,
+                id: 'preview/' + st.id,
+                schedule: t.schedule,
+              }),
+            ),
+          }));
 
-        setIsLoading(false);
-        setPreviewTransactions(ungroupTransactions(withDefaults));
-      }
-    });
+          setIsLoading(false);
+          setPreviewTransactions(ungroupTransactions(withDefaults));
+        }
+      });
+    } else {
+      setIsLoading(false);
+    }
 
     return () => {
       isUnmounted = true;
     };
-  }, [isDisabled, isSchedulesLoading, schedules, statuses]);
+  }, [isSchedulesLoading, schedules, statuses]);
 
   return {
     data: previewTransactions,

@@ -19,6 +19,7 @@ import {
   syncAndDownload,
   updateAccount,
 } from 'loot-core/client/actions';
+import { useDefaultSchedulesQueryBuilder } from 'loot-core/client/data-hooks/schedules';
 import { useTransactions } from 'loot-core/client/data-hooks/transactions';
 import * as queries from 'loot-core/client/queries';
 import { listen, send } from 'loot-core/platform/client/fetch';
@@ -89,33 +90,39 @@ function AccountHeader({ account }: { readonly account: AccountEntity }) {
 
   const dispatch = useDispatch();
 
-  const onSave = (account: AccountEntity) => {
-    dispatch(updateAccount(account));
-  };
+  const onSave = useCallback(
+    (account: AccountEntity) => {
+      dispatch(updateAccount(account));
+    },
+    [dispatch],
+  );
 
-  const onSaveNotes = async (id: string, notes: string) => {
+  const onSaveNotes = useCallback(async (id: string, notes: string) => {
     await send('notes-save', { id, note: notes });
-  };
+  }, []);
 
-  const onEditNotes = (id: string) => {
-    dispatch(
-      pushModal('notes', {
-        id: `account-${id}`,
-        name: account.name,
-        onSave: onSaveNotes,
-      }),
-    );
-  };
+  const onEditNotes = useCallback(
+    (id: string) => {
+      dispatch(
+        pushModal('notes', {
+          id: `account-${id}`,
+          name: account.name,
+          onSave: onSaveNotes,
+        }),
+      );
+    },
+    [account.name, dispatch, onSaveNotes],
+  );
 
-  const onCloseAccount = () => {
+  const onCloseAccount = useCallback(() => {
     dispatch(openAccountCloseModal(account.id));
-  };
+  }, [account.id, dispatch]);
 
-  const onReopenAccount = () => {
+  const onReopenAccount = useCallback(() => {
     dispatch(reopenAccount(account.id));
-  };
+  }, [account.id, dispatch]);
 
-  const onClick = () => {
+  const onClick = useCallback(() => {
     dispatch(
       pushModal('account-menu', {
         accountId: account.id,
@@ -125,7 +132,15 @@ function AccountHeader({ account }: { readonly account: AccountEntity }) {
         onReopenAccount,
       }),
     );
-  };
+  }, [
+    account.id,
+    dispatch,
+    onCloseAccount,
+    onEditNotes,
+    onReopenAccount,
+    onSave,
+  ]);
+
   return (
     <View
       style={{
@@ -209,8 +224,7 @@ function TransactionListWithPreviews({
     queryBuilder: () => baseTransactionsQuery().select('*'),
     options: {
       includePreviewTransactions: !isSearching,
-      filterPreviewTransactions: transactions =>
-        transactions.filter(t => t.account === account?.id),
+      schedulesQueryBuilder: useDefaultSchedulesQueryBuilder(accountId),
     },
   });
 
