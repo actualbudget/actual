@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 import { useLocation } from 'react-router-dom';
 
-import { getTextWidth } from 'loot-core/shared/text-width';
-
 import { SvgInformationCircle } from '../../icons/v2';
 import { theme } from '../../style';
 
@@ -11,14 +9,14 @@ import { View } from './View';
 
 type InfoBubbleProps = {
   label: string;
+  textWidth?: number;
 };
 
-export function InfoBubble({ label }: InfoBubbleProps) {
+export function InfoBubble({ label, textWidth }: InfoBubbleProps) {
   const location = useLocation();
   const [visible, setVisible] = useState(location.hash === '#info');
 
-  const bubbleWidth = getTextWidth(label, 500);
-  console.log(bubbleWidth);
+  const width = textWidth || getStringWidth(label);
 
   return visible ? (
     <View style={{ userSelect: 'none' }}>
@@ -43,7 +41,7 @@ export function InfoBubble({ label }: InfoBubbleProps) {
       >
         <Text
           style={{
-            width: bubbleWidth,
+            width,
           }}
         >
           {label}
@@ -59,4 +57,12 @@ export function InfoBubble({ label }: InfoBubbleProps) {
       />
     </View>
   );
+}
+
+function getStringWidth(text: string): number {
+  const canvas = document.createElement('canvas');
+  const context = canvas.getContext('2d')!;
+  context.font = getComputedStyle(document.body).font;
+
+  return Math.ceil(context.measureText(text).width);
 }

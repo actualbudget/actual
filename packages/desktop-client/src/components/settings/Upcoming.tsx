@@ -57,7 +57,7 @@ export function UpcomingLengthSettings() {
                   style={selectButtonStyle}
                 />
               </View>
-              <InfoBubble label="Only the first i i i i i i i i i i i i  instance of a recurring transaction will be shown." />
+              <InfoBubble label="Only the first instance of a recurring transaction will be shown." />
             </View>
           </Column>
         </View>
