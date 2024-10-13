@@ -32,7 +32,7 @@ budgeting in particular. Not everyone is prepared for this kind of visibility an
 
 Also, stop using cash for common expenses, as this makes tracking so much more complicated.
 
-When your partner is ready to embrace your true joint expenses, use our [/getting-started/starting-fresh] guide to get
+When your partner is ready to embrace your true joint expenses, use our [Starting Fresh guide](/docs/getting-started/starting-fresh) to get
 started. If your partner is new to budgeting, consider skipping the part about using historical data to find
 your initial budget numbers. Another tip is to set aside time each week by going through last week's spending; avoid doing
 this late in the evening when your energies are low.
@@ -46,7 +46,7 @@ the partner feels safe about this approach.
 2. Get two debit cards attached to the joint account, one for you and one for your partner.
 3. Create a joint Actual Budget file on a server that is also reachable by your partner.
 4. Decide how big each partner's contribution to the joint account should be (see below).
-5. Follow the [/getting-started/starting-fresh] guide with your partner.
+5. Follow the [Starting Fresh guide](/docs/getting-started/starting-fresh) with your partner.
 
 
 ### Deciding on how big each partner's contribution should be
