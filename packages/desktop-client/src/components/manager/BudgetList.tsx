@@ -446,7 +446,8 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
   };
 
   const exposeActualServer = async () => {
-    await globalThis.Actual.exposeActualServer();
+    const url = await globalThis.Actual.exposeActualServer();
+    console.info('exposting actual at: ' + url);
   };
 
   return (
