@@ -1,6 +1,5 @@
 // @ts-strict-ignore
 import { memo, useRef, useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { type PayeeEntity } from 'loot-core/src/types/models';
@@ -101,8 +100,6 @@ export const PayeeTableRow = memo(
     onUpdate,
     style,
   }: PayeeTableRowProps) => {
-    const { t } = useTranslation();
-
     const { id } = payee;
     const dispatchSelected = useSelectedDispatch();
     const borderColor = selected
