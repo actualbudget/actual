@@ -42,39 +42,40 @@ export const PayeeTable = forwardRef<
       onViewRules,
       onCreateRule,
     },
-    ref) => {
-  const [hovered, setHovered] = useState(null);
-  const selectedItems = useSelectedItems();
+    ref,
+  ) => {
+    const [hovered, setHovered] = useState(null);
+    const selectedItems = useSelectedItems();
 
-  useLayoutEffect(() => {
-    const firstSelected = [...selectedItems][0] as string;
-    if (typeof ref !== 'function') {
-      ref.current.scrollTo(firstSelected, 'center');
-    }
-  }, []);
+    useLayoutEffect(() => {
+      const firstSelected = [...selectedItems][0] as string;
+      if (typeof ref !== 'function') {
+        ref.current.scrollTo(firstSelected, 'center');
+      }
+    }, []);
 
-  const onHover = useCallback(id => {
-    setHovered(id);
-  }, []);
+    const onHover = useCallback(id => {
+      setHovered(id);
+    }, []);
 
-  return (
-    <View style={{ flex: 1 }} onMouseLeave={() => setHovered(null)}>
-      <Table
-        ref={ref}
-        items={payees}
-        renderItem={({ item, editing, focusedField, onEdit }) => {
-          return (
-            <PayeeTableRow
-              payee={item}
-              ruleCount={ruleCounts.get(item.id) || 0}
-              selected={selectedItems.has(item.id)}
-              editing={editing}
-              focusedField={focusedField}
-              hovered={hovered === item.id}
-              onHover={onHover}
-              onEdit={onEdit}
-              onUpdate={onUpdate}
-              onDelete={onDelete}
+    return (
+      <View style={{ flex: 1 }} onMouseLeave={() => setHovered(null)}>
+        <Table
+          ref={ref}
+          items={payees}
+          renderItem={({ item, editing, focusedField, onEdit }) => {
+            return (
+              <PayeeTableRow
+                payee={item}
+                ruleCount={ruleCounts.get(item.id) || 0}
+                selected={selectedItems.has(item.id)}
+                editing={editing}
+                focusedField={focusedField}
+                hovered={hovered === item.id}
+                onHover={onHover}
+                onEdit={onEdit}
+                onUpdate={onUpdate}
+                onDelete={onDelete}
                 onViewRules={onViewRules}
                 onCreateRule={onCreateRule}
               />
@@ -83,6 +84,7 @@ export const PayeeTable = forwardRef<
         />
       </View>
     );
-  });
+  },
+);
 
 PayeeTable.displayName = 'PayeeTable';
