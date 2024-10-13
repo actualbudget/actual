@@ -118,7 +118,7 @@ export function ExperimentalFeatures() {
             </FeatureToggle>
             <FeatureToggle
               flag="upcomingLengthAdjustment"
-              // feedbackLink="https://github.com/actualbudget/actual/issues/3606" TODO: Create feedback issue
+              feedbackLink="https://github.com/actualbudget/actual/issues/3660"
             >
               <Trans>Scheduled transaction upcoming length adjustment</Trans>
             </FeatureToggle>
