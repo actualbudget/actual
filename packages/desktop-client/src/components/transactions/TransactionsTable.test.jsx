@@ -40,20 +40,20 @@ const payees = [
   {
     id: 'bob-id',
     name: 'Bob',
-    favorite: true,
+    favorite: 1,
     transfer_acct: null,
     category: null,
   },
   {
     id: 'alice-id',
     name: 'Alice',
-    favorite: true,
+    favorite: 1,
     transfer_acct: null,
     category: null,
   },
   {
     id: 'guy',
-    favorite: false,
+    favorite: 0,
     transfer_acct: null,
     category: null,
     name: 'This guy on the side of the road',
