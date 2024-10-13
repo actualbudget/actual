@@ -23,6 +23,7 @@ import { Block } from '../../common/Block';
 import { Button } from '../../common/Button2';
 import { Paragraph } from '../../common/Paragraph';
 import { Select } from '../../common/Select';
+import { SpaceBetween } from '../../common/SpaceBetween';
 import { Text } from '../../common/Text';
 import { Tooltip } from '../../common/Tooltip';
 import { View } from '../../common/View';
@@ -235,13 +236,7 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
         }}
       >
         {!isNarrowWidth && (
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              flexShrink: 0,
-            }}
-          >
+          <SpaceBetween gap={0}>
             {isDashboardsFeatureEnabled && (
               <>
                 <Button
@@ -263,14 +258,7 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
               </>
             )}
 
-            <View
-              style={{
-                alignItems: 'center',
-                flexDirection: 'row',
-                marginRight: 5,
-                gap: 5,
-              }}
-            >
+            <SpaceBetween gap={5}>
               <Text>
                 <Trans>Compare</Trans>
               </Text>
@@ -305,7 +293,7 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                 style={{ width: 150 }}
                 popoverStyle={{ width: 150 }}
               />
-            </View>
+            </SpaceBetween>
 
             <View
               style={{
@@ -313,16 +301,11 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                 height: 28,
                 backgroundColor: theme.pillBorderDark,
                 marginRight: 15,
-                marginLeft: 10,
+                marginLeft: 15,
               }}
             />
 
-            <View
-              style={{
-                flexDirection: 'row',
-                marginRight: 5,
-              }}
-            >
+            <SpaceBetween gap={5}>
               <ModeButton
                 selected={reportMode === 'single-month'}
                 style={{
@@ -356,7 +339,7 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
               >
                 <Trans>Average</Trans>
               </ModeButton>
-            </View>
+            </SpaceBetween>
 
             <View
               style={{
@@ -409,7 +392,7 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                 </Tooltip>
               )}
             </View>
-          </View>
+          </SpaceBetween>
         )}
 
         {conditions && conditions.length > 0 && (
