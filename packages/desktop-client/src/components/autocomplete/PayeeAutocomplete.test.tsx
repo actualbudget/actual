@@ -38,7 +38,7 @@ function makePayee(name: string, options?: { favorite: boolean }): PayeeEntity {
   return {
     id: name.toLowerCase() + '-id',
     name,
-    favorite: options?.favorite ?? false,
+    favorite: options?.favorite ? 1 : 0,
     transfer_acct: undefined,
   };
 }

@@ -24,7 +24,6 @@ import {
   getShortYearRegex,
   currentDate,
 } from 'loot-core/src/shared/months';
-import { stringToInteger } from 'loot-core/src/shared/util';
 
 import { useSyncedPref } from '../../hooks/useSyncedPref';
 import { styles, theme } from '../../style';
@@ -134,7 +133,7 @@ const DatePicker = forwardRef<DatePickerForwardedRef, DatePickerProps>(
       picker.current = new Pikaday({
         theme: 'actual-date-picker',
         keyboardInput: false,
-        firstDay: stringToInteger(firstDayOfWeekIdx),
+        firstDay: parseInt(firstDayOfWeekIdx),
         defaultDate: value
           ? parse(value, dateFormat, currentDate())
           : currentDate(),

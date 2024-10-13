@@ -1212,7 +1212,7 @@ export const Table = forwardRef(
 // @ts-expect-error fix me
 Table.displayName = 'Table';
 
-export type TableNavigator<T extends TableItem> = {
+type TableNavigator<T extends TableItem> = {
   onEdit: (id: T['id'], field?: string) => void;
   editingId: T['id'];
   focusedField: string;
