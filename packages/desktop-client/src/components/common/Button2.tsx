@@ -1,7 +1,6 @@
 import React, {
   forwardRef,
   useMemo,
-  useRef,
   type ComponentPropsWithoutRef,
   type ReactNode,
 } from 'react';
@@ -12,8 +11,6 @@ import {
 
 import { css } from 'glamor';
 
-import { useMergedRefs } from '../../hooks/useMergedRefs';
-import { useProperFocus } from '../../hooks/useProperFocus';
 import { AnimatedLoading } from '../../icons/AnimatedLoading';
 import { type CSSProperties, styles, theme } from '../../style';
 
@@ -137,24 +134,13 @@ type ButtonProps = ComponentPropsWithoutRef<typeof ReactAriaButton> & {
   variant?: ButtonVariant;
   bounce?: boolean;
   children?: ReactNode;
-  focused?: boolean;
 };
 
 type ButtonVariant = 'normal' | 'primary' | 'bare' | 'menu' | 'menuSelected';
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  (props, buttonRef) => {
-    const {
-      children,
-      variant = 'normal',
-      bounce = true,
-      focused = false,
-      ...restProps
-    } = props;
-
-    const ref = useRef<HTMLButtonElement>(null);
-    useProperFocus(ref, focused);
-    const mergedRef = useMergedRefs<HTMLButtonElement>(ref, buttonRef);
+  (props, ref) => {
+    const { children, variant = 'normal', bounce = true, ...restProps } = props;
 
     const variantWithDisabled: ButtonVariant | `${ButtonVariant}Disabled` =
       props.isDisabled ? `${variant}Disabled` : variant;
@@ -188,7 +174,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 
     return (
       <ReactAriaButton
-        ref={mergedRef}
+        ref={ref}
         {...restProps}
         className={
           typeof className === 'function'

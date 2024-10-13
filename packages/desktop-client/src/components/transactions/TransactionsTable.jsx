@@ -49,6 +49,7 @@ import {
 
 import { useMergedRefs } from '../../hooks/useMergedRefs';
 import { usePrevious } from '../../hooks/usePrevious';
+import { useProperFocus } from '../../hooks/useProperFocus';
 import { useSelectedDispatch, useSelectedItems } from '../../hooks/useSelected';
 import { useSplitsExpanded } from '../../hooks/useSplitsExpanded';
 import { SvgLeftArrow2, SvgRightArrow2, SvgSplit } from '../../icons/v0';
@@ -1670,6 +1671,11 @@ function NewTransaction({
   );
   const emptyChildTransactions = childTransactions.filter(t => t.amount === 0);
 
+  const addRef = useRef(null);
+  useProperFocus(addRef, focusedField === 'add');
+  const cancelRef = useRef(null);
+  useProperFocus(cancelRef, focusedField === 'cancel');
+
   return (
     <View
       style={{
@@ -1731,7 +1737,7 @@ function NewTransaction({
           style={{ marginRight: 10, padding: '4px 10px' }}
           onPress={() => onClose()}
           data-testid="cancel-button"
-          focused={focusedField === 'cancel'}
+          ref={cancelRef}
         >
           Cancel
         </Button>
@@ -1751,7 +1757,7 @@ function NewTransaction({
             style={{ padding: '4px 10px' }}
             onPress={onAdd}
             data-testid="add-button"
-            focused={focusedField === 'add'}
+            ref={addRef}
           >
             Add
           </Button>
