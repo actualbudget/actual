@@ -50,7 +50,9 @@ function loadStatuses(
   );
 }
 
-type UseSchedulesArgs = { queryBuilder?: (q: Query) => Query };
+type UseSchedulesProps = {
+  queryBuilder?: (q: Query) => Query;
+};
 type ScheduleData = {
   schedules: readonly ScheduleEntity[];
   statuses: ScheduleStatuses;
@@ -61,7 +63,7 @@ type UseSchedulesResult = ScheduleData & {
 
 export function useSchedules({
   queryBuilder,
-}: UseSchedulesArgs = {}): UseSchedulesResult {
+}: UseSchedulesProps = {}): UseSchedulesResult {
   const [isLoading, setIsLoading] = useState(true);
   const [data, setData] = useState<ScheduleData>();
   const [upcomingLength] = useSyncedPref('upcomingScheduledTransactionLength');
@@ -122,7 +124,7 @@ const SchedulesContext = createContext<SchedulesContextValue>({
 });
 
 type SchedulesProviderProps = PropsWithChildren<{
-  queryBuilder?: UseSchedulesArgs['queryBuilder'];
+  queryBuilder?: UseSchedulesProps['queryBuilder'];
 }>;
 
 export function SchedulesProvider({

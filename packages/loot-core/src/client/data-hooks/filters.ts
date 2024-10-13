@@ -20,8 +20,9 @@ function toJS(rows) {
 }
 
 export function useFilters(): TransactionFilterEntity[] {
-  const { data } = useQuery<TransactionFilterEntity>(() =>
-    q('transaction_filters').select('*'),
+  const { data } = useQuery<TransactionFilterEntity>(
+    () => q('transaction_filters').select('*'),
+    [],
   );
 
   /** Sort filters by alphabetical order */
