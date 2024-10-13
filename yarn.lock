@@ -18188,14 +18188,14 @@ __metadata:
   linkType: hard
 
 "tough-cookie@npm:^4.0.0":
-  version: 4.1.2
-  resolution: "tough-cookie@npm:4.1.2"
+  version: 4.1.4
+  resolution: "tough-cookie@npm:4.1.4"
   dependencies:
     psl: "npm:^1.1.33"
     punycode: "npm:^2.1.1"
     universalify: "npm:^0.2.0"
     url-parse: "npm:^1.5.3"
-  checksum: 10/7c42b332ad1e89ed97e6c725618140eade6b104a006857b1605daed18f47bef2b0e9b5684025d1a50b879de5af3ed84eb602a571d308cec7c9514956cab93a77
+  checksum: 10/75663f4e2cd085f16af0b217e4218772adf0617fb3227171102618a54ce0187a164e505d61f773ed7d65988f8ff8a8f935d381f87da981752c1171b076b4afac
   languageName: node
   linkType: hard
 
