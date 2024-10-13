@@ -1,6 +1,7 @@
 // @ts-strict-ignore
 import React, { type ReactNode } from 'react';
 
+import { getCurrencyList } from 'loot-core/shared/currency';
 import { numberFormats } from 'loot-core/src/shared/util';
 import { type SyncedPrefs } from 'loot-core/src/types/prefs';
 
@@ -64,6 +65,16 @@ export function FormatSettings() {
   const numberFormat = _numberFormat || 'comma-dot';
   const [hideFraction, setHideFractionPref] = useSyncedPref('hideFraction');
 
+  const [budgetCurrency, setBudgetCurrencyPref] = useSyncedPref('budgetCurrency');
+  const [displayCurrencySymbol, setDisplayCurrencySymbolPref] = useSyncedPref('displayCurrencySymbol');
+
+  const currencies = getCurrencyList('iso4217');
+  const currencyCode = Object.keys(currencies).sort((a, b) => {
+    if(currencies[a].name < currencies[b].name) { return -1; }
+    if(currencies[a].name > currencies[b].name) { return 1; }
+    return 0;
+  });
+
   const selectButtonStyle: CSSProperties = {
     ':hover': {
       backgroundColor: theme.buttonNormalBackgroundHover,
@@ -71,8 +82,50 @@ export function FormatSettings() {
   };
 
   return (
-    <Setting
-      primaryAction={
+    <Setting>
+      <Text>
+        <strong>Budget Currency</strong> sets the base currency for the budget.
+      </Text>
+      <View>
+        <Column title="Budget Currency">
+          <Select
+            key={'currencySelect'}
+            defaultLabel='Select a Currency'
+            value={budgetCurrency || 'XXX'}
+            onChange={code => setBudgetCurrencyPref(code)}
+            options={currencyCode.map(code => [
+              code,
+              currencies[code].name + ' (' + code + ')',
+            ])}
+            style={selectButtonStyle}
+          />
+          <Text style={{ display: 'flex' }}>
+              <Checkbox
+                id="settings-textSymbol"
+                checked={String(displayCurrencySymbol) === 'true'}
+                onChange={e =>
+                  setDisplayCurrencySymbolPref(String(e.currentTarget.checked))
+                }
+              />
+              <label htmlFor="settings-textSymbol">Display Currency Symbol</label>
+            </Text>
+        </Column>
+      </View>
+      <Text>
+        <strong>Note:</strong> Budget Currency can only be set once and cannot be changed.
+      </Text>
+      <View
+        style={{
+          height: 2,
+          backgroundColor: theme.sidebarItemBackgroundHover,
+          marginTop: 15,
+          flexShrink: 0,
+        }}
+      />
+      <Text>
+        <strong>Formatting</strong> does not affect how budget data is stored,
+        and can be changed at any time.
+      </Text>
         <View
           style={{
             flexDirection: 'column',
@@ -129,12 +182,6 @@ export function FormatSettings() {
             />
           </Column>
         </View>
-      }
-    >
-      <Text>
-        <strong>Formatting</strong> does not affect how budget data is stored,
-        and can be changed at any time.
-      </Text>
     </Setting>
   );
 }

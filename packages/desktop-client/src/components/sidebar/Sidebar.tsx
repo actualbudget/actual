@@ -29,6 +29,7 @@ import { PrimaryButtons } from './PrimaryButtons';
 import { SecondaryButtons } from './SecondaryButtons';
 import { useSidebar } from './SidebarProvider';
 import { ToggleButton } from './ToggleButton';
+import { MonetaryUnit } from 'loot-core/shared/currency/MonetaryUnit';
 
 export function Sidebar() {
   const hasWindowButtons = !Platform.isBrowser && Platform.OS === 'mac';
@@ -71,6 +72,8 @@ export function Sidebar() {
   const containerRef = useResizeObserver(rect => {
     setSidebarWidth(rect.width);
   });
+
+  console.log(MonetaryUnit);
 
   return (
     <Resizable

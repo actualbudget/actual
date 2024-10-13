@@ -2,12 +2,21 @@ import { useCallback, useEffect, useMemo } from 'react';
 
 import {
   getNumberFormat,
-  integerToCurrency,
   isNumberFormat,
   setNumberFormat,
 } from 'loot-core/src/shared/util';
 
 import { useSyncedPref } from '../../hooks/useSyncedPref';
+import {
+  type Currency,
+  getCurrency,
+  integerToMonetaryUnit,
+} from 'loot-core/shared/currency';
+import {
+  MonetaryUnitDisplayFormat
+} from 'loot-core/shared/currency/MonetaryUnit';
+
+type FormatValueType = string | number | unknown;
 
 export type FormatType =
   | 'string'
@@ -17,10 +26,15 @@ export type FormatType =
   | 'financial-with-sign';
 
 function format(
-  value: unknown,
+  value: FormatValueType,
   type: FormatType = 'string',
+  currencyCode?: string,
+  options?: MonetaryUnitDisplayFormat,
   formatter?: Intl.NumberFormat,
 ): string {
+  const currency = getCurrency(currencyCode);
+  var result = '';
+
   switch (type) {
     case 'string':
       const val = JSON.stringify(value);
@@ -34,14 +48,18 @@ function format(
     case 'percentage':
       return value + '%';
     case 'financial-with-sign':
-      const formatted = format(value, 'financial', formatter);
+      const formatted = format(value, 'financial', currencyCode, options, formatter);
       if (typeof value === 'number' && value >= 0) {
-        return '+' + formatted;
+        result = '+' + formatted;
+      } else {
+        result = formatted;
       }
-      return formatted;
+      break;
     case 'financial':
       if (value == null || value === '' || value === 0) {
-        return integerToCurrency(0, formatter);
+//        result = integerToCurrency(0, formatter, currencyCode);
+        result = integerToMonetaryUnit(0, currencyCode).toString(options);
+        break;
       } else if (typeof value === 'string') {
         const parsed = parseFloat(value);
         value = isNaN(parsed) ? 0 : parsed;
@@ -53,22 +71,30 @@ function format(
         );
       }
 
-      return integerToCurrency(value, formatter);
+//      result = integerToCurrency(value, formatter, currencyCode);
+      result = integerToMonetaryUnit(value, currencyCode).toString(options);
+      break;
     default:
       throw new Error('Unknown format type: ' + type);
   }
+
+  return result;
 }
 
-export function useFormat() {
+export function useFormat(code?: string) {
   const [numberFormat] = useSyncedPref('numberFormat');
   const [hideFraction] = useSyncedPref('hideFraction');
+  const [budgetCurrency] = useSyncedPref('budgetCurrency');
+  const [displayCurrencySymbol] = useSyncedPref('displayCurrencySymbol');
 
   const config = useMemo(
     () => ({
       format: isNumberFormat(numberFormat) ? numberFormat : 'comma-dot',
       hideFraction: String(hideFraction) === 'true',
+      currencyCode: code ? code : budgetCurrency,
+      displayCurrencySymbol,
     }),
-    [numberFormat, hideFraction],
+    [numberFormat, hideFraction, budgetCurrency, code, displayCurrencySymbol],
   );
 
   // Hack: keep the global number format in sync - update the settings when
@@ -80,8 +106,14 @@ export function useFormat() {
   }, [config]);
 
   return useCallback(
-    (value: unknown, type: FormatType = 'string') =>
-      format(value, type, getNumberFormat(config).formatter),
+    (value: FormatValueType, type: FormatType = 'string', currency?: string | Currency) =>
+      format(
+        value,
+        type,
+        currency ? (typeof currency === 'string' ? currency : currency.code) : (code ? code : budgetCurrency),
+        { locale: getNumberFormat(config).locale, showSymbol: displayCurrencySymbol === 'true', postSymbol: false },
+        getNumberFormat(config).formatter
+      ),
     [config],
   );
 }

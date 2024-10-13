@@ -1,4 +1,7 @@
 // @ts-strict-ignore
+import { getCurrency } from './currency';
+import { MonetaryUnit } from './currency/MonetaryUnit';
+
 export function last<T>(arr: Array<T>) {
   return arr[arr.length - 1];
 }
@@ -254,6 +257,7 @@ export const numberFormats: Array<{
 let numberFormatConfig: {
   format: NumberFormats;
   hideFraction: boolean;
+  currencyCode?: string;
 } = {
   format: 'comma-dot',
   hideFraction: false,
@@ -266,11 +270,14 @@ export function setNumberFormat(config: typeof numberFormatConfig) {
 export function getNumberFormat({
   format,
   hideFraction,
+  currencyCode,
 }: {
   format?: NumberFormats;
   hideFraction: boolean;
+  currencyCode?: string;
 } = numberFormatConfig) {
   let locale, regex, separator, separatorRegex;
+  const currency = getCurrency(currencyCode);
 
   switch (format) {
     case 'space-comma':
@@ -303,11 +310,12 @@ export function getNumberFormat({
   }
 
   return {
+    locale,
     value: format,
     separator,
     formatter: new Intl.NumberFormat(locale, {
-      minimumFractionDigits: hideFraction ? 0 : 2,
-      maximumFractionDigits: hideFraction ? 0 : 2,
+      minimumFractionDigits: hideFraction ? 0 : currencyCode ? currency.minorUnits : 2,
+      maximumFractionDigits: hideFraction ? 0 : currencyCode ? currency.minorUnits : 2,
     }),
     regex,
     separatorRegex,
@@ -321,9 +329,9 @@ export function getNumberFormat({
 // (i.e. N / 100). For example, `9007199254740987 / 100 ===
 // 90071992547409.88`. While the internal arithemetic would be correct
 // because we always do that on numbers, the app would potentially
-// display wrong numbers. Instead of `2**53` we use `2**51` which
+// display wrong numbers. Instead of `2**53` we use `2**52` which
 // gives division more room to be correct
-const MAX_SAFE_NUMBER = 2 ** 51 - 1;
+const MAX_SAFE_NUMBER = 2 ** 52 - 1;
 const MIN_SAFE_NUMBER = -MAX_SAFE_NUMBER;
 
 export function safeNumber(value: number) {
@@ -347,8 +355,12 @@ export function toRelaxedNumber(value: string) {
 export function integerToCurrency(
   n: number,
   formatter = getNumberFormat().formatter,
+  currencyCode?: string,
 ) {
-  return formatter.format(safeNumber(n) / 100);
+  const currency = getCurrency(currencyCode);
+//  console.log(currencyCode + ' minor units:  ' + currency.minorUnits);
+//  return formatter.format(safeNumber(n) / 10**currency.minorUnits);
+  return MonetaryUnit(n / 10**currency.minorUnits, currency).toString();
 }
 
 export function amountToCurrency(n) {
@@ -393,12 +405,14 @@ export function stringToInteger(str: string) {
   return null;
 }
 
-export function amountToInteger(n: number) {
-  return Math.round(n * 100);
+export function amountToInteger(n: number, currencyCode?: string) {
+  const currency = getCurrency(currencyCode);
+  return Math.round(n * 10**currency.minorUnits);
 }
 
-export function integerToAmount(n) {
-  return parseFloat((safeNumber(n) / 100).toFixed(2));
+export function integerToAmount(n, currencyCode?: string) {
+  const currency = getCurrency(currencyCode);
+  return parseFloat((safeNumber(n) / 10**currency.minorUnits).toFixed(currency.minorUnits));
 }
 
 // This is used when the input format could be anything (from

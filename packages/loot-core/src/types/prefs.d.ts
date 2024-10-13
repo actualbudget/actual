@@ -12,6 +12,8 @@ export type SyncedPrefs = Partial<
   Record<
     | 'budgetType'
     | 'upcomingScheduledTransactionLength'
+    | 'budgetCurrency'
+    | 'displayCurrencySymbol'
     | 'firstDayOfWeekIdx'
     | 'dateFormat'
     | 'numberFormat'

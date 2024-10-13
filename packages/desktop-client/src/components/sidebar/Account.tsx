@@ -74,6 +74,10 @@ export function Account<FieldName extends SheetFields<'account'>>({
         : 'account-onbudget'
     : 'title';
 
+    //  This is needed for future multi-currency and will be:
+    //  const accountCurrency = account?.currency;
+    const accountCurrency = null;  
+
   const { dragRef } = useDraggable({
     type,
     onDragChange,
@@ -156,7 +160,7 @@ export function Account<FieldName extends SheetFields<'account'>>({
                 }
               }
               left={name}
-              right={<CellValue binding={query} type="financial" />}
+              right={<CellValue binding={query} type="financial" currency={accountCurrency}/>}
             />
           </Link>
         </View>
