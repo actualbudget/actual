@@ -184,7 +184,7 @@ function AccountList({
     >
       {accounts.length === 0 && <EmptyMessage />}
       <PullToRefresh onRefresh={onSync}>
-        <View style={{ margin: 10 }}>
+        <View aria-label="Account list" style={{ margin: 10 }}>
           {budgetedAccounts.length > 0 && (
             <AccountHeader name="For Budget" amount={getOnBudgetBalance()} />
           )}
