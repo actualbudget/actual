@@ -9,11 +9,12 @@ import { integerToCurrency } from 'loot-core/src/shared/util';
 import { type CashFlowWidget } from 'loot-core/src/types/models';
 
 import { useFeatureFlag } from '../../../hooks/useFeatureFlag';
-import { theme } from '../../../style';
-import { Warning } from '../../alerts';
+import { SvgExclamationSolid } from '../../../icons/v1';
+import { styles, theme } from '../../../style';
 import { AlignedText } from '../../common/AlignedText';
 import { Block } from '../../common/Block';
 import { Text } from '../../common/Text';
+import { Tooltip } from '../../common/Tooltip';
 import { View } from '../../common/View';
 import { PrivacyFilter } from '../../PrivacyFilter';
 import { Change } from '../Change';
@@ -113,38 +114,56 @@ function retChartCondensed(
   income: number,
   expenses: number,
   t: TFunction,
+  hasWarning: boolean,
 ) {
   return (
-    <BarChart
-      width={width}
-      height={height}
-      data={[
-        {
-          income,
-          expenses,
-        },
-      ]}
-      margin={{
-        top: 10,
-        bottom: 0,
-      }}
-    >
-      <Bar dataKey="income" fill={chartTheme.colors.blue} barSize={14}>
-        <LabelList
-          dataKey="income"
-          position="left"
-          content={<CustomLabel name={t('Income')} />}
-        />
-      </Bar>
+    <View>
+      <BarChart
+        width={width}
+        height={height}
+        data={[
+          {
+            income,
+            expenses,
+          },
+        ]}
+        margin={{
+          top: 10,
+          bottom: 0,
+        }}
+      >
+        <Bar dataKey="income" fill={chartTheme.colors.blue} barSize={14}>
+          <LabelList
+            dataKey="income"
+            position="left"
+            content={<CustomLabel name={t('Income')} />}
+          />
+        </Bar>
 
-      <Bar dataKey="expenses" fill={chartTheme.colors.red} barSize={14}>
-        <LabelList
-          dataKey="expenses"
-          position="right"
-          content={<CustomLabel name={t('Expenses')} />}
-        />
-      </Bar>
-    </BarChart>
+        <Bar dataKey="expenses" fill={chartTheme.colors.red} barSize={14}>
+          <LabelList
+            dataKey="expenses"
+            position="right"
+            content={<CustomLabel name={t('Expenses')} />}
+          />
+        </Bar>
+      </BarChart>
+      {hasWarning && (
+        <View style={{ padding: 5, position: 'absolute', bottom: 0 }}>
+          <Tooltip
+            content="Additional widget height required to display the detailed chart, edit dashboard to increase widget height"
+            placement="bottom start"
+            style={{ ...styles.tooltip, maxWidth: 300 }}
+          >
+            <SvgExclamationSolid
+              width={20}
+              height={20}
+              style={{ color: theme.warningText }}
+            />
+          </Tooltip>
+        </View>
+      )}
+    </View>
   );
 }
 
@@ -220,24 +239,14 @@ function retChartDetailed(
     transfers: { x: Date; y: number }[];
   },
   isConcise: boolean,
-  height: number,
 ) {
-  if (height < 290) {
-    return (
-      <Warning style={{ paddingTop: 5, paddingBottom: 5 }}>
-        Additional widget height required to display chart, edit dashboard to
-        increase widget height
-      </Warning>
-    );
-  } else {
-    return (
-      <CashFlowGraph
-        graphData={graphData}
-        isConcise={isConcise}
-        showBalance={true}
-      />
-    );
-  }
+  return (
+    <CashFlowGraph
+      graphData={graphData}
+      isConcise={isConcise}
+      showBalance={true}
+    />
+  );
 }
 
 type CashFlowCardProps = {
@@ -261,13 +270,11 @@ export function CashFlowCard({
   const [start, end] = calculateTimeRange(meta?.timeFrame, defaultTimeFrame);
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
 
-  const isConcise = (() => {
-    const numDays = d.differenceInCalendarDays(
-      d.parseISO(end),
-      d.parseISO(start),
-    );
-    return numDays > 31 * 3;
-  })();
+  const numDays = d.differenceInCalendarDays(
+    d.parseISO(end),
+    d.parseISO(start),
+  );
+  const isConcise = numDays > 31 * 3;
 
   const [isCardHovered, setIsCardHovered] = useState(false);
   const onCardHover = useCallback(() => setIsCardHovered(true), []);
@@ -296,6 +303,7 @@ export function CashFlowCard({
   const dataDetailed = useReport('cash_flow', paramsDetailed);
 
   let dataOk: boolean = false,
+    switchFlag: boolean = false,
     graphDataDetailed = {
       expenses: [{ x: new Date(), y: 0 }],
       income: [{ x: new Date(), y: 0 }],
@@ -308,11 +316,8 @@ export function CashFlowCard({
     expenses: number = 0,
     income: number = 0;
 
-  if (
-    meta &&
-    meta?.isSimpleView !== undefined &&
-    meta?.isSimpleView === false
-  ) {
+  if (meta && meta?.mode !== undefined && meta?.mode === 'full') {
+    switchFlag = true;
     graphDataDetailed = dataDetailed?.graphData || {
       expenses: [{ x: new Date(), y: 0 }],
       income: [{ x: new Date(), y: 0 }],
@@ -323,11 +328,13 @@ export function CashFlowCard({
     totalIncome = dataDetailed?.totalIncome || 0;
     totalTransfers = dataDetailed?.totalTransfers || 0;
     dataOk = dataDetailed ? true : false;
-  } else {
-    const graphData = dataCondensed?.graphData || null;
-    income = graphData?.income || 0;
-    expenses = -(graphData?.expense || 0);
-    dataOk = graphData ? true : false;
+  }
+
+  const graphDataCondensed = dataCondensed?.graphData || null;
+  income = graphDataCondensed?.income || 0;
+  expenses = -(graphDataCondensed?.expense || 0);
+  if (graphDataCondensed && meta?.mode === 'condensed') {
+    dataOk = true;
   }
 
   return (
@@ -340,8 +347,10 @@ export function CashFlowCard({
       }
       menuItems={[
         {
-          name: 'changeView',
-          text: t('Change view'),
+          name: 'change-view',
+          text: switchFlag
+            ? t('Switch to condensed graph')
+            : t('Switch to detailed graph'),
         },
         {
           name: 'rename',
@@ -354,11 +363,11 @@ export function CashFlowCard({
       ]}
       onMenuSelect={item => {
         switch (item) {
-          case 'changeView':
-            const newValue = !meta?.isSimpleView;
+          case 'change-view':
+            const newValue = switchFlag ? 'condensed' : 'full';
             onMetaChange({
               ...meta,
-              isSimpleView: newValue,
+              mode: newValue,
             });
             break;
           case 'rename':
@@ -394,7 +403,7 @@ export function CashFlowCard({
             <DateRange start={start} end={end} />
           </View>
           {dataOk &&
-            (meta?.isSimpleView || meta?.isSimpleView === undefined
+            (meta?.mode === 'condensed' || meta?.mode === undefined
               ? retViewCondensed(isCardHovered, income, expenses)
               : retViewDetailed(
                   totalIncome,
@@ -408,9 +417,18 @@ export function CashFlowCard({
           <Container style={{ height: 'auto', flex: 1 }}>
             {(width, height) => (
               <ResponsiveContainer>
-                {meta?.isSimpleView || meta?.isSimpleView === undefined
-                  ? retChartCondensed(width, height, income, expenses, t)
-                  : retChartDetailed(graphDataDetailed, isConcise, height)}
+                {meta?.mode === 'condensed' ||
+                meta?.mode === undefined ||
+                height < 290
+                  ? retChartCondensed(
+                      width,
+                      height,
+                      income,
+                      expenses,
+                      t,
+                      Boolean(height < 290 && meta?.mode === 'full'),
+                    )
+                  : retChartDetailed(graphDataDetailed, isConcise)}
               </ResponsiveContainer>
             )}
           </Container>
