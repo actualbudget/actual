@@ -151,7 +151,7 @@ function retChartCondensed(
       {hasWarning && (
         <View style={{ padding: 5, position: 'absolute', bottom: 0 }}>
           <Tooltip
-            content="Additional widget height required to display the detailed chart, edit dashboard to increase widget height"
+            content={t('Additional widget height required to display the detailed chart, edit dashboard to increase widget height')}
             placement="bottom start"
             style={{ ...styles.tooltip, maxWidth: 300 }}
           >
