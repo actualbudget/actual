@@ -54,6 +54,8 @@ test.describe('Mobile Accounts', () => {
     await expect(accountPage.transactions).toHaveCount(0);
     await expect(page).toMatchThemeScreenshots();
 
+    await accountPage.clearSearch();
+
     await accountPage.searchByText('Kroger');
     await expect(accountPage.transactionList).toBeVisible();
     await expect(accountPage.transactions).not.toHaveCount(0);

@@ -33,6 +33,10 @@ export class MobileAccountPage {
     await this.searchBox.fill(term);
   }
 
+  async clearSearch() {
+    await this.searchBox.clear();
+  }
+
   /**
    * Go to transaction creation page
    */
