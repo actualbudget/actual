@@ -1,7 +1,11 @@
+import { WithRequired } from '../types/util';
+
 // @ts-strict-ignore
 export type QueryState = {
+  table: string;
+  tableOptions: object;
   filterExpressions: Array<string>;
-  selectExpressions: Array<unknown>;
+  selectExpressions: Array<unknown> | unknown | '*' | string;
   groupExpressions: Array<unknown>;
   orderExpressions: Array<unknown>;
   calculation: boolean;
@@ -15,8 +19,9 @@ export type QueryState = {
 export class Query {
   state: QueryState;
 
-  constructor(state) {
+  constructor(state: WithRequired<Partial<QueryState>, 'table'>) {
     this.state = {
+      tableOptions: state.tableOptions || {},
       filterExpressions: state.filterExpressions || [],
       selectExpressions: state.selectExpressions || [],
       groupExpressions: state.groupExpressions || [],
@@ -48,12 +53,22 @@ export class Query {
     });
   }
 
-  select(exprs: Array<unknown> | unknown = []) {
+  select(
+    exprs:
+      | Array<string>
+      | Array<Record<string, unknown>>
+      | Record<string, unknown>
+      | '*'
+      | string = [],
+  ) {
+    let exprsToUse: Array<unknown>;
     if (!Array.isArray(exprs)) {
-      exprs = [exprs];
+      exprsToUse = [exprs];
+    } else {
+      exprsToUse = exprs;
     }
 
-    const query = new Query({ ...this.state, selectExpressions: exprs });
+    const query = new Query({ ...this.state, selectExpressions: exprsToUse });
     query.state.calculation = false;
     return query;
   }
@@ -86,11 +101,11 @@ export class Query {
     });
   }
 
-  limit(num) {
+  limit(num: number) {
     return new Query({ ...this.state, limit: num });
   }
 
-  offset(num) {
+  offset(num: number) {
     return new Query({ ...this.state, offset: num });
   }
 
@@ -106,7 +121,7 @@ export class Query {
     return new Query({ ...this.state, validateRefs: false });
   }
 
-  options(opts) {
+  options(opts: object) {
     return new Query({ ...this.state, tableOptions: opts });
   }
 
