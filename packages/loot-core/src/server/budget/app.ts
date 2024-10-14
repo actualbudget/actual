@@ -38,6 +38,10 @@ app.method(
   mutator(undoable(goalActions.applySingleCategoryTemplate)),
 );
 app.method(
+  'budget/apply-multiple-templates',
+  mutator(undoable(goalActions.applyMultipleCategoryTemplates)),
+);
+app.method(
   'budget/cleanup-goal-template',
   mutator(undoable(cleanupActions.cleanupTemplate)),
 );
