@@ -335,8 +335,8 @@ export function conditionsToAQL(conditions, { recurDateBounds = 100 } = {}) {
     if (field === 'transfer' && op === 'is') {
       field = "transfer_id";
       if (value) {
-        op = 'gt';
-        value = 0;
+        op = 'isNot';
+        value = null;
       } else {
         value = null;
       }
