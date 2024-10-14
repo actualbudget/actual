@@ -68,6 +68,7 @@ export const Transaction = memo(function Transaction({
     category: categoryId,
     account: accountId,
     cleared,
+    notes,
     is_parent: isParent,
     is_child: isChild,
     schedule,
@@ -178,6 +179,17 @@ export const Transaction = memo(function Transaction({
                 }}
               >
                 {prettyDescription || 'Empty'}
+              </TextOneLine>
+            </View>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <TextOneLine
+                style={{
+                  fontSize: 12,
+                  opacity: 0.8,
+                  paddingTop: '3px',
+                }}
+              >
+                {notes}
               </TextOneLine>
             </View>
             {isPreview ? (
