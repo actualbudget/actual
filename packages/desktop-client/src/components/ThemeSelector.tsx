@@ -53,6 +53,7 @@ export function ThemeSelector({ style }: ThemeSelectorProps) {
       </Button>
 
       <Popover
+        offset={8}
         triggerRef={triggerRef}
         isOpen={menuOpen}
         onOpenChange={() => setMenuOpen(false)}
