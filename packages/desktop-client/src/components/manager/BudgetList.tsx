@@ -23,6 +23,7 @@ import {
   type SyncedLocalFile,
 } from 'loot-core/types/file';
 
+import { useGlobalPref } from '../../hooks/useGlobalPref';
 import { useInitialMount } from '../../hooks/useInitialMount';
 import { useMetadataPref } from '../../hooks/useMetadataPref';
 import { AnimatedLoading } from '../../icons/AnimatedLoading';
@@ -445,8 +446,12 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
     await globalThis.Actual.startActualServer('v24.10.1');
   };
 
+  const [ngrokAuthToken] = useGlobalPref('ngrokAuthToken');
   const exposeActualServer = async () => {
-    const url = await globalThis.Actual.exposeActualServer();
+    const url = await globalThis.Actual.exposeActualServer({
+      authToken: ngrokAuthToken,
+      port: 5006,
+    });
     console.info('exposting actual at: ' + url);
   };
 

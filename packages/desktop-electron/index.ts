@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 
+import ngrok from '@ngrok/ngrok';
 import {
   net,
   app,
@@ -17,7 +18,6 @@ import {
   SaveDialogOptions,
 } from 'electron';
 import { copy, exists, remove } from 'fs-extra';
-import ngrok from 'ngrok';
 import promiseRetry from 'promise-retry';
 
 import { getMenu } from './menu';
@@ -456,28 +456,26 @@ ipcMain.handle(
 );
 
 export type ExposeActualServerPayload = {
-  region: 'us' | 'eu' | 'au' | 'ap' | 'sa' | 'jp' | 'in';
+  authToken: string;
   port: number;
 };
 
 ipcMain.handle(
   'expose-actual-server',
-  async (
-    _event,
-    payload: ExposeActualServerPayload = {
-      region: 'eu',
-      port: 5006,
-    },
-  ) => {
+  async (_event, payload: ExposeActualServerPayload) => {
     try {
-      const url = await ngrok.connect({
-        scheme: 'https',
+      const listener = await ngrok.forward({
+        schemes: ['https'], // change this to https and bind certificate - may need to generate cert and store in user-data
         addr: payload.port,
-        region: payload.region,
+        host_header: `localhost:${payload.port}`,
+        authtoken: payload.authToken,
+        domain: 'creative-genuinely-meerkat.ngrok-free.app', // should come from settings?
+        // crt: fs.readFileSync("crt.pem", "utf8"),
+        // key: fs.readFileSync("key.pem", "utf8"),
       });
 
-      console.info(`Exposing actual server on url: ${url}`);
-      return url;
+      console.info(`Exposing actual server on url: ${listener.url()}`);
+      return listener.url();
     } catch (error) {
       console.error('Unable to run ngrok', error);
     }

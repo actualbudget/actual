@@ -75,11 +75,11 @@
     "npmRebuild": false
   },
   "dependencies": {
+    "@ngrok/ngrok": "^1.4.1",
     "actual-sync": "file:../../../actual-server",
     "adm-zip": "^0.5.10",
     "better-sqlite3": "^9.6.0",
     "fs-extra": "^11.2.0",
-    "ngrok": "^5.0.0-beta.2",
     "node-fetch": "^2.7.0",
     "promise-retry": "^2.0.1"
   },

@@ -9,7 +9,7 @@ declare global {
       downloadActualServer: (releaseVersion: string) => Promise<void>;
       startActualServer: (releaseVersion: string) => Promise<void>;
       exposeActualServer: (settings: {
-        region: 'us' | 'eu' | 'au' | 'ap' | 'sa' | 'jp' | 'in';
+        authToken: string;
         port: number;
       }) => Promise<string | undefined>;
       saveFile: (

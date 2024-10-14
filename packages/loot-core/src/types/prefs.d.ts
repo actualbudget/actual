@@ -78,4 +78,5 @@ export type GlobalPrefs = Partial<{
   preferredDarkTheme: DarkTheme;
   documentDir: string; // Electron only
   serverSelfSignedCert: string; // Electron only
+  ngrokAuthToken: string; // Electron only
 }>;
