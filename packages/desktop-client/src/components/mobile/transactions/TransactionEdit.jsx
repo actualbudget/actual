@@ -422,12 +422,22 @@ const TransactionEditInner = memo(function TransactionEditInner({
   const { grouped: categoryGroups } = useCategories();
 
   const [transaction, ...childTransactions] = transactions;
+  const transactionsRef = useRef(transactions);
+  useEffect(() => {
+    transactionsRef.current = transactions;
+  }, [transactions]);
 
   const childTransactionElementRefMap = useRef({});
   const hasAccountChanged = useRef(false);
 
   const payeesById = useMemo(() => groupById(payees), [payees]);
   const accountsById = useMemo(() => groupById(accounts), [accounts]);
+
+  // getTransaction prevents stale-closure issue with dialogs
+  const getTransaction = useCallback(
+    transactionId => transactionsRef.current.find(t => t.id === transactionId),
+    [],
+  );
 
   const getAccount = useCallback(
     trans => {
@@ -555,7 +565,6 @@ const TransactionEditInner = memo(function TransactionEditInner({
 
   const onEditFieldInner = useCallback(
     (transactionId, name) => {
-      const transactionToEdit = transactions.find(t => t.id === transactionId);
       const unserializedTransaction = unserializedTransactions.find(
         t => t.id === transactionId,
       );
@@ -566,7 +575,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
               categoryGroups,
               month: monthUtils.monthFromDate(unserializedTransaction.date),
               onSelect: categoryId => {
-                onUpdateInner(transactionToEdit, name, categoryId);
+                onUpdateInner(getTransaction(transactionId), name, categoryId);
               },
             }),
           );
@@ -575,7 +584,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
           dispatch(
             pushModal('account-autocomplete', {
               onSelect: accountId => {
-                onUpdateInner(transactionToEdit, name, accountId);
+                onUpdateInner(getTransaction(transactionId), name, accountId);
               },
             }),
           );
@@ -584,7 +593,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
           dispatch(
             pushModal('payee-autocomplete', {
               onSelect: payeeId => {
-                onUpdateInner(transactionToEdit, name, payeeId);
+                onUpdateInner(getTransaction(transactionId), name, payeeId);
               },
             }),
           );
@@ -595,7 +604,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
               name,
               month: monthUtils.monthFromDate(unserializedTransaction.date),
               onSubmit: (name, value) => {
-                onUpdateInner(transactionToEdit, name, value);
+                onUpdateInner(getTransaction(transactionId), name, value);
               },
             }),
           );
@@ -606,7 +615,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
       categoryGroups,
       dispatch,
       onUpdateInner,
-      transactions,
+      getTransaction,
       unserializedTransactions,
     ],
   );
