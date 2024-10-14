@@ -185,6 +185,10 @@ export const FocusableAmountInput = memo(function FocusableAmountInput({
   const [isNegative, setIsNegative] = useState(true);
   const [focused, setFocused] = useState(defaultFocused ?? false);
 
+  useEffect(() => {
+    setFocused(defaultFocused ?? false);
+  }, [defaultFocused]);
+
   const maybeApplyNegative = (amount: number, negative: boolean) => {
     const absValue = Math.abs(amount);
     return negative ? -absValue : absValue;
