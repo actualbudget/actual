@@ -294,7 +294,7 @@ describe('query helpers', () => {
       expect(d[0].id).toBe(data[0].id);
     });
 
-    expect(paged.getTotalCount()).toBe(data.length);
+    expect(paged.totalCount).toBe(data.length);
 
     await paged.fetchNext();
     tracer.expectNow('server-query', ['id']);
@@ -305,7 +305,7 @@ describe('query helpers', () => {
     tracer.expectNow('data', d => {
       expect(d.length).toBe(1000);
     });
-    expect(paged.isFinished()).toBe(false);
+    expect(paged.hasNext).toBe(true);
 
     await paged.fetchNext();
     tracer.expectNow('server-query', ['id']);
@@ -316,7 +316,7 @@ describe('query helpers', () => {
     tracer.expectNow('data', d => {
       expect(d.length).toBe(1500);
     });
-    expect(paged.isFinished()).toBe(false);
+    expect(paged.hasNext).toBe(true);
 
     await paged.fetchNext();
     tracer.expectNow('server-query', ['id']);
@@ -328,8 +328,8 @@ describe('query helpers', () => {
       expect(d.length).toBe(1502);
     });
 
-    expect(paged.getData()).toEqual(selectData(data, ['id']));
-    expect(paged.isFinished()).toBe(true);
+    expect(paged.data).toEqual(selectData(data, ['id']));
+    expect(paged.hasNext).toBe(false);
 
     await paged.fetchNext();
     // Wait a bit and make sure nothing comes through
