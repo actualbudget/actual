@@ -1262,8 +1262,8 @@ handlers['save-global-prefs'] = async function (prefs) {
       prefs.serverSelfSignedCert,
     );
   }
-  if ('ngrokAuthToken' in prefs) {
-    await asyncStorage.setItem('ngrokAuthToken', prefs.ngrokAuthToken);
+  if ('ngrokConfig' in prefs) {
+    await asyncStorage.setItem('ngrokConfig', prefs.ngrokConfig);
   }
   return 'ok';
 };
@@ -1277,7 +1277,7 @@ handlers['load-global-prefs'] = async function () {
     [, theme],
     [, preferredDarkTheme],
     [, serverSelfSignedCert],
-    [, ngrokAuthToken],
+    [, ngrokConfig],
   ] = await asyncStorage.multiGet([
     'floating-sidebar',
     'max-months',
@@ -1286,7 +1286,7 @@ handlers['load-global-prefs'] = async function () {
     'theme',
     'preferred-dark-theme',
     'server-self-signed-cert',
-    'ngrokAuthToken',
+    'ngrokConfig',
   ]);
   return {
     floatingSidebar: floatingSidebar === 'true' ? true : false,
@@ -1306,7 +1306,7 @@ handlers['load-global-prefs'] = async function () {
         ? preferredDarkTheme
         : 'dark',
     serverSelfSignedCert: serverSelfSignedCert || undefined,
-    ngrokAuthToken: ngrokAuthToken || undefined,
+    ngrokConfig: ngrokConfig || undefined,
   };
 };
 

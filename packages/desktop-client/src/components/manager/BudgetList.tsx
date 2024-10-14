@@ -446,13 +446,14 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
     await globalThis.Actual.startActualServer('v24.10.1');
   };
 
-  const [ngrokAuthToken] = useGlobalPref('ngrokAuthToken');
+  const [ngrokConfig] = useGlobalPref('ngrokConfig');
   const exposeActualServer = async () => {
     const url = await globalThis.Actual.exposeActualServer({
-      authToken: ngrokAuthToken,
-      port: 5006,
+      authToken: ngrokConfig.authToken,
+      port: ngrokConfig.port,
+      domain: ngrokConfig.domain,
     });
-    console.info('exposting actual at: ' + url);
+    console.info('exposing actual at: ' + url);
   };
 
   return (

@@ -20,6 +20,8 @@ import {
 import { copy, exists, remove } from 'fs-extra';
 import promiseRetry from 'promise-retry';
 
+import { GlobalPrefs } from 'loot-core/types/prefs';
+
 import { getMenu } from './menu';
 import {
   get as getWindowState,
@@ -27,7 +29,6 @@ import {
 } from './window-state';
 
 import './security';
-import AdmZip from 'adm-zip';
 
 const isDev = !app.isPackaged; // dev mode if not packaged
 
@@ -54,9 +55,26 @@ if (!isDev || !process.env.ACTUAL_DATA_DIR) {
 let clientWin: BrowserWindow | null;
 let serverProcess: UtilityProcess | null;
 let actualServerProcess: UtilityProcess | null;
+let globalPrefs: Partial<GlobalPrefs> | null;
 
 if (isDev) {
   process.traceProcessWarnings = true;
+}
+
+async function loadGlobalPrefs() {
+  let state: GlobalPrefs | undefined = undefined;
+  try {
+    state = JSON.parse(
+      fs.readFileSync(
+        path.join(process.env.ACTUAL_DATA_DIR, 'global-store.json'),
+        'utf8',
+      ),
+    );
+  } catch (e) {
+    console.log('Could not load global state');
+  }
+
+  return state;
 }
 
 function createBackgroundProcess() {
@@ -94,6 +112,62 @@ function createBackgroundProcess() {
         console.log('Unknown server message: ' + msg.type);
     }
   });
+}
+
+function startSyncServer() {
+  const serverPath = path.resolve(
+    __dirname,
+    '../../../node_modules/actual-sync/app.js', // if letting electron-builder bundle it (needs to be in our workspace)
+  );
+
+  // NOTE: config.json parameters will be relative to THIS directory at the moment - may need a fix?
+  // Or we can override the config.json location when starting the process
+  try {
+    actualServerProcess = utilityProcess.fork(
+      serverPath, // This requires actual-server depencies (crdt) to be built before running electron - they need to be manually specified because actual-server doesn't get bundled
+      [],
+      isDev ? { execArgv: ['--inspect'], stdio: 'pipe' } : { stdio: 'pipe' },
+    );
+  } catch (error) {
+    console.error(error);
+  }
+
+  actualServerProcess.stdout?.on('data', (chunk: Buffer) => {
+    // Send the Server console.log messages to the main browser window
+    clientWin?.webContents.executeJavaScript(`
+        console.info('Server Log:', ${JSON.stringify(chunk.toString('utf8'))})`);
+  });
+
+  actualServerProcess.stderr?.on('data', (chunk: Buffer) => {
+    // Send the Server console.error messages out to the main browser window
+    clientWin?.webContents.executeJavaScript(`
+          console.error('Server Log:', ${JSON.stringify(chunk.toString('utf8'))})`);
+  });
+}
+
+async function exposeSyncServer(settings: GlobalPrefs['ngrokConfig']) {
+  if (settings?.authToken && settings?.domain && settings?.port) {
+    console.error('Cannot expose sync server: missing ngrok settings');
+    return { error: 'Missing ngrok settings' };
+  }
+
+  try {
+    const listener = await ngrok.forward({
+      schemes: ['https'], // change this to https and bind certificate - may need to generate cert and store in user-data
+      addr: settings.port,
+      host_header: `localhost:${settings.port}`,
+      authtoken: settings.authToken,
+      domain: settings.domain,
+      // crt: fs.readFileSync("crt.pem", "utf8"),
+      // key: fs.readFileSync("key.pem", "utf8"),
+    });
+
+    console.info(`Exposing actual server on url: ${listener.url()}`);
+    return { url: listener.url() };
+  } catch (error) {
+    console.error('Unable to run ngrok', error);
+    return { error: `Unable to run ngrok. ${error}` };
+  }
 }
 
 async function createWindow() {
@@ -226,6 +300,14 @@ app.on('ready', async () => {
   // Install an `app://` protocol that always returns the base HTML
   // file no matter what URL it is. This allows us to use react-router
   // on the frontend
+
+  globalPrefs = await loadGlobalPrefs(); // load global prefs
+
+  if (globalPrefs.ngrokConfig.autoStart) {
+    startSyncServer();
+    exposeSyncServer(globalPrefs.ngrokConfig);
+  }
+
   protocol.handle('app', request => {
     if (request.method !== 'GET') {
       return new Response(null, {
@@ -376,111 +458,12 @@ ipcMain.handle('open-external-url', (event, url) => {
   shell.openExternal(url);
 });
 
-// NOTE: We could just bundle it in the package, but it would be a large download - consider it though...
-ipcMain.handle(
-  'download-actual-server',
-  async (_event, payload: { releaseVersion: string }) => {
-    console.info({ payload });
-    const downloadUrl = `https://github.com/MikesGlitch/actual-server/releases/download/${payload.releaseVersion}/${payload.releaseVersion}-server-sync-dist.zip`;
-
-    try {
-      const res = await fetch(downloadUrl);
-      const arrBuffer = await res.arrayBuffer();
-      const zipped = new AdmZip(Buffer.from(arrBuffer));
-      console.info(
-        'actual-server will be installed here:',
-        process.env.ACTUAL_DATA_DIR,
-      );
-      zipped.extractAllTo(
-        process.env.ACTUAL_DATA_DIR + '/actual-server-releases',
-        true,
-        false,
-      );
-    } catch (error) {
-      console.error('Error retrieving actual-server:', error);
-      throw error;
-    }
-  },
-);
-
-ipcMain.handle(
-  'start-actual-server',
-  async (_event, payload: { releaseVersion: string }) => {
-    // const serverReleaseDir = path.resolve(
-    //   `${process.env.ACTUAL_DATA_DIR}/actual-server/${payload.releaseVersion}`,
-    // );
-
-    // actualServerProcess = utilityProcess.fork(
-    //   serverReleaseDir + '/app.js', // if bundling it ourselves and manually including it
-    //   ['--subprocess'],
-    //   isDev ? { execArgv: ['--inspect'], stdio: 'pipe' } : { stdio: 'pipe' },
-    // );
-
-    const serverPath = path.resolve(
-      __dirname,
-      '../../../node_modules/actual-sync/app.js', // if letting electron-builder bundle it (needs to be in our workspace)
-    );
-
-    // NOTE: config.json parameters will be relative to THIS directory at the moment - may need a fix?
-    // Or we can override the config.json location when starting the process
-    try {
-      actualServerProcess = utilityProcess.fork(
-        serverPath, // This requires actual-server depencies (crdt) to be built before running electron - they need to be manually specified because actual-server doesn't get bundled
-        [],
-        isDev ? { execArgv: ['--inspect'], stdio: 'pipe' } : { stdio: 'pipe' },
-      );
-    } catch (error) {
-      console.error(error);
-    }
-
-    actualServerProcess.stdout?.on('data', (chunk: Buffer) => {
-      // Send the Server console.log messages to the main browser window
-      clientWin?.webContents.executeJavaScript(`
-          console.info('Server Log:', ${JSON.stringify(chunk.toString('utf8'))})`);
-    });
-
-    actualServerProcess.stderr?.on('data', (chunk: Buffer) => {
-      // Send the Server console.error messages out to the main browser window
-      clientWin?.webContents.executeJavaScript(`
-            console.error('Server Log:', ${JSON.stringify(chunk.toString('utf8'))})`);
-    });
-
-    const url = ngrok.connect({
-      proto: 'http',
-      addr: 5006,
-      region: 'us',
-    });
-
-    return url;
-  },
-);
-
-export type ExposeActualServerPayload = {
-  authToken: string;
-  port: number;
-};
+ipcMain.handle('start-actual-server', async () => startSyncServer());
 
 ipcMain.handle(
   'expose-actual-server',
-  async (_event, payload: ExposeActualServerPayload) => {
-    try {
-      // TODO: check global setting for ServerRunning, if true, autostart the server and expose it - probably done inside of initApp (main.ts)
-      const listener = await ngrok.forward({
-        schemes: ['https'], // change this to https and bind certificate - may need to generate cert and store in user-data
-        addr: payload.port,
-        host_header: `localhost:${payload.port}`,
-        authtoken: payload.authToken,
-        domain: 'creative-genuinely-meerkat.ngrok-free.app', // should come from settings?
-        // crt: fs.readFileSync("crt.pem", "utf8"),
-        // key: fs.readFileSync("key.pem", "utf8"),
-      });
-
-      console.info(`Exposing actual server on url: ${listener.url()}`);
-      return listener.url();
-    } catch (error) {
-      console.error('Unable to run ngrok', error);
-    }
-  },
+  async (_event, payload: GlobalPrefs['ngrokConfig']) =>
+    exposeSyncServer(payload),
 );
 
 ipcMain.on('message', (_event, msg) => {

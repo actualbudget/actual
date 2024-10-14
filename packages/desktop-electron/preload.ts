@@ -1,7 +1,8 @@
 import { ipcRenderer, contextBridge, IpcRenderer } from 'electron';
 
+import { GlobalPrefs } from 'loot-core/types/prefs';
+
 import {
-  ExposeActualServerPayload,
   GetBootstrapDataPayload,
   OpenFileDialogPayload,
   SaveFileDialogPayload,
@@ -59,19 +60,13 @@ contextBridge.exposeInMainWorld('Actual', {
     ipcRenderer.invoke('open-external-url', url);
   },
 
-  downloadActualServer: (releaseVersion: string) => {
-    return ipcRenderer.invoke('download-actual-server', {
-      releaseVersion,
-    });
-  },
-
   startActualServer: (releaseVersion: string) => {
     return ipcRenderer.invoke('start-actual-server', {
       releaseVersion,
     });
   },
 
-  exposeActualServer: (settings: ExposeActualServerPayload) => {
+  exposeActualServer: (settings: GlobalPrefs['ngrokConfig']) => {
     return ipcRenderer.invoke('expose-actual-server', settings);
   },
 

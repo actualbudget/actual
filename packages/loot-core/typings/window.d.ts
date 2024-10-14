@@ -1,3 +1,5 @@
+import type { GlobalPrefs } from 'loot-core/types/prefs';
+
 export {};
 
 declare global {
@@ -8,10 +10,9 @@ declare global {
       openURLInBrowser: (url: string) => void;
       downloadActualServer: (releaseVersion: string) => Promise<void>;
       startActualServer: (releaseVersion: string) => Promise<void>;
-      exposeActualServer: (settings: {
-        authToken: string;
-        port: number;
-      }) => Promise<string | undefined>;
+      exposeActualServer: (
+        settings: GlobalPrefs['ngrokConfig'],
+      ) => Promise<{ url?: string; error?: string } | undefined>;
       saveFile: (
         contents: string | Buffer,
         filename: string,
