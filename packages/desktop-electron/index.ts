@@ -464,6 +464,7 @@ ipcMain.handle(
   'expose-actual-server',
   async (_event, payload: ExposeActualServerPayload) => {
     try {
+      // TODO: check global setting for ServerRunning, if true, autostart the server and expose it - probably done inside of initApp (main.ts)
       const listener = await ngrok.forward({
         schemes: ['https'], // change this to https and bind certificate - may need to generate cert and store in user-data
         addr: payload.port,
