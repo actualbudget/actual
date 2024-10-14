@@ -27,6 +27,7 @@ test.describe('Mobile Accounts', () => {
 
   test('opens the accounts page and asserts on balances', async () => {
     const accountsPage = await navigation.goToAccountsPage();
+    await accountsPage.waitFor();
 
     const account = await accountsPage.getNthAccount(1);
 
@@ -37,7 +38,10 @@ test.describe('Mobile Accounts', () => {
 
   test('opens individual account page and checks that filtering is working', async () => {
     const accountsPage = await navigation.goToAccountsPage();
+    await accountsPage.waitFor();
+
     const accountPage = await accountsPage.openNthAccount(0);
+    await accountPage.waitFor();
 
     await expect(accountPage.heading).toHaveText('Bank of America');
     await expect(accountPage.transactionList).toBeVisible();

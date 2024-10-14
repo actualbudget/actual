@@ -102,7 +102,7 @@ export class LiveQuery<TResponse = unknown> {
     return liveQuery;
   };
 
-  subscribe = () => {
+  protected subscribe = () => {
     if (this.unsubscribeSyncEvent == null) {
       this.unsubscribeSyncEvent = listen('sync-event', ({ type, tables }) => {
         // If the user is doing optimistic updates, they don't want to
@@ -146,10 +146,10 @@ export class LiveQuery<TResponse = unknown> {
   };
 
   protected _optimisticUpdate(
-    dataFunc: (data: Data<TResponse>) => Data<TResponse>,
+    updateFn: (data: Data<TResponse>) => Data<TResponse>,
   ) {
     const previousData = this.data;
-    this.data = dataFunc(this.data);
+    this.updateData(updateFn);
     this.onData(this.data, previousData);
   }
 
@@ -163,8 +163,10 @@ export class LiveQuery<TResponse = unknown> {
     return this.inflightRequestId;
   };
 
-  protected setData = (data: Data<TResponse>) => {
-    this.data = data;
+  protected updateData = (
+    updateFn: (data: Data<TResponse>) => Data<TResponse>,
+  ) => {
+    this.data = updateFn(this.data);
   };
 
   protected fetchData = async (
@@ -346,14 +348,14 @@ export class PagedQuery<TResponse = unknown> extends LiveQuery<TResponse> {
         } else {
           this.done = data.length < this.pageCount;
 
-          const previousData = this.getData();
-          this.setData(previousData.concat(data));
+          const prevData = this.getData();
+          this.updateData(currentData => currentData.concat(data));
 
           // Handle newly loaded page data
           this.onPageData(data);
 
           // Handle entire data
-          this.onData(this.getData(), previousData);
+          this.onData(this.getData(), prevData);
         }
       }
     }
@@ -369,9 +371,9 @@ export class PagedQuery<TResponse = unknown> extends LiveQuery<TResponse> {
     return this.totalCount;
   };
 
-  optimisticUpdate = (dataFunc: (data: Data<TResponse>) => Data<TResponse>) => {
+  optimisticUpdate = (updateFn: (data: Data<TResponse>) => Data<TResponse>) => {
     const previousData = this.getData();
-    super._optimisticUpdate(dataFunc);
+    super._optimisticUpdate(updateFn);
     this.totalCount += this.getData().length - previousData.length;
   };
 }

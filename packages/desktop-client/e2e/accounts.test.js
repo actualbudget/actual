@@ -62,6 +62,8 @@ test.describe('Accounts', () => {
 
     test('creates a transfer from two existing transactions', async () => {
       accountPage = await navigation.goToAccountPage('For budget');
+      await accountPage.waitFor();
+
       await expect(accountPage.accountName).toHaveText('Budgeted Accounts');
 
       await accountPage.filterByNote('Test Acc Transfer');
@@ -109,6 +111,7 @@ test.describe('Accounts', () => {
         offBudget: false,
         balance: 0,
       });
+      await accountPage.waitFor();
     });
 
     async function importCsv(screenshot = false) {
