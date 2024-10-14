@@ -342,7 +342,10 @@ export function CashFlowCard({
   const graphDataCondensed = dataCondensed?.graphData || null;
   income = graphDataCondensed?.income || 0;
   expenses = -(graphDataCondensed?.expense || 0);
-  if (graphDataCondensed && isCondensedMode) {
+  if (
+    graphDataCondensed &&
+    (meta?.mode === 'condensed' || meta?.mode === undefined)
+  ) {
     dataOk = true;
   }
 
