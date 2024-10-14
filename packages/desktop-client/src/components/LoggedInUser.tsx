@@ -110,6 +110,7 @@ export function LoggedInUser({
       </Button>
 
       <Popover
+        offset={8}
         triggerRef={triggerRef}
         isOpen={menuOpen}
         onOpenChange={() => setMenuOpen(false)}

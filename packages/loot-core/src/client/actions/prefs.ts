@@ -1,5 +1,9 @@
 import { send } from '../../platform/client/fetch';
-import { type GlobalPrefs, type MetadataPrefs } from '../../types/prefs';
+import {
+  type GlobalPrefs,
+  type MetadataPrefs,
+  type SyncedPrefs,
+} from '../../types/prefs';
 import * as constants from '../constants';
 
 import { closeModal } from './modals';
@@ -19,6 +23,7 @@ export function loadPrefs() {
       type: constants.SET_PREFS,
       prefs,
       globalPrefs: await send('load-global-prefs'),
+      syncedPrefs: await send('preferences/get'),
     });
 
     return prefs;
@@ -42,6 +47,7 @@ export function loadGlobalPrefs() {
       type: constants.SET_PREFS,
       prefs: getState().prefs.local,
       globalPrefs,
+      syncedPrefs: getState().prefs.synced,
     });
     return globalPrefs;
   };
@@ -58,5 +64,22 @@ export function saveGlobalPrefs(
       globalPrefs: prefs,
     });
     onSaveGlobalPrefs?.();
+  };
+}
+
+export function saveSyncedPrefs(prefs: SyncedPrefs) {
+  return async (dispatch: Dispatch) => {
+    await Promise.all(
+      Object.entries(prefs).map(([prefName, value]) =>
+        send('preferences/save', {
+          id: prefName as keyof SyncedPrefs,
+          value,
+        }),
+      ),
+    );
+    dispatch({
+      type: constants.MERGE_SYNCED_PREFS,
+      syncedPrefs: prefs,
+    });
   };
 }

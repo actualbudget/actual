@@ -1,8 +1,8 @@
 import { type ScheduleEntity } from './schedule';
 
 export interface NewRuleEntity {
-  stage: string;
-  conditionsOp: 'any' | 'and';
+  stage: 'pre' | null | 'post';
+  conditionsOp: 'or' | 'and';
   conditions: RuleConditionEntity[];
   actions: RuleActionEntity[];
   tombstone?: boolean;
@@ -138,6 +138,7 @@ export interface SetRuleActionEntity {
   op: 'set';
   value: unknown;
   options?: {
+    template?: string;
     splitIndex?: number;
   };
   type?: string;

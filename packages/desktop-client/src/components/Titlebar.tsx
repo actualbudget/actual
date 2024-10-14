@@ -29,8 +29,10 @@ import { AnimatedRefresh } from './AnimatedRefresh';
 import { MonthCountSelector } from './budget/MonthCountSelector';
 import { Button } from './common/Button2';
 import { Link } from './common/Link';
+import { SpaceBetween } from './common/SpaceBetween';
 import { Text } from './common/Text';
 import { View } from './common/View';
+import { HelpMenu } from './HelpMenu';
 import { LoggedInUser } from './LoggedInUser';
 import { useServerURL } from './ServerContext';
 import { useSidebar } from './sidebar/SidebarProvider';
@@ -282,7 +284,7 @@ export function Titlebar({ style }: TitlebarProps) {
       style={{
         flexDirection: 'row',
         alignItems: 'center',
-        padding: '0 15px',
+        padding: '0 10px 0 15px',
         height: 36,
         pointerEvents: 'none',
         '& *': {
@@ -341,19 +343,21 @@ export function Titlebar({ style }: TitlebarProps) {
         <Route path="*" element={null} />
       </Routes>
       <View style={{ flex: 1 }} />
-      <UncategorizedButton />
-      {isDevelopmentEnvironment() && !Platform.isPlaywright && (
-        <ThemeSelector style={{ marginLeft: 10 }} />
-      )}
-      <PrivacyButton style={{ marginLeft: 10 }} />
-      {serverURL ? (
-        <SyncButton
-          syncState={syncState}
-          setSyncState={setSyncState}
-          style={{ marginLeft: 10 }}
-        />
-      ) : null}
-      <LoggedInUser syncState={syncState} style={{ marginLeft: 10 }} />
+      <SpaceBetween gap={10}>
+        <UncategorizedButton />
+        {isDevelopmentEnvironment() && !Platform.isPlaywright && (
+          <ThemeSelector />
+        )}
+        <PrivacyButton />
+        {serverURL ? (
+          <SyncButton
+            syncState={syncState}
+            setSyncState={setSyncState}
+          />
+        ) : null}
+        <LoggedInUser syncState={syncState} />
+        <HelpMenu />
+      </SpaceBetween>
     </View>
   );
 }

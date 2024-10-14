@@ -23,9 +23,11 @@ import { Block } from '../../common/Block';
 import { Button } from '../../common/Button2';
 import { Paragraph } from '../../common/Paragraph';
 import { Select } from '../../common/Select';
+import { SpaceBetween } from '../../common/SpaceBetween';
 import { Text } from '../../common/Text';
 import { Tooltip } from '../../common/Tooltip';
 import { View } from '../../common/View';
+import { EditablePageHeaderTitle } from '../../EditablePageHeaderTitle';
 import { AppliedFilters } from '../../filters/AppliedFilters';
 import { FilterButton } from '../../filters/FiltersMenu';
 import { MobileBackButton } from '../../mobile/MobileBackButton';
@@ -181,7 +183,21 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
     compare === monthUtils.currentMonth() ||
     Math.abs(data.intervalData[27].compare) > 0;
 
-  const title = widget?.meta?.name ?? t('Monthly Spending');
+  const title = widget?.meta?.name || t('Monthly Spending');
+  const onSaveWidgetName = async (newName: string) => {
+    if (!widget) {
+      throw new Error('No widget that could be saved.');
+    }
+
+    const name = newName || t('Monthly Spending');
+    await send('dashboard-update-widget', {
+      id: widget.id,
+      meta: {
+        ...(widget.meta ?? {}),
+        name,
+      },
+    });
+  };
 
   return (
     <Page
@@ -194,7 +210,18 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
             }
           />
         ) : (
-          <PageHeader title={title} />
+          <PageHeader
+            title={
+              widget ? (
+                <EditablePageHeaderTitle
+                  title={title}
+                  onSave={onSaveWidgetName}
+                />
+              ) : (
+                title
+              )
+            }
+          />
         )
       }
       padding={0}
@@ -209,13 +236,7 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
         }}
       >
         {!isNarrowWidth && (
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              flexShrink: 0,
-            }}
-          >
+          <SpaceBetween gap={0}>
             {isDashboardsFeatureEnabled && (
               <>
                 <Button
@@ -237,14 +258,7 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
               </>
             )}
 
-            <View
-              style={{
-                alignItems: 'center',
-                flexDirection: 'row',
-                marginRight: 5,
-                gap: 5,
-              }}
-            >
+            <SpaceBetween gap={5}>
               <Text>
                 <Trans>Compare</Trans>
               </Text>
@@ -279,7 +293,7 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                 style={{ width: 150 }}
                 popoverStyle={{ width: 150 }}
               />
-            </View>
+            </SpaceBetween>
 
             <View
               style={{
@@ -287,16 +301,11 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                 height: 28,
                 backgroundColor: theme.pillBorderDark,
                 marginRight: 15,
-                marginLeft: 10,
+                marginLeft: 15,
               }}
             />
 
-            <View
-              style={{
-                flexDirection: 'row',
-                marginRight: 5,
-              }}
-            >
+            <SpaceBetween gap={5}>
               <ModeButton
                 selected={reportMode === 'single-month'}
                 style={{
@@ -330,7 +339,7 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
               >
                 <Trans>Average</Trans>
               </ModeButton>
-            </View>
+            </SpaceBetween>
 
             <View
               style={{
@@ -383,7 +392,7 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                 </Tooltip>
               )}
             </View>
-          </View>
+          </SpaceBetween>
         )}
 
         {conditions && conditions.length > 0 && (
