@@ -68,6 +68,7 @@ export function TransactionList({
   payees,
   balances,
   showBalances,
+  showReconciled,
   showCleared,
   showAccount,
   headerContent,
@@ -203,8 +204,9 @@ export function TransactionList({
       accounts={accounts}
       categoryGroups={categoryGroups}
       payees={payees}
-      showBalances={showBalances}
       balances={balances}
+      showBalances={showBalances}
+      showReconciled={showReconciled}
       showCleared={showCleared}
       showAccount={showAccount}
       showCategory={true}

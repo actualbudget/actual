@@ -14,6 +14,7 @@ import {
 } from '../../icons/v1';
 import { SvgChartArea } from '../../icons/v1/ChartArea';
 import { theme } from '../../style';
+import { SpaceBetween } from '../common/SpaceBetween';
 import { View } from '../common/View';
 import { FilterButton } from '../filters/FiltersMenu';
 
@@ -70,6 +71,7 @@ export function ReportTopbar({
         alignItems: 'center',
         marginBottom: 10,
         flexShrink: 0,
+        overflowY: 'auto',
       }}
     >
       <GraphButton
@@ -177,6 +179,7 @@ export function ReportTopbar({
       >
         <SvgTag width={15} height={15} />
       </GraphButton>
+
       <View
         style={{
           width: 1,
@@ -185,27 +188,35 @@ export function ReportTopbar({
           marginRight: 15,
           flexShrink: 0,
         }}
-      />{' '}
-      <FilterButton
-        compact
-        hover
-        onApply={(e: RuleConditionEntity) => {
-          setSessionReport('conditions', [
-            ...(customReportItems.conditions ?? []),
-            e,
-          ]);
-          onApplyFilter(e);
-          onReportChange({ type: 'modify' });
+      />
+
+      <SpaceBetween
+        style={{
+          flexWrap: 'nowrap',
+          justifyContent: 'space-between',
+          flex: 1,
         }}
-        exclude={[]}
-      />
-      <View style={{ flex: 1 }} />
-      <SaveReport
-        customReportItems={customReportItems}
-        report={report}
-        savedStatus={savedStatus}
-        onReportChange={onReportChange}
-      />
+      >
+        <FilterButton
+          compact
+          hover
+          onApply={(e: RuleConditionEntity) => {
+            setSessionReport('conditions', [
+              ...(customReportItems.conditions ?? []),
+              e,
+            ]);
+            onApplyFilter(e);
+            onReportChange({ type: 'modify' });
+          }}
+          exclude={[]}
+        />
+        <SaveReport
+          customReportItems={customReportItems}
+          report={report}
+          savedStatus={savedStatus}
+          onReportChange={onReportChange}
+        />
+      </SpaceBetween>
     </View>
   );
 }

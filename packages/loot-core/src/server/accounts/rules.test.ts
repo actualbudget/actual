@@ -316,6 +316,109 @@ describe('Action', () => {
       new Action('set', 'account', '', null);
     }).toThrow(/Field cannot be empty/i);
   });
+
+  describe('templating', () => {
+    test('should use available fields', () => {
+      const action = new Action('set', 'notes', '', {
+        template: 'Hey {{notes}}! You just payed {{amount}}',
+      });
+      const item = { notes: 'Sarah', amount: 10 };
+      action.exec(item);
+      expect(item.notes).toBe('Hey Sarah! You just payed 10');
+    });
+
+    test('should not escape text', () => {
+      const action = new Action('set', 'notes', '', {
+        template: '{{notes}}',
+      });
+      const note = 'Sarah !@#$%^&*()<> Special';
+      const item = { notes: note };
+      action.exec(item);
+      expect(item.notes).toBe(note);
+    });
+
+    describe('regex helper', () => {
+      function testHelper(template: string, expected: unknown) {
+        test(template, () => {
+          const action = new Action('set', 'notes', '', { template });
+          const item = { notes: 'Sarah Condition' };
+          action.exec(item);
+          expect(item.notes).toBe(expected);
+        });
+      }
+
+      testHelper('{{regex notes "/[aeuio]/g" "a"}}', 'Sarah Candataan');
+      testHelper('{{regex notes "/[aeuio]/" ""}}', 'Srah Condition');
+      // capture groups
+      testHelper('{{regex notes "/^.+ (.+)$/" "$1"}}', 'Condition');
+      // no match
+      testHelper('{{regex notes "/Klaas/" "Jantje"}}', 'Sarah Condition');
+      // no regex format (/.../flags)
+      testHelper('{{regex notes "Sarah" "Jantje"}}', 'Jantje Condition');
+    });
+
+    describe('math helpers', () => {
+      function testHelper(
+        template: string,
+        expected: unknown,
+        field = 'amount',
+      ) {
+        test(template, () => {
+          const action = new Action('set', field, '', { template });
+          const item = { [field]: 10 };
+          action.exec(item);
+          expect(item[field]).toBe(expected);
+        });
+      }
+
+      testHelper('{{add amount 5}}', 15);
+      testHelper('{{add amount 5 10}}', 25);
+      testHelper('{{sub amount 5}}', 5);
+      testHelper('{{sub amount 5 10}}', -5);
+      testHelper('{{mul amount 5}}', 50);
+      testHelper('{{mul amount 5 10}}', 500);
+      testHelper('{{div amount 5}}', 2);
+      testHelper('{{div amount 5 10}}', 0.2);
+      testHelper('{{mod amount 3}}', 1);
+      testHelper('{{mod amount 6 5}}', 4);
+      testHelper('{{floor (div amount 3)}}', 3);
+      testHelper('{{ceil (div amount 3)}}', 4);
+      testHelper('{{round (div amount 3)}}', 3);
+      testHelper('{{round (div amount 4)}}', 3);
+      testHelper('{{abs -5}}', 5);
+      testHelper('{{abs 5}}', 5);
+      testHelper('{{min amount 5 500}}', 5);
+      testHelper('{{max amount 5 500}}', 500);
+      testHelper('{{fixed (div 10 4) 2}}', '2.50', 'notes');
+    });
+
+    describe('date helpers', () => {
+      function testHelper(template: string, expected: unknown) {
+        test(template, () => {
+          const action = new Action('set', 'notes', '', { template });
+          const item = { notes: '' };
+          action.exec(item);
+          expect(item.notes).toBe(expected);
+        });
+      }
+
+      testHelper('{{day "2002-07-25"}}', '25');
+      testHelper('{{month "2002-07-25"}}', '7');
+      testHelper('{{year "2002-07-25"}}', '2002');
+      testHelper('{{format "2002-07-25" "MM yyyy d"}}', '07 2002 25');
+    });
+
+    test('{{debug}} should log the item', () => {
+      const action = new Action('set', 'notes', '', {
+        template: '{{debug notes}}',
+      });
+      const item = { notes: 'Sarah' };
+      const spy = jest.spyOn(console, 'log').mockImplementation();
+      action.exec(item);
+      expect(spy).toHaveBeenCalledWith('Sarah');
+      spy.mockRestore();
+    });
+  });
 });
 
 describe('Rule', () => {

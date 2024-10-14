@@ -108,15 +108,15 @@ export function getMenu(
     {
       label: i18n.t('View'),
       submenu: [
-        isDev
-          ? {
-              label: i18n.t('Reload'),
-              accelerator: 'CmdOrCtrl+R',
-              click(_item, focusedWindow) {
-                if (focusedWindow) focusedWindow.reload();
-              },
+        {
+          label: i18n.t('Reload'),
+          accelerator: 'CmdOrCtrl+R',
+          click(_item, focusedWindow) {
+            if (focusedWindow) {
+              focusedWindow.reload();
             }
-          : { label: 'hidden', visible: false },
+          },
+        },
         {
           label: i18n.t('Toggle Developer Tools'),
           accelerator:

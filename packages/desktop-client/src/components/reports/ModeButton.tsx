@@ -25,7 +25,6 @@ export function ModeButton({
         css({
           padding: '5px 10px',
           backgroundColor: theme.menuBackground,
-          marginRight: 5,
           fontSize: 'inherit',
           ...style,
           ...(selected && {

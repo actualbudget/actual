@@ -77,4 +77,15 @@ contextBridge.exposeInMainWorld('Actual', {
   setTheme: (theme: string) => {
     ipcRenderer.send('set-theme', theme);
   },
+
+  moveBudgetDirectory: (
+    currentBudgetDirectory: string,
+    newDirectory: string,
+  ) => {
+    return ipcRenderer.invoke(
+      'move-budget-directory',
+      currentBudgetDirectory,
+      newDirectory,
+    );
+  },
 });
