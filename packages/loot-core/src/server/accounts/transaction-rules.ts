@@ -309,11 +309,18 @@ export function conditionsToAQL(conditions, { recurDateBounds = 100 } = {}) {
         return null;
       }
     })
+    .flatMap(cond => {
+        //special cases that require multiple conditions
+        if (cond.op === 'is' && cond.field === 'category' && cond.value === null) {
+          return [cond, new Condition('is', 'transfer', false, null)];
+        }
+        return [cond];
+      })
     .filter(Boolean);
 
   // rule -> actualql
   const filters = conditions.map(cond => {
-    const { type, field, op, value, options } = cond;
+    let { type, field, op, value, options } = cond;
 
     const getValue = value => {
       if (type === 'number') {
@@ -321,6 +328,16 @@ export function conditionsToAQL(conditions, { recurDateBounds = 100 } = {}) {
       }
       return value;
     };
+
+    if (field === 'transfer' && op === 'is') {
+      field = "transfer_id";
+      if (value) {
+        op = 'gt';
+        value = 0;
+      } else {
+        value = null;
+      }
+    }
 
     const apply = (field, op, value) => {
       if (type === 'number') {
