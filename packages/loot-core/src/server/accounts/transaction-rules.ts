@@ -312,7 +312,10 @@ export function conditionsToAQL(conditions, { recurDateBounds = 100 } = {}) {
     .flatMap(cond => {
         //special cases that require multiple conditions
         if (cond.op === 'is' && cond.field === 'category' && cond.value === null) {
-          return [cond, new Condition('is', 'transfer', false, null)];
+          return [cond, 
+            new Condition('is', 'transfer', false, null),
+            new Condition('is', 'parent', false, null)
+          ];
         }
         return [cond];
       })
@@ -336,6 +339,13 @@ export function conditionsToAQL(conditions, { recurDateBounds = 100 } = {}) {
         value = 0;
       } else {
         value = null;
+      }
+    } else if (field === 'parent' && op === 'is') {
+      field = "is_parent";
+      if (value) {
+        op = 'true'
+      } else {
+        op = 'false'
       }
     }
 
