@@ -145,8 +145,11 @@ function startSyncServer() {
   });
 }
 
-async function exposeSyncServer(settings: GlobalPrefs['ngrokConfig']) {
-  if (settings?.authToken && settings?.domain && settings?.port) {
+async function exposeSyncServer(ngrokConfig: GlobalPrefs['ngrokConfig']) {
+  const hasRequiredConfig =
+    ngrokConfig?.authToken && ngrokConfig?.domain && ngrokConfig?.port;
+
+  if (!hasRequiredConfig) {
     console.error('Cannot expose sync server: missing ngrok settings');
     return { error: 'Missing ngrok settings' };
   }
@@ -154,10 +157,10 @@ async function exposeSyncServer(settings: GlobalPrefs['ngrokConfig']) {
   try {
     const listener = await ngrok.forward({
       schemes: ['https'], // change this to https and bind certificate - may need to generate cert and store in user-data
-      addr: settings.port,
-      host_header: `localhost:${settings.port}`,
-      authtoken: settings.authToken,
-      domain: settings.domain,
+      addr: ngrokConfig.port,
+      host_header: `localhost:${ngrokConfig.port}`,
+      authtoken: ngrokConfig.authToken,
+      domain: ngrokConfig.domain,
       // crt: fs.readFileSync("crt.pem", "utf8"),
       // key: fs.readFileSync("key.pem", "utf8"),
     });
