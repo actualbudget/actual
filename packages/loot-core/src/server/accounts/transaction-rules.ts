@@ -291,6 +291,24 @@ export async function runRules(trans) {
   return await finalizeTransactionForRules(finalTrans);
 }
 
+function conditionSpecialCases(cond: Condition): Condition[] {
+  //special cases that require multiple conditions
+  if (cond.op === 'is' && cond.field === 'category' && cond.value === null) {
+    return [
+      cond,
+      new Condition('is', 'transfer', false, null),
+      new Condition('is', 'parent', false, null),
+    ];
+  } else if (
+    cond.op === 'isNot' &&
+    cond.field === 'category' &&
+    cond.value === null
+  ) {
+    return [cond, new Condition('is', 'parent', false, null)];
+  }
+  return [cond];
+}
+
 // This does the inverse: finds all the transactions matching a rule
 export function conditionsToAQL(conditions, { recurDateBounds = 100 } = {}) {
   const errors = [];
@@ -309,21 +327,7 @@ export function conditionsToAQL(conditions, { recurDateBounds = 100 } = {}) {
         return null;
       }
     })
-    .flatMap(cond => {
-      //special cases that require multiple conditions
-      if (
-        cond.op === 'is' &&
-        cond.field === 'category' &&
-        cond.value === null
-      ) {
-        return [
-          cond,
-          new Condition('is', 'transfer', false, null),
-          new Condition('is', 'parent', false, null),
-        ];
-      }
-      return [cond];
-    })
+    .flatMap(conditionSpecialCases)
     .filter(Boolean);
 
   // rule -> actualql
