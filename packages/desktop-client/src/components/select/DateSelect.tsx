@@ -24,10 +24,9 @@ import {
   getShortYearRegex,
   currentDate,
 } from 'loot-core/src/shared/months';
-import { stringToInteger } from 'loot-core/src/shared/util';
 
 import { useSyncedPref } from '../../hooks/useSyncedPref';
-import { theme } from '../../style';
+import { styles, theme } from '../../style';
 import { Input } from '../common/Input';
 import { Popover } from '../common/Popover';
 import { View } from '../common/View';
@@ -134,7 +133,7 @@ const DatePicker = forwardRef<DatePickerForwardedRef, DatePickerProps>(
       picker.current = new Pikaday({
         theme: 'actual-date-picker',
         keyboardInput: false,
-        firstDay: stringToInteger(firstDayOfWeekIdx),
+        firstDay: parseInt(firstDayOfWeekIdx),
         defaultDate: value
           ? parse(value, dateFormat, currentDate())
           : currentDate(),
@@ -172,6 +171,7 @@ function defaultShouldSaveFromKey(e) {
 }
 
 type DateSelectProps = {
+  id?: string;
   containerProps?: ComponentProps<typeof View>;
   inputProps?: ComponentProps<typeof Input>;
   value: string;
@@ -188,6 +188,7 @@ type DateSelectProps = {
 };
 
 export function DateSelect({
+  id,
   containerProps,
   inputProps,
   value: defaultValue,
@@ -333,7 +334,7 @@ export function DateSelect({
         isOpen={open}
         isNonModal
         onOpenChange={() => setOpen(false)}
-        style={{ minWidth: 225 }}
+        style={{ ...styles.popover, minWidth: 225 }}
         data-testid="date-select-tooltip"
       >
         {content}
@@ -344,6 +345,7 @@ export function DateSelect({
   return (
     <View {...containerProps}>
       <Input
+        id={id}
         focused={focused}
         {...inputProps}
         inputRef={inputRef}

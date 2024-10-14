@@ -1,4 +1,5 @@
 import React, { useState, useRef, type CSSProperties } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 
 import {
@@ -11,7 +12,10 @@ import {
   loadBudget,
   pushModal,
 } from 'loot-core/client/actions';
-import { isNonProductionEnvironment } from 'loot-core/src/shared/environment';
+import {
+  isElectron,
+  isNonProductionEnvironment,
+} from 'loot-core/src/shared/environment';
 import {
   type File,
   type LocalFile,
@@ -25,6 +29,7 @@ import { AnimatedLoading } from '../../icons/AnimatedLoading';
 import {
   SvgCloudCheck,
   SvgCloudDownload,
+  SvgCog,
   SvgDotsHorizontalTriple,
   SvgFileDouble,
 } from '../../icons/v1';
@@ -38,19 +43,19 @@ import { Popover } from '../common/Popover';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 
-function getFileDescription(file: File) {
+function getFileDescription(file: File, t: (key: string) => string) {
   if (file.state === 'unknown') {
-    return (
+    return t(
       'This is a cloud-based file but its state is unknown because you ' +
-      'are offline.'
+        'are offline.',
     );
   }
 
   if (file.encryptKeyId) {
     if (file.hasKey) {
-      return 'This file is encrypted and you have key to access it.';
+      return t('This file is encrypted and you have key to access it.');
     }
-    return 'This file is encrypted and you do not have the key for it.';
+    return t('This file is encrypted and you do not have the key for it.');
   }
 
   return null;
@@ -74,25 +79,11 @@ function FileMenu({
     }
   }
 
-  const items = [{ name: 'delete', text: 'Delete' }];
-  const { isNarrowWidth } = useResponsive();
+  const { t } = useTranslation();
 
-  const defaultMenuItemStyle = isNarrowWidth
-    ? {
-        ...styles.mobileMenuItem,
-        color: theme.menuItemText,
-        borderRadius: 0,
-        borderTop: `1px solid ${theme.pillBorder}`,
-      }
-    : {};
+  const items = [{ name: 'delete', text: t('Delete') }];
 
-  return (
-    <Menu
-      getItemStyle={() => defaultMenuItemStyle}
-      onMenuSelect={onMenuSelect}
-      items={items}
-    />
-  );
+  return <Menu onMenuSelect={onMenuSelect} items={items} />;
 }
 
 function FileMenuButton({ onDelete }: { onDelete: () => void }) {
@@ -124,6 +115,8 @@ function FileMenuButton({ onDelete }: { onDelete: () => void }) {
 }
 
 function FileState({ file }: { file: File }) {
+  const { t } = useTranslation();
+
   let Icon;
   let status;
   let color;
@@ -131,21 +124,21 @@ function FileState({ file }: { file: File }) {
   switch (file.state) {
     case 'unknown':
       Icon = SvgCloudUnknown;
-      status = 'Network unavailable';
+      status = t('Network unavailable');
       color = theme.buttonNormalDisabledText;
       break;
     case 'remote':
       Icon = SvgCloudDownload;
-      status = 'Available for download';
+      status = t('Available for download');
       break;
     case 'local':
     case 'broken':
       Icon = SvgFileDouble;
-      status = 'Local';
+      status = t('Local');
       break;
     default:
       Icon = SvgCloudCheck;
-      status = 'Syncing';
+      status = t('Syncing');
       break;
   }
 
@@ -182,6 +175,8 @@ function FileItem({
   onSelect: (file: File) => void;
   onDelete: (file: File) => void;
 }) {
+  const { t } = useTranslation();
+
   const selecting = useRef(false);
 
   async function _onSelect(file: File) {
@@ -195,50 +190,60 @@ function FileItem({
   }
 
   return (
-    <View
-      onClick={() => _onSelect(file)}
-      title={getFileDescription(file) || ''}
+    <Button
+      onPress={() => _onSelect(file)}
       style={{
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
         ...styles.shadow,
         margin: 10,
         padding: '12px 15px',
-        backgroundColor: theme.buttonNormalBackground,
-        borderRadius: 6,
-        flexShrink: 0,
         cursor: 'pointer',
-        ':hover': {
-          backgroundColor: theme.menuItemBackgroundHover,
-        },
+        borderRadius: 6,
+        borderColor: 'transparent',
       }}
     >
-      <View style={{ alignItems: 'flex-start' }}>
-        <Text style={{ fontSize: 16, fontWeight: 700 }}>{file.name}</Text>
-
-        <FileState file={file} />
-      </View>
-
       <View
-        style={{ flex: '0 0 auto', flexDirection: 'row', alignItems: 'center' }}
+        style={{
+          flexDirection: 'row',
+          flex: 1,
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}
       >
-        {file.encryptKeyId && (
-          <SvgKey
-            style={{
-              width: 13,
-              height: 13,
-              marginRight: 8,
-              color: file.hasKey
-                ? theme.formLabelText
-                : theme.buttonNormalDisabledText,
-            }}
-          />
-        )}
+        <View
+          title={getFileDescription(file, t) || ''}
+          style={{ alignItems: 'flex-start' }}
+        >
+          <Text style={{ fontSize: 16, fontWeight: 700 }}>{file.name}</Text>
 
-        {!quickSwitchMode && <FileMenuButton onDelete={() => onDelete(file)} />}
+          <FileState file={file} />
+        </View>
+
+        <View
+          style={{
+            flex: '0 0 auto',
+            flexDirection: 'row',
+            alignItems: 'center',
+          }}
+        >
+          {file.encryptKeyId && (
+            <SvgKey
+              style={{
+                width: 13,
+                height: 13,
+                marginRight: 8,
+                color: file.hasKey
+                  ? theme.formLabelText
+                  : theme.buttonNormalDisabledText,
+              }}
+            />
+          )}
+
+          {!quickSwitchMode && (
+            <FileMenuButton onDelete={() => onDelete(file)} />
+          )}
+        </View>
       </View>
-    </View>
+    </Button>
   );
 }
 
@@ -277,7 +282,7 @@ function BudgetFiles({
             color: theme.pageTextSubdued,
           }}
         >
-          No budget files
+          <Trans>No budget files</Trans>
         </Text>
       ) : (
         files.map(file => (
@@ -323,12 +328,33 @@ function RefreshButton({
   );
 }
 
+function SettingsButton({ onOpenSettings }: { onOpenSettings: () => void }) {
+  const { t } = useTranslation();
+
+  return (
+    <View>
+      <Button
+        variant="bare"
+        aria-label={t('Settings')}
+        onPress={() => {
+          onOpenSettings();
+        }}
+        style={{ padding: 10 }}
+      >
+        <SvgCog style={{ width: 18, height: 18 }} />
+      </Button>
+    </View>
+  );
+}
+
 function BudgetListHeader({
   quickSwitchMode,
   onRefresh,
+  onOpenSettings,
 }: {
   quickSwitchMode: boolean;
   onRefresh: () => void;
+  onOpenSettings: () => void;
 }) {
   return (
     <View
@@ -343,9 +369,19 @@ function BudgetListHeader({
           ...styles.veryLargeText,
         }}
       >
-        Files
+        <Trans>Files</Trans>
       </Text>
-      {!quickSwitchMode && <RefreshButton onRefresh={onRefresh} />}
+      {!quickSwitchMode && (
+        <View
+          style={{
+            flexDirection: 'row',
+            gap: '0.2rem',
+          }}
+        >
+          <RefreshButton onRefresh={onRefresh} />
+          {isElectron() && <SettingsButton onOpenSettings={onOpenSettings} />}
+        </View>
+      )}
     </View>
   );
 }
@@ -389,19 +425,19 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
     refresh();
   }
 
-  const onSelect = (file: File): void => {
+  const onSelect = async (file: File): Promise<void> => {
     const isRemoteFile = file.state === 'remote';
 
     if (!id) {
       if (isRemoteFile) {
-        dispatch(downloadBudget(file.cloudFileId));
+        await dispatch(downloadBudget(file.cloudFileId));
       } else {
-        dispatch(loadBudget(file.id));
+        await dispatch(loadBudget(file.id));
       }
     } else if (!isRemoteFile && file.id !== id) {
-      dispatch(closeAndLoadBudget(file.id));
+      await dispatch(closeAndLoadBudget(file.id));
     } else if (isRemoteFile) {
-      dispatch(closeAndDownloadBudget(file.cloudFileId));
+      await dispatch(closeAndDownloadBudget(file.cloudFileId));
     }
   };
 
@@ -424,6 +460,7 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
         <BudgetListHeader
           quickSwitchMode={quickSwitchMode}
           onRefresh={refresh}
+          onOpenSettings={() => dispatch(pushModal('files-settings'))}
         />
       )}
       <BudgetFiles
@@ -452,7 +489,7 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
               dispatch(pushModal('import'));
             }}
           >
-            Import file
+            <Trans>Import file</Trans>
           </Button>
 
           <Button
@@ -463,7 +500,7 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
               marginLeft: 10,
             }}
           >
-            Create new file
+            <Trans>Create new file</Trans>
           </Button>
 
           {isNonProductionEnvironment() && (
@@ -475,7 +512,7 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
                 marginLeft: 10,
               }}
             >
-              Create test file
+              <Trans>Create test file</Trans>
             </Button>
           )}
         </View>

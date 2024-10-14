@@ -24,4 +24,6 @@ export interface TransactionEntity {
   tombstone?: boolean;
   schedule?: ScheduleEntity['id'];
   subtransactions?: TransactionEntity[];
+  _unmatched?: boolean;
+  _deleted?: boolean;
 }

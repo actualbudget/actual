@@ -1,7 +1,8 @@
+import { type Backup } from '../server/backups';
 import { type UndoState } from '../server/undo';
 
 export interface ServerEvents {
-  'backups-updated': unknown;
+  'backups-updated': Backup[];
   'cells-changed': Array<{ name }>;
   'fallback-write-error': unknown;
   'finish-import': unknown;
@@ -18,4 +19,5 @@ export interface ServerEvents {
   'start-load': unknown;
   'sync-event': { type; subtype; meta; tables; syncDisabled };
   'undo-event': UndoState;
+  'api-fetch-redirected': unknown;
 }

@@ -1,5 +1,6 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, Fragment } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { useLocalPref } from '../../hooks/useLocalPref';
 import { useSplitsExpanded } from '../../hooks/useSplitsExpanded';
@@ -66,6 +67,7 @@ export function AccountHeader({
   onCreateReconciliationTransaction,
   onToggleExtraBalances,
   onSaveName,
+  saveNameError,
   onExposeName,
   onSync,
   onImport,
@@ -88,6 +90,7 @@ export function AccountHeader({
   onMakeAsSplitTransaction,
   onMakeAsNonSplitTransactions,
 }) {
+  const { t } = useTranslation();
   const [menuOpen, setMenuOpen] = useState(false);
   const searchInput = useRef(null);
   const triggerRef = useRef(null);
@@ -173,99 +176,21 @@ export function AccountHeader({
             }}
           >
             {!!account?.bank && (
-              <View
-                style={{
-                  backgroundColor: accountsSyncing.includes(account.id)
-                    ? theme.sidebarItemBackgroundPending
-                    : failedAccounts.has(account.id)
-                      ? theme.sidebarItemBackgroundFailed
-                      : theme.sidebarItemBackgroundPositive,
-                  marginRight: '4px',
-                  width: 8,
-                  height: 8,
-                  borderRadius: 8,
-                }}
+              <AccountSyncSidebar
+                account={account}
+                failedAccounts={failedAccounts}
+                accountsSyncing={accountsSyncing}
               />
             )}
-            {editingName ? (
-              <InitialFocus>
-                <Input
-                  defaultValue={accountName}
-                  onEnter={e => onSaveName(e.target.value)}
-                  onBlur={e => onSaveName(e.target.value)}
-                  onEscape={() => onExposeName(false)}
-                  style={{
-                    fontSize: 25,
-                    fontWeight: 500,
-                    marginTop: -3,
-                    marginBottom: -4,
-                    marginLeft: -6,
-                    paddingTop: 2,
-                    paddingBottom: 2,
-                    width: Math.max(20, accountName.length) + 'ch',
-                  }}
-                />
-              </InitialFocus>
-            ) : isNameEditable ? (
-              <View
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  gap: 3,
-                  '& .hover-visible': {
-                    opacity: 0,
-                    transition: 'opacity .25s',
-                  },
-                  '&:hover .hover-visible': {
-                    opacity: 1,
-                  },
-                }}
-              >
-                <View
-                  style={{
-                    fontSize: 25,
-                    fontWeight: 500,
-                    marginRight: 5,
-                    marginBottom: -1,
-                  }}
-                  data-testid="account-name"
-                >
-                  {account && account.closed
-                    ? 'Closed: ' + accountName
-                    : accountName}
-                </View>
-
-                {account && (
-                  <NotesButton
-                    id={`account-${account.id}`}
-                    defaultColor={theme.pageTextSubdued}
-                  />
-                )}
-                <Button
-                  variant="bare"
-                  aria-label="Edit account name"
-                  className="hover-visible"
-                  onPress={() => onExposeName(true)}
-                >
-                  <SvgPencil1
-                    style={{
-                      width: 11,
-                      height: 11,
-                      color: theme.pageTextSubdued,
-                    }}
-                  />
-                </Button>
-              </View>
-            ) : (
-              <View
-                style={{ fontSize: 25, fontWeight: 500, marginBottom: -1 }}
-                data-testid="account-name"
-              >
-                {account && account.closed
-                  ? 'Closed: ' + accountName
-                  : accountName}
-              </View>
-            )}
+            <AccountNameField
+              account={account}
+              accountName={accountName}
+              isNameEditable={isNameEditable}
+              editingName={editingName}
+              saveNameError={saveNameError}
+              onSaveName={onSaveName}
+              onExposeName={onExposeName}
+            />
           </View>
         </View>
 
@@ -284,42 +209,41 @@ export function AccountHeader({
           align="center"
           style={{ marginTop: 12 }}
         >
-          {((account && !account.closed) || canSync) && (
+          {canSync && (
             <Button
               variant="bare"
-              onPress={canSync ? onSync : onImport}
-              isDisabled={canSync && isServerOffline}
+              onPress={onSync}
+              isDisabled={isServerOffline}
             >
-              {canSync ? (
-                <>
-                  <AnimatedRefresh
-                    width={13}
-                    height={13}
-                    animating={
-                      account
-                        ? accountsSyncing.includes(account.id)
-                        : accountsSyncing.length > 0
-                    }
-                    style={{ marginRight: 4 }}
-                  />{' '}
-                  {isServerOffline ? 'Bank Sync Offline' : 'Bank Sync'}
-                </>
-              ) : (
-                <>
-                  <SvgDownloadThickBottom
-                    width={13}
-                    height={13}
-                    style={{ marginRight: 4 }}
-                  />{' '}
-                  Import
-                </>
-              )}
+              <AnimatedRefresh
+                width={13}
+                height={13}
+                animating={
+                  account
+                    ? accountsSyncing.includes(account.id)
+                    : accountsSyncing.length > 0
+                }
+                style={{ marginRight: 4 }}
+              />{' '}
+              {isServerOffline ? t('Bank Sync Offline') : t('Bank Sync')}
             </Button>
           )}
+
+          {account && !account.closed && (
+            <Button variant="bare" onPress={onImport}>
+              <SvgDownloadThickBottom
+                width={13}
+                height={13}
+                style={{ marginRight: 4 }}
+              />{' '}
+              <Trans>Import</Trans>
+            </Button>
+          )}
+
           {!showEmptyMessage && (
             <Button variant="bare" onPress={onAddTransaction}>
-              <SvgAdd width={10} height={10} style={{ marginRight: 3 }} /> Add
-              New
+              <SvgAdd width={10} height={10} style={{ marginRight: 3 }} />
+              <Trans>Add New</Trans>
             </Button>
           )}
           <View style={{ flexShrink: 0 }}>
@@ -327,7 +251,7 @@ export function AccountHeader({
           </View>
           <View style={{ flex: 1 }} />
           <Search
-            placeholder="Search"
+            placeholder={t('Search')}
             value={search}
             onChange={onSearch}
             inputRef={searchInput}
@@ -359,8 +283,8 @@ export function AccountHeader({
             variant="bare"
             aria-label={
               splitsExpanded.state.mode === 'collapse'
-                ? 'Collapse split transactions'
-                : 'Expand split transactions'
+                ? t('Collapse split transactions')
+                : t('Expand split transactions')
             }
             isDisabled={search !== '' || filterConditions.length > 0}
             style={{ padding: 6, marginLeft: 10 }}
@@ -369,8 +293,8 @@ export function AccountHeader({
             <View
               title={
                 splitsExpanded.state.mode === 'collapse'
-                  ? 'Collapse split transactions'
-                  : 'Expand split transactions'
+                  ? t('Collapse split transactions')
+                  : t('Expand split transactions')
               }
             >
               {splitsExpanded.state.mode === 'collapse' ? (
@@ -432,9 +356,9 @@ export function AccountHeader({
                   items={[
                     isSorted && {
                       name: 'remove-sorting',
-                      text: 'Remove all sorting',
+                      text: t('Remove all sorting'),
                     },
-                    { name: 'export', text: 'Export' },
+                    { name: 'export', text: t('Export') },
                   ]}
                 />
               </Popover>
@@ -468,6 +392,129 @@ export function AccountHeader({
   );
 }
 
+function AccountSyncSidebar({ account, failedAccounts, accountsSyncing }) {
+  return (
+    <View
+      style={{
+        backgroundColor: accountsSyncing.includes(account.id)
+          ? theme.sidebarItemBackgroundPending
+          : failedAccounts.has(account.id)
+            ? theme.sidebarItemBackgroundFailed
+            : theme.sidebarItemBackgroundPositive,
+        marginRight: '4px',
+        width: 8,
+        height: 8,
+        borderRadius: 8,
+      }}
+    />
+  );
+}
+
+function AccountNameField({
+  account,
+  accountName,
+  isNameEditable,
+  editingName,
+  saveNameError,
+  onSaveName,
+  onExposeName,
+}) {
+  const { t } = useTranslation();
+
+  if (editingName) {
+    return (
+      <Fragment>
+        <InitialFocus>
+          <Input
+            defaultValue={accountName}
+            onEnter={e => onSaveName(e.target.value)}
+            onBlur={e => onSaveName(e.target.value)}
+            onEscape={() => onExposeName(false)}
+            style={{
+              fontSize: 25,
+              fontWeight: 500,
+              marginTop: -3,
+              marginBottom: -4,
+              marginLeft: -6,
+              paddingTop: 2,
+              paddingBottom: 2,
+              width: Math.max(20, accountName.length) + 'ch',
+            }}
+          />
+        </InitialFocus>
+        {saveNameError && (
+          <View style={{ color: theme.warningText }}>{saveNameError}</View>
+        )}
+      </Fragment>
+    );
+  } else {
+    if (isNameEditable) {
+      return (
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 3,
+            '& .hover-visible': {
+              opacity: 0,
+              transition: 'opacity .25s',
+            },
+            '&:hover .hover-visible': {
+              opacity: 1,
+            },
+          }}
+        >
+          <View
+            style={{
+              fontSize: 25,
+              fontWeight: 500,
+              marginRight: 5,
+              marginBottom: -1,
+            }}
+            data-testid="account-name"
+          >
+            {account && account.closed
+              ? t('Closed: {{ accountName }}', { accountName })
+              : accountName}
+          </View>
+
+          {account && (
+            <NotesButton
+              id={`account-${account.id}`}
+              defaultColor={theme.pageTextSubdued}
+            />
+          )}
+          <Button
+            variant="bare"
+            aria-label={t('Edit account name')}
+            className="hover-visible"
+            onPress={() => onExposeName(true)}
+          >
+            <SvgPencil1
+              style={{
+                width: 11,
+                height: 11,
+                color: theme.pageTextSubdued,
+              }}
+            />
+          </Button>
+        </View>
+      );
+    } else {
+      return (
+        <View
+          style={{ fontSize: 25, fontWeight: 500, marginBottom: -1 }}
+          data-testid="account-name"
+        >
+          {account && account.closed
+            ? t('Closed: {{ accountName }}', { accountName })
+            : accountName}
+        </View>
+      );
+    }
+  }
+}
+
 function AccountMenu({
   account,
   canSync,
@@ -480,6 +527,7 @@ function AccountMenu({
   onReconcile,
   onMenuSelect,
 }) {
+  const { t } = useTranslation();
   const [tooltip, setTooltip] = useState('default');
   const syncServerStatus = useSyncServerStatus();
 
@@ -501,36 +549,42 @@ function AccountMenu({
       items={[
         isSorted && {
           name: 'remove-sorting',
-          text: 'Remove all sorting',
+          text: t('Remove all sorting'),
         },
         canShowBalances && {
           name: 'toggle-balance',
-          text: (showBalances ? 'Hide' : 'Show') + ' running balance',
+          text: showBalances
+            ? t('Hide running balance')
+            : t('Show running balance'),
         },
         {
           name: 'toggle-cleared',
-          text: (showCleared ? 'Hide' : 'Show') + ' “cleared” checkboxes',
+          text: showCleared
+            ? t('Hide “cleared” checkboxes')
+            : t('Show “cleared” checkboxes'),
         },
         {
           name: 'toggle-reconciled',
-          text: (showReconciled ? 'Hide' : 'Show') + ' reconciled transactions',
+          text: showReconciled
+            ? t('Hide reconciled transactions')
+            : t('Show reconciled transactions'),
         },
-        { name: 'export', text: 'Export' },
-        { name: 'reconcile', text: 'Reconcile' },
+        { name: 'export', text: t('Export') },
+        { name: 'reconcile', text: t('Reconcile') },
         account &&
           !account.closed &&
           (canSync
             ? {
                 name: 'unlink',
-                text: 'Unlink account',
+                text: t('Unlink account'),
               }
             : syncServerStatus === 'online' && {
                 name: 'link',
-                text: 'Link account',
+                text: t('Link account'),
               }),
         account.closed
-          ? { name: 'reopen', text: 'Reopen account' }
-          : { name: 'close', text: 'Close account' },
+          ? { name: 'reopen', text: t('Reopen account') }
+          : { name: 'close', text: t('Close account') },
       ].filter(x => x)}
     />
   );

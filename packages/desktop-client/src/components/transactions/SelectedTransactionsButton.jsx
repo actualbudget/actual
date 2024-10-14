@@ -165,7 +165,8 @@ export function SelectedTransactionsButton({
   ]);
   useHotkeys(
     's',
-    () => (!types.trans || linked ? onViewSchedule() : onLinkSchedule()),
+    () =>
+      !types.trans || linked ? onViewSchedule() : onLinkSchedule(selectedIds),
     {
       scopes: ['app'],
     },

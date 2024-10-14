@@ -74,6 +74,6 @@ Make Actual Budget accessible to more people by helping with the [Internationali
 
 ## Sponsors
 
-Thanks to our wonderful sponsors who make Actual budget possible!
+Thanks to our wonderful sponsors who make Actual Budget possible!
 
 <a href="https://www.netlify.com"> <img src="https://www.netlify.com/v3/img/components/netlify-color-accent.svg" alt="Deploys by Netlify" /> </a>

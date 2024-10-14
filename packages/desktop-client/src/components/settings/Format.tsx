@@ -62,8 +62,7 @@ export function FormatSettings() {
   const [, setDateFormatPref] = useSyncedPref('dateFormat');
   const [_numberFormat, setNumberFormatPref] = useSyncedPref('numberFormat');
   const numberFormat = _numberFormat || 'comma-dot';
-  const [hideFraction = false, setHideFractionPref] =
-    useSyncedPref('hideFraction');
+  const [hideFraction, setHideFractionPref] = useSyncedPref('hideFraction');
 
   const selectButtonStyle: CSSProperties = {
     ':hover': {
@@ -95,16 +94,18 @@ export function FormatSettings() {
               onChange={format => setNumberFormatPref(format)}
               options={numberFormats.map(f => [
                 f.value,
-                hideFraction ? f.labelNoFraction : f.label,
+                String(hideFraction) === 'true' ? f.labelNoFraction : f.label,
               ])}
-              buttonStyle={selectButtonStyle}
+              style={selectButtonStyle}
             />
 
             <Text style={{ display: 'flex' }}>
               <Checkbox
                 id="settings-textDecimal"
-                checked={!!hideFraction}
-                onChange={e => setHideFractionPref(e.currentTarget.checked)}
+                checked={String(hideFraction) === 'true'}
+                onChange={e =>
+                  setHideFractionPref(String(e.currentTarget.checked))
+                }
               />
               <label htmlFor="settings-textDecimal">Hide decimal places</label>
             </Text>
@@ -115,7 +116,7 @@ export function FormatSettings() {
               value={dateFormat}
               onChange={format => setDateFormatPref(format)}
               options={dateFormats.map(f => [f.value, f.label])}
-              buttonStyle={selectButtonStyle}
+              style={selectButtonStyle}
             />
           </Column>
 
@@ -124,7 +125,7 @@ export function FormatSettings() {
               value={firstDayOfWeekIdx}
               onChange={idx => setFirstDayOfWeekIdxPref(idx)}
               options={daysOfWeek.map(f => [f.value, f.label])}
-              buttonStyle={selectButtonStyle}
+              style={selectButtonStyle}
             />
           </Column>
         </View>

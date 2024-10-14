@@ -13,7 +13,6 @@ import { isPreviewId } from 'loot-core/shared/transactions';
 
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import { useNavigate } from '../../../hooks/useNavigate';
-import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { TextOneLine } from '../../common/TextOneLine';
 import { View } from '../../common/View';
 import { MobilePageHeader, Page } from '../../Page';
@@ -29,7 +28,6 @@ export function CategoryTransactions({ category, month }) {
   const [transactions, setTransactions] = useState([]);
 
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
-  const [_numberFormat] = useSyncedPref('numberFormat');
 
   const makeRootQuery = useCallback(
     () =>

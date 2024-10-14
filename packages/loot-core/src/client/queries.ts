@@ -25,10 +25,10 @@ type BudgetType<SheetName extends SheetNames> = Record<
 >;
 
 const accountParametrizedField = parametrizedField<'account'>();
-const rolloverParametrizedField = parametrizedField<'rollover-budget'>();
-const reportParametrizedField = parametrizedField<'report-budget'>();
+const envelopeParametrizedField = parametrizedField<'envelope-budget'>();
+const trackingParametrizedField = parametrizedField<'tracking-budget'>();
 
-export function getAccountFilter(accountId: string, field = 'account') {
+export function getAccountFilter(accountId?: string, field = 'account') {
   if (accountId) {
     if (accountId === 'budgeted') {
       return {
@@ -64,7 +64,7 @@ export function getAccountFilter(accountId: string, field = 'account') {
   return null;
 }
 
-export function makeTransactionsQuery(accountId: string) {
+export function makeTransactionsQuery(accountId?: string) {
   let query = q('transactions').options({ splits: 'grouped' });
 
   const filter = getAccountFilter(accountId);
@@ -115,73 +115,61 @@ export function makeTransactionSearchQuery(
   });
 }
 
-export function accountBalance(
-  acct: AccountEntity,
-): Binding<'account', 'balance'> {
+export function accountBalance(acct: AccountEntity) {
   return {
     name: accountParametrizedField('balance')(acct.id),
     query: q('transactions')
       .filter({ account: acct.id })
       .options({ splits: 'none' })
       .calculate({ $sum: '$amount' }),
-  };
+  } satisfies Binding<'account', 'balance'>;
 }
 
-export function accountBalanceCleared(
-  acct: AccountEntity,
-): Binding<'account', 'balanceCleared'> {
+export function accountBalanceCleared(acct: AccountEntity) {
   return {
     name: accountParametrizedField('balanceCleared')(acct.id),
     query: q('transactions')
       .filter({ account: acct.id, cleared: true })
       .options({ splits: 'none' })
       .calculate({ $sum: '$amount' }),
-  };
+  } satisfies Binding<'account', 'balanceCleared'>;
 }
 
-export function accountBalanceUncleared(
-  acct: AccountEntity,
-): Binding<'account', 'balanceUncleared'> {
+export function accountBalanceUncleared(acct: AccountEntity) {
   return {
     name: accountParametrizedField('balanceUncleared')(acct.id),
     query: q('transactions')
       .filter({ account: acct.id, cleared: false })
       .options({ splits: 'none' })
       .calculate({ $sum: '$amount' }),
-  };
+  } satisfies Binding<'account', 'balanceUncleared'>;
 }
 
-export function allAccountBalance(): Binding<'account', 'accounts-balance'> {
+export function allAccountBalance() {
   return {
     query: q('transactions')
       .filter({ 'account.closed': false })
       .calculate({ $sum: '$amount' }),
     name: 'accounts-balance',
-  };
+  } satisfies Binding<'account', 'accounts-balance'>;
 }
 
-export function budgetedAccountBalance(): Binding<
-  'account',
-  'budgeted-accounts-balance'
-> {
+export function budgetedAccountBalance() {
   return {
     name: `budgeted-accounts-balance`,
     query: q('transactions')
       .filter({ 'account.offbudget': false, 'account.closed': false })
       .calculate({ $sum: '$amount' }),
-  };
+  } satisfies Binding<'account', 'budgeted-accounts-balance'>;
 }
 
-export function offbudgetAccountBalance(): Binding<
-  'account',
-  'offbudget-accounts-balance'
-> {
+export function offbudgetAccountBalance() {
   return {
     name: `offbudget-accounts-balance`,
     query: q('transactions')
       .filter({ 'account.offbudget': true, 'account.closed': false })
       .calculate({ $sum: '$amount' }),
-  };
+  } satisfies Binding<'account', 'offbudget-accounts-balance'>;
 }
 
 export function categoryBalance(category: CategoryEntity, month: string) {
@@ -249,17 +237,14 @@ export function uncategorizedBalance() {
   };
 }
 
-export function uncategorizedCount<SheetName extends SheetNames>(): Binding<
-  SheetName,
-  'uncategorized-amount'
-> {
+export function uncategorizedCount<SheetName extends SheetNames>() {
   return {
     name: 'uncategorized-amount',
     query: uncategorizedQuery.calculate({ $count: '$id' }),
-  };
+  } satisfies Binding<SheetName, 'uncategorized-amount'>;
 }
 
-export const rolloverBudget = {
+export const envelopeBudget = {
   incomeAvailable: 'available-funds',
   lastMonthOverspent: 'last-month-overspent',
   forNextMonth: 'buffered',
@@ -271,21 +256,21 @@ export const rolloverBudget = {
   totalSpent: 'total-spent',
   totalBalance: 'total-leftover',
 
-  groupSumAmount: rolloverParametrizedField('group-sum-amount'),
+  groupSumAmount: envelopeParametrizedField('group-sum-amount'),
   groupIncomeReceived: 'total-income',
 
-  groupBudgeted: rolloverParametrizedField('group-budget'),
-  groupBalance: rolloverParametrizedField('group-leftover'),
+  groupBudgeted: envelopeParametrizedField('group-budget'),
+  groupBalance: envelopeParametrizedField('group-leftover'),
 
-  catBudgeted: rolloverParametrizedField('budget'),
-  catSumAmount: rolloverParametrizedField('sum-amount'),
-  catBalance: rolloverParametrizedField('leftover'),
-  catCarryover: rolloverParametrizedField('carryover'),
-  catGoal: rolloverParametrizedField('goal'),
-  catLongGoal: rolloverParametrizedField('long-goal'),
-} satisfies BudgetType<'rollover-budget'>;
+  catBudgeted: envelopeParametrizedField('budget'),
+  catSumAmount: envelopeParametrizedField('sum-amount'),
+  catBalance: envelopeParametrizedField('leftover'),
+  catCarryover: envelopeParametrizedField('carryover'),
+  catGoal: envelopeParametrizedField('goal'),
+  catLongGoal: envelopeParametrizedField('long-goal'),
+} satisfies BudgetType<'envelope-budget'>;
 
-export const reportBudget = {
+export const trackingBudget = {
   totalBudgetedExpense: 'total-budgeted',
   totalBudgetedIncome: 'total-budget-income',
   totalBudgetedSaved: 'total-saved',
@@ -295,16 +280,16 @@ export const reportBudget = {
   totalSaved: 'real-saved',
 
   totalLeftover: 'total-leftover',
-  groupSumAmount: reportParametrizedField('group-sum-amount'),
+  groupSumAmount: trackingParametrizedField('group-sum-amount'),
   groupIncomeReceived: 'total-income',
 
-  groupBudgeted: reportParametrizedField('group-budget'),
-  groupBalance: reportParametrizedField('group-leftover'),
+  groupBudgeted: trackingParametrizedField('group-budget'),
+  groupBalance: trackingParametrizedField('group-leftover'),
 
-  catBudgeted: reportParametrizedField('budget'),
-  catSumAmount: reportParametrizedField('sum-amount'),
-  catBalance: reportParametrizedField('leftover'),
-  catCarryover: reportParametrizedField('carryover'),
-  catGoal: reportParametrizedField('goal'),
-  catLongGoal: reportParametrizedField('long-goal'),
-} satisfies BudgetType<'report-budget'>;
+  catBudgeted: trackingParametrizedField('budget'),
+  catSumAmount: trackingParametrizedField('sum-amount'),
+  catBalance: trackingParametrizedField('leftover'),
+  catCarryover: trackingParametrizedField('carryover'),
+  catGoal: trackingParametrizedField('goal'),
+  catLongGoal: trackingParametrizedField('long-goal'),
+} satisfies BudgetType<'tracking-budget'>;

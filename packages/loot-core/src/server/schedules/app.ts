@@ -5,22 +5,22 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { captureBreadcrumb } from '../../platform/exceptions';
 import * as connection from '../../platform/server/connection';
-import { dayFromDate, currentDay, parseDate } from '../../shared/months';
+import { currentDay, dayFromDate, parseDate } from '../../shared/months';
 import { q } from '../../shared/query';
 import {
   extractScheduleConds,
-  recurConfigToRSchedule,
   getHasTransactionsQuery,
-  getStatus,
   getScheduledAmount,
+  getStatus,
+  recurConfigToRSchedule,
 } from '../../shared/schedules';
-import { Rule, Condition } from '../accounts/rules';
+import { Condition, Rule } from '../accounts/rules';
 import { addTransactions } from '../accounts/sync';
 import {
-  insertRule,
-  updateRule,
   getRules,
+  insertRule,
   ruleModel,
+  updateRule,
 } from '../accounts/transaction-rules';
 import { createApp } from '../app';
 import { runQuery as aqlQuery } from '../aql';
@@ -73,13 +73,7 @@ export function getNextDate(
 ) {
   start = d.startOfDay(start);
 
-  const cond = new Condition(
-    dateCond.op,
-    'date',
-    dateCond.value,
-    null,
-    new Map(Object.entries({ date: 'date' })),
-  );
+  const cond = new Condition(dateCond.op, 'date', dateCond.value, null);
   const value = cond.getValue();
 
   if (value.type === 'date') {
@@ -366,6 +360,7 @@ async function skipNextDate({ id }) {
     },
   });
 }
+
 function discoverSchedules() {
   return findSchedules();
 }
@@ -374,21 +369,17 @@ async function getUpcomingDates({ config, count }) {
   const rules = recurConfigToRSchedule(config);
 
   try {
-    // @ts-expect-error fix me
     const schedule = new RSchedule({ rrules: rules });
 
-    return (
-      schedule
-        // @ts-expect-error fix me
-        .occurrences({ start: d.startOfDay(new Date()), take: count })
-        .toArray()
-        .map(date =>
-          config.skipWeekend
-            ? getDateWithSkippedWeekend(date.date, config.weekendSolveMode)
-            : date.date,
-        )
-        .map(date => dayFromDate(date))
-    );
+    return schedule
+      .occurrences({ start: d.startOfDay(new Date()), take: count })
+      .toArray()
+      .map(date =>
+        config.skipWeekend
+          ? getDateWithSkippedWeekend(date.date, config.weekendSolveMode)
+          : date.date,
+      )
+      .map(date => dayFromDate(date));
   } catch (err) {
     captureBreadcrumb(config);
     throw err;
@@ -490,11 +481,20 @@ async function advanceSchedulesService(syncSuccess) {
   const failedToPost = [];
   let didPost = false;
 
+  const { data: upcomingLength } = await aqlQuery(
+    q('preferences')
+      .filter({ id: 'upcomingScheduledTransactionLength' })
+      .select('value'),
+  );
+
+  const upcomingLengthValue = upcomingLength[0]?.value ?? '7'; // Default to 7 days if not set
+
   for (const schedule of schedules) {
     const status = getStatus(
       schedule.next_date,
       schedule.completed,
       hasTrans.has(schedule.id),
+      upcomingLengthValue,
     );
 
     if (status === 'paid') {

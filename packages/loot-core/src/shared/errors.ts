@@ -100,8 +100,9 @@ export class LazyLoadFailedError extends Error {
   type = 'app-init-failure';
   meta = {};
 
-  constructor(name: string) {
+  constructor(name: string, cause: unknown) {
     super(`Error: failed loading lazy-loaded module ${name}`);
     this.meta = { name };
+    this.cause = cause;
   }
 }

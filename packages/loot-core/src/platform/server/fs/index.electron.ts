@@ -2,6 +2,8 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
+import promiseRetry from 'promise-retry';
+
 import type * as T from '.';
 
 export { getDocumentDir, getBudgetDir, _setDocumentDir } from './shared';
@@ -110,13 +112,43 @@ export const readFile: T.ReadFile = (
   });
 };
 
-export const writeFile: T.WriteFile = (filepath, contents) => {
-  return new Promise(function (resolve, reject) {
-    // @ts-expect-error contents type needs refining
-    fs.writeFile(filepath, contents, 'utf8', function (err) {
-      return err ? reject(err) : resolve(undefined);
-    });
-  });
+export const writeFile: T.WriteFile = async (filepath, contents) => {
+  try {
+    await promiseRetry(
+      (retry, attempt) => {
+        return new Promise((resolve, reject) => {
+          // @ts-expect-error contents type needs refining
+          fs.writeFile(filepath, contents, 'utf8', err => {
+            if (err) {
+              console.error(
+                `Failed to write to ${filepath}. Attempted ${attempt} times. Something is locking the file - potentially a virus scanner or backup software.`,
+              );
+              reject(err);
+            } else {
+              if (attempt > 1) {
+                console.info(
+                  `Successfully recovered from file lock. It took ${attempt} retries`,
+                );
+              }
+
+              resolve(undefined);
+            }
+          });
+        }).catch(retry);
+      },
+      {
+        retries: 20,
+        minTimeout: 100,
+        maxTimeout: 500,
+        factor: 1.5,
+      },
+    );
+
+    return undefined;
+  } catch (err) {
+    console.error(`Unable to recover from file lock on file ${filepath}`);
+    throw err;
+  }
 };
 
 export const removeFile = filepath => {

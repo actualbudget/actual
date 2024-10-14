@@ -1,11 +1,20 @@
 import React, { useState, useMemo, useEffect } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
+import { useDispatch } from 'react-redux';
+import { useParams } from 'react-router-dom';
 
+import * as d from 'date-fns';
+
+import { addNotification } from 'loot-core/client/actions';
+import { useWidget } from 'loot-core/client/data-hooks/widget';
+import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { amountToCurrency } from 'loot-core/src/shared/util';
+import { type SpendingWidget } from 'loot-core/types/models';
 import { type RuleConditionEntity } from 'loot-core/types/models/rule';
 
+import { useFeatureFlag } from '../../../hooks/useFeatureFlag';
 import { useFilters } from '../../../hooks/useFilters';
-import { useLocalPref } from '../../../hooks/useLocalPref';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { useResponsive } from '../../../ResponsiveProvider';
 import { theme, styles } from '../../../style';
@@ -14,21 +23,48 @@ import { Block } from '../../common/Block';
 import { Button } from '../../common/Button2';
 import { Paragraph } from '../../common/Paragraph';
 import { Select } from '../../common/Select';
+import { SpaceBetween } from '../../common/SpaceBetween';
 import { Text } from '../../common/Text';
 import { Tooltip } from '../../common/Tooltip';
 import { View } from '../../common/View';
+import { EditablePageHeaderTitle } from '../../EditablePageHeaderTitle';
 import { AppliedFilters } from '../../filters/AppliedFilters';
 import { FilterButton } from '../../filters/FiltersMenu';
 import { MobileBackButton } from '../../mobile/MobileBackButton';
 import { MobilePageHeader, Page, PageHeader } from '../../Page';
 import { PrivacyFilter } from '../../PrivacyFilter';
 import { SpendingGraph } from '../graphs/SpendingGraph';
+import { LegendItem } from '../LegendItem';
 import { LoadingIndicator } from '../LoadingIndicator';
 import { ModeButton } from '../ModeButton';
+import { calculateSpendingReportTimeRange } from '../reportRanges';
 import { createSpendingSpreadsheet } from '../spreadsheets/spending-spreadsheet';
 import { useReport } from '../useReport';
+import { fromDateRepr } from '../util';
 
 export function Spending() {
+  const params = useParams();
+  const { data: widget, isLoading } = useWidget<SpendingWidget>(
+    params.id ?? '',
+    'spending-card',
+  );
+
+  if (isLoading) {
+    return <LoadingIndicator />;
+  }
+
+  return <SpendingInternal widget={widget} />;
+}
+
+type SpendingInternalProps = {
+  widget?: SpendingWidget;
+};
+
+function SpendingInternal({ widget }: SpendingInternalProps) {
+  const isDashboardsFeatureEnabled = useFeatureFlag('dashboards');
+  const dispatch = useDispatch();
+  const { t } = useTranslation();
+
   const {
     conditions,
     conditionsOp,
@@ -36,242 +72,347 @@ export function Spending() {
     onDelete: onDeleteFilter,
     onUpdate: onUpdateFilter,
     onConditionsOpChange,
-  } = useFilters<RuleConditionEntity>();
-
-  const [spendingReportFilter = '', setSpendingReportFilter] = useLocalPref(
-    'spendingReportFilter',
+  } = useFilters<RuleConditionEntity>(
+    widget?.meta?.conditions,
+    widget?.meta?.conditionsOp,
   );
-  const [spendingReportTime = 'lastMonth', setSpendingReportTime] =
-    useLocalPref('spendingReportTime');
-  const [spendingReportCompare = 'thisMonth', setSpendingReportCompare] =
-    useLocalPref('spendingReportCompare');
 
-  const [dataCheck, setDataCheck] = useState(false);
-  const [compare, setCompare] = useState(spendingReportCompare);
-  const [mode, setMode] = useState(spendingReportTime);
+  const emptyIntervals: { name: string; pretty: string }[] = [];
+  const [allIntervals, setAllIntervals] = useState(emptyIntervals);
 
-  const parseFilter = spendingReportFilter && JSON.parse(spendingReportFilter);
-  const filterSaved =
-    JSON.stringify(parseFilter.conditions) === JSON.stringify(conditions) &&
-    parseFilter.conditionsOp === conditionsOp &&
-    spendingReportTime === mode &&
-    spendingReportCompare === compare;
+  const initialReportMode = widget?.meta?.mode ?? 'single-month';
+  const [initialCompare, initialCompareTo] = calculateSpendingReportTimeRange(
+    widget?.meta ?? {},
+  );
+  const [compare, setCompare] = useState(initialCompare);
+  const [compareTo, setCompareTo] = useState(initialCompareTo);
+  const [isLive, setIsLive] = useState(widget?.meta?.isLive ?? true);
+
+  const [reportMode, setReportMode] = useState(initialReportMode);
 
   useEffect(() => {
-    const checkFilter =
-      spendingReportFilter && JSON.parse(spendingReportFilter);
-    if (checkFilter.conditions) {
-      onApplyFilter(checkFilter);
-    }
-  }, [onApplyFilter, spendingReportFilter]);
+    async function run() {
+      const trans = await send('get-earliest-transaction');
 
-  const getGraphData = useMemo(() => {
-    setDataCheck(false);
-    return createSpendingSpreadsheet({
-      conditions,
-      conditionsOp,
-      setDataCheck,
-      compare,
-    });
-  }, [conditions, conditionsOp, compare]);
+      let earliestMonth = trans
+        ? monthUtils.monthFromDate(d.parseISO(fromDateRepr(trans.date)))
+        : monthUtils.currentMonth();
+
+      // Make sure the month selects are at least populates with a
+      // year's worth of months. We can undo this when we have fancier
+      // date selects.
+      const yearAgo = monthUtils.subMonths(monthUtils.currentMonth(), 12);
+      if (earliestMonth > yearAgo) {
+        earliestMonth = yearAgo;
+      }
+
+      const allMonths = monthUtils
+        .rangeInclusive(earliestMonth, monthUtils.currentMonth())
+        .map(month => ({
+          name: month,
+          pretty: monthUtils.format(month, 'MMMM, yyyy'),
+        }))
+        .reverse();
+
+      setAllIntervals(allMonths);
+    }
+    run();
+  }, []);
+
+  const getGraphData = useMemo(
+    () =>
+      createSpendingSpreadsheet({
+        conditions,
+        conditionsOp,
+        compare,
+        compareTo,
+      }),
+    [conditions, conditionsOp, compare, compareTo],
+  );
 
   const data = useReport('default', getGraphData);
   const navigate = useNavigate();
   const { isNarrowWidth } = useResponsive();
 
+  async function onSaveWidget() {
+    if (!widget) {
+      throw new Error('No widget that could be saved.');
+    }
+
+    await send('dashboard-update-widget', {
+      id: widget.id,
+      meta: {
+        ...(widget.meta ?? {}),
+        conditions,
+        conditionsOp,
+        compare,
+        compareTo,
+        isLive,
+        mode: reportMode,
+      },
+    });
+    dispatch(
+      addNotification({
+        type: 'message',
+        message: t('Dashboard widget successfully saved.'),
+      }),
+    );
+  }
+
   if (!data) {
     return null;
   }
 
-  const saveFilter = () => {
-    setSpendingReportFilter(
-      JSON.stringify({
-        conditionsOp,
-        conditions,
-      }),
-    );
-    setSpendingReportTime(mode);
-    setSpendingReportCompare(compare);
-  };
-
   const showAverage =
+    data.intervalData[27].months[monthUtils.subMonths(compare, 3)] &&
     Math.abs(
-      data.intervalData[27].months[
-        monthUtils.subMonths(monthUtils.currentDay(), 3)
-      ].cumulative,
+      data.intervalData[27].months[monthUtils.subMonths(compare, 3)].cumulative,
     ) > 0;
 
   const todayDay =
-    compare === 'lastMonth'
+    compare !== monthUtils.currentMonth()
       ? 27
       : monthUtils.getDay(monthUtils.currentDay()) - 1 >= 28
         ? 27
         : monthUtils.getDay(monthUtils.currentDay()) - 1;
 
-  const showLastYear =
-    Math.abs(
-      data.intervalData[27][
-        compare === 'thisMonth' ? 'lastYear' : 'lastYearPrevious'
-      ],
-    ) > 0;
-  const showPreviousMonth =
-    Math.abs(data.intervalData[27][spendingReportTime]) > 0;
+  const showCompareTo =
+    compareTo === monthUtils.currentMonth() ||
+    Math.abs(data.intervalData[27].compareTo) > 0;
+  const showCompare =
+    compare === monthUtils.currentMonth() ||
+    Math.abs(data.intervalData[27].compare) > 0;
+
+  const title = widget?.meta?.name || t('Monthly Spending');
+  const onSaveWidgetName = async (newName: string) => {
+    if (!widget) {
+      throw new Error('No widget that could be saved.');
+    }
+
+    const name = newName || t('Monthly Spending');
+    await send('dashboard-update-widget', {
+      id: widget.id,
+      meta: {
+        ...(widget.meta ?? {}),
+        name,
+      },
+    });
+  };
+
   return (
     <Page
       header={
         isNarrowWidth ? (
           <MobilePageHeader
-            title="Monthly Spending"
+            title={title}
             leftContent={
-              <MobileBackButton onClick={() => navigate('/reports')} />
+              <MobileBackButton onPress={() => navigate('/reports')} />
             }
           />
         ) : (
-          <PageHeader title="Monthly Spending" />
+          <PageHeader
+            title={
+              widget ? (
+                <EditablePageHeaderTitle
+                  title={title}
+                  onSave={onSaveWidgetName}
+                />
+              ) : (
+                title
+              )
+            }
+          />
         )
       }
       padding={0}
     >
       <View
         style={{
-          flexDirection: isNarrowWidth ? 'column' : 'row',
-          alignItems: isNarrowWidth ? 'inherit' : 'center',
-          padding: 20,
-          paddingBottom: 0,
+          paddingLeft: 20,
+          paddingRight: 20,
+          paddingTop: 15,
+          paddingBottom: 20,
           flexShrink: 0,
         }}
       >
-        <View
-          style={{
-            alignItems: 'center',
-            flexDirection: 'row',
-            marginRight: 5,
-            marginBottom: 5,
-            marginTop: 5,
-          }}
-        >
-          <Text
-            style={{
-              paddingRight: 5,
-            }}
-          >
-            Compare
-          </Text>
-          <Select
-            value={compare}
-            onChange={e => {
-              setCompare(e);
-              if (mode === 'lastMonth') setMode('twoMonthsPrevious');
-              if (mode === 'twoMonthsPrevious') setMode('lastMonth');
-            }}
-            options={[
-              ['thisMonth', 'this month'],
-              ['lastMonth', 'last month'],
-            ]}
-          />
-          <Text
-            style={{
-              paddingRight: 10,
-              paddingLeft: 5,
-            }}
-          >
-            to the:
-          </Text>
-        </View>
-        <View
-          style={{
-            flexDirection: 'row',
-            marginRight: 5,
-            marginTop: 5,
-            marginBottom: 5,
-          }}
-        >
-          <ModeButton
-            selected={['lastMonth', 'twoMonthsPrevious'].includes(mode)}
-            style={{
-              backgroundColor: 'inherit',
-            }}
-            onSelect={() =>
-              setMode(
-                compare === 'thisMonth' ? 'lastMonth' : 'twoMonthsPrevious',
-              )
-            }
-          >
-            Previous month
-          </ModeButton>
-          {showLastYear && (
-            <ModeButton
-              selected={mode === 'lastYear'}
-              onSelect={() => setMode('lastYear')}
-              style={{
-                backgroundColor: 'inherit',
-              }}
-            >
-              Last year
-            </ModeButton>
-          )}
-          {showAverage && (
-            <ModeButton
-              selected={mode === 'average'}
-              onSelect={() => setMode('average')}
-              style={{
-                backgroundColor: 'inherit',
-              }}
-            >
-              Average
-            </ModeButton>
-          )}
-        </View>
         {!isNarrowWidth && (
-          <>
+          <SpaceBetween gap={0}>
+            {isDashboardsFeatureEnabled && (
+              <>
+                <Button
+                  variant={isLive ? 'primary' : 'normal'}
+                  onPress={() => setIsLive(state => !state)}
+                >
+                  {isLive ? t('Live') : t('Static')}
+                </Button>
+
+                <View
+                  style={{
+                    width: 1,
+                    height: 28,
+                    backgroundColor: theme.pillBorderDark,
+                    marginRight: 10,
+                    marginLeft: 10,
+                  }}
+                />
+              </>
+            )}
+
+            <SpaceBetween gap={5}>
+              <Text>
+                <Trans>Compare</Trans>
+              </Text>
+              <Select
+                value={compare}
+                onChange={setCompare}
+                options={allIntervals.map(
+                  ({ name, pretty }) => [name, pretty] as const,
+                )}
+                style={{ width: 150 }}
+                popoverStyle={{ width: 150 }}
+              />
+              <Text>
+                <Trans>to</Trans>
+              </Text>
+              <Select
+                value={reportMode === 'single-month' ? compareTo : 'label'}
+                onChange={setCompareTo}
+                options={
+                  reportMode === 'single-month'
+                    ? allIntervals.map(({ name, pretty }) => [name, pretty])
+                    : [
+                        [
+                          'label',
+                          reportMode === 'budget'
+                            ? t('Budgeted')
+                            : t('Average spent'),
+                        ],
+                      ]
+                }
+                disabled={reportMode !== 'single-month'}
+                style={{ width: 150 }}
+                popoverStyle={{ width: 150 }}
+              />
+            </SpaceBetween>
+
             <View
               style={{
                 width: 1,
-                height: 30,
+                height: 28,
+                backgroundColor: theme.pillBorderDark,
+                marginRight: 15,
+                marginLeft: 15,
+              }}
+            />
+
+            <SpaceBetween gap={5}>
+              <ModeButton
+                selected={reportMode === 'single-month'}
+                style={{
+                  backgroundColor: 'inherit',
+                }}
+                onSelect={() => {
+                  setReportMode('single-month');
+                }}
+              >
+                <Trans>Single month</Trans>
+              </ModeButton>
+              <ModeButton
+                selected={reportMode === 'budget'}
+                onSelect={() => {
+                  setReportMode('budget');
+                }}
+                style={{
+                  backgroundColor: 'inherit',
+                }}
+              >
+                <Trans>Budgeted</Trans>
+              </ModeButton>
+              <ModeButton
+                selected={reportMode === 'average'}
+                onSelect={() => {
+                  setReportMode('average');
+                }}
+                style={{
+                  backgroundColor: 'inherit',
+                }}
+              >
+                <Trans>Average</Trans>
+              </ModeButton>
+            </SpaceBetween>
+
+            <View
+              style={{
+                width: 1,
+                height: 28,
                 backgroundColor: theme.pillBorderDark,
                 marginRight: 10,
               }}
-            />{' '}
-          </>
+            />
+
+            <View
+              style={{
+                alignItems: 'center',
+                flexDirection: 'row',
+                flex: 1,
+              }}
+            >
+              <FilterButton
+                onApply={onApplyFilter}
+                compact={isNarrowWidth}
+                hover={false}
+                exclude={['date']}
+              />
+              <View style={{ flex: 1 }} />
+
+              {widget && (
+                <Tooltip
+                  placement="top end"
+                  content={
+                    <Text>
+                      <Trans>Save compare and filter options</Trans>
+                    </Text>
+                  }
+                  style={{
+                    ...styles.tooltip,
+                    lineHeight: 1.5,
+                    padding: '6px 10px',
+                    marginLeft: 10,
+                  }}
+                >
+                  <Button
+                    variant="primary"
+                    style={{
+                      marginLeft: 10,
+                    }}
+                    onPress={onSaveWidget}
+                  >
+                    <Trans>Save</Trans>
+                  </Button>
+                </Tooltip>
+              )}
+            </View>
+          </SpaceBetween>
         )}
-        <View
-          style={{
-            alignItems: 'center',
-            flexDirection: 'row',
-            marginBottom: 5,
-            marginTop: 5,
-            flex: 1,
-          }}
-        >
-          <FilterButton
-            onApply={onApplyFilter}
-            compact={isNarrowWidth}
-            hover={false}
-            exclude={['date']}
-          />
-          <View style={{ flex: 1 }} />
-          <Tooltip
-            placement="bottom start"
-            content={<Text>Save compare and filter options</Text>}
+
+        {conditions && conditions.length > 0 && (
+          <View
             style={{
-              ...styles.tooltip,
-              lineHeight: 1.5,
-              padding: '6px 10px',
-              marginLeft: 10,
+              marginTop: 5,
+              flexShrink: 0,
+              flexDirection: 'row',
+              spacing: 2,
             }}
           >
-            <Button
-              variant="primary"
-              style={{
-                marginLeft: 10,
-              }}
-              onPress={saveFilter}
-              isDisabled={filterSaved}
-            >
-              {filterSaved ? 'Saved' : 'Save'}
-            </Button>
-          </Tooltip>
-        </View>
+            <AppliedFilters
+              conditions={conditions}
+              onUpdate={onUpdateFilter}
+              onDelete={onDeleteFilter}
+              conditionsOp={conditionsOp}
+              onConditionsOpChange={onConditionsOpChange}
+            />
+          </View>
+        )}
       </View>
       <View
         style={{
@@ -286,25 +427,6 @@ export function Spending() {
             flexGrow: 1,
           }}
         >
-          {conditions && conditions.length > 0 && (
-            <View
-              style={{
-                marginBottom: 10,
-                marginLeft: 20,
-                flexShrink: 0,
-                flexDirection: 'row',
-                spacing: 2,
-              }}
-            >
-              <AppliedFilters
-                conditions={conditions}
-                onUpdate={onUpdateFilter}
-                onDelete={onDeleteFilter}
-                conditionsOp={conditionsOp}
-                onConditionsOpChange={onConditionsOpChange}
-              />
-            </View>
-          )}
           <View
             style={{
               backgroundColor: theme.tableBackground,
@@ -328,6 +450,24 @@ export function Spending() {
                   flexDirection: 'row',
                 }}
               >
+                <View>
+                  <LegendItem
+                    color={theme.reportsGreen}
+                    label={monthUtils.format(compare, 'MMM, yyyy')}
+                    style={{ padding: 0, paddingBottom: 10 }}
+                  />
+                  <LegendItem
+                    color={theme.reportsGray}
+                    label={
+                      reportMode === 'single-month'
+                        ? monthUtils.format(compareTo, 'MMM, yyyy')
+                        : reportMode === 'budget'
+                          ? 'Budgeted'
+                          : 'Average'
+                    }
+                    style={{ padding: 0, paddingBottom: 10 }}
+                  />
+                </View>
                 <View style={{ flex: 1 }} />
                 <View
                   style={{
@@ -335,72 +475,80 @@ export function Spending() {
                     color: theme.pageText,
                   }}
                 >
-                  {showPreviousMonth && (
-                    <View>
+                  <View>
+                    {showCompare && (
                       <AlignedText
                         style={{ marginBottom: 5, minWidth: 210 }}
                         left={
                           <Block>
-                            Spent{' '}
-                            {compare === 'thisMonth' ? 'MTD' : 'Last Month'}:
+                            Spent {monthUtils.format(compare, 'MMM, yyyy')}
+                            {compare === monthUtils.currentMonth() && ' MTD'}:
                           </Block>
                         }
                         right={
                           <Text style={{ fontWeight: 600 }}>
-                            <PrivacyFilter blurIntensity={5}>
+                            <PrivacyFilter>
                               {amountToCurrency(
-                                Math.abs(
-                                  data.intervalData[todayDay][
-                                    compare === 'thisMonth'
-                                      ? 'thisMonth'
-                                      : 'lastMonth'
-                                  ],
-                                ),
+                                Math.abs(data.intervalData[todayDay].compare),
                               )}
                             </PrivacyFilter>
                           </Text>
                         }
                       />
+                    )}
+                    {reportMode === 'single-month' && showCompareTo && (
                       <AlignedText
                         style={{ marginBottom: 5, minWidth: 210 }}
                         left={
                           <Block>
-                            Spent{' '}
-                            {compare === 'thisMonth'
-                              ? ' Last MTD'
-                              : '2 Months Ago'}
-                            :
+                            Spent {monthUtils.format(compareTo, 'MMM, yyyy')}
+                            {compare === monthUtils.currentMonth() && ' MTD'}:
                           </Block>
                         }
                         right={
                           <Text style={{ fontWeight: 600 }}>
-                            <PrivacyFilter blurIntensity={5}>
+                            <PrivacyFilter>
                               {amountToCurrency(
-                                Math.abs(
-                                  data.intervalData[todayDay][
-                                    compare === 'thisMonth'
-                                      ? 'lastMonth'
-                                      : 'twoMonthsPrevious'
-                                  ],
-                                ),
+                                Math.abs(data.intervalData[todayDay].compareTo),
                               )}
                             </PrivacyFilter>
                           </Text>
                         }
                       />
-                    </View>
+                    )}
+                  </View>
+                  {Math.abs(data.intervalData[todayDay].budget) > 0 && (
+                    <AlignedText
+                      style={{ marginBottom: 5, minWidth: 210 }}
+                      left={
+                        <Block>
+                          Budgeted
+                          {compare === monthUtils.currentMonth() && ' MTD'}:
+                        </Block>
+                      }
+                      right={
+                        <Text style={{ fontWeight: 600 }}>
+                          <PrivacyFilter>
+                            {amountToCurrency(
+                              Math.abs(data.intervalData[todayDay].budget),
+                            )}
+                          </PrivacyFilter>
+                        </Text>
+                      }
+                    />
                   )}
                   {showAverage && (
                     <AlignedText
                       style={{ marginBottom: 5, minWidth: 210 }}
                       left={
                         <Block>
-                          Spent Average{compare === 'thisMonth' && ' MTD'}:
+                          Spent Average
+                          {compare === monthUtils.currentMonth() && ' MTD'}:
                         </Block>
                       }
                       right={
                         <Text style={{ fontWeight: 600 }}>
-                          <PrivacyFilter blurIntensity={5}>
+                          <PrivacyFilter>
                             {amountToCurrency(
                               Math.abs(data.intervalData[todayDay].average),
                             )}
@@ -411,37 +559,31 @@ export function Spending() {
                   )}
                 </View>
               </View>
-              {!showPreviousMonth ? (
-                <View style={{ marginTop: 20 }}>
-                  <h1>Additional data required to generate graph</h1>
-                  <Paragraph>
-                    Currently, there is insufficient data to display any
-                    information regarding your spending. Please input
-                    transactions from last month to enable graph visualization.
-                  </Paragraph>
-                </View>
-              ) : dataCheck ? (
+              {data ? (
                 <SpendingGraph
                   style={{ flexGrow: 1 }}
                   compact={false}
                   data={data}
-                  mode={mode}
+                  mode={reportMode}
                   compare={compare}
+                  compareTo={compareTo}
                 />
               ) : (
-                <LoadingIndicator message="Loading report..." />
+                <LoadingIndicator message={t('Loading report...')} />
               )}
               {showAverage && (
                 <View style={{ marginTop: 30 }}>
-                  <Paragraph>
-                    <strong>
-                      How are “Average” and “Spent Average MTD” calculated?
-                    </strong>
-                  </Paragraph>
-                  <Paragraph>
-                    They are both the average cumulative spending by day for the
-                    last three months.
-                  </Paragraph>
+                  <Trans>
+                    <Paragraph>
+                      <strong>
+                        How are “Average” and “Spent Average MTD” calculated?
+                      </strong>
+                    </Paragraph>
+                    <Paragraph>
+                      They are both the average cumulative spending by day for
+                      the three months before the selected “compare” month.
+                    </Paragraph>
+                  </Trans>
                 </View>
               )}
             </View>

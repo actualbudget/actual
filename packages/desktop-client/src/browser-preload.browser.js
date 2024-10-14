@@ -51,6 +51,24 @@ global.Actual = {
     window.location.reload();
   },
 
+  reload: () => {
+    if (window.navigator.serviceWorker == null) return;
+
+    // Unregister the service worker handling routing and then reload. This should force the reload
+    // to query the actual server rather than delegating to the worker
+    return window.navigator.serviceWorker
+      .getRegistration('/')
+      .then(registration => {
+        if (registration == null) return;
+        return registration.unregister();
+      })
+      .then(() => {
+        window.location.reload();
+      });
+  },
+
+  restartElectronServer: () => {},
+
   openFileDialog: async ({ filters = [] }) => {
     return new Promise(resolve => {
       let createdElement = false;
@@ -133,6 +151,8 @@ global.Actual = {
   setTheme: theme => {
     window.__actionsForMenu.saveGlobalPrefs({ theme });
   },
+
+  moveBudgetDirectory: () => {},
 };
 
 function inputFocused(e) {

@@ -15,6 +15,7 @@ import { send } from 'loot-core/src/platform/client/fetch';
 import {
   type CustomReportWidget,
   type ExportImportDashboard,
+  type MarkdownWidget,
   type Widget,
 } from 'loot-core/src/types/models';
 
@@ -35,6 +36,7 @@ import { NON_DRAGGABLE_AREA_CLASS_NAME } from './constants';
 import { LoadingIndicator } from './LoadingIndicator';
 import { CashFlowCard } from './reports/CashFlowCard';
 import { CustomReportListCards } from './reports/CustomReportListCards';
+import { MarkdownCard } from './reports/MarkdownCard';
 import { NetWorthCard } from './reports/NetWorthCard';
 import { SpendingCard } from './reports/SpendingCard';
 
@@ -44,22 +46,6 @@ const ResponsiveGridLayout = WidthProvider(Responsive);
 
 function isCustomReportWidget(widget: Widget): widget is CustomReportWidget {
   return widget.type === 'custom-report';
-}
-
-type LayoutWidget = Layout & Pick<Widget, 'type' | 'meta'>;
-
-function useWidgetLayout(widgets: Widget[]): LayoutWidget[] {
-  return widgets.map(widget => ({
-    i: widget.id,
-    type: widget.type,
-    x: widget.x,
-    y: widget.y,
-    w: widget.width,
-    h: widget.height,
-    minW: isCustomReportWidget(widget) ? 2 : 3,
-    minH: isCustomReportWidget(widget) ? 1 : 2,
-    meta: widget.meta,
-  }));
 }
 
 export function Overview() {
@@ -96,7 +82,46 @@ export function Overview() {
   const isDashboardsFeatureEnabled = useFeatureFlag('dashboards');
   const spendingReportFeatureFlag = useFeatureFlag('spendingReport');
 
-  const layout = useWidgetLayout(widgets);
+  const baseLayout = widgets
+    .map(widget => ({
+      i: widget.id,
+      w: widget.width,
+      h: widget.height,
+      minW:
+        isCustomReportWidget(widget) || widget.type === 'markdown-card' ? 2 : 3,
+      minH:
+        isCustomReportWidget(widget) || widget.type === 'markdown-card' ? 1 : 2,
+      ...widget,
+    }))
+    .filter(item => {
+      if (isDashboardsFeatureEnabled) {
+        return true;
+      }
+      if (item.type === 'custom-report' && !customReportMap.has(item.meta.id)) {
+        return false;
+      }
+      return true;
+    });
+
+  const layout =
+    spendingReportFeatureFlag &&
+    !isDashboardsFeatureEnabled &&
+    !baseLayout.find(({ type }) => type === 'spending-card')
+      ? [
+          ...baseLayout,
+          {
+            i: 'spending',
+            type: 'spending-card' as const,
+            x: 0,
+            y: Math.max(...baseLayout.map(({ y }) => y), 0) + 2,
+            w: 4,
+            h: 2,
+            minW: 3,
+            minH: 2,
+            meta: null,
+          },
+        ]
+      : baseLayout;
 
   const closeNotifications = () => {
     dispatch(removeNotification('import'));
@@ -289,10 +314,7 @@ export function Overview() {
     );
   };
 
-  const onMetaChange = <T extends LayoutWidget>(
-    widget: T,
-    newMeta: T['meta'],
-  ) => {
+  const onMetaChange = (widget: { i: string }, newMeta: Widget['meta']) => {
     send('dashboard-update-widget', {
       id: widget.i,
       meta: newMeta,
@@ -329,7 +351,7 @@ export function Overview() {
             >
               {currentBreakpoint === 'desktop' && (
                 <>
-                  {isEditing ? (
+                  {isDashboardsFeatureEnabled && (
                     <>
                       <Button
                         ref={triggerRef}
@@ -338,12 +360,6 @@ export function Overview() {
                         onPress={() => setMenuOpen(true)}
                       >
                         <Trans>Add new widget</Trans>
-                      </Button>
-                      <Button
-                        isDisabled={isImporting}
-                        onPress={() => setIsEditing(false)}
-                      >
-                        <Trans>Finish editing dashboard</Trans>
                       </Button>
 
                       <Popover
@@ -365,7 +381,18 @@ export function Overview() {
                             }
                             if (isExistingCustomReport(item)) {
                               const [, reportId] = item.split('custom-report-');
-                              onAddWidget('custom-report', { id: reportId });
+                              onAddWidget<CustomReportWidget>('custom-report', {
+                                id: reportId,
+                              });
+                              return;
+                            }
+
+                            if (item === 'markdown-card') {
+                              onAddWidget<MarkdownWidget>(item, {
+                                content: t(
+                                  '### Text Widget\n\nEdit this widget to change the **markdown** content.',
+                                ),
+                              });
                               return;
                             }
 
@@ -389,6 +416,10 @@ export function Overview() {
                                 ]
                               : []),
                             {
+                              name: 'markdown-card' as const,
+                              text: t('Text widget'),
+                            },
+                            {
                               name: 'custom-report' as const,
                               text: t('New custom report'),
                             },
@@ -403,24 +434,30 @@ export function Overview() {
                         />
                       </Popover>
                     </>
+                  )}
+
+                  {isEditing ? (
+                    <Button
+                      isDisabled={isImporting}
+                      onPress={() => setIsEditing(false)}
+                    >
+                      <Trans>Finish editing dashboard</Trans>
+                    </Button>
+                  ) : isDashboardsFeatureEnabled ? (
+                    <Button
+                      isDisabled={isImporting}
+                      onPress={() => setIsEditing(true)}
+                    >
+                      <Trans>Edit dashboard</Trans>
+                    </Button>
                   ) : (
-                    <>
-                      <Button
-                        variant="primary"
-                        isDisabled={isImporting}
-                        onPress={() => navigate('/reports/custom')}
-                      >
-                        <Trans>Create new custom report</Trans>
-                      </Button>
-                      {isDashboardsFeatureEnabled && (
-                        <Button
-                          isDisabled={isImporting}
-                          onPress={() => setIsEditing(true)}
-                        >
-                          <Trans>Edit dashboard</Trans>
-                        </Button>
-                      )}
-                    </>
+                    <Button
+                      variant="primary"
+                      isDisabled={isImporting}
+                      onPress={() => navigate('/reports/custom')}
+                    >
+                      <Trans>Create new custom report</Trans>
+                    </Button>
                   )}
 
                   {isDashboardsFeatureEnabled && (
@@ -501,34 +538,40 @@ export function Overview() {
               <div key={item.i}>
                 {item.type === 'net-worth-card' ? (
                   <NetWorthCard
+                    widgetId={item.i}
                     isEditing={isEditing}
                     accounts={accounts}
-                    meta={item.meta && 'name' in item.meta ? item.meta : {}}
+                    meta={item.meta}
                     onMetaChange={newMeta => onMetaChange(item, newMeta)}
                     onRemove={() => onRemoveWidget(item.i)}
                   />
                 ) : item.type === 'cash-flow-card' ? (
                   <CashFlowCard
+                    widgetId={item.i}
                     isEditing={isEditing}
-                    meta={item.meta && 'name' in item.meta ? item.meta : {}}
+                    meta={item.meta}
                     onMetaChange={newMeta => onMetaChange(item, newMeta)}
                     onRemove={() => onRemoveWidget(item.i)}
                   />
                 ) : item.type === 'spending-card' ? (
                   <SpendingCard
+                    widgetId={item.i}
                     isEditing={isEditing}
-                    meta={item.meta && 'name' in item.meta ? item.meta : {}}
+                    meta={item.meta}
+                    onMetaChange={newMeta => onMetaChange(item, newMeta)}
+                    onRemove={() => onRemoveWidget(item.i)}
+                  />
+                ) : item.type === 'markdown-card' ? (
+                  <MarkdownCard
+                    isEditing={isEditing}
+                    meta={item.meta}
                     onMetaChange={newMeta => onMetaChange(item, newMeta)}
                     onRemove={() => onRemoveWidget(item.i)}
                   />
                 ) : item.type === 'custom-report' ? (
                   <CustomReportListCards
                     isEditing={isEditing}
-                    report={
-                      item.meta && 'id' in item.meta
-                        ? customReportMap.get(item.meta.id)
-                        : undefined
-                    }
+                    report={customReportMap.get(item.meta.id)}
                     onRemove={() => onRemoveWidget(item.i)}
                   />
                 ) : null}

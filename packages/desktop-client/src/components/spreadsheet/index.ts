@@ -8,18 +8,19 @@ export type Spreadsheets = {
 
     // Account fields
     balance: number;
+    [key: `balance-${string}-cleared`]: number | null;
     'accounts-balance': number;
     'budgeted-accounts-balance': number;
     'offbudget-accounts-balance': number;
     balanceCleared: number;
     balanceUncleared: number;
   };
-  'rollover-budget': {
+  'envelope-budget': {
     // Common fields
     'uncategorized-amount': number;
     'uncategorized-balance': number;
 
-    // Rollover fields
+    // Envelope budget fields
     'available-funds': number;
     'last-month-overspent': number;
     buffered: number;
@@ -39,12 +40,12 @@ export type Spreadsheets = {
     goal: number;
     'long-goal': number;
   };
-  'report-budget': {
+  'tracking-budget': {
     // Common fields
     'uncategorized-amount': number;
     'uncategorized-balance': number;
 
-    // Report fields
+    // Tracking budget fields
     'total-budgeted': number;
     'total-budget-income': number;
     'total-saved': number;
@@ -61,6 +62,14 @@ export type Spreadsheets = {
     carryover: number;
     goal: number;
     'long-goal': number;
+  };
+  [`balance`]: {
+    // Common fields
+    'uncategorized-amount': number;
+    'uncategorized-balance': number;
+
+    // Balance fields
+    [key: `balance-query-${string}-cleared`]: number;
   };
 };
 

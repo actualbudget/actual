@@ -16,15 +16,11 @@ import { Schedule as RSchedule } from '../util/rschedule';
 import { SchedulesHandlers } from './types/handlers';
 
 function takeDates(config) {
-  // @ts-expect-error fix me
   const schedule = new RSchedule({ rrules: recurConfigToRSchedule(config) });
-  return (
-    schedule
-      // @ts-expect-error fix me
-      .occurrences({ take: 3 })
-      .toArray()
-      .map(d => d.date)
-  );
+  return schedule
+    .occurrences({ take: 3 })
+    .toArray()
+    .map(d => d.date);
 }
 
 async function getTransactions(date, account) {

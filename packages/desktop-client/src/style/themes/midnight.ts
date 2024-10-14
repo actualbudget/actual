@@ -174,10 +174,12 @@ export const formInputTextSelection = colorPalette.gray800;
 export const formInputShadowSelected = colorPalette.purple400;
 export const formInputTextHighlight = colorPalette.purple200;
 export const checkboxText = tableText;
-export const checkboxToggleBackground = colorPalette.gray400;
 export const checkboxBackgroundSelected = colorPalette.purple300;
 export const checkboxBorderSelected = colorPalette.purple300;
 export const checkboxShadowSelected = colorPalette.purple500;
+export const checkboxToggleBackground = colorPalette.gray400;
+export const checkboxToggleBackgroundSelected = colorPalette.purple300;
+export const checkboxToggleDisabled = colorPalette.gray700;
 
 export const pillBackground = colorPalette.gray500;
 export const pillBackgroundLight = colorPalette.gray900;
@@ -193,6 +195,7 @@ export const pillTextSubdued = colorPalette.gray500;
 export const reportsRed = colorPalette.red300;
 export const reportsBlue = colorPalette.blue400;
 export const reportsGreen = colorPalette.green400;
+export const reportsGray = colorPalette.gray400;
 export const reportsLabel = pageText;
 export const reportsInnerLabel = colorPalette.navy800;
 
@@ -208,3 +211,7 @@ export const budgetHeaderCurrentMonth = tableHeaderBackground;
 export const floatingActionBarBackground = colorPalette.gray900;
 export const floatingActionBarBorder = colorPalette.purple300;
 export const floatingActionBarText = colorPalette.purple200;
+
+export const tooltipText = colorPalette.gray100;
+export const tooltipBackground = colorPalette.gray800;
+export const tooltipBorder = colorPalette.gray600;
