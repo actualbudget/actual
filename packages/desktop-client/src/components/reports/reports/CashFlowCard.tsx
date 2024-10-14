@@ -327,7 +327,7 @@ export function CashFlowCard({
     totalExpenses = dataDetailed?.totalExpenses || 0;
     totalIncome = dataDetailed?.totalIncome || 0;
     totalTransfers = dataDetailed?.totalTransfers || 0;
-    dataOk = dataDetailed ? true : false;
+    dataOk = Boolean(dataDetailed);
   }
 
   const graphDataCondensed = dataCondensed?.graphData || null;
