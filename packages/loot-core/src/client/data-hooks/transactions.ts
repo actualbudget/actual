@@ -15,6 +15,8 @@ import {
   useSchedules,
 } from './schedules';
 
+const defaultQuery = q('transactions').select('*');
+
 type UseTransactionsProps = {
   queryBuilder: (query: Query) => Query;
   options?: {
@@ -37,9 +39,8 @@ export function useTransactions({
   queryBuilder,
   options = { pageCount: 50, includePreviewTransactions: false },
 }: UseTransactionsProps): UseTransactionsResult {
-  const initialQuery = q('transactions').select('*');
   const [query, setQuery] = useState<Query>(
-    queryBuilder?.(initialQuery) ?? initialQuery,
+    queryBuilder?.(defaultQuery) ?? defaultQuery,
   );
   const [isLoading, setIsLoading] = useState(false);
   const [transactions, setTransactions] = useState<
@@ -86,8 +87,8 @@ export function useTransactions({
 
   const updateQuery = useCallback(
     (queryBuilder: (currentQuery: Query) => Query) =>
-      setQuery(queryBuilder?.(query) ?? query),
-    [query],
+      setQuery(currentQuery => queryBuilder?.(currentQuery) ?? currentQuery),
+    [],
   );
 
   return {
@@ -168,7 +169,8 @@ function usePreviewTransactions({
           setPreviewTransactions(ungroupTransactions(withDefaults));
         }
       });
-    } else {
+    } else if (!isUnmounted) {
+      // Nothing to preview
       setIsLoading(false);
     }
 
