@@ -92,8 +92,10 @@ export function AccountHeader({
   const { t } = useTranslation();
 
   const [menuOpen, setMenuOpen] = useState(false);
+  const [reconcileOpen, setReconcileOpen] = useState(false);
   const searchInput = useRef(null);
   const triggerRef = useRef(null);
+  const reconcileRef = useRef(null);
   const splitsExpanded = useSplitsExpanded();
   const syncServerStatus = useSyncServerStatus();
   const isUsingServer = syncServerStatus !== 'no-server';
@@ -160,6 +162,15 @@ export function AccountHeader({
       scopes: ['app'],
     },
     [onSync],
+  );
+
+  useHotkeys(
+    'r',
+    () => setReconcileOpen(true),
+    {
+      scopes: ['app'],
+    },
+    [setReconcileOpen],
   );
 
   return (
@@ -328,6 +339,30 @@ export function AccountHeader({
             <FilterButton onApply={onApplyFilter} type="accounts" />
           </View>
           <View style={{ flex: 1 }} />
+          <View>
+            <Button
+              ref={reconcileRef}
+              variant="primary"
+              onPress={() => {
+                setReconcileOpen(true);
+              }}
+            >
+              Reconcile
+            </Button>
+            <Popover
+              placement="bottom"
+              triggerRef={reconcileRef}
+              style={{ width: 275 }}
+              isOpen={reconcileOpen}
+              onOpenChange={() => setReconcileOpen(false)}
+            >
+              <ReconcileMenu
+                account={account}
+                onClose={() => setReconcileOpen(false)}
+                onReconcile={onReconcile}
+              />
+            </Popover>
+          </View>
           <Search
             placeholder={t('Search')}
             value={search}
