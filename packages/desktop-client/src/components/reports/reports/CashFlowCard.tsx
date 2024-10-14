@@ -334,17 +334,17 @@ export function CashFlowCard({
     dataOk = Boolean(dataDetailed);
   }
 
-  const graphDataCondensed = dataCondensed?.graphData || null;
-  income = graphDataCondensed?.income || 0;
-  expenses = -(graphDataCondensed?.expense || 0);
-  if (graphDataCondensed && meta?.mode === 'condensed') {
-    dataOk = true;
-  }
-
   const isCondensedMode = (mode: string | undefined, height: number) =>
     mode === 'condensed' ||
     mode === undefined ||
     height < MIN_DETAILED_CHART_HEIGHT;
+
+  const graphDataCondensed = dataCondensed?.graphData || null;
+  income = graphDataCondensed?.income || 0;
+  expenses = -(graphDataCondensed?.expense || 0);
+  if (graphDataCondensed && isCondensedMode) {
+    dataOk = true;
+  }
 
   return (
     <ReportCard
