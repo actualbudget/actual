@@ -44,10 +44,8 @@ import {
 import { useAccounts } from '../../../hooks/useAccounts';
 import { useCategories } from '../../../hooks/useCategories';
 import { useDateFormat } from '../../../hooks/useDateFormat';
-import { useInitialMount } from '../../../hooks/useInitialMount';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { usePayees } from '../../../hooks/usePayees';
-import { useSetThemeColor } from '../../../hooks/useSetThemeColor';
 import { SvgSplit } from '../../../icons/v0';
 import { SvgAdd, SvgPiggyBank, SvgTrash } from '../../../icons/v1';
 import { SvgPencilWriteAlternate } from '../../../icons/v2';
@@ -608,7 +606,6 @@ const TransactionEditInner = memo(function TransactionEditInner({
       categoryGroups,
       dispatch,
       onUpdateInner,
-      transaction.id,
       transactions,
       unserializedTransactions,
     ],
