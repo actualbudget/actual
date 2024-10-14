@@ -117,7 +117,9 @@ function createBackgroundProcess() {
 function startSyncServer() {
   const serverPath = path.resolve(
     __dirname,
-    '../../../node_modules/actual-sync/app.js', // if letting electron-builder bundle it (needs to be in our workspace)
+    isDev
+      ? '../../../node_modules/actual-sync/app.js'
+      : '../node_modules/actual-sync/app.js', // Temporary - required because actual-server is in the other repo
   );
 
   // NOTE: config.json parameters will be relative to THIS directory at the moment - may need a fix?

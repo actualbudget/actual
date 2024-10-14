@@ -448,12 +448,19 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
 
   const [ngrokConfig] = useGlobalPref('ngrokConfig');
   const exposeActualServer = async () => {
-    const url = await globalThis.Actual.exposeActualServer({
-      authToken: ngrokConfig.authToken,
-      port: ngrokConfig.port,
-      domain: ngrokConfig.domain,
-    });
-    console.info('exposing actual at: ' + url);
+    const hasRequiredNgrokSettings =
+      ngrokConfig?.authToken && ngrokConfig?.port && ngrokConfig?.domain;
+    if (hasRequiredNgrokSettings) {
+      const url = await globalThis.Actual.exposeActualServer({
+        authToken: ngrokConfig.authToken,
+        port: ngrokConfig.port,
+        domain: ngrokConfig.domain,
+      });
+
+      console.info('exposing actual at: ' + url);
+    } else {
+      console.info('ngrok settings not set');
+    }
   };
 
   return (
