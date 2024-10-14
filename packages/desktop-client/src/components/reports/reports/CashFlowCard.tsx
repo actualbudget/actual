@@ -151,7 +151,9 @@ function retChartCondensed(
       {hasWarning && (
         <View style={{ padding: 5, position: 'absolute', bottom: 0 }}>
           <Tooltip
-            content={t('Additional widget height required to display the detailed chart, edit dashboard to increase widget height')}
+            content={t(
+              'Additional widget height required to display the detailed chart, edit dashboard to increase widget height',
+            )}
             placement="bottom start"
             style={{ ...styles.tooltip, maxWidth: 300 }}
           >
@@ -267,6 +269,8 @@ export function CashFlowCard({
   const isDashboardsFeatureEnabled = useFeatureFlag('dashboards');
   const { t } = useTranslation();
 
+  const MIN_DETAILED_CHART_HEIGHT = 290;
+
   const [start, end] = calculateTimeRange(meta?.timeFrame, defaultTimeFrame);
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
 
@@ -337,6 +341,11 @@ export function CashFlowCard({
     dataOk = true;
   }
 
+  const isCondensedMode = (mode: string, height: number) =>
+    mode === 'condensed' ||
+    mode === undefined ||
+    height < MIN_DETAILED_CHART_HEIGHT;
+
   return (
     <ReportCard
       isEditing={isEditing}
@@ -363,13 +372,14 @@ export function CashFlowCard({
       ]}
       onMenuSelect={item => {
         switch (item) {
-          case 'change-view':
+          case 'change-view': {
             const newValue = switchFlag ? 'condensed' : 'full';
             onMetaChange({
               ...meta,
               mode: newValue,
             });
             break;
+          }
           case 'rename':
             setNameMenuOpen(true);
             break;
@@ -417,16 +427,17 @@ export function CashFlowCard({
           <Container style={{ height: 'auto', flex: 1 }}>
             {(width, height) => (
               <ResponsiveContainer>
-                {meta?.mode === 'condensed' ||
-                meta?.mode === undefined ||
-                height < 290
+                {isCondensedMode(meta?.mode, height)
                   ? retChartCondensed(
                       width,
                       height,
                       income,
                       expenses,
                       t,
-                      Boolean(height < 290 && meta?.mode === 'full'),
+                      Boolean(
+                        height < MIN_DETAILED_CHART_HEIGHT &&
+                          meta?.mode === 'full',
+                      ),
                     )
                   : retChartDetailed(graphDataDetailed, isConcise)}
               </ResponsiveContainer>
