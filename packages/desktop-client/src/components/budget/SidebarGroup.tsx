@@ -13,6 +13,7 @@ import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { NotesButton } from '../NotesButton';
 import { InputCell } from '../table';
+import { useFeatureFlag } from "../../hooks/useFeatureFlag";
 
 type SidebarGroupProps = {
   group: {
@@ -52,6 +53,8 @@ export function SidebarGroup({
   onToggleCollapse,
 }: SidebarGroupProps) {
   const { t } = useTranslation();
+  const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
+
 
   const temporary = group.id === 'new';
   const [menuOpen, setMenuOpen] = useState(false);
@@ -122,6 +125,10 @@ export function SidebarGroup({
                     onDelete(group.id);
                   } else if (type === 'toggle-visibility') {
                     onSave({ ...group, hidden: !group.hidden });
+                  } else if (type === 'apply-single-category-template'){
+                    //onApplyBudgetTemplate
+                    console.log(group.categories);
+                    console.log("pressed on apply")
                   }
                   setMenuOpen(false);
                 }}
@@ -133,6 +140,14 @@ export function SidebarGroup({
                     text: group.hidden ? t('Show') : t('Hide'),
                   },
                   onDelete && { name: 'delete', text: t('Delete') },
+                  ...(isGoalTemplatesEnabled
+                    ? [
+                      {
+                        name: 'apply-single-category-template',
+                        text: t('Apply budget template'),
+                      },
+                    ]
+                    : []),
                 ]}
               />
             </Popover>
