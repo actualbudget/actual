@@ -805,7 +805,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
                 fontWeight: 300,
               }),
             }}
-            value={title}
+            value={getPrettyPayee(transaction)}
             onPress={() => onEditField(transaction.id, 'payee')}
             data-testid="payee-field"
           />
@@ -888,7 +888,6 @@ const TransactionEditInner = memo(function TransactionEditInner({
         <View>
           <FieldLabel title={t('Account')} />
           <TapField
-            isDisabled={!isAdding}
             value={account?.name}
             onPress={() => onEditField(transaction.id, 'account')}
             data-testid="account-field"
@@ -933,7 +932,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
           <FieldLabel title={t('Notes')} />
           <InputField
             defaultValue={transaction.notes}
-            onUpdate={value => onUpdate(transaction, 'notes', value)}
+            onUpdate={value => onUpdateInner(transaction, 'notes', value)}
           />
         </View>
 
