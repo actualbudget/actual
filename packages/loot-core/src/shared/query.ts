@@ -1,9 +1,16 @@
-// @ts-strict-ignore
+import { WithRequired } from '../types/util';
+
+type ObjectExpression = {
+  [key: string]: ObjectExpression | unknown;
+};
+
 export type QueryState = {
-  filterExpressions: Array<string>;
-  selectExpressions: Array<unknown>;
-  groupExpressions: Array<unknown>;
-  orderExpressions: Array<unknown>;
+  table: string;
+  tableOptions: Record<string, unknown>;
+  filterExpressions: Array<ObjectExpression>;
+  selectExpressions: Array<ObjectExpression | string | '*'>;
+  groupExpressions: Array<ObjectExpression | string>;
+  orderExpressions: Array<ObjectExpression | string>;
   calculation: boolean;
   rawMode: boolean;
   withDead: boolean;
@@ -15,8 +22,9 @@ export type QueryState = {
 export class Query {
   state: QueryState;
 
-  constructor(state) {
+  constructor(state: WithRequired<Partial<QueryState>, 'table'>) {
     this.state = {
+      tableOptions: state.tableOptions || {},
       filterExpressions: state.filterExpressions || [],
       selectExpressions: state.selectExpressions || [],
       groupExpressions: state.groupExpressions || [],
@@ -31,14 +39,22 @@ export class Query {
     };
   }
 
-  filter(expr) {
+  filter(expr: ObjectExpression) {
     return new Query({
       ...this.state,
       filterExpressions: [...this.state.filterExpressions, expr],
     });
   }
 
-  unfilter(exprs) {
+  unfilter(exprs?: Array<keyof ObjectExpression>) {
+    // Remove all filters if no arguments are passed
+    if (!exprs) {
+      return new Query({
+        ...this.state,
+        filterExpressions: [],
+      });
+    }
+
     const exprSet = new Set(exprs);
     return new Query({
       ...this.state,
@@ -48,7 +64,14 @@ export class Query {
     });
   }
 
-  select(exprs: Array<unknown> | unknown = []) {
+  select(
+    exprs:
+      | Array<ObjectExpression | string>
+      | ObjectExpression
+      | string
+      | '*'
+      | ['*'] = [],
+  ) {
     if (!Array.isArray(exprs)) {
       exprs = [exprs];
     }
@@ -58,13 +81,13 @@ export class Query {
     return query;
   }
 
-  calculate(expr) {
+  calculate(expr: ObjectExpression | string) {
     const query = this.select({ result: expr });
     query.state.calculation = true;
     return query;
   }
 
-  groupBy(exprs) {
+  groupBy(exprs: ObjectExpression | string | Array<ObjectExpression | string>) {
     if (!Array.isArray(exprs)) {
       exprs = [exprs];
     }
@@ -75,7 +98,7 @@ export class Query {
     });
   }
 
-  orderBy(exprs) {
+  orderBy(exprs: ObjectExpression | string | Array<ObjectExpression | string>) {
     if (!Array.isArray(exprs)) {
       exprs = [exprs];
     }
@@ -86,11 +109,11 @@ export class Query {
     });
   }
 
-  limit(num) {
+  limit(num: number) {
     return new Query({ ...this.state, limit: num });
   }
 
-  offset(num) {
+  offset(num: number) {
     return new Query({ ...this.state, offset: num });
   }
 
@@ -106,8 +129,12 @@ export class Query {
     return new Query({ ...this.state, validateRefs: false });
   }
 
-  options(opts) {
+  options(opts: Record<string, unknown>) {
     return new Query({ ...this.state, tableOptions: opts });
+  }
+
+  reset() {
+    return q(this.state.table);
   }
 
   serialize() {
@@ -115,7 +142,10 @@ export class Query {
   }
 }
 
-export function getPrimaryOrderBy(query, defaultOrderBy) {
+export function getPrimaryOrderBy(
+  query: Query,
+  defaultOrderBy: ObjectExpression | null,
+) {
   const orderExprs = query.serialize().orderExpressions;
   if (orderExprs.length === 0) {
     if (defaultOrderBy) {
@@ -133,6 +163,6 @@ export function getPrimaryOrderBy(query, defaultOrderBy) {
   return { field, order: firstOrder[field] };
 }
 
-export function q(table) {
+export function q(table: QueryState['table']) {
   return new Query({ table });
 }

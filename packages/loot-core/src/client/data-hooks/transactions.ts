@@ -9,11 +9,7 @@ import {
 } from '../../types/models';
 import { type PagedQuery, pagedQuery } from '../query-helpers';
 
-import {
-  type ScheduleStatuses,
-  useDefaultSchedulesQueryBuilder,
-  useSchedules,
-} from './schedules';
+import { type ScheduleStatuses, useCachedSchedules } from './schedules';
 
 const defaultQuery = q('transactions').select('*');
 
@@ -21,14 +17,11 @@ type UseTransactionsProps = {
   queryBuilder: (query: Query) => Query;
   options?: {
     pageCount?: number;
-    includePreviewTransactions?: boolean;
-    schedulesQueryBuilder?: (query: Query) => Query;
   };
 };
 
 type UseTransactionsResult = {
   transactions: ReadonlyArray<TransactionEntity>;
-  previewTransactions: ReadonlyArray<TransactionEntity>;
   isLoading?: boolean;
   reload?: () => void;
   loadMore?: () => void;
@@ -37,7 +30,7 @@ type UseTransactionsResult = {
 
 export function useTransactions({
   queryBuilder,
-  options = { pageCount: 50, includePreviewTransactions: false },
+  options = { pageCount: 50 },
 }: UseTransactionsProps): UseTransactionsResult {
   const [query, setQuery] = useState<Query>(
     queryBuilder?.(defaultQuery) ?? defaultQuery,
@@ -54,14 +47,6 @@ export function useTransactions({
   // allow us to use the latest options on next render.
   const optionsRef = useRef(options);
   optionsRef.current = options;
-
-  const defaultSchedulesQueryBuilder = useDefaultSchedulesQueryBuilder();
-  const { data: previewTransactions, isLoading: isPreviewTransactionsLoading } =
-    usePreviewTransactions({
-      queryBuilder:
-        optionsRef.current.schedulesQueryBuilder ??
-        defaultSchedulesQueryBuilder,
-    });
 
   useEffect(() => {
     let isUnmounted = false;
@@ -92,11 +77,8 @@ export function useTransactions({
   );
 
   return {
-    transactions: optionsRef.current.includePreviewTransactions
-      ? previewTransactions.concat(transactions)
-      : transactions,
-    previewTransactions,
-    isLoading: isLoading || isPreviewTransactionsLoading,
+    transactions,
+    isLoading,
     reload: pagedQueryRef.current?.run,
     loadMore: pagedQueryRef.current?.fetchNext,
     updateQuery,
@@ -104,7 +86,9 @@ export function useTransactions({
 }
 
 type UsePreviewTransactionsProps = {
-  queryBuilder: (query: Query) => Query;
+  options?: {
+    isDisabled?: boolean;
+  };
 };
 
 type UsePreviewTransactionsResult = {
@@ -112,9 +96,9 @@ type UsePreviewTransactionsResult = {
   isLoading: boolean;
 };
 
-function usePreviewTransactions({
-  queryBuilder,
-}: UsePreviewTransactionsProps): UsePreviewTransactionsResult {
+export function usePreviewTransactions2({
+  options: { isDisabled } = { isDisabled: false },
+}: UsePreviewTransactionsProps = {}): UsePreviewTransactionsResult {
   const [previewTransactions, setPreviewTransactions] = useState<
     TransactionEntity[]
   >([]);
@@ -122,7 +106,7 @@ function usePreviewTransactions({
     isLoading: isSchedulesLoading,
     schedules,
     statuses,
-  } = useSchedules({ queryBuilder });
+  } = useCachedSchedules();
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -180,7 +164,7 @@ function usePreviewTransactions({
   }, [isSchedulesLoading, schedules, statuses]);
 
   return {
-    data: previewTransactions,
+    data: isDisabled ? [] : previewTransactions,
     isLoading: isLoading || isSchedulesLoading,
   };
 }

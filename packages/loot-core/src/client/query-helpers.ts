@@ -36,26 +36,54 @@ type LiveQueryOptions = {
 
 // Subscribe and refetch
 export class LiveQuery<TResponse = unknown> {
-  private unsubscribeSyncEvent: () => void | null;
-  private data: Data<TResponse>;
-  private dependencies: Set<string>;
-  private listeners: Array<Listener<TResponse>>;
-  private onlySync: boolean;
-  private query: Query;
+  private _unsubscribeSyncEvent: () => void | null;
+  private _data: Data<TResponse>;
+  private _dependencies: Set<string>;
+  private _listeners: Array<Listener<TResponse>>;
+  private _supportedSyncTypes: Set<string>;
+  private _query: Query;
+
+  get query() {
+    return this._query;
+  }
+
+  get data() {
+    return this._data;
+  }
+
+  private set data(data: Data<TResponse>) {
+    this._data = data;
+  }
+
+  get isRunning() {
+    return this._unsubscribeSyncEvent != null;
+  }
 
   // Async coordination
-  private inflightRequestId: number | null;
+  private _inflightRequestId: number | null;
+
+  protected get inflightRequestId() {
+    return this._inflightRequestId;
+  }
+
+  private set inflightRequestId(id: number) {
+    this._inflightRequestId = id;
+  }
 
   constructor(
     query: Query,
     onData?: Listener<TResponse>,
     opts: LiveQueryOptions = {},
   ) {
-    this.query = query;
-    this.data = null;
-    this.dependencies = null;
-    this.onlySync = opts.onlySync;
-    this.listeners = [];
+    this._query = query;
+    this._data = null;
+    this._dependencies = null;
+    this._listeners = [];
+
+    // TODO: error types?
+    this._supportedSyncTypes = !!opts.onlySync
+      ? new Set<string>(['success'])
+      : new Set<string>(['applied', 'success']);
 
     if (onData) {
       this.addListener(onData);
@@ -63,25 +91,25 @@ export class LiveQuery<TResponse = unknown> {
   }
 
   addListener = (func: Listener<TResponse>) => {
-    this.listeners.push(func);
+    this._listeners.push(func);
 
     return () => {
-      this.listeners = this.listeners.filter(l => l !== func);
+      this._listeners = this._listeners.filter(l => l !== func);
     };
   };
 
-  onData = (data: Data<TResponse>, prevData: Data<TResponse>) => {
-    for (let i = 0; i < this.listeners.length; i++) {
-      this.listeners[i](data, prevData);
+  protected onData = (data: Data<TResponse>, prevData: Data<TResponse>) => {
+    for (let i = 0; i < this._listeners.length; i++) {
+      this._listeners[i](data, prevData);
     }
   };
 
-  onUpdate = (tables: string[]) => {
+  protected onUpdate = (tables: string[]) => {
     // We might not know the dependencies if the first query result
     // hasn't come back yet
     if (
-      this.dependencies == null ||
-      tables.find(table => this.dependencies.has(table))
+      this._dependencies == null ||
+      tables.find(table => this._dependencies.has(table))
     ) {
       this.run();
     }
@@ -89,7 +117,7 @@ export class LiveQuery<TResponse = unknown> {
 
   run = () => {
     this.subscribe();
-    return this.fetchData(() => runQuery(this.query));
+    return this.fetchData(() => runQuery(this._query));
   };
 
   static runNew = <TResponse>(
@@ -103,19 +131,15 @@ export class LiveQuery<TResponse = unknown> {
   };
 
   protected subscribe = () => {
-    if (this.unsubscribeSyncEvent == null) {
-      this.unsubscribeSyncEvent = listen('sync-event', ({ type, tables }) => {
+    if (this._unsubscribeSyncEvent == null) {
+      this._unsubscribeSyncEvent = listen('sync-event', ({ type, tables }) => {
         // If the user is doing optimistic updates, they don't want to
         // always refetch whenever something changes because it would
         // refetch all data after they've already updated the UI. This
         // voids the perf benefits of optimistic updates. Allow querys
         // to only react to remote syncs. By default, queries will
         // always update to all changes.
-        //
-        // TODO: errors?
-        const syncTypes = this.onlySync ? ['success'] : ['applied', 'success'];
-
-        if (syncTypes.indexOf(type) !== -1) {
+        if (this._supportedSyncTypes.has(type)) {
           this.onUpdate(tables);
         }
       });
@@ -123,44 +147,22 @@ export class LiveQuery<TResponse = unknown> {
   };
 
   unsubscribe = () => {
-    if (this.unsubscribeSyncEvent) {
-      this.unsubscribeSyncEvent();
-      this.unsubscribeSyncEvent = null;
+    if (this._unsubscribeSyncEvent) {
+      this._unsubscribeSyncEvent();
+      this._unsubscribeSyncEvent = null;
     }
   };
 
-  getQuery = () => {
-    return this.query;
-  };
-
-  getData = () => {
-    return this.data;
-  };
-
-  getNumListeners = () => {
-    return this.listeners.length;
-  };
-
-  isRunning = () => {
-    return this.unsubscribeSyncEvent != null;
-  };
-
-  protected _optimisticUpdate(
+  protected _optimisticUpdate = (
     updateFn: (data: Data<TResponse>) => Data<TResponse>,
-  ) {
+  ) => {
     const previousData = this.data;
     this.updateData(updateFn);
     this.onData(this.data, previousData);
-  }
+  };
 
   optimisticUpdate = (dataFunc: (data: Data<TResponse>) => Data<TResponse>) => {
     this._optimisticUpdate(dataFunc);
-  };
-
-  // Protected methods
-
-  protected getInflightRequestId = () => {
-    return this.inflightRequestId;
   };
 
   protected updateData = (
@@ -187,13 +189,13 @@ export class LiveQuery<TResponse = unknown> {
     // Regardless if this request was cancelled or not, save the
     // dependencies. The query can't change so all requests will
     // return the same deps.
-    if (this.dependencies == null) {
-      this.dependencies = new Set(dependencies);
+    if (this._dependencies == null) {
+      this._dependencies = new Set(dependencies);
     }
 
     // Only fire events if this hasn't been cancelled and if we're
     // still subscribed (`this.unsubscribeSyncEvent` will exist)
-    if (this.inflightRequestId === reqId && this.unsubscribeSyncEvent) {
+    if (this.inflightRequestId === reqId && this._unsubscribeSyncEvent) {
       const previousData = this.data;
       this.data = data;
       this.onData(this.data, previousData);
@@ -209,11 +211,19 @@ type PagedQueryOptions<TResponse = unknown> = LiveQueryOptions & {
 
 // Paging
 export class PagedQuery<TResponse = unknown> extends LiveQuery<TResponse> {
-  private done: boolean;
-  private onPageData: (data: Data<TResponse>) => void;
-  private pageCount: number;
-  private runPromise: Promise<void>;
-  private totalCount: number;
+  private _hasReachedEnd: boolean;
+  private _onPageData: (data: Data<TResponse>) => void;
+  private _pageCount: number;
+  private _fetchDataPromise: Promise<void>;
+  private _totalCount: number;
+
+  get hasNext() {
+    return !this._hasReachedEnd;
+  }
+
+  get totalCount() {
+    return this._totalCount;
+  }
 
   constructor(
     query: Query,
@@ -221,26 +231,24 @@ export class PagedQuery<TResponse = unknown> extends LiveQuery<TResponse> {
     opts: PagedQueryOptions<TResponse> = {},
   ) {
     super(query, onData, opts);
-    this.totalCount = null;
-    this.pageCount = opts.pageCount || 500;
-    this.runPromise = null;
-    this.done = false;
-    this.onPageData = opts.onPageData || (() => {});
+    this._totalCount = null;
+    this._pageCount = opts.pageCount || 500;
+    this._fetchDataPromise = null;
+    this._hasReachedEnd = false;
+    this._onPageData = opts.onPageData || (() => {});
   }
 
   private fetchCount = () => {
-    return runQuery(this.getQuery().calculate({ $count: '*' })).then(
-      ({ data }) => {
-        this.totalCount = data;
-      },
-    );
+    return runQuery(this.query.calculate({ $count: '*' })).then(({ data }) => {
+      this._totalCount = data;
+    });
   };
 
   run = () => {
     this.subscribe();
 
-    this.runPromise = this.fetchData(async () => {
-      this.done = false;
+    this._fetchDataPromise = this.fetchData(async () => {
+      this._hasReachedEnd = false;
 
       // Also fetch the total count
       this.fetchCount();
@@ -248,15 +256,15 @@ export class PagedQuery<TResponse = unknown> extends LiveQuery<TResponse> {
       // If data is null, we haven't fetched anything yet so just
       // fetch the first page
       return runQuery(
-        this.getQuery().limit(
-          this.getData() == null
-            ? this.pageCount
-            : Math.max(this.getData().length, this.pageCount),
+        this.query.limit(
+          this.data == null
+            ? this._pageCount
+            : Math.max(this.data.length, this._pageCount),
         ),
       );
     });
 
-    return this.runPromise;
+    return this._fetchDataPromise;
   };
 
   static runNew = <TResponse>(
@@ -270,20 +278,20 @@ export class PagedQuery<TResponse = unknown> extends LiveQuery<TResponse> {
   };
 
   refetchUpToRow = async (id, defaultOrderBy) => {
-    this.runPromise = this.fetchData(async () => {
-      this.done = false;
+    this._fetchDataPromise = this.fetchData(async () => {
+      this._hasReachedEnd = false;
 
       // Also fetch the total count
       this.fetchCount();
 
-      const orderDesc = getPrimaryOrderBy(this.getQuery(), defaultOrderBy);
+      const orderDesc = getPrimaryOrderBy(this.query, defaultOrderBy);
       if (orderDesc == null) {
         throw new Error(`refetchUpToRow requires a query with orderBy`);
       }
 
       const { field, order } = orderDesc;
 
-      let result = await runQuery(this.getQuery().filter({ id }).select(field));
+      let result = await runQuery(this.query.filter({ id }).select(field));
       if (result.data.length === 0) {
         // This row is not part of this set anymore, we can't do
         // this. We stop early to avoid possibly pulling in a ton of
@@ -293,7 +301,7 @@ export class PagedQuery<TResponse = unknown> extends LiveQuery<TResponse> {
       const fullRow = result.data[0];
 
       result = await runQuery(
-        this.getQuery().filter({
+        this.query.filter({
           [field]: {
             [order === 'asc' ? '$lte' : '$gte']: fullRow[field],
           },
@@ -304,13 +312,13 @@ export class PagedQuery<TResponse = unknown> extends LiveQuery<TResponse> {
       // Load in an extra page to make room for the UI to show some
       // data after it
       result = await runQuery(
-        this.getQuery()
+        this.query
           .filter({
             [field]: {
               [order === 'asc' ? '$gt' : '$lt']: fullRow[field],
             },
           })
-          .limit(this.pageCount),
+          .limit(this._pageCount),
       );
 
       return {
@@ -319,43 +327,43 @@ export class PagedQuery<TResponse = unknown> extends LiveQuery<TResponse> {
       };
     });
 
-    return this.runPromise;
+    return this._fetchDataPromise;
   };
 
   // The public version of this function is created below and
   // throttled by `once`
   private _fetchNext = async () => {
-    while (this.getInflightRequestId()) {
-      await this.runPromise;
+    while (this.inflightRequestId) {
+      await this._fetchDataPromise;
     }
 
-    const previousData = this.getData();
+    const previousData = this.data;
 
-    if (!this.done) {
+    if (!this._hasReachedEnd) {
       const { data } = await runQuery(
-        this.getQuery().limit(this.pageCount).offset(previousData.length),
+        this.query.limit(this._pageCount).offset(previousData.length),
       );
 
       // If either there is an existing request in flight or the data
       // has already changed underneath it, we can't reliably concat
       // the data since it's different now. Need to re-run the whole
       // process again
-      if (this.getInflightRequestId() || previousData !== this.getData()) {
-        return this.fetchNext();
+      if (this.inflightRequestId || previousData !== this.data) {
+        return this._fetchNext();
       } else {
         if (data.length === 0) {
-          this.done = true;
+          this._hasReachedEnd = true;
         } else {
-          this.done = data.length < this.pageCount;
+          this._hasReachedEnd = data.length < this._pageCount;
 
-          const prevData = this.getData();
+          const prevData = this.data;
           this.updateData(currentData => currentData.concat(data));
 
           // Handle newly loaded page data
-          this.onPageData(data);
+          this._onPageData(data);
 
           // Handle entire data
-          this.onData(this.getData(), prevData);
+          this.onData(this.data, prevData);
         }
       }
     }
@@ -363,17 +371,9 @@ export class PagedQuery<TResponse = unknown> extends LiveQuery<TResponse> {
 
   fetchNext: () => Promise<void> = once(this._fetchNext);
 
-  isFinished = () => {
-    return this.done;
-  };
-
-  getTotalCount = () => {
-    return this.totalCount;
-  };
-
   optimisticUpdate = (updateFn: (data: Data<TResponse>) => Data<TResponse>) => {
-    const previousData = this.getData();
-    super._optimisticUpdate(updateFn);
-    this.totalCount += this.getData().length - previousData.length;
+    const previousData = this.data;
+    this._optimisticUpdate(updateFn);
+    this._totalCount += this.data.length - previousData.length;
   };
 }

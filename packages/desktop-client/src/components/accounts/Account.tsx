@@ -19,7 +19,7 @@ import { type UndoState } from 'loot-core/server/undo';
 import { useFilters } from 'loot-core/src/client/data-hooks/filters';
 import {
   SchedulesProvider,
-  useDefaultSchedulesQueryBuilder,
+  defaultSchedulesQueryBuilder,
 } from 'loot-core/src/client/data-hooks/schedules';
 import * as queries from 'loot-core/src/client/queries';
 import {
@@ -216,7 +216,7 @@ function AllTransactions({
     return balances;
   }, [filtered, prependBalances, balances]);
 
-  if (!prependTransactions) {
+  if (!prependTransactions?.length || filtered) {
     return children(transactions, balances);
   }
   return children(allTransactions, allBalances);
@@ -461,7 +461,7 @@ class AccountInternal extends PureComponent<
   }
 
   fetchAllIds = async () => {
-    const { data } = await runQuery(this.paged?.getQuery().select('id'));
+    const { data } = await runQuery(this.paged?.query.select('id'));
     // Remember, this is the `grouped` split type so we need to deal
     // with the `subtransactions` property
     return data.reduce((arr: string[], t: TransactionEntity) => {
@@ -531,7 +531,7 @@ class AccountInternal extends PureComponent<
         this.setState(
           {
             transactions: data,
-            transactionCount: this.paged?.getTotalCount(),
+            transactionCount: this.paged?.totalCount,
             transactionsFiltered: isFiltered,
             loading: false,
             workingHard: false,
@@ -689,8 +689,7 @@ class AccountInternal extends PureComponent<
     }
 
     const { data } = await runQuery(
-      this.paged
-        ?.getQuery()
+      this.paged?.query
         .options({ splits: 'none' })
         .select([{ balance: { $sumOver: '$amount' } }]),
     );
@@ -861,7 +860,7 @@ class AccountInternal extends PureComponent<
 
   getFilteredAmount = async () => {
     const { data: amount } = await runQuery(
-      this.paged?.getQuery().calculate({ $sum: '$amount' }),
+      this.paged?.query.calculate({ $sum: '$amount' }),
     );
     return amount;
   };
@@ -1880,10 +1879,13 @@ export function Account() {
   const savedFiters = useFilters();
   const actionCreators = useActions();
 
-  const queryBuilder = useDefaultSchedulesQueryBuilder(params.id);
+  const schedulesQueryBuilder = useMemo(
+    () => defaultSchedulesQueryBuilder(params.id),
+    [params.id],
+  );
 
   return (
-    <SchedulesProvider queryBuilder={queryBuilder}>
+    <SchedulesProvider queryBuilder={schedulesQueryBuilder}>
       <SplitsExpandedProvider
         initialMode={expandSplits ? 'collapse' : 'expand'}
       >

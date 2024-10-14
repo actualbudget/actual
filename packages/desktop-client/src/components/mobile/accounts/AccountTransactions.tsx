@@ -19,8 +19,14 @@ import {
   syncAndDownload,
   updateAccount,
 } from 'loot-core/client/actions';
-import { useDefaultSchedulesQueryBuilder } from 'loot-core/client/data-hooks/schedules';
-import { useTransactions } from 'loot-core/client/data-hooks/transactions';
+import {
+  defaultSchedulesQueryBuilder,
+  SchedulesProvider,
+} from 'loot-core/client/data-hooks/schedules';
+import {
+  usePreviewTransactions2,
+  useTransactions,
+} from 'loot-core/client/data-hooks/transactions';
 import * as queries from 'loot-core/client/queries';
 import { listen, send } from 'loot-core/platform/client/fetch';
 import { isPreviewId } from 'loot-core/shared/transactions';
@@ -50,6 +56,11 @@ export function AccountTransactions({
   readonly accountId?: string;
   readonly accountName: string;
 }) {
+  const schedulesQueryBuilder = useMemo(
+    () => defaultSchedulesQueryBuilder(accountId),
+    [accountId],
+  );
+
   return (
     <Page
       header={
@@ -67,11 +78,13 @@ export function AccountTransactions({
       }
       padding={0}
     >
-      <TransactionListWithPreviews
-        account={account}
-        accountName={accountName}
-        accountId={accountId}
-      />
+      <SchedulesProvider queryBuilder={schedulesQueryBuilder}>
+        <TransactionListWithPreviews
+          account={account}
+          accountName={accountName}
+          accountId={accountId}
+        />
+      </SchedulesProvider>
     </Page>
   );
 }
@@ -222,11 +235,10 @@ function TransactionListWithPreviews({
     updateQuery: updateTransactionsQuery,
   } = useTransactions({
     queryBuilder: () => baseTransactionsQuery().select('*'),
-    options: {
-      includePreviewTransactions: !isSearching,
-      schedulesQueryBuilder: useDefaultSchedulesQueryBuilder(accountId),
-    },
   });
+
+  const { data: previewTransactions, isLoading: isPreviewTransactionsLoading } =
+    usePreviewTransactions2({ options: { isDisabled: isSearching } });
 
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const dispatch = useDispatch();
@@ -315,8 +327,8 @@ function TransactionListWithPreviews({
 
   return (
     <TransactionListWithBalances
-      isLoading={isLoading}
-      transactions={transactions}
+      isLoading={isLoading || isPreviewTransactionsLoading}
+      transactions={previewTransactions.concat(transactions)}
       balance={balanceQueries.balance}
       balanceCleared={balanceQueries.cleared}
       balanceUncleared={balanceQueries.uncleared}
