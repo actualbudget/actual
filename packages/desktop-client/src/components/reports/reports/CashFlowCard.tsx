@@ -341,7 +341,7 @@ export function CashFlowCard({
     dataOk = true;
   }
 
-  const isCondensedMode = (mode: string, height: number) =>
+  const isCondensedMode = (mode: string | undefined, height: number) =>
     mode === 'condensed' ||
     mode === undefined ||
     height < MIN_DETAILED_CHART_HEIGHT;
