@@ -139,6 +139,7 @@ function fireUpdate<T extends Item>(
 }
 
 function defaultRenderInput(props: ComponentProps<typeof Input>) {
+  // data-1p-ignore disables 1Password autofill behaviour
   return <Input data-1p-ignore {...props} />;
 }
 
