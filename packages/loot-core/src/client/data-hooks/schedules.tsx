@@ -53,6 +53,9 @@ function loadStatuses(
 
 type UseSchedulesProps = {
   query?: Query;
+  options?: {
+    isDisabled?: boolean;
+  };
 };
 type ScheduleData = {
   schedules: readonly ScheduleEntity[];
@@ -60,11 +63,13 @@ type ScheduleData = {
 };
 type UseSchedulesResult = ScheduleData & {
   readonly isLoading: boolean;
+  readonly isDisabled: boolean;
   readonly error?: Error;
 };
 
 export function useSchedules({
   query,
+  options: { isDisabled } = { isDisabled: false },
 }: UseSchedulesProps = {}): UseSchedulesResult {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | undefined>(undefined);
@@ -98,7 +103,7 @@ export function useSchedules({
       return;
     }
 
-    setIsLoading(true);
+    setIsLoading(query !== null);
 
     scheduleQueryRef.current = liveQuery<ScheduleEntity>(query, {
       onData: async schedules => {
@@ -126,8 +131,9 @@ export function useSchedules({
 
   return {
     isLoading,
+    isDisabled,
     error,
-    ...data,
+    ...(isDisabled ? { schedules: [], statuses: new Map() } : data),
   };
 }
 

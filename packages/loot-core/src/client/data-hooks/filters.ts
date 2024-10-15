@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 
 import { q } from '../../shared/query';
 import { type TransactionFilterEntity } from '../../types/models';
@@ -25,13 +25,14 @@ export function useFilters(): TransactionFilterEntity[] {
     [],
   );
 
-  return useMemo(
-    () =>
-      toJS(data ? [...data] : []).sort((a, b) =>
-        a.name
-          .trim()
-          .localeCompare(b.name.trim(), undefined, { ignorePunctuation: true }),
-      ),
-    [data],
-  );
+  /** Sort filters by alphabetical order */
+  const sort = useCallback((filters: TransactionFilterEntity[]) => {
+    return filters.toSorted((a, b) =>
+      a.name
+        .trim()
+        .localeCompare(b.name.trim(), undefined, { ignorePunctuation: true }),
+    );
+  }, []);
+
+  return useMemo(() => sort(toJS(data ? [...data] : [])), [data, sort]);
 }
