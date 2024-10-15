@@ -73,9 +73,6 @@ function EditableBudgetName() {
       case 'settings':
         navigate('/settings');
         break;
-      case 'help':
-        window.open('https://actualbudget.org/docs/', '_blank');
-        break;
       case 'close':
         dispatch(closeBudget());
         break;
@@ -85,7 +82,6 @@ function EditableBudgetName() {
 
   const items = [
     { name: 'settings', text: t('Settings') },
-    ...(Platform.isBrowser ? [{ name: 'help', text: t('Help') }] : []),
     { name: 'close', text: t('Close file') },
   ];
 
