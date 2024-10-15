@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
@@ -35,8 +35,8 @@ import { CashFlowGraph } from '../graphs/CashFlowGraph';
 import { Header } from '../Header';
 import { LoadingIndicator } from '../LoadingIndicator';
 import { calculateTimeRange } from '../reportRanges';
-import { cashFlowByDate } from '../spreadsheets/cash-flow-spreadsheet';
-import { useReport } from '../useReport';
+
+import { useCashFlowDataDetailed } from './useCashFlowDataDetailed';
 
 export const defaultTimeFrame = {
   start: monthUtils.dayFromDate(monthUtils.currentMonth()),
@@ -100,11 +100,13 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
     return numDays > 31 * 3;
   });
 
-  const params = useMemo(
-    () => cashFlowByDate(start, end, isConcise, conditions, conditionsOp),
-    [start, end, isConcise, conditions, conditionsOp],
+  const data = useCashFlowDataDetailed(
+    start,
+    end,
+    isConcise,
+    conditions,
+    conditionsOp,
   );
-  const data = useReport('cash_flow', params);
 
   useEffect(() => {
     async function run() {
