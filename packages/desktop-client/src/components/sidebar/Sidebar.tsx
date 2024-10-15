@@ -189,7 +189,6 @@ function EditableBudgetName() {
   const items = [
     { name: 'rename', text: t('Rename budget') },
     { name: 'settings', text: t('Settings') },
-    ...(Platform.isBrowser ? [{ name: 'help', text: t('Help') }] : []),
     { name: 'close', text: t('Close file') },
   ];
 
