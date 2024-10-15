@@ -44,6 +44,10 @@ function registerHandlebarsHelpers() {
 
   const helpers = {
     regex: (value: unknown, regex: unknown, replace: unknown) => {
+      if (value == null) {
+        return null;
+      }
+
       if (typeof regex !== 'string' || typeof replace !== 'string') {
         return '';
       }
