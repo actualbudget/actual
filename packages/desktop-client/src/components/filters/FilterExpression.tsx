@@ -62,8 +62,21 @@ export function FilterExpression<T extends RuleConditionEntity>({
         variant="bare"
         isDisabled={customName != null}
         onPress={() => setEditing(true)}
+        style={{
+          maxWidth: 'calc(100% - 26px)',
+          whiteSpace: 'nowrap',
+          display: 'block',
+        }}
       >
-        <div style={{ paddingBlock: 1, paddingLeft: 5, paddingRight: 2 }}>
+        <div
+          style={{
+            paddingBlock: 1,
+            paddingLeft: 5,
+            paddingRight: 2,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+          }}
+        >
           {customName ? (
             <Text style={{ color: theme.pageTextPositive }}>{customName}</Text>
           ) : (
