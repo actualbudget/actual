@@ -427,7 +427,7 @@ export function looselyParseAmount(amount: string) {
     amount = amount.replace('(', '-').replace(')', '');
   }
 
-  // Look for a decimal marker, then look for either 1-2 or 5-9 decimal places.
+  // Look for a decimal marker, then look for either 1-2 or 4-9 decimal places.
   // This avoids matching against 3 places which may not actually be decimal
   const m = amount.match(/[.,]([^.,]{4,9}|[^.,]{1,2})$/);
   if (!m || m.index === undefined) {
