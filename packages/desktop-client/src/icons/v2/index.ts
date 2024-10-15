@@ -21,6 +21,7 @@ export { SvgDownloadThickBottom } from './DownloadThickBottom';
 export { SvgEditSkull1 } from './EditSkull1';
 export { SvgFavoriteStar } from './FavoriteStar';
 export { SvgFilter2 } from './Filter2';
+export { SvgHelp } from './Help';
 export { SvgHyperlink2 } from './Hyperlink2';
 export { SvgHyperlink3 } from './Hyperlink3';
 export { SvgInformationCircle } from './InformationCircle';

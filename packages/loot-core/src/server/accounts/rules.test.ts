@@ -327,6 +327,16 @@ describe('Action', () => {
       expect(item.notes).toBe('Hey Sarah! You just payed 10');
     });
 
+    test('should not escape text', () => {
+      const action = new Action('set', 'notes', '', {
+        template: '{{notes}}',
+      });
+      const note = 'Sarah !@#$%^&*()<> Special';
+      const item = { notes: note };
+      action.exec(item);
+      expect(item.notes).toBe(note);
+    });
+
     describe('regex helper', () => {
       function testHelper(template: string, expected: unknown) {
         test(template, () => {
