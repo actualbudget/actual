@@ -16,8 +16,10 @@ import {
   UtilityProcess,
   OpenDialogSyncOptions,
   SaveDialogOptions,
+  Env,
+  ForkOptions,
 } from 'electron';
-import { copy, exists, remove } from 'fs-extra';
+import { copy, exists, mkdir, remove } from 'fs-extra';
 import promiseRetry from 'promise-retry';
 
 import { GlobalPrefs } from 'loot-core/types/prefs';
@@ -115,6 +117,34 @@ function createBackgroundProcess() {
 }
 
 function startSyncServer() {
+  const syncServerConfig = {
+    port: 5006, // actual-server seems to only run on 5006 - I can't get it to work on anything else...
+    ACTUAL_SERVER_DATA_DIR: path.resolve(
+      process.env.ACTUAL_DATA_DIR,
+      'actual-server',
+    ),
+    ACTUAL_SERVER_FILES: path.resolve(
+      process.env.ACTUAL_DATA_DIR,
+      'actual-server',
+      'server-files',
+    ),
+    ACTUAL_USER_FILES: path.resolve(
+      process.env.ACTUAL_DATA_DIR,
+      'actual-server',
+      'user-files',
+    ),
+    defaultDataDir: path.resolve(
+      // TODO: There's no env variable for this - may need to add one to sync server
+      process.env.ACTUAL_DATA_DIR,
+      'actual-server',
+      'data',
+    ),
+    https: {
+      key: '',
+      cert: '',
+    },
+  };
+
   const serverPath = path.resolve(
     __dirname,
     isDev
@@ -125,26 +155,57 @@ function startSyncServer() {
   // NOTE: config.json parameters will be relative to THIS directory at the moment - may need a fix?
   // Or we can override the config.json location when starting the process
   try {
+    const envVariables: Env = {
+      ...process.env, // required
+      ACTUAL_PORT: `${syncServerConfig.port}`,
+      ACTUAL_SERVER_FILES: `${syncServerConfig.ACTUAL_SERVER_FILES}`,
+      ACTUAL_USER_FILES: `${syncServerConfig.ACTUAL_USER_FILES}`,
+      ACTUAL_DATA_DIR: `${syncServerConfig.ACTUAL_SERVER_DATA_DIR}`,
+    };
+
+    if (!fs.existsSync(syncServerConfig.ACTUAL_SERVER_FILES)) {
+      // create directories if they do not exit - actual-sync doesn't do it for us...
+      mkdir(syncServerConfig.ACTUAL_SERVER_FILES, { recursive: true });
+    }
+
+    if (!fs.existsSync(syncServerConfig.ACTUAL_USER_FILES)) {
+      // create directories if they do not exit - actual-sync doesn't do it for us...
+      mkdir(syncServerConfig.ACTUAL_USER_FILES, { recursive: true });
+    }
+
+    // TODO: make sure .migrate file is also in user-directory under actual-server
+
+    let forkOptions: ForkOptions = {
+      stdio: 'pipe',
+      env: envVariables,
+    };
+
+    if (isDev) {
+      forkOptions = { ...forkOptions, execArgv: ['--inspect'] };
+    }
+
+    console.info('server-sync options', { forkOptions });
+
     actualServerProcess = utilityProcess.fork(
       serverPath, // This requires actual-server depencies (crdt) to be built before running electron - they need to be manually specified because actual-server doesn't get bundled
       [],
-      isDev ? { execArgv: ['--inspect'], stdio: 'pipe' } : { stdio: 'pipe' },
+      forkOptions,
     );
+
+    actualServerProcess.stdout?.on('data', (chunk: Buffer) => {
+      // Send the Server console.log messages to the main browser window
+      clientWin?.webContents.executeJavaScript(`
+          console.info('Server Log:', ${JSON.stringify(chunk.toString('utf8'))})`);
+    });
+
+    actualServerProcess.stderr?.on('data', (chunk: Buffer) => {
+      // Send the Server console.error messages out to the main browser window
+      clientWin?.webContents.executeJavaScript(`
+            console.error('Server Log:', ${JSON.stringify(chunk.toString('utf8'))})`);
+    });
   } catch (error) {
     console.error(error);
   }
-
-  actualServerProcess.stdout?.on('data', (chunk: Buffer) => {
-    // Send the Server console.log messages to the main browser window
-    clientWin?.webContents.executeJavaScript(`
-        console.info('Server Log:', ${JSON.stringify(chunk.toString('utf8'))})`);
-  });
-
-  actualServerProcess.stderr?.on('data', (chunk: Buffer) => {
-    // Send the Server console.error messages out to the main browser window
-    clientWin?.webContents.executeJavaScript(`
-          console.error('Server Log:', ${JSON.stringify(chunk.toString('utf8'))})`);
-  });
 }
 
 async function exposeSyncServer(ngrokConfig: GlobalPrefs['ngrokConfig']) {
