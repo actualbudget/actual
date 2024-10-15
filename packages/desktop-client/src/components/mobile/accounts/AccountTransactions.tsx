@@ -24,7 +24,7 @@ import {
   SchedulesProvider,
 } from 'loot-core/client/data-hooks/schedules';
 import {
-  usePreviewTransactions2,
+  usePreviewTransactions,
   useTransactions,
 } from 'loot-core/client/data-hooks/transactions';
 import * as queries from 'loot-core/client/queries';
@@ -238,7 +238,7 @@ function TransactionListWithPreviews({
   });
 
   const { data: previewTransactions, isLoading: isPreviewTransactionsLoading } =
-    usePreviewTransactions2({ options: { isDisabled: isSearching } });
+    usePreviewTransactions({ options: { isDisabled: isSearching } });
 
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const dispatch = useDispatch();
@@ -249,7 +249,9 @@ function TransactionListWithPreviews({
   }, [accountId, dispatch]);
 
   useEffect(() => {
-    dispatch(markAccountRead(accountId));
+    if (accountId) {
+      dispatch(markAccountRead(accountId));
+    }
   }, [accountId, dispatch]);
 
   useEffect(() => {

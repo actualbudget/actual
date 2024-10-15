@@ -29,11 +29,11 @@ export type ScheduleStatuses = Map<ScheduleEntity['id'], ScheduleStatusType>;
 function loadStatuses(
   schedules: readonly ScheduleEntity[],
   onData: (data: ScheduleStatuses) => void,
+  onError: (error: Error) => void,
   upcomingLength: string,
 ) {
-  return liveQuery<TransactionEntity>(
-    getHasTransactionsQuery(schedules),
-    data => {
+  return liveQuery<TransactionEntity>(getHasTransactionsQuery(schedules), {
+    onData: data => {
       const hasTrans = new Set(data.filter(Boolean).map(row => row.schedule));
 
       const scheduleStatuses = new Map(
@@ -50,7 +50,8 @@ function loadStatuses(
 
       onData?.(scheduleStatuses);
     },
-  );
+    onError,
+  });
 }
 
 type UseSchedulesProps = {
@@ -66,6 +67,7 @@ type ScheduleData = {
 type UseSchedulesResult = ScheduleData & {
   readonly isLoading: boolean;
   readonly isDisabled: boolean;
+  readonly error?: Error;
 };
 
 export function useSchedules({
@@ -73,6 +75,7 @@ export function useSchedules({
   options: { isDisabled } = { isDisabled: false },
 }: UseSchedulesProps = {}): UseSchedulesResult {
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | undefined>(undefined);
   const [data, setData] = useState<ScheduleData>({
     schedules: [],
     statuses: new Map(),
@@ -87,18 +90,12 @@ export function useSchedules({
   );
 
   useEffect(() => {
-    if (isDisabled) {
-      setData({ schedules: [], statuses: new Map() });
-      return;
-    }
-
     let isUnmounted = false;
 
-    setIsLoading(true);
+    setIsLoading(query !== null);
 
-    scheduleQueryRef.current = liveQuery<ScheduleEntity>(
-      query,
-      async schedules => {
+    scheduleQueryRef.current = liveQuery<ScheduleEntity>(query, {
+      onData: async schedules => {
         statusQueryRef.current = loadStatuses(
           schedules,
           (statuses: ScheduleStatuses) => {
@@ -107,22 +104,25 @@ export function useSchedules({
               setData({ schedules, statuses });
             }
           },
+          setError,
           upcomingLength,
         );
       },
-    );
+      onError: setError,
+    });
 
     return () => {
       isUnmounted = true;
       scheduleQueryRef.current?.unsubscribe();
       statusQueryRef.current?.unsubscribe();
     };
-  }, [isDisabled, query, upcomingLength]);
+  }, [query, upcomingLength]);
 
   return {
     isLoading,
     isDisabled,
-    ...data,
+    error,
+    ...(isDisabled ? { schedules: [], statuses: new Map() } : data),
   };
 }
 

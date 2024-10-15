@@ -5,7 +5,7 @@ import { q } from '../../shared/query';
 import { type TransactionFilterEntity } from '../../types/models';
 import { useQuery } from '../query-hooks';
 
-function toJS(rows) {
+function toJS(rows): TransactionFilterEntity[] {
   const filters = rows.map(row => {
     return {
       ...row.fields,
@@ -26,9 +26,11 @@ export function useFilters(): TransactionFilterEntity[] {
   );
 
   /** Sort filters by alphabetical order */
-  const sort = useCallback(filters => {
-    return filters.sort((a, b) =>
-      a.name.trim().localeCompare(b.name.trim(), { ignorePunctuation: true }),
+  const sort = useCallback((filters: TransactionFilterEntity[]) => {
+    return filters.toSorted((a, b) =>
+      a.name
+        .trim()
+        .localeCompare(b.name.trim(), undefined, { ignorePunctuation: true }),
     );
   }, []);
 

@@ -85,7 +85,7 @@ export function CategoryTransactions({ category, month }) {
     [updateSearchQuery],
   );
 
-  const onOpenTranasction = useCallback(
+  const onOpenTransaction = useCallback(
     transaction => {
       // details of how the native app used to handle preview transactions here can be found at commit 05e58279
       if (!isPreviewId(transaction.id)) {
@@ -126,7 +126,7 @@ export function CategoryTransactions({ category, month }) {
         searchPlaceholder={`Search ${category.name}`}
         onSearch={onSearch}
         onLoadMore={loadMoreTransactions}
-        onOpenTransaction={onOpenTranasction}
+        onOpenTransaction={onOpenTransaction}
       />
     </Page>
   );

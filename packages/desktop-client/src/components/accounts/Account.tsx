@@ -506,9 +506,8 @@ class AccountInternal extends PureComponent<
       query = query.filter({ reconciled: { $eq: false } });
     }
 
-    this.paged = pagedQuery(
-      query.select('*'),
-      async (groupedData, prevData) => {
+    this.paged = pagedQuery(query.select('*'), {
+      onData: async (groupedData, prevData) => {
         const data = ungroupTransactions([...groupedData]);
         const firstLoad = prevData == null;
 
@@ -551,11 +550,11 @@ class AccountInternal extends PureComponent<
           },
         );
       },
-      {
+      options: {
         pageCount: 150,
         onlySync: true,
       },
-    );
+    });
   }
 
   UNSAFE_componentWillReceiveProps(nextProps: AccountInternalProps) {
