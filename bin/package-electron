@@ -34,11 +34,17 @@ if [ "$OSTYPE" == "msys" ]; then
     fi
 fi
 
-yarn workspace loot-core build:node
+# TODO: should do these async if possible
 
-yarn workspace @actual-app/web build:browser # required for web server (exposed via ngrok)
-yarn workspace @actual-app/web build --mode=desktop # required for desktop app
+# required for when running in electron
 yarn workspace @actual-app/crdt build
+yarn workspace loot-core build:node
+yarn workspace @actual-app/web build --mode=desktop # electron specific build
+
+# required for when running in web server (exposed via ngrok)
+yarn workspace loot-core build:browser
+yarn workspace @actual-app/web build:browser
+
 
 yarn workspace desktop-electron update-client
 
