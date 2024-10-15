@@ -97,7 +97,7 @@ export class LiveQuery<TResponse = unknown> {
     query: Query,
     onData: Listener<TResponse>,
     onError?: (error: Error) => void,
-    opts: LiveQueryOptions = {},
+    options: LiveQueryOptions = {},
   ) {
     this._query = query;
     this._data = null;
@@ -106,7 +106,7 @@ export class LiveQuery<TResponse = unknown> {
     this._onError = onError || (() => {});
 
     // TODO: error types?
-    this._supportedSyncTypes = !opts.onlySync
+    this._supportedSyncTypes = options.onlySync
       ? new Set<string>(['success'])
       : new Set<string>(['applied', 'success']);
 
@@ -153,9 +153,9 @@ export class LiveQuery<TResponse = unknown> {
     query: Query,
     onData: Listener<TResponse>,
     onError: (error: Error) => void,
-    opts: LiveQueryOptions = {},
+    options: LiveQueryOptions = {},
   ) => {
-    const liveQuery = new LiveQuery<TResponse>(query, onData, onError, opts);
+    const liveQuery = new LiveQuery<TResponse>(query, onData, onError, options);
     liveQuery.run();
     return liveQuery;
   };
