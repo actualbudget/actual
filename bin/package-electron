@@ -36,7 +36,8 @@ fi
 
 yarn workspace loot-core build:node
 
-yarn workspace @actual-app/web build --mode=desktop
+yarn workspace @actual-app/web build:browser # required for web server (exposed via ngrok)
+yarn workspace @actual-app/web build --mode=desktop # required for desktop app
 yarn workspace @actual-app/crdt build
 
 yarn workspace desktop-electron update-client
