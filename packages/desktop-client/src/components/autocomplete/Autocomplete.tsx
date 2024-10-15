@@ -139,7 +139,7 @@ function fireUpdate<T extends Item>(
 }
 
 function defaultRenderInput(props: ComponentProps<typeof Input>) {
-  return <Input {...props} />;
+  return <Input data-1p-ignore {...props} />;
 }
 
 function defaultRenderItems<T extends Item>(
