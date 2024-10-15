@@ -23,6 +23,7 @@ type UseTransactionsProps = {
 type UseTransactionsResult = {
   transactions: ReadonlyArray<TransactionEntity>;
   isLoading?: boolean;
+  error?: Error;
   reload?: () => void;
   loadMore?: () => void;
   updateQuery: (buildQuery: (query: Query) => Query) => void;
@@ -36,6 +37,7 @@ export function useTransactions({
     queryBuilder?.(defaultQuery) ?? defaultQuery,
   );
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<Error | undefined>(undefined);
   const [transactions, setTransactions] = useState<
     ReadonlyArray<TransactionEntity>
   >([]);
@@ -51,18 +53,18 @@ export function useTransactions({
   useEffect(() => {
     let isUnmounted = false;
 
-    setIsLoading(true);
+    setIsLoading(query !== null);
 
-    pagedQueryRef.current = pagedQuery<TransactionEntity>(
-      query,
-      data => {
+    pagedQueryRef.current = pagedQuery<TransactionEntity>(query, {
+      onData: data => {
         if (!isUnmounted) {
-          setIsLoading(false);
           setTransactions(data);
+          setIsLoading(false);
         }
       },
-      { pageCount: optionsRef.current.pageCount },
-    );
+      onError: setError,
+      options: { pageCount: optionsRef.current.pageCount },
+    });
 
     return () => {
       isUnmounted = true;
@@ -79,6 +81,7 @@ export function useTransactions({
   return {
     transactions,
     isLoading,
+    error,
     reload: pagedQueryRef.current?.run,
     loadMore: pagedQueryRef.current?.fetchNext,
     updateQuery,
@@ -94,9 +97,10 @@ type UsePreviewTransactionsProps = {
 type UsePreviewTransactionsResult = {
   data: ReadonlyArray<TransactionEntity>;
   isLoading: boolean;
+  error?: Error;
 };
 
-export function usePreviewTransactions2({
+export function usePreviewTransactions({
   options: { isDisabled } = { isDisabled: false },
 }: UsePreviewTransactionsProps = {}): UsePreviewTransactionsResult {
   const [previewTransactions, setPreviewTransactions] = useState<
@@ -104,10 +108,12 @@ export function usePreviewTransactions2({
   >([]);
   const {
     isLoading: isSchedulesLoading,
+    error: scheduleQueryError,
     schedules,
     statuses,
   } = useCachedSchedules();
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<Error | undefined>(undefined);
 
   useEffect(() => {
     if (isSchedulesLoading) {
@@ -116,11 +122,12 @@ export function usePreviewTransactions2({
 
     let isUnmounted = false;
 
-    setIsLoading(true);
+    setIsLoading(schedules.length > 0);
 
     // Kick off an async rules application
-    const schedulesForPreview =
-      schedules?.filter(s => isForPreview(s, statuses)) || [];
+    const schedulesForPreview = schedules.filter(s =>
+      isForPreview(s, statuses),
+    );
 
     const baseTransactions = schedulesForPreview.map(schedule => ({
       id: 'preview/' + schedule.id,
@@ -134,28 +141,32 @@ export function usePreviewTransactions2({
     if (baseTransactions?.length) {
       Promise.all(
         baseTransactions.map(transaction => send('rules-run', { transaction })),
-      ).then(newTrans => {
-        if (!isUnmounted) {
-          const withDefaults = newTrans.map(t => ({
-            ...t,
-            category: statuses.get(t.schedule),
-            schedule: t.schedule,
-            subtransactions: t.subtransactions?.map(
-              (st: TransactionEntity) => ({
-                ...st,
-                id: 'preview/' + st.id,
-                schedule: t.schedule,
-              }),
-            ),
-          }));
+      )
+        .then(newTrans => {
+          if (!isUnmounted) {
+            const withDefaults = newTrans.map(t => ({
+              ...t,
+              category: statuses.get(t.schedule),
+              schedule: t.schedule,
+              subtransactions: t.subtransactions?.map(
+                (st: TransactionEntity) => ({
+                  ...st,
+                  id: 'preview/' + st.id,
+                  schedule: t.schedule,
+                }),
+              ),
+            }));
 
-          setIsLoading(false);
-          setPreviewTransactions(ungroupTransactions(withDefaults));
-        }
-      });
-    } else if (!isUnmounted) {
-      // Nothing to preview
-      setIsLoading(false);
+            setIsLoading(false);
+            setPreviewTransactions(ungroupTransactions(withDefaults));
+          }
+        })
+        .catch(error => {
+          if (!isUnmounted) {
+            setIsLoading(false);
+            setError(error);
+          }
+        });
     }
 
     return () => {
@@ -166,6 +177,7 @@ export function usePreviewTransactions2({
   return {
     data: isDisabled ? [] : previewTransactions,
     isLoading: isLoading || isSchedulesLoading,
+    error: error || scheduleQueryError,
   };
 }
 

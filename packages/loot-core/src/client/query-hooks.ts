@@ -7,39 +7,44 @@ import { liveQuery, type LiveQuery } from './query-helpers';
 type UseQueryResult<Response> = {
   data: null | ReadonlyArray<Response>;
   isLoading: boolean;
-  isError: boolean;
+  error?: Error;
 };
 
 export function useQuery<Response = unknown>(
   makeQuery: () => Query | null,
   dependencies: DependencyList,
 ): UseQueryResult<Response> {
-  const [data, setData] = useState<null | ReadonlyArray<Response>>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isError, setIsError] = useState(false);
-
   // Memo the resulting query. We don't care if the function
   // that creates the query changes, only the resulting query.
   // Safe to ignore the eslint warning here.
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const query = useMemo(makeQuery, dependencies);
 
+  const [data, setData] = useState<ReadonlyArray<Response> | null>(null);
+  const [isLoading, setIsLoading] = useState(query !== null);
+  const [error, setError] = useState<Error | undefined>(undefined);
+
   useEffect(() => {
+    setError(query === null ? new Error('Query is null') : undefined);
+    setIsLoading(query !== null);
+
     if (!query) {
-      setIsError(true);
       return;
     }
 
-    setIsLoading(true);
-
-    let live: null | LiveQuery<Response> = liveQuery<Response>(query, data => {
-      if (live) {
-        setIsLoading(false);
-        setData(data);
-      }
+    let isUnmounted = false;
+    let live: null | LiveQuery<Response> = liveQuery<Response>(query, {
+      onData: data => {
+        if (!isUnmounted) {
+          setData(data);
+          setIsLoading(false);
+        }
+      },
+      onError: setError,
     });
 
     return () => {
+      isUnmounted = true;
       live?.unsubscribe();
       live = null;
     };
@@ -48,6 +53,6 @@ export function useQuery<Response = unknown>(
   return {
     data,
     isLoading,
-    isError,
+    error,
   };
 }
