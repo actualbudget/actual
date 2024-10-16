@@ -76,7 +76,6 @@ export function BudgetName({ children }: BudgetNameProps) {
         variant="bare"
         style={{
           margin: 5,
-          flex: '0 auto',
         }}
         onPress={() => setMenuOpen(true)}
       >
