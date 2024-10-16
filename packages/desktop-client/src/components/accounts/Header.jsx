@@ -164,15 +164,6 @@ export function AccountHeader({
     [onSync],
   );
 
-  useHotkeys(
-    'r',
-    () => setReconcileOpen(true),
-    {
-      scopes: ['app'],
-    },
-    [setReconcileOpen],
-  );
-
   return (
     <>
       <View style={{ ...styles.pageContent, paddingBottom: 10, flexShrink: 0 }}>
@@ -205,14 +196,40 @@ export function AccountHeader({
           </View>
         </View>
 
-        <Balances
-          balanceQuery={balanceQuery}
-          showExtraBalances={showExtraBalances}
-          onToggleExtraBalances={onToggleExtraBalances}
-          account={account}
-          isFiltered={isFiltered}
-          filteredAmount={filteredAmount}
-        />
+        <Stack direction="row" justify="space-between">
+          <Balances
+            balanceQuery={balanceQuery}
+            showExtraBalances={showExtraBalances}
+            onToggleExtraBalances={onToggleExtraBalances}
+            account={account}
+            isFiltered={isFiltered}
+            filteredAmount={filteredAmount}
+          />
+          <View>
+            <Button
+              ref={reconcileRef}
+              variant="primary"
+              onPress={() => {
+                setReconcileOpen(true);
+              }}
+            >
+              Reconcile
+            </Button>
+            <Popover
+              placement="bottom"
+              triggerRef={reconcileRef}
+              style={{ width: 275 }}
+              isOpen={reconcileOpen}
+              onOpenChange={() => setReconcileOpen(false)}
+            >
+              <ReconcileMenu
+                account={account}
+                onClose={() => setReconcileOpen(false)}
+                onReconcile={onReconcile}
+              />
+            </Popover>
+          </View>
+        </Stack>
 
         <Stack
           spacing={2}
@@ -261,30 +278,6 @@ export function AccountHeader({
             <FilterButton onApply={onApplyFilter} type="accounts" />
           </View>
           <View style={{ flex: 1 }} />
-          <View>
-            <Button
-              ref={reconcileRef}
-              variant="primary"
-              onPress={() => {
-                setReconcileOpen(true);
-              }}
-            >
-              Reconcile
-            </Button>
-            <Popover
-              placement="bottom"
-              triggerRef={reconcileRef}
-              style={{ width: 275 }}
-              isOpen={reconcileOpen}
-              onOpenChange={() => setReconcileOpen(false)}
-            >
-              <ReconcileMenu
-                account={account}
-                onClose={() => setReconcileOpen(false)}
-                onReconcile={onReconcile}
-              />
-            </Popover>
-          </View>
           <Search
             placeholder={t('Search')}
             value={search}
