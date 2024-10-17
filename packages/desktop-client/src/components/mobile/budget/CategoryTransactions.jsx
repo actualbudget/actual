@@ -1,8 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { useDebounceCallback } from 'usehooks-ts';
-
 import { getPayees } from 'loot-core/client/actions';
 import {
   useTransactions,
@@ -68,12 +66,11 @@ export function CategoryTransactions({ category, month }) {
     });
   }, [dispatch, reloadTransactions]);
 
-  const { search } = useTransactionsSearch({
+  const { search: onSearch } = useTransactionsSearch({
     updateQuery: setTransactionsQuery,
     resetQuery: () => setTransactionsQuery(baseTransactionsQuery()),
     dateFormat,
   });
-  const onSearch = useDebounceCallback(search, 150);
 
   const onOpenTransaction = useCallback(
     transaction => {

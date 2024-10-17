@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 
+import debounce from 'lodash/debounce';
+
 import { send } from '../../platform/client/fetch';
 import { type Query } from '../../shared/query';
 import { ungroupTransactions } from '../../shared/transactions';
@@ -178,6 +180,7 @@ type UseTransactionsSearchProps = {
   updateQuery: (updateFn: (searchQuery: Query) => Query) => void;
   resetQuery: () => void;
   dateFormat: string;
+  delayMs?: number;
 };
 
 type UseTransactionsSearchResult = {
@@ -189,11 +192,12 @@ export function useTransactionsSearch({
   updateQuery,
   resetQuery,
   dateFormat,
+  delayMs = 150,
 }: UseTransactionsSearchProps): UseTransactionsSearchResult {
   const [isSearching, setIsSearching] = useState(false);
 
   const updateSearchQuery = useCallback(
-    (searchText: string) => {
+    debounce((searchText: string) => {
       if (searchText === '') {
         resetQuery();
         setIsSearching(false);
@@ -203,7 +207,7 @@ export function useTransactionsSearch({
         );
         setIsSearching(true);
       }
-    },
+    }, delayMs),
     [dateFormat, resetQuery, updateQuery],
   );
 
