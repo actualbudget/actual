@@ -196,19 +196,20 @@ export function useTransactionsSearch({
 }: UseTransactionsSearchProps): UseTransactionsSearchResult {
   const [isSearching, setIsSearching] = useState(false);
 
-  const updateSearchQuery = useCallback(
-    debounce((searchText: string) => {
-      if (searchText === '') {
-        resetQuery();
-        setIsSearching(false);
-      } else if (searchText) {
-        updateQuery(previousQuery =>
-          queries.transactionsSearch(previousQuery, searchText, dateFormat),
-        );
-        setIsSearching(true);
-      }
-    }, delayMs),
-    [dateFormat, resetQuery, updateQuery],
+  const updateSearchQuery = useMemo(
+    () =>
+      debounce((searchText: string) => {
+        if (searchText === '') {
+          resetQuery();
+          setIsSearching(false);
+        } else if (searchText) {
+          updateQuery(previousQuery =>
+            queries.transactionsSearch(previousQuery, searchText, dateFormat),
+          );
+          setIsSearching(true);
+        }
+      }, delayMs),
+    [dateFormat, delayMs, resetQuery, updateQuery],
   );
 
   return {
