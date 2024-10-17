@@ -1,6 +1,5 @@
 import React, {
   createElement,
-  createRef,
   forwardRef,
   memo,
   useState,
@@ -1809,6 +1808,7 @@ function NewTransaction({
 }
 
 function TransactionTableInner({
+  isLoading,
   tableNavigator,
   tableRef,
   listContainerRef,
@@ -1818,7 +1818,7 @@ function TransactionTableInner({
   onScroll,
   ...props
 }) {
-  const containerRef = createRef();
+  const containerRef = useRef();
   const isAddingPrev = usePrevious(props.isAdding);
   const [scrollWidth, setScrollWidth] = useState(0);
 
@@ -2043,6 +2043,7 @@ function TransactionTableInner({
         data-testid="transaction-table"
       >
         <Table
+          loading={isLoading}
           navigator={tableNavigator}
           ref={tableRef}
           listContainerRef={listContainerRef}

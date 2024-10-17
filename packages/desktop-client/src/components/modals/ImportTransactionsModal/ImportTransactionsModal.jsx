@@ -6,6 +6,7 @@ import { t } from 'i18next';
 import { amountToInteger } from 'loot-core/src/shared/util';
 
 import { useActions } from '../../../hooks/useActions';
+import { useCategories } from '../../../hooks/useCategories';
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import { useSyncedPrefs } from '../../../hooks/useSyncedPrefs';
 import { theme } from '../../../style';
@@ -155,7 +156,8 @@ export function ImportTransactionsModal({ options }) {
   const [flipAmount, setFlipAmount] = useState(false);
   const [multiplierEnabled, setMultiplierEnabled] = useState(false);
   const [reconcile, setReconcile] = useState(true);
-  const { accountId, categories, onImported } = options;
+  const { accountId, onImported } = options;
+  const { list: categories } = useCategories();
 
   // This cannot be set after parsing the file, because changing it
   // requires re-parsing the file. This is different from the other
@@ -239,7 +241,7 @@ export function ImportTransactionsModal({ options }) {
           break;
         }
 
-        const category_id = parseCategoryFields(trans, categories.list);
+        const category_id = parseCategoryFields(trans, categories);
         if (category_id != null) {
           trans.category = category_id;
         }
@@ -294,7 +296,7 @@ export function ImportTransactionsModal({ options }) {
             // add the updated existing transaction in the list, with the
             // isMatchedTransaction flag to identify it in display and not send it again
             existing_trx.isMatchedTransaction = true;
-            existing_trx.category = categories.list.find(
+            existing_trx.category = categories.find(
               cat => cat.id === existing_trx.category,
             )?.name;
             // add parent transaction attribute to mimic behaviour
@@ -309,7 +311,7 @@ export function ImportTransactionsModal({ options }) {
           return next;
         }, []);
     },
-    [accountId, categories.list, clearOnImport, importPreviewTransactions],
+    [accountId, categories, clearOnImport, importPreviewTransactions],
   );
 
   const parse = useCallback(
@@ -583,7 +585,7 @@ export function ImportTransactionsModal({ options }) {
         break;
       }
 
-      const category_id = parseCategoryFields(trans, categories.list);
+      const category_id = parseCategoryFields(trans, categories);
       trans.category = category_id;
 
       const {
@@ -785,7 +787,7 @@ export function ImportTransactionsModal({ options }) {
                       outValue={outValue}
                       flipAmount={flipAmount}
                       multiplierAmount={multiplierAmount}
-                      categories={categories.list}
+                      categories={categories}
                       onCheckTransaction={onCheckTransaction}
                       reconcile={reconcile}
                     />
