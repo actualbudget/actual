@@ -291,6 +291,24 @@ export async function runRules(trans) {
   return await finalizeTransactionForRules(finalTrans);
 }
 
+function conditionSpecialCases(cond: Condition): Condition[] {
+  //special cases that require multiple conditions
+  if (cond.op === 'is' && cond.field === 'category' && cond.value === null) {
+    return [
+      cond,
+      new Condition('is', 'transfer', false, null),
+      new Condition('is', 'parent', false, null),
+    ];
+  } else if (
+    cond.op === 'isNot' &&
+    cond.field === 'category' &&
+    cond.value === null
+  ) {
+    return [cond, new Condition('is', 'parent', false, null)];
+  }
+  return [cond];
+}
+
 // This does the inverse: finds all the transactions matching a rule
 export function conditionsToAQL(conditions, { recurDateBounds = 100 } = {}) {
   const errors = [];
@@ -309,11 +327,13 @@ export function conditionsToAQL(conditions, { recurDateBounds = 100 } = {}) {
         return null;
       }
     })
+    .flatMap(conditionSpecialCases)
     .filter(Boolean);
 
   // rule -> actualql
   const filters = conditions.map(cond => {
-    const { type, field, op, value, options } = cond;
+    const { type, options } = cond;
+    let { field, op, value } = cond;
 
     const getValue = value => {
       if (type === 'number') {
@@ -321,6 +341,23 @@ export function conditionsToAQL(conditions, { recurDateBounds = 100 } = {}) {
       }
       return value;
     };
+
+    if (field === 'transfer' && op === 'is') {
+      field = 'transfer_id';
+      if (value) {
+        op = 'isNot';
+        value = null;
+      } else {
+        value = null;
+      }
+    } else if (field === 'parent' && op === 'is') {
+      field = 'is_parent';
+      if (value) {
+        op = 'true';
+      } else {
+        op = 'false';
+      }
+    }
 
     const apply = (field, op, value) => {
       if (type === 'number') {
