@@ -1650,7 +1650,6 @@ function AccountTransactions({
         <View style={{ flex: 1 }}>
           <TransactionList
             isLoading={isTransactionsLoading}
-            headerContent={undefined}
             tableRef={tableRef}
             account={account}
             transactions={transactions}
