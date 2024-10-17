@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useMemo } from 'react';
 
 import { send } from '../../platform/client/fetch';
 import { type Query } from '../../shared/query';
@@ -84,21 +84,13 @@ export function useTransactions({
   };
 }
 
-type UsePreviewTransactionsProps = {
-  options?: {
-    isDisabled?: boolean;
-  };
-};
-
 type UsePreviewTransactionsResult = {
   data: ReadonlyArray<TransactionEntity>;
   isLoading: boolean;
   error?: Error;
 };
 
-export function usePreviewTransactions({
-  options: { isDisabled } = { isDisabled: false },
-}: UsePreviewTransactionsProps = {}): UsePreviewTransactionsResult {
+export function usePreviewTransactions(): UsePreviewTransactionsResult {
   const [previewTransactions, setPreviewTransactions] = useState<
     TransactionEntity[]
   >([]);
@@ -111,21 +103,17 @@ export function usePreviewTransactions({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | undefined>(undefined);
 
-  useEffect(() => {
+  const scheduleTransactions = useMemo(() => {
     if (isSchedulesLoading) {
-      return;
+      return [];
     }
-
-    let isUnmounted = false;
-
-    setIsLoading(schedules.length > 0);
 
     // Kick off an async rules application
     const schedulesForPreview = schedules.filter(s =>
       isForPreview(s, statuses),
     );
 
-    const baseTransactions = schedulesForPreview.map(schedule => ({
+    return schedulesForPreview.map(schedule => ({
       id: 'preview/' + schedule.id,
       payee: schedule._payee,
       account: schedule._account,
@@ -133,10 +121,18 @@ export function usePreviewTransactions({
       date: schedule.next_date,
       schedule: schedule.id,
     }));
+  }, [isSchedulesLoading, schedules, statuses]);
 
-    if (baseTransactions?.length) {
+  useEffect(() => {
+    let isUnmounted = false;
+
+    setIsLoading(scheduleTransactions.length > 0);
+
+    if (scheduleTransactions.length) {
       Promise.all(
-        baseTransactions.map(transaction => send('rules-run', { transaction })),
+        scheduleTransactions.map(transaction =>
+          send('rules-run', { transaction }),
+        ),
       )
         .then(newTrans => {
           if (!isUnmounted) {
@@ -168,10 +164,10 @@ export function usePreviewTransactions({
     return () => {
       isUnmounted = true;
     };
-  }, [isSchedulesLoading, schedules, statuses]);
+  }, [scheduleTransactions, schedules, statuses]);
 
   return {
-    data: isDisabled ? [] : previewTransactions,
+    data: previewTransactions,
     isLoading: isLoading || isSchedulesLoading,
     error: error || scheduleQueryError,
   };

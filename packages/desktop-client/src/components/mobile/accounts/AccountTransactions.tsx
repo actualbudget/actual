@@ -242,7 +242,7 @@ function TransactionListWithPreviews({
   });
 
   const { data: previewTransactions, isLoading: isPreviewTransactionsLoading } =
-    usePreviewTransactions({ options: { isDisabled: isSearching } });
+    usePreviewTransactions();
 
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const dispatch = useDispatch();
@@ -294,12 +294,7 @@ function TransactionListWithPreviews({
     150,
   );
 
-  const onSearch = useCallback(
-    (text: string) => {
-      updateSearchQuery(text);
-    },
-    [updateSearchQuery],
-  );
+  const onSearch = useCallback(updateSearchQuery, [updateSearchQuery]);
 
   const onOpenTransaction = useCallback(
     (transaction: TransactionEntity) => {
@@ -331,10 +326,14 @@ function TransactionListWithPreviews({
     [accountId, account],
   );
 
+  const transcationsToDisplay = !isSearching
+    ? previewTransactions.concat(transactions)
+    : transactions;
+
   return (
     <TransactionListWithBalances
       isLoading={isLoading || isPreviewTransactionsLoading}
-      transactions={previewTransactions.concat(transactions)}
+      transactions={transcationsToDisplay}
       balance={balanceQueries.balance}
       balanceCleared={balanceQueries.cleared}
       balanceUncleared={balanceQueries.uncleared}

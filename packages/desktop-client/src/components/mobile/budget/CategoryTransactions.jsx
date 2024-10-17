@@ -81,12 +81,7 @@ export function CategoryTransactions({ category, month }) {
     150,
   );
 
-  const onSearch = useCallback(
-    text => {
-      updateSearchQuery(text);
-    },
-    [updateSearchQuery],
-  );
+  const onSearch = useCallback(updateSearchQuery, [updateSearchQuery]);
 
   const onOpenTransaction = useCallback(
     transaction => {
