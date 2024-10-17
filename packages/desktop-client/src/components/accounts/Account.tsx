@@ -31,8 +31,8 @@ import { validForTransfer } from 'loot-core/client/transfer';
 import { type UndoState } from 'loot-core/server/undo';
 import { useFilters } from 'loot-core/src/client/data-hooks/filters';
 import {
-  SchedulesProvider,
   accountSchedulesQuery,
+  SchedulesProvider,
 } from 'loot-core/src/client/data-hooks/schedules';
 import * as queries from 'loot-core/src/client/queries';
 import { runQuery } from 'loot-core/src/client/query-helpers';
@@ -194,11 +194,6 @@ function getAccountTitle(
   return account.name;
 }
 
-type AccountInternalProps = {
-  accountId?: AccountEntity['id'] | 'onbudget' | 'offbudget' | 'uncategorized';
-  categoryId?: string;
-};
-
 type TableRefProps = {
   edit: (updatedId: string | null, op?: string, someBool?: boolean) => void;
   setRowAnimation: (animation: boolean) => void;
@@ -215,7 +210,15 @@ type SortOptions = {
   prevAscDesc?: 'asc' | 'desc';
 };
 
-function AccountInternal({ accountId, categoryId }: AccountInternalProps) {
+type AccountTransactionsProps = {
+  accountId?: AccountEntity['id'] | 'onbudget' | 'offbudget' | 'uncategorized';
+  categoryId?: string;
+};
+
+function AccountTransactions({
+  accountId,
+  categoryId,
+}: AccountTransactionsProps) {
   const { grouped: categoryGroups } = useCategories();
   const payees = usePayees();
   const accounts = useAccounts();
@@ -494,7 +497,6 @@ function AccountInternal({ accountId, categoryId }: AccountInternalProps) {
     [accountId, previewTransactions],
   );
 
-  // TODO: Enhance SplitsExpandedProvider to always collapse certain IDs on load.
   useEffect(() => {
     if (!isPreviewTransactionsLoading) {
       splitsExpandedDispatch({
@@ -1551,10 +1553,15 @@ function AccountInternal({ accountId, categoryId }: AccountInternalProps) {
 
   const transactionsWithPreview = useMemo(
     () =>
-      !isFiltered
+      !isFiltered && !isPreviewTransactionsLoading
         ? previewTransactionsWithInverse.concat(transactions)
         : transactions,
-    [isFiltered, previewTransactionsWithInverse, transactions],
+    [
+      isFiltered,
+      isPreviewTransactionsLoading,
+      previewTransactionsWithInverse,
+      transactions,
+    ],
   );
 
   const filteredBalance = useMemo(() => {
@@ -1567,18 +1574,6 @@ function AccountInternal({ accountId, categoryId }: AccountInternalProps) {
     [],
     item => !item._unmatched && !item.is_parent,
   );
-
-  // TODO: Can we just use IDs of the loaded transactions?
-  // const fetchAllIds = useCallback(async () => {
-  //   const { data } = await runQuery(transactionsQuery.select('id'));
-  //   // Remember, this is the `grouped` split type so we need to deal
-  //   // with the `subtransactions` property
-  //   return data.reduce((arr: string[], t: TransactionEntity) => {
-  //     arr.push(t.id);
-  //     t.subtransactions?.forEach(sub => arr.push(sub.id));
-  //     return arr;
-  //   }, []);
-  // }, [transactionsQuery]);
 
   if (!accountName && !isTransactionsLoading) {
     // This is probably an account that was deleted, so redirect to all accounts
@@ -1739,7 +1734,7 @@ export function Account() {
       <SplitsExpandedProvider
         initialMode={expandSplits ? 'collapse' : 'expand'}
       >
-        <AccountInternal
+        <AccountTransactions
           accountId={params.id}
           categoryId={location?.state?.categoryId}
         />

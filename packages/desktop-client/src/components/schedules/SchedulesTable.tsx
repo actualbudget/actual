@@ -290,7 +290,7 @@ function ScheduleRow({
 }
 
 export function SchedulesTable({
-  isLoading,
+  isLoading = false,
   schedules,
   statuses,
   filter,
