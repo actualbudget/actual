@@ -29,6 +29,7 @@ import {
 } from 'loot-core/client/data-hooks/transactions';
 import * as queries from 'loot-core/client/queries';
 import { listen, send } from 'loot-core/platform/client/fetch';
+import { type Query } from 'loot-core/shared/query';
 import { isPreviewId } from 'loot-core/shared/transactions';
 import {
   type AccountEntity,
@@ -222,19 +223,22 @@ function TransactionListWithPreviews({
   readonly accountName: AccountEntity['name'] | string;
 }) {
   const baseTransactionsQuery = useCallback(
-    () => queries.transactions(accountId).options({ splits: 'none' }),
+    () =>
+      queries.transactions(accountId).options({ splits: 'none' }).select('*'),
     [accountId],
   );
 
+  const [transactionsQuery, setTransactionsQuery] = useState<Query>(
+    baseTransactionsQuery(),
+  );
   const [isSearching, setIsSearching] = useState(false);
   const {
     transactions,
     isLoading,
     reload: reloadTransactions,
     loadMore: loadMoreTransactions,
-    updateQuery: updateTransactionsQuery,
   } = useTransactions({
-    queryBuilder: () => baseTransactionsQuery().select('*'),
+    query: transactionsQuery,
   });
 
   const { data: previewTransactions, isLoading: isPreviewTransactionsLoading } =
@@ -276,16 +280,16 @@ function TransactionListWithPreviews({
     useCallback(
       searchText => {
         if (searchText === '') {
-          updateTransactionsQuery(() => baseTransactionsQuery().select('*'));
+          setTransactionsQuery(baseTransactionsQuery());
         } else if (searchText) {
-          updateTransactionsQuery(currentQuery =>
+          setTransactionsQuery(currentQuery =>
             queries.transactionsSearch(currentQuery, searchText, dateFormat),
           );
         }
 
         setIsSearching(searchText !== '');
       },
-      [updateTransactionsQuery, baseTransactionsQuery, dateFormat],
+      [setTransactionsQuery, baseTransactionsQuery, dateFormat],
     ),
     150,
   );

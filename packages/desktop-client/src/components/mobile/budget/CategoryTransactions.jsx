@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { useDebounceCallback } from 'usehooks-ts';
@@ -28,18 +28,21 @@ export function CategoryTransactions({ category, month }) {
     () =>
       q('transactions')
         .options({ splits: 'inline' })
-        .filter(getCategoryMonthFilter(category, month)),
+        .filter(getCategoryMonthFilter(category, month))
+        .select('*'),
     [category, month],
   );
 
+  const [transactionsQuery, setTransactionsQuery] = useState(
+    baseTransactionsQuery(),
+  );
   const {
     transactions,
     isLoading,
     loadMore: loadMoreTransactions,
     reload: reloadTransactions,
-    updateQuery: updateTransactionsQuery,
   } = useTransactions({
-    queryBuilder: () => baseTransactionsQuery().select('*'),
+    query: transactionsQuery,
   });
 
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
@@ -66,14 +69,14 @@ export function CategoryTransactions({ category, month }) {
     useCallback(
       searchText => {
         if (searchText === '') {
-          updateTransactionsQuery(() => baseTransactionsQuery().select('*'));
+          setTransactionsQuery(baseTransactionsQuery());
         } else if (searchText) {
-          updateTransactionsQuery(currentQuery =>
+          setTransactionsQuery(currentQuery =>
             queries.transactionsSearch(currentQuery, searchText, dateFormat),
           );
         }
       },
-      [updateTransactionsQuery, baseTransactionsQuery, dateFormat],
+      [baseTransactionsQuery, dateFormat],
     ),
     150,
   );
