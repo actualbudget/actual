@@ -711,7 +711,7 @@ const compileOp = saveStack('op', (state, fieldRef, opData) => {
         END`;
       }
 
-      return `${left} != ${right}`;
+      return `(${left} != ${right} OR ${left} IS NULL)`;
     }
     case '$oneof': {
       const [left, right] = valArray(state, [lhs, rhs], [null, 'array']);
