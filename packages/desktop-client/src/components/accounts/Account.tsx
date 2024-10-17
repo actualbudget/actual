@@ -10,7 +10,6 @@ import { Trans } from 'react-i18next';
 import { Navigate, useParams, useLocation } from 'react-router-dom';
 
 import { t } from 'i18next';
-import { useDebounceCallback } from 'usehooks-ts';
 import { v4 as uuidv4 } from 'uuid';
 
 import {
@@ -26,7 +25,10 @@ import {
   unlinkAccount,
   updateAccount,
 } from 'loot-core/client/actions';
-import { useTransactions } from 'loot-core/client/data-hooks/transactions';
+import {
+  useTransactions,
+  useTransactionsSearch,
+} from 'loot-core/client/data-hooks/transactions';
 import { validForTransfer } from 'loot-core/client/transfer';
 import { type UndoState } from 'loot-core/server/undo';
 import { useFilters } from 'loot-core/src/client/data-hooks/filters';
@@ -271,7 +273,6 @@ function AccountTransactions({
     onBatchUnlinkSchedule,
   } = useTransactionBatchActions();
 
-  const [isSearching, setIsSearching] = useState<boolean>(false);
   const [filterConditions, setFilterConditions] = useState<ConditionEntity[]>(
     location?.state?.filterConditions || [],
   );
@@ -693,25 +694,11 @@ function AccountTransactions({
     }
   }, [modalShowing, reloadTransactions, wasModalShowing]);
 
-  const updateSearchQuery = useDebounceCallback(
-    useCallback(
-      async (searchText: string) => {
-        if (searchText === '') {
-          setTransactionsQuery(await rootTransactionsQuery());
-        } else if (searchText) {
-          setTransactionsQuery(currentQuery =>
-            queries.transactionsSearch(currentQuery, searchText, dateFormat),
-          );
-        }
-
-        setIsSearching(searchText !== '');
-      },
-      [rootTransactionsQuery, dateFormat],
-    ),
-    150,
-  );
-
-  const onSearch = useCallback(updateSearchQuery, [updateSearchQuery]);
+  const { isSearching, search: onSearch } = useTransactionsSearch({
+    updateQuery: setTransactionsQuery,
+    resetQuery: () => rootTransactionsQuery().then(setTransactionsQuery),
+    dateFormat,
+  });
 
   const onSync = useCallback(async () => {
     const account = accounts.find(acct => acct.id === accountId);
