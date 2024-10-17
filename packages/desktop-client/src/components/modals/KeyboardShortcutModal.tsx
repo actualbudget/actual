@@ -168,7 +168,7 @@ export function KeyboardShortcutModal() {
             }}
           >
             <View>
-              <Shortcut shortcut="?" description="Show this help dialog" />
+              <Shortcut shortcut="?" description="Open the help menu" />
               <Shortcut
                 shortcut="O"
                 description="Close the current budget and open another"
