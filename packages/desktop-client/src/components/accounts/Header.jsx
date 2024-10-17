@@ -358,8 +358,6 @@ export function AccountHeader({
                     setMenuOpen(false);
                     onMenuSelect(item);
                   }}
-                  onReconcile={onReconcile}
-                  onClose={() => setMenuOpen(false)}
                 />
               </Popover>
             </View>
@@ -550,29 +548,16 @@ function AccountMenu({
   canShowBalances,
   showCleared,
   showReconciled,
-  onClose,
   isSorted,
-  onReconcile,
   onMenuSelect,
 }) {
   const { t } = useTranslation();
-  const [tooltip, setTooltip] = useState('default');
   const syncServerStatus = useSyncServerStatus();
 
-  return tooltip === 'reconcile' ? (
-    <ReconcileMenu
-      account={account}
-      onClose={onClose}
-      onReconcile={onReconcile}
-    />
-  ) : (
+  return (
     <Menu
       onMenuSelect={item => {
-        if (item === 'reconcile') {
-          setTooltip('reconcile');
-        } else {
-          onMenuSelect(item);
-        }
+        onMenuSelect(item);
       }}
       items={[
         isSorted && {
@@ -598,7 +583,6 @@ function AccountMenu({
             : t('Show reconciled transactions'),
         },
         { name: 'export', text: t('Export') },
-        { name: 'reconcile', text: t('Reconcile') },
         account &&
           !account.closed &&
           (canSync
