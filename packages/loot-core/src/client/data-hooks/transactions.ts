@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { send } from '../../platform/client/fetch';
-import { q, type Query } from '../../shared/query';
+import { type Query } from '../../shared/query';
 import { ungroupTransactions } from '../../shared/transactions';
 import {
   type ScheduleEntity,
@@ -11,10 +11,8 @@ import { type PagedQuery, pagedQuery } from '../query-helpers';
 
 import { type ScheduleStatuses, useCachedSchedules } from './schedules';
 
-const defaultQuery = q('transactions').select('*');
-
 type UseTransactionsProps = {
-  queryBuilder: (query: Query) => Query;
+  query?: Query;
   options?: {
     pageCount?: number;
   };
@@ -26,16 +24,12 @@ type UseTransactionsResult = {
   error?: Error;
   reload?: () => void;
   loadMore?: () => void;
-  updateQuery: (buildQuery: (query: Query) => Query) => void;
 };
 
 export function useTransactions({
-  queryBuilder,
+  query,
   options = { pageCount: 50 },
 }: UseTransactionsProps): UseTransactionsResult {
-  const [query, setQuery] = useState<Query>(
-    queryBuilder?.(defaultQuery) ?? defaultQuery,
-  );
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | undefined>(undefined);
   const [transactions, setTransactions] = useState<
@@ -55,6 +49,15 @@ export function useTransactions({
 
     setIsLoading(query !== null);
 
+    if (!query) {
+      return;
+    }
+
+    if (query.state.table !== 'transactions') {
+      setError(new Error('Query must be a transactions query.'));
+      return;
+    }
+
     pagedQueryRef.current = pagedQuery<TransactionEntity>(query, {
       onData: data => {
         if (!isUnmounted) {
@@ -72,19 +75,12 @@ export function useTransactions({
     };
   }, [query]);
 
-  const updateQuery = useCallback(
-    (queryBuilder: (currentQuery: Query) => Query) =>
-      setQuery(currentQuery => queryBuilder?.(currentQuery) ?? currentQuery),
-    [],
-  );
-
   return {
     transactions,
     isLoading,
     error,
     reload: pagedQueryRef.current?.run,
     loadMore: pagedQueryRef.current?.fetchNext,
-    updateQuery,
   };
 }
 
