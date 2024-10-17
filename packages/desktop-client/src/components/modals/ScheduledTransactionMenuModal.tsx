@@ -1,12 +1,12 @@
 import React, {
-  useCallback,
+  useMemo,
   type ComponentPropsWithoutRef,
   type CSSProperties,
 } from 'react';
 
 import { useSchedules } from 'loot-core/client/data-hooks/schedules';
 import { format } from 'loot-core/shared/months';
-import { type Query } from 'loot-core/shared/query';
+import { q } from 'loot-core/shared/query';
 
 import { theme, styles } from '../../style';
 import { Menu } from '../common/Menu';
@@ -34,8 +34,8 @@ export function ScheduledTransactionMenuModal({
   };
   const scheduleId = transactionId?.split('/')?.[1];
   const { isLoading: isSchedulesLoading, schedules } = useSchedules({
-    queryBuilder: useCallback(
-      (q: Query) => q.filter({ id: scheduleId }),
+    query: useMemo(
+      () => q('schedules').filter({ id: scheduleId }).select('*'),
       [scheduleId],
     ),
   });

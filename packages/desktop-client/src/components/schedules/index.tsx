@@ -1,8 +1,9 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 
 import { pushModal } from 'loot-core/client/actions';
+import { q } from 'loot-core/shared/query';
 import { useSchedules } from 'loot-core/src/client/data-hooks/schedules';
 import { send } from 'loot-core/src/platform/client/fetch';
 import { type ScheduleEntity } from 'loot-core/src/types/models';
@@ -67,7 +68,13 @@ export function Schedules() {
     [],
   );
 
-  const { isLoading: isSchedulesLoading, schedules, statuses } = useSchedules();
+  const {
+    isLoading: isSchedulesLoading,
+    schedules,
+    statuses,
+  } = useSchedules({
+    query: useMemo(() => q('schedules').select('*'), []),
+  });
 
   if (isSchedulesLoading) {
     return null;

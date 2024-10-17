@@ -19,7 +19,7 @@ import { type UndoState } from 'loot-core/server/undo';
 import { useFilters } from 'loot-core/src/client/data-hooks/filters';
 import {
   SchedulesProvider,
-  defaultSchedulesQueryBuilder,
+  accountSchedulesQuery,
 } from 'loot-core/src/client/data-hooks/schedules';
 import * as queries from 'loot-core/src/client/queries';
 import {
@@ -1878,13 +1878,13 @@ export function Account() {
   const savedFiters = useFilters();
   const actionCreators = useActions();
 
-  const schedulesQueryBuilder = useMemo(
-    () => defaultSchedulesQueryBuilder(params.id),
+  const schedulesQuery = useMemo(
+    () => accountSchedulesQuery(params.id),
     [params.id],
   );
 
   return (
-    <SchedulesProvider queryBuilder={schedulesQueryBuilder}>
+    <SchedulesProvider query={schedulesQuery}>
       <SplitsExpandedProvider
         initialMode={expandSplits ? 'collapse' : 'expand'}
       >

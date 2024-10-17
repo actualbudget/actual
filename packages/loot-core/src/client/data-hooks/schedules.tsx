@@ -5,7 +5,6 @@ import React, {
   useEffect,
   useState,
   useRef,
-  useMemo,
   type PropsWithChildren,
 } from 'react';
 
@@ -20,8 +19,6 @@ import {
 } from '../../types/models';
 import { accountFilter } from '../queries';
 import { type LiveQuery, liveQuery } from '../query-helpers';
-
-const defaultQuery = q('schedules').select('*');
 
 export type ScheduleStatusType = ReturnType<typeof getStatus>;
 export type ScheduleStatuses = Map<ScheduleEntity['id'], ScheduleStatusType>;
@@ -55,10 +52,7 @@ function loadStatuses(
 }
 
 type UseSchedulesProps = {
-  queryBuilder?: (q: Query) => Query;
-  options?: {
-    isDisabled?: boolean;
-  };
+  query?: Query;
 };
 type ScheduleData = {
   schedules: readonly ScheduleEntity[];
@@ -66,15 +60,13 @@ type ScheduleData = {
 };
 type UseSchedulesResult = ScheduleData & {
   readonly isLoading: boolean;
-  readonly isDisabled: boolean;
   readonly error?: Error;
 };
 
 export function useSchedules({
-  queryBuilder,
-  options: { isDisabled } = { isDisabled: false },
+  query,
 }: UseSchedulesProps = {}): UseSchedulesResult {
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | undefined>(undefined);
   const [data, setData] = useState<ScheduleData>({
     schedules: [],
@@ -84,15 +76,21 @@ export function useSchedules({
 
   const scheduleQueryRef = useRef<LiveQuery<ScheduleEntity> | null>(null);
   const statusQueryRef = useRef<LiveQuery<TransactionEntity> | null>(null);
-  const query = useMemo(
-    () => queryBuilder?.(defaultQuery) ?? defaultQuery,
-    [queryBuilder],
-  );
 
   useEffect(() => {
     let isUnmounted = false;
 
-    setIsLoading(query !== null);
+    setError(undefined);
+    setIsLoading(!!query);
+
+    if (!query) {
+      return;
+    }
+
+    if (query.state.table !== 'schedules') {
+      setError(new Error('Query must be a schedules query.'));
+      return;
+    }
 
     scheduleQueryRef.current = liveQuery<ScheduleEntity>(query, {
       onData: async schedules => {
@@ -120,9 +118,8 @@ export function useSchedules({
 
   return {
     isLoading,
-    isDisabled,
     error,
-    ...(isDisabled ? { schedules: [], statuses: new Map() } : data),
+    ...data,
   };
 }
 
@@ -130,20 +127,16 @@ type SchedulesContextValue = UseSchedulesResult;
 
 const SchedulesContext = createContext<SchedulesContextValue>({
   isLoading: false,
-  isDisabled: false,
   schedules: [],
   statuses: new Map(),
 });
 
 type SchedulesProviderProps = PropsWithChildren<{
-  queryBuilder?: UseSchedulesProps['queryBuilder'];
+  query?: UseSchedulesProps['query'];
 }>;
 
-export function SchedulesProvider({
-  queryBuilder,
-  children,
-}: SchedulesProviderProps) {
-  const data = useSchedules({ queryBuilder });
+export function SchedulesProvider({ query, children }: SchedulesProviderProps) {
+  const data = useSchedules({ query });
   return (
     <SchedulesContext.Provider value={data}>
       {children}
@@ -155,25 +148,27 @@ export function useCachedSchedules() {
   return useContext(SchedulesContext);
 }
 
-export function defaultSchedulesQueryBuilder(
+export function accountSchedulesQuery(
   accountId?: AccountEntity['id'] | 'budgeted' | 'offbudget' | 'uncategorized',
 ) {
   const filterByAccount = accountFilter(accountId, '_account');
   const filterByPayee = accountFilter(accountId, '_payee.transfer_acct');
 
-  return (q: Query) => {
-    q = q.filter({
+  let query = q('schedules')
+    .select('*')
+    .filter({
       $and: [{ '_account.closed': false }],
     });
-    if (accountId) {
-      if (accountId === 'uncategorized') {
-        q = q.filter({ next_date: null });
-      } else {
-        q = q.filter({
-          $or: [filterByAccount, filterByPayee],
-        });
-      }
+
+  if (accountId) {
+    if (accountId === 'uncategorized') {
+      query = query.filter({ next_date: null });
+    } else {
+      query = query.filter({
+        $or: [filterByAccount, filterByPayee],
+      });
     }
-    return q.orderBy({ next_date: 'desc' });
-  };
+  }
+
+  return query.orderBy({ next_date: 'desc' });
 }

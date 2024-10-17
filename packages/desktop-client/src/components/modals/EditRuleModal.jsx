@@ -1,10 +1,4 @@
-import React, {
-  useState,
-  useEffect,
-  useRef,
-  useCallback,
-  useMemo,
-} from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { css } from '@emotion/css';
@@ -314,7 +308,7 @@ function ScheduleDescription({ id }) {
     statuses: scheduleStatuses,
     isLoading: isSchedulesLoading,
   } = useSchedules({
-    queryBuilder: useCallback(q => q.filter({ id }), [id]),
+    query: useMemo(() => q('schedules').filter({ id }).select('*'), [id]),
   });
 
   if (isSchedulesLoading) {

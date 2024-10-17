@@ -18,7 +18,7 @@ import {
   updateAccount,
 } from 'loot-core/client/actions';
 import {
-  defaultSchedulesQueryBuilder,
+  accountSchedulesQuery,
   SchedulesProvider,
 } from 'loot-core/client/data-hooks/schedules';
 import {
@@ -56,8 +56,8 @@ export function AccountTransactions({
   readonly accountId?: string;
   readonly accountName: string;
 }) {
-  const schedulesQueryBuilder = useMemo(
-    () => defaultSchedulesQueryBuilder(accountId),
+  const schedulesQuery = useMemo(
+    () => accountSchedulesQuery(accountId),
     [accountId],
   );
 
@@ -78,7 +78,7 @@ export function AccountTransactions({
       }
       padding={0}
     >
-      <SchedulesProvider queryBuilder={schedulesQueryBuilder}>
+      <SchedulesProvider query={schedulesQuery}>
         <TransactionListWithPreviews
           account={account}
           accountName={accountName}
@@ -247,7 +247,9 @@ function TransactionListWithPreviews({
   const navigate = useNavigate();
 
   const onRefresh = useCallback(() => {
-    dispatch(syncAndDownload(accountId));
+    if (accountId) {
+      dispatch(syncAndDownload(accountId));
+    }
   }, [accountId, dispatch]);
 
   useEffect(() => {
@@ -310,14 +312,14 @@ function TransactionListWithPreviews({
     [accountId, account],
   );
 
-  const transcationsToDisplay = !isSearching
+  const transactionsToDisplay = !isSearching
     ? previewTransactions.concat(transactions)
     : transactions;
 
   return (
     <TransactionListWithBalances
       isLoading={isLoading || isPreviewTransactionsLoading}
-      transactions={transcationsToDisplay}
+      transactions={transactionsToDisplay}
       balance={balanceQueries.balance}
       balanceCleared={balanceQueries.cleared}
       balanceUncleared={balanceQueries.uncleared}

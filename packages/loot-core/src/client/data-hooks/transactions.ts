@@ -50,7 +50,8 @@ export function useTransactions({
   useEffect(() => {
     let isUnmounted = false;
 
-    setIsLoading(query !== null);
+    setError(undefined);
+    setIsLoading(!!query);
 
     if (!query) {
       return;
@@ -68,7 +69,11 @@ export function useTransactions({
           setIsLoading(false);
         }
       },
-      onError: setError,
+      onError: error => {
+        if (!isUnmounted) {
+          setError(error);
+        }
+      },
       options: { pageCount: optionsRef.current.pageCount },
     });
 
@@ -129,40 +134,44 @@ export function usePreviewTransactions(): UsePreviewTransactionsResult {
   useEffect(() => {
     let isUnmounted = false;
 
-    setIsLoading(scheduleTransactions.length > 0);
+    setError(undefined);
 
-    if (scheduleTransactions.length) {
-      Promise.all(
-        scheduleTransactions.map(transaction =>
-          send('rules-run', { transaction }),
-        ),
-      )
-        .then(newTrans => {
-          if (!isUnmounted) {
-            const withDefaults = newTrans.map(t => ({
-              ...t,
-              category: statuses.get(t.schedule),
-              schedule: t.schedule,
-              subtransactions: t.subtransactions?.map(
-                (st: TransactionEntity) => ({
-                  ...st,
-                  id: 'preview/' + st.id,
-                  schedule: t.schedule,
-                }),
-              ),
-            }));
-
-            setIsLoading(false);
-            setPreviewTransactions(ungroupTransactions(withDefaults));
-          }
-        })
-        .catch(error => {
-          if (!isUnmounted) {
-            setIsLoading(false);
-            setError(error);
-          }
-        });
+    if (scheduleTransactions.length === 0) {
+      setPreviewTransactions([]);
+      return;
     }
+
+    setIsLoading(true);
+
+    Promise.all(
+      scheduleTransactions.map(transaction =>
+        send('rules-run', { transaction }),
+      ),
+    )
+      .then(newTrans => {
+        if (!isUnmounted) {
+          const withDefaults = newTrans.map(t => ({
+            ...t,
+            category: statuses.get(t.schedule),
+            schedule: t.schedule,
+            subtransactions: t.subtransactions?.map(
+              (st: TransactionEntity) => ({
+                ...st,
+                id: 'preview/' + st.id,
+                schedule: t.schedule,
+              }),
+            ),
+          }));
+
+          setIsLoading(false);
+          setPreviewTransactions(ungroupTransactions(withDefaults));
+        }
+      })
+      .catch(error => {
+        if (!isUnmounted) {
+          setError(error);
+        }
+      });
 
     return () => {
       isUnmounted = true;

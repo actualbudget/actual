@@ -10,6 +10,7 @@ import React, {
 import { useDispatch } from 'react-redux';
 
 import { useSchedules } from 'loot-core/client/data-hooks/schedules';
+import { q } from 'loot-core/shared/query';
 import { pushModal } from 'loot-core/src/client/actions/modals';
 import { initiallyLoadPayees } from 'loot-core/src/client/actions/queries';
 import { send } from 'loot-core/src/platform/client/fetch';
@@ -113,7 +114,9 @@ export function ManageRules({
   const [filter, setFilter] = useState('');
   const dispatch = useDispatch();
 
-  const { schedules = [] } = useSchedules();
+  const { schedules = [] } = useSchedules({
+    query: useMemo(() => q('schedules').select('*'), []),
+  });
   const { list: categories } = useCategories();
   const payees = usePayees();
   const accounts = useAccounts();
