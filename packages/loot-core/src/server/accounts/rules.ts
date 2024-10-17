@@ -44,6 +44,10 @@ function registerHandlebarsHelpers() {
 
   const helpers = {
     regex: (value: unknown, regex: unknown, replace: unknown) => {
+      if (value == null) {
+        return null;
+      }
+
       if (typeof regex !== 'string' || typeof replace !== 'string') {
         return '';
       }
@@ -791,7 +795,7 @@ export function execActions(actions: Action[], transaction) {
   // Remove that entry from the subtransactions.
   update.subtransactions = update.subtransactions.slice(1);
 
-  return update;
+  return recalculateSplit(update);
 }
 
 export class Rule {

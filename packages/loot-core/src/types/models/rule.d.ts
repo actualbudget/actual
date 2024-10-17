@@ -35,6 +35,7 @@ type FieldValueTypes = {
   date: string;
   notes: string;
   payee: string;
+  payee_name: string;
   imported_payee: string;
   saved: string;
   cleared: boolean;
