@@ -33,12 +33,10 @@ export function useSheetValue<
     query: bindingObj.query,
   });
   const latestOnChange = useRef(onChange);
-  const latestValue = useRef(result.value);
+  latestOnChange.current = onChange;
 
-  useLayoutEffect(() => {
-    latestOnChange.current = onChange;
-    latestValue.current = result.value;
-  });
+  const latestValue = useRef(result.value);
+  latestValue.current = result.value;
 
   useLayoutEffect(() => {
     if (bindingObj.query) {
@@ -54,7 +52,7 @@ export function useSheetValue<
         setResult(newResult);
       }
     });
-  }, [sheetName, bindingObj.name]);
+  }, [spreadsheet, sheetName, bindingObj.name, bindingObj.query]);
 
   return result.value;
 }
