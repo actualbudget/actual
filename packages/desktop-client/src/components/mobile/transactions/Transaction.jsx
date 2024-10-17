@@ -26,8 +26,9 @@ import { Button } from '../../common/Button2';
 import { Text } from '../../common/Text';
 import { TextOneLine } from '../../common/TextOneLine';
 import { View } from '../../common/View';
+import { usePrettyPayee } from '../usePrettyPayee';
 
-import { lookupName, getDescriptionPretty, Status } from './TransactionEdit';
+import { lookupName, Status } from './TransactionEdit';
 
 const ROW_HEIGHT = 50;
 
@@ -71,11 +72,12 @@ export const Transaction = memo(function Transaction({
     is_parent: isParent,
     is_child: isChild,
     schedule,
+    _inverse,
   } = transaction;
 
   const payee = usePayee(payeeId);
   const account = useAccount(accountId);
-  const transferAcct = useAccount(payee?.transfer_acct);
+  const transferAccount = useAccount(payee?.transfer_acct);
   const isPreview = isPreviewId(id);
 
   const { longPressProps } = useLongPress({
@@ -97,19 +99,19 @@ export const Transaction = memo(function Transaction({
 
   let amount = originalAmount;
   if (isPreview) {
-    amount = getScheduledAmount(amount);
+    amount = getScheduledAmount(amount, _inverse);
   }
 
   const categoryName = lookupName(categories, categoryId);
 
-  const prettyDescription = getDescriptionPretty(
+  const prettyPayee = usePrettyPayee({
     transaction,
     payee,
-    transferAcct,
-  );
+    transferAccount,
+  });
   const specialCategory = account?.offbudget
     ? 'Off Budget'
-    : transferAcct && !transferAcct.offbudget
+    : transferAccount && !transferAccount.offbudget
       ? 'Transfer'
       : isParent
         ? 'Split'
@@ -171,13 +173,13 @@ export const Transaction = memo(function Transaction({
                   ...textStyle,
                   fontSize: 14,
                   fontWeight: isAdded ? '600' : '400',
-                  ...(prettyDescription === '' && {
+                  ...(prettyPayee === '' && {
                     color: theme.tableTextLight,
                     fontStyle: 'italic',
                   }),
                 }}
               >
-                {prettyDescription || 'Empty'}
+                {prettyPayee || 'Empty'}
               </TextOneLine>
             </View>
             {isPreview ? (
