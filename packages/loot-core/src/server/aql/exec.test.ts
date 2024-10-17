@@ -167,7 +167,7 @@ describe('runQuery', () => {
   it('allows null as a parameter', async () => {
     await db.insertCategoryGroup({ id: 'group', name: 'group' });
     await db.insertCategory({ id: 'cat', name: 'cat', cat_group: 'group' });
-    await db.insertCategory({ id: 'different', name: 'different', cat_group: 'group' });
+    await db.insertCategory({ id: 'cat2', name: 'cat2', cat_group: 'group' });
     const transNoCat = await db.insertTransaction({
       account: 'acct',
       date: '2020-01-01',
@@ -184,7 +184,7 @@ describe('runQuery', () => {
       account: 'acct',
       date: '2020-01-02',
       amount: -5001,
-      category: 'different',
+      category: 'cat2',
     });
 
     const queryState = q('transactions')
@@ -200,29 +200,40 @@ describe('runQuery', () => {
 
     data = (
       await runQuery(
-
         q('transactions')
           .filter({ category: { $ne: ':category' } })
           .select('category')
           .serialize(),
 
-        { params: { category: 'different' } }
+        { params: { category: 'cat2' } },
       )
     ).data;
-    expect(data.length).toBe(2);
+    expect(data).toHaveLength(2);
+    expect(data).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ id: transNoCat }),
+        expect.objectContaining({ id: transCat }),
+        expect.not.objectContaining({ id: transCat2 }),
+      ]),
+    );
 
     data = (
       await runQuery(
-
         q('transactions')
           .filter({ category: { $ne: ':category' } })
           .select('category')
           .serialize(),
-        { params: { category: null } }
+        { params: { category: null } },
       )
     ).data;
-    expect(data.length).toBe(2);
-
+    expect(data).toHaveLength(2);
+    expect(data).toEqual(
+      expect.arrayContaining([
+        expect.not.objectContaining({ id: transNoCat }),
+        expect.objectContaining({ id: transCat }),
+        expect.objectContaining({ id: transCat2 }),
+      ]),
+    );
   });
 
   it('parameters have the correct order', async () => {
