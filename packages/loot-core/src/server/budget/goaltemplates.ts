@@ -8,6 +8,7 @@ import { batchMessages } from '../sync';
 import { getSheetValue, isReflectBudget, setBudget, setGoal } from './actions';
 import { goalsAverage } from './goals/goalsAverage';
 import { goalsBy } from './goals/goalsBy';
+import { goalsCopy } from './goals/goalsCopy';
 import { goalsPercentage } from './goals/goalsPercentage';
 import { findRemainder, goalsRemainder } from './goals/goalsRemainder';
 import { goalsSchedule } from './goals/goalsSchedule';
@@ -520,6 +521,24 @@ async function applyCategoryTemplate(
           hold,
           to_budget,
           last_month_balance,
+        );
+        to_budget = goalsReturn.to_budget;
+        errors = goalsReturn.errors;
+        limit = goalsReturn.limit;
+        limitCheck = goalsReturn.limitCheck;
+        hold = goalsReturn.hold;
+        break;
+      }
+      case 'copy': {
+        const goalsReturn = await goalsCopy(
+          template,
+          month,
+          category,
+          limitCheck,
+          errors,
+          limit,
+          hold,
+          to_budget,
         );
         to_budget = goalsReturn.to_budget;
         errors = goalsReturn.errors;
