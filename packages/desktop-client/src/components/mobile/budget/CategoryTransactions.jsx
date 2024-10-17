@@ -4,7 +4,10 @@ import { useDispatch } from 'react-redux';
 import { useDebounceCallback } from 'usehooks-ts';
 
 import { getPayees } from 'loot-core/client/actions';
-import { useTransactions } from 'loot-core/client/data-hooks/transactions';
+import {
+  useTransactions,
+  useTransactionsSearch,
+} from 'loot-core/client/data-hooks/transactions';
 import * as queries from 'loot-core/client/queries';
 import { listen } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
@@ -65,23 +68,12 @@ export function CategoryTransactions({ category, month }) {
     });
   }, [dispatch, reloadTransactions]);
 
-  const updateSearchQuery = useDebounceCallback(
-    useCallback(
-      searchText => {
-        if (searchText === '') {
-          setTransactionsQuery(baseTransactionsQuery());
-        } else if (searchText) {
-          setTransactionsQuery(currentQuery =>
-            queries.transactionsSearch(currentQuery, searchText, dateFormat),
-          );
-        }
-      },
-      [baseTransactionsQuery, dateFormat],
-    ),
-    150,
-  );
-
-  const onSearch = useCallback(updateSearchQuery, [updateSearchQuery]);
+  const { search } = useTransactionsSearch({
+    updateQuery: setTransactionsQuery,
+    resetQuery: () => setTransactionsQuery(baseTransactionsQuery()),
+    dateFormat,
+  });
+  const onSearch = useDebounceCallback(search, 150);
 
   const onOpenTransaction = useCallback(
     transaction => {

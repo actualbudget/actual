@@ -26,6 +26,7 @@ import {
 import {
   usePreviewTransactions,
   useTransactions,
+  useTransactionsSearch,
 } from 'loot-core/client/data-hooks/transactions';
 import * as queries from 'loot-core/client/queries';
 import { listen, send } from 'loot-core/platform/client/fetch';
@@ -231,7 +232,6 @@ function TransactionListWithPreviews({
   const [transactionsQuery, setTransactionsQuery] = useState<Query>(
     baseTransactionsQuery(),
   );
-  const [isSearching, setIsSearching] = useState(false);
   const {
     transactions,
     isLoading,
@@ -276,25 +276,13 @@ function TransactionListWithPreviews({
     });
   }, [dispatch, reloadTransactions]);
 
-  const updateSearchQuery = useDebounceCallback(
-    useCallback(
-      searchText => {
-        if (searchText === '') {
-          setTransactionsQuery(baseTransactionsQuery());
-        } else if (searchText) {
-          setTransactionsQuery(currentQuery =>
-            queries.transactionsSearch(currentQuery, searchText, dateFormat),
-          );
-        }
+  const { isSearching, search } = useTransactionsSearch({
+    updateQuery: setTransactionsQuery,
+    resetQuery: () => setTransactionsQuery(baseTransactionsQuery()),
+    dateFormat,
+  });
 
-        setIsSearching(searchText !== '');
-      },
-      [setTransactionsQuery, baseTransactionsQuery, dateFormat],
-    ),
-    150,
-  );
-
-  const onSearch = useCallback(updateSearchQuery, [updateSearchQuery]);
+  const onSearch = useDebounceCallback(search, 150);
 
   const onOpenTransaction = useCallback(
     (transaction: TransactionEntity) => {
