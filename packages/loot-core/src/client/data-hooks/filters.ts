@@ -27,7 +27,7 @@ export function useFilters(): TransactionFilterEntity[] {
 
   /** Sort filters by alphabetical order */
   const sort = useCallback((filters: TransactionFilterEntity[]) => {
-    return filters.toSorted((a, b) =>
+    return [...filters].sort((a, b) =>
       a.name
         .trim()
         .localeCompare(b.name.trim(), undefined, { ignorePunctuation: true }),

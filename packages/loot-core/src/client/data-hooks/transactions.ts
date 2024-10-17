@@ -73,15 +73,6 @@ export function useTransactions({
 
     setIsLoading(true);
 
-    if (!query) {
-      return;
-    }
-
-    if (query.state.table !== 'transactions') {
-      setError(new Error('Query must be a transactions query.'));
-      return;
-    }
-
     pagedQueryRef.current = pagedQuery<TransactionEntity>(query, {
       onData: data => {
         if (!isUnmounted) {
