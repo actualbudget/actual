@@ -1,5 +1,11 @@
 // @ts-strict-ignore
-import React, { useRef, useState, useMemo, type CSSProperties } from 'react';
+import React, {
+  useRef,
+  useState,
+  useMemo,
+  type CSSProperties,
+  useCallback,
+} from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import {
@@ -198,7 +204,7 @@ export function ScheduleAmountCell({
 }
 
 export function SchedulesTable({
-  isLoading,
+  isLoading = false,
   schedules,
   statuses,
   filter,
@@ -269,94 +275,104 @@ export function SchedulesTable({
     return [...unCompletedSchedules, { id: 'show-completed' }];
   }, [filteredSchedules, showCompleted, allowCompleted]);
 
-  function renderSchedule({ schedule }: { schedule: ScheduleEntity }) {
-    return (
-      <Row
-        height={ROW_HEIGHT}
-        inset={15}
-        onClick={() => onSelect(schedule.id)}
-        style={{
-          cursor: 'pointer',
-          backgroundColor: theme.tableBackground,
-          color: theme.tableText,
-          ':hover': { backgroundColor: theme.tableRowBackgroundHover },
-        }}
-      >
-        <Field width="flex" name="name">
-          <Text
-            style={
-              schedule.name == null
-                ? { color: theme.buttonNormalDisabledText }
-                : null
-            }
-            title={schedule.name ? schedule.name : ''}
-          >
-            {schedule.name ? schedule.name : t('None')}
-          </Text>
-        </Field>
-        <Field width="flex" name="payee">
-          <DisplayId type="payees" id={schedule._payee} />
-        </Field>
-        <Field width="flex" name="account">
-          <DisplayId type="accounts" id={schedule._account} />
-        </Field>
-        <Field width={110} name="date">
-          {schedule.next_date
-            ? monthUtilFormat(schedule.next_date, dateFormat)
-            : null}
-        </Field>
-        <Field width={120} name="status" style={{ alignItems: 'flex-start' }}>
-          <StatusBadge status={statuses.get(schedule.id)} />
-        </Field>
-        <ScheduleAmountCell amount={schedule._amount} op={schedule._amountOp} />
-        {!minimal && (
-          <Field width={80} style={{ textAlign: 'center' }}>
-            {schedule._date && schedule._date.frequency && (
-              <SvgCheck style={{ width: 13, height: 13 }} />
-            )}
-          </Field>
-        )}
-        {!minimal && (
-          <Field width={40} name="actions">
-            <OverflowMenu
-              schedule={schedule}
-              status={statuses.get(schedule.id)}
-              onAction={onAction}
-            />
-          </Field>
-        )}
-      </Row>
-    );
-  }
-
-  function renderItem({ item }: { item: SchedulesTableItem }) {
-    if (item.id === 'show-completed') {
+  const renderSchedule = useCallback(
+    ({ schedule }: { schedule: ScheduleEntity }) => {
+      const status = statuses.get(schedule.id);
       return (
         <Row
           height={ROW_HEIGHT}
           inset={15}
+          onClick={() => onSelect(schedule.id)}
           style={{
             cursor: 'pointer',
-            backgroundColor: 'transparent',
+            backgroundColor: theme.tableBackground,
+            color: theme.tableText,
             ':hover': { backgroundColor: theme.tableRowBackgroundHover },
           }}
-          onClick={() => setShowCompleted(true)}
         >
-          <Field
-            width="flex"
-            style={{
-              fontStyle: 'italic',
-              textAlign: 'center',
-              color: theme.tableText,
-            }}
-          >
-            <Trans>Show completed schedules</Trans>
+          <Field width="flex" name="name">
+            <Text
+              style={
+                schedule.name == null
+                  ? { color: theme.buttonNormalDisabledText }
+                  : null
+              }
+              title={schedule.name ? schedule.name : ''}
+            >
+              {schedule.name ? schedule.name : t('None')}
+            </Text>
           </Field>
+          <Field width="flex" name="payee">
+            <DisplayId type="payees" id={schedule._payee} />
+          </Field>
+          <Field width="flex" name="account">
+            <DisplayId type="accounts" id={schedule._account} />
+          </Field>
+          <Field width={110} name="date">
+            {schedule.next_date
+              ? monthUtilFormat(schedule.next_date, dateFormat)
+              : null}
+          </Field>
+          <Field width={120} name="status" style={{ alignItems: 'flex-start' }}>
+            {status && <StatusBadge status={status} />}
+          </Field>
+          <ScheduleAmountCell
+            amount={schedule._amount}
+            op={schedule._amountOp}
+          />
+          {!minimal && (
+            <Field width={80} style={{ textAlign: 'center' }}>
+              {schedule._date && schedule._date.frequency && (
+                <SvgCheck style={{ width: 13, height: 13 }} />
+              )}
+            </Field>
+          )}
+          {!minimal && (
+            <Field width={40} name="actions">
+              <OverflowMenu
+                schedule={schedule}
+                status={status}
+                onAction={onAction}
+              />
+            </Field>
+          )}
         </Row>
       );
-    }
-    return renderSchedule({ schedule: item as ScheduleEntity });
-  }
+    },
+    [statuses, dateFormat, onAction, minimal, onSelect],
+  );
+
+  const renderItem = useCallback(
+    ({ item }: { item: SchedulesTableItem }) => {
+      if (item.id === 'show-completed') {
+        return (
+          <Row
+            height={ROW_HEIGHT}
+            inset={15}
+            style={{
+              cursor: 'pointer',
+              backgroundColor: 'transparent',
+              ':hover': { backgroundColor: theme.tableRowBackgroundHover },
+            }}
+            onClick={() => setShowCompleted(true)}
+          >
+            <Field
+              width="flex"
+              style={{
+                fontStyle: 'italic',
+                textAlign: 'center',
+                color: theme.tableText,
+              }}
+            >
+              <Trans>Show completed schedules</Trans>
+            </Field>
+          </Row>
+        );
+      }
+      return renderSchedule({ schedule: item as ScheduleEntity });
+    },
+    [renderSchedule],
+  );
 
   return (
     <View style={{ flex: 1, ...tableStyle }}>

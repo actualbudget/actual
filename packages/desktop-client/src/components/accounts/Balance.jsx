@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { css } from '@emotion/css';
@@ -18,7 +18,6 @@ import { PrivacyFilter } from '../PrivacyFilter';
 import { CellValue, CellValueText } from '../spreadsheet/CellValue';
 import { useFormat } from '../spreadsheet/useFormat';
 import { useSheetValue } from '../spreadsheet/useSheetValue';
-import { runQuery } from 'loot-core/client/query-helpers';
 
 function DetailedBalance({ name, balance, isExactBalance = true }) {
   const format = useFormat();

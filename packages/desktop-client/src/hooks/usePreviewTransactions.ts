@@ -16,7 +16,8 @@ import { usePrevious } from './usePrevious';
 /**
  * @deprecated Please use `usePreviewTransactions` hook from `loot-core/client/data-hooks/transactions` instead.
  */
-export function usePreviewTransactions(
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function usePreviewTransactions(
   collapseTransactions?: (ids: string[]) => void,
 ) {
   const [previewTransactions, setPreviewTransactions] = useState<
