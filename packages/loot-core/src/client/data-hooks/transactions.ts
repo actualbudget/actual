@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useMemo } from 'react';
+import { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 
 import { send } from '../../platform/client/fetch';
 import { type Query } from '../../shared/query';
@@ -7,6 +7,7 @@ import {
   type ScheduleEntity,
   type TransactionEntity,
 } from '../../types/models';
+import * as queries from '../queries';
 import { type PagedQuery, pagedQuery } from '../query-helpers';
 
 import { type ScheduleStatuses, useCachedSchedules } from './schedules';
@@ -170,6 +171,45 @@ export function usePreviewTransactions(): UsePreviewTransactionsResult {
     data: previewTransactions,
     isLoading: isLoading || isSchedulesLoading,
     error: error || scheduleQueryError,
+  };
+}
+
+type UseTransactionsSearchProps = {
+  updateQuery: (updateFn: (searchQuery: Query) => Query) => void;
+  resetQuery: () => void;
+  dateFormat: string;
+};
+
+type UseTransactionsSearchResult = {
+  isSearching: boolean;
+  search: (searchText: string) => void;
+};
+
+export function useTransactionsSearch({
+  updateQuery,
+  resetQuery,
+  dateFormat,
+}: UseTransactionsSearchProps): UseTransactionsSearchResult {
+  const [isSearching, setIsSearching] = useState(false);
+
+  const updateSearchQuery = useCallback(
+    (searchText: string) => {
+      if (searchText === '') {
+        resetQuery();
+        setIsSearching(false);
+      } else if (searchText) {
+        updateQuery(previousQuery =>
+          queries.transactionsSearch(previousQuery, searchText, dateFormat),
+        );
+        setIsSearching(true);
+      }
+    },
+    [dateFormat, resetQuery, updateQuery],
+  );
+
+  return {
+    isSearching,
+    search: updateSearchQuery,
   };
 }
 
