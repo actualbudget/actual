@@ -810,19 +810,19 @@ export function TableHeader({
   );
 }
 
-type SelectedItemsButtonProps<T extends MenuItem = MenuItem> = {
+type SelectedItemsButtonProps<Name extends string> = {
   id: string;
   name: ((count: number) => string) | string;
-  items: Array<T | typeof Menu.line>;
-  onSelect: (name: string, items: Array<string>) => void;
+  items: MenuItem<Name>[];
+  onSelect: (name: Name, items: string[]) => void;
 };
 
-export function SelectedItemsButton<T extends MenuItem = MenuItem>({
+export function SelectedItemsButton<Name extends string>({
   id,
   name,
   items,
   onSelect,
-}: SelectedItemsButtonProps<T>) {
+}: SelectedItemsButtonProps<Name>) {
   const selectedItems = useSelectedItems();
   const [menuOpen, setMenuOpen] = useState(false);
   const triggerRef = useRef(null);

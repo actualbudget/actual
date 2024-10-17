@@ -9,7 +9,7 @@ export function FilterMenu({
   filterId,
   onFilterMenuSelect,
 }: {
-  filterId: SavedFilter;
+  filterId?: SavedFilter;
   onFilterMenuSelect: (item: string) => void;
 }) {
   const { t } = useTranslation();
@@ -20,12 +20,12 @@ export function FilterMenu({
         onFilterMenuSelect(item);
       }}
       items={
-        !filterId.id
+        !filterId?.id
           ? [
               { name: 'save-filter', text: t('Save new filter') },
               { name: 'clear-filter', text: t('Clear all conditions') },
             ]
-          : filterId.id !== null && filterId.status === 'saved'
+          : filterId?.id !== null && filterId?.status === 'saved'
             ? [
                 { name: 'rename-filter', text: t('Rename') },
                 { name: 'delete-filter', text: t('Delete') },

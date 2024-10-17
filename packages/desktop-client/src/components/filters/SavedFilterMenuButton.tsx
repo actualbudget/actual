@@ -32,7 +32,7 @@ export function SavedFilterMenuButton({
 }: {
   conditions: RuleConditionEntity[];
   conditionsOp: 'and' | 'or';
-  filterId: SavedFilter;
+  filterId?: SavedFilter;
   onClearFilters: () => void;
   onReloadSavedFilter: (savedFilter: SavedFilter, value?: string) => void;
   savedFilters: TransactionFilterEntity[];
@@ -44,8 +44,8 @@ export function SavedFilterMenuButton({
   const triggerRef = useRef(null);
   const [err, setErr] = useState(null);
   const [menuItem, setMenuItem] = useState('');
-  const [name, setName] = useState(filterId.name);
-  const id = filterId.id;
+  const [name, setName] = useState(filterId?.name ?? '');
+  const id = filterId?.id;
   let savedFilter: SavedFilter;
 
   const onFilterMenuSelect = async (item: string) => {
@@ -69,8 +69,8 @@ export function SavedFilterMenuButton({
         savedFilter = {
           conditions,
           conditionsOp,
-          id: filterId.id,
-          name: filterId.name,
+          id: filterId?.id,
+          name: filterId?.name ?? '',
           status: 'saved',
         };
         const response = await sendCatch('filter-update', {
@@ -137,9 +137,9 @@ export function SavedFilterMenuButton({
     }
 
     const updatedFilter = {
-      conditions: filterId.conditions,
-      conditionsOp: filterId.conditionsOp,
-      id: filterId.id,
+      conditions: filterId?.conditions,
+      conditionsOp: filterId?.conditionsOp,
+      id: filterId?.id,
       name,
     };
 
@@ -178,9 +178,9 @@ export function SavedFilterMenuButton({
               flexShrink: 0,
             }}
           >
-            {!filterId.id ? t('Unsaved filter') : filterId.name}&nbsp;
+            {!filterId?.id ? t('Unsaved filter') : filterId?.name}&nbsp;
           </Text>
-          {filterId.id && filterId.status !== 'saved' && (
+          {filterId?.id && filterId?.status !== 'saved' && (
             <Text>
               <Trans>(modified)</Trans>&nbsp;
             </Text>
