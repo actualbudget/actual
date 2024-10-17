@@ -60,18 +60,19 @@ type CategoryListProps = {
   showHiddenItems?: boolean;
   showBalances?: boolean;
 };
-function CategoryList({
-  items,
-  getItemProps,
-  highlightedIndex,
-  embedded,
-  footer,
-  renderSplitTransactionButton = defaultRenderSplitTransactionButton,
-  renderCategoryItemGroupHeader = defaultRenderCategoryItemGroupHeader,
-  renderCategoryItem = defaultRenderCategoryItem,
-  showHiddenItems,
-  showBalances,
-}: CategoryListProps) {
+function CategoryList(props: CategoryListProps) {
+  const {
+    items,
+    getItemProps,
+    highlightedIndex,
+    embedded,
+    footer,
+    renderSplitTransactionButton = defaultRenderSplitTransactionButton,
+    renderCategoryItemGroupHeader = defaultRenderCategoryItemGroupHeader,
+    renderCategoryItem = defaultRenderCategoryItem,
+    showHiddenItems,
+    showBalances,
+  } = props;
   const { t } = useTranslation();
   let lastGroup: string | undefined | null = null;
 
@@ -89,7 +90,8 @@ function CategoryList({
         style={{
           overflow: 'auto',
           padding: '5px 0',
-          ...(!embedded && { maxHeight: 175 }),
+          // TODO: this is a temporary hack for parental categories
+          // ...(!embedded && { maxHeight: 175 }),
         }}
       >
         {filteredItems.map((item, idx) => {
@@ -116,6 +118,15 @@ function CategoryList({
                         item.group?.hidden && { color: theme.pageTextSubdued }),
                     },
                   })}
+                  {/* TODO: this is a temporary hack for parental categories*/}
+                  <CategoryList
+                    {...props}
+                    items={
+                      item.group.children?.flatMap(
+                        g => g.categories?.map(c => ({ ...c, group: g })) ?? [],
+                      ) ?? []
+                    }
+                  />
                 </Fragment>
               )}
               <Fragment key={item.id}>

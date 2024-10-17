@@ -63,22 +63,34 @@ function createCategory(cat, sheetName, prevSheetName, start, end) {
 }
 
 function createCategoryGroup(group, sheetName) {
+  const children = group.children || [];
+  children.forEach(child => createCategoryGroup(child, sheetName));
+
   sheet.get().createDynamic(sheetName, 'group-sum-amount-' + group.id, {
     initialValue: 0,
-    dependencies: group.categories.map(cat => `sum-amount-${cat.id}`),
+    dependencies: [
+      ...group.categories.map(cat => `sum-amount-${cat.id}`),
+      ...children.map(child => `group-sum-amount-${child.id}`),
+    ],
     run: sumAmounts,
   });
 
   if (!group.is_income || getBudgetType() !== 'rollover') {
     sheet.get().createDynamic(sheetName, 'group-budget-' + group.id, {
       initialValue: 0,
-      dependencies: group.categories.map(cat => `budget-${cat.id}`),
+      dependencies: [
+        ...group.categories.map(cat => `budget-${cat.id}`),
+        ...children.map(child => `group-budget-${child.id}`),
+      ],
       run: sumAmounts,
     });
 
     sheet.get().createDynamic(sheetName, 'group-leftover-' + group.id, {
       initialValue: 0,
-      dependencies: group.categories.map(cat => `leftover-${cat.id}`),
+      dependencies: [
+        ...group.categories.map(cat => `leftover-${cat.id}`),
+        ...children.map(child => `group-leftover-${child.id}`),
+      ],
       run: sumAmounts,
     });
   }
