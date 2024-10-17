@@ -39,6 +39,7 @@ type SelectedTransactionsButtonProps = {
   showMakeTransfer: boolean;
   onMakeAsSplitTransaction: (selectedIds: string[]) => void;
   onMakeAsNonSplitTransactions: (selectedIds: string[]) => void;
+  isLoading?: boolean;
 };
 
 export function SelectedTransactionsButton({
@@ -55,6 +56,7 @@ export function SelectedTransactionsButton({
   showMakeTransfer,
   onMakeAsSplitTransaction,
   onMakeAsNonSplitTransactions,
+  isLoading = false,
 }: SelectedTransactionsButtonProps) {
   const { t } = useTranslation();
   const dispatch = useDispatch();
@@ -206,6 +208,7 @@ export function SelectedTransactionsButton({
   return (
     <SelectedItemsButton
       id="transactions"
+      isLoading={isLoading}
       name={count => t('{{count}} transactions', { count })}
       // @ts-expect-error fix me
       items={[

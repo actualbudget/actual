@@ -57,6 +57,7 @@ async function saveDiffAndApply(diff, changes, onChange) {
 }
 
 export function TransactionList({
+  isLoading = false,
   tableRef,
   transactions,
   allTransactions,
@@ -110,7 +111,6 @@ export function TransactionList({
     newTransactions = realizeTempTransactions(newTransactions);
 
     await saveDiff({ added: newTransactions });
-    onRefetch();
   }, []);
 
   const onSave = useCallback(async transaction => {
@@ -208,6 +208,7 @@ export function TransactionList({
 
   return (
     <TransactionTable
+      isLoading={isLoading}
       ref={tableRef}
       transactions={allTransactions}
       loadMoreTransactions={loadMoreTransactions}

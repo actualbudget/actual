@@ -72,13 +72,15 @@ export type Spreadsheets = {
     goal: number;
     'long-goal': number;
   };
-  [`balance`]: {
+  balance: {
     // Common fields
     'uncategorized-amount': number;
     'uncategorized-balance': number;
 
     // Balance fields
     [key: `balance-query-${string}`]: number;
+    [key: `balance-query-${string}-cleared`]: number;
+    [key: `balance-query-${string}-uncleared`]: number;
     [key: `selected-transactions-${string}`]: Array<{ id: string }>;
     [key: `selected-balance-${string}`]: number;
   };
