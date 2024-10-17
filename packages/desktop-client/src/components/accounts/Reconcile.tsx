@@ -17,23 +17,25 @@ import { useFormat } from '../spreadsheet/useFormat';
 import { useSheetValue } from '../spreadsheet/useSheetValue';
 
 type ReconcilingMessageProps = {
-  balanceQuery: { name: `balance-query-${string}`; query: Query };
+  accountId: AccountEntity['id'] | string;
+  balanceQuery: Query;
   targetBalance: number;
   onDone: () => void;
   onCreateTransaction: (targetDiff: number) => void;
 };
 
 export function ReconcilingMessage({
+  accountId,
   balanceQuery,
   targetBalance,
   onDone,
   onCreateTransaction,
 }: ReconcilingMessageProps) {
   const cleared = useSheetValue<'balance', `balance-query-${string}-cleared`>({
-    name: (balanceQuery.name + '-cleared') as `balance-query-${string}-cleared`,
+    name: `balance-query-${accountId}-cleared`,
     value: 0,
-    query: balanceQuery.query.filter({ cleared: true }),
-  });
+    query: balanceQuery.filter({ cleared: true }),
+  } as const);
   const format = useFormat();
   const targetDiff = targetBalance - cleared;
 
