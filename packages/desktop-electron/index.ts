@@ -35,8 +35,8 @@ import './security';
 const isDev = !app.isPackaged; // dev mode if not packaged
 
 process.env.lootCoreScript = isDev
-  ? 'loot-core/lib-dist/bundle.desktop.js' // serve from local output in development (provides hot-reloading)
-  : path.resolve(__dirname, 'loot-core/lib-dist/bundle.desktop.js'); // serve from build in production
+  ? 'loot-core/lib-dist/electron/bundle.desktop.js' // serve from local output in development (provides hot-reloading)
+  : path.resolve(__dirname, 'loot-core/lib-dist/electron/bundle.desktop.js'); // serve from build in production
 
 // This allows relative URLs to be resolved to app:// which makes
 // local assets load correctly
@@ -152,12 +152,12 @@ function startSyncServer() {
       : '../node_modules/actual-sync/app.js', // Temporary - required because actual-server is in the other repo
   );
 
-  const webRoot = path.resolve(
-    __dirname,
-    isDev
-      ? undefined // default is fine in dev
-      : '../node_modules/@actual-app/web/build/', // this the web build output
-  );
+  const webRoot = isDev
+    ? undefined
+    : path.resolve(
+        __dirname,
+        '../node_modules/@actual-app/web/build/', // this the web build output
+      );
 
   // NOTE: config.json parameters will be relative to THIS directory at the moment - may need a fix?
   // Or we can override the config.json location when starting the process
@@ -191,8 +191,6 @@ function startSyncServer() {
     if (isDev) {
       forkOptions = { ...forkOptions, execArgv: ['--inspect'] };
     }
-
-    console.info('server-sync options', { forkOptions });
 
     actualServerProcess = utilityProcess.fork(
       serverPath, // This requires actual-server depencies (crdt) to be built before running electron - they need to be manually specified because actual-server doesn't get bundled
@@ -378,7 +376,7 @@ app.on('ready', async () => {
   globalPrefs = await loadGlobalPrefs(); // load global prefs
 
   if (globalPrefs.ngrokConfig?.autoStart) {
-    startSyncServer();
+    // startSyncServer();
     exposeSyncServer(globalPrefs.ngrokConfig);
   }
 

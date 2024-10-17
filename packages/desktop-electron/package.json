@@ -21,7 +21,7 @@
       "!**/*.js.map",
       "!**/stats.json",
       "!build/client-build/sql-wasm.wasm",
-      "!build/loot-core/lib-dist/{browser,bundle.mobile*}"
+      "!build/loot-core/lib-dist/electron/{browser,bundle.mobile*}"
     ],
     "beforePack": "./build/beforePackHook.js",
     "mac": {

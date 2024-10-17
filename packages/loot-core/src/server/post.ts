@@ -15,6 +15,12 @@ function throwIfNot200(res, text) {
       const json = JSON.parse(text);
       throw new PostError(json.reason);
     }
+
+    if (res.headers.get('ngrok-error-code')) {
+      // When server is hosted behind ngrok and response code is not 200 we have experienced a network error
+      throw new PostError('network-failure');
+    }
+
     throw new PostError(text);
   }
 }

@@ -4,7 +4,7 @@ import fetch from 'node-fetch';
 import 'source-map-support/register';
 
 // eslint-disable-next-line import/extensions
-import bundle from './lib-dist/bundle.desktop.js';
+import bundle from './lib-dist/electron/bundle.desktop.js';
 
 global.fetch = fetch;
 
