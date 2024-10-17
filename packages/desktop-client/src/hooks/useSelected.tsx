@@ -48,7 +48,7 @@ type SelectAllAction = {
   isRangeSelect?: boolean;
 };
 
-export type Actions = SelectAction | SelectNoneAction | SelectAllAction;
+type Actions = SelectAction | SelectNoneAction | SelectAllAction;
 
 export function useSelected<T extends Item>(
   name: string,
@@ -317,8 +317,10 @@ type SelectedProviderWithItemsProps<T extends Item> = {
   children: ReactElement;
 };
 
-// This can be helpful in class components if you cannot use the
-// custom hook
+/**
+ * This can be helpful in class components if you cannot use the custom hook
+ * @deprecated Use `SelectedProvider` and `useSelected` instead
+ */
 export function SelectedProviderWithItems<T extends Item>({
   name,
   items,
