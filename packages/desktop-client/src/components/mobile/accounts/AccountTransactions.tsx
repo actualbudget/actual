@@ -7,8 +7,6 @@ import React, {
 } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { useDebounceCallback } from 'usehooks-ts';
-
 import {
   collapseModals,
   getPayees,
@@ -276,13 +274,11 @@ function TransactionListWithPreviews({
     });
   }, [dispatch, reloadTransactions]);
 
-  const { isSearching, search } = useTransactionsSearch({
+  const { isSearching, search: onSearch } = useTransactionsSearch({
     updateQuery: setTransactionsQuery,
     resetQuery: () => setTransactionsQuery(baseTransactionsQuery()),
     dateFormat,
   });
-
-  const onSearch = useDebounceCallback(search, 150);
 
   const onOpenTransaction = useCallback(
     (transaction: TransactionEntity) => {
