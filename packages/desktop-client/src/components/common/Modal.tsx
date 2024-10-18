@@ -6,6 +6,7 @@ import React, {
   type ReactNode,
   type ComponentPropsWithoutRef,
   type ComponentPropsWithRef,
+  type CSSProperties,
 } from 'react';
 import {
   ModalOverlay as ReactAriaModalOverlay,
@@ -14,14 +15,14 @@ import {
 } from 'react-aria-components';
 import { useHotkeysContext } from 'react-hotkeys-hook';
 
+import { css } from '@emotion/css';
 import { AutoTextSize } from 'auto-text-size';
-import { css } from 'glamor';
 
 import { useModalState } from '../../hooks/useModalState';
 import { AnimatedLoading } from '../../icons/AnimatedLoading';
 import { SvgLogo } from '../../icons/logo';
 import { SvgDelete } from '../../icons/v0';
-import { type CSSProperties, styles, theme } from '../../style';
+import { styles, theme } from '../../style';
 import { tokens } from '../../tokens';
 
 import { Button } from './Button2';
@@ -90,7 +91,7 @@ export const Modal = ({
         {modalProps => (
           <Dialog
             aria-label="Modal dialog"
-            className={`${css(styles.lightScrollbar)}`}
+            className={css(styles.lightScrollbar)}
             style={{
               outline: 'none', // remove focus outline
             }}

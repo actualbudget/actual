@@ -1,8 +1,7 @@
-import React from 'react';
+import React, { type CSSProperties } from 'react';
 
 import { useResponsive } from '../../ResponsiveProvider';
 import { styles, theme } from '../../style';
-import { type CSSProperties } from '../../style/types';
 
 type ItemHeaderProps = {
   title: string;
