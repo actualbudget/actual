@@ -20,6 +20,7 @@ import {
 import { GlobalPrefs, MetadataPrefs } from './prefs';
 import { Query } from './query';
 import { EmptyObject } from './util';
+import type { Notification } from "loot-core/client/state-types/notifications";
 
 export interface ServerHandlers {
   'transaction-update': (transaction: { id: string }) => Promise<EmptyObject>;
@@ -85,6 +86,11 @@ export interface ServerHandlers {
   'category-move': (arg: { id; groupId; targetId }) => Promise<unknown>;
 
   'category-delete': (arg: { id; transferId? }) => Promise<{ error?: string }>;
+
+  'apply-multiple-templates': (arg: {
+    month: string;
+    categoryIds: string[]; //categoy ids
+  }) => Promise<Notification>;
 
   'category-group-create': (arg: {
     name;

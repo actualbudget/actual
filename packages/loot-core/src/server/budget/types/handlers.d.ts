@@ -69,11 +69,6 @@ export interface BudgetHandlers {
     category: string; //category id
   }) => Promise<Notification>;
 
-  'budget/apply-multiple-templates': (arg: {
-    month: string;
-    categoryIds: [string]; //categoy ids
-  }) => Promise<Notification>;
-
   'budget/set-n-month-avg': (arg: {
     month: string;
     N: number;

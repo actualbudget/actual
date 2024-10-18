@@ -33,6 +33,7 @@ type SidebarGroupProps = {
   onEdit?: (id: string) => void;
   onSave?: (group: object) => Promise<void>;
   onDelete?: (id: string) => Promise<void>;
+  onApplyBudgetTemplate?: (categories: object[]) => void;
   onShowNewCategory?: (groupId: string) => void;
   onHideNewGroup?: () => void;
   onToggleCollapse?: (id: string) => void;
@@ -48,6 +49,7 @@ export function SidebarGroup({
   onEdit,
   onSave,
   onDelete,
+  onApplyBudgetTemplate,
   onShowNewCategory,
   onHideNewGroup,
   onToggleCollapse,
@@ -125,8 +127,8 @@ export function SidebarGroup({
                     onDelete(group.id);
                   } else if (type === 'toggle-visibility') {
                     onSave({ ...group, hidden: !group.hidden });
-                  } else if (type === 'apply-single-category-template'){
-                    //onApplyBudgetTemplate
+                  } else if (type === 'apply-multiple-category-template'){
+                    onApplyBudgetTemplate?.(group.categories.map(c => c.id));
                     console.log(group.categories);
                     console.log("pressed on apply")
                   }
@@ -143,8 +145,8 @@ export function SidebarGroup({
                   ...(isGoalTemplatesEnabled
                     ? [
                       {
-                        name: 'apply-single-category-template',
-                        text: t('Apply budget template'),
+                        name: 'apply-multiple-category-template',
+                        text: t('Apply budget template for all Categories in Group'),
                       },
                     ]
                     : []),

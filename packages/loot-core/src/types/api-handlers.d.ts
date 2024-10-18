@@ -9,6 +9,7 @@ import type {
 
 import type { NewRuleEntity, RuleEntity, TransactionEntity } from './models';
 import { type ServerHandlers } from './server-handlers';
+import type { Notification } from "loot-core/client/state-types/notifications";
 
 export interface ApiHandlers {
   'api/batch-budget-start': () => Promise<unknown>;
@@ -147,6 +148,11 @@ export interface ApiHandlers {
     id;
     transferCategoryId;
   }) => Promise<unknown>;
+
+  'api/apply-multiple-templates': (arg: {
+    month: string;
+    categoryIds: string[]; //categoy ids
+  }) => Promise<Notification>;
 
   'api/category-create': (arg: { category }) => Promise<string>;
 

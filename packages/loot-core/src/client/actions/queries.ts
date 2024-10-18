@@ -237,6 +237,14 @@ export function deleteGroup(id, transferId?) {
   };
 }
 
+export function applyBudgetTemplatesInGroup(month, categoryIds) {
+  return async function(dispatch){
+    addNotification(
+    await send('apply-multiple-templates', { month, categoryIds})
+  )
+  };
+}
+
 export function getPayees() {
   return async (dispatch: Dispatch) => {
     const payees = await send('payees-get');

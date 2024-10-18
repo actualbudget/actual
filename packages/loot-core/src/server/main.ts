@@ -40,6 +40,7 @@ import {
 } from './backups';
 import { app as budgetApp } from './budget/app';
 import * as budget from './budget/base';
+import * as goalActions from './budget/goaltemplates';
 import * as cloudStorage from './cloud-storage';
 import { app as dashboardApp } from './dashboard/app';
 import * as db from './db';
@@ -388,6 +389,18 @@ handlers['category-group-move'] = mutator(async function ({ id, targetId }) {
       await db.moveCategoryGroup(id, targetId);
     });
     return 'ok';
+  });
+});
+
+handlers['apply-multiple-templates'] = mutator(async function ({
+  month,
+  categoryIds,
+}) {
+  return withUndo(async () => {
+    return await goalActions.applyMultipleCategoryTemplates({
+      month,
+      categoryIds,
+    });
   });
 });
 

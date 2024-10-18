@@ -33,10 +33,13 @@ import * as cloudStorage from './cloud-storage';
 import { type RemoteFile } from './cloud-storage';
 import * as db from './db';
 import { APIError } from './errors';
-import { runMutator } from './mutators';
+import { mutator, runMutator } from "./mutators";
 import * as prefs from './prefs';
 import * as sheet from './sheet';
 import { setSyncingMode, batchMessages } from './sync';
+import { undoable } from "loot-core/server/undo";
+import * as goalActions from "loot-core/server/budget/goaltemplates";
+import { app } from "loot-core/server/budget/app";
 
 let IMPORT_MODE = false;
 
@@ -611,6 +614,17 @@ handlers['api/category-group-update'] = withMutation(async function ({
   return handlers['category-group-update']({
     id,
     ...categoryGroupModel.fromExternal(fields),
+  });
+});
+
+handlers['api/apply-multiple-templates'] = withMutation(async function ({
+  month,
+  categoryIds,
+}) {
+  checkFileOpen();
+  return handlers['apply-multiple-templates']({
+    month,
+    categoryIds,
   });
 });
 
