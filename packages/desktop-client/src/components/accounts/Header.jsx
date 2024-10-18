@@ -6,11 +6,12 @@ import { useLocalPref } from '../../hooks/useLocalPref';
 import { useSplitsExpanded } from '../../hooks/useSplitsExpanded';
 import { useSyncServerStatus } from '../../hooks/useSyncServerStatus';
 import { AnimatedLoading } from '../../icons/AnimatedLoading';
-import { SvgAdd } from '../../icons/v1';
+import { SvgAdd, SvgMoneyBag } from '../../icons/v1';
 import {
   SvgArrowsExpand3,
   SvgArrowsShrink3,
   SvgDownloadThickBottom,
+  SvgLockClosed,
   SvgPencil1,
 } from '../../icons/v2';
 import { theme, styles } from '../../style';
@@ -196,40 +197,14 @@ export function AccountHeader({
           </View>
         </View>
 
-        <Stack direction="row" justify="space-between">
-          <Balances
-            balanceQuery={balanceQuery}
-            showExtraBalances={showExtraBalances}
-            onToggleExtraBalances={onToggleExtraBalances}
-            account={account}
-            isFiltered={isFiltered}
-            filteredAmount={filteredAmount}
-          />
-          <View>
-            <Button
-              ref={reconcileRef}
-              variant="primary"
-              onPress={() => {
-                setReconcileOpen(true);
-              }}
-            >
-              Reconcile
-            </Button>
-            <Popover
-              placement="bottom"
-              triggerRef={reconcileRef}
-              style={{ width: 275 }}
-              isOpen={reconcileOpen}
-              onOpenChange={() => setReconcileOpen(false)}
-            >
-              <ReconcileMenu
-                account={account}
-                onClose={() => setReconcileOpen(false)}
-                onReconcile={onReconcile}
-              />
-            </Popover>
-          </View>
-        </Stack>
+        <Balances
+          balanceQuery={balanceQuery}
+          showExtraBalances={showExtraBalances}
+          onToggleExtraBalances={onToggleExtraBalances}
+          account={account}
+          isFiltered={isFiltered}
+          filteredAmount={filteredAmount}
+        />
 
         <Stack
           spacing={2}
@@ -284,6 +259,31 @@ export function AccountHeader({
             onChange={onSearch}
             inputRef={searchInput}
           />
+          <View style={{ marginLeft: 16 }} title={t('Reconcile')}>
+            <Button
+              ref={reconcileRef}
+              variant="bare"
+              aria-label={t('Reconcile')}
+              onPress={() => {
+                setReconcileOpen(true);
+              }}
+            >
+              <SvgLockClosed width={13} height={13} />
+            </Button>
+            <Popover
+              placement="bottom"
+              triggerRef={reconcileRef}
+              style={{ width: 275 }}
+              isOpen={reconcileOpen}
+              onOpenChange={() => setReconcileOpen(false)}
+            >
+              <ReconcileMenu
+                account={account}
+                onClose={() => setReconcileOpen(false)}
+                onReconcile={onReconcile}
+              />
+            </Popover>
+          </View>
           {workingHard ? (
             <View>
               <AnimatedLoading style={{ width: 16, height: 16 }} />
@@ -315,7 +315,7 @@ export function AccountHeader({
                 : t('Expand split transactions')
             }
             isDisabled={search !== '' || filterConditions.length > 0}
-            style={{ padding: 6, marginLeft: 10 }}
+            style={{ padding: 6 }}
             onPress={onToggleSplits}
           >
             <View
