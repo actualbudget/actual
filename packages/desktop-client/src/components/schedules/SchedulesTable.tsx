@@ -30,6 +30,7 @@ import { DisplayId } from '../util/DisplayId';
 import { StatusBadge } from './StatusBadge';
 
 type SchedulesTableProps = {
+  isLoading?: boolean;
   schedules: readonly ScheduleEntity[];
   statuses: ScheduleStatuses;
   filter: string;
@@ -197,6 +198,7 @@ export function ScheduleAmountCell({
 }
 
 export function SchedulesTable({
+  isLoading,
   schedules,
   statuses,
   filter,
@@ -383,6 +385,7 @@ export function SchedulesTable({
         {!minimal && <Field width={40} />}
       </TableHeader>
       <Table
+        loading={isLoading}
         rowHeight={ROW_HEIGHT}
         backgroundColor="transparent"
         style={{ flex: 1, backgroundColor: 'transparent', ...style }}

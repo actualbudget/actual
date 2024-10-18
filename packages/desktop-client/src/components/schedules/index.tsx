@@ -68,17 +68,12 @@ export function Schedules() {
     [],
   );
 
+  const schedulesQuery = useMemo(() => q('schedules').select('*'), []);
   const {
     isLoading: isSchedulesLoading,
     schedules,
     statuses,
-  } = useSchedules({
-    query: useMemo(() => q('schedules').select('*'), []),
-  });
-
-  if (isSchedulesLoading) {
-    return null;
-  }
+  } = useSchedules({ query: schedulesQuery });
 
   return (
     <Page header={t('Schedules')}>
@@ -114,6 +109,7 @@ export function Schedules() {
       </View>
 
       <SchedulesTable
+        isLoading={isSchedulesLoading}
         schedules={schedules}
         filter={filter}
         statuses={statuses}

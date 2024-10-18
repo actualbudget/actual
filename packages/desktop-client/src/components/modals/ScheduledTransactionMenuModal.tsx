@@ -33,11 +33,12 @@ export function ScheduledTransactionMenuModal({
     borderTop: `1px solid ${theme.pillBorder}`,
   };
   const scheduleId = transactionId?.split('/')?.[1];
+  const schedulesQuery = useMemo(
+    () => q('schedules').filter({ id: scheduleId }).select('*'),
+    [scheduleId],
+  );
   const { isLoading: isSchedulesLoading, schedules } = useSchedules({
-    query: useMemo(
-      () => q('schedules').filter({ id: scheduleId }).select('*'),
-      [scheduleId],
-    ),
+    query: schedulesQuery,
   });
 
   if (isSchedulesLoading) {

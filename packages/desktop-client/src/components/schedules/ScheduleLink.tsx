@@ -37,20 +37,17 @@ export function ScheduleLink({
 
   const dispatch = useDispatch();
   const [filter, setFilter] = useState(accountName || '');
-
-  const scheduleData = useSchedules({
-    query: useMemo(
-      () => q('schedules').filter({ completed: false }).select('*'),
-      [],
-    ),
-  });
+  const schedulesQuery = useMemo(
+    () => q('schedules').filter({ completed: false }).select('*'),
+    [],
+  );
+  const {
+    isLoading: isSchedulesLoading,
+    schedules,
+    statuses,
+  } = useSchedules({ query: schedulesQuery });
 
   const searchInput = useRef(null);
-  if (scheduleData == null) {
-    return null;
-  }
-
-  const { schedules, statuses } = scheduleData;
 
   async function onSelect(scheduleId: string) {
     if (ids?.length > 0) {
@@ -134,6 +131,7 @@ export function ScheduleLink({
             }}
           >
             <SchedulesTable
+              isLoading={isSchedulesLoading}
               allowCompleted={false}
               filter={filter}
               minimal={true}

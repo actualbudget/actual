@@ -303,13 +303,15 @@ function formatAmount(amount) {
 
 function ScheduleDescription({ id }) {
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
+  const scheduleQuery = useMemo(
+    () => q('schedules').filter({ id }).select('*'),
+    [id],
+  );
   const {
     schedules,
     statuses: scheduleStatuses,
     isLoading: isSchedulesLoading,
-  } = useSchedules({
-    query: useMemo(() => q('schedules').filter({ id }).select('*'), [id]),
-  });
+  } = useSchedules({ query: scheduleQuery });
 
   if (isSchedulesLoading) {
     return null;
