@@ -6,7 +6,7 @@ import { useLocalPref } from '../../hooks/useLocalPref';
 import { useSplitsExpanded } from '../../hooks/useSplitsExpanded';
 import { useSyncServerStatus } from '../../hooks/useSyncServerStatus';
 import { AnimatedLoading } from '../../icons/AnimatedLoading';
-import { SvgAdd, SvgMoneyBag } from '../../icons/v1';
+import { SvgAdd } from '../../icons/v1';
 import {
   SvgArrowsExpand3,
   SvgArrowsShrink3,
