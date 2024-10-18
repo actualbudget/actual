@@ -221,6 +221,10 @@ export function useTransactionsSearch({
     [dateFormat, delayMs, resetQuery, updateQuery],
   );
 
+  useEffect(() => {
+    return () => updateSearchQuery.cancel();
+  }, []);
+
   return {
     isSearching,
     search: updateSearchQuery,
