@@ -193,6 +193,16 @@ export interface ServerHandlers {
 
   'simplefin-accounts': () => Promise<{ accounts: SimpleFinAccount[] }>;
 
+  'simplefin-batch-sync': ({ ids }: { ids: string[] }) => Promise<
+    {
+      accountId: string;
+      errors;
+      newTransactions;
+      matchedTransactions;
+      updatedAccounts;
+    }[]
+  >;
+
   'gocardless-get-banks': (country: string) => Promise<{
     data: GoCardlessInstitution[];
     error?: { reason: string };
