@@ -6,6 +6,7 @@ import { Column } from 'glamor/jsxstyle';
 
 import { type SyncedPrefs } from 'loot-core/types/prefs';
 
+import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { useSyncedPref } from '../../hooks/useSyncedPref';
 import { type CSSProperties, theme } from '../../style';
 import { Button } from '../common/Button2';
@@ -38,8 +39,12 @@ export function UpcomingLengthSettings() {
     },
   };
 
+  const enabled = useFeatureFlag('upcomingLengthAdjustment');
+
   const location = useLocation();
   const [expanded, setExpanded] = useState(location.hash === '#upcomingLength');
+
+  if (!enabled) return null;
 
   return expanded ? (
     <Setting
