@@ -11,6 +11,7 @@ import {
   SvgArrowsExpand3,
   SvgArrowsShrink3,
   SvgDownloadThickBottom,
+  SvgLockClosed,
   SvgPencil1,
 } from '../../icons/v2';
 import { theme, styles } from '../../style';
@@ -92,8 +93,10 @@ export function AccountHeader({
 }) {
   const { t } = useTranslation();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [reconcileOpen, setReconcileOpen] = useState(false);
   const searchInput = useRef(null);
   const triggerRef = useRef(null);
+  const reconcileRef = useRef(null);
   const splitsExpanded = useSplitsExpanded();
   const syncServerStatus = useSyncServerStatus();
   const isUsingServer = syncServerStatus !== 'no-server';
@@ -256,6 +259,31 @@ export function AccountHeader({
             onChange={onSearch}
             inputRef={searchInput}
           />
+          <View style={{ marginLeft: 16 }} title={t('Reconcile')}>
+            <Button
+              ref={reconcileRef}
+              variant="bare"
+              aria-label={t('Reconcile')}
+              onPress={() => {
+                setReconcileOpen(true);
+              }}
+            >
+              <SvgLockClosed width={13} height={13} />
+            </Button>
+            <Popover
+              placement="bottom"
+              triggerRef={reconcileRef}
+              style={{ width: 275 }}
+              isOpen={reconcileOpen}
+              onOpenChange={() => setReconcileOpen(false)}
+            >
+              <ReconcileMenu
+                account={account}
+                onClose={() => setReconcileOpen(false)}
+                onReconcile={onReconcile}
+              />
+            </Popover>
+          </View>
           {workingHard ? (
             <View>
               <AnimatedLoading style={{ width: 16, height: 16 }} />
@@ -287,7 +315,7 @@ export function AccountHeader({
                 : t('Expand split transactions')
             }
             isDisabled={search !== '' || filterConditions.length > 0}
-            style={{ padding: 6, marginLeft: 10 }}
+            style={{ padding: 6 }}
             onPress={onToggleSplits}
           >
             <View
@@ -330,8 +358,6 @@ export function AccountHeader({
                     setMenuOpen(false);
                     onMenuSelect(item);
                   }}
-                  onReconcile={onReconcile}
-                  onClose={() => setMenuOpen(false)}
                 />
               </Popover>
             </View>
@@ -522,29 +548,16 @@ function AccountMenu({
   canShowBalances,
   showCleared,
   showReconciled,
-  onClose,
   isSorted,
-  onReconcile,
   onMenuSelect,
 }) {
   const { t } = useTranslation();
-  const [tooltip, setTooltip] = useState('default');
   const syncServerStatus = useSyncServerStatus();
 
-  return tooltip === 'reconcile' ? (
-    <ReconcileMenu
-      account={account}
-      onClose={onClose}
-      onReconcile={onReconcile}
-    />
-  ) : (
+  return (
     <Menu
       onMenuSelect={item => {
-        if (item === 'reconcile') {
-          setTooltip('reconcile');
-        } else {
-          onMenuSelect(item);
-        }
+        onMenuSelect(item);
       }}
       items={[
         isSorted && {
@@ -570,7 +583,6 @@ function AccountMenu({
             : t('Show reconciled transactions'),
         },
         { name: 'export', text: t('Export') },
-        { name: 'reconcile', text: t('Reconcile') },
         account &&
           !account.closed &&
           (canSync
