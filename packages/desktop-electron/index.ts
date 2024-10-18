@@ -152,24 +152,25 @@ function startSyncServer() {
       : '../node_modules/actual-sync/app.js', // Temporary - required because actual-server is in the other repo
   );
 
-  const webRoot = isDev
-    ? undefined
-    : path.resolve(
-        __dirname,
-        '../node_modules/@actual-app/web/build/', // this the web build output
-      );
-
   // NOTE: config.json parameters will be relative to THIS directory at the moment - may need a fix?
   // Or we can override the config.json location when starting the process
   try {
-    const envVariables: Env = {
+    let envVariables: Env = {
       ...process.env, // required
       ACTUAL_PORT: `${syncServerConfig.port}`,
       ACTUAL_SERVER_FILES: `${syncServerConfig.ACTUAL_SERVER_FILES}`,
       ACTUAL_USER_FILES: `${syncServerConfig.ACTUAL_USER_FILES}`,
       ACTUAL_DATA_DIR: `${syncServerConfig.ACTUAL_SERVER_DATA_DIR}`,
-      ACTUAL_WEB_ROOT: webRoot,
     };
+
+    if (!isDev) {
+      const webRoot = path.resolve(
+        __dirname,
+        '../node_modules/@actual-app/web/build/', // this the web build output
+      );
+
+      envVariables = { ...envVariables, ACTUAL_WEB_ROOT: webRoot };
+    }
 
     if (!fs.existsSync(syncServerConfig.ACTUAL_SERVER_FILES)) {
       // create directories if they do not exit - actual-sync doesn't do it for us...
