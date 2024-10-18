@@ -137,7 +137,7 @@ describe('query helpers', () => {
       tracer.start();
 
       const query = q('transactions').select('*');
-      doQuery(query, data => tracer.event('data', data));
+      doQuery(query, { onData: data => tracer.event('data', data) });
 
       await tracer.expect('server-query');
       await tracer.expect('data', ['*']);
@@ -153,7 +153,10 @@ describe('query helpers', () => {
       tracer.start();
 
       const query = q('transactions').select('*');
-      doQuery(query, data => tracer.event('data', data), { onlySync: true });
+      doQuery(query, {
+        onData: data => tracer.event('data', data),
+        options: { onlySync: true },
+      });
 
       await tracer.expect('server-query');
       await tracer.expect('data', ['*']);
@@ -168,7 +171,10 @@ describe('query helpers', () => {
       tracer.start();
 
       const query = q('transactions').select('*');
-      doQuery(query, data => tracer.event('data', data), { onlySync: true });
+      doQuery(query, {
+        onData: data => tracer.event('data', data),
+        options: { onlySync: true },
+      });
 
       await tracer.expect('server-query');
       await tracer.expect('data', ['*']);
@@ -191,8 +197,9 @@ describe('query helpers', () => {
 
       tracer.start();
       const query = q('transactions').select('*');
-      const lq = doQuery(query, data => tracer.event('data', data), {
-        onlySync: true,
+      const lq = doQuery(query, {
+        onData: data => tracer.event('data', data),
+        options: { onlySync: true },
       });
 
       // Users should never call `run` manually but we'll do it to
@@ -220,7 +227,10 @@ describe('query helpers', () => {
 
       const query = q('transactions').select('*');
 
-      doQuery(query, data => tracer.event('data', data), { onlySync: true });
+      doQuery(query, {
+        onData: data => tracer.event('data', data),
+        options: { onlySync: true },
+      });
 
       // Send a push in the middle of the query running for the first run
       serverPush('sync-event', { type: 'success', tables: ['transactions'] });
@@ -241,7 +251,10 @@ describe('query helpers', () => {
 
       const query = q('transactions').select('*');
 
-      doQuery(query, data => tracer.event('data', data), { onlySync: true });
+      doQuery(query, {
+        onData: data => tracer.event('data', data),
+        options: { onlySync: true },
+      });
 
       await tracer.expect('server-query');
       await tracer.expect('data', ['*']);
@@ -263,7 +276,9 @@ describe('query helpers', () => {
 
       const query = q('transactions').select('*');
 
-      const lq = doQuery(query, data => tracer.event('data', data));
+      const lq = doQuery(query, {
+        onData: data => tracer.event('data', data),
+      });
 
       await tracer.expect('server-query');
       await tracer.expect('data', ['*']);
@@ -282,7 +297,8 @@ describe('query helpers', () => {
     tracer.start();
 
     const query = q('transactions').select('id');
-    const paged = pagedQuery(query, data => tracer.event('data', data), {
+    const paged = pagedQuery(query, {
+      onData: data => tracer.event('data', data),
       onPageData: data => tracer.event('page-data', data),
     });
 
@@ -294,7 +310,7 @@ describe('query helpers', () => {
       expect(d[0].id).toBe(data[0].id);
     });
 
-    expect(paged.getTotalCount()).toBe(data.length);
+    expect(paged.totalCount).toBe(data.length);
 
     await paged.fetchNext();
     tracer.expectNow('server-query', ['id']);
@@ -305,7 +321,7 @@ describe('query helpers', () => {
     tracer.expectNow('data', d => {
       expect(d.length).toBe(1000);
     });
-    expect(paged.isFinished()).toBe(false);
+    expect(paged.hasNext).toBe(true);
 
     await paged.fetchNext();
     tracer.expectNow('server-query', ['id']);
@@ -316,7 +332,7 @@ describe('query helpers', () => {
     tracer.expectNow('data', d => {
       expect(d.length).toBe(1500);
     });
-    expect(paged.isFinished()).toBe(false);
+    expect(paged.hasNext).toBe(true);
 
     await paged.fetchNext();
     tracer.expectNow('server-query', ['id']);
@@ -328,8 +344,8 @@ describe('query helpers', () => {
       expect(d.length).toBe(1502);
     });
 
-    expect(paged.getData()).toEqual(selectData(data, ['id']));
-    expect(paged.isFinished()).toBe(true);
+    expect(paged.data).toEqual(selectData(data, ['id']));
+    expect(paged.hasNext).toBe(false);
 
     await paged.fetchNext();
     // Wait a bit and make sure nothing comes through
@@ -342,8 +358,9 @@ describe('query helpers', () => {
     tracer.start();
 
     const query = q('transactions').select('id');
-    pagedQuery(query, data => tracer.event('data', data), {
-      pageCount: 10,
+    pagedQuery(query, {
+      onData: data => tracer.event('data', data),
+      options: { pageCount: 10 },
     });
 
     await tracer.expect('server-query', [{ result: { $count: '*' } }]);
@@ -358,7 +375,9 @@ describe('query helpers', () => {
     tracer.start();
 
     const query = q('transactions').select('id');
-    const paged = pagedQuery(query, data => tracer.event('data', data));
+    const paged = pagedQuery(query, {
+      onData: data => tracer.event('data', data),
+    });
 
     await tracer.expect('server-query', [{ result: { $count: '*' } }]);
     await tracer.expect('server-query', ['id']);
@@ -382,9 +401,10 @@ describe('query helpers', () => {
     tracer.start();
 
     const query = q('transactions').select('id');
-    const paged = pagedQuery(query, data => tracer.event('data', data), {
-      pageCount: 20,
+    const paged = pagedQuery(query, {
+      onData: data => tracer.event('data', data),
       onPageData: data => tracer.event('page-data', data),
+      options: { pageCount: 20 },
     });
 
     await tracer.expect('server-query', [{ result: { $count: '*' } }]);
@@ -417,9 +437,10 @@ describe('query helpers', () => {
   it('pagedQuery reruns `fetchNext` if data changed underneath it', async () => {
     const data = initPagingServer(500, { delay: 10 });
     const query = q('transactions').select('id');
-    const paged = pagedQuery(query, data => tracer.event('data', data), {
-      pageCount: 20,
+    const paged = pagedQuery(query, {
+      onData: data => tracer.event('data', data),
       onPageData: data => tracer.event('page-data', data),
+      options: { pageCount: 20 },
     });
 
     await paged.fetchNext();
@@ -460,9 +481,10 @@ describe('query helpers', () => {
   it('pagedQuery fetches up to a specific row', async () => {
     const data = initPagingServer(500, { delay: 10, eventType: 'all' });
     const query = q('transactions').select(['id', 'date']);
-    const paged = pagedQuery(query, data => tracer.event('data', data), {
-      pageCount: 20,
+    const paged = pagedQuery(query, {
+      onData: data => tracer.event('data', data),
       onPageData: data => tracer.event('page-data', data),
+      options: { pageCount: 20 },
     });
     await paged.run();
 
