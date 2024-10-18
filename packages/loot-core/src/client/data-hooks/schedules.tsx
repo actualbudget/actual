@@ -92,21 +92,27 @@ export function useSchedules({
       return;
     }
 
+    function onError(error: Error) {
+      if (!isUnmounted) {
+        setError(error);
+      }
+    }
+
     scheduleQueryRef.current = liveQuery<ScheduleEntity>(query, {
       onData: async schedules => {
         statusQueryRef.current = loadStatuses(
           schedules,
           (statuses: ScheduleStatuses) => {
             if (!isUnmounted) {
-              setIsLoading(false);
               setData({ schedules, statuses });
+              setIsLoading(false);
             }
           },
-          setError,
+          onError,
           upcomingLength,
         );
       },
-      onError: setError,
+      onError,
     });
 
     return () => {
