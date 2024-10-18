@@ -30,7 +30,7 @@ import { DisplayId } from '../util/DisplayId';
 import { StatusBadge } from './StatusBadge';
 
 type SchedulesTableProps = {
-  schedules: ScheduleEntity[];
+  schedules: readonly ScheduleEntity[];
   statuses: ScheduleStatuses;
   filter: string;
   allowCompleted: boolean;
@@ -250,7 +250,7 @@ export function SchedulesTable({
     });
   }, [payees, accounts, schedules, filter, statuses]);
 
-  const items: SchedulesTableItem[] = useMemo(() => {
+  const items: readonly SchedulesTableItem[] = useMemo(() => {
     const unCompletedSchedules = filteredSchedules.filter(s => !s.completed);
 
     if (!allowCompleted) {

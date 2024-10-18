@@ -33,24 +33,25 @@ export function ScheduledTransactionMenuModal({
     borderTop: `1px solid ${theme.pillBorder}`,
   };
   const scheduleId = transactionId?.split('/')?.[1];
-  const scheduleData = useSchedules({
-    transform: useCallback(
+  const { isLoading: isSchedulesLoading, schedules } = useSchedules({
+    queryBuilder: useCallback(
       (q: Query) => q.filter({ id: scheduleId }),
       [scheduleId],
     ),
   });
-  const schedule = scheduleData?.schedules?.[0];
 
-  if (!schedule) {
+  if (isSchedulesLoading) {
     return null;
   }
+
+  const schedule = schedules?.[0];
 
   return (
     <Modal name="scheduled-transaction-menu">
       {({ state: { close } }) => (
         <>
           <ModalHeader
-            title={<ModalTitle title={schedule.name || ''} shrinkOnOverflow />}
+            title={<ModalTitle title={schedule?.name || ''} shrinkOnOverflow />}
             rightContent={<ModalCloseButton onPress={close} />}
           />
           <View
@@ -64,7 +65,7 @@ export function ScheduledTransactionMenuModal({
               Scheduled date
             </Text>
             <Text style={{ fontSize: 17, fontWeight: 700 }}>
-              {format(schedule.next_date, 'MMMM dd, yyyy')}
+              {format(schedule?.next_date || '', 'MMMM dd, yyyy')}
             </Text>
           </View>
           <ScheduledTransactionMenu
