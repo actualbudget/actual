@@ -1,10 +1,10 @@
 // @ts-strict-ignore
-import { Notification } from '../../client/state-types/notifications';
 import * as monthUtils from '../../shared/months';
 import * as db from '../db';
 
 import { setBudget, getSheetValue, setGoal } from './actions';
 import { parse } from './cleanup-template.pegjs';
+import { TemplateResultMessage } from './types/templates';
 
 export function cleanupTemplate({ month }: { month: string }) {
   return processCleanup(month);
@@ -121,7 +121,7 @@ async function applyGroupCleanups(
   return warnings;
 }
 
-async function processCleanup(month: string): Promise<Notification> {
+async function processCleanup(month: string): Promise<TemplateResultMessage> {
   let num_sources = 0;
   let num_sinks = 0;
   let total_weight = 0;

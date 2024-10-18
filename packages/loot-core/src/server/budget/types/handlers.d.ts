@@ -1,4 +1,4 @@
-import type { Notification } from '../../../client/state-types/notifications';
+import { TemplateResultMessage } from './templates';
 
 export interface BudgetHandlers {
   'budget/budget-amount': (arg: {
@@ -13,19 +13,19 @@ export interface BudgetHandlers {
 
   'budget/set-3month-avg': (arg: { month: string }) => Promise<void>;
 
-  'budget/check-templates': () => Promise<Notification>;
+  'budget/check-templates': () => Promise<TemplateResultMessage>;
 
   'budget/apply-goal-template': (arg: {
     month: string;
-  }) => Promise<Notification>;
+  }) => Promise<TemplateResultMessage>;
 
   'budget/overwrite-goal-template': (arg: {
     month: string;
-  }) => Promise<Notification>;
+  }) => Promise<TemplateResultMessage>;
 
   'budget/cleanup-goal-template': (arg: {
     month: string;
-  }) => Promise<Notification>;
+  }) => Promise<TemplateResultMessage>;
 
   'budget/hold-for-next-month': (arg: {
     month: string;

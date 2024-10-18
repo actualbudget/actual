@@ -1,5 +1,11 @@
 import { type Backup } from '../server/backups';
-import { type UndoState } from '../server/undo';
+
+export type UndoState = {
+  messages: Message[];
+  meta?: unknown;
+  tables: string[];
+  undoTag: string;
+};
 
 export interface ServerEvents {
   'backups-updated': Backup[];

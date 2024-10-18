@@ -80,3 +80,13 @@ export type Template =
   | AverageTemplate
   | GoalTemplate
   | ErrorTemplate;
+
+/**
+ * Result object for notification on client-side.
+ */
+export type TemplateResultMessage = {
+  type?: string;
+  message: string;
+  sticky?: boolean;
+  pre?: string;
+};

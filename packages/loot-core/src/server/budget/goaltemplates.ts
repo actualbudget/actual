@@ -1,5 +1,4 @@
 // @ts-strict-ignore
-import { Notification } from '../../client/state-types/notifications';
 import * as monthUtils from '../../shared/months';
 import { amountToInteger, integerToAmount } from '../../shared/util';
 import * as db from '../db';
@@ -16,6 +15,7 @@ import { goalsSimple } from './goals/goalsSimple';
 import { goalsSpend } from './goals/goalsSpend';
 import { goalsWeek } from './goals/goalsWeek';
 import { checkTemplates, storeTemplates } from './template-notes';
+import { TemplateResultMessage } from './types/templates';
 
 const TEMPLATE_PREFIX = '#template';
 
@@ -164,7 +164,7 @@ async function processTemplate(
   force,
   category_templates,
   category?,
-): Promise<Notification> {
+): Promise<TemplateResultMessage> {
   let num_applied = 0;
   let errors = [];
   const idealTemplate = [];

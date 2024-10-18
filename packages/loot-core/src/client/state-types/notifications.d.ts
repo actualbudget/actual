@@ -1,5 +1,7 @@
-import type * as constants from '../constants';
+// import type * as constants from '../constants';
 
+// TODO: Check where to put Notification type
+// This is used in loot-core/server and desktop-client
 export type Notification = {
   id?: string;
   // 'warning' is unhandled??
@@ -17,39 +19,39 @@ export type Notification = {
   onClose?: () => void;
   internal?: string;
 };
-type NotificationWithId = Notification & { id: string };
+// type NotificationWithId = Notification & { id: string };
 
-export type NotificationsState = {
-  notifications: NotificationWithId[];
-  inset?: {
-    bottom?: number;
-    top?: number;
-    right?: number;
-    left?: number;
-  };
-};
+// export type NotificationsState = {
+//   notifications: NotificationWithId[];
+//   inset?: {
+//     bottom?: number;
+//     top?: number;
+//     right?: number;
+//     left?: number;
+//   };
+// };
 
-type AddNotificationAction = {
-  type: typeof constants.ADD_NOTIFICATION;
-  notification: NotificationWithId;
-};
+// type AddNotificationAction = {
+//   type: typeof constants.ADD_NOTIFICATION;
+//   notification: NotificationWithId;
+// };
 
-type RemoveNotificationAction = {
-  type: typeof constants.REMOVE_NOTIFICATION;
-  id: string;
-};
+// type RemoveNotificationAction = {
+//   type: typeof constants.REMOVE_NOTIFICATION;
+//   id: string;
+// };
 
-type SetNotificationInsetAction = {
-  type: typeof constants.SET_NOTIFICATION_INSET;
-  inset: {
-    bottom?: number;
-    top?: number;
-    right?: number;
-    left?: number;
-  };
-};
+// type SetNotificationInsetAction = {
+//   type: typeof constants.SET_NOTIFICATION_INSET;
+//   inset: {
+//     bottom?: number;
+//     top?: number;
+//     right?: number;
+//     left?: number;
+//   };
+// };
 
-export type NotificationsActions =
-  | AddNotificationAction
-  | RemoveNotificationAction
-  | SetNotificationInsetAction;
+// export type NotificationsActions =
+//   | AddNotificationAction
+//   | RemoveNotificationAction
+//   | SetNotificationInsetAction;

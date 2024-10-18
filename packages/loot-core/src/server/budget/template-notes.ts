@@ -1,4 +1,3 @@
-import { Notification } from '../../client/state-types/notifications';
 import * as db from '../db';
 
 import { parse } from './goal-template.pegjs';
@@ -8,7 +7,7 @@ import {
   getCategoriesWithTemplateNotes,
   resetCategoryGoalDefsWithNoTemplates,
 } from './statements';
-import { Template } from './types/templates';
+import { Template, TemplateResultMessage } from './types/templates';
 
 export const TEMPLATE_PREFIX = '#template';
 export const GOAL_PREFIX = '#goal';
@@ -34,7 +33,7 @@ type CategoryWithTemplates = {
   templates: Template[];
 };
 
-export async function checkTemplates(): Promise<Notification> {
+export async function checkTemplates(): Promise<TemplateResultMessage> {
   const categoryWithTemplates = await getCategoriesWithTemplates();
   const schedules = await getActiveSchedules();
   const scheduleNames = schedules.map(({ name }) => name);

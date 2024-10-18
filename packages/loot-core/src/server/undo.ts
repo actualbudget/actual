@@ -23,13 +23,6 @@ let MESSAGE_HISTORY: Array<MarkerMessage | MessagesMessage> = [
 let CURSOR = 0;
 const HISTORY_SIZE = 20;
 
-export type UndoState = {
-  messages: Message[];
-  meta?: unknown;
-  tables: string[];
-  undoTag: string;
-};
-
 function trimHistory() {
   MESSAGE_HISTORY = MESSAGE_HISTORY.slice(0, CURSOR + 1);
 
