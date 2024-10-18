@@ -227,7 +227,7 @@ export function Modals() {
           return <CreateEncryptionKeyModal key={name} options={options} />;
 
         case 'fix-encryption-key':
-          return <FixEncryptionKeyModal key={name} options={options} />;
+          return <FixEncryptionKeyModal key={name} {...options} />;
 
         case 'edit-field':
           return (

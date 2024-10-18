@@ -1,3 +1,5 @@
+import { type ComponentPropsWithoutRef } from 'react';
+
 import {
   type AccountEntity,
   type AccountSyncSource,
@@ -11,9 +13,8 @@ import {
 } from 'loot-core/types/models';
 import { type EmptyObject } from 'loot-core/types/util';
 
+import { type FixEncryptionKeyModal } from '../../components/modals/FixEncryptionKeyModal';
 import * as constants from '../constants';
-import { ComponentPropsWithoutRef } from 'react';
-import { FixEncryptionKeyModal } from '../../components/modals/FixEncryptionKeyModal';
 
 type NoOptions = EmptyObject;
 
