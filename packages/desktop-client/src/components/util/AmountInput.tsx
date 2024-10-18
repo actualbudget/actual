@@ -93,9 +93,7 @@ export function AmountInput({
   }
 
   function onInputAmountBlur(e) {
-    if (!ref.current?.contains(e.relatedTarget)) {
-      fireUpdate(negative);
-    }
+    fireUpdate(negative);
     onBlur?.(e);
   }
 
