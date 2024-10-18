@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Form } from 'react-aria-components';
 import { useDispatch } from 'react-redux';
 
-import { css } from 'glamor';
+import { css } from '@emotion/css';
 
 import { loadAllFiles, loadGlobalPrefs, sync } from 'loot-core/client/actions';
 import { send } from 'loot-core/src/platform/client/fetch';
@@ -98,10 +98,10 @@ export function CreateEncryptionKeyModal({
                 </Paragraph>
                 <Paragraph>
                   <ul
-                    className={`${css({
+                    className={css({
                       marginTop: 0,
                       '& li': { marginBottom: 8 },
-                    })}`}
+                    })}
                   >
                     <li>
                       <strong>Important:</strong> if you forget this password{' '}

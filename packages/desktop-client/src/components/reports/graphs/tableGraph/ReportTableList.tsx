@@ -1,11 +1,11 @@
-import React, { type ReactNode } from 'react';
+import React, { type ReactNode, type CSSProperties } from 'react';
 
 import {
   type GroupedEntity,
   type DataEntity,
 } from 'loot-core/src/types/models/reports';
 
-import { type CSSProperties, theme } from '../../../../style';
+import { theme } from '../../../../style';
 import { View } from '../../../common/View';
 import { Row } from '../../../table';
 

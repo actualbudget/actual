@@ -1,10 +1,14 @@
-import React, { useCallback, type ComponentPropsWithoutRef } from 'react';
+import React, {
+  useCallback,
+  type ComponentPropsWithoutRef,
+  type CSSProperties,
+} from 'react';
 
 import { useSchedules } from 'loot-core/client/data-hooks/schedules';
 import { format } from 'loot-core/shared/months';
 import { type Query } from 'loot-core/shared/query';
 
-import { type CSSProperties, theme, styles } from '../../style';
+import { theme, styles } from '../../style';
 import { Menu } from '../common/Menu';
 import {
   Modal,
