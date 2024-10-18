@@ -6,10 +6,9 @@ import { useLocation } from 'react-router-dom';
 
 import { useToggle } from 'usehooks-ts';
 
-import { pushModal } from 'loot-core/client/actions/modals';
-
 import { useFeatureFlag } from '../hooks/useFeatureFlag';
 import { SvgHelp } from '../icons/v2/Help';
+import { pushModal } from '../state/actions';
 import { openUrl } from '../util/router-tools';
 
 import { Button } from './common/Button2';

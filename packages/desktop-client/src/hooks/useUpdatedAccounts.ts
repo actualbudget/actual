@@ -1,7 +1,7 @@
 import { useSelector } from 'react-redux';
 
-import { type State } from 'loot-core/src/client/state-types';
+import { type State } from '../state';
 
 export function useUpdatedAccounts() {
-  return useSelector((state: State) => state.queries.updatedAccounts);
+  return useSelector((state: State) => state.account.updatedAccounts);
 }

@@ -9,8 +9,6 @@ import React, {
 } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { pushModal } from 'loot-core/src/client/actions/modals';
-import { initiallyLoadPayees } from 'loot-core/src/client/actions/queries';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as undo from 'loot-core/src/platform/client/undo';
 import { getNormalisedString } from 'loot-core/src/shared/normalisation';
@@ -23,6 +21,7 @@ import { useCategories } from '../hooks/useCategories';
 import { usePayees } from '../hooks/usePayees';
 import { useSchedules } from '../hooks/useSchedules';
 import { useSelected, SelectedProvider } from '../hooks/useSelected';
+import { initiallyLoadPayees, pushModal } from '../state/actions';
 import { theme } from '../style';
 
 import { Button } from './common/Button2';

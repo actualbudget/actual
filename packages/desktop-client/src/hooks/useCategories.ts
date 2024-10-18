@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { getCategories } from 'loot-core/src/client/actions';
-import { type State } from 'loot-core/src/client/state-types';
+import { type State } from '../state';
+import { getCategories } from '../state/actions';
 
 export function useCategories() {
   const dispatch = useDispatch();

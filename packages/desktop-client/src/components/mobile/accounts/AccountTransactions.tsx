@@ -11,16 +11,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useDebounceCallback } from 'usehooks-ts';
 
 import {
-  collapseModals,
-  getPayees,
-  markAccountRead,
-  openAccountCloseModal,
-  pushModal,
-  reopenAccount,
-  syncAndDownload,
-  updateAccount,
-} from 'loot-core/client/actions';
-import {
   SchedulesProvider,
   useDefaultSchedulesQueryTransform,
 } from 'loot-core/client/data-hooks/schedules';
@@ -38,6 +28,16 @@ import { useDateFormat } from '../../../hooks/useDateFormat';
 import { useFailedAccounts } from '../../../hooks/useFailedAccounts';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { usePreviewTransactions } from '../../../hooks/usePreviewTransactions';
+import {
+  collapseModals,
+  getPayees,
+  markAccountRead,
+  openAccountCloseModal,
+  pushModal,
+  reopenAccount,
+  syncAndDownload,
+  updateAccount,
+} from '../../../state/actions';
 import { styles, theme } from '../../../style';
 import { Button } from '../../common/Button2';
 import { Text } from '../../common/Text';

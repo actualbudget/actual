@@ -20,13 +20,7 @@ import {
   isValid as isDateValid,
 } from 'date-fns';
 
-import { pushModal } from 'loot-core/client/actions';
 import { useCachedSchedules } from 'loot-core/src/client/data-hooks/schedules';
-import {
-  getAccountsById,
-  getPayeesById,
-  getCategoriesById,
-} from 'loot-core/src/client/reducers/queries';
 import { evalArithmetic } from 'loot-core/src/shared/arithmetic';
 import { currentDay } from 'loot-core/src/shared/months';
 import * as monthUtils from 'loot-core/src/shared/months';
@@ -58,6 +52,12 @@ import {
   SvgCalendar,
   SvgHyperlink2,
 } from '../../icons/v2';
+import { pushModal } from '../../state/actions';
+import {
+  getAccountsById,
+  getPayeesById,
+  getCategoriesById,
+} from '../../state/queries';
 import { styles, theme } from '../../style';
 import { AccountAutocomplete } from '../autocomplete/AccountAutocomplete';
 import { CategoryAutocomplete } from '../autocomplete/CategoryAutocomplete';

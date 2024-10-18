@@ -12,13 +12,6 @@ import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 import { BrowserRouter } from 'react-router-dom';
 
-import {
-  closeBudget,
-  loadBudget,
-  loadGlobalPrefs,
-  setAppState,
-  sync,
-} from 'loot-core/client/actions';
 import { SpreadsheetProvider } from 'loot-core/client/SpreadsheetProvider';
 import * as Platform from 'loot-core/src/client/platform';
 import {
@@ -29,6 +22,13 @@ import {
 import { useMetadataPref } from '../hooks/useMetadataPref';
 import { installPolyfills } from '../polyfills';
 import { ResponsiveProvider } from '../ResponsiveProvider';
+import {
+  closeBudget,
+  loadBudget,
+  loadGlobalPrefs,
+  setAppState,
+  sync,
+} from '../state/actions';
 import { styles, hasHiddenScrollbars, ThemeStyle, useTheme } from '../style';
 import { ExposeNavigate } from '../util/router-tools';
 

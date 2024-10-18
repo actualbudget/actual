@@ -6,10 +6,6 @@ import {
   parseISO,
 } from 'date-fns';
 
-import {
-  getAccountsById,
-  getCategoriesById,
-} from 'loot-core/src/client/reducers/queries';
 import { integerToCurrency } from 'loot-core/src/shared/util';
 
 import { useAccounts } from '../../hooks/useAccounts';
@@ -18,6 +14,7 @@ import { useDateFormat } from '../../hooks/useDateFormat';
 import { usePayees } from '../../hooks/usePayees';
 import { useSelectedItems, useSelectedDispatch } from '../../hooks/useSelected';
 import { SvgArrowsSynchronize } from '../../icons/v2';
+import { getAccountsById, getCategoriesById } from '../../state/queries';
 import { styles, theme } from '../../style';
 import { Cell, Field, Row, SelectCell, Table } from '../table';
 import { DisplayId } from '../util/DisplayId';

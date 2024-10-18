@@ -3,7 +3,6 @@ import { useDispatch } from 'react-redux';
 
 import { useDebounceCallback } from 'usehooks-ts';
 
-import { getPayees } from 'loot-core/client/actions';
 import * as queries from 'loot-core/client/queries';
 import { pagedQuery } from 'loot-core/client/query-helpers';
 import { listen } from 'loot-core/platform/client/fetch';
@@ -13,6 +12,7 @@ import { isPreviewId } from 'loot-core/shared/transactions';
 
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import { useNavigate } from '../../../hooks/useNavigate';
+import { getPayees } from '../../../state/actions';
 import { TextOneLine } from '../../common/TextOneLine';
 import { View } from '../../common/View';
 import { MobilePageHeader, Page } from '../../Page';

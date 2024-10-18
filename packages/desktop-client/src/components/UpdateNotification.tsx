@@ -1,10 +1,9 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 
-import { type State } from 'loot-core/src/client/state-types';
-
 import { useActions } from '../hooks/useActions';
 import { SvgClose } from '../icons/v1';
+import { type State } from '../state';
 import { theme } from '../style';
 
 import { Button } from './common/Button2';

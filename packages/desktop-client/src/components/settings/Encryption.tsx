@@ -2,9 +2,8 @@
 import React from 'react';
 import { useDispatch } from 'react-redux';
 
-import { pushModal } from 'loot-core/client/actions';
-
 import { useMetadataPref } from '../../hooks/useMetadataPref';
+import { pushModal } from '../../state/actions';
 import { theme } from '../../style';
 import { Button } from '../common/Button2';
 import { Link } from '../common/Link';

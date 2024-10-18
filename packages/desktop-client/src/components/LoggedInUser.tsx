@@ -3,9 +3,8 @@ import React, { useState, useEffect, useRef, type CSSProperties } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 
-import { type State } from 'loot-core/src/client/state-types';
-
 import { useActions } from '../hooks/useActions';
+import { type State } from '../state';
 import { theme, styles } from '../style';
 
 import { Button } from './common/Button2';

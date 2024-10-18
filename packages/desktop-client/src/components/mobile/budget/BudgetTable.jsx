@@ -5,7 +5,6 @@ import { css } from '@emotion/css';
 import { AutoTextSize } from 'auto-text-size';
 import memoizeOne from 'memoize-one';
 
-import { collapseModals, pushModal } from 'loot-core/client/actions';
 import { groupById, integerToCurrency } from 'loot-core/shared/util';
 import {
   envelopeBudget,
@@ -31,6 +30,7 @@ import {
 } from '../../../icons/v1';
 import { SvgViewShow } from '../../../icons/v2';
 import { useResponsive } from '../../../ResponsiveProvider';
+import { collapseModals, pushModal } from '../../../state/actions';
 import { theme, styles } from '../../../style';
 import { BalanceWithCarryover } from '../../budget/BalanceWithCarryover';
 import { makeAmountGrey, makeBalanceAmountStyle } from '../../budget/util';

@@ -3,11 +3,11 @@ import { type FormEvent, useState } from 'react';
 import { Form } from 'react-aria-components';
 import { useDispatch } from 'react-redux';
 
-import { closeModal, createAccount } from 'loot-core/client/actions';
 import { toRelaxedNumber } from 'loot-core/src/shared/util';
 
 import * as useAccounts from '../../hooks/useAccounts';
 import { useNavigate } from '../../hooks/useNavigate';
+import { closeModal, createAccount } from '../../state/actions';
 import { theme } from '../../style';
 import { Button } from '../common/Button2';
 import { FormError } from '../common/FormError';

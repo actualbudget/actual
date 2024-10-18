@@ -1,11 +1,11 @@
 import React from 'react';
 
-import { getPayeesById } from 'loot-core/src/client/reducers/queries';
 import { describeSchedule } from 'loot-core/src/shared/schedules';
 import { type ScheduleEntity } from 'loot-core/src/types/models';
 
 import { usePayees } from '../../hooks/usePayees';
 import { useSchedules } from '../../hooks/useSchedules';
+import { getPayeesById } from '../../state/queries';
 
 import { Value } from './Value';
 

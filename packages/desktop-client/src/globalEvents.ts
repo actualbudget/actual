@@ -1,12 +1,12 @@
 // @ts-strict-ignore
 import { type Store } from 'redux';
 
-import * as sharedListeners from 'loot-core/src/client/shared-listeners';
-import type { State } from 'loot-core/src/client/state-types';
 import { listen } from 'loot-core/src/platform/client/fetch';
 import * as undo from 'loot-core/src/platform/client/undo';
 
 import { type BoundActions } from './hooks/useActions';
+import * as sharedListeners from './sharedListeners';
+import { type State } from './state';
 
 export function handleGlobalEvents(actions: BoundActions, store: Store<State>) {
   listen('server-error', () => {

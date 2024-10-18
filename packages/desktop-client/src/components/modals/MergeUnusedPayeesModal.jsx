@@ -1,10 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { replaceModal } from 'loot-core/src/client/actions/modals';
 import { send } from 'loot-core/src/platform/client/fetch';
 
 import { usePayees } from '../../hooks/usePayees';
+import { replaceModal } from '../../state/actions';
 import { theme } from '../../style';
 import { Information } from '../alerts';
 import { Button } from '../common/Button2';

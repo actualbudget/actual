@@ -68,7 +68,7 @@ export function TransactionListWithBalances({
   onOpenTransaction,
   onRefresh,
 }) {
-  const newTransactions = useSelector(state => state.queries.newTransactions);
+  const newTransactions = useSelector(state => state.account.newTransactions);
 
   const isNewTransaction = id => {
     return newTransactions.includes(id);

@@ -1,8 +1,8 @@
 import { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { undo, redo, addNotification } from 'loot-core/client/actions';
-import { type Notification } from 'loot-core/client/state-types/notifications';
+import { undo, redo, addNotification } from '../state/actions';
+import { type Notification } from '../state/notifications';
 
 type UndoActions = {
   undo: () => void;

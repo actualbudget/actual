@@ -1,7 +1,8 @@
-import { type Dispatch } from 'loot-core/client/actions/types';
-import { pushModal } from 'loot-core/src/client/actions/modals';
 import { send } from 'loot-core/src/platform/client/fetch';
 import { type GoCardlessToken } from 'loot-core/src/types/models';
+
+import { type Dispatch } from './state';
+import { pushModal } from './state/actions';
 
 function _authorize(
   dispatch: Dispatch,

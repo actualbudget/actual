@@ -1,8 +1,7 @@
 import { useSelector } from 'react-redux';
 
-import { type State } from 'loot-core/src/client/state-types';
-
 import { useServerURL } from '../components/ServerContext';
+import { type State } from '../state';
 
 type SyncServerStatus = 'offline' | 'no-server' | 'online';
 

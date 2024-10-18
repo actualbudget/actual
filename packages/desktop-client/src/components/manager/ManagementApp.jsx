@@ -2,14 +2,9 @@ import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Navigate, Route, Routes } from 'react-router-dom';
 
-import {
-  getUserData,
-  loadAllFiles,
-  setAppState,
-} from 'loot-core/client/actions';
-
 import { useMetaThemeColor } from '../../hooks/useMetaThemeColor';
 import { useResponsive } from '../../ResponsiveProvider';
+import { getUserData, loadAllFiles, setAppState } from '../../state/actions';
 import { theme } from '../../style';
 import { tokens } from '../../tokens';
 import { AppBackground } from '../AppBackground';

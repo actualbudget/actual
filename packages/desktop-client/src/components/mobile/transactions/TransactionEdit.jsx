@@ -17,7 +17,6 @@ import {
   isValid as isValidDate,
 } from 'date-fns';
 
-import { pushModal, setLastTransaction } from 'loot-core/client/actions';
 import { runQuery } from 'loot-core/src/client/query-helpers';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
@@ -54,6 +53,7 @@ import {
 import { SvgSplit } from '../../../icons/v0';
 import { SvgAdd, SvgPiggyBank, SvgTrash } from '../../../icons/v1';
 import { SvgPencilWriteAlternate } from '../../../icons/v2';
+import { pushModal, setLastTransaction } from '../../../state/actions';
 import { styles, theme } from '../../../style';
 import { Button } from '../../common/Button';
 import { Text } from '../../common/Text';
@@ -1278,7 +1278,7 @@ function TransactionEditUnconnected({
 export const TransactionEdit = props => {
   const { list: categories } = useCategories();
   const payees = usePayees();
-  const lastTransaction = useSelector(state => state.queries.lastTransaction);
+  const lastTransaction = useSelector(state => state.account.lastTransaction);
   const accounts = useAccounts();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
 

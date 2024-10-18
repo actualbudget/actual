@@ -2,7 +2,6 @@
 import React, { useState } from 'react';
 import { Form } from 'react-aria-components';
 
-import { type FinanceModals } from 'loot-core/src/client/state-types/modals';
 import { send } from 'loot-core/src/platform/client/fetch';
 import { getTestKeyError } from 'loot-core/src/shared/errors';
 
@@ -23,14 +22,18 @@ import { Text } from '../common/Text';
 import { View } from '../common/View';
 
 type FixEncryptionKeyModalProps = {
-  options: FinanceModals['fix-encryption-key'];
+  name: 'fix-encryption-key';
+  hasExistingKey?: boolean;
+  cloudFileId?: string;
+  onSuccess?: () => void;
 };
 
 export function FixEncryptionKeyModal({
-  options = {},
+  name,
+  hasExistingKey,
+  cloudFileId,
+  onSuccess,
 }: FixEncryptionKeyModalProps) {
-  const { hasExistingKey, cloudFileId, onSuccess } = options;
-
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -58,7 +61,7 @@ export function FixEncryptionKeyModal({
   }
 
   return (
-    <Modal name="fix-encryption-key">
+    <Modal name={name}>
       {({ state: { close } }) => (
         <>
           <ModalHeader

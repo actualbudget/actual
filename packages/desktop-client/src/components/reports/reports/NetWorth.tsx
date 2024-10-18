@@ -5,7 +5,6 @@ import { useParams } from 'react-router-dom';
 
 import * as d from 'date-fns';
 
-import { addNotification } from 'loot-core/src/client/actions';
 import { useWidget } from 'loot-core/src/client/data-hooks/widget';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
@@ -16,6 +15,7 @@ import { useAccounts } from '../../../hooks/useAccounts';
 import { useFilters } from '../../../hooks/useFilters';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { useResponsive } from '../../../ResponsiveProvider';
+import { addNotification } from '../../../state/actions';
 import { theme, styles } from '../../../style';
 import { Button } from '../../common/Button2';
 import { Paragraph } from '../../common/Paragraph';

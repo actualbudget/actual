@@ -10,8 +10,6 @@ import {
   useHref,
 } from 'react-router-dom';
 
-import { addNotification, sync } from 'loot-core/client/actions';
-import { type State } from 'loot-core/src/client/state-types';
 import * as undo from 'loot-core/src/platform/client/undo';
 
 import { useAccounts } from '../hooks/useAccounts';
@@ -19,6 +17,8 @@ import { useLocalPref } from '../hooks/useLocalPref';
 import { useMetaThemeColor } from '../hooks/useMetaThemeColor';
 import { useNavigate } from '../hooks/useNavigate';
 import { useResponsive } from '../ResponsiveProvider';
+import { type State } from '../state';
+import { addNotification, sync } from '../state/actions';
 import { theme } from '../style';
 import { getIsOutdated, getLatestVersion } from '../util/versions';
 

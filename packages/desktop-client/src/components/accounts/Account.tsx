@@ -15,7 +15,6 @@ import { t } from 'i18next';
 import { v4 as uuidv4 } from 'uuid';
 
 import { validForTransfer } from 'loot-core/client/transfer';
-import { type UndoState } from 'loot-core/server/undo';
 import { useFilters } from 'loot-core/src/client/data-hooks/filters';
 import {
   SchedulesProvider,
@@ -45,6 +44,7 @@ import {
   type TransactionEntity,
   type TransactionFilterEntity,
 } from 'loot-core/src/types/models';
+import { type UndoState } from 'loot-core/types/server-events';
 
 import { useAccounts } from '../../hooks/useAccounts';
 import { useActions } from '../../hooks/useActions';
@@ -1857,9 +1857,9 @@ export function Account() {
   const location = useLocation();
 
   const { grouped: categoryGroups } = useCategories();
-  const newTransactions = useSelector(state => state.queries.newTransactions);
+  const newTransactions = useSelector(state => state.account.newTransactions);
   const matchedTransactions = useSelector(
-    state => state.queries.matchedTransactions,
+    state => state.account.matchedTransactions,
   );
   const accounts = useAccounts();
   const payees = usePayees();

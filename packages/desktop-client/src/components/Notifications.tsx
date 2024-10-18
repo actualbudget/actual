@@ -10,13 +10,12 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import { css } from '@emotion/css';
 
-import { removeNotification } from 'loot-core/client/actions';
-import { type State } from 'loot-core/src/client/state-types';
-import type { NotificationWithId } from 'loot-core/src/client/state-types/notifications';
-
 import { AnimatedLoading } from '../icons/AnimatedLoading';
 import { SvgDelete } from '../icons/v0';
 import { useResponsive } from '../ResponsiveProvider';
+import { type State } from '../state';
+import { removeNotification } from '../state/actions';
+import type { NotificationWithId } from '../state/notifications';
 import { styles, theme } from '../style';
 
 import { Button, ButtonWithLoading } from './common/Button2';

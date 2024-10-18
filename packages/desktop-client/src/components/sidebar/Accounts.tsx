@@ -2,9 +2,7 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { moveAccount } from 'loot-core/src/client/actions';
 import * as queries from 'loot-core/src/client/queries';
-import { type State } from 'loot-core/src/client/state-types';
 import { type AccountEntity } from 'loot-core/types/models';
 
 import { useAccounts } from '../../hooks/useAccounts';
@@ -14,6 +12,8 @@ import { useFailedAccounts } from '../../hooks/useFailedAccounts';
 import { useLocalPref } from '../../hooks/useLocalPref';
 import { useOffBudgetAccounts } from '../../hooks/useOffBudgetAccounts';
 import { useUpdatedAccounts } from '../../hooks/useUpdatedAccounts';
+import { type State } from '../../state';
+import { moveAccount } from '../../state/actions';
 import { theme } from '../../style';
 import { View } from '../common/View';
 

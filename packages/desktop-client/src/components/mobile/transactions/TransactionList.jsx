@@ -8,7 +8,6 @@ import React, {
 import { useDispatch } from 'react-redux';
 import { Item, Section } from 'react-stately';
 
-import { setNotificationInset } from 'loot-core/client/actions';
 import { groupById, integerToCurrency } from 'loot-core/shared/util';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { isPreviewId } from 'loot-core/src/shared/transactions';
@@ -26,6 +25,7 @@ import { useUndo } from '../../../hooks/useUndo';
 import { AnimatedLoading } from '../../../icons/AnimatedLoading';
 import { SvgDelete } from '../../../icons/v0';
 import { SvgDotsHorizontalTriple } from '../../../icons/v1';
+import { setNotificationInset } from '../../../state/actions';
 import { styles, theme } from '../../../style';
 import { Button } from '../../common/Button2';
 import { Menu } from '../../common/Menu';

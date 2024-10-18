@@ -5,7 +5,6 @@ import { useDispatch } from 'react-redux';
 import { css } from '@emotion/css';
 import { Resizable } from 're-resizable';
 
-import { closeBudget, replaceModal } from 'loot-core/src/client/actions';
 import * as Platform from 'loot-core/src/client/platform';
 
 import { useGlobalPref } from '../../hooks/useGlobalPref';
@@ -16,6 +15,7 @@ import { useResizeObserver } from '../../hooks/useResizeObserver';
 import { SvgExpandArrow } from '../../icons/v0';
 import { SvgAdd } from '../../icons/v1';
 import { useResponsive } from '../../ResponsiveProvider';
+import { closeBudget, replaceModal } from '../../state/actions';
 import { styles, theme } from '../../style';
 import { Button } from '../common/Button2';
 import { InitialFocus } from '../common/InitialFocus';

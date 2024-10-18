@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { loadBackup, makeBackup } from 'loot-core/client/actions';
 import { type Backup } from 'loot-core/server/backups';
 import { send, listen, unlisten } from 'loot-core/src/platform/client/fetch';
 
 import { useMetadataPref } from '../../hooks/useMetadataPref';
+import { loadBackup, makeBackup } from '../../state/actions';
 import { theme } from '../../style';
 import { Block } from '../common/Block';
 import { Button } from '../common/Button2';

@@ -11,10 +11,11 @@ import React, {
 } from 'react';
 import { useSelector } from 'react-redux';
 
-import { type State } from 'loot-core/src/client/state-types';
 import { listen } from 'loot-core/src/platform/client/fetch';
 import * as undo from 'loot-core/src/platform/client/undo';
-import { type UndoState } from 'loot-core/src/server/undo';
+import { type UndoState } from 'loot-core/src/types/server-events';
+
+import { type State } from '../state';
 
 type Range<T> = { start: T; end: T | null };
 type Item = { id: string };

@@ -1,14 +1,13 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 
+import { useAccounts } from '../../hooks/useAccounts';
 import {
   closeModal,
   linkAccount,
   linkAccountSimpleFin,
   unlinkAccount,
-} from 'loot-core/client/actions';
-
-import { useAccounts } from '../../hooks/useAccounts';
+} from '../../state/actions';
 import { theme } from '../../style';
 import { Autocomplete } from '../autocomplete/Autocomplete';
 import { Button } from '../common/Button2';

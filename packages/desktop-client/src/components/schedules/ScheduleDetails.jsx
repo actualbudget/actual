@@ -4,8 +4,6 @@ import { useDispatch } from 'react-redux';
 
 import { t } from 'i18next';
 
-import { getPayeesById } from 'loot-core/client/reducers/queries';
-import { pushModal } from 'loot-core/src/client/actions/modals';
 import { runQuery, liveQuery } from 'loot-core/src/client/query-helpers';
 import { send, sendCatch } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
@@ -15,6 +13,8 @@ import { extractScheduleConds } from 'loot-core/src/shared/schedules';
 import { useDateFormat } from '../../hooks/useDateFormat';
 import { usePayees } from '../../hooks/usePayees';
 import { useSelected, SelectedProvider } from '../../hooks/useSelected';
+import { pushModal } from '../../state/actions';
+import { getPayeesById } from '../../state/queries';
 import { theme } from '../../style';
 import { AccountAutocomplete } from '../autocomplete/AccountAutocomplete';
 import { PayeeAutocomplete } from '../autocomplete/PayeeAutocomplete';

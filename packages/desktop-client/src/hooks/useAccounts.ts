@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { getAccounts } from 'loot-core/src/client/actions';
-import { type State } from 'loot-core/src/client/state-types';
+import { type State } from '../state';
+import { getAccounts } from '../state/actions';
 
 export function useAccounts() {
   const dispatch = useDispatch();

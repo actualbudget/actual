@@ -5,11 +5,10 @@ import { useParams } from 'react-router-dom';
 
 import { t } from 'i18next';
 
-import { unlinkAccount } from 'loot-core/client/actions';
-
 import { authorizeBank } from '../../gocardless';
 import { useAccounts } from '../../hooks/useAccounts';
 import { SvgExclamationOutline } from '../../icons/v1';
+import { unlinkAccount } from '../../state/actions';
 import { theme } from '../../style';
 import { Button } from '../common/Button2';
 import { Link } from '../common/Link';

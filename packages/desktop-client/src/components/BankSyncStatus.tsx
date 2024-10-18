@@ -3,8 +3,7 @@ import { Trans } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useTransition, animated } from 'react-spring';
 
-import { type State } from 'loot-core/src/client/state-types';
-
+import { type State } from '../state';
 import { theme, styles } from '../style';
 
 import { AnimatedRefresh } from './AnimatedRefresh';

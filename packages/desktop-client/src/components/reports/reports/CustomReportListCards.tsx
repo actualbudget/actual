@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { send, sendCatch } from 'loot-core/platform/client/fetch/index';
-import { addNotification } from 'loot-core/src/client/actions';
 import { calculateHasWarning } from 'loot-core/src/client/reports';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { type CustomReportEntity } from 'loot-core/types/models/reports';
@@ -13,6 +12,7 @@ import { useFeatureFlag } from '../../../hooks/useFeatureFlag';
 import { usePayees } from '../../../hooks/usePayees';
 import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { SvgExclamationSolid } from '../../../icons/v1';
+import { addNotification } from '../../../state/actions';
 import { styles } from '../../../style/index';
 import { theme } from '../../../style/theme';
 import { Text } from '../../common/Text';

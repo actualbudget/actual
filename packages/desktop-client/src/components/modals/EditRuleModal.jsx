@@ -10,10 +10,6 @@ import { useDispatch } from 'react-redux';
 import { css } from '@emotion/css';
 import { v4 as uuid } from 'uuid';
 
-import {
-  initiallyLoadPayees,
-  setUndoEnabled,
-} from 'loot-core/src/client/actions/queries';
 import { useSchedules } from 'loot-core/src/client/data-hooks/schedules';
 import { runQuery } from 'loot-core/src/client/query-helpers';
 import { send } from 'loot-core/src/platform/client/fetch';
@@ -42,6 +38,7 @@ import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { useSelected, SelectedProvider } from '../../hooks/useSelected';
 import { SvgDelete, SvgAdd, SvgSubtract } from '../../icons/v0';
 import { SvgAlignLeft, SvgCode, SvgInformationOutline } from '../../icons/v1';
+import { initiallyLoadPayees, setUndoEnabled } from '../../state/actions';
 import { styles, theme } from '../../style';
 import { Button } from '../common/Button2';
 import { Menu } from '../common/Menu';

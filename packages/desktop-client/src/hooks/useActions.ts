@@ -4,11 +4,16 @@ import { useDispatch } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { type ThunkAction } from 'redux-thunk';
 
-import * as actions from 'loot-core/src/client/actions';
-import type { Action, State } from 'loot-core/src/client/state-types';
+import type { State } from '../state';
+import * as actions from '../state/actions';
 
 type ActionReturnType<T extends (...args: unknown[]) => unknown> =
-  ReturnType<T> extends ThunkAction<infer ReturnType, State, never, Action>
+  ReturnType<T> extends ThunkAction<
+    infer ReturnType,
+    State,
+    never,
+    actions.Action
+  >
     ? ReturnType
     : ReturnType<T>;
 

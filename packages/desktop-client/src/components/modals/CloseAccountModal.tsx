@@ -3,17 +3,17 @@ import React, { type FormEvent, useState, type CSSProperties } from 'react';
 import { Form } from 'react-aria-components';
 import { useDispatch } from 'react-redux';
 
-import {
-  closeAccount,
-  forceCloseAccount,
-  pushModal,
-} from 'loot-core/client/actions';
 import { integerToCurrency } from 'loot-core/src/shared/util';
 import { type AccountEntity } from 'loot-core/src/types/models';
 
 import { useAccounts } from '../../hooks/useAccounts';
 import { useCategories } from '../../hooks/useCategories';
 import { useResponsive } from '../../ResponsiveProvider';
+import {
+  closeAccount,
+  forceCloseAccount,
+  pushModal,
+} from '../../state/actions';
 import { styles, theme } from '../../style';
 import { AccountAutocomplete } from '../autocomplete/AccountAutocomplete';
 import { CategoryAutocomplete } from '../autocomplete/CategoryAutocomplete';
