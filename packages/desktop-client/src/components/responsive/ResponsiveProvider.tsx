@@ -1,7 +1,8 @@
-import { type ReactNode, createContext, useContext, useMemo } from 'react';
+import { type ReactNode, createContext, useContext } from 'react';
+
+import { useViewportSize } from '@react-aria/utils';
 
 import { breakpoints } from '../../tokens';
-import { useViewportSize } from '@react-aria/utils';
 
 type TResponsiveContext = {
   atLeastMediumWidth: boolean;
@@ -13,7 +14,9 @@ type TResponsiveContext = {
   width: number;
 };
 
-const ResponsiveContext = createContext<TResponsiveContext | undefined>(undefined);
+const ResponsiveContext = createContext<TResponsiveContext | undefined>(
+  undefined,
+);
 
 export function ResponsiveProvider(props: { children: ReactNode }) {
   const { height, width } = useViewportSize();
