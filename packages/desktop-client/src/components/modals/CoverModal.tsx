@@ -16,7 +16,10 @@ import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { View } from '../common/View';
 import { FieldLabel, TapField } from '../mobile/MobileForms';
 
+const MODAL_NAME = 'cover' as const;
+
 type CoverModalProps = {
+  name: typeof MODAL_NAME;
   title: string;
   categoryId?: CategoryEntity['id'];
   month: string;
@@ -25,6 +28,7 @@ type CoverModalProps = {
 };
 
 export function CoverModal({
+  name = MODAL_NAME,
   title,
   categoryId,
   month,
@@ -54,11 +58,14 @@ export function CoverModal({
   const onCategoryClick = useCallback(() => {
     dispatch(
       pushModal('category-autocomplete', {
-        categoryGroups,
-        month,
-        onSelect: categoryId => {
-          setFromCategoryId(categoryId);
+        autocompleteProps: {
+          value: null,
+          categoryGroups,
+          onSelect: categoryId => {
+            setFromCategoryId(categoryId);
+          },
         },
+        month,
       }),
     );
   }, [categoryGroups, dispatch, month]);
@@ -72,7 +79,7 @@ export function CoverModal({
   const fromCategory = categories.find(c => c.id === fromCategoryId);
 
   return (
-    <Modal name="cover">
+    <Modal name={name}>
       {({ state: { close } }) => (
         <>
           <ModalHeader
@@ -111,3 +118,4 @@ export function CoverModal({
     </Modal>
   );
 }
+CoverModal.modalName = MODAL_NAME;

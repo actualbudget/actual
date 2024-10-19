@@ -4,6 +4,7 @@ import React, {
 } from 'react';
 
 import { trackingBudget } from 'loot-core/client/queries';
+import * as monthUtils from 'loot-core/shared/months';
 
 import { useCategory } from '../../hooks/useCategory';
 import { theme, styles } from '../../style';
@@ -21,15 +22,40 @@ import {
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { CellValueText } from '../spreadsheet/CellValue';
+import { NamespaceContext } from '../spreadsheet/NamespaceContext';
+
+const MODAL_NAME = 'tracking-balance-menu' as const;
 
 type TrackingBalanceMenuModalProps = ComponentPropsWithoutRef<
   typeof BalanceMenu
->;
+> & {
+  name: typeof MODAL_NAME;
+  month: string;
+};
 
 export function TrackingBalanceMenuModal({
+  name = MODAL_NAME,
+  month,
   categoryId,
   onCarryover,
 }: TrackingBalanceMenuModalProps) {
+  return (
+    <NamespaceContext.Provider value={monthUtils.sheetForMonth(month)}>
+      <TrackingBalanceMenuModalInner
+        name={name}
+        categoryId={categoryId}
+        onCarryover={onCarryover}
+      />
+    </NamespaceContext.Provider>
+  );
+}
+TrackingBalanceMenuModal.modalName = MODAL_NAME;
+
+function TrackingBalanceMenuModalInner({
+  name = MODAL_NAME,
+  categoryId,
+  onCarryover,
+}: Omit<TrackingBalanceMenuModalProps, 'month'>) {
   const defaultMenuItemStyle: CSSProperties = {
     ...styles.mobileMenuItem,
     color: theme.menuItemText,
@@ -44,7 +70,7 @@ export function TrackingBalanceMenuModal({
   }
 
   return (
-    <Modal name="tracking-balance-menu">
+    <Modal name={name}>
       {({ state: { close } }) => (
         <>
           <ModalHeader

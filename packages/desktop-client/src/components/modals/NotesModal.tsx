@@ -8,13 +8,21 @@ import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { View } from '../common/View';
 import { Notes } from '../Notes';
 
+const MODAL_NAME = 'notes' as const;
+
 type NotesModalProps = {
+  name: typeof MODAL_NAME;
   id: string;
-  name: string;
+  title: string;
   onSave: (id: string, notes: string) => void;
 };
 
-export function NotesModal({ id, name, onSave }: NotesModalProps) {
+export function NotesModal({
+  name = MODAL_NAME,
+  id,
+  title,
+  onSave,
+}: NotesModalProps) {
   const originalNotes = useNotes(id);
 
   const [notes, setNotes] = useState(originalNotes);
@@ -28,7 +36,7 @@ export function NotesModal({ id, name, onSave }: NotesModalProps) {
 
   return (
     <Modal
-      name="notes"
+      name={name}
       containerProps={{
         style: { height: '50vh' },
       }}
@@ -36,7 +44,7 @@ export function NotesModal({ id, name, onSave }: NotesModalProps) {
       {({ state: { close } }) => (
         <>
           <ModalHeader
-            title={`Notes: ${name}`}
+            title={`Notes: ${title}`}
             rightContent={<ModalCloseButton onPress={close} />}
           />
           <View
@@ -87,3 +95,4 @@ export function NotesModal({ id, name, onSave }: NotesModalProps) {
     </Modal>
   );
 }
+NotesModal.modalName = MODAL_NAME;

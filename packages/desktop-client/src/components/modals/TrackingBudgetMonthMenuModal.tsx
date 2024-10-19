@@ -15,14 +15,41 @@ import { Button } from '../common/Button2';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { View } from '../common/View';
 import { Notes } from '../Notes';
+import { NamespaceContext } from '../spreadsheet/NamespaceContext';
+
+const MODAL_NAME = 'tracking-budget-month-menu' as const;
 
 type TrackingBudgetMonthMenuModalProps = {
+  name: typeof MODAL_NAME;
   month: string;
   onBudgetAction: (month: string, action: string, arg?: unknown) => void;
   onEditNotes: (month: string) => void;
 };
 
 export function TrackingBudgetMonthMenuModal({
+  name,
+  month,
+  onBudgetAction,
+  onEditNotes,
+}: TrackingBudgetMonthMenuModalProps) {
+  return (
+    <NamespaceContext.Provider
+      key={name}
+      value={monthUtils.sheetForMonth(month)}
+    >
+      <TrackingBudgetMonthMenuModalInner
+        name={name}
+        month={month}
+        onBudgetAction={onBudgetAction}
+        onEditNotes={onEditNotes}
+      />
+    </NamespaceContext.Provider>
+  );
+}
+TrackingBudgetMonthMenuModal.modalName = MODAL_NAME;
+
+function TrackingBudgetMonthMenuModalInner({
+  name = MODAL_NAME,
   month,
   onBudgetAction,
   onEditNotes,
@@ -59,7 +86,7 @@ export function TrackingBudgetMonthMenuModal({
 
   return (
     <Modal
-      name="tracking-budget-month-menu"
+      name={name}
       containerProps={{
         style: { height: '50vh' },
       }}

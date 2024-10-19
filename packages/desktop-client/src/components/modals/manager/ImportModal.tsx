@@ -10,6 +10,8 @@ import { Modal, ModalCloseButton, ModalHeader } from '../../common/Modal';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
 
+const MODAL_NAME = 'import' as const;
+
 function getErrorMessage(error: 'not-ynab4' | boolean) {
   switch (error) {
     case 'not-ynab4':
@@ -19,7 +21,11 @@ function getErrorMessage(error: 'not-ynab4' | boolean) {
   }
 }
 
-export function ImportModal() {
+type ImportModalProps = {
+  name: typeof MODAL_NAME;
+};
+
+export function ImportModal({ name = MODAL_NAME }: ImportModalProps) {
   const { t } = useTranslation();
 
   const dispatch = useDispatch();
@@ -49,7 +55,7 @@ export function ImportModal() {
   };
 
   return (
-    <Modal name="import" containerProps={{ style: { width: 400 } }}>
+    <Modal name={name} containerProps={{ style: { width: 400 } }}>
       {({ state: { close } }) => (
         <>
           <ModalHeader
@@ -96,3 +102,4 @@ export function ImportModal() {
     </Modal>
   );
 }
+ImportModal.modalName = MODAL_NAME;

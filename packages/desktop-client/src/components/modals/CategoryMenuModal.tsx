@@ -21,7 +21,10 @@ import { Popover } from '../common/Popover';
 import { View } from '../common/View';
 import { Notes } from '../Notes';
 
+const MODAL_NAME = 'category-menu' as const;
+
 type CategoryMenuModalProps = {
+  name: typeof MODAL_NAME;
   categoryId: string;
   onSave: (category: CategoryEntity) => void;
   onEditNotes: (categoryId: string) => void;
@@ -31,6 +34,7 @@ type CategoryMenuModalProps = {
 };
 
 export function CategoryMenuModal({
+  name = MODAL_NAME,
   categoryId,
   onSave,
   onEditNotes,
@@ -73,7 +77,7 @@ export function CategoryMenuModal({
 
   return (
     <Modal
-      name="category-menu"
+      name={name}
       onClose={onClose}
       containerProps={{
         style: { height: '45vh' },
@@ -149,6 +153,7 @@ export function CategoryMenuModal({
     </Modal>
   );
 }
+CategoryMenuModal.modalName = MODAL_NAME;
 
 function AdditionalCategoryMenu({
   category,

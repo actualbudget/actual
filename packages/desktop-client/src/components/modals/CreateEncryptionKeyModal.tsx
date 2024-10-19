@@ -25,14 +25,16 @@ import { Paragraph } from '../common/Paragraph';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 
+const MODAL_NAME = 'create-encryption-key' as const;
+
 type CreateEncryptionKeyModalProps = {
-  options: {
-    recreate?: boolean;
-  };
+  name: typeof MODAL_NAME;
+  recreate?: boolean;
 };
 
 export function CreateEncryptionKeyModal({
-  options = {},
+  name = MODAL_NAME,
+  recreate: isRecreating,
 }: CreateEncryptionKeyModalProps) {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -40,8 +42,6 @@ export function CreateEncryptionKeyModal({
   const [showPassword, setShowPassword] = useState(false);
   const { isNarrowWidth } = useResponsive();
   const dispatch = useDispatch();
-
-  const isRecreating = options.recreate;
 
   async function onCreateKey(close: () => void) {
     if (password !== '' && !loading) {
@@ -65,7 +65,7 @@ export function CreateEncryptionKeyModal({
   }
 
   return (
-    <Modal name="create-encryption-key">
+    <Modal name={name}>
       {({ state: { close } }) => (
         <>
           <ModalHeader
@@ -210,3 +210,4 @@ export function CreateEncryptionKeyModal({
     </Modal>
   );
 }
+CreateEncryptionKeyModal.modalName = MODAL_NAME;

@@ -27,6 +27,7 @@ import {
 } from '../../../state/actions';
 import { theme } from '../../../style';
 import { prewarmMonth } from '../../budget/util';
+import { ModalHeader, ModalTitle } from '../../common/Modal';
 import { View } from '../../common/View';
 import { NamespaceContext } from '../../spreadsheet/NamespaceContext';
 import { SyncRefresh } from '../../SyncRefresh';
@@ -111,6 +112,14 @@ export function Budget() {
   const onOpenNewCategoryGroupModal = useCallback(() => {
     dispatch(
       pushModal('new-category-group', {
+        Header: props => (
+          <ModalHeader
+            {...props}
+            title={<ModalTitle title="New Category Group" shrinkOnOverflow />}
+          />
+        ),
+        inputPlaceholder: 'Category group name',
+        buttonText: 'Add',
         onValidate: name => (!name ? 'Name is required.' : null),
         onSubmit: async name => {
           dispatch(collapseModals('budget-page-menu'));
@@ -124,6 +133,14 @@ export function Budget() {
     (groupId, isIncome) => {
       dispatch(
         pushModal('new-category', {
+          Header: props => (
+            <ModalHeader
+              {...props}
+              title={<ModalTitle title="New Category" shrinkOnOverflow />}
+            />
+          ),
+          inputPlaceholder: 'Category name',
+          buttonText: 'Add',
           onValidate: name => (!name ? 'Name is required.' : null),
           onSubmit: async name => {
             dispatch(collapseModals('category-group-menu'));
@@ -342,7 +359,7 @@ export function Budget() {
       dispatch(
         pushModal('notes', {
           id,
-          name: group.name,
+          title: group.name,
           onSave: onSaveNotes,
         }),
       );
@@ -356,7 +373,7 @@ export function Budget() {
       dispatch(
         pushModal('notes', {
           id,
-          name: category.name,
+          title: category.name,
           onSave: onSaveNotes,
         }),
       );
@@ -399,14 +416,12 @@ export function Budget() {
           onEditNotes: onOpenCategoryNotesModal,
           onDelete: onDeleteCategory,
           onToggleVisibility: onToggleCategoryVisibility,
-          onBudgetAction,
         }),
       );
     },
     [
       categories,
       dispatch,
-      onBudgetAction,
       onDeleteCategory,
       onOpenCategoryNotesModal,
       onSaveCategory,
@@ -428,7 +443,7 @@ export function Budget() {
       dispatch(
         pushModal('notes', {
           id: `budget-${month}`,
-          name: monthUtils.format(month, 'MMMM ‘yy'),
+          title: monthUtils.format(month, 'MMMM ‘yy'),
           onSave: onSaveNotes,
         }),
       );

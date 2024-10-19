@@ -1,497 +1,245 @@
-import { type ComponentPropsWithoutRef } from 'react';
+import { type ElementType, type ComponentPropsWithoutRef } from 'react';
 
-import {
-  type AccountEntity,
-  type CategoryEntity,
-  type CategoryGroupEntity,
-  type ScheduleEntity,
-  type TransactionEntity,
-} from 'loot-core/types/models';
 import { type EmptyObject } from 'loot-core/types/util';
 
+import { type AccountAutocompleteModal } from '../../components/modals/AccountAutocompleteModal';
+import { type AccountMenuModal } from '../../components/modals/AccountMenuModal';
+import { type BudgetListModal } from '../../components/modals/BudgetListModal';
+import { type BudgetPageMenuModal } from '../../components/modals/BudgetPageMenuModal';
+import { type CategoryAutocompleteModal } from '../../components/modals/CategoryAutocompleteModal';
+import { type CategoryGroupMenuModal } from '../../components/modals/CategoryGroupMenuModal';
+import { type CategoryMenuModal } from '../../components/modals/CategoryMenuModal';
 import { type CloseAccountModal } from '../../components/modals/CloseAccountModal';
 import { type ConfirmCategoryDeleteModal } from '../../components/modals/ConfirmCategoryDeleteModal';
+import { type ConfirmTransactionDeleteModal } from '../../components/modals/ConfirmTransactionDeleteModal';
+import { type ConfirmTransactionEditModal } from '../../components/modals/ConfirmTransactionEditModal';
+import { type ConfirmUnlinkAccountModal } from '../../components/modals/ConfirmUnlinkAccountModal';
+import { type CoverModal } from '../../components/modals/CoverModal';
 import { type CreateAccountModal } from '../../components/modals/CreateAccountModal';
+import { type CreateEncryptionKeyModal } from '../../components/modals/CreateEncryptionKeyModal';
 import { type CreateLocalAccountModal } from '../../components/modals/CreateLocalAccountModal';
+import { type EditFieldModal } from '../../components/modals/EditFieldModal';
 import { type EditRuleModal } from '../../components/modals/EditRuleModal';
+import { type EnvelopeBalanceMenuModal } from '../../components/modals/EnvelopeBalanceMenuModal';
+import { type EnvelopeBudgetMenuModal } from '../../components/modals/EnvelopeBudgetMenuModal';
+import { type EnvelopeBudgetMonthMenuModal } from '../../components/modals/EnvelopeBudgetMonthMenuModal';
+import { type EnvelopeBudgetSummaryModal } from '../../components/modals/EnvelopeBudgetSummaryModal';
+import { type EnvelopeToBudgetMenuModal } from '../../components/modals/EnvelopeToBudgetMenuModal';
 import { type FixEncryptionKeyModal } from '../../components/modals/FixEncryptionKeyModal';
+import { type GoalTemplateModal } from '../../components/modals/GoalTemplateModal';
+import { type GoCardlessExternalMsgModal } from '../../components/modals/GoCardlessExternalMsgModal';
 import { type GoCardlessInitialiseModal } from '../../components/modals/GoCardlessInitialiseModal';
+import { type HoldBufferModal } from '../../components/modals/HoldBufferModal';
 import { type ImportTransactionsModal } from '../../components/modals/ImportTransactionsModal';
+import { type KeyboardShortcutModal } from '../../components/modals/KeyboardShortcutModal';
 import { type LoadBackupModal } from '../../components/modals/LoadBackupModal';
+import { type ConfirmChangeDocumentDirModal } from '../../components/modals/manager/ConfirmChangeDocumentDir';
+import { type DeleteFileModal } from '../../components/modals/manager/DeleteFileModal';
+import { type FilesSettingsModal } from '../../components/modals/manager/FilesSettingsModal';
+import { type ImportActualModal } from '../../components/modals/manager/ImportActualModal';
+import { type ImportModal } from '../../components/modals/manager/ImportModal';
+import { type ImportYNAB4Modal } from '../../components/modals/manager/ImportYNAB4Modal';
+import { type ImportYNAB5Modal } from '../../components/modals/manager/ImportYNAB5Modal';
 import { type ManageRulesModal } from '../../components/modals/ManageRulesModal';
 import { type MergeUnusedPayeesModal } from '../../components/modals/MergeUnusedPayeesModal';
+import { type NotesModal } from '../../components/modals/NotesModal';
+import { type OutOfSyncMigrationsModal } from '../../components/modals/OutOfSyncMigrationsModal';
+import { type PayeeAutocompleteModal } from '../../components/modals/PayeeAutocompleteModal';
+import { type ScheduledTransactionMenuModal } from '../../components/modals/ScheduledTransactionMenuModal';
 import { type SelectLinkedAccountsModal } from '../../components/modals/SelectLinkedAccountsModal';
 import { type SimpleFinInitialiseModal } from '../../components/modals/SimpleFinInitialiseModal';
+import { type SingleInputModal } from '../../components/modals/SingleInputModal';
+import { type TrackingBalanceMenuModal } from '../../components/modals/TrackingBalanceMenuModal';
+import { type TrackingBudgetMenuModal } from '../../components/modals/TrackingBudgetMenuModal';
+import { type TrackingBudgetMonthMenuModal } from '../../components/modals/TrackingBudgetMonthMenuModal';
+import { type TrackingBudgetSummaryModal } from '../../components/modals/TrackingBudgetSummaryModal';
+import { type TransferModal } from '../../components/modals/TransferModal';
+import { type DiscoverSchedules } from '../../components/schedules/DiscoverSchedules';
+import { type PostsOfflineNotification } from '../../components/schedules/PostsOfflineNotification';
+import { type ScheduleDetails } from '../../components/schedules/ScheduleDetails';
+import { type ScheduleLink } from '../../components/schedules/ScheduleLink';
 import * as constants from '../constants';
 
-type NoOptions = EmptyObject;
-
-type ImportTransactionsModalRegistration = {
-  // Must be updated to below once file is migrated to TypeScript
-  name: 'import-transactions';
-  // name: typeof ImportTransactionsModal.modalName;
-  options: Omit<
-    ComponentPropsWithoutRef<typeof ImportTransactionsModal>,
-    'name'
-  >;
+/**
+ * This requires modal components to have a static property `modalName` that is a string.
+ * This `modalName` should be a const and contain a unique name for the modal.
+ */
+type ModalRegistration<
+  T extends ElementType & {
+    modalName: string;
+  },
+> = {
+  name: T['modalName'];
+  options: Omit<ComponentPropsWithoutRef<T>, 'name'>;
 };
 
-type AddAccountModalRegistration = {
-  name: typeof CreateAccountModal.modalName;
-  options: Omit<ComponentPropsWithoutRef<typeof CreateAccountModal>, 'name'>;
+type NamedModalRegistration<N, T extends ElementType> = {
+  name: N;
+  options: Omit<ComponentPropsWithoutRef<T>, 'name'>;
 };
 
-type AddLocalAccountModalRegistration = {
-  name: typeof CreateLocalAccountModal.modalName;
-  options: Omit<
-    ComponentPropsWithoutRef<typeof CreateLocalAccountModal>,
-    'name'
-  >;
+/**
+ * This is a more generic version of `ModalRegistration` that does not require the `modalName` static property.
+ * This should only used for jsx modal components that are not yet migrated to TypeScript.
+ */
+type JsxModalRegistration<S, T extends ElementType> = {
+  name: S;
+  options: Omit<ComponentPropsWithoutRef<T>, 'name'>;
 };
 
-type CloseAccountModalRegistration = {
-  name: typeof CloseAccountModal.modalName;
-  options: Omit<ComponentPropsWithoutRef<typeof CloseAccountModal>, 'name'>;
-};
+type ImportTransactionsModalRegistration = JsxModalRegistration<
+  'import-transactions',
+  typeof ImportTransactionsModal
+>;
+type AddAccountModalRegistration = ModalRegistration<typeof CreateAccountModal>;
+type AddLocalAccountModalRegistration = ModalRegistration<
+  typeof CreateLocalAccountModal
+>;
+type CloseAccountModalRegistration = ModalRegistration<
+  typeof CloseAccountModal
+>;
+type SelectLinkedAccountsModalRegistration = JsxModalRegistration<
+  'select-linked-accounts',
+  typeof SelectLinkedAccountsModal
+>;
+type ConfirmCategoryDeleteModalRegistration = ModalRegistration<
+  typeof ConfirmCategoryDeleteModal
+>;
+type LoadBackupModalRegistration = ModalRegistration<typeof LoadBackupModal>;
+type ManageRulesModalRegistration = ModalRegistration<typeof ManageRulesModal>;
+type EditRuleModalRegistration = JsxModalRegistration<
+  'edit-rule',
+  typeof EditRuleModal
+>;
+type MergeUnusedPayeesModalRegistration = JsxModalRegistration<
+  'merge-unused-payees',
+  typeof MergeUnusedPayeesModal
+>;
+type GoCardlessInitModalRegistration = ModalRegistration<
+  typeof GoCardlessInitialiseModal
+>;
+type SimplefinInitModalRegistration = ModalRegistration<
+  typeof SimpleFinInitialiseModal
+>;
+type GoCardlessExternalMsgModalRegistration = ModalRegistration<
+  typeof GoCardlessExternalMsgModal
+>;
+type DeleteBudgetModalRegistration = ModalRegistration<typeof DeleteFileModal>;
+type ImportModalRegistration = ModalRegistration<typeof ImportModal>;
+type ImportYnab4ModalRegistration = ModalRegistration<typeof ImportYNAB4Modal>;
+type ImportYnab5ModalRegistration = ModalRegistration<typeof ImportYNAB5Modal>;
+type ImportActualModalRegistration = ModalRegistration<
+  typeof ImportActualModal
+>;
+type OutOfSyncMigrationsModalRegistration = ModalRegistration<
+  typeof OutOfSyncMigrationsModal
+>;
+type FilesSettingsModalRegistration = ModalRegistration<
+  typeof FilesSettingsModal
+>;
+type ConfirmChangeDocumentDirModalRegistration = ModalRegistration<
+  typeof ConfirmChangeDocumentDirModal
+>;
+type CreateEncryptionKeyModalRegistration = ModalRegistration<
+  typeof CreateEncryptionKeyModal
+>;
+type FixEncryptionKeyModalRegistration = ModalRegistration<
+  typeof FixEncryptionKeyModal
+>;
+type EditFieldModalRegistration = JsxModalRegistration<
+  'edit-field',
+  typeof EditFieldModal
+>;
+type CategoryAutocompleteModalRegistration = ModalRegistration<
+  typeof CategoryAutocompleteModal
+>;
+type AccountAutocompleteModalRegistration = ModalRegistration<
+  typeof AccountAutocompleteModal
+>;
+type PayeeAutocompleteModalRegistration = ModalRegistration<
+  typeof PayeeAutocompleteModal
+>;
+type ScheduleDetailsModalRegistration = JsxModalRegistration<
+  'schedule-edit',
+  typeof ScheduleDetails
+>;
+type ScheduleLinkModalRegistration = ModalRegistration<typeof ScheduleLink>;
+type DiscoverSchedulesModalRegistration = ModalRegistration<
+  typeof DiscoverSchedules
+>;
+type PostsOfflineNotificationModalRegistration = JsxModalRegistration<
+  'schedule-posts-offline-notification',
+  typeof PostsOfflineNotification
+>;
+type AccountMenuModalRegistration = ModalRegistration<typeof AccountMenuModal>;
+type CategoryMenuModalRegistration = ModalRegistration<
+  typeof CategoryMenuModal
+>;
+type EnvelopeBudgetMenuModalRegistration = ModalRegistration<
+  typeof EnvelopeBudgetMenuModal
+>;
+type TrackingBudgetMenuModalRegistration = ModalRegistration<
+  typeof TrackingBudgetMenuModal
+>;
+type CategoryGroupMenuModalRegistration = ModalRegistration<
+  typeof CategoryGroupMenuModal
+>;
+type NotesModalRegistration = ModalRegistration<typeof NotesModal>;
+type TrackingBudgetSummaryModalRegistration = ModalRegistration<
+  typeof TrackingBudgetSummaryModal
+>;
+type EnvelopeBudgetSummaryModalRegistration = ModalRegistration<
+  typeof EnvelopeBudgetSummaryModal
+>;
 
-type SelectLinkedAccountsModalRegistration = {
-  // Must be updated to below once file is migrated to TypeScript
-  name: 'select-linked-accounts';
-  // name: typeof SelectLinkedAccountsModal.modalName;
-  options: Omit<
-    ComponentPropsWithoutRef<typeof SelectLinkedAccountsModal>,
-    'name'
-  >;
-};
-
-type ConfirmCategoryDeleteModalRegistration = {
-  name: typeof ConfirmCategoryDeleteModal.modalName;
-  options: Omit<
-    ComponentPropsWithoutRef<typeof ConfirmCategoryDeleteModal>,
-    'name'
-  >;
-};
-
-type LoadBackupModalRegistration = {
-  name: typeof LoadBackupModal.modalName;
-  options: Omit<ComponentPropsWithoutRef<typeof LoadBackupModal>, 'name'>;
-};
-
-type ManageRulesModalRegistration = {
-  name: typeof ManageRulesModal.modalName;
-  options: Omit<ComponentPropsWithoutRef<typeof ManageRulesModal>, 'name'>;
-};
-
-type EditRuleModalRegistration = {
-  // Must be updated to below once file is migrated to TypeScript
-  name: 'edit-rule';
-  // name: typeof EditRuleModal.modalName;
-  options: Omit<ComponentPropsWithoutRef<typeof EditRuleModal>, 'name'>;
-};
-
-type MergeUnusedPayeesModalRegistration = {
-  // Must be updated to below once file is migrated to TypeScript
-  name: 'merge-unused-payees';
-  // name: typeof MergeUnusedPayeesModal.modalName;
-  options: Omit<
-    ComponentPropsWithoutRef<typeof MergeUnusedPayeesModal>,
-    'name'
-  >;
-};
-
-type GoCardlessInitModalRegistration = {
-  name: typeof GoCardlessInitialiseModal.modalName;
-  options: Omit<
-    ComponentPropsWithoutRef<typeof GoCardlessInitialiseModal>,
-    'name'
-  >;
-};
-
-type SimplefinInitModalRegistration = {
-  name: typeof SimpleFinInitialiseModal.modalName;
-  options: Omit<
-    ComponentPropsWithoutRef<typeof SimpleFinInitialiseModal>,
-    'name'
-  >;
-};
-
-type GoCardlessExternalMsgModalRegistration = {
-  name: typeof GoCardlessInitialiseModal.modalName;
-  options: Omit<
-    ComponentPropsWithoutRef<typeof GoCardlessInitialiseModal>,
-    'name'
-  >;
-};
-
-type DeleteBudgetModal = {
-  name: 'delete-budget';
-  options: { file: File };
-};
-
-type ImportModal = {
-  name: 'import';
-  options: NoOptions;
-};
-
-type ImportYnab4Modal = {
-  name: 'import-ynab4';
-  options: NoOptions;
-};
-
-type ImportYnab5Modal = {
-  name: 'import-ynab5';
-  options: NoOptions;
-};
-
-type ImportActualModal = {
-  name: 'import-actual';
-  options: NoOptions;
-};
-
-type OutOfSyncMigrationsModal = {
-  name: 'out-of-sync-migrations';
-  options: NoOptions;
-};
-
-type FilesSettingsModal = {
-  name: 'files-settings';
-  options: NoOptions;
-};
-
-type ConfirmChangeDocumentDirModal = {
-  name: 'confirm-change-document-dir';
-  options: {
-    currentBudgetDirectory: string;
-    newDirectory: string;
-  };
-};
-
-type CreateEncryptionKeyModal = {
-  name: 'create-encryption-key';
-  options: { recreate?: boolean };
-};
-
-type FixEncryptionKeyModalRegistration = {
-  name: typeof FixEncryptionKeyModal.modalName;
-  options: ComponentPropsWithoutRef<typeof FixEncryptionKeyModal>;
-};
-
-type EditFieldModal = {
-  name: 'edit-field';
-  options: {
-    name: keyof Pick<TransactionEntity, 'date' | 'amount' | 'notes'>;
-    onSubmit: (
-      name: keyof Pick<TransactionEntity, 'date' | 'amount' | 'notes'>,
-      value: string | number,
-      mode?: 'prepend' | 'append' | 'replace' | null,
-    ) => void;
-    onClose?: () => void;
-  };
-};
-
-type CategoryAutocompleteModal = {
-  name: 'category-autocomplete';
-  options: {
-    categoryGroups?: CategoryGroupEntity[];
-    onSelect: (categoryId: string, categoryName: string) => void;
-    month?: string;
-    showHiddenCategories?: boolean;
-    onClose?: () => void;
-  };
-};
-
-type AccountAutocompleteModal = {
-  name: 'account-autocomplete';
-  options: {
-    onSelect: (accountId: string, accountName: string) => void;
-    includeClosedAccounts?: boolean;
-    onClose?: () => void;
-  };
-};
-
-type PayeeAutocompleteModal = {
-  name: 'payee-autocomplete';
-  options: {
-    onSelect: (payeeId: string) => void;
-    onClose?: () => void;
-  };
-};
-
-type BudgetSummaryModal = {
-  name: 'budget-summary';
-  options: {
-    month: string;
-  };
-};
-
-type ScheduleEditModal = {
-  name: 'schedule-edit';
-  options: { id: string; transaction?: TransactionEntity } | null;
-};
-
-type ScheduleLinkModal = {
-  name: 'schedule-link';
-  options: {
-    transactionIds: string[];
-    getTransaction: (
-      transactionId: TransactionEntity['id'],
-    ) => TransactionEntity;
-    accountName?: string;
-    onScheduleLinked?: (schedule: ScheduleEntity) => void;
-  };
-};
-
-type SchedulesDiscoverModal = {
-  name: 'schedules-discover';
-  options: NoOptions;
-};
-
-type SchedulePostsOfflineNotificationModal = {
-  name: 'schedule-posts-offline-notification';
-  options: NoOptions;
-};
-
-type AccountMenuModal = {
-  name: 'account-menu';
-  options: {
-    accountId: string;
-    onSave: (account: AccountEntity) => void;
-    onCloseAccount: (accountId: string) => void;
-    onReopenAccount: (accountId: string) => void;
-    onEditNotes: (id: string) => void;
-    onClose?: () => void;
-  };
-};
-
-type CategoryMenuModal = {
-  name: 'category-menu';
-  options: {
-    categoryId: string;
-    onSave: (category: CategoryEntity) => void;
-    onEditNotes: (id: string) => void;
-    onDelete: (categoryId: string) => void;
-    onToggleVisibility: (categoryId: string) => void;
-    onBudgetAction: (month: string, action: string, args?: unknown) => void;
-    onClose?: () => void;
-  };
-};
-
-type EnvelopeBudgetMenuModal = {
-  name: 'envelope-budget-menu';
-  options: {
-    categoryId: string;
-    month: string;
-    onUpdateBudget: (amount: number) => void;
-    onCopyLastMonthAverage: () => void;
-    onSetMonthsAverage: (numberOfMonths: number) => void;
-    onApplyBudgetTemplate: () => void;
-  };
-};
-
-type TrackingBudgetMenuModal = {
-  name: 'tracking-budget-menu';
-  options: {
-    categoryId: string;
-    month: string;
-    onUpdateBudget: (amount: number) => void;
-    onCopyLastMonthAverage: () => void;
-    onSetMonthsAverage: (numberOfMonths: number) => void;
-    onApplyBudgetTemplate: () => void;
-  };
-};
-
-type CategoryGroupMenuModal = {
-  name: 'category-group-menu';
-  options: {
-    groupId: string;
-    onSave: (group: CategoryGroupEntity) => void;
-    onAddCategory: (groupId: string, isIncome: boolean) => void;
-    onEditNotes: (id: string) => void;
-    onDelete: (groupId: string) => void;
-    onToggleVisibility: (groupId: string) => void;
-    onClose?: () => void;
-  };
-};
-
-type NotesModal = {
-  name: 'notes';
-  options: {
-    id: string;
-    name: string;
-    onSave: (id: string, notes: string) => void;
-  };
-};
-
-type TrackingBudgetSummaryModal = {
-  name: 'tracking-budget-summary';
-  options: { month: string };
-};
-
-type EnvelopeBudgetSummaryModal = {
-  name: 'envelope-budget-summary';
-  options: {
-    month: string;
-    onBudgetAction: (
-      month: string,
-      type: string,
-      args: unknown,
-    ) => Promise<void>;
-  };
-};
-
-type NewCategoryGroupModal = {
-  name: 'new-category-group';
-  options: {
-    onValidate?: (value: string) => string;
-    onSubmit: (value: string) => Promise<void>;
-  };
-};
-
-type NewCategoryModal = {
-  name: 'new-category';
-  options: {
-    onValidate?: (value: string) => string;
-    onSubmit: (value: string) => Promise<void>;
-  };
-};
-
-type EnvelopeBalanceMenuModal = {
-  name: 'envelope-balance-menu';
-  options: {
-    categoryId: string;
-    month: string;
-    onCarryover: (carryover: boolean) => void;
-    onTransfer: () => void;
-    onCover: () => void;
-  };
-};
-
-type EnvelopeSummaryToBudgetMenuModal = {
-  name: 'envelope-summary-to-budget-menu';
-  options: {
-    month: string;
-    onTransfer: () => void;
-    onCover: () => void;
-    onHoldBuffer: () => void;
-    onResetHoldBuffer: () => void;
-  };
-};
-
-type TrackingBalanceMenuModal = {
-  name: 'tracking-balance-menu';
-  options: {
-    categoryId: string;
-    month: string;
-    onCarryover: (carryover: boolean) => void;
-  };
-};
-
-type TransferModal = {
-  name: 'transfer';
-  options: {
-    title: string;
-    categoryId?: CategoryEntity['id'];
-    month: string;
-    amount: number;
-    onSubmit: (amount: number, toCategoryId: string) => void;
-    showToBeBudgeted?: boolean;
-  };
-};
-
-type CoverModal = {
-  name: 'cover';
-  options: {
-    title: string;
-    categoryId?: CategoryEntity['id'];
-    month: string;
-    showToBeBudgeted?: boolean;
-    onSubmit: (fromCategoryId: string) => void;
-  };
-};
-
-type HoldBufferModal = {
-  name: 'hold-buffer';
-  options: {
-    month: string;
-    onSubmit: (amount: number) => void;
-  };
-};
-
-type ScheduledTransactionMenuModal = {
-  name: 'scheduled-transaction-menu';
-  options: {
-    transactionId: string;
-    onPost: (transactionId: string) => void;
-    onSkip: (transactionId: string) => void;
-  };
-};
-
-type BudgetPageMenuModal = {
-  name: 'budget-page-menu';
-  options: {
-    onAddCategoryGroup: () => void;
-    onToggleHiddenCategories: () => void;
-    onSwitchBudgetFile: () => void;
-  };
-};
-
-type EnvelopeBudgetMonthMenuModal = {
-  name: 'envelope-budget-month-menu';
-  options: {
-    month: string;
-    onBudgetAction: (month: string, action: string, arg?: unknown) => void;
-    onEditNotes: (month: string) => void;
-  };
-};
-
-type TrackingBudgetMonthMenuModal = {
-  name: 'tracking-budget-month-menu';
-  options: {
-    month: string;
-    onBudgetAction: (month: string, action: string, arg?: unknown) => void;
-    onEditNotes: (month: string) => void;
-  };
-};
-
-type BudgetListModal = {
-  name: 'budget-list';
-  options: NoOptions;
-};
-
-type ConfirmTransactionEditModal = {
-  name: 'confirm-transaction-edit';
-  options: {
-    onConfirm: () => void;
-    onCancel?: () => void;
-    confirmReason: string;
-  };
-};
-
-type ConfirmTransactionDeleteModal = {
-  name: 'confirm-transaction-delete';
-  options: {
-    message?: string;
-    onConfirm: () => void;
-  };
-};
-
-type ConfirmUnlinkAccountModal = {
-  name: 'confirm-unlink-account';
-  options: {
-    accountName: string;
-    onUnlink: () => void;
-  };
-};
-
-type KeyboardShortcutsModal = {
-  name: 'keyboard-shortcuts';
-  options: NoOptions;
-};
-
-type GoalTemplatesModal = {
-  name: 'goal-templates';
-  options: NoOptions;
-};
+type NewCategoryGroupModalRegistration = NamedModalRegistration<
+  'new-category-group',
+  typeof SingleInputModal
+>;
+type NewCategoryModal = NamedModalRegistration<
+  'new-category',
+  typeof SingleInputModal
+>;
+type EnvelopeBalanceMenuModalRegistration = ModalRegistration<
+  typeof EnvelopeBalanceMenuModal
+>;
+type EnvelopeToBudgetMenuModalRegistration = ModalRegistration<
+  typeof EnvelopeToBudgetMenuModal
+>;
+type TrackingBalanceMenuModalRegistration = ModalRegistration<
+  typeof TrackingBalanceMenuModal
+>;
+type TransferModalRegistration = ModalRegistration<typeof TransferModal>;
+type CoverModalRegistration = ModalRegistration<typeof CoverModal>;
+type HoldBufferModalRegistration = ModalRegistration<typeof HoldBufferModal>;
+type ScheduledTransactionMenuModalRegistration = ModalRegistration<
+  typeof ScheduledTransactionMenuModal
+>;
+type BudgetPageMenuModalRegistration = ModalRegistration<
+  typeof BudgetPageMenuModal
+>;
+type EnvelopeBudgetMonthMenuModalRegistration = ModalRegistration<
+  typeof EnvelopeBudgetMonthMenuModal
+>;
+type TrackingBudgetMonthMenuModalRegistration = ModalRegistration<
+  typeof TrackingBudgetMonthMenuModal
+>;
+type BudgetListModalRegistration = ModalRegistration<typeof BudgetListModal>;
+type ConfirmTransactionEditModalRegistration = ModalRegistration<
+  typeof ConfirmTransactionEditModal
+>;
+type ConfirmTransactionDeleteModalRegistration = ModalRegistration<
+  typeof ConfirmTransactionDeleteModal
+>;
+type ConfirmUnlinkAccountModalRegistration = ModalRegistration<
+  typeof ConfirmUnlinkAccountModal
+>;
+type KeyboardShortcutsModalRegistration = ModalRegistration<
+  typeof KeyboardShortcutModal
+>;
+type GoalTemplateModalRegistration = ModalRegistration<
+  typeof GoalTemplateModal
+>;
 
 export type Modal =
   | ImportTransactionsModalRegistration
@@ -507,51 +255,50 @@ export type Modal =
   | GoCardlessInitModalRegistration
   | SimplefinInitModalRegistration
   | GoCardlessExternalMsgModalRegistration
-  | DeleteBudgetModal
-  | ImportModal
-  | ImportYnab4Modal
-  | ImportYnab5Modal
-  | ImportActualModal
-  | OutOfSyncMigrationsModal
-  | FilesSettingsModal
-  | ConfirmChangeDocumentDirModal
-  | CreateEncryptionKeyModal
+  | DeleteBudgetModalRegistration
+  | ImportModalRegistration
+  | ImportYnab4ModalRegistration
+  | ImportYnab5ModalRegistration
+  | ImportActualModalRegistration
+  | OutOfSyncMigrationsModalRegistration
+  | FilesSettingsModalRegistration
+  | ConfirmChangeDocumentDirModalRegistration
+  | CreateEncryptionKeyModalRegistration
   | FixEncryptionKeyModalRegistration
-  | EditFieldModal
-  | CategoryAutocompleteModal
-  | AccountAutocompleteModal
-  | PayeeAutocompleteModal
-  | BudgetSummaryModal
-  | ScheduleEditModal
-  | ScheduleLinkModal
-  | SchedulesDiscoverModal
-  | SchedulePostsOfflineNotificationModal
-  | AccountMenuModal
-  | CategoryMenuModal
-  | EnvelopeBudgetMenuModal
-  | TrackingBudgetMenuModal
-  | CategoryGroupMenuModal
-  | NotesModal
-  | TrackingBudgetSummaryModal
-  | EnvelopeBudgetSummaryModal
-  | NewCategoryGroupModal
+  | EditFieldModalRegistration
+  | CategoryAutocompleteModalRegistration
+  | AccountAutocompleteModalRegistration
+  | PayeeAutocompleteModalRegistration
+  | ScheduleDetailsModalRegistration
+  | ScheduleLinkModalRegistration
+  | DiscoverSchedulesModalRegistration
+  | PostsOfflineNotificationModalRegistration
+  | AccountMenuModalRegistration
+  | CategoryMenuModalRegistration
+  | EnvelopeBudgetMenuModalRegistration
+  | TrackingBudgetMenuModalRegistration
+  | CategoryGroupMenuModalRegistration
+  | NotesModalRegistration
+  | TrackingBudgetSummaryModalRegistration
+  | EnvelopeBudgetSummaryModalRegistration
+  | NewCategoryGroupModalRegistration
   | NewCategoryModal
-  | EnvelopeBalanceMenuModal
-  | EnvelopeSummaryToBudgetMenuModal
-  | TrackingBalanceMenuModal
-  | TransferModal
-  | CoverModal
-  | HoldBufferModal
-  | ScheduledTransactionMenuModal
-  | BudgetPageMenuModal
-  | EnvelopeBudgetMonthMenuModal
-  | TrackingBudgetMonthMenuModal
-  | BudgetListModal
-  | ConfirmTransactionEditModal
-  | ConfirmTransactionDeleteModal
-  | ConfirmUnlinkAccountModal
-  | KeyboardShortcutsModal
-  | GoalTemplatesModal;
+  | EnvelopeBalanceMenuModalRegistration
+  | EnvelopeToBudgetMenuModalRegistration
+  | TrackingBalanceMenuModalRegistration
+  | TransferModalRegistration
+  | CoverModalRegistration
+  | HoldBufferModalRegistration
+  | ScheduledTransactionMenuModalRegistration
+  | BudgetPageMenuModalRegistration
+  | EnvelopeBudgetMonthMenuModalRegistration
+  | TrackingBudgetMonthMenuModalRegistration
+  | BudgetListModalRegistration
+  | ConfirmTransactionEditModalRegistration
+  | ConfirmTransactionDeleteModalRegistration
+  | ConfirmUnlinkAccountModalRegistration
+  | KeyboardShortcutsModalRegistration
+  | GoalTemplateModalRegistration;
 
 export type PushModalAction = {
   type: typeof constants.PUSH_MODAL;

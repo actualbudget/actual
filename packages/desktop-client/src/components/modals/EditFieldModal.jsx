@@ -15,23 +15,30 @@ import { View } from '../common/View';
 import { SectionLabel } from '../forms';
 import { DateSelect } from '../select/DateSelect';
 
-export function EditFieldModal({ name, onSubmit, onClose }) {
+const MODAL_NAME = 'edit-field';
+
+export function EditFieldModal({
+  name: modalName = MODAL_NAME,
+  fieldName,
+  onSubmit,
+  onClose = undefined,
+}) {
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
 
   function onSelectNote(value, mode) {
     if (value != null) {
-      onSubmit(name, value, mode);
+      onSubmit(fieldName, value, mode);
     }
   }
 
   function onSelect(value) {
     if (value != null) {
       // Process the value if needed
-      if (name === 'amount') {
+      if (fieldName === 'amount') {
         value = amountToInteger(value);
       }
 
-      onSubmit(name, value);
+      onSubmit(fieldName, value);
     }
   }
 
@@ -51,7 +58,7 @@ export function EditFieldModal({ name, onSubmit, onClose }) {
 
   const [noteAmend, onChangeMode] = useState('replace');
 
-  switch (name) {
+  switch (fieldName) {
     case 'date':
       const today = currentDay();
       label = 'Date';
@@ -216,7 +223,7 @@ export function EditFieldModal({ name, onSubmit, onClose }) {
 
   return (
     <Modal
-      name="edit-field"
+      name={modalName}
       noAnimation={!isNarrowWidth}
       onClose={onClose}
       containerProps={{
@@ -254,3 +261,4 @@ export function EditFieldModal({ name, onSubmit, onClose }) {
     </Modal>
   );
 }
+EditFieldModal.modalName = MODAL_NAME;

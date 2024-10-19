@@ -27,6 +27,8 @@ import { DisplayId } from '../util/DisplayId';
 
 import { ScheduleAmountCell } from './SchedulesTable';
 
+const MODAL_NAME = 'schedules-discover' as const;
+
 const ROW_HEIGHT = 43;
 
 function DiscoverSchedulesTable({
@@ -139,7 +141,13 @@ function DiscoverSchedulesTable({
   );
 }
 
-export function DiscoverSchedules() {
+type DiscoverSchedulesProps = {
+  name: typeof MODAL_NAME;
+};
+
+export function DiscoverSchedules({
+  name = MODAL_NAME,
+}: DiscoverSchedulesProps) {
   const { t } = useTranslation();
 
   const { data, isLoading } = useSendPlatformRequest('schedule/discover');
@@ -187,10 +195,7 @@ export function DiscoverSchedules() {
   }
 
   return (
-    <Modal
-      name="schedules-discover"
-      containerProps={{ style: { width: 850, height: 650 } }}
-    >
+    <Modal name={name} containerProps={{ style: { width: 850, height: 650 } }}>
       {({ state: { close } }) => (
         <>
           <ModalHeader
@@ -242,3 +247,4 @@ export function DiscoverSchedules() {
     </Modal>
   );
 }
+DiscoverSchedules.modalName = MODAL_NAME;

@@ -11,16 +11,20 @@ import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { Stack } from '../common/Stack';
 import { NamespaceContext } from '../spreadsheet/NamespaceContext';
 
+const MODAL_NAME = 'tracking-budget-summary' as const;
+
 type TrackingBudgetSummaryModalProps = {
+  name: typeof MODAL_NAME;
   month: string;
 };
 
 export function TrackingBudgetSummaryModal({
+  name = MODAL_NAME,
   month,
 }: TrackingBudgetSummaryModalProps) {
   const currentMonth = monthUtils.currentMonth();
   return (
-    <Modal name="tracking-budget-summary">
+    <Modal name={name}>
       {({ state: { close } }) => (
         <>
           <ModalHeader
@@ -49,3 +53,4 @@ export function TrackingBudgetSummaryModal({
     </Modal>
   );
 }
+TrackingBudgetSummaryModal.modalName = MODAL_NAME;

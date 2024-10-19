@@ -3,7 +3,7 @@ import React, { useState, type CSSProperties } from 'react';
 
 import { css } from '@emotion/css';
 
-import * as monthUtils from 'loot-core/src/shared/months';
+import * as monthUtils from 'loot-core/shared/months';
 
 import { useNotes } from '../../hooks/useNotes';
 import { useUndo } from '../../hooks/useUndo';
@@ -15,14 +15,41 @@ import { Button } from '../common/Button2';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { View } from '../common/View';
 import { Notes } from '../Notes';
+import { NamespaceContext } from '../spreadsheet/NamespaceContext';
+
+const MODAL_NAME = 'envelope-budget-month-menu' as const;
 
 type EnvelopeBudgetMonthMenuModalProps = {
+  name: typeof MODAL_NAME;
   month: string;
   onBudgetAction: (month: string, action: string, arg?: unknown) => void;
   onEditNotes: (month: string) => void;
 };
 
 export function EnvelopeBudgetMonthMenuModal({
+  name,
+  month,
+  onBudgetAction,
+  onEditNotes,
+}: EnvelopeBudgetMonthMenuModalProps) {
+  return (
+    <NamespaceContext.Provider
+      key={name}
+      value={monthUtils.sheetForMonth(month)}
+    >
+      <EnvelopeBudgetMonthMenuModalInner
+        name={name}
+        month={month}
+        onBudgetAction={onBudgetAction}
+        onEditNotes={onEditNotes}
+      />
+    </NamespaceContext.Provider>
+  );
+}
+EnvelopeBudgetMonthMenuModal.modalName = MODAL_NAME;
+
+function EnvelopeBudgetMonthMenuModalInner({
+  name,
   month,
   onBudgetAction,
   onEditNotes,
@@ -59,7 +86,7 @@ export function EnvelopeBudgetMonthMenuModal({
 
   return (
     <Modal
-      name="envelope-budget-month-menu"
+      name={name}
       containerProps={{
         style: { height: '50vh' },
       }}

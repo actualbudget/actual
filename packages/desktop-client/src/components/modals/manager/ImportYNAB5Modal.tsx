@@ -12,6 +12,8 @@ import { Modal, ModalCloseButton, ModalHeader } from '../../common/Modal';
 import { Paragraph } from '../../common/Paragraph';
 import { View } from '../../common/View';
 
+const MODAL_NAME = 'import-ynab5' as const;
+
 function getErrorMessage(error: string): string {
   switch (error) {
     case 'parse-error':
@@ -23,7 +25,11 @@ function getErrorMessage(error: string): string {
   }
 }
 
-export function ImportYNAB5Modal() {
+type ImportYNAB5ModalProps = {
+  name: typeof MODAL_NAME;
+};
+
+export function ImportYNAB5Modal({ name = MODAL_NAME }: ImportYNAB5ModalProps) {
   const { t } = useTranslation();
 
   const dispatch = useDispatch();
@@ -49,7 +55,7 @@ export function ImportYNAB5Modal() {
   }
 
   return (
-    <Modal name="import-ynab5" containerProps={{ style: { width: 400 } }}>
+    <Modal name={name} containerProps={{ style: { width: 400 } }}>
       {({ state: { close } }) => (
         <>
           <ModalHeader
@@ -107,3 +113,4 @@ export function ImportYNAB5Modal() {
     </Modal>
   );
 }
+ImportYNAB5Modal.modalName = MODAL_NAME;

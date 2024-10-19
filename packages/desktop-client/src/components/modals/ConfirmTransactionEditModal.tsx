@@ -7,22 +7,23 @@ import { InitialFocus } from '../common/InitialFocus';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { View } from '../common/View';
 
+const MODAL_NAME = 'confirm-transaction-edit' as const;
+
 type ConfirmTransactionEditProps = {
+  name: typeof MODAL_NAME;
   onCancel?: () => void;
   onConfirm: () => void;
   confirmReason: string;
 };
 
 export function ConfirmTransactionEditModal({
+  name = MODAL_NAME,
   onCancel,
   onConfirm,
   confirmReason,
 }: ConfirmTransactionEditProps) {
   return (
-    <Modal
-      name="confirm-transaction-edit"
-      containerProps={{ style: { width: '30vw' } }}
-    >
+    <Modal name={name} containerProps={{ style: { width: '30vw' } }}>
       {({ state: { close } }) => (
         <>
           <ModalHeader
@@ -109,3 +110,4 @@ export function ConfirmTransactionEditModal({
     </Modal>
   );
 }
+ConfirmTransactionEditModal.modalName = MODAL_NAME;

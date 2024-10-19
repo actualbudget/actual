@@ -6,20 +6,21 @@ import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { Paragraph } from '../common/Paragraph';
 import { View } from '../common/View';
 
+const MODAL_NAME = 'confirm-unlink-account' as const;
+
 type ConfirmUnlinkAccountProps = {
+  name?: typeof MODAL_NAME;
   accountName: string;
   onUnlink: () => void;
 };
 
 export function ConfirmUnlinkAccountModal({
+  name = MODAL_NAME,
   accountName,
   onUnlink,
 }: ConfirmUnlinkAccountProps) {
   return (
-    <Modal
-      name="confirm-unlink-account"
-      containerProps={{ style: { width: '30vw' } }}
-    >
+    <Modal name={name} containerProps={{ style: { width: '30vw' } }}>
       {({ state: { close } }) => (
         <>
           <ModalHeader
@@ -63,3 +64,4 @@ export function ConfirmUnlinkAccountModal({
     </Modal>
   );
 }
+ConfirmUnlinkAccountModal.modalName = MODAL_NAME;

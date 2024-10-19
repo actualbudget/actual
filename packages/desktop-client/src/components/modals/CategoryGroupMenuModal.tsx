@@ -25,18 +25,21 @@ import { Popover } from '../common/Popover';
 import { View } from '../common/View';
 import { Notes } from '../Notes';
 
+const MODAL_NAME = 'category-group-menu' as const;
+
 type CategoryGroupMenuModalProps = {
+  name: typeof MODAL_NAME;
   groupId: string;
   onSave: (group: CategoryGroupEntity) => void;
   onAddCategory: (groupId: string, isIncome: boolean) => void;
   onEditNotes: (id: string) => void;
-  onSaveNotes: (id: string, notes: string) => void;
   onDelete: (groupId: string) => void;
   onToggleVisibility: (groupId: string) => void;
   onClose?: () => void;
 };
 
 export function CategoryGroupMenuModal({
+  name = MODAL_NAME,
   groupId,
   onSave,
   onAddCategory,
@@ -86,7 +89,7 @@ export function CategoryGroupMenuModal({
 
   return (
     <Modal
-      name="category-group-menu"
+      name={name}
       onClose={onClose}
       containerProps={{
         style: {
@@ -168,6 +171,7 @@ export function CategoryGroupMenuModal({
     </Modal>
   );
 }
+CategoryGroupMenuModal.modalName = MODAL_NAME;
 
 function AdditionalCategoryGroupMenu({ group, onDelete, onToggleVisibility }) {
   const triggerRef = useRef(null);

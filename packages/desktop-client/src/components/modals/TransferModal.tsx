@@ -18,7 +18,10 @@ import { View } from '../common/View';
 import { FieldLabel, TapField } from '../mobile/MobileForms';
 import { AmountInput } from '../util/AmountInput';
 
+const MODAL_NAME = 'transfer' as const;
+
 type TransferModalProps = {
+  name: typeof MODAL_NAME;
   title: string;
   categoryId?: CategoryEntity['id'];
   month: string;
@@ -28,6 +31,7 @@ type TransferModalProps = {
 };
 
 export function TransferModal({
+  name = MODAL_NAME,
   title,
   categoryId,
   month,
@@ -60,12 +64,15 @@ export function TransferModal({
   const openCategoryModal = () => {
     dispatch(
       pushModal('category-autocomplete', {
-        categoryGroups,
-        month,
-        showHiddenCategories: true,
-        onSelect: categoryId => {
-          setToCategoryId(categoryId);
+        autocompleteProps: {
+          value: null,
+          categoryGroups,
+          showHiddenCategories: true,
+          onSelect: categoryId => {
+            setToCategoryId(categoryId);
+          },
         },
+        month,
       }),
     );
   };
@@ -79,7 +86,7 @@ export function TransferModal({
   const toCategory = categories.find(c => c.id === toCategoryId);
 
   return (
-    <Modal name="transfer">
+    <Modal name={name}>
       {({ state: { close } }) => (
         <>
           <ModalHeader
@@ -145,3 +152,4 @@ export function TransferModal({
     </Modal>
   );
 }
+TransferModal.modalName = MODAL_NAME;

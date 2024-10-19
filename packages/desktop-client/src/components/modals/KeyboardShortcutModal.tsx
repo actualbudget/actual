@@ -7,6 +7,8 @@ import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 
+const MODAL_NAME = 'keyboard-shortcuts' as const;
+
 type KeyIconProps = {
   shortcut: string;
   style?: CSSProperties;
@@ -148,13 +150,19 @@ function Shortcut({
   );
 }
 
-export function KeyboardShortcutModal() {
+type KeyboardShortcutModalProps = {
+  name: typeof MODAL_NAME;
+};
+
+export function KeyboardShortcutModal({
+  name = MODAL_NAME,
+}: KeyboardShortcutModalProps) {
   const location = useLocation();
   const onBudget = location.pathname.startsWith('/budget');
   const onAccounts = location.pathname.startsWith('/accounts');
   const ctrl = Platform.OS === 'mac' ? '⌘' : 'Ctrl';
   return (
-    <Modal name="keyboard-shortcuts">
+    <Modal name={name}>
       {({ state: { close } }) => (
         <>
           <ModalHeader
@@ -340,3 +348,4 @@ export function KeyboardShortcutModal() {
     </Modal>
   );
 }
+KeyboardShortcutModal.modalName = MODAL_NAME;

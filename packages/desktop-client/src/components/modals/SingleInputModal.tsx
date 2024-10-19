@@ -20,7 +20,7 @@ type SingleInputModalProps = {
   Header: ComponentType<ComponentPropsWithoutRef<typeof ModalHeader>>;
   buttonText: string;
   onSubmit: (value: string) => void;
-  onValidate?: (value: string) => string[];
+  onValidate?: (value: string) => string;
   inputPlaceholder?: string;
 };
 
@@ -33,7 +33,7 @@ export function SingleInputModal({
   inputPlaceholder,
 }: SingleInputModalProps) {
   const [value, setValue] = useState('');
-  const [errorMessage, setErrorMessage] = useState(null);
+  const [errorMessage, setErrorMessage] = useState<string>(null);
 
   const _onSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();

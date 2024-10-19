@@ -15,7 +15,9 @@ import { Stack } from '../common/Stack';
 import { Text } from '../common/Text';
 import { DisplayId } from '../util/DisplayId';
 
-export function PostsOfflineNotification() {
+const MODAL_NAME = 'schedule-posts-offline-notification';
+
+export function PostsOfflineNotification({ name = MODAL_NAME }) {
   const { t } = useTranslation();
 
   const location = useLocation();
@@ -36,7 +38,7 @@ export function PostsOfflineNotification() {
   const payeeNamesList = useFormatList(payeesList, t.language);
 
   return (
-    <Modal name="schedule-posts-offline-notification">
+    <Modal name={name}>
       {({ state: { close } }) => (
         <>
           <ModalHeader
@@ -102,3 +104,4 @@ export function PostsOfflineNotification() {
     </Modal>
   );
 }
+PostsOfflineNotification.modalName = MODAL_NAME;

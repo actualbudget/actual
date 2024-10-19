@@ -11,6 +11,8 @@ import { Modal, ModalCloseButton, ModalHeader } from '../../common/Modal';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
 
+const MODAL_NAME = 'files-settings' as const;
+
 function FileLocationSettings() {
   const [documentDir, _setDocumentDirPref] = useGlobalPref('documentDir');
   const [_documentDirChanged, setDirChanged] = useState(false);
@@ -140,7 +142,11 @@ function SelfSignedCertLocationSettings() {
   );
 }
 
-export function FilesSettingsModal() {
+type FilesSettingsModalProps = {
+  name: typeof MODAL_NAME;
+};
+
+export function FilesSettingsModal({ name }: FilesSettingsModalProps) {
   const dispatch = useDispatch();
 
   function closeModal(close: () => void) {
@@ -149,7 +155,7 @@ export function FilesSettingsModal() {
   }
 
   return (
-    <Modal name="files-settings">
+    <Modal name={name}>
       {({ state: { close } }) => (
         <>
           <ModalHeader
@@ -187,3 +193,4 @@ export function FilesSettingsModal() {
     </Modal>
   );
 }
+FilesSettingsModal.modalName = MODAL_NAME;

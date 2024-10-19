@@ -6,6 +6,7 @@ import React, {
 } from 'react';
 
 import { envelopeBudget } from 'loot-core/client/queries';
+import * as monthUtils from 'loot-core/shared/months';
 import { amountToInteger, integerToAmount } from 'loot-core/shared/util';
 
 import { useCategory } from '../../hooks/useCategory';
@@ -21,21 +22,51 @@ import {
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { FocusableAmountInput } from '../mobile/transactions/FocusableAmountInput';
+import { NamespaceContext } from '../spreadsheet/NamespaceContext';
+
+const MODAL_NAME = 'envelope-budget-menu' as const;
 
 type EnvelopeBudgetMenuModalProps = ComponentPropsWithoutRef<
   typeof BudgetMenu
 > & {
+  name: typeof MODAL_NAME;
+  month: string;
   categoryId: string;
   onUpdateBudget: (amount: number) => void;
 };
 
 export function EnvelopeBudgetMenuModal({
+  name = MODAL_NAME,
+  month,
   categoryId,
   onUpdateBudget,
   onCopyLastMonthAverage,
   onSetMonthsAverage,
   onApplyBudgetTemplate,
 }: EnvelopeBudgetMenuModalProps) {
+  return (
+    <NamespaceContext.Provider value={monthUtils.sheetForMonth(month)}>
+      <EnvelopeBudgetModalInner
+        name={name}
+        categoryId={categoryId}
+        onUpdateBudget={onUpdateBudget}
+        onCopyLastMonthAverage={onCopyLastMonthAverage}
+        onSetMonthsAverage={onSetMonthsAverage}
+        onApplyBudgetTemplate={onApplyBudgetTemplate}
+      />
+    </NamespaceContext.Provider>
+  );
+}
+EnvelopeBudgetMenuModal.modalName = MODAL_NAME;
+
+function EnvelopeBudgetModalInner({
+  name,
+  categoryId,
+  onUpdateBudget,
+  onCopyLastMonthAverage,
+  onSetMonthsAverage,
+  onApplyBudgetTemplate,
+}: Omit<EnvelopeBudgetMenuModalProps, 'month'>) {
   const defaultMenuItemStyle: CSSProperties = {
     ...styles.mobileMenuItem,
     color: theme.menuItemText,
@@ -62,7 +93,7 @@ export function EnvelopeBudgetMenuModal({
   }
 
   return (
-    <Modal name="envelope-budget-menu">
+    <Modal name={name}>
       {({ state: { close } }) => (
         <>
           <ModalHeader

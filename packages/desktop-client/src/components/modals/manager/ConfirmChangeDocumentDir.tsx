@@ -12,6 +12,8 @@ import { Text } from '../../common/Text';
 import { View } from '../../common/View';
 import { Checkbox } from '../../forms';
 
+const MODAL_NAME = 'confirm-change-document-dir' as const;
+
 function DirectoryDisplay({ directory }: { directory: string }) {
   return (
     <View style={{ flexDirection: 'row', gap: '0.5rem', width: '100%' }}>
@@ -36,13 +38,17 @@ function DirectoryDisplay({ directory }: { directory: string }) {
   );
 }
 
-export function ConfirmChangeDocumentDirModal({
-  currentBudgetDirectory,
-  newDirectory,
-}: {
+type ConfirmChangeDocumentDirModalProps = {
+  name: typeof MODAL_NAME;
   currentBudgetDirectory: string;
   newDirectory: string;
-}) {
+};
+
+export function ConfirmChangeDocumentDirModal({
+  name = MODAL_NAME,
+  currentBudgetDirectory,
+  newDirectory,
+}: ConfirmChangeDocumentDirModalProps) {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [moveFiles, setMoveFiles] = useState(false);
@@ -91,7 +97,7 @@ export function ConfirmChangeDocumentDirModal({
   };
 
   return (
-    <Modal name="confirm-change-document-dir">
+    <Modal name={name}>
       {({ state: { close } }) => (
         <>
           <ModalHeader
@@ -205,3 +211,4 @@ export function ConfirmChangeDocumentDirModal({
     </Modal>
   );
 }
+ConfirmChangeDocumentDirModal.modalName = MODAL_NAME;

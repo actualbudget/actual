@@ -11,11 +11,14 @@ import { Modal, ModalCloseButton, ModalHeader } from '../../common/Modal';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
 
+const MODAL_NAME = 'delete-budget' as const;
+
 type DeleteFileProps = {
+  name: typeof MODAL_NAME;
   file: File;
 };
 
-export function DeleteFileModal({ file }: DeleteFileProps) {
+export function DeleteFileModal({ name = MODAL_NAME, file }: DeleteFileProps) {
   const { t } = useTranslation();
 
   // If the state is "broken" that means it was created by another
@@ -29,7 +32,7 @@ export function DeleteFileModal({ file }: DeleteFileProps) {
   );
 
   return (
-    <Modal name="delete-budget">
+    <Modal name={name}>
       {({ state: { close } }) => (
         <>
           <ModalHeader
@@ -152,3 +155,4 @@ export function DeleteFileModal({ file }: DeleteFileProps) {
     </Modal>
   );
 }
+DeleteFileModal.modalName = MODAL_NAME;

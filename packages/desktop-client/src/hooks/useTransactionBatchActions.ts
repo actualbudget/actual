@@ -154,7 +154,10 @@ export function useTransactionBatchActions() {
     const pushPayeeAutocompleteModal = () => {
       dispatch(
         pushModal('payee-autocomplete', {
-          onSelect: payeeId => onChange(name, payeeId),
+          autocompleteProps: {
+            value: null,
+            onSelect: payeeId => onChange(name, payeeId),
+          },
         }),
       );
     };
@@ -162,7 +165,10 @@ export function useTransactionBatchActions() {
     const pushAccountAutocompleteModal = () => {
       dispatch(
         pushModal('account-autocomplete', {
-          onSelect: accountId => onChange(name, accountId),
+          autocompleteProps: {
+            value: null,
+            onSelect: accountId => onChange(name, accountId),
+          },
         }),
       );
     };
@@ -174,8 +180,8 @@ export function useTransactionBatchActions() {
 
       dispatch(
         pushModal('edit-field', {
-          name,
-          onSubmit: (name, value, mode) => onChange(name, value, mode),
+          fieldName: name,
+          onSubmit: onChange,
         }),
       );
     };
@@ -192,8 +198,11 @@ export function useTransactionBatchActions() {
         );
       dispatch(
         pushModal('category-autocomplete', {
+          autocompleteProps: {
+            value: null,
+            onSelect: categoryId => onChange(name, categoryId),
+          },
           month: transactionsHaveSameMonth ? transactionMonth : undefined,
-          onSelect: categoryId => onChange(name, categoryId),
         }),
       );
     };

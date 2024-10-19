@@ -8,12 +8,16 @@ import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { Paragraph } from '../common/Paragraph';
 import { View } from '../common/View';
 
+const MODAL_NAME = 'confirm-transaction-delete' as const;
+
 type ConfirmTransactionDeleteProps = {
+  name?: typeof MODAL_NAME;
   message?: string;
   onConfirm: () => void;
 };
 
 export function ConfirmTransactionDeleteModal({
+  name = MODAL_NAME,
   message = 'Are you sure you want to delete the transaction?',
   onConfirm,
 }: ConfirmTransactionDeleteProps) {
@@ -25,7 +29,7 @@ export function ConfirmTransactionDeleteModal({
     : {};
 
   return (
-    <Modal name="confirm-transaction-delete">
+    <Modal name={name}>
       {({ state: { close } }) => (
         <>
           <ModalHeader
@@ -68,3 +72,4 @@ export function ConfirmTransactionDeleteModal({
     </Modal>
   );
 }
+ConfirmTransactionDeleteModal.modalName = MODAL_NAME;

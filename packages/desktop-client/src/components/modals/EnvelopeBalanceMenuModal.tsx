@@ -4,6 +4,7 @@ import React, {
 } from 'react';
 
 import { envelopeBudget } from 'loot-core/client/queries';
+import * as monthUtils from 'loot-core/shared/months';
 
 import { useCategory } from '../../hooks/useCategory';
 import { theme, styles } from '../../style';
@@ -21,17 +22,46 @@ import {
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { CellValueText } from '../spreadsheet/CellValue';
+import { NamespaceContext } from '../spreadsheet/NamespaceContext';
+
+const MODAL_NAME = 'envelope-balance-menu' as const;
 
 type EnvelopeBalanceMenuModalProps = ComponentPropsWithoutRef<
   typeof BalanceMenu
->;
+> & {
+  name: typeof MODAL_NAME;
+  month: string;
+};
 
 export function EnvelopeBalanceMenuModal({
+  name = MODAL_NAME,
+  month,
   categoryId,
   onCarryover,
   onTransfer,
   onCover,
 }: EnvelopeBalanceMenuModalProps) {
+  return (
+    <NamespaceContext.Provider value={monthUtils.sheetForMonth(month)}>
+      <EnvelopeBalanceMenuModalInner
+        name={name}
+        categoryId={categoryId}
+        onCarryover={onCarryover}
+        onTransfer={onTransfer}
+        onCover={onCover}
+      />
+    </NamespaceContext.Provider>
+  );
+}
+EnvelopeBalanceMenuModal.modalName = MODAL_NAME;
+
+function EnvelopeBalanceMenuModalInner({
+  name = MODAL_NAME,
+  categoryId,
+  onCarryover,
+  onTransfer,
+  onCover,
+}: Omit<EnvelopeBalanceMenuModalProps, 'month'>) {
   const defaultMenuItemStyle: CSSProperties = {
     ...styles.mobileMenuItem,
     color: theme.menuItemText,
@@ -46,7 +76,7 @@ export function EnvelopeBalanceMenuModal({
   }
 
   return (
-    <Modal name="envelope-balance-menu">
+    <Modal name={name}>
       {({ state: { close } }) => (
         <>
           <ModalHeader

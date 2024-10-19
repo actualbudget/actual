@@ -8,9 +8,16 @@ import { theme, styles } from '../../style';
 import { Menu } from '../common/Menu';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 
-type BudgetPageMenuModalProps = ComponentPropsWithoutRef<typeof BudgetPageMenu>;
+const MODAL_NAME = 'budget-page-menu' as const;
+
+type BudgetPageMenuModalProps = ComponentPropsWithoutRef<
+  typeof BudgetPageMenu
+> & {
+  name: typeof MODAL_NAME;
+};
 
 export function BudgetPageMenuModal({
+  name = MODAL_NAME,
   onAddCategoryGroup,
   onToggleHiddenCategories,
   onSwitchBudgetFile,
@@ -23,7 +30,7 @@ export function BudgetPageMenuModal({
   };
 
   return (
-    <Modal name="budget-page-menu">
+    <Modal name={name}>
       {({ state: { close } }) => (
         <>
           <ModalHeader
@@ -41,6 +48,7 @@ export function BudgetPageMenuModal({
     </Modal>
   );
 }
+BudgetPageMenuModal.modalName = MODAL_NAME;
 
 type BudgetPageMenuProps = Omit<
   ComponentPropsWithoutRef<typeof Menu>,

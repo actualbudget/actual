@@ -586,8 +586,11 @@ function PayeeCell({
         onSelect={() =>
           dispatch(
             pushModal('payee-autocomplete', {
-              onSelect: payeeId => {
-                onUpdate('payee', payeeId);
+              autocompleteProps: {
+                value: null,
+                onSelect: payeeId => {
+                  onUpdate('payee', payeeId);
+                },
               },
             }),
           )

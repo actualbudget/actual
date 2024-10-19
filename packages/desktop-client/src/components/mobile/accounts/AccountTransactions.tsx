@@ -111,7 +111,7 @@ function AccountHeader({ account }: { readonly account: AccountEntity }) {
     dispatch(
       pushModal('notes', {
         id: `account-${id}`,
-        name: account.name,
+        title: account.name,
         onSave: onSaveNotes,
       }),
     );

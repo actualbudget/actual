@@ -11,6 +11,8 @@ import { Modal, ModalCloseButton, ModalHeader } from '../../common/Modal';
 import { Paragraph } from '../../common/Paragraph';
 import { View } from '../../common/View';
 
+const MODAL_NAME = 'import-actual' as const;
+
 function getErrorMessage(error: string): string {
   switch (error) {
     case 'parse-error':
@@ -28,7 +30,13 @@ function getErrorMessage(error: string): string {
   }
 }
 
-export function ImportActualModal() {
+type ImportActualModalProps = {
+  name: typeof MODAL_NAME;
+};
+
+export function ImportActualModal({
+  name = MODAL_NAME,
+}: ImportActualModalProps) {
   const { t } = useTranslation();
 
   const dispatch = useDispatch();
@@ -54,7 +62,7 @@ export function ImportActualModal() {
   }
 
   return (
-    <Modal name="import-actual" containerProps={{ style: { width: 400 } }}>
+    <Modal name={name} containerProps={{ style: { width: 400 } }}>
       {({ state: { close } }) => (
         <>
           <ModalHeader
@@ -102,3 +110,4 @@ export function ImportActualModal() {
     </Modal>
   );
 }
+ImportActualModal.modalName = MODAL_NAME;

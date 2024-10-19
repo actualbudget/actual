@@ -19,9 +19,14 @@ import {
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 
-type ScheduledTransactionMenuModalProps = ScheduledTransactionMenuProps;
+const MODAL_NAME = 'scheduled-transaction-menu' as const;
+
+type ScheduledTransactionMenuModalProps = ScheduledTransactionMenuProps & {
+  name: typeof MODAL_NAME;
+};
 
 export function ScheduledTransactionMenuModal({
+  name = MODAL_NAME,
   transactionId,
   onSkip,
   onPost,
@@ -46,7 +51,7 @@ export function ScheduledTransactionMenuModal({
   }
 
   return (
-    <Modal name="scheduled-transaction-menu">
+    <Modal name={name}>
       {({ state: { close } }) => (
         <>
           <ModalHeader
@@ -78,6 +83,7 @@ export function ScheduledTransactionMenuModal({
     </Modal>
   );
 }
+ScheduledTransactionMenuModal.modalName = MODAL_NAME;
 
 type ScheduledTransactionMenuProps = Omit<
   ComponentPropsWithoutRef<typeof Menu>,

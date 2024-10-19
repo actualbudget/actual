@@ -21,8 +21,8 @@ export function handleGlobalEvents(actions: BoundActions, store: Store<State>) {
     });
   });
 
-  listen('schedules-offline', ({ payees }) => {
-    actions.pushModal('schedule-posts-offline-notification', { payees });
+  listen('schedules-offline', () => {
+    actions.pushModal('schedule-posts-offline-notification');
   });
 
   // This is experimental: we sync data locally automatically when

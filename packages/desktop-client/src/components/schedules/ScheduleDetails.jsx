@@ -33,6 +33,8 @@ import { SimpleTransactionsTable } from '../transactions/SimpleTransactionsTable
 import { AmountInput, BetweenAmountInput } from '../util/AmountInput';
 import { GenericInput } from '../util/GenericInput';
 
+const MODAL_NAME = 'schedule-edit';
+
 function updateScheduleConditions(schedule, fields) {
   const conds = extractScheduleConds(schedule._conditions);
 
@@ -73,7 +75,7 @@ function updateScheduleConditions(schedule, fields) {
   };
 }
 
-export function ScheduleDetails({ id, transaction }) {
+export function ScheduleDetails({ name = MODAL_NAME, id, transaction }) {
   const { t } = useTranslation();
 
   const adding = id == null;
@@ -457,7 +459,7 @@ export function ScheduleDetails({ id, transaction }) {
   // This is derived from the date
   const repeats = state.fields.date ? !!state.fields.date.frequency : false;
   return (
-    <Modal name="schedule-edit">
+    <Modal name={name}>
       {({ state: { close } }) => (
         <>
           <ModalHeader
@@ -848,3 +850,4 @@ function NoTransactionsMessage(props) {
     </View>
   );
 }
+ScheduleDetails.modalName = MODAL_NAME;

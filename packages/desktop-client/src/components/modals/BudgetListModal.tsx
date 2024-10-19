@@ -7,14 +7,20 @@ import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { BudgetList } from '../manager/BudgetList';
 
-export function BudgetListModal() {
+const MODAL_NAME = 'budget-list' as const;
+
+type BudgetListModalProps = {
+  name: typeof MODAL_NAME;
+};
+
+export function BudgetListModal({ name = MODAL_NAME }: BudgetListModalProps) {
   const [id] = useMetadataPref('id');
   const currentFile = useSelector(state =>
     state.budgets.allFiles?.find(f => 'id' in f && f.id === id),
   );
 
   return (
-    <Modal name="budget-list">
+    <Modal name={name}>
       {({ state: { close } }) => (
         <>
           <ModalHeader
@@ -41,3 +47,4 @@ export function BudgetListModal() {
     </Modal>
   );
 }
+BudgetListModal.modalName = MODAL_NAME;

@@ -15,13 +15,17 @@ import { View } from '../common/View';
 import { SectionLabel } from '../forms';
 import { NamespaceContext } from '../spreadsheet/NamespaceContext';
 
+const MODAL_NAME = 'category-autocomplete' as const;
+
 type CategoryAutocompleteModalProps = {
+  name: typeof MODAL_NAME;
   autocompleteProps: ComponentPropsWithoutRef<typeof CategoryAutocomplete>;
-  onClose: () => void;
+  onClose?: () => void;
   month?: string;
 };
 
 export function CategoryAutocompleteModal({
+  name = MODAL_NAME,
   autocompleteProps,
   month,
   onClose,
@@ -34,7 +38,7 @@ export function CategoryAutocompleteModal({
 
   return (
     <Modal
-      name="category-autocomplete"
+      name={name}
       noAnimation={!isNarrowWidth}
       onClose={onClose}
       containerProps={{
@@ -94,3 +98,4 @@ export function CategoryAutocompleteModal({
     </Modal>
   );
 }
+CategoryAutocompleteModal.modalName = MODAL_NAME;

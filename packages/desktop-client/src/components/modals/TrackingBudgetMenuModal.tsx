@@ -6,6 +6,7 @@ import React, {
 } from 'react';
 
 import { trackingBudget } from 'loot-core/client/queries';
+import * as monthUtils from 'loot-core/shared/months';
 import { amountToInteger, integerToAmount } from 'loot-core/shared/util';
 
 import { useCategory } from '../../hooks/useCategory';
@@ -21,21 +22,51 @@ import {
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { FocusableAmountInput } from '../mobile/transactions/FocusableAmountInput';
+import { NamespaceContext } from '../spreadsheet/NamespaceContext';
+
+const MODAL_NAME = 'tracking-budget-menu' as const;
 
 type TrackingBudgetMenuModalProps = ComponentPropsWithoutRef<
   typeof BudgetMenu
 > & {
+  name: typeof MODAL_NAME;
+  month: string;
   categoryId: string;
   onUpdateBudget: (amount: number) => void;
 };
 
 export function TrackingBudgetMenuModal({
+  name = MODAL_NAME,
+  month,
   categoryId,
   onUpdateBudget,
   onCopyLastMonthAverage,
   onSetMonthsAverage,
   onApplyBudgetTemplate,
 }: TrackingBudgetMenuModalProps) {
+  return (
+    <NamespaceContext.Provider value={monthUtils.sheetForMonth(month)}>
+      <TrackingBudgetMenuModalInner
+        name={name}
+        categoryId={categoryId}
+        onUpdateBudget={onUpdateBudget}
+        onCopyLastMonthAverage={onCopyLastMonthAverage}
+        onSetMonthsAverage={onSetMonthsAverage}
+        onApplyBudgetTemplate={onApplyBudgetTemplate}
+      />
+    </NamespaceContext.Provider>
+  );
+}
+TrackingBudgetMenuModal.modalName = MODAL_NAME;
+
+function TrackingBudgetMenuModalInner({
+  name = MODAL_NAME,
+  categoryId,
+  onUpdateBudget,
+  onCopyLastMonthAverage,
+  onSetMonthsAverage,
+  onApplyBudgetTemplate,
+}: Omit<TrackingBudgetMenuModalProps, 'month'>) {
   const defaultMenuItemStyle: CSSProperties = {
     ...styles.mobileMenuItem,
     color: theme.menuItemText,
@@ -62,7 +93,7 @@ export function TrackingBudgetMenuModal({
   }
 
   return (
-    <Modal name="tracking-budget-menu">
+    <Modal name={name}>
       {({ state: { close } }) => (
         <>
           <ModalHeader

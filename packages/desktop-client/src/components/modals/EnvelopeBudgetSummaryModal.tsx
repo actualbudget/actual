@@ -2,6 +2,7 @@ import React from 'react';
 import { useDispatch } from 'react-redux';
 
 import { envelopeBudget } from 'loot-core/client/queries';
+import * as monthUtils from 'loot-core/shared/months';
 import { groupById, integerToCurrency } from 'loot-core/shared/util';
 import { format, sheetForMonth, prevMonth } from 'loot-core/src/shared/months';
 
@@ -15,12 +16,32 @@ import { useEnvelopeSheetValue } from '../budget/envelope/EnvelopeBudgetComponen
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { NamespaceContext } from '../spreadsheet/NamespaceContext';
 
+const MODAL_NAME = 'envelope-budget-summary' as const;
+
 type EnvelopeBudgetSummaryModalProps = {
+  name: typeof MODAL_NAME;
   onBudgetAction: (month: string, action: string, arg?: unknown) => void;
   month: string;
 };
 
 export function EnvelopeBudgetSummaryModal({
+  name = MODAL_NAME,
+  month,
+  onBudgetAction,
+}: EnvelopeBudgetSummaryModalProps) {
+  return (
+    <NamespaceContext.Provider value={monthUtils.sheetForMonth(month)}>
+      <EnvelopeBudgetSummaryModalInner
+        name={name}
+        month={month}
+        onBudgetAction={onBudgetAction}
+      />
+    </NamespaceContext.Provider>
+  );
+}
+
+function EnvelopeBudgetSummaryModalInner({
+  name = MODAL_NAME,
   month,
   onBudgetAction,
 }: EnvelopeBudgetSummaryModalProps) {
@@ -108,7 +129,7 @@ export function EnvelopeBudgetSummaryModal({
   };
 
   return (
-    <Modal name="envelope-budget-summary">
+    <Modal name={name}>
       {({ state: { close } }) => (
         <>
           <ModalHeader
@@ -140,3 +161,4 @@ export function EnvelopeBudgetSummaryModal({
     </Modal>
   );
 }
+EnvelopeBudgetSummaryModal.modalName = MODAL_NAME;

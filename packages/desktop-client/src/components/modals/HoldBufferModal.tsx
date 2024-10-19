@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 
 import { envelopeBudget } from 'loot-core/client/queries';
+import * as monthUtils from 'loot-core/shared/months';
 
 import { styles } from '../../style';
 import { useEnvelopeSheetValue } from '../budget/envelope/EnvelopeBudgetComponents';
@@ -9,14 +10,34 @@ import { InitialFocus } from '../common/InitialFocus';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { View } from '../common/View';
 import { FieldLabel } from '../mobile/MobileForms';
+import { NamespaceContext } from '../spreadsheet/NamespaceContext';
 import { AmountInput } from '../util/AmountInput';
 
+const MODAL_NAME = 'hold-buffer' as const;
+
 type HoldBufferModalProps = {
+  name: typeof MODAL_NAME;
   month: string;
   onSubmit: (amount: number) => void;
 };
 
-export function HoldBufferModal({ onSubmit }: HoldBufferModalProps) {
+export function HoldBufferModal({
+  name,
+  month,
+  onSubmit,
+}: HoldBufferModalProps) {
+  return (
+    <NamespaceContext.Provider value={monthUtils.sheetForMonth(month)}>
+      <HoldBufferModalInner name={name} onSubmit={onSubmit} />
+    </NamespaceContext.Provider>
+  );
+}
+HoldBufferModal.modalName = MODAL_NAME;
+
+function HoldBufferModalInner({
+  name,
+  onSubmit,
+}: Omit<HoldBufferModalProps, 'month'>) {
   const available = useEnvelopeSheetValue(envelopeBudget.toBudget) ?? 0;
   const [amount, setAmount] = useState<number>(0);
 
@@ -27,7 +48,7 @@ export function HoldBufferModal({ onSubmit }: HoldBufferModalProps) {
   };
 
   return (
-    <Modal name="hold-buffer">
+    <Modal name={name}>
       {({ state: { close } }) => (
         <>
           <ModalHeader

@@ -12,12 +12,16 @@ import {
 import { View } from '../common/View';
 import { SectionLabel } from '../forms';
 
+const MODAL_NAME = 'account-autocomplete' as const;
+
 type AccountAutocompleteModalProps = {
+  name: typeof MODAL_NAME;
   autocompleteProps: ComponentPropsWithoutRef<typeof AccountAutocomplete>;
-  onClose: () => void;
+  onClose?: () => void;
 };
 
 export function AccountAutocompleteModal({
+  name = MODAL_NAME,
   autocompleteProps,
   onClose,
 }: AccountAutocompleteModalProps) {
@@ -28,7 +32,7 @@ export function AccountAutocompleteModal({
 
   return (
     <Modal
-      name="account-autocomplete"
+      name={name}
       noAnimation={!isNarrowWidth}
       onClose={onClose}
       containerProps={{
@@ -83,3 +87,4 @@ export function AccountAutocompleteModal({
     </Modal>
   );
 }
+AccountAutocompleteModal.modalName = MODAL_NAME;

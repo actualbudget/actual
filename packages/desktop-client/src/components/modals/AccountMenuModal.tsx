@@ -28,7 +28,10 @@ import { View } from '../common/View';
 import { Notes } from '../Notes';
 import { validateAccountName } from '../util/accountValidation';
 
+const MODAL_NAME = 'account-menu' as const;
+
 type AccountMenuModalProps = {
+  name: typeof MODAL_NAME;
   accountId: string;
   onSave: (account: AccountEntity) => void;
   onCloseAccount: (accountId: string) => void;
@@ -38,6 +41,7 @@ type AccountMenuModalProps = {
 };
 
 export function AccountMenuModal({
+  name = MODAL_NAME,
   accountId,
   onSave,
   onCloseAccount,
@@ -105,7 +109,7 @@ export function AccountMenuModal({
 
   return (
     <Modal
-      name="account-menu"
+      name={name}
       onClose={onClose}
       containerProps={{
         style: {
@@ -193,6 +197,7 @@ export function AccountMenuModal({
     </Modal>
   );
 }
+AccountMenuModal.modalName = MODAL_NAME;
 
 type AdditionalAccountMenuProps = {
   account: AccountEntity;

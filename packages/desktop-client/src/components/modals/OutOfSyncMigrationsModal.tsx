@@ -10,7 +10,15 @@ import { Paragraph } from '../common/Paragraph';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 
-export function OutOfSyncMigrationsModal() {
+const MODAL_NAME = 'out-of-sync-migrations' as const;
+
+type OutOfSyncMigrationsModalProps = {
+  name: typeof MODAL_NAME;
+};
+
+export function OutOfSyncMigrationsModal({
+  name,
+}: OutOfSyncMigrationsModalProps) {
   const dispatch = useDispatch();
 
   const { t } = useTranslation();
@@ -21,7 +29,7 @@ export function OutOfSyncMigrationsModal() {
   };
 
   return (
-    <Modal name="out-of-sync-migrations">
+    <Modal name={name}>
       {({ state: { close } }) => (
         <>
           <ModalHeader
@@ -88,3 +96,4 @@ export function OutOfSyncMigrationsModal() {
     </Modal>
   );
 }
+OutOfSyncMigrationsModal.modalName = MODAL_NAME;

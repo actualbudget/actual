@@ -22,17 +22,23 @@ import { View } from '../common/View';
 
 import { ROW_HEIGHT, SchedulesTable } from './SchedulesTable';
 
-export function ScheduleLink({
-  transactionIds: ids,
-  getTransaction,
-  accountName,
-  onScheduleLinked,
-}: {
+const MODAL_NAME = 'schedule-link' as const;
+
+type ScheduleLinkProps = {
+  name: typeof MODAL_NAME;
   transactionIds: string[];
   getTransaction: (transactionId: string) => TransactionEntity;
   accountName?: string;
   onScheduleLinked?: (schedule: ScheduleEntity) => void;
-}) {
+};
+
+export function ScheduleLink({
+  name = MODAL_NAME,
+  transactionIds: ids,
+  getTransaction,
+  accountName,
+  onScheduleLinked,
+}: ScheduleLinkProps) {
   const { t } = useTranslation();
 
   const dispatch = useDispatch();
@@ -69,7 +75,7 @@ export function ScheduleLink({
 
   return (
     <Modal
-      name="schedule-link"
+      name={name}
       containerProps={{
         style: {
           width: 800,
@@ -149,3 +155,4 @@ export function ScheduleLink({
     </Modal>
   );
 }
+ScheduleLink.modalName = MODAL_NAME;

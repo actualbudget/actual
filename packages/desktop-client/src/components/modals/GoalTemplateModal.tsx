@@ -7,10 +7,18 @@ import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { TableHeader, Row, Field } from '../table';
 
-export function GoalTemplateModal() {
+const MODAL_NAME = 'goal-templates' as const;
+
+type GoalTemplateModalProps = {
+  name: typeof MODAL_NAME;
+};
+
+export function GoalTemplateModal({
+  name = MODAL_NAME,
+}: GoalTemplateModalProps) {
   const { t } = useTranslation();
   return (
-    <Modal name="goal-templates" containerProps={{ style: { width: 850 } }}>
+    <Modal name={name} containerProps={{ style: { width: 850 } }}>
       {({ state: { close } }) => (
         <>
           <ModalHeader
@@ -177,3 +185,4 @@ export function GoalTemplateModal() {
     </Modal>
   );
 }
+GoalTemplateModal.modalName = MODAL_NAME;

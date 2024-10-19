@@ -13,12 +13,16 @@ import {
   ModalHeader,
 } from '../common/Modal';
 
+const MODAL_NAME = 'payee-autocomplete' as const;
+
 type PayeeAutocompleteModalProps = {
+  name: typeof MODAL_NAME;
   autocompleteProps: ComponentPropsWithoutRef<typeof PayeeAutocomplete>;
-  onClose: () => void;
+  onClose?: () => void;
 };
 
 export function PayeeAutocompleteModal({
+  name = MODAL_NAME,
   autocompleteProps,
   onClose,
 }: PayeeAutocompleteModalProps) {
@@ -35,7 +39,7 @@ export function PayeeAutocompleteModal({
 
   return (
     <Modal
-      name="payee-autocomplete"
+      name={name}
       noAnimation={!isNarrowWidth}
       onClose={onClose}
       containerProps={{
@@ -81,3 +85,4 @@ export function PayeeAutocompleteModal({
     </Modal>
   );
 }
+PayeeAutocompleteModal.modalName = MODAL_NAME;

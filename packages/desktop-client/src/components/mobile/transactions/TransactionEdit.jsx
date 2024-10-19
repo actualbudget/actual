@@ -628,11 +628,14 @@ const TransactionEditInner = memo(function TransactionEditInner({
           case 'category':
             dispatch(
               pushModal('category-autocomplete', {
-                categoryGroups,
-                month: monthUtils.monthFromDate(unserializedTransaction.date),
-                onSelect: categoryId => {
-                  onUpdateInner(transactionToEdit, name, categoryId);
+                autocompleteProps: {
+                  value: null,
+                  categoryGroups,
+                  onSelect: categoryId => {
+                    onUpdateInner(transactionToEdit, name, categoryId);
+                  },
                 },
+                month: monthUtils.monthFromDate(unserializedTransaction.date),
                 onClose: () => {
                   onClearActiveEdit();
                 },
@@ -642,8 +645,11 @@ const TransactionEditInner = memo(function TransactionEditInner({
           case 'account':
             dispatch(
               pushModal('account-autocomplete', {
-                onSelect: accountId => {
-                  onUpdateInner(transactionToEdit, name, accountId);
+                autocompleteProps: {
+                  value: null,
+                  onSelect: accountId => {
+                    onUpdateInner(transactionToEdit, name, accountId);
+                  },
                 },
                 onClose: () => {
                   onClearActiveEdit();
@@ -654,8 +660,11 @@ const TransactionEditInner = memo(function TransactionEditInner({
           case 'payee':
             dispatch(
               pushModal('payee-autocomplete', {
-                onSelect: payeeId => {
-                  onUpdateInner(transactionToEdit, name, payeeId);
+                autocompleteProps: {
+                  value: null,
+                  onSelect: payeeId => {
+                    onUpdateInner(transactionToEdit, name, payeeId);
+                  },
                 },
                 onClose: () => {
                   onClearActiveEdit();
@@ -666,7 +675,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
           default:
             dispatch(
               pushModal('edit-field', {
-                name,
+                fieldName: name,
                 month: monthUtils.monthFromDate(unserializedTransaction.date),
                 onSubmit: (name, value) => {
                   onUpdateInner(transactionToEdit, name, value);
