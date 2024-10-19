@@ -81,22 +81,24 @@ export function useSchedules({
     let isUnmounted = false;
 
     setError(undefined);
-    setIsLoading(!!query);
 
     if (!query) {
-      return;
-    }
-
-    if (query.state.table !== 'schedules') {
-      setError(new Error('Query must be a schedules query.'));
       return;
     }
 
     function onError(error: Error) {
       if (!isUnmounted) {
         setError(error);
+        setIsLoading(false);
       }
     }
+
+    if (query.state.table !== 'schedules') {
+      onError(new Error('Query must be a schedules query.'));
+      return;
+    }
+
+    setIsLoading(true);
 
     scheduleQueryRef.current = liveQuery<ScheduleEntity>(query, {
       onData: async schedules => {
@@ -131,11 +133,9 @@ export function useSchedules({
 
 type SchedulesContextValue = UseSchedulesResult;
 
-const SchedulesContext = createContext<SchedulesContextValue>({
-  isLoading: false,
-  schedules: [],
-  statuses: new Map(),
-});
+const SchedulesContext = createContext<SchedulesContextValue | undefined>(
+  undefined,
+);
 
 type SchedulesProviderProps = PropsWithChildren<{
   query?: UseSchedulesProps['query'];
@@ -151,7 +151,13 @@ export function SchedulesProvider({ query, children }: SchedulesProviderProps) {
 }
 
 export function useCachedSchedules() {
-  return useContext(SchedulesContext);
+  const context = useContext(SchedulesContext);
+  if (!context) {
+    throw new Error(
+      'useCachedSchedules must be used within a SchedulesProvider',
+    );
+  }
+  return context;
 }
 
 export function accountSchedulesQuery(

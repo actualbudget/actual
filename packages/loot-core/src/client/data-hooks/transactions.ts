@@ -51,16 +51,24 @@ export function useTransactions({
     let isUnmounted = false;
 
     setError(undefined);
-    setIsLoading(!!query);
 
     if (!query) {
       return;
     }
 
+    function onError(error: Error) {
+      if (!isUnmounted) {
+        setError(error);
+        setIsLoading(false);
+      }
+    }
+
     if (query.state.table !== 'transactions') {
-      setError(new Error('Query must be a transactions query.'));
+      onError(new Error('Query must be a transactions query.'));
       return;
     }
+
+    setIsLoading(true);
 
     pagedQueryRef.current = pagedQuery<TransactionEntity>(query, {
       onData: data => {
@@ -69,11 +77,7 @@ export function useTransactions({
           setIsLoading(false);
         }
       },
-      onError: error => {
-        if (!isUnmounted) {
-          setError(error);
-        }
-      },
+      onError,
       options: { pageCount: optionsRef.current.pageCount },
     });
 
@@ -163,13 +167,14 @@ export function usePreviewTransactions(): UsePreviewTransactionsResult {
             ),
           }));
 
-          setIsLoading(false);
           setPreviewTransactions(ungroupTransactions(withDefaults));
+          setIsLoading(false);
         }
       })
       .catch(error => {
         if (!isUnmounted) {
           setError(error);
+          setIsLoading(false);
         }
       });
 
