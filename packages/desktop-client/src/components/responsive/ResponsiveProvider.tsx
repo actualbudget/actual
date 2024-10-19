@@ -1,6 +1,6 @@
 import { type ReactNode, createContext, useContext } from 'react';
 
-import { useViewportSize } from '@react-aria/utils';
+import { useWindowSize } from 'usehooks-ts';
 
 import { breakpoints } from '../../tokens';
 
@@ -19,7 +19,7 @@ const ResponsiveContext = createContext<TResponsiveContext | undefined>(
 );
 
 export function ResponsiveProvider(props: { children: ReactNode }) {
-  const { height, width } = useViewportSize();
+  const { height, width } = useWindowSize();
 
   // Possible view modes: narrow, small, medium, wide
   // To check if we're at least small width, check !isNarrowWidth
