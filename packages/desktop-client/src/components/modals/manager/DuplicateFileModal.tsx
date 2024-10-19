@@ -6,13 +6,17 @@ import { duplicateBudget } from 'loot-core/client/actions';
 import { type File } from 'loot-core/src/types/file';
 
 import { theme } from '../../../style';
-import { ButtonWithLoading } from '../../common/Button2';
-import { InlineField } from '../../common/InlineField';
-import { InitialFocus } from '../../common/InitialFocus';
-import { Button } from '../../common/Button2';
+import { Button, ButtonWithLoading } from '../../common/Button2';
 import { FormError } from '../../common/FormError';
+import { InitialFocus } from '../../common/InitialFocus';
+import { InlineField } from '../../common/InlineField';
 import { Input } from '../../common/Input';
-import { Modal, ModalButtons, ModalCloseButton, ModalHeader } from '../../common/Modal';
+import {
+  Modal,
+  ModalButtons,
+  ModalCloseButton,
+  ModalHeader
+} from '../../common/Modal';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
 
@@ -34,7 +38,7 @@ export function DuplicateFileModal({ file, managePage }: DuplicateFileProps) {
     null,
   );
 
-  const validateNewName = (name: string) => {
+  const validateNewName = (name: string): string | null => {
     if (name === '') return 'Name can not be blank';
     return null;
   };
@@ -54,7 +58,7 @@ export function DuplicateFileModal({ file, managePage }: DuplicateFileProps) {
       {({ state: { close } }) => (
         <>
           <ModalHeader
-            title={t('Duplicate "{{fileName}}"', { fileName: file.name })}
+            title={t('Duplicate “{{fileName}}”', { fileName: file.name })}
             rightContent={<ModalCloseButton onPress={close} />}
           />
           <View
@@ -67,7 +71,6 @@ export function DuplicateFileModal({ file, managePage }: DuplicateFileProps) {
               lineHeight: '1.5em',
             }}
           >
-
             <InlineField label="New Budget Name" width="100%" labelWidth={150}>
               <InitialFocus>
                 <Input
@@ -92,9 +95,10 @@ export function DuplicateFileModal({ file, managePage }: DuplicateFileProps) {
               <>
                 <Text>
                   <Trans>
-                    Current budget is a <strong>hosted budget</strong> which means it is
-                    stored on your server to make it available for download on
-                    any device. Would you like to duplicate this budget for all devices?
+                    Current budget is a <strong>hosted budget</strong> which
+                    means it is stored on your server to make it available for
+                    download on any device. Would you like to duplicate this
+                    budget for all devices?
                   </Trans>
                 </Text>
 
@@ -131,15 +135,15 @@ export function DuplicateFileModal({ file, managePage }: DuplicateFileProps) {
                   <Text>
                     <Trans>
                       You can also duplicate to just the local copy. This will
-                      leave the original on the server and create a duplicate
-                      on only this device.
+                      leave the original on the server and create a duplicate on
+                      only this device.
                     </Trans>
                   </Text>
                 ) : (
                   <Text>
                     <Trans>
                       This a <strong>local budget</strong> which is not stored
-                      on a server.  Only a local copy will be duplicated.
+                      on a server. Only a local copy will be duplicated.
                     </Trans>
                   </Text>
                 )}
@@ -147,7 +151,6 @@ export function DuplicateFileModal({ file, managePage }: DuplicateFileProps) {
                 <ModalButtons>
                   <Button onPress={close}>Cancel</Button>
                   <ButtonWithLoading
-                    type='submit'
                     variant={isCloudFile ? 'normal' : 'primary'}
                     isLoading={loadingState === 'local'}
                     style={{
@@ -161,14 +164,16 @@ export function DuplicateFileModal({ file, managePage }: DuplicateFileProps) {
 
                       if (!nameError) {
                         setLoadingState('local');
-                        await dispatch(duplicateBudget(file.id, newName, managePage));
+                        await dispatch(
+                          duplicateBudget(file.id, newName, managePage),
+                        );
                         setLoadingState(null);
                         close();
                       }
                     }}
                   >
                     <Trans>Duplicate budget</Trans>
-                    {isCloudFile && <Trans>' locally only'</Trans>}
+                    {isCloudFile && <Trans> locally only</Trans>}
                   </ButtonWithLoading>
                 </ModalButtons>
               </>

@@ -19,7 +19,7 @@ export { join };
 export { getDocumentDir, getBudgetDir, _setDocumentDir } from './shared';
 export const getDataDir = () => process.env.ACTUAL_DATA_DIR;
 
-export const pathToId = function (filepath) {
+export const pathToId = function (filepath: string): string {
   return filepath.replace(/^\//, '').replace(/\//g, '-');
 };
 
@@ -47,7 +47,7 @@ function _mkdirRecursively(dir) {
   }
 }
 
-function _createFile(filepath) {
+function _createFile(filepath: string) {
   // This can create the file. Check if it exists, if not create a
   // symlink if it's a sqlite file. Otherwise store in idb
 
@@ -55,6 +55,9 @@ function _createFile(filepath) {
     if (filepath.endsWith('.sqlite')) {
       // If it doesn't exist, we need to create a symlink
       if (!_exists(filepath)) {
+        console.log('_createFile');
+        console.log('/blocked/' + pathToId(filepath));
+        console.log(filepath);
         FS.symlink('/blocked/' + pathToId(filepath), filepath);
       }
     } else {
@@ -156,14 +159,35 @@ async function _writeFile(filepath: string, contents): Promise<boolean> {
 async function _copySqlFile(
   frompath: string,
   topath: string,
-): Promise<boolean | object> {
-  let contents;
-  try {
-    contents = await FS.readFile(resolveLink(frompath));
-  } catch (e) {
-    return { text: 'Failed readFile...' };
+): Promise<boolean> {
+  _createFile(topath);
+
+  const { store } = idb.getStore(await idb.getDatabase(), 'files');
+  const fromitem = await idb.get(store, frompath);
+  const fromDbPath = pathToId(fromitem.filepath);
+  const toDbPath = pathToId(topath);
+
+  const fromfile = BFS.backend.createFile(fromDbPath);
+  const tofile = BFS.backend.createFile(toDbPath);
+  
+  fromfile.open();
+  tofile.open();
+  const fileSize = fromfile.meta.size;
+  let blockSize = fromfile.meta.blockSize;
+
+  let buffer = new ArrayBuffer(blockSize);
+  let bufferView = new Uint8Array(buffer);
+
+  for (let i = 0; i < fileSize; i += blockSize) {
+    if (blockSize <= 0) break;
+    let readSize = fromfile.read(bufferView, 0, blockSize, i);
+    tofile.write(bufferView, 0, blockSize, i);
   }
-  return _writeFile(topath, contents);
+
+  tofile.close();
+  fromfile.close();
+  
+  return true;
 }
 
 async function _removeFile(filepath: string) {
@@ -290,17 +314,20 @@ export const size = async function (filepath) {
   return attrs.size;
 };
 
-export const copyFile = async function (frompath: string, topath: string) {
-  // If the file is a Database file then it needs to be copied on a
-  // block-by-block basis
-  if (frompath.endsWith('.sqlite') || topath.endsWith('.sqlite')) {
-    return _copySqlFile(frompath, topath);
+export const copyFile = async function (frompath: string, topath: string): Promise<boolean> {
+  let result = false;
+  try {
+    const contents = await _readFile(frompath);
+    result = await _writeFile(topath, contents);
+  } catch (e) {
+    try {
+      if (frompath.endsWith('.sqlite') || topath.endsWith('.sqlite')) {
+        result = await _copySqlFile(frompath, topath);
+      }
+    } catch (ee) {
+    }
   }
-
-  // TODO: This reads the whole file into memory, but that's probably
-  // not a problem. This could be optimized
-  const contents = await _readFile(frompath);
-  return _writeFile(topath, contents);
+  return result;
 };
 
 export const readFile = async function (filepath: string, encoding = 'utf8') {

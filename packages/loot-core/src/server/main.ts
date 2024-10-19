@@ -1832,16 +1832,17 @@ handlers['duplicate-budget'] = async function ({ id, newName, cloudFileId }) {
   const newBudgetDir = fs.getBudgetDir(newId);
   await fs.mkdir(newBudgetDir);
 
-//  const copyResults = await fs.copyFile(fs.join(budgetDir, 'db.sqlite'), fs.join(newBudgetDir, 'db.sqlite'));
-//  const testPath = fs.join(budgetDir, 'backups', 'db.sqlite');
-
-  // TODO: Check if there are backups in budgetDir and copy those files too
-
   // write metadata for new budget
   await fs.writeFile(
     fs.join(newBudgetDir, 'metadata.json'),
     JSON.stringify(metadata),
   );
+
+  const copyResults = await fs.copyFile(fs.join(budgetDir, 'db.sqlite'), fs.join(newBudgetDir, 'db.sqlite'));
+  console.log('copyResults');
+  console.log(copyResults);
+
+  // TODO: Check if there are backups in budgetDir and copy those files too
 
 /*
   const budgetsAgain = await handlers['get-budgets']();
@@ -1850,6 +1851,7 @@ handlers['duplicate-budget'] = async function ({ id, newName, cloudFileId }) {
   const baseDir = fs.join(budgetDir, '../');
   const baseDirFiles = await fs.listDir(baseDir);
 */
+  
 
   return newId;
 };
