@@ -35,7 +35,7 @@ export function isReflectBudget(): boolean {
     db.firstSync(`SELECT value FROM preferences WHERE id = ?`, [
       'budgetType',
     ]) ?? 'rollover';
-  return budgetType === 'report';
+  return budgetType.value === 'report';
 }
 
 function dbMonth(month: string): number {
