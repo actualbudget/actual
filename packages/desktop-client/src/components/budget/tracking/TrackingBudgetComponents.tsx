@@ -1,8 +1,14 @@
 // @ts-strict-ignore
-import React, { type ComponentProps, memo, useRef, useState } from 'react';
+import React, {
+  type ComponentProps,
+  type CSSProperties,
+  memo,
+  useRef,
+  useState,
+} from 'react';
 import { Trans } from 'react-i18next';
 
-import { css } from 'glamor';
+import { css } from '@emotion/css';
 
 import { trackingBudget } from 'loot-core/src/client/queries';
 import { evalArithmetic } from 'loot-core/src/shared/arithmetic';
@@ -11,7 +17,7 @@ import { integerToCurrency, amountToInteger } from 'loot-core/src/shared/util';
 
 import { useUndo } from '../../../hooks/useUndo';
 import { SvgCheveronDown } from '../../../icons/v1';
-import { styles, theme, type CSSProperties } from '../../../style';
+import { styles, theme } from '../../../style';
 import { Button } from '../../common/Button2';
 import { Popover } from '../../common/Popover';
 import { Text } from '../../common/Text';
@@ -367,15 +373,13 @@ export const CategoryMonth = memo(function CategoryMonth({
             {props => (
               <CellValueText
                 {...props}
-                className={String(
-                  css({
-                    cursor: 'pointer',
-                    ':hover': {
-                      textDecoration: 'underline',
-                    },
-                    ...makeAmountGrey(props.value),
-                  }),
-                )}
+                className={css({
+                  cursor: 'pointer',
+                  ':hover': {
+                    textDecoration: 'underline',
+                  },
+                  ...makeAmountGrey(props.value),
+                })}
               />
             )}
           </TrackingCellValue>
