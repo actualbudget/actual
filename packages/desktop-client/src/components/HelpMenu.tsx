@@ -16,7 +16,7 @@ import { Menu } from './common/Menu';
 import { Popover } from './common/Popover';
 import { SpaceBetween } from './common/SpaceBetween';
 
-type HelpMenuItem = 'docs' | 'keyboard-shortcuts';
+type HelpMenuItem = 'docs' | 'keyboard-shortcuts' |'goal-templates';
 
 type HelpButtonProps = {
   onPress?: () => void;
@@ -81,6 +81,8 @@ export const HelpMenu = () => {
       case 'keyboard-shortcuts':
         dispatch(pushModal('keyboard-shortcuts'));
         break;
+      case 'goal-templates':
+        dispatch(pushModal('goal-templates'))
     }
   };
 
@@ -108,6 +110,10 @@ export const HelpMenu = () => {
               text: t('Documentation'),
             },
             { name: 'keyboard-shortcuts', text: t('Keyboard shortcuts') },
+            {
+              name: 'goal-templates',
+              text: t('Goal templates')
+            },
           ]}
         />
       </Popover>
