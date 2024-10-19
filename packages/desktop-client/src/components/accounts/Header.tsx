@@ -24,6 +24,7 @@ import {
   SvgArrowsExpand3,
   SvgArrowsShrink3,
   SvgDownloadThickBottom,
+  SvgLockClosed,
   SvgPencil1,
 } from '../../icons/v2';
 import { theme, styles } from '../../style';
@@ -92,7 +93,7 @@ type AccountHeaderProps = {
   onSync: () => void;
   onImport: () => void;
   onMenuSelect: AccountMenuProps['onMenuSelect'];
-  onReconcile: AccountMenuProps['onReconcile'];
+  onReconcile: ComponentProps<typeof ReconcileMenu>['onReconcile'];
   onBatchEdit: ComponentProps<typeof SelectedTransactionsButton>['onEdit'];
   onBatchDelete: ComponentProps<typeof SelectedTransactionsButton>['onDelete'];
   onBatchDuplicate: ComponentProps<
@@ -181,8 +182,10 @@ export function AccountHeader({
 }: AccountHeaderProps) {
   const { t } = useTranslation();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [reconcileOpen, setReconcileOpen] = useState(false);
   const searchInput = useRef<HTMLInputElement>(null);
   const triggerRef = useRef(null);
+  const reconcileRef = useRef(null);
   const splitsExpanded = useSplitsExpanded();
   const syncServerStatus = useSyncServerStatus();
   const isUsingServer = syncServerStatus !== 'no-server';
@@ -345,6 +348,34 @@ export function AccountHeader({
             onChange={onSearch}
             inputRef={searchInput}
           />
+          <View style={{ marginLeft: 16 }}>
+            <Button
+              ref={reconcileRef}
+              variant="bare"
+              aria-label={t('Reconcile')}
+              style={{ padding: 6 }}
+              onPress={() => {
+                setReconcileOpen(true);
+              }}
+            >
+              <View title={t('Reconcile')}>
+                <SvgLockClosed width={14} height={14} />
+              </View>
+            </Button>
+            <Popover
+              placement="bottom"
+              triggerRef={reconcileRef}
+              style={{ width: 275 }}
+              isOpen={reconcileOpen}
+              onOpenChange={() => setReconcileOpen(false)}
+            >
+              <ReconcileMenu
+                account={account}
+                onClose={() => setReconcileOpen(false)}
+                onReconcile={onReconcile}
+              />
+            </Popover>
+          </View>
           {workingHard ? (
             <View>
               <AnimatedLoading style={{ width: 16, height: 16 }} />
@@ -374,7 +405,7 @@ export function AccountHeader({
                 : t('Expand split transactions')
             }
             isDisabled={search !== '' || filterConditions.length > 0}
-            style={{ padding: 6, marginLeft: 10 }}
+            style={{ padding: 6 }}
             onPress={onToggleSplits}
           >
             <View
@@ -417,8 +448,6 @@ export function AccountHeader({
                     setMenuOpen(false);
                     onMenuSelect(item);
                   }}
-                  onReconcile={onReconcile}
-                  onClose={() => setMenuOpen(false)}
                 />
               </Popover>
             </View>
@@ -639,9 +668,7 @@ type AccountMenuProps = {
   canShowBalances: boolean;
   showCleared: boolean;
   showReconciled: boolean;
-  onClose: ComponentProps<typeof ReconcileMenu>['onClose'];
   isSorted: boolean;
-  onReconcile: ComponentProps<typeof ReconcileMenu>['onReconcile'];
   onMenuSelect: (
     item:
       | 'link'
@@ -663,29 +690,16 @@ function AccountMenu({
   canShowBalances,
   showCleared,
   showReconciled,
-  onClose,
   isSorted,
-  onReconcile,
   onMenuSelect,
 }: AccountMenuProps) {
   const { t } = useTranslation();
-  const [tooltip, setTooltip] = useState('default');
   const syncServerStatus = useSyncServerStatus();
 
-  return tooltip === 'reconcile' ? (
-    <ReconcileMenu
-      account={account}
-      onClose={onClose}
-      onReconcile={onReconcile}
-    />
-  ) : (
+  return (
     <Menu
       onMenuSelect={item => {
-        if (item === 'reconcile') {
-          setTooltip('reconcile');
-        } else {
-          onMenuSelect(item);
-        }
+        onMenuSelect(item);
       }}
       items={[
         ...(isSorted
@@ -719,7 +733,6 @@ function AccountMenu({
             : t('Show reconciled transactions'),
         },
         { name: 'export', text: t('Export') },
-        { name: 'reconcile', text: t('Reconcile') },
         ...(account && !account.closed
           ? canSync
             ? [
