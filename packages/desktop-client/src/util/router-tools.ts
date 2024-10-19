@@ -9,3 +9,7 @@ export function ExposeNavigate() {
   }, [navigate]);
   return null;
 }
+
+export function openUrl(url: string) {
+  window.open(url, '_blank', 'noopener,noreferrer');
+}
