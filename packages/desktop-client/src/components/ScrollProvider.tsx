@@ -1,6 +1,6 @@
-// @ts-strict-ignore
 import React, {
   type ReactNode,
+  type RefObject,
   createContext,
   useState,
   useContext,
@@ -17,37 +17,60 @@ type IScrollContext = {
 
 const ScrollContext = createContext<IScrollContext | undefined>(undefined);
 
-type ScrollProviderProps = {
+type ScrollProviderProps<T extends Element> = {
+  scrollableRef: RefObject<T>;
+  isDisabled: boolean;
   children?: ReactNode;
 };
 
-export function ScrollProvider({ children }: ScrollProviderProps) {
-  const [scrollY, setScrollY] = useState(undefined);
-  const [scrollHeight, setScrollHeight] = useState(undefined);
-  const [clientHeight, setClientHeight] = useState(undefined);
+export function ScrollProvider<T extends Element>({
+  scrollableRef,
+  isDisabled,
+  children,
+}: ScrollProviderProps<T>) {
+  const [scrollY, setScrollY] = useState<number | undefined>(undefined);
+  const [scrollHeight, setScrollHeight] = useState<number | undefined>(
+    undefined,
+  );
+  const [clientHeight, setClientHeight] = useState<number | undefined>(
+    undefined,
+  );
 
   const hasScrolledToBottom = useCallback(
-    (tolerance = 1) => scrollHeight - scrollY <= clientHeight + tolerance,
+    (tolerance = 1) => {
+      if (scrollHeight && scrollY && clientHeight) {
+        return scrollHeight - scrollY <= clientHeight + tolerance;
+      }
+      return false;
+    },
     [clientHeight, scrollHeight, scrollY],
   );
 
   useEffect(() => {
-    const listenToScroll = debounce(e => {
+    if (isDisabled) {
+      return;
+    }
+
+    const listenToScroll = debounce((e: Event) => {
       const target = e.target;
-      setScrollY(target?.scrollTop || 0);
-      setScrollHeight(target?.scrollHeight || 0);
-      setClientHeight(target?.clientHeight || 0);
+      if (target instanceof Element) {
+        setScrollY(target.scrollTop || 0);
+        setScrollHeight(target.scrollHeight || 0);
+        setClientHeight(target.clientHeight || 0);
+      }
     }, 10);
 
-    window.addEventListener('scroll', listenToScroll, {
+    const ref = scrollableRef.current;
+
+    ref?.addEventListener('scroll', listenToScroll, {
       capture: true,
       passive: true,
     });
     return () =>
-      window.removeEventListener('scroll', listenToScroll, {
+      ref?.removeEventListener('scroll', listenToScroll, {
         capture: true,
       });
-  }, []);
+  }, [isDisabled, scrollableRef]);
 
   return (
     <ScrollContext.Provider value={{ scrollY, hasScrolledToBottom }}>
@@ -57,5 +80,9 @@ export function ScrollProvider({ children }: ScrollProviderProps) {
 }
 
 export function useScroll(): IScrollContext {
-  return useContext(ScrollContext);
+  const context = useContext(ScrollContext);
+  if (!context) {
+    throw new Error('useScroll must be used within a ScrollProvider');
+  }
+  return context;
 }
