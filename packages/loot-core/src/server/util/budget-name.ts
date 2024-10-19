@@ -3,8 +3,10 @@ import { v4 as uuidv4 } from 'uuid';
 
 import * as fs from '../../platform/server/fs';
 
-export async function uniqueFileName(existingFiles) {
-  const initialName = 'My Finances';
+export async function uniqueFileName(
+  existingFiles,
+  initialName = 'My Finances',
+) {
   let idx = 1;
 
   // If there is a conflict, keep appending an index until there is no

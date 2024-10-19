@@ -67,7 +67,7 @@ function _createFile(filepath) {
   return filepath;
 }
 
-async function _readFile(filepath, opts?: { encoding?: string }) {
+async function _readFile(filepath: string, opts?: { encoding?: string }) {
   // We persist stuff in /documents, but don't need to handle sqlite
   // file specifically because those are symlinked to a separate
   // filesystem and will be handled in the BlockedFS
@@ -101,7 +101,7 @@ async function _readFile(filepath, opts?: { encoding?: string }) {
   }
 }
 
-function resolveLink(path) {
+function resolveLink(path: string): string {
   try {
     const { node } = FS.lookupPath(path, { follow: false });
     return node.link ? FS.readlink(path) : path;
@@ -110,7 +110,7 @@ function resolveLink(path) {
   }
 }
 
-async function _writeFile(filepath, contents) {
+async function _writeFile(filepath: string, contents): Promise<boolean> {
   if (contents instanceof ArrayBuffer) {
     contents = new Uint8Array(contents);
   } else if (ArrayBuffer.isView(contents)) {
@@ -146,9 +146,27 @@ async function _writeFile(filepath, contents) {
   } else {
     FS.writeFile(resolveLink(filepath), contents);
   }
+  return true;
 }
 
-async function _removeFile(filepath) {
+// _copySqlFile currently reads the full file then writes the
+// full file.  This only works with very small database files.
+// This function needs to be reworked to copy on a block-by-block
+// basis instead of the file-by-file basis.
+async function _copySqlFile(
+  frompath: string,
+  topath: string,
+): Promise<boolean | object> {
+  let contents;
+  try {
+    contents = await FS.readFile(resolveLink(frompath));
+  } catch (e) {
+    return { text: 'Failed readFile...' };
+  }
+  return _writeFile(topath, contents);
+}
+
+async function _removeFile(filepath: string) {
   if (!NO_PERSIST && filepath.startsWith('/documents')) {
     const isDb = filepath.endsWith('.sqlite');
 
@@ -272,22 +290,28 @@ export const size = async function (filepath) {
   return attrs.size;
 };
 
-export const copyFile = async function (frompath, topath) {
+export const copyFile = async function (frompath: string, topath: string) {
+  // If the file is a Database file then it needs to be copied on a
+  // block-by-block basis
+  if (frompath.endsWith('.sqlite') || topath.endsWith('.sqlite')) {
+    return _copySqlFile(frompath, topath);
+  }
+
   // TODO: This reads the whole file into memory, but that's probably
   // not a problem. This could be optimized
   const contents = await _readFile(frompath);
   return _writeFile(topath, contents);
 };
 
-export const readFile = async function (filepath, encoding = 'utf8') {
+export const readFile = async function (filepath: string, encoding = 'utf8') {
   return _readFile(filepath, { encoding });
 };
 
-export const writeFile = async function (filepath, contents) {
+export const writeFile = async function (filepath: string, contents) {
   return _writeFile(filepath, contents);
 };
 
-export const removeFile = async function (filepath) {
+export const removeFile = async function (filepath: string) {
   return _removeFile(filepath);
 };
 

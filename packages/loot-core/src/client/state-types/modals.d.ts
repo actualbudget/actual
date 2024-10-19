@@ -49,7 +49,7 @@ type FinanceModals = {
     | { group: string }
   );
 
-  'load-backup': EmptyObject;
+  'load-backup': { budgetId: string | undefined };
 
   'manage-rules': { payeeId?: string };
   'edit-rule': {
@@ -77,6 +77,8 @@ type FinanceModals = {
   };
 
   'delete-budget': { file: File };
+
+  'duplicate-budget': { file: File; managePage: boolean };
 
   import: null;
 

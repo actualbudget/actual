@@ -165,6 +165,7 @@ function EditableBudgetName() {
   const [editing, setEditing] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const triggerRef = useRef(null);
+  const budgetId = undefined;
 
   function onMenuSelect(type: string) {
     setMenuOpen(false);
@@ -172,6 +173,9 @@ function EditableBudgetName() {
     switch (type) {
       case 'rename':
         setEditing(true);
+        break;
+      case 'backups':
+        dispatch(replaceModal('load-backup', { budgetId }));
         break;
       case 'settings':
         navigate('/settings');
@@ -188,6 +192,7 @@ function EditableBudgetName() {
 
   const items = [
     { name: 'rename', text: t('Rename budget') },
+    { name: 'backups', text: t('Load Backups') },
     { name: 'settings', text: t('Settings') },
     { name: 'close', text: t('Close file') },
   ];
