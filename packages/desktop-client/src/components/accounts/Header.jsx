@@ -1,4 +1,4 @@
-import React, { useState, useRef, Fragment } from 'react';
+import { useState, useRef, Fragment } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { Trans, useTranslation } from 'react-i18next';
 
@@ -259,16 +259,19 @@ export function AccountHeader({
             onChange={onSearch}
             inputRef={searchInput}
           />
-          <View style={{ marginLeft: 16 }} title={t('Reconcile')}>
+          <View style={{ marginLeft: 16 }}>
             <Button
               ref={reconcileRef}
               variant="bare"
               aria-label={t('Reconcile')}
+              style={{ padding: 6 }}
               onPress={() => {
                 setReconcileOpen(true);
               }}
             >
-              <SvgLockClosed width={13} height={13} />
+              <View title={t('Reconcile')}>
+                <SvgLockClosed width={14} height={14} />
+              </View>
             </Button>
             <Popover
               placement="bottom"
