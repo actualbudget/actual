@@ -23,7 +23,7 @@ import { integerToCurrency } from 'loot-core/src/shared/util';
 
 import { SelectedProviderWithItems } from '../../hooks/useSelected';
 import { SplitsExpandedProvider } from '../../hooks/useSplitsExpanded';
-import { ResponsiveProvider } from '../../ResponsiveProvider';
+import { ResponsiveProvider } from '../responsive/ResponsiveProvider';
 
 import { TransactionTable } from './TransactionsTable';
 

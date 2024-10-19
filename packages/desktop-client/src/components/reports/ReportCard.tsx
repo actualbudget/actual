@@ -10,12 +10,12 @@ import { type CustomReportEntity } from 'loot-core/src/types/models';
 
 import { useIsInViewport } from '../../hooks/useIsInViewport';
 import { useNavigate } from '../../hooks/useNavigate';
-import { useResponsive } from '../../ResponsiveProvider';
 import { theme } from '../../style';
 import { Menu } from '../common/Menu';
 import { MenuButton } from '../common/MenuButton';
 import { Popover } from '../common/Popover';
 import { View } from '../common/View';
+import { useResponsive } from '../responsive/ResponsiveProvider';
 
 import { NON_DRAGGABLE_AREA_CLASS_NAME } from './constants';
 

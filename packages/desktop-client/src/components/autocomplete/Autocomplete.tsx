@@ -17,12 +17,12 @@ import Downshift, { type StateChangeTypes } from 'downshift';
 import { getNormalisedString } from 'loot-core/src/shared/normalisation';
 
 import { SvgRemove } from '../../icons/v2';
-import { useResponsive } from '../../ResponsiveProvider';
 import { theme, styles } from '../../style';
 import { Button } from '../common/Button';
 import { Input } from '../common/Input';
 import { Popover } from '../common/Popover';
 import { View } from '../common/View';
+import { useResponsive } from '../responsive/ResponsiveProvider';
 
 type CommonAutocompleteProps<T extends Item> = {
   focused?: boolean;
