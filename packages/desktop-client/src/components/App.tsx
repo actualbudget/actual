@@ -40,7 +40,6 @@ import { FinancesApp } from './FinancesApp';
 import { ManagementApp } from './manager/ManagementApp';
 import { Modals } from './Modals';
 import { ResponsiveProvider } from './responsive/ResponsiveProvider';
-import { ScrollProvider } from './ScrollProvider';
 import { SidebarProvider } from './sidebar/SidebarProvider';
 import { UpdateNotification } from './UpdateNotification';
 
