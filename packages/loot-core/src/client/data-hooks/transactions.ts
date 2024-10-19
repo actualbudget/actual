@@ -223,7 +223,7 @@ export function useTransactionsSearch({
 
   useEffect(() => {
     return () => updateSearchQuery.cancel();
-  }, []);
+  }, [updateSearchQuery]);
 
   return {
     isSearching,
