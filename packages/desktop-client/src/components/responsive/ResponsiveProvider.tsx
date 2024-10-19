@@ -20,7 +20,7 @@ const ResponsiveContext = createContext<TResponsiveContext | undefined>(
 
 export function ResponsiveProvider(props: { children: ReactNode }) {
   const { height, width } = useWindowSize({
-    debounceDelay: 100,
+    debounceDelay: 250,
   });
 
   // Possible view modes: narrow, small, medium, wide
