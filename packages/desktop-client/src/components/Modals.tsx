@@ -35,6 +35,7 @@ import { EnvelopeBudgetMonthMenuModal } from './modals/EnvelopeBudgetMonthMenuMo
 import { EnvelopeBudgetSummaryModal } from './modals/EnvelopeBudgetSummaryModal';
 import { EnvelopeToBudgetMenuModal } from './modals/EnvelopeToBudgetMenuModal';
 import { FixEncryptionKeyModal } from './modals/FixEncryptionKeyModal';
+import { GoalTemplateModal } from './modals/GoalTemplateModal';
 import { GoCardlessExternalMsgModal } from './modals/GoCardlessExternalMsgModal';
 import { GoCardlessInitialiseModal } from './modals/GoCardlessInitialiseModal';
 import { HoldBufferModal } from './modals/HoldBufferModal';
@@ -67,7 +68,6 @@ import { PostsOfflineNotification } from './schedules/PostsOfflineNotification';
 import { ScheduleDetails } from './schedules/ScheduleDetails';
 import { ScheduleLink } from './schedules/ScheduleLink';
 import { NamespaceContext } from './spreadsheet/NamespaceContext';
-import { GoalTemplateModal } from './modals/GoalTemplateModal';
 
 export function Modals() {
   const location = useLocation();
@@ -85,8 +85,8 @@ export function Modals() {
     .map(({ name, options }) => {
       switch (name) {
         case 'goal-templates':
-          return budgetId ? <GoalTemplateModal key={name}/> : null;
-          
+          return budgetId ? <GoalTemplateModal key={name} /> : null;
+
         case 'keyboard-shortcuts':
           // don't show the hotkey help modal when a budget is not open
           return budgetId ? <KeyboardShortcutModal key={name} /> : null;
