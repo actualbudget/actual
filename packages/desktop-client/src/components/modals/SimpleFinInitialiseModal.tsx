@@ -17,11 +17,15 @@ import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { FormField, FormLabel } from '../forms';
 
+const MODAL_NAME = 'simplefin-init' as const;
+
 type SimpleFinInitialiseProps = {
+  name: typeof MODAL_NAME;
   onSuccess: () => void;
 };
 
 export const SimpleFinInitialiseModal = ({
+  name = MODAL_NAME,
   onSuccess,
 }: SimpleFinInitialiseProps) => {
   const [token, setToken] = useState('');
@@ -47,7 +51,7 @@ export const SimpleFinInitialiseModal = ({
   };
 
   return (
-    <Modal name="simplefin-init" containerProps={{ style: { width: 300 } }}>
+    <Modal name={name} containerProps={{ style: { width: 300 } }}>
       {({ state: { close } }) => (
         <>
           <ModalHeader
@@ -102,3 +106,4 @@ export const SimpleFinInitialiseModal = ({
     </Modal>
   );
 };
+SimpleFinInitialiseModal.modalName = MODAL_NAME;

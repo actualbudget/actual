@@ -2,117 +2,125 @@ import { type ComponentPropsWithoutRef } from 'react';
 
 import {
   type AccountEntity,
-  type AccountSyncSource,
   type CategoryEntity,
   type CategoryGroupEntity,
-  type GoCardlessToken,
-  type NewRuleEntity,
-  type RuleEntity,
   type ScheduleEntity,
   type TransactionEntity,
 } from 'loot-core/types/models';
 import { type EmptyObject } from 'loot-core/types/util';
 
+import { type CloseAccountModal } from '../../components/modals/CloseAccountModal';
+import { type ConfirmCategoryDeleteModal } from '../../components/modals/ConfirmCategoryDeleteModal';
+import { type CreateAccountModal } from '../../components/modals/CreateAccountModal';
+import { type CreateLocalAccountModal } from '../../components/modals/CreateLocalAccountModal';
+import { type EditRuleModal } from '../../components/modals/EditRuleModal';
 import { type FixEncryptionKeyModal } from '../../components/modals/FixEncryptionKeyModal';
+import { type GoCardlessInitialiseModal } from '../../components/modals/GoCardlessInitialiseModal';
+import { type ImportTransactionsModal } from '../../components/modals/ImportTransactionsModal';
+import { type LoadBackupModal } from '../../components/modals/LoadBackupModal';
+import { type ManageRulesModal } from '../../components/modals/ManageRulesModal';
+import { type MergeUnusedPayeesModal } from '../../components/modals/MergeUnusedPayeesModal';
+import { type SelectLinkedAccountsModal } from '../../components/modals/SelectLinkedAccountsModal';
+import { type SimpleFinInitialiseModal } from '../../components/modals/SimpleFinInitialiseModal';
 import * as constants from '../constants';
 
 type NoOptions = EmptyObject;
 
-type ImportTransactionsModal = {
+type ImportTransactionsModalRegistration = {
+  // Must be updated to below once file is migrated to TypeScript
   name: 'import-transactions';
-  options: {
-    accountId: string;
-    filename: string;
-    onImported: (didChange: boolean) => void;
-  };
+  // name: typeof ImportTransactionsModal.modalName;
+  options: Omit<
+    ComponentPropsWithoutRef<typeof ImportTransactionsModal>,
+    'name'
+  >;
 };
 
-type AddAccountModal = {
-  name: 'add-account';
-  options: NoOptions;
+type AddAccountModalRegistration = {
+  name: typeof CreateAccountModal.modalName;
+  options: Omit<ComponentPropsWithoutRef<typeof CreateAccountModal>, 'name'>;
 };
 
-type AddLocalAccountModal = {
-  name: 'add-local-account';
-  options: NoOptions;
+type AddLocalAccountModalRegistration = {
+  name: typeof CreateLocalAccountModal.modalName;
+  options: Omit<
+    ComponentPropsWithoutRef<typeof CreateLocalAccountModal>,
+    'name'
+  >;
 };
 
-type CloseAccountModal = {
-  name: 'close-account';
-  options: {
-    account: AccountEntity;
-    balance: number;
-    canDelete: boolean;
-  };
+type CloseAccountModalRegistration = {
+  name: typeof CloseAccountModal.modalName;
+  options: Omit<ComponentPropsWithoutRef<typeof CloseAccountModal>, 'name'>;
 };
 
-type SelectLinkedAccountsModal = {
+type SelectLinkedAccountsModalRegistration = {
+  // Must be updated to below once file is migrated to TypeScript
   name: 'select-linked-accounts';
-  options: {
-    accounts: unknown[];
-    requisitionId?: string;
-    upgradingAccountId?: string;
-    syncSource?: AccountSyncSource;
-  };
+  // name: typeof SelectLinkedAccountsModal.modalName;
+  options: Omit<
+    ComponentPropsWithoutRef<typeof SelectLinkedAccountsModal>,
+    'name'
+  >;
 };
 
-type ConfirmCategoryDeleteModal = {
-  name: 'confirm-category-delete';
-  options: { onDelete: (categoryId: string) => void } & (
-    | { category: string }
-    | { group: string }
-  );
+type ConfirmCategoryDeleteModalRegistration = {
+  name: typeof ConfirmCategoryDeleteModal.modalName;
+  options: Omit<
+    ComponentPropsWithoutRef<typeof ConfirmCategoryDeleteModal>,
+    'name'
+  >;
 };
 
-type LoadBackupModal = {
-  name: 'load-backup';
-  options: NoOptions;
+type LoadBackupModalRegistration = {
+  name: typeof LoadBackupModal.modalName;
+  options: Omit<ComponentPropsWithoutRef<typeof LoadBackupModal>, 'name'>;
 };
 
-type ManageRulesModal = {
-  name: 'manage-rules';
-  options: { payeeId?: string };
+type ManageRulesModalRegistration = {
+  name: typeof ManageRulesModal.modalName;
+  options: Omit<ComponentPropsWithoutRef<typeof ManageRulesModal>, 'name'>;
 };
 
-type EditRuleModal = {
+type EditRuleModalRegistration = {
+  // Must be updated to below once file is migrated to TypeScript
   name: 'edit-rule';
-  options: {
-    rule: RuleEntity | NewRuleEntity;
-    onSave?: (rule: RuleEntity) => void;
-  };
+  // name: typeof EditRuleModal.modalName;
+  options: Omit<ComponentPropsWithoutRef<typeof EditRuleModal>, 'name'>;
 };
 
-type MergeUnusedPayeesModal = {
+type MergeUnusedPayeesModalRegistration = {
+  // Must be updated to below once file is migrated to TypeScript
   name: 'merge-unused-payees';
-  options: {
-    payeeIds: string[];
-    targetPayeeId: string;
-  };
+  // name: typeof MergeUnusedPayeesModal.modalName;
+  options: Omit<
+    ComponentPropsWithoutRef<typeof MergeUnusedPayeesModal>,
+    'name'
+  >;
 };
 
-type GoCardlessInitModal = {
-  name: 'gocardless-init';
-  options: {
-    onSuccess: () => void;
-  };
+type GoCardlessInitModalRegistration = {
+  name: typeof GoCardlessInitialiseModal.modalName;
+  options: Omit<
+    ComponentPropsWithoutRef<typeof GoCardlessInitialiseModal>,
+    'name'
+  >;
 };
 
-type SimplefinInitModal = {
-  name: 'simplefin-init';
-  options: {
-    onSuccess: () => void;
-  };
+type SimplefinInitModalRegistration = {
+  name: typeof SimpleFinInitialiseModal.modalName;
+  options: Omit<
+    ComponentPropsWithoutRef<typeof SimpleFinInitialiseModal>,
+    'name'
+  >;
 };
 
-type GoCardlessExternalMsgModal = {
-  name: 'gocardless-external-msg';
-  options: {
-    onMoveExternal: (arg: {
-      institutionId: string;
-    }) => Promise<{ error: string } | { data: unknown }>;
-    onClose?: () => void;
-    onSuccess: (data: GoCardlessToken) => Promise<void>;
-  };
+type GoCardlessExternalMsgModalRegistration = {
+  name: typeof GoCardlessInitialiseModal.modalName;
+  options: Omit<
+    ComponentPropsWithoutRef<typeof GoCardlessInitialiseModal>,
+    'name'
+  >;
 };
 
 type DeleteBudgetModal = {
@@ -163,8 +171,8 @@ type CreateEncryptionKeyModal = {
   options: { recreate?: boolean };
 };
 
-type FixEncryptionKeyModalOptions = {
-  name: 'fix-encryption-key';
+type FixEncryptionKeyModalRegistration = {
+  name: typeof FixEncryptionKeyModal.modalName;
   options: ComponentPropsWithoutRef<typeof FixEncryptionKeyModal>;
 };
 
@@ -486,19 +494,19 @@ type GoalTemplatesModal = {
 };
 
 export type Modal =
-  | ImportTransactionsModal
-  | AddAccountModal
-  | AddLocalAccountModal
-  | CloseAccountModal
-  | SelectLinkedAccountsModal
-  | ConfirmCategoryDeleteModal
-  | LoadBackupModal
-  | ManageRulesModal
-  | EditRuleModal
-  | MergeUnusedPayeesModal
-  | GoCardlessInitModal
-  | SimplefinInitModal
-  | GoCardlessExternalMsgModal
+  | ImportTransactionsModalRegistration
+  | AddAccountModalRegistration
+  | AddLocalAccountModalRegistration
+  | CloseAccountModalRegistration
+  | SelectLinkedAccountsModalRegistration
+  | ConfirmCategoryDeleteModalRegistration
+  | LoadBackupModalRegistration
+  | ManageRulesModalRegistration
+  | EditRuleModalRegistration
+  | MergeUnusedPayeesModalRegistration
+  | GoCardlessInitModalRegistration
+  | SimplefinInitModalRegistration
+  | GoCardlessExternalMsgModalRegistration
   | DeleteBudgetModal
   | ImportModal
   | ImportYnab4Modal
@@ -508,7 +516,7 @@ export type Modal =
   | FilesSettingsModal
   | ConfirmChangeDocumentDirModal
   | CreateEncryptionKeyModal
-  | FixEncryptionKeyModalOptions
+  | FixEncryptionKeyModalRegistration
   | EditFieldModal
   | CategoryAutocompleteModal
   | AccountAutocompleteModal

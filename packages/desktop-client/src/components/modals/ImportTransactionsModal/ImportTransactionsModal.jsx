@@ -32,6 +32,8 @@ import {
   stripCsvImportTransaction,
 } from './utils';
 
+const MODAL_NAME = 'import-transactions';
+
 function getFileType(filepath) {
   const m = filepath.match(/\.([^.]*)$/);
   if (!m) return 'ofx';
@@ -133,7 +135,13 @@ function parseCategoryFields(trans, categories) {
   return match;
 }
 
-export function ImportTransactionsModal({ options }) {
+export function ImportTransactionsModal({
+  name = MODAL_NAME,
+  accountId,
+  filename: originalFilename,
+  onImported,
+  categories,
+}) {
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const [prefs, savePrefs] = useSyncedPrefs();
   const {
@@ -146,7 +154,7 @@ export function ImportTransactionsModal({ options }) {
   const [multiplierAmount, setMultiplierAmount] = useState('');
   const [loadingState, setLoadingState] = useState('parsing');
   const [error, setError] = useState(null);
-  const [filename, setFilename] = useState(options.filename);
+  const [filename, setFilename] = useState(originalFilename);
   const [transactions, setTransactions] = useState([]);
   const [filetype, setFileType] = useState(null);
   const [fieldMappings, setFieldMappings] = useState(null);
@@ -154,7 +162,6 @@ export function ImportTransactionsModal({ options }) {
   const [flipAmount, setFlipAmount] = useState(false);
   const [multiplierEnabled, setMultiplierEnabled] = useState(false);
   const [reconcile, setReconcile] = useState(true);
-  const { accountId, categories, onImported } = options;
 
   // This cannot be set after parsing the file, because changing it
   // requires re-parsing the file. This is different from the other
@@ -416,7 +423,7 @@ export function ImportTransactionsModal({ options }) {
   }
 
   useEffect(() => {
-    const fileType = getFileType(options.filename);
+    const fileType = getFileType(originalFilename);
     const parseOptions = getParseOptions(fileType, {
       delimiter,
       hasHeaderRow,
@@ -424,10 +431,10 @@ export function ImportTransactionsModal({ options }) {
       fallbackMissingPayeeToMemo,
     });
 
-    parse(options.filename, parseOptions);
+    parse(originalFilename, parseOptions);
   }, [
     parseTransactions,
-    options.filename,
+    originalFilename,
     delimiter,
     hasHeaderRow,
     skipLines,
@@ -718,7 +725,7 @@ export function ImportTransactionsModal({ options }) {
 
   return (
     <Modal
-      name="import-transactions"
+      name={name}
       isLoading={loadingState === 'parsing'}
       containerProps={{ style: { width: 800 } }}
     >
@@ -1069,6 +1076,7 @@ export function ImportTransactionsModal({ options }) {
     </Modal>
   );
 }
+ImportTransactionsModal.modalName = MODAL_NAME;
 
 function getParseOptions(fileType, options = {}) {
   if (fileType === 'csv') {

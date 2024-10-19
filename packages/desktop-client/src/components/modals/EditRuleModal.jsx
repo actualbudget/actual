@@ -54,6 +54,8 @@ import { BetweenAmountInput } from '../util/AmountInput';
 import { DisplayId } from '../util/DisplayId';
 import { GenericInput } from '../util/GenericInput';
 
+const MODAL_NAME = 'edit-rule';
+
 function updateValue(array, value, update) {
   return array.map(v => (v === value ? update() : v));
 }
@@ -755,12 +757,16 @@ const conditionFields = [
     ['amount-outflow', mapField('amount', { outflow: true })],
   ]);
 
-export function EditRuleModal({ defaultRule, onSave: originalOnSave }) {
+export function EditRuleModal({
+  name = MODAL_NAME,
+  rule,
+  onSave: originalOnSave,
+}) {
   const [conditions, setConditions] = useState(
-    defaultRule.conditions.map(parse).map(c => ({ ...c, inputKey: uuid() })),
+    rule.conditions.map(parse).map(c => ({ ...c, inputKey: uuid() })),
   );
   const [actionSplits, setActionSplits] = useState(() => {
-    const parsedActions = defaultRule.actions.map(parse);
+    const parsedActions = rule.actions.map(parse);
     return parsedActions.reduce(
       (acc, action) => {
         const splitIndex = action.options?.splitIndex ?? 0;
@@ -772,8 +778,8 @@ export function EditRuleModal({ defaultRule, onSave: originalOnSave }) {
       [{ id: uuid(), actions: [] }],
     );
   });
-  const [stage, setStage] = useState(defaultRule.stage);
-  const [conditionsOp, setConditionsOp] = useState(defaultRule.conditionsOp);
+  const [stage, setStage] = useState(rule.stage);
+  const [conditionsOp, setConditionsOp] = useState(rule.conditionsOp);
   const [transactions, setTransactions] = useState([]);
   const dispatch = useDispatch();
   const scrollableEl = useRef();
@@ -961,16 +967,16 @@ export function EditRuleModal({ defaultRule, onSave: originalOnSave }) {
   }
 
   async function onSave(close) {
-    const rule = {
-      ...defaultRule,
+    const ruleToSave = {
+      ...rule,
       stage,
       conditionsOp,
       conditions: conditions.map(unparse),
       actions: getUnparsedActions(actionSplits),
     };
 
-    const method = rule.id ? 'rule-update' : 'rule-add';
-    const { error, id: newId } = await send(method, rule);
+    const method = ruleToSave.id ? 'rule-update' : 'rule-add';
+    const { error, id: newId } = await send(method, ruleToSave);
 
     if (error) {
       if (error.conditionErrors) {
@@ -992,10 +998,10 @@ export function EditRuleModal({ defaultRule, onSave: originalOnSave }) {
     } else {
       // If adding a rule, we got back an id
       if (newId) {
-        rule.id = newId;
+        ruleToSave.id = newId;
       }
 
-      originalOnSave?.(rule);
+      originalOnSave?.(ruleToSave);
       close();
     }
   }
@@ -1010,7 +1016,7 @@ export function EditRuleModal({ defaultRule, onSave: originalOnSave }) {
   const showSplitButton = actionSplits.length > 0;
 
   return (
-    <Modal name="edit-rule">
+    <Modal name={name}>
       {({ state: { close } }) => (
         <>
           <ModalHeader
@@ -1271,3 +1277,4 @@ export function EditRuleModal({ defaultRule, onSave: originalOnSave }) {
     </Modal>
   );
 }
+EditRuleModal.modalName = MODAL_NAME;

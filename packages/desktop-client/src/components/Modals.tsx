@@ -91,48 +91,32 @@ export function Modals() {
           // don't show the hotkey help modal when a budget is not open
           return budgetId ? <KeyboardShortcutModal key={name} /> : null;
 
+        // Must be `case ImportTransactionsModal.modalName` once component is migrated to TS
         case 'import-transactions':
-          return <ImportTransactionsModal key={name} options={options} />;
-
-        case 'add-account':
           return (
-            <CreateAccountModal
-              key={name}
-              upgradingAccountId={options?.upgradingAccountId}
-            />
+            <ImportTransactionsModal key={name} name={name} {...options} />
           );
 
-        case 'add-local-account':
-          return <CreateLocalAccountModal key={name} />;
+        case CreateAccountModal.modalName:
+          return <CreateAccountModal key={name} name={name} {...options} />;
 
-        case 'close-account':
+        case CreateLocalAccountModal.modalName:
           return (
-            <CloseAccountModal
-              key={name}
-              account={options.account}
-              balance={options.balance}
-              canDelete={options.canDelete}
-            />
+            <CreateLocalAccountModal key={name} name={name} {...options} />
           );
 
+        case CloseAccountModal.modalName:
+          return <CloseAccountModal key={name} name={name} {...options} />;
+
+        // Must be `case SelectLinkedAccountsModal.modalName` once component is migrated to TS
         case 'select-linked-accounts':
           return (
-            <SelectLinkedAccountsModal
-              key={name}
-              externalAccounts={options.accounts}
-              requisitionId={options.requisitionId}
-              syncSource={options.syncSource}
-            />
+            <SelectLinkedAccountsModal key={name} name={name} {...options} />
           );
 
-        case 'confirm-category-delete':
+        case ConfirmCategoryDeleteModal.modalName:
           return (
-            <ConfirmCategoryDeleteModal
-              key={name}
-              category={options.category}
-              group={options.group}
-              onDelete={options.onDelete}
-            />
+            <ConfirmCategoryDeleteModal key={name} name={name} {...options} />
           );
 
         case 'confirm-unlink-account':
@@ -163,71 +147,40 @@ export function Modals() {
             />
           );
 
-        case 'load-backup':
-          return (
-            <LoadBackupModal
-              key={name}
-              watchUpdates
-              budgetId={options.budgetId}
-              backupDisabled={false}
-            />
-          );
+        case LoadBackupModal.modalName:
+          return <LoadBackupModal key={name} name={name} {...options} />;
 
-        case 'manage-rules':
-          return <ManageRulesModal key={name} payeeId={options?.payeeId} />;
+        case ManageRulesModal.modalName:
+          return <ManageRulesModal key={name} name={name} {...options} />;
 
+        // Must be `case EditRuleModal.modalName` once component is migrated to TS
         case 'edit-rule':
-          return (
-            <EditRuleModal
-              key={name}
-              defaultRule={options.rule}
-              onSave={options.onSave}
-            />
-          );
+          return <EditRuleModal key={name} name={name} {...options} />;
 
+        // Must be `case MergeUnusedPayeesModal.modalName` once component is migrated to TS
         case 'merge-unused-payees':
+          return <MergeUnusedPayeesModal key={name} name={name} {...options} />;
+
+        case GoCardlessInitialiseModal.modalName:
           return (
-            <MergeUnusedPayeesModal
-              key={name}
-              payeeIds={options.payeeIds}
-              targetPayeeId={options.targetPayeeId}
-            />
+            <GoCardlessInitialiseModal key={name} name={name} {...options} />
           );
 
-        case 'gocardless-init':
+        case SimpleFinInitialiseModal.modalName:
           return (
-            <GoCardlessInitialiseModal
-              key={name}
-              onSuccess={options.onSuccess}
-            />
+            <SimpleFinInitialiseModal key={name} name={name} {...options} />
           );
 
-        case 'simplefin-init':
+        case GoCardlessExternalMsgModal.modalName:
           return (
-            <SimpleFinInitialiseModal
-              key={name}
-              onSuccess={options.onSuccess}
-            />
-          );
-
-        case 'gocardless-external-msg':
-          return (
-            <GoCardlessExternalMsgModal
-              key={name}
-              onMoveExternal={options.onMoveExternal}
-              onClose={() => {
-                options.onClose?.();
-                send('gocardless-poll-web-token-stop');
-              }}
-              onSuccess={options.onSuccess}
-            />
+            <GoCardlessExternalMsgModal key={name} name={name} {...options} />
           );
 
         case 'create-encryption-key':
           return <CreateEncryptionKeyModal key={name} options={options} />;
 
-        case 'fix-encryption-key':
-          return <FixEncryptionKeyModal key={name} {...options} />;
+        case FixEncryptionKeyModal.modalName:
+          return <FixEncryptionKeyModal key={name} name={name} {...options} />;
 
         case 'edit-field':
           return (

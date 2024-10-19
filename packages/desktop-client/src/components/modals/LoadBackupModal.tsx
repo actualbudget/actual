@@ -14,6 +14,8 @@ import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { Row, Cell } from '../table';
 
+const MODAL_NAME = 'load-backup' as const;
+
 type BackupTableProps = {
   backups: Backup[];
   onSelect: (backupId: string) => void;
@@ -41,14 +43,16 @@ function BackupTable({ backups, onSelect }: BackupTableProps) {
 }
 
 type LoadBackupModalProps = {
+  name: typeof MODAL_NAME;
   budgetId: string;
-  watchUpdates: boolean;
-  backupDisabled: boolean;
+  watchUpdates?: boolean;
+  backupDisabled?: boolean;
 };
 
 export function LoadBackupModal({
+  name = MODAL_NAME,
   budgetId,
-  watchUpdates,
+  watchUpdates = true,
   backupDisabled,
 }: LoadBackupModalProps) {
   const dispatch = useDispatch();
@@ -75,7 +79,7 @@ export function LoadBackupModal({
   );
 
   return (
-    <Modal name="load-backup" containerProps={{ style: { maxWidth: '30vw' } }}>
+    <Modal name={name} containerProps={{ style: { maxWidth: '30vw' } }}>
       {({ state: { close } }) => (
         <>
           <ModalHeader
@@ -146,3 +150,4 @@ export function LoadBackupModal({
     </Modal>
   );
 }
+LoadBackupModal.modalName = MODAL_NAME;

@@ -10,13 +10,17 @@ import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 
+const MODAL_NAME = 'confirm-category-delete' as const;
+
 type ConfirmCategoryDeleteProps = {
-  category: string;
-  group: string;
-  onDelete: (categoryId: string) => void;
+  name: typeof MODAL_NAME;
+  category?: string;
+  group?: string;
+  onDelete: (id: string) => void;
 };
 
 export function ConfirmCategoryDeleteModal({
+  name = MODAL_NAME,
   group: groupId,
   category: categoryId,
   onDelete,
@@ -53,10 +57,7 @@ export function ConfirmCategoryDeleteModal({
   const isIncome = !!(category || group).is_income;
 
   return (
-    <Modal
-      name="confirm-category-delete"
-      containerProps={{ style: { width: '30vw' } }}
-    >
+    <Modal name={name} containerProps={{ style: { width: '30vw' } }}>
       {({ state: { close } }) => (
         <>
           <ModalHeader
@@ -144,3 +145,4 @@ export function ConfirmCategoryDeleteModal({
     </Modal>
   );
 }
+ConfirmCategoryDeleteModal.modalName = MODAL_NAME;

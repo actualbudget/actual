@@ -13,9 +13,15 @@ import { Paragraph } from '../common/Paragraph';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 
+const MODAL_NAME = 'merge-unused-payees';
+
 const highlightStyle = { color: theme.pageTextPositive };
 
-export function MergeUnusedPayeesModal({ payeeIds, targetPayeeId }) {
+export function MergeUnusedPayeesModal({
+  name = MODAL_NAME,
+  payeeIds,
+  targetPayeeId,
+}) {
   const allPayees = usePayees();
   const modalStack = useSelector(state => state.modals.modalStack);
   const isEditingRule = !!modalStack.find(m => m.name === 'edit-rule');
@@ -76,7 +82,7 @@ export function MergeUnusedPayeesModal({ payeeIds, targetPayeeId }) {
   }
 
   return (
-    <Modal name="merge-unused-payees">
+    <Modal name={name}>
       {({ state: { close } }) => (
         <View style={{ padding: 20, maxWidth: 500 }}>
           <View>
@@ -181,3 +187,4 @@ export function MergeUnusedPayeesModal({ payeeIds, targetPayeeId }) {
     </Modal>
   );
 }
+MergeUnusedPayeesModal.modalName = MODAL_NAME;

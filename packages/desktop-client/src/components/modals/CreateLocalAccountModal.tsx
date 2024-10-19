@@ -27,7 +27,15 @@ import { View } from '../common/View';
 import { Checkbox } from '../forms';
 import { validateAccountName } from '../util/accountValidation';
 
-export function CreateLocalAccountModal() {
+const MODAL_NAME = 'add-local-account' as const;
+
+type CreateLocalAccountModalProps = {
+  name: typeof MODAL_NAME;
+};
+
+export function CreateLocalAccountModal({
+  name: modalName = MODAL_NAME,
+}: CreateLocalAccountModalProps) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const accounts = useAccounts.useAccounts();
@@ -67,7 +75,7 @@ export function CreateLocalAccountModal() {
     }
   };
   return (
-    <Modal name="add-local-account">
+    <Modal name={modalName}>
       {({ state: { close } }) => (
         <>
           <ModalHeader
@@ -189,3 +197,4 @@ export function CreateLocalAccountModal() {
     </Modal>
   );
 }
+CreateLocalAccountModal.modalName = MODAL_NAME;

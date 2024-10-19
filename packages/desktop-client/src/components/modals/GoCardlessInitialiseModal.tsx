@@ -18,11 +18,15 @@ import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { FormField, FormLabel } from '../forms';
 
+const MODAL_NAME = 'gocardless-init' as const;
+
 type GoCardlessInitialiseProps = {
+  name: typeof MODAL_NAME;
   onSuccess: () => void;
 };
 
 export const GoCardlessInitialiseModal = ({
+  name = MODAL_NAME,
   onSuccess,
 }: GoCardlessInitialiseProps) => {
   const [secretId, setSecretId] = useState('');
@@ -55,7 +59,7 @@ export const GoCardlessInitialiseModal = ({
   };
 
   return (
-    <Modal name="gocardless-init" containerProps={{ style: { width: '30vw' } }}>
+    <Modal name={name} containerProps={{ style: { width: '30vw' } }}>
       {({ state: { close } }) => (
         <>
           <ModalHeader
@@ -128,3 +132,4 @@ export const GoCardlessInitialiseModal = ({
     </Modal>
   );
 };
+GoCardlessInitialiseModal.modalName = MODAL_NAME;

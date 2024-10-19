@@ -25,6 +25,8 @@ import { Paragraph } from '../common/Paragraph';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 
+const MODAL_NAME = 'close-account' as const;
+
 function needsCategory(
   account: AccountEntity,
   currentTransfer: string,
@@ -39,12 +41,14 @@ function needsCategory(
 }
 
 type CloseAccountModalProps = {
+  name: typeof MODAL_NAME;
   account: AccountEntity;
   balance: number;
   canDelete: boolean;
 };
 
 export function CloseAccountModal({
+  name = MODAL_NAME,
   account,
   balance,
   canDelete,
@@ -105,7 +109,7 @@ export function CloseAccountModal({
 
   return (
     <Modal
-      name="close-account"
+      name={name}
       isLoading={loading}
       containerProps={{ style: { width: '30vw' } }}
     >
@@ -272,3 +276,4 @@ export function CloseAccountModal({
     </Modal>
   );
 }
+CloseAccountModal.modalName = MODAL_NAME;

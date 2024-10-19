@@ -21,8 +21,10 @@ import { Paragraph } from '../common/Paragraph';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 
+const MODAL_NAME = 'fix-encryption-key' as const;
+
 type FixEncryptionKeyModalProps = {
-  name: 'fix-encryption-key';
+  name: typeof MODAL_NAME;
   hasExistingKey?: boolean;
   cloudFileId?: string;
   onSuccess?: () => void;
@@ -180,3 +182,4 @@ export function FixEncryptionKeyModal({
     </Modal>
   );
 }
+FixEncryptionKeyModal.modalName = MODAL_NAME;

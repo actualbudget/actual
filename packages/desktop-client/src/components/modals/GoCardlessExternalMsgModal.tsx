@@ -23,6 +23,8 @@ import { View } from '../common/View';
 import { FormField, FormLabel } from '../forms';
 import { COUNTRY_OPTIONS } from '../util/countries';
 
+const MODAL_NAME = 'gocardless-external-msg' as const;
+
 function useAvailableBanks(country: string) {
   const [banks, setBanks] = useState<GoCardlessInstitution[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -72,7 +74,8 @@ function renderError(error: 'unknown' | 'timeout', t: (key: string) => string) {
   );
 }
 
-type GoCardlessExternalMsgProps = {
+type GoCardlessExternalMsgModalProps = {
+  name: typeof MODAL_NAME;
   onMoveExternal: (arg: {
     institutionId: string;
   }) => Promise<{ error?: 'unknown' | 'timeout'; data?: GoCardlessToken }>;
@@ -81,10 +84,11 @@ type GoCardlessExternalMsgProps = {
 };
 
 export function GoCardlessExternalMsgModal({
+  name = MODAL_NAME,
   onMoveExternal,
   onSuccess,
   onClose,
-}: GoCardlessExternalMsgProps) {
+}: GoCardlessExternalMsgModalProps) {
   const { t } = useTranslation();
 
   const dispatch = useDispatch();
@@ -237,7 +241,7 @@ export function GoCardlessExternalMsgModal({
 
   return (
     <Modal
-      name="gocardless-external-msg"
+      name={name}
       onClose={onClose}
       containerProps={{ style: { width: '30vw' } }}
     >
@@ -320,3 +324,4 @@ export function GoCardlessExternalMsgModal({
     </Modal>
   );
 }
+GoCardlessExternalMsgModal.modalName = MODAL_NAME;

@@ -17,6 +17,8 @@ import { View } from '../common/View';
 import { PrivacyFilter } from '../PrivacyFilter';
 import { TableHeader, Table, Row, Field } from '../table';
 
+const MODAL_NAME = 'select-linked-accounts';
+
 const addOnBudgetAccountOption = { id: 'new-on', name: 'Create new account' };
 const addOffBudgetAccountOption = {
   id: 'new-off',
@@ -24,7 +26,8 @@ const addOffBudgetAccountOption = {
 };
 
 export function SelectLinkedAccountsModal({
-  requisitionId,
+  name = MODAL_NAME,
+  requisitionId = '',
   externalAccounts,
   syncSource,
 }) {
@@ -113,10 +116,7 @@ export function SelectLinkedAccountsModal({
   }
 
   return (
-    <Modal
-      name="select-linked-accounts"
-      containerProps={{ style: { width: 800 } }}
-    >
+    <Modal name={name} containerProps={{ style: { width: 800 } }}>
       {({ state: { close } }) => (
         <>
           <ModalHeader
@@ -259,3 +259,4 @@ function TableRow({
     </Row>
   );
 }
+SelectLinkedAccountsModal.modalName = MODAL_NAME;

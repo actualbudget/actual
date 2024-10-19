@@ -48,12 +48,15 @@ export async function authorizeBank(
     onSuccess: async data => {
       dispatch(
         pushModal('select-linked-accounts', {
-          accounts: data.accounts,
+          externalAccounts: data.accounts,
           requisitionId: data.id,
-          upgradingAccountId,
+          // upgradingAccountId,
           syncSource: 'goCardless',
         }),
       );
+    },
+    onClose: () => {
+      send('gocardless-poll-web-token-stop');
     },
   });
 }

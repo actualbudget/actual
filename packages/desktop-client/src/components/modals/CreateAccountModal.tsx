@@ -21,11 +21,17 @@ import { Popover } from '../common/Popover';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 
-type CreateAccountProps = {
+const MODAL_NAME = 'add-account' as const;
+
+type CreateAccountModalProps = {
+  name: typeof MODAL_NAME;
   upgradingAccountId?: string;
 };
 
-export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
+export function CreateAccountModal({
+  name = MODAL_NAME,
+  upgradingAccountId,
+}: CreateAccountModalProps) {
   const syncServerStatus = useSyncServerStatus();
   const dispatch = useDispatch();
   const [isGoCardlessSetupComplete, setIsGoCardlessSetupComplete] =
@@ -95,7 +101,7 @@ export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
 
       dispatch(
         pushModal('select-linked-accounts', {
-          accounts: newAccounts,
+          externalAccounts: newAccounts,
           syncSource: 'simpleFin',
         }),
       );
@@ -180,7 +186,7 @@ export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
   }
 
   return (
-    <Modal name="add-account">
+    <Modal name={name}>
       {({ state: { close } }) => (
         <>
           <ModalHeader
@@ -387,3 +393,4 @@ export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
     </Modal>
   );
 }
+CreateAccountModal.modalName = MODAL_NAME;
