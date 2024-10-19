@@ -55,9 +55,6 @@ function _createFile(filepath: string) {
     if (filepath.endsWith('.sqlite')) {
       // If it doesn't exist, we need to create a symlink
       if (!_exists(filepath)) {
-        console.log('_createFile');
-        console.log('/blocked/' + pathToId(filepath));
-        console.log(filepath);
         FS.symlink('/blocked/' + pathToId(filepath), filepath);
       }
     } else {
@@ -152,10 +149,6 @@ async function _writeFile(filepath: string, contents): Promise<boolean> {
   return true;
 }
 
-// _copySqlFile currently reads the full file then writes the
-// full file.  This only works with very small database files.
-// This function needs to be reworked to copy on a block-by-block
-// basis instead of the file-by-file basis.
 async function _copySqlFile(
   frompath: string,
   topath: string,
@@ -169,24 +162,23 @@ async function _copySqlFile(
 
   const fromfile = BFS.backend.createFile(fromDbPath);
   const tofile = BFS.backend.createFile(toDbPath);
-  
+
   fromfile.open();
   tofile.open();
   const fileSize = fromfile.meta.size;
-  let blockSize = fromfile.meta.blockSize;
+  const blockSize = fromfile.meta.blockSize;
 
-  let buffer = new ArrayBuffer(blockSize);
-  let bufferView = new Uint8Array(buffer);
+  const buffer = new ArrayBuffer(blockSize);
+  const bufferView = new Uint8Array(buffer);
 
   for (let i = 0; i < fileSize; i += blockSize) {
-    if (blockSize <= 0) break;
-    let readSize = fromfile.read(bufferView, 0, blockSize, i);
+    fromfile.read(bufferView, 0, blockSize, i);
     tofile.write(bufferView, 0, blockSize, i);
   }
 
   tofile.close();
   fromfile.close();
-  
+
   return true;
 }
 
@@ -314,7 +306,10 @@ export const size = async function (filepath) {
   return attrs.size;
 };
 
-export const copyFile = async function (frompath: string, topath: string): Promise<boolean> {
+export const copyFile = async function (
+  frompath: string,
+  topath: string,
+): Promise<boolean> {
   let result = false;
   try {
     const contents = await _readFile(frompath);
@@ -324,8 +319,7 @@ export const copyFile = async function (frompath: string, topath: string): Promi
       if (frompath.endsWith('.sqlite') || topath.endsWith('.sqlite')) {
         result = await _copySqlFile(frompath, topath);
       }
-    } catch (ee) {
-    }
+    } catch (ee) {}
   }
   return result;
 };
@@ -365,7 +359,7 @@ export const removeDirRecursively = async function (dirpath) {
 };
 
 export const getModifiedTime = async function () {
-  throw new Error(
-    'getModifiedTime not supported on the web (only used for backups)',
-  );
+  return new Promise(function (resolve) {
+    resolve(new Date());
+  });
 };

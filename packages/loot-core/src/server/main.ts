@@ -1838,20 +1838,12 @@ handlers['duplicate-budget'] = async function ({ id, newName, cloudFileId }) {
     JSON.stringify(metadata),
   );
 
-  const copyResults = await fs.copyFile(fs.join(budgetDir, 'db.sqlite'), fs.join(newBudgetDir, 'db.sqlite'));
-  console.log('copyResults');
-  console.log(copyResults);
+  await fs.copyFile(
+    fs.join(budgetDir, 'db.sqlite'),
+    fs.join(newBudgetDir, 'db.sqlite'),
+  );
 
   // TODO: Check if there are backups in budgetDir and copy those files too
-
-/*
-  const budgetsAgain = await handlers['get-budgets']();
-  console.log(budgetsAgain);
-  const filesAgain = await fs.listDir(budgetDir);
-  const baseDir = fs.join(budgetDir, '../');
-  const baseDirFiles = await fs.listDir(baseDir);
-*/
-  
 
   return newId;
 };

@@ -15,7 +15,7 @@ import {
   Modal,
   ModalButtons,
   ModalCloseButton,
-  ModalHeader
+  ModalHeader,
 } from '../../common/Modal';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
@@ -28,7 +28,7 @@ type DuplicateFileProps = {
 export function DuplicateFileModal({ file, managePage }: DuplicateFileProps) {
   const { t } = useTranslation();
   const [newName, setNewName] = useState(file.name + ' - copy');
-  const [nameError, setNameError] = useState(null);
+  const [nameError, setNameError] = useState('');
 
   // If the state is "broken" that means it was created by another user.
   const isCloudFile = 'cloudFileId' in file && file.state !== 'broken';
@@ -38,18 +38,18 @@ export function DuplicateFileModal({ file, managePage }: DuplicateFileProps) {
     null,
   );
 
-  const validateNewName = (name: string): string | null => {
+  const validateNewName = (name: string): string => {
     if (name === '') return 'Name can not be blank';
-    return null;
+    return '';
   };
 
   const validateAndSetName = (name: string) => {
     const nameError = validateNewName(name);
-    if (nameError) {
+    if (nameError !== '') {
       setNameError(nameError);
     } else {
       setNewName(name);
-      setNameError(null);
+      setNameError('');
     }
   };
 
@@ -161,12 +161,9 @@ export function DuplicateFileModal({ file, managePage }: DuplicateFileProps) {
                     }}
                     onPress={async () => {
                       const nameError = validateNewName(newName);
-
                       if (!nameError) {
                         setLoadingState('local');
-                        await dispatch(
-                          duplicateBudget(file.id, newName, managePage),
-                        );
+                        dispatch(duplicateBudget(file.id, newName, managePage));
                         setLoadingState(null);
                         close();
                       }
