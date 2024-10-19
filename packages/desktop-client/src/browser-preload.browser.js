@@ -1,4 +1,5 @@
 import { initBackend as initSQLBackend } from 'absurd-sql/dist/indexeddb-main-thread';
+import { registerSW } from 'virtual:pwa-register';
 
 import * as Platform from 'loot-core/src/client/platform';
 
@@ -186,3 +187,5 @@ document.addEventListener('keydown', e => {
     }
   }
 });
+
+registerSW({ immediate: true });
