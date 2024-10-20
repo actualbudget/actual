@@ -162,11 +162,12 @@ export function duplicateBudget({
   cloudSync?: boolean;
 }) {
   return async (dispatch: Dispatch) => {
-    console.log(
-      'loot-core/client/actions/budgets/duplicateBudget:  ' + id + newName,
-    );
-    const reply = await send('duplicate-budget', { id, cloudId, newName, cloudSync });
-    console.log(reply);
+    await send('duplicate-budget', {
+      id,
+      cloudId,
+      newName,
+      cloudSync,
+    });
     if (managePage) await dispatch(loadAllFiles());
   };
 }

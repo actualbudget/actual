@@ -1805,7 +1805,6 @@ handlers['delete-budget'] = async function ({ id, cloudFileId }) {
 
 handlers['duplicate-budget'] = async function ({
   id,
-  cloudId,
   newName,
   cloudSync,
 }): Promise<string> {
@@ -1832,17 +1831,17 @@ handlers['duplicate-budget'] = async function ({
   // copy metadata from current budget
   // replace id with new budget id and budgetName with new budget name
   const metadataText = await fs.readFile(fs.join(budgetDir, 'metadata.json'));
-  let metadata = JSON.parse(metadataText);
+  const metadata = JSON.parse(metadataText);
   metadata.id = newId;
   metadata.budgetName = budgetName;
-  ([
+  [
     'cloudFileId',
     'groupId',
     'lastUploaded',
     'encryptKeyId',
-    'lastSyncedTimestamp'
-  ]).forEach(item => {
-    metadata[item] && delete metadata[item];
+    'lastSyncedTimestamp',
+  ].forEach(item => {
+    if (metadata[item]) delete metadata[item];
   });
 
   const newBudgetDir = fs.getBudgetDir(newId);

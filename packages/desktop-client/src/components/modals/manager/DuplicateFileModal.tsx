@@ -104,7 +104,7 @@ export function DuplicateFileModal({ file, managePage }: DuplicateFileProps) {
                 </Text>
 
                 <ButtonWithLoading
-                  variant={loading ? "bare" : "primary"}
+                  variant={loading ? 'bare' : 'primary'}
                   isLoading={loadingState === 'cloud'}
                   style={{
                     alignSelf: 'center',
@@ -116,20 +116,24 @@ export function DuplicateFileModal({ file, managePage }: DuplicateFileProps) {
                     const nameError = validateNewName(newName);
                     if (!nameError) {
                       setLoading(true);
-                      await dispatch(duplicateBudget({
-                        id: 'id' in file ? file.id : undefined,
-                        cloudId: file.cloudFileId,
-                        newName,
-                        cloudSync: true,
-                        managePage
-                      }));
+                      setLoadingState('cloud');
+                      await dispatch(
+                        duplicateBudget({
+                          id: 'id' in file ? file.id : undefined,
+                          cloudId: file.cloudFileId,
+                          newName,
+                          cloudSync: true,
+                          managePage,
+                        }),
+                      );
+                      setLoadingState(null);
                       setLoading(false);
                       close();
                     }
                   }}
                 >
-                  { !loading && <Trans>Duplicate budget for all devices</Trans> }
-                  { loading && <Trans>Duplicating...</Trans> }
+                  {!loading && <Trans>Duplicate budget for all devices</Trans>}
+                  {loading && <Trans>Duplicating...</Trans>}
                 </ButtonWithLoading>
               </>
             )}
@@ -156,7 +160,9 @@ export function DuplicateFileModal({ file, managePage }: DuplicateFileProps) {
                 <ModalButtons>
                   <Button onPress={close}>Cancel</Button>
                   <ButtonWithLoading
-                    variant={loading ? "bare" : isCloudFile ? 'normal' : 'primary'}
+                    variant={
+                      loading ? 'bare' : isCloudFile ? 'normal' : 'primary'
+                    }
                     isLoading={loadingState === 'local'}
                     style={{
                       alignSelf: 'center',
@@ -168,16 +174,19 @@ export function DuplicateFileModal({ file, managePage }: DuplicateFileProps) {
                       const nameError = validateNewName(newName);
                       if (!nameError) {
                         setLoading(true);
-                        await dispatch(duplicateBudget({ id: file.id, newName, managePage }));
+                        setLoadingState('local');
+                        await dispatch(
+                          duplicateBudget({ id: file.id, newName, managePage }),
+                        );
+                        setLoadingState(null);
                         setLoading(false);
                         close();
                       }
                     }}
                   >
-                    
-                    { !loading && <Trans>Duplicate budget</Trans> }
-                    { !loading && isCloudFile && <Trans> locally only</Trans>}
-                    { loading && <Trans>Duplicating...</Trans> }
+                    {!loading && <Trans>Duplicate budget</Trans>}
+                    {!loading && isCloudFile && <Trans> locally only</Trans>}
+                    {loading && <Trans>Duplicating...</Trans>}
                   </ButtonWithLoading>
                 </ModalButtons>
               </>

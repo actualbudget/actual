@@ -78,7 +78,7 @@ function FileMenu({
         onDelete();
         break;
       case 'duplicate':
-        onDuplicate();
+        if (onDuplicate) onDuplicate();
         break;
       default:
     }

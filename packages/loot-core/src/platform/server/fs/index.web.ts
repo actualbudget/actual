@@ -156,7 +156,7 @@ async function _copySqlFile(
   _createFile(topath);
 
   const { store } = await idb.getStore(await idb.getDatabase(), 'files');
-  await idb.set(store, { filepath:topath, contents: '' });
+  await idb.set(store, { filepath: topath, contents: '' });
   const fromitem = await idb.get(store, frompath);
   const fromDbPath = pathToId(fromitem.filepath);
   const toDbPath = pathToId(topath);
