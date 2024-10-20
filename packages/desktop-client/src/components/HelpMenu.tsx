@@ -12,9 +12,10 @@ import { SvgHelp } from '../icons/v2/Help';
 import { openUrl } from '../util/router-tools';
 
 import { Button } from './common/Button2';
-import { Menu } from './common/Menu';
+import { Menu, MenuItem } from './common/Menu';
 import { Popover } from './common/Popover';
 import { SpaceBetween } from './common/SpaceBetween';
+import { useFeatureFlag } from '../hooks/useFeatureFlag';
 
 type HelpMenuItem = 'docs' | 'keyboard-shortcuts' | 'goal-templates';
 
@@ -66,6 +67,7 @@ const getPageDocs = (page: string) => {
 };
 
 export const HelpMenu = () => {
+  const showGoalTemplates = useFeatureFlag('goalTemplatesEnabled');
   const { t } = useTranslation();
   const [isMenuOpen, toggleMenuOpen, setMenuOpen] = useToggle();
   const menuButtonRef = useRef(null);
@@ -83,6 +85,7 @@ export const HelpMenu = () => {
         break;
       case 'goal-templates':
         dispatch(pushModal('goal-templates'));
+        break;
     }
   };
 
@@ -102,7 +105,7 @@ export const HelpMenu = () => {
         <Menu
           onMenuSelect={item => {
             setMenuOpen(false);
-            handleItemSelect(item);
+            handleItemSelect(item as HelpMenuItem);
           }}
           items={[
             {
@@ -110,10 +113,7 @@ export const HelpMenu = () => {
               text: t('Documentation'),
             },
             { name: 'keyboard-shortcuts', text: t('Keyboard shortcuts') },
-            {
-              name: 'goal-templates',
-              text: t('Goal templates'),
-            },
+            ...(showGoalTemplates ? [{ name: 'goal-templates', text: t('Goal templates') }] : []),
           ]}
         />
       </Popover>
