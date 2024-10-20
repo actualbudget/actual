@@ -8,14 +8,14 @@ import { useToggle } from 'usehooks-ts';
 
 import { pushModal } from 'loot-core/client/actions/modals';
 
+import { useFeatureFlag } from '../hooks/useFeatureFlag';
 import { SvgHelp } from '../icons/v2/Help';
 import { openUrl } from '../util/router-tools';
 
 import { Button } from './common/Button2';
-import { Menu, MenuItem } from './common/Menu';
+import { Menu } from './common/Menu';
 import { Popover } from './common/Popover';
 import { SpaceBetween } from './common/SpaceBetween';
-import { useFeatureFlag } from '../hooks/useFeatureFlag';
 
 type HelpMenuItem = 'docs' | 'keyboard-shortcuts' | 'goal-templates';
 
@@ -113,7 +113,9 @@ export const HelpMenu = () => {
               text: t('Documentation'),
             },
             { name: 'keyboard-shortcuts', text: t('Keyboard shortcuts') },
-            ...(showGoalTemplates ? [{ name: 'goal-templates', text: t('Goal templates') }] : []),
+            ...(showGoalTemplates
+              ? [{ name: 'goal-templates', text: t('Goal templates') }]
+              : []),
           ]}
         />
       </Popover>
