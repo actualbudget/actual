@@ -103,9 +103,9 @@ export const HelpMenu = () => {
         onOpenChange={() => setMenuOpen(false)}
       >
         <Menu
-          onMenuSelect={item => {
+          onMenuSelect={(item: HelpMenuItem) => {
             setMenuOpen(false);
-            handleItemSelect(item as HelpMenuItem);
+            handleItemSelect(item);
           }}
           items={[
             {

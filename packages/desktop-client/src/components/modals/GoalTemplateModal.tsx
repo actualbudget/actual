@@ -1,10 +1,11 @@
+import { Heading } from 'react-aria-components';
 import { useTranslation } from 'react-i18next';
+
 import { theme } from '../../style';
 import { Link } from '../common/Link';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
-import { Heading } from 'react-aria-components';
 
 export function GoalTemplateModal() {
   const { t } = useTranslation();
@@ -23,8 +24,8 @@ export function GoalTemplateModal() {
             }}
           >
             <Text style={{ textAlign: 'left' }}>
-            <Heading level={3}>{t('Weekly')}</Heading>
-            
+              <Heading level={3}>{t('Weekly')}</Heading>
+
               <table>
                 <tr>
                   <th>{t('Syntax')}</th>
@@ -41,7 +42,9 @@ export function GoalTemplateModal() {
                 <tr>
                   <td>
                     <strong>
-                      {t('#template $10 repeat every week starting 2025-01-03 up to $80')}
+                      {t(
+                        '#template $10 repeat every week starting 2025-01-03 up to $80',
+                      )}
                     </strong>
                   </td>
                   <td>{t('$10 a week, up to a maximum of $80')}</td>
@@ -51,8 +54,8 @@ export function GoalTemplateModal() {
               <Heading level={3}>{t('Monthly')}</Heading>
               <table>
                 <tr>
-                <th>{t('Syntax')}</th>
-                <th>{t('Description')}</th>
+                  <th>{t('Syntax')}</th>
+                  <th>{t('Description')}</th>
                 </tr>
                 <tr>
                   <td>
@@ -65,14 +68,18 @@ export function GoalTemplateModal() {
                     <strong>{t('#template up to $150')}</strong>
                   </td>
                   <td>
-                    {t('Up to $150 each month, and remove extra funds over $150')}
+                    {t(
+                      'Up to $150 each month, and remove extra funds over $150',
+                    )}
                   </td>
                 </tr>
                 <tr>
                   <td>
                     <strong>{t('#template up to $150 hold')}</strong>
                   </td>
-                  <td>{t('Up to $150 each month, but retain any funds over $150')}</td>
+                  <td>
+                    {t('Up to $150 each month, but retain any funds over $150')}
+                  </td>
                 </tr>
               </table>
 
@@ -89,15 +96,21 @@ export function GoalTemplateModal() {
                     </strong>
                   </td>
                   <td>
-                    {t('Break down large, less-frequent expenses into manageable monthly expenses')}
+                    {t(
+                      'Break down large, less-frequent expenses into manageable monthly expenses',
+                    )}
                   </td>
                 </tr>
                 <tr>
                   <td>
-                    <strong>{t('#template $500 by 2025-03 repeat every year')}</strong>
+                    <strong>
+                      {t('#template $500 by 2025-03 repeat every year')}
+                    </strong>
                   </td>
                   <td>
-                    {t('Break down large, less-frequent expenses into manageable monthly expenses')}
+                    {t(
+                      'Break down large, less-frequent expenses into manageable monthly expenses',
+                    )}
                   </td>
                 </tr>
                 <tr>
@@ -107,7 +120,9 @@ export function GoalTemplateModal() {
                     </strong>
                   </td>
                   <td>
-                    {t('Break down large, less-frequent expenses into manageable monthly expenses')}
+                    {t(
+                      'Break down large, less-frequent expenses into manageable monthly expenses',
+                    )}
                   </td>
                 </tr>
               </table>
@@ -126,10 +141,14 @@ export function GoalTemplateModal() {
                 </tr>
                 <tr>
                   <td>
-                    <strong>{t('#template schedule full SCHEDULE_NAME')}</strong>
+                    <strong>
+                      {t('#template schedule full SCHEDULE_NAME')}
+                    </strong>
                   </td>
                   <td>
-                    {t('Fund upcoming scheduled transaction only on needed month')}
+                    {t(
+                      'Fund upcoming scheduled transaction only on needed month',
+                    )}
                   </td>
                 </tr>
               </table>
