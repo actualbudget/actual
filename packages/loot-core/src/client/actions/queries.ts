@@ -238,10 +238,10 @@ export function deleteGroup(id, transferId?) {
 }
 
 export function applyBudgetTemplatesInGroup(month, categoryIds) {
-  return async function(dispatch){
+  return async function (dispatch) {
     addNotification(
-    await send('apply-multiple-templates', { month, categoryIds})
-  )
+      await send('apply-multiple-templates', { month, categoryIds }),
+    );
   };
 }
 

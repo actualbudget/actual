@@ -3,6 +3,7 @@ import React, { type CSSProperties, useRef, useState } from 'react';
 import { type ConnectDragSource } from 'react-dnd';
 import { useTranslation } from 'react-i18next';
 
+import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { SvgExpandArrow } from '../../icons/v0';
 import { SvgCheveronDown } from '../../icons/v1';
 import { theme } from '../../style';
@@ -13,7 +14,6 @@ import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { NotesButton } from '../NotesButton';
 import { InputCell } from '../table';
-import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 
 type SidebarGroupProps = {
   group: {

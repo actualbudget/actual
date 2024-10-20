@@ -1,3 +1,5 @@
+import type { Notification } from 'loot-core/client/state-types/notifications';
+
 import { ParseFileResult } from '../server/accounts/parse-file';
 import { batchUpdateTransactions } from '../server/accounts/transactions';
 import { Backup } from '../server/backups';
@@ -20,7 +22,6 @@ import {
 import { GlobalPrefs, MetadataPrefs } from './prefs';
 import { Query } from './query';
 import { EmptyObject } from './util';
-import type { Notification } from "loot-core/client/state-types/notifications";
 
 export interface ServerHandlers {
   'transaction-update': (transaction: { id: string }) => Promise<EmptyObject>;
