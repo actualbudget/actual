@@ -51,8 +51,9 @@ function AppInner() {
   const { showBoundary: showErrorBoundary } = useErrorBoundary();
   const dispatch = useDispatch();
 
-  const maybeUpdate = async <T,>(cb: () => T): T => {
+  const maybeUpdate = async <T,>(cb: () => T): Promise<T> => {
     if (global.Actual.isUpdateReadyForDownload()) {
+      console.log('set text for update:');
       dispatch(
         setAppState({
           loadingText: t('Downloading and applying update...'),
