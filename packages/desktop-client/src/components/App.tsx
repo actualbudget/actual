@@ -51,6 +51,19 @@ function AppInner() {
   const { showBoundary: showErrorBoundary } = useErrorBoundary();
   const dispatch = useDispatch();
 
+  const maybeUpdate = async <T,>(cb: () => T): T => {
+    if (global.Actual.isUpdateReadyForDownload()) {
+      dispatch(
+        setAppState({
+          loadingText: t('Downloading and applying update...'),
+        }),
+      );
+      global.Actual.applyAppUpdate();
+      await new Promise(() => {});
+    }
+    return cb();
+  };
+
   async function init() {
     const socketName = await global.Actual.getServerSocket();
 
@@ -59,7 +72,7 @@ function AppInner() {
         loadingText: t('Initializing the connection to the local database...'),
       }),
     );
-    await initConnection(socketName);
+    await maybeUpdate(() => initConnection(socketName));
 
     // Load any global prefs
     dispatch(
@@ -67,7 +80,7 @@ function AppInner() {
         loadingText: t('Loading global preferences...'),
       }),
     );
-    await dispatch(loadGlobalPrefs());
+    maybeUpdate(() => dispatch(loadGlobalPrefs()));
 
     // Open the last opened budget, if any
     dispatch(
@@ -75,9 +88,9 @@ function AppInner() {
         loadingText: t('Opening last budget...'),
       }),
     );
-    const budgetId = await send('get-last-opened-backup');
+    const budgetId = await maybeUpdate(() => send('get-last-opened-backup'));
     if (budgetId) {
-      await dispatch(loadBudget(budgetId));
+      maybeUpdate(() => dispatch(loadBudget(budgetId)));
 
       // Check to see if this file has been remotely deleted (but
       // don't block on this in case they are offline or something)
@@ -86,14 +99,16 @@ function AppInner() {
           loadingText: t('Retrieving remote files...'),
         }),
       );
-      send('get-remote-files').then(files => {
-        if (files) {
-          const remoteFile = files.find(f => f.fileId === cloudFileId);
-          if (remoteFile && remoteFile.deleted) {
-            dispatch(closeBudget());
+      await maybeUpdate(() =>
+        send('get-remote-files').then(files => {
+          if (files) {
+            const remoteFile = files.find(f => f.fileId === cloudFileId);
+            if (remoteFile && remoteFile.deleted) {
+              dispatch(closeBudget());
+            }
           }
-        }
-      });
+        }),
+      );
     }
   }
 
