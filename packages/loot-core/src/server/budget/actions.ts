@@ -31,10 +31,10 @@ function getBudgetTable(): string {
 }
 
 export function isReflectBudget(): boolean {
-  const budgetType =
-    db.firstSync(`SELECT value FROM preferences WHERE id = ?`, [
-      'budgetType',
-    ]);
+  const budgetType = db.firstSync(
+    `SELECT value FROM preferences WHERE id = ?`,
+    ['budgetType'],
+  );
   const val = budgetType ? budgetType.value : 'rollover';
   return val === 'report';
 }
