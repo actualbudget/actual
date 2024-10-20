@@ -79,7 +79,7 @@ function AppInner() {
         loadingText: t('Loading global preferences...'),
       }),
     );
-    maybeUpdate(() => dispatch(loadGlobalPrefs()));
+    await maybeUpdate(() => dispatch(loadGlobalPrefs()));
 
     // Open the last opened budget, if any
     dispatch(
@@ -89,7 +89,7 @@ function AppInner() {
     );
     const budgetId = await maybeUpdate(() => send('get-last-opened-backup'));
     if (budgetId) {
-      maybeUpdate(() => dispatch(loadBudget(budgetId)));
+      await maybeUpdate(() => dispatch(loadBudget(budgetId)));
 
       // Check to see if this file has been remotely deleted (but
       // don't block on this in case they are offline or something)
