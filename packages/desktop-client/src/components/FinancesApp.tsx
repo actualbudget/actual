@@ -107,13 +107,11 @@ export function FinancesApp() {
         addNotification({
           type: 'message',
           title: t('A new version of Actual is available!'),
-          message: t(
-            'A new version of Actual is available from the server. Reload to update.',
-          ),
+          message: t('Click the button below to reload and apply the update.'),
           sticky: true,
           id: 'update-notification',
           button: {
-            title: t('Download update'),
+            title: t('Update now'),
             action: async () => {
               await global.Actual.applyAppUpdate();
             },
