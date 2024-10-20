@@ -9,7 +9,7 @@ import type {
 
 import type { NewRuleEntity, RuleEntity, TransactionEntity } from './models';
 import { type ServerHandlers } from './server-handlers';
-import type { Notification } from "loot-core/client/state-types/notifications";
+import type { Notification } from 'loot-core/client/state-types/notifications';
 
 export interface ApiHandlers {
   'api/batch-budget-start': () => Promise<unknown>;

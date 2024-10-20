@@ -149,7 +149,7 @@ export function deleteCategoryGroup(id, transferCategoryId?) {
   return send('api/category-group-delete', { id, transferCategoryId });
 }
 
-export function applyMultipleTemplates(month, categoryIds){
+export function applyMultipleTemplates(month, categoryIds) {
   return send('api/apply-multiple-templates', { month, categoryIds });
 }
 
