@@ -348,33 +348,37 @@ export function AccountHeader({
             onChange={onSearch}
             inputRef={searchInput}
           />
-          <View style={{ marginLeft: 16 }}>
-            <Button
-              ref={reconcileRef}
-              variant="bare"
-              aria-label={t('Reconcile')}
-              style={{ padding: 6 }}
-              onPress={() => {
-                setReconcileOpen(true);
-              }}
-            >
-              <View title={t('Reconcile')}>
-                <SvgLockClosed width={14} height={14} />
-              </View>
-            </Button>
-            <Popover
-              placement="bottom"
-              triggerRef={reconcileRef}
-              style={{ width: 275 }}
-              isOpen={reconcileOpen}
-              onOpenChange={() => setReconcileOpen(false)}
-            >
-              <ReconcileMenu
-                account={account}
-                onClose={() => setReconcileOpen(false)}
-                onReconcile={onReconcile}
-              />
-            </Popover>
+          <View>
+            {account && (
+              <>
+                <Button
+                  ref={reconcileRef}
+                  variant="bare"
+                  aria-label={t('Reconcile')}
+                  style={{ padding: 6, marginLeft: 10 }}
+                  onPress={() => {
+                    setReconcileOpen(true);
+                  }}
+                >
+                  <View title={t('Reconcile')}>
+                    <SvgLockClosed width={14} height={14} />
+                  </View>
+                </Button>
+                <Popover
+                  placement="bottom"
+                  triggerRef={reconcileRef}
+                  style={{ width: 275 }}
+                  isOpen={reconcileOpen}
+                  onOpenChange={() => setReconcileOpen(false)}
+                >
+                  <ReconcileMenu
+                    account={account}
+                    onClose={() => setReconcileOpen(false)}
+                    onReconcile={onReconcile}
+                  />
+                </Popover>
+              </>
+            )}
           </View>
           {workingHard ? (
             <View>
