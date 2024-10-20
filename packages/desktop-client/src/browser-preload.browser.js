@@ -188,4 +188,8 @@ document.addEventListener('keydown', e => {
   }
 });
 
-registerSW({ immediate: true });
+registerSW({
+  onNeedRefresh: () => {
+    console.log('SW needs refresh');
+  },
+});
