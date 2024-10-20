@@ -1,6 +1,6 @@
 import React, { type SVGProps } from 'react';
 
-import { css, keyframes } from 'glamor';
+import { css, keyframes } from '@emotion/css';
 
 import { SvgLoading } from './Loading';
 
@@ -12,13 +12,13 @@ const rotation = keyframes({
 export function AnimatedLoading(props: SVGProps<SVGSVGElement>) {
   return (
     <span
-      className={`${css({
+      className={css({
         animationName: rotation,
         animationDuration: '1.6s',
         animationTimingFunction: 'cubic-bezier(0.17, 0.67, 0.83, 0.67)',
         animationIterationCount: 'infinite',
         lineHeight: 0,
-      })}`}
+      })}
     >
       <SvgLoading {...props} />
     </span>

@@ -31,11 +31,12 @@ function getBudgetTable(): string {
 }
 
 export function isReflectBudget(): boolean {
-  const budgetType =
-    db.firstSync(`SELECT value FROM preferences WHERE id = ?`, [
-      'budgetType',
-    ]) ?? 'rollover';
-  return budgetType === 'report';
+  const budgetType = db.firstSync(
+    `SELECT value FROM preferences WHERE id = ?`,
+    ['budgetType'],
+  );
+  const val = budgetType ? budgetType.value : 'rollover';
+  return val === 'report';
 }
 
 function dbMonth(month: string): number {

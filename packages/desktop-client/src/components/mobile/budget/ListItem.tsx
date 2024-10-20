@@ -1,6 +1,10 @@
-import React, { type ComponentProps, type ReactNode } from 'react';
+import React, {
+  type ComponentProps,
+  type ReactNode,
+  type CSSProperties,
+} from 'react';
 
-import { type CSSProperties, theme } from '../../../style';
+import { theme } from '../../../style';
 import { View } from '../../common/View';
 
 const ROW_HEIGHT = 50;
