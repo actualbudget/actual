@@ -18,8 +18,6 @@ function throwIfNot200(res, text) {
 
     // Actual Sync Server may be exposed via a tunnel (e.g. ngrok). Tunnel errors should be treated as network errors.
     const tunnelErrorHeaders = ['ngrok-error-code'];
-
-    // const headerKeys = res.headers.keys().toArray();
     const tunnelError = tunnelErrorHeaders.some(header =>
       res.headers.has(header),
     );
