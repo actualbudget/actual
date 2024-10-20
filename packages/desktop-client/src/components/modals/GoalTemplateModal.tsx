@@ -1,5 +1,5 @@
 import { Heading } from 'react-aria-components';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { theme } from '../../style';
 import { Link } from '../common/Link';
@@ -20,12 +20,14 @@ export function GoalTemplateModal() {
           />
           <Heading level={3}>{t('Weekly')}</Heading>
           <View>
-            <TableHeader
-              headers={[
-                { name: t('Syntax'), width: 'flex' },
-                { name: t('Description'), width: 'flex' },
-              ]}
-            />
+            <TableHeader>
+              <Field width="flex">
+                <Trans>Syntax</Trans>
+              </Field>
+              <Field width="flex">
+                <Trans>Description</Trans>
+              </Field>
+            </TableHeader>
             <Row style={{ backgroundColor: theme.tableBackground }}>
               <Field width="flex">
                 {t('#template $10 repeat every week starting 2025-01-03')}
@@ -44,12 +46,14 @@ export function GoalTemplateModal() {
             </Row>
 
             <Heading level={3}>{t('Monthly')}</Heading>
-            <TableHeader
-              headers={[
-                { name: t('Syntax'), width: 'flex' },
-                { name: t('Description'), width: 'flex' },
-              ]}
-            />
+            <TableHeader>
+              <Field width="flex">
+                <Trans>Syntax</Trans>
+              </Field>
+              <Field width="flex">
+                <Trans>Description</Trans>
+              </Field>
+            </TableHeader>
             <Row style={{ backgroundColor: theme.tableBackground }}>
               <Field width="flex">{t('#template $50')}</Field>
               <Field width="flex">{t('$50 each month')}</Field>
@@ -68,12 +72,14 @@ export function GoalTemplateModal() {
             </Row>
 
             <Heading level={3}>{t('Longer Term')}</Heading>
-            <TableHeader
-              headers={[
-                { name: t('Syntax'), width: 'flex' },
-                { name: t('Description'), width: 'flex' },
-              ]}
-            />
+            <TableHeader>
+              <Field width="flex">
+                <Trans>Syntax</Trans>
+              </Field>
+              <Field width="flex">
+                <Trans>Description</Trans>
+              </Field>
+            </TableHeader>
             <Row style={{ backgroundColor: theme.tableBackground }}>
               <Field width="flex">
                 {t('#template $500 by 2025-03 repeat every 6 months')}
@@ -106,12 +112,14 @@ export function GoalTemplateModal() {
             </Row>
 
             <Heading level={3}>{t('Schedules')}</Heading>
-            <TableHeader
-              headers={[
-                { name: t('Syntax'), width: 'flex' },
-                { name: t('Description'), width: 'flex' },
-              ]}
-            />
+            <TableHeader>
+              <Field width="flex">
+                <Trans>Syntax</Trans>
+              </Field>
+              <Field width="flex">
+                <Trans>Description</Trans>
+              </Field>
+            </TableHeader>
             <Row style={{ backgroundColor: theme.tableBackground }}>
               <Field width="flex">
                 {t('#template schedule SCHEDULE_NAME')}
@@ -130,12 +138,14 @@ export function GoalTemplateModal() {
             </Row>
 
             <Heading level={3}>{t('Goals')}</Heading>
-            <TableHeader
-              headers={[
-                { name: t('Syntax'), width: 'flex' },
-                { name: t('Description'), width: 'flex' },
-              ]}
-            />
+            <TableHeader>
+              <Field width="flex">
+                <Trans>Syntax</Trans>
+              </Field>
+              <Field width="flex">
+                <Trans>Description</Trans>
+              </Field>
+            </TableHeader>
             <Row style={{ backgroundColor: theme.tableBackground }}>
               <Field width="flex">{t('#goal 1000')}</Field>
               <Field width="flex">
