@@ -109,7 +109,7 @@ export function FinancesApp() {
           title: t('A new version of Actual is available!'),
           message: t('Click the button below to reload and apply the update.'),
           sticky: true,
-          id: 'update-notification',
+          id: 'update-reload-notification',
           button: {
             title: t('Update now'),
             action: async () => {
