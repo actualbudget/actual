@@ -1,4 +1,4 @@
-import { getPageDocs } from '@actual-app/web/src/components/HelpMenu';
+import { getPageDocs } from '@actual-app/web/src/util/help';
 import {
   MenuItemConstructorOptions,
   Menu,
