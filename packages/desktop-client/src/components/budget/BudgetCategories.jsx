@@ -28,7 +28,7 @@ export const BudgetCategories = memo(
     onSaveGroup,
     onDeleteCategory,
     onDeleteGroup,
-    onApplyBudgetTemplate,
+    onApplyBudgetTemplatesInGroup,
     onReorderCategory,
     onReorderGroup,
   }) => {
@@ -246,7 +246,7 @@ export const BudgetCategories = memo(
                   onReorderCategory={onReorderCategory}
                   onToggleCollapse={onToggleCollapse}
                   onShowNewCategory={onShowNewCategory}
-                  onApplyBudgetTemplate={onApplyBudgetTemplate}
+                  onApplyBudgetTemplatesInGroup={onApplyBudgetTemplatesInGroup}
                 />
               );
               break;
