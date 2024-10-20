@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { type CSSProperties, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 
+import { css } from '@emotion/css';
 import { Resizable } from 're-resizable';
 
 import { replaceModal } from 'loot-core/src/client/actions';
@@ -86,7 +87,7 @@ export function Sidebar() {
     >
       <View
         innerRef={containerRef}
-        style={{
+        className={css({
           color: theme.sidebarItemText,
           height: '100%',
           backgroundColor: theme.sidebarBackground,
@@ -94,20 +95,20 @@ export function Sidebar() {
             opacity: isFloating ? 1 : 0,
             transition: 'opacity .25s, width .25s',
             width: hasWindowButtons || isFloating ? null : 0,
-          },
+          } as CSSProperties,
           '&:hover .float': {
             opacity: 1,
             width: hasWindowButtons ? null : 'auto',
-          },
+          } as CSSProperties,
           '& .hover-visible': {
             display: 'none',
-          },
+          } as CSSProperties,
           '&:hover .hover-visible': {
             display: 'flex',
-          },
+          } as CSSProperties,
           flex: 1,
           ...styles.darkScrollbar,
-        }}
+        })}
       >
         <BudgetName>
           {!sidebar.alwaysFloats && (
