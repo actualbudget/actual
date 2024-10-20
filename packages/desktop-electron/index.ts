@@ -377,7 +377,7 @@ app.on('ready', async () => {
   globalPrefs = await loadGlobalPrefs(); // load global prefs
 
   if (globalPrefs.ngrokConfig?.autoStart) {
-    startSyncServer();
+    // startSyncServer();
     exposeSyncServer(globalPrefs.ngrokConfig);
   }
 
