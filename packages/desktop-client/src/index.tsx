@@ -58,7 +58,12 @@ function rootReducer(state, action) {
   return appReducer(state, action);
 }
 
-const store = createStore(rootReducer, undefined, applyMiddleware(thunk));
+const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
+const store = createStore(
+  rootReducer,
+  undefined,
+  composeEnhancers(applyMiddleware(thunk)),
+);
 const boundActions = bindActionCreators(
   actions,
   store.dispatch,

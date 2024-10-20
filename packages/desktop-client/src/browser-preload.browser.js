@@ -40,6 +40,14 @@ function createBackendWorker() {
 
 createBackendWorker();
 
+let needRefresh = false;
+const updateSW = registerSW({
+  immediate: true,
+  onNeedRefresh: () => {
+    needRefresh = true;
+  },
+});
+
 global.Actual = {
   IS_DEV,
   ACTUAL_VERSION,
@@ -141,7 +149,10 @@ global.Actual = {
     window.open(url, '_blank');
   },
   onEventFromMain: () => {},
-  applyAppUpdate: () => {},
+  isUpdateReadyForDownload: () => needRefresh,
+  applyAppUpdate: () => {
+    updateSW();
+  },
   updateAppMenu: () => {},
 
   ipcConnect: () => {},
@@ -186,10 +197,4 @@ document.addEventListener('keydown', e => {
       }
     }
   }
-});
-
-registerSW({
-  onNeedRefresh: () => {
-    console.log('SW needs refresh');
-  },
 });
