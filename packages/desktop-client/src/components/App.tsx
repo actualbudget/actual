@@ -53,14 +53,12 @@ function AppInner() {
 
   const maybeUpdate = async <T,>(cb: () => T): Promise<T> => {
     if (global.Actual.isUpdateReadyForDownload()) {
-      console.log('set text for update:');
       dispatch(
         setAppState({
           loadingText: t('Downloading and applying update...'),
         }),
       );
-      global.Actual.applyAppUpdate();
-      await new Promise(() => {});
+      await global.Actual.applyAppUpdate();
     }
     return cb();
   };

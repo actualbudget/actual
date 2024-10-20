@@ -102,6 +102,31 @@ export function FinancesApp() {
 
   useEffect(() => {
     async function run() {
+      await global.Actual.waitForUpdateReadyForDownload();
+      dispatch(
+        addNotification({
+          type: 'message',
+          title: t('A new version of Actual is available!'),
+          message: t(
+            'A new version of Actual is available from the server. Reload to update.',
+          ),
+          sticky: true,
+          id: 'update-notification',
+          button: {
+            title: t('Download update'),
+            action: async () => {
+              await global.Actual.applyAppUpdate();
+            },
+          },
+        }),
+      );
+    }
+
+    run();
+  }, []);
+
+  useEffect(() => {
+    async function run() {
       const latestVersion = await getLatestVersion();
       const isOutdated = await getIsOutdated(latestVersion);
 
