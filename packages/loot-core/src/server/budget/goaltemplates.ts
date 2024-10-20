@@ -37,13 +37,11 @@ export async function overwriteTemplate({ month }) {
 }
 
 export async function applyMultipleCategoryTemplates({ month, categoryIds }) {
-  console.log('called apply multiple for month:' + month + " and categories: " + categoryIds);
   const placeholders = categoryIds.map(() => '?').join(', ');
   const query = `SELECT * FROM v_categories WHERE id IN (${placeholders})`;
   const categories = await db.all(query, categoryIds);
   await storeTemplates();
   const category_templates = await getTemplates(categories, 'template');
-  console.log(category_templates);
   const category_goals = await getTemplates(categories, 'goal');
   const ret = await processTemplate(
     month,
@@ -51,7 +49,6 @@ export async function applyMultipleCategoryTemplates({ month, categoryIds }) {
     category_templates,
     categories,
   );
-  console.log(ret)
   await processGoals(category_goals, month);
   return ret;
 }
@@ -218,7 +215,6 @@ async function processTemplate(
     );
     const template = category_templates[category.id];
     if (template) {
-      console.log("found template: " + JSON.stringify(template))
       for (let l = 0; l < template.length; l++) {
         //add each priority we need to a list.  Will sort later
         if (template[l].priority == null) {
@@ -227,8 +223,6 @@ async function processTemplate(
         priority_list.push(template[l].priority);
       }
     }
-    console.log("BUDGET")
-    console.log(budgeted)
     if (budgeted) {
       if (!force) {
         // save index of category to remove
@@ -256,7 +250,6 @@ async function processTemplate(
     month,
     templateBudget: setToZero,
   });
-  console.log(categories)
   await resetCategoryTargets(month, categories);
 
   // sort and filter down to just the requested priorities
@@ -289,9 +282,6 @@ async function processTemplate(
     for (let c = 0; c < categories.length; c++) {
       const category = categories[c];
       let template_lines = category_templates[category.id];
-      console.log(category_templates)
-      console.log(category)
-      console.log(template_lines)
       if (template_lines) {
         //check that all schedule and by lines have the same priority level
         let skipSchedule = false;
@@ -324,7 +314,6 @@ async function processTemplate(
             );
           }
         }
-        console.log(template_lines)
         if (!skipSchedule) {
           if (!isScheduleOrBy) {
             template_lines = template_lines.filter(
@@ -465,7 +454,6 @@ async function applyCategoryTemplate(
   budgetAvailable,
   prev_budgeted,
 ) {
-  console.log("applying template ")
   const current_month = `${month}-01`;
   let errors = [];
   let all_schedule_names = await db.all(

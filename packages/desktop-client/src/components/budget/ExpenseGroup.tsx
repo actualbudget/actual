@@ -25,7 +25,9 @@ type ExpenseGroupProps = {
   onEditName?: ComponentProps<typeof SidebarGroup>['onEdit'];
   onSave?: ComponentProps<typeof SidebarGroup>['onSave'];
   onDelete?: ComponentProps<typeof SidebarGroup>['onDelete'];
-  onApplyBudgetTemplate?: ComponentProps<typeof SidebarGroup>['onApplyBudgetTemplate'];
+  onApplyBudgetTemplatesInGroup?: ComponentProps<
+    typeof SidebarGroup
+  >['onApplyBudgetTemplatesInGroup'];
   onDragChange: OnDragChangeCallback<
     ComponentProps<typeof SidebarGroup>['group']
   >;
@@ -44,7 +46,7 @@ export function ExpenseGroup({
   onEditName,
   onSave,
   onDelete,
-  onApplyBudgetTemplate,
+  onApplyBudgetTemplatesInGroup,
   onDragChange,
   onReorderGroup,
   onReorderCategory,
@@ -127,7 +129,7 @@ export function ExpenseGroup({
           onEdit={onEditName}
           onSave={onSave}
           onDelete={onDelete}
-          onApplyBudgetTemplate={onApplyBudgetTemplate}
+          onApplyBudgetTemplatesInGroup={onApplyBudgetTemplatesInGroup}
           onShowNewCategory={onShowNewCategory}
         />
         <RenderMonths component={MonthComponent} args={{ group }} />

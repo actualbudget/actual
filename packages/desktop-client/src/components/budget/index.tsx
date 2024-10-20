@@ -5,7 +5,8 @@ import { useDispatch } from 'react-redux';
 
 import {
   addNotification,
-  applyBudgetAction, applyBudgetTemplatesInGroup,
+  applyBudgetAction,
+  applyBudgetTemplatesInGroup,
   createCategory,
   createGroup,
   deleteCategory,
@@ -15,8 +16,8 @@ import {
   moveCategoryGroup,
   pushModal,
   updateCategory,
-  updateGroup
-} from "loot-core/src/client/actions";
+  updateGroup,
+} from 'loot-core/src/client/actions';
 import { useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
 import { send, listen } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
@@ -265,8 +266,7 @@ function BudgetInner(props: BudgetInnerProps) {
     }
   };
 
-  const onApplyBudgetTemplate = async (categories) => {
-    console.log('apply template in index ' + startMonth);
+  const onApplyBudgetTemplatesInGroup = async categories => {
     dispatch(applyBudgetTemplatesInGroup(startMonth, categories));
   };
 
@@ -371,7 +371,7 @@ function BudgetInner(props: BudgetInnerProps) {
           onMonthSelect={onMonthSelect}
           onDeleteCategory={onDeleteCategory}
           onDeleteGroup={onDeleteGroup}
-          onApplyBudgetTemplate={onApplyBudgetTemplate}
+          onApplyBudgetTemplatesInGroup={onApplyBudgetTemplatesInGroup}
           onSaveCategory={onSaveCategory}
           onSaveGroup={onSaveGroup}
           onBudgetAction={onBudgetAction}
