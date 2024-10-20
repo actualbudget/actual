@@ -317,10 +317,11 @@ export interface ServerHandlers {
   }) => Promise<'ok'>;
 
   'duplicate-budget': (arg: {
-    id: string;
+    id?: string;
+    cloudId?: string;
     newName: string;
-    cloudFileId?: string;
-  }) => Promise<unknown>;
+    cloudSync?: boolean;
+  }) => Promise<string>;
 
   'create-budget': (arg: {
     budgetName?;

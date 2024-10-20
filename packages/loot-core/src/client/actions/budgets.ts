@@ -148,17 +148,24 @@ export function createBudget({ testMode = false, demoMode = false } = {}) {
   };
 }
 
-export function duplicateBudget(
-  id: string,
-  newName: string,
-  managePage?: boolean,
-  cloudFileId?: string,
-) {
+export function duplicateBudget({
+  id,
+  cloudId,
+  newName,
+  managePage,
+  cloudSync,
+}: {
+  id?: string;
+  cloudId?: string;
+  newName: string;
+  managePage?: boolean;
+  cloudSync?: boolean;
+}) {
   return async (dispatch: Dispatch) => {
     console.log(
       'loot-core/client/actions/budgets/duplicateBudget:  ' + id + newName,
     );
-    const reply = await send('duplicate-budget', { id, newName, cloudFileId });
+    const reply = await send('duplicate-budget', { id, cloudId, newName, cloudSync });
     console.log(reply);
     if (managePage) await dispatch(loadAllFiles());
   };

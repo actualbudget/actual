@@ -1803,7 +1803,14 @@ handlers['delete-budget'] = async function ({ id, cloudFileId }) {
   return 'ok';
 };
 
-handlers['duplicate-budget'] = async function ({ id, newName, cloudFileId }) {
+handlers['duplicate-budget'] = async function ({
+  id,
+  cloudId,
+  newName,
+  cloudSync,
+}): Promise<string> {
+  if (!id) throw new Error('Unable to duplicate a budget that is not local.');
+
   const budgetDir = fs.getBudgetDir(id);
 
   let budgetName = newName;
@@ -1825,9 +1832,18 @@ handlers['duplicate-budget'] = async function ({ id, newName, cloudFileId }) {
   // copy metadata from current budget
   // replace id with new budget id and budgetName with new budget name
   const metadataText = await fs.readFile(fs.join(budgetDir, 'metadata.json'));
-  const metadata = JSON.parse(metadataText);
+  let metadata = JSON.parse(metadataText);
   metadata.id = newId;
   metadata.budgetName = budgetName;
+  ([
+    'cloudFileId',
+    'groupId',
+    'lastUploaded',
+    'encryptKeyId',
+    'lastSyncedTimestamp'
+  ]).forEach(item => {
+    metadata[item] && delete metadata[item];
+  });
 
   const newBudgetDir = fs.getBudgetDir(newId);
   await fs.mkdir(newBudgetDir);
@@ -1844,6 +1860,20 @@ handlers['duplicate-budget'] = async function ({ id, newName, cloudFileId }) {
   );
 
   // TODO: Check if there are backups in budgetDir and copy those files too
+
+  if (cloudSync) {
+    const { error } = await loadBudget(newId);
+    if (error) {
+      console.log('Error creating budget: ' + error);
+      return error;
+    }
+    try {
+      await cloudStorage.upload();
+    } catch (e) {
+      // Ignore any errors uploading. If they are offline they should
+      // still be able to create files.
+    }
+  }
 
   return newId;
 };
@@ -1942,8 +1972,8 @@ handlers['export-budget'] = async function () {
   }
 };
 
-async function loadBudget(id) {
-  let dir;
+async function loadBudget(id: string) {
+  let dir: string;
   try {
     dir = fs.getBudgetDir(id);
   } catch (e) {

@@ -28,28 +28,29 @@ type DuplicateFileProps = {
 export function DuplicateFileModal({ file, managePage }: DuplicateFileProps) {
   const { t } = useTranslation();
   const [newName, setNewName] = useState(file.name + ' - copy');
-  const [nameError, setNameError] = useState('');
+  const [nameError, setNameError] = useState<string | null>(null);
 
   // If the state is "broken" that means it was created by another user.
   const isCloudFile = 'cloudFileId' in file && file.state !== 'broken';
   const dispatch = useDispatch();
 
+  const [loading, setLoading] = useState(false);
   const [loadingState, setLoadingState] = useState<'cloud' | 'local' | null>(
     null,
   );
 
-  const validateNewName = (name: string): string => {
+  const validateNewName = (name: string): string | null => {
     if (name === '') return 'Name can not be blank';
-    return '';
+    return null;
   };
 
   const validateAndSetName = (name: string) => {
     const nameError = validateNewName(name);
-    if (nameError !== '') {
+    if (nameError) {
       setNameError(nameError);
     } else {
       setNewName(name);
-      setNameError('');
+      setNameError(null);
     }
   };
 
@@ -103,7 +104,7 @@ export function DuplicateFileModal({ file, managePage }: DuplicateFileProps) {
                 </Text>
 
                 <ButtonWithLoading
-                  variant="primary"
+                  variant={loading ? "bare" : "primary"}
                   isLoading={loadingState === 'cloud'}
                   style={{
                     alignSelf: 'center',
@@ -112,19 +113,23 @@ export function DuplicateFileModal({ file, managePage }: DuplicateFileProps) {
                     fontSize: 14,
                   }}
                   onPress={async () => {
-//                    setLoadingState('cloud');
-//                    await dispatch(
-//                      deleteBudget(
-//                        'id' in file ? file.id : undefined,
-//                        file.cloudFileId,
-//                      ),
-//                    );
-//                    setLoadingState(null);
-
-                    close();
+                    const nameError = validateNewName(newName);
+                    if (!nameError) {
+                      setLoading(true);
+                      await dispatch(duplicateBudget({
+                        id: 'id' in file ? file.id : undefined,
+                        cloudId: file.cloudFileId,
+                        newName,
+                        cloudSync: true,
+                        managePage
+                      }));
+                      setLoading(false);
+                      close();
+                    }
                   }}
                 >
-                  <Trans>Duplicate budget for all devices</Trans>
+                  { !loading && <Trans>Duplicate budget for all devices</Trans> }
+                  { loading && <Trans>Duplicating...</Trans> }
                 </ButtonWithLoading>
               </>
             )}
@@ -151,7 +156,7 @@ export function DuplicateFileModal({ file, managePage }: DuplicateFileProps) {
                 <ModalButtons>
                   <Button onPress={close}>Cancel</Button>
                   <ButtonWithLoading
-                    variant={isCloudFile ? 'normal' : 'primary'}
+                    variant={loading ? "bare" : isCloudFile ? 'normal' : 'primary'}
                     isLoading={loadingState === 'local'}
                     style={{
                       alignSelf: 'center',
@@ -162,15 +167,17 @@ export function DuplicateFileModal({ file, managePage }: DuplicateFileProps) {
                     onPress={async () => {
                       const nameError = validateNewName(newName);
                       if (!nameError) {
-                        setLoadingState('local');
-                        dispatch(duplicateBudget(file.id, newName, managePage));
-                        setLoadingState(null);
+                        setLoading(true);
+                        await dispatch(duplicateBudget({ id: file.id, newName, managePage }));
+                        setLoading(false);
                         close();
                       }
                     }}
                   >
-                    <Trans>Duplicate budget</Trans>
-                    {isCloudFile && <Trans> locally only</Trans>}
+                    
+                    { !loading && <Trans>Duplicate budget</Trans> }
+                    { !loading && isCloudFile && <Trans> locally only</Trans>}
+                    { loading && <Trans>Duplicating...</Trans> }
                   </ButtonWithLoading>
                 </ModalButtons>
               </>

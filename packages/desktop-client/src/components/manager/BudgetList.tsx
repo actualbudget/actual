@@ -68,7 +68,7 @@ function FileMenu({
 }: {
   onDelete: () => void;
   onClose: () => void;
-  onDuplicate: () => void;
+  onDuplicate?: () => void;
 }) {
   function onMenuSelect(type: string) {
     onClose();
@@ -87,7 +87,7 @@ function FileMenu({
   const { t } = useTranslation();
 
   const items = [
-    { name: 'duplicate', text: t('Duplicate') },
+    ...(onDuplicate ? [{ name: 'duplicate', text: t('Duplicate') }] : []),
     { name: 'delete', text: t('Delete') },
   ];
 
@@ -99,7 +99,7 @@ function FileMenuButton({
   onDuplicate,
 }: {
   onDelete: () => void;
-  onDuplicate: () => void;
+  onDuplicate?: () => void;
 }) {
   const triggerRef = useRef(null);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -261,7 +261,7 @@ function FileItem({
           {!quickSwitchMode && (
             <FileMenuButton
               onDelete={() => onDelete(file)}
-              onDuplicate={() => onDuplicate(file)}
+              onDuplicate={'id' in file ? () => onDuplicate(file) : undefined}
             />
           )}
         </View>

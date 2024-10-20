@@ -23,7 +23,7 @@ export const pathToId = function (filepath: string): string {
   return filepath.replace(/^\//, '').replace(/\//g, '-');
 };
 
-function _exists(filepath) {
+function _exists(filepath: string): boolean {
   try {
     FS.readlink(filepath);
     return true;
@@ -155,7 +155,8 @@ async function _copySqlFile(
 ): Promise<boolean> {
   _createFile(topath);
 
-  const { store } = idb.getStore(await idb.getDatabase(), 'files');
+  const { store } = await idb.getStore(await idb.getDatabase(), 'files');
+  await idb.set(store, { filepath:topath, contents: '' });
   const fromitem = await idb.get(store, frompath);
   const fromDbPath = pathToId(fromitem.filepath);
   const toDbPath = pathToId(topath);
