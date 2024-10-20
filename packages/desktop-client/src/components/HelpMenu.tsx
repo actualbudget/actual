@@ -45,7 +45,7 @@ const HelpButton = forwardRef<HTMLButtonElement, HelpButtonProps>(
 
 HelpButton.displayName = 'HelpButton';
 
-const getPageDocs = (page: string) => {
+export const getPageDocs = (page: string) => {
   switch (page) {
     case '/budget':
       return 'https://actualbudget.org/docs/getting-started/envelope-budgeting';

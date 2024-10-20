@@ -1,3 +1,4 @@
+import { getPageDocs } from '@actual-app/web/src/components/HelpMenu';
 import {
   MenuItemConstructorOptions,
   Menu,
@@ -173,7 +174,16 @@ export function getMenu(
       role: 'help',
       submenu: [
         {
-          label: 'Keyboard Shortcuts Reference',
+          label: 'Documentation',
+          async click(_menuItem, focusedWin) {
+            const page = await focusedWin?.webContents.executeJavaScript(
+              'window.location.pathname',
+            );
+            shell.openExternal(getPageDocs(page));
+          },
+        },
+        {
+          label: 'Keyboard Shortcuts',
           accelerator: '?',
           enabled: !!budgetId,
           click: function (_menuItem, focusedWin) {
@@ -182,15 +192,6 @@ export function getMenu(
                 'window.__actionsForMenu && !window.__actionsForMenu.inputFocused() && window.__actionsForMenu.pushModal("keyboard-shortcuts")',
               );
             }
-          },
-        },
-        {
-          type: 'separator',
-        },
-        {
-          label: 'Learn More',
-          click() {
-            shell.openExternal('https://actualbudget.org/docs/');
           },
         },
       ],
