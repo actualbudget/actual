@@ -118,7 +118,7 @@ function createBackgroundProcess() {
 
 function startSyncServer() {
   const syncServerConfig = {
-    port: 5006, // actual-server seems to only run on 5006 - I can't get it to work on anything else...
+    port: 5007,
     ACTUAL_SERVER_DATA_DIR: path.resolve(
       process.env.ACTUAL_DATA_DIR,
       'actual-server',
@@ -163,14 +163,14 @@ function startSyncServer() {
       ACTUAL_DATA_DIR: `${syncServerConfig.ACTUAL_SERVER_DATA_DIR}`,
     };
 
-    if (!isDev) {
-      const webRoot = path.resolve(
-        __dirname,
-        '../node_modules/@actual-app/web/build/', // this the web build output
-      );
+    const webRoot = path.resolve(
+      __dirname,
+      isDev
+        ? '../../../node_modules/@actual-app/web/build/' // workspace node_modules
+        : '../node_modules/@actual-app/web/build/', // location of packaged module
+    );
 
-      envVariables = { ...envVariables, ACTUAL_WEB_ROOT: webRoot };
-    }
+    envVariables = { ...envVariables, ACTUAL_WEB_ROOT: webRoot };
 
     if (!fs.existsSync(syncServerConfig.ACTUAL_SERVER_FILES)) {
       // create directories if they do not exit - actual-sync doesn't do it for us...
