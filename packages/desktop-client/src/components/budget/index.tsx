@@ -266,8 +266,8 @@ function BudgetInner(props: BudgetInnerProps) {
   };
 
   const onApplyBudgetTemplate = async (categories) => {
-    console.log('apply template in index');
-    dispatch(applyBudgetTemplatesInGroup(currentMonth, categories));
+    console.log('apply template in index ' + startMonth);
+    dispatch(applyBudgetTemplatesInGroup(startMonth, categories));
   };
 
   const onBudgetAction = (month, type, args) => {
