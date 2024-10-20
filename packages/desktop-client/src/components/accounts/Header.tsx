@@ -348,6 +348,27 @@ export function AccountHeader({
             onChange={onSearch}
             inputRef={searchInput}
           />
+          {workingHard ? (
+            <View>
+              <AnimatedLoading style={{ width: 16, height: 16 }} />
+            </View>
+          ) : (
+            <SelectedTransactionsButton
+              getTransaction={id => transactions.find(t => t.id === id)}
+              onShow={onShowTransactions}
+              onDuplicate={onBatchDuplicate}
+              onDelete={onBatchDelete}
+              onEdit={onBatchEdit}
+              onLinkSchedule={onBatchLinkSchedule}
+              onUnlinkSchedule={onBatchUnlinkSchedule}
+              onCreateRule={onCreateRule}
+              onSetTransfer={onSetTransfer}
+              onScheduleAction={onScheduleAction}
+              showMakeTransfer={showMakeTransfer}
+              onMakeAsSplitTransaction={onMakeAsSplitTransaction}
+              onMakeAsNonSplitTransactions={onMakeAsNonSplitTransactions}
+            />
+          )}
           <View>
             {account && (
               <>
@@ -380,27 +401,6 @@ export function AccountHeader({
               </>
             )}
           </View>
-          {workingHard ? (
-            <View>
-              <AnimatedLoading style={{ width: 16, height: 16 }} />
-            </View>
-          ) : (
-            <SelectedTransactionsButton
-              getTransaction={id => transactions.find(t => t.id === id)}
-              onShow={onShowTransactions}
-              onDuplicate={onBatchDuplicate}
-              onDelete={onBatchDelete}
-              onEdit={onBatchEdit}
-              onLinkSchedule={onBatchLinkSchedule}
-              onUnlinkSchedule={onBatchUnlinkSchedule}
-              onCreateRule={onCreateRule}
-              onSetTransfer={onSetTransfer}
-              onScheduleAction={onScheduleAction}
-              showMakeTransfer={showMakeTransfer}
-              onMakeAsSplitTransaction={onMakeAsSplitTransaction}
-              onMakeAsNonSplitTransactions={onMakeAsNonSplitTransactions}
-            />
-          )}
           <Button
             variant="bare"
             aria-label={
