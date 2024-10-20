@@ -40,12 +40,17 @@ function createBackendWorker() {
 
 createBackendWorker();
 
-let needRefresh = false;
+let isUpdateReadyForDownload = false;
+let markUpdateReadyForDownload;
+const isUpdateReadyForDownloadPromise = new Promise(resolve => {
+  markUpdateReadyForDownload = () => {
+    isUpdateReadyForDownload = true;
+    resolve(true);
+  };
+});
 const updateSW = registerSW({
   immediate: true,
-  onNeedRefresh: () => {
-    needRefresh = true;
-  },
+  onNeedRefresh: markUpdateReadyForDownload,
 });
 
 global.Actual = {
@@ -149,9 +154,13 @@ global.Actual = {
     window.open(url, '_blank');
   },
   onEventFromMain: () => {},
-  isUpdateReadyForDownload: () => needRefresh,
-  applyAppUpdate: () => {
+  isUpdateReadyForDownload: () => isUpdateReadyForDownload,
+  waitForUpdateReadyForDownload: () => isUpdateReadyForDownloadPromise,
+  applyAppUpdate: async () => {
     updateSW();
+
+    // Wait for the app to reload
+    await new Promise(() => {});
   },
   updateAppMenu: () => {},
 
