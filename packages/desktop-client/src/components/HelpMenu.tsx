@@ -113,7 +113,7 @@ export const HelpMenu = () => {
               text: t('Documentation'),
             },
             { name: 'keyboard-shortcuts', text: t('Keyboard shortcuts') },
-            ...(showGoalTemplates
+            ...(showGoalTemplates && page == '/budget'
               ? [{ name: 'goal-templates', text: t('Goal templates') }]
               : []),
           ]}
