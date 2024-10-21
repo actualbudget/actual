@@ -31,7 +31,12 @@ async function clearCategory(transaction, transferAcct) {
   // transferring from an on-budget to off-budget account
   if (fromOffBudget === toOffBudget) {
     await db.updateTransaction({ id: transaction.id, category: null });
-    await db.updateTransaction({ id: transaction.transfer_id, category: null });
+    if (transaction.transfer_id) {
+      await db.updateTransaction({
+        id: transaction.transfer_id,
+        category: null,
+      });
+    }
     return true;
   }
   return false;
