@@ -25,6 +25,7 @@ type TextLinkProps = {
 
 type ButtonLinkProps = Omit<ComponentProps<typeof Button>, 'variant'> & {
   buttonVariant?: ComponentProps<typeof Button>['variant'];
+  onClick?: MouseEventHandler;
   to?: string;
   activeStyle?: CSSProperties;
 };
