@@ -4,6 +4,7 @@ import { css } from '@emotion/css';
 
 import { envelopeBudget } from 'loot-core/src/client/queries';
 
+import { useFeatureFlag } from '../../../../hooks/useFeatureFlag';
 import { theme, styles } from '../../../../style';
 import { Block } from '../../../common/Block';
 import { Tooltip } from '../../../common/Tooltip';
@@ -46,6 +47,7 @@ export function ToBudgetAmount({
   }
   const num = availableValue ?? 0;
   const isNegative = num < 0;
+  const contextMenusEnabled = useFeatureFlag('contextMenus');
 
   return (
     <View style={{ alignItems: 'center', ...style }}>
@@ -71,6 +73,11 @@ export function ToBudgetAmount({
           >
             <Block
               onClick={onClick}
+              onContextMenu={e => {
+                if (!contextMenusEnabled) return;
+                e.preventDefault();
+                onClick();
+              }}
               data-cellname={sheetName}
               className={css([
                 styles.veryLargeText,

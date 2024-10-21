@@ -34,6 +34,9 @@ vi.mock('../../hooks/useFeatureFlag', () => ({
 vi.mock('../../hooks/useSyncedPref', () => ({
   useSyncedPref: vi.fn().mockReturnValue([undefined, vi.fn()]),
 }));
+vi.mock('../../hooks/useFeatureFlag', () => ({
+  useFeatureFlag: () => false,
+}));
 
 const accounts = [generateAccount('Bank of America')];
 const payees = [
