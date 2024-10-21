@@ -1,4 +1,3 @@
-import { Heading } from 'react-aria-components';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { theme } from '../../style';
@@ -6,8 +5,7 @@ import { Link } from '../common/Link';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
-import { TableHeader, Row, Field, ROW_HEIGHT } from '../table';
-import { SpaceBetween } from '../common/SpaceBetween';
+import { TableHeader, Row, Field } from '../table';
 
 export function GoalTemplateModal() {
   const { t } = useTranslation();
@@ -44,7 +42,9 @@ export function GoalTemplateModal() {
                 {t('$10 a week, up to a maximum of $80')}
               </Field>
             </Row>
-            <span><br /></span>
+            <span>
+              <br />
+            </span>
             <TableHeader>
               <Field width="flex">
                 <Trans>Monthly Templates</Trans>
@@ -69,7 +69,9 @@ export function GoalTemplateModal() {
                 {t('Up to $150 each month, but retain any funds over $150')}
               </Field>
             </Row>
-            <span><br /></span>
+            <span>
+              <br />
+            </span>
             <TableHeader>
               <Field width="flex">
                 <Trans>Multi-month Templates</Trans>
@@ -83,9 +85,7 @@ export function GoalTemplateModal() {
                 {t('#template $500 by 2025-03 repeat every 6 months')}
               </Field>
               <Field width="flex">
-                {t(
-                  'Break down less-frequent expenses into monthly expenses',
-                )}
+                {t('Break down less-frequent expenses into monthly expenses')}
               </Field>
             </Row>
             <Row style={{ backgroundColor: theme.tableBackground }}>
@@ -93,9 +93,7 @@ export function GoalTemplateModal() {
                 {t('#template $500 by 2025-03 repeat every year')}
               </Field>
               <Field width="flex">
-                {t(
-                  'Break down less-frequent expenses into monthly expenses',
-                )}
+                {t('Break down less-frequent expenses into monthly expenses')}
               </Field>
             </Row>
             <Row style={{ backgroundColor: theme.tableBackground }}>
@@ -103,12 +101,12 @@ export function GoalTemplateModal() {
                 {t('#template $500 by 2025-03 repeat every 2 years')}
               </Field>
               <Field width="flex">
-                {t(
-                  'Break down less-frequent expenses into monthly expenses',
-                )}
+                {t('Break down less-frequent expenses into monthly expenses')}
               </Field>
             </Row>
-            <span><br /></span>
+            <span>
+              <br />
+            </span>
             <TableHeader>
               <Field width="flex">
                 <Trans>Schedule Templates</Trans>
@@ -133,7 +131,9 @@ export function GoalTemplateModal() {
                 {t('Fund upcoming scheduled transaction only on needed month')}
               </Field>
             </Row>
-            <span><br /></span>
+            <span>
+              <br />
+            </span>
             <TableHeader>
               <Field width="flex">
                 <Trans>Goal Tempaltes</Trans>
