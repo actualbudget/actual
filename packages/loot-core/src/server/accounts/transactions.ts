@@ -102,7 +102,7 @@ export async function batchUpdateTransactions({
     if (updated) {
       await Promise.all(
         updated.map(async t => {
-          if (t.account || t.category) {
+          if (t.account) {
             // Moving transactions off budget should always clear the
             // category
             const account = accounts.find(acct => acct.id === t.account);
