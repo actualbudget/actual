@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Trans, useTranslation } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 
 import * as monthUtils from 'loot-core/src/shared/months';
 import { amountToCurrency } from 'loot-core/src/shared/util';
@@ -19,8 +19,6 @@ import { ReportCardName } from '../ReportCardName';
 import { calculateSpendingReportTimeRange } from '../reportRanges';
 import { createSpendingSpreadsheet } from '../spreadsheets/spending-spreadsheet';
 import { useReport } from '../useReport';
-
-import { MissingReportCard } from './MissingReportCard';
 
 type SpendingCardProps = {
   widgetId: string;
@@ -70,17 +68,6 @@ export function SpendingCard({
     data.intervalData[todayDay][selection] -
       data.intervalData[todayDay].compare;
 
-  const spendingReportFeatureFlag = useFeatureFlag('spendingReport');
-
-  if (!spendingReportFeatureFlag) {
-    return (
-      <MissingReportCard isEditing={isEditing} onRemove={onRemove}>
-        <Trans>
-          The experimental spending report feature has not been enabled.
-        </Trans>
-      </MissingReportCard>
-    );
-  }
   return (
     <ReportCard
       isEditing={isEditing}

@@ -17,7 +17,8 @@ export default async function runMigration(db) {
       INSERT INTO dashboard (id, type, width, height, x, y)
       VALUES
         ('${uuidv4()}','net-worth-card', 8, 2, 0, 0),
-        ('${uuidv4()}', 'cash-flow-card', 4, 2, 8, 0);
+        ('${uuidv4()}', 'cash-flow-card', 4, 2, 8, 0),
+        ('${uuidv4()}', 'spending-card', 4, 2, 0, 2);
     `);
 
     // Add custom reports to the dashboard

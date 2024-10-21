@@ -17,4 +17,12 @@ export const DEFAULT_DASHBOARD_STATE: NewWidget[] = [
     y: 0,
     meta: null,
   },
+  {
+    type: 'spending-card',
+    width: 4,
+    height: 2,
+    x: 0,
+    y: 2,
+    meta: null,
+  },
 ];
