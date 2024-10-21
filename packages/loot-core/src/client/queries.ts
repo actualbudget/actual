@@ -28,7 +28,10 @@ const accountParametrizedField = parametrizedField<'account'>();
 const envelopeParametrizedField = parametrizedField<'envelope-budget'>();
 const trackingParametrizedField = parametrizedField<'tracking-budget'>();
 
-export function getAccountFilter(accountId?: string, field = 'account') {
+export function accountFilter(
+  accountId?: AccountEntity['id'] | 'budgeted' | 'offbudget' | 'uncategorized',
+  field = 'account',
+) {
   if (accountId) {
     if (accountId === 'budgeted') {
       return {
@@ -64,10 +67,12 @@ export function getAccountFilter(accountId?: string, field = 'account') {
   return null;
 }
 
-export function makeTransactionsQuery(accountId?: string) {
+export function transactions(
+  accountId?: AccountEntity['id'] | 'budgeted' | 'offbudget' | 'uncategorized',
+) {
   let query = q('transactions').options({ splits: 'grouped' });
 
-  const filter = getAccountFilter(accountId);
+  const filter = accountFilter(accountId);
   if (filter) {
     query = query.filter(filter);
   }
@@ -75,7 +80,7 @@ export function makeTransactionsQuery(accountId?: string) {
   return query;
 }
 
-export function makeTransactionSearchQuery(
+export function transactionsSearch(
   currentQuery: Query,
   search: string,
   dateFormat: SyncedPrefs['dateFormat'],
