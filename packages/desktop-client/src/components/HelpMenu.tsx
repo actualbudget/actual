@@ -2,15 +2,13 @@ import { forwardRef, useRef } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { Trans, useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
-import { useLocation } from 'react-router-dom';
 
 import { useToggle } from 'usehooks-ts';
 
+import { openDocsForCurrentPage } from 'loot-core/client/actions';
 import { pushModal } from 'loot-core/client/actions/modals';
 
 import { SvgHelp } from '../icons/v2/Help';
-import { getPageDocs } from '../util/help';
-import { openUrl } from '../util/router-tools';
 
 import { Button } from './common/Button2';
 import { Menu } from './common/Menu';
@@ -52,12 +50,11 @@ export const HelpMenu = () => {
   const menuButtonRef = useRef(null);
 
   const dispatch = useDispatch();
-  const page = useLocation().pathname;
 
   const handleItemSelect = (item: HelpMenuItem) => {
     switch (item) {
       case 'docs':
-        openUrl(getPageDocs(page));
+        dispatch(openDocsForCurrentPage());
         break;
       case 'keyboard-shortcuts':
         dispatch(pushModal('keyboard-shortcuts'));

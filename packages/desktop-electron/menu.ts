@@ -1,11 +1,4 @@
-import { getPageDocs } from '@actual-app/web/src/util/help';
-import {
-  MenuItemConstructorOptions,
-  Menu,
-  ipcMain,
-  app,
-  shell,
-} from 'electron';
+import { MenuItemConstructorOptions, Menu, ipcMain, app } from 'electron';
 
 export function getMenu(
   isDev: boolean,
@@ -175,11 +168,10 @@ export function getMenu(
       submenu: [
         {
           label: 'Documentation',
-          async click(_menuItem, focusedWin) {
-            const page = await focusedWin?.webContents.executeJavaScript(
-              'window.location.pathname',
+          click(_menuItem, focusedWin) {
+            focusedWin?.webContents.executeJavaScript(
+              'window.__actionsForMenu && window.__actionsForMenu.openDocsForCurrentPage()',
             );
-            shell.openExternal(getPageDocs(page));
           },
         },
         {
