@@ -223,7 +223,7 @@ export function createSpendingSpreadsheet({
           return arr;
         }, []);
         const maxCumulative = data.reduce((a, b) =>
-          a.cumulative < b.cumulative ? a : b,
+          b.cumulative === null ? a : b,
         ).cumulative;
 
         const totalDaily = data.reduce((a, v) => (a = a + v.totalTotals), 0);

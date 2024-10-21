@@ -11,8 +11,8 @@ import React, {
   type ChangeEvent,
 } from 'react';
 
+import { css, cx } from '@emotion/css';
 import Downshift, { type StateChangeTypes } from 'downshift';
-import { css } from 'glamor';
 
 import { getNormalisedString } from 'loot-core/src/shared/normalisation';
 
@@ -139,7 +139,8 @@ function fireUpdate<T extends Item>(
 }
 
 function defaultRenderInput(props: ComponentProps<typeof Input>) {
-  return <Input {...props} />;
+  // data-1p-ignore disables 1Password autofill behaviour
+  return <Input data-1p-ignore {...props} />;
 }
 
 function defaultRenderItems<T extends Item>(
@@ -177,14 +178,14 @@ function defaultRenderItems<T extends Item>(
             // * https://github.com/WebKit/WebKit/blob/58956cf59ba01267644b5e8fe766efa7aa6f0c5c/Source/WebKit/WebProcess/WebPage/ios/WebPageIOS.mm#L783
             role="button"
             key={name}
-            className={`${css({
+            className={css({
               padding: 5,
               cursor: 'default',
               backgroundColor:
                 highlightedIndex === index
                   ? theme.menuAutoCompleteBackgroundHover
-                  : null,
-            })}`}
+                  : undefined,
+            })}
           >
             {name}
           </div>
@@ -442,7 +443,10 @@ function SingleAutocomplete<T extends Item>({
         // Super annoying but it works best to return a div so we
         // can't use a View here, but we can fake it be using the
         // className
-        <div className={`view ${css({ display: 'flex' })}`} {...containerProps}>
+        <div
+          className={cx('view', css({ display: 'flex' }))}
+          {...containerProps}
+        >
           <View ref={triggerRef} style={{ flexShrink: 0 }}>
             {renderInput(
               getInputProps({

@@ -10,7 +10,6 @@ export async function goalsAverage(
   errors,
   to_budget,
 ) {
-  // simple has an 'amount' param
   let increment = 0;
   if (template.amount) {
     let sum = 0;
