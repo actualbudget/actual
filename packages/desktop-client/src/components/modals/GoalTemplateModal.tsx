@@ -6,23 +6,23 @@ import { Link } from '../common/Link';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
-import { TableHeader, Row, Field } from '../table';
+import { TableHeader, Row, Field, ROW_HEIGHT } from '../table';
+import { SpaceBetween } from '../common/SpaceBetween';
 
 export function GoalTemplateModal() {
   const { t } = useTranslation();
   return (
-    <Modal name="goal-templates" containerProps={{ style: { width: 1000 } }}>
+    <Modal name="goal-templates" containerProps={{ style: { width: 850 } }}>
       {({ state: { close } }) => (
         <>
           <ModalHeader
             title={t('Goal Templates')}
             rightContent={<ModalCloseButton onPress={close} />}
           />
-          <Heading level={3}>{t('Weekly')}</Heading>
           <View>
             <TableHeader>
               <Field width="flex">
-                <Trans>Syntax</Trans>
+                <Trans>Weekly Templates</Trans>
               </Field>
               <Field width="flex">
                 <Trans>Description</Trans>
@@ -44,11 +44,10 @@ export function GoalTemplateModal() {
                 {t('$10 a week, up to a maximum of $80')}
               </Field>
             </Row>
-
-            <Heading level={3}>{t('Monthly')}</Heading>
+            <span><br /></span>
             <TableHeader>
               <Field width="flex">
-                <Trans>Syntax</Trans>
+                <Trans>Monthly Templates</Trans>
               </Field>
               <Field width="flex">
                 <Trans>Description</Trans>
@@ -70,11 +69,10 @@ export function GoalTemplateModal() {
                 {t('Up to $150 each month, but retain any funds over $150')}
               </Field>
             </Row>
-
-            <Heading level={3}>{t('Longer Term')}</Heading>
+            <span><br /></span>
             <TableHeader>
               <Field width="flex">
-                <Trans>Syntax</Trans>
+                <Trans>Multi-month Templates</Trans>
               </Field>
               <Field width="flex">
                 <Trans>Description</Trans>
@@ -86,7 +84,7 @@ export function GoalTemplateModal() {
               </Field>
               <Field width="flex">
                 {t(
-                  'Break down large, less-frequent expenses into manageable monthly expenses',
+                  'Break down less-frequent expenses into monthly expenses',
                 )}
               </Field>
             </Row>
@@ -96,7 +94,7 @@ export function GoalTemplateModal() {
               </Field>
               <Field width="flex">
                 {t(
-                  'Break down large, less-frequent expenses into manageable monthly expenses',
+                  'Break down less-frequent expenses into monthly expenses',
                 )}
               </Field>
             </Row>
@@ -106,15 +104,14 @@ export function GoalTemplateModal() {
               </Field>
               <Field width="flex">
                 {t(
-                  'Break down large, less-frequent expenses into manageable monthly expenses',
+                  'Break down less-frequent expenses into monthly expenses',
                 )}
               </Field>
             </Row>
-
-            <Heading level={3}>{t('Schedules')}</Heading>
+            <span><br /></span>
             <TableHeader>
               <Field width="flex">
-                <Trans>Syntax</Trans>
+                <Trans>Schedule Templates</Trans>
               </Field>
               <Field width="flex">
                 <Trans>Description</Trans>
@@ -136,11 +133,10 @@ export function GoalTemplateModal() {
                 {t('Fund upcoming scheduled transaction only on needed month')}
               </Field>
             </Row>
-
-            <Heading level={3}>{t('Goals')}</Heading>
+            <span><br /></span>
             <TableHeader>
               <Field width="flex">
-                <Trans>Syntax</Trans>
+                <Trans>Goal Tempaltes</Trans>
               </Field>
               <Field width="flex">
                 <Trans>Description</Trans>
