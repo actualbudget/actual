@@ -8,6 +8,7 @@ import { useToggle } from 'usehooks-ts';
 
 import { pushModal } from 'loot-core/client/actions/modals';
 
+import { useFeatureFlag } from '../hooks/useFeatureFlag';
 import { SvgHelp } from '../icons/v2/Help';
 import { openUrl } from '../util/router-tools';
 
@@ -16,7 +17,7 @@ import { Menu } from './common/Menu';
 import { Popover } from './common/Popover';
 import { SpaceBetween } from './common/SpaceBetween';
 
-type HelpMenuItem = 'docs' | 'keyboard-shortcuts';
+type HelpMenuItem = 'docs' | 'keyboard-shortcuts' | 'goal-templates';
 
 type HelpButtonProps = {
   onPress?: () => void;
@@ -66,6 +67,7 @@ const getPageDocs = (page: string) => {
 };
 
 export const HelpMenu = () => {
+  const showGoalTemplates = useFeatureFlag('goalTemplatesEnabled');
   const { t } = useTranslation();
   const [isMenuOpen, toggleMenuOpen, setMenuOpen] = useToggle();
   const menuButtonRef = useRef(null);
@@ -80,6 +82,9 @@ export const HelpMenu = () => {
         break;
       case 'keyboard-shortcuts':
         dispatch(pushModal('keyboard-shortcuts'));
+        break;
+      case 'goal-templates':
+        dispatch(pushModal('goal-templates'));
         break;
     }
   };
@@ -98,7 +103,7 @@ export const HelpMenu = () => {
         onOpenChange={() => setMenuOpen(false)}
       >
         <Menu
-          onMenuSelect={item => {
+          onMenuSelect={(item: HelpMenuItem) => {
             setMenuOpen(false);
             handleItemSelect(item);
           }}
@@ -108,6 +113,9 @@ export const HelpMenu = () => {
               text: t('Documentation'),
             },
             { name: 'keyboard-shortcuts', text: t('Keyboard shortcuts') },
+            ...(showGoalTemplates && page === '/budget'
+              ? [{ name: 'goal-templates', text: t('Goal templates') }]
+              : []),
           ]}
         />
       </Popover>
