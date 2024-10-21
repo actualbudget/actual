@@ -156,6 +156,9 @@ export function GoalTemplateModal() {
                 marginTop: 3,
               }}
             >
+              <span>
+                <br />
+              </span>
               <Text>
                 {t('See')}{' '}
                 <Link
