@@ -1,3 +1,4 @@
+import type { Notification } from '../client/state-types/notifications';
 import { ParseFileResult } from '../server/accounts/parse-file';
 import { batchUpdateTransactions } from '../server/accounts/transactions';
 import { Backup } from '../server/backups';
@@ -85,6 +86,11 @@ export interface ServerHandlers {
   'category-move': (arg: { id; groupId; targetId }) => Promise<unknown>;
 
   'category-delete': (arg: { id; transferId? }) => Promise<{ error?: string }>;
+
+  'apply-multiple-templates': (arg: {
+    month: string;
+    categoryIds: string[]; //categoy ids
+  }) => Promise<Notification>;
 
   'category-group-create': (arg: {
     name;

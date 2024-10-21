@@ -1,3 +1,4 @@
+import type { Notification } from '../client/state-types/notifications';
 import { type batchUpdateTransactions } from '../server/accounts/transactions';
 import type {
   APIAccountEntity,
@@ -147,6 +148,11 @@ export interface ApiHandlers {
     id;
     transferCategoryId;
   }) => Promise<unknown>;
+
+  'api/apply-multiple-templates': (arg: {
+    month: string;
+    categoryIds: string[]; //categoy ids
+  }) => Promise<Notification>;
 
   'api/category-create': (arg: { category }) => Promise<string>;
 

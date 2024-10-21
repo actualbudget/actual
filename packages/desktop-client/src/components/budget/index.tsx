@@ -6,6 +6,7 @@ import { useDispatch } from 'react-redux';
 import {
   addNotification,
   applyBudgetAction,
+  applyBudgetTemplatesInGroup,
   createCategory,
   createGroup,
   deleteCategory,
@@ -265,6 +266,10 @@ function BudgetInner(props: BudgetInnerProps) {
     }
   };
 
+  const onApplyBudgetTemplatesInGroup = async categories => {
+    dispatch(applyBudgetTemplatesInGroup(startMonth, categories));
+  };
+
   const onBudgetAction = (month, type, args) => {
     dispatch(applyBudgetAction(month, type, args));
   };
@@ -366,6 +371,7 @@ function BudgetInner(props: BudgetInnerProps) {
           onMonthSelect={onMonthSelect}
           onDeleteCategory={onDeleteCategory}
           onDeleteGroup={onDeleteGroup}
+          onApplyBudgetTemplatesInGroup={onApplyBudgetTemplatesInGroup}
           onSaveCategory={onSaveCategory}
           onSaveGroup={onSaveGroup}
           onBudgetAction={onBudgetAction}
