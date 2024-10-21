@@ -1,41 +1,43 @@
+import { t } from 'i18next';
+
 const intervalOptions = [
   {
-    description: 'Daily',
-    defaultRange: 'This month',
+    description: t('Daily'),
+    defaultRange: t('This month'),
   },
   {
-    description: 'Weekly',
-    defaultRange: 'Last 3 months',
+    description: t('Weekly'),
+    defaultRange: t('Last 3 months'),
   },
   {
-    description: 'Monthly',
-    defaultRange: 'Last 6 months',
+    description: t('Monthly'),
+    defaultRange: t('Last 6 months'),
   },
   {
-    description: 'Yearly',
-    defaultRange: 'Year to date',
+    description: t('Yearly'),
+    defaultRange: t('Year to date'),
   },
 ];
 
 const currentIntervalOptions = [
   {
-    description: 'This week',
+    description: t('This week'),
     disableInclude: true,
   },
   {
-    description: 'This month',
+    description: t('This month'),
     disableInclude: true,
   },
   {
-    description: 'Year to date',
+    description: t('Year to date'),
     disableInclude: true,
   },
   {
-    description: 'Last year',
+    description: t('Last year'),
     disableInclude: true,
   },
   {
-    description: 'All time',
+    description: t('All time'),
     disableInclude: true,
   },
 ];
