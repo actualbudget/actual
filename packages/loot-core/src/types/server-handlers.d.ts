@@ -1,4 +1,4 @@
-import type { Notification } from 'loot-core/client/state-types/notifications';
+import type { Notification } from '../client/state-types/notifications';
 
 import { ParseFileResult } from '../server/accounts/parse-file';
 import { batchUpdateTransactions } from '../server/accounts/transactions';
