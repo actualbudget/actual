@@ -792,15 +792,17 @@ export async function finalizeTransactionForRules(
   trans: TransactionEntity | TransactionForRules,
 ): Promise<TransactionEntity> {
   if ('payee_name' in trans) {
-    if (trans.payee_name) {
-      let payeeId = (await getPayeeByName(trans.payee_name))?.id;
-      payeeId ??= await insertPayee({
-        name: trans.payee_name,
-      });
+    if (trans.payee === 'new') {
+      if (trans.payee_name) {
+        let payeeId = (await getPayeeByName(trans.payee_name))?.id;
+        payeeId ??= await insertPayee({
+          name: trans.payee_name,
+        });
 
-      trans.payee = payeeId;
-    } else {
-      trans.payee = null;
+        trans.payee = payeeId;
+      } else {
+        trans.payee = null;
+      }
     }
 
     delete trans.payee_name;
