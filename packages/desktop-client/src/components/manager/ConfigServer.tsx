@@ -4,17 +4,27 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { isElectron } from 'loot-core/src/shared/environment';
 
+import { useActions } from '../../hooks/useActions';
 import { useNavigate } from '../../hooks/useNavigate';
 import { theme } from '../../style';
 import { Button } from '../common/Button2';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
+import { useSetServerURL } from '../ServerContext';
 
 import { Title } from './subscribe/common';
 
 export function ConfigServer() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const setServerUrl = useSetServerURL();
+  const { loggedIn } = useActions();
+
+  async function onSkip() {
+    await setServerUrl(null);
+    await loggedIn();
+    navigate('/');
+  }
 
   return (
     <View style={{ maxWidth: 500, marginTop: -30 }}>
@@ -54,7 +64,7 @@ export function ConfigServer() {
           </Button>
         </>
       )}
-      <Button onPress={() => navigate('/')}>I don’t want a server</Button>
+      <Button onPress={onSkip}>I don’t want a server</Button>
     </View>
   );
 }

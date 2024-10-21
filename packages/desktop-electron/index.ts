@@ -73,7 +73,7 @@ async function loadGlobalPrefs() {
       ),
     );
   } catch (e) {
-    console.error('Could not load global state - resetting', e);
+    console.info('Could not load global state - using defaults'); // This could be the first time running the app - no global-store.json
     state = {};
   }
 
