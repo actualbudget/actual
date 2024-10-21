@@ -37,6 +37,7 @@ export type CashFlowWidget = AbstractWidget<
     conditions?: RuleConditionEntity[];
     conditionsOp?: 'and' | 'or';
     timeFrame?: TimeFrame;
+    mode?: 'condensed' | 'full';
   } | null
 >;
 export type SpendingWidget = AbstractWidget<
