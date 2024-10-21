@@ -6,6 +6,7 @@ import React, {
   useEffect,
   type FocusEventHandler,
   type KeyboardEventHandler,
+  type CSSProperties,
 } from 'react';
 
 import { evalArithmetic } from 'loot-core/src/shared/arithmetic';
@@ -14,7 +15,7 @@ import { amountToInteger, appendDecimals } from 'loot-core/src/shared/util';
 import { useMergedRefs } from '../../hooks/useMergedRefs';
 import { useSyncedPref } from '../../hooks/useSyncedPref';
 import { SvgAdd, SvgSubtract } from '../../icons/v1';
-import { type CSSProperties, theme } from '../../style';
+import { theme } from '../../style';
 import { Button } from '../common/Button2';
 import { InputWithContent } from '../common/InputWithContent';
 import { View } from '../common/View';

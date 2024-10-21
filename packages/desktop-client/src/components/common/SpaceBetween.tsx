@@ -1,6 +1,4 @@
-import React, { type ReactNode } from 'react';
-
-import { type CSSProperties } from '../../style';
+import React, { type CSSProperties, type ReactNode } from 'react';
 
 import { View } from './View';
 

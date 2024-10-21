@@ -1,6 +1,11 @@
-import { useState, type ComponentProps, type ReactNode } from 'react';
+import {
+  useState,
+  type ComponentProps,
+  type ReactNode,
+  type CSSProperties,
+} from 'react';
 
-import { type CSSProperties, theme } from '../../style';
+import { theme } from '../../style';
 
 import { Input, defaultInputStyle } from './Input';
 import { View } from './View';

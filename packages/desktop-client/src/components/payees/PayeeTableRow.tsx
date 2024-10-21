@@ -1,12 +1,12 @@
 // @ts-strict-ignore
-import { memo, useRef, useState } from 'react';
+import { memo, useRef, useState, type CSSProperties } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { type PayeeEntity } from 'loot-core/src/types/models';
 
 import { useSelectedDispatch } from '../../hooks/useSelected';
 import { SvgArrowThinRight, SvgBookmark } from '../../icons/v1';
-import { type CSSProperties, theme } from '../../style';
+import { theme } from '../../style';
 import { Menu } from '../common/Menu';
 import { Popover } from '../common/Popover';
 import { Text } from '../common/Text';

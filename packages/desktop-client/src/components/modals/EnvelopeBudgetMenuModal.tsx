@@ -2,13 +2,14 @@ import React, {
   useState,
   type ComponentPropsWithoutRef,
   useEffect,
+  type CSSProperties,
 } from 'react';
 
 import { envelopeBudget } from 'loot-core/client/queries';
 import { amountToInteger, integerToAmount } from 'loot-core/shared/util';
 
 import { useCategory } from '../../hooks/useCategory';
-import { type CSSProperties, theme, styles } from '../../style';
+import { theme, styles } from '../../style';
 import { BudgetMenu } from '../budget/envelope/BudgetMenu';
 import { useEnvelopeSheetValue } from '../budget/envelope/EnvelopeBudgetComponents';
 import {
