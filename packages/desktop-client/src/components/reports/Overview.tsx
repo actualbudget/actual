@@ -102,24 +102,7 @@ export function Overview() {
       return true;
     });
 
-  const layout =
-    !isDashboardsFeatureEnabled &&
-    !baseLayout.find(({ type }) => type === 'spending-card')
-      ? [
-          ...baseLayout,
-          {
-            i: 'spending',
-            type: 'spending-card' as const,
-            x: 0,
-            y: Math.max(...baseLayout.map(({ y }) => y), 0) + 2,
-            w: 4,
-            h: 2,
-            minW: 3,
-            minH: 2,
-            meta: null,
-          },
-        ]
-      : baseLayout;
+  const layout = baseLayout;
 
   const closeNotifications = () => {
     dispatch(removeNotification('import'));
