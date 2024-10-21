@@ -73,7 +73,8 @@ async function loadGlobalPrefs() {
       ),
     );
   } catch (e) {
-    console.log('Could not load global state');
+    console.error('Could not load global state - resetting', e);
+    state = {};
   }
 
   return state;
