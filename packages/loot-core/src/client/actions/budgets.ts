@@ -148,6 +148,36 @@ export function createBudget({ testMode = false, demoMode = false } = {}) {
   };
 }
 
+export function duplicateBudget({
+  id,
+  cloudId,
+  newName,
+  managePage,
+  cloudSync,
+}: {
+  id?: string;
+  cloudId?: string;
+  newName: string;
+  managePage?: boolean;
+  cloudSync?: boolean;
+}) {
+  return async (dispatch: Dispatch) => {
+    const newId = await send('duplicate-budget', {
+      id,
+      cloudId,
+      newName,
+      cloudSync,
+    });
+    if (managePage) {
+      await dispatch(loadAllFiles());
+      await dispatch(loadPrefs());
+    } else {
+      await dispatch(closeBudget());
+      await dispatch(loadBudget(newId));
+    }
+  };
+}
+
 export function importBudget(
   filepath: string,
   type: Parameters<Handlers['import-budget']>[0]['type'],

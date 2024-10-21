@@ -316,6 +316,13 @@ export interface ServerHandlers {
     cloudFileId?: string;
   }) => Promise<'ok'>;
 
+  'duplicate-budget': (arg: {
+    id?: string;
+    cloudId?: string;
+    newName: string;
+    cloudSync?: boolean;
+  }) => Promise<string>;
+
   'create-budget': (arg: {
     budgetName?;
     avoidUpload?;

@@ -1803,6 +1803,81 @@ handlers['delete-budget'] = async function ({ id, cloudFileId }) {
   return 'ok';
 };
 
+handlers['duplicate-budget'] = async function ({
+  id,
+  newName,
+  cloudSync,
+}): Promise<string> {
+  if (!id) throw new Error('Unable to duplicate a budget that is not local.');
+
+  const budgetDir = fs.getBudgetDir(id);
+
+  let budgetName = newName;
+  let sameName = false;
+
+  if (budgetName.indexOf(' - copy') !== -1) {
+    sameName = true;
+    budgetName = budgetName.replace(' - copy', '');
+  }
+
+  const newId = await idFromFileName(budgetName);
+
+  const budgets = await handlers['get-budgets']();
+  budgetName = await uniqueFileName(
+    budgets,
+    sameName ? budgetName + ' - copy' : budgetName,
+  );
+
+  // copy metadata from current budget
+  // replace id with new budget id and budgetName with new budget name
+  const metadataText = await fs.readFile(fs.join(budgetDir, 'metadata.json'));
+  const metadata = JSON.parse(metadataText);
+  metadata.id = newId;
+  metadata.budgetName = budgetName;
+  [
+    'cloudFileId',
+    'groupId',
+    'lastUploaded',
+    'encryptKeyId',
+    'lastSyncedTimestamp',
+  ].forEach(item => {
+    if (metadata[item]) delete metadata[item];
+  });
+
+  const newBudgetDir = fs.getBudgetDir(newId);
+  await fs.mkdir(newBudgetDir);
+
+  // write metadata for new budget
+  await fs.writeFile(
+    fs.join(newBudgetDir, 'metadata.json'),
+    JSON.stringify(metadata),
+  );
+
+  await fs.copyFile(
+    fs.join(budgetDir, 'db.sqlite'),
+    fs.join(newBudgetDir, 'db.sqlite'),
+  );
+
+  // TODO: Check if there are backups in budgetDir and copy those files too
+
+  const { error } = await loadBudget(newId);
+  if (error) {
+    console.log('Error duplicating budget: ' + error);
+    return error;
+  }
+
+  if (cloudSync) {
+    try {
+      await cloudStorage.upload();
+    } catch (e) {
+      // Ignore any errors uploading. If they are offline they should
+      // still be able to create files.
+    }
+  }
+
+  return newId;
+};
+
 handlers['create-budget'] = async function ({
   budgetName,
   avoidUpload,
@@ -1897,8 +1972,8 @@ handlers['export-budget'] = async function () {
   }
 };
 
-async function loadBudget(id) {
-  let dir;
+async function loadBudget(id: string) {
+  let dir: string;
   try {
     dir = fs.getBudgetDir(id);
   } catch (e) {

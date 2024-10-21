@@ -1,12 +1,22 @@
 import React, { type CSSProperties, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 import { css } from '@emotion/css';
 import { Resizable } from 're-resizable';
 
-import { closeBudget, replaceModal } from 'loot-core/src/client/actions';
+import {
+  closeBudget,
+  replaceModal,
+  pushModal,
+} from 'loot-core/src/client/actions';
 import * as Platform from 'loot-core/src/client/platform';
+import {
+  type File,
+  type LocalFile,
+  type SyncableLocalFile,
+  type SyncedLocalFile,
+} from 'loot-core/types/file';
 
 import { useGlobalPref } from '../../hooks/useGlobalPref';
 import { useLocalPref } from '../../hooks/useLocalPref';
@@ -167,12 +177,35 @@ function EditableBudgetName() {
   const [menuOpen, setMenuOpen] = useState(false);
   const triggerRef = useRef(null);
 
+  const [id] = useMetadataPref('id');
+  const allFiles = useSelector(state => state.budgets.allFiles || []);
+
+  function isNonRemoteFile(
+    file: File,
+  ): file is LocalFile | SyncableLocalFile | SyncedLocalFile {
+    return file.state !== 'remote';
+  }
+
+  const nonRemoteFiles = allFiles.filter(isNonRemoteFile);
+  const file = id ? nonRemoteFiles.filter(f => f.id !== id) : null;
+
+  const budgetFile = file && file.length > 0 ? file[0] : null;
+  const budgetId = budgetFile?.id ? budgetFile.id : undefined;
+
   function onMenuSelect(type: string) {
     setMenuOpen(false);
 
     switch (type) {
       case 'rename':
         setEditing(true);
+        break;
+      case 'backups':
+        dispatch(replaceModal('load-backup', { budgetId }));
+        break;
+      case 'duplicate':
+        if (budgetFile) {
+          dispatch(pushModal('duplicate-budget', { file: budgetFile }));
+        }
         break;
       case 'settings':
         navigate('/settings');
@@ -189,6 +222,7 @@ function EditableBudgetName() {
 
   const items = [
     { name: 'rename', text: t('Rename budget') },
+    ...(budgetFile ? [{ name: 'duplicate', text: t('Duplicate budget') }] : []),
     { name: 'settings', text: t('Settings') },
     { name: 'close', text: t('Close file') },
   ];

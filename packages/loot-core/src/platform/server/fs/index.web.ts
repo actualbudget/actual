@@ -19,11 +19,11 @@ export { join };
 export { getDocumentDir, getBudgetDir, _setDocumentDir } from './shared';
 export const getDataDir = () => process.env.ACTUAL_DATA_DIR;
 
-export const pathToId = function (filepath) {
+export const pathToId = function (filepath: string): string {
   return filepath.replace(/^\//, '').replace(/\//g, '-');
 };
 
-function _exists(filepath) {
+function _exists(filepath: string): boolean {
   try {
     FS.readlink(filepath);
     return true;
@@ -47,7 +47,7 @@ function _mkdirRecursively(dir) {
   }
 }
 
-function _createFile(filepath) {
+function _createFile(filepath: string) {
   // This can create the file. Check if it exists, if not create a
   // symlink if it's a sqlite file. Otherwise store in idb
 
@@ -67,7 +67,7 @@ function _createFile(filepath) {
   return filepath;
 }
 
-async function _readFile(filepath, opts?: { encoding?: string }) {
+async function _readFile(filepath: string, opts?: { encoding?: string }) {
   // We persist stuff in /documents, but don't need to handle sqlite
   // file specifically because those are symlinked to a separate
   // filesystem and will be handled in the BlockedFS
@@ -101,7 +101,7 @@ async function _readFile(filepath, opts?: { encoding?: string }) {
   }
 }
 
-function resolveLink(path) {
+function resolveLink(path: string): string {
   try {
     const { node } = FS.lookupPath(path, { follow: false });
     return node.link ? FS.readlink(path) : path;
@@ -110,7 +110,7 @@ function resolveLink(path) {
   }
 }
 
-async function _writeFile(filepath, contents) {
+async function _writeFile(filepath: string, contents): Promise<boolean> {
   if (contents instanceof ArrayBuffer) {
     contents = new Uint8Array(contents);
   } else if (ArrayBuffer.isView(contents)) {
@@ -146,9 +146,44 @@ async function _writeFile(filepath, contents) {
   } else {
     FS.writeFile(resolveLink(filepath), contents);
   }
+  return true;
 }
 
-async function _removeFile(filepath) {
+async function _copySqlFile(
+  frompath: string,
+  topath: string,
+): Promise<boolean> {
+  _createFile(topath);
+
+  const { store } = await idb.getStore(await idb.getDatabase(), 'files');
+  await idb.set(store, { filepath: topath, contents: '' });
+  const fromitem = await idb.get(store, frompath);
+  const fromDbPath = pathToId(fromitem.filepath);
+  const toDbPath = pathToId(topath);
+
+  const fromfile = BFS.backend.createFile(fromDbPath);
+  const tofile = BFS.backend.createFile(toDbPath);
+
+  fromfile.open();
+  tofile.open();
+  const fileSize = fromfile.meta.size;
+  const blockSize = fromfile.meta.blockSize;
+
+  const buffer = new ArrayBuffer(blockSize);
+  const bufferView = new Uint8Array(buffer);
+
+  for (let i = 0; i < fileSize; i += blockSize) {
+    fromfile.read(bufferView, 0, blockSize, i);
+    tofile.write(bufferView, 0, blockSize, i);
+  }
+
+  tofile.close();
+  fromfile.close();
+
+  return true;
+}
+
+async function _removeFile(filepath: string) {
   if (!NO_PERSIST && filepath.startsWith('/documents')) {
     const isDb = filepath.endsWith('.sqlite');
 
@@ -272,22 +307,33 @@ export const size = async function (filepath) {
   return attrs.size;
 };
 
-export const copyFile = async function (frompath, topath) {
-  // TODO: This reads the whole file into memory, but that's probably
-  // not a problem. This could be optimized
-  const contents = await _readFile(frompath);
-  return _writeFile(topath, contents);
+export const copyFile = async function (
+  frompath: string,
+  topath: string,
+): Promise<boolean> {
+  let result = false;
+  try {
+    const contents = await _readFile(frompath);
+    result = await _writeFile(topath, contents);
+  } catch (e) {
+    try {
+      if (frompath.endsWith('.sqlite') || topath.endsWith('.sqlite')) {
+        result = await _copySqlFile(frompath, topath);
+      }
+    } catch (ee) {}
+  }
+  return result;
 };
 
-export const readFile = async function (filepath, encoding = 'utf8') {
+export const readFile = async function (filepath: string, encoding = 'utf8') {
   return _readFile(filepath, { encoding });
 };
 
-export const writeFile = async function (filepath, contents) {
+export const writeFile = async function (filepath: string, contents) {
   return _writeFile(filepath, contents);
 };
 
-export const removeFile = async function (filepath) {
+export const removeFile = async function (filepath: string) {
   return _removeFile(filepath);
 };
 
@@ -314,7 +360,7 @@ export const removeDirRecursively = async function (dirpath) {
 };
 
 export const getModifiedTime = async function () {
-  throw new Error(
-    'getModifiedTime not supported on the web (only used for backups)',
-  );
+  return new Promise(function (resolve) {
+    resolve(new Date());
+  });
 };
