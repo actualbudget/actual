@@ -5,6 +5,7 @@ import React, {
   createRef,
   useMemo,
   type ReactElement,
+  useLayoutEffect,
 } from 'react';
 import { Trans } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -53,7 +54,10 @@ import { useDateFormat } from '../../hooks/useDateFormat';
 import { useFailedAccounts } from '../../hooks/useFailedAccounts';
 import { useLocalPref } from '../../hooks/useLocalPref';
 import { usePayees } from '../../hooks/usePayees';
-import { usePreviewTransactions } from '../../hooks/usePreviewTransactions';
+import {
+  type PreviewTransactionEntity,
+  usePreviewTransactions,
+} from '../../hooks/usePreviewTransactions';
 import {
   SelectedProviderWithItems,
   type Actions,
@@ -143,7 +147,6 @@ type AllTransactionsProps = {
     transactions: TransactionEntity[],
     balances: Record<string, { balance: number }> | null,
   ) => ReactElement;
-  collapseTransactions: (ids: string[]) => void;
 };
 
 function AllTransactions({
@@ -153,14 +156,18 @@ function AllTransactions({
   showBalances,
   filtered,
   children,
-  collapseTransactions,
 }: AllTransactionsProps) {
   const accountId = account?.id;
-  const prependTransactions: (TransactionEntity & { _inverse?: boolean })[] =
-    usePreviewTransactions(collapseTransactions).map(trans => ({
-      ...trans,
-      _inverse: accountId ? accountId !== trans.account : false,
-    }));
+  const { dispatch: splitsExpandedDispatch } = useSplitsExpanded();
+  const prependTransactions: PreviewTransactionEntity[] =
+    usePreviewTransactions({ accountId });
+
+  useLayoutEffect(() => {
+    splitsExpandedDispatch({
+      type: 'close-splits',
+      ids: prependTransactions.filter(t => t.is_parent).map(t => t.id),
+    });
+  }, [prependTransactions, splitsExpandedDispatch]);
 
   transactions ??= [];
 
@@ -183,9 +190,10 @@ function AllTransactions({
     const scheduledBalances = [...prependTransactions]
       .reverse()
       .map(scheduledTransaction => {
-        const amount =
-          (scheduledTransaction._inverse ? -1 : 1) *
-          getScheduledAmount(scheduledTransaction.amount);
+        const amount = getScheduledAmount(
+          scheduledTransaction.amount,
+          scheduledTransaction._inverse,
+        );
         return {
           // TODO: fix me
           // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -1678,9 +1686,6 @@ class AccountInternal extends PureComponent<
         balances={balances}
         showBalances={showBalances}
         filtered={transactionsFiltered}
-        collapseTransactions={ids =>
-          this.props.splitsExpandedDispatch({ type: 'close-splits', ids })
-        }
       >
         {(allTransactions, allBalances) => (
           <SelectedProviderWithItems

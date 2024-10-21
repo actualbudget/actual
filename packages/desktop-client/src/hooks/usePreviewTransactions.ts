@@ -6,18 +6,27 @@ import {
 } from 'loot-core/client/data-hooks/schedules';
 import { send } from 'loot-core/platform/client/fetch';
 import { ungroupTransactions } from 'loot-core/shared/transactions';
-import { type ScheduleEntity } from 'loot-core/types/models';
+import {
+  type AccountEntity,
+  type ScheduleEntity,
+} from 'loot-core/types/models';
 
 import { type TransactionEntity } from '../../../loot-core/src/types/models/transaction.d';
 
-export function usePreviewTransactions(
-  collapseTransactions?: (ids: string[]) => void,
-) {
+export type PreviewTransactionEntity = TransactionEntity & {
+  _inverse?: boolean;
+};
+
+export function usePreviewTransactions({
+  accountId,
+}: {
+  accountId?: AccountEntity['id'];
+}): PreviewTransactionEntity[] {
   const scheduleData = useCachedSchedules();
   const [previousScheduleData, setPreviousScheduleData] =
     useState<ReturnType<typeof useCachedSchedules>>(scheduleData);
   const [previewTransactions, setPreviewTransactions] = useState<
-    TransactionEntity[]
+    PreviewTransactionEntity[]
   >([]);
 
   if (scheduleData !== previousScheduleData) {
@@ -52,10 +61,12 @@ export function usePreviewTransactions(
             schedule: t.schedule,
           })),
         }));
-        setPreviewTransactions(ungroupTransactions(withDefaults));
-        if (collapseTransactions) {
-          collapseTransactions(withDefaults.map(t => t.id));
-        }
+        setPreviewTransactions(
+          ungroupTransactions(withDefaults).map(t => ({
+            ...t,
+            _inverse: accountId ? accountId !== t.account : false,
+          })),
+        );
       });
     }
 
