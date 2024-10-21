@@ -77,7 +77,13 @@ export async function batchUpdateTransactions({
   await batchMessages(async () => {
     if (added) {
       addedIds = await Promise.all(
-        added.map(async t => db.insertTransaction(t)),
+        added.map(async t => {
+          const account = accounts.find(acct => acct.id === t.account);
+          if (account.offbudget === 1) {
+            t.category = null;
+          }
+          return db.insertTransaction(t);
+        }),
       );
     }
 
@@ -96,7 +102,7 @@ export async function batchUpdateTransactions({
     if (updated) {
       await Promise.all(
         updated.map(async t => {
-          if (t.account) {
+          if (t.account || t.category) {
             // Moving transactions off budget should always clear the
             // category
             const account = accounts.find(acct => acct.id === t.account);
