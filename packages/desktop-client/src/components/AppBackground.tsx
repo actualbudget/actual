@@ -2,7 +2,7 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 import { useTransition, animated } from 'react-spring';
 
-import { css } from 'glamor';
+import { css } from '@emotion/css';
 
 import { AnimatedLoading } from '../icons/AnimatedLoading';
 import { theme } from '../style';
@@ -33,7 +33,7 @@ export function AppBackground({ isLoading }: AppBackgroundProps) {
         transitions((style, item) => (
           <animated.div key={item} style={style}>
             <View
-              className={`${css({
+              className={css({
                 position: 'absolute',
                 top: 0,
                 left: 0,
@@ -42,7 +42,7 @@ export function AppBackground({ isLoading }: AppBackgroundProps) {
                 paddingTop: 200,
                 color: theme.pageText,
                 alignItems: 'center',
-              })}`}
+              })}
             >
               <Block style={{ marginBottom: 20, fontSize: 18 }}>
                 {loadingText}

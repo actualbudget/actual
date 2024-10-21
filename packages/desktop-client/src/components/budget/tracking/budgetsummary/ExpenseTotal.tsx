@@ -1,9 +1,7 @@
-import React from 'react';
+import React, { type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { trackingBudget } from 'loot-core/src/client/queries';
-
-import { type CSSProperties } from '../../../../style';
 
 import { BudgetTotal } from './BudgetTotal';
 import { ExpenseProgress } from './ExpenseProgress';

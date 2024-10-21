@@ -151,8 +151,6 @@ export function ImportTransactionsModal({ options }) {
   const [filetype, setFileType] = useState(null);
   const [fieldMappings, setFieldMappings] = useState(null);
   const [splitMode, setSplitMode] = useState(false);
-  const [inOutMode, setInOutMode] = useState(false);
-  const [outValue, setOutValue] = useState('');
   const [flipAmount, setFlipAmount] = useState(false);
   const [multiplierEnabled, setMultiplierEnabled] = useState(false);
   const [reconcile, setReconcile] = useState(true);
@@ -169,6 +167,12 @@ export function ImportTransactionsModal({ options }) {
   );
   const [skipLines, setSkipLines] = useState(
     parseInt(prefs[`csv-skip-lines-${accountId}`], 10) || 0,
+  );
+  const [inOutMode, setInOutMode] = useState(
+    String(prefs[`csv-in-out-mode-${accountId}`]) === 'true',
+  );
+  const [outValue, setOutValue] = useState(
+    prefs[`csv-out-value-${accountId}`] ?? '',
   );
   const [hasHeaderRow, setHasHeaderRow] = useState(
     String(prefs[`csv-has-header-${accountId}`]) !== 'false',
@@ -638,6 +642,8 @@ export function ImportTransactionsModal({ options }) {
       savePrefs({ [`csv-delimiter-${accountId}`]: delimiter });
       savePrefs({ [`csv-has-header-${accountId}`]: String(hasHeaderRow) });
       savePrefs({ [`csv-skip-lines-${accountId}`]: String(skipLines) });
+      savePrefs({ [`csv-in-out-mode-${accountId}`]: String(inOutMode) });
+      savePrefs({ [`csv-out-value-${accountId}`]: String(outValue) });
     }
 
     if (filetype === 'csv' || filetype === 'qif') {
@@ -1039,8 +1045,9 @@ export function ImportTransactionsModal({ options }) {
                 variant="primary"
                 autoFocus
                 isDisabled={
-                  transactions?.filter(trans => !trans.isMatchedTransaction)
-                    .length === 0
+                  transactions?.filter(
+                    trans => !trans.isMatchedTransaction && trans.selected,
+                  ).length === 0
                 }
                 isLoading={loadingState === 'importing'}
                 onPress={() => {
@@ -1049,8 +1056,9 @@ export function ImportTransactionsModal({ options }) {
               >
                 Import{' '}
                 {
-                  transactions?.filter(trans => !trans.isMatchedTransaction)
-                    .length
+                  transactions?.filter(
+                    trans => !trans.isMatchedTransaction && trans.selected,
+                  ).length
                 }{' '}
                 transactions
               </ButtonWithLoading>

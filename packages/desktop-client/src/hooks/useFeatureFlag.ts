@@ -7,6 +7,7 @@ const DEFAULT_FEATURE_FLAG_STATE: Record<FeatureFlag, boolean> = {
   goalTemplatesEnabled: false,
   dashboards: false,
   actionTemplating: false,
+  upcomingLengthAdjustment: false,
 };
 
 export function useFeatureFlag(name: FeatureFlag): boolean {

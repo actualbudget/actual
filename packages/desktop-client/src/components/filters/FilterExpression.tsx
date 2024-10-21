@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { mapField, friendlyOp } from 'loot-core/src/shared/rules';
@@ -6,7 +6,7 @@ import { integerToCurrency } from 'loot-core/src/shared/util';
 import { type RuleConditionEntity } from 'loot-core/src/types/models';
 
 import { SvgDelete } from '../../icons/v0';
-import { type CSSProperties, theme } from '../../style';
+import { theme } from '../../style';
 import { Button } from '../common/Button2';
 import { Popover } from '../common/Popover';
 import { Text } from '../common/Text';
@@ -62,8 +62,21 @@ export function FilterExpression<T extends RuleConditionEntity>({
         variant="bare"
         isDisabled={customName != null}
         onPress={() => setEditing(true)}
+        style={{
+          maxWidth: 'calc(100% - 26px)',
+          whiteSpace: 'nowrap',
+          display: 'block',
+        }}
       >
-        <div style={{ paddingBlock: 1, paddingLeft: 5, paddingRight: 2 }}>
+        <div
+          style={{
+            paddingBlock: 1,
+            paddingLeft: 5,
+            paddingRight: 2,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+          }}
+        >
           {customName ? (
             <Text style={{ color: theme.pageTextPositive }}>{customName}</Text>
           ) : (

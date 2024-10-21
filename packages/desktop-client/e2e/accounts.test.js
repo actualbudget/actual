@@ -134,7 +134,27 @@ test.describe('Accounts', () => {
 
     test('import csv file twice', async () => {
       await importCsv(false);
-      await importCsv(true);
+
+      const fileChooserPromise = page.waitForEvent('filechooser');
+      await accountPage.page.getByRole('button', { name: 'Import' }).click();
+
+      const fileChooser = await fileChooserPromise;
+      await fileChooser.setFiles(join(__dirname, 'data/test.csv'));
+
+      await expect(page).toMatchThemeScreenshots();
+
+      const importButton = accountPage.page.getByRole('button', {
+        name: /Import \d+ transactions/,
+      });
+
+      await expect(importButton).toBeDisabled();
+      await expect(await importButton.innerText()).toMatch(
+        /Import 0 transactions/,
+      );
+
+      await accountPage.page.getByRole('button', { name: 'Close' }).click();
+
+      await expect(importButton).not.toBeVisible();
     });
   });
 });
