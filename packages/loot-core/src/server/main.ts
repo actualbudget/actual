@@ -1860,12 +1860,13 @@ handlers['duplicate-budget'] = async function ({
 
   // TODO: Check if there are backups in budgetDir and copy those files too
 
+  const { error } = await loadBudget(newId);
+  if (error) {
+    console.log('Error duplicating budget: ' + error);
+    return error;
+  }
+
   if (cloudSync) {
-    const { error } = await loadBudget(newId);
-    if (error) {
-      console.log('Error creating budget: ' + error);
-      return error;
-    }
     try {
       await cloudStorage.upload();
     } catch (e) {

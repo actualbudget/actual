@@ -78,7 +78,7 @@ type FinanceModals = {
 
   'delete-budget': { file: File };
 
-  'duplicate-budget': { file: File; managePage: boolean };
+  'duplicate-budget': { file: File; managePage?: boolean };
 
   import: null;
 

@@ -162,13 +162,19 @@ export function duplicateBudget({
   cloudSync?: boolean;
 }) {
   return async (dispatch: Dispatch) => {
-    await send('duplicate-budget', {
+    const newId = await send('duplicate-budget', {
       id,
       cloudId,
       newName,
       cloudSync,
     });
-    if (managePage) await dispatch(loadAllFiles());
+    if (managePage) {
+      await dispatch(loadAllFiles());
+      await dispatch(loadPrefs());
+    } else {
+      await dispatch(closeBudget());
+      await dispatch(loadBudget(newId));
+    }
   };
 }
 
