@@ -4,9 +4,10 @@ import React, {
   type MouseEventHandler,
   type ReactNode,
   type SVGProps,
+  type CSSProperties,
 } from 'react';
 
-import { styles, theme, type CSSProperties } from '../../style';
+import { styles, theme } from '../../style';
 import { Block } from '../common/Block';
 import { View } from '../common/View';
 

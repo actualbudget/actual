@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { css } from 'glamor';
+import { css } from '@emotion/css';
 import {
   AreaChart,
   Area,
@@ -23,7 +23,7 @@ import {
 } from 'loot-core/src/types/models/reports';
 
 import { usePrivacyMode } from '../../../hooks/usePrivacyMode';
-import { theme, type CSSProperties } from '../../../style';
+import { theme } from '../../../style';
 import { AlignedText } from '../../common/AlignedText';
 import { Container } from '../Container';
 
@@ -57,7 +57,7 @@ const CustomTooltip = ({
   if (active && payload && payload.length) {
     return (
       <div
-        className={`${css({
+        className={css({
           zIndex: 1000,
           pointerEvents: 'none',
           borderRadius: 2,
@@ -65,7 +65,7 @@ const CustomTooltip = ({
           backgroundColor: theme.menuBackground,
           color: theme.menuItemText,
           padding: 10,
-        })}`}
+        })}
       >
         <div>
           <div style={{ marginBottom: 10 }}>
