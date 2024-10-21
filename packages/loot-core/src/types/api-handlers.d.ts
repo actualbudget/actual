@@ -1,5 +1,4 @@
-import type { Notification } from 'loot-core/client/state-types/notifications';
-
+import type { Notification } from '../client/state-types/notifications';
 import { type batchUpdateTransactions } from '../server/accounts/transactions';
 import type {
   APIAccountEntity,

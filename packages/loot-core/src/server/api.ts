@@ -33,7 +33,7 @@ import * as cloudStorage from './cloud-storage';
 import { type RemoteFile } from './cloud-storage';
 import * as db from './db';
 import { APIError } from './errors';
-import { mutator, runMutator } from './mutators';
+import { runMutator } from './mutators';
 import * as prefs from './prefs';
 import * as sheet from './sheet';
 import { setSyncingMode, batchMessages } from './sync';
