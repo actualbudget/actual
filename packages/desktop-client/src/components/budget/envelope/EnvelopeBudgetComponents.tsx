@@ -14,6 +14,7 @@ import { evalArithmetic } from 'loot-core/src/shared/arithmetic';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToCurrency, amountToInteger } from 'loot-core/src/shared/util';
 
+import { useFeatureFlag } from '../../../hooks/useFeatureFlag';
 import { useUndo } from '../../../hooks/useUndo';
 import { SvgCheveronDown } from '../../../icons/v1';
 import { styles, theme } from '../../../style';
@@ -215,6 +216,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
   };
 
   const { showUndoNotification } = useUndo();
+  const contextMenusEnabled = useFeatureFlag('contextMenus');
 
   return (
     <View
@@ -239,6 +241,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
           flexDirection: 'row',
         }}
         onContextMenu={e => {
+          if (!contextMenusEnabled) return;
           if (editing) return;
           e.preventDefault();
           setBudgetMenuOpen(true);
@@ -397,6 +400,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
           ref={balanceMenuTriggerRef}
           onClick={() => setBalanceMenuOpen(true)}
           onContextMenu={e => {
+            if (!contextMenusEnabled) return;
             e.preventDefault();
             setBalanceMenuOpen(true);
           }}

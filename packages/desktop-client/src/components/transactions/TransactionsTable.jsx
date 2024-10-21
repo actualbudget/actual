@@ -47,6 +47,7 @@ import {
   titleFirst,
 } from 'loot-core/src/shared/util';
 
+import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { useMergedRefs } from '../../hooks/useMergedRefs';
 import { usePrevious } from '../../hooks/usePrevious';
 import { useSelectedDispatch, useSelectedItems } from '../../hooks/useSelected';
@@ -1050,6 +1051,7 @@ const Transaction = memo(function Transaction({
   const [menuOpen, setMenuOpen] = useState(false);
   const [crossOffset, setCrossOffset] = useState(0);
   const [offset, setOffset] = useState(0);
+  const contextMenusEnabled = useFeatureFlag('contextMenus');
 
   return (
     <Row
@@ -1080,6 +1082,7 @@ const Transaction = memo(function Transaction({
         ...(_unmatched && { opacity: 0.5 }),
       }}
       onContextMenu={e => {
+        if (!contextMenusEnabled) return;
         if (transaction.id === 'temp') return;
         e.preventDefault();
         const rect = e.currentTarget.getBoundingClientRect();

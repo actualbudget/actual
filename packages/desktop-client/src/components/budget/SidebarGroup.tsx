@@ -3,6 +3,7 @@ import React, { type CSSProperties, useRef, useState } from 'react';
 import { type ConnectDragSource } from 'react-dnd';
 import { useTranslation } from 'react-i18next';
 
+import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { SvgExpandArrow } from '../../icons/v0';
 import { SvgCheveronDown } from '../../icons/v1';
 import { theme } from '../../style';
@@ -56,6 +57,7 @@ export function SidebarGroup({
   const temporary = group.id === 'new';
   const [menuOpen, setMenuOpen] = useState(false);
   const triggerRef = useRef(null);
+  const contextMenusEnabled = useFeatureFlag('contextMenus');
 
   const displayed = (
     <View
@@ -71,6 +73,7 @@ export function SidebarGroup({
         onToggleCollapse(group.id);
       }}
       onContextMenu={e => {
+        if (!contextMenusEnabled) return;
         e.preventDefault();
         setMenuOpen(true);
       }}

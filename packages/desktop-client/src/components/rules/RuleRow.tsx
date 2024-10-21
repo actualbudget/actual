@@ -7,6 +7,7 @@ import { v4 as uuid } from 'uuid';
 import { friendlyOp } from 'loot-core/src/shared/rules';
 import { type RuleEntity } from 'loot-core/src/types/models';
 
+import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { useSelectedDispatch } from '../../hooks/useSelected';
 import { SvgRightArrow2 } from '../../icons/v0';
 import { styles, theme } from '../../style';
@@ -62,6 +63,7 @@ export const RuleRow = memo(
     const [menuOpen, setMenuOpen] = useState(false);
     const [crossOffset, setCrossOffset] = useState(0);
     const [offset, setOffset] = useState(0);
+    const contextMenusEnabled = useFeatureFlag('contextMenus');
 
     return (
       <Row
@@ -81,6 +83,7 @@ export const RuleRow = memo(
         onMouseEnter={() => onHover && onHover(rule.id)}
         onMouseLeave={() => onHover && onHover(null)}
         onContextMenu={e => {
+          if (!contextMenusEnabled) return;
           e.preventDefault();
           setMenuOpen(true);
           const rect = triggerRef.current.getBoundingClientRect();

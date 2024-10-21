@@ -4,6 +4,7 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { type PayeeEntity } from 'loot-core/src/types/models';
 
+import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { useSelectedDispatch } from '../../hooks/useSelected';
 import { SvgArrowThinRight, SvgBookmark } from '../../icons/v1';
 import { theme } from '../../style';
@@ -113,6 +114,7 @@ export const PayeeTableRow = memo(
     const [menuOpen, setMenuOpen] = useState(false);
     const [crossOffset, setCrossOffset] = useState(0);
     const [offset, setOffset] = useState(0);
+    const contextMenusEnabled = useFeatureFlag('contextMenus');
 
     return (
       <Row
@@ -136,6 +138,7 @@ export const PayeeTableRow = memo(
         data-focus-key={payee.id}
         onMouseEnter={() => onHover && onHover(payee.id)}
         onContextMenu={e => {
+          if (!contextMenusEnabled) return;
           e.preventDefault();
           setMenuOpen(true);
           const rect = e.currentTarget.getBoundingClientRect();

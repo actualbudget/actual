@@ -7,6 +7,7 @@ import {
   type CategoryEntity,
 } from 'loot-core/src/types/models';
 
+import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { SvgCheveronDown } from '../../icons/v1';
 import { theme } from '../../style';
 import { Button } from '../common/Button2';
@@ -51,6 +52,7 @@ export function SidebarCategory({
   const temporary = category.id === 'new';
   const [menuOpen, setMenuOpen] = useState(false);
   const triggerRef = useRef(null);
+  const contextMenusEnabled = useFeatureFlag('contextMenus');
 
   const displayed = (
     <View
@@ -65,6 +67,7 @@ export function SidebarCategory({
       }}
       ref={triggerRef}
       onContextMenu={e => {
+        if (!contextMenusEnabled) return;
         e.preventDefault();
         setMenuOpen(true);
       }}

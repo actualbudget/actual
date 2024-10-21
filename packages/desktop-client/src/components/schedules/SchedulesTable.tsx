@@ -14,6 +14,7 @@ import { type ScheduleEntity } from 'loot-core/src/types/models';
 
 import { useAccounts } from '../../hooks/useAccounts';
 import { useDateFormat } from '../../hooks/useDateFormat';
+import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { usePayees } from '../../hooks/usePayees';
 import { SvgDotsHorizontalTriple } from '../../icons/v1';
 import { SvgCheck } from '../../icons/v2';
@@ -187,6 +188,7 @@ function ScheduleRow({
   const [open, setOpen] = useState<false | 'contextMenu' | 'button'>(false);
   const [crossOffset, setCrossOffset] = useState(0);
   const [offset, setOffset] = useState(0);
+  const contextMenusEnabled = useFeatureFlag('contextMenus');
 
   return (
     <Row
@@ -201,6 +203,7 @@ function ScheduleRow({
         ':hover': { backgroundColor: theme.tableRowBackgroundHover },
       }}
       onContextMenu={e => {
+        if (!contextMenusEnabled) return;
         if (minimal) return;
         e.preventDefault();
         const rect = e.currentTarget.getBoundingClientRect();
