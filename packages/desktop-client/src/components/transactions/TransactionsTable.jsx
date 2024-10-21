@@ -1,6 +1,5 @@
 import React, {
   createElement,
-  createRef,
   forwardRef,
   memo,
   useState,
@@ -751,11 +750,6 @@ function PayeeIcons({
   onNavigateToSchedule,
 }) {
   const scheduleId = transaction.schedule;
-  const scheduleData = useCachedSchedules();
-  const schedule =
-    scheduleId && scheduleData
-      ? scheduleData.schedules.find(s => s.id === scheduleId)
-      : null;
 
   const buttonStyle = useMemo(
     () => ({
@@ -771,6 +765,14 @@ function PayeeIcons({
   const scheduleIconStyle = useMemo(() => ({ width: 13, height: 13 }), []);
 
   const transferIconStyle = useMemo(() => ({ width: 10, height: 10 }), []);
+
+  const { isLoading, schedules = [] } = useCachedSchedules();
+
+  if (isLoading) {
+    return null;
+  }
+
+  const schedule = scheduleId ? schedules.find(s => s.id === scheduleId) : null;
 
   if (schedule == null && transferAccount == null) {
     // Neither a valid scheduled transaction nor a transfer.
@@ -1760,6 +1762,7 @@ function NewTransaction({
 }
 
 function TransactionTableInner({
+  isLoading,
   tableNavigator,
   tableRef,
   listContainerRef,
@@ -1769,7 +1772,7 @@ function TransactionTableInner({
   onScroll,
   ...props
 }) {
-  const containerRef = createRef();
+  const containerRef = useRef();
   const isAddingPrev = usePrevious(props.isAdding);
   const [scrollWidth, setScrollWidth] = useState(0);
 
@@ -1988,6 +1991,7 @@ function TransactionTableInner({
         data-testid="transaction-table"
       >
         <Table
+          loading={isLoading}
           navigator={tableNavigator}
           ref={tableRef}
           listContainerRef={listContainerRef}
