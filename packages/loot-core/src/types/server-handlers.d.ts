@@ -316,6 +316,15 @@ export interface ServerHandlers {
     cloudFileId?: string;
   }) => Promise<'ok'>;
 
+  /**
+   * Duplicates a budget file.
+   * @param {Object} arg - The arguments for duplicating a budget.
+   * @param {string} [arg.id] - The ID of the local budget to duplicate.
+   * @param {string} [arg.cloudId] - The ID of the cloud-synced budget to duplicate.
+   * @param {string} arg.newName - The name for the duplicated budget.
+   * @param {boolean} [arg.cloudSync] - Whether to sync the duplicated budget to the cloud.
+   * @returns {Promise<string>} The ID of the newly created budget.
+   */
   'duplicate-budget': (arg: {
     id?: string;
     cloudId?: string;

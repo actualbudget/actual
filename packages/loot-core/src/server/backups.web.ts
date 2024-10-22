@@ -134,12 +134,27 @@ export async function makeBackup(id: string) {
   connection.send('backups-updated', await getAvailableBackups(id));
 }
 
-export async function removeAllBackups(id: string) {
+/**
+ * Removes all backup files associated with the specified budget ID.
+ * This function is typically used when deleting a budget to ensure all related backups are also removed.
+ * @param {string} id - The ID of the budget whose backups should be removed.
+ * @returns {Promise<boolean>} A promise that resolves to true if all backups were successfully removed, false otherwise.
+ */
+export async function removeAllBackups(id: string): Promise<boolean> {
   const budgetDir = fs.getBudgetDir(id);
   const toRemove = await getAvailableBackups(id);
+  let success = true;
+
   for (const item of toRemove) {
-    await fs.removeFile(fs.join(budgetDir, item.id));
+    try {
+      await fs.removeFile(fs.join(budgetDir, item.id));
+    } catch (error) {
+      console.error(`Failed to remove backup ${item.id}:`, error);
+      success = false;
+    }
   }
+
+  return success;
 }
 
 export async function loadBackup(id: string, backupId: string) {

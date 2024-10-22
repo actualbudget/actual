@@ -49,7 +49,13 @@ type FinanceModals = {
     | { group: string }
   );
 
-  'load-backup': { budgetId: string | undefined };
+  'load-backup': {
+    /**
+     * The ID of the budget to load a backup for.
+     * If undefined, it may indicate loading a backup for the current budget or a user-selected budget.
+     */
+    budgetId: string | undefined,
+  };
 
   'manage-rules': { payeeId?: string };
   'edit-rule': {
@@ -78,7 +84,16 @@ type FinanceModals = {
 
   'delete-budget': { file: File };
 
-  'duplicate-budget': { file: File; managePage?: boolean };
+  'duplicate-budget': {
+    /** The budget file to be duplicated */
+    file: File;
+    /** 
+     * Indicates whether the duplication is initiated from the budget
+     * management page. This may affect the behavior or UI of the
+     * duplication process.
+     */
+    managePage?: boolean;
+  };
 
   import: null;
 

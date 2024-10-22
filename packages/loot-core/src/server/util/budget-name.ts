@@ -1,12 +1,14 @@
 // @ts-strict-ignore
 import { v4 as uuidv4 } from 'uuid';
 
+import { type Budget } from 'loot-core/types/budget';
+
 import * as fs from '../../platform/server/fs';
 
 export async function uniqueFileName(
-  existingFiles,
-  initialName = 'My Finances',
-) {
+  existingFiles: Budget[],
+  initialName: string = 'My Finances',
+): Promise<string> {
   let idx = 1;
 
   // If there is a conflict, keep appending an index until there is no

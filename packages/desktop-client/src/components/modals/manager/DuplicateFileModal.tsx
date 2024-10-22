@@ -87,7 +87,7 @@ export function DuplicateFileModal({ file, managePage }: DuplicateFileProps) {
               </InitialFocus>
             </InlineField>
             {nameError && (
-              <FormError style={{ marginLeft: 75, color: theme.warningText }}>
+              <FormError style={{ marginLeft: 150, color: theme.warningText }}>
                 {nameError}
               </FormError>
             )}
