@@ -40,7 +40,7 @@ export function DuplicateFileModal({ file, managePage }: DuplicateFileProps) {
   );
 
   const validateNewName = (name: string): string | null => {
-    if (name === '') return 'Name can not be blank';
+    if (name === '') return t('Name cannot be blank');
     return null;
   };
 
@@ -72,7 +72,11 @@ export function DuplicateFileModal({ file, managePage }: DuplicateFileProps) {
               lineHeight: '1.5em',
             }}
           >
-            <InlineField label="New Budget Name" width="100%" labelWidth={150}>
+            <InlineField
+              label={t('New Budget Name')}
+              width="100%"
+              labelWidth={150}
+            >
               <InitialFocus>
                 <Input
                   name="name"
@@ -129,6 +133,8 @@ export function DuplicateFileModal({ file, managePage }: DuplicateFileProps) {
                       );
                       setLoadingState(null);
                       setLoading(false);
+                    } else {
+                      setNameError(nameError);
                     }
                   }}
                 >
@@ -150,14 +156,16 @@ export function DuplicateFileModal({ file, managePage }: DuplicateFileProps) {
                 ) : (
                   <Text>
                     <Trans>
-                      This is a <strong>local budget</strong> which is not stored
-                      on a server. Only a local copy will be duplicated.
+                      This is a <strong>local budget</strong> which is not
+                      stored on a server. Only a local copy will be duplicated.
                     </Trans>
                   </Text>
                 )}
 
                 <ModalButtons>
-                  <Button onPress={close}>Cancel</Button>
+                  <Button onPress={close}>
+                    <Trans>Cancel</Trans>
+                  </Button>
                   <ButtonWithLoading
                     variant={
                       loading ? 'bare' : isCloudFile ? 'normal' : 'primary'

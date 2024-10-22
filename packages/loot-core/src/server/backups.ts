@@ -144,7 +144,7 @@ export async function makeBackup(id: string) {
 export async function removeAllBackups(id: string): Promise<boolean> {
   const budgetDir = fs.getBudgetDir(id);
   const backupsDir = fs.join(budgetDir, 'backups');
-  
+
   if (!(await fs.exists(backupsDir))) {
     return true; // No backups to remove
   }

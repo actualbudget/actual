@@ -1,9 +1,8 @@
 // @ts-strict-ignore
 import { v4 as uuidv4 } from 'uuid';
 
-import { type Budget } from 'loot-core/types/budget';
-
 import * as fs from '../../platform/server/fs';
+import { type Budget } from '../../types/budget';
 
 export async function uniqueFileName(
   existingFiles: Budget[],

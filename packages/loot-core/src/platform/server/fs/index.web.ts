@@ -315,12 +315,18 @@ export const copyFile = async function (
   try {
     const contents = await _readFile(frompath);
     result = await _writeFile(topath, contents);
-  } catch (e) {
-    try {
-      if (frompath.endsWith('.sqlite') || topath.endsWith('.sqlite')) {
+  } catch (error) {
+    if (frompath.endsWith('.sqlite') || topath.endsWith('.sqlite')) {
+      try {
         result = await _copySqlFile(frompath, topath);
+      } catch (secondError) {
+        throw new Error(
+          `Failed to copy SQL file from ${frompath} to ${topath}: ${secondError.message}`,
+        );
       }
-    } catch (ee) {}
+    } else {
+      throw error;
+    }
   }
   return result;
 };

@@ -200,7 +200,9 @@ export async function loadBackup(id: string, backupId: string) {
     // Re-upload the new file
     try {
       await cloudStorage.upload();
-    } catch (e) {}
+    } catch (error) {
+      console.error('Error uploading to cloud storage:', error);
+    }
     prefs.unloadPrefs();
   } else {
     console.log('Loading backup', backupId);
@@ -219,7 +221,9 @@ export async function loadBackup(id: string, backupId: string) {
     // Re-upload the new file
     try {
       await cloudStorage.upload();
-    } catch (e) {}
+    } catch (error) {
+      console.error('Error uploading to cloud storage:', error);
+    }
 
     prefs.unloadPrefs();
 

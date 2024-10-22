@@ -200,7 +200,9 @@ function EditableBudgetName() {
         setEditing(true);
         break;
       case 'backups':
-        dispatch(replaceModal('load-backup', { budgetId }));
+        if (budgetId) {
+          dispatch(replaceModal('load-backup', { budgetId }));
+        }
         break;
       case 'duplicate':
         if (budgetFile) {
