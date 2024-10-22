@@ -151,28 +151,41 @@ export function createBudget({ testMode = false, demoMode = false } = {}) {
 export function duplicateBudget({
   id,
   cloudId,
+  oldName,
   newName,
   managePage,
   cloudSync,
 }: {
   id?: string;
   cloudId?: string;
+  oldName: string;
   newName: string;
   managePage?: boolean;
   cloudSync?: boolean;
 }) {
   return async (dispatch: Dispatch) => {
+    if (!managePage) {
+      await dispatch(closeBudget());
+      await dispatch(
+        setAppState({
+          loadingText:
+            t('Duplicating:  ') + oldName + t('  --  to:  ') + newName,
+        }),
+      );
+    }
     const newId = await send('duplicate-budget', {
       id,
       cloudId,
       newName,
       cloudSync,
     });
+
+    dispatch(closeModal());
+
     if (managePage) {
       await dispatch(loadAllFiles());
       await dispatch(loadPrefs());
     } else {
-      await dispatch(closeBudget());
       await dispatch(loadBudget(newId));
     }
   };

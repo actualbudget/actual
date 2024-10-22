@@ -35,6 +35,7 @@ import {
   getAvailableBackups,
   loadBackup,
   makeBackup,
+  removeAllBackups,
   startBackupService,
   stopBackupService,
 } from './backups';
@@ -1797,6 +1798,9 @@ handlers['delete-budget'] = async function ({ id, cloudFileId }) {
   // If a local file exists, you can delete it by passing its local id
   if (id) {
     const budgetDir = fs.getBudgetDir(id);
+    if (Platform.isWeb) {
+      await removeAllBackups(id);
+    }
     await fs.removeDirRecursively(budgetDir);
   }
 
@@ -1857,8 +1861,6 @@ handlers['duplicate-budget'] = async function ({
     fs.join(budgetDir, 'db.sqlite'),
     fs.join(newBudgetDir, 'db.sqlite'),
   );
-
-  // TODO: Check if there are backups in budgetDir and copy those files too
 
   const { error } = await loadBudget(newId);
   if (error) {

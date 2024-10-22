@@ -134,6 +134,14 @@ export async function makeBackup(id: string) {
   connection.send('backups-updated', await getAvailableBackups(id));
 }
 
+export async function removeAllBackups(id: string) {
+  const budgetDir = fs.getBudgetDir(id);
+  const toRemove = await getAvailableBackups(id);
+  for (const item of toRemove) {
+    await fs.removeFile(fs.join(budgetDir, item.id));
+  }
+}
+
 export async function loadBackup(id: string, backupId: string) {
   const budgetDir = fs.getBudgetDir(id);
 

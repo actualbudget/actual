@@ -121,6 +121,7 @@ export function DuplicateFileModal({ file, managePage }: DuplicateFileProps) {
                         duplicateBudget({
                           id: 'id' in file ? file.id : undefined,
                           cloudId: file.cloudFileId,
+                          oldName: file.name,
                           newName,
                           cloudSync: true,
                           managePage,
@@ -128,12 +129,10 @@ export function DuplicateFileModal({ file, managePage }: DuplicateFileProps) {
                       );
                       setLoadingState(null);
                       setLoading(false);
-                      close();
                     }
                   }}
                 >
-                  {!loading && <Trans>Duplicate budget for all devices</Trans>}
-                  {loading && <Trans>Duplicating...</Trans>}
+                  <Trans>Duplicate budget for all devices</Trans>
                 </ButtonWithLoading>
               </>
             )}
@@ -176,17 +175,20 @@ export function DuplicateFileModal({ file, managePage }: DuplicateFileProps) {
                         setLoading(true);
                         setLoadingState('local');
                         await dispatch(
-                          duplicateBudget({ id: file.id, newName, managePage }),
+                          duplicateBudget({
+                            id: file.id,
+                            oldName: file.name,
+                            newName,
+                            managePage,
+                          }),
                         );
                         setLoadingState(null);
                         setLoading(false);
-                        close();
                       }
                     }}
                   >
-                    {!loading && <Trans>Duplicate budget</Trans>}
-                    {!loading && isCloudFile && <Trans> locally only</Trans>}
-                    {loading && <Trans>Duplicating...</Trans>}
+                    <Trans>Duplicate budget</Trans>
+                    {isCloudFile && <Trans> locally only</Trans>}
                   </ButtonWithLoading>
                 </ModalButtons>
               </>
