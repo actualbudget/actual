@@ -187,7 +187,7 @@ function EditableBudgetName() {
   }
 
   const nonRemoteFiles = allFiles.filter(isNonRemoteFile);
-  const file = id ? nonRemoteFiles.filter(f => f.id !== id) : null;
+  const file = id ? nonRemoteFiles.filter(f => f.id === id) : null;
 
   const budgetFile = file && file.length > 0 ? file[0] : null;
   const budgetId = budgetFile?.id ? budgetFile.id : undefined;
@@ -223,6 +223,7 @@ function EditableBudgetName() {
   const items = [
     { name: 'rename', text: t('Rename budget') },
     ...(budgetFile ? [{ name: 'duplicate', text: t('Duplicate budget') }] : []),
+    { name: 'backups', text: t('Backups') },
     { name: 'settings', text: t('Settings') },
     { name: 'close', text: t('Close file') },
   ];

@@ -88,7 +88,7 @@ async function _readFile(filepath: string, opts?: { encoding?: string }) {
       throw new Error('File does not exist: ' + filepath);
     }
 
-    if (opts.encoding === 'utf8' && ArrayBuffer.isView(item.contents)) {
+    if (opts?.encoding === 'utf8' && ArrayBuffer.isView(item.contents)) {
       return String.fromCharCode.apply(
         null,
         new Uint16Array(item.contents.buffer),
@@ -359,8 +359,13 @@ export const removeDirRecursively = async function (dirpath) {
   }
 };
 
-export const getModifiedTime = async function () {
-  return new Promise(function (resolve) {
-    resolve(new Date());
+export const getModifiedTime = async function (path: string): Promise<Date> {
+  return new Promise(function (resolve, reject) {
+    const result = new Date(path);
+    if (result.toString() === 'Invalid Date') {
+      reject(result);
+    } else {
+      resolve(result);
+    }
   });
 };

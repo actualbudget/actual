@@ -56,8 +56,6 @@ export function LoadBackupModal({
   const [prefsBudgetId] = useMetadataPref('id');
   const budgetIdToLoad = budgetId ?? prefsBudgetId;
 
-  console.log(budgetIdToLoad);
-
   useEffect(() => {
     send('backups-get', { id: budgetIdToLoad }).then(setBackups);
   }, [budgetIdToLoad]);
