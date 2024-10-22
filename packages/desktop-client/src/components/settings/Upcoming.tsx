@@ -2,13 +2,12 @@ import React, { useState } from 'react';
 import { Trans } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 
-import { Column } from 'glamor/jsxstyle';
-
 import { type SyncedPrefs } from 'loot-core/types/prefs';
 
+import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { useSyncedPref } from '../../hooks/useSyncedPref';
-import { type CSSProperties, theme } from '../../style';
 import { Button } from '../common/Button2';
+import { InfoBubble } from '../common/InfoBubble';
 import { Select } from '../common/Select';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
@@ -31,27 +30,27 @@ export function UpcomingLengthSettings() {
   );
   const upcomingLength = _upcomingLength || '7';
 
-  const selectButtonStyle: CSSProperties = {
-    ':hover': {
-      backgroundColor: theme.buttonNormalBackgroundHover,
-    },
-  };
+  const enabled = useFeatureFlag('upcomingLengthAdjustment');
 
   const location = useLocation();
   const [expanded, setExpanded] = useState(location.hash === '#upcomingLength');
+
+  if (!enabled) return null;
 
   return expanded ? (
     <Setting
       primaryAction={
         <View style={{ flexDirection: 'row', gap: '1em' }}>
-          <Column title="Upcoming Length">
-            <Select
-              options={options.map(x => [x.value || '7', x.label])}
-              value={upcomingLength}
-              onChange={newValue => setUpcomingLength(newValue)}
-              style={selectButtonStyle}
-            />
-          </Column>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 20 }}>
+            <View title="Upcoming Length">
+              <Select
+                options={options.map(x => [x.value || '7', x.label])}
+                value={upcomingLength}
+                onChange={newValue => setUpcomingLength(newValue)}
+              />
+            </View>
+            <InfoBubble label="Only the first instance of a recurring transaction will be shown." />
+          </View>
         </View>
       }
     >
