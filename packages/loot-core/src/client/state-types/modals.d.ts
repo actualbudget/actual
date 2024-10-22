@@ -288,6 +288,7 @@ type FinanceModals = {
     onUnlink: () => void;
   };
   'keyboard-shortcuts': EmptyObject;
+  'goal-templates': EmptyObject;
 };
 
 export type PushModalAction = {
