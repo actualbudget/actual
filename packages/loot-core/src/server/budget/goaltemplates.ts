@@ -505,6 +505,7 @@ async function applyCategoryTemplate(
   const last_month_balance = balance - spent - prev_budgeted;
   let to_budget = 0;
   let limit = 0;
+  let limitPeriod = null;
   let hold = false;
   let limitCheck = false;
   let remainder = 0;
@@ -525,6 +526,7 @@ async function applyCategoryTemplate(
         to_budget = goalsReturn.to_budget;
         errors = goalsReturn.errors;
         limit = goalsReturn.limit;
+        limitPeriod = goalsReturn.lim_period;
         limitCheck = goalsReturn.limitCheck;
         hold = goalsReturn.hold;
         break;
@@ -543,6 +545,7 @@ async function applyCategoryTemplate(
         to_budget = goalsReturn.to_budget;
         errors = goalsReturn.errors;
         limit = goalsReturn.limit;
+        limitPeriod = goalsReturn.lim_period;
         limitCheck = goalsReturn.limitCheck;
         hold = goalsReturn.hold;
         break;
@@ -576,6 +579,7 @@ async function applyCategoryTemplate(
         to_budget = goalsReturn.to_budget;
         errors = goalsReturn.errors;
         limit = goalsReturn.limit;
+        limitPeriod = goalsReturn.lim_period;
         limitCheck = goalsReturn.limitCheck;
         hold = goalsReturn.hold;
         break;
@@ -651,14 +655,19 @@ async function applyCategoryTemplate(
       default:
     }
   }
-
+  
+  // run the limit on the category
   if (limitCheck) {
+    //TODO: add the calculation of expected limit amount based on period
+    if(limitPeriod==='weekly'){
+    }else if(limitPeriod ==='daily') {}
     if (hold && balance > limit) {
       to_budget = 0;
     } else if (to_budget + balance > limit) {
       to_budget = limit - balance;
     }
   }
+
   // setup notifications
   let str = category.name + ': ' + integerToAmount(last_month_balance);
   str +=
