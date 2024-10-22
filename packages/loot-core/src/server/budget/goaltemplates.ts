@@ -504,50 +504,44 @@ async function applyCategoryTemplate(
   const balance = await getSheetValue(sheetName, `leftover-${category.id}`);
   const last_month_balance = balance - spent - prev_budgeted;
   let to_budget = 0;
-  let limit = 0;
-  let limitPeriod = null;
-  let hold = false;
-  let limitCheck = false;
+  let limitStatus = {
+    limitCheck: false,
+    limit: 0,
+    hold: false,
+  };
   let remainder = 0;
 
   for (let l = 0; l < template_lines.length; l++) {
     const template = template_lines[l];
     switch (template.type) {
       case 'simple': {
+        const limitRet = readLimit(template, month, limitStatus, errors);
+        limitStatus = limitRet.limitStatus;
+        errors = limitRet.errors;
         const goalsReturn = await goalsSimple(
           template,
-          limitCheck,
           errors,
-          limit,
-          hold,
+          limitStatus.limit,
           to_budget,
           last_month_balance,
         );
         to_budget = goalsReturn.to_budget;
         errors = goalsReturn.errors;
-        limit = goalsReturn.limit;
-        limitPeriod = goalsReturn.lim_period;
-        limitCheck = goalsReturn.limitCheck;
-        hold = goalsReturn.hold;
         break;
       }
       case 'copy': {
+        const limitRet = readLimit(template, month, limitStatus, errors);
+        limitStatus = limitRet.limitStatus;
+        errors = limitRet.errors;
         const goalsReturn = await goalsCopy(
           template,
           month,
           category,
-          limitCheck,
           errors,
-          limit,
-          hold,
           to_budget,
         );
         to_budget = goalsReturn.to_budget;
         errors = goalsReturn.errors;
-        limit = goalsReturn.limit;
-        limitPeriod = goalsReturn.lim_period;
-        limitCheck = goalsReturn.limitCheck;
-        hold = goalsReturn.hold;
         break;
       }
       case 'by': {
@@ -567,21 +561,17 @@ async function applyCategoryTemplate(
         break;
       }
       case 'week': {
+        const limitRet = readLimit(template, month, limitStatus, errors);
+        limitStatus = limitRet.limitStatus;
+        errors = limitRet.errors;
         const goalsReturn = await goalsWeek(
           template,
-          limit,
-          limitCheck,
-          hold,
           current_month,
           to_budget,
           errors,
         );
         to_budget = goalsReturn.to_budget;
         errors = goalsReturn.errors;
-        limit = goalsReturn.limit;
-        limitPeriod = goalsReturn.lim_period;
-        limitCheck = goalsReturn.limitCheck;
-        hold = goalsReturn.hold;
         break;
       }
       case 'spend': {
@@ -657,14 +647,11 @@ async function applyCategoryTemplate(
   }
   
   // run the limit on the category
-  if (limitCheck) {
-    //TODO: add the calculation of expected limit amount based on period
-    if(limitPeriod==='weekly'){
-    }else if(limitPeriod ==='daily') {}
-    if (hold && balance > limit) {
+  if (limitStatus.limitCheck) {
+    if (limitStatus.hold && balance > limitStatus.limit) {
       to_budget = 0;
-    } else if (to_budget + balance > limit) {
-      to_budget = limit - balance;
+    } else if (to_budget + balance > limitStatus.limit) {
+      to_budget = limitStatus.limit - balance;
     }
   }
 
@@ -678,4 +665,33 @@ async function applyCategoryTemplate(
   str += ' ' + template_lines.map(x => x.line).join('\n');
   console.log(str);
   return { amount: to_budget, errors };
+}
+
+function readLimit(template, month, limitStatus, errors) {
+  if (template.limit != null) {
+    if (limitStatus.limitCheck) {
+      errors.push(`More than one limit found. Ignoring second limit`);
+      return { limitStatus, errors};
+    } else {
+
+      limitStatus.limitCheck = true;
+      limitStatus.hold = template.limit.hold;
+
+      if(template.limit.period==='daily'){
+        const numDays = monthUtils.differenceInCalendarDays(
+          monthUtils.addMonths(month,1),
+          month
+        );
+        limitStatus.limit = amountToInteger(template.limit.amount)*numDays;
+      } else if (template.limit.period==='weekly'){
+        // find next month
+        const nextMonth = monthUtils.nextMonth(month);
+        //find first "day"
+        // add weeks until not in this month
+        limitStatus.limit = template.limit.amount*4;
+      }
+      return {limitStatus, errors};
+    }
+  }
+  return {limitStatus, errors};
 }
