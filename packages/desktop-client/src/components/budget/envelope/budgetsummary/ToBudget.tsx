@@ -1,8 +1,7 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, type CSSProperties } from 'react';
 
 import { envelopeBudget } from 'loot-core/src/client/queries';
 
-import { type CSSProperties } from '../../../../style';
 import { Popover } from '../../../common/Popover';
 import { View } from '../../../common/View';
 import { CoverMenu } from '../CoverMenu';
