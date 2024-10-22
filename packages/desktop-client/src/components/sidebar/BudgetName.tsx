@@ -7,8 +7,7 @@ import * as Platform from 'loot-core/src/client/platform';
 
 import { useMetadataPref } from '../../hooks/useMetadataPref';
 import { useNavigate } from '../../hooks/useNavigate';
-import { SvgLogo } from '../../icons/logo';
-import { SvgPencil1 } from '../../icons/v2';
+import { SvgExpandArrow } from '../../icons/v0';
 import { theme } from '../../style';
 import { Button } from '../common/Button2';
 import { InitialFocus } from '../common/InitialFocus';
@@ -25,41 +24,18 @@ type BudgetNameProps = {
 export function BudgetName({ children }: BudgetNameProps) {
   const hasWindowButtons = !Platform.isBrowser && Platform.OS === 'mac';
 
-  const { t } = useTranslation();
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
-  const [menuOpen, setMenuOpen] = useState(false);
-  const triggerRef = useRef<HTMLButtonElement>(null);
-
-  function onMenuSelect(type: string) {
-    setMenuOpen(false);
-
-    switch (type) {
-      case 'settings':
-        navigate('/settings');
-        break;
-      case 'close':
-        dispatch(closeBudget());
-        break;
-      default:
-    }
-  }
-
-  const items = [
-    { name: 'settings', text: t('Settings') },
-    { name: 'close', text: t('Close file') },
-  ];
-
   return (
     <View
       style={{
-        padding: '15px 8px',
+        paddingTop: 35,
+        height: 30,
         flexDirection: 'row',
         alignItems: 'center',
+        margin: '0 8px 23px 20px',
         userSelect: 'none',
         transition: 'padding .4s',
         ...(hasWindowButtons && {
-          paddingTop: 0,
+          paddingTop: 20,
           justifyContent: 'flex-start',
         }),
         '& .hover-visible': {
@@ -71,32 +47,6 @@ export function BudgetName({ children }: BudgetNameProps) {
         },
       }}
     >
-      <Button
-        ref={triggerRef}
-        variant="bare"
-        style={{
-          margin: 5,
-        }}
-        onPress={() => setMenuOpen(true)}
-      >
-        <SvgLogo
-          width={20}
-          height={20}
-          style={{
-            color: theme.sidebarItemTextSelected,
-          }}
-        />
-      </Button>
-
-      <Popover
-        triggerRef={triggerRef}
-        placement="bottom start"
-        isOpen={menuOpen}
-        onOpenChange={() => setMenuOpen(false)}
-      >
-        <Menu onMenuSelect={onMenuSelect} items={items} />
-      </Popover>
-
       <EditableBudgetName />
 
       <View style={{ flex: 1, flexDirection: 'row' }} />
@@ -109,14 +59,41 @@ export function BudgetName({ children }: BudgetNameProps) {
 function EditableBudgetName() {
   const { t } = useTranslation();
   const [budgetName, setBudgetNamePref] = useMetadataPref('budgetName');
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const triggerRef = useRef<HTMLButtonElement>(null);
   const [editing, setEditing] = useState(false);
+
+  function onMenuSelect(type: string) {
+    setMenuOpen(false);
+
+    switch (type) {
+      case 'rename':
+        setEditing(true);
+        break;
+      case 'settings':
+        navigate('/settings');
+        break;
+      case 'close':
+        dispatch(closeBudget());
+        break;
+      default:
+    }
+  }
+
+  const items = [
+    { name: 'rename', text: t('Rename budget') },
+    { name: 'settings', text: t('Settings') },
+    { name: 'close', text: t('Close file') },
+  ];
 
   if (editing) {
     return (
       <InitialFocus>
         <Input
           style={{
-            maxWidth: 'calc(100% - 73px)',
+            maxWidth: 'calc(100% - 23px)',
             fontSize: 16,
             fontWeight: 500,
           }}
@@ -137,32 +114,36 @@ function EditableBudgetName() {
 
   return (
     <>
-      <Text
+      <Button
+        ref={triggerRef}
+        variant="bare"
         style={{
-          whiteSpace: 'nowrap',
-          overflow: 'hidden',
+          color: theme.buttonNormalBorder,
           fontSize: 16,
           fontWeight: 500,
+          marginLeft: -5,
+          flex: '0 auto',
         }}
+        onPress={() => setMenuOpen(true)}
       >
-        {budgetName || t('A budget has no name')}
-      </Text>
-
-      <Button
-        variant="bare"
-        aria-label={t('Edit budget name')}
-        className="hover-visible"
-        onPress={() => setEditing(true)}
-        style={{ margin: 5 }}
-      >
-        <SvgPencil1
-          style={{
-            width: 11,
-            height: 11,
-            color: theme.pageTextSubdued,
-          }}
+        <Text style={{ whiteSpace: 'nowrap', overflow: 'hidden' }}>
+          {budgetName || t('A budget has no name')}
+        </Text>
+        <SvgExpandArrow
+          width={7}
+          height={7}
+          style={{ flexShrink: 0, marginLeft: 5 }}
         />
       </Button>
+
+      <Popover
+        triggerRef={triggerRef}
+        placement="bottom start"
+        isOpen={menuOpen}
+        onOpenChange={() => setMenuOpen(false)}
+      >
+        <Menu onMenuSelect={onMenuSelect} items={items} />
+      </Popover>
     </>
   );
 }
