@@ -16,8 +16,8 @@ expr
     } }
   / template: template _ monthly: amount limit: limit?
     { return { type: 'simple', monthly, limit, priority: template.priority, directive: template.directive } }
-  / template: template _ limit: limit
-    { return { type: 'simple', limit , priority: template.priority, directive: template.directive } }
+  / template: template limit: limit
+    { return { type: 'simple', monthly: null, limit, priority: template.priority, directive: template.directive } }
   / template: template _ schedule _ full:full? name: name
     { return { type: 'schedule', name, priority: template.priority, directive: template.directive, full } }
   / template: template _ remainder: remainder limit: limit?
@@ -26,20 +26,21 @@ expr
     { return { type: 'average', amount: +amount, priority: template.priority, directive: template.directive }}
   / template: template _ 'copy from'i _ lookBack: positive _ 'months ago'i limit:limit?
     { return { type: 'copy', priority: template.priority, directive: template.directive, lookBack: +lookBack, limit }}
-  / goal: goal amount: amount { return {type: 'simple', amount: amount, priority: null, directive: 'goal' }}
+  / goal: goal amount: amount { return {type: 'simple', amount: amount, priority: null, directive: goal }}
 
 
 repeat 'repeat interval'
   = 'month'i { return { annual: false } }
-  / months: positive _ 'months'i { return { annual: false, repeat: +months } }
+  / months: positive _ 'months'i { return { annual: false, repeat: +months }}
   / 'year'i { return { annual: true } }
-  / years: positive _ 'years'i { return { annual: true, repeat: +years } }
+  / years: positive _ 'years'i { return { annual: true, repeat: +years }}
 
-limit =  _? upTo _ amount: amount _ 'hold'i { return {amount: amount, hold: true } }
-        / _? upTo _ amount: amount { return {amount: amount, hold: false } }
+limit = _? upTo _ amount: amount _ 'per week'i _? hold: hold? { return {amount: amount, hold: hold, period: 'weekly' }}
+        / _? upTo _ amount: amount _ 'per day'i _? hold: hold? { return {amount: amount, hold: hold, period: 'daily' }}
+        / _? upTo _ amount: amount _? hold: hold? { return { amount: amount, hold: hold, period: null }}
 
-percentOf = percent:percent _ of _ 'previous'i _ { return { percent: percent, prev: true} }
-		/ percent:percent _ of _ { return { percent: percent, prev: false} }
+percentOf = percent:percent _ of _ 'previous'i _ { return { percent: percent, prev: true}}
+		/ percent:percent _ of _ { return { percent: percent, prev: false}}
 
 weekCount
   = week { return null }
@@ -54,12 +55,13 @@ of = 'of'i
 repeatEvery = 'repeat'i _ 'every'i
 starting = 'starting'i
 upTo = 'up'i _ 'to'i
+hold = 'hold'i {return true}
 schedule = 'schedule'i
 full = 'full'i _ {return true}
 priority = '-'i number: number {return number}
 remainder = 'remainder'i _? weight: positive? { return +weight || 1 }
 template = '#template' priority: priority? {return {priority: +priority, directive: 'template'}}
-goal = '#goal'
+goal = '#goal' {return 'goal'}
 
 _ 'space' = ' '+
 d 'digit' = [0-9]
@@ -74,4 +76,3 @@ date = $(month '-' day)
 currencySymbol 'currency symbol' = symbol: . & { return /\p{Sc}/u.test(symbol) }
 
 name 'Name' = $([^\r\n\t]+)
-
