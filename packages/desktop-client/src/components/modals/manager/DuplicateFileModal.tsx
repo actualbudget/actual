@@ -150,7 +150,7 @@ export function DuplicateFileModal({ file, managePage }: DuplicateFileProps) {
                 ) : (
                   <Text>
                     <Trans>
-                      This a <strong>local budget</strong> which is not stored
+                      This is a <strong>local budget</strong> which is not stored
                       on a server. Only a local copy will be duplicated.
                     </Trans>
                   </Text>
