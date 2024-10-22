@@ -493,10 +493,16 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
         files={files}
         quickSwitchMode={quickSwitchMode}
         onSelect={onSelect}
-        onDelete={file => dispatch(pushModal('delete-budget', { file }))}
-        onDuplicate={file =>
-          dispatch(pushModal('duplicate-budget', { file, managePage: true }))
+        onDelete={(file: File) =>
+          dispatch(pushModal('delete-budget', { file }))
         }
+        onDuplicate={(file: File) => {
+          if (file && 'id' in file) {
+            dispatch(pushModal('duplicate-budget', { file, managePage: true }));
+          } else {
+            console.error('Attempted to duplicate an invalid file:', file);
+          }
+        }}
       />
       {!quickSwitchMode && (
         <View

@@ -40,17 +40,19 @@ export function DuplicateFileModal({ file, managePage }: DuplicateFileProps) {
   );
 
   const validateNewName = (name: string): string | null => {
-    if (name === '') return t('Name cannot be blank');
+    if (name === '') {
+      const error = t('Name cannot be blank');
+      setNameError(error);
+      return error;
+    }
+    setNameError(null);
     return null;
   };
 
   const validateAndSetName = (name: string) => {
-    const nameError = validateNewName(name);
-    if (nameError) {
-      setNameError(nameError);
-    } else {
+    validateNewName(name);
+    if (!nameError) {
       setNewName(name);
-      setNameError(null);
     }
   };
 
@@ -117,7 +119,7 @@ export function DuplicateFileModal({ file, managePage }: DuplicateFileProps) {
                     fontSize: 14,
                   }}
                   onPress={async () => {
-                    const nameError = validateNewName(newName);
+                    validateNewName(newName);
                     if (!nameError) {
                       setLoading(true);
                       setLoadingState('cloud');
@@ -133,8 +135,6 @@ export function DuplicateFileModal({ file, managePage }: DuplicateFileProps) {
                       );
                       setLoadingState(null);
                       setLoading(false);
-                    } else {
-                      setNameError(nameError);
                     }
                   }}
                 >
@@ -178,7 +178,7 @@ export function DuplicateFileModal({ file, managePage }: DuplicateFileProps) {
                       fontSize: 14,
                     }}
                     onPress={async () => {
-                      const nameError = validateNewName(newName);
+                      validateNewName(newName);
                       if (!nameError) {
                         setLoading(true);
                         setLoadingState('local');

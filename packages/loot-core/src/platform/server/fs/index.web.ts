@@ -164,21 +164,30 @@ async function _copySqlFile(
   const fromfile = BFS.backend.createFile(fromDbPath);
   const tofile = BFS.backend.createFile(toDbPath);
 
-  fromfile.open();
-  tofile.open();
-  const fileSize = fromfile.meta.size;
-  const blockSize = fromfile.meta.blockSize;
+  try {
+    fromfile.open();
+    tofile.open();
+    const fileSize = fromfile.meta.size;
+    const blockSize = fromfile.meta.blockSize;
 
-  const buffer = new ArrayBuffer(blockSize);
-  const bufferView = new Uint8Array(buffer);
+    const buffer = new ArrayBuffer(blockSize);
+    const bufferView = new Uint8Array(buffer);
 
-  for (let i = 0; i < fileSize; i += blockSize) {
-    fromfile.read(bufferView, 0, blockSize, i);
-    tofile.write(bufferView, 0, blockSize, i);
+    for (let i = 0; i < fileSize; i += blockSize) {
+      const bytesToRead = Math.min(blockSize, fileSize - i);
+      fromfile.read(bufferView, 0, bytesToRead, i);
+      tofile.write(bufferView, 0, bytesToRead, i);
+    }
+  } catch (error) {
+    tofile.close();
+    fromfile.close();
+    _removeFile(toDbPath);
+    console.error('Failed to copy database file', error);
+    return false;
+  } finally {
+    tofile.close();
+    fromfile.close();
   }
-
-  tofile.close();
-  fromfile.close();
 
   return true;
 }

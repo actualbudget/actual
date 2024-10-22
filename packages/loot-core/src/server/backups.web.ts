@@ -27,19 +27,21 @@ async function getBackups(id: string): Promise<BackupWithDate[]> {
 
   const backups = await Promise.all(
     paths.map(async path => {
-      const mtime = path.match(
-        /(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})(\d{3}Z)-db\.backup/,
-      );
-      const date = mtime[1] + '-' + mtime[2] + '-' + mtime[3];
-      const time = mtime[4] + ':' + mtime[5] + ':' + mtime[6] + '.' + mtime[7];
+      const dateString = path.substring(0, 17); // 'yyyyMMddHHmmssSSS'
+      const date = dateFns.parse(dateString, 'yyyyMMddHHmmssSSS', new Date());
+
+      if (date.toString() === 'Invalid Date') return null;
+
       return {
         id: path,
-        date: new Date(date + 'T' + time),
+        date,
       };
     }),
   );
 
-  backups.sort((b1, b2) => {
+  const validBackups = backups.filter(backup => backup !== null);
+
+  validBackups.sort((b1, b2) => {
     if (b1.date < b2.date) {
       return 1;
     } else if (b1.date > b2.date) {
@@ -48,7 +50,7 @@ async function getBackups(id: string): Promise<BackupWithDate[]> {
     return 0;
   });
 
-  return backups;
+  return validBackups;
 }
 
 async function getLatestBackup(id: string): Promise<LatestBackup | null> {
@@ -113,7 +115,7 @@ export async function makeBackup(id: string) {
   }
 
   const currentTime = new Date();
-  const backupId = `${currentTime.toISOString().replace(/[-:.]/g, '')}-db.backup.sqlite`;
+  const backupId = `${dateFns.format(currentTime, 'yyyyMMddHHmmssSSS')}-db.backup.sqlite`;
 
   await fs.copyFile(
     fs.join(budgetDir, 'db.sqlite'),
