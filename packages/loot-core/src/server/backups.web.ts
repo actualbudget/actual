@@ -1,6 +1,5 @@
 // @ts-strict-ignore
 import * as dateFns from 'date-fns';
-import { v4 as uuidv4 } from 'uuid';
 
 import * as connection from '../platform/server/connection';
 import * as fs from '../platform/server/fs';
@@ -9,7 +8,6 @@ import * as monthUtils from '../shared/months';
 
 import * as cloudStorage from './cloud-storage';
 import * as prefs from './prefs';
-import { isWeb } from './platform';
 
 // A special backup that represents the latest version of the db that
 // can be reverted to after loading a backup
@@ -22,7 +20,7 @@ type BackupWithDate = { id: string; date: Date };
 
 async function getBackups(id: string): Promise<BackupWithDate[]> {
   const budgetDir = fs.getBudgetDir(id);
-  
+
   let paths = [];
   paths = await fs.listDir(budgetDir);
   paths = paths.filter(file => file.match(/db\.backup\.sqlite$/));
@@ -30,7 +28,7 @@ async function getBackups(id: string): Promise<BackupWithDate[]> {
   const backups = await Promise.all(
     paths.map(async path => {
       const mtime = path.match(
-        /(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})(\d{3}Z)-db\.backup/
+        /(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})(\d{3}Z)-db\.backup/,
       );
       const date = mtime[1] + '-' + mtime[2] + '-' + mtime[3];
       const time = mtime[4] + ':' + mtime[5] + ':' + mtime[6] + '.' + mtime[7];
@@ -115,7 +113,7 @@ export async function makeBackup(id: string) {
   }
 
   const currentTime = new Date();
-  const backupId = `${currentTime.toISOString().replace(/[-:\.]/g,'')}-db.backup.sqlite`;
+  const backupId = `${currentTime.toISOString().replace(/[-:.]/g, '')}-db.backup.sqlite`;
 
   await fs.copyFile(
     fs.join(budgetDir, 'db.sqlite'),
@@ -147,7 +145,7 @@ export async function loadBackup(id: string, backupId: string) {
       fs.join(budgetDir, LATEST_BACKUP_FILENAME),
     );
 
-    const copyMetadata = await fs.copyFile(
+    await fs.copyFile(
       fs.join(budgetDir, 'metadata.json'),
       fs.join(budgetDir, 'metadata.latest.json'),
     );
