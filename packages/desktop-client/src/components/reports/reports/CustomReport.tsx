@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 
 import * as d from 'date-fns';
@@ -102,6 +103,7 @@ function useSelectedCategories(
 }
 
 export function CustomReport() {
+  const { t } = useTranslation();
   const categories = useCategories();
   const { isNarrowWidth } = useResponsive();
   const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
@@ -644,16 +646,20 @@ export function CustomReport() {
       header={
         isNarrowWidth ? (
           <MobilePageHeader
-            title={`Custom Report: ${report.name || 'Unsaved report'}`}
+            title={
+              report.name
+                ? t('Custom Report: {{name}}', { name: report.name })
+                : t('Custom Report: Unsaved report')
+            }
             leftContent={<MobileBackButton onPress={onBackClick} />}
           />
         ) : (
           <PageHeader
             title={
               <>
-                <Text>Custom Report:</Text>
+                <Text>{t('Custom Report:')}</Text>
                 <Text style={{ marginLeft: 5, color: theme.pageTextPositive }}>
-                  {report.name || 'Unsaved report'}
+                  {report.name || t('Unsaved report')}
                 </Text>
               </>
             }
@@ -766,8 +772,9 @@ export function CustomReport() {
 
               {hasWarning && (
                 <Warning style={{ paddingTop: 5, paddingBottom: 5 }}>
-                  This report is configured to use a non-existing filter value
-                  (i.e. category/account/payee).
+                  {t(
+                    'This report is configured to use a non-existing filter value (i.e. category/account/payee).',
+                  )}
                 </Warning>
               )}
             </View>
@@ -830,7 +837,7 @@ export function CustomReport() {
                     intervalsCount={intervals.length}
                   />
                 ) : (
-                  <LoadingIndicator message="Loading report..." />
+                  <LoadingIndicator message={t('Loading report...')} />
                 )}
               </View>
             </View>
