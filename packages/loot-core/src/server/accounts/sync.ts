@@ -861,7 +861,7 @@ export async function SimpleFinBatchSync(
         new Promise(resolve => {
           resolve({
             accountId: account.id,
-            download,
+            res: download,
           });
         }),
       );
