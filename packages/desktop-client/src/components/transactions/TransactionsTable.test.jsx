@@ -24,10 +24,10 @@ import { integerToCurrency } from 'loot-core/src/shared/util';
 import { SelectedProviderWithItems } from '../../hooks/useSelected';
 import { SplitsExpandedProvider } from '../../hooks/useSplitsExpanded';
 import { ResponsiveProvider } from '../../ResponsiveProvider';
+import { ColumnWidthProvider } from '../ColumnWidthContext';
 import { ScrollProvider } from '../ScrollProvider';
 
 import { TransactionTable } from './TransactionsTable';
-import { ColumnWidthProvider } from '../ColumnWidthContext';
 
 vi.mock('loot-core/src/platform/client/fetch');
 vi.mock('../../hooks/useFeatureFlag', () => ({
@@ -239,14 +239,16 @@ function renderTransactions(extraProps) {
   };
 
   const result = render(
-    <LiveTransactionTable {...defaultProps} {...extraProps} />,
+    <ColumnWidthProvider prefName="columns">
+      <LiveTransactionTable {...defaultProps} {...extraProps} />
+    </ColumnWidthProvider>,
   );
   return {
     ...result,
     getTransactions: () => transactions,
     updateProps: props =>
       render(
-        <ColumnWidthProvider prefName={"columns"}>
+        <ColumnWidthProvider prefName="columns">
           <LiveTransactionTable {...defaultProps} {...extraProps} {...props} />
         </ColumnWidthProvider>,
         { container: result.container },
