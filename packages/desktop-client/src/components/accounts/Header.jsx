@@ -438,6 +438,10 @@ export function AccountHeader({
                       text: t('Remove all sorting'),
                     },
                     { name: 'export', text: t('Export') },
+                    {
+                      name: 'toogle-column-edit',
+                      text: 'Toggle column edit mode',
+                    },
                   ]}
                 />
               </Popover>
@@ -542,6 +546,10 @@ function AccountMenu({
         account.closed
           ? { name: 'reopen', text: t('Reopen account') }
           : { name: 'close', text: t('Close account') },
+        {
+          name: 'toogle-column-edit',
+          text: 'Toggle column edit mode',
+        },
       ].filter(x => x)}
     />
   );

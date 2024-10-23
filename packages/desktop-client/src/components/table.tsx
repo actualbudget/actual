@@ -318,7 +318,7 @@ export const Row = forwardRef<HTMLDivElement, RowProps>(function Row(
         ...(collapsed && { marginTop: -1 }),
         ...style,
       }}
-      data-testid={testId ?? "row"}
+      data-testid={testId ?? 'row'}
       {...nativeProps}
     >
       {inset !== 0 && <Field width={inset} />}
@@ -815,7 +815,7 @@ export function TableHeader({
     >
       <Row
         collapsed={true}
-        testId='row-header'
+        testId="row-header"
         {...rowProps}
         style={{
           color: theme.tableHeaderText,

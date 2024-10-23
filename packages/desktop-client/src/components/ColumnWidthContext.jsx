@@ -16,6 +16,7 @@ export const ColumnWidthProvider = ({ children, prefName }) => {
   const [fixedSizedColumns, setFixedSizedColumns] = useState({});
   const [, setPositionAccumulator] = useState(0);
   const [clientWidth, setClientWidth] = useState(0);
+  const [editMode, setEditMode] = useState(false);
 
   useEffect(() => {
     if (columnSizePrefs) {
@@ -33,18 +34,26 @@ export const ColumnWidthProvider = ({ children, prefName }) => {
       .filter(([key]) => !(key in columnWidths))
       .reduce((acc, [, width]) => acc + width + 10, 0);
 
-    const widthSum = otherColumnsWidth + currentTotalWidth + 20;
+    const widthSum = otherColumnsWidth + currentTotalWidth + 10;
     return widthSum > clientWidth ? widthSum : clientWidth;
   }, [columnWidths, fixedSizedColumns, clientWidth]);
 
-  const savePrefs = useCallback(() => {
-    setColumnSizePrefs(JSON.stringify(columnWidths));
-  }, [columnWidths, setColumnSizePrefs]);
+  const savePrefs = useCallback(
+    value => {
+      setColumnSizePrefs(JSON.stringify(value ?? columnWidths));
+    },
+    [columnWidths, setColumnSizePrefs],
+  );
 
   const removeColumn = columnName => {
     const { [columnName]: _, ...newObj } = columnWidths;
     setColumnWidths(newObj);
-    savePrefs();
+    savePrefs(newObj);
+  };
+
+  const resetAllColumns = () => {
+    setColumnWidths({});
+    savePrefs({});
   };
 
   const handleDoubleClick = columnName => {
@@ -67,10 +76,10 @@ export const ColumnWidthProvider = ({ children, prefName }) => {
           maximum = Math.max(localValue, maximum);
         });
 
-      updateColumnWidth(columnName, maximum);
+      const newObj = updateColumnWidth(columnName, maximum);
 
-      savePrefs();
-    }, 200);
+      savePrefs(newObj);
+    }, 100);
   };
 
   const setFixedColumn = useCallback(fixedColumns => {
@@ -84,11 +93,12 @@ export const ColumnWidthProvider = ({ children, prefName }) => {
       const newWidth = accumulatedDelta;
 
       if (newWidth === -1) {
-        setColumnWidths(prevWidths => ({
-          ...prevWidths,
+        const newObj = {
+          ...columnWidths,
           [columnName]: newWidth,
-        }));
-        return;
+        };
+        setColumnWidths(newObj);
+        return newObj;
       }
 
       const currentTotalWidth = Object.values(columnWidths).reduce(
@@ -109,10 +119,14 @@ export const ColumnWidthProvider = ({ children, prefName }) => {
           ? viewportWidth - otherColumnsWidth
           : newWidth;
 
-      setColumnWidths(prevWidths => ({
-        ...prevWidths,
+      const newObj = {
+        ...columnWidths,
         [columnName]: Math.max(adjustedWidth, 110),
-      }));
+      };
+
+      setColumnWidths(newObj);
+
+      return newObj;
     },
     [columnWidths, fixedSizedColumns, getViewportWidth],
   );
@@ -170,6 +184,10 @@ export const ColumnWidthProvider = ({ children, prefName }) => {
         removeColumn,
         clientWidth,
         setClientWidth,
+        resetAllColumns,
+        editMode,
+        setEditMode,
+        fixedSizedColumns,
       }}
     >
       {children}

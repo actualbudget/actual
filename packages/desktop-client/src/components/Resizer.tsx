@@ -12,7 +12,13 @@ type ResizerProps = {
 };
 
 export function Resizer({ columnName, resizeRef }: ResizerProps) {
-  const { handleMoveProps, handleDoubleClick, removeColumn } = useColumnWidth();
+  const {
+    handleMoveProps,
+    handleDoubleClick,
+    removeColumn,
+    resetAllColumns,
+    editMode,
+  } = useColumnWidth();
   const resizerRef = useRef<HTMLDivElement | null>(null);
   const { moveProps } = useMove(
     handleMoveProps(columnName, resizeRef, resizerRef),
@@ -29,7 +35,7 @@ export function Resizer({ columnName, resizeRef }: ResizerProps) {
           e.preventDefault();
           setIsMenuOpen(true);
         }}
-        className="resizer-container"
+        className={`resizer-container ${editMode ? 'resizer-container-enabled' : ''}`}
       />
       <Popover
         triggerRef={resizerRef}
@@ -42,6 +48,8 @@ export function Resizer({ columnName, resizeRef }: ResizerProps) {
           onMenuSelect={itemName => {
             if (itemName === 'reset-column') {
               removeColumn(columnName);
+            } else if (itemName === 'reset-all-columns') {
+              resetAllColumns();
             }
             setIsMenuOpen(false);
           }}
@@ -49,6 +57,10 @@ export function Resizer({ columnName, resizeRef }: ResizerProps) {
             {
               name: 'reset-column',
               text: `Reset column ‘${columnName}’`,
+            },
+            {
+              name: 'reset-all-columns',
+              text: `Reset all columns`,
             },
           ]}
         />

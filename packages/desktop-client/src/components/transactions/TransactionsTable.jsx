@@ -82,7 +82,7 @@ import {
   CellButton,
   useTableNavigator,
   UnexposedCellContent,
-  TableResizable,
+  Table,
 } from '../table';
 
 function getDisplayValue(obj, name) {
@@ -194,8 +194,8 @@ const TransactionHeader = memo(
       setFixedColumn({
         selected: 20,
         date: 110,
-        payment: 100,
-        deposit: 100,
+        debit: 100,
+        credit: 100,
         payee: 200,
         account: 200,
         balance: showBalance ? 103 : 0,
@@ -209,7 +209,7 @@ const TransactionHeader = memo(
     return (
       <Row
         ref={rowRef}
-        testId='row-header'
+        testId="row-header"
         style={{
           fontWeight: 300,
           zIndex: 200,
@@ -2098,8 +2098,7 @@ function TransactionTableInner({
         }}
         data-testid="transaction-table"
       >
-        <TableResizable
-          prefName="transactions-table-column-sizes"
+        <Table
           autoSizer={true}
           navigator={tableNavigator}
           ref={tableRef}
