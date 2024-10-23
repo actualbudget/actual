@@ -506,7 +506,7 @@ async function applyCategoryTemplate(
   let to_budget = 0;
   let limitStatus = {
     limitCheck: false,
-    limit: 0,
+    amount: 0,
     hold: false,
     start: null,
   };
@@ -522,7 +522,7 @@ async function applyCategoryTemplate(
         const goalsReturn = await goalsSimple(
           template,
           errors,
-          limitStatus.limit,
+          limitStatus.amount,
           to_budget,
           last_month_balance,
         );
@@ -649,10 +649,10 @@ async function applyCategoryTemplate(
 
   // run the limit on the category
   if (limitStatus.limitCheck) {
-    if (limitStatus.hold && balance > limitStatus.limit) {
+    if (limitStatus.hold && balance > limitStatus.amount) {
       to_budget = 0;
-    } else if (to_budget + balance > limitStatus.limit) {
-      to_budget = limitStatus.limit - balance;
+    } else if (to_budget + balance > limitStatus.amount) {
+      to_budget = limitStatus.amount - balance;
     }
   }
 
@@ -669,35 +669,38 @@ async function applyCategoryTemplate(
 }
 
 function readLimit(template, month, limitStatus, errors) {
-  if (template.limit != null) {
-    if (limitStatus.limitCheck) {
-      errors.push(`More than one limit found. Ignoring second limit`);
-      return { limitStatus, errors };
-    } else {
-      limitStatus.limitCheck = true;
-      limitStatus.hold = template.limit.hold;
-      limitStatus.start = template.limit.start;
-
-      if (template.limit.period === 'daily') {
-        const numDays = monthUtils.differenceInCalendarDays(
-          monthUtils.addMonths(month, 1),
-          month,
-        );
-        limitStatus.limit = amountToInteger(template.limit.amount) * numDays;
-      } else if (template.limit.period === 'weekly') {
-        const nextMonth = monthUtils.nextMonth(month);
-        let week = limitStatus.start;
-        const baseLimit = amountToInteger(template.limit.amount);
-        // check if weeks are in this month
-        while (week < nextMonth) {
-          if (week >= month) {
-            limitStatus.limit += baseLimit;
-          }
-          week = monthUtils.addWeeks(week, 1);
-        }
-      }
-      return { limitStatus, errors };
-    }
+  if (template.limit === null) {
+    return { limitStatus, errors };
   }
-  return { limitStatus, errors };
+  if (limitStatus.limitCheck) {
+    errors.push(`More than one limit found. Ignoring second limit`);
+    return { limitStatus, errors };
+  } else {
+    limitStatus.limitCheck = true;
+    limitStatus.hold = template.limit.hold;
+    limitStatus.start = template.limit.start;
+
+    if (template.limit.period === 'daily') {
+      const numDays = monthUtils.differenceInCalendarDays(
+        monthUtils.addMonths(month, 1),
+        month,
+      );
+      limitStatus.amount = amountToInteger(template.limit.amount) * numDays;
+    } else if (template.limit.period === 'weekly') {
+      const nextMonth = monthUtils.nextMonth(month);
+      let week = limitStatus.start;
+      const baseLimit = amountToInteger(template.limit.amount);
+      // check if weeks are in this month
+      while (week < nextMonth) {
+        if (week >= month) {
+          limitStatus.amount += baseLimit;
+        }
+        week = monthUtils.addWeeks(week, 1);
+      }
+    } else {
+      limitStatus.amount = amountToInteger(template.limit.amount);
+    }
+    
+    return { limitStatus, errors };
+  }
 }
