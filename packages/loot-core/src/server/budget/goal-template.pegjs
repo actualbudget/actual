@@ -15,13 +15,13 @@ expr
       priority: template.priority, directive: template.directive
     } }
   / template: template _ monthly: amount limit: limit?
-    { return { type: 'simple', monthly, limit, priority: template.priority, directive: template.directive } }
-  / template: template limit: limit
-    { return { type: 'simple', monthly: null, limit, priority: template.priority, directive: template.directive } }
+    { return { type: 'simple', monthly, limit, priority: template.priority, directive: template.directive }}
+  / template: template _ limit: limit
+    { return { type: 'simple', monthly: null, limit, priority: template.priority, directive: template.directive }}
   / template: template _ schedule _ full:full? name: name
-    { return { type: 'schedule', name, priority: template.priority, directive: template.directive, full } }
+    { return { type: 'schedule', name, priority: template.priority, directive: template.directive, full }}
   / template: template _ remainder: remainder limit: limit?
-    { return { type: 'remainder', priority: null, directive: template.directive, weight: remainder, limit } }
+    { return { type: 'remainder', priority: null, directive: template.directive, weight: remainder, limit }}
   / template: template _ 'average'i _ amount: positive _ 'months'i?
     { return { type: 'average', amount: +amount, priority: template.priority, directive: template.directive }}
   / template: template _ 'copy from'i _ lookBack: positive _ 'months ago'i limit:limit?
@@ -30,9 +30,9 @@ expr
 
 
 repeat 'repeat interval'
-  = 'month'i { return { annual: false } }
+  = 'month'i { return { annual: false }}
   / months: positive _ 'months'i { return { annual: false, repeat: +months }}
-  / 'year'i { return { annual: true } }
+  / 'year'i { return { annual: true }}
   / years: positive _ 'years'i { return { annual: true, repeat: +years }}
 
 limit = _? upTo _ amount: amount _ 'per week'i _? hold: hold? { return {amount: amount, hold: hold, period: 'weekly' }}
