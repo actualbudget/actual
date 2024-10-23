@@ -2,12 +2,7 @@
 import * as monthUtils from '../../../shared/months';
 import { amountToInteger } from '../../../shared/util';
 
-export async function goalsWeek(
-  template,
-  current_month,
-  to_budget,
-  errors,
-) {
+export async function goalsWeek(template, current_month, to_budget, errors) {
   // week has 'amount', 'starting', 'weeks' and optional 'limit' params
   const amount = amountToInteger(template.amount);
   const weeks = template.weeks != null ? Math.round(template.weeks) : 1;
@@ -20,5 +15,5 @@ export async function goalsWeek(
     }
     w = monthUtils.addWeeks(w, weeks);
   }
-  return { to_budget, errors};
+  return { to_budget, errors };
 }

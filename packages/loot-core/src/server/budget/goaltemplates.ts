@@ -645,7 +645,7 @@ async function applyCategoryTemplate(
       default:
     }
   }
-  
+
   // run the limit on the category
   if (limitStatus.limitCheck) {
     if (limitStatus.hold && balance > limitStatus.limit) {
@@ -671,34 +671,33 @@ function readLimit(template, month, limitStatus, errors) {
   if (template.limit != null) {
     if (limitStatus.limitCheck) {
       errors.push(`More than one limit found. Ignoring second limit`);
-      return { limitStatus, errors};
+      return { limitStatus, errors };
     } else {
-
       limitStatus.limitCheck = true;
       limitStatus.hold = template.limit.hold;
 
-      if(template.limit.period==='daily'){
+      if (template.limit.period === 'daily') {
         const numDays = monthUtils.differenceInCalendarDays(
-          monthUtils.addMonths(month,1),
-          month
+          monthUtils.addMonths(month, 1),
+          month,
         );
-        limitStatus.limit = amountToInteger(template.limit.amount)*numDays;
-      } else if (template.limit.period==='weekly'){
+        limitStatus.limit = amountToInteger(template.limit.amount) * numDays;
+      } else if (template.limit.period === 'weekly') {
         // find next month
         const nextMonth = monthUtils.nextMonth(month);
         //find weeks this month
-        const range = monthUtils.weekRangeInclusive(month, nextMonth,'2');
+        const range = monthUtils.weekRangeInclusive(month, nextMonth, '2');
         console.log(range);
         const baseLimit = amountToInteger(template.limit.amount);
         // add weeks until not in this month
-        for (let i = 0; i<range.length; i++){
-          if (monthUtils.monthFromDate(range[i])===month){
-            limitStatus.limit+=baseLimit;
+        for (let i = 0; i < range.length; i++) {
+          if (monthUtils.monthFromDate(range[i]) === month) {
+            limitStatus.limit += baseLimit;
           }
         }
       }
-      return {limitStatus, errors};
+      return { limitStatus, errors };
     }
   }
-  return {limitStatus, errors};
+  return { limitStatus, errors };
 }

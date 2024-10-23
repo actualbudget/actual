@@ -17,5 +17,5 @@ export async function goalsSimple(
     increment = limit - last_month_balance;
   }
   to_budget += increment;
-  return { to_budget, errors};
+  return { to_budget, errors };
 }

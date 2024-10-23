@@ -2,13 +2,7 @@
 import * as monthUtils from '../../../shared/months';
 import { getSheetValue } from '../actions';
 
-export async function goalsCopy(
-  template,
-  month,
-  category,
-  errors,
-  to_budget,
-) {
+export async function goalsCopy(template, month, category, errors, to_budget) {
   // simple has 'monthly' and/or 'limit' params
   let increment = 0;
   if (template.lookBack) {
@@ -20,5 +14,5 @@ export async function goalsCopy(
     errors.push('Missing number of months to look back');
   }
   to_budget += increment;
-  return { to_budget, errors};
+  return { to_budget, errors };
 }
