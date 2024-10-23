@@ -9,7 +9,7 @@ describe('IntegrationBank', () => {
   let consoleSpy;
 
   beforeEach(() => {
-    consoleSpy = jest.spyOn(console, 'log');
+    consoleSpy = jest.spyOn(console, 'debug');
   });
 
   describe('normalizeAccount', () => {
