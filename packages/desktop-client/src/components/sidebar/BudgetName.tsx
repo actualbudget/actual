@@ -38,13 +38,6 @@ export function BudgetName({ children }: BudgetNameProps) {
           paddingTop: 20,
           justifyContent: 'flex-start',
         }),
-        '& .hover-visible': {
-          opacity: 0,
-          transition: 'opacity .25s',
-        },
-        '&:hover .hover-visible': {
-          opacity: 1,
-        },
       }}
     >
       <EditableBudgetName />

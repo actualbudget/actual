@@ -100,12 +100,6 @@ export function Sidebar() {
             opacity: 1,
             width: hasWindowButtons ? null : 'auto',
           } as CSSProperties,
-          '& .hover-visible': {
-            display: 'none',
-          } as CSSProperties,
-          '&:hover .hover-visible': {
-            display: 'flex',
-          } as CSSProperties,
           flex: 1,
           ...styles.darkScrollbar,
         })}
