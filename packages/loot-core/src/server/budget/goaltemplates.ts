@@ -689,11 +689,11 @@ function readLimit(template, month, limitStatus, errors) {
         let week = limitStatus.start;
         const baseLimit = amountToInteger(template.limit.amount);
         // check if weeks are in this month
-        while (week<nextMonth) {
+        while (week < nextMonth) {
           if (week >= month) {
             limitStatus.limit += baseLimit;
           }
-          week = monthUtils.addWeeks(week,1);
+          week = monthUtils.addWeeks(week, 1);
         }
       }
       return { limitStatus, errors };
