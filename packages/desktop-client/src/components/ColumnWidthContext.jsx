@@ -7,11 +7,12 @@ import React, {
 } from 'react';
 
 import { useLocalPref } from '../hooks/useLocalPref';
+import { useSyncedPref } from '../hooks/useSyncedPref';
 
 const ColumnWidthContext = createContext();
 
 export const ColumnWidthProvider = ({ children, prefName }) => {
-  const [columnSizePrefs, setColumnSizePrefs] = useLocalPref(prefName);
+  const [columnSizePrefs, setColumnSizePrefs] = useSyncedPref(prefName);
   const [columnWidths, setColumnWidths] = useState({});
   const [fixedSizedColumns, setFixedSizedColumns] = useState({});
   const [, setPositionAccumulator] = useState(0);
