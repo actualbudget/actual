@@ -227,15 +227,20 @@ async function downloadSimpleFinTransactions(acctId, since) {
     for (const [accountId, data] of Object.entries(
       res as SimpleFinBatchSyncResponse,
     )) {
+      if (accountId === 'errors') continue;
+
       const error = res?.errors?.[accountId]?.[0];
 
       retVal[accountId] = {
-        error_type: error?.error_type,
-        error_code: data?.error_code,
         transactions: data?.transactions?.all,
         accountBalance: data?.balances,
         startingBalance: data?.startingBalance,
       };
+
+      if (error) {
+        retVal[accountId].error_type = error.error_type;
+        retVal[accountId].error_code = error.error_code;
+      }
     }
   } else {
     const singleRes = res as BankSyncData;
