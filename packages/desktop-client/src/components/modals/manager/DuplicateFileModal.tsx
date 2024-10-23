@@ -23,9 +23,14 @@ import { View } from '../../common/View';
 type DuplicateFileProps = {
   file: File;
   managePage?: boolean;
+  loadBudget?: 'none' | 'original' | 'copy';
 };
 
-export function DuplicateFileModal({ file, managePage }: DuplicateFileProps) {
+export function DuplicateFileModal({
+  file,
+  managePage,
+  loadBudget = 'none',
+}: DuplicateFileProps) {
   const { t } = useTranslation();
   const [newName, setNewName] = useState(file.name + ' - copy');
   const [nameError, setNameError] = useState<string | null>(null);
@@ -131,6 +136,7 @@ export function DuplicateFileModal({ file, managePage }: DuplicateFileProps) {
                           newName,
                           cloudSync: true,
                           managePage,
+                          loadBudget,
                         }),
                       );
                       setLoadingState(null);
@@ -188,6 +194,7 @@ export function DuplicateFileModal({ file, managePage }: DuplicateFileProps) {
                             oldName: file.name,
                             newName,
                             managePage,
+                            loadBudget,
                           }),
                         );
                         setLoadingState(null);

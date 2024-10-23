@@ -1797,6 +1797,12 @@ handlers['delete-budget'] = async function ({ id, cloudFileId }) {
 
   // If a local file exists, you can delete it by passing its local id
   if (id) {
+    // loading and then closing the budget is a hack to be able to delete
+    // the budget file if it hasn't been opened yet.  This needs a better
+    // way, but works for now.
+    await loadBudget(id);
+    await handlers['close-budget']();
+
     const budgetDir = fs.getBudgetDir(id);
     if (Platform.isWeb) {
       await removeAllBackups(id);
@@ -1811,6 +1817,7 @@ handlers['duplicate-budget'] = async function ({
   id,
   newName,
   cloudSync,
+  open,
 }): Promise<string> {
   if (!id) throw new Error('Unable to duplicate a budget that is not local.');
 
@@ -1862,6 +1869,7 @@ handlers['duplicate-budget'] = async function ({
     fs.join(newBudgetDir, 'db.sqlite'),
   );
 
+  // load in and validate
   const { error } = await loadBudget(newId);
   if (error) {
     console.log('Error duplicating budget: ' + error);
@@ -1876,6 +1884,10 @@ handlers['duplicate-budget'] = async function ({
       // still be able to create files.
     }
   }
+
+  handlers['close-budget']();
+  if (open === 'original') await loadBudget(id);
+  if (open === 'copy') await loadBudget(newId);
 
   return newId;
 };

@@ -154,6 +154,7 @@ export function duplicateBudget({
   oldName,
   newName,
   managePage,
+  loadBudget = 'none',
   cloudSync,
 }: {
   id?: string;
@@ -161,6 +162,7 @@ export function duplicateBudget({
   oldName: string;
   newName: string;
   managePage?: boolean;
+  loadBudget: 'none' | 'original' | 'copy';
   /**
    * cloudSync is used to determine if the duplicate budget
    * should be synced to the server
@@ -169,32 +171,25 @@ export function duplicateBudget({
 }) {
   return async (dispatch: Dispatch) => {
     try {
-      if (!managePage) {
-        await dispatch(closeBudget());
-        dispatch(
-          setAppState({
-            loadingText:
-              t('Duplicating:  ') + oldName + t('  --  to:  ') + newName,
-          }),
-        );
-      } else {
-        dispatch(setAppState({ loadingText: t('Duplicating budget...') }));
-      }
+      dispatch(
+        setAppState({
+          loadingText:
+            t('Duplicating:  ') + oldName + t('  --  to:  ') + newName,
+        }),
+      );
 
-      const newId = await send('duplicate-budget', {
+      await send('duplicate-budget', {
         id,
         cloudId,
         newName,
         cloudSync,
+        open: loadBudget,
       });
 
       dispatch(closeModal());
 
       if (managePage) {
         await dispatch(loadAllFiles());
-        await dispatch(loadPrefs());
-      } else {
-        await dispatch(loadBudget(newId));
       }
     } catch (error) {
       console.error('Error duplicating budget:', error);

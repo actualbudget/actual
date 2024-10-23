@@ -5,11 +5,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { css } from '@emotion/css';
 import { Resizable } from 're-resizable';
 
-import {
-  closeBudget,
-  replaceModal,
-  pushModal,
-} from 'loot-core/src/client/actions';
+import { closeBudget, replaceModal } from 'loot-core/src/client/actions';
 import * as Platform from 'loot-core/src/client/platform';
 import {
   type File,
@@ -204,11 +200,6 @@ function EditableBudgetName() {
           dispatch(replaceModal('load-backup', { budgetId }));
         }
         break;
-      case 'duplicate':
-        if (budgetFile) {
-          dispatch(pushModal('duplicate-budget', { file: budgetFile }));
-        }
-        break;
       case 'settings':
         navigate('/settings');
         break;
@@ -224,7 +215,6 @@ function EditableBudgetName() {
 
   const items = [
     { name: 'rename', text: t('Rename budget') },
-    ...(budgetFile ? [{ name: 'duplicate', text: t('Duplicate budget') }] : []),
     { name: 'backups', text: t('Backups') },
     { name: 'settings', text: t('Settings') },
     { name: 'close', text: t('Close file') },

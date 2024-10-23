@@ -93,6 +93,7 @@ type FinanceModals = {
      * duplication process.
      */
     managePage?: boolean;
+    loadBudget?: 'none' | 'original' | 'copy';
   };
 
   import: null;

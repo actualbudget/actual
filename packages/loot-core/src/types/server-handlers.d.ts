@@ -330,6 +330,7 @@ export interface ServerHandlers {
     cloudId?: string;
     newName: string;
     cloudSync?: boolean;
+    open: 'none' | 'original' | 'copy';
   }) => Promise<string>;
 
   'create-budget': (arg: {
