@@ -1,10 +1,4 @@
-import {
-  MenuItemConstructorOptions,
-  Menu,
-  ipcMain,
-  app,
-  shell,
-} from 'electron';
+import { MenuItemConstructorOptions, Menu, ipcMain, app } from 'electron';
 
 import i18n from './i18n';
 
@@ -175,7 +169,15 @@ export function getMenu(
       role: 'help',
       submenu: [
         {
-          label: i18n.t('Keyboard Shortcuts Reference'),
+          label: i18n.t('Documentation'),
+          click(_menuItem, focusedWin) {
+            focusedWin?.webContents.executeJavaScript(
+              'window.__actionsForMenu && window.__actionsForMenu.openDocsForCurrentPage()',
+            );
+          },
+        },
+        {
+          label: i18n.t('Keyboard Shortcuts'),
           accelerator: '?',
           enabled: !!budgetId,
           click: function (_menuItem, focusedWin) {
@@ -184,15 +186,6 @@ export function getMenu(
                 'window.__actionsForMenu && !window.__actionsForMenu.inputFocused() && window.__actionsForMenu.pushModal("keyboard-shortcuts")',
               );
             }
-          },
-        },
-        {
-          type: 'separator',
-        },
-        {
-          label: i18n.t('Learn More'),
-          click() {
-            shell.openExternal('https://actualbudget.org/docs/');
           },
         },
       ],
