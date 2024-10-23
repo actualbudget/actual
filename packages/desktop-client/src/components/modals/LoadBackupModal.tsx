@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 
 import { loadBackup, makeBackup } from 'loot-core/client/actions';
@@ -8,7 +9,7 @@ import { send, listen, unlisten } from 'loot-core/src/platform/client/fetch';
 import { useMetadataPref } from '../../hooks/useMetadataPref';
 import { theme } from '../../style';
 import { Block } from '../common/Block';
-import { Button } from '../common/Button2';
+import { ButtonWithLoading } from '../common/Button2';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
@@ -20,6 +21,7 @@ type BackupTableProps = {
 };
 
 function BackupTable({ backups, onSelect }: BackupTableProps) {
+  const { t } = useTranslation();
   return (
     <View style={{ flex: 1, maxHeight: 200, overflow: 'auto' }}>
       {backups.map((backup, idx) => (
@@ -31,7 +33,7 @@ function BackupTable({ backups, onSelect }: BackupTableProps) {
         >
           <Cell
             width="flex"
-            value={backup.date ? backup.date : 'Revert to Latest'}
+            value={backup.date ? backup.date : t('Revert to Latest')}
             valueStyle={{ paddingLeft: 20 }}
           />
         </Row>
@@ -51,8 +53,10 @@ export function LoadBackupModal({
   watchUpdates,
   backupDisabled,
 }: LoadBackupModalProps) {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const [backups, setBackups] = useState<Backup[]>([]);
+  const [loading, setLoading] = useState<'revert' | 'backup' | null>(null);
   const [prefsBudgetId] = useMetadataPref('id');
   const budgetIdToLoad = budgetId ?? prefsBudgetId;
 
@@ -79,7 +83,7 @@ export function LoadBackupModal({
       {({ state: { close } }) => (
         <>
           <ModalHeader
-            title="Load Backup"
+            title={t('Load Backup')}
             rightContent={<ModalCloseButton onPress={close} />}
           />
           <View style={{ marginBottom: 30 }}>
@@ -95,44 +99,61 @@ export function LoadBackupModal({
                 <Block>
                   <Block style={{ marginBottom: 10 }}>
                     <Text style={{ fontWeight: 600 }}>
-                      You are currently working from a backup.
+                      <Trans>You are currently working from a backup.</Trans>
                     </Text>{' '}
-                    You can load a different backup or revert to the original
-                    version below.
+                    <Trans>
+                      You can load a different backup or revert to the original
+                      version below.
+                    </Trans>
                   </Block>
-                  <Button
+                  <ButtonWithLoading
                     variant="primary"
-                    onPress={() =>
-                      dispatch(loadBackup(budgetIdToLoad, latestBackup.id))
-                    }
+                    isDisabled={loading != null}
+                    isLoading={loading === 'revert'}
+                    onPress={async () => {
+                      setLoading('revert');
+                      await dispatch(
+                        loadBackup(budgetIdToLoad, latestBackup.id),
+                      );
+                      setLoading(null);
+                    }}
                   >
-                    Revert to original version
-                  </Button>
+                    <Trans>Revert to original version</Trans>
+                  </ButtonWithLoading>
                 </Block>
               ) : (
                 <View style={{ alignItems: 'flex-start' }}>
                   <Block style={{ marginBottom: 10 }}>
-                    Select a backup to load. After loading a backup, you will
-                    have a chance to revert to the current version in this
-                    screen.{' '}
+                    <Trans>
+                      Select a backup to load. After loading a backup, you will
+                      have a chance to revert to the current version in this
+                      screen.
+                    </Trans>{' '}
                     <Text style={{ fontWeight: 600 }}>
-                      If you use a backup, you will have to setup all your
-                      devices to sync from the new budget.
+                      <Trans>
+                        If you use a backup, you will have to setup all your
+                        devices to sync from the new budget.
+                      </Trans>
                     </Text>
                   </Block>
-                  <Button
+                  <ButtonWithLoading
                     variant="primary"
-                    isDisabled={backupDisabled}
-                    onPress={() => dispatch(makeBackup())}
+                    isDisabled={backupDisabled || loading != null}
+                    isLoading={loading === 'backup'}
+                    onPress={async () => {
+                      setLoading('backup');
+                      await dispatch(makeBackup());
+                      setLoading(null);
+                    }}
                   >
-                    Backup now
-                  </Button>
+                    <Trans>Backup now</Trans>
+                  </ButtonWithLoading>
                 </View>
               )}
             </View>
             {previousBackups.length === 0 ? (
               <Block style={{ color: theme.tableTextLight, marginLeft: 20 }}>
-                No backups available
+                <Trans>No backups available</Trans>
               </Block>
             ) : (
               <BackupTable
