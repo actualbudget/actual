@@ -41,6 +41,8 @@ interface BankSyncData {
     referenceDate: string;
   }[];
   startingBalance: number;
+  error_type: string;
+  error_code: string;
 }
 
 interface SimpleFinBatchSyncResponse {
@@ -226,9 +228,11 @@ async function downloadSimpleFinTransactions(acctId, since) {
       res as SimpleFinBatchSyncResponse,
     )) {
       retVal[accountId] = {
-        transactions: data.transactions.all,
-        accountBalance: data.balances,
-        startingBalance: data.startingBalance,
+        error_type: data?.error_type,
+        error_code: data?.error_code,
+        transactions: data?.transactions?.all,
+        accountBalance: data?.balances,
+        startingBalance: data?.startingBalance,
       };
     }
   } else {
@@ -851,6 +855,19 @@ export async function SimpleFinBatchSync(
     const download = res[account.accountId];
 
     const acctRow = await db.select('accounts', account.id);
+
+    if (download.error_code) {
+      promises.push(
+        new Promise(resolve => {
+          resolve({
+            accountId: account.id,
+            download,
+          });
+        }),
+      );
+
+      continue;
+    }
 
     promises.push(
       processBankSyncDownload(
