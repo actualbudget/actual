@@ -25,7 +25,7 @@ describe('goalsSimple', () => {
 
   it('should return correct budget amount when limit set and balance from previous month left over', async () => {
     // Given
-    const template = {monthly: null, limit: { amount: 100, hold: false } };
+    const template = { monthly: null, limit: { amount: 100, hold: false } };
     const errors: string[] = [];
     const limit = 10000;
     const to_budget = 0;

@@ -700,7 +700,7 @@ function readLimit(template, month, limitStatus, errors) {
     } else {
       limitStatus.amount = amountToInteger(template.limit.amount);
     }
-    
+
     return { limitStatus, errors };
   }
 }
