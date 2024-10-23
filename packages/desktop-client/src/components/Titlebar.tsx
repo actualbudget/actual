@@ -7,7 +7,10 @@ import { css } from '@emotion/css';
 import * as Platform from 'loot-core/src/client/platform';
 import * as queries from 'loot-core/src/client/queries';
 import { listen } from 'loot-core/src/platform/client/fetch';
-import { isDevelopmentEnvironment } from 'loot-core/src/shared/environment';
+import {
+  isDevelopmentEnvironment,
+  isElectron,
+} from 'loot-core/src/shared/environment';
 
 import { useActions } from '../hooks/useActions';
 import { useGlobalPref } from '../hooks/useGlobalPref';
@@ -340,7 +343,7 @@ export function Titlebar({ style }: TitlebarProps) {
         <PrivacyButton />
         {serverURL ? <SyncButton /> : null}
         <LoggedInUser />
-        <HelpMenu />
+        {!isElectron() && <HelpMenu />}
       </SpaceBetween>
     </View>
   );
