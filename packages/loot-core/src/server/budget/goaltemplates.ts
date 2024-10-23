@@ -686,9 +686,16 @@ function readLimit(template, month, limitStatus, errors) {
       } else if (template.limit.period==='weekly'){
         // find next month
         const nextMonth = monthUtils.nextMonth(month);
-        //find first "day"
+        //find weeks this month
+        const range = monthUtils.weekRangeInclusive(month, nextMonth,'2');
+        console.log(range);
+        const baseLimit = amountToInteger(template.limit.amount);
         // add weeks until not in this month
-        limitStatus.limit = template.limit.amount*4;
+        for (let i = 0; i<range.length; i++){
+          if (monthUtils.monthFromDate(range[i])===month){
+            limitStatus.limit+=baseLimit;
+          }
+        }
       }
       return {limitStatus, errors};
     }
