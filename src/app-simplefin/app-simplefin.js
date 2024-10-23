@@ -42,7 +42,7 @@ app.post(
           }
         }
       }
-    } catch (error) {
+    } catch {
       invalidToken(res);
       return;
     }
