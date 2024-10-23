@@ -18,7 +18,10 @@ export function filterHiddenItems(
         (e.categoryHidden === false && e.categoryGroupHidden === false),
     )
     .filter(e => showOffBudget || e.accountOffBudget === false)
-    .filter(e => showUncategorized || e.category !== null);
+    .filter(
+      e =>
+        showUncategorized || e.category !== null || e.accountOffBudget === true,
+    );
 
   return showHide.filter(query => {
     if (!groupByCategory) return true;
