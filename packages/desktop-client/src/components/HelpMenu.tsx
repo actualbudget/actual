@@ -2,15 +2,14 @@ import { forwardRef, useRef } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { Trans, useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
-import { useLocation } from 'react-router-dom';
 
 import { useToggle } from 'usehooks-ts';
 
+import { openDocsForCurrentPage } from 'loot-core/client/actions';
 import { pushModal } from 'loot-core/client/actions/modals';
 
 import { useFeatureFlag } from '../hooks/useFeatureFlag';
 import { SvgHelp } from '../icons/v2/Help';
-import { openUrl } from '../util/router-tools';
 
 import { Button } from './common/Button2';
 import { Menu } from './common/Menu';
@@ -46,26 +45,6 @@ const HelpButton = forwardRef<HTMLButtonElement, HelpButtonProps>(
 
 HelpButton.displayName = 'HelpButton';
 
-const getPageDocs = (page: string) => {
-  switch (page) {
-    case '/budget':
-      return 'https://actualbudget.org/docs/getting-started/envelope-budgeting';
-    case '/reports':
-      return 'https://actualbudget.org/docs/reports/';
-    case '/schedules':
-      return 'https://actualbudget.org/docs/schedules';
-    case '/payees':
-      return 'https://actualbudget.org/docs/transactions/payees';
-    case '/rules':
-      return 'https://actualbudget.org/docs/budgeting/rules';
-    case '/settings':
-      return 'https://actualbudget.org/docs/settings';
-    default:
-      // All pages under /accounts, plus any missing pages
-      return 'https://actualbudget.org/docs';
-  }
-};
-
 export const HelpMenu = () => {
   const showGoalTemplates = useFeatureFlag('goalTemplatesEnabled');
   const { t } = useTranslation();
@@ -73,12 +52,11 @@ export const HelpMenu = () => {
   const menuButtonRef = useRef(null);
 
   const dispatch = useDispatch();
-  const page = useLocation().pathname;
 
   const handleItemSelect = (item: HelpMenuItem) => {
     switch (item) {
       case 'docs':
-        openUrl(getPageDocs(page));
+        dispatch(openDocsForCurrentPage());
         break;
       case 'keyboard-shortcuts':
         dispatch(pushModal('keyboard-shortcuts'));
