@@ -2,6 +2,7 @@ import { forwardRef, useRef } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { Trans, useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
+import { useLocation } from 'react-router-dom';
 
 import { useToggle } from 'usehooks-ts';
 
@@ -52,6 +53,7 @@ export const HelpMenu = () => {
   const menuButtonRef = useRef(null);
 
   const dispatch = useDispatch();
+  const page = useLocation().pathname;
 
   const handleItemSelect = (item: HelpMenuItem) => {
     switch (item) {
