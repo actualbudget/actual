@@ -508,6 +508,7 @@ async function applyCategoryTemplate(
     limitCheck: false,
     limit: 0,
     hold: false,
+    start: null,
   };
   let remainder = 0;
 
@@ -675,6 +676,7 @@ function readLimit(template, month, limitStatus, errors) {
     } else {
       limitStatus.limitCheck = true;
       limitStatus.hold = template.limit.hold;
+      limitStatus.start = template.limit.start;
 
       if (template.limit.period === 'daily') {
         const numDays = monthUtils.differenceInCalendarDays(
@@ -683,17 +685,15 @@ function readLimit(template, month, limitStatus, errors) {
         );
         limitStatus.limit = amountToInteger(template.limit.amount) * numDays;
       } else if (template.limit.period === 'weekly') {
-        // find next month
         const nextMonth = monthUtils.nextMonth(month);
-        //find weeks this month
-        const range = monthUtils.weekRangeInclusive(month, nextMonth, '2');
-        console.log(range);
+        let week = limitStatus.start;
         const baseLimit = amountToInteger(template.limit.amount);
-        // add weeks until not in this month
-        for (let i = 0; i < range.length; i++) {
-          if (monthUtils.monthFromDate(range[i]) === month) {
+        // check if weeks are in this month
+        while (week<nextMonth) {
+          if (week >= month) {
             limitStatus.limit += baseLimit;
           }
+          week = monthUtils.addWeeks(week,1);
         }
       }
       return { limitStatus, errors };

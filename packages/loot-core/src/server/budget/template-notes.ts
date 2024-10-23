@@ -1,13 +1,13 @@
 import { Notification } from '../../client/state-types/notifications';
 import * as db from '../db';
 
-import { parse } from './templateParser.pegjs';
 import {
   CategoryWithTemplateNote,
   getActiveSchedules,
   getCategoriesWithTemplateNotes,
   resetCategoryGoalDefsWithNoTemplates,
 } from './statements';
+import { parse } from './templateParser.pegjs';
 import { Template } from './types/templates';
 
 export const TEMPLATE_PREFIX = '#template';

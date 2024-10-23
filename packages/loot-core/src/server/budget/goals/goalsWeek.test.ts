@@ -9,12 +9,7 @@ describe('goalsWeek', () => {
     const errors: string[] = [];
 
     // When
-    const result = await goalsWeek(
-      template,
-      current_month,
-      to_budget,
-      errors,
-    );
+    const result = await goalsWeek(template, current_month, to_budget, errors);
 
     // Then
     expect(result.to_budget).toBe(50000);
@@ -29,16 +24,10 @@ describe('goalsWeek', () => {
     const errors: string[] = [];
 
     // When
-    const result = await goalsWeek(
-      template,
-      current_month,
-      to_budget,
-      errors,
-    );
+    const result = await goalsWeek(template, current_month, to_budget, errors);
 
     // Then
     expect(result.to_budget).toBe(30000);
     expect(result.errors).toHaveLength(0);
   });
-
 });
