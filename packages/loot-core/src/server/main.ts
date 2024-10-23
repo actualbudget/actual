@@ -1190,13 +1190,26 @@ handlers['simplefin-batch-sync'] = async function ({ ids }) {
     const matchedTransactions = [];
     const updatedAccounts = [];
 
-    handleSyncResponse(
-      account.res,
-      accounts.find(a => a.id === account.accountId),
-      newTransactions,
-      matchedTransactions,
-      updatedAccounts,
-    );
+    if (account.res.error_code) {
+      errors.push(
+        handleSyncError(
+          {
+            type: 'BankSyncError',
+            category: account.res.error_type,
+            code: account.res.error_code,
+          },
+          accounts.find(a => a.id === account.accountId),
+        ),
+      );
+    } else {
+      handleSyncResponse(
+        account.res,
+        accounts.find(a => a.id === account.accountId),
+        newTransactions,
+        matchedTransactions,
+        updatedAccounts,
+      );
+    }
 
     retVal.push({
       accountId: account.accountId,
