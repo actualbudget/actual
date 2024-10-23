@@ -40,7 +40,7 @@ limit = _? upTo _ amount: amount _ 'per week starting'i _ start:date _? hold: ho
         / _? upTo _ amount: amount _ 'per day'i _? hold: hold? 
           { return {amount: amount, hold: hold, period: 'daily', start:null }}
         / _? upTo _ amount: amount _? hold: hold? 
-          { return { amount: amount, hold: hold, period: 'montly', start:null }}
+          { return { amount: amount, hold: hold, period: 'monthly', start:null }}
 
 percentOf = percent:percent _ of _ 'previous'i _ { return { percent: percent, prev: true}}
 		/ percent:percent _ of _ { return { percent: percent, prev: false}}
