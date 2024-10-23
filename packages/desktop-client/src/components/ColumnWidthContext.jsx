@@ -6,7 +6,6 @@ import React, {
   useEffect,
 } from 'react';
 
-import { useLocalPref } from '../hooks/useLocalPref';
 import { useSyncedPref } from '../hooks/useSyncedPref';
 
 const ColumnWidthContext = createContext();
