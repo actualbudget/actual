@@ -3,9 +3,9 @@ import { goalsSimple } from './goalsSimple';
 describe('goalsSimple', () => {
   it('should return correct budget amount when limit set and no balance left from previous months', async () => {
     // Given
-    const template = { limit: { amount: 100, hold: false } };
+    const template = { monthly: null, limit: { amount: 100, hold: false } };
     const errors: string[] = [];
-    const limit = 0;
+    const limit = 10000;
     const to_budget = 0;
     const last_month_balance = 0;
 
@@ -25,9 +25,9 @@ describe('goalsSimple', () => {
 
   it('should return correct budget amount when limit set and balance from previous month left over', async () => {
     // Given
-    const template = { limit: { amount: 100, hold: false } };
+    const template = {monthly: null, limit: { amount: 100, hold: false } };
     const errors: string[] = [];
-    const limit = 0;
+    const limit = 10000;
     const to_budget = 0;
     const last_month_balance = 2000;
 
@@ -47,9 +47,9 @@ describe('goalsSimple', () => {
 
   it('should return correct budget amount when assigned from previous month is greater than the limit set', async () => {
     // Given
-    const template = { limit: { amount: 100, hold: false } };
+    const template = { monthly: null, limit: { amount: 100, hold: false } };
     const errors: string[] = [];
-    const limit = 0;
+    const limit = 10000;
     const to_budget = 0;
     const last_month_balance = 20000;
 
@@ -71,7 +71,7 @@ describe('goalsSimple', () => {
     // Given
     const template = { monthly: 50, limit: { amount: 100, hold: false } };
     const errors: string[] = [];
-    const limit = 0;
+    const limit = 10000;
     const to_budget = 0;
     const last_month_balance = 0;
 

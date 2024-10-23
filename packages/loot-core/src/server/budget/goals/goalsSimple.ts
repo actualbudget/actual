@@ -11,8 +11,7 @@ export async function goalsSimple(
   // simple has 'monthly' and/or 'limit' params
   let increment = 0;
   if (template.monthly != null) {
-    const monthly = amountToInteger(template.monthly);
-    increment = monthly;
+    increment = amountToInteger(template.monthly);
   } else {
     increment = limit - last_month_balance;
   }
