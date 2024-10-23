@@ -696,7 +696,7 @@ function readLimit(template, month, limitStatus, errors) {
       }
       week = monthUtils.addWeeks(week, 1);
     }
-  } else if (template.limit.period ==='monthly') {
+  } else if (template.limit.period === 'monthly') {
     limitStatus.amount = amountToInteger(template.limit.amount);
   } else {
     errors.push('Invalid limit period. Check the template syntax');
