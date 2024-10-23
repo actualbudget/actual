@@ -2230,15 +2230,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@internationalized/date@npm:^3.5.5":
-  version: 3.5.5
-  resolution: "@internationalized/date@npm:3.5.5"
-  dependencies:
-    "@swc/helpers": "npm:^0.5.0"
-  checksum: 10/5f045faf7af0d217874e537507ad9a68753eabc5fa8905524801acaafd6c5e2b4df050c467b423b738ab40a327e1889e620bab41b47c4032aa17f7ca731dc06b
-  languageName: node
-  linkType: hard
-
 "@internationalized/message@npm:^3.1.4":
   version: 3.1.4
   resolution: "@internationalized/message@npm:3.1.4"
@@ -3151,26 +3142,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-aria/listbox@npm:^3.13.3":
-  version: 3.13.3
-  resolution: "@react-aria/listbox@npm:3.13.3"
-  dependencies:
-    "@react-aria/interactions": "npm:^3.22.2"
-    "@react-aria/label": "npm:^3.7.11"
-    "@react-aria/selection": "npm:^3.19.3"
-    "@react-aria/utils": "npm:^3.25.2"
-    "@react-stately/collections": "npm:^3.10.9"
-    "@react-stately/list": "npm:^3.10.8"
-    "@react-types/listbox": "npm:^3.5.1"
-    "@react-types/shared": "npm:^3.24.1"
-    "@swc/helpers": "npm:^0.5.0"
-  peerDependencies:
-    react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0 || ^19.0.0
-    react-dom: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0 || ^19.0.0
-  checksum: 10/29fd91e97dde48ccc1c85f9769f586e125977e9c348e3b67e050b33bd6c4fb612228cd30ae3edd57633b041386836cf65c874ba2d69beb3a3f8f367a7383e258
-  languageName: node
-  linkType: hard
-
 "@react-aria/live-announcer@npm:^3.3.4":
   version: 3.3.4
   resolution: "@react-aria/live-announcer@npm:3.3.4"
@@ -3633,20 +3604,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-aria/visually-hidden@npm:^3.8.15":
-  version: 3.8.15
-  resolution: "@react-aria/visually-hidden@npm:3.8.15"
-  dependencies:
-    "@react-aria/interactions": "npm:^3.22.2"
-    "@react-aria/utils": "npm:^3.25.2"
-    "@react-types/shared": "npm:^3.24.1"
-    "@swc/helpers": "npm:^0.5.0"
-  peerDependencies:
-    react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0 || ^19.0.0
-  checksum: 10/5923eebcaa1873503f9c19bcdea5d6f6d5051583d0076aadbb627886608ef7f0b7ef96eff5ac794afe099cfeb0479fbb2bc54c40b5375b8b1ae1b53e67e12e2b
-  languageName: node
-  linkType: hard
-
 "@react-dnd/asap@npm:^5.0.1":
   version: 5.0.2
   resolution: "@react-dnd/asap@npm:5.0.2"
@@ -3898,19 +3855,6 @@ __metadata:
   peerDependencies:
     react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0 || ^19.0.0
   checksum: 10/9ffe8e729893f810aaa3694e48c4579764d5b432fd68a9138f0e740ef8062711682ac4fe01ec2ba6f81d24f84c4f9cdcb94aff9aae1a61a7e09e16951490cfcf
-  languageName: node
-  linkType: hard
-
-"@react-stately/dnd@npm:^3.4.2":
-  version: 3.4.2
-  resolution: "@react-stately/dnd@npm:3.4.2"
-  dependencies:
-    "@react-stately/selection": "npm:^3.16.2"
-    "@react-types/shared": "npm:^3.24.1"
-    "@swc/helpers": "npm:^0.5.0"
-  peerDependencies:
-    react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0 || ^19.0.0
-  checksum: 10/f39d594f05cef11ec1fcc8b3b5a3abe355b56173a3c122e184f73bba2b47ba3110946077546acb5c9734463449bb6813eee97d68394b448fbf8bc8dfa8289ec1
   languageName: node
   linkType: hard
 
@@ -15822,54 +15766,6 @@ __metadata:
     react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0 || ^19.0.0
     react-dom: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0 || ^19.0.0
   checksum: 10/d1296e4874aee14ea41e57a1b728e6267ac82282175c5e93b812c33242d8580756ac3c1fbae20647a6816e77de055319503005640bb2ba29768439abeca3abf4
-  languageName: node
-  linkType: hard
-
-"react-aria@npm:^3.34.3":
-  version: 3.34.3
-  resolution: "react-aria@npm:3.34.3"
-  dependencies:
-    "@internationalized/string": "npm:^3.2.3"
-    "@react-aria/breadcrumbs": "npm:^3.5.16"
-    "@react-aria/button": "npm:^3.9.8"
-    "@react-aria/calendar": "npm:^3.5.11"
-    "@react-aria/checkbox": "npm:^3.14.6"
-    "@react-aria/combobox": "npm:^3.10.3"
-    "@react-aria/datepicker": "npm:^3.11.2"
-    "@react-aria/dialog": "npm:^3.5.17"
-    "@react-aria/dnd": "npm:^3.7.2"
-    "@react-aria/focus": "npm:^3.18.2"
-    "@react-aria/gridlist": "npm:^3.9.3"
-    "@react-aria/i18n": "npm:^3.12.2"
-    "@react-aria/interactions": "npm:^3.22.2"
-    "@react-aria/label": "npm:^3.7.11"
-    "@react-aria/link": "npm:^3.7.4"
-    "@react-aria/listbox": "npm:^3.13.3"
-    "@react-aria/menu": "npm:^3.15.3"
-    "@react-aria/meter": "npm:^3.4.16"
-    "@react-aria/numberfield": "npm:^3.11.6"
-    "@react-aria/overlays": "npm:^3.23.2"
-    "@react-aria/progress": "npm:^3.4.16"
-    "@react-aria/radio": "npm:^3.10.7"
-    "@react-aria/searchfield": "npm:^3.7.8"
-    "@react-aria/select": "npm:^3.14.9"
-    "@react-aria/selection": "npm:^3.19.3"
-    "@react-aria/separator": "npm:^3.4.2"
-    "@react-aria/slider": "npm:^3.7.11"
-    "@react-aria/ssr": "npm:^3.9.5"
-    "@react-aria/switch": "npm:^3.6.7"
-    "@react-aria/table": "npm:^3.15.3"
-    "@react-aria/tabs": "npm:^3.9.5"
-    "@react-aria/tag": "npm:^3.4.5"
-    "@react-aria/textfield": "npm:^3.14.8"
-    "@react-aria/tooltip": "npm:^3.7.7"
-    "@react-aria/utils": "npm:^3.25.2"
-    "@react-aria/visually-hidden": "npm:^3.8.15"
-    "@react-types/shared": "npm:^3.24.1"
-  peerDependencies:
-    react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0 || ^19.0.0
-    react-dom: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0 || ^19.0.0
-  checksum: 10/7da0a97a58a88ecb447370c621b3b8decf6763d4ad3af932e67f8a99d0bb7be5f234f61ca2f490c17c23e6cbda83447afb380d96f9b7a9611c9f6424ebc5b869
   languageName: node
   linkType: hard
 
