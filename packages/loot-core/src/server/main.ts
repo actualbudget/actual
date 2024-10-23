@@ -1219,6 +1219,8 @@ handlers['simplefin-batch-sync'] = async function ({ ids }) {
     });
   }
 
+  console.groupEnd();
+
   return retVal;
 };
 
