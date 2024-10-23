@@ -47,12 +47,8 @@ app.post(
       return;
     }
 
-    const now = new Date();
-    const startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-    const endDate = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-
     try {
-      const accounts = await getAccounts(accessKey, startDate, endDate);
+      const accounts = await getAccounts(accessKey, null, null, true);
 
       res.send({
         status: 'ok',
@@ -313,7 +309,12 @@ function normalizeDate(date) {
   return (date.valueOf() - date.getTimezoneOffset() * 60 * 1000) / 1000;
 }
 
-async function getAccounts(accessKey, startDate, endDate) {
+async function getAccounts(
+  accessKey,
+  startDate,
+  endDate,
+  noTransactions = false,
+) {
   const sfin = parseAccessKey(accessKey);
   const options = {
     headers: {
@@ -323,16 +324,20 @@ async function getAccounts(accessKey, startDate, endDate) {
     },
   };
   const params = [];
+  if (!noTransactions) {
+    if (startDate) {
+      params.push(`start-date=${normalizeDate(startDate)}`);
+    }
+    if (endDate) {
+      params.push(`end-date=${normalizeDate(endDate)}`);
+    }
+
+    params.push(`pending=1`);
+  } else {
+    params.push(`balances-only=1`);
+  }
+
   let queryString = '';
-  if (startDate) {
-    params.push(`start-date=${normalizeDate(startDate)}`);
-  }
-  if (endDate) {
-    params.push(`end-date=${normalizeDate(endDate)}`);
-  }
-
-  params.push(`pending=1`);
-
   if (params.length > 0) {
     queryString += '?' + params.join('&');
   }
