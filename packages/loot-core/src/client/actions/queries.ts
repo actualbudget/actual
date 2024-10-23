@@ -34,9 +34,7 @@ export function applyBudgetAction(month, type, args) {
         break;
       case 'apply-goal-template':
         dispatch(
-          addNotification(
-            await send('budget/apply-goal-template', { month }),
-          ),
+          addNotification(await send('budget/apply-goal-template', { month })),
         );
         break;
       case 'overwrite-goal-template':
