@@ -36,7 +36,7 @@ function FeatureToggle({
       <Checkbox
         checked={enabled}
         onChange={() => {
-          setFlagPref(!enabled);
+          setFlagPref(String(!enabled));
         }}
         disabled={disableToggle}
       />
@@ -67,7 +67,7 @@ function FeatureToggle({
   );
 }
 
-function ReportBudgetFeature() {
+function TrackingBudgetFeature() {
   const { t } = useTranslation();
   const [budgetType = 'rollover'] = useSyncedPref('budgetType');
   const enabled = useFeatureFlag('reportBudget');
@@ -76,7 +76,7 @@ function ReportBudgetFeature() {
     <FeatureToggle
       flag="reportBudget"
       disableToggle={blockToggleOff}
-      error={t('Switch to a rollover budget before turning off this feature')}
+      error={t('Switch to a envelope budget before turning off this feature')}
       feedbackLink="https://github.com/actualbudget/actual/issues/2999"
     >
       <Trans>Budget mode toggle</Trans>
@@ -92,29 +92,28 @@ export function ExperimentalFeatures() {
       primaryAction={
         expanded ? (
           <View style={{ gap: '1em' }}>
-            <FeatureToggle
-              flag="spendingReport"
-              feedbackLink="https://github.com/actualbudget/actual/issues/2820"
-            >
-              <Trans>Monthly spending report</Trans>
-            </FeatureToggle>
-
-            <ReportBudgetFeature />
+            <TrackingBudgetFeature />
 
             <FeatureToggle flag="goalTemplatesEnabled">
               <Trans>Goal templates</Trans>
-            </FeatureToggle>
-            <FeatureToggle
-              flag="simpleFinSync"
-              feedbackLink="https://github.com/actualbudget/actual/issues/2272"
-            >
-              <Trans>SimpleFIN sync</Trans>
             </FeatureToggle>
             <FeatureToggle
               flag="dashboards"
               feedbackLink="https://github.com/actualbudget/actual/issues/3282"
             >
               <Trans>Customizable reports page (dashboards)</Trans>
+            </FeatureToggle>
+            <FeatureToggle
+              flag="actionTemplating"
+              feedbackLink="https://github.com/actualbudget/actual/issues/3606"
+            >
+              <Trans>Rule action templating</Trans>
+            </FeatureToggle>
+            <FeatureToggle
+              flag="upcomingLengthAdjustment"
+              feedbackLink="https://github.com/actualbudget/actual/issues/3660"
+            >
+              <Trans>Scheduled transaction upcoming length adjustment</Trans>
             </FeatureToggle>
           </View>
         ) : (

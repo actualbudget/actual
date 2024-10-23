@@ -15,6 +15,7 @@ import React, {
   type ReactElement,
   type Ref,
   type MutableRefObject,
+  type CSSProperties,
 } from 'react';
 import { useStore } from 'react-redux';
 import AutoSizer from 'react-virtualized-auto-sizer';
@@ -28,10 +29,10 @@ import { useSelectedItems } from '../hooks/useSelected';
 import { AnimatedLoading } from '../icons/AnimatedLoading';
 import { SvgDelete, SvgExpandArrow } from '../icons/v0';
 import { SvgCheckmark } from '../icons/v1';
-import { type CSSProperties, styles, theme } from '../style';
+import { styles, theme } from '../style';
 
 import { ColumnWidthProvider, useColumnWidth } from './ColumnWidthContext';
-import { Button } from './common/Button';
+import { Button } from './common/Button2';
 import { Input } from './common/Input';
 import { Menu, type MenuItem } from './common/Menu';
 import { Popover } from './common/Popover';
@@ -217,11 +218,6 @@ export const Cell = forwardRef<HTMLDivElement, CellProps>(function Cell(
         privacyFilter={mergeConditionalPrivacyFilterProps(
           {
             activationFilters: [!focused, !exposed],
-            style: {
-              position: 'absolute',
-              width: '100%',
-              height: '100%',
-            },
           },
           privacyFilter,
         )}
@@ -843,19 +839,19 @@ export function TableHeader({
   );
 }
 
-type SelectedItemsButtonProps<T extends MenuItem = MenuItem> = {
+type SelectedItemsButtonProps<Name extends string> = {
   id: string;
   name: ((count: number) => string) | string;
-  items: Array<T | typeof Menu.line>;
-  onSelect: (name: string, items: Array<string>) => void;
+  items: MenuItem<Name>[];
+  onSelect: (name: Name, items: string[]) => void;
 };
 
-export function SelectedItemsButton<T extends MenuItem = MenuItem>({
+export function SelectedItemsButton<Name extends string>({
   id,
   name,
   items,
   onSelect,
-}: SelectedItemsButtonProps<T>) {
+}: SelectedItemsButtonProps<Name>) {
   const selectedItems = useSelectedItems();
   const [menuOpen, setMenuOpen] = useState(null);
   const triggerRef = useRef(null);
@@ -871,9 +867,9 @@ export function SelectedItemsButton<T extends MenuItem = MenuItem>({
     <View style={{ marginLeft: 10, flexShrink: 0 }}>
       <Button
         ref={triggerRef}
-        type="bare"
+        variant="bare"
         style={{ color: theme.pageTextPositive }}
-        onClick={() => setMenuOpen(true)}
+        onPress={() => setMenuOpen(true)}
         data-testid={id + '-select-button'}
       >
         <SvgExpandArrow
@@ -1131,7 +1127,6 @@ export const Table = forwardRef(
             zIndex: editing || selected ? 101 : 'auto',
             transform: 'translateY(var(--pos))',
           }}
-          // @ts-expect-error not a recognised style attribute
           nativeStyle={{ '--pos': `${style.top - 1}px` }}
           data-focus-key={item.id}
         >
@@ -1321,7 +1316,7 @@ TableResizable.displayName = 'TableResizable';
 // @ts-expect-error fix me
 Table.displayName = 'Table';
 
-export type TableNavigator<T extends TableItem> = {
+type TableNavigator<T extends TableItem> = {
   onEdit: (id: T['id'], field?: string) => void;
   editingId: T['id'];
   focusedField: string;

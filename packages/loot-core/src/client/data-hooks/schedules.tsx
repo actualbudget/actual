@@ -1,14 +1,16 @@
 // @ts-strict-ignore
 import React, {
   createContext,
-  useEffect,
-  useState,
   useContext,
+  useEffect,
   useMemo,
+  useState,
 } from 'react';
 
+import { useSyncedPref } from '@actual-app/web/src/hooks/useSyncedPref';
+
 import { q, type Query } from '../../shared/query';
-import { getStatus, getHasTransactionsQuery } from '../../shared/schedules';
+import { getHasTransactionsQuery, getStatus } from '../../shared/schedules';
 import { type ScheduleEntity } from '../../types/models';
 import { getAccountFilter } from '../queries';
 import { liveQuery } from '../query-helpers';
@@ -16,7 +18,7 @@ import { liveQuery } from '../query-helpers';
 export type ScheduleStatusType = ReturnType<typeof getStatus>;
 export type ScheduleStatuses = Map<ScheduleEntity['id'], ScheduleStatusType>;
 
-function loadStatuses(schedules: ScheduleEntity[], onData) {
+function loadStatuses(schedules: ScheduleEntity[], onData, prefs) {
   return liveQuery(getHasTransactionsQuery(schedules), onData, {
     mapper: data => {
       const hasTrans = new Set(data.filter(Boolean).map(row => row.schedule));
@@ -24,7 +26,7 @@ function loadStatuses(schedules: ScheduleEntity[], onData) {
       return new Map(
         schedules.map(s => [
           s.id,
-          getStatus(s.next_date, s.completed, hasTrans.has(s.id)),
+          getStatus(s.next_date, s.completed, hasTrans.has(s.id), prefs),
         ]),
       );
     },
@@ -36,15 +38,15 @@ type UseSchedulesResult = {
   schedules: ScheduleEntity[];
   statuses: ScheduleStatuses;
 } | null;
+
 export function useSchedules({
   transform,
 }: UseSchedulesArgs = {}): UseSchedulesResult {
   const [data, setData] = useState<UseSchedulesResult>(null);
-
+  const upcomingLength = useSyncedPref('upcomingScheduledTransactionLength')[0];
   useEffect(() => {
     const query = q('schedules').select('*');
     let statusQuery;
-
     const scheduleQuery = liveQuery(
       transform ? transform(query) : query,
       async (schedules: ScheduleEntity[]) => {
@@ -53,8 +55,10 @@ export function useSchedules({
             statusQuery.unsubscribe();
           }
 
-          statusQuery = loadStatuses(schedules, (statuses: ScheduleStatuses) =>
-            setData({ schedules, statuses }),
+          statusQuery = loadStatuses(
+            schedules,
+            (statuses: ScheduleStatuses) => setData({ schedules, statuses }),
+            upcomingLength,
           );
         }
       },
@@ -68,7 +72,7 @@ export function useSchedules({
         statusQuery.unsubscribe();
       }
     };
-  }, [transform]);
+  }, [upcomingLength, transform]);
 
   return data;
 }

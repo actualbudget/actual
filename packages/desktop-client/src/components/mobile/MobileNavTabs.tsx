@@ -1,5 +1,9 @@
 // @ts-strict-ignore
-import React, { type ComponentType, useEffect } from 'react';
+import React, {
+  type ComponentType,
+  useEffect,
+  type CSSProperties,
+} from 'react';
 import { NavLink } from 'react-router-dom';
 import { useSpring, animated, config } from 'react-spring';
 
@@ -17,7 +21,7 @@ import {
 import { SvgReports } from '../../icons/v1/Reports';
 import { SvgCalendar } from '../../icons/v2';
 import { useResponsive } from '../../ResponsiveProvider';
-import { theme, styles, type CSSProperties } from '../../style';
+import { theme, styles } from '../../style';
 import { View } from '../common/View';
 import { useScroll } from '../ScrollProvider';
 
@@ -199,7 +203,7 @@ export function MobileNavTabs() {
       <View>
         <div
           style={{
-            background: theme.pillBorder,
+            backgroundColor: theme.pillBorder,
             borderRadius: 10,
             width: 30,
             marginTop: 5,

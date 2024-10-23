@@ -117,9 +117,7 @@ export function ReportSummary({
             fontWeight: 800,
           }}
         >
-          <PrivacyFilter blurIntensity={7}>
-            {amountToCurrency(data[balanceTypeOp])}
-          </PrivacyFilter>
+          <PrivacyFilter>{amountToCurrency(data[balanceTypeOp])}</PrivacyFilter>
         </Text>
         <Text style={{ fontWeight: 600 }}>For this time period</Text>
       </View>
@@ -154,7 +152,7 @@ export function ReportSummary({
             fontWeight: 800,
           }}
         >
-          <PrivacyFilter blurIntensity={7}>
+          <PrivacyFilter>
             {!isNaN(average) && integerToCurrency(Math.round(average))}
           </PrivacyFilter>
         </Text>

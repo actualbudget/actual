@@ -1,6 +1,9 @@
-import React, { type MouseEventHandler, type ReactNode } from 'react';
+import React, {
+  type MouseEventHandler,
+  type ReactNode,
+  type CSSProperties,
+} from 'react';
 
-import { type CSSProperties } from '../../style';
 import { Link } from '../common/Link';
 import { View } from '../common/View';
 
@@ -38,7 +41,7 @@ export function ItemContent({
       {children}
     </View>
   ) : (
-    <Link to={to} style={style} activeStyle={activeStyle}>
+    <Link variant="internal" to={to} style={style} activeStyle={activeStyle}>
       {children}
     </Link>
   );

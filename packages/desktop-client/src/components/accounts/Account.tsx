@@ -69,7 +69,9 @@ import { ColumnWidthProvider, useColumnWidth } from '../ColumnWidthContext';
 import { Button } from '../common/Button2';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
+import { type SavedFilter } from '../filters/SavedFilterMenuButton';
 import { TransactionList } from '../transactions/TransactionList';
+import { validateAccountName } from '../util/accountValidation';
 
 import { AccountHeader } from './Header';
 
@@ -284,7 +286,7 @@ type AccountInternalProps = {
 type AccountInternalState = {
   search: string;
   filterConditions: ConditionEntity[];
-  filterId: Record<string, unknown>;
+  filterId?: SavedFilter;
   filterConditionsOp: 'and' | 'or';
   loading: boolean;
   workingHard: boolean;
@@ -298,6 +300,7 @@ type AccountInternalState = {
   prevShowCleared?: boolean;
   showReconciled: boolean;
   editingName: boolean;
+  nameError: string;
   isAdding: boolean;
   modalShowing?: boolean;
   sort: {
@@ -309,6 +312,14 @@ type AccountInternalState = {
   filteredAmount: null | number;
 };
 
+export type TableRef = MutableRefObject<{
+  edit: (updatedId: string | null, op?: string, someBool?: boolean) => void;
+  setRowAnimation: (animation: boolean) => void;
+  scrollTo: (focusId: string) => void;
+  scrollToTop: () => void;
+  getScrolledItem: () => string;
+} | null>;
+
 class AccountInternal extends PureComponent<
   AccountInternalProps,
   AccountInternalState
@@ -316,12 +327,7 @@ class AccountInternal extends PureComponent<
   paged: ReturnType<typeof pagedQuery> | null;
   rootQuery: Query;
   currentQuery: Query;
-  table: MutableRefObject<{
-    edit: (updatedId: string | null, op?: string, someBool?: boolean) => void;
-    setRowAnimation: (animation: boolean) => void;
-    scrollTo: (focusId: string) => void;
-    scrollToTop: () => void;
-  } | null>;
+  table: TableRef;
   unlisten?: () => void;
   dispatchSelected?: (action: Actions) => void;
 
@@ -333,7 +339,7 @@ class AccountInternal extends PureComponent<
     this.state = {
       search: '',
       filterConditions: props.filterConditions || [],
-      filterId: {},
+      filterId: undefined,
       filterConditionsOp: 'and',
       loading: true,
       workingHard: false,
@@ -345,6 +351,7 @@ class AccountInternal extends PureComponent<
       showCleared: props.showCleared,
       showReconciled: props.showReconciled,
       editingName: false,
+      nameError: '',
       isAdding: false,
       sort: null,
       filteredAmount: null,
@@ -488,8 +495,12 @@ class AccountInternal extends PureComponent<
       this.paged.unsubscribe();
     }
 
-    // Filter out reconciled transactions if necessary.
-    if (!this.state.showReconciled) {
+    // Filter out reconciled transactions if they are hidden
+    // and we're not showing balances.
+    if (
+      !this.state.showReconciled &&
+      (!this.state.showBalances || !this.canCalculateBalance())
+    ) {
       query = query.filter({ reconciled: { $eq: false } });
     }
 
@@ -705,13 +716,19 @@ class AccountInternal extends PureComponent<
   };
 
   onSaveName = (name: string) => {
-    if (name.trim().length) {
-      const accountId = this.props.accountId;
+    const accountNameError = validateAccountName(
+      name,
+      this.props.accountId,
+      this.props.accounts,
+    );
+    if (accountNameError) {
+      this.setState({ nameError: accountNameError });
+    } else {
       const account = this.props.accounts.find(
-        account => account.id === accountId,
-      )!;
+        account => account.id === this.props.accountId,
+      );
       this.props.updateAccount({ ...account, name });
-      this.setState({ editingName: false });
+      this.setState({ editingName: false, nameError: '' });
     }
   };
 
@@ -856,7 +873,7 @@ class AccountInternal extends PureComponent<
     return {
       name: `balance-query-${id}`,
       query: this.makeRootQuery().calculate({ $sum: '$amount' }),
-    };
+    } as const;
   }
 
   getFilteredAmount = async () => {
@@ -975,9 +992,16 @@ class AccountInternal extends PureComponent<
       transactions: [...reconciliationTransactions, ...this.state.transactions],
     });
 
+    // run rules on the reconciliation transaction
+    const ruledTransactions = await Promise.all(
+      reconciliationTransactions.map(transaction =>
+        send('rules-run', { transaction }),
+      ),
+    );
+
     // sync the reconciliation transaction
     await send('transactions-batch-update', {
-      added: reconciliationTransactions,
+      added: ruledTransactions,
     });
     await this.refetchTransactions();
   };
@@ -1200,7 +1224,7 @@ class AccountInternal extends PureComponent<
     } satisfies RuleConditionEntity;
 
     const rule = {
-      stage: 'default',
+      stage: null,
       conditionsOp: 'and',
       conditions: [payeeCondition, amountCondition],
       actions: [
@@ -1297,13 +1321,10 @@ class AccountInternal extends PureComponent<
     }
   };
 
-  onReloadSavedFilter = (
-    savedFilter: TransactionFilterEntity & { status?: string },
-    item: string,
-  ) => {
+  onReloadSavedFilter = (savedFilter: SavedFilter, item: string) => {
     if (item === 'reload') {
       const [savedFilter] = this.props.savedFilters.filter(
-        f => f.id === this.state.filterId.id,
+        f => f.id === this.state.filterId?.id,
       );
       this.setState({ filterConditionsOp: savedFilter.conditionsOp ?? 'and' });
       this.applyFilters([...savedFilter.conditions]);
@@ -1320,7 +1341,7 @@ class AccountInternal extends PureComponent<
 
   onClearFilters = () => {
     this.setState({ filterConditionsOp: 'and' });
-    this.setState({ filterId: {} });
+    this.setState({ filterId: undefined });
     this.applyFilters([]);
     if (this.state.search !== '') {
       this.onSearch(this.state.search);
@@ -1350,7 +1371,7 @@ class AccountInternal extends PureComponent<
   onDeleteFilter = (condition: RuleConditionEntity) => {
     this.applyFilters(this.state.filterConditions.filter(c => c !== condition));
     if (this.state.filterConditions.length === 1) {
-      this.setState({ filterId: {} });
+      this.setState({ filterId: undefined });
       this.setState({ filterConditionsOp: 'and' });
     } else {
       this.setState({
@@ -1367,6 +1388,18 @@ class AccountInternal extends PureComponent<
 
   onApplyFilter = async (conditionOrSavedFilter: ConditionEntity) => {
     let filterConditions = this.state.filterConditions;
+
+    if (
+      'customName' in conditionOrSavedFilter &&
+      conditionOrSavedFilter.customName
+    ) {
+      filterConditions = filterConditions.filter(
+        c =>
+          !isTransactionFilterEntity(c) &&
+          c.customName !== conditionOrSavedFilter.customName,
+      );
+    }
+
     if (isTransactionFilterEntity(conditionOrSavedFilter)) {
       // A saved filter was passed in.
       const savedFilter = conditionOrSavedFilter;
@@ -1376,12 +1409,6 @@ class AccountInternal extends PureComponent<
       this.setState({ filterConditionsOp: savedFilter.conditionsOp });
       this.applyFilters([...savedFilter.conditions]);
     } else {
-      filterConditions = filterConditions.filter(
-        c =>
-          !isTransactionFilterEntity(c) &&
-          c.customName !== conditionOrSavedFilter.customName,
-      );
-
       // A condition was passed in.
       const condition = conditionOrSavedFilter;
       this.setState({
@@ -1699,15 +1726,16 @@ class AccountInternal extends PureComponent<
                 isSorted={this.state.sort !== null}
                 reconcileAmount={reconcileAmount}
                 search={this.state.search}
+                // @ts-expect-error fix me
                 filterConditions={this.state.filterConditions}
                 filterConditionsOp={this.state.filterConditionsOp}
-                pushModal={this.props.pushModal}
                 onSearch={this.onSearch}
                 onShowTransactions={this.onShowTransactions}
                 onMenuSelect={this.onMenuSelect}
                 onAddTransaction={this.onAddTransaction}
                 onToggleExtraBalances={this.onToggleExtraBalances}
                 onSaveName={this.onSaveName}
+                saveNameError={this.state.nameError}
                 onExposeName={this.onExposeName}
                 onReconcile={this.onReconcile}
                 onDoneReconciling={this.onDoneReconciling}
@@ -1750,6 +1778,7 @@ class AccountInternal extends PureComponent<
                   payees={payees}
                   balances={allBalances}
                   showBalances={!!allBalances}
+                  showReconciled={showReconciled}
                   showCleared={showCleared}
                   showAccount={
                     !accountId ||
@@ -1856,7 +1885,7 @@ function AccountInner() {
   const payees = usePayees();
   const failedAccounts = useFailedAccounts();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
-  const [hideFraction = false] = useSyncedPref('hideFraction');
+  const [hideFraction] = useSyncedPref('hideFraction');
   const [expandSplits] = useLocalPref('expand-splits');
   const [showBalances, setShowBalances] = useSyncedPref(
     `show-balances-${params.id}`,
@@ -1893,16 +1922,20 @@ function AccountInner() {
           accounts={accounts}
           failedAccounts={failedAccounts}
           dateFormat={dateFormat}
-          hideFraction={hideFraction}
+          hideFraction={String(hideFraction) === 'true'}
           expandSplits={expandSplits}
-          showBalances={showBalances}
-          setShowBalances={setShowBalances}
-          showCleared={!hideCleared}
-          setShowCleared={val => setHideCleared(!val)}
-          showReconciled={!hideReconciled}
-          setShowReconciled={val => setHideReconciled(!val)}
-          showExtraBalances={showExtraBalances}
-          setShowExtraBalances={setShowExtraBalances}
+          showBalances={String(showBalances) === 'true'}
+          setShowBalances={showBalances =>
+            setShowBalances(String(showBalances))
+          }
+          showCleared={String(hideCleared) !== 'true'}
+          setShowCleared={val => setHideCleared(String(!val))}
+          showReconciled={String(hideReconciled) !== 'true'}
+          setShowReconciled={val => setHideReconciled(String(!val))}
+          showExtraBalances={String(showExtraBalances) === 'true'}
+          setShowExtraBalances={extraBalances =>
+            setShowExtraBalances(String(extraBalances))
+          }
           payees={payees}
           modalShowing={modalShowing}
           accountsSyncing={accountsSyncing}

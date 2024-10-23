@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, type CSSProperties } from 'react';
 
 import { type CategoryEntity } from 'loot-core/src/types/models';
 
@@ -8,7 +8,7 @@ import { useCategoryGroup } from '../../hooks/useCategoryGroup';
 import { useNotes } from '../../hooks/useNotes';
 import { SvgDotsHorizontalTriple, SvgTrash } from '../../icons/v1';
 import { SvgNotesPaper, SvgViewHide, SvgViewShow } from '../../icons/v2';
-import { type CSSProperties, styles, theme } from '../../style';
+import { styles, theme } from '../../style';
 import { Button } from '../common/Button2';
 import { Menu } from '../common/Menu';
 import {
@@ -16,7 +16,7 @@ import {
   ModalCloseButton,
   ModalHeader,
   ModalTitle,
-} from '../common/Modal2';
+} from '../common/Modal';
 import { Popover } from '../common/Popover';
 import { View } from '../common/View';
 import { Notes } from '../Notes';
@@ -43,7 +43,7 @@ export function CategoryMenuModal({
   const originalNotes = useNotes(category.id);
 
   const onRename = newName => {
-    if (newName !== category.name) {
+    if (newName && newName !== category.name) {
       onSave?.({
         ...category,
         name: newName,
@@ -97,7 +97,7 @@ export function CategoryMenuModal({
                 onTitleUpdate={onRename}
               />
             }
-            rightContent={<ModalCloseButton onClick={close} />}
+            rightContent={<ModalCloseButton onPress={close} />}
           />
           <View
             style={{

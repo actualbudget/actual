@@ -1,3 +1,4 @@
+import { AccountPage } from './account-page';
 import { BudgetPage } from './budget-page';
 
 export class ConfigurationPage {
@@ -18,6 +19,8 @@ export class ConfigurationPage {
 
   async startFresh() {
     await this.page.getByRole('button', { name: 'Start fresh' }).click();
+
+    return new AccountPage(this.page);
   }
 
   async importBudget(type, file) {

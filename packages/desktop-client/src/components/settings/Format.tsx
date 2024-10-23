@@ -1,12 +1,14 @@
 // @ts-strict-ignore
 import React, { type ReactNode } from 'react';
 
+import { css } from '@emotion/css';
+
 import { numberFormats } from 'loot-core/src/shared/util';
 import { type SyncedPrefs } from 'loot-core/src/types/prefs';
 
 import { useDateFormat } from '../../hooks/useDateFormat';
 import { useSyncedPref } from '../../hooks/useSyncedPref';
-import { type CSSProperties, theme } from '../../style';
+import { theme } from '../../style';
 import { tokens } from '../../tokens';
 import { Select } from '../common/Select';
 import { Text } from '../common/Text';
@@ -62,14 +64,13 @@ export function FormatSettings() {
   const [, setDateFormatPref] = useSyncedPref('dateFormat');
   const [_numberFormat, setNumberFormatPref] = useSyncedPref('numberFormat');
   const numberFormat = _numberFormat || 'comma-dot';
-  const [hideFraction = false, setHideFractionPref] =
-    useSyncedPref('hideFraction');
+  const [hideFraction, setHideFractionPref] = useSyncedPref('hideFraction');
 
-  const selectButtonStyle: CSSProperties = {
-    ':hover': {
+  const selectButtonClassName = css({
+    '&[data-hovered]': {
       backgroundColor: theme.buttonNormalBackgroundHover,
     },
-  };
+  });
 
   return (
     <Setting
@@ -95,16 +96,18 @@ export function FormatSettings() {
               onChange={format => setNumberFormatPref(format)}
               options={numberFormats.map(f => [
                 f.value,
-                hideFraction ? f.labelNoFraction : f.label,
+                String(hideFraction) === 'true' ? f.labelNoFraction : f.label,
               ])}
-              buttonStyle={selectButtonStyle}
+              className={selectButtonClassName}
             />
 
             <Text style={{ display: 'flex' }}>
               <Checkbox
                 id="settings-textDecimal"
-                checked={!!hideFraction}
-                onChange={e => setHideFractionPref(e.currentTarget.checked)}
+                checked={String(hideFraction) === 'true'}
+                onChange={e =>
+                  setHideFractionPref(String(e.currentTarget.checked))
+                }
               />
               <label htmlFor="settings-textDecimal">Hide decimal places</label>
             </Text>
@@ -115,7 +118,7 @@ export function FormatSettings() {
               value={dateFormat}
               onChange={format => setDateFormatPref(format)}
               options={dateFormats.map(f => [f.value, f.label])}
-              buttonStyle={selectButtonStyle}
+              className={selectButtonClassName}
             />
           </Column>
 
@@ -124,7 +127,7 @@ export function FormatSettings() {
               value={firstDayOfWeekIdx}
               onChange={idx => setFirstDayOfWeekIdxPref(idx)}
               options={daysOfWeek.map(f => [f.value, f.label])}
-              buttonStyle={selectButtonStyle}
+              className={selectButtonClassName}
             />
           </Column>
         </View>

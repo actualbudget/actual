@@ -21,6 +21,7 @@ import { type NewRuleEntity } from 'loot-core/src/types/models';
 import { useAccounts } from '../hooks/useAccounts';
 import { useCategories } from '../hooks/useCategories';
 import { usePayees } from '../hooks/usePayees';
+import { useSchedules } from '../hooks/useSchedules';
 import { useSelected, SelectedProvider } from '../hooks/useSelected';
 import { theme } from '../style';
 
@@ -32,10 +33,13 @@ import { Text } from './common/Text';
 import { View } from './common/View';
 import { RulesHeader } from './rules/RulesHeader';
 import { RulesList } from './rules/RulesList';
-import { SchedulesQuery } from './rules/SchedulesQuery';
 import { SimpleTable } from './rules/SimpleTable';
 
-function mapValue(field, value, { payees, categories, accounts }) {
+function mapValue(
+  field,
+  value,
+  { payees = [], categories = [], accounts = [] },
+) {
   if (!value) return '';
 
   let object = null;
@@ -93,37 +97,34 @@ function ruleToString(rule, data) {
   );
 }
 
-type ManageRulesContentProps = {
+type ManageRulesProps = {
   isModal: boolean;
   payeeId: string | null;
   setLoading?: Dispatch<SetStateAction<boolean>>;
 };
 
-function ManageRulesContent({
+export function ManageRules({
   isModal,
   payeeId,
-  setLoading,
-}: ManageRulesContentProps) {
+  setLoading = () => {},
+}: ManageRulesProps) {
   const [allRules, setAllRules] = useState([]);
   const [page, setPage] = useState(0);
   const [filter, setFilter] = useState('');
   const dispatch = useDispatch();
 
-  const { data: schedules } = SchedulesQuery.useQuery();
+  const { data: schedules = [] } = useSchedules();
   const { list: categories } = useCategories();
   const payees = usePayees();
   const accounts = useAccounts();
-  const state = {
-    payees,
-    accounts,
-    schedules,
-  };
   const filterData = useMemo(
     () => ({
-      ...state,
+      payees,
+      accounts,
+      schedules,
       categories,
     }),
-    [state, categories],
+    [payees, accounts, schedules, categories],
   );
 
   const filteredRules = useMemo(
@@ -347,27 +348,5 @@ function EmptyMessage({ text, style }) {
     >
       {text}
     </View>
-  );
-}
-
-type ManageRulesProps = {
-  isModal: boolean;
-  payeeId: string | null;
-  setLoading?: Dispatch<SetStateAction<boolean>>;
-};
-
-export function ManageRules({
-  isModal,
-  payeeId,
-  setLoading = () => {},
-}: ManageRulesProps) {
-  return (
-    <SchedulesQuery.Provider>
-      <ManageRulesContent
-        isModal={isModal}
-        payeeId={payeeId}
-        setLoading={setLoading}
-      />
-    </SchedulesQuery.Provider>
   );
 }

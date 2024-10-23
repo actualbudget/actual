@@ -120,7 +120,7 @@ async function createReport(report: CustomReportEntity) {
 
   const nameExists = await reportNameExists(item.name, item.id ?? '', true);
   if (nameExists) {
-    throw new Error('There is already a filter named ' + item.name);
+    throw new Error('There is already a report named ' + item.name);
   }
 
   // Create the report here based on the info
@@ -140,7 +140,7 @@ async function updateReport(item: CustomReportEntity) {
 
   const nameExists = await reportNameExists(item.name, item.id, false);
   if (nameExists) {
-    throw new Error('There is already a filter named ' + item.name);
+    throw new Error('There is already a report named ' + item.name);
   }
 
   await db.updateWithSchema('custom_reports', reportModel.fromJS(item));

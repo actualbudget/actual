@@ -148,7 +148,9 @@ export function diffItems<T extends { id: string }>(
   return { added, updated, deleted };
 }
 
-export function groupById<T extends { id: string }>(data: T[]) {
+export function groupById<T extends { id: string }>(
+  data: T[],
+): Record<string, T> {
   const res: { [key: string]: T } = {};
   for (let i = 0; i < data.length; i++) {
     const item = data[i];
@@ -222,12 +224,20 @@ export function appendDecimals(
   return amountToCurrency(currencyToAmount(result));
 }
 
-type NumberFormats =
-  | 'comma-dot'
-  | 'dot-comma'
-  | 'space-comma'
-  | 'apostrophe-dot'
-  | 'comma-dot-in';
+const NUMBER_FORMATS = [
+  'comma-dot',
+  'dot-comma',
+  'space-comma',
+  'apostrophe-dot',
+  'comma-dot',
+  'comma-dot-in',
+] as const;
+
+type NumberFormats = (typeof NUMBER_FORMATS)[number];
+
+export function isNumberFormat(input: string = ''): input is NumberFormats {
+  return (NUMBER_FORMATS as readonly string[]).includes(input);
+}
 
 export const numberFormats: Array<{
   value: NumberFormats;
@@ -417,9 +427,9 @@ export function looselyParseAmount(amount: string) {
     amount = amount.replace('(', '-').replace(')', '');
   }
 
-  // Look for a decimal marker, then look for either 1-2 or 5-9 decimal places.
+  // Look for a decimal marker, then look for either 1-2 or 4-9 decimal places.
   // This avoids matching against 3 places which may not actually be decimal
-  const m = amount.match(/[.,]([^.,]{5,9}|[^.,]{1,2})$/);
+  const m = amount.match(/[.,]([^.,]{4,9}|[^.,]{1,2})$/);
   if (!m || m.index === undefined) {
     return safeNumber(parseFloat(extractNumbers(amount)));
   }

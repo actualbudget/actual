@@ -7,13 +7,14 @@ import React, {
   type ComponentType,
   type ComponentPropsWithoutRef,
   type ReactElement,
+  type CSSProperties,
   useCallback,
 } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
-import { css } from 'glamor';
+import { css, cx } from '@emotion/css';
 
-import { reportBudget, rolloverBudget } from 'loot-core/client/queries';
+import { trackingBudget, envelopeBudget } from 'loot-core/client/queries';
 import { integerToCurrency } from 'loot-core/shared/util';
 import { getNormalisedString } from 'loot-core/src/shared/normalisation';
 import {
@@ -25,8 +26,8 @@ import { useCategories } from '../../hooks/useCategories';
 import { useSyncedPref } from '../../hooks/useSyncedPref';
 import { SvgSplit } from '../../icons/v0';
 import { useResponsive } from '../../ResponsiveProvider';
-import { type CSSProperties, theme, styles } from '../../style';
-import { useRolloverSheetValue } from '../budget/rollover/RolloverComponents';
+import { theme, styles } from '../../style';
+import { useEnvelopeSheetValue } from '../budget/envelope/EnvelopeBudgetComponents';
 import { makeAmountFullStyle } from '../budget/util';
 import { Text } from '../common/Text';
 import { TextOneLine } from '../common/TextOneLine';
@@ -383,23 +384,24 @@ function CategoryItem({
 
   const balanceBinding =
     budgetType === 'rollover'
-      ? rolloverBudget.catBalance(item.id)
-      : reportBudget.catBalance(item.id);
+      ? envelopeBudget.catBalance(item.id)
+      : trackingBudget.catBalance(item.id);
   const balance = useSheetValue<
-    'rollover-budget' | 'report-budget',
+    'envelope-budget' | 'tracking-budget',
     typeof balanceBinding
   >(balanceBinding);
 
   const isToBeBudgetedItem = item.id === 'to-be-budgeted';
-  const toBudget = useRolloverSheetValue(rolloverBudget.toBudget) ?? 0;
+  const toBudget = useEnvelopeSheetValue(envelopeBudget.toBudget) ?? 0;
 
   return (
     <div
       style={style}
       // See comment above.
       role="button"
-      className={`${className} ${css([
-        {
+      className={cx(
+        className,
+        css({
           backgroundColor: highlighted
             ? theme.menuAutoCompleteBackgroundHover
             : 'transparent',
@@ -410,8 +412,8 @@ function CategoryItem({
           paddingLeft: 20,
           borderRadius: embedded ? 4 : 0,
           ...narrowStyle,
-        },
-      ])}`}
+        }),
+      )}
       data-testid={`${item.name}-category-item`}
       data-highlighted={highlighted || undefined}
       {...props}

@@ -1,70 +1,102 @@
 // @ts-strict-ignore
-import React, { type ComponentProps, type ReactNode } from 'react';
+import React, {
+  type ComponentPropsWithoutRef,
+  type ReactNode,
+  type CSSProperties,
+} from 'react';
 
-import { type CSSProperties, styles } from '../../style';
+import { styles } from '../../style';
 import { Text } from '../common/Text';
-import { ConditionalPrivacyFilter } from '../PrivacyFilter';
+import { PrivacyFilter } from '../PrivacyFilter';
 
 import { type FormatType, useFormat } from './useFormat';
 import { useSheetName } from './useSheetName';
 import { useSheetValue } from './useSheetValue';
 
-import { type Binding, type SheetNames, type SheetFields } from '.';
+import {
+  type Binding,
+  type SheetNames,
+  type SheetFields,
+  type Spreadsheets,
+} from '.';
 
-export type CellValueProps<
+type CellValueProps<
   SheetName extends SheetNames,
   FieldName extends SheetFields<SheetName>,
 > = {
+  children?: ({
+    type,
+    name,
+    value,
+  }: {
+    type?: FormatType;
+    name: string;
+    value: Spreadsheets[SheetName][FieldName];
+  }) => ReactNode;
   binding: Binding<SheetName, FieldName>;
   type?: FormatType;
-  formatter?: (value) => ReactNode;
-  style?: CSSProperties;
-  getStyle?: (value) => CSSProperties;
-  privacyFilter?: ComponentProps<
-    typeof ConditionalPrivacyFilter
-  >['privacyFilter'];
-  ['data-testid']?: string;
 };
 
 export function CellValue<
   SheetName extends SheetNames,
   FieldName extends SheetFields<SheetName>,
->({
-  binding,
-  type,
-  formatter,
-  style,
-  getStyle,
-  privacyFilter,
-  'data-testid': testId,
-  ...props
-}: CellValueProps<SheetName, FieldName>) {
+>({ type, binding, children, ...props }: CellValueProps<SheetName, FieldName>) {
   const { fullSheetName } = useSheetName(binding);
   const sheetValue = useSheetValue(binding);
-  const format = useFormat();
 
+  return children ? (
+    <>{children({ type, name: fullSheetName, value: sheetValue })}</>
+  ) : (
+    <CellValueText
+      type={type}
+      name={fullSheetName}
+      value={sheetValue}
+      {...props}
+    />
+  );
+}
+
+const PRIVACY_FILTER_TYPES = ['financial', 'financial-with-sign'];
+
+type CellValueTextProps<
+  SheetName extends SheetNames,
+  FieldName extends SheetFields<SheetName>,
+> = Omit<ComponentPropsWithoutRef<typeof Text>, 'value'> & {
+  type?: FormatType;
+  name: string;
+  value: Spreadsheets[SheetName][FieldName];
+  style?: CSSProperties;
+  formatter?: (
+    value: Spreadsheets[SheetName][FieldName],
+    type?: FormatType,
+  ) => string;
+};
+
+export function CellValueText<
+  SheetName extends SheetNames,
+  FieldName extends SheetFields<SheetName>,
+>({
+  type,
+  name,
+  value,
+  formatter,
+  style,
+  ...props
+}: CellValueTextProps<SheetName, FieldName>) {
+  const format = useFormat();
   return (
-    <ConditionalPrivacyFilter
-      privacyFilter={
-        privacyFilter != null
-          ? privacyFilter
-          : type === 'financial'
-            ? true
-            : undefined
-      }
+    <Text
+      style={{
+        ...(type === 'financial' && styles.tnum),
+        ...style,
+      }}
+      data-testid={name}
+      data-cellname={name}
+      {...props}
     >
-      <Text
-        style={{
-          ...(type === 'financial' && styles.tnum),
-          ...style,
-          ...(getStyle && getStyle(sheetValue)),
-        }}
-        data-testid={testId || fullSheetName}
-        data-cellname={fullSheetName}
-        {...props}
-      >
-        {formatter ? formatter(sheetValue) : format(sheetValue, type)}
-      </Text>
-    </ConditionalPrivacyFilter>
+      <PrivacyFilter activationFilters={[PRIVACY_FILTER_TYPES.includes(type)]}>
+        {formatter ? formatter(value, type) : format(value, type)}
+      </PrivacyFilter>
+    </Text>
   );
 }

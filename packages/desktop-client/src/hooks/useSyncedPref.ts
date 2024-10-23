@@ -1,6 +1,9 @@
-import { type SyncedPrefs } from 'loot-core/src/types/prefs';
+import { useCallback } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 
-import { useLocalPref } from './useLocalPref';
+import { saveSyncedPrefs } from 'loot-core/client/actions';
+import { type State } from 'loot-core/client/state-types';
+import { type SyncedPrefs } from 'loot-core/src/types/prefs';
 
 type SetSyncedPrefAction<K extends keyof SyncedPrefs> = (
   value: SyncedPrefs[K],
@@ -9,7 +12,14 @@ type SetSyncedPrefAction<K extends keyof SyncedPrefs> = (
 export function useSyncedPref<K extends keyof SyncedPrefs>(
   prefName: K,
 ): [SyncedPrefs[K], SetSyncedPrefAction<K>] {
-  // TODO: implement logic for fetching the pref exclusively from the
-  // database (in follow-up PR)
-  return useLocalPref(prefName);
+  const dispatch = useDispatch();
+  const setPref = useCallback<SetSyncedPrefAction<K>>(
+    value => {
+      dispatch(saveSyncedPrefs({ [prefName]: value }));
+    },
+    [prefName, dispatch],
+  );
+  const pref = useSelector((state: State) => state.prefs.synced[prefName]);
+
+  return [pref, setPref];
 }

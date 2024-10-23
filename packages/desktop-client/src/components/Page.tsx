@@ -1,7 +1,7 @@
-import React, { type ReactNode } from 'react';
+import React, { type ReactNode, type CSSProperties } from 'react';
 
 import { useResponsive } from '../ResponsiveProvider';
-import { theme, styles, type CSSProperties } from '../style';
+import { theme, styles } from '../style';
 
 import { Text } from './common/Text';
 import { View } from './common/View';
@@ -54,11 +54,16 @@ export function MobilePageHeader({
     <View
       style={{
         alignItems: 'center',
-        backgroundColor: theme.mobileHeaderBackground,
-        color: theme.mobileHeaderText,
         flexDirection: 'row',
         flexShrink: 0,
         height: HEADER_HEIGHT,
+        backgroundColor: theme.mobileHeaderBackground,
+        '& *': {
+          color: theme.mobileHeaderText,
+        },
+        '& button[data-pressed]': {
+          backgroundColor: theme.mobileHeaderTextHover,
+        },
         ...style,
       }}
     >

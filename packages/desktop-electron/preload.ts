@@ -34,6 +34,10 @@ contextBridge.exposeInMainWorld('Actual', {
     ipcRenderer.invoke('relaunch');
   },
 
+  restartElectronServer: () => {
+    ipcRenderer.invoke('restart-server');
+  },
+
   openFileDialog: (opts: OpenFileDialogPayload) => {
     return ipcRenderer.invoke('open-file-dialog', opts);
   },
@@ -68,5 +72,16 @@ contextBridge.exposeInMainWorld('Actual', {
 
   setTheme: (theme: string) => {
     ipcRenderer.send('set-theme', theme);
+  },
+
+  moveBudgetDirectory: (
+    currentBudgetDirectory: string,
+    newDirectory: string,
+  ) => {
+    return ipcRenderer.invoke(
+      'move-budget-directory',
+      currentBudgetDirectory,
+      newDirectory,
+    );
   },
 });

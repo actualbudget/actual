@@ -3,26 +3,25 @@ import path from 'path';
 
 import electron, { BrowserWindow } from 'electron';
 
-const backend = undefined;
-const getBackend = async () =>
-  // eslint-disable-next-line import/extensions
-  backend || (await import('loot-core/lib-dist/bundle.desktop.js'));
-
 type WindowState = Electron.Rectangle & {
   isMaximized?: boolean;
   isFullScreen?: boolean;
   displayBounds?: Electron.Rectangle;
 };
 
+const getDataDir = () => {
+  if (!process.env.ACTUAL_DATA_DIR) {
+    throw new Error('ACTUAL_DATA_DIR is not set');
+  }
+
+  return process.env.ACTUAL_DATA_DIR;
+};
+
 async function loadState() {
   let state: WindowState | undefined = undefined;
-  const backend = await getBackend();
   try {
     state = JSON.parse(
-      fs.readFileSync(
-        path.join(backend.lib.getDataDir(), 'window.json'),
-        'utf8',
-      ),
+      fs.readFileSync(path.join(getDataDir(), 'window.json'), 'utf8'),
     );
   } catch (e) {
     console.log('Could not load window state');
@@ -47,10 +46,9 @@ function updateState(win: BrowserWindow, state: WindowState) {
 }
 
 async function saveState(win: BrowserWindow, state: WindowState) {
-  const backend = await getBackend();
   updateState(win, state);
   fs.writeFileSync(
-    path.join(backend.lib.getDataDir(), 'window.json'),
+    path.join(getDataDir(), 'window.json'),
     JSON.stringify(state),
     'utf8',
   );

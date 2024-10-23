@@ -9,11 +9,12 @@ import React, {
   type SVGProps,
   type ComponentPropsWithoutRef,
   type ReactElement,
+  type CSSProperties,
 } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 
-import { css } from 'glamor';
+import { css, cx } from '@emotion/css';
 
 import { createPayee } from 'loot-core/src/client/actions/queries';
 import { getActivePayees } from 'loot-core/src/client/reducers/queries';
@@ -27,7 +28,7 @@ import { useAccounts } from '../../hooks/useAccounts';
 import { useCommonPayees, usePayees } from '../../hooks/usePayees';
 import { SvgAdd, SvgBookmark } from '../../icons/v1';
 import { useResponsive } from '../../ResponsiveProvider';
-import { type CSSProperties, theme, styles } from '../../style';
+import { theme, styles } from '../../style';
 import { Button } from '../common/Button';
 import { TextOneLine } from '../common/TextOneLine';
 import { View } from '../common/View';
@@ -39,7 +40,7 @@ import {
 } from './Autocomplete';
 import { ItemHeader } from './ItemHeader';
 
-type PayeeAutocompleteItem = PayeeEntity;
+export type PayeeAutocompleteItem = PayeeEntity;
 
 const MAX_AUTO_SUGGESTIONS = 5;
 
@@ -47,30 +48,37 @@ function getPayeeSuggestions(
   commonPayees: PayeeAutocompleteItem[],
   payees: PayeeAutocompleteItem[],
 ): (PayeeAutocompleteItem & PayeeItemType)[] {
+  const favoritePayees = payees
+    .filter(p => p.favorite)
+    .map(p => {
+      return { ...p, itemType: determineItemType(p, true) };
+    })
+    .sort((a, b) => a.name.localeCompare(b.name));
+
+  let additionalCommonPayees: (PayeeAutocompleteItem & PayeeItemType)[] = [];
   if (commonPayees?.length > 0) {
-    const favoritePayees = payees.filter(p => p.favorite);
-    let additionalCommonPayees: PayeeAutocompleteItem[] = [];
     if (favoritePayees.length < MAX_AUTO_SUGGESTIONS) {
       additionalCommonPayees = commonPayees
         .filter(
           p => !(p.favorite || favoritePayees.map(fp => fp.id).includes(p.id)),
         )
-        .slice(0, MAX_AUTO_SUGGESTIONS - favoritePayees.length);
+        .slice(0, MAX_AUTO_SUGGESTIONS - favoritePayees.length)
+        .map(p => {
+          return { ...p, itemType: determineItemType(p, true) };
+        })
+        .sort((a, b) => a.name.localeCompare(b.name));
     }
-    const frequentPayees: (PayeeAutocompleteItem & PayeeItemType)[] =
-      favoritePayees.concat(additionalCommonPayees).map(p => {
-        return { ...p, itemType: 'common_payee' };
-      });
+  }
 
+  if (favoritePayees.length + additionalCommonPayees.length) {
     const filteredPayees: (PayeeAutocompleteItem & PayeeItemType)[] = payees
-      .filter(p => !frequentPayees.find(fp => fp.id === p.id))
+      .filter(p => !favoritePayees.find(fp => fp.id === p.id))
+      .filter(p => !additionalCommonPayees.find(fp => fp.id === p.id))
       .map<PayeeAutocompleteItem & PayeeItemType>(p => {
         return { ...p, itemType: determineItemType(p, false) };
       });
 
-    return frequentPayees
-      .sort((a, b) => a.name.localeCompare(b.name))
-      .concat(filteredPayees);
+    return favoritePayees.concat(additionalCommonPayees).concat(filteredPayees);
   }
 
   return payees.map(p => {
@@ -245,7 +253,7 @@ function PayeeList({
   );
 }
 
-type PayeeAutocompleteProps = ComponentProps<
+export type PayeeAutocompleteProps = ComponentProps<
   typeof Autocomplete<PayeeAutocompleteItem>
 > & {
   showMakeTransfer?: boolean;
@@ -309,10 +317,8 @@ export function PayeeAutocomplete({
     if (!hasPayeeInput) {
       return filteredSuggestions;
     }
-    filteredSuggestions.forEach(s => {
-      console.log(s.name + ' ' + s.id);
-    });
-    return [{ id: 'new', favorite: false, name: '' }, ...filteredSuggestions];
+
+    return [{ id: 'new', favorite: 0, name: '' }, ...filteredSuggestions];
   }, [commonPayees, payees, focusTransferPayees, accounts, hasPayeeInput]);
 
   const dispatch = useDispatch();
@@ -602,8 +608,9 @@ function PayeeItem({
       // * https://github.com/WebKit/WebKit/blob/58956cf59ba01267644b5e8fe766efa7aa6f0c5c/Source/WebCore/page/ios/ContentChangeObserver.cpp
       // * https://github.com/WebKit/WebKit/blob/58956cf59ba01267644b5e8fe766efa7aa6f0c5c/Source/WebKit/WebProcess/WebPage/ios/WebPageIOS.mm#L783
       role="button"
-      className={`${className} ${css([
-        {
+      className={cx(
+        className,
+        css({
           backgroundColor: highlighted
             ? theme.menuAutoCompleteBackgroundHover
             : 'transparent',
@@ -614,8 +621,8 @@ function PayeeItem({
           padding: 4,
           paddingLeft: paddingLeftOverFromIcon,
           ...narrowStyle,
-        },
-      ])}`}
+        }),
+      )}
       data-testid={`${item.name}-payee-item`}
       data-highlighted={highlighted || undefined}
       {...props}

@@ -282,23 +282,36 @@ export function updateWithSchema(table, fields) {
 // Data-specific functions. Ideally this would be split up into
 // different files
 
-export async function getCategories(): Promise<CategoryEntity[]> {
-  return await all(`
-    SELECT c.* FROM categories c WHERE c.tombstone = 0
-      ORDER BY c.sort_order, c.id
-  `);
+export async function getCategories(
+  ids?: Array<CategoryEntity['id']>,
+): Promise<CategoryEntity[]> {
+  const whereIn = ids ? `c.id IN (${toSqlQueryParameters(ids)}) AND` : '';
+  const query = `SELECT c.* FROM categories c WHERE ${whereIn} c.tombstone = 0 ORDER BY c.sort_order, c.id`;
+  return ids ? await all(query, [...ids]) : await all(query);
 }
 
-export async function getCategoriesGrouped(): Promise<
-  Array<CategoryGroupEntity>
-> {
-  const groups = await all(`
-    SELECT cg.* FROM category_groups cg WHERE cg.tombstone = 0 ORDER BY cg.is_income, cg.sort_order, cg.id
-  `);
-  const categories = await all(`
-    SELECT c.* FROM categories c WHERE c.tombstone = 0
-      ORDER BY c.sort_order, c.id
-  `);
+export async function getCategoriesGrouped(
+  ids?: Array<CategoryGroupEntity['id']>,
+): Promise<Array<CategoryGroupEntity>> {
+  const categoryGroupWhereIn = ids
+    ? `cg.id IN (${toSqlQueryParameters(ids)}) AND`
+    : '';
+  const categoryGroupQuery = `SELECT cg.* FROM category_groups cg WHERE ${categoryGroupWhereIn} cg.tombstone = 0
+    ORDER BY cg.is_income, cg.sort_order, cg.id`;
+
+  const categoryWhereIn = ids
+    ? `c.cat_group IN (${toSqlQueryParameters(ids)}) AND`
+    : '';
+  const categoryQuery = `SELECT c.* FROM categories c WHERE ${categoryWhereIn} c.tombstone = 0
+    ORDER BY c.sort_order, c.id`;
+
+  const groups = ids
+    ? await all(categoryGroupQuery, [...ids])
+    : await all(categoryGroupQuery);
+
+  const categories = ids
+    ? await all(categoryQuery, [...ids])
+    : await all(categoryQuery);
 
   return groups.map(group => {
     return {
@@ -553,7 +566,7 @@ export function getCommonPayees() {
   return all(`
     SELECT     p.id as id, p.name as name, p.favorite as favorite,
       p.category as category, TRUE as common, NULL as transfer_acct,
-    count(*) as c, 
+    count(*) as c,
     max(t.date) as latest
     FROM payees p
     LEFT JOIN v_transactions_internal_alive t on t.payee == p.id
@@ -561,28 +574,38 @@ export function getCommonPayees() {
     AND p.tombstone = 0
     AND t.date > ${twelveWeeksAgo}
     GROUP BY p.id
-    ORDER BY c DESC ,p.transfer_acct IS NULL DESC, p.name 
+    ORDER BY c DESC ,p.transfer_acct IS NULL DESC, p.name
     COLLATE NOCASE
     LIMIT ${limit}
   `);
 }
 
+/* eslint-disable rulesdir/typography */
+const orphanedPayeesQuery = `
+  SELECT p.id
+  FROM payees p
+    LEFT JOIN payee_mapping pm ON pm.id = p.id
+    LEFT JOIN v_transactions_internal_alive t ON t.payee = pm.targetId
+  WHERE p.tombstone = 0
+    AND p.transfer_acct IS NULL
+    AND t.id IS NULL
+    AND NOT EXISTS (
+      SELECT 1
+      FROM rules r,
+      json_each(r.conditions) as cond
+      WHERE r.tombstone = 0
+        AND json_extract(cond.value, '$.field') = 'description'
+        AND json_extract(cond.value, '$.value') = pm.targetId
+    );
+`;
+/* eslint-enable rulesdir/typography */
+
 export function syncGetOrphanedPayees() {
-  return all(`
-  SELECT p.id FROM payees p
-  LEFT JOIN payee_mapping pm ON pm.id = p.id
-  LEFT JOIN v_transactions_internal_alive t ON t.payee = pm.targetId
-  WHERE p.tombstone = 0 AND p.transfer_acct IS NULL AND t.id IS NULL
-`);
+  return all(orphanedPayeesQuery);
 }
 
 export async function getOrphanedPayees() {
-  const rows = await all(`
-    SELECT p.id FROM payees p
-    LEFT JOIN payee_mapping pm ON pm.id = p.id
-    LEFT JOIN v_transactions_internal_alive t ON t.payee = pm.targetId
-    WHERE p.tombstone = 0 AND p.transfer_acct IS NULL AND t.id IS NULL
-  `);
+  const rows = await all(orphanedPayeesQuery);
   return rows.map(row => row.id);
 }
 
@@ -680,4 +703,8 @@ export function updateTransaction(transaction) {
 
 export async function deleteTransaction(transaction) {
   return delete_('transactions', transaction.id);
+}
+
+function toSqlQueryParameters(params: unknown[]) {
+  return params.map(() => '?').join(',');
 }

@@ -10,7 +10,7 @@ import {
   Modal,
   ModalTitle,
   ModalHeader,
-} from '../common/Modal2';
+} from '../common/Modal';
 import { View } from '../common/View';
 import { SectionLabel } from '../forms';
 import { NamespaceContext } from '../spreadsheet/NamespaceContext';
@@ -56,7 +56,7 @@ export function CategoryAutocompleteModal({
               }
               rightContent={
                 <ModalCloseButton
-                  onClick={close}
+                  onPress={close}
                   style={{ color: theme.menuAutoCompleteText }}
                 />
               }

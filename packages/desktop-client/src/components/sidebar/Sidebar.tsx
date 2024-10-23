@@ -1,25 +1,20 @@
-import React, { useRef, useState } from 'react';
+import React, { type CSSProperties, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 
+import { css } from '@emotion/css';
 import { Resizable } from 're-resizable';
 
-import {
-  closeBudget,
-  moveAccount,
-  replaceModal,
-} from 'loot-core/src/client/actions';
+import { closeBudget, replaceModal } from 'loot-core/src/client/actions';
 import * as Platform from 'loot-core/src/client/platform';
 
-import { useAccounts } from '../../hooks/useAccounts';
 import { useGlobalPref } from '../../hooks/useGlobalPref';
 import { useLocalPref } from '../../hooks/useLocalPref';
 import { useMetadataPref } from '../../hooks/useMetadataPref';
 import { useNavigate } from '../../hooks/useNavigate';
 import { useResizeObserver } from '../../hooks/useResizeObserver';
 import { SvgExpandArrow } from '../../icons/v0';
-import { SvgReports, SvgWallet } from '../../icons/v1';
-import { SvgCalendar } from '../../icons/v2';
+import { SvgAdd } from '../../icons/v1';
 import { useResponsive } from '../../ResponsiveProvider';
 import { styles, theme } from '../../style';
 import { Button } from '../common/Button2';
@@ -31,10 +26,10 @@ import { Text } from '../common/Text';
 import { View } from '../common/View';
 
 import { Accounts } from './Accounts';
-import { Item } from './Item';
+import { PrimaryButtons } from './PrimaryButtons';
+import { SecondaryButtons } from './SecondaryButtons';
 import { useSidebar } from './SidebarProvider';
 import { ToggleButton } from './ToggleButton';
-import { Tools } from './Tools';
 
 export function Sidebar() {
   const hasWindowButtons = !Platform.isBrowser && Platform.OS === 'mac';
@@ -42,36 +37,29 @@ export function Sidebar() {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const sidebar = useSidebar();
-  const accounts = useAccounts();
   const { width } = useResponsive();
-  const [showClosedAccounts, setShowClosedAccountsPref] = useLocalPref(
-    'ui.showClosedAccounts',
-  );
   const [isFloating = false, setFloatingSidebarPref] =
     useGlobalPref('floatingSidebar');
 
-  const [_sidebarWidth, setSidebarWidth] = useLocalPref('sidebarWidth');
+  const [sidebarWidthLocalPref, setSidebarWidthLocalPref] =
+    useLocalPref('sidebarWidth');
   const DEFAULT_SIDEBAR_WIDTH = 240;
   const MAX_SIDEBAR_WIDTH = width / 3;
   const MIN_SIDEBAR_WIDTH = 200;
-  const sidebarWidth = Math.min(
-    MAX_SIDEBAR_WIDTH,
-    Math.max(MIN_SIDEBAR_WIDTH, _sidebarWidth || DEFAULT_SIDEBAR_WIDTH),
+
+  const [sidebarWidth, setSidebarWidth] = useState(
+    Math.min(
+      MAX_SIDEBAR_WIDTH,
+      Math.max(
+        MIN_SIDEBAR_WIDTH,
+        sidebarWidthLocalPref || DEFAULT_SIDEBAR_WIDTH,
+      ),
+    ),
   );
 
-  async function onReorder(
-    id: string,
-    dropPos: 'top' | 'bottom',
-    targetId: unknown,
-  ) {
-    let targetIdToMove = targetId;
-    if (dropPos === 'bottom') {
-      const idx = accounts.findIndex(a => a.id === targetId) + 1;
-      targetIdToMove = idx < accounts.length ? accounts[idx].id : null;
-    }
-
-    dispatch(moveAccount(id, targetIdToMove));
-  }
+  const onResizeStop = () => {
+    setSidebarWidthLocalPref(sidebarWidth);
+  };
 
   const onFloat = () => {
     setFloatingSidebarPref(!isFloating);
@@ -79,10 +67,6 @@ export function Sidebar() {
 
   const onAddAccount = () => {
     dispatch(replaceModal('add-account'));
-  };
-
-  const onToggleClosedAccounts = () => {
-    setShowClosedAccountsPref(!showClosedAccounts);
   };
 
   const containerRef = useResizeObserver(rect => {
@@ -95,6 +79,7 @@ export function Sidebar() {
         width: sidebarWidth,
         height: '100%',
       }}
+      onResizeStop={onResizeStop}
       maxWidth={MAX_SIDEBAR_WIDTH}
       minWidth={MIN_SIDEBAR_WIDTH}
       enable={{
@@ -110,7 +95,7 @@ export function Sidebar() {
     >
       <View
         innerRef={containerRef}
-        style={{
+        className={css({
           color: theme.sidebarItemText,
           height: '100%',
           backgroundColor: theme.sidebarBackground,
@@ -118,14 +103,14 @@ export function Sidebar() {
             opacity: isFloating ? 1 : 0,
             transition: 'opacity .25s, width .25s',
             width: hasWindowButtons || isFloating ? null : 0,
-          },
+          } as CSSProperties,
           '&:hover .float': {
             opacity: 1,
             width: hasWindowButtons ? null : 'auto',
-          },
+          } as CSSProperties,
           flex: 1,
           ...styles.darkScrollbar,
-        }}
+        })}
       >
         <View
           style={{
@@ -150,27 +135,22 @@ export function Sidebar() {
           )}
         </View>
 
-        <View style={{ overflow: 'auto' }}>
-          <Item title={t('Budget')} Icon={SvgWallet} to="/budget" />
-          <Item title={t('Reports')} Icon={SvgReports} to="/reports" />
+        <View
+          style={{
+            flexGrow: 1,
+            '@media screen and (max-height: 480px)': {
+              overflowY: 'auto',
+            },
+          }}
+        >
+          <PrimaryButtons />
 
-          <Item title={t('Schedules')} Icon={SvgCalendar} to="/schedules" />
+          <Accounts />
 
-          <Tools />
-
-          <View
-            style={{
-              height: 1,
-              backgroundColor: theme.sidebarItemBackgroundHover,
-              marginTop: 15,
-              flexShrink: 0,
-            }}
-          />
-
-          <Accounts
-            onAddAccount={onAddAccount}
-            onToggleClosedAccounts={onToggleClosedAccounts}
-            onReorder={onReorder}
+          <SecondaryButtons
+            buttons={[
+              { title: t('Add account'), Icon: SvgAdd, onClick: onAddAccount },
+            ]}
           />
         </View>
       </View>
@@ -210,7 +190,6 @@ function EditableBudgetName() {
   const items = [
     { name: 'rename', text: t('Rename budget') },
     { name: 'settings', text: t('Settings') },
-    ...(Platform.isBrowser ? [{ name: 'help', text: t('Help') }] : []),
     { name: 'close', text: t('Close file') },
   ];
 

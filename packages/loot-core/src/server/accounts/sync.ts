@@ -54,6 +54,13 @@ function getAccountBalance(account) {
   }
 }
 
+async function updateAccountBalance(id, balance) {
+  await db.runQuery('UPDATE accounts SET balance_current = ? WHERE id = ?', [
+    amountToInteger(balance),
+    id,
+  ]);
+}
+
 export async function getGoCardlessAccounts(userId, userKey, id) {
   const userToken = await asyncStorage.getItem('user-token');
   if (!userToken) return;
@@ -231,6 +238,8 @@ async function normalizeTransactions(
     trans.account = acctId;
     trans.payee = await resolvePayee(trans, payee_name, payeesToCreate);
 
+    trans.category = trans.category ?? null;
+
     normalized.push({
       payee_name,
       subtransactions: subtransactions
@@ -287,6 +296,7 @@ async function normalizeBankSyncTransactions(transactions, acctId) {
         account: trans.account,
         date: trans.date,
         notes: notes.trim().replace('#', '##'),
+        category: trans.category ?? null,
         imported_id: trans.transactionId,
         imported_payee: trans.imported_payee,
         cleared: trans.cleared,
@@ -450,7 +460,7 @@ export async function matchTransactions(
     subtransactions,
   } of normalized) {
     // Run the rules
-    const trans = runRules(originalTrans);
+    const trans = await runRules(originalTrans);
 
     let match = null;
     let fuzzyDataset = null;
@@ -595,7 +605,7 @@ export async function addTransactions(
 
   for (const { trans: originalTrans, subtransactions } of normalized) {
     // Run the rules
-    const trans = runRules(originalTrans);
+    const trans = await runRules(originalTrans);
 
     const finalTransaction = {
       id: uuidv4(),
@@ -694,7 +704,7 @@ export async function syncAccount(
       );
     }
 
-    const { transactions: originalTransactions } = download;
+    const { transactions: originalTransactions, accountBalance } = download;
 
     if (originalTransactions.length === 0) {
       return { added: [], updated: [] };
@@ -712,6 +722,8 @@ export async function syncAccount(
         true,
         useStrictIdChecking,
       );
+
+      if (accountBalance) await updateAccountBalance(id, accountBalance);
 
       return result;
     });

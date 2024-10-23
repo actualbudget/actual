@@ -12,3 +12,11 @@ rm -rf ${ROOT}/build/client-build/data
 rm -rf ${ROOT}/build/client-build/*kcab.*
 rm -rf ${ROOT}/build/client-build/*.wasm
 rm -rf ${ROOT}/build/client-build/*.map
+
+# Copy loot-core into build directory
+mkdir -p ${ROOT}/build/loot-core/lib-dist
+ls ${ROOT}/build/loot-core/lib-dist
+cp ${ROOT}/../loot-core/lib-dist/bundle.desktop.js ${ROOT}/build/loot-core/lib-dist/bundle.desktop.js
+cp ${ROOT}/../loot-core/default-db.sqlite ${ROOT}/build/loot-core/default-db.sqlite
+cp -r ${ROOT}/../loot-core/migrations ${ROOT}/build/loot-core/migrations
+

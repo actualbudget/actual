@@ -1,9 +1,11 @@
 // @ts-strict-ignore
+import { FieldValueTypes, RuleConditionOp } from '../types/models';
+
 import { integerToAmount, amountToInteger, currencyToAmount } from './util';
 
 // For now, this info is duplicated from the backend. Figure out how
 // to share it later.
-export const TYPE_INFO = {
+const TYPE_INFO = {
   date: {
     ops: ['is', 'isapprox', 'gt', 'gte', 'lt', 'lte'],
     nullable: false,
@@ -38,18 +40,6 @@ export const TYPE_INFO = {
     ],
     nullable: true,
   },
-  imported_payee: {
-    ops: [
-      'is',
-      'contains',
-      'matches',
-      'oneOf',
-      'isNot',
-      'doesNotContain',
-      'notOneOf',
-    ],
-    nullable: true,
-  },
   number: {
     ops: ['is', 'isapprox', 'isbetween', 'gt', 'gte', 'lt', 'lte'],
     nullable: false,
@@ -58,24 +48,58 @@ export const TYPE_INFO = {
     ops: ['is'],
     nullable: false,
   },
-};
+} as const;
 
-export const FIELD_TYPES = new Map(
-  Object.entries({
-    imported_payee: 'imported_payee',
-    payee: 'id',
-    date: 'date',
-    notes: 'string',
-    amount: 'number',
-    amountInflow: 'number',
-    amountOutfow: 'number',
-    category: 'id',
-    account: 'id',
-    cleared: 'boolean',
-    reconciled: 'boolean',
-    saved: 'saved',
-  }),
+type FieldInfoConstraint = Record<
+  keyof FieldValueTypes,
+  { type: keyof typeof TYPE_INFO; disallowedOps?: Set<RuleConditionOp> }
+>;
+
+const FIELD_INFO = {
+  imported_payee: {
+    type: 'string',
+    disallowedOps: new Set(['hasTags']),
+  },
+  payee: { type: 'id' },
+  payee_name: { type: 'string' },
+  date: { type: 'date' },
+  notes: { type: 'string' },
+  amount: { type: 'number' },
+  category: { type: 'id' },
+  account: { type: 'id' },
+  cleared: { type: 'boolean' },
+  reconciled: { type: 'boolean' },
+  saved: { type: 'saved' },
+} as const satisfies FieldInfoConstraint;
+
+const fieldInfo: FieldInfoConstraint = FIELD_INFO;
+
+export const FIELD_TYPES = new Map<keyof FieldValueTypes, string>(
+  Object.entries(FIELD_INFO).map(([field, info]) => [
+    field as unknown as keyof FieldValueTypes,
+    info.type,
+  ]),
 );
+
+export function isValidOp(field: keyof FieldValueTypes, op: RuleConditionOp) {
+  const type = FIELD_TYPES.get(field);
+  if (!type) {
+    return false;
+  }
+  return (
+    TYPE_INFO[type].ops.includes(op) && !fieldInfo[field].disallowedOps?.has(op)
+  );
+}
+
+export function getValidOps(field: keyof FieldValueTypes) {
+  const type = FIELD_TYPES.get(field);
+  if (!type) {
+    return [];
+  }
+  return TYPE_INFO[type].ops.filter(
+    op => !fieldInfo[field].disallowedOps?.has(op),
+  );
+}
 
 export const ALLOCATION_METHODS = {
   'fixed-amount': 'a fixed amount',
@@ -89,6 +113,8 @@ export function mapField(field, opts?) {
   switch (field) {
     case 'imported_payee':
       return 'imported payee';
+    case 'payee_name':
+      return 'payee (name)';
     case 'amount':
       if (opts.inflow) {
         return 'amount (inflow)';
@@ -188,10 +214,16 @@ export function getFieldError(type) {
     case 'no-empty-array':
     case 'no-empty-string':
       return 'Value cannot be empty';
+    case 'not-string':
+      return 'Value must be a string';
+    case 'not-boolean':
+      return 'Value must be a boolean';
     case 'not-number':
       return 'Value must be a number';
     case 'invalid-field':
       return 'Please choose a valid field for this type of rule';
+    case 'invalid-template':
+      return 'Invalid handlebars template';
     default:
       return 'Internal error, sorry! Please get in touch https://actualbudget.org/contact/ for support';
   }

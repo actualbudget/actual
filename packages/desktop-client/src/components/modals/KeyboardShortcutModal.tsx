@@ -1,9 +1,9 @@
+import { type CSSProperties } from 'react';
 import { useLocation } from 'react-router-dom';
 
 import * as Platform from 'loot-core/src/client/platform';
 
-import { type CSSProperties } from '../../style';
-import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal2';
+import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 
@@ -159,7 +159,7 @@ export function KeyboardShortcutModal() {
         <>
           <ModalHeader
             title="Keyboard Shortcuts"
-            rightContent={<ModalCloseButton onClick={close} />}
+            rightContent={<ModalCloseButton onPress={close} />}
           />
           <View
             style={{
@@ -168,7 +168,7 @@ export function KeyboardShortcutModal() {
             }}
           >
             <View>
-              <Shortcut shortcut="?" description="Show this help dialog" />
+              <Shortcut shortcut="?" description="Open the help menu" />
               <Shortcut
                 shortcut="O"
                 description="Close the current budget and open another"

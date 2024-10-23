@@ -80,38 +80,29 @@ export function Overview() {
   sessionStorage.setItem('url', location.pathname);
 
   const isDashboardsFeatureEnabled = useFeatureFlag('dashboards');
-  const spendingReportFeatureFlag = useFeatureFlag('spendingReport');
 
-  const baseLayout = widgets.map(widget => ({
-    i: widget.id,
-    w: widget.width,
-    h: widget.height,
-    minW:
-      isCustomReportWidget(widget) || widget.type === 'markdown-card' ? 2 : 3,
-    minH:
-      isCustomReportWidget(widget) || widget.type === 'markdown-card' ? 1 : 2,
-    ...widget,
-  }));
+  const baseLayout = widgets
+    .map(widget => ({
+      i: widget.id,
+      w: widget.width,
+      h: widget.height,
+      minW:
+        isCustomReportWidget(widget) || widget.type === 'markdown-card' ? 2 : 3,
+      minH:
+        isCustomReportWidget(widget) || widget.type === 'markdown-card' ? 1 : 2,
+      ...widget,
+    }))
+    .filter(item => {
+      if (isDashboardsFeatureEnabled) {
+        return true;
+      }
+      if (item.type === 'custom-report' && !customReportMap.has(item.meta.id)) {
+        return false;
+      }
+      return true;
+    });
 
-  const layout =
-    spendingReportFeatureFlag &&
-    !isDashboardsFeatureEnabled &&
-    !baseLayout.find(({ type }) => type === 'spending-card')
-      ? [
-          ...baseLayout,
-          {
-            i: 'spending',
-            type: 'spending-card' as const,
-            x: 0,
-            y: Math.max(...baseLayout.map(({ y }) => y), 0) + 2,
-            w: 4,
-            h: 2,
-            minW: 3,
-            minH: 2,
-            meta: null,
-          },
-        ]
-      : baseLayout;
+  const layout = baseLayout;
 
   const closeNotifications = () => {
     dispatch(removeNotification('import'));
@@ -341,7 +332,7 @@ export function Overview() {
             >
               {currentBreakpoint === 'desktop' && (
                 <>
-                  {isEditing ? (
+                  {isDashboardsFeatureEnabled && (
                     <>
                       <Button
                         ref={triggerRef}
@@ -350,12 +341,6 @@ export function Overview() {
                         onPress={() => setMenuOpen(true)}
                       >
                         <Trans>Add new widget</Trans>
-                      </Button>
-                      <Button
-                        isDisabled={isImporting}
-                        onPress={() => setIsEditing(false)}
-                      >
-                        <Trans>Finish editing dashboard</Trans>
                       </Button>
 
                       <Popover
@@ -403,14 +388,10 @@ export function Overview() {
                               name: 'net-worth-card' as const,
                               text: t('Net worth graph'),
                             },
-                            ...(spendingReportFeatureFlag
-                              ? [
-                                  {
-                                    name: 'spending-card' as const,
-                                    text: t('Spending analysis'),
-                                  },
-                                ]
-                              : []),
+                            {
+                              name: 'spending-card' as const,
+                              text: t('Spending analysis'),
+                            },
                             {
                               name: 'markdown-card' as const,
                               text: t('Text widget'),
@@ -430,24 +411,30 @@ export function Overview() {
                         />
                       </Popover>
                     </>
+                  )}
+
+                  {isEditing ? (
+                    <Button
+                      isDisabled={isImporting}
+                      onPress={() => setIsEditing(false)}
+                    >
+                      <Trans>Finish editing dashboard</Trans>
+                    </Button>
+                  ) : isDashboardsFeatureEnabled ? (
+                    <Button
+                      isDisabled={isImporting}
+                      onPress={() => setIsEditing(true)}
+                    >
+                      <Trans>Edit dashboard</Trans>
+                    </Button>
                   ) : (
-                    <>
-                      <Button
-                        variant="primary"
-                        isDisabled={isImporting}
-                        onPress={() => navigate('/reports/custom')}
-                      >
-                        <Trans>Create new custom report</Trans>
-                      </Button>
-                      {isDashboardsFeatureEnabled && (
-                        <Button
-                          isDisabled={isImporting}
-                          onPress={() => setIsEditing(true)}
-                        >
-                          <Trans>Edit dashboard</Trans>
-                        </Button>
-                      )}
-                    </>
+                    <Button
+                      variant="primary"
+                      isDisabled={isImporting}
+                      onPress={() => navigate('/reports/custom')}
+                    >
+                      <Trans>Create new custom report</Trans>
+                    </Button>
                   )}
 
                   {isDashboardsFeatureEnabled && (
@@ -528,6 +515,7 @@ export function Overview() {
               <div key={item.i}>
                 {item.type === 'net-worth-card' ? (
                   <NetWorthCard
+                    widgetId={item.i}
                     isEditing={isEditing}
                     accounts={accounts}
                     meta={item.meta}
@@ -536,6 +524,7 @@ export function Overview() {
                   />
                 ) : item.type === 'cash-flow-card' ? (
                   <CashFlowCard
+                    widgetId={item.i}
                     isEditing={isEditing}
                     meta={item.meta}
                     onMetaChange={newMeta => onMetaChange(item, newMeta)}
@@ -543,6 +532,7 @@ export function Overview() {
                   />
                 ) : item.type === 'spending-card' ? (
                   <SpendingCard
+                    widgetId={item.i}
                     isEditing={isEditing}
                     meta={item.meta}
                     onMetaChange={newMeta => onMetaChange(item, newMeta)}
