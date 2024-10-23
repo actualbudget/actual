@@ -614,17 +614,6 @@ handlers['api/category-group-update'] = withMutation(async function ({
   });
 });
 
-handlers['api/apply-multiple-templates'] = withMutation(async function ({
-  month,
-  categoryIds,
-}) {
-  checkFileOpen();
-  return handlers['apply-multiple-templates']({
-    month,
-    categoryIds,
-  });
-});
-
 handlers['api/category-group-delete'] = withMutation(async function ({
   id,
   transferCategoryId,

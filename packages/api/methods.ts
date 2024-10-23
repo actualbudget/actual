@@ -149,10 +149,6 @@ export function deleteCategoryGroup(id, transferCategoryId?) {
   return send('api/category-group-delete', { id, transferCategoryId });
 }
 
-export function applyMultipleTemplates(month, categoryIds) {
-  return send('api/apply-multiple-templates', { month, categoryIds });
-}
-
 export function getCategories() {
   return send('api/categories-get', { grouped: false });
 }
