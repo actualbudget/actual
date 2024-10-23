@@ -1,7 +1,7 @@
 import { Notification } from '../../client/state-types/notifications';
 import * as db from '../db';
 
-import { parse } from './goal-template.pegjs';
+import { parse } from './templateParser.pegjs';
 import {
   CategoryWithTemplateNote,
   getActiveSchedules,

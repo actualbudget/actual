@@ -4,7 +4,7 @@ import * as monthUtils from '../../shared/months';
 import * as db from '../db';
 
 import { setBudget, getSheetValue, setGoal } from './actions';
-import { parse } from './cleanup-template.pegjs';
+import { parse } from './cleanupParser.pegjs';
 
 export function cleanupTemplate({ month }: { month: string }) {
   return processCleanup(month);
