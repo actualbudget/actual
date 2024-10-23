@@ -483,6 +483,10 @@ export function AccountHeader({
                         ]
                       : []),
                     { name: 'export', text: t('Export') },
+                    {
+                      name: 'toogle-column-edit',
+                      text: t('Toggle column edit mode'),
+                    },
                   ]}
                 />
               </Popover>
@@ -683,7 +687,8 @@ type AccountMenuProps = {
       | 'toggle-balance'
       | 'remove-sorting'
       | 'toggle-cleared'
-      | 'toggle-reconciled',
+      | 'toggle-reconciled'
+      | 'toogle-column-edit',
   ) => void;
 };
 
@@ -758,6 +763,10 @@ function AccountMenu({
         ...(account.closed
           ? [{ name: 'reopen', text: t('Reopen account') } as const]
           : [{ name: 'close', text: t('Close account') } as const]),
+        {
+          name: 'toogle-column-edit',
+          text: t('Toggle column edit mode'),
+        },
       ]}
     />
   );

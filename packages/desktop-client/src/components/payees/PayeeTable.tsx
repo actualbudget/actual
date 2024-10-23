@@ -12,7 +12,7 @@ import { type PayeeEntity } from 'loot-core/src/types/models';
 
 import { useSelectedItems } from '../../hooks/useSelected';
 import { View } from '../common/View';
-import { Table, TableResizable, type TableNavigator } from '../table';
+import { type Table, TableResizable } from '../table';
 
 import { PayeeTableRow } from './PayeeTableRow';
 
