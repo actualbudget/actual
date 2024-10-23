@@ -46,7 +46,7 @@ export async function applyMultipleCategoryTemplates({ month, categoryIds }) {
   const category_goals = await getTemplates(categories, 'goal');
   const ret = await processTemplate(
     month,
-    false,
+    true,
     category_templates,
     categories,
   );
