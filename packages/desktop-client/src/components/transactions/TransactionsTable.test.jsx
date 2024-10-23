@@ -27,6 +27,7 @@ import { ResponsiveProvider } from '../../ResponsiveProvider';
 import { ScrollProvider } from '../ScrollProvider';
 
 import { TransactionTable } from './TransactionsTable';
+import { ColumnWidthProvider } from '../ColumnWidthContext';
 
 vi.mock('loot-core/src/platform/client/fetch');
 vi.mock('../../hooks/useFeatureFlag', () => ({
@@ -245,7 +246,9 @@ function renderTransactions(extraProps) {
     getTransactions: () => transactions,
     updateProps: props =>
       render(
-        <LiveTransactionTable {...defaultProps} {...extraProps} {...props} />,
+        <ColumnWidthProvider prefName={"columns"}>
+          <LiveTransactionTable {...defaultProps} {...extraProps} {...props} />
+        </ColumnWidthProvider>,
         { container: result.container },
       ),
   };
