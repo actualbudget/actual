@@ -1,3 +1,5 @@
+type LimitPeriod = 'daily' | 'weekly' | 'montly';
+
 interface BaseTemplate {
   type: string;
   priority?: number;
@@ -16,7 +18,7 @@ interface WeekTemplate extends BaseTemplate {
   amount: number;
   weeks: number | null;
   starting: string;
-  limit?: { amount: number; hold: boolean; period: string; start: string };
+  limit?: { amount: number; hold: boolean; period: LimitPeriod; start: string };
 }
 
 interface ByTemplate extends BaseTemplate {
@@ -37,8 +39,8 @@ interface SpendTemplate extends BaseTemplate {
 
 interface SimpleTemplate extends BaseTemplate {
   type: 'simple';
-  monthly?: number;
-  limit?: { amount: number; hold: boolean; period: string; start: string };
+  monthly: number | null;
+  limit?: { amount: number; hold: boolean; period: LimitPeriod; start: string };
 }
 
 interface ScheduleTemplate extends BaseTemplate {
@@ -50,7 +52,7 @@ interface ScheduleTemplate extends BaseTemplate {
 interface RemainderTemplate extends BaseTemplate {
   type: 'remainder';
   weight: number;
-  limit?: { amount: number; hold: boolean; period: string; start: string };
+  limit?: { amount: number; hold: boolean; period: LimitPeriod; start: string };
 }
 
 interface AverageTemplate extends BaseTemplate {

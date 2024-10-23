@@ -508,7 +508,6 @@ async function applyCategoryTemplate(
     limitCheck: false,
     amount: 0,
     hold: false,
-    start: null,
   };
   let remainder = 0;
 
@@ -669,38 +668,43 @@ async function applyCategoryTemplate(
 }
 
 function readLimit(template, month, limitStatus, errors) {
+  //return early if there is no limit
   if (template.limit === null) {
     return { limitStatus, errors };
   }
+  // fail out if there is already a limit set
   if (limitStatus.limitCheck) {
     errors.push(`More than one limit found. Ignoring second limit`);
     return { limitStatus, errors };
-  } else {
-    limitStatus.limitCheck = true;
-    limitStatus.hold = template.limit.hold;
-    limitStatus.start = template.limit.start;
-
-    if (template.limit.period === 'daily') {
-      const numDays = monthUtils.differenceInCalendarDays(
-        monthUtils.addMonths(month, 1),
-        month,
-      );
-      limitStatus.amount = amountToInteger(template.limit.amount) * numDays;
-    } else if (template.limit.period === 'weekly') {
-      const nextMonth = monthUtils.nextMonth(month);
-      let week = limitStatus.start;
-      const baseLimit = amountToInteger(template.limit.amount);
-      // check if weeks are in this month
-      while (week < nextMonth) {
-        if (week >= month) {
-          limitStatus.amount += baseLimit;
-        }
-        week = monthUtils.addWeeks(week, 1);
+  } 
+  
+  //get the amount figured out
+  if (template.limit.period === 'daily') {
+    const numDays = monthUtils.differenceInCalendarDays(
+      monthUtils.addMonths(month, 1),
+      month,
+    );
+    limitStatus.amount = amountToInteger(template.limit.amount) * numDays;
+  } else if (template.limit.period === 'weekly') {
+    const nextMonth = monthUtils.nextMonth(month);
+    let week = template.limit.start;
+    const baseLimit = amountToInteger(template.limit.amount);
+    // check if weeks are in this month
+    while (week < nextMonth) {
+      if (week >= month) {
+        limitStatus.amount += baseLimit;
       }
-    } else {
-      limitStatus.amount = amountToInteger(template.limit.amount);
+      week = monthUtils.addWeeks(week, 1);
     }
-
+  } else if (template.limit.period == 'monthly') {
+    limitStatus.amount = amountToInteger(template.limit.amount);
+  } else {
+    errors.push('Invalid limit period. Check the template syntax')
     return { limitStatus, errors };
   }
+
+  // amount is good, so set all the other fields
+  limitStatus.limitCheck = true;
+  limitStatus.hold = template.limit.hold;
+  return { limitStatus, errors };
 }
