@@ -128,7 +128,9 @@ export function SidebarGroup({
                     onSave({ ...group, hidden: !group.hidden });
                   } else if (type === 'apply-multiple-category-template') {
                     onApplyBudgetTemplatesInGroup?.(
-                      group.categories.filter(c => !c.hidden).map(c => c['id']),
+                      group.categories
+                        .filter(c => !c['hidden'])
+                        .map(c => c['id']),
                     );
                   }
                   setMenuOpen(false);
