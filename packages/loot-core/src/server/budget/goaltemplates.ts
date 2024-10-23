@@ -676,8 +676,8 @@ function readLimit(template, month, limitStatus, errors) {
   if (limitStatus.limitCheck) {
     errors.push(`More than one limit found. Ignoring second limit`);
     return { limitStatus, errors };
-  } 
-  
+  }
+
   //get the amount figured out
   if (template.limit.period === 'daily') {
     const numDays = monthUtils.differenceInCalendarDays(
@@ -696,10 +696,10 @@ function readLimit(template, month, limitStatus, errors) {
       }
       week = monthUtils.addWeeks(week, 1);
     }
-  } else if (template.limit.period == 'monthly') {
+  } else if (template.limit.period ==='monthly') {
     limitStatus.amount = amountToInteger(template.limit.amount);
   } else {
-    errors.push('Invalid limit period. Check the template syntax')
+    errors.push('Invalid limit period. Check the template syntax');
     return { limitStatus, errors };
   }
 

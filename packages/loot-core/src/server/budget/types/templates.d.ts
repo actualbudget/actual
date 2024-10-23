@@ -1,4 +1,4 @@
-type LimitPeriod = 'daily' | 'weekly' | 'montly';
+type LimitPeriod = 'daily' | 'weekly' | 'monthly';
 
 interface BaseTemplate {
   type: string;
