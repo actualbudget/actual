@@ -625,6 +625,10 @@ export class Action {
         } else {
           object[this.field] = this.value;
         }
+
+        if (this.field === 'payee_name') {
+          object['payee'] = 'new';
+        }
         break;
       case 'set-split-amount':
         switch (this.options.method) {
