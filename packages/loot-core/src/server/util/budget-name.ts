@@ -2,9 +2,12 @@
 import { v4 as uuidv4 } from 'uuid';
 
 import * as fs from '../../platform/server/fs';
+import { type Budget } from '../../types/budget';
 
-export async function uniqueFileName(existingFiles) {
-  const initialName = 'My Finances';
+export async function uniqueFileName(
+  existingFiles: Budget[],
+  initialName: string = 'My Finances',
+): Promise<string> {
   let idx = 1;
 
   // If there is a conflict, keep appending an index until there is no

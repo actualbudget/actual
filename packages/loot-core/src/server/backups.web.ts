@@ -1,6 +1,5 @@
 // @ts-strict-ignore
 import * as dateFns from 'date-fns';
-import { v4 as uuidv4 } from 'uuid';
 
 import * as connection from '../platform/server/connection';
 import * as fs from '../platform/server/fs';
@@ -21,34 +20,30 @@ type BackupWithDate = { id: string; date: Date };
 
 async function getBackups(id: string): Promise<BackupWithDate[]> {
   const budgetDir = fs.getBudgetDir(id);
-  const backupDir = fs.join(budgetDir, 'backups');
 
   let paths = [];
-  if (await fs.exists(backupDir)) {
-    paths = await fs.listDir(backupDir);
-    paths = paths.filter(file => file.match(/\.sqlite$/));
-  }
+  paths = await fs.listDir(budgetDir);
+  paths = paths.filter(file => file.match(/db\.backup\.sqlite$/));
 
   const backups = await Promise.all(
     paths.map(async path => {
-      const mtime = await fs.getModifiedTime(fs.join(backupDir, path));
+      const dateString = path.substring(0, 17); // 'yyyyMMddHHmmssSSS'
+      const date = dateFns.parse(dateString, 'yyyyMMddHHmmssSSS', new Date());
+
+      if (date.toString() === 'Invalid Date') return null;
+
       return {
         id: path,
-        date: new Date(mtime),
+        date,
       };
     }),
   );
 
-  backups.sort((b1, b2) => {
-    if (b1.date < b2.date) {
-      return 1;
-    } else if (b1.date > b2.date) {
-      return -1;
-    }
-    return 0;
-  });
+  const validBackups = backups.filter(backup => backup !== null);
 
-  return backups;
+  validBackups.sort((b1, b2) => b2.date.getTime() - b1.date.getTime());
+
+  return validBackups;
 }
 
 async function getLatestBackup(id: string): Promise<LatestBackup | null> {
@@ -109,27 +104,26 @@ export async function makeBackup(id: string) {
   // viewing any backups. If there exists a "latest backup" we should
   // delete it and consider whatever is current as the latest
   if (await fs.exists(fs.join(budgetDir, LATEST_BACKUP_FILENAME))) {
-    await fs.removeFile(fs.join(fs.getBudgetDir(id), LATEST_BACKUP_FILENAME));
+    await fs.removeFile(fs.join(budgetDir, LATEST_BACKUP_FILENAME));
   }
 
-  const backupId = `${uuidv4()}.sqlite`;
-  const backupPath = fs.join(budgetDir, 'backups', backupId);
+  const currentTime = new Date();
+  const backupId = `${dateFns.format(currentTime, 'yyyyMMddHHmmssSSS')}-db.backup.sqlite`;
 
-  if (!(await fs.exists(fs.join(budgetDir, 'backups')))) {
-    await fs.mkdir(fs.join(budgetDir, 'backups'));
-  }
-
-  await fs.copyFile(fs.join(budgetDir, 'db.sqlite'), backupPath);
+  await fs.copyFile(
+    fs.join(budgetDir, 'db.sqlite'),
+    fs.join(budgetDir, backupId),
+  );
 
   // Remove all the messages from the backup
-  const db = sqlite.openDatabase(backupPath);
+  const db = await sqlite.openDatabase(fs.join(budgetDir, backupId));
   await sqlite.runQuery(db, 'DELETE FROM messages_crdt');
   await sqlite.runQuery(db, 'DELETE FROM messages_clock');
   sqlite.closeDatabase(db);
 
   const toRemove = await updateBackups(await getBackups(id));
   for (const id of toRemove) {
-    await fs.removeFile(fs.join(budgetDir, 'backups', id));
+    await fs.removeFile(fs.join(budgetDir, id));
   }
 
   connection.send('backups-updated', await getAvailableBackups(id));
@@ -143,18 +137,12 @@ export async function makeBackup(id: string) {
  */
 export async function removeAllBackups(id: string): Promise<boolean> {
   const budgetDir = fs.getBudgetDir(id);
-  const backupsDir = fs.join(budgetDir, 'backups');
-
-  if (!(await fs.exists(backupsDir))) {
-    return true; // No backups to remove
-  }
-
   const toRemove = await getAvailableBackups(id);
   let success = true;
 
   for (const item of toRemove) {
     try {
-      await fs.removeFile(fs.join(backupsDir, item.id));
+      await fs.removeFile(fs.join(budgetDir, item.id));
     } catch (error) {
       console.error(`Failed to remove backup ${item.id}:`, error);
       success = false;
@@ -207,7 +195,9 @@ export async function loadBackup(id: string, backupId: string) {
     // Re-upload the new file
     try {
       await cloudStorage.upload();
-    } catch (e) {}
+    } catch (error) {
+      console.error('Error uploading to cloud storage:', error);
+    }
     prefs.unloadPrefs();
   } else {
     console.log('Loading backup', backupId);
@@ -226,12 +216,14 @@ export async function loadBackup(id: string, backupId: string) {
     // Re-upload the new file
     try {
       await cloudStorage.upload();
-    } catch (e) {}
+    } catch (error) {
+      console.error('Error uploading to cloud storage:', error);
+    }
 
     prefs.unloadPrefs();
 
     await fs.copyFile(
-      fs.join(budgetDir, 'backups', backupId),
+      fs.join(budgetDir, backupId),
       fs.join(budgetDir, 'db.sqlite'),
     );
   }
@@ -245,8 +237,12 @@ export function startBackupService(id: string) {
   // Make a backup every 15 minutes
   serviceInterval = setInterval(
     async () => {
-      console.log('Making backup');
-      await makeBackup(id);
+      try {
+        console.log('Making backup');
+        await makeBackup(id);
+      } catch (error) {
+        console.error('Error making backup:', error);
+      }
     },
     1000 * 60 * 15,
   );
