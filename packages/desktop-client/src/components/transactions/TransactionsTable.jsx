@@ -2133,51 +2133,52 @@ function TransactionTableInner({
                 ascDesc={props.ascDesc}
                 field={props.sortField}
               />
-
-              {props.isAdding && (
-                <View
-                  {...newNavigator.getNavigatorProps({
-                    onKeyDown: e => props.onCheckNewEnter(e),
-                  })}
-                >
-                  <NewTransaction
-                    transactions={props.newTransactions}
-                    transferAccountsByTransaction={
-                      props.transferAccountsByTransaction
-                    }
-                    editingTransaction={newNavigator.editingId}
-                    focusedField={newNavigator.focusedField}
-                    accounts={props.accounts}
-                    categoryGroups={props.categoryGroups}
-                    payees={props.payees || []}
-                    showAccount={props.showAccount}
-                    showCategory={props.showCategory}
-                    showBalance={props.showBalances}
-                    showCleared={props.showCleared}
-                    dateFormat={dateFormat}
-                    hideFraction={props.hideFraction}
-                    onClose={props.onCloseAddTransaction}
-                    onAdd={props.onAddTemporary}
-                    onAddSplit={props.onAddSplit}
-                    onSplit={props.onSplit}
-                    onEdit={newNavigator.onEdit}
-                    onSave={props.onSave}
-                    onDelete={props.onDelete}
-                    onManagePayees={props.onManagePayees}
-                    onCreatePayee={props.onCreatePayee}
-                    onNavigateToTransferAccount={onNavigateToTransferAccount}
-                    onNavigateToSchedule={onNavigateToSchedule}
-                    onNotesTagClick={onNotesTagClick}
-                    onDistributeRemainder={props.onDistributeRemainder}
-                    balance={
-                      props.transactions?.length > 0
-                        ? props.balances?.[props.transactions[0]?.id]?.balance
-                        : 0
-                    }
-                  />
-                </View>
-              )}
             </View>
+          }
+          subHeaders={
+            props.isAdding && (
+              <View
+                {...newNavigator.getNavigatorProps({
+                  onKeyDown: e => props.onCheckNewEnter(e),
+                })}
+              >
+                <NewTransaction
+                  transactions={props.newTransactions}
+                  transferAccountsByTransaction={
+                    props.transferAccountsByTransaction
+                  }
+                  editingTransaction={newNavigator.editingId}
+                  focusedField={newNavigator.focusedField}
+                  accounts={props.accounts}
+                  categoryGroups={props.categoryGroups}
+                  payees={props.payees || []}
+                  showAccount={props.showAccount}
+                  showCategory={props.showCategory}
+                  showBalance={props.showBalances}
+                  showCleared={props.showCleared}
+                  dateFormat={dateFormat}
+                  hideFraction={props.hideFraction}
+                  onClose={props.onCloseAddTransaction}
+                  onAdd={props.onAddTemporary}
+                  onAddSplit={props.onAddSplit}
+                  onSplit={props.onSplit}
+                  onEdit={newNavigator.onEdit}
+                  onSave={props.onSave}
+                  onDelete={props.onDelete}
+                  onManagePayees={props.onManagePayees}
+                  onCreatePayee={props.onCreatePayee}
+                  onNavigateToTransferAccount={onNavigateToTransferAccount}
+                  onNavigateToSchedule={onNavigateToSchedule}
+                  onNotesTagClick={onNotesTagClick}
+                  onDistributeRemainder={props.onDistributeRemainder}
+                  balance={
+                    props.transactions?.length > 0
+                      ? props.balances?.[props.transactions[0]?.id]?.balance
+                      : 0
+                  }
+                />
+              </View>
+            )
           }
         />
 

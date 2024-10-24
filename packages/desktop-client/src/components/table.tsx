@@ -944,6 +944,7 @@ type TableProps<T extends TableItem = TableItem> = {
   items: T[];
   count?: number;
   headers?: ReactNode | TableHeaderProps['headers'];
+  subHeaders?: ReactNode;
   contentHeader?: ReactNode;
   loading?: boolean;
   rowHeight?: number;
@@ -974,6 +975,7 @@ export const Table = forwardRef(
       items,
       count,
       headers,
+      subHeaders,
       contentHeader,
       loading,
       rowHeight = ROW_HEIGHT,
@@ -1012,6 +1014,14 @@ export const Table = forwardRef(
     const listInitialized = useRef(false);
     const { totalWidth, setClientWidth } = useColumnWidth();
     const { setScrollContainers } = useScroll();
+    const subHeaderRef = useRef<HTMLDivElement>(null);
+    const [subHeaderOffset, setSubHeaderOffset] = useState(0);
+
+    useEffect(() => {
+      if (subHeaderRef.current) {
+        setSubHeaderOffset(subHeaderRef.current.offsetHeight);
+      }
+    }, [subHeaders, subHeaderRef]);
 
     useEffect(() => {
       if (
@@ -1255,6 +1265,7 @@ export const Table = forwardRef(
                 return (
                   <>
                     <View style={{ width: `${width}px` }}>
+                      <View ref={subHeaderRef}>{subHeaders}</View>
                       <AvoidRefocusScrollProvider>
                         <FixedSizeList
                           ref={list}
@@ -1263,7 +1274,7 @@ export const Table = forwardRef(
                           outerRef={scrollContainer}
                           width={width}
                           totalWidth={totalWidth()}
-                          height={height}
+                          height={height - subHeaderOffset}
                           renderRow={renderRow}
                           itemCount={count || items.length}
                           itemSize={rowHeight - 1}
