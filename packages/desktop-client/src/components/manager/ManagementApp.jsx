@@ -20,6 +20,8 @@ import { Notifications } from '../Notifications';
 import { useServerVersion } from '../ServerContext';
 
 import { BudgetList } from './BudgetList';
+import { ConfigExternalSyncServer } from './ConfigExternalSyncServer';
+import { ConfigInternalSyncServer } from './ConfigInternalSyncServer';
 import { ConfigServer } from './ConfigServer';
 import { ServerURL } from './ServerURL';
 import { Bootstrap } from './subscribe/Bootstrap';
@@ -126,6 +128,14 @@ export function ManagementApp() {
             <>
               <Routes>
                 <Route path="/config-server" element={<ConfigServer />} />
+                <Route
+                  path="/config-server/external"
+                  element={<ConfigExternalSyncServer />}
+                />
+                <Route
+                  path="/config-server/internal"
+                  element={<ConfigInternalSyncServer />}
+                />
 
                 <Route path="/change-password" element={<ChangePassword />} />
                 {files && files.length > 0 ? (

@@ -21,7 +21,7 @@
       "!**/*.js.map",
       "!**/stats.json",
       "!build/client-build/sql-wasm.wasm",
-      "!build/loot-core/lib-dist/{browser,bundle.mobile*}"
+      "!build/loot-core/lib-dist/electron/{browser,bundle.mobile*}"
     ],
     "beforePack": "./build/beforePackHook.js",
     "mac": {
@@ -57,19 +57,9 @@
     "win": {
       "target": [
         {
-          "target": "appx",
-          "arch": [
-            "ia32",
-            "x64",
-            "arm64"
-          ]
-        },
-        {
           "target": "nsis",
           "arch": [
-            "ia32",
-            "x64",
-            "arm64"
+            "x64"
           ]
         }
       ],
@@ -85,6 +75,8 @@
     "npmRebuild": false
   },
   "dependencies": {
+    "@ngrok/ngrok": "^1.4.1",
+    "actual-sync": "file:../../../actual-server",
     "better-sqlite3": "^9.6.0",
     "fs-extra": "^11.2.0",
     "node-fetch": "^2.7.0",

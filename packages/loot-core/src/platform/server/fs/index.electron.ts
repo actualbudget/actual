@@ -13,7 +13,7 @@ let rootPath = path.join(__dirname, '..', '..', '..', '..');
 if (__filename.match('bundle')) {
   // The file name is not our filename and indicates that we're in the
   // bundled form. Because of this, the root path is different.
-  rootPath = path.join(__dirname, '..');
+  rootPath = path.join(__dirname, '..', '..');
 }
 
 export const init = () => {

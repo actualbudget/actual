@@ -10,6 +10,7 @@ playwright-report
 
 # production
 build
+build-electron
 build-stats
 stats.json
 

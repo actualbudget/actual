@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 
+import ngrok from '@ngrok/ngrok';
 import {
   net,
   app,
@@ -15,9 +16,13 @@ import {
   UtilityProcess,
   OpenDialogSyncOptions,
   SaveDialogOptions,
+  Env,
+  ForkOptions,
 } from 'electron';
-import { copy, exists, remove } from 'fs-extra';
+import { copy, exists, mkdir, remove } from 'fs-extra';
 import promiseRetry from 'promise-retry';
+
+import { GlobalPrefs } from 'loot-core/types/prefs';
 
 import { getMenu } from './menu';
 import {
@@ -30,8 +35,8 @@ import './security';
 const isDev = !app.isPackaged; // dev mode if not packaged
 
 process.env.lootCoreScript = isDev
-  ? 'loot-core/lib-dist/bundle.desktop.js' // serve from local output in development (provides hot-reloading)
-  : path.resolve(__dirname, 'loot-core/lib-dist/bundle.desktop.js'); // serve from build in production
+  ? 'loot-core/lib-dist/electron/bundle.desktop.js' // serve from local output in development (provides hot-reloading)
+  : path.resolve(__dirname, 'loot-core/lib-dist/electron/bundle.desktop.js'); // serve from build in production
 
 // This allows relative URLs to be resolved to app:// which makes
 // local assets load correctly
@@ -51,9 +56,28 @@ if (!isDev || !process.env.ACTUAL_DATA_DIR) {
 // be closed automatically when the JavaScript object is garbage collected.
 let clientWin: BrowserWindow | null;
 let serverProcess: UtilityProcess | null;
+let actualServerProcess: UtilityProcess | null;
+let globalPrefs: Partial<GlobalPrefs> | null;
 
 if (isDev) {
   process.traceProcessWarnings = true;
+}
+
+async function loadGlobalPrefs() {
+  let state: GlobalPrefs | undefined = undefined;
+  try {
+    state = JSON.parse(
+      fs.readFileSync(
+        path.join(process.env.ACTUAL_DATA_DIR, 'global-store.json'),
+        'utf8',
+      ),
+    );
+  } catch (e) {
+    console.info('Could not load global state - using defaults'); // This could be the first time running the app - no global-store.json
+    state = {};
+  }
+
+  return state;
 }
 
 function createBackgroundProcess() {
@@ -91,6 +115,133 @@ function createBackgroundProcess() {
         console.log('Unknown server message: ' + msg.type);
     }
   });
+}
+
+function startSyncServer() {
+  const syncServerConfig = {
+    port: 5007,
+    ACTUAL_SERVER_DATA_DIR: path.resolve(
+      process.env.ACTUAL_DATA_DIR,
+      'actual-server',
+    ),
+    ACTUAL_SERVER_FILES: path.resolve(
+      process.env.ACTUAL_DATA_DIR,
+      'actual-server',
+      'server-files',
+    ),
+    ACTUAL_USER_FILES: path.resolve(
+      process.env.ACTUAL_DATA_DIR,
+      'actual-server',
+      'user-files',
+    ),
+    defaultDataDir: path.resolve(
+      // TODO: There's no env variable for this - may need to add one to sync server
+      process.env.ACTUAL_DATA_DIR,
+      'actual-server',
+      'data',
+    ),
+    https: {
+      key: '',
+      cert: '',
+    },
+  };
+
+  const serverPath = path.resolve(
+    __dirname,
+    isDev
+      ? '../../../node_modules/actual-sync/app.js'
+      : '../node_modules/actual-sync/app.js', // Temporary - required because actual-server is in the other repo
+  );
+
+  // NOTE: config.json parameters will be relative to THIS directory at the moment - may need a fix?
+  // Or we can override the config.json location when starting the process
+  try {
+    let envVariables: Env = {
+      ...process.env, // required
+      ACTUAL_PORT: `${syncServerConfig.port}`,
+      ACTUAL_SERVER_FILES: `${syncServerConfig.ACTUAL_SERVER_FILES}`,
+      ACTUAL_USER_FILES: `${syncServerConfig.ACTUAL_USER_FILES}`,
+      ACTUAL_DATA_DIR: `${syncServerConfig.ACTUAL_SERVER_DATA_DIR}`,
+    };
+
+    const webRoot = path.resolve(
+      __dirname,
+      isDev
+        ? '../../../node_modules/@actual-app/web/build/' // workspace node_modules
+        : '../node_modules/@actual-app/web/build/', // location of packaged module
+    );
+
+    envVariables = { ...envVariables, ACTUAL_WEB_ROOT: webRoot };
+
+    if (!fs.existsSync(syncServerConfig.ACTUAL_SERVER_FILES)) {
+      // create directories if they do not exit - actual-sync doesn't do it for us...
+      mkdir(syncServerConfig.ACTUAL_SERVER_FILES, { recursive: true });
+    }
+
+    if (!fs.existsSync(syncServerConfig.ACTUAL_USER_FILES)) {
+      // create directories if they do not exit - actual-sync doesn't do it for us...
+      mkdir(syncServerConfig.ACTUAL_USER_FILES, { recursive: true });
+    }
+
+    // TODO: make sure .migrate file is also in user-directory under actual-server
+
+    let forkOptions: ForkOptions = {
+      stdio: 'pipe',
+      env: envVariables,
+    };
+
+    if (isDev) {
+      forkOptions = { ...forkOptions, execArgv: ['--inspect'] };
+    }
+
+    actualServerProcess = utilityProcess.fork(
+      serverPath, // This requires actual-server depencies (crdt) to be built before running electron - they need to be manually specified because actual-server doesn't get bundled
+      [],
+      forkOptions,
+    );
+
+    actualServerProcess.stdout?.on('data', (chunk: Buffer) => {
+      // Send the Server console.log messages to the main browser window
+      clientWin?.webContents.executeJavaScript(`
+          console.info('Server Log:', ${JSON.stringify(chunk.toString('utf8'))})`);
+    });
+
+    actualServerProcess.stderr?.on('data', (chunk: Buffer) => {
+      // Send the Server console.error messages out to the main browser window
+      clientWin?.webContents.executeJavaScript(`
+            console.error('Server Log:', ${JSON.stringify(chunk.toString('utf8'))})`);
+    });
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+async function exposeSyncServer(ngrokConfig: GlobalPrefs['ngrokConfig']) {
+  const hasRequiredConfig =
+    ngrokConfig?.authToken && ngrokConfig?.domain && ngrokConfig?.port;
+
+  if (!hasRequiredConfig) {
+    console.error('Cannot expose sync server: missing ngrok settings');
+    return { error: 'Missing ngrok settings' };
+  }
+
+  try {
+    const listener = await ngrok.forward({
+      schemes: ['https'], // change this to https and bind certificate - may need to generate cert and store in user-data
+      addr: ngrokConfig.port,
+      host_header: `localhost:${ngrokConfig.port}`,
+      authtoken: ngrokConfig.authToken,
+      domain: ngrokConfig.domain,
+      // crt: fs.readFileSync("crt.pem", "utf8"),
+      // key: fs.readFileSync("key.pem", "utf8"),
+    });
+
+    console.info(`Exposing actual server on url: ${listener.url()}`);
+    return { url: listener.url() };
+  } catch (error) {
+    console.error('Unable to run ngrok', error);
+    return { error: `Unable to run ngrok. ${error}` };
+  }
 }
 
 async function createWindow() {
@@ -223,6 +374,14 @@ app.on('ready', async () => {
   // Install an `app://` protocol that always returns the base HTML
   // file no matter what URL it is. This allows us to use react-router
   // on the frontend
+
+  globalPrefs = await loadGlobalPrefs(); // load global prefs
+
+  if (globalPrefs.ngrokConfig?.autoStart) {
+    startSyncServer();
+    exposeSyncServer(globalPrefs.ngrokConfig);
+  }
+
   protocol.handle('app', request => {
     if (request.method !== 'GET') {
       return new Response(null, {
@@ -372,6 +531,14 @@ ipcMain.handle(
 ipcMain.handle('open-external-url', (event, url) => {
   shell.openExternal(url);
 });
+
+ipcMain.handle('start-actual-server', async () => startSyncServer());
+
+ipcMain.handle(
+  'expose-actual-server',
+  async (_event, payload: GlobalPrefs['ngrokConfig']) =>
+    exposeSyncServer(payload),
+);
 
 ipcMain.on('message', (_event, msg) => {
   if (!serverProcess) {

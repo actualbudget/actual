@@ -15,7 +15,7 @@ const addWatchers = (): Plugin => ({
   configureServer(server) {
     server.watcher
       .add([
-        path.resolve('../loot-core/lib-dist/*.js'),
+        path.resolve('../loot-core/lib-dist/electron/*.js'),
         path.resolve('../loot-core/lib-dist/browser/*.js'),
       ])
       .on('all', function () {
@@ -109,7 +109,7 @@ export default defineConfig(async ({ mode }) => {
     build: {
       target: 'es2022',
       sourcemap: true,
-      outDir: 'build',
+      outDir: mode === 'desktop' ? 'build-electron' : 'build',
       assetsDir: 'static',
       manifest: true,
       assetsInlineLimit: 0,
@@ -148,7 +148,7 @@ export default defineConfig(async ({ mode }) => {
       extensions: resolveExtensions,
     },
     plugins: [
-      // Macos electron (desktop) builds do not support PWA
+      // electron (desktop) builds do not support PWA
       mode === 'desktop'
         ? undefined
         : VitePWA({

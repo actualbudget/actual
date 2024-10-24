@@ -4,7 +4,7 @@ ROOT=`dirname $0`/..
 
 rm -rf ${ROOT}/build
 mkdir -p ${ROOT}/build
-cp -r ${ROOT}/../desktop-client/build ${ROOT}/build/client-build
+cp -r ${ROOT}/../desktop-client/build-electron ${ROOT}/build/client-build
 
 # Remove the embedded backend for the browser version. Will improve
 # this process
@@ -14,9 +14,8 @@ rm -rf ${ROOT}/build/client-build/*.wasm
 rm -rf ${ROOT}/build/client-build/*.map
 
 # Copy loot-core into build directory
-mkdir -p ${ROOT}/build/loot-core/lib-dist
-ls ${ROOT}/build/loot-core/lib-dist
-cp ${ROOT}/../loot-core/lib-dist/bundle.desktop.js ${ROOT}/build/loot-core/lib-dist/bundle.desktop.js
+mkdir -p ${ROOT}/build/loot-core/lib-dist/electron
+cp ${ROOT}/../loot-core/lib-dist/electron/bundle.desktop.js ${ROOT}/build/loot-core/lib-dist/electron/bundle.desktop.js
 cp ${ROOT}/../loot-core/default-db.sqlite ${ROOT}/build/loot-core/default-db.sqlite
 cp -r ${ROOT}/../loot-core/migrations ${ROOT}/build/loot-core/migrations
 
