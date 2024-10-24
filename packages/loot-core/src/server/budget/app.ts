@@ -30,6 +30,10 @@ app.method(
   mutator(undoable(goalActions.applyTemplate)),
 );
 app.method(
+  'budget/apply-multiple-templates',
+  mutator(undoable(goalActions.applyMultipleCategoryTemplates)),
+);
+app.method(
   'budget/overwrite-goal-template',
   mutator(undoable(goalActions.overwriteTemplate)),
 );
