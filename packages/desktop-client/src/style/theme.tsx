@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useState } from 'react';
 
 import { isNonProductionEnvironment } from 'loot-core/src/shared/environment';
 import type { DarkTheme, Theme } from 'loot-core/src/types/prefs';
@@ -52,42 +52,44 @@ export function ThemeStyle() {
     | undefined
   >(undefined);
 
+  const setAutoThemeColors = useCallback(
+    (isDarkMode: boolean) => {
+      if (isDarkMode) {
+        setThemeColors(themes[darkThemePreference].colors);
+      } else {
+        setThemeColors(themes['light'].colors);
+      }
+    },
+    [darkThemePreference],
+  );
+
+  useLayoutEffect(() => {
+    if (theme === 'auto') {
+      const isDarkMode = window.matchMedia(
+        '(prefers-color-scheme: dark)',
+      ).matches;
+      setAutoThemeColors(isDarkMode);
+    } else {
+      setThemeColors(themes[theme].colors);
+    }
+  }, [theme, darkThemePreference, setAutoThemeColors]);
+
   useEffect(() => {
     if (theme === 'auto') {
-      const darkTheme = themes[darkThemePreference];
-
-      function darkThemeMediaQueryListener(event: MediaQueryListEvent) {
-        if (event.matches) {
-          setThemeColors(darkTheme.colors);
-        } else {
-          setThemeColors(themes['light'].colors);
-        }
-      }
       const darkThemeMediaQuery = window.matchMedia(
         '(prefers-color-scheme: dark)',
       );
 
-      darkThemeMediaQuery.addEventListener(
-        'change',
-        darkThemeMediaQueryListener,
-      );
-
-      if (darkThemeMediaQuery.matches) {
-        setThemeColors(darkTheme.colors);
-      } else {
-        setThemeColors(themes['light'].colors);
-      }
-
-      return () => {
-        darkThemeMediaQuery.removeEventListener(
-          'change',
-          darkThemeMediaQueryListener,
-        );
+      const changeListener = (event: MediaQueryListEvent) => {
+        setAutoThemeColors(event.matches);
       };
-    } else {
-      setThemeColors(themes[theme].colors);
+
+      darkThemeMediaQuery.addEventListener('change', changeListener);
+      return () => {
+        darkThemeMediaQuery.removeEventListener('change', changeListener);
+      };
     }
-  }, [theme, darkThemePreference]);
+  }, [setAutoThemeColors, theme]);
 
   if (!themeColors) return null;
 
