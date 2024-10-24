@@ -6,7 +6,6 @@ import { useDispatch } from 'react-redux';
 import {
   addNotification,
   applyBudgetAction,
-  applyBudgetTemplatesInGroup,
   createCategory,
   createGroup,
   deleteCategory,

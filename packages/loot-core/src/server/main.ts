@@ -40,7 +40,6 @@ import {
 } from './backups';
 import { app as budgetApp } from './budget/app';
 import * as budget from './budget/base';
-import * as goalActions from './budget/goaltemplates';
 import * as cloudStorage from './cloud-storage';
 import { app as dashboardApp } from './dashboard/app';
 import * as db from './db';
