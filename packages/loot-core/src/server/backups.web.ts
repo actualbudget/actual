@@ -41,14 +41,7 @@ async function getBackups(id: string): Promise<BackupWithDate[]> {
 
   const validBackups = backups.filter(backup => backup !== null);
 
-  validBackups.sort((b1, b2) => {
-    if (b1.date < b2.date) {
-      return 1;
-    } else if (b1.date > b2.date) {
-      return -1;
-    }
-    return 0;
-  });
+  validBackups.sort((b1, b2) => b2.date.getTime() - b1.date.getTime());
 
   return validBackups;
 }
@@ -244,8 +237,12 @@ export function startBackupService(id: string) {
   // Make a backup every 15 minutes
   serviceInterval = setInterval(
     async () => {
-      console.log('Making backup');
-      await makeBackup(id);
+      try {
+        console.log('Making backup');
+        await makeBackup(id);
+      } catch (error) {
+        console.error('Error making backup:', error);
+      }
     },
     1000 * 60 * 15,
   );

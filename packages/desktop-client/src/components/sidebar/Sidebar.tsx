@@ -183,9 +183,7 @@ function EditableBudgetName() {
   }
 
   const nonRemoteFiles = allFiles.filter(isNonRemoteFile);
-  const file = id ? nonRemoteFiles.filter(f => f.id === id) : null;
-
-  const budgetFile = file && file.length > 0 ? file[0] : null;
+  const budgetFile = id ? nonRemoteFiles.find(f => f.id === id) : null;
   const budgetId = budgetFile?.id ? budgetFile.id : undefined;
 
   function onMenuSelect(type: string) {

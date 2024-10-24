@@ -1855,19 +1855,30 @@ handlers['duplicate-budget'] = async function ({
     if (metadata[item]) delete metadata[item];
   });
 
-  const newBudgetDir = fs.getBudgetDir(newId);
-  await fs.mkdir(newBudgetDir);
+  try {
+    const newBudgetDir = fs.getBudgetDir(newId);
+    await fs.mkdir(newBudgetDir);
 
-  // write metadata for new budget
-  await fs.writeFile(
-    fs.join(newBudgetDir, 'metadata.json'),
-    JSON.stringify(metadata),
-  );
+    // write metadata for new budget
+    await fs.writeFile(
+      fs.join(newBudgetDir, 'metadata.json'),
+      JSON.stringify(metadata),
+    );
 
-  await fs.copyFile(
-    fs.join(budgetDir, 'db.sqlite'),
-    fs.join(newBudgetDir, 'db.sqlite'),
-  );
+    await fs.copyFile(
+      fs.join(budgetDir, 'db.sqlite'),
+      fs.join(newBudgetDir, 'db.sqlite'),
+    );
+  } catch (error) {
+    // Clean up any partially created files
+    try {
+      const newBudgetDir = fs.getBudgetDir(newId);
+      if (await fs.exists(newBudgetDir)) {
+        await fs.removeDirRecursively(newBudgetDir);
+      }
+    } catch {} // Ignore cleanup errors
+    throw new Error(`Failed to duplicate budget: ${error.message}`);
+  }
 
   // load in and validate
   const { error } = await loadBudget(newId);
@@ -1879,7 +1890,8 @@ handlers['duplicate-budget'] = async function ({
   if (cloudSync) {
     try {
       await cloudStorage.upload();
-    } catch (e) {
+    } catch (error) {
+      console.warn('Failed to sync duplicated budget to cloud:', error);
       // Ignore any errors uploading. If they are offline they should
       // still be able to create files.
     }

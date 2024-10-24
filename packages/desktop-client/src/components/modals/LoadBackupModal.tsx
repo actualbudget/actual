@@ -112,10 +112,15 @@ export function LoadBackupModal({
                     isLoading={loading === 'revert'}
                     onPress={async () => {
                       setLoading('revert');
-                      await dispatch(
-                        loadBackup(budgetIdToLoad, latestBackup.id),
-                      );
-                      setLoading(null);
+                      try {
+                        await dispatch(
+                          loadBackup(budgetIdToLoad, latestBackup.id),
+                        );
+                      } catch (error) {
+                        console.error('Failed to revert backup:', error);
+                      } finally {
+                        setLoading(null);
+                      }
                     }}
                   >
                     <Trans>Revert to original version</Trans>

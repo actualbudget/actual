@@ -374,13 +374,8 @@ export const removeDirRecursively = async function (dirpath) {
   }
 };
 
-export const getModifiedTime = async function (path: string): Promise<Date> {
-  return new Promise(function (resolve, reject) {
-    const result = new Date(path);
-    if (result.toString() === 'Invalid Date') {
-      reject(result);
-    } else {
-      resolve(result);
-    }
-  });
+export const getModifiedTime = async function () {
+  throw new Error(
+    'getModifiedTime not supported on the web (only used for backups)',
+  );
 };

@@ -39,25 +39,53 @@ export function DuplicateFileModal({
   const isCloudFile = 'cloudFileId' in file && file.state !== 'broken';
   const dispatch = useDispatch();
 
-  const [loading, setLoading] = useState(false);
   const [loadingState, setLoadingState] = useState<'cloud' | 'local' | null>(
     null,
   );
 
   const validateNewName = (name: string): string | null => {
-    if (name === '') {
-      const error = t('Name cannot be blank');
-      setNameError(error);
-      return error;
+    const trimmedName = name.trim();
+    if (trimmedName === '') return t('Budget name cannot be blank');
+    if (trimmedName.length > 100) {
+      return t('Budget name is too long (max length 100)');
     }
-    setNameError(null);
+    // Additional validation checks can go here
+
     return null;
   };
 
   const validateAndSetName = (name: string) => {
-    validateNewName(name);
-    if (!nameError) {
-      setNewName(name);
+    const trimmedName = name.trim();
+    const error = validateNewName(trimmedName);
+    if (error) {
+      setNameError(error);
+    } else {
+      setNewName(trimmedName);
+      setNameError(null);
+    }
+  };
+
+  const handleDuplicate = async (sync: 'localOnly' | 'cloudSync') => {
+    const error = validateNewName(newName);
+    if (!error) {
+      setLoadingState(sync === 'cloudSync' ? 'cloud' : 'local');
+
+      await dispatch(
+        duplicateBudget({
+          id: 'id' in file ? file.id : undefined,
+          cloudId:
+            sync === 'cloudSync' && 'cloudFileId' in file
+              ? file.cloudFileId
+              : undefined,
+          oldName: file.name,
+          newName,
+          cloudSync: sync === 'cloudSync',
+          managePage,
+          loadBudget,
+        }),
+      );
+
+      setLoadingState(null);
     }
   };
 
@@ -88,11 +116,10 @@ export function DuplicateFileModal({
                 <Input
                   name="name"
                   value={newName}
+                  aria-label={t('New budget name')}
+                  aria-invalid={nameError ? 'true' : 'false'}
                   onChange={event => setNewName(event.target.value)}
-                  onBlur={event => {
-                    const name = event.target.value.trim();
-                    validateAndSetName(name);
-                  }}
+                  onBlur={event => validateAndSetName(event.target.value)}
                   style={{ flex: 1 }}
                 />
               </InitialFocus>
@@ -115,7 +142,7 @@ export function DuplicateFileModal({
                 </Text>
 
                 <ButtonWithLoading
-                  variant={loading ? 'bare' : 'primary'}
+                  variant={loadingState !== null ? 'bare' : 'primary'}
                   isLoading={loadingState === 'cloud'}
                   style={{
                     alignSelf: 'center',
@@ -123,26 +150,7 @@ export function DuplicateFileModal({
                     padding: '5px 30px',
                     fontSize: 14,
                   }}
-                  onPress={async () => {
-                    validateNewName(newName);
-                    if (!nameError) {
-                      setLoading(true);
-                      setLoadingState('cloud');
-                      await dispatch(
-                        duplicateBudget({
-                          id: 'id' in file ? file.id : undefined,
-                          cloudId: file.cloudFileId,
-                          oldName: file.name,
-                          newName,
-                          cloudSync: true,
-                          managePage,
-                          loadBudget,
-                        }),
-                      );
-                      setLoadingState(null);
-                      setLoading(false);
-                    }
-                  }}
+                  onPress={() => handleDuplicate('cloudSync')}
                 >
                   <Trans>Duplicate budget for all devices</Trans>
                 </ButtonWithLoading>
@@ -174,7 +182,11 @@ export function DuplicateFileModal({
                   </Button>
                   <ButtonWithLoading
                     variant={
-                      loading ? 'bare' : isCloudFile ? 'normal' : 'primary'
+                      loadingState !== null
+                        ? 'bare'
+                        : isCloudFile
+                          ? 'normal'
+                          : 'primary'
                     }
                     isLoading={loadingState === 'local'}
                     style={{
@@ -183,24 +195,7 @@ export function DuplicateFileModal({
                       padding: '5px 30px',
                       fontSize: 14,
                     }}
-                    onPress={async () => {
-                      validateNewName(newName);
-                      if (!nameError) {
-                        setLoading(true);
-                        setLoadingState('local');
-                        await dispatch(
-                          duplicateBudget({
-                            id: file.id,
-                            oldName: file.name,
-                            newName,
-                            managePage,
-                            loadBudget,
-                          }),
-                        );
-                        setLoadingState(null);
-                        setLoading(false);
-                      }
-                    }}
+                    onPress={() => handleDuplicate('localOnly')}
                   >
                     <Trans>Duplicate budget</Trans>
                     {isCloudFile && <Trans> locally only</Trans>}
