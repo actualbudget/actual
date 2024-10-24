@@ -205,7 +205,9 @@ function TransactionListWithPreviews({
   const [transactions, setTransactions] = useState<
     ReadonlyArray<TransactionEntity>
   >([]);
-  const prependTransactions = usePreviewTransactions();
+  const prependTransactions = usePreviewTransactions({
+    accountId: account?.id,
+  });
   const allTransactions = useMemo(
     () =>
       !isSearching ? prependTransactions.concat(transactions) : transactions,
