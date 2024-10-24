@@ -96,6 +96,16 @@ export function applyBudgetAction(month, type, args) {
           category: args.category,
         });
         break;
+      case 'apply-multiple-templates':
+        dispatch(
+          addNotification(
+            await send('budget/apply-multiple-templates', {
+              month,
+              categoryIds: args.categories,
+            }),
+          ),
+        );
+        break;
       case 'set-single-3-avg':
         await send('budget/set-n-month-avg', {
           month,
@@ -122,15 +132,6 @@ export function applyBudgetAction(month, type, args) {
           month,
           category: args.category,
         });
-        break;
-      case 'apply-multiple-templates':
-        console.log('apply: ' + args.categories);
-        addNotification(
-          await send('budget/apply-multiple-templates', {
-            month,
-            categoryIds: args.categories,
-          }),
-        );
         break;
       default:
     }
