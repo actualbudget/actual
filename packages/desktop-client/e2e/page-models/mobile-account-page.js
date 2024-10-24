@@ -15,6 +15,10 @@ export class MobileAccountPage {
     });
   }
 
+  async waitFor() {
+    await this.transactionList.waitFor();
+  }
+
   /**
    * Retrieve the balance of the account as a number
    */
@@ -27,6 +31,10 @@ export class MobileAccountPage {
    */
   async searchByText(term) {
     await this.searchBox.fill(term);
+  }
+
+  async clearSearch() {
+    await this.searchBox.clear();
   }
 
   /**

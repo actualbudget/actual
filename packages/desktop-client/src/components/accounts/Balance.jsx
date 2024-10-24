@@ -68,8 +68,13 @@ function SelectedBalance({ selectedItems, account }) {
   });
 
   let scheduleBalance = null;
-  const scheduleData = useCachedSchedules();
-  const schedules = scheduleData ? scheduleData.schedules : [];
+
+  const { isLoading, schedules = [] } = useCachedSchedules();
+
+  if (isLoading) {
+    return null;
+  }
+
   const previewIds = [...selectedItems]
     .filter(id => isPreviewId(id))
     .map(id => id.slice(8));

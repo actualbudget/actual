@@ -1,12 +1,12 @@
 // @ts-strict-ignore
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 
 import { pushModal } from 'loot-core/client/actions';
 import { useSchedules } from 'loot-core/src/client/data-hooks/schedules';
 import { send } from 'loot-core/src/platform/client/fetch';
-import { type Query } from 'loot-core/src/shared/query';
+import { q } from 'loot-core/src/shared/query';
 import {
   type ScheduleEntity,
   type TransactionEntity,
@@ -37,17 +37,17 @@ export function ScheduleLink({
 
   const dispatch = useDispatch();
   const [filter, setFilter] = useState(accountName || '');
-
-  const scheduleData = useSchedules({
-    transform: useCallback((q: Query) => q.filter({ completed: false }), []),
-  });
+  const schedulesQuery = useMemo(
+    () => q('schedules').filter({ completed: false }).select('*'),
+    [],
+  );
+  const {
+    isLoading: isSchedulesLoading,
+    schedules,
+    statuses,
+  } = useSchedules({ query: schedulesQuery });
 
   const searchInput = useRef(null);
-  if (scheduleData == null) {
-    return null;
-  }
-
-  const { schedules, statuses } = scheduleData;
 
   async function onSelect(scheduleId: string) {
     if (ids?.length > 0) {
@@ -131,6 +131,7 @@ export function ScheduleLink({
             }}
           >
             <SchedulesTable
+              isLoading={isSchedulesLoading}
               allowCompleted={false}
               filter={filter}
               minimal={true}
