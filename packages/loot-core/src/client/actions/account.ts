@@ -62,10 +62,6 @@ export function linkAccount(
   offBudget?: boolean,
 ) {
   return async (dispatch: Dispatch) => {
-    if (upgradingId) {
-      await dispatch(setAccountsSyncing([upgradingId]));
-    }
-
     await send('gocardless-accounts-link', {
       requisitionId,
       account,
@@ -83,10 +79,6 @@ export function linkAccountSimpleFin(
   offBudget?: boolean,
 ) {
   return async (dispatch: Dispatch) => {
-    if (upgradingId) {
-      await dispatch(setAccountsSyncing([upgradingId]));
-    }
-
     await send('simplefin-accounts-link', {
       externalAccount,
       upgradingId,
