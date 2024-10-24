@@ -267,7 +267,12 @@ function BudgetInner(props: BudgetInnerProps) {
   };
 
   const onApplyBudgetTemplatesInGroup = async categories => {
-    dispatch(applyBudgetTemplatesInGroup(startMonth, categories));
+    dispatch(
+      applyBudgetAction(startMonth, 'apply-multiple-templates', {
+        month: startMonth,
+        categories,
+      }),
+    );
   };
 
   const onBudgetAction = (month, type, args) => {

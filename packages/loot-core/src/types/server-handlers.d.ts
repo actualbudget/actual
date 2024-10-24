@@ -87,11 +87,6 @@ export interface ServerHandlers {
 
   'category-delete': (arg: { id; transferId? }) => Promise<{ error?: string }>;
 
-  'apply-multiple-templates': (arg: {
-    month: string;
-    categoryIds: string[]; //categoy ids
-  }) => Promise<Notification>;
-
   'category-group-create': (arg: {
     name;
     isIncome?: boolean;

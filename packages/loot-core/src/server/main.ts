@@ -392,18 +392,6 @@ handlers['category-group-move'] = mutator(async function ({ id, targetId }) {
   });
 });
 
-handlers['apply-multiple-templates'] = mutator(async function ({
-  month,
-  categoryIds,
-}) {
-  return withUndo(async () => {
-    return await goalActions.applyMultipleCategoryTemplates({
-      month,
-      categoryIds,
-    });
-  });
-});
-
 handlers['category-group-delete'] = mutator(async function ({
   id,
   transferId,

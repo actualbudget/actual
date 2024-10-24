@@ -149,11 +149,6 @@ export interface ApiHandlers {
     transferCategoryId;
   }) => Promise<unknown>;
 
-  'api/apply-multiple-templates': (arg: {
-    month: string;
-    categoryIds: string[]; //categoy ids
-  }) => Promise<Notification>;
-
   'api/category-create': (arg: { category }) => Promise<string>;
 
   'api/category-update': (arg: { id; fields }) => Promise<unknown>;

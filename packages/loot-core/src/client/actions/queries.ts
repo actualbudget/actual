@@ -123,6 +123,15 @@ export function applyBudgetAction(month, type, args) {
           category: args.category,
         });
         break;
+      case 'apply-multiple-templates':
+        console.log('apply: ' + args.categories);
+        addNotification(
+          await send('budget/apply-multiple-templates', {
+            month,
+            categoryIds: args.categories,
+          }),
+        );
+        break;
       default:
     }
   };
@@ -234,16 +243,6 @@ export function deleteGroup(id, transferId?) {
     await dispatch(getCategories());
     // See `deleteCategory` for why we need this
     await dispatch(getPayees());
-  };
-}
-
-export function applyBudgetTemplatesInGroup(month, categoryIds) {
-  return async function (dispatch: Dispatch) {
-    dispatch(
-      addNotification(
-        await send('apply-multiple-templates', { month, categoryIds }),
-      ),
-    );
   };
 }
 
