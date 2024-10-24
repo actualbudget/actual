@@ -58,6 +58,7 @@ export type MetadataPrefs = Partial<{
  */
 export type LocalPrefs = Partial<{
   'ui.showClosedAccounts': boolean;
+  'ui.expandPrimaryButtons': boolean;
   'expand-splits': boolean;
   'budget.collapsed': string[];
   'budget.summaryCollapsed': boolean;
