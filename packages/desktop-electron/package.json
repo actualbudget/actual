@@ -86,6 +86,12 @@
   },
   "dependencies": {
     "better-sqlite3": "^9.6.0",
+    "electron-is-dev": "2.0.0",
+    "electron-log": "4.4.8",
+    "i18next": "^23.12.6",
+    "i18next-electron-fs-backend": "^3.0.2",
+    "lodash": "^4.17.21",
+    "loot-core": "*",
     "fs-extra": "^11.2.0",
     "node-fetch": "^2.7.0",
     "promise-retry": "^2.0.1"
@@ -94,6 +100,7 @@
     "@electron/notarize": "2.4.0",
     "@electron/rebuild": "3.6.0",
     "@types/copyfiles": "^2",
+    "@types/lodash": "^4",
     "@types/fs-extra": "^11",
     "copyfiles": "^2.4.1",
     "cross-env": "^7.0.3",

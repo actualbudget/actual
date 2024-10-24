@@ -1,5 +1,7 @@
 import { MenuItemConstructorOptions, Menu, ipcMain, app } from 'electron';
 
+import i18n from './i18n';
+
 export function getMenu(
   isDev: boolean,
   createWindow: () => Promise<void>,
@@ -7,10 +9,10 @@ export function getMenu(
 ) {
   const template: MenuItemConstructorOptions[] = [
     {
-      label: 'File',
+      label: i18n.t('File'),
       submenu: [
         {
-          label: 'Load Backup...',
+          label: i18n.t('Load Backup...'),
           enabled: false,
           click(_item, focusedWindow) {
             if (focusedWindow && budgetId) {
@@ -26,7 +28,7 @@ export function getMenu(
           type: 'separator',
         },
         {
-          label: 'Manage files...',
+          label: i18n.t('Manage files...'),
           accelerator: 'CmdOrCtrl+O',
           click(_item, focusedWindow) {
             if (focusedWindow) {
@@ -46,10 +48,10 @@ export function getMenu(
       ],
     },
     {
-      label: 'Edit',
+      label: i18n.t('Edit'),
       submenu: [
         {
-          label: 'Undo',
+          label: i18n.t('Undo'),
           enabled: false,
           accelerator: 'CmdOrCtrl+Z',
           click: function (_menuItem, focusedWin) {
@@ -62,7 +64,7 @@ export function getMenu(
           },
         },
         {
-          label: 'Redo',
+          label: i18n.t('Redo'),
           enabled: false,
           accelerator: 'Shift+CmdOrCtrl+Z',
           click: function (_menuItem, focusedWin) {
@@ -98,10 +100,10 @@ export function getMenu(
       ],
     },
     {
-      label: 'View',
+      label: i18n.t('View'),
       submenu: [
         {
-          label: 'Reload',
+          label: i18n.t('Reload'),
           accelerator: 'CmdOrCtrl+R',
           click(_item, focusedWindow) {
             if (focusedWindow) {
@@ -110,7 +112,7 @@ export function getMenu(
           },
         },
         {
-          label: 'Toggle Developer Tools',
+          label: i18n.t('Toggle Developer Tools'),
           accelerator:
             process.platform === 'darwin' ? 'Alt+Command+I' : 'Ctrl+Shift+I',
           click(_item, focusedWindow) {
@@ -140,10 +142,10 @@ export function getMenu(
       ],
     },
     {
-      label: 'Tools',
+      label: i18n.t('Tools'),
       submenu: [
         {
-          label: 'Find schedules',
+          label: i18n.t('Find schedules'),
           enabled: false,
           click: function (_menuItem, focusedWin) {
             if (focusedWin) {
@@ -167,7 +169,7 @@ export function getMenu(
       role: 'help',
       submenu: [
         {
-          label: 'Documentation',
+          label: i18n.t('Documentation'),
           click(_menuItem, focusedWin) {
             focusedWin?.webContents.executeJavaScript(
               'window.__actionsForMenu && window.__actionsForMenu.openDocsForCurrentPage()',
@@ -175,7 +177,7 @@ export function getMenu(
           },
         },
         {
-          label: 'Keyboard Shortcuts',
+          label: i18n.t('Keyboard Shortcuts'),
           accelerator: '?',
           enabled: !!budgetId,
           click: function (_menuItem, focusedWin) {
@@ -197,7 +199,7 @@ export function getMenu(
       submenu: [
         isDev
           ? {
-              label: 'Screenshot',
+              label: i18n.t('Screenshot'),
               click() {
                 ipcMain.emit('screenshot');
               },
@@ -231,13 +233,13 @@ export function getMenu(
       ],
     });
     // Edit menu.
-    const editIdx = template.findIndex(t => t.label === 'Edit');
+    const editIdx = template.findIndex(t => t.label === i18n.t('Edit'));
     (template[editIdx].submenu as MenuItemConstructorOptions[]).push(
       {
         type: 'separator',
       },
       {
-        label: 'Speech',
+        label: i18n.t('Speech'),
         submenu: [
           {
             role: 'startSpeaking',
@@ -252,24 +254,24 @@ export function getMenu(
     const windowIdx = template.findIndex(t => t.role === 'window');
     template[windowIdx].submenu = [
       {
-        label: 'Close',
+        label: i18n.t('Close'),
         accelerator: 'CmdOrCtrl+W',
         role: 'close',
       },
       {
-        label: 'Minimize',
+        label: i18n.t('Minimize'),
         accelerator: 'CmdOrCtrl+M',
         role: 'minimize',
       },
       {
-        label: 'Zoom',
+        label: i18n.t('Zoom'),
         role: 'zoom',
       },
       {
         type: 'separator',
       },
       {
-        label: 'Bring All to Front',
+        label: i18n.t('Bring All to Front'),
         role: 'front',
       },
     ];

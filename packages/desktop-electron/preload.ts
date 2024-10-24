@@ -6,6 +6,8 @@ import {
   SaveFileDialogPayload,
 } from './index';
 
+const backend = require('i18next-electron-fs-backend');
+
 const { version: VERSION, isDev: IS_DEV }: GetBootstrapDataPayload =
   ipcRenderer.sendSync('get-bootstrap-data');
 
@@ -13,6 +15,8 @@ contextBridge.exposeInMainWorld('Actual', {
   IS_DEV,
   ACTUAL_VERSION: VERSION,
   logToTerminal: console.log,
+
+  i18nextElectronBackend: backend.preloadBindings(ipcRenderer, process),
 
   ipcConnect: (
     func: (payload: {
