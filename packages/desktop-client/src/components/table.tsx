@@ -30,7 +30,7 @@ import { SvgDelete, SvgExpandArrow } from '../icons/v0';
 import { SvgCheckmark } from '../icons/v1';
 import { styles, theme } from '../style';
 
-import { Button } from './common/Button2';
+import { ButtonWithLoading } from './common/Button2';
 import { Input } from './common/Input';
 import { Menu, type MenuItem } from './common/Menu';
 import { Popover } from './common/Popover';
@@ -816,6 +816,7 @@ type SelectedItemsButtonProps<Name extends string> = {
   name: ((count: number) => string) | string;
   items: MenuItem<Name>[];
   onSelect: (name: Name, items: string[]) => void;
+  isLoading: boolean;
 };
 
 export function SelectedItemsButton<Name extends string>({
@@ -823,6 +824,7 @@ export function SelectedItemsButton<Name extends string>({
   name,
   items,
   onSelect,
+  isLoading = false,
 }: SelectedItemsButtonProps<Name>) {
   const selectedItems = useSelectedItems();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -837,7 +839,8 @@ export function SelectedItemsButton<Name extends string>({
 
   return (
     <View style={{ marginLeft: 10, flexShrink: 0 }}>
-      <Button
+      <ButtonWithLoading
+        isLoading={isLoading}
         ref={triggerRef}
         variant="bare"
         style={{ color: theme.pageTextPositive }}
@@ -850,7 +853,7 @@ export function SelectedItemsButton<Name extends string>({
           style={{ marginRight: 5, color: theme.pageText }}
         />
         {buttonLabel}
-      </Button>
+      </ButtonWithLoading>
 
       <Popover
         triggerRef={triggerRef}

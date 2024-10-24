@@ -48,12 +48,12 @@ type SelectAllAction = {
   isRangeSelect?: boolean;
 };
 
-export type Actions = SelectAction | SelectNoneAction | SelectAllAction;
+type Actions = SelectAction | SelectNoneAction | SelectAllAction;
 
 export function useSelected<T extends Item>(
   name: string,
-  items: T[],
-  initialSelectedIds: string[],
+  items: readonly T[],
+  initialSelectedIds: readonly string[],
   selectAllFilter?: (item: T) => boolean,
 ) {
   const [state, dispatch] = useReducer(
@@ -309,16 +309,18 @@ export function SelectedProvider<T extends Item>({
 
 type SelectedProviderWithItemsProps<T extends Item> = {
   name: string;
-  items: T[];
-  initialSelectedIds?: string[];
+  items: readonly T[];
+  initialSelectedIds?: readonly string[];
   fetchAllIds: () => Promise<string[]>;
   registerDispatch?: (dispatch: Dispatch<Actions>) => void;
   selectAllFilter?: (item: T) => boolean;
   children: ReactElement;
 };
 
-// This can be helpful in class components if you cannot use the
-// custom hook
+/**
+ * This can be helpful in class components if you cannot use the custom hook
+ * @deprecated Use `SelectedProvider` and `useSelected` instead
+ */
 export function SelectedProviderWithItems<T extends Item>({
   name,
   items,

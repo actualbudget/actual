@@ -9,6 +9,8 @@ import React, {
 } from 'react';
 import { useDispatch } from 'react-redux';
 
+import { useSchedules } from 'loot-core/client/data-hooks/schedules';
+import { q } from 'loot-core/shared/query';
 import { pushModal } from 'loot-core/src/client/actions/modals';
 import { initiallyLoadPayees } from 'loot-core/src/client/actions/queries';
 import { send } from 'loot-core/src/platform/client/fetch';
@@ -21,7 +23,6 @@ import { type NewRuleEntity } from 'loot-core/src/types/models';
 import { useAccounts } from '../hooks/useAccounts';
 import { useCategories } from '../hooks/useCategories';
 import { usePayees } from '../hooks/usePayees';
-import { useSchedules } from '../hooks/useSchedules';
 import { useSelected, SelectedProvider } from '../hooks/useSelected';
 import { theme } from '../style';
 
@@ -113,7 +114,9 @@ export function ManageRules({
   const [filter, setFilter] = useState('');
   const dispatch = useDispatch();
 
-  const { data: schedules = [] } = useSchedules();
+  const { schedules = [] } = useSchedules({
+    query: useMemo(() => q('schedules').select('*'), []),
+  });
   const { list: categories } = useCategories();
   const payees = usePayees();
   const accounts = useAccounts();
