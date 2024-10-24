@@ -18,7 +18,7 @@ export function setAppState(state: Partial<AppState>): SetAppStateAction {
 
 export function updateApp() {
   return async (dispatch: Dispatch) => {
-    global.Actual.applyAppUpdate();
+    await global.Actual.applyAppUpdate();
     dispatch(setAppState({ updateInfo: null }));
   };
 }

@@ -1,4 +1,5 @@
 import { initBackend as initSQLBackend } from 'absurd-sql/dist/indexeddb-main-thread';
+import { registerSW } from 'virtual:pwa-register';
 
 import * as Platform from 'loot-core/src/client/platform';
 
@@ -38,6 +39,19 @@ function createBackendWorker() {
 }
 
 createBackendWorker();
+
+let isUpdateReadyForDownload = false;
+let markUpdateReadyForDownload;
+const isUpdateReadyForDownloadPromise = new Promise(resolve => {
+  markUpdateReadyForDownload = () => {
+    isUpdateReadyForDownload = true;
+    resolve(true);
+  };
+});
+const updateSW = registerSW({
+  immediate: true,
+  onNeedRefresh: markUpdateReadyForDownload,
+});
 
 global.Actual = {
   IS_DEV,
@@ -140,7 +154,14 @@ global.Actual = {
     window.open(url, '_blank');
   },
   onEventFromMain: () => {},
-  applyAppUpdate: () => {},
+  isUpdateReadyForDownload: () => isUpdateReadyForDownload,
+  waitForUpdateReadyForDownload: () => isUpdateReadyForDownloadPromise,
+  applyAppUpdate: async () => {
+    updateSW();
+
+    // Wait for the app to reload
+    await new Promise(() => {});
+  },
   updateAppMenu: () => {},
 
   ipcConnect: () => {},
