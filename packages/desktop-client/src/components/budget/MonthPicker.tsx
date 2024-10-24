@@ -1,10 +1,11 @@
 // @ts-strict-ignore
-import { type CSSProperties, useState } from 'react';
+import React, { type CSSProperties, useState } from 'react';
 
 import * as monthUtils from 'loot-core/src/shared/months';
 
 import { useResizeObserver } from '../../hooks/useResizeObserver';
 import { styles, theme } from '../../style';
+import { Link } from '../common/Link';
 import { View } from '../common/View';
 
 import { type BoundsProps } from './MonthsContext';
@@ -63,15 +64,34 @@ export const MonthPicker = ({
   return (
     <View
       style={{
-        flexDirection: 'row',
+        flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'space-between',
+        marginTop: 24,
         ...style,
       }}
     >
       <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: 10,
+          position: 'absolute',
+          top: -34,
+        }}
+      >
+        <Link
+          variant="button"
+          buttonVariant="bare"
+          onClick={() => onSelect(currentMonth)}
+        >
+          Now
+        </Link>
+      </View>
+      <View
         innerRef={containerRef}
         style={{
+          width: '100%',
           flexDirection: 'row',
           flex: 1,
           alignItems: 'center',
