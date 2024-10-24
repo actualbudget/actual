@@ -77,11 +77,7 @@ export function AmountInput({
   function onSwitch() {
     const amount = getAmount();
     if (amount === 0) {
-      if (symbol !== '+') {
-        setSymbol('+');
-      } else {
-        setSymbol('-');
-      }
+      setSymbol(symbol === '+' ? '-' : '+');
     }
     fireUpdate(amount * -1);
   }
