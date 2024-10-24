@@ -3,6 +3,7 @@ import React, { type CSSProperties, useRef, useState } from 'react';
 import { type ConnectDragSource } from 'react-dnd';
 import { useTranslation } from 'react-i18next';
 
+import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { SvgExpandArrow } from '../../icons/v0';
 import { SvgCheveronDown } from '../../icons/v1';
 import { theme } from '../../style';
@@ -56,6 +57,7 @@ export function SidebarGroup({
   const temporary = group.id === 'new';
   const [menuOpen, setMenuOpen] = useState(false);
   const triggerRef = useRef(null);
+  const contextMenusEnabled = useFeatureFlag('contextMenus');
 
   const displayed = (
     <View
@@ -64,9 +66,16 @@ export function SidebarGroup({
         alignItems: 'center',
         userSelect: 'none',
         WebkitUserSelect: 'none',
+        height: 20,
       }}
+      ref={triggerRef}
       onClick={() => {
         onToggleCollapse(group.id);
+      }}
+      onContextMenu={e => {
+        if (!contextMenusEnabled) return;
+        e.preventDefault();
+        setMenuOpen(true);
       }}
     >
       {!dragPreview && (
@@ -95,7 +104,7 @@ export function SidebarGroup({
       </div>
       {!dragPreview && (
         <>
-          <View style={{ marginLeft: 5, flexShrink: 0 }} ref={triggerRef}>
+          <View style={{ marginLeft: 5, flexShrink: 0 }}>
             <Button
               variant="bare"
               className="hover-visible"
@@ -111,6 +120,7 @@ export function SidebarGroup({
               isOpen={menuOpen}
               onOpenChange={() => setMenuOpen(false)}
               style={{ width: 200 }}
+              isNonModal
             >
               <Menu
                 onMenuSelect={type => {

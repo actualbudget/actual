@@ -204,6 +204,13 @@ export function ManageRules({
     setLoading(false);
   }
 
+  async function onDeleteRule(id: string) {
+    setLoading(true);
+    await send('rule-delete', id);
+    await loadRules();
+    setLoading(false);
+  }
+
   const onEditRule = useCallback(rule => {
     dispatch(
       pushModal('edit-rule', {
@@ -306,6 +313,7 @@ export function ManageRules({
                 hoveredRule={hoveredRule}
                 onHover={onHover}
                 onEditRule={onEditRule}
+                onDeleteRule={rule => onDeleteRule(rule.id)}
               />
             )}
           </SimpleTable>

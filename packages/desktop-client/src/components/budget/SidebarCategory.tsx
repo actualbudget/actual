@@ -7,6 +7,7 @@ import {
   type CategoryEntity,
 } from 'loot-core/src/types/models';
 
+import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { SvgCheveronDown } from '../../icons/v1';
 import { theme } from '../../style';
 import { Button } from '../common/Button2';
@@ -51,6 +52,7 @@ export function SidebarCategory({
   const temporary = category.id === 'new';
   const [menuOpen, setMenuOpen] = useState(false);
   const triggerRef = useRef(null);
+  const contextMenusEnabled = useFeatureFlag('contextMenus');
 
   const displayed = (
     <View
@@ -61,6 +63,13 @@ export function SidebarCategory({
         WebkitUserSelect: 'none',
         opacity: category.hidden || categoryGroup?.hidden ? 0.33 : undefined,
         backgroundColor: 'transparent',
+        height: 20,
+      }}
+      ref={triggerRef}
+      onContextMenu={e => {
+        if (!contextMenusEnabled) return;
+        e.preventDefault();
+        setMenuOpen(true);
       }}
     >
       <div
@@ -74,7 +83,7 @@ export function SidebarCategory({
       >
         {category.name}
       </div>
-      <View style={{ flexShrink: 0, marginLeft: 5 }} ref={triggerRef}>
+      <View style={{ flexShrink: 0, marginLeft: 5 }}>
         <Button
           variant="bare"
           className="hover-visible"
@@ -94,6 +103,7 @@ export function SidebarCategory({
           isOpen={menuOpen}
           onOpenChange={() => setMenuOpen(false)}
           style={{ width: 200 }}
+          isNonModal
         >
           <Menu
             onMenuSelect={type => {

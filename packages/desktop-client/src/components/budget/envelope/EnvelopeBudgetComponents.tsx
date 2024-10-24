@@ -14,6 +14,7 @@ import { evalArithmetic } from 'loot-core/src/shared/arithmetic';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToCurrency, amountToInteger } from 'loot-core/src/shared/util';
 
+import { useFeatureFlag } from '../../../hooks/useFeatureFlag';
 import { useUndo } from '../../../hooks/useUndo';
 import { SvgCheveronDown } from '../../../icons/v1';
 import { styles, theme } from '../../../style';
@@ -215,6 +216,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
   };
 
   const { showUndoNotification } = useUndo();
+  const contextMenusEnabled = useFeatureFlag('contextMenus');
 
   return (
     <View
@@ -237,6 +239,12 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
         style={{
           flex: 1,
           flexDirection: 'row',
+        }}
+        onContextMenu={e => {
+          if (!contextMenusEnabled) return;
+          if (editing) return;
+          e.preventDefault();
+          setBudgetMenuOpen(true);
         }}
       >
         {!editing && (
@@ -274,6 +282,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
               isOpen={budgetMenuOpen}
               onOpenChange={() => setBudgetMenuOpen(false)}
               style={{ width: 200 }}
+              isNonModal
             >
               <BudgetMenu
                 onCopyLastMonthAverage={() => {
@@ -390,6 +399,11 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
         <span
           ref={balanceMenuTriggerRef}
           onClick={() => setBalanceMenuOpen(true)}
+          onContextMenu={e => {
+            if (!contextMenusEnabled) return;
+            e.preventDefault();
+            setBalanceMenuOpen(true);
+          }}
         >
           <BalanceWithCarryover
             carryover={envelopeBudget.catCarryover(category.id)}
@@ -406,6 +420,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
           isOpen={balanceMenuOpen}
           onOpenChange={() => setBalanceMenuOpen(false)}
           style={{ width: 200 }}
+          isNonModal
         >
           <BalanceMovementMenu
             categoryId={category.id}
