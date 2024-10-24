@@ -1,6 +1,5 @@
 import React, { type ComponentPropsWithoutRef } from 'react';
 
-import { useResponsive } from '../../ResponsiveProvider';
 import { theme } from '../../style';
 import { AccountAutocomplete } from '../autocomplete/AccountAutocomplete';
 import {
@@ -11,6 +10,7 @@ import {
 } from '../common/Modal';
 import { View } from '../common/View';
 import { SectionLabel } from '../forms';
+import { useResponsive } from '../responsive/ResponsiveProvider';
 
 type AccountAutocompleteModalProps = {
   autocompleteProps: ComponentPropsWithoutRef<typeof AccountAutocomplete>;

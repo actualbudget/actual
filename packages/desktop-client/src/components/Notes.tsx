@@ -5,11 +5,11 @@ import ReactMarkdown from 'react-markdown';
 import { css } from '@emotion/css';
 import remarkGfm from 'remark-gfm';
 
-import { useResponsive } from '../ResponsiveProvider';
 import { theme } from '../style';
 import { remarkBreaks, sequentialNewlinesPlugin } from '../util/markdown';
 
 import { Text } from './common/Text';
+import { useResponsive } from './responsive/ResponsiveProvider';
 
 const remarkPlugins = [sequentialNewlinesPlugin, remarkGfm, remarkBreaks];
 

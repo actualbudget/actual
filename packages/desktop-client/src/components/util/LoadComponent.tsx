@@ -21,49 +21,46 @@ export function LoadComponent<K extends string>(props: LoadComponentProps<K>) {
   return <LoadComponentInner key={props.name} {...props} />;
 }
 
-// Cache of the various modules so we would not need to
-// load the same thing multiple times.
-const localModuleCache = new Map();
-
 function LoadComponentInner<K extends string>({
   name,
   message,
   importer,
 }: LoadComponentProps<K>) {
-  const [Component, setComponent] = useState<ProplessComponent | null>(
-    localModuleCache.get(name) ?? null,
-  );
-  const [failedToLoad, setFailedToLoad] = useState(false);
-  const [failedToLoadException, setFailedToLoadException] = useState(null);
+  const [Component, setComponent] = useState<ProplessComponent | null>(null);
+  const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
-    if (localModuleCache.has(name)) {
-      return;
-    }
-
-    setFailedToLoad(false);
+    let isUnmounted = false;
+    setError(null);
+    setComponent(null);
 
     // Load the module; if it fails - retry with exponential backoff
     promiseRetry(
       retry =>
         importer()
           .then(module => {
-            const component = () => module[name];
-            localModuleCache.set(name, component);
-            setComponent(component);
+            // Handle possibly being unmounted while retrying.
+            if (!isUnmounted) {
+              setComponent(() => module[name]);
+            }
           })
           .catch(retry),
       {
         retries: 5,
       },
     ).catch(e => {
-      setFailedToLoad(true);
-      setFailedToLoadException(e);
+      if (!isUnmounted) {
+        setError(e);
+      }
     });
+
+    return () => {
+      isUnmounted = true;
+    };
   }, [name, importer]);
 
-  if (failedToLoad) {
-    throw new LazyLoadFailedError(name, failedToLoadException);
+  if (error) {
+    throw new LazyLoadFailedError(name, error);
   }
 
   if (!Component) {

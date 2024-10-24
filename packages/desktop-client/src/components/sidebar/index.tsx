@@ -3,8 +3,8 @@ import React from 'react';
 import { useDebounceCallback } from 'usehooks-ts';
 
 import { useGlobalPref } from '../../hooks/useGlobalPref';
-import { useResponsive } from '../../ResponsiveProvider';
 import { View } from '../common/View';
+import { useResponsive } from '../responsive/ResponsiveProvider';
 
 import { Sidebar } from './Sidebar';
 import { useSidebar } from './SidebarProvider';

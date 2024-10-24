@@ -9,7 +9,6 @@ import {
 } from 'loot-core/client/actions';
 
 import { useMetaThemeColor } from '../../hooks/useMetaThemeColor';
-import { useResponsive } from '../../ResponsiveProvider';
 import { theme } from '../../style';
 import { tokens } from '../../tokens';
 import { AppBackground } from '../AppBackground';
@@ -17,6 +16,7 @@ import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { LoggedInUser } from '../LoggedInUser';
 import { Notifications } from '../Notifications';
+import { useResponsive } from '../responsive/ResponsiveProvider';
 import { useServerVersion } from '../ServerContext';
 
 import { BudgetList } from './BudgetList';
