@@ -586,6 +586,7 @@ export function Modals() {
               file={options.file}
               managePage={options?.managePage}
               loadBudget={options?.loadBudget}
+              onComplete={options?.onComplete}
             />
           );
         case 'import':

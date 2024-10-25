@@ -93,7 +93,26 @@ type FinanceModals = {
      * duplication process.
      */
     managePage?: boolean;
+    /**
+     * loadBudget indicates whether to open the 'original' budget, the
+     * new duplicated 'copy' budget, or no budget ('none'). If 'none'
+     * duplicate-budget stays on the same page.
+     */
     loadBudget?: 'none' | 'original' | 'copy';
+    /**
+     * onComplete is called when the DuplicateFileModal is closed.
+     * @param event the event object will pass back the status of the
+     * duplicate process.
+     * 'success' if the budget was duplicated.
+     * 'failed' if the budget could not be duplicated.  This will also
+     * pass an error on the event object.
+     * 'canceled' if the DuplicateFileModal was canceled.
+     * @returns
+     */
+    onComplete?: (event: {
+      status: 'success' | 'failed' | 'canceled';
+      error?: Error;
+    }) => void;
   };
 
   import: null;

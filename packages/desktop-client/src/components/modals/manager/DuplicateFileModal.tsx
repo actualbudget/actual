@@ -24,12 +24,17 @@ type DuplicateFileProps = {
   file: File;
   managePage?: boolean;
   loadBudget?: 'none' | 'original' | 'copy';
+  onComplete?: (event: {
+    status: 'success' | 'failed' | 'canceled';
+    error?: object;
+  }) => void;
 };
 
 export function DuplicateFileModal({
   file,
   managePage,
   loadBudget = 'none',
+  onComplete,
 }: DuplicateFileProps) {
   const { t } = useTranslation();
   const [newName, setNewName] = useState(file.name + ' - copy');
@@ -86,6 +91,10 @@ export function DuplicateFileModal({
       );
 
       setLoadingState(null);
+      if (onComplete) onComplete({ status: 'success' });
+    } else {
+      const failError = new Error(error);
+      if (onComplete) onComplete({ status: 'failed', error: failError });
     }
   };
 
@@ -95,7 +104,14 @@ export function DuplicateFileModal({
         <>
           <ModalHeader
             title={t('Duplicate “{{fileName}}”', { fileName: file.name })}
-            rightContent={<ModalCloseButton onPress={close} />}
+            rightContent={
+              <ModalCloseButton
+                onPress={() => {
+                  close();
+                  if (onComplete) onComplete({ status: 'canceled' });
+                }}
+              />
+            }
           />
           <View
             style={{
@@ -177,7 +193,12 @@ export function DuplicateFileModal({
                 )}
 
                 <ModalButtons>
-                  <Button onPress={close}>
+                  <Button
+                    onPress={() => {
+                      close();
+                      if (onComplete) onComplete({ status: 'canceled' });
+                    }}
+                  >
                     <Trans>Cancel</Trans>
                   </Button>
                   <ButtonWithLoading
