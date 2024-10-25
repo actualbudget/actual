@@ -72,7 +72,7 @@ export function HorizontalFakeScrollbar() {
       handleMouseMove(e.deltaX);
     },
     onMoveEnd: () => {
-      if (!scrollX) return;
+      if (scrollX === undefined || scrollX === null) return;
 
       setIsDragging(false);
 
