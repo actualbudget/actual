@@ -40,9 +40,7 @@ export function Resizer({ columnName, resizeRef }: ResizerProps) {
       <Popover
         triggerRef={resizerRef}
         isOpen={isMenuOpen}
-        onOpenChange={() => {
-          setIsMenuOpen(false);
-        }}
+        onOpenChange={setIsMenuOpen}
       >
         <Menu
           onMenuSelect={itemName => {
