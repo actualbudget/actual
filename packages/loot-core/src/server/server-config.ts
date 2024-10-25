@@ -27,13 +27,21 @@ export function setServer(url: string): void {
 // `url` is optional; if not given it will provide the global config
 export function getServer(url?: string): ServerConfig | null {
   if (url) {
-    return {
-      BASE_SERVER: url,
-      SYNC_SERVER: joinURL(url, '/sync'),
-      SIGNUP_SERVER: joinURL(url, '/account'),
-      GOCARDLESS_SERVER: joinURL(url, '/gocardless'),
-      SIMPLEFIN_SERVER: joinURL(url, '/simplefin'),
-    };
+    try {
+      return {
+        BASE_SERVER: url,
+        SYNC_SERVER: joinURL(url, '/sync'),
+        SIGNUP_SERVER: joinURL(url, '/account'),
+        GOCARDLESS_SERVER: joinURL(url, '/gocardless'),
+        SIMPLEFIN_SERVER: joinURL(url, '/simplefin'),
+      };
+    } catch (error) {
+      console.warn(
+        'Unable to parse server URL - using the global config.',
+        error,
+      );
+      return config;
+    }
   }
   return config;
 }
