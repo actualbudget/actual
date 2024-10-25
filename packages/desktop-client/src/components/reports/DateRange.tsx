@@ -2,6 +2,8 @@ import React, { type ReactElement } from 'react';
 
 import * as d from 'date-fns';
 
+import * as monthUtils from 'loot-core/src/shared/months';
+
 import { theme } from '../../style';
 import { styles } from '../../style/styles';
 import { Block } from '../common/Block';
@@ -14,7 +16,7 @@ type DateRangeProps = {
 };
 
 function checkDate(date: string) {
-  const dateParsed = new Date(date);
+  const dateParsed = monthUtils.parseDate(date);
   if (dateParsed.toString() !== 'Invalid Date') {
     return d.format(dateParsed, 'yyyy-MM-dd');
   } else {
