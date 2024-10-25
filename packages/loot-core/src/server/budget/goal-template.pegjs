@@ -23,7 +23,7 @@ expr
   / template: template _ remainder: remainder limit: limit?
     { return { type: 'remainder', priority: null, directive: template.directive, weight: remainder, limit } }
   / template: template _ 'average'i _ amount: positive _ 'months'i?
-    { return { type: 'average', amount: +amount, priority: template.priority, directive: template.directive }}
+    { return { type: 'average', numMonths: +amount, priority: template.priority, directive: template.directive }}
   / template: template _ 'copy from'i _ lookBack: positive _ 'months ago'i limit:limit?
     { return { type: 'copy', priority: template.priority, directive: template.directive, lookBack: +lookBack, limit }}
   / goal: goal amount: amount { return {type: 'simple', amount: amount, priority: null, directive: 'goal' }}
