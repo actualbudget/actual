@@ -1253,19 +1253,19 @@ export const Table = forwardRef(
             backgroundColor,
           }}
         >
-          {isEmpty ? (
-            getEmptyContent(renderEmpty)
-          ) : (
-            <AutoSizer onResize={size => setClientWidth(size.width)}>
-              {({ width, height }) => {
-                if (width === 0 || height === 0) {
-                  return null;
-                }
+          <View ref={subHeaderRef}>{subHeaders}</View>
+          <AutoSizer onResize={size => setClientWidth(size.width)}>
+            {({ width, height }) => {
+              if (width === 0 || height === 0) {
+                return null;
+              }
 
-                return (
-                  <>
-                    <View style={{ width: `${width}px` }}>
-                      <View ref={subHeaderRef}>{subHeaders}</View>
+              return (
+                <>
+                  <View style={{ width: `${width}px` }}>
+                    {isEmpty ? (
+                      getEmptyContent(renderEmpty)
+                    ) : (
                       <AvoidRefocusScrollProvider>
                         <FixedSizeList
                           ref={list}
@@ -1294,13 +1294,13 @@ export const Table = forwardRef(
                           onScroll={onScroll}
                         />
                       </AvoidRefocusScrollProvider>
-                    </View>
-                    <HorizontalFakeScrollbar />
-                  </>
-                );
-              }}
-            </AutoSizer>
-          )}
+                    )}
+                  </View>
+                  <HorizontalFakeScrollbar />
+                </>
+              );
+            }}
+          </AutoSizer>
         </View>
       </View>
     );

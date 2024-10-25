@@ -50,7 +50,7 @@ test.describe('Transactions', () => {
       await filterTooltip.applyButton.click();
 
       // Assert that there are no transactions
-      await expect(accountPage.transactionTable).toHaveText('No transactions');
+      await expect(accountPage.transactionTable).toContainText('No transactions');
       await expect(page).toMatchThemeScreenshots();
     });
 

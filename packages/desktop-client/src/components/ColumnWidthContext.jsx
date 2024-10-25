@@ -82,10 +82,6 @@ export const ColumnWidthProvider = ({ children, prefName }) => {
     }, 100);
   };
 
-  const setFixedColumn = useCallback(fixedColumns => {
-    setFixedSizedColumns(fixedColumns);
-  }, []);
-
   const getViewportWidth = useCallback(() => clientWidth, [clientWidth]);
 
   const updateColumnWidth = useCallback(
@@ -178,7 +174,7 @@ export const ColumnWidthProvider = ({ children, prefName }) => {
       value={{
         columnWidths,
         handleMoveProps,
-        setFixedColumn,
+        setFixedSizedColumns,
         handleDoubleClick,
         totalWidth,
         removeColumn,

@@ -176,10 +176,10 @@ const TransactionHeader = memo(
     onSort,
     ascDesc,
     field,
+    columnWidths,
   }) => {
     const dispatchSelected = useSelectedDispatch();
     const refs = useRef({});
-    const { columnWidths, setFixedColumn } = useColumnWidth();
 
     useHotkeys(
       'ctrl+a, cmd+a, meta+a',
@@ -190,19 +190,6 @@ const TransactionHeader = memo(
       },
       [dispatchSelected],
     );
-
-    useEffect(() => {
-      setFixedColumn({
-        selected: 20,
-        date: 110,
-        debit: 100,
-        credit: 100,
-        payee: 200,
-        account: 200,
-        balance: showBalance ? 103 : 0,
-        cleared: showCleared ? 38 : 0,
-      });
-    }, [columnWidths, columnWidths.current]);
 
     const { totalWidth, clientWidth } = useColumnWidth();
     const rowRef = useRef();
@@ -239,7 +226,7 @@ const TransactionHeader = memo(
         <HeaderCell
           value="Date"
           ref={el => (refs.current['date'] = el)}
-          width={columnWidths['date'] ? columnWidths['date'] : 110}
+          width={columnWidths.date}
           alignItems="flex"
           marginLeft={-5}
           id="date"
@@ -254,7 +241,7 @@ const TransactionHeader = memo(
             <HeaderCell
               value="Account"
               ref={el => (refs.current['account'] = el)}
-              width={columnWidths['account'] ? columnWidths['account'] : 200}
+              width={columnWidths.account}
               alignItems="flex"
               marginLeft={-5}
               id="account"
@@ -272,7 +259,7 @@ const TransactionHeader = memo(
         <HeaderCell
           value="Payee"
           ref={el => (refs.current['payee'] = el)}
-          width={columnWidths['payee'] ? columnWidths['payee'] : 200}
+          width={columnWidths.payee}
           alignItems="flex"
           marginLeft={-5}
           id="payee"
@@ -285,7 +272,7 @@ const TransactionHeader = memo(
         <HeaderCell
           value="Notes"
           ref={el => (refs.current['notes'] = el)}
-          width={columnWidths['notes'] ? columnWidths['notes'] : 'flex'}
+          width={columnWidths.notes}
           alignItems="flex"
           marginLeft={-5}
           id="notes"
@@ -300,7 +287,7 @@ const TransactionHeader = memo(
             <HeaderCell
               value="Category"
               ref={el => (refs.current['category'] = el)}
-              width={columnWidths['category'] ? columnWidths['category'] : 110}
+              width={columnWidths.category}
               marginLeft={-5}
               id="category"
               icon={field === 'category' ? ascDesc : 'clickable'}
@@ -320,7 +307,7 @@ const TransactionHeader = memo(
         <HeaderCell
           value="Payment"
           ref={el => (refs.current['debit'] = el)}
-          width={columnWidths['debit'] ? columnWidths['debit'] : 100}
+          width={columnWidths.debit}
           alignItems="flex-end"
           marginRight={-5}
           id="payment"
@@ -333,7 +320,7 @@ const TransactionHeader = memo(
         <HeaderCell
           value="Deposit"
           ref={el => (refs.current['credit'] = el)}
-          width={columnWidths['credit'] ? columnWidths['credit'] : 100}
+          width={columnWidths.credit}
           alignItems="flex-end"
           marginRight={-5}
           id="deposit"
@@ -348,7 +335,7 @@ const TransactionHeader = memo(
             <HeaderCell
               value="Balance"
               ref={el => (refs.current['balance'] = el)}
-              width={columnWidths['balance'] ? columnWidths['balance'] : 103}
+              width={columnWidths.balance}
               alignItems="flex-end"
               marginRight={-5}
               id="balance"
@@ -930,6 +917,7 @@ const Transaction = memo(function Transaction({
   onNotesTagClick,
   splitError,
   listContainerRef,
+  columnWidths,
 }) {
   const dispatch = useDispatch();
   const dispatchSelected = useSelectedDispatch();
@@ -974,7 +962,6 @@ const Transaction = memo(function Transaction({
     _inverse = false,
   } = transaction;
 
-  const { columnWidths } = useColumnWidth();
   const refs = useRef({});
 
   function onUpdate(name, value) {
@@ -1164,7 +1151,7 @@ const Transaction = memo(function Transaction({
       {isChild && (
         <Field
           /* Checkmark blank placeholder for Child transaction */
-          width={columnWidths['date'] ? columnWidths['date'] : 110}
+          width={columnWidths.date}
           style={{
             backgroundColor: theme.tableRowBackgroundHover,
             border: 0, // known z-order issue, bottom border for parent transaction hidden
@@ -1175,7 +1162,7 @@ const Transaction = memo(function Transaction({
       {isChild && showAccount && (
         <>
           <Field
-            width={columnWidths['account'] ? columnWidths['account'] : 200}
+            width={columnWidths.account}
             data-resizeable-column="account"
             /* Account blank placeholder for Child transaction */
             style={{
@@ -1241,7 +1228,7 @@ const Transaction = memo(function Transaction({
             /* Date field for non-child transaction */
             name="date"
             ref={el => (refs.current['date'] = el)}
-            width={columnWidths['date'] ? columnWidths['date'] : 110}
+            width={columnWidths.date}
             data-resizeable-column="date"
             textAlign="flex"
             exposed={focusedField === 'date'}
@@ -1289,7 +1276,7 @@ const Transaction = memo(function Transaction({
             /* Account field for non-child transaction */
             name="account"
             ref={el => (refs.current['account'] = el)}
-            width={columnWidths['account'] ? columnWidths['account'] : 200}
+            width={columnWidths.account}
             data-resizeable-column="account"
             textAlign="flex"
             value={accountId}
@@ -1347,7 +1334,7 @@ const Transaction = memo(function Transaction({
             id={id}
             payee={payee}
             ref={el => (refs.current['payee'] = el)}
-            width={columnWidths['payee'] ? columnWidths['payee'] : 200}
+            width={columnWidths.payee}
             data-resizeable-column="payee"
             focused={focusedField === 'payee'}
             /* Filter out the account we're currently in as it is not a valid transfer */
@@ -1380,7 +1367,7 @@ const Transaction = memo(function Transaction({
 
       <InputCell
         ref={el => (refs.current['notes'] = el)}
-        width={columnWidths['notes'] ? columnWidths['notes'] : 'flex'}
+        width={columnWidths.notes}
         data-resizeable-column="notes"
         name="notes"
         textAlign="flex"
@@ -1407,7 +1394,7 @@ const Transaction = memo(function Transaction({
           /* Category field (Split button) for parent transactions */
           name="category"
           ref={el => (refs.current['category'] = el)}
-          width={columnWidths['category'] ? columnWidths['category'] : 110}
+          width={columnWidths.category}
           data-resizeable-column="category"
           focused={focusedField === 'category'}
           style={{
@@ -1501,7 +1488,7 @@ const Transaction = memo(function Transaction({
      (NOT preview, it is covered first) */
           name="category"
           ref={el => (refs.current['category'] = el)}
-          width={columnWidths['category'] ? columnWidths['category'] : 110}
+          width={columnWidths.category}
           data-resizeable-column="category"
           exposed={focusedField === 'category'}
           focused={focusedField === 'category'}
@@ -1531,7 +1518,7 @@ const Transaction = memo(function Transaction({
           /* Category field for normal and child transactions */
           name="category"
           ref={el => (refs.current['category'] = el)}
-          width={columnWidths['category'] ? columnWidths['category'] : 110}
+          width={columnWidths.category}
           data-resizeable-column="category"
           textAlign="flex"
           value={categoryId}
@@ -1612,7 +1599,7 @@ const Transaction = memo(function Transaction({
         /* Debit field for all transactions */
         type="input"
         ref={el => (refs.current['debit'] = el)}
-        width={columnWidths['debit'] ? columnWidths['debit'] : 100}
+        width={columnWidths.debit}
         data-resizeable-column="debit"
         name="debit"
         exposed={focusedField === 'debit'}
@@ -1647,7 +1634,7 @@ const Transaction = memo(function Transaction({
         type="input"
         name="credit"
         ref={el => (refs.current['credit'] = el)}
-        width={columnWidths['credit'] ? columnWidths['credit'] : 100}
+        width={columnWidths.credit}
         data-resizeable-column="credit"
         exposed={focusedField === 'credit'}
         focused={focusedField === 'credit'}
@@ -1692,7 +1679,7 @@ const Transaction = memo(function Transaction({
             }}
             style={{ ...styles.tnum, ...amountStyle }}
             ref={el => (refs.current['balance'] = el)}
-            width={columnWidths['balance'] ? columnWidths['balance'] : 103}
+            width={columnWidths.balance}
             data-resizeable-column="balance"
             textAlign="right"
             privacyFilter
@@ -1842,7 +1829,12 @@ function NewTransaction({
     t => t.parent_id === transactions[0].id,
   );
   const emptyChildTransactions = childTransactions.filter(t => t.amount === 0);
-
+  const { columnWidths, editMode, fixedSizedColumns } = useColumnWidth();
+  const columnSizes = {
+    notes: 'flex',
+    ...fixedSizedColumns,
+    ...columnWidths,
+  };
   return (
     <View
       style={{
@@ -1889,6 +1881,7 @@ function NewTransaction({
           onNavigateToSchedule={onNavigateToSchedule}
           onNotesTagClick={onNotesTagClick}
           balance={balance}
+          columnWidths={columnSizes}
         />
       ))}
       <View
@@ -1991,6 +1984,28 @@ function TransactionTableInner({
     [props.transactions, props.showReconciled],
   );
 
+  const { columnWidths, editMode, fixedSizedColumns, setFixedSizedColumns } =
+    useColumnWidth();
+  const columnSizes = {
+    ...fixedSizedColumns,
+    ...columnWidths,
+  };
+
+  useEffect(() => {
+    setFixedSizedColumns({
+      notes: 'flex',
+      selected: 20,
+      date: 110,
+      debit: 100,
+      credit: 100,
+      payee: 200,
+      account: 200,
+      category: 110,
+      balance: props.showBalance ? 103 : 0,
+      cleared: props.showCleared ? 38 : 0,
+    });
+  }, [columnWidths, columnWidths.current]);
+
   const renderRow = ({ item, index, editing }) => {
     const {
       transactions,
@@ -2083,6 +2098,7 @@ function TransactionTableInner({
           )
         }
         listContainerRef={listContainerRef}
+        columnWidths={columnSizes}
       />
     );
   };
@@ -2132,6 +2148,7 @@ function TransactionTableInner({
                 onSort={props.onSort}
                 ascDesc={props.ascDesc}
                 field={props.sortField}
+                columnWidths={columnSizes}
               />
             </View>
           }
