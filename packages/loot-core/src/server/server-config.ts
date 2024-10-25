@@ -38,8 +38,8 @@ export function getServer(url?: string): ServerConfig | null {
     } catch (error) {
       console.warn(
         'Unable to parse server URL - using the global config.',
+        { config },
         error,
-        config,
       );
       return config;
     }
