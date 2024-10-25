@@ -2,7 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 
-import { loadBackup, makeBackup } from 'loot-core/client/actions';
+import {
+  addNotification,
+  loadBackup,
+  makeBackup,
+} from 'loot-core/client/actions';
 import { type Backup } from 'loot-core/server/backups';
 import { send, listen, unlisten } from 'loot-core/src/platform/client/fetch';
 
@@ -116,8 +120,22 @@ export function LoadBackupModal({
                         await dispatch(
                           loadBackup(budgetIdToLoad, latestBackup.id),
                         );
+                        dispatch(
+                          addNotification({
+                            type: 'message',
+                            message: t(
+                              'Budget reverted from backup to original version.',
+                            ),
+                          }),
+                        );
                       } catch (error) {
                         console.error('Failed to revert backup:', error);
+                        dispatch(
+                          addNotification({
+                            type: 'error',
+                            message: t('Failed to revert to original version.'),
+                          }),
+                        );
                       } finally {
                         setLoading(null);
                       }
@@ -149,8 +167,20 @@ export function LoadBackupModal({
                       setLoading('backup');
                       try {
                         await dispatch(makeBackup());
+                        dispatch(
+                          addNotification({
+                            type: 'message',
+                            message: t('Backup Created'),
+                          }),
+                        );
                       } catch (error) {
                         console.error('Failed to create backup:', error);
+                        dispatch(
+                          addNotification({
+                            type: 'error',
+                            message: t('Failed to create backup.'),
+                          }),
+                        );
                       } finally {
                         setLoading(null);
                       }
@@ -168,7 +198,18 @@ export function LoadBackupModal({
             ) : (
               <BackupTable
                 backups={previousBackups}
-                onSelect={id => dispatch(loadBackup(budgetIdToLoad, id))}
+                onSelect={id => {
+                  try {
+                    dispatch(loadBackup(budgetIdToLoad, id));
+                  } catch (error) {
+                    dispatch(
+                      addNotification({
+                        type: 'error',
+                        message: t('Unable to load backup.'),
+                      }),
+                    );
+                  }
+                }}
               />
             )}
           </View>

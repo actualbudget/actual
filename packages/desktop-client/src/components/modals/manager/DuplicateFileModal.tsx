@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 
-import { duplicateBudget } from 'loot-core/client/actions';
+import { addNotification, duplicateBudget } from 'loot-core/client/actions';
 import { type File } from 'loot-core/src/types/file';
 
 import { theme } from '../../../style';
@@ -93,15 +93,26 @@ export function DuplicateFileModal({
             loadBudget,
           }),
         );
+        dispatch(
+          addNotification({
+            type: 'message',
+            message: t('Duplicate file “' + newName + '” created.'),
+          }),
+        );
+        if (onComplete) onComplete({ status: 'success' });
       } catch (e) {
-        const newError =  new Error('Failed to duplicate budget');
+        const newError = new Error('Failed to duplicate budget');
         if (onComplete) onComplete({ status: 'failed', error: newError });
         else console.error('Failed to duplicate budget:', e);
+        dispatch(
+          addNotification({
+            type: 'error',
+            message: t('Failed to duplicate budget file.'),
+          }),
+        );
       } finally {
         setLoadingState(null);
       }
-
-      if (onComplete) onComplete({ status: 'success' });
     } else {
       const failError = new Error(error);
       if (onComplete) onComplete({ status: 'failed', error: failError });
