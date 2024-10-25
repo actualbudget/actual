@@ -1829,7 +1829,7 @@ function NewTransaction({
     t => t.parent_id === transactions[0].id,
   );
   const emptyChildTransactions = childTransactions.filter(t => t.amount === 0);
-  const { columnWidths, editMode, fixedSizedColumns } = useColumnWidth();
+  const { columnWidths, fixedSizedColumns } = useColumnWidth();
   const columnSizes = {
     notes: 'flex',
     ...fixedSizedColumns,
@@ -1984,7 +1984,7 @@ function TransactionTableInner({
     [props.transactions, props.showReconciled],
   );
 
-  const { columnWidths, editMode, fixedSizedColumns, setFixedSizedColumns } =
+  const { columnWidths, fixedSizedColumns, setFixedSizedColumns } =
     useColumnWidth();
   const columnSizes = {
     ...fixedSizedColumns,
