@@ -36,11 +36,6 @@ export function EnvelopeBudgetGroupMenuModal({
     envelopeBudget.groupBudgeted(group.id),
   );
   const value = integerToAmount(budgeted || 0);
-  const [amountFocused, setAmountFocused] = useState(false);
-
-  useEffect(() => {
-    setAmountFocused(true);
-  }, []);
 
   if (!group) {
     return null;
