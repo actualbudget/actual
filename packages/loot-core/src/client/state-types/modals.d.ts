@@ -174,6 +174,11 @@ type FinanceModals = {
     onSetMonthsAverage: (numberOfMonths: number) => void;
     onApplyBudgetTemplate: () => void;
   };
+  'envelope-budget-group-menu': {
+    month: string;
+    group: CategoryGroupEntity;
+    onApplyGroupTemplate: () => void;
+  };
   'tracking-budget-menu': {
     categoryId: string;
     month: string;
