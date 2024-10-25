@@ -24,6 +24,8 @@ import { integerToCurrency } from 'loot-core/src/shared/util';
 import { SelectedProviderWithItems } from '../../hooks/useSelected';
 import { SplitsExpandedProvider } from '../../hooks/useSplitsExpanded';
 import { ResponsiveProvider } from '../../ResponsiveProvider';
+import { ColumnWidthProvider } from '../ColumnWidthContext';
+import { ScrollProvider } from '../ScrollProvider';
 
 import { TransactionTable } from './TransactionsTable';
 
@@ -151,19 +153,21 @@ function LiveTransactionTable(props) {
             fetchAllIds={() => transactions.map(t => t.id)}
           >
             <SplitsExpandedProvider>
-              <TransactionTable
-                {...props}
-                transactions={transactions}
-                loadMoreTransactions={() => {}}
-                commonPayees={[]}
-                payees={payees}
-                addNotification={n => console.log(n)}
-                onSave={onSave}
-                onSplit={onSplit}
-                onAdd={onAdd}
-                onAddSplit={onAddSplit}
-                onCreatePayee={onCreatePayee}
-              />
+              <ScrollProvider>
+                <TransactionTable
+                  {...props}
+                  transactions={transactions}
+                  loadMoreTransactions={() => {}}
+                  commonPayees={[]}
+                  payees={payees}
+                  addNotification={n => console.log(n)}
+                  onSave={onSave}
+                  onSplit={onSplit}
+                  onAdd={onAdd}
+                  onAddSplit={onAddSplit}
+                  onCreatePayee={onCreatePayee}
+                />
+              </ScrollProvider>
             </SplitsExpandedProvider>
           </SelectedProviderWithItems>
         </SpreadsheetProvider>
@@ -235,23 +239,37 @@ function renderTransactions(extraProps) {
   };
 
   const result = render(
-    <LiveTransactionTable {...defaultProps} {...extraProps} />,
+    <ColumnWidthProvider prefName="columns">
+      <LiveTransactionTable {...defaultProps} {...extraProps} />
+    </ColumnWidthProvider>,
   );
   return {
     ...result,
     getTransactions: () => transactions,
     updateProps: props =>
       render(
-        <LiveTransactionTable {...defaultProps} {...extraProps} {...props} />,
+        <ColumnWidthProvider prefName="columns">
+          <LiveTransactionTable {...defaultProps} {...extraProps} {...props} />
+        </ColumnWidthProvider>,
         { container: result.container },
       ),
   };
 }
 
 function queryNewField(container, name, subSelector = '', idx = 0) {
-  const field = container.querySelectorAll(
+  const selectedNodes = container.querySelectorAll(
     `[data-testid="new-transaction"] [data-testid="${name}"]`,
-  )[idx];
+  );
+
+  let i = 0;
+  for (i = 0; i < selectedNodes.length; i++) {
+    if (!selectedNodes[i].parentNode.querySelector('[data-header]')) {
+      break;
+    }
+  }
+
+  const field = selectedNodes[idx + i];
+
   if (subSelector !== '') {
     return field.querySelector(subSelector);
   }
@@ -259,9 +277,22 @@ function queryNewField(container, name, subSelector = '', idx = 0) {
 }
 
 function queryField(container, name, subSelector = '', idx) {
-  const field = container.querySelectorAll(
+  //why not?
+  //`[data-testid="transaction-table"] [data-testid="${name}"]:not([data-header])`
+  //when using :not, the rows gets out of order. this way we keep the order
+  const selectedNodes = container.querySelectorAll(
     `[data-testid="transaction-table"] [data-testid="${name}"]`,
-  )[idx];
+  );
+
+  let i = 0;
+  for (i = 0; i < selectedNodes.length; i++) {
+    if (!selectedNodes[i].parentNode.querySelector('[data-header]')) {
+      break;
+    }
+  }
+
+  const field = selectedNodes[idx + i];
+
   if (subSelector !== '') {
     return field.querySelector(subSelector);
   }
@@ -346,6 +377,7 @@ function expectToBeEditingField(container, name, rowIndex, isNew) {
   } else {
     field = queryField(container, name, '', rowIndex);
   }
+
   const input = field.querySelector(':focus');
   expect(input).toBeTruthy();
   expect(container.ownerDocument.activeElement).toBe(input);

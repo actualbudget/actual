@@ -271,6 +271,7 @@ export type PayeeAutocompleteProps = ComponentProps<
   ) => ReactElement<typeof PayeeItem>;
   accounts?: AccountEntity[];
   payees?: PayeeAutocompleteItem[];
+  onBlur?: (e: unknown) => void;
 };
 
 export function PayeeAutocomplete({
@@ -364,9 +365,10 @@ export function PayeeAutocomplete({
       inputProps={{
         ...inputProps,
         autoCapitalize: 'words',
-        onBlur: () => {
+        onBlur: e => {
           setRawPayee('');
           setPayeeFieldFocused(false);
+          inputProps?.onBlur?.(e);
         },
         onFocus: () => setPayeeFieldFocused(true),
         onChange: setRawPayee,

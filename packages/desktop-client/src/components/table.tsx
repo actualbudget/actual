@@ -20,6 +20,7 @@ import React, {
 import { useStore } from 'react-redux';
 import AutoSizer from 'react-virtualized-auto-sizer';
 
+import { useMergedRefs } from '../hooks/useMergedRefs';
 import {
   AvoidRefocusScrollProvider,
   useProperFocus,
@@ -30,6 +31,7 @@ import { SvgDelete, SvgExpandArrow } from '../icons/v0';
 import { SvgCheckmark } from '../icons/v1';
 import { styles, theme } from '../style';
 
+import { ColumnWidthProvider, useColumnWidth } from './ColumnWidthContext';
 import { Button } from './common/Button2';
 import { Input } from './common/Input';
 import { Menu, type MenuItem } from './common/Menu';
@@ -37,10 +39,12 @@ import { Popover } from './common/Popover';
 import { Text } from './common/Text';
 import { View } from './common/View';
 import { FixedSizeList } from './FixedSizeList';
+import { HorizontalFakeScrollbar } from './HorizontalFakeScrollbar';
 import {
   ConditionalPrivacyFilter,
   mergeConditionalPrivacyFilterProps,
 } from './PrivacyFilter';
+import { useScroll } from './ScrollProvider';
 import {
   type Spreadsheets,
   type SheetFields,
@@ -157,31 +161,47 @@ type CellProps = Omit<ComponentProps<typeof View>, 'children' | 'value'> & {
     typeof ConditionalPrivacyFilter
   >['privacyFilter'];
 };
-export function Cell({
-  width,
-  name,
-  exposed,
-  focused,
-  value,
-  formatter,
-  textAlign,
-  alignItems,
-  onExpose,
-  children,
-  plain,
-  style,
-  valueStyle,
-  unexposedContent,
-  privacyFilter,
-  ...viewProps
-}: CellProps) {
+export const Cell = forwardRef<HTMLDivElement, CellProps>(function Cell(
+  {
+    width,
+    name,
+    exposed,
+    focused,
+    value,
+    formatter,
+    textAlign,
+    alignItems,
+    onExpose,
+    children,
+    plain,
+    style,
+    valueStyle,
+    unexposedContent,
+    privacyFilter,
+    ...viewProps
+  }: CellProps,
+  ref,
+) {
   const mouseCoords = useRef(null);
   const viewRef = useRef(null);
+  const mergeRef = useMergedRefs(ref, viewRef);
+  const [widthStyle, setWidthStyle] = useState({});
 
   useProperFocus(viewRef, focused !== undefined ? focused : exposed);
 
-  const widthStyle: CSSProperties =
-    width === 'flex' ? { flex: 1, flexBasis: 0 } : { width };
+  useEffect(() => {
+    if (width === -1) console.log('-1');
+    setWidthStyle(
+      width
+        ? width === 'flex'
+          ? { flex: 1, flexBasis: 0 }
+          : width?.toString() === '-1'
+            ? { width: 'auto' }
+            : { width: `${width}px` }
+        : { width: 'auto' },
+    );
+  }, [width]);
+
   const cellStyle: CSSProperties = {
     position: 'relative',
     textAlign: textAlign || 'left',
@@ -263,7 +283,7 @@ export function Cell({
 
   return (
     <View
-      innerRef={viewRef}
+      innerRef={mergeRef}
       style={{ ...widthStyle, ...cellStyle, ...style }}
       {...viewProps}
       data-testid={name}
@@ -271,14 +291,16 @@ export function Cell({
       {conditionalPrivacyFilter}
     </View>
   );
-}
+});
 
 type RowProps = ComponentProps<typeof View> & {
   inset?: number;
   collapsed?: boolean;
+  testId?: string;
 };
+
 export const Row = forwardRef<HTMLDivElement, RowProps>(function Row(
-  { inset = 0, collapsed, children, height, style, ...nativeProps },
+  { inset = 0, collapsed, children, height, style, testId, ...nativeProps },
   ref,
 ) {
   return (
@@ -292,7 +314,7 @@ export const Row = forwardRef<HTMLDivElement, RowProps>(function Row(
         ...(collapsed && { marginTop: -1 }),
         ...style,
       }}
-      data-testid="row"
+      data-testid={testId ?? 'row'}
       {...nativeProps}
     >
       {inset !== 0 && <Field width={inset} />}
@@ -389,27 +411,26 @@ type InputCellProps = ComponentProps<typeof Cell> & {
   onBlur?: ComponentProps<typeof InputValue>['onBlur'];
   textAlign?: CSSProperties['textAlign'];
 };
-export function InputCell({
-  inputProps,
-  onUpdate,
-  onBlur,
-  textAlign,
-  ...props
-}: InputCellProps) {
-  return (
-    <Cell textAlign={textAlign} {...props}>
-      {() => (
-        <InputValue
-          value={props.value}
-          onUpdate={onUpdate}
-          onBlur={onBlur}
-          style={{ textAlign, ...(inputProps && inputProps.style) }}
-          {...inputProps}
-        />
-      )}
-    </Cell>
-  );
-}
+export const InputCell = forwardRef<HTMLInputElement, InputCellProps>(
+  function InputCell(
+    { inputProps, onUpdate, onBlur, textAlign, ...props }: InputCellProps,
+    ref,
+  ) {
+    return (
+      <Cell textAlign={textAlign} {...props} ref={ref}>
+        {() => (
+          <InputValue
+            value={props.value}
+            onUpdate={onUpdate}
+            onBlur={onBlur}
+            style={{ textAlign, ...(inputProps && inputProps.style) }}
+            {...inputProps}
+          />
+        )}
+      </Cell>
+    );
+  },
+);
 
 function shouldSaveFromKey(e) {
   switch (e.key) {
@@ -434,55 +455,61 @@ type CustomCellProps = Omit<ComponentProps<typeof Cell>, 'children'> & {
   onUpdate: (value: string) => void;
   onBlur: (ev: UIEvent<unknown>) => void;
 };
-export function CustomCell({
-  value: defaultValue,
-  children,
-  onUpdate,
-  onBlur,
-  ...props
-}: CustomCellProps) {
-  const [value, setValue] = useState(defaultValue);
-  const [prevDefaultValue, setPrevDefaultValue] = useState(defaultValue);
+export const CustomCell = forwardRef<HTMLDivElement, CustomCellProps>(
+  function CustomCell(
+    {
+      value: defaultValue,
+      children,
+      onUpdate,
+      onBlur,
+      width,
+      ...props
+    }: CustomCellProps,
+    ref,
+  ) {
+    const [value, setValue] = useState(defaultValue);
+    const [prevDefaultValue, setPrevDefaultValue] = useState(defaultValue);
 
-  if (prevDefaultValue !== defaultValue) {
-    setValue(defaultValue);
-    setPrevDefaultValue(defaultValue);
-  }
-
-  function onBlur_(e) {
-    // Only save on blur if the app is focused. Blur events fire when
-    // the app unfocuses, and it's unintuitive to save the value since
-    // the input will be focused again when the app regains focus
-    if (document.hasFocus()) {
-      onUpdate?.(value);
-      fireBlur(onBlur, e);
+    if (prevDefaultValue !== defaultValue) {
+      setValue(defaultValue);
+      setPrevDefaultValue(defaultValue);
     }
-  }
 
-  function onKeyDown(e) {
-    if (shouldSaveFromKey(e)) {
-      onUpdate?.(value);
-    }
-  }
-
-  return (
-    <Cell {...props} value={defaultValue}>
-      {() =>
-        children({
-          onBlur: onBlur_,
-          onKeyDown,
-          onUpdate: val => setValue(val),
-          onSave: val => {
-            setValue(val);
-            onUpdate?.(val);
-          },
-          shouldSaveFromKey,
-          inputStyle: inputCellStyle,
-        })
+    function onBlur_(e) {
+      // Only save on blur if the app is focused. Blur events fire when
+      // the app unfocuses, and it's unintuitive to save the value since
+      // the input will be focused again when the app regains focus
+      if (document.hasFocus()) {
+        onUpdate?.(value);
+        fireBlur(onBlur, e);
       }
-    </Cell>
-  );
-}
+    }
+
+    function onKeyDown(e) {
+      if (shouldSaveFromKey(e)) {
+        onUpdate?.(value);
+      }
+    }
+
+    return (
+      <Cell {...props} value={defaultValue} ref={ref} width={width}>
+        {() =>
+          children({
+            onBlur: onBlur_,
+            onKeyDown,
+            onUpdate: val => setValue(val),
+            onSave: val => {
+              setValue(val);
+              onUpdate?.(val);
+            },
+            shouldSaveFromKey,
+            inputStyle: inputCellStyle,
+          })
+        }
+      </Cell>
+    );
+  },
+);
 
 type DeleteCellProps = Omit<ComponentProps<typeof Cell>, 'children'> & {
   onDelete?: () => void;
@@ -784,6 +811,7 @@ export function TableHeader({
     >
       <Row
         collapsed={true}
+        testId="row-header"
         {...rowProps}
         style={{
           color: theme.tableHeaderText,
@@ -825,7 +853,7 @@ export function SelectedItemsButton<Name extends string>({
   onSelect,
 }: SelectedItemsButtonProps<Name>) {
   const selectedItems = useSelectedItems();
-  const [menuOpen, setMenuOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(null);
   const triggerRef = useRef(null);
 
   if (selectedItems.size === 0) {
@@ -901,7 +929,13 @@ export function TableWithNavigator({
   ...props
 }: TableWithNavigatorProps) {
   const navigator = useTableNavigator(props.items, fields);
-  return <Table {...props} navigator={navigator} />;
+  return (
+    <TableResizable
+      {...props}
+      navigator={navigator}
+      prefName="import-transactions-column-sizes"
+    />
+  );
 }
 
 type TableItem = { id: number | string };
@@ -910,6 +944,7 @@ type TableProps<T extends TableItem = TableItem> = {
   items: T[];
   count?: number;
   headers?: ReactNode | TableHeaderProps['headers'];
+  subHeaders?: ReactNode;
   contentHeader?: ReactNode;
   loading?: boolean;
   rowHeight?: number;
@@ -931,6 +966,7 @@ type TableProps<T extends TableItem = TableItem> = {
   onScroll?: () => void;
   isSelected?: (id: T['id']) => boolean;
   saveScrollWidth?: (parent, child) => void;
+  autoSizer?: boolean;
 };
 
 export const Table = forwardRef(
@@ -939,6 +975,7 @@ export const Table = forwardRef(
       items,
       count,
       headers,
+      subHeaders,
       contentHeader,
       loading,
       rowHeight = ROW_HEIGHT,
@@ -953,6 +990,7 @@ export const Table = forwardRef(
       isSelected,
       saveScrollWidth,
       listContainerRef,
+      autoSizer = false,
       ...props
     },
     ref,
@@ -971,8 +1009,32 @@ export const Table = forwardRef(
     const listContainerInnerRef = useRef<HTMLDivElement>(null);
     const listContainer = listContainerRef || listContainerInnerRef;
     const scrollContainer = useRef(null);
+    const scrollContainerHeader = useRef(null);
     const initialScrollTo = useRef(null);
     const listInitialized = useRef(false);
+    const { totalWidth, setClientWidth } = useColumnWidth();
+    const { setScrollContainers } = useScroll();
+    const subHeaderRef = useRef<HTMLDivElement>(null);
+    const [subHeaderOffset, setSubHeaderOffset] = useState(0);
+
+    useEffect(() => {
+      if (subHeaderRef.current) {
+        setSubHeaderOffset(subHeaderRef.current.offsetHeight);
+      }
+    }, [subHeaders, subHeaderRef]);
+
+    useEffect(() => {
+      if (
+        scrollContainer.current &&
+        scrollContainerHeader &&
+        scrollContainerHeader.current
+      ) {
+        setScrollContainers([
+          scrollContainer.current,
+          scrollContainerHeader.current,
+        ]);
+      }
+    }, [scrollContainer.current, totalWidth]);
 
     useImperativeHandle(ref, () => ({
       scrollTo: (id, alignment = 'smart') => {
@@ -1137,6 +1199,33 @@ export const Table = forwardRef(
 
     const isEmpty = (count || items.length) === 0;
 
+    let encapsulatedHeaders: ReactNode | TableHeaderProps['headers'] =
+      autoSizer && (
+        <AutoSizer disableHeight={true}>
+          {({ width }) => {
+            if (width === 0) {
+              return null;
+            }
+
+            return (
+              <View
+                ref={scrollContainerHeader}
+                style={{
+                  width: `${width}px`,
+                  overflow: 'hidden',
+                }}
+              >
+                <View style={{ width: `${totalWidth()}px` }}>{headers}</View>
+              </View>
+            );
+          }}
+        </AutoSizer>
+      );
+
+    if (!autoSizer) {
+      encapsulatedHeaders = headers;
+    }
+
     return (
       <View
         style={{
@@ -1151,7 +1240,11 @@ export const Table = forwardRef(
         {headers && (
           <TableHeader
             height={rowHeight}
-            {...(Array.isArray(headers) ? { headers } : { children: headers })}
+            {...(Array.isArray(headers)
+              ? { headers }
+              : {
+                  children: encapsulatedHeaders,
+                })}
           />
         )}
         <View
@@ -1163,40 +1256,47 @@ export const Table = forwardRef(
           {isEmpty ? (
             getEmptyContent(renderEmpty)
           ) : (
-            <AutoSizer>
+            <AutoSizer onResize={size => setClientWidth(size.width)}>
               {({ width, height }) => {
                 if (width === 0 || height === 0) {
                   return null;
                 }
 
                 return (
-                  <AvoidRefocusScrollProvider>
-                    <FixedSizeList
-                      ref={list}
-                      header={contentHeader}
-                      innerRef={listContainer}
-                      outerRef={scrollContainer}
-                      width={width}
-                      height={height}
-                      renderRow={renderRow}
-                      itemCount={count || items.length}
-                      itemSize={rowHeight - 1}
-                      itemKey={
-                        getItemKey || ((index: number) => items[index].id)
-                      }
-                      indexForKey={key =>
-                        items.findIndex(item => item.id === key)
-                      }
-                      initialScrollOffset={
-                        initialScrollTo.current
-                          ? getScrollOffset(height, initialScrollTo.current)
-                          : 0
-                      }
-                      overscanCount={5}
-                      onItemsRendered={onItemsRendered}
-                      onScroll={onScroll}
-                    />
-                  </AvoidRefocusScrollProvider>
+                  <>
+                    <View style={{ width: `${width}px` }}>
+                      <View ref={subHeaderRef}>{subHeaders}</View>
+                      <AvoidRefocusScrollProvider>
+                        <FixedSizeList
+                          ref={list}
+                          header={contentHeader}
+                          innerRef={listContainer}
+                          outerRef={scrollContainer}
+                          width={width}
+                          totalWidth={totalWidth()}
+                          height={height - subHeaderOffset}
+                          renderRow={renderRow}
+                          itemCount={count || items.length}
+                          itemSize={rowHeight - 1}
+                          itemKey={
+                            getItemKey || ((index: number) => items[index].id)
+                          }
+                          indexForKey={key =>
+                            items.findIndex(item => item.id === key)
+                          }
+                          initialScrollOffset={
+                            initialScrollTo.current
+                              ? getScrollOffset(height, initialScrollTo.current)
+                              : 0
+                          }
+                          overscanCount={5}
+                          onItemsRendered={onItemsRendered}
+                          onScroll={onScroll}
+                        />
+                      </AvoidRefocusScrollProvider>
+                    </View>
+                    <HorizontalFakeScrollbar />
+                  </>
                 );
               }}
             </AutoSizer>
@@ -1208,6 +1308,21 @@ export const Table = forwardRef(
 ) as <T extends TableItem>(
   props: TableProps<T> & { ref?: Ref<TableHandleRef<T>> },
 ) => ReactElement;
+
+export const TableResizable = forwardRef(({ prefName, ...props }, ref) => {
+  return (
+    <ColumnWidthProvider prefName={prefName}>
+      <Table {...props} ref={ref} />
+    </ColumnWidthProvider>
+  );
+}) as <T extends TableItem>(
+  props: TableProps<T> & { ref?: Ref<TableHandleRef<T>> } & {
+    prefName: string;
+  },
+) => ReactElement;
+
+// @ts-expect-error fix me
+TableResizable.displayName = 'TableResizable';
 
 // @ts-expect-error fix me
 Table.displayName = 'Table';
