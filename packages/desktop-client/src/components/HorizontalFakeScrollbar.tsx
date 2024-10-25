@@ -16,9 +16,9 @@ export function HorizontalFakeScrollbar() {
   const [scrollbarPosition, setScrollbarPosition] = useState(0);
 
   const sliderWidth =
-    (totalWidth() > clientWidth
-      ? clientWidth - (totalWidth() - clientWidth)
-      : 0) - 12;
+    totalWidth() > clientWidth
+      ? (clientWidth / totalWidth()) * clientWidth - 12
+      : clientWidth - 12;
 
   const handleMouseMove = (deltaX: number) => {
     const newLeft = Math.min(
