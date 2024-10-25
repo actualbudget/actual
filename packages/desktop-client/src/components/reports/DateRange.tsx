@@ -17,7 +17,7 @@ type DateRangeProps = {
 
 function checkDate(date: string) {
   const dateParsed = monthUtils.parseDate(date);
-  if (dateParsed.toString() !== 'Invalid Date') {
+  if (dateParsed) {
     return d.format(dateParsed, 'yyyy-MM-dd');
   } else {
     return null;
