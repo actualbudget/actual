@@ -39,6 +39,7 @@ export function getServer(url?: string): ServerConfig | null {
       console.warn(
         'Unable to parse server URL - using the global config.',
         error,
+        config,
       );
       return config;
     }
