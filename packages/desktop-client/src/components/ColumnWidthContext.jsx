@@ -5,6 +5,7 @@ import React, {
   useCallback,
   useEffect,
   useRef,
+  useMemo,
 } from 'react';
 
 import { AUTO_SIZE } from 'loot-core/client/constants';
@@ -27,19 +28,20 @@ export const ColumnWidthProvider = ({ children, prefName }) => {
     }
   }, [columnSizePrefs]);
 
-  const totalWidth = useCallback(() => {
-    const currentTotalWidth = Object.values(columnWidths).reduce(
-      (acc, width) => acc + width,
-      0,
-    );
+  const currentTotalWidth = useMemo(() => {
+    return Object.values(columnWidths).reduce((acc, width) => acc + width, 0);
+  }, [columnWidths]);
 
-    const otherColumnsWidth = Object.entries(fixedSizedColumns)
+  const otherColumnsWidth = useMemo(() => {
+    return Object.entries(fixedSizedColumns)
       .filter(([key]) => !(key in columnWidths))
       .reduce((acc, [, width]) => acc + width + 10, 0);
+  }, [fixedSizedColumns, columnWidths]);
 
+  const totalWidth = useCallback(() => {
     const widthSum = otherColumnsWidth + currentTotalWidth + 10;
     return widthSum > clientWidth ? widthSum : clientWidth;
-  }, [columnWidths, fixedSizedColumns, clientWidth]);
+  }, [currentTotalWidth, otherColumnsWidth, clientWidth]);
 
   const savePrefs = useCallback(
     value => {
