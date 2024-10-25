@@ -101,6 +101,7 @@ async function getAccountSyncStartDate(id) {
     'SELECT date FROM v_transactions WHERE account = ? ORDER BY date ASC LIMIT 1',
     [id],
   );
+  if (!startingTransaction) return null;
   const startingDate = db.fromDateRepr(startingTransaction.date);
   // assert(startingTransaction)
 
