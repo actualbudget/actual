@@ -88,7 +88,8 @@ function CategoryList({
     <View>
       <View
         style={{
-          overflow: 'auto',
+          overflowY: 'auto',
+          willChange: 'transform',
           padding: '5px 0',
           ...(!embedded && { maxHeight: 175 }),
         }}
