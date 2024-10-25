@@ -4,7 +4,10 @@ import React, {
   useState,
   useCallback,
   useEffect,
+  useRef,
 } from 'react';
+
+import { AUTO_SIZE } from 'loot-core/client/constants';
 
 import { useSyncedPref } from '../hooks/useSyncedPref';
 
@@ -14,7 +17,7 @@ export const ColumnWidthProvider = ({ children, prefName }) => {
   const [columnSizePrefs, setColumnSizePrefs] = useSyncedPref(prefName);
   const [columnWidths, setColumnWidths] = useState({});
   const [fixedSizedColumns, setFixedSizedColumns] = useState({});
-  const [, setPositionAccumulator] = useState(0);
+  const positionAccumulatorRef = useRef(0);
   const [clientWidth, setClientWidth] = useState(0);
   const [editMode, setEditMode] = useState(false);
 
@@ -86,9 +89,10 @@ export const ColumnWidthProvider = ({ children, prefName }) => {
 
   const updateColumnWidth = useCallback(
     (columnName, accumulatedDelta) => {
+      const existingColumnWidth = columnWidths[columnName] || 0;
       const newWidth = accumulatedDelta;
 
-      if (newWidth === -1) {
+      if (newWidth === AUTO_SIZE) {
         const newObj = {
           ...columnWidths,
           [columnName]: newWidth,
@@ -107,7 +111,7 @@ export const ColumnWidthProvider = ({ children, prefName }) => {
       );
 
       const proposedTotalWidth =
-        currentTotalWidth - otherColumnsWidth - newWidth;
+        currentTotalWidth - existingColumnWidth + newWidth + otherColumnsWidth;
 
       const viewportWidth = getViewportWidth();
       const adjustedWidth =
@@ -128,14 +132,9 @@ export const ColumnWidthProvider = ({ children, prefName }) => {
   );
 
   const handleMoveProps = (columnName, ref, resizerRef) => {
-    const animationFrameId = null;
-
     const updatePosition = deltaX => {
-      setPositionAccumulator(prevDelta => {
-        const newDelta = prevDelta + deltaX;
-        updateColumnWidth(columnName, newDelta);
-        return newDelta;
-      });
+      positionAccumulatorRef.current += deltaX;
+      updateColumnWidth(columnName, positionAccumulatorRef.current);
     };
 
     return {
@@ -148,7 +147,7 @@ export const ColumnWidthProvider = ({ children, prefName }) => {
             columnWidth = rect.width;
           }
           const startWidth = columnWidth;
-          setPositionAccumulator(startWidth);
+          positionAccumulatorRef.current = startWidth;
         }
       },
       onMove(e) {
@@ -161,10 +160,7 @@ export const ColumnWidthProvider = ({ children, prefName }) => {
         if (resizerRef.current) {
           resizerRef.current.classList.remove('dragging');
         }
-        if (animationFrameId) {
-          cancelAnimationFrame(animationFrameId);
-        }
-        setPositionAccumulator(0);
+        positionAccumulatorRef.current = 0;
       },
     };
   };

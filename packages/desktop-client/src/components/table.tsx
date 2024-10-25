@@ -20,6 +20,8 @@ import React, {
 import { useStore } from 'react-redux';
 import AutoSizer from 'react-virtualized-auto-sizer';
 
+import { AUTO_SIZE } from 'loot-core/client/constants';
+
 import { useMergedRefs } from '../hooks/useMergedRefs';
 import {
   AvoidRefocusScrollProvider,
@@ -190,16 +192,17 @@ export const Cell = forwardRef<HTMLDivElement, CellProps>(function Cell(
   useProperFocus(viewRef, focused !== undefined ? focused : exposed);
 
   useEffect(() => {
-    if (width === -1) console.log('-1');
-    setWidthStyle(
-      width
-        ? width === 'flex'
-          ? { flex: 1, flexBasis: 0 }
-          : width?.toString() === '-1'
-            ? { width: 'auto' }
-            : { width: `${width}px` }
-        : { width: 'auto' },
-    );
+    if (
+      width === AUTO_SIZE ||
+      width?.toString() === AUTO_SIZE.toString() ||
+      !width
+    ) {
+      setWidthStyle({ width: 'auto' });
+    } else if (width === 'flex') {
+      setWidthStyle({ flex: 1, flexBasis: 0 });
+    } else {
+      setWidthStyle({ width: `${width}px` });
+    }
   }, [width]);
 
   const cellStyle: CSSProperties = {
@@ -423,7 +426,7 @@ export const InputCell = forwardRef<HTMLInputElement, InputCellProps>(
             value={props.value}
             onUpdate={onUpdate}
             onBlur={onBlur}
-            style={{ textAlign, ...(inputProps && inputProps.style) }}
+            style={{ textAlign, ...inputProps?.style }}
             {...inputProps}
           />
         )}

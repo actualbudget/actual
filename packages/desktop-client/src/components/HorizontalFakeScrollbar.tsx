@@ -13,6 +13,7 @@ export function HorizontalFakeScrollbar() {
   const [maxPosition, setMaxPosition] = useState(
     clientWidth - (clientWidth / totalWidth()) * clientWidth,
   );
+  const [scrollbarPosition, setScrollbarPosition] = useState(0);
 
   const sliderWidth =
     (totalWidth() > clientWidth
@@ -29,29 +30,30 @@ export function HorizontalFakeScrollbar() {
     scrollToX(newLeft, false);
 
     if (scrollbarRef.current) {
-      scrollbarRef.current.style.transform = `translateX(${newLeft}px)`;
+      setScrollbarPosition(newLeft);
     }
   };
 
   const handleContainerClick = (event: MouseEvent<HTMLDivElement>) => {
     if (!scrollbarRef.current) return;
 
+    const clickX = event.clientX;
     const container = event.currentTarget;
     const containerRect = container.getBoundingClientRect();
-    const clickX = event.clientX - containerRect.left;
-    const sliderWidth = (clientWidth / totalWidth()) * clientWidth;
-    const rect = scrollbarRef.current.getBoundingClientRect();
-    const currentLeft = rect.left || 0;
 
-    const newLeft =
-      clickX > currentLeft
-        ? Math.min(Math.max(clickX - sliderWidth, 0), maxPosition)
-        : Math.min(Math.max(clickX, 0), maxPosition);
+    const clickPercent = (clickX - containerRect.left) / containerRect.width;
+    let newLeft = Math.trunc(clickPercent * (totalWidth() - clientWidth));
+
+    if (newLeft < 10) newLeft = 0;
+
+    if (newLeft > clickX - containerRect.left - 10) {
+      newLeft = clickX - containerRect.left;
+    }
 
     scrollToX(newLeft, true);
 
     if (scrollbarRef.current) {
-      scrollbarRef.current.style.transform = `translateX(${newLeft}px)`;
+      setScrollbarPosition(newLeft);
     }
   };
 
@@ -78,7 +80,7 @@ export function HorizontalFakeScrollbar() {
       const sliderPosition = (scrollX / totalWidth()) * maxPos;
 
       if (scrollbarRef.current) {
-        scrollbarRef.current.style.transform = `translateX(${sliderPosition}px)`;
+        setScrollbarPosition(sliderPosition);
       }
 
       setMaxPosition(maxPos);
@@ -114,6 +116,7 @@ export function HorizontalFakeScrollbar() {
             backgroundColor: 'rgba(200, 200, 200, 1)',
             position: 'absolute',
             left: '0px',
+            transform: `translateX(${scrollbarPosition}px)`,
             transition: isDragging ? 'none' : 'transform 0.2s',
           }}
           {...moveProps}
