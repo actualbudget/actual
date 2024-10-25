@@ -1,4 +1,4 @@
-import React, { useState, useEffect, type CSSProperties } from 'react';
+import React, { type CSSProperties } from 'react';
 
 import { envelopeBudget } from 'loot-core/client/queries';
 import { amountToCurrency, integerToAmount } from 'loot-core/shared/util';
