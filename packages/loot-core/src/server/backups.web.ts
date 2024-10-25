@@ -1,4 +1,5 @@
 // @ts-strict-ignore
+import { type Database } from '@jlongster/sql.js';
 import * as dateFns from 'date-fns';
 
 import * as connection from '../platform/server/connection';
@@ -116,10 +117,18 @@ export async function makeBackup(id: string) {
   );
 
   // Remove all the messages from the backup
-  const db = await sqlite.openDatabase(fs.join(budgetDir, backupId));
-  await sqlite.runQuery(db, 'DELETE FROM messages_crdt');
-  await sqlite.runQuery(db, 'DELETE FROM messages_clock');
-  sqlite.closeDatabase(db);
+  let db: Database;
+  try {
+    db = await sqlite.openDatabase(fs.join(budgetDir, backupId));
+    await sqlite.runQuery(db, 'DELETE FROM messages_crdt');
+    await sqlite.runQuery(db, 'DELETE FROM messages_clock');
+  } catch (error) {
+    console.error('Error cleaning up backup messages:', error);
+  } finally {
+    if (db) {
+      sqlite.closeDatabase(db);
+    }
+  }
 
   const toRemove = await updateBackups(await getBackups(id));
   for (const id of toRemove) {

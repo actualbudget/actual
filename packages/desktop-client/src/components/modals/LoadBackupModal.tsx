@@ -147,8 +147,13 @@ export function LoadBackupModal({
                     isLoading={loading === 'backup'}
                     onPress={async () => {
                       setLoading('backup');
-                      await dispatch(makeBackup());
-                      setLoading(null);
+                      try {
+                        await dispatch(makeBackup());
+                      } catch (error) {
+                        console.error('Failed to create backup:', error);
+                      } finally {
+                        setLoading(null);
+                      }
                     }}
                   >
                     <Trans>Backup now</Trans>

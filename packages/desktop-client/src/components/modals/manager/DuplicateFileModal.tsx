@@ -54,6 +54,9 @@ export function DuplicateFileModal({
     if (trimmedName.length > 100) {
       return t('Budget name is too long (max length 100)');
     }
+    if (!/^[a-zA-Z0-9 .\-_()]+$/.test(trimmedName)) {
+      return t('Budget name contains invalid characters');
+    }
     // Additional validation checks can go here
 
     return null;
@@ -75,22 +78,29 @@ export function DuplicateFileModal({
     if (!error) {
       setLoadingState(sync === 'cloudSync' ? 'cloud' : 'local');
 
-      await dispatch(
-        duplicateBudget({
-          id: 'id' in file ? file.id : undefined,
-          cloudId:
-            sync === 'cloudSync' && 'cloudFileId' in file
-              ? file.cloudFileId
-              : undefined,
-          oldName: file.name,
-          newName,
-          cloudSync: sync === 'cloudSync',
-          managePage,
-          loadBudget,
-        }),
-      );
+      try {
+        await dispatch(
+          duplicateBudget({
+            id: 'id' in file ? file.id : undefined,
+            cloudId:
+              sync === 'cloudSync' && 'cloudFileId' in file
+                ? file.cloudFileId
+                : undefined,
+            oldName: file.name,
+            newName,
+            cloudSync: sync === 'cloudSync',
+            managePage,
+            loadBudget,
+          }),
+        );
+      } catch (e) {
+        const newError =  new Error('Failed to duplicate budget');
+        if (onComplete) onComplete({ status: 'failed', error: newError });
+        else console.error('Failed to duplicate budget:', e);
+      } finally {
+        setLoadingState(null);
+      }
 
-      setLoadingState(null);
       if (onComplete) onComplete({ status: 'success' });
     } else {
       const failError = new Error(error);

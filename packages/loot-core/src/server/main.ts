@@ -1820,6 +1820,12 @@ handlers['duplicate-budget'] = async function ({
   open,
 }): Promise<string> {
   if (!id) throw new Error('Unable to duplicate a budget that is not local.');
+  if (!newName?.trim()) {
+    throw new Error('Budget name is required and cannot be empty');
+  }
+  if (!/^[a-zA-Z0-9 .\-_()]+$/.test(newName)) {
+    throw new Error('Budget name contains invalid characters');
+  }
 
   const budgetDir = fs.getBudgetDir(id);
 
