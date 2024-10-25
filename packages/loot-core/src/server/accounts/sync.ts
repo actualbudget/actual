@@ -866,11 +866,9 @@ export async function SimpleFinBatchSync(
 
     if (download.error_code) {
       promises.push(
-        new Promise(resolve => {
-          resolve({
-            accountId: account.id,
-            res: download,
-          });
+        Promise.resolve({
+          accountId: account.id,
+          res: download,
         }),
       );
 
