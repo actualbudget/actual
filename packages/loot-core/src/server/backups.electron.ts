@@ -7,19 +7,17 @@ import * as fs from '../platform/server/fs';
 import * as sqlite from '../platform/server/sqlite';
 import * as monthUtils from '../shared/months';
 
+import { type Backup, type LatestBackup } from './backups';
 import * as cloudStorage from './cloud-storage';
 import * as prefs from './prefs';
 
 // A special backup that represents the latest version of the db that
 // can be reverted to after loading a backup
 const LATEST_BACKUP_FILENAME = 'db.latest.sqlite';
-let serviceInterval = null;
 
-export type Backup = { id: string; date: string } | LatestBackup;
-type LatestBackup = { id: string; date: null; isLatest: true };
-type BackupWithDate = { id: string; date: Date };
+let serviceInterval: NodeJS.Timeout | null = null;
 
-async function getBackups(id: string): Promise<BackupWithDate[]> {
+async function getBackups(id: string): Promise<Backup[]> {
   const budgetDir = fs.getBudgetDir(id);
   const backupDir = fs.join(budgetDir, 'backups');
 
@@ -71,14 +69,18 @@ export async function getAvailableBackups(id: string): Promise<Backup[]> {
     backups.unshift(latestBackup);
   }
 
+  return backups;
+  /*
   return backups.map(backup => ({
     ...backup,
     date: backup.date ? dateFns.format(backup.date, 'yyyy-MM-dd H:mm') : null,
   }));
+  */
 }
 
-export async function updateBackups(backups) {
-  const byDay = backups.reduce((groups, backup) => {
+export async function updateBackups(backups: Backup[]): Promise<string[]> {
+  const actualBackups = backups.filter(backup => backup.date !== null);
+  const byDay = actualBackups.reduce((groups, backup) => {
     const day = dateFns.format(backup.date, 'yyyy-MM-dd');
     groups[day] = groups[day] || [];
     groups[day].push(backup);
@@ -253,6 +255,8 @@ export function startBackupService(id: string) {
 }
 
 export function stopBackupService() {
-  clearInterval(serviceInterval);
-  serviceInterval = null;
+  if (serviceInterval) {
+    clearInterval(serviceInterval);
+    serviceInterval = null;
+  }
 }

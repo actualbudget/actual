@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 
+import * as dateFns from 'date-fns';
+
 import {
   addNotification,
   loadBackup,
@@ -37,7 +39,11 @@ function BackupTable({ backups, onSelect }: BackupTableProps) {
         >
           <Cell
             width="flex"
-            value={backup.date ? backup.date : t('Revert to Latest')}
+            value={
+              backup.date
+                ? dateFns.format(backup.date, 'yyyy-MM-dd H:mm')
+                : t('Revert to Latest')
+            }
             valueStyle={{ paddingLeft: 20 }}
           />
         </Row>
