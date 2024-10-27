@@ -22,7 +22,7 @@ async function getBackups(id: string): Promise<Backup[]> {
   const budgetDir = fs.getBudgetDir(id);
 
   let paths = [] as string[];
-  await fs.listDir(budgetDir);
+  paths = await fs.listDir(budgetDir);
   paths = paths.filter(file => file.match(/db\.backup\.sqlite$/));
 
   const backups = await Promise.all(
