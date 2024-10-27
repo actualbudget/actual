@@ -68,12 +68,6 @@ export async function getAvailableBackups(id: string): Promise<Backup[]> {
   }
 
   return backups;
-  /*
-  return backups.map(backup => ({
-    ...backup,
-    date: backup.date ? dateFns.format(backup.date, 'yyyy-MM-dd H:mm') : null,
-  }));
-  */
 }
 
 export async function updateBackups(backups: Backup[]): Promise<string[]> {

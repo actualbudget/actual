@@ -70,12 +70,6 @@ export async function getAvailableBackups(id: string): Promise<Backup[]> {
   }
 
   return backups;
-  /*
-  return backups.map(backup => ({
-    ...backup,
-    date: backup.date ? dateFns.format(backup.date, 'yyyy-MM-dd H:mm') : null,
-  }));
-  */
 }
 
 export async function updateBackups(backups: Backup[]): Promise<string[]> {
@@ -156,7 +150,11 @@ export async function removeAllBackups(id: string): Promise<boolean> {
 
   for (const item of toRemove) {
     try {
-      await fs.removeFile(fs.join(backupsDir, item.id));
+      if (item?.isLatest) {
+        await fs.removeFile(fs.join(budgetDir, LATEST_BACKUP_FILENAME));
+      } else {
+        await fs.removeFile(fs.join(backupsDir, item.id));
+      }
     } catch (error) {
       console.error(`Failed to remove backup ${item.id}:`, error);
       success = false;

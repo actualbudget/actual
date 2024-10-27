@@ -1,11 +1,11 @@
-export type Backup = { id: string; date: Date } | LatestBackup;
-export type LatestBackup = { id: string; date: null; isLatest: true };
+export type Backup = { id: string; date: Date; isLatest?: boolean } | LatestBackup;
+export type LatestBackup = { id: string; date: null; isLatest: boolean };
 
-export async function getAvailableBackups(id: string): Promise<Backup[]>;
+export function getAvailableBackups(id: string): Promise<Backup[]>;
 
-export async function updateBackups(backups: Backup[]): Promise<Backup[]>;
+export function updateBackups(backups: Backup[]): Promise<Backup[]>;
 
-export async function makeBackup(id: string);
+export function makeBackup(id: string);
 
 /**
  * Removes all backup files associated with the specified budget ID.
@@ -13,10 +13,10 @@ export async function makeBackup(id: string);
  * @param {string} id - The ID of the budget whose backups should be removed.
  * @returns {Promise<boolean>} A promise that resolves to true if all backups were successfully removed, false otherwise.
  */
-export async function removeAllBackups(id: string): Promise<boolean>;
+export function removeAllBackups(id: string): Promise<boolean>;
 
-export async function loadBackup(id: string, backupId: string);
+export function loadBackup(id: string, backupId: string);
 
 export function startBackupService(id: string);
 
-export function stopBackupService();
+export function stopBackupService(): void;
