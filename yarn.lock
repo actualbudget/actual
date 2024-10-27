@@ -6603,7 +6603,7 @@ __metadata:
 
 "actual-sync@file:../../../actual-server::locator=desktop-electron%40workspace%3Apackages%2Fdesktop-electron":
   version: 24.10.1
-  resolution: "actual-sync@file:../../../actual-server#../../../actual-server::hash=d86144&locator=desktop-electron%40workspace%3Apackages%2Fdesktop-electron"
+  resolution: "actual-sync@file:../../../actual-server#../../../actual-server::hash=fefd95&locator=desktop-electron%40workspace%3Apackages%2Fdesktop-electron"
   dependencies:
     "@actual-app/crdt": "npm:2.1.0"
     "@actual-app/web": "npm:24.10.1"
@@ -6623,7 +6623,7 @@ __metadata:
     nordigen-node: "npm:^1.4.0"
     uuid: "npm:^9.0.0"
     winston: "npm:^3.14.2"
-  checksum: 10/ad0fd9e40428f3914ccc4ebed056c0f6cfe77676b53becea09d6e528a6c0dce564cd4f6c1324a441f426545853a0a0140ef3a3583606a50ba2cc1427dc679834
+  checksum: 10/ed0b8268d4433477f654900b0e78a0f95eccd286c7abbce88f5d6865a9f16c3377dc5811d52d67745fdbf5ad4c84ece443d73008017e6713258d4fbca024bad4
   languageName: node
   linkType: hard
 

@@ -23,7 +23,6 @@ import {
   type SyncedLocalFile,
 } from 'loot-core/types/file';
 
-import { useGlobalPref } from '../../hooks/useGlobalPref';
 import { useInitialMount } from '../../hooks/useInitialMount';
 import { useMetadataPref } from '../../hooks/useMetadataPref';
 import { AnimatedLoading } from '../../icons/AnimatedLoading';
@@ -442,27 +441,6 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
     }
   };
 
-  const startActualServer = async () => {
-    await globalThis.Actual.startActualServer('v24.10.1');
-  };
-
-  const [ngrokConfig] = useGlobalPref('ngrokConfig');
-  const exposeActualServer = async () => {
-    const hasRequiredNgrokSettings =
-      ngrokConfig?.authToken && ngrokConfig?.port && ngrokConfig?.domain;
-    if (hasRequiredNgrokSettings) {
-      const url = await globalThis.Actual.exposeActualServer({
-        authToken: ngrokConfig.authToken,
-        port: ngrokConfig.port,
-        domain: ngrokConfig.domain,
-      });
-
-      console.info('exposing actual at: ' + url);
-    } else {
-      console.info('ngrok settings not set');
-    }
-  };
-
   return (
     <View
       style={{
@@ -537,26 +515,6 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
               <Trans>Create test file</Trans>
             </Button>
           )}
-          <Button
-            variant="primary"
-            onPress={startActualServer}
-            style={{
-              ...narrowButtonStyle,
-              marginLeft: 10,
-            }}
-          >
-            Start Server
-          </Button>
-          <Button
-            variant="primary"
-            onPress={exposeActualServer}
-            style={{
-              ...narrowButtonStyle,
-              marginLeft: 10,
-            }}
-          >
-            Expose Server
-          </Button>
         </View>
       )}
     </View>
