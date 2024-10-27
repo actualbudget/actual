@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useLocation } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 
 import * as d from 'date-fns';
 
+import { useReport as useCustomReport } from 'loot-core/src/client/data-hooks/reports';
 import { calculateHasWarning } from 'loot-core/src/client/reports';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
@@ -53,7 +54,6 @@ import {
 import { ReportSidebar } from '../ReportSidebar';
 import { ReportSummary } from '../ReportSummary';
 import { ReportTopbar } from '../ReportTopbar';
-import { setSessionReport } from '../setSessionReport';
 import { createCustomSpreadsheet } from '../spreadsheets/custom-spreadsheet';
 import { createGroupedSpreadsheet } from '../spreadsheets/grouped-spreadsheet';
 import { useReport } from '../useReport';
@@ -103,6 +103,22 @@ function useSelectedCategories(
 }
 
 export function CustomReport() {
+  const params = useParams();
+  const { data: report, isLoading } = useCustomReport(params.id ?? '');
+
+  if (isLoading) {
+    return <LoadingIndicator />;
+  }
+
+  return <CustomReportInner report={report} />;
+}
+
+type CustomReportInnerProps = {
+  report?: CustomReportEntity;
+};
+
+function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
+  const loadReport = initialReport ?? defaultReport;
   const { t } = useTranslation();
   const categories = useCategories();
   const { isNarrowWidth } = useResponsive();
@@ -124,24 +140,6 @@ export function CustomReport() {
     onUpdate: onUpdateFilter,
     onConditionsOpChange,
   } = useFilters();
-
-  const location = useLocation();
-
-  const prevUrl = sessionStorage.getItem('url') || '';
-
-  sessionStorage.setItem('prevUrl', prevUrl);
-  sessionStorage.setItem('url', location.pathname);
-
-  if (['/reports'].includes(prevUrl)) sessionStorage.clear();
-
-  const reportFromSessionStorage = sessionStorage.getItem('report');
-  const session = reportFromSessionStorage
-    ? JSON.parse(reportFromSessionStorage)
-    : {};
-  const combine = location.state
-    ? (location.state.report ?? defaultReport)
-    : defaultReport;
-  const loadReport = { ...combine, ...session };
 
   const [allIntervals, setAllIntervals] = useState<
     Array<{
@@ -243,17 +241,13 @@ export function CustomReport() {
   const [earliestTransaction, setEarliestTransaction] = useState('');
   const [report, setReport] = useState(loadReport);
   const [savedStatus, setSavedStatus] = useState(
-    location.state
-      ? location.state.report
-        ? 'saved'
-        : (loadReport.savedStatus ?? 'new')
-      : (loadReport.savedStatus ?? 'new'),
+    initialReport ? 'saved' : 'new',
   );
 
   useEffect(() => {
     async function run() {
       onApplyFilter(null);
-      report.conditions.forEach((condition: RuleConditionEntity) =>
+      report.conditions?.forEach((condition: RuleConditionEntity) =>
         onApplyFilter(condition),
       );
       const trans = await send('get-earliest-transaction');
@@ -473,13 +467,11 @@ export function CustomReport() {
 
   const defaultModeItems = (graph: string, item: string) => {
     const chooseGraph = graph || graphType;
-    const newGraph = (disabledList.modeGraphsMap.get(item) || []).includes(
-      chooseGraph,
-    )
-      ? defaultsList.modeGraphsMap.get(item)
-      : chooseGraph;
+    const newGraph =
+      ((disabledList.modeGraphsMap.get(item) || []).includes(chooseGraph)
+        ? defaultsList.modeGraphsMap.get(item)
+        : chooseGraph) ?? chooseGraph;
     if ((disabledList.modeGraphsMap.get(item) || []).includes(graphType)) {
-      setSessionReport('graphType', newGraph);
       setGraphType(newGraph);
     }
 
@@ -489,7 +481,6 @@ export function CustomReport() {
       )
     ) {
       const cond = defaultsGraphList(item, newGraph, 'defaultSplit');
-      setSessionReport('groupBy', cond);
       setGroupBy(cond);
     }
 
@@ -499,7 +490,6 @@ export function CustomReport() {
       )
     ) {
       const cond = defaultsGraphList(item, newGraph, 'defaultType');
-      setSessionReport('balanceType', cond);
       setBalanceType(cond);
     }
   };
@@ -512,7 +502,6 @@ export function CustomReport() {
       )
     ) {
       const cond = defaultsGraphList(mode, chooseGraph, 'defaultSplit');
-      setSessionReport('groupBy', cond);
       setGroupBy(cond);
     }
     if (
@@ -521,7 +510,6 @@ export function CustomReport() {
       )
     ) {
       const cond = defaultsGraphList(mode, chooseGraph, 'defaultType');
-      setSessionReport('balanceType', cond);
       setBalanceType(cond);
     }
   };
@@ -555,8 +543,6 @@ export function CustomReport() {
   };
 
   const onChangeDates = (dateStart: string, dateEnd: string) => {
-    setSessionReport('startDate', dateStart);
-    setSessionReport('endDate', dateEnd);
     setStartDate(dateStart);
     setEndDate(dateEnd);
     onReportChange({ type: 'modify' });
@@ -594,44 +580,56 @@ export function CustomReport() {
     onConditionsOpChange(input.conditionsOp);
   };
 
-  const onReportChange = ({
-    savedReport,
-    type,
-  }: {
-    savedReport?: CustomReportEntity;
-    type: string;
-  }) => {
-    switch (type) {
+  const onReportChange = (
+    params:
+      | {
+          type: 'add-update';
+          savedReport: CustomReportEntity;
+        }
+      | {
+          type: 'rename';
+          savedReport?: CustomReportEntity;
+        }
+      | {
+          type: 'modify';
+        }
+      | {
+          type: 'reload';
+        }
+      | {
+          type: 'reset';
+        }
+      | {
+          type: 'choose';
+          savedReport?: CustomReportEntity;
+        },
+  ) => {
+    switch (params.type) {
       case 'add-update':
-        setSessionReport('savedStatus', 'saved');
         setSavedStatus('saved');
-        setReport(savedReport);
+        setReport(params.savedReport);
         break;
       case 'rename':
-        setReport({ ...report, name: savedReport?.name || '' });
+        setReport({ ...report, name: params.savedReport?.name || '' });
         break;
       case 'modify':
         if (report.name) {
-          setSessionReport('savedStatus', 'modified');
           setSavedStatus('modified');
         }
         break;
       case 'reload':
-        setSessionReport('savedStatus', 'saved');
         setSavedStatus('saved');
         setReportData(report);
         break;
       case 'reset':
-        sessionStorage.clear();
         setSavedStatus('new');
         setReport(defaultReport);
         setReportData(defaultReport);
         break;
       case 'choose':
-        setSessionReport('savedStatus', 'saved');
         setSavedStatus('saved');
-        setReport(savedReport);
-        setReportData(savedReport || report);
+        setReport(params.savedReport || report);
+        setReportData(params.savedReport || report);
         break;
       default:
     }
@@ -747,18 +745,10 @@ export function CustomReport() {
                 <AppliedFilters
                   conditions={conditions}
                   onUpdate={(oldFilter, newFilter) => {
-                    setSessionReport(
-                      'conditions',
-                      conditions.map(f => (f === oldFilter ? newFilter : f)),
-                    );
                     onReportChange({ type: 'modify' });
                     onUpdateFilter(oldFilter, newFilter);
                   }}
                   onDelete={deletedFilter => {
-                    setSessionReport(
-                      'conditions',
-                      conditions.filter(f => f !== deletedFilter),
-                    );
                     onDeleteFilter(deletedFilter);
                     onReportChange({ type: 'modify' });
                   }}

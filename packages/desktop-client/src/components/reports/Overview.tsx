@@ -3,7 +3,6 @@ import { Responsive, WidthProvider, type Layout } from 'react-grid-layout';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { Trans, useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
-import { useLocation } from 'react-router-dom';
 
 import {
   addNotification,
@@ -75,9 +74,6 @@ export function Overview() {
 
   const { isNarrowWidth } = useResponsive();
   const navigate = useNavigate();
-
-  const location = useLocation();
-  sessionStorage.setItem('url', location.pathname);
 
   const isDashboardsFeatureEnabled = useFeatureFlag('dashboards');
 
