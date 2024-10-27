@@ -184,8 +184,8 @@ export async function loadBackup(id: string, backupId: string) {
 
     // Restart the backup service to make sure the user has the full
     // amount of time to figure out which one they want
-    stopBackupService();
-    startBackupService(id);
+    await stopBackupService();
+    await startBackupService(id);
 
     await prefs.loadPrefs(id);
   }
@@ -239,7 +239,7 @@ export async function loadBackup(id: string, backupId: string) {
   }
 }
 
-export function startBackupService(id: string) {
+export async function startBackupService(id: string): Promise<void> {
   if (serviceInterval) {
     clearInterval(serviceInterval);
   }
@@ -254,7 +254,7 @@ export function startBackupService(id: string) {
   );
 }
 
-export function stopBackupService() {
+export async function stopBackupService(): Promise<void> {
   if (serviceInterval) {
     clearInterval(serviceInterval);
     serviceInterval = null;

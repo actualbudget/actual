@@ -22,7 +22,7 @@ async function getBackups(id: string): Promise<Backup[]> {
   const budgetDir = fs.getBudgetDir(id);
 
   let paths = [] as string[];
-  paths = await fs.listDir(budgetDir);
+  await fs.listDir(budgetDir);
   paths = paths.filter(file => file.match(/db\.backup\.sqlite$/));
 
   const backups = await Promise.all(
@@ -134,7 +134,11 @@ export async function makeBackup(id: string) {
 
   const toRemove = await updateBackups(await getBackups(id));
   for (const id of toRemove) {
-    await fs.removeFile(fs.join(budgetDir, id));
+    try {
+      await fs.removeFile(fs.join(budgetDir, id));
+    } catch (error) {
+      console.error(`Failed to remove backup ${id}:`, error);
+    }
   }
 
   connection.send('backups-updated', await getAvailableBackups(id));
@@ -181,8 +185,8 @@ export async function loadBackup(id: string, backupId: string) {
 
     // Restart the backup service to make sure the user has the full
     // amount of time to figure out which one they want
-    stopBackupService();
-    startBackupService(id);
+    await stopBackupService();
+    await startBackupService(id);
 
     await prefs.loadPrefs(id);
   }
@@ -240,7 +244,7 @@ export async function loadBackup(id: string, backupId: string) {
   }
 }
 
-export function startBackupService(id: string) {
+export async function startBackupService(id: string): Promise<void> {
   if (serviceInterval) {
     clearInterval(serviceInterval);
   }
@@ -259,7 +263,7 @@ export function startBackupService(id: string) {
   );
 }
 
-export function stopBackupService() {
+export async function stopBackupService(): Promise<void> {
   if (serviceInterval) {
     clearInterval(serviceInterval);
     serviceInterval = null;

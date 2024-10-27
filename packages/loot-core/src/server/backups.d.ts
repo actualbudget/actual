@@ -7,7 +7,7 @@ export function getAvailableBackups(id: string): Promise<Backup[]>;
 
 export function updateBackups(backups: Backup[]): Promise<Backup[]>;
 
-export function makeBackup(id: string);
+export function makeBackup(id: string): Promise<void>;
 
 /**
  * Removes all backup files associated with the specified budget ID.
@@ -17,8 +17,8 @@ export function makeBackup(id: string);
  */
 export function removeAllBackups(id: string): Promise<boolean>;
 
-export function loadBackup(id: string, backupId: string);
+export function loadBackup(id: string, backupId: string): Promise<void>;
 
-export function startBackupService(id: string);
+export function startBackupService(id: string): Promise<void>;
 
-export function stopBackupService(): void;
+export function stopBackupService(): Promise<void>;

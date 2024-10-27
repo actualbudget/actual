@@ -1784,7 +1784,7 @@ handlers['close-budget'] = async function () {
   }
 
   prefs.unloadPrefs();
-  stopBackupService();
+  await stopBackupService();
   return 'ok';
 };
 
@@ -2082,7 +2082,7 @@ async function loadBudget(id: string) {
     !Platform.isMobile &&
     process.env.NODE_ENV !== 'test'
   ) {
-    startBackupService(id);
+    await startBackupService(id);
   }
 
   try {
