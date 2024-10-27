@@ -173,6 +173,15 @@ function startSyncServer() {
 
     envVariables = { ...envVariables, ACTUAL_WEB_ROOT: webRoot };
 
+    // const customDomain = globalPrefs?.ngrokConfig?.domain;
+
+    // if (customDomain) {
+    //   // If we expose on a custom domain via ngrok we need to tell the server to allow it to work as a proxy
+    //   // I'm not sure about this. It needs a CIDR block. I'm not sure what to put here or if it is needed.
+    //   // It's possible this setting will prevent the annoying auth issue where I have to login every day
+    //   envVariables = { ...envVariables, ACTUAL_TRUSTED_PROXIES: customDomain };
+    // }
+
     if (!fs.existsSync(syncServerConfig.ACTUAL_SERVER_FILES)) {
       // create directories if they do not exit - actual-sync doesn't do it for us...
       mkdir(syncServerConfig.ACTUAL_SERVER_FILES, { recursive: true });
