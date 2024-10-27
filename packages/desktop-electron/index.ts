@@ -229,7 +229,6 @@ async function exposeSyncServer(ngrokConfig: GlobalPrefs['ngrokConfig']) {
     const listener = await ngrok.forward({
       schemes: ['https'], // change this to https and bind certificate - may need to generate cert and store in user-data
       addr: ngrokConfig.port,
-      host_header: `localhost:${ngrokConfig.port}`,
       authtoken: ngrokConfig.authToken,
       domain: ngrokConfig.domain,
       // crt: fs.readFileSync("crt.pem", "utf8"),
