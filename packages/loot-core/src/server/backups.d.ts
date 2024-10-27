@@ -1,4 +1,6 @@
-export type Backup = { id: string; date: Date; isLatest?: boolean } | LatestBackup;
+export type Backup =
+  | { id: string; date: Date; isLatest?: boolean }
+  | LatestBackup;
 export type LatestBackup = { id: string; date: null; isLatest: boolean };
 
 export function getAvailableBackups(id: string): Promise<Backup[]>;

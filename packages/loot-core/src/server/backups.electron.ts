@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import * as dateFns from 'date-fns';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -21,7 +20,7 @@ async function getBackups(id: string): Promise<Backup[]> {
   const budgetDir = fs.getBudgetDir(id);
   const backupDir = fs.join(budgetDir, 'backups');
 
-  let paths = [];
+  let paths = [] as string[];
   if (await fs.exists(backupDir)) {
     paths = await fs.listDir(backupDir);
     paths = paths.filter(file => file.match(/\.sqlite$/));
@@ -73,15 +72,18 @@ export async function getAvailableBackups(id: string): Promise<Backup[]> {
 }
 
 export async function updateBackups(backups: Backup[]): Promise<string[]> {
-  const actualBackups = backups.filter(backup => backup.date !== null);
-  const byDay = actualBackups.reduce((groups, backup) => {
-    const day = dateFns.format(backup.date, 'yyyy-MM-dd');
-    groups[day] = groups[day] || [];
-    groups[day].push(backup);
-    return groups;
-  }, {});
+  type GroupByDay = { [index: string]: Backup[] };
 
-  const removed = [];
+  const byDay = backups.reduce((groups: GroupByDay, backup: Backup) => {
+    if (backup.date) {
+      const day = dateFns.format(backup.date, 'yyyy-MM-dd');
+      groups[day] = groups[day] || ([] as Backup[]);
+      groups[day].push(backup);
+    }
+    return groups;
+  }, {} as GroupByDay);
+
+  const removed = [] as string[];
   for (const day of Object.keys(byDay)) {
     const dayBackups = byDay[day];
     const isToday = day === monthUtils.currentDay();
@@ -218,9 +220,9 @@ export async function loadBackup(id: string, backupId: string) {
     // will be restored if the user reverts to the original version)
     await prefs.loadPrefs(id);
     await prefs.savePrefs({
-      groupId: null,
-      lastSyncedTimestamp: null,
-      lastUploaded: null,
+      groupId: undefined,
+      lastSyncedTimestamp: undefined,
+      lastUploaded: undefined,
     });
 
     // Re-upload the new file
