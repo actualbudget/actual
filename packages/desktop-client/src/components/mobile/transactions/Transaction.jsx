@@ -181,17 +181,18 @@ export const Transaction = memo(function Transaction({
                 {prettyDescription || 'Empty'}
               </TextOneLine>
             </View>
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <TextOneLine
-                style={{
-                  fontSize: 12,
-                  opacity: 0.8,
-                  paddingTop: '3px',
-                }}
-              >
-                {notes}
-              </TextOneLine>
-            </View>
+            {notes && (
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <TextOneLine
+                  style={{
+                    fontSize: 12,
+                    paddingTop: '2px',
+                  }}
+                >
+                  {notes.length > 25 ? `${notes.slice(0, 25)}...` : notes}
+                </TextOneLine>
+              </View>
+            )}
             {isPreview ? (
               <Status status={categoryId} isSplit={isParent || isChild} />
             ) : (
