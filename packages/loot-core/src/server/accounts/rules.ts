@@ -76,10 +76,10 @@ function registerHandlebarsHelpers() {
     min: mathHelper((a, b) => Math.min(a, b)),
     max: mathHelper((a, b) => Math.max(a, b)),
     fixed: (a: unknown, digits: unknown) => Number(a).toFixed(Number(digits)),
-    day: (date: string) => format(date, 'd'),
-    month: (date: string) => format(date, 'M'),
-    year: (date: string) => format(date, 'yyyy'),
-    format: (date: string, f: string) => format(date, f),
+    day: (date?: string) => date && format(date, 'd'),
+    month: (date?: string) => date && format(date, 'M'),
+    year: (date?: string) => date && format(date, 'yyyy'),
+    format: (date?: string, f?: string) => date && f && format(date, f),
     debug: (value: unknown) => {
       console.log(value);
     },
