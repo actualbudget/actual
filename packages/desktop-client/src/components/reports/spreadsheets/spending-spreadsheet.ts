@@ -194,7 +194,11 @@ export function createSpendingSpreadsheet({
               }
               return null;
             });
-            if (month.month >= startDate && month.month < compare) {
+
+            if (
+              month.month >= monthUtils.monthFromDate(startDate) &&
+              month.month < compare
+            ) {
               if (day === '28') {
                 if (monthUtils.getMonthEnd(intervalItem) === intervalItem) {
                   averageSum += cumulativeAssets + cumulativeDebts;

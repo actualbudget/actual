@@ -2,7 +2,6 @@ export type FeatureFlag =
   | 'dashboards'
   | 'reportBudget'
   | 'goalTemplatesEnabled'
-  | 'spendingReport'
   | 'actionTemplating'
   | 'upcomingLengthAdjustment'
   | 'contextMenus';

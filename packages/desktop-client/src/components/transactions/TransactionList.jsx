@@ -113,6 +113,7 @@ export function TransactionList({
 
   const onSave = useCallback(async transaction => {
     const changes = updateTransaction(transactionsLatest.current, transaction);
+    transactionsLatest.current = changes.data;
 
     if (changes.diff.updated.length > 0) {
       const dateChanged = !!changes.diff.updated[0].date;
