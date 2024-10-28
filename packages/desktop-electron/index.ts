@@ -155,54 +155,64 @@ function startSyncServer() {
 
   // NOTE: config.json parameters will be relative to THIS directory at the moment - may need a fix?
   // Or we can override the config.json location when starting the process
-  try {
-    let envVariables: Env = {
-      ...process.env, // required
-      ACTUAL_PORT: `${syncServerConfig.port}`,
-      ACTUAL_SERVER_FILES: `${syncServerConfig.ACTUAL_SERVER_FILES}`,
-      ACTUAL_USER_FILES: `${syncServerConfig.ACTUAL_USER_FILES}`,
-      ACTUAL_DATA_DIR: `${syncServerConfig.ACTUAL_SERVER_DATA_DIR}`,
-    };
+  let envVariables: Env = {
+    ...process.env, // required
+    ACTUAL_PORT: `${syncServerConfig.port}`,
+    ACTUAL_SERVER_FILES: `${syncServerConfig.ACTUAL_SERVER_FILES}`,
+    ACTUAL_USER_FILES: `${syncServerConfig.ACTUAL_USER_FILES}`,
+    ACTUAL_DATA_DIR: `${syncServerConfig.ACTUAL_SERVER_DATA_DIR}`,
+  };
 
-    const webRoot = path.resolve(
-      __dirname,
-      isDev
-        ? '../../../node_modules/@actual-app/web/build/' // workspace node_modules
-        : '../node_modules/@actual-app/web/build/', // location of packaged module
-    );
+  const webRoot = path.resolve(
+    __dirname,
+    isDev
+      ? '../../../node_modules/@actual-app/web/build/' // workspace node_modules
+      : '../node_modules/@actual-app/web/build/', // location of packaged module
+  );
 
-    envVariables = { ...envVariables, ACTUAL_WEB_ROOT: webRoot };
+  envVariables = { ...envVariables, ACTUAL_WEB_ROOT: webRoot };
 
-    // const customDomain = globalPrefs?.ngrokConfig?.domain;
+  // const customDomain = globalPrefs?.ngrokConfig?.domain;
 
-    // if (customDomain) {
-    //   // If we expose on a custom domain via ngrok we need to tell the server to allow it to work as a proxy
-    //   // I'm not sure about this. It needs a CIDR block. I'm not sure what to put here or if it is needed.
-    //   // It's possible this setting will prevent the annoying auth issue where I have to login every day
-    //   envVariables = { ...envVariables, ACTUAL_TRUSTED_PROXIES: customDomain };
-    // }
+  // if (customDomain) {
+  //   // If we expose on a custom domain via ngrok we need to tell the server to allow it to work as a proxy
+  //   // I'm not sure about this. It needs a CIDR block. I'm not sure what to put here or if it is needed.
+  //   // It's possible this setting will prevent the annoying auth issue where I have to login every day
+  //   envVariables = { ...envVariables, ACTUAL_TRUSTED_PROXIES: customDomain };
+  // }
 
-    if (!fs.existsSync(syncServerConfig.ACTUAL_SERVER_FILES)) {
-      // create directories if they do not exit - actual-sync doesn't do it for us...
-      mkdir(syncServerConfig.ACTUAL_SERVER_FILES, { recursive: true });
-    }
+  if (!fs.existsSync(syncServerConfig.ACTUAL_SERVER_FILES)) {
+    // create directories if they do not exit - actual-sync doesn't do it for us...
+    mkdir(syncServerConfig.ACTUAL_SERVER_FILES, { recursive: true });
+  }
 
-    if (!fs.existsSync(syncServerConfig.ACTUAL_USER_FILES)) {
-      // create directories if they do not exit - actual-sync doesn't do it for us...
-      mkdir(syncServerConfig.ACTUAL_USER_FILES, { recursive: true });
-    }
+  if (!fs.existsSync(syncServerConfig.ACTUAL_USER_FILES)) {
+    // create directories if they do not exit - actual-sync doesn't do it for us...
+    mkdir(syncServerConfig.ACTUAL_USER_FILES, { recursive: true });
+  }
 
-    // TODO: make sure .migrate file is also in user-directory under actual-server
+  // TODO: make sure .migrate file is also in user-directory under actual-server
 
-    let forkOptions: ForkOptions = {
-      stdio: 'pipe',
-      env: envVariables,
-    };
+  let forkOptions: ForkOptions = {
+    stdio: 'pipe',
+    env: envVariables,
+  };
 
-    if (isDev) {
-      forkOptions = { ...forkOptions, execArgv: ['--inspect'] };
-    }
+  if (isDev) {
+    forkOptions = { ...forkOptions, execArgv: ['--inspect'] };
+  }
 
+  const SYNC_SERVER_WAIT_TIMEOUT = 10000; // wait 10 seconds for the server to start - if it doesn't, throw an error
+
+  const syncServerTimeout = new Promise<void>((_, reject) => {
+    setTimeout(() => {
+      const errorMessage = `Sync server failed to start within ${SYNC_SERVER_WAIT_TIMEOUT / 1000} seconds. Something is wrong. Please raise a github issue.`;
+      console.error(errorMessage);
+      reject(new Error(errorMessage));
+    }, SYNC_SERVER_WAIT_TIMEOUT);
+  });
+
+  const syncServerPromise = new Promise<void>(async resolve => {
     actualServerProcess = utilityProcess.fork(
       serverPath, // This requires actual-server depencies (crdt) to be built before running electron - they need to be manually specified because actual-server doesn't get bundled
       [],
@@ -211,18 +221,24 @@ function startSyncServer() {
 
     actualServerProcess.stdout?.on('data', (chunk: Buffer) => {
       // Send the Server console.log messages to the main browser window
+      const chunkValue = JSON.stringify(chunk.toString('utf8'));
+      if (chunkValue.includes('Listening on')) {
+        console.info('Actual Sync Server has started!');
+        resolve(); // The server is running - resolve
+      }
+
       clientWin?.webContents.executeJavaScript(`
-          console.info('Server Log:', ${JSON.stringify(chunk.toString('utf8'))})`);
+          console.info('Actual Sync Server Log:', ${chunkValue})`);
     });
 
     actualServerProcess.stderr?.on('data', (chunk: Buffer) => {
       // Send the Server console.error messages out to the main browser window
       clientWin?.webContents.executeJavaScript(`
-            console.error('Server Log:', ${JSON.stringify(chunk.toString('utf8'))})`);
+            console.error('Actual Sync Server Log:', ${JSON.stringify(chunk.toString('utf8'))})`);
     });
-  } catch (error) {
-    console.error(error);
-  }
+  });
+
+  return Promise.race([syncServerPromise, syncServerTimeout]); // Either the server has started or the timeout is reached
 }
 
 async function exposeSyncServer(ngrokConfig: GlobalPrefs['ngrokConfig']) {
@@ -386,8 +402,11 @@ app.on('ready', async () => {
   globalPrefs = await loadGlobalPrefs(); // load global prefs
 
   if (globalPrefs.ngrokConfig?.autoStart) {
-    startSyncServer();
-    exposeSyncServer(globalPrefs.ngrokConfig);
+    // wait for both server and ngrok to start before starting the Actual client to ensure server is available
+    await Promise.allSettled([
+      startSyncServer(),
+      exposeSyncServer(globalPrefs.ngrokConfig),
+    ]);
   }
 
   protocol.handle('app', request => {
