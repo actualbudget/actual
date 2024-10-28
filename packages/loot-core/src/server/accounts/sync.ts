@@ -413,9 +413,9 @@ export async function reconcileTransactions(
   }
 
   // Maintain the sort order of the server
-  const now = new Date();
+  const now = Date.now();
   added.forEach((t, index) => {
-    t.sort_order ??= now.valueOf() - index;
+    t.sort_order ??= now - index;
   });
 
   if (!isPreview) {
