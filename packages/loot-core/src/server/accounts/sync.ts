@@ -412,6 +412,12 @@ export async function reconcileTransactions(
     }
   }
 
+  // Maintain the sort order of the server
+  const now = new Date();
+  added.forEach((t, index) => {
+    t.sort_order ??= now.valueOf() - index;
+  });
+
   if (!isPreview) {
     await createNewPayees(payeesToCreate, [...added, ...updated]);
     await batchUpdateTransactions({ added, updated });
