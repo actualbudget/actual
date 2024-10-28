@@ -126,7 +126,7 @@ export function ExperimentalFeatures() {
               flag="contextMenus"
               feedbackLink="https://github.com/actualbudget/actual/issues/3706"
             >
-              <Trans>Context menu’s</Trans>
+              <Trans>Context menus</Trans>
             </FeatureToggle>
           </View>
         ) : (
