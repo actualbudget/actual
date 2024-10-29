@@ -33,10 +33,16 @@ export function applyBudgetAction(month, type, args) {
         dispatch(addNotification(await send('budget/check-templates')));
         break;
       case 'apply-goal-template':
-        await send('budget/apply-goal-template', { month });
+        dispatch(
+          addNotification(await send('budget/apply-goal-template', { month })),
+        );
         break;
       case 'overwrite-goal-template':
-        await send('budget/overwrite-goal-template', { month });
+        dispatch(
+          addNotification(
+            await send('budget/overwrite-goal-template', { month }),
+          ),
+        );
         break;
       case 'cleanup-goal-template':
         dispatch(
