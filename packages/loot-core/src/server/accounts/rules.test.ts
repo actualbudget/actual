@@ -406,6 +406,10 @@ describe('Action', () => {
       testHelper('{{month "2002-07-25"}}', '7');
       testHelper('{{year "2002-07-25"}}', '2002');
       testHelper('{{format "2002-07-25" "MM yyyy d"}}', '07 2002 25');
+      testHelper('{{day undefined}}', '');
+      testHelper('{{month undefined}}', '');
+      testHelper('{{year undefined}}', '');
+      testHelper('{{format undefined undefined}}', '');
     });
 
     test('{{debug}} should log the item', () => {
