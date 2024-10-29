@@ -47,8 +47,10 @@ function AccountHeader<SheetFieldName extends SheetFields<'account'>>({
       style={{
         flex: 1,
         flexDirection: 'row',
-        marginTop: 10,
-        padding: 0,
+        paddingTop: 15,
+        paddingBottom: 15,
+        paddingLeft: 0,
+        paddingRight: 0,
         color: theme.pageTextLight,
         width: '100%',
         ...style,
@@ -58,6 +60,7 @@ function AccountHeader<SheetFieldName extends SheetFields<'account'>>({
         <Text
           style={{
             ...styles.text,
+            fontSize: 17,
           }}
           data-testid="name"
         >
