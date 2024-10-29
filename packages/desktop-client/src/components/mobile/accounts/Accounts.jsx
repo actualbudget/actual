@@ -8,7 +8,7 @@ import { useAccounts } from '../../../hooks/useAccounts';
 import { useFailedAccounts } from '../../../hooks/useFailedAccounts';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { useSyncedPref } from '../../../hooks/useSyncedPref';
-import { SvgAdd } from '../../../icons/v1';
+import { SvgAdd, SvgCheveronRight } from '../../../icons/v1';
 import { theme, styles } from '../../../style';
 import { makeAmountFullStyle } from '../../budget/util';
 import { Button } from '../../common/Button2';
@@ -20,36 +20,46 @@ import { CellValue, CellValueText } from '../../spreadsheet/CellValue';
 import { MOBILE_NAV_HEIGHT } from '../MobileNavTabs';
 import { PullToRefresh } from '../PullToRefresh';
 
-function AccountHeader({ name, amount, style = {} }) {
+function AccountHeader({ id, name, amount, style = {} }) {
+  const navigate = useNavigate();
+
   return (
-    <View
+    <Button
+      variant="bare"
+      onPress={() => navigate(`/accounts/${id}`)}
       style={{
         flex: 1,
         flexDirection: 'row',
         marginTop: 10,
-        marginRight: 10,
+        padding: 0,
         color: theme.pageTextLight,
         width: '100%',
         ...style,
       }}
     >
-      <View style={{ flex: 1 }}>
+      <View style={{ flex: 1, alignItems: 'center', flexDirection: 'row' }}>
         <Text
           style={{
             ...styles.text,
-            fontSize: 14,
           }}
           data-testid="name"
         >
           {name}
         </Text>
+        <SvgCheveronRight
+          style={{
+            flexShrink: 0,
+            color: theme.mobileHeaderTextSubdued,
+            marginLeft: 5,
+          }}
+          width={styles.text.fontSize}
+          height={styles.text.fontSize}
+        />
       </View>
       <CellValue binding={amount} type="financial">
-        {props => (
-          <CellValueText {...props} style={{ ...styles.text, fontSize: 14 }} />
-        )}
+        {props => <CellValueText {...props} style={{ ...styles.text }} />}
       </CellValue>
-    </View>
+    </Button>
   );
 }
 
@@ -186,7 +196,11 @@ function AccountList({
       <PullToRefresh onRefresh={onSync}>
         <View style={{ margin: 10 }}>
           {budgetedAccounts.length > 0 && (
-            <AccountHeader name="For Budget" amount={getOnBudgetBalance()} />
+            <AccountHeader
+              id="budgeted"
+              name="For Budget"
+              amount={getOnBudgetBalance()}
+            />
           )}
           {budgetedAccounts.map(acct => (
             <AccountCard
@@ -203,6 +217,7 @@ function AccountList({
 
           {offbudgetAccounts.length > 0 && (
             <AccountHeader
+              id="offbudget"
               name="Off Budget"
               amount={getOffBudgetBalance()}
               style={{ marginTop: 30 }}
