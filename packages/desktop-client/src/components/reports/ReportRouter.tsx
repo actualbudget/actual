@@ -2,6 +2,7 @@ import React from 'react';
 import { Route, Routes } from 'react-router-dom';
 
 import { Overview } from './Overview';
+import { Calendar } from './reports/Calendar';
 import { CashFlow } from './reports/CashFlow';
 import { CustomReport } from './reports/CustomReport';
 import { NetWorth } from './reports/NetWorth';
@@ -19,6 +20,8 @@ export function ReportRouter() {
       <Route path="/custom/:id" element={<CustomReport />} />
       <Route path="/spending" element={<Spending />} />
       <Route path="/spending/:id" element={<Spending />} />
+      <Route path="/calendar" element={<Calendar />} />
+      <Route path="/calendar/:id" element={<Calendar />} />
     </Routes>
   );
 }

@@ -65,7 +65,8 @@ type SpecializedWidget =
   | NetWorthWidget
   | CashFlowWidget
   | SpendingWidget
-  | MarkdownWidget;
+  | MarkdownWidget
+  | CalendarWidget;
 export type Widget = SpecializedWidget | CustomReportWidget;
 export type NewWidget = Omit<Widget, 'id' | 'tombstone'>;
 
@@ -88,3 +89,13 @@ export type ExportImportDashboard = {
   version: 1;
   widgets: ExportImportDashboardWidget[];
 };
+
+export type CalendarWidget = AbstractWidget<
+  'calendar-card',
+  {
+    name?: string;
+    conditions?: RuleConditionEntity[];
+    conditionsOp?: 'and' | 'or';
+    timeFrame?: TimeFrame;
+  } | null
+>;
