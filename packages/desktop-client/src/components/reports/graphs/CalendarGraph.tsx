@@ -1,0 +1,290 @@
+import { type Ref, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+
+import {
+  addDays,
+  format,
+  getDate,
+  isSameMonth,
+  startOfMonth,
+  startOfWeek,
+} from 'date-fns';
+
+import { amountToCurrency } from 'loot-core/shared/util';
+import { type SyncedPrefs } from 'loot-core/types/prefs';
+
+import { useResizeObserver } from '../../../hooks/useResizeObserver';
+import { styles, theme } from '../../../style';
+import { Button } from '../../common/Button2';
+import { Tooltip } from '../../common/Tooltip';
+import { View } from '../../common/View';
+import { chartTheme } from '../chart-theme';
+
+type CalendarGraphProps = {
+  data: {
+    date: Date;
+    incomeValue: number;
+    expenseValue: number;
+    incomeSize: number;
+    expenseSize: number;
+  }[];
+  start: Date;
+  firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'];
+  onDayClick: (date: Date) => void;
+  // onFilter: (
+  //   conditionsOrSavedFilter:
+  //     | null
+  //     | {
+  //         conditions: RuleConditionEntity[];
+  //         conditionsOp: 'and' | 'or';
+  //         id: RuleConditionEntity[];
+  //       }
+  //     | RuleConditionEntity,
+  // ) => void;
+};
+export function CalendarGraph({
+  data,
+  start,
+  firstDayOfWeekIdx,
+  //onFilter,
+  onDayClick,
+}: CalendarGraphProps) {
+  const { t } = useTranslation();
+  const startingDate = startOfWeek(new Date(), {
+    weekStartsOn: firstDayOfWeekIdx
+      ? (parseInt(firstDayOfWeekIdx) as 0 | 1 | 2 | 3 | 4 | 5 | 6)
+      : 0,
+  });
+  const [fontSize, setFontSize] = useState(14);
+
+  const buttonRef = useResizeObserver(rect => {
+    const newValue = Math.floor(rect.height / 2);
+    if (newValue > 14) {
+      setFontSize(14);
+    } else {
+      setFontSize(newValue);
+    }
+  });
+
+  return (
+    <>
+      <View
+        style={{
+          color: theme.pageTextSubdued,
+          display: 'grid',
+          gridTemplateColumns: 'repeat(7, 1fr)',
+          gridAutoRows: '1fr',
+          gap: 2,
+        }}
+      >
+        {Array.from({ length: 7 }, (_, index) => (
+          <View
+            key={index}
+            style={{
+              textAlign: 'center',
+              fontSize: 14,
+              fontWeight: 500,
+              padding: '3px 0',
+              height: '100%',
+              width: '100%',
+              position: 'relative',
+            }}
+          >
+            {format(addDays(startingDate, index), 'EEEEE')}
+          </View>
+        ))}
+      </View>
+      <View
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(7, 1fr)',
+          gridAutoRows: '1fr',
+          gap: 2,
+          width: '100%',
+          height: '100%',
+          //gridTemplateRows: `repeat(${Math.trunc(data.length) <= data.length / 7 ? Math.trunc(data.length) : Math.trunc(data.length) + 1},1fr)`,
+        }}
+      >
+        {data.map((day, index) =>
+          !isSameMonth(day.date, startOfMonth(start)) ? (
+            <View key={index} />
+          ) : (
+            <Tooltip
+              key={index}
+              content={
+                <View>
+                  <View style={{ marginBottom: 10 }}>
+                    <strong>
+                      {t('Day:') + ' '}
+                      {format(day.date, 'dd')}
+                    </strong>
+                  </View>
+                  <View style={{ lineHeight: 1.5 }}>
+                    <View
+                      style={{
+                        display: 'grid',
+                        gridTemplateColumns: '70px 1fr 60px',
+                        gridAutoRows: '1fr',
+                      }}
+                    >
+                      {day.incomeValue !== 0 && (
+                        <>
+                          <View
+                            style={{
+                              textAlign: 'right',
+                              marginRight: 4,
+                            }}
+                          >
+                            Income:
+                          </View>
+                          <View style={{ color: chartTheme.colors.blue }}>
+                            {day.incomeValue !== 0
+                              ? amountToCurrency(day.incomeValue)
+                              : ''}
+                          </View>
+                          <View style={{ marginLeft: 4 }}>
+                            ({Math.round(day.incomeSize * 100) / 100 + '%'})
+                          </View>
+                        </>
+                      )}
+                      {day.expenseValue !== 0 && (
+                        <>
+                          <View
+                            style={{
+                              textAlign: 'right',
+                              marginRight: 4,
+                            }}
+                          >
+                            Expenses:
+                          </View>
+                          <View style={{ color: chartTheme.colors.red }}>
+                            {day.expenseValue !== 0
+                              ? amountToCurrency(day.expenseValue)
+                              : ''}
+                          </View>
+                          <View style={{ marginLeft: 4 }}>
+                            ({Math.round(day.expenseSize * 100) / 100 + '%'})
+                          </View>
+                        </>
+                      )}
+                    </View>
+                  </View>
+                </View>
+              }
+              placement="bottom end"
+              style={{
+                ...styles.tooltip,
+                lineHeight: 1.5,
+                padding: '6px 10px',
+              }}
+            >
+              <DayButton
+                key={index}
+                resizeRef={index === 15 ? buttonRef : null}
+                fontSize={fontSize}
+                day={day}
+                onPress={() => onDayClick(day.date)}
+              />
+            </Tooltip>
+          ),
+        )}
+      </View>
+    </>
+  );
+}
+
+type DayButtonProps = {
+  fontSize: number;
+  resizeRef: Ref<HTMLButtonElement>;
+  day: {
+    date: Date;
+    incomeSize: number;
+    expenseSize: number;
+  };
+  onPress: () => void;
+};
+function DayButton({ day, onPress, fontSize, resizeRef }: DayButtonProps) {
+  const [currentFontSize, setCurrentFontSize] = useState(fontSize);
+
+  useEffect(() => {
+    setCurrentFontSize(fontSize);
+  }, [fontSize]);
+
+  return (
+    <Button
+      ref={resizeRef}
+      style={{
+        borderColor: 'transparent',
+        backgroundColor: theme.menuAutoCompleteBackground,
+        position: 'relative',
+        padding: 'unset',
+        height: '100%',
+        minWidth: 0,
+        minHeight: 0,
+        margin: 0,
+      }}
+      onPress={() => onPress()}
+    >
+      {day.expenseSize !== 0 && (
+        <View
+          style={{
+            position: 'absolute',
+            width: '50%',
+            height: '100%',
+            background: chartTheme.colors.red,
+            opacity: 0.2,
+            right: 0,
+          }}
+        />
+      )}
+      {day.incomeSize !== 0 && (
+        <View
+          style={{
+            position: 'absolute',
+            width: '50%',
+            height: '100%',
+            background: chartTheme.colors.blue,
+            opacity: 0.2,
+            left: 0,
+          }}
+        />
+      )}
+      <View
+        className="bar positive-bar"
+        style={{
+          position: 'absolute',
+          left: 0,
+          bottom: 0,
+          opacity: 0.9,
+          height: `${Math.ceil(day.incomeSize)}%`,
+          backgroundColor: chartTheme.colors.blue,
+          width: '50%',
+          transition: 'height 0.5s ease-out',
+        }}
+      />
+
+      <View
+        className="bar"
+        style={{
+          position: 'absolute',
+          right: 0,
+          bottom: 0,
+          opacity: 0.9,
+          height: `${Math.ceil(day.expenseSize)}%`,
+          backgroundColor: chartTheme.colors.red,
+          width: '50%',
+          transition: 'height 0.5s ease-out',
+        }}
+      />
+      <span
+        style={{
+          fontSize: `${currentFontSize}px`,
+          fontWeight: 500,
+          position: 'relative',
+        }}
+      >
+        {getDate(day.date)}
+      </span>
+    </Button>
+  );
+}
