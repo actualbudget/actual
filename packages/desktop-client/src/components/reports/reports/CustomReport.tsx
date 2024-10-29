@@ -111,7 +111,7 @@ export function CustomReport() {
     return <LoadingIndicator />;
   }
 
-  return <CustomReportInner report={report} />;
+  return <CustomReportInner key={report?.id} report={report} />;
 }
 
 type CustomReportInnerProps = {
@@ -632,6 +632,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
         setSessionReport('savedStatus', 'saved');
         setSavedStatus('saved');
         setReport(params.savedReport);
+        navigate(`/reports/custom/${params.savedReport.id}`);
         break;
       case 'rename':
         setReport({ ...report, name: params.savedReport?.name || '' });
@@ -654,10 +655,12 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
         setReportData(defaultReport);
         break;
       case 'choose':
+        const newReport = params.savedReport || report;
         setSessionReport('savedStatus', 'saved');
         setSavedStatus('saved');
-        setReport(params.savedReport || report);
-        setReportData(params.savedReport || report);
+        setReport(newReport);
+        setReportData(newReport);
+        navigate(`/reports/custom/${newReport.id}`);
         break;
       default:
     }
