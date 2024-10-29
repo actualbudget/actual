@@ -42,6 +42,7 @@ function AccountHeader<SheetFieldName extends SheetFields<'account'>>({
   return (
     <Button
       variant="bare"
+      aria-label={`View ${name} transactions`}
       onPress={() => navigate(`/accounts/${id}`)}
       style={{
         flex: 1,
