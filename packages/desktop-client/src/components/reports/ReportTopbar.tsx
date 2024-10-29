@@ -20,6 +20,7 @@ import { FilterButton } from '../filters/FiltersMenu';
 
 import { GraphButton } from './GraphButton';
 import { SaveReport } from './SaveReport';
+import { setSessionReport } from './setSessionReport';
 
 type ReportTopbarProps = {
   customReportItems: CustomReportEntity;
@@ -51,6 +52,7 @@ export function ReportTopbar({
   defaultItems,
 }: ReportTopbarProps) {
   const onChangeGraph = (cond: string) => {
+    setSessionReport('graphType', cond);
     onReportChange({ type: 'modify' });
     setGraphType(cond);
     defaultItems(cond);
@@ -193,6 +195,10 @@ export function ReportTopbar({
           compact
           hover
           onApply={(e: RuleConditionEntity) => {
+            setSessionReport('conditions', [
+              ...(customReportItems.conditions ?? []),
+              e,
+            ]);
             onApplyFilter(e);
             onReportChange({ type: 'modify' });
           }}

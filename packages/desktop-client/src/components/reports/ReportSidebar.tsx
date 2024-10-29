@@ -25,6 +25,7 @@ import { getLiveRange } from './getLiveRange';
 import { ModeButton } from './ModeButton';
 import { type dateRangeProps, ReportOptions } from './ReportOptions';
 import { validateEnd, validateStart } from './reportRanges';
+import { setSessionReport } from './setSessionReport';
 
 type ReportSidebarProps = {
   customReportItems: CustomReportEntity;
@@ -90,6 +91,7 @@ export function ReportSidebar({
   const [menuOpen, setMenuOpen] = useState(false);
   const triggerRef = useRef(null);
   const onSelectRange = (cond: string) => {
+    setSessionReport('dateRange', cond);
     onReportChange({ type: 'modify' });
     setDateRange(cond);
     onChangeDates(
@@ -103,16 +105,19 @@ export function ReportSidebar({
   };
 
   const onChangeMode = (cond: string) => {
+    setSessionReport('mode', cond);
     onReportChange({ type: 'modify' });
     setMode(cond);
     let graph = '';
     if (cond === 'time') {
       if (customReportItems.graphType === 'BarGraph') {
+        setSessionReport('graphType', 'StackedBarGraph');
         setGraphType('StackedBarGraph');
         graph = 'StackedBarGraph';
       }
     } else {
       if (customReportItems.graphType === 'StackedBarGraph') {
+        setSessionReport('graphType', 'BarGraph');
         setGraphType('BarGraph');
         graph = 'BarGraph';
       }
@@ -121,12 +126,14 @@ export function ReportSidebar({
   };
 
   const onChangeSplit = (cond: string) => {
+    setSessionReport('groupBy', cond);
     onReportChange({ type: 'modify' });
     setGroupBy(cond);
     defaultItems(cond);
   };
 
   const onChangeBalanceType = (cond: string) => {
+    setSessionReport('balanceType', cond);
     onReportChange({ type: 'modify' });
     setBalanceType(cond);
   };
@@ -235,6 +242,7 @@ export function ReportSidebar({
           <Select
             value={customReportItems.interval}
             onChange={e => {
+              setSessionReport('interval', e);
               setInterval(e);
               onReportChange({ type: 'modify' });
               if (
@@ -285,18 +293,35 @@ export function ReportSidebar({
                 onReportChange({ type: 'modify' });
 
                 if (type === 'include-current-interval') {
+                  setSessionReport(
+                    'includeCurrentInterval',
+                    !customReportItems.includeCurrentInterval,
+                  );
                   setIncludeCurrentInterval(
                     !customReportItems.includeCurrentInterval,
                   );
                 } else if (type === 'show-hidden-categories') {
+                  setSessionReport(
+                    'showHiddenCategories',
+                    !customReportItems.showHiddenCategories,
+                  );
                   setShowHiddenCategories(
                     !customReportItems.showHiddenCategories,
                   );
                 } else if (type === 'show-off-budget') {
+                  setSessionReport(
+                    'showOffBudget',
+                    !customReportItems.showOffBudget,
+                  );
                   setShowOffBudget(!customReportItems.showOffBudget);
                 } else if (type === 'show-empty-items') {
+                  setSessionReport('showEmpty', !customReportItems.showEmpty);
                   setShowEmpty(!customReportItems.showEmpty);
                 } else if (type === 'show-uncategorized') {
+                  setSessionReport(
+                    'showUncategorized',
+                    !customReportItems.showUncategorized,
+                  );
                   setShowUncategorized(!customReportItems.showUncategorized);
                 }
               }}
@@ -375,6 +400,7 @@ export function ReportSidebar({
           <ModeButton
             selected={!customReportItems.isDateStatic}
             onSelect={() => {
+              setSessionReport('isDateStatic', false);
               setIsDateStatic(false);
               onSelectRange(customReportItems.dateRange);
             }}
@@ -384,6 +410,7 @@ export function ReportSidebar({
           <ModeButton
             selected={customReportItems.isDateStatic}
             onSelect={() => {
+              setSessionReport('isDateStatic', true);
               setIsDateStatic(true);
               onChangeDates(
                 customReportItems.startDate,

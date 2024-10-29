@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 
 import * as d from 'date-fns';
 
@@ -54,6 +54,7 @@ import {
 import { ReportSidebar } from '../ReportSidebar';
 import { ReportSummary } from '../ReportSummary';
 import { ReportTopbar } from '../ReportTopbar';
+import { setSessionReport } from '../setSessionReport';
 import { createCustomSpreadsheet } from '../spreadsheets/custom-spreadsheet';
 import { createGroupedSpreadsheet } from '../spreadsheets/grouped-spreadsheet';
 import { useReport } from '../useReport';
@@ -118,7 +119,6 @@ type CustomReportInnerProps = {
 };
 
 function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
-  const loadReport = initialReport ?? defaultReport;
   const { t } = useTranslation();
   const categories = useCategories();
   const { isNarrowWidth } = useResponsive();
@@ -140,6 +140,22 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
     onUpdate: onUpdateFilter,
     onConditionsOpChange,
   } = useFilters();
+
+  const location = useLocation();
+
+  const prevUrl = sessionStorage.getItem('url') || '';
+
+  sessionStorage.setItem('prevUrl', prevUrl);
+  sessionStorage.setItem('url', location.pathname);
+
+  if (['/reports'].includes(prevUrl)) sessionStorage.clear();
+
+  const reportFromSessionStorage = sessionStorage.getItem('report');
+  const session = reportFromSessionStorage
+    ? JSON.parse(reportFromSessionStorage)
+    : {};
+  const combine = initialReport ?? defaultReport;
+  const loadReport = { ...combine, ...session };
 
   const [allIntervals, setAllIntervals] = useState<
     Array<{
@@ -472,6 +488,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
         ? defaultsList.modeGraphsMap.get(item)
         : chooseGraph) ?? chooseGraph;
     if ((disabledList.modeGraphsMap.get(item) || []).includes(graphType)) {
+      setSessionReport('graphType', newGraph);
       setGraphType(newGraph);
     }
 
@@ -481,6 +498,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
       )
     ) {
       const cond = defaultsGraphList(item, newGraph, 'defaultSplit');
+      setSessionReport('groupBy', cond);
       setGroupBy(cond);
     }
 
@@ -490,6 +508,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
       )
     ) {
       const cond = defaultsGraphList(item, newGraph, 'defaultType');
+      setSessionReport('balanceType', cond);
       setBalanceType(cond);
     }
   };
@@ -502,6 +521,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
       )
     ) {
       const cond = defaultsGraphList(mode, chooseGraph, 'defaultSplit');
+      setSessionReport('groupBy', cond);
       setGroupBy(cond);
     }
     if (
@@ -510,6 +530,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
       )
     ) {
       const cond = defaultsGraphList(mode, chooseGraph, 'defaultType');
+      setSessionReport('balanceType', cond);
       setBalanceType(cond);
     }
   };
@@ -543,6 +564,8 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
   };
 
   const onChangeDates = (dateStart: string, dateEnd: string) => {
+    setSessionReport('startDate', dateStart);
+    setSessionReport('endDate', dateEnd);
     setStartDate(dateStart);
     setEndDate(dateEnd);
     onReportChange({ type: 'modify' });
@@ -606,6 +629,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
   ) => {
     switch (params.type) {
       case 'add-update':
+        setSessionReport('savedStatus', 'saved');
         setSavedStatus('saved');
         setReport(params.savedReport);
         break;
@@ -614,19 +638,23 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
         break;
       case 'modify':
         if (report.name) {
+          setSessionReport('savedStatus', 'modified');
           setSavedStatus('modified');
         }
         break;
       case 'reload':
+        setSessionReport('savedStatus', 'saved');
         setSavedStatus('saved');
         setReportData(report);
         break;
       case 'reset':
+        sessionStorage.clear();
         setSavedStatus('new');
         setReport(defaultReport);
         setReportData(defaultReport);
         break;
       case 'choose':
+        setSessionReport('savedStatus', 'saved');
         setSavedStatus('saved');
         setReport(params.savedReport || report);
         setReportData(params.savedReport || report);
@@ -745,10 +773,18 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
                 <AppliedFilters
                   conditions={conditions}
                   onUpdate={(oldFilter, newFilter) => {
+                    setSessionReport(
+                      'conditions',
+                      conditions.map(f => (f === oldFilter ? newFilter : f)),
+                    );
                     onReportChange({ type: 'modify' });
                     onUpdateFilter(oldFilter, newFilter);
                   }}
                   onDelete={deletedFilter => {
+                    setSessionReport(
+                      'conditions',
+                      conditions.filter(f => f !== deletedFilter),
+                    );
                     onDeleteFilter(deletedFilter);
                     onReportChange({ type: 'modify' });
                   }}
