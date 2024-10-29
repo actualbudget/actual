@@ -257,7 +257,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
   const [earliestTransaction, setEarliestTransaction] = useState('');
   const [report, setReport] = useState(loadReport);
   const [savedStatus, setSavedStatus] = useState(
-    initialReport ? 'saved' : 'new',
+    session.savedStatus ?? (initialReport ? 'saved' : 'new'),
   );
 
   useEffect(() => {
@@ -629,10 +629,14 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
   ) => {
     switch (params.type) {
       case 'add-update':
+        sessionStorage.clear();
         setSessionReport('savedStatus', 'saved');
         setSavedStatus('saved');
         setReport(params.savedReport);
-        navigate(`/reports/custom/${params.savedReport.id}`);
+
+        if (params.savedReport.id !== initialReport?.id) {
+          navigate(`/reports/custom/${params.savedReport.id}`);
+        }
         break;
       case 'rename':
         setReport({ ...report, name: params.savedReport?.name || '' });
@@ -655,6 +659,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
         setReportData(defaultReport);
         break;
       case 'choose':
+        sessionStorage.clear();
         const newReport = params.savedReport || report;
         setSessionReport('savedStatus', 'saved');
         setSavedStatus('saved');
