@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { Trans } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
@@ -16,7 +16,7 @@ import { Link } from '../common/Link';
 import { Popover } from '../common/Popover';
 import { View } from '../common/View';
 
-function getErrorMessage(type, code) {
+function getErrorMessage(type: string, code: string) {
   switch (type.toUpperCase()) {
     case 'ITEM_ERROR':
       switch (code.toUpperCase()) {
@@ -81,7 +81,7 @@ export function AccountSyncCheck() {
   const [open, setOpen] = useState(false);
   const triggerRef = useRef(null);
 
-  if (!failedAccounts) {
+  if (!failedAccounts || !id) {
     return null;
   }
 
@@ -91,21 +91,30 @@ export function AccountSyncCheck() {
   }
 
   const account = accounts.find(account => account.id === id);
+  if (!account) {
+    return null;
+  }
+
   const { type, code } = error;
   const showAuth =
     (type === 'ITEM_ERROR' && code === 'ITEM_LOGIN_REQUIRED') ||
     (type === 'INVALID_INPUT' && code === 'INVALID_ACCESS_TOKEN');
 
-  function reauth() {
+  const reauth = useCallback(() => {
     setOpen(false);
 
-    authorizeBank(dispatch, { upgradingAccountId: account.account_id });
-  }
+    if (account?.account_id) {
+      authorizeBank(dispatch, { upgradingAccountId: account.account_id });
+    }
+  }, [dispatch, account?.account_id]);
 
-  async function unlink() {
-    dispatch(unlinkAccount(account.id));
+  const unlink = useCallback(async () => {
+    if (account?.id) {
+      dispatch(unlinkAccount(account.id));
+    }
+
     setOpen(false);
-  }
+  }, [dispatch, account?.id]);
 
   return (
     <View>
