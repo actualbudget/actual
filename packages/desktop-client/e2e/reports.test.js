@@ -30,7 +30,7 @@ test.describe.parallel('Reports', () => {
   test('loads net worth and cash flow reports', async () => {
     const reports = await reportsPage.getAvailableReportList();
 
-    expect(reports).toEqual(['Net Worth', 'Cash Flow']);
+    expect(reports).toEqual(['Net Worth', 'Cash Flow', 'Monthly Spending']);
     await expect(page).toMatchThemeScreenshots();
   });
 
