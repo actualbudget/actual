@@ -283,9 +283,7 @@ export function SchedulesTable({
         <Field width="flex" name="name">
           <Text
             style={
-              schedule.name == null
-                ? { color: theme.buttonNormalDisabledText }
-                : null
+              !schedule.name ? { color: theme.buttonNormalDisabledText } : null
             }
             title={schedule.name ? schedule.name : ''}
           >
