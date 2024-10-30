@@ -204,13 +204,7 @@ function startSyncServer() {
 
   const SYNC_SERVER_WAIT_TIMEOUT = 10000; // wait 10 seconds for the server to start - if it doesn't, throw an error
 
-  const syncServerTimeout = new Promise<void>((_, reject) => {
-    setTimeout(() => {
-      const errorMessage = `Sync server failed to start within ${SYNC_SERVER_WAIT_TIMEOUT / 1000} seconds. Something is wrong. Please raise a github issue.`;
-      console.error(errorMessage);
-      reject(new Error(errorMessage));
-    }, SYNC_SERVER_WAIT_TIMEOUT);
-  });
+  let syncServerStarted = false;
 
   const syncServerPromise = new Promise<void>(async resolve => {
     actualServerProcess = utilityProcess.fork(
@@ -224,6 +218,7 @@ function startSyncServer() {
       const chunkValue = JSON.stringify(chunk.toString('utf8'));
       if (chunkValue.includes('Listening on')) {
         console.info('Actual Sync Server has started!');
+        syncServerStarted = true;
         resolve(); // The server is running - resolve
       }
 
@@ -238,6 +233,17 @@ function startSyncServer() {
     });
   });
 
+  const syncServerTimeout = new Promise<void>((_, reject) => {
+    setTimeout(() => {
+      if (!syncServerStarted) {
+        const errorMessage = `Sync server failed to start within ${SYNC_SERVER_WAIT_TIMEOUT / 1000} seconds. Something is wrong. Please raise a github issue.`;
+        console.error(errorMessage);
+        reject(new Error(errorMessage));
+      }
+    }, SYNC_SERVER_WAIT_TIMEOUT);
+  });
+
+  // This aint working...
   return Promise.race([syncServerPromise, syncServerTimeout]); // Either the server has started or the timeout is reached
 }
 
