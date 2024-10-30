@@ -8,6 +8,7 @@ import { Resizable } from 're-resizable';
 import { closeBudget, replaceModal } from 'loot-core/src/client/actions';
 import * as Platform from 'loot-core/src/client/platform';
 
+import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { useGlobalPref } from '../../hooks/useGlobalPref';
 import { useLocalPref } from '../../hooks/useLocalPref';
 import { useMetadataPref } from '../../hooks/useMetadataPref';
@@ -166,6 +167,9 @@ function EditableBudgetName() {
   const [editing, setEditing] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const triggerRef = useRef(null);
+  const contextMenusEnabled = useFeatureFlag('contextMenus');
+  const [crossOffset, setCrossOffset] = useState(0);
+  const [offset, setOffset] = useState(0);
 
   function onMenuSelect(type: string) {
     setMenuOpen(false);
@@ -218,7 +222,16 @@ function EditableBudgetName() {
   }
 
   return (
-    <>
+    <View
+      onContextMenu={e => {
+        if (!contextMenusEnabled) return;
+        e.preventDefault();
+        const rect = e.currentTarget.getBoundingClientRect();
+        setCrossOffset(e.clientX - rect.left);
+        setOffset(e.clientY - rect.bottom);
+        setMenuOpen(true);
+      }}
+    >
       <Button
         ref={triggerRef}
         variant="bare"
@@ -226,10 +239,14 @@ function EditableBudgetName() {
           color: theme.buttonNormalBorder,
           fontSize: 16,
           fontWeight: 500,
-          marginLeft: -5,
+          margin: 1,
           flex: '0 auto',
         }}
-        onPress={() => setMenuOpen(true)}
+        onPress={() => {
+          setOffset(0);
+          setCrossOffset(0);
+          setMenuOpen(true);
+        }}
       >
         <Text style={{ whiteSpace: 'nowrap', overflow: 'hidden' }}>
           {budgetName || t('A budget has no name')}
@@ -242,9 +259,11 @@ function EditableBudgetName() {
         placement="bottom start"
         isOpen={menuOpen}
         onOpenChange={() => setMenuOpen(false)}
+        crossOffset={crossOffset}
+        offset={offset}
       >
         <Menu onMenuSelect={onMenuSelect} items={items} />
       </Popover>
-    </>
+    </View>
   );
 }
