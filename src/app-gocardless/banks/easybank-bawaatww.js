@@ -10,7 +10,7 @@ export default {
 
   institutionIds: ['EASYBANK_BAWAATWW'],
 
-  accessValidForDays: 180,
+  accessValidForDays: 179,
 
   // If date is same, sort by transactionId
   sortTransactions: (transactions = []) =>
