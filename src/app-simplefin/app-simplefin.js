@@ -48,7 +48,7 @@ app.post(
     }
 
     try {
-      const accounts = await getAccounts(accessKey, null, null, true);
+      const accounts = await getAccounts(accessKey, null, null, null, true);
 
       res.send({
         status: 'ok',
@@ -91,7 +91,11 @@ app.post(
       : startDate;
     let results;
     try {
-      results = await getTransactions(accessKey, new Date(earliestStartDate));
+      results = await getTransactions(
+        accessKey,
+        Array.isArray(accountId) ? accountId : [accountId],
+        new Date(earliestStartDate),
+      );
     } catch (e) {
       if (e.message === 'Forbidden') {
         invalidToken(res);
@@ -293,12 +297,12 @@ async function getAccessKey(base64Token) {
   });
 }
 
-async function getTransactions(accessKey, startDate, endDate) {
+async function getTransactions(accessKey, accounts, startDate, endDate) {
   const now = new Date();
   startDate = startDate || new Date(now.getFullYear(), now.getMonth(), 1);
   endDate = endDate || new Date(now.getFullYear(), now.getMonth() + 1, 1);
   console.log(`${getDate(startDate)} - ${getDate(endDate)}`);
-  return await getAccounts(accessKey, startDate, endDate);
+  return await getAccounts(accessKey, accounts, startDate, endDate);
 }
 
 function getDate(date) {
@@ -311,6 +315,7 @@ function normalizeDate(date) {
 
 async function getAccounts(
   accessKey,
+  accounts,
   startDate,
   endDate,
   noTransactions = false,
@@ -335,6 +340,12 @@ async function getAccounts(
     params.push(`pending=1`);
   } else {
     params.push(`balances-only=1`);
+  }
+
+  if (accounts) {
+    accounts.forEach((id) => {
+      params.push(`account=${encodeURIComponent(id)}`);
+    });
   }
 
   let queryString = '';
