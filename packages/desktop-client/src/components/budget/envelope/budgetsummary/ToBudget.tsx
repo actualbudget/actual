@@ -7,6 +7,7 @@ import React, {
 
 import { envelopeBudget } from 'loot-core/src/client/queries';
 
+import { useFeatureFlag } from '../../../../hooks/useFeatureFlag';
 import { Popover } from '../../../common/Popover';
 import { View } from '../../../common/View';
 import { CoverMenu } from '../CoverMenu';
@@ -16,7 +17,6 @@ import { TransferMenu } from '../TransferMenu';
 
 import { ToBudgetAmount } from './ToBudgetAmount';
 import { ToBudgetMenu } from './ToBudgetMenu';
-import { useFeatureFlag } from '../../../../hooks/useFeatureFlag';
 
 type ToBudgetProps = {
   month: string;
@@ -43,7 +43,7 @@ export function ToBudget({
       if (menu) ref.current?.focus();
       _setMenuOpen(menu);
     },
-    [triggerRef],
+    [ref],
   );
   const sheetValue = useEnvelopeSheetValue({
     name: envelopeBudget.toBudget,
