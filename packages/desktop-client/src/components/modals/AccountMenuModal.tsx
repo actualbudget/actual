@@ -1,12 +1,20 @@
-import React, { type ComponentProps, useRef, useState } from 'react';
+import {
+  type ComponentProps,
+  type CSSProperties,
+  Fragment,
+  useRef,
+  useState,
+} from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { type AccountEntity } from 'loot-core/types/models';
 
 import { useAccount } from '../../hooks/useAccount';
+import { useAccounts } from '../../hooks/useAccounts';
 import { useNotes } from '../../hooks/useNotes';
 import { SvgClose, SvgDotsHorizontalTriple, SvgLockOpen } from '../../icons/v1';
 import { SvgNotesPaper } from '../../icons/v2';
-import { type CSSProperties, styles, theme } from '../../style';
+import { styles, theme } from '../../style';
 import { Button } from '../common/Button2';
 import { Menu } from '../common/Menu';
 import {
@@ -18,6 +26,7 @@ import {
 import { Popover } from '../common/Popover';
 import { View } from '../common/View';
 import { Notes } from '../Notes';
+import { validateAccountName } from '../util/accountValidation';
 
 type AccountMenuModalProps = {
   accountId: string;
@@ -36,19 +45,41 @@ export function AccountMenuModal({
   onEditNotes,
   onClose,
 }: AccountMenuModalProps) {
+  const { t } = useTranslation();
   const account = useAccount(accountId);
+  const accounts = useAccounts();
   const originalNotes = useNotes(`account-${accountId}`);
+  const [accountNameError, setAccountNameError] = useState('');
+  const [currentAccountName, setCurrentAccountName] = useState(
+    account?.name || t('New Account'),
+  );
 
   const onRename = (newName: string) => {
+    newName = newName.trim();
     if (!account) {
       return;
     }
+    if (!newName) {
+      setCurrentAccountName(t('Account'));
+    } else {
+      setCurrentAccountName(newName);
+    }
 
     if (newName !== account.name) {
-      onSave?.({
-        ...account,
-        name: newName,
-      });
+      const renameAccountError = validateAccountName(
+        newName,
+        accountId,
+        accounts,
+      );
+      if (renameAccountError) {
+        setAccountNameError(renameAccountError);
+      } else {
+        setAccountNameError('');
+        onSave?.({
+          ...account,
+          name: newName,
+        });
+      }
     }
   };
 
@@ -93,11 +124,18 @@ export function AccountMenuModal({
               />
             }
             title={
-              <ModalTitle
-                isEditable
-                title={account.name}
-                onTitleUpdate={onRename}
-              />
+              <Fragment>
+                <ModalTitle
+                  isEditable
+                  title={currentAccountName}
+                  onTitleUpdate={onRename}
+                />
+                {accountNameError && (
+                  <View style={{ color: theme.warningText }}>
+                    {accountNameError}
+                  </View>
+                )}
+              </Fragment>
             }
             rightContent={<ModalCloseButton onPress={close} />}
           />

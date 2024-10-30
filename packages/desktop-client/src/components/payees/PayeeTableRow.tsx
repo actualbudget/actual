@@ -1,12 +1,12 @@
 // @ts-strict-ignore
-import { memo } from 'react';
+import { memo, type CSSProperties } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { type PayeeEntity } from 'loot-core/src/types/models';
 
 import { useSelectedDispatch } from '../../hooks/useSelected';
 import { SvgArrowThinRight, SvgBookmark } from '../../icons/v1';
-import { type CSSProperties, theme } from '../../style';
+import { theme } from '../../style';
 import { Text } from '../common/Text';
 import {
   Cell,
@@ -71,10 +71,10 @@ type PayeeTableRowProps = {
   focusedField: string;
   onHover?: (id: PayeeEntity['id']) => void;
   onEdit: (id: PayeeEntity['id'], field: string) => void;
-  onUpdate: (
+  onUpdate: <T extends EditablePayeeFields>(
     id: PayeeEntity['id'],
-    field: EditablePayeeFields,
-    value: unknown,
+    field: T,
+    value: PayeeEntity[T],
   ) => void;
   onViewRules: (id: PayeeEntity['id']) => void;
   onCreateRule: (id: PayeeEntity['id']) => void;

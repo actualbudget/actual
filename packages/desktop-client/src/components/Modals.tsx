@@ -35,6 +35,7 @@ import { EnvelopeBudgetMonthMenuModal } from './modals/EnvelopeBudgetMonthMenuMo
 import { EnvelopeBudgetSummaryModal } from './modals/EnvelopeBudgetSummaryModal';
 import { EnvelopeToBudgetMenuModal } from './modals/EnvelopeToBudgetMenuModal';
 import { FixEncryptionKeyModal } from './modals/FixEncryptionKeyModal';
+import { GoalTemplateModal } from './modals/GoalTemplateModal';
 import { GoCardlessExternalMsgModal } from './modals/GoCardlessExternalMsgModal';
 import { GoCardlessInitialiseModal } from './modals/GoCardlessInitialiseModal';
 import { HoldBufferModal } from './modals/HoldBufferModal';
@@ -51,6 +52,7 @@ import { ImportYNAB5Modal } from './modals/manager/ImportYNAB5Modal';
 import { ManageRulesModal } from './modals/ManageRulesModal';
 import { MergeUnusedPayeesModal } from './modals/MergeUnusedPayeesModal';
 import { NotesModal } from './modals/NotesModal';
+import { OutOfSyncMigrationsModal } from './modals/OutOfSyncMigrationsModal';
 import { PayeeAutocompleteModal } from './modals/PayeeAutocompleteModal';
 import { ScheduledTransactionMenuModal } from './modals/ScheduledTransactionMenuModal';
 import { SelectLinkedAccountsModal } from './modals/SelectLinkedAccountsModal';
@@ -82,6 +84,9 @@ export function Modals() {
   const modals = modalStack
     .map(({ name, options }) => {
       switch (name) {
+        case 'goal-templates':
+          return budgetId ? <GoalTemplateModal key={name} /> : null;
+
         case 'keyboard-shortcuts':
           // don't show the hotkey help modal when a budget is not open
           return budgetId ? <KeyboardShortcutModal key={name} /> : null;
@@ -591,15 +596,8 @@ export function Modals() {
           return <ImportYNAB5Modal key={name} />;
         case 'import-actual':
           return <ImportActualModal key={name} />;
-        case 'manager-load-backup':
-          return (
-            <LoadBackupModal
-              key={name}
-              budgetId={options.budgetId}
-              backupDisabled={true}
-              watchUpdates={false}
-            />
-          );
+        case 'out-of-sync-migrations':
+          return <OutOfSyncMigrationsModal key={name} />;
 
         default:
           throw new Error('Unknown modal');

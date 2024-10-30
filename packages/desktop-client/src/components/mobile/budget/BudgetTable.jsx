@@ -1,8 +1,8 @@
 import React, { memo, useCallback, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 
+import { css } from '@emotion/css';
 import { AutoTextSize } from 'auto-text-size';
-import { css } from 'glamor';
 import memoizeOne from 'memoize-one';
 
 import { collapseModals, pushModal } from 'loot-core/client/actions';
@@ -801,15 +801,13 @@ const ExpenseGroupHeader = memo(function ExpenseGroupHeader({
       >
         <Button
           variant="bare"
-          className={String(
-            css({
-              flexShrink: 0,
-              color: theme.pageTextSubdued,
-              '&[data-pressed]': {
-                backgroundColor: 'transparent',
-              },
-            }),
-          )}
+          className={css({
+            flexShrink: 0,
+            color: theme.pageTextSubdued,
+            '&[data-pressed]': {
+              backgroundColor: 'transparent',
+            },
+          })}
           onPress={() => onToggleCollapse?.(group.id)}
         >
           <SvgExpandArrow
@@ -996,15 +994,13 @@ const IncomeGroupHeader = memo(function IncomeGroupHeader({
       >
         <Button
           variant="bare"
-          className={String(
-            css({
-              flexShrink: 0,
-              color: theme.pageTextSubdued,
-              '&[data-pressed]': {
-                backgroundColor: 'transparent',
-              },
-            }),
-          )}
+          className={css({
+            flexShrink: 0,
+            color: theme.pageTextSubdued,
+            '&[data-pressed]': {
+              backgroundColor: 'transparent',
+            },
+          })}
           onPress={() => onToggleCollapse?.(group.id)}
         >
           <SvgExpandArrow
@@ -1793,7 +1789,7 @@ function BudgetTableHeader({
             }
             type="financial"
           >
-            {({ type, value }) => (
+            {({ type: formatType, value }) => (
               <Button
                 variant="bare"
                 isDisabled={show3Cols}
@@ -1834,7 +1830,7 @@ function BudgetTableHeader({
                           paddingRight: 4,
                         }}
                       >
-                        {format(value, type)}
+                        {format(type === 'report' ? value : -value, formatType)}
                       </AutoTextSize>
                     </PrivacyFilter>
                   </View>
