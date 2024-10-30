@@ -2,8 +2,9 @@
 import { Notification } from '../../client/state-types/notifications';
 import * as db from '../db';
 import { batchMessages } from '../sync';
+import * as monthUtils from '../../shared/months';
 
-import { isReflectBudget } from './actions';
+import { isReflectBudget, getSheetValue, setGoal } from './actions';
 import { categoryTemplate } from './categoryTemplate';
 import { checkTemplates, storeTemplates } from './template-notes';
 
@@ -88,7 +89,7 @@ async function getTemplates(category) {
   }
 }
 
-async function processTemplate(month, force, category_templates, category?) {
+async function processTemplate(month:string, force:boolean, categoryTemplates, category?) {
   // get all categoryIDs that need processed
   //done?
   // setup objects for each category and catch errors
@@ -104,31 +105,53 @@ async function processTemplate(month, force, category_templates, category?) {
   } else {
     categories = category.id;
   }
-  const catObjects = [];
-  let availBudget = 10000;
+  const catObjects: categoryTemplate[] = [];
+  let availBudget = await getSheetValue(
+    monthUtils.sheetForMonth(month),
+    `to-budget`,
+  );
   let priorities = [];
   let remainderWeight = 0;
-  categories.forEach(c => {
-    let obj;
-    //try {
-    obj = new categoryTemplate(category_templates[c], c, month);
-    //} catch (error) {
-    //  console.error(error);
-    //}
-    catObjects.push(obj);
-  });
+  for(let i = 0; i<categories.length; i++){
+    const id = categories[i];
+    const sheetName = monthUtils.sheetForMonth(month);
+    const templates = categoryTemplates[id];
+    //if there is a good way to add these to the class that would be nice,
+    // but the async getSheetValue messes things up
+    const budgeted = await getSheetValue(
+      sheetName,
+      `budget-${id}`,
+    );
+    const fromLastMonth = await getSheetValue(
+      monthUtils.sheetForMonth(monthUtils.subMonths(month,1)),
+      `leftover-${id}`,
+    );
+    //get goalValue 
+    const existingGoal = await getSheetValue(
+      sheetName,
+      `goal-${id}`,
+    );
+
+    // only run categories that are unbudgeted or if we are forcing it
+    if((budgeted === 0 || force) && templates){
+      // get available starting balance figured out by reading originalBudget and toBudget
+      // gather needed priorities
+      // gather remainder weights
+      const obj = new categoryTemplate(templates, id, month, fromLastMonth);
+      availBudget += budgeted;
+      const p = obj.readPriorities();
+      p.forEach(pr => priorities.push(pr));
+      remainderWeight += obj.getRemainderWeight();
+      catObjects.push(obj);
+
+    // do a reset of the goals that are orphaned
+    } else if(existingGoal != null && !templates) {
+      await setGoal({month: month, category: id, goal: null, long_goal: null})
+    }
+  }
 
   // read messages
 
-  // get available starting balance figured out by reading originalBudget and toBudget
-  // gather needed priorities
-  // gather remainder weights
-  catObjects.forEach(o => {
-    availBudget += o.getOriginalBudget();
-    const p = o.readPriorities();
-    p.forEach(pr => priorities.push(pr));
-    remainderWeight += o.getRemainderWeight();
-  });
 
   //compress to needed, sorted priorities
   priorities = priorities
@@ -143,19 +166,27 @@ async function processTemplate(month, force, category_templates, category?) {
       const ret = await catObjects[i].runTemplatesForPriority(
         priorities[pi],
         availBudget,
-        force,
       );
       availBudget -= ret;
+      if(availBudget<=0){
+        break;
+      }
+    }
+    if(availBudget<=0){
+      break;
     }
   }
   // run limits
   catObjects.forEach(o => {
-    o.applyLimit();
+    availBudget += o.applyLimit();
   });
   // run remainder
-  catObjects.forEach(o => {
-    o.runRemainder();
-  });
+  if(availBudget>0){
+    const perWeight = availBudget/remainderWeight;
+    catObjects.forEach(o => {
+      availBudget -= o.runRemainder(availBudget, perWeight);
+    });
+  }
   // finish
   catObjects.forEach(o => {
     o.runFinish();
