@@ -4,9 +4,9 @@ import * as monthUtils from '../../shared/months';
 import { amountToInteger } from '../../shared/util';
 import * as db from '../db';
 
-import { getSheetValue, isReflectBudget, setBudget, setGoal } from './actions';
+import { getSheetValue, setBudget, setGoal } from './actions';
 import { getActiveSchedules } from './statements';
-import { Template } from './types/templates';
+//import { Template } from './types/templates';
 
 export class categoryTemplate {
   /*----------------------------------------------------------------------------
@@ -33,11 +33,6 @@ export class categoryTemplate {
     return this.remainderWeight;
   }
 
-  // return the current budgeted amount in the category
-  getOriginalBudget(): number {
-    return this.originalBudget;
-  }
-
   // returns a list of priority levels in this category
   readPriorities(): number[] {
     return this.priorities;
@@ -49,10 +44,10 @@ export class categoryTemplate {
   }
 
   // what is the full requested amount this month
-  runAll(force: boolean, available: number) {
+  runAll(available: number) {
     let toBudget: number = 0;
     this.priorities.forEach(async p => {
-      toBudget += await this.runTemplatesForPriority(p, available, force);
+      toBudget += await this.runTemplatesForPriority(p, available);
     });
     //TODO does this need to run limits?
     return toBudget;
@@ -60,11 +55,9 @@ export class categoryTemplate {
 
   // run all templates in a given priority level
   // return: amount budgeted in this priority level
-  async runTemplatesForPriority(
-    priority: number,
-    budgetAvail: number,
-    force: boolean,
-  ) {
+  async runTemplatesForPriority(priority: number, budgetAvail: number) {
+    if (!this.priorities.includes(priority)) return 0;
+
     const t = this.templates.filter(t => t.priority === priority);
     let available = budgetAvail || 0;
     let toBudget = 0;
@@ -107,13 +100,12 @@ export class categoryTemplate {
       }
 
       // don't overbudget when using a priority
-      //TODO fix the usage of force here.  Its wrong
-      if (priority > 0 && force === false && toBudget > available) {
+      if (priority > 0 && toBudget > available) {
         toBudget = available;
       }
       available = available - toBudget;
 
-      if (available <= 0 && force === false) {
+      if (priority > 0 && available <= 0) {
         break;
       }
     }
@@ -122,19 +114,20 @@ export class categoryTemplate {
     return toBudget;
   }
 
-  applyLimit() {
+  applyLimit(): number {
     if (this.limitCheck === false) {
-      this.toBudgetAmount = this.targetAmount;
-      return;
+      return 0;
     }
     if (this.limitHold && this.fromLastMonth >= this.limitAmount) {
+      const orig = this.toBudgetAmount;
       this.toBudgetAmount = 0;
-      return;
+      return orig;
     }
-    if (this.targetAmount > this.limitAmount) {
+    if (this.toBudgetAmount + this.fromLastMonth > this.limitAmount) {
+      const orig = this.toBudgetAmount;
       this.toBudgetAmount = this.limitAmount - this.fromLastMonth;
+      return orig - this.toBudgetAmount;
     }
-    //TODO return the value removed by the limits
   }
 
   // run all of the 'remainder' type templates
@@ -166,25 +159,28 @@ export class categoryTemplate {
   private goals = [];
   private priorities: number[] = [];
   private remainderWeight: number = 0;
-  private originalBudget: number = 0;
   private toBudgetAmount: number = null; // amount that will be budgeted by the templates
-  private targetAmount: number = null;
   private isLongGoal: boolean = null; //defaulting the goals to null so templates can be unset
   private goalAmount: number = null;
-  private spentThisMonth = 0; // amount already spend this month
   private fromLastMonth = 0; // leftover from last month
   private limitAmount = null;
   private limitCheck = false;
   private limitHold = false;
   private msgs: string[];
 
-  constructor(templates, categoryID: string, month: string) {
+  constructor(
+    templates,
+    categoryID: string,
+    month: string,
+    fromLastMonth: number,
+  ) {
     this.categoryID = categoryID;
     this.month = month;
+    this.fromLastMonth = fromLastMonth;
     // sort the template lines into regular template, goals, and remainder templates
     if (templates) {
       templates.forEach(t => {
-        if (t.directive === 'template' && t.type != 'remainder') {
+        if (t.directive === 'template' && t.type !== 'remainder') {
           this.templates.push(t);
         }
       });
@@ -203,11 +199,6 @@ export class categoryTemplate {
     this.findPriorities();
     //find remainder weight
     this.findRemainderWeightSum();
-    //get the starting budget amount
-    this.readBudgeted();
-    //get the from last month amount
-    this.readSpent();
-    this.getFromLastMonth();
   }
 
   private findPriorities() {
@@ -233,7 +224,7 @@ export class categoryTemplate {
     this.remainderWeight = weight;
   }
 
-  private checkTemplates() {
+  private async checkTemplates() {
     //run all the individual checks
     this.checkByAndSchedule();
     this.checkPercentage();
@@ -262,13 +253,6 @@ export class categoryTemplate {
     });
   }
 
-  private async readBudgeted() {
-    this.originalBudget = await getSheetValue(
-      monthUtils.sheetForMonth(this.month),
-      `budget-${this.categoryID}`,
-    );
-  }
-
   private setGoal() {
     setGoal({
       category: this.categoryID,
@@ -276,14 +260,6 @@ export class categoryTemplate {
       month: this.month,
       long_goal: this.isLongGoal ? 1 : 0,
     });
-  }
-
-  private async readSpent() {
-    const sheetName = monthUtils.sheetForMonth(this.month);
-    this.spentThisMonth = await getSheetValue(
-      sheetName,
-      `sum-amount-${this.categoryID}`,
-    );
   }
 
   private async getFromLastMonth() {
@@ -306,7 +282,7 @@ export class categoryTemplate {
       .filter(t => t.type === 'schedule')
       .forEach(t => {
         if (!scheduleNames.includes(t.name.trim())) {
-          throw new Error(`Schedule "${t.name.trim()}" does not exist`);
+          throw new Error(`Schedule ${t.name.trim()} does not exist`);
         }
       });
     //find lowest priority
@@ -322,7 +298,7 @@ export class categoryTemplate {
     this.templates
       .filter(t => t.type === 'schedule' || t.type === 'by')
       .forEach(t => {
-        if (t.priority != lowestPriority) {
+        if (t.priority !== lowestPriority) {
           t.priority = lowestPriority;
           this.msgs.push(
             `Changed the priority of BY and SCHEDULE templates to be ${lowestPriority}`,
@@ -338,8 +314,7 @@ export class categoryTemplate {
       const t = this.templates[i];
       if (this.limitCheck) {
         throw new Error('Only one `up to` allowed per category');
-        break;
-      } else if (t.limit != null) {
+      } else if (t.limit) {
         this.limitCheck = true;
         this.limitHold = t.limit.hold ? true : false;
         this.limitAmount = amountToInteger(t.limit.amount);
@@ -386,7 +361,7 @@ export class categoryTemplate {
 
   private async runCopy(template) {
     const sheetName = monthUtils.sheetForMonth(
-      monthUtils.subMonths(this.month, template.lookback),
+      monthUtils.subMonths(this.month, template.lookBack),
     );
     return await getSheetValue(sheetName, `budget-${this.categoryID}`);
   }
@@ -456,7 +431,7 @@ export class categoryTemplate {
     const cat = template.category.toLowerCase();
     const prev = template.previous;
     let sheetName;
-    let monthlyIncome = 0;
+    let monthlyIncome = 1;
 
     //choose the sheet to find income for
     if (prev) {
@@ -474,7 +449,7 @@ export class categoryTemplate {
       );
       monthlyIncome = await getSheetValue(
         sheetName,
-        `sum_amount-${incomeCat.id}`,
+        `sum-amount-${incomeCat.id}`,
       );
     }
 

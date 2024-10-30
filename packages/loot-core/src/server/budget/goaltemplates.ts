@@ -1,46 +1,40 @@
 // @ts-strict-ignore
 import { Notification } from '../../client/state-types/notifications';
+import * as monthUtils from '../../shared/months';
 import * as db from '../db';
 import { batchMessages } from '../sync';
 
-import { isReflectBudget } from './actions';
+import { isReflectBudget, getSheetValue, setGoal } from './actions';
 import { categoryTemplate } from './categoryTemplate';
 import { checkTemplates, storeTemplates } from './template-notes';
 
 export async function applyTemplate({ month }) {
-  //await storeTemplates();
-  //const category_templates = await getTemplates(null, 'template');
-  //const category_goals = await getTemplates(null, 'goal');
-  //const ret = await processTemplate(month, false, category_templates);
-  //await processGoals(category_goals, month);
-  //return ret;
-  return overwriteTemplate({ month });
+  await storeTemplates();
+  const category_templates = await getTemplates(null);
+  const ret = await processTemplate(month, false, category_templates, null);
+  return ret;
 }
 
 export async function overwriteTemplate({ month }) {
   await storeTemplates();
   const category_templates = await getTemplates(null);
-  const ret = await processTemplate(month, true, category_templates);
-  //await processGoals(category_goals, month);
+  const ret = await processTemplate(month, true, category_templates, null);
   return ret;
 }
 
 export async function applySingleCategoryTemplate({ month, category }) {
-  //const categories = await db.all(`SELECT * FROM v_categories WHERE id = ?`, [
-  //  category,
-  //]);
-  //await storeTemplates();
-  //const category_templates = await getTemplates(categories[0], 'template');
-  //const category_goals = await getTemplates(categories[0], 'goal');
-  //const ret = await processTemplate(
-  //  month,
-  //  true,
-  //  category_templates,
-  //  categories[0],
-  //);
-  //await processGoals(category_goals, month, categories[0]);
-  //return ret;
-  return overwriteTemplate({ month });
+  const categories = await db.all(`SELECT * FROM v_categories WHERE id = ?`, [
+    category,
+  ]);
+  await storeTemplates();
+  const category_templates = await getTemplates(categories[0]);
+  const ret = await processTemplate(
+    month,
+    true,
+    category_templates,
+    categories,
+  );
+  return ret;
 }
 
 export function runCheckTemplates() {
@@ -69,12 +63,9 @@ async function getTemplates(category) {
     templates[goal_def[ll].id] = JSON.parse(goal_def[ll].goal_def);
   }
   if (category) {
-    const singleCategoryTemplate = [];
-    if (templates[category.id] !== undefined) {
-      return singleCategoryTemplate;
-    }
-    singleCategoryTemplate[category.id] = undefined;
-    return singleCategoryTemplate;
+    const ret = [];
+    ret[category.id] = templates[category.id];
+    return ret;
   } else {
     const categories = await getCategories();
     const ret = [];
@@ -88,47 +79,72 @@ async function getTemplates(category) {
   }
 }
 
-async function processTemplate(month, force, category_templates, category?) {
+async function processTemplate(
+  month,
+  force: boolean,
+  categoryTemplates,
+  categoriesIn?: any[],
+) {
   // get all categoryIDs that need processed
   //done?
   // setup objects for each category and catch errors
   let categories = [];
-  if (!category) {
+  if (!categoriesIn) {
     const isReflect = isReflectBudget();
     const categories_long = await getCategories();
     categories_long.forEach(c => {
       if (!isReflect && !c.is_income) {
-        categories.push(c.id);
+        categories.push(c);
       }
     });
   } else {
-    categories = category.id;
+    categories = categoriesIn;
   }
-  const catObjects = [];
-  let availBudget = 10000;
+  const catObjects: categoryTemplate[] = [];
+  let availBudget = await getSheetValue(
+    monthUtils.sheetForMonth(month),
+    `to-budget`,
+  );
   let priorities = [];
   let remainderWeight = 0;
-  categories.forEach(c => {
-    let obj;
-    //try {
-    obj = new categoryTemplate(category_templates[c], c, month);
-    //} catch (error) {
-    //  console.error(error);
-    //}
-    catObjects.push(obj);
-  });
+  for (let i = 0; i < categories.length; i++) {
+    const id = categories[i].id;
+    const sheetName = monthUtils.sheetForMonth(month);
+    const templates = categoryTemplates[id];
+    //if there is a good way to add these to the class that would be nice,
+    // but the async getSheetValue messes things up
+    // only the fromLastMonth value is needed inside the class but it
+    // would be nice to have everything wrapped up as much as possible
+    const budgeted = await getSheetValue(sheetName, `budget-${id}`);
+    const fromLastMonth = await getSheetValue(
+      monthUtils.sheetForMonth(monthUtils.subMonths(month, 1)),
+      `leftover-${id}`,
+    );
+    const existingGoal = await getSheetValue(sheetName, `goal-${id}`);
+
+    // only run categories that are unbudgeted or if we are forcing it
+    if ((budgeted === 0 || force) && templates) {
+      // add to available budget
+      // gather needed priorities
+      // gather remainder weights
+      try {
+        const obj = new categoryTemplate(templates, id, month, fromLastMonth);
+        availBudget += budgeted;
+        const p = obj.readPriorities();
+        p.forEach(pr => priorities.push(pr));
+        remainderWeight += obj.getRemainderWeight();
+        catObjects.push(obj);
+      } catch (e) {
+        console.log(`Got error in ${categories[i].name}: ${e}`);
+      }
+
+      // do a reset of the goals that are orphaned
+    } else if (existingGoal != null && !templates) {
+      await setGoal({ month, category: id, goal: null, long_goal: null });
+    }
+  }
 
   // read messages
-
-  // get available starting balance figured out by reading originalBudget and toBudget
-  // gather needed priorities
-  // gather remainder weights
-  catObjects.forEach(o => {
-    availBudget += o.getOriginalBudget();
-    const p = o.readPriorities();
-    p.forEach(pr => priorities.push(pr));
-    remainderWeight += o.getRemainderWeight();
-  });
 
   //compress to needed, sorted priorities
   priorities = priorities
@@ -143,19 +159,27 @@ async function processTemplate(month, force, category_templates, category?) {
       const ret = await catObjects[i].runTemplatesForPriority(
         priorities[pi],
         availBudget,
-        force,
       );
       availBudget -= ret;
+      if (availBudget <= 0) {
+        break;
+      }
+    }
+    if (availBudget <= 0) {
+      break;
     }
   }
   // run limits
   catObjects.forEach(o => {
-    o.applyLimit();
+    availBudget += o.applyLimit();
   });
   // run remainder
-  catObjects.forEach(o => {
-    o.runRemainder();
-  });
+  if (availBudget > 0 && remainderWeight) {
+    const perWeight = availBudget / remainderWeight;
+    catObjects.forEach(o => {
+      availBudget -= o.runRemainder(availBudget, perWeight);
+    });
+  }
   // finish
   catObjects.forEach(o => {
     o.runFinish();
