@@ -217,9 +217,10 @@ function startSyncServer() {
       // Send the Server console.log messages to the main browser window
       const chunkValue = JSON.stringify(chunk.toString('utf8'));
       if (chunkValue.includes('Listening on')) {
+        // can we send a signal from the server instead of doing this?
         console.info('Actual Sync Server has started!');
         syncServerStarted = true;
-        resolve(); // The server is running - resolve
+        resolve();
       }
 
       clientWin?.webContents.executeJavaScript(`
