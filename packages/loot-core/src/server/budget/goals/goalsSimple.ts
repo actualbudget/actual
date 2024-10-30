@@ -1,10 +1,7 @@
 // @ts-strict-ignore
 import { amountToInteger } from '../../../shared/util';
 
-export async function goalsSimple(
-  template,
-  limit,
-) {
+export async function goalsSimple(template, limit) {
   // simple has 'monthly' and/or 'limit' params
   let increment = 0;
   if (template.monthly != null) {
@@ -13,6 +10,5 @@ export async function goalsSimple(
   } else {
     increment = limit;
   }
-  to_budget += increment;
-  return { to_budget };
+  return { increment };
 }
