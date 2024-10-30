@@ -84,7 +84,7 @@ export class categoryTemplate {
           break;
         }
         case 'spend': {
-          toBudget + -this.runSpend(t[i]);
+          toBudget += await this.runSpend(t[i]);
           break;
         }
         case 'percentage': {
