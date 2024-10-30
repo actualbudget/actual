@@ -1,4 +1,9 @@
-import React, { useRef, useState, type CSSProperties } from 'react';
+import React, {
+  useRef,
+  useState,
+  type CSSProperties,
+  useCallback,
+} from 'react';
 
 import { envelopeBudget } from 'loot-core/src/client/queries';
 
@@ -11,6 +16,7 @@ import { TransferMenu } from '../TransferMenu';
 
 import { ToBudgetAmount } from './ToBudgetAmount';
 import { ToBudgetMenu } from './ToBudgetMenu';
+import { useFeatureFlag } from '../../../../hooks/useFeatureFlag';
 
 type ToBudgetProps = {
   month: string;
@@ -28,8 +34,17 @@ export function ToBudget({
   amountStyle,
   isCollapsed = false,
 }: ToBudgetProps) {
-  const [menuOpen, setMenuOpen] = useState<string | null>(null);
+  const [menuOpen, _setMenuOpen] = useState<string | null>(null);
   const triggerRef = useRef(null);
+
+  const ref = useRef<HTMLSpanElement>(null);
+  const setMenuOpen = useCallback(
+    (menu: string | null) => {
+      if (menu) ref.current?.focus();
+      _setMenuOpen(menu);
+    },
+    [triggerRef],
+  );
   const sheetValue = useEnvelopeSheetValue({
     name: envelopeBudget.toBudget,
     value: 0,
@@ -41,6 +56,7 @@ export function ToBudget({
     );
   }
   const isMenuOpen = Boolean(menuOpen);
+  const contextMenusEnabled = useFeatureFlag('contextMenus');
 
   return (
     <>
@@ -51,6 +67,11 @@ export function ToBudget({
           style={style}
           amountStyle={amountStyle}
           isTotalsListTooltipDisabled={!isCollapsed || isMenuOpen}
+          onContextMenu={e => {
+            if (!contextMenusEnabled) return;
+            e.preventDefault();
+            setMenuOpen('actions');
+          }}
         />
       </View>
 
@@ -62,48 +83,50 @@ export function ToBudget({
         style={{ width: 200 }}
         isNonModal
       >
-        {menuOpen === 'actions' && (
-          <ToBudgetMenu
-            onTransfer={() => setMenuOpen('transfer')}
-            onCover={() => setMenuOpen('cover')}
-            onHoldBuffer={() => setMenuOpen('buffer')}
-            onResetHoldBuffer={() => {
-              onBudgetAction(month, 'reset-hold');
-              setMenuOpen(null);
-            }}
-          />
-        )}
-        {menuOpen === 'buffer' && (
-          <HoldMenu
-            onClose={() => setMenuOpen(null)}
-            onSubmit={amount => {
-              onBudgetAction(month, 'hold', { amount });
-            }}
-          />
-        )}
-        {menuOpen === 'transfer' && (
-          <TransferMenu
-            initialAmount={availableValue ?? undefined}
-            onClose={() => setMenuOpen(null)}
-            onSubmit={(amount, categoryId) => {
-              onBudgetAction(month, 'transfer-available', {
-                amount,
-                category: categoryId,
-              });
-            }}
-          />
-        )}
-        {menuOpen === 'cover' && (
-          <CoverMenu
-            showToBeBudgeted={false}
-            onClose={() => setMenuOpen(null)}
-            onSubmit={categoryId => {
-              onBudgetAction(month, 'cover-overbudgeted', {
-                category: categoryId,
-              });
-            }}
-          />
-        )}
+        <span tabIndex={-1} ref={ref}>
+          {menuOpen === 'actions' && (
+            <ToBudgetMenu
+              onTransfer={() => setMenuOpen('transfer')}
+              onCover={() => setMenuOpen('cover')}
+              onHoldBuffer={() => setMenuOpen('buffer')}
+              onResetHoldBuffer={() => {
+                onBudgetAction(month, 'reset-hold');
+                setMenuOpen(null);
+              }}
+            />
+          )}
+          {menuOpen === 'buffer' && (
+            <HoldMenu
+              onClose={() => setMenuOpen(null)}
+              onSubmit={amount => {
+                onBudgetAction(month, 'hold', { amount });
+              }}
+            />
+          )}
+          {menuOpen === 'transfer' && (
+            <TransferMenu
+              initialAmount={availableValue ?? undefined}
+              onClose={() => setMenuOpen(null)}
+              onSubmit={(amount, categoryId) => {
+                onBudgetAction(month, 'transfer-available', {
+                  amount,
+                  category: categoryId,
+                });
+              }}
+            />
+          )}
+          {menuOpen === 'cover' && (
+            <CoverMenu
+              showToBeBudgeted={false}
+              onClose={() => setMenuOpen(null)}
+              onSubmit={categoryId => {
+                onBudgetAction(month, 'cover-overbudgeted', {
+                  category: categoryId,
+                });
+              }}
+            />
+          )}
+        </span>
       </Popover>
     </>
   );

@@ -1,10 +1,9 @@
-import React, { type CSSProperties } from 'react';
+import React, { type CSSProperties, type MouseEventHandler } from 'react';
 
 import { css } from '@emotion/css';
 
 import { envelopeBudget } from 'loot-core/src/client/queries';
 
-import { useFeatureFlag } from '../../../../hooks/useFeatureFlag';
 import { theme, styles } from '../../../../style';
 import { Block } from '../../../common/Block';
 import { Tooltip } from '../../../common/Tooltip';
@@ -23,6 +22,7 @@ type ToBudgetAmountProps = {
   style?: CSSProperties;
   amountStyle?: CSSProperties;
   onClick: () => void;
+  onContextMenu?: MouseEventHandler;
   isTotalsListTooltipDisabled?: boolean;
 };
 
@@ -32,6 +32,7 @@ export function ToBudgetAmount({
   amountStyle,
   onClick,
   isTotalsListTooltipDisabled = false,
+  onContextMenu,
 }: ToBudgetAmountProps) {
   const sheetName = useEnvelopeSheetName(envelopeBudget.toBudget);
   const sheetValue = useEnvelopeSheetValue({
@@ -47,7 +48,6 @@ export function ToBudgetAmount({
   }
   const num = availableValue ?? 0;
   const isNegative = num < 0;
-  const contextMenusEnabled = useFeatureFlag('contextMenus');
 
   return (
     <View style={{ alignItems: 'center', ...style }}>
@@ -73,11 +73,7 @@ export function ToBudgetAmount({
           >
             <Block
               onClick={onClick}
-              onContextMenu={e => {
-                if (!contextMenusEnabled) return;
-                e.preventDefault();
-                onClick();
-              }}
+              onContextMenu={onContextMenu}
               data-cellname={sheetName}
               className={css([
                 styles.veryLargeText,
