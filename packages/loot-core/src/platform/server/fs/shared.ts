@@ -1,4 +1,6 @@
 // @ts-strict-ignore
+import { t } from 'i18next';
+
 import { join } from './path-join';
 
 let documentDir;
@@ -6,14 +8,14 @@ export const _setDocumentDir = dir => (documentDir = dir);
 
 export const getDocumentDir = () => {
   if (!documentDir) {
-    throw new Error('Document directory is not set');
+    throw new Error(t('Document directory is not set'));
   }
   return documentDir;
 };
 
 export const getBudgetDir = id => {
   if (!id) {
-    throw new Error('getDocumentDir: id is falsy: ' + id);
+    throw new Error(t('getDocumentDir: id is falsy: {{id}}', { id }));
   }
 
   // TODO: This should be better
@@ -25,7 +27,10 @@ export const getBudgetDir = id => {
   // never allowing slashes.
   if (id.match(/[^A-Za-z0-9\-_]/)) {
     throw new Error(
-      `Invalid budget id “${id}”. Check the id of your budget in the Advanced section of the settings page.`,
+      t(
+        'Invalid budget id “{{id}}”. Check the id of your budget in the Advanced section of the settings page.',
+        { id },
+      ),
     );
   }
 

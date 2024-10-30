@@ -1,4 +1,6 @@
 // @ts-strict-ignore
+import { t } from 'i18next';
+
 import * as db from '../db';
 
 import { compileQuery, defaultConstructQuery } from './compiler';
@@ -47,7 +49,7 @@ export async function runCompiledQuery(
   const paramArray = state.namedParameters.map(param => {
     const name = param.paramName;
     if (params[name] === undefined) {
-      throw new Error(`Parameter ${name} not provided to query`);
+      throw new Error(t('Parameter {name} not provided to query', { name }));
     }
     return convertInputType(params[name], param.paramType);
   });

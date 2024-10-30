@@ -1,6 +1,7 @@
 // @ts-strict-ignore
 import { SQLiteFS } from 'absurd-sql';
 import IndexedDBBackend from 'absurd-sql/dist/indexeddb-backend';
+import { t } from 'i18next';
 
 import * as connection from '../connection';
 import * as idb from '../indexeddb';
@@ -77,7 +78,7 @@ async function _readFile(filepath, opts?: { encoding?: string }) {
     !filepath.endsWith('.sqlite')
   ) {
     if (!_exists(filepath)) {
-      throw new Error('File does not exist: ' + filepath);
+      throw new Error(t('File does not exist:') + ' ' + filepath);
     }
 
     // Grab contents from IDB
@@ -85,7 +86,7 @@ async function _readFile(filepath, opts?: { encoding?: string }) {
     const item = await idb.get(store, filepath);
 
     if (item == null) {
-      throw new Error('File does not exist: ' + filepath);
+      throw new Error(t('File does not exist:') + ' ' + filepath);
     }
 
     if (opts.encoding === 'utf8' && ArrayBuffer.isView(item.contents)) {
@@ -315,6 +316,6 @@ export const removeDirRecursively = async function (dirpath) {
 
 export const getModifiedTime = async function () {
   throw new Error(
-    'getModifiedTime not supported on the web (only used for backups)',
+    t('getModifiedTime not supported on the web (only used for backups)'),
   );
 };

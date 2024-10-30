@@ -1,4 +1,6 @@
 // @ts-strict-ignore
+import { t } from 'i18next';
+
 type Division = {
   category?: string;
   subcategory?: string;
@@ -35,7 +37,9 @@ export function qif2json(qif, options: { dateFormat?: string } = {}) {
   let transaction: QIFTransaction = {};
 
   if (!type || !type.length) {
-    throw new Error('File does not appear to be a valid qif file: ' + line);
+    throw new Error(
+      t('File does not appear to be a valid QIF file: {{line}}', { line }),
+    );
   }
   data.type = type[1];
 
@@ -96,11 +100,10 @@ export function qif2json(qif, options: { dateFormat?: string } = {}) {
         }
         transaction.division.push(division);
         division = {};
-
         break;
 
       default:
-        throw new Error('Unknown Detail Code: ' + line[0]);
+        throw new Error(t('Unknown Detail Code: {{code}}', { code: line[0] }));
     }
   }
 

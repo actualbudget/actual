@@ -11,6 +11,7 @@ import React, {
   useEffect,
 } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
+import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 
 import { css } from '@emotion/css';
@@ -176,6 +177,7 @@ const TransactionHeader = memo(
     field,
   }) => {
     const dispatchSelected = useSelectedDispatch();
+    const { t } = useTranslation();
 
     useHotkeys(
       'ctrl+a, cmd+a, meta+a',
@@ -214,7 +216,7 @@ const TransactionHeader = memo(
           }
         />
         <HeaderCell
-          value="Date"
+          value={t('Date')}
           width={110}
           alignItems="flex"
           marginLeft={-5}
@@ -226,7 +228,7 @@ const TransactionHeader = memo(
         />
         {showAccount && (
           <HeaderCell
-            value="Account"
+            value={t('Account')}
             width="flex"
             alignItems="flex"
             marginLeft={-5}
@@ -238,7 +240,7 @@ const TransactionHeader = memo(
           />
         )}
         <HeaderCell
-          value="Payee"
+          value={t('Payee')}
           width="flex"
           alignItems="flex"
           marginLeft={-5}
@@ -249,7 +251,7 @@ const TransactionHeader = memo(
           }
         />
         <HeaderCell
-          value="Notes"
+          value={t('Notes')}
           width="flex"
           alignItems="flex"
           marginLeft={-5}
@@ -261,7 +263,7 @@ const TransactionHeader = memo(
         />
         {showCategory && (
           <HeaderCell
-            value="Category"
+            value={t('Category')}
             width="flex"
             alignItems="flex"
             marginLeft={-5}
@@ -276,7 +278,7 @@ const TransactionHeader = memo(
           />
         )}
         <HeaderCell
-          value="Payment"
+          value={t('Payment')}
           width={100}
           alignItems="flex-end"
           marginRight={-5}
@@ -287,7 +289,7 @@ const TransactionHeader = memo(
           }
         />
         <HeaderCell
-          value="Deposit"
+          value={t('Deposit')}
           width={100}
           alignItems="flex-end"
           marginRight={-5}
@@ -299,7 +301,7 @@ const TransactionHeader = memo(
         />
         {showBalance && (
           <HeaderCell
-            value="Balance"
+            value={t('Balance')}
             width={103}
             alignItems="flex-end"
             marginRight={-5}
