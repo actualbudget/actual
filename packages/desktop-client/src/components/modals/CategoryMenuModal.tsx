@@ -1,6 +1,8 @@
 // @ts-strict-ignore
 import React, { useRef, useState, type CSSProperties } from 'react';
 
+import { t } from 'i18next';
+
 import { type CategoryEntity } from 'loot-core/src/types/models';
 
 import { useCategory } from '../../hooks/useCategory';
@@ -173,7 +175,7 @@ function AdditionalCategoryMenu({
       <Button
         ref={triggerRef}
         variant="bare"
-        aria-label="Menu"
+        aria-label={t('Menu')}
         onPress={() => {
           setMenuOpen(true);
         }}

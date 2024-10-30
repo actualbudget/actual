@@ -17,6 +17,7 @@ import { useHotkeysContext } from 'react-hotkeys-hook';
 
 import { css } from '@emotion/css';
 import { AutoTextSize } from 'auto-text-size';
+import { t } from 'i18next';
 
 import { useModalState } from '../../hooks/useModalState';
 import { AnimatedLoading } from '../../icons/AnimatedLoading';
@@ -90,7 +91,7 @@ export const Modal = ({
       <ReactAriaModal>
         {modalProps => (
           <Dialog
-            aria-label="Modal dialog"
+            aria-label={t('Modal dialog')}
             className={css(styles.lightScrollbar)}
             style={{
               outline: 'none', // remove focus outline
@@ -319,7 +320,7 @@ export function ModalHeader({
         >
           {showLogo && (
             <SvgLogo
-              aria-label="Modal logo"
+              aria-label={t('Modal logo')}
               width={30}
               height={30}
               style={{ justifyContent: 'center', alignSelf: 'center' }}
@@ -462,7 +463,7 @@ export function ModalCloseButton({ onPress, style }: ModalCloseButtonProps) {
       variant="bare"
       onPress={onPress}
       style={{ padding: '10px 10px' }}
-      aria-label="Close"
+      aria-label={t('Close')}
     >
       <SvgDelete width={10} style={style} />
     </Button>

@@ -43,8 +43,7 @@ export function UpdateNotification() {
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
           <View style={{ marginRight: 10, fontWeight: 700 }}>
             <Text>
-              {t('App updated to ')}
-              {updateInfo.version}
+              {t('App updated to {{version}}', { version: updateInfo.version })}
             </Text>
           </View>
           <View style={{ flex: 1 }} />
@@ -78,7 +77,7 @@ export function UpdateNotification() {
               )
               <Button
                 variant="bare"
-                aria-label="Close"
+                aria-label={t('Close')}
                 style={{ display: 'inline', padding: '1px 7px 2px 7px' }}
                 onPress={() => {
                   // Set a flag to never show an update notification again for this session

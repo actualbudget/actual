@@ -9,6 +9,7 @@ import React, {
 import { useDispatch, useSelector } from 'react-redux';
 
 import { css } from '@emotion/css';
+import { t } from 'i18next';
 
 import { removeNotification } from 'loot-core/client/actions';
 import { type State } from 'loot-core/src/client/state-types';
@@ -231,7 +232,7 @@ function Notification({
         </Stack>
         <Button
           variant="bare"
-          aria-label="Close"
+          aria-label={t('Close')}
           style={{ flexShrink: 0, color: 'currentColor' }}
           onPress={onRemove}
         >
