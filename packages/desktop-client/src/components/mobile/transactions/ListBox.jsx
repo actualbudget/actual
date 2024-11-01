@@ -2,8 +2,7 @@ import React, { useRef } from 'react';
 import { useListBox } from 'react-aria';
 import { useListState } from 'react-stately';
 
-import { usePrevious } from '../../../hooks/usePrevious';
-import { useScroll } from '../../ScrollProvider';
+import { useScrollEffect } from '../../ScrollProvider';
 
 import { ListBoxSection } from './ListBoxSection';
 
@@ -13,13 +12,12 @@ export function ListBox(props) {
   const { listBoxProps, labelProps } = useListBox(props, state, listBoxRef);
   const { loadMore } = props;
 
-  const { hasScrolledToBottom } = useScroll();
-  const scrolledToBottom = hasScrolledToBottom(5);
-  const prevScrolledToBottom = usePrevious(scrolledToBottom);
-
-  if (!prevScrolledToBottom && scrolledToBottom) {
-    loadMore?.();
-  }
+  useScrollEffect(({ hasScrolledToEnd }) => {
+    const scrolledToBottom = hasScrolledToEnd('down', 5);
+    if (scrolledToBottom) {
+      loadMore?.();
+    }
+  });
 
   return (
     <>

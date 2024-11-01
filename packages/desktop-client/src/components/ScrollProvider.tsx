@@ -2,17 +2,28 @@ import React, {
   type ReactNode,
   type RefObject,
   createContext,
-  useState,
   useContext,
   useEffect,
   useCallback,
+  useRef,
 } from 'react';
 
 import debounce from 'debounce';
 
+type ScrollDirection = 'up' | 'down' | 'left' | 'right';
+
+type ScrollListenerArgs = {
+  scrollX: number;
+  scrollY: number;
+  isScrolling: (direction: ScrollDirection) => boolean;
+  hasScrolledToEnd: (direction: ScrollDirection, tolerance?: number) => boolean;
+};
+
+type ScrollListener = (values: ScrollListenerArgs) => void;
+
 type IScrollContext = {
-  scrollY: number | undefined;
-  hasScrolledToBottom: (tolerance?: number) => boolean;
+  registerListener: (listener: ScrollListener) => void;
+  unregisterListener: (listener: ScrollListener) => void;
 };
 
 const ScrollContext = createContext<IScrollContext | undefined>(undefined);
@@ -28,23 +39,99 @@ export function ScrollProvider<T extends Element>({
   isDisabled,
   children,
 }: ScrollProviderProps<T>) {
-  const [scrollY, setScrollY] = useState<number | undefined>(undefined);
-  const [scrollHeight, setScrollHeight] = useState<number | undefined>(
-    undefined,
-  );
-  const [clientHeight, setClientHeight] = useState<number | undefined>(
-    undefined,
+  const previousScrollX = useRef<number | undefined>(undefined);
+  const scrollX = useRef<number | undefined>(undefined);
+  const previousScrollY = useRef<number | undefined>(undefined);
+  const scrollY = useRef<number | undefined>(undefined);
+  const scrollWidth = useRef<number | undefined>(undefined);
+  const scrollHeight = useRef<number | undefined>(undefined);
+  const clientWidth = useRef<number | undefined>(undefined);
+  const clientHeight = useRef<number | undefined>(undefined);
+  const listeners = useRef<ScrollListener[]>([]);
+
+  const hasScrolledToEnd = useCallback(
+    (direction: ScrollDirection, tolerance = 1) => {
+      switch (direction) {
+        case 'up':
+          const hasScrolledToTop = () => {
+            if (scrollY.current) {
+              return scrollY.current <= tolerance;
+            }
+            return false;
+          };
+          return hasScrolledToTop();
+        case 'down':
+          const hasScrolledToBottom = () => {
+            if (
+              scrollHeight.current &&
+              scrollY.current &&
+              clientHeight.current
+            ) {
+              return (
+                scrollHeight.current - scrollY.current <=
+                clientHeight.current + tolerance
+              );
+            }
+            return false;
+          };
+          return hasScrolledToBottom();
+        case 'left':
+          const hasScrollToLeft = () => {
+            if (scrollX.current) {
+              return scrollX.current <= tolerance;
+            }
+            return false;
+          };
+          return hasScrollToLeft();
+        case 'right':
+          const hasScrolledToRight = () => {
+            if (scrollWidth.current && scrollX.current && clientWidth.current) {
+              return (
+                scrollWidth.current - scrollX.current <=
+                clientWidth.current + tolerance
+              );
+            }
+
+            return false;
+          };
+          return hasScrolledToRight();
+        default:
+          return false;
+      }
+    },
+    [],
   );
 
-  const hasScrolledToBottom = useCallback(
-    (tolerance = 1) => {
-      if (scrollHeight && scrollY && clientHeight) {
-        return scrollHeight - scrollY <= clientHeight + tolerance;
-      }
-      return false;
-    },
-    [clientHeight, scrollHeight, scrollY],
-  );
+  const isScrolling = useCallback((direction: ScrollDirection) => {
+    switch (direction) {
+      case 'up':
+        return (
+          previousScrollY.current !== undefined &&
+          scrollY.current !== undefined &&
+          previousScrollY.current > scrollY.current
+        );
+      case 'down':
+        return (
+          previousScrollY.current !== undefined &&
+          scrollY.current !== undefined &&
+          previousScrollY.current < scrollY.current
+        );
+      case 'left':
+        return (
+          previousScrollX.current !== undefined &&
+          scrollX.current !== undefined &&
+          previousScrollX.current > scrollX.current
+        );
+      case 'right':
+        return (
+          previousScrollX.current !== undefined &&
+          scrollX.current !== undefined &&
+          previousScrollX.current < scrollX.current
+        );
+      default:
+        return false;
+    }
+  }, []);
 
   useEffect(() => {
     if (isDisabled) {
@@ -54,9 +141,21 @@ export function ScrollProvider<T extends Element>({
     const listenToScroll = debounce((e: Event) => {
       const target = e.target;
       if (target instanceof Element) {
-        setScrollY(target.scrollTop || 0);
-        setScrollHeight(target.scrollHeight || 0);
-        setClientHeight(target.clientHeight || 0);
+        previousScrollX.current = scrollX.current;
+        scrollX.current = target.scrollLeft || 0;
+        previousScrollY.current = scrollY.current;
+        scrollY.current = target.scrollTop || 0;
+        scrollHeight.current = target.scrollHeight || 0;
+        clientHeight.current = target.clientHeight || 0;
+
+        listeners.current.forEach(listener =>
+          listener({
+            scrollX: scrollX.current!,
+            scrollY: scrollY.current!,
+            isScrolling,
+            hasScrolledToEnd,
+          }),
+        );
       }
     }, 10);
 
@@ -70,19 +169,34 @@ export function ScrollProvider<T extends Element>({
       ref?.removeEventListener('scroll', listenToScroll, {
         capture: true,
       });
-  }, [isDisabled, scrollableRef]);
+  }, [hasScrolledToEnd, isDisabled, isScrolling, scrollableRef]);
+
+  const registerListener = useCallback((listener: ScrollListener) => {
+    listeners.current.push(listener);
+  }, []);
+
+  const unregisterListener = useCallback((listener: ScrollListener) => {
+    listeners.current = listeners.current.filter(l => l !== listener);
+  }, []);
 
   return (
-    <ScrollContext.Provider value={{ scrollY, hasScrolledToBottom }}>
+    <ScrollContext.Provider value={{ registerListener, unregisterListener }}>
       {children}
     </ScrollContext.Provider>
   );
 }
 
-export function useScroll(): IScrollContext {
+export function useScrollEffect(listener: ScrollListener) {
   const context = useContext(ScrollContext);
   if (!context) {
-    throw new Error('useScroll must be used within a ScrollProvider');
+    throw new Error('useScrollEffect must be used within a ScrollProvider');
   }
-  return context;
+
+  const { registerListener, unregisterListener } = context;
+
+  useEffect(() => {
+    const _listener = listener;
+    registerListener(_listener);
+    return () => unregisterListener(_listener);
+  }, [listener, registerListener, unregisterListener]);
 }

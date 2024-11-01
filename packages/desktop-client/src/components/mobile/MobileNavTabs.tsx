@@ -1,15 +1,10 @@
 // @ts-strict-ignore
-import React, {
-  type ComponentType,
-  useEffect,
-  type CSSProperties,
-} from 'react';
+import React, { type ComponentType, type CSSProperties } from 'react';
 import { NavLink } from 'react-router-dom';
 import { useSpring, animated, config } from 'react-spring';
 
 import { useDrag } from '@use-gesture/react';
 
-import { usePrevious } from '../../hooks/usePrevious';
 import {
   SvgAdd,
   SvgCog,
@@ -23,7 +18,7 @@ import { SvgCalendar } from '../../icons/v2';
 import { theme, styles } from '../../style';
 import { View } from '../common/View';
 import { useResponsive } from '../responsive/ResponsiveProvider';
-import { useScroll } from '../ScrollProvider';
+import { useScrollEffect } from '../ScrollProvider';
 
 const COLUMN_COUNT = 3;
 const PILL_HEIGHT = 15;
@@ -32,7 +27,6 @@ export const MOBILE_NAV_HEIGHT = ROW_HEIGHT + PILL_HEIGHT;
 
 export function MobileNavTabs() {
   const { isNarrowWidth } = useResponsive();
-  const { scrollY } = useScroll();
 
   const navTabStyle = {
     flex: `1 1 ${100 / COLUMN_COUNT}%`,
@@ -129,20 +123,13 @@ export function MobileNavTabs() {
     });
   };
 
-  const previousScrollY = usePrevious(scrollY);
-
-  useEffect(() => {
-    if (
-      scrollY &&
-      previousScrollY &&
-      scrollY > previousScrollY &&
-      previousScrollY !== 0
-    ) {
+  useScrollEffect(({ isScrolling }) => {
+    if (isScrolling('down')) {
       hide();
     } else {
       close();
     }
-  }, [scrollY]);
+  });
 
   const bind = useDrag(
     ({
