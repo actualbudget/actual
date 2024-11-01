@@ -132,8 +132,6 @@ export function TransactionList({
               style={{
                 ...styles.smallText,
                 backgroundColor: theme.pageBackground,
-                borderBottom: `1px solid ${theme.tableBorder}`,
-                borderTop: `1px solid ${theme.tableBorder}`,
                 color: theme.tableHeaderText,
                 display: 'flex',
                 justifyContent: 'center',

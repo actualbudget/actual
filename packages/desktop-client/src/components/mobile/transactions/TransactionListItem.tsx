@@ -1,4 +1,7 @@
-import React, { type ComponentPropsWithoutRef } from 'react';
+import React, {
+  type CSSProperties,
+  type ComponentPropsWithoutRef,
+} from 'react';
 import { mergeProps } from 'react-aria';
 import { ListBoxItem } from 'react-aria-components';
 import { useSelector } from 'react-redux';
@@ -114,12 +117,16 @@ export function TransactionListItem({
 
   const prettyCategory = specialCategory || categoryName;
 
-  const textStyle = isPreview
-    ? {
-        fontStyle: 'italic',
-        color: theme.pageTextLight,
-      }
-    : {};
+  const textStyle: CSSProperties = {
+    ...styles.text,
+    fontSize: 14,
+    ...(isPreview
+      ? {
+          fontStyle: 'italic',
+          color: theme.pageTextLight,
+        }
+      : {}),
+  };
 
   return (
     <ListBoxItem textValue={id} {...props}>
@@ -157,7 +164,7 @@ export function TransactionListItem({
                 flex: 1,
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                padding: '0 10px',
+                padding: '0 4px',
               }}
             >
               <View>
@@ -174,9 +181,7 @@ export function TransactionListItem({
                   )}
                   <TextOneLine
                     style={{
-                      ...styles.text,
                       ...textStyle,
-                      fontSize: 14,
                       fontWeight: isAdded ? '600' : '400',
                       ...(prettyDescription === '' && {
                         color: theme.tableTextLight,
@@ -250,11 +255,7 @@ export function TransactionListItem({
               <View style={{ justifyContent: 'center' }}>
                 <Text
                   style={{
-                    ...styles.text,
                     ...textStyle,
-                    marginLeft: 25,
-                    marginRight: 5,
-                    fontSize: 14,
                     ...makeAmountFullStyle(amount),
                   }}
                 >
