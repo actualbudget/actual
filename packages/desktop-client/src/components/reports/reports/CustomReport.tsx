@@ -648,9 +648,10 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
         }
         break;
       case 'reload':
+        sessionStorage.clear();
         setSessionReport('savedStatus', 'saved');
         setSavedStatus('saved');
-        setReportData(report);
+        setReportData(initialReport ?? defaultReport);
         break;
       case 'reset':
         sessionStorage.clear();
