@@ -18,7 +18,7 @@ import { SvgCalendar } from '../../icons/v2';
 import { theme, styles } from '../../style';
 import { View } from '../common/View';
 import { useResponsive } from '../responsive/ResponsiveProvider';
-import { useScrollEffect } from '../ScrollProvider';
+import { useScrollListener } from '../ScrollProvider';
 
 const COLUMN_COUNT = 3;
 const PILL_HEIGHT = 15;
@@ -123,7 +123,7 @@ export function MobileNavTabs() {
     });
   };
 
-  useScrollEffect(({ isScrolling }) => {
+  useScrollListener(({ isScrolling }) => {
     if (isScrolling('down')) {
       hide();
     } else {

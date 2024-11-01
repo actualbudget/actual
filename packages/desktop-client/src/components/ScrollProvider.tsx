@@ -190,10 +190,10 @@ export function ScrollProvider<T extends Element>({
   );
 }
 
-export function useScrollEffect(listener: ScrollListener) {
+export function useScrollListener(listener: ScrollListener) {
   const context = useContext(ScrollContext);
   if (!context) {
-    throw new Error('useScrollEffect must be used within a ScrollProvider');
+    throw new Error('useScrollListener must be used within a ScrollProvider');
   }
 
   const { registerListener, unregisterListener } = context;

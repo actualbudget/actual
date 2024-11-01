@@ -2,7 +2,7 @@ import React, { useRef } from 'react';
 import { useListBox } from 'react-aria';
 import { useListState } from 'react-stately';
 
-import { useScrollEffect } from '../../ScrollProvider';
+import { useScrollListener } from '../../ScrollProvider';
 
 import { ListBoxSection } from './ListBoxSection';
 
@@ -12,7 +12,7 @@ export function ListBox(props) {
   const { listBoxProps, labelProps } = useListBox(props, state, listBoxRef);
   const { loadMore } = props;
 
-  useScrollEffect(({ hasScrolledToEnd }) => {
+  useScrollListener(({ hasScrolledToEnd }) => {
     const scrolledToBottom = hasScrolledToEnd('down', 5);
     if (scrolledToBottom) {
       loadMore?.();
