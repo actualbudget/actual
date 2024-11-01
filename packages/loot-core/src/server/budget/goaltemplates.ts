@@ -107,19 +107,12 @@ async function processTemplate(
   );
   let priorities = [];
   let remainderWeight = 0;
+  const errors = [];
   for (let i = 0; i < categories.length; i++) {
     const id = categories[i].id;
     const sheetName = monthUtils.sheetForMonth(month);
     const templates = categoryTemplates[id];
-    //if there is a good way to add these to the class that would be nice,
-    // but the async getSheetValue messes things up
-    // only the fromLastMonth value is needed inside the class but it
-    // would be nice to have everything wrapped up as much as possible
     const budgeted = await getSheetValue(sheetName, `budget-${id}`);
-    const fromLastMonth = await getSheetValue(
-      monthUtils.sheetForMonth(monthUtils.subMonths(month, 1)),
-      `leftover-${id}`,
-    );
     const existingGoal = await getSheetValue(sheetName, `goal-${id}`);
 
     // only run categories that are unbudgeted or if we are forcing it
@@ -128,23 +121,22 @@ async function processTemplate(
       // gather needed priorities
       // gather remainder weights
       try {
-        const obj = new categoryTemplate(templates, id, month, fromLastMonth);
+        const obj = await categoryTemplate.init(templates, id, month);
         availBudget += budgeted;
-        const p = obj.readPriorities();
+        const p = obj.getPriorities();
         p.forEach(pr => priorities.push(pr));
         remainderWeight += obj.getRemainderWeight();
         catObjects.push(obj);
       } catch (e) {
         console.log(`Got error in ${categories[i].name}: ${e}`);
+        errors.push(e);
       }
 
       // do a reset of the goals that are orphaned
-    } else if (existingGoal != null && !templates) {
+    } else if (existingGoal !== null && !templates) {
       await setGoal({ month, category: id, goal: null, long_goal: null });
     }
   }
-
-  // read messages
 
   //compress to needed, sorted priorities
   priorities = priorities

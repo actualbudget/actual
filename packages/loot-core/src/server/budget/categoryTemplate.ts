@@ -11,11 +11,11 @@ import { getActiveSchedules } from './statements';
 export class categoryTemplate {
   /*----------------------------------------------------------------------------
    * Using This Class:
-   * 1. instantiate via `new categoryTemplate(categoryID, templates, month)`;
-   *    categoryID: the ID of the category that this Class will be for
+   * 1. instantiate via `await categoryTemplate.init(templates, categoryID, month)`;
    *    templates: all templates for this category (including templates and goals)
+   *    categoryID: the ID of the category that this Class will be for
    *    month: the month string of the month for templates being applied
-   * 2. gather needed data for external use.  ex: remainder weights, priorities, originalBudget
+   * 2. gather needed data for external use.  ex: remainder weights, priorities
    * 3. run each priority level that is needed via runTemplatesForPriority
    * 4. run applyLimits to apply any existing limit to the category
    * 5. run the remainder templates via runRemainder (limits get applied at the start of this)
@@ -28,19 +28,24 @@ export class categoryTemplate {
   //-----------------------------------------------------------------------------
   // Class interface
 
-  // returns the total remainder weight of remainder templates in this category
-  getRemainderWeight(): number {
-    return this.remainderWeight;
+  // set up the class and check all templates
+  static async init(templates, categoryID: string, month) {
+    // get all the needed setup values
+    const fromLastMonth = await getSheetValue(
+      monthUtils.sheetForMonth(monthUtils.subMonths(month, 1)),
+      `leftover-${categoryID}`,
+    );
+    // run all checks
+    await categoryTemplate.checkTemplates(templates);
+    // call the private constructor
+    return new categoryTemplate(templates, categoryID, month, fromLastMonth);
   }
 
-  // returns a list of priority levels in this category
-  readPriorities(): number[] {
+  getPriorities() {
     return this.priorities;
   }
-
-  // get messages that were generated during construction
-  readMsgs() {
-    return this.msgs;
+  getRemainderWeight() {
+    return this.remainderWeight;
   }
 
   // what is the full requested amount this month
@@ -152,7 +157,7 @@ export class categoryTemplate {
 
   //-----------------------------------------------------------------------------
   // Implimentation
-  readonly categoryID: string;
+  readonly categoryID: string; //readonly so we can double check the category this is using
   private month: string;
   private templates = [];
   private remainder = [];
@@ -166,9 +171,8 @@ export class categoryTemplate {
   private limitAmount = null;
   private limitCheck = false;
   private limitHold = false;
-  private msgs: string[];
 
-  constructor(
+  private constructor(
     templates,
     categoryID: string,
     month: string,
@@ -193,15 +197,10 @@ export class categoryTemplate {
         if (t.directive === 'goal') this.goals.push(t);
       });
     }
-    //check templates and throw exception if there is something wrong
-    this.checkTemplates();
-    //find priorities
-    this.findPriorities();
-    //find remainder weight
-    this.findRemainderWeightSum();
-  }
+    // check limits here since it needs to save states inside the object
+    this.checkLimit();
 
-  private findPriorities() {
+    //find priorities
     const p = [];
     this.templates.forEach(t => {
       if (t.priority != null) {
@@ -214,21 +213,13 @@ export class categoryTemplate {
         return a - b;
       })
       .filter((item, idx, curr) => curr.indexOf(item) === idx);
-  }
 
-  private findRemainderWeightSum() {
+    //find remainder weight
     let weight = 0;
     this.remainder.forEach(r => {
       weight += r.weight;
     });
     this.remainderWeight = weight;
-  }
-
-  private async checkTemplates() {
-    //run all the individual checks
-    this.checkByAndSchedule();
-    this.checkPercentage();
-    this.checkLimit();
   }
 
   private runGoal() {
@@ -238,9 +229,8 @@ export class categoryTemplate {
       return;
     }
     if (this.goals.length > 1) {
-      this.msgs.push(
-        'Can only have one #goal per category. Using the first found',
-      );
+      //TODO make this not hard fail
+      throw new Error(`Can only have one #goal per category`);
     }
     this.goalAmount = this.toBudgetAmount;
   }
@@ -275,10 +265,17 @@ export class categoryTemplate {
 
   //-----------------------------------------------------------------------------
   //  Template Validation
-  private async checkByAndSchedule() {
+  static async checkTemplates(templates) {
+    //run all the individual checks
+    await categoryTemplate.checkByAndSchedule(templates);
+    await categoryTemplate.checkPercentage(templates);
+    //limits checked inside constructor
+  }
+
+  static async checkByAndSchedule(templates) {
     //check schedule names
     const scheduleNames = (await getActiveSchedules()).map(({ name }) => name);
-    this.templates
+    templates
       .filter(t => t.type === 'schedule')
       .forEach(t => {
         if (!scheduleNames.includes(t.name.trim())) {
@@ -287,32 +284,30 @@ export class categoryTemplate {
       });
     //find lowest priority
     let lowestPriority = null;
-    this.templates
+    templates
       .filter(t => t.type === 'schedule' || t.type === 'by')
       .forEach(t => {
         if (lowestPriority === null || t.priority < lowestPriority) {
           lowestPriority = t.priority;
         }
       });
-    //set priority to needed value
-    this.templates
+    //warn if priority needs fixed
+    templates
       .filter(t => t.type === 'schedule' || t.type === 'by')
       .forEach(t => {
         if (t.priority !== lowestPriority) {
-          t.priority = lowestPriority;
-          this.msgs.push(
-            `Changed the priority of BY and SCHEDULE templates to be ${lowestPriority}`,
+          throw new Error(
+            `Schedule and By templates must be the same priority level.  Fix by setting all Schedule and By templates to priority level ${lowestPriority}`,
           );
+          //t.priority = lowestPriority;
         }
       });
-
-    //TODO add a message that the priority has been changed
   }
 
   private checkLimit() {
     for (let i = 0; i < this.templates.length; i++) {
       const t = this.templates[i];
-      if (this.limitCheck) {
+      if (this.limitCheck && t.limit) {
         throw new Error('Only one `up to` allowed per category');
       } else if (t.limit) {
         this.limitCheck = true;
@@ -322,8 +317,8 @@ export class categoryTemplate {
     }
   }
 
-  private async checkPercentage() {
-    const pt = this.templates.filter(t => t.type === 'percentage');
+  static async checkPercentage(templates) {
+    const pt = templates.filter(t => t.type === 'percentage');
     const reqCategories = [];
     pt.forEach(t => reqCategories.push(t.category.toLowerCase()));
 
@@ -336,7 +331,7 @@ export class categoryTemplate {
     });
 
     reqCategories.forEach(n => {
-      if (n === 'availble funds' || n === 'all income') {
+      if (n === 'available funds' || n === 'all income') {
         //skip the name check since these are special
       } else if (!availNames.includes(n)) {
         throw new Error(
