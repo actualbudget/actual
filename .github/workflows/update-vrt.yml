@@ -24,17 +24,14 @@ jobs:
           COMMIT_SHA: ${{ steps.comment-branch.outputs.head.sha }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: ./.github/actions/netlify-wait-for-build
-      - name: Set up environment
-        uses: ./.github/actions/setup
       - name: Run VRT Tests on Netlify URL
         run: yarn vrt --update-snapshots
         env:
-          E2E_START_URL: ${{ needs.netlify.outputs.netlify_url }}
+          E2E_START_URL: ${{ steps.netlify.outputs.url }}
       - name: Commit and push changes
-        working-directory: ${{ inputs.working-directory }}
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add :/*.png
+          git add "**/*.png"
           git commit -m "Update VRT"
           git push origin HEAD:${{ steps.comment-branch.outputs.head_ref }}
