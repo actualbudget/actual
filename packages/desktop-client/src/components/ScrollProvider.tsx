@@ -54,7 +54,7 @@ export function ScrollProvider<T extends Element>({
       switch (direction) {
         case 'up':
           const hasScrolledToTop = () => {
-            if (scrollY.current) {
+            if (scrollY.current !== undefined) {
               return scrollY.current <= tolerance;
             }
             return false;
@@ -63,9 +63,9 @@ export function ScrollProvider<T extends Element>({
         case 'down':
           const hasScrolledToBottom = () => {
             if (
-              scrollHeight.current &&
-              scrollY.current &&
-              clientHeight.current
+              scrollHeight.current !== undefined &&
+              scrollY.current !== undefined &&
+              clientHeight.current !== undefined
             ) {
               return (
                 scrollHeight.current - scrollY.current <=
@@ -77,7 +77,7 @@ export function ScrollProvider<T extends Element>({
           return hasScrolledToBottom();
         case 'left':
           const hasScrollToLeft = () => {
-            if (scrollX.current) {
+            if (scrollX.current !== undefined) {
               return scrollX.current <= tolerance;
             }
             return false;
@@ -85,7 +85,11 @@ export function ScrollProvider<T extends Element>({
           return hasScrollToLeft();
         case 'right':
           const hasScrolledToRight = () => {
-            if (scrollWidth.current && scrollX.current && clientWidth.current) {
+            if (
+              scrollWidth.current !== undefined &&
+              scrollX.current !== undefined &&
+              clientWidth.current !== undefined
+            ) {
               return (
                 scrollWidth.current - scrollX.current <=
                 clientWidth.current + tolerance
@@ -142,11 +146,11 @@ export function ScrollProvider<T extends Element>({
       const target = e.target;
       if (target instanceof Element) {
         previousScrollX.current = scrollX.current;
-        scrollX.current = target.scrollLeft || 0;
+        scrollX.current = target.scrollLeft;
         previousScrollY.current = scrollY.current;
-        scrollY.current = target.scrollTop || 0;
-        scrollHeight.current = target.scrollHeight || 0;
-        clientHeight.current = target.clientHeight || 0;
+        scrollY.current = target.scrollTop;
+        scrollHeight.current = target.scrollHeight;
+        clientHeight.current = target.clientHeight;
 
         listeners.current.forEach(listener =>
           listener({
