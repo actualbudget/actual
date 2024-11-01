@@ -92,13 +92,6 @@ export function ExperimentalFeatures() {
       primaryAction={
         expanded ? (
           <View style={{ gap: '1em' }}>
-            <FeatureToggle
-              flag="spendingReport"
-              feedbackLink="https://github.com/actualbudget/actual/issues/2820"
-            >
-              <Trans>Monthly spending report</Trans>
-            </FeatureToggle>
-
             <TrackingBudgetFeature />
 
             <FeatureToggle flag="goalTemplatesEnabled">
