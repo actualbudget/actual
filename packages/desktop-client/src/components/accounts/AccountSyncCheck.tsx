@@ -6,6 +6,7 @@ import { useParams } from 'react-router-dom';
 import { t } from 'i18next';
 
 import { unlinkAccount } from 'loot-core/client/actions';
+import { type AccountEntity } from 'loot-core/types/models';
 
 import { authorizeBank } from '../../gocardless';
 import { useAccounts } from '../../hooks/useAccounts';
@@ -81,6 +82,28 @@ export function AccountSyncCheck() {
   const [open, setOpen] = useState(false);
   const triggerRef = useRef(null);
 
+  const reauth = useCallback(
+    (acc: AccountEntity) => {
+      setOpen(false);
+
+      if (acc.account_id) {
+        authorizeBank(dispatch, { upgradingAccountId: acc.account_id });
+      }
+    },
+    [dispatch],
+  );
+
+  const unlink = useCallback(
+    (acc: AccountEntity) => {
+      if (acc.id) {
+        dispatch(unlinkAccount(acc.id));
+      }
+
+      setOpen(false);
+    },
+    [dispatch],
+  );
+
   if (!failedAccounts || !id) {
     return null;
   }
@@ -99,22 +122,6 @@ export function AccountSyncCheck() {
   const showAuth =
     (type === 'ITEM_ERROR' && code === 'ITEM_LOGIN_REQUIRED') ||
     (type === 'INVALID_INPUT' && code === 'INVALID_ACCESS_TOKEN');
-
-  const reauth = useCallback(() => {
-    setOpen(false);
-
-    if (account?.account_id) {
-      authorizeBank(dispatch, { upgradingAccountId: account.account_id });
-    }
-  }, [dispatch, account?.account_id]);
-
-  const unlink = useCallback(async () => {
-    if (account?.id) {
-      dispatch(unlinkAccount(account.id));
-    }
-
-    setOpen(false);
-  }, [dispatch, account?.id]);
 
   return (
     <View>
@@ -157,20 +164,20 @@ export function AccountSyncCheck() {
         <View style={{ justifyContent: 'flex-end', flexDirection: 'row' }}>
           {showAuth ? (
             <>
-              <Button onPress={unlink}>
+              <Button onPress={() => unlink(account)}>
                 <Trans>Unlink</Trans>
               </Button>
               <Button
                 variant="primary"
                 autoFocus
-                onPress={reauth}
+                onPress={() => reauth(account)}
                 style={{ marginLeft: 5 }}
               >
                 <Trans>Reauthorize</Trans>
               </Button>
             </>
           ) : (
-            <Button onPress={unlink}>
+            <Button onPress={() => unlink(account)}>
               <Trans>Unlink account</Trans>
             </Button>
           )}
