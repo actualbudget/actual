@@ -98,14 +98,14 @@ function AppInner() {
           loadingText: t('Retrieving remote files...'),
         }),
       );
-      await send('get-remote-files').then(files => {
-        if (files) {
-          const remoteFile = files.find(f => f.fileId === cloudFileId);
-          if (remoteFile && remoteFile.deleted) {
-            dispatch(closeBudget());
-          }
+
+      const files = await send('get-remote-files');
+      if (files) {
+        const remoteFile = files.find(f => f.fileId === cloudFileId);
+        if (remoteFile && remoteFile.deleted) {
+          dispatch(closeBudget());
         }
-      });
+      }
 
       await maybeUpdate();
     }
