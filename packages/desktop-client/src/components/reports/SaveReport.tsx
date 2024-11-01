@@ -1,5 +1,7 @@
 import React, { createRef, useRef, useState } from 'react';
 
+import { t } from 'i18next';
+
 import { useReports } from 'loot-core/client/data-hooks/reports';
 import { send, sendCatch } from 'loot-core/src/platform/client/fetch';
 import { type CustomReportEntity } from 'loot-core/src/types/models';
@@ -181,7 +183,7 @@ export function SaveReport({
             flexShrink: 0,
           }}
         >
-          {!report.id ? 'Unsaved report' : report.name}&nbsp;
+          {!report.id ? t('Unsaved report') : report.name}&nbsp;
         </Text>
         {savedStatus === 'modified' && <Text>(modified)&nbsp;</Text>}
         <SvgExpandArrow width={8} height={8} style={{ marginRight: 5 }} />

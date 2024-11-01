@@ -44,7 +44,7 @@ export function CategoryMenuModal({
   const categoryGroup = useCategoryGroup(category?.cat_group);
   const originalNotes = useNotes(category.id);
 
-  const onRename = newName => {
+  const onRename = (newName: string) => {
     if (newName && newName !== category.name) {
       onSave?.({
         ...category,
@@ -114,7 +114,9 @@ export function CategoryMenuModal({
               }}
             >
               <Notes
-                notes={originalNotes?.length > 0 ? originalNotes : 'No notes'}
+                notes={
+                  originalNotes?.length > 0 ? originalNotes : t('No notes')
+                }
                 editable={false}
                 focused={false}
                 getStyle={() => ({
@@ -142,7 +144,7 @@ export function CategoryMenuModal({
                   height={20}
                   style={{ paddingRight: 5 }}
                 />
-                Edit notes
+                {t('Edit notes')}
               </Button>
             </View>
           </View>
@@ -196,14 +198,14 @@ function AdditionalCategoryMenu({
             items={[
               !categoryGroup?.hidden && {
                 name: 'toggleVisibility',
-                text: category.hidden ? 'Show' : 'Hide',
+                text: category.hidden ? t('Show') : t('Hide'),
                 icon: category.hidden ? SvgViewShow : SvgViewHide,
                 iconSize: 16,
               },
               !categoryGroup?.hidden && Menu.line,
               {
                 name: 'delete',
-                text: 'Delete',
+                text: t('Delete'),
                 icon: SvgTrash,
                 iconSize: 15,
               },

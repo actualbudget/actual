@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 
+import { t } from 'i18next';
+
 import {
   closeModal,
   linkAccount,
@@ -18,10 +20,13 @@ import { View } from '../common/View';
 import { PrivacyFilter } from '../PrivacyFilter';
 import { TableHeader, Table, Row, Field } from '../table';
 
-const addOnBudgetAccountOption = { id: 'new-on', name: 'Create new account' };
+const addOnBudgetAccountOption = {
+  id: 'new-on',
+  name: t('Create new account'),
+};
 const addOffBudgetAccountOption = {
   id: 'new-off',
-  name: 'Create new account (off-budget)',
+  name: t('Create new account (off-budget)'),
 };
 
 export function SelectLinkedAccountsModal({
@@ -121,11 +126,13 @@ export function SelectLinkedAccountsModal({
       {({ state: { close } }) => (
         <>
           <ModalHeader
-            title="Link Accounts"
+            title={t('Link Accounts')}
             rightContent={<ModalCloseButton onPress={close} />}
           />
           <Text style={{ marginBottom: 10 }}>
-            We found the following accounts. Select which ones you want to add:
+            {t(
+              'We found the following accounts. Select which ones you want to add:',
+            )}
           </Text>
           <View
             style={{
@@ -136,10 +143,10 @@ export function SelectLinkedAccountsModal({
           >
             <TableHeader
               headers={[
-                { name: 'Bank Account To Sync', width: 200 },
-                { name: 'Balance', width: 80 },
-                { name: 'Account in Actual', width: 'flex' },
-                { name: 'Actions', width: 'flex' },
+                { name: t('Bank Account To Sync'), width: 200 },
+                { name: t('Balance'), width: 80 },
+                { name: t('Account in Actual'), width: 'flex' },
+                { name: t('Actions'), width: 'flex' },
               ]}
             />
 
@@ -182,7 +189,7 @@ export function SelectLinkedAccountsModal({
               onPress={onNext}
               isDisabled={!Object.keys(chosenAccounts).length}
             >
-              Link accounts
+              {t('Link accounts')}
             </Button>
           </View>
         </>
@@ -243,7 +250,7 @@ function TableRow({
             }}
             style={{ float: 'right' }}
           >
-            Remove bank-sync
+            {t('Remove bank-sync')}
           </Button>
         ) : (
           <Button
@@ -253,7 +260,7 @@ function TableRow({
             }}
             style={{ float: 'right' }}
           >
-            Setup bank-sync
+            {t('Setup bank-sync')}
           </Button>
         )}
       </Field>

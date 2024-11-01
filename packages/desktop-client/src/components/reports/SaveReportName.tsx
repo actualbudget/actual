@@ -1,6 +1,8 @@
 import React, { type RefObject, useEffect } from 'react';
 import { Form } from 'react-aria-components';
 
+import { t } from 'i18next';
+
 import { type CustomReportEntity } from 'loot-core/types/models/reports';
 
 import { theme } from '../../style';
@@ -62,7 +64,7 @@ export function SaveReportName({
           >
             <FormField style={{ flex: 1 }}>
               <FormLabel
-                title="Report Name"
+                title={t('Report Name')}
                 htmlFor="name-field"
                 style={{ userSelect: 'none' }}
               />
@@ -75,7 +77,7 @@ export function SaveReportName({
               />
             </FormField>
             <Button variant="primary" type="submit" style={{ marginTop: 30 }}>
-              {menuItem === 'save-report' ? 'Add' : 'Update'}
+              {menuItem === 'save-report' ? t('Add') : t('Update')}
             </Button>
           </Stack>
         </Form>

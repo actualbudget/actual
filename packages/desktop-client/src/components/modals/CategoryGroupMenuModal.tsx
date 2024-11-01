@@ -6,6 +6,8 @@ import React, {
   type CSSProperties,
 } from 'react';
 
+import { t } from 'i18next';
+
 import { type CategoryGroupEntity } from 'loot-core/src/types/models';
 
 import { useCategories } from '../../hooks/useCategories';
@@ -126,7 +128,7 @@ export function CategoryGroupMenuModal({
               }}
             >
               <Notes
-                notes={notes?.length > 0 ? notes : 'No notes'}
+                notes={notes?.length > 0 ? notes : t('No notes')}
                 editable={false}
                 focused={false}
                 getStyle={() => ({
@@ -151,7 +153,7 @@ export function CategoryGroupMenuModal({
             >
               <Button style={buttonStyle} onPress={_onAddCategory}>
                 <SvgAdd width={17} height={17} style={{ paddingRight: 5 }} />
-                Add category
+                {t('Add category')}
               </Button>
               <Button style={buttonStyle} onPress={_onEditNotes}>
                 <SvgNotesPaper
@@ -159,7 +161,7 @@ export function CategoryGroupMenuModal({
                   height={20}
                   style={{ paddingRight: 5 }}
                 />
-                Edit notes
+                {t('Edit notes')}
               </Button>
             </View>
           </View>
@@ -188,7 +190,7 @@ function AdditionalCategoryGroupMenu({ group, onDelete, onToggleVisibility }) {
         <Button
           ref={triggerRef}
           variant="bare"
-          aria-label="Menu"
+          aria-label={t('Menu')}
           onPress={() => {
             setMenuOpen(true);
           }}
@@ -214,7 +216,7 @@ function AdditionalCategoryGroupMenu({ group, onDelete, onToggleVisibility }) {
                 [
                   {
                     name: 'toggleVisibility',
-                    text: group.hidden ? 'Show' : 'Hide',
+                    text: group.hidden ? t('Show') : t('Hide'),
                     icon: group.hidden ? SvgViewShow : SvgViewHide,
                     iconSize: 16,
                   },

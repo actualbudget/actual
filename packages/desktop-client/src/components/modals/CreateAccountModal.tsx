@@ -1,5 +1,6 @@
 // @ts-strict-ignore
 import React, { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 
 import { pushModal } from 'loot-core/client/actions';
@@ -26,6 +27,7 @@ type CreateAccountProps = {
 };
 
 export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
+  const { t } = useTranslation();
   const syncServerStatus = useSyncServerStatus();
   const dispatch = useDispatch();
   const [isGoCardlessSetupComplete, setIsGoCardlessSetupComplete] =
@@ -176,7 +178,7 @@ export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
     useState(false);
 
   if (upgradingAccountId != null) {
-    title = 'Link Account';
+    title = t('Link Account');
   }
 
   return (
@@ -200,19 +202,21 @@ export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
                     }}
                     onPress={onCreateLocalAccount}
                   >
-                    Create local account
+                    {t('Create local account')}
                   </Button>
                 </InitialFocus>
                 <View style={{ lineHeight: '1.4em', fontSize: 15 }}>
                   <Text>
-                    <strong>Create a local account</strong> if you want to add
-                    transactions manually. You can also{' '}
+                    <strong>{t('Create a local account')}</strong>{' '}
+                    {t(
+                      'if you want to add transactions manually. You can also',
+                    )}
                     <Link
                       variant="external"
                       to="https://actualbudget.org/docs/transactions/importing"
                       linkColor="muted"
                     >
-                      import QIF/OFX/QFX files into a local account
+                      {t('import QIF/OFX/QFX files into a local account')}{' '}
                     </Link>
                     .
                   </Text>
@@ -240,8 +244,8 @@ export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
                       onPress={onConnectGoCardless}
                     >
                       {isGoCardlessSetupComplete
-                        ? 'Link bank account with GoCardless'
-                        : 'Set up GoCardless for bank sync'}
+                        ? t('Link bank account with GoCardless')
+                        : t('Set up GoCardless for bank sync')}{' '}
                     </ButtonWithLoading>
                     {isGoCardlessSetupComplete && (
                       <>
@@ -272,7 +276,7 @@ export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
                             items={[
                               {
                                 name: 'reconfigure',
-                                text: 'Reset GoCardless credentials',
+                                text: t('Reset GoCardless credentials'),
                               },
                             ]}
                           />
@@ -282,10 +286,11 @@ export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
                   </View>
                   <Text style={{ lineHeight: '1.4em', fontSize: 15 }}>
                     <strong>
-                      Link a <em>European</em> bank account
+                      {t('Link a')} <em>{t('European')}</em> {t('bank account')}
                     </strong>{' '}
-                    to automatically download transactions. GoCardless provides
-                    reliable, up-to-date information from hundreds of banks.
+                    {t(
+                      'to automatically download transactions. GoCardless provides reliable, up-to-date information from hundreds of banks.',
+                    )}{' '}
                   </Text>
 
                   <View
@@ -308,8 +313,8 @@ export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
                       onPress={onConnectSimpleFin}
                     >
                       {isSimpleFinSetupComplete
-                        ? 'Link bank account with SimpleFIN'
-                        : 'Set up SimpleFIN for bank sync'}
+                        ? t('Link bank account with SimpleFin')
+                        : t('Set up SimpleFin for bank sync')}{' '}
                     </ButtonWithLoading>
                     {isSimpleFinSetupComplete && (
                       <>
@@ -339,7 +344,7 @@ export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
                             items={[
                               {
                                 name: 'reconfigure',
-                                text: 'Reset SimpleFIN credentials',
+                                text: t('Reset SimpleFin credentials'),
                               },
                             ]}
                           />
@@ -349,10 +354,11 @@ export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
                   </View>
                   <Text style={{ lineHeight: '1.4em', fontSize: 15 }}>
                     <strong>
-                      Link a <em>North American</em> bank account
+                      {t('Link a')} <em>{t('US')}</em> {t('bank account')}
                     </strong>{' '}
-                    to automatically download transactions. SimpleFIN provides
-                    reliable, up-to-date information from hundreds of banks.
+                    {t(
+                      'to automatically download transactions. SimpleFin supports all major US banks.',
+                    )}{' '}
                   </Text>
                 </>
               ) : (
@@ -368,13 +374,13 @@ export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
                     Set up bank sync
                   </Button>
                   <Paragraph style={{ fontSize: 15 }}>
-                    Connect to an Actual server to set up{' '}
+                    {t('Connect to an Actual server to set up ')}
                     <Link
                       variant="external"
                       to="https://actualbudget.org/docs/advanced/bank-sync"
                       linkColor="muted"
                     >
-                      automatic syncing
+                      {t('automatic syncing')}
                     </Link>
                     .
                   </Paragraph>

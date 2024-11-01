@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { useLocation } from 'react-router-dom';
 
+import { t } from 'i18next';
 import { isNonProductionEnvironment } from 'loot-core/src/shared/environment';
 
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
@@ -23,11 +24,11 @@ export function ManageRulesModal({ payeeId }: ManageRulesModalProps) {
   }
 
   return (
-    <Modal name="manage-rules" isLoading={loading}>
+    <Modal name={t('manage-rules')} isLoading={loading}>
       {({ state: { close } }) => (
         <>
           <ModalHeader
-            title="Rules"
+            title={t('Rules')}
             rightContent={<ModalCloseButton onPress={close} />}
           />
           <ManageRules isModal payeeId={payeeId} setLoading={setLoading} />

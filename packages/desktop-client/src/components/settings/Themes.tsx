@@ -1,6 +1,7 @@
 import React, { type ReactNode } from 'react';
 
 import { css } from '@emotion/css';
+import { t } from 'i18next';
 
 import { type DarkTheme, type Theme } from 'loot-core/types/prefs';
 
@@ -91,7 +92,8 @@ export function ThemeSettings() {
       }
     >
       <Text>
-        <strong>Themes</strong> change the user interface colors.
+        <strong> {t('Themes')} </strong>{' '}
+        {t(' change the user interface colors.')}
       </Text>
     </Setting>
   );

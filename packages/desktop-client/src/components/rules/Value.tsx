@@ -2,6 +2,7 @@
 import React, { useState, type CSSProperties } from 'react';
 
 import { format as formatDate, parseISO } from 'date-fns';
+import { t } from 'i18next';
 
 import { getMonthYearFormat } from 'loot-core/src/shared/months';
 import { getRecurringDescription } from 'loot-core/src/shared/schedules';
@@ -113,7 +114,7 @@ export function Value<T>({
 
   if (Array.isArray(value)) {
     if (value.length === 0) {
-      return <Text style={valueStyle}>(empty)</Text>;
+      return <Text style={valueStyle}>({t('empty')})</Text>;
     } else if (value.length === 1) {
       return (
         <Text>
@@ -157,7 +158,7 @@ export function Value<T>({
           <Text style={valueStyle}>
             &nbsp;&nbsp;
             <Link variant="text" onClick={onExpand} style={valueStyle}>
-              {numHidden} more items...
+              {numHidden} {t('more items...')}
             </Link>
             {!inline && <br />}
           </Text>
@@ -172,7 +173,7 @@ export function Value<T>({
     const { num1, num2 } = value;
     return (
       <Text>
-        <Text style={valueStyle}>{formatValue(num1)}</Text> and{' '}
+        <Text style={valueStyle}>{formatValue(num1)}</Text> {t('and')}{' '}
         <Text style={valueStyle}>{formatValue(num2)}</Text>
       </Text>
     );

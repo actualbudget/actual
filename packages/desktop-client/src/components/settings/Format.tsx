@@ -2,6 +2,7 @@
 import React, { type ReactNode } from 'react';
 
 import { css } from '@emotion/css';
+import { t } from 'i18next';
 
 import { numberFormats } from 'loot-core/src/shared/util';
 import { type SyncedPrefs } from 'loot-core/src/types/prefs';
@@ -89,7 +90,7 @@ export function FormatSettings() {
             },
           }}
         >
-          <Column title="Numbers">
+          <Column title={t('Numbers')}>
             <Select
               key={String(hideFraction)} // needed because label does not update
               value={numberFormat}
@@ -109,11 +110,13 @@ export function FormatSettings() {
                   setHideFractionPref(String(e.currentTarget.checked))
                 }
               />
-              <label htmlFor="settings-textDecimal">Hide decimal places</label>
+              <label htmlFor="settings-textDecimal">
+                {t('Hide decimal places')}
+              </label>
             </Text>
           </Column>
 
-          <Column title="Dates">
+          <Column title={t('Dates')}>
             <Select
               value={dateFormat}
               onChange={format => setDateFormatPref(format)}
@@ -122,7 +125,7 @@ export function FormatSettings() {
             />
           </Column>
 
-          <Column title="First day of the week">
+          <Column title={t('First day of the week')}>
             <Select
               value={firstDayOfWeekIdx}
               onChange={idx => setFirstDayOfWeekIdxPref(idx)}
@@ -134,8 +137,10 @@ export function FormatSettings() {
       }
     >
       <Text>
-        <strong>Formatting</strong> does not affect how budget data is stored,
-        and can be changed at any time.
+        <strong>{t('Formatting')}</strong>{' '}
+        {t(
+          ' does not affect how budget data is stored, and can be changed at any time.',
+        )}
       </Text>
     </Setting>
   );

@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { Button } from '../common/Button2';
 import { InitialFocus } from '../common/InitialFocus';
@@ -15,6 +16,8 @@ export function ConfirmUnlinkAccountModal({
   accountName,
   onUnlink,
 }: ConfirmUnlinkAccountProps) {
+  const { t } = useTranslation();
+
   return (
     <Modal
       name="confirm-unlink-account"
@@ -23,17 +26,19 @@ export function ConfirmUnlinkAccountModal({
       {({ state: { close } }) => (
         <>
           <ModalHeader
-            title="Confirm Unlink"
+            title={t('Confirm Unlink')} // Use translation for title
             rightContent={<ModalCloseButton onPress={close} />}
           />
           <View style={{ lineHeight: 1.5 }}>
             <Paragraph>
-              Are you sure you want to unlink <strong>{accountName}</strong>?
+              {t('Are you sure you want to unlink')}{' '}
+              <strong>{accountName}</strong>?
             </Paragraph>
 
             <Paragraph>
-              Transactions will no longer be synchronized with this account and
-              must be manually entered.
+              {t(
+                'Transactions will no longer be synchronized with this account and must be manually entered.',
+              )}
             </Paragraph>
 
             <View
@@ -43,7 +48,7 @@ export function ConfirmUnlinkAccountModal({
               }}
             >
               <Button style={{ marginRight: 10 }} onPress={close}>
-                Cancel
+                {t('Cancel')}
               </Button>
               <InitialFocus>
                 <Button
@@ -53,7 +58,7 @@ export function ConfirmUnlinkAccountModal({
                     close();
                   }}
                 >
-                  Unlink
+                  {t('Unlink')}
                 </Button>
               </InitialFocus>
             </View>

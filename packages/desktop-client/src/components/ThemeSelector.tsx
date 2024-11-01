@@ -1,5 +1,7 @@
 import React, { useRef, useState, type CSSProperties } from 'react';
 
+import { t } from 'i18next';
+
 import type { Theme } from 'loot-core/src/types/prefs';
 
 import { SvgMoonStars, SvgSun, SvgSystem } from '../icons/v2';
@@ -45,7 +47,7 @@ export function ThemeSelector({ style }: ThemeSelectorProps) {
       <Button
         ref={triggerRef}
         variant="bare"
-        aria-label="Switch theme"
+        aria-label={t('Switch theme')}
         onPress={() => setMenuOpen(true)}
         style={style}
       >

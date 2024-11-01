@@ -1,6 +1,8 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
+import { t } from 'i18next';
+
 import { replaceModal, syncAndDownload } from 'loot-core/src/client/actions';
 import * as queries from 'loot-core/src/client/queries';
 
@@ -137,9 +139,9 @@ function EmptyMessage() {
   return (
     <View style={{ flex: 1, padding: 30 }}>
       <Text style={styles.text}>
-        For Actual to be useful, you need to add an account. You can link an
-        account to automatically download transactions, or manage it locally
-        yourself.
+        {t(
+          'For Actual to be useful, you need to add an account. You can link an account to automatically download transactions, or manage it locally yourself.',
+        )}
       </Text>
     </View>
   );
@@ -164,11 +166,11 @@ function AccountList({
     <Page
       header={
         <MobilePageHeader
-          title="Accounts"
+          title={t('Accounts')}
           rightContent={
             <Button
               variant="bare"
-              aria-label="Add account"
+              aria-label={t('Add account')}
               style={{ margin: 10 }}
               onPress={onAddAccount}
             >
@@ -186,7 +188,10 @@ function AccountList({
       <PullToRefresh onRefresh={onSync}>
         <View style={{ margin: 10 }}>
           {budgetedAccounts.length > 0 && (
-            <AccountHeader name="For Budget" amount={getOnBudgetBalance()} />
+            <AccountHeader
+              name={t('For Budget')}
+              amount={getOnBudgetBalance()}
+            />
           )}
           {budgetedAccounts.map(acct => (
             <AccountCard
@@ -203,7 +208,7 @@ function AccountList({
 
           {offbudgetAccounts.length > 0 && (
             <AccountHeader
-              name="Off Budget"
+              name={t('Off Budget')}
               amount={getOffBudgetBalance()}
               style={{ marginTop: 30 }}
             />

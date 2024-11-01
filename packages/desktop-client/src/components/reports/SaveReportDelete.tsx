@@ -1,5 +1,7 @@
 import React from 'react';
 
+import { t } from 'i18next';
+
 import { theme } from '../../style/theme';
 import { Button } from '../common/Button2';
 import { Stack } from '../common/Stack';
@@ -21,7 +23,7 @@ export function SaveReportDelete({
     <>
       <View style={{ align: 'center' }}>
         <Text style={{ color: theme.errorText, marginBottom: 5 }}>
-          Are you sure you want to delete report:
+          {t('Are you sure you want to delete report:')}
         </Text>
         <View>{name}</View>
       </View>
@@ -34,10 +36,10 @@ export function SaveReportDelete({
       >
         <View style={{ flex: 1 }} />
         <Button variant="primary" autoFocus onPress={onDelete}>
-          Yes
+          {t('Yes')}
         </Button>
         <Button variant="primary" onPress={onClose}>
-          No
+          {t('No')}
         </Button>
       </Stack>
     </>

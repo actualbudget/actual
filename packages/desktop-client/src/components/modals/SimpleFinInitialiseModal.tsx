@@ -1,6 +1,8 @@
 // @ts-strict-ignore
 import React, { useState } from 'react';
 
+import { t } from 'i18next';
+
 import { send } from 'loot-core/src/platform/client/fetch';
 
 import { Error } from '../alerts';
@@ -51,14 +53,14 @@ export const SimpleFinInitialiseModal = ({
       {({ state: { close } }) => (
         <>
           <ModalHeader
-            title="Set-up SimpleFIN"
+            title={t('Set-up SimpleFIN')}
             rightContent={<ModalCloseButton onPress={close} />}
           />
           <View style={{ display: 'flex', gap: 10 }}>
             <Text>
-              In order to enable bank-sync via SimpleFIN (only for North
-              American banks) you will need to create a token. This can be done
-              by creating an account with{' '}
+              {t(
+                'In order to enable bank-sync via SimpleFIN (only for North American banks), you will need to create a token. This can be done by creating an account with',
+              )}{' '}
               <Link
                 variant="external"
                 to="https://bridge.simplefin.org/"
@@ -70,7 +72,7 @@ export const SimpleFinInitialiseModal = ({
             </Text>
 
             <FormField>
-              <FormLabel title="Token:" htmlFor="token-field" />
+              <FormLabel title={t('Token:')} htmlFor="token-field" />
               <Input
                 id="token-field"
                 type="password"
@@ -82,7 +84,9 @@ export const SimpleFinInitialiseModal = ({
               />
             </FormField>
 
-            {!isValid && <Error>It is required to provide a token.</Error>}
+            {!isValid && (
+              <Error>{t('It is required to provide a token.')}</Error>
+            )}
           </View>
 
           <ModalButtons>
@@ -94,7 +98,7 @@ export const SimpleFinInitialiseModal = ({
                 onSubmit(close);
               }}
             >
-              Save and continue
+              {t('Save and continue')}
             </ButtonWithLoading>
           </ModalButtons>
         </>

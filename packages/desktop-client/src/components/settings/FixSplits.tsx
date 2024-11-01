@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 
+import { t } from 'i18next';
+
 import { send } from 'loot-core/src/platform/client/fetch';
 import { type Handlers } from 'loot-core/src/types/handlers';
 
@@ -16,23 +18,30 @@ type Results = Awaited<ReturnType<Handlers['tools/fix-split-transactions']>>;
 function renderResults(results: Results) {
   const { numBlankPayees, numCleared, numDeleted } = results;
   let result = '';
+
   if (numBlankPayees === 0 && numCleared === 0 && numDeleted === 0) {
-    result = 'No split transactions found needing repair.';
+    result = t('No split transactions found needing repair.');
   } else {
     if (numBlankPayees > 0) {
-      result += `Fixed ${numBlankPayees} splits with a blank payee.`;
+      result += t('Fixed {{count}} splits with a blank payee.', {
+        count: numBlankPayees,
+      });
     }
     if (numCleared > 0) {
       if (result !== '') {
         result += '\n';
       }
-      result += `Fixed ${numCleared} splits with the wrong cleared flag.`;
+      result += t('Fixed {{count}} splits with the wrong cleared flag.', {
+        count: numCleared,
+      });
     }
     if (numDeleted > 0) {
       if (result !== '') {
         result += '\n';
       }
-      result += `Fixed ${numDeleted} splits that weren’t properly deleted.`;
+      result += t('Fixed {{count}} splits that weren’t properly deleted.', {
+        count: numDeleted,
+      });
     }
   }
 
@@ -75,31 +84,28 @@ export function FixSplits() {
           }}
         >
           <ButtonWithLoading isLoading={loading} onPress={onFix}>
-            Repair split transactions
+            {t('Repair split transactions')}
           </ButtonWithLoading>
           {results && renderResults(results)}
         </View>
       }
     >
       <Text>
-        <strong>Repair split transactions</strong> if you are experiencing bugs
-        relating to split transactions and the “Reset budget cache” button above
-        does not help, this tool may fix them. Some examples of bugs include
-        seeing blank payees on splits or incorrect account balances. This tool
-        does two things:
+        <strong>{t('Repair split transactions')}</strong>{' '}
+        {t(
+          'if you are experiencing bugs relating to split transactions and the “Reset budget cache” button above does not help, this tool may fix them. Some examples of bugs include seeing blank payees on splits or incorrect account balances. This tool does two things:',
+        )}
       </Text>
       <ul style={{ margin: 0, paddingLeft: '1.5em' }}>
         <li style={{ marginBottom: '0.5em' }}>
-          Ensures that deleted split transactions are fully deleted. In previous
-          versions of the app, certain split transactions may appear deleted but
-          not all of them are actually deleted. This causes the transactions
-          list to look correct, but certain balances may be incorrect when
-          filtering.
+          {t(
+            'Ensures that deleted split transactions are fully deleted. In previous versions of the app, certain split transactions may appear deleted but not all of them are actually deleted. This causes the transactions list to look correct, but certain balances may be incorrect when filtering.',
+          )}
         </li>
         <li>
-          Sync the payee and cleared flag of a split transaction to the main or
-          “parent” transaction, if appropriate. The payee will only be set if it
-          currently doesn’t have one.
+          {t(
+            'Sync the payee and cleared flag of a split transaction to the main or “parent” transaction, if appropriate. The payee will only be set if it currently doesn’t have one.',
+          )}
         </li>
       </ul>
     </Setting>

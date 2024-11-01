@@ -1,5 +1,7 @@
 import React, { type ComponentPropsWithoutRef } from 'react';
 
+import { t } from 'i18next';
+
 import * as monthUtils from 'loot-core/src/shared/months';
 
 import { useResponsive } from '../../ResponsiveProvider';
@@ -50,7 +52,7 @@ export function CategoryAutocompleteModal({
             <ModalHeader
               title={
                 <ModalTitle
-                  title="Category"
+                  title={t('Category')}
                   getStyle={() => ({ color: theme.menuAutoCompleteText })}
                 />
               }
@@ -65,7 +67,7 @@ export function CategoryAutocompleteModal({
           <View>
             {!isNarrowWidth && (
               <SectionLabel
-                title="Category"
+                title={t('Category')}
                 style={{
                   alignSelf: 'center',
                   color: theme.menuAutoCompleteText,

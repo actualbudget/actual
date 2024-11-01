@@ -1,5 +1,7 @@
 import React from 'react';
 
+import { t } from 'i18next';
+
 import * as monthUtils from 'loot-core/src/shared/months';
 import {
   amountToCurrency,
@@ -119,7 +121,7 @@ export function ReportSummary({
         >
           <PrivacyFilter>{amountToCurrency(data[balanceTypeOp])}</PrivacyFilter>
         </Text>
-        <Text style={{ fontWeight: 600 }}>For this time period</Text>
+        <Text style={{ fontWeight: 600 }}>{t('For this time period')}</Text>
       </View>
       <View
         style={{
@@ -157,7 +159,8 @@ export function ReportSummary({
           </PrivacyFilter>
         </Text>
         <Text style={{ fontWeight: 600 }}>
-          Per {(ReportOptions.intervalMap.get(interval) || '').toLowerCase()}
+          {t('Per')}{' '}
+          {(ReportOptions.intervalMap.get(interval) || '').toLowerCase()}
         </Text>
       </View>
     </View>

@@ -6,6 +6,7 @@ import {
   usePress,
   useLongPress,
 } from '@react-aria/interactions';
+import { t } from 'i18next';
 
 import { getScheduledAmount } from 'loot-core/src/shared/schedules';
 import { isPreviewId } from 'loot-core/src/shared/transactions';
@@ -79,7 +80,7 @@ export const Transaction = memo(function Transaction({
   const isPreview = isPreviewId(id);
 
   const { longPressProps } = useLongPress({
-    accessibilityDescription: 'Long press to select multiple transactions',
+    accessibilityDescription: t('Long press to select multiple transactions'),
     onLongPress: () => {
       if (isPreview) {
         return;
@@ -177,7 +178,7 @@ export const Transaction = memo(function Transaction({
                   }),
                 }}
               >
-                {prettyDescription || 'Empty'}
+                {prettyDescription || t('Empty')}
               </TextOneLine>
             </View>
             {isPreview ? (
@@ -233,7 +234,7 @@ export const Transaction = memo(function Transaction({
                     textAlign: 'left',
                   }}
                 >
-                  {prettyCategory || 'Uncategorized'}
+                  {prettyCategory || t('Uncategorized')}
                 </TextOneLine>
               </View>
             )}

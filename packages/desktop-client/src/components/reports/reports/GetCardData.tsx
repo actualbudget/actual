@@ -1,6 +1,8 @@
 import React, { useMemo } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 
+import { t } from 'i18next';
+
 import * as monthUtils from 'loot-core/src/shared/months';
 import { type AccountEntity } from 'loot-core/types/models/account';
 import { type CategoryEntity } from 'loot-core/types/models/category';
@@ -28,7 +30,7 @@ function ErrorFallback() {
         <br />
       </div>
       <Text style={{ ...styles.mediumText, color: theme.errorText }}>
-        There was a problem loading your report
+        {t('There was a problem loading your report')}
       </Text>
     </>
   );

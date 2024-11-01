@@ -7,6 +7,8 @@ import {
 } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { t } from 'i18next';
+
 import { type AccountEntity } from 'loot-core/types/models';
 
 import { useAccount } from '../../hooks/useAccount';
@@ -155,7 +157,7 @@ export function AccountMenuModal({
                 notes={
                   originalNotes && originalNotes.length > 0
                     ? originalNotes
-                    : 'No notes'
+                    : t('No notes')
                 }
                 editable={false}
                 focused={false}
@@ -184,7 +186,7 @@ export function AccountMenuModal({
                   height={20}
                   style={{ paddingRight: 5 }}
                 />
-                Edit notes
+                {t('Edit notes')}
               </Button>
             </View>
           </View>
@@ -244,13 +246,13 @@ function AdditionalAccountMenu({
               account.closed
                 ? {
                     name: 'reopen',
-                    text: 'Reopen account',
+                    text: t('Reopen account'),
                     icon: SvgLockOpen,
                     iconSize: 15,
                   }
                 : {
                     name: 'close',
-                    text: 'Close account',
+                    text: t('Close account'),
                     icon: SvgClose,
                     iconSize: 15,
                   },

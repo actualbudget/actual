@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
+import { t } from 'i18next';
+
 import { replaceModal } from 'loot-core/src/client/actions/modals';
 import { send } from 'loot-core/src/platform/client/fetch';
 
@@ -83,15 +85,22 @@ export function MergeUnusedPayeesModal({ payeeIds, targetPayeeId }) {
             <Paragraph style={{ marginBottom: 10, fontWeight: 500 }}>
               {payees.length === 1 ? (
                 <>
-                  The payee <Text style={highlightStyle}>{payees[0].name}</Text>{' '}
-                  is not used by transactions any more. Would like to merge it
-                  with <Text style={highlightStyle}>{targetPayee.name}</Text>?
+                  {t(
+                    'The payee {{name}} is not used by transactions anymore. Would you like to merge it with {{targetName}}?',
+                    {
+                      name: payees[0].name,
+                      targetName: targetPayee.name,
+                    },
+                  )}
                 </>
               ) : (
                 <>
-                  The following payees are not used by transactions any more.
-                  Would like to merge them with{' '}
-                  <Text style={highlightStyle}>{targetPayee.name}</Text>?
+                  {t(
+                    'The following payees are not used by transactions anymore. Would you like to merge them with {{targetName}}?',
+                    {
+                      targetName: targetPayee.name,
+                    },
+                  )}
                   <ul
                     ref={flashRef}
                     style={{
@@ -112,13 +121,14 @@ export function MergeUnusedPayeesModal({ payeeIds, targetPayeeId }) {
             </Paragraph>
 
             <Information>
-              Merging will remove the payee and transfer any existing rules to
-              the new payee.
+              {t(
+                'Merging will remove the payee and transfer any existing rules to the new payee.',
+              )}
               {!isEditingRule && (
                 <>
-                  {' '}
-                  If checked below, a rule will be created to do this rename
-                  while importing transactions.
+                  {t(
+                    ' If checked below, a rule will be created to do this rename while importing transactions.',
+                  )}
                 </>
               )}
             </Information>
@@ -141,9 +151,10 @@ export function MergeUnusedPayeesModal({ payeeIds, targetPayeeId }) {
                   onChange={e => setShouldCreateRule(e.target.checked)}
                 />
                 <Text style={{ marginLeft: 3 }}>
-                  Automatically rename{' '}
-                  {payees.length === 1 ? 'this payee' : 'these payees'} in the
-                  future
+                  {t('Automatically rename {{payeeCount}} in the future', {
+                    payeeCount:
+                      payees.length === 1 ? t('this payee') : t('these payees'),
+                  })}
                 </Text>
               </label>
             )}
@@ -158,7 +169,7 @@ export function MergeUnusedPayeesModal({ payeeIds, targetPayeeId }) {
                   close();
                 }}
               >
-                Merge
+                {t('Merge')}
               </Button>
               {!isEditingRule && (
                 <Button
@@ -168,11 +179,11 @@ export function MergeUnusedPayeesModal({ payeeIds, targetPayeeId }) {
                     close();
                   }}
                 >
-                  Merge and edit rule
+                  {t('Merge and edit rule')}
                 </Button>
               )}
               <Button style={{ marginRight: 10 }} onPress={close}>
-                Do nothing
+                {t('Do nothing')}
               </Button>
             </ModalButtons>
           </View>

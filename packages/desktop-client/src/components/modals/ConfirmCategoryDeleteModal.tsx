@@ -1,5 +1,6 @@
 // @ts-strict-ignore
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next'; // Import useTranslation
 
 import { useCategories } from '../../hooks/useCategories';
 import { theme } from '../../style';
@@ -21,6 +22,7 @@ export function ConfirmCategoryDeleteModal({
   category: categoryId,
   onDelete,
 }: ConfirmCategoryDeleteProps) {
+  const { t } = useTranslation(); // Initialize translation hook
   const [transferCategory, setTransferCategory] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const { grouped: categoryGroups, list: categories } = useCategories();
@@ -32,10 +34,10 @@ export function ConfirmCategoryDeleteModal({
 
     switch (error) {
       case 'required-transfer':
-        msg = 'You must select a category';
+        msg = t('You must select a category'); // Use translation
         break;
       default:
-        msg = 'Something bad happened, sorry!';
+        msg = t('Something bad happened, sorry!'); // Use translation
     }
 
     return (
@@ -60,29 +62,29 @@ export function ConfirmCategoryDeleteModal({
       {({ state: { close } }) => (
         <>
           <ModalHeader
-            title="Confirm Delete"
+            title={t('Confirm Delete')} // Use translation for title
             rightContent={<ModalCloseButton onPress={close} />}
           />
           <View style={{ lineHeight: 1.5 }}>
             {group ? (
               <Block>
-                Categories in the group <strong>{group.name}</strong> are used
-                by existing transactions
+                {t(
+                  'Categories in the group {{groupName}} are used by existing transactions. If so, you must select another category to transfer existing transactions and balance to.',
+                  { groupName: group.name },
+                )}
                 {!isIncome &&
-                  ' or it has a positive leftover balance currently'}
-                . <strong>Are you sure you want to delete it?</strong> If so,
-                you must select another category to transfer existing
-                transactions and balance to.
+                  t(' or it has a positive leftover balance currently.')}
+                <strong>{t('Are you sure you want to delete it?')}</strong>
               </Block>
             ) : (
               <Block>
-                <strong>{category.name}</strong> is used by existing
-                transactions
+                <strong>{category.name}</strong>{' '}
+                {t(
+                  'is used by existing transactions. If so, you must select another category to transfer existing transactions and balance to.',
+                )}
                 {!isIncome &&
-                  ' or it has a positive leftover balance currently'}
-                . <strong>Are you sure you want to delete it?</strong> If so,
-                you must select another category to transfer existing
-                transactions and balance to.
+                  t(' or it has a positive leftover balance currently.')}
+                <strong>{t('Are you sure you want to delete it?')}</strong>
               </Block>
             )}
 
@@ -96,7 +98,7 @@ export function ConfirmCategoryDeleteModal({
                 alignItems: 'center',
               }}
             >
-              <Text>Transfer to:</Text>
+              <Text>{t('Transfer to:')}</Text>
 
               <View style={{ flex: 1, marginLeft: 10, marginRight: 30 }}>
                 <CategoryAutocomplete
@@ -117,7 +119,7 @@ export function ConfirmCategoryDeleteModal({
                   value={transferCategory}
                   focused={true}
                   inputProps={{
-                    placeholder: 'Select category...',
+                    placeholder: t('Select category...'),
                   }}
                   onSelect={category => setTransferCategory(category)}
                   showHiddenCategories={true}
@@ -135,7 +137,7 @@ export function ConfirmCategoryDeleteModal({
                   }
                 }}
               >
-                Delete
+                {t('Delete')}
               </Button>
             </View>
           </View>

@@ -8,6 +8,7 @@ import React, {
 import { useDispatch } from 'react-redux';
 
 import { css } from '@emotion/css';
+import { t } from 'i18next';
 import { v4 as uuid } from 'uuid';
 
 import {
@@ -334,7 +335,7 @@ function ScheduleDescription({ id }) {
             textOverflow: 'ellipsis',
           }}
         >
-          Payee:{' '}
+          {t('Payee')}:{' '}
           <DisplayId
             type="payees"
             id={schedule._payee}
@@ -343,11 +344,11 @@ function ScheduleDescription({ id }) {
         </Text>
         <Text style={{ margin: '0 5px' }}> — </Text>
         <Text style={{ flexShrink: 0 }}>
-          Amount: {formatAmount(schedule._amount)}
+          {t('Amount')}: {formatAmount(schedule._amount)}
         </Text>
         <Text style={{ margin: '0 5px' }}> — </Text>
         <Text style={{ flexShrink: 0 }}>
-          Next: {monthUtils.format(schedule.next_date, dateFormat)}
+          {t('Next')}: {monthUtils.format(schedule.next_date, dateFormat)}
         </Text>
       </View>
       <StatusBadge status={status} />
@@ -427,7 +428,7 @@ function ActionEditor({ action, editorStyle, onChange, onDelete, onAdd }) {
                   padding: 5,
                 }}
                 aria-label={
-                  templated ? 'Disable templating' : 'Enable templating'
+                  templated ? t('Disable templating') : t('Enable templating')
                 }
                 onPress={() => onChange('template', !templated)}
               >
@@ -446,7 +447,7 @@ function ActionEditor({ action, editorStyle, onChange, onDelete, onAdd }) {
       ) : op === 'set-split-amount' ? (
         <>
           <View style={{ padding: '5px 10px', lineHeight: '1em' }}>
-            allocate
+            {t('allocate')}
           </View>
 
           <SplitAmountMethodSelect
@@ -522,9 +523,9 @@ function StageInfo() {
       <Tooltip
         content={
           <>
-            The stage of a rule allows you to force a specific order. Pre rules
-            always run first, and post rules always run last. Within each stage
-            rules are automatically ordered from least to most specific.
+            {t(
+              'The stage of a rule allows you to force a specific order. Pre rules always run first, and post rules always run last. Within each stage rules are automatically ordered from least to most specific.',
+            )}
           </>
         }
         placement="bottom start"
@@ -1017,7 +1018,7 @@ export function EditRuleModal({ defaultRule, onSave: originalOnSave }) {
       {({ state: { close } }) => (
         <>
           <ModalHeader
-            title="Rule"
+            title={t('Rule')}
             rightContent={<ModalCloseButton onPress={close} />}
           />
           <View
@@ -1040,26 +1041,26 @@ export function EditRuleModal({ defaultRule, onSave: originalOnSave }) {
                 padding: '0 20px',
               }}
             >
-              <Text style={{ marginRight: 15 }}>Stage of rule:</Text>
+              <Text style={{ marginRight: 15 }}>{t('Stage of rule:')}</Text>
 
               <Stack direction="row" align="center" spacing={1}>
                 <StageButton
                   selected={stage === 'pre'}
                   onSelect={() => onChangeStage('pre')}
                 >
-                  Pre
+                  {t('Pre')}
                 </StageButton>
                 <StageButton
                   selected={stage === null}
                   onSelect={() => onChangeStage(null)}
                 >
-                  Default
+                  {t('Default')}
                 </StageButton>
                 <StageButton
                   selected={stage === 'post'}
                   onSelect={() => onChangeStage('post')}
                 >
-                  Post
+                  {t('Post')}
                 </StageButton>
 
                 <StageInfo />
@@ -1078,7 +1079,7 @@ export function EditRuleModal({ defaultRule, onSave: originalOnSave }) {
               <View style={{ flexShrink: 0 }}>
                 <View style={{ marginBottom: 30 }}>
                   <Text style={{ marginBottom: 15 }}>
-                    If
+                    {t('If')}
                     <FieldSelect
                       data-testid="conditions-op"
                       style={{ display: 'inline-flex' }}
@@ -1089,7 +1090,7 @@ export function EditRuleModal({ defaultRule, onSave: originalOnSave }) {
                       value={conditionsOp}
                       onChange={onChangeConditionsOp}
                     />
-                    of these conditions match:
+                    {t('of these conditions match:')}
                   </Text>
 
                   <ConditionsList
@@ -1102,7 +1103,7 @@ export function EditRuleModal({ defaultRule, onSave: originalOnSave }) {
                 </View>
 
                 <Text style={{ marginBottom: 15 }}>
-                  Then apply these actions:
+                  {t('Then apply these actions:')}
                 </Text>
                 <View style={{ flex: 1 }}>
                   {actionSplits.length === 0 && (
@@ -1110,7 +1111,7 @@ export function EditRuleModal({ defaultRule, onSave: originalOnSave }) {
                       style={{ alignSelf: 'flex-start' }}
                       onPress={addInitialAction}
                     >
-                      Add action
+                      {t('Add action')}
                     </Button>
                   )}
                   <Stack spacing={2} data-testid="action-split-list">
@@ -1141,8 +1142,8 @@ export function EditRuleModal({ defaultRule, onSave: originalOnSave }) {
                               }}
                             >
                               {splitIndex === 0
-                                ? 'Apply to all'
-                                : `Split ${splitIndex}`}
+                                ? t('Apply to all')
+                                : `${t('Split')} ${splitIndex}`}
                             </Text>
                             {splitIndex && (
                               <Button
@@ -1152,7 +1153,7 @@ export function EditRuleModal({ defaultRule, onSave: originalOnSave }) {
                                   width: 20,
                                   height: 20,
                                 }}
-                                aria-label="Delete split"
+                                aria-label={t('Delete split')}
                               >
                                 <SvgDelete
                                   style={{
@@ -1199,7 +1200,7 @@ export function EditRuleModal({ defaultRule, onSave: originalOnSave }) {
                               addActionToSplitAfterIndex(splitIndex, -1)
                             }
                           >
-                            Add action
+                            {t('Add action')}
                           </Button>
                         )}
                       </View>
@@ -1214,8 +1215,8 @@ export function EditRuleModal({ defaultRule, onSave: originalOnSave }) {
                       data-testid="add-split-transactions"
                     >
                       {actionSplits.length > 1
-                        ? 'Add another split'
-                        : 'Split into multiple transactions'}
+                        ? t('Add another split')
+                        : t('Split into multiple transactions')}
                     </Button>
                   )}
                 </View>
@@ -1232,7 +1233,7 @@ export function EditRuleModal({ defaultRule, onSave: originalOnSave }) {
                   }}
                 >
                   <Text style={{ color: theme.pageTextLight, marginBottom: 0 }}>
-                    This rule applies to these transactions:
+                    {t('This rule applies to these transactions:')}
                   </Text>
 
                   <View style={{ flex: 1 }} />
@@ -1240,7 +1241,7 @@ export function EditRuleModal({ defaultRule, onSave: originalOnSave }) {
                     isDisabled={selectedInst.items.size === 0}
                     onPress={onApply}
                   >
-                    Apply actions ({selectedInst.items.size})
+                    {t('Apply actions')} ({selectedInst.items.size})
                   </Button>
                 </View>
 
@@ -1261,9 +1262,9 @@ export function EditRuleModal({ defaultRule, onSave: originalOnSave }) {
                   justify="flex-end"
                   style={{ marginTop: 20 }}
                 >
-                  <Button onClick={close}>Cancel</Button>
+                  <Button onClick={close}>{t('Cancel')}</Button>
                   <Button variant="primary" onPress={() => onSave(close)}>
-                    Save
+                    {t('Save')}
                   </Button>
                 </Stack>
               </View>

@@ -1,6 +1,7 @@
 // @ts-strict-ignore
 import React, { memo } from 'react';
 
+import { t } from 'i18next';
 import { v4 as uuid } from 'uuid';
 
 import { friendlyOp } from 'loot-core/src/shared/rules';
@@ -143,7 +144,9 @@ export const RuleRow = memo(
                           marginBottom: 6,
                         }}
                       >
-                        {i ? `Split ${i}` : 'Apply to all'}
+                        {i
+                          ? t('Split {{index}}', { index: i })
+                          : t('Apply to all')}
                       </Text>
                       {split.actions.map((action, j) => (
                         <ActionExpression
@@ -166,7 +169,7 @@ export const RuleRow = memo(
         </Field>
 
         <Cell name="edit" plain style={{ padding: '0 15px', paddingLeft: 5 }}>
-          <Button onPress={() => onEditRule(rule)}>Edit</Button>
+          <Button onPress={() => onEditRule(rule)}>{t('Edit')}</Button>
         </Cell>
       </Row>
     );

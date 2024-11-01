@@ -9,6 +9,8 @@ import React, {
 } from 'react';
 import { useDispatch } from 'react-redux';
 
+import { t } from 'i18next';
+
 import { pushModal } from 'loot-core/src/client/actions/modals';
 import { initiallyLoadPayees } from 'loot-core/src/client/actions/queries';
 import { send } from 'loot-core/src/platform/client/fetch';
@@ -196,7 +198,9 @@ export function ManageRules({
     ]);
 
     if (someDeletionsFailed) {
-      alert('Some rules were not deleted because they are linked to schedules');
+      alert(
+        t('Some rules were not deleted because they are linked to schedules'),
+      );
     }
 
     await loadRules();
@@ -273,19 +277,19 @@ export function ManageRules({
             }}
           >
             <Text>
-              Rules are always run in the order that you see them.{' '}
+              {t('Rules are always run in the order that you see them.')}{' '}
               <Link
                 variant="external"
                 to="https://actualbudget.org/docs/budgeting/rules/"
                 linkColor="muted"
               >
-                Learn more
+                {t('Learn more')}
               </Link>
             </Text>
           </View>
           <View style={{ flex: 1 }} />
           <Search
-            placeholder="Filter rules..."
+            placeholder={t('Filter rules...')}
             value={filter}
             onChange={onSearchChange}
           />
@@ -298,7 +302,7 @@ export function ManageRules({
             style={{ marginBottom: -1 }}
           >
             {filteredRules.length === 0 ? (
-              <EmptyMessage text="No rules" style={{ marginTop: 15 }} />
+              <EmptyMessage text={t('No rules')} style={{ marginTop: 15 }} />
             ) : (
               <RulesList
                 rules={filteredRules}
@@ -325,7 +329,7 @@ export function ManageRules({
               </Button>
             )}
             <Button variant="primary" onPress={onCreateRule}>
-              Create new rule
+              {t('Create new rule')}
             </Button>
           </Stack>
         </View>

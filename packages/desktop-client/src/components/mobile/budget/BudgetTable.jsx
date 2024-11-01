@@ -3,6 +3,7 @@ import { useDispatch } from 'react-redux';
 
 import { css } from '@emotion/css';
 import { AutoTextSize } from 'auto-text-size';
+import { t } from 'i18next';
 import memoizeOne from 'memoize-one';
 
 import { collapseModals, pushModal } from 'loot-core/client/actions';
@@ -82,7 +83,7 @@ function ToBudget({ toBudget, onPress, show3Cols }) {
       <Button variant="bare" onPress={onPress}>
         <View>
           <Label
-            title={amount < 0 ? 'Overbudgeted' : 'To Budget'}
+            title={amount < 0 ? t('Overbudgeted') : t('To Budget')}
             style={{
               ...(amount < 0 ? styles.smallText : {}),
               color: theme.formInputText,
@@ -155,7 +156,7 @@ function Saved({ projected, onPress, show3Cols }) {
                 minFontSizePx={6}
                 maxFontSizePx={12}
                 mode="oneline"
-                title="Projected Savings"
+                title={t('Projected Savings')} // Translated title
                 style={{
                   color: theme.formInputText,
                   textAlign: 'left',
@@ -165,7 +166,7 @@ function Saved({ projected, onPress, show3Cols }) {
             </View>
           ) : (
             <Label
-              title={isNegative ? 'Overspent' : 'Saved'}
+              title={t(isNegative ? 'Overspent' : 'Saved')} // Translated title
               style={{
                 color: theme.formInputText,
                 textAlign: 'left',
@@ -287,7 +288,9 @@ function BudgetCell({
     <CellValue
       binding={binding}
       type="financial"
-      aria-label={`Budgeted amount for ${category.name} category`}
+      aria-label={t('Budgeted amount for {{categoryName}} category', {
+        categoryName: category.name,
+      })}
       {...props}
     >
       {({ type, name, value }) =>
@@ -305,7 +308,9 @@ function BudgetCell({
               ...makeAmountGrey(value),
             }}
             onPress={onOpenCategoryBudgetMenu}
-            aria-label={`Open budget menu for ${category.name} category`}
+            aria-label={t('Open budget menu for {{categoryName}} category', {
+              categoryName: category.name,
+            })}
           >
             <View>
               <PrivacyFilter>
@@ -609,7 +614,9 @@ const ExpenseCategory = memo(function ExpenseCategory({
           <CellValue
             binding={spent}
             type="financial"
-            aria-label={`Spent amount for ${category.name} category`}
+            aria-label={t('Spent amount for {{categoryName}} category', {
+              categoryName: category.name,
+            })} // Translated aria-label
           >
             {({ type, value }) => (
               <Button
@@ -618,7 +625,10 @@ const ExpenseCategory = memo(function ExpenseCategory({
                   ...PILL_STYLE,
                 }}
                 onPress={onShowActivity}
-                aria-label={`Show transactions for ${category.name} category`}
+                aria-label={t(
+                  'Show transactions for {{categoryName}} category',
+                  { categoryName: category.name },
+                )} // Translated aria-label
               >
                 <PrivacyFilter>
                   <AutoTextSize
@@ -649,7 +659,9 @@ const ExpenseCategory = memo(function ExpenseCategory({
           }}
         >
           <BalanceWithCarryover
-            aria-label={`Balance for ${category.name} category`}
+            aria-label={t('Balance for {{categoryName}} category', {
+              categoryName: category.name,
+            })} // Translated aria-label
             type="financial"
             carryover={carryover}
             balance={balance}
@@ -682,7 +694,10 @@ const ExpenseCategory = memo(function ExpenseCategory({
                   maxWidth: columnWidth,
                 }}
                 onPress={onOpenBalanceMenu}
-                aria-label={`Open balance menu for ${category.name} category`}
+                aria-label={t(
+                  'Open balance menu for {{categoryName}} category',
+                  { categoryName: category.name },
+                )} // Translated aria-label
               >
                 <PrivacyFilter>
                   <AutoTextSize
@@ -809,6 +824,9 @@ const ExpenseGroupHeader = memo(function ExpenseGroupHeader({
             },
           })}
           onPress={() => onToggleCollapse?.(group.id)}
+          aria-label={t('Toggle collapse for {{groupName}}', {
+            groupName: group.name,
+          })} // Translated aria-label
         >
           <SvgExpandArrow
             width={8}
@@ -826,6 +844,7 @@ const ExpenseGroupHeader = memo(function ExpenseGroupHeader({
             maxWidth: sidebarColumnWidth,
           }}
           onPress={() => onEdit?.(group.id)}
+          aria-label={t('Edit group {{groupName}}', { groupName: group.name })} // Translated aria-label
         >
           <View
             style={{
@@ -1002,6 +1021,9 @@ const IncomeGroupHeader = memo(function IncomeGroupHeader({
             },
           })}
           onPress={() => onToggleCollapse?.(group.id)}
+          aria-label={t('Toggle collapse for {{groupName}}', {
+            groupName: group.name,
+          })} // Translated aria-label
         >
           <SvgExpandArrow
             width={8}
@@ -1019,6 +1041,7 @@ const IncomeGroupHeader = memo(function IncomeGroupHeader({
             maxWidth: sidebarColumnWidth,
           }}
           onPress={() => onEdit?.(group.id)}
+          aria-label={t('Edit group {{groupName}}', { groupName: group.name })} // Translated aria-label
         >
           <View
             style={{
@@ -1157,6 +1180,9 @@ const IncomeCategory = memo(function IncomeCategory({
             maxWidth: sidebarColumnWidth,
           }}
           onPress={() => onEdit?.(category.id)}
+          aria-label={t('Edit category {{categoryName}}', {
+            categoryName: category.name,
+          })} // Translated aria-label
         >
           <View
             style={{
@@ -1211,7 +1237,9 @@ const IncomeCategory = memo(function IncomeCategory({
         <CellValue
           binding={balance}
           type="financial"
-          aria-label={`Balance for ${category.name} category`}
+          aria-label={t('Balance for category {{categoryName}}', {
+            categoryName: category.name,
+          })} // Translated aria-label
         >
           {({ type, value }) => (
             <View>
@@ -1410,9 +1438,10 @@ function IncomeGroup({
         }}
       >
         {type === 'report' && (
-          <Label title="Budgeted" style={{ width: columnWidth }} />
+          <Label title={t('Budgeted')} style={{ width: columnWidth }} />
         )}
-        <Label title="Received" style={{ width: columnWidth }} />
+        <Label title={t('Received')} style={{ width: columnWidth }} />
+        Translated title
       </View>
 
       <Card style={{ marginTop: 0 }}>
@@ -1494,7 +1523,8 @@ function UncategorizedButton() {
           padding: '1.25em',
         }}
       >
-        {count} uncategorized {count === 1 ? 'transaction' : 'transactions'}
+        {count} {t('uncategorized')}
+        {count === 1 ? t('transaction') : t('transactions')}
         <View style={{ flex: 1 }} />
         <SvgArrowThinRight width="15" height="15" />
       </Link>
@@ -1652,7 +1682,7 @@ export function BudgetTable({
               variant="bare"
               style={{ margin: 10 }}
               onPress={onOpenBudgetPageMenu}
-              aria-label="Budget page menu"
+              aria-label={t('Budget page menu')}
             >
               <SvgLogo
                 style={{ color: theme.mobileHeaderText }}
@@ -1813,7 +1843,7 @@ function BudgetTableHeader({
                       />
                     )}
                     <Label
-                      title="Budgeted"
+                      title={t('Budgeted')}
                       style={{ color: theme.formInputText, paddingRight: 4 }}
                     />
                   </View>
@@ -1872,7 +1902,7 @@ function BudgetTableHeader({
                       />
                     )}
                     <Label
-                      title="Spent"
+                      title={t('Spent')}
                       style={{ color: theme.formInputText, paddingRight: 4 }}
                     />
                   </View>
@@ -1909,7 +1939,10 @@ function BudgetTableHeader({
           {({ type, value }) => (
             <View style={{ width: columnWidth }}>
               <View style={{ flex: 1, alignItems: 'flex-end' }}>
-                <Label title="Balance" style={{ color: theme.formInputText }} />
+                <Label
+                  title={t('Balance')}
+                  style={{ color: theme.formInputText }}
+                />
                 <View>
                   <PrivacyFilter>
                     <AutoTextSize
@@ -1960,7 +1993,7 @@ function MonthSelector({
       }}
     >
       <Button
-        aria-label="Previous month"
+        aria-label={t('Previous month')}
         variant="bare"
         onPress={() => {
           if (prevEnabled) {
@@ -1989,7 +2022,7 @@ function MonthSelector({
         </Text>
       </Button>
       <Button
-        aria-label="Next month"
+        aria-label={t('Next month')}
         variant="bare"
         onPress={() => {
           if (nextEnabled) {

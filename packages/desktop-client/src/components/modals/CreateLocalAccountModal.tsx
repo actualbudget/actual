@@ -3,6 +3,8 @@ import { type FormEvent, useState } from 'react';
 import { Form } from 'react-aria-components';
 import { useDispatch } from 'react-redux';
 
+import { t } from 'i18next';
+
 import { closeModal, createAccount } from 'loot-core/client/actions';
 import { toRelaxedNumber } from 'loot-core/src/shared/util';
 
@@ -71,7 +73,9 @@ export function CreateLocalAccountModal() {
       {({ state: { close } }) => (
         <>
           <ModalHeader
-            title={<ModalTitle title="Create Local Account" shrinkOnOverflow />}
+            title={
+              <ModalTitle title={t('Create Local Account')} shrinkOnOverflow />
+            }
             rightContent={<ModalCloseButton onPress={close} />}
           />
           <View>
@@ -123,7 +127,7 @@ export function CreateLocalAccountModal() {
                         verticalAlign: 'center',
                       }}
                     >
-                      Off-budget
+                      {t('Off-budget')}
                     </label>
                   </View>
                   <div
@@ -135,16 +139,16 @@ export function CreateLocalAccountModal() {
                     }}
                   >
                     <Text>
-                      This cannot be changed later. <br /> {'\n'}
-                      See{' '}
+                      {t('This cannot be changed later.')} <br /> {'\n'}
+                      {t('See')}
                       <Link
                         variant="external"
                         linkColor="muted"
                         to="https://actualbudget.org/docs/accounts/#off-budget-accounts"
                       >
-                        Accounts Overview
+                        {t('Accounts Overview')}
                       </Link>{' '}
-                      for more information.
+                      {t('for more information.')}
                     </Text>
                   </div>
                 </View>
@@ -168,18 +172,18 @@ export function CreateLocalAccountModal() {
               </InlineField>
               {balanceError && (
                 <FormError style={{ marginLeft: 75 }}>
-                  Balance must be a number
+                  {t('Balance must be a number')}
                 </FormError>
               )}
 
               <ModalButtons>
-                <Button onPress={close}>Back</Button>
+                <Button onPress={close}>{t('Back')}</Button>
                 <Button
                   type="submit"
                   variant="primary"
                   style={{ marginLeft: 10 }}
                 >
-                  Create
+                  {t('Create')}
                 </Button>
               </ModalButtons>
             </Form>

@@ -9,6 +9,8 @@ import React, {
   type CSSProperties,
 } from 'react';
 
+import { t } from 'i18next';
+
 import { evalArithmetic } from 'loot-core/src/shared/arithmetic';
 import { amountToInteger, appendDecimals } from 'loot-core/src/shared/util';
 
@@ -153,7 +155,7 @@ export function BetweenAmountInput({ defaultValue, onChange }) {
         }}
         style={{ color: theme.formInputText }}
       />
-      <View style={{ margin: '0 5px' }}>and</View>
+      <View style={{ margin: '0 5px' }}>{t('and')}</View>
       <AmountInput
         value={num2}
         onUpdate={value => {

@@ -1,4 +1,5 @@
 import { type CSSProperties } from 'react';
+import { useTranslation } from 'react-i18next'; // Import useTranslation from i18next
 import { useLocation } from 'react-router-dom';
 
 import * as Platform from 'loot-core/src/client/platform';
@@ -49,6 +50,7 @@ function KeyIcon({ shortcut, style }: KeyIconProps) {
 }
 
 function GroupHeading({ group }: GroupHeadingProps) {
+  const { t } = useTranslation(); // Initialize useTranslation
   return (
     <Text
       style={{
@@ -58,7 +60,7 @@ function GroupHeading({ group }: GroupHeadingProps) {
         marginBottom: 10,
       }}
     >
-      {group}:
+      {t(group)}:
     </Text>
   );
 }
@@ -70,6 +72,7 @@ function Shortcut({
   shift,
   style,
 }: ShortcutProps) {
+  const { t } = useTranslation(); // Initialize useTranslation
   return (
     <div
       style={{
@@ -142,7 +145,7 @@ function Shortcut({
           maxWidth: 300,
         }}
       >
-        {description}
+        {t(description)} {/* Translate description */}
       </div>
     </div>
   );
@@ -150,6 +153,7 @@ function Shortcut({
 
 export function KeyboardShortcutModal() {
   const location = useLocation();
+  const { t } = useTranslation(); // Initialize useTranslation
   const onBudget = location.pathname.startsWith('/budget');
   const onAccounts = location.pathname.startsWith('/accounts');
   const ctrl = Platform.OS === 'mac' ? '⌘' : 'Ctrl';
@@ -158,7 +162,7 @@ export function KeyboardShortcutModal() {
       {({ state: { close } }) => (
         <>
           <ModalHeader
-            title="Keyboard Shortcuts"
+            title={t('Keyboard Shortcuts')} // Translate title
             rightContent={<ModalCloseButton onPress={close} />}
           />
           <View
@@ -168,22 +172,22 @@ export function KeyboardShortcutModal() {
             }}
           >
             <View>
-              <Shortcut shortcut="?" description="Open the help menu" />
+              <Shortcut shortcut="?" description={t('Open the help menu')} />
               <Shortcut
                 shortcut="O"
-                description="Close the current budget and open another"
+                description={t('Close the current budget and open another')}
                 meta={ctrl}
               />
               <Shortcut
                 shortcut="P"
-                description="Toggle the privacy filter"
+                description={t('Toggle the privacy filter')}
                 meta={ctrl}
                 shift={true}
               />
               {onBudget && (
                 <Shortcut
                   shortcut="0"
-                  description="View current month"
+                  description={t('View current month')}
                   style={{
                     fontVariantNumeric: 'slashed-zero',
                   }}
@@ -193,51 +197,57 @@ export function KeyboardShortcutModal() {
                 <>
                   <Shortcut
                     shortcut="Enter"
-                    description="Move down when editing"
+                    description={t('Move down when editing')}
                   />
                   <Shortcut
                     shortcut="Enter"
-                    description="Move up when editing"
+                    description={t('Move up when editing')}
                     shift={true}
                   />
                   <Shortcut
                     shortcut="I"
-                    description="Import transactions"
+                    description={t('Import transactions')}
                     meta={ctrl}
                   />
-                  <Shortcut shortcut="B" description="Bank sync" meta={ctrl} />
-                  <GroupHeading group="With transaction(s) selected" />
+                  <Shortcut
+                    shortcut="B"
+                    description={t('Bank sync')}
+                    meta={ctrl}
+                  />
+                  <GroupHeading group={t('With transaction(s) selected')} />
                   <Shortcut
                     shortcut="F"
-                    description="Filter to the selected transactions"
+                    description={t('Filter to the selected transactions')}
                   />
                   <Shortcut
                     shortcut="D"
-                    description="Delete selected transactions"
+                    description={t('Delete selected transactions')}
                   />
                   <Shortcut
                     shortcut="A"
-                    description="Set account for selected transactions"
+                    description={t('Set account for selected transactions')}
                   />
                   <Shortcut
                     shortcut="P"
-                    description="Set payee for selected transactions"
+                    description={t('Set payee for selected transactions')}
                   />
                   <Shortcut
                     shortcut="N"
-                    description="Set notes for selected transactions"
+                    description={t('Set notes for selected transactions')}
                   />
                   <Shortcut
                     shortcut="C"
-                    description="Set category for selected transactions"
+                    description={t('Set category for selected transactions')}
                   />
                   <Shortcut
                     shortcut="L"
-                    description="Toggle cleared for selected transactions"
+                    description={t('Toggle cleared for selected transactions')}
                   />
                   <Shortcut
                     shortcut="S"
-                    description="Link or view schedule for selected transactions"
+                    description={t(
+                      'Link or view schedule for selected transactions',
+                    )}
                   />
                 </>
               )}
@@ -249,12 +259,12 @@ export function KeyboardShortcutModal() {
             >
               <Shortcut
                 shortcut="Z"
-                description="Undo the last change"
+                description={t('Undo the last change')}
                 meta={ctrl}
               />
               <Shortcut
                 shortcut="Z"
-                description="Redo the last undone change"
+                description={t('Redo the last undone change')}
                 shift={true}
                 meta={ctrl}
               />
@@ -262,71 +272,82 @@ export function KeyboardShortcutModal() {
                 <>
                   <Shortcut
                     shortcut="Enter"
-                    description="Move up when editing"
+                    description={t('Move up when editing')}
                     shift={true}
                   />
                   <Shortcut
                     shortcut="Tab"
-                    description="Move left when editing"
+                    description={t('Move left when editing')}
                     shift={true}
                   />
                   {onBudget && (
                     <>
                       <Shortcut
                         shortcut="←"
-                        description="View previous month"
+                        description={t('View previous month')}
                       />
-                      <Shortcut shortcut="→" description="View next month" />
+                      <Shortcut
+                        shortcut="→"
+                        description={t('View next month')}
+                      />
                     </>
                   )}
                   {onAccounts && (
                     <>
                       <Shortcut
                         shortcut="A"
-                        description="Select all transactions"
+                        description={t('Select all transactions')}
                         meta={ctrl}
                       />
                       <Shortcut
                         shortcut="Tab"
-                        description="Move right when editing"
+                        description={t('Move right when editing')}
                       />
                       <Shortcut
                         shortcut="Tab"
-                        description="Move left when editing"
+                        description={t('Move left when editing')}
                         shift={true}
                       />
                       <Shortcut
                         shortcut="T"
-                        description="Add a new transaction"
+                        description={t('Add a new transaction')}
                       />
                       <Shortcut
                         shortcut="F"
-                        description="Filter transactions"
+                        description={t('Filter transactions')}
                       />
-                      <GroupHeading group="Select a transaction, then" />
+                      <GroupHeading group={t('Select a transaction, then')} />
                       <Shortcut
                         shortcut="J"
-                        description="Move to the next transaction down"
+                        description={t('Move to the next transaction down')}
                       />
                       <Shortcut
                         shortcut="K"
-                        description="Move to the next transaction up"
+                        description={t('Move to the next transaction up')}
                       />
                       <Shortcut
                         shortcut="↑"
-                        description="Move to the next transaction down and scroll"
+                        description={t(
+                          'Move to the next transaction down and scroll',
+                        )}
                       />
                       <Shortcut
                         shortcut="↓"
-                        description="Move to the next transaction up and scroll"
+                        description={t(
+                          'Move to the next transaction up and scroll',
+                        )}
                       />
                       <Shortcut
                         shortcut="Space"
-                        description="Toggle selection of current transaction"
+                        description={t(
+                          'Toggle selection of current transaction',
+                        )}
                       />
                       <Shortcut
                         shortcut="Space"
-                        description="Toggle all transactions between current and most recently selected transaction"
+                        description={t(
+                          'Toggle all transactions between current and most recently selected transaction',
+                        )}
                         shift={true}
                       />
                     </>

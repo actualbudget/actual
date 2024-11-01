@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
+import { t } from 'i18next';
+
 import { send, sendCatch } from 'loot-core/platform/client/fetch/index';
 import { addNotification } from 'loot-core/src/client/actions';
 import { calculateHasWarning } from 'loot-core/src/client/reports';
@@ -47,7 +49,7 @@ export function CustomReportListCards({
 
     return (
       <MissingReportCard isEditing={isEditing} onRemove={onRemove}>
-        This custom report has been deleted.
+        {t('This custom report has been deleted.')}
       </MissingReportCard>
     );
   }
@@ -178,7 +180,9 @@ function CustomReportListCardsInner({
       {hasWarning && (
         <View style={{ padding: 5, position: 'absolute', bottom: 0 }}>
           <Tooltip
-            content="The widget is configured to use a non-existing filter value (i.e. category/account/payee). Edit the filters used in this report widget to remove the warning."
+            content={t(
+              'The widget is configured to use a non-existing filter value (i.e. category/account/payee). Edit the filters used in this report widget to remove the warning.',
+            )}
             placement="bottom start"
             style={{ ...styles.tooltip, maxWidth: 300 }}
           >
