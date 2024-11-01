@@ -1,7 +1,5 @@
 import React, {
-  useState,
   type ComponentPropsWithoutRef,
-  useEffect,
   type CSSProperties,
 } from 'react';
 
