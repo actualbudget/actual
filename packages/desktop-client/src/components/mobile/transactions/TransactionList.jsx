@@ -112,6 +112,7 @@ export function TransactionList({
         aria-label="Transaction list"
         selectionMode={selectedTransactions.size > 0 ? 'multiple' : 'single'}
         selectedKeys={selectedTransactions}
+        dependencies={[selectedTransactions]}
         renderEmptyState={() => (
           <View
             style={{
@@ -124,7 +125,6 @@ export function TransactionList({
           </View>
         )}
         items={sections}
-        dependencies={[selectedTransactions]}
       >
         {section => (
           <Section>
@@ -155,6 +155,7 @@ export function TransactionList({
             >
               {transaction => (
                 <TransactionListItem
+                  key={transaction.id}
                   value={transaction}
                   onPress={trans => onTransactionPress(trans)}
                   onLongPress={trans => onTransactionPress(trans, true)}

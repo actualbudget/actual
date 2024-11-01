@@ -122,147 +122,149 @@ export function TransactionListItem({
     : {};
 
   return (
-    <ListBoxItem
-      style={({ isSelected }) => ({
-        ...(isSelected
-          ? {
-              borderWidth: '0 0 0 4px',
-              borderColor: theme.mobileTransactionSelected,
-              borderStyle: 'solid',
-            }
-          : {}),
-      })}
-      textValue={id}
-      {...props}
-    >
-      <PressResponder {...mergeProps(pressProps, longPressProps)}>
-        <Button
-          style={{
-            border: 'none',
-            backgroundColor: theme.tableBackground,
-            userSelect: 'none',
-            height: ROW_HEIGHT,
-            width: '100%',
-            ...(isPreview
-              ? {
-                  backgroundColor: theme.tableRowHeaderBackground,
-                }
-              : {}),
-          }}
-        >
-          <View
+    <ListBoxItem textValue={id} {...props}>
+      {({ isSelected }) => (
+        <PressResponder {...mergeProps(pressProps, longPressProps)}>
+          <Button
             style={{
-              flexDirection: 'row',
-              flex: 1,
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              padding: '0 10px',
+              userSelect: 'none',
+              height: ROW_HEIGHT,
+              width: '100%',
+              borderRadius: 0,
+              ...(isSelected
+                ? {
+                    borderWidth: '0 0 0 4px',
+                    borderColor: theme.mobileTransactionSelected,
+                    borderStyle: 'solid',
+                  }
+                : {
+                    borderWidth: '0 0 1px 0',
+                    borderColor: theme.tableBorder,
+                    borderStyle: 'solid',
+                  }),
+              ...(isPreview
+                ? {
+                    backgroundColor: theme.tableRowHeaderBackground,
+                  }
+                : {
+                    backgroundColor: theme.tableBackground,
+                  }),
             }}
           >
-            <View>
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                {schedule && (
-                  <SvgArrowsSynchronize
-                    style={{
-                      width: 12,
-                      height: 12,
-                      marginRight: 5,
-                      color: textStyle.color || theme.menuItemText,
-                    }}
-                  />
-                )}
-                <TextOneLine
-                  style={{
-                    ...styles.text,
-                    ...textStyle,
-                    fontSize: 14,
-                    fontWeight: isAdded ? '600' : '400',
-                    ...(prettyDescription === '' && {
-                      color: theme.tableTextLight,
-                      fontStyle: 'italic',
-                    }),
-                  }}
-                >
-                  {prettyDescription || 'Empty'}
-                </TextOneLine>
-              </View>
-              {isPreview ? (
-                <Status status={categoryId} isSplit={isParent || isChild} />
-              ) : (
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    marginTop: 3,
-                  }}
-                >
-                  {isReconciled ? (
-                    <SvgLockClosed
-                      style={{
-                        width: 11,
-                        height: 11,
-                        color: theme.noticeTextLight,
-                        marginRight: 5,
-                      }}
-                    />
-                  ) : (
-                    <SvgCheckCircle1
-                      style={{
-                        width: 11,
-                        height: 11,
-                        color: isCleared
-                          ? theme.noticeTextLight
-                          : theme.pageTextSubdued,
-                        marginRight: 5,
-                      }}
-                    />
-                  )}
-                  {(isParent || isChild) && (
-                    <SvgSplit
+            <View
+              style={{
+                flexDirection: 'row',
+                flex: 1,
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '0 10px',
+              }}
+            >
+              <View>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  {schedule && (
+                    <SvgArrowsSynchronize
                       style={{
                         width: 12,
                         height: 12,
                         marginRight: 5,
+                        color: textStyle.color || theme.menuItemText,
                       }}
                     />
                   )}
                   <TextOneLine
                     style={{
-                      fontSize: 11,
-                      marginTop: 1,
-                      fontWeight: '400',
-                      color: prettyCategory
-                        ? theme.tableText
-                        : theme.menuItemTextSelected,
-                      fontStyle:
-                        specialCategory || !prettyCategory
-                          ? 'italic'
-                          : undefined,
-                      textAlign: 'left',
+                      ...styles.text,
+                      ...textStyle,
+                      fontSize: 14,
+                      fontWeight: isAdded ? '600' : '400',
+                      ...(prettyDescription === '' && {
+                        color: theme.tableTextLight,
+                        fontStyle: 'italic',
+                      }),
                     }}
                   >
-                    {prettyCategory || 'Uncategorized'}
+                    {prettyDescription || 'Empty'}
                   </TextOneLine>
                 </View>
-              )}
+                {isPreview ? (
+                  <Status status={categoryId} isSplit={isParent || isChild} />
+                ) : (
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      marginTop: 3,
+                    }}
+                  >
+                    {isReconciled ? (
+                      <SvgLockClosed
+                        style={{
+                          width: 11,
+                          height: 11,
+                          color: theme.noticeTextLight,
+                          marginRight: 5,
+                        }}
+                      />
+                    ) : (
+                      <SvgCheckCircle1
+                        style={{
+                          width: 11,
+                          height: 11,
+                          color: isCleared
+                            ? theme.noticeTextLight
+                            : theme.pageTextSubdued,
+                          marginRight: 5,
+                        }}
+                      />
+                    )}
+                    {(isParent || isChild) && (
+                      <SvgSplit
+                        style={{
+                          width: 12,
+                          height: 12,
+                          marginRight: 5,
+                        }}
+                      />
+                    )}
+                    <TextOneLine
+                      style={{
+                        fontSize: 11,
+                        marginTop: 1,
+                        fontWeight: '400',
+                        color: prettyCategory
+                          ? theme.tableText
+                          : theme.menuItemTextSelected,
+                        fontStyle:
+                          specialCategory || !prettyCategory
+                            ? 'italic'
+                            : undefined,
+                        textAlign: 'left',
+                      }}
+                    >
+                      {prettyCategory || 'Uncategorized'}
+                    </TextOneLine>
+                  </View>
+                )}
+              </View>
+              <View style={{ justifyContent: 'center' }}>
+                <Text
+                  style={{
+                    ...styles.text,
+                    ...textStyle,
+                    marginLeft: 25,
+                    marginRight: 5,
+                    fontSize: 14,
+                    ...makeAmountFullStyle(amount),
+                  }}
+                >
+                  {integerToCurrency(amount)}
+                </Text>
+              </View>
             </View>
-            <View style={{ justifyContent: 'center' }}>
-              <Text
-                style={{
-                  ...styles.text,
-                  ...textStyle,
-                  marginLeft: 25,
-                  marginRight: 5,
-                  fontSize: 14,
-                  ...makeAmountFullStyle(amount),
-                }}
-              >
-                {integerToCurrency(amount)}
-              </Text>
-            </View>
-          </View>
-        </Button>
-      </PressResponder>
+          </Button>
+        </PressResponder>
+      )}
     </ListBoxItem>
   );
 }
