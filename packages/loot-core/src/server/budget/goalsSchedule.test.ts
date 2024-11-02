@@ -1,7 +1,7 @@
-import * as db from '../../db';
-import { getRuleForSchedule } from '../../schedules/app';
-import { isReflectBudget } from '../actions';
+import * as db from '../db';
+import { getRuleForSchedule } from '../schedules/app';
 
+import { isReflectBudget } from './actions';
 import { goalsSchedule } from './goalsSchedule';
 
 jest.mock('../../db');

@@ -108,7 +108,7 @@ async function processTemplate(
   month,
   force: boolean,
   categoryTemplates,
-  categoriesIn?: any[],
+  categoriesIn?,
 ): Promise<Notification> {
   // setup objects for each category and catch errors
   let categories = [];
