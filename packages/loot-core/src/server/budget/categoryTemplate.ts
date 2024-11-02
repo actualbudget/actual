@@ -53,7 +53,7 @@ export class categoryTemplate {
   // what is the full requested amount this month
   async runAll(available: number) {
     let toBudget: number = 0;
-    for (let i=0; i < this.priorities.length; i++) {
+    for (let i = 0; i < this.priorities.length; i++) {
       const p = this.priorities[i];
       toBudget += await this.runTemplatesForPriority(p, available, available);
     }
@@ -185,7 +185,11 @@ export class categoryTemplate {
 
   getValues() {
     this.runGoal();
-    return { budgeted: this.toBudgetAmount, goal: this.goalAmount, longGoal: this.isLongGoal };
+    return {
+      budgeted: this.toBudgetAmount,
+      goal: this.goalAmount,
+      longGoal: this.isLongGoal,
+    };
   }
 
   //-----------------------------------------------------------------------------

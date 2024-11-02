@@ -218,7 +218,11 @@ async function processTemplate(
   catObjects.forEach(o => {
     const ret = o.getValues();
     budgetList.push({ category: o.categoryID, budgeted: ret.budgeted });
-    goalList.push({ category: o.categoryID, goal: ret.goal, longGoal: ret.longGoal });
+    goalList.push({
+      category: o.categoryID,
+      goal: ret.goal,
+      longGoal: ret.longGoal,
+    });
   });
   await setBudgets(month, budgetList);
   await setGoals(month, goalList);
