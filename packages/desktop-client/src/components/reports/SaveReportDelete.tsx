@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { t } from 'i18next';
+import { useTranslation } from 'react-i18next';
 
 import { theme } from '../../style/theme';
 import { Button } from '../common/Button2';
@@ -19,6 +19,7 @@ export function SaveReportDelete({
   onClose,
   name,
 }: SaveReportDeleteProps) {
+  const { t } = useTranslation();
   return (
     <>
       <View style={{ align: 'center' }}>

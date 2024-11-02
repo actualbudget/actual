@@ -173,7 +173,7 @@ export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
     setIsSimpleFinSetupComplete(configuredSimpleFin);
   }, [configuredSimpleFin]);
 
-  let title = 'Add Account';
+  let title = t('Add Account');
   const [loadingSimpleFinAccounts, setLoadingSimpleFinAccounts] =
     useState(false);
 
@@ -371,7 +371,7 @@ export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
                       fontWeight: 600,
                     }}
                   >
-                    Set up bank sync
+                    {t('Set up bank sync')}
                   </Button>
                   <Paragraph style={{ fontSize: 15 }}>
                     {t('Connect to an Actual server to set up ')}

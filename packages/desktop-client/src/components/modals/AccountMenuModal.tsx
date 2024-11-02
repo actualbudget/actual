@@ -7,8 +7,6 @@ import {
 } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { t } from 'i18next';
-
 import { type AccountEntity } from 'loot-core/types/models';
 
 import { useAccount } from '../../hooks/useAccount';

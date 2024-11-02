@@ -9,7 +9,7 @@ import React, {
 } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { t } from 'i18next';
+import { useTranslation } from 'react-i18next';
 
 import { pushModal } from 'loot-core/src/client/actions/modals';
 import { initiallyLoadPayees } from 'loot-core/src/client/actions/queries';
@@ -256,6 +256,7 @@ export function ManageRules({
   const onHover = useCallback(id => {
     setHoveredRule(id);
   }, []);
+  const { t } = useTranslation();
 
   return (
     <SelectedProvider instance={selectedInst}>

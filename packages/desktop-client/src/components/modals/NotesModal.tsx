@@ -1,7 +1,7 @@
 // @ts-strict-ignore
 import React, { useEffect, useState } from 'react';
 
-import { t } from 'i18next';
+import { useTranslation } from 'react-i18next';
 
 import { useNotes } from '../../hooks/useNotes';
 import { SvgCheck } from '../../icons/v2';
@@ -17,6 +17,7 @@ type NotesModalProps = {
 };
 
 export function NotesModal({ id, name, onSave }: NotesModalProps) {
+  const { t } = useTranslation();
   const originalNotes = useNotes(id);
 
   const [notes, setNotes] = useState(originalNotes);

@@ -145,7 +145,7 @@ function Shortcut({
           maxWidth: 300,
         }}
       >
-        {t(description)} {/* Translate description */}
+        {t('description')}
       </div>
     </div>
   );

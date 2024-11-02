@@ -1,7 +1,7 @@
 import React from 'react';
 import { useDispatch } from 'react-redux';
 
-import { t } from 'i18next';
+import { useTranslation } from 'react-i18next';
 
 import { pushModal } from 'loot-core/client/actions';
 
@@ -15,6 +15,7 @@ import { useServerURL } from '../ServerContext';
 import { Setting } from './UI';
 
 export function EncryptionSettings() {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const serverURL = useServerURL();
   const [encryptKeyId] = useMetadataPref('encryptKeyId');

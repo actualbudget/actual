@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { t } from 'i18next';
+import { useTranslation } from 'react-i18next';
 
 import * as monthUtils from 'loot-core/src/shared/months';
 import {
@@ -37,6 +37,7 @@ export function ReportSummary({
   interval,
   intervalsCount,
 }: ReportSummaryProps) {
+  const { t } = useTranslation();
   const net =
     balanceTypeOp === 'netAssets'
       ? 'DEPOSIT'

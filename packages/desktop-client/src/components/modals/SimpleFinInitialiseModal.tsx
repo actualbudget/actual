@@ -1,7 +1,7 @@
 // @ts-strict-ignore
 import React, { useState } from 'react';
 
-import { t } from 'i18next';
+import { useTranslation } from 'react-i18next';
 
 import { send } from 'loot-core/src/platform/client/fetch';
 
@@ -26,6 +26,7 @@ type SimpleFinInitialiseProps = {
 export const SimpleFinInitialiseModal = ({
   onSuccess,
 }: SimpleFinInitialiseProps) => {
+  const { t } = useTranslation();
   const [token, setToken] = useState('');
   const [isValid, setIsValid] = useState(true);
   const [isLoading, setIsLoading] = useState(false);

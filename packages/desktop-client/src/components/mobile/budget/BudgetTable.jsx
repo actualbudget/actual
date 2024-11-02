@@ -166,7 +166,7 @@ function Saved({ projected, onPress, show3Cols }) {
             </View>
           ) : (
             <Label
-              title={t(isNegative ? 'Overspent' : 'Saved')} // Translated title
+              title={isNegative ? t('Overspent') : t('Saved')}
               style={{
                 color: theme.formInputText,
                 textAlign: 'left',
