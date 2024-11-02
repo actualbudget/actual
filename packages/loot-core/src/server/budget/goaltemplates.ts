@@ -159,10 +159,12 @@ async function processTemplate(
 
   // run each priority level
   for (let pi = 0; pi < priorities.length; pi++) {
+    const availStart = availBudget;
     for (let i = 0; i < catObjects.length; i++) {
       const ret = await catObjects[i].runTemplatesForPriority(
         priorities[pi],
         availBudget,
+        availStart,
       );
       availBudget -= ret;
       if (availBudget <= 0) {

@@ -5,6 +5,7 @@ import { amountToInteger } from '../../shared/util';
 import * as db from '../db';
 
 import { getSheetValue, setBudget, setGoal } from './actions';
+import { goalsSchedule } from './goals/goalsSchedule';
 import { getActiveSchedules } from './statements';
 //import { Template } from './types/templates';
 
@@ -36,7 +37,7 @@ export class categoryTemplate {
       `leftover-${categoryID}`,
     );
     // run all checks
-    await categoryTemplate.checkByAndSchedule(templates);
+    await categoryTemplate.checkByAndScheduleAndSpend(templates,month);
     await categoryTemplate.checkPercentage(templates);
     // call the private constructor
     return new categoryTemplate(templates, categoryID, month, fromLastMonth);
@@ -53,7 +54,7 @@ export class categoryTemplate {
   runAll(available: number) {
     let toBudget: number = 0;
     this.priorities.forEach(async p => {
-      toBudget += await this.runTemplatesForPriority(p, available);
+      toBudget += await this.runTemplatesForPriority(p, available,available);
     });
     //TODO does this need to run limits? maybe pass in option to ignore previous balance?
     return toBudget;
@@ -61,7 +62,7 @@ export class categoryTemplate {
 
   // run all templates in a given priority level
   // return: amount budgeted in this priority level
-  async runTemplatesForPriority(priority: number, budgetAvail: number) {
+  async runTemplatesForPriority(priority: number, budgetAvail: number, availStart: number) {
     if (!this.priorities.includes(priority)) return 0;
 
     const t = this.templates.filter(t => t.priority === priority);
@@ -69,6 +70,7 @@ export class categoryTemplate {
     let toBudget = 0;
     let first = true; // needed for by templates
     let remainder = 0;
+    let scheduleFlag = false;
     // switch on template type and calculate the amount for the line
     for (let i = 0; i < t.length; i++) {
       switch (t[i].type) {
@@ -89,7 +91,7 @@ export class categoryTemplate {
           break;
         }
         case 'percentage': {
-          toBudget += await this.runPercentage(t[i], budgetAvail);
+          toBudget += await this.runPercentage(t[i], availStart);
           break;
         }
         case 'by': {
@@ -101,8 +103,26 @@ export class categoryTemplate {
           break;
         }
         case 'schedule': {
-          //TODO add the logic to run all of these at once or whatever needs to happen
-          toBudget += this.runSchedule(t[i]);
+          //TODO add this......
+          //TODO remember to trim the schedule name
+          const budgeted = getSheetValue(
+            monthUtils.sheetForMonth(this.month),
+            `leftover-${this.categoryID}`,
+          );
+          const ret = await goalsSchedule(
+            scheduleFlag,
+            t,
+            this.month,
+            budgeted,
+            remainder,
+            this.fromLastMonth,
+            toBudget,
+            [],
+            this.categoryID,
+          );
+          toBudget = ret.to_budget;
+          remainder = ret.remainder;
+          scheduleFlag = ret.scheduleFlag;
           break;
         }
         case 'average': {
@@ -140,10 +160,12 @@ export class categoryTemplate {
       this.toBudgetAmount = this.limitAmount - this.fromLastMonth;
       return orig - this.toBudgetAmount;
     }
+    return 0;
   }
 
   // run all of the 'remainder' type templates
   runRemainder(budgetAvail: number, perWeight: number) {
+    if(this.remainder.length===0) return 0;
     const toBudget = Math.round(this.remainderWeight * perWeight);
     //check possible overbudget from rounding, 1cent leftover
     if (toBudget > budgetAvail) {
@@ -207,6 +229,7 @@ export class categoryTemplate {
     // check limits here since it needs to save states inside the object
     this.checkLimit();
     this.checkSpend();
+    this.checkGoal();
 
     //find priorities
     const p = [];
@@ -236,9 +259,6 @@ export class categoryTemplate {
       this.goalAmount = amountToInteger(this.goals[0].amount);
       return;
     }
-    if (this.goals.length > 1) {
-      throw new Error(`Can only have one #goal per category`);
-    }
     this.goalAmount = this.toBudgetAmount;
   }
 
@@ -261,7 +281,7 @@ export class categoryTemplate {
 
   //-----------------------------------------------------------------------------
   //  Template Validation
-  static async checkByAndSchedule(templates) {
+  static async checkByAndScheduleAndSpend(templates, month) {
     //check schedule names
     const scheduleNames = (await getActiveSchedules()).map(({ name }) => name);
     templates
@@ -289,6 +309,18 @@ export class categoryTemplate {
             `Schedule and By templates must be the same priority level.  Fix by setting all Schedule and By templates to priority level ${lowestPriority}`,
           );
           //t.priority = lowestPriority;
+        }
+      });
+    // check if the target date is past and not repeating
+    templates
+      .filter(t => t.type === 'by' || t.type === 'spend')
+      .forEach(t => {
+        const range = monthUtils.differenceInCalendarMonths(
+          `${t.month}`,
+          month,
+        );
+        if(range < 0 && !t.annual){
+          throw new Error(`Target month has passed, remove or update the target month`);
         }
       });
   }
@@ -355,6 +387,12 @@ export class categoryTemplate {
     const st = this.templates.filter(t => t.type === 'spend');
     if (st.length > 1) {
       throw new Error('Only one spend template is allowed per category');
+    }
+  }
+
+  private checkGoal(){
+    if(this.goals.length>1) {
+      throw new Error(`Only one #goal is allowed per category`);
     }
   }
 
@@ -509,9 +547,5 @@ export class categoryTemplate {
     return { ret, remainder };
   }
 
-  private runSchedule(template_lines) {
-    //TODO add this......
-    //TODO remember to trim the schedule name
-    return 0;
-  }
+  //private async runSchedule(template_lines) {}
 }
