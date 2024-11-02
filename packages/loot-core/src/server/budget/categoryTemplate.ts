@@ -178,10 +178,9 @@ export class categoryTemplate {
     return toBudget;
   }
 
-  runFinish() {
+  getValues() {
     this.runGoal();
-    this.setBudget();
-    this.setGoal();
+    return { budgeted: this.toBudgetAmount, goal: this.goalAmount}
   }
 
   //-----------------------------------------------------------------------------
@@ -262,23 +261,6 @@ export class categoryTemplate {
     this.goalAmount = this.toBudgetAmount;
   }
 
-  private setBudget() {
-    setBudget({
-      category: this.categoryID,
-      month: this.month,
-      amount: this.toBudgetAmount,
-    });
-  }
-
-  private setGoal() {
-    setGoal({
-      category: this.categoryID,
-      goal: this.goalAmount,
-      month: this.month,
-      long_goal: this.isLongGoal ? 1 : 0,
-    });
-  }
-
   //-----------------------------------------------------------------------------
   //  Template Validation
   static async checkByAndScheduleAndSpend(templates, month) {
@@ -319,7 +301,7 @@ export class categoryTemplate {
           `${t.month}`,
           month,
         );
-        if(range < 0 && !t.annual){
+        if(range < 0 && !(t.repeat || t.annual)){
           throw new Error(`Target month has passed, remove or update the target month`);
         }
       });

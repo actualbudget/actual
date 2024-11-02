@@ -4,18 +4,18 @@ import * as monthUtils from '../../shared/months';
 import * as db from '../db';
 import { batchMessages } from '../sync';
 
-import { isReflectBudget, getSheetValue, setGoal } from './actions';
+import { isReflectBudget, getSheetValue, setGoal, setBudget } from './actions';
 import { categoryTemplate } from './categoryTemplate';
 import { checkTemplates, storeTemplates } from './template-notes';
 
-export async function applyTemplate({ month }) {
+export async function applyTemplate({ month }): Promise<Notification> {
   await storeTemplates();
   const category_templates = await getTemplates(null);
   const ret = await processTemplate(month, false, category_templates, null);
   return ret;
 }
 
-export async function overwriteTemplate({ month }) {
+export async function overwriteTemplate({ month }) :Promise<Notification> {
   await storeTemplates();
   const category_templates = await getTemplates(null);
   const ret = await processTemplate(month, true, category_templates, null);
@@ -79,14 +79,37 @@ async function getTemplates(category) {
   }
 }
 
+async function setBudgets( month, templateBudget ) {
+  await batchMessages(async () => {
+    templateBudget.forEach(element => {
+      setBudget({
+        category: element.category,
+        month,
+        amount: element.budgeted,
+      });
+    });
+  });
+}
+
+async function setGoals( month, idealTemplate ) {
+  await batchMessages(async () => {
+    idealTemplate.forEach(element => {
+      setGoal({
+        category: element.category,
+        goal: element.goal,
+        month,
+        long_goal: 0,
+      });
+    });
+  });
+}
+
 async function processTemplate(
   month,
   force: boolean,
   categoryTemplates,
   categoriesIn?: any[],
-) {
-  // get all categoryIDs that need processed
-  //done?
+) : Promise<Notification> {
   // setup objects for each category and catch errors
   let categories = [];
   if (!categoriesIn) {
@@ -187,9 +210,15 @@ async function processTemplate(
     });
   }
   // finish
+  let budgetList= [];
+  let goalList= [];
   catObjects.forEach(o => {
-    o.runFinish();
+    const ret = o.getValues();
+    budgetList.push({category: o.categoryID, budgeted: ret.budgeted});
+    goalList.push({category: o.categoryID, goal: ret.goal});
   });
+  await setBudgets(month, budgetList);
+  await setGoals(month, goalList);
 
   return {
     type: 'message',
