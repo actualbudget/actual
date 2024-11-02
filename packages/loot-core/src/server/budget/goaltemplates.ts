@@ -139,10 +139,10 @@ async function processTemplate(
   }
 
   //break early if nothing to do, or there are errors
-  if(catObjects.length===0 && errors.length===0){
+  if (catObjects.length === 0 && errors.length === 0) {
     errors.push('Everything is up to date');
   }
-  if(errors.length>0){
+  if (errors.length > 0) {
     return {
       sticky: true,
       message: `There were errors interpreting some templates:`,
@@ -192,5 +192,5 @@ async function processTemplate(
   return {
     type: 'message',
     message: `Successfully applied templates to ${catObjects.length} categories`,
-  }
+  };
 }

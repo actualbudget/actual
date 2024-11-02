@@ -55,7 +55,7 @@ export class categoryTemplate {
     this.priorities.forEach(async p => {
       toBudget += await this.runTemplatesForPriority(p, available);
     });
-    //TODO does this need to run limits?
+    //TODO does this need to run limits? maybe pass in option to ignore previous balance?
     return toBudget;
   }
 
@@ -67,6 +67,8 @@ export class categoryTemplate {
     const t = this.templates.filter(t => t.priority === priority);
     let available = budgetAvail || 0;
     let toBudget = 0;
+    let first = true; // needed for by templates
+    let remainder = 0;
     // switch on template type and calculate the amount for the line
     for (let i = 0; i < t.length; i++) {
       switch (t[i].type) {
@@ -91,11 +93,15 @@ export class categoryTemplate {
           break;
         }
         case 'by': {
-          //TODO add the logic to run all of these at once
-          toBudget += this.runBy(t[i], this.templates, 0, budgetAvail);
+          //TODO add the logic to run all of these at once or whatever is needed
+          const ret = this.runBy(t[i], first, remainder);
+          toBudget += ret.ret;
+          remainder = ret.remainder;
+          first = false;
           break;
         }
         case 'schedule': {
+          //TODO add the logic to run all of these at once or whatever needs to happen
           toBudget += this.runSchedule(t[i]);
           break;
         }
@@ -231,7 +237,6 @@ export class categoryTemplate {
       return;
     }
     if (this.goals.length > 1) {
-      //TODO make this not hard fail
       throw new Error(`Can only have one #goal per category`);
     }
     this.goalAmount = this.toBudgetAmount;
@@ -252,17 +257,6 @@ export class categoryTemplate {
       month: this.month,
       long_goal: this.isLongGoal ? 1 : 0,
     });
-  }
-
-  private async getFromLastMonth() {
-    const sheetName = monthUtils.sheetForMonth(
-      monthUtils.subMonths(this.month, 1),
-    );
-    //TODO see if this is accurate from the sheet for the balance last month
-    this.fromLastMonth = await getSheetValue(
-      sheetName,
-      `leftover-${this.categoryID}`,
-    );
   }
 
   //-----------------------------------------------------------------------------
@@ -329,21 +323,21 @@ export class categoryTemplate {
       if (this.limitCheck && t.limit) {
         throw new Error('Only one `up to` allowed per category');
       } else if (t.limit) {
-        if (t.limit.period === 'daily'){
+        if (t.limit.period === 'daily') {
           const numDays = monthUtils.differenceInCalendarDays(
-            monthUtils.addMonths(this.month,1),
+            monthUtils.addMonths(this.month, 1),
             this.month,
           );
           this.limitAmount += amountToInteger(t.limit.amount) * numDays;
-        } else if(t.limit.period === 'weekly') {
+        } else if (t.limit.period === 'weekly') {
           const nextMonth = monthUtils.nextMonth(this.month);
           let week = t.limit.start;
           const baseLimit = amountToInteger(t.limit.amount);
           while (week < nextMonth) {
-            if(week >= this.month) {
+            if (week >= this.month) {
               this.limitAmount += baseLimit;
             }
-            week = monthUtils.addWeeks(week,1);
+            week = monthUtils.addWeeks(week, 1);
           }
         } else if (t.limit.period === 'monthly') {
           this.limitAmount = amountToInteger(t.limit.amount);
@@ -358,8 +352,8 @@ export class categoryTemplate {
   }
 
   private checkSpend() {
-    const st = this.templates.filter(t => t.type=== 'spend');
-    if(st.length>1){
+    const st = this.templates.filter(t => t.type === 'spend');
+    if (st.length > 1) {
       throw new Error('Only one spend template is allowed per category');
     }
   }
@@ -485,24 +479,25 @@ export class categoryTemplate {
     return -Math.round(sum / template.amount);
   }
 
-  private runBy(template, allTemplates, l: number, remainder: number) {
+  private runBy(template, first: boolean, remainder: number) {
     let target = 0;
-    let targetMonth = `${allTemplates[l].month}`;
+    let targetMonth = `${template.month}`;
     let numMonths = monthUtils.differenceInCalendarMonths(
       targetMonth,
       this.month,
     );
-    const repeat =
-      template.type === 'by' ? template.repeat : (template.repeat || 1) * 12;
+    const repeat = template.annual
+      ? (template.repeat || 1) * 12
+      : template.repeat;
     while (numMonths < 0 && repeat) {
       targetMonth = monthUtils.addMonths(targetMonth, repeat);
       numMonths = monthUtils.differenceInCalendarMonths(
-        allTemplates[l].month,
+        targetMonth,
         this.month,
       );
     }
-    if (l === 0) remainder = this.fromLastMonth;
-    remainder = amountToInteger(allTemplates[l].amount) - remainder;
+    if (first) remainder = this.fromLastMonth;
+    remainder = amountToInteger(template.amount) - remainder;
     if (remainder >= 0) {
       target = remainder;
       remainder = 0;
@@ -510,7 +505,8 @@ export class categoryTemplate {
       target = 0;
       remainder = Math.abs(remainder);
     }
-    return numMonths >= 0 ? Math.round(target / (numMonths + 1)) : 0;
+    const ret = numMonths >= 0 ? Math.round(target / (numMonths + 1)) : 0;
+    return { ret, remainder };
   }
 
   private runSchedule(template_lines) {

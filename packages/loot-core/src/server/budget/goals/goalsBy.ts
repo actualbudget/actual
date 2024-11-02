@@ -26,7 +26,7 @@ export async function goalsBy(
     while (num_months < 0 && repeat) {
       target_month = monthUtils.addMonths(target_month, repeat);
       num_months = monthUtils.differenceInCalendarMonths(
-        template_lines[l].month,
+        target_month,
         current_month,
       );
     }
