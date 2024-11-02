@@ -954,8 +954,11 @@ describe('Type conversions', () => {
 
   it('allows fields to be not nullable', () => {
     // With validated refs
-    let result = generateSQLWithState(
-      q('transactions').filter({ payee: { '$ne': null }}).select().serialize(),
+    const result = generateSQLWithState(
+      q('transactions')
+        .filter({ payee: { $ne: null } })
+        .select()
+        .serialize(),
       schemaWithRefs,
     );
     expect(result.sql).toMatch('WHERE (payees1.id IS NOT NULL)');
