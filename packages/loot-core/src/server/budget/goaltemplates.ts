@@ -98,7 +98,7 @@ async function setGoals(month, idealTemplate) {
         category: element.category,
         goal: element.goal,
         month,
-        long_goal: 0,
+        long_goal: element.long_goal,
       });
     });
   });
@@ -163,7 +163,10 @@ async function processTemplate(
 
   //break early if nothing to do, or there are errors
   if (catObjects.length === 0 && errors.length === 0) {
-    errors.push('Everything is up to date');
+    return {
+      type: 'message',
+      message: 'Everything is up to date',
+    };
   }
   if (errors.length > 0) {
     return {
@@ -215,7 +218,7 @@ async function processTemplate(
   catObjects.forEach(o => {
     const ret = o.getValues();
     budgetList.push({ category: o.categoryID, budgeted: ret.budgeted });
-    goalList.push({ category: o.categoryID, goal: ret.goal });
+    goalList.push({ category: o.categoryID, goal: ret.goal, longGoal: ret.longGoal });
   });
   await setBudgets(month, budgetList);
   await setGoals(month, goalList);

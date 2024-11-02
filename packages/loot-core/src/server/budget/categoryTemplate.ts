@@ -51,11 +51,12 @@ export class categoryTemplate {
   }
 
   // what is the full requested amount this month
-  runAll(available: number) {
+  async runAll(available: number) {
     let toBudget: number = 0;
-    this.priorities.forEach(async p => {
+    for (let i=0; i < this.priorities.length; i++) {
+      const p = this.priorities[i];
       toBudget += await this.runTemplatesForPriority(p, available, available);
-    });
+    }
     //TODO does this need to run limits? maybe pass in option to ignore previous balance?
     return toBudget;
   }
@@ -184,7 +185,7 @@ export class categoryTemplate {
 
   getValues() {
     this.runGoal();
-    return { budgeted: this.toBudgetAmount, goal: this.goalAmount };
+    return { budgeted: this.toBudgetAmount, goal: this.goalAmount, longGoal: this.isLongGoal };
   }
 
   //-----------------------------------------------------------------------------
@@ -196,11 +197,11 @@ export class categoryTemplate {
   private goals = [];
   private priorities: number[] = [];
   private remainderWeight: number = 0;
-  private toBudgetAmount: number = null; // amount that will be budgeted by the templates
+  private toBudgetAmount: number = 0; // amount that will be budgeted by the templates
   private isLongGoal: boolean = null; //defaulting the goals to null so templates can be unset
   private goalAmount: number = null;
   private fromLastMonth = 0; // leftover from last month
-  private limitAmount = null;
+  private limitAmount = 0;
   private limitCheck = false;
   private limitHold = false;
 
