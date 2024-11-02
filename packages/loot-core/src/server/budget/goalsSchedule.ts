@@ -1,13 +1,13 @@
 // @ts-strict-ignore
-import * as monthUtils from '../../../shared/months';
-import { extractScheduleConds } from '../../../shared/schedules';
-import * as db from '../../db';
+import * as monthUtils from '../../shared/months';
+import { extractScheduleConds } from '../../shared/schedules';
+import * as db from '../db';
 import {
   getRuleForSchedule,
   getNextDate,
   getDateWithSkippedWeekend,
-} from '../../schedules/app';
-import { isReflectBudget } from '../actions';
+} from '../schedules/app';
+import { isReflectBudget } from './actions';
 
 async function createScheduleList(template, current_month, category) {
   const t = [];
