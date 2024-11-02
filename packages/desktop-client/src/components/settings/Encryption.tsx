@@ -1,7 +1,6 @@
 import React from 'react';
-import { useDispatch } from 'react-redux';
-
 import { useTranslation } from 'react-i18next';
+import { useDispatch } from 'react-redux';
 
 import { pushModal } from 'loot-core/client/actions';
 

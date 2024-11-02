@@ -216,6 +216,7 @@ function AdditionalAccountMenu({
     ...itemStyle,
     ...(item.name === 'close' && { color: theme.errorTextMenu }),
   });
+  const { t } = useTranslation();
 
   return (
     <View>
