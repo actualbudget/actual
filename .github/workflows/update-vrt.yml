@@ -7,6 +7,10 @@ permissions:
   pull-requests: write
   contents: write
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.issue.number }}
+  cancel-in-progress: true
+
 jobs:
   update-vrt:
     name: Update VRT
