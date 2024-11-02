@@ -133,6 +133,9 @@ export const PayeeTableRow = memo(
           focused={focusedField === 'select'}
           selected={selected}
           onSelect={e => {
+            if (payee.transfer_acct != null) {
+              return;
+            }
             dispatchSelected({
               type: 'select',
               id: payee.id,
