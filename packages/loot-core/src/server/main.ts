@@ -1716,7 +1716,7 @@ handlers['download-budget'] = async function ({ fileId }) {
   const id = result.id;
   await handlers['load-budget']({ id });
   result = await handlers['sync-budget']();
-  await handlers['close-budget']();
+
   if (result.error) {
     return result;
   }

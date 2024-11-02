@@ -468,7 +468,9 @@ export function conditionsToAQL(conditions, { recurDateBounds = 100 } = {}) {
 
         return {
           $and: tagValues.map(v => {
-            const regex = new RegExp(`(^|\\s)${v}(\\s|$)`);
+            const regex = new RegExp(
+              `(^|\\s)${v.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(\\s|$)`,
+            );
             return apply(field, '$regexp', regex.source);
           }),
         };

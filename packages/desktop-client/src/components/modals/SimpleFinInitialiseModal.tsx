@@ -1,6 +1,5 @@
 // @ts-strict-ignore
 import React, { useState } from 'react';
-
 import { useTranslation } from 'react-i18next';
 
 import { send } from 'loot-core/src/platform/client/fetch';

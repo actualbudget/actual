@@ -72,7 +72,6 @@ function Shortcut({
   shift,
   style,
 }: ShortcutProps) {
-  const { t } = useTranslation(); // Initialize useTranslation
   return (
     <div
       style={{
@@ -145,7 +144,7 @@ function Shortcut({
           maxWidth: 300,
         }}
       >
-        {t('description')}
+        {description}
       </div>
     </div>
   );

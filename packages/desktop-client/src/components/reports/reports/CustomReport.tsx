@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 
 import * as d from 'date-fns';
-import { t } from 'i18next';
 
 import { calculateHasWarning } from 'loot-core/src/client/reports';
 import { send } from 'loot-core/src/platform/client/fetch';
@@ -103,6 +103,7 @@ function useSelectedCategories(
 }
 
 export function CustomReport() {
+  const { t } = useTranslation();
   const categories = useCategories();
   const { isNarrowWidth } = useResponsive();
   const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
@@ -645,7 +646,11 @@ export function CustomReport() {
       header={
         isNarrowWidth ? (
           <MobilePageHeader
-            title={`${t('Custom Report:')} ${report.name || t('Unsaved report')}`}
+            title={
+              report.name
+                ? t('Custom Report: {{name}}', { name: report.name })
+                : t('Custom Report: Unsaved report')
+            }
             leftContent={<MobileBackButton onPress={onBackClick} />}
           />
         ) : (
@@ -834,7 +839,7 @@ export function CustomReport() {
                     intervalsCount={intervals.length}
                   />
                 ) : (
-                  <LoadingIndicator message="Loading report..." />
+                  <LoadingIndicator message={t('Loading report...')} />
                 )}
               </View>
             </View>

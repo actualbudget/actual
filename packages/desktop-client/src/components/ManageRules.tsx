@@ -7,9 +7,8 @@ import React, {
   type SetStateAction,
   type Dispatch,
 } from 'react';
-import { useDispatch } from 'react-redux';
-
 import { useTranslation } from 'react-i18next';
+import { useDispatch } from 'react-redux';
 
 import { pushModal } from 'loot-core/src/client/actions/modals';
 import { initiallyLoadPayees } from 'loot-core/src/client/actions/queries';
