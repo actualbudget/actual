@@ -329,9 +329,30 @@ export class categoryTemplate {
       if (this.limitCheck && t.limit) {
         throw new Error('Only one `up to` allowed per category');
       } else if (t.limit) {
+        if (t.limit.period === 'daily'){
+          const numDays = monthUtils.differenceInCalendarDays(
+            monthUtils.addMonths(this.month,1),
+            this.month,
+          );
+          this.limitAmount += amountToInteger(t.limit.amount) * numDays;
+        } else if(t.limit.period === 'weekly') {
+          const nextMonth = monthUtils.nextMonth(this.month);
+          let week = t.limit.start;
+          const baseLimit = amountToInteger(t.limit.amount);
+          while (week < nextMonth) {
+            if(week >= this.month) {
+              this.limitAmount += baseLimit;
+            }
+            week = monthUtils.addWeeks(week,1);
+          }
+        } else if (t.limit.period === 'monthly') {
+          this.limitAmount = amountToInteger(t.limit.amount);
+        } else {
+          throw new Error('Invalid limit period. Check template syntax');
+        }
+        //amount is good save the rest
         this.limitCheck = true;
         this.limitHold = t.limit.hold ? true : false;
-        this.limitAmount = amountToInteger(t.limit.amount);
       }
     }
   }
