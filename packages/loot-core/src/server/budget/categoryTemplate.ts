@@ -19,8 +19,8 @@ export class categoryTemplate {
    * 2. gather needed data for external use.  ex: remainder weights, priorities
    * 3. run each priority level that is needed via runTemplatesForPriority
    * 4. run applyLimits to apply any existing limit to the category
-   * 5. run the remainder templates via runRemainder (limits get applied at the start of this)
-   * 6. finish processing by running getValues() for batch processing.
+   * 5. run the remainder templates via runRemainder()
+   * 6. finish processing by running getValues() and saving values for batch processing.
    * Alternate:
    * If the situation calls for it you can run all templates in a catagory in one go using the
    * method runAll which will run all templates and goals for reference, and can optionally be saved
