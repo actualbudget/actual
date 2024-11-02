@@ -36,7 +36,8 @@ export class categoryTemplate {
       `leftover-${categoryID}`,
     );
     // run all checks
-    await categoryTemplate.checkTemplates(templates);
+    await categoryTemplate.checkByAndSchedule(templates);
+    await categoryTemplate.checkPercentage(templates);
     // call the private constructor
     return new categoryTemplate(templates, categoryID, month, fromLastMonth);
   }
@@ -199,6 +200,7 @@ export class categoryTemplate {
     }
     // check limits here since it needs to save states inside the object
     this.checkLimit();
+    this.checkSpend();
 
     //find priorities
     const p = [];
@@ -265,13 +267,6 @@ export class categoryTemplate {
 
   //-----------------------------------------------------------------------------
   //  Template Validation
-  static async checkTemplates(templates) {
-    //run all the individual checks
-    await categoryTemplate.checkByAndSchedule(templates);
-    await categoryTemplate.checkPercentage(templates);
-    //limits checked inside constructor
-  }
-
   static async checkByAndSchedule(templates) {
     //check schedule names
     const scheduleNames = (await getActiveSchedules()).map(({ name }) => name);
@@ -304,19 +299,6 @@ export class categoryTemplate {
       });
   }
 
-  private checkLimit() {
-    for (let i = 0; i < this.templates.length; i++) {
-      const t = this.templates[i];
-      if (this.limitCheck && t.limit) {
-        throw new Error('Only one `up to` allowed per category');
-      } else if (t.limit) {
-        this.limitCheck = true;
-        this.limitHold = t.limit.hold ? true : false;
-        this.limitAmount = amountToInteger(t.limit.amount);
-      }
-    }
-  }
-
   static async checkPercentage(templates) {
     const pt = templates.filter(t => t.type === 'percentage');
     const reqCategories = [];
@@ -335,10 +317,30 @@ export class categoryTemplate {
         //skip the name check since these are special
       } else if (!availNames.includes(n)) {
         throw new Error(
-          `Category ${n} is not found in available income categories`,
+          `Category \x22${n}\x22 is not found in available income categories`,
         );
       }
     });
+  }
+
+  private checkLimit() {
+    for (let i = 0; i < this.templates.length; i++) {
+      const t = this.templates[i];
+      if (this.limitCheck && t.limit) {
+        throw new Error('Only one `up to` allowed per category');
+      } else if (t.limit) {
+        this.limitCheck = true;
+        this.limitHold = t.limit.hold ? true : false;
+        this.limitAmount = amountToInteger(t.limit.amount);
+      }
+    }
+  }
+
+  private checkSpend() {
+    const st = this.templates.filter(t => t.type=== 'spend');
+    if(st.length>1){
+      throw new Error('Only one spend template is allowed per category');
+    }
   }
 
   //-----------------------------------------------------------------------------

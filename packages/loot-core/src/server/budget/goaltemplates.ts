@@ -128,14 +128,26 @@ async function processTemplate(
         remainderWeight += obj.getRemainderWeight();
         catObjects.push(obj);
       } catch (e) {
-        console.log(`Got error in ${categories[i].name}: ${e}`);
-        errors.push(e);
+        //console.log(`${categories[i].name}: ${e}`);
+        errors.push(`${categories[i].name}: ${e.message}`);
       }
 
       // do a reset of the goals that are orphaned
     } else if (existingGoal !== null && !templates) {
       await setGoal({ month, category: id, goal: null, long_goal: null });
     }
+  }
+
+  //break early if nothing to do, or there are errors
+  if(catObjects.length===0 && errors.length===0){
+    errors.push('Everything is up to date');
+  }
+  if(errors.length>0){
+    return {
+      sticky: true,
+      message: `There were errors interpreting some templates:`,
+      pre: errors.join(`\n\n`),
+    };
   }
 
   //compress to needed, sorted priorities
@@ -176,4 +188,9 @@ async function processTemplate(
   catObjects.forEach(o => {
     o.runFinish();
   });
+
+  return {
+    type: 'message',
+    message: `Successfully applied templates to ${catObjects.length} categories`,
+  }
 }
