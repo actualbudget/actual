@@ -4,10 +4,10 @@ import { getRuleForSchedule } from '../schedules/app';
 import { isReflectBudget } from './actions';
 import { goalsSchedule } from './goalsSchedule';
 
-jest.mock('../../db');
-jest.mock('../actions');
-jest.mock('../../schedules/app', () => {
-  const actualModule = jest.requireActual('../../schedules/app');
+jest.mock('../db');
+jest.mock('./actions');
+jest.mock('../schedules/app', () => {
+  const actualModule = jest.requireActual('../schedules/app');
   return {
     ...actualModule,
     getRuleForSchedule: jest.fn(),
