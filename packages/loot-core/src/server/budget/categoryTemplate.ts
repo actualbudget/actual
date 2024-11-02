@@ -4,7 +4,7 @@ import * as monthUtils from '../../shared/months';
 import { amountToInteger } from '../../shared/util';
 import * as db from '../db';
 
-import { getSheetValue, setBudget, setGoal } from './actions';
+import { getSheetValue} from './actions';
 import { goalsSchedule } from './goals/goalsSchedule';
 import { getActiveSchedules } from './statements';
 //import { Template } from './types/templates';
@@ -37,7 +37,7 @@ export class categoryTemplate {
       `leftover-${categoryID}`,
     );
     // run all checks
-    await categoryTemplate.checkByAndScheduleAndSpend(templates,month);
+    await categoryTemplate.checkByAndScheduleAndSpend(templates, month);
     await categoryTemplate.checkPercentage(templates);
     // call the private constructor
     return new categoryTemplate(templates, categoryID, month, fromLastMonth);
@@ -54,7 +54,7 @@ export class categoryTemplate {
   runAll(available: number) {
     let toBudget: number = 0;
     this.priorities.forEach(async p => {
-      toBudget += await this.runTemplatesForPriority(p, available,available);
+      toBudget += await this.runTemplatesForPriority(p, available, available);
     });
     //TODO does this need to run limits? maybe pass in option to ignore previous balance?
     return toBudget;
@@ -62,7 +62,11 @@ export class categoryTemplate {
 
   // run all templates in a given priority level
   // return: amount budgeted in this priority level
-  async runTemplatesForPriority(priority: number, budgetAvail: number, availStart: number) {
+  async runTemplatesForPriority(
+    priority: number,
+    budgetAvail: number,
+    availStart: number,
+  ) {
     if (!this.priorities.includes(priority)) return 0;
 
     const t = this.templates.filter(t => t.priority === priority);
@@ -165,7 +169,7 @@ export class categoryTemplate {
 
   // run all of the 'remainder' type templates
   runRemainder(budgetAvail: number, perWeight: number) {
-    if(this.remainder.length===0) return 0;
+    if (this.remainder.length === 0) return 0;
     const toBudget = Math.round(this.remainderWeight * perWeight);
     //check possible overbudget from rounding, 1cent leftover
     if (toBudget > budgetAvail) {
@@ -180,7 +184,7 @@ export class categoryTemplate {
 
   getValues() {
     this.runGoal();
-    return { budgeted: this.toBudgetAmount, goal: this.goalAmount}
+    return { budgeted: this.toBudgetAmount, goal: this.goalAmount };
   }
 
   //-----------------------------------------------------------------------------
@@ -301,8 +305,10 @@ export class categoryTemplate {
           `${t.month}`,
           month,
         );
-        if(range < 0 && !(t.repeat || t.annual)){
-          throw new Error(`Target month has passed, remove or update the target month`);
+        if (range < 0 && !(t.repeat || t.annual)) {
+          throw new Error(
+            `Target month has passed, remove or update the target month`,
+          );
         }
       });
   }
@@ -372,8 +378,8 @@ export class categoryTemplate {
     }
   }
 
-  private checkGoal(){
-    if(this.goals.length>1) {
+  private checkGoal() {
+    if (this.goals.length > 1) {
       throw new Error(`Only one #goal is allowed per category`);
     }
   }

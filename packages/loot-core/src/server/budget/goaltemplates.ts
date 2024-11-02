@@ -15,7 +15,7 @@ export async function applyTemplate({ month }): Promise<Notification> {
   return ret;
 }
 
-export async function overwriteTemplate({ month }) :Promise<Notification> {
+export async function overwriteTemplate({ month }): Promise<Notification> {
   await storeTemplates();
   const category_templates = await getTemplates(null);
   const ret = await processTemplate(month, true, category_templates, null);
@@ -79,7 +79,7 @@ async function getTemplates(category) {
   }
 }
 
-async function setBudgets( month, templateBudget ) {
+async function setBudgets(month, templateBudget) {
   await batchMessages(async () => {
     templateBudget.forEach(element => {
       setBudget({
@@ -91,7 +91,7 @@ async function setBudgets( month, templateBudget ) {
   });
 }
 
-async function setGoals( month, idealTemplate ) {
+async function setGoals(month, idealTemplate) {
   await batchMessages(async () => {
     idealTemplate.forEach(element => {
       setGoal({
@@ -109,7 +109,7 @@ async function processTemplate(
   force: boolean,
   categoryTemplates,
   categoriesIn?: any[],
-) : Promise<Notification> {
+): Promise<Notification> {
   // setup objects for each category and catch errors
   let categories = [];
   if (!categoriesIn) {
@@ -210,12 +210,12 @@ async function processTemplate(
     });
   }
   // finish
-  let budgetList= [];
-  let goalList= [];
+  const budgetList = [];
+  const goalList = [];
   catObjects.forEach(o => {
     const ret = o.getValues();
-    budgetList.push({category: o.categoryID, budgeted: ret.budgeted});
-    goalList.push({category: o.categoryID, goal: ret.goal});
+    budgetList.push({ category: o.categoryID, budgeted: ret.budgeted });
+    goalList.push({ category: o.categoryID, goal: ret.goal });
   });
   await setBudgets(month, budgetList);
   await setGoals(month, goalList);
