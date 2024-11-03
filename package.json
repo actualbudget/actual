@@ -1,6 +1,6 @@
 {
   "name": "actual-sync",
-  "version": "24.10.1",
+  "version": "24.11.0",
   "license": "MIT",
   "description": "actual syncing server",
   "type": "module",
