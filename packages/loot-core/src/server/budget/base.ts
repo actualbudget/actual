@@ -326,7 +326,10 @@ function handleCategoryGroupChange(months, oldValue, newValue) {
         );
         createCategoryGroup({ ...group, categories }, sheetName);
 
-        addDeps(sheetName, group.id);
+        // These are already added to their parent groups
+        if (!group.parent_id) {
+          addDeps(sheetName, group.id);
+        }
       });
     }
   }
