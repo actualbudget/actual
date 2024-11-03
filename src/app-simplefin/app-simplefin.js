@@ -266,6 +266,10 @@ function parseAccessKey(accessKey) {
   let username = null;
   let password = null;
   let baseUrl = null;
+  if (!accessKey || !accessKey.match(/^.*\/\/.*:.*@.*$/)) {
+    console.log(`Invalid SimpleFIN access key: ${accessKey}`);
+    throw new Error(`Invalid access key`);
+  }
   [scheme, rest] = accessKey.split('//');
   [auth, rest] = rest.split('@');
   [username, password] = auth.split(':');
