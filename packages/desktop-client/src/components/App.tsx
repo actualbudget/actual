@@ -51,8 +51,20 @@ function AppInner() {
   const { showBoundary: showErrorBoundary } = useErrorBoundary();
   const dispatch = useDispatch();
 
+  const maybeUpdate = async <T,>(cb?: () => T): Promise<T> => {
+    if (global.Actual.isUpdateReadyForDownload()) {
+      dispatch(
+        setAppState({
+          loadingText: t('Downloading and applying update...'),
+        }),
+      );
+      await global.Actual.applyAppUpdate();
+    }
+    return cb?.();
+  };
+
   async function init() {
-    const socketName = await global.Actual.getServerSocket();
+    const socketName = await maybeUpdate(() => global.Actual.getServerSocket());
 
     dispatch(
       setAppState({
@@ -86,14 +98,16 @@ function AppInner() {
           loadingText: t('Retrieving remote files...'),
         }),
       );
-      send('get-remote-files').then(files => {
-        if (files) {
-          const remoteFile = files.find(f => f.fileId === cloudFileId);
-          if (remoteFile && remoteFile.deleted) {
-            dispatch(closeBudget());
-          }
+
+      const files = await send('get-remote-files');
+      if (files) {
+        const remoteFile = files.find(f => f.fileId === cloudFileId);
+        if (remoteFile && remoteFile.deleted) {
+          dispatch(closeBudget());
         }
-      });
+      }
+
+      await maybeUpdate();
     }
   }
 
