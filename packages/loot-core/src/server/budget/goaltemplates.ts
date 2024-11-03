@@ -98,7 +98,7 @@ async function setGoals(month, idealTemplate) {
         category: element.category,
         goal: element.goal,
         month,
-        long_goal: element.long_goal,
+        long_goal: element.longGoal,
       });
     });
   });
