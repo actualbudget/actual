@@ -1,3 +1,5 @@
+import { WithRequired } from '../util';
+
 import { CategoryEntity } from './category';
 
 export interface NewCategoryGroupEntity {
@@ -6,10 +8,12 @@ export interface NewCategoryGroupEntity {
   sort_order?: number;
   tombstone?: boolean;
   hidden?: boolean;
+  parent_id?: string;
   categories?: Omit<CategoryEntity, 'id'>[];
 }
 
 export interface CategoryGroupEntity extends NewCategoryGroupEntity {
   id: string;
   categories?: CategoryEntity[];
+  children?: WithRequired<CategoryGroupEntity, 'parent_id'>[];
 }

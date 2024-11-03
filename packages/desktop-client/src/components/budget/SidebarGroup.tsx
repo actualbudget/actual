@@ -3,6 +3,7 @@ import React, { type CSSProperties, useRef, useState } from 'react';
 import { type ConnectDragSource } from 'react-dnd';
 import { useTranslation } from 'react-i18next';
 
+import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { SvgExpandArrow } from '../../icons/v0';
 import { SvgCheveronDown } from '../../icons/v1';
 import { theme } from '../../style';
@@ -33,8 +34,10 @@ type SidebarGroupProps = {
   onSave?: (group: object) => Promise<void>;
   onDelete?: (id: string) => Promise<void>;
   onShowNewCategory?: (groupId: string) => void;
+  onShowNewGroup?: (parent?: string) => void;
   onHideNewGroup?: () => void;
   onToggleCollapse?: (id: string) => void;
+  depth?: number;
 };
 
 export function SidebarGroup({
@@ -48,14 +51,17 @@ export function SidebarGroup({
   onSave,
   onDelete,
   onShowNewCategory,
+  onShowNewGroup,
   onHideNewGroup,
   onToggleCollapse,
+  depth,
 }: SidebarGroupProps) {
   const { t } = useTranslation();
 
   const temporary = group.id === 'new';
   const [menuOpen, setMenuOpen] = useState(false);
   const triggerRef = useRef(null);
+  const subCategoryGroups = useFeatureFlag('subCategoryGroups');
 
   const displayed = (
     <View
@@ -64,6 +70,7 @@ export function SidebarGroup({
         alignItems: 'center',
         userSelect: 'none',
         WebkitUserSelect: 'none',
+        paddingLeft: (depth ?? 0) * 13 - (depth ? 5 : 0),
       }}
       onClick={() => {
         onToggleCollapse(group.id);
@@ -118,6 +125,8 @@ export function SidebarGroup({
                     onEdit(group.id);
                   } else if (type === 'add-category') {
                     onShowNewCategory(group.id);
+                  } else if (type === 'add-group') {
+                    onShowNewGroup(group.id);
                   } else if (type === 'delete') {
                     onDelete(group.id);
                   } else if (type === 'toggle-visibility') {
@@ -127,6 +136,10 @@ export function SidebarGroup({
                 }}
                 items={[
                   { name: 'add-category', text: t('Add category') },
+                  subCategoryGroups && {
+                    name: 'add-group',
+                    text: t('Add group'),
+                  },
                   { name: 'rename', text: t('Rename') },
                   !group.is_income && {
                     name: 'toggle-visibility',
@@ -190,10 +203,10 @@ export function SidebarGroup({
             if (value === '') {
               onHideNewGroup();
             } else if (value !== '') {
-              onSave({ id: group.id, name: value });
+              onSave({ ...group, id: group.id, name: value });
             }
           } else {
-            onSave({ id: group.id, name: value });
+            onSave({ ...group, id: group.id, name: value });
           }
         }}
         onBlur={() => onEdit(null)}

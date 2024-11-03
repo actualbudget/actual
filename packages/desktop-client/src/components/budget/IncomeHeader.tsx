@@ -8,7 +8,7 @@ import { RenderMonths } from './RenderMonths';
 
 type IncomeHeaderProps = {
   MonthComponent?: () => JSX.Element;
-  onShowNewGroup: () => void;
+  onShowNewGroup: (parent?: string) => void;
 };
 
 export function IncomeHeader({
@@ -24,7 +24,10 @@ export function IncomeHeader({
           justifyContent: 'flex-start',
         }}
       >
-        <Button onPress={onShowNewGroup} style={{ fontSize: 12, margin: 10 }}>
+        <Button
+          onPress={() => onShowNewGroup()}
+          style={{ fontSize: 12, margin: 10 }}
+        >
           <Trans>Add Group</Trans>
         </Button>
       </View>

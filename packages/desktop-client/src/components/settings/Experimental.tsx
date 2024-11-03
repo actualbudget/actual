@@ -115,6 +115,9 @@ export function ExperimentalFeatures() {
             >
               <Trans>Scheduled transaction upcoming length adjustment</Trans>
             </FeatureToggle>
+            <FeatureToggle flag="subCategoryGroups">
+              <Trans>Sub category groups</Trans>
+            </FeatureToggle>
           </View>
         ) : (
           <Link

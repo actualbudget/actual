@@ -63,24 +63,54 @@ function createCategory(cat, sheetName, prevSheetName, start, end) {
 }
 
 function createCategoryGroup(group, sheetName) {
+  const children = group.children || [];
+  children.forEach(child => createCategoryGroup(child, sheetName));
+
   sheet.get().createDynamic(sheetName, 'group-sum-amount-' + group.id, {
     initialValue: 0,
-    dependencies: group.categories.map(cat => `sum-amount-${cat.id}`),
+    dependencies: [
+      ...group.categories.map(cat => `sum-amount-${cat.id}`),
+      ...children.map(child => `group-sum-amount-${child.id}`),
+    ],
     run: sumAmounts,
   });
 
   if (!group.is_income || getBudgetType() !== 'rollover') {
     sheet.get().createDynamic(sheetName, 'group-budget-' + group.id, {
       initialValue: 0,
-      dependencies: group.categories.map(cat => `budget-${cat.id}`),
+      dependencies: [
+        ...group.categories.map(cat => `budget-${cat.id}`),
+        ...children.map(child => `group-budget-${child.id}`),
+      ],
       run: sumAmounts,
     });
 
     sheet.get().createDynamic(sheetName, 'group-leftover-' + group.id, {
       initialValue: 0,
-      dependencies: group.categories.map(cat => `leftover-${cat.id}`),
+      dependencies: [
+        ...group.categories.map(cat => `leftover-${cat.id}`),
+        ...children.map(child => `group-leftover-${child.id}`),
+      ],
       run: sumAmounts,
     });
+  }
+
+  if (group.parent_id) {
+    sheet
+      .get()
+      .addDependencies(sheetName, `group-sum-amount-${group.parent_id}`, [
+        `group-sum-amount-${group.id}`,
+      ]);
+    sheet
+      .get()
+      .addDependencies(sheetName, `group-budget-${group.parent_id}`, [
+        `group-budget-${group.id}`,
+      ]);
+    sheet
+      .get()
+      .addDependencies(sheetName, `group-leftover-${group.parent_id}`, [
+        `group-leftover-${group.id}`,
+      ]);
   }
 }
 
@@ -391,7 +421,7 @@ export async function doTransfer(categoryIds, transferId) {
 
 export async function createBudget(months) {
   const categories = await db.getCategories();
-  const groups = await db.getCategoriesGrouped();
+  const groups = await db.getCategoriesGroupedHierarchical();
 
   sheet.startTransaction();
   const meta = sheet.get().meta();

@@ -86,12 +86,17 @@ export interface ServerHandlers {
 
   'category-delete': (arg: { id; transferId? }) => Promise<{ error?: string }>;
 
+  'get-category-groups': () => Promise<CategoryGroupEntity[]>;
+
   'category-group-create': (arg: {
     name;
     isIncome?: boolean;
+    parentId?: string;
   }) => Promise<string>;
 
-  'category-group-update': (group) => Promise<unknown>;
+  'category-group-update': (
+    group: Partial<CategoryGroupEntity>,
+  ) => Promise<unknown>;
 
   'category-group-move': (arg: { id; targetId }) => Promise<unknown>;
 

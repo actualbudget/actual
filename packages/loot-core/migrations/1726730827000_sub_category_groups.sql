@@ -1,0 +1,5 @@
+BEGIN TRANSACTION;
+
+ALTER TABLE category_groups ADD COLUMN parent_id TEXT DEFAULT null;
+
+COMMIT;

@@ -2,6 +2,7 @@
 import React, { type ComponentProps } from 'react';
 
 import { theme } from '../../style';
+import * as colorPalette from '../../style/palette';
 import { View } from '../common/View';
 import {
   useDraggable,
@@ -32,6 +33,8 @@ type ExpenseGroupProps = {
   onReorderCategory: OnDropCallback;
   onToggleCollapse?: ComponentProps<typeof SidebarGroup>['onToggleCollapse'];
   onShowNewCategory?: ComponentProps<typeof SidebarGroup>['onShowNewCategory'];
+  onShowNewGroup?: ComponentProps<typeof SidebarGroup>['onShowNewGroup'];
+  depth?: number;
 };
 
 export function ExpenseGroup({
@@ -48,6 +51,8 @@ export function ExpenseGroup({
   onReorderCategory,
   onToggleCollapse,
   onShowNewCategory,
+  onShowNewGroup,
+  depth,
 }: ExpenseGroupProps) {
   const dragging = dragState && dragState.item === group;
 
@@ -81,7 +86,8 @@ export function ExpenseGroup({
       style={{
         fontWeight: 600,
         opacity: group.hidden ? 0.33 : undefined,
-        backgroundColor: theme.tableRowHeaderBackground,
+        backgroundColor:
+          depth > 0 ? theme.tableRowHeaderBackground : colorPalette.navy900,
       }}
     >
       {dragState && !dragState.preview && dragState.type === 'group' && (
@@ -126,6 +132,8 @@ export function ExpenseGroup({
           onSave={onSave}
           onDelete={onDelete}
           onShowNewCategory={onShowNewCategory}
+          onShowNewGroup={onShowNewGroup}
+          depth={depth}
         />
         <RenderMonths component={MonthComponent} args={{ group }} />
       </View>
