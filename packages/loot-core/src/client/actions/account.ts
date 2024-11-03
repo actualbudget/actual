@@ -174,7 +174,7 @@ export function syncAccounts(id?: string) {
     const matchedTransactions = [];
     const updatedAccounts = [];
 
-    if (batchSync && simpleFinAccounts.length) {
+    if (batchSync && simpleFinAccounts.length > 0) {
       console.log('Using SimpleFin batch sync');
 
       const res = await send('simplefin-batch-sync', {
