@@ -7,7 +7,7 @@ import * as db from '../db';
 import { getSheetValue } from './actions';
 import { goalsSchedule } from './goalsSchedule';
 import { getActiveSchedules } from './statements';
-//import { Template } from './types/templates';
+import { Template } from './types/templates';
 
 export class CategoryTemplate {
   /*----------------------------------------------------------------------------
@@ -30,7 +30,7 @@ export class CategoryTemplate {
   // Class interface
 
   // set up the class and check all templates
-  static async init(templates, categoryID: string, month) {
+  static async init(templates: Template[], categoryID: string, month) {
     // get all the needed setup values
     const fromLastMonth = await getSheetValue(
       monthUtils.sheetForMonth(monthUtils.subMonths(month, 1)),
@@ -210,7 +210,7 @@ export class CategoryTemplate {
   private limitHold = false;
 
   private constructor(
-    templates,
+    templates: Template[],
     categoryID: string,
     month: string,
     fromLastMonth: number,
