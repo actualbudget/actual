@@ -12,7 +12,7 @@ import { type PayeeEntity } from 'loot-core/src/types/models';
 
 import { useSelectedItems } from '../../hooks/useSelected';
 import { View } from '../common/View';
-import { Table } from '../table';
+import { useTableNavigator, Table } from '../table';
 
 import { PayeeTableRow } from './PayeeTableRow';
 
@@ -33,15 +33,7 @@ export const PayeeTable = forwardRef<
   PayeeTableProps
 >(
   (
-    {
-      payees,
-      ruleCounts,
-
-      onUpdate,
-      onDelete,
-      onViewRules,
-      onCreateRule,
-    },
+    { payees, ruleCounts, onUpdate, onDelete, onViewRules, onCreateRule },
     ref,
   ) => {
     const [hovered, setHovered] = useState(null);
@@ -58,9 +50,16 @@ export const PayeeTable = forwardRef<
       setHovered(id);
     }, []);
 
+    const tableNavigator = useTableNavigator(payees, item =>
+      item.transfer_acct == null
+        ? ['select', 'name', 'rule-count']
+        : ['rule-count'],
+    );
+
     return (
       <View style={{ flex: 1 }} onMouseLeave={() => setHovered(null)}>
         <Table
+          navigator={tableNavigator}
           ref={ref}
           items={payees}
           renderItem={({ item, editing, focusedField, onEdit }) => {
