@@ -200,7 +200,7 @@ const CONDITION_TYPES = {
       'isNot',
       'doesNotContain',
       'notOneOf',
-      'subExpression',
+      'and',
     ],
     nullable: true,
     parse(op, value, fieldName) {
