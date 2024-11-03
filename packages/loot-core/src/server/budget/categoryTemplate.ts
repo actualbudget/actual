@@ -108,9 +108,7 @@ export class CategoryTemplate {
           break;
         }
         case 'schedule': {
-          //TODO add this......
-          //TODO remember to trim the schedule name
-          const budgeted = getSheetValue(
+          const budgeted = await getSheetValue(
             monthUtils.sheetForMonth(this.month),
             `leftover-${this.categoryID}`,
           );
