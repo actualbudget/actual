@@ -95,9 +95,9 @@ async function setGoals(month, idealTemplate) {
   await batchMessages(async () => {
     idealTemplate.forEach(element => {
       setGoal({
+        month,
         category: element.category,
         goal: element.goal,
-        month,
         long_goal: element.longGoal,
       });
     });
@@ -220,7 +220,7 @@ async function processTemplate(
     goalList.push({
       category: o.categoryID,
       goal: ret.goal,
-      longGoal: ret.longGoal,
+      longGoal: ret.longGoal ? 1 : null,
     });
   });
   await setBudgets(month, budgetList);
