@@ -494,6 +494,21 @@ describe('Transaction rules', () => {
 
     // todo: isapprox
   });
+
+  test('subexpression builds $and condition', async () => {
+    const conds = [{ field: 'category', op: 'is', value: null }];
+    debugger;
+    const { filters } = conditionsToAQL(conds);
+    expect(filters).toStrictEqual([
+      {
+        $and: [
+          { category: { $eq: null } },
+          { transfer_id: { $eq: null } },
+          { is_parent: { $eq: false } },
+        ],
+      },
+    ]);
+  });
 });
 
 describe('Learning categories', () => {

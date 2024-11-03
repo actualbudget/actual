@@ -291,22 +291,32 @@ export async function runRules(trans) {
   return await finalizeTransactionForRules(finalTrans);
 }
 
-function conditionSpecialCases(cond: Condition): Condition[] {
+function conditionSpecialCases(cond: Condition): Condition {
   //special cases that require multiple conditions
   if (cond.op === 'is' && cond.field === 'category' && cond.value === null) {
-    return [
-      cond,
-      new Condition('is', 'transfer', false, null),
-      new Condition('is', 'parent', false, null),
-    ];
+    return new Condition(
+      'subExpression',
+      cond.field,
+      [
+        cond,
+        new Condition('is', 'transfer', false, null),
+        new Condition('is', 'parent', false, null),
+      ],
+      {},
+    );
   } else if (
     cond.op === 'isNot' &&
     cond.field === 'category' &&
     cond.value === null
   ) {
-    return [cond, new Condition('is', 'parent', false, null)];
+    return new Condition(
+      'subExpression',
+      cond.field,
+      [cond, new Condition('is', 'parent', false, null)],
+      {},
+    );
   }
-  return [cond];
+  return cond;
 }
 
 // This does the inverse: finds all the transactions matching a rule
@@ -327,11 +337,11 @@ export function conditionsToAQL(conditions, { recurDateBounds = 100 } = {}) {
         return null;
       }
     })
-    .flatMap(conditionSpecialCases)
+    .map(conditionSpecialCases)
     .filter(Boolean);
 
   // rule -> actualql
-  const filters = conditions.map(cond => {
+  const mapConditionToActualQL = cond => {
     const { type, options } = cond;
     let { field, op, value } = cond;
 
@@ -541,11 +551,18 @@ export function conditionsToAQL(conditions, { recurDateBounds = 100 } = {}) {
         return apply(field, '$eq', true);
       case 'false':
         return apply(field, '$eq', false);
+      case 'subExpression':
+        debugger;
+        return {
+          $and: getValue(value).map(subExpr => mapConditionToActualQL(subExpr)),
+        };
       default:
+        debugger;
         throw new Error('Unhandled operator: ' + op);
     }
-  });
+  };
 
+  const filters = conditions.map(mapConditionToActualQL);
   return { filters, errors };
 }
 
