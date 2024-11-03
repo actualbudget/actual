@@ -44,7 +44,7 @@ export const BudgetCategories = memo(
     const items = useMemo(() => {
       const [expenseGroups, incomeGroup] = separateGroups(categoryGroups);
 
-      function expandGroup(group, depth = 0) {
+      function expandGroup(group, depth = 0, type = 'expense') {
         if (group.hidden && !showHiddenCategories) {
           return [];
         }
@@ -57,7 +57,7 @@ export const BudgetCategories = memo(
           child => showHiddenCategories || !child.hidden,
         );
 
-        const items = [{ type: 'expense-group', value: { ...group }, depth }];
+        const items = [{ type: `${type}-group`, value: { ...group }, depth }];
 
         if (newCategoryForGroup === group.id) {
           items.push({ type: 'new-category', depth });
@@ -72,10 +72,10 @@ export const BudgetCategories = memo(
           ...(collapsedGroupIds.includes(group.id)
             ? []
             : groupChildren
-          ).flatMap(child => expandGroup(child, depth + 1)),
+          ).flatMap(child => expandGroup(child, depth + 1, type)),
           ...(collapsedGroupIds.includes(group.id) ? [] : groupCategories).map(
             cat => ({
-              type: 'expense-category',
+              type: `${type}-category`,
               value: cat,
               group,
               depth,
@@ -94,18 +94,7 @@ export const BudgetCategories = memo(
         items = items.concat(
           [
             { type: 'income-separator' },
-            { type: 'income-group', value: incomeGroup },
-            //TODO add income sub groups!
-            newCategoryForGroup === incomeGroup.id && { type: 'new-category' },
-            ...(collapsedGroupIds.includes(incomeGroup.id)
-              ? []
-              : incomeGroup.categories.filter(
-                  cat => showHiddenCategories || !cat.hidden,
-                )
-            ).map(cat => ({
-              type: 'income-category',
-              value: cat,
-            })),
+            ...expandGroup(incomeGroup, 0, 'income'),
           ].filter(x => x),
         );
       }
@@ -312,6 +301,7 @@ export const BudgetCategories = memo(
                   onToggleCollapse={onToggleCollapse}
                   onShowNewCategory={onShowNewCategory}
                   onShowNewGroup={onShowNewGroup}
+                  depth={item.depth}
                 />
               );
               break;
@@ -330,6 +320,7 @@ export const BudgetCategories = memo(
                   onReorder={onReorderCategory}
                   onBudgetAction={onBudgetAction}
                   onShowActivity={onShowActivity}
+                  depth={item.depth}
                 />
               );
               break;

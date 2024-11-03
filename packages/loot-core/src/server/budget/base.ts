@@ -101,16 +101,19 @@ function createCategoryGroup(group, sheetName) {
       .addDependencies(sheetName, `group-sum-amount-${group.parent_id}`, [
         `group-sum-amount-${group.id}`,
       ]);
-    sheet
-      .get()
-      .addDependencies(sheetName, `group-budget-${group.parent_id}`, [
-        `group-budget-${group.id}`,
-      ]);
-    sheet
-      .get()
-      .addDependencies(sheetName, `group-leftover-${group.parent_id}`, [
-        `group-leftover-${group.id}`,
-      ]);
+
+    if (!group.is_income || getBudgetType() !== 'rollover') {
+      sheet
+        .get()
+        .addDependencies(sheetName, `group-budget-${group.parent_id}`, [
+          `group-budget-${group.id}`,
+        ]);
+      sheet
+        .get()
+        .addDependencies(sheetName, `group-leftover-${group.parent_id}`, [
+          `group-leftover-${group.id}`,
+        ]);
+    }
   }
 }
 
