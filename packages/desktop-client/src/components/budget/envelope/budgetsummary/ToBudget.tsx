@@ -1,8 +1,8 @@
 import React, {
-  useRef,
-  useState,
   type CSSProperties,
   useCallback,
+  useRef,
+  useState,
 } from 'react';
 
 import { envelopeBudget } from 'loot-core/src/client/queries';
@@ -43,13 +43,12 @@ export function ToBudget({
       if (menu) ref.current?.focus();
       _setMenuOpen(menu);
     },
-    [ref],
+    [ref, _setMenuOpen],
   );
-  const sheetValue = useEnvelopeSheetValue({
+  const availableValue = useEnvelopeSheetValue({
     name: envelopeBudget.toBudget,
     value: 0,
   });
-  const availableValue = sheetValue;
   if (typeof availableValue !== 'number' && availableValue !== null) {
     throw new Error(
       'Expected availableValue to be a number but got ' + availableValue,
@@ -58,11 +57,20 @@ export function ToBudget({
   const isMenuOpen = Boolean(menuOpen);
   const contextMenusEnabled = useFeatureFlag('contextMenus');
 
+  const [crossOffset, setCrossOffset] = useState(0);
+  const [offset, setOffset] = useState(0);
+  const [contextMenuOpen, setContextMenuOpen] = useState(false);
+
   return (
     <>
       <View ref={triggerRef}>
         <ToBudgetAmount
-          onClick={() => setMenuOpen('actions')}
+          onClick={() => {
+            setOffset(0);
+            setCrossOffset(0);
+            setContextMenuOpen(false);
+            setMenuOpen('actions');
+          }}
           prevMonthName={prevMonthName}
           style={style}
           amountStyle={amountStyle}
@@ -71,17 +79,23 @@ export function ToBudget({
             if (!contextMenusEnabled) return;
             e.preventDefault();
             setMenuOpen('actions');
+            const rect = e.currentTarget.getBoundingClientRect();
+            setCrossOffset(e.clientX - rect.left);
+            setOffset(e.clientY - rect.bottom);
+            setContextMenuOpen(true);
           }}
         />
       </View>
 
       <Popover
         triggerRef={triggerRef}
-        placement="bottom"
+        placement={contextMenuOpen ? 'bottom start' : 'bottom'}
         isOpen={isMenuOpen}
         onOpenChange={() => setMenuOpen(null)}
-        style={{ width: 200 }}
+        style={{ width: 200, margin: 1 }}
         isNonModal
+        crossOffset={crossOffset}
+        offset={offset}
       >
         <span tabIndex={-1} ref={ref}>
           {menuOpen === 'actions' && (

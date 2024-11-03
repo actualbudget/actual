@@ -218,6 +218,9 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
   const { showUndoNotification } = useUndo();
   const contextMenusEnabled = useFeatureFlag('contextMenus');
 
+  const [crossOffset, setCrossOffset] = useState(0);
+  const [offset, setOffset] = useState(0);
+
   return (
     <View
       style={{
@@ -236,6 +239,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
       }}
     >
       <View
+        ref={budgetMenuTriggerRef}
         style={{
           flex: 1,
           flexDirection: 'row',
@@ -245,6 +249,9 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
           if (editing) return;
           e.preventDefault();
           setBudgetMenuOpen(true);
+          const rect = e.currentTarget.getBoundingClientRect();
+          setCrossOffset(e.clientX - rect.left);
+          setOffset(e.clientY - rect.bottom);
         }}
       >
         {!editing && (
@@ -261,9 +268,12 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
             }}
           >
             <Button
-              ref={budgetMenuTriggerRef}
               variant="bare"
-              onPress={() => setBudgetMenuOpen(true)}
+              onPress={() => {
+                setOffset(-4);
+                setCrossOffset(2);
+                setBudgetMenuOpen(true);
+              }}
               style={{
                 padding: 3,
               }}
@@ -278,11 +288,13 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
 
             <Popover
               triggerRef={budgetMenuTriggerRef}
-              placement="bottom start"
+              placement="bottom left"
               isOpen={budgetMenuOpen}
               onOpenChange={() => setBudgetMenuOpen(false)}
               style={{ width: 200 }}
               isNonModal
+              offset={offset}
+              crossOffset={crossOffset}
             >
               <BudgetMenu
                 onCopyLastMonthAverage={() => {
@@ -392,17 +404,24 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
         </span>
       </Field>
       <Field
+        ref={balanceMenuTriggerRef}
         name="balance"
         width="flex"
         style={{ paddingRight: styles.monthRightPadding, textAlign: 'right' }}
       >
         <span
-          ref={balanceMenuTriggerRef}
-          onClick={() => setBalanceMenuOpen(true)}
+          onClick={() => {
+            setOffset(-4);
+            setCrossOffset(-6);
+            setBalanceMenuOpen(true);
+          }}
           onContextMenu={e => {
             if (!contextMenusEnabled) return;
             e.preventDefault();
             setBalanceMenuOpen(true);
+            const rect = e.currentTarget.getBoundingClientRect();
+            setCrossOffset(e.clientX - rect.right + 200 - 8);
+            setOffset(e.clientY - rect.bottom - 8);
           }}
         >
           <BalanceWithCarryover
@@ -419,8 +438,10 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
           placement="bottom end"
           isOpen={balanceMenuOpen}
           onOpenChange={() => setBalanceMenuOpen(false)}
-          style={{ width: 200 }}
+          style={{ width: 200, margin: 1 }}
           isNonModal
+          offset={offset}
+          crossOffset={crossOffset}
         >
           <BalanceMovementMenu
             categoryId={category.id}

@@ -54,6 +54,9 @@ export function SidebarCategory({
   const triggerRef = useRef(null);
   const contextMenusEnabled = useFeatureFlag('contextMenus');
 
+  const [crossOffset, setCrossOffset] = useState(0);
+  const [offset, setOffset] = useState(0);
+
   const displayed = (
     <View
       style={{
@@ -70,6 +73,9 @@ export function SidebarCategory({
         if (!contextMenusEnabled) return;
         e.preventDefault();
         setMenuOpen(true);
+        const rect = e.currentTarget.getBoundingClientRect();
+        setCrossOffset(e.clientX - rect.left);
+        setOffset(e.clientY - rect.bottom);
       }}
     >
       <div
@@ -88,7 +94,11 @@ export function SidebarCategory({
           variant="bare"
           className="hover-visible"
           style={{ color: 'currentColor', padding: 3 }}
-          onPress={() => setMenuOpen(true)}
+          onPress={() => {
+            setOffset(0);
+            setCrossOffset(0);
+            setMenuOpen(true);
+          }}
         >
           <SvgCheveronDown
             width={14}
@@ -102,8 +112,10 @@ export function SidebarCategory({
           placement="bottom start"
           isOpen={menuOpen}
           onOpenChange={() => setMenuOpen(false)}
-          style={{ width: 200 }}
+          style={{ width: 200, margin: 1 }}
           isNonModal
+          offset={offset}
+          crossOffset={crossOffset}
         >
           <Menu
             onMenuSelect={type => {

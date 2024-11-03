@@ -59,6 +59,9 @@ export function SidebarGroup({
   const triggerRef = useRef(null);
   const contextMenusEnabled = useFeatureFlag('contextMenus');
 
+  const [crossOffset, setCrossOffset] = useState(0);
+  const [offset, setOffset] = useState(0);
+
   const displayed = (
     <View
       style={{
@@ -76,6 +79,9 @@ export function SidebarGroup({
         if (!contextMenusEnabled) return;
         e.preventDefault();
         setMenuOpen(true);
+        const rect = e.currentTarget.getBoundingClientRect();
+        setCrossOffset(e.clientX - rect.left);
+        setOffset(e.clientY - rect.bottom);
       }}
     >
       {!dragPreview && (
@@ -108,7 +114,11 @@ export function SidebarGroup({
             <Button
               variant="bare"
               className="hover-visible"
-              onPress={() => setMenuOpen(true)}
+              onPress={() => {
+                setOffset(0);
+                setCrossOffset(0);
+                setMenuOpen(true);
+              }}
               style={{ padding: 3 }}
             >
               <SvgCheveronDown width={14} height={14} />
@@ -119,8 +129,10 @@ export function SidebarGroup({
               placement="bottom start"
               isOpen={menuOpen}
               onOpenChange={() => setMenuOpen(false)}
-              style={{ width: 200 }}
+              style={{ width: 200, margin: 1 }}
               isNonModal
+              offset={offset}
+              crossOffset={crossOffset}
             >
               <Menu
                 onMenuSelect={type => {
