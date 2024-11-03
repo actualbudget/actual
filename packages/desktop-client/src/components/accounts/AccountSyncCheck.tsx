@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { Trans } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
@@ -6,6 +6,7 @@ import { useParams } from 'react-router-dom';
 import { t } from 'i18next';
 
 import { unlinkAccount } from 'loot-core/client/actions';
+import { type AccountEntity } from 'loot-core/types/models';
 
 import { authorizeBank } from '../../gocardless';
 import { useAccounts } from '../../hooks/useAccounts';
@@ -16,7 +17,7 @@ import { Link } from '../common/Link';
 import { Popover } from '../common/Popover';
 import { View } from '../common/View';
 
-function getErrorMessage(type, code) {
+function getErrorMessage(type: string, code: string) {
   switch (type.toUpperCase()) {
     case 'ITEM_ERROR':
       switch (code.toUpperCase()) {
@@ -81,7 +82,29 @@ export function AccountSyncCheck() {
   const [open, setOpen] = useState(false);
   const triggerRef = useRef(null);
 
-  if (!failedAccounts) {
+  const reauth = useCallback(
+    (acc: AccountEntity) => {
+      setOpen(false);
+
+      if (acc.account_id) {
+        authorizeBank(dispatch, { upgradingAccountId: acc.account_id });
+      }
+    },
+    [dispatch],
+  );
+
+  const unlink = useCallback(
+    (acc: AccountEntity) => {
+      if (acc.id) {
+        dispatch(unlinkAccount(acc.id));
+      }
+
+      setOpen(false);
+    },
+    [dispatch],
+  );
+
+  if (!failedAccounts || !id) {
     return null;
   }
 
@@ -91,21 +114,14 @@ export function AccountSyncCheck() {
   }
 
   const account = accounts.find(account => account.id === id);
+  if (!account) {
+    return null;
+  }
+
   const { type, code } = error;
   const showAuth =
     (type === 'ITEM_ERROR' && code === 'ITEM_LOGIN_REQUIRED') ||
     (type === 'INVALID_INPUT' && code === 'INVALID_ACCESS_TOKEN');
-
-  function reauth() {
-    setOpen(false);
-
-    authorizeBank(dispatch, { upgradingAccountId: account.account_id });
-  }
-
-  async function unlink() {
-    dispatch(unlinkAccount(account.id));
-    setOpen(false);
-  }
 
   return (
     <View>
@@ -148,20 +164,20 @@ export function AccountSyncCheck() {
         <View style={{ justifyContent: 'flex-end', flexDirection: 'row' }}>
           {showAuth ? (
             <>
-              <Button onPress={unlink}>
+              <Button onPress={() => unlink(account)}>
                 <Trans>Unlink</Trans>
               </Button>
               <Button
                 variant="primary"
                 autoFocus
-                onPress={reauth}
+                onPress={() => reauth(account)}
                 style={{ marginLeft: 5 }}
               >
                 <Trans>Reauthorize</Trans>
               </Button>
             </>
           ) : (
-            <Button onPress={unlink}>
+            <Button onPress={() => unlink(account)}>
               <Trans>Unlink account</Trans>
             </Button>
           )}
