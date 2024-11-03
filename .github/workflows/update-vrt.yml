@@ -1,0 +1,50 @@
+name: /update-vrt
+on:
+  issue_comment:
+    types: [ created ]
+
+permissions:
+  pull-requests: write
+  contents: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.issue.number }}
+  cancel-in-progress: true
+
+jobs:
+  update-vrt:
+    name: Update VRT
+    runs-on: ubuntu-latest
+    if: |
+      github.event.issue.pull_request &&
+      contains(github.event.comment.body, '/update-vrt')
+    steps:
+      - name: Get PR branch
+        uses: xt0rted/pull-request-comment-branch@v2
+        id: comment-branch
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.comment-branch.outputs.head_ref }}
+      - name: Set up environment
+        uses: ./.github/actions/setup
+      - name: Wait for Netlify build to finish
+        id: netlify
+        env:
+          COMMIT_SHA: ${{ steps.comment-branch.outputs.head_sha }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./.github/actions/netlify-wait-for-build
+      - name: Run VRT Tests on Netlify URL
+        run: yarn vrt --update-snapshots
+        env:
+          E2E_START_URL: ${{ steps.netlify.outputs.url }}
+      - name: Commit and push changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add "**/*.png"
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git commit -m "Update VRT"
+          git push origin HEAD:${{ steps.comment-branch.outputs.head_ref }}
