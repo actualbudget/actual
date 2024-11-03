@@ -18,6 +18,8 @@ jobs:
     if: |
       github.event.issue.pull_request &&
       contains(github.event.comment.body, '/update-vrt')
+    container:
+      image: mcr.microsoft.com/playwright:v1.41.1-jammy
     steps:
       - name: Get PR branch
 #        Until https://github.com/xt0rted/pull-request-comment-branch/issues/322 is resolved we use the forked version
