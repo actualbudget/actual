@@ -1,3 +1,5 @@
+import { BankSyncResponse } from './bank-sync';
+
 export type SimpleFinOrganization = {
   name: string;
   domain: string;
@@ -8,3 +10,7 @@ export type SimpleFinAccount = {
   name: string;
   org: SimpleFinOrganization;
 };
+
+export interface SimpleFinBatchSyncResponse {
+  [accountId: AccountEntity['account_id']]: BankSyncResponse;
+}

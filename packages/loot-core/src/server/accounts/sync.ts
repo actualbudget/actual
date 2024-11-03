@@ -13,7 +13,11 @@ import {
   amountToInteger,
   integerToAmount,
 } from '../../shared/util';
-import { AccountEntity } from '../../types/models';
+import {
+  AccountEntity,
+  BankSyncResponse,
+  SimpleFinBatchSyncResponse,
+} from '../../types/models';
 import * as db from '../db';
 import { runMutator } from '../mutators';
 import { post } from '../post';
@@ -24,30 +28,6 @@ import { getStartingBalancePayee } from './payees';
 import { title } from './title';
 import { runRules } from './transaction-rules';
 import { batchUpdateTransactions } from './transactions';
-
-// TODO - add types for bank sync transaction data
-interface BankSyncData {
-  transactions: {
-    all: any[]; // eslint-disable-line
-    booked: any[]; // eslint-disable-line
-    pending: any[]; // eslint-disable-line
-  };
-  balances: {
-    balanceAmount: {
-      amount: string;
-      currency: string;
-    };
-    balanceType: string;
-    referenceDate: string;
-  }[];
-  startingBalance: number;
-  error_type: string;
-  error_code: string;
-}
-
-interface SimpleFinBatchSyncResponse {
-  [accountId: AccountEntity['account_id']]: BankSyncData;
-}
 
 function BankSyncError(type: string, code: string) {
   return { type: 'BankSyncError', category: type, code };
@@ -244,7 +224,7 @@ async function downloadSimpleFinTransactions(acctId, since) {
       }
     }
   } else {
-    const singleRes = res as BankSyncData;
+    const singleRes = res as BankSyncResponse;
     retVal = {
       transactions: singleRes.transactions.all,
       accountBalance: singleRes.balances,

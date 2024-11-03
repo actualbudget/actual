@@ -12,3 +12,61 @@ export type GoCardlessInstitution = {
   logo: string;
   identification_codes: string[];
 };
+
+export type GoCardlessBalance = {
+  balanceAmount: Amount;
+  balanceType:
+    | 'closingBooked'
+    | 'expected'
+    | 'forwardAvailable'
+    | 'interimAvailable'
+    | 'interimBooked'
+    | 'nonInvoiced'
+    | 'openingBooked';
+  creditLimitIncluded?: boolean;
+  lastChangeDateTime?: string;
+  lastCommittedTransaction?: string;
+  referenceDate?: string;
+};
+
+export type GoCardlessAmount = {
+  amount: string;
+  currency: string;
+};
+
+export type GoCardlessTransaction = {
+  additionalInformation?: string;
+  bookingStatus?: string;
+  balanceAfterTransaction?: Pick<Balance, 'balanceType' | 'balanceAmount'>;
+  bankTransactionCode?: string;
+  bookingDate?: string;
+  bookingDateTime?: string;
+  checkId?: string;
+  creditorAccount?: string;
+  creditorAgent?: string;
+  creditorId?: string;
+  creditorName?: string;
+  currencyExchange?: string[];
+  debtorAccount?: {
+    iban: string;
+  };
+  debtorAgent?: string;
+  debtorName?: string;
+  endToEndId?: string;
+  entryReference?: string;
+  internalTransactionId?: string;
+  mandateId?: string;
+  merchantCategoryCode?: string;
+  proprietaryBankTransactionCode?: string;
+  purposeCode?: string;
+  remittanceInformationStructured?: string;
+  remittanceInformationStructuredArray?: string[];
+  remittanceInformationUnstructured?: string;
+  remittanceInformationUnstructuredArray?: string[];
+  transactionAmount: Amount;
+  transactionId?: string;
+  ultimateCreditor?: string;
+  ultimateDebtor?: string;
+  valueDate?: string;
+  valueDateTime?: string;
+};
