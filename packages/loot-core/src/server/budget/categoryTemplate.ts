@@ -9,7 +9,7 @@ import { goalsSchedule } from './goalsSchedule';
 import { getActiveSchedules } from './statements';
 //import { Template } from './types/templates';
 
-export class categoryTemplate {
+export class CategoryTemplate {
   /*----------------------------------------------------------------------------
    * Using This Class:
    * 1. instantiate via `await categoryTemplate.init(templates, categoryID, month)`;
@@ -37,16 +37,16 @@ export class categoryTemplate {
       `leftover-${categoryID}`,
     );
     // run all checks
-    await categoryTemplate.checkByAndScheduleAndSpend(templates, month);
-    await categoryTemplate.checkPercentage(templates);
+    await CategoryTemplate.checkByAndScheduleAndSpend(templates, month);
+    await CategoryTemplate.checkPercentage(templates);
     // call the private constructor
-    return new categoryTemplate(templates, categoryID, month, fromLastMonth);
+    return new CategoryTemplate(templates, categoryID, month, fromLastMonth);
   }
 
-  getPriorities() {
+  getPriorities(): number[] {
     return this.priorities;
   }
-  getRemainderWeight() {
+  getRemainderWeight(): number {
     return this.remainderWeight;
   }
 
@@ -67,7 +67,7 @@ export class categoryTemplate {
     priority: number,
     budgetAvail: number,
     availStart: number,
-  ) {
+  ): Promise<number> {
     if (!this.priorities.includes(priority)) return 0;
 
     const t = this.templates.filter(t => t.priority === priority);
@@ -183,7 +183,7 @@ export class categoryTemplate {
     return toBudget;
   }
 
-  getValues() {
+  getValues(): { budgeted; goal; longGoal } {
     this.runGoal();
     return {
       budgeted: this.toBudgetAmount,
@@ -193,7 +193,7 @@ export class categoryTemplate {
   }
 
   //-----------------------------------------------------------------------------
-  // Implimentation
+  // Implementation
   readonly categoryID: string; //readonly so we can double check the category this is using
   private month: string;
   private templates = [];
@@ -283,14 +283,11 @@ export class categoryTemplate {
         }
       });
     //find lowest priority
-    let lowestPriority = null;
-    templates
-      .filter(t => t.type === 'schedule' || t.type === 'by')
-      .forEach(t => {
-        if (lowestPriority === null || t.priority < lowestPriority) {
-          lowestPriority = t.priority;
-        }
-      });
+    const lowestPriority = Math.min(
+      ...templates
+        .filter(t => t.type === 'schedule' || t.type === 'by')
+        .map(t => t.priority),
+    );
     //warn if priority needs fixed
     templates
       .filter(t => t.type === 'schedule' || t.type === 'by')
@@ -320,16 +317,13 @@ export class categoryTemplate {
 
   static async checkPercentage(templates) {
     const pt = templates.filter(t => t.type === 'percentage');
-    const reqCategories = [];
-    pt.forEach(t => reqCategories.push(t.category.toLowerCase()));
+    if (pt.length === 0) return;
+    const reqCategories = pt.map(t => t.category.toLowerCase());
 
     const availCategories = await db.getCategories();
-    const availNames = [];
-    availCategories.forEach(c => {
-      if (c.is_income) {
-        availNames.push(c.name.toLowerCase());
-      }
-    });
+    const availNames = availCategories
+      .filter(c => c.is_income)
+      .map(c => c.name.toLocaleLowerCase());
 
     reqCategories.forEach(n => {
       if (n === 'available funds' || n === 'all income') {
@@ -343,9 +337,9 @@ export class categoryTemplate {
   }
 
   private checkLimit() {
-    for (let i = 0; i < this.templates.length; i++) {
-      const t = this.templates[i];
-      if (this.limitCheck && t.limit) {
+    for (const t of this.templates) {
+      if (!t.limit) continue;
+      if (this.limitCheck) {
         throw new Error('Only one `up to` allowed per category');
       } else if (t.limit) {
         if (t.limit.period === 'daily') {
@@ -392,24 +386,22 @@ export class categoryTemplate {
   //-----------------------------------------------------------------------------
   //  Processor Functions
 
-  private runSimple(template, limit) {
-    let toBudget = 0;
+  private runSimple(template, limit): number {
     if (template.monthly != null) {
-      toBudget = amountToInteger(template.monthly);
+      return amountToInteger(template.monthly);
     } else {
-      toBudget = limit || 0;
+      return limit;
     }
-    return toBudget;
   }
 
-  private async runCopy(template) {
+  private async runCopy(template): Promise<number> {
     const sheetName = monthUtils.sheetForMonth(
       monthUtils.subMonths(this.month, template.lookBack),
     );
     return await getSheetValue(sheetName, `budget-${this.categoryID}`);
   }
 
-  private runWeek(template) {
+  private runWeek(template): number {
     let toBudget = 0;
     const amount = amountToInteger(template.amount);
     const weeks = template.weeks != null ? Math.round(template.weeks) : 1;
@@ -425,7 +417,7 @@ export class categoryTemplate {
     return toBudget;
   }
 
-  private async runSpend(template) {
+  private async runSpend(template): Promise<number> {
     const fromMonth = `${template.from}`;
     const toMonth = `${template.month}`;
     let alreadyBudgeted = this.fromLastMonth;
@@ -469,7 +461,7 @@ export class categoryTemplate {
     }
   }
 
-  private async runPercentage(template, availableFunds) {
+  private async runPercentage(template, availableFunds): Promise<number> {
     const percent = template.percent;
     const cat = template.category.toLowerCase();
     const prev = template.previous;
@@ -499,7 +491,7 @@ export class categoryTemplate {
     return Math.max(0, Math.round(monthlyIncome * (percent / 100)));
   }
 
-  private async runAverage(template) {
+  private async runAverage(template): Promise<number> {
     let sum = 0;
     for (let i = 1; i <= template.numMonths; i++) {
       const sheetName = monthUtils.sheetForMonth(
@@ -510,7 +502,11 @@ export class categoryTemplate {
     return -Math.round(sum / template.amount);
   }
 
-  private runBy(template, first: boolean, remainder: number) {
+  private runBy(
+    template,
+    first: boolean,
+    remainder: number,
+  ): { ret: number; remainder: number } {
     let target = 0;
     let targetMonth = `${template.month}`;
     let numMonths = monthUtils.differenceInCalendarMonths(

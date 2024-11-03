@@ -5,7 +5,7 @@ import * as db from '../db';
 import { batchMessages } from '../sync';
 
 import { isReflectBudget, getSheetValue, setGoal, setBudget } from './actions';
-import { categoryTemplate } from './categoryTemplate';
+import { CategoryTemplate } from './categoryTemplate';
 import { checkTemplates, storeTemplates } from './template-notes';
 
 export async function applyTemplate({ month }): Promise<Notification> {
@@ -123,7 +123,7 @@ async function processTemplate(
   } else {
     categories = categoriesIn;
   }
-  const catObjects: categoryTemplate[] = [];
+  const catObjects: CategoryTemplate[] = [];
   let availBudget = await getSheetValue(
     monthUtils.sheetForMonth(month),
     `to-budget`,
@@ -144,7 +144,7 @@ async function processTemplate(
       // gather needed priorities
       // gather remainder weights
       try {
-        const obj = await categoryTemplate.init(templates, id, month);
+        const obj = await CategoryTemplate.init(templates, id, month);
         availBudget += budgeted;
         const p = obj.getPriorities();
         p.forEach(pr => priorities.push(pr));
@@ -186,16 +186,15 @@ async function processTemplate(
   // run each priority level
   for (let pi = 0; pi < priorities.length; pi++) {
     const availStart = availBudget;
+    const p = priorities[pi];
     for (let i = 0; i < catObjects.length; i++) {
+      if (availBudget <= 0 && p > 0) break;
       const ret = await catObjects[i].runTemplatesForPriority(
-        priorities[pi],
+        p,
         availBudget,
         availStart,
       );
       availBudget -= ret;
-      if (availBudget <= 0) {
-        break;
-      }
     }
     if (availBudget <= 0) {
       break;
