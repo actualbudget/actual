@@ -20,10 +20,12 @@ jobs:
       contains(github.event.comment.body, '/update-vrt')
     steps:
       - name: Get PR branch
-        uses: xt0rted/pull-request-comment-branch@v2
+#        Until https://github.com/xt0rted/pull-request-comment-branch/issues/322 is resolved we use the forked version
+        uses: gotson/pull-request-comment-branch@head-repo-owner-dist
         id: comment-branch
       - uses: actions/checkout@v4
         with:
+          repository: ${{ steps.comment-branch.outputs.head_owner }}/${{ steps.comment-branch.outputs.head_repo }}
           ref: ${{ steps.comment-branch.outputs.head_ref }}
       - name: Set up environment
         uses: ./.github/actions/setup
