@@ -12,6 +12,7 @@ import {
 import * as Platform from 'loot-core/client/platform';
 import { type AccountEntity } from 'loot-core/src/types/models';
 
+import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { useNotes } from '../../hooks/useNotes';
 import { styles, theme } from '../../style';
 import { AlignedText } from '../common/AlignedText';
@@ -31,7 +32,6 @@ import {
 } from '../sort';
 import { type SheetFields, type Binding } from '../spreadsheet';
 import { CellValue } from '../spreadsheet/CellValue';
-import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 
 export const accountNameStyle: CSSProperties = {
   marginTop: -2,
