@@ -69,10 +69,9 @@ async function updateAccountBalance(id, balance) {
 async function getAccountSyncStartDate(id) {
   // there is no way to get the current date in sql.js, the workaround is to
   // calculate the date in js and pass it into the query
-  const currentDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
   const latestTransaction = await db.first(
     'SELECT * FROM v_transactions WHERE account = ? AND date <= ? ORDER BY date DESC LIMIT 1',
-    [id, currentDate],
+    [id, monthUtils.currentDay()],
   );
 
   if (!latestTransaction) return null;
