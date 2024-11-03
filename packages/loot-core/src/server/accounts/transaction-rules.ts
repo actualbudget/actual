@@ -295,7 +295,7 @@ function conditionSpecialCases(cond: Condition): Condition {
   //special cases that require multiple conditions
   if (cond.op === 'is' && cond.field === 'category' && cond.value === null) {
     return new Condition(
-      'subExpression',
+      'and',
       cond.field,
       [
         cond,
@@ -310,7 +310,7 @@ function conditionSpecialCases(cond: Condition): Condition {
     cond.value === null
   ) {
     return new Condition(
-      'subExpression',
+      'and',
       cond.field,
       [cond, new Condition('is', 'parent', false, null)],
       {},
@@ -551,7 +551,7 @@ export function conditionsToAQL(conditions, { recurDateBounds = 100 } = {}) {
         return apply(field, '$eq', true);
       case 'false':
         return apply(field, '$eq', false);
-      case 'subExpression':
+      case 'and':
         debugger;
         return {
           $and: getValue(value).map(subExpr => mapConditionToActualQL(subExpr)),

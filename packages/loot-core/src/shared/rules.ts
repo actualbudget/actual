@@ -22,7 +22,7 @@ const TYPE_INFO = {
       'doesNotContain',
       'notOneOf',
       'hasTags',
-      'subExpression',
+      'and',
     ],
     nullable: true,
   },

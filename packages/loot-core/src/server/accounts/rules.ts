@@ -204,7 +204,7 @@ const CONDITION_TYPES = {
     ],
     nullable: true,
     parse(op, value, fieldName) {
-      if (op === 'oneOf' || op === 'notOneOf' || op === 'subExpression') {
+      if (op === 'oneOf' || op === 'notOneOf' || op === 'and') {
         assert(
           Array.isArray(value),
           'no-empty-array',

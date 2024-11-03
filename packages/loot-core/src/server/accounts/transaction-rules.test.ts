@@ -510,7 +510,7 @@ describe('Transaction rules', () => {
     // todo: isapprox
   });
 
-  test('subexpression builds $and condition', async () => {
+  test('and sub expression builds $and condition', async () => {
     const conds = [{ field: 'category', op: 'is', value: null }];
     debugger;
     const { filters } = conditionsToAQL(conds);
