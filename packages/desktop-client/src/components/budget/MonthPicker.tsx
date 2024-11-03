@@ -1,10 +1,11 @@
 // @ts-strict-ignore
-import { type CSSProperties, useState } from 'react';
+import React, { type CSSProperties, useState } from 'react';
 
 import * as monthUtils from 'loot-core/src/shared/months';
 
 import { useResizeObserver } from '../../hooks/useResizeObserver';
 import { styles, theme } from '../../style';
+import { Link } from '../common/Link';
 import { View } from '../common/View';
 
 import { type BoundsProps } from './MonthsContext';
@@ -78,6 +79,19 @@ export const MonthPicker = ({
           justifyContent: 'center',
         }}
       >
+        <Link
+          variant="button"
+          buttonVariant="bare"
+          onPress={() => onSelect(currentMonth)}
+          style={{
+            position: 'absolute',
+            left: 0,
+            padding: '2.2px 3px',
+            border: `1px solid ${theme.buttonPrimaryBorder}`,
+          }}
+        >
+          Now
+        </Link>
         {range.map((month, idx) => {
           const monthName = monthUtils.format(month, 'MMM');
           const selected =
