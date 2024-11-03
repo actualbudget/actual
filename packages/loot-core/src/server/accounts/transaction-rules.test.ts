@@ -372,14 +372,14 @@ describe('Transaction rules', () => {
     await loadRules();
     const account = await db.insertAccount({ name: 'bank' });
     const categoryGroupId = await db.insertCategoryGroup({ name: 'general' });
-    const categoryId = await db.insertCategory({
+    const foodCategoryId = await db.insertCategory({
       name: 'food',
       cat_group: categoryGroupId,
     });
     const krogerId = await db.insertPayee({ name: 'kroger' });
     const lowesId = await db.insertPayee({
       name: 'lowes',
-      category: categoryId,
+      category: foodCategoryId,
     });
 
     await db.insertTransaction({
@@ -387,6 +387,7 @@ describe('Transaction rules', () => {
       date: '2020-10-01',
       account,
       payee: krogerId,
+      category: foodCategoryId,
       notes: 'barr',
       amount: 353,
     });
@@ -419,6 +420,7 @@ describe('Transaction rules', () => {
       date: '2020-10-16',
       account,
       payee: lowesId,
+      category: foodCategoryId,
       notes: '',
       amount: 124,
     });
@@ -491,6 +493,19 @@ describe('Transaction rules', () => {
       { field: 'date', op: 'gt', value: '2020-10-10' },
     ]);
     expect(transactions.map(t => t.id)).toEqual(['4', '5', '2', '3']);
+
+    //Condition special cases
+    //is category null
+    transactions = await getMatchingTransactions([
+      { field: 'category', op: 'is', value: null },
+    ]);
+    expect(transactions.map(t => t.id)).toEqual(['4', '2', '3']);
+
+    //category is not X
+    transactions = await getMatchingTransactions([
+      { field: 'category', op: 'isNot', value: null },
+    ]);
+    expect(transactions.map(t => t.id)).toEqual(['5', '1']);
 
     // todo: isapprox
   });
