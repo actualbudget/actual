@@ -102,8 +102,7 @@ export function ScheduleDetails({ id, transaction }) {
             fields: {
               payee: schedule._payee,
               account: schedule._account,
-              // defalut to a non-zero value so the sign can be changed before the value
-              amount: schedule._amount || -1000,
+              amount: schedule._amount || 0,
               amountOp: schedule._amountOp || 'isapprox',
               date: schedule._date,
               posts_transaction: action.schedule.posts_transaction,
