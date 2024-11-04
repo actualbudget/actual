@@ -21,6 +21,8 @@ import {
 import { copy, exists, remove } from 'fs-extra';
 import promiseRetry from 'promise-retry';
 
+import { GlobalPrefs } from 'loot-core/types/prefs';
+
 import { getMenu } from './menu';
 import {
   get as getWindowState,
@@ -28,7 +30,6 @@ import {
 } from './window-state';
 
 import './security';
-import { GlobalPrefs } from 'loot-core/types/prefs';
 
 const isDev = !app.isPackaged; // dev mode if not packaged
 
@@ -60,11 +61,11 @@ if (isDev) {
 }
 
 async function loadGlobalPrefs() {
-  let state: GlobalPrefs | undefined = undefined;
+  let state: { [key: string]: unknown } | undefined = undefined;
   try {
     state = JSON.parse(
       fs.readFileSync(
-        path.join(process.env.ACTUAL_DATA_DIR, 'global-store.json'),
+        path.join(process.env.ACTUAL_DATA_DIR!, 'global-store.json'),
         'utf8',
       ),
     );

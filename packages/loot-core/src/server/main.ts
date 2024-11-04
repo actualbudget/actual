@@ -1,7 +1,5 @@
 // @ts-strict-ignore
 import './polyfills';
-import https from 'https';
-import tls from 'tls';
 
 import * as injectAPI from '@actual-app/api/injected';
 import * as CRDT from '@actual-app/crdt';
