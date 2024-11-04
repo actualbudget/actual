@@ -19,12 +19,6 @@ jobs:
       github.event.issue.pull_request &&
       contains(github.event.comment.body, '/update-vrt')
     steps:
-      - name: React to comment
-        uses: dkershner6/reaction-action@v2
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          commentId: ${{ github.event.comment.id }}
-          reaction: "+1"
       - name: Get PR branch
         uses: xt0rted/pull-request-comment-branch@v2
         id: comment-branch
@@ -54,6 +48,29 @@ jobs:
           fi
           git commit -m "Update VRT"
           git push origin HEAD:${{ steps.comment-branch.outputs.head_ref }}
+  add-starting-reaction:
+    runs-on: ubuntu-latest
+    if: |
+      github.event.issue.pull_request &&
+      contains(github.event.comment.body, '/update-vrt')
+    permissions:
+      contents: write
+    steps:
+      - name: React to comment
+        uses: dkershner6/reaction-action@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commentId: ${{ github.event.comment.id }}
+          reaction: "+1"
+  add-finished-reaction:
+    runs-on: ubuntu-latest
+    needs: update-vrt
+    if: |
+      github.event.issue.pull_request &&
+      contains(github.event.comment.body, '/update-vrt')
+    permissions:
+      contents: write
+    steps:
       - name: React to comment
         uses: dkershner6/reaction-action@v2
         with:
