@@ -1,10 +1,14 @@
 // @ts-strict-ignore
-import React, { useEffect, type ComponentProps } from 'react';
+import React, { useEffect, useRef, type ComponentProps } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import AutoSizer from 'react-virtualized-auto-sizer';
 
+import { useMediaQuery } from 'usehooks-ts';
+
 import * as monthUtils from 'loot-core/src/shared/months';
 
+import { useSpaceMeasure } from '../../hooks/useSpaceMeasure';
+import { useResponsive } from '../../ResponsiveProvider';
 import { View } from '../common/View';
 
 import { useBudgetMonthCount } from './BudgetMonthCountContext';
@@ -114,6 +118,8 @@ const DynamicBudgetTableInner = ({
     [_onMonthSelect, startMonth, numMonths],
   );
 
+  const isPrinting = useMediaQuery('print');
+
   return (
     <View
       style={{
@@ -124,12 +130,14 @@ const DynamicBudgetTableInner = ({
       }}
     >
       <View style={{ width: '100%', maxWidth }}>
-        <BudgetPageHeader
-          startMonth={prewarmStartMonth}
-          numMonths={numMonths}
-          monthBounds={monthBounds}
-          onMonthSelect={_onMonthSelect}
-        />
+        {!isPrinting && (
+          <BudgetPageHeader
+            startMonth={prewarmStartMonth}
+            numMonths={numMonths}
+            monthBounds={monthBounds}
+            onMonthSelect={_onMonthSelect}
+          />
+        )}
         <BudgetTable
           prewarmStartMonth={prewarmStartMonth}
           startMonth={startMonth}
@@ -147,12 +155,31 @@ DynamicBudgetTableInner.displayName = 'DynamicBudgetTableInner';
 type DynamicBudgetTableProps = ComponentProps<typeof BudgetTable>;
 
 export const DynamicBudgetTable = (props: DynamicBudgetTableProps) => {
+  // Important: re-render when printing to get the correct width
+  const isPrinting = useMediaQuery('print');
+  const measure = useSpaceMeasure();
+
   return (
-    <AutoSizer>
-      {({ width, height }) => (
-        <DynamicBudgetTableInner width={width} height={height} {...props} />
-      )}
-    </AutoSizer>
+    <>
+      {measure.elements}
+
+      <AutoSizer>
+        {({ width, height }) => {
+          if (isPrinting) {
+            return (
+              <DynamicBudgetTableInner
+                width={measure.width()}
+                height={measure.height()}
+                {...props}
+              />
+            );
+          }
+          return (
+            <DynamicBudgetTableInner width={width} height={height} {...props} />
+          );
+        }}
+      </AutoSizer>
+    </>
   );
 };
 

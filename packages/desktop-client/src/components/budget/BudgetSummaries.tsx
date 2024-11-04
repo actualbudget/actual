@@ -8,10 +8,12 @@ import React, {
 import { useSpring, animated } from 'react-spring';
 
 import { css } from '@emotion/css';
+import { useMediaQuery } from 'usehooks-ts';
 
 import { addMonths, subMonths } from 'loot-core/src/shared/months';
 
 import { useResizeObserver } from '../../hooks/useResizeObserver';
+import { useSpaceMeasure } from '../../hooks/useSpaceMeasure';
 import { View } from '../common/View';
 
 import { type BudgetSummary as EnvelopeBudgetSummary } from './envelope/budgetsummary/BudgetSummary';
@@ -37,11 +39,16 @@ export function BudgetSummaries({ SummaryComponent }: BudgetSummariesProps) {
     }, []),
   );
 
+  // Re-render when printing to get the correct width
+  const isPrinting = useMediaQuery('print');
+  const measure = useSpaceMeasure();
+
   const prevMonth0 = useRef(months[0]);
   const allMonths = [...months];
   allMonths.unshift(subMonths(months[0], 1));
   allMonths.push(addMonths(months[months.length - 1], 1));
-  const monthWidth = widthState / months.length;
+  const totalWidth = isPrinting ? measure.width() : widthState;
+  const monthWidth = totalWidth / months.length;
 
   useLayoutEffect(() => {
     const prevMonth = prevMonth0.current;
@@ -68,7 +75,7 @@ export function BudgetSummaries({ SummaryComponent }: BudgetSummariesProps) {
   return (
     <div
       className={css([
-        { flex: 1, overflow: 'hidden' },
+        { flex: 1, overflow: 'hidden', position: 'relative' },
         months.length === 1 && {
           marginLeft: -4,
           marginRight: -4,
@@ -76,13 +83,16 @@ export function BudgetSummaries({ SummaryComponent }: BudgetSummariesProps) {
       ])}
       ref={containerRef}
     >
+      {measure.elements}
       <animated.div
         className="view"
         style={{
           flexDirection: 'row',
-          width: widthState,
-          willChange: 'transform',
-          transform: styles.x.to(x => `translateX(${x}px)`),
+          width: totalWidth,
+          ...(!isPrinting && {
+            willChange: 'transform',
+            transform: styles.x.to(x => `translateX(${x}px)`),
+          }),
         }}
       >
         {allMonths.map(month => {
