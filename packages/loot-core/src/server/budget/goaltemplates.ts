@@ -22,6 +22,23 @@ export async function overwriteTemplate({ month }): Promise<Notification> {
   return ret;
 }
 
+export async function applyMultipleCategoryTemplates({ month, categoryIds }) {
+  const placeholders = categoryIds.map(() => '?').join(', ');
+  const query = `SELECT * FROM v_categories WHERE id IN (${placeholders})`;
+  const categories = await db.all(query, categoryIds);
+  await storeTemplates();
+  const category_templates = await getTemplates(categories, 'template');
+  const category_goals = await getTemplates(categories, 'goal');
+  const ret = await processTemplate(
+    month,
+    true,
+    category_templates,
+    categories,
+  );
+  await processGoals(category_goals, month);
+  return ret;
+}
+
 export async function applySingleCategoryTemplate({ month, category }) {
   const categories = await db.all(`SELECT * FROM v_categories WHERE id = ?`, [
     category,
@@ -62,7 +79,19 @@ async function getTemplates(category) {
   for (let ll = 0; ll < goalDef.length; ll++) {
     templates[goalDef[ll].id] = JSON.parse(goalDef[ll].goalDef);
   }
-  if (category) {
+  if (Array.isArray(category)) {
+    const multipleCategoryTemplates = [];
+    for (let dd = 0; dd < category.length; dd++) {
+      const categoryId = category[dd].id;
+      if (templates[categoryId] !== undefined) {
+        multipleCategoryTemplates[categoryId] = templates[categoryId];
+        multipleCategoryTemplates[categoryId] = multipleCategoryTemplates[
+          categoryId
+        ].filter(t => t.directive === directive);
+      }
+    }
+    return multipleCategoryTemplates;
+  } else if (category) {
     const ret = [];
     ret[category.id] = templates[category.id];
     return ret;
@@ -110,7 +139,7 @@ async function processTemplate(
   categoryTemplates,
   categoriesIn?,
 ): Promise<Notification> {
-  // setup objects for each category and catch errors
+  // setup categories
   let categories = [];
   if (!categoriesIn) {
     const isReflect = isReflectBudget();
@@ -123,14 +152,18 @@ async function processTemplate(
   } else {
     categories = categoriesIn;
   }
+
+  // setup categories to process
   const catObjects: CategoryTemplate[] = [];
   let availBudget = await getSheetValue(
     monthUtils.sheetForMonth(month),
     `to-budget`,
   );
-  let priorities = [];
+  const priorities = [];
   let remainderWeight = 0;
   const errors = [];
+  const budgetList = [];
+  const goalList = [];
   for (let i = 0; i < categories.length; i++) {
     const id = categories[i].id;
     const sheetName = monthUtils.sheetForMonth(month);
@@ -157,7 +190,12 @@ async function processTemplate(
 
       // do a reset of the goals that are orphaned
     } else if (existingGoal !== null && !templates) {
-      await setGoal({ month, category: id, goal: null, long_goal: null });
+      goalList.push({
+        category: id,
+        goal: null,
+        longGoal: null,
+      });
+      //await setGoal({ month, category: id, goal: null, long_goal: null });
     }
   }
 
@@ -212,8 +250,6 @@ async function processTemplate(
     });
   }
   // finish
-  const budgetList = [];
-  const goalList = [];
   catObjects.forEach(o => {
     const ret = o.getValues();
     budgetList.push({ category: o.categoryID, budgeted: ret.budgeted });
