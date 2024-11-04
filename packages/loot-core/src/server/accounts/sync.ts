@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import * as asyncStorage from '../../platform/server/asyncStorage';
 import * as monthUtils from '../../shared/months';
+import { q } from '../../shared/query';
 import {
   makeChild as makeChildTransaction,
   recalculateSplit,
@@ -17,7 +18,9 @@ import {
   AccountEntity,
   BankSyncResponse,
   SimpleFinBatchSyncResponse,
+  TransactionEntity,
 } from '../../types/models';
+import { runQuery } from '../aql';
 import * as db from '../db';
 import { runMutator } from '../mutators';
 import { post } from '../post';
@@ -66,36 +69,33 @@ async function updateAccountBalance(id, balance) {
   ]);
 }
 
+async function getAccountOldestTransaction(id): Promise<TransactionEntity> {
+  return (
+    await runQuery(
+      q('transactions')
+        .filter({
+          account: id,
+          date: { $lte: monthUtils.currentDay() },
+        })
+        .select('date')
+        .orderBy('date')
+        .limit(1),
+    )
+  ).data?.[0];
+}
+
 async function getAccountSyncStartDate(id) {
-  // there is no way to get the current date in sql.js, the workaround is to
-  // calculate the date in js and pass it into the query
-  const latestTransaction = await db.first(
-    'SELECT * FROM v_transactions WHERE account = ? AND date <= ? ORDER BY date DESC LIMIT 1',
-    [id, monthUtils.currentDay()],
+  // Many GoCardless integrations do not support getting more than 90 days
+  // worth of data, so make that the earliest possible limit.
+  const dates = [monthUtils.subDays(monthUtils.currentDay(), 90)];
+
+  const oldestTransaction = await getAccountOldestTransaction(id);
+
+  if (oldestTransaction) dates.push(oldestTransaction.date);
+
+  return monthUtils.dayFromDate(
+    dateFns.max(dates.map(d => monthUtils.parseDate(d))),
   );
-
-  if (!latestTransaction) return null;
-
-  const startingTransaction = await db.first(
-    'SELECT date FROM v_transactions WHERE account = ? ORDER BY date ASC LIMIT 1',
-    [id],
-  );
-  if (!startingTransaction) return null;
-  const startingDate = db.fromDateRepr(startingTransaction.date);
-  // assert(startingTransaction)
-
-  const startDate = monthUtils.dayFromDate(
-    dateFns.max([
-      // Many GoCardless integrations do not support getting more than 90 days
-      // worth of data, so make that the earliest possible limit.
-      monthUtils.parseDate(monthUtils.subDays(monthUtils.currentDay(), 90)),
-
-      // Never download transactions before the starting date.
-      monthUtils.parseDate(startingDate),
-    ]),
-  );
-
-  return startDate;
 }
 
 export async function getGoCardlessAccounts(userId, userKey, id) {
@@ -795,21 +795,20 @@ export async function syncAccount(
 ) {
   const acctRow = await db.select('accounts', id);
 
-  const latestTransaction = await getAccountSyncStartDate(id);
-  const syncFromBlank = latestTransaction === null;
-  const syncFromDate =
-    latestTransaction ?? monthUtils.subDays(monthUtils.currentDay(), 90);
+  const syncStartDate = await getAccountSyncStartDate(id);
+  const oldestTransaction = await getAccountOldestTransaction(id);
+  const newAccount = oldestTransaction == null;
 
   let download;
   if (acctRow.account_sync_source === 'simpleFin') {
-    download = await downloadSimpleFinTransactions(acctId, syncFromDate);
+    download = await downloadSimpleFinTransactions(acctId, syncStartDate);
   } else if (acctRow.account_sync_source === 'goCardless') {
     download = await downloadGoCardlessTransactions(
       userId,
       userKey,
       acctId,
       bankId,
-      syncFromBlank,
+      newAccount,
     );
   } else {
     throw new Error(
@@ -817,7 +816,7 @@ export async function syncAccount(
     );
   }
 
-  return processBankSyncDownload(download, id, acctRow, syncFromBlank);
+  return processBankSyncDownload(download, id, acctRow, newAccount);
 }
 
 export async function SimpleFinBatchSync(
