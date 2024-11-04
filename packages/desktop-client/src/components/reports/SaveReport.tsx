@@ -21,13 +21,30 @@ type SaveReportProps<T extends CustomReportEntity = CustomReportEntity> = {
   customReportItems: T;
   report: CustomReportEntity;
   savedStatus: string;
-  onReportChange: ({
-    savedReport,
-    type,
-  }: {
-    savedReport?: T;
-    type: string;
-  }) => void;
+  onReportChange: (
+    params:
+      | {
+          type: 'add-update';
+          savedReport: CustomReportEntity;
+        }
+      | {
+          type: 'rename';
+          savedReport?: CustomReportEntity;
+        }
+      | {
+          type: 'modify';
+        }
+      | {
+          type: 'reload';
+        }
+      | {
+          type: 'reset';
+        }
+      | {
+          type: 'choose';
+          savedReport?: CustomReportEntity;
+        },
+  ) => void;
 };
 
 export function SaveReport({
