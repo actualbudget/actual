@@ -197,6 +197,9 @@ export function App() {
                           flexGrow: 1,
                           overflow: 'hidden',
                           ...styles.lightScrollbar,
+                          '@media print': {
+                            overflow: 'visible',
+                          },
                         }}
                       >
                         <ErrorBoundary FallbackComponent={ErrorFallback}>

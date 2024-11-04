@@ -213,6 +213,9 @@ export function BudgetTable(props) {
             flex: 1,
             paddingLeft: 5,
             paddingRight: 5,
+            '@media print': {
+              overflowY: 'visible',
+            },
           }}
         >
           <View

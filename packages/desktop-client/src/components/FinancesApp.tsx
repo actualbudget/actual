@@ -177,6 +177,9 @@ export function FinancesApp() {
             flex: 1,
             overflow: 'hidden',
             width: '100%',
+            '@media print': {
+              overflow: 'visible',
+            },
           }}
         >
           <View
@@ -184,6 +187,9 @@ export function FinancesApp() {
               flex: 1,
               overflow: 'auto',
               position: 'relative',
+              '@media print': {
+                overflow: 'visible',
+              },
             }}
           >
             <Titlebar
