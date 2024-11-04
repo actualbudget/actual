@@ -152,7 +152,7 @@ export default defineConfig(async ({ mode }) => {
       mode === 'desktop'
         ? undefined
         : VitePWA({
-            registerType: 'autoUpdate',
+            registerType: 'prompt',
             workbox: {
               globPatterns: [
                 '**/*.{js,css,html,txt,wasm,sql,sqlite,ico,png,woff2,webmanifest}',

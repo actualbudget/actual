@@ -78,6 +78,10 @@ contextBridge.exposeInMainWorld('Actual', {
     ipcRenderer.send('update-menu', budgetId);
   },
 
+  // No auto-updates in the desktop app
+  isUpdateReadyForDownload: () => false,
+  waitForUpdateReadyForDownload: () => new Promise<void>(() => {}),
+
   getServerSocket: () => {
     return null;
   },
