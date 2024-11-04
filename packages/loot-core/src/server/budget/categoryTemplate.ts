@@ -499,7 +499,7 @@ export class CategoryTemplate {
       );
       sum += await getSheetValue(sheetName, `sum-amount-${this.categoryID}`);
     }
-    return -Math.round(sum / template.amount);
+    return -Math.round(sum / template.numMonths);
   }
 
   private runBy(

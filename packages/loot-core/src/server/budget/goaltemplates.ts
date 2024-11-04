@@ -10,15 +10,15 @@ import { checkTemplates, storeTemplates } from './template-notes';
 
 export async function applyTemplate({ month }): Promise<Notification> {
   await storeTemplates();
-  const category_templates = await getTemplates(null);
-  const ret = await processTemplate(month, false, category_templates, null);
+  const categoryTemplates = await getTemplates(null);
+  const ret = await processTemplate(month, false, categoryTemplates, null);
   return ret;
 }
 
 export async function overwriteTemplate({ month }): Promise<Notification> {
   await storeTemplates();
-  const category_templates = await getTemplates(null);
-  const ret = await processTemplate(month, true, category_templates, null);
+  const categoryTemplates = await getTemplates(null);
+  const ret = await processTemplate(month, true, categoryTemplates, null);
   return ret;
 }
 
@@ -27,11 +27,11 @@ export async function applySingleCategoryTemplate({ month, category }) {
     category,
   ]);
   await storeTemplates();
-  const category_templates = await getTemplates(categories[0]);
+  const categoryTemplates = await getTemplates(categories[0]);
   const ret = await processTemplate(
     month,
     true,
-    category_templates,
+    categoryTemplates,
     categories,
   );
   return ret;
@@ -54,13 +54,13 @@ async function getCategories() {
 
 async function getTemplates(category) {
   //retrieves template definitions from the database
-  const goal_def = await db.all(
+  const goalDef = await db.all(
     'SELECT * FROM categories WHERE goal_def IS NOT NULL',
   );
 
   const templates = [];
-  for (let ll = 0; ll < goal_def.length; ll++) {
-    templates[goal_def[ll].id] = JSON.parse(goal_def[ll].goal_def);
+  for (let ll = 0; ll < goalDef.length; ll++) {
+    templates[goalDef[ll].id] = JSON.parse(goalDef[ll].goalDef);
   }
   if (category) {
     const ret = [];
@@ -114,8 +114,8 @@ async function processTemplate(
   let categories = [];
   if (!categoriesIn) {
     const isReflect = isReflectBudget();
-    const categories_long = await getCategories();
-    categories_long.forEach(c => {
+    const categoriesLong = await getCategories();
+    categoriesLong.forEach(c => {
       if (!isReflect && !c.is_income) {
         categories.push(c);
       }
