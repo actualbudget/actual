@@ -1,7 +1,5 @@
 // @ts-strict-ignore
 import './polyfills';
-import https from 'https';
-import tls from 'tls';
 
 import * as injectAPI from '@actual-app/api/injected';
 import * as CRDT from '@actual-app/crdt';
@@ -2231,23 +2229,6 @@ export async function initApp(isDev, socketName) {
     } catch (e) {
       console.log('Error loading key', e);
       throw new Error('load-key-error');
-    }
-  }
-
-  const selfSignedCertPath = await asyncStorage.getItem(
-    'server-self-signed-cert',
-  );
-
-  if (selfSignedCertPath) {
-    try {
-      const selfSignedCert = await fs.readFile(selfSignedCertPath);
-      https.globalAgent.options.ca = [...tls.rootCertificates, selfSignedCert];
-    } catch (error) {
-      console.error(
-        'Unable to add the self signed certificate, removing its reference',
-        error,
-      );
-      await asyncStorage.removeItem('server-self-signed-cert');
     }
   }
 
