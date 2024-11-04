@@ -8,10 +8,10 @@ import {
   type SimpleKeyboard,
 } from 'react-simple-keyboard';
 
+import { styles } from '@actual-app/components/styles';
+import { theme } from '@actual-app/components/theme';
+import { View } from '@actual-app/components/view';
 import { css, cx } from '@emotion/css';
-
-import { styles, theme } from '../../style';
-import { View } from '../common/View';
 
 export type AmountKeyboardRef = SimpleKeyboard;
 
@@ -27,7 +27,8 @@ export function AmountKeyboard(props: AmountKeyboardProps) {
       },
       '& .hg-button': {
         ...styles.noTapHighlight,
-        ...styles.mediumText,
+        ...styles.largeText,
+        fontWeight: 500,
         display: 'flex',
         height: '60px',
         flex: 1,
@@ -35,21 +36,23 @@ export function AmountKeyboard(props: AmountKeyboardProps) {
         justifyContent: 'center',
         borderRadius: 16,
         cursor: 'pointer',
-        backgroundColor: theme.buttonNormalBackground,
-        color: theme.buttonNormalText,
-        border: `1px solid ${theme.buttonNormalBorder}`,
+        backgroundColor: theme.keyboardButtonBackground,
+        color: theme.keyboardText,
         padding: '5px 10px',
         margin: 2,
+        borderWidth: 0,
+        outline: 0,
+        boxSizing: 'border-box',
         ':active': {
           transform: 'translateY(1px)',
-          boxShadow: `0 1px 4px 0 ${theme.buttonNormalShadow}`,
+          boxShadow: `0 1px 4px 0 ${theme.keyboardButtonShadow}`,
           transition: 'none',
         },
       },
       // eslint-disable-next-line rulesdir/typography
       '& [data-skbtn="+"], & [data-skbtn="-"], & [data-skbtn="×"], & [data-skbtn="÷"], & [data-skbtn="{bksp}"]':
         {
-          backgroundColor: theme.pageTextSubdued,
+          backgroundColor: theme.keyboardButtonSecondaryBackground,
         },
     }),
     props.theme,
@@ -65,8 +68,8 @@ export function AmountKeyboard(props: AmountKeyboardProps) {
         bottom: 0,
         right: 0,
         zIndex: 999,
-        backgroundColor: theme.tableBackground,
-        borderTop: `1px solid ${theme.tableBorder}`,
+        backgroundColor: theme.keyboardBackground,
+        borderTop: `1px solid ${theme.keyboardBorder}`,
         padding: 5,
       }}
       onBlur={e => {

@@ -201,4 +201,10 @@ export const theme = {
   tooltipBackground: 'var(--color-tooltipBackground)',
   tooltipBorder: 'var(--color-tooltipBorder)',
   calendarCellBackground: 'var(--color-calendarCellBackground)',
+  keyboardBackground: 'var(--color-keyboardBackground)',
+  keyboardBorder: 'var(--color-keyboardBorder)',
+  keyboardText: 'var(--color-keyboardText)',
+  keyboardButtonBackground: 'var(--color-keyboardButtonBackground)',
+  keyboardButtonShadow: 'var(--color-keyboardButtonShadow)',
+  keyboardButtonSecondaryBackground: 'var(--color-keyboardButtonSecondaryBackground)',
 };
