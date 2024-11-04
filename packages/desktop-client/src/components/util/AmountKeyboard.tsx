@@ -47,7 +47,7 @@ export function AmountKeyboard(props: AmountKeyboardProps) {
         },
       },
       // eslint-disable-next-line rulesdir/typography
-      '& [data-skbtn="+"], & [data-skbtn="-"], & [data-skbtn="*"], & [data-skbtn="/"], & [data-skbtn="{bksp}"]':
+      '& [data-skbtn="+"], & [data-skbtn="-"], & [data-skbtn="×"], & [data-skbtn="÷"], & [data-skbtn="{bksp}"]':
         {
           backgroundColor: theme.pageTextSubdued,
         },
