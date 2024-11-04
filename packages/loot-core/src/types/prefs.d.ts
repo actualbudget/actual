@@ -3,7 +3,8 @@ export type FeatureFlag =
   | 'reportBudget'
   | 'goalTemplatesEnabled'
   | 'actionTemplating'
-  | 'upcomingLengthAdjustment';
+  | 'upcomingLengthAdjustment'
+  | 'contextMenus';
 
 /**
  * Cross-device preferences. These sync across devices when they are changed.
