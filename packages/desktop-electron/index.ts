@@ -57,7 +57,6 @@ if (!isDev || !process.env.ACTUAL_DATA_DIR) {
 let clientWin: BrowserWindow | null;
 let serverProcess: UtilityProcess | null;
 let actualServerProcess: UtilityProcess | null;
-let globalPrefs: Partial<GlobalPrefs> | null;
 
 if (isDev) {
   process.traceProcessWarnings = true;
@@ -80,11 +79,32 @@ async function loadGlobalPrefs() {
   return state;
 }
 
-function createBackgroundProcess() {
+async function createBackgroundProcess() {
+  const globalPrefs = await loadGlobalPrefs(); // ensures we have the latest settings even when restarting the server
+  let envVariables: Env = {
+    ...process.env, // required
+  };
+
+  if (globalPrefs?.['server-self-signed-cert']) {
+    envVariables = {
+      ...envVariables,
+      NODE_EXTRA_CA_CERTS: globalPrefs?.['server-self-signed-cert'], // add self signed cert to env variable - fetch can pick that up
+    };
+  }
+
+  let forkOptions: ForkOptions = {
+    stdio: 'pipe',
+    env: envVariables,
+  };
+
+  if (isDev) {
+    forkOptions = { ...forkOptions, execArgv: ['--inspect'] };
+  }
+
   serverProcess = utilityProcess.fork(
     __dirname + '/server.js',
     ['--subprocess', app.getVersion()],
-    isDev ? { execArgv: ['--inspect'], stdio: 'pipe' } : { stdio: 'pipe' },
+    forkOptions,
   );
 
   serverProcess.stdout?.on('data', (chunk: Buffer) => {
@@ -406,7 +426,7 @@ app.on('ready', async () => {
   // file no matter what URL it is. This allows us to use react-router
   // on the frontend
 
-  globalPrefs = await loadGlobalPrefs(); // load global prefs
+  const globalPrefs = await loadGlobalPrefs(); // load global prefs
 
   if (globalPrefs.ngrokConfig?.autoStart) {
     // wait for both server and ngrok to start before starting the Actual client to ensure server is available
@@ -471,7 +491,7 @@ app.on('ready', async () => {
     console.log('Suspending', new Date());
   });
 
-  createBackgroundProcess();
+  await createBackgroundProcess();
 });
 
 app.on('window-all-closed', () => {
