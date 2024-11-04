@@ -286,6 +286,9 @@ export function Titlebar({ style }: TitlebarProps) {
           Platform.OS === 'mac' &&
           floatingSidebar && { paddingLeft: 80 }),
         ...style,
+        '@media print': {
+          display: 'none',
+        },
       }}
     >
       {(floatingSidebar || sidebar.alwaysFloats) && (

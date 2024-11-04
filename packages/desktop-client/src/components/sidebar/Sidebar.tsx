@@ -75,6 +75,11 @@ export function Sidebar() {
 
   return (
     <Resizable
+      className={css({
+        '@media print': {
+          display: 'none',
+        },
+      })}
       defaultSize={{
         width: sidebarWidth,
         height: '100%',
