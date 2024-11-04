@@ -76,7 +76,7 @@
   },
   "dependencies": {
     "@ngrok/ngrok": "^1.4.1",
-    "actual-sync": "file:../../../actual-server",
+    "actual-sync": "*",
     "better-sqlite3": "^9.6.0",
     "fs-extra": "^11.2.0",
     "promise-retry": "^2.0.1"

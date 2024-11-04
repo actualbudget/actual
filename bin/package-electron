@@ -45,7 +45,6 @@ yarn workspace @actual-app/web build --mode=desktop # electron specific build
 yarn workspace loot-core build:browser
 yarn workspace @actual-app/web build:browser
 
-
 yarn workspace desktop-electron update-client
 
 (
