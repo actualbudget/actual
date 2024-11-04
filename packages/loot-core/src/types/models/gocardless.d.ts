@@ -14,7 +14,7 @@ export type GoCardlessInstitution = {
 };
 
 export type GoCardlessBalance = {
-  balanceAmount: Amount;
+  balanceAmount: GoCardlessAmount;
   balanceType:
     | 'closingBooked'
     | 'expected'
@@ -63,7 +63,7 @@ export type GoCardlessTransaction = {
   remittanceInformationStructuredArray?: string[];
   remittanceInformationUnstructured?: string;
   remittanceInformationUnstructuredArray?: string[];
-  transactionAmount: Amount;
+  transactionAmount: GoCardlessAmount;
   transactionId?: string;
   ultimateCreditor?: string;
   ultimateDebtor?: string;

@@ -1,3 +1,4 @@
+import { AccountEntity } from './account';
 import { BankSyncResponse } from './bank-sync';
 
 export type SimpleFinOrganization = {
