@@ -2149,23 +2149,6 @@ export async function initApp(isDev, socketName) {
     }
   }
 
-  const selfSignedCertPath = await asyncStorage.getItem(
-    'server-self-signed-cert',
-  );
-
-  if (selfSignedCertPath) {
-    try {
-      const selfSignedCert = await fs.readFile(selfSignedCertPath);
-      https.globalAgent.options.ca = [...tls.rootCertificates, selfSignedCert];
-    } catch (error) {
-      console.error(
-        'Unable to add the self signed certificate, removing its reference',
-        error,
-      );
-      await asyncStorage.removeItem('server-self-signed-cert');
-    }
-  }
-
   const url = await asyncStorage.getItem('server-url');
 
   if (!url) {
