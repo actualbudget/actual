@@ -87,7 +87,7 @@ export function PrimaryButtons({
         title={expanded ? t('Less') : t('More')}
         Icon={expanded ? SvgCheveronUp : SvgCheveronDown}
         onClick={onToggle}
-        style={{ ...styles.verySmallText }}
+        style={{ marginLeft: 6, ...styles.verySmallText }}
       />
     </View>
   );
