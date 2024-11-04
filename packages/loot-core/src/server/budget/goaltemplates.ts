@@ -27,15 +27,13 @@ export async function applyMultipleCategoryTemplates({ month, categoryIds }) {
   const query = `SELECT * FROM v_categories WHERE id IN (${placeholders})`;
   const categories = await db.all(query, categoryIds);
   await storeTemplates();
-  const category_templates = await getTemplates(categories, 'template');
-  const category_goals = await getTemplates(categories, 'goal');
+  const categoryTemplates = await getTemplates(categories);
   const ret = await processTemplate(
     month,
     true,
-    category_templates,
+    categoryTemplates,
     categories,
   );
-  await processGoals(category_goals, month);
   return ret;
 }
 
@@ -45,12 +43,7 @@ export async function applySingleCategoryTemplate({ month, category }) {
   ]);
   await storeTemplates();
   const categoryTemplates = await getTemplates(categories[0]);
-  const ret = await processTemplate(
-    month,
-    true,
-    categoryTemplates,
-    categories,
-  );
+  const ret = await processTemplate(month, true, categoryTemplates, categories);
   return ret;
 }
 
@@ -77,7 +70,7 @@ async function getTemplates(category) {
 
   const templates = [];
   for (let ll = 0; ll < goalDef.length; ll++) {
-    templates[goalDef[ll].id] = JSON.parse(goalDef[ll].goalDef);
+    templates[goalDef[ll].id] = JSON.parse(goalDef[ll].goal_def);
   }
   if (Array.isArray(category)) {
     const multipleCategoryTemplates = [];
@@ -85,9 +78,6 @@ async function getTemplates(category) {
       const categoryId = category[dd].id;
       if (templates[categoryId] !== undefined) {
         multipleCategoryTemplates[categoryId] = templates[categoryId];
-        multipleCategoryTemplates[categoryId] = multipleCategoryTemplates[
-          categoryId
-        ].filter(t => t.directive === directive);
       }
     }
     return multipleCategoryTemplates;
@@ -159,7 +149,7 @@ async function processTemplate(
     monthUtils.sheetForMonth(month),
     `to-budget`,
   );
-  const priorities = [];
+  let priorities = [];
   let remainderWeight = 0;
   const errors = [];
   const budgetList = [];
