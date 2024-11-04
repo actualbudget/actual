@@ -28,12 +28,7 @@ export async function applyMultipleCategoryTemplates({ month, categoryIds }) {
   const categories = await db.all(query, categoryIds);
   await storeTemplates();
   const categoryTemplates = await getTemplates(categories);
-  const ret = await processTemplate(
-    month,
-    true,
-    categoryTemplates,
-    categories,
-  );
+  const ret = await processTemplate(month, true, categoryTemplates, categories);
   return ret;
 }
 
