@@ -239,7 +239,7 @@ function EditableBudgetName() {
           color: theme.buttonNormalBorder,
           fontSize: 16,
           fontWeight: 500,
-          margin: -5,
+          marginLeft: -5,
           flex: '0 auto',
         }}
         onPress={() => {
@@ -259,6 +259,7 @@ function EditableBudgetName() {
         placement="bottom start"
         isOpen={menuOpen}
         onOpenChange={() => setMenuOpen(false)}
+        style={{ margin: 1 }}
         crossOffset={crossOffset}
         offset={offset}
       >
