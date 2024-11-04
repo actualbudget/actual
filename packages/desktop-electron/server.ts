@@ -10,7 +10,7 @@ const lazyLoadBackend = async (isDev: boolean) => {
     bundle.initApp(isDev);
   } catch (error) {
     console.error('Failed to init the server bundle:', error);
-    throw new Error(`Failed to init the server bundle: ${error?.message}`);
+    throw new Error(`Failed to init the server bundle: ${error}`);
   }
 };
 
