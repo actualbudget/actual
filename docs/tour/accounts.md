@@ -20,7 +20,7 @@ The top section also give you access to several functions like importing transac
 and filter what transactions you see. On the right side you'll find the _Search_ field which let's you quickly search 
 all fields. 
 
-It is possible to split a transaction into more than one category, clicking on the expand/contract arrows, seen in the blue box, 
+It is possible to split a transaction into more than one category, clicking on the expand/contract arrows, seen in the yellow box, 
 will be able to show or hide split transactions.
 
 The three horizontal dots, shown in the blue box, will allow you to perform various manipulations on the account. This range from
