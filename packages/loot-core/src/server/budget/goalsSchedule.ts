@@ -1,13 +1,14 @@
 // @ts-strict-ignore
-import * as monthUtils from '../../../shared/months';
-import { extractScheduleConds } from '../../../shared/schedules';
-import * as db from '../../db';
+import * as monthUtils from '../../shared/months';
+import { extractScheduleConds } from '../../shared/schedules';
+import * as db from '../db';
 import {
   getRuleForSchedule,
   getNextDate,
   getDateWithSkippedWeekend,
-} from '../../schedules/app';
-import { isReflectBudget } from '../actions';
+} from '../schedules/app';
+
+import { isReflectBudget } from './actions';
 
 async function createScheduleList(template, current_month, category) {
   const t = [];
@@ -15,8 +16,8 @@ async function createScheduleList(template, current_month, category) {
 
   for (let ll = 0; ll < template.length; ll++) {
     const { id: sid, completed: complete } = await db.first(
-      'SELECT * FROM schedules WHERE name = ? AND tombstone = 0',
-      [template[ll].name],
+      'SELECT * FROM schedules WHERE TRIM(name) = ? AND tombstone = 0',
+      [template[ll].name.trim()],
     );
     const rule = await getRuleForSchedule(sid);
     const conditions = rule.serialize().conditions;

@@ -90,7 +90,9 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
   const [start, setStart] = useState(initialStart);
   const [end, setEnd] = useState(initialEnd);
   const [mode, setMode] = useState(initialMode);
-  const [showBalance, setShowBalance] = useState(true);
+  const [showBalance, setShowBalance] = useState(
+    widget?.meta?.showBalance ?? true,
+  );
 
   const [isConcise, setIsConcise] = useState(() => {
     const numDays = d.differenceInCalendarDays(
@@ -158,6 +160,7 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
           end,
           mode,
         },
+        showBalance,
       },
     });
     dispatch(
