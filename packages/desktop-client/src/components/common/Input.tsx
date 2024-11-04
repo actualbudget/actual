@@ -46,7 +46,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
       }
     }, [autoSelect]);
 
-    const defaultButtonClassName = useCallback(
+    const defaultInputClassName = useCallback(
       () =>
         css(
           {
@@ -77,9 +77,8 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
         {...props}
         className={
           typeof className === 'function'
-            ? renderProps =>
-                cx(defaultButtonClassName(), className(renderProps))
-            : cx(defaultButtonClassName(), className)
+            ? renderProps => cx(defaultInputClassName(), className(renderProps))
+            : cx(defaultInputClassName(), className)
         }
         onKeyDown={e => {
           props.onKeyDown?.(e);
