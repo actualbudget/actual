@@ -17,6 +17,7 @@ export type AmountKeyboardRef = SimpleKeyboard;
 
 type AmountKeyboardProps = ComponentPropsWithoutRef<typeof Keyboard> & {
   onBlur?: FocusEventHandler<HTMLDivElement>;
+  onEnter?: (text: string) => void;
 };
 
 export function AmountKeyboard(props: AmountKeyboardProps) {
@@ -50,10 +51,18 @@ export function AmountKeyboard(props: AmountKeyboardProps) {
         },
       },
       // eslint-disable-next-line rulesdir/typography
-      '& [data-skbtn="+"], & [data-skbtn="-"], & [data-skbtn="×"], & [data-skbtn="÷"], & [data-skbtn="{bksp}"]':
+      '& [data-skbtn="+"], & [data-skbtn="-"], & [data-skbtn="×"], & [data-skbtn="÷"]':
         {
           backgroundColor: theme.keyboardButtonSecondaryBackground,
         },
+      // eslint-disable-next-line rulesdir/typography
+      '& [data-skbtn="{bksp}"], & [data-skbtn="{clear}"]': {
+        backgroundColor: theme.keyboardButtonSecondaryBackground,
+      },
+      // eslint-disable-next-line rulesdir/typography
+      '& [data-skbtn="{enter}"]': {
+        backgroundColor: theme.buttonPrimaryBackground,
+      },
     }),
     props.theme,
   ]);
@@ -81,24 +90,37 @@ export function AmountKeyboard(props: AmountKeyboardProps) {
       }}
     >
       <Keyboard
-        layoutName="default"
         layout={{
-          // eslint-disable-next-line prettier/prettier
           default: [
             '+ 1 2 3',
             '- 4 5 6',
             '× 7 8 9',
-            '÷ . 0 {bksp}',
+            '÷ {clear} 0 {bksp}',
+            '{space} , . {enter}',
           ],
         }}
         display={{
           '{bksp}': '⌫',
+          '{enter}': '↵',
+          '{space}': '␣',
+          '{clear}': 'C',
         }}
         useButtonTag
+        stopMouseUpPropagation
+        stopMouseDownPropagation
+        autoUseTouchEvents
         {...props}
         keyboardRef={r => {
           keyboardRef.current = r;
           props.keyboardRef?.(r);
+        }}
+        onKeyPress={key => {
+          if (key === '{clear}') {
+            props.onChange?.('');
+          } else if (key === '{enter}') {
+            props.onEnter?.(keyboardRef.current?.getInput() || '');
+          }
+          props.onKeyPress?.(key);
         }}
         theme={layoutClassName}
       />

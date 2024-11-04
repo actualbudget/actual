@@ -16,7 +16,13 @@ import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
 import {
+  evalArithmetic,
+  hasArithmeticOperator,
+  lastIndexOfArithmeticOperator,
+} from 'loot-core/shared/arithmetic';
+import {
   amountToCurrency,
+  amountToInteger,
   appendDecimals,
   currencyToAmount,
   reapplyThousandSeparators,
@@ -76,6 +82,10 @@ const AmountInput = memo(function AmountInput({
     setValue(initialValue);
   }, [initialValue]);
 
+  useEffect(() => {
+    keyboardRef.current?.setInput(text);
+  }, [text]);
+
   const onKeyUp: HTMLProps<HTMLInputElement>['onKeyUp'] = e => {
     if (e.key === 'Backspace' && text === '') {
       setEditing(true);
@@ -88,7 +98,10 @@ const AmountInput = memo(function AmountInput({
   };
 
   const applyText = () => {
-    const parsed = currencyToAmount(text) || 0;
+    const parsed = hasArithmeticOperator(text)
+      ? evalArithmetic(text)
+      : currencyToAmount(text) || 0;
+
     const newValue = editing ? parsed : value;
 
     setValue(Math.abs(newValue));
@@ -119,12 +132,46 @@ const AmountInput = memo(function AmountInput({
   };
 
   const onChangeText = (text: string) => {
+    console.log('text', text);
+
     text = reapplyThousandSeparators(text);
-    text = appendDecimals(text, String(hideFraction) === 'true');
+
+    const lastOperatorIndex = lastIndexOfArithmeticOperator(text);
+    if (lastOperatorIndex > 0) {
+      // This will evaluate the expression whenever an operator is added
+      // so only one operation will be displayed at a given time
+      const isOperatorAtEnd = lastOperatorIndex === text.length - 1;
+      if (isOperatorAtEnd) {
+        const lastOperator = text[lastOperatorIndex];
+        const charIndexPriorToLastOperator = lastOperatorIndex - 1;
+        const charPriorToLastOperator =
+          text.length > 0 ? text[charIndexPriorToLastOperator] : '';
+
+        if (
+          charPriorToLastOperator &&
+          hasArithmeticOperator(charPriorToLastOperator)
+        ) {
+          // Clicked on another operator while there is still an operator
+          // Replace previous operator with the new one
+          // TODO: Fix why clicking the same operator duplicates it
+          text = `${text.slice(0, charIndexPriorToLastOperator)}${lastOperator}`;
+        } else {
+          // Evaluate the left side of the expression whenever an operator is added
+          const left = text.slice(0, lastOperatorIndex);
+          const leftEvaluated = evalArithmetic(left);
+          const leftEvaluatedWithDecimal = appendDecimals(
+            String(amountToInteger(leftEvaluated)),
+            String(hideFraction) === 'true',
+          );
+          text = `${leftEvaluatedWithDecimal}${lastOperator}`;
+        }
+      }
+    } else {
+      text = appendDecimals(text, String(hideFraction) === 'true');
+    }
     setEditing(true);
     setText(text);
     props.onChangeValue?.(text);
-    keyboardRef.current?.setInput(text);
   };
 
   const input = (
@@ -177,6 +224,7 @@ const AmountInput = memo(function AmountInput({
           keyboardRef={(r: AmountKeyboardRef) => (keyboardRef.current = r)}
           onChange={onChangeText}
           onBlur={onBlur}
+          onEnter={onUpdate}
         />
       )}
     </View>
