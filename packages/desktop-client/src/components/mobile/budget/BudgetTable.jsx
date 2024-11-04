@@ -236,6 +236,7 @@ function BudgetCell({
   const categoryNotes = useNotes(category.id);
 
   const onOpenCategoryBudgetMenu = () => {
+    console.log('open');
     dispatch(
       pushModal(categoryBudgetMenuModal, {
         categoryId: category.id,
@@ -749,6 +750,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
 
 const ExpenseGroupHeader = memo(function ExpenseGroupHeader({
   group,
+  month,
   budgeted,
   spent,
   balance,
@@ -759,7 +761,26 @@ const ExpenseGroupHeader = memo(function ExpenseGroupHeader({
   showBudgetedCol,
   collapsed,
   onToggleCollapse,
+  onBudgetAction,
 }) {
+  const dispatch = useDispatch();
+  const onOpenGroupBudgetMenu = () => {
+    console.log('OPEN Group header menu' + month);
+    dispatch(
+      pushModal('envelope-budget-group-menu', {
+        month,
+        group,
+        onApplyGroupTemplate: () => {
+          onBudgetAction(month, 'apply-multiple-templates', {
+            month,
+            categories: group.categories
+              .filter(c => !c['hidden'])
+              .map(c => c['id']),
+          });
+        },
+      }),
+    );
+  };
   const opacity = blank ? 0 : 1;
   const listItemRef = useRef();
   const format = useFormat();
@@ -866,24 +887,30 @@ const ExpenseGroupHeader = memo(function ExpenseGroupHeader({
         <View
           style={{ ...(!show3Cols && !showBudgetedCol && { display: 'none' }) }}
         >
-          <CellValue binding={budgeted} type="financial">
-            {({ type, value }) => (
-              <View>
-                <PrivacyFilter>
-                  <AutoTextSize
-                    key={value}
-                    as={Text}
-                    minFontSizePx={6}
-                    maxFontSizePx={12}
-                    mode="oneline"
-                    style={amountStyle}
-                  >
-                    {format(value, type)}
-                  </AutoTextSize>
-                </PrivacyFilter>
-              </View>
-            )}
-          </CellValue>
+          <Button
+            variant="bare"
+            style={{ backgroundColor: 'transparent' }}
+            onPress={() => onOpenGroupBudgetMenu()}
+          >
+            <CellValue binding={budgeted} type="financial">
+              {({ type, value }) => (
+                <View>
+                  <PrivacyFilter>
+                    <AutoTextSize
+                      key={value}
+                      as={Text}
+                      minFontSizePx={6}
+                      maxFontSizePx={12}
+                      mode="oneline"
+                      style={amountStyle}
+                    >
+                      {format(value, type)}
+                    </AutoTextSize>
+                  </PrivacyFilter>
+                </View>
+              )}
+            </CellValue>
+          </Button>
         </View>
         <View
           style={{ ...(!show3Cols && showBudgetedCol && { display: 'none' }) }}
@@ -1016,6 +1043,7 @@ const IncomeGroupHeader = memo(function IncomeGroupHeader({
         <Button
           variant="bare"
           style={{
+            paddingRight: 4,
             maxWidth: sidebarColumnWidth,
           }}
           onPress={() => onEdit?.(group.id)}
@@ -1320,6 +1348,8 @@ const ExpenseGroup = memo(function ExpenseGroup({
         onEdit={onEditGroup}
         collapsed={collapsed}
         onToggleCollapse={onToggleCollapse}
+        month={month}
+        onBudgetAction={onBudgetAction}
         // onReorderCategory={onReorderCategory}
       />
 

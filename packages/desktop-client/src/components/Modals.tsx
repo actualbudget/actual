@@ -30,6 +30,7 @@ import { CreateLocalAccountModal } from './modals/CreateLocalAccountModal';
 import { EditFieldModal } from './modals/EditFieldModal';
 import { EditRuleModal } from './modals/EditRuleModal';
 import { EnvelopeBalanceMenuModal } from './modals/EnvelopeBalanceMenuModal';
+import { EnvelopeBudgetGroupMenuModal } from './modals/EnvelopeBudgetGroupMenuModal';
 import { EnvelopeBudgetMenuModal } from './modals/EnvelopeBudgetMenuModal';
 import { EnvelopeBudgetMonthMenuModal } from './modals/EnvelopeBudgetMonthMenuModal';
 import { EnvelopeBudgetSummaryModal } from './modals/EnvelopeBudgetSummaryModal';
@@ -400,6 +401,18 @@ export function Modals() {
                 onCopyLastMonthAverage={options.onCopyLastMonthAverage}
                 onSetMonthsAverage={options.onSetMonthsAverage}
                 onApplyBudgetTemplate={options.onApplyBudgetTemplate}
+              />
+            </NamespaceContext.Provider>
+          );
+        case 'envelope-budget-group-menu':
+          return (
+            <NamespaceContext.Provider
+              key={name}
+              value={monthUtils.sheetForMonth(options.month)}
+            >
+              <EnvelopeBudgetGroupMenuModal
+                onApplyGroupTemplate={options.onApplyGroupTemplate}
+                group={options.group}
               />
             </NamespaceContext.Provider>
           );
