@@ -63,11 +63,11 @@ if (isDev) {
 }
 
 async function loadGlobalPrefs() {
-  let state: GlobalPrefs | undefined = undefined;
+  let state: { [key: string]: unknown } | undefined = undefined;
   try {
     state = JSON.parse(
       fs.readFileSync(
-        path.join(process.env.ACTUAL_DATA_DIR, 'global-store.json'),
+        path.join(process.env.ACTUAL_DATA_DIR!, 'global-store.json'),
         'utf8',
       ),
     );
@@ -80,7 +80,7 @@ async function loadGlobalPrefs() {
 }
 
 async function createBackgroundProcess() {
-  const globalPrefs = await loadGlobalPrefs(); // ensures we have the latest settings even when restarting the server
+  const globalPrefs = await loadGlobalPrefs(); // ensures we have the latest settings - even when restarting the server
   let envVariables: Env = {
     ...process.env, // required
   };
@@ -88,7 +88,7 @@ async function createBackgroundProcess() {
   if (globalPrefs?.['server-self-signed-cert']) {
     envVariables = {
       ...envVariables,
-      NODE_EXTRA_CA_CERTS: globalPrefs?.['server-self-signed-cert'], // add self signed cert to env variable - fetch can pick that up
+      NODE_EXTRA_CA_CERTS: globalPrefs?.['server-self-signed-cert'], // add self signed cert to env - fetch can pick it up
     };
   }
 
@@ -428,7 +428,11 @@ app.on('ready', async () => {
 
   const globalPrefs = await loadGlobalPrefs(); // load global prefs
 
-  if (globalPrefs.ngrokConfig?.autoStart) {
+  const ngrokConfig = globalPrefs.ngrokConfig as
+    | { autoStart: boolean }
+    | undefined; // euuughhh
+
+  if (ngrokConfig?.autoStart) {
     // wait for both server and ngrok to start before starting the Actual client to ensure server is available
     await Promise.allSettled([
       startSyncServer(),

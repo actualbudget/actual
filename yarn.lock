@@ -6610,7 +6610,7 @@ __metadata:
 
 "actual-sync@file:../../../actual-server::locator=desktop-electron%40workspace%3Apackages%2Fdesktop-electron":
   version: 24.10.1
-  resolution: "actual-sync@file:../../../actual-server#../../../actual-server::hash=00708e&locator=desktop-electron%40workspace%3Apackages%2Fdesktop-electron"
+  resolution: "actual-sync@file:../../../actual-server#../../../actual-server::hash=9c9a2b&locator=desktop-electron%40workspace%3Apackages%2Fdesktop-electron"
   dependencies:
     "@actual-app/crdt": "npm:2.1.0"
     "@actual-app/web": "npm:24.10.1"
@@ -6630,7 +6630,7 @@ __metadata:
     nordigen-node: "npm:^1.4.0"
     uuid: "npm:^9.0.0"
     winston: "npm:^3.14.2"
-  checksum: 10/aa1f647a8258674bd5d47e881987578e291da2f7bafbd70c3f717d8fcc6f7ed9810e9f2b53cb1975e13505aaeb5768c1eea12d6a2a368643aeca12215f7fc4a7
+  checksum: 10/b837f26312430cfbfec0e5827119cf9fd01934a2916e8f5b054780536243ce5d157810ba0f2e5a6e7f67aec9d7e7cfbda0942fdecaec2660ed643d0d0f2f453f
   languageName: node
   linkType: hard
 
@@ -9125,7 +9125,6 @@ __metadata:
     electron: "npm:30.0.6"
     electron-builder: "npm:24.13.3"
     fs-extra: "npm:^11.2.0"
-    node-fetch: "npm:^2.7.0"
     promise-retry: "npm:^2.0.1"
     typescript: "npm:^5.5.4"
   languageName: unknown
@@ -14125,7 +14124,6 @@ __metadata:
     memoize-one: "npm:^6.0.0"
     mitt: "npm:^3.0.1"
     mockdate: "npm:^3.0.5"
-    node-fetch: "npm:^2.7.0"
     npm-run-all: "npm:^4.1.5"
     path-browserify: "npm:^1.0.1"
     peggy: "npm:3.0.2"
@@ -15402,7 +15400,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"node-fetch@npm:^2.6.7, node-fetch@npm:^2.7.0":
+"node-fetch@npm:^2.6.7":
   version: 2.7.0
   resolution: "node-fetch@npm:2.7.0"
   dependencies:
