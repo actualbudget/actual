@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { useEffect, useRef, type ComponentProps } from 'react';
+import React, { useEffect, type ComponentProps } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import AutoSizer from 'react-virtualized-auto-sizer';
 
@@ -8,7 +8,6 @@ import { useMediaQuery } from 'usehooks-ts';
 import * as monthUtils from 'loot-core/src/shared/months';
 
 import { useSpaceMeasure } from '../../hooks/useSpaceMeasure';
-import { useResponsive } from '../../ResponsiveProvider';
 import { View } from '../common/View';
 
 import { useBudgetMonthCount } from './BudgetMonthCountContext';

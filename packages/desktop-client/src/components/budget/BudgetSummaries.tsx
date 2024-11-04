@@ -47,7 +47,7 @@ export function BudgetSummaries({ SummaryComponent }: BudgetSummariesProps) {
   const allMonths = [...months];
   allMonths.unshift(subMonths(months[0], 1));
   allMonths.push(addMonths(months[months.length - 1], 1));
-  const totalWidth = isPrinting ? measure.width() : widthState;
+  const totalWidth = isPrinting ? (measure.width() ?? widthState) : widthState;
   const monthWidth = totalWidth / months.length;
 
   useLayoutEffect(() => {
