@@ -21,8 +21,6 @@ import {
 import { copy, exists, remove } from 'fs-extra';
 import promiseRetry from 'promise-retry';
 
-import { GlobalPrefs } from 'loot-core/types/prefs';
-
 import { getMenu } from './menu';
 import {
   get as getWindowState,
