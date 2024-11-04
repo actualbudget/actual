@@ -27,6 +27,7 @@ export function AmountKeyboard(props: AmountKeyboardProps) {
       },
       '& .hg-button': {
         ...styles.noTapHighlight,
+        ...styles.mediumText,
         display: 'flex',
         height: '60px',
         flex: 1,
@@ -34,7 +35,6 @@ export function AmountKeyboard(props: AmountKeyboardProps) {
         justifyContent: 'center',
         borderRadius: 16,
         cursor: 'pointer',
-        fontSize: 'inherit',
         backgroundColor: theme.buttonNormalBackground,
         color: theme.buttonNormalText,
         border: `1px solid ${theme.buttonNormalBorder}`,
@@ -70,7 +70,7 @@ export function AmountKeyboard(props: AmountKeyboardProps) {
         padding: 5,
       }}
       onBlur={e => {
-        if (keyboardRef.current?.keyboardDOM?.contains(e.relatedTarget)) {
+        if (keyboardRef.current?.keyboardDOM.contains(e.relatedTarget)) {
           return;
         }
 
