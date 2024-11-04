@@ -57,7 +57,9 @@ export function AmountInput({
   autoDecimals = false,
 }: AmountInputProps) {
   const format = useFormat();
-  const negative = (initialValue === 0 && zeroSign === '-') || initialValue < 0;
+  const [symbol, setSymbol] = useState<'+' | '-'>(
+    initialValue === 0 ? zeroSign : initialValue > 0 ? '+' : '-',
+  );
 
   const initialValueAbsolute = format(Math.abs(initialValue || 0), 'financial');
   const [value, setValue] = useState(initialValueAbsolute);
@@ -75,12 +77,16 @@ export function AmountInput({
   }, [focused]);
 
   function onSwitch() {
-    fireUpdate(!negative);
+    const amount = getAmount();
+    if (amount === 0) {
+      setSymbol(symbol === '+' ? '-' : '+');
+    }
+    fireUpdate(amount * -1);
   }
 
-  function getAmount(negate) {
-    const valueOrInitial = Math.abs(amountToInteger(evalArithmetic(value)));
-    return negate ? valueOrInitial * -1 : valueOrInitial;
+  function getAmount() {
+    const signedValued = symbol === '-' ? symbol + value : value;
+    return amountToInteger(evalArithmetic(signedValued));
   }
 
   function onInputTextChange(val) {
@@ -91,13 +97,19 @@ export function AmountInput({
     onChangeValue?.(val);
   }
 
-  function fireUpdate(negate) {
-    onUpdate?.(getAmount(negate));
+  function fireUpdate(amount) {
+    onUpdate?.(amount);
+    if (amount > 0) {
+      setSymbol('+');
+    } else if (amount < 0) {
+      setSymbol('-');
+    }
   }
 
   function onInputAmountBlur(e) {
     if (!ref.current?.contains(e.relatedTarget)) {
-      fireUpdate(negative);
+      const amount = getAmount();
+      fireUpdate(amount);
     }
     onBlur?.(e);
   }
@@ -111,14 +123,15 @@ export function AmountInput({
         <Button
           variant="bare"
           isDisabled={disabled}
-          aria-label={`Make ${negative ? 'positive' : 'negative'}`}
+          aria-label={`Make ${symbol === '-' ? 'positive' : 'negative'}`}
           style={{ padding: '0 7px' }}
           onPress={onSwitch}
           ref={buttonRef}
         >
-          {negative ? (
+          {symbol === '-' && (
             <SvgSubtract style={{ width: 8, height: 8, color: 'inherit' }} />
-          ) : (
+          )}
+          {symbol === '+' && (
             <SvgAdd style={{ width: 8, height: 8, color: 'inherit' }} />
           )}
         </Button>
@@ -130,7 +143,8 @@ export function AmountInput({
       inputStyle={inputStyle}
       onKeyUp={e => {
         if (e.key === 'Enter') {
-          fireUpdate(negative);
+          const amount = getAmount();
+          fireUpdate(amount);
         }
       }}
       onChangeValue={onInputTextChange}

@@ -138,9 +138,11 @@ export const ManagePayees = ({
     );
   }, [filteredPayees]);
 
-  function onDelete() {
-    onBatchChange({ deleted: [...selected.items].map(id => ({ id })) });
-    selected.dispatch({ type: 'select-none' });
+  function onDelete(ids?: { id: string }[]) {
+    onBatchChange({
+      deleted: ids ?? [...selected.items].map(id => ({ id })),
+    });
+    if (!ids) selected.dispatch({ type: 'select-none' });
   }
 
   function onFavorite() {
@@ -276,6 +278,7 @@ export const ManagePayees = ({
               onUpdate={onUpdate}
               onViewRules={onViewRules}
               onCreateRule={onCreateRule}
+              onDelete={id => onDelete([{ id }])}
             />
           )}
         </View>
