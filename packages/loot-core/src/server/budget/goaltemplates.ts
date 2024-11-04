@@ -37,6 +37,23 @@ export async function overwriteTemplate({ month }) {
   return ret;
 }
 
+export async function applyMultipleCategoryTemplates({ month, categoryIds }) {
+  const placeholders = categoryIds.map(() => '?').join(', ');
+  const query = `SELECT * FROM v_categories WHERE id IN (${placeholders})`;
+  const categories = await db.all(query, categoryIds);
+  await storeTemplates();
+  const category_templates = await getTemplates(categories, 'template');
+  const category_goals = await getTemplates(categories, 'goal');
+  const ret = await processTemplate(
+    month,
+    true,
+    category_templates,
+    categories,
+  );
+  await processGoals(category_goals, month);
+  return ret;
+}
+
 export async function applySingleCategoryTemplate({ month, category }) {
   const categories = await db.all(`SELECT * FROM v_categories WHERE id = ?`, [
     category,
@@ -48,7 +65,7 @@ export async function applySingleCategoryTemplate({ month, category }) {
     month,
     true,
     category_templates,
-    categories[0],
+    categories,
   );
   await processGoals(category_goals, month, categories[0]);
   return ret;
@@ -135,7 +152,19 @@ async function getTemplates(category, directive: string) {
   for (let ll = 0; ll < goal_def.length; ll++) {
     templates[goal_def[ll].id] = JSON.parse(goal_def[ll].goal_def);
   }
-  if (category) {
+  if (Array.isArray(category)) {
+    const multipleCategoryTemplates = [];
+    for (let dd = 0; dd < category.length; dd++) {
+      const categoryId = category[dd].id;
+      if (templates[categoryId] !== undefined) {
+        multipleCategoryTemplates[categoryId] = templates[categoryId];
+        multipleCategoryTemplates[categoryId] = multipleCategoryTemplates[
+          categoryId
+        ].filter(t => t.directive === directive);
+      }
+    }
+    return multipleCategoryTemplates;
+  } else if (category) {
     const singleCategoryTemplate = [];
     if (templates[category.id] !== undefined) {
       singleCategoryTemplate[category.id] = templates[category.id].filter(
@@ -174,11 +203,10 @@ async function processTemplate(
   let categories = [];
   const categories_remove = [];
   if (category) {
-    categories[0] = category;
+    categories = category;
   } else {
     categories = await getCategories();
   }
-
   //clears templated categories
   for (let c = 0; c < categories.length; c++) {
     const category = categories[c];
