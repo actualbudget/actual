@@ -21,7 +21,9 @@ type ScrollListenerArgs = {
 
 type ScrollListener = (args: ScrollListenerArgs) => void;
 type UnregisterScrollListener = () => void;
-type RegisterScrollListener = (listener: ScrollListener) => UnregisterScrollListener;
+type RegisterScrollListener = (
+  listener: ScrollListener,
+) => UnregisterScrollListener;
 
 type IScrollContext = {
   registerScrollListener: RegisterScrollListener;
@@ -176,13 +178,16 @@ export function ScrollProvider<T extends Element>({
       });
   }, [hasScrolledToEnd, isDisabled, isScrolling, scrollableRef]);
 
-  const registerScrollListener: RegisterScrollListener = useCallback(listener => {
-    listeners.current.push(listener);
+  const registerScrollListener: RegisterScrollListener = useCallback(
+    listener => {
+      listeners.current.push(listener);
 
-    return () => {
-      listeners.current = listeners.current.filter(l => l !== listener);
-    };
-  }, []);
+      return () => {
+        listeners.current = listeners.current.filter(l => l !== listener);
+      };
+    },
+    [],
+  );
 
   return (
     <ScrollContext.Provider value={{ registerScrollListener }}>
