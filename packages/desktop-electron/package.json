@@ -87,7 +87,6 @@
   "dependencies": {
     "better-sqlite3": "^9.6.0",
     "fs-extra": "^11.2.0",
-    "node-fetch": "^2.7.0",
     "promise-retry": "^2.0.1"
   },
   "devDependencies": {
