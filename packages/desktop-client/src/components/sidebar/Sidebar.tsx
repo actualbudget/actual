@@ -239,7 +239,7 @@ function EditableBudgetName() {
           color: theme.buttonNormalBorder,
           fontSize: 16,
           fontWeight: 500,
-          margin: 1,
+          margin: -5,
           flex: '0 auto',
         }}
         onPress={() => {
