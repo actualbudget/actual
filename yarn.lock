@@ -185,6 +185,7 @@ __metadata:
     react-modal: "npm:3.16.3"
     react-redux: "npm:^9.2.0"
     react-router: "npm:7.6.2"
+    react-simple-keyboard: "npm:^3.7.134"
     react-simple-pull-to-refresh: "npm:^1.3.3"
     react-spring: "npm:^10.0.0"
     react-stately: "npm:^3.37.0"
@@ -17077,6 +17078,16 @@ __metadata:
     react-dom:
       optional: true
   checksum: 10/38a8473c7358d873eb60cc6660deae16a629701b8867ee00e67871ff61009b90f73853235ef3b0f2e43ebedee697389afc7bf170df069823dc872be79798965b
+  languageName: node
+  linkType: hard
+
+"react-simple-keyboard@npm:^3.7.134":
+  version: 3.7.134
+  resolution: "react-simple-keyboard@npm:3.7.134"
+  peerDependencies:
+    react: ^16.0.0 || ^17.0.0 || ^18.0.0
+    react-dom: ^16.0.0 || ^17.0.0 || ^18.0.0
+  checksum: 10/b98cce161003b8ddf777fcaa1d2e02a34011dcb913f1360c34301633ebe18ff659fcc57e6f0115e1c4101ca8b225447a948c6d94052104a3e31bf2b4deac73a6
   languageName: node
   linkType: hard
 
