@@ -19,18 +19,19 @@ type ScrollListenerArgs = {
   hasScrolledToEnd: (direction: ScrollDirection, tolerance?: number) => boolean;
 };
 
-type ScrollListener = (values: ScrollListenerArgs) => void;
+type ScrollListener = (args: ScrollListenerArgs) => void;
+type UnregisterScrollListener = () => void;
+type RegisterScrollListener = (listener: ScrollListener) => UnregisterScrollListener;
 
 type IScrollContext = {
-  registerListener: (listener: ScrollListener) => void;
-  unregisterListener: (listener: ScrollListener) => void;
+  registerScrollListener: RegisterScrollListener;
 };
 
 const ScrollContext = createContext<IScrollContext | undefined>(undefined);
 
 type ScrollProviderProps<T extends Element> = {
   scrollableRef: RefObject<T>;
-  isDisabled: boolean;
+  isDisabled?: boolean;
   children?: ReactNode;
 };
 
@@ -175,16 +176,16 @@ export function ScrollProvider<T extends Element>({
       });
   }, [hasScrolledToEnd, isDisabled, isScrolling, scrollableRef]);
 
-  const registerListener = useCallback((listener: ScrollListener) => {
+  const registerScrollListener: RegisterScrollListener = useCallback(listener => {
     listeners.current.push(listener);
-  }, []);
 
-  const unregisterListener = useCallback((listener: ScrollListener) => {
-    listeners.current = listeners.current.filter(l => l !== listener);
+    return () => {
+      listeners.current = listeners.current.filter(l => l !== listener);
+    };
   }, []);
 
   return (
-    <ScrollContext.Provider value={{ registerListener, unregisterListener }}>
+    <ScrollContext.Provider value={{ registerScrollListener }}>
       {children}
     </ScrollContext.Provider>
   );
@@ -196,11 +197,9 @@ export function useScrollListener(listener: ScrollListener) {
     throw new Error('useScrollListener must be used within a ScrollProvider');
   }
 
-  const { registerListener, unregisterListener } = context;
+  const { registerScrollListener } = context;
 
   useEffect(() => {
-    const _listener = listener;
-    registerListener(_listener);
-    return () => unregisterListener(_listener);
-  }, [listener, registerListener, unregisterListener]);
+    return registerScrollListener(listener);
+  }, [listener, registerScrollListener]);
 }
