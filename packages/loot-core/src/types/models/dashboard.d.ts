@@ -65,7 +65,8 @@ type SpecializedWidget =
   | NetWorthWidget
   | CashFlowWidget
   | SpendingWidget
-  | MarkdownWidget;
+  | MarkdownWidget
+  | SummaryWidget;
 export type Widget = SpecializedWidget | CustomReportWidget;
 export type NewWidget = Omit<Widget, 'id' | 'tombstone'>;
 
@@ -87,4 +88,22 @@ export type ExportImportDashboard = {
   // future versions
   version: 1;
   widgets: ExportImportDashboardWidget[];
+};
+
+export type SummaryWidget = AbstractWidget<
+  'summary-card',
+  {
+    name?: string;
+    conditions?: RuleConditionEntity[];
+    conditionsOp?: 'and' | 'or';
+    timeFrame?: TimeFrame;
+    content?: string;
+  } | null
+>;
+
+export type SummaryContent = {
+  type: 'sum' | 'avgPerMonth' | 'avgPerTransact' | 'percentage';
+  divisorConditions?: RuleConditionEntity[];
+  divisorConditionsOp?: 'and' | 'or';
+  divisorIncludeDateRange?: boolean;
 };
