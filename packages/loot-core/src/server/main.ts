@@ -1160,7 +1160,7 @@ handlers['accounts-bank-sync'] = async function ({ id }) {
   return { errors, newTransactions, matchedTransactions, updatedAccounts };
 };
 
-handlers['simplefin-batch-sync'] = async function ({ ids }) {
+handlers['simplefin-batch-sync'] = async function ({ ids = [] }) {
   const accounts = await db.runQuery(
     `SELECT a.*, b.bank_id as bankId FROM accounts a
          LEFT JOIN banks b ON a.bank = b.id
