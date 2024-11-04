@@ -13,6 +13,16 @@ import { getPathForUserFile, getPathForGroupFile } from './util/paths.js';
 import * as simpleSync from './sync-simple.js';
 
 import { SyncProtoBuf } from '@actual-app/crdt';
+import {
+  File,
+  FilesService,
+  FileUpdate,
+} from './app-sync/services/files-service.js';
+import { FileNotFound } from './app-sync/errors.js';
+import {
+  validateSyncedFile,
+  validateUploadedFile,
+} from './app-sync/validation.js';
 
 const app = express();
 app.use(errorMiddleware);
@@ -26,11 +36,24 @@ export { app as handlers };
 
 const OK_RESPONSE = { status: 'ok' };
 
-// This is a version representing the internal format of sync
-// messages. When this changes, all sync files need to be reset. We
-// will check this version when syncing and notify the user if they
-// need to reset.
-const SYNC_FORMAT_VERSION = 2;
+function boolToInt(deleted) {
+  return deleted ? 1 : 0;
+}
+
+const verifyFileExists = (fileId, filesService, res, errorObject) => {
+  try {
+    return filesService.get(fileId);
+  } catch (e) {
+    if (e instanceof FileNotFound) {
+      //FIXME: error code should be 404. Need to make sure frontend is ok with it.
+      //TODO: put this into a middleware that checks if FileNotFound is thrown and returns 404 and same error message
+      // for every FileNotFound error
+      res.status(400).send(errorObject);
+      return;
+    }
+    throw e;
+  }
+};
 
 app.post('/sync', async (req, res) => {
   let requestPb;
@@ -43,10 +66,9 @@ app.post('/sync', async (req, res) => {
     return;
   }
 
-  let accountDb = getAccountDb();
-  let file_id = requestPb.getFileid() || null;
-  let group_id = requestPb.getGroupid() || null;
-  let key_id = requestPb.getKeyid() || null;
+  let fileId = requestPb.getFileid() || null;
+  let groupId = requestPb.getGroupid() || null;
+  let keyId = requestPb.getKeyid() || null;
   let since = requestPb.getSince() || null;
   let messages = requestPb.getMessagesList();
 
@@ -58,68 +80,27 @@ app.post('/sync', async (req, res) => {
     });
   }
 
-  let currentFiles = accountDb.all(
-    'SELECT group_id, encrypt_keyid, encrypt_meta, sync_version FROM files WHERE id = ?',
-    [file_id],
+  const filesService = new FilesService(getAccountDb());
+
+  const currentFile = verifyFileExists(
+    fileId,
+    filesService,
+    res,
+    'file-not-found',
   );
 
-  if (currentFiles.length === 0) {
-    res.status(400);
-    res.send('file-not-found');
+  if (!currentFile) {
     return;
   }
 
-  let currentFile = currentFiles[0];
-
-  if (
-    currentFile.sync_version == null ||
-    currentFile.sync_version < SYNC_FORMAT_VERSION
-  ) {
+  const errorMessage = validateSyncedFile(groupId, keyId, currentFile);
+  if (errorMessage) {
     res.status(400);
-    res.send('file-old-version');
+    res.send(errorMessage);
     return;
   }
 
-  // When resetting sync state, something went wrong. There is no
-  // group id and it's awaiting a file to be uploaded.
-  if (currentFile.group_id == null) {
-    res.status(400);
-    res.send('file-needs-upload');
-    return;
-  }
-
-  // Check to make sure the uploaded file is valid and has been
-  // encrypted with the same key it is registered with (this might
-  // be wrong if there was an error during the key creation
-  // process)
-  let uploadedKeyId = currentFile.encrypt_meta
-    ? JSON.parse(currentFile.encrypt_meta).keyId
-    : null;
-  if (uploadedKeyId !== currentFile.encrypt_keyid) {
-    res.status(400);
-    res.send('file-key-mismatch');
-    return;
-  }
-
-  // The changes being synced are part of an old group, which
-  // means the file has been reset. User needs to re-download.
-  if (group_id !== currentFile.group_id) {
-    res.status(400);
-    res.send('file-has-reset');
-    return;
-  }
-
-  // The data is encrypted with a different key which is
-  // unacceptable. We can't accept these changes. Reject them and
-  // tell the user that they need to generate the correct key
-  // (which necessitates a sync reset so they need to re-download).
-  if (key_id !== currentFile.encrypt_keyid) {
-    res.status(400);
-    res.send('file-has-new-key');
-    return false;
-  }
-
-  let { trie, newMessages } = simpleSync.sync(messages, since, group_id);
+  let { trie, newMessages } = simpleSync.sync(messages, since, groupId);
 
   // encode it back...
   let responsePb = new SyncProtoBuf.SyncResponse();
@@ -132,57 +113,70 @@ app.post('/sync', async (req, res) => {
 });
 
 app.post('/user-get-key', (req, res) => {
-  let accountDb = getAccountDb();
   let { fileId } = req.body;
 
-  let rows = accountDb.all(
-    'SELECT encrypt_salt, encrypt_keyid, encrypt_test FROM files WHERE id = ?',
-    [fileId],
-  );
-  if (rows.length === 0) {
-    res.status(400).send('file-not-found');
+  const filesService = new FilesService(getAccountDb());
+  const file = verifyFileExists(fileId, filesService, res, 'file-not-found');
+
+  if (!file) {
     return;
   }
-  let { encrypt_salt, encrypt_keyid, encrypt_test } = rows[0];
 
   res.send({
     status: 'ok',
-    data: { id: encrypt_keyid, salt: encrypt_salt, test: encrypt_test },
+    data: {
+      id: file.encryptKeyId,
+      salt: file.encryptSalt,
+      test: file.encryptTest,
+    },
   });
 });
 
 app.post('/user-create-key', (req, res) => {
-  let accountDb = getAccountDb();
   let { fileId, keyId, keySalt, testContent } = req.body;
 
-  accountDb.mutate(
-    'UPDATE files SET encrypt_salt = ?, encrypt_keyid = ?, encrypt_test = ? WHERE id = ?',
-    [keySalt, keyId, testContent, fileId],
+  const filesService = new FilesService(getAccountDb());
+
+  if (!verifyFileExists(fileId, filesService, res, 'file not found')) {
+    return;
+  }
+
+  filesService.update(
+    fileId,
+    new FileUpdate({
+      encryptSalt: keySalt,
+      encryptKeyId: keyId,
+      encryptTest: testContent,
+    }),
   );
 
   res.send(OK_RESPONSE);
 });
 
 app.post('/reset-user-file', async (req, res) => {
-  let accountDb = getAccountDb();
   let { fileId } = req.body;
 
-  let files = accountDb.all('SELECT group_id FROM files WHERE id = ?', [
+  const filesService = new FilesService(getAccountDb());
+  const file = verifyFileExists(
     fileId,
-  ]);
-  if (files.length === 0) {
-    res.status(400).send('User or file not found');
+    filesService,
+    res,
+    'User or file not found',
+  );
+
+  if (!file) {
     return;
   }
-  let { group_id } = files[0];
 
-  accountDb.mutate('UPDATE files SET group_id = NULL WHERE id = ?', [fileId]);
+  const groupId = file.groupId;
 
-  if (group_id) {
+  filesService.update(fileId, new FileUpdate({ groupId: null }));
+
+  if (groupId) {
     try {
-      await fs.unlink(getPathForGroupFile(group_id));
-    } catch (e) {
-      console.log(`Unable to delete sync data for group "${group_id}"`);
+      await fs.unlink(getPathForGroupFile(groupId));
+    } catch {
+      console.log(`Unable to delete sync data for group "${groupId}"`);
     }
   }
 
@@ -190,7 +184,6 @@ app.post('/reset-user-file', async (req, res) => {
 });
 
 app.post('/upload-user-file', async (req, res) => {
-  let accountDb = getAccountDb();
   if (typeof req.headers['x-actual-name'] !== 'string') {
     // FIXME: Not sure how this cannot be a string when the header is
     // set.
@@ -215,36 +208,23 @@ app.post('/upload-user-file', async (req, res) => {
       ? JSON.parse(encryptMeta).keyId
       : null;
 
-  let currentFiles = accountDb.all(
-    'SELECT group_id, encrypt_keyid, encrypt_meta FROM files WHERE id = ?',
-    [fileId],
-  );
-  if (currentFiles.length > 0) {
-    let currentFile = currentFiles[0];
+  const filesService = new FilesService(getAccountDb());
+  let currentFile;
 
-    // The uploading file is part of an old group, so reject
-    // it. All of its internal sync state is invalid because its
-    // old. The sync state has been reset, so user needs to
-    // either reset again or download from the current group.
-    if (groupId !== currentFile.group_id) {
-      res.status(400);
-      res.send('file-has-reset');
-      return;
+  try {
+    currentFile = filesService.get(fileId);
+  } catch (e) {
+    if (e instanceof FileNotFound) {
+      currentFile = null;
+    } else {
+      throw e;
     }
+  }
 
-    // The key that the file is encrypted with is different than
-    // the current registered key. All data must always be
-    // encrypted with the registered key for consistency. Key
-    // changes always necessitate a sync reset, which means this
-    // upload is trying to overwrite another reset. That might
-    // be be fine, but since we definitely cannot accept a file
-    // encrypted with the wrong key, we bail and suggest the
-    // user download the latest file.
-    if (keyId !== currentFile.encrypt_keyid) {
-      res.status(400);
-      res.send('file-has-new-key');
-      return;
-    }
+  const errorMessage = validateUploadedFile(groupId, keyId, currentFile);
+  if (errorMessage) {
+    res.status(400).send(errorMessage);
+    return;
   }
 
   try {
@@ -255,37 +235,44 @@ app.post('/upload-user-file', async (req, res) => {
     return;
   }
 
-  let rows = accountDb.all('SELECT id FROM files WHERE id = ?', [fileId]);
-  if (rows.length === 0) {
+  if (!currentFile) {
     // it's new
     groupId = uuid.v4();
-    accountDb.mutate(
-      'INSERT INTO files (id, group_id, sync_version, name, encrypt_meta) VALUES (?, ?, ?, ?, ?)',
-      [fileId, groupId, syncFormatVersion, name, encryptMeta],
-    );
-    res.send({ status: 'ok', groupId });
-  } else {
-    if (!groupId) {
-      // sync state was reset, create new group
-      groupId = uuid.v4();
-      accountDb.mutate('UPDATE files SET group_id = ? WHERE id = ?', [
-        groupId,
-        fileId,
-      ]);
-    }
 
-    // Regardless, update some properties
-    accountDb.mutate(
-      'UPDATE files SET sync_version = ?, encrypt_meta = ?, name = ? WHERE id = ?',
-      [syncFormatVersion, encryptMeta, name, fileId],
+    filesService.set(
+      new File({
+        id: fileId,
+        groupId: groupId,
+        syncVersion: syncFormatVersion,
+        name: name,
+        encryptMeta: encryptMeta,
+      }),
     );
 
     res.send({ status: 'ok', groupId });
+    return;
   }
+
+  if (!groupId) {
+    // sync state was reset, create new group
+    groupId = uuid.v4();
+    filesService.update(fileId, new FileUpdate({ groupId: groupId }));
+  }
+
+  // Regardless, update some properties
+  filesService.update(
+    fileId,
+    new FileUpdate({
+      syncVersion: syncFormatVersion,
+      encryptMeta: encryptMeta,
+      name: name,
+    }),
+  );
+
+  res.send({ status: 'ok', groupId });
 });
 
 app.get('/download-user-file', async (req, res) => {
-  let accountDb = getAccountDb();
   let fileId = req.headers['x-actual-file-id'];
   if (typeof fileId !== 'string') {
     // FIXME: Not sure how this cannot be a string when the header is
@@ -294,13 +281,8 @@ app.get('/download-user-file', async (req, res) => {
     return;
   }
 
-  // Do some authentication
-  let rows = accountDb.all(
-    'SELECT id FROM files WHERE id = ? AND deleted = FALSE',
-    [fileId],
-  );
-  if (rows.length === 0) {
-    res.status(400).send('User or file not found');
+  const filesService = new FilesService(getAccountDb());
+  if (!verifyFileExists(fileId, filesService, res, 'User or file not found')) {
     return;
   }
 
@@ -309,70 +291,69 @@ app.get('/download-user-file', async (req, res) => {
 });
 
 app.post('/update-user-filename', (req, res) => {
-  let accountDb = getAccountDb();
   let { fileId, name } = req.body;
 
-  // Do some authentication
-  let rows = accountDb.all(
-    'SELECT id FROM files WHERE id = ? AND deleted = FALSE',
-    [fileId],
-  );
-  if (rows.length === 0) {
-    res.status(400).send('file not found');
+  const filesService = new FilesService(getAccountDb());
+
+  if (!verifyFileExists(fileId, filesService, res, 'file not found')) {
     return;
   }
 
-  accountDb.mutate('UPDATE files SET name = ? WHERE id = ?', [name, fileId]);
-
+  filesService.update(fileId, new FileUpdate({ name: name }));
   res.send(OK_RESPONSE);
 });
 
 app.get('/list-user-files', (req, res) => {
-  let accountDb = getAccountDb();
-  let rows = accountDb.all('SELECT * FROM files');
-
+  const fileService = new FilesService(getAccountDb());
+  const rows = fileService.find();
   res.send({
     status: 'ok',
     data: rows.map((row) => ({
-      deleted: row.deleted,
+      deleted: boolToInt(row.deleted),
       fileId: row.id,
-      groupId: row.group_id,
+      groupId: row.groupId,
       name: row.name,
-      encryptKeyId: row.encrypt_keyid,
+      encryptKeyId: row.encryptKeyId,
     })),
   });
 });
 
 app.get('/get-user-file-info', (req, res) => {
-  let accountDb = getAccountDb();
   let fileId = req.headers['x-actual-file-id'];
 
-  let rows = accountDb.all(
-    'SELECT * FROM files WHERE id = ? AND deleted = FALSE',
-    [fileId],
-  );
+  // TODO: Return 422 if fileId is not provided. Need to make sure frontend can handle it
+  // if (!fileId) {
+  //   return res.status(422).send({
+  //     details: 'fileId-required',
+  //     reason: 'unprocessable-entity',
+  //     status: 'error',
+  //   });
+  // }
 
-  if (rows.length === 0) {
-    res.status(400).send({ status: 'error', reason: 'file-not-found' });
+  const fileService = new FilesService(getAccountDb());
+
+  const file = verifyFileExists(fileId, fileService, res, {
+    status: 'error',
+    reason: 'file-not-found',
+  });
+
+  if (!file) {
     return;
   }
-
-  let row = rows[0];
 
   res.send({
     status: 'ok',
     data: {
-      deleted: row.deleted,
-      fileId: row.id,
-      groupId: row.group_id,
-      name: row.name,
-      encryptMeta: row.encrypt_meta ? JSON.parse(row.encrypt_meta) : null,
+      deleted: boolToInt(file.deleted), //   FIXME: convert to boolean, make sure it works in the frontend
+      fileId: file.id,
+      groupId: file.groupId,
+      name: file.name,
+      encryptMeta: file.encryptMeta ? JSON.parse(file.encryptMeta) : null,
     },
   });
 });
 
 app.post('/delete-user-file', (req, res) => {
-  let accountDb = getAccountDb();
   let { fileId } = req.body;
 
   if (!fileId) {
@@ -383,12 +364,12 @@ app.post('/delete-user-file', (req, res) => {
     });
   }
 
-  let rows = accountDb.all('SELECT * FROM files WHERE id = ?', [fileId]);
-
-  if (rows.length === 0) {
-    return res.status(400).send('file-not-found');
+  const filesService = new FilesService(getAccountDb());
+  if (!verifyFileExists(fileId, filesService, res, 'file-not-found')) {
+    return;
   }
 
-  accountDb.mutate('UPDATE files SET deleted = TRUE WHERE id = ?', [fileId]);
+  filesService.update(fileId, new FileUpdate({ deleted: true }));
+
   res.send(OK_RESPONSE);
 });
