@@ -33,7 +33,6 @@
     "md5": "^2.3.0",
     "memoize-one": "^6.0.0",
     "mitt": "^3.0.1",
-    "node-fetch": "^2.7.0",
     "reselect": "^4.1.8",
     "slash": "3.0.0",
     "throttleit": "^1.0.1",
