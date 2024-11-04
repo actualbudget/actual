@@ -88,6 +88,13 @@ export function TransactionList({
   onCloseAddTransaction,
   onCreatePayee,
   onApplyFilter,
+  onBatchDelete,
+  onBatchDuplicate,
+  onBatchLinkSchedule,
+  onBatchUnlinkSchedule,
+  onCreateRule,
+  onScheduleAction,
+  onMakeAsNonSplitTransactions,
 }) {
   const dispatch = useDispatch();
   const transactionsLatest = useRef();
@@ -237,6 +244,13 @@ export function TransactionList({
       onSort={onSort}
       sortField={sortField}
       ascDesc={ascDesc}
+      onBatchDelete={onBatchDelete}
+      onBatchDuplicate={onBatchDuplicate}
+      onBatchLinkSchedule={onBatchLinkSchedule}
+      onBatchUnlinkSchedule={onBatchUnlinkSchedule}
+      onCreateRule={onCreateRule}
+      onScheduleAction={onScheduleAction}
+      onMakeAsNonSplitTransactions={onMakeAsNonSplitTransactions}
     />
   );
 }

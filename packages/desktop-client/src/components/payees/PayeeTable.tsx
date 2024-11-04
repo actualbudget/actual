@@ -25,59 +25,65 @@ type PayeeTableProps = {
   ruleCounts: Map<PayeeWithId['id'], number>;
 } & Pick<
   ComponentProps<typeof PayeeTableRow>,
-  'onUpdate' | 'onViewRules' | 'onCreateRule'
+  'onUpdate' | 'onDelete' | 'onViewRules' | 'onCreateRule'
 >;
 
 export const PayeeTable = forwardRef<
   ComponentRef<typeof Table<PayeeWithId>>,
   PayeeTableProps
->(({ payees, ruleCounts, onUpdate, onViewRules, onCreateRule }, ref) => {
-  const [hovered, setHovered] = useState(null);
-  const selectedItems = useSelectedItems();
+>(
+  (
+    { payees, ruleCounts, onUpdate, onDelete, onViewRules, onCreateRule },
+    ref,
+  ) => {
+    const [hovered, setHovered] = useState(null);
+    const selectedItems = useSelectedItems();
 
-  useLayoutEffect(() => {
-    const firstSelected = [...selectedItems][0] as string;
-    if (typeof ref !== 'function') {
-      ref.current.scrollTo(firstSelected, 'center');
-    }
-  }, []);
+    useLayoutEffect(() => {
+      const firstSelected = [...selectedItems][0] as string;
+      if (typeof ref !== 'function') {
+        ref.current.scrollTo(firstSelected, 'center');
+      }
+    }, []);
 
-  const onHover = useCallback(id => {
-    setHovered(id);
-  }, []);
+    const onHover = useCallback(id => {
+      setHovered(id);
+    }, []);
 
-  const tableNavigator = useTableNavigator(payees, item =>
-    item.transfer_acct == null
-      ? ['select', 'name', 'rule-count']
-      : ['rule-count'],
-  );
+    const tableNavigator = useTableNavigator(payees, item =>
+      item.transfer_acct == null
+        ? ['select', 'name', 'rule-count']
+        : ['rule-count'],
+    );
 
-  return (
-    <View style={{ flex: 1 }} onMouseLeave={() => setHovered(null)}>
-      <Table
-        navigator={tableNavigator}
-        ref={ref}
-        items={payees}
-        renderItem={({ item, editing, focusedField, onEdit }) => {
-          return (
-            <PayeeTableRow
-              payee={item}
-              ruleCount={ruleCounts.get(item.id) || 0}
-              selected={selectedItems.has(item.id)}
-              editing={editing}
-              focusedField={focusedField}
-              hovered={hovered === item.id}
-              onHover={onHover}
-              onEdit={onEdit}
-              onUpdate={onUpdate}
-              onViewRules={onViewRules}
-              onCreateRule={onCreateRule}
-            />
-          );
-        }}
-      />
-    </View>
-  );
-});
+    return (
+      <View style={{ flex: 1 }} onMouseLeave={() => setHovered(null)}>
+        <Table
+          navigator={tableNavigator}
+          ref={ref}
+          items={payees}
+          renderItem={({ item, editing, focusedField, onEdit }) => {
+            return (
+              <PayeeTableRow
+                payee={item}
+                ruleCount={ruleCounts.get(item.id) || 0}
+                selected={selectedItems.has(item.id)}
+                editing={editing}
+                focusedField={focusedField}
+                hovered={hovered === item.id}
+                onHover={onHover}
+                onEdit={onEdit}
+                onUpdate={onUpdate}
+                onDelete={onDelete}
+                onViewRules={onViewRules}
+                onCreateRule={onCreateRule}
+              />
+            );
+          }}
+        />
+      </View>
+    );
+  },
+);
 
 PayeeTable.displayName = 'PayeeTable';
