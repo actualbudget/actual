@@ -1,9 +1,11 @@
 // @ts-strict-ignore
 import React, { type CSSProperties, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import * as monthUtils from 'loot-core/src/shared/months';
 
 import { useResizeObserver } from '../../hooks/useResizeObserver';
+import { SvgCalendar } from '../../icons/v2';
 import { styles, theme } from '../../style';
 import { Link } from '../common/Link';
 import { View } from '../common/View';
@@ -25,6 +27,7 @@ export const MonthPicker = ({
   style,
   onSelect,
 }: MonthPickerProps) => {
+  const { t } = useTranslation();
   const [hoverId, setHoverId] = useState(null);
   const [targetMonthCount, setTargetMonthCount] = useState(12);
 
@@ -86,11 +89,17 @@ export const MonthPicker = ({
           style={{
             position: 'absolute',
             left: 0,
-            padding: '2.2px 3px',
-            border: `1px solid ${theme.buttonPrimaryBorder}`,
+            padding: '3px 3px',
           }}
         >
-          Now
+          <View title={t('Now')}>
+            <SvgCalendar
+              style={{
+                width: 16,
+                height: 16,
+              }}
+            />
+          </View>
         </Link>
         {range.map((month, idx) => {
           const monthName = monthUtils.format(month, 'MMM');
