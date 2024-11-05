@@ -1,12 +1,9 @@
-// @ts-strict-ignore
-import nodeFetch from 'node-fetch';
-
 export const fetch = async (
   input: RequestInfo | URL,
   options?: RequestInit,
 ) => {
   try {
-    return await nodeFetch(input, {
+    return await globalThis.fetch(input, {
       ...options,
       headers: {
         ...options?.headers,
