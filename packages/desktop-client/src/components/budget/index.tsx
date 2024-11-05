@@ -263,6 +263,15 @@ function BudgetInner(props: BudgetInnerProps) {
     }
   };
 
+  const onApplyBudgetTemplatesInGroup = async categories => {
+    dispatch(
+      applyBudgetAction(startMonth, 'apply-multiple-templates', {
+        month: startMonth,
+        categories,
+      }),
+    );
+  };
+
   const onBudgetAction = (month, type, args) => {
     dispatch(applyBudgetAction(month, type, args));
   };
@@ -364,6 +373,7 @@ function BudgetInner(props: BudgetInnerProps) {
           onMonthSelect={onMonthSelect}
           onDeleteCategory={onDeleteCategory}
           onDeleteGroup={onDeleteGroup}
+          onApplyBudgetTemplatesInGroup={onApplyBudgetTemplatesInGroup}
           onSaveCategory={onSaveCategory}
           onSaveGroup={onSaveGroup}
           onBudgetAction={onBudgetAction}

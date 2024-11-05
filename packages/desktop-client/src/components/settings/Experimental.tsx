@@ -115,6 +115,12 @@ export function ExperimentalFeatures() {
             >
               <Trans>Scheduled transaction upcoming length adjustment</Trans>
             </FeatureToggle>
+            <FeatureToggle
+              flag="contextMenus"
+              feedbackLink="https://github.com/actualbudget/actual/issues/3706"
+            >
+              <Trans>Context menus</Trans>
+            </FeatureToggle>
             <FeatureToggle flag="subCategoryGroups">
               <Trans>Sub category groups</Trans>
             </FeatureToggle>

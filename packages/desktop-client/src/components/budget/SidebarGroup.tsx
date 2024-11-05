@@ -33,6 +33,7 @@ type SidebarGroupProps = {
   onEdit?: (id: string) => void;
   onSave?: (group: object) => Promise<void>;
   onDelete?: (id: string) => Promise<void>;
+  onApplyBudgetTemplatesInGroup?: (categories: object[]) => void;
   onShowNewCategory?: (groupId: string) => void;
   onShowNewGroup?: (parent?: string) => void;
   onHideNewGroup?: () => void;
@@ -50,6 +51,7 @@ export function SidebarGroup({
   onEdit,
   onSave,
   onDelete,
+  onApplyBudgetTemplatesInGroup,
   onShowNewCategory,
   onShowNewGroup,
   onHideNewGroup,
@@ -57,10 +59,12 @@ export function SidebarGroup({
   depth,
 }: SidebarGroupProps) {
   const { t } = useTranslation();
+  const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
 
   const temporary = group.id === 'new';
   const [menuOpen, setMenuOpen] = useState(false);
   const triggerRef = useRef(null);
+  const contextMenusEnabled = useFeatureFlag('contextMenus');
   const subCategoryGroups = useFeatureFlag('subCategoryGroups');
 
   const displayed = (
@@ -70,10 +74,17 @@ export function SidebarGroup({
         alignItems: 'center',
         userSelect: 'none',
         WebkitUserSelect: 'none',
+        height: 20,
         paddingLeft: (depth ?? 0) * 13 - (depth ? 5 : 0),
       }}
+      ref={triggerRef}
       onClick={() => {
         onToggleCollapse(group.id);
+      }}
+      onContextMenu={e => {
+        if (!contextMenusEnabled) return;
+        e.preventDefault();
+        setMenuOpen(true);
       }}
     >
       {!dragPreview && (
@@ -102,7 +113,7 @@ export function SidebarGroup({
       </div>
       {!dragPreview && (
         <>
-          <View style={{ marginLeft: 5, flexShrink: 0 }} ref={triggerRef}>
+          <View style={{ marginLeft: 5, flexShrink: 0 }}>
             <Button
               variant="bare"
               className="hover-visible"
@@ -118,6 +129,7 @@ export function SidebarGroup({
               isOpen={menuOpen}
               onOpenChange={() => setMenuOpen(false)}
               style={{ width: 200 }}
+              isNonModal
             >
               <Menu
                 onMenuSelect={type => {
@@ -131,6 +143,12 @@ export function SidebarGroup({
                     onDelete(group.id);
                   } else if (type === 'toggle-visibility') {
                     onSave({ ...group, hidden: !group.hidden });
+                  } else if (type === 'apply-multiple-category-template') {
+                    onApplyBudgetTemplatesInGroup?.(
+                      group.categories
+                        .filter(c => !c['hidden'])
+                        .map(c => c['id']),
+                    );
                   }
                   setMenuOpen(false);
                 }}
@@ -146,6 +164,14 @@ export function SidebarGroup({
                     text: group.hidden ? t('Show') : t('Hide'),
                   },
                   onDelete && { name: 'delete', text: t('Delete') },
+                  ...(isGoalTemplatesEnabled
+                    ? [
+                        {
+                          name: 'apply-multiple-category-template',
+                          text: t('Apply budget templates'),
+                        },
+                      ]
+                    : []),
                 ]}
               />
             </Popover>

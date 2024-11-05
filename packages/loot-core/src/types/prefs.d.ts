@@ -4,6 +4,7 @@ export type FeatureFlag =
   | 'goalTemplatesEnabled'
   | 'actionTemplating'
   | 'upcomingLengthAdjustment'
+  | 'contextMenus'
   | 'subCategoryGroups';
 
 /**

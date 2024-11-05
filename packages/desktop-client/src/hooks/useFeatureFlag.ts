@@ -8,6 +8,7 @@ const DEFAULT_FEATURE_FLAG_STATE: Record<FeatureFlag, boolean> = {
   dashboards: false,
   actionTemplating: false,
   upcomingLengthAdjustment: false,
+  contextMenus: false,
   subCategoryGroups: false,
 };
 
