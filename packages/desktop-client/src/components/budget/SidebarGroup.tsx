@@ -125,7 +125,7 @@ export function SidebarGroup({
                     onEdit(group.id);
                   } else if (type === 'add-category') {
                     onShowNewCategory(group.id);
-                  } else if (type === 'add-group') {
+                  } else if (type === 'add-sub-group') {
                     onShowNewGroup(group.id);
                   } else if (type === 'delete') {
                     onDelete(group.id);
@@ -137,8 +137,8 @@ export function SidebarGroup({
                 items={[
                   { name: 'add-category', text: t('Add category') },
                   subCategoryGroups && {
-                    name: 'add-group',
-                    text: t('Add group'),
+                    name: 'add-sub-group',
+                    text: t('Add sub-group'),
                   },
                   { name: 'rename', text: t('Rename') },
                   !group.is_income && {
