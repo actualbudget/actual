@@ -16,7 +16,6 @@ import type { NotificationWithId } from 'loot-core/src/client/state-types/notifi
 
 import { AnimatedLoading } from '../icons/AnimatedLoading';
 import { SvgDelete } from '../icons/v0';
-import { useResponsive } from '../ResponsiveProvider';
 import { styles, theme } from '../style';
 
 import { Button, ButtonWithLoading } from './common/Button2';
@@ -24,6 +23,7 @@ import { Link } from './common/Link';
 import { Stack } from './common/Stack';
 import { Text } from './common/Text';
 import { View } from './common/View';
+import { useResponsive } from './responsive/ResponsiveProvider';
 
 function compileMessage(
   message: string,
