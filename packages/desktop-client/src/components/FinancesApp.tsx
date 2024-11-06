@@ -18,7 +18,6 @@ import { useAccounts } from '../hooks/useAccounts';
 import { useLocalPref } from '../hooks/useLocalPref';
 import { useMetaThemeColor } from '../hooks/useMetaThemeColor';
 import { useNavigate } from '../hooks/useNavigate';
-import { useResponsive } from '../ResponsiveProvider';
 import { theme } from '../style';
 import { getIsOutdated, getLatestVersion } from '../util/versions';
 
@@ -34,6 +33,7 @@ import { ManagePayeesPage } from './payees/ManagePayeesPage';
 import { Reports } from './reports';
 import { LoadingIndicator } from './reports/LoadingIndicator';
 import { NarrowAlternate, WideComponent } from './responsive';
+import { useResponsive } from './responsive/ResponsiveProvider';
 import { Settings } from './settings';
 import { FloatableSidebar } from './sidebar';
 import { Titlebar } from './Titlebar';

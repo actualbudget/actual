@@ -12,9 +12,9 @@ import { useGlobalPref } from '../../hooks/useGlobalPref';
 import { useLocalPref } from '../../hooks/useLocalPref';
 import { useResizeObserver } from '../../hooks/useResizeObserver';
 import { SvgAdd } from '../../icons/v1';
-import { useResponsive } from '../../ResponsiveProvider';
 import { styles, theme } from '../../style';
 import { View } from '../common/View';
+import { useResponsive } from '../responsive/ResponsiveProvider';
 
 import { Accounts } from './Accounts';
 import { BudgetName } from './BudgetName';
