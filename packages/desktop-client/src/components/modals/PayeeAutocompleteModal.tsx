@@ -3,7 +3,6 @@ import React, { type ComponentPropsWithoutRef } from 'react';
 import { useAccounts } from '../../hooks/useAccounts';
 import { useNavigate } from '../../hooks/useNavigate';
 import { usePayees } from '../../hooks/usePayees';
-import { useResponsive } from '../../ResponsiveProvider';
 import { theme } from '../../style';
 import { PayeeAutocomplete } from '../autocomplete/PayeeAutocomplete';
 import {
@@ -12,6 +11,7 @@ import {
   ModalTitle,
   ModalHeader,
 } from '../common/Modal';
+import { useResponsive } from '../responsive/ResponsiveProvider';
 
 type PayeeAutocompleteModalProps = {
   autocompleteProps: ComponentPropsWithoutRef<typeof PayeeAutocomplete>;

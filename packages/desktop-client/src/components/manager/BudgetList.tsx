@@ -34,7 +34,6 @@ import {
   SvgFileDouble,
 } from '../../icons/v1';
 import { SvgCloudUnknown, SvgKey, SvgRefreshArrow } from '../../icons/v2';
-import { useResponsive } from '../../ResponsiveProvider';
 import { styles, theme } from '../../style';
 import { tokens } from '../../tokens';
 import { Button } from '../common/Button2';
@@ -42,6 +41,7 @@ import { Menu } from '../common/Menu';
 import { Popover } from '../common/Popover';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
+import { useResponsive } from '../responsive/ResponsiveProvider';
 
 function getFileDescription(file: File, t: (key: string) => string) {
   if (file.state === 'unknown') {
