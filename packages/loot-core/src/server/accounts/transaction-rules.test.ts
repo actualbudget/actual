@@ -512,7 +512,6 @@ describe('Transaction rules', () => {
 
   test('and sub expression builds $and condition', async () => {
     const conds = [{ field: 'category', op: 'is', value: null }];
-    debugger;
     const { filters } = conditionsToAQL(conds);
     expect(filters).toStrictEqual([
       {

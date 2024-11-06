@@ -552,12 +552,10 @@ export function conditionsToAQL(conditions, { recurDateBounds = 100 } = {}) {
       case 'false':
         return apply(field, '$eq', false);
       case 'and':
-        debugger;
         return {
           $and: getValue(value).map(subExpr => mapConditionToActualQL(subExpr)),
         };
       default:
-        debugger;
         throw new Error('Unhandled operator: ' + op);
     }
   };
