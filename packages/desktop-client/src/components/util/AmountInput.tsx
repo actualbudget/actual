@@ -9,6 +9,8 @@ import React, {
   forwardRef,
 } from 'react';
 
+import { css } from '@emotion/css';
+
 import { evalArithmetic } from 'loot-core/src/shared/arithmetic';
 import { amountToInteger, appendDecimals } from 'loot-core/src/shared/util';
 
@@ -122,7 +124,7 @@ export const AmountInput = forwardRef<HTMLInputElement, AmountInputProps>(
             variant="bare"
             isDisabled={disabled}
             aria-label={`Make ${symbol === '-' ? 'positive' : 'negative'}`}
-            style={{ padding: '0 7px' }}
+            style={{ padding: '0 7px', flexShrink: 0 }}
             onPress={onSwitch}
             ref={buttonRef}
           >
@@ -138,8 +140,12 @@ export const AmountInput = forwardRef<HTMLInputElement, AmountInputProps>(
         disabled={disabled}
         autoFocus={autoFocus}
         autoSelect={autoSelect}
-        style={{ flex: 1, alignItems: 'stretch', ...style }}
-        inputStyle={inputStyle}
+        containerClassName={css({
+          flex: 1,
+          alignItems: 'stretch',
+          '& input': inputStyle,
+          ...style,
+        })}
         onKeyUp={e => {
           if (e.key === 'Enter') {
             const amount = getAmount();

@@ -4,7 +4,7 @@ import React, {
   forwardRef,
   useEffect,
   useRef,
-  useCallback,
+  useMemo,
 } from 'react';
 import { Input as ReactAriaInput } from 'react-aria-components';
 
@@ -46,7 +46,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
       }
     }, [autoSelect]);
 
-    const defaultInputClassName = useCallback(
+    const defaultInputClassName = useMemo(
       () =>
         css(
           {
@@ -77,8 +77,8 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
         {...props}
         className={
           typeof className === 'function'
-            ? renderProps => cx(defaultInputClassName(), className(renderProps))
-            : cx(defaultInputClassName(), className)
+            ? renderProps => cx(defaultInputClassName, className(renderProps))
+            : cx(defaultInputClassName, className)
         }
         onKeyDown={e => {
           props.onKeyDown?.(e);
@@ -110,7 +110,7 @@ type BigInputProps = InputProps;
 
 export const BigInput = forwardRef<HTMLInputElement, BigInputProps>(
   ({ className, ...props }, ref) => {
-    const defaultClassName = useCallback(
+    const defaultClassName = useMemo(
       () =>
         String(
           css({
@@ -127,8 +127,8 @@ export const BigInput = forwardRef<HTMLInputElement, BigInputProps>(
         {...props}
         className={renderProps =>
           typeof className === 'function'
-            ? `${defaultClassName()} ${className(renderProps)}`
-            : `${defaultClassName()}  ${className}`
+            ? cx(defaultClassName, className(renderProps))
+            : cx(defaultClassName, className)
         }
       />
     );
