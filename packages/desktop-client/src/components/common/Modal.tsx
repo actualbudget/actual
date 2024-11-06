@@ -22,9 +22,9 @@ import { useModalState } from '../../hooks/useModalState';
 import { AnimatedLoading } from '../../icons/AnimatedLoading';
 import { SvgLogo } from '../../icons/logo';
 import { SvgDelete } from '../../icons/v0';
-import { useResponsive } from '../../ResponsiveProvider';
 import { styles, theme } from '../../style';
 import { tokens } from '../../tokens';
+import { useResponsive } from '../responsive/ResponsiveProvider';
 
 import { Button } from './Button2';
 import { Input } from './Input';
