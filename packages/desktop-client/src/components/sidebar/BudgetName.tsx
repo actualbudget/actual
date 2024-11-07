@@ -1,9 +1,15 @@
 import React, { type ReactNode, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
-import { closeBudget } from 'loot-core/src/client/actions';
+import { closeBudget, replaceModal } from 'loot-core/src/client/actions';
 import * as Platform from 'loot-core/src/client/platform';
+import {
+  type File,
+  type LocalFile,
+  type SyncableLocalFile,
+  type SyncedLocalFile,
+} from 'loot-core/types/file';
 
 import { useMetadataPref } from '../../hooks/useMetadataPref';
 import { useNavigate } from '../../hooks/useNavigate';
@@ -58,12 +64,30 @@ function EditableBudgetName() {
   const triggerRef = useRef<HTMLButtonElement>(null);
   const [editing, setEditing] = useState(false);
 
+  const [id] = useMetadataPref('id');
+  const allFiles = useSelector(state => state.budgets.allFiles || []);
+
+  function isNonRemoteFile(
+    file: File,
+  ): file is LocalFile | SyncableLocalFile | SyncedLocalFile {
+    return file.state !== 'remote';
+  }
+
+  const nonRemoteFiles = allFiles.filter(isNonRemoteFile);
+  const budgetFile = id ? nonRemoteFiles.find(f => f.id === id) : null;
+  const budgetId = budgetFile?.id ? budgetFile.id : undefined;
+
   function onMenuSelect(type: string) {
     setMenuOpen(false);
 
     switch (type) {
       case 'rename':
         setEditing(true);
+        break;
+      case 'backups':
+        if (budgetId) {
+          dispatch(replaceModal('load-backup', { budgetId }));
+        }
         break;
       case 'settings':
         navigate('/settings');
@@ -77,6 +101,7 @@ function EditableBudgetName() {
 
   const items = [
     { name: 'rename', text: t('Rename budget') },
+    { name: 'backups', text: t('Backups') },
     { name: 'settings', text: t('Settings') },
     { name: 'close', text: t('Close file') },
   ];
