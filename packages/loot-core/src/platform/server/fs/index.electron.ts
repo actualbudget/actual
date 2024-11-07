@@ -18,7 +18,6 @@ switch (path.basename(__filename)) {
     rootPath = path.join(__dirname, '..', '..');
     break;
   default:
-    rootPath = path.join(__dirname, '..', '..');
     break;
 }
 
