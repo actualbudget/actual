@@ -10,7 +10,7 @@ export { getDocumentDir, getBudgetDir, _setDocumentDir } from './shared';
 
 let rootPath = path.join(__dirname, '..', '..', '..', '..');
 
-switch (__filename) {
+switch (path.basename(__filename)) {
   case 'bundle.api.js': // api bundle uses the electron bundle - account for its file structure
     rootPath = path.join(__dirname, '..');
     break;
@@ -21,6 +21,8 @@ switch (__filename) {
     rootPath = path.join(__dirname, '..', '..');
     break;
 }
+
+console.warn({ __filename, rootPath, name: path.basename(__filename) });
 
 export const init = () => {
   // Nothing to do
