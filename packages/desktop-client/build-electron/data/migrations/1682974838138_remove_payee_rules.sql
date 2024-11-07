@@ -1,5 +1,0 @@
-BEGIN TRANSACTION;
-
-DROP TABLE payee_rules;
-
-COMMIT;
