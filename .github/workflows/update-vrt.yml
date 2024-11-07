@@ -43,6 +43,9 @@ jobs:
           E2E_START_URL: ${{ steps.netlify.outputs.url }}
       - name: Create patch
         run: |
+          git config --system --add safe.directory "*"
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git reset
           git add "**/*.png"
           if git diff --staged --quiet; then
@@ -77,10 +80,9 @@ jobs:
           name: patch
       - name: Apply patch and push
         run: |
-          git apply Update-VRT.patch
-          git config --system --add safe.directory "*"
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git apply Update-VRT.patch
           git add "**/*.png"
           if git diff --staged --quiet; then
             echo "No changes to commit"
