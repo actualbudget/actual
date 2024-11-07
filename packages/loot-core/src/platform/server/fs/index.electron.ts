@@ -10,11 +10,16 @@ export { getDocumentDir, getBudgetDir, _setDocumentDir } from './shared';
 
 let rootPath = path.join(__dirname, '..', '..', '..', '..');
 
-console.warn({ rootPath, __filename });
-if (__filename.match('bundle')) {
-  // The file name is not our filename and indicates that we're in the
-  // bundled form. Because of this, the root path is different.
-  rootPath = path.join(__dirname, '..', '..');
+switch (__filename) {
+  case 'bundle.api.js': // api bundle uses the electron bundle - account for its file structure
+    rootPath = path.join(__dirname, '..');
+    break;
+  case 'bundle.desktop.js': // electron app
+    rootPath = path.join(__dirname, '..', '..');
+    break;
+  default:
+    rootPath = path.join(__dirname, '..', '..');
+    break;
 }
 
 export const init = () => {
