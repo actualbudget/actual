@@ -22,7 +22,6 @@ const TYPE_INFO = {
       'doesNotContain',
       'notOneOf',
       'hasTags',
-      'and',
     ],
     nullable: true,
   },
@@ -55,7 +54,11 @@ const TYPE_INFO = {
 
 type FieldInfoConstraint = Record<
   keyof FieldValueTypes,
-  { type: keyof typeof TYPE_INFO; disallowedOps?: Set<RuleConditionOp> }
+  {
+    type: keyof typeof TYPE_INFO;
+    disallowedOps?: Set<RuleConditionOp>;
+    internalOps?: Set<RuleConditionOp>;
+  }
 >;
 
 const FIELD_INFO = {
@@ -68,7 +71,7 @@ const FIELD_INFO = {
   date: { type: 'date' },
   notes: { type: 'string' },
   amount: { type: 'number' },
-  category: { type: 'id' },
+  category: { type: 'id', internalOps: new Set(['and']) },
   account: { type: 'id' },
   cleared: { type: 'boolean' },
   reconciled: { type: 'boolean' },
@@ -92,7 +95,9 @@ export function isValidOp(field: keyof FieldValueTypes, op: RuleConditionOp) {
     return false;
   }
   return (
-    TYPE_INFO[type].ops.includes(op) && !fieldInfo[field].disallowedOps?.has(op)
+    (TYPE_INFO[type].ops.includes(op) ||
+      fieldInfo[field].internalOps?.has(op)) &&
+    !fieldInfo[field].disallowedOps?.has(op)
   );
 }
 
