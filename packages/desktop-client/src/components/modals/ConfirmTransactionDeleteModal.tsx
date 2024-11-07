@@ -33,7 +33,7 @@ export function ConfirmTransactionDeleteModal({
             rightContent={<ModalCloseButton onPress={close} />}
           />
           <View style={{ lineHeight: 1.5 }}>
-            <Paragraph>{message}</Paragraph>
+            <Paragraph style={{ textAlign: 'center' }}>{message}</Paragraph>
             <View
               style={{
                 flexDirection: 'row',
