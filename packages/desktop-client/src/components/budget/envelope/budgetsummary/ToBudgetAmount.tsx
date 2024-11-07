@@ -1,4 +1,4 @@
-import React, { type CSSProperties } from 'react';
+import React, { type CSSProperties, type MouseEventHandler } from 'react';
 
 import { css } from '@emotion/css';
 
@@ -22,6 +22,7 @@ type ToBudgetAmountProps = {
   style?: CSSProperties;
   amountStyle?: CSSProperties;
   onClick: () => void;
+  onContextMenu?: MouseEventHandler;
   isTotalsListTooltipDisabled?: boolean;
 };
 
@@ -31,6 +32,7 @@ export function ToBudgetAmount({
   amountStyle,
   onClick,
   isTotalsListTooltipDisabled = false,
+  onContextMenu,
 }: ToBudgetAmountProps) {
   const sheetName = useEnvelopeSheetName(envelopeBudget.toBudget);
   const sheetValue = useEnvelopeSheetValue({
@@ -71,6 +73,7 @@ export function ToBudgetAmount({
           >
             <Block
               onClick={onClick}
+              onContextMenu={onContextMenu}
               data-cellname={sheetName}
               className={css([
                 styles.veryLargeText,

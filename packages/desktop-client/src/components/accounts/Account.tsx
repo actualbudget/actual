@@ -1794,6 +1794,15 @@ class AccountInternal extends PureComponent<
                   sortField={this.state.sort?.field}
                   ascDesc={this.state.sort?.ascDesc}
                   onChange={this.onTransactionsChange}
+                  onBatchDelete={this.onBatchDelete}
+                  onBatchDuplicate={this.onBatchDuplicate}
+                  onBatchLinkSchedule={this.onBatchLinkSchedule}
+                  onBatchUnlinkSchedule={this.onBatchUnlinkSchedule}
+                  onCreateRule={this.onCreateRule}
+                  onScheduleAction={this.onScheduleAction}
+                  onMakeAsNonSplitTransactions={
+                    this.onMakeAsNonSplitTransactions
+                  }
                   onRefetch={this.refetchTransactions}
                   onCloseAddTransaction={() =>
                     this.setState({ isAdding: false })

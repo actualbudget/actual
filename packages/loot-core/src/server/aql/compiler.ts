@@ -706,12 +706,12 @@ const compileOp = saveStack('op', (state, fieldRef, opData) => {
         state.namedParameters = [].concat.apply([], orders);
 
         return `CASE
-          WHEN ${left} IS NULL THEN ${right} IS NULL
-          ELSE ${left} != ${right}
+          WHEN ${left} IS NULL THEN ${right} IS NOT NULL
+          ELSE ${left} IS NOT ${right}
         END`;
       }
 
-      return `${left} != ${right}`;
+      return `(${left} != ${right} OR ${left} IS NULL)`;
     }
     case '$oneof': {
       const [left, right] = valArray(state, [lhs, rhs], [null, 'array']);
