@@ -10,7 +10,7 @@ export { getDocumentDir, getBudgetDir, _setDocumentDir } from './shared';
 
 let rootPath = path.join(__dirname, '..', '..', '..', '..');
 
-console.info('root path', rootPath);
+console.warn({ rootPath, __filename });
 if (__filename.match('bundle')) {
   // The file name is not our filename and indicates that we're in the
   // bundled form. Because of this, the root path is different.
