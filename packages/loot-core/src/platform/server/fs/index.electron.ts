@@ -21,8 +21,6 @@ switch (path.basename(__filename)) {
     break;
 }
 
-console.warn({ __filename, rootPath, name: path.basename(__filename) });
-
 export const init = () => {
   // Nothing to do
 };
