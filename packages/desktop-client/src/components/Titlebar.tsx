@@ -25,7 +25,6 @@ import {
   SvgViewHide,
   SvgViewShow,
 } from '../icons/v2';
-import { useResponsive } from '../ResponsiveProvider';
 import { theme, styles } from '../style';
 
 import { AccountSyncCheck } from './accounts/AccountSyncCheck';
@@ -38,6 +37,7 @@ import { Text } from './common/Text';
 import { View } from './common/View';
 import { HelpMenu } from './HelpMenu';
 import { LoggedInUser } from './LoggedInUser';
+import { useResponsive } from './responsive/ResponsiveProvider';
 import { useServerURL } from './ServerContext';
 import { useSidebar } from './sidebar/SidebarProvider';
 import { useSheetValue } from './spreadsheet/useSheetValue';

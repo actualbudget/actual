@@ -7,13 +7,13 @@ import { currentDay, dayFromDate } from 'loot-core/src/shared/months';
 import { amountToInteger } from 'loot-core/src/shared/util';
 
 import { useDateFormat } from '../../hooks/useDateFormat';
-import { useResponsive } from '../../ResponsiveProvider';
 import { theme } from '../../style';
 import { Button } from '../common/Button2';
 import { Input } from '../common/Input';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { View } from '../common/View';
 import { SectionLabel } from '../forms';
+import { useResponsive } from '../responsive/ResponsiveProvider';
 import { DateSelect } from '../select/DateSelect';
 
 export function EditFieldModal({ name, onSubmit, onClose }) {

@@ -8,7 +8,6 @@ import { type FinanceModals } from 'loot-core/src/client/state-types/modals';
 import { send } from 'loot-core/src/platform/client/fetch';
 import { getTestKeyError } from 'loot-core/src/shared/errors';
 
-import { useResponsive } from '../../ResponsiveProvider';
 import { styles, theme } from '../../style';
 import { Button, ButtonWithLoading } from '../common/Button2';
 import { InitialFocus } from '../common/InitialFocus';
@@ -23,6 +22,7 @@ import {
 import { Paragraph } from '../common/Paragraph';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
+import { useResponsive } from '../responsive/ResponsiveProvider';
 
 type FixEncryptionKeyModalProps = {
   options: FinanceModals['fix-encryption-key'];

@@ -11,10 +11,10 @@ import { type PayeeEntity } from 'loot-core/types/models/payee';
 import { type CustomReportEntity } from 'loot-core/types/models/reports';
 import { type SyncedPrefs } from 'loot-core/types/prefs';
 
-import { useResponsive } from '../../../ResponsiveProvider';
 import { styles } from '../../../style/styles';
 import { theme } from '../../../style/theme';
 import { Text } from '../../common/Text';
+import { useResponsive } from '../../responsive/ResponsiveProvider';
 import { ChooseGraph } from '../ChooseGraph';
 import { getLiveRange } from '../getLiveRange';
 import { LoadingIndicator } from '../LoadingIndicator';
