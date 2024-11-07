@@ -44,6 +44,8 @@ jobs:
       - name: Create patch
         run: |
           git config --system --add safe.directory "*"
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git reset
           git add "**/*.png"
           if git diff --staged --quiet; then
@@ -79,9 +81,9 @@ jobs:
       - name: Apply patch and push
         run: |
           git config --system --add safe.directory "*"
-          git apply Update-VRT.patch
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git apply Update-VRT.patch
           git add "**/*.png"
           if git diff --staged --quiet; then
             echo "No changes to commit"
