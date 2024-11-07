@@ -5,7 +5,6 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { useGlobalPref } from '../../hooks/useGlobalPref';
 import { useNavigate } from '../../hooks/useNavigate';
-import { useResponsive } from '../../ResponsiveProvider';
 import { styles, theme } from '../../style';
 import { Button, ButtonWithLoading } from '../common/Button2';
 import { Input } from '../common/Input';
@@ -14,6 +13,7 @@ import { Text } from '../common/Text';
 import { View } from '../common/View';
 
 import { Title } from './subscribe/common';
+import { useResponsive } from '../responsive/ResponsiveProvider';
 
 export function ConfigInternalSyncServer() {
   const { t } = useTranslation();
