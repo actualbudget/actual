@@ -58,10 +58,10 @@ export function ExportBudget() {
       }
     >
       <Text>
-        <strong>{t('Export')}</strong>{' '}
-        {t(
-          'your data as a zip file containing db.sqlite and metadata.json files. It can be imported into another Actual instance by closing an open file (if any), then clicking the “Import file” button, then choosing “Actual.”',
-        )}
+        <strong>Export</strong> your data as a zip file containing{' '}
+        <code>db.sqlite</code> and <code>metadata.json</code> files. It can be
+        imported into another Actual instance by closing an open file (if any),
+        then clicking the “Import file” button, then choosing “Actual.”
       </Text>
       {encryptKeyId ? (
         <Text>

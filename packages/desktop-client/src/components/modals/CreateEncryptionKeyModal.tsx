@@ -88,11 +88,11 @@ export function CreateEncryptionKeyModal({
                 <Paragraph style={{ marginTop: 5 }}>
                   {t(
                     'To enable end-to-end encryption, you need to create a key. We will generate a key based on a password and use it to encrypt from now on.',
-                  )}{' '}
+                  )}
                   <strong>{t('This requires a sync reset')}</strong>{' '}
                   {t(
                     'and all other devices will have to revert to this version of your data.',
-                  )}
+                  )}{' '}
                   <Link
                     variant="external"
                     to="https://actualbudget.org/docs/getting-started/sync/#end-to-end-encryption"
@@ -109,11 +109,10 @@ export function CreateEncryptionKeyModal({
                     })}
                   >
                     <li>
-                      <strong>{t('Important:')}</strong>{' '}
-                      {t('if you forget this password')} <em>{t('and')}</em>{' '}
-                      {t(
-                        'you don’t have any local copies of your data, you will lose access to all your data. The data cannot be decrypted without the password.',
-                      )}
+                      <strong>Important:</strong> if you forget this password{' '}
+                      <em>and</em> you don’t have any local copies of your data,
+                      you will lose access to all your data. The data cannot be
+                      decrypted without the password.
                     </li>
                     <li>
                       {t(
@@ -137,10 +136,10 @@ export function CreateEncryptionKeyModal({
               <>
                 <Paragraph style={{ marginTop: 5 }}>
                   {t('This will generate a new key for encrypting your data.')}{' '}
-                  <strong>{t('This requires a sync reset')}</strong>{' '}
+                  <strong>{t('This requires a sync reset')}</strong>
                   {t(
                     'and all other devices will have to revert to this version of your data. Actual will take you through that process on those devices.',
-                  )}
+                  )}{' '}
                   <Link
                     variant="external"
                     to="https://actualbudget.org/docs/getting-started/sync/#end-to-end-encryption"

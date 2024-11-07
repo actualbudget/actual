@@ -85,22 +85,15 @@ export function MergeUnusedPayeesModal({ payeeIds, targetPayeeId }) {
             <Paragraph style={{ marginBottom: 10, fontWeight: 500 }}>
               {payees.length === 1 ? (
                 <>
-                  {t(
-                    'The payee {{name}} is not used by transactions anymore. Would you like to merge it with {{targetName}}?',
-                    {
-                      name: payees[0].name,
-                      targetName: targetPayee.name,
-                    },
-                  )}
+                  The payee <Text style={highlightStyle}>{payees[0].name}</Text>{' '}
+                  is not used by transactions any more. Would like to merge it
+                  with <Text style={highlightStyle}>{targetPayee.name}</Text>?
                 </>
               ) : (
                 <>
-                  {t(
-                    'The following payees are not used by transactions anymore. Would you like to merge them with {{targetName}}?',
-                    {
-                      targetName: targetPayee.name,
-                    },
-                  )}
+                  The following payees are not used by transactions any more.
+                  Would like to merge them with{' '}
+                  <Text style={highlightStyle}>{targetPayee.name}</Text>?
                   <ul
                     ref={flashRef}
                     style={{
@@ -126,9 +119,9 @@ export function MergeUnusedPayeesModal({ payeeIds, targetPayeeId }) {
               )}
               {!isEditingRule && (
                 <>
-                  {t(
-                    ' If checked below, a rule will be created to do this rename while importing transactions.',
-                  )}
+                  {' '}
+                  If checked below, a rule will be created to do this rename
+                  while importing transactions.
                 </>
               )}
             </Information>
@@ -151,10 +144,9 @@ export function MergeUnusedPayeesModal({ payeeIds, targetPayeeId }) {
                   onChange={e => setShouldCreateRule(e.target.checked)}
                 />
                 <Text style={{ marginLeft: 3 }}>
-                  {t('Automatically rename {{payeeCount}} in the future', {
-                    payeeCount:
-                      payees.length === 1 ? t('this payee') : t('these payees'),
-                  })}
+                  Automatically rename{' '}
+                  {payees.length === 1 ? 'this payee' : 'these payees'} in the
+                  future
                 </Text>
               </label>
             )}

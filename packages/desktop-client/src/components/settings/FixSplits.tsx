@@ -20,28 +20,22 @@ function renderResults(results: Results) {
   let result = '';
 
   if (numBlankPayees === 0 && numCleared === 0 && numDeleted === 0) {
-    result = t('No split transactions found needing repair.');
+    result = 'No split transactions found needing repair.';
   } else {
     if (numBlankPayees > 0) {
-      result += t('Fixed {{count}} splits with a blank payee.', {
-        count: numBlankPayees,
-      });
+      result += `Fixed ${numBlankPayees} splits with a blank payee.`;
     }
     if (numCleared > 0) {
       if (result !== '') {
         result += '\n';
       }
-      result += t('Fixed {{count}} splits with the wrong cleared flag.', {
-        count: numCleared,
-      });
+      result += `Fixed ${numCleared} splits with the wrong cleared flag.`;
     }
     if (numDeleted > 0) {
       if (result !== '') {
         result += '\n';
       }
-      result += t('Fixed {{count}} splits that weren’t properly deleted.', {
-        count: numDeleted,
-      });
+      result += `Fixed ${numDeleted} splits that weren’t properly deleted.`;
     }
   }
 
@@ -93,7 +87,7 @@ export function FixSplits() {
       <Text>
         <strong>{t('Repair split transactions')}</strong>{' '}
         {t(
-          'if you are experiencing bugs relating to split transactions and the “Reset budget cache” button above does not help, this tool may fix them. Some examples of bugs include seeing blank payees on splits or incorrect account balances. This tool does two things:',
+          ' if you are experiencing bugs relating to split transactions and the “Reset budget cache” button above does not help, this tool may fix them. Some examples of bugs include seeing blank payees on splits or incorrect account balances. This tool does two things:',
         )}
       </Text>
       <ul style={{ margin: 0, paddingLeft: '1.5em' }}>

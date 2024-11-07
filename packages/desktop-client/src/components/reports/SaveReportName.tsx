@@ -77,7 +77,7 @@ export function SaveReportName({
               />
             </FormField>
             <Button variant="primary" type="submit" style={{ marginTop: 30 }}>
-              {menuItem === 'save-report' ? t('Add') : t('Update')}
+              {menuItem === 'save-report' ? 'Add' : 'Update'}
             </Button>
           </Stack>
         </Form>

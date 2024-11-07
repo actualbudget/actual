@@ -1,6 +1,4 @@
 // @ts-strict-ignore
-import { t } from 'i18next';
-
 import * as db from '../../db';
 import { whereIn } from '../../db/util';
 import { isAggregateQuery } from '../compiler';
@@ -34,11 +32,7 @@ function execTransactions(state, query, sql, params, outputTypes) {
   const splitType = tableOptions.splits || 'inline';
 
   if (['all', 'inline', 'none', 'grouped'].indexOf(splitType) === -1) {
-    throw new Error(
-      t('Invalid “splits” option for transactions: “{{splitType}}”', {
-        splitType,
-      }),
-    );
+    throw new Error(`Invalid “splits” option for transactions: “${splitType}”`);
   }
 
   if (splitType === 'all' || splitType === 'inline' || splitType === 'none') {

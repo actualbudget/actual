@@ -34,10 +34,10 @@ export function ConfirmCategoryDeleteModal({
 
     switch (error) {
       case 'required-transfer':
-        msg = t('You must select a category'); // Use translation
+        msg = 'You must select a category';
         break;
       default:
-        msg = t('Something bad happened, sorry!'); // Use translation
+        msg = 'Something bad happened, sorry!';
     }
 
     return (
@@ -68,23 +68,17 @@ export function ConfirmCategoryDeleteModal({
           <View style={{ lineHeight: 1.5 }}>
             {group ? (
               <Block>
-                {t(
-                  'Categories in the group {{groupName}} are used by existing transactions. If so, you must select another category to transfer existing transactions and balance to.',
-                  { groupName: group.name },
-                )}
-                {!isIncome &&
-                  t(' or it has a positive leftover balance currently.')}
-                <strong>{t('Are you sure you want to delete it?')}</strong>
+                Categories in the group <strong>{group.name}</strong> are used
+                by existing transactions
               </Block>
             ) : (
               <Block>
-                <strong>{category.name}</strong>{' '}
-                {t(
-                  'is used by existing transactions. If so, you must select another category to transfer existing transactions and balance to.',
-                )}
+                <strong>{category.name}</strong>is used by existing transactions
                 {!isIncome &&
-                  t(' or it has a positive leftover balance currently.')}
-                <strong>{t('Are you sure you want to delete it?')}</strong>
+                  ' or it has a positive leftover balance currently'}
+                .<strong>Are you sure you want to delete it?</strong> If so, you
+                must select another category to transfer existing transactions
+                and balance to.
               </Block>
             )}
 

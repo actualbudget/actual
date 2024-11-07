@@ -2,7 +2,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
-import { t } from 'i18next';
 import promiseRetry from 'promise-retry';
 
 import type * as T from '.';
@@ -23,7 +22,7 @@ export const init = () => {
 
 export const getDataDir = () => {
   if (!process.env.ACTUAL_DATA_DIR) {
-    throw new Error(t('ACTUAL_DATA_DIR env variable is required'));
+    throw new Error('ACTUAL_DATA_DIR env variable is required');
   }
   return process.env.ACTUAL_DATA_DIR;
 };
@@ -122,22 +121,13 @@ export const writeFile: T.WriteFile = async (filepath, contents) => {
           fs.writeFile(filepath, contents, 'utf8', err => {
             if (err) {
               console.error(
-                t(
-                  'Failed to write to {{filepath}}. Attempted {{attempt}} times. Something is locking the file - potentially a virus scanner or backup software.',
-                  {
-                    filepath,
-                    attempt,
-                  },
-                ),
+                `Failed to write to ${filepath}. Attempted ${attempt} times. Something is locking the file - potentially a virus scanner or backup software.`,
               );
               reject(err);
             } else {
               if (attempt > 1) {
                 console.info(
-                  t(
-                    'Successfully recovered from file lock. It took {{attempt}} retries',
-                    { attempt },
-                  ),
+                  `Successfully recovered from file lock. It took ${attempt} retries`,
                 );
               }
               resolve(undefined);
@@ -155,9 +145,7 @@ export const writeFile: T.WriteFile = async (filepath, contents) => {
 
     return undefined;
   } catch (err) {
-    console.error(
-      t('Unable to recover from file lock on file {{filepath}}', { filepath }),
-    );
+    console.error(`Unable to recover from file lock on file ${filepath}`);
     throw err;
   }
 };

@@ -824,9 +824,6 @@ const ExpenseGroupHeader = memo(function ExpenseGroupHeader({
             },
           })}
           onPress={() => onToggleCollapse?.(group.id)}
-          aria-label={t('Toggle collapse for {{groupName}}', {
-            groupName: group.name,
-          })} // Translated aria-label
         >
           <SvgExpandArrow
             width={8}
@@ -844,7 +841,6 @@ const ExpenseGroupHeader = memo(function ExpenseGroupHeader({
             maxWidth: sidebarColumnWidth,
           }}
           onPress={() => onEdit?.(group.id)}
-          aria-label={t('Edit group {{groupName}}', { groupName: group.name })} // Translated aria-label
         >
           <View
             style={{
@@ -1021,9 +1017,6 @@ const IncomeGroupHeader = memo(function IncomeGroupHeader({
             },
           })}
           onPress={() => onToggleCollapse?.(group.id)}
-          aria-label={t('Toggle collapse for {{groupName}}', {
-            groupName: group.name,
-          })} // Translated aria-label
         >
           <SvgExpandArrow
             width={8}
@@ -1041,7 +1034,6 @@ const IncomeGroupHeader = memo(function IncomeGroupHeader({
             maxWidth: sidebarColumnWidth,
           }}
           onPress={() => onEdit?.(group.id)}
-          aria-label={t('Edit group {{groupName}}', { groupName: group.name })} // Translated aria-label
         >
           <View
             style={{
@@ -1180,9 +1172,6 @@ const IncomeCategory = memo(function IncomeCategory({
             maxWidth: sidebarColumnWidth,
           }}
           onPress={() => onEdit?.(category.id)}
-          aria-label={t('Edit category {{categoryName}}', {
-            categoryName: category.name,
-          })} // Translated aria-label
         >
           <View
             style={{
@@ -1237,7 +1226,7 @@ const IncomeCategory = memo(function IncomeCategory({
         <CellValue
           binding={balance}
           type="financial"
-          aria-label={t('Balance for category {{categoryName}}', {
+          aria-label={t('Balance for {{categoryName}} category', {
             categoryName: category.name,
           })} // Translated aria-label
         >

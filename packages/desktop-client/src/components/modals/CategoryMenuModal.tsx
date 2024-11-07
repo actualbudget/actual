@@ -44,7 +44,7 @@ export function CategoryMenuModal({
   const categoryGroup = useCategoryGroup(category?.cat_group);
   const originalNotes = useNotes(category.id);
 
-  const onRename = (newName: string) => {
+  const onRename = newName => {
     if (newName && newName !== category.name) {
       onSave?.({
         ...category,

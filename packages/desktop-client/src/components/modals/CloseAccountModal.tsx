@@ -114,14 +114,13 @@ export function CloseAccountModal({
       {({ state: { close } }) => (
         <>
           <ModalHeader
-            title={t('Close Account')} // Use translation for title
+            title={t('Close Account')}
             rightContent={<ModalCloseButton onPress={close} />}
           />
           <View>
             <Paragraph>
-              {t('Are you sure you want to close {{accountName}}?', {
-                accountName: account.name,
-              })}{' '}
+              {t('Are you sure you want to close ')}
+              <strong>{account.name}</strong>?{' '}
               {canDelete ? (
                 <span>
                   {t(
@@ -145,10 +144,10 @@ export function CloseAccountModal({
               {balance !== 0 && (
                 <View>
                   <Paragraph>
-                    {t(
-                      'This account has a balance of {{balance}}. To close this account, select a different account to transfer this balance to:',
-                      { balance: integerToCurrency(balance) },
-                    )}
+                    This account has a balance of{' '}
+                    <strong>{integerToCurrency(balance)}</strong>. To close this
+                    account, select a different account to transfer this balance
+                    to:
                   </Paragraph>
 
                   <View style={{ marginBottom: 15 }}>
@@ -156,7 +155,7 @@ export function CloseAccountModal({
                       includeClosedAccounts={false}
                       value={transferAccountId}
                       inputProps={{
-                        placeholder: t('Select account...'), // Use translation for placeholder
+                        placeholder: t('Select account...'),
                         autoFocus: true,
                         ...(isNarrowWidth && {
                           value: transferAccount?.name || '',
@@ -179,8 +178,7 @@ export function CloseAccountModal({
 
                   {transferError && (
                     <FormError style={{ marginBottom: 15 }}>
-                      {t('Transfer is required')}{' '}
-                      {/* Use translation for error message */}
+                      {t('Transfer is required')}
                     </FormError>
                   )}
 
@@ -196,7 +194,7 @@ export function CloseAccountModal({
                         categoryGroups={categoryGroups}
                         value={categoryId}
                         inputProps={{
-                          placeholder: t('Select category...'), // Use translation for placeholder
+                          placeholder: t('Select category...'),
                           ...(isNarrowWidth && {
                             value: category?.name || '',
                             style: {
@@ -217,7 +215,7 @@ export function CloseAccountModal({
                       />
 
                       {categoryError && (
-                        <FormError>{t('Category is required')}</FormError> // Use translation for error message
+                        <FormError>{t('Category is required')}</FormError>
                       )}
                     </View>
                   )}
@@ -227,7 +225,7 @@ export function CloseAccountModal({
               {!canDelete && (
                 <View style={{ marginBottom: 15 }}>
                   <Text style={{ fontSize: 12 }}>
-                    {t('You can also')}
+                    {t('You can also')}{' '}
                     <Link
                       variant="text"
                       onClick={() => {
@@ -238,7 +236,7 @@ export function CloseAccountModal({
                       }}
                       style={{ color: theme.errorText }}
                     >
-                      {t(' force close')}
+                      {t('force close')}
                     </Link>{' '}
                     {t(
                       'the account which will delete it and all its transactions permanently. Doing so may change your budget unexpectedly since money in it may vanish.',

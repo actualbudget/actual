@@ -681,11 +681,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
       header={
         isNarrowWidth ? (
           <MobilePageHeader
-            title={
-              report.name
-                ? t('Custom Report: {{name}}', { name: report.name })
-                : t('Custom Report: Unsaved report')
-            }
+            title={`Custom Report: ${report.name || 'Unsaved report'}`}
             leftContent={<MobileBackButton onPress={onBackClick} />}
           />
         ) : (

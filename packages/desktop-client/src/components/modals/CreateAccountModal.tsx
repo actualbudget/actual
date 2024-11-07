@@ -207,16 +207,16 @@ export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
                 </InitialFocus>
                 <View style={{ lineHeight: '1.4em', fontSize: 15 }}>
                   <Text>
-                    <strong>{t('Create a local account')}</strong>{' '}
+                    <strong>{t('Create a local account')}</strong>
                     {t(
                       'if you want to add transactions manually. You can also',
-                    )}
+                    )}{' '}
                     <Link
                       variant="external"
                       to="https://actualbudget.org/docs/transactions/importing"
                       linkColor="muted"
                     >
-                      {t('import QIF/OFX/QFX files into a local account')}{' '}
+                      {t('import QIF/OFX/QFX files into a local account')}
                     </Link>
                     .
                   </Text>
@@ -245,7 +245,7 @@ export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
                     >
                       {isGoCardlessSetupComplete
                         ? t('Link bank account with GoCardless')
-                        : t('Set up GoCardless for bank sync')}{' '}
+                        : t('Set up GoCardless for bank sync')}
                     </ButtonWithLoading>
                     {isGoCardlessSetupComplete && (
                       <>
@@ -290,7 +290,7 @@ export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
                     </strong>{' '}
                     {t(
                       'to automatically download transactions. GoCardless provides reliable, up-to-date information from hundreds of banks.',
-                    )}{' '}
+                    )}
                   </Text>
 
                   <View
@@ -314,7 +314,7 @@ export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
                     >
                       {isSimpleFinSetupComplete
                         ? t('Link bank account with SimpleFin')
-                        : t('Set up SimpleFin for bank sync')}{' '}
+                        : t('Set up SimpleFin for bank sync')}
                     </ButtonWithLoading>
                     {isSimpleFinSetupComplete && (
                       <>
@@ -374,7 +374,7 @@ export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
                     {t('Set up bank sync')}
                   </Button>
                   <Paragraph style={{ fontSize: 15 }}>
-                    {t('Connect to an Actual server to set up ')}
+                    {t('Connect to an Actual server to set up')}{' '}
                     <Link
                       variant="external"
                       to="https://actualbudget.org/docs/advanced/bank-sync"

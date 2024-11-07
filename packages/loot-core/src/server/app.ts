@@ -1,5 +1,4 @@
 // @ts-strict-ignore
-import { t } from 'i18next';
 import mitt from 'mitt';
 
 import { captureException } from '../platform/exceptions';
@@ -28,9 +27,7 @@ class App<Handlers> {
   ) {
     if (this.handlers[name] != null) {
       throw new Error(
-        t('Conflicting method name, names must be globally unique: {name}', {
-          name,
-        }),
+        'Conflicting method name, names must be globally unique: ' + name,
       );
     }
     this.handlers[name] = func;
@@ -61,7 +58,9 @@ class App<Handlers> {
   startServices() {
     if (this.unlistenServices.length > 0) {
       captureException(
-        new Error(t('Cannot start services because they are already running.')),
+        new Error(
+          'App: startServices called while services are already running',
+        ),
       );
     }
     this.unlistenServices = this.services.map(service => service());
@@ -74,12 +73,6 @@ class App<Handlers> {
       }
     });
     this.unlistenServices = [];
-  }
-
-  validateQIFFile(line: number) {
-    throw new Error(
-      t('File does not appear to be a valid QIF file: {line}', { line }),
-    );
   }
 }
 

@@ -68,7 +68,7 @@ export const GoCardlessInitialiseModal = ({
             <Text>
               {t(
                 'In order to enable bank-sync via GoCardless (only for EU banks) you will need to create access credentials. This can be done by creating an account with',
-              )}
+              )}{' '}
               <Link
                 variant="external"
                 to="https://actualbudget.org/docs/advanced/bank-sync/"

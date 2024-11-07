@@ -31,9 +31,8 @@ export function ConfirmUnlinkAccountModal({
           />
           <View style={{ lineHeight: 1.5 }}>
             <Paragraph>
-              {t('Are you sure you want to unlink {{account}}', {
-                account: <strong>{accountName}</strong>,
-              })}
+              {t('Are you sure you want to unlink')}{' '}
+              <strong>{accountName}</strong>?
             </Paragraph>
 
             <Paragraph>

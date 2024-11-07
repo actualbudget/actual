@@ -20,13 +20,10 @@ import { View } from '../common/View';
 import { PrivacyFilter } from '../PrivacyFilter';
 import { TableHeader, Table, Row, Field } from '../table';
 
-const addOnBudgetAccountOption = {
-  id: 'new-on',
-  name: t('Create new account'),
-};
+const addOnBudgetAccountOption = { id: 'new-on', name: 'Create new account' };
 const addOffBudgetAccountOption = {
   id: 'new-off',
-  name: t('Create new account (off-budget)'),
+  name: 'Create new account (off-budget)',
 };
 
 export function SelectLinkedAccountsModal({

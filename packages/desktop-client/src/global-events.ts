@@ -1,5 +1,4 @@
 // @ts-strict-ignore
-import { t } from 'i18next';
 import { type Store } from 'redux';
 
 import * as sharedListeners from 'loot-core/src/client/shared-listeners';
@@ -112,11 +111,9 @@ export function handleGlobalEvents(actions: BoundActions, store: Store<State>) {
       title: 'Unable to save changes',
       sticky: true,
       message:
-        t('This browser only supports using the app in one tab at a time, ') +
-        t('and another tab has opened the app. No changes will be saved ') +
-        t(
-          'from this tab; please close it and continue working in the other one.',
-        ),
+        'This browser only supports using the app in one tab at a time, ' +
+        'and another tab has opened the app. No changes will be saved ' +
+        'from this tab; please close it and continue working in the other one.',
     });
   });
 

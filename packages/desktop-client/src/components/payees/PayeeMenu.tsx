@@ -1,5 +1,3 @@
-import { t } from 'i18next';
-
 import { type PayeeEntity } from 'loot-core/src/types/models';
 
 import { SvgDelete, SvgMerge } from '../../icons/v0';
@@ -59,7 +57,7 @@ export function PayeeMenu({
           {[...selectedPayees]
             .slice(0, 4)
             .map(id => payeesById[id].name)
-            .join(', ') + (selectedPayees.size > 4 ? t(', and more') : '')}
+            .join(', ') + (selectedPayees.size > 4 ? ', and more' : '')}
         </View>
       }
       items={[
