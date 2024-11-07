@@ -58,8 +58,8 @@ jest.mock('uuid', () => ({
     return 'id' + _id++;
   },
 }));
-jest.mock('../server/migrate/migrations', () => {
-  const realMigrations = jest.requireActual('../server/migrate/migrations');
+jest.mock('../../server/migrate/migrations', () => {
+  const realMigrations = jest.requireActual('../../server/migrate/migrations');
   return {
     ...realMigrations,
     migrate: async db => {
