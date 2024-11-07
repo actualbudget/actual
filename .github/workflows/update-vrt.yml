@@ -80,7 +80,6 @@ jobs:
           name: patch
       - name: Apply patch and push
         run: |
-          git config --system --add safe.directory "*"
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git apply Update-VRT.patch
