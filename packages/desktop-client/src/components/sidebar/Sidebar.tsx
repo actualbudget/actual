@@ -22,7 +22,6 @@ import {
   SvgWallet,
 } from '../../icons/v1';
 import { SvgCalendar } from '../../icons/v2';
-import { useResponsive } from '../../ResponsiveProvider';
 import { styles, theme } from '../../style';
 import { Button } from '../common/Button2';
 import { InitialFocus } from '../common/InitialFocus';
@@ -31,6 +30,7 @@ import { Menu } from '../common/Menu';
 import { Popover } from '../common/Popover';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
+import { useResponsive } from '../responsive/ResponsiveProvider';
 
 import { Accounts } from './Accounts';
 import { PrimaryButtons } from './PrimaryButtons';
