@@ -44,6 +44,7 @@ import {
   type RuleConditionEntity,
   type TransactionEntity,
   type TransactionFilterEntity,
+  RuleEntity,
 } from 'loot-core/src/types/models';
 
 import { useAccounts } from '../../hooks/useAccounts';
@@ -705,6 +706,30 @@ class AccountInternal extends PureComponent<
     return groupById<{ id: string; balance: number }>(data);
   }
 
+  onRunRules = async (ids: string[]) => {
+    // this should be probably inside the onEdit function that the others button are calling
+    // but I'm not sure how to do it and if i'll break anything
+    let transactions = this.state.transactions;
+    for (const transId of ids) {
+      let trans = transactions.find(({ id }) => transId === id);
+      const the_rules = send('payees-get-rules', {
+        id: trans.payee,
+      }).then((the_rules: RuleEntity[]) => {
+        the_rules.forEach((rule: RuleEntity) => {
+          send('rule-apply-actions', {
+            transactions: [trans],
+            actions: rule.actions,
+          }).then(() => {
+            // once rule is applied, fetch the transaction again.
+            // should just update the one that has been updated, but not sure how to do it.
+            // probably via the updateTransaction function ?
+            this.fetchTransactions();
+          });
+        });
+      });
+    }
+
+  };
   onAddTransaction = () => {
     this.setState({ isAdding: true });
   };
@@ -1736,6 +1761,7 @@ class AccountInternal extends PureComponent<
                 onImport={this.onImport}
                 onBatchDelete={this.onBatchDelete}
                 onBatchDuplicate={this.onBatchDuplicate}
+                onRunRules={this.onRunRules}
                 onBatchEdit={this.onBatchEdit}
                 onBatchLinkSchedule={this.onBatchLinkSchedule}
                 onBatchUnlinkSchedule={this.onBatchUnlinkSchedule}

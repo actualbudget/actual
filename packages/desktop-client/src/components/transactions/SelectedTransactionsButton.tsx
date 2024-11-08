@@ -6,11 +6,12 @@ import { useDispatch } from 'react-redux';
 import { pushModal } from 'loot-core/client/actions';
 import { isPreviewId } from 'loot-core/shared/transactions';
 import { validForTransfer } from 'loot-core/src/client/transfer';
-import { type TransactionEntity } from 'loot-core/types/models';
+import { RuleEntity, type TransactionEntity } from 'loot-core/types/models';
 
 import { useSelectedItems } from '../../hooks/useSelected';
 import { Menu } from '../common/Menu';
 import { SelectedItemsButton } from '../table';
+import { send } from 'loot-core/src/platform/client/fetch';
 
 type SelectedTransactionsButtonProps = {
   getTransaction: (id: string) => TransactionEntity | undefined;
@@ -31,6 +32,7 @@ type SelectedTransactionsButtonProps = {
   onLinkSchedule: (selectedIds: string[]) => void;
   onUnlinkSchedule: (selectedIds: string[]) => void;
   onCreateRule: (selectedIds: string[]) => void;
+  onRunRules: (selectedIds: string[]) => void;
   onSetTransfer: (selectedIds: string[]) => void;
   onScheduleAction: (
     action: 'post-transaction' | 'skip',
@@ -50,6 +52,7 @@ export function SelectedTransactionsButton({
   onLinkSchedule,
   onUnlinkSchedule,
   onCreateRule,
+  onRunRules,
   onSetTransfer,
   onScheduleAction,
   showMakeTransfer,
@@ -193,6 +196,10 @@ export function SelectedTransactionsButton({
     onEdit,
     selectedIds,
   ]);
+  useHotkeys('r', () => onRunRules(selectedIds), hotKeyOptions, [
+    onRunRules,
+    selectedIds,
+  ]);
   useHotkeys(
     's',
     () =>
@@ -253,7 +260,13 @@ export function SelectedTransactionsButton({
                       name: 'create-rule',
                       text: t('Create rule'),
                     } as const,
+                    {
+                      name: 'run-rules',
+                      text: t('Run Rules'),
+                      key: 'R',
+                    } as const,
                   ]),
+
               ...(showMakeTransfer
                 ? [
                     {
@@ -324,6 +337,9 @@ export function SelectedTransactionsButton({
             break;
           case 'create-rule':
             onCreateRule(selectedIds);
+            break;
+          case 'run-rules':
+            onRunRules(selectedIds);
             break;
           case 'set-transfer':
             onSetTransfer(selectedIds);
