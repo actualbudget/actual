@@ -576,7 +576,7 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                   <Trans>
                     <Paragraph>
                       <strong>
-                        How are “Average” and “Spent Average MTD” calculated?
+                        How are “Average” and “Spent Average Month to Date (MTD)” calculated?
                       </strong>
                     </Paragraph>
                     <Paragraph>
