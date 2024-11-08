@@ -19,10 +19,10 @@ import { type RuleConditionEntity } from 'loot-core/types/models/rule';
 import { useAccounts } from '../../../../hooks/useAccounts';
 import { useCategories } from '../../../../hooks/useCategories';
 import { useNavigate } from '../../../../hooks/useNavigate';
-import { useResponsive } from '../../../../ResponsiveProvider';
 import { theme } from '../../../../style';
 import { Text } from '../../../common/Text';
 import { View } from '../../../common/View';
+import { useResponsive } from '../../../responsive/ResponsiveProvider';
 import { Row, Cell } from '../../../table';
 import { showActivity } from '../showActivity';
 

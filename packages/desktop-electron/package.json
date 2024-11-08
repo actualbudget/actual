@@ -3,7 +3,7 @@
   "author": "Actual",
   "productName": "Actual",
   "description": "A simple and powerful personal finance system",
-  "version": "24.10.1",
+  "version": "24.11.0",
   "scripts": {
     "clean": "rm -rf dist",
     "update-client": "bin/update-client",
@@ -93,7 +93,6 @@
     "lodash": "^4.17.21",
     "loot-core": "*",
     "fs-extra": "^11.2.0",
-    "node-fetch": "^2.7.0",
     "promise-retry": "^2.0.1"
   },
   "devDependencies": {
