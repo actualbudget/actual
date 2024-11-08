@@ -6,12 +6,11 @@ import { useDispatch } from 'react-redux';
 import { pushModal } from 'loot-core/client/actions';
 import { isPreviewId } from 'loot-core/shared/transactions';
 import { validForTransfer } from 'loot-core/src/client/transfer';
-import { RuleEntity, type TransactionEntity } from 'loot-core/types/models';
+import { type TransactionEntity } from 'loot-core/types/models';
 
 import { useSelectedItems } from '../../hooks/useSelected';
 import { Menu } from '../common/Menu';
 import { SelectedItemsButton } from '../table';
-import { send } from 'loot-core/src/platform/client/fetch';
 
 type SelectedTransactionsButtonProps = {
   getTransaction: (id: string) => TransactionEntity | undefined;

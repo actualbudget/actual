@@ -712,7 +712,7 @@ class AccountInternal extends PureComponent<
     let transactions = this.state.transactions;
     for (const transId of ids) {
       let trans = transactions.find(({ id }) => transId === id);
-      const the_rules = send('payees-get-rules', {
+      send('payees-get-rules', {
         id: trans.payee,
       }).then((the_rules: RuleEntity[]) => {
         the_rules.forEach((rule: RuleEntity) => {
