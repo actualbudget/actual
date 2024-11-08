@@ -3,18 +3,17 @@ import React, {
   useState,
   type ComponentProps,
   type ReactNode,
+  type CSSProperties,
 } from 'react';
-
-import { type CustomReportEntity } from 'loot-core/src/types/models';
 
 import { useIsInViewport } from '../../hooks/useIsInViewport';
 import { useNavigate } from '../../hooks/useNavigate';
-import { useResponsive } from '../../ResponsiveProvider';
-import { type CSSProperties, theme } from '../../style';
+import { theme } from '../../style';
 import { Menu } from '../common/Menu';
 import { MenuButton } from '../common/MenuButton';
 import { Popover } from '../common/Popover';
 import { View } from '../common/View';
+import { useResponsive } from '../responsive/ResponsiveProvider';
 
 import { NON_DRAGGABLE_AREA_CLASS_NAME } from './constants';
 
@@ -22,7 +21,6 @@ type ReportCardProps = {
   isEditing?: boolean;
   to?: string;
   children: ReactNode;
-  report?: CustomReportEntity;
   menuItems?: ComponentProps<typeof Menu>['items'];
   onMenuSelect?: ComponentProps<typeof Menu>['onMenuSelect'];
   size?: number;
@@ -32,7 +30,6 @@ type ReportCardProps = {
 export function ReportCard({
   isEditing,
   to,
-  report,
   menuItems,
   onMenuSelect,
   children,
@@ -98,9 +95,7 @@ export function ReportCard({
       <Layout {...layoutProps}>
         <View
           role="button"
-          onClick={
-            isEditing ? undefined : () => navigate(to, { state: { report } })
-          }
+          onClick={isEditing ? undefined : () => navigate(to)}
           style={{
             height: '100%',
             width: '100%',

@@ -7,6 +7,7 @@ import React, {
 } from 'react';
 import { useDispatch } from 'react-redux';
 
+import { css } from '@emotion/css';
 import { v4 as uuid } from 'uuid';
 
 import {
@@ -37,9 +38,10 @@ import {
 } from 'loot-core/src/shared/util';
 
 import { useDateFormat } from '../../hooks/useDateFormat';
+import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { useSelected, SelectedProvider } from '../../hooks/useSelected';
 import { SvgDelete, SvgAdd, SvgSubtract } from '../../icons/v0';
-import { SvgInformationOutline } from '../../icons/v1';
+import { SvgAlignLeft, SvgCode, SvgInformationOutline } from '../../icons/v1';
 import { styles, theme } from '../../style';
 import { Button } from '../common/Button2';
 import { Menu } from '../common/Menu';
@@ -96,10 +98,10 @@ export function FieldSelect({ fields, style, value, onChange }) {
         options={fields}
         value={value}
         onChange={onChange}
-        style={{
+        className={css({
           color: theme.pageTextPositive,
           '&[data-hovered]': { color: theme.pageTextPositive },
-        }}
+        })}
       />
     </View>
   );
@@ -230,7 +232,15 @@ function ConditionEditor({
   onDelete,
   onAdd,
 }) {
-  const { field: originalField, op, value, type, options, error } = condition;
+  const {
+    field: originalField,
+    op,
+    value,
+    type,
+    options,
+    error,
+    inputKey,
+  } = condition;
 
   let field = originalField;
   if (field === 'amount' && options) {
@@ -245,6 +255,7 @@ function ConditionEditor({
   if (type === 'number' && op === 'isbetween') {
     valueEditor = (
       <BetweenAmountInput
+        key={inputKey}
         defaultValue={value}
         onChange={v => onChange('value', v)}
       />
@@ -252,6 +263,7 @@ function ConditionEditor({
   } else {
     valueEditor = (
       <GenericInput
+        key={inputKey}
         field={field}
         type={type}
         value={value}
@@ -346,6 +358,7 @@ function ScheduleDescription({ id }) {
 const actionFields = [
   'category',
   'payee',
+  'payee_name',
   'notes',
   'cleared',
   'account',
@@ -368,6 +381,16 @@ function ActionEditor({ action, editorStyle, onChange, onDelete, onAdd }) {
     options,
   } = action;
 
+  const templated = options?.template !== undefined;
+
+  // Even if the feature flag is disabled, we still want to be able to turn off templating
+  const actionTemplating = useFeatureFlag('actionTemplating');
+  const isTemplatingEnabled = actionTemplating || templated;
+
+  const fields = (
+    options?.splitIndex ? splitActionFields : actionFields
+  ).filter(([s]) => actionTemplating || !s.includes('_name') || field === s);
+
   return (
     <Editor style={editorStyle} error={error}>
       {op === 'set' ? (
@@ -379,7 +402,7 @@ function ActionEditor({ action, editorStyle, onChange, onDelete, onAdd }) {
           />
 
           <FieldSelect
-            fields={options?.splitIndex ? splitActionFields : actionFields}
+            fields={fields}
             value={field}
             onChange={value => onChange('field', value)}
           />
@@ -388,13 +411,37 @@ function ActionEditor({ action, editorStyle, onChange, onDelete, onAdd }) {
             <GenericInput
               key={inputKey}
               field={field}
-              type={type}
+              type={templated ? 'string' : type}
               op={op}
-              value={value}
+              value={options?.template ?? value}
               onChange={v => onChange('value', v)}
               numberFormatType="currency"
             />
           </View>
+          {/*Due to that these fields have id's as value it is not helpful to have templating here*/}
+          {isTemplatingEnabled &&
+            ['payee', 'category', 'account'].indexOf(field) === -1 && (
+              <Button
+                variant="bare"
+                style={{
+                  padding: 5,
+                }}
+                aria-label={
+                  templated ? 'Disable templating' : 'Enable templating'
+                }
+                onPress={() => onChange('template', !templated)}
+              >
+                {templated ? (
+                  <SvgCode
+                    style={{ width: 12, height: 12, color: 'inherit' }}
+                  />
+                ) : (
+                  <SvgAlignLeft
+                    style={{ width: 12, height: 12, color: 'inherit' }}
+                  />
+                )}
+              </Button>
+            )}
         </>
       ) : op === 'set-split-amount' ? (
         <>
@@ -517,7 +564,7 @@ function StageButton({ selected, children, style, onSelect }) {
 }
 
 function newInput(item) {
-  return { ...item, inputKey: '' + Math.random() };
+  return { ...item, inputKey: uuid() };
 }
 
 function ConditionsList({
@@ -549,6 +596,7 @@ function ConditionsList({
       field,
       op: 'is',
       value: null,
+      inputKey: uuid(),
     });
     onChangeConditions(copy);
   }
@@ -712,7 +760,7 @@ const conditionFields = [
 
 export function EditRuleModal({ defaultRule, onSave: originalOnSave }) {
   const [conditions, setConditions] = useState(
-    defaultRule.conditions.map(parse),
+    defaultRule.conditions.map(parse).map(c => ({ ...c, inputKey: uuid() })),
   );
   const [actionSplits, setActionSplits] = useState(() => {
     const parsedActions = defaultRule.actions.map(parse);
@@ -720,7 +768,7 @@ export function EditRuleModal({ defaultRule, onSave: originalOnSave }) {
       (acc, action) => {
         const splitIndex = action.options?.splitIndex ?? 0;
         acc[splitIndex] = acc[splitIndex] ?? { id: uuid(), actions: [] };
-        acc[splitIndex].actions.push(action);
+        acc[splitIndex].actions.push({ ...action, inputKey: uuid() });
         return acc;
       },
       // The pre-split group is always there
@@ -791,6 +839,7 @@ export function EditRuleModal({ defaultRule, onSave: originalOnSave }) {
         op: 'set-split-amount',
         options: { method: 'remainder', splitIndex },
         value: null,
+        inputKey: uuid(),
       };
     } else {
       const fieldsArray = splitIndex === 0 ? actionFields : splitActionFields;
@@ -805,6 +854,7 @@ export function EditRuleModal({ defaultRule, onSave: originalOnSave }) {
         op: 'set',
         value: null,
         options: { splitIndex },
+        inputKey: uuid(),
       };
     }
 
@@ -821,18 +871,31 @@ export function EditRuleModal({ defaultRule, onSave: originalOnSave }) {
         id,
         actions: updateValue(actions, action, () => {
           const a = { ...action };
+
           if (field === 'method') {
             a.options = { ...a.options, method: value };
+          } else if (field === 'template') {
+            if (value) {
+              a.options = { ...a.options, template: a.value };
+            } else {
+              a.options = { ...a.options, template: undefined };
+              if (a.type !== 'string') a.value = null;
+            }
           } else {
             a[field] = value;
+            if (a.options?.template !== undefined) {
+              a.options.template = value;
+            }
 
             if (field === 'field') {
               a.type = FIELD_TYPES.get(a.field);
               a.value = null;
+              a.options = { ...a.options, template: undefined };
               return newInput(a);
             } else if (field === 'op') {
               a.value = null;
               a.inputKey = '' + Math.random();
+              a.options = { ...a.options, template: undefined };
               return newInput(a);
             }
           }

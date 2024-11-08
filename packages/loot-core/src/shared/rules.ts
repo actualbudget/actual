@@ -61,6 +61,7 @@ const FIELD_INFO = {
     disallowedOps: new Set(['hasTags']),
   },
   payee: { type: 'id' },
+  payee_name: { type: 'string' },
   date: { type: 'date' },
   notes: { type: 'string' },
   amount: { type: 'number' },
@@ -112,6 +113,8 @@ export function mapField(field, opts?) {
   switch (field) {
     case 'imported_payee':
       return 'imported payee';
+    case 'payee_name':
+      return 'payee (name)';
     case 'amount':
       if (opts.inflow) {
         return 'amount (inflow)';
@@ -219,6 +222,8 @@ export function getFieldError(type) {
       return 'Value must be a number';
     case 'invalid-field':
       return 'Please choose a valid field for this type of rule';
+    case 'invalid-template':
+      return 'Invalid handlebars template';
     default:
       return 'Internal error, sorry! Please get in touch https://actualbudget.org/contact/ for support';
   }

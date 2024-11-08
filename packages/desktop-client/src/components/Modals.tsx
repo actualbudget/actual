@@ -37,13 +37,16 @@ import { EnvelopeBudgetMonthMenuModal } from './modals/EnvelopeBudgetMonthMenuMo
 import { EnvelopeBudgetSummaryModal } from './modals/EnvelopeBudgetSummaryModal';
 import { EnvelopeToBudgetMenuModal } from './modals/EnvelopeToBudgetMenuModal';
 import { FixEncryptionKeyModal } from './modals/FixEncryptionKeyModal';
+import { GoalTemplateModal } from './modals/GoalTemplateModal';
 import { GoCardlessExternalMsgModal } from './modals/GoCardlessExternalMsgModal';
 import { GoCardlessInitialiseModal } from './modals/GoCardlessInitialiseModal';
 import { HoldBufferModal } from './modals/HoldBufferModal';
 import { ImportTransactionsModal } from './modals/ImportTransactionsModal';
 import { KeyboardShortcutModal } from './modals/KeyboardShortcutModal';
 import { LoadBackupModal } from './modals/LoadBackupModal';
+import { ConfirmChangeDocumentDirModal } from './modals/manager/ConfirmChangeDocumentDir';
 import { DeleteFileModal } from './modals/manager/DeleteFileModal';
+import { FilesSettingsModal } from './modals/manager/FilesSettingsModal';
 import { ImportActualModal } from './modals/manager/ImportActualModal';
 import { ImportModal } from './modals/manager/ImportModal';
 import { ImportYNAB4Modal } from './modals/manager/ImportYNAB4Modal';
@@ -51,6 +54,7 @@ import { ImportYNAB5Modal } from './modals/manager/ImportYNAB5Modal';
 import { ManageRulesModal } from './modals/ManageRulesModal';
 import { MergeUnusedPayeesModal } from './modals/MergeUnusedPayeesModal';
 import { NotesModal } from './modals/NotesModal';
+import { OutOfSyncMigrationsModal } from './modals/OutOfSyncMigrationsModal';
 import { OpenIDEnableModal } from './modals/OpenIDEnableModal';
 import { PasswordEnableModal } from './modals/PasswordEnableModal';
 import { PayeeAutocompleteModal } from './modals/PayeeAutocompleteModal';
@@ -85,6 +89,9 @@ export function Modals() {
   const modals = modalStack
     .map(({ name, options }) => {
       switch (name) {
+        case 'goal-templates':
+          return budgetId ? <GoalTemplateModal key={name} /> : null;
+
         case 'keyboard-shortcuts':
           // don't show the hotkey help modal when a budget is not open
           return budgetId ? <KeyboardShortcutModal key={name} /> : null;
@@ -578,6 +585,16 @@ export function Modals() {
           return <DeleteFileModal key={name} file={options.file} />;
         case 'import':
           return <ImportModal key={name} />;
+        case 'files-settings':
+          return <FilesSettingsModal key={name} />;
+        case 'confirm-change-document-dir':
+          return (
+            <ConfirmChangeDocumentDirModal
+              key={name}
+              currentBudgetDirectory={options.currentBudgetDirectory}
+              newDirectory={options.newDirectory}
+            />
+          );
         case 'import-ynab4':
           return <ImportYNAB4Modal key={name} />;
         case 'import-ynab5':
@@ -593,6 +610,35 @@ export function Modals() {
               watchUpdates={false}
             />
           );
+        case 'out-of-sync-migrations':
+          return <OutOfSyncMigrationsModal key={name} />;
+
+        case 'edit-access':
+          return (
+            <EditUserAccess
+              key={name}
+              defaultUserAccess={options.access}
+              onSave={options.onSave}
+            />
+          );
+
+        case 'edit-user':
+          return (
+            <EditUserFinanceApp
+              key={name}
+              defaultUser={options.user}
+              onSave={options.onSave}
+            />
+          );
+
+        case 'transfer-ownership':
+          return <TransferOwnership key={name} onSave={options.onSave} />;
+
+        case 'enable-openid':
+          return <OpenIDEnableModal key={name} onSave={options.onSave} />;
+
+        case 'enable-password-auth':
+          return <PasswordEnableModal key={name} onSave={options.onSave} />;
 
         case 'edit-access':
           return (

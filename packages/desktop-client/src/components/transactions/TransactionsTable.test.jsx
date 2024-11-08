@@ -24,7 +24,7 @@ import { integerToCurrency } from 'loot-core/src/shared/util';
 import { AuthProvider } from '../../auth/AuthProvider';
 import { SelectedProviderWithItems } from '../../hooks/useSelected';
 import { SplitsExpandedProvider } from '../../hooks/useSplitsExpanded';
-import { ResponsiveProvider } from '../../ResponsiveProvider';
+import { ResponsiveProvider } from '../responsive/ResponsiveProvider';
 
 import { TransactionTable } from './TransactionsTable';
 
@@ -35,26 +35,29 @@ vi.mock('../../hooks/useFeatureFlag', () => ({
 vi.mock('../../hooks/useSyncedPref', () => ({
   useSyncedPref: vi.fn().mockReturnValue([undefined, vi.fn()]),
 }));
+vi.mock('../../hooks/useFeatureFlag', () => ({
+  useFeatureFlag: () => false,
+}));
 
 const accounts = [generateAccount('Bank of America')];
 const payees = [
   {
     id: 'bob-id',
     name: 'Bob',
-    favorite: true,
+    favorite: 1,
     transfer_acct: null,
     category: null,
   },
   {
     id: 'alice-id',
     name: 'Alice',
-    favorite: true,
+    favorite: 1,
     transfer_acct: null,
     category: null,
   },
   {
     id: 'guy',
-    favorite: false,
+    favorite: 0,
     transfer_acct: null,
     category: null,
     name: 'This guy on the side of the road',

@@ -1,7 +1,7 @@
-import { type ComponentProps } from 'react';
+import { type ComponentProps, useCallback, useEffect, useRef } from 'react';
 import { Popover as ReactAriaPopover } from 'react-aria-components';
 
-import { css } from 'glamor';
+import { css } from '@emotion/css';
 
 import { styles } from '../../style';
 
@@ -12,16 +12,37 @@ export const Popover = ({
   shouldCloseOnInteractOutside,
   ...props
 }: PopoverProps) => {
+  const ref = useRef<HTMLElement>(null);
+
+  const handleFocus = useCallback(
+    (e: FocusEvent) => {
+      if (!ref.current?.contains(e.relatedTarget as Node)) {
+        props.onOpenChange?.(false);
+      }
+    },
+    [props],
+  );
+
+  useEffect(() => {
+    if (!props.isNonModal) return;
+    if (props.isOpen) {
+      ref.current?.addEventListener('focusout', handleFocus);
+    } else {
+      ref.current?.removeEventListener('focusout', handleFocus);
+    }
+  }, [handleFocus, props.isNonModal, props.isOpen]);
+
   return (
     <ReactAriaPopover
+      ref={ref}
       placement="bottom end"
       offset={1}
-      className={`${css({
+      className={css({
         ...styles.tooltip,
         ...styles.lightScrollbar,
         padding: 0,
         ...style,
-      })}`}
+      })}
       shouldCloseOnInteractOutside={element => {
         if (shouldCloseOnInteractOutside) {
           return shouldCloseOnInteractOutside(element);

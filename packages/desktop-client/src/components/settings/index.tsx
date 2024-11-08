@@ -1,16 +1,15 @@
 import React, { type ReactNode, useEffect } from 'react';
 
-import { media } from 'glamor';
+import { css } from '@emotion/css';
 
+import { isElectron } from 'loot-core/shared/environment';
 import { listen } from 'loot-core/src/platform/client/fetch';
-import { isElectron } from 'loot-core/src/shared/environment';
 
 import { useActions } from '../../hooks/useActions';
 import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { useGlobalPref } from '../../hooks/useGlobalPref';
-import { useLatestVersion, useIsOutdated } from '../../hooks/useLatestVersion';
+import { useIsOutdated, useLatestVersion } from '../../hooks/useLatestVersion';
 import { useMetadataPref } from '../../hooks/useMetadataPref';
-import { useResponsive } from '../../ResponsiveProvider';
 import { theme } from '../../style';
 import { tokens } from '../../tokens';
 import { Button } from '../common/Button2';
@@ -21,8 +20,10 @@ import { View } from '../common/View';
 import { FormField, FormLabel } from '../forms';
 import { MOBILE_NAV_HEIGHT } from '../mobile/MobileNavTabs';
 import { Page } from '../Page';
+import { useResponsive } from '../responsive/ResponsiveProvider';
 import { useServerVersion } from '../ServerContext';
 
+import { Backups } from './Backups';
 import { AuthSettings } from './AuthSettings';
 import { BudgetTypeSettings } from './BudgetTypeSettings';
 import { EncryptionSettings } from './Encryption';
@@ -30,7 +31,6 @@ import { ExperimentalFeatures } from './Experimental';
 import { ExportBudget } from './Export';
 import { FixSplits } from './FixSplits';
 import { FormatSettings } from './Format';
-import { GlobalSettings } from './Global';
 import { ResetCache, ResetSync } from './Reset';
 import { ThemeSettings } from './Themes';
 import { AdvancedToggle, Setting } from './UI';
@@ -51,13 +51,15 @@ function About() {
           flexDirection: 'column',
           gap: 10,
         }}
-        className={`${media(`(min-width: ${tokens.breakpoint_small})`, {
-          display: 'grid',
-          gridTemplateRows: '1fr 1fr',
-          gridTemplateColumns: '50% 50%',
-          columnGap: '2em',
-          gridAutoFlow: 'column',
-        })}`}
+        className={css({
+          [`@media (min-width: ${tokens.breakpoint_small})`]: {
+            display: 'grid',
+            gridTemplateRows: '1fr 1fr',
+            gridTemplateColumns: '50% 50%',
+            columnGap: '2em',
+            gridAutoFlow: 'column',
+          },
+        })}
         data-vrt-mask
       >
         <Text>Client version: v{window.Actual?.ACTUAL_VERSION}</Text>
@@ -172,12 +174,12 @@ export function Settings() {
           </View>
         )}
         <About />
-        {isElectron() && <GlobalSettings />}
         <ThemeSettings />
         <FormatSettings />
         <AuthSettings />
         <EncryptionSettings />
         {useFeatureFlag('reportBudget') && <BudgetTypeSettings />}
+        {isElectron() && <Backups />}
         <ExportBudget />
         <AdvancedToggle>
           <AdvancedAbout />

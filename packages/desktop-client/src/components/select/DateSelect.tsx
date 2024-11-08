@@ -1,5 +1,6 @@
 // @ts-strict-ignore
 import React, {
+  type CSSProperties,
   forwardRef,
   useEffect,
   useImperativeHandle,
@@ -12,6 +13,7 @@ import React, {
   type MutableRefObject,
 } from 'react';
 
+import { css } from '@emotion/css';
 import { parse, parseISO, format, subDays, addDays, isValid } from 'date-fns';
 import Pikaday from 'pikaday';
 
@@ -24,7 +26,6 @@ import {
   getShortYearRegex,
   currentDate,
 } from 'loot-core/src/shared/months';
-import { stringToInteger } from 'loot-core/src/shared/util';
 
 import { useSyncedPref } from '../../hooks/useSyncedPref';
 import { styles, theme } from '../../style';
@@ -35,7 +36,7 @@ import { View } from '../common/View';
 import DateSelectLeft from './DateSelect.left.png';
 import DateSelectRight from './DateSelect.right.png';
 
-const pickerStyles = {
+const pickerStyles: CSSProperties = {
   '& .pika-single.actual-date-picker': {
     color: theme.calendarText,
     background: theme.calendarBackground,
@@ -134,7 +135,7 @@ const DatePicker = forwardRef<DatePickerForwardedRef, DatePickerProps>(
       picker.current = new Pikaday({
         theme: 'actual-date-picker',
         keyboardInput: false,
-        firstDay: stringToInteger(firstDayOfWeekIdx),
+        firstDay: parseInt(firstDayOfWeekIdx),
         defaultDate: value
           ? parse(value, dateFormat, currentDate())
           : currentDate(),
@@ -161,7 +162,12 @@ const DatePicker = forwardRef<DatePickerForwardedRef, DatePickerProps>(
       }
     }, [value, dateFormat]);
 
-    return <View style={{ ...pickerStyles, flex: 1 }} innerRef={mountPoint} />;
+    return (
+      <View
+        className={css([pickerStyles, { flex: 1 }])}
+        innerRef={mountPoint}
+      />
+    );
   },
 );
 

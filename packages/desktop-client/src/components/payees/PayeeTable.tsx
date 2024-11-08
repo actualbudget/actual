@@ -12,7 +12,7 @@ import { type PayeeEntity } from 'loot-core/src/types/models';
 
 import { useSelectedItems } from '../../hooks/useSelected';
 import { View } from '../common/View';
-import { Table, type TableNavigator } from '../table';
+import { useTableNavigator, Table } from '../table';
 
 import { PayeeTableRow } from './PayeeTableRow';
 
@@ -23,10 +23,9 @@ type PayeeWithId = PayeeEntity & Required<Pick<PayeeEntity, 'id'>>;
 type PayeeTableProps = {
   payees: PayeeWithId[];
   ruleCounts: Map<PayeeWithId['id'], number>;
-  navigator: TableNavigator<PayeeWithId>;
 } & Pick<
   ComponentProps<typeof PayeeTableRow>,
-  'onUpdate' | 'onViewRules' | 'onCreateRule'
+  'onUpdate' | 'onDelete' | 'onViewRules' | 'onCreateRule'
 >;
 
 export const PayeeTable = forwardRef<
@@ -34,7 +33,7 @@ export const PayeeTable = forwardRef<
   PayeeTableProps
 >(
   (
-    { payees, ruleCounts, navigator, onUpdate, onViewRules, onCreateRule },
+    { payees, ruleCounts, onUpdate, onDelete, onViewRules, onCreateRule },
     ref,
   ) => {
     const [hovered, setHovered] = useState(null);
@@ -45,19 +44,24 @@ export const PayeeTable = forwardRef<
       if (typeof ref !== 'function') {
         ref.current.scrollTo(firstSelected, 'center');
       }
-      navigator.onEdit(firstSelected, 'select');
     }, []);
 
     const onHover = useCallback(id => {
       setHovered(id);
     }, []);
 
+    const tableNavigator = useTableNavigator(payees, item =>
+      item.transfer_acct == null
+        ? ['select', 'name', 'rule-count']
+        : ['rule-count'],
+    );
+
     return (
       <View style={{ flex: 1 }} onMouseLeave={() => setHovered(null)}>
         <Table
+          navigator={tableNavigator}
           ref={ref}
           items={payees}
-          navigator={navigator}
           renderItem={({ item, editing, focusedField, onEdit }) => {
             return (
               <PayeeTableRow
@@ -70,6 +74,7 @@ export const PayeeTable = forwardRef<
                 onHover={onHover}
                 onEdit={onEdit}
                 onUpdate={onUpdate}
+                onDelete={onDelete}
                 onViewRules={onViewRules}
                 onCreateRule={onCreateRule}
               />

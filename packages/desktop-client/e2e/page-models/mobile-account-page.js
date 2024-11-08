@@ -6,9 +6,9 @@ export class MobileAccountPage {
 
     this.heading = page.getByRole('heading');
     this.balance = page.getByTestId('transactions-balance');
-    this.noTransactionsFoundError = page.getByText('No transactions');
+    this.noTransactionsMessage = page.getByText('No transactions');
     this.searchBox = page.getByPlaceholder(/^Search/);
-    this.transactionList = page.getByLabel('transaction list');
+    this.transactionList = page.getByLabel('Transaction list');
     this.transactions = this.transactionList.getByRole('button');
     this.createTransactionButton = page.getByRole('button', {
       name: 'Add Transaction',

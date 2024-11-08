@@ -30,7 +30,6 @@ import {
 import { useActions } from '../hooks/useActions';
 import { useMetadataPref } from '../hooks/useMetadataPref';
 import { installPolyfills } from '../polyfills';
-import { ResponsiveProvider } from '../ResponsiveProvider';
 import { styles, hasHiddenScrollbars, ThemeStyle, useTheme } from '../style';
 import { ExposeNavigate } from '../util/router-tools';
 
@@ -42,6 +41,7 @@ import { FatalError } from './FatalError';
 import { FinancesApp } from './FinancesApp';
 import { ManagementApp } from './manager/ManagementApp';
 import { Modals } from './Modals';
+import { ResponsiveProvider } from './responsive/ResponsiveProvider';
 import { ScrollProvider } from './ScrollProvider';
 import { SidebarProvider } from './sidebar/SidebarProvider';
 import { UpdateNotification } from './UpdateNotification';
@@ -55,8 +55,20 @@ function AppInner() {
   const userData = useSelector((state: State) => state.user.data);
   const { signOut, addNotification } = useActions();
 
+  const maybeUpdate = async <T,>(cb?: () => T): Promise<T> => {
+    if (global.Actual.isUpdateReadyForDownload()) {
+      dispatch(
+        setAppState({
+          loadingText: t('Downloading and applying update...'),
+        }),
+      );
+      await global.Actual.applyAppUpdate();
+    }
+    return cb?.();
+  };
+
   async function init() {
-    const socketName = await global.Actual.getServerSocket();
+    const socketName = await maybeUpdate(() => global.Actual.getServerSocket());
 
     dispatch(
       setAppState({
@@ -90,14 +102,16 @@ function AppInner() {
           loadingText: t('Retrieving remote files...'),
         }),
       );
-      send('get-remote-files').then(files => {
-        if (files) {
-          const remoteFile = files.find(f => f.fileId === cloudFileId);
-          if (remoteFile && remoteFile.deleted) {
-            dispatch(closeBudget());
-          }
+
+      const files = await send('get-remote-files');
+      if (files) {
+        const remoteFile = files.find(f => f.fileId === cloudFileId);
+        if (remoteFile && remoteFile.deleted) {
+          dispatch(closeBudget());
         }
-      });
+      }
+
+      await maybeUpdate();
     }
   }
 

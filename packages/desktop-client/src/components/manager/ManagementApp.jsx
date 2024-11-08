@@ -11,7 +11,6 @@ import {
 import { ProtectedRoute } from '../../auth/ProtectedRoute';
 import { Permissions } from '../../auth/types';
 import { useMetaThemeColor } from '../../hooks/useMetaThemeColor';
-import { useResponsive } from '../../ResponsiveProvider';
 import { theme } from '../../style';
 import { tokens } from '../../tokens';
 import {
@@ -23,6 +22,7 @@ import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { LoggedInUser } from '../LoggedInUser';
 import { Notifications } from '../Notifications';
+import { useResponsive } from '../responsive/ResponsiveProvider';
 import { useMultiuserEnabled, useServerVersion } from '../ServerContext';
 
 import { BudgetList } from './BudgetList';

@@ -3,18 +3,16 @@ import React, {
   useMemo,
   type ComponentPropsWithoutRef,
   type ReactNode,
+  type CSSProperties,
 } from 'react';
-import {
-  type ButtonRenderProps as ReactAriaButtonRenderProps,
-  Button as ReactAriaButton,
-} from 'react-aria-components';
+import { Button as ReactAriaButton } from 'react-aria-components';
 
-import { css } from 'glamor';
+import { css } from '@emotion/css';
 
 import { useAuth } from '../../auth/AuthProvider';
 import { type Permissions } from '../../auth/types';
 import { AnimatedLoading } from '../../icons/AnimatedLoading';
-import { type CSSProperties, styles, theme } from '../../style';
+import { styles, theme } from '../../style';
 
 import { View } from './View';
 

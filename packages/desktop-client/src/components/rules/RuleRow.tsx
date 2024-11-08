@@ -1,15 +1,19 @@
 // @ts-strict-ignore
-import React, { memo } from 'react';
+import React, { memo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { v4 as uuid } from 'uuid';
 
 import { friendlyOp } from 'loot-core/src/shared/rules';
 import { type RuleEntity } from 'loot-core/src/types/models';
 
+import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { useSelectedDispatch } from '../../hooks/useSelected';
 import { SvgRightArrow2 } from '../../icons/v0';
 import { styles, theme } from '../../style';
 import { Button } from '../common/Button2';
+import { Menu } from '../common/Menu';
+import { Popover } from '../common/Popover';
 import { Stack } from '../common/Stack';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
@@ -24,10 +28,18 @@ type RuleRowProps = {
   selected?: boolean;
   onHover?: (id: string | null) => void;
   onEditRule?: (rule: RuleEntity) => void;
+  onDeleteRule?: (rule: RuleEntity) => void;
 };
 
 export const RuleRow = memo(
-  ({ rule, hovered, selected, onHover, onEditRule }: RuleRowProps) => {
+  ({
+    rule,
+    hovered,
+    selected,
+    onHover,
+    onEditRule,
+    onDeleteRule,
+  }: RuleRowProps) => {
     const dispatchSelected = useSelectedDispatch();
     const borderColor = selected ? theme.tableBorderSelected : 'none';
     const backgroundFocus = hovered;
@@ -43,8 +55,19 @@ export const RuleRow = memo(
     );
     const hasSplits = actionSplits.length > 1;
 
+    const hasSchedule = rule.actions.some(({ op }) => op === 'link-schedule');
+
+    const { t } = useTranslation();
+
+    const triggerRef = useRef(null);
+    const [menuOpen, setMenuOpen] = useState(false);
+    const [crossOffset, setCrossOffset] = useState(0);
+    const [offset, setOffset] = useState(0);
+    const contextMenusEnabled = useFeatureFlag('contextMenus');
+
     return (
       <Row
+        ref={triggerRef}
         height="auto"
         style={{
           fontSize: 13,
@@ -59,7 +82,46 @@ export const RuleRow = memo(
         collapsed={true}
         onMouseEnter={() => onHover && onHover(rule.id)}
         onMouseLeave={() => onHover && onHover(null)}
+        onContextMenu={e => {
+          if (!contextMenusEnabled) return;
+          e.preventDefault();
+          setMenuOpen(true);
+          const rect = triggerRef.current.getBoundingClientRect();
+          setCrossOffset(e.clientX - rect.left);
+          setOffset(e.clientY - rect.bottom);
+        }}
       >
+        <Popover
+          triggerRef={triggerRef}
+          placement="bottom start"
+          isOpen={menuOpen}
+          onOpenChange={() => setMenuOpen(false)}
+          crossOffset={crossOffset}
+          offset={offset}
+          style={{ width: 200, margin: 1 }}
+          isNonModal
+        >
+          <Menu
+            items={[
+              onEditRule && { name: 'edit', text: t('Edit') },
+              onDeleteRule &&
+                !hasSchedule && { name: 'delete', text: t('Delete') },
+            ]}
+            onMenuSelect={name => {
+              switch (name) {
+                case 'delete':
+                  onDeleteRule(rule);
+                  break;
+                case 'edit':
+                  onEditRule(rule);
+                  break;
+                default:
+                  throw new Error(`Unrecognized menu option: ${name}`);
+              }
+              setMenuOpen(false);
+            }}
+          />
+        </Popover>
         <SelectCell
           exposed={hovered || selected}
           focused={true}

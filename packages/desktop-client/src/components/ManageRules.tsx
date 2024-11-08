@@ -117,17 +117,14 @@ export function ManageRules({
   const { list: categories } = useCategories();
   const payees = usePayees();
   const accounts = useAccounts();
-  const state = {
-    payees,
-    accounts,
-    schedules,
-  };
   const filterData = useMemo(
     () => ({
-      ...state,
+      payees,
+      accounts,
+      schedules,
       categories,
     }),
-    [state, categories],
+    [payees, accounts, schedules, categories],
   );
 
   const filteredRules = useMemo(
@@ -204,6 +201,13 @@ export function ManageRules({
 
     await loadRules();
     selectedInst.dispatch({ type: 'select-none' });
+    setLoading(false);
+  }
+
+  async function onDeleteRule(id: string) {
+    setLoading(true);
+    await send('rule-delete', id);
+    await loadRules();
     setLoading(false);
   }
 
@@ -309,6 +313,7 @@ export function ManageRules({
                 hoveredRule={hoveredRule}
                 onHover={onHover}
                 onEditRule={onEditRule}
+                onDeleteRule={rule => onDeleteRule(rule.id)}
               />
             )}
           </SimpleTable>

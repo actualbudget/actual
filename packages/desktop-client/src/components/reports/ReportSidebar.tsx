@@ -14,6 +14,7 @@ import { Button } from '../common/Button2';
 import { Menu } from '../common/Menu';
 import { Popover } from '../common/Popover';
 import { Select, type SelectOption } from '../common/Select';
+import { SpaceBetween } from '../common/SpaceBetween';
 import { Text } from '../common/Text';
 import { Tooltip } from '../common/Tooltip';
 import { View } from '../common/View';
@@ -50,13 +51,7 @@ type ReportSidebarProps = {
     dateEnd: string,
     mode: TimeFrame['mode'],
   ) => void;
-  onReportChange: ({
-    savedReport,
-    type,
-  }: {
-    savedReport?: CustomReportEntity;
-    type: string;
-  }) => void;
+  onReportChange: ({ type }: { type: 'modify' }) => void;
   disabledItems: (type: string) => string[];
   defaultItems: (item: string) => void;
   defaultModeItems: (graph: string, item: string) => void;
@@ -177,16 +172,13 @@ export function ReportSidebar({
             <strong>Display</strong>
           </Text>
         </View>
-        <View
+        <SpaceBetween
+          gap={5}
           style={{
-            flexDirection: 'row',
             padding: 5,
-            alignItems: 'center',
           }}
         >
-          <Text style={{ width: 50, textAlign: 'right', marginRight: 5 }}>
-            Mode:
-          </Text>
+          <Text style={{ width: 50, textAlign: 'right' }}>Mode:</Text>
           <ModeButton
             selected={customReportItems.mode === 'total'}
             onSelect={() => onChangeMode('total')}
@@ -199,7 +191,7 @@ export function ReportSidebar({
           >
             Time
           </ModeButton>
-        </View>
+        </SpaceBetween>
         <View
           style={{
             flexDirection: 'row',
@@ -394,12 +386,11 @@ export function ReportSidebar({
             flexShrink: 0,
           }}
         />
-        <View
+        <SpaceBetween
+          gap={5}
           style={{
-            flexDirection: 'row',
             marginTop: 10,
             marginBottom: 5,
-            alignItems: 'center',
           }}
         >
           <Text>
@@ -430,7 +421,7 @@ export function ReportSidebar({
           >
             Static
           </ModeButton>
-        </View>
+        </SpaceBetween>
         {!customReportItems.isDateStatic ? (
           <View
             style={{

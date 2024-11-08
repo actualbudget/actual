@@ -15,6 +15,19 @@ function throwIfNot200(res, text) {
       const json = JSON.parse(text);
       throw new PostError(json.reason);
     }
+
+    // Actual Sync Server may be exposed via a tunnel (e.g. ngrok). Tunnel errors should be treated as network errors.
+    const tunnelErrorHeaders = ['ngrok-error-code'];
+    const tunnelError = tunnelErrorHeaders.some(header =>
+      res.headers.has(header),
+    );
+
+    if (tunnelError) {
+      // Tunnel errors are present when the tunnel is active and the server is not reachable e.g. server is offline
+      // When we experience a tunnel error we treat it as a network failure
+      throw new PostError('network-failure');
+    }
+
     throw new PostError(text);
   }
 }

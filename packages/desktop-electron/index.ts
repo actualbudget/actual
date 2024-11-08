@@ -1,5 +1,4 @@
 import fs from 'fs';
-import Module from 'module';
 import path from 'path';
 
 import {
@@ -16,8 +15,10 @@ import {
   UtilityProcess,
   OpenDialogSyncOptions,
   SaveDialogOptions,
+  Env,
+  ForkOptions,
 } from 'electron';
-import isDev from 'electron-is-dev';
+import { copy, exists, remove } from 'fs-extra';
 import promiseRetry from 'promise-retry';
 
 import { getMenu } from './menu';
@@ -28,7 +29,11 @@ import {
 
 import './security';
 
-Module.globalPaths.push(__dirname + '/..');
+const isDev = !app.isPackaged; // dev mode if not packaged
+
+process.env.lootCoreScript = isDev
+  ? 'loot-core/lib-dist/bundle.desktop.js' // serve from local output in development (provides hot-reloading)
+  : path.resolve(__dirname, 'loot-core/lib-dist/bundle.desktop.js'); // serve from build in production
 
 // This allows relative URLs to be resolved to app:// which makes
 // local assets load correctly
@@ -53,11 +58,49 @@ if (isDev) {
   process.traceProcessWarnings = true;
 }
 
-function createBackgroundProcess() {
+async function loadGlobalPrefs() {
+  let state: { [key: string]: unknown } | undefined = undefined;
+  try {
+    state = JSON.parse(
+      fs.readFileSync(
+        path.join(process.env.ACTUAL_DATA_DIR!, 'global-store.json'),
+        'utf8',
+      ),
+    );
+  } catch (e) {
+    console.info('Could not load global state - using defaults'); // This could be the first time running the app - no global-store.json
+    state = {};
+  }
+
+  return state;
+}
+
+async function createBackgroundProcess() {
+  const globalPrefs = await loadGlobalPrefs(); // ensures we have the latest settings - even when restarting the server
+  let envVariables: Env = {
+    ...process.env, // required
+  };
+
+  if (globalPrefs?.['server-self-signed-cert']) {
+    envVariables = {
+      ...envVariables,
+      NODE_EXTRA_CA_CERTS: globalPrefs?.['server-self-signed-cert'], // add self signed cert to env - fetch can pick it up
+    };
+  }
+
+  let forkOptions: ForkOptions = {
+    stdio: 'pipe',
+    env: envVariables,
+  };
+
+  if (isDev) {
+    forkOptions = { ...forkOptions, execArgv: ['--inspect'] };
+  }
+
   serverProcess = utilityProcess.fork(
     __dirname + '/server.js',
     ['--subprocess', app.getVersion()],
-    isDev ? { execArgv: ['--inspect'], stdio: 'pipe' } : { stdio: 'pipe' },
+    forkOptions,
   );
 
   serverProcess.stdout?.on('data', (chunk: Buffer) => {
@@ -143,7 +186,9 @@ async function createWindow() {
     if (clientWin) {
       const url = clientWin.webContents.getURL();
       if (url.includes('app://') || url.includes('localhost:')) {
-        clientWin.webContents.executeJavaScript('__actionsForMenu.focused()');
+        clientWin.webContents.executeJavaScript(
+          'window.__actionsForMenu.focused()',
+        );
       }
     }
   });
@@ -399,3 +444,32 @@ ipcMain.on('set-theme', (_event, theme: string) => {
     );
   }
 });
+
+ipcMain.handle(
+  'move-budget-directory',
+  async (_event, currentBudgetDirectory: string, newDirectory: string) => {
+    try {
+      if (!currentBudgetDirectory || !newDirectory) {
+        throw new Error('The from and to directories must be provided');
+      }
+
+      if (newDirectory.startsWith(currentBudgetDirectory)) {
+        throw new Error(
+          'The destination must not be a subdirectory of the current directory',
+        );
+      }
+
+      if (!(await exists(newDirectory))) {
+        throw new Error('The destination directory does not exist');
+      }
+
+      await copy(currentBudgetDirectory, newDirectory, {
+        overwrite: true,
+      });
+      await remove(currentBudgetDirectory);
+    } catch (error) {
+      console.error('There was an error moving your directory', error);
+      throw error;
+    }
+  },
+);

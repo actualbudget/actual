@@ -1,5 +1,6 @@
 // @ts-strict-ignore
 import React, { useState, useEffect } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 import { useSearchParams } from 'react-router-dom';
 
@@ -189,6 +190,8 @@ function HeaderLogin({ error }) {
 }
 
 export function Login() {
+  const { t } = useTranslation();
+
   const dispatch = useDispatch();
   const defaultLoginMethod = useLoginMethod();
   const [method, setMethod] = useState(defaultLoginMethod);
@@ -240,7 +243,7 @@ export function Login() {
 
   return (
     <View style={{ maxWidth: 450, marginTop: -30, color: theme.pageText }}>
-      <Title text="Sign in to this Actual instance" />
+      <Title text={t('Sign in to this Actual instance')} />
 
       {loginMethods.length > 1 && (
         <Text
@@ -251,9 +254,11 @@ export function Login() {
             marginBottom: 10,
           }}
         >
+          <Trans>
           If you lost your password, you likely still have access to your server
-          to manually reset it.
-        </Text>
+            to manually reset it.
+          </Trans>
+      </Text>
       )}
 
       {loginMethods.length > 1 && (

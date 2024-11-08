@@ -18,7 +18,10 @@ import {
   loadBudget,
   pushModal,
 } from 'loot-core/client/actions';
-import { isNonProductionEnvironment } from 'loot-core/src/shared/environment';
+import {
+  isElectron,
+  isNonProductionEnvironment,
+} from 'loot-core/src/shared/environment';
 import {
   type RemoteFile,
   type File,
@@ -33,13 +36,13 @@ import { AnimatedLoading } from '../../icons/AnimatedLoading';
 import {
   SvgCloudCheck,
   SvgCloudDownload,
+  SvgCog,
   SvgDotsHorizontalTriple,
   SvgFileDouble,
   SvgUser,
   SvgUserGroup,
 } from '../../icons/v1';
 import { SvgCloudUnknown, SvgKey, SvgRefreshArrow } from '../../icons/v2';
-import { useResponsive } from '../../ResponsiveProvider';
 import { styles, theme } from '../../style';
 import { tokens } from '../../tokens';
 import { Button } from '../common/Button2';
@@ -48,6 +51,7 @@ import { Popover } from '../common/Popover';
 import { Text } from '../common/Text';
 import { Tooltip } from '../common/Tooltip';
 import { View } from '../common/View';
+import { useResponsive } from '../responsive/ResponsiveProvider';
 import { useMultiuserEnabled } from '../ServerContext';
 
 function getFileDescription(file: File, t: (key: string) => string) {
@@ -93,24 +97,8 @@ function FileMenu({
   const { t } = useTranslation();
 
   const items = [{ name: 'delete', text: t('Delete') }];
-  const { isNarrowWidth } = useResponsive();
 
-  const defaultMenuItemStyle = isNarrowWidth
-    ? {
-        ...styles.mobileMenuItem,
-        color: theme.menuItemText,
-        borderRadius: 0,
-        borderTop: `1px solid ${theme.pillBorder}`,
-      }
-    : {};
-
-  return (
-    <Menu
-      getItemStyle={() => defaultMenuItemStyle}
-      onMenuSelect={onMenuSelect}
-      items={items}
-    />
-  );
+  return <Menu onMenuSelect={onMenuSelect} items={items} />;
 }
 
 function FileMenuButton({ onDelete }: { onDelete: () => void }) {
@@ -279,28 +267,31 @@ function FileItem({
   }
 
   return (
-    <View
-      onClick={() => _onSelect(file)}
-      title={getFileDescription(file, t) || ''}
+    <Button
+      onPress={() => _onSelect(file)}
       style={{
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
         ...styles.shadow,
         margin: 10,
         padding: '12px 15px',
-        backgroundColor: theme.buttonNormalBackground,
-        borderRadius: 6,
-        flexShrink: 0,
         cursor: 'pointer',
-        ':hover': {
-          backgroundColor: theme.menuItemBackgroundHover,
-        },
+        borderRadius: 6,
+        borderColor: 'transparent',
       }}
     >
-      <View style={{ alignItems: 'flex-start', width: '100%' }}>
-        <View style={{ flexDirection: 'row', width: '100%' }}>
-          <Text style={{ fontSize: 16, fontWeight: 700 }}>{file.name}</Text>
+      <View
+        style={{
+          flexDirection: 'row',
+          flex: 1,
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}
+      >
+        <View
+          title={getFileDescription(file, t) || ''}
+          style={{ alignItems: 'flex-start', width: '100%' }}>
+        <View style={{ flexDirection: 'row', width: '100%' }}
+        >
+            <Text style={{ fontSize: 16, fontWeight: 700 }}>{file.name}</Text>
           {multiuserEnabled && (
             <UserAccessForFile
               fileId={(file as RemoteFile).cloudFileId}
@@ -312,25 +303,32 @@ function FileItem({
         <FileState file={file} currentUserId={currentUserId} />
       </View>
 
-      <View
-        style={{ flex: '0 0 auto', flexDirection: 'row', alignItems: 'center' }}
-      >
-        {file.encryptKeyId && (
-          <SvgKey
-            style={{
-              width: 13,
-              height: 13,
-              marginRight: 8,
-              color: file.hasKey
-                ? theme.formLabelText
-                : theme.buttonNormalDisabledText,
-            }}
-          />
-        )}
+        <View
+          style={{
+            flex: '0 0 auto',
+            flexDirection: 'row',
+            alignItems: 'center',
+          }}
+        >
+          {file.encryptKeyId && (
+            <SvgKey
+              style={{
+                width: 13,
+                height: 13,
+                marginRight: 8,
+                color: file.hasKey
+                  ? theme.formLabelText
+                  : theme.buttonNormalDisabledText,
+              }}
+            />
+          )}
 
-        {!quickSwitchMode && <FileMenuButton onDelete={() => onDelete(file)} />}
+          {!quickSwitchMode && (
+            <FileMenuButton onDelete={() => onDelete(file)} />
+          )}
+        </View>
       </View>
-    </View>
+    </Button>
   );
 }
 
@@ -414,12 +412,33 @@ function RefreshButton({
   );
 }
 
+function SettingsButton({ onOpenSettings }: { onOpenSettings: () => void }) {
+  const { t } = useTranslation();
+
+  return (
+    <View>
+      <Button
+        variant="bare"
+        aria-label={t('Settings')}
+        onPress={() => {
+          onOpenSettings();
+        }}
+        style={{ padding: 10 }}
+      >
+        <SvgCog style={{ width: 18, height: 18 }} />
+      </Button>
+    </View>
+  );
+}
+
 function BudgetListHeader({
   quickSwitchMode,
   onRefresh,
+  onOpenSettings,
 }: {
   quickSwitchMode: boolean;
   onRefresh: () => void;
+  onOpenSettings: () => void;
 }) {
   return (
     <View
@@ -436,7 +455,17 @@ function BudgetListHeader({
       >
         <Trans>Files</Trans>
       </Text>
-      {!quickSwitchMode && <RefreshButton onRefresh={onRefresh} />}
+      {!quickSwitchMode && (
+        <View
+          style={{
+            flexDirection: 'row',
+            gap: '0.2rem',
+          }}
+        >
+          <RefreshButton onRefresh={onRefresh} />
+          {isElectron() && <SettingsButton onOpenSettings={onOpenSettings} />}
+        </View>
+      )}
     </View>
   );
 }
@@ -534,6 +563,7 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
         <BudgetListHeader
           quickSwitchMode={quickSwitchMode}
           onRefresh={refresh}
+          onOpenSettings={() => dispatch(pushModal('files-settings'))}
         />
       )}
       <BudgetFiles

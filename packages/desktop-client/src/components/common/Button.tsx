@@ -1,11 +1,16 @@
-import React, { forwardRef, type ElementType, type HTMLProps } from 'react';
+import React, {
+  forwardRef,
+  type ElementType,
+  type HTMLProps,
+  type CSSProperties,
+} from 'react';
 
-import { css } from 'glamor';
+import { css } from '@emotion/css';
 
 import { useAuth } from '../../auth/AuthProvider';
 import { type Permissions } from '../../auth/types';
 import { AnimatedLoading } from '../../icons/AnimatedLoading';
-import { type CSSProperties, styles, theme } from '../../style';
+import { styles, theme } from '../../style';
 
 import { View } from './View';
 
@@ -159,7 +164,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     };
 
     const Component = as;
-    const buttonStyle = {
+    const buttonStyle: CSSProperties = {
       alignItems: 'center',
       justifyContent: 'center',
       flexShrink: 0,
@@ -174,8 +179,8 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       transition: 'box-shadow .25s',
       WebkitAppRegion: 'no-drag',
       ...styles.smallText,
-      ':hover': !disabled && hoveredStyle,
-      ':active': !disabled && activeStyle,
+      ':hover': !disabled ? hoveredStyle : {},
+      ':active': !disabled ? activeStyle : {},
       ...(hover && hoveredStyle),
       ...(pressed && activeStyle),
       ...style,
@@ -185,8 +190,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       <Component
         ref={ref}
         {...(typeof as === 'string'
-          ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            (css(buttonStyle) as any)
+          ? { className: css(buttonStyle) }
           : { style: buttonStyle })}
         disabled={disabled ? disabled : !hasPermission(permission)}
         type={isSubmit ? 'submit' : 'button'}

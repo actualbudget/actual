@@ -1,5 +1,4 @@
 import { type ComponentProps, type ReactNode } from 'react';
-import { useLocation } from 'react-router-dom';
 
 import * as monthUtils from 'loot-core/src/shared/months';
 import {
@@ -8,12 +7,13 @@ import {
 } from 'loot-core/types/models';
 
 import { useFeatureFlag } from '../../hooks/useFeatureFlag';
-import { useResponsive } from '../../ResponsiveProvider';
 import { Button } from '../common/Button2';
 import { Select } from '../common/Select';
+import { SpaceBetween } from '../common/SpaceBetween';
 import { View } from '../common/View';
 import { AppliedFilters } from '../filters/AppliedFilters';
 import { FilterButton } from '../filters/FiltersMenu';
+import { useResponsive } from '../responsive/ResponsiveProvider';
 
 import {
   calculateTimeRange,
@@ -61,27 +61,23 @@ export function Header({
   children,
 }: HeaderProps) {
   const isDashboardsFeatureEnabled = useFeatureFlag('dashboards');
-  const location = useLocation();
-  const path = location.pathname;
   const { isNarrowWidth } = useResponsive();
 
   return (
     <View
       style={{
         padding: 20,
-        paddingTop: 0,
+        paddingTop: 15,
         flexShrink: 0,
       }}
     >
-      {!['/reports/custom'].includes(path) && (
-        <View
-          style={{
-            flexDirection: isNarrowWidth ? 'column' : 'row',
-            alignItems: isNarrowWidth ? 'flex-start' : 'center',
-            marginTop: 15,
-            gap: 15,
-          }}
-        >
+      <SpaceBetween
+        direction={isNarrowWidth ? 'vertical' : 'horizontal'}
+        style={{
+          alignItems: isNarrowWidth ? 'flex-start' : 'center',
+        }}
+      >
+        <SpaceBetween gap={isNarrowWidth ? 5 : undefined}>
           {isDashboardsFeatureEnabled && mode && (
             <Button
               variant={mode === 'static' ? 'normal' : 'primary'}
@@ -100,13 +96,7 @@ export function Header({
             </Button>
           )}
 
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              gap: 5,
-            }}
-          >
+          <SpaceBetween gap={5}>
             <Select
               onChange={newValue =>
                 onChangeDates(
@@ -136,78 +126,72 @@ export function Header({
               options={allMonths.map(({ name, pretty }) => [name, pretty])}
               style={{ marginRight: 10 }}
             />
-          </View>
+          </SpaceBetween>
+        </SpaceBetween>
 
+        <SpaceBetween>
+          {show1Month && (
+            <Button
+              variant="bare"
+              onPress={() => onChangeDates(...getLatestRange(1))}
+            >
+              1 month
+            </Button>
+          )}
+          <Button
+            variant="bare"
+            onPress={() => onChangeDates(...getLatestRange(2))}
+          >
+            3 months
+          </Button>
+          <Button
+            variant="bare"
+            onPress={() => onChangeDates(...getLatestRange(5))}
+          >
+            6 months
+          </Button>
+          <Button
+            variant="bare"
+            onPress={() => onChangeDates(...getLatestRange(11))}
+          >
+            1 Year
+          </Button>
+          <Button
+            variant="bare"
+            onPress={() =>
+              onChangeDates(
+                ...getFullRange(allMonths[allMonths.length - 1].name),
+              )
+            }
+          >
+            All Time
+          </Button>
+
+          {filters && (
+            <FilterButton
+              compact={isNarrowWidth}
+              onApply={onApply}
+              hover={false}
+              exclude={undefined}
+            />
+          )}
+        </SpaceBetween>
+
+        {children ? (
           <View
             style={{
+              flex: 1,
               flexDirection: 'row',
-              alignItems: 'center',
-              gap: 15,
-              flexWrap: 'wrap',
+              justifyContent: 'flex-end',
             }}
           >
-            {show1Month && (
-              <Button
-                variant="bare"
-                onPress={() => onChangeDates(...getLatestRange(1))}
-              >
-                1 month
-              </Button>
-            )}
-            <Button
-              variant="bare"
-              onPress={() => onChangeDates(...getLatestRange(2))}
-            >
-              3 months
-            </Button>
-            <Button
-              variant="bare"
-              onPress={() => onChangeDates(...getLatestRange(5))}
-            >
-              6 months
-            </Button>
-            <Button
-              variant="bare"
-              onPress={() => onChangeDates(...getLatestRange(11))}
-            >
-              1 Year
-            </Button>
-            <Button
-              variant="bare"
-              onPress={() =>
-                onChangeDates(
-                  ...getFullRange(allMonths[allMonths.length - 1].name),
-                )
-              }
-            >
-              All Time
-            </Button>
-
-            {filters && (
-              <FilterButton
-                compact={isNarrowWidth}
-                onApply={onApply}
-                hover={false}
-                exclude={undefined}
-              />
-            )}
+            {children}
           </View>
+        ) : (
+          <View style={{ flex: 1 }} />
+        )}
+      </SpaceBetween>
 
-          {children ? (
-            <View
-              style={{
-                flex: 1,
-                flexDirection: 'row',
-                justifyContent: 'flex-end',
-              }}
-            >
-              {children}
-            </View>
-          ) : (
-            <View style={{ flex: 1 }} />
-          )}
-        </View>
-      )}
       {filters && filters.length > 0 && (
         <View style={{ marginTop: 5 }}>
           <AppliedFilters

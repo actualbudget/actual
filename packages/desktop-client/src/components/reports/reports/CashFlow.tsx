@@ -18,7 +18,6 @@ import {
 
 import { useFilters } from '../../../hooks/useFilters';
 import { useNavigate } from '../../../hooks/useNavigate';
-import { useResponsive } from '../../../ResponsiveProvider';
 import { theme } from '../../../style';
 import { AlignedText } from '../../common/AlignedText';
 import { Block } from '../../common/Block';
@@ -26,9 +25,11 @@ import { Button } from '../../common/Button2';
 import { Paragraph } from '../../common/Paragraph';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
+import { EditablePageHeaderTitle } from '../../EditablePageHeaderTitle';
 import { MobileBackButton } from '../../mobile/MobileBackButton';
 import { MobilePageHeader, Page, PageHeader } from '../../Page';
 import { PrivacyFilter } from '../../PrivacyFilter';
+import { useResponsive } from '../../responsive/ResponsiveProvider';
 import { Change } from '../Change';
 import { CashFlowGraph } from '../graphs/CashFlowGraph';
 import { Header } from '../Header';
@@ -89,7 +90,9 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
   const [start, setStart] = useState(initialStart);
   const [end, setEnd] = useState(initialEnd);
   const [mode, setMode] = useState(initialMode);
-  const [showBalance, setShowBalance] = useState(true);
+  const [showBalance, setShowBalance] = useState(
+    widget?.meta?.showBalance ?? true,
+  );
 
   const [isConcise, setIsConcise] = useState(() => {
     const numDays = d.differenceInCalendarDays(
@@ -157,6 +160,7 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
           end,
           mode,
         },
+        showBalance,
       },
     });
     dispatch(
@@ -167,12 +171,27 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
     );
   }
 
+  const title = widget?.meta?.name || t('Cash Flow');
+  const onSaveWidgetName = async (newName: string) => {
+    if (!widget) {
+      throw new Error('No widget that could be saved.');
+    }
+
+    const name = newName || t('Cash Flow');
+    await send('dashboard-update-widget', {
+      id: widget.id,
+      meta: {
+        ...(widget.meta ?? {}),
+        name,
+      },
+    });
+  };
+
   if (!allMonths || !data) {
     return null;
   }
 
   const { graphData, totalExpenses, totalIncome, totalTransfers } = data;
-  const title = widget?.meta?.name ?? t('Cash Flow');
 
   return (
     <Page
@@ -185,7 +204,18 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
             }
           />
         ) : (
-          <PageHeader title={title} />
+          <PageHeader
+            title={
+              widget ? (
+                <EditablePageHeaderTitle
+                  title={title}
+                  onSave={onSaveWidgetName}
+                />
+              ) : (
+                title
+              )
+            }
+          />
         )
       }
       padding={0}

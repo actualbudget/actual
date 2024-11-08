@@ -52,7 +52,7 @@ export const Tooltip = ({
 
   return (
     <View
-      style={{ minHeight: 'auto' }}
+      style={{ minHeight: 'auto', flexShrink: 0, maxWidth: '100%' }}
       ref={triggerRef}
       onMouseEnter={handlePointerEnter}
       onMouseLeave={handlePointerLeave}

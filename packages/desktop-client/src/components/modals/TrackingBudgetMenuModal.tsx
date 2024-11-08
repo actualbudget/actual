@@ -2,13 +2,14 @@ import React, {
   useState,
   type ComponentPropsWithoutRef,
   useEffect,
+  type CSSProperties,
 } from 'react';
 
 import { trackingBudget } from 'loot-core/client/queries';
 import { amountToInteger, integerToAmount } from 'loot-core/shared/util';
 
 import { useCategory } from '../../hooks/useCategory';
-import { type CSSProperties, theme, styles } from '../../style';
+import { theme, styles } from '../../style';
 import { BudgetMenu } from '../budget/tracking/BudgetMenu';
 import { useTrackingSheetValue } from '../budget/tracking/TrackingBudgetComponents';
 import {
@@ -81,7 +82,7 @@ export function TrackingBudgetMenuModal({
                 fontWeight: 400,
               }}
             >
-              Budget
+              Budgeted
             </Text>
             <FocusableAmountInput
               value={integerToAmount(budgeted || 0)}
@@ -99,6 +100,7 @@ export function TrackingBudgetMenuModal({
               }}
               textStyle={{ ...styles.veryLargeText, textAlign: 'center' }}
               onUpdateAmount={_onUpdateBudget}
+              data-testid="budget-amount"
             />
           </View>
           <BudgetMenu

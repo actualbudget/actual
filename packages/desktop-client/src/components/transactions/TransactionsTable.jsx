@@ -13,12 +13,12 @@ import React, {
 import { useHotkeys } from 'react-hotkeys-hook';
 import { useDispatch } from 'react-redux';
 
+import { css } from '@emotion/css';
 import {
   format as formatDate,
   parseISO,
   isValid as isDateValid,
 } from 'date-fns';
-import { css } from 'glamor';
 
 import { pushModal } from 'loot-core/client/actions';
 import { useCachedSchedules } from 'loot-core/src/client/data-hooks/schedules';
@@ -47,6 +47,7 @@ import {
   titleFirst,
 } from 'loot-core/src/shared/util';
 
+import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { useMergedRefs } from '../../hooks/useMergedRefs';
 import { usePrevious } from '../../hooks/usePrevious';
 import { useSelectedDispatch, useSelectedItems } from '../../hooks/useSelected';
@@ -83,6 +84,8 @@ import {
   Table,
   UnexposedCellContent,
 } from '../table';
+
+import { TransactionMenu } from './TransactionMenu';
 
 function getDisplayValue(obj, name) {
   return obj ? obj[name] : '';
@@ -845,6 +848,12 @@ const Transaction = memo(function Transaction({
   onSave,
   onEdit,
   onDelete,
+  onDuplicate,
+  onLinkSchedule,
+  onUnlinkSchedule,
+  onCreateRule,
+  onScheduleAction,
+  onMakeAsNonSplitTransactions,
   onSplit,
   onManagePayees,
   onCreatePayee,
@@ -1039,6 +1048,11 @@ const Transaction = memo(function Transaction({
     }, 1);
   }, [splitError, allTransactions]);
 
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [crossOffset, setCrossOffset] = useState(0);
+  const [offset, setOffset] = useState(0);
+  const contextMenusEnabled = useFeatureFlag('contextMenus');
+
   return (
     <Row
       ref={triggerRef}
@@ -1067,7 +1081,43 @@ const Transaction = memo(function Transaction({
         }),
         ...(_unmatched && { opacity: 0.5 }),
       }}
+      onContextMenu={e => {
+        if (!contextMenusEnabled) return;
+        if (transaction.id === 'temp') return;
+        e.preventDefault();
+        const rect = e.currentTarget.getBoundingClientRect();
+        setCrossOffset(e.clientX - rect.left);
+        setOffset(e.clientY - rect.bottom);
+        setMenuOpen(true);
+      }}
     >
+      <Popover
+        triggerRef={triggerRef}
+        placement="bottom start"
+        isOpen={menuOpen}
+        onOpenChange={() => setMenuOpen(false)}
+        crossOffset={crossOffset}
+        offset={offset}
+        style={{ width: 200, margin: 1 }}
+        isNonModal
+      >
+        <TransactionMenu
+          transaction={transaction}
+          onDelete={() => onDelete?.(transaction.id)}
+          onDuplicate={() => onDuplicate?.(transaction.id)}
+          onLinkSchedule={() => onLinkSchedule?.(transaction.id)}
+          onUnlinkSchedule={() => onUnlinkSchedule?.(transaction.id)}
+          onCreateRule={() => onCreateRule?.(transaction.id)}
+          onScheduleAction={action =>
+            onScheduleAction?.(action, transaction.id)
+          }
+          onMakeAsNonSplitTransactions={() =>
+            onMakeAsNonSplitTransactions?.(transaction.id)
+          }
+          closeMenu={() => setMenuOpen(false)}
+        />
+      </Popover>
+
       {splitError && listContainerRef.current && (
         <Popover
           arrowSize={updateId}
@@ -1809,6 +1859,15 @@ function TransactionTableInner({
     }
   }, [isAddingPrev, props.isAdding, newNavigator]);
 
+  // Don't render reconciled transactions if we're hiding them.
+  const transactionsToRender = useMemo(
+    () =>
+      props.showReconciled
+        ? props.transactions
+        : props.transactions.filter(t => !t.reconciled),
+    [props.transactions, props.showReconciled],
+  );
+
   const renderRow = ({ item, index, editing }) => {
     const {
       transactions,
@@ -1880,6 +1939,12 @@ function TransactionTableInner({
         onEdit={tableNavigator.onEdit}
         onSave={props.onSave}
         onDelete={props.onDelete}
+        onDuplicate={props.onDuplicate}
+        onLinkSchedule={props.onLinkSchedule}
+        onUnlinkSchedule={props.onUnlinkSchedule}
+        onCreateRule={props.onCreateRule}
+        onScheduleAction={props.onScheduleAction}
+        onMakeAsNonSplitTransactions={props.onMakeAsNonSplitTransactions}
         onSplit={props.onSplit}
         onManagePayees={props.onManagePayees}
         onCreatePayee={props.onCreatePayee}
@@ -1982,7 +2047,7 @@ function TransactionTableInner({
           navigator={tableNavigator}
           ref={tableRef}
           listContainerRef={listContainerRef}
-          items={props.transactions}
+          items={transactionsToRender}
           renderItem={renderRow}
           renderEmpty={renderEmpty}
           loadMore={props.loadMoreTransactions}
@@ -2334,7 +2399,29 @@ export const TransactionTable = forwardRef((props, ref) => {
       }
 
       setNewTransactions(deleteTransaction(newTrans, id).data);
+    } else {
+      props.onBatchDelete([id]);
     }
+  }, []);
+
+  const onDuplicate = useCallback(id => {
+    props.onBatchDuplicate([id]);
+  }, []);
+
+  const onLinkSchedule = useCallback(id => {
+    props.onBatchLinkSchedule([id]);
+  }, []);
+  const onUnlinkSchedule = useCallback(id => {
+    props.onBatchUnlinkSchedule([id]);
+  }, []);
+  const onCreateRule = useCallback(id => {
+    props.onCreateRule([id]);
+  }, []);
+  const onScheduleAction = useCallback((action, id) => {
+    props.onScheduleAction(action, [id]);
+  }, []);
+  const onMakeAsNonSplitTransactions = useCallback(id => {
+    props.onMakeAsNonSplitTransactions([id]);
   }, []);
 
   const onSplit = useMemo(() => {
@@ -2480,6 +2567,12 @@ export const TransactionTable = forwardRef((props, ref) => {
       isExpanded={splitsExpanded.expanded}
       onSave={onSave}
       onDelete={onDelete}
+      onDuplicate={onDuplicate}
+      onLinkSchedule={onLinkSchedule}
+      onUnlinkSchedule={onUnlinkSchedule}
+      onCreateRule={onCreateRule}
+      onScheduleAction={onScheduleAction}
+      onMakeAsNonSplitTransactions={onMakeAsNonSplitTransactions}
       onSplit={onSplit}
       onCheckNewEnter={onCheckNewEnter}
       onCheckEnter={onCheckEnter}
@@ -2529,20 +2622,18 @@ function notesTagFormatter(notes, onNotesTagClick) {
                 <Button
                   variant="bare"
                   key={i}
-                  className={String(
-                    css({
-                      display: 'inline-flex',
-                      padding: '3px 7px',
-                      borderRadius: 16,
-                      userSelect: 'none',
-                      backgroundColor: theme.noteTagBackground,
-                      color: theme.noteTagText,
-                      cursor: 'pointer',
-                      '&[data-hovered]': {
-                        backgroundColor: theme.noteTagBackgroundHover,
-                      },
-                    }),
-                  )}
+                  className={css({
+                    display: 'inline-flex',
+                    padding: '3px 7px',
+                    borderRadius: 16,
+                    userSelect: 'none',
+                    backgroundColor: theme.noteTagBackground,
+                    color: theme.noteTagText,
+                    cursor: 'pointer',
+                    '&[data-hovered]': {
+                      backgroundColor: theme.noteTagBackgroundHover,
+                    },
+                  })}
                   onPress={() => {
                     onNotesTagClick?.(validTag);
                   }}

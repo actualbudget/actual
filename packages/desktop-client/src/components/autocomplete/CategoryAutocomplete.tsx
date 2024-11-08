@@ -7,11 +7,12 @@ import React, {
   type ComponentType,
   type ComponentPropsWithoutRef,
   type ReactElement,
+  type CSSProperties,
   useCallback,
 } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
-import { css } from 'glamor';
+import { css, cx } from '@emotion/css';
 
 import { trackingBudget, envelopeBudget } from 'loot-core/client/queries';
 import { integerToCurrency } from 'loot-core/shared/util';
@@ -24,13 +25,13 @@ import {
 import { useCategories } from '../../hooks/useCategories';
 import { useSyncedPref } from '../../hooks/useSyncedPref';
 import { SvgSplit } from '../../icons/v0';
-import { useResponsive } from '../../ResponsiveProvider';
-import { type CSSProperties, theme, styles } from '../../style';
+import { theme, styles } from '../../style';
 import { useEnvelopeSheetValue } from '../budget/envelope/EnvelopeBudgetComponents';
 import { makeAmountFullStyle } from '../budget/util';
 import { Text } from '../common/Text';
 import { TextOneLine } from '../common/TextOneLine';
 import { View } from '../common/View';
+import { useResponsive } from '../responsive/ResponsiveProvider';
 import { useSheetValue } from '../spreadsheet/useSheetValue';
 
 import { Autocomplete, defaultFilterSuggestion } from './Autocomplete';
@@ -87,7 +88,8 @@ function CategoryList({
     <View>
       <View
         style={{
-          overflow: 'auto',
+          overflowY: 'auto',
+          willChange: 'transform',
           padding: '5px 0',
           ...(!embedded && { maxHeight: 175 }),
         }}
@@ -398,8 +400,9 @@ function CategoryItem({
       style={style}
       // See comment above.
       role="button"
-      className={`${className} ${css([
-        {
+      className={cx(
+        className,
+        css({
           backgroundColor: highlighted
             ? theme.menuAutoCompleteBackgroundHover
             : 'transparent',
@@ -410,8 +413,8 @@ function CategoryItem({
           paddingLeft: 20,
           borderRadius: embedded ? 4 : 0,
           ...narrowStyle,
-        },
-      ])}`}
+        }),
+      )}
       data-testid={`${item.name}-category-item`}
       data-highlighted={highlighted || undefined}
       {...props}

@@ -1,7 +1,5 @@
 // @ts-strict-ignore
 import './polyfills';
-import https from 'https';
-import tls from 'tls';
 
 import * as injectAPI from '@actual-app/api/injected';
 import * as CRDT from '@actual-app/crdt';
@@ -1057,6 +1055,51 @@ handlers['gocardless-create-web-token'] = async function ({
   }
 };
 
+function handleSyncResponse(
+  res,
+  acct,
+  newTransactions,
+  matchedTransactions,
+  updatedAccounts,
+) {
+  const { added, updated } = res;
+
+  newTransactions.push(...added);
+  matchedTransactions.push(...updated);
+
+  if (added.length > 0 || updated.length > 0) {
+    updatedAccounts.push(acct.id);
+  }
+}
+
+function handleSyncError(err, acct) {
+  if (err.type === 'BankSyncError') {
+    return {
+      type: 'SyncError',
+      accountId: acct.id,
+      message: 'Failed syncing account “' + acct.name + '.”',
+      category: err.category,
+      code: err.code,
+    };
+  }
+
+  if (err instanceof PostError && err.reason !== 'internal') {
+    return {
+      accountId: acct.id,
+      message: err.reason
+        ? err.reason
+        : `Account “${acct.name}” is not linked properly. Please link it again.`,
+    };
+  }
+
+  return {
+    accountId: acct.id,
+    message:
+      'There was an internal error. Please get in touch https://actualbudget.org/contact for support.',
+    internal: err.stack,
+  };
+}
+
 handlers['accounts-bank-sync'] = async function ({ id }) {
   const [[, userId], [, userKey]] = await asyncStorage.multiGet([
     'user-id',
@@ -1072,9 +1115,9 @@ handlers['accounts-bank-sync'] = async function ({ id }) {
   );
 
   const errors = [];
-  let newTransactions = [];
-  let matchedTransactions = [];
-  let updatedAccounts = [];
+  const newTransactions = [];
+  const matchedTransactions = [];
+  const updatedAccounts = [];
 
   for (let i = 0; i < accounts.length; i++) {
     const acct = accounts[i];
@@ -1089,39 +1132,15 @@ handlers['accounts-bank-sync'] = async function ({ id }) {
           acct.bankId,
         );
 
-        const { added, updated } = res;
-
-        newTransactions = newTransactions.concat(added);
-        matchedTransactions = matchedTransactions.concat(updated);
-
-        if (added.length > 0 || updated.length > 0) {
-          updatedAccounts = updatedAccounts.concat(acct.id);
-        }
+        handleSyncResponse(
+          res,
+          acct,
+          newTransactions,
+          matchedTransactions,
+          updatedAccounts,
+        );
       } catch (err) {
-        if (err.type === 'BankSyncError') {
-          errors.push({
-            type: 'SyncError',
-            accountId: acct.id,
-            message: 'Failed syncing account “' + acct.name + '.”',
-            category: err.category,
-            code: err.code,
-          });
-        } else if (err instanceof PostError && err.reason !== 'internal') {
-          errors.push({
-            accountId: acct.id,
-            message: err.reason
-              ? err.reason
-              : `Account “${acct.name}” is not linked properly. Please link it again.`,
-          });
-        } else {
-          errors.push({
-            accountId: acct.id,
-            message:
-              'There was an internal error. Please get in touch https://actualbudget.org/contact for support.',
-            internal: err.stack,
-          });
-        }
-
+        errors.push(handleSyncError(err, acct));
         err.message = 'Failed syncing account “' + acct.name + '.”';
         captureException(err);
       } finally {
@@ -1138,6 +1157,70 @@ handlers['accounts-bank-sync'] = async function ({ id }) {
   }
 
   return { errors, newTransactions, matchedTransactions, updatedAccounts };
+};
+
+handlers['simplefin-batch-sync'] = async function ({ ids = [] }) {
+  const accounts = await db.runQuery(
+    `SELECT a.*, b.bank_id as bankId FROM accounts a
+         LEFT JOIN banks b ON a.bank = b.id
+         WHERE a.tombstone = 0 AND a.closed = 0 ${ids.length ? `AND a.id IN (${ids.map(() => '?').join(', ')})` : ''}
+         ORDER BY a.offbudget, a.sort_order`,
+    ids.length ? ids : [],
+    true,
+  );
+
+  console.group('Bank Sync operation for all SimpleFin accounts');
+  const res = await bankSync.SimpleFinBatchSync(
+    accounts.map(a => ({
+      id: a.id,
+      accountId: a.account_id,
+    })),
+  );
+
+  const retVal = [];
+  for (const account of res) {
+    const errors = [];
+    const newTransactions = [];
+    const matchedTransactions = [];
+    const updatedAccounts = [];
+
+    if (account.res.error_code) {
+      errors.push(
+        handleSyncError(
+          {
+            type: 'BankSyncError',
+            category: account.res.error_type,
+            code: account.res.error_code,
+          },
+          accounts.find(a => a.id === account.accountId),
+        ),
+      );
+    } else {
+      handleSyncResponse(
+        account.res,
+        accounts.find(a => a.id === account.accountId),
+        newTransactions,
+        matchedTransactions,
+        updatedAccounts,
+      );
+    }
+
+    retVal.push({
+      accountId: account.accountId,
+      res: { errors, newTransactions, matchedTransactions, updatedAccounts },
+    });
+  }
+
+  if (retVal.some(a => a.res.updatedAccounts.length > 0)) {
+    connection.send('sync-event', {
+      type: 'success',
+      tables: ['transactions'],
+    });
+  }
+
+  console.groupEnd();
+
+  return retVal;
 };
 
 handlers['transactions-import'] = mutator(function ({
@@ -1274,6 +1357,7 @@ handlers['load-global-prefs'] = async function () {
     [, encryptKey],
     [, theme],
     [, preferredDarkTheme],
+    [, serverSelfSignedCert],
   ] = await asyncStorage.multiGet([
     'floating-sidebar',
     'max-months',
@@ -1281,6 +1365,7 @@ handlers['load-global-prefs'] = async function () {
     'encrypt-key',
     'theme',
     'preferred-dark-theme',
+    'server-self-signed-cert',
   ]);
   return {
     floatingSidebar: floatingSidebar === 'true' ? true : false,
@@ -1299,6 +1384,7 @@ handlers['load-global-prefs'] = async function () {
       preferredDarkTheme === 'dark' || preferredDarkTheme === 'midnight'
         ? preferredDarkTheme
         : 'dark',
+    serverSelfSignedCert: serverSelfSignedCert || undefined,
   };
 };
 
@@ -1755,7 +1841,7 @@ handlers['download-budget'] = async function ({ fileId }) {
   const id = result.id;
   await handlers['load-budget']({ id });
   result = await handlers['sync-budget']();
-  await handlers['close-budget']();
+
   if (result.error) {
     return result;
   }
@@ -2230,23 +2316,6 @@ export async function initApp(isDev, socketName) {
     } catch (e) {
       console.log('Error loading key', e);
       throw new Error('load-key-error');
-    }
-  }
-
-  const selfSignedCertPath = await asyncStorage.getItem(
-    'server-self-signed-cert',
-  );
-
-  if (selfSignedCertPath) {
-    try {
-      const selfSignedCert = await fs.readFile(selfSignedCertPath);
-      https.globalAgent.options.ca = [...tls.rootCertificates, selfSignedCert];
-    } catch (error) {
-      console.error(
-        'Unable to add the self signed certificate, removing its reference',
-        error,
-      );
-      await asyncStorage.removeItem('server-self-signed-cert');
     }
   }
 

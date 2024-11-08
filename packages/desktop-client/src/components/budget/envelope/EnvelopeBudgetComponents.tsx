@@ -1,15 +1,23 @@
-import React, { type ComponentProps, memo, useRef, useState } from 'react';
+import React, {
+  type ComponentProps,
+  type CSSProperties,
+  memo,
+  useRef,
+  useState,
+} from 'react';
+import { useTranslation, Trans } from 'react-i18next';
 
-import { css } from 'glamor';
+import { css } from '@emotion/css';
 
 import { envelopeBudget } from 'loot-core/src/client/queries';
 import { evalArithmetic } from 'loot-core/src/shared/arithmetic';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToCurrency, amountToInteger } from 'loot-core/src/shared/util';
 
+import { useFeatureFlag } from '../../../hooks/useFeatureFlag';
 import { useUndo } from '../../../hooks/useUndo';
 import { SvgCheveronDown } from '../../../icons/v1';
-import { styles, theme, type CSSProperties } from '../../../style';
+import { styles, theme } from '../../../style';
 import { Button } from '../../common/Button2';
 import { Popover } from '../../common/Popover';
 import { Text } from '../../common/Text';
@@ -74,7 +82,9 @@ export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
       }}
     >
       <View style={headerLabelStyle}>
-        <Text style={{ color: theme.tableHeaderText }}>Budgeted</Text>
+        <Text style={{ color: theme.tableHeaderText }}>
+          <Trans>Budgeted</Trans>
+        </Text>
         <EnvelopeCellValue
           binding={envelopeBudget.totalBudgeted}
           type="financial"
@@ -112,7 +122,9 @@ export function IncomeHeaderMonth() {
         paddingRight: 10,
       }}
     >
-      <View style={{ flex: 1, textAlign: 'right' }}>Received</View>
+      <View style={{ flex: 1, textAlign: 'right' }}>
+        <Trans>Received</Trans>
+      </View>
     </Row>
   );
 }
@@ -191,6 +203,8 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
   onBudgetAction,
   onShowActivity,
 }: ExpenseCategoryMonthProps) {
+  const { t } = useTranslation();
+
   const budgetMenuTriggerRef = useRef(null);
   const balanceMenuTriggerRef = useRef(null);
   const [budgetMenuOpen, setBudgetMenuOpen] = useState(false);
@@ -202,6 +216,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
   };
 
   const { showUndoNotification } = useUndo();
+  const contextMenusEnabled = useFeatureFlag('contextMenus');
 
   return (
     <View
@@ -224,6 +239,12 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
         style={{
           flex: 1,
           flexDirection: 'row',
+        }}
+        onContextMenu={e => {
+          if (!contextMenusEnabled) return;
+          if (editing) return;
+          e.preventDefault();
+          setBudgetMenuOpen(true);
         }}
       >
         {!editing && (
@@ -261,6 +282,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
               isOpen={budgetMenuOpen}
               onOpenChange={() => setBudgetMenuOpen(false)}
               style={{ width: 200 }}
+              isNonModal
             >
               <BudgetMenu
                 onCopyLastMonthAverage={() => {
@@ -268,7 +290,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
                     category: category.id,
                   });
                   showUndoNotification({
-                    message: `Budget set to last month’s budget.`,
+                    message: t(`Budget set to last month’s budget.`),
                   });
                 }}
                 onSetMonthsAverage={numberOfMonths => {
@@ -284,7 +306,10 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
                     category: category.id,
                   });
                   showUndoNotification({
-                    message: `Budget set to ${numberOfMonths}-month average.`,
+                    message: t(
+                      'Budget set to {{numberOfMonths}}-month average.',
+                      { numberOfMonths },
+                    ),
                   });
                 }}
                 onApplyBudgetTemplate={() => {
@@ -292,7 +317,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
                     category: category.id,
                   });
                   showUndoNotification({
-                    message: `Budget template applied.`,
+                    message: t(`Budget template applied.`),
                   });
                 }}
               />
@@ -356,13 +381,11 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
             {props => (
               <CellValueText
                 {...props}
-                className={String(
-                  css({
-                    cursor: 'pointer',
-                    ':hover': { textDecoration: 'underline' },
-                    ...makeAmountGrey(props.value),
-                  }),
-                )}
+                className={css({
+                  cursor: 'pointer',
+                  ':hover': { textDecoration: 'underline' },
+                  ...makeAmountGrey(props.value),
+                })}
               />
             )}
           </EnvelopeCellValue>
@@ -376,6 +399,11 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
         <span
           ref={balanceMenuTriggerRef}
           onClick={() => setBalanceMenuOpen(true)}
+          onContextMenu={e => {
+            if (!contextMenusEnabled) return;
+            e.preventDefault();
+            setBalanceMenuOpen(true);
+          }}
         >
           <BalanceWithCarryover
             carryover={envelopeBudget.catCarryover(category.id)}
@@ -392,6 +420,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
           isOpen={balanceMenuOpen}
           onOpenChange={() => setBalanceMenuOpen(false)}
           style={{ width: 200 }}
+          isNonModal
         >
           <BalanceMovementMenu
             categoryId={category.id}
@@ -466,12 +495,10 @@ export function IncomeCategoryMonth({
             {props => (
               <CellValueText
                 {...props}
-                className={String(
-                  css({
-                    cursor: 'pointer',
-                    ':hover': { textDecoration: 'underline' },
-                  }),
-                )}
+                className={css({
+                  cursor: 'pointer',
+                  ':hover': { textDecoration: 'underline' },
+                })}
               />
             )}
           </EnvelopeCellValue>

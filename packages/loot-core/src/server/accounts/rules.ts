@@ -1,5 +1,6 @@
 // @ts-strict-ignore
 import * as dateFns from 'date-fns';
+import * as Handlebars from 'handlebars';
 
 import {
   monthFromDate,
@@ -9,6 +10,8 @@ import {
   addDays,
   subDays,
   parseDate,
+  format,
+  currentDay,
 } from '../../shared/months';
 import {
   sortNumbers,
@@ -19,16 +22,77 @@ import {
 import { recurConfigToRSchedule } from '../../shared/schedules';
 import {
   addSplitTransaction,
+  groupTransaction,
   recalculateSplit,
   splitTransaction,
   ungroupTransaction,
 } from '../../shared/transactions';
 import { fastSetMerge } from '../../shared/util';
-import { RuleConditionEntity } from '../../types/models';
+import { RuleConditionEntity, RuleEntity } from '../../types/models';
 import { RuleError } from '../errors';
 import { Schedule as RSchedule } from '../util/rschedule';
 
-function assert(test, type, msg) {
+function registerHandlebarsHelpers() {
+  const regexTest = /^\/(.*)\/([gimuy]*)$/;
+
+  function mathHelper(fn: (a: number, b: number) => number) {
+    return (a: unknown, ...b: unknown[]) => {
+      // Last argument is the Handlebars options object
+      b.splice(-1, 1);
+      return b.map(Number).reduce(fn, Number(a));
+    };
+  }
+
+  const helpers = {
+    regex: (value: unknown, regex: unknown, replace: unknown) => {
+      if (value == null) {
+        return null;
+      }
+
+      if (typeof regex !== 'string' || typeof replace !== 'string') {
+        return '';
+      }
+
+      let regexp: RegExp;
+      const match = regexTest.exec(regex);
+      // Regex is in format /regex/flags
+      if (match) {
+        regexp = new RegExp(match[1], match[2]);
+      } else {
+        regexp = new RegExp(regex);
+      }
+
+      return String(value).replace(regexp, replace);
+    },
+    add: mathHelper((a, b) => a + b),
+    sub: mathHelper((a, b) => a - b),
+    div: mathHelper((a, b) => a / b),
+    mul: mathHelper((a, b) => a * b),
+    mod: mathHelper((a, b) => a % b),
+    floor: (a: unknown) => Math.floor(Number(a)),
+    ceil: (a: unknown) => Math.ceil(Number(a)),
+    round: (a: unknown) => Math.round(Number(a)),
+    abs: (a: unknown) => Math.abs(Number(a)),
+    min: mathHelper((a, b) => Math.min(a, b)),
+    max: mathHelper((a, b) => Math.max(a, b)),
+    fixed: (a: unknown, digits: unknown) => Number(a).toFixed(Number(digits)),
+    day: (date?: string) => date && format(date, 'd'),
+    month: (date?: string) => date && format(date, 'M'),
+    year: (date?: string) => date && format(date, 'yyyy'),
+    format: (date?: string, f?: string) => date && f && format(date, f),
+    debug: (value: unknown) => {
+      console.log(value);
+    },
+  };
+
+  for (const [name, fn] of Object.entries(helpers)) {
+    Handlebars.registerHelper(name, fn);
+  }
+}
+
+registerHandlebarsHelpers();
+
+function assert(test: unknown, type: string, msg: string): asserts test {
   if (!test) {
     throw new RuleError(type, msg);
   }
@@ -384,12 +448,12 @@ export class Condition {
         if (fieldValue === null) {
           return false;
         }
-        return fieldValue.indexOf(this.value) !== -1;
+        return String(fieldValue).indexOf(this.value) !== -1;
       case 'doesNotContain':
         if (fieldValue === null) {
           return false;
         }
-        return fieldValue.indexOf(this.value) === -1;
+        return String(fieldValue).indexOf(this.value) === -1;
       case 'oneOf':
         if (fieldValue === null) {
           return false;
@@ -400,7 +464,7 @@ export class Condition {
         if (fieldValue === null) {
           return false;
         }
-        return fieldValue.indexOf(this.value) !== -1;
+        return String(fieldValue).indexOf(this.value) !== -1;
 
       case 'notOneOf':
         if (fieldValue === null) {
@@ -491,6 +555,8 @@ export class Action {
   type;
   value;
 
+  private handlebarsTemplate?: Handlebars.TemplateDelegate;
+
   constructor(op: ActionOperator, field, value, options) {
     assert(
       ACTION_OPS.includes(op),
@@ -503,6 +569,17 @@ export class Action {
       assert(typeName, 'internal', `Invalid field for action: ${field}`);
       this.field = field;
       this.type = typeName;
+      if (options?.template) {
+        this.handlebarsTemplate = Handlebars.compile(options.template, {
+          noEscape: true,
+        });
+        try {
+          this.handlebarsTemplate({});
+        } catch (e) {
+          console.debug(e);
+          assert(false, 'invalid-template', `Invalid Handlebars template`);
+        }
+      }
     } else if (op === 'set-split-amount') {
       this.field = null;
       this.type = 'number';
@@ -527,7 +604,31 @@ export class Action {
   exec(object) {
     switch (this.op) {
       case 'set':
-        object[this.field] = this.value;
+        if (this.handlebarsTemplate) {
+          object[this.field] = this.handlebarsTemplate({
+            ...object,
+            today: currentDay(),
+          });
+
+          // Handlebars always returns a string, so we need to convert
+          switch (this.type) {
+            case 'number':
+              object[this.field] = parseFloat(object[this.field]);
+              break;
+            case 'date':
+              object[this.field] = parseDate(object[this.field]);
+              break;
+            case 'boolean':
+              object[this.field] = object[this.field] === 'true';
+              break;
+          }
+        } else {
+          object[this.field] = this.value;
+        }
+
+        if (this.field === 'payee_name') {
+          object['payee'] = 'new';
+        }
         break;
       case 'set-split-amount':
         switch (this.options.method) {
@@ -571,6 +672,75 @@ function execNonSplitActions(actions: Action[], transaction) {
   return update;
 }
 
+function getSplitRemainder(transactions) {
+  const { error } = recalculateSplit(groupTransaction(transactions));
+  return error ? error.difference : 0;
+}
+
+function execSplitActions(actions: Action[], transaction) {
+  const splitAmountActions = actions.filter(
+    action => action.op === 'set-split-amount',
+  );
+
+  // Convert the transaction to a split transaction.
+  const { data } = splitTransaction(
+    ungroupTransaction(transaction),
+    transaction.id,
+  );
+  let newTransactions = data;
+
+  // Add empty splits, and apply non-set-amount actions.
+  // This also populates any fixed-amount splits.
+  actions.forEach(action => {
+    const splitTransactionIndex = (action.options?.splitIndex ?? 0) + 1;
+    if (splitTransactionIndex >= newTransactions.length) {
+      const { data } = addSplitTransaction(newTransactions, transaction.id);
+      newTransactions = data;
+    }
+    action.exec(newTransactions[splitTransactionIndex]);
+  });
+
+  // Distribute to fixed-percent splits.
+  const remainingAfterFixedAmounts = getSplitRemainder(newTransactions);
+  splitAmountActions
+    .filter(action => action.options.method === 'fixed-percent')
+    .forEach(action => {
+      const splitTransactionIndex = (action.options?.splitIndex ?? 0) + 1;
+      const percent = action.value / 100;
+      const amount = Math.round(remainingAfterFixedAmounts * percent);
+      newTransactions[splitTransactionIndex].amount = amount;
+    });
+
+  // Distribute to remainder splits.
+  const remainderActions = splitAmountActions.filter(
+    action => action.options.method === 'remainder',
+  );
+  const remainingAfterFixedPercents = getSplitRemainder(newTransactions);
+  if (remainderActions.length !== 0) {
+    const amountPerRemainderSplit = Math.round(
+      remainingAfterFixedPercents / remainderActions.length,
+    );
+    let lastNonFixedTransactionIndex = -1;
+    remainderActions.forEach(action => {
+      const splitTransactionIndex = (action.options?.splitIndex ?? 0) + 1;
+      newTransactions[splitTransactionIndex].amount = amountPerRemainderSplit;
+      lastNonFixedTransactionIndex = Math.max(
+        lastNonFixedTransactionIndex,
+        splitTransactionIndex,
+      );
+    });
+
+    // The last remainder split will be adjusted for any leftovers from rounding.
+    newTransactions[lastNonFixedTransactionIndex].amount -=
+      getSplitRemainder(newTransactions);
+  }
+
+  // The split index 0 (transaction index 1) is reserved for "Apply to all" actions.
+  // Remove that entry from the transaction list.
+  newTransactions.splice(1, 1);
+  return recalculateSplit(groupTransaction(newTransactions));
+}
+
 export function execActions(actions: Action[], transaction) {
   const parentActions = actions.filter(action => !action.options?.splitIndex);
   const childActions = actions.filter(action => action.options?.splitIndex);
@@ -580,134 +750,26 @@ export function execActions(actions: Action[], transaction) {
       0,
     ) + 1;
 
-  let update = execNonSplitActions(parentActions, transaction);
+  const nonSplitResult = execNonSplitActions(parentActions, transaction);
   if (totalSplitCount === 1) {
     // No splits, no need to do anything else.
-    return update;
+    return nonSplitResult;
   }
 
-  if (update.is_child) {
+  if (nonSplitResult.is_child) {
     // Rules with splits can't be applied to child transactions.
-    return update;
+    return nonSplitResult;
   }
 
-  const splitAmountActions = childActions.filter(
-    action => action.op === 'set-split-amount',
-  );
-  const fixedSplitAmountActions = splitAmountActions.filter(
-    action => action.options.method === 'fixed-amount',
-  );
-  const fixedAmountsBySplit: Record<number, number> = {};
-  fixedSplitAmountActions.forEach(action => {
-    const splitIndex = action.options.splitIndex ?? 0;
-    fixedAmountsBySplit[splitIndex] = action.value;
-  });
-  const fixedAmountSplitCount = Object.keys(fixedAmountsBySplit).length;
-  const totalFixedAmount = Object.values(fixedAmountsBySplit).reduce<number>(
-    (prev, cur: number) => prev + cur,
-    0,
-  );
-  if (
-    fixedAmountSplitCount === totalSplitCount &&
-    totalFixedAmount !== (transaction.amount ?? totalFixedAmount)
-  ) {
-    // Not all value would be distributed to a split.
-    return transaction;
-  }
-
-  const { data, newTransaction } = splitTransaction(
-    ungroupTransaction(update),
-    transaction.id,
-  );
-  update = recalculateSplit(newTransaction);
-  data[0] = update;
-  let newTransactions = data;
-
-  for (const action of childActions) {
-    const splitIndex = action.options?.splitIndex ?? 0;
-    if (splitIndex >= update.subtransactions.length) {
-      const { data, newTransaction } = addSplitTransaction(
-        newTransactions,
-        transaction.id,
-      );
-      update = recalculateSplit(newTransaction);
-      data[0] = update;
-      newTransactions = data;
-    }
-    action.exec(update.subtransactions[splitIndex]);
-  }
-
-  // Make sure every transaction has an amount.
-  if (fixedAmountSplitCount !== totalSplitCount) {
-    // This is the amount that will be distributed to the splits that
-    // don't have a fixed amount. The last split will get the remainder.
-    // The amount will be zero if the parent transaction has no amount.
-    const amountToDistribute =
-      (transaction.amount ?? totalFixedAmount) - totalFixedAmount;
-    let remainingAmount = amountToDistribute;
-
-    // First distribute the fixed percentages.
-    splitAmountActions
-      .filter(action => action.options.method === 'fixed-percent')
-      .forEach(action => {
-        const splitIndex = action.options.splitIndex;
-        const percent = action.value / 100;
-        const amount = Math.round(amountToDistribute * percent);
-        update.subtransactions[splitIndex].amount = amount;
-        remainingAmount -= amount;
-      });
-
-    // Then distribute the remainder.
-    const remainderSplitAmountActions = splitAmountActions.filter(
-      action => action.options.method === 'remainder',
-    );
-
-    // Check if there is any value left to distribute after all fixed
-    // (percentage and amount) splits have been distributed.
-    if (remainingAmount !== 0) {
-      // If there are no remainder splits explicitly added by the user,
-      // distribute the remainder to a virtual split that will be
-      // adjusted for the remainder.
-      if (remainderSplitAmountActions.length === 0) {
-        const splitIndex = totalSplitCount;
-        const { newTransaction } = addSplitTransaction(
-          newTransactions,
-          transaction.id,
-        );
-        update = recalculateSplit(newTransaction);
-        update.subtransactions[splitIndex].amount = remainingAmount;
-      } else {
-        const amountPerRemainderSplit = Math.round(
-          remainingAmount / remainderSplitAmountActions.length,
-        );
-        let lastNonFixedIndex = -1;
-        remainderSplitAmountActions.forEach(action => {
-          const splitIndex = action.options.splitIndex;
-          update.subtransactions[splitIndex].amount = amountPerRemainderSplit;
-          remainingAmount -= amountPerRemainderSplit;
-          lastNonFixedIndex = Math.max(lastNonFixedIndex, splitIndex);
-        });
-
-        // The last non-fixed split will be adjusted for the remainder.
-        update.subtransactions[lastNonFixedIndex].amount -= remainingAmount;
-      }
-      update = recalculateSplit(update);
-    }
-  }
-
-  // The split index 0 is reserved for "Apply to all" actions.
-  // Remove that entry from the subtransactions.
-  update.subtransactions = update.subtransactions.slice(1);
-
-  return update;
+  return execSplitActions(childActions, nonSplitResult);
 }
 
 export class Rule {
-  actions;
-  conditions;
+  actions: Action[];
+  conditions: Condition[];
   conditionsOp;
-  id;
-  stage;
+  id?: string;
+  stage: 'pre' | null | 'post';
 
   constructor({
     id,
@@ -717,13 +779,13 @@ export class Rule {
     actions,
   }: {
     id?: string;
-    stage?;
+    stage?: 'pre' | null | 'post';
     conditionsOp;
     conditions;
     actions;
   }) {
     this.id = id;
-    this.stage = stage;
+    this.stage = stage ?? null;
     this.conditionsOp = conditionsOp;
     this.conditions = conditions.map(
       c => new Condition(c.op, c.field, c.value, c.options),
@@ -733,7 +795,7 @@ export class Rule {
     );
   }
 
-  evalConditions(object) {
+  evalConditions(object): boolean {
     if (this.conditions.length === 0) {
       return false;
     }
@@ -770,11 +832,11 @@ export class Rule {
     return Object.assign({}, object, changes);
   }
 
-  getId() {
+  getId(): string | undefined {
     return this.id;
   }
 
-  serialize() {
+  serialize(): RuleEntity {
     return {
       id: this.id,
       stage: this.stage,
@@ -786,9 +848,9 @@ export class Rule {
 }
 
 export class RuleIndexer {
-  field;
-  method;
-  rules;
+  field: string;
+  method?: string;
+  rules: Map<string, Set<Rule>>;
 
   constructor({ field, method }: { field: string; method?: string }) {
     this.field = field;
@@ -796,18 +858,18 @@ export class RuleIndexer {
     this.rules = new Map();
   }
 
-  getIndex(key) {
+  getIndex(key: string | null): Set<Rule> {
     if (!this.rules.has(key)) {
       this.rules.set(key, new Set());
     }
     return this.rules.get(key);
   }
 
-  getIndexForValue(value) {
+  getIndexForValue(value: unknown): Set<Rule> {
     return this.getIndex(this.getKey(value) || '*');
   }
 
-  getKey(value) {
+  getKey(value: unknown): string | null {
     if (typeof value === 'string' && value !== '') {
       if (this.method === 'firstchar') {
         return value[0].toLowerCase();
@@ -817,7 +879,7 @@ export class RuleIndexer {
     return null;
   }
 
-  getIndexes(rule) {
+  getIndexes(rule: Rule): Set<Rule>[] {
     const cond = rule.conditions.find(cond => cond.field === this.field);
     const indexes = [];
 
@@ -840,21 +902,21 @@ export class RuleIndexer {
     return indexes;
   }
 
-  index(rule) {
+  index(rule: Rule): void {
     const indexes = this.getIndexes(rule);
     indexes.forEach(index => {
       index.add(rule);
     });
   }
 
-  remove(rule) {
+  remove(rule: Rule): void {
     const indexes = this.getIndexes(rule);
     indexes.forEach(index => {
       index.delete(rule);
     });
   }
 
-  getApplicableRules(object) {
+  getApplicableRules(object): Set<Rule> {
     let indexedRules;
     if (this.field in object) {
       const key = this.getKey(object[this.field]);
@@ -887,7 +949,7 @@ const OP_SCORES: Record<RuleConditionEntity['op'], number> = {
   hasTags: 0,
 };
 
-function computeScore(rule) {
+function computeScore(rule: Rule): number {
   const initialScore = rule.conditions.reduce((score, condition) => {
     if (OP_SCORES[condition.op] == null) {
       console.log(`Found invalid operation while ranking: ${condition.op}`);
@@ -912,7 +974,7 @@ function computeScore(rule) {
   return initialScore;
 }
 
-function _rankRules(rules) {
+function _rankRules(rules: Rule[]): Rule[] {
   const scores = new Map();
   rules.forEach(rule => {
     scores.set(rule, computeScore(rule));
@@ -936,7 +998,7 @@ function _rankRules(rules) {
   });
 }
 
-export function rankRules(rules) {
+export function rankRules(rules: Iterable<Rule>): Rule[] {
   let pre = [];
   let normal = [];
   let post = [];
@@ -961,7 +1023,7 @@ export function rankRules(rules) {
   return pre.concat(normal).concat(post);
 }
 
-export function migrateIds(rule, mappings) {
+export function migrateIds(rule: Rule, mappings: Map<string, string>): void {
   // Go through the in-memory rules and patch up ids that have been
   // "migrated" to other ids. This is a little tricky, but a lot
   // easier than trying to keep an up-to-date mapping in the db. This
@@ -1013,7 +1075,11 @@ export function migrateIds(rule, mappings) {
 }
 
 // This finds all the rules that reference the `id`
-export function iterateIds(rules, fieldName, func) {
+export function iterateIds(
+  rules: Rule[],
+  fieldName: string,
+  func: (rule: Rule, id: string) => void | boolean,
+): void {
   let i;
 
   ruleiter: for (i = 0; i < rules.length; i++) {

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { type CSSProperties } from 'react';
 
 import {
   mapField,
@@ -14,7 +14,7 @@ import {
   type PrependNoteRuleActionEntity,
 } from 'loot-core/src/types/models';
 
-import { type CSSProperties, theme } from '../../style';
+import { theme } from '../../style';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 
@@ -71,7 +71,14 @@ function SetActionExpression({
       <Text>{friendlyOp(op)}</Text>{' '}
       <Text style={valueStyle}>{mapField(field, options)}</Text>{' '}
       <Text>to </Text>
-      <Value style={valueStyle} value={value} field={field} />
+      {options?.template ? (
+        <>
+          <Text>template </Text>
+          <Text style={valueStyle}>{options.template}</Text>
+        </>
+      ) : (
+        <Value style={valueStyle} value={value} field={field} />
+      )}
     </>
   );
 }

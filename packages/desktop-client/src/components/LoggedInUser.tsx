@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, type CSSProperties } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useLocation } from 'react-router-dom';
@@ -11,7 +11,7 @@ import { Permissions } from '../auth/types';
 import { useActions } from '../hooks/useActions';
 import { useMetadataPref } from '../hooks/useMetadataPref';
 import { useNavigate } from '../hooks/useNavigate';
-import { theme, styles, type CSSProperties } from '../style';
+import { theme, styles } from '../style';
 
 import { Button } from './common/Button2';
 import { Menu } from './common/Menu';
@@ -222,6 +222,7 @@ export function LoggedInUser({
       )}
 
       <Popover
+        offset={8}
         triggerRef={triggerRef}
         isOpen={menuOpen}
         onOpenChange={() => setMenuOpen(false)}

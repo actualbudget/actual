@@ -1,9 +1,12 @@
-import React, { type ComponentPropsWithoutRef } from 'react';
+import React, {
+  type ComponentPropsWithoutRef,
+  type CSSProperties,
+} from 'react';
 
 import { trackingBudget } from 'loot-core/client/queries';
 
 import { useCategory } from '../../hooks/useCategory';
-import { type CSSProperties, theme, styles } from '../../style';
+import { theme, styles } from '../../style';
 import {
   BalanceWithCarryover,
   CarryoverIndicator,
