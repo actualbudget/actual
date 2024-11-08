@@ -1541,7 +1541,10 @@ handlers['subscribe-needs-bootstrap'] = async function ({
 
   return {
     bootstrapped: res.data.bootstrapped,
-    loginMethod: res.data.loginMethod || 'password',
+    loginMethods: res.data.loginMethods || [
+      { method: 'password', active: true, displayName: 'Password' },
+    ],
+    multiuser: res.data.multiuser || false,
     hasServer: true,
   };
 };
@@ -1597,7 +1600,7 @@ handlers['subscribe-get-user'] = async function () {
       reason,
       data: {
         userName = null,
-        permissions = [],
+        permission = '',
         userId = null,
         displayName = null,
         loginMethod = null,
@@ -1617,7 +1620,7 @@ handlers['subscribe-get-user'] = async function () {
     return {
       offline: false,
       userName,
-      permissions,
+      permission,
       userId,
       displayName,
       loginMethod,
@@ -1781,6 +1784,10 @@ handlers['get-budgets'] = async function () {
 
 handlers['get-remote-files'] = async function () {
   return cloudStorage.listRemoteFiles();
+};
+
+handlers['get-user-file-info'] = async function (fileId: string) {
+  return cloudStorage.getRemoteFile(fileId);
 };
 
 handlers['reset-budget-cache'] = mutator(async function () {

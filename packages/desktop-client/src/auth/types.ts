@@ -1,3 +1,3 @@
 export enum Permissions {
-  ADMINISTRATOR = 'ADMINISTRATOR',
+  ADMINISTRATOR = 'ADMIN',
 }

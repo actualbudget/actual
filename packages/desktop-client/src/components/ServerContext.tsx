@@ -8,6 +8,7 @@ import React, {
 } from 'react';
 
 import { send } from 'loot-core/src/platform/client/fetch';
+import { type Handlers } from 'loot-core/types/handlers';
 
 type LoginMethods = {
   method: string;
@@ -25,6 +26,8 @@ type ServerContextValue = {
     opts?: { validate?: boolean },
   ) => Promise<{ error?: string }>;
   refreshLoginMethods: () => Promise<void>;
+  setMultiuserEnabled: (enabled: boolean) => void;
+  setLoginMethods: (methods: LoginMethods[]) => void;
 };
 
 const ServerContext = createContext<ServerContextValue>({
@@ -35,6 +38,8 @@ const ServerContext = createContext<ServerContextValue>({
   setURL: () => Promise.reject(new Error('ServerContext not initialized')),
   refreshLoginMethods: () =>
     Promise.reject(new Error('ServerContext not initialized')),
+  setMultiuserEnabled: () => {},
+  setLoginMethods: () => {},
 });
 
 export const useServerURL = () => useContext(ServerContext).url;
@@ -69,6 +74,12 @@ async function getServerVersion() {
 export const useRefreshLoginMethods = () =>
   useContext(ServerContext).refreshLoginMethods;
 
+export const useSetMultiuserEnabled = () =>
+  useContext(ServerContext).setMultiuserEnabled;
+
+export const useSetLoginMethods = () =>
+  useContext(ServerContext).setLoginMethods;
+
 export function ServerProvider({ children }: { children: ReactNode }) {
   const [serverURL, setServerURL] = useState('');
   const [version, setVersion] = useState('');
@@ -93,13 +104,17 @@ export function ServerProvider({ children }: { children: ReactNode }) {
   }, [serverURL]);
 
   useEffect(() => {
-    refreshLoginMethods();
     if (serverURL) {
-      send('multiuser-get').then((data: boolean) => {
-        setMultiuserEnabled(data);
-      });
+      send('subscribe-needs-bootstrap').then(
+        (data: Awaited<ReturnType<Handlers['subscribe-needs-bootstrap']>>) => {
+          if ('hasServer' in data && data.hasServer) {
+            setAvailableLoginMethods(data.loginMethods);
+            setMultiuserEnabled(data.multiuser);
+          }
+        },
+      );
     }
-  }, [serverURL, refreshLoginMethods]);
+  }, [serverURL]);
 
   const setURL = useCallback(
     async (url: string, opts: { validate?: boolean } = {}) => {
@@ -122,6 +137,8 @@ export function ServerProvider({ children }: { children: ReactNode }) {
         setURL,
         version: version ? `v${version}` : 'N/A',
         refreshLoginMethods,
+        setMultiuserEnabled,
+        setLoginMethods: setAvailableLoginMethods,
       }}
     >
       {children}

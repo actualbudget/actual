@@ -149,7 +149,6 @@ app.method('access-delete-all', async function ({ fileId, ids }) {
   const userToken = await asyncStorage.getItem('user-token');
   if (userToken) {
     try {
-      debugger;
       const res = await del(
         getServer().BASE_SERVER + `/admin/access?fileId=${fileId}`,
         {
@@ -231,18 +230,8 @@ app.method('file-owner-get', async function (fileId) {
   return null;
 });
 
-app.method('multiuser-get', async function () {
-  const res = await get(getServer().BASE_SERVER + '/admin/multiuser/');
-
-  if (res) {
-    return (JSON.parse(res) as boolean) || false;
-  }
-
-  return null;
-});
-
 app.method('owner-created', async function () {
-  const res = await get(getServer().BASE_SERVER + '/admin/ownerCreated/');
+  const res = await get(getServer().BASE_SERVER + '/admin/owner-created/');
 
   if (res) {
     return JSON.parse(res) as boolean;

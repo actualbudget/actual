@@ -124,9 +124,7 @@ function EditUser({ defaultUser, onSave: originalOnSave }: EditUserProps) {
     defaultUser.displayName ?? '',
   );
   const [enabled, setEnabled] = useState<boolean>(defaultUser.enabled);
-  const [role, setRole] = useState<string>(
-    defaultUser.role ?? '213733c1-5645-46ad-8784-a7b20b400f93',
-  );
+  const [role, setRole] = useState<string>(defaultUser.role ?? 'BASIC');
   const [error, setError] = useState<string>('');
 
   async function onSave() {

@@ -267,10 +267,22 @@ export interface ServerHandlers {
 
   'get-did-bootstrap': () => Promise<boolean>;
 
-  'subscribe-needs-bootstrap': (args: {
-    url;
-  }) => Promise<
-    { error: string } | { bootstrapped: unknown; hasServer: boolean }
+  'subscribe-needs-bootstrap': (args: { url }) => Promise<
+    | { error: string }
+    | {
+        bootstrapped: boolean;
+        hasServer: false;
+      }
+    | {
+        bootstrapped: boolean;
+        hasServer: true;
+        loginMethods: {
+          method: string;
+          displayName: string;
+          active: boolean;
+        }[];
+        multiuser: boolean;
+      }
   >;
 
   'subscribe-get-login-methods': () => Promise<{
@@ -280,7 +292,7 @@ export interface ServerHandlers {
 
   'subscribe-bootstrap': (arg: {
     password?: string;
-    openid?: OpenIdConfig;
+    openId?: OpenIdConfig;
   }) => Promise<{ error?: string }>;
 
   'subscribe-get-user': () => Promise<{
@@ -288,7 +300,7 @@ export interface ServerHandlers {
     userName?: string;
     userId?: string;
     displayName?: string;
-    permissions?: string[];
+    permission?: string;
     loginMethod?: string;
     tokenExpired?: boolean;
   } | null>;
@@ -330,6 +342,8 @@ export interface ServerHandlers {
   'get-budgets': () => Promise<Budget[]>;
 
   'get-remote-files': () => Promise<RemoteFile[]>;
+
+  'get-user-file-info': (fileId: string) => Promise<RemoteFile | null>;
 
   'reset-budget-cache': () => Promise<unknown>;
 

@@ -25,7 +25,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
     return (
       (userData?.offline ?? false) ||
-      (userData?.permissions?.includes(permission?.toUpperCase()) ?? false)
+      userData?.permission?.toUpperCase() === permission?.toUpperCase()
     );
   };
 

@@ -77,7 +77,7 @@ function OpenIdLogin({ setError }) {
 
   async function onSetOpenId(config: OpenIdConfig) {
     setError(null);
-    const { error } = await send('subscribe-bootstrap', { openid: config });
+    const { error } = await send('subscribe-bootstrap', { openId: config });
 
     if (error) {
       setError(error);

@@ -10,11 +10,12 @@ import React, {
 } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { css } from 'glamor';
+import { css } from '@emotion/css';
 
-import { pushModal } from 'loot-core/src/client/actions/modals';
+import { pushModal } from 'loot-core/client/actions';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as undo from 'loot-core/src/platform/client/undo';
+import { type Handlers } from 'loot-core/types/handlers';
 import { type UserAvailable } from 'loot-core/types/models';
 import { type UserAccessEntity } from 'loot-core/types/models/userAccess';
 
@@ -100,8 +101,16 @@ function UserAccessContent({
   }, [cloudFileId, setLoading]);
 
   const loadOwner = useCallback(async () => {
-    const owner = (await send('file-owner-get', cloudFileId as string)) ?? {};
-    return owner;
+    debugger;
+    const file: Awaited<ReturnType<Handlers['get-user-file-info']>> =
+      (await send('get-user-file-info', cloudFileId as string)) ?? {};
+    const owner = file?.usersWithAccess.filter(user => user.owner);
+
+    if (owner.length > 0) {
+      return owner[0];
+    }
+
+    return null;
   }, [cloudFileId]);
 
   useEffect(() => {
@@ -325,7 +334,7 @@ const iconStyle = css({
 });
 
 const LockToggle = props => (
-  <div {...wrapperStyle}>
+  <div className={wrapperStyle}>
     <div className={`${iconStyle} default-icon`}>
       <SvgLockClosed {...props} />
     </div>
