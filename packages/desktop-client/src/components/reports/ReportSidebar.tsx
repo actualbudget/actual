@@ -51,13 +51,7 @@ type ReportSidebarProps = {
     dateEnd: string,
     mode: TimeFrame['mode'],
   ) => void;
-  onReportChange: ({
-    savedReport,
-    type,
-  }: {
-    savedReport?: CustomReportEntity;
-    type: string;
-  }) => void;
+  onReportChange: ({ type }: { type: 'modify' }) => void;
   disabledItems: (type: string) => string[];
   defaultItems: (item: string) => void;
   defaultModeItems: (graph: string, item: string) => void;

@@ -20,9 +20,9 @@ import {
 } from '../../icons/v1';
 import { SvgReports } from '../../icons/v1/Reports';
 import { SvgCalendar } from '../../icons/v2';
-import { useResponsive } from '../../ResponsiveProvider';
 import { theme, styles } from '../../style';
 import { View } from '../common/View';
+import { useResponsive } from '../responsive/ResponsiveProvider';
 import { useScroll } from '../ScrollProvider';
 
 const COLUMN_COUNT = 3;
