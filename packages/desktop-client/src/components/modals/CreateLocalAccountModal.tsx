@@ -140,7 +140,7 @@ export function CreateLocalAccountModal() {
                   >
                     <Text>
                       {t('This cannot be changed later.')} <br /> {'\n'}
-                      {t('See')}
+                      {t('See')}{' '}
                       <Link
                         variant="external"
                         linkColor="muted"

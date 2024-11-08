@@ -123,15 +123,13 @@ export function CloseAccountModal({
               <strong>{account.name}</strong>?{' '}
               {canDelete ? (
                 <span>
-                  {t(
-                    'This account has no transactions so it will be permanently deleted.',
-                  )}
+                  This account has no transactions so it will be permanently
+                  deleted.
                 </span>
               ) : (
                 <span>
-                  {t(
-                    'This account has transactions so we can’t permanently delete it.',
-                  )}
+                  This account has transactions so we can’t permanently delete
+                  it.
                 </span>
               )}
             </Paragraph>
@@ -185,9 +183,9 @@ export function CloseAccountModal({
                   {needsCategory(account, transferAccountId, accounts) && (
                     <View style={{ marginBottom: 15 }}>
                       <Paragraph>
-                        {t(
-                          'Since you are transferring the balance from a budgeted account to an off-budget account, this transaction must be categorized. Select a category:',
-                        )}
+                        Since you are transferring the balance from a budgeted
+                        account to an off-budget account, this transaction must
+                        be categorized. Select a category:
                       </Paragraph>
 
                       <CategoryAutocomplete
@@ -238,9 +236,9 @@ export function CloseAccountModal({
                     >
                       {t('force close')}
                     </Link>{' '}
-                    {t(
-                      'the account which will delete it and all its transactions permanently. Doing so may change your budget unexpectedly since money in it may vanish.',
-                    )}
+                    the account which will delete it and all its transactions
+                    permanently. Doing so may change your budget unexpectedly
+                    since money in it may vanish.
                   </Text>
                 </View>
               )}

@@ -521,9 +521,13 @@ function StageInfo() {
   return (
     <View style={{ position: 'relative', marginLeft: 5 }}>
       <Tooltip
-        content={t(
-          'The stage of a rule allows you to force a specific order. Pre rules always run first, and post rules always run last. Within each stage rules are automatically ordered from least to most specific.',
-        )}
+        content={
+          <>
+            The stage of a rule allows you to force a specific order. Pre rules
+            always run first, and post rules always run last. Within each stage
+            rules are automatically ordered from least to most specific.
+          </>
+        }
         placement="bottom start"
         style={{
           ...styles.tooltip,

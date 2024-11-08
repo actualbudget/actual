@@ -137,7 +137,7 @@ export function FormatSettings() {
       }
     >
       <Text>
-        <strong>{t('Formatting')}</strong>{' '}
+        <strong>{t('Formatting')}</strong>
         {t(
           ' does not affect how budget data is stored, and can be changed at any time.',
         )}

@@ -84,9 +84,7 @@ export const SimpleFinInitialiseModal = ({
               />
             </FormField>
 
-            {!isValid && (
-              <Error>{t('It is required to provide a token.')}</Error>
-            )}
+            {!isValid && <Error>It is required to provide a token.</Error>}
           </View>
 
           <ModalButtons>

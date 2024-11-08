@@ -50,7 +50,6 @@ function KeyIcon({ shortcut, style }: KeyIconProps) {
 }
 
 function GroupHeading({ group }: GroupHeadingProps) {
-  const { t } = useTranslation(); // Initialize useTranslation
   return (
     <Text
       style={{
@@ -60,7 +59,7 @@ function GroupHeading({ group }: GroupHeadingProps) {
         marginBottom: 10,
       }}
     >
-      {t(group)}:
+      {group}:
     </Text>
   );
 }

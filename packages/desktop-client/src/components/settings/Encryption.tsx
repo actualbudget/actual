@@ -52,9 +52,9 @@ export function EncryptionSettings() {
       primaryAction={<Button isDisabled>{t('Enable encryption…')}</Button>}
     >
       <Text>
-        <strong>{t('End-to-end encryption')}</strong>{' '}
+        <strong>{t('End-to-end encryption')}</strong>
         {t(
-          'is not available when making an unencrypted connection to a remote server. You’ll need to enable HTTPS on your server to use end-to-end encryption. This problem may also occur if your browser is too old to work with Actual.',
+          ' is not available when making an unencrypted connection to a remote server. You’ll need to enable HTTPS on your server to use end-to-end encryption. This problem may also occur if your browser is too old to work with Actual.',
         )}{' '}
         <Link
           variant="external"
@@ -74,7 +74,6 @@ export function EncryptionSettings() {
       }
     >
       <Text>
-        <strong>{t('End-to-end encryption')}</strong>{' '}
         <strong>End-to-end encryption</strong> is not enabled. Any data on the
         server is still protected by the server password, but it’s not
         end-to-end encrypted which means the server owners have the ability to

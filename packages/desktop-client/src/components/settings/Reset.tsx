@@ -29,7 +29,7 @@ export function ResetCache() {
       }
     >
       <Text>
-        <strong>{t('Reset budget cache')}</strong>{' '}
+        <strong>{t('Reset budget cache')}</strong>
         {t(
           ' will clear all cached values for the budget and recalculate the entire budget. All values in the budget are cached for performance reasons, and if there is a bug in the cache you won’t see correct values. There is no danger in resetting the cache. Hopefully you never have to do this.',
         )}
@@ -65,14 +65,14 @@ export function ResetSync() {
     >
       {isEnabled ? (
         <Text>
-          <strong>{t('Reset sync')}</strong>{' '}
+          <strong>{t('Reset sync')}</strong>
           {t(
             ' will remove all local data used to track changes for syncing, and create a fresh sync ID on the server. This file on other devices will have to be re-downloaded to use the new sync ID. Use this if there is a problem with syncing and you want to start fresh.',
           )}
         </Text>
       ) : (
         <Text>
-          <strong>{t('Reset sync')}</strong>{' '}
+          <strong>{t('Reset sync')}</strong>
           {t(' is only available when syncing is')}
         </Text>
       )}

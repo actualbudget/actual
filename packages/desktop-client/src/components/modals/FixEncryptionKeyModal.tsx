@@ -82,7 +82,7 @@ export function FixEncryptionKeyModal({
             {hasExistingKey ? (
               <Paragraph>
                 {t(
-                  'This file was encrypted with a different key than you are currently using. This probably means you changed your password. Enter your current password to update your key. ',
+                  'This file was encrypted with a different key than you are currently using. This probably means you changed your password. Enter your current password to update your key.',
                 )}{' '}
                 <Link
                   variant="external"
@@ -94,7 +94,7 @@ export function FixEncryptionKeyModal({
             ) : (
               <Paragraph>
                 {t(
-                  'We don’t have a key that encrypts or decrypts this file. Enter the password for this file to create the key for encryption. ',
+                  'We don’t have a key that encrypts or decrypts this file. Enter the password for this file to create the key for encryption.',
                 )}{' '}
                 <Link
                   variant="external"
@@ -120,7 +120,7 @@ export function FixEncryptionKeyModal({
             >
               <Text style={{ fontWeight: 600, marginBottom: 5 }}>
                 {t('Password')}
-              </Text>
+              </Text>{' '}
               {error && (
                 <View
                   style={{

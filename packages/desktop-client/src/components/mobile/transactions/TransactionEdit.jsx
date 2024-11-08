@@ -775,8 +775,8 @@ const TransactionEditInner = memo(function TransactionEditInner({
           title={
             transaction.payee == null
               ? adding
-                ? t('New Transaction')
-                : t('Transaction')
+                ? 'New Transaction'
+                : 'Transaction'
               : title
           }
           leftContent={<MobileBackButton />}

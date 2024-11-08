@@ -114,7 +114,7 @@ export function Value<T>({
 
   if (Array.isArray(value)) {
     if (value.length === 0) {
-      return <Text style={valueStyle}>({t('empty')})</Text>;
+      return <Text style={valueStyle}>(empty)</Text>;
     } else if (value.length === 1) {
       return (
         <Text>
@@ -158,7 +158,7 @@ export function Value<T>({
           <Text style={valueStyle}>
             &nbsp;&nbsp;
             <Link variant="text" onClick={onExpand} style={valueStyle}>
-              {numHidden} {t('more items...')}
+              {numHidden} more items...
             </Link>
             {!inline && <br />}
           </Text>

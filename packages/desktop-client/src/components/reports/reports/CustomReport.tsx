@@ -681,7 +681,11 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
       header={
         isNarrowWidth ? (
           <MobilePageHeader
-            title={`Custom Report: ${report.name || 'Unsaved report'}`}
+            title={
+              report.name
+                ? t('Custom Report: {{name}}', { name: report.name })
+                : t('Custom Report: Unsaved report')
+            }
             leftContent={<MobileBackButton onPress={onBackClick} />}
           />
         ) : (
@@ -804,10 +808,8 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
               {hasWarning && (
                 <Warning style={{ paddingTop: 5, paddingBottom: 5 }}>
                   {t(
-                    'This report is configured to use a non-existing filter value',
+                    'This report is configured to use a non-existing filter value (i.e. category/account/payee).',
                   )}
-                  <LoadingIndicator message={t('Loading report...')} />
-                  {t('(i.e. category/account/payee)')}
                 </Warning>
               )}
             </View>

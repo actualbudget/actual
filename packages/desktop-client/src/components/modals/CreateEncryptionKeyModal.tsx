@@ -86,13 +86,11 @@ export function CreateEncryptionKeyModal({
             {!isRecreating ? (
               <>
                 <Paragraph style={{ marginTop: 5 }}>
-                  {t(
-                    'To enable end-to-end encryption, you need to create a key. We will generate a key based on a password and use it to encrypt from now on.',
-                  )}
-                  <strong>{t('This requires a sync reset')}</strong>{' '}
-                  {t(
-                    'and all other devices will have to revert to this version of your data.',
-                  )}{' '}
+                  To enable end-to-end encryption, you need to create a key. We
+                  will generate a key based on a password and use it to encrypt
+                  from now on. <strong>This requires a sync reset</strong> and
+                  all other devices will have to revert to this version of your
+                  data.{' '}
                   <Link
                     variant="external"
                     to="https://actualbudget.org/docs/getting-started/sync/#end-to-end-encryption"
@@ -138,7 +136,7 @@ export function CreateEncryptionKeyModal({
                   {t('This will generate a new key for encrypting your data.')}{' '}
                   <strong>{t('This requires a sync reset')}</strong>
                   {t(
-                    'and all other devices will have to revert to this version of your data. Actual will take you through that process on those devices.',
+                    ' and all other devices will have to revert to this version of your data. Actual will take you through that process on those devices.',
                   )}{' '}
                   <Link
                     variant="external"

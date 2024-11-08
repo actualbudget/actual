@@ -85,7 +85,7 @@ export function FixSplits() {
       }
     >
       <Text>
-        <strong>{t('Repair split transactions')}</strong>{' '}
+        <strong>{t('Repair split transactions')}</strong>
         {t(
           ' if you are experiencing bugs relating to split transactions and the “Reset budget cache” button above does not help, this tool may fix them. Some examples of bugs include seeing blank payees on splits or incorrect account balances. This tool does two things:',
         )}

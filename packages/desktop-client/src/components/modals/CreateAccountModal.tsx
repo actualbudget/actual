@@ -313,8 +313,8 @@ export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
                       onPress={onConnectSimpleFin}
                     >
                       {isSimpleFinSetupComplete
-                        ? t('Link bank account with SimpleFin')
-                        : t('Set up SimpleFin for bank sync')}
+                        ? t('Link bank account with SimpleFIN')
+                        : t('Set up SimpleFIN for bank sync')}
                     </ButtonWithLoading>
                     {isSimpleFinSetupComplete && (
                       <>
@@ -344,7 +344,7 @@ export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
                             items={[
                               {
                                 name: 'reconfigure',
-                                text: t('Reset SimpleFin credentials'),
+                                text: t('Reset SimpleFIN credentials'),
                               },
                             ]}
                           />
@@ -354,10 +354,11 @@ export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
                   </View>
                   <Text style={{ lineHeight: '1.4em', fontSize: 15 }}>
                     <strong>
-                      {t('Link a')} <em>{t('US')}</em> {t('bank account')}
+                      {t('Link a')} <em>{t('North American')}</em>
+                      {t(' bank account')}
                     </strong>{' '}
                     {t(
-                      'to automatically download transactions. SimpleFin supports all major US banks.',
+                      'to automatically download transactions. SimpleFIN provides reliable, up-to-date information from hundreds of banks.',
                     )}{' '}
                   </Text>
                 </>

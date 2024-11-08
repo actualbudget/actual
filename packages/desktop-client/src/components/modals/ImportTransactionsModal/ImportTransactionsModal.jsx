@@ -735,7 +735,7 @@ export function ImportTransactionsModal({ options }) {
           {error && !error.parsed && (
             <View style={{ alignItems: 'center', marginBottom: 15 }}>
               <Text style={{ marginRight: 10, color: theme.errorText }}>
-                <strong>{t('Error:')}</strong> {error.message}
+                <strong>Error:</strong> {error.message}
               </Text>
             </View>
           )}
@@ -803,7 +803,7 @@ export function ImportTransactionsModal({ options }) {
               }}
             >
               <Text style={{ maxWidth: 450, marginBottom: 15 }}>
-                <strong>{t('Error:')}</strong> {error.message}
+                <strong>Error:</strong> {error.message}
               </Text>
               {error.parsed && (
                 <Button onPress={() => onNewFile()}>

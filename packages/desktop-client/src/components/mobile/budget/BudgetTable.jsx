@@ -156,7 +156,7 @@ function Saved({ projected, onPress, show3Cols }) {
                 minFontSizePx={6}
                 maxFontSizePx={12}
                 mode="oneline"
-                title={t('Projected Savings')} // Translated title
+                title="Projected Savings"
                 style={{
                   color: theme.formInputText,
                   textAlign: 'left',
@@ -1430,7 +1430,6 @@ function IncomeGroup({
           <Label title={t('Budgeted')} style={{ width: columnWidth }} />
         )}
         <Label title={t('Received')} style={{ width: columnWidth }} />
-        Translated title
       </View>
 
       <Card style={{ marginTop: 0 }}>
@@ -1512,8 +1511,7 @@ function UncategorizedButton() {
           padding: '1.25em',
         }}
       >
-        {count} {t('uncategorized')}
-        {count === 1 ? t('transaction') : t('transactions')}
+        {count} uncategorized {count === 1 ? 'transaction' : 'transactions'}
         <View style={{ flex: 1 }} />
         <SvgArrowThinRight width="15" height="15" />
       </Link>

@@ -28,7 +28,7 @@ export function ExportBudget() {
     if ('error' in response) {
       setError(response.error);
       setIsLoading(false);
-      console.log(t('Export error code:'), response.error);
+      console.log('Export error code:', response.error);
       return;
     }
 

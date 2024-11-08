@@ -155,7 +155,7 @@ export function AccountMenuModal({
                 notes={
                   originalNotes && originalNotes.length > 0
                     ? originalNotes
-                    : t('No notes')
+                    : 'No notes'
                 }
                 editable={false}
                 focused={false}
@@ -216,7 +216,6 @@ function AdditionalAccountMenu({
     ...itemStyle,
     ...(item.name === 'close' && { color: theme.errorTextMenu }),
   });
-  const { t } = useTranslation();
 
   return (
     <View>
@@ -245,13 +244,13 @@ function AdditionalAccountMenu({
               account.closed
                 ? {
                     name: 'reopen',
-                    text: t('Reopen account'),
+                    text: 'Reopen account',
                     icon: SvgLockOpen,
                     iconSize: 15,
                   }
                 : {
                     name: 'close',
-                    text: t('Close account'),
+                    text: 'Close account',
                     icon: SvgClose,
                     iconSize: 15,
                   },

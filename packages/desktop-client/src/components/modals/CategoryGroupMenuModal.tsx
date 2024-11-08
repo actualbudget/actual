@@ -128,7 +128,7 @@ export function CategoryGroupMenuModal({
               }}
             >
               <Notes
-                notes={notes?.length > 0 ? notes : t('No notes')}
+                notes={notes?.length > 0 ? notes : 'No notes'}
                 editable={false}
                 focused={false}
                 getStyle={() => ({
@@ -216,7 +216,7 @@ function AdditionalCategoryGroupMenu({ group, onDelete, onToggleVisibility }) {
                 [
                   {
                     name: 'toggleVisibility',
-                    text: group.hidden ? t('Show') : t('Hide'),
+                    text: group.hidden ? 'Show' : 'Hide',
                     icon: group.hidden ? SvgViewShow : SvgViewHide,
                     iconSize: 16,
                   },
