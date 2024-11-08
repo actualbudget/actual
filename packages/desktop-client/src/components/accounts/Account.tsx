@@ -44,7 +44,7 @@ import {
   type RuleConditionEntity,
   type TransactionEntity,
   type TransactionFilterEntity,
-  RuleEntity,
+  type RuleEntity,
 } from 'loot-core/src/types/models';
 
 import { useAccounts } from '../../hooks/useAccounts';
@@ -709,9 +709,9 @@ class AccountInternal extends PureComponent<
   onRunRules = async (ids: string[]) => {
     // this should be probably inside the onEdit function that the others button are calling
     // but I'm not sure how to do it and if i'll break anything
-    let transactions = this.state.transactions;
+    const transactions = this.state.transactions;
     for (const transId of ids) {
-      let trans = transactions.find(({ id }) => transId === id);
+      const trans = transactions.find(({ id }) => transId === id);
       send('payees-get-rules', {
         id: trans.payee,
       }).then((the_rules: RuleEntity[]) => {
@@ -728,7 +728,6 @@ class AccountInternal extends PureComponent<
         });
       });
     }
-
   };
   onAddTransaction = () => {
     this.setState({ isAdding: true });
