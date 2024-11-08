@@ -576,11 +576,11 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                   <Trans>
                     <Paragraph>
                       <strong>
-                        How are “Average” and “Spent Average Month to Date (MTD)” calculated?
+                        How are “Average” and “Spent Average MTD” calculated?
                       </strong>
                     </Paragraph>
                     <Paragraph>
-                      They are both the average cumulative spending by day for
+                      The "Average" and "Spent Average MTD" or "Spent Average Month to Date" are both the average cumulative spending by day for
                       the three months before the selected “compare” month.
                     </Paragraph>
                   </Trans>
