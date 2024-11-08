@@ -6,7 +6,6 @@ import React, {
   type CSSProperties,
 } from 'react';
 
-
 import { View } from './View';
 
 type SimpleTableProps = {

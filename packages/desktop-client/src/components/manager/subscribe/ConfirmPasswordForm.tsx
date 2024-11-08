@@ -148,4 +148,3 @@ export function ConfirmOldPasswordForm({ buttons, onSetPassword }) {
     </View>
   );
 }
-

@@ -255,10 +255,10 @@ export function Login() {
           }}
         >
           <Trans>
-          If you lost your password, you likely still have access to your server
-            to manually reset it.
+            If you lost your password, you likely still have access to your
+            server to manually reset it.
           </Trans>
-      </Text>
+        </Text>
       )}
 
       {loginMethods.length > 1 && (

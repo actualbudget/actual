@@ -288,20 +288,20 @@ function FileItem({
       >
         <View
           title={getFileDescription(file, t) || ''}
-          style={{ alignItems: 'flex-start', width: '100%' }}>
-        <View style={{ flexDirection: 'row', width: '100%' }}
+          style={{ alignItems: 'flex-start', width: '100%' }}
         >
+          <View style={{ flexDirection: 'row', width: '100%' }}>
             <Text style={{ fontSize: 16, fontWeight: 700 }}>{file.name}</Text>
-          {multiuserEnabled && (
-            <UserAccessForFile
-              fileId={(file as RemoteFile).cloudFileId}
-              currentUserId={currentUserId}
-            />
-          )}
-        </View>
+            {multiuserEnabled && (
+              <UserAccessForFile
+                fileId={(file as RemoteFile).cloudFileId}
+                currentUserId={currentUserId}
+              />
+            )}
+          </View>
 
-        <FileState file={file} currentUserId={currentUserId} />
-      </View>
+          <FileState file={file} currentUserId={currentUserId} />
+        </View>
 
         <View
           style={{

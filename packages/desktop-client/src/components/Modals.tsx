@@ -54,8 +54,8 @@ import { ImportYNAB5Modal } from './modals/manager/ImportYNAB5Modal';
 import { ManageRulesModal } from './modals/ManageRulesModal';
 import { MergeUnusedPayeesModal } from './modals/MergeUnusedPayeesModal';
 import { NotesModal } from './modals/NotesModal';
-import { OutOfSyncMigrationsModal } from './modals/OutOfSyncMigrationsModal';
 import { OpenIDEnableModal } from './modals/OpenIDEnableModal';
+import { OutOfSyncMigrationsModal } from './modals/OutOfSyncMigrationsModal';
 import { PasswordEnableModal } from './modals/PasswordEnableModal';
 import { PayeeAutocompleteModal } from './modals/PayeeAutocompleteModal';
 import { ScheduledTransactionMenuModal } from './modals/ScheduledTransactionMenuModal';
@@ -612,33 +612,6 @@ export function Modals() {
           );
         case 'out-of-sync-migrations':
           return <OutOfSyncMigrationsModal key={name} />;
-
-        case 'edit-access':
-          return (
-            <EditUserAccess
-              key={name}
-              defaultUserAccess={options.access}
-              onSave={options.onSave}
-            />
-          );
-
-        case 'edit-user':
-          return (
-            <EditUserFinanceApp
-              key={name}
-              defaultUser={options.user}
-              onSave={options.onSave}
-            />
-          );
-
-        case 'transfer-ownership':
-          return <TransferOwnership key={name} onSave={options.onSave} />;
-
-        case 'enable-openid':
-          return <OpenIDEnableModal key={name} onSave={options.onSave} />;
-
-        case 'enable-password-auth':
-          return <PasswordEnableModal key={name} onSave={options.onSave} />;
 
         case 'edit-access':
           return (
