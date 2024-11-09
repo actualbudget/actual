@@ -1140,6 +1140,31 @@ class AccountInternal extends PureComponent<
     });
   };
 
+  onUnmarkTransactionsAsImported = async (ids: string[]) => {
+    this.setState({ workingHard: true });
+
+    const { data } = await runQuery(
+      q('transactions')
+        .filter({ id: { $oneof: ids } })
+        .select('*')
+        .options({ splits: 'grouped' }),
+    );
+
+    const transactions: TransactionEntity[] = data;
+
+    if (!transactions || transactions.length === 0) {
+      return;
+    }
+
+    const importedTransactionIds = transactions
+      .filter(t => t.imported_payee)
+      .map(t => t.id);
+
+    this.onBatchEdit('imported_payee', importedTransactionIds);
+
+    this.refetchTransactions();
+  };
+
   checkForReconciledTransactions = async (
     ids: string[],
     confirmReason: string,
@@ -1750,6 +1775,9 @@ class AccountInternal extends PureComponent<
                 onSetTransfer={this.onSetTransfer}
                 onMakeAsSplitTransaction={this.onMakeAsSplitTransaction}
                 onMakeAsNonSplitTransactions={this.onMakeAsNonSplitTransactions}
+                onUnmarkTransactionsAsImported={
+                  this.onUnmarkTransactionsAsImported
+                }
               />
 
               <View style={{ flex: 1 }}>

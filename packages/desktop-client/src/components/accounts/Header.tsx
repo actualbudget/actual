@@ -113,6 +113,7 @@ type AccountHeaderProps = {
   | 'onSetTransfer'
   | 'onMakeAsSplitTransaction'
   | 'onMakeAsNonSplitTransactions'
+  | 'onUnmarkTransactionsAsImported'
 > &
   Pick<
     ComponentProps<typeof FiltersStack>,
@@ -179,6 +180,7 @@ export function AccountHeader({
   onSetTransfer,
   onMakeAsSplitTransaction,
   onMakeAsNonSplitTransactions,
+  onUnmarkTransactionsAsImported,
 }: AccountHeaderProps) {
   const { t } = useTranslation();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -367,6 +369,7 @@ export function AccountHeader({
               showMakeTransfer={showMakeTransfer}
               onMakeAsSplitTransaction={onMakeAsSplitTransaction}
               onMakeAsNonSplitTransactions={onMakeAsNonSplitTransactions}
+              onUnmarkTransactionsAsImported={onUnmarkTransactionsAsImported}
             />
           )}
           <View>
