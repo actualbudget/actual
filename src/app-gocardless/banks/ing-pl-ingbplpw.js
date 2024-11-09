@@ -27,7 +27,7 @@ export default {
     return {
       ...transaction,
       payeeName: formatPayeeName(transaction),
-      date: transaction.bookingDate || transaction.valueDate,
+      date: transaction.valueDate ?? transaction.bookingDate,
     };
   },
 
