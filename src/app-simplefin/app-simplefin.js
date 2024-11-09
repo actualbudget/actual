@@ -202,7 +202,7 @@ function getAccountResponse(results, accountId, startDate) {
 
     let dateToUse = 0;
 
-    if (trans.posted == 0) {
+    if (trans.pending ?? trans.posted == 0) {
       newTrans.booked = false;
       dateToUse = trans.transacted_at;
     } else {
