@@ -12,7 +12,7 @@ let config: ServerConfig | null = null;
 
 function joinURL(base: string | URL, ...paths: string[]): string {
   const url = new URL(base);
-  url.pathname = fs.join(...paths);
+  url.pathname += fs.join(...paths);
   return url.toString();
 }
 
