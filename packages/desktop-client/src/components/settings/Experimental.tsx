@@ -92,13 +92,6 @@ export function ExperimentalFeatures() {
       primaryAction={
         expanded ? (
           <View style={{ gap: '1em' }}>
-            <FeatureToggle
-              flag="spendingReport"
-              feedbackLink="https://github.com/actualbudget/actual/issues/2820"
-            >
-              <Trans>Monthly spending report</Trans>
-            </FeatureToggle>
-
             <TrackingBudgetFeature />
 
             <FeatureToggle flag="goalTemplatesEnabled">
@@ -115,6 +108,18 @@ export function ExperimentalFeatures() {
               feedbackLink="https://github.com/actualbudget/actual/issues/3606"
             >
               <Trans>Rule action templating</Trans>
+            </FeatureToggle>
+            <FeatureToggle
+              flag="upcomingLengthAdjustment"
+              feedbackLink="https://github.com/actualbudget/actual/issues/3660"
+            >
+              <Trans>Scheduled transaction upcoming length adjustment</Trans>
+            </FeatureToggle>
+            <FeatureToggle
+              flag="contextMenus"
+              feedbackLink="https://github.com/actualbudget/actual/issues/3706"
+            >
+              <Trans>Context menus</Trans>
             </FeatureToggle>
           </View>
         ) : (

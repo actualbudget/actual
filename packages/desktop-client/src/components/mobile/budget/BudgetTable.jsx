@@ -1,8 +1,8 @@
 import React, { memo, useCallback, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 
+import { css } from '@emotion/css';
 import { AutoTextSize } from 'auto-text-size';
-import { css } from 'glamor';
 import memoizeOne from 'memoize-one';
 
 import { collapseModals, pushModal } from 'loot-core/client/actions';
@@ -30,7 +30,6 @@ import {
   SvgCheveronRight,
 } from '../../../icons/v1';
 import { SvgViewShow } from '../../../icons/v2';
-import { useResponsive } from '../../../ResponsiveProvider';
 import { theme, styles } from '../../../style';
 import { BalanceWithCarryover } from '../../budget/BalanceWithCarryover';
 import { makeAmountGrey, makeBalanceAmountStyle } from '../../budget/util';
@@ -42,6 +41,7 @@ import { Text } from '../../common/Text';
 import { View } from '../../common/View';
 import { MobilePageHeader, Page } from '../../Page';
 import { PrivacyFilter } from '../../PrivacyFilter';
+import { useResponsive } from '../../responsive/ResponsiveProvider';
 import { CellValue } from '../../spreadsheet/CellValue';
 import { useFormat } from '../../spreadsheet/useFormat';
 import { useSheetValue } from '../../spreadsheet/useSheetValue';
@@ -801,15 +801,13 @@ const ExpenseGroupHeader = memo(function ExpenseGroupHeader({
       >
         <Button
           variant="bare"
-          className={String(
-            css({
-              flexShrink: 0,
-              color: theme.pageTextSubdued,
-              '&[data-pressed]': {
-                backgroundColor: 'transparent',
-              },
-            }),
-          )}
+          className={css({
+            flexShrink: 0,
+            color: theme.pageTextSubdued,
+            '&[data-pressed]': {
+              backgroundColor: 'transparent',
+            },
+          })}
           onPress={() => onToggleCollapse?.(group.id)}
         >
           <SvgExpandArrow
@@ -996,15 +994,13 @@ const IncomeGroupHeader = memo(function IncomeGroupHeader({
       >
         <Button
           variant="bare"
-          className={String(
-            css({
-              flexShrink: 0,
-              color: theme.pageTextSubdued,
-              '&[data-pressed]': {
-                backgroundColor: 'transparent',
-              },
-            }),
-          )}
+          className={css({
+            flexShrink: 0,
+            color: theme.pageTextSubdued,
+            '&[data-pressed]': {
+              backgroundColor: 'transparent',
+            },
+          })}
           onPress={() => onToggleCollapse?.(group.id)}
         >
           <SvgExpandArrow

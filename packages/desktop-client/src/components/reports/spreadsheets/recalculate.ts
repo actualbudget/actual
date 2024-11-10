@@ -43,17 +43,21 @@ export function recalculate({
     (arr: IntervalEntity[], intervalItem, index) => {
       const last = arr.length === 0 ? null : arr[arr.length - 1];
 
+      const groupsByCategory =
+        groupByLabel === 'category' || groupByLabel === 'categoryGroup';
       const intervalAssets = filterHiddenItems(
         item,
         assets,
         showOffBudget,
         showHiddenCategories,
         showUncategorized,
+        groupsByCategory,
       )
         .filter(
           asset =>
             asset.date === intervalItem &&
-            asset[groupByLabel] === (item.id ?? null),
+            (asset[groupByLabel] === (item.id ?? null) ||
+              (item.uncategorized_id && groupsByCategory)),
         )
         .reduce((a, v) => (a = a + v.amount), 0);
       totalAssets += intervalAssets;
@@ -64,11 +68,13 @@ export function recalculate({
         showOffBudget,
         showHiddenCategories,
         showUncategorized,
+        groupsByCategory,
       )
         .filter(
           debt =>
             debt.date === intervalItem &&
-            debt[groupByLabel] === (item.id ?? null),
+            (debt[groupByLabel] === (item.id ?? null) ||
+              (item.uncategorized_id && groupsByCategory)),
         )
         .reduce((a, v) => (a = a + v.amount), 0);
       totalDebts += intervalDebts;

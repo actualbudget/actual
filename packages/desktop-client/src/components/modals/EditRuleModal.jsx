@@ -7,6 +7,7 @@ import React, {
 } from 'react';
 import { useDispatch } from 'react-redux';
 
+import { css } from '@emotion/css';
 import { v4 as uuid } from 'uuid';
 
 import {
@@ -97,10 +98,10 @@ export function FieldSelect({ fields, style, value, onChange }) {
         options={fields}
         value={value}
         onChange={onChange}
-        style={{
+        className={css({
           color: theme.pageTextPositive,
           '&[data-hovered]': { color: theme.pageTextPositive },
-        }}
+        })}
       />
     </View>
   );
@@ -357,6 +358,7 @@ function ScheduleDescription({ id }) {
 const actionFields = [
   'category',
   'payee',
+  'payee_name',
   'notes',
   'cleared',
   'account',
@@ -382,7 +384,12 @@ function ActionEditor({ action, editorStyle, onChange, onDelete, onAdd }) {
   const templated = options?.template !== undefined;
 
   // Even if the feature flag is disabled, we still want to be able to turn off templating
-  const isTemplatingEnabled = useFeatureFlag('actionTemplating') || templated;
+  const actionTemplating = useFeatureFlag('actionTemplating');
+  const isTemplatingEnabled = actionTemplating || templated;
+
+  const fields = (
+    options?.splitIndex ? splitActionFields : actionFields
+  ).filter(([s]) => actionTemplating || !s.includes('_name') || field === s);
 
   return (
     <Editor style={editorStyle} error={error}>
@@ -395,7 +402,7 @@ function ActionEditor({ action, editorStyle, onChange, onDelete, onAdd }) {
           />
 
           <FieldSelect
-            fields={options?.splitIndex ? splitActionFields : actionFields}
+            fields={fields}
             value={field}
             onChange={value => onChange('field', value)}
           />

@@ -3,13 +3,12 @@ import React, { useState } from 'react';
 import { Form } from 'react-aria-components';
 import { useDispatch } from 'react-redux';
 
-import { css } from 'glamor';
+import { css } from '@emotion/css';
 
 import { loadAllFiles, loadGlobalPrefs, sync } from 'loot-core/client/actions';
 import { send } from 'loot-core/src/platform/client/fetch';
 import { getCreateKeyError } from 'loot-core/src/shared/errors';
 
-import { useResponsive } from '../../ResponsiveProvider';
 import { styles, theme } from '../../style';
 import { ButtonWithLoading } from '../common/Button2';
 import { InitialFocus } from '../common/InitialFocus';
@@ -24,6 +23,7 @@ import {
 import { Paragraph } from '../common/Paragraph';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
+import { useResponsive } from '../responsive/ResponsiveProvider';
 
 type CreateEncryptionKeyModalProps = {
   options: {
@@ -98,10 +98,10 @@ export function CreateEncryptionKeyModal({
                 </Paragraph>
                 <Paragraph>
                   <ul
-                    className={`${css({
+                    className={css({
                       marginTop: 0,
                       '& li': { marginBottom: 8 },
-                    })}`}
+                    })}
                   >
                     <li>
                       <strong>Important:</strong> if you forget this password{' '}

@@ -88,6 +88,13 @@ export function TransactionList({
   onCloseAddTransaction,
   onCreatePayee,
   onApplyFilter,
+  onBatchDelete,
+  onBatchDuplicate,
+  onBatchLinkSchedule,
+  onBatchUnlinkSchedule,
+  onCreateRule,
+  onScheduleAction,
+  onMakeAsNonSplitTransactions,
 }) {
   const dispatch = useDispatch();
   const transactionsLatest = useRef();
@@ -106,6 +113,7 @@ export function TransactionList({
 
   const onSave = useCallback(async transaction => {
     const changes = updateTransaction(transactionsLatest.current, transaction);
+    transactionsLatest.current = changes.data;
 
     if (changes.diff.updated.length > 0) {
       const dateChanged = !!changes.diff.updated[0].date;
@@ -236,6 +244,13 @@ export function TransactionList({
       onSort={onSort}
       sortField={sortField}
       ascDesc={ascDesc}
+      onBatchDelete={onBatchDelete}
+      onBatchDuplicate={onBatchDuplicate}
+      onBatchLinkSchedule={onBatchLinkSchedule}
+      onBatchUnlinkSchedule={onBatchUnlinkSchedule}
+      onCreateRule={onCreateRule}
+      onScheduleAction={onScheduleAction}
+      onMakeAsNonSplitTransactions={onMakeAsNonSplitTransactions}
     />
   );
 }

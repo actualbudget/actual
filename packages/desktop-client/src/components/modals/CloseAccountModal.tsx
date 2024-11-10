@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { type FormEvent, useState } from 'react';
+import React, { type FormEvent, useState, type CSSProperties } from 'react';
 import { Form } from 'react-aria-components';
 import { useDispatch } from 'react-redux';
 
@@ -13,8 +13,7 @@ import { type AccountEntity } from 'loot-core/src/types/models';
 
 import { useAccounts } from '../../hooks/useAccounts';
 import { useCategories } from '../../hooks/useCategories';
-import { useResponsive } from '../../ResponsiveProvider';
-import { type CSSProperties, styles, theme } from '../../style';
+import { styles, theme } from '../../style';
 import { AccountAutocomplete } from '../autocomplete/AccountAutocomplete';
 import { CategoryAutocomplete } from '../autocomplete/CategoryAutocomplete';
 import { Button } from '../common/Button2';
@@ -24,6 +23,7 @@ import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { Paragraph } from '../common/Paragraph';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
+import { useResponsive } from '../responsive/ResponsiveProvider';
 
 function needsCategory(
   account: AccountEntity,

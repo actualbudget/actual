@@ -1,6 +1,5 @@
-import React from 'react';
+import React, { type CSSProperties } from 'react';
 
-import { type CSSProperties } from '../../../style';
 import { Select } from '../../common/Select';
 
 type SelectFieldProps = {

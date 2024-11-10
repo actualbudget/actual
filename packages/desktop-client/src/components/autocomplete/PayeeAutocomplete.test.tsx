@@ -7,7 +7,7 @@ import { TestProvider } from 'loot-core/src/mocks/redux';
 import type { AccountEntity, PayeeEntity } from 'loot-core/types/models';
 
 import { useCommonPayees } from '../../hooks/usePayees';
-import { ResponsiveProvider } from '../../ResponsiveProvider';
+import { ResponsiveProvider } from '../responsive/ResponsiveProvider';
 
 import {
   PayeeAutocomplete,
