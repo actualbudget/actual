@@ -268,7 +268,7 @@ export class CategoryTemplate {
       this.goalAmount = amountToInteger(this.goals[0].amount);
       return;
     }
-    this.goalAmount = this.fullAmount
+    this.goalAmount = this.fullAmount;
   }
 
   //-----------------------------------------------------------------------------
