@@ -58,12 +58,10 @@ export function PayeeMenu({
             color: theme.pageTextSubdued,
           }}
         >
-          {t(
-            [...selectedPayees]
-              .slice(0, 4)
-              .map(id => payeesById[id].name)
-              .join(', ') + (selectedPayees.size > 4 ? ', and more' : ''),
-          )}
+          {[...selectedPayees]
+            .slice(0, 4)
+            .map(id => payeesById[id].name)
+            .join(', ') + (selectedPayees.size > 4 ? t(', and more') : '')}
         </View>
       }
       items={[
