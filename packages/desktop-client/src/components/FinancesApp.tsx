@@ -18,7 +18,6 @@ import { useAccounts } from '../hooks/useAccounts';
 import { useLocalPref } from '../hooks/useLocalPref';
 import { useMetaThemeColor } from '../hooks/useMetaThemeColor';
 import { useNavigate } from '../hooks/useNavigate';
-import { useResponsive } from '../ResponsiveProvider';
 import { theme } from '../style';
 import { getIsOutdated, getLatestVersion } from '../util/versions';
 
@@ -34,6 +33,7 @@ import { ManagePayeesPage } from './payees/ManagePayeesPage';
 import { Reports } from './reports';
 import { LoadingIndicator } from './reports/LoadingIndicator';
 import { NarrowAlternate, WideComponent } from './responsive';
+import { useResponsive } from './responsive/ResponsiveProvider';
 import { Settings } from './settings';
 import { FloatableSidebar } from './sidebar';
 import { Titlebar } from './Titlebar';
@@ -98,6 +98,29 @@ export function FinancesApp() {
     setTimeout(async () => {
       await dispatch(sync());
     }, 100);
+  }, []);
+
+  useEffect(() => {
+    async function run() {
+      await global.Actual.waitForUpdateReadyForDownload();
+      dispatch(
+        addNotification({
+          type: 'message',
+          title: t('A new version of Actual is available!'),
+          message: t('Click the button below to reload and apply the update.'),
+          sticky: true,
+          id: 'update-reload-notification',
+          button: {
+            title: t('Update now'),
+            action: async () => {
+              await global.Actual.applyAppUpdate();
+            },
+          },
+        }),
+      );
+    }
+
+    run();
   }, []);
 
   useEffect(() => {

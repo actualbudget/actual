@@ -60,7 +60,7 @@ export function separateGroups(categoryGroups: CategoryGroupEntity[]) {
   return [
     categoryGroups.filter(g => !g.is_income),
     categoryGroups.find(g => g.is_income),
-  ];
+  ] as const;
 }
 
 export function makeAmountGrey(value: number | string): CSSProperties {

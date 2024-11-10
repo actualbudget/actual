@@ -119,8 +119,7 @@ function CustomReportListCardsInner({
   return (
     <ReportCard
       isEditing={isEditing}
-      to="/reports/custom"
-      report={report}
+      to={`/reports/custom/${report.id}`}
       menuItems={[
         {
           name: 'rename',
