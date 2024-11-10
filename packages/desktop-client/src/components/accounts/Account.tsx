@@ -707,28 +707,41 @@ class AccountInternal extends PureComponent<
   }
 
   onRunRules = async (ids: string[]) => {
-    // this should be probably inside the onEdit function that the others button are calling
-    // but I'm not sure how to do it and if i'll break anything
-    const transactions = this.state.transactions;
-    for (const transId of ids) {
-      const trans = transactions.find(({ id }) => transId === id);
-      send('payees-get-rules', {
-        id: trans.payee,
-      }).then((the_rules: RuleEntity[]) => {
-        the_rules.forEach((rule: RuleEntity) => {
-          send('rule-apply-actions', {
+    try {
+      this.setState({ workingHard: true });
+      // Bulk fetch transactions
+      const transactions = this.state.transactions.filter(trans =>
+        ids.includes(trans.id),
+      );
+      // Process transactions sequentially to maintain order
+      for (const trans of transactions) {
+        if (!trans.payee) continue;
+        // Fetch rules for the transaction's payee
+        const rules = (await send('payees-get-rules', {
+          id: trans.payee,
+        })) as RuleEntity[];
+
+        // Apply all rules for this transaction
+        for (const rule of rules) {
+          await send('rule-apply-actions', {
             transactions: [trans],
             actions: rule.actions,
-          }).then(() => {
-            // once rule is applied, fetch the transaction again.
-            // should just update the one that has been updated, but not sure how to do it.
-            // probably via the updateTransaction function ?
-            this.fetchTransactions();
           });
-        });
+        }
+      }
+      // Fetch updated transactions once at the end
+      await this.fetchTransactions();
+    } catch (error) {
+      console.error('Error applying rules:', error);
+      this.props.addNotification({
+        type: 'error',
+        message: 'Failed to apply rules to transactions',
       });
+    } finally {
+      this.setState({ workingHard: false });
     }
   };
+
   onAddTransaction = () => {
     this.setState({ isAdding: true });
   };
