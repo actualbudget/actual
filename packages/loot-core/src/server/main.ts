@@ -1345,6 +1345,15 @@ handlers['save-global-prefs'] = async function (prefs) {
       prefs.serverSelfSignedCert,
     );
   }
+<<<<<<< Updated upstream
+=======
+  if ('startupOptions' in prefs) {
+    await asyncStorage.setItem('startupOptions', prefs.startupOptions);
+  }
+  if ('ngrokConfig' in prefs) {
+    await asyncStorage.setItem('ngrokConfig', prefs.ngrokConfig);
+  }
+>>>>>>> Stashed changes
   return 'ok';
 };
 
@@ -1357,6 +1366,11 @@ handlers['load-global-prefs'] = async function () {
     [, theme],
     [, preferredDarkTheme],
     [, serverSelfSignedCert],
+<<<<<<< Updated upstream
+=======
+    [, startupOptions],
+    [, ngrokConfig],
+>>>>>>> Stashed changes
   ] = await asyncStorage.multiGet([
     'floating-sidebar',
     'max-months',
@@ -1365,6 +1379,11 @@ handlers['load-global-prefs'] = async function () {
     'theme',
     'preferred-dark-theme',
     'server-self-signed-cert',
+<<<<<<< Updated upstream
+=======
+    'startupOptions',
+    'ngrokConfig',
+>>>>>>> Stashed changes
   ]);
   return {
     floatingSidebar: floatingSidebar === 'true' ? true : false,
@@ -1384,6 +1403,11 @@ handlers['load-global-prefs'] = async function () {
         ? preferredDarkTheme
         : 'dark',
     serverSelfSignedCert: serverSelfSignedCert || undefined,
+<<<<<<< Updated upstream
+=======
+    startupOptions: startupOptions || undefined,
+    ngrokConfig: ngrokConfig || undefined,
+>>>>>>> Stashed changes
   };
 };
 

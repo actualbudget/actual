@@ -66,6 +66,10 @@ contextBridge.exposeInMainWorld('Actual', {
     ipcRenderer.send('update-menu', budgetId);
   },
 
+  setStartupOptions: (options: { openAtLogin?: boolean }) => {
+    ipcRenderer.send('set-startup-options', options);
+  },
+
   // No auto-updates in the desktop app
   isUpdateReadyForDownload: () => false,
   waitForUpdateReadyForDownload: () => new Promise<void>(() => {}),

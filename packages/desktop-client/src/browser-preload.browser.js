@@ -154,6 +154,7 @@ global.Actual = {
     window.open(url, '_blank');
   },
   onEventFromMain: () => {},
+  setStartupOptions: () => {},
   isUpdateReadyForDownload: () => isUpdateReadyForDownload,
   waitForUpdateReadyForDownload: () => isUpdateReadyForDownloadPromise,
   applyAppUpdate: async () => {

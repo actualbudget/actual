@@ -341,6 +341,16 @@ app.on('activate', () => {
   }
 });
 
+ipcMain.handle(
+  'set-startup-options',
+  (_event, payload: { openAtLogin?: boolean }) => {
+    const openAtLogin = payload.openAtLogin;
+    app.setLoginItemSettings({
+      openAtLogin,
+    });
+  },
+);
+
 export type GetBootstrapDataPayload = {
   version: string;
   isDev: boolean;

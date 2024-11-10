@@ -10,6 +10,7 @@ import { theme, styles } from '../../../style';
 import { Button } from '../../common/Button2';
 import { Modal, ModalCloseButton, ModalHeader } from '../../common/Modal';
 import { Text } from '../../common/Text';
+import { Toggle } from '../../common/Toggle';
 import { View } from '../../common/View';
 
 function FileLocationSettings() {
@@ -141,6 +142,62 @@ function SelfSignedCertLocationSettings() {
   );
 }
 
+function StartupOptions() {
+  const [startupOptionsPref, setStartupOptionsPref] =
+    useGlobalPref('startupOptions');
+
+  const { t } = useTranslation();
+
+  const onToggleOpenAtLogin = (openAtLogin: boolean) => {
+    setStartupOptionsPref({ openAtLogin });
+    globalThis.window.Actual.setStartupOptions({ openAtLogin });
+  };
+
+  return (
+    <View
+      style={{
+        gap: 15,
+        backgroundColor: theme.pillBackground,
+        alignSelf: 'flex-start',
+        alignItems: 'flex-start',
+        padding: 15,
+        borderRadius: 4,
+        border: '1px solid ' + theme.pillBorderDark,
+        width: '100%',
+      }}
+    >
+      <Text>
+        <strong>
+          <Trans>Startup options</Trans>
+        </strong>{' '}
+        <small style={{ marginLeft: '0.5rem' }}>
+          <i>
+            <Trans>system startup behaviour</Trans>
+          </i>
+        </small>
+      </Text>
+      <View
+        style={{
+          flexDirection: 'row',
+          gap: '0.5rem',
+          width: '100%',
+          alignItems: 'center',
+        }}
+      >
+        <label htmlFor="startupOptions" title={t('Startup options')}>
+          <Trans>Open Actual when your computer starts up</Trans>
+        </label>
+        <Toggle
+          id="startupOptions"
+          isOn={startupOptionsPref?.openAtLogin || false}
+          style={{ marginLeft: 5 }}
+          onToggle={onToggleOpenAtLogin}
+        />
+      </View>
+    </View>
+  );
+}
+
 export function FilesSettingsModal() {
   const dispatch = useDispatch();
 
@@ -171,6 +228,7 @@ export function FilesSettingsModal() {
           >
             <FileLocationSettings />
             <SelfSignedCertLocationSettings />
+            <StartupOptions />
             <Button
               variant="primary"
               style={{
