@@ -82,18 +82,8 @@ export type GlobalPrefs = Partial<{
   preferredDarkTheme: DarkTheme;
   documentDir: string; // Electron only
   serverSelfSignedCert: string; // Electron only
-<<<<<<< Updated upstream
-=======
   startupOptions?: {
     // Electron only
     openAtLogin?: boolean;
   };
-  ngrokConfig?: {
-    // Electron only
-    autoStart?: boolean;
-    authToken?: string;
-    port?: number;
-    domain?: string;
-  };
->>>>>>> Stashed changes
 }>;
