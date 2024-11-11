@@ -13,33 +13,37 @@ expr
       ...(repeat ? repeat[3] : {}),
       from,
       priority: template.priority, directive: template.directive
-    } }
+    }}
   / template: template _ monthly: amount limit: limit?
-    { return { type: 'simple', monthly, limit, priority: template.priority, directive: template.directive } }
+    { return { type: 'simple', monthly, limit, priority: template.priority, directive: template.directive }}
   / template: template _ limit: limit
-    { return { type: 'simple', limit , priority: template.priority, directive: template.directive } }
+    { return { type: 'simple', monthly: null, limit, priority: template.priority, directive: template.directive }}
   / template: template _ schedule _ full:full? name: name
-    { return { type: 'schedule', name, priority: template.priority, directive: template.directive, full } }
+    { return { type: 'schedule', name, priority: template.priority, directive: template.directive, full }}
   / template: template _ remainder: remainder limit: limit?
-    { return { type: 'remainder', priority: null, directive: template.directive, weight: remainder, limit } }
+    { return { type: 'remainder', priority: null, directive: template.directive, weight: remainder, limit }}
   / template: template _ 'average'i _ amount: positive _ 'months'i?
-    { return { type: 'average', amount: +amount, priority: template.priority, directive: template.directive }}
+    { return { type: 'average', numMonths: +amount, priority: template.priority, directive: template.directive }}
   / template: template _ 'copy from'i _ lookBack: positive _ 'months ago'i limit:limit?
     { return { type: 'copy', priority: template.priority, directive: template.directive, lookBack: +lookBack, limit }}
-  / goal: goal amount: amount { return {type: 'simple', amount: amount, priority: null, directive: 'goal' }}
+  / goal: goal amount: amount { return {type: 'simple', amount: amount, priority: null, directive: goal }}
 
 
 repeat 'repeat interval'
-  = 'month'i { return { annual: false } }
-  / months: positive _ 'months'i { return { annual: false, repeat: +months } }
-  / 'year'i { return { annual: true } }
-  / years: positive _ 'years'i { return { annual: true, repeat: +years } }
+  = 'month'i { return { annual: false }}
+  / months: positive _ 'months'i { return { annual: false, repeat: +months }}
+  / 'year'i { return { annual: true }}
+  / years: positive _ 'years'i { return { annual: true, repeat: +years }}
 
-limit =  _? upTo _ amount: amount _ 'hold'i { return {amount: amount, hold: true } }
-        / _? upTo _ amount: amount { return {amount: amount, hold: false } }
+limit =  _? upTo _ amount: amount _ 'per week starting'i _ start:date _? hold:hold? 
+          { return {amount: amount, hold: hold, period: 'weekly', start: start }}
+        / _? upTo _ amount: amount _ 'per day'i _? hold: hold?
+          { return {amount: amount, hold: hold, period: 'daily', start:null }}
+        / _? upTo _ amount: amount _? hold: hold? 
+          { return {amount: amount, hold: hold, period: 'monthly', start:null }}
 
-percentOf = percent:percent _ of _ 'previous'i _ { return { percent: percent, prev: true} }
-		/ percent:percent _ of _ { return { percent: percent, prev: false} }
+percentOf = percent:percent _ of _ 'previous'i _ { return { percent: percent, prev: true}}
+		/ percent:percent _ of _ { return { percent: percent, prev: false}}
 
 weekCount
   = week { return null }
@@ -54,12 +58,13 @@ of = 'of'i
 repeatEvery = 'repeat'i _ 'every'i
 starting = 'starting'i
 upTo = 'up'i _ 'to'i
+hold = 'hold'i {return true}
 schedule = 'schedule'i
 full = 'full'i _ {return true}
 priority = '-'i number: number {return number}
 remainder = 'remainder'i _? weight: positive? { return +weight || 1 }
 template = '#template' priority: priority? {return {priority: +priority, directive: 'template'}}
-goal = '#goal'
+goal = '#goal'i { return 'goal'}
 
 _ 'space' = ' '+
 d 'digit' = [0-9]

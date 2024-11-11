@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { type ComponentProps } from 'react';
 
 import { type CustomReportEntity } from 'loot-core/types/models/reports';
 import { type RuleConditionEntity } from 'loot-core/types/models/rule';
@@ -32,13 +32,7 @@ type ReportTopbarProps = {
   viewLabels: boolean;
   onApplyFilter: (newFilter: RuleConditionEntity) => void;
   onChangeViews: (viewType: string) => void;
-  onReportChange: ({
-    savedReport,
-    type,
-  }: {
-    savedReport?: CustomReportEntity;
-    type: string;
-  }) => void;
+  onReportChange: ComponentProps<typeof SaveReport>['onReportChange'];
   isItemDisabled: (type: string) => boolean;
   defaultItems: (item: string) => void;
 };

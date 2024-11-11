@@ -60,3 +60,12 @@ export function useReports() {
     [queryData],
   );
 }
+
+export function useReport(id: string) {
+  const { data, isLoading } = useReports();
+
+  return {
+    data: data.find(report => report.id === id),
+    isLoading,
+  };
+}

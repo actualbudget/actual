@@ -8633,7 +8633,6 @@ __metadata:
     electron: "npm:30.0.6"
     electron-builder: "npm:24.13.3"
     fs-extra: "npm:^11.2.0"
-    node-fetch: "npm:^2.7.0"
     promise-retry: "npm:^2.0.1"
     typescript: "npm:^5.5.4"
   languageName: unknown
@@ -13336,7 +13335,6 @@ __metadata:
     memoize-one: "npm:^6.0.0"
     mitt: "npm:^3.0.1"
     mockdate: "npm:^3.0.5"
-    node-fetch: "npm:^2.7.0"
     npm-run-all: "npm:^4.1.5"
     path-browserify: "npm:^1.0.1"
     peggy: "npm:3.0.2"
@@ -14539,20 +14537,6 @@ __metadata:
   bin:
     ndh: bin/ndh
   checksum: 10/c25f23a5a8b6c1be61b7b3fa8b075bc3e4bdd2a6bf9cc7927e7813942cf503614fcf7cd23025a334152b1a84b086b7c90fbf0f7af161929a1d61d3e51de3c337
-  languageName: node
-  linkType: hard
-
-"node-fetch@npm:^2.7.0":
-  version: 2.7.0
-  resolution: "node-fetch@npm:2.7.0"
-  dependencies:
-    whatwg-url: "npm:^5.0.0"
-  peerDependencies:
-    encoding: ^0.1.0
-  peerDependenciesMeta:
-    encoding:
-      optional: true
-  checksum: 10/b24f8a3dc937f388192e59bcf9d0857d7b6940a2496f328381641cb616efccc9866e89ec43f2ec956bbd6c3d3ee05524ce77fe7b29ccd34692b3a16f237d6676
   languageName: node
   linkType: hard
 
@@ -18233,13 +18217,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tr46@npm:~0.0.3":
-  version: 0.0.3
-  resolution: "tr46@npm:0.0.3"
-  checksum: 10/8f1f5aa6cb232f9e1bdc86f485f916b7aa38caee8a778b378ffec0b70d9307873f253f5cbadbe2955ece2ac5c83d0dc14a77513166ccd0a0c7fe197e21396695
-  languageName: node
-  linkType: hard
-
 "trampa@npm:^1.0.0":
   version: 1.0.1
   resolution: "trampa@npm:1.0.1"
@@ -19357,13 +19334,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"webidl-conversions@npm:^3.0.0":
-  version: 3.0.1
-  resolution: "webidl-conversions@npm:3.0.1"
-  checksum: 10/b65b9f8d6854572a84a5c69615152b63371395f0c5dcd6729c45789052296df54314db2bc3e977df41705eacb8bc79c247cee139a63fa695192f95816ed528ad
-  languageName: node
-  linkType: hard
-
 "webidl-conversions@npm:^4.0.2":
   version: 4.0.2
   resolution: "webidl-conversions@npm:4.0.2"
@@ -19506,16 +19476,6 @@ __metadata:
   version: 2.3.0
   resolution: "whatwg-mimetype@npm:2.3.0"
   checksum: 10/3582c1d74d708716013433bbab45cb9b31ef52d276adfbe2205d948be1ec9bb1a4ac05ce6d9045f3acc4104489e1344c857b14700002385a4b997a5673ff6416
-  languageName: node
-  linkType: hard
-
-"whatwg-url@npm:^5.0.0":
-  version: 5.0.0
-  resolution: "whatwg-url@npm:5.0.0"
-  dependencies:
-    tr46: "npm:~0.0.3"
-    webidl-conversions: "npm:^3.0.0"
-  checksum: 10/f95adbc1e80820828b45cc671d97da7cd5e4ef9deb426c31bcd5ab00dc7103042291613b3ef3caec0a2335ed09e0d5ed026c940755dbb6d404e2b27f940fdf07
   languageName: node
   linkType: hard
 

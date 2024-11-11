@@ -22,7 +22,6 @@ import {
 import { useAccounts } from '../../hooks/useAccounts';
 import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { useNavigate } from '../../hooks/useNavigate';
-import { useResponsive } from '../../ResponsiveProvider';
 import { breakpoints } from '../../tokens';
 import { Button } from '../common/Button2';
 import { Menu } from '../common/Menu';
@@ -31,6 +30,7 @@ import { Popover } from '../common/Popover';
 import { View } from '../common/View';
 import { MOBILE_NAV_HEIGHT } from '../mobile/MobileNavTabs';
 import { MobilePageHeader, Page, PageHeader } from '../Page';
+import { useResponsive } from '../responsive/ResponsiveProvider';
 
 import { NON_DRAGGABLE_AREA_CLASS_NAME } from './constants';
 import { LoadingIndicator } from './LoadingIndicator';
