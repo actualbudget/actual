@@ -249,7 +249,7 @@ handlers['api/sync'] = async function () {
 
 handlers['api/bank-sync'] = async function (args) {
   const batchSync = args?.accountId == null;
-  let allErrors = [];
+  const allErrors = [];
 
   if (!batchSync) {
     const { errors } = await handlers['accounts-bank-sync']({

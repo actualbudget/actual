@@ -1106,7 +1106,7 @@ handlers['accounts-bank-sync'] = async function ({ id, ids }) {
   ]);
 
   if ((id && ids) || (!id && !ids)) {
-    throw new Error('Specify either "id" or "ids", but not both.');
+    throw new Error('Specify either id or ids, but not both');
   }
 
   const accounts = await db.runQuery(
