@@ -211,16 +211,12 @@ async function processTemplate(
     const availStart = availBudget;
     const p = priorities[pi];
     for (let i = 0; i < catObjects.length; i++) {
-      if (availBudget <= 0 && p > 0) break;
       const ret = await catObjects[i].runTemplatesForPriority(
         p,
         availBudget,
         availStart,
       );
       availBudget -= ret;
-    }
-    if (availBudget <= 0) {
-      break;
     }
   }
   // run limits

@@ -134,18 +134,18 @@ export class CategoryTemplate {
         }
       }
 
-      // don't overbudget when using a priority
-      if (priority > 0 && toBudget > available) {
-        toBudget = available;
-      }
       available = available - toBudget;
-
-      if (priority > 0 && available <= 0) {
-        break;
-      }
     }
 
-    this.toBudgetAmount += toBudget;
+    // don't overbudget when using a priority
+    if (priority > 0 && available < 0) {
+      this.fullAmount += toBudget;
+      toBudget = Math.max(0, toBudget + available);
+      this.toBudgetAmount += toBudget;
+    } else {
+      this.fullAmount += toBudget;
+      this.toBudgetAmount += toBudget;
+    }
     return toBudget;
   }
 
@@ -155,12 +155,14 @@ export class CategoryTemplate {
     }
     if (this.limitHold && this.fromLastMonth >= this.limitAmount) {
       const orig = this.toBudgetAmount;
+      this.fullAmount = 0;
       this.toBudgetAmount = 0;
       return orig;
     }
     if (this.toBudgetAmount + this.fromLastMonth > this.limitAmount) {
       const orig = this.toBudgetAmount;
       this.toBudgetAmount = this.limitAmount - this.fromLastMonth;
+      this.fullAmount = this.toBudgetAmount;
       return orig - this.toBudgetAmount;
     }
     return 0;
@@ -200,6 +202,7 @@ export class CategoryTemplate {
   private priorities: number[] = [];
   private remainderWeight: number = 0;
   private toBudgetAmount: number = 0; // amount that will be budgeted by the templates
+  private fullAmount: number = 0; // the full requested amount
   private isLongGoal: boolean = null; //defaulting the goals to null so templates can be unset
   private goalAmount: number = null;
   private fromLastMonth = 0; // leftover from last month
@@ -265,7 +268,7 @@ export class CategoryTemplate {
       this.goalAmount = amountToInteger(this.goals[0].amount);
       return;
     }
-    this.goalAmount = this.toBudgetAmount;
+    this.goalAmount = this.fullAmount;
   }
 
   //-----------------------------------------------------------------------------
