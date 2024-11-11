@@ -196,10 +196,12 @@ export interface ServerHandlers {
   'simplefin-batch-sync': ({ ids }: { ids: string[] }) => Promise<
     {
       accountId: string;
-      errors;
-      newTransactions;
-      matchedTransactions;
-      updatedAccounts;
+      res: {
+        errors;
+        newTransactions;
+        matchedTransactions;
+        updatedAccounts;
+      };
     }[]
   >;
 

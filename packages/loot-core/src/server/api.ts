@@ -270,19 +270,19 @@ handlers['api/bank-sync'] = async function (args) {
         ids: simpleFinAccountIds,
       });
 
-      res.forEach(a => allErrors.push(a.errors));
+      res.forEach(a => allErrors.push(...a.res.errors));
     }
 
     const { errors } = await handlers['accounts-bank-sync']({
       ids: accountIdsToSync.filter(a => !simpleFinAccountIds.includes(a)),
     });
 
-    allErrors.push(errors);
+    allErrors.push(...errors);
   }
 
-  const [firstError] = allErrors.filter(e => e != null);
-  if (firstError) {
-    throw new Error(getBankSyncError(firstError));
+  const errors = allErrors.filter(e => e != null);
+  if (errors.length > 0) {
+    throw new Error(getBankSyncError(errors[0]));
   }
 };
 
