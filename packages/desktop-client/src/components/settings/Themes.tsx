@@ -93,7 +93,7 @@ export function ThemeSettings() {
     >
       <Text>
         <strong>{t('Themes')} </strong>
-        {t('change the user interface colors.')}
+        {t(' change the user interface colors.')}
       </Text>
     </Setting>
   );
