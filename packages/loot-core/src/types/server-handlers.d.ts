@@ -223,7 +223,7 @@ export interface ServerHandlers {
     | { error: 'failed' }
   >;
 
-  'accounts-bank-sync': (arg: { id?: string }) => Promise<{
+  'accounts-bank-sync': (arg: { id?: string; ids?: string[] }) => Promise<{
     errors;
     newTransactions;
     matchedTransactions;

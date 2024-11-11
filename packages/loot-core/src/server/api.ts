@@ -248,11 +248,39 @@ handlers['api/sync'] = async function () {
 };
 
 handlers['api/bank-sync'] = async function (args) {
-  const { errors } = await handlers['accounts-bank-sync']({
-    id: args?.accountId,
-  });
+  const batchSync = args?.accountId == null;
+  let allErrors = [];
 
-  const [firstError] = errors;
+  if (!batchSync) {
+    const { errors } = await handlers['accounts-bank-sync']({
+      id: args?.accountId,
+    });
+
+    allErrors.push(errors);
+  } else {
+    const accountsData = await handlers['accounts-get']();
+    const accountIdsToSync = accountsData.map(a => a.id);
+    const simpleFinAccounts = accountsData.filter(
+      a => a.account_sync_source === 'simpleFin',
+    );
+    const simpleFinAccountIds = simpleFinAccounts.map(a => a.id);
+
+    if (simpleFinAccounts.length > 1) {
+      const res = await handlers['simplefin-batch-sync']({
+        ids: simpleFinAccountIds,
+      });
+
+      res.forEach(a => allErrors.push(a.errors));
+    }
+
+    const { errors } = await handlers['accounts-bank-sync']({
+      ids: accountIdsToSync.filter(a => !simpleFinAccountIds.includes(a)),
+    });
+
+    allErrors.push(errors);
+  }
+
+  const [firstError] = allErrors.filter(e => e != null);
   if (firstError) {
     throw new Error(getBankSyncError(firstError));
   }
