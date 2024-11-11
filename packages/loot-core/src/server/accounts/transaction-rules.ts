@@ -475,10 +475,6 @@ export function conditionsToAQL(conditions, { recurDateBounds = 100 } = {}) {
             tagValues.push(word);
           }
         });
-        // const tagValues = value.split(' ').filter(tag => tag.startsWith('#'));
-        // const tagValues = value
-        //   .split(/(?<!#)(#[\w\d\p{Emoji}-]+)(?=\s|$)/gu)
-        //   .filter(tag => tag.startsWith('#'));
 
         return {
           $and: tagValues.map(v => {
