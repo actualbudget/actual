@@ -1671,10 +1671,10 @@ function NewTransaction({
   );
   const emptyChildTransactions = childTransactions.filter(t => t.amount === 0);
 
-  const addRef = useRef(null);
-  useProperFocus(addRef, focusedField === 'add');
-  const cancelRef = useRef(null);
-  useProperFocus(cancelRef, focusedField === 'cancel');
+  const addButtonRef = useRef(null);
+  useProperFocus(addButtonRef, focusedField === 'add');
+  const cancelButtonRef = useRef(null);
+  useProperFocus(cancelButtonRef, focusedField === 'cancel');
 
   return (
     <View
@@ -1737,7 +1737,7 @@ function NewTransaction({
           style={{ marginRight: 10, padding: '4px 10px' }}
           onPress={() => onClose()}
           data-testid="cancel-button"
-          ref={cancelRef}
+          ref={cancelButtonRef}
         >
           Cancel
         </Button>
@@ -1757,7 +1757,7 @@ function NewTransaction({
             style={{ padding: '4px 10px' }}
             onPress={onAdd}
             data-testid="add-button"
-            ref={addRef}
+            ref={addButtonRef}
           >
             Add
           </Button>
