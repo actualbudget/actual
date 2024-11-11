@@ -1,5 +1,7 @@
 import React, { type ComponentProps } from 'react';
 
+import { t } from 'i18next';
+
 import { type CustomReportEntity } from 'loot-core/types/models/reports';
 import { type RuleConditionEntity } from 'loot-core/types/models/rule';
 
@@ -70,7 +72,7 @@ export function ReportTopbar({
     >
       <GraphButton
         selected={customReportItems.graphType === 'TableGraph'}
-        title="Data Table"
+        title={t('Data Table')}
         onSelect={() => {
           onChangeGraph('TableGraph');
         }}
@@ -81,7 +83,9 @@ export function ReportTopbar({
       </GraphButton>
       <GraphButton
         title={
-          customReportItems.mode === 'total' ? 'Bar Graph' : 'Stacked Bar Graph'
+          customReportItems.mode === 'total'
+            ? t('Bar Graph')
+            : t('Stacked Bar Graph')
         }
         selected={
           customReportItems.graphType === 'BarGraph' ||
@@ -100,7 +104,7 @@ export function ReportTopbar({
         <SvgChartBar width={15} height={15} />
       </GraphButton>
       <GraphButton
-        title="Line Graph"
+        title={t('Line Graph')}
         selected={customReportItems.graphType === 'LineGraph'}
         onSelect={() => {
           onChangeGraph('LineGraph');
@@ -111,7 +115,7 @@ export function ReportTopbar({
         <SvgChart width={15} height={15} />
       </GraphButton>
       <GraphButton
-        title="Area Graph"
+        title={t('Area Graph')}
         selected={customReportItems.graphType === 'AreaGraph'}
         onSelect={() => {
           onChangeGraph('AreaGraph');
@@ -122,7 +126,7 @@ export function ReportTopbar({
         <SvgChartArea width={15} height={15} />
       </GraphButton>
       <GraphButton
-        title="Donut Graph"
+        title={t('Donut Graph')}
         selected={customReportItems.graphType === 'DonutGraph'}
         onSelect={() => {
           onChangeGraph('DonutGraph');
@@ -147,7 +151,7 @@ export function ReportTopbar({
           onChangeViews('viewLegend');
         }}
         style={{ marginRight: 15 }}
-        title="Show Legend"
+        title={t('Show Legend')}
         disabled={isItemDisabled('ShowLegend')}
       >
         <SvgListBullet width={15} height={15} />
@@ -158,7 +162,7 @@ export function ReportTopbar({
           onChangeViews('viewSummary');
         }}
         style={{ marginRight: 15 }}
-        title="Show Summary"
+        title={t('Show Summary')}
       >
         <SvgCalculator width={15} height={15} />
       </GraphButton>
@@ -168,7 +172,7 @@ export function ReportTopbar({
           onChangeViews('viewLabels');
         }}
         style={{ marginRight: 15 }}
-        title="Show Labels"
+        title={t('Show Labels')}
         disabled={isItemDisabled('ShowLabels')}
       >
         <SvgTag width={15} height={15} />
