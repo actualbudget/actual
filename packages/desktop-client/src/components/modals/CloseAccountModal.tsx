@@ -1,6 +1,7 @@
 // @ts-strict-ignore
-import React, { type FormEvent, useState } from 'react';
+import React, { type FormEvent, useState, type CSSProperties } from 'react';
 import { Form } from 'react-aria-components';
+import { useTranslation } from 'react-i18next'; // Import useTranslation
 import { useDispatch } from 'react-redux';
 
 import {
@@ -13,8 +14,7 @@ import { type AccountEntity } from 'loot-core/src/types/models';
 
 import { useAccounts } from '../../hooks/useAccounts';
 import { useCategories } from '../../hooks/useCategories';
-import { useResponsive } from '../../ResponsiveProvider';
-import { type CSSProperties, styles, theme } from '../../style';
+import { styles, theme } from '../../style';
 import { AccountAutocomplete } from '../autocomplete/AccountAutocomplete';
 import { CategoryAutocomplete } from '../autocomplete/CategoryAutocomplete';
 import { Button } from '../common/Button2';
@@ -24,6 +24,7 @@ import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { Paragraph } from '../common/Paragraph';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
+import { useResponsive } from '../responsive/ResponsiveProvider';
 
 function needsCategory(
   account: AccountEntity,
@@ -49,6 +50,7 @@ export function CloseAccountModal({
   balance,
   canDelete,
 }: CloseAccountModalProps) {
+  const { t } = useTranslation(); // Initialize translation hook
   const accounts = useAccounts().filter(a => a.closed === 0);
   const { grouped: categoryGroups, list: categories } = useCategories();
   const [loading, setLoading] = useState(false);
@@ -112,12 +114,13 @@ export function CloseAccountModal({
       {({ state: { close } }) => (
         <>
           <ModalHeader
-            title="Close Account"
+            title={t('Close Account')}
             rightContent={<ModalCloseButton onPress={close} />}
           />
           <View>
             <Paragraph>
-              Are you sure you want to close <strong>{account.name}</strong>?{' '}
+              {t('Are you sure you want to close ')}
+              <strong>{account.name}</strong>?{' '}
               {canDelete ? (
                 <span>
                   This account has no transactions so it will be permanently
@@ -150,7 +153,7 @@ export function CloseAccountModal({
                       includeClosedAccounts={false}
                       value={transferAccountId}
                       inputProps={{
-                        placeholder: 'Select account...',
+                        placeholder: t('Select account...'),
                         autoFocus: true,
                         ...(isNarrowWidth && {
                           value: transferAccount?.name || '',
@@ -173,7 +176,7 @@ export function CloseAccountModal({
 
                   {transferError && (
                     <FormError style={{ marginBottom: 15 }}>
-                      Transfer is required
+                      {t('Transfer is required')}
                     </FormError>
                   )}
 
@@ -189,7 +192,7 @@ export function CloseAccountModal({
                         categoryGroups={categoryGroups}
                         value={categoryId}
                         inputProps={{
-                          placeholder: 'Select category...',
+                          placeholder: t('Select category...'),
                           ...(isNarrowWidth && {
                             value: category?.name || '',
                             style: {
@@ -210,7 +213,7 @@ export function CloseAccountModal({
                       />
 
                       {categoryError && (
-                        <FormError>Category is required</FormError>
+                        <FormError>{t('Category is required')}</FormError>
                       )}
                     </View>
                   )}
@@ -220,7 +223,7 @@ export function CloseAccountModal({
               {!canDelete && (
                 <View style={{ marginBottom: 15 }}>
                   <Text style={{ fontSize: 12 }}>
-                    You can also{' '}
+                    {t('You can also')}{' '}
                     <Link
                       variant="text"
                       onClick={() => {
@@ -231,7 +234,7 @@ export function CloseAccountModal({
                       }}
                       style={{ color: theme.errorText }}
                     >
-                      force close
+                      {t('force close')}
                     </Link>{' '}
                     the account which will delete it and all its transactions
                     permanently. Doing so may change your budget unexpectedly
@@ -253,7 +256,7 @@ export function CloseAccountModal({
                   }}
                   onPress={close}
                 >
-                  Cancel
+                  {t('Cancel')}
                 </Button>
                 <Button
                   type="submit"
@@ -262,7 +265,7 @@ export function CloseAccountModal({
                     height: isNarrowWidth ? styles.mobileMinHeight : undefined,
                   }}
                 >
-                  Close Account
+                  {t('Close Account')}
                 </Button>
               </View>
             </Form>

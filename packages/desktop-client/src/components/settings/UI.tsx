@@ -1,9 +1,10 @@
-import React, { useState, type ReactNode } from 'react';
+import React, { useState, type ReactNode, type CSSProperties } from 'react';
 import { useLocation } from 'react-router-dom';
 
-import { css, media } from 'glamor';
+import { css } from '@emotion/css';
+import { t } from 'i18next';
 
-import { type CSSProperties, theme } from '../../style';
+import { theme } from '../../style';
 import { tokens } from '../../tokens';
 import { Link } from '../common/Link';
 import { View } from '../common/View';
@@ -17,7 +18,7 @@ type SettingProps = {
 export const Setting = ({ primaryAction, style, children }: SettingProps) => {
   return (
     <View
-      className={`${css([
+      className={css([
         {
           backgroundColor: theme.pillBackground,
           alignSelf: 'flex-start',
@@ -28,7 +29,7 @@ export const Setting = ({ primaryAction, style, children }: SettingProps) => {
           width: '100%',
         },
         style,
-      ])}`}
+      ])}
     >
       <View
         style={{
@@ -61,9 +62,11 @@ export const AdvancedToggle = ({ children }: AdvancedToggleProps) => {
         marginBottom: 25,
         width: '100%',
       }}
-      className={`${media(`(min-width: ${tokens.breakpoint_small})`, {
-        width: 'auto',
-      })}`}
+      className={css({
+        [`@media (min-width: ${tokens.breakpoint_small})`]: {
+          width: 'auto',
+        },
+      })}
       innerRef={el => {
         if (el && location.hash === '#advanced') {
           el.scrollIntoView(true);
@@ -71,7 +74,7 @@ export const AdvancedToggle = ({ children }: AdvancedToggleProps) => {
       }}
     >
       <View style={{ fontSize: 20, fontWeight: 500, flexShrink: 0 }}>
-        Advanced Settings
+        {t('Advanced Settings')}
       </View>
       {children}
     </View>
@@ -87,7 +90,7 @@ export const AdvancedToggle = ({ children }: AdvancedToggleProps) => {
         marginBottom: 25,
       }}
     >
-      Show advanced settings
+      {t('Show advanced settings')}
     </Link>
   );
 };

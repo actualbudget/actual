@@ -1,5 +1,8 @@
 import React, { type ReactNode } from 'react';
 
+import { css } from '@emotion/css';
+import { t } from 'i18next';
+
 import { type DarkTheme, type Theme } from 'loot-core/types/prefs';
 
 import {
@@ -62,11 +65,11 @@ export function ThemeSettings() {
               }}
               value={theme}
               options={themeOptions}
-              style={{
+              className={css({
                 '&[data-hovered]': {
                   backgroundColor: themeStyle.buttonNormalBackgroundHover,
                 },
-              }}
+              })}
             />
           </Column>
           {theme === 'auto' && (
@@ -77,11 +80,11 @@ export function ThemeSettings() {
                 }}
                 value={darkTheme}
                 options={darkThemeOptions}
-                style={{
+                className={css({
                   '&[data-hovered]': {
                     backgroundColor: themeStyle.buttonNormalBackgroundHover,
                   },
-                }}
+                })}
               />
             </Column>
           )}
@@ -89,7 +92,8 @@ export function ThemeSettings() {
       }
     >
       <Text>
-        <strong>Themes</strong> change the user interface colors.
+        <strong>{t('Themes')}</strong>
+        {t(' change the user interface colors.')}
       </Text>
     </Setting>
   );

@@ -1,5 +1,7 @@
 // @ts-strict-ignore
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, type CSSProperties } from 'react';
+
+import { t } from 'i18next';
 
 import { type CategoryEntity } from 'loot-core/src/types/models';
 
@@ -8,7 +10,7 @@ import { useCategoryGroup } from '../../hooks/useCategoryGroup';
 import { useNotes } from '../../hooks/useNotes';
 import { SvgDotsHorizontalTriple, SvgTrash } from '../../icons/v1';
 import { SvgNotesPaper, SvgViewHide, SvgViewShow } from '../../icons/v2';
-import { type CSSProperties, styles, theme } from '../../style';
+import { styles, theme } from '../../style';
 import { Button } from '../common/Button2';
 import { Menu } from '../common/Menu';
 import {
@@ -140,7 +142,7 @@ export function CategoryMenuModal({
                   height={20}
                   style={{ paddingRight: 5 }}
                 />
-                Edit notes
+                {t('Edit notes')}
               </Button>
             </View>
           </View>
@@ -173,7 +175,7 @@ function AdditionalCategoryMenu({
       <Button
         ref={triggerRef}
         variant="bare"
-        aria-label="Menu"
+        aria-label={t('Menu')}
         onPress={() => {
           setMenuOpen(true);
         }}

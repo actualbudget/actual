@@ -1,0 +1,113 @@
+name: /update-vrt
+on:
+  issue_comment:
+    types: [ created ]
+
+permissions:
+  pull-requests: read
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.issue.number }}-${{ contains(github.event.comment.body, '/update-vrt') }}
+  cancel-in-progress: true
+
+jobs:
+  update-vrt:
+    name: Update VRT
+    runs-on: ubuntu-latest
+    if: |
+      github.event.issue.pull_request &&
+      contains(github.event.comment.body, '/update-vrt')
+    container:
+      image: mcr.microsoft.com/playwright:v1.41.1-jammy
+    steps:
+      - name: Get PR branch
+#        Until https://github.com/xt0rted/pull-request-comment-branch/issues/322 is resolved we use the forked version
+        uses: gotson/pull-request-comment-branch@head-repo-owner-dist
+        id: comment-branch
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ steps.comment-branch.outputs.head_owner }}/${{ steps.comment-branch.outputs.head_repo }}
+          ref: ${{ steps.comment-branch.outputs.head_ref }}
+      - name: Set up environment
+        uses: ./.github/actions/setup
+      - name: Wait for Netlify build to finish
+        id: netlify
+        env:
+          COMMIT_SHA: ${{ steps.comment-branch.outputs.head_sha }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./.github/actions/netlify-wait-for-build
+      - name: Run VRT Tests on Netlify URL
+        run: yarn vrt --update-snapshots
+        env:
+          E2E_START_URL: ${{ steps.netlify.outputs.url }}
+      - name: Create patch
+        run: |
+          git config --system --add safe.directory "*"
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git reset
+          git add "**/*.png"
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git commit -m "Update VRT"
+          git format-patch -1 HEAD --stdout > Update-VRT.patch
+      - uses: actions/upload-artifact@v4
+        with:
+          name: patch
+          path: Update-VRT.patch
+
+  push-patch:
+    runs-on: ubuntu-latest
+    needs: update-vrt
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Get PR branch
+        #        Until https://github.com/xt0rted/pull-request-comment-branch/issues/322 is resolved we use the forked version
+        uses: gotson/pull-request-comment-branch@head-repo-owner-dist
+        id: comment-branch
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ steps.comment-branch.outputs.head_owner }}/${{ steps.comment-branch.outputs.head_repo }}
+          ref: ${{ steps.comment-branch.outputs.head_ref }}
+      - uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: patch
+      - name: Apply patch and push
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git apply Update-VRT.patch
+          git add "**/*.png"
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git commit -m "Update VRT"
+          git push origin HEAD:${{ steps.comment-branch.outputs.head_ref }}
+      - name: Add finished reaction
+        uses: dkershner6/reaction-action@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commentId: ${{ github.event.comment.id }}
+          reaction: "rocket"
+
+  add-starting-reaction:
+    runs-on: ubuntu-latest
+    if: |
+      github.event.issue.pull_request &&
+      contains(github.event.comment.body, '/update-vrt')
+    permissions:
+      pull-requests: write
+    steps:
+      - name: React to comment
+        uses: dkershner6/reaction-action@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commentId: ${{ github.event.comment.id }}
+          reaction: "+1"

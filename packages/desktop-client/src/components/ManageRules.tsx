@@ -7,6 +7,7 @@ import React, {
   type SetStateAction,
   type Dispatch,
 } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 
 import { pushModal } from 'loot-core/src/client/actions/modals';
@@ -117,17 +118,14 @@ export function ManageRules({
   const { list: categories } = useCategories();
   const payees = usePayees();
   const accounts = useAccounts();
-  const state = {
-    payees,
-    accounts,
-    schedules,
-  };
   const filterData = useMemo(
     () => ({
-      ...state,
+      payees,
+      accounts,
+      schedules,
       categories,
     }),
-    [state, categories],
+    [payees, accounts, schedules, categories],
   );
 
   const filteredRules = useMemo(
@@ -199,11 +197,20 @@ export function ManageRules({
     ]);
 
     if (someDeletionsFailed) {
-      alert('Some rules were not deleted because they are linked to schedules');
+      alert(
+        t('Some rules were not deleted because they are linked to schedules'),
+      );
     }
 
     await loadRules();
     selectedInst.dispatch({ type: 'select-none' });
+    setLoading(false);
+  }
+
+  async function onDeleteRule(id: string) {
+    setLoading(true);
+    await send('rule-delete', id);
+    await loadRules();
     setLoading(false);
   }
 
@@ -255,6 +262,7 @@ export function ManageRules({
   const onHover = useCallback(id => {
     setHoveredRule(id);
   }, []);
+  const { t } = useTranslation();
 
   return (
     <SelectedProvider instance={selectedInst}>
@@ -276,19 +284,19 @@ export function ManageRules({
             }}
           >
             <Text>
-              Rules are always run in the order that you see them.{' '}
+              {t('Rules are always run in the order that you see them.')}{' '}
               <Link
                 variant="external"
                 to="https://actualbudget.org/docs/budgeting/rules/"
                 linkColor="muted"
               >
-                Learn more
+                {t('Learn more')}
               </Link>
             </Text>
           </View>
           <View style={{ flex: 1 }} />
           <Search
-            placeholder="Filter rules..."
+            placeholder={t('Filter rules...')}
             value={filter}
             onChange={onSearchChange}
           />
@@ -301,7 +309,7 @@ export function ManageRules({
             style={{ marginBottom: -1 }}
           >
             {filteredRules.length === 0 ? (
-              <EmptyMessage text="No rules" style={{ marginTop: 15 }} />
+              <EmptyMessage text={t('No rules')} style={{ marginTop: 15 }} />
             ) : (
               <RulesList
                 rules={filteredRules}
@@ -309,6 +317,7 @@ export function ManageRules({
                 hoveredRule={hoveredRule}
                 onHover={onHover}
                 onEditRule={onEditRule}
+                onDeleteRule={rule => onDeleteRule(rule.id)}
               />
             )}
           </SimpleTable>
@@ -328,7 +337,7 @@ export function ManageRules({
               </Button>
             )}
             <Button variant="primary" onPress={onCreateRule}>
-              Create new rule
+              {t('Create new rule')}
             </Button>
           </Stack>
         </View>

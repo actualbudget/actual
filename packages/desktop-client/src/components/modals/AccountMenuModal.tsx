@@ -1,4 +1,10 @@
-import { type ComponentProps, Fragment, useRef, useState } from 'react';
+import {
+  type ComponentProps,
+  type CSSProperties,
+  Fragment,
+  useRef,
+  useState,
+} from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { type AccountEntity } from 'loot-core/types/models';
@@ -8,7 +14,7 @@ import { useAccounts } from '../../hooks/useAccounts';
 import { useNotes } from '../../hooks/useNotes';
 import { SvgClose, SvgDotsHorizontalTriple, SvgLockOpen } from '../../icons/v1';
 import { SvgNotesPaper } from '../../icons/v2';
-import { type CSSProperties, styles, theme } from '../../style';
+import { styles, theme } from '../../style';
 import { Button } from '../common/Button2';
 import { Menu } from '../common/Menu';
 import {
@@ -178,7 +184,7 @@ export function AccountMenuModal({
                   height={20}
                   style={{ paddingRight: 5 }}
                 />
-                Edit notes
+                {t('Edit notes')}
               </Button>
             </View>
           </View>

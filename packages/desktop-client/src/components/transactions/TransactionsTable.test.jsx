@@ -23,7 +23,7 @@ import { integerToCurrency } from 'loot-core/src/shared/util';
 
 import { SelectedProviderWithItems } from '../../hooks/useSelected';
 import { SplitsExpandedProvider } from '../../hooks/useSplitsExpanded';
-import { ResponsiveProvider } from '../../ResponsiveProvider';
+import { ResponsiveProvider } from '../responsive/ResponsiveProvider';
 
 import { TransactionTable } from './TransactionsTable';
 
@@ -33,6 +33,9 @@ vi.mock('../../hooks/useFeatureFlag', () => ({
 }));
 vi.mock('../../hooks/useSyncedPref', () => ({
   useSyncedPref: vi.fn().mockReturnValue([undefined, vi.fn()]),
+}));
+vi.mock('../../hooks/useFeatureFlag', () => ({
+  useFeatureFlag: () => false,
 }));
 
 const accounts = [generateAccount('Bank of America')];

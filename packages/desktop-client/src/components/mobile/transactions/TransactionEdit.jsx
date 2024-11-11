@@ -16,6 +16,7 @@ import {
   parseISO,
   isValid as isValidDate,
 } from 'date-fns';
+import { t } from 'i18next';
 
 import { pushModal, setLastTransaction } from 'loot-core/client/actions';
 import { runQuery } from 'loot-core/src/client/query-helpers';
@@ -57,11 +58,12 @@ import { SvgPencilWriteAlternate } from '../../../icons/v2';
 import { styles, theme } from '../../../style';
 import { Button } from '../../common/Button';
 import { Text } from '../../common/Text';
+import { Toggle } from '../../common/Toggle';
 import { View } from '../../common/View';
 import { MobilePageHeader, Page } from '../../Page';
 import { AmountInput } from '../../util/AmountInput';
 import { MobileBackButton } from '../MobileBackButton';
-import { FieldLabel, TapField, InputField, BooleanField } from '../MobileForms';
+import { FieldLabel, TapField, InputField, ToggleField } from '../MobileForms';
 
 import { FocusableAmountInput } from './FocusableAmountInput';
 
@@ -317,7 +319,7 @@ const ChildTransactionEdit = forwardRef(
       >
         <View style={{ flexDirection: 'row' }}>
           <View style={{ flexBasis: '75%' }}>
-            <FieldLabel title="Payee" />
+            <FieldLabel title={t('Payee')} />
             <TapField
               disabled={
                 editingField &&
@@ -333,7 +335,7 @@ const ChildTransactionEdit = forwardRef(
               flexBasis: '25%',
             }}
           >
-            <FieldLabel title="Amount" style={{ padding: 0 }} />
+            <FieldLabel title={t('Amount')} style={{ padding: 0 }} />
             <AmountInput
               disabled={
                 editingField &&
@@ -365,7 +367,7 @@ const ChildTransactionEdit = forwardRef(
         </View>
 
         <View>
-          <FieldLabel title="Category" />
+          <FieldLabel title={t('Category')} />
           <TapField
             textStyle={{
               ...((isOffBudget || isBudgetTransfer(transaction)) && {
@@ -387,7 +389,7 @@ const ChildTransactionEdit = forwardRef(
         </View>
 
         <View>
-          <FieldLabel title="Notes" />
+          <FieldLabel title={t('Notes')} />
           <InputField
             disabled={
               editingField &&
@@ -427,7 +429,7 @@ const ChildTransactionEdit = forwardRef(
                 userSelect: 'none',
               }}
             >
-              Delete split
+              {t('Delete split')}
             </Text>
           </Button>
         </View>
@@ -805,7 +807,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
             alignItems: 'center',
           }}
         >
-          <FieldLabel title="Amount" flush style={{ marginBottom: 0 }} />
+          <FieldLabel title={t('Amount')} flush style={{ marginBottom: 0 }} />
           <FocusableAmountInput
             value={transaction.amount}
             zeroSign="-"
@@ -824,7 +826,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
         </View>
 
         <View>
-          <FieldLabel title="Payee" />
+          <FieldLabel title={t('Payee')} />
           <TapField
             textStyle={{
               ...(transaction.is_parent && {
@@ -844,7 +846,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
 
         {!transaction.is_parent && (
           <View>
-            <FieldLabel title="Category" />
+            <FieldLabel title={t('Category')} />
             <TapField
               style={{
                 ...((isOffBudget || isBudgetTransfer(transaction)) && {
@@ -915,14 +917,14 @@ const TransactionEditInner = memo(function TransactionEditInner({
                   color: theme.formLabelText,
                 }}
               >
-                Split
+                {t('Split')}
               </Text>
             </Button>
           </View>
         )}
 
         <View>
-          <FieldLabel title="Account" />
+          <FieldLabel title={t('Account')} />
           <TapField
             disabled={
               editingField &&
@@ -936,7 +938,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
 
         <View style={{ flexDirection: 'row' }}>
           <View style={{ flex: 1 }}>
-            <FieldLabel title="Date" />
+            <FieldLabel title={t('Date')} />
             <InputField
               type="date"
               disabled={
@@ -959,39 +961,24 @@ const TransactionEditInner = memo(function TransactionEditInner({
             />
           </View>
           {transaction.reconciled ? (
-            <View style={{ marginLeft: 0, marginRight: 8 }}>
-              <FieldLabel title="Reconciled" />
-              <BooleanField
-                disabled
-                checked
-                style={{
-                  margin: 'auto',
-                  width: 22,
-                  height: 22,
-                }}
-              />
+            <View style={{ alignItems: 'center' }}>
+              <FieldLabel title={t('Reconciled')} />
+              <Toggle id="Reconciled" isOn isDisabled />
             </View>
           ) : (
-            <View style={{ marginLeft: 0, marginRight: 8 }}>
-              <FieldLabel title="Cleared" />
-              <BooleanField
-                disabled={editingField}
-                checked={transaction.cleared}
-                onUpdate={checked =>
-                  onUpdateInner(transaction, 'cleared', checked)
-                }
-                style={{
-                  margin: 'auto',
-                  width: 22,
-                  height: 22,
-                }}
+            <View style={{ alignItems: 'center' }}>
+              <FieldLabel title={t('Cleared')} />
+              <ToggleField
+                id="cleared"
+                isOn={transaction.cleared}
+                onToggle={on => onUpdateInner(transaction, 'cleared', on)}
               />
             </View>
           )}
         </View>
 
         <View>
-          <FieldLabel title="Notes" />
+          <FieldLabel title={t('Notes')} />
           <InputField
             disabled={
               editingField &&
@@ -1031,7 +1018,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
                   userSelect: 'none',
                 }}
               >
-                Delete transaction
+                {t('Delete transaction')}
               </Text>
             </Button>
           </View>
@@ -1075,6 +1062,8 @@ function TransactionEditUnconnected({
   const deleted = useRef(false);
 
   useEffect(() => {
+    let unmounted = false;
+
     async function fetchTransaction() {
       // Query for the transaction based on the ID with grouped splits.
       //
@@ -1091,15 +1080,22 @@ function TransactionEditUnconnected({
           .select('*')
           .options({ splits: 'grouped' }),
       );
-      const fetchedTransactions = ungroupTransactions(data);
-      setTransactions(fetchedTransactions);
-      setFetchedTransactions(fetchedTransactions);
+
+      if (!unmounted) {
+        const fetchedTransactions = ungroupTransactions(data);
+        setTransactions(fetchedTransactions);
+        setFetchedTransactions(fetchedTransactions);
+      }
     }
     if (transactionId !== 'new') {
       fetchTransaction();
     } else {
       adding.current = true;
     }
+
+    return () => {
+      unmounted = true;
+    };
   }, [transactionId]);
 
   useEffect(() => {
@@ -1114,6 +1110,139 @@ function TransactionEditUnconnected({
     }
   }, [locationState?.accountId, locationState?.categoryId, lastTransaction]);
 
+  const onUpdate = useCallback(
+    async (serializedTransaction, updatedField) => {
+      const transaction = deserializeTransaction(
+        serializedTransaction,
+        null,
+        dateFormat,
+      );
+
+      // Run the rules to auto-fill in any data. Right now we only do
+      // this on new transactions because that's how desktop works.
+      const newTransaction = { ...transaction };
+      if (isTemporary(newTransaction)) {
+        const afterRules = await send('rules-run', {
+          transaction: newTransaction,
+        });
+        const diff = getChangedValues(newTransaction, afterRules);
+
+        if (diff) {
+          Object.keys(diff).forEach(field => {
+            if (
+              newTransaction[field] == null ||
+              newTransaction[field] === '' ||
+              newTransaction[field] === 0 ||
+              newTransaction[field] === false
+            ) {
+              newTransaction[field] = diff[field];
+            }
+          });
+
+          // When a rule updates a parent transaction, overwrite all changes to the current field in subtransactions.
+          if (
+            newTransaction.is_parent &&
+            diff.subtransactions !== undefined &&
+            updatedField !== null
+          ) {
+            newTransaction.subtransactions = diff.subtransactions.map(
+              (st, idx) => ({
+                ...(newTransaction.subtransactions[idx] || st),
+                ...(st[updatedField] != null && {
+                  [updatedField]: st[updatedField],
+                }),
+              }),
+            );
+          }
+        }
+      }
+
+      const { data: newTransactions } = updateTransaction(
+        transactions,
+        newTransaction,
+      );
+      setTransactions(newTransactions);
+    },
+    [dateFormat, transactions],
+  );
+
+  const onSave = useCallback(
+    async newTransactions => {
+      if (deleted.current) {
+        return;
+      }
+
+      const changes = diffItems(fetchedTransactions || [], newTransactions);
+      if (
+        changes.added.length > 0 ||
+        changes.updated.length > 0 ||
+        changes.deleted.length
+      ) {
+        const _remoteUpdates = await send('transactions-batch-update', {
+          added: changes.added,
+          deleted: changes.deleted,
+          updated: changes.updated,
+        });
+
+        // if (onTransactionsChange) {
+        //   onTransactionsChange({
+        //     ...changes,
+        //     updated: changes.updated.concat(remoteUpdates),
+        //   });
+        // }
+      }
+
+      if (adding.current) {
+        // The first one is always the "parent" and the only one we care
+        // about
+        dispatch(setLastTransaction(newTransactions[0]));
+      }
+    },
+    [dispatch, fetchedTransactions],
+  );
+
+  const onDelete = useCallback(
+    async id => {
+      const changes = deleteTransaction(transactions, id);
+
+      if (adding.current) {
+        // Adding a new transactions, this disables saving when the component unmounts
+        deleted.current = true;
+      } else {
+        const _remoteUpdates = await send('transactions-batch-update', {
+          deleted: changes.diff.deleted,
+        });
+
+        // if (onTransactionsChange) {
+        //   onTransactionsChange({ ...changes, updated: remoteUpdates });
+        // }
+      }
+
+      setTransactions(changes.data);
+    },
+    [transactions],
+  );
+
+  const onAddSplit = useCallback(
+    id => {
+      const changes = addSplitTransaction(transactions, id);
+      setTransactions(changes.data);
+    },
+    [transactions],
+  );
+
+  const onSplit = useCallback(
+    id => {
+      const changes = splitTransaction(transactions, id, parent => [
+        makeChild(parent),
+        makeChild(parent),
+      ]);
+
+      setTransactions(changes.data);
+    },
+    [transactions],
+  );
+
   if (
     categories.length === 0 ||
     accounts.length === 0 ||
@@ -1121,124 +1250,6 @@ function TransactionEditUnconnected({
   ) {
     return null;
   }
-
-  const onUpdate = async (serializedTransaction, updatedField) => {
-    const transaction = deserializeTransaction(
-      serializedTransaction,
-      null,
-      dateFormat,
-    );
-
-    // Run the rules to auto-fill in any data. Right now we only do
-    // this on new transactions because that's how desktop works.
-    const newTransaction = { ...transaction };
-    if (isTemporary(newTransaction)) {
-      const afterRules = await send('rules-run', {
-        transaction: newTransaction,
-      });
-      const diff = getChangedValues(newTransaction, afterRules);
-
-      if (diff) {
-        Object.keys(diff).forEach(field => {
-          if (
-            newTransaction[field] == null ||
-            newTransaction[field] === '' ||
-            newTransaction[field] === 0 ||
-            newTransaction[field] === false
-          ) {
-            newTransaction[field] = diff[field];
-          }
-        });
-
-        // When a rule updates a parent transaction, overwrite all changes to the current field in subtransactions.
-        if (
-          newTransaction.is_parent &&
-          diff.subtransactions !== undefined &&
-          updatedField !== null
-        ) {
-          newTransaction.subtransactions = diff.subtransactions.map(
-            (st, idx) => ({
-              ...(newTransaction.subtransactions[idx] || st),
-              ...(st[updatedField] != null && {
-                [updatedField]: st[updatedField],
-              }),
-            }),
-          );
-        }
-      }
-    }
-
-    const { data: newTransactions } = updateTransaction(
-      transactions,
-      newTransaction,
-    );
-    setTransactions(newTransactions);
-  };
-
-  const onSave = async newTransactions => {
-    if (deleted.current) {
-      return;
-    }
-
-    const changes = diffItems(fetchedTransactions || [], newTransactions);
-    if (
-      changes.added.length > 0 ||
-      changes.updated.length > 0 ||
-      changes.deleted.length
-    ) {
-      const _remoteUpdates = await send('transactions-batch-update', {
-        added: changes.added,
-        deleted: changes.deleted,
-        updated: changes.updated,
-      });
-
-      // if (onTransactionsChange) {
-      //   onTransactionsChange({
-      //     ...changes,
-      //     updated: changes.updated.concat(remoteUpdates),
-      //   });
-      // }
-    }
-
-    if (adding.current) {
-      // The first one is always the "parent" and the only one we care
-      // about
-      dispatch(setLastTransaction(newTransactions[0]));
-    }
-  };
-
-  const onDelete = async id => {
-    const changes = deleteTransaction(transactions, id);
-
-    if (adding.current) {
-      // Adding a new transactions, this disables saving when the component unmounts
-      deleted.current = true;
-    } else {
-      const _remoteUpdates = await send('transactions-batch-update', {
-        deleted: changes.diff.deleted,
-      });
-
-      // if (onTransactionsChange) {
-      //   onTransactionsChange({ ...changes, updated: remoteUpdates });
-      // }
-    }
-
-    setTransactions(changes.data);
-  };
-
-  const onAddSplit = id => {
-    const changes = addSplitTransaction(transactions, id);
-    setTransactions(changes.data);
-  };
-
-  const onSplit = id => {
-    const changes = splitTransaction(transactions, id, parent => [
-      makeChild(parent),
-      makeChild(parent),
-    ]);
-
-    setTransactions(changes.data);
-  };
 
   return (
     <View

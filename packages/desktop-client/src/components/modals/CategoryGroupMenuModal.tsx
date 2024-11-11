@@ -1,5 +1,12 @@
 // @ts-strict-ignore
-import React, { type ComponentProps, useRef, useState } from 'react';
+import React, {
+  type ComponentProps,
+  useRef,
+  useState,
+  type CSSProperties,
+} from 'react';
+
+import { t } from 'i18next';
 
 import { type CategoryGroupEntity } from 'loot-core/src/types/models';
 
@@ -7,7 +14,7 @@ import { useCategories } from '../../hooks/useCategories';
 import { useNotes } from '../../hooks/useNotes';
 import { SvgDotsHorizontalTriple, SvgAdd, SvgTrash } from '../../icons/v1';
 import { SvgNotesPaper, SvgViewHide, SvgViewShow } from '../../icons/v2';
-import { type CSSProperties, styles, theme } from '../../style';
+import { styles, theme } from '../../style';
 import { Button } from '../common/Button2';
 import { Menu } from '../common/Menu';
 import {
@@ -146,7 +153,7 @@ export function CategoryGroupMenuModal({
             >
               <Button style={buttonStyle} onPress={_onAddCategory}>
                 <SvgAdd width={17} height={17} style={{ paddingRight: 5 }} />
-                Add category
+                {t('Add category')}
               </Button>
               <Button style={buttonStyle} onPress={_onEditNotes}>
                 <SvgNotesPaper
@@ -154,7 +161,7 @@ export function CategoryGroupMenuModal({
                   height={20}
                   style={{ paddingRight: 5 }}
                 />
-                Edit notes
+                {t('Edit notes')}
               </Button>
             </View>
           </View>
@@ -183,7 +190,7 @@ function AdditionalCategoryGroupMenu({ group, onDelete, onToggleVisibility }) {
         <Button
           ref={triggerRef}
           variant="bare"
-          aria-label="Menu"
+          aria-label={t('Menu')}
           onPress={() => {
             setMenuOpen(true);
           }}

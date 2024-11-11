@@ -285,6 +285,8 @@ type FinanceModals = {
     accountName: string;
     onUnlink: () => void;
   };
+  'keyboard-shortcuts': EmptyObject;
+  'goal-templates': EmptyObject;
 };
 
 export type PushModalAction = {

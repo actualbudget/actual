@@ -1,4 +1,6 @@
 // @ts-strict-ignore
+import { type CSSProperties } from 'react';
+
 import { t } from 'i18next';
 
 import { type useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
@@ -11,7 +13,7 @@ import {
 } from 'loot-core/src/types/models';
 import { type SyncedPrefs } from 'loot-core/src/types/prefs';
 
-import { type CSSProperties, styles, theme } from '../../style';
+import { styles, theme } from '../../style';
 import { type DropPosition } from '../sort';
 
 import { getValidMonthBounds } from './MonthsContext';
@@ -58,7 +60,7 @@ export function separateGroups(categoryGroups: CategoryGroupEntity[]) {
   return [
     categoryGroups.filter(g => !g.is_income),
     categoryGroups.find(g => g.is_income),
-  ];
+  ] as const;
 }
 
 export function makeAmountGrey(value: number | string): CSSProperties {

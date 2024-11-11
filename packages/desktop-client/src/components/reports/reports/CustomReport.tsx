@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { useLocation, useParams } from 'react-router-dom';
 
 import * as d from 'date-fns';
 
+import { useReport as useCustomReport } from 'loot-core/src/client/data-hooks/reports';
 import { calculateHasWarning } from 'loot-core/src/client/reports';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
@@ -22,7 +24,6 @@ import { useLocalPref } from '../../../hooks/useLocalPref';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { usePayees } from '../../../hooks/usePayees';
 import { useSyncedPref } from '../../../hooks/useSyncedPref';
-import { useResponsive } from '../../../ResponsiveProvider';
 import { theme, styles } from '../../../style';
 import { Warning } from '../../alerts';
 import { AlignedText } from '../../common/AlignedText';
@@ -33,6 +34,7 @@ import { AppliedFilters } from '../../filters/AppliedFilters';
 import { MobileBackButton } from '../../mobile/MobileBackButton';
 import { MobilePageHeader, Page, PageHeader } from '../../Page';
 import { PrivacyFilter } from '../../PrivacyFilter';
+import { useResponsive } from '../../responsive/ResponsiveProvider';
 import { ChooseGraph } from '../ChooseGraph';
 import {
   defaultsGraphList,
@@ -102,6 +104,22 @@ function useSelectedCategories(
 }
 
 export function CustomReport() {
+  const params = useParams();
+  const { data: report, isLoading } = useCustomReport(params.id ?? '');
+
+  if (isLoading) {
+    return <LoadingIndicator />;
+  }
+
+  return <CustomReportInner key={report?.id} report={report} />;
+}
+
+type CustomReportInnerProps = {
+  report?: CustomReportEntity;
+};
+
+function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
+  const { t } = useTranslation();
   const categories = useCategories();
   const { isNarrowWidth } = useResponsive();
   const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
@@ -136,9 +154,7 @@ export function CustomReport() {
   const session = reportFromSessionStorage
     ? JSON.parse(reportFromSessionStorage)
     : {};
-  const combine = location.state
-    ? (location.state.report ?? defaultReport)
-    : defaultReport;
+  const combine = initialReport ?? defaultReport;
   const loadReport = { ...combine, ...session };
 
   const [allIntervals, setAllIntervals] = useState<
@@ -241,17 +257,13 @@ export function CustomReport() {
   const [earliestTransaction, setEarliestTransaction] = useState('');
   const [report, setReport] = useState(loadReport);
   const [savedStatus, setSavedStatus] = useState(
-    location.state
-      ? location.state.report
-        ? 'saved'
-        : (loadReport.savedStatus ?? 'new')
-      : (loadReport.savedStatus ?? 'new'),
+    session.savedStatus ?? (initialReport ? 'saved' : 'new'),
   );
 
   useEffect(() => {
     async function run() {
       onApplyFilter(null);
-      report.conditions.forEach((condition: RuleConditionEntity) =>
+      report.conditions?.forEach((condition: RuleConditionEntity) =>
         onApplyFilter(condition),
       );
       const trans = await send('get-earliest-transaction');
@@ -471,11 +483,10 @@ export function CustomReport() {
 
   const defaultModeItems = (graph: string, item: string) => {
     const chooseGraph = graph || graphType;
-    const newGraph = (disabledList.modeGraphsMap.get(item) || []).includes(
-      chooseGraph,
-    )
-      ? defaultsList.modeGraphsMap.get(item)
-      : chooseGraph;
+    const newGraph =
+      ((disabledList.modeGraphsMap.get(item) || []).includes(chooseGraph)
+        ? defaultsList.modeGraphsMap.get(item)
+        : chooseGraph) ?? chooseGraph;
     if ((disabledList.modeGraphsMap.get(item) || []).includes(graphType)) {
       setSessionReport('graphType', newGraph);
       setGraphType(newGraph);
@@ -592,21 +603,43 @@ export function CustomReport() {
     onConditionsOpChange(input.conditionsOp);
   };
 
-  const onReportChange = ({
-    savedReport,
-    type,
-  }: {
-    savedReport?: CustomReportEntity;
-    type: string;
-  }) => {
-    switch (type) {
+  const onReportChange = (
+    params:
+      | {
+          type: 'add-update';
+          savedReport: CustomReportEntity;
+        }
+      | {
+          type: 'rename';
+          savedReport?: CustomReportEntity;
+        }
+      | {
+          type: 'modify';
+        }
+      | {
+          type: 'reload';
+        }
+      | {
+          type: 'reset';
+        }
+      | {
+          type: 'choose';
+          savedReport?: CustomReportEntity;
+        },
+  ) => {
+    switch (params.type) {
       case 'add-update':
+        sessionStorage.clear();
         setSessionReport('savedStatus', 'saved');
         setSavedStatus('saved');
-        setReport(savedReport);
+        setReport(params.savedReport);
+
+        if (params.savedReport.id !== initialReport?.id) {
+          navigate(`/reports/custom/${params.savedReport.id}`);
+        }
         break;
       case 'rename':
-        setReport({ ...report, name: savedReport?.name || '' });
+        setReport({ ...report, name: params.savedReport?.name || '' });
         break;
       case 'modify':
         if (report.name) {
@@ -615,9 +648,10 @@ export function CustomReport() {
         }
         break;
       case 'reload':
+        sessionStorage.clear();
         setSessionReport('savedStatus', 'saved');
         setSavedStatus('saved');
-        setReportData(report);
+        setReportData(initialReport ?? defaultReport);
         break;
       case 'reset':
         sessionStorage.clear();
@@ -626,10 +660,13 @@ export function CustomReport() {
         setReportData(defaultReport);
         break;
       case 'choose':
+        sessionStorage.clear();
+        const newReport = params.savedReport || report;
         setSessionReport('savedStatus', 'saved');
         setSavedStatus('saved');
-        setReport(savedReport);
-        setReportData(savedReport || report);
+        setReport(newReport);
+        setReportData(newReport);
+        navigate(`/reports/custom/${newReport.id}`);
         break;
       default:
     }
@@ -644,16 +681,20 @@ export function CustomReport() {
       header={
         isNarrowWidth ? (
           <MobilePageHeader
-            title={`Custom Report: ${report.name || 'Unsaved report'}`}
+            title={
+              report.name
+                ? t('Custom Report: {{name}}', { name: report.name })
+                : t('Custom Report: Unsaved report')
+            }
             leftContent={<MobileBackButton onPress={onBackClick} />}
           />
         ) : (
           <PageHeader
             title={
               <>
-                <Text>Custom Report:</Text>
+                <Text>{t('Custom Report:')}</Text>
                 <Text style={{ marginLeft: 5, color: theme.pageTextPositive }}>
-                  {report.name || 'Unsaved report'}
+                  {report.name || t('Unsaved report')}
                 </Text>
               </>
             }
@@ -766,8 +807,9 @@ export function CustomReport() {
 
               {hasWarning && (
                 <Warning style={{ paddingTop: 5, paddingBottom: 5 }}>
-                  This report is configured to use a non-existing filter value
-                  (i.e. category/account/payee).
+                  {t(
+                    'This report is configured to use a non-existing filter value (i.e. category/account/payee).',
+                  )}
                 </Warning>
               )}
             </View>
@@ -830,7 +872,7 @@ export function CustomReport() {
                     intervalsCount={intervals.length}
                   />
                 ) : (
-                  <LoadingIndicator message="Loading report..." />
+                  <LoadingIndicator message={t('Loading report...')} />
                 )}
               </View>
             </View>

@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { type CSSProperties, type MouseEventHandler } from 'react';
 
-import { css } from 'glamor';
+import { css } from '@emotion/css';
 
 import { envelopeBudget } from 'loot-core/src/client/queries';
 
-import { theme, styles, type CSSProperties } from '../../../../style';
+import { theme, styles } from '../../../../style';
 import { Block } from '../../../common/Block';
 import { Tooltip } from '../../../common/Tooltip';
 import { View } from '../../../common/View';
@@ -22,6 +22,7 @@ type ToBudgetAmountProps = {
   style?: CSSProperties;
   amountStyle?: CSSProperties;
   onClick: () => void;
+  onContextMenu?: MouseEventHandler;
   isTotalsListTooltipDisabled?: boolean;
 };
 
@@ -31,6 +32,7 @@ export function ToBudgetAmount({
   amountStyle,
   onClick,
   isTotalsListTooltipDisabled = false,
+  onContextMenu,
 }: ToBudgetAmountProps) {
   const sheetName = useEnvelopeSheetName(envelopeBudget.toBudget);
   const sheetValue = useEnvelopeSheetValue({
@@ -71,8 +73,9 @@ export function ToBudgetAmount({
           >
             <Block
               onClick={onClick}
+              onContextMenu={onContextMenu}
               data-cellname={sheetName}
-              className={`${css([
+              className={css([
                 styles.veryLargeText,
                 {
                   fontWeight: 400,
@@ -88,7 +91,7 @@ export function ToBudgetAmount({
                   },
                 },
                 amountStyle,
-              ])}`}
+              ])}
             >
               {format(num, 'financial')}
             </Block>

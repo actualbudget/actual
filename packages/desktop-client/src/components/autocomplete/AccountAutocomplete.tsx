@@ -4,18 +4,19 @@ import React, {
   type ComponentProps,
   type ComponentPropsWithoutRef,
   type ReactElement,
+  type CSSProperties,
 } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { css } from 'glamor';
+import { css, cx } from '@emotion/css';
 
 import { type AccountEntity } from 'loot-core/src/types/models';
 
 import { useAccounts } from '../../hooks/useAccounts';
-import { useResponsive } from '../../ResponsiveProvider';
-import { type CSSProperties, theme, styles } from '../../style';
+import { theme, styles } from '../../style';
 import { TextOneLine } from '../common/TextOneLine';
 import { View } from '../common/View';
+import { useResponsive } from '../responsive/ResponsiveProvider';
 
 import { Autocomplete } from './Autocomplete';
 import { ItemHeader } from './ItemHeader';
@@ -208,8 +209,9 @@ function AccountItem({
       // * https://github.com/WebKit/WebKit/blob/58956cf59ba01267644b5e8fe766efa7aa6f0c5c/Source/WebCore/page/ios/ContentChangeObserver.cpp
       // * https://github.com/WebKit/WebKit/blob/58956cf59ba01267644b5e8fe766efa7aa6f0c5c/Source/WebKit/WebProcess/WebPage/ios/WebPageIOS.mm#L783
       role="button"
-      className={`${className} ${css([
-        {
+      className={cx(
+        className,
+        css({
           backgroundColor: highlighted
             ? theme.menuAutoCompleteBackgroundHover
             : 'transparent',
@@ -220,8 +222,8 @@ function AccountItem({
           paddingLeft: 20,
           borderRadius: embedded ? 4 : 0,
           ...narrowStyle,
-        },
-      ])}`}
+        }),
+      )}
       data-testid={`${item.name}-account-item`}
       data-highlighted={highlighted || undefined}
       {...props}

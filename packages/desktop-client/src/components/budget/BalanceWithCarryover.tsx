@@ -2,18 +2,19 @@
 import React, {
   type ComponentType,
   type ComponentPropsWithoutRef,
+  type CSSProperties,
   useCallback,
 } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { css } from 'glamor';
+import { css } from '@emotion/css';
 
 import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { SvgArrowThinRight } from '../../icons/v1';
-import { useResponsive } from '../../ResponsiveProvider';
-import { type CSSProperties, theme, styles } from '../../style';
+import { theme, styles } from '../../style';
 import { Tooltip } from '../common/Tooltip';
 import { View } from '../common/View';
+import { useResponsive } from '../responsive/ResponsiveProvider';
 import { type Binding } from '../spreadsheet';
 import { CellValue, CellValueText } from '../spreadsheet/CellValue';
 import { useFormat } from '../spreadsheet/useFormat';
@@ -124,18 +125,16 @@ export function BalanceWithCarryover({
 
   const getDefaultClassName = useCallback(
     (balanceValue: number) =>
-      String(
-        css({
-          ...getBalanceAmountStyle(balanceValue),
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          textAlign: 'right',
-          ...(!isDisabled && {
-            cursor: 'pointer',
-          }),
-          ':hover': { textDecoration: 'underline' },
+      css({
+        ...getBalanceAmountStyle(balanceValue),
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        textAlign: 'right',
+        ...(!isDisabled && {
+          cursor: 'pointer',
         }),
-      ),
+        ':hover': { textDecoration: 'underline' },
+      }),
     [getBalanceAmountStyle, isDisabled],
   );
 

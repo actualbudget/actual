@@ -1,8 +1,9 @@
 import React, { type ComponentPropsWithoutRef } from 'react';
 
+import { t } from 'i18next';
+
 import * as monthUtils from 'loot-core/src/shared/months';
 
-import { useResponsive } from '../../ResponsiveProvider';
 import { theme } from '../../style';
 import { CategoryAutocomplete } from '../autocomplete/CategoryAutocomplete';
 import {
@@ -13,6 +14,7 @@ import {
 } from '../common/Modal';
 import { View } from '../common/View';
 import { SectionLabel } from '../forms';
+import { useResponsive } from '../responsive/ResponsiveProvider';
 import { NamespaceContext } from '../spreadsheet/NamespaceContext';
 
 type CategoryAutocompleteModalProps = {
@@ -50,7 +52,7 @@ export function CategoryAutocompleteModal({
             <ModalHeader
               title={
                 <ModalTitle
-                  title="Category"
+                  title={t('Category')}
                   getStyle={() => ({ color: theme.menuAutoCompleteText })}
                 />
               }
@@ -65,7 +67,7 @@ export function CategoryAutocompleteModal({
           <View>
             {!isNarrowWidth && (
               <SectionLabel
-                title="Category"
+                title={t('Category')}
                 style={{
                   alignSelf: 'center',
                   color: theme.menuAutoCompleteText,

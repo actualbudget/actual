@@ -1,6 +1,6 @@
-import React, { type HTMLProps } from 'react';
+import React, { type HTMLProps, type CSSProperties } from 'react';
 
-import { type CSSProperties, styles, theme } from '../../style';
+import { styles, theme } from '../../style';
 import { Button } from '../common/Button2';
 import { Text } from '../common/Text';
 import { Tooltip } from '../common/Tooltip';

@@ -15,6 +15,7 @@ import React, {
   type ReactElement,
   type Ref,
   type MutableRefObject,
+  type CSSProperties,
 } from 'react';
 import { useStore } from 'react-redux';
 import AutoSizer from 'react-virtualized-auto-sizer';
@@ -27,7 +28,7 @@ import { useSelectedItems } from '../hooks/useSelected';
 import { AnimatedLoading } from '../icons/AnimatedLoading';
 import { SvgDelete, SvgExpandArrow } from '../icons/v0';
 import { SvgCheckmark } from '../icons/v1';
-import { type CSSProperties, styles, theme } from '../style';
+import { styles, theme } from '../style';
 
 import { Button } from './common/Button2';
 import { Input } from './common/Input';
@@ -810,19 +811,19 @@ export function TableHeader({
   );
 }
 
-type SelectedItemsButtonProps<T extends MenuItem = MenuItem> = {
+type SelectedItemsButtonProps<Name extends string> = {
   id: string;
   name: ((count: number) => string) | string;
-  items: Array<T | typeof Menu.line>;
-  onSelect: (name: string, items: Array<string>) => void;
+  items: MenuItem<Name>[];
+  onSelect: (name: Name, items: string[]) => void;
 };
 
-export function SelectedItemsButton<T extends MenuItem = MenuItem>({
+export function SelectedItemsButton<Name extends string>({
   id,
   name,
   items,
   onSelect,
-}: SelectedItemsButtonProps<T>) {
+}: SelectedItemsButtonProps<Name>) {
   const selectedItems = useSelectedItems();
   const [menuOpen, setMenuOpen] = useState(false);
   const triggerRef = useRef(null);
@@ -1074,7 +1075,6 @@ export const Table = forwardRef(
             zIndex: editing || selected ? 101 : 'auto',
             transform: 'translateY(var(--pos))',
           }}
-          // @ts-expect-error not a recognised style attribute
           nativeStyle={{ '--pos': `${style.top - 1}px` }}
           data-focus-key={item.id}
         >

@@ -1,15 +1,16 @@
 // @ts-strict-ignore
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, type CSSProperties } from 'react';
 import ReactMarkdown from 'react-markdown';
 
-import { css } from 'glamor';
+import { css } from '@emotion/css';
+import { t } from 'i18next';
 import remarkGfm from 'remark-gfm';
 
-import { useResponsive } from '../ResponsiveProvider';
-import { type CSSProperties, theme } from '../style';
+import { theme } from '../style';
 import { remarkBreaks, sequentialNewlinesPlugin } from '../util/markdown';
 
 import { Text } from './common/Text';
+import { useResponsive } from './responsive/ResponsiveProvider';
 
 const remarkPlugins = [sequentialNewlinesPlugin, remarkGfm, remarkBreaks];
 
@@ -110,7 +111,7 @@ export function Notes({
   return editable ? (
     <textarea
       ref={textAreaRef}
-      className={`${css({
+      className={css({
         border: '1px solid ' + theme.buttonNormalBorder,
         padding: 7,
         ...(!isNarrowWidth && { minWidth: 350, minHeight: 120 }),
@@ -118,14 +119,14 @@ export function Notes({
         backgroundColor: theme.tableBackground,
         color: theme.tableText,
         ...getStyle?.(editable),
-      })}`}
+      })}
       value={notes || ''}
       onChange={e => onChange?.(e.target.value)}
       onBlur={e => onBlur?.(e.target.value)}
-      placeholder="Notes (markdown supported)"
+      placeholder={t('Notes (markdown supported)')}
     />
   ) : (
-    <Text {...markdownStyles} style={{ ...getStyle?.(editable) }}>
+    <Text className={css([markdownStyles, getStyle?.(editable)])}>
       <ReactMarkdown remarkPlugins={remarkPlugins} linkTarget="_blank">
         {notes}
       </ReactMarkdown>

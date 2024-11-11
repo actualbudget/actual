@@ -1,6 +1,7 @@
 import React, { type ReactNode, useEffect } from 'react';
 
-import { media } from 'glamor';
+import { css } from '@emotion/css';
+import { t } from 'i18next';
 
 import { isElectron } from 'loot-core/shared/environment';
 import { listen } from 'loot-core/src/platform/client/fetch';
@@ -10,7 +11,6 @@ import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { useGlobalPref } from '../../hooks/useGlobalPref';
 import { useIsOutdated, useLatestVersion } from '../../hooks/useLatestVersion';
 import { useMetadataPref } from '../../hooks/useMetadataPref';
-import { useResponsive } from '../../ResponsiveProvider';
 import { theme } from '../../style';
 import { tokens } from '../../tokens';
 import { Button } from '../common/Button2';
@@ -21,6 +21,7 @@ import { View } from '../common/View';
 import { FormField, FormLabel } from '../forms';
 import { MOBILE_NAV_HEIGHT } from '../mobile/MobileNavTabs';
 import { Page } from '../Page';
+import { useResponsive } from '../responsive/ResponsiveProvider';
 import { useServerVersion } from '../ServerContext';
 
 import { Backups } from './Backups';
@@ -42,21 +43,23 @@ function About() {
   return (
     <Setting>
       <Text>
-        <strong>Actual</strong> is a super fast privacy-focused app for managing
-        your finances.
+        <strong>{t('Actual')}</strong>
+        {t(' is a super fast privacy-focused app for managing your finances.')}
       </Text>
       <View
         style={{
           flexDirection: 'column',
           gap: 10,
         }}
-        className={`${media(`(min-width: ${tokens.breakpoint_small})`, {
-          display: 'grid',
-          gridTemplateRows: '1fr 1fr',
-          gridTemplateColumns: '50% 50%',
-          columnGap: '2em',
-          gridAutoFlow: 'column',
-        })}`}
+        className={css({
+          [`@media (min-width: ${tokens.breakpoint_small})`]: {
+            display: 'grid',
+            gridTemplateRows: '1fr 1fr',
+            gridTemplateColumns: '50% 50%',
+            columnGap: '2em',
+            gridAutoFlow: 'column',
+          },
+        })}
         data-vrt-mask
       >
         <Text>Client version: v{window.Actual?.ACTUAL_VERSION}</Text>
@@ -67,11 +70,11 @@ function About() {
             to="https://actualbudget.org/docs/releases"
             linkColor="purple"
           >
-            New version available: {latestVersion}
+            {t('New version available:')} {latestVersion}
           </Link>
         ) : (
           <Text style={{ color: theme.noticeText, fontWeight: 600 }}>
-            You’re up to date!
+            {t('You’re up to date!')}
           </Text>
         )}
         <Text>
@@ -80,7 +83,7 @@ function About() {
             to="https://actualbudget.org/docs/releases"
             linkColor="purple"
           >
-            Release Notes
+            {t('Release Notes')}
           </Link>
         </Text>
       </View>
@@ -99,16 +102,16 @@ function AdvancedAbout() {
   return (
     <Setting>
       <Text>
-        <strong>IDs</strong> are the names Actual uses to identify your budget
-        internally. There are several different IDs associated with your budget.
-        The Budget ID is used to identify your budget file. The Sync ID is used
-        to access the budget on the server.
+        <strong>{t('IDs')}</strong>
+        {t(
+          ' are the names Actual uses to identify your budget internally. There are several different IDs associated with your budget. The Budget ID is used to identify your budget file. The Sync ID is used to access the budget on the server.',
+        )}
       </Text>
       <Text>
-        <IDName>Budget ID:</IDName> {budgetId}
+        <IDName>{t('Budget ID:')}</IDName> {budgetId}
       </Text>
       <Text style={{ color: theme.pageText }}>
-        <IDName>Sync ID:</IDName> {groupId || '(none)'}
+        <IDName>{t('Sync ID:')}</IDName> {groupId || '(none)'}
       </Text>
       {/* low priority todo: eliminate some or all of these, or decide when/if to show them */}
       {/* <Text>
@@ -140,7 +143,7 @@ export function Settings() {
 
   return (
     <Page
-      header="Settings"
+      header={t('Settings')}
       style={{
         marginInline: floatingSidebar && !isNarrowWidth ? 'auto' : 0,
         paddingBottom: MOBILE_NAV_HEIGHT,
@@ -160,14 +163,14 @@ export function Settings() {
           >
             {/* The only spot to close a budget on mobile */}
             <FormField>
-              <FormLabel title="Budget Name" />
+              <FormLabel title={t('Budget Name')} />
               <Input
                 value={budgetName}
                 disabled
                 style={{ color: theme.buttonNormalDisabledText }}
               />
             </FormField>
-            <Button onPress={closeBudget}>Close Budget</Button>
+            <Button onPress={closeBudget}>{t('Close Budget')}</Button>
           </View>
         )}
         <About />

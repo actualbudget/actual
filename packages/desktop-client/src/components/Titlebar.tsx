@@ -1,13 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, type CSSProperties } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { Routes, Route, useLocation } from 'react-router-dom';
 
-import { css } from 'glamor';
+import { css } from '@emotion/css';
+import { t } from 'i18next';
 
 import * as Platform from 'loot-core/src/client/platform';
 import * as queries from 'loot-core/src/client/queries';
 import { listen } from 'loot-core/src/platform/client/fetch';
-import { isDevelopmentEnvironment } from 'loot-core/src/shared/environment';
+import {
+  isDevelopmentEnvironment,
+  isElectron,
+} from 'loot-core/src/shared/environment';
 
 import { useActions } from '../hooks/useActions';
 import { useGlobalPref } from '../hooks/useGlobalPref';
@@ -21,17 +25,19 @@ import {
   SvgViewHide,
   SvgViewShow,
 } from '../icons/v2';
-import { useResponsive } from '../ResponsiveProvider';
-import { theme, type CSSProperties, styles } from '../style';
+import { theme, styles } from '../style';
 
 import { AccountSyncCheck } from './accounts/AccountSyncCheck';
 import { AnimatedRefresh } from './AnimatedRefresh';
 import { MonthCountSelector } from './budget/MonthCountSelector';
 import { Button } from './common/Button2';
 import { Link } from './common/Link';
+import { SpaceBetween } from './common/SpaceBetween';
 import { Text } from './common/Text';
 import { View } from './common/View';
+import { HelpMenu } from './HelpMenu';
 import { LoggedInUser } from './LoggedInUser';
+import { useResponsive } from './responsive/ResponsiveProvider';
 import { useServerURL } from './ServerContext';
 import { useSidebar } from './sidebar/SidebarProvider';
 import { useSheetValue } from './spreadsheet/useSheetValue';
@@ -201,24 +207,22 @@ function SyncButton({ style, isMobile = false }: SyncButtonProps) {
   return (
     <Button
       variant="bare"
-      aria-label="Sync"
-      className={String(
-        css({
-          ...(isMobile
-            ? {
-                ...style,
-                WebkitAppRegion: 'none',
-                ...mobileIconStyle,
-              }
-            : {
-                ...style,
-                WebkitAppRegion: 'none',
-                color: desktopColor,
-              }),
-          '&[data-hovered]': hoveredStyle,
-          '&[data-pressed]': activeStyle,
-        }),
-      )}
+      aria-label={t('Sync')}
+      className={css({
+        ...(isMobile
+          ? {
+              ...style,
+              WebkitAppRegion: 'none',
+              ...mobileIconStyle,
+            }
+          : {
+              ...style,
+              WebkitAppRegion: 'none',
+              color: desktopColor,
+            }),
+        '&[data-hovered]': hoveredStyle,
+        '&[data-pressed]': activeStyle,
+      })}
       onPress={sync}
     >
       {isMobile ? (
@@ -273,7 +277,7 @@ export function Titlebar({ style }: TitlebarProps) {
       style={{
         flexDirection: 'row',
         alignItems: 'center',
-        padding: '0 15px',
+        padding: '0 10px 0 15px',
         height: 36,
         pointerEvents: 'none',
         '& *': {
@@ -287,7 +291,7 @@ export function Titlebar({ style }: TitlebarProps) {
     >
       {(floatingSidebar || sidebar.alwaysFloats) && (
         <Button
-          aria-label="Sidebar menu"
+          aria-label={t('Sidebar menu')}
           variant="bare"
           style={{ marginRight: 8 }}
           onHoverStart={e => {
@@ -319,7 +323,7 @@ export function Titlebar({ style }: TitlebarProps) {
                   height={10}
                   style={{ marginRight: 5, color: 'currentColor' }}
                 />{' '}
-                Back
+                {t('Back')}
               </Button>
             ) : null
           }
@@ -332,13 +336,16 @@ export function Titlebar({ style }: TitlebarProps) {
         <Route path="*" element={null} />
       </Routes>
       <View style={{ flex: 1 }} />
-      <UncategorizedButton />
-      {isDevelopmentEnvironment() && !Platform.isPlaywright && (
-        <ThemeSelector style={{ marginLeft: 10 }} />
-      )}
-      <PrivacyButton style={{ marginLeft: 10 }} />
-      {serverURL ? <SyncButton style={{ marginLeft: 10 }} /> : null}
-      <LoggedInUser style={{ marginLeft: 10 }} />
+      <SpaceBetween gap={10}>
+        <UncategorizedButton />
+        {isDevelopmentEnvironment() && !Platform.isPlaywright && (
+          <ThemeSelector />
+        )}
+        <PrivacyButton />
+        {serverURL ? <SyncButton /> : null}
+        <LoggedInUser />
+        {!isElectron() && <HelpMenu />}
+      </SpaceBetween>
     </View>
   );
 }

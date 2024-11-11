@@ -1,12 +1,15 @@
 // @ts-strict-ignore
 import React, { type ReactNode } from 'react';
 
+import { css } from '@emotion/css';
+import { t } from 'i18next';
+
 import { numberFormats } from 'loot-core/src/shared/util';
 import { type SyncedPrefs } from 'loot-core/src/types/prefs';
 
 import { useDateFormat } from '../../hooks/useDateFormat';
 import { useSyncedPref } from '../../hooks/useSyncedPref';
-import { type CSSProperties, theme } from '../../style';
+import { theme } from '../../style';
 import { tokens } from '../../tokens';
 import { Select } from '../common/Select';
 import { Text } from '../common/Text';
@@ -64,11 +67,11 @@ export function FormatSettings() {
   const numberFormat = _numberFormat || 'comma-dot';
   const [hideFraction, setHideFractionPref] = useSyncedPref('hideFraction');
 
-  const selectButtonStyle: CSSProperties = {
-    ':hover': {
+  const selectButtonClassName = css({
+    '&[data-hovered]': {
       backgroundColor: theme.buttonNormalBackgroundHover,
     },
-  };
+  });
 
   return (
     <Setting
@@ -87,7 +90,7 @@ export function FormatSettings() {
             },
           }}
         >
-          <Column title="Numbers">
+          <Column title={t('Numbers')}>
             <Select
               key={String(hideFraction)} // needed because label does not update
               value={numberFormat}
@@ -96,7 +99,7 @@ export function FormatSettings() {
                 f.value,
                 String(hideFraction) === 'true' ? f.labelNoFraction : f.label,
               ])}
-              style={selectButtonStyle}
+              className={selectButtonClassName}
             />
 
             <Text style={{ display: 'flex' }}>
@@ -107,33 +110,37 @@ export function FormatSettings() {
                   setHideFractionPref(String(e.currentTarget.checked))
                 }
               />
-              <label htmlFor="settings-textDecimal">Hide decimal places</label>
+              <label htmlFor="settings-textDecimal">
+                {t('Hide decimal places')}
+              </label>
             </Text>
           </Column>
 
-          <Column title="Dates">
+          <Column title={t('Dates')}>
             <Select
               value={dateFormat}
               onChange={format => setDateFormatPref(format)}
               options={dateFormats.map(f => [f.value, f.label])}
-              style={selectButtonStyle}
+              className={selectButtonClassName}
             />
           </Column>
 
-          <Column title="First day of the week">
+          <Column title={t('First day of the week')}>
             <Select
               value={firstDayOfWeekIdx}
               onChange={idx => setFirstDayOfWeekIdxPref(idx)}
               options={daysOfWeek.map(f => [f.value, f.label])}
-              style={selectButtonStyle}
+              className={selectButtonClassName}
             />
           </Column>
         </View>
       }
     >
       <Text>
-        <strong>Formatting</strong> does not affect how budget data is stored,
-        and can be changed at any time.
+        <strong>{t('Formatting')}</strong>
+        {t(
+          ' does not affect how budget data is stored, and can be changed at any time.',
+        )}
       </Text>
     </Setting>
   );
