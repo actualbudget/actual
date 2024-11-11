@@ -93,7 +93,6 @@ export function EncryptionSettings() {
       primaryAction={<Button isDisabled>{t('Enable encryption…')}</Button>}
     >
       <Text>
-        <strong>End-to-end Encryption is turned on.</strong>{' '}
         <strong>End-to-end encryption</strong> is not available when running
         without a server. Budget files are always kept unencrypted locally, and
         encryption is only applied when sending data to a server.{' '}
