@@ -96,7 +96,6 @@ export function qif2json(qif, options: { dateFormat?: string } = {}) {
         }
         transaction.division.push(division);
         division = {};
-
         break;
 
       default:

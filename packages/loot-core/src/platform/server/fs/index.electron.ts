@@ -135,7 +135,6 @@ export const writeFile: T.WriteFile = async (filepath, contents) => {
                   `Successfully recovered from file lock. It took ${attempt} retries`,
                 );
               }
-
               resolve(undefined);
             }
           });

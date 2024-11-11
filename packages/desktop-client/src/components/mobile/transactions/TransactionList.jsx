@@ -8,6 +8,8 @@ import React, {
 import { useDispatch } from 'react-redux';
 import { Item, Section } from 'react-stately';
 
+import { t } from 'i18next';
+
 import { setNotificationInset } from 'loot-core/client/actions';
 import { groupById, integerToCurrency } from 'loot-core/shared/util';
 import * as monthUtils from 'loot-core/src/shared/months';
@@ -91,7 +93,7 @@ export function TransactionList({
   if (isLoading) {
     return (
       <View
-        aria-label="Loading..."
+        aria-label={t('Loading...')}
         style={{
           flex: 1,
           justifyContent: 'center',

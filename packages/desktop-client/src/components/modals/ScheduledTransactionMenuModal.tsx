@@ -4,6 +4,8 @@ import React, {
   type CSSProperties,
 } from 'react';
 
+import { t } from 'i18next';
+
 import { useSchedules } from 'loot-core/client/data-hooks/schedules';
 import { format } from 'loot-core/shared/months';
 import { type Query } from 'loot-core/shared/query';
@@ -61,7 +63,7 @@ export function ScheduledTransactionMenuModal({
             }}
           >
             <Text style={{ fontSize: 17, fontWeight: 400 }}>
-              Scheduled date
+              {t('Scheduled date')}
             </Text>
             <Text style={{ fontSize: 17, fontWeight: 700 }}>
               {format(schedule.next_date, 'MMMM dd, yyyy')}
@@ -112,11 +114,11 @@ function ScheduledTransactionMenu({
       items={[
         {
           name: 'post',
-          text: 'Post transaction',
+          text: t('Post transaction'),
         },
         {
           name: 'skip',
-          text: 'Skip scheduled date',
+          text: t('Skip scheduled date'),
         },
       ]}
     />
