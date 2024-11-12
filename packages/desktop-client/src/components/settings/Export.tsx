@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 
 import { format } from 'date-fns';
+import { t } from 'i18next';
 
 import { send } from 'loot-core/src/platform/client/fetch';
 
@@ -34,7 +35,7 @@ export function ExportBudget() {
     window.Actual?.saveFile(
       response.data,
       `${format(new Date(), 'yyyy-MM-dd')}-${budgetName}.zip`,
-      'Export budget',
+      t('Export budget'),
     );
     setIsLoading(false);
   }
@@ -44,12 +45,13 @@ export function ExportBudget() {
       primaryAction={
         <>
           <ButtonWithLoading onPress={onExport} isLoading={isLoading}>
-            Export data
+            {t('Export data')}
           </ButtonWithLoading>
           {error && (
             <Block style={{ color: theme.errorText, marginTop: 15 }}>
-              An unknown error occurred while exporting. Please report this as a
-              new issue on Github.
+              {t(
+                'An unknown error occurred while exporting. Please report this as a new issue on Github.',
+              )}
             </Block>
           )}
         </>
@@ -63,8 +65,9 @@ export function ExportBudget() {
       </Text>
       {encryptKeyId ? (
         <Text>
-          Even though encryption is enabled, the exported zip file will not have
-          any encryption.
+          {t(
+            'Even though encryption is enabled, the exported zip file will not have any encryption.',
+          )}
         </Text>
       ) : null}
     </Setting>

@@ -3,6 +3,7 @@ import { useHotkeys } from 'react-hotkeys-hook';
 import { Routes, Route, useLocation } from 'react-router-dom';
 
 import { css } from '@emotion/css';
+import { t } from 'i18next';
 
 import * as Platform from 'loot-core/src/client/platform';
 import * as queries from 'loot-core/src/client/queries';
@@ -206,7 +207,7 @@ function SyncButton({ style, isMobile = false }: SyncButtonProps) {
   return (
     <Button
       variant="bare"
-      aria-label="Sync"
+      aria-label={t('Sync')}
       className={css({
         ...(isMobile
           ? {
@@ -290,7 +291,7 @@ export function Titlebar({ style }: TitlebarProps) {
     >
       {(floatingSidebar || sidebar.alwaysFloats) && (
         <Button
-          aria-label="Sidebar menu"
+          aria-label={t('Sidebar menu')}
           variant="bare"
           style={{ marginRight: 8 }}
           onHoverStart={e => {
@@ -322,7 +323,7 @@ export function Titlebar({ style }: TitlebarProps) {
                   height={10}
                   style={{ marginRight: 5, color: 'currentColor' }}
                 />{' '}
-                Back
+                {t('Back')}
               </Button>
             ) : null
           }

@@ -3,6 +3,7 @@ import React, { useEffect, useRef, type CSSProperties } from 'react';
 import ReactMarkdown from 'react-markdown';
 
 import { css } from '@emotion/css';
+import { t } from 'i18next';
 import remarkGfm from 'remark-gfm';
 
 import { theme } from '../style';
@@ -122,7 +123,7 @@ export function Notes({
       value={notes || ''}
       onChange={e => onChange?.(e.target.value)}
       onBlur={e => onBlur?.(e.target.value)}
-      placeholder="Notes (markdown supported)"
+      placeholder={t('Notes (markdown supported)')}
     />
   ) : (
     <Text className={css([markdownStyles, getStyle?.(editable)])}>

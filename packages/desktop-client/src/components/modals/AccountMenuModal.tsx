@@ -184,7 +184,7 @@ export function AccountMenuModal({
                   height={20}
                   style={{ paddingRight: 5 }}
                 />
-                Edit notes
+                {t('Edit notes')}
               </Button>
             </View>
           </View>

@@ -5,6 +5,7 @@ import {
   isValid as isDateValid,
   parseISO,
 } from 'date-fns';
+import { t } from 'i18next';
 
 import {
   getAccountsById,
@@ -198,43 +199,43 @@ export function SimpleTransactionsTable({
               case 'date':
                 return (
                   <Field key={i} width={100}>
-                    Date
+                    {t('Date')}
                   </Field>
                 );
               case 'imported_payee':
                 return (
                   <Field key={i} width="flex">
-                    Imported payee
+                    {t('Imported payee')}
                   </Field>
                 );
               case 'payee':
                 return (
                   <Field key={i} width="flex">
-                    Payee
+                    {t('Payee')}
                   </Field>
                 );
               case 'category':
                 return (
                   <Field key={i} width="flex">
-                    Category
+                    {t('Category')}
                   </Field>
                 );
               case 'account':
                 return (
                   <Field key={i} width="flex">
-                    Account
+                    {t('Account')}
                   </Field>
                 );
               case 'notes':
                 return (
                   <Field key={i} width="flex">
-                    Notes
+                    {t('Notes')}
                   </Field>
                 );
               case 'amount':
                 return (
                   <Field key={i} width={75} style={{ textAlign: 'right' }}>
-                    Amount
+                    {t('Amount')}
                   </Field>
                 );
               default:

@@ -2,6 +2,7 @@
 import React, { useState, type CSSProperties } from 'react';
 
 import { format as formatDate, parseISO } from 'date-fns';
+import { t } from 'i18next';
 
 import { getMonthYearFormat } from 'loot-core/src/shared/months';
 import { getRecurringDescription } from 'loot-core/src/shared/schedules';
@@ -172,7 +173,7 @@ export function Value<T>({
     const { num1, num2 } = value;
     return (
       <Text>
-        <Text style={valueStyle}>{formatValue(num1)}</Text> and{' '}
+        <Text style={valueStyle}>{formatValue(num1)}</Text> {t('and')}{' '}
         <Text style={valueStyle}>{formatValue(num2)}</Text>
       </Text>
     );
