@@ -140,9 +140,11 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
 
     if (
       parameters.has('monthStart') &&
-      isValid(new Date(parameters.get('monthStart') as string)) &&
+      parameters.get('monthStart') &&
+      isValid(new Date(parameters.get('monthStart') || '')) &&
       parameters.has('monthEnd') &&
-      isValid(new Date(parameters.get('monthEnd') as string)) &&
+      parameters.get('monthEnd') &&
+      isValid(new Date(parameters.get('monthEnd') || '')) &&
       onApplyFilter
     ) {
       onApplyFilter({
@@ -186,27 +188,31 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
 
     send('make-filters-from-conditions', {
       conditions: conditions.filter(cond => !cond.customName),
-    }).then((data: { filters: unknown[] }) => {
-      let query = q('transactions')
-        .filter({
-          [conditionsOpKey]: data.filters,
-        })
-        .filter({
-          $and: [
-            { date: { $gte: monthUtils.firstDayOfMonth(start) } },
-            { date: { $lte: monthUtils.lastDayOfMonth(end) } },
-          ],
-        })
-        .select('*');
+    })
+      .then((data: { filters: unknown[] }) => {
+        let query = q('transactions')
+          .filter({
+            [conditionsOpKey]: data.filters,
+          })
+          .filter({
+            $and: [
+              { date: { $gte: monthUtils.firstDayOfMonth(start) } },
+              { date: { $lte: monthUtils.lastDayOfMonth(end) } },
+            ],
+          })
+          .select('*');
 
-      if (sortField) {
-        query = query.orderBy({
-          [getField(sortField)]: ascDesc,
-        });
-      }
+        if (sortField) {
+          query = query.orderBy({
+            [getField(sortField)]: ascDesc,
+          });
+        }
 
-      setQuery(query);
-    });
+        setQuery(query);
+      })
+      .catch((error: unknown) => {
+        console.error('Error generating filters:', error);
+      });
   }, [start, end, conditions, conditionsOp, sortField, ascDesc]);
 
   const [flexAlignment, setFlexAlignment] = useState('center');
@@ -236,29 +242,33 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
 
   useEffect(() => {
     async function run() {
-      const trans = await send('get-earliest-transaction');
-      const currentMonth = monthUtils.currentMonth();
-      let earliestMonth = trans
-        ? monthUtils.monthFromDate(parseISO(fromDateRepr(trans.date)))
-        : currentMonth;
+      try {
+        const trans = await send('get-earliest-transaction');
+        const currentMonth = monthUtils.currentMonth();
+        let earliestMonth = trans
+          ? monthUtils.monthFromDate(parseISO(fromDateRepr(trans.date)))
+          : currentMonth;
 
-      // Make sure the month selects are at least populates with a
-      // year's worth of months. We can undo this when we have fancier
-      // date selects.
-      const yearAgo = monthUtils.subMonths(monthUtils.currentMonth(), 12);
-      if (earliestMonth > yearAgo) {
-        earliestMonth = yearAgo;
+        // Make sure the month selects are at least populates with a
+        // year's worth of months. We can undo this when we have fancier
+        // date selects.
+        const yearAgo = monthUtils.subMonths(monthUtils.currentMonth(), 12);
+        if (earliestMonth > yearAgo) {
+          earliestMonth = yearAgo;
+        }
+
+        const allMonths = monthUtils
+          .rangeInclusive(earliestMonth, monthUtils.currentMonth())
+          .map(month => ({
+            name: month,
+            pretty: monthUtils.format(month, 'MMMM, yyyy'),
+          }))
+          .reverse();
+
+        setAllMonths(allMonths);
+      } catch (error) {
+        console.error('Error fetching earliest transaction:', error);
       }
-
-      const allMonths = monthUtils
-        .rangeInclusive(earliestMonth, monthUtils.currentMonth())
-        .map(month => ({
-          name: month,
-          pretty: monthUtils.format(month, 'MMMM, yyyy'),
-        }))
-        .reverse();
-
-      setAllMonths(allMonths);
     }
     run();
   }, []);
@@ -275,7 +285,7 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
       throw new Error('No widget that could be saved.');
     }
 
-    const name = newName || t('Net Worth');
+    const name = newName || t('Calendar');
     await send('dashboard-update-widget', {
       id: widget.id,
       meta: {
@@ -296,29 +306,38 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
       throw new Error('No widget that could be saved.');
     }
 
-    await send('dashboard-update-widget', {
-      id: widget.id,
-      meta: {
-        ...(widget.meta ?? {}),
-        conditions,
-        conditionsOp,
-        timeFrame: {
-          start,
-          end,
-          mode,
+    try {
+      await send('dashboard-update-widget', {
+        id: widget.id,
+        meta: {
+          ...(widget.meta ?? {}),
+          conditions,
+          conditionsOp,
+          timeFrame: {
+            start,
+            end,
+            mode,
+          },
         },
-      },
-    });
-    dispatch(
-      addNotification({
-        type: 'message',
-        message: t('Dashboard widget successfully saved.'),
-      }),
-    );
+      });
+      dispatch(
+        addNotification({
+          type: 'message',
+          message: t('Dashboard widget successfully saved.'),
+        }),
+      );
+    } catch (error) {
+      dispatch(
+        addNotification({
+          type: 'error',
+          message: t('Failed to save dashboard widget.'),
+        }),
+      );
+      console.error('Error saving widget:', error);
+    }
   }
-
   const { totalIncome, totalExpense } = useMemo(() => {
-    if (!data) {
+    if (!data || !data.calendarData) {
       return { totalIncome: 0, totalExpense: 0 };
     }
     return {
@@ -395,6 +414,12 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
     setMobileTransactionsOpen(false);
   };
 
+  const DRAG_BOUNDS = {
+    CHEVRON_MULTIPLIER: 1.5,
+    RUBBER_BAND_ENABLED: true,
+    MIN_DRAG_OFFSET: 115,
+  };
+
   const bind = useDrag(
     ({ offset: [, oy], cancel }) => {
       if (oy < 0) {
@@ -403,21 +428,26 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
       }
 
       api.start({ y: oy, immediate: true });
-      if (oy > totalHeight - CHEVRON_HEIGHT * 1.5 && mobileTransactionsOpen) {
+      if (
+        oy > totalHeight - CHEVRON_HEIGHT * DRAG_BOUNDS.CHEVRON_MULTIPLIER &&
+        mobileTransactionsOpen
+      ) {
         cancel();
         close();
         setMobileTransactionsOpen(false);
       } else {
         setMobileTransactionsOpen(true);
       }
-      // }
     },
     {
       from: () => [0, y.get()],
       filterTaps: true,
-      bounds: { top: -totalHeight + 115, bottom: totalHeight - CHEVRON_HEIGHT },
+      bounds: {
+        top: -totalHeight + DRAG_BOUNDS.MIN_DRAG_OFFSET,
+        bottom: totalHeight - CHEVRON_HEIGHT,
+      },
       axis: 'y',
-      rubberband: true,
+      rubberband: DRAG_BOUNDS.RUBBER_BAND_ENABLED,
     },
   );
 

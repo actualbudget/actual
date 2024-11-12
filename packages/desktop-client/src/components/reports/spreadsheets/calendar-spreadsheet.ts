@@ -34,22 +34,45 @@ export function calendarSpreadsheet(
       }[];
     }) => void,
   ) => {
-    const { filters } = await send('make-filters-from-conditions', {
-      conditions: conditions.filter(cond => !cond.customName),
-    });
+    let filters;
+
+    try {
+      const { filters: filtersLocal } = await send(
+        'make-filters-from-conditions',
+        {
+          conditions: conditions.filter(cond => !cond.customName),
+        },
+      );
+      filters = filtersLocal;
+    } catch (error) {
+      console.error('Failed to make filters from conditions:', error);
+      filters = [];
+    }
     const conditionsOpKey = conditionsOp === 'or' ? '$or' : '$and';
 
-    const startDay = d.parse(
-      monthUtils.firstDayOfMonth(start),
-      'yyyy-MM-dd',
-      new Date(),
-    );
+    let startDay: Date;
+    try {
+      startDay = d.parse(
+        monthUtils.firstDayOfMonth(start),
+        'yyyy-MM-dd',
+        new Date(),
+      );
+    } catch (error) {
+      console.error('Failed to parse start date:', error);
+      throw new Error('Invalid start date format');
+    }
 
-    const endDay = d.parse(
-      monthUtils.lastDayOfMonth(end),
-      'yyyy-MM-dd',
-      new Date(),
-    );
+    let endDay: Date;
+    try {
+      endDay = d.parse(
+        monthUtils.lastDayOfMonth(end),
+        'yyyy-MM-dd',
+        new Date(),
+      );
+    } catch (error) {
+      console.error('Failed to parse end date:', error);
+      throw new Error('Invalid end date format');
+    }
 
     const makeRootQuery = () =>
       q('transactions')
@@ -65,17 +88,29 @@ export function calendarSpreadsheet(
         .groupBy(['date'])
         .select(['date', { amount: { $sum: '$amount' } }]);
 
-    const expenseData = await runQuery(
-      makeRootQuery().filter({
-        $and: { amount: { $lt: 0 } },
-      }),
-    );
+    let expenseData;
+    try {
+      expenseData = await runQuery(
+        makeRootQuery().filter({
+          $and: { amount: { $lt: 0 } },
+        }),
+      );
+    } catch (error) {
+      console.error('Failed to fetch expense data:', error);
+      expenseData = { data: [] };
+    }
 
-    const incomeData = await runQuery(
-      makeRootQuery().filter({
-        $and: { amount: { $gt: 0 } },
-      }),
-    );
+    let incomeData;
+    try {
+      incomeData = await runQuery(
+        makeRootQuery().filter({
+          $and: { amount: { $gt: 0 } },
+        }),
+      );
+    } catch (error) {
+      console.error('Failed to fetch income data:', error);
+      incomeData = { data: [] };
+    }
 
     const getOneDatePerMonth = (start: Date, end: Date) => {
       const months = [];
@@ -115,16 +150,32 @@ function recalculate(
   start: string,
   firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'],
 ) {
+  const incomeDataMap = new Map<string, number>();
+  incomeData.forEach(item => {
+    incomeDataMap.set(item.date, item.amount);
+  });
+
+  const expenseDataMap = new Map<string, number>();
+  expenseData.forEach(item => {
+    expenseDataMap.set(item.date, item.amount);
+  });
+
+  const parseAndCacheDate = (() => {
+    const cache = new Map<string, Date>();
+    return (dateStr: string) => {
+      if (!cache.has(dateStr)) {
+        cache.set(dateStr, d.parse(dateStr, 'yyyy-MM-dd', new Date()));
+      }
+      return cache.get(dateStr)!;
+    };
+  })();
+
   const getDaysArray = (month: Date) => {
     const expenseValues = expenseData
-      .filter(f =>
-        d.isSameMonth(d.parse(f.date, 'yyyy-MM-dd', new Date()), month),
-      )
+      .filter(f => d.isSameMonth(parseAndCacheDate(f.date), month))
       .map(m => Math.abs(m.amount));
     const incomeValues = incomeData
-      .filter(f =>
-        d.isSameMonth(d.parse(f.date, 'yyyy-MM-dd', new Date()), month),
-      )
+      .filter(f => d.isSameMonth(parseAndCacheDate(f.date), month))
       .map(m => Math.abs(m.amount));
 
     const totalExpenseValue = expenseValues.length
@@ -136,14 +187,20 @@ function recalculate(
       : null;
 
     const getBarLength = (value: number) => {
-      if (value < 0 && totalExpenseValue !== null && totalExpenseValue !== 0) {
-        return (Math.abs(value) / totalExpenseValue) * 100;
+      if (
+        value < 0 &&
+        typeof totalExpenseValue === 'number' &&
+        totalExpenseValue > 0
+      ) {
+        const result = (Math.abs(value) / totalExpenseValue) * 100;
+        return Number.isFinite(result) ? result : 0;
       } else if (
         value > 0 &&
-        totalIncomeValue !== null &&
-        totalIncomeValue !== 0
+        typeof totalIncomeValue === 'number' &&
+        totalIncomeValue > 0
       ) {
-        return (value / totalIncomeValue) * 100;
+        const result = (value / totalIncomeValue) * 100;
+        return Number.isFinite(result) ? result : 0;
       } else {
         return 0;
       }
@@ -151,9 +208,13 @@ function recalculate(
 
     const firstDay = d.startOfMonth(month);
     const beginDay = d.startOfWeek(firstDay, {
-      weekStartsOn: firstDayOfWeekIdx
-        ? (parseInt(firstDayOfWeekIdx) as 0 | 1 | 2 | 3 | 4 | 5 | 6)
-        : 0,
+      weekStartsOn:
+        firstDayOfWeekIdx !== undefined &&
+        !Number.isNaN(parseInt(firstDayOfWeekIdx)) &&
+        parseInt(firstDayOfWeekIdx) >= 0 &&
+        parseInt(firstDayOfWeekIdx) <= 6
+          ? (parseInt(firstDayOfWeekIdx) as 0 | 1 | 2 | 3 | 4 | 5 | 6)
+          : 0,
     });
     let totalDays =
       d.differenceInDays(firstDay, beginDay) + d.getDaysInMonth(firstDay);
@@ -173,15 +234,10 @@ function recalculate(
           expenseSize: 0,
         });
       } else {
-        const currentIncome =
-          incomeData.find(f =>
-            d.isSameDay(d.parse(f.date, 'yyyy-MM-dd', new Date()), currentDate),
-          )?.amount ?? 0;
+        const dateKey = d.format(currentDate, 'yyyy-MM-dd');
+        const currentIncome = incomeDataMap.get(dateKey) ?? 0;
+        const currentExpense = expenseDataMap.get(dateKey) ?? 0;
 
-        const currentExpense =
-          expenseData.find(f =>
-            d.isSameDay(d.parse(f.date, 'yyyy-MM-dd', new Date()), currentDate),
-          )?.amount ?? 0;
         daysArray.push({
           date: currentDate,
           incomeSize: getBarLength(currentIncome),

@@ -51,9 +51,13 @@ export function CalendarGraph({
 }: CalendarGraphProps) {
   const { t } = useTranslation();
   const startingDate = startOfWeek(new Date(), {
-    weekStartsOn: firstDayOfWeekIdx
-      ? (parseInt(firstDayOfWeekIdx) as 0 | 1 | 2 | 3 | 4 | 5 | 6)
-      : 0,
+    weekStartsOn:
+      firstDayOfWeekIdx !== undefined &&
+      !Number.isNaN(parseInt(firstDayOfWeekIdx)) &&
+      parseInt(firstDayOfWeekIdx) >= 0 &&
+      parseInt(firstDayOfWeekIdx) <= 6
+        ? (parseInt(firstDayOfWeekIdx) as 0 | 1 | 2 | 3 | 4 | 5 | 6)
+        : 0,
   });
   const [fontSize, setFontSize] = useState(14);
 
@@ -88,6 +92,7 @@ export function CalendarGraph({
               height: '100%',
               width: '100%',
               position: 'relative',
+              marginBottom: 4,
             }}
           >
             {format(addDays(startingDate, index), 'EEEEE')}
@@ -107,10 +112,10 @@ export function CalendarGraph({
       >
         {data.map((day, index) =>
           !isSameMonth(day.date, startOfMonth(start)) ? (
-            <View key={index} />
+            <View key={`empty-${day.date.getTime()}`} />
           ) : (
             <Tooltip
-              key={index}
+              key={day.date.getTime()}
               content={
                 <View>
                   <View style={{ marginBottom: 10 }}>
@@ -179,7 +184,7 @@ export function CalendarGraph({
               }}
             >
               <DayButton
-                key={index}
+                key={day.date.getTime()}
                 resizeRef={index === 15 ? buttonRef : null}
                 fontSize={fontSize}
                 day={day}
@@ -213,9 +218,10 @@ function DayButton({ day, onPress, fontSize, resizeRef }: DayButtonProps) {
   return (
     <Button
       ref={resizeRef}
+      aria-label={format(day.date, 'MMMM d, yyyy')}
       style={{
         borderColor: 'transparent',
-        backgroundColor: theme.menuAutoCompleteBackground,
+        backgroundColor: theme.calendarCellBackground,
         position: 'relative',
         padding: 'unset',
         height: '100%',

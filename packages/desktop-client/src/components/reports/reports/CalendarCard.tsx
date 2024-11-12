@@ -6,6 +6,7 @@ import React, {
   useEffect,
   type Dispatch,
   type SetStateAction,
+  useCallback,
 } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -323,45 +324,54 @@ function CalendarCardInner({
   );
   const monthNameContainerRef = useRef<HTMLDivElement>(null);
 
-  const debouncedResizeCallback = debounce(() => {
-    for (let i = 0; i < monthFormatSizeContainers.current.length; i++) {
+  const measureMonthFormats = useCallback(() => {
+    const measurements = monthFormatSizeContainers.current.map(container => ({
+      width: container?.clientWidth ?? 0,
+      format: container?.getAttribute('data-format') ?? '',
+    }));
+    return measurements;
+  }, []);
+
+  const debouncedResizeCallback = useRef(
+    debounce(() => {
+      const measurements = measureMonthFormats();
+      const containerWidth = monthNameContainerRef.current?.clientWidth ?? 0;
+
+      const suitableFormat = measurements.find(m => containerWidth > m.width);
+      if (suitableFormat) {
+        if (
+          monthNameContainerRef.current &&
+          containerWidth > suitableFormat.width
+        ) {
+          setMonthNameFormats(prev => {
+            const newArray = [...prev];
+            newArray[index] = suitableFormat.format;
+            return newArray;
+          });
+
+          setMonthNameVisible(true);
+          return;
+        }
+      }
+
       if (
         monthNameContainerRef.current &&
-        monthFormatSizeContainers &&
-        monthFormatSizeContainers.current[i] &&
-        monthNameContainerRef.current.clientWidth >
-          (monthFormatSizeContainers?.current[i]?.clientWidth ?? 0)
+        monthNameContainerRef.current.scrollWidth >
+          monthNameContainerRef.current.clientWidth
       ) {
-        setMonthNameFormats(prev => {
-          const newArray = [...prev];
-          newArray[index] =
-            monthFormatSizeContainers?.current[i]?.getAttribute(
-              'data-format',
-            ) ?? '';
-          return newArray;
-        });
-
+        setMonthNameVisible(false);
+      } else {
         setMonthNameVisible(true);
-        return;
       }
-    }
+    }, 20),
+  );
 
-    if (
-      monthNameContainerRef.current &&
-      monthNameContainerRef.current.scrollWidth >
-        monthNameContainerRef.current.clientWidth
-    ) {
-      setMonthNameVisible(false);
-    } else {
-      setMonthNameVisible(true);
-    }
-  }, 20);
-
-  const monthNameResizeRef = useResizeObserver(debouncedResizeCallback);
+  const monthNameResizeRef = useResizeObserver(debouncedResizeCallback.current);
 
   useEffect(() => {
+    const debounce = debouncedResizeCallback?.current;
     return () => {
-      debouncedResizeCallback.clear();
+      debounce?.clear();
     };
   }, [debouncedResizeCallback]);
 
@@ -484,35 +494,45 @@ function CalendarCardInner({
       />
       <View style={{ fontWeight: 'bold', fontSize: '12px' }}>
         <span
-          ref={rel => (monthFormatSizeContainers.current[0] = rel)}
+          ref={node => {
+            if (node) monthFormatSizeContainers.current[0] = node;
+          }}
           style={{ position: 'fixed', top: -9999, left: -9999 }}
           data-format="MMMM yyyy"
         >
           {format(calendar.start, 'MMMM yyyy')}:
         </span>
         <span
-          ref={rel => (monthFormatSizeContainers.current[1] = rel)}
+          ref={node => {
+            if (node) monthFormatSizeContainers.current[1] = node;
+          }}
           style={{ position: 'fixed', top: -9999, left: -9999 }}
           data-format="MMM yyyy"
         >
           {format(calendar.start, 'MMM yyyy')}:
         </span>
         <span
-          ref={rel => (monthFormatSizeContainers.current[2] = rel)}
+          ref={node => {
+            if (node) monthFormatSizeContainers.current[2] = node;
+          }}
           style={{ position: 'fixed', top: -9999, left: -9999 }}
           data-format="MMM yy"
         >
           {format(calendar.start, 'MMM yy')}:
         </span>
         <span
-          ref={rel => (monthFormatSizeContainers.current[3] = rel)}
+          ref={node => {
+            if (node) monthFormatSizeContainers.current[3] = node;
+          }}
           style={{ position: 'fixed', top: -9999, left: -9999 }}
           data-format="MMM"
         >
           {format(calendar.start, 'MMM')}:
         </span>
         <span
-          ref={rel => (monthFormatSizeContainers.current[4] = rel)}
+          ref={node => {
+            if (node) monthFormatSizeContainers.current[4] = node;
+          }}
           style={{ position: 'fixed', top: -9999, left: -9999 }}
           data-format=""
         />
