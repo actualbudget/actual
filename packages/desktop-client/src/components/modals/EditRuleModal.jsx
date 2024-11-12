@@ -1,10 +1,4 @@
-import React, {
-  useState,
-  useEffect,
-  useRef,
-  useCallback,
-  useMemo,
-} from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { css } from '@emotion/css';
@@ -310,20 +304,26 @@ function formatAmount(amount) {
 
 function ScheduleDescription({ id }) {
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
-  const scheduleData = useSchedules({
-    transform: useCallback(q => q.filter({ id }), [id]),
-  });
+  const scheduleQuery = useMemo(
+    () => q('schedules').filter({ id }).select('*'),
+    [id],
+  );
+  const {
+    schedules,
+    statuses: scheduleStatuses,
+    isLoading: isSchedulesLoading,
+  } = useSchedules({ query: scheduleQuery });
 
-  if (scheduleData == null) {
+  if (isSchedulesLoading) {
     return null;
   }
 
-  if (scheduleData.schedules.length === 0) {
+  if (schedules.length === 0) {
     return <View style={{ flex: 1 }}>{id}</View>;
   }
 
-  const [schedule] = scheduleData.schedules;
-  const status = schedule && scheduleData.statuses.get(schedule.id);
+  const [schedule] = schedules;
+  const status = schedule && scheduleStatuses.get(schedule.id);
 
   return (
     <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>
