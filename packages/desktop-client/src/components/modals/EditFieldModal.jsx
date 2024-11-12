@@ -1,18 +1,19 @@
 import React, { useState } from 'react';
 
 import { parseISO, format as formatDate, parse as parseDate } from 'date-fns';
+import { t } from 'i18next';
 
 import { currentDay, dayFromDate } from 'loot-core/src/shared/months';
 import { amountToInteger } from 'loot-core/src/shared/util';
 
 import { useDateFormat } from '../../hooks/useDateFormat';
-import { useResponsive } from '../../ResponsiveProvider';
 import { theme } from '../../style';
 import { Button } from '../common/Button2';
 import { Input } from '../common/Input';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { View } from '../common/View';
 import { SectionLabel } from '../forms';
+import { useResponsive } from '../responsive/ResponsiveProvider';
 import { DateSelect } from '../select/DateSelect';
 
 export function EditFieldModal({ name, onSubmit, onClose }) {
@@ -54,7 +55,7 @@ export function EditFieldModal({ name, onSubmit, onClose }) {
   switch (name) {
     case 'date':
       const today = currentDay();
-      label = 'Date';
+      label = t('Date');
       minWidth = 350;
       editor = ({ close }) => (
         <DateSelect
@@ -72,7 +73,7 @@ export function EditFieldModal({ name, onSubmit, onClose }) {
       break;
 
     case 'notes':
-      label = 'Notes';
+      label = t('Notes');
       editor = ({ close }) => (
         <>
           <View
@@ -116,7 +117,7 @@ export function EditFieldModal({ name, onSubmit, onClose }) {
                 document.getElementById('noteInput').focus();
               }}
             >
-              Prepend
+              {t('Prepend')}
             </Button>
             <Button
               selected={noteAmend === 'replace'}
@@ -148,7 +149,7 @@ export function EditFieldModal({ name, onSubmit, onClose }) {
                 document.getElementById('noteInput').focus();
               }}
             >
-              Replace
+              {t('Replace')}
             </Button>
             <Button
               selected={noteAmend === 'append'}
@@ -180,7 +181,7 @@ export function EditFieldModal({ name, onSubmit, onClose }) {
                 document.getElementById('noteInput').focus();
               }}
             >
-              Append
+              {t('Append')}
             </Button>
           </View>
           <Input
@@ -198,7 +199,7 @@ export function EditFieldModal({ name, onSubmit, onClose }) {
       break;
 
     case 'amount':
-      label = 'Amount';
+      label = t('Amount');
       editor = ({ close }) => (
         <Input
           focused={true}

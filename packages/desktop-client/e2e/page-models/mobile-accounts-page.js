@@ -4,7 +4,12 @@ export class MobileAccountsPage {
   constructor(page) {
     this.page = page;
 
+    this.accountList = this.page.getByLabel('Account list');
     this.accounts = this.page.getByTestId('account');
+  }
+
+  async waitFor() {
+    await this.accountList.waitFor();
   }
 
   /**

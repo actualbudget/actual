@@ -10,7 +10,7 @@ import React, {
 } from 'react';
 
 import { useGlobalPref } from '../../hooks/useGlobalPref';
-import { useResponsive } from '../../ResponsiveProvider';
+import { useResponsive } from '../responsive/ResponsiveProvider';
 
 type SidebarContextValue = {
   hidden: boolean;
