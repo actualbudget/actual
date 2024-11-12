@@ -96,7 +96,7 @@ async function fillPrimaryChecking(
     billCategories,
     billPayees,
   } = extractCommonThings(payees, groups);
-  const numTransactions = integer(100, 200);
+  const numTransactions = integer(4000, 5000);
 
   const transactions = [];
   for (let i = 0; i < numTransactions; i++) {
@@ -257,7 +257,7 @@ async function fillPrimaryChecking(
 async function fillChecking(handlers, account, payees, groups) {
   const { incomePayee, expensePayees, incomeGroup, expenseCategories } =
     extractCommonThings(payees, groups);
-  const numTransactions = integer(20, 40);
+  const numTransactions = integer(3000, 6000);
 
   const transactions = [];
   for (let i = 0; i < numTransactions; i++) {
@@ -305,7 +305,7 @@ async function fillChecking(handlers, account, payees, groups) {
 async function fillInvestment(handlers, account, payees, groups) {
   const { incomePayee, incomeGroup } = extractCommonThings(payees, groups);
 
-  const numTransactions = integer(10, 30);
+  const numTransactions = integer(3000, 4000);
 
   const transactions = [];
   for (let i = 0; i < numTransactions; i++) {
@@ -342,7 +342,7 @@ async function fillSavings(handlers, account, payees, groups) {
   const { incomePayee, expensePayees, incomeGroup, expenseCategories } =
     extractCommonThings(payees, groups);
 
-  const numTransactions = integer(15, 40);
+  const numTransactions = integer(1500, 4000);
 
   const transactions = [];
   for (let i = 0; i < numTransactions; i++) {
@@ -386,7 +386,7 @@ async function fillSavings(handlers, account, payees, groups) {
 async function fillMortgage(handlers, account, payees, groups) {
   const { incomePayee, incomeGroup } = extractCommonThings(payees, groups);
 
-  const numTransactions = integer(7, 10);
+  const numTransactions = integer(700, 1000);
   const amount = integer(100000, 200000);
   const category = incomeGroup.categories.find(c => c.name === 'Income');
 
@@ -423,7 +423,7 @@ async function fillMortgage(handlers, account, payees, groups) {
 async function fillOther(handlers, account, payees, groups) {
   const { incomePayee, incomeGroup } = extractCommonThings(payees, groups);
 
-  const numTransactions = integer(3, 6);
+  const numTransactions = integer(300, 600);
   const category = incomeGroup.categories.find(c => c.name === 'Income');
 
   const transactions: TransactionEntity[] = [

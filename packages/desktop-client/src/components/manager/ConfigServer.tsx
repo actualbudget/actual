@@ -59,11 +59,11 @@ export function ConfigServer() {
           <Button onPress={() => navigate('/config-server/internal')}>
             Host on this computer
           </Button>
-          <Button onPress={() => navigate('/config-server/external')}>
-            Connect to an external server
-          </Button>
         </>
       )}
+      <Button onPress={() => navigate('/config-server/external')}>
+        Connect to an external server
+      </Button>
       <Button onPress={onSkip}>I don’t want a server</Button>
     </View>
   );
