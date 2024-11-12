@@ -73,7 +73,7 @@ function AccountCard({
         boxShadow: `0 1px 1px ${theme.mobileAccountShadow}`,
         marginTop: 10,
       }}
-      data-testid="account"
+      data-testid="account-list-item"
     >
       <View
         style={{
@@ -186,7 +186,7 @@ function AccountList({
     >
       {accounts.length === 0 && <EmptyMessage />}
       <PullToRefresh onRefresh={onSync}>
-        <View style={{ margin: 10 }}>
+        <View data-testid="account-list" style={{ margin: 10 }}>
           {budgetedAccounts.length > 0 && (
             <AccountHeader name="For Budget" amount={getOnBudgetBalance()} />
           )}
