@@ -130,7 +130,8 @@ function Layout({ children, isEditing, menuItems, onMenuSelect }: LayoutProps) {
   const [menuOpen, setMenuOpen] = useState<null | 'context' | 'button'>(null);
   const [crossOffset, setCrossOffset] = useState(0);
   const [offset, setOffset] = useState(0);
-  const contextMenusEnabled = useFeatureFlag('contextMenus');
+  const contextMenusEnabled =
+    useFeatureFlag('contextMenus') && useFeatureFlag('reportBudget');
 
   const isContextMenu = menuOpen === 'context';
 
