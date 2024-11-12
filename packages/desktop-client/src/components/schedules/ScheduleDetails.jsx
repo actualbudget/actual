@@ -297,7 +297,10 @@ export function ScheduleDetails({ id, transaction }) {
           .filter({ schedule: state.schedule.id })
           .select('*')
           .options({ splits: 'all' }),
-        data => dispatch({ type: 'set-transactions', transactions: data }),
+        {
+          onData: data =>
+            dispatch({ type: 'set-transactions', transactions: data }),
+        },
       );
       return live.unsubscribe;
     }
@@ -337,7 +340,10 @@ export function ScheduleDetails({ id, transaction }) {
               .filter({ $and: filters })
               .select('*')
               .options({ splits: 'all' }),
-            data => dispatch({ type: 'set-transactions', transactions: data }),
+            {
+              onData: data =>
+                dispatch({ type: 'set-transactions', transactions: data }),
+            },
           );
           unsubscribe = live.unsubscribe;
         }
