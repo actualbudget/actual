@@ -651,75 +651,77 @@ function UserAccessForFile({ fileId, currentUserId }: UserAccessForFileProps) {
 
   return (
     <View>
-      {multiuserEnabled && usersAccess.length > 0 && (
-        <View
-          style={{
-            marginLeft: '5px',
-            alignSelf: 'center',
-          }}
-        >
-          <Tooltip
-            content={
-              <View
-                style={{
-                  margin: 5,
-                }}
-              >
-                <Text
-                  style={{
-                    ...styles.altMenuHeaderText,
-                    ...styles.verySmallText,
-                    color: theme.pageTextLight,
-                  }}
-                >
-                  File shared with:
-                </Text>
+      {multiuserEnabled &&
+        usersAccess.length > 0 &&
+        !(sortedUsersAccess.length === 1 && sortedUsersAccess[0].owner) && (
+          <View
+            style={{
+              marginLeft: '5px',
+              alignSelf: 'center',
+            }}
+          >
+            <Tooltip
+              content={
                 <View
                   style={{
-                    padding: 0,
+                    margin: 5,
                   }}
                 >
-                  {sortedUsersAccess.map(user => (
-                    <View key={user.userId} style={{ flexDirection: 'row' }}>
-                      <SvgUser
-                        style={{
-                          width: 10,
-                          height: 10,
-                          opacity: 0.7,
-                          marginTop: 3,
-                          marginRight: 5,
-                        }}
-                      />
-                      <View
-                        style={{
-                          ...styles.verySmallText,
-                          color: theme.pageTextLight,
-                          margin: 0,
-                          listStylePosition: 'inside',
-                        }}
-                      >
-                        {user.userId === currentUserId
-                          ? 'You'
-                          : (user.displayName ?? user.userName)}
+                  <Text
+                    style={{
+                      ...styles.altMenuHeaderText,
+                      ...styles.verySmallText,
+                      color: theme.pageTextLight,
+                    }}
+                  >
+                    File shared with:
+                  </Text>
+                  <View
+                    style={{
+                      padding: 0,
+                    }}
+                  >
+                    {sortedUsersAccess.map(user => (
+                      <View key={user.userId} style={{ flexDirection: 'row' }}>
+                        <SvgUser
+                          style={{
+                            width: 10,
+                            height: 10,
+                            opacity: 0.7,
+                            marginTop: 3,
+                            marginRight: 5,
+                          }}
+                        />
+                        <View
+                          style={{
+                            ...styles.verySmallText,
+                            color: theme.pageTextLight,
+                            margin: 0,
+                            listStylePosition: 'inside',
+                          }}
+                        >
+                          {user.userId === currentUserId
+                            ? 'You'
+                            : (user.displayName ?? user.userName)}
+                        </View>
                       </View>
-                    </View>
-                  ))}
+                    ))}
+                  </View>
                 </View>
-              </View>
-            }
-            placement="bottom end"
-          >
-            <SvgUserGroup
-              style={{
-                width: 15,
-                height: 15,
-                alignSelf: 'flex-end',
-                opacity: 0.7,
-              }}
-            />
-          </Tooltip>
-        </View>
-      )}
+              }
+              placement="bottom end"
+            >
+              <SvgUserGroup
+                style={{
+                  width: 15,
+                  height: 15,
+                  alignSelf: 'flex-end',
+                  opacity: 0.7,
+                }}
+              />
+            </Tooltip>
+          </View>
+        )}
     </View>
   );
 }
