@@ -34,7 +34,7 @@ export function SummaryCard({
 }: SummaryProps) {
   const { t } = useTranslation();
   const isDashboardsFeatureEnabled = useFeatureFlag('dashboards');
-  const [start, end] = calculateTimeRange(meta?.timeFrame, {
+  const [start, end] = calculateTimeRange(meta?.timeFrame ?? 'all', {
     start: monthUtils.dayFromDate(monthUtils.currentMonth()),
     end: monthUtils.currentDay(),
     mode: 'full',
