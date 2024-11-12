@@ -462,9 +462,19 @@ export function conditionsToAQL(conditions, { recurDateBounds = 100 } = {}) {
         return { $or: values.map(v => apply(field, '$eq', v)) };
 
       case 'hasTags':
-        const tagValues = value
-          .split(/(?<!#)(#[\w\d\p{Emoji}-]+)(?=\s|$)/gu)
-          .filter(tag => tag.startsWith('#'));
+        const words = value.split(/\s+/);
+        const tagValues = [];
+        words.forEach(word => {
+          const startsWithHash = word.startsWith('#');
+          const containsMultipleHash = word.slice(1).includes('#');
+          const correctlyFormatted = word.match(/#[\w\d\p{Emoji}-]+/gu);
+          const validHashtag =
+            startsWithHash && !containsMultipleHash && correctlyFormatted;
+
+          if (validHashtag) {
+            tagValues.push(word);
+          }
+        });
 
         return {
           $and: tagValues.map(v => {

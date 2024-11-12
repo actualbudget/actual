@@ -202,7 +202,7 @@ export class CategoryTemplate {
   private priorities: number[] = [];
   private remainderWeight: number = 0;
   private toBudgetAmount: number = 0; // amount that will be budgeted by the templates
-  private fullAmount: number = 0; // the full requested amount
+  private fullAmount: number = null; // the full requested amount, start null for remainder only cats
   private isLongGoal: boolean = null; //defaulting the goals to null so templates can be unset
   private goalAmount: number = null;
   private fromLastMonth = 0; // leftover from last month

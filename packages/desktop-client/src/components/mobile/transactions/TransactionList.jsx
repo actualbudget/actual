@@ -46,7 +46,6 @@ export function TransactionList({
   transactions,
   isNewTransaction,
   onOpenTransaction,
-  scrollProps = {},
   onLoadMore,
 }) {
   const sections = useMemo(() => {
@@ -107,11 +106,8 @@ export function TransactionList({
 
   return (
     <>
-      {scrollProps.ListHeaderComponent}
       <ListBox
-        {...scrollProps}
         aria-label="Transaction list"
-        label=""
         loadMore={onLoadMore}
         selectionMode="none"
       >

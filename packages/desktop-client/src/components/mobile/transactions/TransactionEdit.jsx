@@ -559,7 +559,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
         const { account: accountId } = unserializedTransaction;
         const account = accountsById?.[accountId];
         if (account) {
-          navigate(`/accounts/${account.id}`);
+          navigate(`/accounts/${account.id}`, { replace: true });
         } else {
           // Handle the case where account is undefined
           navigate(-1);
