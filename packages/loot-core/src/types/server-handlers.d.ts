@@ -225,7 +225,7 @@ export interface ServerHandlers {
     | { error: 'failed' }
   >;
 
-  'accounts-bank-sync': (arg: { id?: string; ids?: string[] }) => Promise<{
+  'accounts-bank-sync': (arg: { ids?: AccountEntity['id'][] }) => Promise<{
     errors;
     newTransactions;
     matchedTransactions;

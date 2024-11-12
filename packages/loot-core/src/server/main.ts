@@ -1099,27 +1099,22 @@ function handleSyncError(err, acct) {
   };
 }
 
-handlers['accounts-bank-sync'] = async function ({ id, ids }) {
+handlers['accounts-bank-sync'] = async function ({ ids = [] }) {
   const [[, userId], [, userKey]] = await asyncStorage.multiGet([
     'user-id',
     'user-key',
   ]);
-
-  if ((id && ids) || (!id && !ids)) {
-    throw new Error('Specify either id or ids, but not both');
-  }
 
   const accounts = await db.runQuery(
     `
     SELECT a.*, b.bank_id as bankId 
     FROM accounts a
     LEFT JOIN banks b ON a.bank = b.id
-    WHERE a.tombstone = 0 AND a.closed = 0 
-      ${id ? 'AND a.id = ?' : ''} 
-      ${ids ? `AND a.id IN (${ids.map(() => '?').join(', ')})` : ''}
+    WHERE a.tombstone = 0 AND a.closed = 0
+      ${ids.length ? `AND a.id IN (${ids.map(() => '?').join(', ')})` : ''}
     ORDER BY a.offbudget, a.sort_order
   `,
-    id ? [id] : ids || [],
+    ids,
     true,
   );
 
