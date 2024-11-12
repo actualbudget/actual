@@ -7,13 +7,13 @@ import {
 } from 'loot-core/types/models';
 
 import { useFeatureFlag } from '../../hooks/useFeatureFlag';
-import { useResponsive } from '../../ResponsiveProvider';
 import { Button } from '../common/Button2';
 import { Select } from '../common/Select';
 import { SpaceBetween } from '../common/SpaceBetween';
 import { View } from '../common/View';
 import { AppliedFilters } from '../filters/AppliedFilters';
 import { FilterButton } from '../filters/FiltersMenu';
+import { useResponsive } from '../responsive/ResponsiveProvider';
 
 import {
   calculateTimeRange,

@@ -55,12 +55,17 @@ interface RemainderTemplate extends BaseTemplate {
 
 interface AverageTemplate extends BaseTemplate {
   type: 'average';
-  amount: number;
+  numMonths: number;
 }
 
 interface GoalTemplate extends BaseTemplate {
   type: 'simple';
   amount: number;
+}
+
+interface CopyTemplate extends BaseTemplate {
+  type: 'copy';
+  lookBack: number;
 }
 
 interface ErrorTemplate extends BaseTemplate {
@@ -79,4 +84,5 @@ export type Template =
   | RemainderTemplate
   | AverageTemplate
   | GoalTemplate
+  | CopyTemplate
   | ErrorTemplate;

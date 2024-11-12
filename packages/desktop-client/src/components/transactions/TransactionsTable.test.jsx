@@ -5,6 +5,7 @@ import userEvent from '@testing-library/user-event';
 import { format as formatDate, parse as parseDate } from 'date-fns';
 import { v4 as uuidv4 } from 'uuid';
 
+import { SchedulesProvider } from 'loot-core/src/client/data-hooks/schedules';
 import { SpreadsheetProvider } from 'loot-core/src/client/SpreadsheetProvider';
 import {
   generateTransaction,
@@ -23,7 +24,7 @@ import { integerToCurrency } from 'loot-core/src/shared/util';
 
 import { SelectedProviderWithItems } from '../../hooks/useSelected';
 import { SplitsExpandedProvider } from '../../hooks/useSplitsExpanded';
-import { ResponsiveProvider } from '../../ResponsiveProvider';
+import { ResponsiveProvider } from '../responsive/ResponsiveProvider';
 
 import { TransactionTable } from './TransactionsTable';
 
@@ -148,27 +149,29 @@ function LiveTransactionTable(props) {
     <TestProvider>
       <ResponsiveProvider>
         <SpreadsheetProvider>
-          <SelectedProviderWithItems
-            name="transactions"
-            items={transactions}
-            fetchAllIds={() => transactions.map(t => t.id)}
-          >
-            <SplitsExpandedProvider>
-              <TransactionTable
-                {...props}
-                transactions={transactions}
-                loadMoreTransactions={() => {}}
-                commonPayees={[]}
-                payees={payees}
-                addNotification={n => console.log(n)}
-                onSave={onSave}
-                onSplit={onSplit}
-                onAdd={onAdd}
-                onAddSplit={onAddSplit}
-                onCreatePayee={onCreatePayee}
-              />
-            </SplitsExpandedProvider>
-          </SelectedProviderWithItems>
+          <SchedulesProvider>
+            <SelectedProviderWithItems
+              name="transactions"
+              items={transactions}
+              fetchAllIds={() => transactions.map(t => t.id)}
+            >
+              <SplitsExpandedProvider>
+                <TransactionTable
+                  {...props}
+                  transactions={transactions}
+                  loadMoreTransactions={() => {}}
+                  commonPayees={[]}
+                  payees={payees}
+                  addNotification={n => console.log(n)}
+                  onSave={onSave}
+                  onSplit={onSplit}
+                  onAdd={onAdd}
+                  onAddSplit={onAddSplit}
+                  onCreatePayee={onCreatePayee}
+                />
+              </SplitsExpandedProvider>
+            </SelectedProviderWithItems>
+          </SchedulesProvider>
         </SpreadsheetProvider>
       </ResponsiveProvider>
     </TestProvider>
