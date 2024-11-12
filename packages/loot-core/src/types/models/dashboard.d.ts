@@ -101,9 +101,15 @@ export type SummaryWidget = AbstractWidget<
   } | null
 >;
 
-export type SummaryContent = {
-  type: 'sum' | 'avgPerMonth' | 'avgPerTransact' | 'percentage';
-  divisorConditions?: RuleConditionEntity[];
-  divisorConditionsOp?: 'and' | 'or';
+export type BaseSummaryContent = {
+  type: 'sum' | 'avgPerMonth' | 'avgPerTransact';
+};
+
+export type PercentageSummaryContent = {
+  type: 'percentage';
+  divisorConditions: RuleConditionEntity[];
+  divisorConditionsOp: 'and' | 'or';
   divisorIncludeDateRange?: boolean;
 };
+
+export type SummaryContent = BaseSummaryContent | PercentageSummaryContent;

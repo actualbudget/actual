@@ -21,9 +21,15 @@ export function summarySpreadsheet(
     spreadsheet: ReturnType<typeof useSpreadsheet>,
     setData: (data: { total: number }) => void,
   ) => {
-    const { filters } = await send('make-filters-from-conditions', {
-      conditions: conditions.filter(cond => !cond.customName),
-    });
+    let filters = [];
+    try {
+      const response = await send('make-filters-from-conditions', {
+        conditions: conditions.filter(cond => !cond.customName),
+      });
+      filters = response.filters;
+    } catch (error) {
+      console.error('Error fetching filters:', error);
+    }
     const conditionsOpKey = conditionsOp === 'or' ? '$or' : '$and';
 
     const startDay = d.parse(
@@ -37,6 +43,10 @@ export function summarySpreadsheet(
       'yyyy-MM-dd',
       new Date(),
     );
+
+    if (d.isAfter(startDay, endDay)) {
+      throw new Error('Start date must be before or equal to end date.');
+    }
 
     const getOneDatePerMonth = (start: Date, end: Date) => {
       const months = [];
@@ -82,7 +92,13 @@ export function summarySpreadsheet(
       query = query.groupBy(['date']);
     }
 
-    const data = await runQuery(query);
+    let data;
+    try {
+      data = await runQuery(query);
+    } catch (error) {
+      console.error('Error executing query:', error);
+      return;
+    }
 
     switch (summaryContent.type) {
       case 'sum':
@@ -157,6 +173,12 @@ async function calculatePercentage(
   startDay: Date,
   endDay: Date,
 ) {
+  if (summaryContent.type !== 'percentage') {
+    return {
+      total: 0,
+    };
+  }
+
   const conditionsOpKey =
     summaryContent.divisorConditionsOp === 'or' ? '$or' : '$and';
   const { filters } = await send('make-filters-from-conditions', {

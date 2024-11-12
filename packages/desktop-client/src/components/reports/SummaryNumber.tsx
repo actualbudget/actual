@@ -70,6 +70,8 @@ export function SummaryNumber({
       {/* Visible element */}
       <View
         ref={mergedRef as Ref<HTMLDivElement>}
+        role="text"
+        aria-label={`${value < 0 ? 'Negative' : 'Positive'} amount: ${amountToCurrency(Math.abs(value))}${suffix}`}
         style={{
           alignItems: 'center',
           height: '100%',
@@ -80,7 +82,7 @@ export function SummaryNumber({
           color: value < 0 ? chartTheme.colors.red : chartTheme.colors.blue,
         }}
       >
-        <span>
+        <span aria-hidden="true">
           {amountToCurrency(Math.abs(value))}
           {suffix}
         </span>

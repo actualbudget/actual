@@ -17,7 +17,6 @@ import {
 
 import { useFilters } from '../../../hooks/useFilters';
 import { useNavigate } from '../../../hooks/useNavigate';
-import { useResponsive } from '../../../ResponsiveProvider';
 import { styles, theme } from '../../../style';
 import { Button } from '../../common/Button2';
 import { View } from '../../common/View';
@@ -28,6 +27,7 @@ import { Checkbox } from '../../forms';
 import { MobileBackButton } from '../../mobile/MobileBackButton';
 import { FieldSelect } from '../../modals/EditRuleModal';
 import { MobilePageHeader, Page, PageHeader } from '../../Page';
+import { useResponsive } from '../../responsive/ResponsiveProvider';
 import { Header } from '../Header';
 import { LoadingIndicator } from '../LoadingIndicator';
 import { calculateTimeRange } from '../reportRanges';
@@ -75,7 +75,10 @@ function SummaryInner({ widget }: SummaryInnerProps) {
     onDelete: onDeleteFilter,
     onUpdate: onUpdateFilter,
     onConditionsOpChange,
-  } = useFilters(widget?.meta?.conditions, widget?.meta?.conditionsOp);
+  } = useFilters(
+    widget?.meta?.conditions ?? [],
+    widget?.meta?.conditionsOp ?? 'and',
+  );
 
   const [content, setContent] = useState<SummaryContent>(
     widget?.meta?.content
@@ -84,10 +87,20 @@ function SummaryInner({ widget }: SummaryInnerProps) {
             return JSON.parse(widget.meta.content);
           } catch (error) {
             console.error('Failed to parse widget meta content:', error);
-            return { type: 'sum' };
+            return {
+              type: 'sum',
+              divisorIncludeDateRange: true,
+              divisorConditions: [],
+              divisorConditionsOp: 'and',
+            };
           }
         })()
-      : { type: 'sum' },
+      : {
+          type: 'sum',
+          divisorIncludeDateRange: true,
+          divisorConditions: [],
+          divisorConditionsOp: 'and',
+        },
   );
 
   const {
@@ -97,7 +110,12 @@ function SummaryInner({ widget }: SummaryInnerProps) {
     onDelete: divisorOnDeleteFilter,
     onUpdate: divisorOnUpdateFilter,
     onConditionsOpChange: divisorOnConditionsOpChange,
-  } = useFilters(content?.divisorConditions, content?.divisorConditionsOp);
+  } = useFilters(
+    content.type === 'percentage' ? (content?.divisorConditions ?? []) : [],
+    content.type === 'percentage'
+      ? (content?.divisorConditionsOp ?? 'and')
+      : 'and',
+  );
 
   const params = useMemo(
     () => summarySpreadsheet(start, end, conditions, conditionsOp, content),
@@ -153,10 +171,16 @@ function SummaryInner({ widget }: SummaryInnerProps) {
 
   const onSaveWidgetName = async (newName: string) => {
     if (!widget) {
-      throw new Error('No widget that could be saved.');
+      dispatch(
+        addNotification({
+          type: 'error',
+          message: t('Cannot save: No widget available.'),
+        }),
+      );
+      return;
     }
 
-    const name = newName || t('Net Worth');
+    const name = newName || t('Summary');
     await send('dashboard-update-widget', {
       id: widget.id,
       meta: {
@@ -175,7 +199,13 @@ function SummaryInner({ widget }: SummaryInnerProps) {
 
   async function onSaveWidget() {
     if (!widget) {
-      throw new Error('No widget that could be saved.');
+      dispatch(
+        addNotification({
+          type: 'error',
+          message: t('Cannot save: No widget available.'),
+        }),
+      );
+      return;
     }
 
     await send('dashboard-update-widget', {
@@ -311,10 +341,13 @@ function SummaryInner({ widget }: SummaryInnerProps) {
             onChange={(
               newValue: 'sum' | 'avgPerMonth' | 'avgPerTransact' | 'percentage',
             ) =>
-              setContent((prev: SummaryContent) => ({
-                ...prev,
-                type: newValue,
-              }))
+              setContent(
+                (prev: SummaryContent) =>
+                  ({
+                    ...prev,
+                    type: newValue,
+                  }) as SummaryContent,
+              )
             }
           />
         </View>
@@ -364,12 +397,14 @@ function SummaryInner({ widget }: SummaryInnerProps) {
                 <Checkbox
                   id="enabled-field"
                   checked={content.divisorIncludeDateRange ?? true}
-                  onChange={() =>
+                  onChange={() => {
+                    const currentValue =
+                      content.divisorIncludeDateRange ?? true;
                     setContent(prev => ({
                       ...prev,
-                      divisorIncludeDateRange: !content.divisorIncludeDateRange,
-                    }))
-                  }
+                      divisorIncludeDateRange: !currentValue,
+                    }));
+                  }}
                 />{' '}
                 Include summary date range
               </View>
