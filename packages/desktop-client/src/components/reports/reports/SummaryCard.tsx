@@ -34,7 +34,7 @@ export function SummaryCard({
 }: SummaryProps) {
   const { t } = useTranslation();
   const isDashboardsFeatureEnabled = useFeatureFlag('dashboards');
-  const [start, end] = calculateTimeRange(meta?.timeFrame ?? 'all', {
+  const [start, end] = calculateTimeRange(meta?.timeFrame, {
     start: monthUtils.dayFromDate(monthUtils.currentMonth()),
     end: monthUtils.currentDay(),
     mode: 'full',
@@ -133,6 +133,7 @@ export function SummaryCard({
           <SummaryNumber
             value={data?.total ?? 0}
             suffix={content.type === 'percentage' ? '%' : ''}
+            loading={data === undefined}
           />
         </View>
       </View>

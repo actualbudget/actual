@@ -148,15 +148,20 @@ function calculatePerMonth(
     return { total: 0 };
   }
 
-  // Pre-process data into a month-indexed map for O(1) lookup
-  const monthlyData = data.reduce((acc, day) => {
-    const monthKey = d.format(d.parse(day.date, 'yyyy-MM-dd', new Date()), 'yyyy-MM');
-    acc[monthKey] = (acc[monthKey] || 0) + day.amount;
-    return acc;
-  }, {} as Record<string, number>);
+  const monthlyData = data.reduce(
+    (acc, day) => {
+      const monthKey = d.format(
+        d.parse(day.date, 'yyyy-MM-dd', new Date()),
+        'yyyy-MM',
+      );
+      acc[monthKey] = (acc[monthKey] || 0) + day.amount;
+      return acc;
+    },
+    {} as Record<string, number>,
+  );
 
   const monthsSum = months.map(m => ({
-    amount: monthlyData[d.format(m, 'yyyy-MM')] || 0
+    amount: monthlyData[d.format(m, 'yyyy-MM')] || 0,
   }));
 
   const totalAmount = monthsSum.reduce((sum, month) => sum + month.amount, 0);

@@ -305,7 +305,7 @@ function SummaryInner({ widget }: SummaryInnerProps) {
           >
             <SummaryNumber
               animate={false}
-              value={data === undefined ? null : data?.total ?? 0}
+              value={data === undefined ? null : (data?.total ?? 0)}
               suffix={content.type === 'percentage' ? '%' : ''}
               loading={data === undefined}
             />
