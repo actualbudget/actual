@@ -4,7 +4,7 @@ import * as monthUtils from '../../shared/months';
 import { amountToInteger } from '../../shared/util';
 import * as db from '../db';
 
-import { getSheetValue } from './actions';
+import { getSheetValue, getSheetBoolean } from './actions';
 import { goalsSchedule } from './goalsSchedule';
 import { getActiveSchedules } from './statements';
 import { Template } from './types/templates';
@@ -31,10 +31,23 @@ export class CategoryTemplate {
   // set up the class and check all templates
   static async init(templates: Template[], categoryID: string, month) {
     // get all the needed setup values
-    const fromLastMonth = await getSheetValue(
-      monthUtils.sheetForMonth(monthUtils.subMonths(month, 1)),
+    const lastMonthSheet = monthUtils.sheetForMonth(
+      monthUtils.subMonths(month, 1),
+    );
+    const lastMonthBalance = await getSheetValue(
+      lastMonthSheet,
       `leftover-${categoryID}`,
     );
+    const carryover = await getSheetBoolean(
+      lastMonthSheet,
+      `carryover-${categoryID}`,
+    );
+    let fromLastMonth;
+    if (lastMonthBalance < 0 && !carryover) {
+      fromLastMonth = 0;
+    } else {
+      fromLastMonth = lastMonthBalance;
+    }
     // run all checks
     await CategoryTemplate.checkByAndScheduleAndSpend(templates, month);
     await CategoryTemplate.checkPercentage(templates);
@@ -142,9 +155,14 @@ export class CategoryTemplate {
 
     //check limit
     if (this.limitCheck) {
-      if (toBudget + this.fromLastMonth >= this.limitAmount) {
-        toBudget = this.limitAmount - this.fromLastMonth;
+      if (
+        toBudget + this.toBudgetAmount + this.fromLastMonth >=
+        this.limitAmount
+      ) {
+        const orig = toBudget;
+        toBudget = this.limitAmount - this.toBudgetAmount - this.fromLastMonth;
         this.limitMet = true;
+        available = available + orig - toBudget;
       }
     }
     // don't overbudget when using a priority
