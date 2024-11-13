@@ -1,4 +1,6 @@
 // @ts-strict-ignore
+import { t } from 'i18next';
+
 import { captureException, captureBreadcrumb } from '../platform/exceptions';
 import { sequential } from '../shared/async';
 import { type HandlerFunctions, type Handlers } from '../types/handlers';
@@ -121,7 +123,7 @@ export function getMutatorContext() {
   if (currentContext == null) {
     captureBreadcrumb({
       category: 'server',
-      message: 'Recent methods: ' + _latestHandlerNames.join(', '),
+      message: t('Recent methods: ') + _latestHandlerNames.join(', '),
     });
     // captureException(new Error('getMutatorContext: mutator not running'));
 
