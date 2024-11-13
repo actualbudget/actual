@@ -55,6 +55,7 @@ import { EditablePageHeaderTitle } from '../../EditablePageHeaderTitle';
 import { MobileBackButton } from '../../mobile/MobileBackButton';
 import { TransactionList as TransactionListMobile } from '../../mobile/transactions/TransactionList';
 import { MobilePageHeader, Page, PageHeader } from '../../Page';
+import { PrivacyFilter } from '../../PrivacyFilter';
 import { useResponsive } from '../../responsive/ResponsiveProvider';
 import { TransactionList } from '../../transactions/TransactionList';
 import { chartTheme } from '../chart-theme';
@@ -779,7 +780,9 @@ function CalendarWithHeader({
                 }}
                 aria-label="Income"
               >
-                {amountToCurrency(calendar.totalIncome)}
+                <PrivacyFilter>
+                  {amountToCurrency(calendar.totalIncome)}
+                </PrivacyFilter>
               </View>
             </>
           ) : (
@@ -801,7 +804,9 @@ function CalendarWithHeader({
                 }}
                 aria-label="Expenses"
               >
-                {amountToCurrency(calendar.totalExpense)}
+                <PrivacyFilter>
+                  {amountToCurrency(calendar.totalExpense)}
+                </PrivacyFilter>
               </View>
             </>
           ) : (
@@ -888,7 +893,13 @@ function CalendarCardHeader({
                   Income:
                 </View>
                 <View style={{ color: chartTheme.colors.blue }}>
-                  {totalIncome !== 0 ? amountToCurrency(totalIncome) : ''}
+                  {totalIncome !== 0 ? (
+                    <PrivacyFilter>
+                      {amountToCurrency(totalIncome)}
+                    </PrivacyFilter>
+                  ) : (
+                    ''
+                  )}
                 </View>
               </>
             )}
@@ -903,7 +914,13 @@ function CalendarCardHeader({
                   Expenses:
                 </View>
                 <View style={{ color: chartTheme.colors.red }}>
-                  {totalExpense !== 0 ? amountToCurrency(totalExpense) : ''}
+                  {totalExpense !== 0 ? (
+                    <PrivacyFilter>
+                      {amountToCurrency(totalExpense)}
+                    </PrivacyFilter>
+                  ) : (
+                    ''
+                  )}
                 </View>
               </>
             )}

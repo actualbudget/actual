@@ -18,6 +18,7 @@ import { styles, theme } from '../../../style';
 import { Button } from '../../common/Button2';
 import { Tooltip } from '../../common/Tooltip';
 import { View } from '../../common/View';
+import { PrivacyFilter } from '../../PrivacyFilter';
 import { chartTheme } from '../chart-theme';
 
 type CalendarGraphProps = {
@@ -142,13 +143,26 @@ export function CalendarGraph({
                           >
                             Income:
                           </View>
-                          <View style={{ color: chartTheme.colors.blue }}>
-                            {day.incomeValue !== 0
-                              ? amountToCurrency(day.incomeValue)
-                              : ''}
+                          <View
+                            style={{
+                              color: chartTheme.colors.blue,
+                              flexDirection: 'row',
+                            }}
+                          >
+                            {day.incomeValue !== 0 ? (
+                              <PrivacyFilter>
+                                {amountToCurrency(day.incomeValue)}
+                              </PrivacyFilter>
+                            ) : (
+                              ''
+                            )}
                           </View>
-                          <View style={{ marginLeft: 4 }}>
-                            ({Math.round(day.incomeSize * 100) / 100 + '%'})
+                          <View style={{ marginLeft: 4, flexDirection: 'row' }}>
+                            (
+                            <PrivacyFilter>
+                              {Math.round(day.incomeSize * 100) / 100 + '%'}
+                            </PrivacyFilter>
+                            )
                           </View>
                         </>
                       )}
@@ -162,13 +176,26 @@ export function CalendarGraph({
                           >
                             Expenses:
                           </View>
-                          <View style={{ color: chartTheme.colors.red }}>
-                            {day.expenseValue !== 0
-                              ? amountToCurrency(day.expenseValue)
-                              : ''}
+                          <View
+                            style={{
+                              color: chartTheme.colors.red,
+                              flexDirection: 'row',
+                            }}
+                          >
+                            {day.expenseValue !== 0 ? (
+                              <PrivacyFilter>
+                                {amountToCurrency(day.expenseValue)}
+                              </PrivacyFilter>
+                            ) : (
+                              ''
+                            )}
                           </View>
-                          <View style={{ marginLeft: 4 }}>
-                            ({Math.round(day.expenseSize * 100) / 100 + '%'})
+                          <View style={{ marginLeft: 4, flexDirection: 'row' }}>
+                            (
+                            <PrivacyFilter>
+                              {Math.round(day.expenseSize * 100) / 100 + '%'}
+                            </PrivacyFilter>
+                            )
                           </View>
                         </>
                       )}

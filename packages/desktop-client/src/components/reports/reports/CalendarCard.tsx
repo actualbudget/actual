@@ -28,6 +28,7 @@ import { Block } from '../../common/Block';
 import { Button } from '../../common/Button2';
 import { Tooltip } from '../../common/Tooltip';
 import { View } from '../../common/View';
+import { PrivacyFilter } from '../../PrivacyFilter';
 import { useResponsive } from '../../responsive/ResponsiveProvider';
 import { chartTheme } from '../chart-theme';
 import { DateRange } from '../DateRange';
@@ -216,9 +217,13 @@ export function CalendarCard({
                             Income:
                           </View>
                           <View style={{ color: chartTheme.colors.blue }}>
-                            {totalIncome !== 0
-                              ? amountToCurrency(totalIncome)
-                              : ''}
+                            {totalIncome !== 0 ? (
+                              <PrivacyFilter>
+                                {amountToCurrency(totalIncome)}
+                              </PrivacyFilter>
+                            ) : (
+                              ''
+                            )}
                           </View>
                         </>
                       )}
@@ -233,9 +238,13 @@ export function CalendarCard({
                             Expenses:
                           </View>
                           <View style={{ color: chartTheme.colors.red }}>
-                            {totalExpense !== 0
-                              ? amountToCurrency(totalExpense)
-                              : ''}
+                            {totalExpense !== 0 ? (
+                              <PrivacyFilter>
+                                {amountToCurrency(totalExpense)}
+                              </PrivacyFilter>
+                            ) : (
+                              ''
+                            )}
                           </View>
                         </>
                       )}
@@ -459,7 +468,9 @@ function CalendarCardInner({
                   height={16}
                   style={{ flexShrink: 0 }}
                 />
-                {amountToCurrency(calendar.totalIncome)}
+                <PrivacyFilter>
+                  {amountToCurrency(calendar.totalIncome)}
+                </PrivacyFilter>
               </>
             ) : (
               ''
@@ -480,7 +491,9 @@ function CalendarCardInner({
                   height={16}
                   style={{ flexShrink: 0 }}
                 />
-                {amountToCurrency(calendar.totalExpense)}
+                <PrivacyFilter>
+                  {amountToCurrency(calendar.totalExpense)}
+                </PrivacyFilter>
               </>
             ) : (
               ''
