@@ -1,5 +1,6 @@
 // @ts-strict-ignore
 import React, { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 
@@ -80,6 +81,8 @@ export function Modals() {
       dispatch(closeModal());
     }
   }, [location]);
+
+  const { t } = useTranslation();
 
   const modals = modalStack
     .map(({ name, options }) => {
@@ -287,10 +290,12 @@ export function Modals() {
               Header={props => (
                 <ModalHeader
                   {...props}
-                  title={<ModalTitle title="New Category" shrinkOnOverflow />}
+                  title={
+                    <ModalTitle title={t('New Category')} shrinkOnOverflow />
+                  }
                 />
               )}
-              inputPlaceholder="Category name"
+              inputPlaceholder={t('Category name')}
               buttonText="Add"
               onValidate={options.onValidate}
               onSubmit={options.onSubmit}
@@ -306,12 +311,15 @@ export function Modals() {
                 <ModalHeader
                   {...props}
                   title={
-                    <ModalTitle title="New Category Group" shrinkOnOverflow />
+                    <ModalTitle
+                      title={t('New Category Group')}
+                      shrinkOnOverflow
+                    />
                   }
                 />
               )}
-              inputPlaceholder="Category group name"
-              buttonText="Add"
+              inputPlaceholder={t('Category group name')}
+              buttonText={t('Add')}
               onValidate={options.onValidate}
               onSubmit={options.onSubmit}
             />
