@@ -1,6 +1,5 @@
 // @ts-strict-ignore
 import { type Database } from '@jlongster/sql.js';
-import { t } from 'i18next';
 
 import { captureBreadcrumb } from '../platform/exceptions';
 import * as sqlite from '../platform/server/sqlite';
@@ -133,7 +132,7 @@ export async function loadSpreadsheet(
   }
 
   captureBreadcrumb({
-    message: t('loading spreaadsheet'),
+    message: 'loading spreaadsheet',
     category: 'server',
   });
 
@@ -163,7 +162,7 @@ export async function loadSpreadsheet(
   }
 
   captureBreadcrumb({
-    message: t('loaded spreaadsheet'),
+    message: 'loaded spreaadsheet',
     category: 'server',
   });
 
