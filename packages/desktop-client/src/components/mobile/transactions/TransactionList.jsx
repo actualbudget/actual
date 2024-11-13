@@ -79,7 +79,7 @@ export function TransactionList({
         onOpenTransaction(transaction);
       }
     },
-    [dispatchSelected, onOpenTransaction, selectedTransactions.size],
+    [dispatchSelected, onOpenTransaction, selectedTransactions],
   );
 
   useScrollListener(({ hasScrolledToEnd }) => {
