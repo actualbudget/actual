@@ -2,6 +2,7 @@ import React, {
   type ComponentPropsWithoutRef,
   type CSSProperties,
 } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { useLocalPref } from '../../hooks/useLocalPref';
 import { theme, styles } from '../../style';
@@ -77,6 +78,7 @@ function BudgetPageMenu({
         throw new Error(`Unrecognized menu item: ${name}`);
     }
   };
+  const { t } = useTranslation();
 
   return (
     <Menu
@@ -85,15 +87,15 @@ function BudgetPageMenu({
       items={[
         {
           name: 'add-category-group',
-          text: 'Add category group',
+          text: t('Add category group'),
         },
         {
           name: 'toggle-hidden-categories',
-          text: `${!showHiddenCategories ? 'Show' : 'Hide'} hidden categories`,
+          text: `${!showHiddenCategories ? t('Show') : t('Hide')} hidden categories`,
         },
         {
           name: 'switch-budget-file',
-          text: 'Switch budget file',
+          text: t('Switch budget file'),
         },
       ]}
     />
