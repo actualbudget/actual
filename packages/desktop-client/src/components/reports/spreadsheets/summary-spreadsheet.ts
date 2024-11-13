@@ -19,7 +19,13 @@ export function summarySpreadsheet(
 ) {
   return async (
     spreadsheet: ReturnType<typeof useSpreadsheet>,
-    setData: (data: { total: number }) => void,
+    setData: (data: {
+      total: number;
+      divisor: number;
+      dividend: number;
+      fromRange: string;
+      toRange: string;
+    }) => void,
   ) => {
     let filters = [];
     try {
@@ -100,37 +106,49 @@ export function summarySpreadsheet(
       return;
     }
 
+    const dateRanges = {
+      fromRange: d.format(startDay, 'MMM yy'),
+      toRange: d.format(endDay, 'MMM yy'),
+    };
+
     switch (summaryContent.type) {
       case 'sum':
         setData({
+          ...dateRanges,
           total: (data.data[0]?.amount ?? 0) / 100,
+          dividend: (data.data[0]?.amount ?? 0) / 100,
+          divisor: 0,
         });
         break;
 
       case 'avgPerTransact':
         setData({
+          ...dateRanges,
           total:
             ((data.data[0]?.count ?? 0)
               ? (data.data[0]?.amount ?? 0) / data.data[0].count
               : 0) / 100,
+          dividend: (data.data[0]?.amount ?? 0) / 100,
+          divisor: data.data[0].count,
         });
         break;
 
       case 'avgPerMonth': {
         const months = getOneDatePerMonth(startDay, endDay);
-        setData(calculatePerMonth(data.data, months));
+        setData({ ...dateRanges, ...calculatePerMonth(data.data, months) });
         break;
       }
 
       case 'percentage':
-        setData(
-          await calculatePercentage(
+        setData({
+          ...dateRanges,
+          ...(await calculatePercentage(
             data.data,
             summaryContent,
             startDay,
             endDay,
-          ),
-        );
+          )),
+        });
         break;
     }
   };
@@ -145,7 +163,7 @@ function calculatePerMonth(
   months: Date[],
 ) {
   if (!data.length || !months.length) {
-    return { total: 0 };
+    return { total: 0, dividend: 0, divisor: 0 };
   }
 
   const monthlyData = data.reduce(
@@ -169,6 +187,8 @@ function calculatePerMonth(
 
   return {
     total: averageAmountPerMonth / 100,
+    dividend: totalAmount / 100,
+    divisor: months.length,
   };
 }
 
@@ -183,6 +203,8 @@ async function calculatePercentage(
   if (summaryContent.type !== 'percentage') {
     return {
       total: 0,
+      dividend: 0,
+      divisor: 0,
     };
   }
 
@@ -227,15 +249,15 @@ async function calculatePercentage(
   if (divisorValue === 0) {
     return {
       total: 0,
+      dividend: 0,
+      divisor: 0,
     };
   }
 
+  const dividend = data.reduce((prev, ac) => prev + (ac?.amount ?? 0), 0);
   return {
-    total:
-      Math.round(
-        (data.reduce((prev, ac) => prev + (ac?.amount ?? 0), 0) /
-          divisorValue) *
-          10000,
-      ) / 100,
+    total: Math.round(((dividend ?? 0) / (divisorValue ?? 1)) * 10000) / 100,
+    divisor: (divisorValue ?? 0) / 100,
+    dividend: (dividend ?? 0) / 100,
   };
 }

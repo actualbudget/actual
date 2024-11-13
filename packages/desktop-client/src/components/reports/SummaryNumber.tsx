@@ -1,7 +1,5 @@
 import React, { type Ref, useRef, useState } from 'react';
 
-import debounce from 'lodash/debounce';
-
 import { amountToCurrency } from 'loot-core/shared/util';
 
 import { useMergedRefs } from '../../hooks/useMergedRefs';
@@ -39,18 +37,18 @@ export function SummaryNumber({
       offScreenDiv.scrollWidth <= containerWidth &&
       offScreenDiv.scrollHeight <= containerHeight
     ) {
-      testFontSize += 0.5;
+      testFontSize += 1;
       offScreenDiv.style.fontSize = `${testFontSize}px`;
     }
 
     setFontSize(testFontSize);
   };
 
-  const handleResize = debounce((rect: DOMRectReadOnly) => {
-    adjustFontSize(rect.width, rect.height);
-  }, 10);
+  //const handleResize = debounce(, 0);
 
-  const ref = useResizeObserver(handleResize);
+  const ref = useResizeObserver((rect: DOMRectReadOnly) => {
+    adjustFontSize(rect.width, rect.height);
+  });
   const mergedRef = useMergedRefs(ref, refDiv);
 
   return (
