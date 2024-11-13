@@ -5,6 +5,7 @@ import { amountToCurrency } from 'loot-core/shared/util';
 import { useMergedRefs } from '../../hooks/useMergedRefs';
 import { useResizeObserver } from '../../hooks/useResizeObserver';
 import { View } from '../common/View';
+import { PrivacyFilter } from '../PrivacyFilter';
 
 import { chartTheme } from './chart-theme';
 import { LoadingIndicator } from './LoadingIndicator';
@@ -67,8 +68,10 @@ export function SummaryNumber({
               whiteSpace: 'nowrap',
             }}
           >
-            {amountToCurrency(value)}
-            {suffix}
+            <PrivacyFilter>
+              {amountToCurrency(value)}
+              {suffix}
+            </PrivacyFilter>
           </div>
 
           <View
@@ -86,8 +89,10 @@ export function SummaryNumber({
             }}
           >
             <span aria-hidden="true">
-              {amountToCurrency(Math.abs(value))}
-              {suffix}
+              <PrivacyFilter>
+                {amountToCurrency(Math.abs(value))}
+                {suffix}
+              </PrivacyFilter>
             </span>
           </View>
         </>

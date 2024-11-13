@@ -32,6 +32,7 @@ import { Checkbox } from '../../forms';
 import { MobileBackButton } from '../../mobile/MobileBackButton';
 import { FieldSelect } from '../../modals/EditRuleModal';
 import { MobilePageHeader, Page, PageHeader } from '../../Page';
+import { PrivacyFilter } from '../../PrivacyFilter';
 import { useResponsive } from '../../responsive/ResponsiveProvider';
 import { Header } from '../Header';
 import { LoadingIndicator } from '../LoadingIndicator';
@@ -340,50 +341,6 @@ function SummaryInner({ widget }: SummaryInnerProps) {
             />{' '}
             Include summary date range
           </View>
-          // <View
-          //   style={{
-          //     margin: 16,
-          //     marginTop: 0,
-          //   }}
-          // >
-          //   <span
-          //     style={{
-          //       ...styles.verySmallText,
-          //       color: theme.pageTextLight,
-          //     }}
-          //   >
-          //     Divisor Filter
-          //   </span>
-          //   <View
-          //     style={{
-          //       border: '1px solid',
-          //       borderColor: theme.tableBorder,
-          //       flexGrow: 1,
-          //       padding: 8,
-          //     }}
-          //   >
-          //     <View style={{ width: '100px' }}>
-          //       <FilterButton
-          //         compact={isNarrowWidth}
-          //         onApply={divisorOnApplyFilter}
-          //         hover={false}
-          //         exclude={undefined}
-          //       />
-          //     </View>
-          //     {divisorConditions && divisorConditions.length > 0 && (
-          //       <View style={{ marginTop: 5 }}>
-          //         <AppliedFilters
-          //           conditions={divisorConditions}
-          //           onUpdate={divisorOnUpdateFilter}
-          //           onDelete={divisorOnDeleteFilter}
-          //           conditionsOp={divisorConditionsOp}
-          //           onConditionsOpChange={divisorOnConditionsOpChange}
-          //         />
-          //       </View>
-          //     )}
-
-          //   </View>
-          // </View>
         )}
       </View>
       <View
@@ -425,7 +382,7 @@ function SummaryInner({ widget }: SummaryInnerProps) {
                     textAlign: 'center',
                   }}
                 >
-                  {data?.dividend ?? 0}
+                  <PrivacyFilter>{data?.dividend ?? 0}</PrivacyFilter>
                 </Text>
                 <div
                   style={{
@@ -443,7 +400,7 @@ function SummaryInner({ widget }: SummaryInnerProps) {
                     textAlign: 'center',
                   }}
                 >
-                  {data?.divisor ?? 0}
+                  <PrivacyFilter>{data?.divisor ?? 0}</PrivacyFilter>
                 </Text>
               </View>
             </>
@@ -487,7 +444,7 @@ function Operator({
   divisorFilterObject,
   fromRange,
   toRange,
-  showDivisorDateRange
+  showDivisorDateRange,
 }: OperatorProps) {
   return (
     <View>
