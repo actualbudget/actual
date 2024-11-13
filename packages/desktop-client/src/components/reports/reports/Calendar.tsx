@@ -130,21 +130,24 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
   } = useFilters(widget?.meta?.conditions, widget?.meta?.conditionsOp);
 
   useLayoutEffect(() => {
-    if (parameters.has('day') && onApplyFilter) {
+    const day = parameters.get('day');
+    const month = parameters.get('month');
+
+    if (day && onApplyFilter) {
       onApplyFilter({
         op: 'is',
         field: 'date',
-        value: parameters.get('day') as string,
+        value: day,
       });
     }
 
-    if (parameters.has('month') && parameters.get('month') && onApplyFilter) {
+    if (month && onApplyFilter) {
       onApplyFilter({
         conditions: [
           {
             field: 'date',
             op: 'is',
-            value: parameters.get('month'),
+            value: month,
             options: {
               month: true,
             },

@@ -493,49 +493,26 @@ function CalendarCardInner({
         }}
       />
       <View style={{ fontWeight: 'bold', fontSize: '12px' }}>
-        <span
-          ref={node => {
-            if (node) monthFormatSizeContainers.current[0] = node;
-          }}
-          style={{ position: 'fixed', top: -9999, left: -9999 }}
-          data-format="MMMM yyyy"
-        >
-          {format(calendar.start, 'MMMM yyyy')}:
-        </span>
-        <span
-          ref={node => {
-            if (node) monthFormatSizeContainers.current[1] = node;
-          }}
-          style={{ position: 'fixed', top: -9999, left: -9999 }}
-          data-format="MMM yyyy"
-        >
-          {format(calendar.start, 'MMM yyyy')}:
-        </span>
-        <span
-          ref={node => {
-            if (node) monthFormatSizeContainers.current[2] = node;
-          }}
-          style={{ position: 'fixed', top: -9999, left: -9999 }}
-          data-format="MMM yy"
-        >
-          {format(calendar.start, 'MMM yy')}:
-        </span>
-        <span
-          ref={node => {
-            if (node) monthFormatSizeContainers.current[3] = node;
-          }}
-          style={{ position: 'fixed', top: -9999, left: -9999 }}
-          data-format="MMM"
-        >
-          {format(calendar.start, 'MMM')}:
-        </span>
-        <span
-          ref={node => {
-            if (node) monthFormatSizeContainers.current[4] = node;
-          }}
-          style={{ position: 'fixed', top: -9999, left: -9999 }}
-          data-format=""
-        />
+        const monthFormats = [
+          { format: 'MMMM yyyy', text: format(calendar.start, 'MMMM yyyy') },
+          { format: 'MMM yyyy', text: format(calendar.start, 'MMM yyyy') },
+          { format: 'MMM yy', text: format(calendar.start, 'MMM yy') },
+          { format: 'MMM', text: format(calendar.start, 'MMM') },
+          { format: '', text: '' }
+        ];
+
+        {monthFormats.map((item, idx) => (
+          <span
+            key={item.format}
+            ref={node => {
+              if (node) monthFormatSizeContainers.current[idx] = node;
+            }}
+            style={{ position: 'fixed', top: -9999, left: -9999 }}
+            data-format={item.format}
+          >
+            {item.text}{item.text && ':'}
+          </span>
+        ))}
       </View>
     </View>
   );
