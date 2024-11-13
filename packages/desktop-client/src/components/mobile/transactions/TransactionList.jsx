@@ -34,7 +34,7 @@ import { Menu } from '../../common/Menu';
 import { Popover } from '../../common/Popover';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
-import { useScroll } from '../../ScrollProvider';
+import { useScrollListener } from '../../ScrollProvider';
 import { FloatingActionBar } from '../FloatingActionBar';
 
 import { TransactionListItem } from './TransactionListItem';
@@ -82,15 +82,11 @@ export function TransactionList({
     [dispatchSelected, onOpenTransaction, selectedTransactions.size],
   );
 
-  const { hasScrolledToBottom } = useScroll();
-  const scrolledToBottom = hasScrolledToBottom(5);
-  const prevScrolledToBottom = useRef(scrolledToBottom);
-
-  useEffect(() => {
-    if (!prevScrolledToBottom.current && scrolledToBottom) {
+  useScrollListener(({ hasScrolledToEnd }) => {
+    if (hasScrolledToEnd('down', 5)) {
       onLoadMore?.();
     }
-  }, [onLoadMore, scrolledToBottom]);
+  });
 
   if (isLoading) {
     return (
