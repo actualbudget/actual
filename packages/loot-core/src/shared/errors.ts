@@ -60,9 +60,8 @@ export function getDownloadError({ reason, meta, fileName }) {
       );
 
     case 'out-of-sync-migrations':
-      return (
-        t('This budget cannot be loaded with this version of the app. ') +
-        t('Make sure the app is up-to-date.')
+      return t(
+        'This budget cannot be loaded with this version of the app. Make sure the app is up-to-date.',
       );
 
     default:
@@ -86,14 +85,8 @@ export function getTestKeyError({ reason }) {
         'Unable to connect to the server. We need to access the server to get some information about your keys.',
       );
     case 'old-key-style':
-      return (
-        t(
-          'This file is encrypted with an old unsupported key style. Recreate the key ',
-        ) +
-        t(
-          'on a device where the file is available, or use an older version of Actual to download ',
-        ) +
-        t('it.')
+      return t(
+        'This file is encrypted with an old unsupported key style. Recreate the key on a device where the file is available, or use an older version of Actual to download it.',
       );
     case 'decrypt-failure':
       return t('Unable to decrypt file with this password. Please try again.');
