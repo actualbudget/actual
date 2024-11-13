@@ -68,6 +68,7 @@ export function SummaryNumber({
               fontSize: '14px',
               visibility: 'hidden',
               whiteSpace: 'nowrap',
+              padding: 16,
             }}
           >
             <PrivacyFilter>
@@ -85,6 +86,7 @@ export function SummaryNumber({
               height: '100%',
               width: '100%',
               fontSize: `${fontSize}px`,
+              padding: 16,
               justifyContent: 'center',
               transition: animate ? 'font-size 0.3s ease' : '',
               color: value < 0 ? chartTheme.colors.red : chartTheme.colors.blue,
