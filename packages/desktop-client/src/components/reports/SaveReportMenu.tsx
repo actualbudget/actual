@@ -28,11 +28,11 @@ export function SaveReportMenu({
           { name: 'rename-report', text: t('Rename') },
           {
             name: 'update-report',
-            text: 'Update report',
+            text: t('Update report'),
           },
           {
             name: 'reload-report',
-            text: 'Revert changes',
+            text: t('Revert changes'),
           },
           { name: 'delete-report', text: t('Delete') },
           Menu.line,
