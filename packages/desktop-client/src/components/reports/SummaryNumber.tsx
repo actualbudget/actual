@@ -1,5 +1,7 @@
 import React, { type Ref, useRef, useState } from 'react';
 
+import { debounce } from 'debounce';
+
 import { amountToCurrency } from 'loot-core/shared/util';
 
 import { useMergedRefs } from '../../hooks/useMergedRefs';
@@ -9,7 +11,6 @@ import { PrivacyFilter } from '../PrivacyFilter';
 
 import { chartTheme } from './chart-theme';
 import { LoadingIndicator } from './LoadingIndicator';
-import { debounce } from 'debounce';
 
 type AnimatedNumberProps = {
   value: number;
@@ -28,34 +29,27 @@ export function SummaryNumber({
   const refDiv = useRef<HTMLDivElement>(null);
   const offScreenRef = useRef<HTMLDivElement>(null);
 
-const adjustFontSize = (containerWidth: number, containerHeight: number) => {
+  const adjustFontSize = (containerWidth: number, containerHeight: number) => {
     if (!offScreenRef.current) return;
 
-    const MIN_FONT_SIZE = 14;
-    const MAX_FONT_SIZE = 100;
-    let low = MIN_FONT_SIZE;
-    let high = MAX_FONT_SIZE;
+    let testFontSize = 14;
     const offScreenDiv = offScreenRef.current;
+    offScreenDiv.style.fontSize = `${testFontSize}px`;
 
-    // Binary search for the optimal font size
-    while (low <= high) {
-      const mid = Math.floor((low + high) / 2);
-      offScreenDiv.style.fontSize = `${mid}px`;
-      
-      if (offScreenDiv.scrollWidth <= containerWidth && 
-          offScreenDiv.scrollHeight <= containerHeight) {
-        low = mid + 1;
-      } else {
-        high = mid - 1;
-      }
+    while (
+      offScreenDiv.scrollWidth <= containerWidth &&
+      offScreenDiv.scrollHeight <= containerHeight
+    ) {
+      testFontSize += 1;
+      offScreenDiv.style.fontSize = `${testFontSize}px`;
     }
 
-    setFontSize(high);
+    setFontSize(testFontSize);
   };
 
   const handleResize = debounce((rect: DOMRectReadOnly) => {
     adjustFontSize(rect.width, rect.height);
-  }, 0);
+  }, 10);
 
   const ref = useResizeObserver(handleResize);
   const mergedRef = useMergedRefs(ref, refDiv);

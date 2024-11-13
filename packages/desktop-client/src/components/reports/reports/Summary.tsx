@@ -7,6 +7,7 @@ import { parseISO } from 'date-fns';
 
 import { useWidget } from 'loot-core/client/data-hooks/widget';
 import { send } from 'loot-core/platform/client/fetch';
+import { amountToCurrency } from 'loot-core/shared/util';
 import { addNotification } from 'loot-core/src/client/actions';
 import * as monthUtils from 'loot-core/src/shared/months';
 import {
@@ -34,11 +35,11 @@ import { FieldSelect } from '../../modals/EditRuleModal';
 import { MobilePageHeader, Page, PageHeader } from '../../Page';
 import { PrivacyFilter } from '../../PrivacyFilter';
 import { useResponsive } from '../../responsive/ResponsiveProvider';
+import { chartTheme } from '../chart-theme';
 import { Header } from '../Header';
 import { LoadingIndicator } from '../LoadingIndicator';
 import { calculateTimeRange } from '../reportRanges';
 import { summarySpreadsheet } from '../spreadsheets/summary-spreadsheet';
-import { SummaryNumber } from '../SummaryNumber';
 import { useReport } from '../useReport';
 import { fromDateRepr } from '../util';
 
@@ -415,14 +416,18 @@ function SummaryInner({ widget }: SummaryInnerProps) {
               justifyItems: 'center',
               alignItems: 'center',
               marginLeft: 16,
+              fontSize: '50px',
+              justifyContent: 'center',
+              color:
+                (data?.total ?? 0) < 0
+                  ? chartTheme.colors.red
+                  : chartTheme.colors.blue,
             }}
           >
-            <SummaryNumber
-              animate={false}
-              value={data === undefined ? 0 : (data?.total ?? 0)}
-              suffix={content.type === 'percentage' ? '%' : ''}
-              loading={data === undefined}
-            />
+            <PrivacyFilter>
+              {amountToCurrency(data?.total ?? 0)}
+              {content.type === 'percentage' ? '%' : ''}
+            </PrivacyFilter>
           </View>
         </View>
       </View>
