@@ -163,7 +163,7 @@ export function summarySpreadsheet(
         break;
 
       default:
-        throw new Error(`Unsupported summary type: ${summaryContent.type}`);
+        throw new Error(`Unsupported summary type`);
     }
   };
 }
