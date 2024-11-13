@@ -333,9 +333,9 @@ function CalendarCardInner({
   }, []);
 
   const debouncedResizeCallback = useRef(
-    debounce(() => {
+    debounce((contentRect: DOMRectReadOnly) => {
       const measurements = measureMonthFormats();
-      const containerWidth = monthNameContainerRef.current?.clientWidth ?? 0;
+      const containerWidth = contentRect.width;
 
       const suitableFormat = measurements.find(m => containerWidth > m.width);
       if (suitableFormat) {
@@ -366,7 +366,9 @@ function CalendarCardInner({
     }, 20),
   );
 
-  const monthNameResizeRef = useResizeObserver(debouncedResizeCallback.current);
+  const monthNameResizeRef = useResizeObserver(contentRect => {
+    debouncedResizeCallback.current(contentRect);
+  });
 
   useEffect(() => {
     const debounce = debouncedResizeCallback?.current;
