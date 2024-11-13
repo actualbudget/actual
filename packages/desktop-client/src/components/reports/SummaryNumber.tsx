@@ -9,6 +9,7 @@ import { PrivacyFilter } from '../PrivacyFilter';
 
 import { chartTheme } from './chart-theme';
 import { LoadingIndicator } from './LoadingIndicator';
+import { debounce } from 'debounce';
 
 type AnimatedNumberProps = {
   value: number;
@@ -45,11 +46,11 @@ export function SummaryNumber({
     setFontSize(testFontSize);
   };
 
-  //const handleResize = debounce(, 0);
-
-  const ref = useResizeObserver((rect: DOMRectReadOnly) => {
+  const handleResize = debounce((rect: DOMRectReadOnly) => {
     adjustFontSize(rect.width, rect.height);
-  });
+  }, 0);
+
+  const ref = useResizeObserver(handleResize);
   const mergedRef = useMergedRefs(ref, refDiv);
 
   return (
