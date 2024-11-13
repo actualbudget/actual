@@ -285,8 +285,7 @@ async function processCleanup(month: string): Promise<Notification> {
 
   const budgetAvailable = await getSheetValue(sheetName, `to-budget`);
   if (budgetAvailable <= 0) {
-    console.log('Global: No funds are available to reallocate.');
-    // warnings.push(t('Global: No funds are available to reallocate.'));
+    warnings.push('Global: No funds are available to reallocate.');
   }
 
   //fill sinking categories
