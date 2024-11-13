@@ -113,7 +113,7 @@ export function CalendarGraph({
         {data.map((day, index) =>
           !isSameMonth(day.date, startOfMonth(start)) ? (
             <View key={`empty-${day.date.getTime()}`} />
-          ) : (
+          ) : day.incomeValue !== 0 || day.expenseValue !== 0 ? (
             <Tooltip
               key={day.date.getTime()}
               content={
@@ -191,6 +191,14 @@ export function CalendarGraph({
                 onPress={() => onDayClick(day.date)}
               />
             </Tooltip>
+          ) : (
+            <DayButton
+              key={day.date.getTime()}
+              resizeRef={index === 15 ? buttonRef : null}
+              fontSize={fontSize}
+              day={day}
+              onPress={() => onDayClick(day.date)}
+            />
           ),
         )}
       </View>

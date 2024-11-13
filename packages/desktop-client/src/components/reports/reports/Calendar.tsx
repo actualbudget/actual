@@ -13,7 +13,7 @@ import { useParams, useSearchParams } from 'react-router-dom';
 import { useSpring, animated, config } from 'react-spring';
 
 import { useDrag } from '@use-gesture/react';
-import { format, isValid, parseISO } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 
 import { SchedulesProvider } from 'loot-core/client/data-hooks/schedules';
 import { useTransactions } from 'loot-core/client/data-hooks/transactions';
@@ -138,26 +138,16 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
       });
     }
 
-    if (
-      parameters.has('monthStart') &&
-      parameters.get('monthStart') &&
-      isValid(new Date(parameters.get('monthStart') || '')) &&
-      parameters.has('monthEnd') &&
-      parameters.get('monthEnd') &&
-      isValid(new Date(parameters.get('monthEnd') || '')) &&
-      onApplyFilter
-    ) {
+    if (parameters.has('month') && parameters.get('month') && onApplyFilter) {
       onApplyFilter({
         conditions: [
           {
             field: 'date',
-            op: 'gte',
-            value: parameters.get('monthStart'),
-          },
-          {
-            field: 'date',
-            op: 'lte',
-            value: parameters.get('monthEnd'),
+            op: 'is',
+            value: parameters.get('month'),
+            options: {
+              month: true,
+            },
           },
         ] as RuleConditionEntity[],
         conditionsOp: 'and',
@@ -753,13 +743,11 @@ function CalendarWithHeader({
               conditions: [
                 {
                   field: 'date',
-                  op: 'gte',
-                  value: format(calendar.start, 'yyyy-MM-dd'),
-                },
-                {
-                  field: 'date',
-                  op: 'lte',
-                  value: format(calendar.end, 'yyyy-MM-dd'),
+                  op: 'is',
+                  value: format(calendar.start, 'yyyy-MM'),
+                  options: {
+                    month: true,
+                  },
                 },
               ],
               conditionsOp: 'and',

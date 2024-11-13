@@ -420,7 +420,7 @@ function CalendarCardInner({
             onPress={() => {
               navigate(
                 isDashboardsFeatureEnabled
-                  ? `/reports/calendar/${widgetId}?monthStart=${format(calendar.start, 'yyyy-MM-dd')}&monthEnd=${format(calendar.end, 'yyyy-MM-dd')}`
+                  ? `/reports/calendar/${widgetId}?month=${format(calendar.start, 'yyyy-MM')}`
                   : '/reports/calendar',
               );
             }}
