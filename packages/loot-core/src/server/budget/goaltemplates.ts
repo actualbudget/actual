@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import { t } from 'i18next';
+//import { t } from 'i18next';
 
 import { Notification } from '../../client/state-types/notifications';
 import * as monthUtils from '../../shared/months';
@@ -249,6 +249,6 @@ async function processTemplate(
     //message: t('Successfully applied templates to {length} categories', {
     //  length: catObjects.length,
     //}),
-    message: 'Successfully applied',
+    message: `Successfully applied templates to ${catObjects.length} categories`,
   };
 }
