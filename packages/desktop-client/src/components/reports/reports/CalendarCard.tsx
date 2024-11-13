@@ -382,6 +382,14 @@ function CalendarCardInner({
 
   const navigate = useNavigate();
 
+  const monthFormats = [
+    { format: 'MMMM yyyy', text: format(calendar.start, 'MMMM yyyy') },
+    { format: 'MMM yyyy', text: format(calendar.start, 'MMM yyyy') },
+    { format: 'MMM yy', text: format(calendar.start, 'MMM yy') },
+    { format: 'MMM', text: format(calendar.start, 'MMM') },
+    { format: '', text: '' },
+  ];
+
   return (
     <View style={{ flex: 1, overflow: 'visible' }}>
       <View
@@ -493,14 +501,6 @@ function CalendarCardInner({
         }}
       />
       <View style={{ fontWeight: 'bold', fontSize: '12px' }}>
-        const monthFormats = [
-          { format: 'MMMM yyyy', text: format(calendar.start, 'MMMM yyyy') },
-          { format: 'MMM yyyy', text: format(calendar.start, 'MMM yyyy') },
-          { format: 'MMM yy', text: format(calendar.start, 'MMM yy') },
-          { format: 'MMM', text: format(calendar.start, 'MMM') },
-          { format: '', text: '' }
-        ];
-
         {monthFormats.map((item, idx) => (
           <span
             key={item.format}
@@ -510,7 +510,8 @@ function CalendarCardInner({
             style={{ position: 'fixed', top: -9999, left: -9999 }}
             data-format={item.format}
           >
-            {item.text}{item.text && ':'}
+            {item.text}
+            {item.text && ':'}
           </span>
         ))}
       </View>
