@@ -38,17 +38,28 @@ export function summarySpreadsheet(
     }
     const conditionsOpKey = conditionsOp === 'or' ? '$or' : '$and';
 
-    const startDay = d.parse(
-      monthUtils.firstDayOfMonth(start),
-      'yyyy-MM-dd',
-      new Date(),
-    );
+    let startDay: Date;
+    let endDay: Date;
+    try {
+      startDay = d.parse(
+        monthUtils.firstDayOfMonth(start),
+        'yyyy-MM-dd',
+        new Date(),
+      );
 
-    const endDay = d.parse(
-      monthUtils.lastDayOfMonth(end),
-      'yyyy-MM-dd',
-      new Date(),
-    );
+      endDay = d.parse(
+        monthUtils.lastDayOfMonth(end),
+        'yyyy-MM-dd',
+        new Date(),
+      );
+    } catch (error) {
+      console.error('Error parsing dates:', error);
+      throw new Error('Invalid date format provided');
+    }
+
+    if (!d.isValid(startDay) || !d.isValid(endDay)) {
+      throw new Error('Invalid date values provided');
+    }
 
     if (d.isAfter(startDay, endDay)) {
       throw new Error('Start date must be before or equal to end date.');
@@ -210,11 +221,22 @@ async function calculatePercentage(
 
   const conditionsOpKey =
     summaryContent.divisorConditionsOp === 'or' ? '$or' : '$and';
-  const { filters } = await send('make-filters-from-conditions', {
-    conditions: summaryContent?.divisorConditions?.filter(
-      cond => !cond.customName,
-    ),
-  });
+  let filters = [];
+  try {
+    const response = await send('make-filters-from-conditions', {
+      conditions: summaryContent?.divisorConditions?.filter(
+        cond => !cond.customName,
+      ),
+    });
+    filters = response.filters;
+  } catch (error) {
+    console.error('Error creating filters:', error);
+    return {
+      total: 0,
+      dividend: 0,
+      divisor: 0,
+    };
+  }
 
   const makeDivisorQuery = () =>
     q('transactions')
@@ -242,7 +264,17 @@ async function calculatePercentage(
     });
   }
 
-  const divisorData = (await runQuery(query)) as { data: { amount: number }[] };
+  let divisorData;
+  try {
+    divisorData = (await runQuery(query)) as { data: { amount: number }[] };
+  } catch (error) {
+    console.error('Error executing divisor query:', error);
+    return {
+      total: 0,
+      dividend: 0,
+      divisor: 0,
+    };
+  }
 
   const divisorValue = divisorData?.data?.[0]?.amount ?? 0;
 

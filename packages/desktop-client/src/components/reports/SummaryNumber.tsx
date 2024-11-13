@@ -27,22 +27,29 @@ export function SummaryNumber({
   const refDiv = useRef<HTMLDivElement>(null);
   const offScreenRef = useRef<HTMLDivElement>(null);
 
-  const adjustFontSize = (containerWidth: number, containerHeight: number) => {
+const adjustFontSize = (containerWidth: number, containerHeight: number) => {
     if (!offScreenRef.current) return;
 
-    let testFontSize = 14;
+    const MIN_FONT_SIZE = 14;
+    const MAX_FONT_SIZE = 100;
+    let low = MIN_FONT_SIZE;
+    let high = MAX_FONT_SIZE;
     const offScreenDiv = offScreenRef.current;
-    offScreenDiv.style.fontSize = `${testFontSize}px`;
 
-    while (
-      offScreenDiv.scrollWidth <= containerWidth &&
-      offScreenDiv.scrollHeight <= containerHeight
-    ) {
-      testFontSize += 1;
-      offScreenDiv.style.fontSize = `${testFontSize}px`;
+    // Binary search for the optimal font size
+    while (low <= high) {
+      const mid = Math.floor((low + high) / 2);
+      offScreenDiv.style.fontSize = `${mid}px`;
+      
+      if (offScreenDiv.scrollWidth <= containerWidth && 
+          offScreenDiv.scrollHeight <= containerHeight) {
+        low = mid + 1;
+      } else {
+        high = mid - 1;
+      }
     }
 
-    setFontSize(testFontSize);
+    setFontSize(high);
   };
 
   //const handleResize = debounce(, 0);
