@@ -1,6 +1,4 @@
 // @ts-strict-ignore
-//import { t } from 'i18next';
-
 import { Notification } from '../../client/state-types/notifications';
 import * as monthUtils from '../../shared/months';
 import * as db from '../db';
@@ -191,14 +189,12 @@ async function processTemplate(
   if (catObjects.length === 0 && errors.length === 0) {
     return {
       type: 'message',
-      //message: t('Everything is up to date'),
       message: 'Everything is up to date',
     };
   }
   if (errors.length > 0) {
     return {
       sticky: true,
-      //message: t('There were errors interpreting some templates:'),
       message: 'There were errors interpreting some templates:',
       pre: errors.join(`\n\n`),
     };
@@ -246,9 +242,6 @@ async function processTemplate(
 
   return {
     type: 'message',
-    //message: t('Successfully applied templates to {length} categories', {
-    //  length: catObjects.length,
-    //}),
     message: `Successfully applied templates to ${catObjects.length} categories`,
   };
 }
