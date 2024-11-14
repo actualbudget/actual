@@ -194,7 +194,7 @@ async function processTemplate(
   if (errors.length > 0) {
     return {
       sticky: true,
-      message: `There were errors interpreting some templates:`,
+      message: 'There were errors interpreting some templates:',
       pre: errors.join(`\n\n`),
     };
   }

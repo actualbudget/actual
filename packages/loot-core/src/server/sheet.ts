@@ -132,7 +132,7 @@ export async function loadSpreadsheet(
   }
 
   captureBreadcrumb({
-    message: 'loading spreaadsheet',
+    message: 'loading spreadsheet',
     category: 'server',
   });
 
@@ -162,7 +162,7 @@ export async function loadSpreadsheet(
   }
 
   captureBreadcrumb({
-    message: 'loaded spreaadsheet',
+    message: 'loaded spreadsheet',
     category: 'server',
   });
 
