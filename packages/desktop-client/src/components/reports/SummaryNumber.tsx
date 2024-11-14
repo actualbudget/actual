@@ -17,13 +17,17 @@ type AnimatedNumberProps = {
   animate?: boolean;
   suffix?: string;
   loading?: boolean;
+  initialFontSize?: number;
+  fontSizeChanged?: (fontSize: number) => void;
 };
 
 export function SummaryNumber({
   value,
-  animate = true,
+  animate = false,
   suffix = '',
   loading = true,
+  initialFontSize = 14,
+  fontSizeChanged,
 }: AnimatedNumberProps) {
   const [fontSize, setFontSize] = useState<number>(0);
   const refDiv = useRef<HTMLDivElement>(null);
@@ -32,19 +36,38 @@ export function SummaryNumber({
   const adjustFontSize = (containerWidth: number, containerHeight: number) => {
     if (!offScreenRef.current) return;
 
-    let testFontSize = 14;
+    let testFontSize = initialFontSize;
     const offScreenDiv = offScreenRef.current;
     offScreenDiv.style.fontSize = `${testFontSize}px`;
 
-    while (
-      offScreenDiv.scrollWidth <= containerWidth &&
-      offScreenDiv.scrollHeight <= containerHeight
+    if (
+      offScreenDiv.scrollWidth > containerWidth ||
+      offScreenDiv.scrollHeight > containerHeight
     ) {
-      testFontSize += 1;
-      offScreenDiv.style.fontSize = `${testFontSize}px`;
+      while (
+        offScreenDiv.scrollWidth > containerWidth &&
+        offScreenDiv.scrollHeight > containerHeight
+      ) {
+        testFontSize -= 0.5;
+        offScreenDiv.style.fontSize = `${testFontSize}px`;
+      }
+    } else if (
+      offScreenDiv.scrollWidth <= containerWidth * 0.9 &&
+      offScreenDiv.scrollHeight <= containerHeight * 0.9
+    ) {
+      while (
+        offScreenDiv.scrollWidth <= containerWidth &&
+        offScreenDiv.scrollHeight <= containerHeight
+      ) {
+        testFontSize += 0.5;
+        offScreenDiv.style.fontSize = `${testFontSize}px`;
+      }
     }
 
     setFontSize(testFontSize);
+    if (initialFontSize !== testFontSize && fontSizeChanged) {
+      fontSizeChanged(testFontSize);
+    }
   };
 
   const handleResize = debounce((rect: DOMRectReadOnly) => {

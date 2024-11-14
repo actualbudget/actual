@@ -383,7 +383,9 @@ function SummaryInner({ widget }: SummaryInnerProps) {
                     textAlign: 'center',
                   }}
                 >
-                  <PrivacyFilter>{data?.dividend ?? 0}</PrivacyFilter>
+                  <PrivacyFilter>
+                    {amountToCurrency(data?.dividend ?? 0)}
+                  </PrivacyFilter>
                 </Text>
                 <div
                   style={{
@@ -401,7 +403,9 @@ function SummaryInner({ widget }: SummaryInnerProps) {
                     textAlign: 'center',
                   }}
                 >
-                  <PrivacyFilter>{data?.divisor ?? 0}</PrivacyFilter>
+                  <PrivacyFilter>
+                    {amountToCurrency(data?.divisor ?? 0)}
+                  </PrivacyFilter>
                 </Text>
               </View>
             </>
@@ -425,7 +429,7 @@ function SummaryInner({ widget }: SummaryInnerProps) {
             }}
           >
             <PrivacyFilter>
-              {amountToCurrency(data?.total ?? 0)}
+              {amountToCurrency(Math.abs(data?.total ?? 0))}
               {content.type === 'percentage' ? '%' : ''}
             </PrivacyFilter>
           </View>

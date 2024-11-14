@@ -10,6 +10,7 @@ import {
 import { useFeatureFlag } from '../../../hooks/useFeatureFlag';
 import { View } from '../../common/View';
 import { DateRange } from '../DateRange';
+import { LoadingIndicator } from '../LoadingIndicator';
 import { ReportCard } from '../ReportCard';
 import { ReportCardName } from '../ReportCardName';
 import { calculateTimeRange } from '../reportRanges';
@@ -130,11 +131,23 @@ export function SummaryCard({
             alignItems: 'center',
           }}
         >
-          <SummaryNumber
-            value={data?.total ?? 0}
-            suffix={content.type === 'percentage' ? '%' : ''}
-            loading={data === undefined}
-          />
+          {data ? (
+            <SummaryNumber
+              value={data?.total ?? 0}
+              suffix={content.type === 'percentage' ? '%' : ''}
+              loading={!data}
+              fontSizeChanged={newSize => {
+                content.fontSize = newSize;
+                onMetaChange({
+                  ...meta,
+                  content: JSON.stringify(content),
+                });
+              }}
+              animate={isEditing ?? false}
+            />
+          ) : (
+            <LoadingIndicator />
+          )}
         </View>
       </View>
     </ReportCard>

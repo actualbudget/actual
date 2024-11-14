@@ -103,6 +103,7 @@ export type SummaryWidget = AbstractWidget<
 
 export type BaseSummaryContent = {
   type: 'sum' | 'avgPerMonth' | 'avgPerTransact';
+  fontSize?: number;
 };
 
 export type PercentageSummaryContent = {
@@ -110,6 +111,7 @@ export type PercentageSummaryContent = {
   divisorConditions: RuleConditionEntity[];
   divisorConditionsOp: 'and' | 'or';
   divisorIncludeDateRange?: boolean;
+  fontSize?: number;
 };
 
 export type SummaryContent = BaseSummaryContent | PercentageSummaryContent;
