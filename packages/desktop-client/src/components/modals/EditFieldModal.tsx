@@ -23,12 +23,14 @@ const itemStyle: CSSProperties = {
   paddingBottom: 8,
 };
 
+type NoteAmendMode = 'replace' | 'prepend' | 'append';
+
 type EditFieldModalProps = {
   name: string;
   onSubmit: (
     name: string,
     value: string | number,
-    mode?: 'replace' | 'prepend' | 'append',
+    mode?: NoteAmendMode,
   ) => void;
   onClose: () => void;
 };
@@ -43,7 +45,7 @@ export function EditFieldModal({
 
   function onSelectNote(
     value: string,
-    mode?: 'replace' | 'prepend' | 'append',
+    mode?: NoteAmendMode,
   ) {
     if (value != null) {
       onSubmit(name, value, mode);
@@ -70,7 +72,7 @@ export function EditFieldModal({
     ...(isNarrowWidth && itemStyle),
   };
 
-  const [noteAmend, onChangeMode] = useState<'replace' | 'prepend' | 'append'>(
+  const [noteAmend, onChangeMode] = useState<NoteAmendMode>(
     'replace',
   );
 
