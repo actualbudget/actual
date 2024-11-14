@@ -91,7 +91,7 @@ function SummaryInner({ widget }: SummaryInnerProps) {
             console.error('Failed to parse widget meta content:', error);
             return {
               type: 'sum',
-              divisorIncludeDateRange: true,
+              divisorAllTimeDateRange: false,
               divisorConditions: [],
               divisorConditionsOp: 'and',
             };
@@ -99,7 +99,7 @@ function SummaryInner({ widget }: SummaryInnerProps) {
         })()
       : {
           type: 'sum',
-          divisorIncludeDateRange: true,
+          divisorAllTimeDateRange: false,
           divisorConditions: [],
           divisorConditionsOp: 'and',
         },
@@ -331,16 +331,16 @@ function SummaryInner({ widget }: SummaryInnerProps) {
           <View style={{ flexDirection: 'row', marginLeft: 16 }}>
             <Checkbox
               id="enabled-field"
-              checked={content.divisorIncludeDateRange ?? true}
+              checked={content.divisorAllTimeDateRange ?? false}
               onChange={() => {
-                const currentValue = content.divisorIncludeDateRange ?? true;
+                const currentValue = content.divisorAllTimeDateRange ?? false;
                 setContent(prev => ({
                   ...prev,
-                  divisorIncludeDateRange: !currentValue,
+                  divisorAllTimeDateRange: !currentValue,
                 }));
               }}
             />{' '}
-            {t('Include summary date range')}
+            {t('All time divisor')}
           </View>
         )}
       </View>
@@ -366,7 +366,7 @@ function SummaryInner({ widget }: SummaryInnerProps) {
             divisorFilterObject={divisorFilters}
             showDivisorDateRange={
               content.type === 'percentage'
-                ? (content.divisorIncludeDateRange ?? false)
+                ? !(content.divisorAllTimeDateRange ?? false)
                 : false
             }
             fromRange={data?.fromRange ?? ''}

@@ -110,7 +110,7 @@ export type PercentageSummaryContent = {
   type: 'percentage';
   divisorConditions: RuleConditionEntity[];
   divisorConditionsOp: 'and' | 'or';
-  divisorIncludeDateRange?: boolean;
+  divisorAllTimeDateRange?: boolean;
   fontSize?: number;
 };
 

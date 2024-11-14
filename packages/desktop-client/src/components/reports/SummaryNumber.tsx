@@ -72,7 +72,7 @@ export function SummaryNumber({
 
   const handleResize = debounce((rect: DOMRectReadOnly) => {
     adjustFontSize(rect.width, rect.height);
-  }, 10);
+  }, 150);
 
   const ref = useResizeObserver(handleResize);
   const mergedRef = useMergedRefs(ref, refDiv);

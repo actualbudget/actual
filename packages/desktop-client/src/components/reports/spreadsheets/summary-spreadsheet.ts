@@ -250,7 +250,7 @@ async function calculatePercentage(
 
   let query = makeDivisorQuery();
 
-  if (summaryContent.divisorIncludeDateRange ?? true) {
+  if (!(summaryContent.divisorAllTimeDateRange ?? false)) {
     query = query.filter({
       $and: [
         {

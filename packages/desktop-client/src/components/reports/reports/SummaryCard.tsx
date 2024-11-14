@@ -113,6 +113,7 @@ export function SummaryCard({
               onChange={newName => {
                 onMetaChange({
                   ...meta,
+                  content: JSON.stringify(content),
                   name: newName,
                 });
                 setNameMenuOpen(false);
@@ -136,6 +137,7 @@ export function SummaryCard({
               value={data?.total ?? 0}
               suffix={content.type === 'percentage' ? '%' : ''}
               loading={!data}
+              initialFontSize={content.fontSize}
               fontSizeChanged={newSize => {
                 const newContent = { ...content, fontSize: newSize };
                 onMetaChange({
