@@ -22,7 +22,7 @@ type UseAccountPreviewTransactionsResult = {
 /**
  * Preview transactions for a given account
  */
-export function useAccountPreviewTransaction({
+export function useAccountPreviewTransactions({
   accountId,
 }: UseAccountPreviewTransactionsProps): UseAccountPreviewTransactionsResult {
   const { data: originalPreviewTransactions, isLoading } =

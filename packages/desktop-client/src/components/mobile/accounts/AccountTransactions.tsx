@@ -34,7 +34,7 @@ import {
   type TransactionEntity,
 } from 'loot-core/types/models';
 
-import { useAccountPreviewTransaction } from '../../../hooks/useAccountPreviewTransactions';
+import { useAccountPreviewTransactions } from '../../../hooks/useAccountPreviewTransactions';
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import { useFailedAccounts } from '../../../hooks/useFailedAccounts';
 import { useNavigate } from '../../../hooks/useNavigate';
@@ -239,7 +239,7 @@ function TransactionListWithPreviews({
     query: transactionsQuery,
   });
 
-  const { previewTransactions } = useAccountPreviewTransaction({
+  const { previewTransactions } = useAccountPreviewTransactions({
     accountId: account?.id || '',
   });
 

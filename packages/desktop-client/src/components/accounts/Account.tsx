@@ -50,7 +50,7 @@ import {
   type TransactionFilterEntity,
 } from 'loot-core/src/types/models';
 
-import { useAccountPreviewTransaction } from '../../hooks/useAccountPreviewTransactions';
+import { useAccountPreviewTransactions } from '../../hooks/useAccountPreviewTransactions';
 import { useAccounts } from '../../hooks/useAccounts';
 import { useActions } from '../../hooks/useActions';
 import { useCategories } from '../../hooks/useCategories';
@@ -160,7 +160,7 @@ function AllTransactions({
   const accountId = account?.id;
   const { dispatch: splitsExpandedDispatch } = useSplitsExpanded();
   const { previewTransactions, isLoading: isPreviewTransactionsLoading } =
-    useAccountPreviewTransaction({ accountId });
+    useAccountPreviewTransactions({ accountId });
 
   useEffect(() => {
     if (!isPreviewTransactionsLoading) {
