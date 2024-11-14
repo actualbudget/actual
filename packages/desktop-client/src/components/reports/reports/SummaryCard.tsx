@@ -137,10 +137,10 @@ export function SummaryCard({
               suffix={content.type === 'percentage' ? '%' : ''}
               loading={!data}
               fontSizeChanged={newSize => {
-                content.fontSize = newSize;
+                const newContent = { ...content, fontSize: newSize };
                 onMetaChange({
                   ...meta,
-                  content: JSON.stringify(content),
+                  content: JSON.stringify(newContent),
                 });
               }}
               animate={isEditing ?? false}
