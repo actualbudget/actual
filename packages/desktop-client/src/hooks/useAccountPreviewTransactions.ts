@@ -20,7 +20,8 @@ type UseAccountPreviewTransactionsResult = {
 };
 
 /**
- * Preview transactions for a given account
+ * Preview transactions for a given account. This will invert the payees, accounts,
+ * and amounts depending on which account the preview transactions are being viewed from.
  */
 export function useAccountPreviewTransactions({
   accountId,
