@@ -60,7 +60,7 @@ export function ManagePayeesWithData({
     return () => {
       unlisten();
     };
-  }, [dispatch]);
+  }, [dispatch, refetchRuleCounts, refetchOrphanedPayees]);
 
   useEffect(() => {
     async function onUndo({ tables, messages, meta }: UndoState) {
@@ -88,7 +88,7 @@ export function ManagePayeesWithData({
     }
 
     return listen('undo-event', onUndo);
-  }, [lastUndoState]);
+  }, [lastUndoState, refetchRuleCounts, refetchOrphanedPayees]);
 
   function onViewRules(id: PayeeEntity['id']) {
     dispatch(pushModal('manage-rules', { payeeId: id }));
@@ -144,7 +144,6 @@ export function ManagePayeesWithData({
         }
         filtedOrphans = filtedOrphans.filter(o => !mergeIds.includes(o.id));
 
-        const result = payees.filter(p => !mergeIds.includes(p.id));
         mergeIds.forEach(id => {
           const count = ruleCounts.value.get(id) || 0;
           ruleCounts.value.set(
