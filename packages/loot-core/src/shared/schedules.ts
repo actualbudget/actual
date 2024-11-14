@@ -279,9 +279,8 @@ export function getScheduledAmount(
   if (typeof amount === 'number') {
     return inverse ? -amount : amount;
   }
-  const num1 = inverse ? -amount.num1 : amount.num1;
-  const num2 = inverse ? -amount.num2 : amount.num2;
-  return Math.round((num1 + num2) / 2);
+  const avg = (amount.num1 + amount.num2) / 2;
+  return inverse ? -Math.round(avg) : Math.round(avg);
 }
 
 export function describeSchedule(schedule, payee) {
