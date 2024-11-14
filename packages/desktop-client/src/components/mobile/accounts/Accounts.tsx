@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { type CSSProperties, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { t } from 'i18next';
 
 import { replaceModal, syncAndDownload } from 'loot-core/src/client/actions';
 import * as queries from 'loot-core/src/client/queries';
+import { type AccountEntity } from 'loot-core/types/models';
 
 import { useAccounts } from '../../../hooks/useAccounts';
 import { useFailedAccounts } from '../../../hooks/useFailedAccounts';
@@ -18,11 +19,22 @@ import { Text } from '../../common/Text';
 import { TextOneLine } from '../../common/TextOneLine';
 import { View } from '../../common/View';
 import { MobilePageHeader, Page } from '../../Page';
+import { type Binding, type SheetFields } from '../../spreadsheet';
 import { CellValue, CellValueText } from '../../spreadsheet/CellValue';
 import { MOBILE_NAV_HEIGHT } from '../MobileNavTabs';
 import { PullToRefresh } from '../PullToRefresh';
 
-function AccountHeader({ name, amount, style = {} }) {
+type AccountHeaderProps<SheetFieldName extends SheetFields<'account'>> = {
+  name: string;
+  amount: Binding<'account', SheetFieldName>;
+  style?: CSSProperties;
+};
+
+function AccountHeader<SheetFieldName extends SheetFields<'account'>>({
+  name,
+  amount,
+  style = {},
+}: AccountHeaderProps<SheetFieldName>) {
   return (
     <View
       style={{
@@ -48,12 +60,25 @@ function AccountHeader({ name, amount, style = {} }) {
       </View>
       <CellValue binding={amount} type="financial">
         {props => (
-          <CellValueText {...props} style={{ ...styles.text, fontSize: 14 }} />
+          <CellValueText<'account', SheetFieldName>
+            {...props}
+            style={{ ...styles.text, fontSize: 14 }}
+          />
         )}
       </CellValue>
     </View>
   );
 }
+
+type AccountCardProps = {
+  account: AccountEntity;
+  updated: boolean;
+  connected: boolean;
+  pending: boolean;
+  failed: boolean;
+  getBalanceQuery: (account: AccountEntity) => Binding<'account', 'balance'>;
+  onSelect: (id: string) => void;
+};
 
 function AccountCard({
   account,
@@ -63,7 +88,7 @@ function AccountCard({
   failed,
   getBalanceQuery,
   onSelect,
-}) {
+}: AccountCardProps) {
   return (
     <Button
       onPress={() => onSelect(account.id)}
@@ -87,7 +112,7 @@ function AccountCard({
             alignItems: 'center',
           }}
         >
-          {account.bankId && (
+          {/* TODO: Should bankId be part of the AccountEntity type? */ 'bankId' in account && account.bankId ? (
             <View
               style={{
                 backgroundColor: pending
@@ -103,7 +128,7 @@ function AccountCard({
                 opacity: connected ? 1 : 0,
               }}
             />
-          )}
+          ) : null}
           <TextOneLine
             style={{
               ...styles.text,
@@ -124,7 +149,6 @@ function AccountCard({
             {...props}
             style={{
               fontSize: 16,
-              color: 'inherit',
               ...makeAmountFullStyle(props.value),
             }}
             data-testid="account-balance"
@@ -147,6 +171,17 @@ function EmptyMessage() {
   );
 }
 
+type AccountListProps = {
+  accounts: AccountEntity[];
+  updatedAccounts: Array<AccountEntity['id']>;
+  getBalanceQuery: (account: AccountEntity) => Binding<'account', 'balance'>;
+  getOnBudgetBalance: () => Binding<'account', 'budgeted-accounts-balance'>;
+  getOffBudgetBalance: () => Binding<'account', 'offbudget-accounts-balance'>;
+  onAddAccount: () => void;
+  onSelectAccount: (id: string) => void;
+  onSync: () => Promise<void>;
+};
+
 function AccountList({
   accounts,
   updatedAccounts,
@@ -156,7 +191,7 @@ function AccountList({
   onAddAccount,
   onSelectAccount,
   onSync,
-}) {
+}: AccountListProps) {
   const failedAccounts = useFailedAccounts();
   const syncingAccountIds = useSelector(state => state.account.accountsSyncing);
   const budgetedAccounts = accounts.filter(account => account.offbudget === 0);
@@ -238,17 +273,20 @@ export function Accounts() {
 
   const navigate = useNavigate();
 
-  const onSelectAccount = id => {
-    navigate(`/accounts/${id}`);
-  };
+  const onSelectAccount = useCallback(
+    (id: AccountEntity['id']) => {
+      navigate(`/accounts/${id}`);
+    },
+    [navigate],
+  );
 
-  const onAddAccount = () => {
+  const onAddAccount = useCallback(() => {
     dispatch(replaceModal('add-account'));
-  };
+  }, [dispatch]);
 
-  const onSync = () => {
+  const onSync = useCallback(async () => {
     dispatch(syncAndDownload());
-  };
+  }, [dispatch]);
 
   return (
     <View style={{ flex: 1 }}>

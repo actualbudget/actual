@@ -1,12 +1,12 @@
 import type { Handlers } from '../../types/handlers';
-import { type AccountEntity } from '../../types/models';
+import { type TransactionEntity, type AccountEntity } from '../../types/models';
 import type * as constants from '../constants';
 
 export type QueriesState = {
-  newTransactions: string[];
-  matchedTransactions: string[];
-  lastTransaction: unknown | null;
-  updatedAccounts: string[];
+  newTransactions: Array<TransactionEntity['id']>;
+  matchedTransactions: Array<TransactionEntity['id']>;
+  lastTransaction: TransactionEntity | null;
+  updatedAccounts: Array<AccountEntity['id']>;
   accounts: AccountEntity[];
   accountsLoaded: boolean;
   categories: Awaited<ReturnType<Handlers['get-categories']>>;
@@ -15,14 +15,13 @@ export type QueriesState = {
   commonPayees: Awaited<ReturnType<Handlers['common-payees-get']>>;
   payees: Awaited<ReturnType<Handlers['payees-get']>>;
   payeesLoaded: boolean;
-  earliestTransaction: unknown | null;
 };
 
 type SetNewTransactionsAction = {
   type: typeof constants.SET_NEW_TRANSACTIONS;
-  newTransactions?: string[];
-  matchedTransactions?: string[];
-  updatedAccounts?: string[];
+  newTransactions?: Array<TransactionEntity['id']>;
+  matchedTransactions?: Array<TransactionEntity['id']>;
+  updatedAccounts?: Array<AccountEntity['id']>;
 };
 
 type UpdateNewTransactionsAction = {
@@ -32,7 +31,7 @@ type UpdateNewTransactionsAction = {
 
 type SetLastTransactionAction = {
   type: typeof constants.SET_LAST_TRANSACTION;
-  transaction: unknown;
+  transaction: TransactionEntity;
 };
 
 type MarkAccountReadAction = {
