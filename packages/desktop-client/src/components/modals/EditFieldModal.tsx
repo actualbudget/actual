@@ -1,4 +1,9 @@
-import React, { type CSSProperties, useRef, useState } from 'react';
+import React, {
+  type CSSProperties,
+  type ReactNode,
+  useRef,
+  useState,
+} from 'react';
 
 import { parseISO, format as formatDate, parse as parseDate } from 'date-fns';
 import { t } from 'i18next';
@@ -43,10 +48,7 @@ export function EditFieldModal({
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const noteInputRef = useRef<HTMLInputElement | null>(null);
 
-  function onSelectNote(
-    value: string,
-    mode?: NoteAmendMode,
-  ) {
+  function onSelectNote(value: string, mode?: NoteAmendMode) {
     if (value != null) {
       onSubmit(name, value, mode);
     }
@@ -65,16 +67,14 @@ export function EditFieldModal({
 
   const { isNarrowWidth } = useResponsive();
   let label: string;
-  let editor: (props: { close: () => void }) => React.ReactNode;
+  let editor: (props: { close: () => void }) => ReactNode;
   let minWidth: number | undefined;
 
   const inputStyle: CSSProperties = {
     ...(isNarrowWidth && itemStyle),
   };
 
-  const [noteAmend, onChangeMode] = useState<NoteAmendMode>(
-    'replace',
-  );
+  const [noteAmend, onChangeMode] = useState<NoteAmendMode>('replace');
 
   switch (name) {
     case 'date':
