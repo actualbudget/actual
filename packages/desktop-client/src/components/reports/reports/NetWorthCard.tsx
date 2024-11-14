@@ -8,11 +8,11 @@ import {
 } from 'loot-core/src/types/models';
 
 import { useFeatureFlag } from '../../../hooks/useFeatureFlag';
-import { useResponsive } from '../../../ResponsiveProvider';
 import { styles } from '../../../style';
 import { Block } from '../../common/Block';
 import { View } from '../../common/View';
 import { PrivacyFilter } from '../../PrivacyFilter';
+import { useResponsive } from '../../responsive/ResponsiveProvider';
 import { Change } from '../Change';
 import { DateRange } from '../DateRange';
 import { NetWorthGraph } from '../graphs/NetWorthGraph';

@@ -1,5 +1,6 @@
 // @ts-strict-ignore
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next'; // Import useTranslation
 
 import { useCategories } from '../../hooks/useCategories';
 import { theme } from '../../style';
@@ -21,6 +22,7 @@ export function ConfirmCategoryDeleteModal({
   category: categoryId,
   onDelete,
 }: ConfirmCategoryDeleteProps) {
+  const { t } = useTranslation(); // Initialize translation hook
   const [transferCategory, setTransferCategory] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const { grouped: categoryGroups, list: categories } = useCategories();
@@ -60,7 +62,7 @@ export function ConfirmCategoryDeleteModal({
       {({ state: { close } }) => (
         <>
           <ModalHeader
-            title="Confirm Delete"
+            title={t('Confirm Delete')} // Use translation for title
             rightContent={<ModalCloseButton onPress={close} />}
           />
           <View style={{ lineHeight: 1.5 }}>
@@ -76,8 +78,7 @@ export function ConfirmCategoryDeleteModal({
               </Block>
             ) : (
               <Block>
-                <strong>{category.name}</strong> is used by existing
-                transactions
+                <strong>{category.name}</strong>is used by existing transactions
                 {!isIncome &&
                   ' or it has a positive leftover balance currently'}
                 . <strong>Are you sure you want to delete it?</strong> If so,
@@ -96,7 +97,7 @@ export function ConfirmCategoryDeleteModal({
                 alignItems: 'center',
               }}
             >
-              <Text>Transfer to:</Text>
+              <Text>{t('Transfer to:')}</Text>
 
               <View style={{ flex: 1, marginLeft: 10, marginRight: 30 }}>
                 <CategoryAutocomplete
@@ -117,7 +118,7 @@ export function ConfirmCategoryDeleteModal({
                   value={transferCategory}
                   focused={true}
                   inputProps={{
-                    placeholder: 'Select category...',
+                    placeholder: t('Select category...'),
                   }}
                   onSelect={category => setTransferCategory(category)}
                   showHiddenCategories={true}
@@ -135,7 +136,7 @@ export function ConfirmCategoryDeleteModal({
                   }
                 }}
               >
-                Delete
+                {t('Delete')}
               </Button>
             </View>
           </View>

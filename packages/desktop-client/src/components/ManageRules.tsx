@@ -7,8 +7,11 @@ import React, {
   type SetStateAction,
   type Dispatch,
 } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 
+import { useSchedules } from 'loot-core/client/data-hooks/schedules';
+import { q } from 'loot-core/shared/query';
 import { pushModal } from 'loot-core/src/client/actions/modals';
 import { initiallyLoadPayees } from 'loot-core/src/client/actions/queries';
 import { send } from 'loot-core/src/platform/client/fetch';
@@ -21,7 +24,6 @@ import { type NewRuleEntity } from 'loot-core/src/types/models';
 import { useAccounts } from '../hooks/useAccounts';
 import { useCategories } from '../hooks/useCategories';
 import { usePayees } from '../hooks/usePayees';
-import { useSchedules } from '../hooks/useSchedules';
 import { useSelected, SelectedProvider } from '../hooks/useSelected';
 import { theme } from '../style';
 
@@ -113,7 +115,9 @@ export function ManageRules({
   const [filter, setFilter] = useState('');
   const dispatch = useDispatch();
 
-  const { data: schedules = [] } = useSchedules();
+  const { schedules = [] } = useSchedules({
+    query: useMemo(() => q('schedules').select('*'), []),
+  });
   const { list: categories } = useCategories();
   const payees = usePayees();
   const accounts = useAccounts();
@@ -196,11 +200,20 @@ export function ManageRules({
     ]);
 
     if (someDeletionsFailed) {
-      alert('Some rules were not deleted because they are linked to schedules');
+      alert(
+        t('Some rules were not deleted because they are linked to schedules'),
+      );
     }
 
     await loadRules();
     selectedInst.dispatch({ type: 'select-none' });
+    setLoading(false);
+  }
+
+  async function onDeleteRule(id: string) {
+    setLoading(true);
+    await send('rule-delete', id);
+    await loadRules();
     setLoading(false);
   }
 
@@ -252,6 +265,7 @@ export function ManageRules({
   const onHover = useCallback(id => {
     setHoveredRule(id);
   }, []);
+  const { t } = useTranslation();
 
   return (
     <SelectedProvider instance={selectedInst}>
@@ -273,19 +287,19 @@ export function ManageRules({
             }}
           >
             <Text>
-              Rules are always run in the order that you see them.{' '}
+              {t('Rules are always run in the order that you see them.')}{' '}
               <Link
                 variant="external"
                 to="https://actualbudget.org/docs/budgeting/rules/"
                 linkColor="muted"
               >
-                Learn more
+                {t('Learn more')}
               </Link>
             </Text>
           </View>
           <View style={{ flex: 1 }} />
           <Search
-            placeholder="Filter rules..."
+            placeholder={t('Filter rules...')}
             value={filter}
             onChange={onSearchChange}
           />
@@ -298,7 +312,7 @@ export function ManageRules({
             style={{ marginBottom: -1 }}
           >
             {filteredRules.length === 0 ? (
-              <EmptyMessage text="No rules" style={{ marginTop: 15 }} />
+              <EmptyMessage text={t('No rules')} style={{ marginTop: 15 }} />
             ) : (
               <RulesList
                 rules={filteredRules}
@@ -306,6 +320,7 @@ export function ManageRules({
                 hoveredRule={hoveredRule}
                 onHover={onHover}
                 onEditRule={onEditRule}
+                onDeleteRule={rule => onDeleteRule(rule.id)}
               />
             )}
           </SimpleTable>
@@ -325,7 +340,7 @@ export function ManageRules({
               </Button>
             )}
             <Button variant="primary" onPress={onCreateRule}>
-              Create new rule
+              {t('Create new rule')}
             </Button>
           </Stack>
         </View>

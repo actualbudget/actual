@@ -12,7 +12,7 @@ import { type PayeeEntity } from 'loot-core/src/types/models';
 
 import { useSelectedItems } from '../../hooks/useSelected';
 import { View } from '../common/View';
-import { type Table, TableResizable } from '../table';
+import { useTableNavigator, type Table, TableResizable } from '../table';
 
 import { PayeeTableRow } from './PayeeTableRow';
 
@@ -25,53 +25,66 @@ type PayeeTableProps = {
   ruleCounts: Map<PayeeWithId['id'], number>;
 } & Pick<
   ComponentProps<typeof PayeeTableRow>,
-  'onUpdate' | 'onViewRules' | 'onCreateRule'
+  'onUpdate' | 'onDelete' | 'onViewRules' | 'onCreateRule'
 >;
 
 export const PayeeTable = forwardRef<
   ComponentRef<typeof Table<PayeeWithId>>,
   PayeeTableProps
->(({ payees, ruleCounts, onUpdate, onViewRules, onCreateRule }, ref) => {
-  const [hovered, setHovered] = useState(null);
-  const selectedItems = useSelectedItems();
+>(
+  (
+    { payees, ruleCounts, onUpdate, onDelete, onViewRules, onCreateRule },
+    ref,
+  ) => {
+    const [hovered, setHovered] = useState(null);
+    const selectedItems = useSelectedItems();
 
-  useLayoutEffect(() => {
-    const firstSelected = [...selectedItems][0] as string;
-    if (typeof ref !== 'function') {
-      ref.current.scrollTo(firstSelected, 'center');
-    }
-  }, []);
+    useLayoutEffect(() => {
+      const firstSelected = [...selectedItems][0] as string;
+      if (typeof ref !== 'function') {
+        ref.current.scrollTo(firstSelected, 'center');
+      }
+    }, []);
 
   const onHover = useCallback(id => {
     setHovered(id);
   }, []);
 
-  return (
-    <View style={{ flex: 1 }} onMouseLeave={() => setHovered(null)}>
-      <TableResizable
-        prefName="payee-table-column-sizes"
-        ref={ref}
-        items={payees}
-        renderItem={({ item, editing, focusedField, onEdit }) => {
-          return (
-            <PayeeTableRow
-              payee={item}
-              ruleCount={ruleCounts.get(item.id) || 0}
-              selected={selectedItems.has(item.id)}
-              editing={editing}
-              focusedField={focusedField}
-              hovered={hovered === item.id}
-              onHover={onHover}
-              onEdit={onEdit}
-              onUpdate={onUpdate}
-              onViewRules={onViewRules}
-              onCreateRule={onCreateRule}
-            />
-          );
-        }}
-      />
-    </View>
+  const tableNavigator = useTableNavigator(payees, item =>
+    item.transfer_acct == null
+      ? ['select', 'name', 'rule-count']
+      : ['rule-count'],
   );
-});
+
+    return (
+      <View style={{ flex: 1 }} onMouseLeave={() => setHovered(null)}>
+        <TableResizable
+        prefName="payee-table-column-sizes"
+          navigator={tableNavigator}
+          ref={ref}
+          items={payees}
+          renderItem={({ item, editing, focusedField, onEdit }) => {
+            return (
+              <PayeeTableRow
+                payee={item}
+                ruleCount={ruleCounts.get(item.id) || 0}
+                selected={selectedItems.has(item.id)}
+                editing={editing}
+                focusedField={focusedField}
+                hovered={hovered === item.id}
+                onHover={onHover}
+                onEdit={onEdit}
+                onUpdate={onUpdate}
+                onDelete={onDelete}
+                onViewRules={onViewRules}
+                onCreateRule={onCreateRule}
+              />
+            );
+          }}
+        />
+      </View>
+    );
+  },
+);
 
 PayeeTable.displayName = 'PayeeTable';

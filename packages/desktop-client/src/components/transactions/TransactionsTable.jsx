@@ -11,6 +11,7 @@ import React, {
   useEffect,
 } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
+import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 
 import { css } from '@emotion/css';
@@ -47,8 +48,10 @@ import {
   titleFirst,
 } from 'loot-core/src/shared/util';
 
+import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { useMergedRefs } from '../../hooks/useMergedRefs';
 import { usePrevious } from '../../hooks/usePrevious';
+import { useProperFocus } from '../../hooks/useProperFocus';
 import { useSelectedDispatch, useSelectedItems } from '../../hooks/useSelected';
 import { useSplitsExpanded } from '../../hooks/useSplitsExpanded';
 import { SvgLeftArrow2, SvgRightArrow2, SvgSplit } from '../../icons/v0';
@@ -85,6 +88,8 @@ import {
   UnexposedCellContent,
   Table,
 } from '../table';
+
+import { TransactionMenu } from './TransactionMenu';
 
 function getDisplayValue(obj, name) {
   return obj ? obj[name] : '';
@@ -179,6 +184,7 @@ const TransactionHeader = memo(
     columnWidths,
   }) => {
     const dispatchSelected = useSelectedDispatch();
+    const { t } = useTranslation();
     const refs = useRef({});
 
     useHotkeys(
@@ -224,7 +230,7 @@ const TransactionHeader = memo(
           }
         />
         <HeaderCell
-          value="Date"
+          value={t('Date')}
           ref={el => (refs.current['date'] = el)}
           width={columnWidths.date}
           alignItems="flex"
@@ -239,7 +245,7 @@ const TransactionHeader = memo(
         {showAccount && (
           <>
             <HeaderCell
-              value="Account"
+              value={t('Account')}
               ref={el => (refs.current['account'] = el)}
               width={columnWidths.account}
               alignItems="flex"
@@ -257,7 +263,7 @@ const TransactionHeader = memo(
           </>
         )}
         <HeaderCell
-          value="Payee"
+          value={t('Payee')}
           ref={el => (refs.current['payee'] = el)}
           width={columnWidths.payee}
           alignItems="flex"
@@ -270,7 +276,7 @@ const TransactionHeader = memo(
         />
         <Resizer columnName="payee" resizeRef={refs.current['payee']} />
         <HeaderCell
-          value="Notes"
+          value={t('Notes')}
           ref={el => (refs.current['notes'] = el)}
           width={columnWidths.notes}
           alignItems="flex"
@@ -285,7 +291,7 @@ const TransactionHeader = memo(
         {showCategory && (
           <>
             <HeaderCell
-              value="Category"
+              value={t('Category')}
               ref={el => (refs.current['category'] = el)}
               width={columnWidths.category}
               marginLeft={-5}
@@ -305,7 +311,7 @@ const TransactionHeader = memo(
           </>
         )}
         <HeaderCell
-          value="Payment"
+          value={t('Payment')}
           ref={el => (refs.current['debit'] = el)}
           width={columnWidths.debit}
           alignItems="flex-end"
@@ -318,7 +324,7 @@ const TransactionHeader = memo(
         />
         <Resizer columnName="debit" resizeRef={refs.current['debit']} />
         <HeaderCell
-          value="Deposit"
+          value={t('Deposit')}
           ref={el => (refs.current['credit'] = el)}
           width={columnWidths.credit}
           alignItems="flex-end"
@@ -333,7 +339,7 @@ const TransactionHeader = memo(
         {showBalance && (
           <>
             <HeaderCell
-              value="Balance"
+              value={t('Balance')}
               ref={el => (refs.current['balance'] = el)}
               width={columnWidths.balance}
               alignItems="flex-end"
@@ -814,11 +820,6 @@ function PayeeIcons({
   onNavigateToSchedule,
 }) {
   const scheduleId = transaction.schedule;
-  const scheduleData = useCachedSchedules();
-  const schedule =
-    scheduleId && scheduleData
-      ? scheduleData.schedules.find(s => s.id === scheduleId)
-      : null;
 
   const buttonStyle = useMemo(
     () => ({
@@ -834,6 +835,14 @@ function PayeeIcons({
   const scheduleIconStyle = useMemo(() => ({ width: 13, height: 13 }), []);
 
   const transferIconStyle = useMemo(() => ({ width: 10, height: 10 }), []);
+
+  const { isLoading, schedules = [] } = useCachedSchedules();
+
+  if (isLoading) {
+    return null;
+  }
+
+  const schedule = scheduleId ? schedules.find(s => s.id === scheduleId) : null;
 
   if (schedule == null && transferAccount == null) {
     // Neither a valid scheduled transaction nor a transfer.
@@ -908,6 +917,12 @@ const Transaction = memo(function Transaction({
   onSave,
   onEdit,
   onDelete,
+  onDuplicate,
+  onLinkSchedule,
+  onUnlinkSchedule,
+  onCreateRule,
+  onScheduleAction,
+  onMakeAsNonSplitTransactions,
   onSplit,
   onManagePayees,
   onCreatePayee,
@@ -1104,6 +1119,11 @@ const Transaction = memo(function Transaction({
     }, 1);
   }, [splitError, allTransactions]);
 
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [crossOffset, setCrossOffset] = useState(0);
+  const [offset, setOffset] = useState(0);
+  const contextMenusEnabled = useFeatureFlag('contextMenus');
+
   return (
     <Row
       ref={triggerRef}
@@ -1132,7 +1152,43 @@ const Transaction = memo(function Transaction({
         }),
         ...(_unmatched && { opacity: 0.5 }),
       }}
+      onContextMenu={e => {
+        if (!contextMenusEnabled) return;
+        if (transaction.id === 'temp') return;
+        e.preventDefault();
+        const rect = e.currentTarget.getBoundingClientRect();
+        setCrossOffset(e.clientX - rect.left);
+        setOffset(e.clientY - rect.bottom);
+        setMenuOpen(true);
+      }}
     >
+      <Popover
+        triggerRef={triggerRef}
+        placement="bottom start"
+        isOpen={menuOpen}
+        onOpenChange={() => setMenuOpen(false)}
+        crossOffset={crossOffset}
+        offset={offset}
+        style={{ width: 200, margin: 1 }}
+        isNonModal
+      >
+        <TransactionMenu
+          transaction={transaction}
+          onDelete={() => onDelete?.(transaction.id)}
+          onDuplicate={() => onDuplicate?.(transaction.id)}
+          onLinkSchedule={() => onLinkSchedule?.(transaction.id)}
+          onUnlinkSchedule={() => onUnlinkSchedule?.(transaction.id)}
+          onCreateRule={() => onCreateRule?.(transaction.id)}
+          onScheduleAction={action =>
+            onScheduleAction?.(action, transaction.id)
+          }
+          onMakeAsNonSplitTransactions={() =>
+            onMakeAsNonSplitTransactions?.(transaction.id)
+          }
+          closeMenu={() => setMenuOpen(false)}
+        />
+      </Popover>
+
       {splitError && listContainerRef.current && (
         <Popover
           arrowSize={updateId}
@@ -1829,6 +1885,11 @@ function NewTransaction({
     t => t.parent_id === transactions[0].id,
   );
   const emptyChildTransactions = childTransactions.filter(t => t.amount === 0);
+
+  const addButtonRef = useRef(null);
+  useProperFocus(addButtonRef, focusedField === 'add');
+  const cancelButtonRef = useRef(null);
+  useProperFocus(cancelButtonRef, focusedField === 'cancel');
   const { columnWidths, fixedSizedColumns } = useColumnWidth();
   const columnSizes = {
     notes: 'flex',
@@ -1897,6 +1958,7 @@ function NewTransaction({
           style={{ marginRight: 10, padding: '4px 10px' }}
           onPress={() => onClose()}
           data-testid="cancel-button"
+          ref={cancelButtonRef}
         >
           Cancel
         </Button>
@@ -1916,6 +1978,7 @@ function NewTransaction({
             style={{ padding: '4px 10px' }}
             onPress={onAdd}
             data-testid="add-button"
+            ref={addButtonRef}
           >
             Add
           </Button>
@@ -2077,6 +2140,12 @@ function TransactionTableInner({
         onEdit={tableNavigator.onEdit}
         onSave={props.onSave}
         onDelete={props.onDelete}
+        onDuplicate={props.onDuplicate}
+        onLinkSchedule={props.onLinkSchedule}
+        onUnlinkSchedule={props.onUnlinkSchedule}
+        onCreateRule={props.onCreateRule}
+        onScheduleAction={props.onScheduleAction}
+        onMakeAsNonSplitTransactions={props.onMakeAsNonSplitTransactions}
         onSplit={props.onSplit}
         onManagePayees={props.onManagePayees}
         onCreatePayee={props.onCreatePayee}
@@ -2315,10 +2384,14 @@ export const TransactionTable = forwardRef((props, ref) => {
     }
   }, [prevSplitsExpanded.current]);
 
-  const newNavigator = useTableNavigator(newTransactions, getFields);
+  const newNavigator = useTableNavigator(
+    newTransactions,
+    getFieldsNewTransaction,
+  );
+
   const tableNavigator = useTableNavigator(
     transactionsWithExpandedSplits,
-    getFields,
+    getFieldsTableTransaction,
   );
   const shouldAdd = useRef(false);
   const latestState = useRef({ newTransactions, newNavigator, tableNavigator });
@@ -2383,8 +2456,26 @@ export const TransactionTable = forwardRef((props, ref) => {
     savePending.current = false;
   }, [newTransactions, props.transactions]);
 
-  function getFields(item) {
-    let fields = [
+  function getFieldsNewTransaction(item) {
+    const fields = [
+      'select',
+      'date',
+      'account',
+      'payee',
+      'notes',
+      'category',
+      'debit',
+      'credit',
+      'cleared',
+      'cancel',
+      'add',
+    ];
+
+    return getFields(item, fields);
+  }
+
+  function getFieldsTableTransaction(item) {
+    const fields = [
       'select',
       'date',
       'account',
@@ -2396,6 +2487,10 @@ export const TransactionTable = forwardRef((props, ref) => {
       'cleared',
     ];
 
+    return getFields(item, fields);
+  }
+
+  function getFields(item, fields) {
     fields = item.is_child
       ? ['select', 'payee', 'notes', 'category', 'debit', 'credit']
       : fields.filter(
@@ -2541,7 +2636,29 @@ export const TransactionTable = forwardRef((props, ref) => {
       }
 
       setNewTransactions(deleteTransaction(newTrans, id).data);
+    } else {
+      props.onBatchDelete([id]);
     }
+  }, []);
+
+  const onDuplicate = useCallback(id => {
+    props.onBatchDuplicate([id]);
+  }, []);
+
+  const onLinkSchedule = useCallback(id => {
+    props.onBatchLinkSchedule([id]);
+  }, []);
+  const onUnlinkSchedule = useCallback(id => {
+    props.onBatchUnlinkSchedule([id]);
+  }, []);
+  const onCreateRule = useCallback(id => {
+    props.onCreateRule([id]);
+  }, []);
+  const onScheduleAction = useCallback((action, id) => {
+    props.onScheduleAction(action, [id]);
+  }, []);
+  const onMakeAsNonSplitTransactions = useCallback(id => {
+    props.onMakeAsNonSplitTransactions([id]);
   }, []);
 
   const onSplit = useMemo(() => {
@@ -2687,6 +2804,12 @@ export const TransactionTable = forwardRef((props, ref) => {
       isExpanded={splitsExpanded.expanded}
       onSave={onSave}
       onDelete={onDelete}
+      onDuplicate={onDuplicate}
+      onLinkSchedule={onLinkSchedule}
+      onUnlinkSchedule={onUnlinkSchedule}
+      onCreateRule={onCreateRule}
+      onScheduleAction={onScheduleAction}
+      onMakeAsNonSplitTransactions={onMakeAsNonSplitTransactions}
       onSplit={onSplit}
       onCheckNewEnter={onCheckNewEnter}
       onCheckEnter={onCheckEnter}

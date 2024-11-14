@@ -27,11 +27,11 @@ import {
 import { useAccounts } from '../../hooks/useAccounts';
 import { useCommonPayees, usePayees } from '../../hooks/usePayees';
 import { SvgAdd, SvgBookmark } from '../../icons/v1';
-import { useResponsive } from '../../ResponsiveProvider';
 import { theme, styles } from '../../style';
 import { Button } from '../common/Button';
 import { TextOneLine } from '../common/TextOneLine';
 import { View } from '../common/View';
+import { useResponsive } from '../responsive/ResponsiveProvider';
 
 import {
   Autocomplete,
