@@ -387,10 +387,10 @@ function CategoryItem({
     budgetType === 'rollover'
       ? envelopeBudget.catBalance(item.id)
       : trackingBudget.catBalance(item.id);
-  const balance = useSheetValue<
-    'envelope-budget' | 'tracking-budget',
-    typeof balanceBinding
-  >(balanceBinding);
+  const balance =
+    useSheetValue<'envelope-budget' | 'tracking-budget', typeof balanceBinding>(
+      balanceBinding,
+    ) ?? 0;
 
   const isToBeBudgetedItem = item.id === 'to-be-budgeted';
   const toBudget = useEnvelopeSheetValue(envelopeBudget.toBudget) ?? 0;
