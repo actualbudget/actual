@@ -41,12 +41,10 @@ import { Popover } from './common/Popover';
 import { Text } from './common/Text';
 import { View } from './common/View';
 import { FixedSizeList } from './FixedSizeList';
-import { HorizontalFakeScrollbar } from './HorizontalFakeScrollbar';
 import {
   ConditionalPrivacyFilter,
   mergeConditionalPrivacyFilterProps,
 } from './PrivacyFilter';
-import { useScroll } from './ScrollProvider';
 import {
   type Spreadsheets,
   type SheetFields,
@@ -1011,12 +1009,11 @@ export const Table = forwardRef(
     const list = useRef(null);
     const listContainerInnerRef = useRef<HTMLDivElement>(null);
     const listContainer = listContainerRef || listContainerInnerRef;
-    const scrollContainer = useRef(null);
+    const scrollContainer = useRef<HTMLDivElement>(null);
     const scrollContainerHeader = useRef(null);
     const initialScrollTo = useRef(null);
     const listInitialized = useRef(false);
     const { totalWidth, setClientWidth } = useColumnWidth();
-    const { setScrollContainers } = useScroll();
     const subHeaderRef = useRef<HTMLDivElement>(null);
     const [subHeaderOffset, setSubHeaderOffset] = useState(0);
 
@@ -1025,19 +1022,6 @@ export const Table = forwardRef(
         setSubHeaderOffset(subHeaderRef.current.offsetHeight);
       }
     }, [subHeaders, subHeaderRef]);
-
-    useEffect(() => {
-      if (
-        scrollContainer.current &&
-        scrollContainerHeader &&
-        scrollContainerHeader.current
-      ) {
-        setScrollContainers([
-          scrollContainer.current,
-          scrollContainerHeader.current,
-        ]);
-      }
-    }, [scrollContainer.current, totalWidth]);
 
     useImperativeHandle(ref, () => ({
       scrollTo: (id, alignment = 'smart') => {
@@ -1218,7 +1202,13 @@ export const Table = forwardRef(
                   overflow: 'hidden',
                 }}
               >
-                <View style={{ width: `${totalWidth()}px` }}>{headers}</View>
+                <View
+                  style={{
+                    width: `${totalWidth() + 11 /* 11 = vertical scrollbar width */}px`,
+                  }}
+                >
+                  {headers}
+                </View>
               </View>
             );
           }}
@@ -1256,7 +1246,6 @@ export const Table = forwardRef(
             backgroundColor,
           }}
         >
-          <View ref={subHeaderRef}>{subHeaders}</View>
           <AutoSizer onResize={size => setClientWidth(size.width)}>
             {({ width, height }) => {
               if (width === 0 || height === 0) {
@@ -1265,7 +1254,25 @@ export const Table = forwardRef(
 
               return (
                 <>
-                  <View style={{ width: `${width}px` }}>
+                  <View
+                    style={{ width: `${width}px`, overflow: 'hidden' }}
+                    ref={subHeaderRef}
+                  >
+                    <View
+                      style={{
+                        width: `${totalWidth()}px`,
+                        overflow: 'visible',
+                      }}
+                    >
+                      {subHeaders}
+                    </View>
+                  </View>
+                  <View
+                    style={{
+                      width: `${width}px`,
+                      ...styles.horizontalScrollbarTable,
+                    }}
+                  >
                     {isEmpty ? (
                       getEmptyContent(renderEmpty)
                     ) : (
@@ -1294,12 +1301,23 @@ export const Table = forwardRef(
                           }
                           overscanCount={5}
                           onItemsRendered={onItemsRendered}
-                          onScroll={onScroll}
+                          onScroll={config => {
+                            onScroll?.();
+                            console.log(config.scrollLeftOffset);
+                            subHeaderRef?.current.scrollTo({
+                              left: scrollContainer.current.scrollLeft,
+                              behavior: 'instant',
+                            });
+                            scrollContainerHeader?.current.scrollTo({
+                              left: scrollContainer.current.scrollLeft,
+                              behavior: 'instant',
+                            });
+                          }}
                         />
                       </AvoidRefocusScrollProvider>
                     )}
                   </View>
-                  <HorizontalFakeScrollbar />
+                  {/* <HorizontalFakeScrollbar /> */}
                 </>
               );
             }}

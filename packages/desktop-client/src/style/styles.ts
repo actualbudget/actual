@@ -147,6 +147,7 @@ export const styles = {
   },
   // Dynamically set
   horizontalScrollbar: null as CSSProperties | null,
+  horizontalScrollbarTable: null as CSSProperties | null,
   lightScrollbar: null as CSSProperties | null,
   darkScrollbar: null as CSSProperties | null,
   scrollbarWidth: null as number | null,
@@ -165,6 +166,16 @@ function onScrollbarChange() {
       backgroundColor: 'rgba(0, 0, 0, 0)',
     },
     '& ::-webkit-scrollbar-thumb:vertical': {
+      backgroundColor: 'rgba(200, 200, 200, .5)',
+    },
+  };
+
+  styles.horizontalScrollbarTable = !hiddenScrollbars && {
+    '& ::-webkit-scrollbar:horizontal': {
+      height: 11,
+      backgroundColor: 'rgba(0, 0, 0, 0)',
+    },
+    '& ::-webkit-scrollbar-thumb:horizontal': {
       backgroundColor: 'rgba(200, 200, 200, .5)',
     },
   };
