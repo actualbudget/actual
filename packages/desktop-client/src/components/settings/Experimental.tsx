@@ -1,5 +1,5 @@
 import { type ReactNode, useState } from 'react';
-import { Trans, useTranslation } from 'react-i18next';
+import { Trans } from 'react-i18next';
 
 import type { FeatureFlag } from 'loot-core/src/types/prefs';
 
