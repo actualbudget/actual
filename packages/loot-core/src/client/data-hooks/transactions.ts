@@ -34,7 +34,7 @@ export function useTransactions({
   query,
   options = { pageCount: 50 },
 }: UseTransactionsProps): UseTransactionsResult {
-  const [isLoading, setIsLoading] = useState(query != null);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | undefined>(undefined);
   const [transactions, setTransactions] = useState<
     ReadonlyArray<TransactionEntity>

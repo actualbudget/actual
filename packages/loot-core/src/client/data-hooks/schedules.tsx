@@ -66,7 +66,7 @@ type UseSchedulesResult = ScheduleData & {
 export function useSchedules({
   query,
 }: UseSchedulesProps = {}): UseSchedulesResult {
-  const [isLoading, setIsLoading] = useState(query != null);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | undefined>(undefined);
   const [data, setData] = useState<ScheduleData>({
     schedules: [],
