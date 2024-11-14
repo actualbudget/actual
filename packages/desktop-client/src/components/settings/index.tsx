@@ -177,7 +177,7 @@ export function Settings() {
         <ThemeSettings />
         <FormatSettings />
         <EncryptionSettings />
-        {useFeatureFlag('reportBudget') && <BudgetTypeSettings />}
+        <BudgetTypeSettings />
         {isElectron() && <Backups />}
         <ExportBudget />
         <AdvancedToggle>
