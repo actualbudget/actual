@@ -320,7 +320,7 @@ async function processCleanup(month: string): Promise<Notification> {
       return {
         type: 'error',
         sticky: true,
-        message: `There were errors interpreting some templates:`,
+        message: 'There were errors interpreting some templates:',
         pre: errors.join('\n\n'),
       };
     } else if (warnings.length) {
