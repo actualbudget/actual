@@ -304,14 +304,14 @@ function SummaryInner({ widget }: SummaryInnerProps) {
             padding: 16,
           }}
         >
-          <span style={{ marginRight: 4 }}>Show as</span>
+          <span style={{ marginRight: 4 }}>{t('Show as')}</span>
           <FieldSelect
             style={{ marginRight: 16 }}
             fields={[
-              ['sum', 'Sum'],
-              ['avgPerMonth', 'Average per month'],
-              ['avgPerTransact', 'Average per transaction'],
-              ['percentage', 'Percentage'],
+              ['sum', t('Sum')],
+              ['avgPerMonth', t('Average per month')],
+              ['avgPerTransact', t('Average per transaction')],
+              ['percentage', t('Percentage')],
             ]}
             value={content.type ?? 'sum'}
             onChange={(
@@ -340,7 +340,7 @@ function SummaryInner({ widget }: SummaryInnerProps) {
                 }));
               }}
             />{' '}
-            Include summary date range
+            {t('Include summary date range')}
           </View>
         )}
       </View>
@@ -455,6 +455,8 @@ function Operator({
   toRange,
   showDivisorDateRange,
 }: OperatorProps) {
+  const { t } = useTranslation();
+
   return (
     <View>
       <SumWithRange
@@ -495,8 +497,8 @@ function Operator({
             style={{ fontSize: '32px', width: '100%', textAlign: 'center' }}
           >
             {type === 'avgPerMonth'
-              ? 'number of months'
-              : 'number of transactions'}
+              ? t('number of months')
+              : t('number of transactions')}
           </Text>
         </>
       )}
@@ -516,6 +518,8 @@ function SumWithRange({
   containerStyle,
   filterObject,
 }: SumWithRangeProps) {
+  const { t } = useTranslation();
+
   return (
     <View
       style={{
@@ -539,7 +543,7 @@ function SumWithRange({
       <View style={{ marginLeft: 16, maxWidth: '220px', marginRight: 16 }}>
         {(filterObject.conditions?.length ?? 0) === 0 ? (
           <Text style={{ fontSize: '25px', color: theme.pageTextPositive }}>
-            all transactions
+            {t('all transactions')}
           </Text>
         ) : (
           <AppliedFilters
