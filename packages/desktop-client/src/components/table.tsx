@@ -1204,7 +1204,7 @@ export const Table = forwardRef(
               >
                 <View
                   style={{
-                    width: `${totalWidth() + 11 /* 11 = vertical scrollbar width */}px`,
+                    width: `${totalWidth() + 11}px`,
                   }}
                 >
                   {headers}
@@ -1243,7 +1243,7 @@ export const Table = forwardRef(
         <View
           style={{
             flex: `1 1 ${rowHeight * Math.max(2, items.length)}px`,
-            backgroundColor,
+            backgroundColor: theme.tableBackground,
           }}
         >
           <AutoSizer onResize={size => setClientWidth(size.width)}>
@@ -1301,7 +1301,7 @@ export const Table = forwardRef(
                           }
                           overscanCount={5}
                           onItemsRendered={onItemsRendered}
-                          onScroll={config => {
+                          onScroll={() => {
                             onScroll?.();
                             subHeaderRef?.current.scrollTo({
                               left: scrollContainer.current.scrollLeft,
@@ -1316,7 +1316,6 @@ export const Table = forwardRef(
                       </AvoidRefocusScrollProvider>
                     )}
                   </View>
-                  {/* <HorizontalFakeScrollbar /> */}
                 </>
               );
             }}

@@ -270,7 +270,7 @@ export class FixedSizeList extends PureComponent<
           style={{
             position: 'relative',
             height: estimatedTotalSize,
-            width: `${Math.max(totalWidth || 0, width || 0)}px`,
+            width: `${Math.max(totalWidth || 0, width || 0) - 16}px`,
             pointerEvents: isScrolling ? 'none' : undefined,
           }}
         >

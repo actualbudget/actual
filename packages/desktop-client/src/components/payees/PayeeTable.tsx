@@ -46,20 +46,20 @@ export const PayeeTable = forwardRef<
       }
     }, []);
 
-  const onHover = useCallback(id => {
-    setHovered(id);
-  }, []);
+    const onHover = useCallback(id => {
+      setHovered(id);
+    }, []);
 
-  const tableNavigator = useTableNavigator(payees, item =>
-    item.transfer_acct == null
-      ? ['select', 'name', 'rule-count']
-      : ['rule-count'],
-  );
+    const tableNavigator = useTableNavigator(payees, item =>
+      item.transfer_acct == null
+        ? ['select', 'name', 'rule-count']
+        : ['rule-count'],
+    );
 
     return (
       <View style={{ flex: 1 }} onMouseLeave={() => setHovered(null)}>
         <TableResizable
-        prefName="payee-table-column-sizes"
+          prefName="payee-table-column-sizes"
           navigator={tableNavigator}
           ref={ref}
           items={payees}

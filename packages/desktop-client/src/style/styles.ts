@@ -198,10 +198,11 @@ function onScrollbarChange() {
 
   styles.darkScrollbar = !hiddenScrollbars && {
     '& ::-webkit-scrollbar': {
-      width: 7,
+      width: 11,
       backgroundColor: 'rgba(0, 0, 0, 0)',
     },
     '& ::-webkit-scrollbar-thumb:vertical': {
+      width: 7,
       backgroundColor: 'rgba(200, 200, 200, .5)',
     },
   };

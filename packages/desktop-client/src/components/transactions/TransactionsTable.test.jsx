@@ -24,8 +24,8 @@ import { integerToCurrency } from 'loot-core/src/shared/util';
 
 import { SelectedProviderWithItems } from '../../hooks/useSelected';
 import { SplitsExpandedProvider } from '../../hooks/useSplitsExpanded';
-import { ResponsiveProvider } from '../responsive/ResponsiveProvider';
 import { ColumnWidthProvider } from '../ColumnWidthContext';
+import { ResponsiveProvider } from '../responsive/ResponsiveProvider';
 import { ScrollProvider } from '../ScrollProvider';
 
 import { TransactionTable } from './TransactionsTable';
@@ -159,7 +159,7 @@ function LiveTransactionTable(props) {
             >
               <SplitsExpandedProvider>
                 <ScrollProvider>
-                <TransactionTable
+                  <TransactionTable
                     {...props}
                     transactions={transactions}
                     loadMoreTransactions={() => {}}
@@ -173,7 +173,7 @@ function LiveTransactionTable(props) {
                     onCreatePayee={onCreatePayee}
                   />
                 </ScrollProvider>
-            </SplitsExpandedProvider>
+              </SplitsExpandedProvider>
             </SelectedProviderWithItems>
           </SchedulesProvider>
         </SpreadsheetProvider>
