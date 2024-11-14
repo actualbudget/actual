@@ -112,23 +112,26 @@ function AccountCard({
             alignItems: 'center',
           }}
         >
-          {/* TODO: Should bankId be part of the AccountEntity type? */ 'bankId' in account && account.bankId ? (
-            <View
-              style={{
-                backgroundColor: pending
-                  ? theme.sidebarItemBackgroundPending
-                  : failed
-                    ? theme.sidebarItemBackgroundFailed
-                    : theme.sidebarItemBackgroundPositive,
-                marginRight: '8px',
-                width: 8,
-                flexShrink: 0,
-                height: 8,
-                borderRadius: 8,
-                opacity: connected ? 1 : 0,
-              }}
-            />
-          ) : null}
+          {
+            /* TODO: Should bankId be part of the AccountEntity type? */
+            'bankId' in account && account.bankId ? (
+              <View
+                style={{
+                  backgroundColor: pending
+                    ? theme.sidebarItemBackgroundPending
+                    : failed
+                      ? theme.sidebarItemBackgroundFailed
+                      : theme.sidebarItemBackgroundPositive,
+                  marginRight: '8px',
+                  width: 8,
+                  flexShrink: 0,
+                  height: 8,
+                  borderRadius: 8,
+                  opacity: connected ? 1 : 0,
+                }}
+              />
+            ) : null
+          }
           <TextOneLine
             style={{
               ...styles.text,
@@ -145,7 +148,7 @@ function AccountCard({
       </View>
       <CellValue binding={getBalanceQuery(account)} type="financial">
         {props => (
-          <CellValueText
+          <CellValueText<'account', 'balance'>
             {...props}
             style={{
               fontSize: 16,
