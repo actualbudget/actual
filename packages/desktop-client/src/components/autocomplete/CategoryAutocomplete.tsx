@@ -387,13 +387,13 @@ function CategoryItem({
     budgetType === 'rollover'
       ? envelopeBudget.catBalance(item.id)
       : trackingBudget.catBalance(item.id);
-  const balance =
-    useSheetValue<'envelope-budget' | 'tracking-budget', typeof balanceBinding>(
-      balanceBinding,
-    ) ?? 0;
+  const balance = useSheetValue<
+    'envelope-budget' | 'tracking-budget',
+    typeof balanceBinding
+  >(balanceBinding);
 
   const isToBeBudgetedItem = item.id === 'to-be-budgeted';
-  const toBudget = useEnvelopeSheetValue(envelopeBudget.toBudget) ?? 0;
+  const toBudget = useEnvelopeSheetValue(envelopeBudget.toBudget);
 
   return (
     <div
@@ -429,10 +429,13 @@ function CategoryItem({
             display: !showBalances ? 'none' : undefined,
             marginLeft: 5,
             flexShrink: 0,
-            ...makeAmountFullStyle(isToBeBudgetedItem ? toBudget : balance, {
-              positiveColor: theme.noticeTextMenu,
-              negativeColor: theme.errorTextMenu,
-            }),
+            ...makeAmountFullStyle(
+              (isToBeBudgetedItem ? toBudget : balance) || 0,
+              {
+                positiveColor: theme.noticeTextMenu,
+                negativeColor: theme.errorTextMenu,
+              },
+            ),
           }}
         >
           {isToBeBudgetedItem
