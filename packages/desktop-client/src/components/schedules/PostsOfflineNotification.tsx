@@ -14,14 +14,18 @@ import { Paragraph } from '../common/Paragraph';
 import { Stack } from '../common/Stack';
 import { Text } from '../common/Text';
 import { DisplayId } from '../util/DisplayId';
+import { PayeeEntity } from 'loot-core/types/models';
 
 export function PostsOfflineNotification() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const location = useLocation();
   const dispatch = useDispatch();
 
-  const payees = (location.state && location.state.payees) || [];
+  const locationState = location.state;
+  const payees = locationState && 'payees' in locationState
+    ? locationState.payees as Array<PayeeEntity['id']>
+    : [];
 
   async function onPost() {
     await send('schedule/force-run-service');
@@ -33,7 +37,7 @@ export function PostsOfflineNotification() {
       <DisplayId id={id} type="payees" />
     </Text>
   ));
-  const payeeNamesList = useFormatList(payeesList, t.language);
+  const payeeNamesList = useFormatList(payeesList, i18n.language);
 
   return (
     <Modal name="schedule-posts-offline-notification">
