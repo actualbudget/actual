@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { type CSSProperties, useRef, useState } from 'react';
 
 import { parseISO, format as formatDate, parse as parseDate } from 'date-fns';
 import { t } from 'i18next';
@@ -16,19 +16,44 @@ import { SectionLabel } from '../forms';
 import { useResponsive } from '../responsive/ResponsiveProvider';
 import { DateSelect } from '../select/DateSelect';
 
-export function EditFieldModal({ name, onSubmit, onClose }) {
-  const dateFormat = useDateFormat() || 'MM/dd/yyyy';
+const itemStyle: CSSProperties = {
+  fontSize: 17,
+  fontWeight: 400,
+  paddingTop: 8,
+  paddingBottom: 8,
+};
 
-  function onSelectNote(value, mode) {
+type EditFieldModalProps = {
+  name: string;
+  onSubmit: (
+    name: string,
+    value: string | number,
+    mode?: 'replace' | 'prepend' | 'append',
+  ) => void;
+  onClose: () => void;
+};
+
+export function EditFieldModal({
+  name,
+  onSubmit,
+  onClose,
+}: EditFieldModalProps) {
+  const dateFormat = useDateFormat() || 'MM/dd/yyyy';
+  const noteInputRef = useRef<HTMLInputElement | null>(null);
+
+  function onSelectNote(
+    value: string,
+    mode?: 'replace' | 'prepend' | 'append',
+  ) {
     if (value != null) {
       onSubmit(name, value, mode);
     }
   }
 
-  function onSelect(value) {
+  function onSelect(value: string | number) {
     if (value != null) {
       // Process the value if needed
-      if (name === 'amount') {
+      if (name === 'amount' && typeof value === 'number') {
         value = amountToInteger(value);
       }
 
@@ -36,21 +61,18 @@ export function EditFieldModal({ name, onSubmit, onClose }) {
     }
   }
 
-  const itemStyle = {
-    fontSize: 17,
-    fontWeight: 400,
-    paddingTop: 8,
-    paddingBottom: 8,
-  };
-
   const { isNarrowWidth } = useResponsive();
-  let label, editor, minWidth;
-  const inputStyle = {
-    ':focus': { boxShadow: 0 },
+  let label: string;
+  let editor: (props: { close: () => void }) => React.ReactNode;
+  let minWidth: number | undefined;
+
+  const inputStyle: CSSProperties = {
     ...(isNarrowWidth && itemStyle),
   };
 
-  const [noteAmend, onChangeMode] = useState('replace');
+  const [noteAmend, onChangeMode] = useState<'replace' | 'prepend' | 'append'>(
+    'replace',
+  );
 
   switch (name) {
     case 'date':
@@ -88,7 +110,6 @@ export function EditFieldModal({ name, onSubmit, onClose }) {
             }}
           >
             <Button
-              selected={noteAmend === 'prepend'}
               style={{
                 padding: '5px 10px',
                 width: '33.33%',
@@ -114,13 +135,12 @@ export function EditFieldModal({ name, onSubmit, onClose }) {
               }}
               onPress={() => {
                 onChangeMode('prepend');
-                document.getElementById('noteInput').focus();
+                noteInputRef.current?.focus();
               }}
             >
               {t('Prepend')}
             </Button>
             <Button
-              selected={noteAmend === 'replace'}
               style={{
                 padding: '5px 10px',
                 width: '33.34%',
@@ -146,13 +166,12 @@ export function EditFieldModal({ name, onSubmit, onClose }) {
               }}
               onPress={() => {
                 onChangeMode('replace');
-                document.getElementById('noteInput').focus();
+                noteInputRef.current?.focus();
               }}
             >
               {t('Replace')}
             </Button>
             <Button
-              selected={noteAmend === 'append'}
               style={{
                 padding: '5px 10px',
                 width: '33.33%',
@@ -178,18 +197,18 @@ export function EditFieldModal({ name, onSubmit, onClose }) {
               }}
               onPress={() => {
                 onChangeMode('append');
-                document.getElementById('noteInput').focus();
+                noteInputRef.current?.focus();
               }}
             >
               {t('Append')}
             </Button>
           </View>
           <Input
-            id="noteInput"
+            inputRef={noteInputRef}
             autoFocus
             focused={true}
             onEnter={e => {
-              onSelectNote(e.target.value, noteAmend);
+              onSelectNote(e.currentTarget.value, noteAmend);
               close();
             }}
             style={inputStyle}
@@ -204,7 +223,7 @@ export function EditFieldModal({ name, onSubmit, onClose }) {
         <Input
           focused={true}
           onEnter={e => {
-            onSelect(e.target.value);
+            onSelect(e.currentTarget.value);
             close();
           }}
           style={inputStyle}
