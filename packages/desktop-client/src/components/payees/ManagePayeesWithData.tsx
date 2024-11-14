@@ -1,59 +1,58 @@
-import React, { useState, useEffect } from 'react';
-import { useSelector } from 'react-redux';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 
+import {
+  getPayees,
+  initiallyLoadPayees,
+  pushModal,
+  setLastUndoState,
+} from 'loot-core/client/actions';
+import { type UndoState } from 'loot-core/server/undo';
 import { send, listen } from 'loot-core/src/platform/client/fetch';
-import { applyChanges } from 'loot-core/src/shared/util';
+import { applyChanges, type Diff } from 'loot-core/src/shared/util';
+import { type NewRuleEntity, type PayeeEntity } from 'loot-core/types/models';
 
-import { useActions } from '../../hooks/useActions';
-import { useCategories } from '../../hooks/useCategories';
 import { usePayees } from '../../hooks/usePayees';
 
 import { ManagePayees } from './ManagePayees';
 
-export function ManagePayeesWithData({ initialSelectedIds }) {
-  const initialPayees = usePayees();
+type ManagePayeesWithDataProps = {
+  initialSelectedIds: string[];
+};
+
+export function ManagePayeesWithData({
+  initialSelectedIds,
+}: ManagePayeesWithDataProps) {
+  const payees = usePayees();
   const lastUndoState = useSelector(state => state.app.lastUndoState);
-  const { grouped: categoryGroups } = useCategories();
+  const dispatch = useDispatch();
 
-  const { initiallyLoadPayees, getPayees, setLastUndoState, pushModal } =
-    useActions();
-
-  const [payees, setPayees] = useState(initialPayees);
   const [ruleCounts, setRuleCounts] = useState({ value: new Map() });
-  const [orphans, setOrphans] = useState({ value: new Map() });
+  const [orphans, setOrphans] = useState<PayeeEntity[]>([]);
 
-  async function refetchOrphanedPayees() {
+  const refetchOrphanedPayees = useCallback(async () => {
     const orphs = await send('payees-get-orphaned');
     setOrphans(orphs);
-  }
+  }, []);
 
-  async function refetchRuleCounts() {
+  const refetchRuleCounts = useCallback(async () => {
     let counts = await send('payees-get-rule-counts');
     counts = new Map(Object.entries(counts));
     setRuleCounts({ value: counts });
-  }
+  }, []);
 
   useEffect(() => {
     async function loadData() {
-      const result = await initiallyLoadPayees();
-
-      // Wait a bit before setting the data. This lets the modal
-      // settle and makes for a smoother experience.
-      await new Promise(resolve => setTimeout(resolve, 100));
-
-      if (result) {
-        setPayees(result);
-      }
-
-      refetchRuleCounts();
-      refetchOrphanedPayees();
+      await dispatch(initiallyLoadPayees());
+      await refetchRuleCounts();
+      await refetchOrphanedPayees();
     }
     loadData();
 
     const unlisten = listen('sync-event', async ({ type, tables }) => {
       if (type === 'applied') {
         if (tables.includes('rules')) {
-          refetchRuleCounts();
+          await refetchRuleCounts();
         }
       }
     });
@@ -61,40 +60,42 @@ export function ManagePayeesWithData({ initialSelectedIds }) {
     return () => {
       unlisten();
     };
-  }, []);
-
-  async function onUndo({ tables, messages, meta }) {
-    if (!tables.includes('payees') && !tables.includes('payee_mapping')) {
-      return;
-    }
-
-    setPayees(await getPayees());
-    refetchOrphanedPayees();
-
-    if (
-      (meta && meta.targetId) ||
-      messages.find(msg => msg.dataset === 'rules')
-    ) {
-      refetchRuleCounts();
-    }
-
-    setLastUndoState(null);
-  }
+  }, [dispatch]);
 
   useEffect(() => {
+    async function onUndo({ tables, messages, meta }: UndoState) {
+      if (!tables.includes('payees') && !tables.includes('payee_mapping')) {
+        return;
+      }
+
+      await dispatch(getPayees());
+      await refetchOrphanedPayees();
+
+      const targetId =
+        meta && typeof meta === 'object' && 'targetId' in meta
+          ? meta.targetId
+          : null;
+
+      if (targetId || messages.find(msg => msg.dataset === 'rules')) {
+        await refetchRuleCounts();
+      }
+
+      await dispatch(setLastUndoState(null));
+    }
+
     if (lastUndoState.current) {
       onUndo(lastUndoState.current);
     }
 
     return listen('undo-event', onUndo);
-  }, []);
+  }, [lastUndoState]);
 
-  function onViewRules(id) {
-    pushModal('manage-rules', { payeeId: id });
+  function onViewRules(id: PayeeEntity['id']) {
+    dispatch(pushModal('manage-rules', { payeeId: id }));
   }
 
-  function onCreateRule(id) {
-    const rule = {
+  function onCreateRule(id: PayeeEntity['id']) {
+    const rule: NewRuleEntity = {
       stage: null,
       conditionsOp: 'and',
       conditions: [
@@ -114,7 +115,7 @@ export function ManagePayeesWithData({ initialSelectedIds }) {
         },
       ],
     };
-    pushModal('edit-rule', { rule });
+    dispatch(pushModal('edit-rule', { rule }));
   }
 
   return (
@@ -122,12 +123,10 @@ export function ManagePayeesWithData({ initialSelectedIds }) {
       payees={payees}
       ruleCounts={ruleCounts.value}
       orphanedPayees={orphans}
-      categoryGroups={categoryGroups}
       initialSelectedIds={initialSelectedIds}
-      lastUndoState={lastUndoState}
-      onBatchChange={changes => {
-        send('payees-batch-change', changes);
-        setPayees(applyChanges(changes, payees));
+      onBatchChange={async (changes: Diff<PayeeEntity>) => {
+        await send('payees-batch-change', changes);
+        await dispatch(getPayees());
         setOrphans(applyChanges(changes, orphans));
       }}
       onMerge={async ([targetId, ...mergeIds]) => {
@@ -154,7 +153,7 @@ export function ManagePayeesWithData({ initialSelectedIds }) {
           );
         });
 
-        setPayees(result);
+        await dispatch(getPayees());
         setOrphans(filtedOrphans);
         setRuleCounts({ value: ruleCounts.value });
       }}
