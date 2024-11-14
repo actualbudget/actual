@@ -1303,7 +1303,6 @@ export const Table = forwardRef(
                           onItemsRendered={onItemsRendered}
                           onScroll={config => {
                             onScroll?.();
-                            console.log(config.scrollLeftOffset);
                             subHeaderRef?.current.scrollTo({
                               left: scrollContainer.current.scrollLeft,
                               behavior: 'instant',
