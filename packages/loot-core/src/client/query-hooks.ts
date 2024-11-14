@@ -21,7 +21,7 @@ export function useQuery<Response = unknown>(
   const query = useMemo(makeQuery, dependencies);
 
   const [data, setData] = useState<ReadonlyArray<Response> | null>(null);
-  const [isLoading, setIsLoading] = useState(query !== null);
+  const [isLoading, setIsLoading] = useState(query != null);
   const [error, setError] = useState<Error | undefined>(undefined);
 
   useEffect(() => {

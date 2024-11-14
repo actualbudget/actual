@@ -34,7 +34,7 @@ export function useTransactions({
   query,
   options = { pageCount: 50 },
 }: UseTransactionsProps): UseTransactionsResult {
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(query != null);
   const [error, setError] = useState<Error | undefined>(undefined);
   const [transactions, setTransactions] = useState<
     ReadonlyArray<TransactionEntity>
@@ -113,7 +113,7 @@ export function usePreviewTransactions(): UsePreviewTransactionsResult {
     schedules,
     statuses,
   } = useCachedSchedules();
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(isSchedulesLoading);
   const [error, setError] = useState<Error | undefined>(undefined);
 
   const scheduleTransactions = useMemo(() => {
