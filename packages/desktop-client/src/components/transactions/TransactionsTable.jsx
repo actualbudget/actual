@@ -360,7 +360,7 @@ function getPayeePretty(transaction, payee, transferAcct, numHiddenPayees = 0) {
     return formatPayeeName(payeeId.slice('new:'.length));
   }
 
-  return '(No payee)';
+  return '';
 }
 
 function StatusCell({
@@ -672,7 +672,13 @@ function PayeeCell({
           isCreatingPayee.current = false;
         }
       }}
-      formatter={() => getPayeePretty(transaction, payee, transferAccount)}
+      formatter={() => {
+        const payeeName = getPayeePretty(transaction, payee, transferAccount);
+        if (!payeeName && isPreview) {
+          return '(No payee)';
+        }
+        return payeeName;
+      }}
       unexposedContent={props => {
         const payeeName = (
           <UnexposedCellContent

@@ -182,7 +182,7 @@ export function TransactionListItem({
                       }),
                     }}
                   >
-                    {prettyPayee || 'No Payee'}
+                    {prettyPayee || '(No payee)'}
                   </TextOneLine>
                 </View>
                 {isPreview ? (

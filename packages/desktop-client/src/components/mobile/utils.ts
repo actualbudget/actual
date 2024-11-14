@@ -27,5 +27,5 @@ export function getPrettyPayee({
     return payee.name;
   }
 
-  return '(No payee)';
+  return '';
 }
