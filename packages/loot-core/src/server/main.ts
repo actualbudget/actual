@@ -3,7 +3,6 @@ import './polyfills';
 
 import * as injectAPI from '@actual-app/api/injected';
 import * as CRDT from '@actual-app/crdt';
-import { t } from 'i18next';
 import { v4 as uuidv4 } from 'uuid';
 
 import { createTestBudget } from '../mocks/budget';
@@ -1088,18 +1087,14 @@ function handleSyncError(err, acct) {
       accountId: acct.id,
       message: err.reason
         ? err.reason
-        : t(
-            'Account “{acctName}” is not linked properly. Please link it again.',
-            { acctName: acct.name },
-          ),
+        : `Account “${acct.name}” is not linked properly. Please link it again.`,
     };
   }
 
   return {
     accountId: acct.id,
-    message: t(
+    message:
       'There was an internal error. Please get in touch https://actualbudget.org/contact for support.',
-    ),
     internal: err.stack,
   };
 }

@@ -1,6 +1,4 @@
 // @ts-strict-ignore
-import { t } from 'i18next';
-
 import { Notification } from '../../client/state-types/notifications';
 import * as monthUtils from '../../shared/months';
 import * as db from '../db';
@@ -115,7 +113,7 @@ async function applyGroupCleanups(
         });
       }
     } else {
-      warnings.push(groupName + t(' has no matching sink categories.'));
+      warnings.push(groupName + ' has no matching sink categories.');
     }
     sourceGroups = sourceGroups.filter(c => c.group !== groupName);
     groupLength = sourceGroups.length;
@@ -220,7 +218,7 @@ async function processCleanup(month: string): Promise<Notification> {
           });
           num_sources += 1;
         } else {
-          warnings.push(category.name + t(' does not have available funds.'));
+          warnings.push(category.name + ' does not have available funds.');
         }
         const carryover = await db.first(
           `SELECT carryover FROM zero_budgets WHERE month = ? and category = ?`,
@@ -287,7 +285,7 @@ async function processCleanup(month: string): Promise<Notification> {
 
   const budgetAvailable = await getSheetValue(sheetName, `to-budget`);
   if (budgetAvailable <= 0) {
-    warnings.push(t('Global: No funds are available to reallocate.'));
+    warnings.push('Global: No funds are available to reallocate.');
   }
 
   //fill sinking categories
@@ -322,19 +320,19 @@ async function processCleanup(month: string): Promise<Notification> {
       return {
         type: 'error',
         sticky: true,
-        message: t('There were errors interpreting some templates:'),
+        message: 'There were errors interpreting some templates:',
         pre: errors.join('\n\n'),
       };
     } else if (warnings.length) {
       return {
         type: 'warning',
-        message: t('Global: Funds not available:'),
+        message: 'Global: Funds not available:',
         pre: warnings.join('\n\n'),
       };
     } else {
       return {
         type: 'message',
-        message: t('All categories were up to date.'),
+        message: 'All categories were up to date.',
       };
     }
   } else {
@@ -344,15 +342,13 @@ async function processCleanup(month: string): Promise<Notification> {
     if (errors.length) {
       return {
         sticky: true,
-        message: t('{applied} There were errors interpreting some templates:', {
-          applied,
-        }),
+        message: `${applied} There were errors interpreting some templates:`,
         pre: errors.join('\n\n'),
       };
     } else if (warnings.length) {
       return {
         type: 'warning',
-        message: t('Global: Funds not available:'),
+        message: 'Global: Funds not available:',
         pre: warnings.join('\n\n'),
       };
     } else {
