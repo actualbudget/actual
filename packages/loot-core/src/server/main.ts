@@ -1513,7 +1513,7 @@ handlers['get-did-bootstrap'] = async function () {
 handlers['subscribe-needs-bootstrap'] = async function ({
   url,
 }: { url? } = {}) {
-  if (!isValidBaseURL(url)) {
+  if (url && !isValidBaseURL(url)) {
     return { error: 'get-server-failure' };
   }
 
