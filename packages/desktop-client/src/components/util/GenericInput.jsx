@@ -23,14 +23,14 @@ import { AmountInput } from './AmountInput';
 import { PercentInput } from './PercentInput';
 
 export function GenericInput({
-  field,
-  subfield,
+  field = undefined,
+  subfield = undefined,
   type,
   numberFormatType = undefined,
-  multi,
+  multi = false,
   value,
-  inputRef,
-  style,
+  inputRef = null,
+  style = {},
   onChange,
 }) {
   const { grouped: categoryGroups } = useCategories();
