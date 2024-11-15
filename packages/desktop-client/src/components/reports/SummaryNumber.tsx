@@ -33,7 +33,7 @@ export function SummaryNumber({
   const refDiv = useRef<HTMLDivElement>(null);
   const offScreenRef = useRef<HTMLDivElement>(null);
 
-  const adjustFontSizeBinary = (minFontSize, maxFontSize) => {
+  const adjustFontSizeBinary = (minFontSize: number, maxFontSize: number) => {
     if (!offScreenRef.current || !refDiv.current) return;
 
     const offScreenDiv = offScreenRef.current;
