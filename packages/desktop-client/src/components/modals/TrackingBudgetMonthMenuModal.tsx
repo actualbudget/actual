@@ -160,7 +160,7 @@ export function TrackingBudgetMonthMenuModal({
                   close();
                   showUndoNotification({
                     message: t(
-                      '{displayMonth} budgets have all been set to last month’s budgeted amounts.',
+                      '{{displayMonth}} budgets have all been set to last month’s budgeted amounts.',
                       { displayMonth },
                     ),
                   });
@@ -170,7 +170,7 @@ export function TrackingBudgetMonthMenuModal({
                   close();
                   showUndoNotification({
                     message: t(
-                      '{displayMonth} budgets have all been set to zero.',
+                      '{{displayMonth}} budgets have all been set to zero.',
                       { displayMonth },
                     ),
                   });
@@ -191,7 +191,7 @@ export function TrackingBudgetMonthMenuModal({
                   close();
                   showUndoNotification({
                     message: t(
-                      '{displayMonth} budget templates have been applied.',
+                      '{{displayMonth}} budget templates have been applied.',
                       { displayMonth },
                     ),
                   });
@@ -201,7 +201,7 @@ export function TrackingBudgetMonthMenuModal({
                   close();
                   showUndoNotification({
                     message: t(
-                      '{displayMonth} budget templates have been overwritten.',
+                      '{{displayMonth}} budget templates have been overwritten.',
                       { displayMonth },
                     ),
                   });
