@@ -33,30 +33,45 @@ export function SummaryNumber({
   const refDiv = useRef<HTMLDivElement>(null);
   const offScreenRef = useRef<HTMLDivElement>(null);
 
+  const FONT_SIZE_SCALE_FACTOR = 0.8;
+  const MAX_RECURSION_DEPTH = 10;
+
   const adjustFontSizeBinary = (minFontSize: number, maxFontSize: number) => {
     if (!offScreenRef.current || !refDiv.current) return;
 
     const offScreenDiv = offScreenRef.current;
     const refDivCurrent = refDiv.current;
 
-    const binarySearchFontSize = (min, max) => {
+    const binarySearchFontSize = (min: number, max: number, depth = 0) => {
+      if (depth >= MAX_RECURSION_DEPTH) {
+        setFontSize(min);
+        return;
+      }
+
       const testFontSize = (min + max) / 2;
       offScreenDiv.style.fontSize = `${testFontSize}px`;
 
+      let frameId: number;
       requestAnimationFrame(() => {
         const isOverflowing =
           offScreenDiv.scrollWidth > refDivCurrent.clientWidth ||
           offScreenDiv.scrollHeight > refDivCurrent.clientHeight;
 
         if (isOverflowing) {
-          binarySearchFontSize(min, testFontSize);
+          frameId = requestAnimationFrame(() => 
+            binarySearchFontSize(min, testFontSize, depth + 1)
+          );
         } else {
           const isUnderflowing =
-            offScreenDiv.scrollWidth <= refDivCurrent.clientWidth * 0.8 &&
-            offScreenDiv.scrollHeight <= refDivCurrent.clientHeight * 0.8;
+            offScreenDiv.scrollWidth <= refDivCurrent.clientWidth *
+              FONT_SIZE_SCALE_FACTOR &&
+            offScreenDiv.scrollHeight <= refDivCurrent.clientHeight *
+              FONT_SIZE_SCALE_FACTOR;
 
           if (isUnderflowing && testFontSize < max) {
-            binarySearchFontSize(testFontSize, max);
+            frameId = requestAnimationFrame(() => 
+              binarySearchFontSize(testFontSize, max, depth + 1)
+            );
           } else {
             setFontSize(testFontSize);
             if (initialFontSize !== testFontSize && fontSizeChanged) {
@@ -65,6 +80,12 @@ export function SummaryNumber({
           }
         }
       });
+      
+      return () => {
+        if (frameId) {
+          cancelAnimationFrame(frameId);
+        }
+      };
     };
 
     binarySearchFontSize(minFontSize, maxFontSize);
