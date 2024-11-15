@@ -70,6 +70,8 @@ function FeatureToggle({
 export function ExperimentalFeatures() {
   const [expanded, setExpanded] = useState(false);
 
+  const goalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
+
   return (
     <Setting
       primaryAction={
@@ -78,6 +80,13 @@ export function ExperimentalFeatures() {
             <FeatureToggle flag="goalTemplatesEnabled">
               <Trans>Goal templates</Trans>
             </FeatureToggle>
+            {goalTemplatesEnabled && (
+              <View style={{ paddingLeft: 22 }}>
+                <FeatureToggle flag="goalTemplatesUIEnabled">
+                  <Trans>Subfeature: Goal templates UI</Trans>
+                </FeatureToggle>
+              </View>
+            )}
             <FeatureToggle
               flag="actionTemplating"
               feedbackLink="https://github.com/actualbudget/actual/issues/3606"
