@@ -112,6 +112,12 @@
       .js-focus-visible :focus:not(.focus-visible) {
         outline: 0;
       }
+
+      @media print {
+        body {
+          overflow: visible;
+        }
+      }
     </style>
   </head>
   <body>

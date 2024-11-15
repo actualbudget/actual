@@ -438,6 +438,9 @@ export function Budget() {
         paddingLeft: 8,
         paddingRight: 8,
         overflow: 'hidden',
+        '@media print': {
+          overflow: 'visible',
+        },
       }}
     >
       <BudgetInner
