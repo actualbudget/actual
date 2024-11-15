@@ -9,6 +9,7 @@ import {
   resetCategoryGoalDefsWithNoTemplates,
 } from './statements';
 import { Template } from './types/templates';
+import { useTranslation } from 'react-i18next';
 
 export const TEMPLATE_PREFIX = '#template';
 export const GOAL_PREFIX = '#goal';
@@ -35,6 +36,7 @@ type CategoryWithTemplates = {
 };
 
 export async function checkTemplates(): Promise<Notification> {
+  const { t } = useTranslation();
   const categoryWithTemplates = await getCategoriesWithTemplates();
   const schedules = await getActiveSchedules();
   const scheduleNames = schedules.map(({ name }) => name);
@@ -48,7 +50,7 @@ export async function checkTemplates(): Promise<Notification> {
         template.type === 'schedule' &&
         !scheduleNames.includes(template.name)
       ) {
-        errors.push(`${id}: Schedule “${template.name}” does not exist`);
+        errors.push(t('{{id}}: Schedule {{template.name}} does not exist'));
       }
     });
   });
@@ -56,14 +58,14 @@ export async function checkTemplates(): Promise<Notification> {
   if (errors.length) {
     return {
       sticky: true,
-      message: 'There were errors interpreting some templates:',
+      message: t('There were errors interpreting some templates:'),
       pre: errors.join('\n\n'),
     };
   }
 
   return {
     type: 'message',
-    message: 'All templates passed! 🎉',
+    message: t('All templates passed! 🎉'),
   };
 }
 
