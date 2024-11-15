@@ -1,5 +1,6 @@
 export type FeatureFlag =
   | 'goalTemplatesEnabled'
+  | 'goalTemplatesUIEnabled'
   | 'actionTemplating'
   | 'contextMenus'
   | 'openidAuth';
