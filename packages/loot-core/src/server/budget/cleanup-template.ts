@@ -5,6 +5,7 @@ import * as db from '../db';
 
 import { setBudget, getSheetValue, setGoal } from './actions';
 import { parse } from './cleanup-template.pegjs';
+import { useTranslation } from 'react-i18next';
 
 export function cleanupTemplate({ month }: { month: string }) {
   return processCleanup(month);
@@ -113,7 +114,8 @@ async function applyGroupCleanups(
         });
       }
     } else {
-      warnings.push(groupName + ' has no matching sink categories.');
+      warnings.push(t('{{groupname}} has no matching sink categories.', 
+        { groupname: groupName }));
     }
     sourceGroups = sourceGroups.filter(c => c.group !== groupName);
     groupLength = sourceGroups.length;
@@ -218,7 +220,8 @@ async function processCleanup(month: string): Promise<Notification> {
           });
           num_sources += 1;
         } else {
-          warnings.push(category.name + ' does not have available funds.');
+          warnings.push(t('{{name}} does not have available funds.', 
+            { name: category.name }));
         }
         const carryover = await db.first(
           `SELECT carryover FROM zero_budgets WHERE month = ? and category = ?`,
@@ -285,7 +288,7 @@ async function processCleanup(month: string): Promise<Notification> {
 
   const budgetAvailable = await getSheetValue(sheetName, `to-budget`);
   if (budgetAvailable <= 0) {
-    warnings.push('Global: No funds are available to reallocate.');
+    warnings.push(t('Global: No funds are available to reallocate.'));
   }
 
   //fill sinking categories
@@ -320,35 +323,36 @@ async function processCleanup(month: string): Promise<Notification> {
       return {
         type: 'error',
         sticky: true,
-        message: 'There were errors interpreting some templates:',
+        message: t('There were errors interpreting some templates:'),
         pre: errors.join('\n\n'),
       };
     } else if (warnings.length) {
       return {
         type: 'warning',
-        message: 'Global: Funds not available:',
+        message: t('Global: Funds not available:'),
         pre: warnings.join('\n\n'),
       };
     } else {
       return {
         type: 'message',
-        message: 'All categories were up to date.',
+        message: t('All categories were up to date.'),
       };
     }
   } else {
-    const applied = `Successfully returned funds from ${num_sources} ${
-      num_sources === 1 ? 'source' : 'sources'
-    } and funded ${num_sinks} sinking ${num_sinks === 1 ? 'fund' : 'funds'}.`;
+    const applied = t('Successfully returned funds from {{count}} sources ',
+      { count: num_sources }) +
+      t(' and funded {{count}} sinking funds', { count: num_sinks });
     if (errors.length) {
       return {
         sticky: true,
-        message: `${applied} There were errors interpreting some templates:`,
+        message: applied + ' ' + 
+          t('There were errors interpreting some templates:'),
         pre: errors.join('\n\n'),
       };
     } else if (warnings.length) {
       return {
         type: 'warning',
-        message: 'Global: Funds not available:',
+        message: t('Global: Funds not available:'),
         pre: warnings.join('\n\n'),
       };
     } else {
