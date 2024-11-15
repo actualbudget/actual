@@ -87,7 +87,6 @@ export function LoadBackupModal({
   const previousBackups = backups.filter(
     backup => !('isLatest' in backup ? backup.isLatest : false),
   );
-  const { t } = useTranslation();
 
   return (
     <Modal name="load-backup" containerProps={{ style: { maxWidth: '30vw' } }}>
@@ -189,7 +188,7 @@ export function LoadBackupModal({
                       }
                     }}
                   >
-                    {t('<Trans>Backup now')}</Trans>
+                    {t('<Trans>Backup now')}
                   </ButtonWithLoading>
                 </View>
               )}
