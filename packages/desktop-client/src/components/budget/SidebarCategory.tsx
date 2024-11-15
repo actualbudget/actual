@@ -17,6 +17,8 @@ import { View } from '../common/View';
 import { NotesButton } from '../NotesButton';
 import { InputCell } from '../table';
 
+import { GoalButton } from './goals/GoalButton';
+
 type SidebarCategoryProps = {
   innerRef: Ref<HTMLDivElement>;
   category: CategoryEntity;
@@ -128,6 +130,13 @@ export function SidebarCategory({
         </Popover>
       </View>
       <View style={{ flex: 1 }} />
+      <View style={{ flexShrink: 0 }}>
+        <GoalButton
+          id={category.id}
+          style={dragging && { color: 'currentColor' }}
+          defaultColor={theme.pageTextLight}
+        />
+      </View>
       <View style={{ flexShrink: 0 }}>
         <NotesButton
           id={category.id}
