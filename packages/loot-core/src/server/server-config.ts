@@ -16,6 +16,14 @@ function joinURL(base: string | URL, ...paths: string[]): string {
   return url.toString();
 }
 
+export function isValidBaseURL(base: string): boolean {
+  try {
+    return Boolean(new URL(base));
+  } catch (error) {
+    return false;
+  }
+}
+
 export function setServer(url: string): void {
   if (url == null) {
     config = null;
