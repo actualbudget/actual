@@ -18,7 +18,7 @@ import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { PrivacyFilter } from '../PrivacyFilter';
-import { TableHeader, Table, Row, Field } from '../table';
+import { TableHeader, Row, Field, TableResizable } from '../table';
 
 const addOnBudgetAccountOption = { id: 'new-on', name: 'Create new account' };
 const addOffBudgetAccountOption = {
@@ -147,7 +147,8 @@ export function SelectLinkedAccountsModal({
               ]}
             />
 
-            <Table
+            <TableResizable
+              prefName="linked-accounts-column-sizes"
               items={externalAccounts}
               style={{ backgroundColor: theme.tableHeaderBackground }}
               getItemKey={index => index}

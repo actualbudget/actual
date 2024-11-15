@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, {
+import {
   PureComponent,
   type MutableRefObject,
   createRef,
@@ -69,6 +69,7 @@ import {
 import { useSyncedPref } from '../../hooks/useSyncedPref';
 import { useTransactionBatchActions } from '../../hooks/useTransactionBatchActions';
 import { styles, theme } from '../../style';
+import { ColumnWidthProvider, useColumnWidth } from '../ColumnWidthContext';
 import { Button } from '../common/Button2';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
@@ -284,6 +285,7 @@ type AccountInternalProps = {
   categoryGroups: ReturnType<typeof useCategories>['grouped'];
   hideFraction: boolean;
   accountsSyncing: string[];
+  toggleColumnEditMode: () => void;
 } & ReturnType<typeof useActions>;
 type AccountInternalState = {
   search: string;
@@ -725,6 +727,10 @@ class AccountInternal extends PureComponent<
     this.props.setShowExtraBalances(!this.props.showExtraBalances);
   };
 
+  onToogleColumnEdit = () => {
+    this.props.toggleColumnEditMode();
+  };
+
   onMenuSelect = async (
     item:
       | 'link'
@@ -735,7 +741,8 @@ class AccountInternal extends PureComponent<
       | 'toggle-balance'
       | 'remove-sorting'
       | 'toggle-cleared'
-      | 'toggle-reconciled',
+      | 'toggle-reconciled'
+      | 'toogle-column-edit',
   ) => {
     const accountId = this.props.accountId!;
     const account = this.props.accounts.find(
@@ -822,6 +829,9 @@ class AccountInternal extends PureComponent<
             this.fetchTransactions(this.state.filterConditions),
           );
         }
+        break;
+      case 'toogle-column-edit':
+        this.onToogleColumnEdit();
         break;
       default:
     }
@@ -1838,6 +1848,7 @@ function AccountHack(props: AccountHackProps) {
     onBatchUnlinkSchedule,
     onBatchDelete,
   } = useTransactionBatchActions();
+  const { editMode, setEditMode } = useColumnWidth();
 
   return (
     <AccountInternal
@@ -1847,12 +1858,21 @@ function AccountHack(props: AccountHackProps) {
       onBatchLinkSchedule={onBatchLinkSchedule}
       onBatchUnlinkSchedule={onBatchUnlinkSchedule}
       onBatchDelete={onBatchDelete}
+      toggleColumnEditMode={() => setEditMode(!editMode)}
       {...props}
     />
   );
 }
 
 export function Account() {
+  return (
+    <ColumnWidthProvider prefName="transactions-table-column-sizes">
+      <AccountInner />
+    </ColumnWidthProvider>
+  );
+}
+
+function AccountInner() {
   const params = useParams();
   const location = useLocation();
 
@@ -1892,6 +1912,8 @@ export function Account() {
     [params.id],
   );
 
+  const { editMode, setEditMode } = useColumnWidth();
+
   return (
     <SchedulesProvider query={schedulesQuery}>
       <SplitsExpandedProvider
@@ -1928,6 +1950,7 @@ export function Account() {
           categoryId={location?.state?.categoryId}
           location={location}
           savedFilters={savedFiters}
+          toggleColumnEditMode={() => setEditMode(!editMode)}
         />
       </SplitsExpandedProvider>
     </SchedulesProvider>

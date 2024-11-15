@@ -147,6 +147,7 @@ export const styles = {
   },
   // Dynamically set
   horizontalScrollbar: null as CSSProperties | null,
+  horizontalScrollbarTable: null as CSSProperties | null,
   lightScrollbar: null as CSSProperties | null,
   darkScrollbar: null as CSSProperties | null,
   scrollbarWidth: null as number | null,
@@ -160,16 +161,22 @@ let hiddenScrollbars = false;
 // darkScrollbar => secondary
 function onScrollbarChange() {
   styles.horizontalScrollbar = !hiddenScrollbars && {
-    '::-webkit-scrollbar': {
-      backgroundColor: 'inherit',
-      height: 12,
-    },
-    '::-webkit-scrollbar-thumb': {
+    '& ::-webkit-scrollbar': {
       width: 7,
-      borderRadius: 30,
-      backgroundClip: 'padding-box',
-      border: '2px solid rgba(0, 0, 0, 0)',
-      backgroundColor: '#d0d0d0',
+      backgroundColor: 'rgba(0, 0, 0, 0)',
+    },
+    '& ::-webkit-scrollbar-thumb:vertical': {
+      backgroundColor: 'rgba(200, 200, 200, .5)',
+    },
+  };
+
+  styles.horizontalScrollbarTable = !hiddenScrollbars && {
+    '& ::-webkit-scrollbar:horizontal': {
+      height: 11,
+      backgroundColor: 'rgba(0, 0, 0, 0)',
+    },
+    '& ::-webkit-scrollbar-thumb:horizontal': {
+      backgroundColor: 'rgba(200, 200, 200, .5)',
     },
   };
 
@@ -191,10 +198,11 @@ function onScrollbarChange() {
 
   styles.darkScrollbar = !hiddenScrollbars && {
     '& ::-webkit-scrollbar': {
-      width: 7,
+      width: 11,
       backgroundColor: 'rgba(0, 0, 0, 0)',
     },
     '& ::-webkit-scrollbar-thumb:vertical': {
+      width: 7,
       backgroundColor: 'rgba(200, 200, 200, .5)',
     },
   };

@@ -25,7 +25,7 @@ import { Popover } from '../common/Popover';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { PrivacyFilter } from '../PrivacyFilter';
-import { Table, TableHeader, Row, Field, Cell } from '../table';
+import { TableHeader, Row, Field, Cell, TableResizable } from '../table';
 import { DisplayId } from '../util/DisplayId';
 
 import { StatusBadge } from './StatusBadge';
@@ -426,7 +426,8 @@ export function SchedulesTable({
         )}
         {!minimal && <Field width={40} />}
       </TableHeader>
-      <Table
+      <TableResizable
+        prefName="schedules-table-column-sizes"
         loading={isLoading}
         rowHeight={ROW_HEIGHT}
         backgroundColor="transparent"

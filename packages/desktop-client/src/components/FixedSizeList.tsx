@@ -45,6 +45,7 @@ type FixedSizeListProps = {
     scrollDirection: FixedSizeListState['scrollDirection'];
     scrollOffset: FixedSizeListState['scrollOffset'];
     scrollUpdateWasRequested: FixedSizeListState['scrollUpdateWasRequested'];
+    scrollLeftOffset: FixedSizeListState['scrollLeftOffset'];
   }) => void;
   indexForKey?: (key: string | number) => number;
   height?: number;
@@ -52,6 +53,7 @@ type FixedSizeListProps = {
   header?: ReactNode;
   innerRef?: Ref<HTMLDivElement>;
   itemKey?: (index: number) => string | number;
+  totalWidth?: number;
 };
 
 type FixedSizeListState = {
@@ -59,6 +61,7 @@ type FixedSizeListState = {
   scrollDirection: 'forward' | 'backward';
   scrollOffset: number;
   scrollUpdateWasRequested: boolean;
+  scrollLeftOffset: number;
 };
 
 export class FixedSizeList extends PureComponent<
@@ -103,6 +106,7 @@ export class FixedSizeList extends PureComponent<
           ? this.props.initialScrollOffset
           : 0,
       scrollUpdateWasRequested: false,
+      scrollLeftOffset: 0,
     };
   }
 
@@ -203,6 +207,7 @@ export class FixedSizeList extends PureComponent<
       itemKey = defaultItemKey,
       useIsScrolling,
       width,
+      totalWidth,
     } = this.props;
     const { isScrolling } = this.state;
 
@@ -256,7 +261,7 @@ export class FixedSizeList extends PureComponent<
         style={{
           height,
           width,
-          overflow: 'hidden auto',
+          overflow: 'visible auto',
         }}
       >
         <View>{header}</View>
@@ -265,7 +270,7 @@ export class FixedSizeList extends PureComponent<
           style={{
             position: 'relative',
             height: estimatedTotalSize,
-            width: '100%',
+            width: `${Math.max(totalWidth || 0, width || 0) - 16}px`,
             pointerEvents: isScrolling ? 'none' : undefined,
           }}
         >
@@ -412,11 +417,17 @@ export class FixedSizeList extends PureComponent<
   );
 
   _callOnScroll = memoizeOne(
-    (scrollDirection, scrollOffset, scrollUpdateWasRequested) =>
+    (
+      scrollDirection,
+      scrollOffset,
+      scrollUpdateWasRequested,
+      scrollLeftOffset,
+    ) =>
       this.props.onScroll({
         scrollDirection,
         scrollOffset,
         scrollUpdateWasRequested,
+        scrollLeftOffset,
       }),
   );
 
@@ -440,12 +451,17 @@ export class FixedSizeList extends PureComponent<
     }
 
     if (typeof this.props.onScroll === 'function') {
-      const { scrollDirection, scrollOffset, scrollUpdateWasRequested } =
-        this.state;
+      const {
+        scrollDirection,
+        scrollOffset,
+        scrollUpdateWasRequested,
+        scrollLeftOffset,
+      } = this.state;
       this._callOnScroll(
         scrollDirection,
         scrollOffset,
         scrollUpdateWasRequested,
+        scrollLeftOffset,
       );
     }
   }
@@ -522,24 +538,41 @@ export class FixedSizeList extends PureComponent<
   }
 
   _onScrollVertical = (event: UIEvent<HTMLDivElement>) => {
-    const { scrollTop } = event.currentTarget;
+    const { scrollTop, scrollLeft } = event.currentTarget;
 
     this.setState(prevState => {
-      if (prevState.scrollOffset === scrollTop) {
+      if (
+        prevState.scrollOffset === scrollTop &&
+        prevState.scrollLeftOffset === scrollLeft
+      ) {
         // Scroll position may have been updated by cDM/cDU,
         // In which case we don't need to trigger another render,
         // And we don't want to update state.isScrolling.
         return null;
       }
+      const newState = {
+        isScrolling: scrollTop !== prevState.scrollOffset,
+        scrollDirection:
+          prevState.scrollOffset < scrollTop ? 'forward' : 'backward',
+        scrollOffset: scrollTop,
+        scrollUpdateWasRequested: false,
+        scrollLeftOffset: scrollLeft,
+      };
 
-      const scrollOffset = scrollTop;
+      this._callOnScroll(
+        newState.scrollDirection,
+        newState.scrollOffset,
+        newState.scrollUpdateWasRequested,
+        newState.scrollLeftOffset,
+      );
 
       return {
-        isScrolling: true,
+        isScrolling: scrollTop !== prevState.scrollOffset,
         scrollDirection:
-          prevState.scrollOffset < scrollOffset ? 'forward' : 'backward',
-        scrollOffset,
+          prevState.scrollOffset < scrollTop ? 'forward' : 'backward',
+        scrollOffset: scrollTop,
         scrollUpdateWasRequested: false,
+        scrollLeftOffset: scrollLeft,
       };
     }, this._resetIsScrollingDebounced);
   };
