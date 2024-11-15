@@ -8,6 +8,8 @@ import { isReflectBudget, getSheetValue, setGoal, setBudget } from './actions';
 import { CategoryTemplate } from './categoryTemplate';
 import { checkTemplates, storeTemplates } from './template-notes';
 
+import { useTranslation } from 'react-i18next';
+
 export async function applyTemplate({ month }): Promise<Notification> {
   await storeTemplates();
   const categoryTemplates = await getTemplates(null);
@@ -188,13 +190,13 @@ async function processTemplate(
   if (catObjects.length === 0 && errors.length === 0) {
     return {
       type: 'message',
-      message: 'Everything is up to date',
+      message: t('Everything is up to date'),
     };
   }
   if (errors.length > 0) {
     return {
       sticky: true,
-      message: 'There were errors interpreting some templates:',
+      message: t('There were errors interpreting some templates:'),
       pre: errors.join(`\n\n`),
     };
   }
@@ -245,6 +247,7 @@ async function processTemplate(
 
   return {
     type: 'message',
-    message: `Successfully applied templates to ${catObjects.length} categories`,
+    message: t('Successfully applied templates to {{count}} categories', {
+      count: catObjects.length }),
   };
 }

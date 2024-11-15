@@ -10,6 +10,8 @@ import {
 
 import { isReflectBudget } from './actions';
 
+import { useTranslation } from 'react-i18next';
+
 async function createScheduleList(template, current_month, category) {
   const t = [];
   const errors = [];
@@ -62,7 +64,8 @@ async function createScheduleList(template, current_month, category) {
     );
     if (num_months < 0) {
       //non-repeating schedules could be negative
-      errors.push(`Schedule ${template[ll].name} is in the Past.`);
+      errors.push(t('Schedule {{name}} is in the past.', { 
+        name: template[ll].name }));
     } else {
       t.push({
         target,
@@ -126,7 +129,8 @@ async function createScheduleList(template, current_month, category) {
         }
       } else {
         errors.push(
-          `Schedule ${t[ll].name} is not active during the month in question.`,
+          t('Schedule {{name}} is not active during the month in question.', {
+            name: t[ll].name }),
         );
       }
     }

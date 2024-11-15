@@ -9,6 +9,8 @@ import { goalsSchedule } from './goalsSchedule';
 import { getActiveSchedules } from './statements';
 import { Template } from './types/templates';
 
+import { useTranslation } from 'react-i18next';
+
 export class CategoryTemplate {
   /*----------------------------------------------------------------------------
    * Using This Class:
@@ -282,7 +284,9 @@ export class CategoryTemplate {
       .filter(t => t.type === 'schedule')
       .forEach(t => {
         if (!scheduleNames.includes(t.name.trim())) {
-          throw new Error(`Schedule ${t.name.trim()} does not exist`);
+          throw new Error(t('Schedule {{name}} does not exist', {
+            name: t.name.trim()
+          }));
         }
       });
     //find lowest priority
@@ -296,8 +300,9 @@ export class CategoryTemplate {
       .filter(t => t.type === 'schedule' || t.type === 'by')
       .forEach(t => {
         if (t.priority !== lowestPriority) {
-          throw new Error(
-            `Schedule and By templates must be the same priority level.  Fix by setting all Schedule and By templates to priority level ${lowestPriority}`,
+          throw new Error(t(
+            'Schedule and By templates must be the same priority level.  Fix by setting all Schedule and By templates to priority level {{lowestPriority}}',
+              { lowestPriority: lowestPriority}),
           );
           //t.priority = lowestPriority;
         }
@@ -312,8 +317,8 @@ export class CategoryTemplate {
         );
         if (range < 0 && !(t.repeat || t.annual)) {
           throw new Error(
-            `Target month has passed, remove or update the target month`,
-          );
+            t('Target month has passed, remove or update the target month'),
+            );
         }
       });
   }
@@ -333,7 +338,9 @@ export class CategoryTemplate {
         //skip the name check since these are special
       } else if (!availNames.includes(n)) {
         throw new Error(
-          `Category \x22${n}\x22 is not found in available income categories`,
+          t('Category \x22{{name}}\x22 is not found in available income categories', {
+            name: n
+          }),
         );
       }
     });
@@ -343,7 +350,7 @@ export class CategoryTemplate {
     for (const t of this.templates) {
       if (!t.limit) continue;
       if (this.limitCheck) {
-        throw new Error('Only one `up to` allowed per category');
+        throw new Error(t('Only one `up to` allowed per category'));
       } else if (t.limit) {
         if (t.limit.period === 'daily') {
           const numDays = monthUtils.differenceInCalendarDays(
@@ -364,7 +371,7 @@ export class CategoryTemplate {
         } else if (t.limit.period === 'monthly') {
           this.limitAmount = amountToInteger(t.limit.amount);
         } else {
-          throw new Error('Invalid limit period. Check template syntax');
+          throw new Error(t('Invalid limit period. Check template syntax'));
         }
         //amount is good save the rest
         this.limitCheck = true;
@@ -376,13 +383,13 @@ export class CategoryTemplate {
   private checkSpend() {
     const st = this.templates.filter(t => t.type === 'spend');
     if (st.length > 1) {
-      throw new Error('Only one spend template is allowed per category');
+      throw new Error(t('Only one spend template is allowed per category'));
     }
   }
 
   private checkGoal() {
     if (this.goals.length > 1) {
-      throw new Error(`Only one #goal is allowed per category`);
+      throw new Error(t('Only one #goal is allowed per category'));
     }
   }
 

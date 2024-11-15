@@ -10,6 +10,8 @@ import {
 } from './statements';
 import { Template } from './types/templates';
 
+import { useTranslation } from 'react-i18next';
+
 export const TEMPLATE_PREFIX = '#template';
 export const GOAL_PREFIX = '#goal';
 
@@ -56,14 +58,14 @@ export async function checkTemplates(): Promise<Notification> {
   if (errors.length) {
     return {
       sticky: true,
-      message: 'There were errors interpreting some templates:',
+      message: t('There were errors interpreting some templates:'),
       pre: errors.join('\n\n'),
     };
   }
 
   return {
     type: 'message',
-    message: 'All templates passed! 🎉',
+    message: t('All templates passed!') + ' 🎉',
   };
 }
 

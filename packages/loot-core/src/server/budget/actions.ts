@@ -5,6 +5,8 @@ import * as db from '../db';
 import * as sheet from '../sheet';
 import { batchMessages } from '../sync';
 
+import { useTranslation } from 'react-i18next';
+
 export async function getSheetValue(
   sheetName: string,
   cell: string,
@@ -512,17 +514,23 @@ async function addMovementNotes({
 
   const fromCategoryName =
     from === 'to-be-budgeted'
-      ? 'To Budget'
+      ? t('To Budget')
       : categories.find(c => c.id === from)?.name;
 
   const toCategoryName =
     to === 'to-be-budgeted'
-      ? 'To Budget'
+      ? t('To Budget')
       : to === 'overbudgeted'
-        ? 'Overbudgeted'
+        ? t('Overbudgeted')
         : categories.find(c => c.id === to)?.name;
 
-  const note = `Reassigned ${displayAmount} from ${fromCategoryName} → ${toCategoryName} on ${displayDay}`;
+  const note = t('Reassigned {{displayAmount}} from {{fromCategory}} → ' + 
+    '{{toCategory}} on {{displayDay}}', {
+      displayAmount: displayAmount,
+      fromCategory: fromCategoryName,
+      toCategory: toCategoryName,
+      displayDay: displayDay
+    });
 
   await db.update('notes', {
     id: monthBudgetNotesId,
