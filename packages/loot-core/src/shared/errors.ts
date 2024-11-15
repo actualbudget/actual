@@ -34,7 +34,7 @@ export function getUploadError({
       return t('Uploading the file failed. Check your network connection.');
     default:
       return t(
-        'An internal error occurred, sorry! Visit https://actualbudget.org/contact/ for support. (ref: {reason})',
+        'An internal error occurred, sorry! Visit https://actualbudget.org/contact/ for support. (ref: {{reason}})',
         { reason },
       );
   }
@@ -67,7 +67,7 @@ export function getDownloadError({ reason, meta, fileName }) {
     default:
       const info = meta && meta.fileId ? `, fileId: ${meta.fileId}` : '';
       return t(
-        'Something went wrong trying to download that file, sorry! Visit https://actualbudget.org/contact/ for support. reason: {reason}{info}',
+        'Something went wrong trying to download that file, sorry! Visit https://actualbudget.org/contact/ for support. reason: {{reason}}{{info}}',
         { reason, info },
       );
   }
@@ -105,7 +105,7 @@ export function getSyncError(error, id) {
       { id },
     );
   } else {
-    return t('We had an unknown problem opening “{id}”.', { id });
+    return t('We had an unknown problem opening “{{id}}”.', { id });
   }
 }
 
