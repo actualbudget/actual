@@ -33,46 +33,46 @@ export function SummaryNumber({
   const refDiv = useRef<HTMLDivElement>(null);
   const offScreenRef = useRef<HTMLDivElement>(null);
 
-  const adjustFontSize = (containerWidth: number, containerHeight: number) => {
-    if (!offScreenRef.current) return;
+  const adjustFontSizeBinary = (minFontSize, maxFontSize) => {
+    if (!offScreenRef.current || !refDiv.current) return;
 
-    let testFontSize = initialFontSize;
     const offScreenDiv = offScreenRef.current;
-    offScreenDiv.style.fontSize = `${testFontSize}px`;
+    const refDivCurrent = refDiv.current;
 
-    if (
-      offScreenDiv.scrollWidth > containerWidth ||
-      offScreenDiv.scrollHeight > containerHeight
-    ) {
-      while (
-        offScreenDiv.scrollWidth > containerWidth &&
-        offScreenDiv.scrollHeight > containerHeight
-      ) {
-        testFontSize -= 0.5;
-        offScreenDiv.style.fontSize = `${testFontSize}px`;
-      }
-    } else if (
-      offScreenDiv.scrollWidth <= containerWidth * 0.9 &&
-      offScreenDiv.scrollHeight <= containerHeight * 0.9
-    ) {
-      while (
-        offScreenDiv.scrollWidth <= containerWidth &&
-        offScreenDiv.scrollHeight <= containerHeight
-      ) {
-        testFontSize += 0.5;
-        offScreenDiv.style.fontSize = `${testFontSize}px`;
-      }
-    }
+    const binarySearchFontSize = (min, max) => {
+      const testFontSize = (min + max) / 2;
+      offScreenDiv.style.fontSize = `${testFontSize}px`;
 
-    setFontSize(testFontSize);
-    if (initialFontSize !== testFontSize && fontSizeChanged) {
-      fontSizeChanged(testFontSize);
-    }
+      requestAnimationFrame(() => {
+        const isOverflowing =
+          offScreenDiv.scrollWidth > refDivCurrent.clientWidth ||
+          offScreenDiv.scrollHeight > refDivCurrent.clientHeight;
+
+        if (isOverflowing) {
+          binarySearchFontSize(min, testFontSize);
+        } else {
+          const isUnderflowing =
+            offScreenDiv.scrollWidth <= refDivCurrent.clientWidth * 0.8 &&
+            offScreenDiv.scrollHeight <= refDivCurrent.clientHeight * 0.8;
+
+          if (isUnderflowing && testFontSize < max) {
+            binarySearchFontSize(testFontSize, max);
+          } else {
+            setFontSize(testFontSize);
+            if (initialFontSize !== testFontSize && fontSizeChanged) {
+              fontSizeChanged(testFontSize);
+            }
+          }
+        }
+      });
+    };
+
+    binarySearchFontSize(minFontSize, maxFontSize);
   };
 
-  const handleResize = debounce((rect: DOMRectReadOnly) => {
-    adjustFontSize(rect.width, rect.height);
-  }, 150);
+  const handleResize = debounce(() => {
+    adjustFontSizeBinary(14, 100);
+  }, 100);
 
   const ref = useResizeObserver(handleResize);
   const mergedRef = useMergedRefs(ref, refDiv);
@@ -88,34 +88,37 @@ export function SummaryNumber({
               position: 'fixed',
               left: '-999px',
               top: '-999px',
-              fontSize: '14px',
+              fontSize: `${initialFontSize}px`,
               visibility: 'hidden',
               whiteSpace: 'nowrap',
-              padding: 16,
+              padding: 8,
             }}
           >
             <PrivacyFilter>
-              {amountToCurrency(value)}
+              {amountToCurrency(Math.abs(value))}
               {suffix}
             </PrivacyFilter>
           </div>
 
           <View
             ref={mergedRef as Ref<HTMLDivElement>}
+            id="test"
             role="text"
             aria-label={`${value < 0 ? 'Negative' : 'Positive'} amount: ${amountToCurrency(Math.abs(value))}${suffix}`}
             style={{
               alignItems: 'center',
-              height: '100%',
+              flexGrow: 1,
+              flexShrink: 1,
               width: '100%',
+              maxWidth: '100%',
               fontSize: `${fontSize}px`,
-              padding: 16,
+              padding: 8,
               justifyContent: 'center',
               transition: animate ? 'font-size 0.3s ease' : '',
               color: value < 0 ? chartTheme.colors.red : chartTheme.colors.blue,
             }}
           >
-            <span aria-hidden="true">
+            <span aria-hidden="true" id="coiso">
               <PrivacyFilter>
                 {amountToCurrency(Math.abs(value))}
                 {suffix}

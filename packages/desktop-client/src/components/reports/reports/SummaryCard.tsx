@@ -104,32 +104,29 @@ export function SummaryCard({
         }
       }}
     >
-      <View style={{ flex: 1, margin: 2, overflow: 'hidden' }}>
-        <View style={{ flexDirection: 'row', padding: 20, paddingBottom: 0 }}>
-          <View style={{ flex: 1, marginBottom: -5 }}>
-            <ReportCardName
-              name={meta?.name || t('Summary')}
-              isEditing={nameMenuOpen}
-              onChange={newName => {
-                onMetaChange({
-                  ...meta,
-                  content: JSON.stringify(content),
-                  name: newName,
-                });
-                setNameMenuOpen(false);
-              }}
-              onClose={() => setNameMenuOpen(false)}
-            />
-            <DateRange start={start} end={end} />
-          </View>
+      <View style={{ flex: 1, overflow: 'hidden' }}>
+        <View style={{ flexGrow: 0, flexShrink: 0, padding: 20 }}>
+          <ReportCardName
+            name={meta?.name || t('Summary')}
+            isEditing={nameMenuOpen}
+            onChange={newName => {
+              onMetaChange({
+                ...meta,
+                content: JSON.stringify(content),
+                name: newName,
+              });
+              setNameMenuOpen(false);
+            }}
+            onClose={() => setNameMenuOpen(false)}
+          />
+          <DateRange start={start} end={end} />
         </View>
         <View
           style={{
-            width: '100%',
-            flexGrow: 1,
-            marginTop: -20,
             justifyContent: 'center',
             alignItems: 'center',
+            flexGrow: 1,
+            flexShrink: 1,
           }}
         >
           {data ? (
