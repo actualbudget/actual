@@ -3,6 +3,8 @@ import React, {
   type CSSProperties,
 } from 'react';
 
+import { t } from 'i18next';
+
 import { trackingBudget } from 'loot-core/client/queries';
 
 import { useCategory } from '../../hooks/useCategory';
@@ -64,7 +66,7 @@ export function TrackingBalanceMenuModal({
                 fontWeight: 400,
               }}
             >
-              Balance
+              {t('Balance')}
             </Text>
             <BalanceWithCarryover
               isDisabled

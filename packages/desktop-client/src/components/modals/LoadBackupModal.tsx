@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Trans, useTranslation } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 
 import * as dateFns from 'date-fns';
@@ -87,6 +87,7 @@ export function LoadBackupModal({
   const previousBackups = backups.filter(
     backup => !('isLatest' in backup ? backup.isLatest : false),
   );
+  const { t } = useTranslation();
 
   return (
     <Modal name="load-backup" containerProps={{ style: { maxWidth: '30vw' } }}>
@@ -109,12 +110,11 @@ export function LoadBackupModal({
                 <Block>
                   <Block style={{ marginBottom: 10 }}>
                     <Text style={{ fontWeight: 600 }}>
-                      <Trans>You are currently working from a backup.</Trans>
+                      {t('You are currently working from a backup.')}
                     </Text>{' '}
-                    <Trans>
-                      You can load a different backup or revert to the original
-                      version below.
-                    </Trans>
+                    {t(
+                      'You can load a different backup or revert to the original version below.',
+                    )}
                   </Block>
                   <ButtonWithLoading
                     variant="primary"
@@ -147,22 +147,19 @@ export function LoadBackupModal({
                       }
                     }}
                   >
-                    <Trans>Revert to original version</Trans>
+                    {t('<Trans>Revert to original version')}
                   </ButtonWithLoading>
                 </Block>
               ) : (
                 <View style={{ alignItems: 'flex-start' }}>
                   <Block style={{ marginBottom: 10 }}>
-                    <Trans>
-                      Select a backup to load. After loading a backup, you will
-                      have a chance to revert to the current version in this
-                      screen.
-                    </Trans>{' '}
+                    {t(
+                      'Select a backup to load. After loading a backup, you will have a chance to revert to the current version in this screen.',
+                    )}{' '}
                     <Text style={{ fontWeight: 600 }}>
-                      <Trans>
-                        If you use a backup, you will have to setup all your
-                        devices to sync from the new budget.
-                      </Trans>
+                      {t(
+                        'If you use a backup, you will have to setup all your devices to sync from the new budget.',
+                      )}
                     </Text>
                   </Block>
                   <ButtonWithLoading
@@ -192,14 +189,14 @@ export function LoadBackupModal({
                       }
                     }}
                   >
-                    <Trans>Backup now</Trans>
+                    {t('<Trans>Backup now')}</Trans>
                   </ButtonWithLoading>
                 </View>
               )}
             </View>
             {previousBackups.length === 0 ? (
               <Block style={{ color: theme.tableTextLight, marginLeft: 20 }}>
-                <Trans>No backups available</Trans>
+                {t('No backups available')}
               </Block>
             ) : (
               <BackupTable
