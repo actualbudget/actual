@@ -39,7 +39,7 @@ export function SummaryNumber({
     const offScreenDiv = offScreenRef.current;
     const refDivCurrent = refDiv.current;
 
-    const binarySearchFontSize = (min, max) => {
+    const binarySearchFontSize = (min: number, max: number) => {
       const testFontSize = (min + max) / 2;
       offScreenDiv.style.fontSize = `${testFontSize}px`;
 
