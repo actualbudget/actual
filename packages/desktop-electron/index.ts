@@ -34,8 +34,8 @@ const backend = require('i18next-electron-fs-backend');
 const isDev = !app.isPackaged; // dev mode if not packaged
 
 process.env.lootCoreScript = isDev
-  ? 'loot-core/lib-dist/bundle.desktop.js' // serve from local output in development (provides hot-reloading)
-  : path.resolve(__dirname, 'loot-core/lib-dist/bundle.desktop.js'); // serve from build in production
+  ? 'loot-core/lib-dist/electron/bundle.desktop.js' // serve from local output in development (provides hot-reloading)
+  : path.resolve(__dirname, 'loot-core/lib-dist/electron/bundle.desktop.js'); // serve from build in production
 
 // This allows relative URLs to be resolved to app:// which makes
 // local assets load correctly

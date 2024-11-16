@@ -11,6 +11,7 @@ import React, {
   useEffect,
 } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
+import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 
 import { css } from '@emotion/css';
@@ -50,6 +51,7 @@ import {
 import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { useMergedRefs } from '../../hooks/useMergedRefs';
 import { usePrevious } from '../../hooks/usePrevious';
+import { useProperFocus } from '../../hooks/useProperFocus';
 import { useSelectedDispatch, useSelectedItems } from '../../hooks/useSelected';
 import { useSplitsExpanded } from '../../hooks/useSplitsExpanded';
 import { SvgLeftArrow2, SvgRightArrow2, SvgSplit } from '../../icons/v0';
@@ -179,6 +181,7 @@ const TransactionHeader = memo(
     field,
   }) => {
     const dispatchSelected = useSelectedDispatch();
+    const { t } = useTranslation();
 
     useHotkeys(
       'ctrl+a, cmd+a, meta+a',
@@ -217,7 +220,7 @@ const TransactionHeader = memo(
           }
         />
         <HeaderCell
-          value="Date"
+          value={t('Date')}
           width={110}
           alignItems="flex"
           marginLeft={-5}
@@ -229,7 +232,7 @@ const TransactionHeader = memo(
         />
         {showAccount && (
           <HeaderCell
-            value="Account"
+            value={t('Account')}
             width="flex"
             alignItems="flex"
             marginLeft={-5}
@@ -241,7 +244,7 @@ const TransactionHeader = memo(
           />
         )}
         <HeaderCell
-          value="Payee"
+          value={t('Payee')}
           width="flex"
           alignItems="flex"
           marginLeft={-5}
@@ -252,7 +255,7 @@ const TransactionHeader = memo(
           }
         />
         <HeaderCell
-          value="Notes"
+          value={t('Notes')}
           width="flex"
           alignItems="flex"
           marginLeft={-5}
@@ -264,7 +267,7 @@ const TransactionHeader = memo(
         />
         {showCategory && (
           <HeaderCell
-            value="Category"
+            value={t('Category')}
             width="flex"
             alignItems="flex"
             marginLeft={-5}
@@ -279,7 +282,7 @@ const TransactionHeader = memo(
           />
         )}
         <HeaderCell
-          value="Payment"
+          value={t('Payment')}
           width={100}
           alignItems="flex-end"
           marginRight={-5}
@@ -290,7 +293,7 @@ const TransactionHeader = memo(
           }
         />
         <HeaderCell
-          value="Deposit"
+          value={t('Deposit')}
           width={100}
           alignItems="flex-end"
           marginRight={-5}
@@ -302,7 +305,7 @@ const TransactionHeader = memo(
         />
         {showBalance && (
           <HeaderCell
-            value="Balance"
+            value={t('Balance')}
             width={103}
             alignItems="flex-end"
             marginRight={-5}
@@ -754,11 +757,6 @@ function PayeeIcons({
   onNavigateToSchedule,
 }) {
   const scheduleId = transaction.schedule;
-  const scheduleData = useCachedSchedules();
-  const schedule =
-    scheduleId && scheduleData
-      ? scheduleData.schedules.find(s => s.id === scheduleId)
-      : null;
 
   const buttonStyle = useMemo(
     () => ({
@@ -774,6 +772,14 @@ function PayeeIcons({
   const scheduleIconStyle = useMemo(() => ({ width: 13, height: 13 }), []);
 
   const transferIconStyle = useMemo(() => ({ width: 10, height: 10 }), []);
+
+  const { isLoading, schedules = [] } = useCachedSchedules();
+
+  if (isLoading) {
+    return null;
+  }
+
+  const schedule = scheduleId ? schedules.find(s => s.id === scheduleId) : null;
 
   if (schedule == null && transferAccount == null) {
     // Neither a valid scheduled transaction nor a transfer.
@@ -1720,6 +1726,11 @@ function NewTransaction({
   );
   const emptyChildTransactions = childTransactions.filter(t => t.amount === 0);
 
+  const addButtonRef = useRef(null);
+  useProperFocus(addButtonRef, focusedField === 'add');
+  const cancelButtonRef = useRef(null);
+  useProperFocus(cancelButtonRef, focusedField === 'cancel');
+
   return (
     <View
       style={{
@@ -1781,6 +1792,7 @@ function NewTransaction({
           style={{ marginRight: 10, padding: '4px 10px' }}
           onPress={() => onClose()}
           data-testid="cancel-button"
+          ref={cancelButtonRef}
         >
           Cancel
         </Button>
@@ -1800,6 +1812,7 @@ function NewTransaction({
             style={{ padding: '4px 10px' }}
             onPress={onAdd}
             data-testid="add-button"
+            ref={addButtonRef}
           >
             Add
           </Button>
@@ -2173,10 +2186,14 @@ export const TransactionTable = forwardRef((props, ref) => {
     }
   }, [prevSplitsExpanded.current]);
 
-  const newNavigator = useTableNavigator(newTransactions, getFields);
+  const newNavigator = useTableNavigator(
+    newTransactions,
+    getFieldsNewTransaction,
+  );
+
   const tableNavigator = useTableNavigator(
     transactionsWithExpandedSplits,
-    getFields,
+    getFieldsTableTransaction,
   );
   const shouldAdd = useRef(false);
   const latestState = useRef({ newTransactions, newNavigator, tableNavigator });
@@ -2241,8 +2258,26 @@ export const TransactionTable = forwardRef((props, ref) => {
     savePending.current = false;
   }, [newTransactions, props.transactions]);
 
-  function getFields(item) {
-    let fields = [
+  function getFieldsNewTransaction(item) {
+    const fields = [
+      'select',
+      'date',
+      'account',
+      'payee',
+      'notes',
+      'category',
+      'debit',
+      'credit',
+      'cleared',
+      'cancel',
+      'add',
+    ];
+
+    return getFields(item, fields);
+  }
+
+  function getFieldsTableTransaction(item) {
+    const fields = [
       'select',
       'date',
       'account',
@@ -2254,6 +2289,10 @@ export const TransactionTable = forwardRef((props, ref) => {
       'cleared',
     ];
 
+    return getFields(item, fields);
+  }
+
+  function getFields(item, fields) {
     fields = item.is_child
       ? ['select', 'payee', 'notes', 'category', 'debit', 'credit']
       : fields.filter(

@@ -1,5 +1,7 @@
 import React, { type ComponentPropsWithoutRef } from 'react';
 
+import { t } from 'i18next';
+
 import { useAccounts } from '../../hooks/useAccounts';
 import { useNavigate } from '../../hooks/useNavigate';
 import { usePayees } from '../../hooks/usePayees';
@@ -51,7 +53,7 @@ export function PayeeAutocompleteModal({
             <ModalHeader
               title={
                 <ModalTitle
-                  title="Payee"
+                  title={t('Payee')}
                   getStyle={() => ({ color: theme.menuAutoCompleteText })}
                 />
               }

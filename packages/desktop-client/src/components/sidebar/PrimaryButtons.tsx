@@ -39,7 +39,7 @@ export function PrimaryButtons() {
       <Item title={t('Reports')} Icon={SvgReports} to="/reports" />
       <Item title={t('Schedules')} Icon={SvgCalendar} to="/schedules" />
       <Item
-        title="More"
+        title={t('More')}
         Icon={isOpen ? SvgCheveronDown : SvgCheveronRight}
         onClick={onToggle}
         style={{ marginBottom: isOpen ? 8 : 0 }}

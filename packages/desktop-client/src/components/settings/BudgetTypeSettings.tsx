@@ -1,5 +1,7 @@
 import React from 'react';
 
+import { t } from 'i18next';
+
 import { useSyncedPref } from '../../hooks/useSyncedPref';
 import { Button } from '../common/Button2';
 import { Link } from '../common/Link';
@@ -34,7 +36,7 @@ export function BudgetTypeSettings() {
           to="https://actualbudget.org/docs/getting-started/envelope-budgeting"
           linkColor="purple"
         >
-          Learn more…
+          {t('Learn more…')}
         </Link>
       </Text>
       <Text>
@@ -47,7 +49,7 @@ export function BudgetTypeSettings() {
           to="https://actualbudget.org/docs/experimental/tracking-budget"
           linkColor="purple"
         >
-          Learn more…
+          {t('Learn more…')}
         </Link>
       </Text>
     </Setting>

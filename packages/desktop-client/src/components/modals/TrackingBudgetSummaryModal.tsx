@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { sheetForMonth } from 'loot-core/src/shared/months';
 import * as monthUtils from 'loot-core/src/shared/months';
@@ -18,13 +19,14 @@ type TrackingBudgetSummaryModalProps = {
 export function TrackingBudgetSummaryModal({
   month,
 }: TrackingBudgetSummaryModalProps) {
+  const { t } = useTranslation();
   const currentMonth = monthUtils.currentMonth();
   return (
     <Modal name="tracking-budget-summary">
       {({ state: { close } }) => (
         <>
           <ModalHeader
-            title="Budget Summary"
+            title={t('Budget Summary')}
             rightContent={<ModalCloseButton onPress={close} />}
           />
           <NamespaceContext.Provider value={sheetForMonth(month)}>
