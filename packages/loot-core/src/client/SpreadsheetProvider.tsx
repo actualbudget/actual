@@ -62,9 +62,13 @@ function makeSpreadsheet() {
       });
     }
 
-    bind(sheetName = '__global', binding, fields, cb) {
+    bind(sheetName = '__global', binding, cb) {
       binding =
         typeof binding === 'string' ? { name: binding, value: null } : binding;
+
+      if (binding.query) {
+        this.createQuery(sheetName, binding.name, binding.query);
+      }
 
       const resolvedName = `${sheetName}!${binding.name}`;
       const cleanup = this.observeCell(resolvedName, cb);

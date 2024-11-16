@@ -1,4 +1,4 @@
-import { useState, useRef, useLayoutEffect } from 'react';
+import { useState, useRef, useLayoutEffect, useMemo } from 'react';
 
 import { type Query } from 'loot-core/shared/query';
 import { useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
@@ -30,17 +30,25 @@ export function useSheetValue<
 ): SheetValueResult<SheetName, FieldName>['value'] {
   const { sheetName, fullSheetName } = useSheetName(binding);
 
-  const bindingObj =
-    typeof binding === 'string'
-      ? { name: binding, value: null, query: undefined }
-      : binding;
+  const bindingObj = useMemo(
+    () =>
+      typeof binding === 'string'
+        ? { name: binding, value: null, query: undefined }
+        : binding,
+    [binding],
+  );
+
+  const initialResult = useMemo(
+    () => ({
+      name: fullSheetName,
+      value: bindingObj.value === undefined ? null : bindingObj.value,
+      query: bindingObj.query,
+    }),
+    [fullSheetName, bindingObj.value, bindingObj.query],
+  );
 
   const spreadsheet = useSpreadsheet();
-  const [result, setResult] = useState<SheetValueResult<SheetName, FieldName>>({
-    name: fullSheetName,
-    value: bindingObj.value === undefined ? null : bindingObj.value,
-    query: bindingObj.query,
-  });
+  const [result, setResult] = useState<SheetValueResult<SheetName, FieldName>>(initialResult);
   const latestOnChange = useRef(onChange);
   latestOnChange.current = onChange;
 
@@ -48,14 +56,9 @@ export function useSheetValue<
   latestValue.current = result.value;
 
   useLayoutEffect(() => {
-    if (bindingObj.query) {
-      spreadsheet.createQuery(sheetName, bindingObj.name, bindingObj.query);
-    }
-
     return spreadsheet.bind(
       sheetName,
-      binding,
-      null,
+      bindingObj,
       (newResult: SheetValueResult<SheetName, FieldName>) => {
         if (latestOnChange.current) {
           latestOnChange.current(newResult);
