@@ -110,6 +110,20 @@ function generateTransactions(count, splitAtIndexes = [], showError = false) {
   return transactions;
 }
 
+// This is needed because useSelected needs redux access.
+// This provider needs to be a child of the redux TestProvider.
+function TestSelectedProvider({ transactions, children }) {
+  const selectedInst = useSelected('transactions', transactions);
+  return (
+    <SelectedProvider
+      instance={selectedInst}
+      fetchAllIds={() => transactions.map(t => t.id)}
+    >
+      {children}
+    </SelectedProvider>
+  );
+}
+
 function LiveTransactionTable(props) {
   const [transactions, setTransactions] = useState(props.transactions);
 
@@ -142,8 +156,6 @@ function LiveTransactionTable(props) {
 
   const onCreatePayee = () => 'id';
 
-  const selectedInst = useSelected('transactions', transactions);
-
   // It's important that these functions are they same instances
   // across renders. Doing so tests that the transaction table
   // implementation properly uses the right latest state even if the
@@ -154,10 +166,7 @@ function LiveTransactionTable(props) {
         <AuthProvider>
           <SpreadsheetProvider>
             <SchedulesProvider>
-              <SelectedProvider
-                instance={selectedInst}
-                fetchAllIds={() => transactions.map(t => t.id)}
-              >
+              <TestSelectedProvider>
                 <SplitsExpandedProvider>
                   <TransactionTable
                     {...props}
@@ -173,7 +182,7 @@ function LiveTransactionTable(props) {
                     onCreatePayee={onCreatePayee}
                   />
                 </SplitsExpandedProvider>
-              </SelectedProvider>
+              </TestSelectedProvider>
             </SchedulesProvider>
           </SpreadsheetProvider>
         </AuthProvider>
