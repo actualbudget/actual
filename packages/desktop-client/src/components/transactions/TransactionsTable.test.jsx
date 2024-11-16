@@ -164,7 +164,7 @@ function LiveTransactionTable(props) {
       <ResponsiveProvider>
         <SpreadsheetProvider>
           <SchedulesProvider>
-            <TestSelectedProvider>
+            <TestSelectedProvider transactions={transactions}>
               <SplitsExpandedProvider>
                 <TransactionTable
                   {...props}
