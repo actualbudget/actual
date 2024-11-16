@@ -22,7 +22,7 @@ import {
 } from 'loot-core/src/shared/transactions';
 import { integerToCurrency } from 'loot-core/src/shared/util';
 
-import { SelectedProviderWithItems } from '../../hooks/useSelected';
+import { SelectedProvider, useSelected } from '../../hooks/useSelected';
 import { SplitsExpandedProvider } from '../../hooks/useSplitsExpanded';
 import { ResponsiveProvider } from '../responsive/ResponsiveProvider';
 
@@ -141,6 +141,8 @@ function LiveTransactionTable(props) {
 
   const onCreatePayee = () => 'id';
 
+  const selectedInst = useSelected('transactions', transactions);
+
   // It's important that these functions are they same instances
   // across renders. Doing so tests that the transaction table
   // implementation properly uses the right latest state even if the
@@ -150,9 +152,8 @@ function LiveTransactionTable(props) {
       <ResponsiveProvider>
         <SpreadsheetProvider>
           <SchedulesProvider>
-            <SelectedProviderWithItems
-              name="transactions"
-              items={transactions}
+            <SelectedProvider
+              instance={selectedInst}
               fetchAllIds={() => transactions.map(t => t.id)}
             >
               <SplitsExpandedProvider>
@@ -170,7 +171,7 @@ function LiveTransactionTable(props) {
                   onCreatePayee={onCreatePayee}
                 />
               </SplitsExpandedProvider>
-            </SelectedProviderWithItems>
+            </SelectedProvider>
           </SchedulesProvider>
         </SpreadsheetProvider>
       </ResponsiveProvider>

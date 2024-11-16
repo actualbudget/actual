@@ -128,13 +128,22 @@ function FilteredBalance({ filteredBalance }) {
 function MoreBalances({ accountId, balanceQuery }) {
   const { t } = useTranslation();
 
+  const clearedQuery = useMemo(
+    () => balanceQuery?.filter({ cleared: true }),
+    [balanceQuery],
+  );
   const cleared = useSheetValue({
     name: `balance-query-${accountId}-cleared`,
-    query: balanceQuery?.filter({ cleared: true }),
+    query: clearedQuery,
   });
+
+  const unclearedQuery = useMemo(
+    () => balanceQuery?.filter({ cleared: false }),
+    [balanceQuery],
+  );
   const uncleared = useSheetValue({
     name: `balance-query-${accountId}-uncleared`,
-    query: balanceQuery?.filter({ cleared: false }),
+    query: unclearedQuery,
   });
 
   return (
