@@ -2,6 +2,7 @@ import React, { useState, type ReactNode, type CSSProperties } from 'react';
 import { useLocation } from 'react-router-dom';
 
 import { css } from '@emotion/css';
+import { t } from 'i18next';
 
 import { theme } from '../../style';
 import { tokens } from '../../tokens';
@@ -73,7 +74,7 @@ export const AdvancedToggle = ({ children }: AdvancedToggleProps) => {
       }}
     >
       <View style={{ fontSize: 20, fontWeight: 500, flexShrink: 0 }}>
-        Advanced Settings
+        {t('Advanced Settings')}
       </View>
       {children}
     </View>
@@ -89,7 +90,7 @@ export const AdvancedToggle = ({ children }: AdvancedToggleProps) => {
         marginBottom: 25,
       }}
     >
-      Show advanced settings
+      {t('Show advanced settings')}
     </Link>
   );
 };

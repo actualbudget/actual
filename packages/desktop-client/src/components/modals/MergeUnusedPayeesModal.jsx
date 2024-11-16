@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
+import { t } from 'i18next';
+
 import { replaceModal } from 'loot-core/src/client/actions/modals';
 import { send } from 'loot-core/src/platform/client/fetch';
 
@@ -112,8 +114,9 @@ export function MergeUnusedPayeesModal({ payeeIds, targetPayeeId }) {
             </Paragraph>
 
             <Information>
-              Merging will remove the payee and transfer any existing rules to
-              the new payee.
+              {t(
+                'Merging will remove the payee and transfer any existing rules to the new payee.',
+              )}
               {!isEditingRule && (
                 <>
                   {' '}
@@ -158,7 +161,7 @@ export function MergeUnusedPayeesModal({ payeeIds, targetPayeeId }) {
                   close();
                 }}
               >
-                Merge
+                {t('Merge')}
               </Button>
               {!isEditingRule && (
                 <Button
@@ -168,11 +171,11 @@ export function MergeUnusedPayeesModal({ payeeIds, targetPayeeId }) {
                     close();
                   }}
                 >
-                  Merge and edit rule
+                  {t('Merge and edit rule')}
                 </Button>
               )}
               <Button style={{ marginRight: 10 }} onPress={close}>
-                Do nothing
+                {t('Do nothing')}
               </Button>
             </ModalButtons>
           </View>
