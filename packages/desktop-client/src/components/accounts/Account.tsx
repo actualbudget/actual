@@ -1708,7 +1708,7 @@ function AccountTransactions({
 export function Account() {
   const params = useParams();
   const location = useLocation();
-  const [expandSplits] = useLocalPref('expand-splits');
+  const [expandSplits = true] = useLocalPref('expand-splits');
 
   const schedulesQuery = useMemo(
     () => accountSchedulesQuery(params.id),
