@@ -38,18 +38,12 @@ export function useSheetValue<
     [binding],
   );
 
-  const initialResult = useMemo(
-    () => ({
-      name: fullSheetName,
-      value: bindingObj.value === undefined ? null : bindingObj.value,
-      query: bindingObj.query,
-    }),
-    [fullSheetName, bindingObj.value, bindingObj.query],
-  );
-
   const spreadsheet = useSpreadsheet();
-  const [result, setResult] =
-    useState<SheetValueResult<SheetName, FieldName>>(initialResult);
+  const [result, setResult] = useState<SheetValueResult<SheetName, FieldName>>({
+    name: fullSheetName,
+    value: bindingObj.value ? bindingObj.value : null,
+    query: bindingObj.query,
+  });
   const latestOnChange = useRef(onChange);
   latestOnChange.current = onChange;
 
@@ -81,7 +75,13 @@ export function useSheetValue<
       isMounted = false;
       unbind();
     };
-  }, [spreadsheet, sheetName, bindingObj]);
+  }, [
+    spreadsheet,
+    sheetName,
+    bindingObj.name,
+    bindingObj.value,
+    bindingObj.query ? JSON.stringify(bindingObj.query.serialize()) : null,
+  ]);
 
   return result.value;
 }
