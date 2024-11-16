@@ -512,22 +512,8 @@ handlers['make-filters-from-conditions'] = async function ({ conditions }) {
 };
 
 handlers['getCell'] = async function ({ sheetName, name }) {
-  // Fields is no longer used - hardcode
-  const fields = ['name', 'value'];
   const node = sheet.get()._getNode(resolveName(sheetName, name));
-  if (fields) {
-    const res = {};
-    fields.forEach(field => {
-      if (field === 'run') {
-        res[field] = node._run ? node._run.toString() : null;
-      } else {
-        res[field] = node[field];
-      }
-    });
-    return res;
-  } else {
-    return node;
-  }
+  return { name: node.name, value: node.value };
 };
 
 handlers['getCells'] = async function ({ names }) {
@@ -1107,7 +1093,7 @@ handlers['accounts-bank-sync'] = async function ({ ids = [] }) {
 
   const accounts = await db.runQuery(
     `
-    SELECT a.*, b.bank_id as bankId 
+    SELECT a.*, b.bank_id as bankId
     FROM accounts a
     LEFT JOIN banks b ON a.bank = b.id
     WHERE a.tombstone = 0 AND a.closed = 0

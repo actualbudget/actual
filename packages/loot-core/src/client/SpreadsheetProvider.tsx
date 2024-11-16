@@ -62,7 +62,7 @@ function makeSpreadsheet() {
       });
     }
 
-    bind(sheetName = '__global', binding, cb) {
+    bind(sheetName = '__global', binding, callback) {
       binding =
         typeof binding === 'string' ? { name: binding, value: null } : binding;
 
@@ -71,17 +71,17 @@ function makeSpreadsheet() {
       }
 
       const resolvedName = `${sheetName}!${binding.name}`;
-      const cleanup = this.observeCell(resolvedName, cb);
+      const cleanup = this.observeCell(resolvedName, callback);
 
       // Always synchronously call with the existing value if it has one.
       // This is a display optimization to avoid flicker. The LRU cache
       // will keep a number of recent nodes in memory.
       if (LRUValueCache.has(resolvedName)) {
-        cb(LRUValueCache.get(resolvedName));
+        callback(LRUValueCache.get(resolvedName));
       }
 
       if (cellCache[resolvedName] != null) {
-        cellCache[resolvedName].then(cb);
+        cellCache[resolvedName].then(callback);
       } else {
         const req = this.get(sheetName, binding.name);
         cellCache[resolvedName] = req;
@@ -94,7 +94,7 @@ function makeSpreadsheet() {
           // with an old value depending on the order of messages)
           if (cellCache[resolvedName] === req) {
             LRUValueCache.set(resolvedName, result);
-            cb(result);
+            callback(result);
           }
         });
       }

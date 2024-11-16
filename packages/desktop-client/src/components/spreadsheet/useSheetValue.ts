@@ -57,10 +57,16 @@ export function useSheetValue<
   latestValue.current = result.value;
 
   useLayoutEffect(() => {
-    return spreadsheet.bind(
+    let isMounted = true;
+
+    const unbind = spreadsheet.bind(
       sheetName,
       bindingObj,
       (newResult: SheetValueResult<SheetName, FieldName>) => {
+        if (!isMounted) {
+          return;
+        }
+
         if (latestOnChange.current) {
           latestOnChange.current(newResult);
         }
@@ -70,7 +76,12 @@ export function useSheetValue<
         }
       },
     );
-  }, [sheetName, bindingObj.name, JSON.stringify(bindingObj.query)]);
+
+    return () => {
+      isMounted = false;
+      unbind();
+    };
+  }, [spreadsheet, sheetName, bindingObj]);
 
   return result.value;
 }
