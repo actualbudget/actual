@@ -815,7 +815,7 @@ type SelectedItemsButtonProps<Name extends string> = {
   name: ((count: number) => string) | string;
   items: MenuItem<Name>[];
   onSelect: (name: Name, items: string[]) => void;
-  isLoading: boolean;
+  isLoading?: boolean;
 };
 
 export function SelectedItemsButton<Name extends string>({

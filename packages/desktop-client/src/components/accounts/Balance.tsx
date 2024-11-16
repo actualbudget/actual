@@ -150,16 +150,25 @@ type MoreBalancesProps = {
 function MoreBalances({ accountId, balanceQuery }: MoreBalancesProps) {
   const { t } = useTranslation();
 
+  const clearedQuery = useMemo(
+    () => balanceQuery.filter({ cleared: true }),
+    [balanceQuery],
+  );
   const cleared = useSheetValue<'balance', `balance-query-${string}-cleared`>({
     name: `balance-query-${accountId}-cleared`,
-    query: balanceQuery.filter({ cleared: true }),
+    query: clearedQuery,
   });
+
+  const unclearedQuery = useMemo(
+    () => balanceQuery.filter({ cleared: false }),
+    [balanceQuery],
+  );
   const uncleared = useSheetValue<
     'balance',
     `balance-query-${string}-uncleared`
   >({
     name: `balance-query-${accountId}-uncleared`,
-    query: balanceQuery.filter({ cleared: false }),
+    query: unclearedQuery,
   });
 
   return (

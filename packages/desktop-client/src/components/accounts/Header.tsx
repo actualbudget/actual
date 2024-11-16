@@ -4,6 +4,8 @@ import React, {
   Fragment,
   type ReactNode,
   type ComponentProps,
+  useCallback,
+  useMemo,
 } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { Trans, useTranslation } from 'react-i18next';
@@ -260,6 +262,19 @@ export function AccountHeader({
     [onSync],
   );
 
+  const onSearchChange = useCallback(
+    (search: string) => {
+      setSearch(search);
+      onSearch?.(search);
+    },
+    [onSearch],
+  );
+
+  const transactionsMap = useMemo(
+    () => new Map(transactions.map(t => [t.id, t])),
+    [transactions],
+  );
+
   return (
     <>
       <View style={{ ...styles.pageContent, paddingBottom: 10, flexShrink: 0 }}>
@@ -351,15 +366,12 @@ export function AccountHeader({
           <Search
             placeholder={t('Search')}
             value={search}
-            onChange={search => {
-              setSearch(search);
-              onSearch?.(search);
-            }}
+            onChange={onSearchChange}
             inputRef={searchInput}
           />
           <SelectedTransactionsButton
             isLoading={isLoading}
-            getTransaction={id => transactions.find(t => t.id === id)}
+            getTransaction={id => transactionsMap.get(id)}
             onShow={onShowTransactions}
             onDuplicate={onBatchDuplicate}
             onDelete={onBatchDelete}
