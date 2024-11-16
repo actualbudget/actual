@@ -48,7 +48,8 @@ export function useSheetValue<
   );
 
   const spreadsheet = useSpreadsheet();
-  const [result, setResult] = useState<SheetValueResult<SheetName, FieldName>>(initialResult);
+  const [result, setResult] =
+    useState<SheetValueResult<SheetName, FieldName>>(initialResult);
   const latestOnChange = useRef(onChange);
   latestOnChange.current = onChange;
 
