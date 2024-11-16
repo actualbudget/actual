@@ -146,7 +146,7 @@ export function LoadBackupModal({
                       }
                     }}
                   >
-                    {t('<Trans>Revert to original version')}
+                    {t('Revert to original version')}
                   </ButtonWithLoading>
                 </Block>
               ) : (
@@ -188,7 +188,7 @@ export function LoadBackupModal({
                       }
                     }}
                   >
-                    {t('<Trans>Backup now')}
+                    {t('Backup now')}
                   </ButtonWithLoading>
                 </View>
               )}
