@@ -500,7 +500,10 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
           if (file && 'id' in file) {
             dispatch(pushModal('duplicate-budget', { file, managePage: true }));
           } else {
-            console.error('Attempted to duplicate an invalid file:', file);
+            console.error(
+              'Attempted to duplicate a cloud file - only local files are supported. Cloud file:',
+              file,
+            );
           }
         }}
       />
