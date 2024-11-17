@@ -61,7 +61,7 @@ export type dateRangeProps = {
 
 const dateRangeOptions: dateRangeProps[] = [
   {
-    description: t('This week'),
+    description: 'This week',
     name: 0,
     type: 'Week',
     Daily: true,
@@ -70,7 +70,7 @@ const dateRangeOptions: dateRangeProps[] = [
     Yearly: false,
   },
   {
-    description: t('Last week'),
+    description: 'Last week',
     name: 1,
     type: 'Week',
     Daily: true,
@@ -79,7 +79,7 @@ const dateRangeOptions: dateRangeProps[] = [
     Yearly: false,
   },
   {
-    description: t('This month'),
+    description: 'This month',
     name: 0,
     type: 'Month',
     Daily: true,
@@ -88,7 +88,7 @@ const dateRangeOptions: dateRangeProps[] = [
     Yearly: false,
   },
   {
-    description: t('Last month'),
+    description: 'Last month',
     name: 1,
     type: 'Month',
     Daily: true,
@@ -97,7 +97,7 @@ const dateRangeOptions: dateRangeProps[] = [
     Yearly: false,
   },
   {
-    description: t('Last 3 months'),
+    description: 'Last 3 months',
     name: 3,
     type: 'Month',
     Daily: true,
@@ -106,7 +106,7 @@ const dateRangeOptions: dateRangeProps[] = [
     Yearly: false,
   },
   {
-    description: t('Last 6 months'),
+    description: 'Last 6 months',
     name: 6,
     type: 'Month',
     Daily: false,
@@ -115,7 +115,7 @@ const dateRangeOptions: dateRangeProps[] = [
     Yearly: false,
   },
   {
-    description: t('Last 12 months'),
+    description: 'Last 12 months',
     name: 12,
     type: 'Month',
     Daily: false,
@@ -124,7 +124,7 @@ const dateRangeOptions: dateRangeProps[] = [
     Yearly: false,
   },
   {
-    description: t('Year to date'),
+    description: 'Year to date',
     name: 'yearToDate',
     type: 'Month',
     Daily: false,
@@ -133,7 +133,7 @@ const dateRangeOptions: dateRangeProps[] = [
     Yearly: true,
   },
   {
-    description: t('Last year'),
+    description: 'Last year',
     name: 'lastYear',
     type: 'Month',
     Daily: false,
@@ -142,7 +142,7 @@ const dateRangeOptions: dateRangeProps[] = [
     Yearly: true,
   },
   {
-    description: t('All time'),
+    description: 'All time',
     name: 'allTime',
     type: 'Month',
     Daily: false,
@@ -245,19 +245,19 @@ export type UncategorizedEntity = Pick<
 
 const uncategorizedCategory: UncategorizedEntity = {
   id: '',
-  name: 'Uncategorized',
+  name: t('Uncategorized'),
   uncategorized_id: 'other',
   hidden: false,
 };
 const transferCategory: UncategorizedEntity = {
   id: '',
-  name: 'Transfers',
+  name: t('Transfers'),
   uncategorized_id: 'transfer',
   hidden: false,
 };
 const offBudgetCategory: UncategorizedEntity = {
   id: '',
-  name: 'Off Budget',
+  name: t('Off Budget'),
   uncategorized_id: 'off_budget',
   hidden: false,
 };
