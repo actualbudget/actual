@@ -2,9 +2,9 @@ export type FeatureFlag =
   | 'dashboards'
   | 'reportBudget'
   | 'goalTemplatesEnabled'
-  | 'spendingReport'
   | 'actionTemplating'
-  | 'upcomingLengthAdjustment';
+  | 'upcomingLengthAdjustment'
+  | 'contextMenus';
 
 /**
  * Cross-device preferences. These sync across devices when they are changed.

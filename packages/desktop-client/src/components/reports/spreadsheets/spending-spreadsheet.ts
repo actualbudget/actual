@@ -194,7 +194,11 @@ export function createSpendingSpreadsheet({
               }
               return null;
             });
-            if (month.month >= startDate && month.month < compare) {
+
+            if (
+              month.month >= monthUtils.monthFromDate(startDate) &&
+              month.month < compare
+            ) {
               if (day === '28') {
                 if (monthUtils.getMonthEnd(intervalItem) === intervalItem) {
                   averageSum += cumulativeAssets + cumulativeDebts;
@@ -223,7 +227,7 @@ export function createSpendingSpreadsheet({
           return arr;
         }, []);
         const maxCumulative = data.reduce((a, b) =>
-          a.cumulative < b.cumulative ? a : b,
+          b.cumulative === null ? a : b,
         ).cumulative;
 
         const totalDaily = data.reduce((a, v) => (a = a + v.totalTotals), 0);

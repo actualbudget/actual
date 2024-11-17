@@ -22,7 +22,6 @@ import {
 import { useAccounts } from '../../hooks/useAccounts';
 import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { useNavigate } from '../../hooks/useNavigate';
-import { useResponsive } from '../../ResponsiveProvider';
 import { breakpoints } from '../../tokens';
 import { Button } from '../common/Button2';
 import { Menu } from '../common/Menu';
@@ -31,6 +30,7 @@ import { Popover } from '../common/Popover';
 import { View } from '../common/View';
 import { MOBILE_NAV_HEIGHT } from '../mobile/MobileNavTabs';
 import { MobilePageHeader, Page, PageHeader } from '../Page';
+import { useResponsive } from '../responsive/ResponsiveProvider';
 
 import { NON_DRAGGABLE_AREA_CLASS_NAME } from './constants';
 import { LoadingIndicator } from './LoadingIndicator';
@@ -80,7 +80,6 @@ export function Overview() {
   sessionStorage.setItem('url', location.pathname);
 
   const isDashboardsFeatureEnabled = useFeatureFlag('dashboards');
-  const spendingReportFeatureFlag = useFeatureFlag('spendingReport');
 
   const baseLayout = widgets
     .map(widget => ({
@@ -103,25 +102,7 @@ export function Overview() {
       return true;
     });
 
-  const layout =
-    spendingReportFeatureFlag &&
-    !isDashboardsFeatureEnabled &&
-    !baseLayout.find(({ type }) => type === 'spending-card')
-      ? [
-          ...baseLayout,
-          {
-            i: 'spending',
-            type: 'spending-card' as const,
-            x: 0,
-            y: Math.max(...baseLayout.map(({ y }) => y), 0) + 2,
-            w: 4,
-            h: 2,
-            minW: 3,
-            minH: 2,
-            meta: null,
-          },
-        ]
-      : baseLayout;
+  const layout = baseLayout;
 
   const closeNotifications = () => {
     dispatch(removeNotification('import'));
@@ -407,14 +388,10 @@ export function Overview() {
                               name: 'net-worth-card' as const,
                               text: t('Net worth graph'),
                             },
-                            ...(spendingReportFeatureFlag
-                              ? [
-                                  {
-                                    name: 'spending-card' as const,
-                                    text: t('Spending analysis'),
-                                  },
-                                ]
-                              : []),
+                            {
+                              name: 'spending-card' as const,
+                              text: t('Spending analysis'),
+                            },
                             {
                               name: 'markdown-card' as const,
                               text: t('Text widget'),

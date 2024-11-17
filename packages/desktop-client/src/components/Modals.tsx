@@ -1,5 +1,6 @@
 // @ts-strict-ignore
 import React, { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 
@@ -35,6 +36,7 @@ import { EnvelopeBudgetMonthMenuModal } from './modals/EnvelopeBudgetMonthMenuMo
 import { EnvelopeBudgetSummaryModal } from './modals/EnvelopeBudgetSummaryModal';
 import { EnvelopeToBudgetMenuModal } from './modals/EnvelopeToBudgetMenuModal';
 import { FixEncryptionKeyModal } from './modals/FixEncryptionKeyModal';
+import { GoalTemplateModal } from './modals/GoalTemplateModal';
 import { GoCardlessExternalMsgModal } from './modals/GoCardlessExternalMsgModal';
 import { GoCardlessInitialiseModal } from './modals/GoCardlessInitialiseModal';
 import { HoldBufferModal } from './modals/HoldBufferModal';
@@ -80,9 +82,14 @@ export function Modals() {
     }
   }, [location]);
 
+  const { t } = useTranslation();
+
   const modals = modalStack
     .map(({ name, options }) => {
       switch (name) {
+        case 'goal-templates':
+          return budgetId ? <GoalTemplateModal key={name} /> : null;
+
         case 'keyboard-shortcuts':
           // don't show the hotkey help modal when a budget is not open
           return budgetId ? <KeyboardShortcutModal key={name} /> : null;
@@ -283,10 +290,12 @@ export function Modals() {
               Header={props => (
                 <ModalHeader
                   {...props}
-                  title={<ModalTitle title="New Category" shrinkOnOverflow />}
+                  title={
+                    <ModalTitle title={t('New Category')} shrinkOnOverflow />
+                  }
                 />
               )}
-              inputPlaceholder="Category name"
+              inputPlaceholder={t('Category name')}
               buttonText="Add"
               onValidate={options.onValidate}
               onSubmit={options.onSubmit}
@@ -302,12 +311,15 @@ export function Modals() {
                 <ModalHeader
                   {...props}
                   title={
-                    <ModalTitle title="New Category Group" shrinkOnOverflow />
+                    <ModalTitle
+                      title={t('New Category Group')}
+                      shrinkOnOverflow
+                    />
                   }
                 />
               )}
-              inputPlaceholder="Category group name"
-              buttonText="Add"
+              inputPlaceholder={t('Category group name')}
+              buttonText={t('Add')}
               onValidate={options.onValidate}
               onSubmit={options.onSubmit}
             />

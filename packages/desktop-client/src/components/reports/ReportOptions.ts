@@ -234,49 +234,32 @@ export type QueryDataEntity = {
   amount: number;
 };
 
+type UncategorizedId = 'off_budget' | 'transfer' | 'other' | 'all';
+
 export type UncategorizedEntity = Pick<
   CategoryEntity,
-  'id' | 'name' | 'hidden'
+  'id' | 'name' | 'hidden' | 'cat_group'
 > & {
-  /*
-    When looking at uncategorized and hidden transactions we
-    need a way to group them. To do this we give them a unique
-    uncategorized_id. We also need a way to filter the
-    transctions from our query. For this we use the 3 variables
-    below.
-  */
-  uncategorized_id?: string;
-  is_off_budget?: boolean;
-  is_transfer?: boolean;
-  has_category?: boolean;
+  uncategorized_id?: UncategorizedId;
 };
 
 const uncategorizedCategory: UncategorizedEntity = {
   id: '',
-  name: t('Uncategorized'),
-  uncategorized_id: '1',
+  name: 'Uncategorized',
+  uncategorized_id: 'other',
   hidden: false,
-  is_off_budget: false,
-  is_transfer: false,
-  has_category: false,
 };
 const transferCategory: UncategorizedEntity = {
   id: '',
-  name: t('Transfers'),
-  uncategorized_id: '2',
+  name: 'Transfers',
+  uncategorized_id: 'transfer',
   hidden: false,
-  is_off_budget: false,
-  is_transfer: true,
-  has_category: false,
 };
 const offBudgetCategory: UncategorizedEntity = {
   id: '',
-  name: t('Off Budget'),
-  uncategorized_id: '3',
+  name: 'Off Budget',
+  uncategorized_id: 'off_budget',
   hidden: false,
-  is_off_budget: true,
-  is_transfer: false,
-  has_category: true,
 };
 
 type UncategorizedGroupEntity = Pick<
@@ -284,12 +267,14 @@ type UncategorizedGroupEntity = Pick<
   'name' | 'id' | 'hidden'
 > & {
   categories?: UncategorizedEntity[];
+  uncategorized_id?: UncategorizedId;
 };
 
 const uncategorizedGroup: UncategorizedGroupEntity = {
   name: t('Uncategorized & Off Budget'),
   id: 'uncategorized',
   hidden: false,
+  uncategorized_id: 'all',
   categories: [uncategorizedCategory, transferCategory, offBudgetCategory],
 };
 
@@ -344,7 +329,12 @@ export const groupBySelections = (
       break;
     case 'Group':
       groupByList = categoryGroup.map(group => {
-        return { id: group.id, name: group.name, hidden: group.hidden };
+        return {
+          ...group,
+          id: group.id,
+          name: group.name,
+          hidden: group.hidden,
+        };
       });
       groupByLabel = 'categoryGroup';
       break;

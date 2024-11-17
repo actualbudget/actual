@@ -102,8 +102,7 @@ export function ScheduleDetails({ id, transaction }) {
             fields: {
               payee: schedule._payee,
               account: schedule._account,
-              // defalut to a non-zero value so the sign can be changed before the value
-              amount: schedule._amount || -1000,
+              amount: schedule._amount || 0,
               amountOp: schedule._amountOp || 'isapprox',
               date: schedule._date,
               posts_transaction: action.schedule.posts_transaction,
@@ -298,7 +297,10 @@ export function ScheduleDetails({ id, transaction }) {
           .filter({ schedule: state.schedule.id })
           .select('*')
           .options({ splits: 'all' }),
-        data => dispatch({ type: 'set-transactions', transactions: data }),
+        {
+          onData: data =>
+            dispatch({ type: 'set-transactions', transactions: data }),
+        },
       );
       return live.unsubscribe;
     }
@@ -338,7 +340,10 @@ export function ScheduleDetails({ id, transaction }) {
               .filter({ $and: filters })
               .select('*')
               .options({ splits: 'all' }),
-            data => dispatch({ type: 'set-transactions', transactions: data }),
+            {
+              onData: data =>
+                dispatch({ type: 'set-transactions', transactions: data }),
+            },
           );
           unsubscribe = live.unsubscribe;
         }

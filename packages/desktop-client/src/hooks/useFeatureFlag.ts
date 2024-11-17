@@ -5,10 +5,10 @@ import { useSyncedPref } from './useSyncedPref';
 const DEFAULT_FEATURE_FLAG_STATE: Record<FeatureFlag, boolean> = {
   reportBudget: false,
   goalTemplatesEnabled: false,
-  spendingReport: false,
   dashboards: false,
   actionTemplating: false,
   upcomingLengthAdjustment: false,
+  contextMenus: false,
 };
 
 export function useFeatureFlag(name: FeatureFlag): boolean {

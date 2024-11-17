@@ -42,7 +42,7 @@ function useAvailableBanks(country: string) {
 
       const { data, error } = await sendCatch('gocardless-get-banks', country);
 
-      if (error) {
+      if (error || !Array.isArray(data)) {
         setIsError(true);
         setBanks([]);
       } else {

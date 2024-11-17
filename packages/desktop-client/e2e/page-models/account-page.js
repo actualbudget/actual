@@ -30,6 +30,10 @@ export class AccountPage {
     this.selectTooltip = this.page.getByTestId('transactions-select-tooltip');
   }
 
+  async waitFor() {
+    await this.transactionTable.waitFor();
+  }
+
   /**
    * Enter details of a transaction
    */

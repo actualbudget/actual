@@ -3,13 +3,14 @@ import React, { useEffect, useRef, type CSSProperties } from 'react';
 import ReactMarkdown from 'react-markdown';
 
 import { css } from '@emotion/css';
+import { t } from 'i18next';
 import remarkGfm from 'remark-gfm';
 
-import { useResponsive } from '../ResponsiveProvider';
 import { theme } from '../style';
 import { remarkBreaks, sequentialNewlinesPlugin } from '../util/markdown';
 
 import { Text } from './common/Text';
+import { useResponsive } from './responsive/ResponsiveProvider';
 
 const remarkPlugins = [sequentialNewlinesPlugin, remarkGfm, remarkBreaks];
 
@@ -122,7 +123,7 @@ export function Notes({
       value={notes || ''}
       onChange={e => onChange?.(e.target.value)}
       onBlur={e => onBlur?.(e.target.value)}
-      placeholder="Notes (markdown supported)"
+      placeholder={t('Notes (markdown supported)')}
     />
   ) : (
     <Text className={css([markdownStyles, getStyle?.(editable)])}>

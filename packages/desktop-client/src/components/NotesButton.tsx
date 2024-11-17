@@ -6,6 +6,8 @@ import React, {
   type CSSProperties,
 } from 'react';
 
+import { t } from 'i18next';
+
 import { send } from 'loot-core/src/platform/client/fetch';
 
 import { useNotes } from '../hooks/useNotes';
@@ -59,7 +61,7 @@ export function NotesButton({
         <Button
           ref={triggerRef}
           variant="bare"
-          aria-label="View notes"
+          aria-label={t('View notes')}
           className={!hasNotes && !isOpen ? 'hover-visible' : ''}
           style={{
             color: defaultColor,

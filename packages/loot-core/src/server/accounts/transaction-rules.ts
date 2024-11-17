@@ -462,13 +462,25 @@ export function conditionsToAQL(conditions, { recurDateBounds = 100 } = {}) {
         return { $or: values.map(v => apply(field, '$eq', v)) };
 
       case 'hasTags':
-        const tagValues = value
-          .split(/(?<!#)(#[\w\d\p{Emoji}-]+)(?=\s|$)/gu)
-          .filter(tag => tag.startsWith('#'));
+        const words = value.split(/\s+/);
+        const tagValues = [];
+        words.forEach(word => {
+          const startsWithHash = word.startsWith('#');
+          const containsMultipleHash = word.slice(1).includes('#');
+          const correctlyFormatted = word.match(/#[\w\d\p{Emoji}-]+/gu);
+          const validHashtag =
+            startsWithHash && !containsMultipleHash && correctlyFormatted;
+
+          if (validHashtag) {
+            tagValues.push(word);
+          }
+        });
 
         return {
           $and: tagValues.map(v => {
-            const regex = new RegExp(`(^|\\s)${v}(\\s|$)`);
+            const regex = new RegExp(
+              `(^|\\s)${v.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(\\s|$)`,
+            );
             return apply(field, '$regexp', regex.source);
           }),
         };
@@ -792,15 +804,17 @@ export async function finalizeTransactionForRules(
   trans: TransactionEntity | TransactionForRules,
 ): Promise<TransactionEntity> {
   if ('payee_name' in trans) {
-    if (trans.payee_name) {
-      let payeeId = (await getPayeeByName(trans.payee_name))?.id;
-      payeeId ??= await insertPayee({
-        name: trans.payee_name,
-      });
+    if (trans.payee === 'new') {
+      if (trans.payee_name) {
+        let payeeId = (await getPayeeByName(trans.payee_name))?.id;
+        payeeId ??= await insertPayee({
+          name: trans.payee_name,
+        });
 
-      trans.payee = payeeId;
-    } else {
-      trans.payee = null;
+        trans.payee = payeeId;
+      } else {
+        trans.payee = null;
+      }
     }
 
     delete trans.payee_name;

@@ -1,5 +1,7 @@
 import React from 'react';
 
+import { t } from 'i18next';
+
 import { useNavigate } from '../../../hooks/useNavigate';
 import { SvgAdd } from '../../../icons/v1';
 import { Button } from '../../common/Button2';
@@ -19,7 +21,7 @@ export function AddTransactionButton({
   return (
     <Button
       variant="bare"
-      aria-label="Add transaction"
+      aria-label={t('Add transaction')}
       style={{ margin: 10 }}
       onPress={() => {
         navigate(to, { state: { accountId, categoryId } });
