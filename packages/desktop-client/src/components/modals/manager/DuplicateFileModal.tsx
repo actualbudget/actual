@@ -57,7 +57,6 @@ export function DuplicateFileModal({
     if (!/^[a-zA-Z0-9 .\-_()]+$/.test(trimmedName)) {
       return t('Budget name contains invalid characters');
     }
-    // Additional validation checks can go here
 
     return null;
   };
