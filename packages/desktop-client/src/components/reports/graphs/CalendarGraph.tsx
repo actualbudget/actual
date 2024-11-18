@@ -1,5 +1,4 @@
 import { type Ref, useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
 
 import {
   addDays,
@@ -32,25 +31,13 @@ type CalendarGraphProps = {
   start: Date;
   firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'];
   onDayClick: (date: Date) => void;
-  // onFilter: (
-  //   conditionsOrSavedFilter:
-  //     | null
-  //     | {
-  //         conditions: RuleConditionEntity[];
-  //         conditionsOp: 'and' | 'or';
-  //         id: RuleConditionEntity[];
-  //       }
-  //     | RuleConditionEntity,
-  // ) => void;
 };
 export function CalendarGraph({
   data,
   start,
   firstDayOfWeekIdx,
-  //onFilter,
   onDayClick,
 }: CalendarGraphProps) {
-  const { t } = useTranslation();
   const startingDate = startOfWeek(new Date(), {
     weekStartsOn:
       firstDayOfWeekIdx !== undefined &&
@@ -108,7 +95,6 @@ export function CalendarGraph({
           gap: 2,
           width: '100%',
           height: '100%',
-          //gridTemplateRows: `repeat(${Math.trunc(data.length) <= data.length / 7 ? Math.trunc(data.length) : Math.trunc(data.length) + 1},1fr)`,
         }}
       >
         {data.map((day, index) =>
@@ -120,9 +106,7 @@ export function CalendarGraph({
               content={
                 <View>
                   <View style={{ marginBottom: 10 }}>
-                    <strong>
-                      {format(day.date, 'MMM dd')}
-                    </strong>
+                    <strong>{format(day.date, 'MMM dd')}</strong>
                   </View>
                   <View style={{ lineHeight: 1.5 }}>
                     <View

@@ -139,6 +139,14 @@ export function CalendarCard({
     }
   }, [monthNameFormats]);
 
+  const calendarLenSize = useMemo(() => {
+    if (!data) {
+      return 0;
+    }
+
+    return data?.calendarData.length;
+  }, [data]);
+
   return (
     <ReportCard
       isEditing={isEditing}
@@ -265,7 +273,7 @@ export function CalendarCard({
               cardOrientation === 'row'
                 ? isNarrowWidth
                   ? 'auto'
-                  : data?.calendarData.length > 4
+                  : calendarLenSize > 4
                     ? 'auto'
                     : 'hidden'
                 : 'hidden',
@@ -283,9 +291,9 @@ export function CalendarCard({
               width:
                 cardOrientation === 'row'
                   ? isNarrowWidth
-                    ? `${data?.calendarData.length * 100}%`
-                    : data?.calendarData.length > 4
-                      ? `${100 + ((data?.calendarData.length - 4) % 4) * 25}%`
+                    ? `${calendarLenSize * 100}%`
+                    : calendarLenSize > 4
+                      ? `${100 + ((calendarLenSize - 4) % 4) * 25}%`
                       : 'auto'
                   : 'auto',
             }}
