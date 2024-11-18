@@ -60,7 +60,7 @@ This only controls the _maximum_ number of months. If the app is too small to re
 
 ## Show running balances
 
-A "running balance" is the balance of the account after every transaction over time. This is very useful for reconciling accounts with banks because you can see the balance at a specific date and use it to compare it with your bank.
+A "running balance" is the balance of the account after every transaction over time. This is very useful for reconciling accounts with banks because you can see the balance at a specific date and use it to compare it with your bank. Note that the "Show running balance" option and column is only available when the list of transactions is sorted by date in descending order.
 
 To enable this:
 
