@@ -262,7 +262,13 @@ export function CalendarCard({
             height: '100%',
             margin: 6,
             overflowX:
-              isNarrowWidth && cardOrientation === 'row' ? 'auto' : 'hidden',
+              cardOrientation === 'row'
+                ? isNarrowWidth
+                  ? 'auto'
+                  : data?.calendarData.length > 6
+                    ? 'auto'
+                    : 'hidden'
+                : 'hidden',
             ...styles.horizontalScrollbar,
           }}
         >
@@ -275,8 +281,12 @@ export function CalendarCard({
               textAlign: 'left',
               marginBottom: isNarrowWidth ? 4 : 0,
               width:
-                isNarrowWidth && cardOrientation === 'row' && data?.calendarData
-                  ? `${data.calendarData.length * 100}%`
+                cardOrientation === 'row'
+                  ? isNarrowWidth
+                    ? `${data?.calendarData.length * 100}%`
+                    : data?.calendarData.length > 6
+                      ? `${100 + ((data?.calendarData.length - 6) % 6) * 17}%`
+                      : 'auto'
                   : 'auto',
             }}
           >

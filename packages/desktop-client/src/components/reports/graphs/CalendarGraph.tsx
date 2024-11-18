@@ -121,8 +121,7 @@ export function CalendarGraph({
                 <View>
                   <View style={{ marginBottom: 10 }}>
                     <strong>
-                      {t('Day:') + ' '}
-                      {format(day.date, 'dd')}
+                      {format(day.date, 'MMM dd')}
                     </strong>
                   </View>
                   <View style={{ lineHeight: 1.5 }}>
