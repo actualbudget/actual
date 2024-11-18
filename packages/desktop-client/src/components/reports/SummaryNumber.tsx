@@ -100,6 +100,7 @@ export function SummaryNumber({
               left: '-999px',
               top: '-999px',
               fontSize: `${initialFontSize}px`,
+              lineHeight: 1,
               visibility: 'hidden',
               whiteSpace: 'nowrap',
               padding: 8,
