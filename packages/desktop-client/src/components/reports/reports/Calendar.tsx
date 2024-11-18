@@ -674,7 +674,6 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
                   >
                     <TransactionListMobile
                       isLoading={false}
-                      isNewTransaction={() => false}
                       onLoadMore={loadMoreTransactions}
                       transactions={allTransactions}
                       onOpenTransaction={onOpenTransaction}
