@@ -40,7 +40,6 @@ import { FinancesApp } from './FinancesApp';
 import { ManagementApp } from './manager/ManagementApp';
 import { Modals } from './Modals';
 import { ResponsiveProvider } from './responsive/ResponsiveProvider';
-import { ScrollProvider } from './ScrollProvider';
 import { SidebarProvider } from './sidebar/SidebarProvider';
 import { UpdateNotification } from './UpdateNotification';
 
@@ -180,36 +179,34 @@ export function App() {
             <SidebarProvider>
               <BudgetMonthCountProvider>
                 <DndProvider backend={HTML5Backend}>
-                  <ScrollProvider>
+                  <View
+                    data-theme={theme}
+                    style={{
+                      height: '100%',
+                      display: 'flex',
+                      flexDirection: 'column',
+                    }}
+                  >
                     <View
-                      data-theme={theme}
+                      key={
+                        hiddenScrollbars ? 'hidden-scrollbars' : 'scrollbars'
+                      }
                       style={{
-                        height: '100%',
-                        display: 'flex',
-                        flexDirection: 'column',
+                        flexGrow: 1,
+                        overflow: 'hidden',
+                        ...styles.lightScrollbar,
                       }}
                     >
-                      <View
-                        key={
-                          hiddenScrollbars ? 'hidden-scrollbars' : 'scrollbars'
-                        }
-                        style={{
-                          flexGrow: 1,
-                          overflow: 'hidden',
-                          ...styles.lightScrollbar,
-                        }}
-                      >
-                        <ErrorBoundary FallbackComponent={ErrorFallback}>
-                          {process.env.REACT_APP_REVIEW_ID &&
-                            !Platform.isPlaywright && <DevelopmentTopBar />}
-                          <AppInner />
-                        </ErrorBoundary>
-                        <ThemeStyle />
-                        <Modals />
-                        <UpdateNotification />
-                      </View>
+                      <ErrorBoundary FallbackComponent={ErrorFallback}>
+                        {process.env.REACT_APP_REVIEW_ID &&
+                          !Platform.isPlaywright && <DevelopmentTopBar />}
+                        <AppInner />
+                      </ErrorBoundary>
+                      <ThemeStyle />
+                      <Modals />
+                      <UpdateNotification />
                     </View>
-                  </ScrollProvider>
+                  </View>
                 </DndProvider>
               </BudgetMonthCountProvider>
             </SidebarProvider>

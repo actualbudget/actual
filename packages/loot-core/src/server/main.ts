@@ -56,7 +56,7 @@ import * as prefs from './prefs';
 import { app as reportsApp } from './reports/app';
 import { app as rulesApp } from './rules/app';
 import { app as schedulesApp } from './schedules/app';
-import { getServer, setServer } from './server-config';
+import { getServer, isValidBaseURL, setServer } from './server-config';
 import * as sheet from './sheet';
 import { resolveName, unresolveName } from './spreadsheet/util';
 import {
@@ -1513,6 +1513,10 @@ handlers['get-did-bootstrap'] = async function () {
 handlers['subscribe-needs-bootstrap'] = async function ({
   url,
 }: { url? } = {}) {
+  if (url && !isValidBaseURL(url)) {
+    return { error: 'get-server-failure' };
+  }
+
   try {
     if (!getServer(url)) {
       return { bootstrapped: true, hasServer: false };
