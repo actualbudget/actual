@@ -33,7 +33,7 @@ export function SummaryNumber({
   const refDiv = useRef<HTMLDivElement>(null);
   const offScreenRef = useRef<HTMLDivElement>(null);
 
-  const FONT_SIZE_SCALE_FACTOR = 0.8;
+  const FONT_SIZE_SCALE_FACTOR = 0.9;
   const MAX_RECURSION_DEPTH = 10;
 
   const adjustFontSizeBinary = (minFontSize: number, maxFontSize: number) => {
@@ -57,17 +57,14 @@ export function SummaryNumber({
 
       requestAnimationFrame(() => {
         const isOverflowing =
-          offScreenDiv.scrollWidth > refDivCurrent.clientWidth ||
-          offScreenDiv.scrollHeight > refDivCurrent.clientHeight;
+          offScreenDiv.scrollWidth > refDivCurrent.clientWidth;
 
         if (isOverflowing) {
           binarySearchFontSize(min, testFontSize, depth + 1);
         } else {
           const isUnderflowing =
             offScreenDiv.scrollWidth <=
-              refDivCurrent.clientWidth * FONT_SIZE_SCALE_FACTOR &&
-            offScreenDiv.scrollHeight <=
-              refDivCurrent.clientHeight * FONT_SIZE_SCALE_FACTOR;
+            refDivCurrent.clientWidth * FONT_SIZE_SCALE_FACTOR;
 
           if (isUnderflowing && testFontSize < max) {
             binarySearchFontSize(testFontSize, max, depth + 1);
@@ -85,8 +82,8 @@ export function SummaryNumber({
   };
 
   const handleResize = debounce(() => {
-    adjustFontSizeBinary(14, 100);
-  }, 100);
+    adjustFontSizeBinary(14, 200);
+  }, 250);
 
   const ref = useResizeObserver(handleResize);
   const mergedRef = useMergedRefs(ref, refDiv);
@@ -116,7 +113,6 @@ export function SummaryNumber({
 
           <View
             ref={mergedRef as Ref<HTMLDivElement>}
-            id="test"
             role="text"
             aria-label={`${value < 0 ? 'Negative' : 'Positive'} amount: ${amountToCurrency(Math.abs(value))}${suffix}`}
             style={{
@@ -124,15 +120,17 @@ export function SummaryNumber({
               flexGrow: 1,
               flexShrink: 1,
               width: '100%',
+              height: '100%',
               maxWidth: '100%',
               fontSize: `${fontSize}px`,
+              lineHeight: 1,
               padding: 8,
               justifyContent: 'center',
               transition: animate ? 'font-size 0.3s ease' : '',
               color: value < 0 ? chartTheme.colors.red : chartTheme.colors.blue,
             }}
           >
-            <span aria-hidden="true" id="coiso">
+            <span aria-hidden="true">
               <PrivacyFilter>
                 {amountToCurrency(Math.abs(value))}
                 {suffix}
