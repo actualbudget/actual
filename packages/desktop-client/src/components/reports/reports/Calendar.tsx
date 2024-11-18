@@ -421,7 +421,13 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
         open({ canceled: false });
       }
 
-      api.start({ y: oy, immediate: true });
+      if (oy < 0) {
+        api.start({ y: 0, immediate: true });
+        return;
+      } else {
+        api.start({ y: oy, immediate: true });
+      }
+
       if (
         oy > totalHeight - CHEVRON_HEIGHT * DRAG_BOUNDS.CHEVRON_MULTIPLIER &&
         mobileTransactionsOpen
