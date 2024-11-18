@@ -265,7 +265,7 @@ export function CalendarCard({
               cardOrientation === 'row'
                 ? isNarrowWidth
                   ? 'auto'
-                  : data?.calendarData.length > 6
+                  : data?.calendarData.length > 4
                     ? 'auto'
                     : 'hidden'
                 : 'hidden',
@@ -284,8 +284,8 @@ export function CalendarCard({
                 cardOrientation === 'row'
                   ? isNarrowWidth
                     ? `${data?.calendarData.length * 100}%`
-                    : data?.calendarData.length > 6
-                      ? `${100 + ((data?.calendarData.length - 6) % 6) * 17}%`
+                    : data?.calendarData.length > 4
+                      ? `${100 + ((data?.calendarData.length - 4) % 4) * 25}%`
                       : 'auto'
                   : 'auto',
             }}
