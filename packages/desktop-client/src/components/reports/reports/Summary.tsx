@@ -548,7 +548,7 @@ function SumWithRange({
         ) : (
           <AppliedFilters
             conditions={filterObject.conditions}
-            onUpdate={filterObject.onApply}
+            onUpdate={filterObject.onUpdate}
             onDelete={filterObject.onDelete}
             conditionsOp={filterObject.conditionsOp}
             onConditionsOpChange={filterObject.onConditionsOpChange}
