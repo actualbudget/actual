@@ -1,6 +1,6 @@
-// @ts-strict-ignore
 import React, {
   useCallback,
+  type ComponentProps,
   type ComponentType,
   type CSSProperties,
 } from 'react';
@@ -42,6 +42,43 @@ export function MobileNavTabs() {
     height: ROW_HEIGHT,
     padding: 10,
   };
+
+  const [{ y }, api] = useSpring(() => ({ y: OPEN_DEFAULT_Y }));
+
+  const openFull = useCallback(
+    ({ canceled }: { canceled?: boolean }) => {
+      // when cancel is true, it means that the user passed the upwards threshold
+      // so we change the spring config to create a nice wobbly effect
+      api.start({
+        y: OPEN_FULL_Y,
+        immediate: false,
+        config: canceled ? config.wobbly : config.stiff,
+      });
+    },
+    [api, OPEN_FULL_Y],
+  );
+
+  const openDefault = useCallback(
+    (velocity = 0) => {
+      api.start({
+        y: OPEN_DEFAULT_Y,
+        immediate: false,
+        config: { ...config.stiff, velocity },
+      });
+    },
+    [api, OPEN_DEFAULT_Y],
+  );
+
+  const hide = useCallback(
+    (velocity = 0) => {
+      api.start({
+        y: HIDDEN_Y,
+        immediate: false,
+        config: { ...config.stiff, velocity },
+      });
+    },
+    [api, HIDDEN_Y],
+  );
 
   const navTabs = [
     {
@@ -92,49 +129,14 @@ export function MobileNavTabs() {
       style: navTabStyle,
       Icon: SvgCog,
     },
-  ].map(tab => <NavTab key={tab.path} {...tab} />);
+  ].map(tab => (
+    <NavTab key={tab.path} onClick={() => openDefault()} {...tab} />
+  ));
 
   const bufferTabsCount = COLUMN_COUNT - (navTabs.length % COLUMN_COUNT);
   const bufferTabs = Array.from({ length: bufferTabsCount }).map((_, idx) => (
     <div key={idx} style={navTabStyle} />
   ));
-
-  const [{ y }, api] = useSpring(() => ({ y: OPEN_DEFAULT_Y }));
-
-  const openFull = useCallback(
-    ({ canceled }) => {
-      // when cancel is true, it means that the user passed the upwards threshold
-      // so we change the spring config to create a nice wobbly effect
-      api.start({
-        y: OPEN_FULL_Y,
-        immediate: false,
-        config: canceled ? config.wobbly : config.stiff,
-      });
-    },
-    [api, OPEN_FULL_Y],
-  );
-
-  const openDefault = useCallback(
-    (velocity = 0) => {
-      api.start({
-        y: OPEN_DEFAULT_Y,
-        immediate: false,
-        config: { ...config.stiff, velocity },
-      });
-    },
-    [api, OPEN_DEFAULT_Y],
-  );
-
-  const hide = useCallback(
-    (velocity = 0) => {
-      api.start({
-        y: HIDDEN_Y,
-        immediate: false,
-        config: { ...config.stiff, velocity },
-      });
-    },
-    [api, HIDDEN_Y],
-  );
 
   useScrollListener(({ isScrolling }) => {
     if (isScrolling('down')) {
@@ -237,9 +239,10 @@ type NavTabProps = {
   path: string;
   Icon: ComponentType<NavTabIconProps>;
   style?: CSSProperties;
+  onClick: ComponentProps<typeof NavLink>['onClick'];
 };
 
-function NavTab({ Icon: TabIcon, name, path, style }: NavTabProps) {
+function NavTab({ Icon: TabIcon, name, path, style, onClick }: NavTabProps) {
   return (
     <NavLink
       to={path}
@@ -253,6 +256,7 @@ function NavTab({ Icon: TabIcon, name, path, style }: NavTabProps) {
         textAlign: 'center',
         ...style,
       })}
+      onClick={onClick}
     >
       <TabIcon width={22} height={22} />
       {name}
