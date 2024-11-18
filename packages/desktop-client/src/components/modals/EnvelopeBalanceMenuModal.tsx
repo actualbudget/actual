@@ -3,6 +3,8 @@ import React, {
   type CSSProperties,
 } from 'react';
 
+import { t } from 'i18next';
+
 import { envelopeBudget } from 'loot-core/client/queries';
 
 import { useCategory } from '../../hooks/useCategory';
@@ -66,7 +68,7 @@ export function EnvelopeBalanceMenuModal({
                 fontWeight: 400,
               }}
             >
-              Balance
+              {t('Balance')}
             </Text>
             <BalanceWithCarryover
               isDisabled
