@@ -1,5 +1,5 @@
 import { type ReactNode, useState } from 'react';
-import { Trans, useTranslation } from 'react-i18next';
+import { Trans } from 'react-i18next';
 
 import type { FeatureFlag } from 'loot-core/src/types/prefs';
 
@@ -67,23 +67,6 @@ function FeatureToggle({
   );
 }
 
-function TrackingBudgetFeature() {
-  const { t } = useTranslation();
-  const [budgetType = 'rollover'] = useSyncedPref('budgetType');
-  const enabled = useFeatureFlag('reportBudget');
-  const blockToggleOff = budgetType === 'report' && enabled;
-  return (
-    <FeatureToggle
-      flag="reportBudget"
-      disableToggle={blockToggleOff}
-      error={t('Switch to a envelope budget before turning off this feature')}
-      feedbackLink="https://github.com/actualbudget/actual/issues/2999"
-    >
-      <Trans>Budget mode toggle</Trans>
-    </FeatureToggle>
-  );
-}
-
 export function ExperimentalFeatures() {
   const [expanded, setExpanded] = useState(false);
 
@@ -92,8 +75,6 @@ export function ExperimentalFeatures() {
       primaryAction={
         expanded ? (
           <View style={{ gap: '1em' }}>
-            <TrackingBudgetFeature />
-
             <FeatureToggle flag="goalTemplatesEnabled">
               <Trans>Goal templates</Trans>
             </FeatureToggle>

@@ -1,3 +1,5 @@
+import { t } from 'i18next';
+
 import * as monthUtils from 'loot-core/src/shared/months';
 import {
   type CustomReportEntity,
@@ -32,11 +34,11 @@ export const defaultReport: CustomReportEntity = {
 };
 
 const balanceTypeOptions = [
-  { description: 'Payment', format: 'totalDebts' as const },
-  { description: 'Deposit', format: 'totalAssets' as const },
-  { description: 'Net', format: 'totalTotals' as const },
-  { description: 'Net Payment', format: 'netDebts' as const },
-  { description: 'Net Deposit', format: 'netAssets' as const },
+  { description: t('Payment'), format: 'totalDebts' as const },
+  { description: t('Deposit'), format: 'totalAssets' as const },
+  { description: t('Net'), format: 'totalTotals' as const },
+  { description: t('Net Payment'), format: 'netDebts' as const },
+  { description: t('Net Deposit'), format: 'netAssets' as const },
 ];
 
 const groupByOptions = [
@@ -59,7 +61,7 @@ export type dateRangeProps = {
 
 const dateRangeOptions: dateRangeProps[] = [
   {
-    description: 'This week',
+    description: t('This week'),
     name: 0,
     type: 'Week',
     Daily: true,
@@ -68,7 +70,7 @@ const dateRangeOptions: dateRangeProps[] = [
     Yearly: false,
   },
   {
-    description: 'Last week',
+    description: t('Last week'),
     name: 1,
     type: 'Week',
     Daily: true,
@@ -77,7 +79,7 @@ const dateRangeOptions: dateRangeProps[] = [
     Yearly: false,
   },
   {
-    description: 'This month',
+    description: t('This month'),
     name: 0,
     type: 'Month',
     Daily: true,
@@ -86,7 +88,7 @@ const dateRangeOptions: dateRangeProps[] = [
     Yearly: false,
   },
   {
-    description: 'Last month',
+    description: t('Last month'),
     name: 1,
     type: 'Month',
     Daily: true,
@@ -95,7 +97,7 @@ const dateRangeOptions: dateRangeProps[] = [
     Yearly: false,
   },
   {
-    description: 'Last 3 months',
+    description: t('Last 3 months'),
     name: 3,
     type: 'Month',
     Daily: true,
@@ -104,7 +106,7 @@ const dateRangeOptions: dateRangeProps[] = [
     Yearly: false,
   },
   {
-    description: 'Last 6 months',
+    description: t('Last 6 months'),
     name: 6,
     type: 'Month',
     Daily: false,
@@ -113,7 +115,7 @@ const dateRangeOptions: dateRangeProps[] = [
     Yearly: false,
   },
   {
-    description: 'Last 12 months',
+    description: t('Last 12 months'),
     name: 12,
     type: 'Month',
     Daily: false,
@@ -122,7 +124,7 @@ const dateRangeOptions: dateRangeProps[] = [
     Yearly: false,
   },
   {
-    description: 'Year to date',
+    description: t('Year to date'),
     name: 'yearToDate',
     type: 'Month',
     Daily: false,
@@ -131,7 +133,7 @@ const dateRangeOptions: dateRangeProps[] = [
     Yearly: true,
   },
   {
-    description: 'Last year',
+    description: t('Last year'),
     name: 'lastYear',
     type: 'Month',
     Daily: false,
@@ -140,7 +142,7 @@ const dateRangeOptions: dateRangeProps[] = [
     Yearly: true,
   },
   {
-    description: 'All time',
+    description: t('All time'),
     name: 'allTime',
     type: 'Month',
     Daily: false,
@@ -163,27 +165,27 @@ type intervalOptionsProps = {
 
 const intervalOptions: intervalOptionsProps[] = [
   {
-    description: 'Daily',
+    description: t('Daily'),
     name: 'Day',
     format: 'yy-MM-dd',
     range: 'dayRangeInclusive',
   },
   {
-    description: 'Weekly',
+    description: t('Weekly'),
     name: 'Week',
     format: 'yy-MM-dd',
     range: 'weekRangeInclusive',
   },
   //{ value: 3, description: 'Fortnightly', name: 3},
   {
-    description: 'Monthly',
+    description: t('Monthly'),
     name: 'Month',
     // eslint-disable-next-line rulesdir/typography
     format: "MMM ''yy",
     range: 'rangeInclusive',
   },
   {
-    description: 'Yearly',
+    description: t('Yearly'),
     name: 'Year',
     format: 'yyyy',
     range: 'yearRangeInclusive',
@@ -243,19 +245,19 @@ export type UncategorizedEntity = Pick<
 
 const uncategorizedCategory: UncategorizedEntity = {
   id: '',
-  name: 'Uncategorized',
+  name: t('Uncategorized'),
   uncategorized_id: 'other',
   hidden: false,
 };
 const transferCategory: UncategorizedEntity = {
   id: '',
-  name: 'Transfers',
+  name: t('Transfers'),
   uncategorized_id: 'transfer',
   hidden: false,
 };
 const offBudgetCategory: UncategorizedEntity = {
   id: '',
-  name: 'Off Budget',
+  name: t('Off Budget'),
   uncategorized_id: 'off_budget',
   hidden: false,
 };
@@ -269,7 +271,7 @@ type UncategorizedGroupEntity = Pick<
 };
 
 const uncategorizedGroup: UncategorizedGroupEntity = {
-  name: 'Uncategorized & Off Budget',
+  name: t('Uncategorized & Off Budget'),
   id: 'uncategorized',
   hidden: false,
   uncategorized_id: 'all',

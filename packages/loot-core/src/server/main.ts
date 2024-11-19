@@ -1100,17 +1100,22 @@ function handleSyncError(err, acct) {
   };
 }
 
-handlers['accounts-bank-sync'] = async function ({ id }) {
+handlers['accounts-bank-sync'] = async function ({ ids = [] }) {
   const [[, userId], [, userKey]] = await asyncStorage.multiGet([
     'user-id',
     'user-key',
   ]);
+
   const accounts = await db.runQuery(
-    `SELECT a.*, b.bank_id as bankId FROM accounts a
-         LEFT JOIN banks b ON a.bank = b.id
-         WHERE a.tombstone = 0 AND a.closed = 0 ${id ? 'AND a.id = ?' : ''}
-         ORDER BY a.offbudget, a.sort_order`,
-    id ? [id] : [],
+    `
+    SELECT a.*, b.bank_id as bankId 
+    FROM accounts a
+    LEFT JOIN banks b ON a.bank = b.id
+    WHERE a.tombstone = 0 AND a.closed = 0
+      ${ids.length ? `AND a.id IN (${ids.map(() => '?').join(', ')})` : ''}
+    ORDER BY a.offbudget, a.sort_order
+  `,
+    ids,
     true,
   );
 
@@ -1163,7 +1168,11 @@ handlers['simplefin-batch-sync'] = async function ({ ids = [] }) {
   const accounts = await db.runQuery(
     `SELECT a.*, b.bank_id as bankId FROM accounts a
          LEFT JOIN banks b ON a.bank = b.id
-         WHERE a.tombstone = 0 AND a.closed = 0 ${ids.length ? `AND a.id IN (${ids.map(() => '?').join(', ')})` : ''}
+         WHERE
+          a.tombstone = 0
+          AND a.closed = 0
+          AND a.account_sync_source = 'simpleFin'
+          ${ids.length ? `AND a.id IN (${ids.map(() => '?').join(', ')})` : ''}
          ORDER BY a.offbudget, a.sort_order`,
     ids.length ? ids : [],
     true,
