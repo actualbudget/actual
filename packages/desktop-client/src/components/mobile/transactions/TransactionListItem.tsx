@@ -12,7 +12,6 @@ import {
   useLongPress,
 } from '@react-aria/interactions';
 
-import { getScheduledAmount } from 'loot-core/src/shared/schedules';
 import { isPreviewId } from 'loot-core/src/shared/transactions';
 import { integerToCurrency } from 'loot-core/src/shared/util';
 import { type TransactionEntity } from 'loot-core/types/models';
@@ -32,8 +31,9 @@ import { Button } from '../../common/Button2';
 import { Text } from '../../common/Text';
 import { TextOneLine } from '../../common/TextOneLine';
 import { View } from '../../common/View';
+import { getPrettyPayee } from '../utils';
 
-import { lookupName, getDescriptionPretty, Status } from './TransactionEdit';
+import { lookupName, Status } from './TransactionEdit';
 
 const ROW_HEIGHT = 60;
 
@@ -56,7 +56,7 @@ export function TransactionListItem({
 
   const payee = usePayee(transaction?.payee || '');
   const account = useAccount(transaction?.account || '');
-  const transferAcct = useAccount(payee?.transfer_acct || '');
+  const transferAccount = useAccount(payee?.transfer_acct || '');
   const isPreview = isPreviewId(transaction?.id || '');
 
   const newTransactions = useSelector(state => state.queries.newTransactions);
@@ -84,32 +84,25 @@ export function TransactionListItem({
 
   const {
     id,
-    amount: originalAmount,
+    amount,
     category: categoryId,
     cleared: isCleared,
     reconciled: isReconciled,
     is_parent: isParent,
     is_child: isChild,
-    schedule,
+    schedule: scheduleId,
   } = transaction;
 
   const isAdded = newTransactions.includes(id);
-
-  let amount = originalAmount;
-  if (isPreview) {
-    amount = getScheduledAmount(amount);
-  }
-
   const categoryName = lookupName(categories, categoryId);
-
-  const prettyDescription = getDescriptionPretty(
+  const prettyPayee = getPrettyPayee({
     transaction,
     payee,
-    transferAcct,
-  );
+    transferAccount,
+  });
   const specialCategory = account?.offbudget
     ? 'Off Budget'
-    : transferAcct && !transferAcct.offbudget
+    : transferAccount && !transferAccount.offbudget
       ? 'Transfer'
       : isParent
         ? 'Split'
@@ -169,7 +162,7 @@ export function TransactionListItem({
             >
               <View>
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  {schedule && (
+                  {scheduleId && (
                     <SvgArrowsSynchronize
                       style={{
                         width: 12,
@@ -183,13 +176,13 @@ export function TransactionListItem({
                     style={{
                       ...textStyle,
                       fontWeight: isAdded ? '600' : '400',
-                      ...(prettyDescription === '' && {
+                      ...(prettyPayee === '' && {
                         color: theme.tableTextLight,
                         fontStyle: 'italic',
                       }),
                     }}
                   >
-                    {prettyDescription || 'Empty'}
+                    {prettyPayee || '(No payee)'}
                   </TextOneLine>
                 </View>
                 {isPreview ? (

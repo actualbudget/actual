@@ -64,23 +64,12 @@ import { MobilePageHeader, Page } from '../../Page';
 import { AmountInput } from '../../util/AmountInput';
 import { MobileBackButton } from '../MobileBackButton';
 import { FieldLabel, TapField, InputField, ToggleField } from '../MobileForms';
+import { getPrettyPayee } from '../utils';
 
 import { FocusableAmountInput } from './FocusableAmountInput';
 
 function getFieldName(transactionId, field) {
   return `${field}-${transactionId}`;
-}
-
-export function getDescriptionPretty(transaction, payee, transferAcct) {
-  const { amount } = transaction;
-
-  if (transferAcct) {
-    return `Transfer ${amount > 0 ? 'from' : 'to'} ${transferAcct.name}`;
-  } else if (payee) {
-    return payee.name;
-  }
-
-  return '';
 }
 
 function serializeTransaction(transaction, dateFormat) {
@@ -291,7 +280,8 @@ const ChildTransactionEdit = forwardRef(
       amountFocused,
       amountSign,
       getCategory,
-      getPrettyPayee,
+      getPayee,
+      getTransferAccount,
       isOffBudget,
       isBudgetTransfer,
       onEditField,
@@ -302,6 +292,11 @@ const ChildTransactionEdit = forwardRef(
   ) => {
     const { editingField, onRequestActiveEdit, onClearActiveEdit } =
       useSingleActiveEditForm();
+    const prettyPayee = getPrettyPayee({
+      transaction,
+      payee: getPayee(transaction),
+      transferAccount: getTransferAccount(transaction),
+    });
     return (
       <View
         innerRef={ref}
@@ -325,7 +320,7 @@ const ChildTransactionEdit = forwardRef(
                 editingField &&
                 editingField !== getFieldName(transaction.id, 'payee')
               }
-              value={getPrettyPayee(transaction)}
+              value={prettyPayee}
               onClick={() => onEditField(transaction.id, 'payee')}
               data-testid={`payee-field-${transaction.id}`}
             />
@@ -503,7 +498,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
     [payeesById],
   );
 
-  const getTransferAcct = useCallback(
+  const getTransferAccount = useCallback(
     trans => {
       const payee = trans && getPayee(trans);
       return payee?.transfer_acct && accountsById?.[payee.transfer_acct];
@@ -511,24 +506,12 @@ const TransactionEditInner = memo(function TransactionEditInner({
     [accountsById, getPayee],
   );
 
-  const getPrettyPayee = useCallback(
-    trans => {
-      if (trans?.is_parent) {
-        return 'Split';
-      }
-      const transPayee = trans && getPayee(trans);
-      const transTransferAcct = trans && getTransferAcct(trans);
-      return getDescriptionPretty(trans, transPayee, transTransferAcct);
-    },
-    [getPayee, getTransferAcct],
-  );
-
   const isBudgetTransfer = useCallback(
     trans => {
-      const transferAcct = trans && getTransferAcct(trans);
+      const transferAcct = trans && getTransferAccount(trans);
       return transferAcct && !transferAcct.offbudget;
     },
-    [getTransferAcct],
+    [getTransferAccount],
   );
 
   const getCategory = useCallback(
@@ -759,11 +742,11 @@ const TransactionEditInner = memo(function TransactionEditInner({
 
   const account = getAccount(transaction);
   const isOffBudget = account && !!account.offbudget;
-  const title = getDescriptionPretty(
+  const title = getPrettyPayee({
     transaction,
-    getPayee(transaction),
-    getTransferAcct(transaction),
-  );
+    payee: getPayee(transaction),
+    transferAccount: getTransferAccount(transaction),
+  });
 
   const transactionDate = parseDate(transaction.date, dateFormat, new Date());
   const dateDefaultValue = monthUtils.dayFromDate(transactionDate);
@@ -834,7 +817,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
                 fontWeight: 300,
               }),
             }}
-            value={getPrettyPayee(transaction)}
+            value={title}
             disabled={
               editingField &&
               editingField !== getFieldName(transaction.id, 'payee')
@@ -882,7 +865,8 @@ const TransactionEditInner = memo(function TransactionEditInner({
             }}
             isOffBudget={isOffBudget}
             getCategory={getCategory}
-            getPrettyPayee={getPrettyPayee}
+            getPayee={getPayee}
+            getTransferAccount={getTransferAccount}
             isBudgetTransfer={isBudgetTransfer}
             onUpdate={onUpdateInner}
             onEditField={onEditFieldInner}
