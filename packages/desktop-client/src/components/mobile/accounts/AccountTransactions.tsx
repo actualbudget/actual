@@ -239,8 +239,7 @@ function TransactionListWithPreviews({
     query: transactionsQuery,
   });
 
-  const { data: previewTransactions, isLoading: isPreviewTransactionsLoading } =
-    usePreviewTransactions();
+  const { data: previewTransactions } = usePreviewTransactions();
 
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const dispatch = useDispatch();
@@ -318,7 +317,7 @@ function TransactionListWithPreviews({
 
   return (
     <TransactionListWithBalances
-      isLoading={isLoading || isPreviewTransactionsLoading}
+      isLoading={isLoading}
       transactions={transactionsToDisplay}
       balance={balanceQueries.balance}
       balanceCleared={balanceQueries.cleared}
