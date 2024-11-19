@@ -83,7 +83,7 @@ subscription services, charitable donations, child care, gifts, fun money, or de
 
 :::tip
 
-Refrain from spending too much time which categories you want from the start, your situation is
+Refrain from spending too much time deciding which categories you want from the start, your situation is
 different from other people. Add the categories that make sense for you as your budget evolves.
 
 :::
