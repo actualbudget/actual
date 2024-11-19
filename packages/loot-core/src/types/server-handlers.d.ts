@@ -303,6 +303,12 @@ export interface ServerHandlers {
     | { messages: Message[] }
   >;
 
+  'validate-budget-name': (arg: {
+    name: string;
+  }) => Promise<{ valid: boolean; message?: string }>;
+
+  'unique-budget-name': (arg: { name: string }) => Promise<string>;
+
   'get-budgets': () => Promise<Budget[]>;
 
   'get-remote-files': () => Promise<RemoteFile[]>;

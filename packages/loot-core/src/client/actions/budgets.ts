@@ -148,6 +148,17 @@ export function createBudget({ testMode = false, demoMode = false } = {}) {
   };
 }
 
+export function validateBudgetName(name: string): {
+  valid: boolean;
+  message?: string;
+} {
+  return send('validate-budget-name', { name });
+}
+
+export function uniqueBudgetName(name: string): string {
+  return send('unique-budget-name', { name });
+}
+
 export function duplicateBudget({
   id,
   cloudId,
@@ -195,8 +206,9 @@ export function duplicateBudget({
       }
     } catch (error) {
       console.error('Error duplicating budget:', error);
-      dispatch(setAppState({ loadingText: null }));
-      throw new Error('Error duplicating budget:');
+      throw error instanceof Error
+        ? error
+        : new Error('Error duplicating budget: ' + String(error));
     } finally {
       dispatch(setAppState({ loadingText: null }));
     }

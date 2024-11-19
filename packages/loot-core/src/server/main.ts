@@ -73,7 +73,11 @@ import * as syncMigrations from './sync/migrate';
 import { app as toolsApp } from './tools/app';
 import { withUndo, clearUndo, undo, redo } from './undo';
 import { updateVersion } from './update';
-import { uniqueFileName, idFromFileName } from './util/budget-name';
+import {
+  uniqueBudgetName,
+  idFromBudgetName,
+  validateBudgetName,
+} from './util/budget-name';
 
 const DEMO_BUDGET_ID = '_demo-budget';
 const TEST_BUDGET_ID = '_test-budget';
@@ -1710,6 +1714,14 @@ handlers['sync'] = async function () {
   return fullSync();
 };
 
+handlers['validate-budget-name'] = async function ({ name }) {
+  return validateBudgetName(name);
+};
+
+handlers['unique-budget-name'] = async function ({ name }) {
+  return uniqueBudgetName(name);
+};
+
 handlers['get-budgets'] = async function () {
   const paths = await fs.listDir(fs.getDocumentDir());
   const budgets = (
@@ -1912,37 +1924,24 @@ handlers['duplicate-budget'] = async function ({
   open,
 }): Promise<string> {
   if (!id) throw new Error('Unable to duplicate a budget that is not local.');
-  if (!newName?.trim()) {
-    throw new Error('Budget name is required and cannot be empty');
-  }
-  if (!/^[a-zA-Z0-9 .\-_()]+$/.test(newName)) {
-    throw new Error('Budget name contains invalid characters');
-  }
+
+  const { valid, message } = await validateBudgetName(newName);
+  if (!valid) throw new Error(message);
 
   const budgetDir = fs.getBudgetDir(id);
 
-  let budgetName = newName;
-  let sameName = false;
-
-  if (budgetName.indexOf(' - copy') !== -1) {
-    sameName = true;
-    budgetName = budgetName.replace(' - copy', '');
+  let budgetFileName = newName;
+  if (budgetFileName.indexOf(' - copy') !== -1) {
+    budgetFileName = budgetFileName.replace(/\s-\scopy.*/, '');
   }
-
-  const newId = await idFromFileName(budgetName);
-
-  const budgets = await handlers['get-budgets']();
-  budgetName = await uniqueFileName(
-    budgets,
-    sameName ? budgetName + ' - copy' : budgetName,
-  );
+  const newId = await idFromBudgetName(budgetFileName);
 
   // copy metadata from current budget
   // replace id with new budget id and budgetName with new budget name
   const metadataText = await fs.readFile(fs.join(budgetDir, 'metadata.json'));
   const metadata = JSON.parse(metadataText);
   metadata.id = newId;
-  metadata.budgetName = budgetName;
+  metadata.budgetName = newName;
   [
     'cloudFileId',
     'groupId',
@@ -2024,13 +2023,10 @@ handlers['create-budget'] = async function ({
   } else {
     // Generate budget name if not given
     if (!budgetName) {
-      // Unfortunately we need to load all of the existing files first
-      // so we can detect conflicting names.
-      const files = await handlers['get-budgets']();
-      budgetName = await uniqueFileName(files);
+      budgetName = await uniqueBudgetName();
     }
 
-    id = await idFromFileName(budgetName);
+    id = await idFromBudgetName(budgetName);
   }
 
   const budgetDir = fs.getBudgetDir(id);

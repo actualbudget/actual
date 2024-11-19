@@ -1,19 +1,18 @@
-// @ts-strict-ignore
 import { v4 as uuidv4 } from 'uuid';
 
 import * as fs from '../../platform/server/fs';
-import { type Budget } from '../../types/budget';
+import { handlers } from '../main';
 
-export async function uniqueFileName(
-  existingFiles: Budget[],
+export async function uniqueBudgetName(
   initialName: string = 'My Finances',
 ): Promise<string> {
+  const budgets = await handlers['get-budgets']();
   let idx = 1;
 
   // If there is a conflict, keep appending an index until there is no
   // conflict and we have a unique name
   let newName = initialName;
-  while (existingFiles.find(file => file.name === newName)) {
+  while (budgets.find(file => file.name === newName)) {
     newName = `${initialName} ${idx}`;
     idx++;
   }
@@ -21,7 +20,25 @@ export async function uniqueFileName(
   return newName;
 }
 
-export async function idFromFileName(name) {
+export async function validateBudgetName(
+  name: string,
+): Promise<{ valid: boolean; message?: string }> {
+  const trimmedName = name.trim();
+  const uniqueName = await uniqueBudgetName(trimmedName);
+  let message: string | null = null;
+
+  if (trimmedName === '') message = 'Budget name cannot be blank';
+  if (trimmedName.length > 100) {
+    message = 'Budget name is too long (max length 100)';
+  }
+  if (uniqueName !== trimmedName) {
+    message = `“${name}” already exists, try “${uniqueName}” instead`;
+  }
+
+  return message ? { valid: false, message } : { valid: true };
+}
+
+export async function idFromBudgetName(name: string): Promise<string> {
   let id = name.replace(/( |[^A-Za-z0-9])/g, '-') + '-' + uuidv4().slice(0, 7);
 
   // Make sure the id is unique. There's a chance one could already

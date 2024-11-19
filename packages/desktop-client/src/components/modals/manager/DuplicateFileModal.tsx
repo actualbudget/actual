@@ -1,8 +1,13 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 
-import { addNotification, duplicateBudget } from 'loot-core/client/actions';
+import {
+  addNotification,
+  duplicateBudget,
+  uniqueBudgetName,
+  validateBudgetName,
+} from 'loot-core/client/actions';
 import { type File } from 'loot-core/src/types/file';
 
 import { theme } from '../../../style';
@@ -48,33 +53,27 @@ export function DuplicateFileModal({
     null,
   );
 
-  const validateNewName = (name: string): string | null => {
-    const trimmedName = name.trim();
-    if (trimmedName === '') return t('Budget name cannot be blank');
-    if (trimmedName.length > 100) {
-      return t('Budget name is too long (max length 100)');
-    }
-    if (!/^[a-zA-Z0-9 .\-_()]+$/.test(trimmedName)) {
-      return t('Budget name contains invalid characters');
-    }
+  useEffect(() => {
+    (async () => {
+      setNewName(await uniqueBudgetName(file.name + ' - copy'));
+    })();
+  }, [file.name]);
 
-    return null;
-  };
-
-  const validateAndSetName = (name: string) => {
+  const validateAndSetName = async (name: string) => {
     const trimmedName = name.trim();
-    const error = validateNewName(trimmedName);
-    if (error) {
-      setNameError(error);
-    } else {
+    const { valid, message } = await validateBudgetName(trimmedName);
+    if (valid) {
       setNewName(trimmedName);
       setNameError(null);
+    } else {
+      // The "Unknown error" should never happen, but this satifies type checking
+      setNameError(message ?? t('Unknown error with budget name'));
     }
   };
 
   const handleDuplicate = async (sync: 'localOnly' | 'cloudSync') => {
-    const error = validateNewName(newName);
-    if (!error) {
+    const { valid, message } = await validateBudgetName(newName);
+    if (valid) {
       setLoadingState(sync === 'cloudSync' ? 'cloud' : 'local');
 
       try {
@@ -113,7 +112,9 @@ export function DuplicateFileModal({
         setLoadingState(null);
       }
     } else {
-      const failError = new Error(error);
+      const failError = new Error(
+        message ?? t('Unknown error with budget name'),
+      );
       if (onComplete) onComplete({ status: 'failed', error: failError });
     }
   };
