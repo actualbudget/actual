@@ -1,11 +1,11 @@
-import { TagEntity } from 'loot-core/types/models/tag';
 import {
   type KeyboardEvent,
   useCallback,
-  useEffect,
   useState,
   type MutableRefObject,
 } from 'react';
+
+import { type TagEntity } from 'loot-core/types/models/tag';
 
 export function useTagPopover(
   initialValue: string,

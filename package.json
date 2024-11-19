@@ -45,7 +45,6 @@
     "prepare": "husky"
   },
   "devDependencies": {
-    "@types/react-color": "^2",
     "@typescript-eslint/eslint-plugin": "^8.1.0",
     "@typescript-eslint/parser": "^8.1.0",
     "confusing-browser-globals": "^1.0.11",
@@ -81,9 +80,5 @@
   "browserslist": [
     "electron 24.0",
     "defaults"
-  ],
-  "dependencies": {
-    "react-color": "^2.19.3",
-    "react-contenteditable": "^3.3.7"
-  }
+  ]
 }

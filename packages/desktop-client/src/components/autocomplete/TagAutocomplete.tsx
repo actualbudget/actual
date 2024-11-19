@@ -7,10 +7,9 @@ import { getNormalisedString } from 'loot-core/shared/normalisation';
 import { extractAllTags, TAGCOLORS } from 'loot-core/shared/tag';
 
 import { useTags } from '../../hooks/useTags';
-import { styles, theme } from '../../style';
+import { theme } from '../../style';
 import { Button } from '../common/Button2';
 import { Popover } from '../common/Popover';
-import { Text } from '../common/Text';
 import { View } from '../common/View';
 
 type Tag = {
@@ -64,7 +63,7 @@ function TagAutocomplete({
         clickedOnIt();
       }
     }
-  }, [tags, hint, setSelectedIndex]);
+  }, [tags, hint, setSelectedIndex, clickedOnIt]);
 
   useEffect(() => {
     const minIndex = 0;
@@ -134,7 +133,7 @@ function TagList({
   const [width, setWidth] = useState(0);
   const [showColors, setShowColors] = useState(false);
   const [selectedItem, setSelectedItem] = useState<Tag | null>(null);
-  const [uncommitedTags, setUncommitedTags] = useState<string[]>([]);
+  const [, setUncommitedTags] = useState<string[]>([]);
   const colorRef = useRef(null);
   const dispatch = useDispatch();
 

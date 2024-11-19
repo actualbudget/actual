@@ -110,6 +110,7 @@ __metadata:
     react-aria: "npm:^3.33.1"
     react-aria-components: "npm:^1.2.1"
     react-color: "npm:^2.19.3"
+    react-contenteditable: "npm:^3.3.7"
     react-dnd: "npm:^16.0.1"
     react-dnd-html5-backend: "npm:^16.0.1"
     react-dom: "npm:18.2.0"
@@ -6028,7 +6029,6 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "actual@workspace:."
   dependencies:
-    "@types/react-color": "npm:^2"
     "@typescript-eslint/eslint-plugin": "npm:^8.1.0"
     "@typescript-eslint/parser": "npm:^8.1.0"
     confusing-browser-globals: "npm:^1.0.11"
@@ -6047,8 +6047,6 @@ __metadata:
     node-jq: "npm:^4.0.1"
     npm-run-all: "npm:^4.1.5"
     prettier: "npm:3.3.3"
-    react-color: "npm:^2.19.3"
-    react-contenteditable: "npm:^3.3.7"
     source-map-support: "npm:^0.5.21"
     typescript: "npm:^5.5.4"
     typescript-strict-plugin: "npm:^2.4.4"

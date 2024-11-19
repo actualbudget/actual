@@ -56,6 +56,7 @@
     "react": "18.2.0",
     "react-aria": "^3.33.1",
     "react-aria-components": "^1.2.1",
+    "react-color": "^2.19.3",
     "react-dnd": "^16.0.1",
     "react-dnd-html5-backend": "^16.0.1",
     "react-dom": "18.2.0",
