@@ -223,7 +223,7 @@ export function DonutGraph({
 
   // Sort the data in the pie chart
   const unsortedData = data[splitData];
-  const sortedData = unsortedData.sort((a, b) => getVal(a) - getVal(b));
+  const sortedData = unsortedData.toSorted((a, b) => getVal(b) - getVal(a));
 
   return (
     <Container
