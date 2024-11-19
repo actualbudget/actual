@@ -1,24 +1,106 @@
 // @ts-strict-ignore
-import React from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
-import { isElectron } from 'loot-core/src/shared/environment';
+import {
+  isNonProductionEnvironment,
+  isElectron,
+} from 'loot-core/src/shared/environment';
 
 import { useActions } from '../../hooks/useActions';
+import { useGlobalPref } from '../../hooks/useGlobalPref';
 import { useNavigate } from '../../hooks/useNavigate';
 import { theme } from '../../style';
-import { Button } from '../common/Button2';
+import { Button, ButtonWithLoading } from '../common/Button2';
+import { BigInput } from '../common/Input';
+import { Link } from '../common/Link';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
-import { useSetServerURL } from '../ServerContext';
+import { useServerURL, useSetServerURL } from '../ServerContext';
 
 import { Title } from './subscribe/common';
 
 export function ConfigServer() {
   const { t } = useTranslation();
+  const { createBudget, signOut, loggedIn } = useActions();
   const navigate = useNavigate();
+  const [url, setUrl] = useState('');
+  const currentUrl = useServerURL();
   const setServerUrl = useSetServerURL();
-  const { loggedIn } = useActions();
+  useEffect(() => {
+    setUrl(currentUrl);
+  }, [currentUrl]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const restartElectronServer = useCallback(() => {
+    globalThis.window.Actual.restartElectronServer();
+    setError(null);
+  }, []);
+
+  const [_serverSelfSignedCert, setServerSelfSignedCert] = useGlobalPref(
+    'serverSelfSignedCert',
+    restartElectronServer,
+  );
+
+  function getErrorMessage(error: string) {
+    switch (error) {
+      case 'network-failure':
+        return t(
+          'Server is not running at this URL. Make sure you have HTTPS set up properly.',
+        );
+      default:
+        return t(
+          'Server does not look like an Actual server. Is it set up correctly?',
+        );
+    }
+  }
+
+  async function onSubmit() {
+    if (url === '' || loading) {
+      return;
+    }
+
+    setError(null);
+    setLoading(true);
+
+    let httpUrl = url;
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      httpUrl = 'https://' + url;
+    }
+
+    const { error } = await setServerUrl(httpUrl);
+    setUrl(httpUrl);
+
+    if (error) {
+      setLoading(false);
+      setError(error);
+    } else {
+      setLoading(false);
+      await signOut();
+      navigate('/');
+    }
+  }
+
+  function onSameDomain() {
+    setUrl(window.location.origin);
+  }
+
+  async function onSelectSelfSignedCertificate() {
+    const selfSignedCertificateLocation = await window.Actual?.openFileDialog({
+      properties: ['openFile'],
+      filters: [
+        {
+          name: 'Self Signed Certificate',
+          extensions: ['crt', 'pem'],
+        },
+      ],
+    });
+
+    if (selfSignedCertificateLocation) {
+      setServerSelfSignedCert(selfSignedCertificateLocation[0]);
+    }
+  }
 
   async function onSkip() {
     await setServerUrl(null);
@@ -26,45 +108,156 @@ export function ConfigServer() {
     navigate('/');
   }
 
+  async function onCreateTestFile() {
+    await setServerUrl(null);
+    await createBudget({ testMode: true });
+    window.__navigate('/');
+  }
+
   return (
     <View style={{ maxWidth: 500, marginTop: -30 }}>
-      <Title text={t('Let’s set up your server!')} />
+      <Title text={t('Where’s the server?')} />
 
       <Text
         style={{
           fontSize: 16,
-          color: theme.pageText,
+          color: theme.tableRowHeaderText,
           lineHeight: 1.5,
         }}
       >
-        <Trans>
-          If you like, Actual can setup a server for you to sync your data
-          across devices.
-        </Trans>
+        {currentUrl ? (
+          <Trans>
+            Existing sessions will be logged out and you will log in to this
+            server. We will validate that Actual is running at this URL.
+          </Trans>
+        ) : (
+          <Trans>
+            There is no server configured. After running the server, specify the
+            URL here to use the app. You can always change this later. We will
+            validate that Actual is running at this URL.
+          </Trans>
+        )}
       </Text>
-      {isElectron() && (
+
+      {error && (
         <>
           <Text
             style={{
-              fontSize: 16,
-              color: theme.pageText,
-              lineHeight: 1.5,
+              marginTop: 20,
+              color: theme.errorText,
+              borderRadius: 4,
+              fontSize: 15,
             }}
           >
-            <Trans>
-              Would you like to host the server on your computer or connect to
-              an external server?
-            </Trans>
+            {getErrorMessage(error)}
           </Text>
-          <Button onPress={() => navigate('/config-server/internal')}>
-            Host on this computer
-          </Button>
+          {isElectron() && (
+            <View
+              style={{ display: 'flex', flexDirection: 'row', marginTop: 20 }}
+            >
+              <Text
+                style={{
+                  color: theme.errorText,
+                  borderRadius: 4,
+                  fontSize: 15,
+                }}
+              >
+                <Trans>
+                  If the server is using a self-signed certificate{' '}
+                  <Link
+                    variant="text"
+                    style={{ fontSize: 15 }}
+                    onClick={onSelectSelfSignedCertificate}
+                  >
+                    select it here
+                  </Link>
+                  .
+                </Trans>
+              </Text>
+            </View>
+          )}
         </>
       )}
-      <Button onPress={() => navigate('/config-server/external')}>
-        Connect to an external server
-      </Button>
-      <Button onPress={onSkip}>I don’t want a server</Button>
+
+      <View style={{ display: 'flex', flexDirection: 'row', marginTop: 30 }}>
+        <BigInput
+          autoFocus={true}
+          placeholder={t('https://example.com')}
+          value={url || ''}
+          onChangeValue={setUrl}
+          style={{ flex: 1, marginRight: 10 }}
+          onEnter={onSubmit}
+        />
+        <ButtonWithLoading
+          variant="primary"
+          isLoading={loading}
+          style={{ fontSize: 15 }}
+          onPress={onSubmit}
+        >
+          {t('OK')}
+        </ButtonWithLoading>
+        {currentUrl && (
+          <Button
+            variant="bare"
+            style={{ fontSize: 15, marginLeft: 10 }}
+            onPress={() => navigate(-1)}
+          >
+            {t('Cancel')}
+          </Button>
+        )}
+      </View>
+
+      <View
+        style={{
+          flexDirection: 'row',
+          flexFlow: 'row wrap',
+          justifyContent: 'center',
+          marginTop: 15,
+        }}
+      >
+        {currentUrl ? (
+          <Button
+            variant="bare"
+            style={{ color: theme.pageTextLight }}
+            onPress={onSkip}
+          >
+            {t('Stop using a server')}
+          </Button>
+        ) : (
+          <>
+            {!isElectron() && (
+              <Button
+                variant="bare"
+                style={{
+                  color: theme.pageTextLight,
+                  margin: 5,
+                  marginRight: 15,
+                }}
+                onPress={onSameDomain}
+              >
+                {t('Use current domain')}
+              </Button>
+            )}
+            <Button
+              variant="bare"
+              style={{ color: theme.pageTextLight, margin: 5 }}
+              onPress={onSkip}
+            >
+              {t('Don’t use a server')}
+            </Button>
+
+            {isNonProductionEnvironment() && (
+              <Button
+                variant="primary"
+                style={{ marginLeft: 15 }}
+                onPress={onCreateTestFile}
+              >
+                {t('Create test file')}
+              </Button>
+            )}
+          </>
+        )}
+      </View>
     </View>
   );
 }

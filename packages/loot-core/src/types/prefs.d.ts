@@ -1,6 +1,5 @@
 export type FeatureFlag =
   | 'dashboards'
-  | 'reportBudget'
   | 'goalTemplatesEnabled'
   | 'actionTemplating'
   | 'upcomingLengthAdjustment'
