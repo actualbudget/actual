@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { useState, type CSSProperties } from 'react';
+import React, { useMemo, useState, type CSSProperties } from 'react';
 
 import { PieChart, Pie, Cell, Sector, ResponsiveContainer } from 'recharts';
 
@@ -40,14 +40,14 @@ const ActiveShapeMobile = props => {
 
   return (
     <g>
-      <text x={cx} y={cy + 70} dy={-8} textAnchor="middle" fill={fill}>
+      <text x={cx} y={cy + 70} dy={0} textAnchor="middle" fill={fill}>
         {`${yAxis}`}
       </text>
       <PrivacyFilter>
-        <text x={cx - 40} y={cy + 40} dy={0} textAnchor="end" fill={fill}>
+        <text x={cx - 50} y={cy + 40} dy={0} textAnchor="end" fill={fill}>
           {`${amountToCurrency(value)}`}
         </text>
-        <text x={cx + 45} y={cy + 40} dy={0} textAnchor="start" fill="#999">
+        <text x={cx + 50} y={cy + 40} dy={0} textAnchor="start" fill="#999">
           {`${(percent * 100).toFixed(2)}%`}
         </text>
       </PrivacyFilter>
@@ -211,7 +211,7 @@ export function DonutGraph({
   const accounts = useAccounts();
   const [pointer, setPointer] = useState('');
 
-  const getVal = obj => {
+  const getVal = (obj: DataEntity) => {
     if (['totalDebts', 'netDebts'].includes(balanceTypeOp)) {
       return -1 * obj[balanceTypeOp];
     } else {
@@ -221,6 +221,12 @@ export function DonutGraph({
 
   const [activeIndex, setActiveIndex] = useState(0);
 
+  // Sort the data in the pie chart
+  const unsortedData = data[splitData];
+  const sortedData = useMemo(() => {
+    return unsortedData.sort((a, b) => a[balanceTypeOp] - b[balanceTypeOp]);
+  }, [unsortedData, balanceTypeOp]);
+
   return (
     <Container
       style={{
@@ -229,7 +235,7 @@ export function DonutGraph({
       }}
     >
       {(width, height) =>
-        data[splitData] && (
+        sortedData && (
           <ResponsiveContainer>
             <div>
               {!compact && <div style={{ marginTop: '15px' }} />}
@@ -244,13 +250,15 @@ export function DonutGraph({
                   dataKey={val => getVal(val)}
                   nameKey={yAxis}
                   isAnimationActive={false}
-                  data={data[splitData]}
+                  data={sortedData}
                   innerRadius={Math.min(width, height) * 0.2}
                   fill="#8884d8"
                   labelLine={false}
                   label={e =>
                     viewLabels && !compact ? customLabel(e) : <div />
                   }
+                  startAngle={90}
+                  endAngle={-270}
                   onMouseLeave={() => setPointer('')}
                   onMouseEnter={(_, index) => {
                     setActiveIndex(index);
