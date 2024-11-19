@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { useMemo, useState, type CSSProperties } from 'react';
+import React, { useState, type CSSProperties } from 'react';
 
 import { PieChart, Pie, Cell, Sector, ResponsiveContainer } from 'recharts';
 
@@ -223,9 +223,7 @@ export function DonutGraph({
 
   // Sort the data in the pie chart
   const unsortedData = data[splitData];
-  const sortedData = useMemo(() => {
-    return unsortedData.sort((a, b) => getVal(a) - getVal(b));
-  }, [unsortedData, getVal]);
+  const sortedData = unsortedData.sort((a, b) => getVal(a) - getVal(b));
 
   return (
     <Container
