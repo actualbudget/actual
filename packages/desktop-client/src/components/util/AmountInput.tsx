@@ -107,7 +107,6 @@ export function AmountInput({
   }
 
   function onInputAmountBlur(e) {
-    fireUpdate(negative);
     if (!ref.current?.contains(e.relatedTarget)) {
       const amount = getAmount();
       fireUpdate(amount);
