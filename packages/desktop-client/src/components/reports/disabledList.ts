@@ -3,19 +3,19 @@ import { t } from 'i18next';
 const intervalOptions = [
   {
     description: t('Daily'),
-    defaultRange: t('This month'),
+    defaultRange: 'This month',
   },
   {
     description: t('Weekly'),
-    defaultRange: t('Last 3 months'),
+    defaultRange: 'Last 3 months',
   },
   {
     description: t('Monthly'),
-    defaultRange: t('Last 6 months'),
+    defaultRange: 'Last 6 months',
   },
   {
     description: t('Yearly'),
-    defaultRange: t('Year to date'),
+    defaultRange: 'Year to date',
   },
 ];
 

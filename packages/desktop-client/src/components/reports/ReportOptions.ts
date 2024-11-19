@@ -61,7 +61,7 @@ export type dateRangeProps = {
 
 const dateRangeOptions: dateRangeProps[] = [
   {
-    description: 'This week',
+    description: t('This week'),
     name: 0,
     type: 'Week',
     Daily: true,
@@ -70,7 +70,7 @@ const dateRangeOptions: dateRangeProps[] = [
     Yearly: false,
   },
   {
-    description: 'Last week',
+    description: t('Last week'),
     name: 1,
     type: 'Week',
     Daily: true,
@@ -79,7 +79,7 @@ const dateRangeOptions: dateRangeProps[] = [
     Yearly: false,
   },
   {
-    description: 'This month',
+    description: t('This month'),
     name: 0,
     type: 'Month',
     Daily: true,
@@ -88,7 +88,7 @@ const dateRangeOptions: dateRangeProps[] = [
     Yearly: false,
   },
   {
-    description: 'Last month',
+    description: t('Last month'),
     name: 1,
     type: 'Month',
     Daily: true,
@@ -97,7 +97,7 @@ const dateRangeOptions: dateRangeProps[] = [
     Yearly: false,
   },
   {
-    description: 'Last 3 months',
+    description: t('Last 3 months'),
     name: 3,
     type: 'Month',
     Daily: true,
@@ -106,7 +106,7 @@ const dateRangeOptions: dateRangeProps[] = [
     Yearly: false,
   },
   {
-    description: 'Last 6 months',
+    description: t('Last 6 months'),
     name: 6,
     type: 'Month',
     Daily: false,
@@ -115,7 +115,7 @@ const dateRangeOptions: dateRangeProps[] = [
     Yearly: false,
   },
   {
-    description: 'Last 12 months',
+    description: t('Last 12 months'),
     name: 12,
     type: 'Month',
     Daily: false,
@@ -124,7 +124,7 @@ const dateRangeOptions: dateRangeProps[] = [
     Yearly: false,
   },
   {
-    description: 'Year to date',
+    description: t('Year to date'),
     name: 'yearToDate',
     type: 'Month',
     Daily: false,
@@ -133,7 +133,7 @@ const dateRangeOptions: dateRangeProps[] = [
     Yearly: true,
   },
   {
-    description: 'Last year',
+    description: t('Last year'),
     name: 'lastYear',
     type: 'Month',
     Daily: false,
@@ -142,7 +142,7 @@ const dateRangeOptions: dateRangeProps[] = [
     Yearly: true,
   },
   {
-    description: 'All time',
+    description: t('All time'),
     name: 'allTime',
     type: 'Month',
     Daily: false,
