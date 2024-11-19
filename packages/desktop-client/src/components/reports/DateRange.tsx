@@ -1,4 +1,5 @@
 import React, { type ReactElement } from 'react';
+import { Trans } from 'react-i18next';
 
 import * as d from 'date-fns';
 
@@ -36,39 +37,45 @@ export function DateRange({ start, end, type }: DateRangeProps): ReactElement {
   } else {
     return (
       <Text style={{ ...styles.mediumText, color: theme.errorText }}>
-        There was a problem loading your date range
+        <Trans>There was a problem loading your date range</Trans>
       </Text>
     );
+  }
+
+  const formattedStartDate = d.format(startDate, 'MMM yyyy');
+  const formattedEndDate = d.format(endDate, 'MMM yyyy');
+  let typeOrFormattedEndDate: string;
+
+  if (type && ['budget', 'average'].includes(type)) {
+    typeOrFormattedEndDate = type === 'budget' ? 'budgeted' : type;
+  } else {
+    typeOrFormattedEndDate = formattedEndDate;
   }
 
   let content: string | ReactElement;
   if (['budget', 'average'].includes(type || '')) {
     content = (
       <div>
-        Compare {d.format(startDate, 'MMM yyyy')} to{' '}
-        {type === 'budget' ? 'budgeted' : 'average'}
+        <Trans>
+          Compare {{ formattedStartDate }} to {{ typeOrFormattedEndDate }}
+        </Trans>
       </div>
     );
-  } else if (startDate.getFullYear() !== endDate.getFullYear()) {
+  } else if (
+    startDate.getFullYear() !== endDate.getFullYear() ||
+    startDate.getMonth() !== endDate.getMonth()
+  ) {
     content = (
       <div>
-        {type && 'Compare '}
-        {d.format(startDate, 'MMM yyyy')}
-        {type ? ' to ' : ' - '}
-        {['budget', 'average'].includes(type || '')
-          ? type
-          : d.format(endDate, 'MMM yyyy')}
-      </div>
-    );
-  } else if (startDate.getMonth() !== endDate.getMonth()) {
-    content = (
-      <div>
-        {type && 'Compare '}
-        {d.format(startDate, 'MMM yyyy')}
-        {type ? ' to ' : ' - '}
-        {['budget', 'average'].includes(type || '')
-          ? type
-          : d.format(endDate, 'MMM yyyy')}
+        {type ? (
+          <Trans>
+            Compare {{ formattedStartDate }} to {{ typeOrFormattedEndDate }}
+          </Trans>
+        ) : (
+          <Trans>
+            {{ formattedStartDate }} - {{ formattedEndDate }}
+          </Trans>
+        )}
       </div>
     );
   } else {
