@@ -228,7 +228,7 @@ export const RuleRow = memo(
         </Field>
 
         <Cell name="edit" plain style={{ padding: '0 15px', paddingLeft: 5 }}>
-          <Button onPress={() => onEditRule(rule)}>Edit</Button>
+          <Button onPress={() => onEditRule(rule)}>{t('Edit')}</Button>
         </Cell>
       </Row>
     );

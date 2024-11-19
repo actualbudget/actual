@@ -149,7 +149,7 @@ export function SidebarGroup({
                   { name: 'rename', text: t('Rename') },
                   !group.is_income && {
                     name: 'toggle-visibility',
-                    text: group.hidden ? t('Show') : t('Hide'),
+                    text: group.hidden ? 'Show' : 'Hide',
                   },
                   onDelete && { name: 'delete', text: t('Delete') },
                   ...(isGoalTemplatesEnabled

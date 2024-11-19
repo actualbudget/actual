@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 
 import deepEqual from 'deep-equal';
+import { t } from 'i18next';
 
 import { amountToInteger } from 'loot-core/src/shared/util';
 
@@ -726,7 +727,7 @@ export function ImportTransactionsModal({ options }) {
         <>
           <ModalHeader
             title={
-              'Import transactions' +
+              t('Import transactions') +
               (filetype ? ` (${filetype.toUpperCase()})` : '')
             }
             rightContent={<ModalCloseButton onPress={close} />}
@@ -767,7 +768,7 @@ export function ImportTransactionsModal({ options }) {
                         fontStyle: 'italic',
                       }}
                     >
-                      No transactions found
+                      {t('No transactions found')}
                     </View>
                   );
                 }}
@@ -805,7 +806,9 @@ export function ImportTransactionsModal({ options }) {
                 <strong>Error:</strong> {error.message}
               </Text>
               {error.parsed && (
-                <Button onPress={() => onNewFile()}>Select new file...</Button>
+                <Button onPress={() => onNewFile()}>
+                  {t('Select new file...')}
+                </Button>
               )}
             </View>
           )}
@@ -837,7 +840,7 @@ export function ImportTransactionsModal({ options }) {
                 );
               }}
             >
-              Use Memo as a fallback for empty Payees
+              {t('Use Memo as a fallback for empty Payees')}
             </CheckboxOption>
           )}
           {(isOfxFile(filetype) || isCamtFile(filetype)) && (
@@ -848,7 +851,7 @@ export function ImportTransactionsModal({ options }) {
                 setReconcile(!reconcile);
               }}
             >
-              Merge with existing transactions
+              {t('Merge with existing transactions')}
             </CheckboxOption>
           )}
 
@@ -879,7 +882,7 @@ export function ImportTransactionsModal({ options }) {
                 {/* CSV Options */}
                 {filetype === 'csv' && (
                   <View style={{ marginLeft: 10, gap: 5 }}>
-                    <SectionLabel title="CSV OPTIONS" />
+                    <SectionLabel title={t('CSV OPTIONS')} />
                     <label
                       style={{
                         display: 'flex',
@@ -888,7 +891,7 @@ export function ImportTransactionsModal({ options }) {
                         alignItems: 'baseline',
                       }}
                     >
-                      Delimiter:
+                      {t('Delimiter:')}
                       <Select
                         options={[
                           [',', ','],
@@ -919,7 +922,7 @@ export function ImportTransactionsModal({ options }) {
                         alignItems: 'baseline',
                       }}
                     >
-                      Skip lines:
+                      {t('Skip lines:')}
                       <Input
                         type="number"
                         value={skipLines}
@@ -953,7 +956,7 @@ export function ImportTransactionsModal({ options }) {
                         );
                       }}
                     >
-                      File has header row
+                      {t('File has header row')}
                     </CheckboxOption>
                     <CheckboxOption
                       id="clear_on_import"
@@ -962,7 +965,7 @@ export function ImportTransactionsModal({ options }) {
                         setClearOnImport(!clearOnImport);
                       }}
                     >
-                      Clear transactions on import
+                      {t('Clear transactions on import')}
                     </CheckboxOption>
                     <CheckboxOption
                       id="form_dont_reconcile"
@@ -971,7 +974,7 @@ export function ImportTransactionsModal({ options }) {
                         setReconcile(!reconcile);
                       }}
                     >
-                      Merge with existing transactions
+                      {t('Merge with existing transactions')}
                     </CheckboxOption>
                   </View>
                 )}
@@ -979,7 +982,7 @@ export function ImportTransactionsModal({ options }) {
                 <View style={{ flex: 1 }} />
 
                 <View style={{ marginRight: 10, gap: 5 }}>
-                  <SectionLabel title="AMOUNT OPTIONS" />
+                  <SectionLabel title={t('AMOUNT OPTIONS')} />
                   <CheckboxOption
                     id="form_flip"
                     checked={flipAmount}
@@ -989,7 +992,7 @@ export function ImportTransactionsModal({ options }) {
                       runImportPreview();
                     }}
                   >
-                    Flip amount
+                    {t('Flip amount')}
                   </CheckboxOption>
                   {filetype === 'csv' && (
                     <>
@@ -1002,7 +1005,7 @@ export function ImportTransactionsModal({ options }) {
                           runImportPreview();
                         }}
                       >
-                        Split amount into separate inflow/outflow columns
+                        {t('Split amount into separate inflow/outflow columns')}
                       </CheckboxOption>
                       <InOutOption
                         inOutMode={inOutMode}
@@ -1060,7 +1063,7 @@ export function ImportTransactionsModal({ options }) {
                     trans => !trans.isMatchedTransaction && trans.selected,
                   ).length
                 }{' '}
-                transactions
+                {t('transactions')}
               </ButtonWithLoading>
             </View>
           </View>

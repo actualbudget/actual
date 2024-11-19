@@ -3,6 +3,8 @@ import React, {
   type CSSProperties,
 } from 'react';
 
+import { t } from 'i18next';
+
 import { trackingBudget } from 'loot-core/client/queries';
 import { amountToInteger, integerToAmount } from 'loot-core/shared/util';
 
@@ -75,7 +77,7 @@ export function TrackingBudgetMenuModal({
                 fontWeight: 400,
               }}
             >
-              Budgeted
+              {t('Budgeted')}
             </Text>
             <FocusableAmountInput
               value={integerToAmount(budgeted || 0)}
