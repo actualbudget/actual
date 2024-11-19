@@ -224,8 +224,8 @@ export function DonutGraph({
   // Sort the data in the pie chart
   const unsortedData = data[splitData];
   const sortedData = useMemo(() => {
-    return unsortedData.sort((a, b) => a[balanceTypeOp] - b[balanceTypeOp]);
-  }, [unsortedData, balanceTypeOp]);
+    return unsortedData.sort((a, b) => getVal(a) - getVal(b));
+  }, [unsortedData, getVal]);
 
   return (
     <Container
