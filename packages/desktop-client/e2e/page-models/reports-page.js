@@ -24,9 +24,7 @@ export class ReportsPage {
     await this.pageContent
       .getByRole('button', { name: 'Add new widget' })
       .click();
-    await this.pageContent
-      .getByRole('button', { name: 'New custom report' })
-      .click();
+    await this.page.getByRole('button', { name: 'New custom report' }).click();
     return new CustomReportPage(this.page);
   }
 
