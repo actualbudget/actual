@@ -22,7 +22,7 @@ import { useServerVersion } from '../ServerContext';
 import { BudgetList } from './BudgetList';
 import { ConfigExternalSyncServer } from './ConfigExternalSyncServer';
 import { ConfigInternalSyncServer } from './ConfigInternalSyncServer';
-import { ConfigServer } from './ConfigServer';
+import { ConfigServer, loader as ConfigServerLoader } from './ConfigServer';
 import { ServerURL } from './ServerURL';
 import { Bootstrap } from './subscribe/Bootstrap';
 import { ChangePassword } from './subscribe/ChangePassword';

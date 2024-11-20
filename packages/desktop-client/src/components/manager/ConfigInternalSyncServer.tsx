@@ -3,6 +3,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Group, NumberField } from 'react-aria-components';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { loggedIn } from 'loot-core/client/actions';
+
 import { useGlobalPref } from '../../hooks/useGlobalPref';
 import { useNavigate } from '../../hooks/useNavigate';
 import { styles, theme } from '../../style';
@@ -11,9 +13,9 @@ import { Input } from '../common/Input';
 import { Label } from '../common/Label';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
+import { useResponsive } from '../responsive/ResponsiveProvider';
 
 import { Title } from './subscribe/common';
-import { useResponsive } from '../responsive/ResponsiveProvider';
 
 export function ConfigInternalSyncServer() {
   const { t } = useTranslation();
@@ -36,7 +38,8 @@ export function ConfigInternalSyncServer() {
       }
     : {};
 
-  const [ngrokConfig] = useGlobalPref('ngrokConfig');
+  const [ngrokConfig, setNgrokConfig] = useGlobalPref('ngrokConfig');
+
   const exposeActualServer = async () => {
     const hasRequiredNgrokSettings =
       ngrokConfig?.authToken && ngrokConfig?.port && ngrokConfig?.domain;
@@ -61,6 +64,21 @@ export function ConfigInternalSyncServer() {
       [name]: value,
     });
   };
+
+  function onStopUsingInternalServer() {
+    setNgrokConfig(undefined);
+    loggedIn();
+    navigate('/');
+  }
+
+  function onBack() {
+    // If ngrok is setup, go back to files manager, otherwise go to server setup
+    if (ngrokConfig) {
+      navigate('/');
+    } else {
+      navigate(-1);
+    }
+  }
 
   return (
     <View style={{ maxWidth: 500, marginTop: -30 }}>
@@ -122,14 +140,27 @@ export function ConfigInternalSyncServer() {
           />
         </View>
       </View>
-      <View>
-        <Button onPress={() => navigate(-1)}>Back</Button>
+      <View
+        style={{
+          flexDirection: 'row',
+          flexFlow: 'row wrap',
+          justifyContent: 'center',
+          marginTop: 15,
+          gap: '10px',
+        }}
+      >
+        <Button onPress={onBack}>Back</Button>
+        {ngrokConfig && (
+          <Button onPress={onStopUsingInternalServer}>
+            Stop using internal server
+          </Button>
+        )}
+
         <Button
           variant="primary"
           onPress={startActualServer}
           style={{
             ...narrowButtonStyle,
-            marginLeft: 10,
           }}
         >
           Start Server
@@ -139,7 +170,6 @@ export function ConfigInternalSyncServer() {
           onPress={exposeActualServer}
           style={{
             ...narrowButtonStyle,
-            marginLeft: 10,
           }}
         >
           Expose Server

@@ -1,6 +1,7 @@
 // @ts-strict-ignore
 import React, { useState, useEffect, useCallback } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
+import { type To } from 'react-router-dom';
 
 import {
   isNonProductionEnvironment,
@@ -109,19 +110,19 @@ export function ConfigExternalSyncServer() {
     }
   }
 
-  async function onSkip() {
-    await setServerUrl(null);
-    await loggedIn();
+  function onStopUsingExternalServer() {
+    setServerUrl(null);
+    loggedIn();
     navigate('/');
   }
 
-  async function onCreateTestFile() {
-    await setServerUrl(null);
-    await createBudget({ testMode: true });
-    window.__navigate('/');
-  }
-
-  if (isElectron()) {
+  function onBack() {
+    // If server url is setup, go back to files manager, otherwise go to server setup
+    if (currentUrl) {
+      navigate('/');
+    } else {
+      navigate(-1);
+    }
   }
 
   return (
@@ -142,8 +143,7 @@ export function ConfigExternalSyncServer() {
           </Trans>
         ) : (
           <Trans>
-            There is no server configured. After running the server, specify the
-            URL here to use the app. You can always change this later. We will
+            After running the server, specify the URL here to use it. We will
             validate that Actual is running at this URL.
           </Trans>
         )}
@@ -216,56 +216,20 @@ export function ConfigExternalSyncServer() {
           </Button>
         )}
       </View>
-
       <View
         style={{
           flexDirection: 'row',
           flexFlow: 'row wrap',
           justifyContent: 'center',
           marginTop: 15,
+          gap: '10px',
         }}
       >
-        {currentUrl ? (
-          <Button
-            variant="bare"
-            style={{ color: theme.pageTextLight }}
-            onPress={onSkip}
-          >
-            {t('Stop using a server')}
+        <Button onPress={onBack}>Back</Button>
+        {currentUrl && (
+          <Button onPress={onStopUsingExternalServer}>
+            Stop using external server
           </Button>
-        ) : (
-          <>
-            {!isElectron() && (
-              <Button
-                variant="bare"
-                style={{
-                  color: theme.pageTextLight,
-                  margin: 5,
-                  marginRight: 15,
-                }}
-                onPress={onSameDomain}
-              >
-                {t('Use current domain')}
-              </Button>
-            )}
-            <Button
-              variant="bare"
-              style={{ color: theme.pageTextLight, margin: 5 }}
-              onPress={onSkip}
-            >
-              {t('Don’t use a server')}
-            </Button>
-
-            {isNonProductionEnvironment() && (
-              <Button
-                variant="primary"
-                style={{ marginLeft: 15 }}
-                onPress={onCreateTestFile}
-              >
-                {t('Create test file')}
-              </Button>
-            )}
-          </>
         )}
       </View>
     </View>

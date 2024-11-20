@@ -1,6 +1,7 @@
 // @ts-strict-ignore
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useEffect } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
+import { redirect } from 'react-router-dom';
 
 import {
   isNonProductionEnvironment,
@@ -11,9 +12,7 @@ import { useActions } from '../../hooks/useActions';
 import { useGlobalPref } from '../../hooks/useGlobalPref';
 import { useNavigate } from '../../hooks/useNavigate';
 import { theme } from '../../style';
-import { Button, ButtonWithLoading } from '../common/Button2';
-import { BigInput } from '../common/Input';
-import { Link } from '../common/Link';
+import { Button } from '../common/Button2';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { useServerURL, useSetServerURL } from '../ServerContext';
@@ -22,85 +21,18 @@ import { Title } from './subscribe/common';
 
 export function ConfigServer() {
   const { t } = useTranslation();
-  const { createBudget, signOut, loggedIn } = useActions();
+  const { createBudget, loggedIn } = useActions();
   const navigate = useNavigate();
-  const [url, setUrl] = useState('');
   const currentUrl = useServerURL();
+  const [ngrokConfig] = useGlobalPref('ngrokConfig');
   const setServerUrl = useSetServerURL();
-  useEffect(() => {
-    setUrl(currentUrl);
-  }, [currentUrl]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const onShowExternalConfiguration = () => {
+    navigate('/config-server/external');
+  };
 
-  const restartElectronServer = useCallback(() => {
-    globalThis.window.Actual.restartElectronServer();
-    setError(null);
-  }, []);
-
-  const [_serverSelfSignedCert, setServerSelfSignedCert] = useGlobalPref(
-    'serverSelfSignedCert',
-    restartElectronServer,
-  );
-
-  function getErrorMessage(error: string) {
-    switch (error) {
-      case 'network-failure':
-        return t(
-          'Server is not running at this URL. Make sure you have HTTPS set up properly.',
-        );
-      default:
-        return t(
-          'Server does not look like an Actual server. Is it set up correctly?',
-        );
-    }
-  }
-
-  async function onSubmit() {
-    if (url === '' || loading) {
-      return;
-    }
-
-    setError(null);
-    setLoading(true);
-
-    let httpUrl = url;
-    if (!url.startsWith('http://') && !url.startsWith('https://')) {
-      httpUrl = 'https://' + url;
-    }
-
-    const { error } = await setServerUrl(httpUrl);
-    setUrl(httpUrl);
-
-    if (error) {
-      setLoading(false);
-      setError(error);
-    } else {
-      setLoading(false);
-      await signOut();
-      navigate('/');
-    }
-  }
-
-  function onSameDomain() {
-    setUrl(window.location.origin);
-  }
-
-  async function onSelectSelfSignedCertificate() {
-    const selfSignedCertificateLocation = await window.Actual?.openFileDialog({
-      properties: ['openFile'],
-      filters: [
-        {
-          name: 'Self Signed Certificate',
-          extensions: ['crt', 'pem'],
-        },
-      ],
-    });
-
-    if (selfSignedCertificateLocation) {
-      setServerSelfSignedCert(selfSignedCertificateLocation[0]);
-    }
-  }
+  const onShowInternalConfiguration = () => {
+    navigate('/config-server/internal');
+  };
 
   async function onSkip() {
     await setServerUrl(null);
@@ -114,98 +46,80 @@ export function ConfigServer() {
     window.__navigate('/');
   }
 
+  // let serverConfiguration = undefined;
+  // if (currentUrl) {
+  //   serverConfiguration = 'external';
+  // } else if (ngrokConfig) {
+  //   serverConfiguration = 'internal';
+  // }
+  useEffect(() => {
+    // If user has already setup server navigate them to the configure screen
+    // TODO: make an easy setting to determin if internal or external server is setup
+    if (currentUrl) {
+      // external
+      navigate('/config-server/external');
+    } else if (ngrokConfig) {
+      // internal
+      navigate('/config-server/internal');
+    }
+  }, [currentUrl, navigate, ngrokConfig]);
+
   return (
     <View style={{ maxWidth: 500, marginTop: -30 }}>
-      <Title text={t('Where’s the server?')} />
+      <Title text={t('Setup your server')} />
 
-      <Text
-        style={{
-          fontSize: 16,
-          color: theme.tableRowHeaderText,
-          lineHeight: 1.5,
-        }}
-      >
-        {currentUrl ? (
-          <Trans>
-            Existing sessions will be logged out and you will log in to this
-            server. We will validate that Actual is running at this URL.
-          </Trans>
-        ) : (
-          <Trans>
-            There is no server configured. After running the server, specify the
-            URL here to use the app. You can always change this later. We will
-            validate that Actual is running at this URL.
-          </Trans>
-        )}
-      </Text>
-
-      {error && (
-        <>
+      {isElectron() && (
+        <View
+          style={{
+            flexDirection: 'column',
+            gap: '1rem',
+            alignItems: 'center',
+            marginBottom: '20px',
+          }}
+        >
           <Text
             style={{
-              marginTop: 20,
-              color: theme.errorText,
-              borderRadius: 4,
-              fontSize: 15,
+              fontSize: 16,
+              color: theme.pageText,
+              lineHeight: 1.5,
             }}
           >
-            {getErrorMessage(error)}
+            <Trans>
+              If you like, Actual can connect to a server for you to sync your
+              data across devices.
+            </Trans>
           </Text>
-          {isElectron() && (
-            <View
-              style={{ display: 'flex', flexDirection: 'row', marginTop: 20 }}
-            >
-              <Text
-                style={{
-                  color: theme.errorText,
-                  borderRadius: 4,
-                  fontSize: 15,
-                }}
-              >
-                <Trans>
-                  If the server is using a self-signed certificate{' '}
-                  <Link
-                    variant="text"
-                    style={{ fontSize: 15 }}
-                    onClick={onSelectSelfSignedCertificate}
-                  >
-                    select it here
-                  </Link>
-                  .
-                </Trans>
-              </Text>
-            </View>
-          )}
-        </>
-      )}
-
-      <View style={{ display: 'flex', flexDirection: 'row', marginTop: 30 }}>
-        <BigInput
-          autoFocus={true}
-          placeholder={t('https://example.com')}
-          value={url || ''}
-          onChangeValue={setUrl}
-          style={{ flex: 1, marginRight: 10 }}
-          onEnter={onSubmit}
-        />
-        <ButtonWithLoading
-          variant="primary"
-          isLoading={loading}
-          style={{ fontSize: 15 }}
-          onPress={onSubmit}
-        >
-          {t('OK')}
-        </ButtonWithLoading>
-        {currentUrl && (
-          <Button
-            variant="bare"
-            style={{ fontSize: 15, marginLeft: 10 }}
-            onPress={() => navigate(-1)}
+          <Text
+            style={{
+              fontSize: 16,
+              color: theme.pageText,
+              lineHeight: 1.5,
+            }}
           >
-            {t('Cancel')}
-          </Button>
-        )}
-      </View>
+            <Trans>
+              Would you like to host the server on your computer or connect to
+              an external server?
+            </Trans>
+          </Text>
+          <View
+            style={{
+              flexDirection: 'row',
+              flexFlow: 'row wrap',
+              justifyContent: 'center',
+              marginTop: 15,
+              gap: '15px',
+            }}
+          >
+            <Button onPress={onShowInternalConfiguration}>
+              Host on this computer
+            </Button>
+
+            <Button onPress={onShowExternalConfiguration}>
+              Connect to an external server
+            </Button>
+          </View>
+        </View>
+      )}
 
       <View
         style={{
@@ -225,19 +139,6 @@ export function ConfigServer() {
           </Button>
         ) : (
           <>
-            {!isElectron() && (
-              <Button
-                variant="bare"
-                style={{
-                  color: theme.pageTextLight,
-                  margin: 5,
-                  marginRight: 15,
-                }}
-                onPress={onSameDomain}
-              >
-                {t('Use current domain')}
-              </Button>
-            )}
             <Button
               variant="bare"
               style={{ color: theme.pageTextLight, margin: 5 }}
