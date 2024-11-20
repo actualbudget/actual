@@ -91,13 +91,12 @@ export const FIELD_TYPES = new Map<keyof FieldValueTypes, string>(
 
 export function isValidOp(field: keyof FieldValueTypes, op: RuleConditionOp) {
   const type = FIELD_TYPES.get(field);
-  if (!type) {
-    return false;
-  }
+
+  if (!type) return false;
+  if (fieldInfo[field].disallowedOps?.has(op)) return false;
+
   return (
-    (TYPE_INFO[type].ops.includes(op) ||
-      fieldInfo[field].internalOps?.has(op)) &&
-    !fieldInfo[field].disallowedOps?.has(op)
+    TYPE_INFO[type].ops.includes(op) || fieldInfo[field].internalOps?.has(op)
   );
 }
 
