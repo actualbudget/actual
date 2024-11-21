@@ -120,72 +120,64 @@ export function CalendarGraph({
                         gridAutoRows: '1fr',
                       }}
                     >
-                      {day.incomeValue !== 0 && (
-                        <>
-                          <View
-                            style={{
-                              textAlign: 'right',
-                              marginRight: 4,
-                            }}
-                          >
-                            Income:
-                          </View>
-                          <View
-                            style={{
-                              color: chartTheme.colors.blue,
-                              flexDirection: 'row',
-                            }}
-                          >
-                            {day.incomeValue !== 0 ? (
-                              <PrivacyFilter>
-                                {amountToCurrency(day.incomeValue)}
-                              </PrivacyFilter>
-                            ) : (
-                              ''
-                            )}
-                          </View>
-                          <View style={{ marginLeft: 4, flexDirection: 'row' }}>
-                            (
-                            <PrivacyFilter>
-                              {Math.round(day.incomeSize * 100) / 100 + '%'}
-                            </PrivacyFilter>
-                            )
-                          </View>
-                        </>
-                      )}
-                      {day.expenseValue !== 0 && (
-                        <>
-                          <View
-                            style={{
-                              textAlign: 'right',
-                              marginRight: 4,
-                            }}
-                          >
-                            Expenses:
-                          </View>
-                          <View
-                            style={{
-                              color: chartTheme.colors.red,
-                              flexDirection: 'row',
-                            }}
-                          >
-                            {day.expenseValue !== 0 ? (
-                              <PrivacyFilter>
-                                {amountToCurrency(day.expenseValue)}
-                              </PrivacyFilter>
-                            ) : (
-                              ''
-                            )}
-                          </View>
-                          <View style={{ marginLeft: 4, flexDirection: 'row' }}>
-                            (
-                            <PrivacyFilter>
-                              {Math.round(day.expenseSize * 100) / 100 + '%'}
-                            </PrivacyFilter>
-                            )
-                          </View>
-                        </>
-                      )}
+                      <View
+                        style={{
+                          textAlign: 'right',
+                          marginRight: 4,
+                        }}
+                      >
+                        Income:
+                      </View>
+                      <View
+                        style={{
+                          color: chartTheme.colors.blue,
+                          flexDirection: 'row',
+                        }}
+                      >
+                        {day.incomeValue !== 0 ? (
+                          <PrivacyFilter>
+                            {amountToCurrency(day.incomeValue)}
+                          </PrivacyFilter>
+                        ) : (
+                          ''
+                        )}
+                      </View>
+                      <View style={{ marginLeft: 4, flexDirection: 'row' }}>
+                        (
+                        <PrivacyFilter>
+                          {Math.round(day.incomeSize * 100) / 100 + '%'}
+                        </PrivacyFilter>
+                        )
+                      </View>
+                      <View
+                        style={{
+                          textAlign: 'right',
+                          marginRight: 4,
+                        }}
+                      >
+                        Expenses:
+                      </View>
+                      <View
+                        style={{
+                          color: chartTheme.colors.red,
+                          flexDirection: 'row',
+                        }}
+                      >
+                        {day.expenseValue !== 0 ? (
+                          <PrivacyFilter>
+                            {amountToCurrency(day.expenseValue)}
+                          </PrivacyFilter>
+                        ) : (
+                          ''
+                        )}
+                      </View>
+                      <View style={{ marginLeft: 4, flexDirection: 'row' }}>
+                        (
+                        <PrivacyFilter>
+                          {Math.round(day.expenseSize * 100) / 100 + '%'}
+                        </PrivacyFilter>
+                        )
+                      </View>
                     </View>
                   </View>
                 </View>

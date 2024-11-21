@@ -138,15 +138,23 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
 
     if (day && onApplyFilter) {
       onApplyFilter({
-        op: 'is',
-        field: 'date',
-        value: day,
+        conditions: [
+          ...widget?.meta?.conditions,
+          {
+            op: 'is',
+            field: 'date',
+            value: day,
+          } as RuleConditionEntity,
+        ],
+        conditionsOp: 'and',
+        id: [],
       });
     }
 
     if (month && onApplyFilter) {
       onApplyFilter({
         conditions: [
+          ...widget?.meta?.conditions,
           {
             field: 'date',
             op: 'is',
@@ -155,12 +163,12 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
               month: true,
             },
           },
-        ] as RuleConditionEntity[],
+        ],
         conditionsOp: 'and',
         id: [],
       });
     }
-  }, [parameters, onApplyFilter]);
+  }, [widget?.meta?.conditions, onApplyFilter, parameters]);
 
   const params = useMemo(() => {
     if (dirty === true) {
@@ -530,10 +538,10 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
                   <CalendarWithHeader
                     key={index}
                     calendar={calendar}
-                    totalIncome={totalIncome}
-                    totalExpense={totalExpense}
                     onApplyFilter={onApplyFilter}
                     firstDayOfWeekIdx={firstDayOfWeekIdx}
+                    conditions={conditions}
+                    conditionsOp={conditionsOp}
                   />
                 ))}
               </View>
@@ -652,13 +660,13 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
                     {!mobileTransactionsOpen && (
                       <>
                         <SvgCheveronUp width={16} height={16} />
-                        Show Transactions
+                        Show transactions
                       </>
                     )}
                     {mobileTransactionsOpen && (
                       <>
                         <SvgCheveronDown width={16} height={16} />
-                        Hide Transactions
+                        Hide transactions
                       </>
                     )}
                   </Button>
@@ -690,8 +698,6 @@ type CalendarWithHeaderProps = {
     totalExpense: number;
     totalIncome: number;
   };
-  totalIncome: number;
-  totalExpense: number;
   onApplyFilter: (
     conditions:
       | null
@@ -703,14 +709,16 @@ type CalendarWithHeaderProps = {
         },
   ) => void;
   firstDayOfWeekIdx: string;
+  conditions: RuleConditionEntity[];
+  conditionsOp: 'and' | 'or';
 };
 
 function CalendarWithHeader({
   calendar,
-  totalIncome,
-  totalExpense,
   onApplyFilter,
   firstDayOfWeekIdx,
+  conditions,
+  conditionsOp,
 }: CalendarWithHeaderProps) {
   return (
     <View
@@ -723,8 +731,8 @@ function CalendarWithHeader({
       }}
       onClick={() =>
         onApplyFilter({
-          conditions: [],
-          conditionsOp: 'and',
+          conditions: [...conditions.filter(f => f.field !== 'date')],
+          conditionsOp,
           id: [],
         })
       }
@@ -751,6 +759,7 @@ function CalendarWithHeader({
           onPress={() => {
             onApplyFilter({
               conditions: [
+                ...conditions,
                 {
                   field: 'date',
                   op: 'is',
@@ -770,79 +779,70 @@ function CalendarWithHeader({
         <View
           style={{ display: 'grid', gridTemplateColumns: '16px 1fr', gap: 2 }}
         >
-          {totalIncome ? (
-            <>
-              <SvgArrowThickUp
-                width={16}
-                height={16}
-                style={{ color: chartTheme.colors.blue, flexShrink: 0 }}
-              />
-              <View
-                style={{
-                  color: chartTheme.colors.blue,
-                  flexDirection: 'row',
-                  flexGrow: 1,
-                  justifyContent: 'start',
-                }}
-                aria-label="Income"
-              >
-                <PrivacyFilter>
-                  {amountToCurrency(calendar.totalIncome)}
-                </PrivacyFilter>
-              </View>
-            </>
-          ) : (
-            ''
-          )}
-          {totalExpense ? (
-            <>
-              <SvgArrowThickDown
-                width={16}
-                height={16}
-                style={{ color: chartTheme.colors.red, flexShrink: 0 }}
-              />
-              <View
-                style={{
-                  color: chartTheme.colors.red,
-                  flexDirection: 'row',
-                  flexGrow: 1,
-                  justifyContent: 'start',
-                }}
-                aria-label="Expenses"
-              >
-                <PrivacyFilter>
-                  {amountToCurrency(calendar.totalExpense)}
-                </PrivacyFilter>
-              </View>
-            </>
-          ) : (
-            ''
-          )}
+          <SvgArrowThickUp
+            width={16}
+            height={16}
+            style={{ color: chartTheme.colors.blue, flexShrink: 0 }}
+          />
+          <View
+            style={{
+              color: chartTheme.colors.blue,
+              flexDirection: 'row',
+              flexGrow: 1,
+              justifyContent: 'start',
+            }}
+            aria-label="Income"
+          >
+            <PrivacyFilter>
+              {amountToCurrency(calendar.totalIncome)}
+            </PrivacyFilter>
+          </View>
+          <SvgArrowThickDown
+            width={16}
+            height={16}
+            style={{ color: chartTheme.colors.red, flexShrink: 0 }}
+          />
+          <View
+            style={{
+              color: chartTheme.colors.red,
+              flexDirection: 'row',
+              flexGrow: 1,
+              justifyContent: 'start',
+            }}
+            aria-label="Expenses"
+          >
+            <PrivacyFilter>
+              {amountToCurrency(calendar.totalExpense)}
+            </PrivacyFilter>
+          </View>
         </View>
       </View>
       <View style={{ flexGrow: 1, display: 'block', marginBottom: 20 }}>
         <CalendarGraph
           data={calendar.data}
           start={calendar.start}
-          onDayClick={date =>
-            date
-              ? onApplyFilter({
-                  conditions: [
-                    {
-                      field: 'date',
-                      op: 'is',
-                      value: format(date, 'yyyy-MM-dd'),
-                    },
-                  ],
-                  conditionsOp: 'and',
-                  id: [],
-                })
-              : onApplyFilter({
-                  conditions: [],
-                  conditionsOp: 'and',
-                  id: [],
-                })
-          }
+          onDayClick={date => {
+            if (date) {
+              onApplyFilter({
+                conditions: [
+                  ...conditions.filter(f => f.field !== 'date'),
+                  {
+                    field: 'date',
+                    op: 'is',
+                    value: format(date, 'yyyy-MM-dd'),
+                  },
+                ],
+                conditionsOp: 'and',
+                id: [],
+              });
+            } else {
+              onApplyFilter({
+                conditions: [...conditions.filter(f => f.field !== 'date')],
+                conditionsOp: 'and',
+                id: [],
+              });
+            }
+          }}
           firstDayOfWeekIdx={firstDayOfWeekIdx}
         />
       </View>
@@ -894,48 +894,29 @@ function CalendarCardHeader({
               gridAutoRows: '1fr',
             }}
           >
-            {totalIncome !== 0 && (
-              <>
-                <View
-                  style={{
-                    textAlign: 'right',
-                    marginRight: 4,
-                  }}
-                >
-                  Income:
-                </View>
-                <View style={{ color: chartTheme.colors.blue }}>
-                  {totalIncome !== 0 ? (
-                    <PrivacyFilter>
-                      {amountToCurrency(totalIncome)}
-                    </PrivacyFilter>
-                  ) : (
-                    ''
-                  )}
-                </View>
-              </>
-            )}
-            {totalExpense !== 0 && (
-              <>
-                <View
-                  style={{
-                    textAlign: 'right',
-                    marginRight: 4,
-                  }}
-                >
-                  Expenses:
-                </View>
-                <View style={{ color: chartTheme.colors.red }}>
-                  {totalExpense !== 0 ? (
-                    <PrivacyFilter>
-                      {amountToCurrency(totalExpense)}
-                    </PrivacyFilter>
-                  ) : (
-                    ''
-                  )}
-                </View>
-              </>
-            )}
+            <View
+              style={{
+                textAlign: 'right',
+                marginRight: 4,
+              }}
+            >
+              Income:
+            </View>
+            <View style={{ color: chartTheme.colors.blue }}>
+              <PrivacyFilter>{amountToCurrency(totalIncome)}</PrivacyFilter>
+            </View>
+
+            <View
+              style={{
+                textAlign: 'right',
+                marginRight: 4,
+              }}
+            >
+              Expenses:
+            </View>
+            <View style={{ color: chartTheme.colors.red }}>
+              <PrivacyFilter>{amountToCurrency(totalExpense)}</PrivacyFilter>
+            </View>
           </View>
         </View>
       </View>
