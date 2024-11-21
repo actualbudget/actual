@@ -43,7 +43,7 @@ import {
 } from '../spreadsheets/calendar-spreadsheet';
 import { useReport } from '../useReport';
 
-type CalendarProps = {
+type CalendarCardProps = {
   widgetId: string;
   isEditing?: boolean;
   meta?: CalendarWidget['meta'];
