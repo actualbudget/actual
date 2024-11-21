@@ -4,7 +4,6 @@ import React, {
   useMemo,
   useRef,
   type Ref,
-  useLayoutEffect,
   useCallback,
 } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
@@ -133,7 +132,7 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
     onConditionsOpChange,
   } = useFilters(widget?.meta?.conditions, widget?.meta?.conditionsOp);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     const day = parameters.get('day');
     const month = parameters.get('month');
 
@@ -349,14 +348,17 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
     };
   }, [data]);
 
-  const onSort = (headerClicked: string, ascDesc: 'asc' | 'desc') => {
-    if (headerClicked === sortField) {
-      setAscDesc(ascDesc);
-    } else {
-      setSortField(headerClicked);
-      setAscDesc('desc');
-    }
-  };
+  const onSort = useCallback(
+    (headerClicked: string, ascDesc: 'asc' | 'desc') => {
+      if (headerClicked === sortField) {
+        setAscDesc(ascDesc);
+      } else {
+        setSortField(headerClicked);
+        setAscDesc('desc');
+      }
+    },
+    [sortField],
+  );
 
   const onOpenTransaction = useCallback(
     (transaction: TransactionEntity) => {

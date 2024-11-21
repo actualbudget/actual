@@ -278,7 +278,6 @@ function DayButton({ day, onPress, fontSize, resizeRef }: DayButtonProps) {
         />
       )}
       <View
-        className="bar positive-bar"
         style={{
           position: 'absolute',
           left: 0,
@@ -292,7 +291,6 @@ function DayButton({ day, onPress, fontSize, resizeRef }: DayButtonProps) {
       />
 
       <View
-        className="bar"
         style={{
           position: 'absolute',
           right: 0,
