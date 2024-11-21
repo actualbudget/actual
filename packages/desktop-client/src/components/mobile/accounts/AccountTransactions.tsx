@@ -22,7 +22,6 @@ import {
   SchedulesProvider,
 } from 'loot-core/client/data-hooks/schedules';
 import {
-  usePreviewTransactions,
   useTransactions,
   useTransactionsSearch,
 } from 'loot-core/client/data-hooks/transactions';
@@ -35,6 +34,7 @@ import {
   type TransactionEntity,
 } from 'loot-core/types/models';
 
+import { useAccountPreviewTransactions } from '../../../hooks/useAccountPreviewTransactions';
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import { useFailedAccounts } from '../../../hooks/useFailedAccounts';
 import { useNavigate } from '../../../hooks/useNavigate';
@@ -239,7 +239,9 @@ function TransactionListWithPreviews({
     query: transactionsQuery,
   });
 
-  const { data: previewTransactions } = usePreviewTransactions();
+  const { previewTransactions } = useAccountPreviewTransactions({
+    accountId: account?.id || '',
+  });
 
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const dispatch = useDispatch();

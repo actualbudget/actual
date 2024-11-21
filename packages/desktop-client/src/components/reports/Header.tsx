@@ -7,7 +7,6 @@ import {
   type TimeFrame,
 } from 'loot-core/types/models';
 
-import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { Button } from '../common/Button2';
 import { Select } from '../common/Select';
 import { SpaceBetween } from '../common/SpaceBetween';
@@ -62,7 +61,6 @@ export function Header({
   children,
 }: HeaderProps) {
   const { t } = useTranslation();
-  const isDashboardsFeatureEnabled = useFeatureFlag('dashboards');
   const { isNarrowWidth } = useResponsive();
 
   return (
@@ -80,7 +78,7 @@ export function Header({
         }}
       >
         <SpaceBetween gap={isNarrowWidth ? 5 : undefined}>
-          {isDashboardsFeatureEnabled && mode && (
+          {mode && (
             <Button
               variant={mode === 'static' ? 'normal' : 'primary'}
               onPress={() => {

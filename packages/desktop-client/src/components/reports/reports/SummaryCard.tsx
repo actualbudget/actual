@@ -7,7 +7,6 @@ import {
   type SummaryWidget,
 } from 'loot-core/types/models';
 
-import { useFeatureFlag } from '../../../hooks/useFeatureFlag';
 import { View } from '../../common/View';
 import { DateRange } from '../DateRange';
 import { LoadingIndicator } from '../LoadingIndicator';
@@ -34,7 +33,6 @@ export function SummaryCard({
   onRemove,
 }: SummaryCardProps) {
   const { t } = useTranslation();
-  const isDashboardsFeatureEnabled = useFeatureFlag('dashboards');
   const [start, end] = calculateTimeRange(meta?.timeFrame, {
     start: monthUtils.dayFromDate(monthUtils.currentMonth()),
     end: monthUtils.currentDay(),
@@ -75,11 +73,7 @@ export function SummaryCard({
   return (
     <ReportCard
       isEditing={isEditing}
-      to={
-        isDashboardsFeatureEnabled
-          ? `/reports/summary/${widgetId}`
-          : '/reports/summary'
-      }
+      to={`/reports/summary/${widgetId}`}
       menuItems={[
         {
           name: 'rename',

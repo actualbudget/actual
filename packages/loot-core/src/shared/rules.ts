@@ -54,7 +54,11 @@ const TYPE_INFO = {
 
 type FieldInfoConstraint = Record<
   keyof FieldValueTypes,
-  { type: keyof typeof TYPE_INFO; disallowedOps?: Set<RuleConditionOp> }
+  {
+    type: keyof typeof TYPE_INFO;
+    disallowedOps?: Set<RuleConditionOp>;
+    internalOps?: Set<RuleConditionOp>;
+  }
 >;
 
 const FIELD_INFO = {
@@ -67,11 +71,13 @@ const FIELD_INFO = {
   date: { type: 'date' },
   notes: { type: 'string' },
   amount: { type: 'number' },
-  category: { type: 'id' },
+  category: { type: 'id', internalOps: new Set(['and']) },
   account: { type: 'id' },
   cleared: { type: 'boolean' },
   reconciled: { type: 'boolean' },
   saved: { type: 'saved' },
+  transfer: { type: 'boolean' },
+  parent: { type: 'boolean' },
 } as const satisfies FieldInfoConstraint;
 
 const fieldInfo: FieldInfoConstraint = FIELD_INFO;
@@ -85,11 +91,12 @@ export const FIELD_TYPES = new Map<keyof FieldValueTypes, string>(
 
 export function isValidOp(field: keyof FieldValueTypes, op: RuleConditionOp) {
   const type = FIELD_TYPES.get(field);
-  if (!type) {
-    return false;
-  }
+
+  if (!type) return false;
+  if (fieldInfo[field].disallowedOps?.has(op)) return false;
+
   return (
-    TYPE_INFO[type].ops.includes(op) && !fieldInfo[field].disallowedOps?.has(op)
+    TYPE_INFO[type].ops.includes(op) || fieldInfo[field].internalOps?.has(op)
   );
 }
 
