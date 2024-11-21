@@ -30,7 +30,7 @@ type CalendarGraphProps = {
   }[];
   start: Date;
   firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'];
-  onDayClick: (date: Date) => void;
+  onDayClick: (date: Date | null) => void;
 };
 export function CalendarGraph({
   data,
@@ -68,6 +68,7 @@ export function CalendarGraph({
           gridAutoRows: '1fr',
           gap: 2,
         }}
+        onClick={() => onDayClick(null)}
       >
         {Array.from({ length: 7 }, (_, index) => (
           <View
@@ -99,7 +100,10 @@ export function CalendarGraph({
       >
         {data.map((day, index) =>
           !isSameMonth(day.date, startOfMonth(start)) ? (
-            <View key={`empty-${day.date.getTime()}`} />
+            <View
+              key={`empty-${day.date.getTime()}`}
+              onClick={() => onDayClick(null)}
+            />
           ) : day.incomeValue !== 0 || day.expenseValue !== 0 ? (
             <Tooltip
               key={day.date.getTime()}

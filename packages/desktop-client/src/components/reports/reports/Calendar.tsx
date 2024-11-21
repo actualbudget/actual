@@ -555,9 +555,7 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
         <SelectedProviderWithItems
           name="transactions"
           items={[]}
-          fetchAllIds={async () => {
-            return Promise.resolve([]);
-          }}
+          fetchAllIds={async () => []}
           registerDispatch={() => {}}
           selectAllFilter={(item: TransactionEntity) =>
             !item._unmatched && !item.is_parent
@@ -727,6 +725,13 @@ function CalendarWithHeader({
         borderRadius: 4,
         backgroundColor: theme.tableBackground,
       }}
+      onClick={() =>
+        onApplyFilter({
+          conditions: [],
+          conditionsOp: 'and',
+          id: [],
+        })
+      }
     >
       <View
         style={{
@@ -824,17 +829,23 @@ function CalendarWithHeader({
           data={calendar.data}
           start={calendar.start}
           onDayClick={date =>
-            onApplyFilter({
-              conditions: [
-                {
-                  field: 'date',
-                  op: 'is',
-                  value: format(date, 'yyyy-MM-dd'),
-                },
-              ],
-              conditionsOp: 'and',
-              id: [],
-            })
+            date
+              ? onApplyFilter({
+                  conditions: [
+                    {
+                      field: 'date',
+                      op: 'is',
+                      value: format(date, 'yyyy-MM-dd'),
+                    },
+                  ],
+                  conditionsOp: 'and',
+                  id: [],
+                })
+              : onApplyFilter({
+                  conditions: [],
+                  conditionsOp: 'and',
+                  id: [],
+                })
           }
           firstDayOfWeekIdx={firstDayOfWeekIdx}
         />

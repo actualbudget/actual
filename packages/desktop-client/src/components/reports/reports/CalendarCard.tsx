@@ -359,46 +359,47 @@ function CalendarCardInner({
     return measurements;
   }, []);
 
-  const debouncedResizeCallback = useRef(
-    debounce(() => {
-      const measurements = measureMonthFormats();
-      const containerWidth = monthNameContainerRef.current?.clientWidth ?? 0;
+  const debouncedResizeCallback = useMemo(
+    () =>
+      debounce(() => {
+        const measurements = measureMonthFormats();
+        const containerWidth = monthNameContainerRef.current?.clientWidth ?? 0;
 
-      const suitableFormat = measurements.find(m => containerWidth > m.width);
-      if (suitableFormat) {
+        const suitableFormat = measurements.find(m => containerWidth > m.width);
+        if (suitableFormat) {
+          if (
+            monthNameContainerRef.current &&
+            containerWidth > suitableFormat.width
+          ) {
+            setMonthNameFormats(prev => {
+              const newArray = [...prev];
+              newArray[index] = suitableFormat.format;
+              return newArray;
+            });
+
+            setMonthNameVisible(true);
+            return;
+          }
+        }
+
         if (
           monthNameContainerRef.current &&
-          containerWidth > suitableFormat.width
+          monthNameContainerRef.current.scrollWidth >
+            monthNameContainerRef.current.clientWidth
         ) {
-          setMonthNameFormats(prev => {
-            const newArray = [...prev];
-            newArray[index] = suitableFormat.format;
-            return newArray;
-          });
-
+          setMonthNameVisible(false);
+        } else {
           setMonthNameVisible(true);
-          return;
         }
-      }
-
-      if (
-        monthNameContainerRef.current &&
-        monthNameContainerRef.current.scrollWidth >
-          monthNameContainerRef.current.clientWidth
-      ) {
-        setMonthNameVisible(false);
-      } else {
-        setMonthNameVisible(true);
-      }
-    }, 20),
+      }, 20),
+    [measureMonthFormats, monthNameContainerRef, index, setMonthNameFormats],
   );
 
-  const monthNameResizeRef = useResizeObserver(debouncedResizeCallback.current);
+  const monthNameResizeRef = useResizeObserver(debouncedResizeCallback);
 
   useEffect(() => {
-    const debounce = debouncedResizeCallback?.current;
     return () => {
-      debounce?.clear();
+      debouncedResizeCallback?.clear();
     };
   }, [debouncedResizeCallback]);
 
@@ -524,11 +525,19 @@ function CalendarCardInner({
         start={calendar.start}
         firstDayOfWeekIdx={firstDayOfWeekIdx}
         onDayClick={date => {
-          navigate(
-            isDashboardsFeatureEnabled
-              ? `/reports/calendar/${widgetId}?day=${format(date, 'yyyy-MM-dd')}`
-              : '/reports/calendar',
-          );
+          if (date) {
+            navigate(
+              isDashboardsFeatureEnabled
+                ? `/reports/calendar/${widgetId}?day=${format(date, 'yyyy-MM-dd')}`
+                : '/reports/calendar',
+            );
+          } else {
+            navigate(
+              isDashboardsFeatureEnabled
+                ? `/reports/calendar/${widgetId}`
+                : '/reports/calendar',
+            );
+          }
         }}
       />
       <View style={{ fontWeight: 'bold', fontSize: '12px' }}>
