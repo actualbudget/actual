@@ -70,7 +70,7 @@ export function SummaryNumber({
             height: '100%',
             maxWidth: '100%',
             fontSize,
-            lineHeight: 0.85,
+            lineHeight: 1,
             margin: FONT_PADDING,
             justifyContent: 'center',
             transition: animate ? 'font-size 0.3s ease' : '',
