@@ -37,6 +37,8 @@ export function SummaryNumber({
 
   const displayAmount = amountToCurrency(Math.abs(value));
   const handleResize = debounce(() => {
+    if (!refDiv.current) return;
+
     const { clientWidth, clientHeight } = refDiv.current;
     const width = clientWidth - CONTAINER_MARGIN * 2; // margin left and right
     const height = clientHeight - CONTAINER_MARGIN * 2; // margin top and bottom
