@@ -13,7 +13,7 @@ import { chartTheme } from './chart-theme';
 import { LoadingIndicator } from './LoadingIndicator';
 
 const FONT_SIZE_SCALE_FACTOR = 1.6;
-const FONT_PADDING = 8;
+const CONTAINER_MARGIN = 8;
 
 type SummaryNumberProps = {
   value: number;
@@ -38,13 +38,12 @@ export function SummaryNumber({
   const displayAmount = amountToCurrency(Math.abs(value));
   const handleResize = debounce(() => {
     const { clientWidth, clientHeight } = refDiv.current;
-    const widthWithPadding = clientWidth - FONT_PADDING * 2; // padding left and right
-    const heightWithPadding = clientHeight - FONT_PADDING * 2; // padding top and bottom
+    const width = clientWidth - CONTAINER_MARGIN * 2; // margin left and right
+    const height = clientHeight - CONTAINER_MARGIN * 2; // margin top and bottom
 
     const calculatedFontSize = Math.min(
-      (widthWithPadding * FONT_SIZE_SCALE_FACTOR) /
-        displayAmount.toString().length,
-      heightWithPadding, // Ensure the text fits vertically by using the height as the limiting factor
+      (width * FONT_SIZE_SCALE_FACTOR) / displayAmount.toString().length,
+      height, // Ensure the text fits vertically by using the height as the limiting factor
     );
 
     setFontSize(calculatedFontSize);
@@ -71,7 +70,7 @@ export function SummaryNumber({
             maxWidth: '100%',
             fontSize,
             lineHeight: 1,
-            margin: FONT_PADDING,
+            margin: CONTAINER_MARGIN,
             justifyContent: 'center',
             transition: animate ? 'font-size 0.3s ease' : '',
             color: value < 0 ? chartTheme.colors.red : chartTheme.colors.blue,
