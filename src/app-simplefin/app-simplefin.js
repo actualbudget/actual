@@ -210,12 +210,13 @@ function getAccountResponse(results, accountId, startDate) {
       dateToUse = trans.posted;
     }
 
-    newTrans.bookingDate = getDate(new Date(dateToUse * 1000));
-    if (newTrans.bookingDate < startDate) {
+    const transactionDate = new Date(dateToUse * 1000);
+
+    if (transactionDate < startDate) {
       continue;
     }
 
-    newTrans.date = newTrans.bookingDate;
+    newTrans.date = getDate(transactionDate);
     newTrans.payeeName = trans.payee;
     newTrans.remittanceInformationUnstructured = trans.description;
     newTrans.transactionAmount = { amount: trans.amount, currency: 'USD' };
