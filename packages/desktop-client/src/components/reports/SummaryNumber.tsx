@@ -47,7 +47,10 @@ export function SummaryNumber({
     );
 
     setFontSize(calculatedFontSize);
-    fontSizeChanged(calculatedFontSize);
+
+    if (calculatedFontSize !== initialFontSize) {
+      fontSizeChanged(calculatedFontSize);
+    }
   }, 100);
 
   const ref = useResizeObserver(handleResize);
