@@ -139,7 +139,7 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
     if (day && onApplyFilter) {
       onApplyFilter({
         conditions: [
-          ...widget?.meta?.conditions,
+          ...(widget?.meta?.conditions || []),
           {
             op: 'is',
             field: 'date',
@@ -154,7 +154,7 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
     if (month && onApplyFilter) {
       onApplyFilter({
         conditions: [
-          ...widget?.meta?.conditions,
+          ...(widget?.meta?.conditions || []),
           {
             field: 'date',
             op: 'is',
@@ -428,13 +428,13 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
   const bind = useDrag(
     ({ offset: [, oy], cancel }) => {
       if (oy < 0) {
+        cancel();
         api.start({ y: 0, immediate: true });
         return;
-      } else {
-        api.start({ y: oy, immediate: true });
       }
+      api.start({ y: oy, immediate: true });
 
-      if (oy > 0 && mobileTransactionsOpen) {
+      if (oy > totalHeight * 0.6 && mobileTransactionsOpen) {
         cancel();
         close();
         setMobileTransactionsOpen(false);
@@ -446,13 +446,23 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
       from: () => [0, y.get()],
       filterTaps: true,
       bounds: {
-        top: -totalHeight,
+        top: -totalHeight + CHEVRON_HEIGHT,
         bottom: totalHeight - CHEVRON_HEIGHT,
       },
       axis: 'y',
-      rubberband: true,
+      rubberband: {
+        top: true,
+        bottom: false,
+      },
     },
   );
+
+  useEffect(() => {
+    return () => {
+      // Cleanup gesture bindings on unmount
+      bind.clean?.();
+    };
+  }, [bind]);
 
   return (
     <Page
