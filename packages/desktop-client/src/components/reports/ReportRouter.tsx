@@ -7,6 +7,7 @@ import { CashFlow } from './reports/CashFlow';
 import { CustomReport } from './reports/CustomReport';
 import { NetWorth } from './reports/NetWorth';
 import { Spending } from './reports/Spending';
+import { Summary } from './reports/Summary';
 
 export function ReportRouter() {
   return (
@@ -20,6 +21,8 @@ export function ReportRouter() {
       <Route path="/custom/:id" element={<CustomReport />} />
       <Route path="/spending" element={<Spending />} />
       <Route path="/spending/:id" element={<Spending />} />
+      <Route path="/summary" element={<Summary />} />
+      <Route path="/summary/:id" element={<Summary />} />
       <Route path="/calendar" element={<Calendar />} />
       <Route path="/calendar/:id" element={<Calendar />} />
     </Routes>

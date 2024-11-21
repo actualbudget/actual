@@ -40,8 +40,8 @@ import { CustomReportListCards } from './reports/CustomReportListCards';
 import { MarkdownCard } from './reports/MarkdownCard';
 import { NetWorthCard } from './reports/NetWorthCard';
 import { SpendingCard } from './reports/SpendingCard';
-
 import './overview.scss';
+import { SummaryCard } from './reports/SummaryCard';
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -386,6 +386,10 @@ export function Overview() {
                           text: t('Text widget'),
                         },
                         {
+                          name: 'summary-card' as const,
+                          text: t('Summary card'),
+                        },
+                        {
                           name: 'calendar-card' as const,
                           text: t('Calendar card'),
                         },
@@ -528,6 +532,14 @@ export function Overview() {
                   <CustomReportListCards
                     isEditing={isEditing}
                     report={customReportMap.get(item.meta.id)}
+                    onRemove={() => onRemoveWidget(item.i)}
+                  />
+                ) : item.type === 'summary-card' ? (
+                  <SummaryCard
+                    widgetId={item.i}
+                    isEditing={isEditing}
+                    meta={item.meta}
+                    onMetaChange={newMeta => onMetaChange(item, newMeta)}
                     onRemove={() => onRemoveWidget(item.i)}
                   />
                 ) : item.type === 'calendar-card' ? (
