@@ -88,12 +88,7 @@ export function ManagePayeesWithData({
     }
 
     return listen('undo-event', onUndo);
-  }, [
-    dispatch,
-    lastUndoState,
-    refetchRuleCounts,
-    refetchOrphanedPayees,
-  ]);
+  }, [dispatch, lastUndoState, refetchRuleCounts, refetchOrphanedPayees]);
 
   function onViewRules(id: PayeeEntity['id']) {
     dispatch(pushModal('manage-rules', { payeeId: id }));
