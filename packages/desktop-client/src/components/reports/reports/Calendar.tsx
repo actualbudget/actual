@@ -71,8 +71,8 @@ import {
 import { useReport } from '../useReport';
 import { fromDateRepr } from '../util';
 
-const CHEVRON_HEIGHT = 26;
-const SUMMARY_HEIGHT = 115;
+const CHEVRON_HEIGHT = 44;
+const SUMMARY_HEIGHT = 140;
 
 export function Calendar() {
   const params = useParams();
@@ -415,19 +415,8 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
     [api],
   );
 
-  const DRAG_BOUNDS = {
-    CHEVRON_MULTIPLIER: 1.5,
-    RUBBER_BAND_ENABLED: true,
-    MIN_DRAG_OFFSET: 115,
-  };
-
   const bind = useDrag(
     ({ offset: [, oy], cancel }) => {
-      if (oy < 0) {
-        cancel();
-        open({ canceled: false });
-      }
-
       if (oy < 0) {
         api.start({ y: 0, immediate: true });
         return;
@@ -435,10 +424,7 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
         api.start({ y: oy, immediate: true });
       }
 
-      if (
-        oy > totalHeight - CHEVRON_HEIGHT * DRAG_BOUNDS.CHEVRON_MULTIPLIER &&
-        mobileTransactionsOpen
-      ) {
+      if (oy > 0 && mobileTransactionsOpen) {
         cancel();
         close();
         setMobileTransactionsOpen(false);
@@ -450,11 +436,11 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
       from: () => [0, y.get()],
       filterTaps: true,
       bounds: {
-        top: -totalHeight + DRAG_BOUNDS.MIN_DRAG_OFFSET,
+        top: -totalHeight,
         bottom: totalHeight - CHEVRON_HEIGHT,
       },
       axis: 'y',
-      rubberband: DRAG_BOUNDS.RUBBER_BAND_ENABLED,
+      rubberband: true,
     },
   );
 
@@ -659,7 +645,7 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
                         ? open({ canceled: false })
                         : close()
                     }
-                    style={{ color: theme.pageTextSubdued }}
+                    style={{ color: theme.pageTextSubdued, height: 40 }}
                   >
                     {!mobileTransactionsOpen && (
                       <>
