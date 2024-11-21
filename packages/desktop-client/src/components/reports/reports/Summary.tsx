@@ -18,10 +18,10 @@ import {
 
 import { useFilters } from '../../../hooks/useFilters';
 import { useNavigate } from '../../../hooks/useNavigate';
-import { SvgCloseParenthesis } from '../../../icons/custom/CloseParenthesis';
-import { SvgOpenParenthesis } from '../../../icons/custom/OpenParenthesis';
-import { SvgSum } from '../../../icons/custom/Sum';
 import { SvgEquals } from '../../../icons/v1';
+import { SvgCloseParenthesis } from '../../../icons/v2/CloseParenthesis';
+import { SvgOpenParenthesis } from '../../../icons/v2/OpenParenthesis';
+import { SvgSum } from '../../../icons/v2/Sum';
 import { theme } from '../../../style';
 import { Button } from '../../common/Button2';
 import { Text } from '../../common/Text';

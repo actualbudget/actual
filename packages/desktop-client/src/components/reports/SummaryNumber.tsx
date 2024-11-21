@@ -12,7 +12,10 @@ import { PrivacyFilter } from '../PrivacyFilter';
 import { chartTheme } from './chart-theme';
 import { LoadingIndicator } from './LoadingIndicator';
 
-type AnimatedNumberProps = {
+const FONT_SIZE_SCALE_FACTOR = 0.9;
+const MAX_RECURSION_DEPTH = 10;
+
+type SummaryNumberProps = {
   value: number;
   animate?: boolean;
   suffix?: string;
@@ -28,13 +31,10 @@ export function SummaryNumber({
   loading = true,
   initialFontSize = 14,
   fontSizeChanged,
-}: AnimatedNumberProps) {
+}: SummaryNumberProps) {
   const [fontSize, setFontSize] = useState<number>(0);
   const refDiv = useRef<HTMLDivElement>(null);
   const offScreenRef = useRef<HTMLDivElement>(null);
-
-  const FONT_SIZE_SCALE_FACTOR = 0.9;
-  const MAX_RECURSION_DEPTH = 10;
 
   const adjustFontSizeBinary = (minFontSize: number, maxFontSize: number) => {
     if (!offScreenRef.current || !refDiv.current) return;

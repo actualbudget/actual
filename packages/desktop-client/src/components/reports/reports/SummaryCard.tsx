@@ -18,7 +18,7 @@ import { summarySpreadsheet } from '../spreadsheets/summary-spreadsheet';
 import { SummaryNumber } from '../SummaryNumber';
 import { useReport } from '../useReport';
 
-type SummaryProps = {
+type SummaryCardProps = {
   widgetId: string;
   isEditing?: boolean;
   meta?: SummaryWidget['meta'];
@@ -32,7 +32,7 @@ export function SummaryCard({
   meta = {},
   onMetaChange,
   onRemove,
-}: SummaryProps) {
+}: SummaryCardProps) {
   const { t } = useTranslation();
   const isDashboardsFeatureEnabled = useFeatureFlag('dashboards');
   const [start, end] = calculateTimeRange(meta?.timeFrame, {
