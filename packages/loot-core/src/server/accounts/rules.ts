@@ -200,10 +200,11 @@ const CONDITION_TYPES = {
       'isNot',
       'doesNotContain',
       'notOneOf',
+      'and',
     ],
     nullable: true,
     parse(op, value, fieldName) {
-      if (op === 'oneOf' || op === 'notOneOf') {
+      if (op === 'oneOf' || op === 'notOneOf' || op === 'and') {
         assert(
           Array.isArray(value),
           'no-empty-array',
