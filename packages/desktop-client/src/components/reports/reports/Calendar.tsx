@@ -70,7 +70,7 @@ import {
 import { useReport } from '../useReport';
 import { fromDateRepr } from '../util';
 
-const CHEVRON_HEIGHT = 44;
+const CHEVRON_HEIGHT = 42;
 const SUMMARY_HEIGHT = 140;
 
 export function Calendar() {
@@ -432,14 +432,19 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
         api.start({ y: 0, immediate: true });
         return;
       }
-      api.start({ y: oy, immediate: true });
 
-      if (oy > totalHeight * 0.6 && mobileTransactionsOpen) {
+      if (oy > totalHeight * 0.05 && mobileTransactionsOpen) {
         cancel();
         close();
         setMobileTransactionsOpen(false);
-      } else {
-        setMobileTransactionsOpen(true);
+      } else if (!mobileTransactionsOpen) {
+        if (oy / totalHeight > 0.05) {
+          cancel();
+          open({ canceled: true });
+          setMobileTransactionsOpen(true);
+        } else {
+          api.start({ y: oy, immediate: true });
+        }
       }
     },
     {
@@ -450,19 +455,9 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
         bottom: totalHeight - CHEVRON_HEIGHT,
       },
       axis: 'y',
-      rubberband: {
-        top: true,
-        bottom: false,
-      },
+      rubberband: true,
     },
   );
-
-  useEffect(() => {
-    return () => {
-      // Cleanup gesture bindings on unmount
-      bind.clean?.();
-    };
-  }, [bind]);
 
   return (
     <Page
@@ -665,7 +660,7 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
                         ? open({ canceled: false })
                         : close()
                     }
-                    style={{ color: theme.pageTextSubdued, height: 40 }}
+                    style={{ color: theme.pageTextSubdued, height: 42 }}
                   >
                     {!mobileTransactionsOpen && (
                       <>

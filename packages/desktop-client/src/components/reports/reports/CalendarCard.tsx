@@ -18,7 +18,6 @@ import * as monthUtils from 'loot-core/src/shared/months';
 import { type CalendarWidget } from 'loot-core/types/models';
 import { type SyncedPrefs } from 'loot-core/types/prefs';
 
-import { useFeatureFlag } from '../../../hooks/useFeatureFlag';
 import { useMergedRefs } from '../../../hooks/useMergedRefs';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { useResizeObserver } from '../../../hooks/useResizeObserver';
@@ -61,7 +60,6 @@ export function CalendarCard({
   firstDayOfWeekIdx,
 }: CalendarCardProps) {
   const { t } = useTranslation();
-  const isDashboardsFeatureEnabled = useFeatureFlag('dashboards');
   const [start, end] = calculateTimeRange(meta?.timeFrame, {
     start: monthUtils.dayFromDate(monthUtils.currentMonth()),
     end: monthUtils.currentDay(),
@@ -150,11 +148,7 @@ export function CalendarCard({
   return (
     <ReportCard
       isEditing={isEditing}
-      to={
-        isDashboardsFeatureEnabled
-          ? `/reports/calendar/${widgetId}`
-          : '/reports/calendar'
-      }
+      to={`/reports/calendar/${widgetId}`}
       menuItems={[
         {
           name: 'rename',
@@ -179,7 +173,7 @@ export function CalendarCard({
       }}
     >
       <View
-        ref={cardRef}
+        ref={el => el && cardRef(el)}
         style={{ flex: 1, margin: 2, overflow: 'hidden', width: '100%' }}
       >
         <View style={{ flexDirection: 'row', padding: 20, paddingBottom: 0 }}>
@@ -307,7 +301,6 @@ export function CalendarCard({
                   setMonthNameFormats={setMonthNameFormats}
                   selectedMonthNameFormat={selectedMonthNameFormat}
                   index={index}
-                  isDashboardsFeatureEnabled={isDashboardsFeatureEnabled}
                   widgetId={widgetId}
                 />
               ))
@@ -333,7 +326,6 @@ type CalendarCardInnerProps = {
   setMonthNameFormats: Dispatch<SetStateAction<string[]>>;
   selectedMonthNameFormat: string;
   index: number;
-  isDashboardsFeatureEnabled: boolean;
   widgetId: string;
 };
 function CalendarCardInner({
@@ -342,7 +334,6 @@ function CalendarCardInner({
   setMonthNameFormats,
   selectedMonthNameFormat,
   index,
-  isDashboardsFeatureEnabled,
   widgetId,
 }: CalendarCardInnerProps) {
   const [monthNameVisible, setMonthNameVisible] = useState(true);
@@ -455,9 +446,7 @@ function CalendarCardInner({
             }}
             onPress={() => {
               navigate(
-                isDashboardsFeatureEnabled
-                  ? `/reports/calendar/${widgetId}?month=${format(calendar.start, 'yyyy-MM')}`
-                  : '/reports/calendar',
+                `/reports/calendar/${widgetId}?month=${format(calendar.start, 'yyyy-MM')}`,
               );
             }}
           >
@@ -527,16 +516,10 @@ function CalendarCardInner({
         onDayClick={date => {
           if (date) {
             navigate(
-              isDashboardsFeatureEnabled
-                ? `/reports/calendar/${widgetId}?day=${format(date, 'yyyy-MM-dd')}`
-                : '/reports/calendar',
+              `/reports/calendar/${widgetId}?day=${format(date, 'yyyy-MM-dd')}`,
             );
           } else {
-            navigate(
-              isDashboardsFeatureEnabled
-                ? `/reports/calendar/${widgetId}`
-                : '/reports/calendar',
-            );
+            navigate(`/reports/calendar/${widgetId}`);
           }
         }}
       />

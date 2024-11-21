@@ -191,7 +191,11 @@ export function CalendarGraph({
             >
               <DayButton
                 key={day.date.getTime()}
-                resizeRef={index === 15 ? buttonRef : null}
+                resizeRef={el => {
+                  if (index === 15 && el) {
+                    buttonRef(el);
+                  }
+                }}
                 fontSize={fontSize}
                 day={day}
                 onPress={() => onDayClick(day.date)}
@@ -200,7 +204,11 @@ export function CalendarGraph({
           ) : (
             <DayButton
               key={day.date.getTime()}
-              resizeRef={index === 15 ? buttonRef : null}
+              resizeRef={el => {
+                if (index === 15 && el) {
+                  buttonRef(el);
+                }
+              }}
               fontSize={fontSize}
               day={day}
               onPress={() => onDayClick(day.date)}
