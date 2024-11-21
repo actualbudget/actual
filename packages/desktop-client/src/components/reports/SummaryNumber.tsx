@@ -40,8 +40,8 @@ export function SummaryNumber({
     if (!refDiv.current) return;
 
     const { clientWidth, clientHeight } = refDiv.current;
-    const width = clientWidth - CONTAINER_MARGIN * 2; // margin left and right
-    const height = clientHeight - CONTAINER_MARGIN * 2; // margin top and bottom
+    const width = clientWidth - CONTAINER_MARGIN * 2; // account for margin left and right
+    const height = clientHeight - CONTAINER_MARGIN * 2; // account for margin top and bottom
 
     const calculatedFontSize = Math.min(
       (width * FONT_SIZE_SCALE_FACTOR) / displayAmount.toString().length,
