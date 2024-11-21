@@ -57,14 +57,17 @@ export function SummaryNumber({
 
       requestAnimationFrame(() => {
         const isOverflowing =
-          offScreenDiv.scrollWidth > refDivCurrent.clientWidth;
+          offScreenDiv.scrollWidth > refDivCurrent.clientWidth ||
+          offScreenDiv.scrollHeight > refDivCurrent.clientHeight;
 
         if (isOverflowing) {
           binarySearchFontSize(min, testFontSize, depth + 1);
         } else {
           const isUnderflowing =
             offScreenDiv.scrollWidth <=
-            refDivCurrent.clientWidth * FONT_SIZE_SCALE_FACTOR;
+              refDivCurrent.clientWidth * FONT_SIZE_SCALE_FACTOR ||
+            offScreenDiv.scrollHeight <=
+              refDivCurrent.clientHeight * FONT_SIZE_SCALE_FACTOR;
 
           if (isUnderflowing && testFontSize < max) {
             binarySearchFontSize(testFontSize, max, depth + 1);
