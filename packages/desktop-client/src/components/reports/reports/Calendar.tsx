@@ -486,26 +486,28 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
       }
       padding={0}
     >
-      <Header
-        allMonths={allMonths}
-        start={start}
-        end={end}
-        mode={mode}
-        onChangeDates={onChangeDates}
-        filters={conditions}
-        onApply={onApplyFilter}
-        onUpdateFilter={onUpdateFilter}
-        onDeleteFilter={onDeleteFilter}
-        conditionsOp={conditionsOp}
-        onConditionsOpChange={onConditionsOpChange}
-        show1Month={true}
-      >
-        {widget && (
-          <Button variant="primary" onPress={onSaveWidget}>
-            <Trans>Save widget</Trans>
-          </Button>
-        )}
-      </Header>
+      <View style={{ minHeight: !isNarrowWidth ? '120px' : 'unset' }}>
+        <Header
+          allMonths={allMonths}
+          start={start}
+          end={end}
+          mode={mode}
+          onChangeDates={onChangeDates}
+          filters={conditions}
+          onApply={onApplyFilter}
+          onUpdateFilter={onUpdateFilter}
+          onDeleteFilter={onDeleteFilter}
+          conditionsOp={conditionsOp}
+          onConditionsOpChange={onConditionsOpChange}
+          show1Month={true}
+        >
+          {widget && (
+            <Button variant="primary" onPress={onSaveWidget}>
+              <Trans>Save widget</Trans>
+            </Button>
+          )}
+        </Header>
+      </View>
       <View ref={refContainer as Ref<HTMLDivElement>} style={{ flexGrow: 1 }}>
         <View
           style={{
