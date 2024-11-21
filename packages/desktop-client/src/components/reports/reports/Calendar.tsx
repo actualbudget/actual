@@ -71,6 +71,9 @@ import {
 import { useReport } from '../useReport';
 import { fromDateRepr } from '../util';
 
+const CHEVRON_HEIGHT = 26;
+const SUMMARY_HEIGHT = 115;
+
 export function Calendar() {
   const params = useParams();
   const [searchParams] = useSearchParams();
@@ -362,13 +365,11 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
     [navigate],
   );
 
-  const CHEVRON_HEIGHT = 26;
-
   const refContainer = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (refContainer.current) {
-      setTotalHeight(refContainer.current.clientHeight - 115);
+      setTotalHeight(refContainer.current.clientHeight - SUMMARY_HEIGHT);
     }
   }, [query]);
 
@@ -391,22 +392,25 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
     });
   }, [totalHeight, mobileTransactionsOpen, api]);
 
-  const open = ({ canceled }: { canceled: boolean }) => {
-    api.start({
-      y: openY,
-      immediate: false,
-      config: canceled ? config.wobbly : config.stiff,
-    });
-    setMobileTransactionsOpen(true);
-  };
+  const open = useCallback(
+    ({ canceled }: { canceled: boolean }) => {
+      api.start({
+        y: openY,
+        immediate: false,
+        config: canceled ? config.wobbly : config.stiff,
+      });
+      setMobileTransactionsOpen(true);
+    },
+    [api],
+  );
 
-  const close = (velocity = 0) => {
+  const close = useCallback((velocity = 0) => {
     api.start({
       y: closeY.current,
       config: { ...config.stiff, velocity },
     });
     setMobileTransactionsOpen(false);
-  };
+  }, [api]);
 
   const DRAG_BOUNDS = {
     CHEVRON_MULTIPLIER: 1.5,
@@ -686,6 +690,7 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
     </Page>
   );
 }
+
 type CalendarWithHeaderProps = {
   calendar: {
     start: Date;
@@ -715,7 +720,7 @@ function CalendarWithHeader({
   totalExpense,
   onApplyFilter,
   firstDayOfWeekIdx,
-}: CalendarHeaderProps) {
+}: CalendarWithHeaderProps) {
   return (
     <View
       style={{
@@ -824,7 +829,7 @@ function CalendarWithHeader({
           )}
         </View>
       </View>
-      <div style={{ flexGrow: 1, marginBottom: 20 }}>
+      <View style={{ flexGrow: 1, display: 'block', marginBottom: 20 }}>
         <CalendarGraph
           data={calendar.data}
           start={calendar.start}
@@ -849,7 +854,7 @@ function CalendarWithHeader({
           }
           firstDayOfWeekIdx={firstDayOfWeekIdx}
         />
-      </div>
+      </View>
     </View>
   );
 }
