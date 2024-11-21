@@ -404,13 +404,16 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
     [api],
   );
 
-  const close = useCallback((velocity = 0) => {
-    api.start({
-      y: closeY.current,
-      config: { ...config.stiff, velocity },
-    });
-    setMobileTransactionsOpen(false);
-  }, [api]);
+  const close = useCallback(
+    (velocity = 0) => {
+      api.start({
+        y: closeY.current,
+        config: { ...config.stiff, velocity },
+      });
+      setMobileTransactionsOpen(false);
+    },
+    [api],
+  );
 
   const DRAG_BOUNDS = {
     CHEVRON_MULTIPLIER: 1.5,
