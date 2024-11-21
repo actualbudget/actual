@@ -4,7 +4,6 @@ import { useSyncedPref } from './useSyncedPref';
 
 const DEFAULT_FEATURE_FLAG_STATE: Record<FeatureFlag, boolean> = {
   goalTemplatesEnabled: false,
-  dashboards: false,
   actionTemplating: false,
   upcomingLengthAdjustment: false,
   contextMenus: false,
