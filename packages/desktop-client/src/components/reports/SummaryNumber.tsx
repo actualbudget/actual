@@ -50,7 +50,7 @@ export function SummaryNumber({
 
     setFontSize(calculatedFontSize);
 
-    if (calculatedFontSize !== initialFontSize) {
+    if (calculatedFontSize !== initialFontSize && fontSizeChanged) {
       fontSizeChanged(calculatedFontSize);
     }
   }, 100);
