@@ -5,7 +5,6 @@ import * as monthUtils from 'loot-core/src/shared/months';
 import { amountToCurrency } from 'loot-core/src/shared/util';
 import { type SpendingWidget } from 'loot-core/src/types/models';
 
-import { useFeatureFlag } from '../../../hooks/useFeatureFlag';
 import { styles } from '../../../style/styles';
 import { theme } from '../../../style/theme';
 import { Block } from '../../common/Block';
@@ -35,7 +34,6 @@ export function SpendingCard({
   onMetaChange,
   onRemove,
 }: SpendingCardProps) {
-  const isDashboardsFeatureEnabled = useFeatureFlag('dashboards');
   const { t } = useTranslation();
 
   const [compare, compareTo] = calculateSpendingReportTimeRange(meta ?? {});
@@ -71,11 +69,7 @@ export function SpendingCard({
   return (
     <ReportCard
       isEditing={isEditing}
-      to={
-        isDashboardsFeatureEnabled
-          ? `/reports/spending/${widgetId}`
-          : '/reports/spending'
-      }
+      to={`/reports/spending/${widgetId}`}
       menuItems={[
         {
           name: 'rename',
