@@ -59,7 +59,7 @@ export function CalendarCard({
   onMetaChange,
   onRemove,
   firstDayOfWeekIdx,
-}: CalendarProps) {
+}: CalendarCardProps) {
   const { t } = useTranslation();
   const isDashboardsFeatureEnabled = useFeatureFlag('dashboards');
   const [start, end] = calculateTimeRange(meta?.timeFrame, {
