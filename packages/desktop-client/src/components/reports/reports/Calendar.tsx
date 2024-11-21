@@ -686,7 +686,7 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
     </Page>
   );
 }
-type CalendarHeaderProps = {
+type CalendarWithHeaderProps = {
   calendar: {
     start: Date;
     end: Date;
