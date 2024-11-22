@@ -20,8 +20,8 @@ import { useFormat } from '../spreadsheet/useFormat';
 import { useSheetValue } from '../spreadsheet/useSheetValue';
 
 type DetailedBalanceProps = {
-  name: any
-  balance: any
+  name: string
+  balance: number
   isExactBalance: boolean
 }
 
