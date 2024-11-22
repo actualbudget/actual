@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 
 import { t } from 'i18next';
 
+import { type TransactionEntity } from 'loot-core/types/models';
+
 import { SelectedProvider, useSelected } from '../../../hooks/useSelected';
 import { SvgSearchAlternate } from '../../../icons/v2';
 import { styles, theme } from '../../../style';
@@ -14,9 +16,14 @@ import { useSheetValue } from '../../spreadsheet/useSheetValue';
 import { PullToRefresh } from '../PullToRefresh';
 
 import { TransactionList } from './TransactionList';
-import { TransactionEntity } from 'loot-core/types/models';
 
-function TransactionSearchInput({ placeholder, onSearch }: { placeholder: string, onSearch: any}) {
+function TransactionSearchInput({
+  placeholder,
+  onSearch,
+}: {
+  placeholder: string;
+  onSearch: (searchText: string) => void;
+}) {
   const [text, setText] = useState<string>('');
 
   return (
@@ -108,7 +115,9 @@ export function TransactionListWithBalances({
                 balanceUncleared={balanceUncleared}
               />
             ) : (
-              <Balance balance={balance as unknown as SheetFields<SheetNames>} />
+              <Balance
+                balance={balance as unknown as SheetFields<SheetNames>}
+              />
             )}
           </View>
           <TransactionSearchInput
@@ -134,9 +143,9 @@ function BalanceWithCleared({
   balanceCleared,
   balance,
 }: {
-  balanceUncleared: SheetFields<SheetNames>
-  balanceCleared: SheetFields<SheetNames>
-  balance: SheetFields<SheetNames>
+  balanceUncleared: SheetFields<SheetNames>;
+  balanceCleared: SheetFields<SheetNames>;
+  balance: SheetFields<SheetNames>;
 }) {
   const unclearedAmount = useSheetValue(balanceUncleared);
 
@@ -152,10 +161,7 @@ function BalanceWithCleared({
           title={t('Cleared')}
           style={{ textAlign: 'center', fontSize: 12 }}
         />
-        <CellValue
-          binding={balance}
-          type="financial"
-        >
+        <CellValue binding={balance} type="financial">
           {props => (
             <CellValueText
               {...props}
@@ -180,10 +186,7 @@ function BalanceWithCleared({
           title={t('Uncleared')}
           style={{ textAlign: 'center', fontSize: 12 }}
         />
-        <CellValue
-          binding={balance}
-          type="financial"
-        >
+        <CellValue binding={balance} type="financial">
           {props => (
             <CellValueText
               {...props}
@@ -201,11 +204,7 @@ function BalanceWithCleared({
   );
 }
 
-function Balance({
-  balance,
-}: {
-  balance: SheetFields<SheetNames>;
-}) {
+function Balance({ balance }: { balance: SheetFields<SheetNames> }) {
   return (
     <View style={{ flexBasis: '33%' }}>
       <Label title={t('Balance')} style={{ textAlign: 'center' }} />

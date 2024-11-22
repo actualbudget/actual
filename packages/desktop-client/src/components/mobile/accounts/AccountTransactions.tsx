@@ -43,10 +43,10 @@ import { Button } from '../../common/Button2';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
 import { MobilePageHeader, Page } from '../../Page';
+import { type SheetFields, type SheetNames } from '../../spreadsheet/index';
 import { MobileBackButton } from '../MobileBackButton';
 import { AddTransactionButton } from '../transactions/AddTransactionButton';
 import { TransactionListWithBalances } from '../transactions/TransactionListWithBalances';
-import { type SheetFields, type SheetNames } from '../../spreadsheet/index';
 
 export function AccountTransactions({
   account,
@@ -323,8 +323,16 @@ function TransactionListWithPreviews({
       isLoading={isLoading}
       transactions={transactionsToDisplay}
       balance={balanceQueries.balance.name as SheetFields<SheetNames>}
-      balanceCleared={balanceQueries.cleared.name ? balanceQueries.cleared.name as SheetFields<SheetNames> : undefined}
-      balanceUncleared={balanceQueries.uncleared.name ? balanceQueries.uncleared.name as SheetFields<SheetNames>: undefined}
+      balanceCleared={
+        balanceQueries.cleared.name
+          ? (balanceQueries.cleared.name as SheetFields<SheetNames>)
+          : undefined
+      }
+      balanceUncleared={
+        balanceQueries.uncleared.name
+          ? (balanceQueries.uncleared.name as SheetFields<SheetNames>)
+          : undefined
+      }
       onLoadMore={loadMoreTransactions}
       searchPlaceholder={`Search ${accountName}`}
       onSearch={onSearch}
