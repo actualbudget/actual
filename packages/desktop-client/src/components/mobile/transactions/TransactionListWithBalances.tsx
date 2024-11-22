@@ -76,7 +76,7 @@ type TransactionListWithBalancesProps = {
   onSearch: (searchText: string) => void;
   onLoadMore: (() => void) | undefined;
   onOpenTransaction: (transaction: TransactionEntity) => void;
-  onRefresh: any;
+  onRefresh: () => Promise<void>;
 };
 
 export function TransactionListWithBalances({
@@ -115,9 +115,7 @@ export function TransactionListWithBalances({
                 balanceUncleared={balanceUncleared}
               />
             ) : (
-              <Balance
-                balance={balance as unknown as SheetFields<SheetNames>}
-              />
+              <Balance balance={balance} />
             )}
           </View>
           <TransactionSearchInput

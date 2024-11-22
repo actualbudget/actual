@@ -248,9 +248,9 @@ function TransactionListWithPreviews({
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const onRefresh = useCallback(() => {
+  const onRefresh = useCallback(async () => {
     if (accountId) {
-      dispatch(syncAndDownload(accountId));
+      await dispatch(syncAndDownload(accountId));
     }
   }, [accountId, dispatch]);
 
