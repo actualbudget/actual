@@ -61,7 +61,7 @@ export function Sidebar() {
     dispatch(replaceModal('add-account'));
   };
 
-  const containerRef = useResizeObserver(rect => {
+  const containerRef = useResizeObserver<HTMLDivElement>(rect => {
     setSidebarWidth(rect.width);
   });
 

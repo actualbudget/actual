@@ -29,7 +29,8 @@ export function BalanceMenu({
   const carryover = useEnvelopeSheetValue(
     envelopeBudget.catCarryover(categoryId),
   );
-  const balance = useEnvelopeSheetValue(envelopeBudget.catBalance(categoryId));
+  const balance =
+    useEnvelopeSheetValue(envelopeBudget.catBalance(categoryId)) ?? 0;
 
   return (
     <Menu
