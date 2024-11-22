@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, type ComponentProps } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useHover } from 'usehooks-ts';
@@ -7,6 +7,7 @@ import { isPreviewId } from 'loot-core/shared/transactions';
 import { useCachedSchedules } from 'loot-core/src/client/data-hooks/schedules';
 import { q } from 'loot-core/src/shared/query';
 import { getScheduledAmount } from 'loot-core/src/shared/schedules';
+import { type AccountEntity } from 'loot-core/types/models';
 
 import { useSelectedItems } from '../../hooks/useSelected';
 import { SvgArrowButtonRight1 } from '../../icons/v2';
@@ -16,8 +17,11 @@ import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { PrivacyFilter } from '../PrivacyFilter';
 import { CellValue, CellValueText } from '../spreadsheet/CellValue';
+import { type SheetFields, type SheetNames } from '../spreadsheet/index';
 import { useFormat } from '../spreadsheet/useFormat';
 import { useSheetValue } from '../spreadsheet/useSheetValue';
+
+import { type ReconcilingMessage } from './Reconcile';
 
 type DetailedBalanceProps = {
   name: string;
@@ -56,8 +60,8 @@ function SelectedBalance({
   selectedItems,
   account,
 }: {
-  selectedItems: any;
-  account: any;
+  selectedItems: Set<string>;
+  account: AccountEntity;
 }) {
   const { t } = useTranslation();
 
@@ -132,7 +136,7 @@ function SelectedBalance({
   );
 }
 
-function FilteredBalance({ filteredAmount }: { filteredAmount: any }) {
+function FilteredBalance({ filteredAmount }: { filteredAmount: number }) {
   const { t } = useTranslation();
 
   return (
@@ -144,7 +148,11 @@ function FilteredBalance({ filteredAmount }: { filteredAmount: any }) {
   );
 }
 
-function MoreBalances({ balanceQuery }: { balanceQuery: any }) {
+function MoreBalances({
+  balanceQuery,
+}: {
+  balanceQuery: ComponentProps<typeof ReconcilingMessage>['balanceQuery'];
+}) {
   const { t } = useTranslation();
 
   type SelectedBalanceClearedName = `balance-query-${string}-cleared`;
@@ -176,12 +184,12 @@ function MoreBalances({ balanceQuery }: { balanceQuery: any }) {
 }
 
 type BalancesProps = {
-  balanceQuery: any;
-  showExtraBalances: any;
-  onToggleExtraBalances: any;
-  account: any;
-  isFiltered: any;
-  filteredAmount: any;
+  balanceQuery: ComponentProps<typeof ReconcilingMessage>['balanceQuery'];
+  showExtraBalances: boolean;
+  onToggleExtraBalances: () => void;
+  account: AccountEntity;
+  isFiltered: boolean;
+  filteredAmount: number;
 };
 
 export function Balances({
@@ -215,7 +223,14 @@ export function Balances({
           paddingBottom: 1,
         }}
       >
-        <CellValue binding={{ ...balanceQuery, value: 0 }} type="financial">
+        <CellValue
+          binding={{
+            name: balanceQuery.name as SheetFields<SheetNames>,
+            query: balanceQuery.query,
+            value: 0,
+          }}
+          type="financial"
+        >
           {props => (
             <CellValueText
               {...props}
