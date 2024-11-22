@@ -11,7 +11,7 @@ import { useAccounts } from './useAccounts';
 import { usePayees } from './usePayees';
 
 type UseAccountPreviewTransactionsProps = {
-  accountId: AccountEntity['id'];
+  accountId?: AccountEntity['id'];
 };
 
 type UseAccountPreviewTransactionsResult = {
@@ -32,9 +32,14 @@ export function useAccountPreviewTransactions({
   const payees = usePayees();
 
   const previewTransactions = useMemo(() => {
-    if (!accountId || isLoading) {
+    if (isLoading) {
       return [];
     }
+
+    if (!accountId) {
+      return originalPreviewTransactions;
+    }
+
     return accountPreview({
       accountId,
       transactions: originalPreviewTransactions,

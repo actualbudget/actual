@@ -266,8 +266,8 @@ type AccountInternalProps = {
   accounts: AccountEntity[];
   getPayees: () => Promise<PayeeEntity[]>;
   updateAccount: (newAccount: AccountEntity) => void;
-  newTransactions: string[];
-  matchedTransactions: string[];
+  newTransactions: Array<TransactionEntity['id']>;
+  matchedTransactions: Array<TransactionEntity['id']>;
   splitsExpandedDispatch: ReturnType<typeof useSplitsExpanded>['dispatch'];
   expandSplits?: boolean;
   savedFilters: TransactionFilterEntity[];
@@ -870,11 +870,11 @@ class AccountInternal extends PureComponent<
     return amount;
   };
 
-  isNew = (id: string) => {
+  isNew = (id: TransactionEntity['id']) => {
     return this.props.newTransactions.includes(id);
   };
 
-  isMatched = (id: string) => {
+  isMatched = (id: TransactionEntity['id']) => {
     return this.props.matchedTransactions.includes(id);
   };
 

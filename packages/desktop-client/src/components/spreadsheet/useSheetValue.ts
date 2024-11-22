@@ -1,6 +1,6 @@
-// @ts-strict-ignore
 import { useState, useRef, useLayoutEffect } from 'react';
 
+import { type Query } from 'loot-core/shared/query';
 import { useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
 
 import { useSheetName } from './useSheetName';
@@ -12,13 +12,22 @@ import {
   type Binding,
 } from '.';
 
+type SheetValueResult<
+  SheetName extends SheetNames,
+  FieldName extends SheetFields<SheetName>,
+> = {
+  name: string;
+  value: Spreadsheets[SheetName][FieldName] | null;
+  query?: Query;
+};
+
 export function useSheetValue<
   SheetName extends SheetNames,
   FieldName extends SheetFields<SheetName>,
 >(
   binding: Binding<SheetName, FieldName>,
-  onChange?: (result) => void,
-): Spreadsheets[SheetName][FieldName] {
+  onChange?: (result: SheetValueResult<SheetName, FieldName>) => void,
+): SheetValueResult<SheetName, FieldName>['value'] {
   const { sheetName, fullSheetName } = useSheetName(binding);
 
   const bindingObj =
@@ -27,34 +36,37 @@ export function useSheetValue<
       : binding;
 
   const spreadsheet = useSpreadsheet();
-  const [result, setResult] = useState({
+  const [result, setResult] = useState<SheetValueResult<SheetName, FieldName>>({
     name: fullSheetName,
     value: bindingObj.value === undefined ? null : bindingObj.value,
     query: bindingObj.query,
   });
   const latestOnChange = useRef(onChange);
-  const latestValue = useRef(result.value);
+  latestOnChange.current = onChange;
 
-  useLayoutEffect(() => {
-    latestOnChange.current = onChange;
-    latestValue.current = result.value;
-  });
+  const latestValue = useRef(result.value);
+  latestValue.current = result.value;
 
   useLayoutEffect(() => {
     if (bindingObj.query) {
       spreadsheet.createQuery(sheetName, bindingObj.name, bindingObj.query);
     }
 
-    return spreadsheet.bind(sheetName, binding, null, newResult => {
-      if (latestOnChange.current) {
-        latestOnChange.current(newResult);
-      }
+    return spreadsheet.bind(
+      sheetName,
+      binding,
+      null,
+      (newResult: SheetValueResult<SheetName, FieldName>) => {
+        if (latestOnChange.current) {
+          latestOnChange.current(newResult);
+        }
 
-      if (newResult.value !== latestValue.current) {
-        setResult(newResult);
-      }
-    });
-  }, [sheetName, bindingObj.name]);
+        if (newResult.value !== latestValue.current) {
+          setResult(newResult);
+        }
+      },
+    );
+  }, [sheetName, bindingObj.name, bindingObj.query]);
 
   return result.value;
 }
