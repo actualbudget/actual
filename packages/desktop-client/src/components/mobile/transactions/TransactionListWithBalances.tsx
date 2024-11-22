@@ -161,7 +161,7 @@ function BalanceWithCleared({
           title={t('Cleared')}
           style={{ textAlign: 'center', fontSize: 12 }}
         />
-        <CellValue binding={balance} type="financial">
+        <CellValue binding={balanceCleared} type="financial">
           {props => (
             <CellValueText
               {...props}
@@ -186,7 +186,7 @@ function BalanceWithCleared({
           title={t('Uncleared')}
           style={{ textAlign: 'center', fontSize: 12 }}
         />
-        <CellValue binding={balance} type="financial">
+        <CellValue binding={balanceUncleared} type="financial">
           {props => (
             <CellValueText
               {...props}
