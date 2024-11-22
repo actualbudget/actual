@@ -20,12 +20,16 @@ import { useFormat } from '../spreadsheet/useFormat';
 import { useSheetValue } from '../spreadsheet/useSheetValue';
 
 type DetailedBalanceProps = {
-  name: string
-  balance: number
-  isExactBalance: boolean
-}
+  name: string;
+  balance: number;
+  isExactBalance: boolean;
+};
 
-function DetailedBalance({ name, balance, isExactBalance = true }: DetailedBalanceProps) {
+function DetailedBalance({
+  name,
+  balance,
+  isExactBalance = true,
+}: DetailedBalanceProps) {
   const format = useFormat();
   return (
     <Text
@@ -66,7 +70,7 @@ function SelectedBalance({ selectedItems, account }) {
   const ids = new Set(Array.isArray(rows) ? rows.map(r => r.id) : []);
 
   const finalIds = [...selectedItems].filter(id => !ids.has(id));
-  type SelectedBalanceSumName = `selected-balance-${string}-sum`
+  type SelectedBalanceSumName = `selected-balance-${string}-sum`;
   let balance = useSheetValue<'balance', SelectedBalanceName>({
     name: (name + '-sum') as SelectedBalanceSumName,
     query: q('transactions')
@@ -137,13 +141,13 @@ function FilteredBalance({ filteredAmount }) {
 function MoreBalances({ balanceQuery }) {
   const { t } = useTranslation();
 
-  type SelectedBalanceClearedName = `balance-query-${string}-cleared`
+  type SelectedBalanceClearedName = `balance-query-${string}-cleared`;
   const cleared = useSheetValue<'balance', SelectedBalanceClearedName>({
     name: (balanceQuery.name + '-cleared') as SelectedBalanceClearedName,
     query: balanceQuery.query.filter({ cleared: true }),
   });
 
-  type SelectedBalanceUnclearedName = `balance-query-${string}-uncleared`
+  type SelectedBalanceUnclearedName = `balance-query-${string}-uncleared`;
   const uncleared = useSheetValue<'balance', SelectedBalanceUnclearedName>({
     name: (balanceQuery.name + '-uncleared') as SelectedBalanceUnclearedName,
     query: balanceQuery.query.filter({ cleared: false }),
@@ -151,8 +155,16 @@ function MoreBalances({ balanceQuery }) {
 
   return (
     <View style={{ flexDirection: 'row' }}>
-      <DetailedBalance name={t('Cleared total:')} balance={cleared} isExactBalance />
-      <DetailedBalance name={t('Uncleared total:')} balance={uncleared} isExactBalance />
+      <DetailedBalance
+        name={t('Cleared total:')}
+        balance={cleared}
+        isExactBalance
+      />
+      <DetailedBalance
+        name={t('Uncleared total:')}
+        balance={uncleared}
+        isExactBalance
+      />
     </View>
   );
 }
