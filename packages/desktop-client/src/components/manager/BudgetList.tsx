@@ -1,4 +1,10 @@
-import React, { useState, useRef, type CSSProperties } from 'react';
+import React, {
+  useState,
+  useRef,
+  useEffect,
+  type CSSProperties,
+  useCallback,
+} from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -17,6 +23,7 @@ import {
   isNonProductionEnvironment,
 } from 'loot-core/src/shared/environment';
 import {
+  type RemoteFile,
   type File,
   type LocalFile,
   type SyncableLocalFile,
@@ -32,6 +39,8 @@ import {
   SvgCog,
   SvgDotsHorizontalTriple,
   SvgFileDouble,
+  SvgUser,
+  SvgUserGroup,
 } from '../../icons/v1';
 import { SvgCloudUnknown, SvgKey, SvgRefreshArrow } from '../../icons/v2';
 import { styles, theme } from '../../style';
@@ -40,8 +49,10 @@ import { Button } from '../common/Button2';
 import { Menu } from '../common/Menu';
 import { Popover } from '../common/Popover';
 import { Text } from '../common/Text';
+import { Tooltip } from '../common/Tooltip';
 import { View } from '../common/View';
 import { useResponsive } from '../responsive/ResponsiveProvider';
+import { useMultiuserEnabled } from '../ServerContext';
 
 function getFileDescription(file: File, t: (key: string) => string) {
   if (file.state === 'unknown') {
@@ -59,6 +70,10 @@ function getFileDescription(file: File, t: (key: string) => string) {
   }
 
   return null;
+}
+
+function isLocalFile(file: File): file is LocalFile {
+  return file.state === 'local';
 }
 
 function FileMenu({
@@ -114,54 +129,113 @@ function FileMenuButton({ onDelete }: { onDelete: () => void }) {
   );
 }
 
-function FileState({ file }: { file: File }) {
+function FileState({
+  file,
+  currentUserId,
+}: {
+  file: File;
+  currentUserId: string;
+}) {
   const { t } = useTranslation();
+  const multiuserEnabled = useMultiuserEnabled();
 
   let Icon;
   let status;
   let color;
+  let ownerName = null;
 
   switch (file.state) {
     case 'unknown':
       Icon = SvgCloudUnknown;
       status = t('Network unavailable');
       color = theme.buttonNormalDisabledText;
+      ownerName = 'unknown';
       break;
     case 'remote':
       Icon = SvgCloudDownload;
       status = t('Available for download');
+      ownerName = multiuserEnabled ? getOwnerDisplayName() : '';
       break;
     case 'local':
+      Icon = SvgFileDouble;
+      status = 'Local';
+      break;
     case 'broken':
+      ownerName = 'unknown';
       Icon = SvgFileDouble;
       status = t('Local');
       break;
     default:
       Icon = SvgCloudCheck;
       status = t('Syncing');
+      ownerName = multiuserEnabled ? getOwnerDisplayName() : '';
       break;
   }
 
-  return (
-    <View
-      style={{
-        color,
-        alignItems: 'center',
-        flexDirection: 'row',
-        marginTop: 8,
-      }}
-    >
-      <Icon
-        style={{
-          width: 18,
-          height: 18,
-          color: 'currentColor',
-        }}
-      />
+  const showOwnerContent = multiuserEnabled && file.owner !== currentUserId;
 
-      <Text style={{ marginLeft: 5 }}>{status}</Text>
+  return (
+    <View style={{ width: '100%' }}>
+      <View
+        style={{
+          color,
+          alignItems: 'center',
+          flexDirection: 'row',
+          marginTop: 8,
+        }}
+      >
+        <Icon
+          style={{
+            width: 18,
+            height: 18,
+            color: 'currentColor',
+          }}
+        />
+
+        <Text style={{ marginLeft: 5 }}>{status}</Text>
+      </View>
+
+      <View style={{ paddingTop: 10, flexDirection: 'row', width: '100%' }}>
+        {showOwnerContent && (
+          <View style={{ flexDirection: 'row' }}>
+            <Text
+              style={{
+                ...styles.altMenuHeaderText,
+                ...styles.verySmallText,
+                color: theme.pageTextLight,
+              }}
+            >
+              Owner:
+            </Text>
+            <Text
+              style={{
+                ...styles.verySmallText,
+                color: theme.pageTextLight,
+                paddingLeft: 10,
+              }}
+            >
+              {ownerName}
+            </Text>
+          </View>
+        )}
+      </View>
     </View>
   );
+
+  function getOwnerDisplayName() {
+    if (
+      !(
+        file.state === 'remote' ||
+        file.state === 'synced' ||
+        file.state === 'detached'
+      )
+    ) {
+      return '';
+    }
+
+    const userFound = file.usersWithAccess?.find(f => f.owner);
+    return userFound?.displayName ?? userFound?.userName ?? 'unknown';
+  }
 }
 
 function FileItem({
@@ -169,13 +243,16 @@ function FileItem({
   quickSwitchMode,
   onSelect,
   onDelete,
+  currentUserId,
 }: {
   file: File;
   quickSwitchMode: boolean;
   onSelect: (file: File) => void;
   onDelete: (file: File) => void;
+  currentUserId: string;
 }) {
   const { t } = useTranslation();
+  const multiuserEnabled = useMultiuserEnabled();
 
   const selecting = useRef(false);
 
@@ -211,11 +288,19 @@ function FileItem({
       >
         <View
           title={getFileDescription(file, t) || ''}
-          style={{ alignItems: 'flex-start' }}
+          style={{ alignItems: 'flex-start', width: '100%' }}
         >
-          <Text style={{ fontSize: 16, fontWeight: 700 }}>{file.name}</Text>
+          <View style={{ flexDirection: 'row', width: '100%' }}>
+            <Text style={{ fontSize: 16, fontWeight: 700 }}>{file.name}</Text>
+            {multiuserEnabled && (
+              <UserAccessForFile
+                fileId={(file as RemoteFile).cloudFileId}
+                currentUserId={currentUserId}
+              />
+            )}
+          </View>
 
-          <FileState file={file} />
+          <FileState file={file} currentUserId={currentUserId} />
         </View>
 
         <View
@@ -252,24 +337,22 @@ function BudgetFiles({
   quickSwitchMode,
   onSelect,
   onDelete,
+  currentUserId,
 }: {
   files: File[];
   quickSwitchMode: boolean;
   onSelect: (file: File) => void;
   onDelete: (file: File) => void;
+  currentUserId: string;
 }) {
-  function isLocalFile(file: File): file is LocalFile {
-    return file.state === 'local';
-  }
-
   return (
     <View
       style={{
         flexGrow: 1,
         [`@media (min-width: ${tokens.breakpoint_small})`]: {
           flexGrow: 0,
-          maxHeight: 310,
         },
+        maxHeight: '100%',
         overflow: 'auto',
         '& *': { userSelect: 'none' },
       }}
@@ -289,6 +372,7 @@ function BudgetFiles({
           <FileItem
             key={isLocalFile(file) ? file.id : file.cloudFileId}
             file={file}
+            currentUserId={currentUserId}
             quickSwitchMode={quickSwitchMode}
             onSelect={onSelect}
             onDelete={onDelete}
@@ -389,7 +473,24 @@ function BudgetListHeader({
 export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
   const dispatch = useDispatch();
   const allFiles = useSelector(state => state.budgets.allFiles || []);
+  const multiuserEnabled = useMultiuserEnabled();
   const [id] = useMetadataPref('id');
+  const [currentUserId, setCurrentUserId] = useState('');
+  const userData = useSelector(state => state.user.data);
+
+  const fetchUsers = useCallback(async () => {
+    try {
+      setCurrentUserId(userData?.userId ?? '');
+    } catch (error) {
+      console.error('Failed to fetch users:', error);
+    }
+  }, [userData?.userId]);
+
+  useEffect(() => {
+    if (multiuserEnabled && !userData?.offline) {
+      fetchUsers();
+    }
+  }, [multiuserEnabled, userData?.offline, fetchUsers]);
 
   // Remote files do not have the 'id' field
   function isNonRemoteFile(
@@ -397,6 +498,7 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
   ): file is LocalFile | SyncableLocalFile | SyncedLocalFile {
     return file.state !== 'remote';
   }
+
   const nonRemoteFiles = allFiles.filter(isNonRemoteFile);
   const files = id ? nonRemoteFiles.filter(f => f.id !== id) : allFiles;
 
@@ -444,6 +546,7 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
   return (
     <View
       style={{
+        maxHeight: '100%',
         flex: 1,
         justifyContent: 'center',
         ...(!quickSwitchMode && {
@@ -465,6 +568,7 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
       )}
       <BudgetFiles
         files={files}
+        currentUserId={currentUserId}
         quickSwitchMode={quickSwitchMode}
         onSelect={onSelect}
         onDelete={file => dispatch(pushModal('delete-budget', { file }))}
@@ -517,6 +621,107 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
           )}
         </View>
       )}
+    </View>
+  );
+}
+
+type UserAccessForFileProps = {
+  fileId: string;
+  currentUserId: string;
+};
+
+function UserAccessForFile({ fileId, currentUserId }: UserAccessForFileProps) {
+  const allFiles = useSelector(state => state.budgets.allFiles || []);
+  const remoteFiles = allFiles.filter(
+    f => f.state === 'remote' || f.state === 'synced' || f.state === 'detached',
+  ) as (SyncedLocalFile | RemoteFile)[];
+  const currentFile = remoteFiles.find(f => f.cloudFileId === fileId);
+  const multiuserEnabled = useMultiuserEnabled();
+
+  let usersAccess = currentFile?.usersWithAccess ?? [];
+  usersAccess = usersAccess?.filter(user => user.userName !== '') ?? [];
+
+  const sortedUsersAccess = [...usersAccess].sort((a, b) => {
+    const textA =
+      a.userId === currentUserId ? 'You' : (a.displayName ?? a.userName);
+    const textB =
+      b.userId === currentUserId ? 'You' : (b.displayName ?? b.userName);
+    return textA.localeCompare(textB);
+  });
+
+  return (
+    <View>
+      {multiuserEnabled &&
+        usersAccess.length > 0 &&
+        !(sortedUsersAccess.length === 1 && sortedUsersAccess[0].owner) && (
+          <View
+            style={{
+              marginLeft: '5px',
+              alignSelf: 'center',
+            }}
+          >
+            <Tooltip
+              content={
+                <View
+                  style={{
+                    margin: 5,
+                  }}
+                >
+                  <Text
+                    style={{
+                      ...styles.altMenuHeaderText,
+                      ...styles.verySmallText,
+                      color: theme.pageTextLight,
+                    }}
+                  >
+                    File shared with:
+                  </Text>
+                  <View
+                    style={{
+                      padding: 0,
+                    }}
+                  >
+                    {sortedUsersAccess.map(user => (
+                      <View key={user.userId} style={{ flexDirection: 'row' }}>
+                        <SvgUser
+                          style={{
+                            width: 10,
+                            height: 10,
+                            opacity: 0.7,
+                            marginTop: 3,
+                            marginRight: 5,
+                          }}
+                        />
+                        <View
+                          style={{
+                            ...styles.verySmallText,
+                            color: theme.pageTextLight,
+                            margin: 0,
+                            listStylePosition: 'inside',
+                          }}
+                        >
+                          {user.userId === currentUserId
+                            ? 'You'
+                            : (user.displayName ?? user.userName)}
+                        </View>
+                      </View>
+                    ))}
+                  </View>
+                </View>
+              }
+              placement="bottom end"
+            >
+              <SvgUserGroup
+                style={{
+                  width: 15,
+                  height: 15,
+                  alignSelf: 'flex-end',
+                  opacity: 0.7,
+                }}
+              />
+            </Tooltip>
+          </View>
+        )}
     </View>
   );
 }

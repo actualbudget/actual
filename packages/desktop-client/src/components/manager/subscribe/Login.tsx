@@ -2,44 +2,213 @@
 import React, { useState, useEffect } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
-import { useParams, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 
-import { createBudget } from 'loot-core/src/client/actions/budgets';
 import { loggedIn } from 'loot-core/src/client/actions/user';
 import { send } from 'loot-core/src/platform/client/fetch';
+import { type OpenIdConfig } from 'loot-core/types/models/openid';
 
+import { useNavigate } from '../../../hooks/useNavigate';
 import { AnimatedLoading } from '../../../icons/AnimatedLoading';
-import { theme } from '../../../style';
+import { styles, theme } from '../../../style';
 import { Button, ButtonWithLoading } from '../../common/Button2';
 import { BigInput } from '../../common/Input';
+import { Label } from '../../common/Label';
 import { Link } from '../../common/Link';
+import { Select } from '../../common/Select';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
+import { useAvailableLoginMethods, useLoginMethod } from '../../ServerContext';
 
 import { useBootstrapped, Title } from './common';
+import { OpenIdForm } from './OpenIdForm';
+
+function PasswordLogin({ setError, dispatch }) {
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  async function onSubmitPassword() {
+    if (password === '' || loading) {
+      return;
+    }
+
+    setError(null);
+    setLoading(true);
+    const { error } = await send('subscribe-sign-in', {
+      password,
+      loginMethod: 'password',
+    });
+    setLoading(false);
+
+    if (error) {
+      setError(error);
+    } else {
+      dispatch(loggedIn());
+    }
+  }
+
+  return (
+    <View style={{ flexDirection: 'row', marginTop: 5 }}>
+      <BigInput
+        autoFocus={true}
+        placeholder="Password"
+        type="password"
+        onChangeValue={newValue => setPassword(newValue)}
+        style={{ flex: 1, marginRight: 10 }}
+        onEnter={onSubmitPassword}
+      />
+      <ButtonWithLoading
+        variant="primary"
+        isLoading={loading}
+        style={{ fontSize: 15 }}
+        onPress={onSubmitPassword}
+      >
+        Sign in
+      </ButtonWithLoading>
+    </View>
+  );
+}
+
+function OpenIdLogin({ setError }) {
+  const [warnMasterCreation, setWarnMasterCreation] = useState(false);
+  const [reviewOpenIdConfiguration, setReviewOpenIdConfiguration] =
+    useState(false);
+  const navigate = useNavigate();
+
+  async function onSetOpenId(config: OpenIdConfig) {
+    setError(null);
+    const { error } = await send('subscribe-bootstrap', { openId: config });
+
+    if (error) {
+      setError(error);
+    } else {
+      navigate('/');
+    }
+  }
+
+  useEffect(() => {
+    send('owner-created').then(created => setWarnMasterCreation(!created));
+  }, []);
+
+  async function onSubmitOpenId() {
+    const { error, redirect_url } = await send('subscribe-sign-in', {
+      return_url: window.location.origin,
+      loginMethod: 'openid',
+    });
+
+    if (error) {
+      setError(error);
+    } else {
+      window.location.href = redirect_url;
+    }
+  }
+
+  return (
+    <View>
+      {!reviewOpenIdConfiguration && (
+        <>
+          <View style={{ flexDirection: 'row' }}>
+            <Button
+              variant="primary"
+              style={{
+                fontSize: 15,
+                alignSelf: 'center',
+                flexGrow: 1,
+                marginTop: 5,
+              }}
+              onPress={onSubmitOpenId}
+            >
+              Sign in with OpenID
+            </Button>
+          </View>
+          {warnMasterCreation && (
+            <>
+              <label style={{ color: theme.warningText, marginTop: 10 }}>
+                The first user to login with OpenID will be the{' '}
+                <Text style={{ fontWeight: 'bold' }}>server owner</Text>. This
+                can&apos;t be changed using UI.
+              </label>
+              <Button
+                variant="bare"
+                onPress={() => setReviewOpenIdConfiguration(true)}
+                style={{ marginTop: 5 }}
+              >
+                Review OpenID configuration
+              </Button>
+            </>
+          )}
+        </>
+      )}
+      {reviewOpenIdConfiguration && (
+        <OpenIdForm
+          loadData={true}
+          otherButtons={[
+            <Button
+              key="cancel"
+              variant="bare"
+              style={{ marginRight: 10 }}
+              onPress={() => setReviewOpenIdConfiguration(false)}
+            >
+              Cancel
+            </Button>,
+          ]}
+          onSetOpenId={async config => {
+            onSetOpenId(config);
+          }}
+        />
+      )}
+    </View>
+  );
+}
+
+function HeaderLogin({ error }) {
+  return (
+    <View
+      style={{
+        flexDirection: 'row',
+        justifyContent: 'center',
+        marginTop: 15,
+      }}
+    >
+      {error ? (
+        <Link
+          variant="button"
+          type="button"
+          style={{ fontSize: 15 }}
+          to={'/login/password?error=' + error}
+        >
+          Login with Password
+        </Link>
+      ) : (
+        <span>
+          Checking Header Token Login ...{' '}
+          <AnimatedLoading style={{ width: 20, height: 20 }} />
+        </span>
+      )}
+    </View>
+  );
+}
 
 export function Login() {
   const { t } = useTranslation();
 
   const dispatch = useDispatch();
-  const { method = 'password' } = useParams();
+  const defaultLoginMethod = useLoginMethod();
+  const [method, setMethod] = useState(defaultLoginMethod);
   const [searchParams, _setSearchParams] = useSearchParams();
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(searchParams.get('error'));
-  const { checked } = useBootstrapped(!searchParams.has('error'));
+  const [error, setError] = useState(null);
+  const { checked } = useBootstrapped();
+  const loginMethods = useAvailableLoginMethods();
 
   useEffect(() => {
     if (checked && !searchParams.has('error')) {
       (async () => {
         if (method === 'header') {
           setError(null);
-          setLoading(true);
           const { error } = await send('subscribe-sign-in', {
             password: '',
             loginMethod: method,
           });
-          setLoading(false);
 
           if (error) {
             setError(error);
@@ -49,7 +218,7 @@ export function Login() {
         }
       })();
     }
-  }, [checked, searchParams, method, dispatch]);
+  }, [loginMethods, checked, searchParams, method, dispatch]);
 
   function getErrorMessage(error) {
     switch (error) {
@@ -61,33 +230,11 @@ export function Login() {
         return 'Invalid password';
       case 'network-failure':
         return 'Unable to contact the server';
+      case 'internal-error':
+        return 'Internal error';
       default:
         return `An unknown error occurred: ${error}`;
     }
-  }
-
-  async function onSubmit() {
-    if (password === '' || loading) {
-      return;
-    }
-
-    setError(null);
-    setLoading(true);
-    const { error } = await send('subscribe-sign-in', {
-      password,
-      loginMethod: method,
-    });
-    setLoading(false);
-
-    if (error) {
-      setError(error);
-    } else {
-      dispatch(loggedIn());
-    }
-  }
-
-  async function onDemo() {
-    await dispatch(createBudget({ demoMode: true }));
   }
 
   if (!checked) {
@@ -97,18 +244,43 @@ export function Login() {
   return (
     <View style={{ maxWidth: 450, marginTop: -30, color: theme.pageText }}>
       <Title text={t('Sign in to this Actual instance')} />
-      <Text
-        style={{
-          fontSize: 16,
-          color: theme.pageTextDark,
-          lineHeight: 1.4,
-        }}
-      >
-        <Trans>
-          If you lost your password, you likely still have access to your server
-          to manually reset it.
-        </Trans>
-      </Text>
+
+      {loginMethods.length > 1 && (
+        <Text
+          style={{
+            fontSize: 16,
+            color: theme.pageTextDark,
+            lineHeight: 1.4,
+            marginBottom: 10,
+          }}
+        >
+          <Trans>
+            If you lost your password, you likely still have access to your
+            server to manually reset it.
+          </Trans>
+        </Text>
+      )}
+
+      {loginMethods.length > 1 && (
+        <View style={{ marginTop: 10 }}>
+          <Label
+            style={{
+              ...styles.verySmallText,
+              color: theme.pageTextLight,
+              paddingTop: 5,
+            }}
+            title="Select the login method"
+          />
+          <Select
+            value={method}
+            onChange={newValue => {
+              setError(null);
+              setMethod(newValue);
+            }}
+            options={loginMethods.map(m => [m.method, m.displayName])}
+          />
+        </View>
+      )}
 
       {error && (
         <Text
@@ -124,66 +296,12 @@ export function Login() {
       )}
 
       {method === 'password' && (
-        <View style={{ display: 'flex', flexDirection: 'row', marginTop: 30 }}>
-          <BigInput
-            autoFocus={true}
-            placeholder={t('Password')}
-            type="password"
-            onChangeValue={setPassword}
-            style={{ flex: 1, marginRight: 10 }}
-            onEnter={onSubmit}
-          />
-          <ButtonWithLoading
-            variant="primary"
-            isLoading={loading}
-            style={{ fontSize: 15 }}
-            onPress={onSubmit}
-          >
-            <Trans>Sign in</Trans>
-          </ButtonWithLoading>
-        </View>
+        <PasswordLogin setError={setError} dispatch={dispatch} />
       )}
-      {method === 'header' && (
-        <View
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'center',
-            marginTop: 15,
-          }}
-        >
-          {error && (
-            <Link
-              variant="button"
-              buttonVariant="primary"
-              style={{ fontSize: 15 }}
-              to={'/login/password?error=' + error}
-            >
-              <Trans>Login with Password</Trans>
-            </Link>
-          )}
-          {!error && (
-            <span>
-              <Trans>Checking Header Token Login ...</Trans>{' '}
-              <AnimatedLoading style={{ width: 20, height: 20 }} />
-            </span>
-          )}
-        </View>
-      )}
-      <View
-        style={{
-          flexDirection: 'row',
-          justifyContent: 'center',
-          marginTop: 15,
-        }}
-      >
-        <Button
-          variant="bare"
-          style={{ fontSize: 15, color: theme.pageTextLink, marginLeft: 10 }}
-          onPress={onDemo}
-        >
-          <Trans>Try Demo &rarr;</Trans>
-        </Button>
-      </View>
+
+      {method === 'openid' && <OpenIdLogin setError={setError} />}
+
+      {method === 'header' && <HeaderLogin error={error} />}
     </View>
   );
 }

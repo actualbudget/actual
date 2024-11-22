@@ -1,0 +1,94 @@
+import { useState } from 'react';
+
+import { send } from 'loot-core/platform/client/fetch';
+import * as asyncStorage from 'loot-core/platform/server/asyncStorage';
+import { getOpenIdErrors } from 'loot-core/shared/errors';
+import { type OpenIdConfig } from 'loot-core/types/models/openid';
+
+import { useActions } from '../../hooks/useActions';
+import { theme, styles } from '../../style';
+import { Error } from '../alerts';
+import { Button } from '../common/Button2';
+import { Label } from '../common/Label';
+import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
+import { View } from '../common/View';
+import { OpenIdForm } from '../manager/subscribe/OpenIdForm';
+import { useRefreshLoginMethods } from '../ServerContext';
+
+type OpenIDEnableModalProps = {
+  onSave?: () => void;
+};
+
+export function OpenIDEnableModal({
+  onSave: originalOnSave,
+}: OpenIDEnableModalProps) {
+  const [error, setError] = useState('');
+  const actions = useActions();
+  const { closeBudget } = useActions();
+  const refreshLoginMethods = useRefreshLoginMethods();
+
+  async function onSave(config: OpenIdConfig) {
+    const { error } = (await send('enable-openid', { openId: config })) || {};
+    if (!error) {
+      originalOnSave?.();
+      await refreshLoginMethods();
+      await asyncStorage.removeItem('user-token');
+      await closeBudget();
+    } else {
+      setError(getOpenIdErrors(error));
+    }
+  }
+
+  return (
+    <Modal name="enable-openid">
+      {({ state: { close } }) => (
+        <>
+          <ModalHeader
+            title="Enable OpenID"
+            rightContent={<ModalCloseButton onPress={close} />}
+          />
+
+          <View style={{ flexDirection: 'column' }}>
+            <OpenIdForm
+              onSetOpenId={onSave}
+              otherButtons={[
+                <Button
+                  key="cancel"
+                  variant="bare"
+                  style={{ marginRight: 10 }}
+                  onPress={actions.popModal}
+                >
+                  Cancel
+                </Button>,
+              ]}
+            />
+            <Label
+              style={{
+                ...styles.verySmallText,
+                color: theme.pageTextLight,
+                paddingTop: 5,
+              }}
+              title="After enabling openid all sessions will be closed"
+            />
+            <Label
+              style={{
+                ...styles.verySmallText,
+                color: theme.pageTextLight,
+              }}
+              title="The first user to login will become the server owner"
+            />
+            <Label
+              style={{
+                ...styles.verySmallText,
+                color: theme.warningText,
+              }}
+              title="The current password will be disabled"
+            />
+
+            {error && <Error>{error}</Error>}
+          </View>
+        </>
+      )}
+    </Modal>
+  );
+}
