@@ -82,7 +82,7 @@ export function CategoryTransactions({
   });
 
   const onOpenTransaction = useCallback(
-    (transaction: { id: string })  => {
+    (transaction: { id: string }) => {
       // details of how the native app used to handle preview transactions here can be found at commit 05e58279
       if (!isPreviewId(transaction.id)) {
         navigate(`/transactions/${transaction.id}`);
