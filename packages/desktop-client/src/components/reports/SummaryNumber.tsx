@@ -34,8 +34,8 @@ export function SummaryNumber({
 }: SummaryNumberProps) {
   const [fontSize, setFontSize] = useState<number>(initialFontSize);
   const refDiv = useRef<HTMLDivElement>(null);
+  const displayAmount = amountToCurrency(Math.abs(value)) + suffix;
 
-  const displayAmount = amountToCurrency(Math.abs(value));
   const handleResize = debounce(() => {
     if (!refDiv.current) return;
 
@@ -65,7 +65,7 @@ export function SummaryNumber({
         <View
           ref={mergedRef as Ref<HTMLDivElement>}
           role="text"
-          aria-label={`${value < 0 ? 'Negative' : 'Positive'} amount: ${displayAmount}${suffix}`}
+          aria-label={`${value < 0 ? 'Negative' : 'Positive'} amount: ${displayAmount}`}
           style={{
             alignItems: 'center',
             flexGrow: 1,
@@ -82,10 +82,7 @@ export function SummaryNumber({
           }}
         >
           <span aria-hidden="true">
-            <PrivacyFilter>
-              {displayAmount}
-              {suffix}
-            </PrivacyFilter>
+            <PrivacyFilter>{displayAmount}</PrivacyFilter>
           </span>
         </View>
       )}
