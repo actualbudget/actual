@@ -3,7 +3,6 @@ import React, { useState } from 'react';
 import { t } from 'i18next';
 
 import { type TransactionEntity } from 'loot-core/types/models';
-
 import { SelectedProvider, useSelected } from '../../../hooks/useSelected';
 import { SvgSearchAlternate } from '../../../icons/v2';
 import { styles, theme } from '../../../style';
@@ -14,7 +13,6 @@ import { CellValue, CellValueText } from '../../spreadsheet/CellValue';
 import { type SheetFields, type SheetNames } from '../../spreadsheet/index';
 import { useSheetValue } from '../../spreadsheet/useSheetValue';
 import { PullToRefresh } from '../PullToRefresh';
-
 import { TransactionList } from './TransactionList';
 
 function TransactionSearchInput({
