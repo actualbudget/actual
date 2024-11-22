@@ -1,10 +1,11 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { t } from 'i18next';
 
 import { replaceModal } from 'loot-core/src/client/actions/modals';
 import { send } from 'loot-core/src/platform/client/fetch';
+import { type PayeeEntity } from 'loot-core/types/models';
 
 import { usePayees } from '../../hooks/usePayees';
 import { theme } from '../../style';
@@ -17,13 +18,21 @@ import { View } from '../common/View';
 
 const highlightStyle = { color: theme.pageTextPositive };
 
-export function MergeUnusedPayeesModal({ payeeIds, targetPayeeId }) {
+type MergeUnusedPayeesModalProps = {
+  payeeIds: Array<PayeeEntity['id']>;
+  targetPayeeId: PayeeEntity['id'];
+};
+
+export function MergeUnusedPayeesModal({
+  payeeIds,
+  targetPayeeId,
+}: MergeUnusedPayeesModalProps) {
   const allPayees = usePayees();
   const modalStack = useSelector(state => state.modals.modalStack);
   const isEditingRule = !!modalStack.find(m => m.name === 'edit-rule');
   const dispatch = useDispatch();
   const [shouldCreateRule, setShouldCreateRule] = useState(true);
-  const flashRef = useRef(null);
+  const flashRef = useRef<HTMLUListElement | null>(null);
 
   useEffect(() => {
     // Flash the scrollbar
@@ -41,40 +50,46 @@ export function MergeUnusedPayeesModal({ payeeIds, targetPayeeId }) {
   //
   // TODO: I think a custom `useSelector` hook that doesn't bind would
   // be nice
-  const [payees] = useState(() =>
-    payeeIds.map(id => allPayees.find(p => p.id === id)),
+  const [payees] = useState<PayeeEntity[]>(() =>
+    allPayees.filter(p => payeeIds.includes(p.id)),
   );
-  const targetPayee = allPayees.find(p => p.id === targetPayeeId);
 
+  const onMerge = useCallback(
+    async (targetPayee: PayeeEntity) => {
+      await send('payees-merge', {
+        targetId: targetPayee.id,
+        mergeIds: payees.map(payee => payee.id),
+      });
+
+      let ruleId;
+      if (shouldCreateRule && !isEditingRule) {
+        const id = await send('rule-add-payee-rename', {
+          fromNames: payees.map(payee => payee.name),
+          to: targetPayee.id,
+        });
+        ruleId = id;
+      }
+
+      return ruleId;
+    },
+    [shouldCreateRule, isEditingRule, payees],
+  );
+
+  const onMergeAndCreateRule = useCallback(
+    async (targetPayee: PayeeEntity) => {
+      const ruleId = await onMerge(targetPayee);
+
+      if (ruleId) {
+        const rule = await send('rule-get', { id: ruleId });
+        dispatch(replaceModal('edit-rule', { rule }));
+      }
+    },
+    [onMerge, dispatch],
+  );
+
+  const targetPayee = allPayees.find(p => p.id === targetPayeeId);
   if (!targetPayee) {
     return null;
-  }
-
-  async function onMerge() {
-    await send('payees-merge', {
-      targetId: targetPayee.id,
-      mergeIds: payees.map(p => p.id),
-    });
-
-    let ruleId;
-    if (shouldCreateRule && !isEditingRule) {
-      const id = await send('rule-add-payee-rename', {
-        fromNames: payees.map(p => p.name),
-        to: targetPayee.id,
-      });
-      ruleId = id;
-    }
-
-    return ruleId;
-  }
-
-  async function onMergeAndCreateRule() {
-    const ruleId = await onMerge();
-
-    if (ruleId) {
-      const rule = await send('rule-get', { id: ruleId });
-      dispatch(replaceModal('edit-rule', { rule }));
-    }
   }
 
   return (
@@ -103,9 +118,9 @@ export function MergeUnusedPayeesModal({ payeeIds, targetPayeeId }) {
                       overflow: 'auto',
                     }}
                   >
-                    {payees.map(p => (
-                      <li key={p.id}>
-                        <Text style={highlightStyle}>{p.name}</Text>
+                    {payees.map(payee => (
+                      <li key={payee.id}>
+                        <Text style={highlightStyle}>{payee.name}</Text>
                       </li>
                     ))}
                   </ul>
@@ -157,7 +172,7 @@ export function MergeUnusedPayeesModal({ payeeIds, targetPayeeId }) {
                 autoFocus
                 style={{ marginRight: 10 }}
                 onPress={() => {
-                  onMerge();
+                  onMerge(targetPayee);
                   close();
                 }}
               >
@@ -167,7 +182,7 @@ export function MergeUnusedPayeesModal({ payeeIds, targetPayeeId }) {
                 <Button
                   style={{ marginRight: 10 }}
                   onPress={() => {
-                    onMergeAndCreateRule();
+                    onMergeAndCreateRule(targetPayee);
                     close();
                   }}
                 >

@@ -116,6 +116,7 @@ export interface ServerHandlers {
   }) => Promise<unknown>;
 
   'payees-check-orphaned': (arg: { ids }) => Promise<unknown>;
+  'payees-get-orphaned': () => Promise<PayeeEntity[]>;
 
   'payees-get-rules': (arg: { id: string }) => Promise<RuleEntity[]>;
 
