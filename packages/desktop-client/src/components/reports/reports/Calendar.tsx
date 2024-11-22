@@ -11,6 +11,7 @@ import { useDispatch } from 'react-redux';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { useSpring, animated, config } from 'react-spring';
 
+import { css } from '@emotion/css';
 import { useDrag } from '@use-gesture/react';
 import { format, parseISO } from 'date-fns';
 
@@ -662,7 +663,11 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
                         ? open({ canceled: false })
                         : close()
                     }
-                    style={{ color: theme.pageTextSubdued, height: 42 }}
+                    className={css({
+                      color: theme.pageTextSubdued,
+                      height: 42,
+                      '&[data-pressed]': { backgroundColor: 'transparent' },
+                    })}
                   >
                     {!mobileTransactionsOpen && (
                       <>
