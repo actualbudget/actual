@@ -324,14 +324,10 @@ function TransactionListWithPreviews({
       transactions={transactionsToDisplay}
       balance={balanceQueries.balance.name as SheetFields<SheetNames>}
       balanceCleared={
-        balanceQueries.cleared.name
-          ? (balanceQueries.cleared.name as SheetFields<SheetNames>)
-          : undefined
+        (balanceQueries.cleared?.name as SheetFields<SheetNames>) ?? undefined
       }
       balanceUncleared={
-        balanceQueries.uncleared.name
-          ? (balanceQueries.uncleared.name as SheetFields<SheetNames>)
-          : undefined
+        (balanceQueries.uncleared?.name as SheetFields<SheetNames>) ?? undefined
       }
       onLoadMore={loadMoreTransactions}
       searchPlaceholder={`Search ${accountName}`}
