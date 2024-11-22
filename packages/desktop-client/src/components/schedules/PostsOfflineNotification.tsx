@@ -5,6 +5,7 @@ import { useLocation } from 'react-router-dom';
 
 import { popModal } from 'loot-core/client/actions';
 import { send } from 'loot-core/src/platform/client/fetch';
+import { type PayeeEntity } from 'loot-core/types/models';
 
 import { useFormatList } from '../../hooks/useFormatList';
 import { theme } from '../../style';
@@ -16,12 +17,16 @@ import { Text } from '../common/Text';
 import { DisplayId } from '../util/DisplayId';
 
 export function PostsOfflineNotification() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const location = useLocation();
   const dispatch = useDispatch();
 
-  const payees = (location.state && location.state.payees) || [];
+  const locationState = location.state;
+  const payees =
+    locationState && 'payees' in locationState
+      ? (locationState.payees as Array<PayeeEntity['id']>)
+      : [];
 
   async function onPost() {
     await send('schedule/force-run-service');
@@ -33,7 +38,7 @@ export function PostsOfflineNotification() {
       <DisplayId id={id} type="payees" />
     </Text>
   ));
-  const payeeNamesList = useFormatList(payeesList, t.language);
+  const payeeNamesList = useFormatList(payeesList, i18n.language);
 
   return (
     <Modal name="schedule-posts-offline-notification">
