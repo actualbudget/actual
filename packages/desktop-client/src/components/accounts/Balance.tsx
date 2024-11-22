@@ -21,7 +21,7 @@ import { useSheetValue } from '../spreadsheet/useSheetValue';
 
 type DetailedBalanceProps = {
   name: string;
-  balance: number;
+  balance: number | null;
   isExactBalance: boolean;
 };
 
@@ -52,7 +52,13 @@ function DetailedBalance({
   );
 }
 
-function SelectedBalance({ selectedItems, account }) {
+function SelectedBalance({
+  selectedItems,
+  account,
+}: {
+  selectedItems: any;
+  account: any;
+}) {
   const { t } = useTranslation();
 
   type SelectedBalanceName = `selected-balance-${string}`;
@@ -79,7 +85,7 @@ function SelectedBalance({ selectedItems, account }) {
       .calculate({ $sum: '$amount' }),
   });
 
-  let scheduleBalance = null;
+  let scheduleBalance = 0;
 
   const { isLoading, schedules = [] } = useCachedSchedules();
 
@@ -126,7 +132,7 @@ function SelectedBalance({ selectedItems, account }) {
   );
 }
 
-function FilteredBalance({ filteredAmount }) {
+function FilteredBalance({ filteredAmount }: { filteredAmount: any }) {
   const { t } = useTranslation();
 
   return (
@@ -138,7 +144,7 @@ function FilteredBalance({ filteredAmount }) {
   );
 }
 
-function MoreBalances({ balanceQuery }) {
+function MoreBalances({ balanceQuery }: { balanceQuery: any }) {
   const { t } = useTranslation();
 
   type SelectedBalanceClearedName = `balance-query-${string}-cleared`;
@@ -169,6 +175,15 @@ function MoreBalances({ balanceQuery }) {
   );
 }
 
+type BalancesProps = {
+  balanceQuery: any;
+  showExtraBalances: any;
+  onToggleExtraBalances: any;
+  account: any;
+  isFiltered: any;
+  filteredAmount: any;
+};
+
 export function Balances({
   balanceQuery,
   showExtraBalances,
@@ -176,7 +191,7 @@ export function Balances({
   account,
   isFiltered,
   filteredAmount,
-}) {
+}: BalancesProps) {
   const selectedItems = useSelectedItems();
   const buttonRef = useRef(null);
   const isButtonHovered = useHover(buttonRef);
