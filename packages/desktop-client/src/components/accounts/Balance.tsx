@@ -19,7 +19,13 @@ import { CellValue, CellValueText } from '../spreadsheet/CellValue';
 import { useFormat } from '../spreadsheet/useFormat';
 import { useSheetValue } from '../spreadsheet/useSheetValue';
 
-function DetailedBalance({ name, balance, isExactBalance = true }) {
+type DetailedBalanceProps = {
+  name: any
+  balance: any
+  isExactBalance: boolean
+}
+
+function DetailedBalance({ name, balance, isExactBalance = true }: DetailedBalanceProps) {
   const format = useFormat();
   return (
     <Text
@@ -45,10 +51,11 @@ function DetailedBalance({ name, balance, isExactBalance = true }) {
 function SelectedBalance({ selectedItems, account }) {
   const { t } = useTranslation();
 
+  type SelectedBalanceName = `selected-balance-${string}`;
   const name = `selected-balance-${[...selectedItems].join('-')}`;
 
-  const rows = useSheetValue({
-    name,
+  const rows = useSheetValue<'balance', SelectedBalanceName>({
+    name: name as SelectedBalanceName,
     query: q('transactions')
       .filter({
         id: { $oneof: [...selectedItems] },
@@ -56,11 +63,12 @@ function SelectedBalance({ selectedItems, account }) {
       })
       .select('id'),
   });
-  const ids = new Set((rows || []).map(r => r.id));
+  const ids = new Set(Array.isArray(rows) ? rows.map(r => r.id) : []);
 
   const finalIds = [...selectedItems].filter(id => !ids.has(id));
-  let balance = useSheetValue({
-    name: name + '-sum',
+  type SelectedBalanceSumName = `selected-balance-${string}-sum`
+  let balance = useSheetValue<'balance', SelectedBalanceName>({
+    name: (name + '-sum') as SelectedBalanceSumName,
     query: q('transactions')
       .filter({ id: { $oneof: finalIds } })
       .options({ splits: 'all' })
@@ -129,19 +137,22 @@ function FilteredBalance({ filteredAmount }) {
 function MoreBalances({ balanceQuery }) {
   const { t } = useTranslation();
 
-  const cleared = useSheetValue({
-    name: balanceQuery.name + '-cleared',
+  type SelectedBalanceClearedName = `balance-query-${string}-cleared`
+  const cleared = useSheetValue<'balance', SelectedBalanceClearedName>({
+    name: (balanceQuery.name + '-cleared') as SelectedBalanceClearedName,
     query: balanceQuery.query.filter({ cleared: true }),
   });
-  const uncleared = useSheetValue({
-    name: balanceQuery.name + '-uncleared',
+
+  type SelectedBalanceUnclearedName = `balance-query-${string}-uncleared`
+  const uncleared = useSheetValue<'balance', SelectedBalanceUnclearedName>({
+    name: (balanceQuery.name + '-uncleared') as SelectedBalanceUnclearedName,
     query: balanceQuery.query.filter({ cleared: false }),
   });
 
   return (
     <View style={{ flexDirection: 'row' }}>
-      <DetailedBalance name={t('Cleared total:')} balance={cleared} />
-      <DetailedBalance name={t('Uncleared total:')} balance={uncleared} />
+      <DetailedBalance name={t('Cleared total:')} balance={cleared} isExactBalance />
+      <DetailedBalance name={t('Uncleared total:')} balance={uncleared} isExactBalance />
     </View>
   );
 }

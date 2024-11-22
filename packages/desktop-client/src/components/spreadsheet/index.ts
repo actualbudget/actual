@@ -70,6 +70,9 @@ export type Spreadsheets = {
 
     // Balance fields
     [key: `balance-query-${string}-cleared`]: number;
+    [key: `balance-query-${string}-uncleared`]: number;
+    [key: `selected-balance-${string}`]: number;
+    [key: `selected-balance-${string}-sum`]: number;
   };
 };
 
