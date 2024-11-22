@@ -22,15 +22,13 @@ import { MobileBackButton } from '../MobileBackButton';
 import { AddTransactionButton } from '../transactions/AddTransactionButton';
 import { TransactionListWithBalances } from '../transactions/TransactionListWithBalances';
 
-type CategoryTransactionsProps = {
-  category: CategoryEntity;
-  month: string;
-};
-
 export function CategoryTransactions({
   category,
   month,
-}: CategoryTransactionsProps) {
+}: {
+  category: CategoryEntity;
+  month: string;
+}) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
