@@ -46,6 +46,7 @@ import { MobilePageHeader, Page } from '../../Page';
 import { MobileBackButton } from '../MobileBackButton';
 import { AddTransactionButton } from '../transactions/AddTransactionButton';
 import { TransactionListWithBalances } from '../transactions/TransactionListWithBalances';
+import { type SheetFields, type SheetNames } from '../../spreadsheet/index';
 
 export function AccountTransactions({
   account,
@@ -314,16 +315,16 @@ function TransactionListWithPreviews({
   );
 
   const transactionsToDisplay = !isSearching
-    ? previewTransactions.concat(transactions)
-    : transactions;
+    ? [...previewTransactions, ...transactions]
+    : [...transactions];
 
   return (
     <TransactionListWithBalances
       isLoading={isLoading}
       transactions={transactionsToDisplay}
-      balance={balanceQueries.balance}
-      balanceCleared={balanceQueries.cleared}
-      balanceUncleared={balanceQueries.uncleared}
+      balance={balanceQueries.balance.name as SheetFields<SheetNames>}
+      balanceCleared={balanceQueries.cleared.name ? balanceQueries.cleared.name as SheetFields<SheetNames> : undefined}
+      balanceUncleared={balanceQueries.uncleared.name ? balanceQueries.uncleared.name as SheetFields<SheetNames>: undefined}
       onLoadMore={loadMoreTransactions}
       searchPlaceholder={`Search ${accountName}`}
       onSearch={onSearch}

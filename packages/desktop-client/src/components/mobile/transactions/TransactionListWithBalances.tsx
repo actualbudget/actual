@@ -9,13 +9,15 @@ import { InputWithContent } from '../../common/InputWithContent';
 import { Label } from '../../common/Label';
 import { View } from '../../common/View';
 import { CellValue, CellValueText } from '../../spreadsheet/CellValue';
+import { type SheetFields, type SheetNames } from '../../spreadsheet/index';
 import { useSheetValue } from '../../spreadsheet/useSheetValue';
 import { PullToRefresh } from '../PullToRefresh';
 
 import { TransactionList } from './TransactionList';
+import { TransactionEntity } from 'loot-core/types/models';
 
-function TransactionSearchInput({ placeholder, onSearch }) {
-  const [text, setText] = useState('');
+function TransactionSearchInput({ placeholder, onSearch }: { placeholder: string, onSearch: any}) {
+  const [text, setText] = useState<string>('');
 
   return (
     <View
@@ -57,6 +59,19 @@ function TransactionSearchInput({ placeholder, onSearch }) {
   );
 }
 
+type TransactionListWithBalancesProps = {
+  isLoading: boolean | undefined;
+  transactions: TransactionEntity[];
+  balance: SheetFields<SheetNames>;
+  balanceCleared: SheetFields<SheetNames> | undefined;
+  balanceUncleared: SheetFields<SheetNames> | undefined;
+  searchPlaceholder: string;
+  onSearch: (searchText: string) => void;
+  onLoadMore: (() => void) | undefined;
+  onOpenTransaction: (transaction: TransactionEntity) => void;
+  onRefresh: any;
+};
+
 export function TransactionListWithBalances({
   isLoading,
   transactions,
@@ -68,51 +83,61 @@ export function TransactionListWithBalances({
   onLoadMore,
   onOpenTransaction,
   onRefresh,
-}) {
-  const selectedInst = useSelected('transactions', transactions);
+}: TransactionListWithBalancesProps) {
+  const selectedInst = useSelected('transactions', transactions, []);
 
   return (
     <SelectedProvider instance={selectedInst}>
-      <View
-        style={{
-          flexShrink: 0,
-          marginTop: 10,
-        }}
-      >
+      <>
         <View
           style={{
-            flexDirection: 'row',
-            justifyContent: 'space-evenly',
+            flexShrink: 0,
+            marginTop: 10,
           }}
         >
-          {balanceCleared && balanceUncleared ? (
-            <BalanceWithCleared
-              balance={balance}
-              balanceCleared={balanceCleared}
-              balanceUncleared={balanceUncleared}
-            />
-          ) : (
-            <Balance balance={balance} />
-          )}
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-evenly',
+            }}
+          >
+            {balanceCleared && balanceUncleared ? (
+              <BalanceWithCleared
+                balance={balance}
+                balanceCleared={balanceCleared}
+                balanceUncleared={balanceUncleared}
+              />
+            ) : (
+              <Balance balance={balance as unknown as SheetFields<SheetNames>} />
+            )}
+          </View>
+          <TransactionSearchInput
+            placeholder={searchPlaceholder}
+            onSearch={onSearch}
+          />
         </View>
-        <TransactionSearchInput
-          placeholder={searchPlaceholder}
-          onSearch={onSearch}
-        />
-      </View>
-      <PullToRefresh isPullable={!!onRefresh} onRefresh={onRefresh}>
-        <TransactionList
-          isLoading={isLoading}
-          transactions={transactions}
-          onLoadMore={onLoadMore}
-          onOpenTransaction={onOpenTransaction}
-        />
-      </PullToRefresh>
+        <PullToRefresh isPullable={!!onRefresh} onRefresh={onRefresh}>
+          <TransactionList
+            isLoading={isLoading}
+            transactions={transactions}
+            onLoadMore={onLoadMore}
+            onOpenTransaction={onOpenTransaction}
+          />
+        </PullToRefresh>
+      </>
     </SelectedProvider>
   );
 }
 
-function BalanceWithCleared({ balanceUncleared, balanceCleared, balance }) {
+function BalanceWithCleared({
+  balanceUncleared,
+  balanceCleared,
+  balance,
+}: {
+  balanceUncleared: SheetFields<SheetNames>
+  balanceCleared: SheetFields<SheetNames>
+  balance: SheetFields<SheetNames>
+}) {
   const unclearedAmount = useSheetValue(balanceUncleared);
 
   return (
@@ -127,7 +152,10 @@ function BalanceWithCleared({ balanceUncleared, balanceCleared, balance }) {
           title={t('Cleared')}
           style={{ textAlign: 'center', fontSize: 12 }}
         />
-        <CellValue binding={balanceCleared} type="financial">
+        <CellValue
+          binding={balance}
+          type="financial"
+        >
           {props => (
             <CellValueText
               {...props}
@@ -152,7 +180,10 @@ function BalanceWithCleared({ balanceUncleared, balanceCleared, balance }) {
           title={t('Uncleared')}
           style={{ textAlign: 'center', fontSize: 12 }}
         />
-        <CellValue binding={balanceUncleared} type="financial">
+        <CellValue
+          binding={balance}
+          type="financial"
+        >
           {props => (
             <CellValueText
               {...props}
@@ -170,7 +201,11 @@ function BalanceWithCleared({ balanceUncleared, balanceCleared, balance }) {
   );
 }
 
-function Balance({ balance }) {
+function Balance({
+  balance,
+}: {
+  balance: SheetFields<SheetNames>;
+}) {
   return (
     <View style={{ flexBasis: '33%' }}>
       <Label title={t('Balance')} style={{ textAlign: 'center' }} />
