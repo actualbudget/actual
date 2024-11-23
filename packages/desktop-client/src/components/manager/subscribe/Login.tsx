@@ -171,21 +171,21 @@ export function Login() {
         </View>
       )}
       {shouldDisplayDemo() && (
-              <View
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'center',
-                marginTop: 15,
-              }}
-            >
-              <Button
-                variant="bare"
-                style={{ fontSize: 15, color: theme.pageTextLink, marginLeft: 10 }}
-                onPress={onDemo}
-              >
-                <Trans>Try Demo &rarr;</Trans>
-              </Button>
-            </View>
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'center',
+            marginTop: 15,
+          }}
+        >
+          <Button
+            variant="bare"
+            style={{ fontSize: 15, color: theme.pageTextLink, marginLeft: 10 }}
+            onPress={onDemo}
+          >
+            <Trans>Try Demo &rarr;</Trans>
+          </Button>
+        </View>
       )}
     </View>
   );
