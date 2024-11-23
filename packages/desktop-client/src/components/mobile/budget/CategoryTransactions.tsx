@@ -126,7 +126,6 @@ export function CategoryTransactions({
         onSearch={onSearch}
         onLoadMore={loadMoreTransactions}
         onOpenTransaction={onOpenTransaction}
-        onRefresh
       />
     </Page>
   );

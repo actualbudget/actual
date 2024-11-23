@@ -67,7 +67,7 @@ export function TransactionListWithBalances({
   onSearch,
   onLoadMore,
   onOpenTransaction,
-  onRefresh,
+  onRefresh = () => {},
 }) {
   const selectedInst = useSelected('transactions', transactions);
 
