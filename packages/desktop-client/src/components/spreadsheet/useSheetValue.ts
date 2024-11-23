@@ -1,4 +1,4 @@
-import { useState, useRef, useLayoutEffect } from 'react';
+import { useState, useRef, useLayoutEffect, useMemo } from 'react';
 
 import { type Query } from 'loot-core/shared/query';
 import { useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
@@ -30,10 +30,13 @@ export function useSheetValue<
 ): SheetValueResult<SheetName, FieldName>['value'] {
   const { sheetName, fullSheetName } = useSheetName(binding);
 
-  const bindingObj =
-    typeof binding === 'string'
-      ? { name: binding, value: null, query: undefined }
-      : binding;
+  const bindingObj = useMemo(
+    () =>
+      typeof binding === 'string'
+        ? { name: binding, value: null, query: undefined }
+        : binding,
+    [],
+  );
 
   const spreadsheet = useSpreadsheet();
   const [result, setResult] = useState<SheetValueResult<SheetName, FieldName>>({
@@ -48,6 +51,7 @@ export function useSheetValue<
   latestValue.current = result.value;
 
   useLayoutEffect(() => {
+    console.info(' yo:', bindingObj.query);
     if (bindingObj.query) {
       spreadsheet.createQuery(sheetName, bindingObj.name, bindingObj.query);
     }
