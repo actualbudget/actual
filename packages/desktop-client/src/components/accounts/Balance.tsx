@@ -58,16 +58,14 @@ function DetailedBalance({
 
 type SelectedBalanceName = `selected-balance-${string}`;
 type SelectedBalanceSumName = `selected-balance-${string}-sum`;
-
-function SelectedBalance({
-  selectedItems,
-  account,
-}: {
+type SelectedBalanceProps = {
   selectedItems: Set<string>;
   account: AccountEntity;
-}) {
+};
+
+function SelectedBalance({ selectedItems, account }: SelectedBalanceProps) {
   const { t } = useTranslation();
-  
+
   const name = `selected-balance-${[...selectedItems].join('-')}`;
 
   const rows = useSheetValue<'balance', SelectedBalanceName>({
@@ -138,8 +136,8 @@ function SelectedBalance({
 }
 
 type FilteredBalanceProps = {
-  filteredAmount: number
-}
+  filteredAmount: number;
+};
 
 function FilteredBalance({ filteredAmount }: FilteredBalanceProps) {
   const { t } = useTranslation();
@@ -181,7 +179,7 @@ function MoreBalances({
       />
       <DetailedBalance
         name={t('Uncleared total:')}
-        balance={uncleared ?? 0} 
+        balance={uncleared ?? 0}
         isExactBalance
       />
     </View>
