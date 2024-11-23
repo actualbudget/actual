@@ -101,7 +101,6 @@ function UserAccessContent({
   }, [cloudFileId, setLoading]);
 
   const loadOwner = useCallback(async () => {
-    debugger;
     const file: Awaited<ReturnType<Handlers['get-user-file-info']>> =
       (await send('get-user-file-info', cloudFileId as string)) ?? {};
     const owner = file?.usersWithAccess.filter(user => user.owner);

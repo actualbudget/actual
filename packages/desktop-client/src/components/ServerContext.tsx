@@ -98,8 +98,14 @@ export function ServerProvider({ children }: { children: ReactNode }) {
 
   const refreshLoginMethods = useCallback(async () => {
     if (serverURL) {
-      const data = await send('subscribe-get-login-methods');
-      setAvailableLoginMethods(data.methods);
+      try {
+        const data = await send('subscribe-get-login-methods');
+        setAvailableLoginMethods(data.methods);
+      } catch (error) {
+        console.error('Failed to refresh login methods:', error);
+        // Consider setting an error state or showing a notification
+        setAvailableLoginMethods([]);
+      }
     }
   }, [serverURL]);
 

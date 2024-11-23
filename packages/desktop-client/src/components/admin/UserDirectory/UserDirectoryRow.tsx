@@ -113,7 +113,7 @@ export const UserDirectoryRow = memo(
         </Cell>
 
         <Cell
-          name="enabled"
+          name="owner"
           width={100}
           plain
           style={{ padding: '0 15px', paddingLeft: 5 }}
@@ -130,7 +130,7 @@ export const UserDirectoryRow = memo(
           <Button
             style={{ margin: 4, fontSize: 14, color: theme.pageTextLink }}
             variant="bare"
-            onPress={() => onEditUser(user)}
+            onPress={() => onEditUser?.(user)}
           >
             Edit
           </Button>
