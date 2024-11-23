@@ -11,7 +11,10 @@ import { listen } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
 import { isPreviewId } from 'loot-core/shared/transactions';
-import { type CategoryEntity } from 'loot-core/src/types/models';
+import {
+  type TransactionEntity,
+  type CategoryEntity,
+} from 'loot-core/src/types/models';
 
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import { useNavigate } from '../../../hooks/useNavigate';
@@ -22,13 +25,15 @@ import { MobileBackButton } from '../MobileBackButton';
 import { AddTransactionButton } from '../transactions/AddTransactionButton';
 import { TransactionListWithBalances } from '../transactions/TransactionListWithBalances';
 
+type CategoryTransactionsProps = {
+  category: CategoryEntity;
+  month: string;
+};
+
 export function CategoryTransactions({
   category,
   month,
-}: {
-  category: CategoryEntity;
-  month: string;
-}) {
+}: CategoryTransactionsProps) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -80,7 +85,7 @@ export function CategoryTransactions({
   });
 
   const onOpenTransaction = useCallback(
-    (transaction: { id: string }) => {
+    (transaction: TransactionEntity) => {
       // details of how the native app used to handle preview transactions here can be found at commit 05e58279
       if (!isPreviewId(transaction.id)) {
         navigate(`/transactions/${transaction.id}`);
