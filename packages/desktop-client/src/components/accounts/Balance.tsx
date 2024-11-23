@@ -5,7 +5,7 @@ import { useHover } from 'usehooks-ts';
 
 import { isPreviewId } from 'loot-core/shared/transactions';
 import { useCachedSchedules } from 'loot-core/src/client/data-hooks/schedules';
-import { q } from 'loot-core/src/shared/query';
+import { q, type Query } from 'loot-core/src/shared/query';
 import { getScheduledAmount } from 'loot-core/src/shared/schedules';
 import { type AccountEntity } from 'loot-core/types/models';
 
@@ -56,8 +56,6 @@ function DetailedBalance({
   );
 }
 
-type SelectedBalanceName = `selected-balance-${string}`;
-type SelectedBalanceSumName = `selected-balance-${string}-sum`;
 type SelectedBalanceProps = {
   selectedItems: Set<string>;
   account: AccountEntity;
@@ -68,8 +66,8 @@ function SelectedBalance({ selectedItems, account }: SelectedBalanceProps) {
 
   const name = `selected-balance-${[...selectedItems].join('-')}`;
 
-  const rows = useSheetValue<'balance', SelectedBalanceName>({
-    name: name as SelectedBalanceName,
+  const rows = useSheetValue<'balance', `selected-balance-${string}`>({
+    name: name as `selected-balance-${string}`,
     query: q('transactions')
       .filter({
         id: { $oneof: [...selectedItems] },
@@ -80,8 +78,8 @@ function SelectedBalance({ selectedItems, account }: SelectedBalanceProps) {
   const ids = new Set(Array.isArray(rows) ? rows.map(r => r.id) : []);
 
   const finalIds = [...selectedItems].filter(id => !ids.has(id));
-  let balance = useSheetValue<'balance', SelectedBalanceName>({
-    name: (name + '-sum') as SelectedBalanceSumName,
+  let balance = useSheetValue<'balance', `selected-balance-${string}`>({
+    name: (name + '-sum') as `selected-balance-${string}`,
     query: q('transactions')
       .filter({ id: { $oneof: finalIds } })
       .options({ splits: 'all' })
@@ -151,22 +149,23 @@ function FilteredBalance({ filteredAmount }: FilteredBalanceProps) {
   );
 }
 
-function MoreBalances({
-  balanceQuery,
-}: {
-  balanceQuery: ComponentProps<typeof ReconcilingMessage>['balanceQuery'];
-}) {
+type MoreBalancesProps = {
+  balanceQuery: {
+    name: `balance-query-${string}`;
+    query: Query;
+  };
+};
+
+function MoreBalances({ balanceQuery }: MoreBalancesProps) {
   const { t } = useTranslation();
 
-  type SelectedBalanceClearedName = `balance-query-${string}-cleared`;
-  const cleared = useSheetValue<'balance', SelectedBalanceClearedName>({
-    name: (balanceQuery.name + '-cleared') as SelectedBalanceClearedName,
+  const cleared = useSheetValue<'balance', `balance-query-${string}`>({
+    name: (balanceQuery.name + '-cleared') as `balance-query-${string}`,
     query: balanceQuery.query.filter({ cleared: true }),
   });
 
-  type SelectedBalanceUnclearedName = `balance-query-${string}-uncleared`;
-  const uncleared = useSheetValue<'balance', SelectedBalanceUnclearedName>({
-    name: (balanceQuery.name + '-uncleared') as SelectedBalanceUnclearedName,
+  const uncleared = useSheetValue<'balance', `balance-query-${string}`>({
+    name: (balanceQuery.name + '-uncleared') as `balance-query-${string}`,
     query: balanceQuery.query.filter({ cleared: false }),
   });
 
