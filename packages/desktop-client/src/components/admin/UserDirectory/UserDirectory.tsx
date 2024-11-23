@@ -1,11 +1,12 @@
 // @ts-strict-ignore
-import React, {
+import {
   useState,
   useEffect,
   useCallback,
   useMemo,
   type SetStateAction,
   type Dispatch,
+  type CSSProperties,
 } from 'react';
 import { useDispatch } from 'react-redux';
 
@@ -270,10 +271,10 @@ function UserDirectoryContent({
   );
 }
 
-interface EmptyMessageProps {
+type EmptyMessageProps = {
   text: string;
-  style?: React.CSSProperties;
-}
+  style?: CSSProperties;
+};
 
 function EmptyMessage({ text, style }: EmptyMessageProps) {
   return (

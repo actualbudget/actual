@@ -3,8 +3,9 @@ import { useSelector } from 'react-redux';
 
 import { type State } from 'loot-core/client/state-types';
 
-import { type Permissions } from './types';
 import { useServerURL } from '../components/ServerContext';
+
+import { type Permissions } from './types';
 
 type AuthContextType = {
   hasPermission: (permission?: Permissions) => boolean;

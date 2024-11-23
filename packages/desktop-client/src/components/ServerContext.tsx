@@ -7,6 +7,9 @@ import React, {
   type ReactNode,
 } from 'react';
 
+import { t } from 'i18next';
+
+import { addNotification } from 'loot-core/client/actions';
 import { send } from 'loot-core/src/platform/client/fetch';
 import { type Handlers } from 'loot-core/types/handlers';
 
@@ -98,12 +101,18 @@ export function ServerProvider({ children }: { children: ReactNode }) {
 
   const refreshLoginMethods = useCallback(async () => {
     if (serverURL) {
-      try {
-        const data = await send('subscribe-get-login-methods');
+      const data: Awaited<ReturnType<Handlers['subscribe-get-login-methods']>> =
+        await send('subscribe-get-login-methods');
+      if ('error' in data) {
+        addNotification({
+          type: 'error',
+          title: t('Failed to refresh login methods'),
+          message: data.error ?? t('Unknown'),
+        });
+        setAvailableLoginMethods([]);
+      } else if (data.methods) {
         setAvailableLoginMethods(data.methods);
-      } catch (error) {
-        console.error('Failed to refresh login methods:', error);
-        // Consider setting an error state or showing a notification
+      } else {
         setAvailableLoginMethods([]);
       }
     }
