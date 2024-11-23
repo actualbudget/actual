@@ -137,7 +137,11 @@ function SelectedBalance({
   );
 }
 
-function FilteredBalance({ filteredAmount }: { filteredAmount: number }) {
+type FilteredBalanceProps = {
+  filteredAmount: number
+}
+
+function FilteredBalance({ filteredAmount }: FilteredBalanceProps) {
   const { t } = useTranslation();
 
   return (
