@@ -270,7 +270,12 @@ function UserDirectoryContent({
   );
 }
 
-function EmptyMessage({ text, style }) {
+interface EmptyMessageProps {
+  text: string;
+  style?: React.CSSProperties;
+}
+
+function EmptyMessage({ text, style }: EmptyMessageProps) {
   return (
     <View
       style={{
@@ -279,7 +284,7 @@ function EmptyMessage({ text, style }) {
         fontStyle: 'italic',
         fontSize: 13,
         marginTop: 5,
-        style,
+        ...style,
       }}
     >
       {text}
