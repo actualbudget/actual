@@ -128,6 +128,14 @@ function EditUser({ defaultUser, onSave: originalOnSave }: EditUserProps) {
   const [error, setError] = useState<string>('');
 
   async function onSave() {
+    if (!userName.trim()) {
+      setError('Username is required.');
+      return;
+    }
+    if (!role) {
+      setError('Role is required.');
+      return;
+    }
     const user: User = {
       ...defaultUser,
       userName,
@@ -145,7 +153,7 @@ function EditUser({ defaultUser, onSave: originalOnSave }: EditUserProps) {
       <Stack direction="row" style={{ marginTop: 10 }}>
         <FormField style={{ flex: 1 }}>
           <FormLabel title="Username" htmlFor="name-field" />
-          <Input value={userName} onChangeValue={text => setUserName(text)} />
+          <Input id="name-field" value={userName} onChangeValue={text => setUserName(text)} />
           <label
             style={{
               ...styles.verySmallText,
@@ -191,8 +199,9 @@ function EditUser({ defaultUser, onSave: originalOnSave }: EditUserProps) {
       )}
       <Stack direction="row" style={{ marginTop: 10 }}>
         <FormField style={{ flex: 1 }}>
-          <FormLabel title="Display Name" htmlFor="dispalyname-field" />
+          <FormLabel title="Display Name" htmlFor="displayname-field" />
           <Input
+            id="displayname-field"
             value={displayName}
             onChangeValue={text => setDisplayName(text)}
             placeholder="(Optional)"
@@ -220,8 +229,9 @@ function EditUser({ defaultUser, onSave: originalOnSave }: EditUserProps) {
       </Stack>
       <Stack direction="row" style={{ marginTop: 10, width: '100px' }}>
         <FormField style={{ flex: 1 }}>
-          <FormLabel title="Role" htmlFor="name-field" />
+          <FormLabel title="Role" htmlFor="role-field" />
           <Select
+            id="role-field"
             disabled={defaultUser.owner}
             options={Object.entries(PossibleRoles)}
             value={role}

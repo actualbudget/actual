@@ -42,8 +42,12 @@ app.method('users-get', async function () {
     });
 
     if (res) {
-      const list = JSON.parse(res) as UserEntity[];
-      return list;
+      try {
+        const list = JSON.parse(res) as UserEntity[];
+        return list;
+      } catch (err) {
+        return { error: 'Failed to parse response: ' + err.message };
+      }
     }
   }
 
@@ -223,7 +227,11 @@ app.method('file-owner-get', async function (fileId) {
     );
 
     if (res) {
-      return JSON.parse(res) as UserEntity;
+      try {
+        return JSON.parse(res) as UserEntity;
+      } catch (err) {
+        return { error: 'Failed to parse response: ' + err.message };
+      }
     }
   }
 

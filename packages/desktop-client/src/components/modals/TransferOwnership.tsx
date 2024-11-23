@@ -147,16 +147,24 @@ export function TransferOwnership({
             <Button style={{ marginRight: 10 }} onPress={actions.popModal}>
               Cancel
             </Button>
-            <Button
-              isDisabled={availableUsers.length === 0}
-              onPress={async () => {
-                await onSave();
-                close();
+            const [isTransferring, setIsTransferring] = useState(false);
 
-                await dispatch(closeAndLoadBudget((currentFile as Budget).id));
+            <Button
+              isDisabled={availableUsers.length === 0 || !userId || isTransferring}
+              onPress={async () => {
+                setIsTransferring(true);
+                try {
+                  await onSave();
+                  await dispatch(closeAndLoadBudget((currentFile as Budget).id));
+                  close();
+                } catch (error) {
+                  console.error('Failed to transfer ownership:', error);
+                  setError('Failed to complete ownership transfer. Please try again.');
+                  setIsTransferring(false);
+                }
               }}
             >
-              Transfer ownership
+              {isTransferring ? 'Transferring...' : 'Transfer ownership'}
             </Button>
           </Stack>
         </>

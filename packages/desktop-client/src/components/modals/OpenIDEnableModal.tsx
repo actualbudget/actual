@@ -27,17 +27,27 @@ export function OpenIDEnableModal({
   const { closeBudget } = useActions();
   const refreshLoginMethods = useRefreshLoginMethods();
 
-  async function onSave(config: OpenIdConfig) {
+async function onSave(config: OpenIdConfig) {
+  try {
     const { error } = (await send('enable-openid', { openId: config })) || {};
     if (!error) {
       originalOnSave?.();
-      await refreshLoginMethods();
-      await asyncStorage.removeItem('user-token');
-      await closeBudget();
+      try {
+        await refreshLoginMethods();
+        await asyncStorage.removeItem('user-token');
+        await closeBudget();
+      } catch (e) {
+        console.error('Failed to cleanup after OpenID enable:', e);
+        setError('OpenID was enabled but cleanup failed. Please refresh the application.');
+      }
     } else {
       setError(getOpenIdErrors(error));
     }
+  } catch (e) {
+    console.error('Failed to enable OpenID:', e);
+    setError('Failed to enable OpenID. Please try again.');
   }
+}
 
   return (
     <Modal name="enable-openid">

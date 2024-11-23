@@ -44,12 +44,29 @@ async function checkHTTPStatus(res) {
     return res.text().then(str => {
       throw new HTTPError(res.status, str);
     });
-  } else if (res.status === 403) {
-    const data = JSON.parse(res.text())?.data;
-    if (data && data.reason === 'token-expired') {
-      asyncStorage.removeItem('user-token');
-      window.location.href = '/';
+async function checkHTTPStatus(res) {
+  if (res.status !== 200) {
+    if (res.status === 403) {
+      try {
+        const text = await res.text();
+        const data = JSON.parse(text)?.data;
+        if (data?.reason === 'token-expired') {
+          await asyncStorage.removeItem('user-token');
+          // Use a platform-agnostic way to handle redirection
+          throw new HTTPError(403, 'token-expired');
+        }
+      } catch (e) {
+        if (e instanceof HTTPError) throw e;
+        // If JSON parsing fails, proceed with normal error handling
+      }
     }
+    return res.text().then(str => {
+      throw new HTTPError(res.status, str);
+    });
+  } else {
+    return res;
+  }
+}
   } else {
     return res;
   }

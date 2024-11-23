@@ -127,19 +127,19 @@ export class LazyLoadFailedError extends Error {
 export function getUserAccessErrors(reason: string) {
   switch (reason) {
     case 'unauthorized':
-      return 'You are not logged in.';
+      return t('You are not logged in.');
     case 'token-expired':
-      return 'Login expired, please login again.';
+      return t('Login expired, please login again.');
     case 'user-cant-be-empty':
-      return 'Please select a user.';
+      return t('Please select a user.');
     case 'invalid-file-id':
-      return 'This file is invalid.';
+      return t('This file is invalid.');
     case 'file-denied':
-      return `You don&apos;t have permissions over this file.`;
+      return t('You don\'t have permissions over this file.');
     case 'user-already-have-access':
-      return `User already have access.`;
+      return t('User already has access.');
     default:
-      return `An internal error occurred, sorry! Visit https://actualbudget.org/contact/ for support. (ref: ${reason})`;
+      return t('An internal error occurred, sorry! Visit https://actualbudget.org/contact/ for support. (ref: {{reason}})', { reason });
   }
 }
 

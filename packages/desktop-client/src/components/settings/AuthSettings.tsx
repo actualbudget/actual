@@ -20,7 +20,7 @@ export function AuthSettings() {
   const openidAuthFeatureFlag = useFeatureFlag('openidAuth');
 
   return (
-    <View style={{ display: openidAuthFeatureFlag ? 'visible' : 'none' }}>
+    <View>
       {openidAuthFeatureFlag && (
         <Setting
           primaryAction={
