@@ -1,4 +1,4 @@
-import { useState, useRef, useLayoutEffect, useMemo } from 'react';
+import { useState, useRef, useLayoutEffect } from 'react';
 
 import { type Query } from 'loot-core/shared/query';
 import { useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
@@ -48,7 +48,6 @@ export function useSheetValue<
   latestValue.current = result.value;
 
   useLayoutEffect(() => {
-    console.info('hello', bindingObj.query, bindingObj.name);
     if (bindingObj.query) {
       spreadsheet.createQuery(sheetName, bindingObj.name, bindingObj.query);
     }
