@@ -137,27 +137,7 @@ function AppInner() {
         message: 'Login expired, please login again.',
         button: {
           title: 'Go to login',
-          action: () => {
-            signOut();
-          },
-        },
-      });
-    }
-  }, [userData, userData?.tokenExpired]);
-
-  useEffect(() => {
-    if (userData?.tokenExpired) {
-      addNotification({
-        type: 'error',
-        id: 'login-expired',
-        title: 'Login expired',
-        sticky: true,
-        message: 'Login expired, please login again.',
-        button: {
-          title: 'Go to login',
-          action: () => {
-            signOut();
-          },
+          action: signOut,
         },
       });
     }

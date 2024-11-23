@@ -68,7 +68,7 @@ export function LoggedInUser({
     } else {
       setIsOwner(false);
     }
-  }, [cloudFileId]);
+  }, [cloudFileId, currentFile, userData]);
 
   const handleMenuSelect = async (type: string) => {
     setMenuOpen(false);

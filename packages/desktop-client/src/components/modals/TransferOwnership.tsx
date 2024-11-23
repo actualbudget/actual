@@ -1,13 +1,15 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { closeAndLoadBudget } from 'loot-core/client/actions';
+import { t } from 'i18next';
+
+import { addNotification, closeAndLoadBudget } from 'loot-core/client/actions';
 import { type State } from 'loot-core/client/state-types';
 import { send } from 'loot-core/platform/client/fetch';
 import { getUserAccessErrors } from 'loot-core/shared/errors';
 import { type Budget } from 'loot-core/types/budget';
 import { type RemoteFile, type SyncedLocalFile } from 'loot-core/types/file';
-import { type UserEntity } from 'loot-core/types/models';
+import { type Handlers } from 'loot-core/types/handlers';
 
 import { useActions } from '../../hooks/useActions';
 import { useMetadataPref } from '../../hooks/useMetadataPref';
@@ -30,7 +32,7 @@ export function TransferOwnership({
   const userData = useSelector((state: State) => state.user.data);
   const actions = useActions();
   const [userId, setUserId] = useState('');
-  const [error, setSetError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [availableUsers, setAvailableUsers] = useState<[string, string][]>([]);
   const [cloudFileId] = useMetadataPref('cloudFileId');
   const allFiles = useSelector(state => state.budgets.allFiles || []);
@@ -39,19 +41,35 @@ export function TransferOwnership({
   ) as (SyncedLocalFile | RemoteFile)[];
   const currentFile = remoteFiles.find(f => f.cloudFileId === cloudFileId);
   const dispatch = useDispatch();
+  const [isTransferring, setIsTransferring] = useState(false);
 
   useEffect(() => {
-    send('users-get').then((users: UserEntity[]) =>
-      setAvailableUsers(
-        users
-          .filter(f => currentFile?.owner !== f.id)
-          .map(user => [
-            user.id,
-            user.displayName
-              ? `${user.displayName} (${user.userName})`
-              : user.userName,
-          ]),
-      ),
+    send('users-get').then(
+      (data: Awaited<ReturnType<Handlers['users-get']>>) => {
+        if (!data) {
+          setAvailableUsers([]);
+        } else if ('error' in data) {
+          addNotification({
+            type: 'error',
+            title: t('Error getting users'),
+            message: t(
+              'Failed to complete ownership transfer. Please try again.',
+            ),
+            sticky: true,
+          });
+        } else {
+          setAvailableUsers(
+            data
+              .filter(f => currentFile?.owner !== f.id)
+              .map(user => [
+                user.id,
+                user.displayName
+                  ? `${user.displayName} (${user.userName})`
+                  : user.userName,
+              ]),
+          );
+        }
+      },
     );
   }, [userData?.userId, currentFile?.owner]);
 
@@ -65,10 +83,10 @@ export function TransferOwnership({
       if (!error) {
         originalOnSave?.();
       } else {
-        setSetError(getUserAccessErrors(error));
+        setError(getUserAccessErrors(error));
       }
     } else {
-      setSetError('Cloud file ID is missing.');
+      setError(t('Cloud file ID is missing.'));
     }
   }
 
@@ -77,7 +95,7 @@ export function TransferOwnership({
       {({ state: { close } }: { state: { close: () => void } }) => (
         <>
           <ModalHeader
-            title="Transfer ownership"
+            title={t('Transfer ownership')}
             rightContent={<ModalCloseButton onPress={close} />}
           />
           <Stack direction="row" style={{ marginTop: 10 }}>
@@ -99,8 +117,9 @@ export function TransferOwnership({
                       marginTop: 5,
                     }}
                   >
-                    Select a user from the directory to designate as the new
-                    budget owner.
+                    {t(
+                      'Select a user from the directory to designate as the new budget owner.',
+                    )}
                   </label>
                   <label
                     style={{
@@ -109,8 +128,9 @@ export function TransferOwnership({
                       marginTop: 5,
                     }}
                   >
-                    This action is irreversible. Only the new owner or an
-                    administrator can reverse it.
+                    {t(
+                      'This action is irreversible. Only the new owner or an administrator can reverse it.',
+                    )}
                   </label>
                   <label
                     style={{
@@ -119,7 +139,7 @@ export function TransferOwnership({
                       marginTop: 5,
                     }}
                   >
-                    Proceed with caution.
+                    {t('Proceed with caution.')}
                   </label>
                 </View>
               )}
@@ -131,7 +151,7 @@ export function TransferOwnership({
                     marginTop: 5,
                   }}
                 >
-                  No users available
+                  {t('No users available')}
                 </Text>
               )}
             </FormField>
@@ -147,24 +167,33 @@ export function TransferOwnership({
             <Button style={{ marginRight: 10 }} onPress={actions.popModal}>
               Cancel
             </Button>
-            const [isTransferring, setIsTransferring] = useState(false);
 
             <Button
-              isDisabled={availableUsers.length === 0 || !userId || isTransferring}
+              isDisabled={
+                availableUsers.length === 0 || !userId || isTransferring
+              }
               onPress={async () => {
                 setIsTransferring(true);
                 try {
                   await onSave();
-                  await dispatch(closeAndLoadBudget((currentFile as Budget).id));
+                  await dispatch(
+                    closeAndLoadBudget((currentFile as Budget).id),
+                  );
                   close();
                 } catch (error) {
-                  console.error('Failed to transfer ownership:', error);
-                  setError('Failed to complete ownership transfer. Please try again.');
+                  addNotification({
+                    type: 'error',
+                    title: t('Failed to transfer ownership'),
+                    message: t(
+                      'Failed to complete ownership transfer. Please try again.',
+                    ),
+                    sticky: true,
+                  });
                   setIsTransferring(false);
                 }
               }}
             >
-              {isTransferring ? 'Transferring...' : 'Transfer ownership'}
+              {isTransferring ? t('Transferring...') : t('Transfer ownership')}
             </Button>
           </Stack>
         </>

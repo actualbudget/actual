@@ -153,7 +153,11 @@ function EditUser({ defaultUser, onSave: originalOnSave }: EditUserProps) {
       <Stack direction="row" style={{ marginTop: 10 }}>
         <FormField style={{ flex: 1 }}>
           <FormLabel title="Username" htmlFor="name-field" />
-          <Input id="name-field" value={userName} onChangeValue={text => setUserName(text)} />
+          <Input
+            id="name-field"
+            value={userName}
+            onChangeValue={text => setUserName(text)}
+          />
           <label
             style={{
               ...styles.verySmallText,

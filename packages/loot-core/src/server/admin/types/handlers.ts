@@ -5,7 +5,7 @@ import {
 } from '../../../types/models/userAccess';
 
 export interface AdminHandlers {
-  'users-get': () => Promise<UserEntity[] | null>;
+  'users-get': () => Promise<UserEntity[] | null | { error: string }>;
 
   'users-get-access': (
     fileIds: string[],
@@ -46,8 +46,6 @@ export interface AdminHandlers {
     fileId: string;
     newUserId: string;
   }) => Promise<{ error?: string } | Record<string, never>>;
-
-  'file-owner-get': (fileId: string) => Promise<UserEntity | null>;
 
   'owner-created': () => Promise<boolean>;
 }

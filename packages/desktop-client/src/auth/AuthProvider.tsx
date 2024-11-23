@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux';
 import { type State } from 'loot-core/client/state-types';
 
 import { type Permissions } from './types';
+import { useServerURL } from '../components/ServerContext';
 
 type AuthContextType = {
   hasPermission: (permission?: Permissions) => boolean;
@@ -17,6 +18,7 @@ type AuthProviderProps = {
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const userData = useSelector((state: State) => state.user.data);
+  const serverUrl = useServerURL();
 
   const hasPermission = (permission?: Permissions) => {
     if (!permission) {
@@ -24,7 +26,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
 
     return (
-      (userData?.offline ?? false) ||
+      !serverUrl ||
       userData?.permission?.toUpperCase() === permission?.toUpperCase()
     );
   };

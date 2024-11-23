@@ -15,10 +15,15 @@ app.method('user-delete-all', async function (ids) {
   const userToken = await asyncStorage.getItem('user-token');
   if (userToken) {
     try {
-      const res = await del(getServer().BASE_SERVER + '/admin/users', {
-        token: userToken,
-        ids,
-      });
+      const res = await del(
+        getServer().BASE_SERVER + '/admin/users',
+        {
+          ids,
+        },
+        {
+          'X-ACTUAL-TOKEN': userToken,
+        },
+      );
 
       if (res) {
         return res;
@@ -211,31 +216,6 @@ app.method('transfer-ownership', async function ({ fileId, newUserId }) {
   }
 
   return {};
-});
-
-app.method('file-owner-get', async function (fileId) {
-  const userToken = await asyncStorage.getItem('user-token');
-
-  if (userToken) {
-    const res = await get(
-      `${getServer().BASE_SERVER + '/admin/file/owner'}?fileId=${fileId}`,
-      {
-        headers: {
-          'X-ACTUAL-TOKEN': userToken,
-        },
-      },
-    );
-
-    if (res) {
-      try {
-        return JSON.parse(res) as UserEntity;
-      } catch (err) {
-        return { error: 'Failed to parse response: ' + err.message };
-      }
-    }
-  }
-
-  return null;
 });
 
 app.method('owner-created', async function () {
