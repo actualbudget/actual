@@ -1,8 +1,9 @@
 import { join } from 'node:path';
 import openDatabase from './db.js';
 import config from './load-config.js';
-import * as uuid from 'uuid';
 import * as bcrypt from 'bcrypt';
+import { bootstrapPassword, loginWithPassword } from './accounts/password.js';
+import { bootstrapOpenId } from './accounts/openid.js';
 
 let _accountDb;
 
@@ -15,14 +16,27 @@ export default function getAccountDb() {
   return _accountDb;
 }
 
-function hashPassword(password) {
-  return bcrypt.hashSync(password, 12);
-}
-
 export function needsBootstrap() {
   let accountDb = getAccountDb();
   let rows = accountDb.all('SELECT * FROM auth');
   return rows.length === 0;
+}
+
+export function listLoginMethods() {
+  let accountDb = getAccountDb();
+  let rows = accountDb.all('SELECT method, display_name, active FROM auth');
+  return rows.map((r) => ({
+    method: r.method,
+    active: r.active,
+    displayName: r.display_name,
+  }));
+}
+
+export function getActiveLoginMethod() {
+  let accountDb = getAccountDb();
+  let { method } =
+    accountDb.first('SELECT method FROM auth WHERE active = 1') || {};
+  return method;
 }
 
 /*
@@ -38,74 +52,154 @@ export function getLoginMethod(req) {
   ) {
     return req.body.loginMethod;
   }
+
   return config.loginMethod || 'password';
 }
 
-export function bootstrap(password) {
-  if (password === undefined || password === '') {
-    return { error: 'invalid-password' };
+export async function bootstrap(loginSettings) {
+  if (!loginSettings) {
+    return { error: 'invalid-login-settings' };
   }
+  const passEnabled = 'password' in loginSettings;
+  const openIdEnabled = 'openId' in loginSettings;
 
-  let accountDb = getAccountDb();
-  let rows = accountDb.all('SELECT * FROM auth');
+  const accountDb = getAccountDb();
+  accountDb.mutate('BEGIN TRANSACTION');
+  try {
+    const { countOfOwner } =
+      accountDb.first(
+        `SELECT count(*) as countOfOwner
+   FROM users
+   WHERE users.user_name <> '' and users.owner = 1`,
+      ) || {};
 
-  if (rows.length !== 0) {
-    return { error: 'already-bootstrapped' };
+    if (!openIdEnabled || countOfOwner > 0) {
+      if (!needsBootstrap()) {
+        accountDb.mutate('ROLLBACK');
+        return { error: 'already-bootstrapped' };
+      }
+    }
+
+    if (!passEnabled && !openIdEnabled) {
+      accountDb.mutate('ROLLBACK');
+      return { error: 'no-auth-method-selected' };
+    }
+
+    if (passEnabled && openIdEnabled) {
+      accountDb.mutate('ROLLBACK');
+      return { error: 'max-one-method-allowed' };
+    }
+
+    if (passEnabled) {
+      let { error } = bootstrapPassword(loginSettings.password);
+      if (error) {
+        accountDb.mutate('ROLLBACK');
+        return { error };
+      }
+    }
+
+    if (openIdEnabled) {
+      let { error } = await bootstrapOpenId(loginSettings.openId);
+      if (error) {
+        accountDb.mutate('ROLLBACK');
+        return { error };
+      }
+    }
+
+    accountDb.mutate('COMMIT');
+    return passEnabled ? loginWithPassword(loginSettings.password) : {};
+  } catch (error) {
+    accountDb.mutate('ROLLBACK');
+    throw error;
   }
-
-  // Hash the password. There's really not a strong need for this
-  // since this is a self-hosted instance owned by the user.
-  // However, just in case we do it.
-  let hashed = hashPassword(password);
-  accountDb.mutate('INSERT INTO auth (password) VALUES (?)', [hashed]);
-
-  let token = uuid.v4();
-  accountDb.mutate('INSERT INTO sessions (token) VALUES (?)', [token]);
-
-  return { token };
 }
 
-export function login(password) {
-  if (password === undefined || password === '') {
-    return { error: 'invalid-password' };
-  }
-
-  let accountDb = getAccountDb();
-  let row = accountDb.first('SELECT * FROM auth');
-
-  let confirmed = row && bcrypt.compareSync(password, row.password);
-
-  if (!confirmed) {
-    return { error: 'invalid-password' };
-  }
-
-  // Right now, tokens are permanent and there's just one in the
-  // system. In the future this should probably evolve to be a
-  // "session" that times out after a long time or something, and
-  // maybe each device has a different token
-  let sessionRow = accountDb.first('SELECT * FROM sessions');
-  return { token: sessionRow.token };
+export function isAdmin(userId) {
+  return hasPermission(userId, 'ADMIN');
 }
 
-export function changePassword(newPassword) {
-  if (newPassword === undefined || newPassword === '') {
-    return { error: 'invalid-password' };
+export function hasPermission(userId, permission) {
+  return getUserPermission(userId) === permission;
+}
+
+export async function enableOpenID(loginSettings) {
+  if (!loginSettings || !loginSettings.openId) {
+    return { error: 'invalid-login-settings' };
+  }
+
+  let { error } = (await bootstrapOpenId(loginSettings.openId)) || {};
+  if (error) {
+    return { error };
+  }
+
+  getAccountDb().mutate('DELETE FROM sessions');
+}
+
+export async function disableOpenID(loginSettings) {
+  if (!loginSettings || !loginSettings.password) {
+    return { error: 'invalid-login-settings' };
   }
 
   let accountDb = getAccountDb();
+  const { extra_data: passwordHash } =
+    accountDb.first('SELECT extra_data FROM auth WHERE method = ?', [
+      'password',
+    ]) || {};
 
-  let hashed = hashPassword(newPassword);
-  let token = uuid.v4();
+  if (!passwordHash) {
+    return { error: 'invalid-password' };
+  }
 
-  // Note that this doesn't have a WHERE. This table only ever has 1
-  // row (maybe that will change in the future? if so this will not work)
-  accountDb.mutate('UPDATE auth SET password = ?', [hashed]);
-  accountDb.mutate('UPDATE sessions SET token = ?', [token]);
+  if (!loginSettings?.password) {
+    return { error: 'invalid-password' };
+  }
 
-  return {};
+  if (passwordHash) {
+    let confirmed = bcrypt.compareSync(loginSettings.password, passwordHash);
+
+    if (!confirmed) {
+      return { error: 'invalid-password' };
+    }
+  }
+
+  let { error } = (await bootstrapPassword(loginSettings.password)) || {};
+  if (error) {
+    return { error };
+  }
+
+  getAccountDb().mutate('DELETE FROM sessions');
+  getAccountDb().mutate('DELETE FROM users WHERE user_name <> ?', ['']);
+  getAccountDb().mutate('DELETE FROM auth WHERE method = ?', ['openid']);
 }
 
 export function getSession(token) {
   let accountDb = getAccountDb();
   return accountDb.first('SELECT * FROM sessions WHERE token = ?', [token]);
+}
+
+export function getUserInfo(userId) {
+  let accountDb = getAccountDb();
+  return accountDb.first('SELECT * FROM users WHERE id = ?', [userId]);
+}
+
+export function getUserPermission(userId) {
+  let accountDb = getAccountDb();
+  const { role } = accountDb.first(
+    `SELECT role FROM users
+          WHERE users.id = ?`,
+    [userId],
+  ) || { role: '' };
+
+  return role;
+}
+
+export function clearExpiredSessions() {
+  const clearThreshold = Math.floor(Date.now() / 1000) - 3600;
+
+  const deletedSessions = getAccountDb().mutate(
+    'DELETE FROM sessions WHERE expires_at <> -1 and expires_at < ?',
+    [clearThreshold],
+  ).changes;
+
+  console.log(`Deleted ${deletedSessions} old sessions`);
 }

@@ -1,4 +1,4 @@
-import getAccountDb from '../../account-db.js';
+import getAccountDb, { isAdmin } from '../../account-db.js';
 import { FileNotFound, GenericFileError } from '../errors.js';
 
 class FileBase {
@@ -11,6 +11,7 @@ class FileBase {
     encryptMeta,
     syncVersion,
     deleted,
+    owner,
   ) {
     this.name = name;
     this.groupId = groupId;
@@ -20,6 +21,7 @@ class FileBase {
     this.encryptMeta = encryptMeta;
     this.syncVersion = syncVersion;
     this.deleted = typeof deleted === 'boolean' ? deleted : Boolean(deleted);
+    this.owner = owner;
   }
 }
 
@@ -34,6 +36,7 @@ class File extends FileBase {
     encryptMeta = null,
     syncVersion = null,
     deleted = false,
+    owner = null,
   }) {
     super(
       name,
@@ -44,6 +47,7 @@ class File extends FileBase {
       encryptMeta,
       syncVersion,
       deleted,
+      owner,
     );
     this.id = id;
   }
@@ -64,6 +68,7 @@ class FileUpdate extends FileBase {
     encryptMeta = undefined,
     syncVersion = undefined,
     deleted = undefined,
+    owner = undefined,
   }) {
     super(
       name,
@@ -74,6 +79,7 @@ class FileUpdate extends FileBase {
       encryptMeta,
       syncVersion,
       deleted,
+      owner,
     );
   }
 }
@@ -99,7 +105,7 @@ class FilesService {
   set(file) {
     const deletedInt = boolToInt(file.deleted);
     this.accountDb.mutate(
-      'INSERT INTO files (id, group_id, sync_version, name, encrypt_meta, encrypt_salt, encrypt_test, encrypt_keyid, deleted) VALUES (?, ?, ?, ?, ?, ?, ?,? ,?)',
+      'INSERT INTO files (id, group_id, sync_version, name, encrypt_meta, encrypt_salt, encrypt_test, encrypt_keyid, deleted, owner) VALUES (?, ?, ?, ?, ?, ?, ?, ? ,?, ?)',
       [
         file.id,
         file.groupId,
@@ -110,14 +116,53 @@ class FilesService {
         file.encrypt_test,
         file.encrypt_keyid,
         deletedInt,
+        file.owner,
       ],
     );
   }
 
-  find(limit = 1000) {
-    return this.accountDb
-      .all('SELECT * FROM files WHERE deleted = 0 LIMIT ?', [limit])
-      .map(this.validate);
+  find({ userId, limit = 1000 }) {
+    const canSeeAll = isAdmin(userId);
+
+    return (
+      canSeeAll
+        ? this.accountDb.all('SELECT * FROM files WHERE deleted = 0 LIMIT ?', [
+            limit,
+          ])
+        : this.accountDb.all(
+            `SELECT files.* 
+        FROM files
+        WHERE files.owner = ? and deleted = 0
+      UNION
+       SELECT files.*
+        FROM files
+        JOIN user_access
+          ON user_access.file_id = files.id
+          AND user_access.user_id = ?
+       WHERE files.deleted = 0 LIMIT ?`,
+            [userId, userId, limit],
+          )
+    ).map(this.validate);
+  }
+
+  findUsersWithAccess(fileId) {
+    const userAccess =
+      this.accountDb.all(
+        `SELECT UA.user_id as userId, users.display_name displayName, users.user_name userName
+              FROM files
+                JOIN user_access UA ON UA.file_id = files.id
+                JOIN users on users.id = UA.user_id
+              WHERE files.id = ? 
+          UNION ALL
+        SELECT users.id, users.display_name, users.user_name
+              FROM files
+                JOIN users on users.id = files.owner
+              WHERE files.id = ?
+          `,
+        [fileId, fileId],
+      ) || [];
+
+    return userAccess;
   }
 
   update(id, fileUpdate) {
@@ -188,6 +233,7 @@ class FilesService {
       encryptMeta: rawFile.encrypt_meta,
       syncVersion: rawFile.sync_version,
       deleted: Boolean(rawFile.deleted),
+      owner: rawFile.owner,
     });
   }
 }

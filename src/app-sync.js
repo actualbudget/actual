@@ -5,14 +5,14 @@ import * as uuid from 'uuid';
 import {
   errorMiddleware,
   requestLoggerMiddleware,
-  validateUserMiddleware,
+  validateSessionMiddleware,
 } from './util/middlewares.js';
-import getAccountDb from './account-db.js';
 import { getPathForUserFile, getPathForGroupFile } from './util/paths.js';
 
 import * as simpleSync from './sync-simple.js';
 
 import { SyncProtoBuf } from '@actual-app/crdt';
+import getAccountDb from './account-db.js';
 import {
   File,
   FilesService,
@@ -25,13 +25,13 @@ import {
 } from './app-sync/validation.js';
 
 const app = express();
+app.use(validateSessionMiddleware);
 app.use(errorMiddleware);
 app.use(requestLoggerMiddleware);
 app.use(express.raw({ type: 'application/actual-sync' }));
 app.use(express.raw({ type: 'application/encrypted-file' }));
 app.use(express.json());
 
-app.use(validateUserMiddleware);
 export { app as handlers };
 
 const OK_RESPONSE = { status: 'ok' };
@@ -113,6 +113,8 @@ app.post('/sync', async (req, res) => {
 });
 
 app.post('/user-get-key', (req, res) => {
+  if (!res.locals) return;
+
   let { fileId } = req.body;
 
   const filesService = new FilesService(getAccountDb());
@@ -246,6 +248,11 @@ app.post('/upload-user-file', async (req, res) => {
         syncVersion: syncFormatVersion,
         name: name,
         encryptMeta: encryptMeta,
+        owner:
+          res.locals.user_id ||
+          (() => {
+            throw new Error('User ID is required for file creation');
+          })(),
       }),
     );
 
@@ -305,7 +312,7 @@ app.post('/update-user-filename', (req, res) => {
 
 app.get('/list-user-files', (req, res) => {
   const fileService = new FilesService(getAccountDb());
-  const rows = fileService.find();
+  const rows = fileService.find({ userId: res.locals.user_id });
   res.send({
     status: 'ok',
     data: rows.map((row) => ({
@@ -314,6 +321,13 @@ app.get('/list-user-files', (req, res) => {
       groupId: row.groupId,
       name: row.name,
       encryptKeyId: row.encryptKeyId,
+      owner: row.owner,
+      usersWithAccess: fileService
+        .findUsersWithAccess(row.id)
+        .map((access) => ({
+          ...access,
+          owner: access.userId === row.owner,
+        })),
     })),
   });
 });
@@ -349,6 +363,12 @@ app.get('/get-user-file-info', (req, res) => {
       groupId: file.groupId,
       name: file.name,
       encryptMeta: file.encryptMeta ? JSON.parse(file.encryptMeta) : null,
+      usersWithAccess: fileService
+        .findUsersWithAccess(file.id)
+        .map((access) => ({
+          ...access,
+          owner: access.userId === file.owner,
+        })),
     },
   });
 });
