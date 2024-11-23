@@ -1,4 +1,4 @@
-import React, { useRef, type ComponentProps } from 'react';
+import React, { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useHover } from 'usehooks-ts';
@@ -20,8 +20,6 @@ import { CellValue, CellValueText } from '../spreadsheet/CellValue';
 import { type SheetFields, type SheetNames } from '../spreadsheet/index';
 import { useFormat } from '../spreadsheet/useFormat';
 import { useSheetValue } from '../spreadsheet/useSheetValue';
-
-import { type ReconcilingMessage } from './Reconcile';
 
 type DetailedBalanceProps = {
   name: string;
