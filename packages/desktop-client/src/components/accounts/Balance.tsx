@@ -113,12 +113,8 @@ function SelectedBalance({ selectedItems, account }: SelectedBalanceProps) {
   }
 
   if (balance == null) {
-    if (scheduleBalance == null) {
-      return null;
-    } else {
-      balance = scheduleBalance;
-    }
-  } else if (scheduleBalance != null) {
+    balance = scheduleBalance;
+  } else {
     balance += scheduleBalance;
   }
 
