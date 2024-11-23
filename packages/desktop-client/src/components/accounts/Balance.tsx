@@ -25,7 +25,7 @@ import { type ReconcilingMessage } from './Reconcile';
 
 type DetailedBalanceProps = {
   name: string;
-  balance: number | null;
+  balance: number;
   isExactBalance: boolean;
 };
 
@@ -171,12 +171,12 @@ function MoreBalances({
     <View style={{ flexDirection: 'row' }}>
       <DetailedBalance
         name={t('Cleared total:')}
-        balance={cleared}
+        balance={cleared ?? 0}
         isExactBalance
       />
       <DetailedBalance
         name={t('Uncleared total:')}
-        balance={uncleared}
+        balance={uncleared ?? 0} 
         isExactBalance
       />
     </View>
