@@ -56,6 +56,9 @@ function DetailedBalance({
   );
 }
 
+type SelectedBalanceName = `selected-balance-${string}`;
+type SelectedBalanceSumName = `selected-balance-${string}-sum`;
+
 function SelectedBalance({
   selectedItems,
   account,
@@ -64,8 +67,7 @@ function SelectedBalance({
   account: AccountEntity;
 }) {
   const { t } = useTranslation();
-
-  type SelectedBalanceName = `selected-balance-${string}`;
+  
   const name = `selected-balance-${[...selectedItems].join('-')}`;
 
   const rows = useSheetValue<'balance', SelectedBalanceName>({
@@ -80,7 +82,6 @@ function SelectedBalance({
   const ids = new Set(Array.isArray(rows) ? rows.map(r => r.id) : []);
 
   const finalIds = [...selectedItems].filter(id => !ids.has(id));
-  type SelectedBalanceSumName = `selected-balance-${string}-sum`;
   let balance = useSheetValue<'balance', SelectedBalanceName>({
     name: (name + '-sum') as SelectedBalanceSumName,
     query: q('transactions')
