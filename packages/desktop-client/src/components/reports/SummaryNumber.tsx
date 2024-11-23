@@ -12,8 +12,8 @@ import { PrivacyFilter } from '../PrivacyFilter';
 import { chartTheme } from './chart-theme';
 import { LoadingIndicator } from './LoadingIndicator';
 
-const FONT_SIZE_SCALE_FACTOR = 0.9;
-const MAX_RECURSION_DEPTH = 10;
+const FONT_SIZE_SCALE_FACTOR = 1.6;
+const CONTAINER_MARGIN = 8;
 
 type SummaryNumberProps = {
   value: number;
@@ -32,61 +32,28 @@ export function SummaryNumber({
   initialFontSize = 14,
   fontSizeChanged,
 }: SummaryNumberProps) {
-  const [fontSize, setFontSize] = useState<number>(0);
+  const [fontSize, setFontSize] = useState<number>(initialFontSize);
   const refDiv = useRef<HTMLDivElement>(null);
-  const offScreenRef = useRef<HTMLDivElement>(null);
-
-  const adjustFontSizeBinary = (minFontSize: number, maxFontSize: number) => {
-    if (!offScreenRef.current || !refDiv.current) return;
-
-    const offScreenDiv = offScreenRef.current;
-    const refDivCurrent = refDiv.current;
-
-    const binarySearchFontSize = (
-      min: number,
-      max: number,
-      depth: number = 0,
-    ) => {
-      if (depth >= MAX_RECURSION_DEPTH) {
-        setFontSize(min);
-        return;
-      }
-
-      const testFontSize = (min + max) / 2;
-      offScreenDiv.style.fontSize = `${testFontSize}px`;
-
-      requestAnimationFrame(() => {
-        const isOverflowing =
-          offScreenDiv.scrollWidth > refDivCurrent.clientWidth ||
-          offScreenDiv.scrollHeight > refDivCurrent.clientHeight;
-
-        if (isOverflowing) {
-          binarySearchFontSize(min, testFontSize, depth + 1);
-        } else {
-          const isUnderflowing =
-            offScreenDiv.scrollWidth <=
-              refDivCurrent.clientWidth * FONT_SIZE_SCALE_FACTOR ||
-            offScreenDiv.scrollHeight <=
-              refDivCurrent.clientHeight * FONT_SIZE_SCALE_FACTOR;
-
-          if (isUnderflowing && testFontSize < max) {
-            binarySearchFontSize(testFontSize, max, depth + 1);
-          } else {
-            setFontSize(testFontSize);
-            if (initialFontSize !== testFontSize && fontSizeChanged) {
-              fontSizeChanged(testFontSize);
-            }
-          }
-        }
-      });
-    };
-
-    binarySearchFontSize(minFontSize, maxFontSize);
-  };
+  const displayAmount = amountToCurrency(Math.abs(value)) + suffix;
 
   const handleResize = debounce(() => {
-    adjustFontSizeBinary(14, 200);
-  }, 250);
+    if (!refDiv.current) return;
+
+    const { clientWidth, clientHeight } = refDiv.current;
+    const width = clientWidth; // no margin required on left and right
+    const height = clientHeight - CONTAINER_MARGIN * 2; // account for margin top and bottom
+
+    const calculatedFontSize = Math.min(
+      (width * FONT_SIZE_SCALE_FACTOR) / displayAmount.toString().length,
+      height, // Ensure the text fits vertically by using the height as the limiting factor
+    );
+
+    setFontSize(calculatedFontSize);
+
+    if (calculatedFontSize !== initialFontSize && fontSizeChanged) {
+      fontSizeChanged(calculatedFontSize);
+    }
+  }, 100);
 
   const ref = useResizeObserver(handleResize);
   const mergedRef = useMergedRefs(ref, refDiv);
@@ -95,53 +62,29 @@ export function SummaryNumber({
     <>
       {loading && <LoadingIndicator />}
       {!loading && (
-        <>
-          <div
-            ref={offScreenRef}
-            style={{
-              position: 'fixed',
-              left: '-999px',
-              top: '-999px',
-              fontSize: `${initialFontSize}px`,
-              lineHeight: 1,
-              visibility: 'hidden',
-              whiteSpace: 'nowrap',
-              padding: 8,
-            }}
-          >
-            <PrivacyFilter>
-              {amountToCurrency(Math.abs(value))}
-              {suffix}
-            </PrivacyFilter>
-          </div>
-
-          <View
-            ref={mergedRef as Ref<HTMLDivElement>}
-            role="text"
-            aria-label={`${value < 0 ? 'Negative' : 'Positive'} amount: ${amountToCurrency(Math.abs(value))}${suffix}`}
-            style={{
-              alignItems: 'center',
-              flexGrow: 1,
-              flexShrink: 1,
-              width: '100%',
-              height: '100%',
-              maxWidth: '100%',
-              fontSize: `${fontSize}px`,
-              lineHeight: 1,
-              padding: 8,
-              justifyContent: 'center',
-              transition: animate ? 'font-size 0.3s ease' : '',
-              color: value < 0 ? chartTheme.colors.red : chartTheme.colors.blue,
-            }}
-          >
-            <span aria-hidden="true">
-              <PrivacyFilter>
-                {amountToCurrency(Math.abs(value))}
-                {suffix}
-              </PrivacyFilter>
-            </span>
-          </View>
-        </>
+        <View
+          ref={mergedRef as Ref<HTMLDivElement>}
+          role="text"
+          aria-label={`${value < 0 ? 'Negative' : 'Positive'} amount: ${displayAmount}`}
+          style={{
+            alignItems: 'center',
+            flexGrow: 1,
+            flexShrink: 1,
+            width: '100%',
+            height: '100%',
+            maxWidth: '100%',
+            fontSize,
+            lineHeight: 1,
+            margin: `${CONTAINER_MARGIN}px 0`,
+            justifyContent: 'center',
+            transition: animate ? 'font-size 0.3s ease' : '',
+            color: value < 0 ? chartTheme.colors.red : chartTheme.colors.blue,
+          }}
+        >
+          <span aria-hidden="true">
+            <PrivacyFilter>{displayAmount}</PrivacyFilter>
+          </span>
+        </View>
       )}
     </>
   );
