@@ -51,7 +51,6 @@ export function useSheetValue<
   latestValue.current = result.value;
 
   useLayoutEffect(() => {
-    console.info(' yo:', bindingObj.query);
     if (bindingObj.query) {
       spreadsheet.createQuery(sheetName, bindingObj.name, bindingObj.query);
     }
