@@ -202,7 +202,7 @@ function getAccountResponse(results, accountId, startDate) {
 
     let dateToUse = 0;
 
-    if (trans.posted == 0) {
+    if (trans.pending ?? trans.posted == 0) {
       newTrans.booked = false;
       dateToUse = trans.transacted_at;
     } else {
@@ -210,12 +210,13 @@ function getAccountResponse(results, accountId, startDate) {
       dateToUse = trans.posted;
     }
 
-    newTrans.bookingDate = getDate(new Date(dateToUse * 1000));
-    if (newTrans.bookingDate < startDate) {
+    const transactionDate = new Date(dateToUse * 1000);
+
+    if (transactionDate < startDate) {
       continue;
     }
 
-    newTrans.date = newTrans.bookingDate;
+    newTrans.date = getDate(transactionDate);
     newTrans.payeeName = trans.payee;
     newTrans.remittanceInformationUnstructured = trans.description;
     newTrans.transactionAmount = { amount: trans.amount, currency: 'USD' };
@@ -266,6 +267,10 @@ function parseAccessKey(accessKey) {
   let username = null;
   let password = null;
   let baseUrl = null;
+  if (!accessKey || !accessKey.match(/^.*\/\/.*:.*@.*$/)) {
+    console.log(`Invalid SimpleFIN access key: ${accessKey}`);
+    throw new Error(`Invalid access key`);
+  }
   [scheme, rest] = accessKey.split('//');
   [auth, rest] = rest.split('@');
   [username, password] = auth.split(':');

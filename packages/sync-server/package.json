@@ -36,6 +36,7 @@
     "jws": "^4.0.0",
     "migrate": "^2.0.1",
     "nordigen-node": "^1.4.0",
+    "openid-client": "^5.4.2",
     "uuid": "^9.0.0",
     "winston": "^3.14.2"
   },

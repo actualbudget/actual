@@ -28,6 +28,7 @@ describe('FilesService', () => {
   };
 
   const clearDatabase = () => {
+    accountDb.mutate('DELETE FROM user_access');
     accountDb.mutate('DELETE FROM files');
   };
 
@@ -123,7 +124,7 @@ describe('FilesService', () => {
   );
 
   test('find should return a list of files', () => {
-    const files = filesService.find();
+    const files = filesService.find({ userId: 'genericAdmin' });
     expect(files.length).toBe(1);
     expect(files[0]).toEqual(
       new File({
@@ -152,11 +153,14 @@ describe('FilesService', () => {
       }),
     );
     // Make sure that the file was inserted
-    const allFiles = filesService.find();
+    const allFiles = filesService.find({ userId: 'genericAdmin' });
     expect(allFiles.length).toBe(2);
 
     // Limit the number of files returned
-    const limitedFiles = filesService.find(1);
+    const limitedFiles = filesService.find({
+      userId: 'genericAdmin',
+      limit: 1,
+    });
     expect(limitedFiles.length).toBe(1);
   });
 
@@ -186,6 +190,37 @@ describe('FilesService', () => {
         deleted: true,
       }),
     );
+  });
+
+  test('find should return only files accessible to the user', () => {
+    filesService.set(
+      new File({
+        id: crypto.randomBytes(16).toString('hex'),
+        groupId: 'group2',
+        syncVersion: 1,
+        name: 'file2',
+        encryptMeta: '{"key":"value2"}',
+        deleted: false,
+        owner: 'genericAdmin',
+      }),
+    );
+
+    filesService.set(
+      new File({
+        id: crypto.randomBytes(16).toString('hex'),
+        groupId: 'group2',
+        syncVersion: 1,
+        name: 'file2',
+        encryptMeta: '{"key":"value2"}',
+        deleted: false,
+        owner: 'genericUser',
+      }),
+    );
+
+    expect(filesService.find({ userId: 'genericUser' })).toHaveLength(1);
+    expect(
+      filesService.find({ userId: 'genericAdmin' }).length,
+    ).toBeGreaterThan(1);
   });
 
   test.each([['update-group', null]])(
