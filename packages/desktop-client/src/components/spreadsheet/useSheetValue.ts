@@ -30,13 +30,10 @@ export function useSheetValue<
 ): SheetValueResult<SheetName, FieldName>['value'] {
   const { sheetName, fullSheetName } = useSheetName(binding);
 
-  const bindingObj = useMemo(
-    () =>
-      typeof binding === 'string'
-        ? { name: binding, value: null, query: undefined }
-        : binding,
-    [],
-  );
+  const bindingObj =
+    typeof binding === 'string'
+      ? { name: binding, value: null, query: undefined }
+      : binding;
 
   const spreadsheet = useSpreadsheet();
   const [result, setResult] = useState<SheetValueResult<SheetName, FieldName>>({
@@ -51,6 +48,7 @@ export function useSheetValue<
   latestValue.current = result.value;
 
   useLayoutEffect(() => {
+    console.info('hello', bindingObj.query, bindingObj.name);
     if (bindingObj.query) {
       spreadsheet.createQuery(sheetName, bindingObj.name, bindingObj.query);
     }
@@ -69,7 +67,7 @@ export function useSheetValue<
         }
       },
     );
-  }, [sheetName, bindingObj.name, bindingObj.query]);
+  }, [sheetName, bindingObj.name, JSON.stringify(bindingObj.query)]);
 
   return result.value;
 }
