@@ -17,6 +17,7 @@ import { Text } from '../../common/Text';
 import { View } from '../../common/View';
 
 import { useBootstrapped, Title } from './common';
+import { shouldDisplayDemo } from 'loot-core/src/shared/environment';
 
 export function Login() {
   const { t } = useTranslation();
@@ -169,21 +170,23 @@ export function Login() {
           )}
         </View>
       )}
-      <View
-        style={{
-          flexDirection: 'row',
-          justifyContent: 'center',
-          marginTop: 15,
-        }}
-      >
-        <Button
-          variant="bare"
-          style={{ fontSize: 15, color: theme.pageTextLink, marginLeft: 10 }}
-          onPress={onDemo}
-        >
-          <Trans>Try Demo &rarr;</Trans>
-        </Button>
-      </View>
+      {shouldDisplayDemo() && (
+              <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'center',
+                marginTop: 15,
+              }}
+            >
+              <Button
+                variant="bare"
+                style={{ fontSize: 15, color: theme.pageTextLink, marginLeft: 10 }}
+                onPress={onDemo}
+              >
+                <Trans>Try Demo &rarr;</Trans>
+              </Button>
+            </View>
+      )}
     </View>
   );
 }

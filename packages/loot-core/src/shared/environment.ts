@@ -18,3 +18,7 @@ export function isElectron() {
   }
   return false;
 }
+
+export function shouldDisplayDemo() {
+  return process.env.REACT_APP_HIDE_DEMO === undefined;
+}
