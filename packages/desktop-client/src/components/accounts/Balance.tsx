@@ -186,7 +186,7 @@ function MoreBalances({ balanceQuery }: MoreBalancesProps) {
 }
 
 type BalancesProps = {
-  balanceQuery: ComponentProps<typeof ReconcilingMessage>['balanceQuery'];
+  balanceQuery: { name: `balance-query-${string}`; query: Query };
   showExtraBalances: boolean;
   onToggleExtraBalances: () => void;
   account: AccountEntity;
