@@ -2,11 +2,7 @@ import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Navigate, Route, Routes } from 'react-router-dom';
 
-import {
-  getUserData,
-  loadAllFiles,
-  setAppState,
-} from 'loot-core/client/actions';
+import { loggedIn, setAppState } from 'loot-core/client/actions';
 
 import { useMetaThemeColor } from '../../hooks/useMetaThemeColor';
 import { theme } from '../../style';
@@ -55,7 +51,9 @@ function Version() {
 
 export function ManagementApp() {
   const { isNarrowWidth } = useResponsive();
-  useMetaThemeColor(isNarrowWidth ? theme.mobileConfigServerViewTheme : null);
+  useMetaThemeColor(
+    isNarrowWidth ? theme.mobileConfigServerViewTheme : undefined,
+  );
 
   const files = useSelector(state => state.budgets.allFiles);
   const isLoading = useSelector(state => state.app.loadingText !== null);
@@ -69,16 +67,12 @@ export function ManagementApp() {
   // runs on mount only
   useEffect(() => {
     async function fetchData() {
-      const userData = await dispatch(getUserData());
-      if (userData) {
-        await dispatch(loadAllFiles());
-      }
-
+      await dispatch(loggedIn());
       dispatch(setAppState({ managerHasInitialized: true }));
     }
 
     fetchData();
-  }, []);
+  }, [dispatch]);
 
   return (
     <View style={{ height: '100%', color: theme.pageText }}>

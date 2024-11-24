@@ -10,7 +10,7 @@ import { useTranslation } from 'react-i18next';
 import memoizeOne from 'memoize-one';
 
 import { getNormalisedString } from 'loot-core/src/shared/normalisation';
-import { groupById } from 'loot-core/src/shared/util';
+import { type Diff, groupById } from 'loot-core/src/shared/util';
 import { type PayeeEntity } from 'loot-core/types/models';
 
 import {
@@ -70,10 +70,7 @@ type ManagePayeesProps = {
   ruleCounts: ComponentProps<typeof PayeeTable>['ruleCounts'];
   orphanedPayees: PayeeEntity[];
   initialSelectedIds: string[];
-  onBatchChange: (arg: {
-    deleted?: Array<{ id: string }>;
-    updated?: Array<{ id: string; name?: string; favorite?: 0 | 1 }>;
-  }) => void;
+  onBatchChange: (diff: Diff<PayeeEntity>) => void;
   onViewRules: ComponentProps<typeof PayeeTable>['onViewRules'];
   onCreateRule: ComponentProps<typeof PayeeTable>['onCreateRule'];
   onMerge: (ids: string[]) => Promise<void>;
@@ -126,7 +123,11 @@ export const ManagePayees = ({
     ) => {
       const payee = payees.find(p => p.id === id);
       if (payee && payee[name] !== value) {
-        onBatchChange({ updated: [{ id, [name]: value }] });
+        onBatchChange({
+          updated: [{ id, [name]: value }],
+          added: [],
+          deleted: [],
+        });
       }
     },
     [payees, onBatchChange],
@@ -141,6 +142,8 @@ export const ManagePayees = ({
   function onDelete(ids?: { id: string }[]) {
     onBatchChange({
       deleted: ids ?? [...selected.items].map(id => ({ id })),
+      updated: [],
+      added: [],
     });
     if (!ids) selected.dispatch({ type: 'select-none' });
   }
@@ -152,10 +155,14 @@ export const ManagePayees = ({
     if (allFavorited) {
       onBatchChange({
         updated: [...selected.items].map(id => ({ id, favorite: 0 })),
+        added: [],
+        deleted: [],
       });
     } else {
       onBatchChange({
         updated: [...selected.items].map(id => ({ id, favorite: 1 })),
+        added: [],
+        deleted: [],
       });
     }
     selected.dispatch({ type: 'select-none' });
