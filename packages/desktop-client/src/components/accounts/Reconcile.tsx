@@ -29,11 +29,13 @@ export function ReconcilingMessage({
   onDone,
   onCreateTransaction,
 }: ReconcilingMessageProps) {
-  const cleared = useSheetValue<'balance', `balance-query-${string}-cleared`>({
-    name: (balanceQuery.name + '-cleared') as `balance-query-${string}-cleared`,
-    value: 0,
-    query: balanceQuery.query.filter({ cleared: true }),
-  });
+  const cleared =
+    useSheetValue<'balance', `balance-query-${string}-cleared`>({
+      name: (balanceQuery.name +
+        '-cleared') as `balance-query-${string}-cleared`,
+      value: 0,
+      query: balanceQuery.query.filter({ cleared: true }),
+    }) ?? 0;
   const format = useFormat();
   const targetDiff = targetBalance - cleared;
 

@@ -694,7 +694,7 @@ const compileOp = saveStack('op', (state, fieldRef, opData) => {
     }
     case '$ne': {
       if (castInput(state, rhs, lhs.type).type === 'null') {
-        return `${val(state, lhs)} IS NULL`;
+        return `${val(state, lhs)} IS NOT NULL`;
       }
 
       const [left, right] = valArray(state, [lhs, rhs], [null, lhs.type]);

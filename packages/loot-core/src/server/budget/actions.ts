@@ -1,4 +1,5 @@
 // @ts-strict-ignore
+
 import * as monthUtils from '../../shared/months';
 import { integerToCurrency, safeNumber } from '../../shared/util';
 import * as db from '../db';
@@ -11,6 +12,14 @@ export async function getSheetValue(
 ): Promise<number> {
   const node = await sheet.getCell(sheetName, cell);
   return safeNumber(typeof node.value === 'number' ? node.value : 0);
+}
+
+export async function getSheetBoolean(
+  sheetName: string,
+  cell: string,
+): Promise<boolean> {
+  const node = await sheet.getCell(sheetName, cell);
+  return typeof node.value === 'boolean' ? node.value : false;
 }
 
 // We want to only allow the positive movement of money back and

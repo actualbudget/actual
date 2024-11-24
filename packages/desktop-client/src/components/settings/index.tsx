@@ -7,7 +7,6 @@ import { isElectron } from 'loot-core/shared/environment';
 import { listen } from 'loot-core/src/platform/client/fetch';
 
 import { useActions } from '../../hooks/useActions';
-import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { useGlobalPref } from '../../hooks/useGlobalPref';
 import { useIsOutdated, useLatestVersion } from '../../hooks/useLatestVersion';
 import { useMetadataPref } from '../../hooks/useMetadataPref';
@@ -177,7 +176,7 @@ export function Settings() {
         <ThemeSettings />
         <FormatSettings />
         <EncryptionSettings />
-        {useFeatureFlag('reportBudget') && <BudgetTypeSettings />}
+        <BudgetTypeSettings />
         {isElectron() && <Backups />}
         <ExportBudget />
         <AdvancedToggle>
