@@ -7,6 +7,7 @@ import { useParams, useSearchParams } from 'react-router-dom';
 import { createBudget } from 'loot-core/src/client/actions/budgets';
 import { loggedIn } from 'loot-core/src/client/actions/user';
 import { send } from 'loot-core/src/platform/client/fetch';
+import { shouldDisplayLoginDemo } from 'loot-core/src/shared/environment';
 
 import { AnimatedLoading } from '../../../icons/AnimatedLoading';
 import { theme } from '../../../style';
@@ -17,7 +18,6 @@ import { Text } from '../../common/Text';
 import { View } from '../../common/View';
 
 import { useBootstrapped, Title } from './common';
-import { shouldDisplayLoginDemo } from 'loot-core/src/shared/environment';
 
 export function Login() {
   const { t } = useTranslation();
