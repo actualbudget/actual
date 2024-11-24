@@ -17,7 +17,7 @@ import { Text } from '../../common/Text';
 import { View } from '../../common/View';
 
 import { useBootstrapped, Title } from './common';
-import { shouldDisplayDemo } from 'loot-core/src/shared/environment';
+import { shouldDisplayLoginDemo } from 'loot-core/src/shared/environment';
 
 export function Login() {
   const { t } = useTranslation();
@@ -170,7 +170,7 @@ export function Login() {
           )}
         </View>
       )}
-      {shouldDisplayDemo() && (
+      {shouldDisplayLoginDemo() && (
         <View
           style={{
             flexDirection: 'row',
