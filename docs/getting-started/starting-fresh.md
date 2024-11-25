@@ -216,7 +216,7 @@ You can apply the last three months' average on all budget categories:
 
 ![](/img/getting-started/actual-intro-set-budget-to-3-months-average.png)
 
-You can also set specific categories to various averages::
+You can also set specific categories to various averages:
 
 ![](/img/getting-started/actual-intro-set-budget-category-average.png)
 
