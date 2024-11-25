@@ -427,7 +427,7 @@ export function AccountHeader({
             </View>
           </Button>
           {account ? (
-            <>
+            <View>
               <MenuButton
                 aria-label="Account menu"
                 ref={triggerRef}
@@ -454,9 +454,9 @@ export function AccountHeader({
                   }}
                 />
               </Popover>
-            </>
+            </View>
           ) : (
-            <>
+            <View>
               <MenuButton
                 aria-label="Account menu"
                 ref={triggerRef}
@@ -486,7 +486,7 @@ export function AccountHeader({
                   ]}
                 />
               </Popover>
-            </>
+            </View>
           )}
         </Stack>
 
