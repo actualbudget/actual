@@ -2094,7 +2094,7 @@ export const TransactionTable = forwardRef((props, ref) => {
       result = props.transactions.filter((t, idx) => {
         if (t.parent_id) {
           if (idx >= index) {
-            return splitsExpanded.expanded(t.parent_id);
+            return splitsExpanded.isExpanded(t.parent_id);
           } else if (prevSplitsExpanded.current) {
             return prevSplitsExpanded.current.expanded(t.parent_id);
           }
@@ -2113,7 +2113,7 @@ export const TransactionTable = forwardRef((props, ref) => {
 
       result = props.transactions.filter(t => {
         if (t.parent_id) {
-          return splitsExpanded.expanded(t.parent_id);
+          return splitsExpanded.isExpanded(t.parent_id);
         }
         return true;
       });
@@ -2584,7 +2584,7 @@ export const TransactionTable = forwardRef((props, ref) => {
       transactionsByParent={transactionsByParent}
       transferAccountsByTransaction={transferAccountsByTransaction}
       selectedItems={selectedItems}
-      isExpanded={splitsExpanded.expanded}
+      isExpanded={splitsExpanded.isExpanded}
       onSave={onSave}
       onDelete={onDelete}
       onDuplicate={onDuplicate}
