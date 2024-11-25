@@ -1,12 +1,21 @@
 // @ts-strict-ignore
-import React, { type ChangeEvent, useState } from 'react';
+import React, { type ChangeEvent, type ReactNode, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { ButtonWithLoading } from '../../common/Button2';
 import { BigInput } from '../../common/Input';
 import { View } from '../../common/View';
 
-export function ConfirmPasswordForm({ buttons, onSetPassword, onError }) {
+type ConfirmPasswordFormProps = {
+  buttons: ReactNode;
+  onSetPassword: (password: string) => Promise<void>;
+  onError: (error: string) => void;
+};
+export function ConfirmPasswordForm({
+  buttons,
+  onSetPassword,
+  onError,
+}: ConfirmPasswordFormProps) {
   const { t } = useTranslation();
 
   const [password1, setPassword1] = useState('');
@@ -88,6 +97,7 @@ export function ConfirmOldPasswordForm({ buttons, onSetPassword }) {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const { t } = useTranslation();
 
   async function onSubmit() {
     if (loading) {
@@ -114,7 +124,7 @@ export function ConfirmOldPasswordForm({ buttons, onSetPassword }) {
     >
       <BigInput
         autoFocus={true}
-        placeholder="Password"
+        placeholder={t('Password')}
         type={showPassword ? 'text' : 'password'}
         value={password}
         onChange={(e: ChangeEvent<HTMLInputElement>) =>

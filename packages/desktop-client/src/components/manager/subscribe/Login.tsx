@@ -26,6 +26,7 @@ import { OpenIdForm } from './OpenIdForm';
 function PasswordLogin({ setError, dispatch }) {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const { t } = useTranslation();
 
   async function onSubmitPassword() {
     if (password === '' || loading) {
@@ -51,7 +52,7 @@ function PasswordLogin({ setError, dispatch }) {
     <View style={{ flexDirection: 'row', marginTop: 5 }}>
       <BigInput
         autoFocus={true}
-        placeholder="Password"
+        placeholder={t('Password')}
         type="password"
         onChangeValue={newValue => setPassword(newValue)}
         style={{ flex: 1, marginRight: 10 }}
@@ -245,7 +246,7 @@ export function Login() {
     <View style={{ maxWidth: 450, marginTop: -30, color: theme.pageText }}>
       <Title text={t('Sign in to this Actual instance')} />
 
-      {loginMethods.length > 1 && (
+      {loginMethods?.length > 1 && (
         <Text
           style={{
             fontSize: 16,
@@ -261,7 +262,7 @@ export function Login() {
         </Text>
       )}
 
-      {loginMethods.length > 1 && (
+      {loginMethods?.length > 1 && (
         <View style={{ marginTop: 10 }}>
           <Label
             style={{
@@ -277,7 +278,7 @@ export function Login() {
               setError(null);
               setMethod(newValue);
             }}
-            options={loginMethods.map(m => [m.method, m.displayName])}
+            options={loginMethods?.map(m => [m.method, m.displayName])}
           />
         </View>
       )}

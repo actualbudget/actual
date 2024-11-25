@@ -1554,7 +1554,7 @@ handlers['subscribe-needs-bootstrap'] = async function ({
 
   return {
     bootstrapped: res.data.bootstrapped,
-    availableLoginMethods: res.data.loginMethods || [
+    availableLoginMethods: res.data.availableLoginMethods || [
       { method: 'password', active: true, displayName: 'Password' },
     ],
     multiuser: res.data.multiuser || false,
@@ -2077,13 +2077,18 @@ handlers['enable-password'] = async function (loginConfig) {
 };
 
 handlers['get-openid-config'] = async function () {
-  const res = await get(getServer().BASE_SERVER + '/openid/config');
+  try {
+    const res = await get(getServer().BASE_SERVER + '/openid/config');
 
-  if (res) {
-    return JSON.parse(res) as OpenIdConfig;
+    if (res) {
+      const config = JSON.parse(res) as OpenIdConfig;
+      return { openId: config };
+    }
+
+    return null;
+  } catch (err) {
+    return { error: 'config-fetch-failed' };
   }
-
-  return {};
 };
 
 async function loadBudget(id) {

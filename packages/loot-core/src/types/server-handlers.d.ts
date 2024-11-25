@@ -404,7 +404,11 @@ export interface ServerHandlers {
 
   'enable-password': (arg: { password: string }) => Promise<{ error?: string }>;
 
-  'get-openid-config': () => Promise<{
-    openId?: OpenIdConfig;
-  }>;
+  'get-openid-config': () => Promise<
+    | {
+        openId: OpenIdConfig;
+      }
+    | { error: string }
+    | null
+  >;
 }

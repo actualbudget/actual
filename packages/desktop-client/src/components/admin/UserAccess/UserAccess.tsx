@@ -7,12 +7,11 @@ import React, {
   type SetStateAction,
   type Dispatch,
   useRef,
+  type CSSProperties,
 } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { css } from '@emotion/css';
-
-import { pushModal } from 'loot-core/client/actions';
+import { addNotification, pushModal } from 'loot-core/client/actions';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as undo from 'loot-core/src/platform/client/undo';
 import { type Handlers } from 'loot-core/types/handlers';
@@ -47,7 +46,6 @@ function UserAccessContent({
   const [page, setPage] = useState(0);
   const [filter, setFilter] = useState('');
   const [cloudFileId] = useMetadataPref('cloudFileId');
-  const dispatch = useDispatch();
   const [ownerName, setOwnerName] = useState('unknown');
   const triggerRef = useRef(null);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -77,10 +75,8 @@ function UserAccessContent({
 
   const loadAccess = useCallback(async () => {
     setLoading(true);
-    const users: UserAvailable[] = await send(
-      'access-get-available-users',
-      cloudFileId as string,
-    );
+    const data: Awaited<ReturnType<Handlers['access-get-available-users']>> =
+      await send('access-get-available-users', cloudFileId as string);
 
     const sortUsers = (a: UserAvailable, b: UserAvailable) => {
       if ((a.owner ?? 0) !== (b.owner ?? 0)) {
@@ -89,7 +85,18 @@ function UserAccessContent({
       return (a.displayName ?? '').localeCompare(b.displayName ?? '');
     };
 
-    const loadedAccess = users
+    if ('error' in data) {
+      addNotification({
+        type: 'error',
+        id: 'error',
+        title: 'Error getting available users',
+        sticky: true,
+        message: data.error,
+      });
+      return [];
+    }
+
+    const loadedAccess = data
       .map(user => ({
         ...user,
         displayName: user.displayName || user.userName,
@@ -226,22 +233,13 @@ function UserAccessContent({
             >
               {ownerName}
             </View>
-            <Button
-              variant="bare"
-              aria-label="Menu"
-              onPress={() =>
-                dispatch(
-                  pushModal('transfer-ownership', {
-                    onSave: async () => {
-                      await loadAccess();
-                      setLoading(false);
-                    },
-                  }),
-                )
-              }
-            >
-              <LockToggle style={{ width: 16, height: 16 }} />
-            </Button>
+            <LockToggle
+              style={{ width: 16, height: 16 }}
+              onToggleSave={async () => {
+                await loadAccess();
+                setLoading(false);
+              }}
+            />
           </View>
         </Popover>
       </View>
@@ -316,29 +314,31 @@ function UserAccessList({
   );
 }
 
-const wrapperStyle = css({
-  display: 'inline-block',
-  ':hover .default-icon': {
-    display: 'none',
-  },
-  ':hover .hover-icon': {
-    display: 'inline',
-  },
-});
+type LockToggleProps = {
+  style: CSSProperties;
+  onToggleSave: () => void;
+};
 
-const iconStyle = css({
-  '&.hover-icon': {
-    display: 'none',
-  },
-});
+function LockToggle({ style, onToggleSave }: LockToggleProps) {
+  const [hover, setHover] = useState(false);
+  const dispatch = useDispatch();
 
-const LockToggle = props => (
-  <div className={wrapperStyle}>
-    <div className={`${iconStyle} default-icon`}>
-      <SvgLockClosed {...props} />
-    </div>
-    <div className={`${iconStyle} hover-icon`}>
-      <SvgLockOpen {...props} />
-    </div>
-  </div>
-);
+  return (
+    <Button
+      onHoverStart={() => setHover(true)}
+      onHoverEnd={() => setHover(false)}
+      variant="bare"
+      aria-label="Menu"
+      onPress={() =>
+        dispatch(
+          pushModal('transfer-ownership', {
+            onSave: () => onToggleSave(),
+          }),
+        )
+      }
+    >
+      {hover && <SvgLockOpen style={style} />}
+      {!hover && <SvgLockClosed style={style} />}
+    </Button>
+  );
+}

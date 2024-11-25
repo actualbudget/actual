@@ -144,6 +144,21 @@ function FileState({
   let color;
   let ownerName = null;
 
+  const getOwnerDisplayName = useCallback(() => {
+    if (
+      !(
+        file.state === 'remote' ||
+        file.state === 'synced' ||
+        file.state === 'detached'
+      )
+    ) {
+      return '';
+    }
+
+    const userFound = file.usersWithAccess?.find(f => f.owner);
+    return userFound?.displayName ?? userFound?.userName ?? 'unknown';
+  }, [file]);
+
   switch (file.state) {
     case 'unknown':
       Icon = SvgCloudUnknown;
@@ -221,21 +236,6 @@ function FileState({
       </View>
     </View>
   );
-
-  function getOwnerDisplayName() {
-    if (
-      !(
-        file.state === 'remote' ||
-        file.state === 'synced' ||
-        file.state === 'detached'
-      )
-    ) {
-      return '';
-    }
-
-    const userFound = file.usersWithAccess?.find(f => f.owner);
-    return userFound?.displayName ?? userFound?.userName ?? 'unknown';
-  }
 }
 
 function FileItem({

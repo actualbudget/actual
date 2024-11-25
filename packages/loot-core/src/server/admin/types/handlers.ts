@@ -1,15 +1,8 @@
 import { UserAvailable, UserEntity } from '../../../types/models/user';
-import {
-  NewUserAccessEntity,
-  UserAccessEntity,
-} from '../../../types/models/userAccess';
+import { NewUserAccessEntity } from '../../../types/models/userAccess';
 
 export interface AdminHandlers {
   'users-get': () => Promise<UserEntity[] | null | { error: string }>;
-
-  'users-get-access': (
-    fileIds: string[],
-  ) => Promise<Map<string, UserAccessEntity[]> | null>;
 
   'user-delete-all': (
     ids: string[],
@@ -35,9 +28,9 @@ export interface AdminHandlers {
     ids: string[];
   }) => Promise<{ someDeletionsFailed: boolean; ids?: number[] }>;
 
-  'access-get': (fileId: string) => Promise<UserAccessEntity[]>;
-
-  'access-get-available-users': (fileId: string) => Promise<UserAvailable[]>;
+  'access-get-available-users': (
+    fileId: string,
+  ) => Promise<UserAvailable[] | { error: string }>;
 
   'transfer-ownership': ({
     fileId,

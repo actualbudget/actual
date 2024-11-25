@@ -1,7 +1,6 @@
 // @ts-strict-ignore
 import * as asyncStorage from '../../platform/server/asyncStorage';
 import { UserAvailable, UserEntity } from '../../types/models/user';
-import { UserAccessEntity } from '../../types/models/userAccess';
 import { createApp } from '../app';
 import { del, get, patch, post } from '../post';
 import { getServer } from '../server-config';
@@ -59,26 +58,6 @@ app.method('users-get', async function () {
   return null;
 });
 
-app.method('users-get-access', async function (fileIds) {
-  const userToken = await asyncStorage.getItem('user-token');
-
-  if (userToken) {
-    const res = await post(
-      getServer().BASE_SERVER + '/admin/access/get-bulk',
-      fileIds,
-      {
-        'X-ACTUAL-TOKEN': userToken,
-      },
-    );
-
-    if (res) {
-      return new Map<string, UserAccessEntity[]>(res);
-    }
-  }
-
-  return null;
-});
-
 app.method('user-add', async function (user) {
   const userToken = await asyncStorage.getItem('user-token');
 
@@ -113,27 +92,6 @@ app.method('user-update', async function (user) {
   }
 
   return null;
-});
-
-app.method('access-get', async function (fileId) {
-  const userToken = await asyncStorage.getItem('user-token');
-
-  if (userToken) {
-    const res = await get(
-      `${getServer().BASE_SERVER + '/admin/access/'}?fileId=${fileId}`,
-      {
-        headers: {
-          'X-ACTUAL-TOKEN': userToken,
-        },
-      },
-    );
-
-    if (res) {
-      return JSON.parse(res) as UserAccessEntity[];
-    }
-  }
-
-  return [];
 });
 
 app.method('access-add', async function (access) {
@@ -191,7 +149,11 @@ app.method('access-get-available-users', async function (fileId) {
     );
 
     if (res) {
-      return JSON.parse(res) as UserAvailable[];
+      try {
+        return JSON.parse(res) as UserAvailable[];
+      } catch (err) {
+        return { error: 'Failed to parse response: ' + err.message };
+      }
     }
   }
 

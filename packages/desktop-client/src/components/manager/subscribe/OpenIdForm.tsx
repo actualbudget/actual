@@ -1,7 +1,9 @@
 import { type ReactNode, useEffect, useState } from 'react';
 import { useLocation, type Location } from 'react-router-dom';
 
+import { addNotification } from 'loot-core/client/actions';
 import { send } from 'loot-core/platform/client/fetch';
+import { type Handlers } from 'loot-core/types/handlers';
 import { type OpenIdConfig } from 'loot-core/types/models/openid';
 
 import { theme, styles } from '../../../style';
@@ -57,17 +59,30 @@ export function OpenIdForm({
   const location = useLocation();
   const [tip, setTip] = useState((<Text />) as ReactNode);
   const [submitButtonDisabled, setSubmitButtonDisabled] = useState(false);
-
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (loadData) {
-      send('get-openid-config').then((config: { openId?: OpenIdConfig }) => {
-        setProviderName(config?.openId?.selectedProvider ?? 'other');
-        setIssuer(config?.openId?.issuer ?? '');
-        setClientId(config?.openId?.client_id ?? '');
-        setClientSecret(config?.openId?.client_secret ?? '');
-      });
+      send('get-openid-config').then(
+        (config: Awaited<ReturnType<Handlers['get-openid-config']>>) => {
+          if (!config) return;
+
+          if ('error' in config) {
+            addNotification({
+              type: 'error',
+              id: 'error',
+              title: 'Error getting openid config',
+              sticky: true,
+              message: config.error,
+            });
+          } else if ('openId' in config) {
+            setProviderName(config?.openId?.selectedProvider ?? 'other');
+            setIssuer(config?.openId?.issuer ?? '');
+            setClientId(config?.openId?.client_id ?? '');
+            setClientSecret(config?.openId?.client_secret ?? '');
+          }
+        },
+      );
     }
   }, [loadData]);
 
