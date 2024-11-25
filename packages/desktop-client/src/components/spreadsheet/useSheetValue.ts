@@ -79,7 +79,7 @@ export function useSheetValue<
     spreadsheet,
     sheetName,
     bindingObj.name,
-    bindingObj.query ? JSON.stringify(bindingObj.query.serialize()) : null,
+    bindingObj.query?.serializeAsString(),
   ]);
 
   return result.value;
