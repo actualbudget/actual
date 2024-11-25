@@ -14,10 +14,10 @@ import {
   Dialog,
 } from 'react-aria-components';
 import { useHotkeysContext } from 'react-hotkeys-hook';
+import { useTranslation } from 'react-i18next';
 
 import { css } from '@emotion/css';
 import { AutoTextSize } from 'auto-text-size';
-import { t } from 'i18next';
 
 import { useModalState } from '../../hooks/useModalState';
 import { AnimatedLoading } from '../../icons/AnimatedLoading';
@@ -54,6 +54,7 @@ export const Modal = ({
   containerProps,
   ...props
 }: ModalProps) => {
+  const { t } = useTranslation();
   const { isNarrowWidth } = useResponsive();
   const { enableScope, disableScope } = useHotkeysContext();
 
@@ -300,6 +301,7 @@ export function ModalHeader({
   title,
   rightContent,
 }: ModalHeaderProps) {
+  const { t } = useTranslation();
   return (
     <View
       role="heading"
@@ -468,6 +470,7 @@ type ModalCloseButtonProps = {
 };
 
 export function ModalCloseButton({ onPress, style }: ModalCloseButtonProps) {
+  const { t } = useTranslation();
   return (
     <Button
       variant="bare"

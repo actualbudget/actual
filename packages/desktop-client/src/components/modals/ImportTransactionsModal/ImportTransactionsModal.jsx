@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
+import { useTranslation } from 'react-i18next';
 
 import deepEqual from 'deep-equal';
-import { t } from 'i18next';
 
 import {
   getPayees,
@@ -141,6 +141,7 @@ function parseCategoryFields(trans, categories) {
 }
 
 export function ImportTransactionsModal({ options }) {
+  const { t } = useTranslation();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const [prefs, savePrefs] = useSyncedPrefs();
   const dispatch = useDispatch();
