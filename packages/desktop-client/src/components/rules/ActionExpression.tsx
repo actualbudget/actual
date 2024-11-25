@@ -1,6 +1,5 @@
 import React, { type CSSProperties } from 'react';
-
-import { t } from 'i18next';
+import { useTranslation } from 'react-i18next';
 
 import {
   mapField,
@@ -68,6 +67,7 @@ function SetActionExpression({
   value,
   options,
 }: SetRuleActionEntity) {
+  const { t } = useTranslation();
   return (
     <>
       <Text>{friendlyOp(op)}</Text>{' '}

@@ -1,8 +1,7 @@
 // @ts-strict-ignore
 import React, { useState } from 'react';
 import { Form } from 'react-aria-components';
-
-import { t } from 'i18next';
+import { useTranslation } from 'react-i18next';
 
 import { type FinanceModals } from 'loot-core/src/client/state-types/modals';
 import { send } from 'loot-core/src/platform/client/fetch';
@@ -33,6 +32,7 @@ export function FixEncryptionKeyModal({
 }: FixEncryptionKeyModalProps) {
   const { hasExistingKey, cloudFileId, onSuccess } = options;
 
+  const { t } = useTranslation();
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);

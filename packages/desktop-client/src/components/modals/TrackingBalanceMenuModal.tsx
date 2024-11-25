@@ -2,8 +2,7 @@ import React, {
   type ComponentPropsWithoutRef,
   type CSSProperties,
 } from 'react';
-
-import { t } from 'i18next';
+import { useTranslation } from 'react-i18next';
 
 import { trackingBudget } from 'loot-core/client/queries';
 
@@ -39,6 +38,7 @@ export function TrackingBalanceMenuModal({
     borderTop: `1px solid ${theme.pillBorder}`,
   };
 
+  const { t } = useTranslation();
   const category = useCategory(categoryId);
 
   if (!category) {
