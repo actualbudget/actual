@@ -62,7 +62,7 @@ export function useBootstrapped(redirect = true) {
         await setServerURL(serverURL, { validate: false });
 
         setMultiuserEnabled(result.multiuser);
-        setLoginMethods(result.loginMethods);
+        setLoginMethods(result.availableLoginMethods);
 
         if (result.bootstrapped) {
           ensure(`/login`);
@@ -81,7 +81,7 @@ export function useBootstrapped(redirect = true) {
 
           if ('hasServer' in result && result.hasServer) {
             setMultiuserEnabled(result.multiuser);
-            setLoginMethods(result.loginMethods);
+            setLoginMethods(result.availableLoginMethods);
           }
         } else {
           ensure('/bootstrap');

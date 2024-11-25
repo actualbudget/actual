@@ -279,7 +279,7 @@ export interface ServerHandlers {
     | {
         bootstrapped: boolean;
         hasServer: true;
-        loginMethods: {
+        availableLoginMethods: {
           method: string;
           displayName: string;
           active: boolean;

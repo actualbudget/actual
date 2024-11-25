@@ -123,7 +123,7 @@ export function ServerProvider({ children }: { children: ReactNode }) {
       send('subscribe-needs-bootstrap').then(
         (data: Awaited<ReturnType<Handlers['subscribe-needs-bootstrap']>>) => {
           if ('hasServer' in data && data.hasServer) {
-            setAvailableLoginMethods(data.loginMethods);
+            setAvailableLoginMethods(data.availableLoginMethods);
             setMultiuserEnabled(data.multiuser);
           }
         },

@@ -1554,7 +1554,7 @@ handlers['subscribe-needs-bootstrap'] = async function ({
 
   return {
     bootstrapped: res.data.bootstrapped,
-    loginMethods: res.data.loginMethods || [
+    availableLoginMethods: res.data.loginMethods || [
       { method: 'password', active: true, displayName: 'Password' },
     ],
     multiuser: res.data.multiuser || false,
