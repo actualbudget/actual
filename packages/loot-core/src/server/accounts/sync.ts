@@ -32,7 +32,7 @@ import { title } from './title';
 import { runRules } from './transaction-rules';
 import { batchUpdateTransactions } from './transactions';
 
-function BankSyncError(type: string, code: string, details?: Object) {
+function BankSyncError(type: string, code: string, details?: object) {
   return { type: 'BankSyncError', category: type, code, details };
 }
 
