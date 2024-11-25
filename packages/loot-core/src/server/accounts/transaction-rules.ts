@@ -555,6 +555,12 @@ export function conditionsToAQL(conditions, { recurDateBounds = 100 } = {}) {
         return {
           $and: getValue(value).map(subExpr => mapConditionToActualQL(subExpr)),
         };
+
+      case 'onBudget':
+        return { 'account.offbudget': false };
+      case 'offBudget':
+        return { 'account.offbudget': true };
+
       default:
         throw new Error('Unhandled operator: ' + op);
     }

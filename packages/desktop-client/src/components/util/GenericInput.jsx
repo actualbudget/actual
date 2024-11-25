@@ -32,6 +32,7 @@ export function GenericInput({
   inputRef,
   style,
   onChange,
+  op = undefined,
 }) {
   const { grouped: categoryGroups } = useCategories();
   const { data: savedReports } = useReports();
@@ -100,18 +101,28 @@ export function GenericInput({
           break;
 
         case 'account':
-          content = (
-            <AccountAutocomplete
-              type={autocompleteType}
-              value={value}
-              openOnFocus={true}
-              onSelect={onChange}
-              inputProps={{
-                inputRef,
-                ...(showPlaceholder ? { placeholder: 'nothing' } : null),
-              }}
-            />
-          );
+          switch (op) {
+            case 'onBudget':
+              content = <Input disabled value="on budget" />;
+              break;
+            case 'offBudget':
+              content = <Input disabled value="off budget" />;
+              break;
+            default:
+              content = (
+                <AccountAutocomplete
+                  type={autocompleteType}
+                  value={value}
+                  openOnFocus={true}
+                  onSelect={onChange}
+                  inputProps={{
+                    inputRef,
+                    ...(showPlaceholder ? { placeholder: 'nothing' } : null),
+                  }}
+                />
+              );
+              break;
+          }
           break;
 
         case 'category':

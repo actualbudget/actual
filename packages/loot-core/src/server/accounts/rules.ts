@@ -201,6 +201,8 @@ const CONDITION_TYPES = {
       'doesNotContain',
       'notOneOf',
       'and',
+      'onBudget',
+      'offBudget',
     ],
     nullable: true,
     parse(op, value, fieldName) {
@@ -948,6 +950,8 @@ const OP_SCORES: Record<RuleConditionEntity['op'], number> = {
   doesNotContain: 0,
   matches: 0,
   hasTags: 0,
+  onBudget: 0,
+  offBudget: 0,
 };
 
 function computeScore(rule: Rule): number {

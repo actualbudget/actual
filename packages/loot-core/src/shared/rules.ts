@@ -22,6 +22,8 @@ const TYPE_INFO = {
       'doesNotContain',
       'notOneOf',
       'hasTags',
+      'onBudget',
+      'offBudget',
     ],
     nullable: true,
   },
@@ -66,12 +68,16 @@ const FIELD_INFO = {
     type: 'string',
     disallowedOps: new Set(['hasTags']),
   },
-  payee: { type: 'id' },
+  payee: { type: 'id', disallowedOps: new Set(['onBudget', 'offBudget']) },
   payee_name: { type: 'string' },
   date: { type: 'date' },
   notes: { type: 'string' },
   amount: { type: 'number' },
-  category: { type: 'id', internalOps: new Set(['and']) },
+  category: {
+    type: 'id',
+    disallowedOps: new Set(['onBudget', 'offBudget']),
+    internalOps: new Set(['and']),
+  },
   account: { type: 'id' },
   cleared: { type: 'boolean' },
   reconciled: { type: 'boolean' },
@@ -200,6 +206,10 @@ export function friendlyOp(op, type?) {
       return t('and');
     case 'or':
       return 'or';
+    case 'onBudget':
+      return 'on budget';
+    case 'offBudget':
+      return 'off budget';
     default:
       return '';
   }
