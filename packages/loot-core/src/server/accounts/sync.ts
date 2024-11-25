@@ -32,8 +32,8 @@ import { title } from './title';
 import { runRules } from './transaction-rules';
 import { batchUpdateTransactions } from './transactions';
 
-function BankSyncError(type: string, code: string) {
-  return { type: 'BankSyncError', category: type, code };
+function BankSyncError(type: string, code: string, details?: Object) {
+  return { type: 'BankSyncError', category: type, code, details };
 }
 
 function makeSplitTransaction(trans, subtransactions) {
@@ -152,7 +152,11 @@ async function downloadGoCardlessTransactions(
   );
 
   if (res.error_code) {
-    throw BankSyncError(res.error_type, res.error_code);
+    const errorDetails = {
+      rateLimitHeaders: res.rateLimitHeaders,
+    };
+
+    throw BankSyncError(res.error_type, res.error_code, errorDetails);
   }
 
   if (includeBalance) {
