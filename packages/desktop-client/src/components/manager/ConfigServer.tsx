@@ -249,8 +249,8 @@ export function ConfigServer() {
               <Button
                 variant="primary"
                 style={{ marginLeft: 15 }}
-                onPress={() => {
-                  onCreateTestFile();
+                onPress={async () => {
+                  await onCreateTestFile();
                   navigate('/');
                 }}
               >
