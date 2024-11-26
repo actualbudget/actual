@@ -14,7 +14,7 @@ but also addresses some of its limitations.
 One key difference is that traditional envelope budgeting often overlooks fixed expenses like rent, mortgage,
 utility bills, and other regular payments. These fixed costs are crucial and must be accounted for to have a
 complete picture of your finances. Actual Budget ensures that every fixed or variable expense is
-considered. This comprehensive approach makes AB much more effective than the traditional cash-stuffing method.
+considered. This comprehensive approach makes Actual Budget much more effective than the traditional cash-stuffing method.
 
 A significant advantage of using Actual Budget is increased awareness of expenses. 
 Knowing where every penny of your money is spent is a decisive step towards financial control and stability.
@@ -29,7 +29,7 @@ This gives every unit of currency a purpose, ensuring that income is used effici
 A popular saying is all your money should have a "job". 
 
 One dollar (or whatever your currency is) may be used for Netflix while the next dollar may be for savings. 
-Giving every dollar a job forces you to be honest about where you money is going because each dollar can 
+Giving every dollar a job forces you to be honest about where your money is going because each dollar can 
 only have one job.
 
 
@@ -233,7 +233,7 @@ month to cover these rather than having to put up the larger amount when the bil
 
 **How to plan for irregular expenses**
 
-1. **Identify Irregular Expenses**: List of all large, infrequent expenses you expect throughout the year. 
+1. **Identify Irregular Expenses**: Make a list of all large, infrequent expenses you expect throughout the year. 
    These could be anything from insurance premiums to holiday gifts.
 2. **Break Down Annual Costs**: Calculate the total annual cost for each expense. 
 3. **Divide into Monthly Savings**: Divide the annual cost by 12 to determine how much you need to save each month. 
@@ -256,7 +256,7 @@ cards offers significant advantages. Here's why using cards can be more effectiv
 
 
 **Ease of tracking**: When you use debit or credit cards, all your transactions are automatically recorded 
-in your bank statement. Bank and credit card statement statements provide a detailed history of your 
+in your bank statement. Bank and credit card statements provide a detailed history of your 
 transactions, including the date, amount, and merchant. This makes it much easier to track your spending without 
 having (to remember) to manually enter each transaction whenever you make a purchase or get income. 
 Most financial institutions will let you export your transactions as CSV files, 
@@ -269,7 +269,7 @@ your budget categories. You no longer need to keep physical receipts or manually
 Read more about [managing credit cards](/docs/budgeting/credit-cards) with Actual Budget.
 
 
-## An detailed example of how to do Zero-Sum budgeting 
+## A detailed example of how to do Zero-Sum budgeting 
 
 
 Let's say your total monthly income of January is € 1 200. You get your money on the 1st.  Using Zero-Based Budgeting, 
