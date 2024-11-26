@@ -275,7 +275,7 @@ to rescale the images where appropriate.
 
 
 There are several reasons why you need to annotate screenshots.
-One reason is that you need want readers to pay attention to some aspects of the GUI. This is true if you have a screenshot of an area (for context) and you need to highlight one part of that area. Another reason is that you must address more than one element in the GUI, but presenting several variants of the same screenshot is unfavourable.
+One reason is that you want readers to pay attention to some aspects of the GUI. This is true if you have a screenshot of an area (for context) and you need to highlight one part of that area. Another reason is that you must address more than one element in the GUI, but presenting several variants of the same screenshot is unfavourable.
 We have a few suggestions when annotating screenshots:
 
 
