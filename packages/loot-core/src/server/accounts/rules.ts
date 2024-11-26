@@ -522,10 +522,19 @@ export class Condition {
         }
 
       case 'onBudget':
+        if (!object._account) {
+          return false;
+        }
+
+        return object._account.offbudget === 0;
+
       case 'offBudget':
-        //both has no value, just the operation
-        return true;
-        
+        if (!object._account) {
+          return false;
+        }
+
+        return object._account.offbudget === 1;
+
       default:
     }
 

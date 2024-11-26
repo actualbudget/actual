@@ -16,7 +16,7 @@ import {
 } from '../../types/models';
 import { schemaConfig } from '../aql';
 import * as db from '../db';
-import { getPayee, getPayeeByName, insertPayee } from '../db';
+import { getPayee, getPayeeByName, insertPayee, getAccount } from '../db';
 import { getMappings } from '../db/mappings';
 import { RuleError } from '../errors';
 import { requiredFields, toDateRepr } from '../models';
@@ -852,6 +852,13 @@ export async function prepareTransactionForRules(
     const payee = await getPayee(trans.payee);
     if (payee) {
       r.payee_name = payee.name;
+    }
+  }
+
+  if (trans.account) {
+    const account = await getAccount(trans.account);
+    if (account) {
+      r._account = account;
     }
   }
 
