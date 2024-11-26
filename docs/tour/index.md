@@ -20,7 +20,7 @@ Our tour will touch on the following topics:
 
 * A [quick overview](./user-interface) of the Actual Budget interface.
 * The [budget view](./budget) is where you plan how to save and what you need to spend money on.
-* Without transactions in the [account register](./accounts), there would be a point in having a budget.
+* Without transactions in the [account register](./accounts), there would be no point in having a budget.
 * Actual also has a few other functions we will look at, like [scheduling transactions](./schedules) and [rules](./rules), which will help you automate when entering or importing transactions.
 * Lastly, we have [beautiful reports](./reports) to show you.
 
