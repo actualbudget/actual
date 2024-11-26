@@ -31,7 +31,7 @@ export function BudgetSummaries({ SummaryComponent }: BudgetSummariesProps) {
     config: { mass: 3, tension: 600, friction: 80 },
   }));
 
-  const containerRef = useResizeObserver(
+  const containerRef = useResizeObserver<HTMLDivElement>(
     useCallback(rect => {
       setWidthState(rect.width);
     }, []),

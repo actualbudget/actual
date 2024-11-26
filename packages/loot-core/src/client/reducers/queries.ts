@@ -23,7 +23,6 @@ const initialState: QueriesState = {
   commonPayeesLoaded: false,
   payees: [],
   payeesLoaded: false,
-  earliestTransaction: null,
 };
 
 export function update(state = initialState, action: Action): QueriesState {
