@@ -178,7 +178,7 @@ type AccountListProps = {
   accounts: AccountEntity[];
   updatedAccounts: Array<AccountEntity['id']>;
   getBalanceQuery: (account: AccountEntity) => Binding<'account', 'balance'>;
-  getOnBudgetBalance: () => Binding<'account', 'budgeted-accounts-balance'>;
+  getOnBudgetBalance: () => Binding<'account', 'onbudget-accounts-balance'>;
   getOffBudgetBalance: () => Binding<'account', 'offbudget-accounts-balance'>;
   onAddAccount: () => void;
   onSelectAccount: (id: string) => void;
@@ -226,7 +226,7 @@ function AccountList({
       <PullToRefresh onRefresh={onSync}>
         <View aria-label="Account list" style={{ margin: 10 }}>
           {budgetedAccounts.length > 0 && (
-            <AccountHeader name="For Budget" amount={getOnBudgetBalance()} />
+            <AccountHeader name="On Budget" amount={getOnBudgetBalance()} />
           )}
           {budgetedAccounts.map(acct => (
             <AccountCard
@@ -243,7 +243,7 @@ function AccountList({
 
           {offbudgetAccounts.length > 0 && (
             <AccountHeader
-              name="Off Budget"
+              name="Off-budget"
               amount={getOffBudgetBalance()}
               style={{ marginTop: 30 }}
             />
@@ -300,8 +300,8 @@ export function Accounts() {
         accounts={accounts.filter(account => !account.closed)}
         updatedAccounts={updatedAccounts}
         getBalanceQuery={queries.accountBalance}
-        getOnBudgetBalance={queries.budgetedAccountBalance}
-        getOffBudgetBalance={queries.offbudgetAccountBalance}
+        getOnBudgetBalance={queries.onBudgetAccountBalance}
+        getOffBudgetBalance={queries.offBudgetAccountBalance}
         onAddAccount={onAddAccount}
         onSelectAccount={onSelectAccount}
         onSync={onSync}

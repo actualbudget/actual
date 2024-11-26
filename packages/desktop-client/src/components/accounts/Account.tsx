@@ -250,7 +250,7 @@ function getField(field?: string) {
 }
 
 type AccountInternalProps = {
-  accountId?: AccountEntity['id'] | 'budgeted' | 'offbudget' | 'uncategorized';
+  accountId?: AccountEntity['id'] | 'onbudget' | 'offbudget' | 'uncategorized';
   filterConditions: RuleConditionEntity[];
   showBalances?: boolean;
   setShowBalances: (newValue: boolean) => void;
@@ -841,10 +841,10 @@ class AccountInternal extends PureComponent<
     }
 
     if (!account) {
-      if (id === 'budgeted') {
-        return t('Budgeted Accounts');
+      if (id === 'onbudget') {
+        return t('On-Budget Accounts');
       } else if (id === 'offbudget') {
-        return t('Off Budget Accounts');
+        return t('Off-Budget Accounts');
       } else if (id === 'uncategorized') {
         return t('Uncategorized');
       } else if (!id) {
@@ -1662,7 +1662,7 @@ class AccountInternal extends PureComponent<
 
     const isNameEditable =
       accountId &&
-      accountId !== 'budgeted' &&
+      accountId !== 'onbudget' &&
       accountId !== 'offbudget' &&
       accountId !== 'uncategorized';
 
@@ -1767,7 +1767,7 @@ class AccountInternal extends PureComponent<
                   showAccount={
                     !accountId ||
                     accountId === 'offbudget' ||
-                    accountId === 'budgeted' ||
+                    accountId === 'onbudget' ||
                     accountId === 'uncategorized'
                   }
                   isAdding={this.state.isAdding}
