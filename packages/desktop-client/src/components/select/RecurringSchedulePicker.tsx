@@ -7,6 +7,8 @@ import {
   useState,
 } from 'react';
 
+import { t } from 'i18next';
+
 import { sendCatch } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { getRecurringDescription } from 'loot-core/src/shared/schedules';
@@ -315,7 +317,7 @@ function MonthlyPatterns({
           />
           <Button
             variant="bare"
-            aria-label="Remove recurrence"
+            aria-label={t('Remove recurrence')}
             style={{ padding: 7 }}
             onPress={() =>
               dispatch({
@@ -328,7 +330,7 @@ function MonthlyPatterns({
           </Button>
           <Button
             variant="bare"
-            aria-label="Add recurrence"
+            aria-label={t('Add recurrence')}
             style={{ padding: 7, marginLeft: 5 }}
             onPress={() => dispatch({ type: 'add-recurrence' })}
           >
@@ -392,7 +394,7 @@ function RecurringScheduleTooltip({
   return (
     <>
       <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-        <label htmlFor="start">From</label>
+        <label htmlFor="start">{t('From')}</label>
         <InitialFocus>
           <DateSelect
             id="start"
@@ -429,7 +431,7 @@ function RecurringScheduleTooltip({
         {config.endMode === 'on_date' && (
           <DateSelect
             id="end_date"
-            inputProps={{ placeholder: 'End Date' }}
+            inputProps={{ placeholder: t('End Date') }}
             value={config.endDate}
             onSelect={value => updateField('endDate', value)}
             containerProps={{ style: { width: 100 } }}
@@ -444,7 +446,7 @@ function RecurringScheduleTooltip({
         style={{ marginTop: 10 }}
         spacing={1}
       >
-        <Text style={{ whiteSpace: 'nowrap' }}>Repeat every</Text>
+        <Text style={{ whiteSpace: 'nowrap' }}>{t('Repeat every')}</Text>
         <Input
           id="interval"
           style={{ width: 40 }}
@@ -467,7 +469,7 @@ function RecurringScheduleTooltip({
             }}
             onPress={() => dispatch({ type: 'add-recurrence' })}
           >
-            Add specific days
+            {t('Add specific days')}
           </Button>
         ) : null}
       </Stack>
@@ -503,7 +505,7 @@ function RecurringScheduleTooltip({
               marginRight: 5,
             }}
           >
-            Move schedule{' '}
+            {t('Move schedule')}{' '}
           </label>
           <Select
             id="solve_dropdown"
@@ -520,7 +522,7 @@ function RecurringScheduleTooltip({
             style={{ userSelect: 'none', marginLeft: 5 }}
           >
             {' '}
-            weekend
+            {t('weekend')}
           </label>
         </View>
       </Stack>
@@ -528,13 +530,13 @@ function RecurringScheduleTooltip({
       <div
         style={{ display: 'flex', marginTop: 15, justifyContent: 'flex-end' }}
       >
-        <Button onPress={onClose}>Cancel</Button>
+        <Button onPress={onClose}>{t('Cancel')}</Button>
         <Button
           variant="primary"
           onPress={() => onSave(unparseConfig(config))}
           style={{ marginLeft: 10 }}
         >
-          Apply
+          {t('Apply')}
         </Button>
       </div>
     </>
@@ -570,7 +572,7 @@ export function RecurringSchedulePicker({
       >
         {value
           ? getRecurringDescription(value, dateFormat)
-          : 'No recurring date'}
+          : t('No recurring date')}
       </Button>
 
       <Popover

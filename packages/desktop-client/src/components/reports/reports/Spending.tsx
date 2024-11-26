@@ -13,10 +13,8 @@ import { amountToCurrency } from 'loot-core/src/shared/util';
 import { type SpendingWidget } from 'loot-core/types/models';
 import { type RuleConditionEntity } from 'loot-core/types/models/rule';
 
-import { useFeatureFlag } from '../../../hooks/useFeatureFlag';
 import { useFilters } from '../../../hooks/useFilters';
 import { useNavigate } from '../../../hooks/useNavigate';
-import { useResponsive } from '../../../ResponsiveProvider';
 import { theme, styles } from '../../../style';
 import { AlignedText } from '../../common/AlignedText';
 import { Block } from '../../common/Block';
@@ -33,6 +31,7 @@ import { FilterButton } from '../../filters/FiltersMenu';
 import { MobileBackButton } from '../../mobile/MobileBackButton';
 import { MobilePageHeader, Page, PageHeader } from '../../Page';
 import { PrivacyFilter } from '../../PrivacyFilter';
+import { useResponsive } from '../../responsive/ResponsiveProvider';
 import { SpendingGraph } from '../graphs/SpendingGraph';
 import { LegendItem } from '../LegendItem';
 import { LoadingIndicator } from '../LoadingIndicator';
@@ -61,7 +60,6 @@ type SpendingInternalProps = {
 };
 
 function SpendingInternal({ widget }: SpendingInternalProps) {
-  const isDashboardsFeatureEnabled = useFeatureFlag('dashboards');
   const dispatch = useDispatch();
   const { t } = useTranslation();
 
@@ -237,26 +235,22 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
       >
         {!isNarrowWidth && (
           <SpaceBetween gap={0}>
-            {isDashboardsFeatureEnabled && (
-              <>
-                <Button
-                  variant={isLive ? 'primary' : 'normal'}
-                  onPress={() => setIsLive(state => !state)}
-                >
-                  {isLive ? t('Live') : t('Static')}
-                </Button>
+            <Button
+              variant={isLive ? 'primary' : 'normal'}
+              onPress={() => setIsLive(state => !state)}
+            >
+              {isLive ? t('Live') : t('Static')}
+            </Button>
 
-                <View
-                  style={{
-                    width: 1,
-                    height: 28,
-                    backgroundColor: theme.pillBorderDark,
-                    marginRight: 10,
-                    marginLeft: 10,
-                  }}
-                />
-              </>
-            )}
+            <View
+              style={{
+                width: 1,
+                height: 28,
+                backgroundColor: theme.pillBorderDark,
+                marginRight: 10,
+                marginLeft: 10,
+              }}
+            />
 
             <SpaceBetween gap={5}>
               <Text>

@@ -2,11 +2,12 @@
 import React, { useState } from 'react';
 import { Form } from 'react-aria-components';
 
+import { t } from 'i18next';
+
 import { type FinanceModals } from 'loot-core/src/client/state-types/modals';
 import { send } from 'loot-core/src/platform/client/fetch';
 import { getTestKeyError } from 'loot-core/src/shared/errors';
 
-import { useResponsive } from '../../ResponsiveProvider';
 import { styles, theme } from '../../style';
 import { Button, ButtonWithLoading } from '../common/Button2';
 import { InitialFocus } from '../common/InitialFocus';
@@ -21,6 +22,7 @@ import {
 import { Paragraph } from '../common/Paragraph';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
+import { useResponsive } from '../responsive/ResponsiveProvider';
 
 type FixEncryptionKeyModalProps = {
   options: FinanceModals['fix-encryption-key'];
@@ -64,8 +66,8 @@ export function FixEncryptionKeyModal({
           <ModalHeader
             title={
               hasExistingKey
-                ? 'Unable to decrypt file'
-                : 'This file is encrypted'
+                ? t('Unable to decrypt file')
+                : t('This file is encrypted')
             }
             rightContent={<ModalCloseButton onPress={close} />}
           />
@@ -79,25 +81,26 @@ export function FixEncryptionKeyModal({
           >
             {hasExistingKey ? (
               <Paragraph>
-                This file was encrypted with a different key than you are
-                currently using. This probably means you changed your password.
-                Enter your current password to update your key.{' '}
+                {t(
+                  'This file was encrypted with a different key than you are currently using. This probably means you changed your password. Enter your current password to update your key.',
+                )}{' '}
                 <Link
                   variant="external"
                   to="https://actualbudget.org/docs/getting-started/sync/#end-to-end-encryption"
                 >
-                  Learn more
+                  {t('Learn more')}
                 </Link>
               </Paragraph>
             ) : (
               <Paragraph>
-                We don’t have a key that encrypts or decrypts this file. Enter
-                the password for this file to create the key for encryption.{' '}
+                {t(
+                  'We don’t have a key that encrypts or decrypts this file. Enter the password for this file to create the key for encryption.',
+                )}{' '}
                 <Link
                   variant="external"
                   to="https://actualbudget.org/docs/getting-started/sync/#end-to-end-encryption"
                 >
-                  Learn more
+                  {t('Learn more')}
                 </Link>
               </Paragraph>
             )}
@@ -115,7 +118,9 @@ export function FixEncryptionKeyModal({
                 alignItems: 'center',
               }}
             >
-              <Text style={{ fontWeight: 600, marginBottom: 5 }}>Password</Text>{' '}
+              <Text style={{ fontWeight: 600, marginBottom: 5 }}>
+                {t('Password')}
+              </Text>{' '}
               {error && (
                 <View
                   style={{
@@ -144,7 +149,7 @@ export function FixEncryptionKeyModal({
                     type="checkbox"
                     onClick={() => setShowPassword(!showPassword)}
                   />{' '}
-                  Show password
+                  {t('Show password')}
                 </label>
               </Text>
             </View>
@@ -158,7 +163,7 @@ export function FixEncryptionKeyModal({
                 }}
                 onPress={close}
               >
-                Back
+                {t('Back')}
               </Button>
               <ButtonWithLoading
                 type="submit"
@@ -168,7 +173,7 @@ export function FixEncryptionKeyModal({
                 }}
                 isLoading={loading}
               >
-                {hasExistingKey ? 'Update key' : 'Create key'}
+                {hasExistingKey ? t('Update key') : t('Create key')}
               </ButtonWithLoading>
             </ModalButtons>
           </Form>

@@ -25,13 +25,13 @@ import {
 import { useCategories } from '../../hooks/useCategories';
 import { useSyncedPref } from '../../hooks/useSyncedPref';
 import { SvgSplit } from '../../icons/v0';
-import { useResponsive } from '../../ResponsiveProvider';
 import { theme, styles } from '../../style';
 import { useEnvelopeSheetValue } from '../budget/envelope/EnvelopeBudgetComponents';
 import { makeAmountFullStyle } from '../budget/util';
 import { Text } from '../common/Text';
 import { TextOneLine } from '../common/TextOneLine';
 import { View } from '../common/View';
+import { useResponsive } from '../responsive/ResponsiveProvider';
 import { useSheetValue } from '../spreadsheet/useSheetValue';
 
 import { Autocomplete, defaultFilterSuggestion } from './Autocomplete';
@@ -393,7 +393,7 @@ function CategoryItem({
   >(balanceBinding);
 
   const isToBeBudgetedItem = item.id === 'to-be-budgeted';
-  const toBudget = useEnvelopeSheetValue(envelopeBudget.toBudget) ?? 0;
+  const toBudget = useEnvelopeSheetValue(envelopeBudget.toBudget);
 
   return (
     <div
@@ -429,10 +429,13 @@ function CategoryItem({
             display: !showBalances ? 'none' : undefined,
             marginLeft: 5,
             flexShrink: 0,
-            ...makeAmountFullStyle(isToBeBudgetedItem ? toBudget : balance, {
-              positiveColor: theme.noticeTextMenu,
-              negativeColor: theme.errorTextMenu,
-            }),
+            ...makeAmountFullStyle(
+              (isToBeBudgetedItem ? toBudget : balance) || 0,
+              {
+                positiveColor: theme.noticeTextMenu,
+                negativeColor: theme.errorTextMenu,
+              },
+            ),
           }}
         >
           {isToBeBudgetedItem

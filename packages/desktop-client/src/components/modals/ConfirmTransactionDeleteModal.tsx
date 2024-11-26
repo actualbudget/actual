@@ -1,12 +1,13 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
-import { useResponsive } from '../../ResponsiveProvider';
 import { styles } from '../../style';
 import { Button } from '../common/Button2';
 import { InitialFocus } from '../common/InitialFocus';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { Paragraph } from '../common/Paragraph';
 import { View } from '../common/View';
+import { useResponsive } from '../responsive/ResponsiveProvider';
 
 type ConfirmTransactionDeleteProps = {
   message?: string;
@@ -17,6 +18,7 @@ export function ConfirmTransactionDeleteModal({
   message = 'Are you sure you want to delete the transaction?',
   onConfirm,
 }: ConfirmTransactionDeleteProps) {
+  const { t } = useTranslation();
   const { isNarrowWidth } = useResponsive();
   const narrowButtonStyle = isNarrowWidth
     ? {
@@ -29,7 +31,7 @@ export function ConfirmTransactionDeleteModal({
       {({ state: { close } }) => (
         <>
           <ModalHeader
-            title="Confirm Delete"
+            title={t('Confirm Delete')}
             rightContent={<ModalCloseButton onPress={close} />}
           />
           <View style={{ lineHeight: 1.5 }}>
@@ -47,7 +49,7 @@ export function ConfirmTransactionDeleteModal({
                 }}
                 onPress={close}
               >
-                Cancel
+                {t('Cancel')}
               </Button>
               <InitialFocus>
                 <Button
@@ -58,7 +60,7 @@ export function ConfirmTransactionDeleteModal({
                     close();
                   }}
                 >
-                  Delete
+                  {t('Delete')}
                 </Button>
               </InitialFocus>
             </View>

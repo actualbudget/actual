@@ -1,5 +1,6 @@
 // @ts-strict-ignore
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { useNotes } from '../../hooks/useNotes';
 import { SvgCheck } from '../../icons/v2';
@@ -15,6 +16,7 @@ type NotesModalProps = {
 };
 
 export function NotesModal({ id, name, onSave }: NotesModalProps) {
+  const { t } = useTranslation();
   const originalNotes = useNotes(id);
 
   const [notes, setNotes] = useState(originalNotes);
@@ -36,7 +38,7 @@ export function NotesModal({ id, name, onSave }: NotesModalProps) {
       {({ state: { close } }) => (
         <>
           <ModalHeader
-            title={`Notes: ${name}`}
+            title={t('Notes: {{name}}', { name })}
             rightContent={<ModalCloseButton onPress={close} />}
           />
           <View
@@ -78,7 +80,7 @@ export function NotesModal({ id, name, onSave }: NotesModalProps) {
                 }}
               >
                 <SvgCheck width={17} height={17} style={{ paddingRight: 5 }} />
-                Save notes
+                {t('Save notes')}
               </Button>
             </View>
           </View>
