@@ -103,10 +103,8 @@ export function GenericInput({
         case 'account':
           switch (op) {
             case 'onBudget':
-              content = <Input disabled value="on budget" />;
-              break;
             case 'offBudget':
-              content = <Input disabled value="off budget" />;
+              content = null;
               break;
             default:
               content = (

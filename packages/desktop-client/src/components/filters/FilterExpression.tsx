@@ -84,28 +84,19 @@ export function FilterExpression<T extends RuleConditionEntity>({
               <Text style={{ color: theme.pageTextPositive }}>
                 {mapField(field, options)}
               </Text>{' '}
-              {!['onbudget', 'offbudget'].includes(op?.toLocaleLowerCase()) ? (
-                <>
-                  <Text>{friendlyOp(op, null)}</Text>{' '}
-                  <Value
-                    value={value}
-                    field={field}
-                    inline={true}
-                    valueIsRaw={
-                      op === 'contains' ||
-                      op === 'matches' ||
-                      op === 'doesNotContain' ||
-                      op === 'hasTags'
-                    }
-                  />
-                </>
-              ) : (
-                <>
-                  is{' '}
-                  <Text style={{ color: theme.pageTextPositive }}>
-                    ({friendlyOp(op, null)})
-                  </Text>
-                </>
+              <Text>{friendlyOp(op, null)}</Text>{' '}
+              {!['onbudget', 'offbudget'].includes(op?.toLocaleLowerCase()) && (
+                <Value
+                  value={value}
+                  field={field}
+                  inline={true}
+                  valueIsRaw={
+                    op === 'contains' ||
+                    op === 'matches' ||
+                    op === 'doesNotContain' ||
+                    op === 'hasTags'
+                  }
+                />
               )}
             </>
           )}

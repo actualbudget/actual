@@ -207,9 +207,9 @@ export function friendlyOp(op, type?) {
     case 'or':
       return 'or';
     case 'onBudget':
-      return 'on budget';
+      return 'is on budget';
     case 'offBudget':
-      return 'off budget';
+      return 'is off budget';
     default:
       return '';
   }
