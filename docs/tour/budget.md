@@ -8,7 +8,7 @@ in the [Budgeting](/docs/budgeting/) part of this manual.
 
 The number of months you can see at any one time is defined by the width of your screen.
 
-However, you can select fewer months than the screen can display by clicking on the corresponding numbers of calendar icons in the top right corner.
+However, you can select fewer months than the screen can display by clicking on the corresponding numbers of calendar icons in the top left corner.
 
 ![](/static/img/a-tour-of-actual/tour-budget-calendar.png)
 
@@ -48,14 +48,14 @@ The budget detail section lists all your categories and their grouping. The imag
 groups, _Really Important_ and _Daily Expenses_, along with the income categories. You can minimize a category group, as seen
 with _Daily expenses_.
 
-Clicking on the three vertical dots (in the yellow box) allows you to Toggle hidden categories or expand or hide all category groups.
+Clicking on the three vertical dots (in the yellow box) allows you to Toggle hidden categories or expand or collapse all category groups.
 
 When you hover over a category group (outlined by the green box), you can add a note by clicking the note icon. As with the note icon in the top section,
 we also have full Markdown support here. The dropdown will allow you to add a new category, toggle hide or show the _category group_, rename a group,
 and delete the category group.
 
 Let's look at a category (as seen in the purple box). We have the same functionality as on the group level: hide, rename and delete. And, of course, you
-can also here add a note.
+can also add a note here, with information specific to the category.
 
 ![](/static/img/a-tour-of-actual/tour-budget-details.png)
 
