@@ -520,6 +520,12 @@ export class Condition {
           console.log('invalid regexp in matches condition', e);
           return false;
         }
+
+      case 'onBudget':
+      case 'offBudget':
+        //both has no value, just the operation
+        return true;
+        
       default:
     }
 
