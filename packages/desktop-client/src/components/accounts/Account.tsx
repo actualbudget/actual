@@ -282,7 +282,7 @@ function AccountTransactions({
   );
   const [reconcileAmount, setReconcileAmount] = useState<number | null>(null);
   const [runningBalances, setRunningBalances] = useState<Record<
-    string,
+    TransactionEntity['id'],
     { balance: number }
   > | null>(null);
   const [editingName, setEditingName] = useState<boolean>(false);
@@ -487,16 +487,6 @@ function AccountTransactions({
     useAccountPreviewTransactions({
       accountId,
     });
-  const previewTransactionsWithInverse: (TransactionEntity & {
-    _inverse?: boolean;
-  })[] = useMemo(
-    () =>
-      previewTransactions.map(trans => ({
-        ...trans,
-        _inverse: accountId ? accountId !== trans.account : false,
-      })),
-    [accountId, previewTransactions],
-  );
 
   useEffect(() => {
     if (!isPreviewTransactionsLoading) {
@@ -522,8 +512,12 @@ function AccountTransactions({
 
     const latestBalance = balances[0]?.balance ?? 0;
 
-    const previewBalancesById = previewTransactionsWithInverse.reduce(
-      (map, trans, index, array) => {
+    const nonChildPreviewTransactions = previewTransactions.filter(
+      t => !t.is_child,
+    );
+
+    const nonChildPreviewBalancesById: typeof runningBalances =
+      nonChildPreviewTransactions.reduce((map, trans, index, array) => {
         map[trans.id] = {
           balance: array
             .slice(index, array.length)
@@ -533,16 +527,14 @@ function AccountTransactions({
             ),
         };
         return map;
-      },
-      {},
-    );
+      }, {});
     const balancesById = groupById<{ id: string; balance: number }>(balances);
 
     return {
-      ...previewBalancesById,
+      ...nonChildPreviewBalancesById,
       ...balancesById,
-    };
-  }, [accountId, previewTransactionsWithInverse]);
+    } as typeof runningBalances;
+  }, [accountId, previewTransactions]);
 
   useEffect(() => {
     let isUnmounted = false;
@@ -1541,12 +1533,12 @@ function AccountTransactions({
   const transactionsWithPreview = useMemo(
     () =>
       !isFiltered && !isPreviewTransactionsLoading
-        ? previewTransactionsWithInverse.concat(transactions)
+        ? previewTransactions.concat(transactions)
         : transactions,
     [
       isFiltered,
       isPreviewTransactionsLoading,
-      previewTransactionsWithInverse,
+      previewTransactions,
       transactions,
     ],
   );
