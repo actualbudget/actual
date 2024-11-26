@@ -65,6 +65,7 @@ export function TransactionListWithBalances({
   balanceUncleared,
   searchPlaceholder = 'Search...',
   onSearch,
+  isLoadingMore,
   onLoadMore,
   onOpenTransaction,
   onRefresh,
@@ -104,6 +105,7 @@ export function TransactionListWithBalances({
         <TransactionList
           isLoading={isLoading}
           transactions={transactions}
+          isLoadingMore={isLoadingMore}
           onLoadMore={onLoadMore}
           onOpenTransaction={onOpenTransaction}
         />
