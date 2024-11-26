@@ -291,6 +291,34 @@ export async function runRules(trans) {
   return await finalizeTransactionForRules(finalTrans);
 }
 
+function conditionSpecialCases(cond: Condition): Condition {
+  //special cases that require multiple conditions
+  if (cond.op === 'is' && cond.field === 'category' && cond.value === null) {
+    return new Condition(
+      'and',
+      cond.field,
+      [
+        cond,
+        new Condition('is', 'transfer', false, null),
+        new Condition('is', 'parent', false, null),
+      ],
+      {},
+    );
+  } else if (
+    cond.op === 'isNot' &&
+    cond.field === 'category' &&
+    cond.value === null
+  ) {
+    return new Condition(
+      'and',
+      cond.field,
+      [cond, new Condition('is', 'parent', false, null)],
+      {},
+    );
+  }
+  return cond;
+}
+
 // This does the inverse: finds all the transactions matching a rule
 export function conditionsToAQL(conditions, { recurDateBounds = 100 } = {}) {
   const errors = [];
@@ -309,11 +337,13 @@ export function conditionsToAQL(conditions, { recurDateBounds = 100 } = {}) {
         return null;
       }
     })
+    .map(conditionSpecialCases)
     .filter(Boolean);
 
   // rule -> actualql
-  const filters = conditions.map(cond => {
-    const { type, field, op, value, options } = cond;
+  const mapConditionToActualQL = cond => {
+    const { type, options } = cond;
+    let { field, op, value } = cond;
 
     const getValue = value => {
       if (type === 'number') {
@@ -321,6 +351,23 @@ export function conditionsToAQL(conditions, { recurDateBounds = 100 } = {}) {
       }
       return value;
     };
+
+    if (field === 'transfer' && op === 'is') {
+      field = 'transfer_id';
+      if (value) {
+        op = 'isNot';
+        value = null;
+      } else {
+        value = null;
+      }
+    } else if (field === 'parent' && op === 'is') {
+      field = 'is_parent';
+      if (value) {
+        op = 'true';
+      } else {
+        op = 'false';
+      }
+    }
 
     const apply = (field, op, value) => {
       if (type === 'number') {
@@ -462,9 +509,19 @@ export function conditionsToAQL(conditions, { recurDateBounds = 100 } = {}) {
         return { $or: values.map(v => apply(field, '$eq', v)) };
 
       case 'hasTags':
-        const tagValues = value
-          .split(/(?<!#)(#[\w\d\p{Emoji}-]+)(?=\s|$)/gu)
-          .filter(tag => tag.startsWith('#'));
+        const words = value.split(/\s+/);
+        const tagValues = [];
+        words.forEach(word => {
+          const startsWithHash = word.startsWith('#');
+          const containsMultipleHash = word.slice(1).includes('#');
+          const correctlyFormatted = word.match(/#[\w\d\p{Emoji}-]+/gu);
+          const validHashtag =
+            startsWithHash && !containsMultipleHash && correctlyFormatted;
+
+          if (validHashtag) {
+            tagValues.push(word);
+          }
+        });
 
         return {
           $and: tagValues.map(v => {
@@ -494,11 +551,16 @@ export function conditionsToAQL(conditions, { recurDateBounds = 100 } = {}) {
         return apply(field, '$eq', true);
       case 'false':
         return apply(field, '$eq', false);
+      case 'and':
+        return {
+          $and: getValue(value).map(subExpr => mapConditionToActualQL(subExpr)),
+        };
       default:
         throw new Error('Unhandled operator: ' + op);
     }
-  });
+  };
 
+  const filters = conditions.map(mapConditionToActualQL);
   return { filters, errors };
 }
 

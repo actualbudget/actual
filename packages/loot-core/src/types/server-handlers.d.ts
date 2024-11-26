@@ -116,6 +116,7 @@ export interface ServerHandlers {
   }) => Promise<unknown>;
 
   'payees-check-orphaned': (arg: { ids }) => Promise<unknown>;
+  'payees-get-orphaned': () => Promise<PayeeEntity[]>;
 
   'payees-get-rules': (arg: { id: string }) => Promise<RuleEntity[]>;
 
@@ -196,10 +197,12 @@ export interface ServerHandlers {
   'simplefin-batch-sync': ({ ids }: { ids: string[] }) => Promise<
     {
       accountId: string;
-      errors;
-      newTransactions;
-      matchedTransactions;
-      updatedAccounts;
+      res: {
+        errors;
+        newTransactions;
+        matchedTransactions;
+        updatedAccounts;
+      };
     }[]
   >;
 
@@ -223,7 +226,7 @@ export interface ServerHandlers {
     | { error: 'failed' }
   >;
 
-  'accounts-bank-sync': (arg: { id?: string }) => Promise<{
+  'accounts-bank-sync': (arg: { ids?: AccountEntity['id'][] }) => Promise<{
     errors;
     newTransactions;
     matchedTransactions;

@@ -20,9 +20,7 @@ import {
 } from 'loot-core/src/types/models';
 
 import { useAccounts } from '../../hooks/useAccounts';
-import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { useNavigate } from '../../hooks/useNavigate';
-import { useResponsive } from '../../ResponsiveProvider';
 import { breakpoints } from '../../tokens';
 import { Button } from '../common/Button2';
 import { Menu } from '../common/Menu';
@@ -31,6 +29,7 @@ import { Popover } from '../common/Popover';
 import { View } from '../common/View';
 import { MOBILE_NAV_HEIGHT } from '../mobile/MobileNavTabs';
 import { MobilePageHeader, Page, PageHeader } from '../Page';
+import { useResponsive } from '../responsive/ResponsiveProvider';
 
 import { NON_DRAGGABLE_AREA_CLASS_NAME } from './constants';
 import { LoadingIndicator } from './LoadingIndicator';
@@ -39,8 +38,8 @@ import { CustomReportListCards } from './reports/CustomReportListCards';
 import { MarkdownCard } from './reports/MarkdownCard';
 import { NetWorthCard } from './reports/NetWorthCard';
 import { SpendingCard } from './reports/SpendingCard';
-
 import './overview.scss';
+import { SummaryCard } from './reports/SummaryCard';
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -79,28 +78,16 @@ export function Overview() {
   const location = useLocation();
   sessionStorage.setItem('url', location.pathname);
 
-  const isDashboardsFeatureEnabled = useFeatureFlag('dashboards');
-
-  const baseLayout = widgets
-    .map(widget => ({
-      i: widget.id,
-      w: widget.width,
-      h: widget.height,
-      minW:
-        isCustomReportWidget(widget) || widget.type === 'markdown-card' ? 2 : 3,
-      minH:
-        isCustomReportWidget(widget) || widget.type === 'markdown-card' ? 1 : 2,
-      ...widget,
-    }))
-    .filter(item => {
-      if (isDashboardsFeatureEnabled) {
-        return true;
-      }
-      if (item.type === 'custom-report' && !customReportMap.has(item.meta.id)) {
-        return false;
-      }
-      return true;
-    });
+  const baseLayout = widgets.map(widget => ({
+    i: widget.id,
+    w: widget.width,
+    h: widget.height,
+    minW:
+      isCustomReportWidget(widget) || widget.type === 'markdown-card' ? 2 : 3,
+    minH:
+      isCustomReportWidget(widget) || widget.type === 'markdown-card' ? 1 : 2,
+    ...widget,
+  }));
 
   const layout = baseLayout;
 
@@ -332,86 +319,86 @@ export function Overview() {
             >
               {currentBreakpoint === 'desktop' && (
                 <>
-                  {isDashboardsFeatureEnabled && (
-                    <>
-                      <Button
-                        ref={triggerRef}
-                        variant="primary"
-                        isDisabled={isImporting}
-                        onPress={() => setMenuOpen(true)}
-                      >
-                        <Trans>Add new widget</Trans>
-                      </Button>
+                  <Button
+                    ref={triggerRef}
+                    variant="primary"
+                    isDisabled={isImporting}
+                    onPress={() => setMenuOpen(true)}
+                  >
+                    <Trans>Add new widget</Trans>
+                  </Button>
 
-                      <Popover
-                        triggerRef={triggerRef}
-                        isOpen={menuOpen}
-                        onOpenChange={() => setMenuOpen(false)}
-                      >
-                        <Menu
-                          onMenuSelect={item => {
-                            if (item === 'custom-report') {
-                              navigate('/reports/custom');
-                              return;
-                            }
+                  <Popover
+                    triggerRef={triggerRef}
+                    isOpen={menuOpen}
+                    onOpenChange={() => setMenuOpen(false)}
+                  >
+                    <Menu
+                      onMenuSelect={item => {
+                        if (item === 'custom-report') {
+                          navigate('/reports/custom');
+                          return;
+                        }
 
-                            function isExistingCustomReport(
-                              name: string,
-                            ): name is `custom-report-${string}` {
-                              return name.startsWith('custom-report-');
-                            }
-                            if (isExistingCustomReport(item)) {
-                              const [, reportId] = item.split('custom-report-');
-                              onAddWidget<CustomReportWidget>('custom-report', {
-                                id: reportId,
-                              });
-                              return;
-                            }
+                        function isExistingCustomReport(
+                          name: string,
+                        ): name is `custom-report-${string}` {
+                          return name.startsWith('custom-report-');
+                        }
+                        if (isExistingCustomReport(item)) {
+                          const [, reportId] = item.split('custom-report-');
+                          onAddWidget<CustomReportWidget>('custom-report', {
+                            id: reportId,
+                          });
+                          return;
+                        }
 
-                            if (item === 'markdown-card') {
-                              onAddWidget<MarkdownWidget>(item, {
-                                content: t(
-                                  '### Text Widget\n\nEdit this widget to change the **markdown** content.',
-                                ),
-                              });
-                              return;
-                            }
+                        if (item === 'markdown-card') {
+                          onAddWidget<MarkdownWidget>(item, {
+                            content: t(
+                              '### Text Widget\n\nEdit this widget to change the **markdown** content.',
+                            ),
+                          });
+                          return;
+                        }
 
-                            onAddWidget(item);
-                          }}
-                          items={[
-                            {
-                              name: 'cash-flow-card' as const,
-                              text: t('Cash flow graph'),
-                            },
-                            {
-                              name: 'net-worth-card' as const,
-                              text: t('Net worth graph'),
-                            },
-                            {
-                              name: 'spending-card' as const,
-                              text: t('Spending analysis'),
-                            },
-                            {
-                              name: 'markdown-card' as const,
-                              text: t('Text widget'),
-                            },
-                            {
-                              name: 'custom-report' as const,
-                              text: t('New custom report'),
-                            },
-                            ...(customReports.length
-                              ? ([Menu.line] satisfies Array<typeof Menu.line>)
-                              : []),
-                            ...customReports.map(report => ({
-                              name: `custom-report-${report.id}` as const,
-                              text: report.name,
-                            })),
-                          ]}
-                        />
-                      </Popover>
-                    </>
-                  )}
+                        onAddWidget(item);
+                      }}
+                      items={[
+                        {
+                          name: 'cash-flow-card' as const,
+                          text: t('Cash flow graph'),
+                        },
+                        {
+                          name: 'net-worth-card' as const,
+                          text: t('Net worth graph'),
+                        },
+                        {
+                          name: 'spending-card' as const,
+                          text: t('Spending analysis'),
+                        },
+                        {
+                          name: 'markdown-card' as const,
+                          text: t('Text widget'),
+                        },
+                        {
+                          name: 'summary-card' as const,
+                          text: t('Summary card'),
+                        },
+                        {
+                          name: 'custom-report' as const,
+                          text: t('New custom report'),
+                        },
+                        ...(customReports.length
+                          ? ([Menu.line] satisfies Array<typeof Menu.line>)
+                          : []),
+                        ...customReports.map(report => ({
+                          name: `custom-report-${report.id}` as const,
+                          text: report.name,
+                        })),
+                      ]}
+                    />
+                  </Popover>
 
                   {isEditing ? (
                     <Button
@@ -420,71 +407,59 @@ export function Overview() {
                     >
                       <Trans>Finish editing dashboard</Trans>
                     </Button>
-                  ) : isDashboardsFeatureEnabled ? (
+                  ) : (
                     <Button
                       isDisabled={isImporting}
                       onPress={() => setIsEditing(true)}
                     >
                       <Trans>Edit dashboard</Trans>
                     </Button>
-                  ) : (
-                    <Button
-                      variant="primary"
-                      isDisabled={isImporting}
-                      onPress={() => navigate('/reports/custom')}
-                    >
-                      <Trans>Create new custom report</Trans>
-                    </Button>
                   )}
 
-                  {isDashboardsFeatureEnabled && (
-                    <>
-                      <MenuButton
-                        ref={extraMenuTriggerRef}
-                        onPress={() => setExtraMenuOpen(true)}
-                      />
-                      <Popover
-                        triggerRef={extraMenuTriggerRef}
-                        isOpen={extraMenuOpen}
-                        onOpenChange={() => setExtraMenuOpen(false)}
-                      >
-                        <Menu
-                          onMenuSelect={item => {
-                            switch (item) {
-                              case 'reset':
-                                onResetDashboard();
-                                break;
-                              case 'export':
-                                onExport();
-                                break;
-                              case 'import':
-                                onImport();
-                                break;
-                            }
-                            setExtraMenuOpen(false);
-                          }}
-                          items={[
-                            {
-                              name: 'reset',
-                              text: t('Reset to default'),
-                              disabled: isImporting,
-                            },
-                            Menu.line,
-                            {
-                              name: 'import',
-                              text: t('Import'),
-                              disabled: isImporting,
-                            },
-                            {
-                              name: 'export',
-                              text: t('Export'),
-                              disabled: isImporting,
-                            },
-                          ]}
-                        />
-                      </Popover>
-                    </>
-                  )}
+                  <MenuButton
+                    ref={extraMenuTriggerRef}
+                    onPress={() => setExtraMenuOpen(true)}
+                  />
+                  <Popover
+                    triggerRef={extraMenuTriggerRef}
+                    isOpen={extraMenuOpen}
+                    onOpenChange={() => setExtraMenuOpen(false)}
+                  >
+                    <Menu
+                      onMenuSelect={item => {
+                        switch (item) {
+                          case 'reset':
+                            onResetDashboard();
+                            break;
+                          case 'export':
+                            onExport();
+                            break;
+                          case 'import':
+                            onImport();
+                            break;
+                        }
+                        setExtraMenuOpen(false);
+                      }}
+                      items={[
+                        {
+                          name: 'reset',
+                          text: t('Reset to default'),
+                          disabled: isImporting,
+                        },
+                        Menu.line,
+                        {
+                          name: 'import',
+                          text: t('Import'),
+                          disabled: isImporting,
+                        },
+                        {
+                          name: 'export',
+                          text: t('Export'),
+                          disabled: isImporting,
+                        },
+                      ]}
+                    />
+                  </Popover>
                 </>
               )}
             </View>
@@ -549,6 +524,14 @@ export function Overview() {
                   <CustomReportListCards
                     isEditing={isEditing}
                     report={customReportMap.get(item.meta.id)}
+                    onRemove={() => onRemoveWidget(item.i)}
+                  />
+                ) : item.type === 'summary-card' ? (
+                  <SummaryCard
+                    widgetId={item.i}
+                    isEditing={isEditing}
+                    meta={item.meta}
+                    onMetaChange={newMeta => onMetaChange(item, newMeta)}
                     onRemove={() => onRemoveWidget(item.i)}
                   />
                 ) : null}

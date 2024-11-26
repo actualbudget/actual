@@ -26,6 +26,7 @@ export type RuleConditionOp =
   | 'contains'
   | 'doesNotContain'
   | 'hasTags'
+  | 'and'
   | 'matches';
 
 type FieldValueTypes = {
@@ -38,6 +39,8 @@ type FieldValueTypes = {
   payee_name: string;
   imported_payee: string;
   saved: string;
+  transfer: boolean;
+  parent: boolean;
   cleared: boolean;
   reconciled: boolean;
 };

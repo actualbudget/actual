@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { type ReactElement, useEffect } from 'react';
+import React, { type ReactElement, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import {
@@ -18,7 +18,6 @@ import { useAccounts } from '../hooks/useAccounts';
 import { useLocalPref } from '../hooks/useLocalPref';
 import { useMetaThemeColor } from '../hooks/useMetaThemeColor';
 import { useNavigate } from '../hooks/useNavigate';
-import { useResponsive } from '../ResponsiveProvider';
 import { theme } from '../style';
 import { getIsOutdated, getLatestVersion } from '../util/versions';
 
@@ -34,6 +33,8 @@ import { ManagePayeesPage } from './payees/ManagePayeesPage';
 import { Reports } from './reports';
 import { LoadingIndicator } from './reports/LoadingIndicator';
 import { NarrowAlternate, WideComponent } from './responsive';
+import { useResponsive } from './responsive/ResponsiveProvider';
+import { ScrollProvider } from './ScrollProvider';
 import { Settings } from './settings';
 import { FloatableSidebar } from './sidebar';
 import { Titlebar } from './Titlebar';
@@ -156,6 +157,8 @@ export function FinancesApp() {
     run();
   }, [lastUsedVersion, setLastUsedVersion]);
 
+  const scrollableRef = useRef<HTMLDivElement>(null);
+
   return (
     <View style={{ height: '100%' }}>
       <RouterBehaviors />
@@ -179,113 +182,119 @@ export function FinancesApp() {
             width: '100%',
           }}
         >
-          <View
-            style={{
-              flex: 1,
-              overflow: 'auto',
-              position: 'relative',
-            }}
+          <ScrollProvider
+            isDisabled={!isNarrowWidth}
+            scrollableRef={scrollableRef}
           >
-            <Titlebar
+            <View
+              ref={scrollableRef}
               style={{
-                WebkitAppRegion: 'drag',
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                zIndex: 1000,
+                flex: 1,
+                overflow: 'auto',
+                position: 'relative',
               }}
-            />
-            <Notifications />
-            <BankSyncStatus />
+            >
+              <Titlebar
+                style={{
+                  WebkitAppRegion: 'drag',
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  zIndex: 1000,
+                }}
+              />
+              <Notifications />
+              <BankSyncStatus />
+
+              <Routes>
+                <Route
+                  path="/"
+                  element={
+                    accountsLoaded ? (
+                      accounts.length > 0 ? (
+                        <Navigate to="/budget" replace />
+                      ) : (
+                        // If there are no accounts, we want to redirect the user to
+                        // the All Accounts screen which will prompt them to add an account
+                        <Navigate to="/accounts" replace />
+                      )
+                    ) : (
+                      <LoadingIndicator />
+                    )
+                  }
+                />
+
+                <Route path="/reports/*" element={<Reports />} />
+
+                <Route
+                  path="/budget"
+                  element={<NarrowAlternate name="Budget" />}
+                />
+
+                <Route
+                  path="/schedules"
+                  element={
+                    <NarrowNotSupported>
+                      <WideComponent name="Schedules" />
+                    </NarrowNotSupported>
+                  }
+                />
+
+                <Route path="/payees" element={<ManagePayeesPage />} />
+                <Route path="/rules" element={<ManageRulesPage />} />
+                <Route path="/settings" element={<Settings />} />
+
+                <Route
+                  path="/gocardless/link"
+                  element={
+                    <NarrowNotSupported>
+                      <WideComponent name="GoCardlessLink" />
+                    </NarrowNotSupported>
+                  }
+                />
+
+                <Route
+                  path="/accounts"
+                  element={<NarrowAlternate name="Accounts" />}
+                />
+
+                <Route
+                  path="/accounts/:id"
+                  element={<NarrowAlternate name="Account" />}
+                />
+
+                <Route
+                  path="/transactions/:transactionId"
+                  element={
+                    <WideNotSupported>
+                      <TransactionEdit />
+                    </WideNotSupported>
+                  }
+                />
+
+                <Route
+                  path="/categories/:id"
+                  element={
+                    <WideNotSupported>
+                      <Category />
+                    </WideNotSupported>
+                  }
+                />
+
+                {/* redirect all other traffic to the budget page */}
+                <Route path="/*" element={<Navigate to="/budget" replace />} />
+              </Routes>
+            </View>
 
             <Routes>
-              <Route
-                path="/"
-                element={
-                  accountsLoaded ? (
-                    accounts.length > 0 ? (
-                      <Navigate to="/budget" replace />
-                    ) : (
-                      // If there are no accounts, we want to redirect the user to
-                      // the All Accounts screen which will prompt them to add an account
-                      <Navigate to="/accounts" replace />
-                    )
-                  ) : (
-                    <LoadingIndicator />
-                  )
-                }
-              />
-
-              <Route path="/reports/*" element={<Reports />} />
-
-              <Route
-                path="/budget"
-                element={<NarrowAlternate name="Budget" />}
-              />
-
-              <Route
-                path="/schedules"
-                element={
-                  <NarrowNotSupported>
-                    <WideComponent name="Schedules" />
-                  </NarrowNotSupported>
-                }
-              />
-
-              <Route path="/payees" element={<ManagePayeesPage />} />
-              <Route path="/rules" element={<ManageRulesPage />} />
-              <Route path="/settings" element={<Settings />} />
-
-              <Route
-                path="/gocardless/link"
-                element={
-                  <NarrowNotSupported>
-                    <WideComponent name="GoCardlessLink" />
-                  </NarrowNotSupported>
-                }
-              />
-
-              <Route
-                path="/accounts"
-                element={<NarrowAlternate name="Accounts" />}
-              />
-
-              <Route
-                path="/accounts/:id"
-                element={<NarrowAlternate name="Account" />}
-              />
-
-              <Route
-                path="/transactions/:transactionId"
-                element={
-                  <WideNotSupported>
-                    <TransactionEdit />
-                  </WideNotSupported>
-                }
-              />
-
-              <Route
-                path="/categories/:id"
-                element={
-                  <WideNotSupported>
-                    <Category />
-                  </WideNotSupported>
-                }
-              />
-
-              {/* redirect all other traffic to the budget page */}
-              <Route path="/*" element={<Navigate to="/budget" replace />} />
+              <Route path="/budget" element={<MobileNavTabs />} />
+              <Route path="/accounts" element={<MobileNavTabs />} />
+              <Route path="/settings" element={<MobileNavTabs />} />
+              <Route path="/reports" element={<MobileNavTabs />} />
+              <Route path="*" element={null} />
             </Routes>
-          </View>
-
-          <Routes>
-            <Route path="/budget" element={<MobileNavTabs />} />
-            <Route path="/accounts" element={<MobileNavTabs />} />
-            <Route path="/settings" element={<MobileNavTabs />} />
-            <Route path="/reports" element={<MobileNavTabs />} />
-            <Route path="*" element={null} />
-          </Routes>
+          </ScrollProvider>
         </View>
       </View>
     </View>

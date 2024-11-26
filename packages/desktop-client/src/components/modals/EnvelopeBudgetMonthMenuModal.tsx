@@ -1,5 +1,6 @@
 // @ts-strict-ignore
 import React, { useState, type CSSProperties } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { css } from '@emotion/css';
 
@@ -56,6 +57,7 @@ export function EnvelopeBudgetMonthMenuModal({
   };
 
   const displayMonth = monthUtils.format(month, 'MMMM ‘yy');
+  const { t } = useTranslation();
 
   return (
     <Modal
@@ -113,7 +115,7 @@ export function EnvelopeBudgetMonthMenuModal({
                     height={20}
                     style={{ paddingRight: 5 }}
                   />
-                  Edit notes
+                  {t('Edit notes')}
                 </Button>
               </View>
               <View>
@@ -143,7 +145,7 @@ export function EnvelopeBudgetMonthMenuModal({
                       style={{ paddingRight: 5 }}
                     />
                   )}
-                  Actions
+                  {t('Actions')}
                 </Button>
               </View>
             </View>
@@ -155,14 +157,20 @@ export function EnvelopeBudgetMonthMenuModal({
                   onBudgetAction(month, 'copy-last');
                   close();
                   showUndoNotification({
-                    message: `${displayMonth} budgets have all been set to last month’s budgeted amounts.`,
+                    message: t(
+                      '{{displayMonth}} budgets have all been set to last month’s budgeted amounts.',
+                      { displayMonth },
+                    ),
                   });
                 }}
                 onSetBudgetsToZero={() => {
                   onBudgetAction(month, 'set-zero');
                   close();
                   showUndoNotification({
-                    message: `${displayMonth} budgets have all been set to zero.`,
+                    message: t(
+                      '{{displayMonth}} budgets have all been set to zero.',
+                      { displayMonth },
+                    ),
                   });
                 }}
                 onSetMonthsAverage={numberOfMonths => {
@@ -180,21 +188,30 @@ export function EnvelopeBudgetMonthMenuModal({
                   onBudgetAction(month, 'apply-goal-template');
                   close();
                   showUndoNotification({
-                    message: `${displayMonth} budget templates have been applied.`,
+                    message: t(
+                      '{{displayMonth}} budget templates have been applied.',
+                      { displayMonth },
+                    ),
                   });
                 }}
                 onOverwriteWithBudgetTemplates={() => {
                   onBudgetAction(month, 'overwrite-goal-template');
                   close();
                   showUndoNotification({
-                    message: `${displayMonth} budget templates have been overwritten.`,
+                    message: t(
+                      '{{displayMonth}} budget templates have been overwritten.',
+                      { displayMonth },
+                    ),
                   });
                 }}
                 onEndOfMonthCleanup={() => {
                   onBudgetAction(month, 'cleanup-goal-template');
                   close();
                   showUndoNotification({
-                    message: `${displayMonth} end-of-month cleanup templates have been applied.`,
+                    message: t(
+                      '{{displayMonth}} end-of-month cleanup templates have been applied.',
+                      { displayMonth },
+                    ),
                   });
                 }}
               />

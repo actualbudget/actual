@@ -54,6 +54,7 @@ const filterFields = [
   'cleared',
   'reconciled',
   'saved',
+  'transfer',
 ].map(field => [field, mapField(field)]);
 
 function ConfigureField({
