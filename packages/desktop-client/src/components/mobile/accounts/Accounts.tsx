@@ -197,8 +197,8 @@ function AccountList({
 }: AccountListProps) {
   const failedAccounts = useFailedAccounts();
   const syncingAccountIds = useSelector(state => state.account.accountsSyncing);
-  const budgetedAccounts = accounts.filter(account => account.offbudget === 0);
-  const offbudgetAccounts = accounts.filter(account => account.offbudget === 1);
+  const onBudgetAccounts = accounts.filter(account => account.offbudget === 0);
+  const offBudgetAccounts = accounts.filter(account => account.offbudget === 1);
 
   return (
     <Page
@@ -225,10 +225,10 @@ function AccountList({
       {accounts.length === 0 && <EmptyMessage />}
       <PullToRefresh onRefresh={onSync}>
         <View aria-label="Account list" style={{ margin: 10 }}>
-          {budgetedAccounts.length > 0 && (
+          {onBudgetAccounts.length > 0 && (
             <AccountHeader name="On-budget" amount={getOnBudgetBalance()} />
           )}
-          {budgetedAccounts.map(acct => (
+          {onBudgetAccounts.map(acct => (
             <AccountCard
               account={acct}
               key={acct.id}
@@ -241,14 +241,14 @@ function AccountList({
             />
           ))}
 
-          {offbudgetAccounts.length > 0 && (
+          {offBudgetAccounts.length > 0 && (
             <AccountHeader
               name="Off-budget"
               amount={getOffBudgetBalance()}
               style={{ marginTop: 30 }}
             />
           )}
-          {offbudgetAccounts.map(acct => (
+          {offBudgetAccounts.map(acct => (
             <AccountCard
               account={acct}
               key={acct.id}
