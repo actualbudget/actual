@@ -2,7 +2,7 @@
 import { memo, useRef, useState, type CSSProperties } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
-import { type PayeeEntity } from 'loot-core/src/types/models';
+import { type PayeeEntity } from 'loot-core-shared/types/models';
 
 import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { useSelectedDispatch } from '../../hooks/useSelected';

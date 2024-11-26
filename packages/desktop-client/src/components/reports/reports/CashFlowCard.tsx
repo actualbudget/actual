@@ -1,10 +1,9 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { type CashFlowWidget } from 'loot-core-shared/types/models';
+import { integerToCurrency } from 'loot-core-shared/util';
 import { Bar, BarChart, LabelList, ResponsiveContainer } from 'recharts';
-
-import { integerToCurrency } from 'loot-core/src/shared/util';
-import { type CashFlowWidget } from 'loot-core/src/types/models';
 
 import { theme } from '../../../style';
 import { View } from '../../common/View';

@@ -1,9 +1,10 @@
 import React, { useRef, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
-import { send, sendCatch } from 'loot-core/src/platform/client/fetch';
-import { type TransactionFilterEntity } from 'loot-core/types/models';
-import { type RuleConditionEntity } from 'loot-core/types/models/rule';
+import { type TransactionFilterEntity } from 'loot-core-shared/types/models';
+import { type RuleConditionEntity } from 'loot-core-shared/types/models/rule';
+
+import { send, sendCatch } from 'loot-core/platform/client/fetch';
 
 import { SvgExpandArrow } from '../../icons/v0';
 import { Button } from '../common/Button2';

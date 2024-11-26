@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, type DependencyList } from 'react';
 
-import { type Query } from '../shared/query';
+import { type Query } from 'loot-core-shared/query';
 
 import { liveQuery, type LiveQuery } from './query-helpers';
 

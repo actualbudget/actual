@@ -6,18 +6,16 @@ import { useDispatch } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 
 import {
-  addNotification,
-  removeNotification,
-} from 'loot-core/src/client/actions';
-import { useDashboard } from 'loot-core/src/client/data-hooks/dashboard';
-import { useReports } from 'loot-core/src/client/data-hooks/reports';
-import { send } from 'loot-core/src/platform/client/fetch';
-import {
   type CustomReportWidget,
   type ExportImportDashboard,
   type MarkdownWidget,
   type Widget,
-} from 'loot-core/src/types/models';
+} from 'loot-core-shared/types/models';
+
+import { addNotification, removeNotification } from 'loot-core/client/actions';
+import { useDashboard } from 'loot-core/client/data-hooks/dashboard';
+import { useReports } from 'loot-core/client/data-hooks/reports';
+import { send } from 'loot-core/platform/client/fetch';
 
 import { useAccounts } from '../../hooks/useAccounts';
 import { useNavigate } from '../../hooks/useNavigate';

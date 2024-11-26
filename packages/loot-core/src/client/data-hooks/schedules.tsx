@@ -9,14 +9,14 @@ import React, {
 } from 'react';
 
 import { useSyncedPref } from '@actual-app/web/src/hooks/useSyncedPref';
-
-import { q, type Query } from '../../shared/query';
-import { getHasTransactionsQuery, getStatus } from '../../shared/schedules';
+import { q, type Query } from 'loot-core-shared/query';
+import { getHasTransactionsQuery, getStatus } from 'loot-core-shared/schedules';
 import {
   type TransactionEntity,
   type ScheduleEntity,
   type AccountEntity,
-} from '../../types/models';
+} from 'loot-core-shared/types/models';
+
 import { accountFilter } from '../queries';
 import { type LiveQuery, liveQuery } from '../query-helpers';
 

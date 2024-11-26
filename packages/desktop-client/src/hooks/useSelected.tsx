@@ -11,9 +11,9 @@ import React, {
 } from 'react';
 import { useSelector } from 'react-redux';
 
-import { type State } from 'loot-core/src/client/state-types';
-import { listen } from 'loot-core/src/platform/client/fetch';
-import * as undo from 'loot-core/src/platform/client/undo';
+import { type State } from 'loot-core/client/state-types';
+import { listen } from 'loot-core/platform/client/fetch';
+import * as undo from 'loot-core/platform/client/undo';
 import { type UndoState } from 'loot-core/src/server/undo';
 
 type Range<T> = { start: T; end: T | null };

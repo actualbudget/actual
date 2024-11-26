@@ -7,8 +7,7 @@ import React, {
 import { NavLink, useMatch } from 'react-router-dom';
 
 import { css } from '@emotion/css';
-
-import { type CustomReportEntity } from 'loot-core/types/models/reports';
+import { type CustomReportEntity } from 'loot-core-shared/types/models/reports';
 
 import { useNavigate } from '../../hooks/useNavigate';
 import { styles } from '../../style';

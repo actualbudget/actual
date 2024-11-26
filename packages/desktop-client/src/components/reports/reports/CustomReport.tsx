@@ -3,19 +3,19 @@ import { useTranslation } from 'react-i18next';
 import { useLocation, useParams } from 'react-router-dom';
 
 import * as d from 'date-fns';
-
-import { useReport as useCustomReport } from 'loot-core/src/client/data-hooks/reports';
-import { calculateHasWarning } from 'loot-core/src/client/reports';
-import { send } from 'loot-core/src/platform/client/fetch';
-import * as monthUtils from 'loot-core/src/shared/months';
-import { amountToCurrency } from 'loot-core/src/shared/util';
-import { type CategoryEntity } from 'loot-core/types/models/category';
+import * as monthUtils from 'loot-core-shared/months';
+import { type CategoryEntity } from 'loot-core-shared/types/models/category';
 import {
   type balanceTypeOpType,
   type CustomReportEntity,
   type DataEntity,
-} from 'loot-core/types/models/reports';
-import { type RuleConditionEntity } from 'loot-core/types/models/rule';
+} from 'loot-core-shared/types/models/reports';
+import { type RuleConditionEntity } from 'loot-core-shared/types/models/rule';
+import { amountToCurrency } from 'loot-core-shared/util';
+
+import { useReport as useCustomReport } from 'loot-core/client/data-hooks/reports';
+import { calculateHasWarning } from 'loot-core/client/reports';
+import { send } from 'loot-core/platform/client/fetch';
 
 import { useAccounts } from '../../../hooks/useAccounts';
 import { useCategories } from '../../../hooks/useCategories';

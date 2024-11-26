@@ -4,6 +4,10 @@ import { useTranslation } from 'react-i18next';
 import { css } from '@emotion/css';
 import * as d from 'date-fns';
 import {
+  amountToCurrency,
+  amountToCurrencyNoDecimal,
+} from 'loot-core-shared/util';
+import {
   Bar,
   CartesianGrid,
   ComposedChart,
@@ -15,11 +19,6 @@ import {
   YAxis,
   type TooltipProps,
 } from 'recharts';
-
-import {
-  amountToCurrency,
-  amountToCurrencyNoDecimal,
-} from 'loot-core/src/shared/util';
 
 import { usePrivacyMode } from '../../../hooks/usePrivacyMode';
 import { theme } from '../../../style';

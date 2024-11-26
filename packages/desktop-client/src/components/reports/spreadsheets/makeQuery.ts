@@ -1,4 +1,4 @@
-import { q } from 'loot-core/src/shared/query';
+import { q } from 'loot-core-shared/query';
 
 import { ReportOptions } from '../ReportOptions';
 

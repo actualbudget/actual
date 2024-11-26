@@ -1,9 +1,9 @@
 import React, { useRef, useState, type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { mapField, friendlyOp } from 'loot-core/src/shared/rules';
-import { integerToCurrency } from 'loot-core/src/shared/util';
-import { type RuleConditionEntity } from 'loot-core/src/types/models';
+import { mapField, friendlyOp } from 'loot-core-shared/rules';
+import { type RuleConditionEntity } from 'loot-core-shared/types/models';
+import { integerToCurrency } from 'loot-core-shared/util';
 
 import { SvgDelete } from '../../icons/v0';
 import { theme } from '../../style';

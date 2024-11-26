@@ -4,9 +4,9 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 
 import { t } from 'i18next';
+import { type AccountEntity } from 'loot-core-shared/types/models';
 
 import { unlinkAccount } from 'loot-core/client/actions';
-import { type AccountEntity } from 'loot-core/types/models';
 
 import { authorizeBank } from '../../gocardless';
 import { useAccounts } from '../../hooks/useAccounts';

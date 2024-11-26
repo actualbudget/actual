@@ -1,12 +1,12 @@
 // @ts-strict-ignore
-import { v4 as uuidv4 } from 'uuid';
 
-import * as monthUtils from '../shared/months';
+import * as monthUtils from 'loot-core-shared/months';
 import type {
   _SyncFields,
   AccountEntity,
   TransactionEntity,
-} from '../types/models';
+} from 'loot-core-shared/types/models';
+import { v4 as uuidv4 } from 'uuid';
 
 import { random } from './random';
 

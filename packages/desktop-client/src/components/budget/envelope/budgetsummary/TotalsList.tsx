@@ -1,6 +1,6 @@
 import React, { type CSSProperties } from 'react';
 
-import { envelopeBudget } from 'loot-core/src/client/queries';
+import { envelopeBudget } from 'loot-core/client/queries';
 
 import { styles } from '../../../../style';
 import { AlignedText } from '../../../common/AlignedText';

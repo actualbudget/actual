@@ -1,14 +1,14 @@
 import * as d from 'date-fns';
-
-import { runQuery } from 'loot-core/src/client/query-helpers';
-import { type useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
-import { send } from 'loot-core/src/platform/client/fetch';
-import * as monthUtils from 'loot-core/src/shared/months';
-import { q } from 'loot-core/src/shared/query';
+import * as monthUtils from 'loot-core-shared/months';
+import { q } from 'loot-core-shared/query';
 import {
   type SummaryContent,
   type RuleConditionEntity,
-} from 'loot-core/types/models';
+} from 'loot-core-shared/types/models';
+
+import { runQuery } from 'loot-core/client/query-helpers';
+import { type useSpreadsheet } from 'loot-core/client/SpreadsheetProvider';
+import { send } from 'loot-core/platform/client/fetch';
 
 export function summarySpreadsheet(
   start: string,

@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
 
-import { type RuleConditionEntity } from 'loot-core/types/models/rule';
+import { type RuleConditionEntity } from 'loot-core-shared/types/models/rule';
 
 export function useFilters<T extends RuleConditionEntity>(
   initialConditions: T[] = [],

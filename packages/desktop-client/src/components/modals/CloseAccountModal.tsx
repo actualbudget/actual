@@ -4,13 +4,14 @@ import { Form } from 'react-aria-components';
 import { useTranslation } from 'react-i18next'; // Import useTranslation
 import { useDispatch } from 'react-redux';
 
+import { type AccountEntity } from 'loot-core-shared/types/models';
+import { integerToCurrency } from 'loot-core-shared/util';
+
 import {
   closeAccount,
   forceCloseAccount,
   pushModal,
 } from 'loot-core/client/actions';
-import { integerToCurrency } from 'loot-core/src/shared/util';
-import { type AccountEntity } from 'loot-core/src/types/models';
 
 import { useAccounts } from '../../hooks/useAccounts';
 import { useCategories } from '../../hooks/useCategories';

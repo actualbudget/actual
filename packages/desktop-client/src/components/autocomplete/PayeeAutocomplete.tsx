@@ -15,14 +15,14 @@ import { Trans, useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 
 import { css, cx } from '@emotion/css';
-
-import { createPayee } from 'loot-core/src/client/actions/queries';
-import { getActivePayees } from 'loot-core/src/client/reducers/queries';
-import { getNormalisedString } from 'loot-core/src/shared/normalisation';
+import { getNormalisedString } from 'loot-core-shared/normalisation';
 import {
   type AccountEntity,
   type PayeeEntity,
-} from 'loot-core/src/types/models';
+} from 'loot-core-shared/types/models';
+
+import { createPayee } from 'loot-core/client/actions/queries';
+import { getActivePayees } from 'loot-core/client/reducers/queries';
 
 import { useAccounts } from '../../hooks/useAccounts';
 import { useCommonPayees, usePayees } from '../../hooks/usePayees';

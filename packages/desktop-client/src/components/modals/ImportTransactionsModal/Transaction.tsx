@@ -1,7 +1,7 @@
 import React, { type ComponentProps, useMemo } from 'react';
 
-import { amountToCurrency } from 'loot-core/src/shared/util';
-import { type CategoryEntity } from 'loot-core/types/models';
+import { type CategoryEntity } from 'loot-core-shared/types/models';
+import { amountToCurrency } from 'loot-core-shared/util';
 
 import { SvgDownAndRightArrow } from '../../../icons/v2';
 import { theme, styles } from '../../../style';

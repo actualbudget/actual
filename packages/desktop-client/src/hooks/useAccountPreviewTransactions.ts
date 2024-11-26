@@ -1,11 +1,12 @@
 import { useMemo } from 'react';
 
-import { usePreviewTransactions } from 'loot-core/client/data-hooks/transactions';
 import {
   type AccountEntity,
   type PayeeEntity,
   type TransactionEntity,
-} from 'loot-core/types/models';
+} from 'loot-core-shared/types/models';
+
+import { usePreviewTransactions } from 'loot-core/client/data-hooks/transactions';
 
 import { useAccounts } from './useAccounts';
 import { usePayees } from './usePayees';

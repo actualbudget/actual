@@ -5,8 +5,8 @@ import { useDispatch } from 'react-redux';
 import { css } from '@emotion/css';
 import { Resizable } from 're-resizable';
 
-import { replaceModal } from 'loot-core/src/client/actions';
-import * as Platform from 'loot-core/src/client/platform';
+import { replaceModal } from 'loot-core/client/actions';
+import * as Platform from 'loot-core/client/platform';
 
 import { useGlobalPref } from '../../hooks/useGlobalPref';
 import { useLocalPref } from '../../hooks/useLocalPref';

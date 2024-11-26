@@ -3,6 +3,7 @@ import React, { type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { css } from '@emotion/css';
+import { amountToCurrencyNoDecimal } from 'loot-core-shared/util';
 import {
   AreaChart,
   Area,
@@ -12,8 +13,6 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts';
-
-import { amountToCurrencyNoDecimal } from 'loot-core/shared/util';
 
 import { usePrivacyMode } from '../../../hooks/usePrivacyMode';
 import { theme } from '../../../style';

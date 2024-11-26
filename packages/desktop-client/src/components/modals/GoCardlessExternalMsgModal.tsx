@@ -3,12 +3,13 @@ import React, { useEffect, useState, useRef } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 
-import { pushModal } from 'loot-core/src/client/actions/modals';
-import { sendCatch } from 'loot-core/src/platform/client/fetch';
 import {
   type GoCardlessInstitution,
   type GoCardlessToken,
-} from 'loot-core/src/types/models';
+} from 'loot-core-shared/types/models';
+
+import { pushModal } from 'loot-core/client/actions/modals';
+import { sendCatch } from 'loot-core/platform/client/fetch';
 
 import { useGoCardlessStatus } from '../../hooks/useGoCardlessStatus';
 import { AnimatedLoading } from '../../icons/AnimatedLoading';

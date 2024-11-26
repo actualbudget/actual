@@ -4,14 +4,14 @@ import { Routes, Route, useLocation } from 'react-router-dom';
 
 import { css } from '@emotion/css';
 import { t } from 'i18next';
-
-import * as Platform from 'loot-core/src/client/platform';
-import * as queries from 'loot-core/src/client/queries';
-import { listen } from 'loot-core/src/platform/client/fetch';
 import {
   isDevelopmentEnvironment,
   isElectron,
-} from 'loot-core/src/shared/environment';
+} from 'loot-core-shared/environment';
+
+import * as Platform from 'loot-core/client/platform';
+import * as queries from 'loot-core/client/queries';
+import { listen } from 'loot-core/platform/client/fetch';
 
 import { useActions } from '../hooks/useActions';
 import { useGlobalPref } from '../hooks/useGlobalPref';

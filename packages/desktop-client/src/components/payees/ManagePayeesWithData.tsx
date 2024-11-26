@@ -1,16 +1,20 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
+import { type UndoState } from 'loot-core-server/undo';
+import {
+  type NewRuleEntity,
+  type PayeeEntity,
+} from 'loot-core-shared/types/models';
+import { applyChanges, type Diff } from 'loot-core-shared/util';
+
 import {
   getPayees,
   initiallyLoadPayees,
   pushModal,
   setLastUndoState,
 } from 'loot-core/client/actions';
-import { type UndoState } from 'loot-core/server/undo';
-import { send, listen } from 'loot-core/src/platform/client/fetch';
-import { applyChanges, type Diff } from 'loot-core/src/shared/util';
-import { type NewRuleEntity, type PayeeEntity } from 'loot-core/types/models';
+import { send, listen } from 'loot-core/platform/client/fetch';
 
 import { usePayees } from '../../hooks/usePayees';
 

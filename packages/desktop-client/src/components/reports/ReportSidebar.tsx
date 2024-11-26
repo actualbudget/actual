@@ -1,13 +1,12 @@
 import React, { useMemo, useRef, useState } from 'react';
 
 import { t } from 'i18next';
-
-import * as monthUtils from 'loot-core/src/shared/months';
-import { type CategoryEntity } from 'loot-core/types/models/category';
-import { type CategoryGroupEntity } from 'loot-core/types/models/category-group';
-import { type TimeFrame } from 'loot-core/types/models/dashboard';
-import { type CustomReportEntity } from 'loot-core/types/models/reports';
-import { type SyncedPrefs } from 'loot-core/types/prefs';
+import * as monthUtils from 'loot-core-shared/months';
+import { type CategoryEntity } from 'loot-core-shared/types/models/category';
+import { type CategoryGroupEntity } from 'loot-core-shared/types/models/category-group';
+import { type TimeFrame } from 'loot-core-shared/types/models/dashboard';
+import { type CustomReportEntity } from 'loot-core-shared/types/models/reports';
+import { type SyncedPrefs } from 'loot-core-shared/types/prefs';
 
 import { styles } from '../../style/styles';
 import { theme } from '../../style/theme';

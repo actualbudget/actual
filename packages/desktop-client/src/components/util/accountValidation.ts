@@ -1,6 +1,5 @@
 import { t } from 'i18next';
-
-import { type AccountEntity } from 'loot-core/types/models';
+import { type AccountEntity } from 'loot-core-shared/types/models';
 
 export function validateAccountName(
   newAccountName: string,

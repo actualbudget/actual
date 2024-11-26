@@ -4,9 +4,9 @@ import { Form } from 'react-aria-components';
 import { useDispatch } from 'react-redux';
 
 import { t } from 'i18next';
+import { toRelaxedNumber } from 'loot-core-shared/util';
 
 import { closeModal, createAccount } from 'loot-core/client/actions';
-import { toRelaxedNumber } from 'loot-core/src/shared/util';
 
 import * as useAccounts from '../../hooks/useAccounts';
 import { useNavigate } from '../../hooks/useNavigate';

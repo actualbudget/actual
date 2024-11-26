@@ -2,6 +2,8 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
+import * as monthUtils from 'loot-core-shared/months';
+
 import {
   applyBudgetAction,
   collapseModals,
@@ -17,9 +19,8 @@ import {
   updateGroup,
   sync,
 } from 'loot-core/client/actions';
-import { useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
-import { send, listen } from 'loot-core/src/platform/client/fetch';
-import * as monthUtils from 'loot-core/src/shared/months';
+import { useSpreadsheet } from 'loot-core/client/SpreadsheetProvider';
+import { send, listen } from 'loot-core/platform/client/fetch';
 
 import { useCategories } from '../../../hooks/useCategories';
 import { useLocalPref } from '../../../hooks/useLocalPref';

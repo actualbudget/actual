@@ -3,17 +3,8 @@ import { useDispatch } from 'react-redux';
 
 import { css } from '@emotion/css';
 import { t } from 'i18next';
-import { v4 as uuid } from 'uuid';
-
-import {
-  initiallyLoadPayees,
-  setUndoEnabled,
-} from 'loot-core/src/client/actions/queries';
-import { useSchedules } from 'loot-core/src/client/data-hooks/schedules';
-import { runQuery } from 'loot-core/src/client/query-helpers';
-import { send } from 'loot-core/src/platform/client/fetch';
-import * as monthUtils from 'loot-core/src/shared/months';
-import { q } from 'loot-core/src/shared/query';
+import * as monthUtils from 'loot-core-shared/months';
+import { q } from 'loot-core-shared/query';
 import {
   mapField,
   friendlyOp,
@@ -25,12 +16,21 @@ import {
   ALLOCATION_METHODS,
   isValidOp,
   getValidOps,
-} from 'loot-core/src/shared/rules';
+} from 'loot-core-shared/rules';
 import {
   integerToCurrency,
   integerToAmount,
   amountToInteger,
-} from 'loot-core/src/shared/util';
+} from 'loot-core-shared/util';
+import { v4 as uuid } from 'uuid';
+
+import {
+  initiallyLoadPayees,
+  setUndoEnabled,
+} from 'loot-core/client/actions/queries';
+import { useSchedules } from 'loot-core/client/data-hooks/schedules';
+import { runQuery } from 'loot-core/client/query-helpers';
+import { send } from 'loot-core/platform/client/fetch';
 
 import { useDateFormat } from '../../hooks/useDateFormat';
 import { useFeatureFlag } from '../../hooks/useFeatureFlag';

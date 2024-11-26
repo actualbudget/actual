@@ -1,6 +1,5 @@
 import { test, expect } from '@playwright/test';
-
-import * as monthUtils from 'loot-core/src/shared/months';
+import * as monthUtils from 'loot-core-shared/months';
 
 import { ConfigurationPage } from './page-models/configuration-page';
 import { MobileNavigation } from './page-models/mobile-navigation';

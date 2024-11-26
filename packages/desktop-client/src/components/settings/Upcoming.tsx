@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Trans } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 
-import { type SyncedPrefs } from 'loot-core/types/prefs';
+import { type SyncedPrefs } from 'loot-core-shared/types/prefs';
 
 import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { useSyncedPref } from '../../hooks/useSyncedPref';

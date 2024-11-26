@@ -2,10 +2,11 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { moveAccount } from 'loot-core/src/client/actions';
-import * as queries from 'loot-core/src/client/queries';
-import { type State } from 'loot-core/src/client/state-types';
-import { type AccountEntity } from 'loot-core/types/models';
+import { type AccountEntity } from 'loot-core-shared/types/models';
+
+import { moveAccount } from 'loot-core/client/actions';
+import * as queries from 'loot-core/client/queries';
+import { type State } from 'loot-core/client/state-types';
 
 import { useAccounts } from '../../hooks/useAccounts';
 import { useBudgetedAccounts } from '../../hooks/useBudgetedAccounts';

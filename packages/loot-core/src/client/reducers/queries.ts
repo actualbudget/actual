@@ -1,7 +1,7 @@
 // @ts-strict-ignore
+import { groupById } from 'loot-core-shared/util';
 import memoizeOne from 'memoize-one';
 
-import { groupById } from '../../shared/util';
 import { type AccountEntity, type PayeeEntity } from '../../types/models';
 import * as constants from '../constants';
 import type { Action } from '../state-types';

@@ -1,10 +1,10 @@
 // @ts-strict-ignore
 import { type Store } from 'redux';
 
-import * as sharedListeners from 'loot-core/src/client/shared-listeners';
-import type { State } from 'loot-core/src/client/state-types';
-import { listen } from 'loot-core/src/platform/client/fetch';
-import * as undo from 'loot-core/src/platform/client/undo';
+import * as sharedListeners from 'loot-core/client/shared-listeners';
+import type { State } from 'loot-core/client/state-types';
+import { listen } from 'loot-core/platform/client/fetch';
+import * as undo from 'loot-core/platform/client/undo';
 
 import { type BoundActions } from './hooks/useActions';
 

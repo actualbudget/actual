@@ -1,6 +1,10 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
+import * as monthUtils from 'loot-core-shared/months';
+import { q } from 'loot-core-shared/query';
+import { isPreviewId } from 'loot-core-shared/transactions';
+
 import { getPayees } from 'loot-core/client/actions';
 import {
   useTransactions,
@@ -8,9 +12,6 @@ import {
 } from 'loot-core/client/data-hooks/transactions';
 import * as queries from 'loot-core/client/queries';
 import { listen } from 'loot-core/platform/client/fetch';
-import * as monthUtils from 'loot-core/shared/months';
-import { q } from 'loot-core/shared/query';
-import { isPreviewId } from 'loot-core/shared/transactions';
 
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import { useNavigate } from '../../../hooks/useNavigate';

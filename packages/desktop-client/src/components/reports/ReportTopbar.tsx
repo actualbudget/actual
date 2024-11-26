@@ -1,9 +1,8 @@
 import React, { type ComponentProps } from 'react';
 
 import { t } from 'i18next';
-
-import { type CustomReportEntity } from 'loot-core/types/models/reports';
-import { type RuleConditionEntity } from 'loot-core/types/models/rule';
+import { type CustomReportEntity } from 'loot-core-shared/types/models/reports';
+import { type RuleConditionEntity } from 'loot-core-shared/types/models/rule';
 
 import {
   SvgCalculator,

@@ -11,8 +11,8 @@ import {
 } from 'react-router-dom';
 
 import { addNotification, sync } from 'loot-core/client/actions';
-import { type State } from 'loot-core/src/client/state-types';
-import * as undo from 'loot-core/src/platform/client/undo';
+import { type State } from 'loot-core/client/state-types';
+import * as undo from 'loot-core/platform/client/undo';
 
 import { useAccounts } from '../hooks/useAccounts';
 import { useLocalPref } from '../hooks/useLocalPref';

@@ -10,16 +10,17 @@ import React, {
 import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 
+import { getNormalisedString } from 'loot-core-shared/normalisation';
+import { q } from 'loot-core-shared/query';
+import { mapField, friendlyOp } from 'loot-core-shared/rules';
+import { describeSchedule } from 'loot-core-shared/schedules';
+import { type NewRuleEntity } from 'loot-core-shared/types/models';
+
+import { pushModal } from 'loot-core/client/actions/modals';
+import { initiallyLoadPayees } from 'loot-core/client/actions/queries';
 import { useSchedules } from 'loot-core/client/data-hooks/schedules';
-import { q } from 'loot-core/shared/query';
-import { pushModal } from 'loot-core/src/client/actions/modals';
-import { initiallyLoadPayees } from 'loot-core/src/client/actions/queries';
-import { send } from 'loot-core/src/platform/client/fetch';
-import * as undo from 'loot-core/src/platform/client/undo';
-import { getNormalisedString } from 'loot-core/src/shared/normalisation';
-import { mapField, friendlyOp } from 'loot-core/src/shared/rules';
-import { describeSchedule } from 'loot-core/src/shared/schedules';
-import { type NewRuleEntity } from 'loot-core/src/types/models';
+import { send } from 'loot-core/platform/client/fetch';
+import * as undo from 'loot-core/platform/client/undo';
 
 import { useAccounts } from '../hooks/useAccounts';
 import { useCategories } from '../hooks/useCategories';

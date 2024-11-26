@@ -8,11 +8,14 @@ import {
 } from 'react';
 
 import { t } from 'i18next';
+import * as monthUtils from 'loot-core-shared/months';
+import { getRecurringDescription } from 'loot-core-shared/schedules';
+import {
+  type RecurConfig,
+  type RecurPattern,
+} from 'loot-core-shared/types/models';
 
-import { sendCatch } from 'loot-core/src/platform/client/fetch';
-import * as monthUtils from 'loot-core/src/shared/months';
-import { getRecurringDescription } from 'loot-core/src/shared/schedules';
-import { type RecurConfig, type RecurPattern } from 'loot-core/types/models';
+import { sendCatch } from 'loot-core/platform/client/fetch';
 import { type WithRequired } from 'loot-core/types/util';
 
 import { useDateFormat } from '../../hooks/useDateFormat';

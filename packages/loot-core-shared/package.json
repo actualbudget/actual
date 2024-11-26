@@ -1,0 +1,24 @@
+{
+  "name": "loot-core-shared",
+  "version": "0.0.2",
+  "license": "MIT",
+  "description": "",
+  "scripts": {
+    "build:node": "cross-env NODE_ENV=production webpack --config ./webpack/webpack.desktop.config.js",
+    "build:api": "cross-env NODE_ENV=development ./bin/build-api",
+    "build:browser": "cross-env NODE_ENV=production ./bin/build-browser",
+    "generate:i18n": "i18next",
+    "test": "npm-run-all -cp 'test:*'",
+    "test:node": "jest -c jest.config.js",
+    "test:web": "jest -c jest.web.config.js"
+  },
+  "devDependencies": {
+    "@swc/core": "^1.5.3",
+    "@swc/jest": "^0.2.36",
+    "@types/jest": "^27.5.2",
+    "@types/uuid": "^9.0.2",
+    "jest": "^27.5.1",
+    "ts-protoc-gen": "^0.15.0",
+    "typescript": "^5.5.4"
+  }
+}

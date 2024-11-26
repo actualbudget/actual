@@ -1,8 +1,7 @@
 import React, { type Ref, useRef, useState } from 'react';
 
 import { debounce } from 'debounce';
-
-import { amountToCurrency } from 'loot-core/shared/util';
+import { amountToCurrency } from 'loot-core-shared/util';
 
 import { useMergedRefs } from '../../hooks/useMergedRefs';
 import { useResizeObserver } from '../../hooks/useResizeObserver';

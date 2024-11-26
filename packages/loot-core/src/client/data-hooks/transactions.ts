@@ -1,15 +1,15 @@
 import { useEffect, useRef, useState, useMemo } from 'react';
 
 import debounce from 'lodash/debounce';
-
-import { send } from '../../platform/client/fetch';
-import { type Query } from '../../shared/query';
-import { getScheduledAmount } from '../../shared/schedules';
-import { ungroupTransactions } from '../../shared/transactions';
+import { type Query } from 'loot-core-shared/query';
+import { getScheduledAmount } from 'loot-core-shared/schedules';
+import { ungroupTransactions } from 'loot-core-shared/transactions';
 import {
   type ScheduleEntity,
   type TransactionEntity,
-} from '../../types/models';
+} from 'loot-core-shared/types/models';
+
+import { send } from '../../platform/client/fetch';
 import * as queries from '../queries';
 import { type PagedQuery, pagedQuery } from '../query-helpers';
 

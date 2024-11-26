@@ -4,6 +4,15 @@ import { useTranslation } from 'react-i18next';
 
 import { css } from '@emotion/css';
 import {
+  type balanceTypeOpType,
+  type DataEntity,
+} from 'loot-core-shared/types/models/reports';
+import { type RuleConditionEntity } from 'loot-core-shared/types/models/rule';
+import {
+  amountToCurrency,
+  amountToCurrencyNoDecimal,
+} from 'loot-core-shared/util';
+import {
   BarChart,
   Bar,
   CartesianGrid,
@@ -15,16 +24,6 @@ import {
   LabelList,
   ResponsiveContainer,
 } from 'recharts';
-
-import {
-  amountToCurrency,
-  amountToCurrencyNoDecimal,
-} from 'loot-core/src/shared/util';
-import {
-  type balanceTypeOpType,
-  type DataEntity,
-} from 'loot-core/src/types/models/reports';
-import { type RuleConditionEntity } from 'loot-core/types/models/rule';
 
 import { useAccounts } from '../../../hooks/useAccounts';
 import { useCategories } from '../../../hooks/useCategories';

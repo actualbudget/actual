@@ -2,10 +2,9 @@
 import React, { memo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { friendlyOp } from 'loot-core-shared/rules';
+import { type RuleEntity } from 'loot-core-shared/types/models';
 import { v4 as uuid } from 'uuid';
-
-import { friendlyOp } from 'loot-core/src/shared/rules';
-import { type RuleEntity } from 'loot-core/src/types/models';
 
 import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { useSelectedDispatch } from '../../hooks/useSelected';

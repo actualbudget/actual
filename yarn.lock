@@ -13353,6 +13353,88 @@ __metadata:
   languageName: node
   linkType: hard
 
+"loot-core-server@npm:*, loot-core-server@workspace:packages/loot-core-server":
+  version: 0.0.0-use.local
+  resolution: "loot-core-server@workspace:packages/loot-core-server"
+  dependencies:
+    "@actual-app/api": "npm:*"
+    "@actual-app/crdt": "workspace:^"
+    "@jlongster/sql.js": "npm:^1.6.7"
+    "@rschedule/core": "npm:^1.5.0"
+    "@rschedule/json-tools": "npm:^1.5.0"
+    "@rschedule/standard-date-adapter": "npm:^1.5.0"
+    "@swc/core": "npm:^1.5.3"
+    "@swc/helpers": "npm:^0.5.11"
+    "@swc/jest": "npm:^0.2.36"
+    "@types/adm-zip": "npm:^0.5.0"
+    "@types/better-sqlite3": "npm:^7.6.8"
+    "@types/jest": "npm:^27.5.2"
+    "@types/jlongster__sql.js": "npm:@types/sql.js@latest"
+    "@types/pegjs": "npm:^0.10.3"
+    "@types/react-redux": "npm:^7.1.25"
+    "@types/uuid": "npm:^9.0.2"
+    "@types/webpack": "npm:^5.28.5"
+    "@types/webpack-bundle-analyzer": "npm:^4.6.3"
+    absurd-sql: "npm:0.0.54"
+    adm-zip: "npm:^0.5.10"
+    assert: "npm:^2.1.0"
+    better-sqlite3: "npm:^9.6.0"
+    browserify-zlib: "npm:^0.2.0"
+    buffer: "npm:^6.0.3"
+    cross-env: "npm:^7.0.3"
+    csv-parse: "npm:^4.16.3"
+    csv-stringify: "npm:^5.6.5"
+    date-fns: "npm:^2.30.0"
+    deep-equal: "npm:^2.2.3"
+    fake-indexeddb: "npm:^3.1.8"
+    fast-check: "npm:3.15.0"
+    handlebars: "npm:^4.7.8"
+    i18next: "npm:^23.11.5"
+    jest: "npm:^27.5.1"
+    jsverify: "npm:^0.8.4"
+    loot-core-shared: "workspace:^"
+    lru-cache: "npm:^5.1.1"
+    md5: "npm:^2.3.0"
+    memfs: "npm:3.5.3"
+    memoize-one: "npm:^6.0.0"
+    mitt: "npm:^3.0.1"
+    mockdate: "npm:^3.0.5"
+    npm-run-all: "npm:^4.1.5"
+    path-browserify: "npm:^1.0.1"
+    peggy: "npm:3.0.2"
+    process: "npm:^0.11.10"
+    reselect: "npm:^4.1.8"
+    slash: "npm:3.0.0"
+    snapshot-diff: "npm:^0.10.0"
+    source-map: "npm:^0.7.4"
+    stream-browserify: "npm:^3.0.0"
+    swc-loader: "npm:^0.2.6"
+    terser-webpack-plugin: "npm:^5.3.10"
+    throttleit: "npm:^1.0.1"
+    ts-node: "npm:^10.9.2"
+    typescript: "npm:^5.5.4"
+    uuid: "npm:^9.0.1"
+    webpack: "npm:^5.94.0"
+    webpack-bundle-analyzer: "npm:^4.10.1"
+    webpack-cli: "npm:^5.1.4"
+    yargs: "npm:^17.6.2"
+  languageName: unknown
+  linkType: soft
+
+"loot-core-shared@workspace:^, loot-core-shared@workspace:packages/loot-core-shared":
+  version: 0.0.0-use.local
+  resolution: "loot-core-shared@workspace:packages/loot-core-shared"
+  dependencies:
+    "@swc/core": "npm:^1.5.3"
+    "@swc/jest": "npm:^0.2.36"
+    "@types/jest": "npm:^27.5.2"
+    "@types/uuid": "npm:^9.0.2"
+    jest: "npm:^27.5.1"
+    ts-protoc-gen: "npm:^0.15.0"
+    typescript: "npm:^5.5.4"
+  languageName: unknown
+  linkType: soft
+
 "loot-core@workspace:packages/loot-core":
   version: 0.0.0-use.local
   resolution: "loot-core@workspace:packages/loot-core"
@@ -13392,6 +13474,7 @@ __metadata:
     i18next: "npm:^23.11.5"
     jest: "npm:^27.5.1"
     jsverify: "npm:^0.8.4"
+    loot-core-server: "npm:*"
     lru-cache: "npm:^5.1.1"
     md5: "npm:^2.3.0"
     memfs: "npm:3.5.3"

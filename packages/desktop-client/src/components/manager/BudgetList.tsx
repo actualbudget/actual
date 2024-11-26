@@ -3,6 +3,11 @@ import { Trans, useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 
 import {
+  isElectron,
+  isNonProductionEnvironment,
+} from 'loot-core-shared/environment';
+
+import {
   closeAndDownloadBudget,
   closeAndLoadBudget,
   createBudget,
@@ -12,10 +17,6 @@ import {
   loadBudget,
   pushModal,
 } from 'loot-core/client/actions';
-import {
-  isElectron,
-  isNonProductionEnvironment,
-} from 'loot-core/src/shared/environment';
 import {
   type File,
   type LocalFile,

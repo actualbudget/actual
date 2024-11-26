@@ -4,8 +4,7 @@ import { useTranslation } from 'react-i18next';
 import ReactMarkdown from 'react-markdown';
 
 import { css } from '@emotion/css';
-
-import { type MarkdownWidget } from 'loot-core/src/types/models';
+import { type MarkdownWidget } from 'loot-core-shared/types/models';
 
 import { styles, theme } from '../../../style';
 import { Menu } from '../../common/Menu';

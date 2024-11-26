@@ -3,7 +3,7 @@ import React, { type ReactNode } from 'react';
 import { css } from '@emotion/css';
 import { t } from 'i18next';
 
-import { type DarkTheme, type Theme } from 'loot-core/types/prefs';
+import { type DarkTheme, type Theme } from 'loot-core-shared/types/prefs';
 
 import {
   themeOptions,

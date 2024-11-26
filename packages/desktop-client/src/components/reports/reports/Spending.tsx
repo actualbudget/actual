@@ -4,14 +4,14 @@ import { useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
 
 import * as d from 'date-fns';
+import * as monthUtils from 'loot-core-shared/months';
+import { type SpendingWidget } from 'loot-core-shared/types/models';
+import { type RuleConditionEntity } from 'loot-core-shared/types/models/rule';
+import { amountToCurrency } from 'loot-core-shared/util';
 
 import { addNotification } from 'loot-core/client/actions';
 import { useWidget } from 'loot-core/client/data-hooks/widget';
-import { send } from 'loot-core/src/platform/client/fetch';
-import * as monthUtils from 'loot-core/src/shared/months';
-import { amountToCurrency } from 'loot-core/src/shared/util';
-import { type SpendingWidget } from 'loot-core/types/models';
-import { type RuleConditionEntity } from 'loot-core/types/models/rule';
+import { send } from 'loot-core/platform/client/fetch';
 
 import { useFilters } from '../../../hooks/useFilters';
 import { useNavigate } from '../../../hooks/useNavigate';

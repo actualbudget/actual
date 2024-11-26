@@ -1,9 +1,9 @@
 // @ts-strict-ignore
 import { t } from 'i18next';
+import type { Handlers } from 'loot-core-server/types/handlers';
+import { getDownloadError, getSyncError } from 'loot-core-shared/errors';
 
 import { send } from '../../platform/client/fetch';
-import { getDownloadError, getSyncError } from '../../shared/errors';
-import type { Handlers } from '../../types/handlers';
 import * as constants from '../constants';
 
 import { setAppState } from './app';

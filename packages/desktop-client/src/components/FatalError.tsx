@@ -1,7 +1,7 @@
 import React, { useState, type ReactNode } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 
-import { LazyLoadFailedError } from 'loot-core/src/shared/errors';
+import { LazyLoadFailedError } from 'loot-core-shared/errors';
 
 import { Block } from './common/Block';
 import { Button } from './common/Button2';

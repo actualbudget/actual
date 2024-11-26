@@ -2,8 +2,7 @@
 import React, { useRef, useState, type CSSProperties } from 'react';
 
 import { t } from 'i18next';
-
-import { type CategoryEntity } from 'loot-core/src/types/models';
+import { type CategoryEntity } from 'loot-core-shared/types/models';
 
 import { useCategory } from '../../hooks/useCategory';
 import { useCategoryGroup } from '../../hooks/useCategoryGroup';

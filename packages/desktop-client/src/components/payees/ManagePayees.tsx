@@ -7,11 +7,10 @@ import {
 } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { getNormalisedString } from 'loot-core-shared/normalisation';
+import { type PayeeEntity } from 'loot-core-shared/types/models';
+import { type Diff, groupById } from 'loot-core-shared/util';
 import memoizeOne from 'memoize-one';
-
-import { getNormalisedString } from 'loot-core/src/shared/normalisation';
-import { type Diff, groupById } from 'loot-core/src/shared/util';
-import { type PayeeEntity } from 'loot-core/types/models';
 
 import {
   useSelected,

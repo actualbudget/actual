@@ -2,8 +2,9 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 
+import { type CategoryEntity } from 'loot-core-shared/types/models';
+
 import { pushModal } from 'loot-core/client/actions';
-import { type CategoryEntity } from 'loot-core/src/types/models';
 
 import { useCategories } from '../../hooks/useCategories';
 import { styles } from '../../style';

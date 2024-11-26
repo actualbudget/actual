@@ -3,10 +3,11 @@ import { useHotkeys } from 'react-hotkeys-hook';
 import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 
+import { isPreviewId } from 'loot-core-shared/transactions';
+import { type TransactionEntity } from 'loot-core-shared/types/models';
+
 import { pushModal } from 'loot-core/client/actions';
-import { isPreviewId } from 'loot-core/shared/transactions';
-import { validForTransfer } from 'loot-core/src/client/transfer';
-import { type TransactionEntity } from 'loot-core/types/models';
+import { validForTransfer } from 'loot-core/client/transfer';
 
 import { useSelectedItems } from '../../hooks/useSelected';
 import { Menu } from '../common/Menu';

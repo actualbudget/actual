@@ -3,7 +3,7 @@ import React, { useEffect, type ComponentProps } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import AutoSizer from 'react-virtualized-auto-sizer';
 
-import * as monthUtils from 'loot-core/src/shared/months';
+import * as monthUtils from 'loot-core-shared/months';
 
 import { View } from '../common/View';
 

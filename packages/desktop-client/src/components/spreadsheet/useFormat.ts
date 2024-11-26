@@ -5,7 +5,7 @@ import {
   integerToCurrency,
   isNumberFormat,
   setNumberFormat,
-} from 'loot-core/src/shared/util';
+} from 'loot-core-shared/util';
 
 import { useSyncedPref } from '../../hooks/useSyncedPref';
 

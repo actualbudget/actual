@@ -1,5 +1,6 @@
+import { getUploadError } from 'loot-core-shared/errors';
+
 import { send } from '../../platform/client/fetch';
-import { getUploadError } from '../../shared/errors';
 
 import { syncAccounts } from './account';
 import { pushModal } from './modals';

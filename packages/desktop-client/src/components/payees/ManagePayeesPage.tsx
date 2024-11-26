@@ -2,7 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 
-import { type PayeeEntity } from 'loot-core/types/models';
+import { type PayeeEntity } from 'loot-core-shared/types/models';
 
 import { Page } from '../Page';
 

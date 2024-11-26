@@ -1,8 +1,7 @@
 import React, { type CSSProperties } from 'react';
 
 import { css } from '@emotion/css';
-
-import { friendlyOp } from 'loot-core/src/shared/rules';
+import { friendlyOp } from 'loot-core-shared/rules';
 
 import { theme } from '../../style';
 import { Button } from '../common/Button2';

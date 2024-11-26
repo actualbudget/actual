@@ -2,8 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 
 import deepEqual from 'deep-equal';
 import { t } from 'i18next';
-
-import { amountToInteger } from 'loot-core/src/shared/util';
+import { amountToInteger } from 'loot-core-shared/util';
 
 import { useActions } from '../../../hooks/useActions';
 import { useDateFormat } from '../../../hooks/useDateFormat';

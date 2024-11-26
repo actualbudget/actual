@@ -3,9 +3,8 @@ import React, { type ReactNode } from 'react';
 
 import { css } from '@emotion/css';
 import { t } from 'i18next';
-
-import { numberFormats } from 'loot-core/src/shared/util';
-import { type SyncedPrefs } from 'loot-core/src/types/prefs';
+import { type SyncedPrefs } from 'loot-core-shared/types/prefs';
+import { numberFormats } from 'loot-core-shared/util';
 
 import { useDateFormat } from '../../hooks/useDateFormat';
 import { useSyncedPref } from '../../hooks/useSyncedPref';

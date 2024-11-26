@@ -2,15 +2,16 @@
 import React, { useRef, useState, useMemo, type CSSProperties } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { format as monthUtilFormat } from 'loot-core-shared/months';
+import { getNormalisedString } from 'loot-core-shared/normalisation';
+import { getScheduledAmount } from 'loot-core-shared/schedules';
+import { type ScheduleEntity } from 'loot-core-shared/types/models';
+import { integerToCurrency } from 'loot-core-shared/util';
+
 import {
   type ScheduleStatusType,
   type ScheduleStatuses,
-} from 'loot-core/src/client/data-hooks/schedules';
-import { format as monthUtilFormat } from 'loot-core/src/shared/months';
-import { getNormalisedString } from 'loot-core/src/shared/normalisation';
-import { getScheduledAmount } from 'loot-core/src/shared/schedules';
-import { integerToCurrency } from 'loot-core/src/shared/util';
-import { type ScheduleEntity } from 'loot-core/src/types/models';
+} from 'loot-core/client/data-hooks/schedules';
 
 import { useAccounts } from '../../hooks/useAccounts';
 import { useDateFormat } from '../../hooks/useDateFormat';

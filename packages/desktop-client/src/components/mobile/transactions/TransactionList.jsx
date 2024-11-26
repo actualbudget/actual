@@ -9,11 +9,11 @@ import { ListBox, Section, Header, Collection } from 'react-aria-components';
 import { useDispatch } from 'react-redux';
 
 import { t } from 'i18next';
+import * as monthUtils from 'loot-core-shared/months';
+import { isPreviewId } from 'loot-core-shared/transactions';
+import { groupById, integerToCurrency } from 'loot-core-shared/util';
 
 import { setNotificationInset } from 'loot-core/client/actions';
-import { groupById, integerToCurrency } from 'loot-core/shared/util';
-import * as monthUtils from 'loot-core/src/shared/months';
-import { isPreviewId } from 'loot-core/src/shared/transactions';
 
 import { useAccounts } from '../../../hooks/useAccounts';
 import { useCategories } from '../../../hooks/useCategories';

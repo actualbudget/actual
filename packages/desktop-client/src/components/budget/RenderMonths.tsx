@@ -5,7 +5,7 @@ import React, {
   type ComponentType,
 } from 'react';
 
-import * as monthUtils from 'loot-core/src/shared/months';
+import * as monthUtils from 'loot-core-shared/months';
 
 import { theme } from '../../style';
 import { View } from '../common/View';

@@ -10,6 +10,7 @@ import './i18n';
 import React from 'react';
 import { Provider } from 'react-redux';
 
+import { q } from 'loot-core-shared/query';
 import { createRoot } from 'react-dom/client';
 import {
   createStore,
@@ -19,13 +20,12 @@ import {
 } from 'redux';
 import thunk from 'redux-thunk';
 
-import * as actions from 'loot-core/src/client/actions';
-import * as constants from 'loot-core/src/client/constants';
-import { runQuery } from 'loot-core/src/client/query-helpers';
-import { reducers } from 'loot-core/src/client/reducers';
-import { initialState as initialAppState } from 'loot-core/src/client/reducers/app';
-import { send } from 'loot-core/src/platform/client/fetch';
-import { q } from 'loot-core/src/shared/query';
+import * as actions from 'loot-core/client/actions';
+import * as constants from 'loot-core/client/constants';
+import { runQuery } from 'loot-core/client/query-helpers';
+import { reducers } from 'loot-core/client/reducers';
+import { initialState as initialAppState } from 'loot-core/client/reducers/app';
+import { send } from 'loot-core/platform/client/fetch';
 
 import { App } from './components/App';
 import { ServerProvider } from './components/ServerContext';

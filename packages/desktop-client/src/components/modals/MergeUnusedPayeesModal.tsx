@@ -2,10 +2,10 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { t } from 'i18next';
+import { type PayeeEntity } from 'loot-core-shared/types/models';
 
-import { replaceModal } from 'loot-core/src/client/actions/modals';
-import { send } from 'loot-core/src/platform/client/fetch';
-import { type PayeeEntity } from 'loot-core/types/models';
+import { replaceModal } from 'loot-core/client/actions/modals';
+import { send } from 'loot-core/platform/client/fetch';
 
 import { usePayees } from '../../hooks/usePayees';
 import { theme } from '../../style';

@@ -3,7 +3,7 @@ import {
   type CategoryEntity,
   type RuleConditionEntity,
   type PayeeEntity,
-} from '../types/models';
+} from 'loot-core-shared/types/models';
 
 /**
  * Checks if the given conditions have issues

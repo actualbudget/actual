@@ -5,7 +5,7 @@ import React, {
   useCallback,
 } from 'react';
 
-import { envelopeBudget } from 'loot-core/src/client/queries';
+import { envelopeBudget } from 'loot-core/client/queries';
 
 import { useFeatureFlag } from '../../../../hooks/useFeatureFlag';
 import { Popover } from '../../../common/Popover';

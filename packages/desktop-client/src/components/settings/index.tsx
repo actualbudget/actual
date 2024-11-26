@@ -2,9 +2,9 @@ import React, { type ReactNode, useEffect } from 'react';
 
 import { css } from '@emotion/css';
 import { t } from 'i18next';
+import { isElectron } from 'loot-core-shared/environment';
 
-import { isElectron } from 'loot-core/shared/environment';
-import { listen } from 'loot-core/src/platform/client/fetch';
+import { listen } from 'loot-core/platform/client/fetch';
 
 import { useActions } from '../../hooks/useActions';
 import { useGlobalPref } from '../../hooks/useGlobalPref';

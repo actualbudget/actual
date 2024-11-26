@@ -1,7 +1,8 @@
 // @ts-strict-ignore
+import { once } from 'loot-core-shared/async';
+import { getPrimaryOrderBy, type Query } from 'loot-core-shared/query';
+
 import { listen, send } from '../platform/client/fetch';
-import { once } from '../shared/async';
-import { getPrimaryOrderBy, type Query } from '../shared/query';
 
 export async function runQuery(query) {
   return send('query', query.serialize());

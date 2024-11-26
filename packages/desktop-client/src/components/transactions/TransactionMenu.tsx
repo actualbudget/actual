@@ -2,9 +2,10 @@ import React, { type ComponentPropsWithoutRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 
+import { isPreviewId } from 'loot-core-shared/transactions';
+import { type TransactionEntity } from 'loot-core-shared/types/models';
+
 import { pushModal } from 'loot-core/client/actions';
-import { isPreviewId } from 'loot-core/shared/transactions';
-import { type TransactionEntity } from 'loot-core/types/models';
 
 import { Menu } from '../common/Menu';
 

@@ -3,7 +3,7 @@ import { type CSSProperties } from 'react';
 
 import { keyframes } from '@emotion/css';
 
-import * as Platform from 'loot-core/src/client/platform';
+import * as Platform from 'loot-core/client/platform';
 
 import { tokens } from '../tokens';
 

@@ -5,7 +5,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import {
   isNonProductionEnvironment,
   isElectron,
-} from 'loot-core/src/shared/environment';
+} from 'loot-core-shared/environment';
 
 import { useActions } from '../../hooks/useActions';
 import { useGlobalPref } from '../../hooks/useGlobalPref';

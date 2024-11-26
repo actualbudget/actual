@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 
 import { t } from 'i18next';
+import { type Handlers } from 'loot-core-server/types/handlers';
 
-import { send } from 'loot-core/src/platform/client/fetch';
-import { type Handlers } from 'loot-core/src/types/handlers';
+import { send } from 'loot-core/platform/client/fetch';
 
 import { theme } from '../../style';
 import { ButtonWithLoading } from '../common/Button2';

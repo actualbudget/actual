@@ -1,3 +1,5 @@
+// TODO: Check if still needed. Copied files to loot-core-server/src/messaging.
+
 import type { Handlers } from '../../../types/handlers';
 import type { ServerEvents } from '../../../types/server-events';
 

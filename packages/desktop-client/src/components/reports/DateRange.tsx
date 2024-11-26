@@ -2,8 +2,7 @@ import React, { type ReactElement } from 'react';
 import { Trans } from 'react-i18next';
 
 import * as d from 'date-fns';
-
-import * as monthUtils from 'loot-core/src/shared/months';
+import * as monthUtils from 'loot-core-shared/months';
 
 import { theme } from '../../style';
 import { styles } from '../../style/styles';

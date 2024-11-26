@@ -1,7 +1,7 @@
 import React from 'react';
 
-import { type TransactionFilterEntity } from 'loot-core/types/models';
-import { type RuleConditionEntity } from 'loot-core/types/models/rule';
+import { type TransactionFilterEntity } from 'loot-core-shared/types/models';
+import { type RuleConditionEntity } from 'loot-core-shared/types/models/rule';
 
 import { Stack } from '../common/Stack';
 import { View } from '../common/View';

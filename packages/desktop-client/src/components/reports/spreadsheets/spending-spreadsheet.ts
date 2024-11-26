@@ -1,17 +1,17 @@
 // @ts-strict-ignore
 import keyBy from 'lodash/keyBy';
-
-import { runQuery } from 'loot-core/src/client/query-helpers';
-import { type useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
-import { send } from 'loot-core/src/platform/client/fetch';
-import * as monthUtils from 'loot-core/src/shared/months';
-import { q } from 'loot-core/src/shared/query';
-import { integerToAmount } from 'loot-core/src/shared/util';
-import { type RuleConditionEntity } from 'loot-core/src/types/models';
+import * as monthUtils from 'loot-core-shared/months';
+import { q } from 'loot-core-shared/query';
+import { type RuleConditionEntity } from 'loot-core-shared/types/models';
 import {
   type SpendingMonthEntity,
   type SpendingEntity,
-} from 'loot-core/src/types/models/reports';
+} from 'loot-core-shared/types/models/reports';
+import { integerToAmount } from 'loot-core-shared/util';
+
+import { runQuery } from 'loot-core/client/query-helpers';
+import { type useSpreadsheet } from 'loot-core/client/SpreadsheetProvider';
+import { send } from 'loot-core/platform/client/fetch';
 
 import { makeQuery } from './makeQuery';
 

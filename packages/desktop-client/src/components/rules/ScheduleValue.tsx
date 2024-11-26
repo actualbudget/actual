@@ -1,10 +1,11 @@
 import React, { useMemo } from 'react';
 
+import { q } from 'loot-core-shared/query';
+import { describeSchedule } from 'loot-core-shared/schedules';
+import { type ScheduleEntity } from 'loot-core-shared/types/models';
+
 import { useSchedules } from 'loot-core/client/data-hooks/schedules';
-import { q } from 'loot-core/shared/query';
-import { getPayeesById } from 'loot-core/src/client/reducers/queries';
-import { describeSchedule } from 'loot-core/src/shared/schedules';
-import { type ScheduleEntity } from 'loot-core/src/types/models';
+import { getPayeesById } from 'loot-core/client/reducers/queries';
 
 import { usePayees } from '../../hooks/usePayees';
 import { AnimatedLoading } from '../../icons/AnimatedLoading';

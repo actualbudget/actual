@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { type RuleConditionEntity } from 'loot-core/types/models';
+import { type RuleConditionEntity } from 'loot-core-shared/types/models';
 
 import { theme } from '../../style';
 import { Text } from '../common/Text';

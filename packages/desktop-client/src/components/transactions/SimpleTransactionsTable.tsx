@@ -12,10 +12,9 @@ import {
   parseISO,
 } from 'date-fns';
 import { t } from 'i18next';
-
-import * as monthUtils from 'loot-core/src/shared/months';
-import { integerToCurrency } from 'loot-core/src/shared/util';
-import { type TransactionEntity } from 'loot-core/types/models';
+import * as monthUtils from 'loot-core-shared/months';
+import { type TransactionEntity } from 'loot-core-shared/types/models';
+import { integerToCurrency } from 'loot-core-shared/util';
 
 import { useAccount } from '../../hooks/useAccount';
 import { useCategory } from '../../hooks/useCategory';

@@ -5,10 +5,10 @@ import React, {
 } from 'react';
 
 import { t } from 'i18next';
+import { format } from 'loot-core-shared/months';
+import { q } from 'loot-core-shared/query';
 
 import { useSchedules } from 'loot-core/client/data-hooks/schedules';
-import { format } from 'loot-core/shared/months';
-import { q } from 'loot-core/shared/query';
 
 import { theme, styles } from '../../style';
 import { Menu } from '../common/Menu';

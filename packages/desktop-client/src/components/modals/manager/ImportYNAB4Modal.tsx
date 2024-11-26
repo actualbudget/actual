@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 
-import { importBudget } from 'loot-core/src/client/actions/budgets';
+import { importBudget } from 'loot-core/client/actions/budgets';
 
 import { styles, theme } from '../../../style';
 import { Block } from '../../common/Block';

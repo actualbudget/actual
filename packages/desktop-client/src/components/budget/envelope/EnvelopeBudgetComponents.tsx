@@ -8,11 +8,11 @@ import React, {
 import { useTranslation, Trans } from 'react-i18next';
 
 import { css } from '@emotion/css';
+import { evalArithmetic } from 'loot-core-shared/arithmetic';
+import * as monthUtils from 'loot-core-shared/months';
+import { integerToCurrency, amountToInteger } from 'loot-core-shared/util';
 
-import { envelopeBudget } from 'loot-core/src/client/queries';
-import { evalArithmetic } from 'loot-core/src/shared/arithmetic';
-import * as monthUtils from 'loot-core/src/shared/months';
-import { integerToCurrency, amountToInteger } from 'loot-core/src/shared/util';
+import { envelopeBudget } from 'loot-core/client/queries';
 
 import { useFeatureFlag } from '../../../hooks/useFeatureFlag';
 import { useUndo } from '../../../hooks/useUndo';

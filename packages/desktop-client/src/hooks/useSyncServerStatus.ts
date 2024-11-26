@@ -1,6 +1,6 @@
 import { useSelector } from 'react-redux';
 
-import { type State } from 'loot-core/src/client/state-types';
+import { type State } from 'loot-core/client/state-types';
 
 import { useServerURL } from '../components/ServerContext';
 

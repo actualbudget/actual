@@ -2,11 +2,10 @@
 import React, { Fragment, useMemo, useState } from 'react';
 
 import { t } from 'i18next';
-
 import {
   type CategoryEntity,
   type CategoryGroupEntity,
-} from 'loot-core/src/types/models';
+} from 'loot-core-shared/types/models';
 
 import {
   SvgCheckAll,

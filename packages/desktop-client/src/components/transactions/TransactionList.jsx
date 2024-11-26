@@ -1,16 +1,17 @@
 import React, { useRef, useCallback, useLayoutEffect } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { pushModal } from 'loot-core/client/actions';
-import { send } from 'loot-core/src/platform/client/fetch';
 import {
   splitTransaction,
   updateTransaction,
   addSplitTransaction,
   realizeTempTransactions,
   applyTransactionDiff,
-} from 'loot-core/src/shared/transactions';
-import { getChangedValues, applyChanges } from 'loot-core/src/shared/util';
+} from 'loot-core-shared/transactions';
+import { getChangedValues, applyChanges } from 'loot-core-shared/util';
+
+import { pushModal } from 'loot-core/client/actions';
+import { send } from 'loot-core/platform/client/fetch';
 
 import { useNavigate } from '../../hooks/useNavigate';
 import { theme } from '../../style';

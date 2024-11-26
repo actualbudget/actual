@@ -1,20 +1,20 @@
 import * as d from 'date-fns';
 import keyBy from 'lodash/keyBy';
-
-import { runQuery } from 'loot-core/src/client/query-helpers';
-import { type useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
-import { send } from 'loot-core/src/platform/client/fetch';
-import * as monthUtils from 'loot-core/src/shared/months';
-import { q } from 'loot-core/src/shared/query';
+import * as monthUtils from 'loot-core-shared/months';
+import { q } from 'loot-core-shared/query';
+import {
+  type AccountEntity,
+  type RuleConditionEntity,
+} from 'loot-core-shared/types/models';
 import {
   integerToCurrency,
   integerToAmount,
   amountToInteger,
-} from 'loot-core/src/shared/util';
-import {
-  type AccountEntity,
-  type RuleConditionEntity,
-} from 'loot-core/types/models';
+} from 'loot-core-shared/util';
+
+import { runQuery } from 'loot-core/client/query-helpers';
+import { type useSpreadsheet } from 'loot-core/client/SpreadsheetProvider';
+import { send } from 'loot-core/platform/client/fetch';
 
 type Balance = {
   date: string;

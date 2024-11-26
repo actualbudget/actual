@@ -1,6 +1,6 @@
 import React, { type CSSProperties } from 'react';
 
-import { mapField, friendlyOp } from 'loot-core/src/shared/rules';
+import { mapField, friendlyOp } from 'loot-core-shared/rules';
 
 import { theme } from '../../style';
 import { Text } from '../common/Text';

@@ -3,9 +3,10 @@ import { Trans, useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 
+import { type PayeeEntity } from 'loot-core-shared/types/models';
+
 import { popModal } from 'loot-core/client/actions';
-import { send } from 'loot-core/src/platform/client/fetch';
-import { type PayeeEntity } from 'loot-core/types/models';
+import { send } from 'loot-core/platform/client/fetch';
 
 import { useFormatList } from '../../hooks/useFormatList';
 import { theme } from '../../style';

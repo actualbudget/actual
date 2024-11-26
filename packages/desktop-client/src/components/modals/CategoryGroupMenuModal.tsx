@@ -7,8 +7,7 @@ import React, {
 } from 'react';
 
 import { t } from 'i18next';
-
-import { type CategoryGroupEntity } from 'loot-core/src/types/models';
+import { type CategoryGroupEntity } from 'loot-core-shared/types/models';
 
 import { useCategories } from '../../hooks/useCategories';
 import { useNotes } from '../../hooks/useNotes';

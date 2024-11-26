@@ -1,8 +1,9 @@
 // @ts-strict-ignore
+import { subDays } from 'loot-core-shared/months';
+import { q } from 'loot-core-shared/query';
+import { tracer } from 'loot-core-shared/test-helpers';
+
 import { initServer, serverPush } from '../platform/client/fetch';
-import { subDays } from '../shared/months';
-import { q } from '../shared/query';
-import { tracer } from '../shared/test-helpers';
 
 import { runQuery, liveQuery, pagedQuery } from './query-helpers';
 

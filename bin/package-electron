@@ -34,7 +34,8 @@ if [ "$OSTYPE" == "msys" ]; then
     fi
 fi
 
-yarn workspace loot-core build:node
+yarn workspace loot-core-server build:node
+# yarn workspace loot-core build:node
 
 yarn workspace @actual-app/web build --mode=desktop # electron specific build
 

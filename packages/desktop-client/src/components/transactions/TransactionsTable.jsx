@@ -20,17 +20,9 @@ import {
   parseISO,
   isValid as isDateValid,
 } from 'date-fns';
-
-import { pushModal } from 'loot-core/client/actions';
-import { useCachedSchedules } from 'loot-core/src/client/data-hooks/schedules';
-import {
-  getAccountsById,
-  getPayeesById,
-  getCategoriesById,
-} from 'loot-core/src/client/reducers/queries';
-import { evalArithmetic } from 'loot-core/src/shared/arithmetic';
-import { currentDay } from 'loot-core/src/shared/months';
-import * as monthUtils from 'loot-core/src/shared/months';
+import { evalArithmetic } from 'loot-core-shared/arithmetic';
+import { currentDay } from 'loot-core-shared/months';
+import * as monthUtils from 'loot-core-shared/months';
 import {
   splitTransaction,
   updateTransaction,
@@ -40,12 +32,20 @@ import {
   ungroupTransactions,
   isTemporaryId,
   isPreviewId,
-} from 'loot-core/src/shared/transactions';
+} from 'loot-core-shared/transactions';
 import {
   integerToCurrency,
   amountToInteger,
   titleFirst,
-} from 'loot-core/src/shared/util';
+} from 'loot-core-shared/util';
+
+import { pushModal } from 'loot-core/client/actions';
+import { useCachedSchedules } from 'loot-core/client/data-hooks/schedules';
+import {
+  getAccountsById,
+  getPayeesById,
+  getCategoriesById,
+} from 'loot-core/client/reducers/queries';
 
 import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { useMergedRefs } from '../../hooks/useMergedRefs';

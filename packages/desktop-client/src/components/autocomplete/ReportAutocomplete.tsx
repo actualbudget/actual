@@ -1,7 +1,8 @@
 import React, { type ComponentProps } from 'react';
 
+import { type CustomReportEntity } from 'loot-core-shared/types/models/reports';
+
 import { useReports } from 'loot-core/client/data-hooks/reports';
-import { type CustomReportEntity } from 'loot-core/src/types/models/reports';
 
 import { Autocomplete } from './Autocomplete';
 import { ReportList } from './ReportList';

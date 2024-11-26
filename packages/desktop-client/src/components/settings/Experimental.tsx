@@ -1,7 +1,7 @@
 import { type ReactNode, useState } from 'react';
 import { Trans } from 'react-i18next';
 
-import type { FeatureFlag } from 'loot-core/src/types/prefs';
+import type { FeatureFlag } from 'loot-core-shared/types/prefs';
 
 import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { useSyncedPref } from '../../hooks/useSyncedPref';

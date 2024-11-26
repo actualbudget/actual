@@ -2,14 +2,14 @@ import React, { useMemo } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 
 import { t } from 'i18next';
+import * as monthUtils from 'loot-core-shared/months';
+import { type AccountEntity } from 'loot-core-shared/types/models/account';
+import { type CategoryEntity } from 'loot-core-shared/types/models/category';
+import { type CategoryGroupEntity } from 'loot-core-shared/types/models/category-group';
+import { type PayeeEntity } from 'loot-core-shared/types/models/payee';
+import { type CustomReportEntity } from 'loot-core-shared/types/models/reports';
 
-import * as monthUtils from 'loot-core/src/shared/months';
-import { type AccountEntity } from 'loot-core/types/models/account';
-import { type CategoryEntity } from 'loot-core/types/models/category';
-import { type CategoryGroupEntity } from 'loot-core/types/models/category-group';
-import { type PayeeEntity } from 'loot-core/types/models/payee';
-import { type CustomReportEntity } from 'loot-core/types/models/reports';
-import { type SyncedPrefs } from 'loot-core/types/prefs';
+import { type SyncedPrefs } from 'loot-core-shared/types/prefs';
 
 import { styles } from '../../../style/styles';
 import { theme } from '../../../style/theme';

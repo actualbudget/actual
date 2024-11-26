@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 
+import { type Backup } from 'loot-core-server/backups';
+
 import { loadBackup, makeBackup } from 'loot-core/client/actions';
-import { type Backup } from 'loot-core/server/backups';
-import { send, listen, unlisten } from 'loot-core/src/platform/client/fetch';
+import { send, listen, unlisten } from 'loot-core/platform/client/fetch';
 
 import { useMetadataPref } from '../../hooks/useMetadataPref';
 import { theme } from '../../style';

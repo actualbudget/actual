@@ -13,14 +13,14 @@ import React, {
 import { Trans, useTranslation } from 'react-i18next';
 
 import { css, cx } from '@emotion/css';
-
-import { trackingBudget, envelopeBudget } from 'loot-core/client/queries';
-import { integerToCurrency } from 'loot-core/shared/util';
-import { getNormalisedString } from 'loot-core/src/shared/normalisation';
+import { getNormalisedString } from 'loot-core-shared/normalisation';
 import {
   type CategoryEntity,
   type CategoryGroupEntity,
-} from 'loot-core/src/types/models';
+} from 'loot-core-shared/types/models';
+import { integerToCurrency } from 'loot-core-shared/util';
+
+import { trackingBudget, envelopeBudget } from 'loot-core/client/queries';
 
 import { useCategories } from '../../hooks/useCategories';
 import { useSyncedPref } from '../../hooks/useSyncedPref';

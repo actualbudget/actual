@@ -2,7 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 
-import { type State } from 'loot-core/src/client/state-types';
+import { type State } from 'loot-core/client/state-types';
 
 import { useActions } from '../hooks/useActions';
 import { SvgClose } from '../icons/v1';

@@ -1,10 +1,10 @@
 import { render, type Screen, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import type { AccountEntity, PayeeEntity } from 'loot-core-shared/types/models';
 import { vi } from 'vitest';
 
 import { generateAccount } from 'loot-core/src/mocks';
 import { TestProvider } from 'loot-core/src/mocks/redux';
-import type { AccountEntity, PayeeEntity } from 'loot-core/types/models';
 
 import { useCommonPayees } from '../../hooks/usePayees';
 import { ResponsiveProvider } from '../responsive/ResponsiveProvider';

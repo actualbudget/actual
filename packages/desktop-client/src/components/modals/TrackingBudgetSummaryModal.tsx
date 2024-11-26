@@ -1,8 +1,8 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { sheetForMonth } from 'loot-core/src/shared/months';
-import * as monthUtils from 'loot-core/src/shared/months';
+import { sheetForMonth } from 'loot-core-shared/months';
+import * as monthUtils from 'loot-core-shared/months';
 
 import { styles } from '../../style';
 import { ExpenseTotal } from '../budget/tracking/budgetsummary/ExpenseTotal';

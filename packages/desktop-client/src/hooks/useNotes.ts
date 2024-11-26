@@ -1,8 +1,9 @@
 import { useMemo } from 'react';
 
+import { q } from 'loot-core-shared/query';
+import { type NoteEntity } from 'loot-core-shared/types/models';
+
 import { useQuery } from 'loot-core/client/query-hooks';
-import { q } from 'loot-core/shared/query';
-import { type NoteEntity } from 'loot-core/types/models';
 
 export function useNotes(id: string) {
   const { data } = useQuery<NoteEntity>(

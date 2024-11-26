@@ -17,6 +17,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@actual-app/crdt": "workspace:^",
     "@jlongster/sql.js": "^1.6.7",
     "@rschedule/core": "^1.5.0",
     "@rschedule/json-tools": "^1.5.0",
@@ -29,6 +30,8 @@
     "date-fns": "^2.30.0",
     "deep-equal": "^2.2.3",
     "handlebars": "^4.7.8",
+    "loot-core-server": "workspace:^",
+    "loot-core-shared": "workspace:^",
     "lru-cache": "^5.1.1",
     "md5": "^2.3.0",
     "memoize-one": "^6.0.0",
@@ -40,7 +43,6 @@
   },
   "devDependencies": {
     "@actual-app/api": "*",
-    "@actual-app/crdt": "*",
     "@swc/core": "^1.5.3",
     "@swc/helpers": "^0.5.11",
     "@swc/jest": "^0.2.36",

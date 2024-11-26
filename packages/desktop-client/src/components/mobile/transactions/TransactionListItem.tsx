@@ -11,10 +11,9 @@ import {
   usePress,
   useLongPress,
 } from '@react-aria/interactions';
-
-import { isPreviewId } from 'loot-core/src/shared/transactions';
-import { integerToCurrency } from 'loot-core/src/shared/util';
-import { type TransactionEntity } from 'loot-core/types/models';
+import { isPreviewId } from 'loot-core-shared/transactions';
+import { type TransactionEntity } from 'loot-core-shared/types/models';
+import { integerToCurrency } from 'loot-core-shared/util';
 
 import { useAccount } from '../../../hooks/useAccount';
 import { useCategories } from '../../../hooks/useCategories';

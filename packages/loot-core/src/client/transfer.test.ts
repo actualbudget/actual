@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import * as db from '../server/db';
+import * as db from 'loot-core-server/db';
 
 import * as transfer from './transfer';
 

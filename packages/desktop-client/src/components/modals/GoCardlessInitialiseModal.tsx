@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 
 import { t } from 'i18next'; // Ensure this import is correct
 
-import { send } from 'loot-core/src/platform/client/fetch';
+import { send } from 'loot-core/platform/client/fetch';
 
 import { Error } from '../alerts';
 import { ButtonWithLoading } from '../common/Button2';

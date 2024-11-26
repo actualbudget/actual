@@ -1,11 +1,11 @@
 import { type ComponentProps, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import * as monthUtils from 'loot-core/src/shared/months';
+import * as monthUtils from 'loot-core-shared/months';
 import {
   type RuleConditionEntity,
   type TimeFrame,
-} from 'loot-core/types/models';
+} from 'loot-core-shared/types/models';
 
 import { Button } from '../common/Button2';
 import { Select } from '../common/Select';

@@ -8,7 +8,7 @@ import React, {
 
 import { t } from 'i18next';
 
-import { send } from 'loot-core/src/platform/client/fetch';
+import { send } from 'loot-core/platform/client/fetch';
 
 import { useNotes } from '../hooks/useNotes';
 import { SvgCustomNotesPaper } from '../icons/v2';

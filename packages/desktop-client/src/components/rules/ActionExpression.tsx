@@ -1,12 +1,11 @@
 import React, { type CSSProperties } from 'react';
 
 import { t } from 'i18next';
-
 import {
   mapField,
   friendlyOp,
   ALLOCATION_METHODS,
-} from 'loot-core/src/shared/rules';
+} from 'loot-core-shared/rules';
 import {
   type SetSplitAmountRuleActionEntity,
   type LinkScheduleRuleActionEntity,
@@ -14,7 +13,7 @@ import {
   type SetRuleActionEntity,
   type AppendNoteRuleActionEntity,
   type PrependNoteRuleActionEntity,
-} from 'loot-core/src/types/models';
+} from 'loot-core-shared/types/models';
 
 import { theme } from '../../style';
 import { Text } from '../common/Text';

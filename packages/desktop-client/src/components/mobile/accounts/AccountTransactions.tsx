@@ -7,6 +7,13 @@ import React, {
 } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
+import { type Query } from 'loot-core-shared/query';
+import { isPreviewId } from 'loot-core-shared/transactions';
+import {
+  type AccountEntity,
+  type TransactionEntity,
+} from 'loot-core-shared/types/models';
+
 import {
   collapseModals,
   getPayees,
@@ -27,12 +34,6 @@ import {
 } from 'loot-core/client/data-hooks/transactions';
 import * as queries from 'loot-core/client/queries';
 import { listen, send } from 'loot-core/platform/client/fetch';
-import { type Query } from 'loot-core/shared/query';
-import { isPreviewId } from 'loot-core/shared/transactions';
-import {
-  type AccountEntity,
-  type TransactionEntity,
-} from 'loot-core/types/models';
 
 import { useAccountPreviewTransactions } from '../../../hooks/useAccountPreviewTransactions';
 import { useDateFormat } from '../../../hooks/useDateFormat';

@@ -13,8 +13,7 @@ import React, {
 
 import { css, cx } from '@emotion/css';
 import Downshift, { type StateChangeTypes } from 'downshift';
-
-import { getNormalisedString } from 'loot-core/src/shared/normalisation';
+import { getNormalisedString } from 'loot-core-shared/normalisation';
 
 import { SvgRemove } from '../../icons/v2';
 import { theme, styles } from '../../style';

@@ -1,0 +1,11 @@
+{
+  "jsc": {
+    "target": "es2022",
+    "externalHelpers": true,
+    "parser": {
+      "syntax": "typescript",
+      "tsx": true
+    }
+  },
+  "sourceMaps": true
+}

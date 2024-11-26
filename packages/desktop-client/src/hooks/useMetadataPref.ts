@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import { savePrefs } from 'loot-core/client/actions';
 import { type State } from 'loot-core/client/state-types';
-import { type MetadataPrefs } from 'loot-core/types/prefs';
+import { type MetadataPrefs } from 'loot-core-shared/types/prefs';
 
 type SetMetadataPrefAction<K extends keyof MetadataPrefs> = (
   value: MetadataPrefs[K],

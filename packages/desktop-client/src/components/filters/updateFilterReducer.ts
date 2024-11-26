@@ -1,5 +1,5 @@
-import { makeValue, FIELD_TYPES } from 'loot-core/src/shared/rules';
-import { type RuleConditionEntity } from 'loot-core/src/types/models';
+import { makeValue, FIELD_TYPES } from 'loot-core-shared/rules';
+import { type RuleConditionEntity } from 'loot-core-shared/types/models';
 
 export function updateFilterReducer(
   state: Pick<RuleConditionEntity, 'op' | 'field' | 'value'>,

@@ -17,12 +17,8 @@ import {
   isValid as isValidDate,
 } from 'date-fns';
 import { t } from 'i18next';
-
-import { pushModal, setLastTransaction } from 'loot-core/client/actions';
-import { runQuery } from 'loot-core/src/client/query-helpers';
-import { send } from 'loot-core/src/platform/client/fetch';
-import * as monthUtils from 'loot-core/src/shared/months';
-import { q } from 'loot-core/src/shared/query';
+import * as monthUtils from 'loot-core-shared/months';
+import { q } from 'loot-core-shared/query';
 import {
   ungroupTransactions,
   updateTransaction,
@@ -31,7 +27,7 @@ import {
   addSplitTransaction,
   deleteTransaction,
   makeChild,
-} from 'loot-core/src/shared/transactions';
+} from 'loot-core-shared/transactions';
 import {
   titleFirst,
   integerToCurrency,
@@ -40,7 +36,11 @@ import {
   getChangedValues,
   diffItems,
   groupById,
-} from 'loot-core/src/shared/util';
+} from 'loot-core-shared/util';
+
+import { pushModal, setLastTransaction } from 'loot-core/client/actions';
+import { runQuery } from 'loot-core/client/query-helpers';
+import { send } from 'loot-core/platform/client/fetch';
 
 import { useAccounts } from '../../../hooks/useAccounts';
 import { useCategories } from '../../../hooks/useCategories';

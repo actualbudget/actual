@@ -1,7 +1,8 @@
 import React, { type ComponentProps } from 'react';
 
-import { useFilters } from 'loot-core/src/client/data-hooks/filters';
-import { type TransactionFilterEntity } from 'loot-core/types/models/transaction-filter';
+import { type TransactionFilterEntity } from 'loot-core-shared/types/models/transaction-filter';
+
+import { useFilters } from 'loot-core/client/data-hooks/filters';
 
 import { Autocomplete } from './Autocomplete';
 import { FilterList } from './FilterList';

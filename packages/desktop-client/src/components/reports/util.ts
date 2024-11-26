@@ -1,6 +1,7 @@
 // @ts-strict-ignore
-import { runQuery } from 'loot-core/src/client/query-helpers';
-import type { Query } from 'loot-core/src/shared/query';
+import type { Query } from 'loot-core-shared/query';
+
+import { runQuery } from 'loot-core/client/query-helpers';
 
 export function fromDateRepr(date: string): string {
   return date.slice(0, 7);

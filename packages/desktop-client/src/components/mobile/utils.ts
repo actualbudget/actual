@@ -2,7 +2,7 @@ import {
   type AccountEntity,
   type PayeeEntity,
   type TransactionEntity,
-} from 'loot-core/types/models';
+} from 'loot-core-shared/types/models';
 
 type GetPrettyPayeeProps = {
   transaction?: TransactionEntity;

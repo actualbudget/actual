@@ -2,7 +2,7 @@ import React, { type CSSProperties, type MouseEventHandler } from 'react';
 
 import { css } from '@emotion/css';
 
-import { envelopeBudget } from 'loot-core/src/client/queries';
+import { envelopeBudget } from 'loot-core/client/queries';
 
 import { theme, styles } from '../../../../style';
 import { Block } from '../../../common/Block';

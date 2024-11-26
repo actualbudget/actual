@@ -3,8 +3,7 @@ import React, { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { css } from '@emotion/css';
-
-import * as monthUtils from 'loot-core/src/shared/months';
+import * as monthUtils from 'loot-core-shared/months';
 
 import { SvgDotsHorizontalTriple } from '../../../../icons/v1';
 import { SvgArrowButtonDown1, SvgArrowButtonUp1 } from '../../../../icons/v2';

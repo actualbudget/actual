@@ -8,7 +8,7 @@ import React, {
   type ReactNode,
 } from 'react';
 
-import { send } from 'loot-core/src/platform/client/fetch';
+import { send } from 'loot-core/platform/client/fetch';
 
 type ServerContextValue = {
   url: string | null;

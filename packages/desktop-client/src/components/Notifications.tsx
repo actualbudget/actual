@@ -12,8 +12,8 @@ import { css } from '@emotion/css';
 import { t } from 'i18next';
 
 import { removeNotification } from 'loot-core/client/actions';
-import { type State } from 'loot-core/src/client/state-types';
-import type { NotificationWithId } from 'loot-core/src/client/state-types/notifications';
+import { type State } from 'loot-core/client/state-types';
+import type { NotificationWithId } from 'loot-core/client/state-types/notifications';
 
 import { AnimatedLoading } from '../icons/AnimatedLoading';
 import { SvgDelete } from '../icons/v0';

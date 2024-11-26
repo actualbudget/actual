@@ -3,14 +3,15 @@ import React, { useMemo, useRef, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 
-import { pushModal } from 'loot-core/client/actions';
-import { useSchedules } from 'loot-core/src/client/data-hooks/schedules';
-import { send } from 'loot-core/src/platform/client/fetch';
-import { q } from 'loot-core/src/shared/query';
+import { q } from 'loot-core-shared/query';
 import {
   type ScheduleEntity,
   type TransactionEntity,
-} from 'loot-core/src/types/models';
+} from 'loot-core-shared/types/models';
+
+import { pushModal } from 'loot-core/client/actions';
+import { useSchedules } from 'loot-core/client/data-hooks/schedules';
+import { send } from 'loot-core/platform/client/fetch';
 
 import { SvgAdd } from '../../icons/v0';
 import { Button } from '../common/Button2';

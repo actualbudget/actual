@@ -1,9 +1,9 @@
-import * as monthUtils from 'loot-core/src/shared/months';
-import { amountToInteger, integerToAmount } from 'loot-core/src/shared/util';
+import * as monthUtils from 'loot-core-shared/months';
 import {
   type GroupedEntity,
   type IntervalEntity,
-} from 'loot-core/types/models/reports';
+} from 'loot-core-shared/types/models/reports';
+import { amountToInteger, integerToAmount } from 'loot-core-shared/util';
 
 import {
   type UncategorizedEntity,

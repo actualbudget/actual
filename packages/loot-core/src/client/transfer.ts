@@ -1,4 +1,4 @@
-import type { TransactionEntity } from '../types/models';
+import type { TransactionEntity } from 'loot-core-shared/types/models';
 
 export function validForTransfer(
   fromTransaction: TransactionEntity,

@@ -1,9 +1,10 @@
 import { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
+import { type SyncedPrefs } from 'loot-core-shared/types/prefs';
+
 import { saveSyncedPrefs } from 'loot-core/client/actions';
 import { type State } from 'loot-core/client/state-types';
-import { type SyncedPrefs } from 'loot-core/src/types/prefs';
 
 type SetSyncedPrefAction<K extends keyof SyncedPrefs> = (
   value: SyncedPrefs[K],

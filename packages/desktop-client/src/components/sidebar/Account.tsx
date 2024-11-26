@@ -2,9 +2,9 @@
 import React, { type CSSProperties } from 'react';
 
 import { css, cx } from '@emotion/css';
+import { type AccountEntity } from 'loot-core-shared/types/models';
 
 import * as Platform from 'loot-core/client/platform';
-import { type AccountEntity } from 'loot-core/src/types/models';
 
 import { useNotes } from '../../hooks/useNotes';
 import { styles, theme } from '../../style';

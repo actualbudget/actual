@@ -1,7 +1,7 @@
 import React from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 
-import * as monthUtils from 'loot-core/src/shared/months';
+import * as monthUtils from 'loot-core-shared/months';
 
 import { useCategories } from '../../../hooks/useCategories';
 import { useSyncedPref } from '../../../hooks/useSyncedPref';

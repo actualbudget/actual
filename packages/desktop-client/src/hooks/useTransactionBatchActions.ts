@@ -1,23 +1,24 @@
 import { useDispatch } from 'react-redux';
 
-import { pushModal } from 'loot-core/client/actions';
-import { runQuery } from 'loot-core/client/query-helpers';
-import { send } from 'loot-core/platform/client/fetch';
-import { q } from 'loot-core/shared/query';
+import * as monthUtils from 'loot-core-shared/months';
+import { q } from 'loot-core-shared/query';
 import {
   deleteTransaction,
   realizeTempTransactions,
   ungroupTransaction,
   ungroupTransactions,
   updateTransaction,
-} from 'loot-core/shared/transactions';
-import { applyChanges, type Diff } from 'loot-core/shared/util';
-import * as monthUtils from 'loot-core/src/shared/months';
+} from 'loot-core-shared/transactions';
 import {
   type AccountEntity,
   type ScheduleEntity,
   type TransactionEntity,
-} from 'loot-core/types/models';
+} from 'loot-core-shared/types/models';
+import { applyChanges, type Diff } from 'loot-core-shared/util';
+
+import { pushModal } from 'loot-core/client/actions';
+import { runQuery } from 'loot-core/client/query-helpers';
+import { send } from 'loot-core/platform/client/fetch';
 
 type BatchEditProps = {
   name: keyof TransactionEntity;

@@ -11,8 +11,8 @@ import {
   type GroupedEntity,
   type DataEntity,
   type balanceTypeOpType,
-} from 'loot-core/src/types/models/reports';
-import { type RuleConditionEntity } from 'loot-core/types/models/rule';
+} from 'loot-core-shared/types/models/reports';
+import { type RuleConditionEntity } from 'loot-core-shared/types/models/rule';
 
 import { Block } from '../../../common/Block';
 import { View } from '../../../common/View';

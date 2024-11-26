@@ -31,7 +31,9 @@
     "noEmit": true,
     "paths": {
       // until we turn on composite/references
-      "loot-core/*": ["./packages/loot-core/src/*"]
+      "loot-core/*": ["./packages/loot-core/src/*"],
+      "loot-core-server/*": ["./packages/loot-core-server/src/*"],
+      "loot-core-shared/*": ["./packages/loot-core-shared/src/*"],
     },
     "plugins": [
       {

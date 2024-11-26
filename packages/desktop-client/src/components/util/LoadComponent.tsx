@@ -1,8 +1,7 @@
 import { type ComponentType, useEffect, useState } from 'react';
 
+import { LazyLoadFailedError } from 'loot-core-shared/errors';
 import promiseRetry from 'promise-retry';
-
-import { LazyLoadFailedError } from 'loot-core/src/shared/errors';
 
 import { AnimatedLoading } from '../../icons/AnimatedLoading';
 import { theme, styles } from '../../style';

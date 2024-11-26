@@ -5,10 +5,10 @@ import { useDispatch } from 'react-redux';
 
 import { css } from '@emotion/css';
 import { t } from 'i18next';
+import { getCreateKeyError } from 'loot-core-shared/errors';
 
 import { loadAllFiles, loadGlobalPrefs, sync } from 'loot-core/client/actions';
-import { send } from 'loot-core/src/platform/client/fetch';
-import { getCreateKeyError } from 'loot-core/src/shared/errors';
+import { send } from 'loot-core/platform/client/fetch';
 
 import { styles, theme } from '../../style';
 import { ButtonWithLoading } from '../common/Button2';

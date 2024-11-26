@@ -1,13 +1,12 @@
 import { t } from 'i18next';
-
-import * as monthUtils from 'loot-core/src/shared/months';
+import * as monthUtils from 'loot-core-shared/months';
 import {
   type CustomReportEntity,
   type AccountEntity,
   type CategoryEntity,
   type CategoryGroupEntity,
   type PayeeEntity,
-} from 'loot-core/src/types/models';
+} from 'loot-core-shared/types/models';
 
 const startDate = monthUtils.subMonths(monthUtils.currentMonth(), 5) + '-01';
 const endDate = monthUtils.currentDay();

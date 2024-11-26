@@ -2,16 +2,16 @@
 import { type CSSProperties } from 'react';
 
 import { t } from 'i18next';
-
-import { type useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
-import { send } from 'loot-core/src/platform/client/fetch';
-import * as monthUtils from 'loot-core/src/shared/months';
-import { type Handlers } from 'loot-core/src/types/handlers';
+import { type Handlers } from 'loot-core-server/types/handlers';
+import * as monthUtils from 'loot-core-shared/months';
 import {
   type CategoryEntity,
   type CategoryGroupEntity,
-} from 'loot-core/src/types/models';
-import { type SyncedPrefs } from 'loot-core/src/types/prefs';
+} from 'loot-core-shared/types/models';
+import { type SyncedPrefs } from 'loot-core-shared/types/prefs';
+
+import { type useSpreadsheet } from 'loot-core/client/SpreadsheetProvider';
+import { send } from 'loot-core/platform/client/fetch';
 
 import { styles, theme } from '../../style';
 import { type DropPosition } from '../sort';

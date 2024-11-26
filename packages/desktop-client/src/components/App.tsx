@@ -19,12 +19,9 @@ import {
   setAppState,
   sync,
 } from 'loot-core/client/actions';
+import * as Platform from 'loot-core/client/platform';
 import { SpreadsheetProvider } from 'loot-core/client/SpreadsheetProvider';
-import * as Platform from 'loot-core/src/client/platform';
-import {
-  init as initConnection,
-  send,
-} from 'loot-core/src/platform/client/fetch';
+import { init as initConnection, send } from 'loot-core/platform/client/fetch';
 
 import { useMetadataPref } from '../hooks/useMetadataPref';
 import { installPolyfills } from '../polyfills';

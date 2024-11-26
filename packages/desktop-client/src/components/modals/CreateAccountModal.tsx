@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 
 import { pushModal } from 'loot-core/client/actions';
-import { send } from 'loot-core/src/platform/client/fetch';
+import { send } from 'loot-core/platform/client/fetch';
 
 import { authorizeBank } from '../../gocardless';
 import { useGoCardlessStatus } from '../../hooks/useGoCardlessStatus';

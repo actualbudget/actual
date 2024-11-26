@@ -6,9 +6,9 @@ import React, {
 } from 'react';
 
 import { t } from 'i18next';
+import { amountToInteger, integerToAmount } from 'loot-core-shared/util';
 
 import { trackingBudget } from 'loot-core/client/queries';
-import { amountToInteger, integerToAmount } from 'loot-core/shared/util';
 
 import { useCategory } from '../../hooks/useCategory';
 import { theme, styles } from '../../style';

@@ -1,6 +1,6 @@
 import React, { type ReactNode, type CSSProperties } from 'react';
 
-import { type GroupedEntity } from 'loot-core/src/types/models/reports';
+import { type GroupedEntity } from 'loot-core-shared/types/models/reports';
 
 import { View } from '../../../common/View';
 

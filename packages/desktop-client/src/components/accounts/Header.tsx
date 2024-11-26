@@ -13,7 +13,7 @@ import {
   type RuleConditionEntity,
   type TransactionEntity,
   type TransactionFilterEntity,
-} from 'loot-core/types/models';
+} from 'loot-core-shared/types/models';
 
 import { useLocalPref } from '../../hooks/useLocalPref';
 import { useSplitsExpanded } from '../../hooks/useSplitsExpanded';

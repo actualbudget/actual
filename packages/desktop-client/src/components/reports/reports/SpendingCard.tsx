@@ -1,9 +1,9 @@
 import React, { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import * as monthUtils from 'loot-core/src/shared/months';
-import { amountToCurrency } from 'loot-core/src/shared/util';
-import { type SpendingWidget } from 'loot-core/src/types/models';
+import * as monthUtils from 'loot-core-shared/months';
+import { type SpendingWidget } from 'loot-core-shared/types/models';
+import { amountToCurrency } from 'loot-core-shared/util';
 
 import { styles } from '../../../style/styles';
 import { theme } from '../../../style/theme';

@@ -1,7 +1,7 @@
 // @ts-strict-ignore
 import { type CSSProperties, useState } from 'react';
 
-import * as monthUtils from 'loot-core/src/shared/months';
+import * as monthUtils from 'loot-core-shared/months';
 
 import { useResizeObserver } from '../../hooks/useResizeObserver';
 import { styles, theme } from '../../style';

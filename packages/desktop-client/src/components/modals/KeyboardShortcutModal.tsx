@@ -2,7 +2,7 @@ import { type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next'; // Import useTranslation from i18next
 import { useLocation } from 'react-router-dom';
 
-import * as Platform from 'loot-core/src/client/platform';
+import * as Platform from 'loot-core/client/platform';
 
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { Text } from '../common/Text';

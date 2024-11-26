@@ -1,9 +1,10 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 
+import { getMonthYearFormat } from 'loot-core-shared/months';
+import { integerToAmount, amountToInteger } from 'loot-core-shared/util';
+
 import { useReports } from 'loot-core/client/data-hooks/reports';
-import { getMonthYearFormat } from 'loot-core/src/shared/months';
-import { integerToAmount, amountToInteger } from 'loot-core/src/shared/util';
 
 import { useCategories } from '../../hooks/useCategories';
 import { useDateFormat } from '../../hooks/useDateFormat';

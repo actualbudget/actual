@@ -3,10 +3,9 @@ import React, { useState, type CSSProperties } from 'react';
 
 import { format as formatDate, parseISO } from 'date-fns';
 import { t } from 'i18next';
-
-import { getMonthYearFormat } from 'loot-core/src/shared/months';
-import { getRecurringDescription } from 'loot-core/src/shared/schedules';
-import { integerToCurrency } from 'loot-core/src/shared/util';
+import { getMonthYearFormat } from 'loot-core-shared/months';
+import { getRecurringDescription } from 'loot-core-shared/schedules';
+import { integerToCurrency } from 'loot-core-shared/util';
 
 import { useAccounts } from '../../hooks/useAccounts';
 import { useCategories } from '../../hooks/useCategories';

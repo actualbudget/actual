@@ -4,9 +4,9 @@ import { Trans, useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 import { useParams, useSearchParams } from 'react-router-dom';
 
-import { createBudget } from 'loot-core/src/client/actions/budgets';
-import { loggedIn } from 'loot-core/src/client/actions/user';
-import { send } from 'loot-core/src/platform/client/fetch';
+import { createBudget } from 'loot-core/client/actions/budgets';
+import { loggedIn } from 'loot-core/client/actions/user';
+import { send } from 'loot-core/platform/client/fetch';
 
 import { AnimatedLoading } from '../../../icons/AnimatedLoading';
 import { theme } from '../../../style';

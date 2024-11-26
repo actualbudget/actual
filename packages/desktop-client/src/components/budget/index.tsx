@@ -3,6 +3,8 @@ import React, { memo, useMemo, useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 
+import * as monthUtils from 'loot-core-shared/months';
+
 import {
   addNotification,
   applyBudgetAction,
@@ -16,10 +18,9 @@ import {
   pushModal,
   updateCategory,
   updateGroup,
-} from 'loot-core/src/client/actions';
-import { useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
-import { send, listen } from 'loot-core/src/platform/client/fetch';
-import * as monthUtils from 'loot-core/src/shared/months';
+} from 'loot-core/client/actions';
+import { useSpreadsheet } from 'loot-core/client/SpreadsheetProvider';
+import { send, listen } from 'loot-core/platform/client/fetch';
 
 import { useCategories } from '../../hooks/useCategories';
 import { useGlobalPref } from '../../hooks/useGlobalPref';

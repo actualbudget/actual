@@ -2,10 +2,10 @@ import React, { type CSSProperties, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { t } from 'i18next';
+import { type AccountEntity } from 'loot-core-shared/types/models';
 
-import { replaceModal, syncAndDownload } from 'loot-core/src/client/actions';
-import * as queries from 'loot-core/src/client/queries';
-import { type AccountEntity } from 'loot-core/types/models';
+import { replaceModal, syncAndDownload } from 'loot-core/client/actions';
+import * as queries from 'loot-core/client/queries';
 
 import { useAccounts } from '../../../hooks/useAccounts';
 import { useFailedAccounts } from '../../../hooks/useFailedAccounts';

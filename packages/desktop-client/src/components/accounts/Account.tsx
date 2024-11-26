@@ -13,24 +13,9 @@ import { Navigate, useParams, useLocation } from 'react-router-dom';
 
 import { debounce } from 'debounce';
 import { t } from 'i18next';
-import { v4 as uuidv4 } from 'uuid';
-
-import { validForTransfer } from 'loot-core/client/transfer';
-import { type UndoState } from 'loot-core/server/undo';
-import { useFilters } from 'loot-core/src/client/data-hooks/filters';
-import {
-  SchedulesProvider,
-  accountSchedulesQuery,
-} from 'loot-core/src/client/data-hooks/schedules';
-import * as queries from 'loot-core/src/client/queries';
-import {
-  runQuery,
-  pagedQuery,
-  type PagedQuery,
-} from 'loot-core/src/client/query-helpers';
-import { send, listen } from 'loot-core/src/platform/client/fetch';
-import { currentDay } from 'loot-core/src/shared/months';
-import { q, type Query } from 'loot-core/src/shared/query';
+import { type UndoState } from 'loot-core-server/undo';
+import { currentDay } from 'loot-core-shared/months';
+import { q, type Query } from 'loot-core-shared/query';
 import {
   updateTransaction,
   realizeTempTransactions,
@@ -38,8 +23,7 @@ import {
   ungroupTransactions,
   makeChild,
   makeAsNonChildTransactions,
-} from 'loot-core/src/shared/transactions';
-import { applyChanges, groupById } from 'loot-core/src/shared/util';
+} from 'loot-core-shared/transactions';
 import {
   type NewRuleEntity,
   type RuleActionEntity,
@@ -48,7 +32,23 @@ import {
   type RuleConditionEntity,
   type TransactionEntity,
   type TransactionFilterEntity,
-} from 'loot-core/src/types/models';
+} from 'loot-core-shared/types/models';
+import { applyChanges, groupById } from 'loot-core-shared/util';
+import { v4 as uuidv4 } from 'uuid';
+
+import { useFilters } from 'loot-core/client/data-hooks/filters';
+import {
+  SchedulesProvider,
+  accountSchedulesQuery,
+} from 'loot-core/client/data-hooks/schedules';
+import * as queries from 'loot-core/client/queries';
+import {
+  runQuery,
+  pagedQuery,
+  type PagedQuery,
+} from 'loot-core/client/query-helpers';
+import { validForTransfer } from 'loot-core/client/transfer';
+import { send, listen } from 'loot-core/platform/client/fetch';
 
 import { useAccountPreviewTransactions } from '../../hooks/useAccountPreviewTransactions';
 import { useAccounts } from '../../hooks/useAccounts';

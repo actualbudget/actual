@@ -3,6 +3,14 @@ import { useTranslation } from 'react-i18next';
 
 import { css } from '@emotion/css';
 import {
+  type balanceTypeOpType,
+  type DataEntity,
+} from 'loot-core-shared/types/models/reports';
+import {
+  amountToCurrency,
+  amountToCurrencyNoDecimal,
+} from 'loot-core-shared/util';
+import {
   AreaChart,
   Area,
   CartesianGrid,
@@ -12,15 +20,6 @@ import {
   LabelList,
   ResponsiveContainer,
 } from 'recharts';
-
-import {
-  amountToCurrency,
-  amountToCurrencyNoDecimal,
-} from 'loot-core/src/shared/util';
-import {
-  type balanceTypeOpType,
-  type DataEntity,
-} from 'loot-core/src/types/models/reports';
 
 import { usePrivacyMode } from '../../../hooks/usePrivacyMode';
 import { theme } from '../../../style';

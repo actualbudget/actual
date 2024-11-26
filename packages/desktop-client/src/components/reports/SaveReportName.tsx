@@ -2,8 +2,7 @@ import React, { type RefObject, useEffect } from 'react';
 import { Form } from 'react-aria-components';
 
 import { t } from 'i18next';
-
-import { type CustomReportEntity } from 'loot-core/types/models/reports';
+import { type CustomReportEntity } from 'loot-core-shared/types/models/reports';
 
 import { theme } from '../../style';
 import { Button } from '../common/Button2';

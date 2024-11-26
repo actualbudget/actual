@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { getCommonPayees, getPayees } from 'loot-core/src/client/actions';
-import { type State } from 'loot-core/src/client/state-types';
+import { getCommonPayees, getPayees } from 'loot-core/client/actions';
+import { type State } from 'loot-core/client/state-types';
 
 export function useCommonPayees() {
   const dispatch = useDispatch();

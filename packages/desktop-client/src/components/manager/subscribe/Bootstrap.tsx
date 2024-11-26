@@ -3,9 +3,9 @@ import React, { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 
-import { createBudget } from 'loot-core/src/client/actions/budgets';
-import { loggedIn } from 'loot-core/src/client/actions/user';
-import { send } from 'loot-core/src/platform/client/fetch';
+import { createBudget } from 'loot-core/client/actions/budgets';
+import { loggedIn } from 'loot-core/client/actions/user';
+import { send } from 'loot-core/platform/client/fetch';
 
 import { theme } from '../../../style';
 import { Button } from '../../common/Button2';
