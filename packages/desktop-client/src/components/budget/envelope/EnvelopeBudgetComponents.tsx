@@ -3,7 +3,6 @@ import React, {
   type CSSProperties,
   memo,
   useRef,
-  useState,
 } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 
@@ -14,7 +13,7 @@ import { evalArithmetic } from 'loot-core/src/shared/arithmetic';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToCurrency, amountToInteger } from 'loot-core/src/shared/util';
 
-import { useFeatureFlag } from '../../../hooks/useFeatureFlag';
+import { useContextMenu } from '../../../hooks/useContextMenu';
 import { useUndo } from '../../../hooks/useUndo';
 import { SvgCheveronDown } from '../../../icons/v1';
 import { styles, theme } from '../../../style';
@@ -207,8 +206,20 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
 
   const budgetMenuTriggerRef = useRef(null);
   const balanceMenuTriggerRef = useRef(null);
-  const [budgetMenuOpen, setBudgetMenuOpen] = useState(false);
-  const [balanceMenuOpen, setBalanceMenuOpen] = useState(false);
+  const {
+    setMenuOpen: setBudgetMenuOpen,
+    menuOpen: budgetMenuOpen,
+    handleContextMenu: handleBudgetContextMenu,
+    resetPosition: resetBudgetPosition,
+    position: budgetPosition,
+  } = useContextMenu();
+  const {
+    setMenuOpen: setBalanceMenuOpen,
+    menuOpen: balanceMenuOpen,
+    handleContextMenu: handleBalanceContextMenu,
+    resetPosition: resetBalancePosition,
+    position: balancePosition,
+  } = useContextMenu();
 
   const onMenuAction = (...args: Parameters<typeof onBudgetAction>) => {
     onBudgetAction(...args);
@@ -216,10 +227,6 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
   };
 
   const { showUndoNotification } = useUndo();
-  const contextMenusEnabled = useFeatureFlag('contextMenus');
-
-  const [crossOffset, setCrossOffset] = useState(0);
-  const [offset, setOffset] = useState(0);
 
   return (
     <View
@@ -245,13 +252,8 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
           flexDirection: 'row',
         }}
         onContextMenu={e => {
-          if (!contextMenusEnabled) return;
           if (editing) return;
-          e.preventDefault();
-          setBudgetMenuOpen(true);
-          const rect = e.currentTarget.getBoundingClientRect();
-          setCrossOffset(e.clientX - rect.left);
-          setOffset(e.clientY - rect.bottom);
+          handleBudgetContextMenu(e);
         }}
       >
         {!editing && (
@@ -270,8 +272,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
             <Button
               variant="bare"
               onPress={() => {
-                setOffset(-4);
-                setCrossOffset(2);
+                resetBudgetPosition(2, -4);
                 setBudgetMenuOpen(true);
               }}
               style={{
@@ -293,8 +294,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
               onOpenChange={() => setBudgetMenuOpen(false)}
               style={{ width: 200 }}
               isNonModal
-              offset={offset}
-              crossOffset={crossOffset}
+              {...budgetPosition}
             >
               <BudgetMenu
                 onCopyLastMonthAverage={() => {
@@ -411,17 +411,17 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
       >
         <span
           onClick={() => {
-            setOffset(-4);
-            setCrossOffset(-6);
+            resetBalancePosition(-6, -4);
             setBalanceMenuOpen(true);
           }}
           onContextMenu={e => {
-            if (!contextMenusEnabled) return;
-            e.preventDefault();
-            setBalanceMenuOpen(true);
+            handleBalanceContextMenu(e);
+            // We need to calculate differently from the hook ue to being aligned to the right
             const rect = e.currentTarget.getBoundingClientRect();
-            setCrossOffset(e.clientX - rect.right + 200 - 8);
-            setOffset(e.clientY - rect.bottom - 8);
+            resetBalancePosition(
+              e.clientX - rect.right + 200 - 8,
+              e.clientY - rect.bottom - 8,
+            );
           }}
         >
           <BalanceWithCarryover
@@ -440,8 +440,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
           onOpenChange={() => setBalanceMenuOpen(false)}
           style={{ width: 200, margin: 1 }}
           isNonModal
-          offset={offset}
-          crossOffset={crossOffset}
+          {...balancePosition}
         >
           <BalanceMovementMenu
             categoryId={category.id}

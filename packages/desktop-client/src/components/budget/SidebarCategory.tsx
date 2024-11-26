@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { type CSSProperties, type Ref, useRef, useState } from 'react';
+import React, { type CSSProperties, type Ref, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import {
@@ -7,7 +7,7 @@ import {
   type CategoryEntity,
 } from 'loot-core/src/types/models';
 
-import { useFeatureFlag } from '../../hooks/useFeatureFlag';
+import { useContextMenu } from '../../hooks/useContextMenu';
 import { SvgCheveronDown } from '../../icons/v1';
 import { theme } from '../../style';
 import { Button } from '../common/Button2';
@@ -50,12 +50,9 @@ export function SidebarCategory({
   const { t } = useTranslation();
 
   const temporary = category.id === 'new';
-  const [menuOpen, setMenuOpen] = useState(false);
+  const { setMenuOpen, menuOpen, handleContextMenu, resetPosition, position } =
+    useContextMenu();
   const triggerRef = useRef(null);
-  const contextMenusEnabled = useFeatureFlag('contextMenus');
-
-  const [crossOffset, setCrossOffset] = useState(0);
-  const [offset, setOffset] = useState(0);
 
   const displayed = (
     <View
@@ -69,14 +66,7 @@ export function SidebarCategory({
         height: 20,
       }}
       ref={triggerRef}
-      onContextMenu={e => {
-        if (!contextMenusEnabled) return;
-        e.preventDefault();
-        setMenuOpen(true);
-        const rect = e.currentTarget.getBoundingClientRect();
-        setCrossOffset(e.clientX - rect.left);
-        setOffset(e.clientY - rect.bottom);
-      }}
+      onContextMenu={handleContextMenu}
     >
       <div
         data-testid="category-name"
@@ -95,8 +85,7 @@ export function SidebarCategory({
           className="hover-visible"
           style={{ color: 'currentColor', padding: 3 }}
           onPress={() => {
-            setOffset(0);
-            setCrossOffset(0);
+            resetPosition();
             setMenuOpen(true);
           }}
         >
@@ -114,8 +103,7 @@ export function SidebarCategory({
           onOpenChange={() => setMenuOpen(false)}
           style={{ width: 200, margin: 1 }}
           isNonModal
-          offset={offset}
-          crossOffset={crossOffset}
+          {...position}
         >
           <Menu
             onMenuSelect={type => {

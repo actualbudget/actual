@@ -1,8 +1,9 @@
 // @ts-strict-ignore
-import React, { type CSSProperties, useRef, useState } from 'react';
+import React, { type CSSProperties, useRef } from 'react';
 import { type ConnectDragSource } from 'react-dnd';
 import { useTranslation } from 'react-i18next';
 
+import { useContextMenu } from '../../hooks/useContextMenu';
 import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { SvgExpandArrow } from '../../icons/v0';
 import { SvgCheveronDown } from '../../icons/v1';
@@ -58,12 +59,9 @@ export function SidebarGroup({
   const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
 
   const temporary = group.id === 'new';
-  const [menuOpen, setMenuOpen] = useState(false);
+  const { setMenuOpen, menuOpen, handleContextMenu, resetPosition, position } =
+    useContextMenu();
   const triggerRef = useRef(null);
-  const contextMenusEnabled = useFeatureFlag('contextMenus');
-
-  const [crossOffset, setCrossOffset] = useState(0);
-  const [offset, setOffset] = useState(0);
 
   const displayed = (
     <View
@@ -78,14 +76,7 @@ export function SidebarGroup({
       onClick={() => {
         onToggleCollapse(group.id);
       }}
-      onContextMenu={e => {
-        if (!contextMenusEnabled) return;
-        e.preventDefault();
-        setMenuOpen(true);
-        const rect = e.currentTarget.getBoundingClientRect();
-        setCrossOffset(e.clientX - rect.left);
-        setOffset(e.clientY - rect.bottom);
-      }}
+      onContextMenu={handleContextMenu}
     >
       {!dragPreview && (
         <SvgExpandArrow
@@ -118,8 +109,7 @@ export function SidebarGroup({
               variant="bare"
               className="hover-visible"
               onPress={() => {
-                setOffset(0);
-                setCrossOffset(0);
+                resetPosition();
                 setMenuOpen(true);
               }}
               style={{ padding: 3 }}
@@ -134,8 +124,7 @@ export function SidebarGroup({
               onOpenChange={() => setMenuOpen(false)}
               style={{ width: 200, margin: 1 }}
               isNonModal
-              offset={offset}
-              crossOffset={crossOffset}
+              {...position}
             >
               <Menu
                 onMenuSelect={type => {
