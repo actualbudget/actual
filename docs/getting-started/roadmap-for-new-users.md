@@ -6,7 +6,7 @@ Our documentation is plentiful; getting started on the right track can be overwh
 
 In other words - this very part of our documentation is for you who are entirely new to Actual.
 
-Below, we have outlined various use cases and, under each use case, give pointers to where to start.
+Below, we have outlined various use cases and, under each use case, give pointers on where to start.
 
 ## I just want to look at screenshots before doing anything.
 
