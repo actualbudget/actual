@@ -1,7 +1,7 @@
 # Scheduled Transactions
 
 
-If you already have data in your accounts, you can have Actual proposed schedules based on the available data.
+If you already have data in your accounts, you can have Actual propose schedules based on the available data.
 
 The system is very flexible, and you can schedule based on various factors:
 
