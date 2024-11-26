@@ -1,6 +1,6 @@
 # Reports
 
-This view give you access to both the two built in reports, _Net Worth_ and _Cash Flow_, but also your own custom reports.
+This view gives you access to both the two built in reports, _Net Worth_ and _Cash Flow_, but also your own custom reports.
 
 All reports in this view are shown in their small, tiled, version. Clicking on a tile will take you to that very report.
 
