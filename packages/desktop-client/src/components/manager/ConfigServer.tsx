@@ -111,7 +111,6 @@ export function ConfigServer() {
   async function onCreateTestFile() {
     await setServerUrl(null);
     await createBudget({ testMode: true });
-    window.__navigate('/');
   }
 
   return (
@@ -250,7 +249,10 @@ export function ConfigServer() {
               <Button
                 variant="primary"
                 style={{ marginLeft: 15 }}
-                onPress={onCreateTestFile}
+                onPress={() => {
+                  onCreateTestFile();
+                  navigate('/');
+                }}
               >
                 {t('Create test file')}
               </Button>
