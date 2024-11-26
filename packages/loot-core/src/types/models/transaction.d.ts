@@ -26,5 +26,4 @@ export interface TransactionEntity {
   subtransactions?: TransactionEntity[];
   _unmatched?: boolean;
   _deleted?: boolean;
-  _account?: AccountEntity;
 }

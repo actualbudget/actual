@@ -13,6 +13,7 @@ import {
   type TransactionEntity,
   type RuleActionEntity,
   type RuleEntity,
+  AccountEntity,
 } from '../../types/models';
 import { schemaConfig } from '../aql';
 import * as db from '../db';
@@ -842,6 +843,7 @@ export async function updateCategoryRules(transactions) {
 
 export type TransactionForRules = TransactionEntity & {
   payee_name?: string;
+  _account?: AccountEntity;
 };
 
 export async function prepareTransactionForRules(
