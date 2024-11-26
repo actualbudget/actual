@@ -1,0 +1,1 @@
+Figure out why loot-core-server is not detecting loot-core-shared files.
