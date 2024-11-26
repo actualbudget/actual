@@ -102,7 +102,7 @@ export function TransactionList({
   );
 
   useScrollListener(({ hasScrolledToEnd }) => {
-    if (hasScrolledToEnd('down', 5)) {
+    if (hasScrolledToEnd('down', 100)) {
       onLoadMore?.();
     }
   });
