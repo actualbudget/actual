@@ -1,12 +1,11 @@
 // @ts-strict-ignore
 import React, { useState, useEffect, useRef, type CSSProperties } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
+import { closeBudget, getUserData, signOut } from 'loot-core/client/actions';
 import { type State } from 'loot-core/src/client/state-types';
 
-import { useActions } from '../hooks/useActions';
-import { useNavigate } from '../hooks/useNavigate';
 import { theme, styles } from '../style';
 
 import { Button } from './common/Button2';
@@ -15,6 +14,7 @@ import { Popover } from './common/Popover';
 import { Text } from './common/Text';
 import { View } from './common/View';
 import { useServerURL } from './ServerContext';
+import { useNavigate } from '../hooks/useNavigate';
 
 type LoggedInUserProps = {
   hideIfNoServer?: boolean;
@@ -27,22 +27,28 @@ export function LoggedInUser({
   color,
 }: LoggedInUserProps) {
   const { t } = useTranslation();
-
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
   const userData = useSelector((state: State) => state.user.data);
-  const { getUserData, signOut, closeBudget } = useActions();
   const [loading, setLoading] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
   const serverUrl = useServerURL();
   const triggerRef = useRef(null);
 
   useEffect(() => {
-    getUserData().then(() => setLoading(false));
+    async function init() {
+      await dispatch(getUserData());
+    }
+
+    init().then(() => setLoading(false));
   }, []);
 
-  const navigate = useNavigate();
+  async function onCloseBudget() {
+    await dispatch(closeBudget());
+  }
 
   async function onChangePassword() {
-    await closeBudget();
+    await onCloseBudget();
     navigate('/change-password');
   }
 
@@ -54,14 +60,14 @@ export function LoggedInUser({
         onChangePassword();
         break;
       case 'sign-in':
-        await closeBudget();
+        await onCloseBudget();
         navigate('/login');
         break;
       case 'sign-out':
-        signOut();
+        dispatch(signOut());
         break;
       case 'config-server':
-        await closeBudget();
+        await onCloseBudget();
         navigate('/config-server');
         break;
       default:
