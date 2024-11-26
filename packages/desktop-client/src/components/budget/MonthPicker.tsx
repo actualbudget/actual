@@ -90,6 +90,7 @@ export const MonthPicker = ({
             position: 'absolute',
             left: 0,
             padding: '3px 3px',
+            marginLeft: '4px',
           }}
         >
           <View title={t('Today')}>
