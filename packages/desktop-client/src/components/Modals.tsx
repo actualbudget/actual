@@ -14,6 +14,7 @@ import { useDispatch } from '../redux';
 import { ModalTitle, ModalHeader } from './common/Modal';
 import { AccountAutocompleteModal } from './modals/AccountAutocompleteModal';
 import { AccountMenuModal } from './modals/AccountMenuModal';
+import { BudgetAutomationsModal } from './modals/BudgetAutomationsModal';
 import { BudgetListModal } from './modals/BudgetListModal';
 import { BudgetPageMenuModal } from './modals/BudgetPageMenuModal';
 import { CategoryAutocompleteModal } from './modals/CategoryAutocompleteModal';
@@ -38,7 +39,6 @@ import { EnvelopeBudgetMonthMenuModal } from './modals/EnvelopeBudgetMonthMenuMo
 import { EnvelopeBudgetSummaryModal } from './modals/EnvelopeBudgetSummaryModal';
 import { EnvelopeToBudgetMenuModal } from './modals/EnvelopeToBudgetMenuModal';
 import { FixEncryptionKeyModal } from './modals/FixEncryptionKeyModal';
-import { GoalsEditModal } from './modals/GoalsEditModal';
 import { GoalTemplateModal } from './modals/GoalTemplateModal';
 import { GoCardlessExternalMsgModal } from './modals/GoCardlessExternalMsgModal';
 import { GoCardlessInitialiseModal } from './modals/GoCardlessInitialiseModal';
@@ -99,8 +99,8 @@ export function Modals() {
         case 'goal-templates':
           return budgetId ? <GoalTemplateModal key={name} /> : null;
 
-        case 'category-goals-edit':
-          return budgetId ? <GoalsEditModal key={name} /> : null;
+        case 'category-automations-edit':
+          return budgetId ? <BudgetAutomationsModal key={name} /> : null;
 
         case 'keyboard-shortcuts':
           // don't show the hotkey help modal when a budget is not open

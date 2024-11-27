@@ -342,7 +342,7 @@ type FinanceModals = {
   };
   'keyboard-shortcuts': EmptyObject;
   'goal-templates': EmptyObject;
-  'category-goals-edit': EmptyObject;
+  'category-automations-edit': EmptyObject;
 };
 
 export type PushModalAction = {

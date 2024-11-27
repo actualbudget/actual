@@ -1,17 +1,15 @@
 import React, { type ComponentProps, type CSSProperties } from 'react';
-import { useDispatch } from 'react-redux';
 
 import { pushModal } from 'loot-core/client/actions';
 import { type Template } from 'loot-core/server/budget/types/templates';
 
 import { useFeatureFlag } from '../../../hooks/useFeatureFlag';
 import { SvgChartPie } from '../../../icons/v1';
+import { useDispatch } from '../../../redux';
 import { theme } from '../../../style';
 import { Button } from '../../common/Button2';
 import { Tooltip } from '../../common/Tooltip';
 import { View } from '../../common/View';
-
-const arr = [];
 
 type GoalButtonProps = {
   id: string;
@@ -28,7 +26,7 @@ export function GoalButton({
   tooltipPosition = 'bottom start',
   style,
 }: GoalButtonProps) {
-  const templates: Template[] = arr;
+  const templates: Template[] = [];
   const hasGoals = !!templates.length;
 
   const dispatch = useDispatch();
@@ -59,7 +57,7 @@ export function GoalButton({
             ...(hasGoals && { display: 'flex !important' }),
           }}
           onPress={() => {
-            dispatch(pushModal('category-goals-edit'));
+            dispatch(pushModal('category-automations-edit'));
           }}
         >
           <SvgChartPie style={{ width, height, flexShrink: 0 }} />
