@@ -73,7 +73,7 @@ While making these categories, remember that all money entering or leaving your 
 By default, Actual will start you off with a few basic expense categories.
 If you aren't sure what categories you need, Actual will start you with a few basic ones.
 * **Food**: all grocery and restaurant spending
-* **Bills**: all bills that charge that same amount each month
+* **Bills**: all bills that charge the same amount each month
 * **Bills (Flexible)**: All bills that vary month to month
 * **Savings**: Funds you have saved, or are going to transfer to an off budget savings account
 * **General**: Everything else
@@ -98,7 +98,7 @@ Maybe you have multiple income streams, make a category for each one.
 You may also want a category for interest and dividends.
 
 ### Group your expense categories
-Actual has a nifty and useful feature where you can group your expense categories into groups. 
+Actual has a nifty and useful feature where you can organize your expense categories into groups. 
 This not only provides more visibility and control over your spending but also empowers you 
 to make informed financial decisions.
 When using the [envelope method](/docs/getting-started/envelope-budgeting), one will move available funds between categories when 
@@ -130,7 +130,7 @@ Personal Care, Gifts, Entertainment, Streaming services, News (paper) subscripti
 
 4. **For a rainy day**.  Certain expenses you know will happen in the future, but you don't know when. 
 You should have at least one category named *Emergency Fund*. Other examples may be Car Maintenance, 
-Replacing Stove, and Replacing Washing Machines. 
+Replacing Stove, and Replacing Washing Machine. 
 
 
 5. **Savings goals**.  This is where you keep your savings goals categorised *on budget*. What we 
@@ -161,7 +161,7 @@ time is *how much money to assign to each category*. Fear not; this part of ou
 guide will help you with this.
 
 The best way of bootstrapping your budget is to rely on how you have spent your money and what 
-income you have had in the last three months. Even better, if you can do this for the last six 
+income you have had in the last three months. It's even better if you can do this for the last six 
 or twelve months.
 
 If you use cash for your daily spending, the available funds in those categories will be 
@@ -191,9 +191,9 @@ We can now see the budget numbers to be used for the month of August in the Aver
 
 It's important to note that this method  only works correctly if you use a debit or credit card for all your purchases. 
 As a result, your actual *start date* for your budget is in the past. We will reiterate our warning on
-[how to set up accounts](#how-to-setup-accounts): going to far back, might make your budget completely
+[how to set up accounts](#how-to-setup-accounts): going too far back might make your budget completely
 out of wack.  It's crucial to avoid this, as you can easily spend more time trying to find out what's 
-wrong with your budget and spent numbers as "nothing adds up" anymore.
+wrong with your budget and spent numbers because "nothing adds up" anymore.
 
 
 :::info
@@ -225,21 +225,21 @@ You can also set specific categories to various averages:
 
 
 Budgeting, even without historical data, can help you gain control over your 
-finances, reduce stress, and achieve your financial goals. It just takes
+finances, reduce stress, and achieve your financial goals. It just takes a
 little bit of effort to get going.
 
 You can start using Actual without actually assigning your available funds before you start
 budgeting.
 
 
-1. Record every transaction you make daily. If you do it weekly, the chances are that you have 
+1. Record every transaction you make daily. If you do it weekly, the chances are that you will have 
    forgotten some cash transactions. One way to avoid forgetting transactions is, of course, 
    to keep all receipts.
 
 2. Take special notice of when you use cash. Petty cash transactions are easy to overlook, 
     but all those daily chocolates for "only" 0.50 and all those coffees for "only" 10 add up 
     over a month. If you repeatedly make cash withdrawals and do not know what you are spending 
-    your money on, then using any expense and budget tracking tools in the world will not help you.
+    your money on, then no expense and budget tracking tools in the world will be able to help you.
 
 3. At the end of each week, set the *Budgeted* column in the Budget view to the same value 
    as what you see in the *Spent* column. If done correctly, the sum under *To Budget* should 
@@ -266,7 +266,7 @@ Shortly this method goes like this:
 
 1. Allocate all available funds (income) into your categories whenever you get income.
 2. Track your spending in each category. Every time a new transaction is entered into Actual 
-   (either manually or by importing from your bank statements). Your process should 
+   (either manually or by importing from your bank statements), your process should 
     look something like this:
     1. Give that transaction a category.
     2. If you have enough money budgeted for that category, you're done!
@@ -294,7 +294,7 @@ and [Reports](/docs/reports/index.md).
 
 If you feel a bit overwhelmed, don't worry.
 
-Starting budgeting is confusing, especially if you are new to zero-sum budgeting.
+Getting started with budgeting is confusing, especially if you are new to zero-sum budgeting.
 
 It is a strict, but powerful, way to handle personal finance.
 
