@@ -102,7 +102,7 @@ Your Pod will be created when you click on the green **ADD POD* button. This ste
 
 ## Your pod is now ready to be used
 
-When you click on the green **OPEN POD** button you will be taken your Pod. 
+When you click on the green **OPEN POD** button you will be taken to your Pod. 
 
 The address for your Actual Budget is found in the Domain field. In the screenshot example, this is
 `https://berserk-bullmastiff.pikapod.net/budget/`. Yours will be something completely different.
