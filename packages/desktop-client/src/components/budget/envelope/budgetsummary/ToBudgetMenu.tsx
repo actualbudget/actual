@@ -25,7 +25,7 @@ export function ToBudgetMenu({
   const { t } = useTranslation();
 
   const toBudget = useEnvelopeSheetValue(envelopeBudget.toBudget) ?? 0;
-  const forNextMonth = useEnvelopeSheetValue(envelopeBudget.forNextMonth);
+  const forNextMonth = useEnvelopeSheetValue(envelopeBudget.forNextMonth) ?? 0;
   const items = [
     ...(toBudget > 0
       ? [
