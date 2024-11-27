@@ -38,7 +38,7 @@ You will be greeted with the following screen.
 
 ![](/img/pikapods-setup/pikapods-1-register-login.png)
 
-Click on the **register** inside the blue banner, which will take you to the user registration screen.
+Click on the **register** link inside the blue banner, which will take you to the user registration screen.
 
 
 ## The user registration screen
@@ -102,7 +102,7 @@ Your Pod will be created when you click on the green **ADD POD* button. This ste
 
 ## Your pod is now ready to be used
 
-When click on the green **OPEN POD** you will be taken your Pod. 
+When you click on the green **OPEN POD** button you will be taken your Pod. 
 
 The address for your Actual Budget is found in the Domain field. In the screenshot example, this is
 `https://berserk-bullmastiff.pikapod.net/budget/`. Yours will be something completely different.
