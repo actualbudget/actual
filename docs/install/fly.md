@@ -11,7 +11,7 @@ In order to deploy Actual to Fly.io, you’ll need to use their command line int
 Fly.io has a "pay as you go" plan for new users with no monthly fee, with actual usage billed monthly. Paid plans start at $5/month and include a limited amount of free compute. See [Pricing Details](https://fly.io/docs/about/pricing/) for more information.
 
 To begin, you’ll need to sign up for an account. Go to [fly.io](https://fly.io) and click “Get Started,” then fill in
-the form. Note that Fly requires that credit card details for sign up. See [their docs on how they use credit cards](https://fly.io/docs/about/credit-cards/) for more information.
+the form. Note that Fly requires you to provide credit card details for sign up. See [their docs on how they use credit cards](https://fly.io/docs/about/credit-cards/) for more information.
 
 ### Accessing the `fly` command line tool
 
@@ -144,7 +144,7 @@ You can now visit your very own instance of Actual by opening the link on the la
 
 ## Configuring Actual
 
-Now that Actual has been launched, you should now be able to navigate to Actual using the URL
+Now that Actual has been launched, you should be able to navigate to Actual using the URL
 provided by the Fly command above earlier.
 
 <details><summary>Forgot the URL? Here’s how to find it</summary>
