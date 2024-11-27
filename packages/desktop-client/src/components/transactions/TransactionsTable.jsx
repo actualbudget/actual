@@ -1363,7 +1363,7 @@ const Transaction = memo(function Transaction({
                 borderRadius: 4,
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
-                display: 'inline-block'
+                display: 'inline-block',
               }}
             >
               {titleFirst(categoryId)}
