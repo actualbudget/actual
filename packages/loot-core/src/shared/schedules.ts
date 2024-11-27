@@ -272,11 +272,15 @@ export function extractScheduleConds(conditions) {
   };
 }
 
-export function getScheduledAmount(amount) {
-  if (amount && typeof amount !== 'number') {
-    return Math.round((amount.num1 + amount.num2) / 2);
+export function getScheduledAmount(
+  amount: number | { num1: number; num2: number },
+  inverse: boolean = false,
+): number {
+  if (typeof amount === 'number') {
+    return inverse ? -amount : amount;
   }
-  return amount;
+  const avg = (amount.num1 + amount.num2) / 2;
+  return inverse ? -Math.round(avg) : Math.round(avg);
 }
 
 export function describeSchedule(schedule, payee) {

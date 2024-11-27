@@ -1,4 +1,5 @@
 import { type ComponentProps, type ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import * as monthUtils from 'loot-core/src/shared/months';
 import {
@@ -6,7 +7,6 @@ import {
   type TimeFrame,
 } from 'loot-core/types/models';
 
-import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { Button } from '../common/Button2';
 import { Select } from '../common/Select';
 import { SpaceBetween } from '../common/SpaceBetween';
@@ -60,7 +60,7 @@ export function Header({
   onConditionsOpChange,
   children,
 }: HeaderProps) {
-  const isDashboardsFeatureEnabled = useFeatureFlag('dashboards');
+  const { t } = useTranslation();
   const { isNarrowWidth } = useResponsive();
 
   return (
@@ -78,7 +78,7 @@ export function Header({
         }}
       >
         <SpaceBetween gap={isNarrowWidth ? 5 : undefined}>
-          {isDashboardsFeatureEnabled && mode && (
+          {mode && (
             <Button
               variant={mode === 'static' ? 'normal' : 'primary'}
               onPress={() => {
@@ -92,7 +92,7 @@ export function Header({
                 onChangeDates(newStart, newEnd, newMode);
               }}
             >
-              {mode === 'static' ? 'Static' : 'Live'}
+              {mode === 'static' ? t('Static') : t('Live')}
             </Button>
           )}
 
@@ -111,7 +111,7 @@ export function Header({
               defaultLabel={monthUtils.format(start, 'MMMM, yyyy')}
               options={allMonths.map(({ name, pretty }) => [name, pretty])}
             />
-            <View>to</View>
+            <View>{t('to')}</View>
             <Select
               onChange={newValue =>
                 onChangeDates(
@@ -135,26 +135,26 @@ export function Header({
               variant="bare"
               onPress={() => onChangeDates(...getLatestRange(1))}
             >
-              1 month
+              {t('1 month')}
             </Button>
           )}
           <Button
             variant="bare"
             onPress={() => onChangeDates(...getLatestRange(2))}
           >
-            3 months
+            {t('3 months')}
           </Button>
           <Button
             variant="bare"
             onPress={() => onChangeDates(...getLatestRange(5))}
           >
-            6 months
+            {t('6 months')}
           </Button>
           <Button
             variant="bare"
             onPress={() => onChangeDates(...getLatestRange(11))}
           >
-            1 Year
+            {t('1 Year')}
           </Button>
           <Button
             variant="bare"
@@ -164,7 +164,7 @@ export function Header({
               )
             }
           >
-            All Time
+            {t('All Time')}
           </Button>
 
           {filters && (

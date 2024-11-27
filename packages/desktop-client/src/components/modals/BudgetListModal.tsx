@@ -1,6 +1,8 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 
+import { t } from 'i18next';
+
 import { useMetadataPref } from '../../hooks/useMetadataPref';
 import { Modal, ModalHeader, ModalCloseButton } from '../common/Modal';
 import { Text } from '../common/Text';
@@ -18,7 +20,7 @@ export function BudgetListModal() {
       {({ state: { close } }) => (
         <>
           <ModalHeader
-            title="Switch Budget File"
+            title={t('Switch Budget File')}
             rightContent={<ModalCloseButton onPress={close} />}
           />
           <View
@@ -29,7 +31,7 @@ export function BudgetListModal() {
             }}
           >
             <Text style={{ fontSize: 17, fontWeight: 400 }}>
-              Switching from:
+              {t('Switching from:')}
             </Text>
             <Text style={{ fontSize: 17, fontWeight: 700 }}>
               {currentFile?.name}

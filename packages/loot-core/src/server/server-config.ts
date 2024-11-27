@@ -12,8 +12,16 @@ let config: ServerConfig | null = null;
 
 function joinURL(base: string | URL, ...paths: string[]): string {
   const url = new URL(base);
-  url.pathname = fs.join(...paths);
+  url.pathname = fs.join(url.pathname, ...paths);
   return url.toString();
+}
+
+export function isValidBaseURL(base: string): boolean {
+  try {
+    return Boolean(new URL(base));
+  } catch (error) {
+    return false;
+  }
 }
 
 export function setServer(url: string): void {

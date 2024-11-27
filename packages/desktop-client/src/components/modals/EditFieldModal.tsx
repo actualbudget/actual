@@ -1,6 +1,12 @@
-import React, { useState } from 'react';
+import React, {
+  type CSSProperties,
+  type ReactNode,
+  useRef,
+  useState,
+} from 'react';
 
 import { parseISO, format as formatDate, parse as parseDate } from 'date-fns';
+import { t } from 'i18next';
 
 import { currentDay, dayFromDate } from 'loot-core/src/shared/months';
 import { amountToInteger } from 'loot-core/src/shared/util';
@@ -15,19 +21,43 @@ import { SectionLabel } from '../forms';
 import { useResponsive } from '../responsive/ResponsiveProvider';
 import { DateSelect } from '../select/DateSelect';
 
-export function EditFieldModal({ name, onSubmit, onClose }) {
-  const dateFormat = useDateFormat() || 'MM/dd/yyyy';
+const itemStyle: CSSProperties = {
+  fontSize: 17,
+  fontWeight: 400,
+  paddingTop: 8,
+  paddingBottom: 8,
+};
 
-  function onSelectNote(value, mode) {
+type NoteAmendMode = 'replace' | 'prepend' | 'append';
+
+type EditFieldModalProps = {
+  name: string;
+  onSubmit: (
+    name: string,
+    value: string | number,
+    mode?: NoteAmendMode,
+  ) => void;
+  onClose: () => void;
+};
+
+export function EditFieldModal({
+  name,
+  onSubmit,
+  onClose,
+}: EditFieldModalProps) {
+  const dateFormat = useDateFormat() || 'MM/dd/yyyy';
+  const noteInputRef = useRef<HTMLInputElement | null>(null);
+
+  function onSelectNote(value: string, mode?: NoteAmendMode) {
     if (value != null) {
       onSubmit(name, value, mode);
     }
   }
 
-  function onSelect(value) {
+  function onSelect(value: string | number) {
     if (value != null) {
       // Process the value if needed
-      if (name === 'amount') {
+      if (name === 'amount' && typeof value === 'number') {
         value = amountToInteger(value);
       }
 
@@ -35,26 +65,21 @@ export function EditFieldModal({ name, onSubmit, onClose }) {
     }
   }
 
-  const itemStyle = {
-    fontSize: 17,
-    fontWeight: 400,
-    paddingTop: 8,
-    paddingBottom: 8,
-  };
-
   const { isNarrowWidth } = useResponsive();
-  let label, editor, minWidth;
-  const inputStyle = {
-    ':focus': { boxShadow: 0 },
+  let label: string;
+  let editor: (props: { close: () => void }) => ReactNode;
+  let minWidth: number | undefined;
+
+  const inputStyle: CSSProperties = {
     ...(isNarrowWidth && itemStyle),
   };
 
-  const [noteAmend, onChangeMode] = useState('replace');
+  const [noteAmend, onChangeMode] = useState<NoteAmendMode>('replace');
 
   switch (name) {
     case 'date':
       const today = currentDay();
-      label = 'Date';
+      label = t('Date');
       minWidth = 350;
       editor = ({ close }) => (
         <DateSelect
@@ -72,7 +97,7 @@ export function EditFieldModal({ name, onSubmit, onClose }) {
       break;
 
     case 'notes':
-      label = 'Notes';
+      label = t('Notes');
       editor = ({ close }) => (
         <>
           <View
@@ -87,7 +112,6 @@ export function EditFieldModal({ name, onSubmit, onClose }) {
             }}
           >
             <Button
-              selected={noteAmend === 'prepend'}
               style={{
                 padding: '5px 10px',
                 width: '33.33%',
@@ -113,13 +137,12 @@ export function EditFieldModal({ name, onSubmit, onClose }) {
               }}
               onPress={() => {
                 onChangeMode('prepend');
-                document.getElementById('noteInput').focus();
+                noteInputRef.current?.focus();
               }}
             >
-              Prepend
+              {t('Prepend')}
             </Button>
             <Button
-              selected={noteAmend === 'replace'}
               style={{
                 padding: '5px 10px',
                 width: '33.34%',
@@ -145,13 +168,12 @@ export function EditFieldModal({ name, onSubmit, onClose }) {
               }}
               onPress={() => {
                 onChangeMode('replace');
-                document.getElementById('noteInput').focus();
+                noteInputRef.current?.focus();
               }}
             >
-              Replace
+              {t('Replace')}
             </Button>
             <Button
-              selected={noteAmend === 'append'}
               style={{
                 padding: '5px 10px',
                 width: '33.33%',
@@ -177,18 +199,18 @@ export function EditFieldModal({ name, onSubmit, onClose }) {
               }}
               onPress={() => {
                 onChangeMode('append');
-                document.getElementById('noteInput').focus();
+                noteInputRef.current?.focus();
               }}
             >
-              Append
+              {t('Append')}
             </Button>
           </View>
           <Input
-            id="noteInput"
+            inputRef={noteInputRef}
             autoFocus
             focused={true}
             onEnter={e => {
-              onSelectNote(e.target.value, noteAmend);
+              onSelectNote(e.currentTarget.value, noteAmend);
               close();
             }}
             style={inputStyle}
@@ -198,12 +220,12 @@ export function EditFieldModal({ name, onSubmit, onClose }) {
       break;
 
     case 'amount':
-      label = 'Amount';
+      label = t('Amount');
       editor = ({ close }) => (
         <Input
           focused={true}
           onEnter={e => {
-            onSelect(e.target.value);
+            onSelect(e.currentTarget.value);
             close();
           }}
           style={inputStyle}

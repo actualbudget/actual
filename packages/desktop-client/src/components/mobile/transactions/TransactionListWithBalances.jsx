@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { useSelector } from 'react-redux';
+
+import { t } from 'i18next';
 
 import { SelectedProvider, useSelected } from '../../../hooks/useSelected';
 import { SvgSearchAlternate } from '../../../icons/v2';
@@ -68,12 +69,6 @@ export function TransactionListWithBalances({
   onOpenTransaction,
   onRefresh,
 }) {
-  const newTransactions = useSelector(state => state.queries.newTransactions);
-
-  const isNewTransaction = id => {
-    return newTransactions.includes(id);
-  };
-
   const selectedInst = useSelected('transactions', transactions);
 
   return (
@@ -109,7 +104,6 @@ export function TransactionListWithBalances({
         <TransactionList
           isLoading={isLoading}
           transactions={transactions}
-          isNewTransaction={isNewTransaction}
           onLoadMore={onLoadMore}
           onOpenTransaction={onOpenTransaction}
         />
@@ -129,7 +123,10 @@ function BalanceWithCleared({ balanceUncleared, balanceCleared, balance }) {
           flexBasis: '33%',
         }}
       >
-        <Label title="Cleared" style={{ textAlign: 'center', fontSize: 12 }} />
+        <Label
+          title={t('Cleared')}
+          style={{ textAlign: 'center', fontSize: 12 }}
+        />
         <CellValue binding={balanceCleared} type="financial">
           {props => (
             <CellValueText
@@ -152,7 +149,7 @@ function BalanceWithCleared({ balanceUncleared, balanceCleared, balance }) {
         }}
       >
         <Label
-          title="Uncleared"
+          title={t('Uncleared')}
           style={{ textAlign: 'center', fontSize: 12 }}
         />
         <CellValue binding={balanceUncleared} type="financial">
@@ -176,7 +173,7 @@ function BalanceWithCleared({ balanceUncleared, balanceCleared, balance }) {
 function Balance({ balance }) {
   return (
     <View style={{ flexBasis: '33%' }}>
-      <Label title="Balance" style={{ textAlign: 'center' }} />
+      <Label title={t('Balance')} style={{ textAlign: 'center' }} />
       <CellValue binding={balance} type="financial">
         {props => (
           <CellValueText

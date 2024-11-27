@@ -3,12 +3,9 @@ import React, {
   useCallback,
   useEffect,
   useMemo,
-  useRef,
   useState,
 } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-
-import { useDebounceCallback } from 'usehooks-ts';
 
 import {
   collapseModals,
@@ -21,11 +18,14 @@ import {
   updateAccount,
 } from 'loot-core/client/actions';
 import {
+  accountSchedulesQuery,
   SchedulesProvider,
-  useDefaultSchedulesQueryTransform,
 } from 'loot-core/client/data-hooks/schedules';
+import {
+  useTransactions,
+  useTransactionsSearch,
+} from 'loot-core/client/data-hooks/transactions';
 import * as queries from 'loot-core/client/queries';
-import { type PagedQuery, pagedQuery } from 'loot-core/client/query-helpers';
 import { listen, send } from 'loot-core/platform/client/fetch';
 import { type Query } from 'loot-core/shared/query';
 import { isPreviewId } from 'loot-core/shared/transactions';
@@ -34,10 +34,10 @@ import {
   type TransactionEntity,
 } from 'loot-core/types/models';
 
+import { useAccountPreviewTransactions } from '../../../hooks/useAccountPreviewTransactions';
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import { useFailedAccounts } from '../../../hooks/useFailedAccounts';
 import { useNavigate } from '../../../hooks/useNavigate';
-import { usePreviewTransactions } from '../../../hooks/usePreviewTransactions';
 import { styles, theme } from '../../../style';
 import { Button } from '../../common/Button2';
 import { Text } from '../../common/Text';
@@ -56,7 +56,11 @@ export function AccountTransactions({
   readonly accountId?: string;
   readonly accountName: string;
 }) {
-  const schedulesTransform = useDefaultSchedulesQueryTransform(accountId);
+  const schedulesQuery = useMemo(
+    () => accountSchedulesQuery(accountId),
+    [accountId],
+  );
+
   return (
     <Page
       header={
@@ -74,7 +78,7 @@ export function AccountTransactions({
       }
       padding={0}
     >
-      <SchedulesProvider transform={schedulesTransform}>
+      <SchedulesProvider query={schedulesQuery}>
         <TransactionListWithPreviews
           account={account}
           accountName={accountName}
@@ -99,33 +103,39 @@ function AccountHeader({ account }: { readonly account: AccountEntity }) {
 
   const dispatch = useDispatch();
 
-  const onSave = (account: AccountEntity) => {
-    dispatch(updateAccount(account));
-  };
+  const onSave = useCallback(
+    (account: AccountEntity) => {
+      dispatch(updateAccount(account));
+    },
+    [dispatch],
+  );
 
-  const onSaveNotes = async (id: string, notes: string) => {
+  const onSaveNotes = useCallback(async (id: string, notes: string) => {
     await send('notes-save', { id, note: notes });
-  };
+  }, []);
 
-  const onEditNotes = (id: string) => {
-    dispatch(
-      pushModal('notes', {
-        id: `account-${id}`,
-        name: account.name,
-        onSave: onSaveNotes,
-      }),
-    );
-  };
+  const onEditNotes = useCallback(
+    (id: string) => {
+      dispatch(
+        pushModal('notes', {
+          id: `account-${id}`,
+          name: account.name,
+          onSave: onSaveNotes,
+        }),
+      );
+    },
+    [account.name, dispatch, onSaveNotes],
+  );
 
-  const onCloseAccount = () => {
+  const onCloseAccount = useCallback(() => {
     dispatch(openAccountCloseModal(account.id));
-  };
+  }, [account.id, dispatch]);
 
-  const onReopenAccount = () => {
+  const onReopenAccount = useCallback(() => {
     dispatch(reopenAccount(account.id));
-  };
+  }, [account.id, dispatch]);
 
-  const onClick = () => {
+  const onClick = useCallback(() => {
     dispatch(
       pushModal('account-menu', {
         accountId: account.id,
@@ -135,7 +145,15 @@ function AccountHeader({ account }: { readonly account: AccountEntity }) {
         onReopenAccount,
       }),
     );
-  };
+  }, [
+    account.id,
+    dispatch,
+    onCloseAccount,
+    onEditNotes,
+    onReopenAccount,
+    onSave,
+  ]);
+
   return (
     <View
       style={{
@@ -196,69 +214,60 @@ function TransactionListWithPreviews({
   accountName,
 }: {
   readonly account?: AccountEntity;
-  readonly accountId?: string;
-  readonly accountName: string;
+  readonly accountId?:
+    | AccountEntity['id']
+    | 'budgeted'
+    | 'offbudget'
+    | 'uncategorized';
+  readonly accountName: AccountEntity['name'] | string;
 }) {
-  const [currentQuery, setCurrentQuery] = useState<Query>();
-  const [isSearching, setIsSearching] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [transactions, setTransactions] = useState<
-    ReadonlyArray<TransactionEntity>
-  >([]);
-  const prependTransactions = usePreviewTransactions();
-  const allTransactions = useMemo(
+  const baseTransactionsQuery = useCallback(
     () =>
-      !isSearching ? prependTransactions.concat(transactions) : transactions,
-    [isSearching, prependTransactions, transactions],
+      queries.transactions(accountId).options({ splits: 'none' }).select('*'),
+    [accountId],
   );
+
+  const [transactionsQuery, setTransactionsQuery] = useState<Query>(
+    baseTransactionsQuery(),
+  );
+  const {
+    transactions,
+    isLoading,
+    reload: reloadTransactions,
+    loadMore: loadMoreTransactions,
+  } = useTransactions({
+    query: transactionsQuery,
+  });
+
+  const { previewTransactions } = useAccountPreviewTransactions({
+    accountId: account?.id || '',
+  });
 
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const onRefresh = () => {
-    dispatch(syncAndDownload(accountId));
-  };
-
-  const makeRootQuery = useCallback(
-    () => queries.makeTransactionsQuery(accountId).options({ splits: 'none' }),
-    [accountId],
-  );
-
-  const paged = useRef<PagedQuery>();
-
-  const updateQuery = useCallback((query: Query) => {
-    paged.current?.unsubscribe();
-    setIsLoading(true);
-    paged.current = pagedQuery(
-      query.options({ splits: 'none' }).select('*'),
-      (data: ReadonlyArray<TransactionEntity>) => {
-        setTransactions(data);
-        setIsLoading(false);
-      },
-      { pageCount: 50 },
-    );
-  }, []);
-
-  const fetchTransactions = useCallback(() => {
-    const query = makeRootQuery();
-    setCurrentQuery(query);
-    updateQuery(query);
-  }, [makeRootQuery, updateQuery]);
-
-  const refetchTransactions = () => {
-    paged.current?.run();
-  };
+  const onRefresh = useCallback(() => {
+    if (accountId) {
+      dispatch(syncAndDownload(accountId));
+    }
+  }, [accountId, dispatch]);
 
   useEffect(() => {
-    const unlisten = listen('sync-event', ({ type, tables }) => {
+    if (accountId) {
+      dispatch(markAccountRead(accountId));
+    }
+  }, [accountId, dispatch]);
+
+  useEffect(() => {
+    return listen('sync-event', ({ type, tables }) => {
       if (type === 'applied') {
         if (
           tables.includes('transactions') ||
           tables.includes('category_mapping') ||
           tables.includes('payee_mapping')
         ) {
-          refetchTransactions();
+          reloadTransactions?.();
         }
 
         if (tables.includes('payees') || tables.includes('payee_mapping')) {
@@ -266,77 +275,56 @@ function TransactionListWithPreviews({
         }
       }
     });
+  }, [dispatch, reloadTransactions]);
 
-    fetchTransactions();
-    dispatch(markAccountRead(accountId));
-    return () => unlisten();
-  }, [accountId, dispatch, fetchTransactions]);
+  const { isSearching, search: onSearch } = useTransactionsSearch({
+    updateQuery: setTransactionsQuery,
+    resetQuery: () => setTransactionsQuery(baseTransactionsQuery()),
+    dateFormat,
+  });
 
-  const updateSearchQuery = useDebounceCallback(
-    useCallback(
-      searchText => {
-        if (searchText === '' && currentQuery) {
-          updateQuery(currentQuery);
-        } else if (searchText && currentQuery) {
-          updateQuery(
-            queries.makeTransactionSearchQuery(
-              currentQuery,
-              searchText,
-              dateFormat,
-            ),
-          );
-        }
-
-        setIsSearching(searchText !== '');
-      },
-      [currentQuery, dateFormat, updateQuery],
-    ),
-    150,
+  const onOpenTransaction = useCallback(
+    (transaction: TransactionEntity) => {
+      if (!isPreviewId(transaction.id)) {
+        navigate(`/transactions/${transaction.id}`);
+      } else {
+        dispatch(
+          pushModal('scheduled-transaction-menu', {
+            transactionId: transaction.id,
+            onPost: async transactionId => {
+              const parts = transactionId.split('/');
+              await send('schedule/post-transaction', { id: parts[1] });
+              dispatch(collapseModals('scheduled-transaction-menu'));
+            },
+            onSkip: async transactionId => {
+              const parts = transactionId.split('/');
+              await send('schedule/skip-next-date', { id: parts[1] });
+              dispatch(collapseModals('scheduled-transaction-menu'));
+            },
+          }),
+        );
+      }
+    },
+    [dispatch, navigate],
   );
-
-  const onSearch = (text: string) => {
-    updateSearchQuery(text);
-  };
-
-  const onOpenTransaction = (transaction: TransactionEntity) => {
-    if (!isPreviewId(transaction.id)) {
-      navigate(`/transactions/${transaction.id}`);
-    } else {
-      dispatch(
-        pushModal('scheduled-transaction-menu', {
-          transactionId: transaction.id,
-          onPost: async transactionId => {
-            const parts = transactionId.split('/');
-            await send('schedule/post-transaction', { id: parts[1] });
-            dispatch(collapseModals('scheduled-transaction-menu'));
-          },
-          onSkip: async transactionId => {
-            const parts = transactionId.split('/');
-            await send('schedule/skip-next-date', { id: parts[1] });
-            dispatch(collapseModals('scheduled-transaction-menu'));
-          },
-        }),
-      );
-    }
-  };
-
-  const onLoadMore = () => {
-    paged.current?.fetchNext();
-  };
 
   const balanceQueries = useMemo(
     () => queriesFromAccountId(accountId, account),
     [accountId, account],
   );
 
+  const transactionsToDisplay = !isSearching
+    ? previewTransactions.concat(transactions)
+    : transactions;
+
   return (
     <TransactionListWithBalances
       isLoading={isLoading}
-      transactions={allTransactions}
+      transactions={transactionsToDisplay}
       balance={balanceQueries.balance}
       balanceCleared={balanceQueries.cleared}
       balanceUncleared={balanceQueries.uncleared}
-      onLoadMore={onLoadMore}
+      onLoadMore={loadMoreTransactions}
       searchPlaceholder={`Search ${accountName}`}
       onSearch={onSearch}
       onOpenTransaction={onOpenTransaction}

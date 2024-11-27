@@ -4,43 +4,47 @@ import { type Query } from '../shared/query';
 
 import { liveQuery, type LiveQuery } from './query-helpers';
 
-/** @deprecated: please use `useQuery`; usage is the same - only the returned value is different (object instead of only the data) */
-export function useLiveQuery<Response = unknown>(
-  makeQuery: () => Query,
-  deps: DependencyList,
-): Response | null {
-  const { data } = useQuery<Response>(makeQuery, deps);
-  return data;
-}
+type UseQueryResult<Response> = {
+  data: null | ReadonlyArray<Response>;
+  isLoading: boolean;
+  error?: Error;
+};
 
 export function useQuery<Response = unknown>(
-  makeQuery: () => Query,
-  deps: DependencyList,
-): {
-  data: null | Response;
-  overrideData: (newData: Response) => void;
-  isLoading: boolean;
-} {
-  const [data, setData] = useState<null | Response>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  makeQuery: () => Query | null,
+  dependencies: DependencyList,
+): UseQueryResult<Response> {
+  // Memo the resulting query. We don't care if the function
+  // that creates the query changes, only the resulting query.
+  // Safe to ignore the eslint warning here.
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const query = useMemo(makeQuery, deps);
+  const query = useMemo(makeQuery, dependencies);
+
+  const [data, setData] = useState<ReadonlyArray<Response> | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | undefined>(undefined);
 
   useEffect(() => {
-    setIsLoading(true);
+    setError(query === null ? new Error('Query is null') : undefined);
+    setIsLoading(!!query);
 
-    let live: null | LiveQuery<Response> = liveQuery<Response>(
-      query,
-      async data => {
-        if (live) {
-          setIsLoading(false);
+    if (!query) {
+      return;
+    }
+
+    let isUnmounted = false;
+    let live: null | LiveQuery<Response> = liveQuery<Response>(query, {
+      onData: data => {
+        if (!isUnmounted) {
           setData(data);
+          setIsLoading(false);
         }
       },
-    );
+      onError: setError,
+    });
 
     return () => {
-      setIsLoading(false);
+      isUnmounted = true;
       live?.unsubscribe();
       live = null;
     };
@@ -48,7 +52,7 @@ export function useQuery<Response = unknown>(
 
   return {
     data,
-    overrideData: setData,
     isLoading,
+    error,
   };
 }

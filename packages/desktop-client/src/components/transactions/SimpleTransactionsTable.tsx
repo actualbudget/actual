@@ -1,50 +1,60 @@
-import React, { memo, useMemo, useCallback } from 'react';
+import React, {
+  memo,
+  useMemo,
+  useCallback,
+  type CSSProperties,
+  type ReactNode,
+} from 'react';
 
 import {
   format as formatDate,
   isValid as isDateValid,
   parseISO,
 } from 'date-fns';
+import { t } from 'i18next';
 
-import {
-  getAccountsById,
-  getCategoriesById,
-} from 'loot-core/src/client/reducers/queries';
+import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToCurrency } from 'loot-core/src/shared/util';
+import { type TransactionEntity } from 'loot-core/types/models';
 
-import { useAccounts } from '../../hooks/useAccounts';
-import { useCategories } from '../../hooks/useCategories';
+import { useAccount } from '../../hooks/useAccount';
+import { useCategory } from '../../hooks/useCategory';
 import { useDateFormat } from '../../hooks/useDateFormat';
-import { usePayees } from '../../hooks/usePayees';
 import { useSelectedItems, useSelectedDispatch } from '../../hooks/useSelected';
 import { SvgArrowsSynchronize } from '../../icons/v2';
 import { styles, theme } from '../../style';
 import { Cell, Field, Row, SelectCell, Table } from '../table';
 import { DisplayId } from '../util/DisplayId';
 
-function serializeTransaction(transaction, dateFormat) {
+function serializeTransaction(
+  transaction: TransactionEntity,
+  dateFormat: string,
+): TransactionEntity {
   let { date } = transaction;
 
   if (!isDateValid(parseISO(date))) {
-    date = null;
+    date = monthUtils.currentDay();
   }
 
   return {
     ...transaction,
-    date: date ? formatDate(parseISO(date), dateFormat) : null,
+    date: formatDate(parseISO(date), dateFormat),
   };
 }
+
+type TransactionRowProps = {
+  transaction: TransactionEntity;
+  fields: string[];
+  selected: boolean;
+};
 
 const TransactionRow = memo(function TransactionRow({
   transaction,
   fields,
-  categories,
-  accounts,
   selected,
-}) {
-  // TODO: Convert these to use fetched queries
-  const c = getCategoriesById(categories)[transaction.category];
-  const a = getAccountsById(accounts)[transaction.account];
+}: TransactionRowProps) {
+  const category = useCategory(transaction.category || '');
+  const account = useAccount(transaction.account);
 
   const dispatchSelected = useSelectedDispatch();
 
@@ -99,21 +109,23 @@ const TransactionRow = memo(function TransactionRow({
                         }}
                       />
                     )}
-                    <DisplayId type="payees" id={transaction.payee} />
+                    {transaction.payee && (
+                      <DisplayId type="payees" id={transaction.payee} />
+                    )}
                   </>
                 )}
               </Cell>
             );
           case 'category':
             return (
-              <Field key={i} width="flex" title={c && c.name}>
-                {c ? c.name : ''}
+              <Field key={i} width="flex" title={category?.name}>
+                {category?.name || ''}
               </Field>
             );
           case 'account':
             return (
-              <Field key={i} width="flex" title={a.name}>
-                {a.name}
+              <Field key={i} width="flex" title={account?.name || 'No account'}>
+                {account?.name || 'No account'}
               </Field>
             );
           case 'notes':
@@ -140,38 +152,39 @@ const TransactionRow = memo(function TransactionRow({
   );
 });
 
+type SimpleTransactionsTableProps = {
+  transactions: readonly TransactionEntity[];
+  renderEmpty: ReactNode;
+  fields?: string[];
+  style?: CSSProperties;
+};
+
 export function SimpleTransactionsTable({
   transactions,
   renderEmpty,
   fields = ['date', 'payee', 'amount'],
   style,
-}) {
-  const { grouped: categories } = useCategories();
-  const payees = usePayees();
-  const accounts = useAccounts();
+}: SimpleTransactionsTableProps) {
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const selectedItems = useSelectedItems();
   const dispatchSelected = useSelectedDispatch();
-  const memoFields = useMemo(() => fields, [JSON.stringify(fields)]);
+  const memoFields = useMemo(() => fields, [fields]);
 
   const serializedTransactions = useMemo(() => {
     return transactions.map(trans => serializeTransaction(trans, dateFormat));
-  }, [transactions]);
+  }, [transactions, dateFormat]);
 
   const renderItem = useCallback(
-    ({ item }) => {
+    ({ item }: { item: TransactionEntity }) => {
       return (
         <TransactionRow
           transaction={item}
-          payees={payees}
-          categories={categories}
-          accounts={accounts}
           fields={memoFields}
           selected={selectedItems && selectedItems.has(item.id)}
         />
       );
     },
-    [payees, categories, memoFields, selectedItems],
+    [memoFields, selectedItems],
   );
 
   return (
@@ -198,43 +211,43 @@ export function SimpleTransactionsTable({
               case 'date':
                 return (
                   <Field key={i} width={100}>
-                    Date
+                    {t('Date')}
                   </Field>
                 );
               case 'imported_payee':
                 return (
                   <Field key={i} width="flex">
-                    Imported payee
+                    {t('Imported payee')}
                   </Field>
                 );
               case 'payee':
                 return (
                   <Field key={i} width="flex">
-                    Payee
+                    {t('Payee')}
                   </Field>
                 );
               case 'category':
                 return (
                   <Field key={i} width="flex">
-                    Category
+                    {t('Category')}
                   </Field>
                 );
               case 'account':
                 return (
                   <Field key={i} width="flex">
-                    Account
+                    {t('Account')}
                   </Field>
                 );
               case 'notes':
                 return (
                   <Field key={i} width="flex">
-                    Notes
+                    {t('Notes')}
                   </Field>
                 );
               case 'amount':
                 return (
                   <Field key={i} width={75} style={{ textAlign: 'right' }}>
-                    Amount
+                    {t('Amount')}
                   </Field>
                 );
               default:
