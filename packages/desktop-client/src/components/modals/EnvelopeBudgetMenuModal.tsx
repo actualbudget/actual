@@ -1,7 +1,5 @@
 import React, {
-  useState,
   type ComponentPropsWithoutRef,
-  useEffect,
   type CSSProperties,
 } from 'react';
 
@@ -49,15 +47,10 @@ export function EnvelopeBudgetMenuModal({
     envelopeBudget.catBudgeted(categoryId),
   );
   const category = useCategory(categoryId);
-  const [amountFocused, setAmountFocused] = useState(false);
 
   const _onUpdateBudget = (amount: number) => {
     onUpdateBudget?.(amountToInteger(amount));
   };
-
-  useEffect(() => {
-    setAmountFocused(true);
-  }, []);
 
   if (!category) {
     return null;
@@ -88,11 +81,9 @@ export function EnvelopeBudgetMenuModal({
             </Text>
             <FocusableAmountInput
               value={integerToAmount(budgeted || 0)}
-              focused={amountFocused}
-              onFocus={() => setAmountFocused(true)}
-              onBlur={() => setAmountFocused(false)}
               onEnter={close}
               zeroSign="+"
+              defaultFocused={true}
               focusedStyle={{
                 width: 'auto',
                 padding: '5px',

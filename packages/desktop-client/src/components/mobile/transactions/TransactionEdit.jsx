@@ -45,13 +45,8 @@ import {
 import { useAccounts } from '../../../hooks/useAccounts';
 import { useCategories } from '../../../hooks/useCategories';
 import { useDateFormat } from '../../../hooks/useDateFormat';
-import { useInitialMount } from '../../../hooks/useInitialMount';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { usePayees } from '../../../hooks/usePayees';
-import {
-  SingleActiveEditFormProvider,
-  useSingleActiveEditForm,
-} from '../../../hooks/useSingleActiveEditForm';
 import { SvgSplit } from '../../../icons/v0';
 import { SvgAdd, SvgPiggyBank, SvgTrash } from '../../../icons/v1';
 import { SvgPencilWriteAlternate } from '../../../icons/v2';
@@ -67,10 +62,6 @@ import { FieldLabel, TapField, InputField, ToggleField } from '../MobileForms';
 import { getPrettyPayee } from '../utils';
 
 import { FocusableAmountInput } from './FocusableAmountInput';
-
-function getFieldName(transactionId, field) {
-  return `${field}-${transactionId}`;
-}
 
 function serializeTransaction(transaction, dateFormat) {
   const { date, amount } = transaction;
@@ -162,7 +153,6 @@ function Footer({
   onSplit,
   onAddSplit,
   onEmptySplitFound,
-  editingField,
   onEditField,
 }) {
   const [transaction, ...childTransactions] = transactions;
@@ -195,7 +185,6 @@ function Footer({
         <Button
           type="primary"
           style={{ height: styles.mobileMinHeight }}
-          disabled={editingField}
           onClick={onClickRemainingSplit}
           onPointerDown={e => e.preventDefault()}
         >
@@ -218,7 +207,6 @@ function Footer({
         <Button
           type="primary"
           style={{ height: styles.mobileMinHeight }}
-          disabled={editingField}
           onClick={() => onEditField(transaction.id, 'account')}
           onPointerDown={e => e.preventDefault()}
         >
@@ -236,7 +224,6 @@ function Footer({
         <Button
           type="primary"
           style={{ height: styles.mobileMinHeight }}
-          disabled={editingField}
           onClick={onAdd}
           onPointerDown={e => e.preventDefault()}
         >
@@ -254,7 +241,6 @@ function Footer({
         <Button
           type="primary"
           style={{ height: styles.mobileMinHeight }}
-          disabled={editingField}
           onClick={onSave}
           onPointerDown={e => e.preventDefault()}
         >
@@ -290,13 +276,12 @@ const ChildTransactionEdit = forwardRef(
     },
     ref,
   ) => {
-    const { editingField, onRequestActiveEdit, onClearActiveEdit } =
-      useSingleActiveEditForm();
     const prettyPayee = getPrettyPayee({
       transaction,
       payee: getPayee(transaction),
       transferAccount: getTransferAccount(transaction),
     });
+
     return (
       <View
         innerRef={ref}
@@ -316,10 +301,6 @@ const ChildTransactionEdit = forwardRef(
           <View style={{ flexBasis: '75%' }}>
             <FieldLabel title={t('Payee')} />
             <TapField
-              disabled={
-                editingField &&
-                editingField !== getFieldName(transaction.id, 'payee')
-              }
               value={prettyPayee}
               onClick={() => onEditField(transaction.id, 'payee')}
               data-testid={`payee-field-${transaction.id}`}
@@ -332,10 +313,6 @@ const ChildTransactionEdit = forwardRef(
           >
             <FieldLabel title={t('Amount')} style={{ padding: 0 }} />
             <AmountInput
-              disabled={
-                editingField &&
-                editingField !== getFieldName(transaction.id, 'amount')
-              }
               focused={amountFocused}
               value={amountToInteger(transaction.amount)}
               zeroSign={amountSign}
@@ -345,15 +322,10 @@ const ChildTransactionEdit = forwardRef(
                 textAlign: 'right',
                 minWidth: 0,
               }}
-              onFocus={() =>
-                onRequestActiveEdit(getFieldName(transaction.id, 'amount'))
-              }
               onUpdate={value => {
                 const amount = integerToAmount(value);
                 if (transaction.amount !== amount) {
                   onUpdate(transaction, 'amount', amount);
-                } else {
-                  onClearActiveEdit();
                 }
               }}
               autoDecimals={true}
@@ -372,12 +344,7 @@ const ChildTransactionEdit = forwardRef(
               }),
             }}
             value={getCategory(transaction, isOffBudget)}
-            disabled={
-              (editingField &&
-                editingField !== getFieldName(transaction.id, 'category')) ||
-              isOffBudget ||
-              isBudgetTransfer(transaction)
-            }
+            disabled={isOffBudget || isBudgetTransfer(transaction)}
             onClick={() => onEditField(transaction.id, 'category')}
             data-testid={`category-field-${transaction.id}`}
           />
@@ -386,14 +353,7 @@ const ChildTransactionEdit = forwardRef(
         <View>
           <FieldLabel title={t('Notes')} />
           <InputField
-            disabled={
-              editingField &&
-              editingField !== getFieldName(transaction.id, 'notes')
-            }
             defaultValue={transaction.notes}
-            onFocus={() =>
-              onRequestActiveEdit(getFieldName(transaction.id, 'notes'))
-            }
             onUpdate={value => onUpdate(transaction, 'notes', value)}
           />
         </View>
@@ -459,30 +419,22 @@ const TransactionEditInner = memo(function TransactionEditInner({
   const { grouped: categoryGroups } = useCategories();
 
   const [transaction, ...childTransactions] = transactions;
+  const transactionsRef = useRef(transactions);
+  useEffect(() => {
+    transactionsRef.current = transactions;
+  }, [transactions]);
 
-  const { editingField, onRequestActiveEdit, onClearActiveEdit } =
-    useSingleActiveEditForm();
-  const [totalAmountFocused, setTotalAmountFocused] = useState(true);
   const childTransactionElementRefMap = useRef({});
   const hasAccountChanged = useRef(false);
 
   const payeesById = useMemo(() => groupById(payees), [payees]);
   const accountsById = useMemo(() => groupById(accounts), [accounts]);
 
-  const onTotalAmountEdit = useCallback(() => {
-    onRequestActiveEdit?.(getFieldName(transaction.id, 'amount'), () => {
-      setTotalAmountFocused(true);
-      return () => setTotalAmountFocused(false);
-    });
-  }, [onRequestActiveEdit, transaction.id]);
-
-  const isInitialMount = useInitialMount();
-
-  useEffect(() => {
-    if (isInitialMount && adding) {
-      onTotalAmountEdit();
-    }
-  }, [adding, isInitialMount, onTotalAmountEdit]);
+  // getTransaction prevents stale-closure issue with dialogs
+  const getTransaction = useCallback(
+    transactionId => transactionsRef.current.find(t => t.id === transactionId),
+    [],
+  );
 
   const getAccount = useCallback(
     trans => {
@@ -579,99 +531,76 @@ const TransactionEditInner = memo(function TransactionEditInner({
     async (serializedTransaction, name, value) => {
       const newTransaction = { ...serializedTransaction, [name]: value };
       await onUpdate(newTransaction, name);
-      onClearActiveEdit();
 
       if (name === 'account') {
         hasAccountChanged.current = serializedTransaction.account !== value;
       }
     },
-    [onClearActiveEdit, onUpdate],
+    [onUpdate],
   );
 
   const onTotalAmountUpdate = useCallback(
     value => {
       if (transaction.amount !== value) {
         onUpdateInner(transaction, 'amount', value.toString());
-      } else {
-        onClearActiveEdit();
       }
     },
-    [onClearActiveEdit, onUpdateInner, transaction],
+    [onUpdateInner, transaction],
   );
 
   const onEditFieldInner = useCallback(
     (transactionId, name) => {
-      onRequestActiveEdit?.(getFieldName(transaction.id, name), () => {
-        const transactionToEdit = transactions.find(
-          t => t.id === transactionId,
-        );
-        const unserializedTransaction = unserializedTransactions.find(
-          t => t.id === transactionId,
-        );
-        switch (name) {
-          case 'category':
-            dispatch(
-              pushModal('category-autocomplete', {
-                categoryGroups,
-                month: monthUtils.monthFromDate(unserializedTransaction.date),
-                onSelect: categoryId => {
-                  onUpdateInner(transactionToEdit, name, categoryId);
-                },
-                onClose: () => {
-                  onClearActiveEdit();
-                },
-              }),
-            );
-            break;
-          case 'account':
-            dispatch(
-              pushModal('account-autocomplete', {
-                onSelect: accountId => {
-                  onUpdateInner(transactionToEdit, name, accountId);
-                },
-                onClose: () => {
-                  onClearActiveEdit();
-                },
-              }),
-            );
-            break;
-          case 'payee':
-            dispatch(
-              pushModal('payee-autocomplete', {
-                onSelect: payeeId => {
-                  onUpdateInner(transactionToEdit, name, payeeId);
-                },
-                onClose: () => {
-                  onClearActiveEdit();
-                },
-              }),
-            );
-            break;
-          default:
-            dispatch(
-              pushModal('edit-field', {
-                name,
-                month: monthUtils.monthFromDate(unserializedTransaction.date),
-                onSubmit: (name, value) => {
-                  onUpdateInner(transactionToEdit, name, value);
-                },
-                onClose: () => {
-                  onClearActiveEdit();
-                },
-              }),
-            );
-            break;
-        }
-      });
+      const unserializedTransaction = unserializedTransactions.find(
+        t => t.id === transactionId,
+      );
+      switch (name) {
+        case 'category':
+          dispatch(
+            pushModal('category-autocomplete', {
+              categoryGroups,
+              month: monthUtils.monthFromDate(unserializedTransaction.date),
+              onSelect: categoryId => {
+                onUpdateInner(getTransaction(transactionId), name, categoryId);
+              },
+            }),
+          );
+          break;
+        case 'account':
+          dispatch(
+            pushModal('account-autocomplete', {
+              onSelect: accountId => {
+                onUpdateInner(getTransaction(transactionId), name, accountId);
+              },
+            }),
+          );
+          break;
+        case 'payee':
+          dispatch(
+            pushModal('payee-autocomplete', {
+              onSelect: payeeId => {
+                onUpdateInner(getTransaction(transactionId), name, payeeId);
+              },
+            }),
+          );
+          break;
+        default:
+          dispatch(
+            pushModal('edit-field', {
+              name,
+              month: monthUtils.monthFromDate(unserializedTransaction.date),
+              onSubmit: (name, value) => {
+                onUpdateInner(getTransaction(transactionId), name, value);
+              },
+            }),
+          );
+          break;
+      }
     },
     [
       categoryGroups,
       dispatch,
       onUpdateInner,
-      onClearActiveEdit,
-      onRequestActiveEdit,
-      transaction.id,
-      transactions,
+      getTransaction,
       unserializedTransactions,
     ],
   );
@@ -688,7 +617,6 @@ const TransactionEditInner = memo(function TransactionEditInner({
 
               if (unserializedTransaction.id !== id) {
                 // Only a child transaction was deleted.
-                onClearActiveEdit();
                 return;
               }
 
@@ -709,7 +637,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
         onConfirmDelete();
       }
     },
-    [dispatch, navigate, onClearActiveEdit, onDelete, unserializedTransactions],
+    [dispatch, navigate, onDelete, unserializedTransactions],
   );
 
   const scrollChildTransactionIntoView = useCallback(id => {
@@ -778,7 +706,6 @@ const TransactionEditInner = memo(function TransactionEditInner({
           onSplit={onSplit}
           onAddSplit={onAddSplit}
           onEmptySplitFound={onEmptySplitFound}
-          editingField={editingField}
           onEditField={onEditFieldInner}
         />
       }
@@ -794,8 +721,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
           <FocusableAmountInput
             value={transaction.amount}
             zeroSign="-"
-            focused={totalAmountFocused}
-            onFocus={onTotalAmountEdit}
+            defaultFocused={true}
             onUpdateAmount={onTotalAmountUpdate}
             focusedStyle={{
               width: 'auto',
@@ -818,10 +744,6 @@ const TransactionEditInner = memo(function TransactionEditInner({
               }),
             }}
             value={title}
-            disabled={
-              editingField &&
-              editingField !== getFieldName(transaction.id, 'payee')
-            }
             onClick={() => onEditFieldInner(transaction.id, 'payee')}
             data-testid="payee-field"
           />
@@ -839,12 +761,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
                 }),
               }}
               value={getCategory(transaction, isOffBudget)}
-              disabled={
-                (editingField &&
-                  editingField !== getFieldName(transaction.id, 'category')) ||
-                isOffBudget ||
-                isBudgetTransfer(transaction)
-              }
+              disabled={isOffBudget || isBudgetTransfer(transaction)}
               onClick={() => onEditFieldInner(transaction.id, 'category')}
               data-testid="category-field"
             />
@@ -877,7 +794,6 @@ const TransactionEditInner = memo(function TransactionEditInner({
         {transaction.amount !== 0 && childTransactions.length === 0 && (
           <View style={{ alignItems: 'center' }}>
             <Button
-              disabled={editingField}
               style={{
                 height: 40,
                 borderWidth: 0,
@@ -910,10 +826,6 @@ const TransactionEditInner = memo(function TransactionEditInner({
         <View>
           <FieldLabel title={t('Account')} />
           <TapField
-            disabled={
-              editingField &&
-              editingField !== getFieldName(transaction.id, 'account')
-            }
             value={account?.name}
             onClick={() => onEditFieldInner(transaction.id, 'account')}
             data-testid="account-field"
@@ -925,16 +837,9 @@ const TransactionEditInner = memo(function TransactionEditInner({
             <FieldLabel title={t('Date')} />
             <InputField
               type="date"
-              disabled={
-                editingField &&
-                editingField !== getFieldName(transaction.id, 'date')
-              }
               required
               style={{ color: theme.tableText, minWidth: '150px' }}
               defaultValue={dateDefaultValue}
-              onFocus={() =>
-                onRequestActiveEdit(getFieldName(transaction.id, 'date'))
-              }
               onUpdate={value =>
                 onUpdateInner(
                   transaction,
@@ -964,14 +869,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
         <View>
           <FieldLabel title={t('Notes')} />
           <InputField
-            disabled={
-              editingField &&
-              editingField !== getFieldName(transaction.id, 'notes')
-            }
             defaultValue={transaction.notes}
-            onFocus={() => {
-              onRequestActiveEdit(getFieldName(transaction.id, 'notes'));
-            }}
             onUpdate={value => onUpdateInner(transaction, 'notes', value)}
           />
         </View>
@@ -1268,15 +1166,13 @@ export const TransactionEdit = props => {
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
 
   return (
-    <SingleActiveEditFormProvider formName="mobile-transaction">
-      <TransactionEditUnconnected
-        {...props}
-        categories={categories}
-        payees={payees}
-        lastTransaction={lastTransaction}
-        accounts={accounts}
-        dateFormat={dateFormat}
-      />
-    </SingleActiveEditFormProvider>
+    <TransactionEditUnconnected
+      {...props}
+      categories={categories}
+      payees={payees}
+      lastTransaction={lastTransaction}
+      accounts={accounts}
+      dateFormat={dateFormat}
+    />
   );
 };
