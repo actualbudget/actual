@@ -5,7 +5,7 @@ Client Version 24.6.0 and
 Server Version 24.6.0 or higher are required for this feature.
 :::
 
-This feature will allow Actual to use an HTTP header to automatically authenticate and log in without prompting for a password. This would be useful for individuals who run SSO services like [Authentik](https://goauthentik.io/), [Authelia](https://www.authelia.com/), and more.
+This feature will allow Actual to use an HTTP header to automatically authenticate and log in without prompting for a password. This is useful for individuals who run SSO services like [Authentik](https://goauthentik.io/), [Authelia](https://www.authelia.com/), and more.
 
 ## Setup
 
@@ -18,7 +18,7 @@ Be careful! A misconfiguration on this next step could make your instance availa
 The SSO provider then needs to be configured to pass an extra HTTP header to Actual. The details on how to do this are unique to the SSO provider, but the header `x-actual-password` needs to be set to your actual password.
 
 
-If your setup needs it, it possible to config trusted proxies. See [`trustedProxies` configuration](../config/index.md#trustedProxies) for details.
+If your setup needs it, it is possible to config trusted proxies. See [`trustedProxies` configuration](../config/index.md#trustedProxies) for details.
 
 :::note
 This feature is not an HTTP basic auth, but a different form of using a password. For HTTP basic auth or user accounts see [this issue](https://github.com/actualbudget/actual/issues/524)
