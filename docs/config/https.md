@@ -12,7 +12,7 @@ There are two methods to do this and both refer to not exposing Actual on the in
 
 Use a self-signed certificate. This is the easiest way to get HTTPS working, but it will cause your browser to display a warning that the certificate is invalid. Additionally, if anyone gets access to this certificate, they can intercept most secure traffic on your computer.
    - A command line tool like [mkcert](https://github.com/FiloSottile/mkcert) can automate this process.
-   - Alternately, you can manually generate the certificates. Install OpenSSL for your operating system, then run `openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout selfhost.key -out selfhost.crt` in a terminal to generate the certificate and private key. You’ll need to enter a two-letter country code to get the `.crt` file to be generated, but you can leave the rest of the fields blank (just hit enter at each prompt). Move the `selfhost.key` and `selfhost.crt` files a location accessible to the Actual server.
+   - Alternately, you can manually generate the certificates. Install OpenSSL for your operating system, then run `openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout selfhost.key -out selfhost.crt` in a terminal to generate the certificate and private key. You’ll need to enter a two-letter country code to get the `.crt` file to be generated, but you can leave the rest of the fields blank (just hit enter at each prompt). Move the `selfhost.key` and `selfhost.crt` files to a location accessible to the Actual server.
 
 ### Obtain a certificate without exposing to the internet 
 Use a service like [Tailscale](https://tailscale.com/kb/1153/enabling-https/) or [Caddy](https://caddyserver.com/docs/automatic-https#dns-challenge) that allows you to create a valid HTTPS certificate without having to expose your server to the wider internet.
@@ -51,4 +51,4 @@ To configure the desktop app, follow these steps on the _Where's the server?_ sc
 3. Specify the ```rootCA.pem``` certificate in the desktop app.
 
 ## 3. Test HTTPS!
-Once you have acquired a certificate and configured Actual to use it, attempt to access your instance ensuring you are using `https`. It is recommended to also either re-enter the URL to your server or making a new tab/window instead of refreshing the page where you saw the error.
+Once you have acquired a certificate and configured Actual to use it, attempt to access your instance ensuring you are using `https`. It is recommended to also either re-enter the URL to your server or make a new tab/window instead of refreshing the page where you saw the error.
