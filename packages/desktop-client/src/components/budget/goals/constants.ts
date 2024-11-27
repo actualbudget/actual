@@ -1,6 +1,6 @@
 export const visualTemplateTypes = [
   ['amount', 'an amount'] as const,
-  ['percent', 'a percent of another category'] as const,
+  ['percent', 'a percent'] as const,
   ['schedule', 'for a schedule'] as const,
 ];
 

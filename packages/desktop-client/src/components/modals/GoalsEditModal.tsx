@@ -18,7 +18,7 @@ export function GoalsEditModal() {
   return (
     <Modal
       name="category-goals-edit"
-      containerProps={{ style: { width: 650 } }}
+      containerProps={{ style: { width: 850, height: 650, paddingBottom: 20 } }}
     >
       {({ state: { close } }) => (
         <>

@@ -150,6 +150,12 @@ export const styles = {
   lightScrollbar: null as CSSProperties | null,
   darkScrollbar: null as CSSProperties | null,
   scrollbarWidth: null as number | null,
+  editorPill: {
+    color: theme.pillText,
+    backgroundColor: theme.pillBackground,
+    borderRadius: 4,
+    padding: '3px 5px',
+  },
 };
 
 let hiddenScrollbars = false;

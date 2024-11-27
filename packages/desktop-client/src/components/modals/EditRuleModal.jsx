@@ -203,14 +203,7 @@ function FieldError({ type }) {
 function Editor({ error, style, children }) {
   return (
     <View style={style} data-testid="editor-row">
-      <Stack
-        direction="row"
-        align="center"
-        spacing={1}
-        style={{
-          padding: '3px 5px',
-        }}
-      >
+      <Stack direction="row" align="center" spacing={1}>
         {children}
       </Stack>
       {error && <FieldError type={error} />}
@@ -1004,12 +997,6 @@ export function EditRuleModal({ defaultRule, onSave: originalOnSave }) {
     }
   }
 
-  const editorStyle = {
-    color: theme.pillText,
-    backgroundColor: theme.pillBackground,
-    borderRadius: 4,
-  };
-
   // Enable editing existing split rules even if the feature has since been disabled.
   const showSplitButton = actionSplits.length > 0;
 
@@ -1096,7 +1083,7 @@ export function EditRuleModal({ defaultRule, onSave: originalOnSave }) {
                   <ConditionsList
                     conditionsOp={conditionsOp}
                     conditions={conditions}
-                    editorStyle={editorStyle}
+                    editorStyle={styles.editorPill}
                     isSchedule={isSchedule}
                     onChangeConditions={conds => setConditions(conds)}
                   />
@@ -1177,7 +1164,7 @@ export function EditRuleModal({ defaultRule, onSave: originalOnSave }) {
                                   'append-notes',
                                 ]}
                                 action={action}
-                                editorStyle={editorStyle}
+                                editorStyle={styles.editorPill}
                                 onChange={(name, value) => {
                                   onChangeAction(action, name, value);
                                 }}
