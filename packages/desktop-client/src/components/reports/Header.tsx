@@ -35,7 +35,7 @@ type HeaderProps = {
     mode: TimeFrame['mode'],
   ) => void;
   filters?: RuleConditionEntity[];
-  conditionsOp: 'and' | 'or';
+  conditionsOp: RuleConditionEntity['conditionsOp'];
   onApply?: (conditions: RuleConditionEntity) => void;
   onUpdateFilter: ComponentProps<typeof AppliedFilters>['onUpdate'];
   onDeleteFilter: ComponentProps<typeof AppliedFilters>['onDelete'];

@@ -26,7 +26,11 @@ import {
   updateAccount,
 } from 'loot-core/client/actions';
 import {
+  isTransactionFilterEntity,
+  toFilterConditions,
+  type TransactionFilter,
   useTransactions,
+  useTransactionsFilter,
   useTransactionsSearch,
 } from 'loot-core/client/data-hooks/transactions';
 import { validForTransfer } from 'loot-core/client/transfer';
@@ -85,19 +89,10 @@ import { styles, theme } from '../../style';
 import { Button } from '../common/Button2';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
-import { type SavedFilter } from '../filters/SavedFilterMenuButton';
 import { TransactionList } from '../transactions/TransactionList';
 import { validateAccountName } from '../util/accountValidation';
 
 import { AccountHeader } from './Header';
-
-type ConditionEntity = Partial<RuleConditionEntity> | TransactionFilterEntity;
-
-function isTransactionFilterEntity(
-  filter: ConditionEntity,
-): filter is TransactionFilterEntity {
-  return 'id' in filter;
-}
 
 type EmptyMessageProps = {
   onAdd: () => void;
@@ -262,7 +257,6 @@ function AccountTransactions({
   const modalShowing = useSelector(state => state.modals.modalStack.length > 0);
   const accountsSyncing = useSelector(state => state.account.accountsSyncing);
 
-  // const savedFiters = useFilters();
   const tableRef = useRef<TableRefProps>(null);
   const dispatchSelected = useSelectedDispatch();
   const {
@@ -273,13 +267,6 @@ function AccountTransactions({
     onBatchUnlinkSchedule,
   } = useTransactionBatchActions();
 
-  const [filterConditions, setFilterConditions] = useState<ConditionEntity[]>(
-    location?.state?.filterConditions || [],
-  );
-  const [filterId, setFilterId] = useState<SavedFilter | null>();
-  const [filterConditionsOp, setFilterConditionsOp] = useState<'and' | 'or'>(
-    'and',
-  );
   const [reconcileAmount, setReconcileAmount] = useState<number | null>(null);
   const [runningBalances, setRunningBalances] = useState<Record<
     TransactionEntity['id'],
@@ -289,7 +276,6 @@ function AccountTransactions({
   const [nameError, setNameError] = useState<string | null>(null);
   const [isAdding, setIsAdding] = useState<boolean>(false);
   const [sort, setSort] = useState<SortOptions>(null);
-  // const [filteredAmount, setFilteredAmount] = useState<number | null>(null);
   const [isProcessingTransactions, setIsProcessingTransactions] =
     useState(false);
   const [transactionsQuery, setTransactionsQuery] = useState<Query | undefined>(
@@ -298,7 +284,6 @@ function AccountTransactions({
 
   const applySort = useCallback(
     (query: Query, { field, ascDesc, prevField, prevAscDesc }: SortOptions) => {
-      const isFiltered = filterConditions.length > 0;
       const sortField = getField(!field ? sort?.field : field);
       const sortAscDesc = !ascDesc ? sort?.ascDesc : ascDesc;
       const sortPrevField = getField(!prevField ? sort?.prevField : prevField);
@@ -361,6 +346,8 @@ function AccountTransactions({
         });
       };
 
+      const isQueryFiltered = query.serialize().filterExpressions.length > 0;
+
       switch (true) {
         // called by applyFilters to sort an already filtered result
         case !field:
@@ -369,15 +356,13 @@ function AccountTransactions({
 
         // called directly from UI by sorting a column.
         // active filters need to be applied before sorting
-        case isFiltered:
-          // TODO: Verify that this is no longer needed.
-          // this.applyFilters([...filterConditions]);
+        case isQueryFiltered:
           query = sortQuery(query, sortField, sortAscDesc);
           break;
 
         // called directly from UI by sorting a column.
         // no active filters, start a new root query.
-        case !isFiltered:
+        case !isQueryFiltered:
           query = sortNoActiveFiltersQuery(query, sortField, sortAscDesc);
           break;
 
@@ -387,40 +372,7 @@ function AccountTransactions({
 
       return maybeSortByPreviousField(query, sortPrevField, sortPrevAscDesc);
     },
-    [
-      filterConditions.length,
-      sort?.ascDesc,
-      sort?.field,
-      sort?.prevAscDesc,
-      sort?.prevField,
-    ],
-  );
-
-  const applyFilters = useCallback(
-    async (query: Query, conditions: ConditionEntity[]) => {
-      if (conditions.length > 0) {
-        const filteredCustomQueryFilters: Partial<RuleConditionEntity>[] =
-          conditions.filter(cond => !isTransactionFilterEntity(cond));
-        const customQueryFilters = filteredCustomQueryFilters.map(
-          f => f.queryFilter,
-        );
-        const { filters: queryFilters } = await send(
-          'make-filters-from-conditions',
-          {
-            conditions: conditions.filter(
-              cond => isTransactionFilterEntity(cond) || !cond.customName,
-            ),
-          },
-        );
-        const conditionsOpKey = filterConditionsOp === 'or' ? '$or' : '$and';
-        return query.filter({
-          [conditionsOpKey]: [...queryFilters, ...customQueryFilters],
-        });
-      }
-
-      return query;
-    },
-    [filterConditionsOp],
+    [sort?.ascDesc, sort?.field, sort?.prevAscDesc, sort?.prevField],
   );
 
   const baseTransactionsQuery = useCallback(
@@ -436,13 +388,6 @@ function AccountTransactions({
     [],
   );
 
-  const filteredTransactionsQuery = useCallback(
-    async (query: Query, filterConditions: ConditionEntity[]) => {
-      return await applyFilters(query, filterConditions);
-    },
-    [applyFilters],
-  );
-
   const sortedTransactionsQuery = useCallback(
     async (query: Query, sort: SortOptions) => {
       return sort ? applySort(query, sort) : query;
@@ -453,22 +398,17 @@ function AccountTransactions({
   const rootTransactionsQuery = useCallback(
     async () =>
       sortedTransactionsQuery(
-        await filteredTransactionsQuery(
-          baseTransactionsQuery({
-            accountId,
-            hideReconciled,
-          }),
-          filterConditions,
-        ),
+        baseTransactionsQuery({
+          accountId,
+          hideReconciled,
+        }),
         sort,
       ),
     [
       sortedTransactionsQuery,
-      filteredTransactionsQuery,
       baseTransactionsQuery,
       accountId,
       hideReconciled,
-      filterConditions,
       sort,
     ],
   );
@@ -571,14 +511,14 @@ function AccountTransactions({
   useEffect(() => {
     let isUnmounted = false;
 
-    async function initQuery() {
+    async function buildQuery() {
       const rootQuery = await rootTransactionsQuery();
       if (!isUnmounted) {
         setTransactionsQuery(rootQuery);
       }
     }
 
-    initQuery();
+    buildQuery();
 
     return () => {
       isUnmounted = true;
@@ -690,6 +630,22 @@ function AccountTransactions({
     updateQuery: setTransactionsQuery,
     resetQuery: () => rootTransactionsQuery().then(setTransactionsQuery),
     dateFormat,
+  });
+
+  const {
+    isFiltered,
+    conditionsOp: filterConditionsOp,
+    updateConditionsOp: onUpdateFilterConditionsOp,
+    conditions: filterConditions,
+    updateConditions: onUpdateFilterConditions,
+    clear: onClearFilter,
+    activeFilter: activeSavedFilter,
+    dirtyFilter: dirtySavedFilter,
+    applyFilter: onApplySavedFilter,
+  } = useTransactionsFilter({
+    updateQuery: setTransactionsQuery,
+    resetQuery: () => rootTransactionsQuery().then(setTransactionsQuery),
+    initialConditions: location.state?.filterConditions,
   });
 
   const onSync = useCallback(async () => {
@@ -1369,33 +1325,30 @@ function AccountTransactions({
     [checkForReconciledTransactions, payees, reloadTransactions, transactions],
   );
 
-  const onConditionsOpChange = useCallback((value: 'and' | 'or') => {
-    setFilterConditionsOp(value);
-    setFilterId(f => ({ ...f, status: 'changed' }));
-  }, []);
+  const onConditionsOpChange = useCallback(
+    (value: RuleConditionEntity['conditionsOp']) => {
+      onUpdateFilterConditionsOp(value);
+    },
+    [onUpdateFilterConditionsOp],
+  );
 
   const onReloadSavedFilter = useCallback(
-    (savedFilter: SavedFilter, item: string) => {
-      if (item === 'reload') {
-        const [savedFilter] = savedFilters.filter(f => f.id === filterId?.id);
-        setFilterConditionsOp(savedFilter.conditionsOp ?? 'and');
-        setFilterConditions([...savedFilter.conditions]);
+    (savedFilter: TransactionFilterEntity, action?: 'reload' | 'update') => {
+      if (action === 'reload') {
+        const [originalSavedFilter] = savedFilters.filter(
+          f => f.id === activeSavedFilter?.id,
+        );
+        onApplySavedFilter(originalSavedFilter, true);
       } else {
-        if (savedFilter.status) {
-          setFilterConditionsOp(savedFilter.conditionsOp ?? 'and');
-          setFilterConditions([...savedFilter.conditions]);
-        }
+        onApplySavedFilter(savedFilter, true);
       }
-      setFilterId(f => ({ ...f, ...savedFilter }));
     },
-    [filterId?.id, savedFilters],
+    [activeSavedFilter?.id, onApplySavedFilter, savedFilters],
   );
 
   const onClearFilters = useCallback(() => {
-    setFilterConditionsOp('and');
-    setFilterId(undefined);
-    setFilterConditions([]);
-  }, []);
+    onClearFilter();
+  }, [onClearFilter]);
 
   const onUpdateFilter = useCallback(
     (
@@ -1403,67 +1356,50 @@ function AccountTransactions({
       updatedCondition: RuleConditionEntity,
     ) => {
       // TODO: verify if setting the conditions correctly apply the filters to the query.
-      setFilterConditions(f =>
+      onUpdateFilterConditions(f =>
         f.map(c => (c === oldCondition ? updatedCondition : c)),
       );
-      setFilterId(f => ({ ...f, status: f && 'changed' }));
     },
-    [],
+    [onUpdateFilterConditions],
   );
 
   const onDeleteFilter = useCallback(
     (condition: RuleConditionEntity) => {
-      setFilterConditions(f => f.filter(c => c !== condition));
-
-      if (filterConditions.length === 1) {
-        setFilterId(undefined);
-        setFilterConditionsOp('and');
-      } else {
-        setFilterId(f => ({ ...f, status: f && 'changed' }));
-      }
+      onUpdateFilterConditions(f => f.filter(c => c !== condition));
     },
-    [filterConditions.length],
+    [onUpdateFilterConditions],
   );
 
   const onApplyFilter = useCallback(
-    async (conditionOrSavedFilter: ConditionEntity) => {
-      let _filterConditions = filterConditions;
-
-      if (
-        'customName' in conditionOrSavedFilter &&
-        conditionOrSavedFilter.customName
-      ) {
-        _filterConditions = filterConditions.filter(
-          c =>
-            !isTransactionFilterEntity(c) &&
-            c.customName !== conditionOrSavedFilter.customName,
-        );
-      }
-
-      if (isTransactionFilterEntity(conditionOrSavedFilter)) {
-        // A saved filter was passed in.
-        const savedFilter = conditionOrSavedFilter;
-        setFilterId({ ...savedFilter, status: 'saved' });
-        setFilterConditionsOp(savedFilter.conditionsOp);
-        setFilterConditions([...savedFilter.conditions]);
+    async (filter: TransactionFilter) => {
+      const filterConditions = toFilterConditions(filter);
+      if (isTransactionFilterEntity(filter)) {
+        const savedFilter = filter;
+        onApplySavedFilter(savedFilter, true);
       } else {
-        // A condition was passed in.
-        const condition = conditionOrSavedFilter;
-        setFilterId(f => ({ ...f, status: f && 'changed' }));
-        setFilterConditions(f => [...f, condition]);
+        onUpdateFilterConditions(previousFilterConditions => [
+          ...previousFilterConditions,
+          ...filterConditions,
+        ]);
       }
     },
-    [filterConditions],
+    [onApplySavedFilter, onUpdateFilterConditions],
   );
 
   const onShowTransactions = useCallback(
     async (ids: string[]) => {
-      onApplyFilter({
-        customName: t('Selected transactions'),
-        queryFilter: { id: { $oneof: ids } },
-      });
+      onUpdateFilterConditions(f => [
+        ...f,
+        {
+          customName: 'Selected transactions',
+          field: 'id',
+          op: 'oneOf',
+          value: ids,
+          type: 'id',
+        } satisfies RuleConditionEntity,
+      ]);
     },
-    [onApplyFilter],
+    [onUpdateFilterConditions],
   );
 
   const onScheduleAction = useCallback(
@@ -1528,15 +1464,15 @@ function AccountTransactions({
     accountId !== 'offbudget' &&
     accountId !== 'uncategorized';
 
-  const isFiltered = filterConditions.length > 0 || isSearching;
+  const isFilteredOrSearching = isFiltered || isSearching;
 
   const transactionsWithPreview = useMemo(
     () =>
-      !isFiltered && !isPreviewTransactionsLoading
+      !isFilteredOrSearching && !isPreviewTransactionsLoading
         ? previewTransactions.concat(transactions)
         : transactions,
     [
-      isFiltered,
+      isFilteredOrSearching,
       isPreviewTransactionsLoading,
       previewTransactions,
       transactions,
@@ -1573,8 +1509,8 @@ function AccountTransactions({
           isLoading={isTransactionsLoading || isProcessingTransactions}
           accountId={accountId}
           account={account}
-          filterId={filterId}
-          savedFilters={savedFilters}
+          activeFilter={activeSavedFilter}
+          dirtyFilter={dirtySavedFilter}
           accountName={accountName}
           accountsSyncing={accountsSyncing}
           failedAccounts={failedAccounts}
@@ -1585,13 +1521,11 @@ function AccountTransactions({
           showCleared={!hideCleared}
           showReconciled={!hideReconciled}
           showEmptyMessage={showEmptyMessage}
-          transactionsQuery={transactionsQuery}
           balanceQuery={accountBalanceQuery}
           filteredBalance={filteredBalance}
-          showFilteredBalance={isFiltered}
+          showFilteredBalance={isFilteredOrSearching}
           isSorted={sort !== null}
           reconcileAmount={reconcileAmount}
-          // @ts-expect-error fix me
           filterConditions={filterConditions}
           filterConditionsOp={filterConditionsOp}
           onSearch={onSearch}

@@ -4,19 +4,22 @@ import { type RuleConditionEntity } from 'loot-core/types/models/rule';
 
 export function useFilters<T extends RuleConditionEntity>(
   initialConditions: T[] = [],
-  initialConditionsOp: 'and' | 'or' = 'and',
+  initialConditionsOp: RuleConditionEntity['conditionsOp'] = 'and',
 ) {
   const [conditions, setConditions] = useState<T[]>(initialConditions);
-  const [conditionsOp, setConditionsOp] = useState<'and' | 'or'>(
-    initialConditionsOp,
-  );
+  const [conditionsOp, setConditionsOp] =
+    useState<RuleConditionEntity['conditionsOp']>(initialConditionsOp);
   const [saved, setSaved] = useState<T[] | null>(null);
 
   const onApply = useCallback(
     (
       conditionsOrSavedFilter:
         | null
-        | { conditions: T[]; conditionsOp: 'and' | 'or'; id: T[] | null }
+        | {
+            conditions: T[];
+            conditionsOp: RuleConditionEntity['conditionsOp'];
+            id: T[] | null;
+          }
         | T,
     ) => {
       if (conditionsOrSavedFilter === null) {

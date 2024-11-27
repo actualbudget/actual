@@ -43,7 +43,6 @@ import { Stack } from '../common/Stack';
 import { View } from '../common/View';
 import { FilterButton } from '../filters/FiltersMenu';
 import { FiltersStack } from '../filters/FiltersStack';
-import { type SavedFilter } from '../filters/SavedFilterMenuButton';
 import { NotesButton } from '../NotesButton';
 import { SelectedTransactionsButton } from '../transactions/SelectedTransactionsButton';
 
@@ -58,9 +57,9 @@ type AccountHeaderProps = {
   isLoading: boolean;
   accountId: AccountEntity['id'] | string;
   accountName: string;
-  account?: AccountEntity;
-  filterId?: SavedFilter;
-  savedFilters: TransactionFilterEntity[];
+  account: AccountEntity;
+  activeFilter?: TransactionFilterEntity;
+  dirtyFilter?: TransactionFilterEntity;
   accountsSyncing: string[];
   failedAccounts: AccountSyncSidebarProps['failedAccounts'];
   accounts: AccountEntity[];
@@ -71,15 +70,12 @@ type AccountHeaderProps = {
   showReconciled: boolean;
   showEmptyMessage: boolean;
   balanceQuery: Query;
-  filteredQuery: Query;
   reconcileAmount: number;
-  canCalculateBalance: () => boolean;
   showFilteredBalance: boolean;
   filteredBalance: number;
   isSorted: boolean;
-  search: string;
-  filterConditions: RuleConditionEntity[];
-  filterConditionsOp: 'and' | 'or';
+  filterConditions: readonly RuleConditionEntity[];
+  filterConditionsOp: RuleConditionEntity['conditionsOp'];
   onSearch: (newSearch: string) => void;
   onAddTransaction: () => void;
   onShowTransactions: ComponentProps<
@@ -136,8 +132,8 @@ export function AccountHeader({
   accountId,
   accountName,
   account,
-  filterId,
-  savedFilters,
+  activeFilter,
+  dirtyFilter,
   accountsSyncing,
   failedAccounts,
   accounts,
@@ -147,14 +143,11 @@ export function AccountHeader({
   showCleared,
   showReconciled,
   showEmptyMessage,
-  // transactionsQuery,
   balanceQuery,
   reconcileAmount,
-  // canCalculateBalance,
   showFilteredBalance,
   filteredBalance,
   isSorted,
-  // search,
   filterConditions,
   filterConditionsOp,
   onSearch,
@@ -514,8 +507,8 @@ export function AccountHeader({
             onDeleteFilter={onDeleteFilter}
             onClearFilters={onClearFilters}
             onReloadSavedFilter={onReloadSavedFilter}
-            filterId={filterId}
-            savedFilters={savedFilters}
+            filter={activeFilter}
+            dirtyFilter={dirtyFilter}
             onConditionsOpChange={onConditionsOpChange}
           />
         )}

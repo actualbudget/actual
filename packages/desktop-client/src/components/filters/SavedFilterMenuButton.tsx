@@ -1,6 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { useFilters } from 'loot-core/client/data-hooks/filters';
 import { send, sendCatch } from 'loot-core/src/platform/client/fetch';
 import { type TransactionFilterEntity } from 'loot-core/types/models';
 import { type RuleConditionEntity } from 'loot-core/types/models/rule';
@@ -14,29 +15,26 @@ import { View } from '../common/View';
 import { FilterMenu } from './FilterMenu';
 import { NameFilter } from './NameFilter';
 
-export type SavedFilter = {
-  conditions?: RuleConditionEntity[];
-  conditionsOp?: 'and' | 'or';
-  id?: string;
-  name: string;
-  status?: string;
+type SavedFilterMenuButtonProps = {
+  conditions: readonly RuleConditionEntity[];
+  conditionsOp: RuleConditionEntity['conditionsOp'];
+  filter?: TransactionFilterEntity;
+  dirtyFilter?: TransactionFilterEntity;
+  onClearFilters: () => void;
+  onReloadSavedFilter: (
+    savedFilter: TransactionFilterEntity,
+    action?: 'reload' | 'update',
+  ) => void;
 };
 
 export function SavedFilterMenuButton({
   conditions,
   conditionsOp,
-  filterId,
+  filter,
+  dirtyFilter,
   onClearFilters,
   onReloadSavedFilter,
-  savedFilters,
-}: {
-  conditions: RuleConditionEntity[];
-  conditionsOp: 'and' | 'or';
-  filterId?: SavedFilter;
-  onClearFilters: () => void;
-  onReloadSavedFilter: (savedFilter: SavedFilter, value?: string) => void;
-  savedFilters: TransactionFilterEntity[];
-}) {
+}: SavedFilterMenuButtonProps) {
   const { t } = useTranslation();
   const [nameOpen, setNameOpen] = useState(false);
   const [adding, setAdding] = useState(false);
@@ -44,9 +42,8 @@ export function SavedFilterMenuButton({
   const triggerRef = useRef(null);
   const [err, setErr] = useState(null);
   const [menuItem, setMenuItem] = useState('');
-  const [name, setName] = useState(filterId?.name ?? '');
-  const id = filterId?.id;
-  let savedFilter: SavedFilter;
+  const [name, setName] = useState(filter?.name ?? '');
+  const savedFilters = useFilters();
 
   const onFilterMenuSelect = async (item: string) => {
     setMenuItem(item);
@@ -59,23 +56,22 @@ export function SavedFilterMenuButton({
         break;
       case 'delete-filter':
         setMenuOpen(false);
-        await send('filter-delete', id);
+        if (filter?.id) {
+          await send('filter-delete', filter.id);
+        }
         onClearFilters();
         break;
       case 'update-filter':
         setErr(null);
         setAdding(false);
         setMenuOpen(false);
-        savedFilter = {
-          conditions,
-          conditionsOp,
-          id: filterId?.id,
-          name: filterId?.name ?? '',
-          status: 'saved',
-        };
+        if (!filter || !dirtyFilter) {
+          // No active filter or filter is not dirty, nothing to update.
+          return;
+        }
         const response = await sendCatch('filter-update', {
-          state: savedFilter,
-          filters: [...savedFilters],
+          state: dirtyFilter,
+          filters: savedFilters,
         });
 
         if (response.error) {
@@ -84,7 +80,7 @@ export function SavedFilterMenuButton({
           return;
         }
 
-        onReloadSavedFilter(savedFilter, 'update');
+        onReloadSavedFilter(dirtyFilter, 'update');
         break;
       case 'save-filter':
         setErr(null);
@@ -94,11 +90,9 @@ export function SavedFilterMenuButton({
         break;
       case 'reload-filter':
         setMenuOpen(false);
-        savedFilter = {
-          ...savedFilter,
-          status: 'saved',
-        };
-        onReloadSavedFilter(savedFilter, 'reload');
+        if (filter) {
+          onReloadSavedFilter(filter, 'reload');
+        }
         break;
       case 'clear-filter':
         setMenuOpen(false);
@@ -111,10 +105,9 @@ export function SavedFilterMenuButton({
   async function onAddUpdate() {
     if (adding) {
       const newSavedFilter = {
-        conditions,
-        conditionsOp,
+        conditions: [...conditions],
+        conditionsOp: conditionsOp || 'and',
         name,
-        status: 'saved',
       };
 
       const response = await sendCatch('filter-create', {
@@ -132,30 +125,32 @@ export function SavedFilterMenuButton({
       onReloadSavedFilter({
         ...newSavedFilter,
         id: response.data,
+        tombstone: false,
       });
-      return;
+    } else {
+      if (!filter) {
+        return;
+      }
+
+      const updatedFilter = {
+        ...filter,
+        ...dirtyFilter,
+        name,
+      };
+
+      const response = await sendCatch('filter-update', {
+        state: updatedFilter,
+        filters: [...savedFilters],
+      });
+
+      if (response.error) {
+        setErr(response.error.message);
+        setNameOpen(true);
+      } else {
+        setNameOpen(false);
+        onReloadSavedFilter(updatedFilter);
+      }
     }
-
-    const updatedFilter = {
-      conditions: filterId?.conditions,
-      conditionsOp: filterId?.conditionsOp,
-      id: filterId?.id,
-      name,
-    };
-
-    const response = await sendCatch('filter-update', {
-      state: updatedFilter,
-      filters: [...savedFilters],
-    });
-
-    if (response.error) {
-      setErr(response.error.message);
-      setNameOpen(true);
-      return;
-    }
-
-    setNameOpen(false);
-    onReloadSavedFilter(updatedFilter);
   }
 
   return (
@@ -178,9 +173,9 @@ export function SavedFilterMenuButton({
               flexShrink: 0,
             }}
           >
-            {!filterId?.id ? t('Unsaved filter') : filterId?.name}&nbsp;
+            {!filter?.id ? t('Unsaved filter') : filter?.name}&nbsp;
           </Text>
-          {filterId?.id && filterId?.status !== 'saved' && (
+          {filter?.id && !!dirtyFilter && (
             <Text>
               <Trans>(modified)</Trans>&nbsp;
             </Text>
@@ -196,7 +191,8 @@ export function SavedFilterMenuButton({
         style={{ width: 200 }}
       >
         <FilterMenu
-          filterId={filterId}
+          filter={filter}
+          dirtyFilter={dirtyFilter}
           onFilterMenuSelect={onFilterMenuSelect}
         />
       </Popover>

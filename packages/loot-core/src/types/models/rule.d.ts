@@ -32,6 +32,7 @@ export type RuleConditionOp =
   | 'offBudget';
 
 export type FieldValueTypes = {
+  id: string;
   account: string;
   amount: number;
   category: string;
@@ -64,13 +65,13 @@ type BaseConditionEntity<
     month?: boolean;
     year?: boolean;
   };
-  conditionsOp?: string;
+  conditionsOp?: RuleConditionEntity['conditionsOp'];
   type?: 'id' | 'boolean' | 'date' | 'number' | 'string';
   customName?: string;
-  queryFilter?: Record<string, { $oneof: string[] }>;
 };
 
 export type RuleConditionEntity =
+  | BaseConditionEntity<'id', 'oneOf'>
   | BaseConditionEntity<
       'account',
       | 'is'
