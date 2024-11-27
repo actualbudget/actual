@@ -31,7 +31,8 @@ At a high-level, using the budget looks like this:
 2. Check your budget. If you've already overspent somewhere, you can move money from another category to cover it, or you can wait to cover it next month.
 3. If there's any new income, either add it to your current budget or (most likely) hold it for next month.
 4. At the end of the month, create a new budget for next month. Ideally, you will use income available from last month to cover the new budget. You will quickly see how much you saved by seeing the leftover **To budget** amount after budgeting for the new month.
-5. Move your leftover saved amount into a savings category, or another specific category you're saving up for.
+5. Move your leftover saved amount into a general savings category or another specific category that you are saving up for.
+
 
 ## How money rolls over
 
@@ -64,7 +65,8 @@ If you enter a new month and have a negative "To Be Budgeted" amount and you're 
 
 When you overspend in a category, that needs to rollover as well. You spent money that wasn't budgeted, so now you need to go back and take it out from somewhere. Doing this keeps your budget intact.
 
-One way to do this would be to simply roll it over into next month's budget for that category, subtracting it from the available amount. This hardly ever works in real life — if you have a food budget it's highly unlikely you'll be able go under it next month just because you overspent this month.
+One way to do this would be to simply roll it over into next month's budget for that category, subtracting it from the available amount. This hardly ever works in real life — if you have a food budget it's highly unlikely you'll be able go under it next month just because you overspent on it this month.
+
 
 Usually you have a couple places that you draw money from to cover overspending. To make it easy, **all overspending is automatically taken out of next month's To budget amount**, and category balances are reset to zero. This makes it easy to make up for it by reducing your budget in some other category (like savings).
 
