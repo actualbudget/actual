@@ -10,7 +10,7 @@ This is the easiest method available. While we don't maintain this tool, https:/
 
 If you don't want to use a third party tool, you will need an API key.
 
-If you haven't already got an API key, you'll need to:
+If you don't already have an API key, you'll need to:
 
     Sign in to the YNAB web app
     Go to the "Account Settings" page, then to the "Developer Settings" page
