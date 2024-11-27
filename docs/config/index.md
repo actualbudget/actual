@@ -56,7 +56,7 @@ If you’re providing a custom frontend, make sure you provide an `index.html` i
 
 Change the authentication method for Actual  (environment variable: `ACTUAL_LOGIN_METHOD`). The valid values are: 
 * `"password"` (default) - This is standard password authentication
-* `"header"` - Use the HTTP header `x-actual-password` to automatically login. This is advances used and is not done correctly could have security implications. 
+* `"header"` - Use the HTTP header `x-actual-password` to automatically login. This is for advanced use and if not done correctly could have security implications. 
 
 
 ## `trustedProxies`
