@@ -156,7 +156,7 @@ export function Status({ status, isSplit }) {
 
 function Footer({
   transactions,
-  adding,
+  isAdding,
   onAdd,
   onSave,
   onSplit,
@@ -232,7 +232,7 @@ function Footer({
             Select account
           </Text>
         </Button>
-      ) : adding ? (
+      ) : isAdding ? (
         <Button
           type="primary"
           style={{ height: styles.mobileMinHeight }}
@@ -436,7 +436,7 @@ const ChildTransactionEdit = forwardRef(
 ChildTransactionEdit.displayName = 'ChildTransactionEdit';
 
 const TransactionEditInner = memo(function TransactionEditInner({
-  adding,
+  isAdding,
   accounts,
   categories,
   payees,
@@ -457,6 +457,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
     [unserializedTransactions, dateFormat],
   );
   const { grouped: categoryGroups } = useCategories();
+  const { state: locationState } = useLocation();
 
   const [transaction, ...childTransactions] = transactions;
 
@@ -479,10 +480,10 @@ const TransactionEditInner = memo(function TransactionEditInner({
   const isInitialMount = useInitialMount();
 
   useEffect(() => {
-    if (isInitialMount && adding) {
+    if (isInitialMount && isAdding) {
       onTotalAmountEdit();
     }
-  }, [adding, isInitialMount, onTotalAmountEdit]);
+  }, [isAdding, isInitialMount, onTotalAmountEdit]);
 
   const getAccount = useCallback(
     trans => {
@@ -532,20 +533,21 @@ const TransactionEditInner = memo(function TransactionEditInner({
 
     const onConfirmSave = () => {
       let transactionsToSave = unserializedTransactions;
-      if (adding) {
+      if (isAdding) {
         transactionsToSave = realizeTempTransactions(unserializedTransactions);
       }
 
       onSave(transactionsToSave);
 
-      if (adding || hasAccountChanged.current) {
+      const isAddingFromAccountPage = isAdding && locationState?.accountId;
+      if (!isAddingFromAccountPage || hasAccountChanged.current) {
         const { account: accountId } = unserializedTransaction;
         const account = accountsById?.[accountId];
         if (account) {
           navigate(`/accounts/${account.id}`, { replace: true });
         } else {
           // Handle the case where account is undefined
-          navigate(-1);
+          navigate('/accounts');
         }
       } else {
         navigate(-1);
@@ -568,8 +570,9 @@ const TransactionEditInner = memo(function TransactionEditInner({
     }
   }, [
     accountsById,
-    adding,
+    isAdding,
     dispatch,
+    locationState?.accountId,
     navigate,
     onSave,
     unserializedTransactions,
@@ -757,7 +760,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
         <MobilePageHeader
           title={
             transaction.payee == null
-              ? adding
+              ? isAdding
                 ? 'New Transaction'
                 : 'Transaction'
               : title
@@ -772,7 +775,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
       footer={
         <Footer
           transactions={transactions}
-          adding={adding}
+          isAdding={isAdding}
           onAdd={onSaveInner}
           onSave={onSaveInner}
           onSplit={onSplit}
@@ -976,7 +979,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
           />
         </View>
 
-        {!adding && (
+        {!isAdding && (
           <View style={{ alignItems: 'center' }}>
             <Button
               onClick={() => onDeleteInner(transaction.id)}
@@ -1042,8 +1045,8 @@ function TransactionEditUnconnected({
   const dispatch = useDispatch();
   const [transactions, setTransactions] = useState([]);
   const [fetchedTransactions, setFetchedTransactions] = useState([]);
-  const adding = useRef(false);
-  const deleted = useRef(false);
+  const isAdding = useRef(false);
+  const isDeleted = useRef(false);
 
   useEffect(() => {
     let unmounted = false;
@@ -1074,7 +1077,7 @@ function TransactionEditUnconnected({
     if (transactionId !== 'new') {
       fetchTransaction();
     } else {
-      adding.current = true;
+      isAdding.current = true;
     }
 
     return () => {
@@ -1083,7 +1086,7 @@ function TransactionEditUnconnected({
   }, [transactionId]);
 
   useEffect(() => {
-    if (adding.current) {
+    if (isAdding.current) {
       setTransactions(
         makeTemporaryTransactions(
           locationState?.accountId || lastTransaction?.account || null,
@@ -1152,7 +1155,7 @@ function TransactionEditUnconnected({
 
   const onSave = useCallback(
     async newTransactions => {
-      if (deleted.current) {
+      if (isDeleted.current) {
         return;
       }
 
@@ -1176,7 +1179,7 @@ function TransactionEditUnconnected({
         // }
       }
 
-      if (adding.current) {
+      if (isAdding.current) {
         // The first one is always the "parent" and the only one we care
         // about
         dispatch(setLastTransaction(newTransactions[0]));
@@ -1189,9 +1192,9 @@ function TransactionEditUnconnected({
     async id => {
       const changes = deleteTransaction(transactions, id);
 
-      if (adding.current) {
+      if (isAdding.current) {
         // Adding a new transactions, this disables saving when the component unmounts
-        deleted.current = true;
+        isDeleted.current = true;
       } else {
         const _remoteUpdates = await send('transactions-batch-update', {
           deleted: changes.diff.deleted,
@@ -1244,7 +1247,7 @@ function TransactionEditUnconnected({
     >
       <TransactionEditInner
         transactions={transactions}
-        adding={adding.current}
+        isAdding={isAdding.current}
         categories={categories}
         accounts={accounts}
         payees={payees}
