@@ -63,22 +63,6 @@ import { getPrettyPayee } from '../utils';
 
 import { FocusableAmountInput } from './FocusableAmountInput';
 
-export function getDescriptionPretty(transaction, payee, transferAcct) {
-  const { amount } = transaction;
-
-  if (transferAcct) {
-    return `Transfer ${amount > 0 ? 'from' : 'to'} ${transferAcct.name}`;
-  } else if (payee) {
-    return payee.name;
-  }
-
-  return '';
-}
-
-function getFieldName(transactionId, field) {
-  return `${field}-${transactionId}`;
-}
-
 function serializeTransaction(transaction, dateFormat) {
   const { date, amount } = transaction;
   return {
