@@ -4,7 +4,7 @@ This page has examples of custom rules that some of our users have found useful 
 
 ### Q: How do I set the payee when the payee name changes between transactions
 
-**A:** Sometimes the payee shows up slightly differently from transaction to transaction.  To set the same payee every time and not create a new one every time a new transaction is imported, use a **Pre** rule that reads the imported payee field and finds the merchant name using a "contains" condition.
+**A:** Sometimes the payee shows up slightly differently from transaction to transaction. To set the same payee every time and not create a new one every time a new transaction is imported, use a **Pre** rule that reads the imported payee field and finds the merchant name using a "contains" condition.
 
 ![](/img/rules-custom/custom-rules-imported-payee.png)
 
@@ -20,7 +20,7 @@ This page has examples of custom rules that some of our users have found useful 
 
 ![](/img/rules-custom/custom-rules-2.png)
 
-### Q: I use bank sync.  How do I create transfers and not make duplicates?
+### Q: I use bank sync. How do I create transfers and not make duplicates?
 
 **A:** Rules can be used to automatically create transfers.
 Under the hood, Actual creates payees for each of your accounts.

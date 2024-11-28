@@ -23,7 +23,7 @@ title: Actual Budget Vision
 
 Actual is local first, meaning that the database that powers Actual Budget, and ultimately your budget, lives on your device. We don't store it on a server. Now you're wondering, what 'actual server' is for? Well, that allows you to sync changes to your budget on different devices. To do this, only the changes to the budget are sent to the server. The server stores the messages, and the client pulls down the change(s).
 
-### Open 
+### Open
 
 Actual is Open Source utilizing the MIT license. The code is open for anyone to see, view, and contribute. You own your data; you can do whatever you want with it.
 
@@ -35,7 +35,7 @@ The sleek and clutter-free user interface is simple to use for beginners and com
 
 The contributors to Actual Budget don't just write the program; they USE the program.  We all have a vested interest in maintaining reliability, security, and stability. If issues are found, bug reports are welcomed so that issues can be remedied immediately.
 
-### Privacy Focused  
+### Privacy Focused 
 
 Actual has no trackers, and unless explicitly enabled, no third-party access is allowed.
 

@@ -44,9 +44,9 @@ Delete a transfer the same way you delete any transaction: hover over it and pre
 
 ## Transfer Categories
 
-Transfers between On Budget accounts don't have a category.  This is because the funds never left your budget.  One way to think about this is that the funds both left and entered your budget thus canceling each other out. Actual marks these types of transfers with _`Transfer`_ in the category field.
+Transfers between On Budget accounts don't have a category. This is because the funds never left your budget. One way to think about this is that the funds both left and entered your budget thus canceling each other out. Actual marks these types of transfers with _`Transfer`_ in the category field.
 
-Transfers between Off Budget and On Budget accounts are different.  Only one half of the transfer exists on your budget and, from the perspective of your budget, is the same as a regular transaction.  You can create these transfers just the same as an On Budget transfer, but you will be asked to assign a category on the On Budget side of the transfer.
+Transfers between Off Budget and On Budget accounts are different. Only one half of the transfer exists on your budget and, from the perspective of your budget, is the same as a regular transaction. You can create these transfers just the same as an On Budget transfer, but you will be asked to assign a category on the On Budget side of the transfer.
 
 ## Payee rules
 

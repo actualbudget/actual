@@ -1,12 +1,12 @@
 # Local Installation
 
-The easiest way to get Actual running locally is to use [actual-server](https://github.com/actualbudget/actual-server). 
+The easiest way to get Actual running locally is to use [actual-server](https://github.com/actualbudget/actual-server).
 
 Actual server is used for syncing changes across devices. It comes with the latest version of the [Actual web client](https://github.com/actualbudget/actual).
 
 ## Prerequisites
 
-- The Actual server requires Node.js v18 or greater. You can download and install the latest version of Node.js from [Node.js website](https://nodejs.org/en/download) (we recommend downloading the “LTS” version). 
+- The Actual server requires Node.js v18 or greater. You can download and install the latest version of Node.js from [Node.js website](https://nodejs.org/en/download) (we recommend downloading the “LTS” version).
   - If you're on Windows, during installation of Node.js, be sure to select _Automatically install the necessary tools_ from the _Tools for Native Modules_ page. This is required to build better-sqlite3. If you missed this when you installed Node.js, double-click ```C:\Program Files\nodejs\install_tools.bat``` from the File Explorer or run it in a terminal.
 - Consider using a tool like [nvm](https://github.com/nvm-sh/nvm) or [asdf](https://asdf-vm.com) to install and manage multiple versions of Node.js.
 - You’ll also need to have Git installed. The Git website has [instructions for downloading and working with Git for all supported operating systems](https://git-scm.com/download).
@@ -42,7 +42,7 @@ Note that if you restart your computer, you’ll have to run this command again 
 
 ## Accessing Actual
 
-After the server has been started, you can access Actual using your browser at [http://localhost:5006](http://localhost:5006). 
+After the server has been started, you can access Actual using your browser at [http://localhost:5006](http://localhost:5006).
 
 When accessing Actual for the first time, you may be prompted to provide a URL for the server. For a local installation, click the **Use localhost:5006** button to use the server you've [configured](https://actualbudget.org/docs/config/).
 

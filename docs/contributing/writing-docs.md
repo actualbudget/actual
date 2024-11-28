@@ -248,7 +248,7 @@ Place the content inside the details-tags.
 
 Using images to accompany the description makes the documentation more accessible, thus improving its readability.
 
-The way to do this is to take good screenshots.  When taking screenshots, there are a few things to keep in mind:
+The way to do this is to take good screenshots. When taking screenshots, there are a few things to keep in mind:
 
 * It is crucial to ensure that the image is crystal clear and directly relevant.
   Blurry or muddled images can detract from the user's understanding and confidence in the documentation.

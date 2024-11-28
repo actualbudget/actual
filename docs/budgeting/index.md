@@ -42,12 +42,12 @@ When you add income for a month, it becomes immediately available to budget. You
 
 Most likely, a common workflow will be to "hold" income you make this month for next month's budget. **Optionally, to hold money instead of budgeting it for a month:**
 
-1.  Click the **To Budget** amount.
-2.  Select **Hold for next month** in the menu.
+1. Click the **To Budget** amount.
+2. Select **Hold for next month** in the menu.
 
 ![](/img/how-it-works/buffer-1.png)
 
-3.  Press <Key k="enter" /> to hold all available money, or enter a custom amount to hold.
+3. Press <Key k="enter" /> to hold all available money, or enter a custom amount to hold.
 
 This doesn't do anything except take out money from the **To Budget** amount for that month, allowing you to "zero it out" and mark it to be used for later. That money will appear in next month's **To Budget**.
 
@@ -55,7 +55,7 @@ Using Hold for Next Month will ensure that the funds are no longer available to 
 
 You can also just leave the **To Budget** amount alone.
 
-It is possible to hold money multiple months ahead. If you do this, those dollars will be taken out of the current month's To Budget, and made available in the next month's To Budget.  This can be done for multiple months in a row, if you want to hold the income for 2 or more months. If you need to use that money in the current month to cover over spending, use the **Reset Next Months Buffer** button to bring that money to the current month. This needs to be done for each month there is a hold.
+It is possible to hold money multiple months ahead. If you do this, those dollars will be taken out of the current month's To Budget, and made available in the next month's To Budget. This can be done for multiple months in a row, if you want to hold the income for 2 or more months. If you need to use that money in the current month to cover over spending, use the **Reset Next Months Buffer** button to bring that money to the current month. This needs to be done for each month there is a hold.
 
 :::note
 If you enter a new month and have a negative "To Be Budgeted" amount and you're sure it should be positive, try resetting next month's buffer to bring money that may be held back to the current month.

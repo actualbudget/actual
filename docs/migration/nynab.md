@@ -80,7 +80,7 @@ This is affectively the same thing nYNAB does, but in a manual form.
 To `hold` the leftover funds for the next month follow these steps:
 1. Click on your `To Budget` value for the month.
 2. Select `Hold for next month`.
-3. Fill in how much you would like to reserve for the future.  By default the current `To Budget` value is filled in.  Using this value will bring your `To Budget` to zero.
+3. Fill in how much you would like to reserve for the future. By default the current `To Budget` value is filled in. Using this value will bring your `To Budget` to zero.
 4. Click `Hold`.
 4. Repeat for all desired months.
 

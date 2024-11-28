@@ -42,8 +42,8 @@ You are welcome to have other lines in your note, but the #template/#goal line m
 |#template 12% of available funds|Budget 12% of your "To Budget" funds available at the current priority level| |
 |#template schedule {SCHEDULE NAME}|Fund upcoming scheduled transactions over time|Monthly schedules, or larger non-monthly scheduled transactions|
 |#template schedule full {SCHEDULE NAME}|Fund upcoming scheduled transaction only on needed month| Small schedules that are non-monthly|
-|#template average 6 months | Budget the average amount spent over the last 6 months.  Can set the number to any number > 0.  Matches the existing option on the budget page but with flexible month ranges |
-|#template copy from 12 months ago | Budget the same amount as was budgeted 12 months ago.  Number of months is adjustable | Your power bill fluctuates throughout the year, but is about the same in equivalent months between years. |
+|#template average 6 months | Budget the average amount spent over the last 6 months. Can set the number to any number > 0. Matches the existing option on the budget page but with flexible month ranges |
+|#template copy from 12 months ago | Budget the same amount as was budgeted 12 months ago. Number of months is adjustable | Your power bill fluctuates throughout the year, but is about the same in equivalent months between years. |
 |#template remainder | Add all remaining funds to this category| See the [Remainder Template](#remainder-template) Section for info |
 |#goal 1000         | Set a long term goal instead of a monthly goal | See the [Goal Directive](#goal-directive) Section for info |
 
@@ -56,7 +56,7 @@ You are welcome to have other lines in your note, but the #template/#goal line m
 - By default templates do not consider available funds when being applied. Use template priorities to not budget more than is available.
 - The `hold` flag can be added to any goal that uses the `up to` key word.
 - A single category with two templates that use `up to` is not supported.
-- If any single template contains an `up to`, the whole category will be subject to that limit even if there are later templates and priorities.  This excludes remainders which will run after the limit is applied.
+- If any single template contains an `up to`, the whole category will be subject to that limit even if there are later templates and priorities. This excludes remainders which will run after the limit is applied.
 
 ### Multiple Template Lines
 
@@ -93,17 +93,17 @@ Templates can be given a priority flag to change the order that the templates ge
 - Lower priority values get run first. EX 0 is run first, then 1, then 2, etc.
 - No priority flag defaults to priority 0 and is the same as a standard template.
 - Negative priorities are not allowed and will result in the template being skipped.
-- Template application order is based on the database order, not the view order.  To guarantee a specific fill order use separate priorities for each category.
+- Template application order is based on the database order, not the view order. To guarantee a specific fill order use separate priorities for each category.
 - If you have multiple `schedule` or `by` template lines in a single category, they will be forced to match the same priority level as the line run first.
 - It is recommended to use the "overwrite with budget template" option when applying templates if you use priorities.
 
-    - **Expected budgeted amount is 200**  
+    - **Expected budgeted amount is 200** 
     **Expected maximum category balance is 200**
 
         #template 300
         #template-1 150 up to 200
-        
-    - **Expected budgeted amount is 450**  
+       
+    - **Expected budgeted amount is 450** 
     **No maximum category balance exists**
 
         #template 150 up to 500
@@ -154,13 +154,13 @@ All the examples below use the case of $100 leftover when the remainder pass is 
 ## Goal Directive
 
 This option is unique enough to warrant its own directive `goal` instead of the standard `template` option.
-The `goal` option overrides how the goal indicator typically functions.  
+The `goal` option overrides how the goal indicator typically functions.
 In the standard templates, the goal indication colors are based on the current month's budgeted value.
-When using the `goal` option, the indication is based on the total balance.  
-This shifts the indication to a long-term goal you are saving up to instead of just the current monthly portion.  
+When using the `goal` option, the indication is based on the total balance.
+This shifts the indication to a long-term goal you are saving up to instead of just the current monthly portion.
 A few examples have been given to illustrate this difference.
 
-### Notes 
+### Notes
 * The `goal` templates are run the same way as the other templates but using the month options or the category budget options.
 * If there is a `goal` directive in a category, the indicator for that category will be based on the total balance compared to the amount set in the template line.
 * The `goal` directive will not budget any funds, and funds budgeted by hand will not get reset by running templates.
@@ -214,6 +214,6 @@ To apply the goal templates you create, enable the feature in the Settings exper
 **Overwrite with budget template** will fill in all budget cells using the templates.
 
 ### Goal Indicators
-After having run the templates in a given month the status of a respective category goal will be indicated as a text color of the category balance.  The image below shows an example of categories in the following states: normal (no goal set), zero (no goal set), goal met, goal not met, and a negative balance.
+After having run the templates in a given month the status of a respective category goal will be indicated as a text color of the category balance. The image below shows an example of categories in the following states: normal (no goal set), zero (no goal set), goal met, goal not met, and a negative balance.
 
 ![](/img/goal-template/templates-colors.png)

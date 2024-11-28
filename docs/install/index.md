@@ -1,6 +1,6 @@
 # Installing Actual
 
-The Actual Budget project is made up of two parts: the client and the server.  A server is not required for Actual to function but it is strongly recommended as it provides increased functionality. Below is a table of features of Actual and if those features work with just a client or if a server is needed. 
+The Actual Budget project is made up of two parts: the client and the server. A server is not required for Actual to function but it is strongly recommended as it provides increased functionality. Below is a table of features of Actual and if those features work with just a client or if a server is needed.
 
 | Feature | Without Server | Needs Server |
 |:-|:-:|:-:|
@@ -13,13 +13,13 @@ The Actual Budget project is made up of two parts: the client and the server.  A
 | Use bank syncing (GoCardless or SimpleFIN)| | X |
 | Use the Actual API | | X |
 
-The standard way of using Actual is to set up a personal server and use a web browser for the application.  For quick testing or getting to know Actual before setting up a server, the [demo](https://demo.actualbudget.org) or a [desktop application](https://github.com/actualbudget/actual/releases) are a good place to start.
+The standard way of using Actual is to set up a personal server and use a web browser for the application. For quick testing or getting to know Actual before setting up a server, the [demo](https://demo.actualbudget.org) or a [desktop application](https://github.com/actualbudget/actual/releases) are a good place to start.
 
 ## Using Actual locally in the browser
 
-If you are okay with not having sync, auto-save, or backups then the easiest and fastest way to get started is by using the Actual [web app](https://app.actualbudget.org). This solution requires less setup but more maintenance. 
+If you are okay with not having sync, auto-save, or backups then the easiest and fastest way to get started is by using the Actual [web app](https://app.actualbudget.org). This solution requires less setup but more maintenance.
 
-All data is saved to your local browser. The Actual web app never has access to any of your personal data. It is recommended that you save your data (from the [settings](../backup-restore/backup) menu) after every session. If your browser memory is cleared, your data will be lost, so a backup is crucial. 
+All data is saved to your local browser. The Actual web app never has access to any of your personal data. It is recommended that you save your data (from the [settings](../backup-restore/backup) menu) after every session. If your browser memory is cleared, your data will be lost, so a backup is crucial.
 
 Using a new device or browser requires you to [import](../migration/actual-import#import-backup-file) the saved file for each new device or browser. Remember that these new devices and browsers will not sync without a server set up, so anything you modify on one browser will not appear on others.
 
@@ -31,14 +31,14 @@ This solution is not recommended for long-term use due to the maintenance requir
 
 ## Server-Optional Client Options
 
-Desktop applications are available for Windows, Mac, and Linux. These can be [downloaded from GitHub](https://github.com/actualbudget/actual/releases).  The desktop apps have the following benefits:
+Desktop applications are available for Windows, Mac, and Linux. These can be [downloaded from GitHub](https://github.com/actualbudget/actual/releases). The desktop apps have the following benefits:
 * Can connect to a server (this gives them the ability to use the server-based features)
 * Automated backups
-* Offline use is ready out of the box 
+* Offline use is ready out of the box
 
 ## Server-Based Client Options
 
-The server provides a web-based version of Actual.  This web app can be used in a browser as a standard web page to view and edit your budget.  The web page can also be installed on your device.  For mobile devices, an installed web page will work offline.
+The server provides a web-based version of Actual. This web app can be used in a browser as a standard web page to view and edit your budget. The web page can also be installed on your device. For mobile devices, an installed web page will work offline.
 
 ## Running a Server
 
@@ -70,4 +70,4 @@ Content contained on external links is not managed or maintained by the Actual B
 - [UnRAID SSL Setup](https://discord.com/channels/937901803608096828/1158941114603155477) - this guide is found at our Discord
 
 [^1]: You technically don't need a server instance for this. You need to run either a web-based client or a server, but a server is the same effort.
-[^2]: A portion of the cost to host on PikaPods is donated to the Actual Budget Project.  With that said, PikaPods is a very simple, and cost-effective way to host your server.
+[^2]: A portion of the cost to host on PikaPods is donated to the Actual Budget Project. With that said, PikaPods is a very simple, and cost-effective way to host your server.

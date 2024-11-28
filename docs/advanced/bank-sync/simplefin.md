@@ -17,7 +17,7 @@ Server Version 24.10.0 or higher are required for this feature.
     ![](/static/img/connecting-your-bank/connecting-your-bank-simplefin-02.png)
 
 
-3. Accept the terms, on first login, and then you will be taken to "My Account". 
+3. Accept the terms, on first login, and then you will be taken to "My Account".
 
 4. Link any banks that you wish.
    - You will need to add your accounts first, through "Financial Institutions" > New Connection
@@ -78,7 +78,7 @@ Server Version 24.10.0 or higher are required for this feature.
 
 Actual does not automatically perform syncs.
 You will need to manually request a sync to pull new transactions from SimpleFIN.
-To sync all accounts, click on "All Accounts" in the side menu, and then click "Sync", below the "All Accounts" header.  
+To sync all accounts, click on "All Accounts" in the side menu, and then click "Sync", below the "All Accounts" header.
 If you wish to only sync one account, view the desired account and click the sync button.
 
   ![](/static/img/connecting-your-bank/connecting-your-bank-simplefin-10.png)

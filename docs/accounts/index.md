@@ -60,7 +60,7 @@ Click the account name in the sidebar of Actual
 
 ![](/img/add-account/SidebarAccountList@2x.png)
 
-Hovering your cursor close to the account name at the top will reveal two icons.  
+Hovering your cursor close to the account name at the top will reveal two icons.
 The page icon allows you to write a note about this account, and the pencil icon allows you to rename the account.
 
 After editing a note for the account or its name, hit 'Enter' to save your changes.

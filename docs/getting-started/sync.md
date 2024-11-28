@@ -1,6 +1,6 @@
 # Syncing Across Devices
 
-Actual is a different kind of app. It stores all of your data on your installed Actual server by default AND it stores all of your data on your local device. That means it works regardless of your network connection, and you always have direct access to your data. Your data never goes to any external servers that you don't choose.  It's your data, and you're in control.
+Actual is a different kind of app. It stores all of your data on your installed Actual server by default AND it stores all of your data on your local device. That means it works regardless of your network connection, and you always have direct access to your data. Your data never goes to any external servers that you don't choose. It's your data, and you're in control.
 
 We don't want to throw away the internet though. It's too useful. You can set up your server to access it through a VPN or through the wider internet. The choice is yours. You can access it from any device easily, and you never have to worry about losing your data in case you drop your laptop or phone into a lake.
 

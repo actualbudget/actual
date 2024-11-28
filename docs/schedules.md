@@ -4,11 +4,11 @@
 
 Schedules can be used to enter anticipated transactions early. Some of the available options to tailor schedules to your needs are:
 
-1.  Set to be recurring or only entered once
-2.  Set to be automatically entered into the account register or choose to manually approve entries
-3.  Options for recurring entries for multiple specific days of the month.
+1. Set to be recurring or only entered once
+2. Set to be automatically entered into the account register or choose to manually approve entries
+3. Options for recurring entries for multiple specific days of the month.
     1. A single schedule can be created for a Cell phone plan that has multiple users and different payment cycles for each phone. If you have 3 cell phones that all get paid on different days of the month, each day can be defined in a single schedule for each phone.
-4.  Options to determine frequency of payments, such as every month, every 2 months, every 2 years, etc.
+4. Options to determine frequency of payments, such as every month, every 2 months, every 2 years, etc.
 
 Once a schedule is started, Actual will search the transaction history for entries that match the schedule, select the matches, and the option to link those transactions to the schedule is given. You can click to the **Find missing transactions** button to have Actual look for matches.
 

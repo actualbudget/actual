@@ -127,5 +127,5 @@ To achieve this:
 8. Add a release note in `upcoming-release-notes/` describing your change (see [writing good release notes](/docs/contributing/#writing-good-release-notes)).
 9. Commit your changes and push to your fork.
 
-Once reviewed, the maintainers will comment on the pull request and merge it if acceptable.  The change would then be available in the next release of the software.
+Once reviewed, the maintainers will comment on the pull request and merge it if acceptable. The change would then be available in the next release of the software.
 

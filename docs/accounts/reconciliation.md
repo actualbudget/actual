@@ -26,11 +26,11 @@ When the cleared amount of the Actual account ledger and the value you entered i
 
 ![](/img/reconcile/reconcile-4.png)
 
-Upon pressing done, all cleared transactions will receive a lock icon.  This represents the fact that they were included in a reconciliation and makes it harder to accidentally change.  
+Upon pressing done, all cleared transactions will receive a lock icon. This represents the fact that they were included in a reconciliation and makes it harder to accidentally change.
 
 ![](/img/reconcile/reconcile-9.png)
 
-Of course, there's always the possibility you need to change a locked transaction.  You can click on the lock of any transaction to open a dialog to unlock it.
+Of course, there's always the possibility you need to change a locked transaction. You can click on the lock of any transaction to open a dialog to unlock it.
 
 ![](/img/reconcile/reconcile-10.png)
 

@@ -1,4 +1,4 @@
-# The Budget 
+# The Budget
 
 This view lets you manage your budget for various months. You'll find more information about how to do budgeting with Actual
 in the [Budgeting](/docs/budgeting/) part of this manual.

@@ -6,7 +6,7 @@ This is an **experimental feature**. That means we’re still working on finishi
 
 ## Enabling the Tracking Budget
 
-The **Tracking Budget** feature can be switched on from the Experimental features section within the Settings page by enabling "Budget mode toggle". 
+The **Tracking Budget** feature can be switched on from the Experimental features section within the Settings page by enabling "Budget mode toggle".
 Then scroll up in the settings menu and click "Switch to tracking budgeting".
 
 ![](/img/tracking-budget-7.png)
