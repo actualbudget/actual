@@ -1,6 +1,6 @@
 # Installing Actual
 
-The Actual Budget project is made up of two parts: the client and the server. A server is not required for Actual to function but it is strongly recommended as it provides increased functionality. Below is a table of features of Actual and if those features work with just a client or if a server is needed.
+The Actual Budget project is made up of two parts: the client and the server.  A server is not required for Actual to function but it is strongly recommended as it provides increased functionality. Below is a table of features of Actual and if those features work with just a client or if a server is needed.
 
 | Feature | Without Server | Needs Server |
 |:-|:-:|:-:|
@@ -42,7 +42,7 @@ The server provides a web-based version of Actual. This web app can be used in a
 
 ## Running a Server
 
-While running a server can be a complicated endeavour, we’ve tried to make it fairly easy to set up and hands-off to maintain. Choose one of the following options to get started:
+While running a server can be a complicated endeavor, we’ve tried to make it fairly easy to set up and hands-off to maintain. Choose one of the following options to get started:
 
 - If you’re not comfortable with the command line and are willing to pay a small amount of money to have your version of Actual hosted on the cloud for you, we recommend [PikaPods](pikapods.md).[^2]
 - If you’re willing to run a few commands in the terminal:

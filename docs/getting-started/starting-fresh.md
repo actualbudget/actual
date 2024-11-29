@@ -122,9 +122,9 @@ Should you put your credit card debts in this category?
 The answer is *it depends*. For some input on this, please read our article on 
 [Carrying Debt](/docs/budgeting/credit-cards/carrying-debt).
 
-3. **Daily expenses**. Group your everyday expenses for a more organised and convenient way
-of tracking. This makes it easy to report on expenditures that fluctuate from month to month.
-Examples of spending categories in this group are Groceries, Household Items, Fuel, Eating Out, Clothing,
+3. **Daily expenses**.  Group your everyday expenses for a more organized and convenient way 
+of tracking. This makes it easy to report on expenditures that fluctuate from month to month. 
+Examples of spending categories in this group are Groceries, Household Items, Fuel, Eating Out, Clothing, 
 Personal Care, Gifts, Entertainment, Streaming services, News (paper) subscriptions, and Charities.
 
 
@@ -133,12 +133,12 @@ You should have at least one category named *Emergency Fund*. Other examples ma
 Replacing Stove, and Replacing Washing Machine.
 
 
-5. **Savings goals**. This is where you keep your savings goals categorised *on budget*. What we
-mean by on budget is that if you need to reallocate money, you may settle for a cheaper Vacation or
-postpone the Car Replacement or the Bathroom Renovation for a few months. If you are saving for a
-long view, like your retirement, we suggest you create an *off budget* account for those kind of
-savings. Money allocated in off budget accounts takes more effort to reallocate as you need to
-move the actual funds from your savings account or sell your stocks or global
+5. **Savings goals**.  This is where you keep your savings goals categorized *on budget*. What we 
+mean by on budget is that if you need to reallocate money, you may settle for a cheaper Vacation or 
+postpone the Car Replacement or the Bathroom Renovation for a few months. If you are saving for a 
+long view, like your retirement, we suggest you create an *off budget* account for those kind of 
+savings. Money allocated in off budget accounts takes more effort to reallocate as you need to 
+move the actual funds from your savings account or sell your stocks or global 
 index funds (a few examples of long term saving methods).
 
 
@@ -173,9 +173,9 @@ For bills, your bank or credit card statements are good sources to establish you
 
 ### Use a spreadsheet to find your initial budget numbers
 
-You enter all your expenses in a spreadsheet, summarise them per month, and then calculate the average.
-Now, you know what you need to budget per
-month. Having the budgeted numbers somewhat higher than the calculated average might be a good idea.
+You enter all your expenses in a spreadsheet, summarize them per month, and then calculate the average. 
+Now, you know what you need to budget per 
+month. Having the budgeted numbers somewhat higher than the calculated average might be a good idea. 
 
 This way, you add small buffers in each category as prices rise; the same goes for your rent and mortgage.
 Adding some extra, albeit small, paddings along the way means you are better suited when this happens.
@@ -245,7 +245,7 @@ budgeting.
    as what you see in the *Spent* column. If done correctly, the sum under *To Budget* should
    correctly tell you how much money you have left.
 
-4. Set aside time to analyse your spending and income at the end of the month. Based on this,
+4. Set aside time to analyze your spending and income at the end of the month. Based on this, 
    you can add values to the upcoming months' Budgeted column.
 
 
@@ -273,7 +273,7 @@ Shortly this method goes like this:
     3. If you didn't have enough you need to decide what to do
         * Move money from a different category
         * Change the category of the transaction
-3. Analyse spending habits.
+3. Analyze spending habits.
 4. Adjust and adapt your budget as time goes by.
 
 
@@ -286,9 +286,9 @@ This topic is so important on how to actually use Actual, that we have devoted a
 
 ## The next step in your budgeting journey
 
-A good next step is to read through the "Using Actual" section of the documentation. This section has detailed explainers on the
-features of Actual and how to use them. Some of the most useful features are [Rules](/docs/budgeting/rules/index.md),
-[Schedules](/docs/schedules.md), [Reconciliation](/docs/accounts/reconciliation.md),
+A good next step is to read through the "Using Actual" section of the documentation.  This section has detailed explanations on the 
+features of Actual and how to use them. Some of the most useful features are [Rules](/docs/budgeting/rules/index.md), 
+[Schedules](/docs/schedules.md), [Reconciliation](/docs/accounts/reconciliation.md), 
 and [Reports](/docs/reports/index.md).
 
 

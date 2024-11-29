@@ -14,7 +14,7 @@ One thing to keep in mind: Actual is not like most other apps. While your data i
 
 ## Getting started
 
-We provide an official node.js client in the `@actual-app/api` package. Other languages are not supported at this point.
+We provide an official Node.js client in the `@actual-app/api` package. Other languages are not supported at this point.
 
 The client is [open-source on GitHub](https://github.com/actualbudget/actual/tree/master/packages/api) along with the rest of Actual if you want to see the code.
 
@@ -101,7 +101,7 @@ api.runImport('My-Budget', run);
 
 This is very simple, but it takes some data in `my-data.json` and creates all the accounts and transactions from it. Functions to convert the items (like `convertAccount`) are not included here. Use the [reference docs](./reference.md) to learn the shape of objects that Actual expects.
 
-**Note:** it's important that [`addTransactions`](./reference.md#addtransactions) is used here. You want to use it instead of [`importTransactions`](./reference.md#importtransactions) when dumping raw data into Actual. The former will not run the reconciliation process (which dedupes transactions), and won't create the other side of transfer transactions, and more. If you use `importTransactions` it may adjust your data in ways that don't match the data you’re importing.
+**Note:** it's important that [`addTransactions`](./reference.md#addtransactions) is used here. You want to use it instead of [`importTransactions`](./reference.md#importtransactions) when dumping raw data into Actual. The former will not run the reconciliation process (which deduplicates transactions), and won't create the other side of transfer transactions, and more. If you use `importTransactions` it may adjust your data in ways that don't match the data you’re importing.
 
 Check out the [YNAB4](https://github.com/actualbudget/actual/blob/master/packages/loot-core/src/server/importers/ynab4.ts) and [YNAB5](https://github.com/actualbudget/actual/blob/master/packages/loot-core/src/server/importers/ynab5.ts) importers to see how a real importer works.
 

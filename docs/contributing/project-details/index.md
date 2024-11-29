@@ -41,7 +41,7 @@ The shared underlying functionality component used by both the web/desktop front
 
 ## Actual Server
 
-Actual Server holds all of the code for the synchronization element of the Actual Budget application. Actual server has a dependency of Actual so when you pull Actual Server and deploy it to your hosting method of choice, be that Fly, Local etc. and run `yarn install` Actual will be downloaded as a dependency from npm and installed into the Actual Server deployment.
+Actual Server holds all of the code for the synchronization element of the Actual Budget application. Actual server has a dependency of Actual so when you pull Actual Server and deploy it to your hosting method of choice, be that Fly, Local etc. and run `yarn install` Actual will be downloaded as a dependency from NPM and installed into the Actual Server deployment.
 
 You can see this in the [package.json](https://github.com/actualbudget/actual-server/blob/master/package.json) file;
 
@@ -61,6 +61,6 @@ You can see this in the [package.json](https://github.com/actualbudget/actual-se
   },
 ```
 
-So, you might see some changes being made in the Actual repository but them changes are not reflected in your deployment despite you having the latest version pulled, why? Because Actual hasn't been updated in [npm](https://www.npmjs.com/package/@actual-app/web).
+So, you might see some changes being made in the Actual repository but them changes are not reflected in your deployment despite you having the latest version pulled, why? Because Actual hasn't been updated in [NPM](https://www.npmjs.com/package/@actual-app/web).
 
-Actual is only updated in npm when a release is created.
+Actual is only updated in NPM when a release is created.

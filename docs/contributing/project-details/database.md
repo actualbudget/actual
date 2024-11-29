@@ -1,6 +1,6 @@
 # Database Details
 
-Actual stores your data locally inside a sqlite database. You can see the default db structure by opening `/loot-core/default-db.sqlite`
+Actual stores your data locally inside a SQLite database. You can see the default db structure by opening `/loot-core/default-db.sqlite`
 
 However this is not the 'current' structure, as the database is created as a copy from the default template, and then a series of migrations is run to get the database up to the current level. You can see these migrations in `/loot-core/migrations`.
 

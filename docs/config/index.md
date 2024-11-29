@@ -61,4 +61,4 @@ Change the authentication method for Actual  (environment variable: `ACTUAL_LOGI
 
 ## `trustedProxies`
 
-Config the clients that are allowed to authentic with HTTP headers. This defaults to known internal ip ranges: `[10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, fc00::/7, ::1/128]`  (environment variable: `ACTUAL_TRUSTED_PROXIES`, comma separated string).
+Config the clients that are allowed to authentic with HTTP headers. This defaults to known internal IP ranges: `[10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, fc00::/7, ::1/128]`  (environment variable: `ACTUAL_TRUSTED_PROXIES`, comma separated string).

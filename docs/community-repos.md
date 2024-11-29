@@ -6,9 +6,8 @@ They are for special use cases or for developing features that have not yet been
 
 These and other projects can be discussed in the #community-projects channel on the Actual Discord server.
 
-If you want your project listed here, notify people in the #documentation Discord channel. Before you can ask
-for it to be added, your project must have a proper Readme file.
-
+If you want your project listed here, notify people in the #documentation Discord channel. Before you can ask 
+for it to be added, your project must have a proper README file.
 
 ## Bank Importers
 
@@ -38,13 +37,13 @@ Actual currently has official support for migrating budgets from YNAB4 and nYNAB
 * **Actual Tap** - https://github.com/bobokun/actualtap-py
    - *Provides an API to integrate tap-to-pay transactions on mobile devices with Actual Budget.*
 * **Actual AI** - https://github.com/sakowicz/actual-ai
-   - *Categorise transactions using AI.*
+   - *Categorize transactions using AI.*
 * **Actual Helpers** - https://github.com/psybers/actual-helpers
    - *Collection of helper scripts to track home prices and car values, add loan interest transactions, track investment accounts, etc.*
 * **Actual Tasks** - https://github.com/rodriguestiago0/actual_task
    - *Two utilities to help fix payees and calculate mortgages.*
 * **Coinbase data puller** - https://github.com/SwadeDotExe/Coinbase-To-ActualBudget
-   - *This script pulls data from a USD and BTC wallet in Coinbase and keeps a wallet in ActualBudget synchronized with this balance.*
+   - *This script pulls data from a USD and BTC wallet in Coinbase and keeps a wallet in Actual Budget synchronized with this balance.*
 * **Easy category archive function** - https://github.com/rvisharma/actual-archive-category
    - *This tool moves transactions over to an _archive_ category, and then deletes the category.*
 * **Actual Budget Backup** - https://github.com/rodriguestiago0/actualbudget-backup

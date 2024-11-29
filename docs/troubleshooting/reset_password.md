@@ -15,7 +15,7 @@ docker exec -it <actual_container> /bin/sh
 node /app/src/scripts/reset-password.js
 ```
 
-## From a kubernetes instance
+## From a Kubernetes instance
 ```sh
 kubectl exec --stdin --tty <actual_pod_name> -- /bin/sh
 node /app/src/scripts/reset-password.js

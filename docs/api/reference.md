@@ -580,7 +580,7 @@ Synchronizes the locally cached budget files with the server's copy.
 
 <Method name="runBankSync" args={[{ properties: [{ name: 'accountId', type: 'string' }] }]} returns="Promise<void>" />
 
-Run the 3rd party (gocardless, simplefin) bank sync operation. This will download the transactions and insert them into the ledger.
+Run the 3rd party (GoCardless, SimpleFIN) bank sync operation. This will download the transactions and insert them into the ledger.
 
 #### `runImport`
 

@@ -24,7 +24,7 @@ you will be able to show or hide split transactions.
 The three horizontal dots, shown in the blue box, will allow you to perform various manipulations on the account. These range from
 reconciling and exporting your account to closing and linking your account for [automatic bank transactions](/docs/advanced/bank-sync).
 This is also where you can show the account's running balance (as seen in the first screenshot on this page). You can
-also hide/show both reconciled transactions as well as the cleared checkmark column to the far right of the transaction's row.
+also hide/show both reconciled transactions as well as the cleared checkbox column to the far right of the transaction's row.
 
 
 ![](/static/img/a-tour-of-actual/tour-account-register-header.png)

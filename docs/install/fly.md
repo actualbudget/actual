@@ -10,7 +10,7 @@ In order to deploy Actual to Fly.io, you’ll need to use their command line int
 
 Fly.io has a "pay as you go" plan for new users with no monthly fee, with actual usage billed monthly. Paid plans start at $5/month and include a limited amount of free compute. See [Pricing Details](https://fly.io/docs/about/pricing/) for more information.
 
-To begin, you’ll need to sign up for an account. Go to [fly.io](https://fly.io) and click “Get Started,” then fill in
+To begin, you’ll need to sign up for an account. Go to [Fly.io](https://fly.io) and click “Get Started,” then fill in
 the form. Note that Fly requires you to provide credit card details for sign up. See [their docs on how they use credit cards](https://fly.io/docs/about/credit-cards/) for more information.
 
 ### Accessing the `fly` command line tool
@@ -106,7 +106,7 @@ This command will ask a series of questions:
 - “_An existing fly.toml file was found. Would you like to copy its configuration to the new app?_” Type `y` and press enter to use the config file we’ve provided.
 - “_Choose an app name (leave blank to generate one)_” Your app will be available online at <code>https://<em>the-name-you-choose</em>.fly.dev</code>. You can choose any name you want, but it must be unique. If you’re not sure what to choose, you can leave it blank and Fly will generate a random name for you. Either type the name and press enter, or just press enter.
 - _Choose a region for deployment_ This is the physical location where the server will be set up. You can choose any region you want, but we recommend choosing the one closest to you. Use the up and down arrow keys to pick a region, then press enter to choose the highlighted option.
-- _Would you like to set up a Postgresql database now?_ Type `n` and press enter to skip this step.
+- _Would you like to set up a PostgreSQL database now?_ Type `n` and press enter to skip this step.
 - _Would you like to set up an Upstash Redis database now?_ Type `n` and press enter to skip this step.
 - _Would you like to deploy now?_ We’re not quite done yet! Type `n` and press enter. We’ll deploy the app once we’re done.
 

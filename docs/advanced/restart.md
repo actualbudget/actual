@@ -2,11 +2,11 @@
 
 If you've fallen behind on your budgeting and want to start fresh without starting from scratch, follow these steps to reset your budget:
 
-## Step 1: Address Uncategorised Transactions
+## Step 1: Address Uncategorized Transactions
 
-- Go through any transactions that haven't been categorised.
+- Go through any transactions that haven't been categorized.
 - If you're unsure where to assign certain transactions, create a temporary category named **"Budget Reset"**.
-- Once you've categorised all transactions, you can hide this temporary category.
+- Once you've categorized all transactions, you can hide this temporary category.
 
 ## Step 2: Reconcile Your Accounts
 

@@ -3,13 +3,13 @@
 It can be extremely useful to be able to bulk edit or duplicate a number of transactions at once.
 
 :::danger
-This guidance is not compatible with split transactions, bulk editing produces some unexpected behaviours when bulk editing split transactions.
+This guidance is not compatible with split transactions, bulk editing produces some unexpected behaviors when bulk editing split transactions.
 :::
 
 ### Use Cases
 
 1. Adding categories to imported transactions
-2. Changing the category for a number of transactions You may for example wish to reorganise your category structure and naming.
+2. Changing the category for a number of transactions You may for example wish to reorganize your category structure and naming.
 3. Add a note to certain transactions in order to provide more granular detail for analysis, without having to add still more categories.
 4. To change the Account for a number of transactions - perhaps due to a manual entry or import error.
 5. Duplicating multiple transactions that may not be appropriate for scheduling

@@ -1,6 +1,6 @@
 # Electron Notes
 
-* Generally speaking, it is unlikely that features/fixes you contribute to actual will require electron-specific changes. If you think that is likely feel free to discuss on github or in the actual discord.
+* Generally speaking, it is unlikely that features/fixes you contribute to actual will require electron-specific changes. If you think that is likely feel free to discuss on GitHub or in the actual discord.
 
 * Details of the motivation behind the usage of WebSockets in the electron app can be found in the [Pull Request](https://github.com/actualbudget/actual/pull/1003) where the changes were made.
 

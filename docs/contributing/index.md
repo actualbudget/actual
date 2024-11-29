@@ -21,7 +21,7 @@ Here are some initial guidelines for how contributions will be treated:
 
 - An open PR does not automatically deserve time for a full review and acceptance. It's up to the PR author to convince the maintainers that the change is good and worth reviewing. This involves a clear description for why the change is being made, detailing the tradeoffs.
 
-- We especially welcome improvements in automation: creating github actions to automatically generate builds, making the release process easier, etc.
+- We especially welcome improvements in automation: creating GitHub actions to automatically generate builds, making the release process easier, etc.
 
 ### Main Contributors
 

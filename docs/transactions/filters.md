@@ -47,7 +47,7 @@ Here is an image of the multiple filters that have been selected. In this exampl
 
 ![](/img/filtering/highlight.png)
 
-Now we want to see the total spent on the Mercedes car in 2021. This is shown at the top centre of the following image.
+Now we want to see the total spent on the Mercedes car in 2021. This is shown at the top center of the following image.
 
 ![](/img/filtering/highlight-2.png)
 

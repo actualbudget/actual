@@ -51,7 +51,7 @@ curl -H "Authorization: Bearer <ACCESS_TOKEN>" https://api.youneedabudget.com/v1
 
 ![](/img/migrating/actual-import-2.png)
 
-- Choose the exported json file
+- Choose the exported JSON file
 
 ### Optional: Cleanup
 

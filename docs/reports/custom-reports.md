@@ -37,7 +37,7 @@ Under Options, reports behavior can be changed
 * Show uncategorized will show transactions which have not been assigned a category
 
 Single Categories or entire Groups can be excluded from the Report by using the list on the bottom left side.
-Greyed out options in dropdown menus are not yet available for the chosen report.
+Grayed out options in dropdown menus are not yet available for the chosen report.
 
 ## Center Menu
 

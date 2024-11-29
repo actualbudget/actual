@@ -39,7 +39,7 @@ This should only happen when you're upgrading from a Docker image with the `edge
 
 **IMPORTANT NOTE**: You *MUST* download a backup of each of your budgets using the process outlined above **before** continuing. It's always good practice to backup your data before upgrading to a new version.
 
-The fix for this is to manually migrate the your sqlite database in the steps outlined below:
+The fix for this is to manually migrate the your SQLite database in the steps outlined below:
 
 1. Download and install [SQLite Browser](https://sqlitebrowser.org/)
 1. Unzip the backup budget `.zip` file. The filename should look like: `yyyy-mm-dd-My-Finances-abcd1234.zip`
@@ -47,7 +47,7 @@ The fix for this is to manually migrate the your sqlite database in the steps ou
 1. Load the file and click on the `Browse Data` tab. Select the `__migrations__` table from the table dropdown menu.
 1. You should see a list of integers under the column labeled `id`. Cross-reference the entries in this table with the list of [database migrations](https://github.com/actualbudget/actual/tree/master/packages/loot-core/migrations) in the main Actual repository.
 1. For every integer that's missing, you'll want to click on the `.sql` file associated with it and copy the raw data.
-1. Run the sql query in the Execute tab of SQLite Browser. Be sure to check the output that the command was successful.
+1. Run the SQL query in the Execute tab of SQLite Browser. Be sure to check the output that the command was successful.
 1. If the sql query that you copied is successful, you'll want to insert the migration command's id into the `__migrations__` table by executing `insert into __migrations__ values(id_of_missing_migration_command);`.
 1. Once your `__migrations__` table matches the database migrations folder, commit and close the database.
 1. Rezip your modified `db.sqlite` and `metadata.json` files into a zip file.

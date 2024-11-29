@@ -2,7 +2,7 @@
 
 This repo is the Actual Budget community documentation website, built using [Docusaurus 2](https://docusaurus.io/), a modern static website generator.
 
-[Docusaurus 2](https://docusaurus.io/) uses NodeJS, so if you are running Actual on your local machine, you should be able to easily run [Docusaurus 2](https://docusaurus.io/).
+[Docusaurus 2](https://docusaurus.io/) uses Node.js, so if you are running Actual on your local machine, you should be able to easily run [Docusaurus 2](https://docusaurus.io/).
 
 ## Welcome
 

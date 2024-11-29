@@ -1,6 +1,6 @@
 # How To Cut A Release
 
-In the open-source version of Actual, all updates go through npm. There are two libraries:
+In the open-source version of Actual, all updates go through NPM. There are two libraries:
 
 `@actual-app/api`: The API for the underlying functionality. This includes the entire backend of Actual, meant to be used with node.
 `@actual-app/web`: A web build that will serve the app with a web frontend. This includes both the frontend and backend of Actual. It includes the backend as well because it's built to be used as a Web Worker.

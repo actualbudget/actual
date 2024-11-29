@@ -4,7 +4,7 @@ Keeping your Actual account ledgers consistent with your bank ledgers is importa
 
 ## Work flow
 
-When you reconcile, you will be comparing your bank statement, print or online, against Actual's ledger for that account. If you have made transactions against the budget that have not been verified against your account the **cleared** flag will be shown in grey. If the transaction has been moved out of the pending section (online) of your bank statement, click the grey circle to turn it green. This is a visual indication that the transaction is in both your budget and in your account statement, and they match.
+When you reconcile, you will be comparing your bank statement, print or online, against Actual's ledger for that account. If you have made transactions against the budget that have not been verified against your account the **cleared** flag will be shown in gray. If the transaction has been moved out of the pending section (online) of your bank statement, click the gray circle to turn it green. This is a visual indication that the transaction is in both your budget and in your account statement, and they match.
 
 By clicking on the green balance in the header of the account view, two more category balances will come into view. The **cleared total** only includes transactions that have been cleared while the **uncleared total** will represent the transactions you have entered but may not have entered the bank statement yet.
 
@@ -48,6 +48,6 @@ We can enter this difference into the ledger. We used **Reconciliation** as the 
 
 ![](/img/reconcile/reconcile-7.png)
 
-When you finish entering the transaction, make sure you **clear** it by clicking on the grey checkmark on the right hand side. You should now have a reconciliation tool that is reporting that it is finished and you can enjoy a new higher net worth.
+When you finish entering the transaction, make sure you **clear** it by clicking on the gray checkbox on the right hand side. You should now have a reconciliation tool that is reporting that it is finished and you can enjoy a new higher net worth.
 
 ![](/img/reconcile/reconcile-8.png)

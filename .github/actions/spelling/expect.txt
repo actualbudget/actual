@@ -15,7 +15,6 @@ cashflow
 CREGBEBB
 crt
 Danske
-darkmode
 datadir
 Dominguez
 Fineco
@@ -25,14 +24,13 @@ gocardless
 INVSTMTMSGSRS
 jfdoming
 KORT
-lightmode
 modals
 murmurhash
 nginx
 overbudgeting
 Paribas
+Postgre
 prefs
-qfx
 revolut
 RIED
 RSchedule
