@@ -15,7 +15,9 @@ import { View } from '../common/View';
 import { Page } from '../Page';
 import { UpcomingLengthSettings } from '../settings/Upcoming';
 
+import { CalendarView } from './CalendarView';
 import { type ScheduleItemAction, SchedulesTable } from './SchedulesTable';
+import { ScheduleViewSelector } from './ScheduleViewSelector';
 
 export function Schedules() {
   const { t } = useTranslation();
@@ -108,17 +110,21 @@ export function Schedules() {
         </View>
       </View>
 
-      <SchedulesTable
-        isLoading={isSchedulesLoading}
-        schedules={schedules}
-        filter={filter}
-        statuses={statuses}
-        allowCompleted={true}
-        onSelect={onEdit}
-        onAction={onAction}
-        style={{ backgroundColor: theme.tableBackground }}
+      <ScheduleViewSelector
+        tableComponent={
+          <SchedulesTable
+            isLoading={isSchedulesLoading}
+            schedules={schedules}
+            filter={filter}
+            statuses={statuses}
+            allowCompleted={true}
+            onSelect={onEdit}
+            onAction={onAction}
+            style={{ backgroundColor: theme.tableBackground }}
+          />
+        }
+        calendarComponent={<CalendarView />}
       />
-
       <View
         style={{
           flexDirection: 'row',

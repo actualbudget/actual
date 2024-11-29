@@ -23,12 +23,16 @@ function Calendar({ color, onClick }: CalendarProps) {
 
 type MonthCountSelectorProps = {
   maxMonths: number;
+  numberOfMonths?: number;
   onChange: (value: number) => void;
+  validateDisplayMax?: boolean;
 };
 
 export function MonthCountSelector({
   maxMonths,
   onChange,
+  numberOfMonths,
+  validateDisplayMax = true,
 }: MonthCountSelectorProps) {
   const { t } = useTranslation();
 
@@ -36,12 +40,16 @@ export function MonthCountSelector({
 
   // It doesn't make sense to show anything if we can only fit one
   // month
-  if (displayMax <= 1) {
+  if (validateDisplayMax && displayMax <= 1) {
     return null;
   }
 
   const calendars = [];
-  for (let i = 1; i <= displayMax; i++) {
+  for (
+    let i = 1;
+    i <= (numberOfMonths !== undefined ? numberOfMonths : displayMax);
+    i++
+  ) {
     calendars.push(
       <Calendar
         key={i}
