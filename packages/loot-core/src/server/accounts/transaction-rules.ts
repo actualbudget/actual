@@ -13,10 +13,11 @@ import {
   type TransactionEntity,
   type RuleActionEntity,
   type RuleEntity,
+  AccountEntity,
 } from '../../types/models';
 import { schemaConfig } from '../aql';
 import * as db from '../db';
-import { getPayee, getPayeeByName, insertPayee } from '../db';
+import { getPayee, getPayeeByName, insertPayee, getAccount } from '../db';
 import { getMappings } from '../db/mappings';
 import { RuleError } from '../errors';
 import { requiredFields, toDateRepr } from '../models';
@@ -555,6 +556,12 @@ export function conditionsToAQL(conditions, { recurDateBounds = 100 } = {}) {
         return {
           $and: getValue(value).map(subExpr => mapConditionToActualQL(subExpr)),
         };
+
+      case 'onBudget':
+        return { 'account.offbudget': false };
+      case 'offBudget':
+        return { 'account.offbudget': true };
+
       default:
         throw new Error('Unhandled operator: ' + op);
     }
@@ -836,6 +843,7 @@ export async function updateCategoryRules(transactions) {
 
 export type TransactionForRules = TransactionEntity & {
   payee_name?: string;
+  _account?: AccountEntity;
 };
 
 export async function prepareTransactionForRules(
@@ -846,6 +854,13 @@ export async function prepareTransactionForRules(
     const payee = await getPayee(trans.payee);
     if (payee) {
       r.payee_name = payee.name;
+    }
+  }
+
+  if (trans.account) {
+    const account = await getAccount(trans.account);
+    if (account) {
+      r._account = account;
     }
   }
 

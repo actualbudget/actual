@@ -262,6 +262,7 @@ function ConditionEditor({
         field={field}
         type={type}
         value={value}
+        op={op}
         multi={op === 'oneOf' || op === 'notOneOf'}
         onChange={v => onChange('value', v)}
         numberFormatType="currency"
@@ -461,6 +462,7 @@ function ActionEditor({ action, editorStyle, onChange, onDelete, onAdd }) {
               <GenericInput
                 key={inputKey}
                 field={field}
+                op={op}
                 type="number"
                 numberFormatType={
                   options.method === 'fixed-percent' ? 'percentage' : 'currency'
