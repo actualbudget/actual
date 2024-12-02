@@ -66,7 +66,7 @@ export function useSheetValue<
         }
       },
     );
-  }, [sheetName, bindingObj.name, bindingObj.query]);
+  }, [sheetName, bindingObj.name, JSON.stringify(bindingObj.query)]);
 
   return result.value;
 }
