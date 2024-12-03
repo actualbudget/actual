@@ -75,7 +75,7 @@ Both will then contribute their share of the joint expenses. This is called _pla
 But how do you find your just share? The most just way to do this is by percentage of normal income per partner.
 If Bob makes € 4000 a month and Alice makes € 6000, the total income is € 10 000. Out of
 this, Bob will contribute 40% to the joint expenses. To compute the percentage for Bob: 400 (Bob's income) * 100 / 10000
-(total income). Alice's percentage is 100 - Bob's percentage.
+(total income). Alice's percentage is 60%, found by subtracting Bob's percentage from 100.
 
 
 ### Tracking personal spending in the budget
