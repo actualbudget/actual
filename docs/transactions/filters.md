@@ -17,11 +17,11 @@ Inevitably, there are some restrictions but these offer a great opportunity for 
 
 Well, having got that out of the way please don’t let any of this put you off. Filters are a great tool – and there is lots more scope for further development.
 
-First go to the **Accounts** view. This is to be sure that you are picking up all relevant transactions, rather than those from just one Account or Credit Card.
+First go to the **All Accounts** view. This is to be sure that you are picking up all relevant transactions, rather than those from just one Account or Credit Card.
 
 ![](/img/filtering/accounts@2x.png)
 
-Now select **Filter**. You will see from this drop-down that there are a number to choose from:
+Now select **Filter**. You will see from this drop-down that there are a number of options to choose from:
 
 ![](/img/filtering/filter.png)
 
