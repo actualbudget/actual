@@ -1,6 +1,6 @@
 # Transfers
 
-If you want to transfer money between accounts, you want to do it in a way that doesn't mess up reports. If you only created two transactions, Actual would have no way of knowing they are a single transfer and can be ignored in reports.
+If you want to transfer money between accounts, you will want to do it in a way that doesn't mess up reports. If you only created two transactions, Actual would have no way of knowing they are a single transfer and can be ignored in reports.
 
 When you create a transfer in Actual, those two transactions are linked and updating one always automatically updates the other. For example, if you typed something into the **Notes** column it would appear in both transactions.
 
@@ -40,7 +40,7 @@ Make a transfer of existing transactions in the same way you [bulk-edit transact
 
 ## Deleting a transfer
 
-Delete a transfer the same way you delete any transaction: hover over it and press the **X** on the left. Deleting a transfer transactions always deletes both transactions in each account.
+Delete a transfer the same way you delete any transaction: hover over it and press the **X** on the left. Deleting a transfer transaction always deletes both the transaction in the currently open account, as well as the transfer transaction in the other account.
 
 ## Transfer Categories
 
