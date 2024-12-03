@@ -14,7 +14,7 @@ Using the **Reconcile** feature, bring your accounts up to date with a current b
 
 ## Step 3: Adjust Previous Months' Budgets
 
-- Navigate to the month prior to your new start (e.g., the end of May).
+- Navigate to the month prior to your new start (e.g., the end of May, if the month you're restarting from is June).
 - Review each budget category:
   - If a category has a **negative balance**, allocate additional funds to bring the balance to zero.
   - If a category has a **positive balance**, click on the category and transfer the balance amount back to the **"To Budget"** area.
