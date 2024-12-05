@@ -5,7 +5,7 @@
 If you previously followed the [steps](./backup.md) to back up your data and have an Actual
 zip export, you can now import that using the web version of Actual.
 
-To do this,
+To do this:
 
 1. login to your budget, then in the top right corner click 'Server'
 
@@ -28,7 +28,7 @@ To do this,
 
    ![](/img/migrating/actual-import-2.png)
 
-That is it. A fresh budget will show in your budget list. If the imported data is a copy of your current budget, you may want to rename the new budget by clicking on it's name so you can tell them apart. Once you verify the new imported budget is correct, you can navigate back to the budget selection screen by closing the current budget and deleting the old copy.
+That is it. A fresh budget will show in your budget list. If the imported data is a copy of your current budget, you may want to rename the new budget by clicking on its name so you can tell them apart. Once you verify the new imported budget is correct, you can navigate back to the budget selection screen by closing the current budget and deleting the old copy.
 
 ## Errors When Restoring Database From Backup
 It is possible that you may encounter an error during restoration that says:
@@ -63,7 +63,7 @@ Actual keeps backups of your data locally. If something disastrous happens, you 
 
 Currently it keeps up to 10 backups, one per day of usage of the app, multiple backups of the current day. The result is you will have data backed **up to the last 15 minutes**, in addition to the last 10 days you used the app.
 
-### Loading an automatic backup
+### Loading an Automatic Backup
 
 - Select the **File > Load Backup…** menu item
 - Choose the backup you want to load and select it
