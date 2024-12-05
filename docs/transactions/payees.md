@@ -4,9 +4,9 @@ A payee is a description of the source of a transaction. Actual provides a power
 
 When importing transactions, by default it will create new payees based on the given name. Usually this ends up with some ugly names like `Target Debit Crd Ach Tran Co Id:Xxxxx15170`. With payee management, you can clean these names up, set rules for how payees are resolved, and even set a default category to use.
 
-To manage payees, either select the **File > Manage Payees** menu item or click the **Manage Payees** button when editing a transaction's payee.
+To manage payees, either select the **More >  Payees** from the sidebar or click the **Manage Payees** button when editing a transaction's payee.
 
-## How payees work
+## How Payees Work
 
 When importing transactions from a file, the system tries to automatically match the given names to existing payees. It does this by running through **rules** that you can edit. If no existing payee is found, it will create one.
 
@@ -16,7 +16,7 @@ Otherwise, it will look for payees with rules that match it. These rules specify
 
 When a payee is matched, if it has a **default category** the transaction will automatically be assigned it.
 
-## Editing a payee
+## Editing a Payee
 
 1. Open the **Manage Payees** screen
 2. To **rename** a payee, click the name and type in a new one.
@@ -24,7 +24,7 @@ When a payee is matched, if it has a **default category** the transaction will a
 4. Edit the default category by clicking it and selecting one from the dropdown.
 5. Edit the rules by clicking on the "# rules" button and a dropdown will appear with the list of rules to match this payee with.
 
-## Merging payees
+## Merging Payees
 
 A powerful feature is merging payees. You may already have months worth of data and a lot of ugly **Morrisons** payees that all vary slightly. You want to merge all of these together into one payee.
 
@@ -54,6 +54,6 @@ A powerful feature is merging payees. You may already have months worth of data 
 
 You can individually select payees and merge them if you like, but filtering & merging is a powerful way to quickly clean up your payees.
 
-## Transfer payees
+## Transfer Payees
 
 [Transfers](./transfers.md) are just special payees that indicate which account to transfer to/from. Since they are payees, you can create rules like normal which will automatically create transfers. Find them at the bottom of the **Manage Payees** screen if you want to create custom rules.
