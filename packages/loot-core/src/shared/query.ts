@@ -5,18 +5,18 @@ type ObjectExpression = {
 };
 
 export type QueryState = {
-  table: string;
-  tableOptions: Record<string, unknown>;
-  filterExpressions: Array<ObjectExpression>;
-  selectExpressions: Array<ObjectExpression | string | '*'>;
-  groupExpressions: Array<ObjectExpression | string>;
-  orderExpressions: Array<ObjectExpression | string>;
-  calculation: boolean;
-  rawMode: boolean;
-  withDead: boolean;
-  validateRefs: boolean;
-  limit: number | null;
-  offset: number | null;
+  get table(): string;
+  get tableOptions(): Readonly<Record<string, unknown>>;
+  get filterExpressions(): ReadonlyArray<ObjectExpression>;
+  get selectExpressions(): ReadonlyArray<ObjectExpression | string | '*'>;
+  get groupExpressions(): ReadonlyArray<ObjectExpression | string>;
+  get orderExpressions(): ReadonlyArray<ObjectExpression | string>;
+  get calculation(): boolean;
+  get rawMode(): boolean;
+  get withDead(): boolean;
+  get validateRefs(): boolean;
+  get limit(): number | null;
+  get offset(): number | null;
 };
 
 export class Query {
@@ -76,15 +76,19 @@ export class Query {
       exprs = [exprs];
     }
 
-    const query = new Query({ ...this.state, selectExpressions: exprs });
-    query.state.calculation = false;
-    return query;
+    return new Query({
+      ...this.state,
+      selectExpressions: exprs,
+      calculation: false,
+    });
   }
 
   calculate(expr: ObjectExpression | string) {
-    const query = this.select({ result: expr });
-    query.state.calculation = true;
-    return query;
+    return new Query({
+      ...this.state,
+      selectExpressions: [{ result: expr }],
+      calculation: true,
+    });
   }
 
   groupBy(exprs: ObjectExpression | string | Array<ObjectExpression | string>) {
@@ -139,6 +143,10 @@ export class Query {
 
   serialize() {
     return this.state;
+  }
+
+  serializeAsString() {
+    return JSON.stringify(this.serialize());
   }
 }
 
