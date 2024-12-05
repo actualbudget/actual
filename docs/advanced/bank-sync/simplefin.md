@@ -74,7 +74,7 @@ Server Version 24.10.0 or higher are required for this feature.
 
 5. When you've mapped all your accounts that you wish to, click the "Link Account" button.
 
-### Retrieve transactions
+### Retrieve Transactions
 
 Actual does not automatically perform syncs.
 You will need to manually request a sync to pull new transactions from SimpleFIN.
