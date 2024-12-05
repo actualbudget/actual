@@ -18,7 +18,7 @@ If your bank doesn’t support downloading financial files, you can import a CSV
 3. Select the **CSV** option.
 4. Set up the fields to match the CSV file.
    - For the “CSV Fields” dropdowns, leave them as “Choose field…” to leave the related field blank. Otherwise select the column from your CSV that corresponds to each field.
-   - If the date is not being imported correctly (the green date is how Actual interprets the date), you can change the date format to match your CSV file.
+   - If the date is not being imported correctly (the green date is how Actual interprets the date), you can change the date format to match your CSV file. If your date format is not shown in the dropdown, check that the date column is correctly selected from your CSV file.
    - If the file can’t be imported at all, try changing the CSV delimiter to match your file. (Let us know if your file uses a different delimiter that isn’t listed!)
    - You can optionally toggle on “Flip amount” if you want to negate all of the amounts in the CSV file.
    - You can optionally toggle on “Split amount into separate inflow/outflow columns” if your CSV file has separate columns for inflow and outflow amounts (also known as debit and credit).
