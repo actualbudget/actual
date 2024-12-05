@@ -1,4 +1,4 @@
-# Identify and apply transfers historically
+# Identify and Apply Transfers Historically
 
 These SQL scripts modify transactions as to apply [transfers](../../transactions/transfers.md) historically over migrated data without duplicating transactions. This is useful when you have migrated multiple accounts.
 
@@ -17,7 +17,7 @@ This process will only apply when the below conditions are met
 
       `Account A` -> `Account B` -> `Account A/C`
 
-      As we cannot reliable tell the order of the transfers.
+      As we cannot reliably tell the order of the transfers.
 
 :::
 
