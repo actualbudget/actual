@@ -5,9 +5,9 @@ You can manage your categories in the budget page. Actual supports both expense 
 Get some background information and recommendations on budget categories in our
 [starting fresh](/docs/getting-started/starting-fresh#2-setting-up-your-budget-categories) guide.
 
-## Add a category
+## Add a Category
 
-1. Hover over the category group and press the down arrow
+1. Hover over the category group and press the down arrow 
 
 ![](/img/categories/CategoryGroupRename.png)
 
@@ -15,7 +15,7 @@ Get some background information and recommendations on budget categories in our
 
 ![](/img/categories/CategoryGroupAddCategory.png)
 
-## Adding a category group
+## Adding a Category Group
 
 Scroll to the bottom of the budget sheet and select add group
 
@@ -23,7 +23,7 @@ Scroll to the bottom of the budget sheet and select add group
 
 Only one income group can ever exist and it cannot be deleted.
 
-## Renaming or delete a category
+## Renaming or Deleting a Category
 
 1. Hover over the category and press the down arrow
 
@@ -33,9 +33,9 @@ Only one income group can ever exist and it cannot be deleted.
 
 ![](/img/categories/RenameCategoryOptions.png)
 
-Categories are organized into groups and same actions can be performed on groups.
+Categories are organized into groups and the same actions as above can be performed on groups.
 
-## Merging categories
+## Merging Categories
 
 Let's say you have two categories that are the same but you want to delete one.
 
@@ -49,7 +49,7 @@ If the category you're deleting has a positive balance **OR** has been used for 
 
 ![](/img/categories/CategoryDeleteConfirmation.png)
 
-In our example, we want to use `Food` which will take over from `Foods` once you are happy, click `Delete`
+In our example, we want to use `Food` which will take over from `Foods` once you are happy with your selection, click `Delete`
 
 ![](/img/categories/CategoryDeleteConfirmationNewCat.png)
 
