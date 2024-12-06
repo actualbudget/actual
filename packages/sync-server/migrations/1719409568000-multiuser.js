@@ -1,10 +1,12 @@
 import getAccountDb from '../src/account-db.js';
+import * as uuid from 'uuid';
 
 export const up = async function () {
-  await getAccountDb().exec(
-    `
-    BEGIN TRANSACTION;
-    
+  const accountDb = getAccountDb();
+
+  accountDb.transaction(() => {
+    accountDb.exec(
+      `
     CREATE TABLE users
         (id TEXT PRIMARY KEY,
         user_name TEXT, 
@@ -24,8 +26,6 @@ export const up = async function () {
     ALTER TABLE files
         ADD COLUMN owner TEXT;
         
-    DELETE FROM sessions;
-
     ALTER TABLE sessions
         ADD COLUMN expires_at INTEGER;
 
@@ -34,9 +34,20 @@ export const up = async function () {
 
     ALTER TABLE sessions
         ADD COLUMN auth_method TEXT;
-    COMMIT;        
         `,
-  );
+    );
+
+    const userId = uuid.v4();
+    accountDb.mutate(
+      'INSERT INTO users (id, user_name, display_name, enabled, owner, role) VALUES (?, ?, ?, 1, 1, ?)',
+      [userId, '', '', 'ADMIN'],
+    );
+
+    accountDb.mutate(
+      'UPDATE sessions SET user_id = ?, expires_at = ?, auth_method = ? WHERE auth_method IS NULL',
+      [userId, -1, 'password'],
+    );
+  });
 };
 
 export const down = async function () {

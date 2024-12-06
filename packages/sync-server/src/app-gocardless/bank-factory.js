@@ -9,6 +9,7 @@ import CBCcregbebb from './banks/cbc_cregbebb.js';
 import DanskeBankDabNO22 from './banks/danskebank-dabno22.js';
 import EasybankBawaatww from './banks/easybank-bawaatww.js';
 import Fortuneo from './banks/FORTUNEO_FTNOFRP1XXX.js';
+import HanseaticBank from './banks/HANSEATIC_HSTBDEHH.js';
 import IngIngbrobu from './banks/ing-ingbrobu.js';
 import IngIngddeff from './banks/ing-ingddeff.js';
 import IngPlIngbplpw from './banks/ing-pl-ingbplpw.js';
@@ -41,6 +42,7 @@ export const banks = [
   DanskeBankDabNO22,
   EasybankBawaatww,
   Fortuneo,
+  HanseaticBank,
   IngIngbrobu,
   IngIngddeff,
   IngPlIngbplpw,
@@ -80,7 +82,7 @@ export const BANKS_WITH_LIMITED_HISTORY = [
   'FINECO_FEBIITM2XXX',
   'FINECO_UK_FEBIITM2XXX',
   'HYPE_BUSINESS_HYEEIT22',
-  'HYPE_HYEEIT2',
+  'HYPE_HYEEIT22',
   'ILLIMITY_ITTPIT2M',
   'INDUSTRA_MULTLV2X',
   'JEKYLL_JEYKLL002',

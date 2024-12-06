@@ -33,7 +33,8 @@ app.get('/needs-bootstrap', (req, res) => {
     status: 'ok',
     data: {
       bootstrapped: !needsBootstrap(),
-      loginMethods: listLoginMethods(),
+      loginMethod: getLoginMethod(),
+      availableLoginMethods: listLoginMethods(),
       multiuser: getActiveLoginMethod() === 'openid',
     },
   });
