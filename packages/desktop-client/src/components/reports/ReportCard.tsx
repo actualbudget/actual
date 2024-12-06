@@ -6,6 +6,7 @@ import React, {
   type CSSProperties,
 } from 'react';
 
+import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { useIsInViewport } from '../../hooks/useIsInViewport';
 import { useNavigate } from '../../hooks/useNavigate';
 import { theme } from '../../style';
@@ -119,10 +120,27 @@ type LayoutProps = {
 
 function Layout({ children, isEditing, menuItems, onMenuSelect }: LayoutProps) {
   const triggerRef = useRef(null);
-  const [menuOpen, setMenuOpen] = useState(false);
+  const viewRef = useRef(null);
+  const [menuOpen, setMenuOpen] = useState<null | 'context' | 'button'>(null);
+  const [crossOffset, setCrossOffset] = useState(0);
+  const [offset, setOffset] = useState(0);
+  const dashboardsEnabled = useFeatureFlag('dashboards');
+  const contextMenusEnabled =
+    useFeatureFlag('contextMenus') && dashboardsEnabled;
+
+  const isContextMenu = menuOpen === 'context';
 
   return (
     <View
+      ref={viewRef}
+      onContextMenu={e => {
+        if (!contextMenusEnabled) return;
+        e.preventDefault();
+        setMenuOpen('context');
+        const rect = e.currentTarget.getBoundingClientRect();
+        setCrossOffset(e.clientX - rect.left);
+        setOffset(e.clientY - rect.bottom);
+      }}
       style={{
         display: 'block',
         height: '100%',
@@ -135,24 +153,40 @@ function Layout({ children, isEditing, menuItems, onMenuSelect }: LayoutProps) {
         },
       }}
     >
-      {menuItems && isEditing && (
-        <View
-          className={[
-            menuOpen ? undefined : 'hover-visible',
-            NON_DRAGGABLE_AREA_CLASS_NAME,
-          ].join(' ')}
-          style={{
-            position: 'absolute',
-            top: 7,
-            right: 3,
-            zIndex: 1,
-          }}
-        >
-          <MenuButton ref={triggerRef} onPress={() => setMenuOpen(true)} />
+      {menuItems && (
+        <>
+          {isEditing && (
+            <View
+              className={[
+                menuOpen ? undefined : 'hover-visible',
+                NON_DRAGGABLE_AREA_CLASS_NAME,
+              ].join(' ')}
+              style={{
+                position: 'absolute',
+                top: 7,
+                right: 3,
+                zIndex: 1,
+              }}
+            >
+              <MenuButton
+                ref={triggerRef}
+                onPress={() => {
+                  setCrossOffset(0);
+                  setOffset(0);
+                  setMenuOpen('button');
+                }}
+              />
+            </View>
+          )}
+
           <Popover
-            triggerRef={triggerRef}
-            isOpen={menuOpen}
-            onOpenChange={() => setMenuOpen(false)}
+            triggerRef={isContextMenu ? viewRef : triggerRef}
+            isOpen={Boolean(menuOpen)}
+            onOpenChange={() => setMenuOpen(null)}
+            isNonModal
+            placement={isContextMenu ? 'bottom start' : 'bottom end'}
+            crossOffset={crossOffset}
+            offset={offset}
           >
             <Menu
               className={NON_DRAGGABLE_AREA_CLASS_NAME}
@@ -160,7 +194,7 @@ function Layout({ children, isEditing, menuItems, onMenuSelect }: LayoutProps) {
               items={menuItems}
             />
           </Popover>
-        </View>
+        </>
       )}
 
       {children}
