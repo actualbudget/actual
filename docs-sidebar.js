@@ -52,6 +52,7 @@ const sidebars = {
       items: [
       'getting-started/roadmap-for-new-users',
       'getting-started/envelope-budgeting',
+      'getting-started/tracking-budget',
         {
           type: 'category',
           label: 'Installation and Configuration',
@@ -226,7 +227,6 @@ const sidebars = {
           items: [
             'experimental/goal-templates',
             'experimental/monthly-cleanup',
-            'experimental/tracking-budget',
           ],
         },
         'getting-started/tips-tricks',

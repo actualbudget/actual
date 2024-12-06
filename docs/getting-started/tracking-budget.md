@@ -1,8 +1,13 @@
 # Tracking Budget
 
-:::warning
-This is an **experimental feature**. That means we’re still working on finishing it. There may be bugs, missing functionality or incomplete documentation, and we may decide to remove the feature in a future release. If you have any feedback, please [open an issue](https://github.com/actualbudget/actual/issues) or post a message in the Discord.
-:::
+## What is the Tracking Budget
+
+The **Tracking budget** option allows the user to shift from the default **Envelope budget** option to a more traditional style of budgeting.
+The **Tracking budget** won't automatically rollover funds from month to month, and you don't have to account for all on budget funds continually.
+Instead of working with what funds you have _now_, you can forecast expenses and income.
+All transactions do still need to be categorized.
+
+We, the Actual team, suggest that you try to use the **Envelope Budget** if you haven't already as we believe it to be a more capable style of budgeting than the **Tracking Budget**. However, if you would prefer the more traditional style, then the **Tracking Budget** is for you.
 
 ## Enabling the Tracking Budget
 
@@ -13,20 +18,20 @@ Then scroll up in the settings menu and click "Switch to tracking budgeting".
 
 ## Creating a Budget
 
-There are several important differences between the **Tracking Budget** and the default **Envelope Budget** type.
-
-- Category balances do not rollover from month to month
-- "To Be Budgeted" has been replaced with a "Saved" metric
-- Income is forecasted rather than using what is available
+Below is a view of what the budget page of a **Tracking Budget** looks like.
 
 ![](/img/tracking-budget-1.png)
 
 If you are creating a budget for the first time, here's how it works:
 
-1. Assign the amount of income you expect to receive in the current month.
-2. Assign the amount of money you need for each of your categories.
+1. Assign the amount of income you expect to receive in the current month to the respective income categories.
+2. Assign the amount of money you need for each of your spending categories.
 
-Upon completion of these two tasks for the month, you will see the budgeted totals in the monthly header in gray. The expected savings you will incur for the month will show up in the **Projected Savings** field for the current or future month. When you receive new income or spend from your categories, enter those transactions in the account registers. Your budget is not static, so there will be times when you do not have enough budgeted for your spending. When one of your categories is overdrawn, increase the budgeted amount for that category so it is 0 or greater.
+Upon completion of these two tasks for the month, you will see the budgeted totals in the monthly header in gray.
+The expected savings you will incur for the month will show up in the **Projected Savings** field for the current or future month.
+When you receive new income or spend from your categories, enter those transactions in the account registers.
+Your budget is not static, so there will be times when you do not have enough budgeted for your spending.
+When one of your categories is overdrawn, increase the budgeted amount for that category so it is 0 or greater.
 
 ## The Monthly Summary Explained
 
@@ -58,14 +63,19 @@ Money does not automatically carry over from month to month in the **Tracking Bu
 
 :::note
 If you utilize the **Rollover Overspending** feature on a category that is not over spent, the entire spent amount will be forwarded to the next month and the **Saved** amount will increase for the current month.
+This will affect your spent totals as if the spending didn't happen.
+The spending will only show up in the month that the rollover stops.
 :::
 
+<<<<<<< HEAD:docs/getting-started/tracking-budget.md
+## Other Features
+=======
 ## Working With the Budget
+>>>>>>> master:docs/experimental/tracking-budget.md
 
-Some of the features of the **Envelope Budget** are available in the **Tracking Budget**.
+All the non-budgeting features of Actual can be used with the **Tracking Budget** the same as the **Envelope Budget**.
+Experimental features may not work with the **Tracking Budget** yet.
+If not please let us know in the feature feedback.
 :::note
-Not all features of the **Envelope Budget** have been implemented in the **Tracking Budget**. If you find critical functionality missing that you need, please submit a request on [GitHub](/contact).
+If you find critical functionality missing that you need, please submit a request on [GitHub](/contact).
 :::
-
-- [Create new budgets for the next month](../budgeting/index.md#creating-a-budget)
-- [Rollover negative category balances](../budgeting/index.md#rollover-negative-category-balances)
