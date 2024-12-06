@@ -257,7 +257,7 @@ const transferCategory: UncategorizedEntity = {
 };
 const offBudgetCategory: UncategorizedEntity = {
   id: '',
-  name: t('Off Budget'),
+  name: t('Off-budget'),
   uncategorized_id: 'off_budget',
   hidden: false,
 };
@@ -271,7 +271,7 @@ type UncategorizedGroupEntity = Pick<
 };
 
 const uncategorizedGroup: UncategorizedGroupEntity = {
-  name: t('Uncategorized & Off Budget'),
+  name: t('Uncategorized & Off-budget'),
   id: 'uncategorized',
   hidden: false,
   uncategorized_id: 'all',

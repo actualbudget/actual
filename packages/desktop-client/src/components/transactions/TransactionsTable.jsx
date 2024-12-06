@@ -1428,7 +1428,7 @@ const Transaction = memo(function Transaction({
             isParent
               ? 'Split'
               : isOffBudget
-                ? 'Off Budget'
+                ? 'Off-budget'
                 : isBudgetTransfer
                   ? 'Transfer'
                   : ''

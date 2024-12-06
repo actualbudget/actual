@@ -183,7 +183,7 @@ export function CloseAccountModal({
                   {needsCategory(account, transferAccountId, accounts) && (
                     <View style={{ marginBottom: 15 }}>
                       <Paragraph>
-                        Since you are transferring the balance from a budgeted
+                        Since you are transferring the balance from an on-budget
                         account to an off-budget account, this transaction must
                         be categorized. Select a category:
                       </Paragraph>
