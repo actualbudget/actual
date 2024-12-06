@@ -1,6 +1,6 @@
 # Rules
 
-Rules determine how a transaction is processed. When importing or syncing transactions, they are run through a list of rules that can apply actions to the transaction. For example, a rule could process a transaction with the payee `AMAZON.COM*5C7QC7MH0 AM 10/26 PURCHASE AMZN.COM/BILL`, and because it contains the word "amazon", sets the payee to "Amazon" and the category to "my fun stuff". Rules allow you to automate any workflow you want.
+Rules determine how a transaction is processed. When importing or syncing transactions, they are run through a list of rules that can apply actions to the transaction. For example, a rule could process a transaction with the payee `AMAZON.COM*5C7QC7MH0 AM 10/26 PURCHASE AMZN.COM/BILL`, and because it contains the word "amazon", it could set the payee to "Amazon" and the category to "my fun stuff". Rules allow you to automate any workflow you want.
 
 Cleaning up payees is a common use case of rules since they are ugly much of the time. But rules can do anything: they can set the "notes" field, create a transfer, and more. If you want to be super detailed, you can create all kinds of rules to automate your process away.
 
@@ -10,7 +10,7 @@ Eventually, you can just import transactions and quickly see your spending witho
 
 The second best part is because you ultimately own the rules, you are free to go in and change the rules that Actual made for you. We'll show you how this works in more detail below.
 
-## How rules work
+## How the Rules Work
 
 You can view all the rules by going to **More** and then **Rules** in the Sidebar.
 
@@ -20,7 +20,7 @@ If there is a conflict, for example if two rules set the category, the rule that
 
 Rules are **automatically ranked** from least to most specific. If the conditions of one rule apply broadly, while the conditions of another are more specific, the latter will always run _after_ the former so its changes always win out. This means you can make a broad rule like "if a transaction's payee _contains_ 'cat' set the category to 'pets'", and then fix a mismatched transaction with another rule that says "if the payee _is_ 'catan' set the category to 'games'". An "is" condition always ranks higher than "contains". Generally, you don't need to worry about this and it should work like you expect.
 
-While ranking works for the most part, you might want to say "this rule _always_ should run last no matter what". Actual allows this with **stages**. Rules are actually run in 3 stages: `pre`, normal, and `post`. By tagging a rule as `pre` or `post`, you force it to always run before or after rules in the other stages. Within a stage, rules are still automatically ranked.
+While ranking works for the most part, you might want to say "this rule _always_ should run last no matter what". Actual allows this with **stages**. Rules are actually run in 3 stages: `pre`, `default`, and `post`. By tagging a rule as `pre` or `post`, you force it to always run before or after rules in the other stages. Within a stage, rules are still automatically ranked.
 
 ### Condition Types
 
@@ -61,7 +61,7 @@ Actions can set the following fields:
 
 Actions can also prepend or append text to the `notes` field.
 
-## Automatic rules
+## Automatic Rules
 
 Right now, there are two types of rules that Actual will automatically create or update for you: renaming payees and categorizing transactions.
 
@@ -81,29 +81,29 @@ Of course, you are free to edit the rules as you like. Change the category set f
 
 If Actual is doing something that you simply don't like, create a `post` rule to force it to run after everything else. You could even turn off auto-categorizing altogether by create a `post` rule that matches a `date` of today or later (so all transactions would match) and sets the category to `null`.
 
-## Managing rules
+## Managing Rules
 
-### Creating a rule
+### Creating a Rule
 
 To create a rule, go to More > Rules… to view all the rules and click "Create new rule" in the bottom-right. You will now be editing a new rule.
 
-### Editing a rule
+### Editing a Rule
 
-When viewing a list of rules, click the "edit" button on the right to edit a rule. The "edit rule" screen lists all the conditions and actions in an editable format. You can add/remote actions and conditions, change operators or values, and more.
+When viewing a list of rules, click the "edit" button on the right to edit a rule. The "edit rule" screen lists all the conditions and actions in an editable format. You can add/remove actions and conditions, change operators or values, and more.
 
-This screen also lists all the transactions that currently match the conditions. This gives you great feedback if your conditions are working the way you expect.
+This screen also lists all the transactions that currently match the conditions. This gives you great feedback to see if your conditions are working the way you expect.
 
 You can even manually apply all the actions to the transactions. You need to select the transactions from the list that you want to change (clicking in the header will select all of them) and click "Apply actions". This helps if you want the rule to apply to some existing transactions as well.
 
-### Deleting a rule
+### Deleting a Rule
 
 To delete a rule (or rules), select the ones you want to delete. Then go down to the bottom right of the window and click the "Delete # rules" button.
 
-### Viewing rules for a payee
+### Viewing Rules for a Payee
 
 To view the list of rules that apply to a specific payee, go to More > Payees… to view the list of payees. This table shows you which payees have rules associated with them, and you can click "# associated rules" to view the rules just for that payee.
 
-## Using the rule editor for sophisticated batch editing
+## Using the Rule Editor for Sophisticated Batch Editing
 
 This deserves its own section because this turned out to be a surprising use case. Because the rule editor shows you a list of transactions that match the conditions, and allows you to manually apply actions to some or all of them, it turns out to be a great "batch editor".
 
