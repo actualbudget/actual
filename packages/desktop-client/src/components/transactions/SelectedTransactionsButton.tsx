@@ -39,6 +39,7 @@ type SelectedTransactionsButtonProps = {
   showMakeTransfer: boolean;
   onMakeAsSplitTransaction: (selectedIds: string[]) => void;
   onMakeAsNonSplitTransactions: (selectedIds: string[]) => void;
+  onUnmarkTransactionsAsImported: (selectedIds: string[]) => void;
 };
 
 export function SelectedTransactionsButton({
@@ -55,6 +56,7 @@ export function SelectedTransactionsButton({
   showMakeTransfer,
   onMakeAsSplitTransaction,
   onMakeAsNonSplitTransactions,
+  onUnmarkTransactionsAsImported,
 }: SelectedTransactionsButtonProps) {
   const { t } = useTranslation();
   const dispatch = useDispatch();
@@ -143,6 +145,19 @@ export function SelectedTransactionsButton({
       tx => tx && (tx.is_parent || tx.is_child),
     );
     return areNoReconciledTransactions && areAllSplitTransactions;
+  }, [selectedIds, types, getTransaction]);
+
+  const canUnmarkTransactionsAsImported = useMemo(() => {
+    if (selectedIds.length === 0 || types.preview) {
+      return false;
+    }
+
+    const transactions = selectedIds.map(id => getTransaction(id));
+
+    const areSomeImportedTransactions = transactions.some(
+      tx => tx && tx.imported_payee,
+    );
+    return areSomeImportedTransactions;
   }, [selectedIds, types, getTransaction]);
 
   function onViewSchedule() {
@@ -281,6 +296,14 @@ export function SelectedTransactionsButton({
                     } as const,
                   ]
                 : []),
+              ...(canUnmarkTransactionsAsImported
+                ? [
+                    {
+                      name: 'unmark-transactions-as-imported',
+                      text: t('Unmark as imported'),
+                    } as const,
+                  ]
+                : []),
               Menu.line,
               { type: Menu.label, name: t('Edit field'), text: '' } as const,
               { name: 'date', text: t('Date') } as const,
@@ -308,6 +331,9 @@ export function SelectedTransactionsButton({
             break;
           case 'unsplit-transactions':
             onMakeAsNonSplitTransactions(selectedIds);
+            break;
+          case 'unmark-transactions-as-imported':
+            onUnmarkTransactionsAsImported(selectedIds);
             break;
           case 'post-transaction':
           case 'skip':
