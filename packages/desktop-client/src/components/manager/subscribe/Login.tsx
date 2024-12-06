@@ -7,6 +7,7 @@ import { useParams, useSearchParams } from 'react-router-dom';
 import { createBudget } from 'loot-core/src/client/actions/budgets';
 import { loggedIn } from 'loot-core/src/client/actions/user';
 import { send } from 'loot-core/src/platform/client/fetch';
+import { shouldDisplayLoginDemo } from 'loot-core/src/shared/environment';
 
 import { AnimatedLoading } from '../../../icons/AnimatedLoading';
 import { theme } from '../../../style';
@@ -169,21 +170,23 @@ export function Login() {
           )}
         </View>
       )}
-      <View
-        style={{
-          flexDirection: 'row',
-          justifyContent: 'center',
-          marginTop: 15,
-        }}
-      >
-        <Button
-          variant="bare"
-          style={{ fontSize: 15, color: theme.pageTextLink, marginLeft: 10 }}
-          onPress={onDemo}
+      {shouldDisplayLoginDemo() && (
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'center',
+            marginTop: 15,
+          }}
         >
-          <Trans>Try Demo &rarr;</Trans>
-        </Button>
-      </View>
+          <Button
+            variant="bare"
+            style={{ fontSize: 15, color: theme.pageTextLink, marginLeft: 10 }}
+            onPress={onDemo}
+          >
+            <Trans>Try Demo &rarr;</Trans>
+          </Button>
+        </View>
+      )}
     </View>
   );
 }
