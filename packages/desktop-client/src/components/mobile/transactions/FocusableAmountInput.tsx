@@ -12,7 +12,13 @@ import React, {
 import { css } from '@emotion/css';
 
 import {
+  evalArithmetic,
+  hasArithmeticOperator,
+  lastIndexOfArithmeticOperator,
+} from 'loot-core/shared/arithmetic';
+import {
   amountToCurrency,
+  amountToInteger,
   appendDecimals,
   currencyToAmount,
 } from 'loot-core/src/shared/util';
@@ -24,6 +30,10 @@ import { makeAmountFullStyle } from '../../budget/util';
 import { Button } from '../../common/Button2';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
+import {
+  AmountKeyboard,
+  type AmountKeyboardRef,
+} from '../../util/AmountKeyboard';
 
 type AmountInputProps = {
   value: number;
@@ -57,6 +67,7 @@ const AmountInput = memo(function AmountInput({
   );
 
   const initialValue = Math.abs(props.value);
+  const keyboardRef = useRef<AmountKeyboardRef | null>(null);
 
   useEffect(() => {
     if (focused) {
@@ -70,6 +81,10 @@ const AmountInput = memo(function AmountInput({
     setValue(initialValue);
   }, [initialValue]);
 
+  useEffect(() => {
+    keyboardRef.current?.setInput(text);
+  }, [text]);
+
   const onKeyUp: HTMLProps<HTMLInputElement>['onKeyUp'] = e => {
     if (e.key === 'Backspace' && text === '') {
       setEditing(true);
@@ -82,7 +97,10 @@ const AmountInput = memo(function AmountInput({
   };
 
   const applyText = () => {
-    const parsed = currencyToAmount(text) || 0;
+    const parsed = hasArithmeticOperator(text)
+      ? evalArithmetic(text)
+      : currencyToAmount(text) || 0;
+
     const newValue = editing ? parsed : value;
 
     setValue(Math.abs(newValue));
@@ -110,7 +128,41 @@ const AmountInput = memo(function AmountInput({
   };
 
   const onChangeText = (text: string) => {
-    text = appendDecimals(text, String(hideFraction) === 'true');
+    console.log('text', text);
+
+    const lastOperatorIndex = lastIndexOfArithmeticOperator(text);
+    if (lastOperatorIndex > 0) {
+      // This will evaluate the expression whenever an operator is added
+      // so only one operation will be displayed at a given time
+      const isOperatorAtEnd = lastOperatorIndex === text.length - 1;
+      if (isOperatorAtEnd) {
+        const lastOperator = text[lastOperatorIndex];
+        const charIndexPriorToLastOperator = lastOperatorIndex - 1;
+        const charPriorToLastOperator =
+          text.length > 0 ? text[charIndexPriorToLastOperator] : '';
+
+        if (
+          charPriorToLastOperator &&
+          hasArithmeticOperator(charPriorToLastOperator)
+        ) {
+          // Clicked on another operator while there is still an operator
+          // Replace previous operator with the new one
+          // TODO: Fix why clicking the same operator duplicates it
+          text = `${text.slice(0, charIndexPriorToLastOperator)}${lastOperator}`;
+        } else {
+          // Evaluate the left side of the expression whenever an operator is added
+          const left = text.slice(0, lastOperatorIndex);
+          const leftEvaluated = evalArithmetic(left);
+          const leftEvaluatedWithDecimal = appendDecimals(
+            String(amountToInteger(leftEvaluated)),
+            String(hideFraction) === 'true',
+          );
+          text = `${leftEvaluatedWithDecimal}${lastOperator}`;
+        }
+      }
+    } else {
+      text = appendDecimals(text, String(hideFraction) === 'true');
+    }
     setEditing(true);
     setText(text);
     props.onChangeValue?.(text);
@@ -121,11 +173,17 @@ const AmountInput = memo(function AmountInput({
       type="text"
       ref={mergedInputRef}
       value={text}
-      inputMode="decimal"
+      inputMode="none"
       autoCapitalize="none"
       onChange={e => onChangeText(e.target.value)}
       onFocus={onFocus}
-      onBlur={onBlur}
+      onBlur={e => {
+        // Do not blur when clicking on the keyboard elements
+        if (keyboardRef.current?.keyboardDOM.contains(e.relatedTarget)) {
+          return;
+        }
+        onBlur(e);
+      }}
       onKeyUp={onKeyUp}
       data-testid="amount-input"
       style={{ flex: 1, textAlign: 'center', position: 'absolute' }}
@@ -155,6 +213,14 @@ const AmountInput = memo(function AmountInput({
       >
         {editing ? text : amountToCurrency(value)}
       </Text>
+      {focused && (
+        <AmountKeyboard
+          keyboardRef={(r: AmountKeyboardRef) => (keyboardRef.current = r)}
+          onChange={onChangeText}
+          onBlur={onBlur}
+          onEnter={onUpdate}
+        />
+      )}
     </View>
   );
 });
