@@ -161,7 +161,6 @@ export function importBudget(
     dispatch(closeModal());
 
     await dispatch(loadPrefs());
-    window.__navigate('/budget');
   };
 }
 
