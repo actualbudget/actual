@@ -1,6 +1,6 @@
 # Release Notes
 
-## 24.11.0
+## 24.12.0
 
 The release has the following notable improvements:
 - Dashboards officially released as first-party feature
