@@ -6,6 +6,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { closeBudget, getUserData, signOut } from 'loot-core/client/actions';
 import { type State } from 'loot-core/src/client/state-types';
 
+import { useNavigate } from '../hooks/useNavigate';
 import { theme, styles } from '../style';
 
 import { Button } from './common/Button2';
@@ -14,7 +15,6 @@ import { Popover } from './common/Popover';
 import { Text } from './common/Text';
 import { View } from './common/View';
 import { useServerURL } from './ServerContext';
-import { useNavigate } from '../hooks/useNavigate';
 
 type LoggedInUserProps = {
   hideIfNoServer?: boolean;
