@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
-
-import { t } from 'i18next';
 
 import { send, sendCatch } from 'loot-core/platform/client/fetch/index';
 import { addNotification } from 'loot-core/src/client/actions';
@@ -37,6 +36,8 @@ export function CustomReportListCards({
   report,
   onRemove,
 }: CustomReportListCardsProps) {
+  const { t } = useTranslation();
+
   // It's possible for a dashboard to reference a non-existing
   // custom report
   if (!report) {

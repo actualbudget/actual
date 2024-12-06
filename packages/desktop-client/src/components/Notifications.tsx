@@ -6,10 +6,10 @@ import React, {
   type SetStateAction,
   type CSSProperties,
 } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { css } from '@emotion/css';
-import { t } from 'i18next';
 
 import { removeNotification } from 'loot-core/client/actions';
 import { type State } from 'loot-core/src/client/state-types';
@@ -91,6 +91,7 @@ function Notification({
   notification: NotificationWithId;
   onRemove: () => void;
 }) {
+  const { t } = useTranslation();
   const {
     type,
     title,

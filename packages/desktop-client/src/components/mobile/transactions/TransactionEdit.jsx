@@ -7,6 +7,7 @@ import React, {
   useMemo,
   useCallback,
 } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { useLocation, useParams } from 'react-router-dom';
 
@@ -16,7 +17,6 @@ import {
   parseISO,
   isValid as isValidDate,
 } from 'date-fns';
-import { t } from 'i18next';
 
 import { pushModal, setLastTransaction } from 'loot-core/client/actions';
 import { runQuery } from 'loot-core/src/client/query-helpers';
@@ -290,6 +290,7 @@ const ChildTransactionEdit = forwardRef(
     },
     ref,
   ) => {
+    const { t } = useTranslation();
     const { editingField, onRequestActiveEdit, onClearActiveEdit } =
       useSingleActiveEditForm();
     const prettyPayee = getPrettyPayee({
@@ -448,6 +449,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
   onSplit,
   onAddSplit,
 }) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const transactions = useMemo(

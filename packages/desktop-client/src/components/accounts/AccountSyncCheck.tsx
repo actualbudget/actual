@@ -1,9 +1,7 @@
 import React, { useCallback, useRef, useState } from 'react';
-import { Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
-
-import { t } from 'i18next';
 
 import { unlinkAccount } from 'loot-core/client/actions';
 import { type AccountEntity } from 'loot-core/types/models';
@@ -17,61 +15,69 @@ import { Link } from '../common/Link';
 import { Popover } from '../common/Popover';
 import { View } from '../common/View';
 
-function getErrorMessage(type: string, code: string) {
-  switch (type.toUpperCase()) {
-    case 'ITEM_ERROR':
-      switch (code.toUpperCase()) {
-        case 'NO_ACCOUNTS':
-          return t(
-            'No open accounts could be found. Did you close the account? If so, unlink the account.',
-          );
-        case 'ITEM_LOGIN_REQUIRED':
-          return t(
-            'Your password or something else has changed with your bank and you need to login again.',
-          );
-        default:
-      }
-      break;
+function useErrorMessage() {
+  const { t } = useTranslation();
+  function getErrorMessage(type: string, code: string) {
+    switch (type.toUpperCase()) {
+      case 'ITEM_ERROR':
+        switch (code.toUpperCase()) {
+          case 'NO_ACCOUNTS':
+            return t(
+              'No open accounts could be found. Did you close the account? If so, unlink the account.',
+            );
+          case 'ITEM_LOGIN_REQUIRED':
+            return t(
+              'Your password or something else has changed with your bank and you need to login again.',
+            );
+          default:
+        }
+        break;
 
-    case 'INVALID_INPUT':
-      switch (code.toUpperCase()) {
-        case 'INVALID_ACCESS_TOKEN':
-          return t('Item is no longer authorized. You need to login again.');
-        default:
-      }
-      break;
+      case 'INVALID_INPUT':
+        switch (code.toUpperCase()) {
+          case 'INVALID_ACCESS_TOKEN':
+            return t('Item is no longer authorized. You need to login again.');
+          default:
+        }
+        break;
 
-    case 'RATE_LIMIT_EXCEEDED':
-      return t('Rate limit exceeded for this item. Please try again later.');
+      case 'RATE_LIMIT_EXCEEDED':
+        return t('Rate limit exceeded for this item. Please try again later.');
 
-    case 'INVALID_ACCESS_TOKEN':
-      return t(
-        'Your SimpleFIN Access Token is no longer valid. Please reset and generate a new token.',
-      );
+      case 'INVALID_ACCESS_TOKEN':
+        return t(
+          'Your SimpleFIN Access Token is no longer valid. Please reset and generate a new token.',
+        );
 
-    case 'ACCOUNT_NEEDS_ATTENTION':
-      return (
-        <Trans>
-          The account needs your attention at{' '}
-          <Link variant="external" to="https://bridge.simplefin.org/auth/login">
-            SimpleFIN
-          </Link>
-          .
-        </Trans>
-      );
+      case 'ACCOUNT_NEEDS_ATTENTION':
+        return (
+          <Trans>
+            The account needs your attention at{' '}
+            <Link
+              variant="external"
+              to="https://bridge.simplefin.org/auth/login"
+            >
+              SimpleFIN
+            </Link>
+            .
+          </Trans>
+        );
 
-    default:
+      default:
+    }
+
+    return (
+      <Trans>
+        An internal error occurred. Try to login again, or get{' '}
+        <Link variant="external" to="https://actualbudget.org/contact/">
+          in touch
+        </Link>{' '}
+        for support.
+      </Trans>
+    );
   }
 
-  return (
-    <Trans>
-      An internal error occurred. Try to login again, or get{' '}
-      <Link variant="external" to="https://actualbudget.org/contact/">
-        in touch
-      </Link>{' '}
-      for support.
-    </Trans>
-  );
+  return { getErrorMessage };
 }
 
 export function AccountSyncCheck() {
@@ -81,6 +87,7 @@ export function AccountSyncCheck() {
   const { id } = useParams();
   const [open, setOpen] = useState(false);
   const triggerRef = useRef(null);
+  const { getErrorMessage } = useErrorMessage();
 
   const reauth = useCallback(
     (acc: AccountEntity) => {

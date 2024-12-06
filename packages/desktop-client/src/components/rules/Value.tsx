@@ -1,8 +1,8 @@
 // @ts-strict-ignore
 import React, { useState, type CSSProperties } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { format as formatDate, parseISO } from 'date-fns';
-import { t } from 'i18next';
 
 import { getMonthYearFormat } from 'loot-core/src/shared/months';
 import { getRecurringDescription } from 'loot-core/src/shared/schedules';
@@ -36,6 +36,7 @@ export function Value<T>({
   describe = x => x.name,
   style,
 }: ValueProps<T>) {
+  const { t } = useTranslation();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const payees = usePayees();
   const { list: categories } = useCategories();

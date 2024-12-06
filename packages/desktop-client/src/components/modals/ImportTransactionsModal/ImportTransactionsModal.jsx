@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import deepEqual from 'deep-equal';
-import { t } from 'i18next';
 
 import { amountToInteger } from 'loot-core/src/shared/util';
 
@@ -135,6 +135,7 @@ function parseCategoryFields(trans, categories) {
 }
 
 export function ImportTransactionsModal({ options }) {
+  const { t } = useTranslation();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const [prefs, savePrefs] = useSyncedPrefs();
   const {

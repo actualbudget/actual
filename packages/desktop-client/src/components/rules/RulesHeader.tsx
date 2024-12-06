@@ -1,11 +1,11 @@
 import React from 'react';
-
-import { t } from 'i18next';
+import { useTranslation } from 'react-i18next';
 
 import { useSelectedItems, useSelectedDispatch } from '../../hooks/useSelected';
 import { SelectCell, Cell, TableHeader } from '../table';
 
 export function RulesHeader() {
+  const { t } = useTranslation();
   const selectedItems = useSelectedItems();
   const dispatchSelected = useSelectedDispatch();
 

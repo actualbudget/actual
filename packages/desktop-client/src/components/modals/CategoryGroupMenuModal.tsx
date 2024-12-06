@@ -5,8 +5,7 @@ import React, {
   useState,
   type CSSProperties,
 } from 'react';
-
-import { t } from 'i18next';
+import { useTranslation } from 'react-i18next';
 
 import { type CategoryGroupEntity } from 'loot-core/src/types/models';
 
@@ -47,6 +46,7 @@ export function CategoryGroupMenuModal({
   onToggleVisibility,
   onClose,
 }: CategoryGroupMenuModalProps) {
+  const { t } = useTranslation();
   const { grouped: categoryGroups } = useCategories();
   const group = categoryGroups.find(g => g.id === groupId);
   const notes = useNotes(group.id);
@@ -172,6 +172,7 @@ export function CategoryGroupMenuModal({
 }
 
 function AdditionalCategoryGroupMenu({ group, onDelete, onToggleVisibility }) {
+  const { t } = useTranslation();
   const triggerRef = useRef(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const itemStyle: CSSProperties = {
