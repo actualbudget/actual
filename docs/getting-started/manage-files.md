@@ -6,17 +6,17 @@ A _file_ is your data that consists of all budgets, transactions, accounts, and 
 These instructions relate exclusively to the desktop application
 :::
 
-## Creating a new file
+## Creating a New File
 
 ### Desktop
 
 - On the desktop app, go to the file management screen from the **File** > **Open file…** menu item, or press <Key mod="cmd" k="o" />.
 - Click **Create new file**.
 
-## Delete a file
+## Deleting a File
 
 - On desktop, click the **X** next to the file on the file management screen.
 
-## Renaming a file
+## Renaming a File
 
 Open the file, and click on the name in the top left of the app. You will be able to rename it.
