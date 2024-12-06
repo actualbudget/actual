@@ -16,11 +16,16 @@ CREGBEBB
 crt
 Danske
 datadir
+DIREKT
 Dominguez
+fidd
 Fineco
 Fintro
 gernes
 gocardless
+HABAL
+HELADEF
+INGBPLPW
 INVSTMTMSGSRS
 jfdoming
 KORT
@@ -42,6 +47,7 @@ statestore
 SUBASKBX
 SVGR
 swc
+SWEDBANK
 Synology
 tada
 templating
