@@ -14,12 +14,12 @@ You are welcome to have other lines in your note including goal templates, but t
 Enable this feature alongside the **Goals** experimental feature by enabling **Goal templates** in the **Settings** menu.
 :::
 
-## How to use the End of Month Cleanup script
+## How to Use the End of Month Cleanup Script
 
 There are different ways to interact with the cleanup script, and a few of the examples will be given. But first, let's explore the syntax.
 
 <!-- prettier-ignore -->
-### Global source and sinks
+### Global Source and Sinks
 Global source and sink definitions can affect the whole budget.
 
 |Syntax|Description|Application|
@@ -28,14 +28,14 @@ Global source and sink definitions can affect the whole budget.
 |#cleanup sink|This is a category where extra money will be moved. Weight: 1|This can be a vacation, debt, or other savings category where you want to accelerate the savings rate|
 |#cleanup sink 2|This is a category where extra money will be moved. Weight: 2|This can be a vacation, debt, or other savings category where you want to accelerate the savings rate|
 
-### Local group source and sinks
+### Local Group Source and Sinks
 Local groups can be defined to target certain categories for more refined control. You can have many groups by changing the group name.
 
 |Syntax|Description|Application|
 |---|---|---|
 |#cleanup _Group_ source|This is a source of money to be reused at the end of the month with any Group categories|A reimbursement holding category exists for making small loans to family or friends|
-|#cleanup _Group_ sink |This is a category where extra money will be moved from the Group source. Weight: 1|This can be a category specific to a person or a business where reimbursements are expected.|
-|#cleanup _Group_ sink 2 |This is a category where extra money will be moved. Weight: 2|This can be a category specific to a person or a business where reimbursements are expected.|
+|#cleanup _Group_ sink |This is a category where extra money will be moved into from the Group source. Weight: 1|This can be a category specific to a person or a business where reimbursements are expected.|
+|#cleanup _Group_ sink 2 |This is a category where extra money will be moved into from the Group source. Weight: 2|This can be a category specific to a person or a business where reimbursements are expected.|
 
 The feature works sequentially in the following manner after pressing the **End of month cleanup** button .
 
@@ -47,7 +47,7 @@ The feature works sequentially in the following manner after pressing the **End 
 2. **Overspent** categories that do NOT use **Rollover Overspending** will be found and will attempt to cover the overspending from **To Budget**.
 3. Any `#cleanup sink` entries will be found and redistribute the remaining **To Budget** amounts based on the weight given.
 
-## Calculating the weights of 'sink' categories
+## Calculating the Weights of 'Sink' Categories
 
 The sum of the weights of the `sink` categories are used to determine the amount that will be used when applying the **To Budget** amount to each.
 Suppose there are 5 categories that are identified as `sink` categories with the following syntax:
@@ -78,7 +78,7 @@ The result will be:
 
 **I'm behind on saving for our big Holiday celebration and would like to catch up faster. I would also like to save a little extra for vacation. I would like to put 1/3 in savings for the Holiday and 2/3 for vacation of any extra money I can find.**
 
-- Add the `#cleanup source` note is in the categories where you can find some extra money.
+- Add the `#cleanup source` note in the categories where you can find some extra money.
 - Add a `#cleanup sink` line to your **Holiday Celebration** category.
 - Add a `#cleanup sink 2` line to your **Vacation** category.
 
@@ -86,7 +86,7 @@ The **Holiday Celebration** category has a default weight of 1 while the **Vacat
 
 **I want to pay down my debt as quickly as possible. I have a large debt category where I rollover my overspending so I can budget an additional payment each month.**
 
-- Add the `#cleanup source` note is in the categories where you can find some extra money.
+- Add the `#cleanup source` note in the categories where you can find some extra money.
 - Add the `#cleanup sink` note to your debt category. If this is your only priority, only put the note in this category.
 
 All of your extra money will be used to cover your overspent categories first and all remaining money will go to the **Debt** category to budget for an extra payment.
