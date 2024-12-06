@@ -8,7 +8,7 @@ The release has the following notable improvements:
 - New summary report card type
 - Batch sync for SimpleFin accounts
 
-## Actual
+### Actual
 
 #### Features
 
@@ -83,7 +83,7 @@ The release has the following notable improvements:
 - [#3871](https://github.com/actualbudget/actual/pull/3871) Summary Report: Update font size implementation to be simpler — thanks @MikesGlitch
 - [#3904](https://github.com/actualbudget/actual/pull/3904) Use useNavigate instead of accessing window.__navigate — thanks @joel-jeremy
 
-## Actual Server
+### Actual Server
 
 #### Features
 
