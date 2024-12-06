@@ -11,7 +11,7 @@ Then scroll up in the settings menu and click "Switch to tracking budgeting".
 
 ![](/img/tracking-budget-7.png)
 
-## Creating a budget
+## Creating a Budget
 
 There are several important differences between the **Tracking Budget** and the default **Envelope Budget** type.
 
@@ -26,9 +26,9 @@ If you are creating a budget for the first time, here's how it works:
 1. Assign the amount of income you expect to receive in the current month.
 2. Assign the amount of money you need for each of your categories.
 
-Once completing these two tasks for the month, you will see the budgeted totals in the monthly header in gray. The expected savings you will incur for the month will show up in the **Projected Savings** field for the current or future month. When you receive new income or spend from your categories, enter those transactions in the account registers. Your budget is not static, so there will be times when you do not have enough budgeted for your spending. When one of your categories is overdrawn, increase the budgeted amount for that category so it is 0 or greater.
+Upon completion of these two tasks for the month, you will see the budgeted totals in the monthly header in gray. The expected savings you will incur for the month will show up in the **Projected Savings** field for the current or future month. When you receive new income or spend from your categories, enter those transactions in the account registers. Your budget is not static, so there will be times when you do not have enough budgeted for your spending. When one of your categories is overdrawn, increase the budgeted amount for that category so it is 0 or greater.
 
-## The monthly summary explained
+## The Monthly Summary Explained
 
 As you can see in the following example, your total budgeted items show in the right hand side of the summary for both your **Income** and **Expenses** and your actual expenses and income are totaled in the left hand side of the summary. The **Projected Savings** field is calculated from your budgeted income minus budgeted expenses, so expect the **Projected Savings** to decrease when covering overspending.
 
@@ -52,7 +52,7 @@ When a new month begins, your **Projected Savings** changes to **Saved** or **Ov
 
 ![](/img/tracking-budget-3.png)
 
-## How money rolls over
+## How Money Rolls Over
 
 Money does not automatically carry over from month to month in the **Tracking Budget**. If you have overspending in any category, you may wish to carry this balance forward into the next month. This can be done by clicking on the **Balance** of the category and select **Rollover Overspending**.
 
@@ -60,7 +60,7 @@ Money does not automatically carry over from month to month in the **Tracking Bu
 If you utilize the **Rollover Overspending** feature on a category that is not over spent, the entire spent amount will be forwarded to the next month and the **Saved** amount will increase for the current month.
 :::
 
-## Working with the Budget
+## Working With the Budget
 
 Some of the features of the **Envelope Budget** are available in the **Tracking Budget**.
 :::note
