@@ -333,7 +333,7 @@ export interface ServerHandlers {
   'delete-budget': (arg: {
     id?: string;
     cloudFileId?: string;
-  }) => Promise<'ok'>;
+  }) => Promise<'ok' | 'fail'>;
 
   /**
    * Duplicates a budget file.

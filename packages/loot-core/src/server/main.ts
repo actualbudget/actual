@@ -1904,14 +1904,17 @@ handlers['delete-budget'] = async function ({ id, cloudFileId }) {
 
   // If a local file exists, you can delete it by passing its local id
   if (id) {
-    // loading and then closing the budget is a hack to be able to delete
+    // opening and then closing the database is a hack to be able to delete
     // the budget file if it hasn't been opened yet.  This needs a better
     // way, but works for now.
-    await loadBudget(id);
-    await handlers['close-budget']();
-
-    const budgetDir = fs.getBudgetDir(id);
-    await fs.removeDirRecursively(budgetDir);
+    try {
+      await db.openDatabase(id);
+      await db.closeDatabase();
+      const budgetDir = fs.getBudgetDir(id);
+      await fs.removeDirRecursively(budgetDir);
+    } catch (e) {
+      return 'fail';
+    }
   }
 
   return 'ok';
