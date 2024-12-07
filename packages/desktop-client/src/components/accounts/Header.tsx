@@ -369,7 +369,7 @@ export function AccountHeader({
               onMakeAsNonSplitTransactions={onMakeAsNonSplitTransactions}
             />
           )}
-          <View className="view-buttons">
+          <View style={{ flex: '0 0 auto' }}>
             {account && (
               <>
                 <Button
@@ -427,7 +427,7 @@ export function AccountHeader({
             </View>
           </Button>
           {account ? (
-            <View className="view-buttons">
+            <View style={{ flex: '0 0 auto' }}>
               <MenuButton
                 aria-label="Account menu"
                 ref={triggerRef}
@@ -456,7 +456,7 @@ export function AccountHeader({
               </Popover>
             </View>
           ) : (
-            <View className="view-buttons">
+            <View style={{ flex: '0 0 auto' }}>
               <MenuButton
                 aria-label="Account menu"
                 ref={triggerRef}
