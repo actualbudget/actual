@@ -18,7 +18,7 @@ export interface CustomReportEntity {
   showUncategorized: boolean;
   graphType: string;
   conditions?: RuleConditionEntity[];
-  conditionsOp: 'and' | 'or';
+  conditionsOp: RuleConditionEntity['conditionsOp'];
   data?: GroupedEntity;
   tombstone?: boolean;
 }
@@ -130,7 +130,7 @@ export interface CustomReportData {
   show_uncategorized: number;
   graph_type: string;
   conditions?: RuleConditionEntity[];
-  conditions_op: 'and' | 'or';
+  conditions_op: RuleConditionEntity['conditionsOp'];
   metadata?: GroupedEntity;
   interval: string;
   color_scheme?: string;

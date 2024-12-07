@@ -57,6 +57,7 @@ async function saveDiffAndApply(diff, changes, onChange) {
 }
 
 export function TransactionList({
+  isLoading = false,
   tableRef,
   transactions,
   allTransactions,
@@ -71,7 +72,6 @@ export function TransactionList({
   showReconciled,
   showCleared,
   showAccount,
-  headerContent,
   isAdding,
   isNew,
   isMatched,
@@ -108,7 +108,6 @@ export function TransactionList({
     newTransactions = realizeTempTransactions(newTransactions);
 
     await saveDiff({ added: newTransactions });
-    onRefetch();
   }, []);
 
   const onSave = useCallback(async transaction => {
@@ -206,6 +205,7 @@ export function TransactionList({
 
   return (
     <TransactionTable
+      isLoading={isLoading}
       ref={tableRef}
       transactions={allTransactions}
       loadMoreTransactions={loadMoreTransactions}
@@ -227,7 +227,6 @@ export function TransactionList({
       dateFormat={dateFormat}
       hideFraction={hideFraction}
       addNotification={addNotification}
-      headerContent={headerContent}
       renderEmpty={renderEmpty}
       onSave={onSave}
       onApplyRules={onApplyRules}

@@ -98,7 +98,7 @@ export function useSchedules({
       return;
     }
 
-    setIsLoading(true);
+    setIsLoading(query !== null);
 
     scheduleQueryRef.current = liveQuery<ScheduleEntity>(query, {
       onData: async schedules => {

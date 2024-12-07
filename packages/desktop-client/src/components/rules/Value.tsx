@@ -69,6 +69,8 @@ export function Value<T>({
       return value ? 'true' : 'false';
     } else {
       switch (field) {
+        case 'id':
+          return value;
         case 'amount':
           return integerToCurrency(value);
         case 'date':
