@@ -67,11 +67,7 @@ This will affect your spent totals as if the spending didn't happen.
 The spending will only show up in the month that the rollover stops.
 :::
 
-<<<<<<< HEAD:docs/getting-started/tracking-budget.md
-## Other Features
-=======
 ## Working With the Budget
->>>>>>> master:docs/experimental/tracking-budget.md
 
 All the non-budgeting features of Actual can be used with the **Tracking Budget** the same as the **Envelope Budget**.
 Experimental features may not work with the **Tracking Budget** yet.
