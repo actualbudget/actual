@@ -42,7 +42,7 @@ export function DuplicateFileModal({
   onComplete,
 }: DuplicateFileProps) {
   const { t } = useTranslation();
-  const [newName, setNewName] = useState(file.name + ' - copy');
+  const [newName, setNewName] = useState(file.name + t(' - copy'));
   const [nameError, setNameError] = useState<string | null>(null);
 
   // If the state is "broken" that means it was created by another user.
@@ -55,7 +55,7 @@ export function DuplicateFileModal({
 
   useEffect(() => {
     (async () => {
-      setNewName(await uniqueBudgetName(file.name + ' - copy'));
+      setNewName(await uniqueBudgetName(file.name + t(' - copy')));
     })();
   }, [file.name]);
 
