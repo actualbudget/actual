@@ -1354,6 +1354,9 @@ handlers['save-global-prefs'] = async function (prefs) {
       prefs.serverSelfSignedCert,
     );
   }
+  if ('ngrokConfig' in prefs) {
+    await asyncStorage.setItem('ngrokConfig', prefs.ngrokConfig);
+  }
   return 'ok';
 };
 
@@ -1366,6 +1369,7 @@ handlers['load-global-prefs'] = async function () {
     [, theme],
     [, preferredDarkTheme],
     [, serverSelfSignedCert],
+    [, ngrokConfig],
   ] = await asyncStorage.multiGet([
     'floating-sidebar',
     'max-months',
@@ -1374,6 +1378,7 @@ handlers['load-global-prefs'] = async function () {
     'theme',
     'preferred-dark-theme',
     'server-self-signed-cert',
+    'ngrokConfig',
   ]);
   return {
     floatingSidebar: floatingSidebar === 'true' ? true : false,
@@ -1393,6 +1398,7 @@ handlers['load-global-prefs'] = async function () {
         ? preferredDarkTheme
         : 'dark',
     serverSelfSignedCert: serverSelfSignedCert || undefined,
+    ngrokConfig: ngrokConfig || undefined,
   };
 };
 
