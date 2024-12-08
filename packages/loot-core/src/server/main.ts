@@ -1177,46 +1177,62 @@ handlers['simplefin-batch-sync'] = async function ({ ids = [] }) {
     true,
   );
 
-  console.group('Bank Sync operation for all SimpleFin accounts');
-  const res = await bankSync.SimpleFinBatchSync(
-    accounts.map(a => ({
-      id: a.id,
-      accountId: a.account_id,
-    })),
-  );
-
   const retVal = [];
-  for (const account of res) {
-    const errors = [];
-    const newTransactions = [];
-    const matchedTransactions = [];
-    const updatedAccounts = [];
 
-    if (account.res.error_code) {
-      errors.push(
-        handleSyncError(
-          {
-            type: 'BankSyncError',
-            category: account.res.error_type,
-            code: account.res.error_code,
-          },
+  console.group('Bank Sync operation for all SimpleFin accounts');
+  try {
+    const res = await bankSync.SimpleFinBatchSync(
+      accounts.map(a => ({
+        id: a.id,
+        accountId: a.account_id,
+      })),
+    );
+    for (const account of res) {
+      const errors = [];
+      const newTransactions = [];
+      const matchedTransactions = [];
+      const updatedAccounts = [];
+
+      if (account.res.error_code) {
+        errors.push(
+          handleSyncError(
+            {
+              type: 'BankSyncError',
+              category: account.res.error_type,
+              code: account.res.error_code,
+            },
+            accounts.find(a => a.id === account.accountId),
+          ),
+        );
+      } else {
+        handleSyncResponse(
+          account.res,
           accounts.find(a => a.id === account.accountId),
-        ),
-      );
-    } else {
-      handleSyncResponse(
-        account.res,
-        accounts.find(a => a.id === account.accountId),
-        newTransactions,
-        matchedTransactions,
-        updatedAccounts,
-      );
-    }
+          newTransactions,
+          matchedTransactions,
+          updatedAccounts,
+        );
+      }
 
-    retVal.push({
-      accountId: account.accountId,
-      res: { errors, newTransactions, matchedTransactions, updatedAccounts },
-    });
+      retVal.push({
+        accountId: account.accountId,
+        res: { errors, newTransactions, matchedTransactions, updatedAccounts },
+      });
+    }
+  } catch (err) {
+    const errors = [];
+    for (const account of accounts) {
+      retVal.push({
+        accountId: account.accountId,
+        res: {
+          errors,
+          newTransactions: [],
+          matchedTransactions: [],
+          updatedAccounts: [],
+        },
+      });
+      errors.push(handleSyncError(err, account));
+    }
   }
 
   if (retVal.some(a => a.res.updatedAccounts.length > 0)) {

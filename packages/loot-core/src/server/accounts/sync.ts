@@ -205,6 +205,9 @@ async function downloadSimpleFinTransactions(
     60000,
   );
 
+  if (Object.keys(res).length === 0) {
+    throw BankSyncError('NO_DATA', 'NO_DATA');
+  }
   if (res.error_code) {
     throw BankSyncError(res.error_type, res.error_code);
   }
