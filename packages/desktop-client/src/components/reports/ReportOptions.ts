@@ -42,11 +42,11 @@ const balanceTypeOptions = [
 ];
 
 const groupByOptions = [
-  { description: 'Category' },
-  { description: 'Group' },
-  { description: 'Payee' },
-  { description: 'Account' },
-  { description: 'Interval' },
+  { description: t('Category') },
+  { description: t('Group') },
+  { description: t('Payee') },
+  { description: t('Account') },
+  { description: t('Interval') },
 ];
 
 export type dateRangeProps = {
