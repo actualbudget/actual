@@ -96,6 +96,9 @@ export function ExperimentalFeatures() {
             >
               <Trans>Context menus</Trans>
             </FeatureToggle>
+            <FeatureToggle flag="subCategoryGroups">
+              <Trans>Sub category groups</Trans>
+            </FeatureToggle>
           </View>
         ) : (
           <Link

@@ -158,7 +158,7 @@ describe('Budget', () => {
       await db.insertCategoryGroup({
         id: 'incomeGroup',
         name: 'incomeGroup',
-        is_income: 1,
+        is_income: true,
       });
       await db.insertCategoryGroup({ id: 'group1', name: 'group1' });
       await db.insertCategory({ name: 'foo', cat_group: 'group1' });
@@ -307,7 +307,7 @@ describe('Categories', () => {
       await db.insertCategoryGroup({
         id: 'group2',
         name: 'group2',
-        is_income: 1,
+        is_income: true,
       });
       await db.insertCategory({ id: 'foo', name: 'foo', cat_group: 'group1' });
       await db.insertCategory({ id: 'bar', name: 'bar', cat_group: 'group1b' });
