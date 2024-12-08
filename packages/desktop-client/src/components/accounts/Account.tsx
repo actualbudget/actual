@@ -48,6 +48,7 @@ import {
   type RuleConditionEntity,
   type TransactionEntity,
   type TransactionFilterEntity,
+  type RuleEntity,
 } from 'loot-core/src/types/models';
 
 import { useAccountPreviewTransactions } from '../../hooks/useAccountPreviewTransactions';
@@ -701,6 +702,42 @@ class AccountInternal extends PureComponent<
 
     return groupById<{ id: string; balance: number }>(data);
   }
+
+  onRunRules = async (ids: string[]) => {
+    try {
+      this.setState({ workingHard: true });
+      // Bulk fetch transactions
+      const transactions = this.state.transactions.filter(trans =>
+        ids.includes(trans.id),
+      );
+      // Process transactions sequentially to maintain order
+      for (const trans of transactions) {
+        if (!trans.payee) continue;
+        // Fetch rules for the transaction's payee
+        const rules = (await send('payees-get-rules', {
+          id: trans.payee,
+        })) as RuleEntity[];
+
+        // Apply all rules for this transaction
+        for (const rule of rules) {
+          await send('rule-apply-actions', {
+            transactions: [trans],
+            actions: rule.actions,
+          });
+        }
+      }
+      // Fetch updated transactions once at the end
+      await this.fetchTransactions();
+    } catch (error) {
+      console.error('Error applying rules:', error);
+      this.props.addNotification({
+        type: 'error',
+        message: 'Failed to apply rules to transactions',
+      });
+    } finally {
+      this.setState({ workingHard: false });
+    }
+  };
 
   onAddTransaction = () => {
     this.setState({ isAdding: true });
@@ -1730,6 +1767,7 @@ class AccountInternal extends PureComponent<
                 onImport={this.onImport}
                 onBatchDelete={this.onBatchDelete}
                 onBatchDuplicate={this.onBatchDuplicate}
+                onRunRules={this.onRunRules}
                 onBatchEdit={this.onBatchEdit}
                 onBatchLinkSchedule={this.onBatchLinkSchedule}
                 onBatchUnlinkSchedule={this.onBatchUnlinkSchedule}
