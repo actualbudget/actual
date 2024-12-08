@@ -1933,11 +1933,7 @@ handlers['duplicate-budget'] = async function ({
 
   const budgetDir = fs.getBudgetDir(id);
 
-  let budgetFileName = newName;
-  if (budgetFileName.indexOf(' - copy') !== -1) {
-    budgetFileName = budgetFileName.replace(/\s-\scopy.*/, '');
-  }
-  const newId = await idFromBudgetName(budgetFileName);
+  const newId = await idFromBudgetName(newName);
 
   // copy metadata from current budget
   // replace id with new budget id and budgetName with new budget name
