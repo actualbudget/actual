@@ -41,6 +41,7 @@ export const Popover = ({
         ...styles.tooltip,
         ...styles.lightScrollbar,
         padding: 0,
+        userSelect: 'none',
         ...style,
       })}
       shouldCloseOnInteractOutside={element => {
