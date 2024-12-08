@@ -175,6 +175,7 @@ const TransactionHeader = memo(
     onSort,
     ascDesc,
     field,
+    showSelection,
   }) => {
     const dispatchSelected = useSelectedDispatch();
     const { t } = useTranslation();
@@ -202,19 +203,32 @@ const TransactionHeader = memo(
           borderColor: theme.tableBorder,
         }}
       >
-        <SelectCell
-          exposed={true}
-          focused={false}
-          selected={hasSelected}
-          width={20}
-          style={{
-            borderTopWidth: 0,
-            borderBottomWidth: 0,
-          }}
-          onSelect={e =>
-            dispatchSelected({ type: 'select-all', isRangeSelect: e.shiftKey })
-          }
-        />
+        {showSelection && (
+          <SelectCell
+            exposed={true}
+            focused={false}
+            selected={hasSelected}
+            width={20}
+            style={{
+              borderTopWidth: 0,
+              borderBottomWidth: 0,
+            }}
+            onSelect={e =>
+              dispatchSelected({
+                type: 'select-all',
+                isRangeSelect: e.shiftKey,
+              })
+            }
+          />
+        )}
+        {!showSelection && (
+          <Field
+            style={{
+              width: '20px',
+              border: 0,
+            }}
+          />
+        )}
         <HeaderCell
           value={t('Date')}
           width={110}
@@ -866,6 +880,8 @@ const Transaction = memo(function Transaction({
   onNotesTagClick,
   splitError,
   listContainerRef,
+  showSelection,
+  allowSplitTransaction,
 }) {
   const dispatch = useDispatch();
   const dispatchSelected = useSelectedDispatch();
@@ -1168,7 +1184,7 @@ const Transaction = memo(function Transaction({
         ) : (
           <Cell width={20} />
         )
-      ) : isPreview && isChild ? (
+      ) : (isPreview && isChild) || !showSelection ? (
         <Cell width={20} />
       ) : (
         <SelectCell
@@ -1502,7 +1518,7 @@ const Transaction = memo(function Transaction({
                 value={categoryId}
                 focused={true}
                 clearOnBlur={false}
-                showSplitOption={!isChild && !isParent}
+                showSplitOption={!isChild && !isParent && allowSplitTransaction}
                 shouldSaveFromKey={shouldSaveFromKey}
                 inputProps={{ onBlur, onKeyDown, style: inputStyle }}
                 onUpdate={onUpdate}
@@ -1774,6 +1790,8 @@ function NewTransaction({
           onNavigateToSchedule={onNavigateToSchedule}
           onNotesTagClick={onNotesTagClick}
           balance={balance}
+          showSelection={true}
+          allowSplitTransaction={true}
         />
       ))}
       <View
@@ -1894,6 +1912,8 @@ function TransactionTableInner({
       isNew,
       isMatched,
       isExpanded,
+      showSelection,
+      allowSplitTransaction,
     } = props;
 
     const trans = item;
@@ -1976,6 +1996,8 @@ function TransactionTableInner({
           )
         }
         listContainerRef={listContainerRef}
+        showSelection={showSelection}
+        allowSplitTransaction={allowSplitTransaction}
       />
     );
   };
@@ -2000,6 +2022,7 @@ function TransactionTableInner({
           onSort={props.onSort}
           ascDesc={props.ascDesc}
           field={props.sortField}
+          showSelection={props.showSelection}
         />
 
         {props.isAdding && (
@@ -2615,6 +2638,8 @@ export const TransactionTable = forwardRef((props, ref) => {
       newTransactions={newTransactions}
       tableNavigator={tableNavigator}
       newNavigator={newNavigator}
+      showSelection={props.showSelection}
+      allowSplitTransaction={props.allowSplitTransaction}
     />
   );
 });
