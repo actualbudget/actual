@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
+import { DialogTrigger } from 'react-aria-components';
 import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
-import { DialogTrigger } from 'react-aria-components';
 
 import { pushModal } from 'loot-core/client/actions';
 import { send } from 'loot-core/src/platform/client/fetch';
@@ -246,7 +246,10 @@ export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
                     </ButtonWithLoading>
                     {isGoCardlessSetupComplete && (
                       <DialogTrigger>
-                        <Button variant="bare" aria-label="GoCardless menu">
+                        <Button
+                          variant="bare"
+                          aria-label={t('GoCardless menu')}
+                        >
                           <SvgDotsHorizontalTriple
                             width={15}
                             height={15}
@@ -306,7 +309,7 @@ export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
                     </ButtonWithLoading>
                     {isSimpleFinSetupComplete && (
                       <DialogTrigger>
-                        <Button variant="bare" aria-label="SimpleFIN menu">
+                        <Button variant="bare" aria-label={t('SimpleFIN menu')}>
                           <SvgDotsHorizontalTriple
                             width={15}
                             height={15}
