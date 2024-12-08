@@ -48,6 +48,7 @@ export function DuplicateFileModal({
 
   // If the state is "broken" that means it was created by another user.
   const isCloudFile = 'cloudFileId' in file && file.state !== 'broken';
+  const isLocalFile = 'id' in file;
   const dispatch = useDispatch();
 
   const [loadingState, setLoadingState] = useState<'cloud' | 'local' | null>(
@@ -123,7 +124,7 @@ export function DuplicateFileModal({
   return (
     <Modal name="duplicate-budget">
       {({ state: { close } }) => (
-        <>
+        <View style={{ maxWidth: 700 }}>
           <ModalHeader
             title={t('Duplicate “{{fileName}}”', { fileName: file.name })}
             rightContent={
@@ -135,13 +136,13 @@ export function DuplicateFileModal({
               />
             }
           />
+
           <View
             style={{
               padding: 15,
               gap: 15,
               paddingTop: 0,
               paddingBottom: 25,
-              maxWidth: 512,
               lineHeight: '1.5em',
             }}
           >
@@ -168,88 +169,78 @@ export function DuplicateFileModal({
               </FormError>
             )}
 
-            {isCloudFile && (
-              <>
+            {isLocalFile ? (
+              isCloudFile ? (
                 <Text>
                   <Trans>
-                    Current budget is a <strong>hosted budget</strong> which
-                    means it is stored on your server to make it available for
-                    download on any device. Would you like to duplicate this
-                    budget for all devices?
+                    Your budget is hosted on a server, making it accessible for
+                    download on your devices.
+                    <br />
+                    Would you like to duplicate this budget for all your devices
+                    or keep it stored locally on this device?
                   </Trans>
                 </Text>
-
+              ) : (
+                <Text>
+                  <Trans>
+                    Your budget is only located on your device.
+                    <br />
+                    Only a local copy will be duplicated.
+                  </Trans>
+                </Text>
+              )
+            ) : (
+              <Text>
+                <Trans>
+                  Unable to duplicate a budget that is not located on your
+                  device.
+                  <br />
+                  Please download the budget from the server before duplicating.
+                </Trans>
+              </Text>
+            )}
+            <ModalButtons>
+              <Button
+                onPress={() => {
+                  close();
+                  if (onComplete) onComplete({ status: 'canceled' });
+                }}
+              >
+                <Trans>Cancel</Trans>
+              </Button>
+              {isLocalFile && isCloudFile && (
                 <ButtonWithLoading
                   variant={loadingState !== null ? 'bare' : 'primary'}
                   isLoading={loadingState === 'cloud'}
                   style={{
-                    alignSelf: 'center',
-                    marginLeft: 30,
-                    padding: '5px 30px',
-                    fontSize: 14,
+                    marginLeft: 10,
                   }}
                   onPress={() => handleDuplicate('cloudSync')}
                 >
-                  <Trans>Duplicate budget for all devices</Trans>
+                  <Trans>Duplicate for all devices</Trans>
                 </ButtonWithLoading>
-              </>
-            )}
-
-            {'id' in file && (
-              <>
-                {isCloudFile ? (
-                  <Text>
-                    <Trans>
-                      You can also duplicate to just the local copy. This will
-                      leave the original on the server and create a duplicate on
-                      only this device.
-                    </Trans>
-                  </Text>
-                ) : (
-                  <Text>
-                    <Trans>
-                      This is a <strong>local budget</strong> which is not
-                      stored on a server. Only a local copy will be duplicated.
-                    </Trans>
-                  </Text>
-                )}
-
-                <ModalButtons>
-                  <Button
-                    onPress={() => {
-                      close();
-                      if (onComplete) onComplete({ status: 'canceled' });
-                    }}
-                  >
-                    <Trans>Cancel</Trans>
-                  </Button>
-                  <ButtonWithLoading
-                    variant={
-                      loadingState !== null
-                        ? 'bare'
-                        : isCloudFile
-                          ? 'normal'
-                          : 'primary'
-                    }
-                    isLoading={loadingState === 'local'}
-                    style={{
-                      alignSelf: 'center',
-                      marginLeft: 30,
-                      padding: '5px 30px',
-                      fontSize: 14,
-                    }}
-                    onPress={() => handleDuplicate('localOnly')}
-                  >
-                    {!isCloudFile && <Trans>Duplicate budget</Trans>}
-                    {isCloudFile && (
-                      <Trans>Duplicate budget locally only</Trans>
-                    )}
-                  </ButtonWithLoading>
-                </ModalButtons>
-              </>
-            )}
+              )}
+              {isLocalFile && (
+                <ButtonWithLoading
+                  variant={
+                    loadingState !== null
+                      ? 'bare'
+                      : isCloudFile
+                        ? 'normal'
+                        : 'primary'
+                  }
+                  isLoading={loadingState === 'local'}
+                  style={{
+                    marginLeft: 10,
+                  }}
+                  onPress={() => handleDuplicate('localOnly')}
+                >
+                  <Trans>Duplicate locally</Trans>
+                </ButtonWithLoading>
+              )}
+            </ModalButtons>
           </View>
-        </>
+        </View>
       )}
     </Modal>
   );
