@@ -3,13 +3,13 @@ import React, { createContext, type ReactNode } from 'react';
 
 import * as monthUtils from 'loot-core/src/shared/months';
 
-export type BoundsProps = {
+export type MonthBounds = {
   start: string;
   end: string;
 };
 
 export function getValidMonthBounds(
-  bounds: BoundsProps,
+  bounds: MonthBounds,
   startMonth: undefined | string,
   endMonth: string,
 ) {
@@ -29,7 +29,7 @@ export const MonthsContext = createContext<MonthsContextProps>(null);
 type MonthsProviderProps = {
   startMonth: string | undefined;
   numMonths: number;
-  monthBounds: BoundsProps;
+  monthBounds: MonthBounds;
   type: string;
   children: ReactNode;
 };

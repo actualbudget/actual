@@ -131,6 +131,7 @@ const DynamicBudgetTableInner = ({
           onMonthSelect={_onMonthSelect}
         />
         <BudgetTable
+          type={type}
           prewarmStartMonth={prewarmStartMonth}
           startMonth={startMonth}
           numMonths={numMonths}
@@ -144,7 +145,13 @@ const DynamicBudgetTableInner = ({
 
 DynamicBudgetTableInner.displayName = 'DynamicBudgetTableInner';
 
-type DynamicBudgetTableProps = ComponentProps<typeof BudgetTable>;
+type DynamicBudgetTableProps = Omit<
+  ComponentProps<typeof BudgetTable>,
+  'numMonths'
+> & {
+  maxMonths: number;
+  onMonthSelect: (month: string, numMonths: number) => void;
+};
 
 export const DynamicBudgetTable = (props: DynamicBudgetTableProps) => {
   return (
