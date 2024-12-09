@@ -123,6 +123,7 @@ export const ReportTableRow = memo(
             style={{
               width: compact ? 80 : 125,
               flexShrink: 0,
+              flexGrow: 1,
             }}
             valueStyle={compactStyle}
           />

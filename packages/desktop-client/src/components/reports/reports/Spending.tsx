@@ -13,7 +13,6 @@ import { amountToCurrency } from 'loot-core/src/shared/util';
 import { type SpendingWidget } from 'loot-core/types/models';
 import { type RuleConditionEntity } from 'loot-core/types/models/rule';
 
-import { useFeatureFlag } from '../../../hooks/useFeatureFlag';
 import { useFilters } from '../../../hooks/useFilters';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { theme, styles } from '../../../style';
@@ -61,7 +60,6 @@ type SpendingInternalProps = {
 };
 
 function SpendingInternal({ widget }: SpendingInternalProps) {
-  const isDashboardsFeatureEnabled = useFeatureFlag('dashboards');
   const dispatch = useDispatch();
   const { t } = useTranslation();
 
@@ -237,26 +235,22 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
       >
         {!isNarrowWidth && (
           <SpaceBetween gap={0}>
-            {isDashboardsFeatureEnabled && (
-              <>
-                <Button
-                  variant={isLive ? 'primary' : 'normal'}
-                  onPress={() => setIsLive(state => !state)}
-                >
-                  {isLive ? t('Live') : t('Static')}
-                </Button>
+            <Button
+              variant={isLive ? 'primary' : 'normal'}
+              onPress={() => setIsLive(state => !state)}
+            >
+              {isLive ? t('Live') : t('Static')}
+            </Button>
 
-                <View
-                  style={{
-                    width: 1,
-                    height: 28,
-                    backgroundColor: theme.pillBorderDark,
-                    marginRight: 10,
-                    marginLeft: 10,
-                  }}
-                />
-              </>
-            )}
+            <View
+              style={{
+                width: 1,
+                height: 28,
+                backgroundColor: theme.pillBorderDark,
+                marginRight: 10,
+                marginLeft: 10,
+              }}
+            />
 
             <SpaceBetween gap={5}>
               <Text>

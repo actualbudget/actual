@@ -31,7 +31,6 @@ import {
 import { evalArithmetic } from 'loot-core/src/shared/arithmetic';
 import { currentDay } from 'loot-core/src/shared/months';
 import * as monthUtils from 'loot-core/src/shared/months';
-import { getScheduledAmount } from 'loot-core/src/shared/schedules';
 import {
   splitTransaction,
   updateTransaction,
@@ -48,7 +47,7 @@ import {
   titleFirst,
 } from 'loot-core/src/shared/util';
 
-import { useFeatureFlag } from '../../hooks/useFeatureFlag';
+import { useContextMenu } from '../../hooks/useContextMenu';
 import { useMergedRefs } from '../../hooks/useMergedRefs';
 import { usePrevious } from '../../hooks/usePrevious';
 import { useProperFocus } from '../../hooks/useProperFocus';
@@ -94,11 +93,7 @@ function getDisplayValue(obj, name) {
 }
 
 function serializeTransaction(transaction, showZeroInDeposit) {
-  let { amount, date } = transaction;
-
-  if (isPreviewId(transaction.id)) {
-    amount = (transaction._inverse ? -1 : 1) * getScheduledAmount(amount);
-  }
+  const { amount, date: originalDate } = transaction;
 
   let debit = amount < 0 ? -amount : null;
   let credit = amount > 0 ? amount : null;
@@ -111,6 +106,7 @@ function serializeTransaction(transaction, showZeroInDeposit) {
     }
   }
 
+  let date = originalDate;
   // Validate the date format
   if (!isDateValid(parseISO(date))) {
     // Be a little forgiving if the date isn't valid. This at least
@@ -676,7 +672,13 @@ function PayeeCell({
           isCreatingPayee.current = false;
         }
       }}
-      formatter={() => getPayeePretty(transaction, payee, transferAccount)}
+      formatter={() => {
+        const payeeName = getPayeePretty(transaction, payee, transferAccount);
+        if (!payeeName && isPreview) {
+          return '(No payee)';
+        }
+        return payeeName;
+      }}
       unexposedContent={props => {
         const payeeName = (
           <UnexposedCellContent
@@ -750,6 +752,16 @@ function PayeeCell({
   );
 }
 
+const payeeIconButtonStyle = {
+  marginLeft: -5,
+  marginRight: 2,
+  width: 23,
+  height: 23,
+  color: 'inherit',
+};
+const scheduleIconStyle = { width: 13, height: 13 };
+const transferIconStyle = { width: 10, height: 10 };
+
 function PayeeIcons({
   transaction,
   transferAccount,
@@ -757,22 +769,6 @@ function PayeeIcons({
   onNavigateToSchedule,
 }) {
   const scheduleId = transaction.schedule;
-
-  const buttonStyle = useMemo(
-    () => ({
-      marginLeft: -5,
-      marginRight: 2,
-      width: 23,
-      height: 23,
-      color: 'inherit',
-    }),
-    [],
-  );
-
-  const scheduleIconStyle = useMemo(() => ({ width: 13, height: 13 }), []);
-
-  const transferIconStyle = useMemo(() => ({ width: 10, height: 10 }), []);
-
   const { isLoading, schedules = [] } = useCachedSchedules();
 
   if (isLoading) {
@@ -787,6 +783,7 @@ function PayeeIcons({
   }
 
   const recurring = schedule && schedule._date && !!schedule._date.frequency;
+  const isDeposit = transaction.amount > 0;
 
   return (
     <>
@@ -794,7 +791,7 @@ function PayeeIcons({
         <Button
           variant="bare"
           aria-label="See schedule details"
-          style={buttonStyle}
+          style={payeeIconButtonStyle}
           onPress={() => {
             onNavigateToSchedule(scheduleId);
           }}
@@ -810,14 +807,14 @@ function PayeeIcons({
         <Button
           variant="bare"
           aria-label="See transfer account"
-          style={buttonStyle}
+          style={payeeIconButtonStyle}
           onPress={() => {
             if (!isTemporaryId(transaction.id)) {
               onNavigateToTransferAccount(transferAccount.id);
             }
           }}
         >
-          {(transaction._inverse ? -1 : 1) * transaction.amount > 0 ? (
+          {isDeposit ? (
             <SvgLeftArrow2 style={transferIconStyle} />
           ) : (
             <SvgRightArrow2 style={transferIconStyle} />
@@ -1010,7 +1007,6 @@ const Transaction = memo(function Transaction({
     reconciled,
     is_parent: isParent,
     _unmatched = false,
-    _inverse = false,
   } = transaction;
 
   // Join in some data
@@ -1028,9 +1024,7 @@ const Transaction = memo(function Transaction({
   const backgroundFocus = focusedField === 'select';
   const amountStyle = hideFraction ? { letterSpacing: -0.5 } : null;
 
-  const runningBalance = !isTemporaryId(id)
-    ? balance
-    : balance + (_inverse ? -1 : 1) * amount;
+  const runningBalance = !isTemporaryId(id) ? balance : balance + amount;
 
   // Ok this entire logic is a dirty, dirty hack.. but let me explain.
   // Problem: the split-error Popover (which has the buttons to distribute/add split)
@@ -1054,10 +1048,8 @@ const Transaction = memo(function Transaction({
     }, 1);
   }, [splitError, allTransactions]);
 
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [crossOffset, setCrossOffset] = useState(0);
-  const [offset, setOffset] = useState(0);
-  const contextMenusEnabled = useFeatureFlag('contextMenus');
+  const { setMenuOpen, menuOpen, handleContextMenu, position } =
+    useContextMenu();
 
   return (
     <Row
@@ -1087,23 +1079,14 @@ const Transaction = memo(function Transaction({
         }),
         ...(_unmatched && { opacity: 0.5 }),
       }}
-      onContextMenu={e => {
-        if (!contextMenusEnabled) return;
-        if (transaction.id === 'temp') return;
-        e.preventDefault();
-        const rect = e.currentTarget.getBoundingClientRect();
-        setCrossOffset(e.clientX - rect.left);
-        setOffset(e.clientY - rect.bottom);
-        setMenuOpen(true);
-      }}
+      onContextMenu={handleContextMenu}
     >
       <Popover
         triggerRef={triggerRef}
         placement="bottom start"
         isOpen={menuOpen}
         onOpenChange={() => setMenuOpen(false)}
-        crossOffset={crossOffset}
-        offset={offset}
+        {...position}
         style={{ width: 200, margin: 1 }}
         isNonModal
       >
@@ -1367,6 +1350,9 @@ const Transaction = memo(function Transaction({
                 margin: '0 5px',
                 padding: '3px 7px',
                 borderRadius: 4,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                display: 'inline-block',
               }}
             >
               {titleFirst(categoryId)}
@@ -2164,13 +2150,8 @@ export const TransactionTable = forwardRef((props, ref) => {
         }
 
         const payee = t.payee && payees[t.payee];
-        let transferAccount;
-        if (t._inverse) {
-          transferAccount = t.account && accounts[t.account];
-        } else {
-          transferAccount =
-            payee?.transfer_acct && accounts[payee.transfer_acct];
-        }
+        const transferAccount =
+          payee?.transfer_acct && accounts[payee.transfer_acct];
         return [t.id, transferAccount || null];
       }),
     );

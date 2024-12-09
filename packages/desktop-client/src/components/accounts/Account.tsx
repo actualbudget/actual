@@ -5,6 +5,7 @@ import React, {
   createRef,
   useMemo,
   type ReactElement,
+  useEffect,
 } from 'react';
 import { Trans } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -30,7 +31,6 @@ import {
 import { send, listen } from 'loot-core/src/platform/client/fetch';
 import { currentDay } from 'loot-core/src/shared/months';
 import { q, type Query } from 'loot-core/src/shared/query';
-import { getScheduledAmount } from 'loot-core/src/shared/schedules';
 import {
   updateTransaction,
   realizeTempTransactions,
@@ -50,6 +50,7 @@ import {
   type TransactionFilterEntity,
 } from 'loot-core/src/types/models';
 
+import { useAccountPreviewTransactions } from '../../hooks/useAccountPreviewTransactions';
 import { useAccounts } from '../../hooks/useAccounts';
 import { useActions } from '../../hooks/useActions';
 import { useCategories } from '../../hooks/useCategories';
@@ -57,7 +58,6 @@ import { useDateFormat } from '../../hooks/useDateFormat';
 import { useFailedAccounts } from '../../hooks/useFailedAccounts';
 import { useLocalPref } from '../../hooks/useLocalPref';
 import { usePayees } from '../../hooks/usePayees';
-import { usePreviewTransactions } from '../../hooks/usePreviewTransactions';
 import {
   SelectedProviderWithItems,
   type Actions,
@@ -147,7 +147,6 @@ type AllTransactionsProps = {
     transactions: TransactionEntity[],
     balances: Record<string, { balance: number }> | null,
   ) => ReactElement;
-  collapseTransactions: (ids: string[]) => void;
 };
 
 function AllTransactions({
@@ -157,14 +156,24 @@ function AllTransactions({
   showBalances,
   filtered,
   children,
-  collapseTransactions,
 }: AllTransactionsProps) {
   const accountId = account?.id;
-  const prependTransactions: (TransactionEntity & { _inverse?: boolean })[] =
-    usePreviewTransactions(collapseTransactions).map(trans => ({
-      ...trans,
-      _inverse: accountId ? accountId !== trans.account : false,
-    }));
+  const { dispatch: splitsExpandedDispatch } = useSplitsExpanded();
+  const { previewTransactions, isLoading: isPreviewTransactionsLoading } =
+    useAccountPreviewTransactions({ accountId });
+
+  useEffect(() => {
+    if (!isPreviewTransactionsLoading) {
+      splitsExpandedDispatch({
+        type: 'close-splits',
+        ids: previewTransactions.filter(t => t.is_parent).map(t => t.id),
+      });
+    }
+  }, [
+    isPreviewTransactionsLoading,
+    previewTransactions,
+    splitsExpandedDispatch,
+  ]);
 
   transactions ??= [];
 
@@ -184,29 +193,26 @@ function AllTransactions({
     }
 
     // Reverse so we can calculate from earliest upcoming schedule.
-    const scheduledBalances = [...prependTransactions]
+    const previewBalances = [...previewTransactions]
       .reverse()
-      .map(scheduledTransaction => {
-        const amount =
-          (scheduledTransaction._inverse ? -1 : 1) *
-          getScheduledAmount(scheduledTransaction.amount);
+      .map(previewTransaction => {
         return {
           // TODO: fix me
           // eslint-disable-next-line react-hooks/exhaustive-deps
-          balance: (runningBalance += amount),
-          id: scheduledTransaction.id,
+          balance: (runningBalance += previewTransaction.amount),
+          id: previewTransaction.id,
         };
       });
-    return groupById(scheduledBalances);
-  }, [showBalances, prependTransactions, runningBalance]);
+    return groupById(previewBalances);
+  }, [showBalances, previewTransactions, runningBalance]);
 
   const allTransactions = useMemo(() => {
     // Don't prepend scheduled transactions if we are filtering
-    if (!filtered && prependTransactions.length > 0) {
-      return prependTransactions.concat(transactions);
+    if (!filtered && previewTransactions.length > 0) {
+      return previewTransactions.concat(transactions);
     }
     return transactions;
-  }, [filtered, prependTransactions, transactions]);
+  }, [filtered, previewTransactions, transactions]);
 
   const allBalances = useMemo(() => {
     // Don't prepend scheduled transactions if we are filtering
@@ -216,7 +222,7 @@ function AllTransactions({
     return balances;
   }, [filtered, prependBalances, balances]);
 
-  if (!prependTransactions?.length || filtered) {
+  if (!previewTransactions?.length || filtered) {
     return children(transactions, balances);
   }
   return children(allTransactions, allBalances);
@@ -260,8 +266,8 @@ type AccountInternalProps = {
   accounts: AccountEntity[];
   getPayees: () => Promise<PayeeEntity[]>;
   updateAccount: (newAccount: AccountEntity) => void;
-  newTransactions: string[];
-  matchedTransactions: string[];
+  newTransactions: Array<TransactionEntity['id']>;
+  matchedTransactions: Array<TransactionEntity['id']>;
   splitsExpandedDispatch: ReturnType<typeof useSplitsExpanded>['dispatch'];
   expandSplits?: boolean;
   savedFilters: TransactionFilterEntity[];
@@ -864,11 +870,11 @@ class AccountInternal extends PureComponent<
     return amount;
   };
 
-  isNew = (id: string) => {
+  isNew = (id: TransactionEntity['id']) => {
     return this.props.newTransactions.includes(id);
   };
 
-  isMatched = (id: string) => {
+  isMatched = (id: TransactionEntity['id']) => {
     return this.props.matchedTransactions.includes(id);
   };
 
@@ -1669,9 +1675,6 @@ class AccountInternal extends PureComponent<
         balances={balances}
         showBalances={showBalances}
         filtered={transactionsFiltered}
-        collapseTransactions={ids =>
-          this.props.splitsExpandedDispatch({ type: 'close-splits', ids })
-        }
       >
         {(allTransactions, allBalances) => (
           <SelectedProviderWithItems
