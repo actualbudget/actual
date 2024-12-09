@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 
 import { t } from 'i18next'; // Ensure this import is correct
 
+import { getSecretsError } from 'loot-core/shared/errors';
 import { send } from 'loot-core/src/platform/client/fetch';
 
 import { Error } from '../alerts';
@@ -31,26 +32,45 @@ export const GoCardlessInitialiseModal = ({
   const [secretKey, setSecretKey] = useState('');
   const [isValid, setIsValid] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(
+    'It is required to provide both the secret id and secret key.',
+  );
 
   const onSubmit = async (close: () => void) => {
     if (!secretId || !secretKey) {
       setIsValid(false);
+      setError('It is required to provide both the secret id and secret key.');
       return;
     }
 
     setIsLoading(true);
 
-    await Promise.all([
-      send('secret-set', {
+    let { error, reason } =
+      (await send('secret-set', {
         name: 'gocardless_secretId',
         value: secretId,
-      }),
-      send('secret-set', {
-        name: 'gocardless_secretKey',
-        value: secretKey,
-      }),
-    ]);
+      })) || {};
 
+    if (error) {
+      setIsLoading(false);
+      setIsValid(false);
+      setError(getSecretsError(error, reason));
+      return;
+    } else {
+      ({ error, reason } =
+        (await send('secret-set', {
+          name: 'gocardless_secretKey',
+          value: secretKey,
+        })) || {});
+      if (error) {
+        setIsLoading(false);
+        setIsValid(false);
+        setError(getSecretsError(error, reason));
+        return;
+      }
+    }
+
+    setIsValid(true);
     onSuccess();
     setIsLoading(false);
     close();
@@ -107,13 +127,7 @@ export const GoCardlessInitialiseModal = ({
               />
             </FormField>
 
-            {!isValid && (
-              <Error>
-                {t(
-                  'It is required to provide both the secret id and secret key.',
-                )}
-              </Error>
-            )}
+            {!isValid && <Error>{error}</Error>}
           </View>
 
           <ModalButtons>
