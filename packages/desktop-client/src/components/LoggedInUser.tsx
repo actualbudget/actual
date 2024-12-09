@@ -9,8 +9,8 @@ import { type RemoteFile, type SyncedLocalFile } from 'loot-core/types/file';
 import { useAuth } from '../auth/AuthProvider';
 import { Permissions } from '../auth/types';
 import { useActions } from '../hooks/useActions';
-import { useMetadataPref } from '../hooks/useMetadataPref';
 import { useNavigate } from '../hooks/useNavigate';
+import { useMetadataPref } from '../hooks/useMetadataPref';
 import { theme, styles } from '../style';
 
 import { Button } from './common/Button2';
@@ -70,25 +70,21 @@ export function LoggedInUser({
     }
   }, [cloudFileId, currentFile, userData]);
 
+  async function onChangePassword() {
+    await closeBudget();
+    navigate('/change-password');
+  }
+
   const handleMenuSelect = async (type: string) => {
     setMenuOpen(false);
 
     switch (type) {
       case 'change-password':
-        await closeBudget();
-        if (window.__navigate) {
-          window.__navigate('/change-password');
-        } else {
-          window.location.href = '/change-password';
-        }
+        onChangePassword();
         break;
       case 'sign-in':
         await closeBudget();
-        if (window.__navigate) {
-          window.__navigate('/login');
-        } else {
-          window.location.href = '/login';
-        }
+        navigate('/login');
         break;
       case 'user-access':
         navigate('/user-access');
@@ -106,11 +102,7 @@ export function LoggedInUser({
         break;
       case 'config-server':
         await closeBudget();
-        if (window.__navigate) {
-          window.__navigate('/config-server');
-        } else {
-          window.location.href = '/config-server';
-        }
+        navigate('/config-server');
         break;
       default:
         break;
