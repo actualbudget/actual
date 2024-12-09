@@ -1,11 +1,17 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useDispatch } from 'react-redux';
 
 import deepEqual from 'deep-equal';
 import { t } from 'i18next';
 
+import {
+  getPayees,
+  importPreviewTransactions,
+  importTransactions,
+  parseTransactions,
+} from 'loot-core/client/actions';
 import { amountToInteger } from 'loot-core/src/shared/util';
 
-import { useActions } from '../../../hooks/useActions';
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import { useSyncedPrefs } from '../../../hooks/useSyncedPrefs';
 import { theme } from '../../../style';
@@ -137,12 +143,7 @@ function parseCategoryFields(trans, categories) {
 export function ImportTransactionsModal({ options }) {
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const [prefs, savePrefs] = useSyncedPrefs();
-  const {
-    parseTransactions,
-    importTransactions,
-    importPreviewTransactions,
-    getPayees,
-  } = useActions();
+  const dispatch = useDispatch();
 
   const [multiplierAmount, setMultiplierAmount] = useState('');
   const [loadingState, setLoadingState] = useState('parsing');
@@ -263,9 +264,8 @@ export function ImportTransactionsModal({ options }) {
       }
 
       // Retreive the transactions that would be updated (along with the existing trx)
-      const previewTrx = await importPreviewTransactions(
-        accountId,
-        previewTransactions,
+      const previewTrx = await dispatch(
+        importPreviewTransactions(accountId, previewTransactions),
       );
       const matchedUpdateMap = previewTrx.reduce((map, entry) => {
         map[entry.transaction.trx_id] = entry;
@@ -309,7 +309,7 @@ export function ImportTransactionsModal({ options }) {
           return next;
         }, []);
     },
-    [accountId, categories.list, clearOnImport, importPreviewTransactions],
+    [accountId, categories.list, clearOnImport, dispatch],
   );
 
   const parse = useCallback(
@@ -320,8 +320,9 @@ export function ImportTransactionsModal({ options }) {
       setFilename(filename);
       setFileType(filetype);
 
-      const { errors, transactions: parsedTransactions = [] } =
-        await parseTransactions(filename, options);
+      const { errors, transactions: parsedTransactions = [] } = await dispatch(
+        parseTransactions(filename, options),
+      );
 
       let index = 0;
       const transactions = parsedTransactions.map(trans => {
@@ -399,11 +400,11 @@ export function ImportTransactionsModal({ options }) {
     },
     [
       accountId,
+      dispatch,
       getImportPreview,
       inOutMode,
       multiplierAmount,
       outValue,
-      parseTransactions,
       prefs,
     ],
   );
@@ -427,7 +428,6 @@ export function ImportTransactionsModal({ options }) {
 
     parse(options.filename, parseOptions);
   }, [
-    parseTransactions,
     options.filename,
     delimiter,
     hasHeaderRow,
@@ -653,13 +653,11 @@ export function ImportTransactionsModal({ options }) {
       });
     }
 
-    const didChange = await importTransactions(
-      accountId,
-      finalTransactions,
-      reconcile,
+    const didChange = await dispatch(
+      importTransactions(accountId, finalTransactions, reconcile),
     );
     if (didChange) {
-      await getPayees();
+      await dispatch(getPayees());
     }
 
     if (onImported) {
