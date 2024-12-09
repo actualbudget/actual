@@ -275,8 +275,20 @@ function onApplySync(oldValues, newValues) {
 }
 
 // Runner
-export async function runRules(trans) {
-  let finalTrans = await prepareTransactionForRules({ ...trans });
+export async function runRules(
+  trans,
+  accounts: Map<string, AccountEntity> = null,
+) {
+  let accountsMap = null;
+  if (accounts === null) {
+    accountsMap = new Map(
+      (await db.getAccounts()).map(account => [account.id, account]),
+    );
+  } else {
+    accountsMap = accounts;
+  }
+
+  let finalTrans = await prepareTransactionForRules({ ...trans }, accountsMap);
 
   const rules = rankRules(
     fastSetMerge(
@@ -611,8 +623,14 @@ export async function applyActions(
     return null;
   }
 
+  const accounts: AccountEntity[] = await db.getAccounts();
   const transactionsForRules = await Promise.all(
-    transactions.map(prepareTransactionForRules),
+    transactions.map(transactions =>
+      prepareTransactionForRules(
+        transactions,
+        new Map(accounts.map(account => [account.id, account])),
+      ),
+    ),
   );
 
   const updated = transactionsForRules.flatMap(trans => {
@@ -848,6 +866,7 @@ export type TransactionForRules = TransactionEntity & {
 
 export async function prepareTransactionForRules(
   trans: TransactionEntity,
+  accounts: Map<string, AccountEntity> = null,
 ): Promise<TransactionForRules> {
   const r: TransactionForRules = { ...trans };
   if (trans.payee) {
@@ -858,9 +877,10 @@ export async function prepareTransactionForRules(
   }
 
   if (trans.account) {
-    const account = await getAccount(trans.account);
-    if (account) {
-      r._account = account;
+    if (accounts !== null && accounts.has(trans.account)) {
+      r._account = accounts.get(trans.account);
+    } else {
+      r._account = await getAccount(trans.account);
     }
   }
 
