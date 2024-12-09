@@ -23,7 +23,7 @@ export function makeSpreadsheet() {
       this._getNode(sheetName, name).value = value;
     },
 
-    bind(sheetName, binding, fields, cb) {
+    bind(sheetName, binding, cb) {
       const { name } = binding;
       const resolvedName = `${sheetName}!${name}`;
       if (!this.observers[resolvedName]) {
