@@ -473,6 +473,10 @@ export async function getPayee(id) {
   return first(`SELECT * FROM payees WHERE id = ?`, [id]);
 }
 
+export async function getAccount(id) {
+  return first(`SELECT * FROM accounts WHERE id = ?`, [id]);
+}
+
 export async function insertPayee(payee) {
   payee = payeeModel.validate(payee);
   let id;

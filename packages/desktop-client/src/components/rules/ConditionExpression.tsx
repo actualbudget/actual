@@ -49,7 +49,11 @@ export function ConditionExpression({
       {prefix && <Text>{prefix} </Text>}
       <Text style={valueStyle}>{mapField(field, options)}</Text>{' '}
       <Text>{friendlyOp(op)}</Text>{' '}
-      <Value style={valueStyle} value={value} field={field} inline={inline} />
+      {!['onbudget', 'offbudget'].includes(
+        (op as string)?.toLocaleLowerCase(),
+      ) && (
+        <Value style={valueStyle} value={value} field={field} inline={inline} />
+      )}
     </View>
   );
 }

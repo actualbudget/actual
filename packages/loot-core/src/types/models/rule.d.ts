@@ -27,7 +27,9 @@ export type RuleConditionOp =
   | 'doesNotContain'
   | 'hasTags'
   | 'and'
-  | 'matches';
+  | 'matches'
+  | 'onBudget'
+  | 'offBudget';
 
 type FieldValueTypes = {
   account: string;
@@ -76,6 +78,8 @@ export type RuleConditionEntity =
       | 'contains'
       | 'doesNotContain'
       | 'matches'
+      | 'onBudget'
+      | 'offBudget'
     >
   | BaseConditionEntity<
       'category',
