@@ -277,7 +277,7 @@ function onApplySync(oldValues, newValues) {
 // Runner
 export async function runRules(
   trans,
-  accounts: Map<string, AccountEntity> = null,
+  accounts: Map<string, AccountEntity> | null = null,
 ) {
   let accountsMap = null;
   if (accounts === null) {
