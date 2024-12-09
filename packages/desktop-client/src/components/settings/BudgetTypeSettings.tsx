@@ -46,7 +46,7 @@ export function BudgetTypeSettings() {
         relying on current available funds.{' '}
         <Link
           variant="external"
-          to="https://actualbudget.org/docs/experimental/tracking-budget"
+          to="https://actualbudget.org/docs/getting-started/tracking-budget"
           linkColor="purple"
         >
           {t('Learn more…')}
