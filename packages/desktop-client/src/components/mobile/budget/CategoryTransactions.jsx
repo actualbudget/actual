@@ -40,6 +40,7 @@ export function CategoryTransactions({ category, month }) {
   const {
     transactions,
     isLoading,
+    isLoadingMore,
     loadMore: loadMoreTransactions,
     reload: reloadTransactions,
   } = useTransactions({
@@ -56,7 +57,7 @@ export function CategoryTransactions({ category, month }) {
           tables.includes('category_mapping') ||
           tables.includes('payee_mapping')
         ) {
-          reloadTransactions?.();
+          reloadTransactions();
         }
 
         if (tables.includes('payees') || tables.includes('payee_mapping')) {
@@ -112,6 +113,7 @@ export function CategoryTransactions({ category, month }) {
         balanceUncleared={balanceUncleared}
         searchPlaceholder={`Search ${category.name}`}
         onSearch={onSearch}
+        isLoadingMore={isLoadingMore}
         onLoadMore={loadMoreTransactions}
         onOpenTransaction={onOpenTransaction}
       />

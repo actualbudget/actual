@@ -6,9 +6,8 @@ import React, {
   useState,
 } from 'react';
 import { ListBox, Section, Header, Collection } from 'react-aria-components';
+import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
-
-import { t } from 'i18next';
 
 import { setNotificationInset } from 'loot-core/client/actions';
 import { groupById, integerToCurrency } from 'loot-core/shared/util';
@@ -41,12 +40,32 @@ import { TransactionListItem } from './TransactionListItem';
 
 const NOTIFICATION_BOTTOM_INSET = 75;
 
+function Loading({ style, 'aria-label': ariaLabel }) {
+  return (
+    <View
+      aria-label={ariaLabel || 'Loading...'}
+      style={{
+        backgroundColor: theme.mobilePageBackground,
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        ...style,
+      }}
+    >
+      <AnimatedLoading width={25} height={25} />
+    </View>
+  );
+}
+
 export function TransactionList({
   isLoading,
   transactions,
   onOpenTransaction,
+  isLoadingMore,
   onLoadMore,
 }) {
+  const { t } = useTranslation();
+
   const sections = useMemo(() => {
     // Group by date. We can assume transactions is ordered
     const sections = [];
@@ -83,29 +102,19 @@ export function TransactionList({
   );
 
   useScrollListener(({ hasScrolledToEnd }) => {
-    if (hasScrolledToEnd('down', 5)) {
+    if (hasScrolledToEnd('down', 100)) {
       onLoadMore?.();
     }
   });
 
   if (isLoading) {
-    return (
-      <View
-        aria-label={t('Loading...')}
-        style={{
-          flex: 1,
-          justifyContent: 'center',
-          alignItems: 'center',
-        }}
-      >
-        <AnimatedLoading width={25} height={25} />
-      </View>
-    );
+    return <Loading aria-label={t('Loading transactions...')} />;
   }
+
   return (
     <>
       <ListBox
-        aria-label="Transaction list"
+        aria-label={t('Transaction list')}
         selectionMode={selectedTransactions.size > 0 ? 'multiple' : 'single'}
         selectedKeys={selectedTransactions}
         dependencies={[selectedTransactions]}
@@ -159,6 +168,17 @@ export function TransactionList({
           </Section>
         )}
       </ListBox>
+
+      {isLoadingMore && (
+        <Loading
+          aria-label={t('Loading more transactions...')}
+          style={{
+            // Same height as transaction list item
+            height: 60,
+          }}
+        />
+      )}
+
       {selectedTransactions.size > 0 && (
         <SelectedTransactionsFloatingActionBar transactions={transactions} />
       )}
