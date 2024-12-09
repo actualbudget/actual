@@ -1,17 +1,29 @@
 // @ts-strict-ignore
 import { currencyToAmount } from './util';
 
-function fail(state, msg) {
+// These operators go from high to low order of precedence
+const operators = ['^', '/', '÷', '*', '×', '-', '+'] as const;
+type ArithmeticOp = (typeof operators)[number];
+
+type ArithmeticAst =
+  | number
+  | { op: ArithmeticOp; left: ArithmeticAst; right: ArithmeticAst };
+
+type ArithmeticState = { str: string; index: number };
+
+const parseOperator = makeOperatorParser(...operators);
+
+function fail(state: ArithmeticState, msg: string) {
   throw new Error(
     msg + ': ' + JSON.stringify(state.str.slice(state.index, 10)),
   );
 }
 
-function char(state) {
+function char(state: ArithmeticState): string {
   return state.str[state.index];
 }
 
-function next(state) {
+function next(state: ArithmeticState): string {
   if (state.index >= state.str.length) {
     return null;
   }
@@ -21,7 +33,7 @@ function next(state) {
   return ch;
 }
 
-function nextOperator(state, op) {
+function nextOperator(state: ArithmeticState, op: ArithmeticOp) {
   if (char(state) === op) {
     next(state);
     return true;
@@ -30,7 +42,7 @@ function nextOperator(state, op) {
   return false;
 }
 
-function parsePrimary(state) {
+function parsePrimary(state: ArithmeticState): number {
   // We only support numbers
   const isNegative = char(state) === '-';
   if (isNegative) {
@@ -50,7 +62,7 @@ function parsePrimary(state) {
   return isNegative ? -number : number;
 }
 
-function parseParens(state) {
+function parseParens(state: ArithmeticState): ArithmeticAst {
   if (char(state) === '(') {
     next(state);
     const expr = parseOperator(state);
@@ -66,7 +78,7 @@ function parseParens(state) {
   return parsePrimary(state);
 }
 
-function makeOperatorParser(...ops) {
+function makeOperatorParser(...ops: ArithmeticOp[]) {
   return ops.reduce((prevParser, op) => {
     return state => {
       let node = prevParser(state);
@@ -78,15 +90,15 @@ function makeOperatorParser(...ops) {
   }, parseParens);
 }
 
-// These operators go from high to low order of precedence
-const parseOperator = makeOperatorParser('^', '/', '*', '-', '+');
-
-function parse(expression: string) {
-  const state = { str: expression.replace(/\s/g, ''), index: 0 };
+function parse(expression: string): ArithmeticAst {
+  const state: ArithmeticState = {
+    str: expression.replace(/\s/g, ''),
+    index: 0,
+  };
   return parseOperator(state);
 }
 
-function evaluate(ast): number {
+function evaluate(ast: ArithmeticAst): number {
   if (typeof ast === 'number') {
     return ast;
   }
@@ -99,8 +111,10 @@ function evaluate(ast): number {
     case '-':
       return evaluate(left) - evaluate(right);
     case '*':
+    case '×':
       return evaluate(left) * evaluate(right);
     case '/':
+    case '÷':
       return evaluate(left) / evaluate(right);
     case '^':
       return Math.pow(evaluate(left), evaluate(right));
@@ -112,7 +126,7 @@ function evaluate(ast): number {
 export function evalArithmetic(
   expression: string,
   defaultValue: number = null,
-) {
+): number {
   // An empty expression always evals to the default
   if (expression === '') {
     return defaultValue;
@@ -128,4 +142,15 @@ export function evalArithmetic(
 
   // Never return NaN
   return isNaN(result) ? defaultValue : result;
+}
+
+export function hasArithmeticOperator(expression: string): boolean {
+  return operators.some(op => expression.includes(op));
+}
+
+export function lastIndexOfArithmeticOperator(expression: string): number {
+  return operators.reduce((max, op) => {
+    const index = expression.lastIndexOf(op);
+    return index > max ? index : max;
+  }, -1);
 }
