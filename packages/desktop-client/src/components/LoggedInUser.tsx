@@ -9,8 +9,8 @@ import { type RemoteFile, type SyncedLocalFile } from 'loot-core/types/file';
 import { useAuth } from '../auth/AuthProvider';
 import { Permissions } from '../auth/types';
 import { useActions } from '../hooks/useActions';
-import { useNavigate } from '../hooks/useNavigate';
 import { useMetadataPref } from '../hooks/useMetadataPref';
+import { useNavigate } from '../hooks/useNavigate';
 import { theme, styles } from '../style';
 
 import { Button } from './common/Button2';
