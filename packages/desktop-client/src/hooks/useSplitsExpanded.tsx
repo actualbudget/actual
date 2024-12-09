@@ -7,14 +7,14 @@ import React, {
 } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
-export type SplitMode = 'collapse' | 'expand';
+type SplitMode = 'collapse' | 'expand';
 
-export type SplitsStateContext = {
+type SplitsStateContext = {
   state: {
-    mode: SplitMode,
-    ids: Set<string>
-    transitionId: string | null,
-  }
+    mode: SplitMode;
+    ids: Set<string>;
+    transitionId: string | null;
+  };
 };
 
 const SplitsExpandedContext = createContext<SplitsStateContext>(null);
@@ -63,7 +63,13 @@ type FinishSwitchModeAction = {
   type: 'finish-switch-mode';
 };
 
-export type Actions = ToggleSplitAction | OpenSplitAction | ClospSplitsAction | SetModeAction | SwitchModeAction | FinishSwitchModeAction;
+type Actions =
+  | ToggleSplitAction
+  | OpenSplitAction
+  | ClospSplitsAction
+  | SetModeAction
+  | SwitchModeAction
+  | FinishSwitchModeAction;
 
 export function SplitsExpandedProvider({ children, initialMode = 'expand' }) {
   const cachedState = useSelector(state => state.app.lastSplitState);
