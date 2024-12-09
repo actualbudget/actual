@@ -7,7 +7,17 @@ import React, {
 } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
-const SplitsExpandedContext = createContext(null);
+export type SplitMode = 'collapse' | 'expand';
+
+export type SplitsStateContext = {
+  state: {
+    mode: SplitMode,
+    ids: Set<string>
+    transitionId: string | null,
+  }
+};
+
+const SplitsExpandedContext = createContext<SplitsStateContext>(null);
 
 export function useSplitsExpanded() {
   const data = useContext(SplitsExpandedContext);
@@ -15,7 +25,7 @@ export function useSplitsExpanded() {
   return useMemo(
     () => ({
       ...data,
-      expanded: id =>
+      expanded: (id: string) =>
         data.state.mode === 'collapse'
           ? !data.state.ids.has(id)
           : data.state.ids.has(id),
@@ -24,12 +34,43 @@ export function useSplitsExpanded() {
   );
 }
 
+type ToggleSplitAction = {
+  type: 'toggle-split';
+  id: string;
+};
+
+type OpenSplitAction = {
+  type: 'open-split';
+  id: string;
+};
+
+type ClospSplitsAction = {
+  type: 'close-splits';
+  ids: string[];
+};
+
+type SetModeAction = {
+  type: 'set-mode';
+  mode: SplitMode;
+};
+
+type SwitchModeAction = {
+  type: 'switch-mode';
+  id: string;
+};
+
+type FinishSwitchModeAction = {
+  type: 'finish-switch-mode';
+};
+
+export type Actions = ToggleSplitAction | OpenSplitAction | ClospSplitsAction | SetModeAction | SwitchModeAction | FinishSwitchModeAction;
+
 export function SplitsExpandedProvider({ children, initialMode = 'expand' }) {
   const cachedState = useSelector(state => state.app.lastSplitState);
   const reduxDispatch = useDispatch();
 
   const [state, dispatch] = useReducer(
-    (state, action) => {
+    (state, action: Actions) => {
       switch (action.type) {
         case 'toggle-split': {
           const ids = new Set([...state.ids]);
@@ -84,8 +125,6 @@ export function SplitsExpandedProvider({ children, initialMode = 'expand' }) {
           };
         case 'finish-switch-mode':
           return { ...state, transitionId: null };
-        default:
-          throw new Error('Unknown action type: ' + action.type);
       }
     },
     cachedState.current || { ids: new Set(), mode: initialMode },
