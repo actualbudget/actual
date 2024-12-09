@@ -1,14 +1,18 @@
-import { SplitMode, SplitState } from 'loot-core/client/state-types/app';
 import React, {
   createContext,
   useMemo,
   useEffect,
   useContext,
   useReducer,
-  Dispatch,
-  ReactNode,
+  type Dispatch,
+  type ReactNode,
 } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
+
+import {
+  type SplitMode,
+  type SplitState,
+} from 'loot-core/client/state-types/app';
 
 type ToggleSplitAction = {
   type: 'toggle-split';
@@ -60,7 +64,7 @@ const SplitsExpandedContext = createContext<SplitsStateContext>({
   },
   dispatch: () => {
     throw new Error('Unitialised context method called: dispatch');
-  }
+  },
 });
 
 export function useSplitsExpanded() {
@@ -83,7 +87,10 @@ type SplitsExpandedProviderProps = {
   initialMode: SplitMode;
 };
 
-export function SplitsExpandedProvider({ children, initialMode = 'expand' }: SplitsExpandedProviderProps) {
+export function SplitsExpandedProvider({
+  children,
+  initialMode = 'expand',
+}: SplitsExpandedProviderProps) {
   const cachedState = useSelector(state => state.app.lastSplitState);
   const reduxDispatch = useDispatch();
 
@@ -145,7 +152,11 @@ export function SplitsExpandedProvider({ children, initialMode = 'expand' }: Spl
           return { ...state, transitionId: null };
       }
     },
-    cachedState.current || { ids: new Set<string>(), mode: initialMode, transitionId: null },
+    cachedState.current || {
+      ids: new Set<string>(),
+      mode: initialMode,
+      transitionId: null,
+    },
   );
 
   useEffect(() => {
