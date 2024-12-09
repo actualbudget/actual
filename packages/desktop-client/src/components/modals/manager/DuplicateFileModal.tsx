@@ -170,7 +170,7 @@ export function DuplicateFileModal({
             )}
 
             {isLocalFile ? (
-              isCloudFile ? (
+              isCloudFile && (
                 <Text>
                   <Trans>
                     Your budget is hosted on a server, making it accessible for
@@ -178,14 +178,6 @@ export function DuplicateFileModal({
                     <br />
                     Would you like to duplicate this budget for all your devices
                     or keep it stored locally on this device?
-                  </Trans>
-                </Text>
-              ) : (
-                <Text>
-                  <Trans>
-                    Your budget is only located on your device.
-                    <br />
-                    Only a local copy will be duplicated.
                   </Trans>
                 </Text>
               )
@@ -235,7 +227,8 @@ export function DuplicateFileModal({
                   }}
                   onPress={() => handleDuplicate('localOnly')}
                 >
-                  <Trans>Duplicate locally</Trans>
+                  <Trans>Duplicate</Trans>
+                  {isCloudFile && <Trans> locally</Trans>}
                 </ButtonWithLoading>
               )}
             </ModalButtons>
