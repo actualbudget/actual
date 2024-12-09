@@ -12,7 +12,7 @@ import {
 import * as Platform from 'loot-core/client/platform';
 import { type AccountEntity } from 'loot-core/src/types/models';
 
-import { useFeatureFlag } from '../../hooks/useFeatureFlag';
+import { useContextMenu } from '../../hooks/useContextMenu';
 import { useNotes } from '../../hooks/useNotes';
 import { styles, theme } from '../../style';
 import { AlignedText } from '../common/AlignedText';
@@ -84,10 +84,8 @@ export function Account<FieldName extends SheetFields<'account'>>({
     : 'title';
 
   const triggerRef = useRef(null);
-  const [menuOpen, setMenuOpen] = useState(false);
-  const contextMenusEnabled = useFeatureFlag('contextMenus');
-  const [crossOffset, setCrossOffset] = useState(0);
-  const [offset, setOffset] = useState(0);
+  const { setMenuOpen, menuOpen, handleContextMenu, position } =
+    useContextMenu();
 
   const { dragRef } = useDraggable({
     type,
@@ -138,14 +136,7 @@ export function Account<FieldName extends SheetFields<'account'>>({
     <View
       innerRef={dropRef}
       style={{ flexShrink: 0, ...outerStyle }}
-      onContextMenu={e => {
-        if (!needsTooltip || !contextMenusEnabled) return;
-        e.preventDefault();
-        const rect = e.currentTarget.getBoundingClientRect();
-        setCrossOffset(e.clientX - rect.left);
-        setOffset(e.clientY - rect.bottom);
-        setMenuOpen(true);
-      }}
+      onContextMenu={needsTooltip ? handleContextMenu : undefined}
     >
       <View innerRef={triggerRef}>
         <DropHighlight pos={dropPos} />
@@ -242,8 +233,7 @@ export function Account<FieldName extends SheetFields<'account'>>({
               onOpenChange={() => setMenuOpen(false)}
               style={{ width: 200, margin: 1 }}
               isNonModal
-              crossOffset={crossOffset}
-              offset={offset}
+              {...position}
             >
               <Menu
                 onMenuSelect={type => {
@@ -312,6 +302,7 @@ export function Account<FieldName extends SheetFields<'account'>>({
       placement="right top"
       triggerProps={{
         delay: 1000,
+        isDisabled: menuOpen,
       }}
     >
       {accountRow}

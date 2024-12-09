@@ -5,7 +5,7 @@ import { useDispatch } from 'react-redux';
 import { closeBudget } from 'loot-core/src/client/actions';
 import * as Platform from 'loot-core/src/client/platform';
 
-import { useFeatureFlag } from '../../hooks/useFeatureFlag';
+import { useContextMenu } from '../../hooks/useContextMenu';
 import { useMetadataPref } from '../../hooks/useMetadataPref';
 import { useNavigate } from '../../hooks/useNavigate';
 import { SvgExpandArrow } from '../../icons/v0';
@@ -55,12 +55,10 @@ function EditableBudgetName() {
   const [budgetName, setBudgetNamePref] = useMetadataPref('budgetName');
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const [menuOpen, setMenuOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const [editing, setEditing] = useState(false);
-  const contextMenusEnabled = useFeatureFlag('contextMenus');
-  const [crossOffset, setCrossOffset] = useState(0);
-  const [offset, setOffset] = useState(0);
+  const { setMenuOpen, menuOpen, handleContextMenu, resetPosition, position } =
+    useContextMenu();
 
   function onMenuSelect(type: string) {
     setMenuOpen(false);
@@ -110,16 +108,7 @@ function EditableBudgetName() {
   }
 
   return (
-    <View
-      onContextMenu={e => {
-        if (!contextMenusEnabled) return;
-        e.preventDefault();
-        const rect = e.currentTarget.getBoundingClientRect();
-        setCrossOffset(e.clientX - rect.left);
-        setOffset(e.clientY - rect.bottom);
-        setMenuOpen(true);
-      }}
-    >
+    <View onContextMenu={handleContextMenu}>
       <Button
         ref={triggerRef}
         variant="bare"
@@ -131,8 +120,7 @@ function EditableBudgetName() {
           flex: '0 auto',
         }}
         onPress={() => {
-          setOffset(0);
-          setCrossOffset(0);
+          resetPosition();
           setMenuOpen(true);
         }}
       >
@@ -152,8 +140,7 @@ function EditableBudgetName() {
         isOpen={menuOpen}
         onOpenChange={() => setMenuOpen(false)}
         style={{ margin: 1 }}
-        crossOffset={crossOffset}
-        offset={offset}
+        {...position}
       >
         <Menu onMenuSelect={onMenuSelect} items={items} />
       </Popover>
