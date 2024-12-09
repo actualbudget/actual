@@ -36,6 +36,7 @@ import { EnvelopeBudgetMonthMenuModal } from './modals/EnvelopeBudgetMonthMenuMo
 import { EnvelopeBudgetSummaryModal } from './modals/EnvelopeBudgetSummaryModal';
 import { EnvelopeToBudgetMenuModal } from './modals/EnvelopeToBudgetMenuModal';
 import { FixEncryptionKeyModal } from './modals/FixEncryptionKeyModal';
+import { GoalsEditModal } from './modals/GoalsEditModal';
 import { GoalTemplateModal } from './modals/GoalTemplateModal';
 import { GoCardlessExternalMsgModal } from './modals/GoCardlessExternalMsgModal';
 import { GoCardlessInitialiseModal } from './modals/GoCardlessInitialiseModal';
@@ -89,6 +90,9 @@ export function Modals() {
       switch (name) {
         case 'goal-templates':
           return budgetId ? <GoalTemplateModal key={name} /> : null;
+
+        case 'category-goals-edit':
+          return budgetId ? <GoalsEditModal key={name} /> : null;
 
         case 'keyboard-shortcuts':
           // don't show the hotkey help modal when a budget is not open
