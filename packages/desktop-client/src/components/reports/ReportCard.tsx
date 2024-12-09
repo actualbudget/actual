@@ -1,12 +1,11 @@
 import React, {
   useRef,
-  useState,
   type ComponentProps,
   type ReactNode,
   type CSSProperties,
 } from 'react';
 
-import { useFeatureFlag } from '../../hooks/useFeatureFlag';
+import { useContextMenu } from '../../hooks/useContextMenu';
 import { useIsInViewport } from '../../hooks/useIsInViewport';
 import { useNavigate } from '../../hooks/useNavigate';
 import { theme } from '../../style';
@@ -121,26 +120,20 @@ type LayoutProps = {
 function Layout({ children, isEditing, menuItems, onMenuSelect }: LayoutProps) {
   const triggerRef = useRef(null);
   const viewRef = useRef(null);
-  const [menuOpen, setMenuOpen] = useState<null | 'context' | 'button'>(null);
-  const [crossOffset, setCrossOffset] = useState(0);
-  const [offset, setOffset] = useState(0);
-  const dashboardsEnabled = useFeatureFlag('dashboards');
-  const contextMenusEnabled =
-    useFeatureFlag('contextMenus') && dashboardsEnabled;
 
-  const isContextMenu = menuOpen === 'context';
+  const {
+    setMenuOpen,
+    menuOpen,
+    handleContextMenu,
+    resetPosition,
+    position,
+    asContextMenu,
+  } = useContextMenu();
 
   return (
     <View
       ref={viewRef}
-      onContextMenu={e => {
-        if (!contextMenusEnabled) return;
-        e.preventDefault();
-        setMenuOpen('context');
-        const rect = e.currentTarget.getBoundingClientRect();
-        setCrossOffset(e.clientX - rect.left);
-        setOffset(e.clientY - rect.bottom);
-      }}
+      onContextMenu={handleContextMenu}
       style={{
         display: 'block',
         height: '100%',
@@ -171,22 +164,20 @@ function Layout({ children, isEditing, menuItems, onMenuSelect }: LayoutProps) {
               <MenuButton
                 ref={triggerRef}
                 onPress={() => {
-                  setCrossOffset(0);
-                  setOffset(0);
-                  setMenuOpen('button');
+                  resetPosition();
+                  setMenuOpen(true);
                 }}
               />
             </View>
           )}
 
           <Popover
-            triggerRef={isContextMenu ? viewRef : triggerRef}
+            triggerRef={asContextMenu ? viewRef : triggerRef}
             isOpen={Boolean(menuOpen)}
-            onOpenChange={() => setMenuOpen(null)}
+            onOpenChange={() => setMenuOpen(false)}
             isNonModal
-            placement={isContextMenu ? 'bottom start' : 'bottom end'}
-            crossOffset={crossOffset}
-            offset={offset}
+            placement={asContextMenu ? 'bottom start' : 'bottom end'}
+            {...position}
           >
             <Menu
               className={NON_DRAGGABLE_AREA_CLASS_NAME}

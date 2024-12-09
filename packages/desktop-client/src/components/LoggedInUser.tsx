@@ -6,6 +6,7 @@ import { useSelector } from 'react-redux';
 import { type State } from 'loot-core/src/client/state-types';
 
 import { useActions } from '../hooks/useActions';
+import { useNavigate } from '../hooks/useNavigate';
 import { theme, styles } from '../style';
 
 import { Button } from './common/Button2';
@@ -38,9 +39,11 @@ export function LoggedInUser({
     getUserData().then(() => setLoading(false));
   }, []);
 
+  const navigate = useNavigate();
+
   async function onChangePassword() {
     await closeBudget();
-    window.__navigate('/change-password');
+    navigate('/change-password');
   }
 
   async function onMenuSelect(type) {
@@ -52,14 +55,14 @@ export function LoggedInUser({
         break;
       case 'sign-in':
         await closeBudget();
-        window.__navigate('/login');
+        navigate('/login');
         break;
       case 'sign-out':
         signOut();
         break;
       case 'config-server':
         await closeBudget();
-        window.__navigate('/config-server');
+        navigate('/config-server');
         break;
       default:
     }
