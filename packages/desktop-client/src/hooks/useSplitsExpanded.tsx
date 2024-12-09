@@ -1,38 +1,14 @@
+import { SplitMode, SplitState } from 'loot-core/client/state-types/app';
 import React, {
   createContext,
   useMemo,
   useEffect,
   useContext,
   useReducer,
+  Dispatch,
+  ReactNode,
 } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-
-type SplitMode = 'collapse' | 'expand';
-
-type SplitsStateContext = {
-  state: {
-    mode: SplitMode;
-    ids: Set<string>;
-    transitionId: string | null;
-  };
-};
-
-const SplitsExpandedContext = createContext<SplitsStateContext>(null);
-
-export function useSplitsExpanded() {
-  const data = useContext(SplitsExpandedContext);
-
-  return useMemo(
-    () => ({
-      ...data,
-      expanded: (id: string) =>
-        data.state.mode === 'collapse'
-          ? !data.state.ids.has(id)
-          : data.state.ids.has(id),
-    }),
-    [data],
-  );
-}
 
 type ToggleSplitAction = {
   type: 'toggle-split';
@@ -44,7 +20,7 @@ type OpenSplitAction = {
   id: string;
 };
 
-type ClospSplitsAction = {
+type CloseSplitsAction = {
   type: 'close-splits';
   ids: string[];
 };
@@ -66,17 +42,53 @@ type FinishSwitchModeAction = {
 type Actions =
   | ToggleSplitAction
   | OpenSplitAction
-  | ClospSplitsAction
+  | CloseSplitsAction
   | SetModeAction
   | SwitchModeAction
   | FinishSwitchModeAction;
 
-export function SplitsExpandedProvider({ children, initialMode = 'expand' }) {
+type SplitsStateContext = {
+  state: SplitState;
+  dispatch: Dispatch<Actions>;
+};
+
+const SplitsExpandedContext = createContext<SplitsStateContext>({
+  state: {
+    mode: 'collapse',
+    ids: new Set(),
+    transitionId: null,
+  },
+  dispatch: () => {
+    throw new Error('Unitialised context method called: dispatch');
+  }
+});
+
+export function useSplitsExpanded() {
+  const data = useContext(SplitsExpandedContext);
+
+  return useMemo(
+    () => ({
+      ...data,
+      expanded: (id: string) =>
+        data.state.mode === 'collapse'
+          ? !data.state.ids.has(id)
+          : data.state.ids.has(id),
+    }),
+    [data],
+  );
+}
+
+type SplitsExpandedProviderProps = {
+  children?: ReactNode;
+  initialMode: SplitMode;
+};
+
+export function SplitsExpandedProvider({ children, initialMode = 'expand' }: SplitsExpandedProviderProps) {
   const cachedState = useSelector(state => state.app.lastSplitState);
   const reduxDispatch = useDispatch();
 
   const [state, dispatch] = useReducer(
-    (state, action: Actions) => {
+    (state: SplitState, action: Actions): SplitState => {
       switch (action.type) {
         case 'toggle-split': {
           const ids = new Set([...state.ids]);
@@ -113,7 +125,7 @@ export function SplitsExpandedProvider({ children, initialMode = 'expand' }) {
           return {
             ...state,
             mode: action.mode,
-            ids: new Set(),
+            ids: new Set<string>(),
             transitionId: null,
           };
         }
@@ -127,13 +139,13 @@ export function SplitsExpandedProvider({ children, initialMode = 'expand' }) {
             ...state,
             mode: state.mode === 'expand' ? 'collapse' : 'expand',
             transitionId: action.id,
-            ids: new Set(),
+            ids: new Set<string>(),
           };
         case 'finish-switch-mode':
           return { ...state, transitionId: null };
       }
     },
-    cachedState.current || { ids: new Set(), mode: initialMode },
+    cachedState.current || { ids: new Set<string>(), mode: initialMode, transitionId: null },
   );
 
   useEffect(() => {

@@ -1,7 +1,8 @@
 import type { UndoState } from '../../server/undo';
 import type * as constants from '../constants';
 
-export type SplitState = { ids: Set<string>; mode: 'collapse' | 'expand' };
+export type SplitMode = 'collapse' | 'expand';
+export type SplitState = { ids: Set<string>; mode: SplitMode; transitionId: string | null };
 
 export type AppState = {
   loadingText: string | null;
