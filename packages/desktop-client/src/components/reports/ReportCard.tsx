@@ -1,11 +1,11 @@
 import React, {
   useRef,
-  useState,
   type ComponentProps,
   type ReactNode,
   type CSSProperties,
 } from 'react';
 
+import { useContextMenu } from '../../hooks/useContextMenu';
 import { useIsInViewport } from '../../hooks/useIsInViewport';
 import { useNavigate } from '../../hooks/useNavigate';
 import { theme } from '../../style';
@@ -119,10 +119,21 @@ type LayoutProps = {
 
 function Layout({ children, isEditing, menuItems, onMenuSelect }: LayoutProps) {
   const triggerRef = useRef(null);
-  const [menuOpen, setMenuOpen] = useState(false);
+  const viewRef = useRef(null);
+
+  const {
+    setMenuOpen,
+    menuOpen,
+    handleContextMenu,
+    resetPosition,
+    position,
+    asContextMenu,
+  } = useContextMenu();
 
   return (
     <View
+      ref={viewRef}
+      onContextMenu={handleContextMenu}
       style={{
         display: 'block',
         height: '100%',
@@ -135,24 +146,38 @@ function Layout({ children, isEditing, menuItems, onMenuSelect }: LayoutProps) {
         },
       }}
     >
-      {menuItems && isEditing && (
-        <View
-          className={[
-            menuOpen ? undefined : 'hover-visible',
-            NON_DRAGGABLE_AREA_CLASS_NAME,
-          ].join(' ')}
-          style={{
-            position: 'absolute',
-            top: 7,
-            right: 3,
-            zIndex: 1,
-          }}
-        >
-          <MenuButton ref={triggerRef} onPress={() => setMenuOpen(true)} />
+      {menuItems && (
+        <>
+          {isEditing && (
+            <View
+              className={[
+                menuOpen ? undefined : 'hover-visible',
+                NON_DRAGGABLE_AREA_CLASS_NAME,
+              ].join(' ')}
+              style={{
+                position: 'absolute',
+                top: 7,
+                right: 3,
+                zIndex: 1,
+              }}
+            >
+              <MenuButton
+                ref={triggerRef}
+                onPress={() => {
+                  resetPosition();
+                  setMenuOpen(true);
+                }}
+              />
+            </View>
+          )}
+
           <Popover
-            triggerRef={triggerRef}
-            isOpen={menuOpen}
+            triggerRef={asContextMenu ? viewRef : triggerRef}
+            isOpen={Boolean(menuOpen)}
             onOpenChange={() => setMenuOpen(false)}
+            isNonModal
+            placement={asContextMenu ? 'bottom start' : 'bottom end'}
+            {...position}
           >
             <Menu
               className={NON_DRAGGABLE_AREA_CLASS_NAME}
@@ -160,7 +185,7 @@ function Layout({ children, isEditing, menuItems, onMenuSelect }: LayoutProps) {
               items={menuItems}
             />
           </Popover>
-        </View>
+        </>
       )}
 
       {children}
