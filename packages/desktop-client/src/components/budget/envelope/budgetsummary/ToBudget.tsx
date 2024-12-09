@@ -1,7 +1,6 @@
 import React, {
   type CSSProperties,
   useCallback,
-  useEffect,
   useRef,
   useState,
 } from 'react';

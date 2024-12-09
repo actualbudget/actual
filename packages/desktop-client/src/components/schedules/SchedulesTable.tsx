@@ -15,7 +15,6 @@ import { type ScheduleEntity } from 'loot-core/src/types/models';
 import { useAccounts } from '../../hooks/useAccounts';
 import { useContextMenu } from '../../hooks/useContextMenu';
 import { useDateFormat } from '../../hooks/useDateFormat';
-import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { usePayees } from '../../hooks/usePayees';
 import { SvgDotsHorizontalTriple } from '../../icons/v1';
 import { SvgCheck } from '../../icons/v2';
