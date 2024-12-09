@@ -866,7 +866,7 @@ export type TransactionForRules = TransactionEntity & {
 
 export async function prepareTransactionForRules(
   trans: TransactionEntity,
-  accounts: Map<string, AccountEntity> = null,
+  accounts: Map<string, AccountEntity> | null = null,
 ): Promise<TransactionForRules> {
   const r: TransactionForRules = { ...trans };
   if (trans.payee) {
