@@ -304,6 +304,12 @@ export interface ServerHandlers {
     | { messages: Message[] }
   >;
 
+  'validate-budget-name': (arg: {
+    name: string;
+  }) => Promise<{ valid: boolean; message?: string }>;
+
+  'unique-budget-name': (arg: { name: string }) => Promise<string>;
+
   'get-budgets': () => Promise<Budget[]>;
 
   'get-remote-files': () => Promise<RemoteFile[]>;
@@ -327,7 +333,24 @@ export interface ServerHandlers {
   'delete-budget': (arg: {
     id?: string;
     cloudFileId?: string;
-  }) => Promise<'ok'>;
+  }) => Promise<'ok' | 'fail'>;
+
+  /**
+   * Duplicates a budget file.
+   * @param {Object} arg - The arguments for duplicating a budget.
+   * @param {string} [arg.id] - The ID of the local budget to duplicate.
+   * @param {string} [arg.cloudId] - The ID of the cloud-synced budget to duplicate.
+   * @param {string} arg.newName - The name for the duplicated budget.
+   * @param {boolean} [arg.cloudSync] - Whether to sync the duplicated budget to the cloud.
+   * @returns {Promise<string>} The ID of the newly created budget.
+   */
+  'duplicate-budget': (arg: {
+    id?: string;
+    cloudId?: string;
+    newName: string;
+    cloudSync?: boolean;
+    open: 'none' | 'original' | 'copy';
+  }) => Promise<string>;
 
   'create-budget': (arg: {
     budgetName?;
