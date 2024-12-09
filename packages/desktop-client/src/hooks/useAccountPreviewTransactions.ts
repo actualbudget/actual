@@ -32,10 +32,6 @@ export function useAccountPreviewTransactions({
   const payees = usePayees();
 
   const previewTransactions = useMemo(() => {
-    if (isLoading) {
-      return [];
-    }
-
     if (!accountId) {
       return originalPreviewTransactions;
     }
@@ -50,9 +46,12 @@ export function useAccountPreviewTransactions({
           a => a.id === payees.find(p => p.id === payeeId)?.transfer_acct,
         ),
     });
-  }, [accountId, accounts, isLoading, originalPreviewTransactions, payees]);
+  }, [accountId, accounts, originalPreviewTransactions, payees]);
 
-  return { isLoading, previewTransactions };
+  return {
+    isLoading,
+    previewTransactions,
+  };
 }
 
 type AccountPreviewProps = {
