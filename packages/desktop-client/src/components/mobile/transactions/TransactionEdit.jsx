@@ -457,7 +457,6 @@ const TransactionEditInner = memo(function TransactionEditInner({
     [unserializedTransactions, dateFormat],
   );
   const { grouped: categoryGroups } = useCategories();
-  const { state: locationState } = useLocation();
 
   const [transaction, ...childTransactions] = transactions;
 
@@ -538,20 +537,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
       }
 
       onSave(transactionsToSave);
-
-      const isAddingFromAccountPage = isAdding && locationState?.accountId;
-      if (!isAddingFromAccountPage || hasAccountChanged.current) {
-        const { account: accountId } = unserializedTransaction;
-        const account = accountsById?.[accountId];
-        if (account) {
-          navigate(`/accounts/${account.id}`, { replace: true });
-        } else {
-          // Handle the case where account is undefined
-          navigate('/accounts');
-        }
-      } else {
-        navigate(-1);
-      }
+      navigate(-1);
     };
 
     if (unserializedTransaction.reconciled) {
@@ -568,15 +554,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
     } else {
       onConfirmSave();
     }
-  }, [
-    accountsById,
-    isAdding,
-    dispatch,
-    locationState?.accountId,
-    navigate,
-    onSave,
-    unserializedTransactions,
-  ]);
+  }, [isAdding, dispatch, navigate, onSave, unserializedTransactions]);
 
   const onUpdateInner = useCallback(
     async (serializedTransaction, name, value) => {

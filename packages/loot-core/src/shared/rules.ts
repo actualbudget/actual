@@ -21,7 +21,6 @@ const TYPE_INFO = {
       'isNot',
       'doesNotContain',
       'notOneOf',
-      'hasTags',
       'onBudget',
       'offBudget',
     ],
