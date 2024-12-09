@@ -1,9 +1,9 @@
 // @ts-strict-ignore
 import React, { useEffect, useRef, type CSSProperties } from 'react';
+import { useTranslation } from 'react-i18next';
 import ReactMarkdown from 'react-markdown';
 
 import { css } from '@emotion/css';
-import { t } from 'i18next';
 import remarkGfm from 'remark-gfm';
 
 import { theme } from '../style';
@@ -99,6 +99,7 @@ export function Notes({
   getStyle,
 }: NotesProps) {
   const { isNarrowWidth } = useResponsive();
+  const { t } = useTranslation();
 
   const textAreaRef = useRef<HTMLTextAreaElement>();
 

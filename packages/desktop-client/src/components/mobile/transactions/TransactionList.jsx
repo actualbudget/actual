@@ -6,9 +6,8 @@ import React, {
   useState,
 } from 'react';
 import { ListBox, Section, Header, Collection } from 'react-aria-components';
+import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
-
-import { t } from 'i18next';
 
 import { setNotificationInset } from 'loot-core/client/actions';
 import { groupById, integerToCurrency } from 'loot-core/shared/util';
@@ -47,6 +46,7 @@ export function TransactionList({
   onOpenTransaction,
   onLoadMore,
 }) {
+  const { t } = useTranslation();
   const sections = useMemo(() => {
     // Group by date. We can assume transactions is ordered
     const sections = [];

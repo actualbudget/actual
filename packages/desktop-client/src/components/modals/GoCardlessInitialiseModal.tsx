@@ -1,7 +1,6 @@
 // @ts-strict-ignore
 import React, { useState } from 'react';
-
-import { t } from 'i18next'; // Ensure this import is correct
+import { useTranslation } from 'react-i18next';
 
 import { send } from 'loot-core/src/platform/client/fetch';
 
@@ -27,6 +26,7 @@ type GoCardlessInitialiseProps = {
 export const GoCardlessInitialiseModal = ({
   onSuccess,
 }: GoCardlessInitialiseProps) => {
+  const { t } = useTranslation();
   const [secretId, setSecretId] = useState('');
   const [secretKey, setSecretKey] = useState('');
   const [isValid, setIsValid] = useState(true);

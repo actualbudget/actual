@@ -1,8 +1,7 @@
 // @ts-strict-ignore
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
-
-import { t } from 'i18next';
 
 import { isNonProductionEnvironment } from 'loot-core/src/shared/environment';
 
@@ -14,6 +13,7 @@ type ManageRulesModalProps = {
 };
 
 export function ManageRulesModal({ payeeId }: ManageRulesModalProps) {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const location = useLocation();
   if (isNonProductionEnvironment()) {

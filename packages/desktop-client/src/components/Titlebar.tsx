@@ -1,9 +1,9 @@
 import React, { useState, useEffect, type CSSProperties } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
+import { useTranslation } from 'react-i18next';
 import { Routes, Route, useLocation } from 'react-router-dom';
 
 import { css } from '@emotion/css';
-import { t } from 'i18next';
 
 import * as Platform from 'loot-core/src/client/platform';
 import * as queries from 'loot-core/src/client/queries';
@@ -107,6 +107,7 @@ type SyncButtonProps = {
   isMobile?: boolean;
 };
 function SyncButton({ style, isMobile = false }: SyncButtonProps) {
+  const { t } = useTranslation();
   const [cloudFileId] = useMetadataPref('cloudFileId');
   const { sync } = useActions();
 
@@ -265,6 +266,7 @@ type TitlebarProps = {
 };
 
 export function Titlebar({ style }: TitlebarProps) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   const sidebar = useSidebar();
