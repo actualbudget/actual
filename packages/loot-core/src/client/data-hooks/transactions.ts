@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useMemo } from 'react';
+import { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 
 import debounce from 'lodash/debounce';
 
@@ -24,10 +24,11 @@ type UseTransactionsProps = {
 
 type UseTransactionsResult = {
   transactions: ReadonlyArray<TransactionEntity>;
-  isLoading?: boolean;
+  isLoading: boolean;
   error?: Error;
-  reload?: () => void;
-  loadMore?: () => void;
+  reload: () => void;
+  loadMore: () => void;
+  isLoadingMore: boolean;
 };
 
 export function useTransactions({
@@ -35,6 +36,7 @@ export function useTransactions({
   options = { pageCount: 50 },
 }: UseTransactionsProps): UseTransactionsResult {
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [error, setError] = useState<Error | undefined>(undefined);
   const [transactions, setTransactions] = useState<
     ReadonlyArray<TransactionEntity>
@@ -88,12 +90,32 @@ export function useTransactions({
     };
   }, [query]);
 
+  const loadMore = useCallback(async () => {
+    if (!pagedQueryRef.current) {
+      return;
+    }
+
+    setIsLoadingMore(true);
+
+    await pagedQueryRef.current
+      .fetchNext()
+      .catch(setError)
+      .finally(() => {
+        setIsLoadingMore(false);
+      });
+  }, []);
+
+  const reload = useCallback(() => {
+    pagedQueryRef.current?.run();
+  }, []);
+
   return {
     transactions,
     isLoading,
     error,
-    reload: pagedQueryRef.current?.run,
-    loadMore: pagedQueryRef.current?.fetchNext,
+    reload,
+    loadMore,
+    isLoadingMore,
   };
 }
 
