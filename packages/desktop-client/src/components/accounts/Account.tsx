@@ -842,9 +842,9 @@ class AccountInternal extends PureComponent<
 
     if (!account) {
       if (id === 'onbudget') {
-        return t('On-Budget Accounts');
+        return t('On Budget Accounts');
       } else if (id === 'offbudget') {
-        return t('Off-Budget Accounts');
+        return t('Off Budget Accounts');
       } else if (id === 'uncategorized') {
         return t('Uncategorized');
       } else if (!id) {

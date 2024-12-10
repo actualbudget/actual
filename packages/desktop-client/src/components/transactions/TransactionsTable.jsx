@@ -1409,7 +1409,7 @@ const Transaction = memo(function Transaction({
         </Cell>
       ) : isBudgetTransfer || isOffBudget ? (
         <InputCell
-          /* Category field for transfer and off-budget transactions
+          /* Category field for transfer and off budget transactions
      (NOT preview, it is covered first) */
           name="category"
           width="flex"
@@ -1420,7 +1420,7 @@ const Transaction = memo(function Transaction({
             isParent
               ? 'Split'
               : isOffBudget
-                ? 'Off-budget'
+                ? 'Off budget'
                 : isBudgetTransfer
                   ? 'Transfer'
                   : ''

@@ -102,7 +102,7 @@ export function Accounts() {
 
         {onBudgetAccounts.length > 0 && (
           <Account
-            name={t('On-budget')}
+            name={t('On budget')}
             to="/accounts/onbudget"
             query={queries.onBudgetAccountBalance()}
             style={{
@@ -132,7 +132,7 @@ export function Accounts() {
 
         {offbudgetAccounts.length > 0 && (
           <Account
-            name={t('Off-budget')}
+            name={t('Off budget')}
             to="/accounts/offbudget"
             query={queries.offBudgetAccountBalance()}
             style={{

@@ -226,7 +226,7 @@ function AccountList({
       <PullToRefresh onRefresh={onSync}>
         <View aria-label="Account list" style={{ margin: 10 }}>
           {onBudgetAccounts.length > 0 && (
-            <AccountHeader name="On-budget" amount={getOnBudgetBalance()} />
+            <AccountHeader name="On budget" amount={getOnBudgetBalance()} />
           )}
           {onBudgetAccounts.map(acct => (
             <AccountCard
@@ -243,7 +243,7 @@ function AccountList({
 
           {offBudgetAccounts.length > 0 && (
             <AccountHeader
-              name="Off-budget"
+              name="Off budget"
               amount={getOffBudgetBalance()}
               style={{ marginTop: 30 }}
             />

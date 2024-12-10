@@ -30,9 +30,9 @@ export function Account() {
 function accountNameFromId(id: string | undefined) {
   switch (id) {
     case 'onbudget':
-      return 'On-Budget Accounts';
+      return 'On Budget Accounts';
     case 'offbudget':
-      return 'Off-Budget Accounts';
+      return 'Off Budget Accounts';
     case 'uncategorized':
       return 'Uncategorized';
     default:

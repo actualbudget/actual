@@ -23,7 +23,7 @@ import { TableHeader, Table, Row, Field } from '../table';
 const addOnBudgetAccountOption = { id: 'new-on', name: 'Create new account' };
 const addOffBudgetAccountOption = {
   id: 'new-off',
-  name: 'Create new account (off-budget)',
+  name: 'Create new account (off budget)',
 };
 
 export function SelectLinkedAccountsModal({

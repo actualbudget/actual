@@ -68,8 +68,8 @@ function AccountList({
             item.closed
               ? t('Closed Accounts')
               : item.offbudget
-                ? t('Off-budget')
-                : t('On-budget')
+                ? t('Off budget')
+                : t('On budget')
           }`;
 
           lastItem = item;

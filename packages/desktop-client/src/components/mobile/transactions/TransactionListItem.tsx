@@ -101,7 +101,7 @@ export function TransactionListItem({
     transferAccount,
   });
   const specialCategory = account?.offbudget
-    ? 'Off-budget'
+    ? 'Off budget'
     : transferAccount && !transferAccount.offbudget
       ? 'Transfer'
       : isParent
