@@ -213,3 +213,10 @@ export const floatingActionBarText = colorPalette.navy150;
 export const tooltipText = colorPalette.navy100;
 export const tooltipBackground = colorPalette.navy800;
 export const tooltipBorder = colorPalette.navy700;
+
+export const keyboardBackground = colorPalette.navy900;
+export const keyboardBorder = colorPalette.navy600;
+export const keyboardText = buttonNormalText;
+export const keyboardButtonBackground = buttonNormalBackground;
+export const keyboardButtonShadow = 'rgba(0, 0, 0, 0.4)';
+export const keyboardButtonSecondaryBackground = colorPalette.navy500;
