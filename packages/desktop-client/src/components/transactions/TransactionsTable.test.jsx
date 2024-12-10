@@ -22,7 +22,7 @@ import {
 } from 'loot-core/src/shared/transactions';
 import { integerToCurrency } from 'loot-core/src/shared/util';
 
-import { SelectedProviderWithItems } from '../../hooks/useSelected';
+import { SelectedProvider, useSelected } from '../../hooks/useSelected';
 import { SplitsExpandedProvider } from '../../hooks/useSplitsExpanded';
 import { ResponsiveProvider } from '../responsive/ResponsiveProvider';
 
@@ -109,6 +109,20 @@ function generateTransactions(count, splitAtIndexes = [], showError = false) {
   return transactions;
 }
 
+// This is needed because useSelected needs redux access.
+// This provider needs to be a child of the redux TestProvider.
+function TestSelectedProvider({ transactions, children }) {
+  const selectedInst = useSelected('transactions', transactions);
+  return (
+    <SelectedProvider
+      instance={selectedInst}
+      fetchAllIds={() => transactions.map(t => t.id)}
+    >
+      {children}
+    </SelectedProvider>
+  );
+}
+
 function LiveTransactionTable(props) {
   const [transactions, setTransactions] = useState(props.transactions);
 
@@ -150,11 +164,7 @@ function LiveTransactionTable(props) {
       <ResponsiveProvider>
         <SpreadsheetProvider>
           <SchedulesProvider>
-            <SelectedProviderWithItems
-              name="transactions"
-              items={transactions}
-              fetchAllIds={() => transactions.map(t => t.id)}
-            >
+            <TestSelectedProvider transactions={transactions}>
               <SplitsExpandedProvider>
                 <TransactionTable
                   {...props}
@@ -170,7 +180,7 @@ function LiveTransactionTable(props) {
                   onCreatePayee={onCreatePayee}
                 />
               </SplitsExpandedProvider>
-            </SelectedProviderWithItems>
+            </TestSelectedProvider>
           </SchedulesProvider>
         </SpreadsheetProvider>
       </ResponsiveProvider>

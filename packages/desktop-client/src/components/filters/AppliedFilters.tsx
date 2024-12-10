@@ -8,14 +8,16 @@ import { ConditionsOpMenu } from './ConditionsOpMenu';
 import { FilterExpression } from './FilterExpression';
 
 type AppliedFiltersProps = {
-  conditions: RuleConditionEntity[];
+  conditions: readonly RuleConditionEntity[];
   onUpdate: (
-    filter: RuleConditionEntity,
-    newFilter: RuleConditionEntity,
+    filterCondition: RuleConditionEntity,
+    newFilterCondition: RuleConditionEntity,
   ) => void;
-  onDelete: (filter: RuleConditionEntity) => void;
-  conditionsOp: string;
-  onConditionsOpChange: (value: 'and' | 'or') => void;
+  onDelete: (filterCondition: RuleConditionEntity) => void;
+  conditionsOp: RuleConditionEntity['conditionsOp'];
+  onConditionsOpChange: (
+    filterConditionsOp: RuleConditionEntity['conditionsOp'],
+  ) => void;
 };
 
 export function AppliedFilters({
