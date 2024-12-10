@@ -227,6 +227,9 @@ export function useTransactionBatchActions() {
       // Cleared just toggles it on/off and it depends on the data
       // loaded. Need to clean this up in the future.
       onChange('cleared', null);
+    } else if (name === 'imported_payee') {
+      // Unmark as imported transaction by setting imported payee to empty string.
+      onChange('imported_payee', '');
     } else if (name === 'category') {
       pushCategoryAutocompleteModal();
     } else if (name === 'payee') {
