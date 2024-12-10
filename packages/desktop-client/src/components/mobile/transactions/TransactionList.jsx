@@ -65,7 +65,6 @@ export function TransactionList({
   onLoadMore,
 }) {
   const { t } = useTranslation();
-
   const sections = useMemo(() => {
     // Group by date. We can assume transactions is ordered
     const sections = [];

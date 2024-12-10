@@ -1,6 +1,5 @@
 import React from 'react';
-
-import { t } from 'i18next';
+import { useTranslation } from 'react-i18next';
 
 import { useSyncedPref } from '../../hooks/useSyncedPref';
 import { Button } from '../common/Button2';
@@ -10,6 +9,7 @@ import { Text } from '../common/Text';
 import { Setting } from './UI';
 
 export function BudgetTypeSettings() {
+  const { t } = useTranslation();
   const [budgetType = 'rollover', setBudgetType] = useSyncedPref('budgetType');
 
   function onSwitchType() {

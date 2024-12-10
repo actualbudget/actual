@@ -1,7 +1,6 @@
 import React, { type CSSProperties, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
-
-import { t } from 'i18next';
 
 import { replaceModal, syncAndDownload } from 'loot-core/src/client/actions';
 import * as queries from 'loot-core/src/client/queries';
@@ -163,6 +162,7 @@ function AccountCard({
 }
 
 function EmptyMessage() {
+  const { t } = useTranslation();
   return (
     <View style={{ flex: 1, padding: 30 }}>
       <Text style={styles.text}>
@@ -195,6 +195,7 @@ function AccountList({
   onSelectAccount,
   onSync,
 }: AccountListProps) {
+  const { t } = useTranslation();
   const failedAccounts = useFailedAccounts();
   const syncingAccountIds = useSelector(state => state.account.accountsSyncing);
   const onBudgetAccounts = accounts.filter(account => account.offbudget === 0);

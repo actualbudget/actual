@@ -1,6 +1,5 @@
 import React, { type ComponentProps } from 'react';
-
-import { t } from 'i18next';
+import { useTranslation } from 'react-i18next';
 
 import { type CustomReportEntity } from 'loot-core/types/models/reports';
 import { type RuleConditionEntity } from 'loot-core/types/models/rule';
@@ -53,6 +52,7 @@ export function ReportTopbar({
   isItemDisabled,
   defaultItems,
 }: ReportTopbarProps) {
+  const { t } = useTranslation();
   const onChangeGraph = (cond: string) => {
     setSessionReport('graphType', cond);
     onReportChange({ type: 'modify' });

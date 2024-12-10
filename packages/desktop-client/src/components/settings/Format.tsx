@@ -1,8 +1,8 @@
 // @ts-strict-ignore
 import React, { type ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { css } from '@emotion/css';
-import { t } from 'i18next';
 
 import { numberFormats } from 'loot-core/src/shared/util';
 import { type SyncedPrefs } from 'loot-core/src/types/prefs';
@@ -57,6 +57,7 @@ function Column({ title, children }: { title: string; children: ReactNode }) {
 }
 
 export function FormatSettings() {
+  const { t } = useTranslation();
   const sidebar = useSidebar();
   const [_firstDayOfWeekIdx, setFirstDayOfWeekIdxPref] =
     useSyncedPref('firstDayOfWeekIdx'); // Sunday;

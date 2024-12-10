@@ -4,8 +4,7 @@ import React, {
   useEffect,
   type CSSProperties,
 } from 'react';
-
-import { t } from 'i18next';
+import { useTranslation } from 'react-i18next';
 
 import { trackingBudget } from 'loot-core/client/queries';
 import { amountToInteger, integerToAmount } from 'loot-core/shared/util';
@@ -45,6 +44,7 @@ export function TrackingBudgetMenuModal({
     borderTop: `1px solid ${theme.pillBorder}`,
   };
 
+  const { t } = useTranslation();
   const budgeted = useTrackingSheetValue(
     trackingBudget.catBudgeted(categoryId),
   );

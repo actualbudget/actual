@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-
-import { t } from 'i18next';
+import { useTranslation } from 'react-i18next';
 
 import { send } from 'loot-core/src/platform/client/fetch';
 
@@ -12,6 +11,7 @@ import { Text } from '../common/Text';
 import { Setting } from './UI';
 
 export function ResetCache() {
+  const { t } = useTranslation();
   const [resetting, setResetting] = useState(false);
 
   async function onResetCache() {
@@ -39,6 +39,7 @@ export function ResetCache() {
 }
 
 export function ResetSync() {
+  const { t } = useTranslation();
   const [groupId] = useMetadataPref('groupId');
   const isEnabled = !!groupId;
   const { resetSync } = useActions();

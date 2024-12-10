@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-
-import { t } from 'i18next';
+import { useTranslation } from 'react-i18next';
 
 import { send } from 'loot-core/src/platform/client/fetch';
 import { type Handlers } from 'loot-core/src/types/handlers';
@@ -55,6 +54,7 @@ function renderResults(results: Results) {
 }
 
 export function FixSplits() {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<Results | null>(null);
 

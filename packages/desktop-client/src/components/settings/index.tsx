@@ -1,7 +1,7 @@
 import React, { type ReactNode, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { css } from '@emotion/css';
-import { t } from 'i18next';
 
 import { isElectron } from 'loot-core/shared/environment';
 import { listen } from 'loot-core/src/platform/client/fetch';
@@ -35,6 +35,7 @@ import { ThemeSettings } from './Themes';
 import { AdvancedToggle, Setting } from './UI';
 
 function About() {
+  const { t } = useTranslation();
   const version = useServerVersion();
   const latestVersion = useLatestVersion();
   const isOutdated = useIsOutdated();
@@ -95,6 +96,7 @@ function IDName({ children }: { children: ReactNode }) {
 }
 
 function AdvancedAbout() {
+  const { t } = useTranslation();
   const [budgetId] = useMetadataPref('id');
   const [groupId] = useMetadataPref('groupId');
 
@@ -124,6 +126,7 @@ function AdvancedAbout() {
 }
 
 export function Settings() {
+  const { t } = useTranslation();
   const [floatingSidebar] = useGlobalPref('floatingSidebar');
   const [budgetName] = useMetadataPref('budgetName');
 

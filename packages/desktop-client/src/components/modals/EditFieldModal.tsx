@@ -4,9 +4,9 @@ import React, {
   useRef,
   useState,
 } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { parseISO, format as formatDate, parse as parseDate } from 'date-fns';
-import { t } from 'i18next';
 
 import { currentDay, dayFromDate } from 'loot-core/src/shared/months';
 import { amountToInteger } from 'loot-core/src/shared/util';
@@ -45,6 +45,7 @@ export function EditFieldModal({
   onSubmit,
   onClose,
 }: EditFieldModalProps) {
+  const { t } = useTranslation();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const noteInputRef = useRef<HTMLInputElement | null>(null);
 
