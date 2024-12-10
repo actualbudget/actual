@@ -13,8 +13,8 @@ import { integerToCurrency } from 'loot-core/src/shared/util';
 import { type ScheduleEntity } from 'loot-core/src/types/models';
 
 import { useAccounts } from '../../hooks/useAccounts';
+import { useContextMenu } from '../../hooks/useContextMenu';
 import { useDateFormat } from '../../hooks/useDateFormat';
-import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { usePayees } from '../../hooks/usePayees';
 import { SvgDotsHorizontalTriple } from '../../icons/v1';
 import { SvgCheck } from '../../icons/v2';
@@ -186,10 +186,14 @@ function ScheduleRow({
 
   const rowRef = useRef(null);
   const buttonRef = useRef(null);
-  const [open, setOpen] = useState<false | 'contextMenu' | 'button'>(false);
-  const [crossOffset, setCrossOffset] = useState(0);
-  const [offset, setOffset] = useState(0);
-  const contextMenusEnabled = useFeatureFlag('contextMenus');
+  const {
+    setMenuOpen,
+    menuOpen,
+    handleContextMenu,
+    resetPosition,
+    position,
+    asContextMenu,
+  } = useContextMenu();
 
   return (
     <Row
@@ -203,25 +207,16 @@ function ScheduleRow({
         color: theme.tableText,
         ':hover': { backgroundColor: theme.tableRowBackgroundHover },
       }}
-      onContextMenu={e => {
-        if (!contextMenusEnabled) return;
-        if (minimal) return;
-        e.preventDefault();
-        const rect = e.currentTarget.getBoundingClientRect();
-        setCrossOffset(e.clientX - rect.left);
-        setOffset(e.clientY - rect.bottom);
-        setOpen('contextMenu');
-      }}
+      onContextMenu={handleContextMenu}
     >
       {!minimal && (
         <Popover
-          triggerRef={open === 'contextMenu' ? rowRef : buttonRef}
-          isOpen={!!open}
-          onOpenChange={() => setOpen(false)}
+          triggerRef={asContextMenu ? rowRef : buttonRef}
+          isOpen={menuOpen}
+          onOpenChange={() => setMenuOpen(false)}
           isNonModal
           placement="bottom start"
-          crossOffset={open === 'contextMenu' ? crossOffset : 0}
-          offset={open === 'contextMenu' ? offset : 0}
+          {...position}
           style={{ margin: 1 }}
         >
           <OverflowMenu
@@ -229,7 +224,8 @@ function ScheduleRow({
             status={statuses.get(schedule.id)}
             onAction={(action, id) => {
               onAction(action, id);
-              setOpen(false);
+              resetPosition();
+              setMenuOpen(false);
             }}
           />
         </Popover>
@@ -276,7 +272,8 @@ function ScheduleRow({
               variant="bare"
               aria-label={t('Menu')}
               onPress={() => {
-                setOpen('button');
+                resetPosition();
+                setMenuOpen(true);
               }}
             >
               <SvgDotsHorizontalTriple

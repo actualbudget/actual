@@ -291,7 +291,11 @@ export async function runRules(trans) {
   return await finalizeTransactionForRules(finalTrans);
 }
 
-function conditionSpecialCases(cond: Condition): Condition {
+function conditionSpecialCases(cond: Condition | null): Condition | null {
+  if (!cond) {
+    return cond;
+  }
+
   //special cases that require multiple conditions
   if (cond.op === 'is' && cond.field === 'category' && cond.value === null) {
     return new Condition(
