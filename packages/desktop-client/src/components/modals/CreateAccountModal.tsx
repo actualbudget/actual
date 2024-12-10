@@ -1,5 +1,5 @@
-// @ts-strict-ignore
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { DialogTrigger } from 'react-aria-components';
 import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 
@@ -30,13 +30,12 @@ export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
   const { t } = useTranslation();
   const syncServerStatus = useSyncServerStatus();
   const dispatch = useDispatch();
-  const [isGoCardlessSetupComplete, setIsGoCardlessSetupComplete] =
-    useState(null);
-  const [isSimpleFinSetupComplete, setIsSimpleFinSetupComplete] =
-    useState(null);
-  const [menuGoCardlessOpen, setGoCardlessMenuOpen] = useState<boolean>(false);
-  const triggerRef = useRef(null);
-  const [menuSimplefinOpen, setSimplefinMenuOpen] = useState<boolean>(false);
+  const [isGoCardlessSetupComplete, setIsGoCardlessSetupComplete] = useState<
+    boolean | null
+  >(null);
+  const [isSimpleFinSetupComplete, setIsSimpleFinSetupComplete] = useState<
+    boolean | null
+  >(null);
 
   const onConnectGoCardless = () => {
     if (!isGoCardlessSetupComplete) {
@@ -139,7 +138,6 @@ export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
         value: null,
       }).then(() => {
         setIsGoCardlessSetupComplete(false);
-        setGoCardlessMenuOpen(false);
       });
     });
   };
@@ -154,7 +152,6 @@ export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
         value: null,
       }).then(() => {
         setIsSimpleFinSetupComplete(false);
-        setSimplefinMenuOpen(false);
       });
     });
   };
@@ -248,12 +245,10 @@ export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
                         : t('Set up GoCardless for bank sync')}
                     </ButtonWithLoading>
                     {isGoCardlessSetupComplete && (
-                      <>
+                      <DialogTrigger>
                         <Button
-                          ref={triggerRef}
                           variant="bare"
-                          onPress={() => setGoCardlessMenuOpen(true)}
-                          aria-label="GoCardless menu"
+                          aria-label={t('GoCardless menu')}
                         >
                           <SvgDotsHorizontalTriple
                             width={15}
@@ -262,11 +257,7 @@ export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
                           />
                         </Button>
 
-                        <Popover
-                          triggerRef={triggerRef}
-                          isOpen={menuGoCardlessOpen}
-                          onOpenChange={() => setGoCardlessMenuOpen(false)}
-                        >
+                        <Popover>
                           <Menu
                             onMenuSelect={item => {
                               if (item === 'reconfigure') {
@@ -281,7 +272,7 @@ export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
                             ]}
                           />
                         </Popover>
-                      </>
+                      </DialogTrigger>
                     )}
                   </View>
                   <Text style={{ lineHeight: '1.4em', fontSize: 15 }}>
@@ -317,24 +308,15 @@ export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
                         : t('Set up SimpleFIN for bank sync')}
                     </ButtonWithLoading>
                     {isSimpleFinSetupComplete && (
-                      <>
-                        <Button
-                          ref={triggerRef}
-                          variant="bare"
-                          onPress={() => setSimplefinMenuOpen(true)}
-                          aria-label="SimpleFIN menu"
-                        >
+                      <DialogTrigger>
+                        <Button variant="bare" aria-label={t('SimpleFIN menu')}>
                           <SvgDotsHorizontalTriple
                             width={15}
                             height={15}
                             style={{ transform: 'rotateZ(90deg)' }}
                           />
                         </Button>
-                        <Popover
-                          triggerRef={triggerRef}
-                          isOpen={menuSimplefinOpen}
-                          onOpenChange={() => setSimplefinMenuOpen(false)}
-                        >
+                        <Popover>
                           <Menu
                             onMenuSelect={item => {
                               if (item === 'reconfigure') {
@@ -349,7 +331,7 @@ export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
                             ]}
                           />
                         </Popover>
-                      </>
+                      </DialogTrigger>
                     )}
                   </View>
                   <Text style={{ lineHeight: '1.4em', fontSize: 15 }}>

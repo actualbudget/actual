@@ -85,17 +85,19 @@ export function FilterExpression<T extends RuleConditionEntity>({
                 {mapField(field, options)}
               </Text>{' '}
               <Text>{friendlyOp(op, null)}</Text>{' '}
-              <Value
-                value={value}
-                field={field}
-                inline={true}
-                valueIsRaw={
-                  op === 'contains' ||
-                  op === 'matches' ||
-                  op === 'doesNotContain' ||
-                  op === 'hasTags'
-                }
-              />
+              {!['onbudget', 'offbudget'].includes(op?.toLocaleLowerCase()) && (
+                <Value
+                  value={value}
+                  field={field}
+                  inline={true}
+                  valueIsRaw={
+                    op === 'contains' ||
+                    op === 'matches' ||
+                    op === 'doesNotContain' ||
+                    op === 'hasTags'
+                  }
+                />
+              )}
             </>
           )}
         </div>
