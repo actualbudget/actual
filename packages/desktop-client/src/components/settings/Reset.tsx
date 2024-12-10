@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
+import { useDispatch } from 'react-redux';
 
 import { t } from 'i18next';
 
+import { resetSync } from 'loot-core/client/actions';
 import { send } from 'loot-core/src/platform/client/fetch';
 
-import { useActions } from '../../hooks/useActions';
 import { useMetadataPref } from '../../hooks/useMetadataPref';
 import { ButtonWithLoading } from '../common/Button2';
 import { Text } from '../common/Text';
@@ -41,13 +42,13 @@ export function ResetCache() {
 export function ResetSync() {
   const [groupId] = useMetadataPref('groupId');
   const isEnabled = !!groupId;
-  const { resetSync } = useActions();
+  const dispatch = useDispatch();
 
   const [resetting, setResetting] = useState(false);
 
   async function onResetSync() {
     setResetting(true);
-    await resetSync();
+    await dispatch(resetSync());
     setResetting(false);
   }
 
