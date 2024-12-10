@@ -368,7 +368,7 @@ export function ReportSidebar({
                 },
                 {
                   name: 'show-off-budget',
-                  text: 'Show off-budget',
+                  text: 'Show off budget',
                   tooltip: 'Show off budget accounts',
                   toggle: customReportItems.showOffBudget,
                 },
