@@ -37,9 +37,9 @@ export const MOBILE_NAV_HEIGHT = ROW_HEIGHT + PILL_HEIGHT;
 
 export function MobileNavTabs() {
   const { isNarrowWidth } = useResponsive();
-  const [navbarState, setNavbarState] = useState<
-    'default' | 'open' | 'hidden'
-  >('default');
+  const [navbarState, setNavbarState] = useState<'default' | 'open' | 'hidden'>(
+    'default',
+  );
 
   const navTabStyle = {
     flex: `1 1 ${100 / COLUMN_COUNT}%`,
