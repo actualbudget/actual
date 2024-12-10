@@ -1,6 +1,6 @@
-import { MobileAccountPage } from './mobile-account-page';
 import { expect } from '@playwright/test';
 
+import { MobileAccountPage } from './mobile-account-page';
 import { MobileAccountsPage } from './mobile-accounts-page';
 import { MobileBudgetPage } from './mobile-budget-page';
 import { MobileReportsPage } from './mobile-reports-page';
