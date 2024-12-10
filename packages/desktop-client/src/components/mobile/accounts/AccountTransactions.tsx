@@ -236,6 +236,7 @@ function TransactionListWithPreviews({
     transactions,
     isLoading,
     reload: reloadTransactions,
+    isLoadingMore,
     loadMore: loadMoreTransactions,
   } = useTransactions({
     query: transactionsQuery,
@@ -269,7 +270,7 @@ function TransactionListWithPreviews({
           tables.includes('category_mapping') ||
           tables.includes('payee_mapping')
         ) {
-          reloadTransactions?.();
+          reloadTransactions();
         }
 
         if (tables.includes('payees') || tables.includes('payee_mapping')) {
@@ -326,6 +327,7 @@ function TransactionListWithPreviews({
       balance={balanceQueries.balance}
       balanceCleared={balanceQueries.cleared}
       balanceUncleared={balanceQueries.uncleared}
+      isLoadingMore={isLoadingMore}
       onLoadMore={loadMoreTransactions}
       searchPlaceholder={`Search ${accountName}`}
       onSearch={onSearch}
