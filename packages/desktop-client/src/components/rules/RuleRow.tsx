@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { memo, useRef, useState } from 'react';
+import React, { memo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { v4 as uuid } from 'uuid';
@@ -7,7 +7,7 @@ import { v4 as uuid } from 'uuid';
 import { friendlyOp } from 'loot-core/src/shared/rules';
 import { type RuleEntity } from 'loot-core/src/types/models';
 
-import { useFeatureFlag } from '../../hooks/useFeatureFlag';
+import { useContextMenu } from '../../hooks/useContextMenu';
 import { useSelectedDispatch } from '../../hooks/useSelected';
 import { SvgRightArrow2 } from '../../icons/v0';
 import { styles, theme } from '../../style';
@@ -60,10 +60,8 @@ export const RuleRow = memo(
     const { t } = useTranslation();
 
     const triggerRef = useRef(null);
-    const [menuOpen, setMenuOpen] = useState(false);
-    const [crossOffset, setCrossOffset] = useState(0);
-    const [offset, setOffset] = useState(0);
-    const contextMenusEnabled = useFeatureFlag('contextMenus');
+    const { setMenuOpen, menuOpen, handleContextMenu, position } =
+      useContextMenu();
 
     return (
       <Row
@@ -82,22 +80,14 @@ export const RuleRow = memo(
         collapsed={true}
         onMouseEnter={() => onHover && onHover(rule.id)}
         onMouseLeave={() => onHover && onHover(null)}
-        onContextMenu={e => {
-          if (!contextMenusEnabled) return;
-          e.preventDefault();
-          setMenuOpen(true);
-          const rect = triggerRef.current.getBoundingClientRect();
-          setCrossOffset(e.clientX - rect.left);
-          setOffset(e.clientY - rect.bottom);
-        }}
+        onContextMenu={handleContextMenu}
       >
         <Popover
           triggerRef={triggerRef}
           placement="bottom start"
           isOpen={menuOpen}
           onOpenChange={() => setMenuOpen(false)}
-          crossOffset={crossOffset}
-          offset={offset}
+          {...position}
           style={{ width: 200, margin: 1 }}
           isNonModal
         >
@@ -228,7 +218,7 @@ export const RuleRow = memo(
         </Field>
 
         <Cell name="edit" plain style={{ padding: '0 15px', paddingLeft: 5 }}>
-          <Button onPress={() => onEditRule(rule)}>Edit</Button>
+          <Button onPress={() => onEditRule(rule)}>{t('Edit')}</Button>
         </Cell>
       </Row>
     );

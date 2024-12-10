@@ -1,6 +1,6 @@
-// @ts-strict-ignore
-import { useState, useRef, useLayoutEffect } from 'react';
+import { useState, useRef, useLayoutEffect, useMemo } from 'react';
 
+import { type Query } from 'loot-core/shared/query';
 import { useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
 
 import { useSheetName } from './useSheetName';
@@ -12,49 +12,75 @@ import {
   type Binding,
 } from '.';
 
+type SheetValueResult<
+  SheetName extends SheetNames,
+  FieldName extends SheetFields<SheetName>,
+> = {
+  name: string;
+  value: Spreadsheets[SheetName][FieldName] | null;
+  query?: Query;
+};
+
 export function useSheetValue<
   SheetName extends SheetNames,
   FieldName extends SheetFields<SheetName>,
 >(
   binding: Binding<SheetName, FieldName>,
-  onChange?: (result) => void,
-): Spreadsheets[SheetName][FieldName] {
+  onChange?: (result: SheetValueResult<SheetName, FieldName>) => void,
+): SheetValueResult<SheetName, FieldName>['value'] {
   const { sheetName, fullSheetName } = useSheetName(binding);
 
-  const bindingObj =
-    typeof binding === 'string'
-      ? { name: binding, value: null, query: undefined }
-      : binding;
+  const bindingObj = useMemo(
+    () =>
+      typeof binding === 'string'
+        ? { name: binding, value: null, query: undefined }
+        : binding,
+    [binding],
+  );
 
   const spreadsheet = useSpreadsheet();
-  const [result, setResult] = useState({
+  const [result, setResult] = useState<SheetValueResult<SheetName, FieldName>>({
     name: fullSheetName,
-    value: bindingObj.value === undefined ? null : bindingObj.value,
+    value: bindingObj.value ? bindingObj.value : null,
     query: bindingObj.query,
   });
   const latestOnChange = useRef(onChange);
+  latestOnChange.current = onChange;
+
   const latestValue = useRef(result.value);
+  latestValue.current = result.value;
 
   useLayoutEffect(() => {
-    latestOnChange.current = onChange;
-    latestValue.current = result.value;
-  });
+    let isMounted = true;
 
-  useLayoutEffect(() => {
-    if (bindingObj.query) {
-      spreadsheet.createQuery(sheetName, bindingObj.name, bindingObj.query);
-    }
+    const unbind = spreadsheet.bind(
+      sheetName,
+      bindingObj,
+      (newResult: SheetValueResult<SheetName, FieldName>) => {
+        if (!isMounted) {
+          return;
+        }
 
-    return spreadsheet.bind(sheetName, binding, null, newResult => {
-      if (latestOnChange.current) {
-        latestOnChange.current(newResult);
-      }
+        if (latestOnChange.current) {
+          latestOnChange.current(newResult);
+        }
 
-      if (newResult.value !== latestValue.current) {
-        setResult(newResult);
-      }
-    });
-  }, [sheetName, bindingObj.name]);
+        if (newResult.value !== latestValue.current) {
+          setResult(newResult);
+        }
+      },
+    );
+
+    return () => {
+      isMounted = false;
+      unbind();
+    };
+  }, [
+    spreadsheet,
+    sheetName,
+    bindingObj.name,
+    bindingObj.query?.serializeAsString(),
+  ]);
 
   return result.value;
 }

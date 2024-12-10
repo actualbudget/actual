@@ -1,8 +1,9 @@
 // @ts-strict-ignore
-import React, { type CSSProperties, useRef, useState } from 'react';
+import React, { type CSSProperties, useRef } from 'react';
 import { type ConnectDragSource } from 'react-dnd';
 import { useTranslation } from 'react-i18next';
 
+import { useContextMenu } from '../../hooks/useContextMenu';
 import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { SvgExpandArrow } from '../../icons/v0';
 import { SvgCheveronDown } from '../../icons/v1';
@@ -58,9 +59,9 @@ export function SidebarGroup({
   const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
 
   const temporary = group.id === 'new';
-  const [menuOpen, setMenuOpen] = useState(false);
+  const { setMenuOpen, menuOpen, handleContextMenu, resetPosition, position } =
+    useContextMenu();
   const triggerRef = useRef(null);
-  const contextMenusEnabled = useFeatureFlag('contextMenus');
 
   const displayed = (
     <View
@@ -75,11 +76,7 @@ export function SidebarGroup({
       onClick={() => {
         onToggleCollapse(group.id);
       }}
-      onContextMenu={e => {
-        if (!contextMenusEnabled) return;
-        e.preventDefault();
-        setMenuOpen(true);
-      }}
+      onContextMenu={handleContextMenu}
     >
       {!dragPreview && (
         <SvgExpandArrow
@@ -111,7 +108,10 @@ export function SidebarGroup({
             <Button
               variant="bare"
               className="hover-visible"
-              onPress={() => setMenuOpen(true)}
+              onPress={() => {
+                resetPosition();
+                setMenuOpen(true);
+              }}
               style={{ padding: 3 }}
             >
               <SvgCheveronDown width={14} height={14} />
@@ -122,8 +122,9 @@ export function SidebarGroup({
               placement="bottom start"
               isOpen={menuOpen}
               onOpenChange={() => setMenuOpen(false)}
-              style={{ width: 200 }}
+              style={{ width: 200, margin: 1 }}
               isNonModal
+              {...position}
             >
               <Menu
                 onMenuSelect={type => {
@@ -149,7 +150,7 @@ export function SidebarGroup({
                   { name: 'rename', text: t('Rename') },
                   !group.is_income && {
                     name: 'toggle-visibility',
-                    text: group.hidden ? t('Show') : t('Hide'),
+                    text: group.hidden ? 'Show' : 'Hide',
                   },
                   onDelete && { name: 'delete', text: t('Delete') },
                   ...(isGoalTemplatesEnabled

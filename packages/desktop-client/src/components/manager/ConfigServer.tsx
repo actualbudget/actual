@@ -63,23 +63,16 @@ export function ConfigServer() {
 
     setError(null);
     setLoading(true);
-    const { error } = await setServerUrl(url);
 
-    if (
-      ['network-failure', 'get-server-failure'].includes(error) &&
-      !url.startsWith('http://') &&
-      !url.startsWith('https://')
-    ) {
-      const { error } = await setServerUrl('https://' + url);
-      if (error) {
-        setUrl('https://' + url);
-        setError(error);
-      } else {
-        await signOut();
-        navigate('/');
-      }
-      setLoading(false);
-    } else if (error) {
+    let httpUrl = url;
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      httpUrl = 'https://' + url;
+    }
+
+    const { error } = await setServerUrl(httpUrl);
+    setUrl(httpUrl);
+
+    if (error) {
       setLoading(false);
       setError(error);
     } else {
@@ -118,7 +111,6 @@ export function ConfigServer() {
   async function onCreateTestFile() {
     await setServerUrl(null);
     await createBudget({ testMode: true });
-    window.__navigate('/');
   }
 
   return (
@@ -257,7 +249,10 @@ export function ConfigServer() {
               <Button
                 variant="primary"
                 style={{ marginLeft: 15 }}
-                onPress={onCreateTestFile}
+                onPress={async () => {
+                  await onCreateTestFile();
+                  navigate('/');
+                }}
               >
                 {t('Create test file')}
               </Button>

@@ -1,5 +1,6 @@
 // @ts-strict-ignore
 import React, { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 
@@ -44,6 +45,7 @@ import { KeyboardShortcutModal } from './modals/KeyboardShortcutModal';
 import { LoadBackupModal } from './modals/LoadBackupModal';
 import { ConfirmChangeDocumentDirModal } from './modals/manager/ConfirmChangeDocumentDir';
 import { DeleteFileModal } from './modals/manager/DeleteFileModal';
+import { DuplicateFileModal } from './modals/manager/DuplicateFileModal';
 import { FilesSettingsModal } from './modals/manager/FilesSettingsModal';
 import { ImportActualModal } from './modals/manager/ImportActualModal';
 import { ImportModal } from './modals/manager/ImportModal';
@@ -80,6 +82,8 @@ export function Modals() {
       dispatch(closeModal());
     }
   }, [location]);
+
+  const { t } = useTranslation();
 
   const modals = modalStack
     .map(({ name, options }) => {
@@ -287,10 +291,12 @@ export function Modals() {
               Header={props => (
                 <ModalHeader
                   {...props}
-                  title={<ModalTitle title="New Category" shrinkOnOverflow />}
+                  title={
+                    <ModalTitle title={t('New Category')} shrinkOnOverflow />
+                  }
                 />
               )}
-              inputPlaceholder="Category name"
+              inputPlaceholder={t('Category name')}
               buttonText="Add"
               onValidate={options.onValidate}
               onSubmit={options.onSubmit}
@@ -306,12 +312,15 @@ export function Modals() {
                 <ModalHeader
                   {...props}
                   title={
-                    <ModalTitle title="New Category Group" shrinkOnOverflow />
+                    <ModalTitle
+                      title={t('New Category Group')}
+                      shrinkOnOverflow
+                    />
                   }
                 />
               )}
-              inputPlaceholder="Category group name"
-              buttonText="Add"
+              inputPlaceholder={t('Category group name')}
+              buttonText={t('Add')}
               onValidate={options.onValidate}
               onSubmit={options.onSubmit}
             />
@@ -578,6 +587,16 @@ export function Modals() {
           return <BudgetListModal key={name} />;
         case 'delete-budget':
           return <DeleteFileModal key={name} file={options.file} />;
+        case 'duplicate-budget':
+          return (
+            <DuplicateFileModal
+              key={name}
+              file={options.file}
+              managePage={options?.managePage}
+              loadBudget={options?.loadBudget}
+              onComplete={options?.onComplete}
+            />
+          );
         case 'import':
           return <ImportModal key={name} />;
         case 'files-settings':

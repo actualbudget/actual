@@ -11,6 +11,7 @@ import React, {
   useEffect,
 } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
+import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 
 import { css } from '@emotion/css';
@@ -30,7 +31,6 @@ import {
 import { evalArithmetic } from 'loot-core/src/shared/arithmetic';
 import { currentDay } from 'loot-core/src/shared/months';
 import * as monthUtils from 'loot-core/src/shared/months';
-import { getScheduledAmount } from 'loot-core/src/shared/schedules';
 import {
   splitTransaction,
   updateTransaction,
@@ -47,9 +47,10 @@ import {
   titleFirst,
 } from 'loot-core/src/shared/util';
 
-import { useFeatureFlag } from '../../hooks/useFeatureFlag';
+import { useContextMenu } from '../../hooks/useContextMenu';
 import { useMergedRefs } from '../../hooks/useMergedRefs';
 import { usePrevious } from '../../hooks/usePrevious';
+import { useProperFocus } from '../../hooks/useProperFocus';
 import { useSelectedDispatch, useSelectedItems } from '../../hooks/useSelected';
 import { useSplitsExpanded } from '../../hooks/useSplitsExpanded';
 import { SvgLeftArrow2, SvgRightArrow2, SvgSplit } from '../../icons/v0';
@@ -92,11 +93,7 @@ function getDisplayValue(obj, name) {
 }
 
 function serializeTransaction(transaction, showZeroInDeposit) {
-  let { amount, date } = transaction;
-
-  if (isPreviewId(transaction.id)) {
-    amount = (transaction._inverse ? -1 : 1) * getScheduledAmount(amount);
-  }
+  const { amount, date: originalDate } = transaction;
 
   let debit = amount < 0 ? -amount : null;
   let credit = amount > 0 ? amount : null;
@@ -109,6 +106,7 @@ function serializeTransaction(transaction, showZeroInDeposit) {
     }
   }
 
+  let date = originalDate;
   // Validate the date format
   if (!isDateValid(parseISO(date))) {
     // Be a little forgiving if the date isn't valid. This at least
@@ -179,6 +177,7 @@ const TransactionHeader = memo(
     field,
   }) => {
     const dispatchSelected = useSelectedDispatch();
+    const { t } = useTranslation();
 
     useHotkeys(
       'ctrl+a, cmd+a, meta+a',
@@ -217,7 +216,7 @@ const TransactionHeader = memo(
           }
         />
         <HeaderCell
-          value="Date"
+          value={t('Date')}
           width={110}
           alignItems="flex"
           marginLeft={-5}
@@ -229,7 +228,7 @@ const TransactionHeader = memo(
         />
         {showAccount && (
           <HeaderCell
-            value="Account"
+            value={t('Account')}
             width="flex"
             alignItems="flex"
             marginLeft={-5}
@@ -241,7 +240,7 @@ const TransactionHeader = memo(
           />
         )}
         <HeaderCell
-          value="Payee"
+          value={t('Payee')}
           width="flex"
           alignItems="flex"
           marginLeft={-5}
@@ -252,7 +251,7 @@ const TransactionHeader = memo(
           }
         />
         <HeaderCell
-          value="Notes"
+          value={t('Notes')}
           width="flex"
           alignItems="flex"
           marginLeft={-5}
@@ -264,7 +263,7 @@ const TransactionHeader = memo(
         />
         {showCategory && (
           <HeaderCell
-            value="Category"
+            value={t('Category')}
             width="flex"
             alignItems="flex"
             marginLeft={-5}
@@ -279,7 +278,7 @@ const TransactionHeader = memo(
           />
         )}
         <HeaderCell
-          value="Payment"
+          value={t('Payment')}
           width={100}
           alignItems="flex-end"
           marginRight={-5}
@@ -290,7 +289,7 @@ const TransactionHeader = memo(
           }
         />
         <HeaderCell
-          value="Deposit"
+          value={t('Deposit')}
           width={100}
           alignItems="flex-end"
           marginRight={-5}
@@ -302,7 +301,7 @@ const TransactionHeader = memo(
         />
         {showBalance && (
           <HeaderCell
-            value="Balance"
+            value={t('Balance')}
             width={103}
             alignItems="flex-end"
             marginRight={-5}
@@ -673,7 +672,13 @@ function PayeeCell({
           isCreatingPayee.current = false;
         }
       }}
-      formatter={() => getPayeePretty(transaction, payee, transferAccount)}
+      formatter={() => {
+        const payeeName = getPayeePretty(transaction, payee, transferAccount);
+        if (!payeeName && isPreview) {
+          return '(No payee)';
+        }
+        return payeeName;
+      }}
       unexposedContent={props => {
         const payeeName = (
           <UnexposedCellContent
@@ -747,6 +752,16 @@ function PayeeCell({
   );
 }
 
+const payeeIconButtonStyle = {
+  marginLeft: -5,
+  marginRight: 2,
+  width: 23,
+  height: 23,
+  color: 'inherit',
+};
+const scheduleIconStyle = { width: 13, height: 13 };
+const transferIconStyle = { width: 10, height: 10 };
+
 function PayeeIcons({
   transaction,
   transferAccount,
@@ -754,26 +769,13 @@ function PayeeIcons({
   onNavigateToSchedule,
 }) {
   const scheduleId = transaction.schedule;
-  const scheduleData = useCachedSchedules();
-  const schedule =
-    scheduleId && scheduleData
-      ? scheduleData.schedules.find(s => s.id === scheduleId)
-      : null;
+  const { isLoading, schedules = [] } = useCachedSchedules();
 
-  const buttonStyle = useMemo(
-    () => ({
-      marginLeft: -5,
-      marginRight: 2,
-      width: 23,
-      height: 23,
-      color: 'inherit',
-    }),
-    [],
-  );
+  if (isLoading) {
+    return null;
+  }
 
-  const scheduleIconStyle = useMemo(() => ({ width: 13, height: 13 }), []);
-
-  const transferIconStyle = useMemo(() => ({ width: 10, height: 10 }), []);
+  const schedule = scheduleId ? schedules.find(s => s.id === scheduleId) : null;
 
   if (schedule == null && transferAccount == null) {
     // Neither a valid scheduled transaction nor a transfer.
@@ -781,6 +783,7 @@ function PayeeIcons({
   }
 
   const recurring = schedule && schedule._date && !!schedule._date.frequency;
+  const isDeposit = transaction.amount > 0;
 
   return (
     <>
@@ -788,7 +791,7 @@ function PayeeIcons({
         <Button
           variant="bare"
           aria-label="See schedule details"
-          style={buttonStyle}
+          style={payeeIconButtonStyle}
           onPress={() => {
             onNavigateToSchedule(scheduleId);
           }}
@@ -804,14 +807,14 @@ function PayeeIcons({
         <Button
           variant="bare"
           aria-label="See transfer account"
-          style={buttonStyle}
+          style={payeeIconButtonStyle}
           onPress={() => {
             if (!isTemporaryId(transaction.id)) {
               onNavigateToTransferAccount(transferAccount.id);
             }
           }}
         >
-          {(transaction._inverse ? -1 : 1) * transaction.amount > 0 ? (
+          {isDeposit ? (
             <SvgLeftArrow2 style={transferIconStyle} />
           ) : (
             <SvgRightArrow2 style={transferIconStyle} />
@@ -1004,7 +1007,6 @@ const Transaction = memo(function Transaction({
     reconciled,
     is_parent: isParent,
     _unmatched = false,
-    _inverse = false,
   } = transaction;
 
   // Join in some data
@@ -1022,9 +1024,7 @@ const Transaction = memo(function Transaction({
   const backgroundFocus = focusedField === 'select';
   const amountStyle = hideFraction ? { letterSpacing: -0.5 } : null;
 
-  const runningBalance = !isTemporaryId(id)
-    ? balance
-    : balance + (_inverse ? -1 : 1) * amount;
+  const runningBalance = !isTemporaryId(id) ? balance : balance + amount;
 
   // Ok this entire logic is a dirty, dirty hack.. but let me explain.
   // Problem: the split-error Popover (which has the buttons to distribute/add split)
@@ -1048,10 +1048,8 @@ const Transaction = memo(function Transaction({
     }, 1);
   }, [splitError, allTransactions]);
 
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [crossOffset, setCrossOffset] = useState(0);
-  const [offset, setOffset] = useState(0);
-  const contextMenusEnabled = useFeatureFlag('contextMenus');
+  const { setMenuOpen, menuOpen, handleContextMenu, position } =
+    useContextMenu();
 
   return (
     <Row
@@ -1081,23 +1079,14 @@ const Transaction = memo(function Transaction({
         }),
         ...(_unmatched && { opacity: 0.5 }),
       }}
-      onContextMenu={e => {
-        if (!contextMenusEnabled) return;
-        if (transaction.id === 'temp') return;
-        e.preventDefault();
-        const rect = e.currentTarget.getBoundingClientRect();
-        setCrossOffset(e.clientX - rect.left);
-        setOffset(e.clientY - rect.bottom);
-        setMenuOpen(true);
-      }}
+      onContextMenu={handleContextMenu}
     >
       <Popover
         triggerRef={triggerRef}
         placement="bottom start"
         isOpen={menuOpen}
         onOpenChange={() => setMenuOpen(false)}
-        crossOffset={crossOffset}
-        offset={offset}
+        {...position}
         style={{ width: 200, margin: 1 }}
         isNonModal
       >
@@ -1361,6 +1350,9 @@ const Transaction = memo(function Transaction({
                 margin: '0 5px',
                 padding: '3px 7px',
                 borderRadius: 4,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                display: 'inline-block',
               }}
             >
               {titleFirst(categoryId)}
@@ -1720,6 +1712,11 @@ function NewTransaction({
   );
   const emptyChildTransactions = childTransactions.filter(t => t.amount === 0);
 
+  const addButtonRef = useRef(null);
+  useProperFocus(addButtonRef, focusedField === 'add');
+  const cancelButtonRef = useRef(null);
+  useProperFocus(cancelButtonRef, focusedField === 'cancel');
+
   return (
     <View
       style={{
@@ -1781,6 +1778,7 @@ function NewTransaction({
           style={{ marginRight: 10, padding: '4px 10px' }}
           onPress={() => onClose()}
           data-testid="cancel-button"
+          ref={cancelButtonRef}
         >
           Cancel
         </Button>
@@ -1800,6 +1798,7 @@ function NewTransaction({
             style={{ padding: '4px 10px' }}
             onPress={onAdd}
             data-testid="add-button"
+            ref={addButtonRef}
           >
             Add
           </Button>
@@ -2151,13 +2150,8 @@ export const TransactionTable = forwardRef((props, ref) => {
         }
 
         const payee = t.payee && payees[t.payee];
-        let transferAccount;
-        if (t._inverse) {
-          transferAccount = t.account && accounts[t.account];
-        } else {
-          transferAccount =
-            payee?.transfer_acct && accounts[payee.transfer_acct];
-        }
+        const transferAccount =
+          payee?.transfer_acct && accounts[payee.transfer_acct];
         return [t.id, transferAccount || null];
       }),
     );
@@ -2173,10 +2167,14 @@ export const TransactionTable = forwardRef((props, ref) => {
     }
   }, [prevSplitsExpanded.current]);
 
-  const newNavigator = useTableNavigator(newTransactions, getFields);
+  const newNavigator = useTableNavigator(
+    newTransactions,
+    getFieldsNewTransaction,
+  );
+
   const tableNavigator = useTableNavigator(
     transactionsWithExpandedSplits,
-    getFields,
+    getFieldsTableTransaction,
   );
   const shouldAdd = useRef(false);
   const latestState = useRef({ newTransactions, newNavigator, tableNavigator });
@@ -2241,8 +2239,26 @@ export const TransactionTable = forwardRef((props, ref) => {
     savePending.current = false;
   }, [newTransactions, props.transactions]);
 
-  function getFields(item) {
-    let fields = [
+  function getFieldsNewTransaction(item) {
+    const fields = [
+      'select',
+      'date',
+      'account',
+      'payee',
+      'notes',
+      'category',
+      'debit',
+      'credit',
+      'cleared',
+      'cancel',
+      'add',
+    ];
+
+    return getFields(item, fields);
+  }
+
+  function getFieldsTableTransaction(item) {
+    const fields = [
       'select',
       'date',
       'account',
@@ -2254,6 +2270,10 @@ export const TransactionTable = forwardRef((props, ref) => {
       'cleared',
     ];
 
+    return getFields(item, fields);
+  }
+
+  function getFields(item, fields) {
     fields = item.is_child
       ? ['select', 'payee', 'notes', 'category', 'debit', 'credit']
       : fields.filter(

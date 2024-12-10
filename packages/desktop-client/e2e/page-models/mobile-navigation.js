@@ -1,3 +1,4 @@
+import { MobileAccountPage } from './mobile-account-page';
 import { MobileAccountsPage } from './mobile-accounts-page';
 import { MobileBudgetPage } from './mobile-budget-page';
 import { MobileTransactionEntryPage } from './mobile-transaction-entry-page';
@@ -20,6 +21,13 @@ export class MobileNavigation {
     await link.click();
 
     return new MobileAccountsPage(this.page);
+  }
+
+  async goToUncategorizedPage() {
+    const button = this.page.getByRole('button', { name: /uncategorized/ });
+    await button.click();
+
+    return new MobileAccountPage(this.page);
   }
 
   async goToTransactionEntryPage() {

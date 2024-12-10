@@ -16,6 +16,7 @@ import {
   parseISO,
   isValid as isValidDate,
 } from 'date-fns';
+import { t } from 'i18next';
 
 import { pushModal, setLastTransaction } from 'loot-core/client/actions';
 import { runQuery } from 'loot-core/src/client/query-helpers';
@@ -63,23 +64,12 @@ import { MobilePageHeader, Page } from '../../Page';
 import { AmountInput } from '../../util/AmountInput';
 import { MobileBackButton } from '../MobileBackButton';
 import { FieldLabel, TapField, InputField, ToggleField } from '../MobileForms';
+import { getPrettyPayee } from '../utils';
 
 import { FocusableAmountInput } from './FocusableAmountInput';
 
 function getFieldName(transactionId, field) {
   return `${field}-${transactionId}`;
-}
-
-export function getDescriptionPretty(transaction, payee, transferAcct) {
-  const { amount } = transaction;
-
-  if (transferAcct) {
-    return `Transfer ${amount > 0 ? 'from' : 'to'} ${transferAcct.name}`;
-  } else if (payee) {
-    return payee.name;
-  }
-
-  return '';
 }
 
 function serializeTransaction(transaction, dateFormat) {
@@ -166,7 +156,7 @@ export function Status({ status, isSplit }) {
 
 function Footer({
   transactions,
-  adding,
+  isAdding,
   onAdd,
   onSave,
   onSplit,
@@ -242,7 +232,7 @@ function Footer({
             Select account
           </Text>
         </Button>
-      ) : adding ? (
+      ) : isAdding ? (
         <Button
           type="primary"
           style={{ height: styles.mobileMinHeight }}
@@ -290,7 +280,8 @@ const ChildTransactionEdit = forwardRef(
       amountFocused,
       amountSign,
       getCategory,
-      getPrettyPayee,
+      getPayee,
+      getTransferAccount,
       isOffBudget,
       isBudgetTransfer,
       onEditField,
@@ -301,6 +292,11 @@ const ChildTransactionEdit = forwardRef(
   ) => {
     const { editingField, onRequestActiveEdit, onClearActiveEdit } =
       useSingleActiveEditForm();
+    const prettyPayee = getPrettyPayee({
+      transaction,
+      payee: getPayee(transaction),
+      transferAccount: getTransferAccount(transaction),
+    });
     return (
       <View
         innerRef={ref}
@@ -318,13 +314,13 @@ const ChildTransactionEdit = forwardRef(
       >
         <View style={{ flexDirection: 'row' }}>
           <View style={{ flexBasis: '75%' }}>
-            <FieldLabel title="Payee" />
+            <FieldLabel title={t('Payee')} />
             <TapField
               disabled={
                 editingField &&
                 editingField !== getFieldName(transaction.id, 'payee')
               }
-              value={getPrettyPayee(transaction)}
+              value={prettyPayee}
               onClick={() => onEditField(transaction.id, 'payee')}
               data-testid={`payee-field-${transaction.id}`}
             />
@@ -334,7 +330,7 @@ const ChildTransactionEdit = forwardRef(
               flexBasis: '25%',
             }}
           >
-            <FieldLabel title="Amount" style={{ padding: 0 }} />
+            <FieldLabel title={t('Amount')} style={{ padding: 0 }} />
             <AmountInput
               disabled={
                 editingField &&
@@ -366,7 +362,7 @@ const ChildTransactionEdit = forwardRef(
         </View>
 
         <View>
-          <FieldLabel title="Category" />
+          <FieldLabel title={t('Category')} />
           <TapField
             textStyle={{
               ...((isOffBudget || isBudgetTransfer(transaction)) && {
@@ -388,7 +384,7 @@ const ChildTransactionEdit = forwardRef(
         </View>
 
         <View>
-          <FieldLabel title="Notes" />
+          <FieldLabel title={t('Notes')} />
           <InputField
             disabled={
               editingField &&
@@ -428,7 +424,7 @@ const ChildTransactionEdit = forwardRef(
                 userSelect: 'none',
               }}
             >
-              Delete split
+              {t('Delete split')}
             </Text>
           </Button>
         </View>
@@ -440,7 +436,7 @@ const ChildTransactionEdit = forwardRef(
 ChildTransactionEdit.displayName = 'ChildTransactionEdit';
 
 const TransactionEditInner = memo(function TransactionEditInner({
-  adding,
+  isAdding,
   accounts,
   categories,
   payees,
@@ -483,10 +479,10 @@ const TransactionEditInner = memo(function TransactionEditInner({
   const isInitialMount = useInitialMount();
 
   useEffect(() => {
-    if (isInitialMount && adding) {
+    if (isInitialMount && isAdding) {
       onTotalAmountEdit();
     }
-  }, [adding, isInitialMount, onTotalAmountEdit]);
+  }, [isAdding, isInitialMount, onTotalAmountEdit]);
 
   const getAccount = useCallback(
     trans => {
@@ -502,7 +498,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
     [payeesById],
   );
 
-  const getTransferAcct = useCallback(
+  const getTransferAccount = useCallback(
     trans => {
       const payee = trans && getPayee(trans);
       return payee?.transfer_acct && accountsById?.[payee.transfer_acct];
@@ -510,24 +506,12 @@ const TransactionEditInner = memo(function TransactionEditInner({
     [accountsById, getPayee],
   );
 
-  const getPrettyPayee = useCallback(
-    trans => {
-      if (trans?.is_parent) {
-        return 'Split';
-      }
-      const transPayee = trans && getPayee(trans);
-      const transTransferAcct = trans && getTransferAcct(trans);
-      return getDescriptionPretty(trans, transPayee, transTransferAcct);
-    },
-    [getPayee, getTransferAcct],
-  );
-
   const isBudgetTransfer = useCallback(
     trans => {
-      const transferAcct = trans && getTransferAcct(trans);
+      const transferAcct = trans && getTransferAccount(trans);
       return transferAcct && !transferAcct.offbudget;
     },
-    [getTransferAcct],
+    [getTransferAccount],
   );
 
   const getCategory = useCallback(
@@ -548,24 +532,12 @@ const TransactionEditInner = memo(function TransactionEditInner({
 
     const onConfirmSave = () => {
       let transactionsToSave = unserializedTransactions;
-      if (adding) {
+      if (isAdding) {
         transactionsToSave = realizeTempTransactions(unserializedTransactions);
       }
 
       onSave(transactionsToSave);
-
-      if (adding || hasAccountChanged.current) {
-        const { account: accountId } = unserializedTransaction;
-        const account = accountsById?.[accountId];
-        if (account) {
-          navigate(`/accounts/${account.id}`);
-        } else {
-          // Handle the case where account is undefined
-          navigate(-1);
-        }
-      } else {
-        navigate(-1);
-      }
+      navigate(-1);
     };
 
     if (unserializedTransaction.reconciled) {
@@ -582,14 +554,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
     } else {
       onConfirmSave();
     }
-  }, [
-    accountsById,
-    adding,
-    dispatch,
-    navigate,
-    onSave,
-    unserializedTransactions,
-  ]);
+  }, [isAdding, dispatch, navigate, onSave, unserializedTransactions]);
 
   const onUpdateInner = useCallback(
     async (serializedTransaction, name, value) => {
@@ -758,11 +723,11 @@ const TransactionEditInner = memo(function TransactionEditInner({
 
   const account = getAccount(transaction);
   const isOffBudget = account && !!account.offbudget;
-  const title = getDescriptionPretty(
+  const title = getPrettyPayee({
     transaction,
-    getPayee(transaction),
-    getTransferAcct(transaction),
-  );
+    payee: getPayee(transaction),
+    transferAccount: getTransferAccount(transaction),
+  });
 
   const transactionDate = parseDate(transaction.date, dateFormat, new Date());
   const dateDefaultValue = monthUtils.dayFromDate(transactionDate);
@@ -773,7 +738,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
         <MobilePageHeader
           title={
             transaction.payee == null
-              ? adding
+              ? isAdding
                 ? 'New Transaction'
                 : 'Transaction'
               : title
@@ -788,7 +753,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
       footer={
         <Footer
           transactions={transactions}
-          adding={adding}
+          isAdding={isAdding}
           onAdd={onSaveInner}
           onSave={onSaveInner}
           onSplit={onSplit}
@@ -806,7 +771,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
             alignItems: 'center',
           }}
         >
-          <FieldLabel title="Amount" flush style={{ marginBottom: 0 }} />
+          <FieldLabel title={t('Amount')} flush style={{ marginBottom: 0 }} />
           <FocusableAmountInput
             value={transaction.amount}
             zeroSign="-"
@@ -825,7 +790,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
         </View>
 
         <View>
-          <FieldLabel title="Payee" />
+          <FieldLabel title={t('Payee')} />
           <TapField
             textStyle={{
               ...(transaction.is_parent && {
@@ -833,7 +798,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
                 fontWeight: 300,
               }),
             }}
-            value={getPrettyPayee(transaction)}
+            value={title}
             disabled={
               editingField &&
               editingField !== getFieldName(transaction.id, 'payee')
@@ -845,7 +810,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
 
         {!transaction.is_parent && (
           <View>
-            <FieldLabel title="Category" />
+            <FieldLabel title={t('Category')} />
             <TapField
               style={{
                 ...((isOffBudget || isBudgetTransfer(transaction)) && {
@@ -881,7 +846,8 @@ const TransactionEditInner = memo(function TransactionEditInner({
             }}
             isOffBudget={isOffBudget}
             getCategory={getCategory}
-            getPrettyPayee={getPrettyPayee}
+            getPayee={getPayee}
+            getTransferAccount={getTransferAccount}
             isBudgetTransfer={isBudgetTransfer}
             onUpdate={onUpdateInner}
             onEditField={onEditFieldInner}
@@ -916,14 +882,14 @@ const TransactionEditInner = memo(function TransactionEditInner({
                   color: theme.formLabelText,
                 }}
               >
-                Split
+                {t('Split')}
               </Text>
             </Button>
           </View>
         )}
 
         <View>
-          <FieldLabel title="Account" />
+          <FieldLabel title={t('Account')} />
           <TapField
             disabled={
               editingField &&
@@ -937,7 +903,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
 
         <View style={{ flexDirection: 'row' }}>
           <View style={{ flex: 1 }}>
-            <FieldLabel title="Date" />
+            <FieldLabel title={t('Date')} />
             <InputField
               type="date"
               disabled={
@@ -961,12 +927,12 @@ const TransactionEditInner = memo(function TransactionEditInner({
           </View>
           {transaction.reconciled ? (
             <View style={{ alignItems: 'center' }}>
-              <FieldLabel title="Reconciled" />
+              <FieldLabel title={t('Reconciled')} />
               <Toggle id="Reconciled" isOn isDisabled />
             </View>
           ) : (
             <View style={{ alignItems: 'center' }}>
-              <FieldLabel title="Cleared" />
+              <FieldLabel title={t('Cleared')} />
               <ToggleField
                 id="cleared"
                 isOn={transaction.cleared}
@@ -977,7 +943,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
         </View>
 
         <View>
-          <FieldLabel title="Notes" />
+          <FieldLabel title={t('Notes')} />
           <InputField
             disabled={
               editingField &&
@@ -991,7 +957,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
           />
         </View>
 
-        {!adding && (
+        {!isAdding && (
           <View style={{ alignItems: 'center' }}>
             <Button
               onClick={() => onDeleteInner(transaction.id)}
@@ -1017,7 +983,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
                   userSelect: 'none',
                 }}
               >
-                Delete transaction
+                {t('Delete transaction')}
               </Text>
             </Button>
           </View>
@@ -1057,8 +1023,8 @@ function TransactionEditUnconnected({
   const dispatch = useDispatch();
   const [transactions, setTransactions] = useState([]);
   const [fetchedTransactions, setFetchedTransactions] = useState([]);
-  const adding = useRef(false);
-  const deleted = useRef(false);
+  const isAdding = useRef(false);
+  const isDeleted = useRef(false);
 
   useEffect(() => {
     let unmounted = false;
@@ -1089,7 +1055,7 @@ function TransactionEditUnconnected({
     if (transactionId !== 'new') {
       fetchTransaction();
     } else {
-      adding.current = true;
+      isAdding.current = true;
     }
 
     return () => {
@@ -1098,7 +1064,7 @@ function TransactionEditUnconnected({
   }, [transactionId]);
 
   useEffect(() => {
-    if (adding.current) {
+    if (isAdding.current) {
       setTransactions(
         makeTemporaryTransactions(
           locationState?.accountId || lastTransaction?.account || null,
@@ -1167,7 +1133,7 @@ function TransactionEditUnconnected({
 
   const onSave = useCallback(
     async newTransactions => {
-      if (deleted.current) {
+      if (isDeleted.current) {
         return;
       }
 
@@ -1191,7 +1157,7 @@ function TransactionEditUnconnected({
         // }
       }
 
-      if (adding.current) {
+      if (isAdding.current) {
         // The first one is always the "parent" and the only one we care
         // about
         dispatch(setLastTransaction(newTransactions[0]));
@@ -1204,9 +1170,9 @@ function TransactionEditUnconnected({
     async id => {
       const changes = deleteTransaction(transactions, id);
 
-      if (adding.current) {
+      if (isAdding.current) {
         // Adding a new transactions, this disables saving when the component unmounts
-        deleted.current = true;
+        isDeleted.current = true;
       } else {
         const _remoteUpdates = await send('transactions-batch-update', {
           deleted: changes.diff.deleted,
@@ -1259,7 +1225,7 @@ function TransactionEditUnconnected({
     >
       <TransactionEditInner
         transactions={transactions}
-        adding={adding.current}
+        isAdding={isAdding.current}
         categories={categories}
         accounts={accounts}
         payees={payees}

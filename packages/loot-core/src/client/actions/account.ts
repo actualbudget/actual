@@ -204,7 +204,7 @@ export function syncAccounts(id?: string) {
 
       // Perform sync operation
       const res = await send('accounts-bank-sync', {
-        id: accountId,
+        ids: [accountId],
       });
 
       const success = handleSyncResponse(

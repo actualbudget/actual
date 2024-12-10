@@ -54,6 +54,7 @@ const filterFields = [
   'cleared',
   'reconciled',
   'saved',
+  'transfer',
 ].map(field => [field, mapField(field)]);
 
 function ConfigureField({
@@ -116,8 +117,18 @@ function ConfigureField({
               }}
             />
           ) : (
-            titleFirst(mapField(field))
+            <View
+              style={{
+                flexDirection: 'row',
+                width: '100%',
+                alignItems: 'center',
+                padding: 0,
+              }}
+            >
+              <View style={{ flexGrow: 1 }}>{titleFirst(mapField(field))}</View>
+            </View>
           )}
+
           <View style={{ flex: 1 }} />
         </Stack>
       </View>
@@ -221,6 +232,7 @@ function ConfigureField({
             }
             value={value}
             multi={op === 'oneOf' || op === 'notOneOf'}
+            op={op}
             style={{ marginTop: 10 }}
             onChange={v => {
               dispatch({ type: 'set-value', value: v });

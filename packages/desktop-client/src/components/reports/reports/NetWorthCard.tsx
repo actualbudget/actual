@@ -7,7 +7,6 @@ import {
   type NetWorthWidget,
 } from 'loot-core/src/types/models';
 
-import { useFeatureFlag } from '../../../hooks/useFeatureFlag';
 import { styles } from '../../../style';
 import { Block } from '../../common/Block';
 import { View } from '../../common/View';
@@ -40,7 +39,6 @@ export function NetWorthCard({
   onMetaChange,
   onRemove,
 }: NetWorthCardProps) {
-  const isDashboardsFeatureEnabled = useFeatureFlag('dashboards');
   const { t } = useTranslation();
   const { isNarrowWidth } = useResponsive();
 
@@ -67,11 +65,7 @@ export function NetWorthCard({
   return (
     <ReportCard
       isEditing={isEditing}
-      to={
-        isDashboardsFeatureEnabled
-          ? `/reports/net-worth/${widgetId}`
-          : '/reports/net-worth'
-      }
+      to={`/reports/net-worth/${widgetId}`}
       menuItems={[
         {
           name: 'rename',

@@ -26,7 +26,10 @@ export type RuleConditionOp =
   | 'contains'
   | 'doesNotContain'
   | 'hasTags'
-  | 'matches';
+  | 'and'
+  | 'matches'
+  | 'onBudget'
+  | 'offBudget';
 
 type FieldValueTypes = {
   account: string;
@@ -38,6 +41,8 @@ type FieldValueTypes = {
   payee_name: string;
   imported_payee: string;
   saved: string;
+  transfer: boolean;
+  parent: boolean;
   cleared: boolean;
   reconciled: boolean;
 };
@@ -73,6 +78,8 @@ export type RuleConditionEntity =
       | 'contains'
       | 'doesNotContain'
       | 'matches'
+      | 'onBudget'
+      | 'offBudget'
     >
   | BaseConditionEntity<
       'category',

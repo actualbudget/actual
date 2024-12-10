@@ -164,6 +164,7 @@ async function processTemplate(
       try {
         const obj = await CategoryTemplate.init(templates, id, month);
         availBudget += budgeted;
+        availBudget += obj.getLimitExcess();
         const p = obj.getPriorities();
         p.forEach(pr => priorities.push(pr));
         remainderWeight += obj.getRemainderWeight();
@@ -194,7 +195,7 @@ async function processTemplate(
   if (errors.length > 0) {
     return {
       sticky: true,
-      message: `There were errors interpreting some templates:`,
+      message: 'There were errors interpreting some templates:',
       pre: errors.join(`\n\n`),
     };
   }
@@ -211,7 +212,6 @@ async function processTemplate(
     const availStart = availBudget;
     const p = priorities[pi];
     for (let i = 0; i < catObjects.length; i++) {
-      if (availBudget <= 0 && p > 0) break;
       const ret = await catObjects[i].runTemplatesForPriority(
         p,
         availBudget,
@@ -219,14 +219,7 @@ async function processTemplate(
       );
       availBudget -= ret;
     }
-    if (availBudget <= 0) {
-      break;
-    }
   }
-  // run limits
-  catObjects.forEach(o => {
-    availBudget += o.applyLimit();
-  });
   // run remainder
   if (availBudget > 0 && remainderWeight) {
     const perWeight = availBudget / remainderWeight;

@@ -1,5 +1,6 @@
 // @ts-strict-ignore
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { send } from 'loot-core/src/platform/client/fetch';
 
@@ -24,6 +25,7 @@ type SimpleFinInitialiseProps = {
 export const SimpleFinInitialiseModal = ({
   onSuccess,
 }: SimpleFinInitialiseProps) => {
+  const { t } = useTranslation();
   const [token, setToken] = useState('');
   const [isValid, setIsValid] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
@@ -51,14 +53,14 @@ export const SimpleFinInitialiseModal = ({
       {({ state: { close } }) => (
         <>
           <ModalHeader
-            title="Set-up SimpleFIN"
+            title={t('Set-up SimpleFIN')}
             rightContent={<ModalCloseButton onPress={close} />}
           />
           <View style={{ display: 'flex', gap: 10 }}>
             <Text>
-              In order to enable bank-sync via SimpleFIN (only for North
-              American banks) you will need to create a token. This can be done
-              by creating an account with{' '}
+              {t(
+                'In order to enable bank-sync via SimpleFIN (only for North American banks), you will need to create a token. This can be done by creating an account with',
+              )}{' '}
               <Link
                 variant="external"
                 to="https://bridge.simplefin.org/"
@@ -70,7 +72,7 @@ export const SimpleFinInitialiseModal = ({
             </Text>
 
             <FormField>
-              <FormLabel title="Token:" htmlFor="token-field" />
+              <FormLabel title={t('Token:')} htmlFor="token-field" />
               <Input
                 id="token-field"
                 type="password"
@@ -94,7 +96,7 @@ export const SimpleFinInitialiseModal = ({
                 onSubmit(close);
               }}
             >
-              Save and continue
+              {t('Save and continue')}
             </ButtonWithLoading>
           </ModalButtons>
         </>

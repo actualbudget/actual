@@ -951,4 +951,16 @@ describe('Type conversions', () => {
     );
     expect(result.sql).toMatch('WHERE (transactions.payee IS NULL)');
   });
+
+  it('allows fields to be not nullable', () => {
+    // With validated refs
+    const result = generateSQLWithState(
+      q('transactions')
+        .filter({ payee: { $ne: null } })
+        .select()
+        .serialize(),
+      schemaWithRefs,
+    );
+    expect(result.sql).toMatch('WHERE (payees1.id IS NOT NULL)');
+  });
 });
