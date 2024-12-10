@@ -276,6 +276,8 @@ export function getScheduledAmount(
   amount: number | { num1: number; num2: number },
   inverse: boolean = false,
 ): number {
+  if (amount == null) return 0;
+
   if (typeof amount === 'number') {
     return inverse ? -amount : amount;
   }
