@@ -149,6 +149,7 @@ export function Settings() {
       }}
     >
       <View
+        data-testid="settings"
         style={{
           marginTop: 10,
           flexShrink: 0,
