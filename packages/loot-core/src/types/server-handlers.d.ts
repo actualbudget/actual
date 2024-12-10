@@ -178,7 +178,7 @@ export interface ServerHandlers {
 
   'account-move': (arg: { id; targetId }) => Promise<unknown>;
 
-  'secret-set': (arg: { name: string; value: string }) => Promise<null>;
+  'secret-set': (arg: { name: string; value: string | null }) => Promise<null>;
   'secret-check': (arg: string) => Promise<string | { error?: string }>;
 
   'gocardless-poll-web-token': (arg: {
