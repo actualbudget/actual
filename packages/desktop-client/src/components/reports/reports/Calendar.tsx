@@ -771,7 +771,7 @@ function CalendarWithHeader({
           onPress={() => {
             onApplyFilter({
               conditions: [
-                ...conditions,
+                ...conditions.filter(f => f.field !== 'date'),
                 {
                   field: 'date',
                   op: 'is',
