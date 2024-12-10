@@ -156,7 +156,7 @@ function Saved({ projected, onPress, show3Cols }) {
                 minFontSizePx={6}
                 maxFontSizePx={12}
                 mode="oneline"
-                title="Projected Savings"
+                title="Projected savings"
                 style={{
                   color: theme.formInputText,
                   textAlign: 'left',
