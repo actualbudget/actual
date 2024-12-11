@@ -64,7 +64,7 @@ function PasswordLogin({ setError, dispatch }) {
         style={{ fontSize: 15 }}
         onPress={onSubmitPassword}
       >
-        Sign in
+        <Trans>Sign in</Trans>
       </ButtonWithLoading>
     </View>
   );
@@ -119,22 +119,24 @@ function OpenIdLogin({ setError }) {
               }}
               onPress={onSubmitOpenId}
             >
-              Sign in with OpenID
+              <Trans>Sign in with OpenID</Trans>
             </Button>
           </View>
           {warnMasterCreation && (
             <>
               <label style={{ color: theme.warningText, marginTop: 10 }}>
-                The first user to login with OpenID will be the{' '}
-                <Text style={{ fontWeight: 'bold' }}>server owner</Text>. This
-                can&apos;t be changed using UI.
+                <Trans>
+                  The first user to login with OpenID will be the{' '}
+                  <Text style={{ fontWeight: 'bold' }}>server owner</Text>. This
+                  can&apos;t be changed using UI.
+                </Trans>
               </label>
               <Button
                 variant="bare"
                 onPress={() => setReviewOpenIdConfiguration(true)}
                 style={{ marginTop: 5 }}
               >
-                Review OpenID configuration
+                <Trans>Review OpenID configuration</Trans>
               </Button>
             </>
           )}
@@ -150,7 +152,7 @@ function OpenIdLogin({ setError }) {
               style={{ marginRight: 10 }}
               onPress={() => setReviewOpenIdConfiguration(false)}
             >
-              Cancel
+              <Trans>Cancel</Trans>
             </Button>,
           ]}
           onSetOpenId={async config => {
@@ -178,11 +180,11 @@ function HeaderLogin({ error }) {
           style={{ fontSize: 15 }}
           to={'/login/password?error=' + error}
         >
-          Login with Password
+          <Trans>Login with Password</Trans>
         </Link>
       ) : (
         <span>
-          Checking Header Token Login ...{' '}
+          <Trans>Checking Header Token Login ...</Trans>{' '}
           <AnimatedLoading style={{ width: 20, height: 20 }} />
         </span>
       )}
@@ -224,17 +226,17 @@ export function Login() {
   function getErrorMessage(error) {
     switch (error) {
       case 'invalid-header':
-        return 'Auto login failed - No header sent';
+        return t('Auto login failed - No header sent');
       case 'proxy-not-trusted':
-        return 'Auto login failed - Proxy not trusted';
+        return t('Auto login failed - Proxy not trusted');
       case 'invalid-password':
-        return 'Invalid password';
+        return t('Invalid password');
       case 'network-failure':
-        return 'Unable to contact the server';
+        return t('Unable to contact the server');
       case 'internal-error':
-        return 'Internal error';
+        return t('Internal error');
       default:
-        return `An unknown error occurred: ${error}`;
+        return t(`An unknown error occurred: {{error}}`, { error });
     }
   }
 
@@ -270,7 +272,7 @@ export function Login() {
               color: theme.pageTextLight,
               paddingTop: 5,
             }}
-            title="Select the login method"
+            title={t('Select the login method')}
           />
           <Select
             value={method}
