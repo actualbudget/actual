@@ -2,20 +2,20 @@
 
 Many of the build scripts are bash scripts and not natively invocable in Windows. To solve this, you can build the project using Git Bash.
 
-1. Install [Git & Git Bash for Windows](https://git-scm.com/downloads)
-2. Ensure you have activated [Developer Mode](https://docs.microsoft.com/en-us/windows/apps/get-started/enable-your-device-for-development)
-3. Install Node v16.x (latest version 17.x does not work due to issue with crypto package)
-4. Clone this repo
-5. Using Git Bash (run as administrator), change to the root of this repo
-6. From inside the bash shell, run `yarn install`
-7. From still inside the shell, run `yarn start:browser`
-8. Open your browser to [http://localhost:3001](http://localhost:3001)
+1. Install [Git & Git Bash for Windows](https://git-scm.com/downloads).
+2. Ensure you have activated [Developer Mode](https://docs.microsoft.com/en-us/windows/apps/get-started/enable-your-device-for-development).
+3. Install Node v16.x (latest version 17.x does not work due to issue with crypto package).
+4. Clone this repo.
+5. Using Git Bash (run as administrator), change to the root of this repo.
+6. From inside the bash shell, run `yarn install`.
+7. From still inside the shell, run `yarn start:browser`.
+8. Open your browser to [http://localhost:3001](http://localhost:3001).
 
-## How to build the Electron app on Windows
+## How to Build the Electron App on Windows
 
 1. Follow steps 1 - 6 above.
 2. Run `yarn start`. If you get an error about bundle.desktop.js, just <Key mod="ctrl" k="c" /> and rerun `yarn start`.
-3. If you get an error from electron, run `yarn rebuild-electron` and rerun `yarn start`;
+3. If you get an error from electron, run `yarn rebuild-electron` and rerun `yarn start`.
 
 # Errors
 
