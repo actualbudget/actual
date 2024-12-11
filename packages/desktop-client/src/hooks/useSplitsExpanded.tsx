@@ -73,7 +73,7 @@ export function useSplitsExpanded() {
   return useMemo(
     () => ({
       ...data,
-      expanded: (id: string) =>
+      isExpanded: (id: string) =>
         data.state.mode === 'collapse'
           ? !data.state.ids.has(id)
           : data.state.ids.has(id),
