@@ -1,8 +1,8 @@
-# Feature Flags (experimental features)
+# Feature Flags (Experimental Features)
 
 Feature flags (experimental features) are a way to enable or disable certain features in the application. This is useful when you want to test a feature with a small group of users before rolling it out to everyone. It is also useful when building a larger feature as it allows breaking it up in to smaller releasable chunks.
 
-For example: custom reports initially was released as a read-only version under a feature flag. Later the saving functionality was added. This allowed to put the feature in the hands of real users before announcing it as a stable first-party feature.
+For example: `custom reports` initially was released as a read-only version under a feature flag. Later the saving functionality was added. This allowed us to put the feature in the hands of real users before announcing it as a stable first-party feature.
 
 In short, feature flags allow:
 
@@ -11,7 +11,7 @@ In short, feature flags allow:
 
 However, feature flags also have a downside. They can make the code more complex and harder to understand. They can also lead to technical debt if not managed properly. As such - we impose a strict policy for managing them.
 
-**Experimental features that have not had any active development for over 3 months will be removed from the codebase.** This is to ensure the codebase does not become cluttered with unfinished features. If you wish to bring back an experimental feature that was removed - please free to bring it back as long as you can commit to helping with finishing it up for a first-party release.
+**Experimental features that have not had any active development for over 3 months will be removed from the codebase.** This is to ensure the codebase does not become cluttered with unfinished features. If you wish to bring back an experimental feature that was removed - please feel free to bring it back as long as you can commit to helping with finishing it up for a first-party release.
 
 Before removing an experimental feature flag - we will try our best to communicate with the original engineer/s who implemented it. However, if we cannot reach them - we will remove the feature flag.
 
