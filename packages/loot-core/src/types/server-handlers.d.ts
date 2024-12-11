@@ -121,7 +121,7 @@ export interface ServerHandlers {
   'payees-get-rules': (arg: { id: string }) => Promise<RuleEntity[]>;
 
   'make-filters-from-conditions': (arg: {
-    conditions;
+    conditions: unknown;
   }) => Promise<{ filters: unknown[] }>;
 
   getCell: (arg: {

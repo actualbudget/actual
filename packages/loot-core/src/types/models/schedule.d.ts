@@ -1,6 +1,6 @@
 import type { AccountEntity } from './account';
 import type { PayeeEntity } from './payee';
-import type { RuleEntity } from './rule';
+import type { RuleConditionEntity, RuleEntity } from './rule';
 
 export interface RecurPattern {
   value: number;
@@ -9,7 +9,7 @@ export interface RecurPattern {
 
 export interface RecurConfig {
   frequency: 'daily' | 'weekly' | 'monthly' | 'yearly';
-  interval: number;
+  interval?: number;
   patterns?: RecurPattern[];
   skipWeekend?: boolean;
   start: string;
@@ -35,9 +35,11 @@ export interface ScheduleEntity {
   _amount: number | { num1: number; num2: number };
   _amountOp: string;
   _date: RecurConfig;
-  _conditions: unknown;
-  _actions: unknown;
+  _conditions: RuleConditionEntity[];
+  _actions: Array<{ op: unknown }>;
 }
+
+export type NewScheduleEntity = Omit<ScheduleEntity, 'id'>;
 
 export type DiscoverScheduleEntity = {
   id: ScheduleEntity['id'];
@@ -45,18 +47,5 @@ export type DiscoverScheduleEntity = {
   payee: PayeeEntity['id'];
   date: ScheduleEntity['_date'];
   amount: ScheduleEntity['_amount'];
-  _conditions: Array<
-    | { op: 'is'; field: 'account'; value: AccountEntity['id'] }
-    | { op: 'is'; field: 'payee'; value: PayeeEntity['id'] }
-    | {
-        op: 'is' | 'isapprox';
-        field: 'date';
-        value: ScheduleEntity['_date'];
-      }
-    | {
-        op: 'is' | 'isapprox';
-        field: 'amount';
-        value: ScheduleEntity['_amount'];
-      }
-  >;
+  _conditions: ScheduleEntity['_conditions'];
 };

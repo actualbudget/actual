@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, { useEffect, useReducer } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
@@ -11,6 +12,12 @@ import { send, sendCatch } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { q } from 'loot-core/src/shared/query';
 import { extractScheduleConds } from 'loot-core/src/shared/schedules';
+import {
+  type TransactionEntity,
+  type ScheduleEntity,
+  type RuleConditionOp,
+  type RecurConfig,
+} from 'loot-core/types/models';
 
 import { useDateFormat } from '../../hooks/useDateFormat';
 import { usePayees } from '../../hooks/usePayees';
@@ -33,10 +40,30 @@ import { SimpleTransactionsTable } from '../transactions/SimpleTransactionsTable
 import { AmountInput, BetweenAmountInput } from '../util/AmountInput';
 import { GenericInput } from '../util/GenericInput';
 
-function updateScheduleConditions(schedule, fields) {
+type Fields = {
+  payee: null | string;
+  account: null | string;
+  amount: null | number | { num1: number; num2: number };
+  amountOp: null | string;
+  date: null | string | RecurConfig;
+  posts_transaction: boolean;
+  name: null | string;
+};
+
+function updateScheduleConditions(
+  schedule: Partial<ScheduleEntity>,
+  fields: Fields,
+) {
   const conds = extractScheduleConds(schedule._conditions);
 
-  const updateCond = (cond, op, field, value) => {
+  const updateCond = (
+    cond: ReturnType<typeof extractScheduleConds>[keyof ReturnType<
+      typeof extractScheduleConds
+    >],
+    op: RuleConditionOp,
+    field: string,
+    value: (typeof fields)[keyof typeof fields],
+  ) => {
     if (cond) {
       return { ...cond, value };
     }
@@ -69,11 +96,16 @@ function updateScheduleConditions(schedule, fields) {
         field: 'amount',
         value: fields.amount,
       },
-    ].filter(Boolean),
+    ].filter(val => !!val),
   };
 }
 
-export function ScheduleDetails({ id, transaction }) {
+type ScheduleDetailsProps = {
+  id: string;
+  transaction: TransactionEntity;
+};
+
+export function ScheduleDetails({ id, transaction }: ScheduleDetailsProps) {
   const { t } = useTranslation();
 
   const adding = id == null;
@@ -83,7 +115,67 @@ export function ScheduleDetails({ id, transaction }) {
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
 
   const [state, dispatch] = useReducer(
-    (state, action) => {
+    (
+      state: {
+        isCustom?: boolean;
+        schedule: null | Partial<ScheduleEntity>;
+        upcomingDates: null | string[];
+        error: null | string;
+        fields: Fields;
+        transactions: TransactionEntity[];
+        transactionsMode: 'matched' | 'linked';
+      },
+      action:
+        | {
+            type: 'set-schedule';
+            schedule: Partial<ScheduleEntity>;
+          }
+        | {
+            type: 'set-field';
+            field: 'name' | 'account' | 'payee';
+            value: string;
+          }
+        | {
+            type: 'set-field';
+            field: 'amountOp';
+            value: 'is' | 'isbetween' | 'isapprox';
+          }
+        | {
+            type: 'set-field';
+            field: 'amount';
+            value: number | { num1: number; num2: number };
+          }
+        | {
+            type: 'set-field';
+            field: 'date';
+            value: string | RecurConfig;
+          }
+        | {
+            type: 'set-field';
+            field: 'posts_transaction';
+            value: boolean;
+          }
+        | {
+            type: 'set-transactions';
+            transactions: TransactionEntity[];
+          }
+        | {
+            type: 'set-repeats';
+            repeats: boolean;
+          }
+        | {
+            type: 'set-upcoming-dates';
+            dates: null | string[];
+          }
+        | {
+            type: 'form-error';
+            error: null | string;
+          }
+        | {
+            type: 'switch-transactions';
+            mode: 'matched' | 'linked';
+          },
+    ) => {
       switch (action.type) {
         case 'set-schedule': {
           const schedule = action.schedule;
@@ -91,22 +183,23 @@ export function ScheduleDetails({ id, transaction }) {
           // See if there are custom rules
           const conds = extractScheduleConds(schedule._conditions);
           const condsSet = new Set(Object.values(conds));
-          const isCustom =
-            schedule._conditions.find(c => !condsSet.has(c)) ||
-            schedule._actions.find(a => a.op !== 'link-schedule');
+          const isCustom = !!(
+            schedule._conditions?.find(c => !condsSet.has(c)) ||
+            schedule._actions?.find(a => a.op !== 'link-schedule')
+          );
 
           return {
             ...state,
             schedule: action.schedule,
             isCustom,
             fields: {
-              payee: schedule._payee,
-              account: schedule._account,
+              payee: schedule._payee ?? null,
+              account: schedule._account ?? null,
               amount: schedule._amount || 0,
               amountOp: schedule._amountOp || 'isapprox',
-              date: schedule._date,
-              posts_transaction: action.schedule.posts_transaction,
-              name: schedule.name,
+              date: schedule._date ?? null,
+              posts_transaction: action.schedule.posts_transaction ?? false,
+              name: schedule.name ?? null,
             },
           };
         }
@@ -115,7 +208,9 @@ export function ScheduleDetails({ id, transaction }) {
             throw new Error('Unknown field: ' + action.field);
           }
 
-          const fields = { [action.field]: action.value };
+          const fields: { [key: string]: typeof action.value | undefined } = {
+            [action.field]: action.value,
+          };
 
           // If we are changing the amount operator either to or
           // away from the `isbetween` operator, the amount value is
@@ -141,7 +236,7 @@ export function ScheduleDetails({ id, transaction }) {
               fields.amount =
                 typeof state.fields.amount === 'number'
                   ? state.fields.amount
-                  : state.fields.amount.num1;
+                  : state.fields.amount?.num1;
             }
           }
 
@@ -162,11 +257,12 @@ export function ScheduleDetails({ id, transaction }) {
             fields: {
               ...state.fields,
               date: action.repeats
-                ? {
+                ? ({
                     frequency: 'monthly',
+                    endMode: 'never',
                     start: monthUtils.currentDay(),
                     patterns: [],
-                  }
+                  } satisfies RecurConfig)
                 : monthUtils.currentDay(),
             },
           };
@@ -183,7 +279,7 @@ export function ScheduleDetails({ id, transaction }) {
           return { ...state, transactionsMode: action.mode };
 
         default:
-          throw new Error('Unknown action: ' + action.type);
+          throw new Error('Unknown action');
       }
     },
     {
@@ -219,11 +315,11 @@ export function ScheduleDetails({ id, transaction }) {
           skipWeekend: false,
           weekendSolveMode: 'after',
           endMode: 'never',
-          endOccurrences: '1',
+          endOccurrences: 1,
           endDate: monthUtils.currentDay(),
-        };
+        } satisfies RecurConfig;
 
-        const schedule = fromTrans
+        const schedule: Partial<ScheduleEntity> = fromTrans
           ? {
               posts_transaction: false,
               _conditions: [{ op: 'isapprox', field: 'date', value: date }],
@@ -258,30 +354,33 @@ export function ScheduleDetails({ id, transaction }) {
     }
 
     run();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     async function run() {
       const date = state.fields.date;
 
-      if (date == null) {
+      if (date === null) {
         dispatch({ type: 'set-upcoming-dates', dates: null });
-      } else {
-        if (date.frequency) {
-          const { data } = await sendCatch('schedule/get-upcoming-dates', {
-            config: date,
-            count: 3,
-          });
-          dispatch({ type: 'set-upcoming-dates', dates: data });
-        } else {
-          const today = monthUtils.currentDay();
-          if (date === today || monthUtils.isAfter(date, today)) {
-            dispatch({ type: 'set-upcoming-dates', dates: [date] });
-          } else {
-            dispatch({ type: 'set-upcoming-dates', dates: null });
-          }
-        }
+        return;
       }
+
+      if (typeof date === 'string') {
+        const today = monthUtils.currentDay();
+        if (date === today || monthUtils.isAfter(date, today)) {
+          dispatch({ type: 'set-upcoming-dates', dates: [date] });
+        } else {
+          dispatch({ type: 'set-upcoming-dates', dates: null });
+        }
+        return;
+      }
+
+      const { data } = await sendCatch('schedule/get-upcoming-dates', {
+        config: date,
+        count: 3,
+      });
+      dispatch({ type: 'set-upcoming-dates', dates: data });
     }
     run();
   }, [state.fields.date]);
@@ -292,7 +391,7 @@ export function ScheduleDetails({ id, transaction }) {
       state.schedule.id &&
       state.transactionsMode === 'linked'
     ) {
-      const live = liveQuery(
+      const live = liveQuery<TransactionEntity>(
         q('transactions')
           .filter({ schedule: state.schedule.id })
           .select('*')
@@ -308,21 +407,20 @@ export function ScheduleDetails({ id, transaction }) {
 
   useEffect(() => {
     let current = true;
-    let unsubscribe;
+    let unsubscribe: (() => void) | undefined;
 
     if (state.schedule && state.transactionsMode === 'matched') {
-      const { error, conditions: originalConditions } =
-        updateScheduleConditions(state.schedule, state.fields);
+      const updated = updateScheduleConditions(state.schedule, state.fields);
 
-      if (error) {
-        dispatch({ type: 'form-error', error });
+      if ('error' in updated) {
+        dispatch({ type: 'form-error', error: updated.error });
         return;
       }
 
       // *Extremely* gross hack because the rules are not mapped to
       // public names automatically. We really should be doing that
       // at the database layer
-      const conditions = originalConditions.map(cond => {
+      const conditions = updated.conditions.map(cond => {
         if (cond.field === 'description') {
           return { ...cond, field: 'payee' };
         } else if (cond.field === 'acct') {
@@ -335,7 +433,7 @@ export function ScheduleDetails({ id, transaction }) {
         conditions,
       }).then(({ filters }) => {
         if (current) {
-          const live = liveQuery(
+          const live = liveQuery<TransactionEntity>(
             q('transactions')
               .filter({ $and: filters })
               .select('*')
@@ -364,13 +462,13 @@ export function ScheduleDetails({ id, transaction }) {
     transaction ? [transaction.id] : [],
   );
 
-  async function onSave(close) {
+  async function onSave(close: () => void, schedule: Partial<ScheduleEntity>) {
     dispatch({ type: 'form-error', error: null });
     if (state.fields.name) {
       const { data: sameName } = await runQuery(
         q('schedules').filter({ name: state.fields.name }).select('id'),
       );
-      if (sameName.length > 0 && sameName[0].id !== state.schedule.id) {
+      if (sameName.length > 0 && sameName[0].id !== schedule.id) {
         dispatch({
           type: 'form-error',
           error: t('There is already a schedule with this name'),
@@ -380,7 +478,7 @@ export function ScheduleDetails({ id, transaction }) {
     }
 
     const { error, conditions } = updateScheduleConditions(
-      state.schedule,
+      schedule,
       state.fields,
     );
 
@@ -393,7 +491,7 @@ export function ScheduleDetails({ id, transaction }) {
       adding ? 'schedule/create' : 'schedule/update',
       {
         schedule: {
-          id: state.schedule.id,
+          id: schedule.id,
           posts_transaction: state.fields.posts_transaction,
           name: state.fields.name,
         },
@@ -418,8 +516,8 @@ export function ScheduleDetails({ id, transaction }) {
     close();
   }
 
-  async function onEditRule(ruleId) {
-    const rule = await send('rule-get', { id: ruleId || state.schedule.rule });
+  async function onEditRule(id: string) {
+    const rule = await send('rule-get', { id });
 
     globalDispatch(
       pushModal('edit-rule', {
@@ -432,35 +530,41 @@ export function ScheduleDetails({ id, transaction }) {
     );
   }
 
-  async function onLinkTransactions(ids, scheduleId) {
+  async function onLinkTransactions(ids: string[], scheduleId?: string) {
     await send('transactions-batch-update', {
       updated: ids.map(id => ({
         id,
-        schedule: scheduleId || state.schedule.id,
+        schedule: scheduleId,
       })),
     });
     selectedInst.dispatch({ type: 'select-none' });
   }
 
-  async function onUnlinkTransactions(ids) {
+  async function onUnlinkTransactions(ids: string[]) {
     await send('transactions-batch-update', {
       updated: ids.map(id => ({ id, schedule: null })),
     });
     selectedInst.dispatch({ type: 'select-none' });
   }
 
-  if (state.schedule == null) {
+  const { schedule } = state;
+
+  if (schedule == null) {
     return null;
   }
 
-  function onSwitchTransactions(mode) {
+  function onSwitchTransactions(mode: 'linked' | 'matched') {
     dispatch({ type: 'switch-transactions', mode });
     selectedInst.dispatch({ type: 'select-none' });
   }
 
-  const payee = payees ? payees[state.fields.payee] : null;
+  const payee =
+    payees && state.fields.payee ? payees[state.fields.payee] : null;
   // This is derived from the date
-  const repeats = state.fields.date ? !!state.fields.date.frequency : false;
+  const repeats =
+    state.fields.date && typeof state.fields.date !== 'string'
+      ? !!state.fields.date.frequency
+      : false;
   return (
     <Modal name="schedule-edit">
       {({ state: { close } }) => (
@@ -477,6 +581,7 @@ export function ScheduleDetails({ id, transaction }) {
             <FormField style={{ flex: 1 }}>
               <FormLabel title={t('Schedule Name')} htmlFor="name-field" />
               <InitialFocus>
+                {/* @ts-expect-error should be auto-patched once GenericInput is converted to TS */}
                 <GenericInput
                   field="string"
                   type="string"
@@ -530,6 +635,7 @@ export function ScheduleDetails({ id, transaction }) {
                   htmlFor="amount-field"
                   style={{ margin: 0, flex: 1 }}
                 />
+                {/* @ts-expect-error should be auto-patched once GenericInput is converted to TS */}
                 <OpSelect
                   ops={['isapprox', 'is', 'isbetween']}
                   value={state.fields.amountOp}
@@ -561,6 +667,7 @@ export function ScheduleDetails({ id, transaction }) {
               </Stack>
               {state.fields.amountOp === 'isbetween' ? (
                 <BetweenAmountInput
+                  // @ts-expect-error fix me
                   defaultValue={state.fields.amount}
                   onChange={value =>
                     dispatch({
@@ -573,6 +680,7 @@ export function ScheduleDetails({ id, transaction }) {
               ) : (
                 <AmountInput
                   id="amount-field"
+                  // @ts-expect-error fix me
                   value={state.fields.amount}
                   onUpdate={value =>
                     dispatch({
@@ -594,6 +702,7 @@ export function ScheduleDetails({ id, transaction }) {
             <View style={{ width: '13.44rem' }}>
               {repeats ? (
                 <RecurringSchedulePicker
+                  // @ts-expect-error fix me
                   value={state.fields.date}
                   onChange={value =>
                     dispatch({ type: 'set-field', field: 'date', value })
@@ -601,6 +710,7 @@ export function ScheduleDetails({ id, transaction }) {
                 />
               ) : (
                 <DateSelect
+                  // @ts-expect-error fix me
                   value={state.fields.date}
                   onSelect={date =>
                     dispatch({ type: 'set-field', field: 'date', value: date })
@@ -694,7 +804,7 @@ export function ScheduleDetails({ id, transaction }) {
                 </Trans>
               </Text>
 
-              {!adding && state.schedule.rule && (
+              {!adding && schedule.rule && (
                 <Stack direction="row" align="center" style={{ marginTop: 20 }}>
                   {state.isCustom && (
                     <Text
@@ -710,7 +820,10 @@ export function ScheduleDetails({ id, transaction }) {
                       </Trans>
                     </Text>
                   )}
-                  <Button onPress={() => onEditRule()} isDisabled={adding}>
+                  <Button
+                    onPress={() => onEditRule(schedule.rule)}
+                    isDisabled={adding}
+                  >
                     <Trans>Edit as rule</Trans>
                   </Button>
                 </Stack>
@@ -771,7 +884,7 @@ export function ScheduleDetails({ id, transaction }) {
                     onSelect={(name, ids) => {
                       switch (name) {
                         case 'link':
-                          onLinkTransactions(ids);
+                          onLinkTransactions(ids, schedule.id);
                           break;
                         case 'unlink':
                           onUnlinkTransactions(ids);
@@ -818,7 +931,7 @@ export function ScheduleDetails({ id, transaction }) {
             <Button
               variant="primary"
               onPress={() => {
-                onSave(close);
+                onSave(close, schedule);
               }}
             >
               {adding ? t('Add') : t('Save')}
@@ -830,7 +943,12 @@ export function ScheduleDetails({ id, transaction }) {
   );
 }
 
-function NoTransactionsMessage(props) {
+type NoTransactionsMessageProps = {
+  error: string | null;
+  transactionsMode: 'matched' | 'linked';
+};
+
+function NoTransactionsMessage(props: NoTransactionsMessageProps) {
   const { t } = useTranslation();
 
   return (
