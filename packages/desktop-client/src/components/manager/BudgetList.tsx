@@ -220,7 +220,7 @@ function FileState({
                 color: theme.pageTextLight,
               }}
             >
-              Owner:
+              <Trans>Owner:</Trans>
             </Text>
             <Text
               style={{
