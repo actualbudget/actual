@@ -1,4 +1,5 @@
 import React from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 
 import { pushModal } from 'loot-core/client/actions';
@@ -13,6 +14,8 @@ import { useMultiuserEnabled, useLoginMethod } from '../ServerContext';
 import { Setting } from './UI';
 
 export function AuthSettings() {
+  const { t } = useTranslation();
+
   const multiuserEnabled = useMultiuserEnabled();
   const loginMethod = useLoginMethod();
   const dispatch = useDispatch();
@@ -23,9 +26,9 @@ export function AuthSettings() {
       primaryAction={
         <>
           <label>
-            OpenID is{' '}
+            <Trans>OpenID is</Trans>{' '}
             <label style={{ fontWeight: 'bold' }}>
-              {loginMethod === 'openid' ? 'enabled' : 'disabled'}
+              {loginMethod === 'openid' ? t('enabled') : t('disabled')}
             </label>
           </label>
           {loginMethod === 'password' && (
@@ -48,7 +51,7 @@ export function AuthSettings() {
               </Button>
               <Label
                 style={{ paddingTop: 5 }}
-                title="OpenID is required to enable multi-user mode."
+                title={t('OpenID is required to enable multi-user mode.')}
               />
             </>
           )}
@@ -67,11 +70,13 @@ export function AuthSettings() {
                   )
                 }
               >
-                Disable OpenID
+                <Trans>Disable OpenID</Trans>
               </Button>
               {multiuserEnabled && (
                 <label style={{ paddingTop: 5, color: theme.warningText }}>
-                  Disabling OpenID will deactivate multi-user mode.
+                  <Trans>
+                    Disabling OpenID will deactivate multi-user mode.
+                  </Trans>
                 </label>
               )}
             </>
@@ -80,8 +85,10 @@ export function AuthSettings() {
       }
     >
       <Text>
-        <strong>Authentication method</strong> modifies how users log in to the
-        system.
+        <Trans>
+          <strong>Authentication method</strong> modifies how users log in to
+          the system.
+        </Trans>
       </Text>
     </Setting>
   ) : null;
