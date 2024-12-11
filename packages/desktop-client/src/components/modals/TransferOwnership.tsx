@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
-
-import { t } from 'i18next';
 
 import { addNotification, closeAndLoadBudget } from 'loot-core/client/actions';
 import { type State } from 'loot-core/client/state-types';
@@ -29,6 +28,8 @@ type TransferOwnershipProps = {
 export function TransferOwnership({
   onSave: originalOnSave,
 }: TransferOwnershipProps) {
+  const { t } = useTranslation();
+
   const userData = useSelector((state: State) => state.user.data);
   const actions = useActions();
   const [userId, setUserId] = useState('');
@@ -100,7 +101,7 @@ export function TransferOwnership({
           />
           <Stack direction="row" style={{ marginTop: 10 }}>
             <FormField style={{ flex: 1 }}>
-              <FormLabel title="User" htmlFor="user-field" />
+              <FormLabel title={t('User')} htmlFor="user-field" />
               {availableUsers.length > 0 && (
                 <View>
                   <Select
@@ -165,7 +166,7 @@ export function TransferOwnership({
           >
             {error && <Text style={{ color: theme.errorText }}>{error}</Text>}
             <Button style={{ marginRight: 10 }} onPress={actions.popModal}>
-              Cancel
+              <Trans>Cancel</Trans>
             </Button>
 
             <Button
