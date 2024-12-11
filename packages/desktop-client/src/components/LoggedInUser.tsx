@@ -209,7 +209,9 @@ export function LoggedInUser({
 
       {!loading && multiuserEnabled && userData?.userName && (
         <small>
-          (logged as: <span>{userData?.displayName}</span>)
+          <Trans>
+            (logged in as: <span>{userData?.displayName}</span>)
+          </Trans>
         </small>
       )}
 
