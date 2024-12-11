@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
 import { useTranslation } from 'react-i18next';
+import { useDispatch } from 'react-redux';
 
 import { resetSync } from 'loot-core/client/actions';
 import { send } from 'loot-core/src/platform/client/fetch';

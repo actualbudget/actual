@@ -1,6 +1,6 @@
 import React, { type ReactNode, useEffect } from 'react';
-import { useDispatch } from 'react-redux';
 import { useTranslation } from 'react-i18next';
+import { useDispatch } from 'react-redux';
 
 import { css } from '@emotion/css';
 
