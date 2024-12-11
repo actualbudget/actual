@@ -10,7 +10,7 @@ All of the repositories can be found in the [Actual Budget](https://github.com/a
 
 ## Actual
 
-This repository holds all of the front end code for the Actual Budget application, along with the syncing engine and the importers for YNAB4 and YNAB5.
+This repository holds all of the front end code for the Actual Budget application, along with the syncing engine and the importers for YNAB4 and YNAB5 (also commonly referred to as nYNAB).
 
 ```
 ├── actual
@@ -31,7 +31,7 @@ While this is called Desktop Client, this actually has nothing to do with the de
 
 ### Desktop Electron
 
-This is the source code for the Desktop application, in it's current state it is not configured to work with the self hosted version of Actual Budget, however the source code is available for this to be completed.
+This is the source code for the Desktop application, in its current state it is not configured to work with the self hosted version of Actual Budget, however the source code is available for this to be completed.
 
 ### Loot Core
 
@@ -61,6 +61,6 @@ You can see this in the [package.json](https://github.com/actualbudget/actual-se
   },
 ```
 
-So, you might see some changes being made in the Actual repository but them changes are not reflected in your deployment despite you having the latest version pulled, why? Because Actual hasn't been updated in [NPM](https://www.npmjs.com/package/@actual-app/web).
+So, you might see some changes being made in the Actual repository but those changes are not reflected in your deployment despite you having the latest version pulled, why? Because Actual hasn't been updated in [NPM](https://www.npmjs.com/package/@actual-app/web).
 
 Actual is only updated in NPM when a release is created.
