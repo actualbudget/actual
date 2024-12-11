@@ -52,17 +52,17 @@ Here are some initial guidelines for how contributions will be treated:
 
 ### The Project Layout
 
-The layout of the codebase in Actual Budget takes a bit of getting used to and finding things at first can be a little tricky, we have put together a help [document](./project-details/index.md) that shows the structure of the project, while this isn't 100% complete it will give you a good starting point for your development.
+The layout of the codebase in Actual Budget takes a bit of getting used to and finding things at first can be a little tricky. We have put together a help [document](./project-details/index.md) that shows the structure of the project. While this isn't 100% complete it will give you a good starting point for your development.
 
-### Working on existing issues
+### Working on Existing Issues
 
-Existing issues are a good place to start especially if you want to contribute to Actual Budget but don't know where to start, some of the things to be aware of are;
+Existing issues are a good place to start, especially if you want to contribute to Actual Budget but don't know where to start, some of the things to be aware of are:
 
-1. All issues are open to be worked on by anyone
+1. All issues are open to be worked on by anyone.
 2. Working on the highest rated [feature requests](https://github.com/actualbudget/actual/issues?q=label%3A%22needs+votes%22+sort%3Areactions-%2B1-desc+) would also be appreciated.
-3. We do not assign issues to specific people
+3. We do not assign issues to specific people.
 
-### Submitting an idea for something you want to work on
+### Submitting an Idea for Something you Want to Work On
 
 Okay, so you have an idea for something that you think would be great in Actual Budget, but how do you pitch it to the community so that all your hard work is not wasted?
 
