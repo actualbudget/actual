@@ -1,6 +1,6 @@
 # ActualQL Examples
 
-## Searching by month or year
+## Searching by Month or Year
 
 ActualQL supports various functions to convert data, as well as the ability to convert field data. For example, saying `{ $month: '2021-01-01' }` would come back with the month of `2021-01`. But we need a way to apply that to the `date` field, and we use `$transform` for that.
 
@@ -16,7 +16,7 @@ This would return all transactions in the month of `2021-01`. We've applied the 
 
 You can substitute `$year` to do the same thing for year.
 
-## Total Amount per Payee between 6 Apr 2020 and 5 Apr 2021
+## Total Amount per Payee Between 6 Apr 2020 and 5 Apr 2021
 
 ```js
 (
@@ -37,7 +37,7 @@ You can substitute `$year` to do the same thing for year.
 });
 ```
 
-## Total Amount of all transactions with Note containing #interest (P) between 6 Apr 2020 and 5 Apr 2021
+## Total Amount of all Transactions With Note Containing #interest (P) Between 6 Apr 2020 and 5 Apr 2021
 
 ```js
 (
@@ -73,7 +73,7 @@ or
 ).data[0].total / 100;
 ```
 
-## Total Amount per Category between 6 Apr 2020 and 5 Apr 2021
+## Total Amount per Category Between 6 Apr 2020 and 5 Apr 2021
 
 ```js
 (
