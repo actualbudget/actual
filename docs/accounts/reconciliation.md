@@ -12,7 +12,9 @@ By clicking on the green balance in the header of the account view, two more cat
 
 ## Starting the Reconciliation Tool
 
-Press the icon that has 3 horizontally spaced dots in the right hand corner of the account ledger and then press **Reconcile**.
+Click the lock icon in the right hand corner of the account ledger.
+
+![](/img/reconcile/reconcile-11.png)
 
 Let's imagine that we have just checked our account balance for our Ally Savings account and the current balance is $1229.18. We enter the balance we want to match into the Reconciliation tool and press **Reconcile**.
 
