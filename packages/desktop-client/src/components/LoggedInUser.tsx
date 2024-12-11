@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { useState, useEffect, useRef, type CSSProperties } from 'react';
+import React, { useState, useEffect, useRef, useMemo, type CSSProperties } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -18,11 +18,13 @@ import { useServerURL } from './ServerContext';
 
 type LoggedInUserProps = {
   hideIfNoServer?: boolean;
+  syncState: null | 'offline' | 'local' | 'disabled' | 'error';
   style?: CSSProperties;
   color?: string;
 };
 export function LoggedInUser({
   hideIfNoServer,
+  syncState,
   style,
   color,
 }: LoggedInUserProps) {
@@ -74,17 +76,17 @@ export function LoggedInUser({
     }
   }
 
-  function serverMessage() {
+  const serverMessage = useMemo(() => {
     if (!serverUrl) {
       return t('No server');
     }
 
-    if (userData?.offline) {
+    if (syncState === 'offline') {
       return t('Server offline');
     }
 
     return t('Server online');
-  }
+  }, [serverUrl, syncState]);
 
   if (hideIfNoServer && !serverUrl) {
     return null;
@@ -113,7 +115,7 @@ export function LoggedInUser({
         onPress={() => setMenuOpen(true)}
         style={color && { color }}
       >
-        {serverMessage()}
+        {serverMessage}
       </Button>
 
       <Popover
@@ -126,7 +128,7 @@ export function LoggedInUser({
           onMenuSelect={onMenuSelect}
           items={[
             serverUrl &&
-              !userData?.offline && {
+              syncState === null && {
                 name: 'change-password',
                 text: t('Change password'),
               },
