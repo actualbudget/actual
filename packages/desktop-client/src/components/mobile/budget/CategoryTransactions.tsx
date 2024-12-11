@@ -11,6 +11,10 @@ import { listen } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
 import { isPreviewId } from 'loot-core/shared/transactions';
+import {
+  type CategoryEntity,
+  type TransactionEntity,
+} from 'loot-core/types/models';
 
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import { useNavigate } from '../../../hooks/useNavigate';
@@ -20,14 +24,16 @@ import { MobilePageHeader, Page } from '../../Page';
 import { MobileBackButton } from '../MobileBackButton';
 import { AddTransactionButton } from '../transactions/AddTransactionButton';
 import { TransactionListWithBalances } from '../transactions/TransactionListWithBalances';
-import { CategoryEntity, TransactionEntity } from 'loot-core/types/models';
 
 type CategoryTransactionsProps = {
   category: CategoryEntity;
   month: string;
 };
 
-export function CategoryTransactions({ category, month }: CategoryTransactionsProps) {
+export function CategoryTransactions({
+  category,
+  month,
+}: CategoryTransactionsProps) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
