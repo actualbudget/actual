@@ -85,7 +85,7 @@ import APIList from './APIList';
 "runQuery"
 ]} />
 
-## Types of methods
+## Types of Methods
 
 API methods are categorized into one of four types:
 
@@ -100,7 +100,7 @@ Fields specific to a type of request are marked as such in the notes.
 
 `id` is a special field. All objects have an `id` field. However, you don't need to specify an `id` in a `create` method; all `create` methods will return the created `id` back to you.
 
-All `update` and `delete` methods take an `id` to specify the desired object. `update` takes the fields to update as a second argument — it does not take a full object. That means even if a field is required, you don't have to pass it to `update`. For example, a `category` requires the `group_id` field, however `updateCategory(id, { name: "Food" })` is a valid call. Required means that an `update` can't set the field to `null` and `create` method must always have it.
+All `update` and `delete` methods take an `id` to specify the desired object. `update` takes the fields to update as a second argument — it does not take a full object. That means even if a field is required, you don't have to pass it to `update`. For example, a `category` requires the `group_id` field, however `updateCategory(id, { name: "Food" })` is a valid call. Required means that an `update` can't set the field to `null` and a `create` must always contain the field.
 
 ## Primitives
 
@@ -140,11 +140,11 @@ These are types.
 
 <StructType fields={objects.transaction} />
 
-#### Split transactions
+#### Split Transactions
 
 A split transaction has several sub-transactions that split the total
 amount across them. You can create a split transaction by specifying
-an an array of sub-transactions in the `subtransactions` field.
+an array of sub-transactions in the `subtransactions` field.
 
 Subtransactions can specify the following fields, and `amount` is the only required field:
 
@@ -154,13 +154,13 @@ Subtransactions can specify the following fields, and `amount` is the only requi
 
 If the amounts of the sub-transactions do not equal the total amount
 of the transaction, currently the API call will succeed but an error
-with be displayed within the app.
+will be displayed within the app.
 
 #### Transfers
 
 Existing transfers will have the `transfer_id` field which points to the transaction on the other side. **You should not change this** or you will cause unexpected behavior. (You are allowed to set this when importing, however.)
 
-If you want to create a transfer, use the transfer payee for the account you wish to transfer to/from. Load the payees, use the [`transfer_acct`](#payee) field of the payee to find the account you want to transfer to/from assign that payee to the transaction. A transfer with a transaction in both accounts will be created. (See [transfer payees](#transfers-1).)
+If you want to create a transfer, use the transfer payee for the account you wish to transfer to/from. Load the payees, use the [`transfer_acct`](#payee) field of the payee to find the account you want to transfer to/from, and assign that payee to the transaction. A transfer with a transaction in both accounts will be created. (See [transfer payees](#transfers-1).)
 
 #### Methods
 
@@ -253,7 +253,7 @@ await updateTransaction(id, { category_id: foodCategory.id });
 
 <StructType fields={objects.account} />
 
-#### Account types
+#### Account Types
 
 The account type must be one of these valid strings:
 
@@ -265,9 +265,9 @@ The account type must be one of these valid strings:
 - `debt`
 - `other`
 
-The account type does not effect anything currently. It's simply extra information about the account.
+The account type does not affect anything currently. It's simply extra information about the account.
 
-#### Closing accounts
+#### Closing Accounts
 
 Avoid setting the `closed` property directly to close an account; instead use the `closeAccount` method. If the account still has money in it you will be required to specify another account to transfer the current balance to. This will help track your money correctly.
 
@@ -357,7 +357,7 @@ Get all categories.
 
 <Method name="createCategory" args={[{ name: 'category', type: 'Category' }]} returns="Promise<id>" />
 
-Create a category. Returns the `id` of the new account.
+Create a category. Returns the `id` of the new category.
 
 #### `updateCategory`
 
@@ -380,13 +380,13 @@ Delete a category.
 }
 ```
 
-#### Income categories
+#### Income Categories
 
 Set `is_income` to `true` to create an income category. The `group_id` of the category should point to the existing income group category (currently only one ever exists, see [category group](#category-group)).
 
-## Category groups
+## Category Groups
 
-#### Category group
+#### Category Group
 
 <StructType fields={objects.categoryGroup} />
 
@@ -396,7 +396,7 @@ Set `is_income` to `true` to create an income category. The `group_id` of the ca
 }
 ```
 
-#### Income category groups
+#### Income Category Groups
 
 There should only ever be one income category group,
 
@@ -487,7 +487,7 @@ Merge one or more payees into the target payee, retaining the name of the target
 
 <StructType fields={objects.rule} />
 
-#### Payee rule
+#### Payee Rule
 
 <StructType fields={objects.payeeRule} />
 
@@ -503,7 +503,7 @@ Get all rules.
 
 <Method name="getPayeeRules" args={[{ name: 'payeeId', type: "id" }]} returns="Promise<PayeeRule[]>" />
 
-Get all payees rules for `payeeId`.
+Get all payee rules for `payeeId`.
 
 #### `createRule`
 
