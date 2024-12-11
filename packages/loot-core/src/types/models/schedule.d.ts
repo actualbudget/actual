@@ -39,8 +39,6 @@ export interface ScheduleEntity {
   _actions: Array<{ op: unknown }>;
 }
 
-export type NewScheduleEntity = Omit<ScheduleEntity, 'id'>;
-
 export type DiscoverScheduleEntity = {
   id: ScheduleEntity['id'];
   account: AccountEntity['id'];
