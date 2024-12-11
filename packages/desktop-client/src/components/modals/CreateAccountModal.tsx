@@ -1,6 +1,6 @@
 // @ts-strict-ignore
 import React, { useEffect, useRef, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 
 import { pushModal } from 'loot-core/client/actions';
@@ -32,6 +32,7 @@ type CreateAccountProps = {
 
 export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
   const { t } = useTranslation();
+
   const syncServerStatus = useSyncServerStatus();
   const dispatch = useDispatch();
   const [isGoCardlessSetupComplete, setIsGoCardlessSetupComplete] =
@@ -373,21 +374,24 @@ export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
                         )}
                       </View>
                       <Text style={{ lineHeight: '1.4em', fontSize: 15 }}>
-                        <strong>
-                          {t('Link a')} <em>{t('North American')}</em>
-                          {t(' bank account')}
-                        </strong>{' '}
-                        {t(
-                          'to automatically download transactions. SimpleFIN     provides reliable, up-to-date information from hundreds of banks.',
-                        )}{' '}
+                        <Trans>
+                          <strong>
+                            Link a <em>North American</em> bank account
+                          </strong>{' '}
+                          to automatically download transactions. SimpleFIN
+                          provides reliable, up-to-date information from
+                          hundreds of banks.{' '}
+                        </Trans>
                       </Text>
                     </>
                   )}
                   {(!isGoCardlessSetupComplete || !isSimpleFinSetupComplete) &&
                     !canSetSecrets && (
                       <Warning>
-                        You don&apos;t have the required permissions to set up
-                        secrets. Please contact an Admin to configure{' '}
+                        <Trans>
+                          You don&apos;t have the required permissions to set up
+                          secrets. Please contact an Admin to configure
+                        </Trans>{' '}
                         {[
                           isGoCardlessSetupComplete ? '' : 'GoCardless',
                           isSimpleFinSetupComplete ? '' : 'SimpleFin',
