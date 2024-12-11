@@ -21,7 +21,7 @@ Currently the query language is mostly undocumented, but more docs will come soo
 
 Until we have better docs, here are few things you can do with ActualQL.
 
-## Running a query
+## Running a Query
 
 You construct a query with `q` and run it with `runQuery`. The result is an object with a `data` prop. An example:
 
@@ -33,7 +33,7 @@ let { data } = await runQuery(q('transactions').select('*'));
 
 `data` will be an array of all the transactions in the system.
 
-## Specify split transaction behavior
+## Specify Split Transaction Behavior
 
 Split transactions complicate things: when you sum transaction amounts, do you sum up all the subtransactions or do you just use the top-level transaction? When selecting transactions, which ones do you want?
 
@@ -47,11 +47,11 @@ There are two different options for `splits`: `inline` or `grouped`<super>\*</su
 
 `grouped` always returns the full split transaction (parent and subtransaction), no matter which part of it matched a filter. The returned data is also grouped so that transactions have a `subtransactions` property that lists them.
 
-These two options gives you full control over how you want to handle split transactions.
+These two options give you full control over how you want to handle split transactions.
 
 _\* There is a third option as well, `all`, which returns both transactions and subtransactions in a flat list. You only need this if doing something advanced._
 
-## Searching transactions
+## Searching Transactions
 
 Calling `filter` applies conditions to the query; only data that matches the given filters will be returned.
 
