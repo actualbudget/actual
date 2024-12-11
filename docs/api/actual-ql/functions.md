@@ -1,12 +1,12 @@
 # ActualQL Functions
 
-## Joining tables
+## Joining Tables
 
 You might have noticed the `category.name` field in the first few examples. What exactly is that field, and why can't we just use `category`?
 
 The `category` field in `transactions` is an `id`. You can give it a specific category id to filter by that; you don't want to give it a name like `Home` because multiple categories can exist with the same name in different groups. By giving it a category id, you know you are getting back transactions specific to that category.
 
-However, you often don't have a category id and want to just quickly search by category name. Using the `.` operator in a field name will "poke through" to the referenced table and allow you access any fields on it. Here, we can access any fields on the `categories` table.
+However, you often don't have a category id and want to just quickly search by category name. Using the `.` operator in a field name will "poke through" to the referenced table and allow you to access any fields on it. Here, we can access any fields on the `categories` table.
 
 So filtering by `category.name` allows you to search by name instead of id. You could use any field for `category`; for example `{ 'category.is_income': true }` would find all income categories.
 
@@ -23,7 +23,7 @@ q('transactions')
 
 This returns transactions with an income category sorted by category name. You can also pass an array to `orderBy` to sort by multiple fields.
 
-## Aggregate functions
+## Aggregate Functions
 
 You can specify aggregate functions in `select` for things like sums and counts. An example:
 
@@ -43,4 +43,4 @@ q('transactions')
   .calculate({ $sum: 'amount' });
 ```
 
-Not only did we not have to name the result, `data` in the result will also be the summed value itself. If you use `select`, data will be an array with one element. The difference is in the above you just use `data`, but if you used `select` you'd have to use `data[0].total`.
+Not only did we not have to name the result, `data` in the result will also be the summed value itself. If you use `select`, data will be an array with one element. The difference is that in the above you just use `data`, but if you used `select` you'd have to use `data[0].total`.
