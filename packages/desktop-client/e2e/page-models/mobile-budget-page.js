@@ -34,7 +34,7 @@ export class MobileBudgetPage {
       name: 'Saved',
     });
     this.projectedSavingsButton = this.budgetTableHeader.getByRole('button', {
-      name: 'Projected Savings',
+      name: 'Projected savings',
     });
     this.overspentButton = this.budgetTableHeader.getByRole('button', {
       name: 'Overspent',
@@ -294,7 +294,7 @@ export class MobileBudgetPage {
     }
 
     throw new Error(
-      'None of “Saved”, “Projected Savings”, or “Overspent” buttons could be located on the page',
+      'None of “Saved”, “Projected savings”, or “Overspent” buttons could be located on the page',
     );
   }
 
