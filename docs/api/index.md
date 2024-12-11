@@ -12,7 +12,7 @@ The API gives you full programmatic access to your data. It allows to run the UI
 
 One thing to keep in mind: Actual is not like most other apps. While your data is stored on a server, the server does not have the functionality for analyzing details of or modifying your budget. As a result, the API client contains all the code necessary to query your data and will work on a local copy. Right now, the primary use case is custom importers and exporters.
 
-## Getting started
+## Getting Started
 
 We provide an official Node.js client in the `@actual-app/api` package. Other languages are not supported at this point.
 
@@ -28,7 +28,7 @@ npm install --save @actual-app/api
 yarn add @actual-app/api
 ```
 
-### Connecting to a remote server
+### Connecting to a Remote Server
 
 Next, you’ll need connect to your running server version of Actual to access your budget files.
 
@@ -60,9 +60,9 @@ let api = require('@actual-app/api');
 
 Heads up! You probably don’t want to hard-code the passwords like that, especially if you’ll be using Git to track your code. You can use environment variables to store the passwords instead, or read them in from a file, or request them interactively when running the script instead.
 
-### Self-signed https certificates
+### Self-Signed Https Certificates
 
-If the serverURL is using [self-signed or custom CA certificates](../config/https.md), additional Node.js configuration is be needed for the connections to succeed.
+If the serverURL is using [self-signed or custom CA certificates](../config/https.md), additional Node.js configuration will be needed for the connections to succeed.
 
 The API communicates with the server using `node-fetch`, assigned to the `global.fetch` function. There are a few ways to get Node.js to trust the self-signed certificate.
 
@@ -70,11 +70,11 @@ The API communicates with the server using `node-fetch`, assigned to the `global
 - Option 2: Set environment variable [NODE_TLS_REJECT_UNAUTHORIZED](https://nodejs.org/api/cli.html#node_tls_reject_unauthorizedvalue) to `0`. Not recommended if your program reaches out to any other endpoints other than the Actual server.
 - Options 3: Use OpenSSL CA certificates configuration for Node and add your certificate to the OpenSSL SSL_CERT_DIR. What this requires depends on your build of Node.js, and the configuration details are beyond the scope of this documentation. See the [Node.js OpenSSL Strategy](https://github.com/nodejs/TSC/blob/main/OpenSSL-Strategy.md) page for a starting point.
 
-## Writing data importers
+## Writing Data Importers
 
-If you are using another app, like YNAB or Mint, you might want to migrate your data into Actual. Right now, Actual only officially supports [importing YNAB4 data](../migration/ynab4.md) (and it works very well). But if you want to import all of your data into Actual, you can write a custom importer.
+If you are using another app, like YNAB or Mint, you might want to migrate your data into Actual. Right now, Actual officially supports [importing YNAB4 data](../migration/ynab4.md) and [importing nYNAB data](../migration/nynab.md) (and it works very well). But if you want to import all of your data into Actual, you can write a custom importer.
 
-Note that this is not about importing transactions. If all you want to do is add transactions from a custom source (like your banks API), use [`importTransactions`](./reference.md#importtransactions). In this context, a custom importer is something takes _all_ of your data (budgets, transactions, payees, etc) and dumps them all into a new file in Actual.
+Note that this is not about importing transactions. If all you want to do is add transactions from a custom source (like your bank's API), use [`importTransactions`](./reference.md#importtransactions). In this context, a custom importer is something that takes _all_ of your data (budgets, transactions, payees, etc) and dumps them all into a new file in Actual.
 
 The API has a special mode for bulk importing data. In this mode, a new file is always created (you can't bulk import into an existing file), and it will run much faster than if you did it normally.
 
@@ -99,7 +99,7 @@ async function run() {
 api.runImport('My-Budget', run);
 ```
 
-This is very simple, but it takes some data in `my-data.json` and creates all the accounts and transactions from it. Functions to convert the items (like `convertAccount`) are not included here. Use the [reference docs](./reference.md) to learn the shape of objects that Actual expects.
+This is very simple, but it takes some data in `my-data.json` and creates all the accounts and transactions from it. Functions used to convert items (like `convertAccount`) are not included here. Use the [reference docs](./reference.md) to learn the shape of objects that Actual expects.
 
 **Note:** it's important that [`addTransactions`](./reference.md#addtransactions) is used here. You want to use it instead of [`importTransactions`](./reference.md#importtransactions) when dumping raw data into Actual. The former will not run the reconciliation process (which deduplicates transactions), and won't create the other side of transfer transactions, and more. If you use `importTransactions` it may adjust your data in ways that don't match the data you’re importing.
 
