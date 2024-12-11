@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { send } from 'loot-core/platform/client/fetch';
 import {
@@ -34,25 +35,42 @@ type EditUserFinanceAppProps = {
   onSave: (user: User) => void;
 };
 
-function getUserDirectoryErrors(reason: string): string {
-  switch (reason) {
-    case 'unauthorized':
-      return 'You are not logged in.';
-    case 'token-expired':
-      return 'Login expired, please login again.';
-    case 'user-cant-be-empty':
-      return 'Please enter a value for the username; the field cannot be empty.';
-    case 'role-cant-be-empty':
-      return 'Select a role; the field cannot be empty.';
-    case 'user-already-exists':
-      return 'The username you entered already exists. Please choose a different username.';
-    case 'not-all-deleted':
-      return 'Not all users were deleted. Check if one of the selected users is the server owner.';
-    case 'role-does-not-exists':
-      return 'Selected role does not exists, possibly a bug? Visit https://actualbudget.org/contact/ for support.';
-    default:
-      return `An internal error occurred, sorry! Visit https://actualbudget.org/contact/ for support. (ref: ${reason})`;
+function useGetUserDirectoryErrors() {
+  const { t } = useTranslation();
+
+  function getUserDirectoryErrors(reason) {
+    switch (reason) {
+      case 'unauthorized':
+        return t('You are not logged in.');
+      case 'token-expired':
+        return t('Login expired, please login again.');
+      case 'user-cant-be-empty':
+        return t(
+          'Please enter a value for the username; the field cannot be empty.',
+        );
+      case 'role-cant-be-empty':
+        return t('Select a role; the field cannot be empty.');
+      case 'user-already-exists':
+        return t(
+          'The username you entered already exists. Please choose a different username.',
+        );
+      case 'not-all-deleted':
+        return t(
+          'Not all users were deleted. Check if one of the selected users is the server owner.',
+        );
+      case 'role-does-not-exists':
+        return t(
+          'Selected role does not exists, possibly a bug? Visit https://actualbudget.org/contact/ for support.',
+        );
+      default:
+        return t(
+          'An internal error occurred, sorry! Visit https://actualbudget.org/contact/ for support. (ref: {{reason}})',
+          { reason },
+        );
+    }
   }
+
+  return { getUserDirectoryErrors };
 }
 
 async function saveUser(
@@ -61,6 +79,10 @@ async function saveUser(
   setError: (error: string) => void,
   actions: BoundActions,
 ): Promise<boolean> {
+  const { t } = useTranslation();
+
+  const { getUserDirectoryErrors } = useGetUserDirectoryErrors();
+
   const { error, id: newId } = (await send(method, user)) || {};
   if (!error) {
     if (newId) {
@@ -72,11 +94,11 @@ async function saveUser(
       actions.addNotification({
         type: 'error',
         id: 'login-expired',
-        title: 'Login expired',
+        title: t('Login expired'),
         sticky: true,
         message: getUserDirectoryErrors(error),
         button: {
-          title: 'Go to login',
+          title: t('Go to login'),
           action: () => {
             actions.signOut();
           },
@@ -94,12 +116,14 @@ export function EditUserFinanceApp({
   defaultUser,
   onSave: originalOnSave,
 }: EditUserFinanceAppProps) {
+  const { t } = useTranslation();
+
   return (
     <Modal name="edit-user">
       {({ state: { close } }) => (
         <>
           <ModalHeader
-            title="User"
+            title={t('User')}
             rightContent={<ModalCloseButton onPress={close} />}
           />
           <EditUser
@@ -118,6 +142,8 @@ export function EditUserFinanceApp({
 }
 
 function EditUser({ defaultUser, onSave: originalOnSave }: EditUserProps) {
+  const { t } = useTranslation();
+
   const actions = useActions();
   const [userName, setUserName] = useState<string>(defaultUser.userName ?? '');
   const [displayName, setDisplayName] = useState<string>(
@@ -129,11 +155,11 @@ function EditUser({ defaultUser, onSave: originalOnSave }: EditUserProps) {
 
   async function onSave() {
     if (!userName.trim()) {
-      setError('Username is required.');
+      setError(t('Username is required.'));
       return;
     }
     if (!role) {
-      setError('Role is required.');
+      setError(t('Role is required.'));
       return;
     }
     const user: User = {
@@ -152,7 +178,7 @@ function EditUser({ defaultUser, onSave: originalOnSave }: EditUserProps) {
     <>
       <Stack direction="row" style={{ marginTop: 10 }}>
         <FormField style={{ flex: 1 }}>
-          <FormLabel title="Username" htmlFor="name-field" />
+          <FormLabel title={t('Username')} htmlFor="name-field" />
           <Input
             id="name-field"
             value={userName}
@@ -165,7 +191,7 @@ function EditUser({ defaultUser, onSave: originalOnSave }: EditUserProps) {
               marginTop: 5,
             }}
           >
-            The username registered within the OpenID provider.
+            <Trans>The username registered within the OpenID provider.</Trans>
           </label>
         </FormField>
         <View
@@ -198,17 +224,19 @@ function EditUser({ defaultUser, onSave: originalOnSave }: EditUserProps) {
             marginTop: 5,
           }}
         >
-          Change this username with caution; it is the server owner.
+          <Trans>
+            Change this username with caution; it is the server owner.
+          </Trans>
         </label>
       )}
       <Stack direction="row" style={{ marginTop: 10 }}>
         <FormField style={{ flex: 1 }}>
-          <FormLabel title="Display Name" htmlFor="displayname-field" />
+          <FormLabel title={t('Display Name')} htmlFor="displayname-field" />
           <Input
             id="displayname-field"
             value={displayName}
             onChangeValue={text => setDisplayName(text)}
-            placeholder="(Optional)"
+            placeholder={t('(Optional)')}
           />
           <View
             style={{
@@ -217,8 +245,10 @@ function EditUser({ defaultUser, onSave: originalOnSave }: EditUserProps) {
               marginTop: 5,
             }}
           >
-            If left empty, it will be updated from your OpenID provider on the
-            user&apos;s login, if available there.
+            <Trans>
+              If left empty, it will be updated from your OpenID provider on the
+              user&apos;s login, if available there.
+            </Trans>
           </View>
           <View
             style={{
@@ -226,8 +256,10 @@ function EditUser({ defaultUser, onSave: originalOnSave }: EditUserProps) {
               color: theme.pageTextLight,
             }}
           >
-            When displaying user information, this will be shown instead of the
-            username.
+            <Trans>
+              When displaying user information, this will be shown instead of
+              the username.
+            </Trans>
           </View>
         </FormField>
       </Stack>
@@ -257,7 +289,7 @@ function EditUser({ defaultUser, onSave: originalOnSave }: EditUserProps) {
           style={{ marginRight: 10 }}
           onPress={actions.popModal}
         >
-          Cancel
+          <Trans>Cancel</Trans>
         </Button>
         <Button variant="primary" onPress={onSave}>
           {defaultUser.id ? 'Save' : 'Add'}
@@ -276,8 +308,10 @@ const RoleDescription = () => {
           color: theme.pageTextLight,
         }}
       >
-        In our user directory, each user is assigned a specific role that
-        determines their permissions and capabilities within the system.
+        <Trans>
+          In our user directory, each user is assigned a specific role that
+          determines their permissions and capabilities within the system.
+        </Trans>
       </Text>
       <Text
         style={{
@@ -285,8 +319,10 @@ const RoleDescription = () => {
           color: theme.pageTextLight,
         }}
       >
-        Understanding these roles is essential for managing users and
-        responsibilities effectively.
+        <Trans>
+          Understanding these roles is essential for managing users and
+          responsibilities effectively.
+        </Trans>
       </Text>
       <View style={{ paddingTop: 5 }}>
         <label
@@ -296,7 +332,7 @@ const RoleDescription = () => {
             color: theme.pageTextLight,
           }}
         >
-          Basic
+          <Trans>Basic</Trans>
         </label>
         <Text
           style={{
@@ -304,8 +340,10 @@ const RoleDescription = () => {
             color: theme.pageTextLight,
           }}
         >
-          Users with the Basic role can create new budgets and be invited to
-          collaborate on budgets created by others.
+          <Trans>
+            Users with the Basic role can create new budgets and be invited to
+            collaborate on budgets created by others.
+          </Trans>
         </Text>
         <Text
           style={{
@@ -313,8 +351,10 @@ const RoleDescription = () => {
             color: theme.pageTextLight,
           }}
         >
-          This role is ideal for users who primarily need to manage their own
-          budgets and participate in shared budget activities.
+          <Trans>
+            This role is ideal for users who primarily need to manage their own
+            budgets and participate in shared budget activities.
+          </Trans>
         </Text>
       </View>
       <View style={{ paddingTop: 10 }}>
@@ -325,7 +365,7 @@ const RoleDescription = () => {
             color: theme.pageTextLight,
           }}
         >
-          Admin
+          <Trans>Admin</Trans>
         </label>
         <Text
           style={{
@@ -333,9 +373,11 @@ const RoleDescription = () => {
             color: theme.pageTextLight,
           }}
         >
-          Can do everything that Basic users can. In addition, they have the
-          ability to add new users to the directory and access budget files from
-          all users.
+          <Trans>
+            Can do everything that Basic users can. In addition, they have the
+            ability to add new users to the directory and access budget files
+            from all users.
+          </Trans>
         </Text>
         <Text
           style={{
@@ -343,8 +385,10 @@ const RoleDescription = () => {
             color: theme.pageTextLight,
           }}
         >
-          Also can assign ownership of a budget to another person, ensuring
-          efficient budget management.
+          <Trans>
+            Also can assign ownership of a budget to another person, ensuring
+            efficient budget management.
+          </Trans>
         </Text>
       </View>
     </View>
