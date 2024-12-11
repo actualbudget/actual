@@ -127,7 +127,7 @@ export function CreateLocalAccountModal() {
                         verticalAlign: 'center',
                       }}
                     >
-                      {t('Off-budget')}
+                      {t('Off budget')}
                     </label>
                   </View>
                   <div

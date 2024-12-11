@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 
 import { useAccounts } from './useAccounts';
 
-export function useBudgetedAccounts() {
+export function useOnBudgetAccounts() {
   const accounts = useAccounts();
   return useMemo(
     () =>

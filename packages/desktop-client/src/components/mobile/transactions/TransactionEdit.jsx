@@ -517,7 +517,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
   const getCategory = useCallback(
     (trans, isOffBudget) => {
       if (isOffBudget) {
-        return 'Off Budget';
+        return 'Off budget';
       } else if (isBudgetTransfer(trans)) {
         return 'Transfer';
       } else {

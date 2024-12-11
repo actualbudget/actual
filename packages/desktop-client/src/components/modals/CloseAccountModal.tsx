@@ -35,7 +35,7 @@ function needsCategory(
   const isOffBudget = acct && acct.offbudget === 1;
 
   // The user must select a category if transferring from a budgeted
-  // account to an off-budget account
+  // account to an off budget account
   return account.offbudget === 0 && isOffBudget;
 }
 
@@ -183,8 +183,8 @@ export function CloseAccountModal({
                   {needsCategory(account, transferAccountId, accounts) && (
                     <View style={{ marginBottom: 15 }}>
                       <Paragraph>
-                        Since you are transferring the balance from a budgeted
-                        account to an off-budget account, this transaction must
+                        Since you are transferring the balance from an on budget
+                        account to an off budget account, this transaction must
                         be categorized. Select a category:
                       </Paragraph>
 
