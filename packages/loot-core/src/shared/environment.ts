@@ -18,3 +18,7 @@ export function isElectron() {
   }
   return false;
 }
+
+export function shouldDisplayLoginDemo() {
+  return process.env.REACT_APP_HIDE_LOGIN_DEMO === undefined;
+}
