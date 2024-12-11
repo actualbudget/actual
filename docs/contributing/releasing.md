@@ -1,4 +1,4 @@
-# How To Cut A Release
+# How to Cut a Release
 
 In the open-source version of Actual, all updates go through NPM. There are two libraries:
 
@@ -32,11 +32,11 @@ cd packages/desktop-client
 yarn npm publish --access public
 ```
 
-### Versioning strategy
+### Versioning Strategy
 
 We used to version according to the date when the release was made. For example: if a release was cut on 02-10-2022, then the release number was `22.10.2`. This posed some challenges if critical bugs were spotted after the release. It meant we had to wait for the next day to cut a new release.
 
-Starting from `v23.3.x` we changed how we version Actual by keeping the core philosophy the same. The new versioning strategy is: include the year and month of the release in the version number. But for minor version numbers: start at `0` and increment by +1 for each subsequent bug-fix release.
+Starting from `v23.3.x` we changed how we version Actual while keeping the core philosophy the same. The new versioning strategy is: include the year and month of the release in the version number. But for minor version numbers: start at `0` and increment by +1 for each subsequent bug-fix release.
 
 For example:
 
@@ -67,7 +67,7 @@ Once you’ve merged and tagged the release, go to the releases page and publish
 
 ### Windows Store Releases
 
-The windows Store release process consists of: logging in, uploading the packages, updating the store listing, and submitting for certification.
+The Windows Store release process consists of: logging in, uploading the packages, updating the store listing, and submitting for certification.
 
 It's a relatively straight forward process - Microsoft provide a lot of [documentation for it](https://learn.microsoft.com/en-gb/windows/apps/publish/publish-your-app/msix/create-app-submission).
 
@@ -79,17 +79,17 @@ The steps involved in releasing Actual to the Windows Store are detailed below.
 2. Log in using your Actual Budget account (if you don't have one, ask a core contributor)
 3. Navigate to "Apps and Games" and select "Actual Budget"
 
-**Upload the packages:**
+**Upload the Packages:**
 
-1. Click "Start update" to create a draft release
-2. Under "Product Update", choose "Packages"
-3. Delete all of the packages listed for the previous app version
-4. Upload the new Appx Packages and save (artifacts available on the [Release PR](#release-prs))
+1. Click "Start update" to create a draft release.
+2. Under "Product Update", choose "Packages".
+3. Delete all of the packages listed for the previous app version.
+4. Upload the new Appx Packages and save (artifacts available on the [Release PR](#release-prs)).
 
-**Update the store listing:**
+**Update the Store Listing:**
 
-1. Under "Product update", select "Store listings"
-2. Choose "English" for the english listing
+1. Under "Product update", select "Store listings".
+2. Choose "English" for the english listing.
 3. Under "What's new in this version" briefly describe the "Notable improvements" of the release notes.
 
 **Submit to the Store**
