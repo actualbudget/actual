@@ -9,6 +9,7 @@ import React, {
   useRef,
   type CSSProperties,
 } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 
 import { addNotification, pushModal } from 'loot-core/client/actions';
@@ -42,6 +43,8 @@ function UserAccessContent({
   isModal,
   setLoading,
 }: ManageUserAccessContentProps) {
+  const { t } = useTranslation();
+
   const [allAccess, setAllAccess] = useState([]);
   const [page, setPage] = useState(0);
   const [filter, setFilter] = useState('');
@@ -89,7 +92,7 @@ function UserAccessContent({
       addNotification({
         type: 'error',
         id: 'error',
-        title: 'Error getting available users',
+        title: t('Error getting available users'),
         sticky: true,
         message: data.error,
       });
@@ -168,19 +171,21 @@ function UserAccessContent({
           }}
         >
           <Text>
-            Determine which users can view and manage your budgets..{' '}
-            <Link
-              variant="external"
-              to="https://actualbudget.org/docs/budgeting/users-access/"
-              linkColor="muted"
-            >
-              Learn more
-            </Link>
+            <Trans>
+              Determine which users can view and manage your budgets..{' '}
+              <Link
+                variant="external"
+                to="https://actualbudget.org/docs/budgeting/users-access/"
+                linkColor="muted"
+              >
+                Learn more
+              </Link>
+            </Trans>
           </Text>
         </View>
         <View style={{ flex: 1 }} />
         <Search
-          placeholder="Filter users..."
+          placeholder={t('Filter users...')}
           value={filter}
           onChange={onSearchChange}
         />
