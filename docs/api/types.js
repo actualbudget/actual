@@ -92,7 +92,7 @@ export let objects = {
         <div>
           <div className="mb-6">
             If given, a payee will be created with this name. If this matches an
-            already existing payee, it will use it.
+            already existing payee, that payee will be used.
           </div>
           * Only available in a <a href="#types-of-methods">create</a> request
         </div>
@@ -110,15 +110,15 @@ export let objects = {
       name: 'imported_id',
       type: 'string',
       description:
-        'A unique id usually given by the bank, if importing. Use this is avoid duplicate transactions.',
+        'A unique id usually given by the bank, if importing. Use this to avoid duplicate transactions.',
     },
     {
       name: 'transfer_id',
       type: 'string',
       description: (
         <span>
-          If a transfer, the <code>id</code> of the transaction in the other
-          account for the transfer. See <a href="#transfers">transfers</a>.
+          If a transfer, the <code>id</code> of the corresponding transaction in the other
+          account. See <a href="#transfers">transfers</a>.
         </span>
       ),
     },
