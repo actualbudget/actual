@@ -1,4 +1,4 @@
-# Troubleshooting Server configuration issues
+# Troubleshooting Server Configuration Issues
 
 Actual uses the standard Node.js `debug` module to optionally log helpful debugging information to the console.
 
