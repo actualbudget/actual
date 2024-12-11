@@ -203,7 +203,7 @@ export function ScheduleDetails({ id, transaction }: ScheduleDetailsProps) {
             },
           };
         }
-        case 'set-field':
+        case 'set-field': {
           if (!(action.field in state.fields)) {
             throw new Error('Unknown field: ' + action.field);
           }
@@ -244,14 +244,18 @@ export function ScheduleDetails({ id, transaction }: ScheduleDetailsProps) {
             ...state,
             fields: { ...state.fields, ...fields },
           };
-        case 'set-transactions':
+        }
+
+        case 'set-transactions': {
           if (fromTrans && action.transactions) {
             action.transactions.sort(a => {
               return transaction.id === a.id ? -1 : 1;
             });
           }
           return { ...state, transactions: action.transactions };
-        case 'set-repeats':
+        }
+
+        case 'set-repeats': {
           return {
             ...state,
             fields: {
@@ -266,20 +270,26 @@ export function ScheduleDetails({ id, transaction }: ScheduleDetailsProps) {
                 : monthUtils.currentDay(),
             },
           };
-        case 'set-upcoming-dates':
+        }
+
+        case 'set-upcoming-dates': {
           return {
             ...state,
             upcomingDates: action.dates,
           };
+        }
 
-        case 'form-error':
+        case 'form-error': {
           return { ...state, error: action.error };
+        }
 
-        case 'switch-transactions':
+        case 'switch-transactions': {
           return { ...state, transactionsMode: action.mode };
+        }
 
-        default:
+        default: {
           throw new Error('Unknown action');
+        }
       }
     },
     {
