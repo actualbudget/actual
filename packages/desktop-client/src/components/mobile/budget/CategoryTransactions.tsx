@@ -20,7 +20,7 @@ import { MobilePageHeader, Page } from '../../Page';
 import { MobileBackButton } from '../MobileBackButton';
 import { AddTransactionButton } from '../transactions/AddTransactionButton';
 import { TransactionListWithBalances } from '../transactions/TransactionListWithBalances';
-import { CategoryEntity } from 'loot-core/types/models';
+import { CategoryEntity, TransactionEntity } from 'loot-core/types/models';
 
 type CategoryTransactionsProps = {
   category: CategoryEntity;
@@ -80,7 +80,7 @@ export function CategoryTransactions({ category, month }: CategoryTransactionsPr
   });
 
   const onOpenTransaction = useCallback(
-    transaction => {
+    (transaction: TransactionEntity) => {
       // details of how the native app used to handle preview transactions here can be found at commit 05e58279
       if (!isPreviewId(transaction.id)) {
         navigate(`/transactions/${transaction.id}`);
