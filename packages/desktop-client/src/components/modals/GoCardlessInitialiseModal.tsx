@@ -1,7 +1,6 @@
 // @ts-strict-ignore
 import React, { useState } from 'react';
-
-import { t } from 'i18next'; // Ensure this import is correct
+import { useTranslation } from 'react-i18next';
 
 import { getSecretsError } from 'loot-core/shared/errors';
 import { send } from 'loot-core/src/platform/client/fetch';
@@ -28,18 +27,22 @@ type GoCardlessInitialiseProps = {
 export const GoCardlessInitialiseModal = ({
   onSuccess,
 }: GoCardlessInitialiseProps) => {
+  const { t } = useTranslation();
+
   const [secretId, setSecretId] = useState('');
   const [secretKey, setSecretKey] = useState('');
   const [isValid, setIsValid] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(
-    'It is required to provide both the secret id and secret key.',
+    t('It is required to provide both the secret id and secret key.'),
   );
 
   const onSubmit = async (close: () => void) => {
     if (!secretId || !secretKey) {
       setIsValid(false);
-      setError('It is required to provide both the secret id and secret key.');
+      setError(
+        t('It is required to provide both the secret id and secret key.'),
+      );
       return;
     }
 
