@@ -20,8 +20,14 @@ import { MobilePageHeader, Page } from '../../Page';
 import { MobileBackButton } from '../MobileBackButton';
 import { AddTransactionButton } from '../transactions/AddTransactionButton';
 import { TransactionListWithBalances } from '../transactions/TransactionListWithBalances';
+import { CategoryEntity } from 'loot-core/types/models';
 
-export function CategoryTransactions({ category, month }) {
+type CategoryTransactionsProps = {
+  category: CategoryEntity;
+  month: string;
+};
+
+export function CategoryTransactions({ category, month }: CategoryTransactionsProps) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -122,7 +128,7 @@ export function CategoryTransactions({ category, month }) {
   );
 }
 
-function getCategoryMonthFilter(category, month) {
+function getCategoryMonthFilter(category: CategoryEntity, month: string) {
   return {
     category: category.id,
     date: { $transform: '$month', $eq: month },
