@@ -1,12 +1,12 @@
 # Writing Documentation
 
-Except for a few sections, most of the documentation is aimed at end users. It is important to keep this in mind when writing documentation. In practice, this means that it is better to be a bit verbose and write out every step in a process than assume that the reader is on the writer's technical level.
+Except for a few sections, most of the documentation is aimed at end users. It is important to keep this in mind when writing documentation. In practice, this means that it is better to be a bit verbose and write out every step in a process than to assume that the reader is on the writer's technical level.
 
 <details><summary>Read example</summary>
 
 For those with experience, the process is straightforward and familiar: _To update with our latest releases, simply use the `git pull` command from the `master` branch of your local directory of Actual. Once the changes are updated, execute the `yarn install` to download the latest updates from the releases._
 
-A better approach for inexperienced people, as it explains what each step is doing and the expected outcome.:
+A better approach for inexperienced people, as it explains what each step is doing and the expected outcome:
 
 1. Stop the server if it's running. You can use the keyboard shortcut <Key mod= "ctrl" k= "c"/> (even on macOS) to stop the server or close the terminal window it's running from.
 2. Run `git pull` from the directory you cloned the project into. This will download the latest server code.
@@ -72,7 +72,7 @@ It is important to note that both level 1 and level 2 headings are prominently d
 
 
 
-### Documentation folder structure
+### Documentation Folder Structure
 
 The documentation folder structure should follow the structure in the left of the screen.
 This means sections with more than one page have their own directories.
@@ -83,12 +83,12 @@ This means sections with more than one page have their own directories.
 ```
 website # the root directory of the documentation site
 ├── docs
-│   └── index.md # the introduction file
+│   └── index.md # the introduction file.
 │   └── faq.md
-│   └── releases.md # release notes
-    └── accounts # Anything relating to accounts, account management or transactions
+│   └── releases.md # release notes.
+    └── accounts # Anything relating to accounts, account management or transactions.
         ...
-    └── advanced # Some more advanced guides for Actual
+    └── advanced # Some more advanced guides for Actual.
         └── scripts
         ...
     └── backup-restore
@@ -148,7 +148,7 @@ Docusaurus 2 provides translation using [i18n](https://docusaurus.io/docs/i18n/i
 * **Consistent Terminology**: Use consistent terminology throughout the documentation. Refer to the product as "Actual Budget" or "Actual."
 
 
-## Formatting text
+## Formatting Text
 
 All documentation is written in Markdown, with certain additional Markdown syntax provided by Docusaurus.
 
@@ -156,7 +156,7 @@ If you have never used Markdown, please consult [CommonMark](https://commonmark.
 [Docusaurus Markdown Features](https://docusaurus.io/docs/markdown-features) guide. You can learn more about Markdown in
 [The Markdown Guide](https://www.markdownguide.org/).
 
-### Keyboard shortcuts
+### Keyboard Shortcuts
 
 
 ```markdown
@@ -230,13 +230,13 @@ Place the content inside the details-tags.
 
 ## Naming Standards
 
-### For documents
+### For Documents
 
 * Filenames should be self-explanatory and reflect the title of the file.
-* A longer, more descriptive, filename is preferred over a shorter, less descriptive, one.
+* A longer, more descriptive filename is preferred over a shorter, less descriptive one.
 * Folder names must reflect the naming in the sidebar.
 
-### For images
+### For Images
 
 * Images must be placed in the `/static/img/` folder.
 * Except for logos and such, all images related to the documentation must be placed in a folder corresponding to the location of the document in which it is used. Let's say you want to add an image to a document in the `/docs/budgeting/` folder - the corresponding images must be stored in the `/static/img/budgeting/` folder.
@@ -279,13 +279,13 @@ One reason is that you want readers to pay attention to some aspects of the GUI.
 We have a few suggestions when annotating screenshots:
 
 
-#### Do use boxes over arrows
+#### Do Use Boxes Over Arrows
 Arrows can inadvertently be misunderstood as pointing _from_ something rather than _to_. As we see in the example below, the reader can not be sure if the arrow means the column, the column header or if _To Budget_ is involved.
 
 ![Image of the budget view annotated by a box and an arrow](/static/img/repo/annotation-boxes-over-arrows.png)
 
 
-Use "steps" when referring to several elements
+#### Use "Steps" When Referring to Several Elements
 
 Use running numbers or letters inside circles, also known as "steps", when addressing more than one element in the screenshot. If there is a sequence to what a user is going to click on, use step numbers; if you want to address various elements, letters are preferred.
 
@@ -319,7 +319,7 @@ c. The first day of the week controls grouping on reports.
 </details>
 
 
-#### Do not draw annotations using "free hand"
+#### Do not Draw Annotations Using "Free Hand"
 
 Do not use free hand "marker pens", boxes or arrows, as these kind of annotations just look sloppy. Ask for help on the
 [Actual Budget #documentation Discord channel](https://discord.com/channels/937901803608096828/1027831463103696928)
@@ -350,7 +350,7 @@ We suggest using the following colors (RGB values):
 
 For accessibility reasons (color blindness), avoid using red and green annotation colors on the same image.
 
-#### Avoid using _transparency_ or _spotlight_ annotations
+#### Avoid Using _Transparency_ or _Spotlight_ Annotations
 
 Different annotation tools handle this in various ways, which means we will get inconsistent screenshots. Secondly, unless you can control the opacity and color of the highlight, using highlighting could easily confuse more than enlighten the reader. Can you quickly find the highlighted number in the screenshot below?
 
@@ -373,7 +373,7 @@ There are many software packages available to help you take screenshots. Both Wi
 
 Some of the mentioned tools will let you annotate screenshots, others will not.
 
-If you are serious about your screenshots (and also outside helping out with the Actual documentation), you might want to consider tools created explicitly for taking screenshots and having good annotation support. This list is not an endorsement from the Actual Budget project team but is meant as a starting point for such tools.
+If you are serious about your screenshots (and also helping out with the Actual documentation), you might want to consider tools created explicitly for taking screenshots and having good annotation support. This list is not an endorsement from the Actual Budget project team but is meant as a starting point for such tools.
 
 **For Windows and Mac**:
 
