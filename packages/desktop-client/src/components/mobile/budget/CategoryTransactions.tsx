@@ -116,6 +116,7 @@ export function CategoryTransactions({ category, month }) {
         isLoadingMore={isLoadingMore}
         onLoadMore={loadMoreTransactions}
         onOpenTransaction={onOpenTransaction}
+        onRefresh={undefined}
       />
     </Page>
   );
