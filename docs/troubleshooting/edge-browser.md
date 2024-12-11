@@ -16,5 +16,5 @@ seems to be standard behavior for their security features.
 To mitigate this, we will add an exception.
 
 1. Open Edge's settings and navigate to the section labeled "Enhance your security on the web".
-2. Select the arrow adjacent to "Exceptions":
-3. Click the "Add a site" button and enter the domain where your Actual instance is hosted:
+2. Select the arrow adjacent to "Exceptions".
+3. Click the "Add a site" button and enter the domain where your Actual instance is hosted.
