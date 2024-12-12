@@ -84,7 +84,12 @@ export function FixSplits() {
       return subValue !== t.amount;
     });
 
-    console.log(mismatchedSplits);
+    if (mismatchedSplits.length > 0) {
+      console.log(
+        `Found ${mismatchedSplits.length} split transaction${mismatchedSplits.length > 1 ? 's' : ''} with mismatched amounts:\n` +
+          mismatchedSplits.map(t => `- ${t.date}`).join('\n'),
+      );
+    }
 
     setResults(res);
     setLoading(false);
