@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { runQuery } from 'loot-core/src/client/query-helpers';
 import { send } from 'loot-core/src/platform/client/fetch';
+import { q } from 'loot-core/src/shared/query';
 import { type Handlers } from 'loot-core/src/types/handlers';
 
 import { theme } from '../../style';
@@ -61,6 +63,29 @@ export function FixSplits() {
   async function onFix() {
     setLoading(true);
     const res = await send('tools/fix-split-transactions');
+
+    const allTransactions = (
+      await runQuery(
+        q('transactions')
+          .options({ splits: 'grouped' })
+          .filter({
+            is_parent: true,
+          })
+          .select('*'),
+      )
+    ).data;
+
+    const mismatchedSplits = allTransactions.filter(t => {
+      const subValue = t.subtransactions.reduce(
+        (acc, st) => acc + st.amount,
+        0,
+      );
+
+      return subValue !== t.amount;
+    });
+
+    console.log(mismatchedSplits);
+
     setResults(res);
     setLoading(false);
   }
