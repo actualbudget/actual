@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "module": "esnext",
+    "target": "es6",
+    "declaration": true,
+    "esModuleInterop": true,
+    "moduleResolution": "Node",
+    "skipLibCheck": true,
+  },
+  "include": ["src", "src/global.d.ts"],
+  "exclude": ["node_modules", "dist"]
+}

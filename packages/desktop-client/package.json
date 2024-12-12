@@ -43,6 +43,7 @@
     "inter-ui": "^3.19.3",
     "jest": "^27.5.1",
     "jest-watch-typeahead": "^2.2.2",
+    "jszip": "^3.10.1",
     "lodash": "^4.17.21",
     "mdast-util-newline-to-break": "^2.0.0",
     "memoize-one": "^6.0.0",

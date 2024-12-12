@@ -1,0 +1,23 @@
+{
+  "name": "plugins-shared",
+  "version": "1.0.0",
+  "main": "dist/index.cjs.js",
+  "module": "dist/index.es.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "vite build"
+  },
+  "devDependencies": {
+    "@emotion/css": "^11.13.4",
+    "@types/react": "^18.2.0",
+    "i18next": "^23.11.5",
+    "throttleit": "^1.0.1",
+    "typescript": "^5.0.0",
+    "vite": "^5.2.11",
+    "vite-plugin-dts": "4.3.0"
+  },
+  "peerDependencies": {
+    "react": "18.2.0"
+  },
+  "packageManager": "yarn@1.22.22"
+}

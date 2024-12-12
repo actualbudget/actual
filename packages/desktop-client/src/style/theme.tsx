@@ -11,7 +11,7 @@ import * as developmentTheme from './themes/development';
 import * as lightTheme from './themes/light';
 import * as midnightTheme from './themes/midnight';
 
-const themes = {
+export const themes = {
   light: { name: 'Light', colors: lightTheme },
   dark: { name: 'Dark', colors: darkTheme },
   midnight: { name: 'Midnight', colors: midnightTheme },

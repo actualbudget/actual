@@ -70,8 +70,8 @@ export type LocalPrefs = Partial<{
   'mobile.showSpentColumn': boolean;
 }>;
 
-export type Theme = 'light' | 'dark' | 'auto' | 'midnight' | 'development';
-export type DarkTheme = 'dark' | 'midnight';
+export type Theme = 'light' | 'dark' | 'auto' | 'midnight' | 'development' | (string & {});
+export type DarkTheme = 'dark' | 'midnight' | (string & {});
 export type GlobalPrefs = Partial<{
   floatingSidebar: boolean;
   maxMonths: number;
