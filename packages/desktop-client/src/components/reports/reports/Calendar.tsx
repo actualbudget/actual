@@ -615,7 +615,7 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
                           fontStyle: 'italic',
                         }}
                       >
-                        No transactions
+                        <Trans>No transactions</Trans>
                       </View>
                     )}
                     onSort={onSort}
@@ -672,13 +672,13 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
                     {!mobileTransactionsOpen && (
                       <>
                         <SvgCheveronUp width={16} height={16} />
-                        Show transactions
+                        <Trans>Show transactions</Trans>
                       </>
                     )}
                     {mobileTransactionsOpen && (
                       <>
                         <SvgCheveronDown width={16} height={16} />
-                        Hide transactions
+                        <Trans>Hide transactions</Trans>
                       </>
                     )}
                   </Button>

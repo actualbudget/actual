@@ -8,7 +8,7 @@ import React, {
   type SetStateAction,
   useCallback,
 } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { format } from 'date-fns';
 import { debounce } from 'debounce';
@@ -237,7 +237,7 @@ export function CalendarCard({
                               marginRight: 4,
                             }}
                           >
-                            Expenses:
+                            <Trans>Expenses:</Trans>
                           </View>
                           <View style={{ color: chartTheme.colors.red }}>
                             {totalExpense !== 0 ? (
