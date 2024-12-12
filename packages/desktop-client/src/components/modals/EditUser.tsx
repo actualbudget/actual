@@ -73,43 +73,46 @@ function useGetUserDirectoryErrors() {
   return { getUserDirectoryErrors };
 }
 
-async function saveUser(
-  method: 'user-add' | 'user-update',
-  user: User,
-  setError: (error: string) => void,
-  actions: BoundActions,
-): Promise<boolean> {
+function useSaveUser() {
   const { t } = useTranslation();
-
   const { getUserDirectoryErrors } = useGetUserDirectoryErrors();
 
-  const { error, id: newId } = (await send(method, user)) || {};
-  if (!error) {
-    if (newId) {
-      user.id = newId;
-    }
-  } else {
-    setError(getUserDirectoryErrors(error));
-    if (error === 'token-expired') {
-      actions.addNotification({
-        type: 'error',
-        id: 'login-expired',
-        title: t('Login expired'),
-        sticky: true,
-        message: getUserDirectoryErrors(error),
-        button: {
-          title: t('Go to login'),
-          action: () => {
-            actions.signOut();
+  async function saveUser(
+    method: 'user-add' | 'user-update',
+    user: User,
+    setError: (error: string) => void,
+    actions: BoundActions,
+  ): Promise<boolean> {
+    const { error, id: newId } = (await send(method, user)) || {};
+    if (!error) {
+      if (newId) {
+        user.id = newId;
+      }
+    } else {
+      setError(getUserDirectoryErrors(error));
+      if (error === 'token-expired') {
+        actions.addNotification({
+          type: 'error',
+          id: 'login-expired',
+          title: t('Login expired'),
+          sticky: true,
+          message: getUserDirectoryErrors(error),
+          button: {
+            title: t('Go to login'),
+            action: () => {
+              actions.signOut();
+            },
           },
-        },
-      });
+        });
+      }
+
+      return false;
     }
 
-    return false;
+    return true;
   }
 
-  return true;
+  return { saveUser };
 }
 
 export function EditUserFinanceApp({
@@ -117,6 +120,7 @@ export function EditUserFinanceApp({
   onSave: originalOnSave,
 }: EditUserFinanceAppProps) {
   const { t } = useTranslation();
+  const { saveUser } = useSaveUser();
 
   return (
     <Modal name="edit-user">
