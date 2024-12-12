@@ -1,6 +1,5 @@
 import React, { ReactNode, useEffect, useRef, useState, type CSSProperties } from 'react';
-
-import { t } from 'i18next';
+import { useTranslation } from 'react-i18next';
 
 import type { Theme } from 'loot-core/src/types/prefs';
 
@@ -25,6 +24,7 @@ export function ThemeSelector({ style }: ThemeSelectorProps) {
   const [themeOptionsExtended, setThemeOptionsExtended] = useState(themeOptions);
 
   const { isNarrowWidth } = useResponsive();
+  const { t } = useTranslation();
 
   const baseIcons = {
     light: SvgSun,

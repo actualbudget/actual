@@ -1,9 +1,8 @@
 // @ts-strict-ignore
 import { type FormEvent, useState } from 'react';
 import { Form } from 'react-aria-components';
+import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
-
-import { t } from 'i18next';
 
 import { closeModal, createAccount } from 'loot-core/client/actions';
 import { toRelaxedNumber } from 'loot-core/src/shared/util';
@@ -30,6 +29,7 @@ import { Checkbox } from '../forms';
 import { validateAccountName } from '../util/accountValidation';
 
 export function CreateLocalAccountModal() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const accounts = useAccounts.useAccounts();
