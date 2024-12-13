@@ -132,11 +132,11 @@ function AppInner() {
       addNotification({
         type: 'error',
         id: 'login-expired',
-        title: 'Login expired',
+        title: t('Login expired'),
         sticky: true,
-        message: 'Login expired, please login again.',
+        message: t('Login expired, please login again.'),
         button: {
-          title: 'Go to login',
+          title: t('Go to login'),
           action: signOut,
         },
       });

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { send } from 'loot-core/platform/client/fetch';
 import { getUserAccessErrors } from 'loot-core/shared/errors';
@@ -24,6 +25,8 @@ export function EditUserAccess({
   defaultUserAccess,
   onSave: originalOnSave,
 }: EditUserAccessProps) {
+  const { t } = useTranslation();
+
   const actions = useActions();
   const [userId, setUserId] = useState(defaultUserAccess.userId ?? '');
   const [error, setSetError] = useState('');
@@ -63,11 +66,11 @@ export function EditUserAccess({
         actions.addNotification({
           type: 'error',
           id: 'login-expired',
-          title: 'Login expired',
+          title: t('Login expired'),
           sticky: true,
           message: getUserAccessErrors(error),
           button: {
-            title: 'Go to login',
+            title: t('Go to login'),
             action: () => {
               actions.signOut();
             },
@@ -84,12 +87,12 @@ export function EditUserAccess({
       {({ state: { close } }: { state: { close: () => void } }) => (
         <>
           <ModalHeader
-            title="User Access"
+            title={t('User Access')}
             rightContent={<ModalCloseButton onPress={close} />}
           />
           <Stack direction="row" style={{ marginTop: 10 }}>
             <FormField style={{ flex: 1 }}>
-              <FormLabel title="User" htmlFor="user-field" />
+              <FormLabel title={t('User')} htmlFor="user-field" />
               {availableUsers.length > 0 && (
                 <View>
                   <Select
@@ -104,7 +107,7 @@ export function EditUserAccess({
                       marginTop: 5,
                     }}
                   >
-                    Select a user from the directory
+                    <Trans>Select a user from the directory</Trans>
                   </label>
                 </View>
               )}
@@ -116,7 +119,7 @@ export function EditUserAccess({
                     marginTop: 5,
                   }}
                 >
-                  No users available to give access
+                  <Trans>No users available to give access</Trans>
                 </Text>
               )}
             </FormField>
@@ -141,7 +144,7 @@ export function EditUserAccess({
               isDisabled={availableUsers.length === 0}
               onPress={() => onSave(close)}
             >
-              {defaultUserAccess.userId ? 'Save' : 'Add'}
+              {defaultUserAccess.userId ? t('Save') : t('Add')}
             </Button>
           </Stack>
         </>

@@ -1,5 +1,6 @@
 // @ts-strict-ignore
 import React, { memo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { send } from 'loot-core/platform/client/fetch';
 import { getUserAccessErrors } from 'loot-core/shared/errors';
@@ -20,6 +21,8 @@ type UserAccessProps = {
 
 export const UserAccessRow = memo(
   ({ access, hovered, onHover }: UserAccessProps) => {
+    const { t } = useTranslation();
+
     const backgroundFocus = hovered;
     const [marked, setMarked] = useState(
       access.owner === 1 || access.haveAccess === 1,
@@ -47,8 +50,10 @@ export const UserAccessRow = memo(
         if (someDeletionsFailed) {
           actions.addNotification({
             type: 'error',
-            title: 'Access Revocation Incomplete',
-            message: 'Some access permissions were not revoked successfully.',
+            title: t('Access Revocation Incomplete'),
+            message: t(
+              'Some access permissions were not revoked successfully.',
+            ),
             sticky: true,
           });
         }
@@ -61,11 +66,11 @@ export const UserAccessRow = memo(
         actions.addNotification({
           type: 'error',
           id: 'login-expired',
-          title: 'Login expired',
+          title: t('Login expired'),
           sticky: true,
           message: getUserAccessErrors(error),
           button: {
-            title: 'Go to login',
+            title: t('Go to login'),
             action: () => {
               actions.signOut();
             },
@@ -74,7 +79,7 @@ export const UserAccessRow = memo(
       } else {
         actions.addNotification({
           type: 'error',
-          title: 'Something happened while editing access',
+          title: t('Something happened while editing access'),
           sticky: true,
           message: getUserAccessErrors(error),
         });

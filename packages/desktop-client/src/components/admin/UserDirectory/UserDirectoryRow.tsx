@@ -1,5 +1,6 @@
 // @ts-strict-ignore
 import React, { memo } from 'react';
+import { Trans } from 'react-i18next';
 
 import { PossibleRoles, type UserEntity } from 'loot-core/types/models/user';
 
@@ -132,7 +133,7 @@ export const UserDirectoryRow = memo(
             variant="bare"
             onPress={() => onEditUser?.(user)}
           >
-            Edit
+            <Trans>Edit</Trans>
           </Button>
         </Cell>
       </Row>
