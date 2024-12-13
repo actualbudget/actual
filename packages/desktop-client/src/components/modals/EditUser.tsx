@@ -38,7 +38,7 @@ type EditUserFinanceAppProps = {
 function useGetUserDirectoryErrors() {
   const { t } = useTranslation();
 
-  function getUserDirectoryErrors(reason) {
+  function getUserDirectoryErrors(reason: string) {
     switch (reason) {
       case 'unauthorized':
         return t('You are not logged in.');
