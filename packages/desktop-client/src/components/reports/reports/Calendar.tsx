@@ -213,7 +213,7 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
           });
         }
 
-        setQuery(query);
+        setQuery(query.options({ splits: 'grouped' }));
       })
       .catch((error: unknown) => {
         console.error('Error generating filters:', error);
