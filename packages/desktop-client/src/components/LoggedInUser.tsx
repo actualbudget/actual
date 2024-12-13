@@ -210,11 +210,13 @@ export function LoggedInUser({
 
       {!loading && multiuserEnabled && userData?.userName && (
         <small>
-          (logged as:{' '}
+          <Trans>
+            (logged in as:{' '}
           <span>
             <PrivacyFilter>{userData?.displayName}</PrivacyFilter>
           </span>
           )
+          </Trans>
         </small>
       )}
 

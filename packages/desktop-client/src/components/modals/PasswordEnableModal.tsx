@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { send } from 'loot-core/platform/client/fetch';
 import * as asyncStorage from 'loot-core/src/platform/server/asyncStorage';
@@ -28,6 +29,8 @@ type PasswordEnableModalProps = {
 export function PasswordEnableModal({
   onSave: originalOnSave,
 }: PasswordEnableModalProps) {
+  const { t } = useTranslation();
+
   const [error, setError] = useState<string | null>(null);
   const { closeBudget, popModal } = useActions();
   const multiuserEnabled = useMultiuserEnabled();
@@ -35,17 +38,18 @@ export function PasswordEnableModal({
   const refreshLoginMethods = useRefreshLoginMethods();
 
   const errorMessages = {
-    'invalid-password': 'Invalid Password',
-    'password-match': 'Passwords do not match',
-    'network-failure': 'Unable to contact the server',
-    'unable-to-change-file-config-enabled':
+    'invalid-password': t('Invalid Password'),
+    'password-match': t('Passwords do not match'),
+    'network-failure': t('Unable to contact the server'),
+    'unable-to-change-file-config-enabled': t(
       'Unable to disable OpenID. Please update the config.json file in this case.',
+    ),
   };
 
   function getErrorMessage(error: string): string {
     return (
       errorMessages[error as keyof typeof errorMessages] ||
-      'Internal server error'
+      t('Internal server error')
     );
   }
 
@@ -67,7 +71,7 @@ export function PasswordEnableModal({
       {({ state: { close } }) => (
         <>
           <ModalHeader
-            title="Revert to server password"
+            title={t('Revert to server password')}
             rightContent={<ModalCloseButton onPress={close} />}
           />
 
@@ -83,7 +87,7 @@ export function PasswordEnableModal({
                       style={{ fontSize: 15, marginRight: 10 }}
                       onPress={() => popModal()}
                     >
-                      Cancel
+                      <Trans>Cancel</Trans>
                     </Button>
                   }
                   onSetPassword={onSetPassword}
@@ -100,7 +104,7 @@ export function PasswordEnableModal({
                       style={{ fontSize: 15, marginRight: 10 }}
                       onPress={() => popModal()}
                     >
-                      Cancel
+                      <Trans>Cancel</Trans>
                     </Button>
                   }
                   onSetPassword={onSetPassword}
@@ -113,7 +117,7 @@ export function PasswordEnableModal({
                 color: theme.pageTextLight,
                 paddingTop: 5,
               }}
-              title="After disabling openid all sessions will be closed"
+              title={t('After disabling openid all sessions will be closed')}
             />
             {multiuserEnabled && (
               <Label
@@ -121,7 +125,7 @@ export function PasswordEnableModal({
                   ...styles.verySmallText,
                   color: theme.warningText,
                 }}
-                title="Multi-user will not work after disabling"
+                title={t('Multi-user will not work after disabling')}
               />
             )}
             {error && <ErrorAlert>{error}</ErrorAlert>}

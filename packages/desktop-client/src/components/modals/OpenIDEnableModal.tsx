@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { send } from 'loot-core/platform/client/fetch';
 import * as asyncStorage from 'loot-core/platform/server/asyncStorage';
@@ -22,6 +23,8 @@ type OpenIDEnableModalProps = {
 export function OpenIDEnableModal({
   onSave: originalOnSave,
 }: OpenIDEnableModalProps) {
+  const { t } = useTranslation();
+
   const [error, setError] = useState('');
   const actions = useActions();
   const { closeBudget } = useActions();
@@ -39,7 +42,9 @@ export function OpenIDEnableModal({
         } catch (e) {
           console.error('Failed to cleanup after OpenID enable:', e);
           setError(
-            'OpenID was enabled but cleanup failed. Please refresh the application.',
+            t(
+              'OpenID was enabled but cleanup failed. Please refresh the application.',
+            ),
           );
         }
       } else {
@@ -47,7 +52,7 @@ export function OpenIDEnableModal({
       }
     } catch (e) {
       console.error('Failed to enable OpenID:', e);
-      setError('Failed to enable OpenID. Please try again.');
+      setError(t('Failed to enable OpenID. Please try again.'));
     }
   }
 
@@ -56,7 +61,7 @@ export function OpenIDEnableModal({
       {({ state: { close } }) => (
         <>
           <ModalHeader
-            title="Enable OpenID"
+            title={t('Enable OpenID')}
             rightContent={<ModalCloseButton onPress={close} />}
           />
 
@@ -70,7 +75,7 @@ export function OpenIDEnableModal({
                   style={{ marginRight: 10 }}
                   onPress={actions.popModal}
                 >
-                  Cancel
+                  <Trans>Cancel</Trans>
                 </Button>,
               ]}
             />
@@ -80,21 +85,21 @@ export function OpenIDEnableModal({
                 color: theme.pageTextLight,
                 paddingTop: 5,
               }}
-              title="After enabling openid all sessions will be closed"
+              title={t('After enabling openid all sessions will be closed')}
             />
             <Label
               style={{
                 ...styles.verySmallText,
                 color: theme.pageTextLight,
               }}
-              title="The first user to login will become the server owner"
+              title={t('The first user to login will become the server owner')}
             />
             <Label
               style={{
                 ...styles.verySmallText,
                 color: theme.warningText,
               }}
-              title="The current password will be disabled"
+              title={t('The current password will be disabled')}
             />
 
             {error && <Error>{error}</Error>}
