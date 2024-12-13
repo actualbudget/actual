@@ -53,7 +53,11 @@ export function AccountTransactions({
   accountName,
 }: {
   readonly account?: AccountEntity;
-  readonly accountId?: string;
+  readonly accountId?:
+    | AccountEntity['id']
+    | 'onbudget'
+    | 'offbudget'
+    | 'uncategorized';
   readonly accountName: string;
 }) {
   const schedulesQuery = useMemo(
@@ -218,7 +222,7 @@ function TransactionListWithPreviews({
   readonly account?: AccountEntity;
   readonly accountId?:
     | AccountEntity['id']
-    | 'budgeted'
+    | 'onbudget'
     | 'offbudget'
     | 'uncategorized';
   readonly accountName: AccountEntity['name'] | string;
@@ -342,13 +346,13 @@ function queriesFromAccountId(
   entity: AccountEntity | undefined,
 ) {
   switch (id) {
-    case 'budgeted':
+    case 'onbudget':
       return {
-        balance: queries.budgetedAccountBalance(),
+        balance: queries.onBudgetAccountBalance(),
       };
     case 'offbudget':
       return {
-        balance: queries.offbudgetAccountBalance(),
+        balance: queries.offBudgetAccountBalance(),
       };
     case 'uncategorized':
       return {

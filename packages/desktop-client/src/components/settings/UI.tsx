@@ -1,8 +1,8 @@
 import React, { useState, type ReactNode, type CSSProperties } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 
 import { css } from '@emotion/css';
-import { t } from 'i18next';
 
 import { theme } from '../../style';
 import { tokens } from '../../tokens';
@@ -50,6 +50,7 @@ type AdvancedToggleProps = {
 };
 
 export const AdvancedToggle = ({ children }: AdvancedToggleProps) => {
+  const { t } = useTranslation();
   const location = useLocation();
   const [expanded, setExpanded] = useState(location.hash === '#advanced');
 

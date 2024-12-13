@@ -1,10 +1,10 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 
+import { setAppState, updateApp } from 'loot-core/client/actions';
 import { type State } from 'loot-core/src/client/state-types';
 
-import { useActions } from '../hooks/useActions';
 import { SvgClose } from '../icons/v1';
 import { theme } from '../style';
 
@@ -20,7 +20,10 @@ export function UpdateNotification() {
     (state: State) => state.app.showUpdateNotification,
   );
 
-  const { updateApp, setAppState } = useActions();
+  const dispatch = useDispatch();
+  const onRestart = () => {
+    dispatch(updateApp());
+  };
 
   if (updateInfo && showUpdateNotification) {
     const notes = updateInfo.releaseNotes;
@@ -51,7 +54,7 @@ export function UpdateNotification() {
             <Text>
               <Link
                 variant="text"
-                onClick={updateApp}
+                onClick={onRestart}
                 style={{
                   color: theme.buttonPrimaryText,
                   textDecoration: 'underline',
@@ -81,10 +84,12 @@ export function UpdateNotification() {
                 style={{ display: 'inline', padding: '1px 7px 2px 7px' }}
                 onPress={() => {
                   // Set a flag to never show an update notification again for this session
-                  setAppState({
-                    updateInfo: null,
-                    showUpdateNotification: false,
-                  });
+                  dispatch(
+                    setAppState({
+                      updateInfo: null,
+                      showUpdateNotification: false,
+                    }),
+                  );
                 }}
               >
                 <SvgClose
