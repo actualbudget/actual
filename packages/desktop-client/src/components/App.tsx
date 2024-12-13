@@ -42,6 +42,7 @@ import { Modals } from './Modals';
 import { ResponsiveProvider } from './responsive/ResponsiveProvider';
 import { SidebarProvider } from './sidebar/SidebarProvider';
 import { UpdateNotification } from './UpdateNotification';
+import { loadPlugins, setLoadedPlugins } from '../pluginLoader';
 
 function AppInner() {
   const [budgetId] = useMetadataPref('id');
@@ -117,6 +118,10 @@ function AppInner() {
     }
 
     initAll().catch(showErrorBoundary);
+
+    loadPlugins().then(plugins => {
+      setLoadedPlugins(plugins);
+    });
   }, []);
 
   useEffect(() => {

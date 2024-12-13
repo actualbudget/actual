@@ -4,7 +4,14 @@ import i18n from 'i18next';
 import resourcesToBackend from 'i18next-resources-to-backend';
 
 const loadLanguage = (language: string) => {
-  return import(`./locale/${language}.json`);
+  try
+  {
+    return import(`./locale/${language}.json`);
+  }
+  catch
+  {
+    return null;
+  }
 };
 
 i18n

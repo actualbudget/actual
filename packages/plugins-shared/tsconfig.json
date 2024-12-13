@@ -7,6 +7,6 @@
     "moduleResolution": "Node",
     "skipLibCheck": true,
   },
-  "include": ["src", "src/global.d.ts"],
+  "include": ["src", "src/globals.d.ts"],
   "exclude": ["node_modules", "dist"]
 }

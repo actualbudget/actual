@@ -6,10 +6,12 @@ import type { DarkTheme, Theme } from 'loot-core/src/types/prefs';
 
 import { useGlobalPref } from '../hooks/useGlobalPref';
 
-import * as darkTheme from './themes/dark';
-import * as developmentTheme from './themes/development';
-import * as lightTheme from './themes/light';
-import * as midnightTheme from './themes/midnight';
+import { theme as darkTheme } from './themes/dark';
+import { theme as developmentTheme } from './themes/development';
+import { theme as lightTheme } from './themes/light';
+import { theme as midnightTheme } from './themes/midnight';
+import { ThemeDefinition } from '../../../plugins-shared/src';
+import { loadedPlugins } from '../pluginLoader';
 
 export const themes = {
   light: { name: 'Light', colors: lightTheme },
@@ -43,24 +45,45 @@ export function usePreferredDarkTheme() {
 
 export function ThemeStyle() {
   const [theme] = useTheme();
+  const [themesExtended, setThemesExtended] = useState(themes);
+
   const [darkThemePreference] = usePreferredDarkTheme();
   const [themeColors, setThemeColors] = useState<
-    | typeof lightTheme
-    | typeof darkTheme
-    | typeof midnightTheme
-    | typeof developmentTheme
+    | ThemeDefinition
     | undefined
   >(undefined);
 
   useEffect(() => {
+    const themesLight = loadedPlugins.reduce((acc, plugin) => {
+      if (plugin.availableThemes?.length) {
+        plugin.availableThemes(false).forEach(theme => {
+          acc[theme] = { name: theme, colors: plugin.getThemeSchema(theme, false)};
+        });
+      }
+      return acc;
+    }, {});
+
+    const themesDark = loadedPlugins.reduce((acc, plugin) => {
+      if (plugin.availableThemes?.length) {
+        plugin.availableThemes(true).forEach(theme => {
+          acc[theme] = { name: theme, colors: plugin.getThemeSchema(theme, true)};
+        });
+      }
+      return acc;
+    }, {});
+
+    setThemesExtended({...themes, ...themesLight, ...themesDark})
+  }, [loadedPlugins]);
+
+  useEffect(() => {
     if (theme === 'auto') {
-      const darkTheme = themes[darkThemePreference];
+      const darkTheme = themesExtended[darkThemePreference];
 
       function darkThemeMediaQueryListener(event: MediaQueryListEvent) {
         if (event.matches) {
           setThemeColors(darkTheme.colors);
         } else {
-          setThemeColors(themes['light'].colors);
+          setThemeColors(themesExtended['light'].colors);
         }
       }
       const darkThemeMediaQuery = window.matchMedia(
@@ -75,7 +98,7 @@ export function ThemeStyle() {
       if (darkThemeMediaQuery.matches) {
         setThemeColors(darkTheme.colors);
       } else {
-        setThemeColors(themes['light'].colors);
+        setThemeColors(themesExtended['light'].colors);
       }
 
       return () => {
@@ -85,9 +108,9 @@ export function ThemeStyle() {
         );
       };
     } else {
-      setThemeColors(themes[theme].colors);
+      setThemeColors(themesExtended[theme].colors);
     }
-  }, [theme, darkThemePreference]);
+  }, [theme, darkThemePreference, themesExtended]);
 
   if (!themeColors) return null;
 

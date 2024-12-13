@@ -3,9 +3,10 @@ import { ActualPlugin } from '../../plugins-shared/src';
 import * as jszip from 'jszip';
 
 export var loadedPlugins: ActualPlugin[] = null;
-loadPlugins().then(plugins => {
+
+export function setLoadedPlugins(plugins: ActualPlugin[]) {
   loadedPlugins = plugins;
-});
+}
 
 export async function loadPlugins(): Promise<ActualPlugin[]> {
   return [
