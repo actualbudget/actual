@@ -108,7 +108,7 @@ function UserAccessContent({
 
     setAllAccess(loadedAccess);
     return loadedAccess;
-  }, [cloudFileId, setLoading]);
+  }, [cloudFileId, setLoading, t]);
 
   const loadOwner = useCallback(async () => {
     const file: Awaited<ReturnType<Handlers['get-user-file-info']>> =

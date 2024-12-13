@@ -44,7 +44,6 @@ export function LoggedInUser({
   const [cloudFileId] = useMetadataPref('cloudFileId');
   const location = useLocation();
   const { hasPermission } = useAuth();
-  const [isOwner, setIsOwner] = useState(false);
   const multiuserEnabled = useMultiuserEnabled();
   const allFiles = useSelector(state => state.budgets.allFiles || []);
   const remoteFiles = allFiles.filter(
@@ -169,7 +168,8 @@ export function LoggedInUser({
 
     if (
       multiuserEnabled &&
-      (isOwner || isAdmin) &&
+      ((currentFile && userData && currentFile.owner === userData.userId) ||
+        isAdmin) &&
       serverUrl &&
       !userData?.offline &&
       cloudFileId &&

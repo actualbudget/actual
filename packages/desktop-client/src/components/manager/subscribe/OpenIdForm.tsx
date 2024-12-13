@@ -87,7 +87,7 @@ export function OpenIdForm({
         },
       );
     }
-  }, [loadData]);
+  }, [loadData, t]);
 
   const handleProviderChange = (provider: OpenIdProviderOption) => {
     if (provider) {

@@ -170,7 +170,7 @@ function UserDirectoryContent({
     await loadUsers();
     selectedInst.dispatch({ type: 'select-none' });
     setLoading(false);
-  }, [actions, loadUsers, selectedInst, setLoading]);
+  }, [actions, loadUsers, selectedInst, setLoading, getUserDirectoryErrors, t]);
 
   const onEditUser = useCallback(
     user => {
