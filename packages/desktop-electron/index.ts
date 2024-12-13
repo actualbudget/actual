@@ -1,4 +1,5 @@
 import fs from 'fs';
+import { createServer, Server } from 'http';
 import path from 'path';
 
 import {
@@ -53,6 +54,37 @@ if (!isDev || !process.env.ACTUAL_DATA_DIR) {
 // be closed automatically when the JavaScript object is garbage collected.
 let clientWin: BrowserWindow | null;
 let serverProcess: UtilityProcess | null;
+
+const createOAuthServer = async () => {
+  const port = 3010;
+  console.log(`OAuth server running on port: ${port}`);
+
+  return new Promise<{ url: string; server: Server }>(resolve => {
+    const server = createServer((req, res) => {
+      const query = new URL(req.url || '', `http://localhost:${port}`)
+        .searchParams;
+
+      const code = query.get('token');
+      if (code && clientWin) {
+        clientWin.loadURL(`http://localhost:3001/openid-cb?token=${code}`);
+
+        // Respond to the browser
+        res.writeHead(200, { 'Content-Type': 'text/plain' });
+        res.end('OpenID login successful! You can close this tab.');
+
+        // Clean up the server after receiving the code
+        server.close();
+      } else {
+        res.writeHead(400, { 'Content-Type': 'text/plain' });
+        res.end('No token received.');
+      }
+    });
+
+    server.listen(port, '127.0.0.1', () => {
+      resolve({ url: `http://localhost:${port}`, server });
+    });
+  });
+};
 
 if (isDev) {
   process.traceProcessWarnings = true;
@@ -353,6 +385,11 @@ ipcMain.on('get-bootstrap-data', event => {
   };
 
   event.returnValue = payload;
+});
+
+ipcMain.handle('start-oauth-server', async () => {
+  const { url } = await createOAuthServer();
+  return url;
 });
 
 ipcMain.handle('restart-server', () => {

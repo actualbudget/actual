@@ -4,6 +4,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 import { useSearchParams } from 'react-router-dom';
 
+import { isElectron } from 'loot-core/shared/environment';
 import { loggedIn } from 'loot-core/src/client/actions/user';
 import { send } from 'loot-core/src/platform/client/fetch';
 import { type OpenIdConfig } from 'loot-core/types/models/openid';
@@ -93,14 +94,20 @@ function OpenIdLogin({ setError }) {
 
   async function onSubmitOpenId() {
     const { error, redirect_url } = await send('subscribe-sign-in', {
-      return_url: window.location.origin,
+      return_url: isElectron()
+        ? await window.Actual.startOAuthServer()
+        : window.location.origin,
       loginMethod: 'openid',
     });
 
     if (error) {
       setError(error);
     } else {
-      window.location.href = redirect_url;
+      if (isElectron()) {
+        window.Actual?.openURLInBrowser(redirect_url);
+      } else {
+        window.location.href = redirect_url;
+      }
     }
   }
 

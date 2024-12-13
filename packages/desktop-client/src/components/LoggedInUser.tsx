@@ -18,6 +18,7 @@ import { Menu } from './common/Menu';
 import { Popover } from './common/Popover';
 import { Text } from './common/Text';
 import { View } from './common/View';
+import { PrivacyFilter } from './PrivacyFilter';
 import { useMultiuserEnabled, useServerURL } from './ServerContext';
 
 type LoggedInUserProps = {
@@ -61,9 +62,9 @@ export function LoggedInUser({
   useEffect(() => {
     if (cloudFileId && currentFile) {
       setIsOwner(
-        currentFile.usersWithAccess.some(
+        currentFile.usersWithAccess?.some(
           u => u.userId === userData?.userId && u.owner,
-        ),
+        ) ?? false,
       );
     } else {
       setIsOwner(false);
@@ -209,7 +210,11 @@ export function LoggedInUser({
 
       {!loading && multiuserEnabled && userData?.userName && (
         <small>
-          (logged as: <span>{userData?.displayName}</span>)
+          (logged as:{' '}
+          <span>
+            <PrivacyFilter>{userData?.displayName}</PrivacyFilter>
+          </span>
+          )
         </small>
       )}
 
