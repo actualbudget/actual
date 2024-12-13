@@ -1,4 +1,5 @@
 import { type Ref, useEffect, useState } from 'react';
+import { Trans } from 'react-i18next';
 
 import {
   addDays,
@@ -126,7 +127,7 @@ export function CalendarGraph({
                           marginRight: 4,
                         }}
                       >
-                        Income:
+                        <Trans>Income</Trans>:
                       </View>
                       <View
                         style={{
@@ -155,7 +156,7 @@ export function CalendarGraph({
                           marginRight: 4,
                         }}
                       >
-                        Expenses:
+                        <Trans>Expenses</Trans>:
                       </View>
                       <View
                         style={{

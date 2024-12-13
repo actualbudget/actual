@@ -733,6 +733,8 @@ function CalendarWithHeader({
   conditions,
   conditionsOp,
 }: CalendarWithHeaderProps) {
+  const { t } = useTranslation();
+
   return (
     <View
       style={{
@@ -804,7 +806,7 @@ function CalendarWithHeader({
               flexGrow: 1,
               justifyContent: 'start',
             }}
-            aria-label="Income"
+            aria-label={t('Income')}
           >
             <PrivacyFilter>
               {amountToCurrency(calendar.totalIncome)}
@@ -822,7 +824,7 @@ function CalendarWithHeader({
               flexGrow: 1,
               justifyContent: 'start',
             }}
-            aria-label="Expenses"
+            aria-label={t('Expenses')}
           >
             <PrivacyFilter>
               {amountToCurrency(calendar.totalExpense)}
@@ -913,7 +915,7 @@ function CalendarCardHeader({
                 marginRight: 4,
               }}
             >
-              Income:
+              <Trans>Income</Trans>:
             </View>
             <View style={{ color: chartTheme.colors.blue }}>
               <PrivacyFilter>{amountToCurrency(totalIncome)}</PrivacyFilter>
@@ -925,7 +927,7 @@ function CalendarCardHeader({
                 marginRight: 4,
               }}
             >
-              Expenses:
+              <Trans>Expenses</Trans>:
             </View>
             <View style={{ color: chartTheme.colors.red }}>
               <PrivacyFilter>{amountToCurrency(totalExpense)}</PrivacyFilter>
