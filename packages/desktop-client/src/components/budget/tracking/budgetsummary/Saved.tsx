@@ -33,7 +33,7 @@ export function Saved({ projected, style }: SavedProps) {
     <View style={{ alignItems: 'center', fontSize: 14, ...style }}>
       {projected ? (
         <Text style={{ color: theme.pageTextLight }}>
-          <Trans>Projected Savings:</Trans>
+          <Trans>Projected savings:</Trans>
         </Text>
       ) : (
         <View style={{ color: theme.pageTextLight }}>
@@ -46,7 +46,7 @@ export function Saved({ projected, style }: SavedProps) {
         content={
           <>
             <AlignedText
-              left={t('Projected Savings:')}
+              left={t('Projected savings:')}
               right={
                 <Text
                   style={{

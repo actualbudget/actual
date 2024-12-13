@@ -47,7 +47,7 @@ import {
   titleFirst,
 } from 'loot-core/src/shared/util';
 
-import { useFeatureFlag } from '../../hooks/useFeatureFlag';
+import { useContextMenu } from '../../hooks/useContextMenu';
 import { useMergedRefs } from '../../hooks/useMergedRefs';
 import { usePrevious } from '../../hooks/usePrevious';
 import { useProperFocus } from '../../hooks/useProperFocus';
@@ -1048,10 +1048,8 @@ const Transaction = memo(function Transaction({
     }, 1);
   }, [splitError, allTransactions]);
 
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [crossOffset, setCrossOffset] = useState(0);
-  const [offset, setOffset] = useState(0);
-  const contextMenusEnabled = useFeatureFlag('contextMenus');
+  const { setMenuOpen, menuOpen, handleContextMenu, position } =
+    useContextMenu();
 
   return (
     <Row
@@ -1081,23 +1079,14 @@ const Transaction = memo(function Transaction({
         }),
         ...(_unmatched && { opacity: 0.5 }),
       }}
-      onContextMenu={e => {
-        if (!contextMenusEnabled) return;
-        if (transaction.id === 'temp') return;
-        e.preventDefault();
-        const rect = e.currentTarget.getBoundingClientRect();
-        setCrossOffset(e.clientX - rect.left);
-        setOffset(e.clientY - rect.bottom);
-        setMenuOpen(true);
-      }}
+      onContextMenu={handleContextMenu}
     >
       <Popover
         triggerRef={triggerRef}
         placement="bottom start"
         isOpen={menuOpen}
         onOpenChange={() => setMenuOpen(false)}
-        crossOffset={crossOffset}
-        offset={offset}
+        {...position}
         style={{ width: 200, margin: 1 }}
         isNonModal
       >
@@ -1420,7 +1409,7 @@ const Transaction = memo(function Transaction({
         </Cell>
       ) : isBudgetTransfer || isOffBudget ? (
         <InputCell
-          /* Category field for transfer and off-budget transactions
+          /* Category field for transfer and off budget transactions
      (NOT preview, it is covered first) */
           name="category"
           width="flex"
@@ -1431,7 +1420,7 @@ const Transaction = memo(function Transaction({
             isParent
               ? 'Split'
               : isOffBudget
-                ? 'Off Budget'
+                ? 'Off budget'
                 : isBudgetTransfer
                   ? 'Transfer'
                   : ''
@@ -2105,9 +2094,9 @@ export const TransactionTable = forwardRef((props, ref) => {
       result = props.transactions.filter((t, idx) => {
         if (t.parent_id) {
           if (idx >= index) {
-            return splitsExpanded.expanded(t.parent_id);
+            return splitsExpanded.isExpanded(t.parent_id);
           } else if (prevSplitsExpanded.current) {
-            return prevSplitsExpanded.current.expanded(t.parent_id);
+            return prevSplitsExpanded.current.isExpanded(t.parent_id);
           }
         }
         return true;
@@ -2124,7 +2113,7 @@ export const TransactionTable = forwardRef((props, ref) => {
 
       result = props.transactions.filter(t => {
         if (t.parent_id) {
-          return splitsExpanded.expanded(t.parent_id);
+          return splitsExpanded.isExpanded(t.parent_id);
         }
         return true;
       });
@@ -2595,7 +2584,7 @@ export const TransactionTable = forwardRef((props, ref) => {
       transactionsByParent={transactionsByParent}
       transferAccountsByTransaction={transferAccountsByTransaction}
       selectedItems={selectedItems}
-      isExpanded={splitsExpanded.expanded}
+      isExpanded={splitsExpanded.isExpanded}
       onSave={onSave}
       onDelete={onDelete}
       onDuplicate={onDuplicate}

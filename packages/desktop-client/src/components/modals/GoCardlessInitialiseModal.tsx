@@ -28,7 +28,6 @@ export const GoCardlessInitialiseModal = ({
   onSuccess,
 }: GoCardlessInitialiseProps) => {
   const { t } = useTranslation();
-
   const [secretId, setSecretId] = useState('');
   const [secretKey, setSecretKey] = useState('');
   const [isValid, setIsValid] = useState(true);

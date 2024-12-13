@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useRef, type CSSProperties } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 
+import { closeBudget, getUserData, signOut } from 'loot-core/client/actions';
 import { type State } from 'loot-core/src/client/state-types';
 import { type RemoteFile, type SyncedLocalFile } from 'loot-core/types/file';
 
 import { useAuth } from '../auth/AuthProvider';
 import { Permissions } from '../auth/types';
-import { useActions } from '../hooks/useActions';
 import { useMetadataPref } from '../hooks/useMetadataPref';
 import { useNavigate } from '../hooks/useNavigate';
 import { theme, styles } from '../style';
@@ -33,14 +33,13 @@ export function LoggedInUser({
   color,
 }: LoggedInUserProps) {
   const { t } = useTranslation();
-
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
   const userData = useSelector((state: State) => state.user.data);
-  const { getUserData, signOut, closeBudget } = useActions();
   const [loading, setLoading] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
   const serverUrl = useServerURL();
   const triggerRef = useRef<HTMLButtonElement>(null);
-  const navigate = useNavigate();
   const [budgetId] = useMetadataPref('id');
   const [cloudFileId] = useMetadataPref('cloudFileId');
   const location = useLocation();
@@ -54,25 +53,19 @@ export function LoggedInUser({
   const currentFile = remoteFiles.find(f => f.cloudFileId === cloudFileId);
 
   useEffect(() => {
-    if (getUserData) {
-      getUserData().then(() => setLoading(false));
+    async function init() {
+      await dispatch(getUserData());
     }
-  }, [getUserData]);
 
-  useEffect(() => {
-    if (cloudFileId && currentFile) {
-      setIsOwner(
-        currentFile.usersWithAccess?.some(
-          u => u.userId === userData?.userId && u.owner,
-        ) ?? false,
-      );
-    } else {
-      setIsOwner(false);
-    }
-  }, [cloudFileId, currentFile, userData]);
+    init().then(() => setLoading(false));
+  }, []);
+
+  async function onCloseBudget() {
+    await dispatch(closeBudget());
+  }
 
   async function onChangePassword() {
-    await closeBudget();
+    await onCloseBudget();
     navigate('/change-password');
   }
 
@@ -84,7 +77,7 @@ export function LoggedInUser({
         onChangePassword();
         break;
       case 'sign-in':
-        await closeBudget();
+        await onCloseBudget();
         navigate('/login');
         break;
       case 'user-access':
@@ -97,12 +90,10 @@ export function LoggedInUser({
         navigate('/');
         break;
       case 'sign-out':
-        if (signOut) {
-          signOut();
-        }
+        dispatch(signOut());
         break;
       case 'config-server':
-        await closeBudget();
+        await onCloseBudget();
         navigate('/config-server');
         break;
       default:
@@ -212,10 +203,10 @@ export function LoggedInUser({
         <small>
           <Trans>
             (logged in as:{' '}
-          <span>
-            <PrivacyFilter>{userData?.displayName}</PrivacyFilter>
-          </span>
-          )
+            <span>
+              <PrivacyFilter>{userData?.displayName}</PrivacyFilter>
+            </span>
+            )
           </Trans>
         </small>
       )}

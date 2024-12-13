@@ -47,6 +47,7 @@ import { KeyboardShortcutModal } from './modals/KeyboardShortcutModal';
 import { LoadBackupModal } from './modals/LoadBackupModal';
 import { ConfirmChangeDocumentDirModal } from './modals/manager/ConfirmChangeDocumentDir';
 import { DeleteFileModal } from './modals/manager/DeleteFileModal';
+import { DuplicateFileModal } from './modals/manager/DuplicateFileModal';
 import { FilesSettingsModal } from './modals/manager/FilesSettingsModal';
 import { ImportActualModal } from './modals/manager/ImportActualModal';
 import { ImportModal } from './modals/manager/ImportModal';
@@ -591,6 +592,16 @@ export function Modals() {
           return <BudgetListModal key={name} />;
         case 'delete-budget':
           return <DeleteFileModal key={name} file={options.file} />;
+        case 'duplicate-budget':
+          return (
+            <DuplicateFileModal
+              key={name}
+              file={options.file}
+              managePage={options?.managePage}
+              loadBudget={options?.loadBudget}
+              onComplete={options?.onComplete}
+            />
+          );
         case 'import':
           return <ImportModal key={name} />;
         case 'files-settings':

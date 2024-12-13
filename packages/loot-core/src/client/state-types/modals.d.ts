@@ -80,6 +80,37 @@ type FinanceModals = {
 
   'delete-budget': { file: File };
 
+  'duplicate-budget': {
+    /** The budget file to be duplicated */
+    file: File;
+    /**
+     * Indicates whether the duplication is initiated from the budget
+     * management page. This may affect the behavior or UI of the
+     * duplication process.
+     */
+    managePage?: boolean;
+    /**
+     * loadBudget indicates whether to open the 'original' budget, the
+     * new duplicated 'copy' budget, or no budget ('none'). If 'none'
+     * duplicate-budget stays on the same page.
+     */
+    loadBudget?: 'none' | 'original' | 'copy';
+    /**
+     * onComplete is called when the DuplicateFileModal is closed.
+     * @param event the event object will pass back the status of the
+     * duplicate process.
+     * 'success' if the budget was duplicated.
+     * 'failed' if the budget could not be duplicated.  This will also
+     * pass an error on the event object.
+     * 'canceled' if the DuplicateFileModal was canceled.
+     * @returns
+     */
+    onComplete?: (event: {
+      status: 'success' | 'failed' | 'canceled';
+      error?: Error;
+    }) => void;
+  };
+
   import: null;
 
   'import-ynab4': null;

@@ -79,9 +79,11 @@ function isLocalFile(file: File): file is LocalFile {
 function FileMenu({
   onDelete,
   onClose,
+  onDuplicate,
 }: {
   onDelete: () => void;
   onClose: () => void;
+  onDuplicate?: () => void;
 }) {
   function onMenuSelect(type: string) {
     onClose();
@@ -90,18 +92,30 @@ function FileMenu({
       case 'delete':
         onDelete();
         break;
+      case 'duplicate':
+        if (onDuplicate) onDuplicate();
+        break;
       default:
     }
   }
 
   const { t } = useTranslation();
 
-  const items = [{ name: 'delete', text: t('Delete') }];
+  const items = [
+    ...(onDuplicate ? [{ name: 'duplicate', text: t('Duplicate') }] : []),
+    { name: 'delete', text: t('Delete') },
+  ];
 
   return <Menu onMenuSelect={onMenuSelect} items={items} />;
 }
 
-function FileMenuButton({ onDelete }: { onDelete: () => void }) {
+function FileMenuButton({
+  onDelete,
+  onDuplicate,
+}: {
+  onDelete: () => void;
+  onDuplicate?: () => void;
+}) {
   const triggerRef = useRef(null);
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -123,7 +137,11 @@ function FileMenuButton({ onDelete }: { onDelete: () => void }) {
         isOpen={menuOpen}
         onOpenChange={() => setMenuOpen(false)}
       >
-        <FileMenu onDelete={onDelete} onClose={() => setMenuOpen(false)} />
+        <FileMenu
+          onDelete={onDelete}
+          onClose={() => setMenuOpen(false)}
+          onDuplicate={onDuplicate}
+        />
       </Popover>
     </View>
   );
@@ -243,12 +261,14 @@ function FileItem({
   quickSwitchMode,
   onSelect,
   onDelete,
+  onDuplicate,
   currentUserId,
 }: {
   file: File;
   quickSwitchMode: boolean;
   onSelect: (file: File) => void;
   onDelete: (file: File) => void;
+  onDuplicate: (file: File) => void;
   currentUserId: string;
 }) {
   const { t } = useTranslation();
@@ -324,7 +344,10 @@ function FileItem({
           )}
 
           {!quickSwitchMode && (
-            <FileMenuButton onDelete={() => onDelete(file)} />
+            <FileMenuButton
+              onDelete={() => onDelete(file)}
+              onDuplicate={'id' in file ? () => onDuplicate(file) : undefined}
+            />
           )}
         </View>
       </View>
@@ -337,12 +360,14 @@ function BudgetFiles({
   quickSwitchMode,
   onSelect,
   onDelete,
+  onDuplicate,
   currentUserId,
 }: {
   files: File[];
   quickSwitchMode: boolean;
   onSelect: (file: File) => void;
   onDelete: (file: File) => void;
+  onDuplicate: (file: File) => void;
   currentUserId: string;
 }) {
   return (
@@ -376,6 +401,7 @@ function BudgetFiles({
             quickSwitchMode={quickSwitchMode}
             onSelect={onSelect}
             onDelete={onDelete}
+            onDuplicate={onDuplicate}
           />
         ))
       )}
@@ -571,7 +597,19 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
         currentUserId={currentUserId}
         quickSwitchMode={quickSwitchMode}
         onSelect={onSelect}
-        onDelete={file => dispatch(pushModal('delete-budget', { file }))}
+        onDelete={(file: File) =>
+          dispatch(pushModal('delete-budget', { file }))
+        }
+        onDuplicate={(file: File) => {
+          if (file && 'id' in file) {
+            dispatch(pushModal('duplicate-budget', { file, managePage: true }));
+          } else {
+            console.error(
+              'Attempted to duplicate a cloud file - only local files are supported. Cloud file:',
+              file,
+            );
+          }
+        }}
       />
       {!quickSwitchMode && (
         <View

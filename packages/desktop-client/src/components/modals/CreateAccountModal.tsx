@@ -1,5 +1,5 @@
-// @ts-strict-ignore
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { DialogTrigger } from 'react-aria-components';
 import { Trans, useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 
@@ -35,13 +35,12 @@ export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
 
   const syncServerStatus = useSyncServerStatus();
   const dispatch = useDispatch();
-  const [isGoCardlessSetupComplete, setIsGoCardlessSetupComplete] =
-    useState(null);
-  const [isSimpleFinSetupComplete, setIsSimpleFinSetupComplete] =
-    useState(null);
-  const [menuGoCardlessOpen, setGoCardlessMenuOpen] = useState<boolean>(false);
-  const triggerRef = useRef(null);
-  const [menuSimplefinOpen, setSimplefinMenuOpen] = useState<boolean>(false);
+  const [isGoCardlessSetupComplete, setIsGoCardlessSetupComplete] = useState<
+    boolean | null
+  >(null);
+  const [isSimpleFinSetupComplete, setIsSimpleFinSetupComplete] = useState<
+    boolean | null
+  >(null);
   const { hasPermission } = useAuth();
   const multiuserEnabled = useMultiuserEnabled();
 
@@ -146,7 +145,6 @@ export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
         value: null,
       }).then(() => {
         setIsGoCardlessSetupComplete(false);
-        setGoCardlessMenuOpen(false);
       });
     });
   };
@@ -161,7 +159,6 @@ export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
         value: null,
       }).then(() => {
         setIsSimpleFinSetupComplete(false);
-        setSimplefinMenuOpen(false);
       });
     });
   };
@@ -236,7 +233,7 @@ export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
             <View style={{ gap: 10 }}>
               {syncServerStatus === 'online' ? (
                 <>
-                  {(canSetSecrets || isGoCardlessSetupComplete) && (
+                  {canSetSecrets && (
                     <>
                       <View
                         style={{
@@ -259,13 +256,11 @@ export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
                             ? t('Link bank account with GoCardless')
                             : t('Set up GoCardless for bank sync')}
                         </ButtonWithLoading>
-                        {isGoCardlessSetupComplete && canSetSecrets && (
-                          <>
+                        {isGoCardlessSetupComplete && (
+                          <DialogTrigger>
                             <Button
-                              ref={triggerRef}
                               variant="bare"
-                              onPress={() => setGoCardlessMenuOpen(true)}
-                              aria-label="GoCardless menu"
+                              aria-label={t('GoCardless menu')}
                             >
                               <SvgDotsHorizontalTriple
                                 width={15}
@@ -273,30 +268,23 @@ export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
                                 style={{ transform: 'rotateZ(90deg)' }}
                               />
                             </Button>
-                            {menuGoCardlessOpen && (
-                              <Popover
-                                triggerRef={triggerRef}
-                                isOpen={menuGoCardlessOpen}
-                                onOpenChange={() =>
-                                  setGoCardlessMenuOpen(false)
-                                }
-                              >
-                                <Menu
-                                  onMenuSelect={item => {
-                                    if (item === 'reconfigure') {
-                                      onGoCardlessReset();
-                                    }
-                                  }}
-                                  items={[
-                                    {
-                                      name: 'reconfigure',
-                                      text: t('Reset GoCardless credentials'),
-                                    },
-                                  ]}
-                                />
-                              </Popover>
-                            )}
-                          </>
+
+                            <Popover>
+                              <Menu
+                                onMenuSelect={item => {
+                                  if (item === 'reconfigure') {
+                                    onGoCardlessReset();
+                                  }
+                                }}
+                                items={[
+                                  {
+                                    name: 'reconfigure',
+                                    text: t('Reset GoCardless credentials'),
+                                  },
+                                ]}
+                              />
+                            </Popover>
+                          </DialogTrigger>
                         )}
                       </View>
                       <Text style={{ lineHeight: '1.4em', fontSize: 15 }}>
@@ -305,13 +293,9 @@ export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
                           {t('bank account')}
                         </strong>{' '}
                         {t(
-                          'to automatically download transactions. GoCardless     provides reliable, up-to-date information from hundreds of banks.',
+                          'to automatically download transactions. GoCardless provides reliable, up-to-date information from hundreds of banks.',
                         )}
                       </Text>
-                    </>
-                  )}
-                  {(canSetSecrets || isSimpleFinSetupComplete) && (
-                    <>
                       <View
                         style={{
                           flexDirection: 'row',
@@ -335,13 +319,11 @@ export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
                             ? t('Link bank account with SimpleFIN')
                             : t('Set up SimpleFIN for bank sync')}
                         </ButtonWithLoading>
-                        {isSimpleFinSetupComplete && canSetSecrets && (
-                          <>
+                        {isSimpleFinSetupComplete && (
+                          <DialogTrigger>
                             <Button
-                              ref={triggerRef}
                               variant="bare"
-                              onPress={() => setSimplefinMenuOpen(true)}
-                              aria-label="SimpleFIN menu"
+                              aria-label={t('SimpleFIN menu')}
                             >
                               <SvgDotsHorizontalTriple
                                 width={15}
@@ -349,39 +331,32 @@ export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
                                 style={{ transform: 'rotateZ(90deg)' }}
                               />
                             </Button>
-                            {menuSimplefinOpen && (
-                              <Popover
-                                triggerRef={triggerRef}
-                                isOpen={menuSimplefinOpen}
-                                onOpenChange={() => setSimplefinMenuOpen(false)}
-                              >
-                                <Menu
-                                  onMenuSelect={item => {
-                                    if (item === 'reconfigure') {
-                                      onSimpleFinReset();
-                                    }
-                                  }}
-                                  items={[
-                                    {
-                                      name: 'reconfigure',
-                                      text: t('Reset SimpleFIN credentials'),
-                                    },
-                                  ]}
-                                />
-                              </Popover>
-                            )}
-                          </>
+                            <Popover>
+                              <Menu
+                                onMenuSelect={item => {
+                                  if (item === 'reconfigure') {
+                                    onSimpleFinReset();
+                                  }
+                                }}
+                                items={[
+                                  {
+                                    name: 'reconfigure',
+                                    text: t('Reset SimpleFIN credentials'),
+                                  },
+                                ]}
+                              />
+                            </Popover>
+                          </DialogTrigger>
                         )}
                       </View>
                       <Text style={{ lineHeight: '1.4em', fontSize: 15 }}>
-                        <Trans>
-                          <strong>
-                            Link a <em>North American</em> bank account
-                          </strong>{' '}
-                          to automatically download transactions. SimpleFIN
-                          provides reliable, up-to-date information from
-                          hundreds of banks.{' '}
-                        </Trans>
+                        <strong>
+                          {t('Link a')} <em>{t('North American')}</em>
+                          {t(' bank account')}
+                        </strong>{' '}
+                        {t(
+                          'to automatically download transactions. SimpleFIN provides reliable, up-to-date information from hundreds of banks.',
+                        )}{' '}
                       </Text>
                     </>
                   )}
@@ -396,7 +371,7 @@ export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
                           isGoCardlessSetupComplete ? '' : 'GoCardless',
                           isSimpleFinSetupComplete ? '' : 'SimpleFin',
                         ]
-                          .filter(Boolean) // Remove empty values
+                          .filter(Boolean)
                           .join(' or ')}
                         .
                       </Warning>
