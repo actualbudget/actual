@@ -216,7 +216,7 @@ export function CalendarCard({
                               marginRight: 4,
                             }}
                           >
-                            Income:
+                            <Trans>Income:</Trans>
                           </View>
                           <View style={{ color: chartTheme.colors.blue }}>
                             {totalIncome !== 0 ? (
