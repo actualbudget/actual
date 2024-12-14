@@ -48,6 +48,7 @@
     "mdast-util-newline-to-break": "^2.0.0",
     "memoize-one": "^6.0.0",
     "pikaday": "1.8.2",
+    "plugins-shared": "link:/home/devcontainers/opensource/actual_repos/actual_temp/packages/plugins-shared",
     "promise-retry": "^2.0.1",
     "re-resizable": "^6.9.17",
     "react": "18.2.0",

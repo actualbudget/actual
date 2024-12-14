@@ -94,6 +94,7 @@ __metadata:
     mdast-util-newline-to-break: "npm:^2.0.0"
     memoize-one: "npm:^6.0.0"
     pikaday: "npm:1.8.2"
+    plugins-shared: "link:/home/devcontainers/opensource/actual_repos/actual_temp/packages/plugins-shared"
     promise-retry: "npm:^2.0.1"
     re-resizable: "npm:^6.9.17"
     react: "npm:18.2.0"
@@ -16146,6 +16147,12 @@ __metadata:
   checksum: 10/f513beecc01a021b4913d4e5816894580b284335ae437e7ed2d5e78f8b6f0d2e0f874ec57bab9c9d424cc49e77b8347efa75abcfa8ac138dbfb63a045e1ce559
   languageName: node
   linkType: hard
+
+"plugins-shared@link:/home/devcontainers/opensource/actual_repos/actual_temp/packages/plugins-shared::locator=%40actual-app%2Fweb%40workspace%3Apackages%2Fdesktop-client":
+  version: 0.0.0-use.local
+  resolution: "plugins-shared@link:/home/devcontainers/opensource/actual_repos/actual_temp/packages/plugins-shared::locator=%40actual-app%2Fweb%40workspace%3Apackages%2Fdesktop-client"
+  languageName: node
+  linkType: soft
 
 "plugins-shared@workspace:packages/plugins-shared":
   version: 0.0.0-use.local

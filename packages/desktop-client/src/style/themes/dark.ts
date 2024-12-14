@@ -1,4 +1,4 @@
-import { ThemeDefinition } from '../../../../plugins-shared/src';
+import { ThemeDefinition } from 'plugins-shared';
 import * as colorPalette from '../palette';
 
 export const theme: ThemeDefinition = {

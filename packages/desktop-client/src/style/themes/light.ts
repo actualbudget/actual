@@ -1,4 +1,4 @@
-import { ThemeDefinition } from '../../../../plugins-shared/src';
+import { ThemeDefinition } from 'plugins-shared';
 import * as colorPalette from '../palette';
 
 export const theme: ThemeDefinition = {
@@ -44,8 +44,8 @@ export const theme: ThemeDefinition = {
     sidebarItemBackgroundPending: colorPalette.orange200,
     sidebarItemBackgroundPositive: colorPalette.green500,
     sidebarItemBackgroundFailed: colorPalette.red300,
-    sidebarItemBackgroundHover: colorPalette.navy800,
     sidebarItemAccentSelected: colorPalette.purple200,
+    sidebarItemBackgroundHover: colorPalette.navy800,
     sidebarItemText: colorPalette.navy150,
     sidebarItemTextSelected: colorPalette.purple200,
 
@@ -69,6 +69,7 @@ export const theme: ThemeDefinition = {
 
     modalBackground: colorPalette.white,
     modalBorder: colorPalette.white,
+
     mobileHeaderBackground: colorPalette.purple400,
     mobileHeaderText: colorPalette.navy50,
     mobileHeaderTextSubdued: colorPalette.gray200,
@@ -100,19 +101,34 @@ export const theme: ThemeDefinition = {
     buttonMenuSelectedBorder: colorPalette.orange200,
 
     buttonPrimaryText: colorPalette.white,
+    buttonPrimaryTextHover: 'inherited',
     buttonPrimaryBackground: colorPalette.purple500,
     buttonPrimaryBackgroundHover: colorPalette.purple300,
     buttonPrimaryBorder: colorPalette.purple500,
     buttonPrimaryShadow: 'rgba(0, 0, 0, 0.3)',
     buttonPrimaryDisabledText: colorPalette.white,
     buttonPrimaryDisabledBackground: colorPalette.navy300,
+    buttonPrimaryDisabledBorder: 'inherited',
 
     buttonNormalText: colorPalette.navy900,
+    buttonNormalTextHover: 'inherited',
     buttonNormalBackground: colorPalette.white,
+    buttonNormalBackgroundHover: 'inherited',
     buttonNormalBorder: colorPalette.navy150,
     buttonNormalShadow: 'rgba(0, 0, 0, 0.2)',
+    buttonNormalSelectedText: 'inherited',
+    buttonNormalSelectedBackground: 'inherited',
     buttonNormalDisabledText: colorPalette.navy300,
     buttonNormalDisabledBackground: colorPalette.white,
+    buttonNormalDisabledBorder: 'inherited',
+
+    buttonBareText: 'inherited',
+    buttonBareTextHover: 'inherited',
+    buttonBareBackground: 'inherited',
+    buttonBareBackgroundHover: 'inherited',
+    buttonBareBackgroundActive: 'inherited',
+    buttonBareDisabledText: 'inherited',
+    buttonBareDisabledBackground: 'inherited',
 
     calendarText: colorPalette.navy50,
     calendarBackground: colorPalette.navy900,
@@ -121,18 +137,88 @@ export const theme: ThemeDefinition = {
     calendarSelectedBackground: colorPalette.navy500,
 
     noticeBackground: colorPalette.green150,
+    noticeBackgroundLight: 'inherited',
+    noticeBackgroundDark: 'inherited',
     noticeText: colorPalette.green700,
+    noticeTextLight: 'inherited',
+    noticeTextDark: 'inherited',
+    noticeTextMenu: 'inherited',
+    noticeTextMenuHover: 'inherited',
+    noticeBorder: 'inherited',
+
     warningBackground: colorPalette.orange200,
     warningText: colorPalette.orange700,
+    warningTextLight: 'inherited',
+    warningTextDark: 'inherited',
+    warningBorder: 'inherited',
+
     errorBackground: colorPalette.red100,
     errorText: colorPalette.red500,
+    errorTextDark: 'inherited',
+    errorTextDarker: 'inherited',
+    errorTextMenu: 'inherited',
+    errorBorder: 'inherited',
+
     upcomingBackground: colorPalette.purple100,
     upcomingText: colorPalette.purple700,
+    upcomingBorder: 'inherited',
+
+    formLabelText: 'inherited',
+    formLabelBackground: 'inherited',
+    formInputBackground: 'inherited',
+    formInputBackgroundSelected: 'inherited',
+    formInputBackgroundSelection: 'inherited',
+    formInputBorder: 'inherited',
+    formInputTextReadOnlySelection: 'inherited',
+    formInputBorderSelected: 'inherited',
+    formInputText: 'inherited',
+    formInputTextSelected: 'inherited',
+    formInputTextPlaceholder: 'inherited',
+    formInputTextPlaceholderSelected: 'inherited',
+    formInputTextSelection: 'inherited',
+    formInputShadowSelected: 'inherited',
+    formInputTextHighlight: 'inherited',
+
+    checkboxText: 'inherited',
+    checkboxBackgroundSelected: 'inherited',
+    checkboxBorderSelected: 'inherited',
+    checkboxShadowSelected: 'inherited',
+    checkboxToggleBackground: 'inherited',
+    checkboxToggleBackgroundSelected: 'inherited',
+    checkboxToggleDisabled: 'inherited',
+
+    pillBackground: 'inherited',
+    pillBackgroundLight: 'inherited',
+    pillText: 'inherited',
+    pillTextHighlighted: 'inherited',
+    pillBorder: 'inherited',
+    pillBorderDark: 'inherited',
+    pillBackgroundSelected: 'inherited',
+    pillTextSelected: 'inherited',
+    pillBorderSelected: 'inherited',
+    pillTextSubdued: 'inherited',
+
+    reportsRed: 'inherited',
+    reportsBlue: 'inherited',
+    reportsGreen: 'inherited',
+    reportsGray: 'inherited',
+    reportsLabel: 'inherited',
+    reportsInnerLabel: 'inherited',
+
+    noteTagBackground: 'inherited',
+    noteTagBackgroundHover: 'inherited',
+    noteTagText: 'inherited',
+
+    budgetOtherMonth: 'inherited',
+    budgetCurrentMonth: 'inherited',
+    budgetHeaderOtherMonth: 'inherited',
+    budgetHeaderCurrentMonth: 'inherited',
 
     floatingActionBarBackground: colorPalette.purple400,
+    floatingActionBarBorder: 'inherited',
     floatingActionBarText: colorPalette.navy50,
 
     tooltipText: colorPalette.navy900,
     tooltipBackground: colorPalette.white,
     tooltipBorder: colorPalette.navy150,
-};
+};;

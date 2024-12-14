@@ -1,6 +1,5 @@
 import React from 'react';
-import { ActualPlugin } from '../../plugins-shared/src';
-import * as jszip from 'jszip';
+import { ActualPlugin, ActualPluginEntry } from 'plugins-shared';
 
 export var loadedPlugins: ActualPlugin[] = null;
 
@@ -17,15 +16,12 @@ export async function loadPlugins(): Promise<ActualPlugin[]> {
 async function loadPluginScript(scriptBlob: Blob): Promise<ActualPlugin> {
   window.React = React;
 
-  var script = await scriptBlob.text();
-  let adjustedContent = script.replace('import * as React from "react";', 'const React = window.React;');
-  adjustedContent = adjustedContent.replace('import React__default from "react";', 'const React__default = window.React;');
-  const scriptBlobAdjusted = new Blob([adjustedContent], { type: "application/javascript" });
-  const scriptURL = URL.createObjectURL(scriptBlobAdjusted);
+  const scriptURL = URL.createObjectURL(scriptBlob);
   const pluginModule = await import(/* @vite-ignore */ scriptURL);
 
   if (pluginModule?.default) {
-    const plugin: ActualPlugin = pluginModule.default;
+    const pluginEntry: ActualPluginEntry = pluginModule.default;
+    const plugin = pluginEntry(React);
     console.log(
       `Plugin "${plugin.name}" v${plugin.version} loaded successfully.`,
     );
@@ -38,7 +34,6 @@ async function fetchLatestRelease(
   owner: string,
   repo: string,
 ): Promise<{ version: string; zipUrl: string }> {
-  debugger;
   const apiUrl = `https://api.github.com/repos/${owner}/${repo}/releases/latest`;
   const response = await fetch(apiUrl);
   if (!response.ok)

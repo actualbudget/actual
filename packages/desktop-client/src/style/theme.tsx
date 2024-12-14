@@ -10,7 +10,7 @@ import { theme as darkTheme } from './themes/dark';
 import { theme as developmentTheme } from './themes/development';
 import { theme as lightTheme } from './themes/light';
 import { theme as midnightTheme } from './themes/midnight';
-import { ThemeDefinition } from '../../../plugins-shared/src';
+import { ThemeDefinition } from 'plugins-shared';
 import { loadedPlugins } from '../pluginLoader';
 
 export const themes = {
@@ -54,23 +54,23 @@ export function ThemeStyle() {
   >(undefined);
 
   useEffect(() => {
-    const themesLight = loadedPlugins.reduce((acc, plugin) => {
+    const themesLight = loadedPlugins?.reduce((acc, plugin) => {
       if (plugin.availableThemes?.length) {
         plugin.availableThemes(false).forEach(theme => {
           acc[theme] = { name: theme, colors: plugin.getThemeSchema(theme, false)};
         });
       }
       return acc;
-    }, {});
+    }, {}) ?? {};
 
-    const themesDark = loadedPlugins.reduce((acc, plugin) => {
+    const themesDark = loadedPlugins?.reduce((acc, plugin) => {
       if (plugin.availableThemes?.length) {
         plugin.availableThemes(true).forEach(theme => {
           acc[theme] = { name: theme, colors: plugin.getThemeSchema(theme, true)};
         });
       }
       return acc;
-    }, {});
+    }, {}) ?? {};
 
     setThemesExtended({...themes, ...themesLight, ...themesDark})
   }, [loadedPlugins]);

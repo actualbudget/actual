@@ -36,8 +36,6 @@ export function ThemeSelector({ style }: ThemeSelectorProps) {
   const [themeIcons, setThemeIcons] = useState(baseIcons);
 
   useEffect(() => {
-    debugger;
-
     const pluginIconsLight = loadedPlugins.reduce((acc, plugin) => {
       if (plugin.availableThemes?.length) {
         plugin.availableThemes(false).forEach(theme => {

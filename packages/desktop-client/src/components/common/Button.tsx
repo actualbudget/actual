@@ -42,6 +42,8 @@ const backgroundColor: {
   menuSelected: theme.buttonMenuSelectedBackground,
 };
 
+console.log(backgroundColor);
+
 const backgroundColorHover: Record<ButtonType, string> = {
   normal: theme.buttonNormalBackgroundHover,
   primary: theme.buttonPrimaryBackgroundHover,

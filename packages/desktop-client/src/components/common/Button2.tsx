@@ -143,6 +143,8 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     const variantWithDisabled: ButtonVariant | `${ButtonVariant}Disabled` =
       props.isDisabled ? `${variant}Disabled` : variant;
 
+      console.log(variantWithDisabled);
+
     const defaultButtonClassName: string = useMemo(
       () =>
         String(
