@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 
 import {
@@ -8,6 +8,10 @@ import {
   linkAccountSimpleFin,
   unlinkAccount,
 } from 'loot-core/client/actions';
+import {
+  type AccountEntity,
+  type AccountSyncSource,
+} from 'loot-core/types/models/account';
 
 import { useAccounts } from '../../hooks/useAccounts';
 import { theme } from '../../style';
@@ -17,7 +21,7 @@ import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { PrivacyFilter } from '../PrivacyFilter';
-import { TableHeader, Table, Row, Field } from '../table';
+import { Field, Row, Table, TableHeader } from '../table';
 
 const addOnBudgetAccountOption = { id: 'new-on', name: 'Create new account' };
 const addOffBudgetAccountOption = {
@@ -25,16 +29,32 @@ const addOffBudgetAccountOption = {
   name: 'Create new account (off budget)',
 };
 
+type SelectLinkedAccountsModalProps = {
+  requisitionId: string;
+  externalAccounts: AccountEntity[];
+  syncSource: AccountSyncSource;
+};
+
+type LinkedAccountIds = { [key: string]: string };
+type LinkedAccountIdsSetter = (
+  fn: (value: LinkedAccountIds) => LinkedAccountIds,
+) => void;
+
 export function SelectLinkedAccountsModal({
   requisitionId,
   externalAccounts,
   syncSource,
-}) {
+}: SelectLinkedAccountsModalProps) {
   externalAccounts.sort((a, b) => a.name.localeCompare(b.name));
   const { t } = useTranslation();
   const dispatch = useDispatch();
-  const localAccounts = useAccounts().filter(a => a.closed === 0);
-  const [chosenAccounts, setChosenAccounts] = useState(() => {
+  const localAccounts: AccountEntity[] = useAccounts().filter(
+    a => a.closed === 0,
+  );
+  const [chosenAccounts, setChosenAccounts]: [
+    LinkedAccountIds,
+    LinkedAccountIdsSetter,
+  ] = useState(() => {
     return Object.fromEntries(
       localAccounts
         .filter(acc => acc.account_id)
@@ -43,7 +63,7 @@ export function SelectLinkedAccountsModal({
   });
 
   async function onNext() {
-    const chosenLocalAccountIds = Object.values(chosenAccounts);
+    const chosenLocalAccountIds: string[] = Object.values(chosenAccounts);
 
     // Unlink accounts that were previously linked, but the user
     // chose to remove the bank-sync
@@ -101,9 +121,9 @@ export function SelectLinkedAccountsModal({
     account => !Object.values(chosenAccounts).includes(account.id),
   );
 
-  function onSetLinkedAccount(externalAccount, localAccountId) {
-    setChosenAccounts(accounts => {
-      const updatedAccounts = { ...accounts };
+  function onSetLinkedAccount(externalAccount: AccountEntity, localAccountId: string) {
+    setChosenAccounts((accounts: LinkedAccountIds): LinkedAccountIds => {
+      const updatedAccounts: LinkedAccountIds = { ...accounts };
 
       if (localAccountId) {
         updatedAccounts[externalAccount.account_id] = localAccountId;
@@ -138,21 +158,26 @@ export function SelectLinkedAccountsModal({
               border: '1px solid ' + theme.tableBorder,
             }}
           >
-            <TableHeader
-              headers={[
-                { name: t('Bank Account To Sync'), width: 200 },
-                { name: t('Balance'), width: 80 },
-                { name: t('Account in Actual'), width: 'flex' },
-                { name: t('Actions'), width: 'flex' },
-              ]}
-            />
-
+            <TableHeader>
+              <Field width="200">
+                <Trans>Bank Account To Sync</Trans>
+              </Field>
+              <Field width="80">
+                <Trans>Balance</Trans>
+              </Field>
+              <Field width="flex">
+                <Trans>Account in Actual</Trans>
+              </Field>
+              <Field width="flex">
+                <Trans>Actions</Trans>
+              </Field>
+            </TableHeader>
             <Table
               items={externalAccounts}
               style={{ backgroundColor: theme.tableHeaderBackground }}
-              getItemKey={index => index}
-              renderItem={({ key, item }) => (
-                <View key={key}>
+              getItemKey={index => externalAccounts[index].id}
+              renderItem={({ item }) => (
+                <View key={item.id}>
                   <TableRow
                     externalAccount={item}
                     chosenAccount={
@@ -195,12 +220,19 @@ export function SelectLinkedAccountsModal({
   );
 }
 
+type TableRowProps = {
+  externalAccount: AccountEntity;
+  chosenAccount: any;
+  unlinkedAccounts: AccountEntity[];
+  onSetLinkedAccount: (account: AccountEntity, localAccountId: string) => void;
+};
+
 function TableRow({
   externalAccount,
   chosenAccount,
   unlinkedAccounts,
   onSetLinkedAccount,
-}) {
+}: TableRowProps) {
   const { t } = useTranslation();
   const [focusedField, setFocusedField] = useState(null);
 
