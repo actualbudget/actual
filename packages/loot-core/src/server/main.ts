@@ -73,7 +73,11 @@ import * as syncMigrations from './sync/migrate';
 import { app as toolsApp } from './tools/app';
 import { withUndo, clearUndo, undo, redo } from './undo';
 import { updateVersion } from './update';
-import { uniqueFileName, idFromFileName } from './util/budget-name';
+import {
+  uniqueBudgetName,
+  idFromBudgetName,
+  validateBudgetName,
+} from './util/budget-name';
 
 const DEMO_BUDGET_ID = '_demo-budget';
 const TEST_BUDGET_ID = '_test-budget';
@@ -512,22 +516,8 @@ handlers['make-filters-from-conditions'] = async function ({ conditions }) {
 };
 
 handlers['getCell'] = async function ({ sheetName, name }) {
-  // Fields is no longer used - hardcode
-  const fields = ['name', 'value'];
   const node = sheet.get()._getNode(resolveName(sheetName, name));
-  if (fields) {
-    const res = {};
-    fields.forEach(field => {
-      if (field === 'run') {
-        res[field] = node._run ? node._run.toString() : null;
-      } else {
-        res[field] = node[field];
-      }
-    });
-    return res;
-  } else {
-    return node;
-  }
+  return { name: node.name, value: node.value };
 };
 
 handlers['getCells'] = async function ({ names }) {
@@ -1107,7 +1097,7 @@ handlers['accounts-bank-sync'] = async function ({ ids = [] }) {
 
   const accounts = await db.runQuery(
     `
-    SELECT a.*, b.bank_id as bankId 
+    SELECT a.*, b.bank_id as bankId
     FROM accounts a
     LEFT JOIN banks b ON a.bank = b.id
     WHERE a.tombstone = 0 AND a.closed = 0
@@ -1716,6 +1706,14 @@ handlers['sync'] = async function () {
   return fullSync();
 };
 
+handlers['validate-budget-name'] = async function ({ name }) {
+  return validateBudgetName(name);
+};
+
+handlers['unique-budget-name'] = async function ({ name }) {
+  return uniqueBudgetName(name);
+};
+
 handlers['get-budgets'] = async function () {
   const paths = await fs.listDir(fs.getDocumentDir());
   const budgets = (
@@ -1885,7 +1883,7 @@ handlers['close-budget'] = async function () {
   }
 
   prefs.unloadPrefs();
-  stopBackupService();
+  await stopBackupService();
   return 'ok';
 };
 
@@ -1898,11 +1896,100 @@ handlers['delete-budget'] = async function ({ id, cloudFileId }) {
 
   // If a local file exists, you can delete it by passing its local id
   if (id) {
-    const budgetDir = fs.getBudgetDir(id);
-    await fs.removeDirRecursively(budgetDir);
+    // opening and then closing the database is a hack to be able to delete
+    // the budget file if it hasn't been opened yet.  This needs a better
+    // way, but works for now.
+    try {
+      await db.openDatabase(id);
+      await db.closeDatabase();
+      const budgetDir = fs.getBudgetDir(id);
+      await fs.removeDirRecursively(budgetDir);
+    } catch (e) {
+      return 'fail';
+    }
   }
 
   return 'ok';
+};
+
+handlers['duplicate-budget'] = async function ({
+  id,
+  newName,
+  cloudSync,
+  open,
+}): Promise<string> {
+  if (!id) throw new Error('Unable to duplicate a budget that is not local.');
+
+  const { valid, message } = await validateBudgetName(newName);
+  if (!valid) throw new Error(message);
+
+  const budgetDir = fs.getBudgetDir(id);
+
+  const newId = await idFromBudgetName(newName);
+
+  // copy metadata from current budget
+  // replace id with new budget id and budgetName with new budget name
+  const metadataText = await fs.readFile(fs.join(budgetDir, 'metadata.json'));
+  const metadata = JSON.parse(metadataText);
+  metadata.id = newId;
+  metadata.budgetName = newName;
+  [
+    'cloudFileId',
+    'groupId',
+    'lastUploaded',
+    'encryptKeyId',
+    'lastSyncedTimestamp',
+  ].forEach(item => {
+    if (metadata[item]) delete metadata[item];
+  });
+
+  try {
+    const newBudgetDir = fs.getBudgetDir(newId);
+    await fs.mkdir(newBudgetDir);
+
+    // write metadata for new budget
+    await fs.writeFile(
+      fs.join(newBudgetDir, 'metadata.json'),
+      JSON.stringify(metadata),
+    );
+
+    await fs.copyFile(
+      fs.join(budgetDir, 'db.sqlite'),
+      fs.join(newBudgetDir, 'db.sqlite'),
+    );
+  } catch (error) {
+    // Clean up any partially created files
+    try {
+      const newBudgetDir = fs.getBudgetDir(newId);
+      if (await fs.exists(newBudgetDir)) {
+        await fs.removeDirRecursively(newBudgetDir);
+      }
+    } catch {} // Ignore cleanup errors
+    throw new Error(`Failed to duplicate budget: ${error.message}`);
+  }
+
+  // load in and validate
+  const { error } = await loadBudget(newId);
+  if (error) {
+    console.log('Error duplicating budget: ' + error);
+    return error;
+  }
+
+  if (cloudSync) {
+    try {
+      await cloudStorage.upload();
+    } catch (error) {
+      console.warn('Failed to sync duplicated budget to cloud:', error);
+      // Ignore any errors uploading. If they are offline they should
+      // still be able to create files.
+    }
+  }
+
+  handlers['close-budget']();
+  if (open === 'original') await loadBudget(id);
+  if (open === 'copy') await loadBudget(newId);
+
+  return newId;
 };
 
 handlers['create-budget'] = async function ({
@@ -1927,13 +2014,10 @@ handlers['create-budget'] = async function ({
   } else {
     // Generate budget name if not given
     if (!budgetName) {
-      // Unfortunately we need to load all of the existing files first
-      // so we can detect conflicting names.
-      const files = await handlers['get-budgets']();
-      budgetName = await uniqueFileName(files);
+      budgetName = await uniqueBudgetName();
     }
 
-    id = await idFromFileName(budgetName);
+    id = await idFromBudgetName(budgetName);
   }
 
   const budgetDir = fs.getBudgetDir(id);
@@ -1999,8 +2083,8 @@ handlers['export-budget'] = async function () {
   }
 };
 
-async function loadBudget(id) {
-  let dir;
+async function loadBudget(id: string) {
+  let dir: string;
   try {
     dir = fs.getBudgetDir(id);
   } catch (e) {
@@ -2077,7 +2161,7 @@ async function loadBudget(id) {
     !Platform.isMobile &&
     process.env.NODE_ENV !== 'test'
   ) {
-    startBackupService(id);
+    await startBackupService(id);
   }
 
   try {

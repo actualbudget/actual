@@ -11,6 +11,10 @@ import { listen } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
 import { isPreviewId } from 'loot-core/shared/transactions';
+import {
+  type CategoryEntity,
+  type TransactionEntity,
+} from 'loot-core/types/models';
 
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import { useNavigate } from '../../../hooks/useNavigate';
@@ -21,7 +25,15 @@ import { MobileBackButton } from '../MobileBackButton';
 import { AddTransactionButton } from '../transactions/AddTransactionButton';
 import { TransactionListWithBalances } from '../transactions/TransactionListWithBalances';
 
-export function CategoryTransactions({ category, month }) {
+type CategoryTransactionsProps = {
+  category: CategoryEntity;
+  month: string;
+};
+
+export function CategoryTransactions({
+  category,
+  month,
+}: CategoryTransactionsProps) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -40,6 +52,7 @@ export function CategoryTransactions({ category, month }) {
   const {
     transactions,
     isLoading,
+    isLoadingMore,
     loadMore: loadMoreTransactions,
     reload: reloadTransactions,
   } = useTransactions({
@@ -56,7 +69,7 @@ export function CategoryTransactions({ category, month }) {
           tables.includes('category_mapping') ||
           tables.includes('payee_mapping')
         ) {
-          reloadTransactions?.();
+          reloadTransactions();
         }
 
         if (tables.includes('payees') || tables.includes('payee_mapping')) {
@@ -73,7 +86,7 @@ export function CategoryTransactions({ category, month }) {
   });
 
   const onOpenTransaction = useCallback(
-    transaction => {
+    (transaction: TransactionEntity) => {
       // details of how the native app used to handle preview transactions here can be found at commit 05e58279
       if (!isPreviewId(transaction.id)) {
         navigate(`/transactions/${transaction.id}`);
@@ -112,14 +125,16 @@ export function CategoryTransactions({ category, month }) {
         balanceUncleared={balanceUncleared}
         searchPlaceholder={`Search ${category.name}`}
         onSearch={onSearch}
+        isLoadingMore={isLoadingMore}
         onLoadMore={loadMoreTransactions}
         onOpenTransaction={onOpenTransaction}
+        onRefresh={undefined}
       />
     </Page>
   );
 }
 
-function getCategoryMonthFilter(category, month) {
+function getCategoryMonthFilter(category: CategoryEntity, month: string) {
   return {
     category: category.id,
     date: { $transform: '$month', $eq: month },

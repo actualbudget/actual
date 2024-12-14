@@ -1,14 +1,24 @@
-import React, { useState } from 'react';
+import React, {
+  type ComponentPropsWithoutRef,
+  type KeyboardEvent,
+  useState,
+} from 'react';
+
+import {
+  type CategoryEntity,
+  type CategoryGroupEntity,
+} from 'loot-core/types/models';
 
 import { useCategories } from '../../hooks/useCategories';
 import { useLocalPref } from '../../hooks/useLocalPref';
 import { theme, styles } from '../../style';
 import { View } from '../common/View';
+import { type DropPosition } from '../sort';
 
 import { BudgetCategories } from './BudgetCategories';
 import { BudgetSummaries } from './BudgetSummaries';
 import { BudgetTotals } from './BudgetTotals';
-import { MonthsProvider } from './MonthsContext';
+import { type MonthBounds, MonthsProvider } from './MonthsContext';
 import {
   findSortDown,
   findSortUp,
@@ -16,7 +26,39 @@ import {
   separateGroups,
 } from './util';
 
-export function BudgetTable(props) {
+type BudgetTableProps = {
+  type: string;
+  prewarmStartMonth: string;
+  startMonth: string;
+  numMonths: number;
+  monthBounds: MonthBounds;
+  dataComponents: {
+    SummaryComponent: ComponentPropsWithoutRef<
+      typeof BudgetSummaries
+    >['SummaryComponent'];
+    BudgetTotalsComponent: ComponentPropsWithoutRef<
+      typeof BudgetTotals
+    >['MonthComponent'];
+  };
+  onSaveCategory: (category: CategoryEntity) => void;
+  onDeleteCategory: (id: CategoryEntity['id']) => void;
+  onSaveGroup: (group: CategoryGroupEntity) => void;
+  onDeleteGroup: (id: CategoryGroupEntity['id']) => void;
+  onApplyBudgetTemplatesInGroup: (groupId: CategoryGroupEntity['id']) => void;
+  onReorderCategory: (params: {
+    id: CategoryEntity['id'];
+    groupId?: CategoryGroupEntity['id'];
+    targetId: CategoryEntity['id'] | null;
+  }) => void;
+  onReorderGroup: (params: {
+    id: CategoryGroupEntity['id'];
+    targetId: CategoryEntity['id'] | null;
+  }) => void;
+  onShowActivity: (id: CategoryEntity['id'], month?: string) => void;
+  onBudgetAction: (month: string, type: string, args: unknown) => void;
+};
+
+export function BudgetTable(props: BudgetTableProps) {
   const {
     type,
     prewarmStartMonth,
@@ -35,23 +77,29 @@ export function BudgetTable(props) {
     onBudgetAction,
   } = props;
 
-  const { grouped: categoryGroups } = useCategories();
+  const { grouped: categoryGroups = [] } = useCategories();
   const [collapsedGroupIds = [], setCollapsedGroupIdsPref] =
     useLocalPref('budget.collapsed');
   const [showHiddenCategories, setShowHiddenCategoriesPef] = useLocalPref(
     'budget.showHiddenCategories',
   );
-  const [editing, setEditing] = useState(null);
+  const [editing, setEditing] = useState<{ id: string; cell: string } | null>(
+    null,
+  );
 
-  const onEditMonth = (id, month) => {
+  const onEditMonth = (id: string, month: string) => {
     setEditing(id ? { id, cell: month } : null);
   };
 
-  const onEditName = id => {
+  const onEditName = (id: string) => {
     setEditing(id ? { id, cell: 'name' } : null);
   };
 
-  const _onReorderCategory = (id, dropPos, targetId) => {
+  const _onReorderCategory = (
+    id: string,
+    dropPos: DropPosition,
+    targetId: string,
+  ) => {
     const isGroup = !!categoryGroups.find(g => g.id === targetId);
 
     if (isGroup) {
@@ -63,7 +111,7 @@ export function BudgetTable(props) {
       const group = categoryGroups.find(g => g.id === groupId);
 
       if (group) {
-        const { categories } = group;
+        const { categories = [] } = group;
         onReorderCategory({
           id,
           groupId: group.id,
@@ -77,7 +125,7 @@ export function BudgetTable(props) {
       let targetGroup;
 
       for (const group of categoryGroups) {
-        if (group.categories.find(cat => cat.id === targetId)) {
+        if (group.categories?.find(cat => cat.id === targetId)) {
           targetGroup = group;
           break;
         }
@@ -85,13 +133,17 @@ export function BudgetTable(props) {
 
       onReorderCategory({
         id,
-        groupId: targetGroup.id,
-        ...findSortDown(targetGroup.categories, dropPos, targetId),
+        groupId: targetGroup?.id,
+        ...findSortDown(targetGroup?.categories || [], dropPos, targetId),
       });
     }
   };
 
-  const _onReorderGroup = (id, dropPos, targetId) => {
+  const _onReorderGroup = (
+    id: string,
+    dropPos: DropPosition,
+    targetId: string,
+  ) => {
     const [expenseGroups] = separateGroups(categoryGroups); // exclude Income group from sortable groups to fix off-by-one error
     onReorderGroup({
       id,
@@ -99,13 +151,21 @@ export function BudgetTable(props) {
     });
   };
 
-  const moveVertically = dir => {
-    const flattened = categoryGroups.reduce((all, group) => {
-      if (collapsedGroupIds.includes(group.id)) {
-        return all.concat({ id: group.id, isGroup: true });
-      }
-      return all.concat([{ id: group.id, isGroup: true }, ...group.categories]);
-    }, []);
+  const moveVertically = (dir: 1 | -1) => {
+    const flattened = categoryGroups.reduce(
+      (all, group) => {
+        if (collapsedGroupIds.includes(group.id)) {
+          return all.concat({ id: group.id, isGroup: true });
+        }
+        return all.concat([
+          { id: group.id, isGroup: true },
+          ...(group?.categories || []),
+        ]);
+      },
+      [] as Array<
+        { id: CategoryGroupEntity['id']; isGroup: boolean } | CategoryEntity
+      >,
+    );
 
     if (editing) {
       const idx = flattened.findIndex(item => item.id === editing.id);
@@ -114,10 +174,13 @@ export function BudgetTable(props) {
       while (nextIdx >= 0 && nextIdx < flattened.length) {
         const next = flattened[nextIdx];
 
-        if (next.isGroup) {
+        if ('isGroup' in next && next.isGroup) {
           nextIdx += dir;
           continue;
-        } else if (type === 'report' || !next.is_income) {
+        } else if (
+          type === 'report' ||
+          ('is_income' in next && !next.is_income)
+        ) {
           onEditMonth(next.id, editing.cell);
           return;
         } else {
@@ -127,7 +190,7 @@ export function BudgetTable(props) {
     }
   };
 
-  const onKeyDown = e => {
+  const onKeyDown = (e: KeyboardEvent) => {
     if (!editing) {
       return null;
     }
@@ -138,7 +201,7 @@ export function BudgetTable(props) {
     }
   };
 
-  const onCollapse = collapsedIds => {
+  const onCollapse = (collapsedIds: string[]) => {
     setCollapsedGroupIdsPref(collapsedIds);
   };
 
@@ -223,6 +286,7 @@ export function BudgetTable(props) {
             onKeyDown={onKeyDown}
           >
             <BudgetCategories
+              // @ts-expect-error Fix when migrating BudgetCategories to ts
               categoryGroups={categoryGroups}
               editingCell={editing}
               dataComponents={dataComponents}

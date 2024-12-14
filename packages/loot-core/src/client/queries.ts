@@ -29,11 +29,11 @@ const envelopeParametrizedField = parametrizedField<'envelope-budget'>();
 const trackingParametrizedField = parametrizedField<'tracking-budget'>();
 
 export function accountFilter(
-  accountId?: AccountEntity['id'] | 'budgeted' | 'offbudget' | 'uncategorized',
+  accountId?: AccountEntity['id'] | 'onbudget' | 'offbudget' | 'uncategorized',
   field = 'account',
 ) {
   if (accountId) {
-    if (accountId === 'budgeted') {
+    if (accountId === 'onbudget') {
       return {
         $and: [
           { [`${field}.offbudget`]: false },
@@ -68,7 +68,7 @@ export function accountFilter(
 }
 
 export function transactions(
-  accountId?: AccountEntity['id'] | 'budgeted' | 'offbudget' | 'uncategorized',
+  accountId?: AccountEntity['id'] | 'onbudget' | 'offbudget' | 'uncategorized',
 ) {
   let query = q('transactions').options({ splits: 'grouped' });
 
@@ -159,16 +159,16 @@ export function allAccountBalance() {
   } satisfies Binding<'account', 'accounts-balance'>;
 }
 
-export function budgetedAccountBalance() {
+export function onBudgetAccountBalance() {
   return {
-    name: `budgeted-accounts-balance`,
+    name: `onbudget-accounts-balance`,
     query: q('transactions')
       .filter({ 'account.offbudget': false, 'account.closed': false })
       .calculate({ $sum: '$amount' }),
-  } satisfies Binding<'account', 'budgeted-accounts-balance'>;
+  } satisfies Binding<'account', 'onbudget-accounts-balance'>;
 }
 
-export function offbudgetAccountBalance() {
+export function offBudgetAccountBalance() {
   return {
     name: `offbudget-accounts-balance`,
     query: q('transactions')

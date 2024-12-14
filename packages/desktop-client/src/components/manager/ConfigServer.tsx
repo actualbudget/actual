@@ -1,14 +1,14 @@
 // @ts-strict-ignore
 import React, { useEffect } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { redirect } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 
+import { createBudget, loggedIn } from 'loot-core/client/actions';
 import {
   isNonProductionEnvironment,
   isElectron,
 } from 'loot-core/src/shared/environment';
 
-import { useActions } from '../../hooks/useActions';
 import { useGlobalPref } from '../../hooks/useGlobalPref';
 import { useNavigate } from '../../hooks/useNavigate';
 import { theme } from '../../style';
@@ -21,7 +21,7 @@ import { Title } from './subscribe/common';
 
 export function ConfigServer() {
   const { t } = useTranslation();
-  const { createBudget, loggedIn } = useActions();
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const currentUrl = useServerURL();
   const [ngrokConfig] = useGlobalPref('ngrokConfig');
@@ -36,13 +36,14 @@ export function ConfigServer() {
 
   async function onSkip() {
     await setServerUrl(null);
-    await loggedIn();
+    await dispatch(loggedIn());
     navigate('/');
   }
 
   async function onCreateTestFile() {
     await setServerUrl(null);
-    await createBudget({ testMode: true });
+    await dispatch(createBudget({ testMode: true }));
+    navigate('/');
   }
 
   // let serverConfiguration = undefined;

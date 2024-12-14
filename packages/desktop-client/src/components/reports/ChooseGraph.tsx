@@ -137,7 +137,6 @@ export function ChooseGraph({
     return (
       <DonutGraph
         style={graphStyle}
-        compact={compact}
         data={data}
         filters={filters}
         groupBy={groupBy}

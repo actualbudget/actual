@@ -1,13 +1,13 @@
 import React, {
-  useRef,
-  useState,
   type CSSProperties,
   useCallback,
+  useRef,
+  useState,
 } from 'react';
 
 import { envelopeBudget } from 'loot-core/src/client/queries';
 
-import { useFeatureFlag } from '../../../../hooks/useFeatureFlag';
+import { useContextMenu } from '../../../../hooks/useContextMenu';
 import { Popover } from '../../../common/Popover';
 import { View } from '../../../common/View';
 import { CoverMenu } from '../CoverMenu';
@@ -34,79 +34,88 @@ export function ToBudget({
   amountStyle,
   isCollapsed = false,
 }: ToBudgetProps) {
-  const [menuOpen, _setMenuOpen] = useState<string | null>(null);
+  const [menuStep, _setMenuStep] = useState<string>('actions');
   const triggerRef = useRef(null);
 
   const ref = useRef<HTMLSpanElement>(null);
-  const setMenuOpen = useCallback(
-    (menu: string | null) => {
+  const setMenuStep = useCallback(
+    (menu: string) => {
       if (menu) ref.current?.focus();
-      _setMenuOpen(menu);
+      _setMenuStep(menu);
     },
-    [ref],
+    [ref, _setMenuStep],
   );
-  const sheetValue = useEnvelopeSheetValue({
+  const availableValue = useEnvelopeSheetValue({
     name: envelopeBudget.toBudget,
     value: 0,
   });
-  const availableValue = sheetValue;
   if (typeof availableValue !== 'number' && availableValue !== null) {
     throw new Error(
       'Expected availableValue to be a number but got ' + availableValue,
     );
   }
-  const isMenuOpen = Boolean(menuOpen);
-  const contextMenusEnabled = useFeatureFlag('contextMenus');
+
+  const {
+    setMenuOpen,
+    menuOpen,
+    handleContextMenu,
+    resetPosition,
+    position,
+    asContextMenu,
+  } = useContextMenu();
 
   return (
     <>
       <View ref={triggerRef}>
         <ToBudgetAmount
-          onClick={() => setMenuOpen('actions')}
+          onClick={() => {
+            resetPosition();
+            setMenuOpen(true);
+          }}
           prevMonthName={prevMonthName}
           style={style}
           amountStyle={amountStyle}
-          isTotalsListTooltipDisabled={!isCollapsed || isMenuOpen}
-          onContextMenu={e => {
-            if (!contextMenusEnabled) return;
-            e.preventDefault();
-            setMenuOpen('actions');
-          }}
+          isTotalsListTooltipDisabled={!isCollapsed || asContextMenu}
+          onContextMenu={handleContextMenu}
         />
       </View>
 
       <Popover
         triggerRef={triggerRef}
-        placement="bottom"
-        isOpen={isMenuOpen}
-        onOpenChange={() => setMenuOpen(null)}
-        style={{ width: 200 }}
+        placement={asContextMenu ? 'bottom start' : 'bottom'}
+        isOpen={menuOpen}
+        onOpenChange={() => {
+          setMenuStep('actions');
+          setMenuOpen(false);
+        }}
+        style={{ width: 200, margin: 1 }}
         isNonModal
+        {...position}
       >
         <span tabIndex={-1} ref={ref}>
-          {menuOpen === 'actions' && (
+          {menuStep === 'actions' && (
             <ToBudgetMenu
-              onTransfer={() => setMenuOpen('transfer')}
-              onCover={() => setMenuOpen('cover')}
-              onHoldBuffer={() => setMenuOpen('buffer')}
+              onTransfer={() => setMenuStep('transfer')}
+              onCover={() => setMenuStep('cover')}
+              onHoldBuffer={() => setMenuStep('buffer')}
               onResetHoldBuffer={() => {
                 onBudgetAction(month, 'reset-hold');
-                setMenuOpen(null);
+                setMenuOpen(false);
               }}
             />
           )}
-          {menuOpen === 'buffer' && (
+          {menuStep === 'buffer' && (
             <HoldMenu
-              onClose={() => setMenuOpen(null)}
+              onClose={() => setMenuOpen(false)}
               onSubmit={amount => {
                 onBudgetAction(month, 'hold', { amount });
               }}
             />
           )}
-          {menuOpen === 'transfer' && (
+          {menuStep === 'transfer' && (
             <TransferMenu
               initialAmount={availableValue ?? undefined}
-              onClose={() => setMenuOpen(null)}
+              onClose={() => setMenuOpen(false)}
               onSubmit={(amount, categoryId) => {
                 onBudgetAction(month, 'transfer-available', {
                   amount,
@@ -115,10 +124,10 @@ export function ToBudget({
               }}
             />
           )}
-          {menuOpen === 'cover' && (
+          {menuStep === 'cover' && (
             <CoverMenu
               showToBeBudgeted={false}
-              onClose={() => setMenuOpen(null)}
+              onClose={() => setMenuOpen(false)}
               onSubmit={categoryId => {
                 onBudgetAction(month, 'cover-overbudgeted', {
                   category: categoryId,
