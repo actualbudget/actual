@@ -16163,7 +16163,7 @@ __metadata:
     i18next: "npm:^23.11.5"
     throttleit: "npm:^1.0.1"
     typescript: "npm:^5.0.0"
-    vite: "npm:^5.2.11"
+    vite: "npm:^5.2.14"
     vite-plugin-dts: "npm:4.3.0"
   peerDependencies:
     react: 18.2.0
@@ -20110,7 +20110,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vite@npm:^5.0.0, vite@npm:^5.2.11, vite@npm:^5.2.14":
+"vite@npm:^5.0.0, vite@npm:^5.2.14":
   version: 5.4.11
   resolution: "vite@npm:5.4.11"
   dependencies:

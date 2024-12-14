@@ -13,7 +13,7 @@
     "i18next": "^23.11.5",
     "throttleit": "^1.0.1",
     "typescript": "^5.0.0",
-    "vite": "^5.2.11",
+    "vite": "^5.2.14",
     "vite-plugin-dts": "4.3.0"
   },
   "peerDependencies": {
