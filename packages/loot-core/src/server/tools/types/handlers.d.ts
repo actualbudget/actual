@@ -1,4 +1,4 @@
-import { TransactionEntity } from 'loot-core/types/models';
+import { TransactionEntity } from './models';
 
 export interface ToolsHandlers {
   'tools/fix-split-transactions': () => Promise<{
