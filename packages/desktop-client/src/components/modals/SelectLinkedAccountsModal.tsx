@@ -25,8 +25,17 @@ import { Field, Row, Table, TableHeader } from '../table';
 
 import { type NormalizedAccount } from './CreateAccountModal';
 
-const addOnBudgetAccountOption = { id: 'new-on', name: 'Create new account' };
-const addOffBudgetAccountOption = {
+type LinkAccountOption = {
+  id: string;
+  name: string;
+};
+
+const addOnBudgetAccountOption: LinkAccountOption = {
+  id: 'new-on',
+  name: 'Create new account',
+};
+
+const addOffBudgetAccountOption: LinkAccountOption = {
   id: 'new-off',
   name: 'Create new account (off budget)',
 };
@@ -125,7 +134,7 @@ export function SelectLinkedAccountsModal({
 
   function onSetLinkedAccount(
     externalAccount: NormalizedAccount,
-    localAccountId: string | null,
+    localAccountId: string | undefined,
   ) {
     setChosenAccounts((accounts: LinkedAccountIds): LinkedAccountIds => {
       const updatedAccounts: LinkedAccountIds = { ...accounts };
@@ -226,11 +235,11 @@ export function SelectLinkedAccountsModal({
 
 type TableRowProps = {
   externalAccount: NormalizedAccount;
-  chosenAccount: string;
-  unlinkedAccounts: AccountEntity[];
+  chosenAccount: LinkAccountOption | undefined;
+  unlinkedAccounts: LinkAccountOption[];
   onSetLinkedAccount: (
     account: NormalizedAccount,
-    localAccountId: string | null,
+    localAccountId: string | undefined,
   ) => void;
 };
 
@@ -243,12 +252,15 @@ function TableRow({
   const { t } = useTranslation();
   const [focusedField, setFocusedField] = useState<string | null>(null);
 
-  const availableAccountOptions = [
+  const availableAccountOptions: LinkAccountOption[] = [
     ...unlinkedAccounts,
-    chosenAccount?.id !== addOnBudgetAccountOption.id && chosenAccount,
     addOnBudgetAccountOption,
     addOffBudgetAccountOption,
   ].filter(Boolean);
+
+  if (chosenAccount && chosenAccount.id !== addOnBudgetAccountOption.id) {
+    availableAccountOptions.push(chosenAccount);
+  }
 
   return (
     <Row style={{ backgroundColor: theme.tableBackground }}>
@@ -267,7 +279,7 @@ function TableRow({
             strict
             highlightFirst
             suggestions={availableAccountOptions}
-            onSelect={value => {
+            onSelect={(value: string | undefined) => {
               onSetLinkedAccount(externalAccount, value);
             }}
             inputProps={{
@@ -283,7 +295,7 @@ function TableRow({
         {chosenAccount ? (
           <Button
             onPress={() => {
-              onSetLinkedAccount(externalAccount, null);
+              onSetLinkedAccount(externalAccount, undefined);
             }}
             style={{ float: 'right' }}
           >
