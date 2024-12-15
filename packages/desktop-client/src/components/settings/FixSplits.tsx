@@ -37,7 +37,9 @@ function renderResults(results: Results) {
     }
     if (mismatchedSplits.length > 0) {
       result.push(
-        `Found ${mismatchedSplits.length} split transaction${mismatchedSplits.length > 1 ? 's' : ''} with mismatched amounts:\n` +
+        `Found ${mismatchedSplits.length} split transaction${mismatchedSplits.length > 1 ? 's' : ''} ` +
+          `with mismatched amounts on the below date${mismatchedSplits.length > 1 ? 's' : ''}. ` +
+          `Please fix ${mismatchedSplits.length > 1 ? 'these' : 'this'} manually:\n` +
           mismatchedSplits.map(t => `- ${t.date}`).join('\n'),
       );
     }
@@ -46,10 +48,10 @@ function renderResults(results: Results) {
   return (
     <Paragraph
       style={{
-        color: theme.noticeTextLight,
-        marginBottom: 0,
-        marginLeft: '1em',
-        textAlign: 'right',
+        color:
+          mismatchedSplits.length === 0
+            ? theme.noticeTextLight
+            : theme.errorText,
         whiteSpace: 'pre-wrap',
       }}
     >
@@ -76,11 +78,9 @@ export function FixSplits() {
       primaryAction={
         <View
           style={{
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            maxWidth: 500,
-            width: '100%',
-            alignItems: 'center',
+            flexDirection: 'column',
+            alignItems: 'flex-start',
+            gap: '1em',
           }}
         >
           <ButtonWithLoading isLoading={loading} onPress={onFix}>
