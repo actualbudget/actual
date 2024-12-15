@@ -23,6 +23,8 @@ import { View } from '../common/View';
 import { PrivacyFilter } from '../PrivacyFilter';
 import { Field, Row, Table, TableHeader } from '../table';
 
+import { type NormalizedAccount } from './CreateAccountModal';
+
 const addOnBudgetAccountOption = { id: 'new-on', name: 'Create new account' };
 const addOffBudgetAccountOption = {
   id: 'new-off',
@@ -31,7 +33,7 @@ const addOffBudgetAccountOption = {
 
 type SelectLinkedAccountsModalProps = {
   requisitionId: string;
-  externalAccounts: AccountEntity[];
+  externalAccounts: NormalizedAccount[];
   syncSource: AccountSyncSource;
 };
 
@@ -76,7 +78,7 @@ export function SelectLinkedAccountsModal({
     Object.entries(chosenAccounts).forEach(
       ([chosenExternalAccountId, chosenLocalAccountId]) => {
         const externalAccount = externalAccounts.find(
-          account => account.account_id === chosenExternalAccountId,
+          account => account.id === chosenExternalAccountId,
         );
         const offBudget = chosenLocalAccountId === addOffBudgetAccountOption.id;
 
@@ -121,14 +123,17 @@ export function SelectLinkedAccountsModal({
     account => !Object.values(chosenAccounts).includes(account.id),
   );
 
-  function onSetLinkedAccount(externalAccount: AccountEntity, localAccountId: string) {
+  function onSetLinkedAccount(
+    externalAccount: NormalizedAccount,
+    localAccountId: string | null,
+  ) {
     setChosenAccounts((accounts: LinkedAccountIds): LinkedAccountIds => {
       const updatedAccounts: LinkedAccountIds = { ...accounts };
 
       if (localAccountId) {
-        updatedAccounts[externalAccount.account_id] = localAccountId;
+        updatedAccounts[externalAccount.id] = localAccountId;
       } else {
-        delete updatedAccounts[externalAccount.account_id];
+        delete updatedAccounts[externalAccount.id];
       }
 
       return updatedAccounts;
@@ -181,14 +186,13 @@ export function SelectLinkedAccountsModal({
                   <TableRow
                     externalAccount={item}
                     chosenAccount={
-                      chosenAccounts[item.account_id] ===
-                      addOnBudgetAccountOption.id
+                      chosenAccounts[item.id] === addOnBudgetAccountOption.id
                         ? addOnBudgetAccountOption
-                        : chosenAccounts[item.account_id] ===
+                        : chosenAccounts[item.id] ===
                             addOffBudgetAccountOption.id
                           ? addOffBudgetAccountOption
                           : localAccounts.find(
-                              acc => chosenAccounts[item.account_id] === acc.id,
+                              acc => chosenAccounts[item.id] === acc.id,
                             )
                     }
                     unlinkedAccounts={unlinkedAccounts}
@@ -221,10 +225,13 @@ export function SelectLinkedAccountsModal({
 }
 
 type TableRowProps = {
-  externalAccount: AccountEntity;
-  chosenAccount: any;
+  externalAccount: NormalizedAccount;
+  chosenAccount: string;
   unlinkedAccounts: AccountEntity[];
-  onSetLinkedAccount: (account: AccountEntity, localAccountId: string) => void;
+  onSetLinkedAccount: (
+    account: NormalizedAccount,
+    localAccountId: string | null,
+  ) => void;
 };
 
 function TableRow({
@@ -234,7 +241,7 @@ function TableRow({
   onSetLinkedAccount,
 }: TableRowProps) {
   const { t } = useTranslation();
-  const [focusedField, setFocusedField] = useState(null);
+  const [focusedField, setFocusedField] = useState<string | null>(null);
 
   const availableAccountOptions = [
     ...unlinkedAccounts,
