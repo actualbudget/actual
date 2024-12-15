@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { runQuery } from 'loot-core/src/client/query-helpers';
 import { send } from 'loot-core/src/platform/client/fetch';
-import { q } from 'loot-core/src/shared/query';
 import { type Handlers } from 'loot-core/src/types/handlers';
 
 import { theme } from '../../style';
@@ -17,26 +15,31 @@ import { Setting } from './UI';
 type Results = Awaited<ReturnType<Handlers['tools/fix-split-transactions']>>;
 
 function renderResults(results: Results) {
-  const { numBlankPayees, numCleared, numDeleted } = results;
-  let result = '';
+  const { numBlankPayees, numCleared, numDeleted, mismatchedSplits } = results;
+  const result: string[] = [];
 
-  if (numBlankPayees === 0 && numCleared === 0 && numDeleted === 0) {
-    result = 'No split transactions found needing repair.';
+  if (
+    numBlankPayees === 0 &&
+    numCleared === 0 &&
+    numDeleted === 0 &&
+    mismatchedSplits.length === 0
+  ) {
+    result.push('No split transactions found needing repair.');
   } else {
     if (numBlankPayees > 0) {
-      result += `Fixed ${numBlankPayees} splits with a blank payee.`;
+      result.push(`Fixed ${numBlankPayees} splits with a blank payee.`);
     }
     if (numCleared > 0) {
-      if (result !== '') {
-        result += '\n';
-      }
-      result += `Fixed ${numCleared} splits with the wrong cleared flag.`;
+      result.push(`Fixed ${numCleared} splits with the wrong cleared flag.`);
     }
     if (numDeleted > 0) {
-      if (result !== '') {
-        result += '\n';
-      }
-      result += `Fixed ${numDeleted} splits that weren’t properly deleted.`;
+      result.push(`Fixed ${numDeleted} splits that weren’t properly deleted.`);
+    }
+    if (mismatchedSplits.length > 0) {
+      result.push(
+        `Found ${mismatchedSplits.length} split transaction${mismatchedSplits.length > 1 ? 's' : ''} with mismatched amounts:\n` +
+          mismatchedSplits.map(t => `- ${t.date}`).join('\n'),
+      );
     }
   }
 
@@ -50,7 +53,7 @@ function renderResults(results: Results) {
         whiteSpace: 'pre-wrap',
       }}
     >
-      {result}
+      {result.join('\n')}
     </Paragraph>
   );
 }
@@ -63,35 +66,6 @@ export function FixSplits() {
   async function onFix() {
     setLoading(true);
     const res = await send('tools/fix-split-transactions');
-
-    const allTransactions = (
-      await runQuery(
-        q('transactions')
-          .options({ splits: 'grouped' })
-          .filter({
-            is_parent: true,
-          })
-          .select('*'),
-      )
-    ).data;
-
-    const mismatchedSplits = allTransactions.filter(t => {
-      const subValue = t.subtransactions.reduce(
-        (acc, st) => acc + st.amount,
-        0,
-      );
-
-      return subValue !== t.amount;
-    });
-
-    if (mismatchedSplits.length > 0) {
-      console.log(
-        `Found ${mismatchedSplits.length} split transaction${mismatchedSplits.length > 1 ? 's' : ''} with mismatched amounts:\n` +
-          mismatchedSplits.map(t => `- ${t.date}`).join('\n'),
-      );
-    } else {
-      console.log('No mismatched splits found');
-    }
 
     setResults(res);
     setLoading(false);
