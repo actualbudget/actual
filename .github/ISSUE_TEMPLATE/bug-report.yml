@@ -23,8 +23,6 @@ body:
       options:
         - label: 'I have searched and found no existing issue'
           required: true
-        - label: 'I will be providing steps how to reproduce the bug (in most cases this will also mean uploading a demo budget file)'
-          required: true
     validations:
       required: true
   - type: textarea
@@ -34,6 +32,14 @@ body:
       description: Also tell us, what did you expect to happen? If you’re reporting an issue with imports, please attach a (redacted) version of the file you’re having trouble importing. You may need to zip it before uploading.
       placeholder: Tell us what you see!
       value: 'A bug happened!'
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: How can we reproduce the issue?
+      description: Please give step-by-step instructions on how to reproduce the issue. In most cases this might also require uploading a sample budget/import file.
+      value: 'How can we reproduce the issue?'
     validations:
       required: true
   - type: markdown
