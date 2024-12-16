@@ -8,7 +8,6 @@ const process = {
   },
 };
 
-// eslint-disable-next-line import/no-unused-modules
 export { process };
-// eslint-disable-next-line import/no-unused-modules
+
 export { global };
