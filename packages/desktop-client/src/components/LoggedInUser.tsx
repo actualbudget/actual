@@ -199,7 +199,11 @@ export function LoggedInUser({
       >
         {serverMessage()}
       </Button>
-      {!hasSyncedPrefs && (
+      {!loading &&
+        multiuserEnabled &&
+        userData &&
+        userData?.displayName &&
+        !hasSyncedPrefs && (
         <small>
           <Trans>
             (logged in as: <span>{userData?.displayName}</span>)
