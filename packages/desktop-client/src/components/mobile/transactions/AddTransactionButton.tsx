@@ -1,6 +1,5 @@
 import React from 'react';
-
-import { t } from 'i18next';
+import { useTranslation } from 'react-i18next';
 
 import { useNavigate } from '../../../hooks/useNavigate';
 import { SvgAdd } from '../../../icons/v1';
@@ -17,6 +16,7 @@ export function AddTransactionButton({
   accountId,
   categoryId,
 }: AddTransactionButtonProps) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   return (
     <Button
