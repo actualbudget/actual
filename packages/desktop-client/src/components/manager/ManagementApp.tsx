@@ -16,7 +16,9 @@ import { useResponsive } from '../responsive/ResponsiveProvider';
 import { useServerVersion } from '../ServerContext';
 
 import { BudgetList } from './BudgetList';
-import { ConfigServer } from './ConfigServer';
+import { ConfigExternalSyncServer } from './ConfigExternalSyncServer';
+import { ConfigInternalSyncServer } from './ConfigInternalSyncServer';
+import { ConfigServer, loader as ConfigServerLoader } from './ConfigServer';
 import { ServerURL } from './ServerURL';
 import { Bootstrap } from './subscribe/Bootstrap';
 import { ChangePassword } from './subscribe/ChangePassword';
@@ -120,6 +122,14 @@ export function ManagementApp() {
             <>
               <Routes>
                 <Route path="/config-server" element={<ConfigServer />} />
+                <Route
+                  path="/config-server/external"
+                  element={<ConfigExternalSyncServer />}
+                />
+                <Route
+                  path="/config-server/internal"
+                  element={<ConfigInternalSyncServer />}
+                />
 
                 <Route path="/change-password" element={<ChangePassword />} />
                 {files && files.length > 0 ? (
