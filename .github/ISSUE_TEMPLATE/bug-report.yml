@@ -39,7 +39,7 @@ body:
     attributes:
       label: How can we reproduce the issue?
       description: Please give step-by-step instructions on how to reproduce the issue. In most cases this might also require uploading a sample budget/import file.
-      value: ' '
+      value: 'How can we reproduce the issue?'
     validations:
       required: true
   - type: markdown
