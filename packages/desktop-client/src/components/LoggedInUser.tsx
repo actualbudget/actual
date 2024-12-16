@@ -204,11 +204,11 @@ export function LoggedInUser({
         userData &&
         userData?.displayName &&
         !hasSyncedPrefs && (
-        <small>
-          <Trans>
-            (logged in as: <span>{userData?.displayName}</span>)
-          </Trans>
-        </small>
+          <small>
+            <Trans>
+              (logged in as: <span>{userData?.displayName}</span>)
+            </Trans>
+          </small>
       )}
       {!loading &&
         multiuserEnabled &&
