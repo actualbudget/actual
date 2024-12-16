@@ -304,7 +304,10 @@ export function isValidRedirectUrl(url) {
     const redirectUrl = new URL(url);
     const serverUrl = new URL(serverHostname);
 
-    if (redirectUrl.hostname === serverUrl.hostname) {
+    if (
+      redirectUrl.hostname === serverUrl.hostname ||
+      redirectUrl.hostname === 'localhost'
+    ) {
       return true;
     } else {
       return false;
