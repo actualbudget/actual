@@ -2,35 +2,12 @@
 
 In the open-source version of Actual, all updates go through NPM. There are two libraries:
 
-`@actual-app/api`: The API for the underlying functionality. This includes the entire backend of Actual, meant to be used with node.
+`@actual-app/api`: The API for the underlying functionality. This includes the entire backend of Actual, meant to be used with Node.
+
 `@actual-app/web`: A web build that will serve the app with a web frontend. This includes both the frontend and backend of Actual. It includes the backend as well because it's built to be used as a Web Worker.
 
-Both the API and web libraries are versioned together. This may change in the future, but because the web library also brings along its own backend it's easier to maintain a single version for now. That makes it clear which version the backend is regardless of library.
-Releasing @actual-app/api
-
-### Releasing @actual-app/api
-
-```bash
-cd packages/api
-vim package.json # bump the version
-yarn build
-yarn npm publish --access public
-```
-
-### Releasing @actual-app/web
-
-In the root of actual (not just desktop-client), run this:
-
-```bash
-yarn build:browser
-```
-
-This will compile both the backend and the frontend into a single directory in `packages/desktop-client/build`. This directory is all the files that need to be published. After bumping the version, publish desktop-client:
-
-```bash
-cd packages/desktop-client
-yarn npm publish --access public
-```
+Both the API and web libraries are versioned together. This may change in the future, but because the web library also brings along its own backend it's easier to maintain a single version for now. That makes it clear
+which version the backend is regardless of library.
 
 ### Versioning Strategy
 
@@ -45,15 +22,74 @@ For example:
 - `v23.3.2` - another bugfix launched later in the month of March;
 - `v23.4.0` - first release launched on 9th of April, 2023;
 
-### Release PRs
+## Setting up the PRs
+Pull requests will need to be opened in all three repositories - [docs](https://github.com/actualbudget/docs), [actual](https://github.com/actualbudget/actual) and [actual-server](https://github.com/actualbudget/actual-server).
 
-When cutting a release, create a PR to each of the `actual` and `actual-server` repositories. Make sure to name the branch `release/X.Y.Z` where `X.Y.Z` is the version number. This will trigger the release notes tooling, which will comment on your PR with the generated release notes. You can then copy-paste the release notes into the `Release-Notes.md` file in the `docs ` repository.
+Make sure to name the branch `release/X.Y.Z` where `X.Y.Z` is the version number. This will trigger the release notes tooling, which will comment on your PR with the generated release notes. You can then copy-paste the release notes into the `Release-Notes.md` file in the `docs ` repository.
 
 This automation will also delete all the outdated release note files from the `upcoming-release-notes` directory. Make sure you have merged the latest `master` into the release branch and allowed the automation to run before you merge the release PR so all of the files get properly cleaned up.
 
-### GitHub Releases
+### actual
+1. Bump the versions in
+   - `packages/api/package.json`
+   - `packages/desktop-client/package.json`
+   - `packages/desktop-electron/package.json`
+2. Open the pull request, the release notes workflow will run and collate the release notes into a comment in the PR.
+3. The PR can now be marked as ready for review.
 
-Once you’ve merged and tagged the release, go to the releases page and publish a new release. Use this as the body of the release note:
+### actual-server
+1. Bump the version in `package.json`
+2. Open the pull request, the release notes workflow will run and collate the release notes into a comment in the PR.
+3. The PR can not be finalized until the web package has been released as it uses the new version as a dependency.
+
+Once the `actual` PR has been approved and the new web package has been [published to NPM](#building-and-releasing), the server PR can be finalized.
+1. Bump the web dependency version in `package.json`
+2. Run `yarn install`
+3. Push the updated `package.json` and `yarn.lock`
+4. The PR can now be marked as ready for review.
+
+### docs
+After the release notes workflows in the actual and actual-server PRs have been run, copy the collated notes into a new blog post using a previous release as a template. The release notes will also need adding to the `docs/releases.md` file.
+
+## Building and Publishing to NPM
+Once the web PR has been approved, the new version of the API and web packages need to be published to NPM. If you haven't done this before, another maintainer will need to give you access.
+
+###  @actual-app/api
+
+```bash
+cd packages/api
+yarn build
+yarn npm publish --access public
+```
+
+### @actual-app/web
+
+In the root of actual (not just desktop-client), run:
+
+```bash
+yarn build:browser
+```
+
+This will compile both the backend and the frontend into a single directory in `packages/desktop-client/build`. This directory contains all of the files that need to be published.
+
+Now you can publish the package by running:
+
+```bash
+cd packages/desktop-client
+yarn npm publish --access public
+```
+
+## GitHub Tags and Releases
+
+Once the web and server releases have been merged, they need to be tagged. When the tag is pushed to `actual-server` it will trigger the Docker stable image to be built and published.
+
+Run the below in each repository, or use the GitHub UI.
+```bash
+git tag vX.Y.Z
+git push vX.Y.Z
+```
+
+A GitHub release then needs to be created in [actual](https://github.com/actualbudget/actual) using the below as a template.
 
 ```markdown
 :link: [View release notes](https://actualbudget.org/blog/release-23.10.0)
@@ -65,7 +101,7 @@ Once you’ve merged and tagged the release, go to the releases page and publish
 </a>
 ```
 
-### Windows Store Releases
+## Windows Store Releases
 
 The Windows Store release process consists of: logging in, uploading the packages, updating the store listing, and submitting for certification.
 
@@ -98,7 +134,7 @@ When all of the above steps are complete, select "Submit to the Store" to progre
 
 During the "Certification" stage the app is checked by Microsoft to ensure quality. The certification process can take up to 3 business days, once complete the app will be in the Store.
 
-### Announcement
+## Announcement
 
 After the release is out on `actual-server` - remember to deploy it and do a quick smoke test to verify things still work as expected. If they do: continue with sending an announcement on Discord and Twitter.
 
