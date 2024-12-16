@@ -154,7 +154,15 @@ export function AmountInput({
   );
 }
 
-export function BetweenAmountInput({ defaultValue, onChange }) {
+type BetweenAmountInputProps = {
+  defaultValue: { num1: number; num2: number };
+  onChange: (newValue: { num1: number; num2: number }) => void;
+};
+
+export function BetweenAmountInput({
+  defaultValue,
+  onChange,
+}: BetweenAmountInputProps) {
   const { t } = useTranslation();
   const [num1, setNum1] = useState(defaultValue.num1);
   const [num2, setNum2] = useState(defaultValue.num2);
