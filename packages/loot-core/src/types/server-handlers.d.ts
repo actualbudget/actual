@@ -19,6 +19,7 @@ import {
 } from './models';
 import { OpenIdConfig } from './models/openid';
 import { GlobalPrefs, MetadataPrefs } from './prefs';
+// eslint-disable-next-line import/no-unresolved
 import { Query } from './query';
 import { EmptyObject } from './util';
 
