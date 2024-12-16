@@ -214,7 +214,7 @@ export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
                 </InitialFocus>
                 <View style={{ lineHeight: '1.4em', fontSize: 15 }}>
                   <Text>
-                    <strong>{t('Create a local account')}</strong>
+                    <strong>{t('Create a local account')}</strong>{' '}
                     {t(
                       'if you want to add transactions manually. You can also',
                     )}{' '}
