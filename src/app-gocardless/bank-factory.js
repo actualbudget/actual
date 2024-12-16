@@ -9,6 +9,7 @@ import BnpBeGebabebb from './banks/bnp-be-gebabebb.js';
 import CBCcregbebb from './banks/cbc_cregbebb.js';
 import DanskeBankDabNO22 from './banks/danskebank-dabno22.js';
 import EasybankBawaatww from './banks/easybank-bawaatww.js';
+import EntercardSwednokk from './banks/entercard-swednokk.js';
 import Fortuneo from './banks/FORTUNEO_FTNOFRP1XXX.js';
 import HanseaticBank from './banks/HANSEATIC_HSTBDEHH.js';
 import Hype_HYEEIT22 from './banks/hype_hyeeit22.js';
@@ -23,9 +24,9 @@ import NationwideNaiaGB21 from './banks/nationwide-naiagb21.js';
 import NbgEthngraaxxx from './banks/nbg_ethngraaxxx.js';
 import NorwegianXxNorwnok1 from './banks/norwegian-xx-norwnok1.js';
 import RevolutRevolt21 from './banks/revolut_revolt21.js';
-import SandboxfinanceSfin0000 from './banks/sandboxfinance-sfin0000.js';
 import SEBKortBankAB from './banks/seb-kort-bank-ab.js';
 import SEBPrivat from './banks/seb-privat.js';
+import SandboxfinanceSfin0000 from './banks/sandboxfinance-sfin0000.js';
 import SparNordSpNoDK22 from './banks/sparnord-spnodk22.js';
 import SpkKarlsruhekarsde66 from './banks/spk-karlsruhe-karsde66.js';
 import SpkMarburgBiedenkopfHeladef1mar from './banks/spk-marburg-biedenkopf-heladef1mar.js';
@@ -45,6 +46,7 @@ export const banks = [
   CBCcregbebb,
   DanskeBankDabNO22,
   EasybankBawaatww,
+  EntercardSwednokk,
   Fortuneo,
   HanseaticBank,
   Hype_HYEEIT22,
@@ -58,9 +60,9 @@ export const banks = [
   NbgEthngraaxxx,
   NorwegianXxNorwnok1,
   RevolutRevolt21,
-  SandboxfinanceSfin0000,
   SEBKortBankAB,
   SEBPrivat,
+  SandboxfinanceSfin0000,
   SparNordSpNoDK22,
   SpkKarlsruhekarsde66,
   SpkMarburgBiedenkopfHeladef1mar,
