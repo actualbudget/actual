@@ -50,6 +50,7 @@ export function LoggedInUser({
     f => f.state === 'remote' || f.state === 'synced' || f.state === 'detached',
   ) as (SyncedLocalFile | RemoteFile)[];
   const currentFile = remoteFiles.find(f => f.cloudFileId === cloudFileId);
+  const hasSyncedPrefs = useSelector((state: State) => state.prefs.synced);
 
   useEffect(() => {
     async function init() {
@@ -198,18 +199,28 @@ export function LoggedInUser({
       >
         {serverMessage()}
       </Button>
-
-      {!loading && multiuserEnabled && userData?.userName && (
+      {!hasSyncedPrefs && (
         <small>
           <Trans>
-            (logged in as:{' '}
-            <span>
-              <PrivacyFilter>{userData?.displayName}</PrivacyFilter>
-            </span>
-            )
+            (logged in as: <span>{userData?.displayName}</span>)
           </Trans>
         </small>
       )}
+      {!loading &&
+        multiuserEnabled &&
+        userData &&
+        userData?.displayName &&
+        hasSyncedPrefs && (
+          <small>
+            <Trans>
+              (logged in as:{' '}
+              <span>
+                <PrivacyFilter>{userData?.displayName}</PrivacyFilter>
+              </span>
+              )
+            </Trans>
+          </small>
+        )}
 
       <Popover
         offset={8}

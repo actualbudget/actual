@@ -163,18 +163,17 @@ function FileState({
   let ownerName = null;
 
   const getOwnerDisplayName = useCallback(() => {
-    if (
-      !(
-        file.state === 'remote' ||
-        file.state === 'synced' ||
-        file.state === 'detached'
-      )
-    ) {
-      return '';
+    if ('usersWithAccess' in file) {
+      const userFound = file.usersWithAccess?.find(f => f.owner);
+
+      if (userFound?.userName === '') {
+        return 'Server';
+      }
+
+      return userFound?.displayName ?? userFound?.userName ?? 'Unassigned';
     }
 
-    const userFound = file.usersWithAccess?.find(f => f.owner);
-    return userFound?.displayName ?? userFound?.userName ?? 'unknown';
+    return 'Unknown';
   }, [file]);
 
   switch (file.state) {
@@ -182,26 +181,28 @@ function FileState({
       Icon = SvgCloudUnknown;
       status = t('Network unavailable');
       color = theme.buttonNormalDisabledText;
-      ownerName = 'unknown';
+      ownerName = 'Unknown';
       break;
     case 'remote':
       Icon = SvgCloudDownload;
       status = t('Available for download');
-      ownerName = multiuserEnabled ? getOwnerDisplayName() : '';
+      ownerName = getOwnerDisplayName();
       break;
     case 'local':
       Icon = SvgFileDouble;
       status = 'Local';
+      ownerName = 'You';
       break;
     case 'broken':
       ownerName = 'unknown';
       Icon = SvgFileDouble;
       status = t('Local');
+      ownerName = 'You';
       break;
     default:
       Icon = SvgCloudCheck;
       status = t('Syncing');
-      ownerName = multiuserEnabled ? getOwnerDisplayName() : '';
+      ownerName = getOwnerDisplayName();
       break;
   }
 

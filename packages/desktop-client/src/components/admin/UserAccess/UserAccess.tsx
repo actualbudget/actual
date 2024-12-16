@@ -49,7 +49,7 @@ function UserAccessContent({
   const [page, setPage] = useState(0);
   const [filter, setFilter] = useState('');
   const [cloudFileId] = useMetadataPref('cloudFileId');
-  const [ownerName, setOwnerName] = useState('unknown');
+  const [ownerName, setOwnerName] = useState('Unassigned');
   const triggerRef = useRef(null);
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -128,7 +128,11 @@ function UserAccessContent({
         await loadAccess();
         const owner = await loadOwner();
         if (owner) {
-          setOwnerName(owner?.displayName ?? owner?.userName);
+          if (owner.userName === '') {
+            setOwnerName('Server');
+          } else {
+            setOwnerName(owner.displayName ?? owner.userName);
+          }
         }
       } catch (error) {
         console.error('Error loading user access data:', error);
@@ -227,7 +231,7 @@ function UserAccessContent({
                 marginRight: '5px',
               }}
             >
-              Owner:
+              <Trans>Owner:</Trans>
             </View>
             <View
               style={{
