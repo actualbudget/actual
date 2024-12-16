@@ -72,7 +72,11 @@ const createOAuthServer = async () => {
 
       const code = query.get('token');
       if (code && clientWin) {
-        clientWin.loadURL(`http://localhost:3001/openid-cb?token=${code}`);
+        if (isDev) {
+          clientWin.loadURL(`http://localhost:3001/openid-cb?token=${code}`);
+        } else {
+          clientWin.loadURL(`app://actual/openid-cb?token=${code}`);
+        }
 
         // Respond to the browser
         res.writeHead(200, { 'Content-Type': 'text/plain' });

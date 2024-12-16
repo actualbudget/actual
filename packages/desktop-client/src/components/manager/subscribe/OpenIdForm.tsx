@@ -281,7 +281,7 @@ const openIdProviders: (OpenIdProviderOption | typeof Menu.line)[] = [
     {
       label: 'Microsoft Entra',
       value: 'microsoft',
-      issuer: 'https://login.microsoftonline.com/common/v2.0/',
+      issuer: 'https://login.microsoftonline.com/{tenant-id}',
       clientIdRequired: true,
       clientSecretRequired: true,
       clientSecretDisabled: false,
