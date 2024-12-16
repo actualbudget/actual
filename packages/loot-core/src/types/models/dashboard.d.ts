@@ -52,6 +52,15 @@ export type SpendingWidget = AbstractWidget<
     mode?: 'single-month' | 'budget' | 'average';
   } | null
 >;
+export type SankeyWidget = AbstractWidget<
+  'sankey-card',
+  {
+    name?: string;
+    conditions?: RuleConditionEntity[];
+    conditionsOp?: 'and' | 'or';
+    timeFrame?: TimeFrame;
+  } | null
+>;
 export type CustomReportWidget = AbstractWidget<
   'custom-report',
   { id: string }

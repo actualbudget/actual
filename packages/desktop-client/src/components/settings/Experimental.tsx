@@ -102,6 +102,9 @@ export function ExperimentalFeatures() {
             >
               <Trans>OpenID authentication method</Trans>
             </FeatureToggle>
+            <FeatureToggle flag="sankeyChart">
+              <Trans>Sankey chart</Trans>
+            </FeatureToggle>
           </View>
         ) : (
           <Link

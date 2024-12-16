@@ -111,6 +111,13 @@ const timeGraphOptions: graphOptions[] = [
     disableLegend: false,
     disableLabel: true,
   },
+  {
+    description: 'SankeyGraph',
+    disabledSplit: ['Interval'],
+    defaultSplit: 'Category',
+    disabledType: [],
+    defaultType: 'Net',
+  },
 ];
 
 const modeOptions = [
@@ -123,7 +130,7 @@ const modeOptions = [
   {
     description: 'time',
     graphs: timeGraphOptions,
-    disabledGraph: ['AreaGraph', 'DonutGraph'],
+    disabledGraph: ['AreaGraph', 'DonutGraph', 'SankeyGraph'],
     defaultGraph: 'TableGraph',
   },
 ];

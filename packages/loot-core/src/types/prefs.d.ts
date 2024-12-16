@@ -3,7 +3,8 @@ export type FeatureFlag =
   | 'actionTemplating'
   | 'upcomingLengthAdjustment'
   | 'contextMenus'
-  | 'openidAuth';
+  | 'openidAuth'
+  | 'sankeyChart';
 
 /**
  * Cross-device preferences. These sync across devices when they are changed.

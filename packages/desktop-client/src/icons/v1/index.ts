@@ -71,6 +71,7 @@ export { SvgCamera } from './Camera';
 export { SvgChartArea } from './ChartArea';
 export { SvgChartBar } from './ChartBar';
 export { SvgChartPie } from './ChartPie';
+export { SvgChartSankey } from './ChartSankey';
 export { SvgChart } from './Chart';
 export { SvgChatBubbleDots } from './ChatBubbleDots';
 export { SvgCheckAlternative } from './CheckAlternative';

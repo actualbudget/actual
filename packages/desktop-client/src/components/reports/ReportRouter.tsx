@@ -8,6 +8,7 @@ import { CustomReport } from './reports/CustomReport';
 import { NetWorth } from './reports/NetWorth';
 import { Spending } from './reports/Spending';
 import { Summary } from './reports/Summary';
+import { Sankey } from './reports/Sankey';
 
 export function ReportRouter() {
   return (
@@ -25,6 +26,8 @@ export function ReportRouter() {
       <Route path="/summary/:id" element={<Summary />} />
       <Route path="/calendar" element={<Calendar />} />
       <Route path="/calendar/:id" element={<Calendar />} />
+      <Route path="/sankey" element={<Sankey />} />
+      <Route path="/sankey/:id" element={<Sankey />} />
     </Routes>
   );
 }

@@ -42,6 +42,8 @@ import { NetWorthCard } from './reports/NetWorthCard';
 import { SpendingCard } from './reports/SpendingCard';
 import './overview.scss';
 import { SummaryCard } from './reports/SummaryCard';
+import { useFeatureFlag } from '../../hooks/useFeatureFlag';
+import { SankeyCard } from './reports/SankeyCard';
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -294,6 +296,7 @@ export function Overview() {
   };
 
   const accounts = useAccounts();
+  const enableSankey = useFeatureFlag('sankeyChart');
 
   if (isLoading) {
     return <LoadingIndicator message={t('Loading reports...')} />;
@@ -391,6 +394,14 @@ export function Overview() {
                           name: 'calendar-card' as const,
                           text: t('Calendar card'),
                         },
+                        ...(enableSankey
+                          ? [
+                              {
+                                name: 'sankey-card' as const,
+                                text: t('Sankey card'),
+                              },
+                            ]
+                          : []),
                         {
                           name: 'custom-report' as const,
                           text: t('New custom report'),
@@ -546,6 +557,15 @@ export function Overview() {
                     isEditing={isEditing}
                     meta={item.meta}
                     firstDayOfWeekIdx={firstDayOfWeekIdx}
+                    onMetaChange={newMeta => onMetaChange(item, newMeta)}
+                    onRemove={() => onRemoveWidget(item.i)}
+                  />
+                ) : item.type === 'sankey-card' ? (
+                  <SankeyCard
+                    widgetId={item.i}
+                    isEditing={isEditing}
+                    meta={item.meta}
+                    accounts={accounts}
                     onMetaChange={newMeta => onMetaChange(item, newMeta)}
                     onRemove={() => onRemoveWidget(item.i)}
                   />

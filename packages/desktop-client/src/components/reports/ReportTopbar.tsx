@@ -9,6 +9,7 @@ import {
   SvgChart,
   SvgChartBar,
   SvgChartPie,
+  SvgChartSankey,
   SvgListBullet,
   SvgQueue,
   SvgTag,
@@ -22,6 +23,7 @@ import { FilterButton } from '../filters/FiltersMenu';
 import { GraphButton } from './GraphButton';
 import { SaveReport } from './SaveReport';
 import { setSessionReport } from './setSessionReport';
+import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 
 type ReportTopbarProps = {
   customReportItems: CustomReportEntity;
@@ -59,6 +61,7 @@ export function ReportTopbar({
     setGraphType(cond);
     defaultItems(cond);
   };
+  const enableSankey = useFeatureFlag('sankeyChart');
 
   return (
     <View
@@ -136,6 +139,19 @@ export function ReportTopbar({
       >
         <SvgChartPie width={15} height={15} />
       </GraphButton>
+      { enableSankey ? (
+        <GraphButton
+          title={t('Sankey Diagram')}
+          selected={customReportItems.graphType === 'SankeyGraph'}
+          onSelect={() => {
+            onChangeGraph('SankeyGraph');
+          }}
+          style={{ marginRight: 15 }}
+          disabled={isItemDisabled('ShowSankey')}
+        >
+          <SvgChartSankey width={15} height={15} />
+        </GraphButton>
+      ) : null}
       <View
         style={{
           width: 1,

@@ -123,6 +123,7 @@ export function Header({
                 )
               }
               value={end}
+              defaultLabel={monthUtils.format(end, 'MMMM, yyyy')}
               options={allMonths.map(({ name, pretty }) => [name, pretty])}
               style={{ marginRight: 10 }}
             />

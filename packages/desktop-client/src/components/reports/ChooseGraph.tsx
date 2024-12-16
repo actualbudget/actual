@@ -13,6 +13,7 @@ import { LineGraph } from './graphs/LineGraph';
 import { StackedBarGraph } from './graphs/StackedBarGraph';
 import { ReportTable } from './graphs/tableGraph/ReportTable';
 import { ReportOptions } from './ReportOptions';
+import { SankeyGraph } from './graphs/SankeyGraph';
 
 type ChooseGraphProps = {
   data: DataEntity;
@@ -201,6 +202,22 @@ export function ChooseGraph({
         compactStyle={compactStyle}
         showHiddenCategories={showHiddenCategories}
         showOffBudget={showOffBudget}
+      />
+    );
+  }
+  if (graphType === 'SankeyGraph') {
+    return (
+      <SankeyGraph
+        style={graphStyle}
+        compact={compact}
+        graphData={data}
+        filters={filters}
+        groupBy={groupBy}
+        balanceTypeOp={balanceTypeOp}
+        viewLabels={viewLabels}
+        showHiddenCategories={showHiddenCategories}
+        showOffBudget={showOffBudget}
+        showTooltip={showTooltip}
       />
     );
   }
