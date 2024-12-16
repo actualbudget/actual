@@ -1,4 +1,5 @@
 import AbancaCaglesmm from './banks/abanca-caglesmm.js';
+import AbnamroAbnanl2a from './banks/abnamro_abnanl2a.js';
 import AmericanExpressAesudef1 from './banks/american-express-aesudef1.js';
 import BancsabadellBsabesbb from './banks/bancsabadell-bsabesbbb.js';
 import BankinterBkbkesmm from './banks/bankinter-bkbkesmm.js';
@@ -33,6 +34,7 @@ import VirginNrnbgb22 from './banks/virgin_nrnbgb22.js';
 
 export const banks = [
   AbancaCaglesmm,
+  AbnamroAbnanl2a,
   AmericanExpressAesudef1,
   BancsabadellBsabesbb,
   BankinterBkbkesmm,
