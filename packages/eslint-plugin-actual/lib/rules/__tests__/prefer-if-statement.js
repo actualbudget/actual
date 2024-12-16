@@ -1,5 +1,4 @@
 /* eslint-disable rulesdir/typography */
-'use strict';
 
 //------------------------------------------------------------------------------
 // Requirements
