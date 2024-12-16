@@ -61,7 +61,7 @@ const createOAuthServer = async () => {
   const port = 3010;
   console.log(`OAuth server running on port: ${port}`);
 
-  if(oAuthServer) {
+  if (oAuthServer) {
     return { url: `http://localhost:${port}`, server: oAuthServer };
   }
 
