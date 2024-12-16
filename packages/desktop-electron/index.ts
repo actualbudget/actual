@@ -55,9 +55,15 @@ if (!isDev || !process.env.ACTUAL_DATA_DIR) {
 let clientWin: BrowserWindow | null;
 let serverProcess: UtilityProcess | null;
 
+let oAuthServer: ReturnType<typeof createServer> | null;
+
 const createOAuthServer = async () => {
   const port = 3010;
   console.log(`OAuth server running on port: ${port}`);
+
+  if(oAuthServer) {
+    return { url: `http://localhost:${port}`, server: oAuthServer };
+  }
 
   return new Promise<{ url: string; server: Server }>(resolve => {
     const server = createServer((req, res) => {
@@ -388,7 +394,8 @@ ipcMain.on('get-bootstrap-data', event => {
 });
 
 ipcMain.handle('start-oauth-server', async () => {
-  const { url } = await createOAuthServer();
+  const { url, server: newServer } = await createOAuthServer();
+  oAuthServer = newServer;
   return url;
 });
 
