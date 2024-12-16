@@ -66,7 +66,7 @@ export class Navigation {
     await this.page.getByLabel('Balance:').fill(String(data.balance));
 
     if (data.offBudget) {
-      await this.page.getByLabel('Off-budget').click();
+      await this.page.getByLabel('Off budget').click();
     }
 
     await this.page
