@@ -14,6 +14,7 @@ import IngIngbrobu from './banks/ing-ingbrobu.js';
 import IngIngddeff from './banks/ing-ingddeff.js';
 import IngPlIngbplpw from './banks/ing-pl-ingbplpw.js';
 import IntegrationBank from './banks/integration-bank.js';
+import IsyBankItbbitmm from './banks/isybank-itbbitmm.js';
 import KBCkredbebb from './banks/kbc_kredbebb.js';
 import MbankRetailBrexplpw from './banks/mbank-retail-brexplpw.js';
 import NationwideNaiaGB21 from './banks/nationwide-naiagb21.js';
@@ -46,6 +47,7 @@ export const banks = [
   IngIngbrobu,
   IngIngddeff,
   IngPlIngbplpw,
+  IsyBankItbbitmm,
   KBCkredbebb,
   MbankRetailBrexplpw,
   NationwideNaiaGB21,
