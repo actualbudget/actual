@@ -1,11 +1,12 @@
 // @ts-strict-ignore
 import React, { useState, useEffect, useRef, type CSSProperties } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
+import { closeBudget, getUserData, signOut } from 'loot-core/client/actions';
 import { type State } from 'loot-core/src/client/state-types';
 
-import { useActions } from '../hooks/useActions';
+import { useNavigate } from '../hooks/useNavigate';
 import { theme, styles } from '../style';
 
 import { Button } from './common/Button2';
@@ -26,21 +27,29 @@ export function LoggedInUser({
   color,
 }: LoggedInUserProps) {
   const { t } = useTranslation();
-
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
   const userData = useSelector((state: State) => state.user.data);
-  const { getUserData, signOut, closeBudget } = useActions();
   const [loading, setLoading] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
   const serverUrl = useServerURL();
   const triggerRef = useRef(null);
 
   useEffect(() => {
-    getUserData().then(() => setLoading(false));
+    async function init() {
+      await dispatch(getUserData());
+    }
+
+    init().then(() => setLoading(false));
   }, []);
 
+  async function onCloseBudget() {
+    await dispatch(closeBudget());
+  }
+
   async function onChangePassword() {
-    await closeBudget();
-    window.__navigate('/change-password');
+    await onCloseBudget();
+    navigate('/change-password');
   }
 
   async function onMenuSelect(type) {
@@ -51,15 +60,15 @@ export function LoggedInUser({
         onChangePassword();
         break;
       case 'sign-in':
-        await closeBudget();
-        window.__navigate('/login');
+        await onCloseBudget();
+        navigate('/login');
         break;
       case 'sign-out':
-        signOut();
+        dispatch(signOut());
         break;
       case 'config-server':
-        await closeBudget();
-        window.__navigate('/config-server');
+        await onCloseBudget();
+        navigate('/config-server');
         break;
       default:
     }

@@ -10,12 +10,12 @@ import { styles, theme } from '../../style';
 import { Link } from '../common/Link';
 import { View } from '../common/View';
 
-import { type BoundsProps } from './MonthsContext';
+import { type MonthBounds } from './MonthsContext';
 
 type MonthPickerProps = {
   startMonth: string;
   numDisplayed: number;
-  monthBounds: BoundsProps;
+  monthBounds: MonthBounds;
   style: CSSProperties;
   onSelect: (month: string) => void;
 };
