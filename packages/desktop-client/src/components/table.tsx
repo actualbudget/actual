@@ -19,6 +19,7 @@ import React, {
 } from 'react';
 import AutoSizer from 'react-virtualized-auto-sizer';
 
+import { useModalState } from '../hooks/useModalState';
 import {
   AvoidRefocusScrollProvider,
   useProperFocus,
@@ -27,7 +28,6 @@ import { useSelectedItems } from '../hooks/useSelected';
 import { AnimatedLoading } from '../icons/AnimatedLoading';
 import { SvgDelete, SvgExpandArrow } from '../icons/v0';
 import { SvgCheckmark } from '../icons/v1';
-import { useAppStore } from '../redux';
 import { styles, theme } from '../style';
 
 import { Button } from './common/Button2';
@@ -1229,7 +1229,7 @@ export function useTableNavigator<T extends TableItem>(
   const containerRef = useRef<HTMLDivElement>();
 
   // See `onBlur` for why we need this
-  const store = useAppStore();
+  const modalState = useModalState();
   const modalStackLength = useRef(0);
 
   // onEdit is passed to children, so make sure it maintains identity
@@ -1239,8 +1239,8 @@ export function useTableNavigator<T extends TableItem>(
   }, []);
 
   useEffect(() => {
-    modalStackLength.current = store.getState().modals.modalStack.length;
-  }, []);
+    modalStackLength.current = modalState.modalStack.length;
+  }, [modalState.modalStack]);
 
   function flashInput() {
     // Force the container to be focused which suppresses the "space
@@ -1396,7 +1396,7 @@ export function useTableNavigator<T extends TableItem>(
         // modal just opened. This way the field still shows an
         // input, and it will be refocused when the modal closes.
         const prevNumModals = modalStackLength.current;
-        const numModals = store.getState().modals.modalStack.length;
+        const numModals = modalState.modalStack.length;
 
         if (
           document.hasFocus() &&
