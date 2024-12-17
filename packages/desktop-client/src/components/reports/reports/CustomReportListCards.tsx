@@ -114,6 +114,7 @@ function CustomReportListCardsInner({
   return (
     <ReportCard
       isEditing={isEditing}
+      disableClick={nameMenuOpen}
       to={`/reports/custom/${report.id}`}
       menuItems={[
         {

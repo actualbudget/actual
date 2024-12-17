@@ -19,6 +19,7 @@ import { NON_DRAGGABLE_AREA_CLASS_NAME } from './constants';
 
 type ReportCardProps = {
   isEditing?: boolean;
+  disableClick?: boolean;
   to?: string;
   children: ReactNode;
   menuItems?: ComponentProps<typeof Menu>['items'];
@@ -29,6 +30,7 @@ type ReportCardProps = {
 
 export function ReportCard({
   isEditing,
+  disableClick,
   to,
   menuItems,
   onMenuSelect,
@@ -95,7 +97,7 @@ export function ReportCard({
       <Layout {...layoutProps}>
         <View
           role="button"
-          onClick={isEditing ? undefined : () => navigate(to)}
+          onClick={isEditing || disableClick ? undefined : () => navigate(to)}
           style={{
             height: '100%',
             width: '100%',
