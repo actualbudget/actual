@@ -1,10 +1,10 @@
 import { useEffect, useState, type ReactElement } from 'react';
-import { useSelector } from 'react-redux';
 
 import { type RemoteFile, type SyncedLocalFile } from 'loot-core/types/file';
 
 import { View } from '../components/common/View';
 import { useMetadataPref } from '../hooks/useMetadataPref';
+import { useAppSelector } from '../redux';
 
 import { useAuth } from './AuthProvider';
 import { type Permissions } from './types';
@@ -23,13 +23,13 @@ export const ProtectedRoute = ({
   const { hasPermission } = useAuth();
   const [permissionGranted, setPermissionGranted] = useState(false);
   const [cloudFileId] = useMetadataPref('cloudFileId');
-  const allFiles = useSelector(state => state.budgets.allFiles || []);
+  const allFiles = useAppSelector(state => state.budgets.allFiles || []);
   const remoteFiles = allFiles.filter(
     (f): f is SyncedLocalFile | RemoteFile =>
       f.state === 'remote' || f.state === 'synced' || f.state === 'detached',
   );
   const currentFile = remoteFiles.find(f => f.cloudFileId === cloudFileId);
-  const userData = useSelector(state => state.user.data);
+  const userData = useAppSelector(state => state.user.data);
 
   useEffect(() => {
     const hasRequiredPermission = hasPermission(permission);

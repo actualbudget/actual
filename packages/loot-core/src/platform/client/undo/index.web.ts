@@ -11,6 +11,7 @@ const currentUndoState: T.UndoState = {
   url: null,
   openModal: null,
   selectedItems: null,
+  current: null,
 };
 
 export const setUndoState: T.SetUndoState = function (name, value) {

@@ -1,14 +1,11 @@
-import { useSelector } from 'react-redux';
-
-import { type State } from 'loot-core/src/client/state-types';
-
 import { useServerURL } from '../components/ServerContext';
+import { useAppSelector } from '../redux';
 
 type SyncServerStatus = 'offline' | 'no-server' | 'online';
 
 export function useSyncServerStatus(): SyncServerStatus {
   const serverUrl = useServerURL();
-  const userData = useSelector((state: State) => state.user.data);
+  const userData = useAppSelector(state => state.user.data);
 
   if (!serverUrl) {
     return 'no-server';

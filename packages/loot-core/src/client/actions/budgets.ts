@@ -5,14 +5,14 @@ import { send } from '../../platform/client/fetch';
 import { getDownloadError, getSyncError } from '../../shared/errors';
 import type { Handlers } from '../../types/handlers';
 import * as constants from '../constants';
+import { type AppDispatch, type GetRootState } from '../store';
 
 import { setAppState } from './app';
 import { closeModal, pushModal } from './modals';
 import { loadPrefs, loadGlobalPrefs } from './prefs';
-import type { Dispatch, GetState } from './types';
 
 export function loadBudgets() {
-  return async (dispatch: Dispatch) => {
+  return async (dispatch: AppDispatch) => {
     const budgets = await send('get-budgets');
 
     dispatch({
@@ -23,7 +23,7 @@ export function loadBudgets() {
 }
 
 export function loadRemoteFiles() {
-  return async (dispatch: Dispatch) => {
+  return async (dispatch: AppDispatch) => {
     const files = await send('get-remote-files');
 
     dispatch({
@@ -34,7 +34,7 @@ export function loadRemoteFiles() {
 }
 
 export function loadAllFiles() {
-  return async (dispatch: Dispatch, getState: GetState) => {
+  return async (dispatch: AppDispatch, getState: GetRootState) => {
     const budgets = await send('get-budgets');
     const files = await send('get-remote-files');
 
@@ -49,7 +49,7 @@ export function loadAllFiles() {
 }
 
 export function loadBudget(id: string, options = {}) {
-  return async (dispatch: Dispatch) => {
+  return async (dispatch: AppDispatch) => {
     dispatch(setAppState({ loadingText: t('Loading...') }));
 
     // Loading a budget may fail
@@ -90,7 +90,7 @@ export function loadBudget(id: string, options = {}) {
 }
 
 export function closeBudget() {
-  return async (dispatch: Dispatch, getState: GetState) => {
+  return async (dispatch: AppDispatch, getState: GetRootState) => {
     const prefs = getState().prefs.local;
     if (prefs && prefs.id) {
       // This clears out all the app state so the user starts fresh
@@ -107,7 +107,7 @@ export function closeBudget() {
 }
 
 export function closeBudgetUI() {
-  return async (dispatch: Dispatch, getState: GetState) => {
+  return async (dispatch: AppDispatch, getState: GetRootState) => {
     const prefs = getState().prefs.local;
     if (prefs && prefs.id) {
       dispatch({ type: constants.CLOSE_BUDGET });
@@ -116,14 +116,14 @@ export function closeBudgetUI() {
 }
 
 export function deleteBudget(id?: string, cloudFileId?: string) {
-  return async (dispatch: Dispatch) => {
+  return async (dispatch: AppDispatch) => {
     await send('delete-budget', { id, cloudFileId });
     await dispatch(loadAllFiles());
   };
 }
 
 export function createBudget({ testMode = false, demoMode = false } = {}) {
-  return async (dispatch: Dispatch) => {
+  return async (dispatch: AppDispatch) => {
     dispatch(
       setAppState({
         loadingText:
@@ -180,7 +180,7 @@ export function duplicateBudget({
    */
   cloudSync?: boolean;
 }) {
-  return async (dispatch: Dispatch) => {
+  return async (dispatch: AppDispatch) => {
     try {
       dispatch(
         setAppState({
@@ -219,7 +219,7 @@ export function importBudget(
   filepath: string,
   type: Parameters<Handlers['import-budget']>[0]['type'],
 ) {
-  return async (dispatch: Dispatch) => {
+  return async (dispatch: AppDispatch) => {
     const { error } = await send('import-budget', { filepath, type });
     if (error) {
       throw new Error(error);
@@ -232,7 +232,7 @@ export function importBudget(
 }
 
 export function uploadBudget(id: string) {
-  return async (dispatch: Dispatch) => {
+  return async (dispatch: AppDispatch) => {
     const { error } = await send('upload-budget', { id });
     if (error) {
       return { error };
@@ -244,21 +244,21 @@ export function uploadBudget(id: string) {
 }
 
 export function closeAndLoadBudget(fileId: string) {
-  return async (dispatch: Dispatch) => {
+  return async (dispatch: AppDispatch) => {
     await dispatch(closeBudget());
     await dispatch(loadBudget(fileId));
   };
 }
 
 export function closeAndDownloadBudget(cloudFileId: string) {
-  return async (dispatch: Dispatch) => {
+  return async (dispatch: AppDispatch) => {
     await dispatch(closeBudget());
     dispatch(downloadBudget(cloudFileId, { replace: true }));
   };
 }
 
 export function downloadBudget(cloudFileId: string, { replace = false } = {}) {
-  return async (dispatch: Dispatch) => {
+  return async (dispatch: AppDispatch) => {
     dispatch(
       setAppState({
         loadingText: t('Downloading...'),

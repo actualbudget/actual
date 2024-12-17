@@ -6,8 +6,8 @@ import React, {
   useReducer,
   type Dispatch,
   type ReactNode,
+  useRef,
 } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
 
 import {
   type SplitMode,
@@ -59,7 +59,7 @@ type SplitsStateContext = {
 const SplitsExpandedContext = createContext<SplitsStateContext>({
   state: {
     mode: 'collapse',
-    ids: new Set(),
+    ids: [],
     transitionId: null,
   },
   dispatch: () => {
@@ -73,10 +73,10 @@ export function useSplitsExpanded() {
   return useMemo(
     () => ({
       ...data,
-      isExpanded: (id: string) =>
-        data.state.mode === 'collapse'
-          ? !data.state.ids.has(id)
-          : data.state.ids.has(id),
+      isExpanded: (id: string) => {
+        const idSet = new Set(data.state.ids);
+        return data.state.mode === 'collapse' ? !idSet.has(id) : idSet.has(id);
+      },
     }),
     [data],
   );
@@ -91,8 +91,7 @@ export function SplitsExpandedProvider({
   children,
   initialMode = 'expand',
 }: SplitsExpandedProviderProps) {
-  const cachedState = useSelector(state => state.app.lastSplitState);
-  const reduxDispatch = useDispatch();
+  const previousState = useRef(null);
 
   const [state, dispatch] = useReducer(
     (state: SplitState, action: Actions): SplitState => {
@@ -105,7 +104,7 @@ export function SplitsExpandedProvider({
           } else {
             ids.add(id);
           }
-          return { ...state, ids };
+          return { ...state, ids: Array.from(ids) };
         }
         case 'open-split': {
           const ids = new Set([...state.ids]);
@@ -115,7 +114,7 @@ export function SplitsExpandedProvider({
           } else {
             ids.add(id);
           }
-          return { ...state, ids };
+          return { ...state, ids: Array.from(ids) };
         }
         case 'close-splits': {
           const ids = new Set([...state.ids]);
@@ -126,13 +125,13 @@ export function SplitsExpandedProvider({
               ids.delete(id);
             }
           });
-          return { ...state, ids };
+          return { ...state, ids: Array.from(ids) };
         }
         case 'set-mode': {
           return {
             ...state,
             mode: action.mode,
-            ids: new Set<string>(),
+            ids: [],
             transitionId: null,
           };
         }
@@ -146,14 +145,14 @@ export function SplitsExpandedProvider({
             ...state,
             mode: state.mode === 'expand' ? 'collapse' : 'expand',
             transitionId: action.id,
-            ids: new Set<string>(),
+            ids: [],
           };
         case 'finish-switch-mode':
           return { ...state, transitionId: null };
       }
     },
-    cachedState.current || {
-      ids: new Set<string>(),
+    previousState.current || {
+      ids: [],
       mode: initialMode,
       transitionId: null,
     },
@@ -171,9 +170,9 @@ export function SplitsExpandedProvider({
   useEffect(() => {
     // In a finished state, cache the state
     if (state.transitionId == null) {
-      reduxDispatch({ type: 'SET_LAST_SPLIT_STATE', splitState: state });
+      previousState.current = state;
     }
-  }, [reduxDispatch, state]);
+  }, [state]);
 
   const value = useMemo(() => ({ state, dispatch }), [state, dispatch]);
 

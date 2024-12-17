@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
 
 import { send, sendCatch } from 'loot-core/platform/client/fetch/index';
 import { addNotification } from 'loot-core/src/client/actions';
@@ -13,6 +12,7 @@ import { useCategories } from '../../../hooks/useCategories';
 import { usePayees } from '../../../hooks/usePayees';
 import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { SvgExclamationSolid } from '../../../icons/v1';
+import { useAppDispatch } from '../../../redux';
 import { styles } from '../../../style/index';
 import { theme } from '../../../style/theme';
 import { Text } from '../../common/Text';
@@ -64,7 +64,7 @@ function CustomReportListCardsInner({
 }: Omit<CustomReportListCardsProps, 'report'> & {
   report: CustomReportEntity;
 }) {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
   const [earliestTransaction, setEarliestTransaction] = useState('');
