@@ -3,7 +3,7 @@ import type { Action } from '../state-types';
 import type { AccountState } from '../state-types/account';
 
 const initialState: AccountState = {
-  failedAccounts: new Map(),
+  failedAccounts: {},
   accountsSyncing: [],
 };
 
@@ -15,14 +15,14 @@ export function update(state = initialState, action: Action): AccountState {
         accountsSyncing: action.ids,
       };
     case constants.ACCOUNT_SYNC_STATUS: {
-      const failedAccounts = new Map(state.failedAccounts);
+      const failedAccounts = { ...state.failedAccounts };
       if (action.failed) {
-        failedAccounts.set(action.id, {
+        failedAccounts[action.id] = {
           type: action.errorType,
           code: action.errorCode,
-        });
+        };
       } else {
-        failedAccounts.delete(action.id);
+        failedAccounts[action.id] = undefined;
       }
 
       return { ...state, failedAccounts };

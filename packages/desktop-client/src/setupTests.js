@@ -1,4 +1,4 @@
-import { resetStore } from 'loot-core/src/mocks/redux';
+import { resetStore } from 'loot-core/src/client/store/mock';
 
 import { installPolyfills } from './polyfills';
 
