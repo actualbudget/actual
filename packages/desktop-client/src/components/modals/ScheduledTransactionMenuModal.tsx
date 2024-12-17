@@ -3,8 +3,7 @@ import React, {
   type ComponentPropsWithoutRef,
   type CSSProperties,
 } from 'react';
-
-import { t } from 'i18next';
+import { useTranslation } from 'react-i18next';
 
 import { useSchedules } from 'loot-core/client/data-hooks/schedules';
 import { format } from 'loot-core/shared/months';
@@ -28,6 +27,7 @@ export function ScheduledTransactionMenuModal({
   onSkip,
   onPost,
 }: ScheduledTransactionMenuModalProps) {
+  const { t } = useTranslation();
   const defaultMenuItemStyle: CSSProperties = {
     ...styles.mobileMenuItem,
     color: theme.menuItemText,
@@ -98,6 +98,7 @@ function ScheduledTransactionMenu({
   onPost,
   ...props
 }: ScheduledTransactionMenuProps) {
+  const { t } = useTranslation();
   return (
     <Menu
       {...props}

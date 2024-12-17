@@ -161,7 +161,10 @@ export function getFullRange(start: string) {
 
 export function getLatestRange(offset: number) {
   const end = monthUtils.currentMonth();
-  const start = monthUtils.subMonths(end, offset);
+  let start = end;
+  if (offset !== 1) {
+    start = monthUtils.subMonths(end, offset);
+  }
   return [start, end, 'sliding-window'] as const;
 }
 

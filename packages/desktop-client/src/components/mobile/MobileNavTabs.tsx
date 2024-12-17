@@ -138,10 +138,10 @@ export function MobileNavTabs() {
     <div key={idx} style={navTabStyle} />
   ));
 
-  useScrollListener(({ isScrolling }) => {
-    if (isScrolling('down')) {
+  useScrollListener(({ isScrolling, hasScrolledToEnd }) => {
+    if (isScrolling('down') && !hasScrolledToEnd('up')) {
       hide();
-    } else if (isScrolling('up')) {
+    } else if (isScrolling('up') && !hasScrolledToEnd('down')) {
       openDefault();
     }
   });
