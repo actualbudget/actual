@@ -1,6 +1,6 @@
 import { configureStore, combineReducers } from '@reduxjs/toolkit';
 
-import { reducers } from '../../client/reducers';
+import { reducers } from '../reducers';
 
 const appReducer = combineReducers(reducers);
 

@@ -49,6 +49,7 @@ import {
 } from './spreadsheet';
 import { type FormatType, useFormat } from './spreadsheet/useFormat';
 import { useSheetValue } from './spreadsheet/useSheetValue';
+import { useModalState } from '../hooks/useModalState';
 
 export const ROW_HEIGHT = 32;
 
@@ -1229,7 +1230,7 @@ export function useTableNavigator<T extends TableItem>(
   const containerRef = useRef<HTMLDivElement>();
 
   // See `onBlur` for why we need this
-  const store = useStore();
+  const modalState = useModalState();
   const modalStackLength = useRef(0);
 
   // onEdit is passed to children, so make sure it maintains identity
@@ -1239,8 +1240,8 @@ export function useTableNavigator<T extends TableItem>(
   }, []);
 
   useEffect(() => {
-    modalStackLength.current = store.getState().modals.modalStack.length;
-  }, []);
+    modalStackLength.current = modalState.modalStack.length;
+  }, [modalState.modalStack]);
 
   function flashInput() {
     // Force the container to be focused which suppresses the "space
@@ -1396,7 +1397,7 @@ export function useTableNavigator<T extends TableItem>(
         // modal just opened. This way the field still shows an
         // input, and it will be refocused when the modal closes.
         const prevNumModals = modalStackLength.current;
-        const numModals = store.getState().modals.modalStack.length;
+        const numModals = modalState.modalStack.length;
 
         if (
           document.hasFocus() &&
