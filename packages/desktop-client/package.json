@@ -10,6 +10,7 @@
     "@fontsource/redacted-script": "^5.0.21",
     "@juggle/resize-observer": "^3.4.0",
     "@playwright/test": "1.41.1",
+    "@reduxjs/toolkit": "^2.5.0",
     "@rollup/plugin-inject": "^5.0.5",
     "@svgr/cli": "^8.1.0",
     "@swc/core": "^1.5.3",
