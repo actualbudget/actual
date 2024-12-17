@@ -16,6 +16,8 @@ import { useContextMenu } from '../../hooks/useContextMenu';
 import { useNotes } from '../../hooks/useNotes';
 import { styles, theme } from '../../style';
 import { AlignedText } from '../common/AlignedText';
+import { InitialFocus } from '../common/InitialFocus';
+import { Input } from '../common/Input';
 import { Link } from '../common/Link';
 import { Menu } from '../common/Menu';
 import { Popover } from '../common/Popover';
@@ -102,32 +104,7 @@ export function Account<FieldName extends SheetFields<'account'>>({
 
   const dispatch = useDispatch();
 
-  const editingRef = useRef(null);
   const [isEditing, setIsEditing] = useState(false);
-  useEffect(() => {
-    if (!editingRef.current) return;
-    if (isEditing) {
-      editingRef.current.focus();
-      window.getSelection().selectAllChildren(editingRef.current);
-    } else {
-      editingRef.current.textContent = name;
-    }
-  }, [name, isEditing]);
-
-  const updateName = () => {
-    if (account && isEditing) {
-      setIsEditing(false);
-      const newName = editingRef.current.textContent;
-      if (newName !== account.name && newName.trim()) {
-        dispatch(
-          updateAccount({
-            ...account,
-            name: newName,
-          }),
-        );
-      }
-    }
-  };
 
   const accountNote = useNotes(`account-${account?.id}`);
   const needsTooltip = !!account?.id;
@@ -144,6 +121,7 @@ export function Account<FieldName extends SheetFields<'account'>>({
           <Link
             variant="internal"
             to={to}
+            isDisabled={isEditing}
             style={{
               ...accountNameStyle,
               ...style,
@@ -205,22 +183,34 @@ export function Account<FieldName extends SheetFields<'account'>>({
                 }
               }
               left={
-                <span
-                  contentEditable={isEditing}
-                  ref={editingRef}
-                  suppressContentEditableWarning={true}
-                  onBlur={updateName}
-                  onKeyDown={e => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault();
-                      updateName();
-                    } else if (e.key === 'Escape') {
-                      setIsEditing(false);
-                    }
-                  }}
-                >
-                  {name}
-                </span>
+                isEditing ? (
+                  <InitialFocus>
+                    <Input
+                      style={{
+                        padding: 0,
+                        width: '100%',
+                      }}
+                      onBlur={() => setIsEditing(false)}
+                      onEnter={e => {
+                        const inputEl = e.target as HTMLInputElement;
+                        const newAccountName = inputEl.value;
+                        if (newAccountName.trim() !== '') {
+                          dispatch(
+                            updateAccount({
+                              ...account,
+                              name: newAccountName,
+                            }),
+                          );
+                        }
+                        setIsEditing(false);
+                      }}
+                      onEscape={() => setIsEditing(false)}
+                      defaultValue={name}
+                    />
+                  </InitialFocus>
+                ) : (
+                  name
+                )
               }
               right={<CellValue binding={query} type="financial" />}
             />
