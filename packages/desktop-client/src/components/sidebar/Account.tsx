@@ -199,7 +199,7 @@ export function Account<FieldName extends SheetFields<'account'>>({
 
             <AlignedText
               style={
-                (name === 'Off budget' || name === 'For budget') && {
+                (name === 'Off budget' || name === 'On budget') && {
                   borderBottom: `1.5px solid rgba(255,255,255,0.4)`,
                   paddingBottom: '3px',
                 }

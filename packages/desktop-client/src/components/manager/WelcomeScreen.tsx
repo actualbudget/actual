@@ -1,7 +1,9 @@
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
+import { useDispatch } from 'react-redux';
 
-import { useActions } from '../../hooks/useActions';
+import { createBudget, pushModal } from 'loot-core/client/actions';
+
 import { styles, theme } from '../../style';
 import { Button } from '../common/Button2';
 import { Link } from '../common/Link';
@@ -11,7 +13,7 @@ import { View } from '../common/View';
 
 export function WelcomeScreen() {
   const { t } = useTranslation();
-  const { createBudget, pushModal } = useActions();
+  const dispatch = useDispatch();
 
   return (
     <View
@@ -77,7 +79,7 @@ export function WelcomeScreen() {
           flexShrink: 0,
         }}
       >
-        <Button onPress={() => pushModal('import')}>
+        <Button onPress={() => dispatch(pushModal('import'))}>
           {t('Import my budget')}
         </Button>
         <View
@@ -87,10 +89,14 @@ export function WelcomeScreen() {
             gap: 10,
           }}
         >
-          <Button onPress={() => createBudget({ testMode: true })}>
+          <Button onPress={() => dispatch(createBudget({ testMode: true }))}>
             {t('View demo')}
           </Button>
-          <Button variant="primary" autoFocus onPress={() => createBudget()}>
+          <Button
+            variant="primary"
+            autoFocus
+            onPress={() => dispatch(createBudget())}
+          >
             {t('Start fresh')}
           </Button>
         </View>

@@ -8,11 +8,11 @@ import { type State } from 'loot-core/src/client/state-types';
 import { type AccountEntity } from 'loot-core/types/models';
 
 import { useAccounts } from '../../hooks/useAccounts';
-import { useBudgetedAccounts } from '../../hooks/useBudgetedAccounts';
 import { useClosedAccounts } from '../../hooks/useClosedAccounts';
 import { useFailedAccounts } from '../../hooks/useFailedAccounts';
 import { useLocalPref } from '../../hooks/useLocalPref';
 import { useOffBudgetAccounts } from '../../hooks/useOffBudgetAccounts';
+import { useOnBudgetAccounts } from '../../hooks/useOnBudgetAccounts';
 import { useUpdatedAccounts } from '../../hooks/useUpdatedAccounts';
 import { theme } from '../../style';
 import { View } from '../common/View';
@@ -30,7 +30,7 @@ export function Accounts() {
   const failedAccounts = useFailedAccounts();
   const updatedAccounts = useUpdatedAccounts();
   const offbudgetAccounts = useOffBudgetAccounts();
-  const budgetedAccounts = useBudgetedAccounts();
+  const onBudgetAccounts = useOnBudgetAccounts();
   const closedAccounts = useClosedAccounts();
   const syncingAccountIds = useSelector(
     (state: State) => state.account.accountsSyncing,
@@ -100,11 +100,11 @@ export function Accounts() {
           style={{ fontWeight, marginTop: 15 }}
         />
 
-        {budgetedAccounts.length > 0 && (
+        {onBudgetAccounts.length > 0 && (
           <Account
-            name={t('For budget')}
-            to="/accounts/budgeted"
-            query={queries.budgetedAccountBalance()}
+            name={t('On budget')}
+            to="/accounts/onbudget"
+            query={queries.onBudgetAccountBalance()}
             style={{
               fontWeight,
               marginTop: 13,
@@ -113,7 +113,7 @@ export function Accounts() {
           />
         )}
 
-        {budgetedAccounts.map((account, i) => (
+        {onBudgetAccounts.map((account, i) => (
           <Account
             key={account.id}
             name={account.name}
@@ -134,7 +134,7 @@ export function Accounts() {
           <Account
             name={t('Off budget')}
             to="/accounts/offbudget"
-            query={queries.offbudgetAccountBalance()}
+            query={queries.offBudgetAccountBalance()}
             style={{
               fontWeight,
               marginTop: 13,

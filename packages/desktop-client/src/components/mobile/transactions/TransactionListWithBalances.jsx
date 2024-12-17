@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-
-import { t } from 'i18next';
+import { useTranslation } from 'react-i18next';
 
 import { SelectedProvider, useSelected } from '../../../hooks/useSelected';
 import { SvgSearchAlternate } from '../../../icons/v2';
@@ -65,6 +64,7 @@ export function TransactionListWithBalances({
   balanceUncleared,
   searchPlaceholder = 'Search...',
   onSearch,
+  isLoadingMore,
   onLoadMore,
   onOpenTransaction,
   onRefresh,
@@ -104,6 +104,7 @@ export function TransactionListWithBalances({
         <TransactionList
           isLoading={isLoading}
           transactions={transactions}
+          isLoadingMore={isLoadingMore}
           onLoadMore={onLoadMore}
           onOpenTransaction={onOpenTransaction}
         />
@@ -113,6 +114,7 @@ export function TransactionListWithBalances({
 }
 
 function BalanceWithCleared({ balanceUncleared, balanceCleared, balance }) {
+  const { t } = useTranslation();
   const unclearedAmount = useSheetValue(balanceUncleared);
 
   return (
@@ -171,6 +173,7 @@ function BalanceWithCleared({ balanceUncleared, balanceCleared, balance }) {
 }
 
 function Balance({ balance }) {
+  const { t } = useTranslation();
   return (
     <View style={{ flexBasis: '33%' }}>
       <Label title={t('Balance')} style={{ textAlign: 'center' }} />
