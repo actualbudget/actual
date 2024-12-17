@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { DialogTrigger } from 'react-aria-components';
 import { Trans, useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
 
 import { pushModal } from 'loot-core/client/actions';
 import { send } from 'loot-core/src/platform/client/fetch';
@@ -13,6 +12,7 @@ import { useGoCardlessStatus } from '../../hooks/useGoCardlessStatus';
 import { useSimpleFinStatus } from '../../hooks/useSimpleFinStatus';
 import { useSyncServerStatus } from '../../hooks/useSyncServerStatus';
 import { SvgDotsHorizontalTriple } from '../../icons/v1';
+import { useAppDispatch } from '../../redux';
 import { theme } from '../../style';
 import { Warning } from '../alerts';
 import { Button, ButtonWithLoading } from '../common/Button2';
@@ -34,7 +34,7 @@ export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
   const { t } = useTranslation();
 
   const syncServerStatus = useSyncServerStatus();
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const [isGoCardlessSetupComplete, setIsGoCardlessSetupComplete] = useState<
     boolean | null
   >(null);

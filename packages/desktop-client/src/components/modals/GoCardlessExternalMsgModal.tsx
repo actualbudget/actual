@@ -1,7 +1,6 @@
 // @ts-strict-ignore
 import React, { useEffect, useState, useRef } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
 
 import { pushModal } from 'loot-core/src/client/actions/modals';
 import { sendCatch } from 'loot-core/src/platform/client/fetch';
@@ -12,6 +11,7 @@ import {
 
 import { useGoCardlessStatus } from '../../hooks/useGoCardlessStatus';
 import { AnimatedLoading } from '../../icons/AnimatedLoading';
+import { useAppDispatch } from '../../redux';
 import { theme } from '../../style';
 import { Error, Warning } from '../alerts';
 import { Autocomplete } from '../autocomplete/Autocomplete';
@@ -87,7 +87,7 @@ export function GoCardlessExternalMsgModal({
 }: GoCardlessExternalMsgProps) {
   const { t } = useTranslation();
 
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
   const [waiting, setWaiting] = useState<string | null>(null);
   const [success, setSuccess] = useState<boolean>(false);

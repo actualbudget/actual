@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
 
 import deepEqual from 'deep-equal';
 
@@ -14,6 +13,7 @@ import { amountToInteger } from 'loot-core/src/shared/util';
 
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import { useSyncedPrefs } from '../../../hooks/useSyncedPrefs';
+import { useAppDispatch } from '../../../redux';
 import { theme } from '../../../style';
 import { Button, ButtonWithLoading } from '../../common/Button2';
 import { Input } from '../../common/Input';
@@ -144,7 +144,7 @@ export function ImportTransactionsModal({ options }) {
   const { t } = useTranslation();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const [prefs, savePrefs] = useSyncedPrefs();
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
   const [multiplierAmount, setMultiplierAmount] = useState('');
   const [loadingState, setLoadingState] = useState('parsing');

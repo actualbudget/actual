@@ -1,9 +1,9 @@
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
 
 import { createBudget, pushModal } from 'loot-core/client/actions';
 
+import { useAppDispatch } from '../../redux';
 import { styles, theme } from '../../style';
 import { Button } from '../common/Button2';
 import { Link } from '../common/Link';
@@ -13,7 +13,7 @@ import { View } from '../common/View';
 
 export function WelcomeScreen() {
   const { t } = useTranslation();
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
   return (
     <View

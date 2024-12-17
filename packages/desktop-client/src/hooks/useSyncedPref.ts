@@ -1,9 +1,9 @@
 import { useCallback } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 
 import { saveSyncedPrefs } from 'loot-core/client/actions';
-import { type State } from 'loot-core/client/state-types';
 import { type SyncedPrefs } from 'loot-core/src/types/prefs';
+
+import { useAppSelector, useAppDispatch } from '../redux';
 
 type SetSyncedPrefAction<K extends keyof SyncedPrefs> = (
   value: SyncedPrefs[K],
@@ -12,14 +12,14 @@ type SetSyncedPrefAction<K extends keyof SyncedPrefs> = (
 export function useSyncedPref<K extends keyof SyncedPrefs>(
   prefName: K,
 ): [SyncedPrefs[K], SetSyncedPrefAction<K>] {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const setPref = useCallback<SetSyncedPrefAction<K>>(
     value => {
       dispatch(saveSyncedPrefs({ [prefName]: value }));
     },
     [prefName, dispatch],
   );
-  const pref = useSelector((state: State) => state.prefs.synced[prefName]);
+  const pref = useAppSelector(state => state.prefs.synced[prefName]);
 
   return [pref, setPref];
 }

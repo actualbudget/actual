@@ -1,6 +1,5 @@
 import React, { type CSSProperties, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
 
 import { css } from '@emotion/css';
 import { Resizable } from 're-resizable';
@@ -12,6 +11,7 @@ import { useGlobalPref } from '../../hooks/useGlobalPref';
 import { useLocalPref } from '../../hooks/useLocalPref';
 import { useResizeObserver } from '../../hooks/useResizeObserver';
 import { SvgAdd } from '../../icons/v1';
+import { useAppDispatch } from '../../redux';
 import { styles, theme } from '../../style';
 import { View } from '../common/View';
 import { useResponsive } from '../responsive/ResponsiveProvider';
@@ -27,7 +27,7 @@ export function Sidebar() {
   const hasWindowButtons = !Platform.isBrowser && Platform.OS === 'mac';
 
   const { t } = useTranslation();
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const sidebar = useSidebar();
   const { width } = useResponsive();
   const [isFloating = false, setFloatingSidebarPref] =

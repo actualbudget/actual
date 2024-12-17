@@ -7,7 +7,6 @@ import React, {
   useCallback,
 } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { useSpring, animated, config } from 'react-spring';
 
@@ -48,6 +47,7 @@ import {
   SvgCheveronDown,
   SvgCheveronUp,
 } from '../../../icons/v1';
+import { useAppDispatch } from '../../../redux';
 import { styles, theme } from '../../../style';
 import { Button } from '../../common/Button2';
 import { View } from '../../common/View';
@@ -278,7 +278,7 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
     run();
   }, []);
 
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { isNarrowWidth } = useResponsive();
   const title = widget?.meta?.name || t('Calendar');

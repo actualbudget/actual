@@ -1,10 +1,10 @@
 import React from 'react';
-import { useSelector } from 'react-redux';
 import { useTransition, animated } from 'react-spring';
 
 import { css } from '@emotion/css';
 
 import { AnimatedLoading } from '../icons/AnimatedLoading';
+import { useAppSelector } from '../redux';
 import { theme } from '../style';
 
 import { Background } from './Background';
@@ -16,7 +16,7 @@ type AppBackgroundProps = {
 };
 
 export function AppBackground({ isLoading }: AppBackgroundProps) {
-  const loadingText = useSelector(state => state.app.loadingText);
+  const loadingText = useAppSelector(state => state.app.loadingText);
   const showLoading = isLoading || loadingText !== null;
   const transitions = useTransition(loadingText, {
     from: { opacity: 0, transform: 'translateY(-100px)' },

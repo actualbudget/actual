@@ -1,9 +1,8 @@
-import type { UndoState } from '../../server/undo';
 import type * as constants from '../constants';
 
 export type SplitMode = 'collapse' | 'expand';
 export type SplitState = {
-  ids: Set<string>;
+  ids: string[];
   mode: SplitMode;
   transitionId: string | null;
 };
@@ -17,8 +16,6 @@ export type AppState = {
   } | null;
   showUpdateNotification: boolean;
   managerHasInitialized: boolean;
-  lastUndoState: { current: UndoState | null };
-  lastSplitState: { current: SplitState | null };
 };
 
 export type SetAppStateAction = {
@@ -26,17 +23,4 @@ export type SetAppStateAction = {
   state: Partial<AppState>;
 };
 
-export type SetLastUndoStateAction = {
-  type: typeof constants.SET_LAST_UNDO_STATE;
-  undoState: UndoState | null;
-};
-
-export type SetLastSplitStateAction = {
-  type: typeof constants.SET_LAST_SPLIT_STATE;
-  splitState: SplitState | null;
-};
-
-export type AppActions =
-  | SetAppStateAction
-  | SetLastUndoStateAction
-  | SetLastSplitStateAction;
+export type AppActions = SetAppStateAction;

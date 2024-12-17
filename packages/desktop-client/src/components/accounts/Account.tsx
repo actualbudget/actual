@@ -8,7 +8,6 @@ import React, {
   useEffect,
 } from 'react';
 import { Trans } from 'react-i18next';
-import { useSelector } from 'react-redux';
 import { Navigate, useParams, useLocation } from 'react-router-dom';
 
 import { debounce } from 'debounce';
@@ -29,6 +28,7 @@ import {
   type PagedQuery,
 } from 'loot-core/src/client/query-helpers';
 import { send, listen } from 'loot-core/src/platform/client/fetch';
+import * as undo from 'loot-core/src/platform/client/undo';
 import { currentDay } from 'loot-core/src/shared/months';
 import { q, type Query } from 'loot-core/src/shared/query';
 import {
@@ -68,6 +68,7 @@ import {
 } from '../../hooks/useSplitsExpanded';
 import { useSyncedPref } from '../../hooks/useSyncedPref';
 import { useTransactionBatchActions } from '../../hooks/useTransactionBatchActions';
+import { useAppSelector } from '../../redux';
 import { styles, theme } from '../../style';
 import { Button } from '../common/Button2';
 import { Text } from '../common/Text';
@@ -261,8 +262,6 @@ type AccountInternalProps = {
   showExtraBalances?: boolean;
   setShowExtraBalances: (newValue: boolean) => void;
   modalShowing?: boolean;
-  setLastUndoState: (state: null) => void;
-  lastUndoState: { current: UndoState | null };
   accounts: AccountEntity[];
   getPayees: () => Promise<PayeeEntity[]>;
   updateAccount: (newAccount: AccountEntity) => void;
@@ -412,7 +411,7 @@ class AccountInternal extends PureComponent<
         }
       }
 
-      this.props.setLastUndoState(null);
+      undo.setUndoState('current', null);
     };
 
     const unlistens = [listen('undo-event', onUndo)];
@@ -428,8 +427,9 @@ class AccountInternal extends PureComponent<
 
     // If there is a pending undo, apply it immediately (this happens
     // when an undo changes the location to this page)
-    if (this.props.lastUndoState && this.props.lastUndoState.current) {
-      onUndo(this.props.lastUndoState.current);
+    const lastUndoState = undo.getUndoState('current');
+    if (lastUndoState) {
+      onUndo(lastUndoState as UndoState);
     }
   }
 
@@ -1860,8 +1860,10 @@ export function Account() {
   const location = useLocation();
 
   const { grouped: categoryGroups } = useCategories();
-  const newTransactions = useSelector(state => state.queries.newTransactions);
-  const matchedTransactions = useSelector(
+  const newTransactions = useAppSelector(
+    state => state.queries.newTransactions,
+  );
+  const matchedTransactions = useAppSelector(
     state => state.queries.matchedTransactions,
   );
   const accounts = useAccounts();
@@ -1882,9 +1884,12 @@ export function Account() {
   const [showExtraBalances, setShowExtraBalances] = useSyncedPref(
     `show-extra-balances-${params.id || 'all-accounts'}`,
   );
-  const modalShowing = useSelector(state => state.modals.modalStack.length > 0);
-  const accountsSyncing = useSelector(state => state.account.accountsSyncing);
-  const lastUndoState = useSelector(state => state.app.lastUndoState);
+  const modalShowing = useAppSelector(
+    state => state.modals.modalStack.length > 0,
+  );
+  const accountsSyncing = useAppSelector(
+    state => state.account.accountsSyncing,
+  );
   const filterConditions = location?.state?.filterConditions || [];
 
   const savedFiters = useFilters();
@@ -1923,7 +1928,6 @@ export function Account() {
           payees={payees}
           modalShowing={modalShowing}
           accountsSyncing={accountsSyncing}
-          lastUndoState={lastUndoState}
           filterConditions={filterConditions}
           categoryGroups={categoryGroups}
           {...actionCreators}

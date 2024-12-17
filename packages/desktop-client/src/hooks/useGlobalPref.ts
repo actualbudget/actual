@@ -1,9 +1,9 @@
 import { useCallback } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 
 import { saveGlobalPrefs } from 'loot-core/src/client/actions';
-import { type State } from 'loot-core/src/client/state-types';
 import { type GlobalPrefs } from 'loot-core/src/types/prefs';
+
+import { useAppSelector, useAppDispatch } from '../redux';
 
 type SetGlobalPrefAction<K extends keyof GlobalPrefs> = (
   value: GlobalPrefs[K],
@@ -13,7 +13,7 @@ export function useGlobalPref<K extends keyof GlobalPrefs>(
   prefName: K,
   onSaveGlobalPrefs?: () => void,
 ): [GlobalPrefs[K], SetGlobalPrefAction<K>] {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const setGlobalPref = useCallback<SetGlobalPrefAction<K>>(
     value => {
       dispatch(
@@ -27,8 +27,8 @@ export function useGlobalPref<K extends keyof GlobalPrefs>(
     },
     [prefName, dispatch, onSaveGlobalPrefs],
   );
-  const globalPref = useSelector(
-    (state: State) => state.prefs.global?.[prefName] as GlobalPrefs[K],
+  const globalPref = useAppSelector(
+    state => state.prefs.global?.[prefName] as GlobalPrefs[K],
   );
 
   return [globalPref, setGlobalPref];

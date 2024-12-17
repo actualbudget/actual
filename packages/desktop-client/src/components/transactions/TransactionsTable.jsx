@@ -12,7 +12,6 @@ import React, {
 } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
 
 import { css } from '@emotion/css';
 import {
@@ -60,6 +59,7 @@ import {
   SvgCalendar,
   SvgHyperlink2,
 } from '../../icons/v2';
+import { useAppDispatch } from '../../redux';
 import { styles, theme } from '../../style';
 import { AccountAutocomplete } from '../autocomplete/AccountAutocomplete';
 import { CategoryAutocomplete } from '../autocomplete/CategoryAutocomplete';
@@ -561,7 +561,7 @@ function PayeeCell({
 }) {
   const isCreatingPayee = useRef(false);
 
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
   const parentPayee = useParentPayee(
     payees,
@@ -887,7 +887,7 @@ const Transaction = memo(function Transaction({
   showSelection,
   allowSplitTransaction,
 }) {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const dispatchSelected = useSelectedDispatch();
   const triggerRef = useRef(null);
 

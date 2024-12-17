@@ -9,6 +9,7 @@ export type UndoState = {
     name: string;
     items: Set<string>;
   } | null;
+  current: unknown;
 };
 
 export function setUndoState<K extends keyof Omit<UndoState, 'id'>>(

@@ -1,7 +1,11 @@
-import { useSelector } from 'react-redux';
+import { useMemo } from 'react';
 
-import { type State } from 'loot-core/src/client/state-types';
+import { useAppSelector } from '../redux';
 
 export function useFailedAccounts() {
-  return useSelector((state: State) => state.account.failedAccounts);
+  const failedAccounts = useAppSelector(state => state.account.failedAccounts);
+  return useMemo(
+    () => new Map(Object.entries(failedAccounts)),
+    [failedAccounts],
+  );
 }

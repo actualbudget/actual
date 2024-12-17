@@ -8,7 +8,6 @@ import React, {
   useCallback,
 } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useDispatch, useSelector } from 'react-redux';
 import { useLocation, useParams } from 'react-router-dom';
 
 import {
@@ -55,6 +54,7 @@ import {
 import { SvgSplit } from '../../../icons/v0';
 import { SvgAdd, SvgPiggyBank, SvgTrash } from '../../../icons/v1';
 import { SvgPencilWriteAlternate } from '../../../icons/v2';
+import { useAppSelector, useAppDispatch } from '../../../redux';
 import { styles, theme } from '../../../style';
 import { Button } from '../../common/Button';
 import { Text } from '../../common/Text';
@@ -451,7 +451,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
 }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const transactions = useMemo(
     () =>
       unserializedTransactions.map(t => serializeTransaction(t, dateFormat)) ||
@@ -1022,7 +1022,7 @@ function TransactionEditUnconnected({
   const { transactionId } = useParams();
   const { state: locationState } = useLocation();
   const navigate = useNavigate();
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const [transactions, setTransactions] = useState([]);
   const [fetchedTransactions, setFetchedTransactions] = useState([]);
   const isAdding = useRef(false);
@@ -1246,7 +1246,9 @@ function TransactionEditUnconnected({
 export const TransactionEdit = props => {
   const { list: categories } = useCategories();
   const payees = usePayees();
-  const lastTransaction = useSelector(state => state.queries.lastTransaction);
+  const lastTransaction = useAppSelector(
+    state => state.queries.lastTransaction,
+  );
   const accounts = useAccounts();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
 

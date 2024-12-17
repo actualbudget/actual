@@ -7,16 +7,15 @@ import React, {
   type CSSProperties,
 } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useDispatch, useSelector } from 'react-redux';
 
 import { css } from '@emotion/css';
 
 import { removeNotification } from 'loot-core/client/actions';
-import { type State } from 'loot-core/src/client/state-types';
 import type { NotificationWithId } from 'loot-core/src/client/state-types/notifications';
 
 import { AnimatedLoading } from '../icons/AnimatedLoading';
 import { SvgDelete } from '../icons/v0';
+import { useAppSelector, useAppDispatch } from '../redux';
 import { styles, theme } from '../style';
 
 import { Button, ButtonWithLoading } from './common/Button2';
@@ -263,14 +262,12 @@ function Notification({
 }
 
 export function Notifications({ style }: { style?: CSSProperties }) {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const { isNarrowWidth } = useResponsive();
-  const notifications = useSelector(
-    (state: State) => state.notifications.notifications,
+  const notifications = useAppSelector(
+    state => state.notifications.notifications,
   );
-  const notificationInset = useSelector(
-    (state: State) => state.notifications.inset,
-  );
+  const notificationInset = useAppSelector(state => state.notifications.inset);
   return (
     <View
       style={{

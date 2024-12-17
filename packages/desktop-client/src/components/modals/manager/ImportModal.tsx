@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
 
 import { pushModal } from 'loot-core/client/actions';
 
+import { useAppDispatch } from '../../../redux';
 import { styles, theme } from '../../../style';
 import { Block } from '../../common/Block';
 import { Button } from '../../common/Button2';
@@ -23,7 +23,7 @@ function getErrorMessage(error: 'not-ynab4' | boolean) {
 export function ImportModal() {
   const { t } = useTranslation();
 
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const [error] = useState(false);
 
   function onSelectType(type: 'ynab4' | 'ynab5' | 'actual') {

@@ -1,11 +1,12 @@
 import { useMemo } from 'react';
-import { useDispatch } from 'react-redux';
 
 import { bindActionCreators } from 'redux';
 import { type ThunkAction } from 'redux-thunk';
 
 import * as actions from 'loot-core/src/client/actions';
 import type { Action, State } from 'loot-core/src/client/state-types';
+
+import { useAppDispatch } from '../redux';
 
 type ActionReturnType<T extends (...args: unknown[]) => unknown> =
   ReturnType<T> extends ThunkAction<infer ReturnType, State, never, Action>
@@ -21,11 +22,11 @@ export type BoundActions = {
 
 // https://react-redux.js.org/api/hooks#recipe-useactions
 /**
- * @deprecated please use actions directly with `useDispatch`
+ * @deprecated please use actions directly with `useAppDispatch`
  * @see https://github.com/reduxjs/react-redux/issues/1252#issuecomment-488160930
  **/
 export function useActions() {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   return useMemo(() => {
     return bindActionCreators(actions, dispatch);
   }, [dispatch]) as unknown as BoundActions;
