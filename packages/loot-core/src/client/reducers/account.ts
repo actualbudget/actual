@@ -2,7 +2,7 @@ import * as constants from '../constants';
 import type { Action } from '../state-types';
 import type { AccountState } from '../state-types/account';
 
-const initialState: AccountState = {
+export const initialState: AccountState = {
   failedAccounts: {},
   accountsSyncing: [],
 };

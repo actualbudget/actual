@@ -17,9 +17,9 @@ import React, {
   type MutableRefObject,
   type CSSProperties,
 } from 'react';
-import { useStore } from 'react-redux';
 import AutoSizer from 'react-virtualized-auto-sizer';
 
+import { useModalState } from '../hooks/useModalState';
 import {
   AvoidRefocusScrollProvider,
   useProperFocus,
@@ -49,7 +49,6 @@ import {
 } from './spreadsheet';
 import { type FormatType, useFormat } from './spreadsheet/useFormat';
 import { useSheetValue } from './spreadsheet/useSheetValue';
-import { useModalState } from '../hooks/useModalState';
 
 export const ROW_HEIGHT = 32;
 

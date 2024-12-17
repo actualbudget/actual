@@ -3,6 +3,10 @@ import { combineReducers, configureStore } from '@reduxjs/toolkit';
 import * as constants from '../constants';
 import { reducers } from '../reducers';
 import { initialState as initialAppState } from '../reducers/app';
+import { initialState as initialAccountState } from '../reducers/account';
+import { initialState as initialModalsState } from '../reducers/modals';
+import { initialState as initialNotificationsState } from '../reducers/notifications';
+import { initialState as initialQueriesState } from '../reducers/queries';
 
 const appReducer = combineReducers(reducers);
 const rootReducer: typeof appReducer = (state, action) => {
@@ -10,10 +14,10 @@ const rootReducer: typeof appReducer = (state, action) => {
     // Reset the state and only keep around things intentionally. This
     // blows away everything else
     state = {
-      account: null,
-      modals: null,
-      notifications: null,
-      queries: null,
+      account: initialAccountState,
+      modals: initialModalsState,
+      notifications: initialNotificationsState,
+      queries: initialQueriesState,
       budgets: state.budgets,
       user: state.user,
       prefs: { local: null, global: state.prefs.global, synced: null },
