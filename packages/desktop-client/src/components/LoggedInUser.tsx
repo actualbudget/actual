@@ -209,7 +209,7 @@ export function LoggedInUser({
               (logged in as: <span>{userData?.displayName}</span>)
             </Trans>
           </small>
-      )}
+        )}
       {!loading &&
         multiuserEnabled &&
         userData &&
