@@ -133,6 +133,8 @@ export function ThemeSettings() {
                   typeof themesExtended === 'object'
                 ) {
                   setThemeObject(JSON.stringify(themesExtended?.[value] ?? ''));
+                } else {
+                  setThemeObject(null);
                 }
               }}
               value={theme}
