@@ -1,35 +1,145 @@
-import React, { useRef, useState, type CSSProperties } from 'react';
+import {
+  type CSSProperties,
+  type SVGProps,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { useTranslation } from 'react-i18next';
 
 import type { Theme } from 'loot-core/src/types/prefs';
 
+import { type ThemeDefinition } from '../../../plugins-shared/src';
 import { SvgMoonStars, SvgSun, SvgSystem } from '../icons/v2';
-import { themeOptions, useTheme } from '../style';
+import { themeOptions, themes, useTheme } from '../style';
 
+import { useActualPlugins } from './ActualPluginsProvider';
 import { Button } from './common/Button2';
 import { Menu } from './common/Menu';
 import { Popover } from './common/Popover';
+import { View } from './common/View';
 import { useResponsive } from './responsive/ResponsiveProvider';
 
 type ThemeSelectorProps = {
   style?: CSSProperties;
 };
 
+type ThemesExtendedType = {
+  [key: string]: {
+    name: string;
+    colors: ThemeDefinition;
+  };
+};
+
+type ThemesIconsType = {
+  [key: string]: (props: SVGProps<SVGSVGElement>) => JSX.Element;
+};
+
 export function ThemeSelector({ style }: ThemeSelectorProps) {
   const [theme, switchTheme] = useTheme();
   const [menuOpen, setMenuOpen] = useState(false);
   const triggerRef = useRef(null);
+  const [themesExtended, setThemesExtended] =
+    useState<ThemesExtendedType>(themes);
+  const [themeOptionsExtended, setThemeOptionsExtended] =
+    useState(themeOptions);
 
   const { isNarrowWidth } = useResponsive();
   const { t } = useTranslation();
 
-  const themeIcons = {
-    light: SvgSun,
-    dark: SvgMoonStars,
-    auto: SvgSystem,
-    midnight: SvgMoonStars,
-    development: SvgMoonStars,
-  } as const;
+  const baseIcons = useMemo(
+    () => ({
+      light: SvgSun,
+      dark: SvgMoonStars,
+      auto: SvgSystem,
+      midnight: SvgMoonStars,
+      development: SvgMoonStars,
+    }),
+    [],
+  );
+  const [themeIcons, setThemeIcons] = useState<ThemesIconsType>(baseIcons);
+  const { plugins: loadedPlugins } = useActualPlugins();
+
+  useEffect(() => {
+    const pluginIconsLight =
+      loadedPlugins?.reduce((acc, plugin) => {
+        if (plugin.availableThemes?.length) {
+          plugin.availableThemes(false).forEach(theme => {
+            acc = {
+              ...acc,
+              [theme]: (props: SVGProps<SVGSVGElement>) =>
+                plugin?.getThemeIcon?.(theme, false, props.style) ?? <View />,
+            };
+          });
+        }
+        return acc;
+      }, {} as ThemesIconsType) ?? ({} as ThemesIconsType);
+
+    const pluginIconsDark =
+      loadedPlugins?.reduce((acc, plugin) => {
+        if (plugin.availableThemes?.length) {
+          plugin.availableThemes(true).forEach(theme => {
+            acc = {
+              ...acc,
+              [theme]: (props: SVGProps<SVGSVGElement>) =>
+                plugin?.getThemeIcon?.(theme, true, props.style) ?? <View />,
+            };
+          });
+        }
+        return acc;
+      }, {} as ThemesIconsType) ?? ({} as ThemesIconsType);
+
+    const themesLight =
+      loadedPlugins?.reduce((acc, plugin) => {
+        if (plugin.availableThemes?.length) {
+          plugin
+            .availableThemes(false)
+            .filter(theme => theme !== undefined)
+            .forEach(theme => {
+              acc = {
+                ...acc,
+                [theme]: {
+                  name: theme,
+                  colors: plugin?.getThemeSchema?.(theme, false) ?? {},
+                },
+              };
+            });
+        }
+        return acc;
+      }, {} as ThemesExtendedType) ?? ({} as ThemesExtendedType);
+
+    const themesDark =
+      loadedPlugins?.reduce((acc, plugin) => {
+        if (plugin.availableThemes?.length) {
+          plugin
+            .availableThemes(true)
+            .filter(theme => theme !== undefined)
+            .forEach(theme => {
+              acc = {
+                ...acc,
+                [theme]: {
+                  name: theme,
+                  colors: plugin?.getThemeSchema?.(theme, true) ?? {},
+                },
+              };
+            });
+        }
+        return acc;
+      }, {} as ThemesExtendedType) ?? ({} as ThemesExtendedType);
+
+    setThemeIcons({ ...baseIcons, ...pluginIconsLight, ...pluginIconsDark });
+
+    setThemesExtended({ ...themes, ...themesLight, ...themesDark });
+  }, [loadedPlugins, baseIcons]);
+
+  useEffect(() => {
+    setThemeOptionsExtended(
+      Object.entries(themesExtended).map(
+        ([key, { name }]) => [key, name] as [Theme, string],
+      ),
+    );
+  }, [themesExtended]);
 
   function onMenuSelect(newTheme: Theme) {
     setMenuOpen(false);
@@ -62,7 +172,7 @@ export function ThemeSelector({ style }: ThemeSelectorProps) {
       >
         <Menu
           onMenuSelect={onMenuSelect}
-          items={themeOptions.map(([name, text]) => ({ name, text }))}
+          items={themeOptionsExtended.map(([name, text]) => ({ name, text }))}
         />
       </Popover>
     </>

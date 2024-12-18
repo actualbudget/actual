@@ -70,7 +70,13 @@ export type LocalPrefs = Partial<{
   'mobile.showSpentColumn': boolean;
 }>;
 
-export type Theme = 'light' | 'dark' | 'auto' | 'midnight' | 'development';
+export type Theme =
+  | 'light'
+  | 'dark'
+  | 'auto'
+  | 'midnight'
+  | 'development'
+  | string;
 export type DarkTheme = 'dark' | 'midnight';
 export type GlobalPrefs = Partial<{
   floatingSidebar: boolean;
@@ -80,4 +86,5 @@ export type GlobalPrefs = Partial<{
   preferredDarkTheme: DarkTheme;
   documentDir: string; // Electron only
   serverSelfSignedCert: string; // Electron only
+  customTheme: string;
 }>;

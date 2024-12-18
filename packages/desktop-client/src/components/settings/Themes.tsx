@@ -1,18 +1,21 @@
-import React, { type ReactNode } from 'react';
+import React, { useEffect, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { css } from '@emotion/css';
 
 import { type DarkTheme, type Theme } from 'loot-core/types/prefs';
 
+import { type ThemeDefinition } from '../../../../plugins-shared/src';
 import {
   themeOptions,
   useTheme,
   theme as themeStyle,
   usePreferredDarkTheme,
   darkThemeOptions,
+  themes,
 } from '../../style';
 import { tokens } from '../../tokens';
+import { useActualPlugins } from '../ActualPluginsProvider';
 import { Select } from '../common/Select';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
@@ -36,11 +39,73 @@ function Column({ title, children }: { title: string; children: ReactNode }) {
   );
 }
 
+type ThemesExtendedType = {
+  [key: string]: {
+    name: string;
+    colors: ThemeDefinition;
+  };
+};
+
 export function ThemeSettings() {
   const { t } = useTranslation();
   const sidebar = useSidebar();
-  const [theme, switchTheme] = useTheme();
+  const [theme, switchTheme, , setThemeObject] = useTheme();
   const [darkTheme, switchDarkTheme] = usePreferredDarkTheme();
+  const [themesExtended, setThemesExtended] =
+    useState<ThemesExtendedType>(themes);
+  const [themeOptionsExtended, setThemeOptionsExtended] =
+    useState(themeOptions);
+  const { plugins: loadedPlugins } = useActualPlugins();
+
+  useEffect(() => {
+    const themesLight =
+      loadedPlugins?.reduce((acc, plugin) => {
+        if (plugin.availableThemes?.length) {
+          plugin
+            .availableThemes(false)
+            .filter(theme => theme !== undefined)
+            .forEach(theme => {
+              acc = {
+                ...acc,
+                [theme]: {
+                  name: theme,
+                  colors: plugin?.getThemeSchema?.(theme, false) ?? {},
+                },
+              };
+            });
+        }
+        return acc;
+      }, {} as ThemesExtendedType) ?? ({} as ThemesExtendedType);
+
+    const themesDark =
+      loadedPlugins?.reduce((acc, plugin) => {
+        if (plugin.availableThemes?.length) {
+          plugin
+            .availableThemes(true)
+            .filter(theme => theme !== undefined)
+            .forEach(theme => {
+              acc = {
+                ...acc,
+                [theme]: {
+                  name: theme,
+                  colors: plugin?.getThemeSchema?.(theme, true) ?? {},
+                },
+              };
+            });
+        }
+        return acc;
+      }, {} as ThemesExtendedType) ?? ({} as ThemesExtendedType);
+
+    setThemesExtended({ ...themes, ...themesLight, ...themesDark });
+  }, [loadedPlugins]);
+
+  useEffect(() => {
+    setThemeOptionsExtended(
+      Object.entries(themesExtended).map(
+        ([key, { name }]) => [key, name] as [Theme, string],
+      ),
+    );
+  }, [themesExtended]);
 
   return (
     <Setting
@@ -63,9 +128,15 @@ export function ThemeSettings() {
             <Select<Theme>
               onChange={value => {
                 switchTheme(value);
+                if (
+                  !Object.keys(themes).some(t => t === value) &&
+                  typeof themesExtended === 'object'
+                ) {
+                  setThemeObject(JSON.stringify(themesExtended?.[value] ?? ''));
+                }
               }}
               value={theme}
-              options={themeOptions}
+              options={themeOptionsExtended}
               className={css({
                 '&[data-hovered]': {
                   backgroundColor: themeStyle.buttonNormalBackgroundHover,
