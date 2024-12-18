@@ -134,7 +134,7 @@ async function loadPluginFromRepo(repo: string): Promise<ActualPlugin | null> {
     // );
 
     // console.log(`Downloading plugin “${repo}” v${latestVersion}...`);
-    const response = await fetch('http://localhost:3001/index.es.js');
+    const response = await fetch('/index.es.js');
 
     if (!response.ok) {
       throw new Error(`Failed to download plugin script for ${repo}`);
@@ -145,7 +145,7 @@ async function loadPluginFromRepo(repo: string): Promise<ActualPlugin | null> {
     console.log(`Plugin “${repo}” loaded successfully.`);
     return await loadPluginScript(indexJsBlob);
   } catch (error) {
-    console.error(`Error loading plugin “repo}”:`, error);
+    console.error(`Error loading plugin “${repo}”:`, error);
     return null;
   }
 }
