@@ -63,7 +63,6 @@ __metadata:
     "@fontsource/redacted-script": "npm:^5.0.21"
     "@juggle/resize-observer": "npm:^3.4.0"
     "@playwright/test": "npm:1.41.1"
-    "@reduxjs/toolkit": "npm:^2.5.0"
     "@rollup/plugin-inject": "npm:^5.0.5"
     "@svgr/cli": "npm:^8.1.0"
     "@swc/core": "npm:^1.5.3"
