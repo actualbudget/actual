@@ -119,6 +119,7 @@ export function CashFlowCard({
   return (
     <ReportCard
       isEditing={isEditing}
+      disableClick={nameMenuOpen}
       to={`/reports/cash-flow/${widgetId}`}
       menuItems={[
         {
