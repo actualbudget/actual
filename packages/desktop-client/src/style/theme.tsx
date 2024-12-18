@@ -56,33 +56,20 @@ export function ThemeStyle() {
   const { plugins: loadedPlugins } = useActualPlugins();
 
   useEffect(() => {
-    const themesLight =
+    const customThemes =
       loadedPlugins?.reduce((acc, plugin) => {
         if (plugin.availableThemes?.length) {
-          plugin.availableThemes(false).forEach(theme => {
+          plugin.availableThemes().forEach(theme => {
             acc[theme] = {
               name: theme,
-              colors: plugin.getThemeSchema(theme, false),
+              colors: plugin.getThemeSchema(theme),
             };
           });
         }
         return acc;
       }, {}) ?? {};
 
-    const themesDark =
-      loadedPlugins?.reduce((acc, plugin) => {
-        if (plugin.availableThemes?.length) {
-          plugin.availableThemes(true).forEach(theme => {
-            acc[theme] = {
-              name: theme,
-              colors: plugin.getThemeSchema(theme, true),
-            };
-          });
-        }
-        return acc;
-      }, {}) ?? {};
-
-    setThemesExtended({ ...themes, ...themesLight, ...themesDark });
+    setThemesExtended({ ...themes, ...customThemes });
   }, [loadedPlugins]);
 
   useEffect(() => {

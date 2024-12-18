@@ -58,18 +58,18 @@ export function ThemeSettings() {
   const { plugins: loadedPlugins } = useActualPlugins();
 
   useEffect(() => {
-    const themesLight =
+    const customThemes =
       loadedPlugins?.reduce((acc, plugin) => {
         if (plugin.availableThemes?.length) {
           plugin
-            .availableThemes(false)
+            .availableThemes()
             .filter(theme => theme !== undefined)
             .forEach(theme => {
               acc = {
                 ...acc,
                 [theme]: {
                   name: theme,
-                  colors: plugin?.getThemeSchema?.(theme, false) ?? {},
+                  colors: plugin?.getThemeSchema?.(theme) ?? {},
                 },
               };
             });
@@ -77,26 +77,7 @@ export function ThemeSettings() {
         return acc;
       }, {} as ThemesExtendedType) ?? ({} as ThemesExtendedType);
 
-    const themesDark =
-      loadedPlugins?.reduce((acc, plugin) => {
-        if (plugin.availableThemes?.length) {
-          plugin
-            .availableThemes(true)
-            .filter(theme => theme !== undefined)
-            .forEach(theme => {
-              acc = {
-                ...acc,
-                [theme]: {
-                  name: theme,
-                  colors: plugin?.getThemeSchema?.(theme, true) ?? {},
-                },
-              };
-            });
-        }
-        return acc;
-      }, {} as ThemesExtendedType) ?? ({} as ThemesExtendedType);
-
-    setThemesExtended({ ...themes, ...themesLight, ...themesDark });
+    setThemesExtended({ ...themes, ...customThemes });
   }, [loadedPlugins]);
 
   useEffect(() => {

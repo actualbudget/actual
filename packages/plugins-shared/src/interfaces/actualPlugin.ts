@@ -5,13 +5,13 @@ import { ThemeDefinition } from './themeDefinition';
 export interface ActualPlugin {
   name: string;
   version: string;
-  availableThemes?: (darkMode: boolean) => string[];
+  availableThemes?: () => string[];
   getThemeIcon?: (
     themeName: string,
     darkMode: boolean,
     properties?: CSSProperties,
   ) => JSX.Element;
-  getThemeSchema?: (themeName: string, darkMode: boolean) => ThemeDefinition;
+  getThemeSchema?: (themeName: string) => ThemeDefinition;
   // hooks: {
   //   menuItems?: () => React.ReactNode[];
   //   dropdownItems?: () => React.ReactNode[];
