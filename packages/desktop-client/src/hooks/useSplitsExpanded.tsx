@@ -91,7 +91,7 @@ export function SplitsExpandedProvider({
   children,
   initialMode = 'expand',
 }: SplitsExpandedProviderProps) {
-  const previousState = useRef(null);
+  const previousState = useRef<SplitState | null>(null);
 
   const [state, dispatch] = useReducer(
     (state: SplitState, action: Actions): SplitState => {

@@ -129,7 +129,7 @@ function reconcileFiles(
     .concat(sorted.filter(f => f.state === 'broken'));
 }
 
-const initialState: BudgetsState = {
+export const initialState: BudgetsState = {
   budgets: [],
   remoteFiles: null,
   allFiles: null,
