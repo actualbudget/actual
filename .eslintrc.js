@@ -473,6 +473,42 @@ module.exports = {
       },
     },
     {
+      files: ['./packages/desktop-client/**/*'],
+      excludedFiles: ['./packages/desktop-client/src/redux/index.ts'],
+      rules: {
+        'no-restricted-imports': [
+          'warn',
+          {
+            patterns: [
+              {
+                group: ['react-redux'],
+                importNames: ['useDispatch'],
+                message: 'Please use Actual’s useAppDispatch() hook instead.',
+              },
+            ],
+          },
+        ],
+      },
+    },
+    {
+      files: ['./packages/desktop-client/**/*'],
+      excludedFiles: ['./packages/desktop-client/src/redux/index.ts'],
+      rules: {
+        'no-restricted-imports': [
+          'warn',
+          {
+            patterns: [
+              {
+                group: ['react-redux'],
+                importNames: ['useSelector'],
+                message: 'Please use Actual’s useAppSelector() hook instead.',
+              },
+            ],
+          },
+        ],
+      },
+    },
+    {
       files: ['./packages/loot-core/src/**/*'],
       rules: {
         'no-restricted-imports': [

@@ -1,7 +1,6 @@
 // @ts-strict-ignore
 import React, { useState, useEffect, useCallback } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
 
 import { createBudget, loggedIn, signOut } from 'loot-core/client/actions';
 import {
@@ -11,6 +10,7 @@ import {
 
 import { useGlobalPref } from '../../hooks/useGlobalPref';
 import { useNavigate } from '../../hooks/useNavigate';
+import { useAppDispatch } from '../../redux';
 import { theme } from '../../style';
 import { Button, ButtonWithLoading } from '../common/Button2';
 import { BigInput } from '../common/Input';
@@ -23,7 +23,7 @@ import { Title } from './subscribe/common';
 
 export function ConfigServer() {
   const { t } = useTranslation();
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const [url, setUrl] = useState('');
   const currentUrl = useServerURL();

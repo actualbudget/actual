@@ -1,7 +1,7 @@
 import type * as constants from '../constants';
 
 export type AccountState = {
-  failedAccounts: Map<string, { type: string; code: string }>;
+  failedAccounts: { [key: string]: { type: string; code: string } };
   accountsSyncing: string[];
 };
 

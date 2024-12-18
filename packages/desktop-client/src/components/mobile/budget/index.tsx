@@ -1,6 +1,5 @@
 // @ts-strict-ignore
 import React, { useCallback, useEffect, useState } from 'react';
-import { useDispatch } from 'react-redux';
 
 import {
   applyBudgetAction,
@@ -25,6 +24,7 @@ import { useCategories } from '../../../hooks/useCategories';
 import { useLocalPref } from '../../../hooks/useLocalPref';
 import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { AnimatedLoading } from '../../../icons/AnimatedLoading';
+import { useAppDispatch } from '../../../redux';
 import { theme } from '../../../style';
 import { prewarmMonth } from '../../budget/util';
 import { View } from '../../common/View';
@@ -55,7 +55,7 @@ export function Budget() {
   const [_numberFormat] = useSyncedPref('numberFormat');
   const numberFormat = _numberFormat || 'comma-dot';
   const [hideFraction] = useSyncedPref('hideFraction');
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
     async function init() {
