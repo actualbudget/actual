@@ -863,6 +863,10 @@ export async function SimpleFinBatchSync(
     const oldestTransaction = await getAccountOldestTransaction(account.id);
     const newAccount = oldestTransaction == null;
 
+    if (!download) {
+      continue;
+    }
+
     if (download.error_code) {
       promises.push(
         Promise.resolve({
