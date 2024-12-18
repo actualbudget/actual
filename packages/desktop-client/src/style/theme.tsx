@@ -58,7 +58,7 @@ export function ThemeStyle() {
   useEffect(() => {
     const customThemes =
       loadedPlugins?.reduce((acc, plugin) => {
-        if (plugin.availableThemes?.length) {
+        if (plugin.availableThemes()?.length) {
           plugin.availableThemes().forEach(theme => {
             acc[theme] = {
               name: theme,

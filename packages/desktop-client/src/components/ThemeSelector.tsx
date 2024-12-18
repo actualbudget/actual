@@ -64,7 +64,11 @@ export function ThemeSelector({ style }: ThemeSelectorProps) {
   useEffect(() => {
     const pluginIcons =
       loadedPlugins?.reduce((acc, plugin) => {
-        if (plugin.availableThemes?.length) {
+        if (
+          plugin &&
+          plugin.availableThemes &&
+          plugin.availableThemes().length > 0
+        ) {
           plugin.availableThemes().forEach(theme => {
             acc = {
               ...acc,
@@ -78,7 +82,11 @@ export function ThemeSelector({ style }: ThemeSelectorProps) {
 
     const customThemes =
       loadedPlugins?.reduce((acc, plugin) => {
-        if (plugin.availableThemes?.length) {
+        if (
+          plugin &&
+          plugin.availableThemes &&
+          plugin.availableThemes().length > 0
+        ) {
           plugin
             .availableThemes()
             .filter(theme => theme !== undefined)
