@@ -3,8 +3,15 @@ import { initReactI18next } from 'react-i18next';
 import i18n from 'i18next';
 import resourcesToBackend from 'i18next-resources-to-backend';
 
+const languages = import.meta.glob('/locale/*.json');
+
 const loadLanguage = (language: string) => {
-  return import(`./locale/${language}.json`);
+  const path = `/locale/${language}.json`;
+  if (!languages.hasOwnProperty(path)) {
+    console.error(`Unknown locale ${language}`);
+    throw new Error(`Unknown locale ${language}`);
+  }
+  return languages[path]();
 };
 
 i18n
