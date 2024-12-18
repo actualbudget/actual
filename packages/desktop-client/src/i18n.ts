@@ -7,7 +7,7 @@ const languages = import.meta.glob('/locale/*.json');
 
 const loadLanguage = (language: string) => {
   const path = `/locale/${language}.json`;
-  if (!languages.hasOwnProperty(path)) {
+  if (!Object.hasOwn(languages, path)) {
     console.error(`Unknown locale ${language}`);
     throw new Error(`Unknown locale ${language}`);
   }
