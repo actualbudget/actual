@@ -1,12 +1,12 @@
 // @ts-strict-ignore
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 
 import { pushModal } from 'loot-core/client/actions';
+import { q } from 'loot-core/shared/query';
 import { useSchedules } from 'loot-core/src/client/data-hooks/schedules';
 import { send } from 'loot-core/src/platform/client/fetch';
-import { q } from 'loot-core/src/shared/query';
 import {
   type ScheduleEntity,
   type TransactionEntity,
@@ -37,6 +37,7 @@ export function ScheduleLink({
 
   const dispatch = useDispatch();
   const [filter, setFilter] = useState(accountName || '');
+
   const schedulesQuery = useMemo(
     () => q('schedules').filter({ completed: false }).select('*'),
     [],
@@ -47,25 +48,26 @@ export function ScheduleLink({
     statuses,
   } = useSchedules({ query: schedulesQuery });
 
-  const searchInput = useRef(null);
+  const onSelect = useCallback(
+    async (scheduleId: string) => {
+      if (ids?.length > 0) {
+        await send('transactions-batch-update', {
+          updated: ids.map(id => ({ id, schedule: scheduleId })),
+        });
+        onScheduleLinked?.(schedules.find(s => s.id === scheduleId));
+      }
+    },
+    [ids, onScheduleLinked, schedules],
+  );
 
-  async function onSelect(scheduleId: string) {
-    if (ids?.length > 0) {
-      await send('transactions-batch-update', {
-        updated: ids.map(id => ({ id, schedule: scheduleId })),
-      });
-      onScheduleLinked?.(schedules.find(s => s.id === scheduleId));
-    }
-  }
-
-  async function onCreate() {
+  const onCreate = useCallback(() => {
     dispatch(
       pushModal('schedule-edit', {
         id: null,
         transaction: getTransaction(ids[0]),
       }),
     );
-  }
+  }, [dispatch, getTransaction, ids]);
 
   return (
     <Modal
@@ -98,7 +100,6 @@ export function ScheduleLink({
             </Text>
             <InitialFocus>
               <Search
-                inputRef={searchInput}
                 isInModal
                 width={300}
                 placeholder={t('Filter schedules…')}

@@ -24,6 +24,7 @@ export type BoundActions = {
  * @deprecated please use actions directly with `useDispatch`
  * @see https://github.com/reduxjs/react-redux/issues/1252#issuecomment-488160930
  **/
+// eslint-disable-next-line import/no-unused-modules
 export function useActions() {
   const dispatch = useDispatch();
   return useMemo(() => {
