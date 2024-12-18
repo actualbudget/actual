@@ -1,0 +1,35 @@
+name: Extract and upload i18n strings
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+jobs:
+  extract-and-upload-i18n-strings:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up environment
+      uses: ./.github/actions/setup
+    - name: Configure i18n client
+      run: |
+        pip install wlc
+        mkdir -p ~/.config
+        cat <<EOF >~/.config/weblate
+        [weblate]
+        url = https://hosted.weblate.org/api/
+        key = ${{ secrets.WEBLATE_API_KEY_CI_STRINGS }}
+        translation = actualbudget/actual/en
+        EOF
+        chmod 600 ~/.config/weblate
+    - name: Generate i18n strings
+      run: yarn generate:i18n
+    - name: Upload i18n strings
+      run: |
+        if [[ ! -f packages/desktop-client/locale/en.json ]]; then
+          echo "File packages/desktop-client/locale/en.json not found. Ensure the file was generated correctly."
+          exit 1
+        fi
+        wlc upload --author-name "Actual Budget" --author-email "dev@actualbudget.org" --method add --input packages/desktop-client/locale/en.json
