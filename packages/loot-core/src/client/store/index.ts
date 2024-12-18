@@ -2,11 +2,14 @@ import { combineReducers, configureStore } from '@reduxjs/toolkit';
 
 import * as constants from '../constants';
 import { reducers } from '../reducers';
-import { initialState as initialAppState } from '../reducers/app';
 import { initialState as initialAccountState } from '../reducers/account';
+import { initialState as initialAppState } from '../reducers/app';
+import { initialState as initialBudgetsState } from '../reducers/budgets';
 import { initialState as initialModalsState } from '../reducers/modals';
 import { initialState as initialNotificationsState } from '../reducers/notifications';
+import { initialState as initialPrefsState } from '../reducers/prefs';
 import { initialState as initialQueriesState } from '../reducers/queries';
+import { initialState as initialUserState } from '../reducers/user';
 
 const appReducer = combineReducers(reducers);
 const rootReducer: typeof appReducer = (state, action) => {
@@ -18,13 +21,17 @@ const rootReducer: typeof appReducer = (state, action) => {
       modals: initialModalsState,
       notifications: initialNotificationsState,
       queries: initialQueriesState,
-      budgets: state.budgets,
-      user: state.user,
-      prefs: { local: null, global: state.prefs.global, synced: null },
+      budgets: state?.budgets || initialBudgetsState,
+      user: state?.user || initialUserState,
+      prefs: {
+        local: initialPrefsState.local,
+        global: state?.prefs?.global || initialPrefsState.global,
+        synced: initialPrefsState.synced,
+      },
       app: {
         ...initialAppState,
-        managerHasInitialized: state.app.managerHasInitialized,
-        loadingText: state.app.loadingText,
+        managerHasInitialized: state?.app?.managerHasInitialized || false,
+        loadingText: state?.app?.loadingText || null,
       },
     };
   }

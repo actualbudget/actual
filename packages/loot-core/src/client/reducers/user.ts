@@ -1,7 +1,7 @@
 import * as constants from '../constants';
 import type { UserActions, UserState } from '../state-types/user';
 
-const initialState: UserState = {
+export const initialState: UserState = {
   data: null,
 };
 

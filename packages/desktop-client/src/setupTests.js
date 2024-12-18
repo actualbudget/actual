@@ -1,4 +1,4 @@
-import { resetStore } from 'loot-core/src/client/store/mock';
+import { resetMockStore } from 'loot-core/src/client/store/mock';
 
 import { installPolyfills } from './polyfills';
 
@@ -16,7 +16,7 @@ vi.mock('react-virtualized-auto-sizer', () => ({
 global.Date.now = () => 123456789;
 
 global.__resetWorld = () => {
-  resetStore();
+  resetMockStore();
 };
 
 process.on('unhandledRejection', reason => {
