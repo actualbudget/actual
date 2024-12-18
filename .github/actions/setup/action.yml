@@ -7,6 +7,10 @@ runs:
       uses: actions/setup-node@v4
       with:
         node-version: 18.16.0
+    - name: Install yarn
+      run: npm install -g yarn
+      shell: bash
+      if: ${{ env.ACT }}
     - name: Cache
       uses: actions/cache@v4
       id: cache

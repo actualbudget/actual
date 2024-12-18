@@ -25,3 +25,6 @@ public/kcab
 public/data
 public/data-file-index.txt
 public/*.wasm
+
+# translations
+locale/
