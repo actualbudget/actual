@@ -6,11 +6,7 @@ export interface ActualPlugin {
   name: string;
   version: string;
   availableThemes?: () => string[];
-  getThemeIcon?: (
-    themeName: string,
-    darkMode: boolean,
-    properties?: CSSProperties,
-  ) => JSX.Element;
+  getThemeIcon?: (themeName: string, properties?: CSSProperties) => JSX.Element;
   getThemeSchema?: (themeName: string) => ThemeDefinition;
   // hooks: {
   //   menuItems?: () => React.ReactNode[];

@@ -1,6 +1,6 @@
 {
   "name": "plugins-shared",
-  "packageManager": "yarn@4.3.1",
+  "version": "1.0.0",
   "main": "dist/index.cjs.js",
   "module": "dist/index.es.js",
   "types": "dist/index.d.ts",
@@ -16,5 +16,6 @@
     "typescript": "^5.0.0",
     "vite": "^5.2.14",
     "vite-plugin-dts": "4.3.0"
-  }
+  },
+  "packageManager": "yarn@4.3.1"
 }

@@ -62,46 +62,32 @@ export function ThemeSelector({ style }: ThemeSelectorProps) {
   const { plugins: loadedPlugins } = useActualPlugins();
 
   useEffect(() => {
-    const pluginIconsLight =
+    const pluginIcons =
       loadedPlugins?.reduce((acc, plugin) => {
         if (plugin.availableThemes?.length) {
-          plugin.availableThemes(false).forEach(theme => {
+          plugin.availableThemes().forEach(theme => {
             acc = {
               ...acc,
               [theme]: (props: SVGProps<SVGSVGElement>) =>
-                plugin?.getThemeIcon?.(theme, false, props.style) ?? <View />,
+                plugin?.getThemeIcon?.(theme, props.style) ?? <View />,
             };
           });
         }
         return acc;
       }, {} as ThemesIconsType) ?? ({} as ThemesIconsType);
 
-    const pluginIconsDark =
-      loadedPlugins?.reduce((acc, plugin) => {
-        if (plugin.availableThemes?.length) {
-          plugin.availableThemes(true).forEach(theme => {
-            acc = {
-              ...acc,
-              [theme]: (props: SVGProps<SVGSVGElement>) =>
-                plugin?.getThemeIcon?.(theme, true, props.style) ?? <View />,
-            };
-          });
-        }
-        return acc;
-      }, {} as ThemesIconsType) ?? ({} as ThemesIconsType);
-
-    const themesLight =
+    const customThemes =
       loadedPlugins?.reduce((acc, plugin) => {
         if (plugin.availableThemes?.length) {
           plugin
-            .availableThemes(false)
+            .availableThemes()
             .filter(theme => theme !== undefined)
             .forEach(theme => {
               acc = {
                 ...acc,
                 [theme]: {
                   name: theme,
-                  colors: plugin?.getThemeSchema?.(theme, false) ?? {},
+                  colors: plugin?.getThemeSchema?.(theme) ?? {},
                 },
               };
             });
@@ -109,28 +95,9 @@ export function ThemeSelector({ style }: ThemeSelectorProps) {
         return acc;
       }, {} as ThemesExtendedType) ?? ({} as ThemesExtendedType);
 
-    const themesDark =
-      loadedPlugins?.reduce((acc, plugin) => {
-        if (plugin.availableThemes?.length) {
-          plugin
-            .availableThemes(true)
-            .filter(theme => theme !== undefined)
-            .forEach(theme => {
-              acc = {
-                ...acc,
-                [theme]: {
-                  name: theme,
-                  colors: plugin?.getThemeSchema?.(theme, true) ?? {},
-                },
-              };
-            });
-        }
-        return acc;
-      }, {} as ThemesExtendedType) ?? ({} as ThemesExtendedType);
+    setThemeIcons({ ...baseIcons, ...pluginIcons });
 
-    setThemeIcons({ ...baseIcons, ...pluginIconsLight, ...pluginIconsDark });
-
-    setThemesExtended({ ...themes, ...themesLight, ...themesDark });
+    setThemesExtended({ ...themes, ...customThemes });
   }, [loadedPlugins, baseIcons]);
 
   useEffect(() => {
