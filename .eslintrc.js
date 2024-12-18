@@ -63,6 +63,7 @@ module.exports = {
     globalThis: false,
     vi: true,
   },
+  ignorePatterns: ['**/public/*.js'],
   rules: {
     // http://eslint.org/docs/rules/
     'array-callback-return': 'warn',
