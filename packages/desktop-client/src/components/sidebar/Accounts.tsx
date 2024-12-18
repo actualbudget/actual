@@ -119,8 +119,8 @@ export function Accounts() {
             account={account}
             connected={!!account.bank}
             pending={syncingAccountIds.includes(account.id)}
-            failed={!!failedAccounts?.[account.id]}
-            updated={updatedAccounts?.includes(account.id)}
+            failed={!!failedAccounts.get(account.id)}
+            updated={updatedAccounts.includes(account.id)}
             to={getAccountPath(account)}
             query={queries.accountBalance(account)}
             onDragChange={onDragChange}
@@ -149,8 +149,8 @@ export function Accounts() {
             account={account}
             connected={!!account.bank}
             pending={syncingAccountIds.includes(account.id)}
-            failed={!!failedAccounts?.[account.id]}
-            updated={updatedAccounts?.includes(account.id)}
+            failed={!!failedAccounts.get(account.id)}
+            updated={updatedAccounts.includes(account.id)}
             to={getAccountPath(account)}
             query={queries.accountBalance(account)}
             onDragChange={onDragChange}

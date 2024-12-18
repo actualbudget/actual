@@ -22,7 +22,7 @@ export function update(state = initialState, action: Action): AccountState {
           code: action.errorCode,
         };
       } else {
-        failedAccounts[action.id] = undefined;
+        delete failedAccounts[action.id];
       }
 
       return { ...state, failedAccounts };
