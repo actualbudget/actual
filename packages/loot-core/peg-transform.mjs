@@ -6,6 +6,7 @@ import * as crypto from 'crypto';
 import peg from 'peggy';
 
 const transform = {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   process(sourceText, sourcePath, _options) {
     return `module.exports = ${peg.generate(sourceText, {
       output: 'source-with-inline-map',

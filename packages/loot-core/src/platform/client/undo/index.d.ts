@@ -1,3 +1,4 @@
+// eslint-disable-next-line import/no-unresolved
 import { type ModalType } from '../../client/state-types/modals';
 
 export type UndoState = {

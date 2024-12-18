@@ -2306,7 +2306,6 @@ async function setupDocumentsDir() {
   fs._setDocumentDir(documentDir);
 }
 
-// eslint-disable-next-line import/no-unused-modules
 export async function initApp(isDev, socketName) {
   await sqlite.init();
   await Promise.all([asyncStorage.init(), fs.init()]);
@@ -2355,7 +2354,6 @@ export type InitConfig = {
   password?: string;
 };
 
-// eslint-disable-next-line import/no-unused-modules
 export async function init(config: InitConfig) {
   // Get from build
 
@@ -2394,7 +2392,7 @@ export async function init(config: InitConfig) {
 }
 
 // Export a few things required for the platform
-// eslint-disable-next-line import/no-unused-modules
+
 export const lib = {
   getDataDir: fs.getDataDir,
   sendMessage: (msg, args) => connection.send(msg, args),
