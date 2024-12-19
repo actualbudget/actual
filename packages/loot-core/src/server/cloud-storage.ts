@@ -22,6 +22,12 @@ import { getServer } from './server-config';
 
 const UPLOAD_FREQUENCY_IN_DAYS = 7;
 
+export interface UsersWithAccess {
+  userId: string;
+  userName: string;
+  displayName: string;
+  owner: boolean;
+}
 export interface RemoteFile {
   deleted: boolean;
   fileId: string;
@@ -29,10 +35,24 @@ export interface RemoteFile {
   name: string;
   encryptKeyId: string;
   hasKey: boolean;
+  owner: string;
+  usersWithAccess: UsersWithAccess[];
 }
 
 async function checkHTTPStatus(res) {
   if (res.status !== 200) {
+    if (res.status === 403) {
+      try {
+        const text = await res.text();
+        const data = JSON.parse(text)?.data;
+        if (data?.reason === 'token-expired') {
+          await asyncStorage.removeItem('user-token');
+          throw new HTTPError(403, 'token-expired');
+        }
+      } catch (e) {
+        if (e instanceof HTTPError) throw e;
+      }
+    }
     return res.text().then(str => {
       throw new HTTPError(res.status, str);
     });
@@ -373,6 +393,38 @@ export async function listRemoteFiles(): Promise<RemoteFile[] | null> {
     ...file,
     hasKey: encryption.hasKey(file.encryptKeyId),
   }));
+}
+
+export async function getRemoteFile(
+  fileId: string,
+): Promise<RemoteFile | null> {
+  const userToken = await asyncStorage.getItem('user-token');
+  if (!userToken) {
+    return null;
+  }
+
+  let res;
+  try {
+    res = await fetchJSON(getServer().SYNC_SERVER + '/get-user-file-info', {
+      headers: {
+        'X-ACTUAL-TOKEN': userToken,
+        'X-ACTUAL-FILE-ID': fileId,
+      },
+    });
+  } catch (e) {
+    console.log('Unexpected error fetching file from server', e);
+    return null;
+  }
+
+  if (res.status === 'error') {
+    console.log('Error fetching file from server', res);
+    return null;
+  }
+
+  return {
+    ...res.data,
+    hasKey: encryption.hasKey(res.data.encryptKeyId),
+  };
 }
 
 export async function download(fileId) {

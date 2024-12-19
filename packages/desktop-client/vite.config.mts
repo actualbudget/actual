@@ -158,6 +158,13 @@ export default defineConfig(async ({ mode }) => {
                 '**/*.{js,css,html,txt,wasm,sql,sqlite,ico,png,woff2,webmanifest}',
               ],
               ignoreURLParametersMatching: [/^v$/],
+              navigateFallback: '/index.html',
+              navigateFallbackDenylist: [
+                /^\/account\/.*$/,
+                /^\/admin\/.*$/,
+                /^\/secret\/.*$/,
+                /^\/openid\/.*$/,
+              ],
             },
           }),
       injectShims(),

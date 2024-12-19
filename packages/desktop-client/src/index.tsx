@@ -27,6 +27,7 @@ import { initialState as initialAppState } from 'loot-core/src/client/reducers/a
 import { send } from 'loot-core/src/platform/client/fetch';
 import { q } from 'loot-core/src/shared/query';
 
+import { AuthProvider } from './auth/AuthProvider';
 import { App } from './components/App';
 import { ServerProvider } from './components/ServerContext';
 import { handleGlobalEvents } from './global-events';
@@ -104,7 +105,9 @@ const root = createRoot(container);
 root.render(
   <Provider store={store}>
     <ServerProvider>
-      <App />
+      <AuthProvider>
+        <App />
+      </AuthProvider>
     </ServerProvider>
   </Provider>,
 );
