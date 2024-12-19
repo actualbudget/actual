@@ -1,6 +1,8 @@
 // @ts-strict-ignore
+import { q } from '../../shared/query';
 import { batchUpdateTransactions } from '../accounts/transactions';
 import { createApp } from '../app';
+import { runQuery } from '../aql';
 import * as db from '../db';
 import { runMutator } from '../mutators';
 
@@ -54,9 +56,27 @@ app.method('tools/fix-split-transactions', async () => {
     await batchUpdateTransactions({ updated });
   });
 
+  const splitTransactions = (
+    await runQuery(
+      q('transactions')
+        .options({ splits: 'grouped' })
+        .filter({
+          is_parent: true,
+        })
+        .select('*'),
+    )
+  ).data;
+
+  const mismatchedSplits = splitTransactions.filter(t => {
+    const subValue = t.subtransactions.reduce((acc, st) => acc + st.amount, 0);
+
+    return subValue !== t.amount;
+  });
+
   return {
     numBlankPayees: blankPayeeRows.length,
     numCleared: clearedRows.length,
     numDeleted: deletedRows.length,
+    mismatchedSplits,
   };
 });
