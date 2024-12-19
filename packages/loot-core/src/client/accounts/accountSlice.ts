@@ -34,7 +34,7 @@ type MarkAccountSuccessAction = PayloadAction<{
   id: AccountEntity['id'];
 }>;
 
-interface AccountState {
+type AccountState = {
   failedAccounts: {
     [key: AccountEntity['id']]: { type: string; code: string };
   };
@@ -45,10 +45,7 @@ const accountSlice = createSlice({
   name: 'account',
   initialState,
   reducers: {
-    setAccountsSyncing(
-      state,
-      action: SetAccountsSyncingAction,
-    ) {
+    setAccountsSyncing(state, action: SetAccountsSyncingAction) {
       const payload = action.payload;
       state.accountsSyncing = payload.ids;
     },
@@ -59,10 +56,7 @@ const accountSlice = createSlice({
         code: payload.errorCode,
       };
     },
-    markAccountSuccess(
-      state,
-      action: MarkAccountSuccessAction,
-    ) {
+    markAccountSuccess(state, action: MarkAccountSuccessAction) {
       const payload = action.payload;
       delete state.failedAccounts[payload.id];
     },
