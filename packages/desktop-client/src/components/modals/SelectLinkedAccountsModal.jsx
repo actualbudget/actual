@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 
-import { closeModal } from 'loot-core/client/actions';
 import {
   linkAccount,
   linkAccountSimpleFin,
   unlinkAccount,
 } from 'loot-core/client/accounts/accountSlice';
+import { closeModal } from 'loot-core/client/actions';
 
 import { useAccounts } from '../../hooks/useAccounts';
 import { useDispatch } from '../../redux';
