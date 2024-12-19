@@ -3,7 +3,8 @@ import { type FormEvent, useState } from 'react';
 import { Form } from 'react-aria-components';
 import { useTranslation } from 'react-i18next';
 
-import { closeModal, createAccount } from 'loot-core/client/actions';
+import { closeModal } from 'loot-core/client/actions';
+import { createAccount } from 'loot-core/client/queries/queriesSlice';
 import { toRelaxedNumber } from 'loot-core/src/shared/util';
 
 import * as useAccounts from '../../hooks/useAccounts';
@@ -63,8 +64,12 @@ export function CreateLocalAccountModal() {
     if (!nameError && !balanceError) {
       dispatch(closeModal());
       const id = await dispatch(
-        createAccount(name, toRelaxedNumber(balance), offbudget),
-      );
+        createAccount({
+          name,
+          balance: toRelaxedNumber(balance),
+          offBudget: offbudget,
+        }),
+      ).unwrap();
       navigate('/accounts/' + id);
     }
   };

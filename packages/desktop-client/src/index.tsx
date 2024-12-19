@@ -15,8 +15,10 @@ import { createRoot } from 'react-dom/client';
 
 import * as accountsSlice from 'loot-core/src/client/accounts/accountsSlice';
 import * as actions from 'loot-core/src/client/actions';
+import * as queriesSlice from 'loot-core/src/client/queries/queriesSlice';
 import { runQuery } from 'loot-core/src/client/query-helpers';
 import { store } from 'loot-core/src/client/store';
+import { redo, undo } from 'loot-core/src/client/undo';
 import { send } from 'loot-core/src/platform/client/fetch';
 import { q } from 'loot-core/src/shared/query';
 
@@ -33,6 +35,7 @@ const boundActions = bindActionCreators(
   {
     ...actions,
     ...accountsSlice.actions,
+    ...queriesSlice.actions,
   },
   store.dispatch,
 );
@@ -44,6 +47,8 @@ declare global {
   // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
   interface Window {
     __actionsForMenu: typeof boundActions & {
+      undo: typeof undo;
+      redo: typeof redo;
       inputFocused: typeof inputFocused;
     };
 
@@ -62,7 +67,7 @@ function inputFocused() {
 }
 
 // Expose this to the main process to menu items can access it
-window.__actionsForMenu = { ...boundActions, inputFocused };
+window.__actionsForMenu = { ...boundActions, undo, redo, inputFocused };
 
 // Expose send for fun!
 window.$send = send;
