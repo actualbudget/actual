@@ -1,7 +1,8 @@
 import { useCallback } from 'react';
 
-import { undo, redo, addNotification } from 'loot-core/client/actions';
+import { addNotification } from 'loot-core/client/actions';
 import { type Notification } from 'loot-core/client/state-types/notifications';
+import { redo, undo } from 'loot-core/client/undo';
 
 import { useAppDispatch } from '../redux';
 
@@ -17,14 +18,6 @@ const timeout = 10000;
 export function useUndo(): UndoActions {
   const dispatch = useAppDispatch();
 
-  const dispatchUndo = useCallback(() => {
-    dispatch(undo());
-  }, [dispatch]);
-
-  const dispatchRedo = useCallback(() => {
-    dispatch(redo());
-  }, [dispatch]);
-
   const showUndoNotification = useCallback(
     (notification: Notification) => {
       dispatch(
@@ -33,13 +26,13 @@ export function useUndo(): UndoActions {
           timeout,
           button: {
             title: 'Undo',
-            action: dispatchUndo,
+            action: undo,
           },
           ...notification,
         }),
       );
     },
-    [dispatch, dispatchUndo],
+    [dispatch],
   );
 
   const showRedoNotification = useCallback(
@@ -50,18 +43,18 @@ export function useUndo(): UndoActions {
           timeout,
           button: {
             title: 'Redo',
-            action: dispatchRedo,
+            action: redo,
           },
           ...notificaton,
         }),
       );
     },
-    [dispatch, dispatchRedo],
+    [dispatch],
   );
 
   return {
-    undo: dispatchUndo,
-    redo: dispatchRedo,
+    undo,
+    redo,
     showUndoNotification,
     showRedoNotification,
   };
