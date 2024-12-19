@@ -1,7 +1,6 @@
 // @ts-strict-ignore
 import React, { useState, useEffect } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
 import { useParams, useSearchParams } from 'react-router-dom';
 
 import { createBudget } from 'loot-core/src/client/actions/budgets';
@@ -9,6 +8,7 @@ import { loggedIn } from 'loot-core/src/client/actions/user';
 import { send } from 'loot-core/src/platform/client/fetch';
 
 import { AnimatedLoading } from '../../../icons/AnimatedLoading';
+import { useAppDispatch } from '../../../redux';
 import { theme } from '../../../style';
 import { Button, ButtonWithLoading } from '../../common/Button2';
 import { BigInput } from '../../common/Input';
@@ -21,7 +21,7 @@ import { useBootstrapped, Title } from './common';
 export function Login() {
   const { t } = useTranslation();
 
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const { method = 'password' } = useParams();
   const [searchParams, _setSearchParams] = useSearchParams();
   const [password, setPassword] = useState('');

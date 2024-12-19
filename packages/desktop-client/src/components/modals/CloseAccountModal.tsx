@@ -2,7 +2,6 @@
 import React, { type FormEvent, useState, type CSSProperties } from 'react';
 import { Form } from 'react-aria-components';
 import { useTranslation } from 'react-i18next'; // Import useTranslation
-import { useDispatch } from 'react-redux';
 
 import {
   closeAccount,
@@ -14,6 +13,7 @@ import { type AccountEntity } from 'loot-core/src/types/models';
 
 import { useAccounts } from '../../hooks/useAccounts';
 import { useCategories } from '../../hooks/useCategories';
+import { useAppDispatch } from '../../redux';
 import { styles, theme } from '../../style';
 import { AccountAutocomplete } from '../autocomplete/AccountAutocomplete';
 import { CategoryAutocomplete } from '../autocomplete/CategoryAutocomplete';
@@ -61,7 +61,7 @@ export function CloseAccountModal({
 
   const [transferError, setTransferError] = useState(false);
   const [categoryError, setCategoryError] = useState(false);
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const { isNarrowWidth } = useResponsive();
 
   const onSelectAccount = accId => {
