@@ -126,7 +126,7 @@ export const linkAccountSimpleFin = createAppAsyncThunk(
 );
 
 function handleSyncResponse(
-  accountId: string,
+  accountId: AccountEntity['id'],
   res: {
     errors: Array<{
       type: string;
@@ -199,7 +199,8 @@ export const syncAccounts = createAppAsyncThunk(
   'accounts/syncAccounts',
   async ({ id }: SyncAccountsArgs, thunkApi) => {
     // Disallow two parallel sync operations
-    if (thunkApi.getState().account.accountsSyncing.length > 0) {
+    const accountState = thunkApi.getState().account;
+    if (accountState.accountsSyncing.length > 0) {
       return false;
     }
 
@@ -207,11 +208,11 @@ export const syncAccounts = createAppAsyncThunk(
 
     // Build an array of IDs for accounts to sync.. if no `id` provided
     // then we assume that all accounts should be synced
+    const queriesState = thunkApi.getState().queries;
     let accountIdsToSync = !batchSync
       ? [id]
-      : thunkApi
-          .getState()
-          .queries.accounts.filter(
+      : queriesState.accounts
+          .filter(
             ({ bank, closed, tombstone }) => !!bank && !closed && !tombstone,
           )
           .sort((a, b) =>
