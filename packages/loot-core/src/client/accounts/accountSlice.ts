@@ -4,12 +4,8 @@ import {
   type PayloadAction,
 } from '@reduxjs/toolkit';
 
-import {
-  type AccountEntity,
-  type TransactionEntity,
-} from '../../types/models';
-
 import { send } from '../../platform/client/fetch';
+import { type AccountEntity, type TransactionEntity } from '../../types/models';
 import { addNotification, getAccounts, getPayees } from '../actions';
 import * as constants from '../constants';
 import { type AppDispatch, type RootState } from '../store';
@@ -39,7 +35,9 @@ type MarkAccountSuccessPayload = {
 };
 
 type AccountState = {
-  failedAccounts: { [key: AccountEntity['id']]: { type: string; code: string } };
+  failedAccounts: {
+    [key: AccountEntity['id']]: { type: string; code: string };
+  };
   accountsSyncing: Array<AccountEntity['id']>;
 };
 
