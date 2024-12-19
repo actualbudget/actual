@@ -135,14 +135,14 @@ function handleSyncResponse(
       message: string;
       internal?: string;
     }>;
-    newTransactions: TransactionEntity[];
-    matchedTransactions: TransactionEntity[];
-    updatedAccounts: AccountEntity[];
+    newTransactions: Array<TransactionEntity['id']>;
+    matchedTransactions: Array<TransactionEntity['id']>;
+    updatedAccounts: Array<AccountEntity['id']>;
   },
   dispatch: AppDispatch,
-  resNewTransactions: TransactionEntity[],
-  resMatchedTransactions: TransactionEntity[],
-  resUpdatedAccounts: AccountEntity[],
+  resNewTransactions: Array<TransactionEntity['id']>,
+  resMatchedTransactions: Array<TransactionEntity['id']>,
+  resUpdatedAccounts: Array<AccountEntity['id']>,
 ) {
   const { errors, newTransactions, matchedTransactions, updatedAccounts } = res;
 
@@ -229,9 +229,9 @@ export const syncAccounts = createAppAsyncThunk(
     );
 
     let isSyncSuccess = false;
-    const newTransactions: TransactionEntity[] = [];
-    const matchedTransactions: TransactionEntity[] = [];
-    const updatedAccounts: AccountEntity[] = [];
+    const newTransactions: Array<TransactionEntity['id']> = [];
+    const matchedTransactions: Array<TransactionEntity['id']> = [];
+    const updatedAccounts: Array<AccountEntity['id']> = [];
 
     if (batchSync && simpleFinAccounts.length > 0) {
       console.log('Using SimpleFin batch sync');
