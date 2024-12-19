@@ -1,6 +1,6 @@
 module.exports = {
   input: ['src/**/*.{js,jsx,ts,tsx}', '../loot-core/src/**/*.{js,jsx,ts,tsx}'],
-  output: 'src/locale/$LOCALE.json',
+  output: 'locale/$LOCALE.json',
   locales: ['en'],
   sort: true,
   keySeparator: false,
