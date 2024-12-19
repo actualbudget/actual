@@ -7,8 +7,8 @@ import {
   getPayees,
   importPreviewTransactions,
   importTransactions,
-  parseTransactions,
-} from 'loot-core/client/actions';
+} from 'loot-core/client/queries/queriesSlice';
+import { send } from 'loot-core/platform/client/fetch';
 import { amountToInteger } from 'loot-core/src/shared/util';
 
 import { useCategories } from '../../../hooks/useCategories';
@@ -269,7 +269,7 @@ export function ImportTransactionsModal({ options }) {
       // Retreive the transactions that would be updated (along with the existing trx)
       const previewTrx = await dispatch(
         importPreviewTransactions(accountId, previewTransactions),
-      );
+      ).unwrap();
       const matchedUpdateMap = previewTrx.reduce((map, entry) => {
         map[entry.transaction.trx_id] = entry;
         return map;
@@ -323,8 +323,12 @@ export function ImportTransactionsModal({ options }) {
       setFilename(filename);
       setFileType(filetype);
 
-      const { errors, transactions: parsedTransactions = [] } = await dispatch(
-        parseTransactions(filename, options),
+      const { errors, transactions: parsedTransactions = [] } = await send(
+        'transactions-parse-file',
+        {
+          filepath: filename,
+          options,
+        },
       );
 
       let index = 0;
@@ -401,15 +405,7 @@ export function ImportTransactionsModal({ options }) {
         setTransactions(transactionPreview);
       }
     },
-    [
-      accountId,
-      dispatch,
-      getImportPreview,
-      inOutMode,
-      multiplierAmount,
-      outValue,
-      prefs,
-    ],
+    [accountId, getImportPreview, inOutMode, multiplierAmount, outValue, prefs],
   );
 
   function onMultiplierChange(e) {
@@ -657,8 +653,12 @@ export function ImportTransactionsModal({ options }) {
     }
 
     const didChange = await dispatch(
-      importTransactions(accountId, finalTransactions, reconcile),
-    );
+      importTransactions({
+        id: accountId,
+        transactions: finalTransactions,
+        reconcile,
+      }),
+    ).unwrap();
     if (didChange) {
       await dispatch(getPayees());
     }

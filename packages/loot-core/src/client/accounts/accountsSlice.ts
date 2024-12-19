@@ -2,8 +2,12 @@ import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
 import { send } from '../../platform/client/fetch';
 import { type AccountEntity, type TransactionEntity } from '../../types/models';
-import { addNotification, getAccounts, getPayees } from '../actions';
-import * as constants from '../constants';
+import { addNotification } from '../actions';
+import {
+  getAccounts,
+  getPayees,
+  setNewTransactions,
+} from '../queries/queriesSlice';
 import { createAppAsyncThunk } from '../redux';
 import { type AppDispatch } from '../store';
 
@@ -283,12 +287,13 @@ export const syncAccounts = createAppAsyncThunk(
     }
 
     // Set new transactions
-    dispatch({
-      type: constants.SET_NEW_TRANSACTIONS,
-      newTransactions,
-      matchedTransactions,
-      updatedAccounts,
-    });
+    dispatch(
+      setNewTransactions({
+        newTransactions,
+        matchedTransactions,
+        updatedAccounts,
+      }),
+    );
 
     // Reset the sync state back to empty (fallback in case something breaks
     // in the logic above)
