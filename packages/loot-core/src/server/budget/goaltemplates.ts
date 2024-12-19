@@ -130,7 +130,7 @@ async function processTemplate(
     const isReflect = isReflectBudget();
     const categoriesLong = await getCategories();
     categoriesLong.forEach(c => {
-      if (!isReflect && !c.is_income) {
+      if (isReflect || !c.is_income) {
         categories.push(c);
       }
     });
