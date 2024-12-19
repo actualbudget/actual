@@ -4,15 +4,17 @@ import {
   addNotification,
   closeBudgetUI,
   closeModal,
-  getAccounts,
-  getCategories,
-  getPayees,
   loadPrefs,
   pushModal,
   reloadApp,
   replaceModal,
   setAppState,
 } from 'loot-core/client/actions';
+import {
+  getAccounts,
+  getCategories,
+  getPayees,
+} from 'loot-core/client/queries/queriesSlice';
 import { type AppStore } from 'loot-core/client/store';
 import * as sharedListeners from 'loot-core/src/client/shared-listeners';
 import { listen } from 'loot-core/src/platform/client/fetch';

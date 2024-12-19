@@ -1,3 +1,5 @@
+import { send } from '../../platform/client/fetch';
+import { type AccountEntity } from '../../types/models';
 import * as constants from '../constants';
 import type {
   OptionlessModal,
@@ -10,6 +12,7 @@ import type {
   FinanceModals,
   Modal,
 } from '../state-types/modals';
+import { type AppDispatch, type GetRootState } from '../store';
 
 export function pushModal<M extends keyof ModalWithOptions>(
   name: M,
@@ -51,4 +54,29 @@ export function closeModal(): CloseModalAction {
 
 export function collapseModals(rootModalName: string) {
   return { type: constants.COLLAPSE_MODALS, rootModalName };
+}
+
+export function openAccountCloseModal(accountId: AccountEntity['id']) {
+  return async (dispatch: AppDispatch, getState: GetRootState) => {
+    const {
+      balance,
+      numTransactions,
+    }: { balance: number; numTransactions: number } = await send(
+      'account-properties',
+      {
+        id: accountId,
+      },
+    );
+    const account = getState().queries.accounts.find(
+      acct => acct.id === accountId,
+    );
+
+    dispatch(
+      pushModal('close-account' as ModalType, {
+        account,
+        balance,
+        canDelete: numTransactions === 0,
+      }),
+    );
+  };
 }

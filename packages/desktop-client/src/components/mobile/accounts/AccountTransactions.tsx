@@ -8,13 +8,9 @@ import React, {
 
 import {
   collapseModals,
-  getPayees,
-  markAccountRead,
   openAccountCloseModal,
   pushModal,
-  reopenAccount,
   syncAndDownload,
-  updateAccount,
 } from 'loot-core/client/actions';
 import {
   accountSchedulesQuery,
@@ -25,6 +21,12 @@ import {
   useTransactionsSearch,
 } from 'loot-core/client/data-hooks/transactions';
 import * as queries from 'loot-core/client/queries';
+import {
+  getPayees,
+  markAccountRead,
+  reopenAccount,
+  updateAccount,
+} from 'loot-core/client/queries/queriesSlice';
 import { listen, send } from 'loot-core/platform/client/fetch';
 import { type Query } from 'loot-core/shared/query';
 import { isPreviewId } from 'loot-core/shared/transactions';
@@ -97,9 +99,7 @@ export function AccountTransactions({
 
 function AccountHeader({ account }: { readonly account: AccountEntity }) {
   const failedAccounts = useFailedAccounts();
-  const syncingAccountIds = useSelector(
-    state => state.accounts.accountsSyncing,
-  );
+  const syncingAccountIds = useSelector(state => state.account.accountsSyncing);
   const pending = useMemo(
     () => syncingAccountIds.includes(account.id),
     [syncingAccountIds, account.id],
@@ -113,7 +113,7 @@ function AccountHeader({ account }: { readonly account: AccountEntity }) {
 
   const onSave = useCallback(
     (account: AccountEntity) => {
-      dispatch(updateAccount(account));
+      dispatch(updateAccount({ account }));
     },
     [dispatch],
   );
@@ -140,7 +140,7 @@ function AccountHeader({ account }: { readonly account: AccountEntity }) {
   }, [account.id, dispatch]);
 
   const onReopenAccount = useCallback(() => {
-    dispatch(reopenAccount(account.id));
+    dispatch(reopenAccount({ accountId: account.id }));
   }, [account.id, dispatch]);
 
   const onClick = useCallback(() => {
@@ -264,7 +264,7 @@ function TransactionListWithPreviews({
 
   useEffect(() => {
     if (accountId) {
-      dispatch(markAccountRead(accountId));
+      dispatch(markAccountRead({ accountId }));
     }
   }, [accountId, dispatch]);
 
