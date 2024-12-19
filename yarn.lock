@@ -8689,12 +8689,19 @@ __metadata:
     "@electron/notarize": "npm:2.4.0"
     "@electron/rebuild": "npm:3.6.0"
     "@types/copyfiles": "npm:^2"
+    "@types/lodash": "npm:^4"
     "@types/fs-extra": "npm:^11"
     better-sqlite3: "npm:^11.7.0"
     copyfiles: "npm:^2.4.1"
     cross-env: "npm:^7.0.3"
     electron: "npm:30.0.6"
     electron-builder: "npm:24.13.3"
+    electron-is-dev: "npm:2.0.0"
+    electron-log: "npm:4.4.8"
+    i18next: "npm:^23.12.6"
+    i18next-electron-fs-backend: "npm:^3.0.2"
+    lodash: "npm:^4.17.21"
+    loot-core: "npm:*"
     fs-extra: "npm:^11.2.0"
     promise-retry: "npm:^2.0.1"
     typescript: "npm:^5.5.4"
@@ -11298,6 +11305,23 @@ __metadata:
   languageName: node
   linkType: hard
 
+"hyphenate-style-name@npm:^1.0.2":
+  version: 1.0.4
+  resolution: "hyphenate-style-name@npm:1.0.4"
+  checksum: 10/d37883e6b7e1be62e1ddae29cac83fa59fb93c068bc8eb1561585439adbad91dcf7e264ee2a82c4378fc58049f7bd853544a4a81bf00d4aff717f641052323e7
+  languageName: node
+  linkType: hard
+
+"i18next-electron-fs-backend@npm:^3.0.2":
+  version: 3.0.2
+  resolution: "i18next-electron-fs-backend@npm:3.0.2"
+  dependencies:
+    lodash.clonedeep: "npm:^4.5.0"
+    lodash.merge: "npm:^4.6.2"
+  checksum: 10/43227421724382ba3cea544e03d0ca3d159c73dad57abc85ba216fd6ae425b7f5cd1937205123e75d405b4db2488f654fbf6214145d2970316cd43572f789cbd
+  languageName: node
+  linkType: hard
+
 "i18next-parser@npm:^9.0.0":
   version: 9.0.1
   resolution: "i18next-parser@npm:9.0.1"
@@ -11340,6 +11364,15 @@ __metadata:
   dependencies:
     "@babel/runtime": "npm:^7.23.2"
   checksum: 10/d7a743c54b83acc1203315e547bfe830bfe825dddd7706646aec2a49cb74254bcda70645b568d1bed55ee3610ba5e6f6012fb3c13f03080c1dd0f99db2c45478
+  languageName: node
+  linkType: hard
+
+"i18next@npm:^23.12.6":
+  version: 23.12.6
+  resolution: "i18next@npm:23.12.6"
+  dependencies:
+    "@babel/runtime": "npm:^7.23.2"
+  checksum: 10/6bb7faa2f1645dd7fc8d04c485707221edcf14911756d94faa8f5b7ffb5507995e00dca01f3c516ced9e986effb0073b06e9c55c2d762d400841cc557002abb1
   languageName: node
   linkType: hard
 
@@ -13281,6 +13314,13 @@ __metadata:
   dependencies:
     p-locate: "npm:^5.0.0"
   checksum: 10/72eb661788a0368c099a184c59d2fee760b3831c9c1c33955e8a19ae4a21b4116e53fa736dc086cdeb9fce9f7cc508f2f92d2d3aae516f133e16a2bb59a39f5a
+  languageName: node
+  linkType: hard
+
+"lodash.clonedeep@npm:^4.5.0":
+  version: 4.5.0
+  resolution: "lodash.clonedeep@npm:4.5.0"
+  checksum: 10/957ed243f84ba6791d4992d5c222ffffca339a3b79dbe81d2eaf0c90504160b500641c5a0f56e27630030b18b8e971ea10b44f928a977d5ced3c8948841b555f
   languageName: node
   linkType: hard
 
