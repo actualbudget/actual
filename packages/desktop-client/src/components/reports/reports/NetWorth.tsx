@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
 
 import * as d from 'date-fns';
@@ -15,6 +14,7 @@ import { type TimeFrame, type NetWorthWidget } from 'loot-core/types/models';
 import { useAccounts } from '../../../hooks/useAccounts';
 import { useFilters } from '../../../hooks/useFilters';
 import { useNavigate } from '../../../hooks/useNavigate';
+import { useAppDispatch } from '../../../redux';
 import { theme, styles } from '../../../style';
 import { Button } from '../../common/Button2';
 import { Paragraph } from '../../common/Paragraph';
@@ -52,7 +52,7 @@ type NetWorthInnerProps = {
 };
 
 function NetWorthInner({ widget }: NetWorthInnerProps) {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const { t } = useTranslation();
 
   const accounts = useAccounts();

@@ -1,6 +1,5 @@
 import React, { useEffect, useReducer } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
 
 import { t } from 'i18next';
 
@@ -15,6 +14,7 @@ import { extractScheduleConds } from 'loot-core/src/shared/schedules';
 import { useDateFormat } from '../../hooks/useDateFormat';
 import { usePayees } from '../../hooks/usePayees';
 import { useSelected, SelectedProvider } from '../../hooks/useSelected';
+import { useAppDispatch } from '../../redux';
 import { theme } from '../../style';
 import { AccountAutocomplete } from '../autocomplete/AccountAutocomplete';
 import { PayeeAutocomplete } from '../autocomplete/PayeeAutocomplete';
@@ -79,7 +79,7 @@ export function ScheduleDetails({ id, transaction }) {
   const adding = id == null;
   const fromTrans = transaction != null;
   const payees = getPayeesById(usePayees());
-  const globalDispatch = useDispatch();
+  const globalDispatch = useAppDispatch();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
 
   const [state, dispatch] = useReducer(

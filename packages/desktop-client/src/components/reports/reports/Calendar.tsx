@@ -605,7 +605,6 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
                     isFiltered={() => true}
                     dateFormat={dateFormat}
                     hideFraction={false}
-                    addNotification={addNotification}
                     renderEmpty={() => (
                       <View
                         style={{

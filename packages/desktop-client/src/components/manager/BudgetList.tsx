@@ -1,6 +1,5 @@
 import React, { useState, useRef, type CSSProperties } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { useDispatch, useSelector } from 'react-redux';
 
 import {
   closeAndDownloadBudget,
@@ -34,6 +33,7 @@ import {
   SvgFileDouble,
 } from '../../icons/v1';
 import { SvgCloudUnknown, SvgKey, SvgRefreshArrow } from '../../icons/v2';
+import { useAppSelector, useAppDispatch } from '../../redux';
 import { styles, theme } from '../../style';
 import { tokens } from '../../tokens';
 import { Button } from '../common/Button2';
@@ -413,8 +413,8 @@ function BudgetListHeader({
 }
 
 export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
-  const dispatch = useDispatch();
-  const allFiles = useSelector(state => state.budgets.allFiles || []);
+  const dispatch = useAppDispatch();
+  const allFiles = useAppSelector(state => state.budgets.allFiles || []);
   const [id] = useMetadataPref('id');
 
   // Remote files do not have the 'id' field

@@ -1,12 +1,11 @@
 // @ts-strict-ignore
 import React, { useState, useEffect, useRef, type CSSProperties } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { useDispatch, useSelector } from 'react-redux';
 
 import { closeBudget, getUserData, signOut } from 'loot-core/client/actions';
-import { type State } from 'loot-core/src/client/state-types';
 
 import { useNavigate } from '../hooks/useNavigate';
+import { useAppSelector, useAppDispatch } from '../redux';
 import { theme, styles } from '../style';
 
 import { Button } from './common/Button2';
@@ -27,9 +26,9 @@ export function LoggedInUser({
   color,
 }: LoggedInUserProps) {
   const { t } = useTranslation();
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const userData = useSelector((state: State) => state.user.data);
+  const userData = useAppSelector(state => state.user.data);
   const [loading, setLoading] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
   const serverUrl = useServerURL();

@@ -7,7 +7,7 @@ import * as constants from '../constants';
 import type { Action } from '../state-types';
 import type { QueriesState } from '../state-types/queries';
 
-const initialState: QueriesState = {
+export const initialState: QueriesState = {
   newTransactions: [],
   matchedTransactions: [],
   lastTransaction: null,

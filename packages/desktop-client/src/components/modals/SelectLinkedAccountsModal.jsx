@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
 
 import {
-  closeModal,
   linkAccount,
   linkAccountSimpleFin,
   unlinkAccount,
-} from 'loot-core/client/actions';
+} from 'loot-core/client/accounts/accountSlice';
+import { closeModal } from 'loot-core/client/actions';
 
 import { useAccounts } from '../../hooks/useAccounts';
+import { useAppDispatch } from '../../redux';
 import { theme } from '../../style';
 import { Autocomplete } from '../autocomplete/Autocomplete';
 import { Button } from '../common/Button2';
@@ -32,7 +32,7 @@ export function SelectLinkedAccountsModal({
 }) {
   externalAccounts.sort((a, b) => a.name.localeCompare(b.name));
   const { t } = useTranslation();
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const localAccounts = useAccounts().filter(a => a.closed === 0);
   const [chosenAccounts, setChosenAccounts] = useState(() => {
     return Object.fromEntries(
@@ -50,7 +50,7 @@ export function SelectLinkedAccountsModal({
     localAccounts
       .filter(acc => acc.account_id)
       .filter(acc => !chosenLocalAccountIds.includes(acc.id))
-      .forEach(acc => dispatch(unlinkAccount(acc.id)));
+      .forEach(acc => dispatch(unlinkAccount({ id: acc.id })));
 
     // Link new accounts
     Object.entries(chosenAccounts).forEach(
@@ -69,26 +69,28 @@ export function SelectLinkedAccountsModal({
         // Finally link the matched account
         if (syncSource === 'simpleFin') {
           dispatch(
-            linkAccountSimpleFin(
+            linkAccountSimpleFin({
               externalAccount,
-              chosenLocalAccountId !== addOnBudgetAccountOption.id &&
+              upgradingId:
+                chosenLocalAccountId !== addOnBudgetAccountOption.id &&
                 chosenLocalAccountId !== addOffBudgetAccountOption.id
-                ? chosenLocalAccountId
-                : undefined,
+                  ? chosenLocalAccountId
+                  : undefined,
               offBudget,
-            ),
+            }),
           );
         } else {
           dispatch(
-            linkAccount(
+            linkAccount({
               requisitionId,
-              externalAccount,
-              chosenLocalAccountId !== addOnBudgetAccountOption.id &&
+              account: externalAccount,
+              upgradingId:
+                chosenLocalAccountId !== addOnBudgetAccountOption.id &&
                 chosenLocalAccountId !== addOffBudgetAccountOption.id
-                ? chosenLocalAccountId
-                : undefined,
+                  ? chosenLocalAccountId
+                  : undefined,
               offBudget,
-            ),
+            }),
           );
         }
       },

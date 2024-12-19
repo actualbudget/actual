@@ -1,6 +1,5 @@
 import React, { type ReactNode, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
 
 import { closeBudget } from 'loot-core/src/client/actions';
 import * as Platform from 'loot-core/src/client/platform';
@@ -8,6 +7,7 @@ import * as Platform from 'loot-core/src/client/platform';
 import { useMetadataPref } from '../../hooks/useMetadataPref';
 import { useNavigate } from '../../hooks/useNavigate';
 import { SvgExpandArrow } from '../../icons/v0';
+import { useAppDispatch } from '../../redux';
 import { theme } from '../../style';
 import { Button } from '../common/Button2';
 import { InitialFocus } from '../common/InitialFocus';
@@ -52,7 +52,7 @@ export function BudgetName({ children }: BudgetNameProps) {
 function EditableBudgetName() {
   const { t } = useTranslation();
   const [budgetName, setBudgetNamePref] = useMetadataPref('budgetName');
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
