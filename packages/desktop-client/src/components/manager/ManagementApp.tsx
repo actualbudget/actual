@@ -1,10 +1,10 @@
 import React, { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 import { Navigate, Route, Routes } from 'react-router-dom';
 
 import { loggedIn, setAppState } from 'loot-core/client/actions';
 
 import { useMetaThemeColor } from '../../hooks/useMetaThemeColor';
+import { useAppSelector, useAppDispatch } from '../../redux';
 import { theme } from '../../style';
 import { tokens } from '../../tokens';
 import { AppBackground } from '../AppBackground';
@@ -55,14 +55,14 @@ export function ManagementApp() {
     isNarrowWidth ? theme.mobileConfigServerViewTheme : undefined,
   );
 
-  const files = useSelector(state => state.budgets.allFiles);
-  const isLoading = useSelector(state => state.app.loadingText !== null);
-  const userData = useSelector(state => state.user.data);
-  const managerHasInitialized = useSelector(
+  const files = useAppSelector(state => state.budgets.allFiles);
+  const isLoading = useAppSelector(state => state.app.loadingText !== null);
+  const userData = useAppSelector(state => state.user.data);
+  const managerHasInitialized = useAppSelector(
     state => state.app.managerHasInitialized,
   );
 
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
   // runs on mount only
   useEffect(() => {

@@ -1,11 +1,11 @@
 import React, { useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
 
 import { pushModal } from 'loot-core/client/actions';
 import { type CategoryEntity } from 'loot-core/types/models';
 
 import { useCategories } from '../../hooks/useCategories';
+import { useAppDispatch } from '../../redux';
 import { styles } from '../../style';
 import {
   addToBeBudgetedGroup,
@@ -55,7 +55,7 @@ export function TransferModal({
 
   const [amount, setAmount] = useState<number>(0);
   const [toCategoryId, setToCategoryId] = useState<string | null>(null);
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
   const openCategoryModal = () => {
     dispatch(

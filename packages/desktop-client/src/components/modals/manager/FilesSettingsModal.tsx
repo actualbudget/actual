@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
 
 import { loadAllFiles, pushModal } from 'loot-core/client/actions';
 
 import { useGlobalPref } from '../../../hooks/useGlobalPref';
 import { SvgPencil1 } from '../../../icons/v2';
+import { useAppDispatch } from '../../../redux';
 import { theme, styles } from '../../../style';
 import { Button } from '../../common/Button2';
 import { Modal, ModalCloseButton, ModalHeader } from '../../common/Modal';
@@ -16,7 +16,7 @@ function FileLocationSettings() {
   const [documentDir, _setDocumentDirPref] = useGlobalPref('documentDir');
   const [_documentDirChanged, setDirChanged] = useState(false);
   const { t } = useTranslation();
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
   async function onChooseDocumentDir() {
     const chosenDirectory = await window.Actual?.openFileDialog({
@@ -142,7 +142,7 @@ function SelfSignedCertLocationSettings() {
 }
 
 export function FilesSettingsModal() {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
   function closeModal(close: () => void) {
     dispatch(loadAllFiles());

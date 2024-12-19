@@ -1,14 +1,15 @@
 import React, { useCallback, useRef, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 
-import { unlinkAccount } from 'loot-core/client/actions';
+import { unlinkAccount } from 'loot-core/client/accounts/accountSlice';
 import { type AccountEntity } from 'loot-core/types/models';
 
 import { authorizeBank } from '../../gocardless';
 import { useAccounts } from '../../hooks/useAccounts';
+import { useFailedAccounts } from '../../hooks/useFailedAccounts';
 import { SvgExclamationOutline } from '../../icons/v1';
+import { useAppDispatch } from '../../redux';
 import { theme } from '../../style';
 import { Button } from '../common/Button2';
 import { Link } from '../common/Link';
@@ -82,8 +83,8 @@ function useErrorMessage() {
 
 export function AccountSyncCheck() {
   const accounts = useAccounts();
-  const failedAccounts = useSelector(state => state.account.failedAccounts);
-  const dispatch = useDispatch();
+  const failedAccounts = useFailedAccounts();
+  const dispatch = useAppDispatch();
   const { id } = useParams();
   const [open, setOpen] = useState(false);
   const triggerRef = useRef(null);
@@ -103,7 +104,7 @@ export function AccountSyncCheck() {
   const unlink = useCallback(
     (acc: AccountEntity) => {
       if (acc.id) {
-        dispatch(unlinkAccount(acc.id));
+        dispatch(unlinkAccount({ id: acc.id }));
       }
 
       setOpen(false);

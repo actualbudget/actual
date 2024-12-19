@@ -1,13 +1,13 @@
 import { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 
 import { getCategories } from 'loot-core/src/client/actions';
-import { type State } from 'loot-core/src/client/state-types';
+
+import { useAppSelector, useAppDispatch } from '../redux';
 
 export function useCategories() {
-  const dispatch = useDispatch();
-  const categoriesLoaded = useSelector(
-    (state: State) => state.queries.categoriesLoaded,
+  const dispatch = useAppDispatch();
+  const categoriesLoaded = useAppSelector(
+    state => state.queries.categoriesLoaded,
   );
 
   useEffect(() => {
@@ -16,5 +16,5 @@ export function useCategories() {
     }
   }, []);
 
-  return useSelector(state => state.queries.categories);
+  return useAppSelector(state => state.queries.categories);
 }
