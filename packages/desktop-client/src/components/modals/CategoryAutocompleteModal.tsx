@@ -1,6 +1,5 @@
 import React, { type ComponentPropsWithoutRef } from 'react';
-
-import { t } from 'i18next';
+import { useTranslation } from 'react-i18next';
 
 import * as monthUtils from 'loot-core/src/shared/months';
 
@@ -28,6 +27,7 @@ export function CategoryAutocompleteModal({
   month,
   onClose,
 }: CategoryAutocompleteModalProps) {
+  const { t } = useTranslation();
   const { isNarrowWidth } = useResponsive();
 
   const defaultAutocompleteProps = {

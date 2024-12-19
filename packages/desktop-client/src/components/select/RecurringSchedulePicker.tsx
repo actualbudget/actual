@@ -6,8 +6,7 @@ import {
   useRef,
   useState,
 } from 'react';
-
-import { t } from 'i18next';
+import { useTranslation } from 'react-i18next';
 
 import { sendCatch } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
@@ -271,6 +270,7 @@ function MonthlyPatterns({
   config: StateConfig;
   dispatch: Dispatch<ReducerAction>;
 }) {
+  const { t } = useTranslation();
   return (
     <Stack spacing={2} style={{ marginTop: 10 }}>
       {config.patterns.map((recurrence, idx) => (
@@ -351,6 +351,7 @@ function RecurringScheduleTooltip({
   onClose: () => void;
   onSave: (config: RecurConfig) => void;
 }) {
+  const { t } = useTranslation();
   const [previewDates, setPreviewDates] = useState(null);
 
   const [state, dispatch] = useReducer(reducer, {
@@ -554,6 +555,7 @@ export function RecurringSchedulePicker({
   buttonStyle,
   onChange,
 }: RecurringSchedulePickerProps) {
+  const { t } = useTranslation();
   const triggerRef = useRef(null);
   const [isOpen, setIsOpen] = useState(false);
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';

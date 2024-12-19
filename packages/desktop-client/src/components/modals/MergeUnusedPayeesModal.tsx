@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
-
-import { t } from 'i18next';
 
 import { replaceModal } from 'loot-core/src/client/actions/modals';
 import { send } from 'loot-core/src/platform/client/fetch';
@@ -27,6 +26,7 @@ export function MergeUnusedPayeesModal({
   payeeIds,
   targetPayeeId,
 }: MergeUnusedPayeesModalProps) {
+  const { t } = useTranslation();
   const allPayees = usePayees();
   const modalStack = useSelector(state => state.modals.modalStack);
   const isEditingRule = !!modalStack.find(m => m.name === 'edit-rule');
