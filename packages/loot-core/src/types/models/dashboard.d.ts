@@ -26,7 +26,7 @@ export type NetWorthWidget = AbstractWidget<
   {
     name?: string;
     conditions?: RuleConditionEntity[];
-    conditionsOp?: 'and' | 'or';
+    conditionsOp?: RuleConditionEntity['conditionsOp'];
     timeFrame?: TimeFrame;
   } | null
 >;
@@ -35,7 +35,7 @@ export type CashFlowWidget = AbstractWidget<
   {
     name?: string;
     conditions?: RuleConditionEntity[];
-    conditionsOp?: 'and' | 'or';
+    conditionsOp?: RuleConditionEntity['conditionsOp'];
     timeFrame?: TimeFrame;
     showBalance?: boolean;
   } | null
@@ -45,7 +45,7 @@ export type SpendingWidget = AbstractWidget<
   {
     name?: string;
     conditions?: RuleConditionEntity[];
-    conditionsOp?: 'and' | 'or';
+    conditionsOp?: RuleConditionEntity['conditionsOp'];
     compare?: string;
     compareTo?: string;
     isLive?: boolean;
@@ -96,7 +96,7 @@ export type SummaryWidget = AbstractWidget<
   {
     name?: string;
     conditions?: RuleConditionEntity[];
-    conditionsOp?: 'and' | 'or';
+    conditionsOp?: RuleConditionEntity['conditionsOp'];
     timeFrame?: TimeFrame;
     content?: string;
   } | null
@@ -110,7 +110,7 @@ export type BaseSummaryContent = {
 export type PercentageSummaryContent = {
   type: 'percentage';
   divisorConditions: RuleConditionEntity[];
-  divisorConditionsOp: 'and' | 'or';
+  divisorConditionsOp: RuleConditionEntity['conditionsOp'];
   divisorAllTimeDateRange?: boolean;
   fontSize?: number;
 };

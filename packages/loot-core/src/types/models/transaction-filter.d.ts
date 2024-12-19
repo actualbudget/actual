@@ -3,7 +3,7 @@ import { type RuleConditionEntity } from './rule';
 export interface TransactionFilterEntity {
   id: string;
   name: string;
-  conditionsOp: 'and' | 'or';
+  conditionsOp: RuleConditionEntity['conditionsOp'];
   conditions: RuleConditionEntity[];
   tombstone: boolean;
 }

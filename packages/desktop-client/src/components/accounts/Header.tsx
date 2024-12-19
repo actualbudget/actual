@@ -4,10 +4,13 @@ import React, {
   Fragment,
   type ReactNode,
   type ComponentProps,
+  useCallback,
+  useMemo,
 } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { type Query } from 'loot-core/shared/query';
 import {
   type AccountEntity,
   type RuleConditionEntity,
@@ -18,7 +21,7 @@ import {
 import { useLocalPref } from '../../hooks/useLocalPref';
 import { useSplitsExpanded } from '../../hooks/useSplitsExpanded';
 import { useSyncServerStatus } from '../../hooks/useSyncServerStatus';
-import { AnimatedLoading } from '../../icons/AnimatedLoading';
+// import { AnimatedLoading } from '../../icons/AnimatedLoading';
 import { SvgAdd } from '../../icons/v1';
 import {
   SvgArrowsExpand3,
@@ -40,7 +43,6 @@ import { Stack } from '../common/Stack';
 import { View } from '../common/View';
 import { FilterButton } from '../filters/FiltersMenu';
 import { FiltersStack } from '../filters/FiltersStack';
-import { type SavedFilter } from '../filters/SavedFilterMenuButton';
 import { NotesButton } from '../NotesButton';
 import { SelectedTransactionsButton } from '../transactions/SelectedTransactionsButton';
 
@@ -52,29 +54,28 @@ type AccountHeaderProps = {
   tableRef: TableRef;
   editingName: boolean;
   isNameEditable: boolean;
-  workingHard: boolean;
+  isLoading: boolean;
+  accountId: AccountEntity['id'] | string;
   accountName: string;
   account: AccountEntity;
-  filterId?: SavedFilter;
-  savedFilters: TransactionFilterEntity[];
+  activeFilter?: TransactionFilterEntity;
+  dirtyFilter?: TransactionFilterEntity;
   accountsSyncing: string[];
   failedAccounts: AccountSyncSidebarProps['failedAccounts'];
   accounts: AccountEntity[];
-  transactions: TransactionEntity[];
+  transactions: readonly TransactionEntity[];
   showBalances: boolean;
   showExtraBalances: boolean;
   showCleared: boolean;
   showReconciled: boolean;
   showEmptyMessage: boolean;
-  balanceQuery: ComponentProps<typeof ReconcilingMessage>['balanceQuery'];
+  balanceQuery: Query;
   reconcileAmount: number;
-  canCalculateBalance: () => boolean;
-  isFiltered: boolean;
-  filteredAmount: number;
+  showFilteredBalance: boolean;
+  filteredBalance: number;
   isSorted: boolean;
-  search: string;
-  filterConditions: RuleConditionEntity[];
-  filterConditionsOp: 'and' | 'or';
+  filterConditions: readonly RuleConditionEntity[];
+  filterConditionsOp: RuleConditionEntity['conditionsOp'];
   onSearch: (newSearch: string) => void;
   onAddTransaction: () => void;
   onShowTransactions: ComponentProps<
@@ -127,11 +128,12 @@ export function AccountHeader({
   tableRef,
   editingName,
   isNameEditable,
-  workingHard,
+  isLoading,
+  accountId,
   accountName,
   account,
-  filterId,
-  savedFilters,
+  activeFilter,
+  dirtyFilter,
   accountsSyncing,
   failedAccounts,
   accounts,
@@ -143,11 +145,9 @@ export function AccountHeader({
   showEmptyMessage,
   balanceQuery,
   reconcileAmount,
-  canCalculateBalance,
-  isFiltered,
-  filteredAmount,
+  showFilteredBalance,
+  filteredBalance,
   isSorted,
-  search,
   filterConditions,
   filterConditionsOp,
   onSearch,
@@ -191,6 +191,7 @@ export function AccountHeader({
   const isUsingServer = syncServerStatus !== 'no-server';
   const isServerOffline = syncServerStatus === 'offline';
   const [_, setExpandSplitsPref] = useLocalPref('expand-splits');
+  const [search, setSearch] = useState('');
 
   let canSync = !!(account?.account_id && isUsingServer);
   if (!account) {
@@ -254,6 +255,19 @@ export function AccountHeader({
     [onSync],
   );
 
+  const onSearchChange = useCallback(
+    (search: string) => {
+      setSearch(search);
+      onSearch?.(search);
+    },
+    [onSearch],
+  );
+
+  const transactionsMap = useMemo(
+    () => new Map(transactions.map(t => [t.id, t])),
+    [transactions],
+  );
+
   return (
     <>
       <View style={{ ...styles.pageContent, paddingBottom: 10, flexShrink: 0 }}>
@@ -287,12 +301,13 @@ export function AccountHeader({
         </View>
 
         <Balances
+          // isLoading={isLoading}
+          accountId={accountId}
           balanceQuery={balanceQuery}
+          filteredBalance={filteredBalance}
+          showFilteredBalance={showFilteredBalance}
           showExtraBalances={showExtraBalances}
           onToggleExtraBalances={onToggleExtraBalances}
-          account={account}
-          isFiltered={isFiltered}
-          filteredAmount={filteredAmount}
         />
 
         <Stack
@@ -345,30 +360,25 @@ export function AccountHeader({
           <Search
             placeholder={t('Search')}
             value={search}
-            onChange={onSearch}
+            onChange={onSearchChange}
             inputRef={searchInput}
           />
-          {workingHard ? (
-            <View>
-              <AnimatedLoading style={{ width: 16, height: 16 }} />
-            </View>
-          ) : (
-            <SelectedTransactionsButton
-              getTransaction={id => transactions.find(t => t.id === id)}
-              onShow={onShowTransactions}
-              onDuplicate={onBatchDuplicate}
-              onDelete={onBatchDelete}
-              onEdit={onBatchEdit}
-              onLinkSchedule={onBatchLinkSchedule}
-              onUnlinkSchedule={onBatchUnlinkSchedule}
-              onCreateRule={onCreateRule}
-              onSetTransfer={onSetTransfer}
-              onScheduleAction={onScheduleAction}
-              showMakeTransfer={showMakeTransfer}
-              onMakeAsSplitTransaction={onMakeAsSplitTransaction}
-              onMakeAsNonSplitTransactions={onMakeAsNonSplitTransactions}
-            />
-          )}
+          <SelectedTransactionsButton
+            isLoading={isLoading}
+            getTransaction={id => transactionsMap.get(id)}
+            onShow={onShowTransactions}
+            onDuplicate={onBatchDuplicate}
+            onDelete={onBatchDelete}
+            onEdit={onBatchEdit}
+            onLinkSchedule={onBatchLinkSchedule}
+            onUnlinkSchedule={onBatchUnlinkSchedule}
+            onCreateRule={onCreateRule}
+            onSetTransfer={onSetTransfer}
+            onScheduleAction={onScheduleAction}
+            showMakeTransfer={showMakeTransfer}
+            onMakeAsSplitTransaction={onMakeAsSplitTransaction}
+            onMakeAsNonSplitTransactions={onMakeAsNonSplitTransactions}
+          />
           <View style={{ flex: '0 0 auto' }}>
             {account && (
               <>
@@ -443,7 +453,7 @@ export function AccountHeader({
                 <AccountMenu
                   account={account}
                   canSync={canSync}
-                  canShowBalances={canCalculateBalance()}
+                  // canShowBalances={canCalculateBalance()}
                   isSorted={isSorted}
                   showBalances={showBalances}
                   showCleared={showCleared}
@@ -498,14 +508,15 @@ export function AccountHeader({
             onDeleteFilter={onDeleteFilter}
             onClearFilters={onClearFilters}
             onReloadSavedFilter={onReloadSavedFilter}
-            filterId={filterId}
-            savedFilters={savedFilters}
+            filter={activeFilter}
+            dirtyFilter={dirtyFilter}
             onConditionsOpChange={onConditionsOpChange}
           />
         )}
       </View>
       {reconcileAmount != null && (
         <ReconcilingMessage
+          accountId={accountId}
           targetBalance={reconcileAmount}
           balanceQuery={balanceQuery}
           onDone={onDoneReconciling}
@@ -669,7 +680,7 @@ type AccountMenuProps = {
   account: AccountEntity;
   canSync: boolean;
   showBalances: boolean;
-  canShowBalances: boolean;
+  // canShowBalances: boolean;
   showCleared: boolean;
   showReconciled: boolean;
   isSorted: boolean;
@@ -691,7 +702,7 @@ function AccountMenu({
   account,
   canSync,
   showBalances,
-  canShowBalances,
+  // canShowBalances,
   showCleared,
   showReconciled,
   isSorted,
@@ -714,16 +725,22 @@ function AccountMenu({
               } as const,
             ]
           : []),
-        ...(canShowBalances
-          ? [
-              {
-                name: 'toggle-balance',
-                text: showBalances
-                  ? t('Hide running balance')
-                  : t('Show running balance'),
-              } as const,
-            ]
-          : []),
+        // ...(canShowBalances
+        //   ? [
+        //       {
+        //         name: 'toggle-balance',
+        //         text: showBalances
+        //           ? t('Hide running balance')
+        //           : t('Show running balance'),
+        //       } as const,
+        //     ]
+        //   : []),[
+        {
+          name: 'toggle-balance',
+          text: showBalances
+            ? t('Hide running balance')
+            : t('Show running balance'),
+        },
         {
           name: 'toggle-cleared',
           text: showCleared

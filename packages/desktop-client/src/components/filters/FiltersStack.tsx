@@ -7,10 +7,27 @@ import { Stack } from '../common/Stack';
 import { View } from '../common/View';
 
 import { AppliedFilters } from './AppliedFilters';
-import {
-  type SavedFilter,
-  SavedFilterMenuButton,
-} from './SavedFilterMenuButton';
+import { SavedFilterMenuButton } from './SavedFilterMenuButton';
+
+type FiltersStackProps = {
+  conditions: readonly RuleConditionEntity[];
+  conditionsOp: RuleConditionEntity['conditionsOp'];
+  onUpdateFilter: (
+    filterCondition: RuleConditionEntity,
+    newFilterCondition: RuleConditionEntity,
+  ) => void;
+  onDeleteFilter: (filterCondition: RuleConditionEntity) => void;
+  onClearFilters: () => void;
+  onReloadSavedFilter: (
+    savedFilter: TransactionFilterEntity,
+    action?: 'reload' | 'update',
+  ) => void;
+  filter?: TransactionFilterEntity;
+  dirtyFilter?: TransactionFilterEntity;
+  onConditionsOpChange: (
+    conditionsOp: RuleConditionEntity['conditionsOp'],
+  ) => void;
+};
 
 export function FiltersStack({
   conditions,
@@ -19,23 +36,10 @@ export function FiltersStack({
   onDeleteFilter,
   onClearFilters,
   onReloadSavedFilter,
-  filterId,
-  savedFilters,
+  filter,
+  dirtyFilter,
   onConditionsOpChange,
-}: {
-  conditions: RuleConditionEntity[];
-  conditionsOp: 'and' | 'or';
-  onUpdateFilter: (
-    filter: RuleConditionEntity,
-    newFilter: RuleConditionEntity,
-  ) => void;
-  onDeleteFilter: (filter: RuleConditionEntity) => void;
-  onClearFilters: () => void;
-  onReloadSavedFilter: (savedFilter: SavedFilter, value?: string) => void;
-  filterId?: SavedFilter;
-  savedFilters: TransactionFilterEntity[];
-  onConditionsOpChange: (value: 'and' | 'or') => void;
-}) {
+}: FiltersStackProps) {
   return (
     <View>
       <Stack
@@ -55,10 +59,10 @@ export function FiltersStack({
         <SavedFilterMenuButton
           conditions={conditions}
           conditionsOp={conditionsOp}
-          filterId={filterId}
+          filter={filter}
+          dirtyFilter={dirtyFilter}
           onClearFilters={onClearFilters}
           onReloadSavedFilter={onReloadSavedFilter}
-          savedFilters={savedFilters}
         />
       </Stack>
     </View>

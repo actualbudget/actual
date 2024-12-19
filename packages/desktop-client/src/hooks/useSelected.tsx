@@ -6,7 +6,6 @@ import React, {
   useCallback,
   useEffect,
   useRef,
-  type Dispatch,
   type ReactElement,
 } from 'react';
 import { useSelector } from 'react-redux';
@@ -48,12 +47,12 @@ type SelectAllAction = {
   isRangeSelect?: boolean;
 };
 
-export type Actions = SelectAction | SelectNoneAction | SelectAllAction;
+type Actions = SelectAction | SelectNoneAction | SelectAllAction;
 
 export function useSelected<T extends Item>(
   name: string,
-  items: T[],
-  initialSelectedIds: string[],
+  items: readonly T[],
+  initialSelectedIds: readonly string[],
   selectAllFilter?: (item: T) => boolean,
 ) {
   const [state, dispatch] = useReducer(
@@ -304,44 +303,5 @@ export function SelectedProvider<T extends Item>({
         {children}
       </SelectedDispatch.Provider>
     </SelectedItems.Provider>
-  );
-}
-
-type SelectedProviderWithItemsProps<T extends Item> = {
-  name: string;
-  items: T[];
-  initialSelectedIds?: string[];
-  fetchAllIds: () => Promise<string[]>;
-  registerDispatch?: (dispatch: Dispatch<Actions>) => void;
-  selectAllFilter?: (item: T) => boolean;
-  children: ReactElement;
-};
-
-// This can be helpful in class components if you cannot use the
-// custom hook
-export function SelectedProviderWithItems<T extends Item>({
-  name,
-  items,
-  initialSelectedIds = [],
-  fetchAllIds,
-  registerDispatch,
-  selectAllFilter,
-  children,
-}: SelectedProviderWithItemsProps<T>) {
-  const selected = useSelected<T>(
-    name,
-    items,
-    initialSelectedIds,
-    selectAllFilter,
-  );
-
-  useEffect(() => {
-    registerDispatch?.(selected.dispatch);
-  }, [registerDispatch]);
-
-  return (
-    <SelectedProvider<T> instance={selected} fetchAllIds={fetchAllIds}>
-      {children}
-    </SelectedProvider>
   );
 }
