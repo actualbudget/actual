@@ -20,7 +20,7 @@ import {
   isValid as isDateValid,
 } from 'date-fns';
 
-import { pushModal } from 'loot-core/client/actions';
+import { addNotification, pushModal } from 'loot-core/client/actions';
 import { useCachedSchedules } from 'loot-core/src/client/data-hooks/schedules';
 import {
   getAccountsById,
@@ -2103,6 +2103,7 @@ function TransactionTableInner({
 }
 
 export const TransactionTable = forwardRef((props, ref) => {
+  const dispatch = useAppDispatch();
   const [newTransactions, setNewTransactions] = useState(null);
   const [prevIsAdding, setPrevIsAdding] = useState(false);
   const splitsExpanded = useSplitsExpanded();
@@ -2235,10 +2236,12 @@ export const TransactionTable = forwardRef((props, ref) => {
   useEffect(() => {
     if (shouldAdd.current) {
       if (newTransactions[0].account == null) {
-        props.addNotification({
-          type: 'error',
-          message: 'Account is a required field',
-        });
+        dispatch(
+          addNotification({
+            type: 'error',
+            message: 'Account is a required field',
+          }),
+        );
         newNavigator.onEdit('temp', 'account');
       } else {
         const transactions = latestState.current.newTransactions;
