@@ -1,8 +1,8 @@
 import { send } from '../../platform/client/fetch';
 import { getUploadError } from '../../shared/errors';
+import { syncAccounts } from '../accounts/accountSlice';
 import { type AppDispatch, type GetRootState } from '../store';
 
-import { syncAccounts } from './account';
 import { pushModal } from './modals';
 import { loadPrefs } from './prefs';
 
@@ -64,7 +64,7 @@ export function syncAndDownload(accountId?: string) {
       return { error: syncState.error };
     }
 
-    const hasDownloaded = await dispatch(syncAccounts(accountId));
+    const hasDownloaded = await dispatch(syncAccounts({ id: accountId }));
 
     if (hasDownloaded) {
       // Sync again afterwards if new transactions were created
