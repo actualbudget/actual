@@ -3,6 +3,7 @@ import {
   configureStore,
   createListenerMiddleware,
   isRejected,
+  createAsyncThunk,
 } from '@reduxjs/toolkit';
 
 import {
@@ -90,3 +91,8 @@ export type AppStore = typeof store;
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
 export type GetRootState = typeof store.getState;
+
+export const createAppAsyncThunk = createAsyncThunk.withTypes<{
+  state: RootState;
+  dispatch: AppDispatch;
+}>();
