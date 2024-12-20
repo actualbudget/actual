@@ -39,7 +39,11 @@ import {
   makeChild,
   makeAsNonChildTransactions,
 } from 'loot-core/src/shared/transactions';
-import { applyChanges, groupById } from 'loot-core/src/shared/util';
+import {
+  applyChanges,
+  getChangedValues,
+  groupById,
+} from 'loot-core/src/shared/util';
 import {
   type NewRuleEntity,
   type RuleActionEntity,
@@ -50,7 +54,6 @@ import {
   type TransactionFilterEntity,
   type RuleEntity,
 } from 'loot-core/src/types/models';
-
 import { useAccountPreviewTransactions } from '../../hooks/useAccountPreviewTransactions';
 import { useAccounts } from '../../hooks/useAccounts';
 import { useActions } from '../../hooks/useActions';
@@ -710,22 +713,31 @@ class AccountInternal extends PureComponent<
       const transactions = this.state.transactions.filter(trans =>
         ids.includes(trans.id),
       );
-      // Process transactions sequentially to maintain order
-      for (const trans of transactions) {
-        if (!trans.payee) continue;
-        // Fetch rules for the transaction's payee
-        const rules = (await send('payees-get-rules', {
-          id: trans.payee,
-        })) as RuleEntity[];
-
-        // Apply all rules for this transaction
-        for (const rule of rules) {
-          await send('rule-apply-actions', {
-            transactions: [trans],
-            actions: rule.actions,
-          });
-        }
+      console.log('transactions', transactions);
+      //call the runrules function
+      let changed_transactions = [];
+      for (const transaction of transactions) {
+        await send('rules-run', {
+          transaction: transaction,
+        }).then((res: any) => {
+          if (res) {
+            changed_transactions.push(res);
+          }
+          console.log(
+            'rules-run response for transaction',
+            transaction.id,
+            res,
+          );
+        });
       }
+
+      // If we have changed transactions, update them in the database
+      if (changed_transactions.length > 0) {
+        await send('transactions-batch-update', {
+          updated: changed_transactions,
+        });
+      }
+
       // Fetch updated transactions once at the end
       await this.fetchTransactions();
     } catch (error) {
