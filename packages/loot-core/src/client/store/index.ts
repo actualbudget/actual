@@ -4,7 +4,7 @@ import {
   name as accountSliceName,
   reducer as accountSliceReducer,
   getInitialState as getInitialAccountState,
-} from '../accounts/accountSlice';
+} from '../accounts/accountsSlice';
 import * as constants from '../constants';
 import { reducers } from '../reducers';
 import { initialState as initialAppState } from '../reducers/app';
