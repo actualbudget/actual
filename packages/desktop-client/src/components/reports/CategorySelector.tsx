@@ -1,7 +1,6 @@
 // @ts-strict-ignore
 import React, { Fragment, useMemo, useState } from 'react';
-
-import { t } from 'i18next';
+import { useTranslation } from 'react-i18next';
 
 import {
   type CategoryEntity,
@@ -34,6 +33,7 @@ export function CategorySelector({
   setSelectedCategories,
   showHiddenCategories = true,
 }: CategorySelectorProps) {
+  const { t } = useTranslation();
   const [uncheckedHidden, setUncheckedHidden] = useState(false);
   const filteredGroup = (categoryGroup: CategoryGroupEntity) => {
     return categoryGroup.categories.filter(f => {

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { format } from 'date-fns';
-import { t } from 'i18next';
 
 import { send } from 'loot-core/src/platform/client/fetch';
 
@@ -14,6 +14,7 @@ import { Text } from '../common/Text';
 import { Setting } from './UI';
 
 export function ExportBudget() {
+  const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [budgetName] = useMetadataPref('budgetName');

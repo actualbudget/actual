@@ -1,7 +1,6 @@
 import React, { useMemo } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
-
-import { t } from 'i18next';
+import { useTranslation } from 'react-i18next';
 
 import * as monthUtils from 'loot-core/src/shared/months';
 import { type AccountEntity } from 'loot-core/types/models/account';
@@ -24,6 +23,7 @@ import { createGroupedSpreadsheet } from '../spreadsheets/grouped-spreadsheet';
 import { useReport } from '../useReport';
 
 function ErrorFallback() {
+  const { t } = useTranslation();
   return (
     <>
       <div>
