@@ -26,6 +26,5 @@ export type State = {
   modals: ModalsState;
   notifications: NotificationsState;
   prefs: PrefsState;
-  queries: QueriesState;
   user: UserState;
 };
