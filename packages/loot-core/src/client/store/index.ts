@@ -1,8 +1,16 @@
-import { combineReducers, configureStore } from '@reduxjs/toolkit';
+import {
+  combineReducers,
+  configureStore,
+  createAsyncThunk,
+} from '@reduxjs/toolkit';
 
+import {
+  name as accountsSliceName,
+  reducer as accountsSliceReducer,
+  getInitialState as getInitialAccountsState,
+} from '../accounts/accountsSlice';
 import * as constants from '../constants';
 import { reducers } from '../reducers';
-import { initialState as initialAccountState } from '../reducers/account';
 import { initialState as initialAppState } from '../reducers/app';
 import { initialState as initialBudgetsState } from '../reducers/budgets';
 import { initialState as initialModalsState } from '../reducers/modals';
@@ -11,13 +19,16 @@ import { initialState as initialPrefsState } from '../reducers/prefs';
 import { initialState as initialQueriesState } from '../reducers/queries';
 import { initialState as initialUserState } from '../reducers/user';
 
-const appReducer = combineReducers(reducers);
+const appReducer = combineReducers({
+  ...reducers,
+  [accountsSliceName]: accountsSliceReducer,
+});
 const rootReducer: typeof appReducer = (state, action) => {
   if (action.type === constants.CLOSE_BUDGET) {
     // Reset the state and only keep around things intentionally. This
     // blows away everything else
     state = {
-      account: initialAccountState,
+      accounts: getInitialAccountsState(),
       modals: initialModalsState,
       notifications: initialNotificationsState,
       queries: initialQueriesState,
@@ -48,6 +59,12 @@ export const store = configureStore({
     }),
 });
 
+export type AppStore = typeof store;
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
 export type GetRootState = typeof store.getState;
+
+export const createAppAsyncThunk = createAsyncThunk.withTypes<{
+  state: RootState;
+  dispatch: AppDispatch;
+}>();
