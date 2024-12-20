@@ -11,7 +11,7 @@ import { View } from './common/View';
 
 export function BankSyncStatus() {
   const accountsSyncing = useAppSelector(
-    state => state.account.accountsSyncing,
+    state => state.accounts.accountsSyncing,
   );
   const accountsSyncingCount = accountsSyncing.length;
   const count = accountsSyncingCount;

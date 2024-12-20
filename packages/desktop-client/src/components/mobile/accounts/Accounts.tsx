@@ -227,7 +227,7 @@ function AccountList({
   const { t } = useTranslation();
   const failedAccounts = useFailedAccounts();
   const syncingAccountIds = useAppSelector(
-    state => state.account.accountsSyncing,
+    state => state.accounts.accountsSyncing,
   );
   const onBudgetAccounts = accounts.filter(account => account.offbudget === 0);
   const offBudgetAccounts = accounts.filter(account => account.offbudget === 1);

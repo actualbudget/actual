@@ -32,7 +32,7 @@ export function Accounts() {
   const onBudgetAccounts = useOnBudgetAccounts();
   const closedAccounts = useClosedAccounts();
   const syncingAccountIds = useAppSelector(
-    state => state.account.accountsSyncing,
+    state => state.accounts.accountsSyncing,
   );
 
   const getAccountPath = (account: AccountEntity) => `/accounts/${account.id}`;
