@@ -15,6 +15,7 @@ import { createRoot } from 'react-dom/client';
 
 import * as accountsSlice from 'loot-core/src/client/accounts/accountsSlice';
 import * as actions from 'loot-core/src/client/actions';
+import * as appSlice from 'loot-core/src/client/app/appSlice';
 import * as queriesSlice from 'loot-core/src/client/queries/queriesSlice';
 import { runQuery } from 'loot-core/src/client/query-helpers';
 import { store } from 'loot-core/src/client/store';
@@ -34,6 +35,7 @@ const boundActions = bindActionCreators(
   {
     ...actions,
     ...accountsSlice.actions,
+    ...appSlice.actions,
     ...queriesSlice.actions,
   },
   store.dispatch,
@@ -42,19 +44,8 @@ const boundActions = bindActionCreators(
 // Listen for global events from the server or main process
 handleGlobalEvents(store);
 
-declare global {
-  // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-  interface Window {
-    __actionsForMenu: typeof boundActions & {
-      undo: typeof undo;
-      redo: typeof redo;
-      inputFocused: typeof inputFocused;
-    };
-
-    $send: typeof send;
-    $query: typeof runQuery;
-    $q: typeof q;
-  }
+async function appFocused() {
+  await send('app-focused');
 }
 
 function inputFocused() {
@@ -66,7 +57,13 @@ function inputFocused() {
 }
 
 // Expose this to the main process to menu items can access it
-window.__actionsForMenu = { ...boundActions, undo, redo, inputFocused };
+window.__actionsForMenu = {
+  ...boundActions,
+  undo,
+  redo,
+  appFocused,
+  inputFocused,
+};
 
 // Expose send for fun!
 window.$send = send;
@@ -82,3 +79,19 @@ root.render(
     </ServerProvider>
   </Provider>,
 );
+
+declare global {
+  // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+  interface Window {
+    __actionsForMenu: typeof boundActions & {
+      undo: typeof undo;
+      redo: typeof redo;
+      appFocused: typeof appFocused;
+      inputFocused: typeof inputFocused;
+    };
+
+    $send: typeof send;
+    $query: typeof runQuery;
+    $q: typeof q;
+  }
+}

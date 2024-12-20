@@ -187,7 +187,7 @@ async function createWindow() {
       const url = clientWin.webContents.getURL();
       if (url.includes('app://') || url.includes('localhost:')) {
         clientWin.webContents.executeJavaScript(
-          'window.__actionsForMenu.focused()',
+          'window.__actionsForMenu.appFocused()',
         );
       }
     }
@@ -387,7 +387,7 @@ ipcMain.handle(
 export type SaveFileDialogPayload = {
   title: SaveDialogOptions['title'];
   defaultPath?: SaveDialogOptions['defaultPath'];
-  fileContents: string | NodeJS.ArrayBufferView;
+  fileContents: string | Buffer;
 };
 
 ipcMain.handle(
@@ -400,7 +400,11 @@ ipcMain.handle(
 
     return new Promise<void>((resolve, reject) => {
       if (fileLocation) {
-        fs.writeFile(fileLocation.filePath, fileContents, error => {
+        const contents =
+          typeof fileContents === 'string'
+            ? fileContents
+            : new Uint8Array(fileContents.buffer);
+        fs.writeFile(fileLocation.filePath, contents, error => {
           return reject(error);
         });
       }

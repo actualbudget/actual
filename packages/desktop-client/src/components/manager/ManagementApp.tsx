@@ -1,7 +1,8 @@
 import React, { useEffect } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 
-import { loggedIn, setAppState } from 'loot-core/client/actions';
+import { loggedIn } from 'loot-core/client/actions';
+import { setAppState } from 'loot-core/client/app/appSlice';
 
 import { useMetaThemeColor } from '../../hooks/useMetaThemeColor';
 import { useAppSelector, useAppDispatch } from '../../redux';
@@ -44,7 +45,7 @@ function Version() {
         },
       }}
     >
-      {`App: v${window.Actual?.ACTUAL_VERSION} | Server: ${version}`}
+      {`App: v${global.Actual.ACTUAL_VERSION} | Server: ${version}`}
     </Text>
   );
 }

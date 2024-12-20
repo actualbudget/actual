@@ -9,10 +9,12 @@ import React, {
   useRef,
 } from 'react';
 
-import {
-  type SplitMode,
-  type SplitState,
-} from 'loot-core/client/state-types/app';
+type SplitMode = 'collapse' | 'expand';
+type SplitState = {
+  ids: string[];
+  mode: SplitMode;
+  transitionId: string | null;
+};
 
 type ToggleSplitAction = {
   type: 'toggle-split';

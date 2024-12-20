@@ -15,9 +15,9 @@ import {
   closeBudget,
   loadBudget,
   loadGlobalPrefs,
-  setAppState,
   sync,
 } from 'loot-core/client/actions';
+import { setAppState } from 'loot-core/client/app/appSlice';
 import { SpreadsheetProvider } from 'loot-core/client/SpreadsheetProvider';
 import * as Platform from 'loot-core/src/client/platform';
 import {
