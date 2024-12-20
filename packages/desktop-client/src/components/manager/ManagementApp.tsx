@@ -1,7 +1,8 @@
 import React, { useEffect } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 
-import { loggedIn, setAppState } from 'loot-core/client/actions';
+import { loggedIn } from 'loot-core/client/actions';
+import { setAppState } from 'loot-core/client/app/appSlice';
 
 import { ProtectedRoute } from '../../auth/ProtectedRoute';
 import { Permissions } from '../../auth/types';
@@ -51,7 +52,7 @@ function Version() {
         },
       }}
     >
-      {`App: v${window.Actual?.ACTUAL_VERSION} | Server: ${version}`}
+      {`App: v${global.Actual.ACTUAL_VERSION} | Server: ${version}`}
     </Text>
   );
 }

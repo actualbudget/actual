@@ -6,10 +6,9 @@ import {
   closeModal,
   loadPrefs,
   pushModal,
-  reloadApp,
   replaceModal,
-  setAppState,
 } from 'loot-core/client/actions';
+import { setAppState } from 'loot-core/client/app/appSlice';
 import {
   getAccounts,
   getCategories,
@@ -163,6 +162,6 @@ export function handleGlobalEvents(store: AppStore) {
   });
 
   listen('api-fetch-redirected', () => {
-    store.dispatch(reloadApp());
+    global.Actual.reload();
   });
 }

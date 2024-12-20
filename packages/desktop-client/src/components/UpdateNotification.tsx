@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { setAppState, updateApp } from 'loot-core/client/actions';
+import { setAppState, updateApp } from 'loot-core/client/app/appSlice';
 
 import { SvgClose } from '../icons/v1';
 import { useSelector, useDispatch } from '../redux';
@@ -69,7 +69,7 @@ export function UpdateNotification() {
                   textDecoration: 'underline',
                 }}
                 onClick={() =>
-                  window.Actual?.openURLInBrowser(
+                  global.Actual.openURLInBrowser(
                     'https://actualbudget.org/docs/releases',
                   )
                 }

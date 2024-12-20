@@ -471,7 +471,7 @@ export function ImportTransactionsModal({ options }) {
   }
 
   async function onNewFile() {
-    const res = await window.Actual?.openFileDialog({
+    const res = await global.Actual.openFileDialog({
       filters: [
         {
           name: 'Financial Files',
