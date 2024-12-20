@@ -13,7 +13,6 @@ export type CloseBudgetAction = {
 };
 
 export type Action =
-  | AccountActions
   | AppActions
   | BudgetsActions
   | ModalsActions
