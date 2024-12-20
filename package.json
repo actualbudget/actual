@@ -17,6 +17,8 @@
     "types": "tsc --noEmit --incremental",
     "verify": "yarn lint && yarn types",
     "reset-password": "node src/scripts/reset-password.js",
+    "enable-openid": "node src/scripts/enable-openid.js",
+    "disable-openid": "node src/scripts/disable-openid.js",
     "health-check": "node src/scripts/health-check.js"
   },
   "dependencies": {

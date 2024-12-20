@@ -32,6 +32,7 @@ export interface Config {
     client_id: string;
     client_secret: string;
     server_hostname: string;
+    authMethod?: 'openid' | 'oauth2';
   };
   multiuser: boolean;
   token_expiration?: 'never' | 'openid-provider' | number;

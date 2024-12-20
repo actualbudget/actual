@@ -170,11 +170,22 @@ export async function loginWithOpenIdFinalize(body) {
   let { code_verifier, return_url } = pendingRequest;
 
   try {
-    const params = { code: body.code, state: body.state };
-    let tokenSet = await client.callback(client.redirect_uris[0], params, {
-      code_verifier,
-      state: body.state,
-    });
+    let tokenSet = null;
+
+    if (!config.authMethod || config.authMethod === 'openid') {
+      const params = { code: body.code, state: body.state };
+      tokenSet = await client.callback(client.redirect_uris[0], params, {
+        code_verifier,
+        state: body.state,
+      });
+    } else {
+      tokenSet = await client.grant({
+        grant_type: 'authorization_code',
+        code: body.code,
+        redirect_uri: client.redirect_uris[0],
+        code_verifier,
+      });
+    }
     const userInfo = await client.userinfo(tokenSet.access_token);
     const identity =
       userInfo.preferred_username ??
