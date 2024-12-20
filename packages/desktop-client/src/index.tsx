@@ -13,7 +13,7 @@ import { Provider } from 'react-redux';
 import { bindActionCreators } from '@reduxjs/toolkit';
 import { createRoot } from 'react-dom/client';
 
-import * as accountSlice from 'loot-core/src/client/accounts/accountSlice';
+import * as accountsSlice from 'loot-core/src/client/accounts/accountsSlice';
 import * as actions from 'loot-core/src/client/actions';
 import { runQuery } from 'loot-core/src/client/query-helpers';
 import { store } from 'loot-core/src/client/store';
@@ -32,7 +32,7 @@ import 'focus-visible';
 const boundActions = bindActionCreators(
   {
     ...actions,
-    ...accountSlice.actions,
+    ...accountsSlice.actions,
   },
   store.dispatch,
 );
