@@ -3,7 +3,7 @@ import { configureStore, combineReducers } from '@reduxjs/toolkit';
 import {
   name as accountSliceName,
   reducer as accountSliceReducer,
-} from '../accounts/accountSlice';
+} from '../accounts/accountsSlice';
 import { reducers } from '../reducers';
 
 import { type store as realStore } from './index';

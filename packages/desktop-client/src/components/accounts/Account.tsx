@@ -13,7 +13,7 @@ import { debounce } from 'debounce';
 import { t } from 'i18next';
 import { v4 as uuidv4 } from 'uuid';
 
-import { unlinkAccount } from 'loot-core/client/accounts/accountSlice';
+import { unlinkAccount } from 'loot-core/client/accounts/accountsSlice';
 import {
   createPayee,
   getPayees,
