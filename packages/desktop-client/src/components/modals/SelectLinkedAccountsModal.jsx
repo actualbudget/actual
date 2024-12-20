@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
-
-import { t } from 'i18next';
 
 import {
   closeModal,
@@ -23,7 +22,7 @@ import { TableHeader, Table, Row, Field } from '../table';
 const addOnBudgetAccountOption = { id: 'new-on', name: 'Create new account' };
 const addOffBudgetAccountOption = {
   id: 'new-off',
-  name: 'Create new account (off-budget)',
+  name: 'Create new account (off budget)',
 };
 
 export function SelectLinkedAccountsModal({
@@ -32,6 +31,7 @@ export function SelectLinkedAccountsModal({
   syncSource,
 }) {
   externalAccounts.sort((a, b) => a.name.localeCompare(b.name));
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const localAccounts = useAccounts().filter(a => a.closed === 0);
   const [chosenAccounts, setChosenAccounts] = useState(() => {
@@ -201,6 +201,7 @@ function TableRow({
   unlinkedAccounts,
   onSetLinkedAccount,
 }) {
+  const { t } = useTranslation();
   const [focusedField, setFocusedField] = useState(null);
 
   const availableAccountOptions = [

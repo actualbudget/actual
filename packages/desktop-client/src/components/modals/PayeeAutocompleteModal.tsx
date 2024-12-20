@@ -1,6 +1,5 @@
 import React, { type ComponentPropsWithoutRef } from 'react';
-
-import { t } from 'i18next';
+import { useTranslation } from 'react-i18next';
 
 import { useAccounts } from '../../hooks/useAccounts';
 import { useNavigate } from '../../hooks/useNavigate';
@@ -24,6 +23,7 @@ export function PayeeAutocompleteModal({
   autocompleteProps,
   onClose,
 }: PayeeAutocompleteModalProps) {
+  const { t } = useTranslation();
   const payees = usePayees() || [];
   const accounts = useAccounts() || [];
   const navigate = useNavigate();
