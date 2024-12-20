@@ -3,7 +3,7 @@
   "author": "Actual",
   "productName": "Actual",
   "description": "A simple and powerful personal finance system",
-  "version": "24.11.0",
+  "version": "24.12.0",
   "scripts": {
     "clean": "rm -rf dist",
     "update-client": "bin/update-client",
@@ -85,7 +85,7 @@
     "npmRebuild": false
   },
   "dependencies": {
-    "better-sqlite3": "^9.6.0",
+    "better-sqlite3": "^11.7.0",
     "fs-extra": "^11.2.0",
     "promise-retry": "^2.0.1"
   },

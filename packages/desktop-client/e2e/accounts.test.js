@@ -54,17 +54,17 @@ test.describe('Accounts', () => {
     await expect(page).toMatchThemeScreenshots();
   });
 
-  test.describe('Budgeted Accounts', () => {
+  test.describe('On Budget Accounts', () => {
     // Reset filters
     test.afterEach(async () => {
       await accountPage.removeFilter(0);
     });
 
     test('creates a transfer from two existing transactions', async () => {
-      accountPage = await navigation.goToAccountPage('For budget');
+      accountPage = await navigation.goToAccountPage('On budget');
       await accountPage.waitFor();
 
-      await expect(accountPage.accountName).toHaveText('Budgeted Accounts');
+      await expect(accountPage.accountName).toHaveText('On Budget Accounts');
 
       await accountPage.filterByNote('Test Acc Transfer');
 

@@ -5,8 +5,7 @@ import React, {
   type ComponentProps,
   type CSSProperties,
 } from 'react';
-
-import { t } from 'i18next';
+import { useTranslation } from 'react-i18next';
 
 import { send } from 'loot-core/src/platform/client/fetch';
 
@@ -36,6 +35,7 @@ export function NotesButton({
   tooltipPosition = 'bottom start',
   style,
 }: NotesButtonProps) {
+  const { t } = useTranslation();
   const triggerRef = useRef(null);
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const note = useNotes(id) || '';

@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 
 import { css } from '@emotion/css';
-import { t } from 'i18next';
 import { v4 as uuid } from 'uuid';
 
 import {
@@ -262,6 +262,7 @@ function ConditionEditor({
         field={field}
         type={type}
         value={value}
+        op={op}
         multi={op === 'oneOf' || op === 'notOneOf'}
         onChange={v => onChange('value', v)}
         numberFormatType="currency"
@@ -303,6 +304,7 @@ function formatAmount(amount) {
 }
 
 function ScheduleDescription({ id }) {
+  const { t } = useTranslation();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const scheduleQuery = useMemo(
     () => q('schedules').filter({ id }).select('*'),
@@ -372,6 +374,7 @@ const splitActionFields = actionFields.filter(
 );
 const allocationMethodOptions = Object.entries(ALLOCATION_METHODS);
 function ActionEditor({ action, editorStyle, onChange, onDelete, onAdd }) {
+  const { t } = useTranslation();
   const {
     field,
     op,
@@ -461,6 +464,7 @@ function ActionEditor({ action, editorStyle, onChange, onDelete, onAdd }) {
               <GenericInput
                 key={inputKey}
                 field={field}
+                op={op}
                 type="number"
                 numberFormatType={
                   options.method === 'fixed-percent' ? 'percentage' : 'currency'
@@ -760,6 +764,7 @@ const conditionFields = [
   ]);
 
 export function EditRuleModal({ defaultRule, onSave: originalOnSave }) {
+  const { t } = useTranslation();
   const [conditions, setConditions] = useState(
     defaultRule.conditions.map(parse).map(c => ({ ...c, inputKey: uuid() })),
   );

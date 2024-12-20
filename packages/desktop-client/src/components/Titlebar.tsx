@@ -1,10 +1,12 @@
 import React, { useState, useEffect, type CSSProperties } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
+import { useTranslation } from 'react-i18next';
+import { useDispatch } from 'react-redux';
 import { Routes, Route, useLocation } from 'react-router-dom';
 
 import { css } from '@emotion/css';
-import { t } from 'i18next';
 
+import { sync } from 'loot-core/client/actions';
 import * as Platform from 'loot-core/src/client/platform';
 import * as queries from 'loot-core/src/client/queries';
 import { listen } from 'loot-core/src/platform/client/fetch';
@@ -13,7 +15,6 @@ import {
   isElectron,
 } from 'loot-core/src/shared/environment';
 
-import { useActions } from '../hooks/useActions';
 import { useGlobalPref } from '../hooks/useGlobalPref';
 import { useMetadataPref } from '../hooks/useMetadataPref';
 import { useNavigate } from '../hooks/useNavigate';
@@ -107,9 +108,9 @@ type SyncButtonProps = {
   isMobile?: boolean;
 };
 function SyncButton({ style, isMobile = false }: SyncButtonProps) {
+  const { t } = useTranslation();
   const [cloudFileId] = useMetadataPref('cloudFileId');
-  const { sync } = useActions();
-
+  const dispatch = useDispatch();
   const [syncing, setSyncing] = useState(false);
   const [syncState, setSyncState] = useState<
     null | 'offline' | 'local' | 'disabled' | 'error'
@@ -193,15 +194,17 @@ function SyncButton({ style, isMobile = false }: SyncButtonProps) {
     marginRight: 5,
   };
 
+  const onSync = () => dispatch(sync());
+
   useHotkeys(
     'ctrl+s, cmd+s, meta+s',
-    sync,
+    onSync,
     {
       enableOnFormTags: true,
       preventDefault: true,
       scopes: ['app'],
     },
-    [sync],
+    [onSync],
   );
 
   return (
@@ -223,7 +226,7 @@ function SyncButton({ style, isMobile = false }: SyncButtonProps) {
         '&[data-hovered]': hoveredStyle,
         '&[data-pressed]': activeStyle,
       })}
-      onPress={sync}
+      onPress={onSync}
     >
       {isMobile ? (
         syncState === 'error' ? (
@@ -265,6 +268,7 @@ type TitlebarProps = {
 };
 
 export function Titlebar({ style }: TitlebarProps) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   const sidebar = useSidebar();

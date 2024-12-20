@@ -1,7 +1,7 @@
 import React, { type ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { css } from '@emotion/css';
-import { t } from 'i18next';
 
 import { type DarkTheme, type Theme } from 'loot-core/types/prefs';
 
@@ -37,6 +37,7 @@ function Column({ title, children }: { title: string; children: ReactNode }) {
 }
 
 export function ThemeSettings() {
+  const { t } = useTranslation();
   const sidebar = useSidebar();
   const [theme, switchTheme] = useTheme();
   const [darkTheme, switchDarkTheme] = usePreferredDarkTheme();

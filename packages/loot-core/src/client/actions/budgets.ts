@@ -148,6 +148,73 @@ export function createBudget({ testMode = false, demoMode = false } = {}) {
   };
 }
 
+export function validateBudgetName(name: string): {
+  valid: boolean;
+  message?: string;
+} {
+  return send('validate-budget-name', { name });
+}
+
+export function uniqueBudgetName(name: string): string {
+  return send('unique-budget-name', { name });
+}
+
+export function duplicateBudget({
+  id,
+  cloudId,
+  oldName,
+  newName,
+  managePage,
+  loadBudget = 'none',
+  cloudSync,
+}: {
+  id?: string;
+  cloudId?: string;
+  oldName: string;
+  newName: string;
+  managePage?: boolean;
+  loadBudget: 'none' | 'original' | 'copy';
+  /**
+   * cloudSync is used to determine if the duplicate budget
+   * should be synced to the server
+   */
+  cloudSync?: boolean;
+}) {
+  return async (dispatch: Dispatch) => {
+    try {
+      dispatch(
+        setAppState({
+          loadingText: t('Duplicating:  {{oldName}}  --  to:  {{newName}}', {
+            oldName,
+            newName,
+          }),
+        }),
+      );
+
+      await send('duplicate-budget', {
+        id,
+        cloudId,
+        newName,
+        cloudSync,
+        open: loadBudget,
+      });
+
+      dispatch(closeModal());
+
+      if (managePage) {
+        await dispatch(loadAllFiles());
+      }
+    } catch (error) {
+      console.error('Error duplicating budget:', error);
+      throw error instanceof Error
+        ? error
+        : new Error('Error duplicating budget: ' + String(error));
+    } finally {
+      dispatch(setAppState({ loadingText: null }));
+    }
+  };
+}
+
 export function importBudget(
   filepath: string,
   type: Parameters<Handlers['import-budget']>[0]['type'],
@@ -161,7 +228,6 @@ export function importBudget(
     dispatch(closeModal());
 
     await dispatch(loadPrefs());
-    window.__navigate('/budget');
   };
 }
 
