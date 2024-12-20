@@ -41,8 +41,8 @@ type AccountState = {
   accountsSyncing: Array<AccountEntity['id']>;
 };
 
-const accountSlice = createSlice({
-  name: 'account',
+const accountsSlice = createSlice({
+  name: 'accounts',
   initialState,
   reducers: {
     setAccountsSyncing(state, action: SetAccountsSyncingAction) {
@@ -64,7 +64,7 @@ const accountSlice = createSlice({
 });
 
 const { setAccountsSyncing, markAccountFailed, markAccountSuccess } =
-  accountSlice.actions;
+  accountsSlice.actions;
 
 type UnlinkAccountArgs = {
   id: string;
@@ -199,8 +199,8 @@ export const syncAccounts = createAppAsyncThunk(
   'accounts/syncAccounts',
   async ({ id }: SyncAccountsArgs, thunkApi) => {
     // Disallow two parallel sync operations
-    const accountState = thunkApi.getState().account;
-    if (accountState.accountsSyncing.length > 0) {
+    const accountsState = thunkApi.getState().accounts;
+    if (accountsState.accountsSyncing.length > 0) {
       return false;
     }
 
@@ -313,9 +313,9 @@ export const moveAccount = createAppAsyncThunk(
   },
 );
 
-export const { name, reducer, getInitialState } = accountSlice;
+export const { name, reducer, getInitialState } = accountsSlice;
 export const actions = {
-  ...accountSlice.actions,
+  ...accountsSlice.actions,
   linkAccount,
   unlinkAccount,
   syncAccounts,

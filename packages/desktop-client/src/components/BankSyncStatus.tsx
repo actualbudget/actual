@@ -10,7 +10,7 @@ import { Text } from './common/Text';
 import { View } from './common/View';
 
 export function BankSyncStatus() {
-  const accountsSyncing = useSelector(state => state.account.accountsSyncing);
+  const accountsSyncing = useSelector(state => state.accounts.accountsSyncing);
   const accountsSyncingCount = accountsSyncing.length;
   const count = accountsSyncingCount;
 

@@ -1,8 +1,8 @@
 import { configureStore, combineReducers } from '@reduxjs/toolkit';
 
 import {
-  name as accountSliceName,
-  reducer as accountSliceReducer,
+  name as accountsSliceName,
+  reducer as accountsSliceReducer,
 } from '../accounts/accountsSlice';
 import { reducers } from '../reducers';
 
@@ -10,7 +10,7 @@ import { type store as realStore } from './index';
 
 const appReducer = combineReducers({
   ...reducers,
-  [accountSliceName]: accountSliceReducer,
+  [accountsSliceName]: accountsSliceReducer,
 });
 
 export let mockStore: typeof realStore = configureStore({
