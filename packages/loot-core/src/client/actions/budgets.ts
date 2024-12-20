@@ -4,10 +4,10 @@ import { t } from 'i18next';
 import { send } from '../../platform/client/fetch';
 import { getDownloadError, getSyncError } from '../../shared/errors';
 import type { Handlers } from '../../types/handlers';
+import { setAppState } from '../app/appSlice';
 import * as constants from '../constants';
 import { type AppDispatch, type GetRootState } from '../store';
 
-import { setAppState } from './app';
 import { closeModal, pushModal } from './modals';
 import { loadPrefs, loadGlobalPrefs } from './prefs';
 
