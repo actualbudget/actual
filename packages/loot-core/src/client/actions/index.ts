@@ -1,4 +1,3 @@
-export * from './queries';
 export * from './modals';
 export * from './notifications';
 export * from './prefs';

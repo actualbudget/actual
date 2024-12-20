@@ -6,8 +6,12 @@ import {
 
 import { send } from '../../platform/client/fetch';
 import { type AccountEntity, type TransactionEntity } from '../../types/models';
-import { addNotification, getAccounts, getPayees } from '../actions';
-import * as constants from '../constants';
+import { addNotification } from '../actions';
+import {
+  getAccounts,
+  getPayees,
+  setNewTransactions,
+} from '../queries/queriesSlice';
 import { type AppDispatch, type RootState } from '../store';
 
 const createAppAsyncThunk = createAsyncThunk.withTypes<{
@@ -285,12 +289,13 @@ export const syncAccounts = createAppAsyncThunk(
     }
 
     // Set new transactions
-    thunkApi.dispatch({
-      type: constants.SET_NEW_TRANSACTIONS,
-      newTransactions,
-      matchedTransactions,
-      updatedAccounts,
-    });
+    thunkApi.dispatch(
+      setNewTransactions({
+        newTransactions,
+        matchedTransactions,
+        updatedAccounts,
+      }),
+    );
 
     // Reset the sync state back to empty (fallback in case something breaks
     // in the logic above)

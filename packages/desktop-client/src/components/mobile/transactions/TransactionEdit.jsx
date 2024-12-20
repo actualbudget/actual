@@ -17,7 +17,8 @@ import {
   isValid as isValidDate,
 } from 'date-fns';
 
-import { pushModal, setLastTransaction } from 'loot-core/client/actions';
+import { pushModal } from 'loot-core/client/actions';
+import { setLastTransaction } from 'loot-core/client/queries/queriesSlice';
 import { runQuery } from 'loot-core/src/client/query-helpers';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
