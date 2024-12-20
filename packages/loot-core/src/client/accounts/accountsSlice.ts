@@ -1,38 +1,31 @@
-import {
-  createAsyncThunk,
-  createSlice,
-  type PayloadAction,
-} from '@reduxjs/toolkit';
+import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
 import { send } from '../../platform/client/fetch';
 import { type AccountEntity, type TransactionEntity } from '../../types/models';
 import { addNotification, getAccounts, getPayees } from '../actions';
 import * as constants from '../constants';
-import { type AppDispatch, type RootState } from '../store';
+import { createAppAsyncThunk, type AppDispatch } from '../store';
 
-const createAppAsyncThunk = createAsyncThunk.withTypes<{
-  state: RootState;
-  dispatch: AppDispatch;
-}>();
+const sliceName = 'accounts';
 
 const initialState: AccountState = {
   failedAccounts: {},
   accountsSyncing: [],
 };
 
-type SetAccountsSyncingAction = PayloadAction<{
+type SetAccountsSyncingPayload = {
   ids: Array<AccountEntity['id']>;
-}>;
+};
 
-type MarkAccountFailedAction = PayloadAction<{
+type MarkAccountFailedPayload = {
   id: AccountEntity['id'];
   errorType: string;
   errorCode: string;
-}>;
+};
 
-type MarkAccountSuccessAction = PayloadAction<{
+type MarkAccountSuccessPayload = {
   id: AccountEntity['id'];
-}>;
+};
 
 type AccountState = {
   failedAccounts: {
@@ -42,40 +35,42 @@ type AccountState = {
 };
 
 const accountsSlice = createSlice({
-  name: 'accounts',
+  name: sliceName,
   initialState,
   reducers: {
-    setAccountsSyncing(state, action: SetAccountsSyncingAction) {
-      const payload = action.payload;
-      state.accountsSyncing = payload.ids;
+    setAccountsSyncing(
+      state,
+      action: PayloadAction<SetAccountsSyncingPayload>,
+    ) {
+      state.accountsSyncing = action.payload.ids;
     },
-    markAccountFailed(state, action: MarkAccountFailedAction) {
-      const payload = action.payload;
-      state.failedAccounts[payload.id] = {
-        type: payload.errorType,
-        code: payload.errorCode,
+    markAccountFailed(state, action: PayloadAction<MarkAccountFailedPayload>) {
+      state.failedAccounts[action.payload.id] = {
+        type: action.payload.errorType,
+        code: action.payload.errorCode,
       };
     },
-    markAccountSuccess(state, action: MarkAccountSuccessAction) {
-      const payload = action.payload;
-      delete state.failedAccounts[payload.id];
+    markAccountSuccess(
+      state,
+      action: PayloadAction<MarkAccountSuccessPayload>,
+    ) {
+      delete state.failedAccounts[action.payload.id];
     },
   },
 });
 
-const { setAccountsSyncing, markAccountFailed, markAccountSuccess } =
-  accountsSlice.actions;
-
-type UnlinkAccountArgs = {
-  id: string;
+type UnlinkAccountPayload = {
+  id: AccountEntity['id'];
 };
 
 export const unlinkAccount = createAppAsyncThunk(
   'accounts/unlinkAccount',
-  async ({ id }: UnlinkAccountArgs, thunkApi) => {
+  async ({ id }: UnlinkAccountPayload, { dispatch }) => {
+    const { markAccountSuccess } = accountsSlice.actions;
+
     await send('account-unlink', { id });
-    thunkApi.dispatch(markAccountSuccess({ id }));
-    thunkApi.dispatch(getAccounts());
+    dispatch(markAccountSuccess({ id }));
+    await dispatch(getAccounts());
   },
 );
 
@@ -87,10 +82,10 @@ type LinkAccountArgs = {
 };
 
 export const linkAccount = createAppAsyncThunk(
-  'accounts/linkAccount',
+  `${sliceName}/linkAccount`,
   async (
     { requisitionId, account, upgradingId, offBudget }: LinkAccountArgs,
-    thunkApi,
+    { dispatch },
   ) => {
     await send('gocardless-accounts-link', {
       requisitionId,
@@ -98,30 +93,30 @@ export const linkAccount = createAppAsyncThunk(
       upgradingId,
       offBudget,
     });
-    await thunkApi.dispatch(getPayees());
-    await thunkApi.dispatch(getAccounts());
+    await dispatch(getPayees());
+    await dispatch(getAccounts());
   },
 );
 
-type LinkAccountSimpleFinArgs = {
+type LinkAccountSimpleFinPayload = {
   externalAccount: unknown;
-  upgradingId?: string;
+  upgradingId?: AccountEntity['id'];
   offBudget?: boolean;
 };
 
 export const linkAccountSimpleFin = createAppAsyncThunk(
-  'accounts/linkAccountSimpleFin',
+  `${sliceName}/linkAccountSimpleFin`,
   async (
-    { externalAccount, upgradingId, offBudget }: LinkAccountSimpleFinArgs,
-    thunkApi,
+    { externalAccount, upgradingId, offBudget }: LinkAccountSimpleFinPayload,
+    { dispatch },
   ) => {
     await send('simplefin-accounts-link', {
       externalAccount,
       upgradingId,
       offBudget,
     });
-    await thunkApi.dispatch(getPayees());
-    await thunkApi.dispatch(getAccounts());
+    await dispatch(getPayees());
+    await dispatch(getAccounts());
   },
 );
 
@@ -145,6 +140,7 @@ function handleSyncResponse(
   resUpdatedAccounts: Array<AccountEntity['id']>,
 ) {
   const { errors, newTransactions, matchedTransactions, updatedAccounts } = res;
+  const { markAccountFailed, markAccountSuccess } = accountsSlice.actions;
 
   // Mark the account as failed or succeeded (depending on sync output)
   const [error] = errors;
@@ -191,15 +187,15 @@ function handleSyncResponse(
   return newTransactions.length > 0 || matchedTransactions.length > 0;
 }
 
-type SyncAccountsArgs = {
-  id?: string;
+type SyncAccountsPayload = {
+  id?: AccountEntity['id'];
 };
 
 export const syncAccounts = createAppAsyncThunk(
-  'accounts/syncAccounts',
-  async ({ id }: SyncAccountsArgs, thunkApi) => {
+  `${sliceName}/syncAccounts`,
+  async ({ id }: SyncAccountsPayload, { dispatch, getState }) => {
     // Disallow two parallel sync operations
-    const accountsState = thunkApi.getState().accounts;
+    const accountsState = getState().accounts;
     if (accountsState.accountsSyncing.length > 0) {
       return false;
     }
@@ -208,7 +204,7 @@ export const syncAccounts = createAppAsyncThunk(
 
     // Build an array of IDs for accounts to sync.. if no `id` provided
     // then we assume that all accounts should be synced
-    const queriesState = thunkApi.getState().queries;
+    const queriesState = getState().queries;
     let accountIdsToSync = !batchSync
       ? [id]
       : queriesState.accounts
@@ -222,7 +218,8 @@ export const syncAccounts = createAppAsyncThunk(
           )
           .map(({ id }) => id);
 
-    thunkApi.dispatch(setAccountsSyncing({ ids: accountIdsToSync }));
+    const { setAccountsSyncing } = accountsSlice.actions;
+    dispatch(setAccountsSyncing({ ids: accountIdsToSync }));
 
     const accountsData: AccountEntity[] = await send('accounts-get');
     const simpleFinAccounts = accountsData.filter(
@@ -245,7 +242,7 @@ export const syncAccounts = createAppAsyncThunk(
         const success = handleSyncResponse(
           account.accountId,
           account.res,
-          thunkApi.dispatch,
+          dispatch,
           newTransactions,
           matchedTransactions,
           updatedAccounts,
@@ -270,7 +267,7 @@ export const syncAccounts = createAppAsyncThunk(
       const success = handleSyncResponse(
         accountId,
         res,
-        thunkApi.dispatch,
+        dispatch,
         newTransactions,
         matchedTransactions,
         updatedAccounts,
@@ -279,13 +276,11 @@ export const syncAccounts = createAppAsyncThunk(
       if (success) isSyncSuccess = true;
 
       // Dispatch the ids for the accounts that are yet to be synced
-      thunkApi.dispatch(
-        setAccountsSyncing({ ids: accountIdsToSync.slice(idx + 1) }),
-      );
+      dispatch(setAccountsSyncing({ ids: accountIdsToSync.slice(idx + 1) }));
     }
 
     // Set new transactions
-    thunkApi.dispatch({
+    dispatch({
       type: constants.SET_NEW_TRANSACTIONS,
       newTransactions,
       matchedTransactions,
@@ -294,22 +289,22 @@ export const syncAccounts = createAppAsyncThunk(
 
     // Reset the sync state back to empty (fallback in case something breaks
     // in the logic above)
-    thunkApi.dispatch(setAccountsSyncing({ ids: [] }));
+    dispatch(setAccountsSyncing({ ids: [] }));
     return isSyncSuccess;
   },
 );
 
-type MoveAccountArgs = {
-  id: string;
-  targetId: string;
+type MoveAccountPayload = {
+  id: AccountEntity['id'];
+  targetId: AccountEntity['id'];
 };
 
 export const moveAccount = createAppAsyncThunk(
-  'accounts/moveAccount',
-  async ({ id, targetId }: MoveAccountArgs, thunkApi) => {
+  `${sliceName}/moveAccount`,
+  async ({ id, targetId }: MoveAccountPayload, { dispatch }) => {
     await send('account-move', { id, targetId });
-    thunkApi.dispatch(getAccounts());
-    thunkApi.dispatch(getPayees());
+    await dispatch(getAccounts());
+    await dispatch(getPayees());
   },
 );
 
@@ -317,8 +312,8 @@ export const { name, reducer, getInitialState } = accountsSlice;
 export const actions = {
   ...accountsSlice.actions,
   linkAccount,
-  unlinkAccount,
-  syncAccounts,
   linkAccountSimpleFin,
   moveAccount,
+  unlinkAccount,
+  syncAccounts,
 };
