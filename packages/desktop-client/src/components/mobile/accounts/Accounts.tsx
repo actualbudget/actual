@@ -230,7 +230,9 @@ function AccountList({
 }: AccountListProps) {
   const { t } = useTranslation();
   const failedAccounts = useFailedAccounts();
-  const syncingAccountIds = useSelector(state => state.account.accountsSyncing);
+  const syncingAccountIds = useSelector(
+    state => state.accounts.accountsSyncing,
+  );
   const onBudgetAccounts = accounts.filter(account => account.offbudget === 0);
   const offBudgetAccounts = accounts.filter(account => account.offbudget === 1);
 
