@@ -713,28 +713,22 @@ class AccountInternal extends PureComponent<
       const transactions = this.state.transactions.filter(trans =>
         ids.includes(trans.id),
       );
-      console.log('transactions', transactions);
       //call the runrules function
-      let changed_transactions = [];
+      const changedTransactions = [];
       for (const transaction of transactions) {
         await send('rules-run', {
-          transaction: transaction,
-        }).then((res: any) => {
+          transaction,
+        }).then((res: TransactionEntity | null) => {
           if (res) {
-            changed_transactions.push(res);
+            changedTransactions.push(res);
           }
-          console.log(
-            'rules-run response for transaction',
-            transaction.id,
-            res,
-          );
         });
       }
 
       // If we have changed transactions, update them in the database
-      if (changed_transactions.length > 0) {
+      if (changedTransactions.length > 0) {
         await send('transactions-batch-update', {
-          updated: changed_transactions,
+          updated: changedTransactions,
         });
       }
 
