@@ -39,11 +39,7 @@ import {
   makeChild,
   makeAsNonChildTransactions,
 } from 'loot-core/src/shared/transactions';
-import {
-  applyChanges,
-  getChangedValues,
-  groupById,
-} from 'loot-core/src/shared/util';
+import { applyChanges, groupById } from 'loot-core/src/shared/util';
 import {
   type NewRuleEntity,
   type RuleActionEntity,
@@ -52,8 +48,8 @@ import {
   type RuleConditionEntity,
   type TransactionEntity,
   type TransactionFilterEntity,
-  type RuleEntity,
 } from 'loot-core/src/types/models';
+
 import { useAccountPreviewTransactions } from '../../hooks/useAccountPreviewTransactions';
 import { useAccounts } from '../../hooks/useAccounts';
 import { useActions } from '../../hooks/useActions';
