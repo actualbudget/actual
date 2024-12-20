@@ -5,7 +5,7 @@ import {
   linkAccount,
   linkAccountSimpleFin,
   unlinkAccount,
-} from 'loot-core/client/accounts/accountSlice';
+} from 'loot-core/client/accounts/accountsSlice';
 import { closeModal } from 'loot-core/client/actions';
 
 import { useAccounts } from '../../hooks/useAccounts';

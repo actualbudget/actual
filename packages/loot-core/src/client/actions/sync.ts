@@ -1,6 +1,6 @@
 import { send } from '../../platform/client/fetch';
 import { getUploadError } from '../../shared/errors';
-import { syncAccounts } from '../accounts/accountSlice';
+import { syncAccounts } from '../accounts/accountsSlice';
 import { type AppDispatch, type GetRootState } from '../store';
 
 import { pushModal } from './modals';

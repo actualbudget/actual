@@ -2,7 +2,7 @@ import React, { useCallback, useRef, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 
-import { unlinkAccount } from 'loot-core/client/accounts/accountSlice';
+import { unlinkAccount } from 'loot-core/client/accounts/accountsSlice';
 import { type AccountEntity } from 'loot-core/types/models';
 
 import { authorizeBank } from '../../gocardless';
