@@ -1,4 +1,4 @@
-import React, { useState, useEffect, type CSSProperties } from 'react';
+import React, { useState, useEffect, type CSSProperties, type SetStateAction } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
@@ -105,16 +105,22 @@ function PrivacyButton({ style }: PrivacyButtonProps) {
 
 type SyncButtonProps = {
   style?: CSSProperties;
+  syncState: string | null;
+  setSyncState: (
+    state: SetStateAction<null | 'offline' | 'local' | 'disabled' | 'error'>,
+  ) => void;
   isMobile?: boolean;
 };
-function SyncButton({ style, isMobile = false }: SyncButtonProps) {
+function SyncButton({
+  style,
+  syncState,
+  setSyncState,
+  isMobile = false,
+}: SyncButtonProps) {
   const { t } = useTranslation();
   const [cloudFileId] = useMetadataPref('cloudFileId');
   const dispatch = useDispatch();
   const [syncing, setSyncing] = useState(false);
-  const [syncState, setSyncState] = useState<
-    null | 'offline' | 'local' | 'disabled' | 'error'
-  >(null);
 
   useEffect(() => {
     const unlisten = listen('sync-event', ({ type, subtype, syncDisabled }) => {
@@ -275,6 +281,9 @@ export function Titlebar({ style }: TitlebarProps) {
   const { isNarrowWidth } = useResponsive();
   const serverURL = useServerURL();
   const [floatingSidebar] = useGlobalPref('floatingSidebar');
+  const [syncState, setSyncState] = useState<
+    null | 'offline' | 'local' | 'disabled' | 'error'
+  >(null);
 
   return isNarrowWidth ? null : (
     <View
@@ -346,8 +355,13 @@ export function Titlebar({ style }: TitlebarProps) {
           <ThemeSelector />
         )}
         <PrivacyButton />
-        {serverURL ? <SyncButton /> : null}
-        <LoggedInUser />
+        {serverURL ? (
+          <SyncButton
+            syncState={syncState}
+            setSyncState={setSyncState}
+          />
+        ) : null}
+        <LoggedInUser syncState={syncState} />
         {!isElectron() && <HelpMenu />}
       </SpaceBetween>
     </View>
