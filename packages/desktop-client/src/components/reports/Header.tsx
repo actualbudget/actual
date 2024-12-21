@@ -68,6 +68,15 @@ export function Header({
 }: HeaderProps) {
   const { t } = useTranslation();
   const { isNarrowWidth } = useResponsive();
+
+  function convertToMonth(
+    start: string,
+    end: string,
+    mode: TimeFrame['mode'],
+  ): [string, string, TimeFrame['mode']] {
+    return [monthUtils.getMonth(start), monthUtils.getMonth(end), mode];
+  }
+
   return (
     <View
       style={{
@@ -165,11 +174,13 @@ export function Header({
             variant="bare"
             onPress={() =>
               onChangeDates(
-                ...getLiveRange(
-                  'Year to date',
-                  earliestTransaction,
-                  true,
-                  firstDayOfWeekIdx,
+                ...convertToMonth(
+                  ...getLiveRange(
+                    'Year to date',
+                    earliestTransaction,
+                    true,
+                    firstDayOfWeekIdx,
+                  ),
                 ),
               )
             }
@@ -181,11 +192,13 @@ export function Header({
             onPress={() => {
               debugger;
               onChangeDates(
-                ...getLiveRange(
-                  'Last year',
-                  earliestTransaction,
-                  true,
-                  firstDayOfWeekIdx,
+                ...convertToMonth(
+                  ...getLiveRange(
+                    'Last year',
+                    earliestTransaction,
+                    true,
+                    firstDayOfWeekIdx,
+                  ),
                 ),
               );
             }}
