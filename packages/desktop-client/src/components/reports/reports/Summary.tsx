@@ -18,6 +18,7 @@ import {
 
 import { useFilters } from '../../../hooks/useFilters';
 import { useNavigate } from '../../../hooks/useNavigate';
+import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { SvgEquals } from '../../../icons/v1';
 import { SvgCloseParenthesis } from '../../../icons/v2/CloseParenthesis';
 import { SvgOpenParenthesis } from '../../../icons/v2/OpenParenthesis';
@@ -146,6 +147,10 @@ function SummaryInner({ widget }: SummaryInnerProps) {
       pretty: string;
     }>
   >([]);
+  
+  const [earliestTransaction, _] = useState('');
+  const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
+  const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
 
   useEffect(() => {
     async function run() {
@@ -272,6 +277,8 @@ function SummaryInner({ widget }: SummaryInnerProps) {
       <Header
         allMonths={allMonths}
         start={start}
+        earliestTransaction={earliestTransaction}
+        firstDayOfWeekIdx={firstDayOfWeekIdx}
         end={end}
         mode={mode}
         onChangeDates={onChangeDates}
