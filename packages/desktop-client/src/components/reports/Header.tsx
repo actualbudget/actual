@@ -189,8 +189,7 @@ export function Header({
           </Button>
           <Button
             variant="bare"
-            onPress={() => {
-              debugger;
+            onPress={() =>
               onChangeDates(
                 ...convertToMonth(
                   ...getLiveRange(
@@ -200,8 +199,8 @@ export function Header({
                     firstDayOfWeekIdx,
                   ),
                 ),
-              );
-            }}
+              )
+            }
           >
             {t('Last year')}
           </Button>
