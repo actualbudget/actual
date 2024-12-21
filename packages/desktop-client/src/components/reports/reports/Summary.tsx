@@ -147,7 +147,7 @@ function SummaryInner({ widget }: SummaryInnerProps) {
       pretty: string;
     }>
   >([]);
-  
+
   const [earliestTransaction, _] = useState('');
   const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
   const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
@@ -277,9 +277,9 @@ function SummaryInner({ widget }: SummaryInnerProps) {
       <Header
         allMonths={allMonths}
         start={start}
+        end={end}
         earliestTransaction={earliestTransaction}
         firstDayOfWeekIdx={firstDayOfWeekIdx}
-        end={end}
         mode={mode}
         onChangeDates={onChangeDates}
         onApply={dividendFilters.onApply}
