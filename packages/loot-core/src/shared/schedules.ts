@@ -276,6 +276,10 @@ export function getScheduledAmount(
   amount: number | { num1: number; num2: number },
   inverse: boolean = false,
 ): number {
+  // this check is temporary, and required at the moment as a schedule rule
+  // allows the amount condition to be deleted which causes a crash
+  if (amount == null) return 0;
+
   if (typeof amount === 'number') {
     return inverse ? -amount : amount;
   }
