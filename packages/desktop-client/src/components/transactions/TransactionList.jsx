@@ -88,6 +88,8 @@ export function TransactionList({
   onCloseAddTransaction,
   onCreatePayee,
   onApplyFilter,
+  showSelection = true,
+  allowSplitTransaction = true,
   onBatchDelete,
   onBatchDuplicate,
   onBatchLinkSchedule,
@@ -251,6 +253,8 @@ export function TransactionList({
       onCreateRule={onCreateRule}
       onScheduleAction={onScheduleAction}
       onMakeAsNonSplitTransactions={onMakeAsNonSplitTransactions}
+      showSelection={showSelection}
+      allowSplitTransaction={allowSplitTransaction}
     />
   );
 }
