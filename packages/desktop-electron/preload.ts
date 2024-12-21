@@ -13,7 +13,6 @@ contextBridge.exposeInMainWorld('Actual', {
   IS_DEV,
   ACTUAL_VERSION: VERSION,
   logToTerminal: console.log,
-
   ipcConnect: (
     func: (payload: {
       on: IpcRenderer['on'];
@@ -29,6 +28,8 @@ contextBridge.exposeInMainWorld('Actual', {
       },
     });
   },
+
+  startOAuthServer: () => ipcRenderer.invoke('start-oauth-server'),
 
   relaunch: () => {
     ipcRenderer.invoke('relaunch');

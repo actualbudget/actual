@@ -6,7 +6,7 @@ import React, {
   type CSSProperties,
 } from 'react';
 
-import { View } from '../common/View';
+import { View } from './View';
 
 type SimpleTableProps = {
   loadMore?: () => void;
