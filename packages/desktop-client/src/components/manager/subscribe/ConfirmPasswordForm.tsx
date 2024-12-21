@@ -2,6 +2,7 @@
 import React, { type ChangeEvent, type ReactNode, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { theme } from '../../../style';
 import { ButtonWithLoading } from '../../common/Button2';
 import { BigInput } from '../../common/Input';
 import { View } from '../../common/View';
@@ -131,6 +132,12 @@ export function ConfirmOldPasswordForm({ buttons, onSetPassword }) {
           setPassword(e.target.value)
         }
         onEnter={onSubmit}
+        style={{
+          borderColor: theme.buttonMenuBorder,
+          borderWidth: 1,
+          borderStyle: 'solid',
+          ':focus': {},
+        }}
       />
 
       <View

@@ -62,7 +62,7 @@ function PasswordLogin({ setError, dispatch }) {
       <ButtonWithLoading
         variant="primary"
         isLoading={loading}
-        style={{ fontSize: 15 }}
+        style={{ fontSize: 15, width: 170 }}
         onPress={onSubmitPassword}
       >
         <Trans>Sign in</Trans>
@@ -115,13 +115,13 @@ function OpenIdLogin({ setError }) {
     <View>
       {!reviewOpenIdConfiguration && (
         <>
-          <View style={{ flexDirection: 'row' }}>
+          <View style={{ flexDirection: 'row', justifyContent: 'flex-end' }}>
             <Button
               variant="primary"
               style={{
-                fontSize: 15,
-                alignSelf: 'center',
-                flexGrow: 1,
+                padding: 10,
+                fontSize: 14,
+                width: 170,
                 marginTop: 5,
               }}
               onPress={onSubmitOpenId}

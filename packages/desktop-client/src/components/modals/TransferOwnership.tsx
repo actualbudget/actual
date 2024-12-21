@@ -110,6 +110,7 @@ export function TransferOwnership({
                       setUserId(newValue);
                     }}
                     value={userId}
+                    defaultLabel={t('Select a user')}
                   />
                   <label
                     style={{
@@ -125,18 +126,18 @@ export function TransferOwnership({
                   <label
                     style={{
                       ...styles.verySmallText,
-                      color: theme.pageTextLight,
+                      color: theme.errorText,
                       marginTop: 5,
                     }}
                   >
                     {t(
-                      'This action is irreversible. Only the new owner or an administrator can reverse it.',
+                      'This action is irreversible, ownership of this budget file will only be able to be transferred by the server administrator or new owner.',
                     )}
                   </label>
                   <label
                     style={{
                       ...styles.verySmallText,
-                      color: theme.pageTextLight,
+                      color: theme.errorText,
                       marginTop: 5,
                     }}
                   >
@@ -170,6 +171,7 @@ export function TransferOwnership({
             </Button>
 
             <Button
+              variant="primary"
               isDisabled={
                 availableUsers.length === 0 || !userId || isTransferring
               }

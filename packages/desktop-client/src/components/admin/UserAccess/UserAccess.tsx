@@ -6,7 +6,6 @@ import React, {
   useMemo,
   type SetStateAction,
   type Dispatch,
-  useRef,
   type CSSProperties,
 } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
@@ -20,12 +19,11 @@ import { type UserAvailable } from 'loot-core/types/models';
 import { type UserAccessEntity } from 'loot-core/types/models/userAccess';
 
 import { useMetadataPref } from '../../../hooks/useMetadataPref';
-import { SvgDotsHorizontalTriple, SvgLockOpen } from '../../../icons/v1';
+import { SvgLockOpen } from '../../../icons/v1';
 import { SvgLockClosed } from '../../../icons/v2';
-import { styles, theme } from '../../../style';
+import { theme } from '../../../style';
 import { Button } from '../../common/Button2';
 import { Link } from '../../common/Link';
-import { Popover } from '../../common/Popover';
 import { Search } from '../../common/Search';
 import { SimpleTable } from '../../common/SimpleTable';
 import { Text } from '../../common/Text';
@@ -49,9 +47,6 @@ function UserAccessContent({
   const [page, setPage] = useState(0);
   const [filter, setFilter] = useState('');
   const [cloudFileId] = useMetadataPref('cloudFileId');
-  const [ownerName, setOwnerName] = useState('Unassigned');
-  const triggerRef = useRef(null);
-  const [menuOpen, setMenuOpen] = useState(false);
 
   const filteredAccesses = useMemo(
     () =>
@@ -126,14 +121,6 @@ function UserAccessContent({
     async function loadData() {
       try {
         await loadAccess();
-        const owner = await loadOwner();
-        if (owner) {
-          if (owner.userName === '') {
-            setOwnerName('Server');
-          } else {
-            setOwnerName(owner.displayName ?? owner.userName);
-          }
-        }
       } catch (error) {
         console.error('Error loading user access data:', error);
       } finally {
@@ -194,64 +181,6 @@ function UserAccessContent({
           onChange={onSearchChange}
         />
       </View>
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'flex-end',
-          marginBottom: '5px',
-        }}
-      >
-        <Button
-          ref={triggerRef}
-          variant="bare"
-          aria-label="Menu"
-          onPress={() => setMenuOpen(true)}
-        >
-          <SvgDotsHorizontalTriple style={{ width: 16, height: 16 }} />
-        </Button>
-        <Popover
-          triggerRef={triggerRef}
-          isOpen={menuOpen}
-          onOpenChange={() => setMenuOpen(false)}
-          style={{ padding: 10 }}
-        >
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'flex-end',
-            }}
-          >
-            <View
-              style={{
-                ...styles.altMenuHeaderText,
-                ...styles.verySmallText,
-                color: theme.pageTextLight,
-                marginRight: '5px',
-              }}
-            >
-              <Trans>Owner:</Trans>
-            </View>
-            <View
-              style={{
-                ...styles.verySmallText,
-                color: theme.pageTextLight,
-                marginRight: '5px',
-              }}
-            >
-              {ownerName}
-            </View>
-            <LockToggle
-              style={{ width: 16, height: 16 }}
-              onToggleSave={async () => {
-                await loadAccess();
-                setLoading(false);
-              }}
-            />
-          </View>
-        </Popover>
-      </View>
       <View style={{ flex: 1 }}>
         <UserAccessHeader />
         <SimpleTable
@@ -274,6 +203,15 @@ function UserAccessContent({
           flexShrink: 0,
         }}
       />
+      <View style={{ flexDirection: 'row', justifyContent: 'flex-end' }}>
+        <LockToggle
+          style={{ width: 16, height: 16 }}
+          onToggleSave={async () => {
+            await loadAccess();
+            setLoading(false);
+          }}
+        />
+      </View>
     </View>
   );
 }
@@ -336,7 +274,7 @@ function LockToggle({ style, onToggleSave }: LockToggleProps) {
     <Button
       onHoverStart={() => setHover(true)}
       onHoverEnd={() => setHover(false)}
-      variant="bare"
+      variant="primary"
       aria-label="Menu"
       onPress={() =>
         dispatch(
@@ -346,8 +284,9 @@ function LockToggle({ style, onToggleSave }: LockToggleProps) {
         )
       }
     >
-      {hover && <SvgLockOpen style={style} />}
-      {!hover && <SvgLockClosed style={style} />}
+      {hover && <SvgLockOpen style={{ ...style, marginRight: 5 }} />}
+      {!hover && <SvgLockClosed style={{ ...style, marginRight: 5 }} />}{' '}
+      <Trans>Transfer ownership</Trans>
     </Button>
   );
 }

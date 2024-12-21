@@ -117,13 +117,21 @@ export function PasswordEnableModal({
                 color: theme.pageTextLight,
                 paddingTop: 5,
               }}
-              title={t('After disabling openid all sessions will be closed')}
+              title={t('Type the server password to disable OpenID')}
+            />
+            <Label
+              style={{
+                ...styles.verySmallText,
+                color: theme.pageTextLight,
+                paddingTop: 5,
+              }}
+              title={t('After disabling OpenID all sessions will be closed')}
             />
             {multiuserEnabled && (
               <Label
                 style={{
                   ...styles.verySmallText,
-                  color: theme.warningText,
+                  color: theme.errorText,
                 }}
                 title={t('Multi-user will not work after disabling')}
               />

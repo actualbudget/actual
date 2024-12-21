@@ -127,7 +127,13 @@ export function EditUserFinanceApp({
       {({ state: { close } }) => (
         <>
           <ModalHeader
-            title={t('User')}
+            title={
+              defaultUser.id
+                ? t('Edit user {{userName}}', {
+                    userName: defaultUser.displayName ?? defaultUser.userName,
+                  })
+                : 'Add user'
+            }
             rightContent={<ModalCloseButton onPress={close} />}
           />
           <EditUser
@@ -187,6 +193,9 @@ function EditUser({ defaultUser, onSave: originalOnSave }: EditUserProps) {
             id="name-field"
             value={userName}
             onChangeValue={text => setUserName(text)}
+            style={{
+              borderColor: theme.buttonMenuBorder,
+            }}
           />
           <label
             style={{
@@ -224,7 +233,7 @@ function EditUser({ defaultUser, onSave: originalOnSave }: EditUserProps) {
         <label
           style={{
             ...styles.verySmallText,
-            color: theme.warningTextLight,
+            color: theme.errorText,
             marginTop: 5,
           }}
         >
@@ -241,6 +250,9 @@ function EditUser({ defaultUser, onSave: originalOnSave }: EditUserProps) {
             value={displayName}
             onChangeValue={text => setDisplayName(text)}
             placeholder={t('(Optional)')}
+            style={{
+              borderColor: theme.buttonMenuBorder,
+            }}
           />
           <View
             style={{
@@ -276,6 +288,9 @@ function EditUser({ defaultUser, onSave: originalOnSave }: EditUserProps) {
             options={Object.entries(PossibleRoles)}
             value={role}
             onChange={newValue => setRole(newValue)}
+            style={{
+              borderColor: theme.buttonMenuBorder,
+            }}
           />
         </FormField>
       </Stack>
