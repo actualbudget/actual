@@ -9,7 +9,6 @@ import {
 } from 'react-error-boundary';
 import { HotkeysProvider } from 'react-hotkeys-hook';
 import { useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
 import { BrowserRouter } from 'react-router-dom';
 
 import {
@@ -28,6 +27,7 @@ import {
 
 import { useMetadataPref } from '../hooks/useMetadataPref';
 import { installPolyfills } from '../polyfills';
+import { useAppDispatch } from '../redux';
 import { styles, hasHiddenScrollbars, ThemeStyle, useTheme } from '../style';
 import { ExposeNavigate } from '../util/router-tools';
 
@@ -48,7 +48,7 @@ function AppInner() {
   const [cloudFileId] = useMetadataPref('cloudFileId');
   const { t } = useTranslation();
   const { showBoundary: showErrorBoundary } = useErrorBoundary();
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
   const maybeUpdate = async <T,>(cb?: () => T): Promise<T> => {
     if (global.Actual.isUpdateReadyForDownload()) {
@@ -139,7 +139,7 @@ export function App() {
   const [hiddenScrollbars, setHiddenScrollbars] = useState(
     hasHiddenScrollbars(),
   );
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
     function checkScrollbars() {

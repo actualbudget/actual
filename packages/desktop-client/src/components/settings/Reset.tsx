@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
 
 import { resetSync } from 'loot-core/client/actions';
 import { send } from 'loot-core/src/platform/client/fetch';
 
 import { useMetadataPref } from '../../hooks/useMetadataPref';
+import { useAppDispatch } from '../../redux';
 import { ButtonWithLoading } from '../common/Button2';
 import { Text } from '../common/Text';
 
@@ -43,7 +43,7 @@ export function ResetSync() {
   const { t } = useTranslation();
   const [groupId] = useMetadataPref('groupId');
   const isEnabled = !!groupId;
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
   const [resetting, setResetting] = useState(false);
 

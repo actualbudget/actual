@@ -3,10 +3,10 @@ import userEvent from '@testing-library/user-event';
 import { vi } from 'vitest';
 
 import { generateAccount } from 'loot-core/src/mocks';
-import { TestProvider } from 'loot-core/src/mocks/redux';
 import type { AccountEntity, PayeeEntity } from 'loot-core/types/models';
 
 import { useCommonPayees } from '../../hooks/usePayees';
+import { TestProvider } from '../../redux/mock';
 import { ResponsiveProvider } from '../responsive/ResponsiveProvider';
 
 import {
