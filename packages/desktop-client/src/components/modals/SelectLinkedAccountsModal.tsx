@@ -139,7 +139,7 @@ export function SelectLinkedAccountsModal({
     setChosenAccounts((accounts: LinkedAccountIds): LinkedAccountIds => {
       const updatedAccounts: LinkedAccountIds = { ...accounts };
 
-      if (localAccountId) {
+      if (localAccountId !== undefined) {
         updatedAccounts[externalAccount.id] = localAccountId;
       } else {
         delete updatedAccounts[externalAccount.id];
@@ -258,7 +258,11 @@ function TableRow({
     addOffBudgetAccountOption,
   ].filter(Boolean);
 
-  if (chosenAccount && chosenAccount.id !== addOnBudgetAccountOption.id) {
+  if (
+    chosenAccount &&
+    chosenAccount.id !== addOnBudgetAccountOption.id &&
+    chosenAccount.id !== addOffBudgetAccountOption.id
+  ) {
     availableAccountOptions.push(chosenAccount);
   }
 
