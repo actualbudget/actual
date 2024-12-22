@@ -1,0 +1,41 @@
+{
+  "references": [
+  ],
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "experimentalDecorators": true,
+    "resolveJsonModule": true,
+    "downlevelIteration": true,
+    "strictFunctionTypes": true,
+    "noFallthroughCasesInSwitch": true,
+    "skipLibCheck": true,
+    "jsx": "preserve",
+    "types": ["vite/client", "jest"],
+    "allowJs": true,
+    "checkJs": false,
+    "outDir": "dist",
+    "moduleResolution": "Node10",
+    "module": "ES2022",
+    "noEmit": true,
+    "plugins": [
+      {
+        "name": "typescript-strict-plugin",
+        "path": ["./packages"]
+      }
+    ]
+  },
+  "include": ["packages/**/*"],
+  "exclude": [
+    "node_modules",
+    "**/node_modules/*",
+    "**/dist/*",
+  ],
+  "ts-node": {
+    "compilerOptions": {
+      "module": "CommonJS"
+    }
+  }
+}
