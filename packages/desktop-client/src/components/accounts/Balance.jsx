@@ -1,7 +1,7 @@
-import React, { useRef } from 'react';
+import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { useHover } from 'usehooks-ts';
+import { css } from '@emotion/css';
 
 import { isPreviewId } from 'loot-core/shared/transactions';
 import { useCachedSchedules } from 'loot-core/src/client/data-hooks/schedules';
@@ -11,7 +11,7 @@ import { getScheduledAmount } from 'loot-core/src/shared/schedules';
 import { useSelectedItems } from '../../hooks/useSelected';
 import { SvgArrowButtonRight1 } from '../../icons/v2';
 import { theme } from '../../style';
-import { Button } from '../common/Button2';
+import { ButtonWithLoading } from '../common/Button2';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { PrivacyFilter } from '../PrivacyFilter';
@@ -42,7 +42,7 @@ function DetailedBalance({ name, balance, isExactBalance = true }) {
   );
 }
 
-function SelectedBalance({ selectedItems, account }) {
+function SelectedBalance({ selectedItems, accountId }) {
   const { t } = useTranslation();
 
   const name = `selected-balance-${[...selectedItems].join('-')}`;
@@ -87,7 +87,7 @@ function SelectedBalance({ selectedItems, account }) {
         isExactBalance = false;
       }
 
-      if (!account || account.id === s._account) {
+      if (accountId !== s._account) {
         scheduleBalance += getScheduledAmount(s._amount);
       } else {
         scheduleBalance -= getScheduledAmount(s._amount);
@@ -114,28 +114,36 @@ function SelectedBalance({ selectedItems, account }) {
   );
 }
 
-function FilteredBalance({ filteredAmount }) {
+function FilteredBalance({ filteredBalance }) {
   const { t } = useTranslation();
-
   return (
     <DetailedBalance
       name={t('Filtered balance:')}
-      balance={filteredAmount || 0}
+      balance={filteredBalance || 0}
       isExactBalance={true}
     />
   );
 }
 
-function MoreBalances({ balanceQuery }) {
+function MoreBalances({ accountId, balanceQuery }) {
   const { t } = useTranslation();
 
+  const clearedQuery = useMemo(
+    () => balanceQuery?.filter({ cleared: true }),
+    [balanceQuery],
+  );
   const cleared = useSheetValue({
-    name: balanceQuery.name + '-cleared',
-    query: balanceQuery.query.filter({ cleared: true }),
+    name: `balance-query-${accountId}-cleared`,
+    query: clearedQuery,
   });
+
+  const unclearedQuery = useMemo(
+    () => balanceQuery?.filter({ cleared: false }),
+    [balanceQuery],
+  );
   const uncleared = useSheetValue({
-    name: balanceQuery.name + '-uncleared',
-    query: balanceQuery.query.filter({ cleared: false }),
+    name: `balance-query-${accountId}-uncleared`,
+    query: unclearedQuery,
   });
 
   return (
@@ -147,16 +155,23 @@ function MoreBalances({ balanceQuery }) {
 }
 
 export function Balances({
+  accountId,
   balanceQuery,
+  filteredBalance,
+  showFilteredBalance,
   showExtraBalances,
   onToggleExtraBalances,
-  account,
-  isFiltered,
-  filteredAmount,
 }) {
   const selectedItems = useSelectedItems();
-  const buttonRef = useRef(null);
-  const isButtonHovered = useHover(buttonRef);
+  // const balanceQuery = transactionsQuery?.calculate({ $sum: '$amount' });
+  const balanceBinding = useMemo(
+    () => ({
+      name: `balance-query-${accountId}`,
+      query: balanceQuery,
+      value: 0,
+    }),
+    [accountId, balanceQuery],
+  );
 
   return (
     <View
@@ -167,17 +182,28 @@ export function Balances({
         marginLeft: -5,
       }}
     >
-      <Button
-        ref={buttonRef}
+      <ButtonWithLoading
+        isLoading={!balanceQuery}
         data-testid="account-balance"
         variant="bare"
         onPress={onToggleExtraBalances}
-        style={{
+        className={css({
           paddingTop: 1,
           paddingBottom: 1,
-        }}
+          [`& svg`]: {
+            width: 10,
+            height: 10,
+            marginLeft: 10,
+            color: theme.pillText,
+            transform: showExtraBalances ? 'rotateZ(180deg)' : 'rotateZ(0)',
+            opacity: selectedItems.size > 0 || showExtraBalances ? 1 : 0,
+          },
+          [`&[data-hovered] svg`]: {
+            opacity: 1,
+          },
+        })}
       >
-        <CellValue binding={{ ...balanceQuery, value: 0 }} type="financial">
+        <CellValue binding={balanceBinding} type="financial">
           {props => (
             <CellValueText
               {...props}
@@ -195,26 +221,21 @@ export function Balances({
           )}
         </CellValue>
 
-        <SvgArrowButtonRight1
-          style={{
-            width: 10,
-            height: 10,
-            marginLeft: 10,
-            color: theme.pillText,
-            transform: showExtraBalances ? 'rotateZ(180deg)' : 'rotateZ(0)',
-            opacity:
-              isButtonHovered || selectedItems.size > 0 || showExtraBalances
-                ? 1
-                : 0,
-          }}
+        <SvgArrowButtonRight1 />
+      </ButtonWithLoading>
+      {showExtraBalances && balanceQuery && (
+        <MoreBalances
+          accountId={accountId}
+          // transactionsQuery={transactionsQuery}
+          balanceQuery={balanceQuery}
         />
-      </Button>
-      {showExtraBalances && <MoreBalances balanceQuery={balanceQuery} />}
-
-      {selectedItems.size > 0 && (
-        <SelectedBalance selectedItems={selectedItems} account={account} />
       )}
-      {isFiltered && <FilteredBalance filteredAmount={filteredAmount} />}
+      {selectedItems.size > 0 && (
+        <SelectedBalance selectedItems={selectedItems} accountId={accountId} />
+      )}
+      {showFilteredBalance && (
+        <FilteredBalance filteredBalance={filteredBalance} />
+      )}
     </View>
   );
 }

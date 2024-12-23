@@ -12,9 +12,9 @@ export function ConditionsOpMenu({
   onChange,
   conditions,
 }: {
-  conditionsOp: string;
-  onChange: (value: 'and' | 'or') => void;
-  conditions: RuleConditionEntity[];
+  conditionsOp: RuleConditionEntity['conditionsOp'];
+  onChange: (op: RuleConditionEntity['conditionsOp']) => void;
+  conditions: readonly RuleConditionEntity[];
 }) {
   return conditions.length > 1 ? (
     <Text style={{ color: theme.pageText, marginTop: 11, marginRight: 5 }}>

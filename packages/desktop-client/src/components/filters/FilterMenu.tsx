@@ -1,15 +1,17 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { type TransactionFilterEntity } from 'loot-core/types/models';
+
 import { Menu } from '../common/Menu';
 
-import { type SavedFilter } from './SavedFilterMenuButton';
-
 export function FilterMenu({
-  filterId,
+  filter,
+  dirtyFilter,
   onFilterMenuSelect,
 }: {
-  filterId?: SavedFilter;
+  filter?: TransactionFilterEntity;
+  dirtyFilter?: TransactionFilterEntity;
   onFilterMenuSelect: (item: string) => void;
 }) {
   const { t } = useTranslation();
@@ -20,12 +22,12 @@ export function FilterMenu({
         onFilterMenuSelect(item);
       }}
       items={
-        !filterId?.id
+        !filter?.id
           ? [
               { name: 'save-filter', text: t('Save new filter') },
-              { name: 'clear-filter', text: t('Clear all conditions') },
+              { name: 'clear-filter', text: t('Clear all filter conditions') },
             ]
-          : filterId?.id !== null && filterId?.status === 'saved'
+          : filter?.id !== null && !dirtyFilter
             ? [
                 { name: 'rename-filter', text: t('Rename') },
                 { name: 'delete-filter', text: t('Delete') },
@@ -35,16 +37,22 @@ export function FilterMenu({
                   text: t('Save new filter'),
                   disabled: true,
                 },
-                { name: 'clear-filter', text: t('Clear all conditions') },
+                {
+                  name: 'clear-filter',
+                  text: t('Clear all filter conditions'),
+                },
               ]
             : [
                 { name: 'rename-filter', text: t('Rename') },
-                { name: 'update-filter', text: t('Update condtions') },
+                { name: 'update-filter', text: t('Update filter conditions') },
                 { name: 'reload-filter', text: t('Revert changes') },
                 { name: 'delete-filter', text: t('Delete') },
                 Menu.line,
                 { name: 'save-filter', text: t('Save new filter') },
-                { name: 'clear-filter', text: t('Clear all conditions') },
+                {
+                  name: 'clear-filter',
+                  text: t('Clear all filter conditions'),
+                },
               ]
       }
     />

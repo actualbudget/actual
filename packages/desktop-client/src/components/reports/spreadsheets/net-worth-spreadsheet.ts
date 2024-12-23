@@ -26,7 +26,7 @@ export function createSpreadsheet(
   end: string,
   accounts: AccountEntity[],
   conditions: RuleConditionEntity[] = [],
-  conditionsOp: 'and' | 'or' = 'and',
+  conditionsOp: RuleConditionEntity['conditionsOp'] = 'and',
 ) {
   return async (
     spreadsheet: ReturnType<typeof useSpreadsheet>,
