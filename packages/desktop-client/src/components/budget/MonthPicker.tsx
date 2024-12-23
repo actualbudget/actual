@@ -210,6 +210,7 @@ export const MonthPicker = ({
         <span
           style={{
             width: '22px',
+            marginLeft: '12px',
           }}
         />
       </View>
