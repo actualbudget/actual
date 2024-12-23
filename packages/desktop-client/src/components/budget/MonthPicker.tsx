@@ -87,10 +87,8 @@ export const MonthPicker = ({
           buttonVariant="bare"
           onPress={() => onSelect(currentMonth)}
           style={{
-            position: 'absolute',
-            left: 0,
             padding: '3px 3px',
-            marginLeft: '4px',
+            marginRight: '12px',
           }}
         >
           <View title={t('Today')}>
@@ -208,6 +206,12 @@ export const MonthPicker = ({
             </View>
           );
         })}
+        {/*Keep range centered*/}
+        <span
+          style={{
+            width: '22px',
+          }}
+        />
       </View>
     </View>
   );
