@@ -32,22 +32,22 @@ function useRenderResults() {
     } else {
       if (numBlankPayees > 0) {
         result.push(
-          t('Fixed {{numBlankPayees}} splits with a blank payee.', {
-            numBlankPayees,
+          t('Fixed {{count}} splits with a blank payee.', {
+            count: numBlankPayees,
           }),
         );
       }
       if (numCleared > 0) {
         result.push(
-          t('Fixed {{numCleared}} splits with the wrong cleared flag.', {
-            numCleared,
+          t('Fixed {{count}} splits with the wrong cleared flag.', {
+            count: numCleared,
           }),
         );
       }
       if (numDeleted > 0) {
         result.push(
-          t('Fixed {{numDeleted}} splits that weren’t properly deleted.', {
-            numDeleted,
+          t('Fixed {{count}} splits that weren’t properly deleted.', {
+            count: numDeleted,
           }),
         );
       }
@@ -55,20 +55,13 @@ function useRenderResults() {
         const mismatchedSplitInfo = mismatchedSplits
           .map(t => `- ${t.date}`)
           .join('\n');
-        if (mismatchedSplits.length === 1) {
-          result.push(
-            t(
-              'Found 1 split transaction with mismatched amounts on the below date. Please review it manually:',
-            ) + `\n${mismatchedSplitInfo}`,
-          );
-        } else {
-          result.push(
-            t(
-              'Found {{num}} split transactions with mismatched amounts on the below dates. Please review them manually:',
-              { num: mismatchedSplits.length },
-            ) + `\n${mismatchedSplitInfo}`,
-          );
-        }
+
+        result.push(
+          t(
+            'Found {{count}} split transactions with mismatched amounts on the below dates. Please review them manually:',
+            { count: mismatchedSplits.length },
+          ) + `\n${mismatchedSplitInfo}`,
+        );
       }
     }
 
