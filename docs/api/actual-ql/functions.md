@@ -23,6 +23,15 @@ q('transactions')
 
 This returns transactions with an income category sorted by category name. You can also pass an array to `orderBy` to sort by multiple fields.
 
+You can also change the sort order by specifying either `asc` or `desc`:
+
+```js
+q('transactions')
+  .filter({ 'category.is_income': true })
+  .select('*')
+  .orderBy({ 'category.name': 'desc' });
+```
+
 ## Aggregate Functions
 
 You can specify aggregate functions in `select` for things like sums and counts. An example:
