@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useTranslation, Trans } from 'react-i18next';
 
 import { send } from 'loot-core/src/platform/client/fetch';
 import { type Handlers } from 'loot-core/src/types/handlers';
@@ -14,56 +14,87 @@ import { Setting } from './UI';
 
 type Results = Awaited<ReturnType<Handlers['tools/fix-split-transactions']>>;
 
-function renderResults(results: Results) {
-  const { numBlankPayees, numCleared, numDeleted, mismatchedSplits } = results;
-  const result: string[] = [];
+function useRenderResults() {
+  const { t } = useTranslation();
 
-  if (
-    numBlankPayees === 0 &&
-    numCleared === 0 &&
-    numDeleted === 0 &&
-    mismatchedSplits.length === 0
-  ) {
-    result.push('No split transactions found needing repair.');
-  } else {
-    if (numBlankPayees > 0) {
-      result.push(`Fixed ${numBlankPayees} splits with a blank payee.`);
+  function renderResults(results: Results) {
+    const { numBlankPayees, numCleared, numDeleted, mismatchedSplits } =
+      results;
+    const result: string[] = [];
+
+    if (
+      numBlankPayees === 0 &&
+      numCleared === 0 &&
+      numDeleted === 0 &&
+      mismatchedSplits.length === 0
+    ) {
+      result.push(t('No split transactions found needing repair.'));
+    } else {
+      if (numBlankPayees > 0) {
+        result.push(
+          t('Fixed {{numBlankPayees}} splits with a blank payee.', {
+            numBlankPayees,
+          }),
+        );
+      }
+      if (numCleared > 0) {
+        result.push(
+          t('Fixed {{numCleared}} splits with the wrong cleared flag.', {
+            numCleared,
+          }),
+        );
+      }
+      if (numDeleted > 0) {
+        result.push(
+          t('Fixed {{numDeleted}} splits that weren’t properly deleted.', {
+            numDeleted,
+          }),
+        );
+      }
+      if (mismatchedSplits.length > 0) {
+        const mismatchedSplitInfo = mismatchedSplits
+          .map(t => `- ${t.date}`)
+          .join('\n');
+        if (mismatchedSplits.length === 1) {
+          result.push(
+            t(
+              'Found 1 split transaction with mismatched amounts on the below date. Please review it manually:',
+            ) + `\n${mismatchedSplitInfo}`,
+          );
+        } else {
+          result.push(
+            t(
+              'Found {{num}} split transactions with mismatched amounts on the below dates. Please review them manually:',
+              { num: mismatchedSplits.length },
+            ) + `\n${mismatchedSplitInfo}`,
+          );
+        }
+      }
     }
-    if (numCleared > 0) {
-      result.push(`Fixed ${numCleared} splits with the wrong cleared flag.`);
-    }
-    if (numDeleted > 0) {
-      result.push(`Fixed ${numDeleted} splits that weren’t properly deleted.`);
-    }
-    if (mismatchedSplits.length > 0) {
-      result.push(
-        `Found ${mismatchedSplits.length} split transaction${mismatchedSplits.length > 1 ? 's' : ''} ` +
-          `with mismatched amounts on the below date${mismatchedSplits.length > 1 ? 's' : ''}. ` +
-          `Please review ${mismatchedSplits.length > 1 ? 'them' : 'it'} manually:\n` +
-          mismatchedSplits.map(t => `- ${t.date}`).join('\n'),
-      );
-    }
+
+    return (
+      <Paragraph
+        style={{
+          color:
+            mismatchedSplits.length === 0
+              ? theme.noticeTextLight
+              : theme.errorText,
+          whiteSpace: 'pre-wrap',
+        }}
+      >
+        {result.join('\n')}
+      </Paragraph>
+    );
   }
 
-  return (
-    <Paragraph
-      style={{
-        color:
-          mismatchedSplits.length === 0
-            ? theme.noticeTextLight
-            : theme.errorText,
-        whiteSpace: 'pre-wrap',
-      }}
-    >
-      {result.join('\n')}
-    </Paragraph>
-  );
+  return { renderResults };
 }
 
 export function FixSplits() {
-  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<Results | null>(null);
+
+  const { renderResults } = useRenderResults();
 
   async function onFix() {
     setLoading(true);
@@ -84,30 +115,40 @@ export function FixSplits() {
           }}
         >
           <ButtonWithLoading isLoading={loading} onPress={onFix}>
-            {t('Repair split transactions')}
+            <Trans>Repair split transactions</Trans>
           </ButtonWithLoading>
           {results && renderResults(results)}
         </View>
       }
     >
-      <Text>
-        <strong>{t('Repair split transactions')}</strong>
-        {t(
-          ' if you are experiencing bugs relating to split transactions and the “Reset budget cache” button above does not help, this tool may fix them. Some examples of bugs include seeing blank payees on splits or incorrect account balances. This tool does two things:',
-        )}
-      </Text>
-      <ul style={{ margin: 0, paddingLeft: '1.5em' }}>
-        <li style={{ marginBottom: '0.5em' }}>
-          {t(
-            'Ensures that deleted split transactions are fully deleted. In previous versions of the app, certain split transactions may appear deleted but not all of them are actually deleted. This causes the transactions list to look correct, but certain balances may be incorrect when filtering.',
-          )}
-        </li>
-        <li>
-          {t(
-            'Sync the payee and cleared flag of a split transaction to the main or “parent” transaction, if appropriate. The payee will only be set if it currently doesn’t have one.',
-          )}
-        </li>
-      </ul>
+      <Trans>
+        <Text>
+          <strong>Repair split transactions</strong> if you are experiencing
+          bugs relating to split transactions and the “Reset budget cache”
+          button above does not help, this tool may fix them. Some examples of
+          bugs include seeing blank payees on splits or incorrect account
+          balances. This tool does three things:
+        </Text>
+        <ul style={{ margin: 0, paddingLeft: '1.5em' }}>
+          <li style={{ marginBottom: '0.5em' }}>
+            Ensures that deleted split transactions are fully deleted. In
+            previous versions of the app, certain split transactions may appear
+            deleted but not all of them are actually deleted. This causes the
+            transactions list to look correct, but certain balances may be
+            incorrect when filtering.
+          </li>
+          <li>
+            Sync the payee and cleared flag of a split transaction to the main
+            or “parent” transaction, if appropriate. The payee will only be set
+            if it currently doesn’t have one.
+          </li>
+          <li>
+            Checks that the sum of all child transactions adds up to the total
+            amount. If not, these will be flagged below to allow you to easily
+            locate and fix the amounts.
+          </li>
+        </ul>
+      </Trans>
     </Setting>
   );
 }
