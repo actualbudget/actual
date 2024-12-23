@@ -81,6 +81,8 @@ global.Actual = {
       });
   },
 
+  startOAuthServer: () => {},
+
   restartElectronServer: () => {},
 
   openFileDialog: async ({ filters = [] }) => {

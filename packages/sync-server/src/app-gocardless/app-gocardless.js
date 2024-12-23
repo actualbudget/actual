@@ -201,8 +201,19 @@ app.post(
         });
       }
     } catch (error) {
+      const headers = error.details?.response?.headers ?? {};
+
+      const rateLimitHeaders = Object.fromEntries(
+        Object.entries(headers).filter(([key]) =>
+          key.startsWith('http_x_ratelimit'),
+        ),
+      );
+
       const sendErrorResponse = (data) =>
-        res.send({ status: 'ok', data: { ...data, details: error.details } });
+        res.send({
+          status: 'ok',
+          data: { ...data, details: error.details, rateLimitHeaders },
+        });
 
       switch (true) {
         case error instanceof RequisitionNotLinked:

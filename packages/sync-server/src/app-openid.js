@@ -49,7 +49,7 @@ app.post('/disable', validateSessionMiddleware, async (req, res) => {
   let { error } = (await disableOpenID(req.body)) || {};
 
   if (error) {
-    res.status(500).send({ status: 'error', reason: error });
+    res.status(401).send({ status: 'error', reason: error });
     return;
   }
   res.send({ status: 'ok' });

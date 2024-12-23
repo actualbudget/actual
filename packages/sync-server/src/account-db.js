@@ -169,9 +169,25 @@ export async function disableOpenID(loginSettings) {
     return { error };
   }
 
-  getAccountDb().mutate('DELETE FROM sessions');
-  getAccountDb().mutate('DELETE FROM users WHERE user_name <> ?', ['']);
-  getAccountDb().mutate('DELETE FROM auth WHERE method = ?', ['openid']);
+  try {
+    accountDb.transaction(() => {
+      accountDb.mutate('DELETE FROM sessions');
+      accountDb.mutate(
+        `DELETE FROM user_access 
+                              WHERE user_access.user_id IN (
+                                  SELECT users.id 
+                                  FROM users 
+                                  WHERE users.user_name <> ?
+                              );`,
+        [''],
+      );
+      accountDb.mutate('DELETE FROM users WHERE user_name <> ?', ['']);
+      accountDb.mutate('DELETE FROM auth WHERE method = ?', ['openid']);
+    });
+  } catch (err) {
+    console.error('Error cleaning up openid information:', err);
+    return { error: 'database-error' };
+  }
 }
 
 export function getSession(token) {

@@ -24,6 +24,7 @@ declare global {
       relaunch: () => void;
       reload: (() => Promise<void>) | undefined;
       restartElectronServer: () => void;
+      startOAuthServer: () => Promise<string>;
       moveBudgetDirectory: (
         currentBudgetDirectory: string,
         newDirectory: string,
