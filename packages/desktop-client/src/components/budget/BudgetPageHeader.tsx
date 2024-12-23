@@ -15,9 +15,16 @@ type BudgetPageHeaderProps = {
 
 export const BudgetPageHeader = memo<BudgetPageHeaderProps>(
   ({ startMonth, onMonthSelect, numMonths, monthBounds }) => {
+    const offsetMultipleMonths = numMonths === 1 ? 4 : 0;
     return (
-      <View style={{ marginLeft: 200 + 5, flexShrink: 0 }}>
-        <View style={{ marginRight: 5 + getScrollbarWidth() }}>
+      <View
+        style={{ marginLeft: 200 + 5 - offsetMultipleMonths, flexShrink: 0 }}
+      >
+        <View
+          style={{
+            marginRight: 5 + getScrollbarWidth() - offsetMultipleMonths,
+          }}
+        >
           <MonthPicker
             startMonth={startMonth}
             numDisplayed={numMonths}
