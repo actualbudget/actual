@@ -39,7 +39,7 @@ function renderResults(results: Results) {
       result.push(
         `Found ${mismatchedSplits.length} split transaction${mismatchedSplits.length > 1 ? 's' : ''} ` +
           `with mismatched amounts on the below date${mismatchedSplits.length > 1 ? 's' : ''}. ` +
-          `Please fix ${mismatchedSplits.length > 1 ? 'these' : 'this'} manually:\n` +
+          `Please review ${mismatchedSplits.length > 1 ? 'them' : 'it'} manually:\n` +
           mismatchedSplits.map(t => `- ${t.date}`).join('\n'),
       );
     }
