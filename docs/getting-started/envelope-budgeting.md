@@ -211,7 +211,7 @@ you understand that budgets are not rigid constraints but flexible tools that ca
 
 
 
-### 4. Prepare for the unexpected
+### 5. Prepare for the unexpected
 
 There’s no such thing as a "normal" month when it comes to expenses. Your costs fluctuate throughout the year,
 often unpredictably. Envelope budgeting helps you prepare for these irregular expenses by adding funds to
