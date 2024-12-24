@@ -702,6 +702,45 @@ class AccountInternal extends PureComponent<
     return groupById<{ id: string; balance: number }>(data);
   }
 
+  onRunRules = async (ids: string[]) => {
+    try {
+      this.setState({ workingHard: true });
+      // Bulk fetch transactions
+      const transactions = this.state.transactions.filter(trans =>
+        ids.includes(trans.id),
+      );
+      //call the runrules function
+      const changedTransactions = [];
+      for (const transaction of transactions) {
+        await send('rules-run', {
+          transaction,
+        }).then((res: TransactionEntity | null) => {
+          if (res) {
+            changedTransactions.push(res);
+          }
+        });
+      }
+
+      // If we have changed transactions, update them in the database
+      if (changedTransactions.length > 0) {
+        await send('transactions-batch-update', {
+          updated: changedTransactions,
+        });
+      }
+
+      // Fetch updated transactions once at the end
+      await this.fetchTransactions();
+    } catch (error) {
+      console.error('Error applying rules:', error);
+      this.props.addNotification({
+        type: 'error',
+        message: 'Failed to apply rules to transactions',
+      });
+    } finally {
+      this.setState({ workingHard: false });
+    }
+  };
+
   onAddTransaction = () => {
     this.setState({ isAdding: true });
   };
@@ -1730,6 +1769,7 @@ class AccountInternal extends PureComponent<
                 onImport={this.onImport}
                 onBatchDelete={this.onBatchDelete}
                 onBatchDuplicate={this.onBatchDuplicate}
+                onRunRules={this.onRunRules}
                 onBatchEdit={this.onBatchEdit}
                 onBatchLinkSchedule={this.onBatchLinkSchedule}
                 onBatchUnlinkSchedule={this.onBatchUnlinkSchedule}
