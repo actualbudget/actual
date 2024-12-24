@@ -15,24 +15,36 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: recursive
       - name: Set up environment
         uses: ./.github/actions/setup
+        with:
+          edge: true
       - name: Lint
         run: yarn lint
   typecheck:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: recursive
       - name: Set up environment
         uses: ./.github/actions/setup
+        with:
+          edge: true
       - name: Typecheck
         run: yarn typecheck
   test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: recursive
       - name: Set up environment
         uses: ./.github/actions/setup
+        with:
+          edge: true
       - name: Test
         run: yarn test
 
@@ -41,6 +53,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: recursive
       - uses: actions/setup-node@v4
         with:
           node-version: '19'

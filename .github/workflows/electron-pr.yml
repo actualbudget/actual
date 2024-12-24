@@ -25,6 +25,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: recursive
       - if: ${{ startsWith(matrix.os, 'windows') }}
         run: pip.exe install setuptools
       - if: ${{ ! startsWith(matrix.os, 'windows') }}
@@ -44,6 +46,8 @@ jobs:
           sudo flatpak install org.electronjs.Electron2.BaseApp/x86_64/23.08 -y
       - name: Set up environment
         uses: ./.github/actions/setup
+        with:
+          edge: true
       - name: Build Electron
         run: ./bin/package-electron
       - name: Upload Build

@@ -22,8 +22,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: recursive
       - name: Set up environment
         uses: ./.github/actions/setup
+        with:
+          edge: true
       - name: Build API
         run: cd packages/api && yarn build
       - name: Create package tgz
@@ -38,8 +42,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: recursive
       - name: Set up environment
         uses: ./.github/actions/setup
+        with:
+          edge: true
       - name: Build CRDT
         run: cd packages/crdt && yarn build
       - name: Create package tgz
@@ -54,8 +62,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: recursive
       - name: Set up environment
         uses: ./.github/actions/setup
+        with:
+          edge: true
       - name: Build Web
         run: ./bin/package-browser
       - name: Upload Build

@@ -17,8 +17,12 @@ jobs:
       netlify_url: ${{ steps.netlify.outputs.url }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: recursive
       - name: Set up environment
         uses: ./.github/actions/setup
+        with:
+          edge: true
       - name: Wait for Netlify build to finish
         id: netlify
         env:
@@ -34,8 +38,12 @@ jobs:
       image: mcr.microsoft.com/playwright:v1.41.1-jammy
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: recursive
       - name: Set up environment
         uses: ./.github/actions/setup
+        with:
+          edge: true
       - name: Run E2E Tests on Netlify URL
         run: yarn e2e
         env:
@@ -55,8 +63,12 @@ jobs:
       image: mcr.microsoft.com/playwright:v1.41.1-jammy
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: recursive
       - name: Set up environment
         uses: ./.github/actions/setup
+        with:
+          edge: true
       - name: Run VRT Tests on Netlify URL
         run: yarn vrt
         env:

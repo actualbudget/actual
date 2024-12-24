@@ -29,8 +29,11 @@ jobs:
         with:
           repository: ${{ steps.comment-branch.outputs.head_owner }}/${{ steps.comment-branch.outputs.head_repo }}
           ref: ${{ steps.comment-branch.outputs.head_ref }}
+          submodules: true
       - name: Set up environment
         uses: ./.github/actions/setup
+        with:
+          edge: true
       - name: Wait for Netlify build to finish
         id: netlify
         env:

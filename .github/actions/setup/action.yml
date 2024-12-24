@@ -1,5 +1,11 @@
 name: Setup
 
+inputs:
+  edge:
+    description: 'Whether this is an edge build (vs release)'
+    required: true
+    type: boolean
+
 runs:
   using: composite
   steps:
@@ -21,3 +27,7 @@ runs:
       run: yarn --immutable
       shell: bash
       if: steps.cache.outputs.cache-hit != 'true'
+    - name: Update translations
+      run: git submodule update --remote
+      shell: bash
+      if: ${{ inputs.edge }}
