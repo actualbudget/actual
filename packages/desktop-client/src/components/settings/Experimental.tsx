@@ -98,7 +98,7 @@ export function ExperimentalFeatures() {
             </FeatureToggle>
             <FeatureToggle
               flag="openidAuth"
-              feedbackLink="https://github.com/actualbudget/actual/issues/524"
+              feedbackLink="https://github.com/actualbudget/actual/issues/4029"
             >
               <Trans>OpenID authentication method</Trans>
             </FeatureToggle>
