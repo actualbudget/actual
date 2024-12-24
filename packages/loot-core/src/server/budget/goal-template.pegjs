@@ -35,11 +35,11 @@ repeat 'repeat interval'
   / 'year'i { return { annual: true }}
   / years: positive _ 'years'i { return { annual: true, repeat: +years }}
 
-limit =  _? upTo _ amount: amount _ 'per week starting'i _ start:date _? hold:hold? 
+limit =  _? upTo _ amount: amount _ 'per week starting'i _ start:date _? hold:hold?
           { return {amount: amount, hold: hold, period: 'weekly', start: start }}
         / _? upTo _ amount: amount _ 'per day'i _? hold: hold?
           { return {amount: amount, hold: hold, period: 'daily', start:null }}
-        / _? upTo _ amount: amount _? hold: hold? 
+        / _? upTo _ amount: amount _? hold: hold?
           { return {amount: amount, hold: hold, period: 'monthly', start:null }}
 
 percentOf = percent:percent _ of _ 'previous'i _ { return { percent: percent, prev: true}}
@@ -63,7 +63,7 @@ schedule = 'schedule'i
 full = 'full'i _ {return true}
 priority = '-'i number: number {return number}
 remainder = 'remainder'i _? weight: positive? { return +weight || 1 }
-template = '#template' priority: priority? {return {priority: +priority, directive: 'template'}}
+template = [^#]* '#template' priority: priority? {return {priority: +priority, directive: 'template'}}
 goal = '#goal'i { return 'goal'}
 
 _ 'space' = ' '+
