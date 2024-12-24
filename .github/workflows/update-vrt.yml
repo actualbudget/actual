@@ -29,7 +29,7 @@ jobs:
         with:
           repository: ${{ steps.comment-branch.outputs.head_owner }}/${{ steps.comment-branch.outputs.head_repo }}
           ref: ${{ steps.comment-branch.outputs.head_ref }}
-          submodules: true
+          submodules: recursive
       - name: Set up environment
         uses: ./.github/actions/setup
         with:
