@@ -460,6 +460,8 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
     },
   );
 
+  const [earliestTransaction, _] = useState('');
+
   return (
     <Page
       header={
@@ -492,6 +494,8 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
           allMonths={allMonths}
           start={start}
           end={end}
+          earliestTransaction={earliestTransaction}
+          firstDayOfWeekIdx={firstDayOfWeekIdx}
           mode={mode}
           onChangeDates={onChangeDates}
           filters={conditions}
