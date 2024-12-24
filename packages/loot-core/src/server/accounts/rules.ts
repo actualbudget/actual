@@ -360,6 +360,12 @@ export class Condition {
 
   eval(object) {
     let fieldValue = object[this.field];
+    const type = this.type;
+
+    if (type === 'string') {
+      fieldValue ??= '';
+    }
+
     if (fieldValue === undefined) {
       return false;
     }
@@ -367,8 +373,6 @@ export class Condition {
     if (typeof fieldValue === 'string') {
       fieldValue = fieldValue.toLowerCase();
     }
-
-    const type = this.type;
 
     if (type === 'number' && this.options) {
       if (this.options.outflow) {
