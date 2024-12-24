@@ -1,0 +1,3 @@
+[submodule "packages/desktop-client/locale"]
+	path = packages/desktop-client/locale
+	url = ../translations
