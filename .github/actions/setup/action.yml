@@ -28,6 +28,6 @@ runs:
       shell: bash
       if: steps.cache.outputs.cache-hit != 'true'
     - name: Update translations
-      run: git submodule update --remote
+      run: git config --global --add safe.directory "$PWD" && git submodule update --remote
       shell: bash
       if: ${{ inputs.edge }}
