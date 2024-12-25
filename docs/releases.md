@@ -3,8 +3,8 @@
 ## 24.12.0
 
 The release has the following notable improvements:
-- Dashboards officially released as first-party feature
-- Tracking budget officially released as first-party feature
+- Dashboards (also called Reports) officially released as first-party feature (for details see: https://actualbudget.org/docs/tour/reports)
+- Tracking budget officially released as first-party feature (for details see https://actualbudget.org/docs/getting-started/tracking-budget)
 - New summary report card type
 - Batch sync for SimpleFin accounts
 
