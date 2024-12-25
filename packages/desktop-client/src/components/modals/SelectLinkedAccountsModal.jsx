@@ -258,7 +258,7 @@ function TableRow({
             }}
             style={{ float: 'right' }}
           >
-            {t('Setup bank-sync')}
+            {t('Set up bank-sync')}
           </Button>
         )}
       </Field>
