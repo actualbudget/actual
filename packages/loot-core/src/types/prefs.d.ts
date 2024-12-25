@@ -2,7 +2,8 @@ export type FeatureFlag =
   | 'goalTemplatesEnabled'
   | 'actionTemplating'
   | 'upcomingLengthAdjustment'
-  | 'contextMenus';
+  | 'contextMenus'
+  | 'openidAuth';
 
 /**
  * Cross-device preferences. These sync across devices when they are changed.
@@ -81,3 +82,5 @@ export type GlobalPrefs = Partial<{
   documentDir: string; // Electron only
   serverSelfSignedCert: string; // Electron only
 }>;
+
+export type AuthMethods = 'password' | 'openid';

@@ -28,7 +28,7 @@ __metadata:
     "@swc/jest": "npm:^0.2.36"
     "@types/jest": "npm:^27.5.2"
     "@types/uuid": "npm:^9.0.2"
-    better-sqlite3: "npm:^9.6.0"
+    better-sqlite3: "npm:^11.7.0"
     compare-versions: "npm:^6.1.0"
     jest: "npm:^27.5.1"
     node-fetch: "npm:^3.3.2"
@@ -5306,12 +5306,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/better-sqlite3@npm:^7.6.8":
-  version: 7.6.8
-  resolution: "@types/better-sqlite3@npm:7.6.8"
+"@types/better-sqlite3@npm:^7.6.12":
+  version: 7.6.12
+  resolution: "@types/better-sqlite3@npm:7.6.12"
   dependencies:
     "@types/node": "npm:*"
-  checksum: 10/404e9b7210564866b0f8878353cc6a16c6ffb313077cbb5aec6176ad2b0a30f64236f03f0a40d36d86bf4eab7658bdcd6d6a8a65dc377de7910fc9e9932885a4
+  checksum: 10/a442231518f1a3e28e0ee6efe2581807e5cfaa88a8af4513da34e6ae303ce82f5666e8a0048a1d2738fa248b1b369ee28e59a75189ae0b43e28e44a243a2f24b
   languageName: node
   linkType: hard
 
@@ -7010,14 +7010,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"better-sqlite3@npm:^9.6.0":
-  version: 9.6.0
-  resolution: "better-sqlite3@npm:9.6.0"
+"better-sqlite3@npm:^11.7.0":
+  version: 11.7.0
+  resolution: "better-sqlite3@npm:11.7.0"
   dependencies:
     bindings: "npm:^1.5.0"
     node-gyp: "npm:latest"
     prebuild-install: "npm:^7.1.1"
-  checksum: 10/06b3d95221071a06c2e22a9746d9b7049c0bce7962e5e3290ccf088fffbf4d4d52868f0d98b8ae2565fe33b1adab89823145f23c6f6eb63ecc4fc1b883f9082c
+  checksum: 10/a09bb28c0292bb7c037896ee99197815841275bca2d14f63b58994188239f292642c8c7ea3e0206d8ea6c7530d7b03d7343138ebeb9a4cc855c0b3663e00c812
   languageName: node
   linkType: hard
 
@@ -8690,7 +8690,7 @@ __metadata:
     "@electron/rebuild": "npm:3.6.0"
     "@types/copyfiles": "npm:^2"
     "@types/fs-extra": "npm:^11"
-    better-sqlite3: "npm:^9.6.0"
+    better-sqlite3: "npm:^11.7.0"
     copyfiles: "npm:^2.4.1"
     cross-env: "npm:^7.0.3"
     electron: "npm:30.0.6"
@@ -13367,7 +13367,7 @@ __metadata:
     "@swc/helpers": "npm:^0.5.11"
     "@swc/jest": "npm:^0.2.36"
     "@types/adm-zip": "npm:^0.5.0"
-    "@types/better-sqlite3": "npm:^7.6.8"
+    "@types/better-sqlite3": "npm:^7.6.12"
     "@types/jest": "npm:^27.5.2"
     "@types/jlongster__sql.js": "npm:@types/sql.js@latest"
     "@types/pegjs": "npm:^0.10.3"
@@ -13378,7 +13378,7 @@ __metadata:
     absurd-sql: "npm:0.0.54"
     adm-zip: "npm:^0.5.10"
     assert: "npm:^2.1.0"
-    better-sqlite3: "npm:^9.6.0"
+    better-sqlite3: "npm:^11.7.0"
     browserify-zlib: "npm:^0.2.0"
     buffer: "npm:^6.0.3"
     cross-env: "npm:^7.0.3"
