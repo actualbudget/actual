@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Trans } from 'react-i18next';
+import { useTranslation, Trans } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 
 import { type SyncedPrefs } from 'loot-core/types/prefs';
@@ -25,6 +25,7 @@ const options: {
 ];
 
 export function UpcomingLengthSettings() {
+  const { t } = useTranslation();
   const [_upcomingLength, setUpcomingLength] = useSyncedPref(
     'upcomingScheduledTransactionLength',
   );
@@ -42,28 +43,34 @@ export function UpcomingLengthSettings() {
       primaryAction={
         <View style={{ flexDirection: 'row', gap: '1em' }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 20 }}>
-            <View title="Upcoming Length">
+            <View title={t('Upcoming Length')}>
               <Select
                 options={options.map(x => [x.value || '7', x.label])}
                 value={upcomingLength}
                 onChange={newValue => setUpcomingLength(newValue)}
               />
             </View>
-            <InfoBubble label="Only the first instance of a recurring transaction will be shown." />
+            <InfoBubble
+              label={t(
+                'Only the first instance of a recurring transaction will be shown.',
+              )}
+            />
           </View>
         </View>
       }
     >
       <View style={{ flexDirection: 'row', gap: 20 }}>
         <Text>
-          <strong>Upcoming Length</strong> does not affect how budget data is
-          stored, and can be changed at any time.
+          <Trans>
+            <strong>Upcoming Length</strong> does not affect how budget data is
+            stored, and can be changed at any time.
+          </Trans>
         </Text>
         <Button
           onPress={() => setExpanded(false)}
           aria-label="Close upcoming length settings"
         >
-          Close
+          <Trans>Close</Trans>
         </Button>
       </View>
     </Setting>
@@ -74,10 +81,8 @@ export function UpcomingLengthSettings() {
         variant="primary"
         onPress={() => setExpanded(true)}
       >
-        <Trans>
-          Edit Upcoming Length (
-          {options.find(x => x.value === upcomingLength)?.label ?? '1 Week'})
-        </Trans>
+        <Trans>Edit Upcoming Length</Trans> (
+        {options.find(x => x.value === upcomingLength)?.label ?? '1 Week'})
       </Button>
     </View>
   );

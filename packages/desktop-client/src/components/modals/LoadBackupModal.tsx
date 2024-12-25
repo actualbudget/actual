@@ -129,7 +129,7 @@ export function LoadBackupModal({
                     isDisabled={backupDisabled}
                     onPress={() => dispatch(makeBackup())}
                   >
-                    {t('Backup now')}
+                    {t('Back up now')}
                   </Button>
                 </View>
               )}

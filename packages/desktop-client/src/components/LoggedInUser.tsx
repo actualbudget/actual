@@ -205,9 +205,7 @@ export function LoggedInUser({
         userData?.displayName &&
         !hasSyncedPrefs && (
           <small>
-            <Trans>
-              (logged in as: <span>{userData?.displayName}</span>)
-            </Trans>
+            (<Trans>logged in as:</Trans> <span>{userData?.displayName}</span>)
           </small>
         )}
       {!loading &&
@@ -216,13 +214,11 @@ export function LoggedInUser({
         userData?.displayName &&
         hasSyncedPrefs && (
           <small>
-            <Trans>
-              (logged in as:{' '}
-              <span>
-                <PrivacyFilter>{userData?.displayName}</PrivacyFilter>
-              </span>
-              )
-            </Trans>
+            (<Trans>logged in as:</Trans>{' '}
+            <span>
+              <PrivacyFilter>{userData?.displayName}</PrivacyFilter>
+            </span>
+            )
           </small>
         )}
 

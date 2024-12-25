@@ -6,7 +6,7 @@ import {
   useRef,
   useState,
 } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useTranslation, Trans } from 'react-i18next';
 
 import { sendCatch } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
@@ -33,24 +33,36 @@ import { DateSelect } from './DateSelect';
 // ex: There is no 6th Friday of the Month
 const MAX_DAY_OF_WEEK_INTERVAL = 5;
 
-const FREQUENCY_OPTIONS = [
-  { id: 'daily', name: 'Days' },
-  { id: 'weekly', name: 'Weeks' },
-  { id: 'monthly', name: 'Months' },
-  { id: 'yearly', name: 'Years' },
-] as const;
+function useFrequencyOptions() {
+  const { t } = useTranslation();
+
+  const FREQUENCY_OPTIONS = [
+    { id: 'daily', name: t('Days') },
+    { id: 'weekly', name: t('Weeks') },
+    { id: 'monthly', name: t('Months') },
+    { id: 'yearly', name: t('Years') },
+  ] as const;
+
+  return { FREQUENCY_OPTIONS };
+}
 
 const DAY_OF_MONTH_OPTIONS = [...Array(31).keys()].map(day => day + 1);
 
-const DAY_OF_WEEK_OPTIONS = [
-  { id: 'SU', name: 'Sunday' },
-  { id: 'MO', name: 'Monday' },
-  { id: 'TU', name: 'Tuesday' },
-  { id: 'WE', name: 'Wednesday' },
-  { id: 'TH', name: 'Thursday' },
-  { id: 'FR', name: 'Friday' },
-  { id: 'SA', name: 'Saturday' },
-] as const;
+function useDayOfWeekOptions() {
+  const { t } = useTranslation();
+
+  const DAY_OF_WEEK_OPTIONS = [
+    { id: 'SU', name: t('Sunday') },
+    { id: 'MO', name: t('Monday') },
+    { id: 'TU', name: t('Tuesday') },
+    { id: 'WE', name: t('Wednesday') },
+    { id: 'TH', name: t('Thursday') },
+    { id: 'FR', name: t('Friday') },
+    { id: 'SA', name: t('Saturday') },
+  ] as const;
+
+  return { DAY_OF_WEEK_OPTIONS };
+}
 
 function parsePatternValue(value: string | number) {
   if (value === 'last') {
@@ -271,6 +283,8 @@ function MonthlyPatterns({
   dispatch: Dispatch<ReducerAction>;
 }) {
   const { t } = useTranslation();
+  const { DAY_OF_WEEK_OPTIONS } = useDayOfWeekOptions();
+
   return (
     <Stack spacing={2} style={{ marginTop: 10 }}>
       {config.patterns.map((recurrence, idx) => (
@@ -353,6 +367,8 @@ function RecurringScheduleTooltip({
 }) {
   const { t } = useTranslation();
   const [previewDates, setPreviewDates] = useState(null);
+
+  const { FREQUENCY_OPTIONS } = useFrequencyOptions();
 
   const [state, dispatch] = useReducer(reducer, {
     config: parseConfig(currentConfig),
@@ -499,32 +515,33 @@ function RecurringScheduleTooltip({
               });
             }}
           />
-          <label
-            htmlFor="form_skipwe"
-            style={{
-              userSelect: 'none',
-              marginRight: 5,
-            }}
-          >
-            {t('Move schedule')}{' '}
-          </label>
-          <Select
-            id="solve_dropdown"
-            options={[
-              ['before', 'before'],
-              ['after', 'after'],
-            ]}
-            value={state.config.weekendSolveMode}
-            onChange={value => dispatch({ type: 'set-weekend-solve', value })}
-            disabled={!skipWeekend}
-          />
-          <label
-            htmlFor="solve_dropdown"
-            style={{ userSelect: 'none', marginLeft: 5 }}
-          >
-            {' '}
-            {t('weekend')}
-          </label>
+          <Trans>
+            <label
+              htmlFor="form_skipwe"
+              style={{
+                userSelect: 'none',
+                marginRight: 5,
+              }}
+            >
+              Move schedule{' '}
+            </label>
+            <Select
+              id="solve_dropdown"
+              options={[
+                ['before', 'before'],
+                ['after', 'after'],
+              ]}
+              value={state.config.weekendSolveMode}
+              onChange={value => dispatch({ type: 'set-weekend-solve', value })}
+              disabled={!skipWeekend}
+            />
+            <label
+              htmlFor="solve_dropdown"
+              style={{ userSelect: 'none', marginLeft: 5 }}
+            >
+              <Trans> {{ beforeOrAfter: '' }} weekend</Trans>
+            </label>
+          </Trans>
         </View>
       </Stack>
       <SchedulePreview previewDates={previewDates} />
