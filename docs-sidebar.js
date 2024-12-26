@@ -123,30 +123,19 @@ const sidebars = {
           },
           items: [
             'budgeting/categories',
+            'budgeting/returns-and-reimbursements',
             {
               type: 'category',
-              label: 'How to articles about budgeting',
-              collapsible: false,
+              label: 'Managing Credit Cards',
+              collapsible: true,
               link: {
                 type: 'doc',
-                id: 'budgeting/index',
+                id: 'budgeting/credit-cards/index',
               },
-              items: [
-                'budgeting/returns-and-reimbursements',
-                {
-                  type: 'category',
-                  label: 'Managing Credit Cards',
-                  collapsible: true,
-                  link: {
-                    type: 'doc',
-                    id: 'budgeting/credit-cards/index',
-                  },
-                  items: ['budgeting/credit-cards/carrying-debt'],
-                },
-                'budgeting/joint-accounts',
-                'advanced/restart',
-              ]
+              items: ['budgeting/credit-cards/carrying-debt'],
             },
+            'budgeting/joint-accounts',
+            'advanced/restart'
           ],
         },
 
