@@ -5,8 +5,9 @@ import { useHover } from 'usehooks-ts';
 
 import { isPreviewId } from 'loot-core/shared/transactions';
 import { useCachedSchedules } from 'loot-core/src/client/data-hooks/schedules';
-import { q } from 'loot-core/src/shared/query';
+import { q, type Query } from 'loot-core/src/shared/query';
 import { getScheduledAmount } from 'loot-core/src/shared/schedules';
+import { type AccountEntity } from 'loot-core/types/models';
 
 import { useSelectedItems } from '../../hooks/useSelected';
 import { SvgArrowButtonRight1 } from '../../icons/v2';
@@ -15,11 +16,22 @@ import { Button } from '../common/Button2';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { PrivacyFilter } from '../PrivacyFilter';
+import { type Binding } from '../spreadsheet';
 import { CellValue, CellValueText } from '../spreadsheet/CellValue';
 import { useFormat } from '../spreadsheet/useFormat';
 import { useSheetValue } from '../spreadsheet/useSheetValue';
 
-function DetailedBalance({ name, balance, isExactBalance = true }) {
+type DetailedBalanceProps = {
+  name: string;
+  balance: number;
+  isExactBalance?: boolean;
+};
+
+function DetailedBalance({
+  name,
+  balance,
+  isExactBalance = true,
+}: DetailedBalanceProps) {
   const format = useFormat();
   return (
     <Text
@@ -42,13 +54,18 @@ function DetailedBalance({ name, balance, isExactBalance = true }) {
   );
 }
 
-function SelectedBalance({ selectedItems, account }) {
+type SelectedBalanceProps = {
+  selectedItems: Set<string>;
+  account: AccountEntity;
+};
+
+function SelectedBalance({ selectedItems, account }: SelectedBalanceProps) {
   const { t } = useTranslation();
 
   const name = `selected-balance-${[...selectedItems].join('-')}`;
 
-  const rows = useSheetValue({
-    name,
+  const rows = useSheetValue<'balance', `selected-transactions-${string}`>({
+    name: name as `selected-transactions-${string}`,
     query: q('transactions')
       .filter({
         id: { $oneof: [...selectedItems] },
@@ -56,18 +73,18 @@ function SelectedBalance({ selectedItems, account }) {
       })
       .select('id'),
   });
-  const ids = new Set((rows || []).map(r => r.id));
+  const ids = new Set((rows || []).map((r: { id: string }) => r.id));
 
   const finalIds = [...selectedItems].filter(id => !ids.has(id));
-  let balance = useSheetValue({
-    name: name + '-sum',
+  let balance = useSheetValue<'balance', `selected-balance-${string}`>({
+    name: (name + '-sum') as `selected-balance-${string}`,
     query: q('transactions')
       .filter({ id: { $oneof: finalIds } })
       .options({ splits: 'all' })
       .calculate({ $sum: '$amount' }),
   });
 
-  let scheduleBalance = null;
+  let scheduleBalance = 0;
 
   const { isLoading, schedules = [] } = useCachedSchedules();
 
@@ -95,14 +112,10 @@ function SelectedBalance({ selectedItems, account }) {
     }
   }
 
-  if (balance == null) {
-    if (scheduleBalance == null) {
-      return null;
-    } else {
-      balance = scheduleBalance;
-    }
-  } else if (scheduleBalance != null) {
-    balance += scheduleBalance;
+  if (!balance && !scheduleBalance) {
+    return null;
+  } else {
+    balance = (balance ?? 0) + scheduleBalance;
   }
 
   return (
@@ -114,37 +127,58 @@ function SelectedBalance({ selectedItems, account }) {
   );
 }
 
-function FilteredBalance({ filteredAmount }) {
+type FilteredBalanceProps = {
+  filteredAmount: number;
+};
+
+function FilteredBalance({ filteredAmount }: FilteredBalanceProps) {
   const { t } = useTranslation();
 
   return (
     <DetailedBalance
       name={t('Filtered balance:')}
-      balance={filteredAmount || 0}
+      balance={filteredAmount ?? 0}
       isExactBalance={true}
     />
   );
 }
 
-function MoreBalances({ balanceQuery }) {
+type MoreBalancesProps = {
+  balanceQuery: { name: `balance-query-${string}`; query: Query };
+};
+
+function MoreBalances({ balanceQuery }: MoreBalancesProps) {
   const { t } = useTranslation();
 
-  const cleared = useSheetValue({
-    name: balanceQuery.name + '-cleared',
+  const cleared = useSheetValue<'balance', `balance-query-${string}-cleared`>({
+    name: (balanceQuery.name + '-cleared') as `balance-query-${string}-cleared`,
     query: balanceQuery.query.filter({ cleared: true }),
   });
-  const uncleared = useSheetValue({
-    name: balanceQuery.name + '-uncleared',
+  const uncleared = useSheetValue<
+    'balance',
+    `balance-query-${string}-uncleared`
+  >({
+    name: (balanceQuery.name +
+      '-uncleared') as `balance-query-${string}-uncleared`,
     query: balanceQuery.query.filter({ cleared: false }),
   });
 
   return (
     <View style={{ flexDirection: 'row' }}>
-      <DetailedBalance name={t('Cleared total:')} balance={cleared} />
-      <DetailedBalance name={t('Uncleared total:')} balance={uncleared} />
+      <DetailedBalance name={t('Cleared total:')} balance={cleared ?? 0} />
+      <DetailedBalance name={t('Uncleared total:')} balance={uncleared ?? 0} />
     </View>
   );
 }
+
+type BalancesProps = {
+  balanceQuery: { name: `balance-query-${string}`; query: Query };
+  showExtraBalances: boolean;
+  onToggleExtraBalances: () => void;
+  account: AccountEntity;
+  isFiltered: boolean;
+  filteredAmount: number;
+};
 
 export function Balances({
   balanceQuery,
@@ -153,7 +187,7 @@ export function Balances({
   account,
   isFiltered,
   filteredAmount,
-}) {
+}: BalancesProps) {
   const selectedItems = useSelectedItems();
   const buttonRef = useRef(null);
   const isButtonHovered = useHover(buttonRef);
@@ -177,7 +211,15 @@ export function Balances({
           paddingBottom: 1,
         }}
       >
-        <CellValue binding={{ ...balanceQuery, value: 0 }} type="financial">
+        <CellValue
+          binding={
+            { ...balanceQuery, value: 0 } as Binding<
+              'balance',
+              `balance-query-${string}-cleared`
+            >
+          }
+          type="financial"
+        >
           {props => (
             <CellValueText
               {...props}
