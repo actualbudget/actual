@@ -5,4 +5,5 @@ export interface ActualPluginManifest {
   description?: string;
   pluginType: 'server' | 'client';
   minimumActualVersion: string;
+  plugin?: string;
 }

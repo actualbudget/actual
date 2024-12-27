@@ -30,6 +30,9 @@ function _openDatabase() {
       if (!db.objectStoreNames.contains('files')) {
         db.createObjectStore('files', { keyPath: 'filepath' });
       }
+      if (!db.objectStoreNames.contains('plugins')) {
+        db.createObjectStore('plugins', { keyPath: 'slug' });
+      }
     };
 
     openRequest.onblocked = e => console.log('blocked', e);
