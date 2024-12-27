@@ -56,7 +56,7 @@ function DetailedBalance({
 
 type SelectedBalanceProps = {
   selectedItems: Set<string>;
-  account: AccountEntity;
+  account?: AccountEntity;
 };
 
 function SelectedBalance({ selectedItems, account }: SelectedBalanceProps) {
@@ -128,7 +128,7 @@ function SelectedBalance({ selectedItems, account }: SelectedBalanceProps) {
 }
 
 type FilteredBalanceProps = {
-  filteredAmount: number;
+  filteredAmount?: number | null;
 };
 
 function FilteredBalance({ filteredAmount }: FilteredBalanceProps) {
@@ -175,9 +175,9 @@ type BalancesProps = {
   balanceQuery: { name: `balance-query-${string}`; query: Query };
   showExtraBalances: boolean;
   onToggleExtraBalances: () => void;
-  account: AccountEntity;
+  account?: AccountEntity;
   isFiltered: boolean;
-  filteredAmount: number;
+  filteredAmount?: number | null;
 };
 
 export function Balances({

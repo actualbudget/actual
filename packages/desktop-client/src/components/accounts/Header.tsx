@@ -54,7 +54,7 @@ type AccountHeaderProps = {
   isNameEditable: boolean;
   workingHard: boolean;
   accountName: string;
-  account: AccountEntity;
+  account?: AccountEntity;
   filterId?: SavedFilter;
   savedFilters: TransactionFilterEntity[];
   accountsSyncing: string[];
@@ -67,10 +67,10 @@ type AccountHeaderProps = {
   showReconciled: boolean;
   showEmptyMessage: boolean;
   balanceQuery: ComponentProps<typeof ReconcilingMessage>['balanceQuery'];
-  reconcileAmount: number;
-  canCalculateBalance: () => boolean;
+  reconcileAmount?: number | null;
+  canCalculateBalance?: () => boolean;
   isFiltered: boolean;
-  filteredAmount: number;
+  filteredAmount?: number | null;
   isSorted: boolean;
   search: string;
   filterConditions: RuleConditionEntity[];
@@ -443,7 +443,9 @@ export function AccountHeader({
                 <AccountMenu
                   account={account}
                   canSync={canSync}
-                  canShowBalances={canCalculateBalance()}
+                  canShowBalances={
+                    canCalculateBalance ? canCalculateBalance() : false
+                  }
                   isSorted={isSorted}
                   showBalances={showBalances}
                   showCleared={showCleared}
@@ -551,7 +553,7 @@ function AccountSyncSidebar({
 }
 
 type AccountNameFieldProps = {
-  account: AccountEntity;
+  account?: AccountEntity;
   accountName: string;
   isNameEditable: boolean;
   editingName: boolean;
