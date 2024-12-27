@@ -69,7 +69,7 @@ export const useActualPlugins = () => {
 async function loadPluginScript(
   scriptBlob: Blob,
   manifest: ActualPluginManifest,
-): Promise<ActualPlugin> {
+): Promise<ActualPlugin | null> {
   const scriptURL = URL.createObjectURL(scriptBlob);
   const scriptCode = await scriptBlob.text();
   const pluginModule = await import(/* @vite-ignore */ scriptURL);
@@ -97,6 +97,10 @@ async function loadPluginScript(
   throw new Error('Plugin script does not export a default object.');
 }
 
+type GitHubAsset = {
+  name: string;
+  browser_download_url: string;
+};
 async function fetchLatestRelease(
   owner: string,
   repo: string,
@@ -109,10 +113,11 @@ async function fetchLatestRelease(
 
   const releaseData = await response.json();
   const version = releaseData.tag_name;
-  const scriptUrl = releaseData.assets.filter(f => f.name === 'index.es.js')[0]
-    ?.browser_download_url;
+  const scriptUrl = releaseData.assets.filter(
+    (f: GitHubAsset) => f.name === 'index.es.js',
+  )[0]?.browser_download_url;
   const manifestUrl = releaseData.assets.filter(
-    f => f.name === 'manifest.json',
+    (f: GitHubAsset) => f.name === 'manifest.json',
   )[0]?.browser_download_url;
 
   return { version, scriptUrl, manifestUrl };
@@ -136,7 +141,7 @@ function parseGitHubRepoUrl(
     }
     throw new Error('URL does not contain owner and repository name');
   } catch (error) {
-    console.error(`Error parsing GitHub URL: ${url}`, error.message);
+    console.error(`Error parsing GitHub URL: ${url}`, error);
     return null;
   }
 }
@@ -184,6 +189,10 @@ async function loadPluginFromRepo(repo: string): Promise<ActualPlugin | null> {
       console.log(
         `Using cached version of plugin “${repo}” v${latestVersion}...`,
       );
+    }
+
+    if (!indexContent) {
+      return null;
     }
 
     const indexJsBlob = new Blob([indexContent], {
