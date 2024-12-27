@@ -242,6 +242,68 @@ async function downloadSimpleFinTransactions(
   return retVal;
 }
 
+async function downloadPluggyAiTransactions(
+  acctId: AccountEntity['id'] | AccountEntity['id'][],
+  since: string | string[],
+  to: string | string[],
+) {
+  const userToken = await asyncStorage.getItem('user-token');
+  if (!userToken) return;
+
+  const batchSync = Array.isArray(acctId);
+
+  console.log('Pulling transactions from SimpleFin');
+
+  const res = await post(
+    getServer().PLUGGYAI_SERVER + '/transactions',
+    {
+      accountId: acctId,
+      startDate: since,
+      endDate: to,
+    },
+    {
+      'X-ACTUAL-TOKEN': userToken,
+    },
+    60000,
+  );
+
+  if (res.error_code) {
+    throw BankSyncError(res.error_type, res.error_code);
+  }
+
+  let retVal = {};
+  if (batchSync) {
+    for (const [accountId, data] of Object.entries(
+      res as SimpleFinBatchSyncResponse,
+    )) {
+      if (accountId === 'errors') continue;
+
+      const error = res?.errors?.[accountId]?.[0];
+
+      retVal[accountId] = {
+        transactions: data?.transactions?.all,
+        accountBalance: data?.balances,
+        startingBalance: data?.startingBalance,
+      };
+
+      if (error) {
+        retVal[accountId].error_type = error.error_type;
+        retVal[accountId].error_code = error.error_code;
+      }
+    }
+  } else {
+    const singleRes = res as BankSyncResponse;
+    retVal = {
+      transactions: singleRes.transactions.all,
+      accountBalance: singleRes.balances,
+      startingBalance: singleRes.startingBalance,
+    };
+  }
+
+  console.log('Response:', retVal);
+  return retVal;
+}
+
 async function resolvePayee(trans, payeeName, payeesToCreate) {
   if (trans.payee == null && payeeName) {
     // First check our registry of new payees (to avoid a db access)
@@ -747,6 +809,15 @@ async function processBankSyncDownload(
       balanceToUse = previousBalance;
     }
 
+    if (acctRow.account_sync_source === 'pluggyai') {
+      const currentBalance = download.startingBalance;
+      const previousBalance = transactions.reduce(
+        (total, trans) => total - trans.transactionAmount.amount * 100,
+        currentBalance,
+      );
+      balanceToUse = previousBalance;
+    }
+
     const oldestTransaction = transactions[transactions.length - 1];
 
     const oldestDate =
@@ -821,6 +892,12 @@ export async function syncAccount(
   let download;
   if (acctRow.account_sync_source === 'simpleFin') {
     download = await downloadSimpleFinTransactions(acctId, syncStartDate);
+  } else if (acctRow.account_sync_source === 'pluggyai') {
+    download = await downloadPluggyAiTransactions(
+      acctId,
+      syncStartDate,
+      dateFns.format(dateFns.addDays(new Date(), 1), 'yyyy-MM-dd'),
+    );
   } else if (acctRow.account_sync_source === 'goCardless') {
     download = await downloadGoCardlessTransactions(
       userId,

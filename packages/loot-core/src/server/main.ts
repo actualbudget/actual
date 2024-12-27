@@ -706,6 +706,66 @@ handlers['simplefin-accounts-link'] = async function ({
   return 'ok';
 };
 
+handlers['pluggyai-accounts-link'] = async function ({
+  externalAccount,
+  upgradingId,
+  offBudget,
+}) {
+  let id;
+
+  const institution = {
+    name: externalAccount.institution ?? 'Unknown',
+  };
+
+  const bank = await link.findOrCreateBank(
+    institution,
+    externalAccount.orgDomain ?? externalAccount.orgId,
+  );
+
+  if (upgradingId) {
+    const accRow = await db.first('SELECT * FROM accounts WHERE id = ?', [
+      upgradingId,
+    ]);
+    id = accRow.id;
+    await db.update('accounts', {
+      id,
+      account_id: externalAccount.account_id,
+      bank: bank.id,
+      account_sync_source: 'pluggyai',
+    });
+  } else {
+    id = uuidv4();
+    await db.insertWithUUID('accounts', {
+      id,
+      account_id: externalAccount.account_id,
+      name: externalAccount.name,
+      official_name: externalAccount.name,
+      bank: bank.id,
+      offbudget: offBudget ? 1 : 0,
+      account_sync_source: 'pluggyai',
+    });
+    await db.insertPayee({
+      name: '',
+      transfer_acct: id,
+    });
+  }
+
+  await bankSync.syncAccount(
+    undefined,
+    undefined,
+    id,
+    externalAccount.account_id,
+    bank.bank_id,
+  );
+
+  await connection.send('sync-event', {
+    type: 'success',
+    tables: ['transactions'],
+  });
+
+  return 'ok';
+};
+
 handlers['account-create'] = mutator(async function ({
   name,
   balance,
@@ -974,6 +1034,22 @@ handlers['simplefin-status'] = async function () {
   );
 };
 
+handlers['pluggyai-status'] = async function () {
+  const userToken = await asyncStorage.getItem('user-token');
+
+  if (!userToken) {
+    return { error: 'unauthorized' };
+  }
+
+  return post(
+    getServer().PLUGGYAI_SERVER + '/status',
+    {},
+    {
+      'X-ACTUAL-TOKEN': userToken,
+    },
+  );
+};
+
 handlers['simplefin-accounts'] = async function () {
   const userToken = await asyncStorage.getItem('user-token');
 
@@ -984,6 +1060,27 @@ handlers['simplefin-accounts'] = async function () {
   try {
     return await post(
       getServer().SIMPLEFIN_SERVER + '/accounts',
+      {},
+      {
+        'X-ACTUAL-TOKEN': userToken,
+      },
+      60000,
+    );
+  } catch (error) {
+    return { error_code: 'TIMED_OUT' };
+  }
+};
+
+handlers['pluggyai-accounts'] = async function () {
+  const userToken = await asyncStorage.getItem('user-token');
+
+  if (!userToken) {
+    return { error: 'unauthorized' };
+  }
+
+  try {
+    return await post(
+      getServer().PLUGGYAI_SERVER + '/accounts',
       {},
       {
         'X-ACTUAL-TOKEN': userToken,

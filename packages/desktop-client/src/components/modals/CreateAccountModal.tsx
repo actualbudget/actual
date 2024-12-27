@@ -9,7 +9,9 @@ import { send } from 'loot-core/src/platform/client/fetch';
 import { useAuth } from '../../auth/AuthProvider';
 import { Permissions } from '../../auth/types';
 import { authorizeBank } from '../../gocardless';
+import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { useGoCardlessStatus } from '../../hooks/useGoCardlessStatus';
+import { usePluggyAiStatus } from '../../hooks/usePluggyAiStatus';
 import { useSimpleFinStatus } from '../../hooks/useSimpleFinStatus';
 import { useSyncServerStatus } from '../../hooks/useSyncServerStatus';
 import { SvgDotsHorizontalTriple } from '../../icons/v1';
@@ -33,12 +35,17 @@ type CreateAccountProps = {
 export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
   const { t } = useTranslation();
 
+  const isPluggyAiEnabled = useFeatureFlag('pluggyAiBankSync');
+
   const syncServerStatus = useSyncServerStatus();
   const dispatch = useDispatch();
   const [isGoCardlessSetupComplete, setIsGoCardlessSetupComplete] = useState<
     boolean | null
   >(null);
   const [isSimpleFinSetupComplete, setIsSimpleFinSetupComplete] = useState<
+    boolean | null
+  >(null);
+  const [isPluggyAiSetupComplete, setIsPluggyAiSetupComplete] = useState<
     boolean | null
   >(null);
   const { hasPermission } = useAuth();
@@ -119,6 +126,62 @@ export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
     setLoadingSimpleFinAccounts(false);
   };
 
+  const onConnectPluggyAi = async () => {
+    if (!isPluggyAiSetupComplete) {
+      onPluggyAiInit();
+      return;
+    }
+
+    try {
+      const results = await send('pluggyai-accounts');
+      if (results.error_code) {
+        throw new Error(results.reason);
+      }
+
+      const newAccounts = [];
+
+      type NormalizedAccount = {
+        account_id: string;
+        name: string;
+        institution: string;
+        orgDomain: string;
+        orgId: string;
+        balance: number;
+      };
+
+      for (const oldAccount of results.accounts) {
+        const newAccount: NormalizedAccount = {
+          account_id: oldAccount.id,
+          name: `${oldAccount.name.trim()} - ${oldAccount.type === 'BANK' ? oldAccount.taxNumber : oldAccount.owner}`,
+          institution: oldAccount.name,
+          orgDomain: '',
+          orgId: oldAccount.id,
+          balance:
+            oldAccount.type === 'BANK'
+              ? oldAccount.bankData.automaticallyInvestedBalance +
+                oldAccount.bankData.closingBalance
+              : oldAccount.balance,
+        };
+
+        newAccounts.push(newAccount);
+      }
+
+      dispatch(
+        pushModal('select-linked-accounts', {
+          accounts: newAccounts,
+          syncSource: 'pluggyai',
+        }),
+      );
+    } catch (err) {
+      console.error(err);
+      dispatch(
+        pushModal('pluggyai-init', {
+          onSuccess: () => setIsSimpleFinSetupComplete(true),
+        }),
+      );
+    }
+  };
+
   const onGoCardlessInit = () => {
     dispatch(
       pushModal('gocardless-init', {
@@ -131,6 +194,14 @@ export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
     dispatch(
       pushModal('simplefin-init', {
         onSuccess: () => setIsSimpleFinSetupComplete(true),
+      }),
+    );
+  };
+
+  const onPluggyAiInit = () => {
+    dispatch(
+      pushModal('pluggyai-init', {
+        onSuccess: () => setIsPluggyAiSetupComplete(true),
       }),
     );
   };
@@ -163,6 +234,25 @@ export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
     });
   };
 
+  const onPluggyAiReset = () => {
+    send('secret-set', {
+      name: 'pluggyai_clientId',
+      value: null,
+    }).then(() => {
+      send('secret-set', {
+        name: 'pluggyai_clientSecret',
+        value: null,
+      }).then(() => {
+        send('secret-set', {
+          name: 'pluggyai_itemIds',
+          value: null,
+        }).then(() => {
+          setIsPluggyAiSetupComplete(false);
+        });
+      });
+    });
+  };
+
   const onCreateLocalAccount = () => {
     dispatch(pushModal('add-local-account'));
   };
@@ -176,6 +266,11 @@ export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
   useEffect(() => {
     setIsSimpleFinSetupComplete(configuredSimpleFin);
   }, [configuredSimpleFin]);
+
+  const { configuredPluggyAi } = usePluggyAiStatus();
+  useEffect(() => {
+    setIsPluggyAiSetupComplete(configuredPluggyAi);
+  }, [configuredPluggyAi]);
 
   let title = t('Add Account');
   const [loadingSimpleFinAccounts, setLoadingSimpleFinAccounts] =
@@ -358,9 +453,76 @@ export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
                           'to automatically download transactions. SimpleFIN provides reliable, up-to-date information from hundreds of banks.',
                         )}{' '}
                       </Text>
+                      {isPluggyAiEnabled && (
+                        <>
+                          <View
+                            style={{
+                              flexDirection: 'row',
+                              gap: 10,
+                              alignItems: 'center',
+                            }}
+                          >
+                            <ButtonWithLoading
+                              isDisabled={syncServerStatus !== 'online'}
+                              style={{
+                                padding: '10px 0',
+                                fontSize: 15,
+                                fontWeight: 600,
+                                flex: 1,
+                              }}
+                              onPress={onConnectPluggyAi}
+                            >
+                              {isPluggyAiSetupComplete
+                                ? t('Link bank account with Pluggy.ai')
+                                : t('Set up Pluggy.ai for bank sync')}
+                            </ButtonWithLoading>
+                            {isPluggyAiSetupComplete && (
+                              <DialogTrigger>
+                                <Button
+                                  variant="bare"
+                                  aria-label={t('Pluggy.ai menu')}
+                                >
+                                  <SvgDotsHorizontalTriple
+                                    width={15}
+                                    height={15}
+                                    style={{ transform: 'rotateZ(90deg)' }}
+                                  />
+                                </Button>
+
+                                <Popover>
+                                  <Menu
+                                    onMenuSelect={item => {
+                                      if (item === 'reconfigure') {
+                                        onPluggyAiReset();
+                                      }
+                                    }}
+                                    items={[
+                                      {
+                                        name: 'reconfigure',
+                                        text: t('Reset Pluggy.ai credentials'),
+                                      },
+                                    ]}
+                                  />
+                                </Popover>
+                              </DialogTrigger>
+                            )}
+                          </View>
+                          <Text style={{ lineHeight: '1.4em', fontSize: 15 }}>
+                            <strong>
+                              {t('Link a')} <em>{t('Brazilian')}</em>{' '}
+                              {t('bank account')}
+                            </strong>{' '}
+                            {t(
+                              'to automatically download transactions. Pluggy.ai provides reliable, up-to-date information from hundreds of banks.',
+                            )}
+                          </Text>
+                        </>
+                      )}
                     </>
                   )}
-                  {(!isGoCardlessSetupComplete || !isSimpleFinSetupComplete) &&
+                  {(!isGoCardlessSetupComplete ||
+                    !isSimpleFinSetupComplete ||
+                    !isPluggyAiSetupComplete) &&
                     !canSetSecrets && (
                       <Warning>
                         <Trans>
@@ -370,6 +532,7 @@ export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
                         {[
                           isGoCardlessSetupComplete ? '' : 'GoCardless',
                           isSimpleFinSetupComplete ? '' : 'SimpleFin',
+                          isPluggyAiSetupComplete ? '' : 'Pluggy.ai',
                         ]
                           .filter(Boolean)
                           .join(' or ')}

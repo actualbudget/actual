@@ -89,6 +89,22 @@ export function linkAccountSimpleFin(
   };
 }
 
+export function linkAccountPluggyAi(
+  externalAccount: unknown,
+  upgradingId?: string,
+  offBudget?: boolean,
+) {
+  return async (dispatch: Dispatch) => {
+    await send('pluggyai-accounts-link', {
+      externalAccount,
+      upgradingId,
+      offBudget,
+    });
+    await dispatch(getPayees());
+    await dispatch(getAccounts());
+  };
+}
+
 function handleSyncResponse(
   accountId,
   res,

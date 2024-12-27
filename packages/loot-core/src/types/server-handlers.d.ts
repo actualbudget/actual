@@ -18,6 +18,7 @@ import {
   PayeeEntity,
 } from './models';
 import { OpenIdConfig } from './models/openid';
+import { PluggyAiAccount } from './models/pluggyai';
 import { GlobalPrefs, MetadataPrefs } from './prefs';
 import { Query } from './query';
 import { EmptyObject } from './util';
@@ -161,6 +162,12 @@ export interface ServerHandlers {
     offBudget;
   }) => Promise<'ok'>;
 
+  'pluggyai-accounts-link': (arg: {
+    externalAccount;
+    upgradingId;
+    offBudget;
+  }) => Promise<'ok'>;
+
   'account-create': (arg: {
     name: string;
     balance?: number;
@@ -193,7 +200,11 @@ export interface ServerHandlers {
 
   'simplefin-status': () => Promise<{ configured: boolean }>;
 
+  'pluggyai-status': () => Promise<{ configured: boolean }>;
+
   'simplefin-accounts': () => Promise<{ accounts: SimpleFinAccount[] }>;
+
+  'pluggyai-accounts': () => Promise<{ accounts: PluggyAiAccount[] }>;
 
   'simplefin-batch-sync': ({ ids }: { ids: string[] }) => Promise<
     {
