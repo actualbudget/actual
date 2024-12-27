@@ -252,7 +252,7 @@ async function downloadPluggyAiTransactions(
 
   const batchSync = Array.isArray(acctId);
 
-  console.log('Pulling transactions from SimpleFin');
+  console.log('Pulling transactions from Pluggy.ai');
 
   const res = await post(
     getServer().PLUGGYAI_SERVER + '/transactions',

@@ -104,7 +104,7 @@ export function ExperimentalFeatures() {
             </FeatureToggle>
             <FeatureToggle
               flag="pluggyAiBankSync"
-              feedbackLink="https://github.com/actualbudget/actual/"
+              feedbackLink="https://github.com/actualbudget/actual/pull/4049"
             >
               <Trans>Pluggy.ai Bank Sync (Brazilian banks only)</Trans>
             </FeatureToggle>
