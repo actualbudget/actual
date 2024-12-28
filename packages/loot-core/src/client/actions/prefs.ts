@@ -1,4 +1,5 @@
 import { send } from '../../platform/client/fetch';
+import { parseNumberFormat, setNumberFormat } from '../../shared/util';
 import {
   type GlobalPrefs,
   type MetadataPrefs,
@@ -19,12 +20,25 @@ export function loadPrefs() {
       dispatch(closeModal());
     }
 
+    const [globalPrefs, syncedPrefs] = await Promise.all([
+      send('load-global-prefs'),
+      send('preferences/get'),
+    ]);
+
     dispatch({
       type: constants.SET_PREFS,
       prefs,
-      globalPrefs: await send('load-global-prefs'),
-      syncedPrefs: await send('preferences/get'),
+      globalPrefs,
+      syncedPrefs,
     });
+
+    // Certain loot-core utils depend on state outside of the React tree, update them
+    setNumberFormat(
+      parseNumberFormat({
+        format: syncedPrefs.numberFormat,
+        hideFraction: syncedPrefs.hideFraction,
+      }),
+    );
 
     return prefs;
   };
