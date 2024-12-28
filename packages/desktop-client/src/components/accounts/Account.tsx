@@ -709,6 +709,19 @@ class AccountInternal extends PureComponent<
       const transactions = this.state.transactions.filter(trans =>
         ids.includes(trans.id),
       );
+      const changedTransactions = [];
+      for (const transaction of transactions) {
+        const res: TransactionEntity | null = await send('rules-run', {
+          transaction,
+        });
+        if (res) {
+          changedTransactions.push(res);
+        }
+      }
+      // Bulk fetch transactions
+      const transactions = this.state.transactions.filter(trans =>
+        ids.includes(trans.id),
+      );
       //call the runrules function
       const changedTransactions = [];
       for (const transaction of transactions) {
