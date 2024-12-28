@@ -4,7 +4,7 @@ module.exports = {
     '../loot-core/src/**/*.{js,jsx,ts,tsx}',
     '../desktop-electron/*.{js,ts}',
   ],
-  output: 'src/locale/$LOCALE.json',
+  output: 'locale/$LOCALE.json',
   locales: ['en'],
   sort: true,
   keySeparator: false,

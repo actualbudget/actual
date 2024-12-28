@@ -34,6 +34,8 @@ contextBridge.exposeInMainWorld('Actual', {
     });
   },
 
+  startOAuthServer: () => ipcRenderer.invoke('start-oauth-server'),
+
   relaunch: () => {
     ipcRenderer.invoke('relaunch');
   },

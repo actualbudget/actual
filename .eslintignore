@@ -7,6 +7,7 @@ packages/crdt/dist
 
 packages/desktop-client/bundle.browser.js
 packages/desktop-client/build/
+packages/desktop-client/build-electron/
 packages/desktop-client/build-stats/
 packages/desktop-client/public/kcab/
 packages/desktop-client/public/data/
@@ -16,6 +17,7 @@ packages/desktop-client/src/icons/**/*
 packages/desktop-client/test-results/
 packages/desktop-client/playwright-report/
 
+packages/desktop-electron/build/
 packages/desktop-electron/client-build/
 packages/desktop-electron/dist/
 packages/desktop-electron/build/
