@@ -429,7 +429,7 @@ export function AccountHeader({
           {account ? (
             <View style={{ flex: '0 0 auto' }}>
               <MenuButton
-                aria-label="Account menu"
+                aria-label={t('Account menu')}
                 ref={triggerRef}
                 onPress={() => setMenuOpen(true)}
               />
@@ -460,7 +460,7 @@ export function AccountHeader({
           ) : (
             <View style={{ flex: '0 0 auto' }}>
               <MenuButton
-                aria-label="Account menu"
+                aria-label={t('Account menu')}
                 ref={triggerRef}
                 onPress={() => setMenuOpen(true)}
               />
