@@ -1,5 +1,5 @@
 import React from 'react';
-import { Trans, useTranslation } from 'react-i18next';
+import { Trans } from 'react-i18next';
 
 import { theme } from '../../../style';
 import { Text } from '../../common/Text';
@@ -17,8 +17,6 @@ export function ParsedDate({
   dateFormat,
   date,
 }: ParsedDateProps) {
-  const { t } = useTranslation();
-
   const parsed =
     date &&
     formatDate(
