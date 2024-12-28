@@ -36,7 +36,7 @@ export function ParsedDate({
         &rarr;{' '}
       </Text>
       <Text style={{ color: parsed ? theme.noticeTextLight : theme.errorText }}>
-        {parsed || t('Invalid')}
+        {parsed || <Trans>Invalid</Trans>}
       </Text>
     </Text>
   );

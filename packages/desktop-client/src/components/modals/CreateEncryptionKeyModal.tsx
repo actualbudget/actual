@@ -154,7 +154,7 @@ export function CreateEncryptionKeyModal({
                     to="https://actualbudget.org/docs/getting-started/sync/#end-to-end-encryption"
                     linkColor="purple"
                   >
-                    {t('Learn more')}
+                    <Trans>Learn more</Trans>
                   </Link>
                 </Paragraph>
                 <Paragraph>

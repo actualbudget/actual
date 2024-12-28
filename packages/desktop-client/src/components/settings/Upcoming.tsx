@@ -14,21 +14,30 @@ import { View } from '../common/View';
 
 import { Setting } from './UI';
 
-const options: {
-  value: SyncedPrefs['upcomingScheduledTransactionLength'];
-  label: string;
-}[] = [
-  { value: '1', label: '1 Day' },
-  { value: '7', label: '1 Week' },
-  { value: '14', label: '2 Weeks' },
-  { value: '30', label: '1 Month' },
-];
+function useUpcomingLengthOptions() {
+  const { t } = useTranslation();
+
+  const upcomingLengthOptions: {
+    value: SyncedPrefs['upcomingScheduledTransactionLength'];
+    label: string;
+  }[] = [
+    { value: '1', label: t('1 day') },
+    { value: '7', label: t('1 week') },
+    { value: '14', label: t('2 weeks') },
+    { value: '30', label: t('1 month') },
+  ];
+
+  return { upcomingLengthOptions };
+}
 
 export function UpcomingLengthSettings() {
   const { t } = useTranslation();
   const [_upcomingLength, setUpcomingLength] = useSyncedPref(
     'upcomingScheduledTransactionLength',
   );
+
+  const { upcomingLengthOptions } = useUpcomingLengthOptions();
+
   const upcomingLength = _upcomingLength || '7';
 
   const enabled = useFeatureFlag('upcomingLengthAdjustment');
@@ -45,7 +54,10 @@ export function UpcomingLengthSettings() {
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 20 }}>
             <View title={t('Upcoming Length')}>
               <Select
-                options={options.map(x => [x.value || '7', x.label])}
+                options={upcomingLengthOptions.map(x => [
+                  x.value || '7',
+                  x.label,
+                ])}
                 value={upcomingLength}
                 onChange={newValue => setUpcomingLength(newValue)}
               />
@@ -82,7 +94,9 @@ export function UpcomingLengthSettings() {
         onPress={() => setExpanded(true)}
       >
         <Trans>Edit Upcoming Length</Trans> (
-        {options.find(x => x.value === upcomingLength)?.label ?? '1 Week'})
+        {upcomingLengthOptions.find(x => x.value === upcomingLength)?.label ??
+          t('1 week')}
+        )
       </Button>
     </View>
   );
