@@ -14,6 +14,8 @@ import { addNotification, sync } from 'loot-core/client/actions';
 import { type State } from 'loot-core/src/client/state-types';
 import * as undo from 'loot-core/src/platform/client/undo';
 
+import { ProtectedRoute } from '../auth/ProtectedRoute';
+import { Permissions } from '../auth/types';
 import { useAccounts } from '../hooks/useAccounts';
 import { useLocalPref } from '../hooks/useLocalPref';
 import { useMetaThemeColor } from '../hooks/useMetaThemeColor';
@@ -21,6 +23,7 @@ import { useNavigate } from '../hooks/useNavigate';
 import { theme } from '../style';
 import { getIsOutdated, getLatestVersion } from '../util/versions';
 
+import { UserAccessPage } from './admin/UserAccess/UserAccessPage';
 import { BankSyncStatus } from './BankSyncStatus';
 import { View } from './common/View';
 import { GlobalKeys } from './GlobalKeys';
@@ -34,7 +37,9 @@ import { Reports } from './reports';
 import { LoadingIndicator } from './reports/LoadingIndicator';
 import { NarrowAlternate, WideComponent } from './responsive';
 import { useResponsive } from './responsive/ResponsiveProvider';
+import { UserDirectoryPage } from './responsive/wide';
 import { ScrollProvider } from './ScrollProvider';
+import { useMultiuserEnabled } from './ServerContext';
 import { Settings } from './settings';
 import { FloatableSidebar } from './sidebar';
 import { Titlebar } from './Titlebar';
@@ -92,6 +97,8 @@ export function FinancesApp() {
   const [lastUsedVersion, setLastUsedVersion] = useLocalPref(
     'flags.updateNotificationShownForVersion',
   );
+
+  const multiuserEnabled = useMultiuserEnabled();
 
   useEffect(() => {
     // Wait a little bit to make sure the sync button will get the
@@ -281,7 +288,29 @@ export function FinancesApp() {
                     </WideNotSupported>
                   }
                 />
-
+                {multiuserEnabled && (
+                  <Route
+                    path="/user-directory"
+                    element={
+                      <ProtectedRoute
+                        permission={Permissions.ADMINISTRATOR}
+                        element={<UserDirectoryPage />}
+                      />
+                    }
+                  />
+                )}
+                {multiuserEnabled && (
+                  <Route
+                    path="/user-access"
+                    element={
+                      <ProtectedRoute
+                        permission={Permissions.ADMINISTRATOR}
+                        validateOwner={true}
+                        element={<UserAccessPage />}
+                      />
+                    }
+                  />
+                )}
                 {/* redirect all other traffic to the budget page */}
                 <Route path="/*" element={<Navigate to="/budget" replace />} />
               </Routes>
