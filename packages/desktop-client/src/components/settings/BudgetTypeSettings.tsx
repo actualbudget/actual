@@ -20,11 +20,11 @@ export function BudgetTypeSettings() {
     <Setting
       primaryAction={
         <Button onPress={onSwitchType}>
-          <Trans>
-            Switch to{' '}
-            {{ budgetType: budgetType === 'report' ? 'envelope' : 'tracking' }}{' '}
-            budgeting
-          </Trans>
+          {budgetType === 'report' ? (
+            <Trans>Switch to envelope budgeting</Trans>
+          ) : (
+            <Trans>Switch to tracking budgeting</Trans>
+          )}
         </Button>
       }
     >
