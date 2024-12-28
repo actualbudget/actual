@@ -235,7 +235,7 @@ const NUMBER_FORMATS = [
 
 type NumberFormats = (typeof NUMBER_FORMATS)[number];
 
-export function isNumberFormat(input: string = ''): input is NumberFormats {
+function isNumberFormat(input: string = ''): input is NumberFormats {
   return (NUMBER_FORMATS as readonly string[]).includes(input);
 }
 
@@ -258,6 +258,19 @@ let numberFormatConfig: {
   format: 'comma-dot',
   hideFraction: false,
 };
+
+export function parseNumberFormat({
+  format,
+  hideFraction,
+}: {
+  format?: string;
+  hideFraction?: string | boolean;
+}) {
+  return {
+    format: isNumberFormat(format) ? format : 'comma-dot',
+    hideFraction: String(hideFraction) === 'true',
+  };
+}
 
 export function setNumberFormat(config: typeof numberFormatConfig) {
   numberFormatConfig = config;
