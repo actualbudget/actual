@@ -73,7 +73,7 @@ export function DateRange({ start, end, type }: DateRangeProps): ReactElement {
           </Trans>
         ) : (
           <>
-            {formattedStartDate} - {typeOrFormattedEndDate}
+            {formattedStartDate} - {formattedEndDate}
           </>
         )}
       </div>
