@@ -215,7 +215,7 @@ export function Balances({
           binding={
             { ...balanceQuery, value: 0 } as Binding<
               'balance',
-              `balance-query-${string}-cleared`
+              `balance-query-${string}`
             >
           }
           type="financial"
