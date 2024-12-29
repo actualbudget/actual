@@ -69,6 +69,7 @@ export function SpendingCard({
   return (
     <ReportCard
       isEditing={isEditing}
+      disableClick={nameMenuOpen}
       to={`/reports/spending/${widgetId}`}
       menuItems={[
         {

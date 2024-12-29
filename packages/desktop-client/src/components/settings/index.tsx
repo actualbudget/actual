@@ -24,6 +24,7 @@ import { Page } from '../Page';
 import { useResponsive } from '../responsive/ResponsiveProvider';
 import { useServerVersion } from '../ServerContext';
 
+import { AuthSettings } from './AuthSettings';
 import { Backups } from './Backups';
 import { BudgetTypeSettings } from './BudgetTypeSettings';
 import { EncryptionSettings } from './Encryption';
@@ -182,6 +183,7 @@ export function Settings() {
         <About />
         <ThemeSettings />
         <FormatSettings />
+        <AuthSettings />
         <EncryptionSettings />
         <BudgetTypeSettings />
         {isElectron() && <Backups />}
