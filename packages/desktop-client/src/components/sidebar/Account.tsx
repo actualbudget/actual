@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { type CSSProperties, useEffect, useRef, useState } from 'react';
+import React, { type CSSProperties, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { css, cx } from '@emotion/css';
