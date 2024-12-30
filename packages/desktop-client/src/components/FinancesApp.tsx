@@ -30,6 +30,7 @@ import { MobileNavTabs } from './mobile/MobileNavTabs';
 import { TransactionEdit } from './mobile/transactions/TransactionEdit';
 import { Notifications } from './Notifications';
 import { ManagePayeesPage } from './payees/ManagePayeesPage';
+import { Plugins } from './plugins/Plugins';
 import { Reports } from './reports';
 import { LoadingIndicator } from './reports/LoadingIndicator';
 import { NarrowAlternate, WideComponent } from './responsive';
@@ -243,6 +244,7 @@ export function FinancesApp() {
 
                 <Route path="/payees" element={<ManagePayeesPage />} />
                 <Route path="/rules" element={<ManageRulesPage />} />
+                <Route path="/plugins" element={<Plugins />} />
                 <Route path="/settings" element={<Settings />} />
 
                 <Route

@@ -2,10 +2,12 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 
+import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import {
   SvgCheveronDown,
   SvgCheveronRight,
   SvgCog,
+  SvgPlugin,
   SvgReports,
   SvgStoreFront,
   SvgTuning,
@@ -18,6 +20,7 @@ import { Item } from './Item';
 import { SecondaryItem } from './SecondaryItem';
 
 export function PrimaryButtons() {
+  const pluginsEnabled = useFeatureFlag('plugins');
   const { t } = useTranslation();
   const [isOpen, setOpen] = useState(false);
   const onToggle = useCallback(() => setOpen(open => !open), []);
@@ -59,6 +62,14 @@ export function PrimaryButtons() {
             to="/rules"
             indent={15}
           />
+          {pluginsEnabled && (
+            <SecondaryItem
+              title={t('Plugins')}
+              Icon={SvgPlugin}
+              to="/plugins"
+              indent={15}
+            />
+          )}
           <SecondaryItem
             title={t('Settings')}
             Icon={SvgCog}

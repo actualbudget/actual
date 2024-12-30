@@ -96,6 +96,12 @@ export function ExperimentalFeatures() {
             >
               <Trans>Context menus</Trans>
             </FeatureToggle>
+            <FeatureToggle
+              flag="plugins"
+              feedbackLink="https://github.com/actualbudget/actual/"
+            >
+              <Trans>Plugins</Trans>
+            </FeatureToggle>
           </View>
         ) : (
           <Link

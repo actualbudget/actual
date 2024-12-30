@@ -58,6 +58,7 @@ import { OutOfSyncMigrationsModal } from './modals/OutOfSyncMigrationsModal';
 import { PayeeAutocompleteModal } from './modals/PayeeAutocompleteModal';
 import { ScheduledTransactionMenuModal } from './modals/ScheduledTransactionMenuModal';
 import { SelectLinkedAccountsModal } from './modals/SelectLinkedAccountsModal';
+import { SelectNewPluginModal } from './modals/SelectNewPluginModal';
 import { SimpleFinInitialiseModal } from './modals/SimpleFinInitialiseModal';
 import { SingleInputModal } from './modals/SingleInputModal';
 import { TrackingBalanceMenuModal } from './modals/TrackingBalanceMenuModal';
@@ -617,6 +618,9 @@ export function Modals() {
           return <ImportActualModal key={name} />;
         case 'out-of-sync-migrations':
           return <OutOfSyncMigrationsModal key={name} />;
+
+        case 'select-new-plugin':
+          return <SelectNewPluginModal key={name} onSave={options.onSave} />;
 
         default:
           throw new Error('Unknown modal');

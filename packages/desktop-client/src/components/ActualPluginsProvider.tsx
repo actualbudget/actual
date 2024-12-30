@@ -1,23 +1,28 @@
 import React, {
   createContext,
   type ReactNode,
+  useCallback,
   useContext,
   useEffect,
   useState,
 } from 'react';
 
 import { getDatabase } from 'loot-core/platform/server/indexeddb';
+import { type ActualPluginStored } from 'loot-core/types/models/actual-plugin-stored';
 
 import {
   type ActualPluginManifest,
   type ActualPlugin,
   type ActualPluginEntry,
 } from '../../../plugins-shared/src';
+import { useFeatureFlag } from '../hooks/useFeatureFlag';
 
 // Context and Provider
 type ActualPluginsContextType = {
-  plugins: ActualPlugin[] | null;
+  plugins: ActualPlugin[];
+  pluginStore: ActualPluginStored[];
   loadPlugins: () => Promise<void>;
+  refreshPluginStore: () => Promise<void>;
 };
 
 const ActualPluginsContext = createContext<
@@ -30,26 +35,43 @@ type ActualPluginsProviderProps = {
 export function ActualPluginsProvider({
   children,
 }: ActualPluginsProviderProps) {
-  const [plugins, setPlugins] = useState<ActualPlugin[] | null>(null);
+  const pluginsEnabled = useFeatureFlag('plugins');
+  const [plugins, setPlugins] = useState<ActualPlugin[]>([]);
+  const [pluginStore, setPluginStore] = useState<ActualPluginStored[]>([]);
 
-  const loadPlugins = async () => {
+  const refreshPluginStore = useCallback(async () => {
+    setPluginStore(await getAllPlugins());
+  }, []);
+
+  const loadPlugins = useCallback(async () => {
     try {
-      const loaded = await Promise.all([
-        loadPluginFromRepo('https://github.com/actual-plugins/example'),
-      ]);
+      const allPlugins = await getAllPlugins();
 
-      setPlugins(loaded.filter(Boolean) as ActualPlugin[]);
+      const fullPlugins = [];
+      for (const plugin of allPlugins) {
+        const loadedPlugin = await loadPluginFromRepo(plugins, plugin.url);
+        if (loadedPlugin) {
+          fullPlugins.push(loadedPlugin);
+        }
+      }
+      setPlugins(fullPlugins as ActualPlugin[]);
+      await refreshPluginStore();
     } catch (error) {
       console.error('Failed to load plugins:', error);
     }
-  };
+  }, [plugins, refreshPluginStore]);
 
   useEffect(() => {
-    loadPlugins();
-  }, []);
+    if (pluginsEnabled && plugins.length === 0) {
+      loadPlugins();
+      refreshPluginStore();
+    }
+  }, [pluginsEnabled, plugins, loadPlugins, refreshPluginStore]);
 
   return (
-    <ActualPluginsContext.Provider value={{ plugins, loadPlugins }}>
+    <ActualPluginsContext.Provider
+      value={{ plugins, loadPlugins, pluginStore, refreshPluginStore }}
+    >
       {children}
     </ActualPluginsContext.Provider>
   );
@@ -85,9 +107,10 @@ async function loadPluginScript(
       );
       const transaction = db.transaction(['plugins'], 'readwrite');
       const objectStore = transaction.objectStore('plugins');
-      manifest.plugin = scriptCode;
+      const storedPlugin: ActualPluginStored = manifest as ActualPluginStored;
+      storedPlugin.plugin = scriptCode;
 
-      objectStore.put(manifest);
+      objectStore.put(storedPlugin);
 
       return plugin;
     }
@@ -101,11 +124,12 @@ type GitHubAsset = {
   name: string;
   browser_download_url: string;
 };
-async function fetchLatestRelease(
+export async function fetchRelease(
   owner: string,
   repo: string,
+  releasePath: string,
 ): Promise<{ version: string; scriptUrl: string; manifestUrl: string }> {
-  const apiUrl = `https://cors-anywhere.herokuapp.com/https://api.github.com/repos/${owner}/${repo}/releases/latest`;
+  const apiUrl = `https://cors-anywhere.herokuapp.com/https://api.github.com/repos/${owner}/${repo}/releases/${releasePath}`;
   const response = await fetch(apiUrl);
   if (!response.ok) {
     throw new Error(`Failed to fetch release metadata for ${repo}`);
@@ -123,7 +147,7 @@ async function fetchLatestRelease(
   return { version, scriptUrl, manifestUrl };
 }
 
-function parseGitHubRepoUrl(
+export function parseGitHubRepoUrl(
   url: string,
 ): { owner: string; repo: string } | null {
   try {
@@ -146,7 +170,10 @@ function parseGitHubRepoUrl(
   }
 }
 
-async function loadPluginFromRepo(repo: string): Promise<ActualPlugin | null> {
+async function loadPluginFromRepo(
+  loadedPlugins: ActualPlugin[],
+  repo: string,
+): Promise<ActualPlugin | null> {
   try {
     const parsedRepo = parseGitHubRepoUrl(repo);
     if (parsedRepo == null) throw new Error(`Invalid repo ${repo}`);
@@ -157,7 +184,7 @@ async function loadPluginFromRepo(repo: string): Promise<ActualPlugin | null> {
       version: latestVersion,
       scriptUrl,
       manifestUrl,
-    } = await fetchLatestRelease(parsedRepo.owner, parsedRepo.repo);
+    } = await fetchRelease(parsedRepo.owner, parsedRepo.repo, 'latest');
 
     let response = await fetch(
       `https://cors-anywhere.herokuapp.com/${manifestUrl}`,
@@ -168,6 +195,11 @@ async function loadPluginFromRepo(repo: string): Promise<ActualPlugin | null> {
     }
 
     const manifest = (await response.json()) as ActualPluginManifest;
+
+    const foundPlugin = loadedPlugins.find(
+      plugin => plugin.name === manifest.name,
+    );
+    if (foundPlugin) return foundPlugin;
 
     const storedPlugin = await getStoredPlugin(manifest);
 
@@ -215,7 +247,7 @@ async function getStoredPlugin(
   const objectStore = transaction.objectStore('plugins');
 
   return new Promise((resolve, reject) => {
-    const req = objectStore.get(manifest.slug);
+    const req = objectStore.get(manifest.url);
 
     req.onsuccess = () => {
       resolve(req.result || null); // Resolve with the result
@@ -225,4 +257,76 @@ async function getStoredPlugin(
       reject(req.error); // Reject with the error
     };
   });
+}
+
+async function getAllPlugins(): Promise<ActualPluginStored[]> {
+  const db = await getDatabase(); // Open the database
+  const transaction = db.transaction(['plugins'], 'readonly');
+  const objectStore = transaction.objectStore('plugins');
+
+  return new Promise((resolve, reject) => {
+    const req = objectStore.getAll();
+
+    req.onsuccess = () => {
+      resolve(req.result); // Resolve with the array of rows
+    };
+
+    req.onerror = () => {
+      reject(req.error); // Reject with the error
+    };
+  });
+}
+
+export async function installPluginFromManifest(
+  loadedPlugins: ActualPlugin[],
+  manifest: ActualPluginManifest,
+): Promise<ActualPlugin | null> {
+  try {
+    const foundPlugin = loadedPlugins.find(
+      plugin => plugin.name === manifest.name,
+    );
+    if (foundPlugin) return foundPlugin;
+
+    console.log(
+      `Downloading plugin “${manifest.name}” v${manifest.version}...`,
+    );
+
+    const parsedRepo = parseGitHubRepoUrl(manifest.url);
+    if (parsedRepo == null) throw new Error(`Invalid repo ${manifest.url}`);
+
+    const { scriptUrl } = await fetchRelease(
+      parsedRepo.owner,
+      parsedRepo.repo,
+      `tags/${manifest.version}`,
+    );
+
+    //need to change the cors proxy at some point:
+    const response = await fetch(
+      `https://cors-anywhere.herokuapp.com/${scriptUrl}`,
+    );
+
+    if (!response.ok) {
+      throw new Error(`Failed to download plugin script for ${manifest.name}`);
+    }
+
+    const indexContent = await response.text();
+
+    if (!indexContent) {
+      return null;
+    }
+
+    const indexJsBlob = new Blob([indexContent], {
+      type: 'application/javascript',
+    });
+
+    console.log(`Plugin “${manifest.name}” loaded successfully.`);
+    const loadedPlugin = await loadPluginScript(indexJsBlob, manifest);
+    if (loadedPlugin) {
+      loadedPlugins.push(loadedPlugin);
+    }
+    return loadedPlugin;
+  } catch (error) {
+    console.error(`Error loading plugin “${manifest.name}”:`, error);
+    return null;
+  }
 }

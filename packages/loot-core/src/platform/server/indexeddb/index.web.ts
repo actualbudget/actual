@@ -31,7 +31,7 @@ function _openDatabase() {
         db.createObjectStore('files', { keyPath: 'filepath' });
       }
       if (!db.objectStoreNames.contains('plugins')) {
-        db.createObjectStore('plugins', { keyPath: 'slug' });
+        db.createObjectStore('plugins', { keyPath: 'url' });
       }
     };
 

@@ -2,7 +2,8 @@ export type FeatureFlag =
   | 'goalTemplatesEnabled'
   | 'actionTemplating'
   | 'upcomingLengthAdjustment'
-  | 'contextMenus';
+  | 'contextMenus'
+  | 'plugins';
 
 /**
  * Cross-device preferences. These sync across devices when they are changed.
