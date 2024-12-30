@@ -35,6 +35,7 @@ type InternalLinkProps = {
   activeStyle?: CSSProperties;
   children?: ReactNode;
   report?: CustomReportEntity;
+  isDisabled?: boolean;
 };
 
 const externalLinkColors = {
@@ -121,6 +122,7 @@ const InternalLink = ({
   activeStyle,
   children,
   report,
+  isDisabled,
 }: InternalLinkProps) => {
   const path = to ?? '';
   const match = useMatch({ path });
@@ -130,6 +132,11 @@ const InternalLink = ({
       to={path}
       state={report ? { report } : {}}
       className={css([styles.smallText, style, match ? activeStyle : null])}
+      onClick={e => {
+        if (isDisabled) {
+          e.preventDefault();
+        }
+      }}
     >
       {children}
     </NavLink>

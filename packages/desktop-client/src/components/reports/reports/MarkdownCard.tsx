@@ -39,6 +39,7 @@ export function MarkdownCard({
   return (
     <ReportCard
       isEditing={isEditing}
+      disableClick={isVisibleTextArea}
       menuItems={[
         {
           type: Menu.label,
