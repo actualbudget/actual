@@ -19,6 +19,7 @@ import { q, Query } from '../shared/query';
 import { amountToInteger, stringToInteger } from '../shared/util';
 import { type Budget } from '../types/budget';
 import { Handlers } from '../types/handlers';
+import { OpenIdConfig } from '../types/models/openid';
 
 import { exportToCSV, exportQueryToCSV } from './accounts/export-to-csv';
 import * as link from './accounts/link';
@@ -27,6 +28,7 @@ import { getStartingBalancePayee } from './accounts/payees';
 import * as bankSync from './accounts/sync';
 import * as rules from './accounts/transaction-rules';
 import { batchUpdateTransactions } from './accounts/transactions';
+import { app as adminApp } from './admin/app';
 import { installAPI } from './api';
 import { runQuery as aqlQuery } from './aql';
 import {
@@ -866,8 +868,7 @@ handlers['secret-set'] = async function ({ name, value }) {
       },
     );
   } catch (error) {
-    console.error(error);
-    return { error: 'failed' };
+    return { error: 'failed', reason: error.reason };
   }
 };
 
@@ -1056,7 +1057,7 @@ function handleSyncResponse(
   newTransactions.push(...added);
   matchedTransactions.push(...updated);
 
-  if (added.length > 0 || updated.length > 0) {
+  if (added.length > 0) {
     updatedAccounts.push(acct.id);
   }
 }
@@ -1167,46 +1168,62 @@ handlers['simplefin-batch-sync'] = async function ({ ids = [] }) {
     true,
   );
 
-  console.group('Bank Sync operation for all SimpleFin accounts');
-  const res = await bankSync.SimpleFinBatchSync(
-    accounts.map(a => ({
-      id: a.id,
-      accountId: a.account_id,
-    })),
-  );
-
   const retVal = [];
-  for (const account of res) {
-    const errors = [];
-    const newTransactions = [];
-    const matchedTransactions = [];
-    const updatedAccounts = [];
 
-    if (account.res.error_code) {
-      errors.push(
-        handleSyncError(
-          {
-            type: 'BankSyncError',
-            category: account.res.error_type,
-            code: account.res.error_code,
-          },
+  console.group('Bank Sync operation for all SimpleFin accounts');
+  try {
+    const res = await bankSync.SimpleFinBatchSync(
+      accounts.map(a => ({
+        id: a.id,
+        accountId: a.account_id,
+      })),
+    );
+    for (const account of res) {
+      const errors = [];
+      const newTransactions = [];
+      const matchedTransactions = [];
+      const updatedAccounts = [];
+
+      if (account.res.error_code) {
+        errors.push(
+          handleSyncError(
+            {
+              type: 'BankSyncError',
+              category: account.res.error_type,
+              code: account.res.error_code,
+            },
+            accounts.find(a => a.id === account.accountId),
+          ),
+        );
+      } else {
+        handleSyncResponse(
+          account.res,
           accounts.find(a => a.id === account.accountId),
-        ),
-      );
-    } else {
-      handleSyncResponse(
-        account.res,
-        accounts.find(a => a.id === account.accountId),
-        newTransactions,
-        matchedTransactions,
-        updatedAccounts,
-      );
-    }
+          newTransactions,
+          matchedTransactions,
+          updatedAccounts,
+        );
+      }
 
-    retVal.push({
-      accountId: account.accountId,
-      res: { errors, newTransactions, matchedTransactions, updatedAccounts },
-    });
+      retVal.push({
+        accountId: account.accountId,
+        res: { errors, newTransactions, matchedTransactions, updatedAccounts },
+      });
+    }
+  } catch (err) {
+    const errors = [];
+    for (const account of accounts) {
+      retVal.push({
+        accountId: account.accountId,
+        res: {
+          errors,
+          newTransactions: [],
+          matchedTransactions: [],
+          updatedAccounts: [],
+        },
+      });
+      errors.push(handleSyncError(err, account));
+    }
   }
 
   if (retVal.some(a => a.res.updatedAccounts.length > 0)) {
@@ -1550,22 +1567,35 @@ handlers['subscribe-needs-bootstrap'] = async function ({
 
   return {
     bootstrapped: res.data.bootstrapped,
-    loginMethod: res.data.loginMethod || 'password',
+    availableLoginMethods: res.data.availableLoginMethods || [
+      { method: 'password', active: true, displayName: 'Password' },
+    ],
+    multiuser: res.data.multiuser || false,
     hasServer: true,
   };
 };
 
-handlers['subscribe-bootstrap'] = async function ({ password }) {
+handlers['subscribe-bootstrap'] = async function (loginConfig) {
+  try {
+    await post(getServer().SIGNUP_SERVER + '/bootstrap', loginConfig);
+  } catch (err) {
+    return { error: err.reason || 'network-failure' };
+  }
+  return {};
+};
+
+handlers['subscribe-get-login-methods'] = async function () {
   let res;
   try {
-    res = await post(getServer().SIGNUP_SERVER + '/bootstrap', { password });
+    res = await fetch(getServer().SIGNUP_SERVER + '/login-methods').then(res =>
+      res.json(),
+    );
   } catch (err) {
     return { error: err.reason || 'network-failure' };
   }
 
-  if (res.token) {
-    await asyncStorage.setItem('user-token', res.token);
-    return {};
+  if (res.methods) {
+    return { methods: res.methods };
   }
   return { error: 'internal' };
 };
@@ -1590,16 +1620,38 @@ handlers['subscribe-get-user'] = async function () {
         'X-ACTUAL-TOKEN': userToken,
       },
     });
-    const { status, reason } = JSON.parse(res);
+    let tokenExpired = false;
+    const {
+      status,
+      reason,
+      data: {
+        userName = null,
+        permission = '',
+        userId = null,
+        displayName = null,
+        loginMethod = null,
+      } = {},
+    } = JSON.parse(res) || {};
 
     if (status === 'error') {
       if (reason === 'unauthorized') {
         return null;
+      } else if (reason === 'token-expired') {
+        tokenExpired = true;
+      } else {
+        return { offline: true };
       }
-      return { offline: true };
     }
 
-    return { offline: false };
+    return {
+      offline: false,
+      userName,
+      permission,
+      userId,
+      displayName,
+      loginMethod,
+      tokenExpired,
+    };
   } catch (e) {
     console.log(e);
     return { offline: true };
@@ -1624,19 +1676,23 @@ handlers['subscribe-change-password'] = async function ({ password }) {
   return {};
 };
 
-handlers['subscribe-sign-in'] = async function ({ password, loginMethod }) {
-  if (typeof loginMethod !== 'string' || loginMethod == null) {
-    loginMethod = 'password';
+handlers['subscribe-sign-in'] = async function (loginInfo) {
+  if (
+    typeof loginInfo.loginMethod !== 'string' ||
+    loginInfo.loginMethod == null
+  ) {
+    loginInfo.loginMethod = 'password';
   }
   let res;
 
   try {
-    res = await post(getServer().SIGNUP_SERVER + '/login', {
-      loginMethod,
-      password,
-    });
+    res = await post(getServer().SIGNUP_SERVER + '/login', loginInfo);
   } catch (err) {
     return { error: err.reason || 'network-failure' };
+  }
+
+  if (res.redirect_url) {
+    return { redirect_url: res.redirect_url };
   }
 
   if (!res.token) {
@@ -1656,6 +1712,10 @@ handlers['subscribe-sign-out'] = async function () {
     'readOnly',
   ]);
   return 'ok';
+};
+
+handlers['subscribe-set-token'] = async function ({ token }) {
+  await asyncStorage.setItem('user-token', token);
 };
 
 handlers['get-server-version'] = async function () {
@@ -1742,6 +1802,7 @@ handlers['get-budgets'] = async function () {
                 ? { encryptKeyId: prefs.encryptKeyId }
                 : {}),
               ...(prefs.groupId ? { groupId: prefs.groupId } : {}),
+              ...(prefs.owner ? { owner: prefs.owner } : {}),
               name: prefs.budgetName || '(no name)',
             } satisfies Budget;
           }
@@ -1757,6 +1818,10 @@ handlers['get-budgets'] = async function () {
 
 handlers['get-remote-files'] = async function () {
   return cloudStorage.listRemoteFiles();
+};
+
+handlers['get-user-file-info'] = async function (fileId: string) {
+  return cloudStorage.getRemoteFile(fileId);
 };
 
 handlers['reset-budget-cache'] = mutator(async function () {
@@ -2084,6 +2149,104 @@ handlers['export-budget'] = async function () {
   }
 };
 
+handlers['enable-openid'] = async function (loginConfig) {
+  try {
+    const userToken = await asyncStorage.getItem('user-token');
+
+    if (!userToken) {
+      return { error: 'unauthorized' };
+    }
+
+    await post(getServer().BASE_SERVER + '/openid/enable', loginConfig, {
+      'X-ACTUAL-TOKEN': userToken,
+    });
+  } catch (err) {
+    return { error: err.reason || 'network-failure' };
+  }
+  return {};
+};
+
+handlers['enable-password'] = async function (loginConfig) {
+  try {
+    const userToken = await asyncStorage.getItem('user-token');
+
+    if (!userToken) {
+      return { error: 'unauthorized' };
+    }
+
+    await post(getServer().BASE_SERVER + '/openid/disable', loginConfig, {
+      'X-ACTUAL-TOKEN': userToken,
+    });
+  } catch (err) {
+    return { error: err.reason || 'network-failure' };
+  }
+  return {};
+};
+
+handlers['get-openid-config'] = async function () {
+  try {
+    const res = await get(getServer().BASE_SERVER + '/openid/config');
+
+    if (res) {
+      const config = JSON.parse(res) as OpenIdConfig;
+      return { openId: config };
+    }
+
+    return null;
+  } catch (err) {
+    return { error: 'config-fetch-failed' };
+  }
+};
+
+handlers['enable-openid'] = async function (loginConfig) {
+  try {
+    const userToken = await asyncStorage.getItem('user-token');
+
+    if (!userToken) {
+      return { error: 'unauthorized' };
+    }
+
+    await post(getServer().BASE_SERVER + '/openid/enable', loginConfig, {
+      'X-ACTUAL-TOKEN': userToken,
+    });
+  } catch (err) {
+    return { error: err.reason || 'network-failure' };
+  }
+  return {};
+};
+
+handlers['enable-password'] = async function (loginConfig) {
+  try {
+    const userToken = await asyncStorage.getItem('user-token');
+
+    if (!userToken) {
+      return { error: 'unauthorized' };
+    }
+
+    await post(getServer().BASE_SERVER + '/openid/disable', loginConfig, {
+      'X-ACTUAL-TOKEN': userToken,
+    });
+  } catch (err) {
+    return { error: err.reason || 'network-failure' };
+  }
+  return {};
+};
+
+handlers['get-openid-config'] = async function () {
+  try {
+    const res = await get(getServer().BASE_SERVER + '/openid/config');
+
+    if (res) {
+      const config = JSON.parse(res) as OpenIdConfig;
+      return { openId: config };
+    }
+
+    return null;
+  } catch (err) {
+    return { error: 'config-fetch-failed' };
+  }
+};
+
 async function loadBudget(id: string) {
   let dir: string;
   try {
@@ -2272,6 +2435,7 @@ app.combine(
   filtersApp,
   reportsApp,
   rulesApp,
+  adminApp,
 );
 
 function getDefaultDocumentDir() {

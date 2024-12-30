@@ -1,10 +1,13 @@
 // @ts-strict-ignore
-import { type CSSProperties, useState } from 'react';
+import React, { type CSSProperties, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import * as monthUtils from 'loot-core/src/shared/months';
 
 import { useResizeObserver } from '../../hooks/useResizeObserver';
+import { SvgCalendar } from '../../icons/v2';
 import { styles, theme } from '../../style';
+import { Link } from '../common/Link';
 import { View } from '../common/View';
 
 import { type MonthBounds } from './MonthsContext';
@@ -24,6 +27,7 @@ export const MonthPicker = ({
   style,
   onSelect,
 }: MonthPickerProps) => {
+  const { t } = useTranslation();
   const [hoverId, setHoverId] = useState(null);
   const [targetMonthCount, setTargetMonthCount] = useState(12);
 
@@ -78,6 +82,24 @@ export const MonthPicker = ({
           justifyContent: 'center',
         }}
       >
+        <Link
+          variant="button"
+          buttonVariant="bare"
+          onPress={() => onSelect(currentMonth)}
+          style={{
+            padding: '3px 3px',
+            marginRight: '12px',
+          }}
+        >
+          <View title={t('Today')}>
+            <SvgCalendar
+              style={{
+                width: 16,
+                height: 16,
+              }}
+            />
+          </View>
+        </Link>
         {range.map((month, idx) => {
           const monthName = monthUtils.format(month, 'MMM');
           const selected =
@@ -184,6 +206,13 @@ export const MonthPicker = ({
             </View>
           );
         })}
+        {/*Keep range centered*/}
+        <span
+          style={{
+            width: '22px',
+            marginLeft: '12px',
+          }}
+        />
       </View>
     </View>
   );

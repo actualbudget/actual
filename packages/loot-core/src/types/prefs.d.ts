@@ -3,6 +3,7 @@ export type FeatureFlag =
   | 'actionTemplating'
   | 'upcomingLengthAdjustment'
   | 'contextMenus'
+  | 'openidAuth'
   | 'plugins';
 
 /**
@@ -89,3 +90,5 @@ export type GlobalPrefs = Partial<{
   serverSelfSignedCert: string; // Electron only
   customTheme: string | null;
 }>;
+
+export type AuthMethods = 'password' | 'openid';

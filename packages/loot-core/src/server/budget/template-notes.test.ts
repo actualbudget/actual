@@ -55,6 +55,26 @@ describe('storeTemplates', () => {
     },
     {
       description:
+        'Stores negative templates for categories with valid template notes',
+      mockTemplateNotes: [
+        {
+          id: 'cat1',
+          name: 'Category 1',
+          note: '#template -103.23',
+        },
+      ],
+      expectedTemplates: [
+        {
+          type: 'simple',
+          monthly: -103.23,
+          limit: null,
+          priority: 0,
+          directive: 'template',
+        },
+      ],
+    },
+    {
+      description:
         'Stores templates for categories with valid goal directive template notes',
       mockTemplateNotes: [
         {
