@@ -11,10 +11,10 @@ import { Link } from '../common/Link';
 import { Stack } from '../common/Stack';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
-import { SimpleTable } from '../rules/SimpleTable';
 import { Cell, Row } from '../table';
 
 import { PluginsHeader } from './PluginsHeader';
+import { SimpleTable } from '../common/SimpleTable';
 
 export function ManagePlugins() {
   const dispatch = useDispatch();
