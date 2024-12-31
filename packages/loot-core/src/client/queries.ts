@@ -25,6 +25,7 @@ type BudgetType<SheetName extends SheetNames> = Record<
 >;
 
 const accountParametrizedField = parametrizedField<'account'>();
+const categoryParametrizedField = parametrizedField<'category'>();
 const envelopeParametrizedField = parametrizedField<'envelope-budget'>();
 const trackingParametrizedField = parametrizedField<'tracking-budget'>();
 
@@ -179,7 +180,7 @@ export function offBudgetAccountBalance() {
 
 export function categoryBalance(category: CategoryEntity, month: string) {
   return {
-    name: `balance-${category.id}`,
+    name: categoryParametrizedField("balance")(category.id),
     query: q('transactions')
       .filter({
         category: category.id,
@@ -187,7 +188,7 @@ export function categoryBalance(category: CategoryEntity, month: string) {
       })
       .options({ splits: 'inline' })
       .calculate({ $sum: '$amount' }),
-  };
+  } satisfies Binding<'category', 'balance'>;
 }
 
 export function categoryBalanceCleared(
@@ -195,7 +196,7 @@ export function categoryBalanceCleared(
   month: string,
 ) {
   return {
-    name: `balanceCleared-${category.id}`,
+    name: categoryParametrizedField("balanceCleared")(category.id),
     query: q('transactions')
       .filter({
         category: category.id,
@@ -204,7 +205,7 @@ export function categoryBalanceCleared(
       })
       .options({ splits: 'inline' })
       .calculate({ $sum: '$amount' }),
-  };
+  } satisfies Binding<'category', 'balanceCleared'>;
 }
 
 export function categoryBalanceUncleared(
@@ -212,7 +213,7 @@ export function categoryBalanceUncleared(
   month: string,
 ) {
   return {
-    name: `balanceUncleared-${category.id}`,
+    name: categoryParametrizedField("balanceUncleared")(category.id),
     query: q('transactions')
       .filter({
         category: category.id,
@@ -221,7 +222,7 @@ export function categoryBalanceUncleared(
       })
       .options({ splits: 'inline' })
       .calculate({ $sum: '$amount' }),
-  };
+  } satisfies Binding<'category', 'balanceUncleared'>;
 }
 
 const uncategorizedQuery = q('transactions').filter({

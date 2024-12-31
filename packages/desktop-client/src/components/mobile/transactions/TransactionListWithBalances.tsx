@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { ComponentProps, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { SelectedProvider, useSelected } from '../../../hooks/useSelected';
@@ -11,7 +11,12 @@ import { CellValue, CellValueText } from '../../spreadsheet/CellValue';
 import { useSheetValue } from '../../spreadsheet/useSheetValue';
 import { PullToRefresh } from '../PullToRefresh';
 
+
 import { TransactionList } from './TransactionList';
+import { type TransactionEntity } from 'loot-core/types/models/transaction';
+import * as queries from 'loot-core/client/queries';
+
+import { type SheetFields } from '../../spreadsheet';
 
 function TransactionSearchInput({ placeholder, onSearch }) {
   const [text, setText] = useState('');
@@ -56,6 +61,26 @@ function TransactionSearchInput({ placeholder, onSearch }) {
   );
 }
 
+type TransactionListWithBalancesProps = {
+  isLoading: boolean;
+  transactions: Readonly<TransactionEntity[]>;
+  balance:
+    | ReturnType<typeof queries.categoryBalance>
+    | ReturnType<typeof queries.accountBalance>;
+  balanceCleared:
+    | ReturnType<typeof queries.categoryBalanceCleared>
+    | ReturnType<typeof queries.accountBalanceCleared>;
+  balanceUncleared:
+    | ReturnType<typeof queries.categoryBalanceUncleared>
+    | ReturnType<typeof queries.accountBalanceUncleared>;
+  searchPlaceholder: string;
+  onSearch: (searchText: string) => void;
+  isLoadingMore: boolean;
+  onLoadMore: () => void;
+  onOpenTransaction: (transaction: TransactionEntity) => void;
+  onRefresh: () => void | undefined;
+};
+
 export function TransactionListWithBalances({
   isLoading,
   transactions,
@@ -68,54 +93,77 @@ export function TransactionListWithBalances({
   onLoadMore,
   onOpenTransaction,
   onRefresh,
-}) {
-  const selectedInst = useSelected('transactions', transactions);
+}: TransactionListWithBalancesProps) {
+  const selectedInst = useSelected('transactions', [...transactions], []);
 
   return (
     <SelectedProvider instance={selectedInst}>
-      <View
-        style={{
-          flexShrink: 0,
-          marginTop: 10,
-        }}
-      >
+      <>
         <View
           style={{
-            flexDirection: 'row',
-            justifyContent: 'space-evenly',
+            flexShrink: 0,
+            marginTop: 10,
           }}
         >
-          {balanceCleared && balanceUncleared ? (
-            <BalanceWithCleared
-              balance={balance}
-              balanceCleared={balanceCleared}
-              balanceUncleared={balanceUncleared}
-            />
-          ) : (
-            <Balance balance={balance} />
-          )}
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-evenly',
+            }}
+          >
+            {balanceCleared && balanceUncleared ? (
+              <BalanceWithCleared
+                balance={balance}
+                balanceCleared={balanceCleared}
+                balanceUncleared={balanceUncleared}
+              />
+            ) : (
+              <Balance balance={balance} />
+            )}
+          </View>
+          <TransactionSearchInput
+            placeholder={searchPlaceholder}
+            onSearch={onSearch}
+          />
         </View>
-        <TransactionSearchInput
-          placeholder={searchPlaceholder}
-          onSearch={onSearch}
-        />
-      </View>
-      <PullToRefresh isPullable={!!onRefresh} onRefresh={onRefresh}>
-        <TransactionList
-          isLoading={isLoading}
-          transactions={transactions}
-          isLoadingMore={isLoadingMore}
-          onLoadMore={onLoadMore}
-          onOpenTransaction={onOpenTransaction}
-        />
-      </PullToRefresh>
+        <PullToRefresh
+          isPullable={!!onRefresh}
+          onRefresh={async () => onRefresh?.()}
+        >
+          <TransactionList
+            isLoading={isLoading}
+            transactions={transactions}
+            isLoadingMore={isLoadingMore}
+            onLoadMore={onLoadMore}
+            onOpenTransaction={onOpenTransaction}
+          />
+        </PullToRefresh>
+      </>
     </SelectedProvider>
   );
 }
 
-function BalanceWithCleared({ balanceUncleared, balanceCleared, balance }) {
+
+export const TransactionListBalanceCellValue = <
+  FieldName extends SheetFields<'account' | 'category'>,
+>(
+  props: ComponentProps<typeof CellValue<'account' | 'category', FieldName>>,
+) => {
+  return <CellValue {...props} />;
+};
+
+
+type BalanceWithClearedProps = {
+  balanceUncleared: TransactionListWithBalancesProps['balanceUncleared'];
+  balanceCleared: TransactionListWithBalancesProps['balanceCleared'];
+  balance: TransactionListWithBalancesProps['balance'];
+}
+
+function BalanceWithCleared({ balanceUncleared, balanceCleared, balance }: BalanceWithClearedProps) {
   const { t } = useTranslation();
-  const unclearedAmount = useSheetValue(balanceUncleared);
+  const unclearedAmount = useSheetValue<
+  'account' | 'category', 'balanceUncleared'
+  >(balanceUncleared);
 
   return (
     <>
@@ -129,7 +177,7 @@ function BalanceWithCleared({ balanceUncleared, balanceCleared, balance }) {
           title={t('Cleared')}
           style={{ textAlign: 'center', fontSize: 12 }}
         />
-        <CellValue binding={balanceCleared} type="financial">
+        <TransactionListBalanceCellValue binding={balanceCleared} type="financial">
           {props => (
             <CellValueText
               {...props}
@@ -141,7 +189,7 @@ function BalanceWithCleared({ balanceUncleared, balanceCleared, balance }) {
               data-testid="transactions-balance-cleared"
             />
           )}
-        </CellValue>
+        </TransactionListBalanceCellValue>
       </View>
       <Balance balance={balance} />
       <View
@@ -154,7 +202,7 @@ function BalanceWithCleared({ balanceUncleared, balanceCleared, balance }) {
           title={t('Uncleared')}
           style={{ textAlign: 'center', fontSize: 12 }}
         />
-        <CellValue binding={balanceUncleared} type="financial">
+        <TransactionListBalanceCellValue binding={balanceUncleared} type="financial">
           {props => (
             <CellValueText
               {...props}
@@ -166,18 +214,22 @@ function BalanceWithCleared({ balanceUncleared, balanceCleared, balance }) {
               data-testid="transactions-balance-uncleared"
             />
           )}
-        </CellValue>
+        </TransactionListBalanceCellValue>
       </View>
     </>
   );
 }
 
-function Balance({ balance }) {
+type BalanceProps = {
+  balance: TransactionListWithBalancesProps['balance']
+}
+
+function Balance({ balance }: BalanceProps) {
   const { t } = useTranslation();
   return (
     <View style={{ flexBasis: '33%' }}>
       <Label title={t('Balance')} style={{ textAlign: 'center' }} />
-      <CellValue binding={balance} type="financial">
+      <TransactionListBalanceCellValue binding={balance} type="financial">
         {props => (
           <CellValueText
             {...props}
@@ -191,7 +243,7 @@ function Balance({ balance }) {
             data-testid="transactions-balance"
           />
         )}
-      </CellValue>
+      </TransactionListBalanceCellValue>
     </View>
   );
 }
