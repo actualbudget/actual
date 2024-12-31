@@ -1,5 +1,8 @@
-import React, { ComponentProps, useState } from 'react';
+import React, { type ComponentProps, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+
+import type * as queries from 'loot-core/client/queries';
+import { type TransactionEntity } from 'loot-core/types/models/transaction';
 
 import { SelectedProvider, useSelected } from '../../../hooks/useSelected';
 import { SvgSearchAlternate } from '../../../icons/v2';
@@ -7,18 +10,22 @@ import { styles, theme } from '../../../style';
 import { InputWithContent } from '../../common/InputWithContent';
 import { Label } from '../../common/Label';
 import { View } from '../../common/View';
+import { type SheetFields } from '../../spreadsheet';
 import { CellValue, CellValueText } from '../../spreadsheet/CellValue';
 import { useSheetValue } from '../../spreadsheet/useSheetValue';
 import { PullToRefresh } from '../PullToRefresh';
 
-
 import { TransactionList } from './TransactionList';
-import { type TransactionEntity } from 'loot-core/types/models/transaction';
-import * as queries from 'loot-core/client/queries';
 
-import { type SheetFields } from '../../spreadsheet';
+type TransactionSearchInputProps = {
+  placeholder: string;
+  onSearch: TransactionListWithBalancesProps['onSearch'];
+};
 
-function TransactionSearchInput({ placeholder, onSearch }) {
+function TransactionSearchInput({
+  placeholder,
+  onSearch,
+}: TransactionSearchInputProps) {
   const [text, setText] = useState('');
 
   return (
@@ -65,12 +72,16 @@ type TransactionListWithBalancesProps = {
   isLoading: boolean;
   transactions: Readonly<TransactionEntity[]>;
   balance:
+    | ReturnType<typeof queries.onBudgetAccountBalance>
+    | ReturnType<typeof queries.offBudgetAccountBalance>
+    | ReturnType<typeof queries.uncategorizedBalance>
     | ReturnType<typeof queries.categoryBalance>
-    | ReturnType<typeof queries.accountBalance>;
-  balanceCleared:
+    | ReturnType<typeof queries.accountBalance>
+    | ReturnType<typeof queries.allAccountBalance>;
+  balanceCleared?:
     | ReturnType<typeof queries.categoryBalanceCleared>
     | ReturnType<typeof queries.accountBalanceCleared>;
-  balanceUncleared:
+  balanceUncleared?:
     | ReturnType<typeof queries.categoryBalanceUncleared>
     | ReturnType<typeof queries.accountBalanceUncleared>;
   searchPlaceholder: string;
@@ -78,7 +89,7 @@ type TransactionListWithBalancesProps = {
   isLoadingMore: boolean;
   onLoadMore: () => void;
   onOpenTransaction: (transaction: TransactionEntity) => void;
-  onRefresh: () => void | undefined;
+  onRefresh?: () => void;
 };
 
 export function TransactionListWithBalances({
@@ -143,26 +154,38 @@ export function TransactionListWithBalances({
   );
 }
 
-
-export const TransactionListBalanceCellValue = <
-  FieldName extends SheetFields<'account' | 'category'>,
+const TransactionListBalanceCellValue = <
+  FieldName extends SheetFields<'account'> | SheetFields<'category'>,
 >(
-  props: ComponentProps<typeof CellValue<'account' | 'category', FieldName>>,
+  props: ComponentProps<
+    typeof CellValue<
+      FieldName extends SheetFields<'account'> ? 'account' : 'category',
+      FieldName
+    >
+  >,
 ) => {
   return <CellValue {...props} />;
 };
 
-
 type BalanceWithClearedProps = {
-  balanceUncleared: TransactionListWithBalancesProps['balanceUncleared'];
-  balanceCleared: TransactionListWithBalancesProps['balanceCleared'];
+  balanceUncleared: NonNullable<
+    TransactionListWithBalancesProps['balanceUncleared']
+  >;
+  balanceCleared: NonNullable<
+    TransactionListWithBalancesProps['balanceCleared']
+  >;
   balance: TransactionListWithBalancesProps['balance'];
-}
+};
 
-function BalanceWithCleared({ balanceUncleared, balanceCleared, balance }: BalanceWithClearedProps) {
+function BalanceWithCleared({
+  balanceUncleared,
+  balanceCleared,
+  balance,
+}: BalanceWithClearedProps) {
   const { t } = useTranslation();
   const unclearedAmount = useSheetValue<
-  'account' | 'category', 'balanceUncleared'
+    'account' | 'category',
+    'balanceUncleared'
   >(balanceUncleared);
 
   return (
@@ -177,7 +200,10 @@ function BalanceWithCleared({ balanceUncleared, balanceCleared, balance }: Balan
           title={t('Cleared')}
           style={{ textAlign: 'center', fontSize: 12 }}
         />
-        <TransactionListBalanceCellValue binding={balanceCleared} type="financial">
+        <TransactionListBalanceCellValue
+          binding={balanceCleared}
+          type="financial"
+        >
           {props => (
             <CellValueText
               {...props}
@@ -202,7 +228,10 @@ function BalanceWithCleared({ balanceUncleared, balanceCleared, balance }: Balan
           title={t('Uncleared')}
           style={{ textAlign: 'center', fontSize: 12 }}
         />
-        <TransactionListBalanceCellValue binding={balanceUncleared} type="financial">
+        <TransactionListBalanceCellValue
+          binding={balanceUncleared}
+          type="financial"
+        >
           {props => (
             <CellValueText
               {...props}
@@ -221,8 +250,8 @@ function BalanceWithCleared({ balanceUncleared, balanceCleared, balance }: Balan
 }
 
 type BalanceProps = {
-  balance: TransactionListWithBalancesProps['balance']
-}
+  balance: TransactionListWithBalancesProps['balance'];
+};
 
 function Balance({ balance }: BalanceProps) {
   const { t } = useTranslation();
