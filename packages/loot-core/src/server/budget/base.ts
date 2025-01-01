@@ -63,24 +63,10 @@ function createCategory(cat, sheetName, prevSheetName, start, end) {
 }
 
 function createCategoryGroup(group, sheetName) {
-  sheet.get().createDynamic(sheetName, 'group-sum-amount-' + group.id, {
-    initialValue: 0,
-    dependencies: group.categories.map(cat => `sum-amount-${cat.id}`),
-    run: sumAmounts,
-  });
-
-  if (!group.is_income || getBudgetType() !== 'rollover') {
-    sheet.get().createDynamic(sheetName, 'group-budget-' + group.id, {
-      initialValue: 0,
-      dependencies: group.categories.map(cat => `budget-${cat.id}`),
-      run: sumAmounts,
-    });
-
-    sheet.get().createDynamic(sheetName, 'group-leftover-' + group.id, {
-      initialValue: 0,
-      dependencies: group.categories.map(cat => `leftover-${cat.id}`),
-      run: sumAmounts,
-    });
+  if (getBudgetType() === 'rollover') {
+    envelopeBudget.createCategoryGroup(group, sheetName);
+  } else {
+    report.createCategoryGroup(group, sheetName);
   }
 }
 
