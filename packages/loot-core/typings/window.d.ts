@@ -1,3 +1,5 @@
+import type { GlobalPrefs } from 'loot-core/types/prefs';
+
 export {};
 
 declare global {
@@ -6,6 +8,11 @@ declare global {
       IS_FAKE_WEB: boolean;
       ACTUAL_VERSION: string;
       openURLInBrowser: (url: string) => void;
+      downloadActualServer: (releaseVersion: string) => Promise<void>;
+      startActualServer: (releaseVersion: string) => Promise<void>;
+      exposeActualServer: (
+        settings: GlobalPrefs['ngrokConfig'],
+      ) => Promise<{ url?: string; error?: string } | undefined>;
       saveFile: (
         contents: string | Buffer,
         filename: string,
