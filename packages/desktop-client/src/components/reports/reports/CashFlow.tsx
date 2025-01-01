@@ -17,7 +17,7 @@ import {
 
 import { useFilters } from '../../../hooks/useFilters';
 import { useNavigate } from '../../../hooks/useNavigate';
-import { useAppDispatch } from '../../../redux';
+import { useDispatch } from '../../../redux';
 import { theme } from '../../../style';
 import { AlignedText } from '../../common/AlignedText';
 import { Block } from '../../common/Block';
@@ -63,7 +63,7 @@ type CashFlowInnerProps = {
 };
 
 function CashFlowInner({ widget }: CashFlowInnerProps) {
-  const dispatch = useAppDispatch();
+  const dispatch = useDispatch();
   const { t } = useTranslation();
 
   const {

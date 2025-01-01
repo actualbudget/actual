@@ -6,7 +6,7 @@ import { type Backup } from 'loot-core/server/backups';
 import { send, listen, unlisten } from 'loot-core/src/platform/client/fetch';
 
 import { useMetadataPref } from '../../hooks/useMetadataPref';
-import { useAppDispatch } from '../../redux';
+import { useDispatch } from '../../redux';
 import { theme } from '../../style';
 import { Block } from '../common/Block';
 import { Button } from '../common/Button2';
@@ -52,7 +52,7 @@ export function LoadBackupModal({
   watchUpdates,
   backupDisabled,
 }: LoadBackupModalProps) {
-  const dispatch = useAppDispatch();
+  const dispatch = useDispatch();
   const [backups, setBackups] = useState<Backup[]>([]);
   const [prefsBudgetId] = useMetadataPref('id');
   const budgetIdToLoad = budgetId ?? prefsBudgetId;

@@ -13,7 +13,7 @@ import { type AccountEntity } from 'loot-core/src/types/models';
 
 import { useContextMenu } from '../../hooks/useContextMenu';
 import { useNotes } from '../../hooks/useNotes';
-import { useAppDispatch } from '../../redux';
+import { useDispatch } from '../../redux';
 import { styles, theme } from '../../style';
 import { AlignedText } from '../common/AlignedText';
 import { InitialFocus } from '../common/InitialFocus';
@@ -102,7 +102,7 @@ export function Account<FieldName extends SheetFields<'account'>>({
     onDrop,
   });
 
-  const dispatch = useAppDispatch();
+  const dispatch = useDispatch();
 
   const [isEditing, setIsEditing] = useState(false);
 

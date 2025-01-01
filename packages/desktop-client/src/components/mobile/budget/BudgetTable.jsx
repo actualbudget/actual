@@ -30,7 +30,7 @@ import {
   SvgCheveronRight,
 } from '../../../icons/v1';
 import { SvgViewShow } from '../../../icons/v2';
-import { useAppDispatch } from '../../../redux';
+import { useDispatch } from '../../../redux';
 import { theme, styles } from '../../../style';
 import { BalanceWithCarryover } from '../../budget/BalanceWithCarryover';
 import { makeAmountGrey, makeBalanceAmountStyle } from '../../budget/util';
@@ -230,7 +230,7 @@ function BudgetCell({
 }) {
   const { t } = useTranslation();
   const columnWidth = getColumnWidth();
-  const dispatch = useAppDispatch();
+  const dispatch = useDispatch();
   const format = useFormat();
   const { showUndoNotification } = useUndo();
   const [budgetType = 'rollover'] = useSyncedPref('budgetType');
@@ -408,7 +408,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
 
   const [budgetType = 'rollover'] = useSyncedPref('budgetType');
   const modalBudgetType = budgetType === 'rollover' ? 'envelope' : 'tracking';
-  const dispatch = useAppDispatch();
+  const dispatch = useDispatch();
   const { showUndoNotification } = useUndo();
   const { list: categories } = useCategories();
   const categoriesById = groupById(categories);

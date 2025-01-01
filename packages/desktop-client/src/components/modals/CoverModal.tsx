@@ -5,7 +5,7 @@ import { pushModal } from 'loot-core/client/actions';
 import { type CategoryEntity } from 'loot-core/src/types/models';
 
 import { useCategories } from '../../hooks/useCategories';
-import { useAppDispatch } from '../../redux';
+import { useDispatch } from '../../redux';
 import { styles } from '../../style';
 import {
   addToBeBudgetedGroup,
@@ -49,7 +49,7 @@ export function CoverModal({
   }, [categoryId, originalCategoryGroups, showToBeBudgeted]);
 
   const [fromCategoryId, setFromCategoryId] = useState<string | null>(null);
-  const dispatch = useAppDispatch();
+  const dispatch = useDispatch();
 
   const onCategoryClick = useCallback(() => {
     dispatch(

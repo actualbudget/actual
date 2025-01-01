@@ -59,7 +59,7 @@ import {
   SvgCalendar,
   SvgHyperlink2,
 } from '../../icons/v2';
-import { useAppDispatch } from '../../redux';
+import { useDispatch } from '../../redux';
 import { styles, theme } from '../../style';
 import { AccountAutocomplete } from '../autocomplete/AccountAutocomplete';
 import { CategoryAutocomplete } from '../autocomplete/CategoryAutocomplete';
@@ -561,7 +561,7 @@ function PayeeCell({
 }) {
   const isCreatingPayee = useRef(false);
 
-  const dispatch = useAppDispatch();
+  const dispatch = useDispatch();
 
   const parentPayee = useParentPayee(
     payees,
@@ -887,7 +887,7 @@ const Transaction = memo(function Transaction({
   showSelection,
   allowSplitTransaction,
 }) {
-  const dispatch = useAppDispatch();
+  const dispatch = useDispatch();
   const dispatchSelected = useSelectedDispatch();
   const triggerRef = useRef(null);
 

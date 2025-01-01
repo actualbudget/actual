@@ -3,7 +3,7 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { createBudget, pushModal } from 'loot-core/client/actions';
 
-import { useAppDispatch } from '../../redux';
+import { useDispatch } from '../../redux';
 import { styles, theme } from '../../style';
 import { Button } from '../common/Button2';
 import { Link } from '../common/Link';
@@ -13,7 +13,7 @@ import { View } from '../common/View';
 
 export function WelcomeScreen() {
   const { t } = useTranslation();
-  const dispatch = useAppDispatch();
+  const dispatch = useDispatch();
 
   return (
     <View

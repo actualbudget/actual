@@ -5,7 +5,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { importBudget } from 'loot-core/src/client/actions/budgets';
 
 import { useNavigate } from '../../../hooks/useNavigate';
-import { useAppDispatch } from '../../../redux';
+import { useDispatch } from '../../../redux';
 import { styles, theme } from '../../../style';
 import { Block } from '../../common/Block';
 import { ButtonWithLoading } from '../../common/Button2';
@@ -25,7 +25,7 @@ function getErrorMessage(error: string): string {
 export function ImportYNAB4Modal() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const dispatch = useAppDispatch();
+  const dispatch = useDispatch();
   const [error, setError] = useState<string | null>(null);
   const [importing, setImporting] = useState(false);
 

@@ -12,7 +12,7 @@ import { useCategories } from '../../../hooks/useCategories';
 import { usePayees } from '../../../hooks/usePayees';
 import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { SvgExclamationSolid } from '../../../icons/v1';
-import { useAppDispatch } from '../../../redux';
+import { useDispatch } from '../../../redux';
 import { styles } from '../../../style/index';
 import { theme } from '../../../style/theme';
 import { Text } from '../../common/Text';
@@ -64,7 +64,7 @@ function CustomReportListCardsInner({
 }: Omit<CustomReportListCardsProps, 'report'> & {
   report: CustomReportEntity;
 }) {
-  const dispatch = useAppDispatch();
+  const dispatch = useDispatch();
 
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
   const [earliestTransaction, setEarliestTransaction] = useState('');
