@@ -500,8 +500,8 @@ module.exports = {
             patterns: [
               {
                 group: ['react-redux'],
-                importNames: ['useDispatch'],
-                message: 'Please use Actual’s useAppDispatch() hook instead.',
+                importNames: ['useSelector'],
+                message: 'Please use Actual’s useAppSelector() hook instead.',
               },
             ],
           },
