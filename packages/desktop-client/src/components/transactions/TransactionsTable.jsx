@@ -358,14 +358,7 @@ function getPayeePretty(transaction, payee, transferAcct, numHiddenPayees = 0) {
           alignItems: 'center',
         }}
       >
-        <div
-          style={{
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-          }}
-        >
-          {formatPayeeName(transferAcct.name)}
-        </div>
+        {formatPayeeName(transferAcct.name)}
       </View>
     );
   } else if (payee) {
@@ -706,7 +699,14 @@ function PayeeCell({
         );
 
         return (
-          <>
+          <div
+            style={{
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              display: 'flex',
+              alignItems: 'center',
+            }}
+          >
             <PayeeIcons
               transaction={transaction}
               transferAccount={transferAccount}
@@ -732,7 +732,7 @@ function PayeeCell({
             ) : (
               payeeName
             )}
-          </>
+          </div>
         );
       }}
     >
