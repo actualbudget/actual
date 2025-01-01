@@ -25,7 +25,7 @@ import {
   SvgViewHide,
   SvgViewShow,
 } from '../icons/v2';
-import { useAppDispatch } from '../redux';
+import { useDispatch } from '../redux';
 import { theme, styles } from '../style';
 
 import { AccountSyncCheck } from './accounts/AccountSyncCheck';
@@ -110,7 +110,7 @@ type SyncButtonProps = {
 function SyncButton({ style, isMobile = false }: SyncButtonProps) {
   const { t } = useTranslation();
   const [cloudFileId] = useMetadataPref('cloudFileId');
-  const dispatch = useAppDispatch();
+  const dispatch = useDispatch();
   const [syncing, setSyncing] = useState(false);
   const [syncState, setSyncState] = useState<
     null | 'offline' | 'local' | 'disabled' | 'error'

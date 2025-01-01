@@ -3,7 +3,7 @@ import { useCallback } from 'react';
 import { undo, redo, addNotification } from 'loot-core/client/actions';
 import { type Notification } from 'loot-core/client/state-types/notifications';
 
-import { useAppDispatch } from '../redux';
+import { useDispatch } from '../redux';
 
 type UndoActions = {
   undo: () => void;
@@ -15,7 +15,7 @@ type UndoActions = {
 const timeout = 10000;
 
 export function useUndo(): UndoActions {
-  const dispatch = useAppDispatch();
+  const dispatch = useDispatch();
 
   const dispatchUndo = useCallback(() => {
     dispatch(undo());

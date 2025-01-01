@@ -9,7 +9,7 @@ import { authorizeBank } from '../../gocardless';
 import { useAccounts } from '../../hooks/useAccounts';
 import { useFailedAccounts } from '../../hooks/useFailedAccounts';
 import { SvgExclamationOutline } from '../../icons/v1';
-import { useAppDispatch } from '../../redux';
+import { useDispatch } from '../../redux';
 import { theme } from '../../style';
 import { Button } from '../common/Button2';
 import { Link } from '../common/Link';
@@ -84,7 +84,7 @@ function useErrorMessage() {
 export function AccountSyncCheck() {
   const accounts = useAccounts();
   const failedAccounts = useFailedAccounts();
-  const dispatch = useAppDispatch();
+  const dispatch = useDispatch();
   const { id } = useParams();
   const [open, setOpen] = useState(false);
   const triggerRef = useRef(null);

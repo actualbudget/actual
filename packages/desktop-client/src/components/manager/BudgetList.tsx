@@ -42,7 +42,7 @@ import {
   SvgUserGroup,
 } from '../../icons/v1';
 import { SvgCloudUnknown, SvgKey, SvgRefreshArrow } from '../../icons/v2';
-import { useAppSelector, useAppDispatch } from '../../redux';
+import { useSelector, useDispatch } from '../../redux';
 import { styles, theme } from '../../style';
 import { tokens } from '../../tokens';
 import { Button } from '../common/Button2';
@@ -498,12 +498,12 @@ function BudgetListHeader({
 }
 
 export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
-  const dispatch = useAppDispatch();
-  const allFiles = useAppSelector(state => state.budgets.allFiles || []);
+  const dispatch = useDispatch();
+  const allFiles = useSelector(state => state.budgets.allFiles || []);
   const multiuserEnabled = useMultiuserEnabled();
   const [id] = useMetadataPref('id');
   const [currentUserId, setCurrentUserId] = useState('');
-  const userData = useAppSelector(state => state.user.data);
+  const userData = useSelector(state => state.user.data);
 
   const fetchUsers = useCallback(async () => {
     try {
@@ -670,7 +670,7 @@ type UserAccessForFileProps = {
 };
 
 function UserAccessForFile({ fileId, currentUserId }: UserAccessForFileProps) {
-  const allFiles = useAppSelector(state => state.budgets.allFiles || []);
+  const allFiles = useSelector(state => state.budgets.allFiles || []);
   const remoteFiles = allFiles.filter(
     f => f.state === 'remote' || f.state === 'synced' || f.state === 'detached',
   ) as (SyncedLocalFile | RemoteFile)[];

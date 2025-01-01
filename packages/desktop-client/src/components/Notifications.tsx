@@ -15,7 +15,7 @@ import type { NotificationWithId } from 'loot-core/src/client/state-types/notifi
 
 import { AnimatedLoading } from '../icons/AnimatedLoading';
 import { SvgDelete } from '../icons/v0';
-import { useAppSelector, useAppDispatch } from '../redux';
+import { useSelector, useDispatch } from '../redux';
 import { styles, theme } from '../style';
 
 import { Button, ButtonWithLoading } from './common/Button2';
@@ -262,12 +262,10 @@ function Notification({
 }
 
 export function Notifications({ style }: { style?: CSSProperties }) {
-  const dispatch = useAppDispatch();
+  const dispatch = useDispatch();
   const { isNarrowWidth } = useResponsive();
-  const notifications = useAppSelector(
-    state => state.notifications.notifications,
-  );
-  const notificationInset = useAppSelector(state => state.notifications.inset);
+  const notifications = useSelector(state => state.notifications.notifications);
+  const notificationInset = useSelector(state => state.notifications.inset);
   return (
     <View
       style={{

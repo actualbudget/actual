@@ -1,6 +1,9 @@
-import { useDispatch, useSelector } from 'react-redux';
+import {
+  useDispatch as useReduxDispatch,
+  useSelector as useReduxSelector,
+} from 'react-redux';
 
 import { type AppDispatch, type RootState } from 'loot-core/client/store';
 
-export const useAppDispatch = useDispatch.withTypes<AppDispatch>();
-export const useAppSelector = useSelector.withTypes<RootState>();
+export const useDispatch = useReduxDispatch.withTypes<AppDispatch>();
+export const useSelector = useReduxSelector.withTypes<RootState>();

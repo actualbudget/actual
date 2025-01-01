@@ -12,7 +12,7 @@ import { useLocalPref } from '../../hooks/useLocalPref';
 import { useOffBudgetAccounts } from '../../hooks/useOffBudgetAccounts';
 import { useOnBudgetAccounts } from '../../hooks/useOnBudgetAccounts';
 import { useUpdatedAccounts } from '../../hooks/useUpdatedAccounts';
-import { useAppSelector, useAppDispatch } from '../../redux';
+import { useSelector, useDispatch } from '../../redux';
 import { theme } from '../../style';
 import { View } from '../common/View';
 
@@ -23,7 +23,7 @@ const fontWeight = 600;
 
 export function Accounts() {
   const { t } = useTranslation();
-  const dispatch = useAppDispatch();
+  const dispatch = useDispatch();
   const [isDragging, setIsDragging] = useState(false);
   const accounts = useAccounts();
   const failedAccounts = useFailedAccounts();
@@ -31,9 +31,7 @@ export function Accounts() {
   const offbudgetAccounts = useOffBudgetAccounts();
   const onBudgetAccounts = useOnBudgetAccounts();
   const closedAccounts = useClosedAccounts();
-  const syncingAccountIds = useAppSelector(
-    state => state.account.accountsSyncing,
-  );
+  const syncingAccountIds = useSelector(state => state.account.accountsSyncing);
 
   const getAccountPath = (account: AccountEntity) => `/accounts/${account.id}`;
 

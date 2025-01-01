@@ -14,7 +14,7 @@ import { type TimeFrame, type NetWorthWidget } from 'loot-core/types/models';
 import { useAccounts } from '../../../hooks/useAccounts';
 import { useFilters } from '../../../hooks/useFilters';
 import { useNavigate } from '../../../hooks/useNavigate';
-import { useAppDispatch } from '../../../redux';
+import { useDispatch } from '../../../redux';
 import { theme, styles } from '../../../style';
 import { Button } from '../../common/Button2';
 import { Paragraph } from '../../common/Paragraph';
@@ -52,7 +52,7 @@ type NetWorthInnerProps = {
 };
 
 function NetWorthInner({ widget }: NetWorthInnerProps) {
-  const dispatch = useAppDispatch();
+  const dispatch = useDispatch();
   const { t } = useTranslation();
 
   const accounts = useAccounts();

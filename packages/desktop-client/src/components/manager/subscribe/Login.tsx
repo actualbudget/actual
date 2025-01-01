@@ -10,7 +10,7 @@ import { type OpenIdConfig } from 'loot-core/types/models/openid';
 
 import { useNavigate } from '../../../hooks/useNavigate';
 import { AnimatedLoading } from '../../../icons/AnimatedLoading';
-import { useAppDispatch } from '../../../redux';
+import { useDispatch } from '../../../redux';
 import { styles, theme } from '../../../style';
 import { Button, ButtonWithLoading } from '../../common/Button2';
 import { BigInput } from '../../common/Input';
@@ -202,7 +202,7 @@ function HeaderLogin({ error }) {
 export function Login() {
   const { t } = useTranslation();
 
-  const dispatch = useAppDispatch();
+  const dispatch = useDispatch();
   const defaultLoginMethod = useLoginMethod();
   const [method, setMethod] = useState(defaultLoginMethod);
   const [searchParams, _setSearchParams] = useSearchParams();

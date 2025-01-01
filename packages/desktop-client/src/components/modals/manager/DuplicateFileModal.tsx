@@ -9,7 +9,7 @@ import {
 } from 'loot-core/client/actions';
 import { type File } from 'loot-core/src/types/file';
 
-import { useAppDispatch } from '../../../redux';
+import { useDispatch } from '../../../redux';
 import { theme } from '../../../style';
 import { Button, ButtonWithLoading } from '../../common/Button2';
 import { FormError } from '../../common/FormError';
@@ -49,7 +49,7 @@ export function DuplicateFileModal({
   // If the state is "broken" that means it was created by another user.
   const isCloudFile = 'cloudFileId' in file && file.state !== 'broken';
   const isLocalFile = 'id' in file;
-  const dispatch = useAppDispatch();
+  const dispatch = useDispatch();
 
   const [loadingState, setLoadingState] = useState<'cloud' | 'local' | null>(
     null,

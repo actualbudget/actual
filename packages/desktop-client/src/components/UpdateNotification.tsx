@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { setAppState, updateApp } from 'loot-core/client/actions';
 
 import { SvgClose } from '../icons/v1';
-import { useAppSelector, useAppDispatch } from '../redux';
+import { useSelector, useDispatch } from '../redux';
 import { theme } from '../style';
 
 import { Button } from './common/Button2';
@@ -14,12 +14,12 @@ import { View } from './common/View';
 
 export function UpdateNotification() {
   const { t } = useTranslation();
-  const updateInfo = useAppSelector(state => state.app.updateInfo);
-  const showUpdateNotification = useAppSelector(
+  const updateInfo = useSelector(state => state.app.updateInfo);
+  const showUpdateNotification = useSelector(
     state => state.app.showUpdateNotification,
   );
 
-  const dispatch = useAppDispatch();
+  const dispatch = useDispatch();
   const onRestart = () => {
     dispatch(updateApp());
   };

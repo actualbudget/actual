@@ -17,7 +17,7 @@ import {
   type TransactionEntity,
 } from 'loot-core/types/models';
 
-import { useAppDispatch } from '../redux';
+import { useDispatch } from '../redux';
 
 type BatchEditProps = {
   name: keyof TransactionEntity;
@@ -55,7 +55,7 @@ type BatchUnlinkScheduleProps = {
 };
 
 export function useTransactionBatchActions() {
-  const dispatch = useAppDispatch();
+  const dispatch = useDispatch();
 
   const onBatchEdit = async ({ name, ids, onSuccess }: BatchEditProps) => {
     const { data } = await runQuery(

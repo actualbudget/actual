@@ -4,7 +4,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { deleteBudget } from 'loot-core/client/actions';
 import { type File } from 'loot-core/src/types/file';
 
-import { useAppDispatch } from '../../../redux';
+import { useDispatch } from '../../../redux';
 import { theme } from '../../../style';
 import { ButtonWithLoading } from '../../common/Button2';
 import { Modal, ModalCloseButton, ModalHeader } from '../../common/Modal';
@@ -22,7 +22,7 @@ export function DeleteFileModal({ file }: DeleteFileProps) {
   // user. The current user should be able to delete the local file,
   // but not the remote one
   const isCloudFile = 'cloudFileId' in file && file.state !== 'broken';
-  const dispatch = useAppDispatch();
+  const dispatch = useDispatch();
 
   const [loadingState, setLoadingState] = useState<'cloud' | 'local' | null>(
     null,

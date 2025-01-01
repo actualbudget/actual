@@ -14,7 +14,7 @@ import { type RuleConditionEntity } from 'loot-core/types/models/rule';
 
 import { useFilters } from '../../../hooks/useFilters';
 import { useNavigate } from '../../../hooks/useNavigate';
-import { useAppDispatch } from '../../../redux';
+import { useDispatch } from '../../../redux';
 import { theme, styles } from '../../../style';
 import { AlignedText } from '../../common/AlignedText';
 import { Block } from '../../common/Block';
@@ -60,7 +60,7 @@ type SpendingInternalProps = {
 };
 
 function SpendingInternal({ widget }: SpendingInternalProps) {
-  const dispatch = useAppDispatch();
+  const dispatch = useDispatch();
   const { t } = useTranslation();
 
   const {

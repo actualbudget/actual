@@ -18,7 +18,7 @@ import { useAccounts } from '../hooks/useAccounts';
 import { useLocalPref } from '../hooks/useLocalPref';
 import { useMetaThemeColor } from '../hooks/useMetaThemeColor';
 import { useNavigate } from '../hooks/useNavigate';
-import { useAppSelector, useAppDispatch } from '../redux';
+import { useSelector, useDispatch } from '../redux';
 import { theme } from '../style';
 import { getIsOutdated, getLatestVersion } from '../util/versions';
 
@@ -85,11 +85,11 @@ export function FinancesApp() {
   const { isNarrowWidth } = useResponsive();
   useMetaThemeColor(isNarrowWidth ? theme.mobileViewTheme : null);
 
-  const dispatch = useAppDispatch();
+  const dispatch = useDispatch();
   const { t } = useTranslation();
 
   const accounts = useAccounts();
-  const accountsLoaded = useAppSelector(state => state.queries.accountsLoaded);
+  const accountsLoaded = useSelector(state => state.queries.accountsLoaded);
 
   const [lastUsedVersion, setLastUsedVersion] = useLocalPref(
     'flags.updateNotificationShownForVersion',

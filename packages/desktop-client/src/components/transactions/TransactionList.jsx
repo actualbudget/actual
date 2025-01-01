@@ -12,7 +12,7 @@ import {
 import { getChangedValues, applyChanges } from 'loot-core/src/shared/util';
 
 import { useNavigate } from '../../hooks/useNavigate';
-import { useAppDispatch } from '../../redux';
+import { useDispatch } from '../../redux';
 import { theme } from '../../style';
 
 import { TransactionTable } from './TransactionsTable';
@@ -98,7 +98,7 @@ export function TransactionList({
   onScheduleAction,
   onMakeAsNonSplitTransactions,
 }) {
-  const dispatch = useAppDispatch();
+  const dispatch = useDispatch();
   const transactionsLatest = useRef();
   const navigate = useNavigate();
 

@@ -47,7 +47,7 @@ import {
   SvgCheveronDown,
   SvgCheveronUp,
 } from '../../../icons/v1';
-import { useAppDispatch } from '../../../redux';
+import { useDispatch } from '../../../redux';
 import { styles, theme } from '../../../style';
 import { Button } from '../../common/Button2';
 import { View } from '../../common/View';
@@ -278,7 +278,7 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
     run();
   }, []);
 
-  const dispatch = useAppDispatch();
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const { isNarrowWidth } = useResponsive();
   const title = widget?.meta?.name || t('Calendar');

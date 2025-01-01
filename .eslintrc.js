@@ -483,7 +483,7 @@ module.exports = {
               {
                 group: ['react-redux'],
                 importNames: ['useDispatch'],
-                message: 'Please use Actual’s useAppDispatch() hook instead.',
+                message: 'Please use Actual’s useDispatch() hook instead.',
               },
             ],
           },
@@ -501,7 +501,7 @@ module.exports = {
               {
                 group: ['react-redux'],
                 importNames: ['useSelector'],
-                message: 'Please use Actual’s useAppSelector() hook instead.',
+                message: 'Please use Actual’s useSelector() hook instead.',
               },
             ],
           },

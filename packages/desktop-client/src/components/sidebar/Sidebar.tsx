@@ -11,7 +11,7 @@ import { useGlobalPref } from '../../hooks/useGlobalPref';
 import { useLocalPref } from '../../hooks/useLocalPref';
 import { useResizeObserver } from '../../hooks/useResizeObserver';
 import { SvgAdd } from '../../icons/v1';
-import { useAppDispatch } from '../../redux';
+import { useDispatch } from '../../redux';
 import { styles, theme } from '../../style';
 import { View } from '../common/View';
 import { useResponsive } from '../responsive/ResponsiveProvider';
@@ -27,7 +27,7 @@ export function Sidebar() {
   const hasWindowButtons = !Platform.isBrowser && Platform.OS === 'mac';
 
   const { t } = useTranslation();
-  const dispatch = useAppDispatch();
+  const dispatch = useDispatch();
   const sidebar = useSidebar();
   const { width } = useResponsive();
   const [isFloating = false, setFloatingSidebarPref] =
