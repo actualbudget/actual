@@ -444,10 +444,20 @@ export class CategoryTemplate {
   }
 
   private async runSpend(template): Promise<number> {
-    const fromMonth = `${template.from}`;
-    const toMonth = `${template.month}`;
+    let fromMonth = `${template.from}`;
+    let toMonth = `${template.month}`;
     let alreadyBudgeted = this.fromLastMonth;
     let firstMonth = true;
+
+    //update months if needed
+    let m = monthUtils.differenceInCalendarMonths(toMonth, this.month);
+    if (template.annual && m < 0) {
+      while (m < 0) {
+        toMonth = monthUtils.addMonths(toMonth, 12);
+        fromMonth = monthUtils.addMonths(fromMonth, 12);
+        m = monthUtils.differenceInCalendarMonths(toMonth, this.month);
+      }
+    }
 
     for (
       let m = fromMonth;
