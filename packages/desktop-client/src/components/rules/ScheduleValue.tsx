@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 
 import { useSchedules } from 'loot-core/client/data-hooks/schedules';
 import { q } from 'loot-core/shared/query';
-import { getPayeesById } from 'loot-core/src/client/reducers/queries';
+import { getPayeesById } from 'loot-core/src/client/queries/queriesSlice';
 import { describeSchedule } from 'loot-core/src/shared/schedules';
 import { type ScheduleEntity } from 'loot-core/src/types/models';
 

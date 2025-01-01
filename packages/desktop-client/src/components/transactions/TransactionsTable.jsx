@@ -26,7 +26,7 @@ import {
   getAccountsById,
   getPayeesById,
   getCategoriesById,
-} from 'loot-core/src/client/reducers/queries';
+} from 'loot-core/src/client/queries/queriesSlice';
 import { evalArithmetic } from 'loot-core/src/shared/arithmetic';
 import { currentDay } from 'loot-core/src/shared/months';
 import * as monthUtils from 'loot-core/src/shared/months';

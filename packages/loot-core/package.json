@@ -36,7 +36,6 @@
     "mitt": "^3.0.1",
     "reselect": "^4.1.8",
     "slash": "3.0.0",
-    "throttleit": "^1.0.1",
     "uuid": "^9.0.1"
   },
   "devDependencies": {

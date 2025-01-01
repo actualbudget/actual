@@ -1,9 +1,9 @@
 // @ts-strict-ignore
 import React, { useCallback, useEffect, useState } from 'react';
 
+import { collapseModals, pushModal, sync } from 'loot-core/client/actions';
 import {
   applyBudgetAction,
-  collapseModals,
   createCategory,
   createGroup,
   deleteCategory,
@@ -11,11 +11,9 @@ import {
   getCategories,
   moveCategory,
   moveCategoryGroup,
-  pushModal,
   updateCategory,
   updateGroup,
-  sync,
-} from 'loot-core/client/actions';
+} from 'loot-core/client/queries/queriesSlice';
 import { useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
 import { send, listen } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
@@ -86,7 +84,7 @@ export function Budget() {
 
   const onBudgetAction = useCallback(
     async (month, type, args) => {
-      dispatch(applyBudgetAction(month, type, args));
+      dispatch(applyBudgetAction({ month, type, args }));
     },
     [dispatch],
   );
@@ -114,7 +112,7 @@ export function Budget() {
         onValidate: name => (!name ? 'Name is required.' : null),
         onSubmit: async name => {
           dispatch(collapseModals('budget-page-menu'));
-          dispatch(createGroup(name));
+          dispatch(createGroup({ name }));
         },
       }),
     );
@@ -127,7 +125,9 @@ export function Budget() {
           onValidate: name => (!name ? 'Name is required.' : null),
           onSubmit: async name => {
             dispatch(collapseModals('category-group-menu'));
-            dispatch(createCategory(name, groupId, isIncome, false));
+            dispatch(
+              createCategory({ name, groupId, isIncome, isHidden: false }),
+            );
           },
         }),
       );
@@ -137,7 +137,7 @@ export function Budget() {
 
   const onSaveGroup = useCallback(
     group => {
-      dispatch(updateGroup(group));
+      dispatch(updateGroup({ group }));
     },
     [dispatch],
   );
@@ -164,7 +164,9 @@ export function Budget() {
             group: groupId,
             onDelete: transferCategory => {
               dispatch(collapseModals('category-group-menu'));
-              dispatch(deleteGroup(groupId, transferCategory));
+              dispatch(
+                deleteGroup({ id: groupId, transferId: transferCategory }),
+              );
             },
           }),
         );
@@ -190,7 +192,7 @@ export function Budget() {
 
   const onSaveCategory = useCallback(
     category => {
-      dispatch(updateCategory(category));
+      dispatch(updateCategory({ category }));
     },
     [dispatch],
   );
@@ -208,14 +210,19 @@ export function Budget() {
             onDelete: transferCategory => {
               if (categoryId !== transferCategory) {
                 dispatch(collapseModals('category-menu'));
-                dispatch(deleteCategory(categoryId, transferCategory));
+                dispatch(
+                  deleteCategory({
+                    id: categoryId,
+                    transferId: transferCategory,
+                  }),
+                );
               }
             },
           }),
         );
       } else {
         dispatch(collapseModals('category-menu'));
-        dispatch(deleteCategory(categoryId));
+        dispatch(deleteCategory({ id: categoryId }));
       }
     },
     [dispatch],
@@ -261,7 +268,7 @@ export function Budget() {
         targetId = catId;
       }
 
-      dispatch(moveCategory(id, groupId, targetId));
+      dispatch(moveCategory({ id, groupId, targetId }));
     },
     [categoryGroups, dispatch],
   );
@@ -274,7 +281,7 @@ export function Budget() {
           idx < categoryGroups.length - 1 ? categoryGroups[idx + 1].id : null;
       }
 
-      dispatch(moveCategoryGroup(id, targetId));
+      dispatch(moveCategoryGroup({ id, targetId }));
     },
     [categoryGroups, dispatch],
   );
