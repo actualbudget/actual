@@ -1,9 +1,5 @@
 // @ts-strict-ignore
-import {
-  createAsyncThunk,
-  createSlice,
-  type PayloadAction,
-} from '@reduxjs/toolkit';
+import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import { t } from 'i18next';
 import memoizeOne from 'memoize-one';
 
@@ -17,14 +13,11 @@ import {
   type PayeeEntity,
 } from '../../types/models';
 import { addGenericErrorNotification, addNotification } from '../actions';
-import { type AppDispatch, type RootState } from '../store';
+import { createAppAsyncThunk } from '../store';
 
-const createAppAsyncThunk = createAsyncThunk.withTypes<{
-  state: RootState;
-  dispatch: AppDispatch;
-}>();
+const sliceName = 'queries';
 
-type Categories = {
+type CategoryViews = {
   grouped: CategoryGroupEntity[];
   list: CategoryEntity[];
 };
@@ -36,7 +29,7 @@ type QueriesState = {
   updatedAccounts: Array<AccountEntity['id']>;
   accounts: AccountEntity[];
   accountsLoaded: boolean;
-  categories: Categories;
+  categories: CategoryViews;
   categoriesLoaded: boolean;
   commonPayeesLoaded: boolean;
   commonPayees: PayeeEntity[];
@@ -62,33 +55,33 @@ const initialState: QueriesState = {
   payeesLoaded: false,
 };
 
-type MarkAccountReadAction = PayloadAction<{
+type MarkAccountReadPayload = {
   accountId: AccountEntity['id'];
-}>;
+};
 
 // Account actions
 
-type CreateAccountArgs = {
+type CreateAccountPayload = {
   name: AccountEntity['name'];
   balance: AccountEntity['balance_current'];
   offBudget: boolean;
 };
 
 export const createAccount = createAppAsyncThunk(
-  'queries/createAccount',
-  async ({ name, balance, offBudget }: CreateAccountArgs, thunkApi) => {
+  `${sliceName}/createAccount`,
+  async ({ name, balance, offBudget }: CreateAccountPayload, { dispatch }) => {
     const id: AccountEntity['id'] = await send('account-create', {
       name,
       balance,
       offBudget,
     });
-    await thunkApi.dispatch(getAccounts());
-    await thunkApi.dispatch(getPayees());
+    await dispatch(getAccounts());
+    await dispatch(getPayees());
     return id;
   },
 );
 
-type CloseAccountArgs = {
+type CloseAccountPayload = {
   accountId: AccountEntity['id'];
   transferAccountId?: AccountEntity['id'];
   categoryId?: CategoryEntity['id'];
@@ -96,10 +89,10 @@ type CloseAccountArgs = {
 };
 
 export const closeAccount = createAppAsyncThunk(
-  'queries/closeAccount',
+  `${sliceName}/closeAccount`,
   async (
-    { accountId, transferAccountId, categoryId, forced }: CloseAccountArgs,
-    thunkApi,
+    { accountId, transferAccountId, categoryId, forced }: CloseAccountPayload,
+    { dispatch },
   ) => {
     await send('account-close', {
       id: accountId,
@@ -107,36 +100,36 @@ export const closeAccount = createAppAsyncThunk(
       categoryId: categoryId || null,
       forced,
     });
-    thunkApi.dispatch(getAccounts());
+    dispatch(getAccounts());
   },
 );
 
-type ReopenAccountArgs = {
+type ReopenAccountPayload = {
   accountId: AccountEntity['id'];
 };
 
 export const reopenAccount = createAppAsyncThunk(
-  'queries/reopenAccount',
-  async ({ accountId }: ReopenAccountArgs, thunkApi) => {
+  `${sliceName}/reopenAccount`,
+  async ({ accountId }: ReopenAccountPayload, { dispatch }) => {
     await send('account-reopen', { id: accountId });
-    thunkApi.dispatch(getAccounts());
+    dispatch(getAccounts());
   },
 );
 
-type UpdateAccountArgs = {
+type UpdateAccountPayload = {
   account: AccountEntity;
 };
 
 export const updateAccount = createAppAsyncThunk(
-  'queries/updateAccount',
-  async ({ account }: UpdateAccountArgs) => {
+  `${sliceName}/updateAccount`,
+  async ({ account }: UpdateAccountPayload) => {
     await send('account-update', account);
     return account;
   },
 );
 
 export const getAccounts = createAppAsyncThunk(
-  'queries/getAccounts',
+  `${sliceName}/getAccounts`,
   async () => {
     const accounts: AccountEntity[] = await send('accounts-get');
     return accounts;
@@ -145,60 +138,60 @@ export const getAccounts = createAppAsyncThunk(
 
 // Category actions
 
-type CreateGroupArgs = {
+type CreateGroupPayload = {
   name: CategoryGroupEntity['name'];
 };
 
 export const createGroup = createAppAsyncThunk(
-  'queries/createGroup',
-  async ({ name }: CreateGroupArgs, thunkApi) => {
+  `${sliceName}/createGroup`,
+  async ({ name }: CreateGroupPayload, { dispatch }) => {
     const id = await send('category-group-create', { name });
-    thunkApi.dispatch(getCategories());
+    dispatch(getCategories());
     return id;
   },
 );
 
-type UpdateGroupArgs = {
+type UpdateGroupPayload = {
   group: CategoryGroupEntity;
 };
 
 export const updateGroup = createAppAsyncThunk(
-  'queries/updateGroup',
-  async ({ group }: UpdateGroupArgs, thunkApi) => {
+  `${sliceName}/updateGroup`,
+  async ({ group }: UpdateGroupPayload, { dispatch }) => {
     // Strip off the categories field if it exist. It's not a real db
     // field but groups have this extra field in the client most of the time
     const { categories: _, ...groupNoCategories } = group;
     await send('category-group-update', groupNoCategories);
-    await thunkApi.dispatch(getCategories());
+    await dispatch(getCategories());
   },
 );
 
-type DeleteGroupArgs = {
+type DeleteGroupPayload = {
   id: CategoryGroupEntity['id'];
   transferId?: CategoryGroupEntity['id'];
 };
 
 export const deleteGroup = createAppAsyncThunk(
-  'queries/deleteGroup',
-  async ({ id, transferId }: DeleteGroupArgs, thunkApi) => {
+  `${sliceName}/deleteGroup`,
+  async ({ id, transferId }: DeleteGroupPayload, { dispatch }) => {
     await send('category-group-delete', { id, transferId });
-    await thunkApi.dispatch(getCategories());
+    await dispatch(getCategories());
     // See `deleteCategory` for why we need this
-    await thunkApi.dispatch(getPayees());
+    await dispatch(getPayees());
   },
 );
 
-type CreateCategoryArgs = {
+type CreateCategoryPayload = {
   name: CategoryEntity['name'];
   groupId: CategoryGroupEntity['id'];
   isIncome: boolean;
   isHidden: boolean;
 };
 export const createCategory = createAppAsyncThunk(
-  'queries/createCategory',
+  `${sliceName}/createCategory`,
   async (
-    { name, groupId, isIncome, isHidden }: CreateCategoryArgs,
-    thunkApi,
+    { name, groupId, isIncome, isHidden }: CreateCategoryPayload,
+    { dispatch },
   ) => {
     const id = await send('category-create', {
       name,
@@ -206,37 +199,37 @@ export const createCategory = createAppAsyncThunk(
       isIncome,
       hidden: isHidden,
     });
-    thunkApi.dispatch(getCategories());
+    await dispatch(getCategories());
     return id;
   },
 );
 
-type UpdateCategoryArgs = {
+type UpdateCategoryPayload = {
   category: CategoryEntity;
 };
 
 export const updateCategory = createAppAsyncThunk(
-  'queries/updateCategory',
-  async ({ category }: UpdateCategoryArgs, thunkApi) => {
+  `${sliceName}/updateCategory`,
+  async ({ category }: UpdateCategoryPayload, { dispatch }) => {
     await send('category-update', category);
-    thunkApi.dispatch(getCategories());
+    await dispatch(getCategories());
   },
 );
 
-type DeleteCategoryArgs = {
+type DeleteCategoryPayload = {
   id: CategoryEntity['id'];
   transferId?: CategoryEntity['id'];
 };
 
 export const deleteCategory = createAppAsyncThunk(
-  'queries/deleteCategory',
-  async ({ id, transferId }: DeleteCategoryArgs, thunkApi) => {
+  `${sliceName}/deleteCategory`,
+  async ({ id, transferId }: DeleteCategoryPayload, { dispatch }) => {
     const { error } = await send('category-delete', { id, transferId });
 
     if (error) {
       switch (error) {
         case 'category-type':
-          thunkApi.dispatch(
+          dispatch(
             addNotification({
               type: 'error',
               message: t(
@@ -246,83 +239,83 @@ export const deleteCategory = createAppAsyncThunk(
           );
           break;
         default:
-          thunkApi.dispatch(addGenericErrorNotification());
+          dispatch(addGenericErrorNotification());
       }
 
       throw new Error(error);
     } else {
-      thunkApi.dispatch(getCategories());
+      await dispatch(getCategories());
       // Also need to refresh payees because they might use one of the
       // deleted categories as the default category
-      thunkApi.dispatch(getPayees());
+      await dispatch(getPayees());
     }
   },
 );
 
-type MoveCategoryArgs = {
+type MoveCategoryPayload = {
   id: CategoryEntity['id'];
   groupId: CategoryGroupEntity['id'];
   targetId: CategoryEntity['id'];
 };
 
 export const moveCategory = createAppAsyncThunk(
-  'queries/moveCategory',
-  async ({ id, groupId, targetId }: MoveCategoryArgs, thunkApi) => {
+  `${sliceName}/moveCategory`,
+  async ({ id, groupId, targetId }: MoveCategoryPayload, { dispatch }) => {
     await send('category-move', { id, groupId, targetId });
-    await thunkApi.dispatch(getCategories());
+    await dispatch(getCategories());
   },
 );
 
-type MoveCategoryGroupArgs = {
+type MoveCategoryGroupPayload = {
   id: CategoryGroupEntity['id'];
   targetId: CategoryGroupEntity['id'];
 };
 
 export const moveCategoryGroup = createAppAsyncThunk(
-  'queries/moveCategoryGroup',
-  async ({ id, targetId }: MoveCategoryGroupArgs, thunkApi) => {
+  `${sliceName}/moveCategoryGroup`,
+  async ({ id, targetId }: MoveCategoryGroupPayload, { dispatch }) => {
     await send('category-group-move', { id, targetId });
-    await thunkApi.dispatch(getCategories());
+    await dispatch(getCategories());
   },
 );
 
 export const getCategories = createAppAsyncThunk(
-  'queries/getCategories',
+  `${sliceName}/getCategories`,
   async () => {
-    const categories: Categories = await send('get-categories');
+    const categories: CategoryViews = await send('get-categories');
     return categories;
   },
 );
 
 // Payee actions
 
-type CreatePayeeArgs = {
+type CreatePayeePayload = {
   name: PayeeEntity['name'];
 };
 
 export const createPayee = createAppAsyncThunk(
-  'queries/createPayee',
-  async ({ name }: CreatePayeeArgs, thunkApi) => {
+  `${sliceName}/createPayee`,
+  async ({ name }: CreatePayeePayload, { dispatch }) => {
     const id: PayeeEntity['id'] = await send('payee-create', {
       name: name.trim(),
     });
-    thunkApi.dispatch(getPayees());
+    dispatch(getPayees());
     return id;
   },
 );
 
 export const initiallyLoadPayees = createAppAsyncThunk(
-  'queries/initiallyLoadPayees',
-  async (_, thunkApi) => {
-    const queriesState = thunkApi.getState().queries;
+  `${sliceName}/initiallyLoadPayees`,
+  async (_, { dispatch, getState }) => {
+    const queriesState = getState().queries;
     if (queriesState.payees.length === 0) {
-      return thunkApi.dispatch(getPayees());
+      return dispatch(getPayees());
     }
   },
 );
 
 export const getCommonPayees = createAppAsyncThunk(
-  'queries/getCommonPayees',
+  `${sliceName}/getCommonPayees`,
   async () => {
     const payees: PayeeEntity[] = await send('common-payees-get');
     return payees;
@@ -336,7 +329,7 @@ export const getPayees = createAppAsyncThunk('queries/getPayees', async () => {
 
 // Budget actions
 
-type ApplyBudgetActionArgs =
+type ApplyBudgetActionPayload =
   | {
       type: 'budget-amount';
       month: string;
@@ -486,8 +479,8 @@ type ApplyBudgetActionArgs =
     };
 
 export const applyBudgetAction = createAppAsyncThunk(
-  'queries/applyBudgetAction',
-  async ({ month, type, args }: ApplyBudgetActionArgs, thunkApi) => {
+  `${sliceName}/applyBudgetAction`,
+  async ({ month, type, args }: ApplyBudgetActionPayload, { dispatch }) => {
     switch (type) {
       case 'budget-amount':
         await send('budget/budget-amount', {
@@ -512,24 +505,22 @@ export const applyBudgetAction = createAppAsyncThunk(
         await send('budget/set-12month-avg', { month });
         break;
       case 'check-templates':
-        thunkApi.dispatch(
-          addNotification(await send('budget/check-templates')),
-        );
+        dispatch(addNotification(await send('budget/check-templates')));
         break;
       case 'apply-goal-template':
-        thunkApi.dispatch(
+        dispatch(
           addNotification(await send('budget/apply-goal-template', { month })),
         );
         break;
       case 'overwrite-goal-template':
-        thunkApi.dispatch(
+        dispatch(
           addNotification(
             await send('budget/overwrite-goal-template', { month }),
           ),
         );
         break;
       case 'cleanup-goal-template':
-        thunkApi.dispatch(
+        dispatch(
           addNotification(
             await send('budget/cleanup-goal-template', { month }),
           ),
@@ -587,7 +578,7 @@ export const applyBudgetAction = createAppAsyncThunk(
         });
         break;
       case 'apply-multiple-templates':
-        thunkApi.dispatch(
+        dispatch(
           addNotification(
             await send('budget/apply-multiple-templates', {
               month,
@@ -631,14 +622,17 @@ export const applyBudgetAction = createAppAsyncThunk(
 
 // Transaction actions
 
-type ImportPreviewTransactionsArgs = {
+type ImportPreviewTransactionsPayload = {
   id: string;
   transactions: TransactionEntity[];
 };
 
 export const importPreviewTransactions = createAppAsyncThunk(
-  'queries/importPreviewTransactions',
-  async ({ id, transactions }: ImportPreviewTransactionsArgs, thunkApi) => {
+  `${sliceName}/importPreviewTransactions`,
+  async (
+    { id, transactions }: ImportPreviewTransactionsPayload,
+    { dispatch },
+  ) => {
     const { errors = [], updatedPreview } = await send('transactions-import', {
       accountId: id,
       transactions,
@@ -646,7 +640,7 @@ export const importPreviewTransactions = createAppAsyncThunk(
     });
 
     errors.forEach(error => {
-      thunkApi.dispatch(
+      dispatch(
         addNotification({
           type: 'error',
           message: error.message,
@@ -658,15 +652,18 @@ export const importPreviewTransactions = createAppAsyncThunk(
   },
 );
 
-type ImportTransactionsArgs = {
+type ImportTransactionsPayload = {
   id: string;
   transactions: TransactionEntity[];
   reconcile: boolean;
 };
 
 export const importTransactions = createAppAsyncThunk(
-  'queries/importTransactions',
-  async ({ id, transactions, reconcile }: ImportTransactionsArgs, thunkApi) => {
+  `${sliceName}/importTransactions`,
+  async (
+    { id, transactions, reconcile }: ImportTransactionsPayload,
+    { dispatch },
+  ) => {
     if (!reconcile) {
       await send('api/transactions-add', {
         accountId: id,
@@ -687,7 +684,7 @@ export const importTransactions = createAppAsyncThunk(
     });
 
     errors.forEach(error => {
-      thunkApi.dispatch(
+      dispatch(
         addNotification({
           type: 'error',
           message: error.message,
@@ -697,7 +694,7 @@ export const importTransactions = createAppAsyncThunk(
 
     const { setNewTransactions } = queriesSlice.actions;
 
-    thunkApi.dispatch(
+    dispatch(
       setNewTransactions({
         newTransactions: added,
         matchedTransactions: updated,
@@ -709,23 +706,26 @@ export const importTransactions = createAppAsyncThunk(
   },
 );
 
-type SetNewTransactionsAction = PayloadAction<{
+type SetNewTransactionsPayload = {
   newTransactions: QueriesState['newTransactions'];
   matchedTransactions: QueriesState['matchedTransactions'];
   updatedAccounts: QueriesState['updatedAccounts'];
-}>;
-type UpdateNewTransactionsAction = PayloadAction<{
+};
+type UpdateNewTransactionsPayload = {
   id: TransactionEntity['id'];
-}>;
-type SetLastTransactionAction = PayloadAction<{
+};
+type SetLastTransactionPayload = {
   transaction: TransactionEntity;
-}>;
+};
 
 const queriesSlice = createSlice({
-  name: 'queries',
+  name: sliceName,
   initialState,
   reducers: {
-    setNewTransactions(state, action: SetNewTransactionsAction) {
+    setNewTransactions(
+      state,
+      action: PayloadAction<SetNewTransactionsPayload>,
+    ) {
       state.newTransactions = action.payload.newTransactions
         ? [...state.newTransactions, ...action.payload.newTransactions]
         : state.newTransactions;
@@ -738,7 +738,10 @@ const queriesSlice = createSlice({
         ? [...state.updatedAccounts, ...action.payload.updatedAccounts]
         : state.updatedAccounts;
     },
-    updateNewTransactions(state, action: UpdateNewTransactionsAction) {
+    updateNewTransactions(
+      state,
+      action: PayloadAction<UpdateNewTransactionsPayload>,
+    ) {
       state.newTransactions = state.newTransactions.filter(
         id => id !== action.payload.id,
       );
@@ -746,10 +749,13 @@ const queriesSlice = createSlice({
         id => id !== action.payload.id,
       );
     },
-    setLastTransaction(state, action: SetLastTransactionAction) {
+    setLastTransaction(
+      state,
+      action: PayloadAction<SetLastTransactionPayload>,
+    ) {
       state.lastTransaction = action.payload.transaction;
     },
-    markAccountRead(state, action: MarkAccountReadAction) {
+    markAccountRead(state, action: PayloadAction<MarkAccountReadPayload>) {
       state.updatedAccounts = state.updatedAccounts.filter(
         id => id !== action.payload.accountId,
       );
