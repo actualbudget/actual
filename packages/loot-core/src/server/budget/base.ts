@@ -8,7 +8,6 @@ import { resolveName } from '../spreadsheet/util';
 import * as budgetActions from './actions';
 import * as envelopeBudget from './envelope';
 import * as report from './report';
-import { sumAmounts } from './util';
 
 export function getBudgetType() {
   const meta = sheet.get().meta();

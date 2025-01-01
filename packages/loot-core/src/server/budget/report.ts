@@ -83,11 +83,16 @@ export function createCategoryGroup(group, sheetName) {
 }
 
 export function createSummary(groups, categories, sheetName) {
-  const hiddenGroups = groups.filter(group => group.hidden).map(group => group.id);
+  const hiddenGroups = groups
+    .filter(group => group.hidden)
+    .map(group => group.id);
   groups = groups.filter(group => !group.hidden);
 
   const incomeGroup = groups.filter(group => group.is_income)[0];
-  const expenseCategories = categories.filter(cat => !cat.is_income && !cat.hidden && !hiddenGroups.includes(cat.cat_group));
+  const expenseCategories = categories.filter(
+    cat =>
+      !cat.is_income && !cat.hidden && !hiddenGroups.includes(cat.cat_group),
+  );
 
   sheet.get().createDynamic(sheetName, 'total-budgeted', {
     initialValue: 0,
