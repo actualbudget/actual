@@ -450,11 +450,14 @@ export class CategoryTemplate {
     let firstMonth = true;
 
     //update months if needed
+    const repeat = template.annual
+      ? (template.repeat || 1) * 12
+      : template.repeat;
     let m = monthUtils.differenceInCalendarMonths(toMonth, this.month);
-    if (template.annual && m < 0) {
+    if (repeat && m < 0) {
       while (m < 0) {
-        toMonth = monthUtils.addMonths(toMonth, 12);
-        fromMonth = monthUtils.addMonths(fromMonth, 12);
+        toMonth = monthUtils.addMonths(toMonth, repeat);
+        fromMonth = monthUtils.addMonths(fromMonth, repeat);
         m = monthUtils.differenceInCalendarMonths(toMonth, this.month);
       }
     }
