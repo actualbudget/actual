@@ -539,7 +539,8 @@ function RecurringScheduleTooltip({
               htmlFor="solve_dropdown"
               style={{ userSelect: 'none', marginLeft: 5 }}
             >
-              <Trans> {{ beforeOrAfter: '' }} weekend</Trans>
+              {' '}
+              {{ beforeOrAfter: '' } as any} weekend
             </label>
           </Trans>
         </View>

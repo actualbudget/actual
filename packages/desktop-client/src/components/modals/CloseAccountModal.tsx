@@ -121,10 +121,7 @@ export function CloseAccountModal({
             <Paragraph>
               <Trans>
                 Are you sure you want to close{' '}
-                <strong>
-                  <Trans>{{ accountName: account.name }}</Trans>
-                </strong>
-                ?{' '}
+                <strong>{{ accountName: account.name } as any}</strong>?{' '}
               </Trans>
               {canDelete ? (
                 <span>
@@ -154,7 +151,7 @@ export function CloseAccountModal({
                     <Trans>
                       This account has a balance of{' '}
                       <strong>
-                        <Trans>{{ balance: integerToCurrency(balance) }}</Trans>
+                        {{ balance: integerToCurrency(balance) } as any}
                       </strong>
                       . To close this account, select a different account to
                       transfer this balance to:
