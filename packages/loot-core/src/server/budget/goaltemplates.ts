@@ -150,7 +150,8 @@ async function processTemplate(
   const budgetList = [];
   const goalList = [];
   for (let i = 0; i < categories.length; i++) {
-    const id = categories[i].id;
+    const category = categories[i];
+    const { id } = category;
     const sheetName = monthUtils.sheetForMonth(month);
     const templates = categoryTemplates[id];
     const budgeted = await getSheetValue(sheetName, `budget-${id}`);
@@ -162,7 +163,7 @@ async function processTemplate(
       // gather needed priorities
       // gather remainder weights
       try {
-        const obj = await CategoryTemplate.init(templates, id, month);
+        const obj = await CategoryTemplate.init(templates, category, month);
         availBudget += budgeted;
         availBudget += obj.getLimitExcess();
         const p = obj.getPriorities();
@@ -230,9 +231,9 @@ async function processTemplate(
   // finish
   catObjects.forEach(o => {
     const ret = o.getValues();
-    budgetList.push({ category: o.categoryID, budgeted: ret.budgeted });
+    budgetList.push({ category: o.category.id, budgeted: ret.budgeted });
     goalList.push({
-      category: o.categoryID,
+      category: o.category.id,
       goal: ret.goal,
       longGoal: ret.longGoal ? 1 : null,
     });
