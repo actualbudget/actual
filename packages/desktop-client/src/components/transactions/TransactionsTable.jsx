@@ -806,6 +806,7 @@ function PayeeIcons({
       {schedule && (
         <Button
           variant="bare"
+          data-testid="schedule-icon"
           aria-label="See schedule details"
           style={payeeIconButtonStyle}
           onPress={() => {
@@ -822,6 +823,7 @@ function PayeeIcons({
       {transferAccount && (
         <Button
           variant="bare"
+          data-testid="transfer-icon"
           aria-label="See transfer account"
           style={payeeIconButtonStyle}
           onPress={() => {

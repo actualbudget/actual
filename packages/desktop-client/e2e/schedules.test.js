@@ -58,6 +58,10 @@ test.describe('Schedules', () => {
     await expect(transaction.debit).toHaveText('25.00');
     await expect(transaction.credit).toHaveText('');
 
+    const icon = transaction.payee.getByTestId('schedule-icon');
+    await icon.hover();
+    await expect(page).toMatchThemeScreenshots();
+
     // go to rules page
     const rulesPage = await navigation.goToRulesPage();
     await rulesPage.searchFor('Home Depot');
