@@ -54,8 +54,13 @@ export function LoggedInUser({
   const hasSyncedPrefs = useSelector((state: State) => state.prefs.synced);
 
   const initializeUserData = async () => {
-    await dispatch(getUserData());
-    setLoading(false);
+    try {
+      await dispatch(getUserData());
+    } catch (error) {
+      console.error('Failed to initialize user data:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
