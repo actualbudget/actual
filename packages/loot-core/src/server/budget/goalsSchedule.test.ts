@@ -22,7 +22,13 @@ describe('goalsSchedule', () => {
   it('should return correct budget when recurring schedule set', async () => {
     // Given
     const scheduleFlag = false;
-    const template_lines = [{ type: 'schedule', name: 'Test Schedule' }];
+    const template_lines = [
+      {
+        type: 'schedule',
+        name: 'Test Schedule',
+        directive: '#template schedule Test Schedule',
+      } as const,
+    ];
     const current_month = '2024-08-01';
     const balance = 0;
     const remainder = 0;
@@ -86,7 +92,13 @@ describe('goalsSchedule', () => {
   it('should return correct budget when yearly recurring schedule set and balance is greater than target', async () => {
     // Given
     const scheduleFlag = false;
-    const template_lines = [{ type: 'schedule', name: 'Test Schedule' }];
+    const template_lines = [
+      {
+        type: 'schedule',
+        name: 'Test Schedule',
+        directive: '#template schedule Test Schedule',
+      } as const,
+    ];
     const current_month = '2024-09-01';
     const balance = 12000;
     const remainder = 0;
