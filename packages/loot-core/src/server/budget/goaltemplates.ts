@@ -1,6 +1,7 @@
 // @ts-strict-ignore
 import { Notification } from '../../client/state-types/notifications';
 import * as monthUtils from '../../shared/months';
+import { CategoryEntity } from '../../types/models';
 import * as db from '../db';
 import { batchMessages } from '../sync';
 
@@ -46,7 +47,7 @@ export function runCheckTemplates() {
   return checkTemplates();
 }
 
-async function getCategories() {
+async function getCategories(): Promise<CategoryEntity[]> {
   return await db.all(
     `
     SELECT categories.* FROM categories
