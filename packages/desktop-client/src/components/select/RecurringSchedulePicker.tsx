@@ -12,7 +12,10 @@ import { sendCatch } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { getRecurringDescription } from 'loot-core/src/shared/schedules';
 import { type RecurConfig, type RecurPattern } from 'loot-core/types/models';
-import { type WithRequired } from 'loot-core/types/util';
+import {
+  type TransObjectLiteral,
+  type WithRequired,
+} from 'loot-core/types/util';
 
 import { useDateFormat } from '../../hooks/useDateFormat';
 import { SvgAdd, SvgSubtract } from '../../icons/v0';
@@ -540,7 +543,7 @@ function RecurringScheduleTooltip({
               style={{ userSelect: 'none', marginLeft: 5 }}
             >
               {' '}
-              {{ beforeOrAfter: '' } as any} weekend
+              {{ beforeOrAfter: '' } as TransObjectLiteral} weekend
             </label>
           </Trans>
         </View>

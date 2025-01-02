@@ -11,6 +11,7 @@ import {
 } from 'loot-core/client/actions';
 import { integerToCurrency } from 'loot-core/src/shared/util';
 import { type AccountEntity } from 'loot-core/src/types/models';
+import { type TransObjectLiteral } from 'loot-core/types/util';
 
 import { useAccounts } from '../../hooks/useAccounts';
 import { useCategories } from '../../hooks/useCategories';
@@ -121,7 +122,10 @@ export function CloseAccountModal({
             <Paragraph>
               <Trans>
                 Are you sure you want to close{' '}
-                <strong>{{ accountName: account.name } as any}</strong>?{' '}
+                <strong>
+                  {{ accountName: account.name } as TransObjectLiteral}
+                </strong>
+                ?{' '}
               </Trans>
               {canDelete ? (
                 <span>
@@ -151,7 +155,11 @@ export function CloseAccountModal({
                     <Trans>
                       This account has a balance of{' '}
                       <strong>
-                        {{ balance: integerToCurrency(balance) } as any}
+                        {
+                          {
+                            balance: integerToCurrency(balance),
+                          } as TransObjectLiteral
+                        }
                       </strong>
                       . To close this account, select a different account to
                       transfer this balance to:

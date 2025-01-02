@@ -1,6 +1,8 @@
 import React from 'react';
 import { Trans } from 'react-i18next';
 
+import { type TransObjectLiteral } from 'loot-core/types/util';
+
 import { theme } from '../../style/theme';
 import { Button } from '../common/Button2';
 import { Stack } from '../common/Stack';
@@ -25,7 +27,7 @@ export function SaveReportDelete({
           <Text style={{ color: theme.errorText, marginBottom: 5 }}>
             Are you sure you want to delete report:{' '}
           </Text>
-          <View>{{ name } as any}</View>
+          <View>{{ name } as TransObjectLiteral}</View>
         </Trans>
       </View>
 
