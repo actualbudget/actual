@@ -74,7 +74,7 @@ export function OpenIdForm({
             addNotification({
               type: 'error',
               id: 'error',
-              title: t('Error getting openid config'),
+              title: t('Error getting OpenID config'),
               sticky: true,
               message: config.error,
             });

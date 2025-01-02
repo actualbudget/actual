@@ -454,12 +454,12 @@ export function PayeeAutocomplete({
                     setFocusTransferPayees(!focusTransferPayees);
                   }}
                 >
-                  <Trans>Make Transfer</Trans>
+                  <Trans>Make transfer</Trans>
                 </Button>
               )}
               {showManagePayees && (
                 <Button type="menu" onClick={() => onManagePayees()}>
-                  <Trans>Manage Payees</Trans>
+                  <Trans>Manage payees</Trans>
                 </Button>
               )}
             </AutocompleteFooter>

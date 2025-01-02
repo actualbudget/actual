@@ -38,7 +38,7 @@ export function PasswordEnableModal({
   const refreshLoginMethods = useRefreshLoginMethods();
 
   const errorMessages = {
-    'invalid-password': t('Invalid Password'),
+    'invalid-password': t('Invalid password'),
     'password-match': t('Passwords do not match'),
     'network-failure': t('Unable to contact the server'),
     'unable-to-change-file-config-enabled': t(
@@ -48,8 +48,7 @@ export function PasswordEnableModal({
 
   function getErrorMessage(error: string): string {
     return (
-      errorMessages[error as keyof typeof errorMessages] ||
-      t('Internal server error')
+      errorMessages[error as keyof typeof errorMessages] || t('Internal error')
     );
   }
 

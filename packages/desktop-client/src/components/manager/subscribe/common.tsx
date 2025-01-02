@@ -18,7 +18,7 @@ import {
 // and make sure the user is looking at the right page. For example,
 // it doesn't make sense to show the login page if the server doesn't
 // have any accounts yet. It also doesn't make sense to show the
-// bootstrap page if the server already has been setup with a
+// bootstrap page if the server already has been set up with a
 // password. Both pages will redirect to the other depending on state;
 // they will also potentially redirect to other pages which do *not*
 // do any checks.

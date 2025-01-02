@@ -163,15 +163,15 @@ function UserAccessContent({
         >
           <Text>
             <Trans>
-              Determine which users can view and manage your budgets..{' '}
-              <Link
-                variant="external"
-                to="https://actualbudget.org/docs/budgeting/users-access/"
-                linkColor="muted"
-              >
-                Learn more
-              </Link>
-            </Trans>
+              Determine which users can view and manage your budgets
+            </Trans>{' '}
+            <Link
+              variant="external"
+              to="https://actualbudget.org/docs/budgeting/users-access/"
+              linkColor="muted"
+            >
+              <Trans>Learn more</Trans>
+            </Link>
           </Text>
         </View>
         <View style={{ flex: 1 }} />

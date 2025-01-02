@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Trans } from 'react-i18next';
+import { useTranslation, Trans } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 
 import { type SyncedPrefs } from 'loot-core/types/prefs';
@@ -14,20 +14,30 @@ import { View } from '../common/View';
 
 import { Setting } from './UI';
 
-const options: {
-  value: SyncedPrefs['upcomingScheduledTransactionLength'];
-  label: string;
-}[] = [
-  { value: '1', label: '1 Day' },
-  { value: '7', label: '1 Week' },
-  { value: '14', label: '2 Weeks' },
-  { value: '30', label: '1 Month' },
-];
+function useUpcomingLengthOptions() {
+  const { t } = useTranslation();
+
+  const upcomingLengthOptions: {
+    value: SyncedPrefs['upcomingScheduledTransactionLength'];
+    label: string;
+  }[] = [
+    { value: '1', label: t('1 day') },
+    { value: '7', label: t('1 week') },
+    { value: '14', label: t('2 weeks') },
+    { value: '30', label: t('1 month') },
+  ];
+
+  return { upcomingLengthOptions };
+}
 
 export function UpcomingLengthSettings() {
+  const { t } = useTranslation();
   const [_upcomingLength, setUpcomingLength] = useSyncedPref(
     'upcomingScheduledTransactionLength',
   );
+
+  const { upcomingLengthOptions } = useUpcomingLengthOptions();
+
   const upcomingLength = _upcomingLength || '7';
 
   const enabled = useFeatureFlag('upcomingLengthAdjustment');
@@ -42,28 +52,37 @@ export function UpcomingLengthSettings() {
       primaryAction={
         <View style={{ flexDirection: 'row', gap: '1em' }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 20 }}>
-            <View title="Upcoming Length">
+            <View title={t('Upcoming Length')}>
               <Select
-                options={options.map(x => [x.value || '7', x.label])}
+                options={upcomingLengthOptions.map(x => [
+                  x.value || '7',
+                  x.label,
+                ])}
                 value={upcomingLength}
                 onChange={newValue => setUpcomingLength(newValue)}
               />
             </View>
-            <InfoBubble label="Only the first instance of a recurring transaction will be shown." />
+            <InfoBubble
+              label={t(
+                'Only the first instance of a recurring transaction will be shown.',
+              )}
+            />
           </View>
         </View>
       }
     >
       <View style={{ flexDirection: 'row', gap: 20 }}>
         <Text>
-          <strong>Upcoming Length</strong> does not affect how budget data is
-          stored, and can be changed at any time.
+          <Trans>
+            <strong>Upcoming Length</strong> does not affect how budget data is
+            stored, and can be changed at any time.
+          </Trans>
         </Text>
         <Button
           onPress={() => setExpanded(false)}
           aria-label="Close upcoming length settings"
         >
-          Close
+          <Trans>Close</Trans>
         </Button>
       </View>
     </Setting>
@@ -74,10 +93,10 @@ export function UpcomingLengthSettings() {
         variant="primary"
         onPress={() => setExpanded(true)}
       >
-        <Trans>
-          Edit Upcoming Length (
-          {options.find(x => x.value === upcomingLength)?.label ?? '1 Week'})
-        </Trans>
+        <Trans>Edit Upcoming Length</Trans> (
+        {upcomingLengthOptions.find(x => x.value === upcomingLength)?.label ??
+          t('1 week')}
+        )
       </Button>
     </View>
   );

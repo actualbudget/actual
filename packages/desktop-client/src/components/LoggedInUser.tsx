@@ -6,6 +6,7 @@ import { useLocation } from 'react-router-dom';
 import { closeBudget, getUserData, signOut } from 'loot-core/client/actions';
 import { type State } from 'loot-core/src/client/state-types';
 import { type RemoteFile, type SyncedLocalFile } from 'loot-core/types/file';
+import { type TransObjectLiteral } from 'loot-core/types/util';
 
 import { useAuth } from '../auth/AuthProvider';
 import { Permissions } from '../auth/types';
@@ -205,9 +206,14 @@ export function LoggedInUser({
         userData?.displayName &&
         !hasSyncedPrefs && (
           <small>
+            (
             <Trans>
-              (logged in as: <span>{userData?.displayName}</span>)
+              logged in as:{' '}
+              <span>
+                {{ userName: userData?.displayName } as TransObjectLiteral}
+              </span>
             </Trans>
+            )
           </small>
         )}
       {!loading &&
@@ -216,13 +222,16 @@ export function LoggedInUser({
         userData?.displayName &&
         hasSyncedPrefs && (
           <small>
+            (
             <Trans>
-              (logged in as:{' '}
+              logged in as:{' '}
               <span>
-                <PrivacyFilter>{userData?.displayName}</PrivacyFilter>
+                <PrivacyFilter>
+                  {{ userName: userData?.displayName } as TransObjectLiteral}
+                </PrivacyFilter>
               </span>
-              )
             </Trans>
+            )
           </small>
         )}
 

@@ -1,7 +1,7 @@
 // @ts-strict-ignore
 import React, { useState } from 'react';
 import { Form } from 'react-aria-components';
-import { useTranslation } from 'react-i18next';
+import { useTranslation, Trans } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 
 import { css } from '@emotion/css';
@@ -87,11 +87,13 @@ export function CreateEncryptionKeyModal({
             {!isRecreating ? (
               <>
                 <Paragraph style={{ marginTop: 5 }}>
-                  To enable end-to-end encryption, you need to create a key. We
-                  will generate a key based on a password and use it to encrypt
-                  from now on. <strong>This requires a sync reset</strong> and
-                  all other devices will have to revert to this version of your
-                  data.{' '}
+                  <Trans>
+                    To enable end-to-end encryption, you need to create a key.
+                    We will generate a key based on a password and use it to
+                    encrypt from now on.{' '}
+                    <strong>This requires a sync reset</strong> and all other
+                    devices will have to revert to this version of your data.{' '}
+                  </Trans>
                   <Link
                     variant="external"
                     to="https://actualbudget.org/docs/getting-started/sync/#end-to-end-encryption"
@@ -108,25 +110,32 @@ export function CreateEncryptionKeyModal({
                     })}
                   >
                     <li>
-                      <strong>Important:</strong> if you forget this password{' '}
-                      <em>and</em> you don’t have any local copies of your data,
-                      you will lose access to all your data. The data cannot be
-                      decrypted without the password.
+                      <Trans>
+                        <strong>Important:</strong> if you forget this password{' '}
+                        <em>and</em> you don’t have any local copies of your
+                        data, you will lose access to all your data. The data
+                        cannot be decrypted without the password.
+                      </Trans>
                     </li>
                     <li>
-                      {t(
-                        'This key only applies to this file. You will need to generate a new key for each file you want to encrypt.',
-                      )}
+                      <Trans>
+                        This key only applies to this file. You will need to
+                        generate a new key for each file you want to encrypt.
+                      </Trans>
                     </li>
                     <li>
-                      {t(
-                        'If you’ve already downloaded your data on other devices, you will need to reset them. Actual will automatically take you through this process.',
-                      )}
+                      <Trans>
+                        If you’ve already downloaded your data on other devices,
+                        you will need to reset them. Actual will automatically
+                        take you through this process.
+                      </Trans>
                     </li>
                     <li>
-                      {t(
-                        'It is recommended for the encryption password to be different than the log-in password in order to better protect your data.',
-                      )}
+                      <Trans>
+                        It is recommended for the encryption password to be
+                        different than the log-in password in order to better
+                        protect your data.
+                      </Trans>
                     </li>
                   </ul>
                 </Paragraph>
@@ -134,23 +143,26 @@ export function CreateEncryptionKeyModal({
             ) : (
               <>
                 <Paragraph style={{ marginTop: 5 }}>
-                  {t('This will generate a new key for encrypting your data.')}{' '}
-                  <strong>{t('This requires a sync reset')}</strong>
-                  {t(
-                    ' and all other devices will have to revert to this version of your data. Actual will take you through that process on those devices.',
-                  )}{' '}
+                  <Trans>
+                    This will generate a new key for encrypting your data.{' '}
+                    <strong>This requires a sync reset</strong> and all other
+                    devices will have to revert to this version of your data.
+                    Actual will take you through that process on those devices.
+                  </Trans>{' '}
                   <Link
                     variant="external"
                     to="https://actualbudget.org/docs/getting-started/sync/#end-to-end-encryption"
                     linkColor="purple"
                   >
-                    {t('Learn more')}
+                    <Trans>Learn more</Trans>
                   </Link>
                 </Paragraph>
                 <Paragraph>
-                  {t(
-                    'Key generation is randomized. The same password will create different keys, so this will change your key regardless of the password being different.',
-                  )}
+                  <Trans>
+                    Key generation is randomized. The same password will create
+                    different keys, so this will change your key regardless of
+                    the password being different.
+                  </Trans>
                 </Paragraph>
               </>
             )}
@@ -163,7 +175,7 @@ export function CreateEncryptionKeyModal({
           >
             <View style={{ alignItems: 'center' }}>
               <Text style={{ fontWeight: 600, marginBottom: 3 }}>
-                {t('Password')}
+                <Trans>Password</Trans>
               </Text>
 
               {error && (
@@ -195,7 +207,7 @@ export function CreateEncryptionKeyModal({
                     type="checkbox"
                     onClick={() => setShowPassword(!showPassword)}
                   />{' '}
-                  {t('Show password')}
+                  <Trans>Show password</Trans>
                 </label>
               </Text>
             </View>
@@ -209,7 +221,7 @@ export function CreateEncryptionKeyModal({
                 isLoading={loading}
                 variant="primary"
               >
-                {t('Enable')}
+                <Trans>Enable</Trans>
               </ButtonWithLoading>
             </ModalButtons>
           </Form>

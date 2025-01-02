@@ -29,7 +29,7 @@ export function ChangePassword() {
       case 'network-failure':
         return 'Unable to contact the server';
       default:
-        return 'Internal server error';
+        return 'Internal error';
     }
   }
 
