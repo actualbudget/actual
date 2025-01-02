@@ -414,7 +414,9 @@ function RecurringScheduleTooltip({
   return (
     <>
       <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-        <label htmlFor="start">{t('From')}</label>
+        <label htmlFor="start">
+          <Trans>From</Trans>
+        </label>
         <InitialFocus>
           <DateSelect
             id="start"
@@ -552,13 +554,15 @@ function RecurringScheduleTooltip({
       <div
         style={{ display: 'flex', marginTop: 15, justifyContent: 'flex-end' }}
       >
-        <Button onPress={onClose}>{t('Cancel')}</Button>
+        <Button onPress={onClose}>
+          <Trans>Cancel</Trans>
+        </Button>
         <Button
           variant="primary"
           onPress={() => onSave(unparseConfig(config))}
           style={{ marginLeft: 10 }}
         >
-          {t('Apply')}
+          <Trans>Apply</Trans>
         </Button>
       </div>
     </>
