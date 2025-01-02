@@ -76,8 +76,9 @@ export function LoggedInUser({
       }
 
       const shouldReinitialize =
-        (type === 'success' && userData?.offline) ||
-        (type === 'error' && !userData?.offline);
+        userData &&
+        ((type === 'success' && userData.offline) ||
+          (type === 'error' && !userData.offline));
 
       if (shouldReinitialize) {
         initializeUserData();
