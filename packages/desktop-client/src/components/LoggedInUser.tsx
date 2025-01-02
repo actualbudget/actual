@@ -80,7 +80,7 @@ export function LoggedInUser({
         setLoading(false);
       }
     });
-  }, [userData?.offline]);
+  }, [userData]);
 
   async function onCloseBudget() {
     await dispatch(closeBudget());
