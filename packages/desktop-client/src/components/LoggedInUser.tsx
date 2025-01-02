@@ -5,6 +5,7 @@ import { useLocation } from 'react-router-dom';
 
 import { closeBudget, getUserData, signOut } from 'loot-core/client/actions';
 import { type State } from 'loot-core/src/client/state-types';
+import { listen } from 'loot-core/src/platform/client/fetch';
 import { type RemoteFile, type SyncedLocalFile } from 'loot-core/types/file';
 
 import { useAuth } from '../auth/AuthProvider';
@@ -52,13 +53,34 @@ export function LoggedInUser({
   const currentFile = remoteFiles.find(f => f.cloudFileId === cloudFileId);
   const hasSyncedPrefs = useSelector((state: State) => state.prefs.synced);
 
-  useEffect(() => {
-    async function init() {
-      await dispatch(getUserData());
-    }
+  const initializeUserData = async () => {
+    await dispatch(getUserData());
+    setLoading(false);
+  };
 
-    init().then(() => setLoading(false));
+  useEffect(() => {
+    initializeUserData();
   }, []);
+
+  useEffect(() => {
+    return listen('sync-event', ({ type }) => {
+      if (type === 'start') {
+        setLoading(true);
+
+        return;
+      }
+
+      const shouldReinitialize =
+        (type === 'success' && userData.offline) ||
+        (type === 'error' && !userData.offline);
+
+      if (shouldReinitialize) {
+        initializeUserData();
+      } else {
+        setLoading(false);
+      }
+    });
+  }, [userData.offline]);
 
   async function onCloseBudget() {
     await dispatch(closeBudget());
