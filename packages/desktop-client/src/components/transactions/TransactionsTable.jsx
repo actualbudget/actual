@@ -699,40 +699,42 @@ function PayeeCell({
         );
 
         return (
-          <div
-            style={{
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              display: 'flex',
-              alignItems: 'center',
-            }}
-          >
+          <>
             <PayeeIcons
               transaction={transaction}
               transferAccount={transferAccount}
               onNavigateToTransferAccount={onNavigateToTransferAccount}
               onNavigateToSchedule={onNavigateToSchedule}
             />
-            {importedPayee ? (
-              <Tooltip
-                content={
-                  <View style={{ padding: 10 }}>
-                    <Text style={{ fontWeight: 'bold' }}>Imported Payee</Text>
-                    <Text style={{ fontWeight: 'normal' }}>
-                      {importedPayee}
-                    </Text>
-                  </View>
-                }
-                style={{ ...styles.tooltip, borderRadius: '0px 5px 5px 0px' }}
-                placement="bottom"
-                triggerProps={{ delay: 750 }}
-              >
-                {payeeName}
-              </Tooltip>
-            ) : (
-              payeeName
-            )}
-          </div>
+            <div
+              style={{
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                display: 'flex',
+                alignItems: 'center',
+              }}
+            >
+              {importedPayee ? (
+                <Tooltip
+                  content={
+                    <View style={{ padding: 10 }}>
+                      <Text style={{ fontWeight: 'bold' }}>Imported Payee</Text>
+                      <Text style={{ fontWeight: 'normal' }}>
+                        {importedPayee}
+                      </Text>
+                    </View>
+                  }
+                  style={{ ...styles.tooltip, borderRadius: '0px 5px 5px 0px' }}
+                  placement="bottom"
+                  triggerProps={{ delay: 750 }}
+                >
+                  {payeeName}
+                </Tooltip>
+              ) : (
+                payeeName
+              )}
+            </div>
+          </>
         );
       }}
     >
