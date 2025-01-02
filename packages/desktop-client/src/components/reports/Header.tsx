@@ -6,6 +6,7 @@ import {
   type RuleConditionEntity,
   type TimeFrame,
 } from 'loot-core/types/models';
+import { type SyncedPrefs } from 'loot-core/types/prefs';
 
 import { Button } from '../common/Button2';
 import { Select } from '../common/Select';
@@ -15,6 +16,7 @@ import { AppliedFilters } from '../filters/AppliedFilters';
 import { FilterButton } from '../filters/FiltersMenu';
 import { useResponsive } from '../responsive/ResponsiveProvider';
 
+import { getLiveRange } from './getLiveRange';
 import {
   calculateTimeRange,
   getFullRange,
@@ -29,6 +31,8 @@ type HeaderProps = {
   mode?: TimeFrame['mode'];
   show1Month?: boolean;
   allMonths: Array<{ name: string; pretty: string }>;
+  earliestTransaction: string;
+  firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'];
   onChangeDates: (
     start: TimeFrame['start'],
     end: TimeFrame['end'],
@@ -51,6 +55,8 @@ export function Header({
   mode,
   show1Month,
   allMonths,
+  earliestTransaction,
+  firstDayOfWeekIdx,
   onChangeDates,
   filters,
   conditionsOp,
@@ -62,6 +68,14 @@ export function Header({
 }: HeaderProps) {
   const { t } = useTranslation();
   const { isNarrowWidth } = useResponsive();
+
+  function convertToMonth(
+    start: string,
+    end: string,
+    mode: TimeFrame['mode'],
+  ): [string, string, TimeFrame['mode']] {
+    return [monthUtils.getMonth(start), monthUtils.getMonth(end), mode];
+  }
 
   return (
     <View
@@ -155,6 +169,40 @@ export function Header({
             onPress={() => onChangeDates(...getLatestRange(11))}
           >
             {t('1 Year')}
+          </Button>
+          <Button
+            variant="bare"
+            onPress={() =>
+              onChangeDates(
+                ...convertToMonth(
+                  ...getLiveRange(
+                    'Year to date',
+                    earliestTransaction,
+                    true,
+                    firstDayOfWeekIdx,
+                  ),
+                ),
+              )
+            }
+          >
+            {t('Year to date')}
+          </Button>
+          <Button
+            variant="bare"
+            onPress={() =>
+              onChangeDates(
+                ...convertToMonth(
+                  ...getLiveRange(
+                    'Last year',
+                    earliestTransaction,
+                    true,
+                    firstDayOfWeekIdx,
+                  ),
+                ),
+              )
+            }
+          >
+            {t('Last year')}
           </Button>
           <Button
             variant="bare"
