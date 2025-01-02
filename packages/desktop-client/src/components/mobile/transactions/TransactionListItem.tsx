@@ -4,7 +4,6 @@ import React, {
 } from 'react';
 import { mergeProps } from 'react-aria';
 import { ListBoxItem } from 'react-aria-components';
-import { useSelector } from 'react-redux';
 
 import {
   PressResponder,
@@ -25,6 +24,7 @@ import {
   SvgCheckCircle1,
   SvgLockClosed,
 } from '../../../icons/v2';
+import { useSelector } from '../../../redux';
 import { styles, theme } from '../../../style';
 import { makeAmountFullStyle } from '../../budget/util';
 import { Button } from '../../common/Button2';

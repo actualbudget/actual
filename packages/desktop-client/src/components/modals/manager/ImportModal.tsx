@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
 
 import { pushModal } from 'loot-core/client/actions';
 
+import { useDispatch } from '../../../redux';
 import { styles, theme } from '../../../style';
 import { Block } from '../../common/Block';
 import { Button } from '../../common/Button2';

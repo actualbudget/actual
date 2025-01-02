@@ -9,7 +9,6 @@ import {
 } from 'react-error-boundary';
 import { HotkeysProvider } from 'react-hotkeys-hook';
 import { useTranslation } from 'react-i18next';
-import { useDispatch, useSelector } from 'react-redux';
 import { BrowserRouter } from 'react-router-dom';
 
 import {
@@ -20,7 +19,6 @@ import {
   sync,
 } from 'loot-core/client/actions';
 import { SpreadsheetProvider } from 'loot-core/client/SpreadsheetProvider';
-import { type State } from 'loot-core/client/state-types';
 import * as Platform from 'loot-core/src/client/platform';
 import {
   init as initConnection,
@@ -30,6 +28,7 @@ import {
 import { useActions } from '../hooks/useActions';
 import { useMetadataPref } from '../hooks/useMetadataPref';
 import { installPolyfills } from '../polyfills';
+import { useDispatch, useSelector } from '../redux';
 import { styles, hasHiddenScrollbars, ThemeStyle, useTheme } from '../style';
 import { ExposeNavigate } from '../util/router-tools';
 
@@ -51,7 +50,7 @@ function AppInner() {
   const { t } = useTranslation();
   const { showBoundary: showErrorBoundary } = useErrorBoundary();
   const dispatch = useDispatch();
-  const userData = useSelector((state: State) => state.user.data);
+  const userData = useSelector(state => state.user.data);
   const { signOut, addNotification } = useActions();
 
   const maybeUpdate = async <T,>(cb?: () => T): Promise<T> => {

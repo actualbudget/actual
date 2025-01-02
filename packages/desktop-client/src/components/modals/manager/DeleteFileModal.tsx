@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
 
 import { deleteBudget } from 'loot-core/client/actions';
 import { type File } from 'loot-core/src/types/file';
 
+import { useDispatch } from '../../../redux';
 import { theme } from '../../../style';
 import { ButtonWithLoading } from '../../common/Button2';
 import { Modal, ModalCloseButton, ModalHeader } from '../../common/Modal';

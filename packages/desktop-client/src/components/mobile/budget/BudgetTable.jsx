@@ -1,6 +1,5 @@
 import React, { memo, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
 
 import { css } from '@emotion/css';
 import { AutoTextSize } from 'auto-text-size';
@@ -31,6 +30,7 @@ import {
   SvgCheveronRight,
 } from '../../../icons/v1';
 import { SvgViewShow } from '../../../icons/v2';
+import { useDispatch } from '../../../redux';
 import { theme, styles } from '../../../style';
 import { BalanceWithCarryover } from '../../budget/BalanceWithCarryover';
 import { makeAmountGrey, makeBalanceAmountStyle } from '../../budget/util';

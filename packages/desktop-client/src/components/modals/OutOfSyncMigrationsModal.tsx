@@ -1,9 +1,9 @@
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
 
 import { closeBudget } from 'loot-core/client/actions';
 
+import { useDispatch } from '../../redux';
 import { Button } from '../common/Button2';
 import { Link } from '../common/Link';
 import { Modal, ModalHeader, ModalTitle } from '../common/Modal';

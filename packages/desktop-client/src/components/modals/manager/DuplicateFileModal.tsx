@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
 
 import {
   addNotification,
@@ -10,6 +9,7 @@ import {
 } from 'loot-core/client/actions';
 import { type File } from 'loot-core/src/types/file';
 
+import { useDispatch } from '../../../redux';
 import { theme } from '../../../style';
 import { Button, ButtonWithLoading } from '../../common/Button2';
 import { FormError } from '../../common/FormError';

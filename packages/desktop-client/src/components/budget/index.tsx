@@ -1,7 +1,6 @@
 // @ts-strict-ignore
 import React, { memo, useMemo, useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
 
 import {
   addNotification,
@@ -26,6 +25,7 @@ import { useGlobalPref } from '../../hooks/useGlobalPref';
 import { useLocalPref } from '../../hooks/useLocalPref';
 import { useNavigate } from '../../hooks/useNavigate';
 import { useSyncedPref } from '../../hooks/useSyncedPref';
+import { useDispatch } from '../../redux';
 import { styles } from '../../style';
 import { View } from '../common/View';
 import { NamespaceContext } from '../spreadsheet/NamespaceContext';

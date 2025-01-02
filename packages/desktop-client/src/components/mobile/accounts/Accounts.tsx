@@ -1,9 +1,9 @@
 import React, { type CSSProperties, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useDispatch, useSelector } from 'react-redux';
 
 import { replaceModal, syncAndDownload } from 'loot-core/src/client/actions';
 import * as queries from 'loot-core/src/client/queries';
+import { type RootState } from 'loot-core/src/client/store';
 import { type AccountEntity } from 'loot-core/types/models';
 
 import { useAccounts } from '../../../hooks/useAccounts';
@@ -11,6 +11,7 @@ import { useFailedAccounts } from '../../../hooks/useFailedAccounts';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { SvgAdd } from '../../../icons/v1';
+import { useSelector, useDispatch } from '../../../redux';
 import { theme, styles } from '../../../style';
 import { makeAmountFullStyle } from '../../budget/util';
 import { Button } from '../../common/Button2';
@@ -270,7 +271,9 @@ function AccountList({
 export function Accounts() {
   const dispatch = useDispatch();
   const accounts = useAccounts();
-  const updatedAccounts = useSelector(state => state.queries.updatedAccounts);
+  const updatedAccounts = useSelector(
+    (state: RootState) => state.queries.updatedAccounts,
+  );
   const [_numberFormat] = useSyncedPref('numberFormat');
   const numberFormat = _numberFormat || 'comma-dot';
   const [hideFraction] = useSyncedPref('hideFraction');

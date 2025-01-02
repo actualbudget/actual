@@ -1,9 +1,9 @@
 import { useCallback } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 
 import { popModal } from 'loot-core/client/actions';
-import { type State } from 'loot-core/client/state-types';
 import { type Modal } from 'loot-core/client/state-types/modals';
+
+import { useSelector, useDispatch } from '../redux';
 
 type ModalState = {
   onClose: () => void;
@@ -14,8 +14,8 @@ type ModalState = {
 };
 
 export function useModalState(): ModalState {
-  const modalStack = useSelector((state: State) => state.modals.modalStack);
-  const isHidden = useSelector((state: State) => state.modals.isHidden);
+  const modalStack = useSelector(state => state.modals.modalStack);
+  const isHidden = useSelector(state => state.modals.isHidden);
   const dispatch = useDispatch();
 
   const popModalCallback = useCallback(() => {

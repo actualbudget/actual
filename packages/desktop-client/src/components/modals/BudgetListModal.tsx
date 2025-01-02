@@ -1,8 +1,8 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
 
 import { useMetadataPref } from '../../hooks/useMetadataPref';
+import { useSelector } from '../../redux';
 import { Modal, ModalHeader, ModalCloseButton } from '../common/Modal';
 import { Text } from '../common/Text';
 import { View } from '../common/View';

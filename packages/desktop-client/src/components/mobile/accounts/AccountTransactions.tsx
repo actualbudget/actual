@@ -5,7 +5,6 @@ import React, {
   useMemo,
   useState,
 } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 
 import {
   collapseModals,
@@ -38,6 +37,7 @@ import { useAccountPreviewTransactions } from '../../../hooks/useAccountPreviewT
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import { useFailedAccounts } from '../../../hooks/useFailedAccounts';
 import { useNavigate } from '../../../hooks/useNavigate';
+import { useSelector, useDispatch } from '../../../redux';
 import { styles, theme } from '../../../style';
 import { Button } from '../../common/Button2';
 import { Text } from '../../common/Text';

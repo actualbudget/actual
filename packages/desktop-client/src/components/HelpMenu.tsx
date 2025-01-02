@@ -1,7 +1,6 @@
 import { forwardRef, useRef } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { Trans, useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 
 import { useToggle } from 'usehooks-ts';
@@ -11,6 +10,7 @@ import { pushModal } from 'loot-core/client/actions/modals';
 
 import { useFeatureFlag } from '../hooks/useFeatureFlag';
 import { SvgHelp } from '../icons/v2/Help';
+import { useDispatch } from '../redux';
 
 import { Button } from './common/Button2';
 import { Menu } from './common/Menu';

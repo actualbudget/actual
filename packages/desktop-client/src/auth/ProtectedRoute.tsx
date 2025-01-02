@@ -1,10 +1,10 @@
 import { useEffect, useState, type ReactElement } from 'react';
-import { useSelector } from 'react-redux';
 
 import { type RemoteFile, type SyncedLocalFile } from 'loot-core/types/file';
 
 import { View } from '../components/common/View';
 import { useMetadataPref } from '../hooks/useMetadataPref';
+import { useSelector } from '../redux';
 
 import { useAuth } from './AuthProvider';
 import { type Permissions } from './types';

@@ -12,7 +12,6 @@ import React, {
 } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
 
 import { css } from '@emotion/css';
 import {
@@ -60,6 +59,7 @@ import {
   SvgCalendar,
   SvgHyperlink2,
 } from '../../icons/v2';
+import { useDispatch } from '../../redux';
 import { styles, theme } from '../../style';
 import { AccountAutocomplete } from '../autocomplete/AccountAutocomplete';
 import { CategoryAutocomplete } from '../autocomplete/CategoryAutocomplete';

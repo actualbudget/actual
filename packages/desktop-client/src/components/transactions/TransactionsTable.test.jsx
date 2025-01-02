@@ -12,7 +12,6 @@ import {
   generateAccount,
   generateCategoryGroups,
 } from 'loot-core/src/mocks';
-import { TestProvider } from 'loot-core/src/mocks/redux';
 import { initServer } from 'loot-core/src/platform/client/fetch';
 import {
   addSplitTransaction,
@@ -25,6 +24,7 @@ import { integerToCurrency } from 'loot-core/src/shared/util';
 import { AuthProvider } from '../../auth/AuthProvider';
 import { SelectedProviderWithItems } from '../../hooks/useSelected';
 import { SplitsExpandedProvider } from '../../hooks/useSplitsExpanded';
+import { TestProvider } from '../../redux/mock';
 import { ResponsiveProvider } from '../responsive/ResponsiveProvider';
 
 import { TransactionTable } from './TransactionsTable';

@@ -1,5 +1,3 @@
-import { useDispatch } from 'react-redux';
-
 import { pushModal } from 'loot-core/client/actions';
 import { runQuery } from 'loot-core/client/query-helpers';
 import { send } from 'loot-core/platform/client/fetch';
@@ -18,6 +16,8 @@ import {
   type ScheduleEntity,
   type TransactionEntity,
 } from 'loot-core/types/models';
+
+import { useDispatch } from '../redux';
 
 type BatchEditProps = {
   name: keyof TransactionEntity;

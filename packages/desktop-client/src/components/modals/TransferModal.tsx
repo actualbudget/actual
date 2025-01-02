@@ -1,11 +1,11 @@
 import React, { useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
 
 import { pushModal } from 'loot-core/client/actions';
 import { type CategoryEntity } from 'loot-core/types/models';
 
 import { useCategories } from '../../hooks/useCategories';
+import { useDispatch } from '../../redux';
 import { styles } from '../../style';
 import {
   addToBeBudgetedGroup,

@@ -1,10 +1,10 @@
 import React from 'react';
-import { useSelector } from 'react-redux';
 import { useTransition, animated } from 'react-spring';
 
 import { css } from '@emotion/css';
 
 import { AnimatedLoading } from '../icons/AnimatedLoading';
+import { useSelector } from '../redux';
 import { theme } from '../style';
 
 import { Background } from './Background';
