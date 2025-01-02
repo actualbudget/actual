@@ -79,9 +79,13 @@ export async function batchUpdateTransactions({
       addedIds = await Promise.all(
         added.map(async t => {
           const account = accounts.find(acct => acct.id === t.account);
+
+          if (!account) console.log(t);
+
           if (account.offbudget === 1) {
             t.category = null;
           }
+
           return db.insertTransaction(t);
         }),
       );
