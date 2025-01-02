@@ -69,6 +69,9 @@ type FinanceModals = {
   'simplefin-init': {
     onSuccess: () => void;
   };
+  'pluggyai-init': {
+    onSuccess: () => void;
+  };
 
   'gocardless-external-msg': {
     onMoveExternal: (arg: {
