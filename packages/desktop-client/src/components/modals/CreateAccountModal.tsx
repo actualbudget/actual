@@ -9,6 +9,7 @@ import { send } from 'loot-core/src/platform/client/fetch';
 import { useAuth } from '../../auth/AuthProvider';
 import { Permissions } from '../../auth/types';
 import { authorizeBank } from '../../gocardless';
+import { useActions } from '../../hooks/useActions';
 import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { useGoCardlessStatus } from '../../hooks/useGoCardlessStatus';
 import { usePluggyAiStatus } from '../../hooks/usePluggyAiStatus';
@@ -50,6 +51,7 @@ export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
   >(null);
   const { hasPermission } = useAuth();
   const multiuserEnabled = useMultiuserEnabled();
+  const actions = useActions();
 
   const onConnectGoCardless = () => {
     if (!isGoCardlessSetupComplete) {
@@ -136,6 +138,8 @@ export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
       const results = await send('pluggyai-accounts');
       if (results.error_code) {
         throw new Error(results.reason);
+      } else if ('error' in results) {
+        throw new Error(results.error);
       }
 
       const newAccounts = [];
@@ -174,6 +178,12 @@ export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
       );
     } catch (err) {
       console.error(err);
+      actions.addNotification({
+        type: 'error',
+        title: 'Error when trying to contact Pluggy.ai',
+        message: (err as Error).message,
+        timeout: 5000,
+      });
       dispatch(
         pushModal('pluggyai-init', {
           onSuccess: () => setIsSimpleFinSetupComplete(true),

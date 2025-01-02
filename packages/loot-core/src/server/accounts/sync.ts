@@ -269,6 +269,8 @@ async function downloadPluggyAiTransactions(
 
   if (res.error_code) {
     throw BankSyncError(res.error_type, res.error_code);
+  } else if ('error' in res) {
+    throw BankSyncError('Connection', res.error);
   }
 
   let retVal = {};

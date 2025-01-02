@@ -204,7 +204,9 @@ export interface ServerHandlers {
 
   'simplefin-accounts': () => Promise<{ accounts: SimpleFinAccount[] }>;
 
-  'pluggyai-accounts': () => Promise<{ accounts: PluggyAiAccount[] }>;
+  'pluggyai-accounts': () => Promise<
+    { accounts: PluggyAiAccount[] } | { error: string }
+  >;
 
   'simplefin-batch-sync': ({ ids }: { ids: string[] }) => Promise<
     {
