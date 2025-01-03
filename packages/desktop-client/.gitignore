@@ -26,5 +26,5 @@ public/data
 public/data-file-index.txt
 public/*.wasm
 
-# translations
-locale/
+# translation backups
+locale/en_old.json
