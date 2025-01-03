@@ -49,6 +49,7 @@ SVGR
 swc
 SWEDBANK
 Synology
+systemctl
 tada
 templating
 ubuntu

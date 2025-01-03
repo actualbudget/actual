@@ -40,6 +40,47 @@ yarn start
 ```
 Note that if you restart your computer, you’ll have to run this command again to start the server.
 
+### Linux systemd Setup
+On Linux systems you can configure a systemd unit file to have Actual run on system startup. This needs to be done as the root user (open a root terminal session or preface each command with sudo to run the commands below)
+1. Create the file /etc/systemd/service/actual-server.service with the contents below using your text editor of choice (ex. ``` vi /etc/systemd/service/actual-server.service ```). Note the WorkingDirectory= parameter needs to be set to your Actual install folder
+```
+[Unit]
+Description=Actual-Server (https://actualbudget.org)
+After=network.target
+
+[Service]
+WorkingDirectory=[Link to your actual-server install directory, ex. /var/www/html/actual]
+ExecStart=/usr/bin/yarn start
+Restart=on-watchdog
+
+[Install]
+WantedBy=multi-user.target
+```
+2. Have systemd rescan for the unit file you created -> ``` systemctl daemon-reload ```
+3. Install and start the systemd unit file -> ``` systemctl enable --now /etc/systemd/system/multi-user.target.wants/actual-server.service ```
+4. Confirm that the Actual server is running -> ``` systemctl status actual-server ```
+```
+root@server:/etc/systemd/system# systemctl status actual-server
+● actual-server.service - Actual-Server (https://actualbudget.org)
+     Loaded: loaded (/lib/systemd/system/actual-server.service; enabled; vendor pres>
+     Active: active (running) since Mon 2024-11-18 14:58:29 EST; 23h ago
+   Main PID: 842857 (node)
+      Tasks: 33 (limit: 38316)
+     Memory: 45.9M
+        CPU: 1.995s
+     CGroup: /system.slice/actual-server.service
+             ├─842857 node /usr/bin/yarn start
+             ├─842870 /usr/bin/node /var/www/html/actual-server/.yarn/releases/yarn->
+             └─842881 /usr/bin/node app 
+```
+5. You should see output similar to below. The main thing to check for is the "Active: active (running)" section. From here you can consider [Setting up a Reverse Proxy](https://actualbudget.org/docs/config/reverse-proxies) and [Activating HTTPS](https://actualbudget.org/docs/config/https)
+6. To stop / start / restart the server use the commands
+   - ```systemctl stop actual-server```
+   - ```systemctl start actual-server```
+   - ```systemctl restart actual-server```
+7. To see the system log showing status or errors use the command from before. This can be helpful for troubleshooting.
+   - ```systemctl status actual-server```
+  
 ## Accessing Actual
 
 After the server has been started, you can access Actual using your browser at [http://localhost:5006](http://localhost:5006).
