@@ -2,6 +2,8 @@ import React, { type CSSProperties, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 
+import { css } from '@emotion/css';
+
 import { replaceModal, syncAndDownload } from 'loot-core/src/client/actions';
 import * as queries from 'loot-core/src/client/queries';
 import { type AccountEntity } from 'loot-core/types/models';
@@ -36,7 +38,6 @@ function AccountHeader<SheetFieldName extends SheetFields<'account'>>({
   amount,
   style = {},
 }: AccountHeaderProps<SheetFieldName>) {
-
   const navigate = useNavigate();
 
   return (
@@ -55,6 +56,15 @@ function AccountHeader<SheetFieldName extends SheetFields<'account'>>({
         width: '100%',
         ...style,
       }}
+      // to match the feel of the other account buttons
+      className={css([
+        {
+          '&[data-pressed], &[data-hovered]': {
+            backgroundColor: 'transparent',
+            transform: 'translateY(1px)',
+          },
+        },
+      ])}
     >
       <View style={{ flex: 1, alignItems: 'center', flexDirection: 'row' }}>
         <Text
