@@ -32,6 +32,7 @@ import { ExperimentalFeatures } from './Experimental';
 import { ExportBudget } from './Export';
 import { FixSplits } from './FixSplits';
 import { FormatSettings } from './Format';
+import { LearnCategoriesSettings } from './LearnCategories';
 import { ResetCache, ResetSync } from './Reset';
 import { ThemeSettings } from './Themes';
 import { AdvancedToggle, Setting } from './UI';
@@ -185,6 +186,7 @@ export function Settings() {
         <FormatSettings />
         <AuthSettings />
         <EncryptionSettings />
+        <LearnCategoriesSettings />
         <BudgetTypeSettings />
         {isElectron() && <Backups />}
         <ExportBudget />
