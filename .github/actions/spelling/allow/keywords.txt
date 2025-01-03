@@ -89,7 +89,7 @@ nynab
 offbudget
 ofx
 OFX
-oneoff
+oneof
 payeerule
 pikaday
 pikapods
