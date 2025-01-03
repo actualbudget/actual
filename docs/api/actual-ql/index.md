@@ -66,7 +66,7 @@ q('transactions')
   .select('*');
 ```
 
-The `$gte` operator on `date` returns transactions on or after `2021-01-01`. Available operators are `$eq`, `$lt`, `$lte`, `$gt`, `$gte`, and `$like`.
+The `$gte` operator on `date` returns transactions on or after `2021-01-01`. Available operators are `$eq`, `$lt`, `$lte`, `$gt`, `$gte`, `$ne`, `$oneof`, `$regex`, `$like`, and `$notlike`.
 
 If you pass an array to a field, it will combine the conditions with `$and`:
 
