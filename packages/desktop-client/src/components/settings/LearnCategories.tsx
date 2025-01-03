@@ -10,21 +10,19 @@ import { Setting } from './UI';
 
 export function LearnCategoriesSettings() {
   const { t } = useTranslation();
-  const [learnCategoriesPref, setLearnCategoriesPref] =
+  const [learnCategories, setLearnCategories] =
     useSyncedPref('learn-categories');
-  const isLearnCategoriesEnabledPref = String(learnCategoriesPref) === 'true';
+  const isLearnCategoriesEnabled = String(learnCategories) !== 'false';
 
   return (
     <Setting
       primaryAction={
         <Button
-          onPress={() =>
-            setLearnCategoriesPref(String(!isLearnCategoriesEnabledPref))
-          }
+          onPress={() => setLearnCategories(String(!isLearnCategoriesEnabled))}
         >
-          {isLearnCategoriesEnabledPref
-            ? t('Enable Category Learning')
-            : t('Disable Category Learning')}
+          {isLearnCategoriesEnabled
+            ? t('Disable Category Learning')
+            : t('Enable Category Learning')}
         </Button>
       }
     >
