@@ -1,7 +1,6 @@
 import React, { type ComponentProps, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import type * as queries from 'loot-core/client/queries';
 import { type TransactionEntity } from 'loot-core/types/models/transaction';
 
 import { SelectedProvider, useSelected } from '../../../hooks/useSelected';
@@ -10,7 +9,7 @@ import { styles, theme } from '../../../style';
 import { InputWithContent } from '../../common/InputWithContent';
 import { Label } from '../../common/Label';
 import { View } from '../../common/View';
-import { type SheetFields } from '../../spreadsheet';
+import type { Binding, SheetNames, SheetFields } from '../../spreadsheet';
 import { CellValue, CellValueText } from '../../spreadsheet/CellValue';
 import { useSheetValue } from '../../spreadsheet/useSheetValue';
 import { PullToRefresh } from '../PullToRefresh';
@@ -70,20 +69,20 @@ function TransactionSearchInput({
 
 type TransactionListWithBalancesProps = {
   isLoading: boolean;
-  transactions: Readonly<TransactionEntity[]>;
+  transactions: readonly TransactionEntity[];
   balance:
-    | ReturnType<typeof queries.onBudgetAccountBalance>
-    | ReturnType<typeof queries.offBudgetAccountBalance>
-    | ReturnType<typeof queries.uncategorizedBalance>
-    | ReturnType<typeof queries.categoryBalance>
-    | ReturnType<typeof queries.accountBalance>
-    | ReturnType<typeof queries.allAccountBalance>;
+    | Binding<'account', 'onbudget-accounts-balance'>
+    | Binding<'account', 'offbudget-accounts-balance'>
+    | Binding<SheetNames, 'uncategorized-balance'>
+    | Binding<'category', 'balance'>
+    | Binding<'account', 'balance'>
+    | Binding<'account', 'accounts-balance'>;
   balanceCleared?:
-    | ReturnType<typeof queries.categoryBalanceCleared>
-    | ReturnType<typeof queries.accountBalanceCleared>;
+    | Binding<'category', 'balanceCleared'>
+    | Binding<'account', 'balanceCleared'>;
   balanceUncleared?:
-    | ReturnType<typeof queries.categoryBalanceUncleared>
-    | ReturnType<typeof queries.accountBalanceUncleared>;
+    | Binding<'category', 'balanceUncleared'>
+    | Binding<'account', 'balanceUncleared'>;
   searchPlaceholder: string;
   onSearch: (searchText: string) => void;
   isLoadingMore: boolean;
