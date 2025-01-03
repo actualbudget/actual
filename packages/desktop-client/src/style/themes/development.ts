@@ -214,4 +214,4 @@ export const tooltipText = colorPalette.navy900;
 export const tooltipBackground = colorPalette.navy50;
 export const tooltipBorder = colorPalette.navy150;
 
-export const calendarCellBackground = colorPalette.navy900;
+export const calendarCellBackground = colorPalette.navy100;
