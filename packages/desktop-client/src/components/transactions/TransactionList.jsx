@@ -120,7 +120,6 @@ export function TransactionList({
     const changes = updateTransaction(transactionsLatest.current, transaction);
     transactionsLatest.current = changes.data;
 
-    console.log('changes', changes.diff.updated.length, isLearnCategoriesEnabledPref);
     if (changes.diff.updated.length > 0) {
       const dateChanged = !!changes.diff.updated[0].date;
       if (dateChanged) {

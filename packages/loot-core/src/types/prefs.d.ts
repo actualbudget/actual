@@ -31,8 +31,8 @@ export type SyncedPrefs = Partial<
     | `csv-has-header-${string}`
     | `ofx-fallback-missing-payee-${string}`
     | `flip-amount-${string}-${'csv' | 'qif'}`
-    | `flags.${FeatureFlag}`,
-    `learn-categories`,
+    | `flags.${FeatureFlag}`
+    | `learn-categories`,
     string
   >
 >;
