@@ -3,7 +3,7 @@ import { useTranslation, Trans } from 'react-i18next';
 import { type PayeeEntity } from 'loot-core/src/types/models';
 
 import { SvgDelete, SvgMerge } from '../../icons/v0';
-import { SvgBookmark } from '../../icons/v1';
+import { SvgBookmark, SvgLightBulb } from '../../icons/v1';
 import { theme } from '../../style';
 import { Menu } from '../common/Menu';
 import { View } from '../common/View';
@@ -14,6 +14,7 @@ type PayeeMenuProps = {
   onDelete: () => void;
   onMerge: () => Promise<void>;
   onFavorite: () => void;
+  onLearn: () => void;
   onClose: () => void;
 };
 
@@ -23,6 +24,7 @@ export function PayeeMenu({
   onDelete,
   onMerge,
   onFavorite,
+  onLearn,
   onClose,
 }: PayeeMenuProps) {
   const { t } = useTranslation();
@@ -50,6 +52,9 @@ export function PayeeMenu({
             break;
           case 'favorite':
             onFavorite();
+            break;
+          case 'learn':
+            onLearn();
             break;
           default:
         }
@@ -90,6 +95,13 @@ export function PayeeMenu({
           name: 'merge',
           text: t('Merge'),
           disabled: isDisabled || selectedPayees.size < 2,
+        },
+        {
+          icon: SvgLightBulb,
+          iconSize: 9,
+          name: 'learn',
+          text: t('Category Learning'),
+          disabled: isDisabled,
         },
         Menu.line,
       ]}

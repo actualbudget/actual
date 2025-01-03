@@ -33,6 +33,7 @@ import { ExportBudget } from './Export';
 import { FixSplits } from './FixSplits';
 import { FormatSettings } from './Format';
 import { LanguageSettings } from './LanguageSettings';
+import { LearnCategoriesSettings } from './LearnCategories';
 import { ResetCache, ResetSync } from './Reset';
 import { ThemeSettings } from './Themes';
 import { AdvancedToggle, Setting } from './UI';
@@ -199,6 +200,7 @@ export function Settings() {
         <LanguageSettings />
         <AuthSettings />
         <EncryptionSettings />
+        <LearnCategoriesSettings />
         <BudgetTypeSettings />
         {isElectron() && <Backups />}
         <ExportBudget />

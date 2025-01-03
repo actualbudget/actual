@@ -6,7 +6,7 @@ import { type PayeeEntity } from 'loot-core/src/types/models';
 
 import { useContextMenu } from '../../hooks/useContextMenu';
 import { useSelectedDispatch } from '../../hooks/useSelected';
-import { SvgArrowThinRight, SvgBookmark } from '../../icons/v1';
+import { SvgArrowThinRight, SvgBookmark, SvgLightBulb } from '../../icons/v1';
 import { theme } from '../../style';
 import { Menu } from '../common/Menu';
 import { Popover } from '../common/Popover';
@@ -197,6 +197,19 @@ export const PayeeTableRow = memo(
             });
           }}
         />
+        <CustomCell
+          width={10}
+          exposed={!payee.transfer_acct}
+          onBlur={() => {}}
+          onUpdate={() => {}}
+          onClick={() => {}}
+        >
+          {() => {
+            return !payee.learn_categories ? (
+              <SvgLightBulb style={{ color: 'red' }} />
+            ) : null;
+          }}
+        </CustomCell>
         <CustomCell
           width={10}
           exposed={!payee.transfer_acct}

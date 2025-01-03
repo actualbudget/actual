@@ -168,6 +168,26 @@ export const ManagePayees = ({
     selected.dispatch({ type: 'select-none' });
   }
 
+  function onLearn() {
+    const allLearnCategories = [...selected.items]
+      .map(id => payeesById[id].learn_categories)
+      .every(f => f === 1);
+    if (allLearnCategories) {
+      onBatchChange({
+        updated: [...selected.items].map(id => ({ id, learn_categories: 0 })),
+        added: [],
+        deleted: [],
+      });
+    } else {
+      onBatchChange({
+        updated: [...selected.items].map(id => ({ id, learn_categories: 1 })),
+        added: [],
+        deleted: [],
+      });
+    }
+    selected.dispatch({ type: 'select-none' });
+  }
+
   async function onMerge() {
     const ids = [...selected.items];
     await props.onMerge(ids);
@@ -220,6 +240,7 @@ export const ManagePayees = ({
               onDelete={onDelete}
               onMerge={onMerge}
               onFavorite={onFavorite}
+              onLearn={onLearn}
             />
           </Popover>
         </View>
