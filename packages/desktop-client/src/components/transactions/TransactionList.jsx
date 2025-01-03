@@ -102,8 +102,8 @@ export function TransactionList({
   const dispatch = useDispatch();
   const transactionsLatest = useRef();
   const navigate = useNavigate();
-  const [learnCategoriesPref] = useSyncedPref('learn-categories');
-  const isLearnCategoriesEnabledPref = String(learnCategoriesPref) === 'true';
+  const [learnCategories] = useSyncedPref('learn-categories');
+  const isLearnCategoriesEnabled = String(learnCategories) !== 'false';
 
   useLayoutEffect(() => {
     transactionsLatest.current = transactions;
@@ -126,7 +126,7 @@ export function TransactionList({
         // Make sure it stays at the top of the list of transactions
         // for that date
         changes.diff.updated[0].sort_order = Date.now();
-        await saveDiff(changes.diff, isLearnCategoriesEnabledPref);
+        await saveDiff(changes.diff, isLearnCategoriesEnabled);
         onRefetch();
       } else {
         onChange(changes.newTransaction, changes.data);
@@ -134,7 +134,7 @@ export function TransactionList({
           changes.diff,
           changes,
           onChange,
-          isLearnCategoriesEnabledPref,
+          isLearnCategoriesEnabled,
         );
       }
     }
