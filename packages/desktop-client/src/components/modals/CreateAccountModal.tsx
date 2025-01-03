@@ -26,6 +26,15 @@ import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { useMultiuserEnabled } from '../ServerContext';
 
+export type NormalizedAccount = {
+  id: string;
+  name: string;
+  institution: string;
+  orgDomain: string;
+  orgId: string;
+  balance: number;
+};
+
 type CreateAccountProps = {
   upgradingAccountId?: string;
 };
@@ -77,20 +86,11 @@ export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
         throw new Error(results.reason);
       }
 
-      const newAccounts = [];
-
-      type NormalizedAccount = {
-        account_id: string;
-        name: string;
-        institution: string;
-        orgDomain: string;
-        orgId: string;
-        balance: number;
-      };
+      const newAccounts: NormalizedAccount[] = [];
 
       for (const oldAccount of results.accounts) {
         const newAccount: NormalizedAccount = {
-          account_id: oldAccount.id,
+          id: oldAccount.id,
           name: oldAccount.name,
           institution: oldAccount.org.name,
           orgDomain: oldAccount.org.domain,
