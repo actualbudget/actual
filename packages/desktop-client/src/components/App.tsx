@@ -33,6 +33,7 @@ import { installPolyfills } from '../polyfills';
 import { styles, hasHiddenScrollbars, ThemeStyle, useTheme } from '../style';
 import { ExposeNavigate } from '../util/router-tools';
 
+import { ActualPluginsProvider } from './ActualPluginsProvider';
 import { AppBackground } from './AppBackground';
 import { BudgetMonthCountProvider } from './budget/BudgetMonthCountContext';
 import { View } from './common/View';
@@ -192,47 +193,49 @@ export function App() {
 
   return (
     <BrowserRouter>
-      <ExposeNavigate />
-      <HotkeysProvider initiallyActiveScopes={['*']}>
-        <ResponsiveProvider>
-          <SpreadsheetProvider>
-            <SidebarProvider>
-              <BudgetMonthCountProvider>
-                <DndProvider backend={HTML5Backend}>
-                  <View
-                    data-theme={theme}
-                    style={{
-                      height: '100%',
-                      display: 'flex',
-                      flexDirection: 'column',
-                    }}
-                  >
+      <ActualPluginsProvider>
+        <ExposeNavigate />
+        <HotkeysProvider initiallyActiveScopes={['*']}>
+          <ResponsiveProvider>
+            <SpreadsheetProvider>
+              <SidebarProvider>
+                <BudgetMonthCountProvider>
+                  <DndProvider backend={HTML5Backend}>
                     <View
-                      key={
-                        hiddenScrollbars ? 'hidden-scrollbars' : 'scrollbars'
-                      }
+                      data-theme={theme}
                       style={{
-                        flexGrow: 1,
-                        overflow: 'hidden',
-                        ...styles.lightScrollbar,
+                        height: '100%',
+                        display: 'flex',
+                        flexDirection: 'column',
                       }}
                     >
-                      <ErrorBoundary FallbackComponent={ErrorFallback}>
-                        {process.env.REACT_APP_REVIEW_ID &&
-                          !Platform.isPlaywright && <DevelopmentTopBar />}
-                        <AppInner />
-                      </ErrorBoundary>
-                      <ThemeStyle />
-                      <Modals />
-                      <UpdateNotification />
+                      <View
+                        key={
+                          hiddenScrollbars ? 'hidden-scrollbars' : 'scrollbars'
+                        }
+                        style={{
+                          flexGrow: 1,
+                          overflow: 'hidden',
+                          ...styles.lightScrollbar,
+                        }}
+                      >
+                        <ErrorBoundary FallbackComponent={ErrorFallback}>
+                          {process.env.REACT_APP_REVIEW_ID &&
+                            !Platform.isPlaywright && <DevelopmentTopBar />}
+                          <AppInner />
+                        </ErrorBoundary>
+                        <ThemeStyle />
+                        <Modals />
+                        <UpdateNotification />
+                      </View>
                     </View>
-                  </View>
-                </DndProvider>
-              </BudgetMonthCountProvider>
-            </SidebarProvider>
-          </SpreadsheetProvider>
-        </ResponsiveProvider>
-      </HotkeysProvider>
+                  </DndProvider>
+                </BudgetMonthCountProvider>
+              </SidebarProvider>
+            </SpreadsheetProvider>
+          </ResponsiveProvider>
+        </HotkeysProvider>
+      </ActualPluginsProvider>
     </BrowserRouter>
   );
 }
