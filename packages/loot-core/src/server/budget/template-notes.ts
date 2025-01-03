@@ -82,7 +82,7 @@ async function getCategoriesWithTemplates(): Promise<CategoryWithTemplates[]> {
       const trimmedLine = line.trim();
 
       if (
-        !trimmedLine.startsWith(TEMPLATE_PREFIX) &&
+        !trimmedLine.match(new RegExp(`^[^#]*${TEMPLATE_PREFIX}`)) &&
         !trimmedLine.startsWith(GOAL_PREFIX)
       ) {
         return;
