@@ -184,9 +184,9 @@ export function Settings() {
         <About />
         <ThemeSettings />
         <FormatSettings />
+        <LearnCategoriesSettings />
         <AuthSettings />
         <EncryptionSettings />
-        <LearnCategoriesSettings />
         <BudgetTypeSettings />
         {isElectron() && <Backups />}
         <ExportBudget />
