@@ -1,9 +1,9 @@
 name: Download translations and upload new strings
 
 on:
-  push:
-    branches:
-      - master
+  schedule:
+    # 4am UTC
+    - cron: "0 4 * * *"
   workflow_dispatch:
 
 jobs:
