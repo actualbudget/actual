@@ -13,6 +13,7 @@ import {
 import { getChangedValues, applyChanges } from 'loot-core/src/shared/util';
 
 import { useNavigate } from '../../hooks/useNavigate';
+import { useSyncedPref } from '../../hooks/useSyncedPref';
 import { theme } from '../../style';
 
 import { TransactionTable } from './TransactionsTable';
@@ -37,19 +38,20 @@ import { TransactionTable } from './TransactionsTable';
 // differently than a full refresh. It's up to you to decide which
 // one to use when doing updates.
 
-async function saveDiff(diff) {
+async function saveDiff(diff, learnCategories) {
   const remoteUpdates = await send('transactions-batch-update', {
     ...diff,
-    learnCategories: true,
+    learnCategories,
   });
+
   if (remoteUpdates.length > 0) {
     return { updates: remoteUpdates };
   }
   return {};
 }
 
-async function saveDiffAndApply(diff, changes, onChange) {
-  const remoteDiff = await saveDiff(diff);
+async function saveDiffAndApply(diff, changes, onChange, learnCategories) {
+  const remoteDiff = await saveDiff(diff, learnCategories);
   onChange(
     applyTransactionDiff(changes.newTransaction, remoteDiff),
     applyChanges(remoteDiff, changes.data),
@@ -101,6 +103,8 @@ export function TransactionList({
   const dispatch = useDispatch();
   const transactionsLatest = useRef();
   const navigate = useNavigate();
+  const [learnCategories] = useSyncedPref('learn-categories');
+  const isLearnCategoriesEnabled = String(learnCategories) !== 'false';
 
   useLayoutEffect(() => {
     transactionsLatest.current = transactions;
@@ -123,11 +127,16 @@ export function TransactionList({
         // Make sure it stays at the top of the list of transactions
         // for that date
         changes.diff.updated[0].sort_order = Date.now();
-        await saveDiff(changes.diff);
+        await saveDiff(changes.diff, isLearnCategoriesEnabled);
         onRefetch();
       } else {
         onChange(changes.newTransaction, changes.data);
-        saveDiffAndApply(changes.diff, changes, onChange);
+        saveDiffAndApply(
+          changes.diff,
+          changes,
+          onChange,
+          isLearnCategoriesEnabled,
+        );
       }
     }
   }, []);

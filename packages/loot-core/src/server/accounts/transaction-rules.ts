@@ -801,7 +801,8 @@ export async function updateCategoryRules(transactions) {
   const register: TransactionEntity[] = await db.all(
     `SELECT t.* FROM v_transactions t
      LEFT JOIN accounts a ON a.id = t.account
-     WHERE date >= ? AND date <= ? AND is_parent = 0 AND a.closed = 0
+     LEFT JOIN payees p ON p.id = t.payee
+     WHERE date >= ? AND date <= ? AND is_parent = 0 AND a.closed = 0 AND p.learn_categories = 1
      ORDER BY date DESC`,
     [toDateRepr(oldestDate), toDateRepr(addDays(currentDay(), 180))],
   );

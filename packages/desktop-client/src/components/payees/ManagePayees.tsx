@@ -116,7 +116,7 @@ export const ManagePayees = ({
   }
 
   const onUpdate = useCallback(
-    <T extends 'name' | 'favorite'>(
+    <T extends 'name' | 'favorite' | 'learn_categories'>(
       id: PayeeEntity['id'],
       name: T,
       value: PayeeEntity[T],
@@ -161,6 +161,26 @@ export const ManagePayees = ({
     } else {
       onBatchChange({
         updated: [...selected.items].map(id => ({ id, favorite: 1 })),
+        added: [],
+        deleted: [],
+      });
+    }
+    selected.dispatch({ type: 'select-none' });
+  }
+
+  function onLearn() {
+    const allLearnCategories = [...selected.items]
+      .map(id => payeesById[id].learn_categories)
+      .every(f => f === 1);
+    if (allLearnCategories) {
+      onBatchChange({
+        updated: [...selected.items].map(id => ({ id, learn_categories: 0 })),
+        added: [],
+        deleted: [],
+      });
+    } else {
+      onBatchChange({
+        updated: [...selected.items].map(id => ({ id, learn_categories: 1 })),
         added: [],
         deleted: [],
       });
@@ -220,6 +240,7 @@ export const ManagePayees = ({
               onDelete={onDelete}
               onMerge={onMerge}
               onFavorite={onFavorite}
+              onLearn={onLearn}
             />
           </Popover>
         </View>
