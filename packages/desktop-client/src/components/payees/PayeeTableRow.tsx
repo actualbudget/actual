@@ -11,6 +11,7 @@ import { theme } from '../../style';
 import { Menu } from '../common/Menu';
 import { Popover } from '../common/Popover';
 import { Text } from '../common/Text';
+import { Tooltip } from '../common/Tooltip';
 import {
   Cell,
   CellButton,
@@ -63,7 +64,10 @@ function RuleButton({ ruleCount, focused, onEdit, onClick }: RuleButtonProps) {
   );
 }
 
-type EditablePayeeFields = keyof Pick<PayeeEntity, 'name' | 'favorite'>;
+type EditablePayeeFields = keyof Pick<
+  PayeeEntity,
+  'name' | 'favorite' | 'learn_categories'
+>;
 
 type PayeeTableRowProps = {
   payee: PayeeEntity;
@@ -158,6 +162,12 @@ export const PayeeTableRow = memo(
               },
               ruleCount > 0 && { name: 'view-rules', text: t('View rules') },
               { name: 'create-rule', text: t('Create rule') },
+              payee.learn_categories
+                ? {
+                    name: 'learn',
+                    text: t('Disable learning'),
+                  }
+                : { name: 'learn', text: t('Enable learning') },
             ]}
             onMenuSelect={name => {
               switch (name) {
@@ -166,6 +176,13 @@ export const PayeeTableRow = memo(
                   break;
                 case 'favorite':
                   onUpdate(id, 'favorite', payee.favorite ? 0 : 1);
+                  break;
+                case 'learn':
+                  onUpdate(
+                    id,
+                    'learn_categories',
+                    payee.learn_categories ? 0 : 1,
+                  );
                   break;
                 case 'view-rules':
                   onViewRules(id);
@@ -206,7 +223,9 @@ export const PayeeTableRow = memo(
         >
           {() => {
             return !payee.learn_categories ? (
-              <SvgLightBulb style={{ color: 'red' }} />
+              <Tooltip content={t('Category learning disabled')}>
+                <SvgLightBulb style={{ color: 'red' }} />
+              </Tooltip>
             ) : null;
           }}
         </CustomCell>
