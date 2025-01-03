@@ -116,7 +116,7 @@ export const ManagePayees = ({
   }
 
   const onUpdate = useCallback(
-    <T extends 'name' | 'favorite'>(
+    <T extends 'name' | 'favorite' | 'learn_categories'>(
       id: PayeeEntity['id'],
       name: T,
       value: PayeeEntity[T],
