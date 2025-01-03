@@ -25,7 +25,7 @@ From the sidebar, you have easy access to all Actual's functionality.
 
 * Access to your Budget, Reports and Schedules.
 * Less used functions are found under _More_, like managing Payees and Rules; this is where you find the software settings.
-* The sidebar also holds all of your accounts, both on and off-budget; these will display in a list under the heading to which they belong, e.g., On Budget.
+* The sidebar also holds all of your accounts, both on budget and off budget; these will display in a list under the heading to which they belong e.g. On budget.
 
 Most of these will we cover later in the tour.
 

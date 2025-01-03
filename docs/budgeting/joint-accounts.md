@@ -118,7 +118,7 @@ Situation: I am using Actual to keep track of my budget and finances, but I shar
 
 ### Basic setup steps
 
-1. Create an **on-budget** account used to pay joint bills.
+1. Create an **on budget** account used to pay joint bills.
 2. Create a **category group** used to group your shared expense categories.
 3. Create the **categories** you plan to budget using your joint account.
 4. **Optional:** Create an **Income Category** called **Partner Contribution** or something similar. This will be explained further below.
@@ -127,7 +127,7 @@ Situation: I am using Actual to keep track of my budget and finances, but I shar
 
 #### Your contribution
 
-Each month you will add a transfer of your share to the joint account from one of your on-budget accounts. You don't need a category for your contribution since it is just a transfer from one of your accounts to another.
+Each month you will add a transfer of your share to the joint account from one of your on budget accounts. You don't need a category for your contribution since it is just a transfer from one of your accounts to another.
 
 ![Screenshot of joint accounts in a personal Actual Budget file](/img/joint-accounts/jointaccount-2.png)
 

@@ -271,7 +271,7 @@ The account type does not affect anything currently. It's simply extra informati
 
 Avoid setting the `closed` property directly to close an account; instead use the `closeAccount` method. If the account still has money in it you will be required to specify another account to transfer the current balance to. This will help track your money correctly.
 
-If you want to fully delete an account and remove it entirely from the system, use [`deleteAccount`](#deleteaccount). Note that if it's an on-budget account, any money coming from that account will disappear.
+If you want to fully delete an account and remove it entirely from the system, use [`deleteAccount`](#deleteaccount). Note that if it's an on budget account, any money coming from that account will disappear.
 
 #### Methods
 
@@ -299,9 +299,9 @@ Update fields of an account. `fields` can specify any field described in [`Accou
 
 Close an account. `transferAccountId` and `transferCategoryId` are optional if the balance of the account is 0, otherwise see next paragraph.
 
-If the account has a non-zero balance, you need to specify an account with `transferAccountId` to transfer the money into. If you are transferring from an on-budget account to an off-budget account, you can optionally specify a category with `transferCategoryId` to categorize the transfer transaction.
+If the account has a non-zero balance, you need to specify an account with `transferAccountId` to transfer the money into. If you are transferring from an on budget account to an off budget account, you can optionally specify a category with `transferCategoryId` to categorize the transfer transaction.
 
-Transferring money to an off-budget account needs a category because money is taken out of the budget, so it needs to come from somewhere.
+Transferring money to an off budget account needs a category because money is taken out of the budget, so it needs to come from somewhere.
 
 If you want to simply delete an account, see [`deleteAccount`](#deleteaccount).
 

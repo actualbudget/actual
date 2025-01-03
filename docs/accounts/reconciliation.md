@@ -36,9 +36,9 @@ Of course, there's always the possibility you need to change a locked transactio
 
 ![](/img/reconcile/reconcile-10.png)
 
-## Using the Reconciliation Tool for Off-Budget Asset Tracking
+## Using the Reconciliation Tool for Off Budget Asset Tracking
 
-Some people use off-budget accounts to track values of assets such as vehicles, real estate, retirement accounts, or other investment accounts or property. The reconciliation tool is useful to update these values as well. Let's say we have a house that was valued at 358,700 but with current changes in the market it is now valued at 385,000. We go to the ledger for the house, choose the reconciliation tool, and enter 385,000 as the new value into the tool.
+Some people use off budget accounts to track values of assets such as vehicles, real estate, retirement accounts, or other investment accounts or property. The reconciliation tool is useful to update these values as well. Let's say we have a house that was valued at 358,700 but with current changes in the market it is now valued at 385,000. We go to the ledger for the house, choose the reconciliation tool, and enter 385,000 as the new value into the tool.
 
 ![](/img/reconcile/reconcile-5.png)
 

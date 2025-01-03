@@ -12,15 +12,15 @@ This includes all savings, checking, and investment accounts.
 These accounts should match what shows up in your Bank or Credit Union.
 For example, if you have a savings, checking, and credit card account with Bank of America, add each as a separate account in Actual.
 
-### On or Off Budget
+### On Budget or Off Budget
 
 In Actual, you have the option of on budget accounts and off budget accounts.
 On budget accounts are included towards the funds available in your budget, while off budget accounts are only for tracking.
 Off budget accounts are included in the net worth report.
-It is usually best to err towards putting accounts on budget versus off.
+It is usually best to err towards putting accounts on budget versus off budget.
 The most common off budget accounts would be investment type accounts such as a 401(k), IRA, HSA, brokerage account, loans, and asset tracking such as your home equity.
 
-Savings accounts can be either on or off budget.
+Savings accounts can be either on budget or off budget.
 It is usually easier, and more flexible, to place them on budget.
 
 #### Considerations for On Budget Savings

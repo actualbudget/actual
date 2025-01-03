@@ -11,12 +11,12 @@ Custom reports allow analyzing transaction data by using charts or a data table 
 ## Left Menu
 
 The **Type** menu can be used to change the display of transactions shown in the report:
-1. Payment: outflows from For budget accounts
-2. Deposit: inflows in For budget accounts
-3. Net: sum of outflows and inflows across For budget accounts. Net results are the figures shown in Budget page under Spent and Received columns. This option is currently available in Data Table, Area Graph and partially available in Bar Graph and Donut Graph
+1. Payment: outflows from on budget accounts
+2. Deposit: inflows to on budget accounts
+3. Net: sum of outflows and inflows across on budget accounts. Net results are the figures shown in Budget page under Spent and Received columns. This option is currently available in Data Table, Area Graph and partially available in Bar Graph and Donut Graph
 
 This sum can be **Split** by Category, Group, Payee, Account or Month.
-Note that Split by Account shows sum of transactions from For budget account, not periodic balance.
+Note that Split by Account shows sum of transactions from on budget account, not periodic balance.
 Monthly breakdowns are provided by changing Mode from Total to Time.
 
 ![Custom report left side with display and date filters](/img/reports/cr-left-menu.png)
@@ -31,9 +31,9 @@ Under Options, reports behavior can be changed
 
 * `Show hidden categories` will enable Categories marked as hidden in the Budget page.
 * `Show empty rows` will show items chosen in Split with 0 value.
-* `Show Off budget` enables two categories:
-	* Transfers: include all transfers across For budget account. Transfers from For budget to Off budget are not counted.
-	* Off budget: include all transactions in Off budget accounts. Transfers from For budget to Off budget are not counted.
+* `Show off budget` enables two categories:
+	* Transfers: include all transfers across on budget account. Transfers from on budget to off budget are not counted.
+	* Off budget: include all transactions in off budget accounts. Transfers from on budget to off budget are not counted.
 * `Show uncategorized` will show transactions which have not been assigned a category.
 
 Single Categories or entire Groups can be excluded from the Report by using the list on the bottom left side.
