@@ -40,7 +40,7 @@ const ROW_HEIGHT = 60;
 type TransactionListItemProps = ComponentPropsWithoutRef<
   typeof ListBoxItem<TransactionEntity>
 > & {
-  isNewTransaction: (transaction: TransactionEntity['id']) => boolean;
+  isNewTransaction?: (transaction: TransactionEntity['id']) => boolean;
   onPress: (transaction: TransactionEntity) => void;
   onLongPress: (transaction: TransactionEntity) => void;
 };
