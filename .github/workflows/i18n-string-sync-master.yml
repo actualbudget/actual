@@ -46,9 +46,15 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+      - name: Check mergefreeze status
+        id: mergefreeze
+        shell: bash  # Enable pipefail
+        run: |
+          echo frozen=$(curl "https://www.mergefreeze.com/api/branches/actualbudget/actual/master?access_token=${{ secrets.MERGEFREEZE_API_KEY }}" | jq -r .frozen) > $GITHUB_OUTPUT
 
       - name: Pull latest translations
         working-directory: actual
+        if: ${{ steps.mergefreeze.frozen == 'false' }}
         run: |
           # Not using git subtree to avoid merge commits
           cp -r ../translations/*.json packages/desktop-client/locale/
