@@ -878,7 +878,7 @@ describe('Learning categories', () => {
       name: 'supermarket',
       learn_categories: 0,
     });
-    expect(true).toBe(true);
+
     const trans = {
       date: '2016-12-01',
       account: 'acct',
