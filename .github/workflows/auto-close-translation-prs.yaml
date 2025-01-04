@@ -1,0 +1,14 @@
+name: 🔒 Auto-close Pull Requests that modify translations
+
+on:
+  pull_request_target:
+    types: [opened]
+    paths: 'packages/desktop-client/locale/*.json'
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: superbrothers/close-pull-request@v3
+      with:
+        comment: "👋 This repository does not accept pull requests for translations. Please contribute on [Weblate](https://hosted.weblate.org/projects/actualbudget/) instead."
