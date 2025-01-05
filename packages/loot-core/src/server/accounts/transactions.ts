@@ -57,6 +57,7 @@ export async function batchUpdateTransactions({
 
   const oldPayees = new Set();
   const accounts = await db.all('SELECT * FROM accounts WHERE tombstone = 0');
+  const allAccounts = await db.all('SELECT * FROM accounts');
 
   // We need to get all the payees of updated transactions _before_
   // making changes
@@ -84,6 +85,8 @@ export async function batchUpdateTransactions({
             console.log('\n');
             console.log(t?.account);
             console.log(accounts);
+            console.log(allAccounts);
+            console.log(allAccounts.find(acct => acct.id === t.account);
           }
 
           if (account.offbudget === 1) {
