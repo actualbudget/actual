@@ -82,7 +82,7 @@ export async function batchUpdateTransactions({
 
           if (!account) return;
 
-          if (account.offbudget === 1) {
+          if (account?.offbudget === 1) {
             t.category = null;
           }
 
