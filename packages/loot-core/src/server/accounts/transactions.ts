@@ -86,7 +86,7 @@ export async function batchUpdateTransactions({
             console.log(t?.account);
             console.log(accounts);
             console.log(allAccounts);
-            console.log(allAccounts.find(acct => acct.id === t.account);
+            console.log(allAccounts.find(acct => acct.id === t.account));
           }
 
           if (account.offbudget === 1) {
