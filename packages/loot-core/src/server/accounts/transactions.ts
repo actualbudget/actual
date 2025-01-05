@@ -80,7 +80,11 @@ export async function batchUpdateTransactions({
         added.map(async t => {
           const account = accounts.find(acct => acct.id === t.account);
 
-          if (!account) console.log(t);
+          if (!account) {
+            console.log('\n');
+            console.log(t?.account);
+            console.log(accounts);
+          }
 
           if (account.offbudget === 1) {
             t.category = null;
