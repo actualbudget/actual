@@ -6,7 +6,7 @@
 
 import { runClassic } from 'eslint-vitest-rule-tester';
 
-import * as rule from './prefer-if-statement';
+import * as rule from '../prefer-if-statement';
 
 //------------------------------------------------------------------------------
 // Tests
