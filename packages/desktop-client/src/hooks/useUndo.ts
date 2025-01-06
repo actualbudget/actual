@@ -49,7 +49,7 @@ export function useUndo(): UndoActions {
   );
 
   const showRedoNotification = useCallback(
-    (notificaton: Notification) => {
+    (notification: Notification) => {
       if (!isNarrowWidth) {
         return;
       }
@@ -62,7 +62,7 @@ export function useUndo(): UndoActions {
             title: 'Redo',
             action: dispatchRedo,
           },
-          ...notificaton,
+          ...notification,
         }),
       );
     },
