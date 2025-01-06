@@ -29,19 +29,21 @@ export function useUndo(): UndoActions {
 
   const showUndoNotification = useCallback(
     (notification: Notification) => {
-      if (isNarrowWidth) {
-        dispatch(
-          addNotification({
-            type: 'message',
-            timeout,
-            button: {
-              title: 'Undo',
-              action: dispatchUndo,
-            },
-            ...notification,
-          }),
-        );
+      if (!isNarrowWidth) {
+        return;
       }
+
+      dispatch(
+        addNotification({
+          type: 'message',
+          timeout,
+          button: {
+            title: 'Undo',
+            action: dispatchUndo,
+          },
+          ...notification,
+        }),
+      );
     },
     [dispatch, dispatchUndo, isNarrowWidth],
   );
