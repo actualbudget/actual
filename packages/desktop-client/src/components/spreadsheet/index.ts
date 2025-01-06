@@ -15,6 +15,15 @@ export type Spreadsheets = {
     balanceCleared: number;
     balanceUncleared: number;
   };
+  category: {
+    // Common fields
+    'uncategorized-amount': number;
+    'uncategorized-balance': number;
+
+    balance: number;
+    balanceCleared: number;
+    balanceUncleared: number;
+  };
   'envelope-budget': {
     // Common fields
     'uncategorized-amount': number;
