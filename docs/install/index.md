@@ -19,9 +19,9 @@ The standard way of using Actual is to set up a personal server and use a web br
 
 If you are okay with not having sync, auto-save, or backups then the easiest and fastest way to get started is by using the Actual [web app](https://app.actualbudget.org). This solution requires less setup but more maintenance.
 
-All data is saved to your local browser. The Actual web app never has access to any of your personal data. It is recommended that you save your data (from the [settings](../backup-restore/backup) menu) after every session. If your browser memory is cleared, your data will be lost, so a backup is crucial.
+All data is saved to your local browser. The Actual web app never has access to any of your personal data. It is recommended that you save your data (from the [settings](/docs/backup-restore/backup) menu) after every session. If your browser memory is cleared, your data will be lost, so a backup is crucial.
 
-Using a new device or browser requires you to [import](../migration/actual-import#import-backup-file) the saved file for each new device or browser. Remember that these new devices and browsers will not sync without a server set up, so anything you modify on one browser will not appear on others.
+Using a new device or browser requires you to [restore](/docs/backup-restore/restore) the saved file for each new device or browser. Remember that these new devices and browsers will not sync without a server set up, so anything you modify on one browser will not appear on others.
 
 :::caution
 

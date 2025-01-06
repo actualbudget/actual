@@ -10,9 +10,10 @@
   it is much easier to not pull in historical data. First, set up your account(s) with a correct opening balance on a recent date, then set up bank sync. Only
   transactions after the opening balance date will be synced, making reconciliation easy.
 
-- **Q.** _Can I import my Actual Budget from the hosted instance of Actual to my Self Hosted version_
 
-  **A.** Yes, this has been added to the web version recently, see [our documentation on migrating from the subscription service](./migration/actual-import.md).
+- **Q.** _Can I import my Actual Budget from the hosted instance of Actual to my Self Hosted version_.
+
+  **A.** The hosted subscription service was shut down in 2024, but if you are still using he old Actual Budget Desktop App, we have a [migration guide in place for this](/docs/migration/#migration-from-the-old-actual-budget-desktop-app).
 
 - **Q.** _How do I update my version of Actual after it has been updated?_
 
