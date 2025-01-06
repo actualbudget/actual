@@ -24,6 +24,7 @@ clsx
 codemirror
 Coinbase
 commandlet
+Coverflex
 Crd
 crdt
 creditcards
