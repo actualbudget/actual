@@ -31,7 +31,7 @@ import { SvgDelete } from '../../../icons/v0';
 import { SvgDotsHorizontalTriple } from '../../../icons/v1';
 import { styles, theme } from '../../../style';
 import { Button } from '../../common/Button2';
-import { Menu } from '../../common/Menu';
+import { Menu, type MenuItemObject } from '../../common/Menu';
 import { Popover } from '../../common/Popover';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
@@ -221,9 +221,10 @@ function SelectedTransactionsFloatingActionBar({
   const moreOptionsMenuTriggerRef = useRef(null);
   const [isMoreOptionsMenuOpen, setIsMoreOptionsMenuOpen] = useState(false);
   const getMenuItemStyle = useCallback(
-    () => ({
+    <T extends string>(item: MenuItemObject<T>) => ({
       ...styles.mobileMenuItem,
       color: theme.mobileHeaderText,
+      ...(item.name === 'delete' && { color: theme.errorTextMenu }),
     }),
     [],
   );
@@ -460,10 +461,7 @@ function SelectedTransactionsFloatingActionBar({
             style={{ width: 200 }}
           >
             <Menu
-              getItemStyle={item => ({
-                ...getMenuItemStyle(),
-                ...(item.name === 'delete' && { color: theme.errorTextMenu }),
-              })}
+              getItemStyle={getMenuItemStyle}
               style={{ backgroundColor: theme.floatingActionBarBackground }}
               onMenuSelect={type => {
                 if (type === 'duplicate') {
