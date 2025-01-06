@@ -9,10 +9,12 @@ import React, {
   useRef,
 } from 'react';
 
-import {
-  type SplitMode,
-  type SplitState,
-} from 'loot-core/client/state-types/app';
+type SplitMode = 'collapse' | 'expand';
+type SplitState = {
+  ids: Set<string>;
+  mode: SplitMode;
+  transitionId: string | null;
+};
 
 type ToggleSplitAction = {
   type: 'toggle-split';
@@ -59,7 +61,7 @@ type SplitsStateContext = {
 const SplitsExpandedContext = createContext<SplitsStateContext>({
   state: {
     mode: 'collapse',
-    ids: [],
+    ids: new Set<string>(),
     transitionId: null,
   },
   dispatch: () => {
@@ -74,8 +76,9 @@ export function useSplitsExpanded() {
     () => ({
       ...data,
       isExpanded: (id: string) => {
-        const idSet = new Set(data.state.ids);
-        return data.state.mode === 'collapse' ? !idSet.has(id) : idSet.has(id);
+        return data.state.mode === 'collapse'
+          ? !data.state.ids.has(id)
+          : data.state.ids.has(id);
       },
     }),
     [data],
@@ -104,7 +107,7 @@ export function SplitsExpandedProvider({
           } else {
             ids.add(id);
           }
-          return { ...state, ids: Array.from(ids) };
+          return { ...state, ids };
         }
         case 'open-split': {
           const ids = new Set([...state.ids]);
@@ -114,7 +117,7 @@ export function SplitsExpandedProvider({
           } else {
             ids.add(id);
           }
-          return { ...state, ids: Array.from(ids) };
+          return { ...state, ids };
         }
         case 'close-splits': {
           const ids = new Set([...state.ids]);
@@ -125,13 +128,13 @@ export function SplitsExpandedProvider({
               ids.delete(id);
             }
           });
-          return { ...state, ids: Array.from(ids) };
+          return { ...state, ids };
         }
         case 'set-mode': {
           return {
             ...state,
             mode: action.mode,
-            ids: [],
+            ids: new Set<string>(),
             transitionId: null,
           };
         }
@@ -145,14 +148,14 @@ export function SplitsExpandedProvider({
             ...state,
             mode: state.mode === 'expand' ? 'collapse' : 'expand',
             transitionId: action.id,
-            ids: [],
+            ids: new Set<string>(),
           };
         case 'finish-switch-mode':
           return { ...state, transitionId: null };
       }
     },
     previousState.current || {
-      ids: [],
+      ids: new Set<string>(),
       mode: initialMode,
       transitionId: null,
     },

@@ -4,7 +4,6 @@ import React, {
   useState,
   useCallback,
   useRef,
-  useEffect,
   useLayoutEffect,
   useImperativeHandle,
   useMemo,
@@ -1230,17 +1229,13 @@ export function useTableNavigator<T extends TableItem>(
 
   // See `onBlur` for why we need this
   const modalState = useModalState();
-  const modalStackLength = useRef(0);
+  const modalStackLength = useRef(modalState.modalStack.length);
 
   // onEdit is passed to children, so make sure it maintains identity
   const onEdit = useCallback((id: T['id'], field?: string) => {
     setEditingId(id);
     setFocusedField(id ? field : null);
   }, []);
-
-  useEffect(() => {
-    modalStackLength.current = modalState.modalStack.length;
-  }, [modalState.modalStack]);
 
   function flashInput() {
     // Force the container to be focused which suppresses the "space

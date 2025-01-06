@@ -1,12 +1,5 @@
 import type * as constants from '../constants';
 
-export type SplitMode = 'collapse' | 'expand';
-export type SplitState = {
-  ids: string[];
-  mode: SplitMode;
-  transitionId: string | null;
-};
-
 export type AppState = {
   loadingText: string | null;
   updateInfo: {
