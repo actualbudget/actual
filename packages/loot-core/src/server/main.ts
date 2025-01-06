@@ -1213,7 +1213,7 @@ handlers['accounts-bank-sync'] = async function ({ ids = [] }) {
 
   for (let i = 0; i < accounts.length; i++) {
     const acct = accounts[i];
-    if (acct.bankId) {
+    if (acct.bankId || acct.account_sync_source === 'pluggyai') {
       try {
         console.group('Bank Sync operation for account:', acct.name);
         const res = await bankSync.syncAccount(
