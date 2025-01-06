@@ -358,14 +358,7 @@ function getPayeePretty(transaction, payee, transferAcct, numHiddenPayees = 0) {
           alignItems: 'center',
         }}
       >
-        <div
-          style={{
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-          }}
-        >
-          {formatPayeeName(transferAcct.name)}
-        </div>
+        {formatPayeeName(transferAcct.name)}
       </View>
     );
   } else if (payee) {
@@ -713,25 +706,34 @@ function PayeeCell({
               onNavigateToTransferAccount={onNavigateToTransferAccount}
               onNavigateToSchedule={onNavigateToSchedule}
             />
-            {importedPayee ? (
-              <Tooltip
-                content={
-                  <View style={{ padding: 10 }}>
-                    <Text style={{ fontWeight: 'bold' }}>Imported Payee</Text>
-                    <Text style={{ fontWeight: 'normal' }}>
-                      {importedPayee}
-                    </Text>
-                  </View>
-                }
-                style={{ ...styles.tooltip, borderRadius: '0px 5px 5px 0px' }}
-                placement="bottom"
-                triggerProps={{ delay: 750 }}
-              >
-                {payeeName}
-              </Tooltip>
-            ) : (
-              payeeName
-            )}
+            <div
+              style={{
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                display: 'flex',
+                alignItems: 'center',
+              }}
+            >
+              {importedPayee ? (
+                <Tooltip
+                  content={
+                    <View style={{ padding: 10 }}>
+                      <Text style={{ fontWeight: 'bold' }}>Imported Payee</Text>
+                      <Text style={{ fontWeight: 'normal' }}>
+                        {importedPayee}
+                      </Text>
+                    </View>
+                  }
+                  style={{ ...styles.tooltip, borderRadius: '0px 5px 5px 0px' }}
+                  placement="bottom"
+                  triggerProps={{ delay: 750 }}
+                >
+                  {payeeName}
+                </Tooltip>
+              ) : (
+                payeeName
+              )}
+            </div>
           </>
         );
       }}
@@ -804,6 +806,7 @@ function PayeeIcons({
       {schedule && (
         <Button
           variant="bare"
+          data-testid="schedule-icon"
           aria-label="See schedule details"
           style={payeeIconButtonStyle}
           onPress={() => {
@@ -820,6 +823,7 @@ function PayeeIcons({
       {transferAccount && (
         <Button
           variant="bare"
+          data-testid="transfer-icon"
           aria-label="See transfer account"
           style={payeeIconButtonStyle}
           onPress={() => {

@@ -73,6 +73,7 @@ export function SummaryCard({
   return (
     <ReportCard
       isEditing={isEditing}
+      disableClick={nameMenuOpen}
       to={`/reports/summary/${widgetId}`}
       menuItems={[
         {

@@ -65,6 +65,7 @@ export function NetWorthCard({
   return (
     <ReportCard
       isEditing={isEditing}
+      disableClick={nameMenuOpen}
       to={`/reports/net-worth/${widgetId}`}
       menuItems={[
         {
