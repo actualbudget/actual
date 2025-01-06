@@ -1,15 +1,15 @@
-// eslint-disable-next-line import/no-unresolved
+import { UndoState as ServerUndoState } from '../../../server/undo';
 import { type ModalType } from '../../client/state-types/modals';
 
 export type UndoState = {
   id?: string;
-  url: unknown;
+  url: string;
   openModal: ModalType;
   selectedItems: {
     name: string;
     items: Set<string>;
   } | null;
-  current: unknown;
+  undoEvent: ServerUndoState | null;
 };
 
 export function setUndoState<K extends keyof Omit<UndoState, 'id'>>(

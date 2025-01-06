@@ -411,7 +411,7 @@ class AccountInternal extends PureComponent<
         }
       }
 
-      undo.setUndoState('current', null);
+      undo.setUndoState('undoEvent', null);
     };
 
     const unlistens = [listen('undo-event', onUndo)];
@@ -427,9 +427,9 @@ class AccountInternal extends PureComponent<
 
     // If there is a pending undo, apply it immediately (this happens
     // when an undo changes the location to this page)
-    const lastUndoState = undo.getUndoState('current');
-    if (lastUndoState) {
-      onUndo(lastUndoState as UndoState);
+    const lastUndoEvent = undo.getUndoState('undoEvent');
+    if (lastUndoEvent) {
+      onUndo(lastUndoEvent);
     }
   }
 

@@ -227,9 +227,9 @@ export function useSelected<T extends Item>(
       }
     }
 
-    const lastUndoState = undo.getUndoState('current');
-    if (lastUndoState) {
-      onUndo(lastUndoState as UndoState);
+    const lastUndoEvent = undo.getUndoState('undoEvent');
+    if (lastUndoEvent) {
+      onUndo(lastUndoEvent);
     }
 
     return listen('undo-event', onUndo);

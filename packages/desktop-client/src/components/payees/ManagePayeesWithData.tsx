@@ -79,12 +79,12 @@ export function ManagePayeesWithData({
         await refetchRuleCounts();
       }
 
-      undo.setUndoState('current', null);
+      undo.setUndoState('undoEvent', null);
     }
 
-    const lastUndoState = undo.getUndoState('current');
-    if (lastUndoState) {
-      onUndo(lastUndoState as UndoState);
+    const lastUndoEvent = undo.getUndoState('undoEvent');
+    if (lastUndoEvent) {
+      onUndo(lastUndoEvent);
     }
 
     return listen('undo-event', onUndo);
