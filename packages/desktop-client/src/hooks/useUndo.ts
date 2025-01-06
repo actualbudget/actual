@@ -49,6 +49,10 @@ export function useUndo(): UndoActions {
   );
 
   const showRedoNotification = useCallback(
+      if (!isNarrowWidth) {
+        return;
+      }
+
     (notificaton: Notification) => {
       dispatch(
         addNotification({
@@ -62,7 +66,7 @@ export function useUndo(): UndoActions {
         }),
       );
     },
-    [dispatch, dispatchRedo],
+    [dispatch, dispatchRedo, isNarrowWidth],
   );
 
   return {
