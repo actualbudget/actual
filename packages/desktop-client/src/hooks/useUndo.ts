@@ -3,6 +3,7 @@ import { useDispatch } from 'react-redux';
 
 import { undo, redo, addNotification } from 'loot-core/client/actions';
 import { type Notification } from 'loot-core/client/state-types/notifications';
+
 import { useResponsive } from '../components/responsive/ResponsiveProvider';
 
 type UndoActions = {
@@ -42,7 +43,7 @@ export function useUndo(): UndoActions {
         );
       }
     },
-    [dispatch, dispatchUndo],
+    [dispatch, dispatchUndo, isNarrowWidth],
   );
 
   const showRedoNotification = useCallback(
