@@ -66,7 +66,7 @@ function Loading({ style, 'aria-label': ariaLabel }: LoadingProps) {
 
 type TransactionListProps = {
   isLoading: boolean;
-  transactions: Readonly<TransactionEntity[]>;
+  transactions: readonly TransactionEntity[];
   onOpenTransaction?: (transaction: TransactionEntity) => void;
   isLoadingMore: boolean;
   onLoadMore: () => void;
@@ -208,8 +208,8 @@ export function TransactionList({
 }
 
 type SelectedTransactionsFloatingActionBarProps = {
-  transactions: Readonly<TransactionEntity[]>;
-  style?: Parameters<typeof FloatingActionBar>[0]['style'];
+  transactions: readonly TransactionEntity[];
+  style?: CSSProperties;
 };
 
 function SelectedTransactionsFloatingActionBar({
