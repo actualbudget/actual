@@ -49,11 +49,11 @@ export function useUndo(): UndoActions {
   );
 
   const showRedoNotification = useCallback(
+    (notificaton: Notification) => {
       if (!isNarrowWidth) {
         return;
       }
 
-    (notificaton: Notification) => {
       dispatch(
         addNotification({
           type: 'message',
