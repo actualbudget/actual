@@ -10,9 +10,9 @@ import { Setting } from './UI';
 
 export function LearnCategoriesSettings() {
   const { t } = useTranslation();
-  const [learnCategories, setLearnCategories] =
+  const [learnCategories = 'false', setLearnCategories] =
     useSyncedPref('learn-categories');
-  const isLearnCategoriesEnabled = String(learnCategories) !== 'false';
+  const isLearnCategoriesEnabled = String(learnCategories) === 'true';
 
   return (
     <Setting
