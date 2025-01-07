@@ -1,6 +1,7 @@
 // @ts-strict-ignore
 import * as monthUtils from '../../shared/months';
 import { extractScheduleConds } from '../../shared/schedules';
+import { CategoryEntity } from '../../types/models';
 import * as db from '../db';
 import {
   getRuleForSchedule,
@@ -9,8 +10,13 @@ import {
 } from '../schedules/app';
 
 import { isReflectBudget } from './actions';
+import { ScheduleTemplate, Template } from './types/templates';
 
-async function createScheduleList(template, current_month, category) {
+async function createScheduleList(
+  template: ScheduleTemplate[],
+  current_month: string,
+  category: CategoryEntity,
+) {
   const t = [];
   const errors = [];
 
@@ -186,22 +192,26 @@ async function getSinkingTotal(t) {
 }
 
 export async function goalsSchedule(
-  scheduleFlag,
-  template_lines,
-  current_month,
-  balance,
-  remainder,
-  last_month_balance,
-  to_budget,
-  errors,
-  category,
+  scheduleFlag: boolean,
+  template_lines: Template[],
+  current_month: string,
+  balance: number,
+  remainder: number,
+  last_month_balance: number,
+  to_budget: number,
+  errors: string[],
+  category: CategoryEntity,
 ) {
   if (!scheduleFlag) {
     scheduleFlag = true;
-    const template = template_lines.filter(t => t.type === 'schedule');
+    const scheduleTemplates = template_lines.filter(t => t.type === 'schedule');
     //in the case of multiple templates per category, schedules may have wrong priority level
 
-    const t = await createScheduleList(template, current_month, category);
+    const t = await createScheduleList(
+      scheduleTemplates,
+      current_month,
+      category,
+    );
     errors = errors.concat(t.errors);
 
     const isPayMonthOf = c =>
