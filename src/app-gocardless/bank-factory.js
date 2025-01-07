@@ -3,6 +3,7 @@ import AbnamroAbnanl2a from './banks/abnamro_abnanl2a.js';
 import AmericanExpressAesudef1 from './banks/american-express-aesudef1.js';
 import BancsabadellBsabesbb from './banks/bancsabadell-bsabesbbb.js';
 import BankinterBkbkesmm from './banks/bankinter-bkbkesmm.js';
+import BankOfIrelandB365 from './banks/bank_of_ireland_b365_bofiie2d.js';
 import Belfius from './banks/belfius_gkccbebb.js';
 import Berliner_Sparkasse_beladebexxx from './banks/berliner_sparkasse_beladebexxx.js';
 import BnpBeGebabebb from './banks/bnp-be-gebabebb.js';
@@ -41,6 +42,7 @@ export const banks = [
   AmericanExpressAesudef1,
   BancsabadellBsabesbb,
   BankinterBkbkesmm,
+  BankOfIrelandB365,
   Belfius,
   Berliner_Sparkasse_beladebexxx,
   BnpBeGebabebb,
