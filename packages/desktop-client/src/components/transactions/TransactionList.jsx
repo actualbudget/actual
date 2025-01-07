@@ -112,7 +112,7 @@ export function TransactionList({
   const onAdd = useCallback(async newTransactions => {
     newTransactions = realizeTempTransactions(newTransactions);
 
-    await saveDiff({ added: newTransactions });
+    await saveDiff({ added: newTransactions }, isLearnCategoriesEnabled);
     onRefetch();
   }, []);
 
@@ -143,14 +143,14 @@ export function TransactionList({
   const onAddSplit = useCallback(id => {
     const changes = addSplitTransaction(transactionsLatest.current, id);
     onChange(changes.newTransaction, changes.data);
-    saveDiffAndApply(changes.diff, changes, onChange);
+    saveDiffAndApply(changes.diff, changes, onChange, isLearnCategoriesEnabled);
     return changes.diff.added[0].id;
   }, []);
 
   const onSplit = useCallback(id => {
     const changes = splitTransaction(transactionsLatest.current, id);
     onChange(changes.newTransaction, changes.data);
-    saveDiffAndApply(changes.diff, changes, onChange);
+    saveDiffAndApply(changes.diff, changes, onChange, isLearnCategoriesEnabled);
     return changes.diff.added[0].id;
   }, []);
 
