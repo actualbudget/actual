@@ -718,21 +718,6 @@ class AccountInternal extends PureComponent<
           changedTransactions.push(res);
         }
       }
-      // Bulk fetch transactions
-      const transactions = this.state.transactions.filter(trans =>
-        ids.includes(trans.id),
-      );
-      //call the runrules function
-      const changedTransactions = [];
-      for (const transaction of transactions) {
-        await send('rules-run', {
-          transaction,
-        }).then((res: TransactionEntity | null) => {
-          if (res) {
-            changedTransactions.push(res);
-          }
-        });
-      }
 
       // If we have changed transactions, update them in the database
       if (changedTransactions.length > 0) {
@@ -742,7 +727,7 @@ class AccountInternal extends PureComponent<
       }
 
       // Fetch updated transactions once at the end
-      await this.fetchTransactions();
+      this.fetchTransactions();
     } catch (error) {
       console.error('Error applying rules:', error);
       this.props.addNotification({
