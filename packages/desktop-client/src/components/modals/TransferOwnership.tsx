@@ -75,7 +75,7 @@ export function TransferOwnership({
         }
       },
     );
-  }, [userData.userId, currentFile?.owner, t, dispatch]);
+  }, [userData?.userId, currentFile?.owner, t, dispatch]);
 
   async function onSave() {
     if (cloudFileId) {
