@@ -1,5 +1,5 @@
 import React, { type ReactNode } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useTranslation, Trans } from 'react-i18next';
 
 import { css } from '@emotion/css';
 
@@ -59,7 +59,7 @@ export function ThemeSettings() {
             },
           }}
         >
-          <Column title="Theme">
+          <Column title={t('Theme')}>
             <Select<Theme>
               onChange={value => {
                 switchTheme(value);
@@ -74,7 +74,7 @@ export function ThemeSettings() {
             />
           </Column>
           {theme === 'auto' && (
-            <Column title="Dark theme">
+            <Column title={t('Dark theme')}>
               <Select<DarkTheme>
                 onChange={value => {
                   switchDarkTheme(value);
@@ -93,8 +93,9 @@ export function ThemeSettings() {
       }
     >
       <Text>
-        <strong>{t('Themes')}</strong>
-        {t(' change the user interface colors.')}
+        <Trans>
+          <strong>Themes</strong> change the user interface colors.
+        </Trans>
       </Text>
     </Setting>
   );

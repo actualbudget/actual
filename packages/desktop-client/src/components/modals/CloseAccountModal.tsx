@@ -1,7 +1,7 @@
 // @ts-strict-ignore
 import React, { type FormEvent, useState, type CSSProperties } from 'react';
 import { Form } from 'react-aria-components';
-import { useTranslation } from 'react-i18next'; // Import useTranslation
+import { useTranslation, Trans } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 
 import {
@@ -11,6 +11,7 @@ import {
 } from 'loot-core/client/actions';
 import { integerToCurrency } from 'loot-core/src/shared/util';
 import { type AccountEntity } from 'loot-core/src/types/models';
+import { type TransObjectLiteral } from 'loot-core/types/util';
 
 import { useAccounts } from '../../hooks/useAccounts';
 import { useCategories } from '../../hooks/useCategories';
@@ -119,17 +120,26 @@ export function CloseAccountModal({
           />
           <View>
             <Paragraph>
-              {t('Are you sure you want to close ')}
-              <strong>{account.name}</strong>?{' '}
+              <Trans>
+                Are you sure you want to close{' '}
+                <strong>
+                  {{ accountName: account.name } as TransObjectLiteral}
+                </strong>
+                ?{' '}
+              </Trans>
               {canDelete ? (
                 <span>
-                  This account has no transactions so it will be permanently
-                  deleted.
+                  <Trans>
+                    This account has no transactions so it will be permanently
+                    deleted.
+                  </Trans>
                 </span>
               ) : (
                 <span>
-                  This account has transactions so we can’t permanently delete
-                  it.
+                  <Trans>
+                    This account has transactions so we can’t permanently delete
+                    it.
+                  </Trans>
                 </span>
               )}
             </Paragraph>
@@ -142,10 +152,18 @@ export function CloseAccountModal({
               {balance !== 0 && (
                 <View>
                   <Paragraph>
-                    This account has a balance of{' '}
-                    <strong>{integerToCurrency(balance)}</strong>. To close this
-                    account, select a different account to transfer this balance
-                    to:
+                    <Trans>
+                      This account has a balance of{' '}
+                      <strong>
+                        {
+                          {
+                            balance: integerToCurrency(balance),
+                          } as TransObjectLiteral
+                        }
+                      </strong>
+                      . To close this account, select a different account to
+                      transfer this balance to:
+                    </Trans>
                   </Paragraph>
 
                   <View style={{ marginBottom: 15 }}>
@@ -176,16 +194,18 @@ export function CloseAccountModal({
 
                   {transferError && (
                     <FormError style={{ marginBottom: 15 }}>
-                      {t('Transfer is required')}
+                      <Trans>Transfer is required</Trans>
                     </FormError>
                   )}
 
                   {needsCategory(account, transferAccountId, accounts) && (
                     <View style={{ marginBottom: 15 }}>
                       <Paragraph>
-                        Since you are transferring the balance from an on budget
-                        account to an off budget account, this transaction must
-                        be categorized. Select a category:
+                        <Trans>
+                          Since you are transferring the balance from an on
+                          budget account to an off budget account, this
+                          transaction must be categorized. Select a category:
+                        </Trans>
                       </Paragraph>
 
                       <CategoryAutocomplete
@@ -213,7 +233,9 @@ export function CloseAccountModal({
                       />
 
                       {categoryError && (
-                        <FormError>{t('Category is required')}</FormError>
+                        <FormError>
+                          <Trans>Category is required</Trans>
+                        </FormError>
                       )}
                     </View>
                   )}
@@ -223,22 +245,24 @@ export function CloseAccountModal({
               {!canDelete && (
                 <View style={{ marginBottom: 15 }}>
                   <Text style={{ fontSize: 12 }}>
-                    {t('You can also')}{' '}
-                    <Link
-                      variant="text"
-                      onClick={() => {
-                        setLoading(true);
+                    <Trans>
+                      You can also{' '}
+                      <Link
+                        variant="text"
+                        onClick={() => {
+                          setLoading(true);
 
-                        dispatch(forceCloseAccount(account.id));
-                        close();
-                      }}
-                      style={{ color: theme.errorText }}
-                    >
-                      {t('force close')}
-                    </Link>{' '}
-                    the account which will delete it and all its transactions
-                    permanently. Doing so may change your budget unexpectedly
-                    since money in it may vanish.
+                          dispatch(forceCloseAccount(account.id));
+                          close();
+                        }}
+                        style={{ color: theme.errorText }}
+                      >
+                        force close
+                      </Link>{' '}
+                      the account which will delete it and all its transactions
+                      permanently. Doing so may change your budget unexpectedly
+                      since money in it may vanish.
+                    </Trans>
                   </Text>
                 </View>
               )}
@@ -256,7 +280,7 @@ export function CloseAccountModal({
                   }}
                   onPress={close}
                 >
-                  {t('Cancel')}
+                  <Trans>Cancel</Trans>
                 </Button>
                 <Button
                   type="submit"
@@ -265,7 +289,7 @@ export function CloseAccountModal({
                     height: isNarrowWidth ? styles.mobileMinHeight : undefined,
                   }}
                 >
-                  {t('Close Account')}
+                  <Trans>Close Account</Trans>
                 </Button>
               </View>
             </Form>
