@@ -89,10 +89,10 @@ git tag vX.Y.Z
 git push vX.Y.Z
 ```
 
-A GitHub release then needs to be created in [actual](https://github.com/actualbudget/actual) using the below as a template.
+A GitHub release should be automatically generated on push in [actual](https://github.com/actualbudget/actual). Un-mark it as a draft and change the text to the below
 
 ```markdown
-:link: [View release notes](https://actualbudget.org/blog/release-23.10.0)
+:link: [View release notes](https://actualbudget.org/blog/release-25.2.0)
 
 ## Desktop releases
 
