@@ -253,7 +253,10 @@ export function CloseAccountModal({
                         onClick={() => {
                           setLoading(true);
                           dispatch(
-                            closeAccount({ accountId: account.id, forced: true }),
+                            closeAccount({
+                              accountId: account.id,
+                              forced: true,
+                            }),
                           );
                           close();
                         }}

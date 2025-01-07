@@ -3,10 +3,12 @@ import React, { type CSSProperties, useRef, useState } from 'react';
 
 import { css, cx } from '@emotion/css';
 
-import {
-  openAccountCloseModal,
-} from 'loot-core/client/actions';
+import { openAccountCloseModal } from 'loot-core/client/actions';
 import * as Platform from 'loot-core/client/platform';
+import {
+  reopenAccount,
+  updateAccount,
+} from 'loot-core/client/queries/queriesSlice';
 import { type AccountEntity } from 'loot-core/src/types/models';
 
 import { useContextMenu } from '../../hooks/useContextMenu';
@@ -32,7 +34,6 @@ import {
 } from '../sort';
 import { type SheetFields, type Binding } from '../spreadsheet';
 import { CellValue } from '../spreadsheet/CellValue';
-import { reopenAccount, updateAccount } from 'loot-core/client/queries/queriesSlice';
 
 export const accountNameStyle: CSSProperties = {
   marginTop: -2,
@@ -199,7 +200,7 @@ export function Account<FieldName extends SheetFields<'account'>>({
                               account: {
                                 ...account,
                                 name: newAccountName,
-                              }
+                              },
                             }),
                           );
                         }
