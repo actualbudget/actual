@@ -49,9 +49,9 @@ export function ManagePayeesWithData({
     }
     loadData();
 
-    const unlisten = listen('sync-event', async ({ type, tables }) => {
-      if (type === 'applied') {
-        if (tables.includes('rules')) {
+    const unlisten = listen('sync-event', async event => {
+      if (event.type === 'applied') {
+        if (event.tables.includes('rules')) {
           await refetchRuleCounts();
         }
       }
