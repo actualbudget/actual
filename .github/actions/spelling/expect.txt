@@ -68,3 +68,8 @@ VUB
 websecure
 WOR
 youngcw
+Authentik
+Entra
+Keycloak
+userinfo
+passwordless
