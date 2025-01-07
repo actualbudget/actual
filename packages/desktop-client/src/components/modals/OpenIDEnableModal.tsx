@@ -85,7 +85,7 @@ export function OpenIDEnableModal({
                 color: theme.pageTextLight,
                 paddingTop: 5,
               }}
-              title={t('After enabling openid all sessions will be closed')}
+              title={t('After enabling OpenID all sessions will be closed')}
             />
             <Label
               style={{

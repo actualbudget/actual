@@ -42,7 +42,7 @@ export function DuplicateFileModal({
   onComplete,
 }: DuplicateFileProps) {
   const { t } = useTranslation();
-  const fileEndingTranslation = t(' - copy');
+  const fileEndingTranslation = ' - ' + t('copy');
   const [newName, setNewName] = useState(file.name + fileEndingTranslation);
   const [nameError, setNameError] = useState<string | null>(null);
 
@@ -227,8 +227,11 @@ export function DuplicateFileModal({
                   }}
                   onPress={() => handleDuplicate('localOnly')}
                 >
-                  <Trans>Duplicate</Trans>
-                  {isCloudFile && <Trans> locally</Trans>}
+                  {isCloudFile ? (
+                    <Trans>Duplicate locally</Trans>
+                  ) : (
+                    <Trans>Duplicate</Trans>
+                  )}
                 </ButtonWithLoading>
               )}
             </ModalButtons>

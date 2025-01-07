@@ -120,7 +120,7 @@ export function LoadBackupModal({
                     )}{' '}
                     <Text style={{ fontWeight: 600 }}>
                       {t(
-                        'If you use a backup, you will have to setup all your devices to sync from the new budget.',
+                        'If you use a backup, you will have to set up all your devices to sync from the new budget.',
                       )}
                     </Text>
                   </Block>
@@ -129,7 +129,7 @@ export function LoadBackupModal({
                     isDisabled={backupDisabled}
                     onPress={() => dispatch(makeBackup())}
                   >
-                    {t('Backup now')}
+                    {t('Back up now')}
                   </Button>
                 </View>
               )}

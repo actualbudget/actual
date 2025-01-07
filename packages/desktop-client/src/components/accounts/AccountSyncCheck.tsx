@@ -68,7 +68,7 @@ function useErrorMessage() {
 
     return (
       <Trans>
-        An internal error occurred. Try to login again, or get{' '}
+        An internal error occurred. Try to log in again, or get{' '}
         <Link variant="external" to="https://actualbudget.org/contact/">
           in touch
         </Link>{' '}

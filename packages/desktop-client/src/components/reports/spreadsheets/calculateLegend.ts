@@ -19,24 +19,41 @@ export function calculateLegend(
   const chooseData =
     groupBy === 'Interval'
       ? intervalData.map(c => {
-          return { name: c.date, id: null };
+          return { name: c.date, id: null, data: c };
         })
       : calcDataFiltered.map(c => {
-          return { name: c.name, id: c.id };
+          return { name: c.name, id: c.id, data: c };
         });
+
+  function getColor(data: IntervalEntity, index: number) {
+    if (graphType === 'DonutGraph') {
+      return colorScale[index % colorScale.length];
+    }
+
+    if (groupBy === 'Interval') {
+      if (balanceTypeOp === 'totalDebts') {
+        return theme.reportsRed;
+      }
+
+      if (balanceTypeOp === 'totalTotals') {
+        if (data.totalTotals < 0) {
+          return theme.reportsRed;
+        }
+
+        return theme.reportsBlue;
+      }
+
+      return theme.reportsBlue;
+    }
+
+    return colorScale[index % colorScale.length];
+  }
 
   const legend: LegendEntity[] = chooseData.map((item, index) => {
     return {
       id: item.id || '',
       name: item.name || '',
-      color:
-        graphType === 'DonutGraph'
-          ? colorScale[index % colorScale.length]
-          : groupBy === 'Interval'
-            ? balanceTypeOp === 'totalDebts'
-              ? theme.reportsRed
-              : theme.reportsBlue
-            : colorScale[index % colorScale.length],
+      color: getColor(item.data, index),
     };
   });
   return legend;

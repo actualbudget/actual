@@ -72,9 +72,9 @@ export function DateRange({ start, end, type }: DateRangeProps): ReactElement {
             Compare {{ formattedStartDate }} to {{ typeOrFormattedEndDate }}
           </Trans>
         ) : (
-          <Trans>
-            {{ formattedStartDate }} - {{ formattedEndDate }}
-          </Trans>
+          <>
+            {formattedStartDate} - {formattedEndDate}
+          </>
         )}
       </div>
     );

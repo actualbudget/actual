@@ -25,7 +25,7 @@ export function ManageRulesModal({ payeeId }: ManageRulesModalProps) {
   }
 
   return (
-    <Modal name={t('manage-rules')} isLoading={loading}>
+    <Modal name="manage-rules" isLoading={loading}>
       {({ state: { close } }) => (
         <>
           <ModalHeader

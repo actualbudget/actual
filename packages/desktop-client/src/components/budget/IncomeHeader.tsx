@@ -25,7 +25,7 @@ export function IncomeHeader({
         }}
       >
         <Button onPress={onShowNewGroup} style={{ fontSize: 12, margin: 10 }}>
-          <Trans>Add Group</Trans>
+          <Trans>Add group</Trans>
         </Button>
       </View>
       <RenderMonths

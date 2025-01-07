@@ -1,4 +1,4 @@
-import { useTranslation } from 'react-i18next';
+import { useTranslation, Trans } from 'react-i18next';
 
 import { type PayeeEntity } from 'loot-core/src/types/models';
 
@@ -34,6 +34,11 @@ export function PayeeMenu({
     id => payeesById[id] == null || payeesById[id].transfer_acct,
   );
 
+  const selectedPayeeNames = [...selectedPayees]
+    .slice(0, 4)
+    .map(id => payeesById[id].name)
+    .join(', ');
+
   return (
     <Menu
       onMenuSelect={type => {
@@ -63,10 +68,11 @@ export function PayeeMenu({
             color: theme.pageTextSubdued,
           }}
         >
-          {[...selectedPayees]
-            .slice(0, 4)
-            .map(id => payeesById[id].name)
-            .join(', ') + (selectedPayees.size > 4 ? t(', and more') : '')}
+          {selectedPayees.size > 4 ? (
+            <Trans>{{ selectedPayeeNames }}, and more</Trans>
+          ) : (
+            selectedPayeeNames
+          )}
         </View>
       }
       items={[

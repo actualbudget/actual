@@ -8,6 +8,7 @@ import React, {
   useRef,
   type Dispatch,
   type ReactElement,
+  type ReactNode,
 } from 'react';
 import { useSelector } from 'react-redux';
 
@@ -257,7 +258,7 @@ export function useSelectedItems() {
 type SelectedProviderProps<T extends Item> = {
   instance: ReturnType<typeof useSelected<T>>;
   fetchAllIds?: () => Promise<string[]>;
-  children: ReactElement;
+  children: ReactNode;
 };
 
 export function SelectedProvider<T extends Item>({

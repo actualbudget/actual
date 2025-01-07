@@ -125,7 +125,7 @@ function EditableBudgetName() {
         }}
       >
         <Text style={{ whiteSpace: 'nowrap', overflow: 'hidden' }}>
-          {budgetName || t('A budget has no name')}
+          {budgetName || t('Unnamed')}
         </Text>
         <SvgExpandArrow
           width={7}

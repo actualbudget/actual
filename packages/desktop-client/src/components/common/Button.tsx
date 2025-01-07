@@ -7,8 +7,6 @@ import React, {
 
 import { css } from '@emotion/css';
 
-import { useAuth } from '../../auth/AuthProvider';
-import { type Permissions } from '../../auth/types';
 import { AnimatedLoading } from '../../icons/AnimatedLoading';
 import { styles, theme } from '../../style';
 
@@ -27,7 +25,6 @@ type ButtonProps = HTMLProps<HTMLButtonElement> & {
   textStyle?: CSSProperties;
   bounce?: boolean;
   as?: ElementType;
-  permission?: Permissions;
 };
 
 type ButtonType = 'normal' | 'primary' | 'bare' | 'menu' | 'menuSelected';
@@ -141,13 +138,10 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       activeStyle,
       bounce = true,
       as = 'button',
-      permission,
       ...nativeProps
     }: ButtonProps,
     ref,
   ) => {
-    const { hasPermission } = useAuth();
-
     const typeWithDisabled: ButtonType | `${ButtonType}Disabled` = disabled
       ? `${type}Disabled`
       : type;
@@ -192,7 +186,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         {...(typeof as === 'string'
           ? { className: css(buttonStyle) }
           : { style: buttonStyle })}
-        disabled={disabled ? disabled : !hasPermission(permission)}
+        disabled={disabled}
         type={isSubmit ? 'submit' : 'button'}
         {...nativeProps}
       >

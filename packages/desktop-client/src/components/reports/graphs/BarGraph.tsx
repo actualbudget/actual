@@ -186,10 +186,6 @@ export function BarGraph({
   const labelsMargin = viewLabels ? 30 : 0;
 
   const getVal = obj => {
-    if (balanceTypeOp === 'totalTotals' && groupBy === 'Interval') {
-      return obj.totalAssets;
-    }
-
     if (['totalDebts', 'netDebts'].includes(balanceTypeOp)) {
       return -1 * obj[balanceTypeOp];
     }
@@ -311,23 +307,6 @@ export function BarGraph({
                     />
                   ))}
                 </Bar>
-                {yAxis === 'date' && balanceTypeOp === 'totalTotals' && (
-                  <Bar dataKey="totalDebts" stackId="a">
-                    {viewLabels && !compact && (
-                      <LabelList
-                        dataKey="totalDebts"
-                        content={e => customLabel(e, balanceTypeOp)}
-                      />
-                    )}
-                    {data[splitData].map((entry, index) => (
-                      <Cell
-                        key={`cell-${index}`}
-                        fill={theme.reportsRed}
-                        name={entry.name}
-                      />
-                    ))}
-                  </Bar>
-                )}
               </BarChart>
             </div>
           </ResponsiveContainer>

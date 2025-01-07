@@ -1,5 +1,3 @@
-/* eslint-disable import/no-unused-modules */
-
 export namespace YNAB5 {
   export interface Budget {
     name?: string;
