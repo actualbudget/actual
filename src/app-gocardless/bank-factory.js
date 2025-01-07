@@ -31,6 +31,7 @@ import SparNordSpNoDK22 from './banks/sparnord-spnodk22.js';
 import SpkKarlsruhekarsde66 from './banks/spk-karlsruhe-karsde66.js';
 import SpkMarburgBiedenkopfHeladef1mar from './banks/spk-marburg-biedenkopf-heladef1mar.js';
 import SpkWormsAlzeyRiedMalade51wor from './banks/spk-worms-alzey-ried-malade51wor.js';
+import SskDusseldorfDussdeddxxx from './banks/ssk-dusseldorf-dussdeddxxx.js';
 import SwedbankHabaLV22 from './banks/swedbank-habalv22.js';
 import VirginNrnbgb22 from './banks/virgin_nrnbgb22.js';
 
@@ -67,6 +68,7 @@ export const banks = [
   SpkKarlsruhekarsde66,
   SpkMarburgBiedenkopfHeladef1mar,
   SpkWormsAlzeyRiedMalade51wor,
+  SskDusseldorfDussdeddxxx,
   SwedbankHabaLV22,
   VirginNrnbgb22,
 ];
