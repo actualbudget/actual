@@ -677,13 +677,17 @@ class AccountInternal extends PureComponent<
     const account = this.props.accounts.find(
       account => account.id === accountId,
     );
-    return account
-      ? this.state.search === '' &&
-          this.state.filterConditions.length === 0 &&
-          (this.state.sort === null ||
-            (this.state.sort.field === 'date' &&
-              this.state.sort.ascDesc === 'desc'))
-      : false;
+
+    if (!account) return false;
+    if (this.state.search !== '') return false;
+    if (this.state.filterConditions.length > 0) return false;
+    if (this.state.sort === null) {
+      return true;
+    } else {
+      return (
+        this.state.sort.field === 'date' && this.state.sort.ascDesc === 'desc'
+      );
+    }
   };
 
   async calculateBalances() {
