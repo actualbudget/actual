@@ -45,7 +45,7 @@ export function pagedQuery<TResponse = unknown>(
   );
 }
 
-type Data<TResponse> = ReadonlyArray<TResponse>;
+type Data<TResponse> = TResponse[];
 
 type Listener<TResponse = unknown> = (
   data: Data<TResponse>,

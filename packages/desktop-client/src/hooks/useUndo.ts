@@ -4,6 +4,8 @@ import { useDispatch } from 'react-redux';
 import { undo, redo, addNotification } from 'loot-core/client/actions';
 import { type Notification } from 'loot-core/client/state-types/notifications';
 
+import { useResponsive } from '../components/responsive/ResponsiveProvider';
+
 type UndoActions = {
   undo: () => void;
   redo: () => void;
@@ -15,6 +17,7 @@ const timeout = 10000;
 
 export function useUndo(): UndoActions {
   const dispatch = useDispatch();
+  const { isNarrowWidth } = useResponsive();
 
   const dispatchUndo = useCallback(() => {
     dispatch(undo());
@@ -26,6 +29,10 @@ export function useUndo(): UndoActions {
 
   const showUndoNotification = useCallback(
     (notification: Notification) => {
+      if (!isNarrowWidth) {
+        return;
+      }
+
       dispatch(
         addNotification({
           type: 'message',
@@ -38,11 +45,15 @@ export function useUndo(): UndoActions {
         }),
       );
     },
-    [dispatch, dispatchUndo],
+    [dispatch, dispatchUndo, isNarrowWidth],
   );
 
   const showRedoNotification = useCallback(
-    (notificaton: Notification) => {
+    (notification: Notification) => {
+      if (!isNarrowWidth) {
+        return;
+      }
+
       dispatch(
         addNotification({
           type: 'message',
@@ -51,11 +62,11 @@ export function useUndo(): UndoActions {
             title: 'Redo',
             action: dispatchRedo,
           },
-          ...notificaton,
+          ...notification,
         }),
       );
     },
-    [dispatch, dispatchRedo],
+    [dispatch, dispatchRedo, isNarrowWidth],
   );
 
   return {

@@ -302,7 +302,7 @@ export function Modals() {
                 />
               )}
               inputPlaceholder={t('Category name')}
-              buttonText="Add"
+              buttonText={t('Add')}
               onValidate={options.onValidate}
               onSubmit={options.onSubmit}
             />
