@@ -62,6 +62,7 @@ import { PasswordEnableModal } from './modals/PasswordEnableModal';
 import { PayeeAutocompleteModal } from './modals/PayeeAutocompleteModal';
 import { ScheduledTransactionMenuModal } from './modals/ScheduledTransactionMenuModal';
 import { SelectLinkedAccountsModal } from './modals/SelectLinkedAccountsModal';
+import { SelectNewPluginModal } from './modals/SelectNewPluginModal';
 import { SimpleFinInitialiseModal } from './modals/SimpleFinInitialiseModal';
 import { SingleInputModal } from './modals/SingleInputModal';
 import { TrackingBalanceMenuModal } from './modals/TrackingBalanceMenuModal';
@@ -658,6 +659,9 @@ export function Modals() {
 
         case 'enable-password-auth':
           return <PasswordEnableModal key={name} onSave={options.onSave} />;
+
+        case 'select-new-plugin':
+          return <SelectNewPluginModal key={name} onSave={options.onSave} />;
 
         default:
           throw new Error('Unknown modal');

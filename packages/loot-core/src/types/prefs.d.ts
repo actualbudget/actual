@@ -3,7 +3,8 @@ export type FeatureFlag =
   | 'actionTemplating'
   | 'upcomingLengthAdjustment'
   | 'contextMenus'
-  | 'openidAuth';
+  | 'openidAuth'
+  | 'plugins';
 
 /**
  * Cross-device preferences. These sync across devices when they are changed.
@@ -71,7 +72,13 @@ export type LocalPrefs = Partial<{
   'mobile.showSpentColumn': boolean;
 }>;
 
-export type Theme = 'light' | 'dark' | 'auto' | 'midnight' | 'development';
+export type Theme =
+  | 'light'
+  | 'dark'
+  | 'auto'
+  | 'midnight'
+  | 'development'
+  | string;
 export type DarkTheme = 'dark' | 'midnight';
 export type GlobalPrefs = Partial<{
   floatingSidebar: boolean;
@@ -81,6 +88,7 @@ export type GlobalPrefs = Partial<{
   preferredDarkTheme: DarkTheme;
   documentDir: string; // Electron only
   serverSelfSignedCert: string; // Electron only
+  customTheme: string | null;
 }>;
 
 export type AuthMethods = 'password' | 'openid';

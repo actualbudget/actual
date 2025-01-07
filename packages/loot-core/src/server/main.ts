@@ -1349,6 +1349,9 @@ handlers['save-global-prefs'] = async function (prefs) {
   if ('theme' in prefs) {
     await asyncStorage.setItem('theme', prefs.theme);
   }
+  if ('customTheme' in prefs) {
+    await asyncStorage.setItem('customTheme', prefs.customTheme);
+  }
   if ('preferredDarkTheme' in prefs) {
     await asyncStorage.setItem(
       'preferred-dark-theme',
@@ -1371,6 +1374,7 @@ handlers['load-global-prefs'] = async function () {
     [, documentDir],
     [, encryptKey],
     [, theme],
+    [, customTheme],
     [, preferredDarkTheme],
     [, serverSelfSignedCert],
   ] = await asyncStorage.multiGet([
@@ -1379,6 +1383,7 @@ handlers['load-global-prefs'] = async function () {
     'document-dir',
     'encrypt-key',
     'theme',
+    'customTheme',
     'preferred-dark-theme',
     'server-self-signed-cert',
   ]);
@@ -1392,9 +1397,11 @@ handlers['load-global-prefs'] = async function () {
       theme === 'dark' ||
       theme === 'auto' ||
       theme === 'development' ||
-      theme === 'midnight'
+      theme === 'midnight' ||
+      customTheme
         ? theme
         : 'auto',
+    customTheme,
     preferredDarkTheme:
       preferredDarkTheme === 'dark' || preferredDarkTheme === 'midnight'
         ? preferredDarkTheme

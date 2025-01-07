@@ -102,6 +102,12 @@ export function ExperimentalFeatures() {
             >
               <Trans>OpenID authentication method</Trans>
             </FeatureToggle>
+            <FeatureToggle
+              flag="plugins"
+              feedbackLink="https://github.com/actualbudget/actual/"
+            >
+              <Trans>Plugins</Trans>
+            </FeatureToggle>
           </View>
         ) : (
           <Link

@@ -337,6 +337,9 @@ type FinanceModals = {
   };
   'keyboard-shortcuts': EmptyObject;
   'goal-templates': EmptyObject;
+  'select-new-plugin': {
+    onSave?: () => void;
+  };
 };
 
 export type PushModalAction = {
