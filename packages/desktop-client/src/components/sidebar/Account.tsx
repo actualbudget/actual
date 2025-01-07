@@ -5,8 +5,6 @@ import { css, cx } from '@emotion/css';
 
 import {
   openAccountCloseModal,
-  reopenAccount,
-  updateAccount,
 } from 'loot-core/client/actions';
 import * as Platform from 'loot-core/client/platform';
 import { type AccountEntity } from 'loot-core/src/types/models';
@@ -34,6 +32,7 @@ import {
 } from '../sort';
 import { type SheetFields, type Binding } from '../spreadsheet';
 import { CellValue } from '../spreadsheet/CellValue';
+import { reopenAccount, updateAccount } from 'loot-core/client/queries/queriesSlice';
 
 export const accountNameStyle: CSSProperties = {
   marginTop: -2,
@@ -197,8 +196,10 @@ export function Account<FieldName extends SheetFields<'account'>>({
                         if (newAccountName.trim() !== '') {
                           dispatch(
                             updateAccount({
-                              ...account,
-                              name: newAccountName,
+                              account: {
+                                ...account,
+                                name: newAccountName,
+                              }
                             }),
                           );
                         }
@@ -233,7 +234,7 @@ export function Account<FieldName extends SheetFields<'account'>>({
                       break;
                     }
                     case 'reopen': {
-                      dispatch(reopenAccount(account.id));
+                      dispatch(reopenAccount({ accountId: account.id }));
                       break;
                     }
                     case 'rename': {
