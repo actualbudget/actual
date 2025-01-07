@@ -43,7 +43,7 @@ function useGetUserDirectoryErrors() {
       case 'unauthorized':
         return t('You are not logged in.');
       case 'token-expired':
-        return t('Login expired, please login again.');
+        return t('Login expired, please log in again.');
       case 'user-cant-be-empty':
         return t(
           'Please enter a value for the username; the field cannot be empty.',
@@ -405,7 +405,7 @@ const RoleDescription = () => {
           }}
         >
           <Trans>
-            Also can assign ownership of a budget to another person, ensuring
+            Can also assign ownership of a budget to another person, ensuring
             efficient budget management.
           </Trans>
         </Text>

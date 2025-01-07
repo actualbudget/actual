@@ -19,6 +19,7 @@ import {
 } from './models';
 import { OpenIdConfig } from './models/openid';
 import { GlobalPrefs, MetadataPrefs } from './prefs';
+// eslint-disable-next-line import/no-unresolved
 import { Query } from './query';
 import { EmptyObject } from './util';
 
@@ -122,7 +123,7 @@ export interface ServerHandlers {
   'payees-get-rules': (arg: { id: string }) => Promise<RuleEntity[]>;
 
   'make-filters-from-conditions': (arg: {
-    conditions;
+    conditions: unknown;
   }) => Promise<{ filters: unknown[] }>;
 
   getCell: (arg: {
