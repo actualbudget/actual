@@ -6,6 +6,8 @@ import {
 
 import { type AppDispatch, type RootState } from '../store';
 
+const sliceName = 'app';
+
 const createAppAsyncThunk = createAsyncThunk.withTypes<{
   state: RootState;
   dispatch: AppDispatch;
@@ -30,7 +32,7 @@ const initialState: AppState = {
 };
 
 export const updateApp = createAppAsyncThunk(
-  'app/updateApp',
+  `${sliceName}/updateApp`,
   async (_, thunkApi) => {
     await global.Actual.applyAppUpdate();
     thunkApi.dispatch(setAppState({ updateInfo: null }));
@@ -40,7 +42,7 @@ export const updateApp = createAppAsyncThunk(
 type SetAppStatePayload = Partial<AppState>;
 
 const appSlice = createSlice({
-  name: 'app',
+  name: sliceName,
   initialState,
   reducers: {
     setAppState(state, action: PayloadAction<SetAppStatePayload>) {
