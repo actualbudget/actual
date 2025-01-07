@@ -102,7 +102,7 @@ export function TransactionList({
   const dispatch = useDispatch();
   const transactionsLatest = useRef();
   const navigate = useNavigate();
-  const [learnCategories = 'false'] = useSyncedPref('learn-categories');
+  const [learnCategories = 'true'] = useSyncedPref('learn-categories');
   const isLearnCategoriesEnabled = String(learnCategories) === 'true';
 
   useLayoutEffect(() => {
