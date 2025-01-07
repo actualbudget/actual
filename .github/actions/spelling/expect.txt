@@ -1,3 +1,5 @@
+ABNAMRO
+ABNANL
 Activo
 AESUDEF
 ALZEY
@@ -8,6 +10,7 @@ Belfius
 Biedenkopf
 Bizum
 BKBKESMM
+BYLADEM
 Caddyfile
 CAGLPTPL
 CAMT
@@ -18,17 +21,23 @@ Danske
 datadir
 DIREKT
 Dominguez
+ENTERCARD
 fidd
 Fineco
 Fintro
+FORTUNEO
+FTNOFRP
 gernes
 gocardless
 HABAL
 HELADEF
 INGBPLPW
 INVSTMTMSGSRS
+ISYBANK
+ITBBITMM
 jfdoming
 KORT
+Kreditbank
 modals
 murmurhash
 nginx
@@ -48,6 +57,7 @@ SUBASKBX
 SVGR
 swc
 SWEDBANK
+SWEDNOKK
 Synology
 systemctl
 tada
