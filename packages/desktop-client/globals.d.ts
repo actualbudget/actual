@@ -1,3 +1,4 @@
+// eslint-disable-next-line import/no-unresolved
 import { type CSSObject } from '@emotion/css/dist/declarations/src/create-instance';
 
 // Allow images to be imported
