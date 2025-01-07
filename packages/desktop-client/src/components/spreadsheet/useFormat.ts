@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo } from 'react';
 import {
   getNumberFormat,
   integerToCurrency,
-  isNumberFormat,
+  parseNumberFormat,
   setNumberFormat,
 } from 'loot-core/src/shared/util';
 
@@ -64,10 +64,7 @@ export function useFormat() {
   const [hideFraction] = useSyncedPref('hideFraction');
 
   const config = useMemo(
-    () => ({
-      format: isNumberFormat(numberFormat) ? numberFormat : 'comma-dot',
-      hideFraction: String(hideFraction) === 'true',
-    }),
+    () => parseNumberFormat({ format: numberFormat, hideFraction }),
     [numberFormat, hideFraction],
   );
 
