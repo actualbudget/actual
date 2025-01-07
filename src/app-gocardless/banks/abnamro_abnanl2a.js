@@ -24,25 +24,16 @@ export default {
 
   normalizeTransaction(transaction, _booked) {
     // There is no remittanceInformationUnstructured, so we'll make it
-    let remittanceInformationUnstructured =
-      transaction.remittanceInformationUnstructuredArray.join(' ');
+    transaction.remittanceInformationUnstructured =
+      transaction.remittanceInformationUnstructuredArray.join(', ');
 
     // Remove clutter to extract the payee from remittanceInformationUnstructured ...
     // ... when not otherwise provided.
-    const matches =
-      remittanceInformationUnstructured.match(/Betaalpas(.+),PAS/);
-    const payeeName = matches
-      ? matches[1].replace(/.+\*/, '').trim()
-      : undefined;
+    const payeeName = transaction.remittanceInformationUnstructuredArray
+      .map((el) => el.match(/^(?:.*\*)?(.+),PAS\d+$/))
+      .find((match) => match)?.[1];
     transaction.debtorName = transaction.debtorName || payeeName;
     transaction.creditorName = transaction.creditorName || payeeName;
-
-    // There are anumber of superfluous keywords in the remittanceInformation.
-    // Remove them to aboid clutter in notes.
-    const keywordsToRemove = ['.EA, Betaalpas', ',PAS\\d{3}', 'NR:.+, '];
-    const regex = new RegExp(keywordsToRemove.join('|'), 'g');
-    transaction.remittanceInformationUnstructured =
-      remittanceInformationUnstructured.replace(regex, '').trim();
 
     return {
       ...transaction,
