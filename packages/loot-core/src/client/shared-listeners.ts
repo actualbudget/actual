@@ -12,6 +12,7 @@ import {
   loadPrefs,
   pushModal,
   resetSync,
+  signOut,
   sync,
   uploadBudget,
 } from './actions';
@@ -301,7 +302,7 @@ export function listenForSyncEvent(store: AppStore) {
             id: 'login-expired',
             button: {
               title: 'Go to login',
-              action: () => actions.signOut(),
+              action: () => store.dispatch(signOut()),
             },
           };
           break;
