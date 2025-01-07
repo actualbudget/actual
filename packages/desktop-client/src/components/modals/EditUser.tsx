@@ -1,13 +1,14 @@
 import { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { addNotification, popModal, signOut } from 'loot-core/client/actions';
 import { send } from 'loot-core/platform/client/fetch';
 import {
   PossibleRoles,
   type UserEntity,
 } from 'loot-core/src/types/models/user';
 
-import { type BoundActions, useActions } from '../../hooks/useActions';
+import { useAppDispatch } from '../../redux';
 import { styles, theme } from '../../style';
 import { Button } from '../common/Button2';
 import { Input } from '../common/Input';
@@ -26,7 +27,6 @@ type EditUserProps = {
     method: 'user-add' | 'user-update',
     user: User,
     setError: (error: string) => void,
-    actions: BoundActions,
   ) => Promise<void>;
 };
 
@@ -75,13 +75,13 @@ function useGetUserDirectoryErrors() {
 
 function useSaveUser() {
   const { t } = useTranslation();
+  const dispatch = useAppDispatch();
   const { getUserDirectoryErrors } = useGetUserDirectoryErrors();
 
   async function saveUser(
     method: 'user-add' | 'user-update',
     user: User,
     setError: (error: string) => void,
-    actions: BoundActions,
   ): Promise<boolean> {
     const { error, id: newId } = (await send(method, user)) || {};
     if (!error) {
@@ -91,19 +91,21 @@ function useSaveUser() {
     } else {
       setError(getUserDirectoryErrors(error));
       if (error === 'token-expired') {
-        actions.addNotification({
-          type: 'error',
-          id: 'login-expired',
-          title: t('Login expired'),
-          sticky: true,
-          message: getUserDirectoryErrors(error),
-          button: {
-            title: t('Go to login'),
-            action: () => {
-              actions.signOut();
+        dispatch(
+          addNotification({
+            type: 'error',
+            id: 'login-expired',
+            title: t('Login expired'),
+            sticky: true,
+            message: getUserDirectoryErrors(error),
+            button: {
+              title: t('Go to login'),
+              action: () => {
+                dispatch(signOut());
+              },
             },
-          },
-        });
+          }),
+        );
       }
 
       return false;
@@ -138,8 +140,8 @@ export function EditUserFinanceApp({
           />
           <EditUser
             defaultUser={defaultUser}
-            onSave={async (method, user, setError, actions) => {
-              if (await saveUser(method, user, setError, actions)) {
+            onSave={async (method, user, setError) => {
+              if (await saveUser(method, user, setError)) {
                 originalOnSave(user);
                 close();
               }
@@ -153,8 +155,8 @@ export function EditUserFinanceApp({
 
 function EditUser({ defaultUser, onSave: originalOnSave }: EditUserProps) {
   const { t } = useTranslation();
+  const dispatch = useAppDispatch();
 
-  const actions = useActions();
   const [userName, setUserName] = useState<string>(defaultUser.userName ?? '');
   const [displayName, setDisplayName] = useState<string>(
     defaultUser.displayName ?? '',
@@ -181,7 +183,7 @@ function EditUser({ defaultUser, onSave: originalOnSave }: EditUserProps) {
     };
 
     const method = user.id ? 'user-update' : 'user-add';
-    await originalOnSave(method, user, setError, actions);
+    await originalOnSave(method, user, setError);
   }
 
   return (
@@ -306,7 +308,7 @@ function EditUser({ defaultUser, onSave: originalOnSave }: EditUserProps) {
         <Button
           variant="bare"
           style={{ marginRight: 10 }}
-          onPress={actions.popModal}
+          onPress={() => dispatch(popModal())}
         >
           <Trans>Cancel</Trans>
         </Button>
