@@ -1,5 +1,5 @@
-import type { CategoryGroupEntity } from '../../..//types/models';
 import type { Handlers } from '../../../types/handlers';
+import type { CategoryGroupEntity } from '../../../types/models';
 import type { ServerEvents } from '../../../types/server-events';
 
 export function init(socketName: string): Promise<unknown>;

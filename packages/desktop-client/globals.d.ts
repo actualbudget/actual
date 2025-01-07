@@ -10,5 +10,5 @@ declare module 'react' {
 }
 
 declare global {
-  var __resetWorld: () => void;
+  function __resetWorld(): void;
 }

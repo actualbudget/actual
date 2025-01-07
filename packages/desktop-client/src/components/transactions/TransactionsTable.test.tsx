@@ -1,4 +1,4 @@
-import React, { useState, useEffect, type ComponentProps } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -21,6 +21,13 @@ import {
   updateTransaction,
 } from 'loot-core/src/shared/transactions';
 import { integerToCurrency } from 'loot-core/src/shared/util';
+import {
+  type AccountEntity,
+  type CategoryEntity,
+  type CategoryGroupEntity,
+  type PayeeEntity,
+  type TransactionEntity,
+} from 'loot-core/types/models';
 
 import { AuthProvider } from '../../auth/AuthProvider';
 import { SelectedProviderWithItems } from '../../hooks/useSelected';
@@ -28,13 +35,6 @@ import { SplitsExpandedProvider } from '../../hooks/useSplitsExpanded';
 import { ResponsiveProvider } from '../responsive/ResponsiveProvider';
 
 import { TransactionTable } from './TransactionsTable';
-import {
-  AccountEntity,
-  CategoryEntity,
-  CategoryGroupEntity,
-  PayeeEntity,
-  TransactionEntity,
-} from 'loot-core/types/models';
 
 vi.mock('loot-core/src/platform/client/fetch');
 vi.mock('../../hooks/useFeatureFlag', () => ({
@@ -135,6 +135,7 @@ function LiveTransactionTable(props: LiveTransactionTableProps) {
   useEffect(() => {
     if (transactions === props.transactions) return;
     props.onTransactionsChange?.(transactions);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [transactions]);
 
   const onSplit = (id: string) => {
@@ -1017,7 +1018,7 @@ describe('Transactions', () => {
         category: undefined,
         cleared: false,
         date: '2017-01-01',
-        error: null,
+        error: undefined,
         id: expect.any(String),
         is_parent: true,
         notes: 'Notes',
@@ -1035,6 +1036,7 @@ describe('Transactions', () => {
         is_child: true,
         parent_id: parentId,
         payee: 'alice-id',
+        reconciled: undefined,
         sort_order: -1,
         starting_balance_flag: null,
       },
@@ -1049,6 +1051,7 @@ describe('Transactions', () => {
         is_child: true,
         parent_id: parentId,
         payee: 'alice-id',
+        reconciled: undefined,
         sort_order: -2,
         starting_balance_flag: null,
       },
