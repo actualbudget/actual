@@ -41,8 +41,6 @@
     "i18next-parser": "^9.0.0",
     "i18next-resources-to-backend": "^1.2.1",
     "inter-ui": "^3.19.3",
-    "jest": "^27.5.1",
-    "jest-watch-typeahead": "^2.2.2",
     "lodash": "^4.17.21",
     "mdast-util-newline-to-break": "^2.0.0",
     "memoize-one": "^6.0.0",
