@@ -79,10 +79,10 @@ async function getCategoriesWithTemplates(): Promise<CategoryWithTemplates[]> {
     const parsedTemplates: Template[] = [];
 
     note.split('\n').forEach(line => {
-      const trimmedLine = line.trim();
+      const trimmedLine = line.substring(line.indexOf('#')).trim();
 
       if (
-        !trimmedLine.match(new RegExp(`^[^#]*${TEMPLATE_PREFIX}`)) &&
+        !trimmedLine.startsWith(TEMPLATE_PREFIX) &&
         !trimmedLine.startsWith(GOAL_PREFIX)
       ) {
         return;

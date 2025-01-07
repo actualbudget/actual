@@ -63,7 +63,7 @@ schedule = 'schedule'i
 full = 'full'i _ {return true}
 priority = '-'i number: number {return number}
 remainder = 'remainder'i _? weight: positive? { return +weight || 1 }
-template = [^#]* '#template' priority: priority? {return {priority: +priority, directive: 'template'}}
+template = '#template' priority: priority? {return {priority: +priority, directive: 'template'}}
 goal = '#goal'i { return 'goal'}
 
 _ 'space' = ' '+
