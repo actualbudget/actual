@@ -39,7 +39,7 @@ export const updateApp = createAppAsyncThunk(
 
 type SetAppStateAction = PayloadAction<Partial<AppState>>;
 
-const accountSlice = createSlice({
+const appSlice = createSlice({
   name: 'app',
   initialState,
   reducers: {
@@ -52,10 +52,10 @@ const accountSlice = createSlice({
   },
 });
 
-export const { name, reducer, getInitialState } = accountSlice;
+export const { name, reducer, getInitialState } = appSlice;
 
 export const actions = {
-  ...accountSlice.actions,
+  ...appSlice.actions,
   updateApp,
 };
 
