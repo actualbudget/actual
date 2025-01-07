@@ -49,9 +49,7 @@ export function listenForSyncEvent(actions, store) {
       }
     } else if (type === 'error') {
       let notif: Notification | null = null;
-      const learnMore = t(
-        '[Learn more](https://actualbudget.org/docs/getting-started/sync/#debugging-sync-issues)',
-      );
+      const learnMore = `[${t('Learn more')}](https://actualbudget.org/docs/getting-started/sync/#debugging-sync-issues)`;
       const githubIssueLink =
         'https://github.com/actualbudget/actual/issues/new?assignees=&labels=bug&template=bug-report.yml&title=%5BBug%5D%3A+';
 
@@ -275,6 +273,18 @@ export function listenForSyncEvent(actions, store) {
           break;
         case 'network':
           // Show nothing
+          break;
+        case 'token-expired':
+          notif = {
+            title: 'Login expired',
+            message: 'Please login again.',
+            sticky: true,
+            id: 'login-expired',
+            button: {
+              title: 'Go to login',
+              action: () => actions.signOut(),
+            },
+          };
           break;
         default:
           console.trace('unknown error', info);

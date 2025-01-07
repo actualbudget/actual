@@ -139,7 +139,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       bounce = true,
       as = 'button',
       ...nativeProps
-    },
+    }: ButtonProps,
     ref,
   ) => {
     const typeWithDisabled: ButtonType | `${ButtonType}Disabled` = disabled

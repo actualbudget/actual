@@ -63,7 +63,7 @@ expect.extend({
   },
 });
 
-// eslint-disable-next-line import/no-unused-modules, import/no-default-export
+// eslint-disable-next-line import/no-default-export
 export default defineConfig({
   timeout: 30000, // 30 seconds
   retries: 1,

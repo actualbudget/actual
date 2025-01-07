@@ -58,7 +58,7 @@ export class Navigation {
   async createAccount(data) {
     await this.page.getByRole('button', { name: 'Add account' }).click();
     await this.page
-      .getByRole('button', { name: 'Create local account' })
+      .getByRole('button', { name: 'Create a local account' })
       .click();
 
     // Fill the form

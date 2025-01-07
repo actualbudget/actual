@@ -359,9 +359,7 @@ export function Overview() {
 
                         if (item === 'markdown-card') {
                           onAddWidget<MarkdownWidget>(item, {
-                            content: t(
-                              '### Text Widget\n\nEdit this widget to change the **markdown** content.',
-                            ),
+                            content: `### ${t('Text Widget')}\n\n${t('Edit this widget to change the **markdown** content.')}`,
                           });
                           return;
                         }

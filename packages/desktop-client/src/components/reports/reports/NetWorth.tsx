@@ -251,16 +251,20 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
         />
 
         <View style={{ marginTop: 30, userSelect: 'none' }}>
-          <Trans>
-            <Paragraph>
-              <strong>{t('How is net worth calculated?')}</strong>
-            </Paragraph>
-            <Paragraph>
-              {t(
-                'Net worth shows the balance of all accounts over time, including all of your investments. Your “net worth” is considered to be the amount you’d have if you sold all your assets and paid off as much debt as possible. If you hover over the graph, you can also see the amount of assets and debt individually.',
-              )}
-            </Paragraph>
-          </Trans>
+          <Paragraph>
+            <strong>
+              <Trans>How is net worth calculated?</Trans>
+            </strong>
+          </Paragraph>
+          <Paragraph>
+            <Trans>
+              Net worth shows the balance of all accounts over time, including
+              all of your investments. Your “net worth” is considered to be the
+              amount you’d have if you sold all your assets and paid off as much
+              debt as possible. If you hover over the graph, you can also see
+              the amount of assets and debt individually.
+            </Trans>
+          </Paragraph>
         </View>
       </View>
     </Page>

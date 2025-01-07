@@ -168,7 +168,7 @@ export function Header({
             variant="bare"
             onPress={() => onChangeDates(...getLatestRange(11))}
           >
-            {t('1 Year')}
+            {t('1 year')}
           </Button>
           <Button
             variant="bare"
@@ -212,7 +212,7 @@ export function Header({
               )
             }
           >
-            {t('All Time')}
+            {t('All time')}
           </Button>
 
           {filters && (

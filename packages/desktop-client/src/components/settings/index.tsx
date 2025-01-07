@@ -1,5 +1,5 @@
 import React, { type ReactNode, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useTranslation, Trans } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 
 import { css } from '@emotion/css';
@@ -24,6 +24,7 @@ import { Page } from '../Page';
 import { useResponsive } from '../responsive/ResponsiveProvider';
 import { useServerVersion } from '../ServerContext';
 
+import { AuthSettings } from './AuthSettings';
 import { Backups } from './Backups';
 import { BudgetTypeSettings } from './BudgetTypeSettings';
 import { EncryptionSettings } from './Encryption';
@@ -36,7 +37,6 @@ import { ThemeSettings } from './Themes';
 import { AdvancedToggle, Setting } from './UI';
 
 function About() {
-  const { t } = useTranslation();
   const version = useServerVersion();
   const latestVersion = useLatestVersion();
   const isOutdated = useIsOutdated();
@@ -44,8 +44,10 @@ function About() {
   return (
     <Setting>
       <Text>
-        <strong>{t('Actual')}</strong>
-        {t(' is a super fast privacy-focused app for managing your finances.')}
+        <Trans>
+          <strong>Actual</strong> is a super fast privacy-focused app for
+          managing your finances.
+        </Trans>
       </Text>
       <View
         style={{
@@ -63,19 +65,25 @@ function About() {
         })}
         data-vrt-mask
       >
-        <Text>Client version: v{window.Actual?.ACTUAL_VERSION}</Text>
-        <Text>Server version: {version}</Text>
+        <Text>
+          <Trans>
+            Client version: {{ version: `v${window.Actual?.ACTUAL_VERSION}` }}
+          </Trans>
+        </Text>
+        <Text>
+          <Trans>Server version: {{ version }}</Trans>
+        </Text>
         {isOutdated ? (
           <Link
             variant="external"
             to="https://actualbudget.org/docs/releases"
             linkColor="purple"
           >
-            {t('New version available:')} {latestVersion}
+            <Trans>New version available: {{ latestVersion }}</Trans>
           </Link>
         ) : (
           <Text style={{ color: theme.noticeText, fontWeight: 600 }}>
-            {t('You’re up to date!')}
+            <Trans>You’re up to date!</Trans>
           </Text>
         )}
         <Text>
@@ -84,7 +92,7 @@ function About() {
             to="https://actualbudget.org/docs/releases"
             linkColor="purple"
           >
-            {t('Release Notes')}
+            <Trans>Release Notes</Trans>
           </Link>
         </Text>
       </View>
@@ -97,23 +105,28 @@ function IDName({ children }: { children: ReactNode }) {
 }
 
 function AdvancedAbout() {
-  const { t } = useTranslation();
   const [budgetId] = useMetadataPref('id');
   const [groupId] = useMetadataPref('groupId');
 
   return (
     <Setting>
       <Text>
-        <strong>{t('IDs')}</strong>
-        {t(
-          ' are the names Actual uses to identify your budget internally. There are several different IDs associated with your budget. The Budget ID is used to identify your budget file. The Sync ID is used to access the budget on the server.',
-        )}
+        <Trans>
+          <strong>IDs</strong> are the names Actual uses to identify your budget
+          internally. There are several different IDs associated with your
+          budget. The Budget ID is used to identify your budget file. The Sync
+          ID is used to access the budget on the server.
+        </Trans>
       </Text>
       <Text>
-        <IDName>{t('Budget ID:')}</IDName> {budgetId}
+        <Trans>
+          <IDName>Budget ID:</IDName> {{ budgetId }}
+        </Trans>
       </Text>
       <Text style={{ color: theme.pageText }}>
-        <IDName>{t('Sync ID:')}</IDName> {groupId || '(none)'}
+        <Trans>
+          <IDName>Sync ID:</IDName> {{ syncId: groupId || '(none)' }}
+        </Trans>
       </Text>
       {/* low priority todo: eliminate some or all of these, or decide when/if to show them */}
       {/* <Text>
@@ -182,6 +195,7 @@ export function Settings() {
         <About />
         <ThemeSettings />
         <FormatSettings />
+        <AuthSettings />
         <EncryptionSettings />
         <BudgetTypeSettings />
         {isElectron() && <Backups />}
