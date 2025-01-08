@@ -19,6 +19,7 @@ jobs:
         uses: ./actual/.github/actions/setup
         with:
           working-directory: actual
+          download-translations: false  # As we'll manually clone instead
       - name: Configure Git config
         run: |
           git config --global user.name "github-actions[bot]"

@@ -6,6 +6,11 @@ inputs:
     required: false
     default: .
     type: string
+  download-translations:
+    description: 'Whether to download translations as part of setup, default true'
+    required: false
+    default: true
+    type: boolean
 
 runs:
   using: composite
@@ -29,3 +34,9 @@ runs:
       run: yarn --immutable
       shell: bash
       if: steps.cache.outputs.cache-hit != 'true'
+    - name: Download translations
+      uses: actions/checkout@v4
+      with:
+        repository: actualbudget/translations
+        path: ${{ inputs.working-directory }}/packages/desktop-client/locale
+      if: ${{ inputs.download-translations }}
