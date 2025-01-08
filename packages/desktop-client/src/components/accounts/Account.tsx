@@ -66,6 +66,7 @@ import {
   type RuleConditionEntity,
   type TransactionEntity,
   type TransactionFilterEntity,
+  type PayeeEntity,
 } from 'loot-core/types/models';
 
 import { useAccountPreviewTransactions } from '../../hooks/useAccountPreviewTransactions';
@@ -1985,7 +1986,7 @@ export function Account() {
     `show-extra-balances-${params.id || 'all-accounts'}`,
   );
   const modalShowing = useSelector(state => state.modals.modalStack.length > 0);
-  const accountsSyncing = useSelector(state => state.accounts.accountsSyncing);
+  const accountsSyncing = useSelector(state => state.account.accountsSyncing);
   const filterConditions = location?.state?.filterConditions || [];
 
   const savedFiters = useFilters();
