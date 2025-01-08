@@ -7,7 +7,7 @@ import { send } from 'loot-core/src/platform/client/fetch';
 import { type PayeeEntity } from 'loot-core/types/models';
 
 import { useFormatList } from '../../hooks/useFormatList';
-import { useDispatch } from '../../redux';
+import { useAppDispatch } from '../../redux';
 import { theme } from '../../style';
 import { Button } from '../common/Button2';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
@@ -20,7 +20,7 @@ export function PostsOfflineNotification() {
   const { t, i18n } = useTranslation();
 
   const location = useLocation();
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
   const locationState = location.state;
   const payees =

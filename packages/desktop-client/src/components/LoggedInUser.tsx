@@ -10,7 +10,7 @@ import { useAuth } from '../auth/AuthProvider';
 import { Permissions } from '../auth/types';
 import { useMetadataPref } from '../hooks/useMetadataPref';
 import { useNavigate } from '../hooks/useNavigate';
-import { useSelector, useDispatch } from '../redux';
+import { useAppSelector, useAppDispatch } from '../redux';
 import { theme, styles } from '../style';
 
 import { Button } from './common/Button2';
@@ -33,9 +33,9 @@ export function LoggedInUser({
   color,
 }: LoggedInUserProps) {
   const { t } = useTranslation();
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const userData = useSelector(state => state.user.data);
+  const userData = useAppSelector(state => state.user.data);
   const [loading, setLoading] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
   const serverUrl = useServerURL();
@@ -45,12 +45,12 @@ export function LoggedInUser({
   const location = useLocation();
   const { hasPermission } = useAuth();
   const multiuserEnabled = useMultiuserEnabled();
-  const allFiles = useSelector(state => state.budgets.allFiles || []);
+  const allFiles = useAppSelector(state => state.budgets.allFiles || []);
   const remoteFiles = allFiles.filter(
     f => f.state === 'remote' || f.state === 'synced' || f.state === 'detached',
   ) as (SyncedLocalFile | RemoteFile)[];
   const currentFile = remoteFiles.find(f => f.cloudFileId === cloudFileId);
-  const hasSyncedPrefs = useSelector(state => state.prefs.synced);
+  const hasSyncedPrefs = useAppSelector(state => state.prefs.synced);
 
   useEffect(() => {
     async function init() {

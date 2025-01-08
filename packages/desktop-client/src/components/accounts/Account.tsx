@@ -82,7 +82,7 @@ import {
 } from '../../hooks/useSplitsExpanded';
 import { useSyncedPref } from '../../hooks/useSyncedPref';
 import { useTransactionBatchActions } from '../../hooks/useTransactionBatchActions';
-import { useSelector, useDispatch } from '../../redux';
+import { useAppSelector, useAppDispatch } from '../../redux';
 import { styles, theme } from '../../style';
 import { Button } from '../common/Button2';
 import { Text } from '../common/Text';
@@ -1908,7 +1908,7 @@ type AccountHackProps = Omit<
 
 function AccountHack(props: AccountHackProps) {
   const { dispatch: splitsExpandedDispatch } = useSplitsExpanded();
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const {
     onBatchEdit,
     onBatchDuplicate,
@@ -1936,8 +1936,8 @@ export function Account() {
   const location = useLocation();
 
   const { grouped: categoryGroups } = useCategories();
-  const newTransactions = useSelector(state => state.queries.newTransactions);
-  const matchedTransactions = useSelector(
+  const newTransactions = useAppSelector(state => state.queries.newTransactions);
+  const matchedTransactions = useAppSelector(
     state => state.queries.matchedTransactions,
   );
   const accounts = useAccounts();
@@ -1958,8 +1958,8 @@ export function Account() {
   const [showExtraBalances, setShowExtraBalances] = useSyncedPref(
     `show-extra-balances-${params.id || 'all-accounts'}`,
   );
-  const modalShowing = useSelector(state => state.modals.modalStack.length > 0);
-  const accountsSyncing = useSelector(state => state.account.accountsSyncing);
+  const modalShowing = useAppSelector(state => state.modals.modalStack.length > 0);
+  const accountsSyncing = useAppSelector(state => state.account.accountsSyncing);
   const filterConditions = location?.state?.filterConditions || [];
 
   const savedFiters = useFilters();

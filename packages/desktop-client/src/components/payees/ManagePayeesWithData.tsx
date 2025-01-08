@@ -12,7 +12,7 @@ import { applyChanges, type Diff } from 'loot-core/src/shared/util';
 import { type NewRuleEntity, type PayeeEntity } from 'loot-core/types/models';
 
 import { usePayees } from '../../hooks/usePayees';
-import { useDispatch } from '../../redux';
+import { useAppDispatch } from '../../redux';
 
 import { ManagePayees } from './ManagePayees';
 
@@ -24,7 +24,7 @@ export function ManagePayeesWithData({
   initialSelectedIds,
 }: ManagePayeesWithDataProps) {
   const payees = usePayees();
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
   const [ruleCounts, setRuleCounts] = useState({ value: new Map() });
   const [orphans, setOrphans] = useState<PayeeEntity[]>([]);

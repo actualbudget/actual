@@ -4,7 +4,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { pushModal } from 'loot-core/client/actions';
 
 import { useFeatureFlag } from '../../hooks/useFeatureFlag';
-import { useDispatch } from '../../redux';
+import { useAppDispatch } from '../../redux';
 import { theme } from '../../style';
 import { Button } from '../common/Button2';
 import { Label } from '../common/Label';
@@ -18,7 +18,7 @@ export function AuthSettings() {
 
   const multiuserEnabled = useMultiuserEnabled();
   const loginMethod = useLoginMethod();
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const openidAuthFeatureFlag = useFeatureFlag('openidAuth');
 
   return openidAuthFeatureFlag === true ? (

@@ -10,7 +10,7 @@ import { sync } from 'loot-core/client/app/appSlice';
 import { send } from 'loot-core/src/platform/client/fetch';
 import { getCreateKeyError } from 'loot-core/src/shared/errors';
 
-import { useDispatch } from '../../redux';
+import { useAppDispatch } from '../../redux';
 import { styles, theme } from '../../style';
 import { ButtonWithLoading } from '../common/Button2';
 import { InitialFocus } from '../common/InitialFocus';
@@ -42,7 +42,7 @@ export function CreateEncryptionKeyModal({
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const { isNarrowWidth } = useResponsive();
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
   const isRecreating = options.recreate;
 

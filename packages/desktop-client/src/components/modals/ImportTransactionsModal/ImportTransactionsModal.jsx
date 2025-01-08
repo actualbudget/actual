@@ -14,7 +14,7 @@ import { amountToInteger } from 'loot-core/src/shared/util';
 import { useCategories } from '../../../hooks/useCategories';
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import { useSyncedPrefs } from '../../../hooks/useSyncedPrefs';
-import { useDispatch } from '../../../redux';
+import { useAppDispatch } from '../../../redux';
 import { theme } from '../../../style';
 import { Button, ButtonWithLoading } from '../../common/Button2';
 import { Input } from '../../common/Input';
@@ -145,7 +145,7 @@ export function ImportTransactionsModal({ options }) {
   const { t } = useTranslation();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const [prefs, savePrefs] = useSyncedPrefs();
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const categories = useCategories();
 
   const [multiplierAmount, setMultiplierAmount] = useState('');

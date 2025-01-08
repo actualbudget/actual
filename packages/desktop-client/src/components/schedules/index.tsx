@@ -8,7 +8,7 @@ import { send } from 'loot-core/src/platform/client/fetch';
 import { type ScheduleEntity } from 'loot-core/src/types/models';
 
 import { useFeatureFlag } from '../../hooks/useFeatureFlag';
-import { useDispatch } from '../../redux';
+import { useAppDispatch } from '../../redux';
 import { theme } from '../../style';
 import { Button } from '../common/Button2';
 import { Search } from '../common/Search';
@@ -20,7 +20,7 @@ import { type ScheduleItemAction, SchedulesTable } from './SchedulesTable';
 export function Schedules() {
   const { t } = useTranslation();
 
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const [filter, setFilter] = useState('');
 
   const upcomingLengthEnabled = useFeatureFlag('upcomingLengthAdjustment');

@@ -21,7 +21,7 @@ import {
 import { useDateFormat } from '../../hooks/useDateFormat';
 import { usePayees } from '../../hooks/usePayees';
 import { useSelected, SelectedProvider } from '../../hooks/useSelected';
-import { useDispatch } from '../../redux';
+import { useAppDispatch } from '../../redux';
 import { theme } from '../../style';
 import { AccountAutocomplete } from '../autocomplete/AccountAutocomplete';
 import { PayeeAutocomplete } from '../autocomplete/PayeeAutocomplete';
@@ -111,7 +111,7 @@ export function ScheduleDetails({ id, transaction }: ScheduleDetailsProps) {
   const adding = id == null;
   const fromTrans = transaction != null;
   const payees = getPayeesById(usePayees());
-  const globalDispatch = useDispatch();
+  const globalDispatch = useAppDispatch();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
 
   const [state, dispatch] = useReducer(

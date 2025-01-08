@@ -13,7 +13,7 @@ import { useFailedAccounts } from '../../../hooks/useFailedAccounts';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { SvgAdd, SvgCheveronRight } from '../../../icons/v1';
-import { useDispatch, useSelector } from '../../../redux';
+import { useAppDispatch, useAppSelector } from '../../../redux';
 import { theme, styles } from '../../../style';
 import { makeAmountFullStyle } from '../../budget/util';
 import { Button } from '../../common/Button2';
@@ -227,7 +227,7 @@ function AccountList({
 }: AccountListProps) {
   const { t } = useTranslation();
   const failedAccounts = useFailedAccounts();
-  const syncingAccountIds = useSelector(state => state.account.accountsSyncing);
+  const syncingAccountIds = useAppSelector(state => state.account.accountsSyncing);
   const onBudgetAccounts = accounts.filter(account => account.offbudget === 0);
   const offBudgetAccounts = accounts.filter(account => account.offbudget === 1);
 
@@ -303,9 +303,9 @@ function AccountList({
 }
 
 export function Accounts() {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const accounts = useAccounts();
-  const updatedAccounts = useSelector(state => state.queries.updatedAccounts);
+  const updatedAccounts = useAppSelector(state => state.queries.updatedAccounts);
   const [_numberFormat] = useSyncedPref('numberFormat');
   const numberFormat = _numberFormat || 'comma-dot';
   const [hideFraction] = useSyncedPref('hideFraction');
