@@ -1255,7 +1255,9 @@ function TransactionEditUnconnected({
 export const TransactionEdit = props => {
   const { list: categories } = useCategories();
   const payees = usePayees();
-  const lastTransaction = useAppSelector(state => state.queries.lastTransaction);
+  const lastTransaction = useAppSelector(
+    state => state.queries.lastTransaction,
+  );
   const accounts = useAccounts();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
 

@@ -227,7 +227,9 @@ function AccountList({
 }: AccountListProps) {
   const { t } = useTranslation();
   const failedAccounts = useFailedAccounts();
-  const syncingAccountIds = useAppSelector(state => state.account.accountsSyncing);
+  const syncingAccountIds = useAppSelector(
+    state => state.account.accountsSyncing,
+  );
   const onBudgetAccounts = accounts.filter(account => account.offbudget === 0);
   const offBudgetAccounts = accounts.filter(account => account.offbudget === 1);
 
@@ -305,7 +307,9 @@ function AccountList({
 export function Accounts() {
   const dispatch = useAppDispatch();
   const accounts = useAccounts();
-  const updatedAccounts = useAppSelector(state => state.queries.updatedAccounts);
+  const updatedAccounts = useAppSelector(
+    state => state.queries.updatedAccounts,
+  );
   const [_numberFormat] = useSyncedPref('numberFormat');
   const numberFormat = _numberFormat || 'comma-dot';
   const [hideFraction] = useSyncedPref('hideFraction');

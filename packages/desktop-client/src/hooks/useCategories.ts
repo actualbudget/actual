@@ -6,7 +6,9 @@ import { useAppSelector, useAppDispatch } from '../redux';
 
 export function useCategories() {
   const dispatch = useAppDispatch();
-  const categoriesLoaded = useAppSelector(state => state.queries.categoriesLoaded);
+  const categoriesLoaded = useAppSelector(
+    state => state.queries.categoriesLoaded,
+  );
 
   useEffect(() => {
     if (!categoriesLoaded) {

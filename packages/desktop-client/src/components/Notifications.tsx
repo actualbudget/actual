@@ -264,7 +264,9 @@ function Notification({
 export function Notifications({ style }: { style?: CSSProperties }) {
   const dispatch = useAppDispatch();
   const { isNarrowWidth } = useResponsive();
-  const notifications = useAppSelector(state => state.notifications.notifications);
+  const notifications = useAppSelector(
+    state => state.notifications.notifications,
+  );
   const notificationInset = useAppSelector(state => state.notifications.inset);
   return (
     <View

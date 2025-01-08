@@ -1936,7 +1936,9 @@ export function Account() {
   const location = useLocation();
 
   const { grouped: categoryGroups } = useCategories();
-  const newTransactions = useAppSelector(state => state.queries.newTransactions);
+  const newTransactions = useAppSelector(
+    state => state.queries.newTransactions,
+  );
   const matchedTransactions = useAppSelector(
     state => state.queries.matchedTransactions,
   );
@@ -1958,8 +1960,12 @@ export function Account() {
   const [showExtraBalances, setShowExtraBalances] = useSyncedPref(
     `show-extra-balances-${params.id || 'all-accounts'}`,
   );
-  const modalShowing = useAppSelector(state => state.modals.modalStack.length > 0);
-  const accountsSyncing = useAppSelector(state => state.account.accountsSyncing);
+  const modalShowing = useAppSelector(
+    state => state.modals.modalStack.length > 0,
+  );
+  const accountsSyncing = useAppSelector(
+    state => state.account.accountsSyncing,
+  );
   const filterConditions = location?.state?.filterConditions || [];
 
   const savedFiters = useFilters();
