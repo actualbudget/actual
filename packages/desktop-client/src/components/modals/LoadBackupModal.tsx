@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
 
 import { loadBackup, makeBackup } from 'loot-core/client/actions';
 import { type Backup } from 'loot-core/server/backups';
 import { send, listen, unlisten } from 'loot-core/src/platform/client/fetch';
 
 import { useMetadataPref } from '../../hooks/useMetadataPref';
+import { useDispatch } from '../../redux';
 import { theme } from '../../style';
 import { Block } from '../common/Block';
 import { Button } from '../common/Button2';
@@ -120,7 +120,7 @@ export function LoadBackupModal({
                     )}{' '}
                     <Text style={{ fontWeight: 600 }}>
                       {t(
-                        'If you use a backup, you will have to setup all your devices to sync from the new budget.',
+                        'If you use a backup, you will have to set up all your devices to sync from the new budget.',
                       )}
                     </Text>
                   </Block>
@@ -129,7 +129,7 @@ export function LoadBackupModal({
                     isDisabled={backupDisabled}
                     onPress={() => dispatch(makeBackup())}
                   >
-                    {t('Backup now')}
+                    {t('Back up now')}
                   </Button>
                 </View>
               )}

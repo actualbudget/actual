@@ -10,10 +10,10 @@ import type {
   SetLastTransactionAction,
   UpdateNewTransactionsAction,
 } from '../state-types/queries';
+import { type AppDispatch, type GetRootState } from '../store';
 
 import { addNotification } from './notifications';
 import { getPayees, getAccounts } from './queries';
-import type { Dispatch, GetState } from './types';
 
 export function setAccountsSyncing(
   ids: SetAccountsSyncingAction['ids'],
@@ -48,7 +48,7 @@ export function markAccountSuccess(
 }
 
 export function unlinkAccount(id: string) {
-  return async (dispatch: Dispatch) => {
+  return async (dispatch: AppDispatch) => {
     await send('account-unlink', { id });
     dispatch(markAccountSuccess(id));
     dispatch(getAccounts());
@@ -61,7 +61,7 @@ export function linkAccount(
   upgradingId?: string,
   offBudget?: boolean,
 ) {
-  return async (dispatch: Dispatch) => {
+  return async (dispatch: AppDispatch) => {
     await send('gocardless-accounts-link', {
       requisitionId,
       account,
@@ -78,7 +78,7 @@ export function linkAccountSimpleFin(
   upgradingId?: string,
   offBudget?: boolean,
 ) {
-  return async (dispatch: Dispatch) => {
+  return async (dispatch: AppDispatch) => {
     await send('simplefin-accounts-link', {
       externalAccount,
       upgradingId,
@@ -155,7 +155,7 @@ function handleSyncResponse(
 }
 
 export function syncAccounts(id?: string) {
-  return async (dispatch: Dispatch, getState: GetState) => {
+  return async (dispatch: AppDispatch, getState: GetRootState) => {
     // Disallow two parallel sync operations
     if (getState().account.accountsSyncing.length > 0) {
       return false;
@@ -273,7 +273,7 @@ export function parseTransactions(filepath, options) {
 }
 
 export function importPreviewTransactions(id: string, transactions) {
-  return async (dispatch: Dispatch): Promise<boolean> => {
+  return async (dispatch: AppDispatch): Promise<boolean> => {
     const { errors = [], updatedPreview } = await send('transactions-import', {
       accountId: id,
       transactions,
@@ -294,7 +294,7 @@ export function importPreviewTransactions(id: string, transactions) {
 }
 
 export function importTransactions(id: string, transactions, reconcile = true) {
-  return async (dispatch: Dispatch): Promise<boolean> => {
+  return async (dispatch: AppDispatch): Promise<boolean> => {
     if (!reconcile) {
       await send('api/transactions-add', {
         accountId: id,
@@ -349,7 +349,7 @@ export function markAccountRead(accountId): MarkAccountReadAction {
 }
 
 export function moveAccount(id, targetId) {
-  return async (dispatch: Dispatch) => {
+  return async (dispatch: AppDispatch) => {
     await send('account-move', { id, targetId });
     dispatch(getAccounts());
     dispatch(getPayees());

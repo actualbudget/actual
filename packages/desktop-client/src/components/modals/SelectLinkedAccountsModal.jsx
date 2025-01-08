@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
+import { useTranslation, Trans } from 'react-i18next';
 
 import {
   closeModal,
@@ -11,6 +10,7 @@ import {
 } from 'loot-core/client/actions';
 
 import { useAccounts } from '../../hooks/useAccounts';
+import { useDispatch } from '../../redux';
 import { theme } from '../../style';
 import { Autocomplete } from '../autocomplete/Autocomplete';
 import { Button } from '../common/Button2';
@@ -20,11 +20,20 @@ import { View } from '../common/View';
 import { PrivacyFilter } from '../PrivacyFilter';
 import { TableHeader, Table, Row, Field } from '../table';
 
-const addOnBudgetAccountOption = { id: 'new-on', name: 'Create new account' };
-const addOffBudgetAccountOption = {
-  id: 'new-off',
-  name: 'Create new account (off budget)',
-};
+function useAddBudgetAccountOptions() {
+  const { t } = useTranslation();
+
+  const addOnBudgetAccountOption = {
+    id: 'new-on',
+    name: t('Create new account'),
+  };
+  const addOffBudgetAccountOption = {
+    id: 'new-off',
+    name: t('Create new account (off budget)'),
+  };
+
+  return { addOnBudgetAccountOption, addOffBudgetAccountOption };
+}
 
 export function SelectLinkedAccountsModal({
   requisitionId,
@@ -42,6 +51,8 @@ export function SelectLinkedAccountsModal({
         .map(acc => [acc.account_id, acc.id]),
     );
   });
+  const { addOnBudgetAccountOption, addOffBudgetAccountOption } =
+    useAddBudgetAccountOptions();
 
   async function onNext() {
     const chosenLocalAccountIds = Object.values(chosenAccounts);
@@ -139,9 +150,10 @@ export function SelectLinkedAccountsModal({
             rightContent={<ModalCloseButton onPress={close} />}
           />
           <Text style={{ marginBottom: 10 }}>
-            {t(
-              'We found the following accounts. Select which ones you want to add:',
-            )}
+            <Trans>
+              We found the following accounts. Select which ones you want to
+              add:
+            </Trans>
           </Text>
           <View
             style={{
@@ -198,7 +210,7 @@ export function SelectLinkedAccountsModal({
               onPress={onNext}
               isDisabled={!Object.keys(chosenAccounts).length}
             >
-              {t('Link accounts')}
+              <Trans>Link accounts</Trans>
             </Button>
           </View>
         </>
@@ -213,8 +225,9 @@ function TableRow({
   unlinkedAccounts,
   onSetLinkedAccount,
 }) {
-  const { t } = useTranslation();
   const [focusedField, setFocusedField] = useState(null);
+  const { addOnBudgetAccountOption, addOffBudgetAccountOption } =
+    useAddBudgetAccountOptions();
 
   const availableAccountOptions = [
     ...unlinkedAccounts,
@@ -260,7 +273,7 @@ function TableRow({
             }}
             style={{ float: 'right' }}
           >
-            {t('Remove bank-sync')}
+            <Trans>Remove bank-sync</Trans>
           </Button>
         ) : (
           <Button
@@ -270,7 +283,7 @@ function TableRow({
             }}
             style={{ float: 'right' }}
           >
-            {t('Setup bank-sync')}
+            <Trans>Set up bank-sync</Trans>
           </Button>
         )}
       </Field>

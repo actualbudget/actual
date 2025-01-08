@@ -1,6 +1,6 @@
 // @ts-strict-ignore
 import React, { type ReactNode } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useTranslation, Trans } from 'react-i18next';
 
 import { css } from '@emotion/css';
 
@@ -58,6 +58,7 @@ function Column({ title, children }: { title: string; children: ReactNode }) {
 
 export function FormatSettings() {
   const { t } = useTranslation();
+
   const sidebar = useSidebar();
   const [_firstDayOfWeekIdx, setFirstDayOfWeekIdxPref] =
     useSyncedPref('firstDayOfWeekIdx'); // Sunday;
@@ -112,7 +113,7 @@ export function FormatSettings() {
                 }
               />
               <label htmlFor="settings-textDecimal">
-                {t('Hide decimal places')}
+                <Trans>Hide decimal places</Trans>
               </label>
             </Text>
           </Column>
@@ -138,10 +139,10 @@ export function FormatSettings() {
       }
     >
       <Text>
-        <strong>{t('Formatting')}</strong>
-        {t(
-          ' does not affect how budget data is stored, and can be changed at any time.',
-        )}
+        <Trans>
+          <strong>Formatting</strong> does not affect how budget data is stored,
+          and can be changed at any time.
+        </Trans>
       </Text>
     </Setting>
   );

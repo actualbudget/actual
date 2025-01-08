@@ -1,7 +1,6 @@
 // @ts-strict-ignore
 import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 
 import { closeModal } from 'loot-core/client/actions';
@@ -10,6 +9,7 @@ import * as monthUtils from 'loot-core/src/shared/months';
 
 import { useMetadataPref } from '../hooks/useMetadataPref';
 import { useModalState } from '../hooks/useModalState';
+import { useDispatch } from '../redux';
 
 import { ModalTitle, ModalHeader } from './common/Modal';
 import { AccountAutocompleteModal } from './modals/AccountAutocompleteModal';
@@ -308,7 +308,7 @@ export function Modals() {
                 />
               )}
               inputPlaceholder={t('Category name')}
-              buttonText="Add"
+              buttonText={t('Add')}
               onValidate={options.onValidate}
               onSubmit={options.onSubmit}
             />

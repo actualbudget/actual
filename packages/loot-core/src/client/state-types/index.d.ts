@@ -34,8 +34,3 @@ export type State = {
   queries: QueriesState;
   user: UserState;
 };
-
-declare module 'react-redux' {
-  // eslint-disable-next-line @typescript-eslint/no-empty-object-type, @typescript-eslint/consistent-type-definitions
-  export interface DefaultRootState extends State {}
-}
