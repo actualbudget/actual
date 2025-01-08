@@ -336,12 +336,21 @@ export function useTransactionsFilter({
   );
 
   useEffect(() => {
+    let isUnmounted = false;
+
     if (conditions.length === 0) {
       resetQueryRef.current?.();
       setIsFiltered(false);
     } else {
-      updateQueryFilter(conditions).then(() => setIsFiltered(true));
+      updateQueryFilter(conditions).then(() => {
+        if (!isUnmounted) {
+          setIsFiltered(true);
+        }
+      });
     }
+    return () => {
+      isUnmounted = true;
+    };
   }, [conditions, updateQueryFilter]);
 
   const clear = useCallback(() => {
