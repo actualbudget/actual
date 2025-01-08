@@ -16,12 +16,12 @@ import {
   reducer as appSliceReducer,
   getInitialState as getInitialAppState,
 } from '../app/appSlice';
-import * as constants from '../constants';
 import {
   name as budgetsSliceName,
   reducer as budgetsSliceReducer,
   getInitialState as getInitialBudgetsState,
 } from '../budgets/budgetsSlice';
+import * as constants from '../constants';
 import {
   name as queriesSliceName,
   reducer as queriesSliceReducer,

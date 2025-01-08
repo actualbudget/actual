@@ -7,10 +7,8 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
-import {
-  addNotification,
-  popModal,
-} from 'loot-core/client/actions';
+import { addNotification, popModal } from 'loot-core/client/actions';
+import { closeAndLoadBudget } from 'loot-core/client/budgets/budgetsSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import { getUserAccessErrors } from 'loot-core/shared/errors';
 import { type Budget } from 'loot-core/types/budget';
@@ -23,7 +21,6 @@ import { theme } from '../../style';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { Select } from '../common/Select';
 import { FormField, FormLabel } from '../forms';
-import { closeAndLoadBudget } from 'loot-core/client/budgets/budgetsSlice';
 
 type TransferOwnershipProps = {
   onSave?: () => void;
