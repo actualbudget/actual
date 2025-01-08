@@ -128,11 +128,17 @@ function SelectedBalance({ selectedItems, accountId }: SelectedBalanceProps) {
 }
 
 type FilteredBalanceProps = {
-  filteredBalance: number;
+  transactionsQuery: Query;
 };
 
-function FilteredBalance({ filteredBalance }: FilteredBalanceProps) {
+function FilteredBalance({ transactionsQuery }: FilteredBalanceProps) {
   const { t } = useTranslation();
+  const filteredBalance = useSheetValue<'balance', 'filtered-balance'>({
+    name: 'filtered-balance',
+    query: transactionsQuery.calculate({ $sum: '$amount' }),
+    value: 0,
+  });
+
   return (
     <DetailedBalance
       name={t('Filtered balance:')}
@@ -143,7 +149,7 @@ function FilteredBalance({ filteredBalance }: FilteredBalanceProps) {
 }
 
 type MoreBalancesProps = {
-  accountId: AccountEntity['id'];
+  accountId: AccountEntity['id'] | string;
   balanceQuery: Query;
 };
 
@@ -180,18 +186,18 @@ function MoreBalances({ accountId, balanceQuery }: MoreBalancesProps) {
 }
 
 type BalancesProps = {
+  accountId?: AccountEntity['id'] | string;
+  showFilteredBalance: boolean;
+  transactionsQuery?: Query;
   balanceQuery: Query;
   showExtraBalances: boolean;
   onToggleExtraBalances: () => void;
-  accountId?: AccountEntity['id'];
-  showFilteredBalance: boolean;
-  filteredBalance: number;
 };
 
 export function Balances({
   accountId,
   balanceQuery,
-  filteredBalance,
+  transactionsQuery,
   showFilteredBalance,
   showExtraBalances,
   onToggleExtraBalances,
@@ -256,14 +262,14 @@ export function Balances({
 
         <SvgArrowButtonRight1 />
       </ButtonWithLoading>
-      {showExtraBalances && balanceQuery && (
+      {showExtraBalances && accountId && balanceQuery && (
         <MoreBalances accountId={accountId} balanceQuery={balanceQuery} />
       )}
       {selectedItems.size > 0 && (
         <SelectedBalance selectedItems={selectedItems} accountId={accountId} />
       )}
-      {showFilteredBalance && (
-        <FilteredBalance filteredBalance={filteredBalance} />
+      {showFilteredBalance && transactionsQuery && (
+        <FilteredBalance transactionsQuery={transactionsQuery} />
       )}
     </View>
   );

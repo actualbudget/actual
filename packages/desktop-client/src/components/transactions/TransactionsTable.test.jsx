@@ -174,7 +174,6 @@ function LiveTransactionTable(props) {
                     loadMoreTransactions={() => {}}
                     commonPayees={[]}
                     payees={payees}
-                    addNotification={n => console.log(n)}
                     onSave={onSave}
                     onSplit={onSplit}
                     onAdd={onAdd}

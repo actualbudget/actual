@@ -55,9 +55,9 @@ type AccountHeaderProps = {
   editingName: boolean;
   isNameEditable: boolean;
   isLoading: boolean;
-  accountId: AccountEntity['id'] | string;
-  accountName: string;
-  account: AccountEntity;
+  accountId?: AccountEntity['id'] | string;
+  accountName: string | null;
+  account?: AccountEntity;
   activeFilter?: TransactionFilterEntity;
   dirtyFilter?: TransactionFilterEntity;
   accountsSyncing: string[];
@@ -70,9 +70,9 @@ type AccountHeaderProps = {
   showReconciled: boolean;
   showEmptyMessage: boolean;
   balanceQuery: Query;
-  reconcileAmount: number;
+  transactionsQuery?: Query;
+  reconcileAmount: number | null;
   showFilteredBalance: boolean;
-  filteredBalance: number;
   isSorted: boolean;
   filterConditions: readonly RuleConditionEntity[];
   filterConditionsOp: RuleConditionEntity['conditionsOp'];
@@ -146,7 +146,7 @@ export function AccountHeader({
   balanceQuery,
   reconcileAmount,
   showFilteredBalance,
-  filteredBalance,
+  transactionsQuery,
   isSorted,
   filterConditions,
   filterConditionsOp,
@@ -290,7 +290,7 @@ export function AccountHeader({
             )}
             <AccountNameField
               account={account}
-              accountName={accountName}
+              accountName={accountName || ''}
               isNameEditable={isNameEditable}
               editingName={editingName}
               saveNameError={saveNameError}
@@ -303,7 +303,7 @@ export function AccountHeader({
         <Balances
           accountId={accountId}
           balanceQuery={balanceQuery}
-          filteredBalance={filteredBalance}
+          transactionsQuery={transactionsQuery}
           showFilteredBalance={showFilteredBalance}
           showExtraBalances={!showFilteredBalance && showExtraBalances}
           onToggleExtraBalances={onToggleExtraBalances}
@@ -598,7 +598,7 @@ function AccountNameField({
               marginLeft: -6,
               paddingTop: 2,
               paddingBottom: 2,
-              width: Math.max(20, accountName.length) + 'ch',
+              width: Math.max(20, accountName?.length ?? 0) + 'ch',
             }}
           />
         </InitialFocus>

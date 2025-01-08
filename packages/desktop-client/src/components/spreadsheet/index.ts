@@ -76,6 +76,7 @@ export type Spreadsheets = {
     // Common fields
     'uncategorized-amount': number;
     'uncategorized-balance': number;
+    'filtered-balance': number;
 
     // Balance fields
     [key: `balance-query-${string}`]: number;

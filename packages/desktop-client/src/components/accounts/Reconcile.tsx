@@ -17,7 +17,7 @@ import { useFormat } from '../spreadsheet/useFormat';
 import { useSheetValue } from '../spreadsheet/useSheetValue';
 
 type ReconcilingMessageProps = {
-  accountId: AccountEntity['id'] | string;
+  accountId?: AccountEntity['id'] | string;
   balanceQuery: Query;
   targetBalance: number;
   onDone: () => void;

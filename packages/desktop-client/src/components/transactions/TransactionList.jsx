@@ -78,7 +78,6 @@ export function TransactionList({
   isFiltered,
   dateFormat,
   hideFraction,
-  addNotification,
   renderEmpty,
   onSort,
   sortField,
@@ -228,7 +227,6 @@ export function TransactionList({
       isFiltered={isFiltered}
       dateFormat={dateFormat}
       hideFraction={hideFraction}
-      addNotification={addNotification}
       renderEmpty={renderEmpty}
       onSave={onSave}
       onApplyRules={onApplyRules}

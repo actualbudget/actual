@@ -13,7 +13,6 @@ import { t } from 'i18next';
 import { v4 as uuidv4 } from 'uuid';
 
 import {
-  addNotification,
   createPayee,
   initiallyLoadPayees,
   markAccountRead,
@@ -275,7 +274,7 @@ function AccountTransactions({
   const [editingName, setEditingName] = useState<boolean>(false);
   const [nameError, setNameError] = useState<string | null>(null);
   const [isAdding, setIsAdding] = useState<boolean>(false);
-  const [sort, setSort] = useState<SortOptions>(null);
+  const [sort, setSort] = useState<SortOptions | null>(null);
   const [isProcessingTransactions, setIsProcessingTransactions] =
     useState(false);
   const [transactionsQuery, setTransactionsQuery] = useState<Query | undefined>(
@@ -376,7 +375,7 @@ function AccountTransactions({
   );
 
   const baseTransactionsQuery = useCallback(
-    (options: { accountId: string; hideReconciled: boolean }) => {
+    (options: { accountId?: string; hideReconciled: boolean }) => {
       let query = queries
         .transactions(options.accountId)
         .options({ splits: 'grouped' });
@@ -389,7 +388,7 @@ function AccountTransactions({
   );
 
   const sortedTransactionsQuery = useCallback(
-    async (query: Query, sort: SortOptions) => {
+    async (query: Query, sort: SortOptions | null) => {
       return sort ? applySort(query, sort) : query;
     },
     [applySort],
@@ -442,13 +441,16 @@ function AccountTransactions({
   ]);
 
   const calculateRunningBalances = useCallback(async () => {
-    const { data: balances } = await runQuery(
-      queries
-        .transactions(accountId)
-        .options({ splits: 'none' })
-        .orderBy({ date: 'desc' })
-        .select([{ balance: { $sumOver: '$amount' } }]),
-    );
+    const {
+      data: balances,
+    }: { data: Array<{ id: TransactionEntity['id']; balance: number }> } =
+      await runQuery(
+        queries
+          .transactions(accountId)
+          .options({ splits: 'none' })
+          .orderBy({ date: 'desc' })
+          .select([{ balance: { $sumOver: '$amount' } }]),
+      );
 
     const latestBalance = balances[0]?.balance ?? 0;
 
@@ -457,17 +459,20 @@ function AccountTransactions({
     );
 
     const nonChildPreviewBalancesById: typeof runningBalances =
-      nonChildPreviewTransactions.reduce((map, trans, index, array) => {
-        map[trans.id] = {
-          balance: array
-            .slice(index, array.length)
-            .reduce(
-              (sum, t) => sum + getScheduledAmount(t.amount),
-              latestBalance,
-            ),
-        };
-        return map;
-      }, {});
+      nonChildPreviewTransactions.reduce(
+        (map, trans, index, array) => {
+          map[trans.id] = {
+            balance: array
+              .slice(index, array.length)
+              .reduce(
+                (sum, t) => sum + getScheduledAmount(t.amount),
+                latestBalance,
+              ),
+          };
+          return map;
+        },
+        {} as Record<string, { balance: number }>,
+      );
     const balancesById = groupById<{ id: string; balance: number }>(balances);
 
     return {
@@ -627,7 +632,8 @@ function AccountTransactions({
   }, [modalShowing, reloadTransactions, wasModalShowing]);
 
   const { isSearching, search: onSearch } = useTransactionsSearch({
-    updateQuery: setTransactionsQuery,
+    updateQuery: updateFn =>
+      setTransactionsQuery(tq => (tq ? updateFn(tq) : tq)),
     resetQuery: () => rootTransactionsQuery().then(setTransactionsQuery),
     dateFormat,
   });
@@ -643,7 +649,8 @@ function AccountTransactions({
     dirtyFilter: dirtySavedFilter,
     applyFilter: onApplySavedFilter,
   } = useTransactionsFilter({
-    updateQuery: setTransactionsQuery,
+    updateQuery: updateFn =>
+      setTransactionsQuery(tq => (tq ? updateFn(tq) : tq)),
     resetQuery: () => rootTransactionsQuery().then(setTransactionsQuery),
     initialConditions: location.state?.filterConditions,
   });
@@ -655,6 +662,10 @@ function AccountTransactions({
   }, [accountId, accounts, dispatch]);
 
   const onImport = useCallback(async () => {
+    if (!accountId) {
+      return;
+    }
+
     const account = accounts.find(acct => acct.id === accountId);
     if (account) {
       const res = await window.Actual?.openFileDialog({
@@ -683,7 +694,11 @@ function AccountTransactions({
   }, [accountId, accounts, dispatch, reloadTransactions]);
 
   const onExport = useCallback(
-    async (accountName: string) => {
+    async (accountName: string | null) => {
+      if (!transactionsQuery) {
+        return;
+      }
+
       const exportedTransactions = await send('transactions-export-query', {
         query: transactionsQuery.serialize(),
       });
@@ -726,13 +741,17 @@ function AccountTransactions({
 
   const onSaveName = useCallback(
     (name: string) => {
+      if (!accountId) {
+        return;
+      }
+
       const accountNameError = validateAccountName(name, accountId, accounts);
       if (accountNameError) {
         setNameError(accountNameError);
       } else {
         const account = accounts.find(account => account.id === accountId);
         // TODO: Double check if updateAccount is actually the same.
-        dispatch(updateAccount({ ...account, name }));
+        dispatch(updateAccount({ ...account, name } as AccountEntity));
         setEditingName(false);
         setNameError('');
       }
@@ -776,7 +795,9 @@ function AccountTransactions({
             pushModal('confirm-unlink-account', {
               accountName: account.name,
               onUnlink: () => {
-                dispatch(unlinkAccount(accountId));
+                if (accountId) {
+                  dispatch(unlinkAccount(accountId));
+                }
               },
             }),
           );
@@ -898,7 +919,7 @@ function AccountTransactions({
   }, [accountId, reloadTransactions, transactions]);
 
   const onReconcile = useCallback(
-    async (balance: number) => {
+    async (balance: number | null) => {
       setReconcileAmount(balance);
       setHideCleared(false);
     },
@@ -934,7 +955,7 @@ function AccountTransactions({
 
     setReconcileAmount(null);
     // Get back to previous state
-    setHideCleared(previousHideCleared);
+    setHideCleared(!!previousHideCleared);
   }, [
     accountId,
     lockTransactions,
@@ -949,7 +970,7 @@ function AccountTransactions({
       const reconciliationTransactions = realizeTempTransactions([
         {
           id: 'temp',
-          account: accountId,
+          account: accountId || '',
           cleared: true,
           reconciled: false,
           amount: diff,
@@ -1430,7 +1451,7 @@ function AccountTransactions({
       //if staying on same column but switching asc/desc
       //then keep prev the same
       if (headerClicked === sort?.field) {
-        setSort(s => ({ ...s, ascDesc }));
+        setSort(s => ({ ...s, ascDesc }) as SortOptions);
       } else {
         setSort(s => ({
           ...s,
@@ -1479,10 +1500,6 @@ function AccountTransactions({
     ],
   );
 
-  const filteredBalance = useMemo(() => {
-    return transactions.reduce((total, t) => total + t.amount, 0);
-  }, [transactions]);
-
   const selectedInst = useSelected(
     'transactions',
     transactionsWithPreview,
@@ -1504,7 +1521,7 @@ function AccountTransactions({
         <AccountHeader
           tableRef={tableRef}
           editingName={editingName}
-          isNameEditable={isNameEditable}
+          isNameEditable={!!isNameEditable}
           // TODO: Check if workingHard is still needed.
           isLoading={isTransactionsLoading || isProcessingTransactions}
           accountId={accountId}
@@ -1522,7 +1539,7 @@ function AccountTransactions({
           showReconciled={!hideReconciled}
           showEmptyMessage={showEmptyMessage}
           balanceQuery={accountBalanceQuery}
-          filteredBalance={filteredBalance}
+          transactionsQuery={transactionsQuery}
           showFilteredBalance={isFilteredOrSearching}
           isSorted={sort !== null}
           reconcileAmount={reconcileAmount}
@@ -1604,9 +1621,6 @@ function AccountTransactions({
                   No transactions
                 </View>
               ) : null
-            }
-            addNotification={notification =>
-              dispatch(addNotification(notification))
             }
             onSort={onSort}
             sortField={sort?.field}
