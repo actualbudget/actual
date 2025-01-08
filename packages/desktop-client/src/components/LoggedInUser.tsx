@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, type CSSProperties } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 
-import { closeBudget, getUserData, signOut } from 'loot-core/client/actions';
+import { getUserData, signOut } from 'loot-core/client/actions';
 import { type RemoteFile, type SyncedLocalFile } from 'loot-core/types/file';
 import { type TransObjectLiteral } from 'loot-core/types/util';
 
@@ -20,6 +20,7 @@ import { Text } from './common/Text';
 import { View } from './common/View';
 import { PrivacyFilter } from './PrivacyFilter';
 import { useMultiuserEnabled, useServerURL } from './ServerContext';
+import { closeBudget } from 'loot-core/client/budgets/budgetsSlice';
 
 type LoggedInUserProps = {
   hideIfNoServer?: boolean;

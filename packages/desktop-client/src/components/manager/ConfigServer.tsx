@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
-import { createBudget, loggedIn, signOut } from 'loot-core/client/actions';
+import { loggedIn, signOut } from 'loot-core/client/actions';
 import {
   isNonProductionEnvironment,
   isElectron,
@@ -20,6 +20,7 @@ import { View } from '../common/View';
 import { useServerURL, useSetServerURL } from '../ServerContext';
 
 import { Title } from './subscribe/common';
+import { createBudget } from 'loot-core/client/budgets/budgetsSlice';
 
 export function ConfigServer() {
   const { t } = useTranslation();

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
-import { closeBudget, popModal } from 'loot-core/client/actions';
+import { popModal } from 'loot-core/client/actions';
 import { send } from 'loot-core/platform/client/fetch';
 import * as asyncStorage from 'loot-core/platform/server/asyncStorage';
 import { getOpenIdErrors } from 'loot-core/shared/errors';
@@ -16,6 +16,7 @@ import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { View } from '../common/View';
 import { OpenIdForm } from '../manager/subscribe/OpenIdForm';
 import { useRefreshLoginMethods } from '../ServerContext';
+import { closeBudget } from 'loot-core/client/budgets/budgetsSlice';
 
 type OpenIDEnableModalProps = {
   onSave?: () => void;

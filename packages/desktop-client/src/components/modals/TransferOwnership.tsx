@@ -3,7 +3,6 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import {
   addNotification,
-  closeAndLoadBudget,
   popModal,
 } from 'loot-core/client/actions';
 import { send } from 'loot-core/platform/client/fetch';
@@ -22,6 +21,7 @@ import { Stack } from '../common/Stack';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { FormField, FormLabel } from '../forms';
+import { closeAndLoadBudget } from 'loot-core/client/budgets/budgetsSlice';
 
 type TransferOwnershipProps = {
   onSave?: () => void;
@@ -186,7 +186,7 @@ export function TransferOwnership({
                 try {
                   await onSave();
                   await dispatch(
-                    closeAndLoadBudget((currentFile as Budget).id),
+                    closeAndLoadBudget({ fileId: (currentFile as Budget).id }),
                   );
                   close();
                 } catch (error) {
