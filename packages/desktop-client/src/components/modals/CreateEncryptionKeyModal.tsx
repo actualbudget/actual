@@ -5,7 +5,7 @@ import { useTranslation, Trans } from 'react-i18next';
 
 import { css } from '@emotion/css';
 
-import { loadAllFiles, loadGlobalPrefs, sync } from 'loot-core/client/actions';
+import { loadGlobalPrefs, sync } from 'loot-core/client/actions';
 import { send } from 'loot-core/src/platform/client/fetch';
 import { getCreateKeyError } from 'loot-core/src/shared/errors';
 
@@ -25,6 +25,7 @@ import { Paragraph } from '../common/Paragraph';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { useResponsive } from '../responsive/ResponsiveProvider';
+import { loadAllFiles } from 'loot-core/client/budgets/budgetsSlice';
 
 type CreateEncryptionKeyModalProps = {
   options: {

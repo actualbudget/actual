@@ -16,6 +16,7 @@ import { createRoot } from 'react-dom/client';
 import * as accountsSlice from 'loot-core/src/client/accounts/accountsSlice';
 import * as actions from 'loot-core/src/client/actions';
 import * as appSlice from 'loot-core/src/client/app/appSlice';
+import * as budgetsSlice from 'loot-core/src/client/budgets/budgetsSlice';
 import * as queriesSlice from 'loot-core/src/client/queries/queriesSlice';
 import { runQuery } from 'loot-core/src/client/query-helpers';
 import { store } from 'loot-core/src/client/store';
@@ -37,6 +38,7 @@ const boundActions = bindActionCreators(
     ...actions,
     ...accountsSlice.actions,
     ...appSlice.actions,
+    ...budgetsSlice.actions,
     ...queriesSlice.actions,
   },
   store.dispatch,

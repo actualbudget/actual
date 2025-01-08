@@ -2,8 +2,6 @@
 import React, { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
-import { importBudget } from 'loot-core/src/client/actions/budgets';
-
 import { useNavigate } from '../../../hooks/useNavigate';
 import { useDispatch } from '../../../redux';
 import { styles, theme } from '../../../style';
@@ -12,6 +10,7 @@ import { ButtonWithLoading } from '../../common/Button2';
 import { Modal, ModalCloseButton, ModalHeader } from '../../common/Modal';
 import { Paragraph } from '../../common/Paragraph';
 import { View } from '../../common/View';
+import { importBudget } from 'loot-core/client/budgets/budgetsSlice';
 
 function getErrorMessage(error: string): string {
   switch (error) {
@@ -38,7 +37,7 @@ export function ImportYNAB4Modal() {
       setImporting(true);
       setError(null);
       try {
-        await dispatch(importBudget(res[0], 'ynab4'));
+        await dispatch(importBudget({ filepath: res[0], type: 'ynab4' }));
         navigate('/budget');
       } catch (err) {
         setError(err.message);
