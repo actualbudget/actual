@@ -1,7 +1,4 @@
-import {
-  createSlice,
-  type PayloadAction,
-} from '@reduxjs/toolkit';
+import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
 import { createAppAsyncThunk } from '../store';
 
