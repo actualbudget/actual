@@ -1,10 +1,10 @@
 import React from 'react';
 import { Trans } from 'react-i18next';
-import { useDispatch } from 'react-redux';
 
 import { pushModal } from 'loot-core/client/actions';
 
 import { useMetadataPref } from '../../hooks/useMetadataPref';
+import { useDispatch } from '../../redux';
 import { theme } from '../../style';
 import { Button } from '../common/Button2';
 import { Link } from '../common/Link';

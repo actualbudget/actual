@@ -75,7 +75,7 @@ export function handleGlobalEvents(actions: BoundActions, store: Store<State>) {
 
     if (tagged) {
       Promise.all(promises).then(() => {
-        actions.setLastUndoState(undoState);
+        undo.setUndoState('undoEvent', undoState);
 
         // If a modal has been tagged, open it instead of navigating
         if (tagged.openModal) {

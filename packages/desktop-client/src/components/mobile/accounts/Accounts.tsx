@@ -1,6 +1,5 @@
 import React, { type CSSProperties, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useDispatch, useSelector } from 'react-redux';
 
 import { css } from '@emotion/css';
 
@@ -13,6 +12,7 @@ import { useFailedAccounts } from '../../../hooks/useFailedAccounts';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { SvgAdd, SvgCheveronRight } from '../../../icons/v1';
+import { useDispatch, useSelector } from '../../../redux';
 import { theme, styles } from '../../../style';
 import { makeAmountFullStyle } from '../../budget/util';
 import { Button } from '../../common/Button2';

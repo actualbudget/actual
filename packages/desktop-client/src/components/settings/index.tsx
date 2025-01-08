@@ -1,6 +1,5 @@
 import React, { type ReactNode, useEffect } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
-import { useDispatch } from 'react-redux';
 
 import { css } from '@emotion/css';
 
@@ -11,6 +10,7 @@ import { listen } from 'loot-core/src/platform/client/fetch';
 import { useGlobalPref } from '../../hooks/useGlobalPref';
 import { useIsOutdated, useLatestVersion } from '../../hooks/useLatestVersion';
 import { useMetadataPref } from '../../hooks/useMetadataPref';
+import { useDispatch } from '../../redux';
 import { theme } from '../../style';
 import { tokens } from '../../tokens';
 import { Button } from '../common/Button2';
