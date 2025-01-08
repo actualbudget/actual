@@ -782,7 +782,9 @@ class AccountInternal extends PureComponent<
       const account = this.props.accounts.find(
         account => account.id === this.props.accountId,
       );
-      this.props.dispatch(updateAccount({ account: { ...account, name } }));
+      this.props.dispatch(
+        updateAccount({ account: { ...account, name } as AccountEntity }),
+      );
       this.setState({ editingName: false, nameError: '' });
     }
   };
