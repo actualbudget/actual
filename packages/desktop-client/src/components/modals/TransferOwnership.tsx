@@ -9,7 +9,6 @@ import { View } from '@actual-app/components/view';
 
 import {
   addNotification,
-  closeAndLoadBudget,
   popModal,
 } from 'loot-core/client/actions';
 import { send } from 'loot-core/platform/client/fetch';
@@ -24,6 +23,7 @@ import { theme } from '../../style';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { Select } from '../common/Select';
 import { FormField, FormLabel } from '../forms';
+import { closeAndLoadBudget } from 'loot-core/client/budgets/budgetsSlice';
 
 type TransferOwnershipProps = {
   onSave?: () => void;
@@ -188,7 +188,7 @@ export function TransferOwnership({
                 try {
                   await onSave();
                   await dispatch(
-                    closeAndLoadBudget((currentFile as Budget).id),
+                    closeAndLoadBudget({ fileId: (currentFile as Budget).id }),
                   );
                   close();
                 } catch (error) {

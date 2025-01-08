@@ -16,12 +16,11 @@ import { View } from '@actual-app/components/view';
 
 import {
   addNotification,
-  closeBudget,
-  loadBudget,
   loadGlobalPrefs,
   signOut,
 } from 'loot-core/client/actions';
 import { setAppState, sync } from 'loot-core/client/app/appSlice';
+import { closeBudget, loadBudget } from 'loot-core/client/budgets/budgetsSlice';
 import * as Platform from 'loot-core/client/platform';
 import { SpreadsheetProvider } from 'loot-core/client/SpreadsheetProvider';
 import { init as initConnection, send } from 'loot-core/platform/client/fetch';
