@@ -367,7 +367,9 @@ function SelectedTransactionsFloatingActionBar({
                         displayValue = payeesById[String(value)]?.name ?? value;
                         break;
                       case 'amount':
-                        displayValue = integerToCurrency(Number(value));
+                        displayValue = Number.isNaN(Number(value))
+                          ? value
+                          : integerToCurrency(Number(value));
                         break;
                       case 'notes':
                         displayValue = `${mode} with ${value}`;
