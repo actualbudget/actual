@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
-import { useDispatch } from 'react-redux';
 
 import {
   closeModal,
@@ -10,6 +9,7 @@ import {
 } from 'loot-core/client/actions';
 
 import { useAccounts } from '../../hooks/useAccounts';
+import { useDispatch } from '../../redux';
 import { theme } from '../../style';
 import { Autocomplete } from '../autocomplete/Autocomplete';
 import { Button } from '../common/Button2';

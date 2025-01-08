@@ -6,12 +6,12 @@ import {
   type SyncedPrefs,
 } from '../../types/prefs';
 import * as constants from '../constants';
+import { type AppDispatch, type GetRootState } from '../store';
 
 import { closeModal } from './modals';
-import type { Dispatch, GetState } from './types';
 
 export function loadPrefs() {
-  return async (dispatch: Dispatch, getState: GetState) => {
+  return async (dispatch: AppDispatch, getState: GetRootState) => {
     const prefs = await send('load-prefs');
 
     // Remove any modal state if switching between budgets
@@ -45,7 +45,7 @@ export function loadPrefs() {
 }
 
 export function savePrefs(prefs: MetadataPrefs) {
-  return async (dispatch: Dispatch) => {
+  return async (dispatch: AppDispatch) => {
     await send('save-prefs', prefs);
     dispatch({
       type: constants.MERGE_LOCAL_PREFS,
@@ -55,7 +55,7 @@ export function savePrefs(prefs: MetadataPrefs) {
 }
 
 export function loadGlobalPrefs() {
-  return async (dispatch: Dispatch, getState: GetState) => {
+  return async (dispatch: AppDispatch, getState: GetRootState) => {
     const globalPrefs = await send('load-global-prefs');
     dispatch({
       type: constants.SET_PREFS,
@@ -71,7 +71,7 @@ export function saveGlobalPrefs(
   prefs: GlobalPrefs,
   onSaveGlobalPrefs?: () => void,
 ) {
-  return async (dispatch: Dispatch) => {
+  return async (dispatch: AppDispatch) => {
     await send('save-global-prefs', prefs);
     dispatch({
       type: constants.MERGE_GLOBAL_PREFS,
@@ -82,7 +82,7 @@ export function saveGlobalPrefs(
 }
 
 export function saveSyncedPrefs(prefs: SyncedPrefs) {
-  return async (dispatch: Dispatch) => {
+  return async (dispatch: AppDispatch) => {
     await Promise.all(
       Object.entries(prefs).map(([prefName, value]) =>
         send('preferences/save', {

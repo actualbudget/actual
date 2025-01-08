@@ -1,14 +1,17 @@
-// eslint-disable-next-line import/no-unresolved
-import { type ModalType } from '../../client/state-types/modals';
+import { OptionlessModal } from '../../../client/state-types/modals';
+import { UndoState as ServerUndoState } from '../../../server/undo';
 
 export type UndoState = {
-  id?: string;
-  url: unknown;
-  openModal: ModalType;
+  url: string | null;
+  // Right now, only the payees page uses this. It's only being set to
+  // `manage-rules` which is an optionless modal. Do we want to also
+  // support modals with options?
+  openModal: OptionlessModal | null;
   selectedItems: {
     name: string;
     items: Set<string>;
   } | null;
+  undoEvent: ServerUndoState | null;
 };
 
 export function setUndoState<K extends keyof Omit<UndoState, 'id'>>(

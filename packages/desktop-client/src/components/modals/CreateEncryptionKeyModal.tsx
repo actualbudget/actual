@@ -2,7 +2,6 @@
 import React, { useState } from 'react';
 import { Form } from 'react-aria-components';
 import { useTranslation, Trans } from 'react-i18next';
-import { useDispatch } from 'react-redux';
 
 import { css } from '@emotion/css';
 
@@ -10,6 +9,7 @@ import { loadAllFiles, loadGlobalPrefs, sync } from 'loot-core/client/actions';
 import { send } from 'loot-core/src/platform/client/fetch';
 import { getCreateKeyError } from 'loot-core/src/shared/errors';
 
+import { useDispatch } from '../../redux';
 import { styles, theme } from '../../style';
 import { ButtonWithLoading } from '../common/Button2';
 import { InitialFocus } from '../common/InitialFocus';

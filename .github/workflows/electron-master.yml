@@ -80,6 +80,7 @@ jobs:
       - name: Add to Release
         uses: softprops/action-gh-release@v2
         with:
+          draft: true
           files: |
             packages/desktop-electron/dist/*.dmg
             packages/desktop-electron/dist/*.exe

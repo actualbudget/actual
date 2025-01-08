@@ -282,6 +282,44 @@ export async function set3MonthAvg({
   });
 }
 
+export async function set12MonthAvg({
+  month,
+}: {
+  month: string;
+}): Promise<void> {
+  const categories = await db.all(
+    'SELECT * FROM v_categories WHERE tombstone = 0',
+  );
+
+  await batchMessages(async () => {
+    for (const cat of categories) {
+      if (cat.is_income === 1 && !isReflectBudget()) {
+        continue;
+      }
+      setNMonthAvg({ month, N: 12, category: cat.id });
+    }
+  });
+}
+
+export async function set6MonthAvg({
+  month,
+}: {
+  month: string;
+}): Promise<void> {
+  const categories = await db.all(
+    'SELECT * FROM v_categories WHERE tombstone = 0',
+  );
+
+  await batchMessages(async () => {
+    for (const cat of categories) {
+      if (cat.is_income === 1 && !isReflectBudget()) {
+        continue;
+      }
+      setNMonthAvg({ month, N: 6, category: cat.id });
+    }
+  });
+}
+
 export async function setNMonthAvg({
   month,
   N,
