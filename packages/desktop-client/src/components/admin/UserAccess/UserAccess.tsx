@@ -31,6 +31,7 @@ import { View } from '../../common/View';
 
 import { UserAccessHeader } from './UserAccessHeader';
 import { UserAccessRow } from './UserAccessRow';
+import { useAppDispatch } from '../../../redux';
 
 type ManageUserAccessContentProps = {
   isModal: boolean;
@@ -269,7 +270,7 @@ type LockToggleProps = {
 
 function LockToggle({ style, onToggleSave }: LockToggleProps) {
   const [hover, setHover] = useState(false);
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
   return (
     <Button
