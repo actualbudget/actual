@@ -266,9 +266,13 @@ export const uploadBudget = createAppAsyncThunk(
   },
 );
 
+type CloseAndLoadBudgetPayload = {
+  fileId: string;
+};
+
 export const closeAndLoadBudget = createAppAsyncThunk(
   `${sliceName}/closeAndLoadBudget`,
-  async ({ fileId }: { fileId: string }, { dispatch }) => {
+  async ({ fileId }: CloseAndLoadBudgetPayload, { dispatch }) => {
     await dispatch(closeBudget());
     await dispatch(loadBudget({ id: fileId }));
   },
