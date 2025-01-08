@@ -25,7 +25,6 @@ import { useMetadataPref } from '../../hooks/useMetadataPref';
 import { useDispatch, useSelector } from '../../redux';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { FormField, FormLabel } from '../forms';
-import { closeAndLoadBudget } from 'loot-core/client/budgets/budgetsSlice';
 
 type TransferOwnershipProps = Extract<
   ModalType,
