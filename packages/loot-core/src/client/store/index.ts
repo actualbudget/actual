@@ -23,11 +23,6 @@ import {
 } from '../budgets/budgetsSlice';
 import * as constants from '../constants';
 import {
-  name as budgetsSliceName,
-  reducer as budgetsSliceReducer,
-  getInitialState as getInitialBudgetsState,
-} from '../budgets/budgetsSlice';
-import {
   name as queriesSliceName,
   reducer as queriesSliceReducer,
   getInitialState as getInitialQueriesState,
