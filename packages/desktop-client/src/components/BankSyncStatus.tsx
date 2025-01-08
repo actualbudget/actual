@@ -12,7 +12,7 @@ import { theme } from '../style';
 import { AnimatedRefresh } from './AnimatedRefresh';
 
 export function BankSyncStatus() {
-  const accountsSyncing = useSelector(state => state.accounts.accountsSyncing);
+  const accountsSyncing = useSelector(state => state.account.accountsSyncing);
   const accountsSyncingCount = accountsSyncing.length;
   const count = accountsSyncingCount;
 
