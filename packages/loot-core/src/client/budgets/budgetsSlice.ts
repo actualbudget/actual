@@ -1,30 +1,22 @@
-import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
-
-import { type AppDispatch, type RootState } from '../store';
-import { Budget } from 'loot-core/types/budget';
-import { File } from 'loot-core/types/file';
-import { RemoteFile } from 'loot-core/server/cloud-storage';
-import { send } from 'loot-core/platform/client/fetch';
-import { setAppState } from '../app/appSlice';
+import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import { t } from 'i18next';
-import { getDownloadError, getSyncError } from 'loot-core/shared/errors';
+
+import { send } from '../../platform/client/fetch';
+import { type RemoteFile } from '../../server/cloud-storage';
+import { getDownloadError, getSyncError } from '../../shared/errors';
+import { type Budget } from '../../types/budget';
+import { type File } from '../../types/file';
+import { type Handlers } from '../../types/handlers';
 import { closeModal, loadGlobalPrefs, loadPrefs, pushModal } from '../actions';
+import { setAppState } from '../app/appSlice';
 import * as constants from '../constants';
-import { Handlers } from 'loot-core/types/handlers';
+import { createAppAsyncThunk } from '../store';
 
 const sliceName = 'budgets';
 
-const createAppAsyncThunk = createAsyncThunk.withTypes<{
-  state: RootState;
-  dispatch: AppDispatch;
-}>();
-
 export const loadBudgets = createAppAsyncThunk(
   `${sliceName}/loadBudgets`,
-  async (
-    _,
-    { dispatch },
-  ) => {
+  async (_, { dispatch }) => {
     const budgets = await send('get-budgets');
 
     await dispatch(setBudgets({ budgets }));
@@ -33,10 +25,7 @@ export const loadBudgets = createAppAsyncThunk(
 
 export const loadRemoteFiles = createAppAsyncThunk(
   `${sliceName}/loadRemoteFiles`,
-  async (
-    _,
-    { dispatch },
-  ) => {
+  async (_, { dispatch }) => {
     const files = await send('get-remote-files');
 
     await dispatch(setRemoteFiles({ remoteFiles: files }));
@@ -45,10 +34,7 @@ export const loadRemoteFiles = createAppAsyncThunk(
 
 export const loadAllFiles = createAppAsyncThunk(
   `${sliceName}/loadAllFiles`,
-  async (
-    _,
-    { dispatch, getState },
-  ) => {
+  async (_, { dispatch, getState }) => {
     const budgets = await send('get-budgets');
     const files = await send('get-remote-files');
 
@@ -62,14 +48,11 @@ type LoadBudgetPayload = {
   id: string;
   // TODO: Is this still needed?
   options?: Record<string, unknown>;
-}
+};
 
 export const loadBudget = createAppAsyncThunk(
   `${sliceName}/loadBudget`,
-  async (
-    { id, options = {} }: LoadBudgetPayload,
-    { dispatch },
-  ) => {
+  async ({ id, options = {} }: LoadBudgetPayload, { dispatch }) => {
     await dispatch(setAppState({ loadingText: t('Loading...') }));
 
     // Loading a budget may fail
@@ -110,10 +93,7 @@ export const loadBudget = createAppAsyncThunk(
 
 export const closeBudget = createAppAsyncThunk(
   `${sliceName}/closeBudget`,
-  async (
-    _,
-    { dispatch, getState },
-  ) => {
+  async (_, { dispatch, getState }) => {
     const prefs = getState().prefs.local;
     if (prefs && prefs.id) {
       // This clears out all the app state so the user starts fresh
@@ -132,10 +112,7 @@ export const closeBudget = createAppAsyncThunk(
 
 export const closeBudgetUI = createAppAsyncThunk(
   `${sliceName}/closeBudgetUI`,
-  async (
-    _,
-    { dispatch, getState },
-  ) => {
+  async (_, { dispatch, getState }) => {
     const prefs = getState().prefs.local;
     if (prefs && prefs.id) {
       // TODO: Change to use an action once CLOSE_BUDGET is migrated to redux toolkit.
@@ -151,10 +128,7 @@ type DeleteBudgetPayload = {
 
 export const deleteBudget = createAppAsyncThunk(
   `${sliceName}/deleteBudget`,
-  async (
-    { id, cloudFileId }: DeleteBudgetPayload,
-    { dispatch },
-  ) => {
+  async ({ id, cloudFileId }: DeleteBudgetPayload, { dispatch }) => {
     await send('delete-budget', { id, cloudFileId });
     await dispatch(loadAllFiles());
   },
@@ -258,16 +232,13 @@ export const duplicateBudget = createAppAsyncThunk(
 );
 
 type ImportBudgetPayload = {
-  filepath: string,
-  type: Parameters<Handlers['import-budget']>[0]['type'],
+  filepath: string;
+  type: Parameters<Handlers['import-budget']>[0]['type'];
 };
 
 export const importBudget = createAppAsyncThunk(
   `${sliceName}/importBudget`,
-  async (
-    { filepath, type }: ImportBudgetPayload,
-    { dispatch },
-  ) => {
+  async ({ filepath, type }: ImportBudgetPayload, { dispatch }) => {
     const { error } = await send('import-budget', { filepath, type });
     if (error) {
       throw new Error(error);
@@ -284,10 +255,7 @@ type UploadBudgetPayload = {
 
 export const uploadBudget = createAppAsyncThunk(
   `${sliceName}/uploadBudget`,
-  async (
-    { id }: UploadBudgetPayload,
-    { dispatch },
-  ) => {
+  async ({ id }: UploadBudgetPayload, { dispatch }) => {
     const { error } = await send('upload-budget', { id });
     if (error) {
       return { error };
@@ -300,10 +268,7 @@ export const uploadBudget = createAppAsyncThunk(
 
 export const closeAndLoadBudget = createAppAsyncThunk(
   `${sliceName}/closeAndLoadBudget`,
-  async (
-    { fileId }: { fileId: string },
-    { dispatch },
-  ) => {
+  async ({ fileId }: { fileId: string }, { dispatch }) => {
     await dispatch(closeBudget());
     await dispatch(loadBudget({ id: fileId }));
   },
@@ -315,10 +280,7 @@ type CloseAndDownloadBudgetPayload = {
 
 export const closeAndDownloadBudget = createAppAsyncThunk(
   `${sliceName}/closeAndDownloadBudget`,
-  async (
-    { cloudFileId }: CloseAndDownloadBudgetPayload,
-    { dispatch },
-  ) => {
+  async ({ cloudFileId }: CloseAndDownloadBudgetPayload, { dispatch }) => {
     await dispatch(closeBudget());
     await dispatch(downloadBudget({ cloudFileId, replace: true }));
   },
@@ -371,7 +333,9 @@ export const downloadBudget = createAppAsyncThunk(
           ),
         );
 
-        return await dispatch(downloadBudget({ cloudFileId, replace: true })).unwrap();
+        return await dispatch(
+          downloadBudget({ cloudFileId, replace: true }),
+        ).unwrap();
       } else {
         await dispatch(setAppState({ loadingText: null }));
         alert(getDownloadError(error));
@@ -404,16 +368,16 @@ const initialState: BudgetsState = {
 
 type SetBudgetsPayload = {
   budgets: Budget[];
-}
+};
 
 type SetRemoteFilesPayload = {
   remoteFiles: RemoteFile[];
-}
+};
 
 type SetAllFilesPayload = {
   budgets: Budget[];
   remoteFiles: RemoteFile[];
-}
+};
 
 const budgetsSlice = createSlice({
   name: 'budgets',
@@ -421,16 +385,25 @@ const budgetsSlice = createSlice({
   reducers: {
     setBudgets(state, action: PayloadAction<SetBudgetsPayload>) {
       state.budgets = action.payload.budgets;
-      state.allFiles = reconcileFiles(action.payload.budgets, state.remoteFiles);
+      state.allFiles = reconcileFiles(
+        action.payload.budgets,
+        state.remoteFiles,
+      );
     },
     setRemoteFiles(state, action: PayloadAction<SetRemoteFilesPayload>) {
       state.remoteFiles = action.payload.remoteFiles;
-      state.allFiles = reconcileFiles(state.budgets, action.payload.remoteFiles);
+      state.allFiles = reconcileFiles(
+        state.budgets,
+        action.payload.remoteFiles,
+      );
     },
     setAllFiles(state, action: PayloadAction<SetAllFilesPayload>) {
       state.budgets = action.payload.budgets;
       state.remoteFiles = action.payload.remoteFiles;
-      state.allFiles = reconcileFiles(action.payload.budgets, action.payload.remoteFiles);
+      state.allFiles = reconcileFiles(
+        action.payload.budgets,
+        action.payload.remoteFiles,
+      );
     },
     signOut(state) {
       state.allFiles = null;

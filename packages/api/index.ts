@@ -8,7 +8,7 @@ import type {
 import type { InitConfig } from 'loot-core/server/main';
 
 // @ts-ignore: bundle not available until we build it
-// eslint-disable-next-line import/extensions, import/no-unresolved
+// eslint-disable-next-line import/extensions
 import * as bundle from './app/bundle.api.js';
 import * as injected from './injected';
 import { validateNodeVersion } from './validateNodeVersion';

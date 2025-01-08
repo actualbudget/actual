@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { createBudget } from 'loot-core/client/budgets/budgetsSlice';
 import { send } from 'loot-core/src/platform/client/fetch';
 
 import { useNavigate } from '../../../hooks/useNavigate';
@@ -16,7 +17,6 @@ import { useRefreshLoginMethods } from '../../ServerContext';
 
 import { useBootstrapped, Title } from './common';
 import { ConfirmPasswordForm } from './ConfirmPasswordForm';
-import { createBudget } from 'loot-core/client/budgets/budgetsSlice';
 
 export function Bootstrap() {
   const { t } = useTranslation();

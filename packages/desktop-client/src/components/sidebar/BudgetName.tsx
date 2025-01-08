@@ -1,6 +1,7 @@
 import React, { type ReactNode, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { closeBudget } from 'loot-core/client/budgets/budgetsSlice';
 import * as Platform from 'loot-core/src/client/platform';
 
 import { useContextMenu } from '../../hooks/useContextMenu';
@@ -16,7 +17,6 @@ import { Menu } from '../common/Menu';
 import { Popover } from '../common/Popover';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
-import { closeBudget } from 'loot-core/client/budgets/budgetsSlice';
 
 type BudgetNameProps = {
   children?: ReactNode;

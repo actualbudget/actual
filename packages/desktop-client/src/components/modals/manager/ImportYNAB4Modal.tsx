@@ -2,6 +2,8 @@
 import React, { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { importBudget } from 'loot-core/client/budgets/budgetsSlice';
+
 import { useNavigate } from '../../../hooks/useNavigate';
 import { useDispatch } from '../../../redux';
 import { styles, theme } from '../../../style';
@@ -10,7 +12,6 @@ import { ButtonWithLoading } from '../../common/Button2';
 import { Modal, ModalCloseButton, ModalHeader } from '../../common/Modal';
 import { Paragraph } from '../../common/Paragraph';
 import { View } from '../../common/View';
-import { importBudget } from 'loot-core/client/budgets/budgetsSlice';
 
 function getErrorMessage(error: string): string {
   switch (error) {

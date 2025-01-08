@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { addNotification } from 'loot-core/client/actions';
+import { duplicateBudget } from 'loot-core/client/budgets/budgetsSlice';
+import { send } from 'loot-core/platform/client/fetch';
 import { type File } from 'loot-core/src/types/file';
 
 import { useDispatch } from '../../../redux';
@@ -19,8 +21,6 @@ import {
 } from '../../common/Modal';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
-import { send } from 'loot-core/platform/client/fetch';
-import { duplicateBudget } from 'loot-core/client/budgets/budgetsSlice';
 
 type DuplicateFileProps = {
   file: File;

@@ -11,10 +11,10 @@ import {
   signOut,
   sync,
 } from './actions';
+import { closeAndDownloadBudget, uploadBudget } from './budgets/budgetsSlice';
 import { getAccounts, getCategories, getPayees } from './queries/queriesSlice';
 import type { Notification } from './state-types/notifications';
 import { type AppStore } from './store';
-import { closeAndDownloadBudget, uploadBudget } from './budgets/budgetsSlice';
 
 export function listenForSyncEvent(store: AppStore) {
   let attemptedSyncRepair = false;
@@ -225,7 +225,7 @@ export function listenForSyncEvent(store: AppStore) {
             button: {
               title: t('Revert'),
               action: () => {
-                store.dispatch(closeAndDownloadBudget({ cloudFileId }))
+                store.dispatch(closeAndDownloadBudget({ cloudFileId }));
               },
             },
           };

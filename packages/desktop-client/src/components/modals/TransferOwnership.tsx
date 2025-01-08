@@ -1,10 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
-import {
-  addNotification,
-  popModal,
-} from 'loot-core/client/actions';
+import { addNotification, popModal } from 'loot-core/client/actions';
+import { closeAndLoadBudget } from 'loot-core/client/budgets/budgetsSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import { getUserAccessErrors } from 'loot-core/shared/errors';
 import { type Budget } from 'loot-core/types/budget';
@@ -21,7 +19,6 @@ import { Stack } from '../common/Stack';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { FormField, FormLabel } from '../forms';
-import { closeAndLoadBudget } from 'loot-core/client/budgets/budgetsSlice';
 
 type TransferOwnershipProps = {
   onSave?: () => void;

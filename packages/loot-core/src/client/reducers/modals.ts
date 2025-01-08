@@ -11,13 +11,13 @@ type ModalsAction =
   | Action
   // TODO. Temporary until we migrate to redux toolkit.
   | {
-    type: 'app/setAppState';
-    payload: { loadingText: string | null };
-  }
+      type: 'app/setAppState';
+      payload: { loadingText: string | null };
+    }
   // TODO: Temporary until we migrate to redux toolkit.
   | {
-    type: 'budgets/signOut';
-  };
+      type: 'budgets/signOut';
+    };
 
 export function update(
   state = initialState,
