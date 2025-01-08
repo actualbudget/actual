@@ -139,6 +139,15 @@ Docusaurus 2 provides translation using [i18n](https://docusaurus.io/docs/i18n/i
 
 * **Time Neutral**: Use present voice, unless documentation is for experimental or unreleased features. Where time references are made, remove them upon release or removal of the feature. Example: _Filters can be used..._ instead of _As of June 2022 update, you can..._.
 
+
+### A Short Style Guide
+
+* Prefix monetary values with the $ (dollar) sign.
+* Use the , (comma) sign as the thousands' separator.
+* Calculations should never have the dollar prefix, nor the thousand separator signs.
+* All headings must use [Title Case](https://en.wikipedia.org/wiki/Title_case) using the Chicago Manual of Style rule set.
+
+
 ### Format
 
 * **Keep paragraphs short and focused**. Each paragraph should convey a single idea or concept.
