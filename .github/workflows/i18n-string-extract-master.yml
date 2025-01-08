@@ -52,6 +52,7 @@ jobs:
       - name: Generate i18n strings
         working-directory: actual
         run: |
+          mkdir -p packages/desktop-client/locale/
           cp ../translations/en.json packages/desktop-client/locale/
           yarn generate:i18n
           if [[ ! -f packages/desktop-client/locale/en.json ]]; then
