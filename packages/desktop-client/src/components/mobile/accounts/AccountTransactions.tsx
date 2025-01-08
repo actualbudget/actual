@@ -97,7 +97,9 @@ export function AccountTransactions({
 
 function AccountHeader({ account }: { readonly account: AccountEntity }) {
   const failedAccounts = useFailedAccounts();
-  const syncingAccountIds = useAppSelector(state => state.account.accountsSyncing);
+  const syncingAccountIds = useAppSelector(
+    state => state.account.accountsSyncing,
+  );
   const pending = useMemo(
     () => syncingAccountIds.includes(account.id),
     [syncingAccountIds, account.id],

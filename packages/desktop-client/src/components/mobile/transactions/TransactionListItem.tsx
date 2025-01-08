@@ -59,7 +59,9 @@ export function TransactionListItem({
   const transferAccount = useAccount(payee?.transfer_acct || '');
   const isPreview = isPreviewId(transaction?.id || '');
 
-  const newTransactions = useAppSelector(state => state.queries.newTransactions);
+  const newTransactions = useAppSelector(
+    state => state.queries.newTransactions,
+  );
 
   const { longPressProps } = useLongPress({
     accessibilityDescription: 'Long press to select multiple transactions',
