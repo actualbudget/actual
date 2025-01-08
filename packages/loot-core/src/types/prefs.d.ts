@@ -77,6 +77,7 @@ export type GlobalPrefs = Partial<{
   floatingSidebar: boolean;
   maxMonths: number;
   keyId?: string;
+  language: string;
   theme: Theme;
   preferredDarkTheme: DarkTheme;
   documentDir: string; // Electron only

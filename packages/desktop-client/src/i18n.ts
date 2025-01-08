@@ -5,23 +5,27 @@ import resourcesToBackend from 'i18next-resources-to-backend';
 
 const languages = import.meta.glob('/locale/*.json');
 
+export const availableLanguages = Object.keys(languages).map(
+  path => path.split('/')[2].split('.')[0],
+);
+
+const isLanguageAvailable = (language: string) =>
+  Object.hasOwn(languages, `/locale/${language}.json`);
+
 const loadLanguage = (language: string) => {
-  const path = `/locale/${language}.json`;
-  if (!Object.hasOwn(languages, path)) {
+  if (!isLanguageAvailable(language)) {
     console.error(`Unknown locale ${language}`);
     throw new Error(`Unknown locale ${language}`);
   }
-  return languages[path]();
+  return languages[`/locale/${language}.json`]();
 };
 
 i18n
   .use(initReactI18next)
   .use(resourcesToBackend(loadLanguage))
   .init({
-    // While we mark all strings for translations, one can test
-    // it by setting the language in localStorage to their choice.
     // Set this to 'cimode' to see the exact keys without interpolation.
-    lng: localStorage.getItem('language') || 'en',
+    lng: 'en',
 
     // allow keys to be phrases having `:`, `.`
     nsSeparator: false,
@@ -35,3 +39,28 @@ i18n
       transSupportBasicHtmlNodes: false,
     },
   });
+
+export const setI18NextLanguage = (language: string) => {
+  if (language === 'en' && !isLanguageAvailable(language)) {
+    // English is always ~available since we use natural-language keys.
+    return;
+  }
+
+  if (!language) {
+    // System default
+    setI18NextLanguage(navigator.language || 'en');
+    return;
+  }
+
+  language = language.toLowerCase();
+  if (!availableLanguages.includes(language)) {
+    if (language.includes('-')) {
+      setI18NextLanguage(language.split('-')[0]);
+      return;
+    }
+
+    console.error(`Unknown locale ${language}`);
+    throw new Error(`Unknown locale ${language}`);
+  }
+  i18n.changeLanguage(language || 'en');
+};
