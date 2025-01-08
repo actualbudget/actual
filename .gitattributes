@@ -17,6 +17,3 @@ yarn.lock text eol=lf
 # Denote all files that are truly binary and should not be modified.
 *.png binary
 *.jpg binary
-
-# Mark translation files as generated
-packages/desktop-client/locale/*.json linguist-generated=true
