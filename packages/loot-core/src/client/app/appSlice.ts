@@ -1,17 +1,11 @@
 import {
-  createAsyncThunk,
   createSlice,
   type PayloadAction,
 } from '@reduxjs/toolkit';
 
-import { type AppDispatch, type RootState } from '../store';
+import { createAppAsyncThunk } from '../store';
 
 const sliceName = 'app';
-
-const createAppAsyncThunk = createAsyncThunk.withTypes<{
-  state: RootState;
-  dispatch: AppDispatch;
-}>();
 
 type AppState = {
   loadingText: string | null;
