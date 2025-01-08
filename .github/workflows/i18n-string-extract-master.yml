@@ -1,4 +1,4 @@
-name: Download translations and upload new strings
+name: Extract and upload i18n strings
 
 on:
   schedule:
@@ -7,37 +7,14 @@ on:
   workflow_dispatch:
 
 jobs:
-  download-translations-and-upload-new-strings:
+  extract-and-upload-i18n-strings:
     runs-on: ubuntu-latest
     if: github.repository == 'actualbudget/actual'
     steps:
-      - name: Configure i18n client
-        run: |
-          pip install wlc
-      - name: Lock translations
-        run: |
-          wlc \
-            --url https://hosted.weblate.org/api/ \
-            --key "${{ secrets.WEBLATE_API_KEY_CI_STRINGS }}" \
-            lock \
-            actualbudget/actual
-      - name: Update VCS with latest translations
-        run: |
-          wlc \
-            --url https://hosted.weblate.org/api/ \
-            --key "${{ secrets.WEBLATE_API_KEY_CI_STRINGS }}" \
-            pull \
-            actualbudget/actual
       - name: Check out main repository
         uses: actions/checkout@v4
         with:
           path: actual
-      - name: Check out translations
-        uses: actions/checkout@v4
-        with:
-          ssh-key: ${{ secrets.STRING_IMPORT_DEPLOY_KEY }}
-          repository: actualbudget/translations
-          path: translations
       - name: Set up environment
         uses: ./actual/.github/actions/setup
         with:
@@ -46,28 +23,35 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-      - name: Check mergefreeze status
-        id: mergefreeze
-        shell: bash  # Enable pipefail
+      - name: Configure i18n client
         run: |
-          echo frozen=$(curl "https://www.mergefreeze.com/api/branches/actualbudget/actual/master?access_token=${{ secrets.MERGEFREEZE_API_KEY }}" | jq -r .frozen) > $GITHUB_OUTPUT
+          pip install wlc
 
-      - name: Pull latest translations
-        working-directory: actual
-        if: ${{ steps.mergefreeze.frozen == 'false' }}
+      - name: Lock translations
         run: |
-          # Not using git subtree to avoid merge commits
-          cp -r ../translations/*.json packages/desktop-client/locale/
-          git add .
-          if git commit -m "Update translations"; then
-            git push
-          else
-            echo "No changes to commit"
-          fi
+          wlc \
+            --url https://hosted.weblate.org/api/ \
+            --key "${{ secrets.WEBLATE_API_KEY_CI_STRINGS }}" \
+            lock \
+            actualbudget/actual
 
+      - name: Update VCS with latest translations
+        run: |
+          wlc \
+            --url https://hosted.weblate.org/api/ \
+            --key "${{ secrets.WEBLATE_API_KEY_CI_STRINGS }}" \
+            pull \
+            actualbudget/actual
+      - name: Check out updated translations
+        uses: actions/checkout@v4
+        with:
+          ssh-key: ${{ secrets.STRING_IMPORT_DEPLOY_KEY }}
+          repository: actualbudget/translations
+          path: translations
       - name: Generate i18n strings
         working-directory: actual
         run: |
+          cp ../translations/en.json packages/desktop-client/locale/
           yarn generate:i18n
           if [[ ! -f packages/desktop-client/locale/en.json ]]; then
             echo "File packages/desktop-client/locale/en.json not found. Ensure the file was generated correctly."
