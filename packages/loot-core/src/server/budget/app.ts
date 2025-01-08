@@ -20,6 +20,8 @@ app.method(
 );
 app.method('budget/set-zero', mutator(undoable(actions.setZero)));
 app.method('budget/set-3month-avg', mutator(undoable(actions.set3MonthAvg)));
+app.method('budget/set-6month-avg', mutator(undoable(actions.set6MonthAvg)));
+app.method('budget/set-12month-avg', mutator(undoable(actions.set12MonthAvg)));
 app.method('budget/set-n-month-avg', mutator(undoable(actions.setNMonthAvg)));
 app.method(
   'budget/check-templates',
