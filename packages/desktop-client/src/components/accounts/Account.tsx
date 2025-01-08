@@ -61,6 +61,7 @@ import {
   type RuleConditionEntity,
   type TransactionEntity,
   type TransactionFilterEntity,
+  type PayeeEntity,
 } from 'loot-core/src/types/models';
 
 import { useAccountPreviewTransactions } from '../../hooks/useAccountPreviewTransactions';
@@ -641,17 +642,19 @@ class AccountInternal extends PureComponent<
       });
 
       if (res) {
-        this.props.dispatch(
-          pushModal('import-transactions', {
-            accountId,
-            filename: res[0],
-            onImported: (didChange: boolean) => {
-              if (didChange) {
-                this.fetchTransactions();
-              }
-            },
-          }),
-        );
+        if (accountId && res?.length > 0) {
+          this.props.dispatch(
+            pushModal('import-transactions', {
+              accountId,
+              filename: res[0],
+              onImported: (didChange: boolean) => {
+                if (didChange) {
+                  this.fetchTransactions();
+                }
+              },
+            }),
+          );
+        }
       }
     }
   };
@@ -738,7 +741,7 @@ class AccountInternal extends PureComponent<
       const account = this.props.accounts.find(
         account => account.id === this.props.accountId,
       );
-      this.props.dispatch(updateAccount({ ...account, name }));
+      this.props.dispatch(updateAccount({ ...account, name } as AccountEntity));
       this.setState({ editingName: false, nameError: '' });
     }
   };
@@ -1279,7 +1282,7 @@ class AccountInternal extends PureComponent<
     const onConfirmTransfer = async (ids: string[]) => {
       this.setState({ workingHard: true });
 
-      const payees = await this.props.dispatch(getPayees());
+      const payees: PayeeEntity[] = await this.props.dispatch(getPayees());
       const { data: transactions } = await runQuery(
         q('transactions')
           .filter({ id: { $oneof: ids } })
