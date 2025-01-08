@@ -4,13 +4,11 @@ inputs:
   working-directory:
     description: 'Working directory to run in, default .'
     required: false
-    default: .
-    type: string
+    default: '.'
   download-translations:
     description: 'Whether to download translations as part of setup, default true'
     required: false
-    default: true
-    type: boolean
+    default: 'true'
 
 runs:
   using: composite
@@ -39,4 +37,4 @@ runs:
       with:
         repository: actualbudget/translations
         path: ${{ inputs.working-directory }}/packages/desktop-client/locale
-      if: ${{ inputs.download-translations }}
+      if: ${{ inputs.download-translations == 'true' }}
