@@ -32,6 +32,7 @@ import { ExperimentalFeatures } from './Experimental';
 import { ExportBudget } from './Export';
 import { FixSplits } from './FixSplits';
 import { FormatSettings } from './Format';
+import { LanguageSettings } from './LanguageSettings';
 import { ResetCache, ResetSync } from './Reset';
 import { ThemeSettings } from './Themes';
 import { AdvancedToggle, Setting } from './UI';
@@ -195,6 +196,7 @@ export function Settings() {
         <About />
         <ThemeSettings />
         <FormatSettings />
+        <LanguageSettings />
         <AuthSettings />
         <EncryptionSettings />
         <BudgetTypeSettings />
