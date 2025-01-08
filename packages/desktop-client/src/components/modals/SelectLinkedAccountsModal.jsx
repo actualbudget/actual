@@ -9,7 +9,7 @@ import {
 } from 'loot-core/client/actions';
 
 import { useAccounts } from '../../hooks/useAccounts';
-import { useDispatch } from '../../redux';
+import { useAppDispatch } from '../../redux';
 import { theme } from '../../style';
 import { Autocomplete } from '../autocomplete/Autocomplete';
 import { Button } from '../common/Button2';
@@ -41,7 +41,7 @@ export function SelectLinkedAccountsModal({
 }) {
   externalAccounts.sort((a, b) => a.name.localeCompare(b.name));
   const { t } = useTranslation();
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const localAccounts = useAccounts().filter(a => a.closed === 0);
   const [chosenAccounts, setChosenAccounts] = useState(() => {
     return Object.fromEntries(

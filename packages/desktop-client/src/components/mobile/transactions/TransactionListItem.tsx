@@ -24,7 +24,7 @@ import {
   SvgCheckCircle1,
   SvgLockClosed,
 } from '../../../icons/v2';
-import { useSelector } from '../../../redux';
+import { useAppSelector } from '../../../redux';
 import { styles, theme } from '../../../style';
 import { makeAmountFullStyle } from '../../budget/util';
 import { Button } from '../../common/Button2';
@@ -59,7 +59,7 @@ export function TransactionListItem({
   const transferAccount = useAccount(payee?.transfer_acct || '');
   const isPreview = isPreviewId(transaction?.id || '');
 
-  const newTransactions = useSelector(state => state.queries.newTransactions);
+  const newTransactions = useAppSelector(state => state.queries.newTransactions);
 
   const { longPressProps } = useLongPress({
     accessibilityDescription: 'Long press to select multiple transactions',

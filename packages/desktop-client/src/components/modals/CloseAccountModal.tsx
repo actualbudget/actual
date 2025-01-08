@@ -14,7 +14,7 @@ import { type TransObjectLiteral } from 'loot-core/types/util';
 
 import { useAccounts } from '../../hooks/useAccounts';
 import { useCategories } from '../../hooks/useCategories';
-import { useDispatch } from '../../redux';
+import { useAppDispatch } from '../../redux';
 import { styles, theme } from '../../style';
 import { AccountAutocomplete } from '../autocomplete/AccountAutocomplete';
 import { CategoryAutocomplete } from '../autocomplete/CategoryAutocomplete';
@@ -62,7 +62,7 @@ export function CloseAccountModal({
 
   const [transferError, setTransferError] = useState(false);
   const [categoryError, setCategoryError] = useState(false);
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const { isNarrowWidth } = useResponsive();
 
   const onSelectAccount = accId => {

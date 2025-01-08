@@ -8,7 +8,7 @@ import { format, sheetForMonth, prevMonth } from 'loot-core/src/shared/months';
 
 import { useCategories } from '../../hooks/useCategories';
 import { useUndo } from '../../hooks/useUndo';
-import { useDispatch } from '../../redux';
+import { useAppDispatch } from '../../redux';
 import { styles } from '../../style';
 import { ToBudgetAmount } from '../budget/envelope/budgetsummary/ToBudgetAmount';
 import { TotalsList } from '../budget/envelope/budgetsummary/TotalsList';
@@ -25,7 +25,7 @@ export function EnvelopeBudgetSummaryModal({
   month,
   onBudgetAction,
 }: EnvelopeBudgetSummaryModalProps) {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const prevMonthName = format(prevMonth(month), 'MMM');
   const sheetValue =
     useEnvelopeSheetValue({

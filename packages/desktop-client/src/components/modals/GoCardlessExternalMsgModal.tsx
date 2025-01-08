@@ -11,7 +11,7 @@ import {
 
 import { useGoCardlessStatus } from '../../hooks/useGoCardlessStatus';
 import { AnimatedLoading } from '../../icons/AnimatedLoading';
-import { useDispatch } from '../../redux';
+import { useAppDispatch } from '../../redux';
 import { theme } from '../../style';
 import { Error, Warning } from '../alerts';
 import { Autocomplete } from '../autocomplete/Autocomplete';
@@ -87,7 +87,7 @@ export function GoCardlessExternalMsgModal({
 }: GoCardlessExternalMsgProps) {
   const { t } = useTranslation();
 
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
   const [waiting, setWaiting] = useState<string | null>(null);
   const [success, setSuccess] = useState<boolean>(false);

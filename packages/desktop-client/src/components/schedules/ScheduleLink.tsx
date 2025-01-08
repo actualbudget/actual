@@ -12,7 +12,7 @@ import {
 } from 'loot-core/src/types/models';
 
 import { SvgAdd } from '../../icons/v0';
-import { useDispatch } from '../../redux';
+import { useAppDispatch } from '../../redux';
 import { Button } from '../common/Button2';
 import { InitialFocus } from '../common/InitialFocus';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
@@ -35,7 +35,7 @@ export function ScheduleLink({
 }) {
   const { t } = useTranslation();
 
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const [filter, setFilter] = useState(accountName || '');
   const schedulesQuery = useMemo(
     () => q('schedules').filter({ completed: false }).select('*'),

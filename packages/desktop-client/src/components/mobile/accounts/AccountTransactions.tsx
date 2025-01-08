@@ -37,7 +37,7 @@ import { useAccountPreviewTransactions } from '../../../hooks/useAccountPreviewT
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import { useFailedAccounts } from '../../../hooks/useFailedAccounts';
 import { useNavigate } from '../../../hooks/useNavigate';
-import { useSelector, useDispatch } from '../../../redux';
+import { useAppSelector, useAppDispatch } from '../../../redux';
 import { styles, theme } from '../../../style';
 import { Button } from '../../common/Button2';
 import { Text } from '../../common/Text';
@@ -97,7 +97,7 @@ export function AccountTransactions({
 
 function AccountHeader({ account }: { readonly account: AccountEntity }) {
   const failedAccounts = useFailedAccounts();
-  const syncingAccountIds = useSelector(state => state.account.accountsSyncing);
+  const syncingAccountIds = useAppSelector(state => state.account.accountsSyncing);
   const pending = useMemo(
     () => syncingAccountIds.includes(account.id),
     [syncingAccountIds, account.id],
@@ -107,7 +107,7 @@ function AccountHeader({ account }: { readonly account: AccountEntity }) {
     [failedAccounts, account.id],
   );
 
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
   const onSave = useCallback(
     (account: AccountEntity) => {
@@ -251,7 +251,7 @@ function TransactionListWithPreviews({
   });
 
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
   const onRefresh = useCallback(() => {

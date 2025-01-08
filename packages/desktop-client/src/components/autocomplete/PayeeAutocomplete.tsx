@@ -26,7 +26,7 @@ import {
 import { useAccounts } from '../../hooks/useAccounts';
 import { useCommonPayees, usePayees } from '../../hooks/usePayees';
 import { SvgAdd, SvgBookmark } from '../../icons/v1';
-import { useDispatch } from '../../redux';
+import { useAppDispatch } from '../../redux';
 import { theme, styles } from '../../style';
 import { Button } from '../common/Button';
 import { TextOneLine } from '../common/TextOneLine';
@@ -320,7 +320,7 @@ export function PayeeAutocomplete({
     return [{ id: 'new', favorite: 0, name: '' }, ...filteredSuggestions];
   }, [commonPayees, payees, focusTransferPayees, accounts, hasPayeeInput]);
 
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
   async function handleSelect(idOrIds, rawInputValue) {
     if (!clearOnBlur) {

@@ -10,7 +10,7 @@ import { type Handlers } from 'loot-core/types/handlers';
 
 import { useActions } from '../../hooks/useActions';
 import { useMetadataPref } from '../../hooks/useMetadataPref';
-import { useDispatch, useSelector } from '../../redux';
+import { useAppDispatch, useAppSelector } from '../../redux';
 import { styles, theme } from '../../style';
 import { Button } from '../common/Button2';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
@@ -29,18 +29,18 @@ export function TransferOwnership({
 }: TransferOwnershipProps) {
   const { t } = useTranslation();
 
-  const userData = useSelector(state => state.user.data);
+  const userData = useAppSelector(state => state.user.data);
   const actions = useActions();
   const [userId, setUserId] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [availableUsers, setAvailableUsers] = useState<[string, string][]>([]);
   const [cloudFileId] = useMetadataPref('cloudFileId');
-  const allFiles = useSelector(state => state.budgets.allFiles || []);
+  const allFiles = useAppSelector(state => state.budgets.allFiles || []);
   const remoteFiles = allFiles.filter(
     f => f.state === 'remote' || f.state === 'synced' || f.state === 'detached',
   ) as (SyncedLocalFile | RemoteFile)[];
   const currentFile = remoteFiles.find(f => f.cloudFileId === cloudFileId);
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const [isTransferring, setIsTransferring] = useState(false);
 
   useEffect(() => {
