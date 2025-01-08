@@ -2,6 +2,7 @@ import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { pushModal } from 'loot-core/client/actions';
+import { createBudget } from 'loot-core/client/budgets/budgetsSlice';
 
 import { useDispatch } from '../../redux';
 import { styles, theme } from '../../style';
@@ -10,7 +11,6 @@ import { Link } from '../common/Link';
 import { Paragraph } from '../common/Paragraph';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
-import { createBudget } from 'loot-core/client/budgets/budgetsSlice';
 
 export function WelcomeScreen() {
   const { t } = useTranslation();

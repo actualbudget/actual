@@ -4,6 +4,7 @@ import { useTranslation, Trans } from 'react-i18next';
 import { css } from '@emotion/css';
 
 import { loadPrefs } from 'loot-core/client/actions';
+import { closeBudget } from 'loot-core/client/budgets/budgetsSlice';
 import { isElectron } from 'loot-core/shared/environment';
 import { listen } from 'loot-core/src/platform/client/fetch';
 
@@ -35,7 +36,6 @@ import { FormatSettings } from './Format';
 import { ResetCache, ResetSync } from './Reset';
 import { ThemeSettings } from './Themes';
 import { AdvancedToggle, Setting } from './UI';
-import { closeBudget } from 'loot-core/client/budgets/budgetsSlice';
 
 function About() {
   const version = useServerVersion();

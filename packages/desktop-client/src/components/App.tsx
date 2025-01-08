@@ -17,6 +17,7 @@ import {
   signOut,
 } from 'loot-core/client/actions';
 import { setAppState, sync } from 'loot-core/client/app/appSlice';
+import { closeBudget, loadBudget } from 'loot-core/client/budgets/budgetsSlice';
 import { SpreadsheetProvider } from 'loot-core/client/SpreadsheetProvider';
 import * as Platform from 'loot-core/src/client/platform';
 import {
@@ -41,7 +42,6 @@ import { Modals } from './Modals';
 import { ResponsiveProvider } from './responsive/ResponsiveProvider';
 import { SidebarProvider } from './sidebar/SidebarProvider';
 import { UpdateNotification } from './UpdateNotification';
-import { closeBudget, loadBudget } from 'loot-core/client/budgets/budgetsSlice';
 
 function AppInner() {
   const [budgetId] = useMetadataPref('id');

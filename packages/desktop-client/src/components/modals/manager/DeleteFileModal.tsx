@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { deleteBudget } from 'loot-core/client/budgets/budgetsSlice';
 import { type File } from 'loot-core/src/types/file';
 
 import { useDispatch } from '../../../redux';
@@ -9,7 +10,6 @@ import { ButtonWithLoading } from '../../common/Button2';
 import { Modal, ModalCloseButton, ModalHeader } from '../../common/Modal';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
-import { deleteBudget } from 'loot-core/client/budgets/budgetsSlice';
 
 type DeleteFileProps = {
   file: File;
@@ -73,7 +73,7 @@ export function DeleteFileModal({ file }: DeleteFileProps) {
                       deleteBudget({
                         id: 'id' in file ? file.id : undefined,
                         cloudFileId: file.cloudFileId,
-                    }),
+                      }),
                     );
                     setLoadingState(null);
 

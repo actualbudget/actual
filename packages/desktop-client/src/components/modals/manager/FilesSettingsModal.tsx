@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { pushModal } from 'loot-core/client/actions';
+import { loadAllFiles } from 'loot-core/client/budgets/budgetsSlice';
 
 import { useGlobalPref } from '../../../hooks/useGlobalPref';
 import { SvgPencil1 } from '../../../icons/v2';
@@ -11,7 +12,6 @@ import { Button } from '../../common/Button2';
 import { Modal, ModalCloseButton, ModalHeader } from '../../common/Modal';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
-import { loadAllFiles } from 'loot-core/client/budgets/budgetsSlice';
 
 function FileLocationSettings() {
   const [documentDir, _setDocumentDirPref] = useGlobalPref('documentDir');
