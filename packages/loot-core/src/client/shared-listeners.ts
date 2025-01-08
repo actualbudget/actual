@@ -49,9 +49,7 @@ export function listenForSyncEvent(actions, store) {
       }
     } else if (type === 'error') {
       let notif: Notification | null = null;
-      const learnMore = t(
-        '[Learn more](https://actualbudget.org/docs/getting-started/sync/#debugging-sync-issues)',
-      );
+      const learnMore = `[${t('Learn more')}](https://actualbudget.org/docs/getting-started/sync/#debugging-sync-issues)`;
       const githubIssueLink =
         'https://github.com/actualbudget/actual/issues/new?assignees=&labels=bug&template=bug-report.yml&title=%5BBug%5D%3A+';
 

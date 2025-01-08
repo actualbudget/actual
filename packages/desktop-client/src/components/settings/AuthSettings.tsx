@@ -1,10 +1,10 @@
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
 
 import { pushModal } from 'loot-core/client/actions';
 
 import { useFeatureFlag } from '../../hooks/useFeatureFlag';
+import { useDispatch } from '../../redux';
 import { theme } from '../../style';
 import { Button } from '../common/Button2';
 import { Label } from '../common/Label';

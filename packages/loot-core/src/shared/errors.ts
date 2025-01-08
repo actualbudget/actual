@@ -129,7 +129,7 @@ export function getUserAccessErrors(reason: string) {
     case 'unauthorized':
       return t('You are not logged in.');
     case 'token-expired':
-      return t('Login expired, please login again.');
+      return t('Login expired, please log in again.');
     case 'user-cant-be-empty':
       return t('Please select a user.');
     case 'invalid-file-id':

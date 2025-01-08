@@ -3,7 +3,7 @@ import * as constants from '../constants';
 import type { Action } from '../state-types';
 import type { NotificationsState } from '../state-types/notifications';
 
-const initialState = {
+export const initialState = {
   notifications: [],
   inset: {},
 };

@@ -1,7 +1,6 @@
 // @ts-strict-ignore
 import React, { useEffect, useState, useRef } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
 
 import { pushModal } from 'loot-core/src/client/actions/modals';
 import { sendCatch } from 'loot-core/src/platform/client/fetch';
@@ -12,6 +11,7 @@ import {
 
 import { useGoCardlessStatus } from '../../hooks/useGoCardlessStatus';
 import { AnimatedLoading } from '../../icons/AnimatedLoading';
+import { useDispatch } from '../../redux';
 import { theme } from '../../style';
 import { Error, Warning } from '../alerts';
 import { Autocomplete } from '../autocomplete/Autocomplete';
@@ -228,7 +228,7 @@ export function GoCardlessExternalMsgModal({
             onPress={onJump}
             isDisabled={!institutionId || !country}
           >
-            <Trans>Link bank in browser &rarr;</Trans>
+            <Trans>Link bank in browser</Trans> &rarr;
           </Button>
         </View>
       </View>
@@ -280,9 +280,11 @@ export function GoCardlessExternalMsgModal({
                     onClick={onJump}
                     style={{ marginTop: 10 }}
                   >
+                    (
                     <Trans>
-                      (Account linking not opening in a new tab? Click here)
+                      Account linking not opening in a new tab? Click here
                     </Trans>
+                    )
                   </Link>
                 )}
               </View>
@@ -298,7 +300,7 @@ export function GoCardlessExternalMsgModal({
                 }}
                 onPress={onContinue}
               >
-                <Trans>Success! Click to continue &rarr;</Trans>
+                <Trans>Success! Click to continue</Trans> &rarr;
               </Button>
             ) : isConfigured || isGoCardlessSetupComplete ? (
               renderLinkButton()
