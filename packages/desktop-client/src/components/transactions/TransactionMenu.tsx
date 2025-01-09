@@ -1,7 +1,7 @@
 import React, { type ComponentPropsWithoutRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { pushModal } from 'loot-core/client/actions';
+import { pushModal } from 'loot-core/client/modals/modalsSlice';
 import { isPreviewId } from 'loot-core/shared/transactions';
 import { type TransactionEntity } from 'loot-core/types/models';
 
@@ -54,7 +54,9 @@ export function TransactionMenu({
     }
 
     if (scheduleId) {
-      dispatch(pushModal('schedule-edit', { id: scheduleId }));
+      dispatch(
+        pushModal({ name: 'schedule-edit', options: { id: scheduleId } }),
+      );
     }
   }
 

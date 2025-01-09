@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
-import { pushModal } from 'loot-core/client/actions';
+import { pushModal } from 'loot-core/client/modals/modalsSlice';
 
 import { useDispatch } from '../../../redux';
 import { styles, theme } from '../../../style';
@@ -29,13 +29,13 @@ export function ImportModal() {
   function onSelectType(type: 'ynab4' | 'ynab5' | 'actual') {
     switch (type) {
       case 'ynab4':
-        dispatch(pushModal('import-ynab4'));
+        dispatch(pushModal({ name: 'import-ynab4' }));
         break;
       case 'ynab5':
-        dispatch(pushModal('import-ynab5'));
+        dispatch(pushModal({ name: 'import-ynab5' }));
         break;
       case 'actual':
-        dispatch(pushModal('import-actual'));
+        dispatch(pushModal({ name: 'import-actual' }));
         break;
       default:
     }

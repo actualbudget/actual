@@ -2,7 +2,7 @@ import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 
-import { popModal } from 'loot-core/client/actions';
+import { popModal } from 'loot-core/client/modals/modalsSlice';
 import { send } from 'loot-core/src/platform/client/fetch';
 import { type PayeeEntity } from 'loot-core/types/models';
 

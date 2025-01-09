@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { replaceModal } from 'loot-core/src/client/actions/modals';
+import { replaceModal } from 'loot-core/client/modals/modalsSlice';
 import { send } from 'loot-core/src/platform/client/fetch';
 import { type PayeeEntity } from 'loot-core/types/models';
 
@@ -81,7 +81,7 @@ export function MergeUnusedPayeesModal({
 
       if (ruleId) {
         const rule = await send('rule-get', { id: ruleId });
-        dispatch(replaceModal('edit-rule', { rule }));
+        dispatch(replaceModal({ name: 'edit-rule', options: { rule } }));
       }
     },
     [onMerge, dispatch],

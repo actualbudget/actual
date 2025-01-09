@@ -2,6 +2,7 @@
 import React, { memo, useMemo, useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { pushModal } from 'loot-core/client/modals/modalsSlice';
 import {
   applyBudgetAction,
   createCategory,
@@ -14,7 +15,7 @@ import {
   updateCategory,
   updateGroup,
 } from 'loot-core/client/queries/queriesSlice';
-import { addNotification, pushModal } from 'loot-core/src/client/actions';
+import { addNotification } from 'loot-core/src/client/actions';
 import { useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
 import { send, listen } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
@@ -219,12 +220,15 @@ function BudgetInner(props: BudgetInnerProps) {
 
     if (mustTransfer) {
       dispatch(
-        pushModal('confirm-category-delete', {
-          category: id,
-          onDelete: transferCategory => {
-            if (id !== transferCategory) {
-              dispatch(deleteCategory({ id, transferId: transferCategory }));
-            }
+        pushModal({
+          name: 'confirm-category-delete',
+          options: {
+            category: id,
+            onDelete: transferCategory => {
+              if (id !== transferCategory) {
+                dispatch(deleteCategory({ id, transferId: transferCategory }));
+              }
+            },
           },
         }),
       );
@@ -254,10 +258,13 @@ function BudgetInner(props: BudgetInnerProps) {
 
     if (mustTransfer) {
       dispatch(
-        pushModal('confirm-category-delete', {
-          group: id,
-          onDelete: transferCategory => {
-            dispatch(deleteGroup({ id, transferId: transferCategory }));
+        pushModal({
+          name: 'confirm-category-delete',
+          options: {
+            group: id,
+            onDelete: transferCategory => {
+              dispatch(deleteGroup({ id, transferId: transferCategory }));
+            },
           },
         }),
       );

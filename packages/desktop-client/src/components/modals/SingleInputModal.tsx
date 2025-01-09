@@ -20,7 +20,7 @@ type SingleInputModalProps = {
   Header: ComponentType<ComponentPropsWithoutRef<typeof ModalHeader>>;
   buttonText: string;
   onSubmit: (value: string) => void;
-  onValidate?: (value: string) => string[];
+  onValidate?: (value: string) => string | null;
   inputPlaceholder?: string;
 };
 

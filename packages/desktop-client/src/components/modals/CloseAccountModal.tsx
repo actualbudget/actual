@@ -3,7 +3,7 @@ import React, { type FormEvent, useState, type CSSProperties } from 'react';
 import { Form } from 'react-aria-components';
 import { useTranslation, Trans } from 'react-i18next';
 
-import { pushModal } from 'loot-core/client/actions';
+import { pushModal } from 'loot-core/client/modals/modalsSlice';
 import { closeAccount } from 'loot-core/client/queries/queriesSlice';
 import { integerToCurrency } from 'loot-core/src/shared/util';
 import { type AccountEntity } from 'loot-core/src/types/models';
@@ -181,9 +181,12 @@ export function CloseAccountModal({
                           },
                           onClick: () => {
                             dispatch(
-                              pushModal('account-autocomplete', {
-                                includeClosedAccounts: false,
-                                onSelect: onSelectAccount,
+                              pushModal({
+                                name: 'account-autocomplete',
+                                options: {
+                                  includeClosedAccounts: false,
+                                  onSelect: onSelectAccount,
+                                },
                               }),
                             );
                           },
@@ -221,10 +224,13 @@ export function CloseAccountModal({
                             },
                             onClick: () => {
                               dispatch(
-                                pushModal('category-autocomplete', {
-                                  categoryGroups,
-                                  showHiddenCategories: true,
-                                  onSelect: onSelectCategory,
+                                pushModal({
+                                  name: 'category-autocomplete',
+                                  options: {
+                                    categoryGroups,
+                                    showHiddenCategories: true,
+                                    onSelect: onSelectCategory,
+                                  },
                                 }),
                               );
                             },

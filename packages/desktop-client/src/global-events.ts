@@ -2,13 +2,15 @@
 import {
   addGenericErrorNotification,
   addNotification,
-  closeModal,
   loadPrefs,
-  pushModal,
-  replaceModal,
 } from 'loot-core/client/actions';
 import { setAppState } from 'loot-core/client/app/appSlice';
 import { closeBudgetUI } from 'loot-core/client/budgets/budgetsSlice';
+import {
+  closeModal,
+  pushModal,
+  replaceModal,
+} from 'loot-core/client/modals/modalsSlice';
 import {
   getAccounts,
   getCategories,
@@ -27,15 +29,18 @@ export function handleGlobalEvents(store: AppStore) {
   listen('orphaned-payees', ({ orphanedIds, updatedPayeeIds }) => {
     // Right now, it prompts to merge into the first payee
     store.dispatch(
-      pushModal('merge-unused-payees', {
-        payeeIds: orphanedIds,
-        targetPayeeId: updatedPayeeIds[0],
+      pushModal({
+        name: 'merge-unused-payees',
+        options: {
+          payeeIds: orphanedIds,
+          targetPayeeId: updatedPayeeIds[0],
+        },
       }),
     );
   });
 
   listen('schedules-offline', () => {
-    store.dispatch(pushModal('schedule-posts-offline-notification'));
+    store.dispatch(pushModal({ name: 'schedule-posts-offline-notification' }));
   });
 
   // This is experimental: we sync data locally automatically when
@@ -99,7 +104,7 @@ export function handleGlobalEvents(store: AppStore) {
 
           if (
             modalStack.length === 0 ||
-            modalStack[modalStack.length - 1].name !== tagged.openModal
+            modalStack[modalStack.length - 1].name !== tagged.openModal.name
           ) {
             store.dispatch(replaceModal(tagged.openModal));
           }

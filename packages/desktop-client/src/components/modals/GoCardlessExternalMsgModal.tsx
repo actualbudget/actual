@@ -2,7 +2,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
-import { pushModal } from 'loot-core/src/client/actions/modals';
+import { pushModal } from 'loot-core/client/modals/modalsSlice';
 import { sendCatch } from 'loot-core/src/platform/client/fetch';
 import {
   type GoCardlessInstitution,
@@ -133,8 +133,11 @@ export function GoCardlessExternalMsgModal({
 
   const onGoCardlessInit = () => {
     dispatch(
-      pushModal('gocardless-init', {
-        onSuccess: () => setIsGoCardlessSetupComplete(true),
+      pushModal({
+        name: 'gocardless-init',
+        options: {
+          onSuccess: () => setIsGoCardlessSetupComplete(true),
+        },
       }),
     );
   };

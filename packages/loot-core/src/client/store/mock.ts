@@ -13,6 +13,10 @@ import {
   reducer as budgetsSliceReducer,
 } from '../budgets/budgetsSlice';
 import {
+  name as modalsSliceName,
+  reducer as modalsSliceReducer,
+} from '../modals/modalsSlice';
+import {
   name as queriesSliceName,
   reducer as queriesSliceReducer,
 } from '../queries/queriesSlice';
@@ -25,6 +29,7 @@ const appReducer = combineReducers({
   [accountsSliceName]: accountsSliceReducer,
   [appSliceName]: appSliceReducer,
   [budgetsSliceName]: budgetsSliceReducer,
+  [modalsSliceName]: modalsSliceReducer,
   [queriesSliceName]: queriesSliceReducer,
 });
 

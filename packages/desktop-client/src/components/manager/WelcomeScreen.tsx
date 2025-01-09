@@ -1,8 +1,8 @@
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
-import { pushModal } from 'loot-core/client/actions';
 import { createBudget } from 'loot-core/client/budgets/budgetsSlice';
+import { pushModal } from 'loot-core/client/modals/modalsSlice';
 
 import { useDispatch } from '../../redux';
 import { styles, theme } from '../../style';
@@ -80,7 +80,7 @@ export function WelcomeScreen() {
           flexShrink: 0,
         }}
       >
-        <Button onPress={() => dispatch(pushModal('import'))}>
+        <Button onPress={() => dispatch(pushModal({ name: 'import' }))}>
           {t('Import my budget')}
         </Button>
         <View

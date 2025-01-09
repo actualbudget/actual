@@ -5,7 +5,7 @@ import { useLocation } from 'react-router-dom';
 
 import { useToggle } from 'usehooks-ts';
 
-import { pushModal } from 'loot-core/client/actions/modals';
+import { pushModal } from 'loot-core/client/modals/modalsSlice';
 
 import { useFeatureFlag } from '../hooks/useFeatureFlag';
 import { SvgHelp } from '../icons/v2/Help';
@@ -84,10 +84,10 @@ export const HelpMenu = () => {
         openDocsForCurrentPage();
         break;
       case 'keyboard-shortcuts':
-        dispatch(pushModal('keyboard-shortcuts'));
+        dispatch(pushModal({ name: 'keyboard-shortcuts' }));
         break;
       case 'goal-templates':
-        dispatch(pushModal('goal-templates'));
+        dispatch(pushModal({ name: 'goal-templates' }));
         break;
     }
   };

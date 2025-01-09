@@ -6,11 +6,6 @@ import React, {
   useState,
 } from 'react';
 
-import {
-  collapseModals,
-  openAccountCloseModal,
-  pushModal,
-} from 'loot-core/client/actions';
 import { syncAndDownload } from 'loot-core/client/app/appSlice';
 import {
   accountSchedulesQuery,
@@ -20,6 +15,11 @@ import {
   useTransactions,
   useTransactionsSearch,
 } from 'loot-core/client/data-hooks/transactions';
+import {
+  collapseModals,
+  openAccountCloseModal,
+  pushModal,
+} from 'loot-core/client/modals/modalsSlice';
 import * as queries from 'loot-core/client/queries';
 import {
   getPayees,
@@ -125,10 +125,13 @@ function AccountHeader({ account }: { readonly account: AccountEntity }) {
   const onEditNotes = useCallback(
     (id: string) => {
       dispatch(
-        pushModal('notes', {
-          id: `account-${id}`,
-          name: account.name,
-          onSave: onSaveNotes,
+        pushModal({
+          name: 'notes',
+          options: {
+            id: `account-${id}`,
+            name: account.name,
+            onSave: onSaveNotes,
+          },
         }),
       );
     },
@@ -136,7 +139,7 @@ function AccountHeader({ account }: { readonly account: AccountEntity }) {
   );
 
   const onCloseAccount = useCallback(() => {
-    dispatch(openAccountCloseModal(account.id));
+    dispatch(openAccountCloseModal({ accountId: account.id }));
   }, [account.id, dispatch]);
 
   const onReopenAccount = useCallback(() => {
@@ -145,12 +148,15 @@ function AccountHeader({ account }: { readonly account: AccountEntity }) {
 
   const onClick = useCallback(() => {
     dispatch(
-      pushModal('account-menu', {
-        accountId: account.id,
-        onSave,
-        onEditNotes,
-        onCloseAccount,
-        onReopenAccount,
+      pushModal({
+        name: 'account-menu',
+        options: {
+          accountId: account.id,
+          onSave,
+          onEditNotes,
+          onCloseAccount,
+          onReopenAccount,
+        },
       }),
     );
   }, [
@@ -299,17 +305,28 @@ function TransactionListWithPreviews({
         navigate(`/transactions/${transaction.id}`);
       } else {
         dispatch(
-          pushModal('scheduled-transaction-menu', {
-            transactionId: transaction.id,
-            onPost: async transactionId => {
-              const parts = transactionId.split('/');
-              await send('schedule/post-transaction', { id: parts[1] });
-              dispatch(collapseModals('scheduled-transaction-menu'));
-            },
-            onSkip: async transactionId => {
-              const parts = transactionId.split('/');
-              await send('schedule/skip-next-date', { id: parts[1] });
-              dispatch(collapseModals('scheduled-transaction-menu'));
+          pushModal({
+            name: 'scheduled-transaction-menu',
+            options: {
+              transactionId: transaction.id,
+              onPost: async transactionId => {
+                const parts = transactionId.split('/');
+                await send('schedule/post-transaction', { id: parts[1] });
+                dispatch(
+                  collapseModals({
+                    rootModalName: 'scheduled-transaction-menu',
+                  }),
+                );
+              },
+              onSkip: async transactionId => {
+                const parts = transactionId.split('/');
+                await send('schedule/skip-next-date', { id: parts[1] });
+                dispatch(
+                  collapseModals({
+                    rootModalName: 'scheduled-transaction-menu',
+                  }),
+                );
+              },
             },
           }),
         );

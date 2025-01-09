@@ -10,7 +10,8 @@ import React, {
 } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
-import { addNotification, pushModal } from 'loot-core/client/actions';
+import { addNotification } from 'loot-core/client/actions';
+import { pushModal } from 'loot-core/client/modals/modalsSlice';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as undo from 'loot-core/src/platform/client/undo';
 import { type Handlers } from 'loot-core/types/handlers';
@@ -278,8 +279,11 @@ function LockToggle({ style, onToggleSave }: LockToggleProps) {
       aria-label="Menu"
       onPress={() =>
         dispatch(
-          pushModal('transfer-ownership', {
-            onSave: () => onToggleSave(),
+          pushModal({
+            name: 'transfer-ownership',
+            options: {
+              onSave: () => onToggleSave(),
+            },
           }),
         )
       }

@@ -31,7 +31,6 @@ type CategoryGroupMenuModalProps = {
   onSave: (group: CategoryGroupEntity) => void;
   onAddCategory: (groupId: string, isIncome: boolean) => void;
   onEditNotes: (id: string) => void;
-  onSaveNotes: (id: string, notes: string) => void;
   onDelete: (groupId: string) => void;
   onToggleVisibility: (groupId: string) => void;
   onClose?: () => void;

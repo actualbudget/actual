@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
-import { pushModal } from 'loot-core/client/actions';
+import { pushModal } from 'loot-core/client/modals/modalsSlice';
 import { type CategoryEntity } from 'loot-core/types/models';
 
 import { useCategories } from '../../hooks/useCategories';
@@ -59,12 +59,15 @@ export function TransferModal({
 
   const openCategoryModal = () => {
     dispatch(
-      pushModal('category-autocomplete', {
-        categoryGroups,
-        month,
-        showHiddenCategories: true,
-        onSelect: categoryId => {
-          setToCategoryId(categoryId);
+      pushModal({
+        name: 'category-autocomplete',
+        options: {
+          categoryGroups,
+          month,
+          showHiddenCategories: true,
+          onSelect: categoryId => {
+            setToCategoryId(categoryId);
+          },
         },
       }),
     );

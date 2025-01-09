@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { DialogTrigger } from 'react-aria-components';
 import { Trans, useTranslation } from 'react-i18next';
 
-import { pushModal } from 'loot-core/client/actions';
+import { pushModal } from 'loot-core/client/modals/modalsSlice';
 import { send } from 'loot-core/src/platform/client/fetch';
 
 import { useAuth } from '../../auth/AuthProvider';
@@ -102,16 +102,22 @@ export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
       }
 
       dispatch(
-        pushModal('select-linked-accounts', {
-          accounts: newAccounts,
-          syncSource: 'simpleFin',
+        pushModal({
+          name: 'select-linked-accounts',
+          options: {
+            accounts: newAccounts,
+            syncSource: 'simpleFin',
+          },
         }),
       );
     } catch (err) {
       console.error(err);
       dispatch(
-        pushModal('simplefin-init', {
-          onSuccess: () => setIsSimpleFinSetupComplete(true),
+        pushModal({
+          name: 'simplefin-init',
+          options: {
+            onSuccess: () => setIsSimpleFinSetupComplete(true),
+          },
         }),
       );
     }
@@ -121,16 +127,22 @@ export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
 
   const onGoCardlessInit = () => {
     dispatch(
-      pushModal('gocardless-init', {
-        onSuccess: () => setIsGoCardlessSetupComplete(true),
+      pushModal({
+        name: 'gocardless-init',
+        options: {
+          onSuccess: () => setIsGoCardlessSetupComplete(true),
+        },
       }),
     );
   };
 
   const onSimpleFinInit = () => {
     dispatch(
-      pushModal('simplefin-init', {
-        onSuccess: () => setIsSimpleFinSetupComplete(true),
+      pushModal({
+        name: 'simplefin-init',
+        options: {
+          onSuccess: () => setIsSimpleFinSetupComplete(true),
+        },
       }),
     );
   };
@@ -164,7 +176,7 @@ export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
   };
 
   const onCreateLocalAccount = () => {
-    dispatch(pushModal('add-local-account'));
+    dispatch(pushModal({ name: 'add-local-account' }));
   };
 
   const { configuredGoCardless } = useGoCardlessStatus();
