@@ -18,6 +18,7 @@ import {
   PayeeEntity,
 } from './models';
 import { OpenIdConfig } from './models/openid';
+import { PluggyAiAccount } from './models/pluggyai';
 import { GlobalPrefs, MetadataPrefs } from './prefs';
 // eslint-disable-next-line import/no-unresolved
 import { Query } from './query';
@@ -162,6 +163,12 @@ export interface ServerHandlers {
     offBudget;
   }) => Promise<'ok'>;
 
+  'pluggyai-accounts-link': (arg: {
+    externalAccount;
+    upgradingId;
+    offBudget;
+  }) => Promise<'ok'>;
+
   'account-create': (arg: {
     name: string;
     balance?: number;
@@ -194,7 +201,13 @@ export interface ServerHandlers {
 
   'simplefin-status': () => Promise<{ configured: boolean }>;
 
+  'pluggyai-status': () => Promise<{ configured: boolean }>;
+
   'simplefin-accounts': () => Promise<{ accounts: SimpleFinAccount[] }>;
+
+  'pluggyai-accounts': () => Promise<
+    { accounts: PluggyAiAccount[] } | { error: string }
+  >;
 
   'simplefin-batch-sync': ({ ids }: { ids: string[] }) => Promise<
     {

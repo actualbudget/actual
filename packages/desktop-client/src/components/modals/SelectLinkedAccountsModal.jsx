@@ -4,6 +4,7 @@ import { useTranslation, Trans } from 'react-i18next';
 import {
   closeModal,
   linkAccount,
+  linkAccountPluggyAi,
   linkAccountSimpleFin,
   unlinkAccount,
 } from 'loot-core/client/actions';
@@ -81,6 +82,17 @@ export function SelectLinkedAccountsModal({
         if (syncSource === 'simpleFin') {
           dispatch(
             linkAccountSimpleFin(
+              externalAccount,
+              chosenLocalAccountId !== addOnBudgetAccountOption.id &&
+                chosenLocalAccountId !== addOffBudgetAccountOption.id
+                ? chosenLocalAccountId
+                : undefined,
+              offBudget,
+            ),
+          );
+        } else if (syncSource === 'pluggyai') {
+          dispatch(
+            linkAccountPluggyAi(
               externalAccount,
               chosenLocalAccountId !== addOnBudgetAccountOption.id &&
                 chosenLocalAccountId !== addOffBudgetAccountOption.id
