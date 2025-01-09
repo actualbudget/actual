@@ -95,31 +95,32 @@ export class CategoryTemplate {
     let scheduleFlag = false;
     // switch on template type and calculate the amount for the line
     for (let i = 0; i < t.length; i++) {
+      let newBudget = 0;
       switch (t[i].type) {
         case 'simple': {
-          toBudget += this.runSimple(t[i], this.limitAmount);
+          newBudget = this.runSimple(t[i], this.limitAmount);
           break;
         }
         case 'copy': {
-          toBudget += await this.runCopy(t[i]);
+          newBudget = await this.runCopy(t[i]);
           break;
         }
         case 'week': {
-          toBudget += this.runWeek(t[i]);
+          newBudget = this.runWeek(t[i]);
           break;
         }
         case 'spend': {
-          toBudget += await this.runSpend(t[i]);
+          newBudget = await this.runSpend(t[i]);
           break;
         }
         case 'percentage': {
-          toBudget += await this.runPercentage(t[i], availStart);
+          newBudget = await this.runPercentage(t[i], availStart);
           break;
         }
         case 'by': {
           //TODO add the logic to run all of these at once or whatever is needed
           const ret = this.runBy(t[i], first, remainder);
-          toBudget += ret.ret;
+          newBudget = ret.ret;
           remainder = ret.remainder;
           first = false;
           break;
@@ -140,18 +141,21 @@ export class CategoryTemplate {
             [],
             this.category,
           );
-          toBudget = ret.to_budget;
+          // Schedules assume that its to budget value is the whole thing so this
+          // needs to remove the previous funds so they aren't double counted
+          newBudget = ret.to_budget-toBudget;
           remainder = ret.remainder;
           scheduleFlag = ret.scheduleFlag;
           break;
         }
         case 'average': {
-          toBudget += await this.runAverage(t[i]);
+          newBudget += await this.runAverage(t[i]);
           break;
         }
       }
 
-      available = available - toBudget;
+      available = available - newBudget;
+      toBudget += newBudget;
     }
 
     //check limit
