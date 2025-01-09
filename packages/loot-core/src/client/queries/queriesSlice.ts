@@ -13,7 +13,7 @@ import {
   type PayeeEntity,
 } from '../../types/models';
 import { addGenericErrorNotification, addNotification } from '../actions';
-import { createAppAsyncThunk } from '../store';
+import { createAppAsyncThunk } from '../redux';
 
 const sliceName = 'queries';
 
