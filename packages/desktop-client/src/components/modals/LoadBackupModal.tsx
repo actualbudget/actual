@@ -58,13 +58,14 @@ export function LoadBackupModal({
   const budgetIdToLoad = budgetId ?? prefsBudgetId;
 
   useEffect(() => {
-    send('backups-get', { id: budgetIdToLoad }).then(setBackups);
+    if (budgetIdToLoad) {
+      send('backups-get', { id: budgetIdToLoad }).then(setBackups);
+    }
   }, [budgetIdToLoad]);
 
   useEffect(() => {
     if (watchUpdates) {
-      listen('backups-updated', setBackups);
-      return () => unlisten('backups-updated');
+      return listen('backups-updated', setBackups);
     }
   }, [watchUpdates]);
 
