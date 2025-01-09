@@ -3,7 +3,7 @@ import React, { type CSSProperties } from 'react';
 import { Button } from '@actual-app/components/button';
 import { theme } from '@actual-app/components/theme';
 
-import { pushModal } from 'loot-core/client/actions';
+import { pushModal } from 'loot-core/client/modals/modalsSlice';
 import { type Template } from 'loot-core/server/budget/types/templates';
 
 import { useFeatureFlag } from '../../../hooks/useFeatureFlag';
@@ -45,7 +45,7 @@ export function CategoryAutomationButton({
         ...(hasAutomations && { display: 'flex !important' }),
       }}
       onPress={() => {
-        dispatch(pushModal('category-automations-edit'));
+        dispatch(pushModal({ name: 'category-automations-edit' }));
       }}
     >
       <SvgChartPie style={{ width, height, flexShrink: 0 }} />

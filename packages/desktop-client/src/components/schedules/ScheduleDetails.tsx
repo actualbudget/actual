@@ -9,7 +9,7 @@ import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 import { t } from 'i18next';
 
-import { pushModal } from 'loot-core/client/actions/modals';
+import { pushModal } from 'loot-core/client/modals/modalsSlice';
 import { getPayeesById } from 'loot-core/client/queries/queriesSlice';
 import { runQuery, liveQuery } from 'loot-core/client/query-helpers';
 import { send, sendCatch } from 'loot-core/platform/client/fetch';
@@ -530,11 +530,14 @@ export function ScheduleDetails({ id, transaction }: ScheduleDetailsProps) {
     const rule = await send('rule-get', { id });
 
     globalDispatch(
-      pushModal('edit-rule', {
-        rule,
-        onSave: async () => {
-          const schedule = await loadSchedule();
-          dispatch({ type: 'set-schedule', schedule });
+      pushModal({
+        name: 'edit-rule',
+        options: {
+          rule,
+          onSave: async () => {
+            const schedule = await loadSchedule();
+            dispatch({ type: 'set-schedule', schedule });
+          },
         },
       }),
     );

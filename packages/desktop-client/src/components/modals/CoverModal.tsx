@@ -5,7 +5,7 @@ import { Button } from '@actual-app/components/button';
 import { styles } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
 
-import { pushModal } from 'loot-core/client/actions';
+import { pushModal } from 'loot-core/client/modals/modalsSlice';
 import { type CategoryEntity } from 'loot-core/types/models';
 
 import { useCategories } from '../../hooks/useCategories';
@@ -54,11 +54,14 @@ export function CoverModal({
 
   const onCategoryClick = useCallback(() => {
     dispatch(
-      pushModal('category-autocomplete', {
-        categoryGroups,
-        month,
-        onSelect: categoryId => {
-          setFromCategoryId(categoryId);
+      pushModal({
+        name: 'category-autocomplete',
+        options: {
+          categoryGroups,
+          month,
+          onSelect: categoryId => {
+            setFromCategoryId(categoryId);
+          },
         },
       }),
     );

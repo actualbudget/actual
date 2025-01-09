@@ -10,7 +10,7 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
-import { pushModal } from 'loot-core/client/actions';
+import { pushModal } from 'loot-core/client/modals/modalsSlice';
 import { closeAccount } from 'loot-core/client/queries/queriesSlice';
 import { integerToCurrency } from 'loot-core/shared/util';
 import { type AccountEntity } from 'loot-core/types/models';
@@ -183,9 +183,12 @@ export function CloseAccountModal({
                           },
                           onClick: () => {
                             dispatch(
-                              pushModal('account-autocomplete', {
-                                includeClosedAccounts: false,
-                                onSelect: onSelectAccount,
+                              pushModal({
+                                name: 'account-autocomplete',
+                                options: {
+                                  includeClosedAccounts: false,
+                                  onSelect: onSelectAccount,
+                                },
                               }),
                             );
                           },
@@ -223,10 +226,13 @@ export function CloseAccountModal({
                             },
                             onClick: () => {
                               dispatch(
-                                pushModal('category-autocomplete', {
-                                  categoryGroups,
-                                  showHiddenCategories: true,
-                                  onSelect: onSelectCategory,
+                                pushModal({
+                                  name: 'category-autocomplete',
+                                  options: {
+                                    categoryGroups,
+                                    showHiddenCategories: true,
+                                    onSelect: onSelectCategory,
+                                  },
                                 }),
                               );
                             },

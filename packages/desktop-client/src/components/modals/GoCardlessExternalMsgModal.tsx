@@ -6,7 +6,7 @@ import { Button } from '@actual-app/components/button';
 import { Paragraph } from '@actual-app/components/paragraph';
 import { View } from '@actual-app/components/view';
 
-import { pushModal } from 'loot-core/client/actions/modals';
+import { pushModal } from 'loot-core/client/modals/modalsSlice';
 import { sendCatch } from 'loot-core/platform/client/fetch';
 import {
   type GoCardlessInstitution,
@@ -134,8 +134,11 @@ export function GoCardlessExternalMsgModal({
 
   const onGoCardlessInit = () => {
     dispatch(
-      pushModal('gocardless-init', {
-        onSuccess: () => setIsGoCardlessSetupComplete(true),
+      pushModal({
+        name: 'gocardless-init',
+        options: {
+          onSuccess: () => setIsGoCardlessSetupComplete(true),
+        },
       }),
     );
   };

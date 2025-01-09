@@ -29,7 +29,7 @@ type DuplicateFileProps = {
   loadBudget?: 'none' | 'original' | 'copy';
   onComplete?: (event: {
     status: 'success' | 'failed' | 'canceled';
-    error?: object;
+    error?: Error;
   }) => void;
 };
 

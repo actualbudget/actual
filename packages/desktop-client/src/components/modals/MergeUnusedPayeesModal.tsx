@@ -6,7 +6,7 @@ import { Paragraph } from '@actual-app/components/paragraph';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
-import { replaceModal } from 'loot-core/client/actions/modals';
+import { replaceModal } from 'loot-core/client/modals/modalsSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import { type PayeeEntity } from 'loot-core/types/models';
 
@@ -82,7 +82,7 @@ export function MergeUnusedPayeesModal({
 
       if (ruleId) {
         const rule = await send('rule-get', { id: ruleId });
-        dispatch(replaceModal('edit-rule', { rule }));
+        dispatch(replaceModal({ name: 'edit-rule', options: { rule } }));
       }
     },
     [onMerge, dispatch],

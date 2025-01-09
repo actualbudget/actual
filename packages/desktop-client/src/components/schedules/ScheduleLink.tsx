@@ -7,8 +7,8 @@ import { InitialFocus } from '@actual-app/components/initial-focus';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
-import { pushModal } from 'loot-core/client/actions';
 import { useSchedules } from 'loot-core/client/data-hooks/schedules';
+import { pushModal } from 'loot-core/client/modals/modalsSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import { q } from 'loot-core/shared/query';
 import {
@@ -61,9 +61,12 @@ export function ScheduleLink({
 
   async function onCreate() {
     dispatch(
-      pushModal('schedule-edit', {
-        id: null,
-        transaction: getTransaction(ids[0]),
+      pushModal({
+        name: 'schedule-edit',
+        options: {
+          id: null,
+          transaction: getTransaction(ids[0]),
+        },
       }),
     );
   }

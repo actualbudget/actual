@@ -14,8 +14,8 @@ import { Stack } from '@actual-app/components/stack';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
-import { pushModal } from 'loot-core/client/actions/modals';
 import { useSchedules } from 'loot-core/client/data-hooks/schedules';
+import { pushModal } from 'loot-core/client/modals/modalsSlice';
 import { initiallyLoadPayees } from 'loot-core/client/queries/queriesSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import * as undo from 'loot-core/platform/client/undo';
@@ -184,7 +184,7 @@ export function ManageRules({
     }
 
     if (payeeId) {
-      undo.setUndoState('openModal', 'manage-rules');
+      undo.setUndoState('openModal', { name: 'manage-rules', options: {} });
     }
 
     loadData();
@@ -225,11 +225,14 @@ export function ManageRules({
 
   const onEditRule = useCallback(rule => {
     dispatch(
-      pushModal('edit-rule', {
-        rule,
-        onSave: async () => {
-          await loadRules();
-          setLoading(false);
+      pushModal({
+        name: 'edit-rule',
+        options: {
+          rule,
+          onSave: async () => {
+            await loadRules();
+            setLoading(false);
+          },
         },
       }),
     );
@@ -258,11 +261,14 @@ export function ManageRules({
     };
 
     dispatch(
-      pushModal('edit-rule', {
-        rule,
-        onSave: async () => {
-          await loadRules();
-          setLoading(false);
+      pushModal({
+        name: 'edit-rule',
+        options: {
+          rule,
+          onSave: async () => {
+            await loadRules();
+            setLoading(false);
+          },
         },
       }),
     );

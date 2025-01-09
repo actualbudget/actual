@@ -3,8 +3,8 @@ import { useTranslation } from 'react-i18next';
 
 import { Menu } from '@actual-app/components/menu';
 
-import { pushModal } from 'loot-core/client/actions';
 import { useSchedules } from 'loot-core/client/data-hooks/schedules';
+import { pushModal } from 'loot-core/client/modals/modalsSlice';
 import { q } from 'loot-core/shared/query';
 import {
   scheduleIsRecurring,
@@ -84,7 +84,9 @@ export function TransactionMenu({
     }
 
     if (scheduleId) {
-      dispatch(pushModal('schedule-edit', { id: scheduleId }));
+      dispatch(
+        pushModal({ name: 'schedule-edit', options: { id: scheduleId } }),
+      );
     }
   }
 

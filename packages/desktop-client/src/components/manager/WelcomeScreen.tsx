@@ -7,8 +7,8 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
-import { pushModal } from 'loot-core/client/actions';
 import { createBudget } from 'loot-core/client/budgets/budgetsSlice';
+import { pushModal } from 'loot-core/client/modals/modalsSlice';
 
 import { useDispatch } from '../../redux';
 import { theme } from '../../style';
@@ -82,7 +82,7 @@ export function WelcomeScreen() {
           flexShrink: 0,
         }}
       >
-        <Button onPress={() => dispatch(pushModal('import'))}>
+        <Button onPress={() => dispatch(pushModal({ name: 'import' }))}>
           {t('Import my budget')}
         </Button>
         <View

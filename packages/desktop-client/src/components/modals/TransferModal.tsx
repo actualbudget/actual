@@ -6,7 +6,7 @@ import { InitialFocus } from '@actual-app/components/initial-focus';
 import { styles } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
 
-import { pushModal } from 'loot-core/client/actions';
+import { pushModal } from 'loot-core/client/modals/modalsSlice';
 import { type CategoryEntity } from 'loot-core/types/models';
 
 import { useCategories } from '../../hooks/useCategories';
@@ -60,12 +60,15 @@ export function TransferModal({
 
   const openCategoryModal = () => {
     dispatch(
-      pushModal('category-autocomplete', {
-        categoryGroups,
-        month,
-        showHiddenCategories: true,
-        onSelect: categoryId => {
-          setToCategoryId(categoryId);
+      pushModal({
+        name: 'category-autocomplete',
+        options: {
+          categoryGroups,
+          month,
+          showHiddenCategories: true,
+          onSelect: categoryId => {
+            setToCategoryId(categoryId);
+          },
         },
       }),
     );

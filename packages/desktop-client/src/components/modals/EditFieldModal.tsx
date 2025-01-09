@@ -12,6 +12,7 @@ import { parseISO, format as formatDate, parse as parseDate } from 'date-fns';
 
 import { currentDay, dayFromDate } from 'loot-core/shared/months';
 import { amountToInteger } from 'loot-core/shared/util';
+import { type TransactionEntity } from 'loot-core/types/models';
 
 import { useDateFormat } from '../../hooks/useDateFormat';
 import { theme } from '../../style';
@@ -31,9 +32,9 @@ const itemStyle: CSSProperties = {
 type NoteAmendMode = 'replace' | 'prepend' | 'append';
 
 type EditFieldModalProps = {
-  name: string;
+  name: keyof Pick<TransactionEntity, 'date' | 'amount' | 'notes'>;
   onSubmit: (
-    name: string,
+    name: keyof Pick<TransactionEntity, 'date' | 'amount' | 'notes'>,
     value: string | number,
     mode?: NoteAmendMode,
   ) => void;

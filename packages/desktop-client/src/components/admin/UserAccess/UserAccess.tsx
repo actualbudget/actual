@@ -14,7 +14,8 @@ import { Button } from '@actual-app/components/button';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
-import { addNotification, pushModal } from 'loot-core/client/actions';
+import { addNotification } from 'loot-core/client/actions';
+import { pushModal } from 'loot-core/client/modals/modalsSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import * as undo from 'loot-core/platform/client/undo';
 import { type Handlers } from 'loot-core/types/handlers';
@@ -280,8 +281,11 @@ function LockToggle({ style, onToggleSave }: LockToggleProps) {
       aria-label="Menu"
       onPress={() =>
         dispatch(
-          pushModal('transfer-ownership', {
-            onSave: () => onToggleSave(),
+          pushModal({
+            name: 'transfer-ownership',
+            options: {
+              onSave: () => onToggleSave(),
+            },
           }),
         )
       }

@@ -10,7 +10,7 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
-import { type FinanceModals } from 'loot-core/client/state-types/modals';
+import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import { getTestKeyError } from 'loot-core/shared/errors';
 
@@ -26,7 +26,7 @@ import {
 import { useResponsive } from '../responsive/ResponsiveProvider';
 
 type FixEncryptionKeyModalProps = {
-  options: FinanceModals['fix-encryption-key'];
+  options: Extract<ModalType, { name: 'fix-encryption-key' }>['options'];
 };
 
 export function FixEncryptionKeyModal({

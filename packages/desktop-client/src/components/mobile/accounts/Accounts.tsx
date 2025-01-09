@@ -8,8 +8,8 @@ import { TextOneLine } from '@actual-app/components/text-one-line';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
-import { replaceModal } from 'loot-core/client/actions';
 import { syncAndDownload } from 'loot-core/client/app/appSlice';
+import { replaceModal } from 'loot-core/client/modals/modalsSlice';
 import * as queries from 'loot-core/client/queries';
 import { type AccountEntity } from 'loot-core/types/models';
 
@@ -323,7 +323,7 @@ export function Accounts() {
   );
 
   const onAddAccount = useCallback(() => {
-    dispatch(replaceModal('add-account'));
+    dispatch(replaceModal({ name: 'add-account' }));
   }, [dispatch]);
 
   const onSync = useCallback(async () => {

@@ -22,7 +22,7 @@ import {
 } from 'date-fns';
 import { UAParser } from 'ua-parser-js';
 
-import { pushModal } from 'loot-core/client/actions';
+import { pushModal } from 'loot-core/client/modals/modalsSlice';
 import { setLastTransaction } from 'loot-core/client/queries/queriesSlice';
 import { runQuery } from 'loot-core/client/query-helpers';
 import { send } from 'loot-core/platform/client/fetch';
@@ -559,9 +559,12 @@ const TransactionEditInner = memo(function TransactionEditInner({
       // Should we bring that here as well? Or does the nature of the editing form
       // make this more appropriate?
       dispatch(
-        pushModal('confirm-transaction-edit', {
-          onConfirm: onConfirmSave,
-          confirmReason: 'editReconciled',
+        pushModal({
+          name: 'confirm-transaction-edit',
+          options: {
+            onConfirm: onConfirmSave,
+            confirmReason: 'editReconciled',
+          },
         }),
       );
     } else {
@@ -603,52 +606,64 @@ const TransactionEditInner = memo(function TransactionEditInner({
         switch (name) {
           case 'category':
             dispatch(
-              pushModal('category-autocomplete', {
-                categoryGroups,
-                month: monthUtils.monthFromDate(unserializedTransaction.date),
-                onSelect: categoryId => {
-                  onUpdateInner(transactionToEdit, name, categoryId);
-                },
-                onClose: () => {
-                  onClearActiveEdit();
+              pushModal({
+                name: 'category-autocomplete',
+                options: {
+                  categoryGroups,
+                  month: monthUtils.monthFromDate(unserializedTransaction.date),
+                  onSelect: categoryId => {
+                    onUpdateInner(transactionToEdit, name, categoryId);
+                  },
+                  onClose: () => {
+                    onClearActiveEdit();
+                  },
                 },
               }),
             );
             break;
           case 'account':
             dispatch(
-              pushModal('account-autocomplete', {
-                onSelect: accountId => {
-                  onUpdateInner(transactionToEdit, name, accountId);
-                },
-                onClose: () => {
-                  onClearActiveEdit();
+              pushModal({
+                name: 'account-autocomplete',
+                options: {
+                  onSelect: accountId => {
+                    onUpdateInner(transactionToEdit, name, accountId);
+                  },
+                  onClose: () => {
+                    onClearActiveEdit();
+                  },
                 },
               }),
             );
             break;
           case 'payee':
             dispatch(
-              pushModal('payee-autocomplete', {
-                onSelect: payeeId => {
-                  onUpdateInner(transactionToEdit, name, payeeId);
-                },
-                onClose: () => {
-                  onClearActiveEdit();
+              pushModal({
+                name: 'payee-autocomplete',
+                options: {
+                  onSelect: payeeId => {
+                    onUpdateInner(transactionToEdit, name, payeeId);
+                  },
+                  onClose: () => {
+                    onClearActiveEdit();
+                  },
                 },
               }),
             );
             break;
           default:
             dispatch(
-              pushModal('edit-field', {
-                name,
-                month: monthUtils.monthFromDate(unserializedTransaction.date),
-                onSubmit: (name, value) => {
-                  onUpdateInner(transactionToEdit, name, value);
-                },
-                onClose: () => {
-                  onClearActiveEdit();
+              pushModal({
+                name: 'edit-field',
+                options: {
+                  name,
+                  month: monthUtils.monthFromDate(unserializedTransaction.date),
+                  onSubmit: (name, value) => {
+                    onUpdateInner(transactionToEdit, name, value);
+                  },
+                  onClose: () => {
+                    onClearActiveEdit();
+                  },
                 },
               }),
             );
@@ -674,17 +689,20 @@ const TransactionEditInner = memo(function TransactionEditInner({
 
       const onConfirmDelete = () => {
         dispatch(
-          pushModal('confirm-transaction-delete', {
-            onConfirm: () => {
-              onDelete(id);
+          pushModal({
+            name: 'confirm-transaction-delete',
+            options: {
+              onConfirm: () => {
+                onDelete(id);
 
-              if (unserializedTransaction.id !== id) {
-                // Only a child transaction was deleted.
-                onClearActiveEdit();
-                return;
-              }
+                if (unserializedTransaction.id !== id) {
+                  // Only a child transaction was deleted.
+                  onClearActiveEdit();
+                  return;
+                }
 
-              navigate(-1);
+                navigate(-1);
+              },
             },
           }),
         );
@@ -692,9 +710,12 @@ const TransactionEditInner = memo(function TransactionEditInner({
 
       if (unserializedTransaction.reconciled) {
         dispatch(
-          pushModal('confirm-transaction-edit', {
-            onConfirm: onConfirmDelete,
-            confirmReason: 'deleteReconciled',
+          pushModal({
+            name: 'confirm-transaction-edit',
+            options: {
+              onConfirm: onConfirmDelete,
+              confirmReason: 'deleteReconciled',
+            },
           }),
         );
       } else {

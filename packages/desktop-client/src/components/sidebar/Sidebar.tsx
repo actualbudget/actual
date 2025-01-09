@@ -6,7 +6,7 @@ import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 import { Resizable } from 're-resizable';
 
-import { replaceModal } from 'loot-core/client/actions';
+import { replaceModal } from 'loot-core/client/modals/modalsSlice';
 import * as Platform from 'loot-core/client/platform';
 
 import { useGlobalPref } from '../../hooks/useGlobalPref';
@@ -59,7 +59,7 @@ export function Sidebar() {
   };
 
   const onAddAccount = () => {
-    dispatch(replaceModal('add-account'));
+    dispatch(replaceModal({ name: 'add-account' }));
   };
 
   const containerRef = useResizeObserver<HTMLDivElement>(rect => {

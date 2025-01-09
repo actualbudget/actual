@@ -11,7 +11,7 @@ import { css } from '@emotion/css';
 import { AutoTextSize } from 'auto-text-size';
 import memoizeOne from 'memoize-one';
 
-import { collapseModals, pushModal } from 'loot-core/client/actions';
+import { collapseModals, pushModal } from 'loot-core/client/modals/modalsSlice';
 import {
   envelopeBudget,
   trackingBudget,
@@ -242,50 +242,53 @@ function BudgetCell({
 
   const onOpenCategoryBudgetMenu = () => {
     dispatch(
-      pushModal(categoryBudgetMenuModal, {
-        categoryId: category.id,
-        month,
-        onUpdateBudget: amount => {
-          onBudgetAction(month, 'budget-amount', {
-            category: category.id,
-            amount,
-          });
-          showUndoNotification({
-            message: `${category.name} budget has been updated to ${integerToCurrency(amount)}.`,
-          });
-        },
-        onCopyLastMonthAverage: () => {
-          onBudgetAction(month, 'copy-single-last', {
-            category: category.id,
-          });
-          showUndoNotification({
-            message: `${category.name} budget has been set last to month’s budgeted amount.`,
-          });
-        },
-        onSetMonthsAverage: numberOfMonths => {
-          if (
-            numberOfMonths !== 3 &&
-            numberOfMonths !== 6 &&
-            numberOfMonths !== 12
-          ) {
-            return;
-          }
+      pushModal({
+        name: categoryBudgetMenuModal,
+        options: {
+          categoryId: category.id,
+          month,
+          onUpdateBudget: amount => {
+            onBudgetAction(month, 'budget-amount', {
+              category: category.id,
+              amount,
+            });
+            showUndoNotification({
+              message: `${category.name} budget has been updated to ${integerToCurrency(amount)}.`,
+            });
+          },
+          onCopyLastMonthAverage: () => {
+            onBudgetAction(month, 'copy-single-last', {
+              category: category.id,
+            });
+            showUndoNotification({
+              message: `${category.name} budget has been set last to month’s budgeted amount.`,
+            });
+          },
+          onSetMonthsAverage: numberOfMonths => {
+            if (
+              numberOfMonths !== 3 &&
+              numberOfMonths !== 6 &&
+              numberOfMonths !== 12
+            ) {
+              return;
+            }
 
-          onBudgetAction(month, `set-single-${numberOfMonths}-avg`, {
-            category: category.id,
-          });
-          showUndoNotification({
-            message: `${category.name} budget has been set to ${numberOfMonths === 12 ? 'yearly' : `${numberOfMonths} month`} average.`,
-          });
-        },
-        onApplyBudgetTemplate: () => {
-          onBudgetAction(month, 'apply-single-category-template', {
-            category: category.id,
-          });
-          showUndoNotification({
-            message: `${category.name} budget templates have been applied.`,
-            pre: categoryNotes,
-          });
+            onBudgetAction(month, `set-single-${numberOfMonths}-avg`, {
+              category: category.id,
+            });
+            showUndoNotification({
+              message: `${category.name} budget has been set to ${numberOfMonths === 12 ? 'yearly' : `${numberOfMonths} month`} average.`,
+            });
+          },
+          onApplyBudgetTemplate: () => {
+            onBudgetAction(month, 'apply-single-category-template', {
+              category: category.id,
+            });
+            showUndoNotification({
+              message: `${category.name} budget templates have been applied.`,
+              pre: categoryNotes,
+            });
+          },
         },
       }),
     );
@@ -423,7 +426,9 @@ const ExpenseCategory = memo(function ExpenseCategory({
         category: category.id,
         flag: carryover,
       });
-      dispatch(collapseModals(`${modalBudgetType}-balance-menu`));
+      dispatch(
+        collapseModals({ rootModalName: `${modalBudgetType}-balance-menu` }),
+      );
     },
     [modalBudgetType, category.id, dispatch, month, onBudgetAction],
   );
@@ -444,23 +449,30 @@ const ExpenseCategory = memo(function ExpenseCategory({
 
   const onTransfer = useCallback(() => {
     dispatch(
-      pushModal('transfer', {
-        title: category.name,
-        categoryId: category.id,
-        month,
-        amount: catBalance,
-        onSubmit: (amount, toCategoryId) => {
-          onBudgetAction(month, 'transfer-category', {
-            amount,
-            from: category.id,
-            to: toCategoryId,
-          });
-          dispatch(collapseModals(`${modalBudgetType}-balance-menu`));
-          showUndoNotification({
-            message: `Transferred ${integerToCurrency(amount)} from ${category.name} to ${categoriesById[toCategoryId].name}.`,
-          });
+      pushModal({
+        name: 'transfer',
+        options: {
+          title: category.name,
+          categoryId: category.id,
+          month,
+          amount: catBalance,
+          onSubmit: (amount, toCategoryId) => {
+            onBudgetAction(month, 'transfer-category', {
+              amount,
+              from: category.id,
+              to: toCategoryId,
+            });
+            dispatch(
+              collapseModals({
+                rootModalName: `${modalBudgetType}-balance-menu`,
+              }),
+            );
+            showUndoNotification({
+              message: `Transferred ${integerToCurrency(amount)} from ${category.name} to ${categoriesById[toCategoryId].name}.`,
+            });
+          },
+          showToBeBudgeted: true,
         },
-        showToBeBudgeted: true,
       }),
     );
   }, [
@@ -477,25 +489,32 @@ const ExpenseCategory = memo(function ExpenseCategory({
 
   const onCover = useCallback(() => {
     dispatch(
-      pushModal('cover', {
-        title: category.name,
-        month,
-        categoryId: category.id,
-        onSubmit: fromCategoryId => {
-          onBudgetAction(month, 'cover-overspending', {
-            to: category.id,
-            from: fromCategoryId,
-          });
-          dispatch(collapseModals(`${modalBudgetType}-balance-menu`));
-          showUndoNotification({
-            message: t(
-              `Covered {{toCategoryName}} overspending from {{fromCategoryName}}.`,
-              {
-                toCategoryName: category.name,
-                fromCategoryName: categoriesById[fromCategoryId].name,
-              },
-            ),
-          });
+      pushModal({
+        name: 'cover',
+        options: {
+          title: category.name,
+          month,
+          categoryId: category.id,
+          onSubmit: fromCategoryId => {
+            onBudgetAction(month, 'cover-overspending', {
+              to: category.id,
+              from: fromCategoryId,
+            });
+            dispatch(
+              collapseModals({
+                rootModalName: `${modalBudgetType}-balance-menu`,
+              }),
+            );
+            showUndoNotification({
+              message: t(
+                `Covered {{toCategoryName}} overspending from {{fromCategoryName}}.`,
+                {
+                  toCategoryName: category.name,
+                  fromCategoryName: categoriesById[fromCategoryId].name,
+                },
+              ),
+            });
+          },
         },
       }),
     );
@@ -513,11 +532,14 @@ const ExpenseCategory = memo(function ExpenseCategory({
 
   const onOpenBalanceMenu = useCallback(() => {
     dispatch(
-      pushModal(`${modalBudgetType}-balance-menu`, {
-        categoryId: category.id,
-        month,
-        onCarryover,
-        ...(budgetType === 'rollover' && { onTransfer, onCover }),
+      pushModal({
+        name: `${modalBudgetType}-balance-menu`,
+        options: {
+          categoryId: category.id,
+          month,
+          onCarryover,
+          ...(budgetType === 'rollover' && { onTransfer, onCover }),
+        },
       }),
     );
   }, [

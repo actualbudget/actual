@@ -16,7 +16,7 @@ import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
 import { addNotification, signOut } from 'loot-core/client/actions';
-import { pushModal } from 'loot-core/client/actions/modals';
+import { pushModal } from 'loot-core/client/modals/modalsSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import * as undo from 'loot-core/platform/client/undo';
 import {
@@ -204,11 +204,14 @@ function UserDirectoryContent({
   const onEditUser = useCallback(
     user => {
       dispatch(
-        pushModal('edit-user', {
-          user,
-          onSave: async () => {
-            await loadUsers();
-            setLoading(false);
+        pushModal({
+          name: 'edit-user',
+          options: {
+            user,
+            onSave: async () => {
+              await loadUsers();
+              setLoading(false);
+            },
           },
         }),
       );
@@ -225,11 +228,14 @@ function UserDirectoryContent({
     };
 
     dispatch(
-      pushModal('edit-user', {
-        user,
-        onSave: async () => {
-          await loadUsers();
-          setLoading(false);
+      pushModal({
+        name: 'edit-user',
+        options: {
+          user,
+          onSave: async () => {
+            await loadUsers();
+            setLoading(false);
+          },
         },
       }),
     );

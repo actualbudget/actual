@@ -4,8 +4,8 @@ import { Trans, useTranslation } from 'react-i18next';
 import { Button } from '@actual-app/components/button';
 import { View } from '@actual-app/components/view';
 
-import { pushModal } from 'loot-core/client/actions';
 import { useSchedules } from 'loot-core/client/data-hooks/schedules';
+import { pushModal } from 'loot-core/client/modals/modalsSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import { q } from 'loot-core/shared/query';
 import { type ScheduleEntity } from 'loot-core/types/models';
@@ -25,21 +25,21 @@ export function Schedules() {
 
   const onEdit = useCallback(
     (id: ScheduleEntity['id']) => {
-      dispatch(pushModal('schedule-edit', { id }));
+      dispatch(pushModal({ name: 'schedule-edit', options: { id } }));
     },
     [dispatch],
   );
 
   const onAdd = useCallback(() => {
-    dispatch(pushModal('schedule-edit'));
+    dispatch(pushModal({ name: 'schedule-edit', options: {} }));
   }, [dispatch]);
 
   const onDiscover = useCallback(() => {
-    dispatch(pushModal('schedules-discover'));
+    dispatch(pushModal({ name: 'schedules-discover' }));
   }, [dispatch]);
 
   const onChangeUpcomingLength = useCallback(() => {
-    dispatch(pushModal('schedules-upcoming-length'));
+    dispatch(pushModal({ name: 'schedules-upcoming-length' }));
   }, [dispatch]);
 
   const onAction = useCallback(
