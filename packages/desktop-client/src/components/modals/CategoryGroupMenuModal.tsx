@@ -13,7 +13,7 @@ import { Popover } from '@actual-app/components/popover';
 import { styles } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
 
-import { type CategoryGroupEntity } from 'loot-core/types/models';
+import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
 
 import { useCategories } from '../../hooks/useCategories';
 import { useNotes } from '../../hooks/useNotes';
@@ -28,15 +28,10 @@ import {
 } from '../common/Modal';
 import { Notes } from '../Notes';
 
-type CategoryGroupMenuModalProps = {
-  groupId: string;
-  onSave: (group: CategoryGroupEntity) => void;
-  onAddCategory: (groupId: string, isIncome: boolean) => void;
-  onEditNotes: (id: string) => void;
-  onDelete: (groupId: string) => void;
-  onToggleVisibility: (groupId: string) => void;
-  onClose?: () => void;
-};
+type CategoryGroupMenuModalProps = Extract<
+  ModalType,
+  { name: 'category-group-menu' }
+>['options'];
 
 export function CategoryGroupMenuModal({
   groupId,

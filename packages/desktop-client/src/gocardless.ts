@@ -45,7 +45,7 @@ export async function authorizeBank(dispatch: AppDispatch) {
         pushModal({
           name: 'select-linked-accounts',
           options: {
-            accounts: data.accounts,
+            externalAccounts: data.accounts,
             requisitionId: data.id,
             syncSource: 'goCardless',
           },

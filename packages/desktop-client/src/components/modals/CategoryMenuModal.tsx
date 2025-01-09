@@ -8,7 +8,7 @@ import { Popover } from '@actual-app/components/popover';
 import { styles } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
 
-import { type CategoryEntity } from 'loot-core/types/models';
+import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
 
 import { useCategory } from '../../hooks/useCategory';
 import { useCategoryGroup } from '../../hooks/useCategoryGroup';
@@ -24,14 +24,10 @@ import {
 } from '../common/Modal';
 import { Notes } from '../Notes';
 
-type CategoryMenuModalProps = {
-  categoryId: string;
-  onSave: (category: CategoryEntity) => void;
-  onEditNotes: (categoryId: string) => void;
-  onDelete: (categoryId: string) => void;
-  onToggleVisibility: (categoryId: string) => void;
-  onClose?: () => void;
-};
+type CategoryMenuModalProps = Extract<
+  ModalType,
+  { name: 'category-menu' }
+>['options'];
 
 export function CategoryMenuModal({
   categoryId,

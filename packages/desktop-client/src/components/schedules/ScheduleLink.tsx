@@ -8,13 +8,12 @@ import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
 import { useSchedules } from 'loot-core/client/data-hooks/schedules';
-import { pushModal } from 'loot-core/client/modals/modalsSlice';
+import {
+  type Modal as ModalType,
+  pushModal,
+} from 'loot-core/client/modals/modalsSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import { q } from 'loot-core/shared/query';
-import {
-  type ScheduleEntity,
-  type TransactionEntity,
-} from 'loot-core/types/models';
 
 import { SvgAdd } from '../../icons/v0';
 import { useDispatch } from '../../redux';
@@ -23,17 +22,17 @@ import { Search } from '../common/Search';
 
 import { ROW_HEIGHT, SchedulesTable } from './SchedulesTable';
 
+type ScheduleLinkProps = Extract<
+  ModalType,
+  { name: 'schedule-link' }
+>['options'];
+
 export function ScheduleLink({
   transactionIds: ids,
   getTransaction,
   accountName,
   onScheduleLinked,
-}: {
-  transactionIds: string[];
-  getTransaction: (transactionId: string) => TransactionEntity;
-  accountName?: string;
-  onScheduleLinked?: (schedule: ScheduleEntity) => void;
-}) {
+}: ScheduleLinkProps) {
   const { t } = useTranslation();
 
   const dispatch = useDispatch();

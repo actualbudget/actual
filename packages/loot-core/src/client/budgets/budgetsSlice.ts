@@ -75,7 +75,7 @@ export const loadBudget = createAppAsyncThunk(
           );
 
           if (showBackups) {
-            await dispatch(pushModal({ name: 'load-backup' }));
+            await dispatch(pushModal({ name: 'load-backup', options: {} }));
           }
         } else {
           alert(message + ' ' + t('Make sure the app is up-to-date.'));

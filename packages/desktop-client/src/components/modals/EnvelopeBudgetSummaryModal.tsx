@@ -3,7 +3,11 @@ import { useTranslation } from 'react-i18next';
 
 import { styles } from '@actual-app/components/styles';
 
-import { collapseModals, pushModal } from 'loot-core/client/modals/modalsSlice';
+import {
+  collapseModals,
+  type Modal as ModalType,
+  pushModal,
+} from 'loot-core/client/modals/modalsSlice';
 import { envelopeBudget } from 'loot-core/client/queries';
 import { format, sheetForMonth, prevMonth } from 'loot-core/shared/months';
 import { groupById, integerToCurrency } from 'loot-core/shared/util';
@@ -17,10 +21,10 @@ import { useEnvelopeSheetValue } from '../budget/envelope/EnvelopeBudgetComponen
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { NamespaceContext } from '../spreadsheet/NamespaceContext';
 
-type EnvelopeBudgetSummaryModalProps = {
-  onBudgetAction: (month: string, action: string, arg?: unknown) => void;
-  month: string;
-};
+type EnvelopeBudgetSummaryModalProps = Extract<
+  ModalType,
+  { name: 'envelope-budget-summary' }
+>['options'];
 
 export function EnvelopeBudgetSummaryModal({
   month,

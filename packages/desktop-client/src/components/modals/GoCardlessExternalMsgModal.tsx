@@ -6,7 +6,10 @@ import { Button } from '@actual-app/components/button';
 import { Paragraph } from '@actual-app/components/paragraph';
 import { View } from '@actual-app/components/view';
 
-import { pushModal } from 'loot-core/client/modals/modalsSlice';
+import {
+  type Modal as ModalType,
+  pushModal,
+} from 'loot-core/client/modals/modalsSlice';
 import { sendCatch } from 'loot-core/platform/client/fetch';
 import {
   type GoCardlessInstitution,
@@ -73,19 +76,16 @@ function renderError(error: 'unknown' | 'timeout', t: (key: string) => string) {
   );
 }
 
-type GoCardlessExternalMsgProps = {
-  onMoveExternal: (arg: {
-    institutionId: string;
-  }) => Promise<{ error?: 'unknown' | 'timeout'; data?: GoCardlessToken }>;
-  onSuccess: (data: GoCardlessToken) => Promise<void>;
-  onClose: () => void;
-};
+type GoCardlessExternalMsgModalProps = Extract<
+  ModalType,
+  { name: 'gocardless-external-msg' }
+>['options'];
 
 export function GoCardlessExternalMsgModal({
   onMoveExternal,
   onSuccess,
   onClose,
-}: GoCardlessExternalMsgProps) {
+}: GoCardlessExternalMsgModalProps) {
   const { t } = useTranslation();
 
   const dispatch = useDispatch();
@@ -115,7 +115,7 @@ export function GoCardlessExternalMsgModal({
     setWaiting('browser');
 
     const res = await onMoveExternal({ institutionId });
-    if (res.error) {
+    if ('error' in res) {
       setError(res.error);
       setWaiting(null);
       return;

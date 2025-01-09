@@ -5,8 +5,10 @@ import { Button } from '@actual-app/components/button';
 import { styles } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
 
-import { pushModal } from 'loot-core/client/modals/modalsSlice';
-import { type CategoryEntity } from 'loot-core/types/models';
+import {
+  type Modal as ModalType,
+  pushModal,
+} from 'loot-core/client/modals/modalsSlice';
 
 import { useCategories } from '../../hooks/useCategories';
 import { useDispatch } from '../../redux';
@@ -17,13 +19,7 @@ import {
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { FieldLabel, TapField } from '../mobile/MobileForms';
 
-type CoverModalProps = {
-  title: string;
-  categoryId?: CategoryEntity['id'];
-  month: string;
-  showToBeBudgeted?: boolean;
-  onSubmit: (categoryId: CategoryEntity['id']) => void;
-};
+type CoverModalProps = Extract<ModalType, { name: 'cover' }>['options'];
 
 export function CoverModal({
   title,

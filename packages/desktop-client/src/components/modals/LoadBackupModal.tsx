@@ -8,6 +8,7 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import { loadBackup, makeBackup } from 'loot-core/client/budgets/budgetsSlice';
+import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
 import { send, listen, unlisten } from 'loot-core/platform/client/fetch';
 import { type Backup } from 'loot-core/server/backups';
 
@@ -42,11 +43,10 @@ function BackupTable({ backups, onSelect }: BackupTableProps) {
   );
 }
 
-type LoadBackupModalProps = {
-  budgetId: string;
-  watchUpdates: boolean;
-  backupDisabled: boolean;
-};
+type LoadBackupModalProps = Extract<
+  ModalType,
+  { name: 'load-backup' }
+>['options'];
 
 export function LoadBackupModal({
   budgetId,

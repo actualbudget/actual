@@ -6,8 +6,10 @@ import { InitialFocus } from '@actual-app/components/initial-focus';
 import { styles } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
 
-import { pushModal } from 'loot-core/client/modals/modalsSlice';
-import { type CategoryEntity } from 'loot-core/types/models';
+import {
+  type Modal as ModalType,
+  pushModal,
+} from 'loot-core/client/modals/modalsSlice';
 
 import { useCategories } from '../../hooks/useCategories';
 import { useDispatch } from '../../redux';
@@ -19,14 +21,7 @@ import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { FieldLabel, TapField } from '../mobile/MobileForms';
 import { AmountInput } from '../util/AmountInput';
 
-type TransferModalProps = {
-  title: string;
-  categoryId?: CategoryEntity['id'];
-  month: string;
-  amount: number;
-  showToBeBudgeted: boolean;
-  onSubmit: (amount: number, toCategoryId: CategoryEntity['id']) => void;
-};
+type TransferModalProps = Extract<ModalType, { name: 'transfer' }>['options'];
 
 export function TransferModal({
   title,

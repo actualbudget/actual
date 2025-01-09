@@ -432,7 +432,6 @@ export function Budget() {
             onEditNotes: onOpenCategoryNotesModal,
             onDelete: onDeleteCategory,
             onToggleVisibility: onToggleCategoryVisibility,
-            onBudgetAction,
           },
         }),
       );
@@ -440,7 +439,6 @@ export function Budget() {
     [
       categories,
       dispatch,
-      onBudgetAction,
       onDeleteCategory,
       onOpenCategoryNotesModal,
       onSaveCategory,

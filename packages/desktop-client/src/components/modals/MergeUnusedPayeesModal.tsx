@@ -6,7 +6,10 @@ import { Paragraph } from '@actual-app/components/paragraph';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
-import { replaceModal } from 'loot-core/client/modals/modalsSlice';
+import {
+  type Modal as ModalType,
+  replaceModal,
+} from 'loot-core/client/modals/modalsSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import { type PayeeEntity } from 'loot-core/types/models';
 
@@ -18,10 +21,10 @@ import { Modal, ModalButtons } from '../common/Modal';
 
 const highlightStyle = { color: theme.pageTextPositive };
 
-type MergeUnusedPayeesModalProps = {
-  payeeIds: Array<PayeeEntity['id']>;
-  targetPayeeId: PayeeEntity['id'];
-};
+type MergeUnusedPayeesModalProps = Extract<
+  ModalType,
+  { name: 'merge-unused-payees' }
+>['options'];
 
 export function MergeUnusedPayeesModal({
   payeeIds,

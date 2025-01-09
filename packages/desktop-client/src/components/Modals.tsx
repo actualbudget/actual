@@ -1,6 +1,5 @@
 // @ts-strict-ignore
 import React, { useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 
 import { closeModal } from 'loot-core/client/modals/modalsSlice';
@@ -12,7 +11,6 @@ import { useModalState } from '../hooks/useModalState';
 import { useDispatch } from '../redux';
 
 import { EditSyncAccount } from './banksync/EditSyncAccount';
-import { ModalTitle, ModalHeader } from './common/Modal';
 import { AccountAutocompleteModal } from './modals/AccountAutocompleteModal';
 import { AccountMenuModal } from './modals/AccountMenuModal';
 import { BudgetListModal } from './modals/BudgetListModal';
@@ -56,6 +54,8 @@ import { ImportYNAB4Modal } from './modals/manager/ImportYNAB4Modal';
 import { ImportYNAB5Modal } from './modals/manager/ImportYNAB5Modal';
 import { ManageRulesModal } from './modals/ManageRulesModal';
 import { MergeUnusedPayeesModal } from './modals/MergeUnusedPayeesModal';
+import { NewCategoryGroupModal } from './modals/NewCategoryGroupModal';
+import { NewCategoryModal } from './modals/NewCategoryModal';
 import { NotesModal } from './modals/NotesModal';
 import { OpenIDEnableModal } from './modals/OpenIDEnableModal';
 import { OutOfSyncMigrationsModal } from './modals/OutOfSyncMigrationsModal';
@@ -65,7 +65,6 @@ import { PluggyAiInitialiseModal } from './modals/PluggyAiInitialiseModal';
 import { ScheduledTransactionMenuModal } from './modals/ScheduledTransactionMenuModal';
 import { SelectLinkedAccountsModal } from './modals/SelectLinkedAccountsModal';
 import { SimpleFinInitialiseModal } from './modals/SimpleFinInitialiseModal';
-import { SingleInputModal } from './modals/SingleInputModal';
 import { TrackingBalanceMenuModal } from './modals/TrackingBalanceMenuModal';
 import { TrackingBudgetMenuModal } from './modals/TrackingBudgetMenuModal';
 import { TrackingBudgetMonthMenuModal } from './modals/TrackingBudgetMonthMenuModal';
@@ -92,8 +91,6 @@ export function Modals() {
     }
   }, [location]);
 
-  const { t } = useTranslation();
-
   const modals = modalStack
     .map(modal => {
       const { name } = modal;
@@ -106,7 +103,7 @@ export function Modals() {
           return budgetId ? <KeyboardShortcutModal key={name} /> : null;
 
         case 'import-transactions':
-          return <ImportTransactionsModal key={name} options={modal.options} />;
+          return <ImportTransactionsModal key={name} {...modal.options} />;
 
         case 'add-account':
           return (
@@ -133,7 +130,7 @@ export function Modals() {
           return (
             <SelectLinkedAccountsModal
               key={name}
-              externalAccounts={modal.options.accounts}
+              externalAccounts={modal.options.externalAccounts}
               requisitionId={modal.options.requisitionId}
               syncSource={modal.options.syncSource}
             />
@@ -196,7 +193,7 @@ export function Modals() {
           return (
             <EditRuleModal
               key={name}
-              defaultRule={modal.options.rule}
+              rule={modal.options.rule}
               onSave={modal.options.onSave}
             />
           );
@@ -228,7 +225,10 @@ export function Modals() {
 
         case 'pluggyai-init':
           return (
-            <PluggyAiInitialiseModal key={name} onSuccess={options.onSuccess} />
+            <PluggyAiInitialiseModal
+              key={name}
+              onSuccess={modal.options.onSuccess}
+            />
           );
 
         case 'gocardless-external-msg':
@@ -246,11 +246,21 @@ export function Modals() {
 
         case 'create-encryption-key':
           return (
-            <CreateEncryptionKeyModal key={name} options={modal.options} />
+            <CreateEncryptionKeyModal
+              key={name}
+              recreate={modal.options.recreate}
+            />
           );
 
         case 'fix-encryption-key':
-          return <FixEncryptionKeyModal key={name} options={modal.options} />;
+          return (
+            <FixEncryptionKeyModal
+              key={name}
+              cloudFileId={modal.options.cloudFileId}
+              hasExistingKey={modal.options.hasExistingKey}
+              onSuccess={modal.options.onSuccess}
+            />
+          );
 
         case 'edit-field':
           return (
@@ -266,12 +276,9 @@ export function Modals() {
           return (
             <CategoryAutocompleteModal
               key={name}
-              autocompleteProps={{
-                value: null,
-                onSelect: modal.options.onSelect,
-                categoryGroups: modal.options.categoryGroups,
-                showHiddenCategories: modal.options.showHiddenCategories,
-              }}
+              onSelect={modal.options.onSelect}
+              categoryGroups={modal.options.categoryGroups}
+              showHiddenCategories={modal.options.showHiddenCategories}
               month={modal.options.month}
               onClose={modal.options.onClose}
             />
@@ -281,11 +288,8 @@ export function Modals() {
           return (
             <AccountAutocompleteModal
               key={name}
-              autocompleteProps={{
-                value: null,
-                onSelect: modal.options.onSelect,
-                includeClosedAccounts: modal.options.includeClosedAccounts,
-              }}
+              onSelect={modal.options.onSelect}
+              includeClosedAccounts={modal.options.includeClosedAccounts}
               onClose={modal.options.onClose}
             />
           );
@@ -294,10 +298,7 @@ export function Modals() {
           return (
             <PayeeAutocompleteModal
               key={name}
-              autocompleteProps={{
-                value: null,
-                onSelect: modal.options.onSelect,
-              }}
+              onSelect={modal.options.onSelect}
               onClose={modal.options.onClose}
             />
           );
@@ -307,19 +308,8 @@ export function Modals() {
 
         case 'new-category':
           return (
-            <SingleInputModal
+            <NewCategoryModal
               key={name}
-              name={name}
-              Header={props => (
-                <ModalHeader
-                  {...props}
-                  title={
-                    <ModalTitle title={t('New Category')} shrinkOnOverflow />
-                  }
-                />
-              )}
-              inputPlaceholder={t('Category name')}
-              buttonText={t('Add')}
               onValidate={modal.options.onValidate}
               onSubmit={modal.options.onSubmit}
             />
@@ -327,22 +317,8 @@ export function Modals() {
 
         case 'new-category-group':
           return (
-            <SingleInputModal
+            <NewCategoryGroupModal
               key={name}
-              name={name}
-              Header={props => (
-                <ModalHeader
-                  {...props}
-                  title={
-                    <ModalTitle
-                      title={t('New Category Group')}
-                      shrinkOnOverflow
-                    />
-                  }
-                />
-              )}
-              inputPlaceholder={t('Category group name')}
-              buttonText={t('Add')}
               onValidate={modal.options.onValidate}
               onSubmit={modal.options.onSubmit}
             />
@@ -654,7 +630,7 @@ export function Modals() {
           return (
             <EditUserAccess
               key={name}
-              defaultUserAccess={modal.options.access}
+              access={modal.options.access}
               onSave={modal.options.onSave}
             />
           );
@@ -663,7 +639,7 @@ export function Modals() {
           return (
             <EditUserFinanceApp
               key={name}
-              defaultUser={modal.options.user}
+              user={modal.options.user}
               onSave={modal.options.onSave}
             />
           );

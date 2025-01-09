@@ -6,17 +6,18 @@ import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
 import { deleteBudget } from 'loot-core/client/budgets/budgetsSlice';
-import { type File } from 'loot-core/types/file';
+import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
 
 import { useDispatch } from '../../../redux';
 import { theme } from '../../../style';
 import { Modal, ModalCloseButton, ModalHeader } from '../../common/Modal';
 
-type DeleteFileProps = {
-  file: File;
-};
+type DeleteFileModalProps = Extract<
+  ModalType,
+  { name: 'delete-budget' }
+>['options'];
 
-export function DeleteFileModal({ file }: DeleteFileProps) {
+export function DeleteFileModal({ file }: DeleteFileModalProps) {
   const { t } = useTranslation();
 
   // If the state is "broken" that means it was created by another

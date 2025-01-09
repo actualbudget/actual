@@ -9,7 +9,10 @@ import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 import { t } from 'i18next';
 
-import { pushModal } from 'loot-core/client/modals/modalsSlice';
+import {
+  type Modal as ModalType,
+  pushModal,
+} from 'loot-core/client/modals/modalsSlice';
 import { getPayeesById } from 'loot-core/client/queries/queriesSlice';
 import { runQuery, liveQuery } from 'loot-core/client/query-helpers';
 import { send, sendCatch } from 'loot-core/platform/client/fetch';
@@ -100,10 +103,10 @@ function updateScheduleConditions(
   };
 }
 
-type ScheduleDetailsProps = {
-  id: string;
-  transaction: TransactionEntity;
-};
+type ScheduleDetailsProps = Extract<
+  ModalType,
+  { name: 'schedule-edit' }
+>['options'];
 
 export function ScheduleDetails({ id, transaction }: ScheduleDetailsProps) {
   const { t } = useTranslation();

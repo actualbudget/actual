@@ -11,7 +11,10 @@ import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
 import { addNotification } from 'loot-core/client/actions';
-import { pushModal } from 'loot-core/client/modals/modalsSlice';
+import {
+  type Modal as ModalType,
+  pushModal,
+} from 'loot-core/client/modals/modalsSlice';
 import { send } from 'loot-core/platform/client/fetch';
 
 import { useAuth } from '../../auth/AuthProvider';
@@ -30,11 +33,14 @@ import { Link } from '../common/Link';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { useMultiuserEnabled } from '../ServerContext';
 
-type CreateAccountProps = {
-  upgradingAccountId?: string;
-};
+type CreateAccountModalProps = Extract<
+  ModalType,
+  { name: 'add-account' }
+>['options'];
 
-export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
+export function CreateAccountModal({
+  upgradingAccountId,
+}: CreateAccountModalProps) {
   const { t } = useTranslation();
 
   const isPluggyAiEnabled = useFeatureFlag('pluggyAiBankSync');
@@ -112,7 +118,7 @@ export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
         pushModal({
           name: 'select-linked-accounts',
           options: {
-            accounts: newAccounts,
+            externalAccounts: newAccounts,
             syncSource: 'simpleFin',
           },
         }),
@@ -178,7 +184,7 @@ export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
         pushModal({
           name: 'select-linked-accounts',
           options: {
-            accounts: newAccounts,
+            externalAccounts: newAccounts,
             syncSource: 'pluggyai',
           },
         }),
