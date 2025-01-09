@@ -8,9 +8,9 @@ import { useTranslation } from 'react-i18next';
 
 import { parseISO, format as formatDate, parse as parseDate } from 'date-fns';
 
+import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
 import { currentDay, dayFromDate } from 'loot-core/src/shared/months';
 import { amountToInteger } from 'loot-core/src/shared/util';
-import { type TransactionEntity } from 'loot-core/types/models';
 
 import { useDateFormat } from '../../hooks/useDateFormat';
 import { theme } from '../../style';
@@ -31,15 +31,10 @@ const itemStyle: CSSProperties = {
 
 type NoteAmendMode = 'replace' | 'prepend' | 'append';
 
-type EditFieldModalProps = {
-  name: keyof Pick<TransactionEntity, 'date' | 'amount' | 'notes'>;
-  onSubmit: (
-    name: keyof Pick<TransactionEntity, 'date' | 'amount' | 'notes'>,
-    value: string | number,
-    mode?: NoteAmendMode,
-  ) => void;
-  onClose: () => void;
-};
+type EditFieldModalProps = Extract<
+  ModalType,
+  { name: 'edit-field' }
+>['options'];
 
 export function EditFieldModal({
   name,

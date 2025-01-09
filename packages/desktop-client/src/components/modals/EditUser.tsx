@@ -2,7 +2,10 @@ import { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { addNotification, signOut } from 'loot-core/client/actions';
-import { popModal } from 'loot-core/client/modals/modalsSlice';
+import {
+  type Modal as ModalType,
+  popModal,
+} from 'loot-core/client/modals/modalsSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import {
   type NewUserEntity,
@@ -23,20 +26,6 @@ import { Checkbox, FormField, FormLabel } from '../forms';
 
 type User = UserEntity;
 type NewUser = NewUserEntity;
-
-type EditUserProps = {
-  defaultUser: User | NewUser;
-  onSave: (
-    method: 'user-add' | 'user-update',
-    user: User,
-    setError: (error: string) => void,
-  ) => Promise<void>;
-};
-
-type EditUserFinanceAppProps = {
-  defaultUser: User | NewUser;
-  onSave: (user: User) => void;
-};
 
 function useGetUserDirectoryErrors() {
   const { t } = useTranslation();
@@ -120,8 +109,13 @@ function useSaveUser() {
   return { saveUser };
 }
 
+type EditUserFinanceAppProps = Extract<
+  ModalType,
+  { name: 'edit-user' }
+>['options'];
+
 export function EditUserFinanceApp({
-  defaultUser,
+  user: defaultUser,
   onSave: originalOnSave,
 }: EditUserFinanceAppProps) {
   const { t } = useTranslation();
@@ -155,6 +149,15 @@ export function EditUserFinanceApp({
     </Modal>
   );
 }
+
+type EditUserProps = {
+  defaultUser: User | NewUser;
+  onSave: (
+    method: 'user-add' | 'user-update',
+    user: User,
+    setError: (error: string) => void,
+  ) => Promise<void>;
+};
 
 function EditUser({ defaultUser, onSave: originalOnSave }: EditUserProps) {
   const { t } = useTranslation();

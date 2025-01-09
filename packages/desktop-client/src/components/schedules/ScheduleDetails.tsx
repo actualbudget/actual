@@ -4,7 +4,10 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { t } from 'i18next';
 
-import { pushModal } from 'loot-core/client/modals/modalsSlice';
+import {
+  type Modal as ModalType,
+  pushModal,
+} from 'loot-core/client/modals/modalsSlice';
 import { getPayeesById } from 'loot-core/client/queries/queriesSlice';
 import { runQuery, liveQuery } from 'loot-core/src/client/query-helpers';
 import { send, sendCatch } from 'loot-core/src/platform/client/fetch';
@@ -100,10 +103,10 @@ function updateScheduleConditions(
   };
 }
 
-type ScheduleDetailsProps = {
-  id: string;
-  transaction: TransactionEntity;
-};
+type ScheduleDetailsProps = Extract<
+  ModalType,
+  { name: 'schedule-edit' }
+>['options'];
 
 export function ScheduleDetails({ id, transaction }: ScheduleDetailsProps) {
   const { t } = useTranslation();

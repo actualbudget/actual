@@ -2,7 +2,10 @@ import { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { closeBudget } from 'loot-core/client/budgets/budgetsSlice';
-import { popModal } from 'loot-core/client/modals/modalsSlice';
+import {
+  type Modal as ModalType,
+  popModal,
+} from 'loot-core/client/modals/modalsSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import * as asyncStorage from 'loot-core/platform/server/asyncStorage';
 import { getOpenIdErrors } from 'loot-core/shared/errors';
@@ -18,9 +21,10 @@ import { View } from '../common/View';
 import { OpenIdForm } from '../manager/subscribe/OpenIdForm';
 import { useRefreshLoginMethods } from '../ServerContext';
 
-type OpenIDEnableModalProps = {
-  onSave?: () => void;
-};
+type OpenIDEnableModalProps = Extract<
+  ModalType,
+  { name: 'enable-openid' }
+>['options'];
 
 export function OpenIDEnableModal({
   onSave: originalOnSave,

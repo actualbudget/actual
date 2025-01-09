@@ -2,7 +2,10 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
-import { pushModal } from 'loot-core/client/modals/modalsSlice';
+import {
+  type Modal as ModalType,
+  pushModal,
+} from 'loot-core/client/modals/modalsSlice';
 import { sendCatch } from 'loot-core/src/platform/client/fetch';
 import {
   type GoCardlessInstitution,
@@ -72,19 +75,16 @@ function renderError(error: 'unknown' | 'timeout', t: (key: string) => string) {
   );
 }
 
-type GoCardlessExternalMsgProps = {
-  onMoveExternal: (arg: {
-    institutionId: string;
-  }) => Promise<{ error?: 'unknown' | 'timeout'; data?: GoCardlessToken }>;
-  onSuccess: (data: GoCardlessToken) => Promise<void>;
-  onClose: () => void;
-};
+type GoCardlessExternalMsgModalProps = Extract<
+  ModalType,
+  { name: 'gocardless-external-msg' }
+>['options'];
 
 export function GoCardlessExternalMsgModal({
   onMoveExternal,
   onSuccess,
   onClose,
-}: GoCardlessExternalMsgProps) {
+}: GoCardlessExternalMsgModalProps) {
   const { t } = useTranslation();
 
   const dispatch = useDispatch();

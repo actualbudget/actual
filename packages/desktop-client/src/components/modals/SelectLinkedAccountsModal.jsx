@@ -35,9 +35,9 @@ function useAddBudgetAccountOptions() {
 }
 
 export function SelectLinkedAccountsModal({
-  requisitionId,
+  requisitionId = undefined,
   externalAccounts,
-  syncSource,
+  syncSource = undefined,
 }) {
   externalAccounts.sort((a, b) => a.name.localeCompare(b.name));
   const { t } = useTranslation();

@@ -15,6 +15,7 @@ import {
   type UserEntity,
   type UserAccessEntity,
   type NewUserEntity,
+  type NoteEntity,
 } from '../../types/models';
 import { setAppState } from '../app/appSlice';
 import { signOut } from '../budgets/budgetsSlice';
@@ -28,12 +29,13 @@ export type Modal =
       options: {
         accountId: string;
         filename: string;
+        categories?: { list: CategoryEntity[]; grouped: CategoryGroupEntity[] };
         onImported: (didChange: boolean) => void;
       };
     }
   | {
       name: 'add-account';
-      options?: {
+      options: {
         upgradingAccountId?: string;
       };
     }
@@ -51,7 +53,7 @@ export type Modal =
   | {
       name: 'select-linked-accounts';
       options: {
-        accounts: unknown[];
+        externalAccounts: unknown[];
         requisitionId?: string;
         upgradingAccountId?: string;
         syncSource?: AccountSyncSource;
@@ -67,8 +69,10 @@ export type Modal =
     }
   | {
       name: 'load-backup';
-      options?: {
-        budgetId: string;
+      options: {
+        budgetId?: string;
+        watchUpdates?: boolean;
+        backupDisabled?: boolean;
       };
     }
   | {
@@ -104,11 +108,10 @@ export type Modal =
   | {
       name: 'gocardless-external-msg';
       options: {
-        onMoveExternal: (arg: {
-          institutionId: string;
-        }) => Promise<
-          { error: 'unknown' | 'timeout' } | { data: GoCardlessToken }
-        >;
+        onMoveExternal: (arg: { institutionId: string }) => Promise<{
+          error?: 'unknown' | 'timeout';
+          data?: GoCardlessToken;
+        }>;
         onClose?: () => void;
         onSuccess: (data: GoCardlessToken) => Promise<void>;
       };
@@ -177,7 +180,7 @@ export type Modal =
     }
   | {
       name: 'create-encryption-key';
-      options?: { recreate?: boolean };
+      options: { recreate?: boolean };
     }
   | {
       name: 'fix-encryption-key';
@@ -254,30 +257,29 @@ export type Modal =
   | {
       name: 'account-menu';
       options: {
-        accountId: string;
+        accountId: AccountEntity['id'];
         onSave: (account: AccountEntity) => void;
-        onCloseAccount: (accountId: string) => void;
-        onReopenAccount: (accountId: string) => void;
-        onEditNotes: (id: string) => void;
+        onCloseAccount: (accountId: AccountEntity['id']) => void;
+        onReopenAccount: (accountId: AccountEntity['id']) => void;
+        onEditNotes: (id: NoteEntity['id']) => void;
         onClose?: () => void;
       };
     }
   | {
       name: 'category-menu';
       options: {
-        categoryId: string;
+        categoryId: CategoryEntity['id'];
         onSave: (category: CategoryEntity) => void;
-        onEditNotes: (id: string) => void;
-        onDelete: (categoryId: string) => void;
-        onToggleVisibility: (categoryId: string) => void;
-        onBudgetAction: (month: string, action: string, args?: unknown) => void;
+        onEditNotes: (id: NoteEntity['id']) => void;
+        onDelete: (categoryId: CategoryEntity['id']) => void;
+        onToggleVisibility: (categoryId: CategoryEntity['id']) => void;
         onClose?: () => void;
       };
     }
   | {
       name: 'envelope-budget-menu';
       options: {
-        categoryId: string;
+        categoryId: CategoryEntity['id'];
         month: string;
         onUpdateBudget: (amount: number) => void;
         onCopyLastMonthAverage: () => void;
@@ -288,7 +290,7 @@ export type Modal =
   | {
       name: 'tracking-budget-menu';
       options: {
-        categoryId: string;
+        categoryId: CategoryEntity['id'];
         month: string;
         onUpdateBudget: (amount: number) => void;
         onCopyLastMonthAverage: () => void;
@@ -299,21 +301,24 @@ export type Modal =
   | {
       name: 'category-group-menu';
       options: {
-        groupId: string;
+        groupId: CategoryGroupEntity['id'];
         onSave: (group: CategoryGroupEntity) => void;
-        onAddCategory: (groupId: string, isIncome: boolean) => void;
-        onEditNotes: (id: string) => void;
-        onDelete: (groupId: string) => void;
-        onToggleVisibility: (groupId: string) => void;
+        onAddCategory: (
+          groupId: CategoryGroupEntity['id'],
+          isIncome: CategoryGroupEntity['is_income'],
+        ) => void;
+        onEditNotes: (id: NoteEntity['id']) => void;
+        onDelete: (groupId: CategoryGroupEntity['id']) => void;
+        onToggleVisibility: (groupId: CategoryGroupEntity['id']) => void;
         onClose?: () => void;
       };
     }
   | {
       name: 'notes';
       options: {
-        id: string;
+        id: NoteEntity['id'];
         name: string;
-        onSave: (id: string, notes: string) => void;
+        onSave: (id: NoteEntity['id'], contents: string) => void;
       };
     }
   | {
@@ -327,7 +332,7 @@ export type Modal =
         onBudgetAction: (
           month: string,
           type: string,
-          args: unknown,
+          args?: unknown,
         ) => Promise<void>;
       };
     }
@@ -348,7 +353,7 @@ export type Modal =
   | {
       name: 'envelope-balance-menu';
       options: {
-        categoryId: string;
+        categoryId: CategoryEntity['id'];
         month: string;
         onCarryover: (carryover: boolean) => void;
         onTransfer: () => void;
@@ -368,7 +373,7 @@ export type Modal =
   | {
       name: 'tracking-balance-menu';
       options: {
-        categoryId: string;
+        categoryId: CategoryEntity['id'];
         month: string;
         onCarryover: (carryover: boolean) => void;
       };
@@ -380,7 +385,7 @@ export type Modal =
         categoryId?: CategoryEntity['id'];
         month: string;
         amount: number;
-        onSubmit: (amount: number, toCategoryId: string) => void;
+        onSubmit: (amount: number, toCategoryId: CategoryEntity['id']) => void;
         showToBeBudgeted?: boolean;
       };
     }
@@ -391,7 +396,7 @@ export type Modal =
         categoryId?: CategoryEntity['id'];
         month: string;
         showToBeBudgeted?: boolean;
-        onSubmit: (fromCategoryId: string) => void;
+        onSubmit: (fromCategoryId: CategoryEntity['id']) => void;
       };
     }
   | {
@@ -404,9 +409,9 @@ export type Modal =
   | {
       name: 'scheduled-transaction-menu';
       options: {
-        transactionId: string;
-        onPost: (transactionId: string) => void;
-        onSkip: (transactionId: string) => void;
+        transactionId: TransactionEntity['id'];
+        onPost: (transactionId: TransactionEntity['id']) => void;
+        onSkip: (transactionId: TransactionEntity['id']) => void;
       };
     }
   | {
@@ -422,7 +427,7 @@ export type Modal =
       options: {
         month: string;
         onBudgetAction: (month: string, action: string, arg?: unknown) => void;
-        onEditNotes: (month: string) => void;
+        onEditNotes: (id: NoteEntity['id']) => void;
       };
     }
   | {
@@ -430,7 +435,7 @@ export type Modal =
       options: {
         month: string;
         onBudgetAction: (month: string, action: string, arg?: unknown) => void;
-        onEditNotes: (month: string) => void;
+        onEditNotes: (id: NoteEntity['id']) => void;
       };
     }
   | {
