@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { loadBackup, makeBackup } from 'loot-core/client/budgets/budgetsSlice';
+import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
 import { type Backup } from 'loot-core/server/backups';
 import { send, listen, unlisten } from 'loot-core/src/platform/client/fetch';
 
@@ -41,11 +42,10 @@ function BackupTable({ backups, onSelect }: BackupTableProps) {
   );
 }
 
-type LoadBackupModalProps = {
-  budgetId: string;
-  watchUpdates: boolean;
-  backupDisabled: boolean;
-};
+type LoadBackupModalProps = Extract<
+  ModalType,
+  { name: 'load-backup' }
+>['options'];
 
 export function LoadBackupModal({
   budgetId,

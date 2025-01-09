@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 
+import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
 import { getSecretsError } from 'loot-core/shared/errors';
 import { send } from 'loot-core/src/platform/client/fetch';
 
@@ -19,13 +20,14 @@ import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { FormField, FormLabel } from '../forms';
 
-type SimpleFinInitialiseProps = {
-  onSuccess: () => void;
-};
+type SimpleFinInitialiseModalProps = Extract<
+  ModalType,
+  { name: 'simplefin-init' }
+>['options'];
 
 export const SimpleFinInitialiseModal = ({
   onSuccess,
-}: SimpleFinInitialiseProps) => {
+}: SimpleFinInitialiseModalProps) => {
   const { t } = useTranslation();
   const [token, setToken] = useState('');
   const [isValid, setIsValid] = useState(true);

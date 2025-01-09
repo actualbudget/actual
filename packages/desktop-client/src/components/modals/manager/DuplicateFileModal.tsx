@@ -3,8 +3,8 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { addNotification } from 'loot-core/client/actions';
 import { duplicateBudget } from 'loot-core/client/budgets/budgetsSlice';
+import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
 import { send } from 'loot-core/platform/client/fetch';
-import { type File } from 'loot-core/src/types/file';
 
 import { useDispatch } from '../../../redux';
 import { theme } from '../../../style';
@@ -22,22 +22,17 @@ import {
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
 
-type DuplicateFileProps = {
-  file: File;
-  managePage?: boolean;
-  loadBudget?: 'none' | 'original' | 'copy';
-  onComplete?: (event: {
-    status: 'success' | 'failed' | 'canceled';
-    error?: Error;
-  }) => void;
-};
+type DuplicateFileModalProps = Extract<
+  ModalType,
+  { name: 'duplicate-budget' }
+>['options'];
 
 export function DuplicateFileModal({
   file,
   managePage,
   loadBudget = 'none',
   onComplete,
-}: DuplicateFileProps) {
+}: DuplicateFileModalProps) {
   const { t } = useTranslation();
   const fileEndingTranslation = ' - ' + t('copy');
   const [newName, setNewName] = useState(file.name + fileEndingTranslation);

@@ -1,6 +1,8 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
+
 import { styles } from '../../style';
 import { Button } from '../common/Button2';
 import { InitialFocus } from '../common/InitialFocus';
@@ -9,15 +11,15 @@ import { Paragraph } from '../common/Paragraph';
 import { View } from '../common/View';
 import { useResponsive } from '../responsive/ResponsiveProvider';
 
-type ConfirmTransactionDeleteProps = {
-  message?: string;
-  onConfirm: () => void;
-};
+type ConfirmTransactionDeleteModalProps = Extract<
+  ModalType,
+  { name: 'confirm-transaction-delete' }
+>['options'];
 
 export function ConfirmTransactionDeleteModal({
   message = 'Are you sure you want to delete the transaction?',
   onConfirm,
-}: ConfirmTransactionDeleteProps) {
+}: ConfirmTransactionDeleteModalProps) {
   const { t } = useTranslation();
   const { isNarrowWidth } = useResponsive();
   const narrowButtonStyle = isNarrowWidth

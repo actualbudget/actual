@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
 import { envelopeBudget } from 'loot-core/client/queries';
 
 import { styles } from '../../style';
@@ -12,10 +13,10 @@ import { View } from '../common/View';
 import { FieldLabel } from '../mobile/MobileForms';
 import { AmountInput } from '../util/AmountInput';
 
-type HoldBufferModalProps = {
-  month: string;
-  onSubmit: (amount: number) => void;
-};
+type HoldBufferModalProps = Extract<
+  ModalType,
+  { name: 'hold-buffer' }
+>['options'];
 
 export function HoldBufferModal({ onSubmit }: HoldBufferModalProps) {
   const { t } = useTranslation(); // Initialize i18next

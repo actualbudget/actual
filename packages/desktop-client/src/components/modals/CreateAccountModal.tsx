@@ -2,7 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { DialogTrigger } from 'react-aria-components';
 import { Trans, useTranslation } from 'react-i18next';
 
-import { pushModal } from 'loot-core/client/modals/modalsSlice';
+import {
+  type Modal as ModalType,
+  pushModal,
+} from 'loot-core/client/modals/modalsSlice';
 import { send } from 'loot-core/src/platform/client/fetch';
 
 import { useAuth } from '../../auth/AuthProvider';
@@ -26,11 +29,14 @@ import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { useMultiuserEnabled } from '../ServerContext';
 
-type CreateAccountProps = {
-  upgradingAccountId?: string;
-};
+type CreateAccountModalProps = Extract<
+  ModalType,
+  { name: 'add-account' }
+>['options'];
 
-export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
+export function CreateAccountModal({
+  upgradingAccountId,
+}: CreateAccountModalProps) {
   const { t } = useTranslation();
 
   const syncServerStatus = useSyncServerStatus();
@@ -105,7 +111,7 @@ export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
         pushModal({
           name: 'select-linked-accounts',
           options: {
-            accounts: newAccounts,
+            externalAccounts: newAccounts,
             syncSource: 'simpleFin',
           },
         }),

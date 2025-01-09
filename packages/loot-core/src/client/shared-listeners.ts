@@ -122,7 +122,9 @@ export function listenForSyncEvent(store: AppStore) {
             ),
             messageActions: {
               makeKey: () =>
-                store.dispatch(pushModal({ name: 'create-encryption-key' })),
+                store.dispatch(
+                  pushModal({ name: 'create-encryption-key', options: {} }),
+                ),
             },
             sticky: true,
             id: 'old-file',
@@ -150,7 +152,9 @@ export function listenForSyncEvent(store: AppStore) {
             button: {
               title: t('Reset key'),
               action: () => {
-                store.dispatch(pushModal({ name: 'create-encryption-key' }));
+                store.dispatch(
+                  pushModal({ name: 'create-encryption-key', options: {} }),
+                );
               },
             },
           };

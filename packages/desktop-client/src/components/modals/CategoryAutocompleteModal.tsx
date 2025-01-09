@@ -1,6 +1,7 @@
-import React, { type ComponentPropsWithoutRef } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
 import * as monthUtils from 'loot-core/src/shared/months';
 
 import { theme } from '../../style';
@@ -16,15 +17,16 @@ import { SectionLabel } from '../forms';
 import { useResponsive } from '../responsive/ResponsiveProvider';
 import { NamespaceContext } from '../spreadsheet/NamespaceContext';
 
-type CategoryAutocompleteModalProps = {
-  autocompleteProps: ComponentPropsWithoutRef<typeof CategoryAutocomplete>;
-  onClose: () => void;
-  month?: string;
-};
+type CategoryAutocompleteModalProps = Extract<
+  ModalType,
+  { name: 'category-autocomplete' }
+>['options'];
 
 export function CategoryAutocompleteModal({
-  autocompleteProps,
   month,
+  onSelect,
+  categoryGroups,
+  showHiddenCategories,
   onClose,
 }: CategoryAutocompleteModalProps) {
   const { t } = useTranslation();
@@ -86,7 +88,10 @@ export function CategoryAutocompleteModal({
                   showSplitOption={false}
                   onClose={close}
                   {...defaultAutocompleteProps}
-                  {...autocompleteProps}
+                  onSelect={onSelect}
+                  categoryGroups={categoryGroups}
+                  showHiddenCategories={showHiddenCategories}
+                  value={null}
                 />
               </NamespaceContext.Provider>
             </View>

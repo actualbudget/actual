@@ -1,14 +1,14 @@
-import React, {
-  type ComponentPropsWithoutRef,
-  type CSSProperties,
-} from 'react';
+import React, { type CSSProperties } from 'react';
+
+import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
 
 import { theme, styles } from '../../style';
 import { ToBudgetMenu } from '../budget/envelope/budgetsummary/ToBudgetMenu';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 
-type EnvelopeToBudgetMenuModalProps = ComponentPropsWithoutRef<
-  typeof ToBudgetMenu
+type EnvelopeToBudgetMenuModalProps = Omit<
+  Extract<ModalType, { name: 'envelope-summary-to-budget-menu' }>['options'],
+  'month'
 >;
 
 export function EnvelopeToBudgetMenuModal({

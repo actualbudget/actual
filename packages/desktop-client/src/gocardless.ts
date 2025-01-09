@@ -52,7 +52,7 @@ export async function authorizeBank(
         pushModal({
           name: 'select-linked-accounts',
           options: {
-            accounts: data.accounts,
+            externalAccounts: data.accounts,
             requisitionId: data.id,
             upgradingAccountId,
             syncSource: 'goCardless',

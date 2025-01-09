@@ -58,7 +58,7 @@ export function Sidebar() {
   };
 
   const onAddAccount = () => {
-    dispatch(replaceModal({ name: 'add-account' }));
+    dispatch(replaceModal({ name: 'add-account', options: {} }));
   };
 
   const containerRef = useResizeObserver<HTMLDivElement>(rect => {

@@ -1,5 +1,7 @@
-import React, { type ComponentPropsWithoutRef } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
+
+import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
 
 import { useAccounts } from '../../hooks/useAccounts';
 import { useNavigate } from '../../hooks/useNavigate';
@@ -14,13 +16,13 @@ import {
 } from '../common/Modal';
 import { useResponsive } from '../responsive/ResponsiveProvider';
 
-type PayeeAutocompleteModalProps = {
-  autocompleteProps: ComponentPropsWithoutRef<typeof PayeeAutocomplete>;
-  onClose: () => void;
-};
+type PayeeAutocompleteModalProps = Extract<
+  ModalType,
+  { name: 'payee-autocomplete' }
+>['options'];
 
 export function PayeeAutocompleteModal({
-  autocompleteProps,
+  onSelect,
   onClose,
 }: PayeeAutocompleteModalProps) {
   const { t } = useTranslation();
@@ -76,7 +78,8 @@ export function PayeeAutocompleteModal({
             showManagePayees={!isNarrowWidth}
             showMakeTransfer={!isNarrowWidth}
             {...defaultAutocompleteProps}
-            {...autocompleteProps}
+            onSelect={onSelect}
+            value={null}
           />
         </>
       )}

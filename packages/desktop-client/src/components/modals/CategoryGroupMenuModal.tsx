@@ -7,7 +7,7 @@ import React, {
 } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { type CategoryGroupEntity } from 'loot-core/src/types/models';
+import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
 
 import { useCategories } from '../../hooks/useCategories';
 import { useNotes } from '../../hooks/useNotes';
@@ -26,15 +26,10 @@ import { Popover } from '../common/Popover';
 import { View } from '../common/View';
 import { Notes } from '../Notes';
 
-type CategoryGroupMenuModalProps = {
-  groupId: string;
-  onSave: (group: CategoryGroupEntity) => void;
-  onAddCategory: (groupId: string, isIncome: boolean) => void;
-  onEditNotes: (id: string) => void;
-  onDelete: (groupId: string) => void;
-  onToggleVisibility: (groupId: string) => void;
-  onClose?: () => void;
-};
+type CategoryGroupMenuModalProps = Extract<
+  ModalType,
+  { name: 'category-group-menu' }
+>['options'];
 
 export function CategoryGroupMenuModal({
   groupId,

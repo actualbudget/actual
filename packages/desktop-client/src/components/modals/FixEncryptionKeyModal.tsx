@@ -23,15 +23,16 @@ import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { useResponsive } from '../responsive/ResponsiveProvider';
 
-type FixEncryptionKeyModalProps = {
-  options: Extract<ModalType, { name: 'fix-encryption-key' }>['options'];
-};
+type FixEncryptionKeyModalProps = Extract<
+  ModalType,
+  { name: 'fix-encryption-key' }
+>['options'];
 
 export function FixEncryptionKeyModal({
-  options = {},
+  cloudFileId,
+  hasExistingKey,
+  onSuccess,
 }: FixEncryptionKeyModalProps) {
-  const { hasExistingKey, cloudFileId, onSuccess } = options;
-
   const { t } = useTranslation();
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');

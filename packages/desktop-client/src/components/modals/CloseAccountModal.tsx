@@ -3,7 +3,10 @@ import React, { type FormEvent, useState, type CSSProperties } from 'react';
 import { Form } from 'react-aria-components';
 import { useTranslation, Trans } from 'react-i18next';
 
-import { pushModal } from 'loot-core/client/modals/modalsSlice';
+import {
+  type Modal as ModalType,
+  pushModal,
+} from 'loot-core/client/modals/modalsSlice';
 import { closeAccount } from 'loot-core/client/queries/queriesSlice';
 import { integerToCurrency } from 'loot-core/src/shared/util';
 import { type AccountEntity } from 'loot-core/src/types/models';
@@ -37,11 +40,10 @@ function needsCategory(
   return account.offbudget === 0 && isOffBudget;
 }
 
-type CloseAccountModalProps = {
-  account: AccountEntity;
-  balance: number;
-  canDelete: boolean;
-};
+type CloseAccountModalProps = Extract<
+  ModalType,
+  { name: 'close-account' }
+>['options'];
 
 export function CloseAccountModal({
   account,

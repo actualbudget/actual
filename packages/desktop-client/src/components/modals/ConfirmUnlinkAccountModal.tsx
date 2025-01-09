@@ -1,21 +1,23 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
+
 import { Button } from '../common/Button2';
 import { InitialFocus } from '../common/InitialFocus';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { Paragraph } from '../common/Paragraph';
 import { View } from '../common/View';
 
-type ConfirmUnlinkAccountProps = {
-  accountName: string;
-  onUnlink: () => void;
-};
+type ConfirmUnlinkAccountModalProps = Extract<
+  ModalType,
+  { name: 'confirm-unlink-account' }
+>['options'];
 
 export function ConfirmUnlinkAccountModal({
   accountName,
   onUnlink,
-}: ConfirmUnlinkAccountProps) {
+}: ConfirmUnlinkAccountModalProps) {
   const { t } = useTranslation();
 
   return (

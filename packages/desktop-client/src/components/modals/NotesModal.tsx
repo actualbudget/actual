@@ -2,6 +2,8 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
+
 import { useNotes } from '../../hooks/useNotes';
 import { SvgCheck } from '../../icons/v2';
 import { Button } from '../common/Button2';
@@ -9,11 +11,7 @@ import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { View } from '../common/View';
 import { Notes } from '../Notes';
 
-type NotesModalProps = {
-  id: string;
-  name: string;
-  onSave: (id: string, notes: string) => void;
-};
+type NotesModalProps = Extract<ModalType, { name: 'notes' }>['options'];
 
 export function NotesModal({ id, name, onSave }: NotesModalProps) {
   const { t } = useTranslation();
