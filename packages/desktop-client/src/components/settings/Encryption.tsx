@@ -1,7 +1,7 @@
 import React from 'react';
 import { Trans } from 'react-i18next';
 
-import { pushModal } from 'loot-core/client/actions';
+import { pushModal } from 'loot-core/client/modals/modalsSlice';
 
 import { useMetadataPref } from '../../hooks/useMetadataPref';
 import { useDispatch } from '../../redux';
@@ -21,7 +21,9 @@ export function EncryptionSettings() {
   const missingCryptoAPI = !(window.crypto && crypto.subtle);
 
   function onChangeKey() {
-    dispatch(pushModal('create-encryption-key', { recreate: true }));
+    dispatch(
+      pushModal({ name: 'create-encryption-key', options: { recreate: true } }),
+    );
   }
 
   return encryptKeyId ? (
@@ -77,7 +79,11 @@ export function EncryptionSettings() {
   ) : serverURL ? (
     <Setting
       primaryAction={
-        <Button onPress={() => dispatch(pushModal('create-encryption-key'))}>
+        <Button
+          onPress={() =>
+            dispatch(pushModal({ name: 'create-encryption-key', options: {} }))
+          }
+        >
           <Trans>Enable encryption</Trans>
         </Button>
       }

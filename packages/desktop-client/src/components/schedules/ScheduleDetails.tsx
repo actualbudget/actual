@@ -4,8 +4,8 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { t } from 'i18next';
 
+import { pushModal } from 'loot-core/client/modals/modalsSlice';
 import { getPayeesById } from 'loot-core/client/queries/queriesSlice';
-import { pushModal } from 'loot-core/src/client/actions/modals';
 import { runQuery, liveQuery } from 'loot-core/src/client/query-helpers';
 import { send, sendCatch } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
@@ -530,11 +530,14 @@ export function ScheduleDetails({ id, transaction }: ScheduleDetailsProps) {
     const rule = await send('rule-get', { id });
 
     globalDispatch(
-      pushModal('edit-rule', {
-        rule,
-        onSave: async () => {
-          const schedule = await loadSchedule();
-          dispatch({ type: 'set-schedule', schedule });
+      pushModal({
+        name: 'edit-rule',
+        options: {
+          rule,
+          onSave: async () => {
+            const schedule = await loadSchedule();
+            dispatch({ type: 'set-schedule', schedule });
+          },
         },
       }),
     );

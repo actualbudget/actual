@@ -2,7 +2,7 @@
 import React, { useMemo, useRef, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
-import { pushModal } from 'loot-core/client/actions';
+import { pushModal } from 'loot-core/client/modals/modalsSlice';
 import { useSchedules } from 'loot-core/src/client/data-hooks/schedules';
 import { send } from 'loot-core/src/platform/client/fetch';
 import { q } from 'loot-core/src/shared/query';
@@ -60,9 +60,12 @@ export function ScheduleLink({
 
   async function onCreate() {
     dispatch(
-      pushModal('schedule-edit', {
-        id: null,
-        transaction: getTransaction(ids[0]),
+      pushModal({
+        name: 'schedule-edit',
+        options: {
+          id: null,
+          transaction: getTransaction(ids[0]),
+        },
       }),
     );
   }

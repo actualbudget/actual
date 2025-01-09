@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
-import { addNotification, popModal, signOut } from 'loot-core/client/actions';
+import { addNotification, signOut } from 'loot-core/client/actions';
+import { popModal } from 'loot-core/client/modals/modalsSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import { getUserAccessErrors } from 'loot-core/shared/errors';
 import { type Handlers } from 'loot-core/types/handlers';

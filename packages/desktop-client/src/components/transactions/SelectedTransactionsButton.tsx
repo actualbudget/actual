@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { useTranslation } from 'react-i18next';
 
-import { pushModal } from 'loot-core/client/actions';
+import { pushModal } from 'loot-core/client/modals/modalsSlice';
 import { isPreviewId } from 'loot-core/shared/transactions';
 import { validForTransfer } from 'loot-core/src/client/transfer';
 import { type TransactionEntity } from 'loot-core/types/models';
@@ -157,7 +157,9 @@ export function SelectedTransactionsButton({
     }
 
     if (scheduleId) {
-      dispatch(pushModal('schedule-edit', { id: scheduleId }));
+      dispatch(
+        pushModal({ name: 'schedule-edit', options: { id: scheduleId } }),
+      );
     }
   }
 

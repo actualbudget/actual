@@ -3,7 +3,8 @@ import { useTranslation } from 'react-i18next';
 
 import { css } from '@emotion/css';
 
-import { replaceModal, syncAndDownload } from 'loot-core/src/client/actions';
+import { replaceModal } from 'loot-core/client/modals/modalsSlice';
+import { syncAndDownload } from 'loot-core/src/client/actions';
 import * as queries from 'loot-core/src/client/queries';
 import { type AccountEntity } from 'loot-core/types/models';
 
@@ -321,7 +322,7 @@ export function Accounts() {
   );
 
   const onAddAccount = useCallback(() => {
-    dispatch(replaceModal('add-account'));
+    dispatch(replaceModal({ name: 'add-account' }));
   }, [dispatch]);
 
   const onSync = useCallback(async () => {
