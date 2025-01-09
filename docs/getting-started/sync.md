@@ -90,3 +90,7 @@ Unfortunately, Actual detected an inconsistency in your synced data. This only h
 ### Update Required
 
 While syncing, your device received data that it couldn't apply because your version of Actual is out-of-date. You need to update Actual and it will then sync successfully.
+
+## Multi-user Support
+
+The same budget file may be opened and edited simultaneously from two separate browsers, even by two different people on different client computers. This should work unless the edits conflict. To be safe, avoid simultaneous usage of the same budget file.

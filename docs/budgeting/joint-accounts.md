@@ -11,6 +11,7 @@ One approach is maintaining a common budget where both partners share a single b
 This method promotes transparency and ensures both parties agree regarding financial goals, expenses, and income.
 A shared budget fosters collaboration but requires consistent communication to keep everything current. It will help
 you both set clear boundaries for individual and shared expenses while working together toward common financial objectives.
+See [Multi-user](/docs/getting-started/sync#multi-user-support) regarding simultaneous edits.
 
 Alternatively, you can track your partner’s contributions within your personal Actual Budget file. This allows you to
 maintain individual control over your finances while still acknowledging and accounting for your partner’s financial
