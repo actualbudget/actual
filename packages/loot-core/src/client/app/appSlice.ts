@@ -1,6 +1,6 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
-import { createAppAsyncThunk } from '../store';
+import { createAppAsyncThunk } from '../redux';
 
 const sliceName = 'app';
 
