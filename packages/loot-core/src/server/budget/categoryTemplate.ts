@@ -143,13 +143,13 @@ export class CategoryTemplate {
           );
           // Schedules assume that its to budget value is the whole thing so this
           // needs to remove the previous funds so they aren't double counted
-          newBudget = ret.to_budget-toBudget;
+          newBudget = ret.to_budget - toBudget;
           remainder = ret.remainder;
           scheduleFlag = ret.scheduleFlag;
           break;
         }
         case 'average': {
-          newBudget += await this.runAverage(t[i]);
+          newBudget = await this.runAverage(t[i]);
           break;
         }
       }
