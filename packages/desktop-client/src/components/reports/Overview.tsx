@@ -2,7 +2,6 @@ import React, { useMemo, useRef, useState } from 'react';
 import { Responsive, WidthProvider, type Layout } from 'react-grid-layout';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { Trans, useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 
 import {
@@ -22,6 +21,7 @@ import {
 import { useAccounts } from '../../hooks/useAccounts';
 import { useNavigate } from '../../hooks/useNavigate';
 import { useSyncedPref } from '../../hooks/useSyncedPref';
+import { useDispatch } from '../../redux';
 import { breakpoints } from '../../tokens';
 import { Button } from '../common/Button2';
 import { Menu } from '../common/Menu';
@@ -359,9 +359,7 @@ export function Overview() {
 
                         if (item === 'markdown-card') {
                           onAddWidget<MarkdownWidget>(item, {
-                            content: t(
-                              '### Text Widget\n\nEdit this widget to change the **markdown** content.',
-                            ),
+                            content: `### ${t('Text Widget')}\n\n${t('Edit this widget to change the **markdown** content.')}`,
                           });
                           return;
                         }

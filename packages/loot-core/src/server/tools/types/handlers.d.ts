@@ -1,4 +1,4 @@
-import { TransactionEntity } from './models';
+import { TransactionEntity } from '../../../types/models';
 
 export interface ToolsHandlers {
   'tools/fix-split-transactions': () => Promise<{

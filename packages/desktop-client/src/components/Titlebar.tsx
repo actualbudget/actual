@@ -1,7 +1,6 @@
 import React, { useState, useEffect, type CSSProperties } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
 import { Routes, Route, useLocation } from 'react-router-dom';
 
 import { css } from '@emotion/css';
@@ -26,6 +25,7 @@ import {
   SvgViewHide,
   SvgViewShow,
 } from '../icons/v2';
+import { useDispatch } from '../redux';
 import { theme, styles } from '../style';
 
 import { AccountSyncCheck } from './accounts/AccountSyncCheck';

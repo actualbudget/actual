@@ -1,7 +1,6 @@
 import { useMemo } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
 
 import { pushModal } from 'loot-core/client/actions';
 import { isPreviewId } from 'loot-core/shared/transactions';
@@ -9,6 +8,7 @@ import { validForTransfer } from 'loot-core/src/client/transfer';
 import { type TransactionEntity } from 'loot-core/types/models';
 
 import { useSelectedItems } from '../../hooks/useSelected';
+import { useDispatch } from '../../redux';
 import { Menu } from '../common/Menu';
 import { SelectedItemsButton } from '../table';
 
