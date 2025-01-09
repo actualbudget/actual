@@ -4,7 +4,8 @@ import { send } from '../../platform/client/fetch';
 import { type AccountEntity, type TransactionEntity } from '../../types/models';
 import { addNotification, getAccounts, getPayees } from '../actions';
 import * as constants from '../constants';
-import { createAppAsyncThunk, type AppDispatch } from '../store';
+import { createAppAsyncThunk } from '../redux';
+import { type AppDispatch } from '../store';
 
 const sliceName = 'accounts';
 
