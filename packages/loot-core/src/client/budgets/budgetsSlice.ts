@@ -10,7 +10,7 @@ import { type Handlers } from '../../types/handlers';
 import { closeModal, loadGlobalPrefs, loadPrefs, pushModal } from '../actions';
 import { setAppState } from '../app/appSlice';
 import * as constants from '../constants';
-import { createAppAsyncThunk } from '../store';
+import { createAppAsyncThunk } from '../redux';
 
 const sliceName = 'budgets';
 
