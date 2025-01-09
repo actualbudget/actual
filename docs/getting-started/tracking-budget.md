@@ -11,8 +11,7 @@ We, the Actual team, suggest that you try to use the **Envelope Budget** if you 
 
 ## Enabling the Tracking Budget
 
-The **Tracking Budget** feature can be switched on from the Experimental features section within the Settings page by enabling "Budget mode toggle".
-Then scroll up in the settings menu and click "Switch to tracking budgeting".
+The **Tracking Budget** feature can be enabled from the Settings page by clicking on "Switch to tracking budgeting".
 
 ![](/img/tracking-budget-7.png)
 
