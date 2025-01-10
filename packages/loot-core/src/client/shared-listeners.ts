@@ -3,7 +3,7 @@ import { t } from 'i18next';
 
 import { listen, send } from '../platform/client/fetch';
 
-import { loadPrefs, signOut } from './actions';
+import { signOut } from './actions';
 import { resetSync, sync } from './app/appSlice';
 import { closeAndDownloadBudget, uploadBudget } from './budgets/budgetsSlice';
 import { pushModal } from './modals/modalsSlice';
@@ -11,6 +11,7 @@ import {
   addNotification,
   type Notification,
 } from './notifications/notificationsSlice';
+import { loadPrefs } from './prefs/prefsSlice';
 import { getAccounts, getCategories, getPayees } from './queries/queriesSlice';
 import { type AppStore } from './store';
 

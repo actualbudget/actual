@@ -7,10 +7,10 @@ import { getDownloadError, getSyncError } from '../../shared/errors';
 import { type Budget } from '../../types/budget';
 import { type File } from '../../types/file';
 import { type Handlers } from '../../types/handlers';
-import { loadGlobalPrefs, loadPrefs } from '../actions';
 import { setAppState } from '../app/appSlice';
 import * as constants from '../constants';
 import { closeModal, pushModal } from '../modals/modalsSlice';
+import { loadGlobalPrefs, loadPrefs } from '../prefs/prefsSlice';
 import { createAppAsyncThunk } from '../redux';
 
 const sliceName = 'budgets';
