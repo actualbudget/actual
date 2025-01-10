@@ -11,8 +11,8 @@ import {
 
 import { View } from '@actual-app/components/view';
 
-import { addNotification } from 'loot-core/client/actions';
 import { sync } from 'loot-core/client/app/appSlice';
+import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
 import * as undo from 'loot-core/platform/client/undo';
 
 import { ProtectedRoute } from '../auth/ProtectedRoute';

@@ -25,9 +25,9 @@ import {
   isValid as isDateValid,
 } from 'date-fns';
 
-import { addNotification } from 'loot-core/client/actions';
 import { useCachedSchedules } from 'loot-core/client/data-hooks/schedules';
 import { pushModal } from 'loot-core/client/modals/modalsSlice';
+import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
 import {
   getAccountsById,
   getPayeesById,

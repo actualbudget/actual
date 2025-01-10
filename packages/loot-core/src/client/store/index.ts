@@ -28,12 +28,16 @@ import {
   getInitialState as getInitialModalsState,
 } from '../modals/modalsSlice';
 import {
+  name as notificationsSliceName,
+  reducer as notificationsSliceReducer,
+  getInitialState as getInitialNotificationsState,
+} from '../notifications/notificationsSlice';
+import {
   name as queriesSliceName,
   reducer as queriesSliceReducer,
   getInitialState as getInitialQueriesState,
 } from '../queries/queriesSlice';
 import { reducers } from '../reducers';
-import { initialState as initialNotificationsState } from '../reducers/notifications';
 import { initialState as initialPrefsState } from '../reducers/prefs';
 import { initialState as initialUserState } from '../reducers/user';
 
@@ -43,6 +47,7 @@ const appReducer = combineReducers({
   [appSliceName]: appSliceReducer,
   [budgetsSliceName]: budgetsSliceReducer,
   [modalsSliceName]: modalsSliceReducer,
+  [notificationsSliceName]: notificationsSliceReducer,
   [queriesSliceName]: queriesSliceReducer,
 });
 const rootReducer: typeof appReducer = (state, action) => {
@@ -52,7 +57,7 @@ const rootReducer: typeof appReducer = (state, action) => {
     state = {
       account: getInitialAccountsState(),
       modals: getInitialModalsState(),
-      notifications: initialNotificationsState,
+      notifications: getInitialNotificationsState(),
       queries: getInitialQueriesState(),
       budgets: state?.budgets || getInitialBudgetsState(),
       user: state?.user || initialUserState,

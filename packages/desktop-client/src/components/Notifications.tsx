@@ -15,8 +15,10 @@ import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
-import { removeNotification } from 'loot-core/client/actions';
-import type { NotificationWithId } from 'loot-core/client/state-types/notifications';
+import {
+  removeNotification,
+  type NotificationWithId,
+} from 'loot-core/client/notifications/notificationsSlice';
 
 import { AnimatedLoading } from '../icons/AnimatedLoading';
 import { SvgDelete } from '../icons/v0';
