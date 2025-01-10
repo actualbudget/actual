@@ -20,6 +20,13 @@ import {
   updateTransaction,
 } from 'loot-core/src/shared/transactions';
 import { integerToCurrency } from 'loot-core/src/shared/util';
+import {
+  type AccountEntity,
+  type CategoryEntity,
+  type CategoryGroupEntity,
+  type PayeeEntity,
+  type TransactionEntity,
+} from 'loot-core/types/models';
 
 import { AuthProvider } from '../../auth/AuthProvider';
 import { SelectedProviderWithItems } from '../../hooks/useSelected';
@@ -41,26 +48,20 @@ vi.mock('../../hooks/useFeatureFlag', () => ({
 }));
 
 const accounts = [generateAccount('Bank of America')];
-const payees = [
+const payees: PayeeEntity[] = [
   {
     id: 'bob-id',
     name: 'Bob',
     favorite: 1,
-    transfer_acct: null,
-    category: null,
   },
   {
     id: 'alice-id',
     name: 'Alice',
     favorite: 1,
-    transfer_acct: null,
-    category: null,
   },
   {
     id: 'guy',
     favorite: 0,
-    transfer_acct: null,
-    category: null,
     name: 'This guy on the side of the road',
   },
 ];
@@ -80,8 +81,12 @@ const categoryGroups = generateCategoryGroups([
 ]);
 const usualGroup = categoryGroups[1];
 
-function generateTransactions(count, splitAtIndexes = [], showError = false) {
-  const transactions = [];
+function generateTransactions(
+  count: number,
+  splitAtIndexes: number[] = [],
+  showError: boolean = false,
+) {
+  const transactions: TransactionEntity[] = [];
 
   for (let i = 0; i < count; i++) {
     const isSplit = splitAtIndexes.includes(i);
@@ -94,10 +99,10 @@ function generateTransactions(count, splitAtIndexes = [], showError = false) {
           payee: 'alice-id',
           category:
             i === 0
-              ? null
+              ? undefined
               : i === 1
-                ? usualGroup.categories[1].id
-                : usualGroup.categories[0].id,
+                ? usualGroup.categories?.[1].id
+                : usualGroup.categories?.[0].id,
           amount: isSplit ? 50 : undefined,
           sort_order: i,
         },
@@ -110,31 +115,46 @@ function generateTransactions(count, splitAtIndexes = [], showError = false) {
   return transactions;
 }
 
-function LiveTransactionTable(props) {
+type LiveTransactionTableProps = {
+  transactions: TransactionEntity[];
+  payees: PayeeEntity[];
+  accounts: AccountEntity[];
+  categoryGroups: CategoryGroupEntity[];
+  currentAccountId: string | null;
+  showAccount: boolean;
+  showCategory: boolean;
+  showCleared: boolean;
+  isAdding: boolean;
+  onTransactionsChange?: (newTrans: TransactionEntity[]) => void;
+  onCloseAddTransaction?: () => void;
+};
+
+function LiveTransactionTable(props: LiveTransactionTableProps) {
   const [transactions, setTransactions] = useState(props.transactions);
 
   useEffect(() => {
     if (transactions === props.transactions) return;
     props.onTransactionsChange?.(transactions);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [transactions]);
 
-  const onSplit = id => {
+  const onSplit = (id: string) => {
     const { data, diff } = splitTransaction(transactions, id);
     setTransactions(data);
     return diff.added[0].id;
   };
 
-  const onSave = transaction => {
+  const onSave = (transaction: TransactionEntity) => {
     const { data } = updateTransaction(transactions, transaction);
     setTransactions(data);
   };
 
-  const onAdd = newTransactions => {
+  const onAdd = (newTransactions: TransactionEntity[]) => {
     newTransactions = realizeTempTransactions(newTransactions);
     setTransactions(trans => [...newTransactions, ...trans]);
   };
 
-  const onAddSplit = id => {
+  const onAddSplit = (id: string) => {
     const { data, diff } = addSplitTransaction(transactions, id);
     setTransactions(data);
     return diff.added[0].id;
@@ -155,16 +175,17 @@ function LiveTransactionTable(props) {
               <SelectedProviderWithItems
                 name="transactions"
                 items={transactions}
-                fetchAllIds={() => transactions.map(t => t.id)}
+                fetchAllIds={() => Promise.resolve(transactions.map(t => t.id))}
               >
                 <SplitsExpandedProvider>
                   <TransactionTable
                     {...props}
+                    // @ts-expect-error this will be auto-patched once TransactionTable is moved to TS
                     transactions={transactions}
                     loadMoreTransactions={() => {}}
                     commonPayees={[]}
                     payees={payees}
-                    addNotification={n => console.log(n)}
+                    addNotification={console.log}
                     onSave={onSave}
                     onSplit={onSplit}
                     onAdd={onAdd}
@@ -215,22 +236,22 @@ function waitForAutocomplete() {
   return new Promise(resolve => setTimeout(resolve, 0));
 }
 
-const categories = categoryGroups.reduce(
-  (all, group) => all.concat(group.categories),
+const categories = categoryGroups.reduce<CategoryEntity[]>(
+  (all, group) => (group.categories ? [...all, ...group.categories] : all),
   [],
 );
 
-function prettyDate(date) {
+function prettyDate(date: string) {
   return formatDate(parseDate(date, 'yyyy-MM-dd', new Date()), 'MM/dd/yyyy');
 }
 
-function renderTransactions(extraProps) {
+function renderTransactions(extraProps?: Partial<LiveTransactionTableProps>) {
   let transactions = generateTransactions(5, [6]);
   // Hardcoding the first value makes it easier for tests to do
   // various this
   transactions[0].amount = -2777;
 
-  const defaultProps = {
+  const defaultProps: LiveTransactionTableProps = {
     transactions,
     payees,
     accounts,
@@ -251,7 +272,7 @@ function renderTransactions(extraProps) {
   return {
     ...result,
     getTransactions: () => transactions,
-    updateProps: props =>
+    updateProps: (props: Partial<LiveTransactionTableProps>) =>
       render(
         <LiveTransactionTable {...defaultProps} {...extraProps} {...props} />,
         { container: result.container },
@@ -259,27 +280,37 @@ function renderTransactions(extraProps) {
   };
 }
 
-function queryNewField(container, name, subSelector = '', idx = 0) {
+function queryNewField(
+  container: HTMLElement,
+  name: string,
+  subSelector: string = '',
+  idx: number = 0,
+): HTMLInputElement {
   const field = container.querySelectorAll(
     `[data-testid="new-transaction"] [data-testid="${name}"]`,
   )[idx];
   if (subSelector !== '') {
-    return field.querySelector(subSelector);
+    return field.querySelector(subSelector)!;
   }
-  return field;
+  return field as HTMLInputElement;
 }
 
-function queryField(container, name, subSelector = '', idx) {
+function queryField(
+  container: HTMLElement,
+  name: string,
+  subSelector: string = '',
+  idx: number,
+) {
   const field = container.querySelectorAll(
     `[data-testid="transaction-table"] [data-testid="${name}"]`,
   )[idx];
   if (subSelector !== '') {
-    return field.querySelector(subSelector);
+    return field.querySelector(subSelector)!;
   }
   return field;
 }
 
-async function _editField(field, container) {
+async function _editField(field: Element, container: HTMLElement) {
   // We only short-circuit this for inputs
   const input = field.querySelector(`input`);
   if (input) {
@@ -287,17 +318,17 @@ async function _editField(field, container) {
     return input;
   }
 
-  let element;
+  let element: HTMLInputElement;
   const buttonQuery = 'button,div[data-testid=cell-button]';
 
   if (field.querySelector(buttonQuery)) {
-    const btn = field.querySelector(buttonQuery);
+    const btn = field.querySelector(buttonQuery)!;
     await userEvent.click(btn);
-    element = field.querySelector(':focus');
+    element = field.querySelector(':focus')!;
     expect(element).toBeTruthy();
   } else {
-    await userEvent.click(field.querySelector('div'));
-    element = field.querySelector('input');
+    await userEvent.click(field.querySelector('div')!);
+    element = field.querySelector('input')!;
     expect(element).toBeTruthy();
     expect(container.ownerDocument.activeElement).toBe(element);
   }
@@ -305,20 +336,23 @@ async function _editField(field, container) {
   return element;
 }
 
-function editNewField(container, name, rowIndex) {
+function editNewField(container: HTMLElement, name: string, rowIndex?: number) {
   const field = queryNewField(container, name, '', rowIndex);
   return _editField(field, container);
 }
 
-function editField(container, name, rowIndex) {
+function editField(container: HTMLElement, name: string, rowIndex: number) {
   const field = queryField(container, name, '', rowIndex);
   return _editField(field, container);
 }
 
 expect.extend({
-  payeesToHaveFavoriteStars(container, validPayeeListWithFavorite) {
-    const incorrectStarList = [];
-    const foundStarList = [];
+  payeesToHaveFavoriteStars(
+    container: Element[],
+    validPayeeListWithFavorite: string[],
+  ) {
+    const incorrectStarList: string[] = [];
+    const foundStarList: string[] = [];
     validPayeeListWithFavorite.forEach(payeeItem => {
       const shouldHaveFavorite = payeeItem != null;
       let found = false;
@@ -350,14 +384,19 @@ expect.extend({
   },
 });
 
-function expectToBeEditingField(container, name, rowIndex, isNew) {
-  let field;
+function expectToBeEditingField(
+  container: HTMLElement,
+  name: string,
+  rowIndex: number,
+  isNew?: boolean,
+) {
+  let field: Element;
   if (isNew) {
     field = queryNewField(container, name, '', rowIndex);
   } else {
     field = queryField(container, name, '', rowIndex);
   }
-  const input = field.querySelector(':focus');
+  const input: HTMLInputElement = field.querySelector(':focus')!;
   expect(input).toBeTruthy();
   expect(container.ownerDocument.activeElement).toBe(input);
   return input;
@@ -372,10 +411,10 @@ describe('Transactions', () => {
         prettyDate(transaction.date),
       );
       expect(queryField(container, 'account', 'div', idx).textContent).toBe(
-        accounts.find(acct => acct.id === transaction.account).name,
+        accounts.find(acct => acct.id === transaction.account)?.name,
       );
       expect(queryField(container, 'payee', 'div', idx).textContent).toBe(
-        payees.find(p => p.id === transaction.payee).name,
+        payees.find(p => p.id === transaction.payee)?.name,
       );
       expect(queryField(container, 'notes', 'div', idx).textContent).toBe(
         transaction.notes,
@@ -383,7 +422,7 @@ describe('Transactions', () => {
       expect(queryField(container, 'category', 'div', idx).textContent).toBe(
         transaction.category
           ? categories.find(category => category.id === transaction.category)
-              .name
+              ?.name
           : 'Categorize',
       );
       if (transaction.amount <= 0) {
@@ -531,6 +570,7 @@ describe('Transactions', () => {
     expect(items.length).toBe(2);
     expect(items[0].textContent).toBe('Usual Expenses');
     expect(items[1].textContent).toBe('General 129.87');
+    // @ts-expect-error fix me
     expect(items[1].dataset['highlighted']).toBeDefined();
 
     // It should not allow filtering on group names
@@ -561,10 +601,10 @@ describe('Transactions', () => {
       .getByTestId('autocomplete')
       .querySelector('[data-highlighted]');
     expect(highlighted).not.toBeNull();
-    expect(highlighted.textContent).toBe('General 129.87');
+    expect(highlighted!.textContent).toBe('General 129.87');
 
     expect(getTransactions()[2].category).toBe(
-      categories.find(category => category.name === 'Food').id,
+      categories.find(category => category.name === 'Food')?.id,
     );
 
     await userEvent.type(input, '[Enter]');
@@ -572,7 +612,7 @@ describe('Transactions', () => {
 
     // The transactions data should be updated with the right category
     expect(getTransactions()[2].category).toBe(
-      categories.find(category => category.name === 'General').id,
+      categories.find(category => category.name === 'General')?.id,
     );
 
     // The category field should still be editing
@@ -607,16 +647,16 @@ describe('Transactions', () => {
       .getByTestId('autocomplete')
       .querySelector('[data-highlighted]');
     expect(highlighted).not.toBeNull();
-    expect(highlighted.textContent).toBe('General 129.87');
+    expect(highlighted!.textContent).toBe('General 129.87');
 
     // Click the item and check the before/after values
     expect(getTransactions()[2].category).toBe(
-      categories.find(c => c.name === 'Food').id,
+      categories.find(c => c.name === 'Food')?.id,
     );
     await userEvent.click(items[2]);
     await waitForAutocomplete();
     expect(getTransactions()[2].category).toBe(
-      categories.find(c => c.name === 'General').id,
+      categories.find(c => c.name === 'General')?.id,
     );
 
     // It should still be editing the category
@@ -651,8 +691,9 @@ describe('Transactions', () => {
     // field was different than the transactions' category
     const currentCategory = getTransactions()[2].category;
     expect(currentCategory).toBe(oldCategory);
+    // @ts-expect-error fix me
     expect(highlighted.textContent).not.toBe(
-      categories.find(c => c.id === currentCategory).name,
+      categories.find(c => c.id === currentCategory)?.name,
     );
   });
 
@@ -678,6 +719,7 @@ describe('Transactions', () => {
       'Bob-payee-item',
       'This guy on the side of the road-payee-item',
     ]);
+    // @ts-expect-error fix me
     expect(renderedPayees).payeesToHaveFavoriteStars([
       'Alice-payee-item',
       'Bob-payee-item',
@@ -807,7 +849,7 @@ describe('Transactions', () => {
     await waitForAutocomplete();
 
     await userEvent.click(
-      container.querySelector('[data-testid="add-split-button"]'),
+      container.querySelector('[data-testid="add-split-button"]')!,
     );
 
     input = await editNewField(container, 'debit', 1);
@@ -825,7 +867,7 @@ describe('Transactions', () => {
       null,
     );
 
-    const addButton = container.querySelector('[data-testid="add-button"]');
+    const addButton = container.querySelector('[data-testid="add-button"]')!;
 
     expect(getTransactions().length).toBe(5);
     await userEvent.click(addButton);
@@ -903,13 +945,13 @@ describe('Transactions', () => {
     transactions[0] = { ...transactions[0], id: uuidv4() };
     updateProps({ transactions });
 
-    function expectErrorToNotExist(transactions) {
+    function expectErrorToNotExist(transactions: TransactionEntity[]) {
       transactions.forEach(transaction => {
         expect(transaction.error).toBeFalsy();
       });
     }
 
-    function expectErrorToExist(transactions) {
+    function expectErrorToExist(transactions: TransactionEntity[]) {
       transactions.forEach((transaction, idx) => {
         if (idx === 0) {
           expect(transaction.error).toBeTruthy();
@@ -951,7 +993,7 @@ describe('Transactions', () => {
     // Add another split transaction and make sure everything is
     // updated properly
     await userEvent.click(
-      toolbar.querySelector('[data-testid="add-split-button"]'),
+      toolbar.querySelector('[data-testid="add-split-button"]')!,
     );
     expect(getTransactions().length).toBe(7);
     expect(getTransactions()[2].amount).toBe(0);
@@ -973,10 +1015,10 @@ describe('Transactions', () => {
       {
         account: accounts[0].id,
         amount: -2777,
-        category: null,
+        category: undefined,
         cleared: false,
         date: '2017-01-01',
-        error: null,
+        error: undefined,
         id: expect.any(String),
         is_parent: true,
         notes: 'Notes',
@@ -986,7 +1028,7 @@ describe('Transactions', () => {
       {
         account: accounts[0].id,
         amount: -1000,
-        category: null,
+        category: undefined,
         cleared: false,
         date: '2017-01-01',
         error: null,
@@ -994,13 +1036,14 @@ describe('Transactions', () => {
         is_child: true,
         parent_id: parentId,
         payee: 'alice-id',
+        reconciled: undefined,
         sort_order: -1,
         starting_balance_flag: null,
       },
       {
         account: accounts[0].id,
         amount: -1777,
-        category: null,
+        category: undefined,
         cleared: false,
         date: '2017-01-01',
         error: null,
@@ -1008,6 +1051,7 @@ describe('Transactions', () => {
         is_child: true,
         parent_id: parentId,
         payee: 'alice-id',
+        reconciled: undefined,
         sort_order: -2,
         starting_balance_flag: null,
       },

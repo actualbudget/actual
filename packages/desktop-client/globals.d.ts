@@ -8,3 +8,7 @@ declare module 'react' {
   // eslint-disable-next-line @typescript-eslint/consistent-type-definitions, @typescript-eslint/no-empty-object-type
   interface CSSProperties extends CSSObject {}
 }
+
+declare global {
+  function __resetWorld(): void;
+}

@@ -547,7 +547,6 @@ describe('Rule', () => {
       expect(
         fixedAmountRule.exec({ imported_payee: 'James', amount: 200 }),
       ).toMatchObject({
-        error: null,
         subtransactions: [{ amount: 100 }, { amount: 100 }],
       });
     });
@@ -574,7 +573,6 @@ describe('Rule', () => {
 
       expect(rule.exec({ imported_payee: 'James', amount: 200 })).toMatchObject(
         {
-          error: null,
           subtransactions: [{ amount: 100 }, { amount: 100 }],
         },
       );
@@ -600,7 +598,6 @@ describe('Rule', () => {
 
       expect(rule.exec({ imported_payee: 'James', amount: 200 })).toMatchObject(
         {
-          error: null,
           subtransactions: [{ amount: 100 }, { amount: 100 }],
         },
       );
@@ -635,7 +632,6 @@ describe('Rule', () => {
       expect(
         prioritizationRule.exec({ imported_payee: 'James', amount: 200 }),
       ).toMatchObject({
-        error: null,
         subtransactions: [{ amount: 100 }, { amount: 50 }, { amount: 50 }],
       });
     });
@@ -645,7 +641,6 @@ describe('Rule', () => {
       expect(
         prioritizationRule.exec({ imported_payee: 'James', amount: 50 }),
       ).toMatchObject({
-        error: null,
         subtransactions: [{ amount: 100 }, { amount: -25 }, { amount: -25 }],
       });
     });
@@ -677,7 +672,6 @@ describe('Rule', () => {
 
       expect(rule.exec({ imported_payee: 'James', amount: 150 })).toMatchObject(
         {
-          error: null,
           subtransactions: [{ amount: 100 }, { amount: 50 }, { amount: 0 }],
         },
       );

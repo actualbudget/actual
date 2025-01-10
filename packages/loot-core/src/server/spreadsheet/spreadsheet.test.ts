@@ -10,7 +10,7 @@ function wait(n) {
   return new Promise(resolve => setTimeout(resolve, n));
 }
 
-async function insertTransactions(payeeId = null) {
+async function insertTransactions() {
   await db.insertAccount({ id: '1', name: 'checking', offbudget: 0 });
   await db.insertAccount({ id: '2', name: 'checking', offbudget: 1 });
   await db.insertCategoryGroup({ id: 'group1', name: 'group1' });
@@ -23,7 +23,6 @@ async function insertTransactions(payeeId = null) {
       account: '1',
       category: 'cat1',
       date: '2017-01-08',
-      description: payeeId,
     })[0],
   );
   await db.insertTransaction(
@@ -32,7 +31,6 @@ async function insertTransactions(payeeId = null) {
       account: '1',
       category: 'cat2',
       date: '2017-01-10',
-      description: payeeId,
     })[0],
   );
   await db.insertTransaction(
@@ -41,7 +39,6 @@ async function insertTransactions(payeeId = null) {
       account: '1',
       category: 'cat2',
       date: '2017-01-15',
-      description: payeeId,
     })[0],
   );
 }
@@ -128,8 +125,8 @@ describe('Spreadsheet', () => {
   test('querying deep join works', async () => {
     const spreadsheet = new Spreadsheet(db);
     await db.insertPayee({ name: '', transfer_acct: '1' });
-    const payeeId2 = await db.insertPayee({ name: '', transfer_acct: '2' });
-    await insertTransactions(payeeId2);
+    await db.insertPayee({ name: '', transfer_acct: '2' });
+    await insertTransactions();
 
     spreadsheet.set(
       'g!foo',

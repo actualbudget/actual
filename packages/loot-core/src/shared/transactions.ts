@@ -4,11 +4,6 @@ import { type TransactionEntity } from '../types/models';
 
 import { last, diffItems, applyChanges } from './util';
 
-interface TransactionEntityWithError extends TransactionEntity {
-  error: ReturnType<typeof SplitTransactionError> | null;
-  _deleted?: boolean;
-}
-
 export function isTemporaryId(id: string) {
   return id.indexOf('temp') !== -1;
 }
@@ -26,13 +21,13 @@ function SplitTransactionError(total: number, parent: TransactionEntity) {
   const difference = num(parent.amount) - total;
 
   return {
-    type: 'SplitTransactionError',
-    version: 1,
+    type: 'SplitTransactionError' as const,
+    version: 1 as const,
     difference,
   };
 }
 
-type GenericTransactionEntity = TransactionEntity | TransactionEntityWithError;
+type GenericTransactionEntity = TransactionEntity;
 
 export function makeChild<T extends GenericTransactionEntity>(
   parent: T,
@@ -86,8 +81,10 @@ export function recalculateSplit(trans: TransactionEntity) {
   return {
     ...trans,
     error:
-      total === num(trans.amount) ? null : SplitTransactionError(total, trans),
-  } as TransactionEntityWithError;
+      total === num(trans.amount)
+        ? undefined
+        : SplitTransactionError(total, trans),
+  } satisfies TransactionEntity;
 }
 
 function findParentIndex(transactions: TransactionEntity[], idx: number) {
@@ -129,7 +126,10 @@ export function ungroupTransactions(transactions: TransactionEntity[]) {
 }
 
 export function groupTransaction(split: TransactionEntity[]) {
-  return { ...split[0], subtransactions: split.slice(1) } as TransactionEntity;
+  return {
+    ...split[0],
+    subtransactions: split.slice(1),
+  } satisfies TransactionEntity;
 }
 
 export function ungroupTransaction(split: TransactionEntity | null) {
@@ -154,12 +154,10 @@ export function applyTransactionDiff(
 function replaceTransactions(
   transactions: TransactionEntity[],
   id: string,
-  func: (
-    transaction: TransactionEntity,
-  ) => TransactionEntity | TransactionEntityWithError | null,
+  func: (transaction: TransactionEntity) => TransactionEntity | null,
 ): {
   data: TransactionEntity[];
-  newTransaction: TransactionEntity | TransactionEntityWithError | null;
+  newTransaction: TransactionEntity | null;
   diff: ReturnType<typeof diffItems<TransactionEntity>>;
 } {
   const idx = transactions.findIndex(t => t.id === id);
@@ -282,8 +280,8 @@ export function deleteTransaction(
           ...trans,
           subtransactions: undefined,
           is_parent: false,
-          error: null,
-        } as TransactionEntityWithError;
+          error: undefined,
+        } satisfies TransactionEntity;
       } else {
         const sub = trans.subtransactions?.filter(t => t.id !== id);
         return recalculateSplit({ ...trans, subtransactions: sub });
@@ -313,12 +311,13 @@ export function splitTransaction(
     return {
       ...trans,
       is_parent: true,
-      error: num(trans.amount) === 0 ? null : SplitTransactionError(0, trans),
+      error:
+        num(trans.amount) === 0 ? undefined : SplitTransactionError(0, trans),
       subtransactions: subtransactions.map(t => ({
         ...t,
         sort_order: t.sort_order || -1,
       })),
-    } as TransactionEntityWithError;
+    } satisfies TransactionEntity;
   });
 }
 
@@ -338,7 +337,7 @@ export function realizeTempTransactions(
           ...child,
           id: uuidv4(),
           parent_id: parent.id,
-        }) as TransactionEntity,
+        }) satisfies TransactionEntity,
     ),
   ];
 }

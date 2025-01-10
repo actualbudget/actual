@@ -1,33 +1,54 @@
-// @ts-strict-ignore
 import { v4 as uuidv4 } from 'uuid';
 
 import * as monthUtils from '../shared/months';
 import type {
   _SyncFields,
   AccountEntity,
+  CategoryEntity,
+  CategoryGroupEntity,
+  NewCategoryGroupEntity,
   TransactionEntity,
 } from '../types/models';
 
 import { random } from './random';
 
 export function generateAccount(
-  name,
-  isConnected,
-  offbudget,
-): AccountEntity & { bankId: number; bankName: string } {
-  return {
+  name: AccountEntity['name'],
+  isConnected?: boolean,
+  offbudget?: boolean,
+): AccountEntity & { bankId: number | null; bankName: string | null } {
+  const offlineAccount: AccountEntity & {
+    bankId: number | null;
+    bankName: string | null;
+  } = {
     id: uuidv4(),
     name,
-    balance_current: isConnected ? Math.floor(random() * 100000) : null,
-    bankId: isConnected ? Math.floor(random() * 10000) : null,
-    bankName: isConnected ? 'boa' : null,
-    bank: isConnected ? Math.floor(random() * 10000).toString() : null,
+    bankId: null,
+    bankName: null,
     offbudget: offbudget ? 1 : 0,
     sort_order: 0,
     tombstone: 0,
     closed: 0,
     ...emptySyncFields(),
   };
+
+  if (isConnected) {
+    return {
+      ...offlineAccount,
+      balance_current: Math.floor(random() * 100000),
+      bankId: Math.floor(random() * 10000),
+      bankName: 'boa',
+      bank: Math.floor(random() * 10000).toString(),
+      account_id: 'idx',
+      mask: 'xxx',
+      official_name: 'boa',
+      balance_available: 0,
+      balance_limit: 0,
+      account_sync_source: 'goCardless',
+    };
+  }
+
+  return offlineAccount;
 }
 
 function emptySyncFields(): _SyncFields<false> {
@@ -44,40 +65,51 @@ function emptySyncFields(): _SyncFields<false> {
 }
 
 let sortOrder = 1;
-export function generateCategory(name, group, isIncome = false) {
+export function generateCategory(
+  name: string,
+  group: string,
+  isIncome: boolean = false,
+): CategoryEntity {
   return {
     id: uuidv4(),
     name,
     cat_group: group,
-    is_income: isIncome ? 1 : 0,
+    is_income: isIncome,
     sort_order: sortOrder++,
   };
 }
 
 let groupSortOrder = 1;
-export function generateCategoryGroup(name, isIncome = false) {
+export function generateCategoryGroup(
+  name: string,
+  isIncome: boolean = false,
+): CategoryGroupEntity {
   return {
     id: uuidv4(),
     name,
-    is_income: isIncome ? 1 : 0,
+    is_income: isIncome,
     sort_order: groupSortOrder++,
   };
 }
 
-export function generateCategoryGroups(definition) {
+export function generateCategoryGroups(
+  definition: Partial<NewCategoryGroupEntity>[],
+): CategoryGroupEntity[] {
   return definition.map(group => {
-    const g = generateCategoryGroup(group.name, group.is_income);
+    const g = generateCategoryGroup(group.name ?? '', group.is_income);
 
     return {
       ...g,
-      categories: group.categories.map(cat =>
+      categories: group.categories?.map(cat =>
         generateCategory(cat.name, g.id, cat.is_income),
       ),
     };
   });
 }
 
-function _generateTransaction(data): TransactionEntity {
+function _generateTransaction(
+  data: Partial<TransactionEntity> & Pick<TransactionEntity, 'account'>,
+): TransactionEntity {
   return {
     id: data.id || uuidv4(),
     amount: data.amount || Math.floor(random() * 10000 - 7000),
@@ -91,8 +123,12 @@ function _generateTransaction(data): TransactionEntity {
   };
 }
 
-export function generateTransaction(data, splitAmount?, showError = false) {
-  const result = [];
+export function generateTransaction(
+  data: Partial<TransactionEntity> & Pick<TransactionEntity, 'account'>,
+  splitAmount?: number,
+  showError: boolean = false,
+) {
+  const result: TransactionEntity[] = [];
 
   const trans = _generateTransaction(data);
   result.push(trans);
@@ -107,18 +143,14 @@ export function generateTransaction(data, splitAmount?, showError = false) {
         amount: trans.amount - splitAmount,
         account: parent.account,
         date: parent.date,
-        notes: null,
-        category: null,
-        isChild: true,
+        is_child: true,
       },
       {
         id: parent.id + '/' + uuidv4(),
         amount: splitAmount,
         account: parent.account,
         date: parent.date,
-        notes: null,
-        category: null,
-        isChild: true,
+        is_child: true,
       },
     );
 
@@ -137,13 +169,13 @@ export function generateTransaction(data, splitAmount?, showError = false) {
 }
 
 export function generateTransactions(
-  count,
-  accountId,
-  groupId,
-  splitAtIndexes = [],
-  showError = false,
-) {
-  const transactions = [];
+  count: number,
+  accountId: string,
+  groupId: string,
+  splitAtIndexes: number[] = [],
+  showError: boolean = false,
+): TransactionEntity[] {
+  const transactions: TransactionEntity[] = [];
 
   for (let i = 0; i < count; i++) {
     const isSplit = splitAtIndexes.includes(i);
