@@ -1,7 +1,6 @@
 // @ts-strict-ignore
 import React, { useState, useEffect } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
 import { useSearchParams } from 'react-router-dom';
 
 import { isElectron } from 'loot-core/shared/environment';
@@ -11,6 +10,7 @@ import { type OpenIdConfig } from 'loot-core/types/models/openid';
 
 import { useNavigate } from '../../../hooks/useNavigate';
 import { AnimatedLoading } from '../../../icons/AnimatedLoading';
+import { useDispatch } from '../../../redux';
 import { styles, theme } from '../../../style';
 import { Button, ButtonWithLoading } from '../../common/Button2';
 import { BigInput } from '../../common/Input';

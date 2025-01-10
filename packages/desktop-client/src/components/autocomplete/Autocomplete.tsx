@@ -1,14 +1,14 @@
 // @ts-strict-ignore
 import React, {
-  useState,
-  useRef,
-  useEffect,
-  useMemo,
+  type ChangeEvent,
   type ComponentProps,
   type HTMLProps,
-  type ReactNode,
   type KeyboardEvent,
-  type ChangeEvent,
+  type ReactNode,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
 } from 'react';
 
 import { css, cx } from '@emotion/css';
@@ -17,7 +17,7 @@ import Downshift, { type StateChangeTypes } from 'downshift';
 import { getNormalisedString } from 'loot-core/src/shared/normalisation';
 
 import { SvgRemove } from '../../icons/v2';
-import { theme, styles } from '../../style';
+import { styles, theme } from '../../style';
 import { Button } from '../common/Button';
 import { Input } from '../common/Input';
 import { Popover } from '../common/Popover';
@@ -649,10 +649,10 @@ function MultiAutocomplete<T extends Item>({
     onSelect(items);
   }
 
-  function onAddItem(id: T['id']) {
+  function onAddItem(id: T['id'], value: string) {
     if (id) {
       id = id.trim();
-      onSelect([...selectedItemIds, id], id);
+      onSelect([...selectedItemIds, id], value);
     }
   }
 
@@ -738,6 +738,7 @@ type AutocompleteFooterProps = {
   embedded?: boolean;
   children: ReactNode;
 };
+
 export function AutocompleteFooter({
   show = true,
   embedded,

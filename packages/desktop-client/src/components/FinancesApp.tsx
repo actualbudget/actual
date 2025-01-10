@@ -1,7 +1,6 @@
 // @ts-strict-ignore
 import React, { type ReactElement, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useDispatch, useSelector } from 'react-redux';
 import {
   Route,
   Routes,
@@ -11,7 +10,6 @@ import {
 } from 'react-router-dom';
 
 import { addNotification, sync } from 'loot-core/client/actions';
-import { type State } from 'loot-core/src/client/state-types';
 import * as undo from 'loot-core/src/platform/client/undo';
 
 import { ProtectedRoute } from '../auth/ProtectedRoute';
@@ -20,6 +18,7 @@ import { useAccounts } from '../hooks/useAccounts';
 import { useLocalPref } from '../hooks/useLocalPref';
 import { useMetaThemeColor } from '../hooks/useMetaThemeColor';
 import { useNavigate } from '../hooks/useNavigate';
+import { useSelector, useDispatch } from '../redux';
 import { theme } from '../style';
 import { getIsOutdated, getLatestVersion } from '../util/versions';
 
@@ -90,9 +89,7 @@ export function FinancesApp() {
   const { t } = useTranslation();
 
   const accounts = useAccounts();
-  const accountsLoaded = useSelector(
-    (state: State) => state.queries.accountsLoaded,
-  );
+  const accountsLoaded = useSelector(state => state.queries.accountsLoaded);
 
   const [lastUsedVersion, setLastUsedVersion] = useLocalPref(
     'flags.updateNotificationShownForVersion',

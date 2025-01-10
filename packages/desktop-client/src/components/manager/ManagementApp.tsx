@@ -1,5 +1,4 @@
 import React, { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 import { Navigate, Route, Routes } from 'react-router-dom';
 
 import { loggedIn, setAppState } from 'loot-core/client/actions';
@@ -7,6 +6,7 @@ import { loggedIn, setAppState } from 'loot-core/client/actions';
 import { ProtectedRoute } from '../../auth/ProtectedRoute';
 import { Permissions } from '../../auth/types';
 import { useMetaThemeColor } from '../../hooks/useMetaThemeColor';
+import { useSelector, useDispatch } from '../../redux';
 import { theme } from '../../style';
 import { tokens } from '../../tokens';
 import {

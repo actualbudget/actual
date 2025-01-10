@@ -757,7 +757,7 @@ function compileConditions(state, conds) {
           }
           return compileAnd(state, cond);
         } else if (field === '$or') {
-          if (!cond) {
+          if (!cond || (Array.isArray(cond) && cond.length === 0)) {
             return null;
           }
           return compileOr(state, cond);

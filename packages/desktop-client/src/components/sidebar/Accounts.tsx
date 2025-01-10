@@ -1,10 +1,8 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useDispatch, useSelector } from 'react-redux';
 
 import { moveAccount } from 'loot-core/src/client/actions';
 import * as queries from 'loot-core/src/client/queries';
-import { type State } from 'loot-core/src/client/state-types';
 import { type AccountEntity } from 'loot-core/types/models';
 
 import { useAccounts } from '../../hooks/useAccounts';
@@ -14,6 +12,7 @@ import { useLocalPref } from '../../hooks/useLocalPref';
 import { useOffBudgetAccounts } from '../../hooks/useOffBudgetAccounts';
 import { useOnBudgetAccounts } from '../../hooks/useOnBudgetAccounts';
 import { useUpdatedAccounts } from '../../hooks/useUpdatedAccounts';
+import { useSelector, useDispatch } from '../../redux';
 import { theme } from '../../style';
 import { View } from '../common/View';
 
@@ -32,9 +31,7 @@ export function Accounts() {
   const offbudgetAccounts = useOffBudgetAccounts();
   const onBudgetAccounts = useOnBudgetAccounts();
   const closedAccounts = useClosedAccounts();
-  const syncingAccountIds = useSelector(
-    (state: State) => state.account.accountsSyncing,
-  );
+  const syncingAccountIds = useSelector(state => state.account.accountsSyncing);
 
   const getAccountPath = (account: AccountEntity) => `/accounts/${account.id}`;
 
@@ -120,8 +117,8 @@ export function Accounts() {
             account={account}
             connected={!!account.bank}
             pending={syncingAccountIds.includes(account.id)}
-            failed={failedAccounts?.has(account.id)}
-            updated={updatedAccounts?.includes(account.id)}
+            failed={failedAccounts.has(account.id)}
+            updated={updatedAccounts.includes(account.id)}
             to={getAccountPath(account)}
             query={queries.accountBalance(account)}
             onDragChange={onDragChange}
@@ -150,8 +147,8 @@ export function Accounts() {
             account={account}
             connected={!!account.bank}
             pending={syncingAccountIds.includes(account.id)}
-            failed={failedAccounts?.has(account.id)}
-            updated={updatedAccounts?.includes(account.id)}
+            failed={failedAccounts.has(account.id)}
+            updated={updatedAccounts.includes(account.id)}
             to={getAccountPath(account)}
             query={queries.accountBalance(account)}
             onDragChange={onDragChange}

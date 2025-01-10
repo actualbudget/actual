@@ -7,7 +7,6 @@ import React, {
   useCallback,
 } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { useSpring, animated, config } from 'react-spring';
 
@@ -48,6 +47,7 @@ import {
   SvgCheveronDown,
   SvgCheveronUp,
 } from '../../../icons/v1';
+import { useDispatch } from '../../../redux';
 import { styles, theme } from '../../../style';
 import { Button } from '../../common/Button2';
 import { View } from '../../common/View';

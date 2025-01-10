@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { Trans } from 'react-i18next';
-import { useDispatch } from 'react-redux';
 
 import { resetSync } from 'loot-core/client/actions';
 import { send } from 'loot-core/src/platform/client/fetch';
 
 import { useMetadataPref } from '../../hooks/useMetadataPref';
+import { useDispatch } from '../../redux';
 import { ButtonWithLoading } from '../common/Button2';
 import { Text } from '../common/Text';
 
