@@ -2,9 +2,8 @@ import { send } from '../../platform/client/fetch';
 import { getUploadError } from '../../shared/errors';
 import { syncAccounts } from '../accounts/accountsSlice';
 import { pushModal } from '../modals/modalsSlice';
+import { loadPrefs } from '../prefs/prefsSlice';
 import { type AppDispatch, type GetRootState } from '../store';
-
-import { loadPrefs } from './prefs';
 
 export function resetSync() {
   return async (dispatch: AppDispatch) => {

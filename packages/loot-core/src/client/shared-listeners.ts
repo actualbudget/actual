@@ -3,13 +3,14 @@ import { t } from 'i18next';
 
 import { listen, send } from '../platform/client/fetch';
 
-import { loadPrefs, resetSync, signOut, sync } from './actions';
+import { resetSync, signOut, sync } from './actions';
 import { closeAndDownloadBudget, uploadBudget } from './budgets/budgetsSlice';
 import { pushModal } from './modals/modalsSlice';
 import {
   addNotification,
   type Notification,
 } from './notifications/notificationsSlice';
+import { loadPrefs } from './prefs/prefsSlice';
 import { getAccounts, getCategories, getPayees } from './queries/queriesSlice';
 import { type AppStore } from './store';
 
