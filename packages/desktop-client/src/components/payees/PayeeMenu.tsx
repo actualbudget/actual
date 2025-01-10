@@ -7,6 +7,7 @@ import { SvgBookmark, SvgLightBulb } from '../../icons/v1';
 import { theme } from '../../style';
 import { Menu } from '../common/Menu';
 import { View } from '../common/View';
+import { useSyncedPref } from '../../hooks/useSyncedPref';
 
 type PayeeMenuProps = {
   payeesById: Record<PayeeEntity['id'], PayeeEntity>;
@@ -28,6 +29,8 @@ export function PayeeMenu({
   onClose,
 }: PayeeMenuProps) {
   const { t } = useTranslation();
+  const [learnCategories = 'true'] = useSyncedPref('learn-categories');
+  const isLearnCategoriesEnabled = String(learnCategories) === 'true';
 
   // Transfer accounts are never editable
   const isDisabled = [...selectedPayees].some(
@@ -96,7 +99,7 @@ export function PayeeMenu({
           text: t('Merge'),
           disabled: isDisabled || selectedPayees.size < 2,
         },
-        {
+        isLearnCategoriesEnabled && {
           icon: SvgLightBulb,
           iconSize: 9,
           name: 'learn',

@@ -20,6 +20,7 @@ import {
   Row,
   SelectCell,
 } from '../table';
+import { useSyncedPref } from '../../hooks/useSyncedPref';
 
 type RuleButtonProps = {
   ruleCount: number;
@@ -111,6 +112,8 @@ export const PayeeTableRow = memo(
       ? theme.tableBorderSelected
       : theme.tableBorder;
     const backgroundFocus = hovered || focusedField === 'select';
+    const [learnCategories = 'true'] = useSyncedPref('learn-categories');
+    const isLearnCategoriesEnabled = String(learnCategories) === 'true';
 
     const { t } = useTranslation();
 
@@ -162,12 +165,13 @@ export const PayeeTableRow = memo(
               },
               ruleCount > 0 && { name: 'view-rules', text: t('View rules') },
               { name: 'create-rule', text: t('Create rule') },
-              payee.learn_categories
-                ? {
-                    name: 'learn',
-                    text: t('Disable learning'),
-                  }
-                : { name: 'learn', text: t('Enable learning') },
+              isLearnCategoriesEnabled &&
+                (payee.learn_categories
+                  ? {
+                      name: 'learn',
+                      text: t('Disable learning'),
+                    }
+                  : { name: 'learn', text: t('Enable learning') }),
             ]}
             onMenuSelect={name => {
               switch (name) {
@@ -222,7 +226,7 @@ export const PayeeTableRow = memo(
           onClick={() => {}}
         >
           {() => {
-            return !payee.learn_categories ? (
+            return isLearnCategoriesEnabled && !payee.learn_categories ? (
               <Tooltip content={t('Category learning disabled')}>
                 <SvgLightBulb style={{ color: 'red' }} />
               </Tooltip>
