@@ -15,18 +15,20 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { unlinkAccount } from 'loot-core/client/accounts/accountsSlice';
 import {
+  openAccountCloseModal,
+  pushModal,
+  replaceModal,
+  syncAndDownload,
+} from 'loot-core/client/actions';
+import {
   createPayee,
   getPayees,
   initiallyLoadPayees,
   markAccountRead,
-  openAccountCloseModal,
-  pushModal,
   reopenAccount,
-  replaceModal,
-  syncAndDownload,
   updateAccount,
   updateNewTransactions,
-} from 'loot-core/client/actions';
+} from 'loot-core/client/queries/queriesSlice';
 import { type AppDispatch } from 'loot-core/client/store';
 import { validForTransfer } from 'loot-core/client/transfer';
 import { type UndoState } from 'loot-core/server/undo';
@@ -61,7 +63,6 @@ import {
   type RuleConditionEntity,
   type TransactionEntity,
   type TransactionFilterEntity,
-  type PayeeEntity,
 } from 'loot-core/src/types/models';
 
 import { useAccountPreviewTransactions } from '../../hooks/useAccountPreviewTransactions';
@@ -500,7 +501,7 @@ class AccountInternal extends PureComponent<
     else this.updateQuery(query);
 
     if (this.props.accountId) {
-      this.props.dispatch(markAccountRead(this.props.accountId));
+      this.props.dispatch(markAccountRead({ accountId: this.props.accountId }));
     }
   };
 
@@ -686,7 +687,7 @@ class AccountInternal extends PureComponent<
       }
     });
 
-    this.props.dispatch(updateNewTransactions(updatedTransaction.id));
+    this.props.dispatch(updateNewTransactions({ id: updatedTransaction.id }));
   };
 
   canCalculateBalance = () => {
@@ -741,7 +742,9 @@ class AccountInternal extends PureComponent<
       const account = this.props.accounts.find(
         account => account.id === this.props.accountId,
       );
-      this.props.dispatch(updateAccount({ ...account, name } as AccountEntity));
+      this.props.dispatch(
+        updateAccount({ account: { ...account, name } as AccountEntity }),
+      );
       this.setState({ editingName: false, nameError: '' });
     }
   };
@@ -789,7 +792,7 @@ class AccountInternal extends PureComponent<
         this.props.dispatch(openAccountCloseModal(accountId));
         break;
       case 'reopen':
-        this.props.dispatch(reopenAccount(accountId));
+        this.props.dispatch(reopenAccount({ accountId }));
         break;
       case 'export':
         const accountName = this.getAccountTitle(account, accountId);
@@ -904,7 +907,7 @@ class AccountInternal extends PureComponent<
   onCreatePayee = (name: string) => {
     const trimmed = name.trim();
     if (trimmed !== '') {
-      return this.props.dispatch(createPayee(name));
+      return this.props.dispatch(createPayee({ name })).unwrap();
     }
     return null;
   };
@@ -1282,7 +1285,7 @@ class AccountInternal extends PureComponent<
     const onConfirmTransfer = async (ids: string[]) => {
       this.setState({ workingHard: true });
 
-      const payees: PayeeEntity[] = await this.props.dispatch(getPayees());
+      const payees = await this.props.dispatch(getPayees()).unwrap();
       const { data: transactions } = await runQuery(
         q('transactions')
           .filter({ id: { $oneof: ids } })
