@@ -3,7 +3,7 @@ import { useCallback } from 'react';
 import { popModal } from 'loot-core/client/actions';
 import { type Modal } from 'loot-core/client/state-types/modals';
 
-import { useSelector, useDispatch } from '../redux';
+import { useAppSelector, useAppDispatch } from '../redux';
 
 type ModalState = {
   onClose: () => void;
@@ -14,9 +14,9 @@ type ModalState = {
 };
 
 export function useModalState(): ModalState {
-  const modalStack = useSelector(state => state.modals.modalStack);
-  const isHidden = useSelector(state => state.modals.isHidden);
-  const dispatch = useDispatch();
+  const modalStack = useAppSelector(state => state.modals.modalStack);
+  const isHidden = useAppSelector(state => state.modals.isHidden);
+  const dispatch = useAppDispatch();
 
   const popModalCallback = useCallback(() => {
     dispatch(popModal());

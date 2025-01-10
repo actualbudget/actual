@@ -6,7 +6,7 @@ import { createBudget } from 'loot-core/src/client/actions/budgets';
 import { send } from 'loot-core/src/platform/client/fetch';
 
 import { useNavigate } from '../../../hooks/useNavigate';
-import { useDispatch } from '../../../redux';
+import { useAppDispatch } from '../../../redux';
 import { theme } from '../../../style';
 import { Button } from '../../common/Button2';
 import { Link } from '../../common/Link';
@@ -20,7 +20,7 @@ import { ConfirmPasswordForm } from './ConfirmPasswordForm';
 
 export function Bootstrap() {
   const { t } = useTranslation();
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const [error, setError] = useState(null);
   const refreshLoginMethods = useRefreshLoginMethods();
 

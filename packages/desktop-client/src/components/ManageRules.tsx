@@ -24,7 +24,7 @@ import { useAccounts } from '../hooks/useAccounts';
 import { useCategories } from '../hooks/useCategories';
 import { usePayees } from '../hooks/usePayees';
 import { useSelected, SelectedProvider } from '../hooks/useSelected';
-import { useDispatch } from '../redux';
+import { useAppDispatch } from '../redux';
 import { theme } from '../style';
 
 import { Button } from './common/Button2';
@@ -113,7 +113,7 @@ export function ManageRules({
   const [allRules, setAllRules] = useState([]);
   const [page, setPage] = useState(0);
   const [filter, setFilter] = useState('');
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
   const { schedules = [] } = useSchedules({
     query: useMemo(() => q('schedules').select('*'), []),

@@ -36,7 +36,7 @@ import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { useSelected, SelectedProvider } from '../../hooks/useSelected';
 import { SvgDelete, SvgAdd, SvgSubtract } from '../../icons/v0';
 import { SvgAlignLeft, SvgCode, SvgInformationOutline } from '../../icons/v1';
-import { useDispatch } from '../../redux';
+import { useAppDispatch } from '../../redux';
 import { styles, theme } from '../../style';
 import { Button } from '../common/Button2';
 import { Menu } from '../common/Menu';
@@ -784,7 +784,7 @@ export function EditRuleModal({ defaultRule, onSave: originalOnSave }) {
   const [stage, setStage] = useState(defaultRule.stage);
   const [conditionsOp, setConditionsOp] = useState(defaultRule.conditionsOp);
   const [transactions, setTransactions] = useState([]);
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const scrollableEl = useRef();
 
   const isSchedule = getActions(actionSplits).some(

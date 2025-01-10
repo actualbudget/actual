@@ -28,7 +28,7 @@ import {
 import { useActions } from '../hooks/useActions';
 import { useMetadataPref } from '../hooks/useMetadataPref';
 import { installPolyfills } from '../polyfills';
-import { useDispatch, useSelector } from '../redux';
+import { useAppDispatch, useAppSelector } from '../redux';
 import { styles, hasHiddenScrollbars, ThemeStyle, useTheme } from '../style';
 import { ExposeNavigate } from '../util/router-tools';
 
@@ -49,8 +49,8 @@ function AppInner() {
   const [cloudFileId] = useMetadataPref('cloudFileId');
   const { t } = useTranslation();
   const { showBoundary: showErrorBoundary } = useErrorBoundary();
-  const dispatch = useDispatch();
-  const userData = useSelector(state => state.user.data);
+  const dispatch = useAppDispatch();
+  const userData = useAppSelector(state => state.user.data);
   const { signOut, addNotification } = useActions();
 
   const maybeUpdate = async <T,>(cb?: () => T): Promise<T> => {
@@ -158,7 +158,7 @@ export function App() {
   const [hiddenScrollbars, setHiddenScrollbars] = useState(
     hasHiddenScrollbars(),
   );
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
     function checkScrollbars() {

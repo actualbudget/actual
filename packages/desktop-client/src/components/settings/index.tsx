@@ -10,7 +10,7 @@ import { listen } from 'loot-core/src/platform/client/fetch';
 import { useGlobalPref } from '../../hooks/useGlobalPref';
 import { useIsOutdated, useLatestVersion } from '../../hooks/useLatestVersion';
 import { useMetadataPref } from '../../hooks/useMetadataPref';
-import { useDispatch } from '../../redux';
+import { useAppDispatch } from '../../redux';
 import { theme } from '../../style';
 import { tokens } from '../../tokens';
 import { Button } from '../common/Button2';
@@ -143,7 +143,7 @@ export function Settings() {
   const { t } = useTranslation();
   const [floatingSidebar] = useGlobalPref('floatingSidebar');
   const [budgetName] = useMetadataPref('budgetName');
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
   const onCloseBudget = () => {
     dispatch(closeBudget());

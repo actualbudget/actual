@@ -1,5 +1,5 @@
-import { useSelector } from '../redux';
+import { useAppSelector } from '../redux';
 
 export function useUpdatedAccounts() {
-  return useSelector(state => state.queries.updatedAccounts);
+  return useAppSelector(state => state.queries.updatedAccounts);
 }

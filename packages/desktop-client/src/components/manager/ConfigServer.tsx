@@ -10,7 +10,7 @@ import {
 
 import { useGlobalPref } from '../../hooks/useGlobalPref';
 import { useNavigate } from '../../hooks/useNavigate';
-import { useDispatch } from '../../redux';
+import { useAppDispatch } from '../../redux';
 import { theme } from '../../style';
 import { Button, ButtonWithLoading } from '../common/Button2';
 import { BigInput } from '../common/Input';
@@ -23,7 +23,7 @@ import { Title } from './subscribe/common';
 
 export function ConfigServer() {
   const { t } = useTranslation();
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const [url, setUrl] = useState('');
   const currentUrl = useServerURL();
