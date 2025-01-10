@@ -10,11 +10,24 @@ Running into issues with your configuration not being interpreted correctly? Che
 
 :::
 
+## `ACTUAL_DATA_DIR`
+
+This is where the server stores the budget data files (and configurations unless `ACTUAL_CONFIG_PATH`is set).
+
+The default value is `/data`.
+
+See also sections on `userFiles` and `serverFiles`.
+
+
 ## `ACTUAL_CONFIG_PATH`
 
-This is the path to the config file. If not specified, the server will look for a `config.json` file either in the `/data` directory if it is present, or in the same directory as the `package.json` if `/data` is not present.
+This is the path to the config file. If not specified, the server will look for a `config.json` file either in the
+`/data` folder if it is present or in the same directory as the `package.json` if `/data` is absent.
+
+See the `ACTUAL_DATA_DIR` section above to override the data folder location.
 
 You can’t specify this option in `config.json` since it needs to be used to find the `config.json` in the first place.
+
 
 ## `https`
 
@@ -24,7 +37,7 @@ If you want to Actual to serve over HTTPS, you can set this key to an object wit
 - `cert`: The path to the certificate file. (environment variable: `ACTUAL_HTTPS_CERT`)
 - any other options from Node’s [`tls.createServer()`](https://nodejs.org/docs/latest-v16.x/api/tls.html#tlscreateserveroptions-secureconnectionlistener), [`tls.createSecureContext()`](https://nodejs.org/docs/latest-v16.x/api/tls.html#tlscreatesecurecontextoptions), or [`http.createServer()`](https://nodejs.org/docs/latest-v16.x/api/http.html#httpcreateserveroptions-requestlistener) functions (optional, most people won’t need to set any of these).
 
-See [Activating HTTPS](./https.md) for more information on how to get HTTPS working.
+See [Activating HTTPS](/config/https.md) for more information on how to get HTTPS working.
 
 <!-- ## `mode`
 
@@ -42,9 +55,14 @@ The `hostname` key is used to specify the hostname that the server should listen
 
 The server will put an `account.sqlite` file in this directory, which will contain the (hashed) server password, a list of all the budget files the server knows about, and the active session token (along with anything else the server may want to store in the future). If not specified, the server will use either `/data/server-files` (if `/data` exists) or the `server-files` directory in the same directory as the `package.json`. (environment variable: `ACTUAL_SERVER_FILES`)
 
+See the `ACTUAL_DATA_DIR` section above to override the data folder location.
+
+
 ## `userFiles`
 
 The server will put all the budget files in this directory as binary blobs. If not specified, the server will use either `/data/user-files` (if `/data` exists) or the `user-files` directory in the same directory as the `package.json`. (environment variable: `ACTUAL_USER_FILES`)
+
+See the `ACTUAL_DATA_DIR` section above to override the data folder location.
 
 ## `webRoot`
 
