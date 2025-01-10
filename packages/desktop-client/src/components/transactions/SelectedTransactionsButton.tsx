@@ -262,7 +262,6 @@ export function SelectedTransactionsButton({
                     {
                       name: 'run-rules',
                       text: t('Run Rules'),
-                      key: 'R',
                     } as const,
                   ]),
 
