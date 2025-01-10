@@ -12,10 +12,12 @@ import { useTranslation } from 'react-i18next';
 import { BrowserRouter } from 'react-router-dom';
 
 import {
+  addNotification,
   closeBudget,
   loadBudget,
   loadGlobalPrefs,
   setAppState,
+  signOut,
   sync,
 } from 'loot-core/client/actions';
 import { SpreadsheetProvider } from 'loot-core/client/SpreadsheetProvider';
@@ -25,7 +27,6 @@ import {
   send,
 } from 'loot-core/src/platform/client/fetch';
 
-import { useActions } from '../hooks/useActions';
 import { useMetadataPref } from '../hooks/useMetadataPref';
 import { installPolyfills } from '../polyfills';
 import { useDispatch, useSelector } from '../redux';
@@ -51,7 +52,6 @@ function AppInner() {
   const { showBoundary: showErrorBoundary } = useErrorBoundary();
   const dispatch = useDispatch();
   const userData = useSelector(state => state.user.data);
-  const { signOut, addNotification } = useActions();
 
   const maybeUpdate = async <T,>(cb?: () => T): Promise<T> => {
     if (global.Actual.isUpdateReadyForDownload()) {
@@ -128,17 +128,19 @@ function AppInner() {
 
   useEffect(() => {
     if (userData?.tokenExpired) {
-      addNotification({
-        type: 'error',
-        id: 'login-expired',
-        title: t('Login expired'),
-        sticky: true,
-        message: t('Login expired, please log in again.'),
-        button: {
-          title: t('Go to login'),
-          action: signOut,
-        },
-      });
+      dispatch(
+        addNotification({
+          type: 'error',
+          id: 'login-expired',
+          title: t('Login expired'),
+          sticky: true,
+          message: t('Login expired, please login again.'),
+          button: {
+            title: t('Go to login'),
+            action: () => dispatch(signOut()),
+          },
+        }),
+      );
     }
   }, [userData, userData?.tokenExpired]);
 

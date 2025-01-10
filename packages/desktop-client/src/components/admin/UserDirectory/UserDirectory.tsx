@@ -10,6 +10,7 @@ import {
 } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { addNotification, signOut } from 'loot-core/client/actions';
 import { pushModal } from 'loot-core/src/client/actions/modals';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as undo from 'loot-core/src/platform/client/undo';
@@ -18,7 +19,6 @@ import {
   type UserEntity,
 } from 'loot-core/types/models/user';
 
-import { useActions } from '../../../hooks/useActions';
 import { SelectedProvider, useSelected } from '../../../hooks/useSelected';
 import { useDispatch } from '../../../redux';
 import { theme } from '../../../style';
@@ -86,7 +86,6 @@ function UserDirectoryContent({
   const [page, setPage] = useState(0);
   const [filter, setFilter] = useState('');
   const dispatch = useDispatch();
-  const actions = useActions();
 
   const { getUserDirectoryErrors } = useGetUserDirectoryErrors();
 
@@ -146,31 +145,42 @@ function UserDirectoryContent({
 
     if (error) {
       if (error === 'token-expired') {
-        actions.addNotification({
-          type: 'error',
-          id: 'login-expired',
-          title: t('Login expired'),
-          sticky: true,
-          message: getUserDirectoryErrors(error),
-          button: {
-            title: t('Go to login'),
-            action: () => actions.signOut(),
-          },
-        });
+        dispatch(
+          addNotification({
+            type: 'error',
+            id: 'login-expired',
+            title: t('Login expired'),
+            sticky: true,
+            message: getUserDirectoryErrors(error),
+            button: {
+              title: t('Go to login'),
+              action: () => dispatch(signOut()),
+            },
+          }),
+        );
       } else {
-        actions.addNotification({
-          type: 'error',
-          title: t('Something happened while deleting users'),
-          sticky: true,
-          message: getUserDirectoryErrors(error),
-        });
+        dispatch(
+          addNotification({
+            type: 'error',
+            title: t('Something happened while deleting users'),
+            sticky: true,
+            message: getUserDirectoryErrors(error),
+          }),
+        );
       }
     }
 
     await loadUsers();
     selectedInst.dispatch({ type: 'select-none' });
     setLoading(false);
-  }, [actions, loadUsers, selectedInst, setLoading, getUserDirectoryErrors, t]);
+  }, [
+    setLoading,
+    selectedInst,
+    loadUsers,
+    dispatch,
+    t,
+    getUserDirectoryErrors,
+  ]);
 
   const onEditUser = useCallback(
     user => {

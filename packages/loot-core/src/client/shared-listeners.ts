@@ -3,9 +3,23 @@ import { t } from 'i18next';
 
 import { listen, send } from '../platform/client/fetch';
 
+import {
+  addNotification,
+  closeAndDownloadBudget,
+  getAccounts,
+  getCategories,
+  getPayees,
+  loadPrefs,
+  pushModal,
+  resetSync,
+  signOut,
+  sync,
+  uploadBudget,
+} from './actions';
 import type { Notification } from './state-types/notifications';
+import { type AppStore } from './store';
 
-export function listenForSyncEvent(actions, store) {
+export function listenForSyncEvent(store: AppStore) {
   let attemptedSyncRepair = false;
 
   listen('sync-event', event => {
@@ -19,17 +33,19 @@ export function listenForSyncEvent(actions, store) {
       if (attemptedSyncRepair) {
         attemptedSyncRepair = false;
 
-        actions.addNotification({
-          title: t('Syncing has been fixed!'),
-          message: t('Happy budgeting!'),
-          type: 'message',
-        });
+        store.dispatch(
+          addNotification({
+            title: t('Syncing has been fixed!'),
+            message: t('Happy budgeting!'),
+            type: 'message',
+          }),
+        );
       }
 
       const tables = event.tables;
 
       if (tables.includes('prefs')) {
-        actions.loadPrefs();
+        store.dispatch(loadPrefs());
       }
 
       if (
@@ -37,15 +53,15 @@ export function listenForSyncEvent(actions, store) {
         tables.includes('category_groups') ||
         tables.includes('category_mapping')
       ) {
-        actions.getCategories();
+        store.dispatch(getCategories());
       }
 
       if (tables.includes('payees') || tables.includes('payee_mapping')) {
-        actions.getPayees();
+        store.dispatch(getPayees());
       }
 
       if (tables.includes('accounts')) {
-        actions.getAccounts();
+        store.dispatch(getAccounts());
       }
     } else if (event.type === 'error') {
       let notif: Notification | null = null;
@@ -68,7 +84,7 @@ export function listenForSyncEvent(actions, store) {
               id: 'reset-sync',
               button: {
                 title: t('Reset sync'),
-                action: actions.resetSync,
+                action: () => store.dispatch(resetSync()),
               },
             };
           } else {
@@ -90,7 +106,7 @@ export function listenForSyncEvent(actions, store) {
                 action: async () => {
                   attemptedSyncRepair = true;
                   await send('sync-repair');
-                  actions.sync();
+                  store.dispatch(sync());
                 },
               },
             };
@@ -111,13 +127,13 @@ export function listenForSyncEvent(actions, store) {
                 'Old encryption keys are not migrated. If using encryption, [reset encryption here](#makeKey).',
             ),
             messageActions: {
-              makeKey: () => actions.pushModal('create-encryption-key'),
+              makeKey: () => store.dispatch(pushModal('create-encryption-key')),
             },
             sticky: true,
             id: 'old-file',
             button: {
               title: t('Reset sync'),
-              action: actions.resetSync,
+              action: () => store.dispatch(resetSync()),
             },
           };
           break;
@@ -136,7 +152,9 @@ export function listenForSyncEvent(actions, store) {
             id: 'invalid-key-state',
             button: {
               title: t('Reset key'),
-              action: () => actions.pushModal('create-encryption-key'),
+              action: () => {
+                store.dispatch(pushModal('create-encryption-key'));
+              },
             },
           };
 
@@ -159,9 +177,9 @@ export function listenForSyncEvent(actions, store) {
             button: {
               title: t('Register'),
               action: async () => {
-                await actions.uploadBudget();
-                actions.sync();
-                actions.loadPrefs();
+                await store.dispatch(uploadBudget());
+                store.dispatch(sync());
+                store.dispatch(loadPrefs());
               },
             },
           };
@@ -181,7 +199,7 @@ export function listenForSyncEvent(actions, store) {
             id: 'upload-file',
             button: {
               title: t('Upload'),
-              action: actions.resetSync,
+              action: () => store.dispatch(resetSync()),
             },
           };
           break;
@@ -204,12 +222,12 @@ export function listenForSyncEvent(actions, store) {
               ) +
               ' ' +
               learnMore,
-            messageActions: { upload: actions.resetSync },
+            messageActions: { upload: () => store.dispatch(resetSync()) },
             sticky: true,
             id: 'needs-revert',
             button: {
               title: t('Revert'),
-              action: () => actions.closeAndDownloadBudget(cloudFileId),
+              action: () => store.dispatch(closeAndDownloadBudget(cloudFileId)),
             },
           };
           break;
@@ -226,10 +244,13 @@ export function listenForSyncEvent(actions, store) {
               id: 'encrypt-failure-missing',
               button: {
                 title: t('Create key'),
-                action: () =>
-                  actions.pushModal('fix-encryption-key', {
-                    onSuccess: () => actions.sync(),
-                  }),
+                action: () => {
+                  store.dispatch(
+                    pushModal('fix-encryption-key', {
+                      onSuccess: () => store.dispatch(sync()),
+                    }),
+                  );
+                },
               },
             };
           } else {
@@ -243,10 +264,9 @@ export function listenForSyncEvent(actions, store) {
               id: 'encrypt-failure',
               button: {
                 title: t('Reset key'),
-                action: () =>
-                  actions.pushModal('create-encryption-key', {
-                    onSuccess: () => actions.sync(),
-                  }),
+                action: () => {
+                  store.dispatch(pushModal('create-encryption-key'));
+                },
               },
             };
           }
@@ -282,7 +302,7 @@ export function listenForSyncEvent(actions, store) {
             id: 'login-expired',
             button: {
               title: 'Go to login',
-              action: () => actions.signOut(),
+              action: () => store.dispatch(signOut()),
             },
           };
           break;
@@ -297,7 +317,7 @@ export function listenForSyncEvent(actions, store) {
       }
 
       if (notif) {
-        actions.addNotification({ type: 'error', ...notif });
+        store.dispatch(addNotification({ type: 'error', ...notif }));
       }
     }
   });
