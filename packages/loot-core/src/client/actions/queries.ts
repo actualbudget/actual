@@ -212,7 +212,8 @@ export function deleteCategory(id: string, transferId?: string) {
 export function updateCategory(category) {
   return async (dispatch: AppDispatch) => {
     await send('category-update', category);
-    dispatch(getCategories());
+    await dispatch(getCategories());
+    await send('reset-budget-cache');
   };
 }
 
@@ -247,6 +248,7 @@ export function updateGroup(group) {
   return async dispatch => {
     await send('category-group-update', rawGroup);
     await dispatch(getCategories());
+    await send('reset-budget-cache');
   };
 }
 
