@@ -75,7 +75,7 @@ export const unlinkAccount = createAppAsyncThunk(
   },
 );
 
-type LinkAccountArgs = {
+type LinkAccountPayload = {
   requisitionId: string;
   account: unknown;
   upgradingId?: string;
@@ -85,7 +85,7 @@ type LinkAccountArgs = {
 export const linkAccount = createAppAsyncThunk(
   `${sliceName}/linkAccount`,
   async (
-    { requisitionId, account, upgradingId, offBudget }: LinkAccountArgs,
+    { requisitionId, account, upgradingId, offBudget }: LinkAccountPayload,
     { dispatch },
   ) => {
     await send('gocardless-accounts-link', {
