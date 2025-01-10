@@ -2,7 +2,7 @@ import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
 import { send } from '../../platform/client/fetch';
 import { type AccountEntity, type TransactionEntity } from '../../types/models';
-import { addNotification } from '../actions';
+import { addNotification } from '../notifications/notificationsSlice';
 import {
   getAccounts,
   getPayees,

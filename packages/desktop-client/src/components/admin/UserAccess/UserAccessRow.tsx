@@ -2,7 +2,8 @@
 import React, { memo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { addNotification, signOut } from 'loot-core/client/actions';
+import { signOut } from 'loot-core/client/actions';
+import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import { getUserAccessErrors } from 'loot-core/shared/errors';
 import { type UserAvailable } from 'loot-core/types/models';

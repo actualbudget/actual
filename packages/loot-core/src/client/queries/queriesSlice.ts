@@ -12,7 +12,10 @@ import {
   type AccountEntity,
   type PayeeEntity,
 } from '../../types/models';
-import { addGenericErrorNotification, addNotification } from '../actions';
+import {
+  addGenericErrorNotification,
+  addNotification,
+} from '../notifications/notificationsSlice';
 import { createAppAsyncThunk } from '../redux';
 
 const sliceName = 'queries';

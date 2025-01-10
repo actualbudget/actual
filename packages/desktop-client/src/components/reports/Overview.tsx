@@ -7,7 +7,7 @@ import { useLocation } from 'react-router-dom';
 import {
   addNotification,
   removeNotification,
-} from 'loot-core/src/client/actions';
+} from 'loot-core/client/notifications/notificationsSlice';
 import { useDashboard } from 'loot-core/src/client/data-hooks/dashboard';
 import { useReports } from 'loot-core/src/client/data-hooks/reports';
 import { send } from 'loot-core/src/platform/client/fetch';

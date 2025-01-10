@@ -2,11 +2,12 @@ import { type ReactNode, useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useLocation, type Location } from 'react-router-dom';
 
-import { addNotification } from 'loot-core/client/actions';
+import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import { type Handlers } from 'loot-core/types/handlers';
 import { type OpenIdConfig } from 'loot-core/types/models/openid';
 
+import { useDispatch } from '../../../redux';
 import { theme, styles } from '../../../style';
 import { ButtonWithLoading } from '../../common/Button2';
 import { Input } from '../../common/Input';
@@ -49,7 +50,7 @@ export function OpenIdForm({
   loadData,
 }: OpenIdFormProps) {
   const { t } = useTranslation();
-
+  const dispatch = useDispatch();
   const [issuer, setIssuer] = useState('');
   const [clientId, setClientId] = useState('');
   const [clientSecret, setClientSecret] = useState('');
@@ -71,13 +72,15 @@ export function OpenIdForm({
           if (!config) return;
 
           if ('error' in config) {
-            addNotification({
-              type: 'error',
-              id: 'error',
-              title: t('Error getting OpenID config'),
-              sticky: true,
-              message: config.error,
-            });
+            dispatch(
+              addNotification({
+                type: 'error',
+                id: 'error',
+                title: t('Error getting OpenID config'),
+                sticky: true,
+                message: config.error,
+              }),
+            );
           } else if ('openId' in config) {
             setProviderName(config?.openId?.selectedProvider ?? 'other');
             setIssuer(config?.openId?.issuer ?? '');
@@ -87,7 +90,7 @@ export function OpenIdForm({
         },
       );
     }
-  }, [loadData, t]);
+  }, [dispatch, loadData, t]);
 
   const handleProviderChange = (provider: OpenIdProviderOption) => {
     if (provider) {

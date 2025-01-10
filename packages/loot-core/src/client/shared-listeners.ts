@@ -3,17 +3,14 @@ import { t } from 'i18next';
 
 import { listen, send } from '../platform/client/fetch';
 
-import {
-  addNotification,
-  loadPrefs,
-  resetSync,
-  signOut,
-  sync,
-} from './actions';
+import { loadPrefs, resetSync, signOut, sync } from './actions';
 import { closeAndDownloadBudget, uploadBudget } from './budgets/budgetsSlice';
 import { pushModal } from './modals/modalsSlice';
+import {
+  addNotification,
+  type Notification,
+} from './notifications/notificationsSlice';
 import { getAccounts, getCategories, getPayees } from './queries/queriesSlice';
-import type { Notification } from './state-types/notifications';
 import { type AppStore } from './store';
 
 export function listenForSyncEvent(store: AppStore) {

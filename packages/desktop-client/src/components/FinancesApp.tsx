@@ -9,7 +9,8 @@ import {
   useHref,
 } from 'react-router-dom';
 
-import { addNotification, sync } from 'loot-core/client/actions';
+import { sync } from 'loot-core/client/actions';
+import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
 import * as undo from 'loot-core/src/platform/client/undo';
 
 import { ProtectedRoute } from '../auth/ProtectedRoute';
