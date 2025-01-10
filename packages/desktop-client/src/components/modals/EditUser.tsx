@@ -8,7 +8,7 @@ import {
   type UserEntity,
 } from 'loot-core/src/types/models/user';
 
-import { useAppDispatch } from '../../redux';
+import { useDispatch } from '../../redux';
 import { styles, theme } from '../../style';
 import { Button } from '../common/Button2';
 import { Input } from '../common/Input';
@@ -75,7 +75,7 @@ function useGetUserDirectoryErrors() {
 
 function useSaveUser() {
   const { t } = useTranslation();
-  const dispatch = useAppDispatch();
+  const dispatch = useDispatch();
   const { getUserDirectoryErrors } = useGetUserDirectoryErrors();
 
   async function saveUser(
@@ -155,7 +155,7 @@ export function EditUserFinanceApp({
 
 function EditUser({ defaultUser, onSave: originalOnSave }: EditUserProps) {
   const { t } = useTranslation();
-  const dispatch = useAppDispatch();
+  const dispatch = useDispatch();
 
   const [userName, setUserName] = useState<string>(defaultUser.userName ?? '');
   const [displayName, setDisplayName] = useState<string>(

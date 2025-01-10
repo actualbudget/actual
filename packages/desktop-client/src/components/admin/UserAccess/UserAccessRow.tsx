@@ -8,7 +8,7 @@ import { getUserAccessErrors } from 'loot-core/shared/errors';
 import { type UserAvailable } from 'loot-core/types/models';
 
 import { useMetadataPref } from '../../../hooks/useMetadataPref';
-import { useAppDispatch } from '../../../redux';
+import { useDispatch } from '../../../redux';
 import { theme } from '../../../style';
 import { View } from '../../common/View';
 import { Checkbox } from '../../forms';
@@ -23,7 +23,7 @@ type UserAccessProps = {
 export const UserAccessRow = memo(
   ({ access, hovered, onHover }: UserAccessProps) => {
     const { t } = useTranslation();
-    const dispatch = useAppDispatch();
+    const dispatch = useDispatch();
 
     const backgroundFocus = hovered;
     const [marked, setMarked] = useState(
