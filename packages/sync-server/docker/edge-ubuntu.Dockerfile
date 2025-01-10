@@ -1,4 +1,4 @@
-FROM node:18-bookworm as base
+FROM node:18-bookworm AS base
 RUN apt-get update && apt-get install -y openssl jq
 WORKDIR /app
 COPY .yarn ./.yarn
@@ -14,7 +14,7 @@ ARG GITHUB_TOKEN
 RUN curl -L -o /tmp/desktop-client.zip --header "Authorization: Bearer ${GITHUB_TOKEN}" $(jq -r '.archive_download_url' /tmp/latest-build.json)
 RUN unzip /tmp/desktop-client.zip -d /public
 
-FROM node:18-bookworm-slim as prod
+FROM node:18-bookworm-slim AS prod
 RUN apt-get update && apt-get install tini && apt-get clean -y && rm -rf /var/lib/apt/lists/*
 
 ARG USERNAME=actual

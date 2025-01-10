@@ -2,7 +2,7 @@ import * as constants from '../constants';
 import type { Action } from '../state-types';
 import type { PrefsState } from '../state-types/prefs';
 
-const initialState: PrefsState = {
+export const initialState: PrefsState = {
   local: {},
   global: {},
   synced: {},

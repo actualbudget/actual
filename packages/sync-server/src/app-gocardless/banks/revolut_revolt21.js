@@ -8,7 +8,7 @@ export default {
 
   institutionIds: ['REVOLUT_REVOLT21'],
 
-  accessValidForDays: 90,
+  accessValidForDays: 180,
 
   normalizeTransaction(transaction, _booked) {
     if (

@@ -1,4 +1,4 @@
-FROM alpine:3.18 as base
+FROM alpine:3.18 AS base
 RUN apk add --no-cache nodejs yarn npm python3 openssl build-base
 WORKDIR /app
 COPY .yarn ./.yarn
@@ -7,7 +7,7 @@ RUN if [ "$(uname -m)" = "armv7l" ]; then yarn config set taskPoolConcurrency 2;
 RUN yarn workspaces focus --all --production
 RUN if [ "$(uname -m)" = "armv7l" ]; then npm install bcrypt better-sqlite3 --build-from-source; fi
 
-FROM alpine:3.18 as prod
+FROM alpine:3.18 AS prod
 RUN apk add --no-cache nodejs tini
 
 ARG USERNAME=actual

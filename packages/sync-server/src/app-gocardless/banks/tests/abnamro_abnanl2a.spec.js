@@ -25,9 +25,37 @@ describe('AbnamroAbnanl2a', () => {
       );
 
       expect(normalizedTransaction.remittanceInformationUnstructured).toEqual(
-        'My Payee Name 09.12.23/15:43 CITY',
+        'BEA, Betaalpas, My Payee Name,PAS123, NR:123A4B, 09.12.23/15:43, CITY',
       );
       expect(normalizedTransaction.payeeName).toEqual('My Payee Name');
+    });
+
+    it('correctly extracts the payee for google pay', () => {
+      const transaction = {
+        transactionId: '0123456789012345',
+        bookingDate: '2023-12-11',
+        valueDateTime: '2023-12-09T15:43:37.950',
+        transactionAmount: {
+          amount: '-10.00',
+          currency: 'EUR',
+        },
+        remittanceInformationUnstructuredArray: [
+          'BEA, Google Pay',
+          'CCV*Other payee name,PAS123',
+          'NR:123A4B, 09.12.23/15:43',
+          'CITY',
+        ],
+      };
+
+      const normalizedTransaction = AbnamroAbnanl2a.normalizeTransaction(
+        transaction,
+        false,
+      );
+
+      expect(normalizedTransaction.remittanceInformationUnstructured).toEqual(
+        'BEA, Google Pay, CCV*Other payee name,PAS123, NR:123A4B, 09.12.23/15:43, CITY',
+      );
+      expect(normalizedTransaction.payeeName).toEqual('Other Payee Name');
     });
   });
 });

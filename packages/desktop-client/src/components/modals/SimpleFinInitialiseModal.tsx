@@ -1,6 +1,6 @@
 // @ts-strict-ignore
 import React, { useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useTranslation, Trans } from 'react-i18next';
 
 import { getSecretsError } from 'loot-core/shared/errors';
 import { send } from 'loot-core/src/platform/client/fetch';
@@ -66,17 +66,19 @@ export const SimpleFinInitialiseModal = ({
           />
           <View style={{ display: 'flex', gap: 10 }}>
             <Text>
-              {t(
-                'In order to enable bank-sync via SimpleFIN (only for North American banks), you will need to create a token. This can be done by creating an account with',
-              )}{' '}
-              <Link
-                variant="external"
-                to="https://bridge.simplefin.org/"
-                linkColor="purple"
-              >
-                SimpleFIN
-              </Link>
-              .
+              <Trans>
+                In order to enable bank-sync via SimpleFIN (only for North
+                American banks), you will need to create a token. This can be
+                done by creating an account with{' '}
+                <Link
+                  variant="external"
+                  to="https://bridge.simplefin.org/"
+                  linkColor="purple"
+                >
+                  SimpleFIN
+                </Link>
+                .
+              </Trans>
             </Text>
 
             <FormField>
@@ -104,7 +106,7 @@ export const SimpleFinInitialiseModal = ({
                 onSubmit(close);
               }}
             >
-              {t('Save and continue')}
+              <Trans>Save and continue</Trans>
             </ButtonWithLoading>
           </ModalButtons>
         </>

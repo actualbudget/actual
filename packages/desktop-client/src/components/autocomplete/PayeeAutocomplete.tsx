@@ -12,7 +12,6 @@ import React, {
   type CSSProperties,
 } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
 
 import { css, cx } from '@emotion/css';
 
@@ -27,6 +26,7 @@ import {
 import { useAccounts } from '../../hooks/useAccounts';
 import { useCommonPayees, usePayees } from '../../hooks/usePayees';
 import { SvgAdd, SvgBookmark } from '../../icons/v1';
+import { useDispatch } from '../../redux';
 import { theme, styles } from '../../style';
 import { Button } from '../common/Button';
 import { TextOneLine } from '../common/TextOneLine';
@@ -454,12 +454,12 @@ export function PayeeAutocomplete({
                     setFocusTransferPayees(!focusTransferPayees);
                   }}
                 >
-                  <Trans>Make Transfer</Trans>
+                  <Trans>Make transfer</Trans>
                 </Button>
               )}
               {showManagePayees && (
                 <Button type="menu" onClick={() => onManagePayees()}>
-                  <Trans>Manage Payees</Trans>
+                  <Trans>Manage payees</Trans>
                 </Button>
               )}
             </AutocompleteFooter>
@@ -479,7 +479,6 @@ type CreatePayeeButtonProps = {
   style?: CSSProperties;
 };
 
-// eslint-disable-next-line import/no-unused-modules
 export function CreatePayeeButton({
   Icon,
   payeeName,

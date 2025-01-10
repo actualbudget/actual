@@ -8,10 +8,9 @@ import React, {
   useRef,
   type Dispatch,
   type ReactElement,
+  type ReactNode,
 } from 'react';
-import { useSelector } from 'react-redux';
 
-import { type State } from 'loot-core/src/client/state-types';
 import { listen } from 'loot-core/src/platform/client/fetch';
 import * as undo from 'loot-core/src/platform/client/undo';
 import { type UndoState } from 'loot-core/src/server/undo';
@@ -207,8 +206,6 @@ export function useSelected<T extends Item>(
     return () => undo.setUndoState('selectedItems', prevState);
   }, [state.selectedItems]);
 
-  const lastUndoState = useSelector((state: State) => state.app.lastUndoState);
-
   useEffect(() => {
     function onUndo({ messages, undoTag }: UndoState) {
       const tagged = undo.getTaggedState(undoTag);
@@ -230,8 +227,9 @@ export function useSelected<T extends Item>(
       }
     }
 
-    if (lastUndoState && lastUndoState.current) {
-      onUndo(lastUndoState.current);
+    const lastUndoEvent = undo.getUndoState('undoEvent');
+    if (lastUndoEvent) {
+      onUndo(lastUndoEvent);
     }
 
     return listen('undo-event', onUndo);
@@ -257,7 +255,7 @@ export function useSelectedItems() {
 type SelectedProviderProps<T extends Item> = {
   instance: ReturnType<typeof useSelected<T>>;
   fetchAllIds?: () => Promise<string[]>;
-  children: ReactElement;
+  children: ReactNode;
 };
 
 export function SelectedProvider<T extends Item>({

@@ -2,15 +2,20 @@ import { v4 as uuidv4 } from 'uuid';
 
 import type * as T from '.';
 
+type UndoStateWithId = T.UndoState & {
+  id?: ReturnType<typeof uuidv4>;
+};
+
 // List of recently used states. We don't use a true MRU structure
 // because our needs are simple and we also do some custom reordering.
 const HISTORY_SIZE = 40;
-let UNDO_STATE_MRU: T.UndoState[] = [];
+let UNDO_STATE_MRU: UndoStateWithId[] = [];
 
-const currentUndoState: T.UndoState = {
+const currentUndoState: UndoStateWithId = {
   url: null,
   openModal: null,
   selectedItems: null,
+  undoEvent: null,
 };
 
 export const setUndoState: T.SetUndoState = function (name, value) {

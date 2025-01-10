@@ -5,7 +5,6 @@ import React, {
   useMemo,
   useState,
 } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 
 import {
   collapseModals,
@@ -38,6 +37,7 @@ import { useAccountPreviewTransactions } from '../../../hooks/useAccountPreviewT
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import { useFailedAccounts } from '../../../hooks/useFailedAccounts';
 import { useNavigate } from '../../../hooks/useNavigate';
+import { useSelector, useDispatch } from '../../../redux';
 import { styles, theme } from '../../../style';
 import { Button } from '../../common/Button2';
 import { Text } from '../../common/Text';
@@ -267,8 +267,9 @@ function TransactionListWithPreviews({
   }, [accountId, dispatch]);
 
   useEffect(() => {
-    return listen('sync-event', ({ type, tables }) => {
-      if (type === 'applied') {
+    return listen('sync-event', event => {
+      if (event.type === 'applied') {
+        const tables = event.tables;
         if (
           tables.includes('transactions') ||
           tables.includes('category_mapping') ||

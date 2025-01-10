@@ -1,4 +1,4 @@
-FROM node:18-bookworm as base
+FROM node:18-bookworm AS base
 RUN apt-get update && apt-get install -y openssl
 WORKDIR /app
 COPY .yarn ./.yarn
@@ -6,7 +6,7 @@ COPY yarn.lock package.json .yarnrc.yml ./
 RUN if [ "$(uname -m)" = "armv7l" ]; then yarn config set taskPoolConcurrency 2; yarn config set networkConcurrency 5; fi
 RUN yarn workspaces focus --all --production
 
-FROM node:18-bookworm-slim as prod
+FROM node:18-bookworm-slim AS prod
 RUN apt-get update && apt-get install tini && apt-get clean -y && rm -rf /var/lib/apt/lists/*
 
 ARG USERNAME=actual

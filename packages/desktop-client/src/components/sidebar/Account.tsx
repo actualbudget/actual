@@ -1,15 +1,26 @@
 // @ts-strict-ignore
-import React, { type CSSProperties } from 'react';
+import React, { type CSSProperties, useRef, useState } from 'react';
 
 import { css, cx } from '@emotion/css';
 
+import {
+  openAccountCloseModal,
+  reopenAccount,
+  updateAccount,
+} from 'loot-core/client/actions';
 import * as Platform from 'loot-core/client/platform';
 import { type AccountEntity } from 'loot-core/src/types/models';
 
+import { useContextMenu } from '../../hooks/useContextMenu';
 import { useNotes } from '../../hooks/useNotes';
+import { useDispatch } from '../../redux';
 import { styles, theme } from '../../style';
 import { AlignedText } from '../common/AlignedText';
+import { InitialFocus } from '../common/InitialFocus';
+import { Input } from '../common/Input';
 import { Link } from '../common/Link';
+import { Menu } from '../common/Menu';
+import { Popover } from '../common/Popover';
 import { Text } from '../common/Text';
 import { Tooltip } from '../common/Tooltip';
 import { View } from '../common/View';
@@ -74,6 +85,10 @@ export function Account<FieldName extends SheetFields<'account'>>({
         : 'account-onbudget'
     : 'title';
 
+  const triggerRef = useRef(null);
+  const { setMenuOpen, menuOpen, handleContextMenu, position } =
+    useContextMenu();
+
   const { dragRef } = useDraggable({
     type,
     onDragChange,
@@ -87,17 +102,26 @@ export function Account<FieldName extends SheetFields<'account'>>({
     onDrop,
   });
 
+  const dispatch = useDispatch();
+
+  const [isEditing, setIsEditing] = useState(false);
+
   const accountNote = useNotes(`account-${account?.id}`);
   const needsTooltip = !!account?.id;
 
   const accountRow = (
-    <View innerRef={dropRef} style={{ flexShrink: 0, ...outerStyle }}>
-      <View>
+    <View
+      innerRef={dropRef}
+      style={{ flexShrink: 0, ...outerStyle }}
+      onContextMenu={needsTooltip ? handleContextMenu : undefined}
+    >
+      <View innerRef={triggerRef}>
         <DropHighlight pos={dropPos} />
         <View innerRef={dragRef}>
           <Link
             variant="internal"
             to={to}
+            isDisabled={isEditing}
             style={{
               ...accountNameStyle,
               ...style,
@@ -158,10 +182,76 @@ export function Account<FieldName extends SheetFields<'account'>>({
                   paddingBottom: '3px',
                 }
               }
-              left={name}
+              left={
+                isEditing ? (
+                  <InitialFocus>
+                    <Input
+                      style={{
+                        padding: 0,
+                        width: '100%',
+                      }}
+                      onBlur={() => setIsEditing(false)}
+                      onEnter={e => {
+                        const inputEl = e.target as HTMLInputElement;
+                        const newAccountName = inputEl.value;
+                        if (newAccountName.trim() !== '') {
+                          dispatch(
+                            updateAccount({
+                              ...account,
+                              name: newAccountName,
+                            }),
+                          );
+                        }
+                        setIsEditing(false);
+                      }}
+                      onEscape={() => setIsEditing(false)}
+                      defaultValue={name}
+                    />
+                  </InitialFocus>
+                ) : (
+                  name
+                )
+              }
               right={<CellValue binding={query} type="financial" />}
             />
           </Link>
+          {account && (
+            <Popover
+              triggerRef={triggerRef}
+              placement="bottom start"
+              isOpen={menuOpen}
+              onOpenChange={() => setMenuOpen(false)}
+              style={{ width: 200, margin: 1 }}
+              isNonModal
+              {...position}
+            >
+              <Menu
+                onMenuSelect={type => {
+                  switch (type) {
+                    case 'close': {
+                      dispatch(openAccountCloseModal(account.id));
+                      break;
+                    }
+                    case 'reopen': {
+                      dispatch(reopenAccount(account.id));
+                      break;
+                    }
+                    case 'rename': {
+                      setIsEditing(true);
+                      break;
+                    }
+                  }
+                  setMenuOpen(false);
+                }}
+                items={[
+                  { name: 'rename', text: 'Rename' },
+                  account.closed
+                    ? { name: 'reopen', text: 'Reopen' }
+                    : { name: 'close', text: 'Close' },
+                ]}
+              />
+            </Popover>
+          )}
         </View>
       </View>
     </View>
@@ -202,6 +292,7 @@ export function Account<FieldName extends SheetFields<'account'>>({
       placement="right top"
       triggerProps={{
         delay: 1000,
+        isDisabled: menuOpen,
       }}
     >
       {accountRow}

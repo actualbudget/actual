@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useMemo, type CSSProperties } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
 
 import { parseISO } from 'date-fns';
@@ -22,6 +21,7 @@ import { SvgEquals } from '../../../icons/v1';
 import { SvgCloseParenthesis } from '../../../icons/v2/CloseParenthesis';
 import { SvgOpenParenthesis } from '../../../icons/v2/OpenParenthesis';
 import { SvgSum } from '../../../icons/v2/Sum';
+import { useDispatch } from '../../../redux';
 import { theme } from '../../../style';
 import { Button } from '../../common/Button2';
 import { Text } from '../../common/Text';

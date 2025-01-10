@@ -1,7 +1,6 @@
 // @ts-strict-ignore
 import React, { useEffect } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
 
 import { createBudget, loggedIn } from 'loot-core/client/actions';
 import {
@@ -11,6 +10,7 @@ import {
 
 import { useGlobalPref } from '../../hooks/useGlobalPref';
 import { useNavigate } from '../../hooks/useNavigate';
+import { useDispatch } from '../../redux';
 import { theme } from '../../style';
 import { Button } from '../common/Button2';
 import { Text } from '../common/Text';
