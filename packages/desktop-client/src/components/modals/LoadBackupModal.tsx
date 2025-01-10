@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { loadBackup, makeBackup } from 'loot-core/client/budgets/budgetsSlice';
 import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
 import { type Backup } from 'loot-core/server/backups';
-import { send, listen, unlisten } from 'loot-core/src/platform/client/fetch';
+import { send, listen } from 'loot-core/src/platform/client/fetch';
 
 import { useMetadataPref } from '../../hooks/useMetadataPref';
 import { useDispatch } from '../../redux';
