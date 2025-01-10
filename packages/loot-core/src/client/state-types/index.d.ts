@@ -1,6 +1,5 @@
 import type * as constants from '../constants';
 
-import type { AppActions, AppState } from './app';
 import type { BudgetsActions, BudgetsState } from './budgets';
 import type { ModalsActions, ModalsState } from './modals';
 import type { NotificationsActions, NotificationsState } from './notifications';
@@ -12,7 +11,6 @@ export type CloseBudgetAction = {
 };
 
 export type Action =
-  | AppActions
   | BudgetsActions
   | ModalsActions
   | NotificationsActions
@@ -21,7 +19,6 @@ export type Action =
   | CloseBudgetAction;
 
 export type State = {
-  app: AppState;
   budgets: BudgetsState;
   modals: ModalsState;
   notifications: NotificationsState;
