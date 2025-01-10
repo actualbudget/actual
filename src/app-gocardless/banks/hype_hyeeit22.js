@@ -8,7 +8,7 @@ export default {
 
   institutionIds: ['HYPE_HYEEIT22'],
 
-  accessValidForDays: 90,
+  accessValidForDays: 180,
 
   normalizeTransaction(transaction, _booked) {
     /** Online card payments - identified by "crd" transaction code

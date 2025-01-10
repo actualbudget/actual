@@ -1,4 +1,4 @@
-import Nationwide from '../nationwide-naiagb21.js';
+import Nationwide from '../nationwide_naiagb21.js';
 import { mockTransactionAmount } from '../../services/tests/fixtures.js';
 
 describe('Nationwide', () => {

@@ -1,6 +1,6 @@
 import Fallback from './integration-bank.js';
 
-import { printIban, amountToInteger } from '../utils.js';
+import { amountToInteger } from '../utils.js';
 import { formatPayeeName } from '../../util/payee-name.js';
 
 /** @type {import('./bank.interface.js').IBank} */
@@ -10,18 +10,6 @@ export default {
   institutionIds: ['MBANK_RETAIL_BREXPLPW'],
 
   accessValidForDays: 179,
-
-  normalizeAccount(account) {
-    return {
-      account_id: account.id,
-      institution: account.institution,
-      mask: account.iban.slice(-4),
-      iban: account.iban,
-      name: [account.displayName, printIban(account)].join(' '),
-      official_name: account.product,
-      type: 'checking',
-    };
-  },
 
   normalizeTransaction(transaction, _booked) {
     return {

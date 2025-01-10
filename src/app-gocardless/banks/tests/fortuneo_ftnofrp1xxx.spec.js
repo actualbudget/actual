@@ -1,4 +1,4 @@
-import Fortuneo from '../FORTUNEO_FTNOFRP1XXX.js';
+import Fortuneo from '../fortuneo_ftnofrp1xxx.js';
 
 describe('Fortuneo', () => {
   describe('#normalizeTransaction', () => {

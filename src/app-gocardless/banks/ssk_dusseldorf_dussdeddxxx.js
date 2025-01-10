@@ -6,6 +6,8 @@ export default {
 
   institutionIds: ['SSK_DUSSELDORF_DUSSDEDDXXX'],
 
+  accessValidForDays: 180,
+
   normalizeTransaction(transaction, _booked) {
     // Prioritize unstructured information, falling back to structured formats
     let remittanceInformationUnstructured =

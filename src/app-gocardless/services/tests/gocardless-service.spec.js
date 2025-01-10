@@ -130,12 +130,12 @@ describe('goCardlessService', () => {
           expect.objectContaining({
             account_id: mockDetailedAccountExample1.id,
             institution: mockInstitution,
-            official_name: expect.stringContaining('integration-'), // It comes from IntegrationBank
+            official_name: 'Savings Account for Individuals (Retail)',
           }),
           expect.objectContaining({
             account_id: mockDetailedAccountExample2.id,
             institution: mockInstitution,
-            official_name: expect.stringContaining('integration-'), // It comes from IntegrationBank
+            official_name: 'Savings Account for Individuals (Retail)',
           }),
         ]),
       );

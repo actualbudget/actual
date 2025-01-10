@@ -1,4 +1,4 @@
-import Sabadell from '../bancsabadell-bsabesbbb.js';
+import Sabadell from '../bancsabadell_bsabesbbb.js';
 
 describe('BancSabadell', () => {
   describe('#normalizeTransaction', () => {

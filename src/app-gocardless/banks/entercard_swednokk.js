@@ -1,30 +1,17 @@
 import * as d from 'date-fns';
-import {
-  amountToInteger,
-  printIban,
-  sortByBookingDateOrValueDate,
-} from '../utils.js';
+
+import Fallback from './integration-bank.js';
+
+import { amountToInteger } from '../utils.js';
 import { formatPayeeName } from '../../util/payee-name.js';
 
 /** @type {import('./bank.interface.js').IBank} */
 export default {
+  ...Fallback,
+
   institutionIds: ['ENTERCARD_SWEDNOKK'],
 
   accessValidForDays: 180,
-
-  normalizeAccount(account) {
-    return {
-      account_id: account.id,
-      institution: account.institution,
-      mask: (account?.iban || '0000').slice(-4),
-      iban: account?.iban || null,
-      name: [account.name, printIban(account), account.currency]
-        .filter(Boolean)
-        .join(' '),
-      official_name: `integration-${account.institution_id}`,
-      type: 'checking',
-    };
-  },
 
   normalizeTransaction(transaction, _booked) {
     // GoCardless's Entercard integration returns forex transactions with the
@@ -45,10 +32,6 @@ export default {
       payeeName: formatPayeeName(transaction),
       date: d.format(d.parseISO(transaction.valueDate), 'yyyy-MM-dd'),
     };
-  },
-
-  sortTransactions(transactions = []) {
-    return sortByBookingDateOrValueDate(transactions);
   },
 
   calculateStartingBalance(sortedTransactions = [], balances = []) {

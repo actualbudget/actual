@@ -6,8 +6,6 @@ export default {
 
   institutionIds: ['VIRGIN_NRNBGB22'],
 
-  accessValidForDays: 90,
-
   normalizeTransaction(transaction, booked) {
     const transferPrefixes = ['MOB', 'FPS'];
     const methodRegex = /^(Card|WLT)\s\d+/;

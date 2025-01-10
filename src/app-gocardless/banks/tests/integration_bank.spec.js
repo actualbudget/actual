@@ -23,7 +23,7 @@ describe('IntegrationBank', () => {
         mask: '4321',
         iban: account.iban,
         name: 'account-example-one (XXX 4321) PLN',
-        official_name: 'integration-SANDBOXFINANCE_SFIN0000',
+        official_name: 'Savings Account for Individuals (Retail)',
         type: 'checking',
       });
     });
@@ -39,7 +39,7 @@ describe('IntegrationBank', () => {
         mask: '0000',
         iban: null,
         name: 'account-example-one PLN',
-        official_name: 'integration-SANDBOXFINANCE_SFIN0000',
+        official_name: 'Savings Account for Individuals (Retail)',
         type: 'checking',
       });
     });

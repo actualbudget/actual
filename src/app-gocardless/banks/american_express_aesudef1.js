@@ -13,17 +13,13 @@ export default {
 
   normalizeAccount(account) {
     return {
-      account_id: account.id,
-      institution: account.institution,
+      ...Fallback.normalizeAccount(account),
       // The `iban` field for these American Express cards is actually a masked
       // version of the PAN.  No IBAN is provided.
       mask: account.iban.slice(-5),
       iban: null,
       name: [account.details, `(${account.iban.slice(-5)})`].join(' '),
       official_name: account.details,
-      // The Actual account `type` field is legacy and is currently not used
-      // for anything, so we leave it as the default of `checking`.
-      type: 'checking',
     };
   },
 

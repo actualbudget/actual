@@ -6,8 +6,6 @@ export default {
 
   institutionIds: ['NATIONWIDE_NAIAGB21'],
 
-  accessValidForDays: 90,
-
   normalizeTransaction(transaction, booked) {
     // Nationwide can sometimes return pending transactions with a date
     // representing the latest a transaction could be booked. This stops

@@ -1,4 +1,4 @@
-import SandboxfinanceSfin0000 from '../sandboxfinance-sfin0000.js';
+import SandboxfinanceSfin0000 from '../sandboxfinance_sfin0000.js';
 
 describe('SandboxfinanceSfin0000', () => {
   describe('#normalizeAccount', () => {
@@ -48,7 +48,7 @@ describe('SandboxfinanceSfin0000', () => {
               "transaction_total_days": "90",
             },
             "mask": "4724",
-            "name": "Main Account (XXX 4724)",
+            "name": "Main Account (XXX 4724) EUR",
             "official_name": "Checkings",
             "type": "checking",
           }

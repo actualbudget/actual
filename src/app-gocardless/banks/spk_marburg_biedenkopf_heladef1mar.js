@@ -1,7 +1,7 @@
+import d from 'date-fns';
+
 import Fallback from './integration-bank.js';
 
-import d from 'date-fns';
-import { printIban } from '../utils.js';
 import { formatPayeeName } from '../../util/payee-name.js';
 
 /** @type {import('./bank.interface.js').IBank} */
@@ -11,20 +11,6 @@ export default {
   institutionIds: ['SPK_MARBURG_BIEDENKOPF_HELADEF1MAR'],
 
   accessValidForDays: 180,
-
-  normalizeAccount(account) {
-    return {
-      account_id: account.id,
-      institution: account.institution,
-      mask: (account?.iban || '0000').slice(-4),
-      iban: account?.iban || null,
-      name: [account.product, printIban(account), account.currency]
-        .filter(Boolean)
-        .join(' '),
-      official_name: account.product,
-      type: 'checking',
-    };
-  },
 
   normalizeTransaction(transaction, _booked) {
     const date =

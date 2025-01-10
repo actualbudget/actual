@@ -1,4 +1,4 @@
-import EasybankBawaatww from '../easybank-bawaatww.js';
+import EasybankBawaatww from '../easybank_bawaatww.js';
 import { mockTransactionAmount } from '../../services/tests/fixtures.js';
 
 describe('easybank', () => {

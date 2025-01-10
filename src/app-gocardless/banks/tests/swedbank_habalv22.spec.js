@@ -1,4 +1,4 @@
-import SwedbankHabaLV22 from '../swedbank-habalv22.js';
+import SwedbankHabaLV22 from '../swedbank_habalv22.js';
 
 describe('#normalizeTransaction', () => {
   const bookedCardTransaction = {

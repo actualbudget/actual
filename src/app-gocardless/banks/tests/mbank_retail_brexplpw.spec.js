@@ -1,4 +1,4 @@
-import MbankRetailBrexplpw from '../mbank-retail-brexplpw.js';
+import MbankRetailBrexplpw from '../mbank_retail_brexplpw.js';
 
 describe('MbankRetailBrexplpw', () => {
   describe('#normalizeAccount', () => {
@@ -65,7 +65,7 @@ describe('MbankRetailBrexplpw', () => {
                       "transaction_total_days": "90",
                     },
                     "mask": "4321",
-                    "name": "EKONTO (XXX 4321)",
+                    "name": "EKONTO (XXX 4321) PLN",
                     "official_name": "RACHUNEK BIEŻĄCY",
                     "type": "checking",
                   }

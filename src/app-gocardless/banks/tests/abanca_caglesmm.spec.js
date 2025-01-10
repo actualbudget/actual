@@ -1,4 +1,4 @@
-import Abanca from '../abanca-caglesmm.js';
+import Abanca from '../abanca_caglesmm.js';
 import { mockTransactionAmount } from '../../services/tests/fixtures.js';
 
 describe('Abanca', () => {

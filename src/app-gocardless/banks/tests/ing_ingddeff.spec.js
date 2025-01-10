@@ -1,4 +1,4 @@
-import IngIngddeff from '../ing-ingddeff.js';
+import IngIngddeff from '../ing_ingddeff.js';
 
 describe('IngIngddeff', () => {
   describe('#normalizeAccount', () => {
@@ -61,7 +61,7 @@ describe('IngIngddeff', () => {
           transaction_total_days: '390',
         },
         mask: '5030',
-        name: 'Girokonto (XXX 5030)',
+        name: 'Girokonto (XXX 5030) EUR',
         official_name: 'Girokonto',
         type: 'checking',
       });
