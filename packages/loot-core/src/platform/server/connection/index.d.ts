@@ -9,7 +9,7 @@ export type Init = typeof init;
 
 export function send<K extends keyof ServerEvents>(
   type: K,
-  args?: ServerEvents[k],
+  args?: ServerEvents[K],
 ): void;
 export type Send = typeof send;
 

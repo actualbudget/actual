@@ -533,7 +533,7 @@ async function advanceSchedulesService(syncSuccess) {
   }
 
   if (failedToPost.length > 0) {
-    connection.send('schedules-offline', { payees: failedToPost });
+    connection.send('schedules-offline');
   } else if (didPost) {
     // This forces a full refresh of transactions because it
     // simulates them coming in from a full sync. This not a
@@ -542,7 +542,7 @@ async function advanceSchedulesService(syncSuccess) {
     connection.send('sync-event', {
       type: 'success',
       tables: ['transactions'],
-      syncDisabled: 'false',
+      syncDisabled: false,
     });
   }
 }

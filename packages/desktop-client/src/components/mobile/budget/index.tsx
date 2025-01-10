@@ -69,15 +69,17 @@ export function Budget() {
 
     init();
 
-    const unlisten = listen('sync-event', ({ type, tables }) => {
-      if (
-        type === 'success' &&
-        (tables.includes('categories') ||
+    const unlisten = listen('sync-event', event => {
+      if (event.type === 'success') {
+        const tables = event.tables;
+        if (
+          tables.includes('categories') ||
           tables.includes('category_mapping') ||
-          tables.includes('category_groups'))
-      ) {
-        // TODO: is this loading every time?
-        dispatch(getCategories());
+          tables.includes('category_groups')
+        ) {
+          // TODO: is this loading every time?
+          dispatch(getCategories());
+        }
       }
     });
 

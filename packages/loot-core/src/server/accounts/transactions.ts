@@ -1,7 +1,7 @@
 // @ts-strict-ignore
 import * as connection from '../../platform/server/connection';
 import { Diff } from '../../shared/util';
-import { TransactionEntity } from '../../types/models';
+import { PayeeEntity, TransactionEntity } from '../../types/models';
 import * as db from '../db';
 import { incrFetch, whereIn } from '../db/util';
 import { batchMessages } from '../sync';
@@ -55,7 +55,7 @@ export async function batchUpdateTransactions({
     ? await idsWithChildren(deleted.map(d => d.id))
     : [];
 
-  const oldPayees = new Set();
+  const oldPayees = new Set<PayeeEntity['id']>();
   const accounts = await db.all('SELECT * FROM accounts WHERE tombstone = 0');
 
   // We need to get all the payees of updated transactions _before_

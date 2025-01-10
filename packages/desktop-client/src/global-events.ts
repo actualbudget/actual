@@ -21,19 +21,20 @@ export function handleGlobalEvents(actions: BoundActions, store: Store<State>) {
     });
   });
 
-  listen('schedules-offline', ({ payees }) => {
-    actions.pushModal('schedule-posts-offline-notification', { payees });
+  listen('schedules-offline', () => {
+    actions.pushModal('schedule-posts-offline-notification');
   });
 
   // This is experimental: we sync data locally automatically when
   // data changes from the backend
-  listen('sync-event', async ({ type, tables }) => {
+  listen('sync-event', async event => {
     // We don't need to query anything until the file is loaded, and
     // sync events might come in if the file is being synced before
     // being loaded (happens when downloading)
     const prefs = store.getState().prefs.local;
     if (prefs && prefs.id) {
-      if (type === 'applied') {
+      if (event.type === 'applied') {
+        const tables = event.tables;
         if (tables.includes('payees') || tables.includes('payee_mapping')) {
           actions.getPayees();
         }

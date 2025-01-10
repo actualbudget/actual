@@ -47,6 +47,9 @@ describe('Condition', () => {
 
     cond = new Condition('is', 'payee', null, null);
     expect(cond.eval({ payee: null })).toBe(true);
+
+    cond = new Condition('is', 'notes', '', null);
+    expect(cond.eval({ notes: null })).toBe(true);
   });
 
   test('ops handles undefined fields', () => {

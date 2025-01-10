@@ -35,11 +35,11 @@ repeat 'repeat interval'
   / 'year'i { return { annual: true }}
   / years: positive _ 'years'i { return { annual: true, repeat: +years }}
 
-limit =  _? upTo _ amount: amount _ 'per week starting'i _ start:date _? hold:hold? 
+limit =  _? upTo _ amount: amount _ 'per week starting'i _ start:date _? hold:hold?
           { return {amount: amount, hold: hold, period: 'weekly', start: start }}
         / _? upTo _ amount: amount _ 'per day'i _? hold: hold?
           { return {amount: amount, hold: hold, period: 'daily', start:null }}
-        / _? upTo _ amount: amount _? hold: hold? 
+        / _? upTo _ amount: amount _? hold: hold?
           { return {amount: amount, hold: hold, period: 'monthly', start:null }}
 
 percentOf = percent:percent _ of _ 'previous'i _ { return { percent: percent, prev: true}}

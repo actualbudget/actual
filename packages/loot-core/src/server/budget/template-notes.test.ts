@@ -75,6 +75,26 @@ describe('storeTemplates', () => {
     },
     {
       description:
+        'Stores template when prefix is used with valid template notes',
+      mockTemplateNotes: [
+        {
+          id: 'cat1',
+          name: 'Category 1',
+          note: 'test: #template 12',
+        },
+      ],
+      expectedTemplates: [
+        {
+          type: 'simple',
+          monthly: 12,
+          limit: null,
+          priority: 0,
+          directive: 'template',
+        },
+      ],
+    },
+    {
+      description:
         'Stores templates for categories with valid goal directive template notes',
       mockTemplateNotes: [
         {
