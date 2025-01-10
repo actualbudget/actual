@@ -1,7 +1,10 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { replaceModal } from 'loot-core/src/client/actions/modals';
+import {
+  type Modal as ModalType,
+  replaceModal,
+} from 'loot-core/client/modals/modalsSlice';
 import { send } from 'loot-core/src/platform/client/fetch';
 import { type PayeeEntity } from 'loot-core/types/models';
 
@@ -17,10 +20,10 @@ import { View } from '../common/View';
 
 const highlightStyle = { color: theme.pageTextPositive };
 
-type MergeUnusedPayeesModalProps = {
-  payeeIds: Array<PayeeEntity['id']>;
-  targetPayeeId: PayeeEntity['id'];
-};
+type MergeUnusedPayeesModalProps = Extract<
+  ModalType,
+  { name: 'merge-unused-payees' }
+>['options'];
 
 export function MergeUnusedPayeesModal({
   payeeIds,
@@ -81,7 +84,7 @@ export function MergeUnusedPayeesModal({
 
       if (ruleId) {
         const rule = await send('rule-get', { id: ruleId });
-        dispatch(replaceModal('edit-rule', { rule }));
+        dispatch(replaceModal({ name: 'edit-rule', options: { rule } }));
       }
     },
     [onMerge, dispatch],

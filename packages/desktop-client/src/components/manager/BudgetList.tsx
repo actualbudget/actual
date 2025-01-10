@@ -7,7 +7,7 @@ import React, {
 } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
-import { getUserData, pushModal } from 'loot-core/client/actions';
+import { getUserData } from 'loot-core/client/actions';
 import {
   closeAndDownloadBudget,
   closeAndLoadBudget,
@@ -16,6 +16,7 @@ import {
   loadAllFiles,
   loadBudget,
 } from 'loot-core/client/budgets/budgetsSlice';
+import { pushModal } from 'loot-core/client/modals/modalsSlice';
 import {
   isElectron,
   isNonProductionEnvironment,
@@ -589,7 +590,7 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
         <BudgetListHeader
           quickSwitchMode={quickSwitchMode}
           onRefresh={refresh}
-          onOpenSettings={() => dispatch(pushModal('files-settings'))}
+          onOpenSettings={() => dispatch(pushModal({ name: 'files-settings' }))}
         />
       )}
       <BudgetFiles
@@ -598,11 +599,16 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
         quickSwitchMode={quickSwitchMode}
         onSelect={onSelect}
         onDelete={(file: File) =>
-          dispatch(pushModal('delete-budget', { file }))
+          dispatch(pushModal({ name: 'delete-budget', options: { file } }))
         }
         onDuplicate={(file: File) => {
           if (file && 'id' in file) {
-            dispatch(pushModal('duplicate-budget', { file, managePage: true }));
+            dispatch(
+              pushModal({
+                name: 'duplicate-budget',
+                options: { file, managePage: true },
+              }),
+            );
           } else {
             console.error(
               'Attempted to duplicate a cloud file - only local files are supported. Cloud file:',
@@ -628,7 +634,7 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
               color: theme.pageTextLight,
             }}
             onPress={() => {
-              dispatch(pushModal('import'));
+              dispatch(pushModal({ name: 'import' }));
             }}
           >
             <Trans>Import file</Trans>

@@ -1,5 +1,6 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
+import { type AtLeastOne } from '../../types/util';
 import { createAppAsyncThunk } from '../redux';
 
 const sliceName = 'app';
@@ -30,7 +31,9 @@ export const updateApp = createAppAsyncThunk(
   },
 );
 
-type SetAppStatePayload = Partial<AppState>;
+// Workaround for partial types in actions.
+// https://github.com/reduxjs/redux-toolkit/issues/1423#issuecomment-902680573
+type SetAppStatePayload = AtLeastOne<AppState>;
 
 const appSlice = createSlice({
   name: sliceName,

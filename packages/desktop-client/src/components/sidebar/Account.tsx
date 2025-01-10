@@ -3,7 +3,7 @@ import React, { type CSSProperties, useRef, useState } from 'react';
 
 import { css, cx } from '@emotion/css';
 
-import { openAccountCloseModal } from 'loot-core/client/actions';
+import { openAccountCloseModal } from 'loot-core/client/modals/modalsSlice';
 import * as Platform from 'loot-core/client/platform';
 import {
   reopenAccount,
@@ -231,7 +231,9 @@ export function Account<FieldName extends SheetFields<'account'>>({
                 onMenuSelect={type => {
                   switch (type) {
                     case 'close': {
-                      dispatch(openAccountCloseModal(account.id));
+                      dispatch(
+                        openAccountCloseModal({ accountId: account.id }),
+                      );
                       break;
                     }
                     case 'reopen': {

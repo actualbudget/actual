@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 
+import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
 import { getSecretsError } from 'loot-core/shared/errors';
 import { send } from 'loot-core/src/platform/client/fetch';
 
@@ -20,13 +21,14 @@ import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { FormField, FormLabel } from '../forms';
 
-type GoCardlessInitialiseProps = {
-  onSuccess: () => void;
-};
+type GoCardlessInitialiseModalProps = Extract<
+  ModalType,
+  { name: 'gocardless-init' }
+>['options'];
 
 export const GoCardlessInitialiseModal = ({
   onSuccess,
-}: GoCardlessInitialiseProps) => {
+}: GoCardlessInitialiseModalProps) => {
   const { t } = useTranslation();
   const [secretId, setSecretId] = useState('');
   const [secretKey, setSecretKey] = useState('');

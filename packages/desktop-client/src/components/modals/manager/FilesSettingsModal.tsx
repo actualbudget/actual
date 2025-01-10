@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
-import { pushModal } from 'loot-core/client/actions';
 import { loadAllFiles } from 'loot-core/client/budgets/budgetsSlice';
+import { pushModal } from 'loot-core/client/modals/modalsSlice';
 
 import { useGlobalPref } from '../../../hooks/useGlobalPref';
 import { SvgPencil1 } from '../../../icons/v2';
@@ -28,9 +28,12 @@ function FileLocationSettings() {
       setDirChanged(true);
 
       dispatch(
-        pushModal('confirm-change-document-dir', {
-          currentBudgetDirectory: documentDir,
-          newDirectory: chosenDirectory[0],
+        pushModal({
+          name: 'confirm-change-document-dir',
+          options: {
+            currentBudgetDirectory: documentDir,
+            newDirectory: chosenDirectory[0],
+          },
         }),
       );
     }
