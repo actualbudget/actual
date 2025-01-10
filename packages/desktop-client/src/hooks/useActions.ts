@@ -25,6 +25,7 @@ export type BoundActions = {
  * @deprecated please use actions directly with `useAppDispatch`
  * @see https://github.com/reduxjs/react-redux/issues/1252#issuecomment-488160930
  **/
+
 export function useActions() {
   const dispatch = useDispatch();
   return useMemo(() => {

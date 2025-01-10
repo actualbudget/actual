@@ -22,7 +22,7 @@ import {
 import { integerToCurrency } from 'loot-core/src/shared/util';
 
 import { AuthProvider } from '../../auth/AuthProvider';
-import { SelectedProviderWithItems } from '../../hooks/useSelected';
+import { SelectedProvider, useSelected } from '../../hooks/useSelected';
 import { SplitsExpandedProvider } from '../../hooks/useSplitsExpanded';
 import { TestProvider } from '../../redux/mock';
 import { ResponsiveProvider } from '../responsive/ResponsiveProvider';
@@ -110,6 +110,20 @@ function generateTransactions(count, splitAtIndexes = [], showError = false) {
   return transactions;
 }
 
+// This is needed because useSelected needs redux access.
+// This provider needs to be a child of the redux TestProvider.
+function TestSelectedProvider({ transactions, children }) {
+  const selectedInst = useSelected('transactions', transactions);
+  return (
+    <SelectedProvider
+      instance={selectedInst}
+      fetchAllIds={() => transactions.map(t => t.id)}
+    >
+      {children}
+    </SelectedProvider>
+  );
+}
+
 function LiveTransactionTable(props) {
   const [transactions, setTransactions] = useState(props.transactions);
 
@@ -152,11 +166,7 @@ function LiveTransactionTable(props) {
         <AuthProvider>
           <SpreadsheetProvider>
             <SchedulesProvider>
-              <SelectedProviderWithItems
-                name="transactions"
-                items={transactions}
-                fetchAllIds={() => transactions.map(t => t.id)}
-              >
+              <TestSelectedProvider transactions={transactions}>
                 <SplitsExpandedProvider>
                   <TransactionTable
                     {...props}
@@ -164,17 +174,14 @@ function LiveTransactionTable(props) {
                     loadMoreTransactions={() => {}}
                     commonPayees={[]}
                     payees={payees}
-                    addNotification={n => console.log(n)}
                     onSave={onSave}
                     onSplit={onSplit}
                     onAdd={onAdd}
                     onAddSplit={onAddSplit}
                     onCreatePayee={onCreatePayee}
-                    showSelection={true}
-                    allowSplitTransaction={true}
                   />
                 </SplitsExpandedProvider>
-              </SelectedProviderWithItems>
+              </TestSelectedProvider>
             </SchedulesProvider>
           </SpreadsheetProvider>
         </AuthProvider>

@@ -14,7 +14,7 @@ export function summarySpreadsheet(
   start: string,
   end: string,
   conditions: RuleConditionEntity[] = [],
-  conditionsOp: 'and' | 'or' = 'and',
+  conditionsOp: RuleConditionEntity['conditionsOp'] = 'and',
   summaryContent: SummaryContent,
 ) {
   return async (
