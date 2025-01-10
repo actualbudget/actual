@@ -723,7 +723,6 @@ export default [
       'packages/desktop-client/src/components/budget/envelope/HoldMenu.tsx',
       'packages/desktop-client/src/components/budget/envelope/TransferMenu.tsx',
       'packages/desktop-client/src/components/common/Menu.tsx',
-      'packages/desktop-client/src/components/FinancesApp.tsx',
       'packages/desktop-client/src/components/GlobalKeys.ts',
       'packages/desktop-client/src/components/LoggedInUser.tsx',
       'packages/desktop-client/src/components/manager/ManagementApp.jsx',
