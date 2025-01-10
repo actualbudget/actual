@@ -126,7 +126,7 @@ export function Modals() {
           return (
             <SelectLinkedAccountsModal
               key={name}
-              externalAccounts={modal.options.accounts}
+              externalAccounts={modal.options.externalAccounts}
               requisitionId={modal.options.requisitionId}
               syncSource={modal.options.syncSource}
             />
@@ -189,7 +189,7 @@ export function Modals() {
           return (
             <EditRuleModal
               key={name}
-              defaultRule={modal.options.rule}
+              rule={modal.options.rule}
               onSave={modal.options.onSave}
             />
           );
