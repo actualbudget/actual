@@ -5,7 +5,7 @@ import { closeBudget, popModal } from 'loot-core/client/actions';
 import { send } from 'loot-core/platform/client/fetch';
 import * as asyncStorage from 'loot-core/src/platform/server/asyncStorage';
 
-import { useAppDispatch } from '../../redux';
+import { useDispatch } from '../../redux';
 import { theme, styles } from '../../style';
 import { Error as ErrorAlert } from '../alerts';
 import { Button } from '../common/Button2';
@@ -31,7 +31,7 @@ export function PasswordEnableModal({
   onSave: originalOnSave,
 }: PasswordEnableModalProps) {
   const { t } = useTranslation();
-  const dispatch = useAppDispatch();
+  const dispatch = useDispatch();
 
   const [error, setError] = useState<string | null>(null);
   const multiuserEnabled = useMultiuserEnabled();
