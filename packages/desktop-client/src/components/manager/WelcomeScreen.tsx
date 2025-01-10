@@ -1,7 +1,8 @@
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
-import { createBudget, pushModal } from 'loot-core/client/actions';
+import { pushModal } from 'loot-core/client/actions';
+import { createBudget } from 'loot-core/client/budgets/budgetsSlice';
 
 import { useDispatch } from '../../redux';
 import { styles, theme } from '../../style';
@@ -95,7 +96,7 @@ export function WelcomeScreen() {
           <Button
             variant="primary"
             autoFocus
-            onPress={() => dispatch(createBudget())}
+            onPress={() => dispatch(createBudget({}))}
           >
             {t('Start fresh')}
           </Button>

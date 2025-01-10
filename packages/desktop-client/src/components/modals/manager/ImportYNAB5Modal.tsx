@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
-import { importBudget } from 'loot-core/src/client/actions/budgets';
+import { importBudget } from 'loot-core/client/budgets/budgetsSlice';
 
 import { useNavigate } from '../../../hooks/useNavigate';
 import { useDispatch } from '../../../redux';
@@ -41,7 +41,7 @@ export function ImportYNAB5Modal() {
       setImporting(true);
       setError(null);
       try {
-        await dispatch(importBudget(res[0], 'ynab5'));
+        await dispatch(importBudget({ filepath: res[0], type: 'ynab5' }));
         navigate('/budget');
       } catch (err) {
         setError(err.message);
