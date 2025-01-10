@@ -94,7 +94,6 @@ const sidebars = {
             id: 'migration/index',
           },
           items: [
-                'migration/actual-import',
                 'migration/ynab4',
                 'migration/nynab',
           ],
