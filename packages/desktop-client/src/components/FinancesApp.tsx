@@ -103,7 +103,7 @@ export function FinancesApp() {
     setTimeout(async () => {
       await dispatch(sync());
     }, 100);
-  }, []);
+  }, [dispatch]);
 
   useEffect(() => {
     async function run() {
@@ -126,7 +126,7 @@ export function FinancesApp() {
     }
 
     run();
-  }, []);
+  }, [dispatch, t]);
 
   useEffect(() => {
     async function run() {
@@ -159,7 +159,7 @@ export function FinancesApp() {
     }
 
     run();
-  }, [lastUsedVersion, setLastUsedVersion]);
+  }, [dispatch, lastUsedVersion, setLastUsedVersion, t]);
 
   const scrollableRef = useRef<HTMLDivElement>(null);
 
