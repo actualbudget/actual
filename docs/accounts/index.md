@@ -6,7 +6,7 @@ You can add as many accounts as you like. Adding all of your accounts (including
 
 Actual makes a distinction between accounts being **on** budget or **off** budget. Off budget accounts don't affect the budget and are meant to track stuff like investments and mortgages. Transactions in off budget accounts can't be categorized; they simply track balances over time.
 
-**Off budget** accounts don't effect the budget and are meant to track stuff like investments and mortgages. Transactions in off budget accounts can't be categorized; they simply track balances over time.
+**Off budget** accounts don't affect the budget and are meant to track stuff like investments and mortgages. Transactions in off budget accounts can't be categorized; they simply track balances over time.
 
 **On budget** accounts affect the budget, and transactions can be categorized. These are accounts where you want to track cash flow and use the budget, like checking accounts and credit cards.
 
