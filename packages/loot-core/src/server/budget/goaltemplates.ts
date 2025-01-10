@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import { Notification } from '../../client/state-types/notifications';
+import { Notification } from '../../client/notifications/notificationsSlice';
 import * as monthUtils from '../../shared/months';
 import { CategoryEntity } from '../../types/models';
 import * as db from '../db';

@@ -17,11 +17,11 @@ import { format, parseISO } from 'date-fns';
 import { SchedulesProvider } from 'loot-core/client/data-hooks/schedules';
 import { useTransactions } from 'loot-core/client/data-hooks/transactions';
 import { useWidget } from 'loot-core/client/data-hooks/widget';
+import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import { q, type Query } from 'loot-core/shared/query';
 import { ungroupTransactions } from 'loot-core/shared/transactions';
 import { amountToCurrency } from 'loot-core/shared/util';
-import { addNotification } from 'loot-core/src/client/actions';
 import * as monthUtils from 'loot-core/src/shared/months';
 import {
   type RuleConditionEntity,

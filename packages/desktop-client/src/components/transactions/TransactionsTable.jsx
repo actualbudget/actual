@@ -20,8 +20,8 @@ import {
   isValid as isDateValid,
 } from 'date-fns';
 
-import { addNotification } from 'loot-core/client/actions';
 import { pushModal } from 'loot-core/client/modals/modalsSlice';
+import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
 import { useCachedSchedules } from 'loot-core/src/client/data-hooks/schedules';
 import {
   getAccountsById,

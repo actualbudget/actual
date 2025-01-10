@@ -1,7 +1,9 @@
 import { useCallback } from 'react';
 
-import { addNotification } from 'loot-core/client/actions';
-import { type Notification } from 'loot-core/client/state-types/notifications';
+import {
+  addNotification,
+  type Notification,
+} from 'loot-core/client/notifications/notificationsSlice';
 import { redo, undo } from 'loot-core/client/undo';
 
 import { useResponsive } from '../components/responsive/ResponsiveProvider';

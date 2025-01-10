@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
-import { addNotification, signOut } from 'loot-core/client/actions';
+import { signOut } from 'loot-core/client/actions';
 import {
   type Modal as ModalType,
   popModal,
 } from 'loot-core/client/modals/modalsSlice';
+import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import {
   type NewUserEntity,
