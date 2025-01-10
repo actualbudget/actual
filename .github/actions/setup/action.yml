@@ -1,5 +1,15 @@
 name: Setup
 
+inputs:
+  working-directory:
+    description: 'Working directory to run in, default .'
+    required: false
+    default: '.'
+  download-translations:
+    description: 'Whether to download translations as part of setup, default true'
+    required: false
+    default: 'true'
+
 runs:
   using: composite
   steps:
@@ -15,9 +25,16 @@ runs:
       uses: actions/cache@v4
       id: cache
       with:
-        path: '**/node_modules'
-        key: yarn-v1-${{ runner.os }}-${{ hashFiles('.nvmrc') }}-${{ hashFiles('**/yarn.lock') }}
+        path: ${{ format('{0}/**/node_modules', inputs.working-directory) }}
+        key: yarn-v1-${{ runner.os }}-${{ hashFiles(format('{0}/.nvmrc', inputs.working-directory)) }}-${{ hashFiles(format('{0}/**/yarn.lock', inputs.working-directory)) }}
     - name: Install
+      working-directory: ${{ inputs.working-directory }}
       run: yarn --immutable
       shell: bash
       if: steps.cache.outputs.cache-hit != 'true'
+    - name: Download translations
+      uses: actions/checkout@v4
+      with:
+        repository: actualbudget/translations
+        path: ${{ inputs.working-directory }}/packages/desktop-client/locale
+      if: ${{ inputs.download-translations == 'true' }}
