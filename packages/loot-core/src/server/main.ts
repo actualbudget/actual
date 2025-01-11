@@ -1242,6 +1242,7 @@ handlers['transactions-import'] = mutator(function ({
   accountId,
   transactions,
   isPreview,
+  opts,
 }) {
   return withUndo(async () => {
     if (typeof accountId !== 'string') {
@@ -1255,6 +1256,7 @@ handlers['transactions-import'] = mutator(function ({
         false,
         true,
         isPreview,
+        opts?.defaultCleared,
       );
     } catch (err) {
       if (err instanceof TransactionError) {
