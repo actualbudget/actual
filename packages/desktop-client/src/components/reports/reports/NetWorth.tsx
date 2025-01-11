@@ -4,7 +4,7 @@ import { useParams } from 'react-router-dom';
 
 import * as d from 'date-fns';
 
-import { addNotification } from 'loot-core/src/client/actions';
+import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
 import { useWidget } from 'loot-core/src/client/data-hooks/widget';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
@@ -137,8 +137,10 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
     });
     dispatch(
       addNotification({
-        type: 'message',
-        message: t('Dashboard widget successfully saved.'),
+        notification: {
+          type: 'message',
+          message: t('Dashboard widget successfully saved.'),
+        },
       }),
     );
   }

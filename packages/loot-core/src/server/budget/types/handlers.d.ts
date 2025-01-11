@@ -1,4 +1,4 @@
-import type { Notification } from '../../../client/state-types/notifications';
+import type { Notification } from '../../../client/notifications/notificationsSlice';
 
 export interface BudgetHandlers {
   'budget/budget-amount': (arg: {

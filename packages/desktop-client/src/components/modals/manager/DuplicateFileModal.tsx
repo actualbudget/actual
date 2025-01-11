@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
-import { addNotification } from 'loot-core/client/actions';
 import { duplicateBudget } from 'loot-core/client/budgets/budgetsSlice';
 import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
+import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
 import { send } from 'loot-core/platform/client/fetch';
 
 import { useDispatch } from '../../../redux';
@@ -87,8 +87,10 @@ export function DuplicateFileModal({
         );
         dispatch(
           addNotification({
-            type: 'message',
-            message: t('Duplicate file “{{newName}}” created.', { newName }),
+            notification: {
+              type: 'message',
+              message: t('Duplicate file “{{newName}}” created.', { newName }),
+            },
           }),
         );
         if (onComplete) onComplete({ status: 'success' });
@@ -98,8 +100,10 @@ export function DuplicateFileModal({
         else console.error('Failed to duplicate budget:', e);
         dispatch(
           addNotification({
-            type: 'error',
-            message: t('Failed to duplicate budget file.'),
+            notification: {
+              type: 'error',
+              message: t('Failed to duplicate budget file.'),
+            },
           }),
         );
       } finally {

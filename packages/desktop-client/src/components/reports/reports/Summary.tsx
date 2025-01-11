@@ -5,9 +5,9 @@ import { useParams } from 'react-router-dom';
 import { parseISO } from 'date-fns';
 
 import { useWidget } from 'loot-core/client/data-hooks/widget';
+import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import { amountToCurrency } from 'loot-core/shared/util';
-import { addNotification } from 'loot-core/src/client/actions';
 import * as monthUtils from 'loot-core/src/shared/months';
 import {
   type SummaryContent,
@@ -185,8 +185,10 @@ function SummaryInner({ widget }: SummaryInnerProps) {
     if (!widget) {
       dispatch(
         addNotification({
-          type: 'error',
-          message: t('Cannot save: No widget available.'),
+          notification: {
+            type: 'error',
+            message: t('Cannot save: No widget available.'),
+          },
         }),
       );
       return;
@@ -213,8 +215,10 @@ function SummaryInner({ widget }: SummaryInnerProps) {
     if (!widget) {
       dispatch(
         addNotification({
-          type: 'error',
-          message: t('Cannot save: No widget available.'),
+          notification: {
+            type: 'error',
+            message: t('Cannot save: No widget available.'),
+          },
         }),
       );
       return;
@@ -236,8 +240,10 @@ function SummaryInner({ widget }: SummaryInnerProps) {
     });
     dispatch(
       addNotification({
-        type: 'message',
-        message: t('Dashboard widget successfully saved.'),
+        notification: {
+          type: 'message',
+          message: t('Dashboard widget successfully saved.'),
+        },
       }),
     );
   }
