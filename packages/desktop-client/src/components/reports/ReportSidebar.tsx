@@ -89,6 +89,7 @@ export function ReportSidebar({
   firstDayOfWeekIdx,
   isComplexCategoryCondition = false,
 }: ReportSidebarProps) {
+  debugger;
   const { t } = useTranslation();
   const [menuOpen, setMenuOpen] = useState(false);
   const triggerRef = useRef(null);

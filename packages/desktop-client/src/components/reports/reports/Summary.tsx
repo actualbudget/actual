@@ -224,7 +224,7 @@ function SummaryInner({ widget }: SummaryInnerProps) {
       );
       return;
     }
-
+    debugger;
     await send('dashboard-update-widget', {
       id: widget.id,
       meta: {

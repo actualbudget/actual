@@ -68,10 +68,11 @@ export function Header({
 }: HeaderProps) {
   const { t } = useTranslation();
   const { isNarrowWidth } = useResponsive();
-
+  //debugger;
   function convertToMonth(
     start: string,
     end: string,
+    _: TimeFrame['mode'],
     mode: TimeFrame['mode'],
   ): [string, string, TimeFrame['mode']] {
     return [monthUtils.getMonth(start), monthUtils.getMonth(end), mode];
@@ -181,6 +182,7 @@ export function Header({
                     true,
                     firstDayOfWeekIdx,
                   ),
+                  'yearToDate',
                 ),
               )
             }
@@ -195,9 +197,10 @@ export function Header({
                   ...getLiveRange(
                     'Last year',
                     earliestTransaction,
-                    true,
+                    false,
                     firstDayOfWeekIdx,
                   ),
+                  'lastYear',
                 ),
               )
             }
