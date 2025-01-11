@@ -1,23 +1,86 @@
 import { type Backup } from '../server/backups';
 import { type UndoState } from '../server/undo';
 
+type SyncSubtype =
+  | 'out-of-sync'
+  | 'apply-failure'
+  | 'decrypt-failure'
+  | 'encrypt-failure'
+  | 'invalid-schema'
+  | 'network'
+  | 'file-old-version'
+  | 'file-key-mismatch'
+  | 'file-not-found'
+  | 'file-needs-upload'
+  | 'file-has-reset'
+  | 'file-has-new-key'
+  | 'token-expired'
+  | string;
+
+type SyncEvent = {
+  meta?: Record<string, unknown>;
+} & (
+  | {
+      type: 'applied';
+      tables: string[];
+      data?: Map<string, unknown>;
+      prevData?: Map<string, unknown>;
+    }
+  | {
+      type: 'success';
+      tables: string[];
+      syncDisabled?: boolean;
+    }
+  | {
+      type: 'error';
+      subtype?: SyncSubtype;
+    }
+  | {
+      type: 'start';
+    }
+  | {
+      type: 'unauthorized';
+    }
+);
+
+type BackupUpdatedEvent = Backup[];
+
+type CellsChangedEvent = Array<{
+  name: string;
+  value: string | number | boolean;
+}>;
+
+type FallbackWriteErrorEvent = undefined;
+type FinishImportEvent = undefined;
+type FinishLoadEvent = undefined;
+
+type OrphanedPayeesEvent = {
+  orphanedIds: string[];
+  updatedPayeeIds: string[];
+};
+
+type PrefsUpdatedEvent = undefined;
+type SchedulesOfflineEvent = undefined;
+type ServerErrorEvent = undefined;
+type ShowBudgetsEvent = undefined;
+type StartImportEvent = { budgetName: string };
+type StartLoadEvent = undefined;
+type ApiFetchRedirectedEvent = undefined;
+
 export interface ServerEvents {
-  'backups-updated': Backup[];
-  'cells-changed': Array<{ name }>;
-  'fallback-write-error': unknown;
-  'finish-import': unknown;
-  'finish-load': unknown;
-  'orphaned-payees': {
-    orphanedIds: string[];
-    updatedPayeeIds: string[];
-  };
-  'prefs-updated': unknown;
-  'schedules-offline': { payees: unknown[] };
-  'server-error': unknown;
-  'show-budgets': unknown;
-  'start-import': unknown;
-  'start-load': unknown;
-  'sync-event': { type; subtype; meta; tables; syncDisabled };
+  'backups-updated': BackupUpdatedEvent;
+  'cells-changed': CellsChangedEvent;
+  'fallback-write-error': FallbackWriteErrorEvent;
+  'finish-import': FinishImportEvent;
+  'finish-load': FinishLoadEvent;
+  'orphaned-payees': OrphanedPayeesEvent;
+  'prefs-updated': PrefsUpdatedEvent;
+  'schedules-offline': SchedulesOfflineEvent;
+  'server-error': ServerErrorEvent;
+  'show-budgets': ShowBudgetsEvent;
+  'start-import': StartImportEvent;
+  'start-load': StartLoadEvent;
+  'sync-event': SyncEvent;
   'undo-event': UndoState;
-  'api-fetch-redirected': unknown;
+  'api-fetch-redirected': ApiFetchRedirectedEvent;
 }

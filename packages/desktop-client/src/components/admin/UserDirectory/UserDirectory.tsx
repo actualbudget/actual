@@ -9,7 +9,6 @@ import {
   type CSSProperties,
 } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
 
 import { pushModal } from 'loot-core/src/client/actions/modals';
 import { send } from 'loot-core/src/platform/client/fetch';
@@ -21,6 +20,7 @@ import {
 
 import { useActions } from '../../../hooks/useActions';
 import { SelectedProvider, useSelected } from '../../../hooks/useSelected';
+import { useDispatch } from '../../../redux';
 import { theme } from '../../../style';
 import { Button } from '../../common/Button2';
 import { Link } from '../../common/Link';

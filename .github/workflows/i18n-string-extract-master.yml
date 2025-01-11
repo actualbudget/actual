@@ -1,36 +1,80 @@
 name: Extract and upload i18n strings
 
 on:
-  push:
-    branches:
-      - master
+  schedule:
+    # 4am UTC
+    - cron: "0 4 * * *"
   workflow_dispatch:
 
 jobs:
   extract-and-upload-i18n-strings:
     runs-on: ubuntu-latest
+    if: github.repository == 'actualbudget/actual'
     steps:
-    - uses: actions/checkout@v4
-    - name: Set up environment
-      uses: ./.github/actions/setup
-    - name: Configure i18n client
-      run: |
-        pip install wlc
-    - name: Generate i18n strings
-      run: yarn generate:i18n
-    - name: Upload i18n strings
-      run: |
-        if [[ ! -f packages/desktop-client/locale/en.json ]]; then
-          echo "File packages/desktop-client/locale/en.json not found. Ensure the file was generated correctly."
-          exit 1
-        fi
-        wlc \
-          --url https://hosted.weblate.org/api/ \
-          --key "${{ secrets.WEBLATE_API_KEY_CI_STRINGS }}" \
-          upload \
-          --author-name "Actual Budget" \
-          --author-email "dev@actualbudget.org" \
-          --method add \
-          --input packages/desktop-client/locale/en.json \
-          actualbudget/actual/en
-        echo "Translations uploaded"
+      - name: Check out main repository
+        uses: actions/checkout@v4
+        with:
+          path: actual
+      - name: Set up environment
+        uses: ./actual/.github/actions/setup
+        with:
+          working-directory: actual
+          download-translations: false  # As we'll manually clone instead
+      - name: Configure Git config
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+      - name: Configure i18n client
+        run: |
+          pip install wlc
+
+      - name: Lock translations
+        run: |
+          wlc \
+            --url https://hosted.weblate.org/api/ \
+            --key "${{ secrets.WEBLATE_API_KEY_CI_STRINGS }}" \
+            lock \
+            actualbudget/actual
+
+      - name: Update VCS with latest translations
+        run: |
+          wlc \
+            --url https://hosted.weblate.org/api/ \
+            --key "${{ secrets.WEBLATE_API_KEY_CI_STRINGS }}" \
+            pull \
+            actualbudget/actual
+      - name: Check out updated translations
+        uses: actions/checkout@v4
+        with:
+          ssh-key: ${{ secrets.STRING_IMPORT_DEPLOY_KEY }}
+          repository: actualbudget/translations
+          path: translations
+      - name: Generate i18n strings
+        working-directory: actual
+        run: |
+          mkdir -p packages/desktop-client/locale/
+          cp ../translations/en.json packages/desktop-client/locale/
+          yarn generate:i18n
+          if [[ ! -f packages/desktop-client/locale/en.json ]]; then
+            echo "File packages/desktop-client/locale/en.json not found. Ensure the file was generated correctly."
+            exit 1
+          fi
+      - name: Check in new i18n strings
+        working-directory: translations
+        run: |
+          cp ../actual/packages/desktop-client/locale/en.json .
+          git add .
+          if git commit -m "Update source strings"; then
+            git push
+          else
+            echo "No changes to commit"
+          fi
+
+      - name: Unlock translations
+        if: always()  # Clean up even on failure
+        run: |
+          wlc \
+            --url https://hosted.weblate.org/api/ \
+            --key "${{ secrets.WEBLATE_API_KEY_CI_STRINGS }}" \
+            unlock \
+            actualbudget/actual
