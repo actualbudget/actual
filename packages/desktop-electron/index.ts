@@ -1,3 +1,4 @@
+/* eslint-disable rulesdir/typography */
 import fs from 'fs';
 import { createServer, Server } from 'http';
 import path from 'path';
@@ -60,10 +61,35 @@ let serverProcess: UtilityProcess | null;
 let actualServerProcess: UtilityProcess | null;
 
 let oAuthServer: ReturnType<typeof createServer> | null;
+let queuedClientWinLogs = [];
+
+const logMessage = (loglevel: 'info' | 'error', message: string) => {
+  // Electron main process logs
+  switch (loglevel) {
+    case 'info':
+      console.info(message);
+      break;
+    case 'error':
+      console.error(message);
+      break;
+  }
+
+  // App devtools logs
+  if (!clientWin) {
+    // queue up the logs until the client window is ready
+    queuedClientWinLogs.push(
+      `console.${loglevel}('Actual Sync Server Log:', ${JSON.stringify(message)})`,
+    );
+  } else {
+    clientWin.webContents.executeJavaScript(
+      `console.${loglevel}('Actual Sync Server Log:', ${JSON.stringify(message)})`,
+    );
+  }
+};
 
 const createOAuthServer = async () => {
   const port = 3010;
-  console.log(`OAuth server running on port: ${port}`);
+  logMessage('info', `OAuth server running on port: ${port}`);
 
   if (oAuthServer) {
     return { url: `http://localhost:${port}`, server: oAuthServer };
@@ -114,7 +140,7 @@ async function loadGlobalPrefs() {
       ),
     );
   } catch (e) {
-    console.info('Could not load global state - using defaults'); // This could be the first time running the app - no global-store.json
+    logMessage('info', 'Could not load global state - using defaults');
     state = {};
   }
 
@@ -174,7 +200,7 @@ async function createBackgroundProcess() {
         }
         break;
       default:
-        console.log('Unknown server message: ' + msg.type);
+        logMessage('info', 'Unknown server message: ' + msg.type);
     }
   });
 }
@@ -280,19 +306,17 @@ function startSyncServer() {
       const chunkValue = JSON.stringify(chunk.toString('utf8'));
       if (chunkValue.includes('Listening on')) {
         // can we send a signal from the server instead of doing this?
-        console.info('Actual Sync Server has started!');
+        logMessage('info', 'Actual Sync Server has started!');
         syncServerStarted = true;
         resolve();
       }
 
-      clientWin?.webContents.executeJavaScript(`
-          console.info('Actual Sync Server Log:', ${chunkValue})`);
+      logMessage('info', chunkValue);
     });
 
     actualServerProcess.stderr?.on('data', (chunk: Buffer) => {
       // Send the Server console.error messages out to the main browser window
-      clientWin?.webContents.executeJavaScript(`
-            console.error('Actual Sync Server Log:', ${JSON.stringify(chunk.toString('utf8'))})`);
+      logMessage('error', JSON.stringify(chunk.toString('utf8')));
     });
   });
 
@@ -300,7 +324,7 @@ function startSyncServer() {
     setTimeout(() => {
       if (!syncServerStarted) {
         const errorMessage = `Sync server failed to start within ${SYNC_SERVER_WAIT_TIMEOUT / 1000} seconds. Something is wrong. Please raise a github issue.`;
-        console.error(errorMessage);
+        logMessage('error', errorMessage);
         reject(new Error(errorMessage));
       }
     }, SYNC_SERVER_WAIT_TIMEOUT);
@@ -315,7 +339,7 @@ async function exposeSyncServer(ngrokConfig: GlobalPrefs['ngrokConfig']) {
     ngrokConfig?.authToken && ngrokConfig?.domain && ngrokConfig?.port;
 
   if (!hasRequiredConfig) {
-    console.error('Cannot expose sync server: missing ngrok settings');
+    logMessage('error', 'Cannot expose sync server: missing ngrok settings');
     return { error: 'Missing ngrok settings' };
   }
 
@@ -329,10 +353,10 @@ async function exposeSyncServer(ngrokConfig: GlobalPrefs['ngrokConfig']) {
       // key: fs.readFileSync("key.pem", "utf8"),
     });
 
-    console.info(`Exposing actual server on url: ${listener.url()}`);
+    logMessage('info', `Exposing actual server on url: ${listener.url()}`);
     return { url: listener.url() };
   } catch (error) {
-    console.error('Unable to run ngrok', error);
+    logMessage('error', `Unable to run ngrok: ${error}`);
     return { error: `Unable to run ngrok. ${error}` };
   }
 }
@@ -381,8 +405,9 @@ async function createWindow() {
   });
 
   win.on('unresponsive', () => {
-    console.log(
-      'browser window went unresponsive (maybe because of a modal though)',
+    logMessage(
+      'info',
+      'browser window went unresponsive (maybe because of a modal)',
     );
   });
 
@@ -424,6 +449,13 @@ async function createWindow() {
   }
 
   clientWin = win;
+
+  // Execute any queued logs
+  queuedClientWinLogs.map((log: string) =>
+    clientWin.webContents.executeJavaScript(log),
+  );
+
+  queuedClientWinLogs = [];
 }
 
 function isExternalUrl(url: string) {
@@ -534,7 +566,7 @@ app.on('ready', async () => {
   // This is mainly to aid debugging Sentry errors - it will add a
   // breadcrumb
   powerMonitor.on('suspend', () => {
-    console.log('Suspending', new Date());
+    logMessage('info', 'Suspending: ' + new Date());
   });
 
   await createBackgroundProcess();
@@ -701,7 +733,10 @@ ipcMain.handle(
       });
       await remove(currentBudgetDirectory);
     } catch (error) {
-      console.error('There was an error moving your directory', error);
+      logMessage(
+        'error',
+        `There was an error moving your directory:  ${error}`,
+      );
       throw error;
     }
   },
