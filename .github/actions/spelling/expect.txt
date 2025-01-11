@@ -1,6 +1,7 @@
 ABNAMRO
 ABNANL
 Activo
+Anglais
 AESUDEF
 ALZEY
 BANKA
