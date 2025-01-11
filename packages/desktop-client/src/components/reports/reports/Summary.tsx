@@ -17,6 +17,7 @@ import {
 
 import { useFilters } from '../../../hooks/useFilters';
 import { useNavigate } from '../../../hooks/useNavigate';
+import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { SvgEquals } from '../../../icons/v1';
 import { SvgCloseParenthesis } from '../../../icons/v2/CloseParenthesis';
 import { SvgOpenParenthesis } from '../../../icons/v2/OpenParenthesis';
@@ -147,6 +148,10 @@ function SummaryInner({ widget }: SummaryInnerProps) {
     }>
   >([]);
 
+  const [earliestTransaction, _] = useState('');
+  const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
+  const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
+
   useEffect(() => {
     async function run() {
       const trans = await send('get-earliest-transaction');
@@ -219,7 +224,6 @@ function SummaryInner({ widget }: SummaryInnerProps) {
       );
       return;
     }
-
     await send('dashboard-update-widget', {
       id: widget.id,
       meta: {
@@ -273,6 +277,8 @@ function SummaryInner({ widget }: SummaryInnerProps) {
         allMonths={allMonths}
         start={start}
         end={end}
+        earliestTransaction={earliestTransaction}
+        firstDayOfWeekIdx={firstDayOfWeekIdx}
         mode={mode}
         onChangeDates={onChangeDates}
         onApply={dividendFilters.onApply}

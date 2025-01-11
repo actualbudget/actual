@@ -196,6 +196,17 @@ export function calculateTimeRange(
 
     return getLatestRange(offset);
   }
+  if (mode === 'lastYear') {
+    const year = monthUtils.subYears(monthUtils.currentYear(), 1);
+    return [year + '-01', year + '-12', 'lastYear'] as const;
+  }
+  if (mode === 'yearToDate') {
+    return [
+      monthUtils.currentYear() + '-01',
+      monthUtils.currentMonth(),
+      'yearToDate',
+    ] as const;
+  }
 
   return [start, end, 'static'] as const;
 }

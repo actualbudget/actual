@@ -14,6 +14,7 @@ import { type TimeFrame, type NetWorthWidget } from 'loot-core/types/models';
 import { useAccounts } from '../../../hooks/useAccounts';
 import { useFilters } from '../../../hooks/useFilters';
 import { useNavigate } from '../../../hooks/useNavigate';
+import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { useDispatch } from '../../../redux';
 import { theme, styles } from '../../../style';
 import { Button } from '../../common/Button2';
@@ -162,6 +163,10 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
     });
   };
 
+  const [earliestTransaction, _] = useState('');
+  const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
+  const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
+
   if (!allMonths || !data) {
     return null;
   }
@@ -197,6 +202,8 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
         allMonths={allMonths}
         start={start}
         end={end}
+        earliestTransaction={earliestTransaction}
+        firstDayOfWeekIdx={firstDayOfWeekIdx}
         mode={mode}
         onChangeDates={onChangeDates}
         filters={conditions}
