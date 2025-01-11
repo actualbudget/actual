@@ -87,8 +87,10 @@ export function DuplicateFileModal({
         );
         dispatch(
           addNotification({
-            type: 'message',
-            message: t('Duplicate file “{{newName}}” created.', { newName }),
+            notification: {
+              type: 'message',
+              message: t('Duplicate file “{{newName}}” created.', { newName }),
+            },
           }),
         );
         if (onComplete) onComplete({ status: 'success' });
@@ -98,8 +100,10 @@ export function DuplicateFileModal({
         else console.error('Failed to duplicate budget:', e);
         dispatch(
           addNotification({
-            type: 'error',
-            message: t('Failed to duplicate budget file.'),
+            notification: {
+              type: 'error',
+              message: t('Failed to duplicate budget file.'),
+            },
           }),
         );
       } finally {

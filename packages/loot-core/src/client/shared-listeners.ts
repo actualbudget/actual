@@ -29,9 +29,11 @@ export function listenForSyncEvent(store: AppStore) {
 
         store.dispatch(
           addNotification({
-            title: t('Syncing has been fixed!'),
-            message: t('Happy budgeting!'),
-            type: 'message',
+            notification: {
+              title: t('Syncing has been fixed!'),
+              message: t('Happy budgeting!'),
+              type: 'message',
+            },
           }),
         );
       }
@@ -323,7 +325,9 @@ export function listenForSyncEvent(store: AppStore) {
       }
 
       if (notif) {
-        store.dispatch(addNotification({ type: 'error', ...notif }));
+        store.dispatch(
+          addNotification({ notification: { type: 'error', ...notif } }),
+        );
       }
     }
   });

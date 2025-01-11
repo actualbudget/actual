@@ -327,15 +327,19 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
       });
       dispatch(
         addNotification({
-          type: 'message',
-          message: t('Dashboard widget successfully saved.'),
+          notification: {
+            type: 'message',
+            message: t('Dashboard widget successfully saved.'),
+          },
         }),
       );
     } catch (error) {
       dispatch(
         addNotification({
-          type: 'error',
-          message: t('Failed to save dashboard widget.'),
+          notification: {
+            type: 'error',
+            message: t('Failed to save dashboard widget.'),
+          },
         }),
       );
       console.error('Error saving widget:', error);

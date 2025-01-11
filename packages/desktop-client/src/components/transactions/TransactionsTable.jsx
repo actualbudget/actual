@@ -2248,8 +2248,10 @@ export const TransactionTable = forwardRef((props, ref) => {
       if (newTransactions[0].account == null) {
         dispatch(
           addNotification({
-            type: 'error',
-            message: 'Account is a required field',
+            notification: {
+              type: 'error',
+              message: 'Account is a required field',
+            },
           }),
         );
         newNavigator.onEdit('temp', 'account');

@@ -288,7 +288,7 @@ export function Notifications({ style }: { style?: CSSProperties }) {
             if (note.onClose) {
               note.onClose();
             }
-            dispatch(removeNotification(note.id));
+            dispatch(removeNotification({ id: note.id }));
           }}
         />
       ))}

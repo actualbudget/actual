@@ -101,8 +101,10 @@ function CustomReportListCardsInner({
     if (response.error) {
       dispatch(
         addNotification({
-          type: 'error',
-          message: `Failed saving report name: ${response.error.message}`,
+          notification: {
+            type: 'error',
+            message: `Failed saving report name: ${response.error.message}`,
+          },
         }),
       );
       setNameMenuOpen(true);
