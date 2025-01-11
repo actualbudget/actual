@@ -1,7 +1,7 @@
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
-import { closeBudget } from 'loot-core/client/actions';
+import { closeBudget } from 'loot-core/client/budgets/budgetsSlice';
 
 import { useDispatch } from '../../redux';
 import { Button } from '../common/Button2';

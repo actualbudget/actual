@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 
+import { pushModal } from 'loot-core/client/modals/modalsSlice';
 import {
   getPayees,
   initiallyLoadPayees,
-  pushModal,
-} from 'loot-core/client/actions';
+} from 'loot-core/client/queries/queriesSlice';
 import { type UndoState } from 'loot-core/server/undo';
 import { send, listen } from 'loot-core/src/platform/client/fetch';
 import * as undo from 'loot-core/src/platform/client/undo';
@@ -91,7 +91,7 @@ export function ManagePayeesWithData({
   }, [dispatch, refetchRuleCounts, refetchOrphanedPayees]);
 
   function onViewRules(id: PayeeEntity['id']) {
-    dispatch(pushModal('manage-rules', { payeeId: id }));
+    dispatch(pushModal({ name: 'manage-rules', options: { payeeId: id } }));
   }
 
   function onCreateRule(id: PayeeEntity['id']) {
@@ -115,7 +115,7 @@ export function ManagePayeesWithData({
         },
       ],
     };
-    dispatch(pushModal('edit-rule', { rule }));
+    dispatch(pushModal({ name: 'edit-rule', options: { rule } }));
   }
 
   return (

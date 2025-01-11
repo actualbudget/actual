@@ -7,7 +7,7 @@ import { useLocation } from 'react-router-dom';
 import {
   addNotification,
   removeNotification,
-} from 'loot-core/src/client/actions';
+} from 'loot-core/client/notifications/notificationsSlice';
 import { useDashboard } from 'loot-core/src/client/data-hooks/dashboard';
 import { useReports } from 'loot-core/src/client/data-hooks/reports';
 import { send } from 'loot-core/src/platform/client/fetch';
@@ -21,6 +21,7 @@ import {
 import { useAccounts } from '../../hooks/useAccounts';
 import { useNavigate } from '../../hooks/useNavigate';
 import { useSyncedPref } from '../../hooks/useSyncedPref';
+import { useUndo } from '../../hooks/useUndo';
 import { useDispatch } from '../../redux';
 import { breakpoints } from '../../tokens';
 import { Button } from '../common/Button2';
@@ -96,7 +97,7 @@ export function Overview() {
   const layout = baseLayout;
 
   const closeNotifications = () => {
-    dispatch(removeNotification('import'));
+    dispatch(removeNotification({ id: 'import' }));
   };
 
   // Close import notifications when doing "undo" operation
@@ -109,18 +110,22 @@ export function Overview() {
     [closeNotifications],
   );
 
+  const { undo } = useUndo();
+
   const onDispatchSucessNotification = (message: string) => {
     dispatch(
       addNotification({
-        id: 'import',
-        type: 'message',
-        sticky: true,
-        timeout: 30_000, // 30s
-        message,
-        messageActions: {
-          undo: () => {
-            closeNotifications();
-            window.__actionsForMenu.undo();
+        notification: {
+          id: 'import',
+          type: 'message',
+          sticky: true,
+          timeout: 30_000, // 30s
+          message,
+          messageActions: {
+            undo: () => {
+              closeNotifications();
+              undo();
+            },
           },
         },
       }),
@@ -208,22 +213,24 @@ export function Overview() {
       }),
     } satisfies ExportImportDashboard;
 
-    window.Actual?.saveFile(
+    global.Actual.saveFile(
       JSON.stringify(data, null, 2),
       'dashboard.json',
       'Export Dashboard',
     );
   };
   const onImport = async () => {
-    const openFileDialog = window.Actual?.openFileDialog;
+    const openFileDialog = global.Actual.openFileDialog;
 
     if (!openFileDialog) {
       dispatch(
         addNotification({
-          type: 'error',
-          message: t(
-            'Fatal error occurred: unable to open import file dialog.',
-          ),
+          notification: {
+            type: 'error',
+            message: t(
+              'Fatal error occurred: unable to open import file dialog.',
+            ),
+          },
         }),
       );
       return;
@@ -249,9 +256,11 @@ export function Overview() {
         case 'json-parse-error':
           dispatch(
             addNotification({
-              id: 'import',
-              type: 'error',
-              message: t('Failed parsing the imported JSON.'),
+              notification: {
+                id: 'import',
+                type: 'error',
+                message: t('Failed parsing the imported JSON.'),
+              },
             }),
           );
           break;
@@ -259,9 +268,11 @@ export function Overview() {
         case 'validation-error':
           dispatch(
             addNotification({
-              id: 'import',
-              type: 'error',
-              message: res.message,
+              notification: {
+                id: 'import',
+                type: 'error',
+                message: res.message,
+              },
             }),
           );
           break;
@@ -269,9 +280,11 @@ export function Overview() {
         default:
           dispatch(
             addNotification({
-              id: 'import',
-              type: 'error',
-              message: t('Failed importing the dashboard file.'),
+              notification: {
+                id: 'import',
+                type: 'error',
+                message: t('Failed importing the dashboard file.'),
+              },
             }),
           );
           break;

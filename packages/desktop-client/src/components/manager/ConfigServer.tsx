@@ -2,7 +2,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
-import { createBudget, loggedIn, signOut } from 'loot-core/client/actions';
+import { loggedIn, signOut } from 'loot-core/client/actions';
+import { createBudget } from 'loot-core/client/budgets/budgetsSlice';
 import {
   isNonProductionEnvironment,
   isElectron,
@@ -35,7 +36,7 @@ export function ConfigServer() {
   const [error, setError] = useState<string | null>(null);
 
   const restartElectronServer = useCallback(() => {
-    globalThis.window.Actual.restartElectronServer();
+    global.Actual.restartElectronServer();
     setError(null);
   }, []);
 
@@ -88,7 +89,7 @@ export function ConfigServer() {
   }
 
   async function onSelectSelfSignedCertificate() {
-    const selfSignedCertificateLocation = await window.Actual?.openFileDialog({
+    const selfSignedCertificateLocation = await global.Actual.openFileDialog({
       properties: ['openFile'],
       filters: [
         {

@@ -4,10 +4,10 @@ import { Form } from 'react-aria-components';
 import { useTranslation, Trans } from 'react-i18next';
 
 import {
-  closeAccount,
-  forceCloseAccount,
+  type Modal as ModalType,
   pushModal,
-} from 'loot-core/client/actions';
+} from 'loot-core/client/modals/modalsSlice';
+import { closeAccount } from 'loot-core/client/queries/queriesSlice';
 import { integerToCurrency } from 'loot-core/src/shared/util';
 import { type AccountEntity } from 'loot-core/src/types/models';
 import { type TransObjectLiteral } from 'loot-core/types/util';
@@ -40,11 +40,10 @@ function needsCategory(
   return account.offbudget === 0 && isOffBudget;
 }
 
-type CloseAccountModalProps = {
-  account: AccountEntity;
-  balance: number;
-  canDelete: boolean;
-};
+type CloseAccountModalProps = Extract<
+  ModalType,
+  { name: 'close-account' }
+>['options'];
 
 export function CloseAccountModal({
   account,
@@ -101,7 +100,11 @@ export function CloseAccountModal({
       setLoading(true);
 
       dispatch(
-        closeAccount(account.id, transferAccountId || null, categoryId || null),
+        closeAccount({
+          accountId: account.id,
+          transferAccountId: transferAccountId || null,
+          categoryId: categoryId || null,
+        }),
       );
     }
   };
@@ -180,9 +183,12 @@ export function CloseAccountModal({
                           },
                           onClick: () => {
                             dispatch(
-                              pushModal('account-autocomplete', {
-                                includeClosedAccounts: false,
-                                onSelect: onSelectAccount,
+                              pushModal({
+                                name: 'account-autocomplete',
+                                options: {
+                                  includeClosedAccounts: false,
+                                  onSelect: onSelectAccount,
+                                },
                               }),
                             );
                           },
@@ -220,10 +226,13 @@ export function CloseAccountModal({
                             },
                             onClick: () => {
                               dispatch(
-                                pushModal('category-autocomplete', {
-                                  categoryGroups,
-                                  showHiddenCategories: true,
-                                  onSelect: onSelectCategory,
+                                pushModal({
+                                  name: 'category-autocomplete',
+                                  options: {
+                                    categoryGroups,
+                                    showHiddenCategories: true,
+                                    onSelect: onSelectCategory,
+                                  },
                                 }),
                               );
                             },
@@ -251,8 +260,12 @@ export function CloseAccountModal({
                         variant="text"
                         onClick={() => {
                           setLoading(true);
-
-                          dispatch(forceCloseAccount(account.id));
+                          dispatch(
+                            closeAccount({
+                              accountId: account.id,
+                              forced: true,
+                            }),
+                          );
                           close();
                         }}
                         style={{ color: theme.errorText }}

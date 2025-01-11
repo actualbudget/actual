@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Form } from 'react-aria-components';
 import { useTranslation } from 'react-i18next';
 
-import { type FinanceModals } from 'loot-core/src/client/state-types/modals';
+import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
 import { send } from 'loot-core/src/platform/client/fetch';
 import { getTestKeyError } from 'loot-core/src/shared/errors';
 
@@ -23,15 +23,16 @@ import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { useResponsive } from '../responsive/ResponsiveProvider';
 
-type FixEncryptionKeyModalProps = {
-  options: FinanceModals['fix-encryption-key'];
-};
+type FixEncryptionKeyModalProps = Extract<
+  ModalType,
+  { name: 'fix-encryption-key' }
+>['options'];
 
 export function FixEncryptionKeyModal({
-  options = {},
+  cloudFileId,
+  hasExistingKey,
+  onSuccess,
 }: FixEncryptionKeyModalProps) {
-  const { hasExistingKey, cloudFileId, onSuccess } = options;
-
   const { t } = useTranslation();
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');

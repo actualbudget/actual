@@ -7,6 +7,7 @@ import {
 } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
 import { type AccountEntity } from 'loot-core/types/models';
 
 import { useAccount } from '../../hooks/useAccount';
@@ -28,14 +29,10 @@ import { View } from '../common/View';
 import { Notes } from '../Notes';
 import { validateAccountName } from '../util/accountValidation';
 
-type AccountMenuModalProps = {
-  accountId: string;
-  onSave: (account: AccountEntity) => void;
-  onCloseAccount: (accountId: string) => void;
-  onReopenAccount: (accountId: string) => void;
-  onEditNotes: (id: string) => void;
-  onClose?: () => void;
-};
+type AccountMenuModalProps = Extract<
+  ModalType,
+  { name: 'account-menu' }
+>['options'];
 
 export function AccountMenuModal({
   accountId,

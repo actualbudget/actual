@@ -3,7 +3,8 @@ import { useTranslation } from 'react-i18next';
 
 import { css } from '@emotion/css';
 
-import { replaceModal, syncAndDownload } from 'loot-core/src/client/actions';
+import { replaceModal } from 'loot-core/client/modals/modalsSlice';
+import { syncAndDownload } from 'loot-core/src/client/actions';
 import * as queries from 'loot-core/src/client/queries';
 import { type AccountEntity } from 'loot-core/types/models';
 
@@ -226,7 +227,9 @@ function AccountList({
 }: AccountListProps) {
   const { t } = useTranslation();
   const failedAccounts = useFailedAccounts();
-  const syncingAccountIds = useSelector(state => state.account.accountsSyncing);
+  const syncingAccountIds = useSelector(
+    state => state.accounts.accountsSyncing,
+  );
   const onBudgetAccounts = accounts.filter(account => account.offbudget === 0);
   const offBudgetAccounts = accounts.filter(account => account.offbudget === 1);
 
@@ -319,7 +322,7 @@ export function Accounts() {
   );
 
   const onAddAccount = useCallback(() => {
-    dispatch(replaceModal('add-account'));
+    dispatch(replaceModal({ name: 'add-account', options: {} }));
   }, [dispatch]);
 
   const onSync = useCallback(async () => {

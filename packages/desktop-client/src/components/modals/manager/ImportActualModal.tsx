@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
-import { importBudget } from 'loot-core/src/client/actions/budgets';
+import { importBudget } from 'loot-core/client/budgets/budgetsSlice';
 
 import { useNavigate } from '../../../hooks/useNavigate';
 import { useDispatch } from '../../../redux';
@@ -38,7 +38,7 @@ export function ImportActualModal() {
   const [importing, setImporting] = useState(false);
 
   async function onImport() {
-    const res = await window.Actual?.openFileDialog({
+    const res = await global.Actual.openFileDialog({
       properties: ['openFile'],
       filters: [{ name: 'actual', extensions: ['zip', 'blob'] }],
     });
@@ -46,7 +46,7 @@ export function ImportActualModal() {
       setImporting(true);
       setError(null);
       try {
-        await dispatch(importBudget(res[0], 'actual'));
+        await dispatch(importBudget({ filepath: res[0], type: 'actual' }));
         navigate('/budget');
       } catch (err) {
         setError(err.message);

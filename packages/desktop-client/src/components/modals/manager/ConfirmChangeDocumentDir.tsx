@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
-import { addNotification } from 'loot-core/client/actions';
+import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
 
 import { useGlobalPref } from '../../../hooks/useGlobalPref';
 import { useDispatch } from '../../../redux';
@@ -51,7 +51,7 @@ export function ConfirmChangeDocumentDirModal({
   const dispatch = useDispatch();
 
   const restartElectronServer = useCallback(() => {
-    globalThis.window.Actual?.restartElectronServer();
+    global.Actual.restartElectronServer();
   }, []);
 
   const [_documentDir, setDocumentDirPref] = useGlobalPref(
@@ -64,7 +64,7 @@ export function ConfirmChangeDocumentDirModal({
     setLoading(true);
     try {
       if (moveFiles) {
-        await globalThis.window.Actual?.moveBudgetDirectory(
+        await global.Actual.moveBudgetDirectory(
           currentBudgetDirectory,
           newDirectory,
         );
@@ -74,8 +74,10 @@ export function ConfirmChangeDocumentDirModal({
 
       dispatch(
         addNotification({
-          type: 'message',
-          message: t('Actual’s data directory successfully changed.'),
+          notification: {
+            type: 'message',
+            message: t('Actual’s data directory successfully changed.'),
+          },
         }),
       );
       close();

@@ -1,7 +1,10 @@
 import { useCallback } from 'react';
 
-import { undo, redo, addNotification } from 'loot-core/client/actions';
-import { type Notification } from 'loot-core/client/state-types/notifications';
+import {
+  addNotification,
+  type Notification,
+} from 'loot-core/client/notifications/notificationsSlice';
+import { redo, undo } from 'loot-core/client/undo';
 
 import { useResponsive } from '../components/responsive/ResponsiveProvider';
 import { useDispatch } from '../redux';
@@ -19,14 +22,6 @@ export function useUndo(): UndoActions {
   const dispatch = useDispatch();
   const { isNarrowWidth } = useResponsive();
 
-  const dispatchUndo = useCallback(() => {
-    dispatch(undo());
-  }, [dispatch]);
-
-  const dispatchRedo = useCallback(() => {
-    dispatch(redo());
-  }, [dispatch]);
-
   const showUndoNotification = useCallback(
     (notification: Notification) => {
       if (!isNarrowWidth) {
@@ -35,17 +30,19 @@ export function useUndo(): UndoActions {
 
       dispatch(
         addNotification({
-          type: 'message',
-          timeout,
-          button: {
-            title: 'Undo',
-            action: dispatchUndo,
+          notification: {
+            type: 'message',
+            timeout,
+            button: {
+              title: 'Undo',
+              action: undo,
+            },
+            ...notification,
           },
-          ...notification,
         }),
       );
     },
-    [dispatch, dispatchUndo, isNarrowWidth],
+    [dispatch, isNarrowWidth],
   );
 
   const showRedoNotification = useCallback(
@@ -56,22 +53,24 @@ export function useUndo(): UndoActions {
 
       dispatch(
         addNotification({
-          type: 'message',
-          timeout,
-          button: {
-            title: 'Redo',
-            action: dispatchRedo,
+          notification: {
+            type: 'message',
+            timeout,
+            button: {
+              title: 'Redo',
+              action: redo,
+            },
+            ...notification,
           },
-          ...notification,
         }),
       );
     },
-    [dispatch, dispatchRedo, isNarrowWidth],
+    [dispatch, isNarrowWidth],
   );
 
   return {
-    undo: dispatchUndo,
-    redo: dispatchRedo,
+    undo,
+    redo,
     showUndoNotification,
     showRedoNotification,
   };

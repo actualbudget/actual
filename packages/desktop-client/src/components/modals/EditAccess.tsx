@@ -1,12 +1,17 @@
 import { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { signOut } from 'loot-core/client/actions';
+import {
+  type Modal as ModalType,
+  popModal,
+} from 'loot-core/client/modals/modalsSlice';
+import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import { getUserAccessErrors } from 'loot-core/shared/errors';
 import { type Handlers } from 'loot-core/types/handlers';
-import { type UserAccessEntity } from 'loot-core/types/models/userAccess';
 
-import { useActions } from '../../hooks/useActions';
+import { useDispatch } from '../../redux';
 import { styles, theme } from '../../style';
 import { Button } from '../common/Button2';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
@@ -16,18 +21,18 @@ import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { FormField, FormLabel } from '../forms';
 
-type EditUserAccessProps = {
-  defaultUserAccess: UserAccessEntity;
-  onSave?: (userAccess: UserAccessEntity) => void;
-};
+type EditUserAccessProps = Extract<
+  ModalType,
+  { name: 'edit-access' }
+>['options'];
 
 export function EditUserAccess({
-  defaultUserAccess,
+  access: defaultUserAccess,
   onSave: originalOnSave,
 }: EditUserAccessProps) {
   const { t } = useTranslation();
+  const dispatch = useDispatch();
 
-  const actions = useActions();
   const [userId, setUserId] = useState(defaultUserAccess.userId ?? '');
   const [error, setSetError] = useState('');
   const [availableUsers, setAvailableUsers] = useState<[string, string][]>([]);
@@ -49,7 +54,7 @@ export function EditUserAccess({
         }
       },
     );
-  }, [defaultUserAccess.fileId, actions]);
+  }, [defaultUserAccess.fileId]);
 
   async function onSave(close: () => void) {
     const userAccess = {
@@ -63,19 +68,23 @@ export function EditUserAccess({
       close();
     } else {
       if (error === 'token-expired') {
-        actions.addNotification({
-          type: 'error',
-          id: 'login-expired',
-          title: t('Login expired'),
-          sticky: true,
-          message: getUserAccessErrors(error),
-          button: {
-            title: t('Go to login'),
-            action: () => {
-              actions.signOut();
+        dispatch(
+          addNotification({
+            notification: {
+              type: 'error',
+              id: 'login-expired',
+              title: t('Login expired'),
+              sticky: true,
+              message: getUserAccessErrors(error),
+              button: {
+                title: t('Go to login'),
+                action: () => {
+                  dispatch(signOut());
+                },
+              },
             },
-          },
-        });
+          }),
+        );
       } else {
         setSetError(getUserAccessErrors(error));
       }
@@ -135,7 +144,7 @@ export function EditUserAccess({
             <Button
               variant="bare"
               style={{ marginRight: 10 }}
-              onPress={actions.popModal}
+              onPress={() => dispatch(popModal())}
             >
               Cancel
             </Button>

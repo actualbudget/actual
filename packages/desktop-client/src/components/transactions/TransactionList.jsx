@@ -1,6 +1,6 @@
 import React, { useRef, useCallback, useLayoutEffect } from 'react';
 
-import { pushModal } from 'loot-core/client/actions';
+import { pushModal } from 'loot-core/client/modals/modalsSlice';
 import { send } from 'loot-core/src/platform/client/fetch';
 import {
   splitTransaction,
@@ -78,7 +78,6 @@ export function TransactionList({
   isFiltered,
   dateFormat,
   hideFraction,
-  addNotification,
   renderEmpty,
   onSort,
   sortField,
@@ -194,7 +193,7 @@ export function TransactionList({
   });
 
   const onNavigateToSchedule = useCallback(scheduleId => {
-    dispatch(pushModal('schedule-edit', { id: scheduleId }));
+    dispatch(pushModal({ name: 'schedule-edit', options: { id: scheduleId } }));
   });
 
   const onNotesTagClick = useCallback(tag => {
@@ -228,7 +227,6 @@ export function TransactionList({
       isFiltered={isFiltered}
       dateFormat={dateFormat}
       hideFraction={hideFraction}
-      addNotification={addNotification}
       headerContent={headerContent}
       renderEmpty={renderEmpty}
       onSave={onSave}

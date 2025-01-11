@@ -10,7 +10,8 @@ import React, {
 } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
-import { addNotification, pushModal } from 'loot-core/client/actions';
+import { pushModal } from 'loot-core/client/modals/modalsSlice';
+import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as undo from 'loot-core/src/platform/client/undo';
 import { type Handlers } from 'loot-core/types/handlers';
@@ -42,7 +43,7 @@ function UserAccessContent({
   setLoading,
 }: ManageUserAccessContentProps) {
   const { t } = useTranslation();
-
+  const dispatch = useDispatch();
   const [allAccess, setAllAccess] = useState([]);
   const [page, setPage] = useState(0);
   const [filter, setFilter] = useState('');
@@ -84,13 +85,17 @@ function UserAccessContent({
     };
 
     if ('error' in data) {
-      addNotification({
-        type: 'error',
-        id: 'error',
-        title: t('Error getting available users'),
-        sticky: true,
-        message: data.error,
-      });
+      dispatch(
+        addNotification({
+          notification: {
+            type: 'error',
+            id: 'error',
+            title: t('Error getting available users'),
+            sticky: true,
+            message: data.error,
+          },
+        }),
+      );
       return [];
     }
 
@@ -103,7 +108,7 @@ function UserAccessContent({
 
     setAllAccess(loadedAccess);
     return loadedAccess;
-  }, [cloudFileId, setLoading, t]);
+  }, [cloudFileId, dispatch, setLoading, t]);
 
   const loadOwner = useCallback(async () => {
     const file: Awaited<ReturnType<Handlers['get-user-file-info']>> =
@@ -278,8 +283,11 @@ function LockToggle({ style, onToggleSave }: LockToggleProps) {
       aria-label="Menu"
       onPress={() =>
         dispatch(
-          pushModal('transfer-ownership', {
-            onSave: () => onToggleSave(),
+          pushModal({
+            name: 'transfer-ownership',
+            options: {
+              onSave: () => onToggleSave(),
+            },
           }),
         )
       }

@@ -3,12 +3,12 @@ import React, { type CSSProperties, useRef, useState } from 'react';
 
 import { css, cx } from '@emotion/css';
 
+import { openAccountCloseModal } from 'loot-core/client/modals/modalsSlice';
+import * as Platform from 'loot-core/client/platform';
 import {
-  openAccountCloseModal,
   reopenAccount,
   updateAccount,
-} from 'loot-core/client/actions';
-import * as Platform from 'loot-core/client/platform';
+} from 'loot-core/client/queries/queriesSlice';
 import { type AccountEntity } from 'loot-core/src/types/models';
 
 import { useContextMenu } from '../../hooks/useContextMenu';
@@ -197,8 +197,10 @@ export function Account<FieldName extends SheetFields<'account'>>({
                         if (newAccountName.trim() !== '') {
                           dispatch(
                             updateAccount({
-                              ...account,
-                              name: newAccountName,
+                              account: {
+                                ...account,
+                                name: newAccountName,
+                              },
                             }),
                           );
                         }
@@ -229,11 +231,13 @@ export function Account<FieldName extends SheetFields<'account'>>({
                 onMenuSelect={type => {
                   switch (type) {
                     case 'close': {
-                      dispatch(openAccountCloseModal(account.id));
+                      dispatch(
+                        openAccountCloseModal({ accountId: account.id }),
+                      );
                       break;
                     }
                     case 'reopen': {
-                      dispatch(reopenAccount(account.id));
+                      dispatch(reopenAccount({ accountId: account.id }));
                       break;
                     }
                     case 'rename': {

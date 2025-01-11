@@ -4,10 +4,8 @@ import { useTranslation, Trans } from 'react-i18next';
 import { css } from '@emotion/css';
 import { v4 as uuid } from 'uuid';
 
-import {
-  initiallyLoadPayees,
-  setUndoEnabled,
-} from 'loot-core/src/client/actions/queries';
+import { initiallyLoadPayees } from 'loot-core/client/queries/queriesSlice';
+import { enableUndo, disableUndo } from 'loot-core/client/undo';
 import { useSchedules } from 'loot-core/src/client/data-hooks/schedules';
 import { runQuery } from 'loot-core/src/client/query-helpers';
 import { send } from 'loot-core/src/platform/client/fetch';
@@ -763,7 +761,10 @@ const conditionFields = [
     ['amount-outflow', mapField('amount', { outflow: true })],
   ]);
 
-export function EditRuleModal({ defaultRule, onSave: originalOnSave }) {
+export function EditRuleModal({
+  rule: defaultRule,
+  onSave: originalOnSave = undefined,
+}) {
   const { t } = useTranslation();
   const [conditions, setConditions] = useState(
     defaultRule.conditions.map(parse).map(c => ({ ...c, inputKey: uuid() })),
@@ -795,8 +796,8 @@ export function EditRuleModal({ defaultRule, onSave: originalOnSave }) {
     dispatch(initiallyLoadPayees());
 
     // Disable undo while this modal is open
-    setUndoEnabled(false);
-    return () => setUndoEnabled(true);
+    disableUndo();
+    return () => enableUndo();
   }, [dispatch]);
 
   useEffect(() => {

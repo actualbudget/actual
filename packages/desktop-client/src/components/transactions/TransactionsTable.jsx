@@ -20,13 +20,14 @@ import {
   isValid as isDateValid,
 } from 'date-fns';
 
-import { pushModal } from 'loot-core/client/actions';
+import { pushModal } from 'loot-core/client/modals/modalsSlice';
+import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
 import { useCachedSchedules } from 'loot-core/src/client/data-hooks/schedules';
 import {
   getAccountsById,
   getPayeesById,
   getCategoriesById,
-} from 'loot-core/src/client/reducers/queries';
+} from 'loot-core/src/client/queries/queriesSlice';
 import { evalArithmetic } from 'loot-core/src/shared/arithmetic';
 import { currentDay } from 'loot-core/src/shared/months';
 import * as monthUtils from 'loot-core/src/shared/months';
@@ -594,9 +595,12 @@ function PayeeCell({
         disabled={isPreview}
         onSelect={() =>
           dispatch(
-            pushModal('payee-autocomplete', {
-              onSelect: payeeId => {
-                onUpdate('payee', payeeId);
+            pushModal({
+              name: 'payee-autocomplete',
+              options: {
+                onSelect: payeeId => {
+                  onUpdate('payee', payeeId);
+                },
               },
             }),
           )
@@ -932,15 +936,18 @@ const Transaction = memo(function Transaction({
         if (showReconciliationWarning === false) {
           setShowReconciliationWarning(true);
           dispatch(
-            pushModal('confirm-transaction-edit', {
-              onCancel: () => {
-                setShowReconciliationWarning(false);
+            pushModal({
+              name: 'confirm-transaction-edit',
+              options: {
+                onCancel: () => {
+                  setShowReconciliationWarning(false);
+                },
+                onConfirm: () => {
+                  setShowReconciliationWarning(false);
+                  onUpdateAfterConfirm(name, value);
+                },
+                confirmReason: 'editReconciled',
               },
-              onConfirm: () => {
-                setShowReconciliationWarning(false);
-                onUpdateAfterConfirm(name, value);
-              },
-              confirmReason: 'editReconciled',
             }),
           );
         }
@@ -952,11 +959,14 @@ const Transaction = memo(function Transaction({
     // Allow un-reconciling (unlocking) transactions
     if (name === 'cleared' && transaction.reconciled) {
       dispatch(
-        pushModal('confirm-transaction-edit', {
-          onConfirm: () => {
-            onUpdateAfterConfirm('reconciled', false);
+        pushModal({
+          name: 'confirm-transaction-edit',
+          options: {
+            onConfirm: () => {
+              onUpdateAfterConfirm('reconciled', false);
+            },
+            confirmReason: 'unlockReconciled',
           },
-          confirmReason: 'unlockReconciled',
         }),
       );
     }
@@ -2103,6 +2113,7 @@ function TransactionTableInner({
 }
 
 export const TransactionTable = forwardRef((props, ref) => {
+  const dispatch = useDispatch();
   const [newTransactions, setNewTransactions] = useState(null);
   const [prevIsAdding, setPrevIsAdding] = useState(false);
   const splitsExpanded = useSplitsExpanded();
@@ -2235,10 +2246,14 @@ export const TransactionTable = forwardRef((props, ref) => {
   useEffect(() => {
     if (shouldAdd.current) {
       if (newTransactions[0].account == null) {
-        props.addNotification({
-          type: 'error',
-          message: 'Account is a required field',
-        });
+        dispatch(
+          addNotification({
+            notification: {
+              type: 'error',
+              message: 'Account is a required field',
+            },
+          }),
+        );
         newNavigator.onEdit('temp', 'account');
       } else {
         const transactions = latestState.current.newTransactions;

@@ -1,35 +1,71 @@
 import { combineReducers, configureStore } from '@reduxjs/toolkit';
 
+import {
+  name as accountsSliceName,
+  reducer as accountsSliceReducer,
+  getInitialState as getInitialAccountsState,
+} from '../accounts/accountsSlice';
+import {
+  name as appSliceName,
+  reducer as appSliceReducer,
+  getInitialState as getInitialAppState,
+} from '../app/appSlice';
+import {
+  name as budgetsSliceName,
+  reducer as budgetsSliceReducer,
+  getInitialState as getInitialBudgetsState,
+} from '../budgets/budgetsSlice';
 import * as constants from '../constants';
+import {
+  name as modalsSliceName,
+  reducer as modalsSliceReducer,
+  getInitialState as getInitialModalsState,
+} from '../modals/modalsSlice';
+import {
+  name as notificationsSliceName,
+  reducer as notificationsSliceReducer,
+  getInitialState as getInitialNotificationsState,
+} from '../notifications/notificationsSlice';
+import {
+  name as prefsSliceName,
+  reducer as prefsSliceReducer,
+  getInitialState as getInitialPrefsState,
+} from '../prefs/prefsSlice';
+import {
+  name as queriesSliceName,
+  reducer as queriesSliceReducer,
+  getInitialState as getInitialQueriesState,
+} from '../queries/queriesSlice';
 import { reducers } from '../reducers';
-import { initialState as initialAccountState } from '../reducers/account';
-import { initialState as initialAppState } from '../reducers/app';
-import { initialState as initialBudgetsState } from '../reducers/budgets';
-import { initialState as initialModalsState } from '../reducers/modals';
-import { initialState as initialNotificationsState } from '../reducers/notifications';
-import { initialState as initialPrefsState } from '../reducers/prefs';
-import { initialState as initialQueriesState } from '../reducers/queries';
 import { initialState as initialUserState } from '../reducers/user';
 
-const appReducer = combineReducers(reducers);
+const appReducer = combineReducers({
+  ...reducers,
+  [accountsSliceName]: accountsSliceReducer,
+  [appSliceName]: appSliceReducer,
+  [budgetsSliceName]: budgetsSliceReducer,
+  [modalsSliceName]: modalsSliceReducer,
+  [notificationsSliceName]: notificationsSliceReducer,
+  [prefsSliceName]: prefsSliceReducer,
+  [queriesSliceName]: queriesSliceReducer,
+});
 const rootReducer: typeof appReducer = (state, action) => {
   if (action.type === constants.CLOSE_BUDGET) {
     // Reset the state and only keep around things intentionally. This
     // blows away everything else
     state = {
-      account: initialAccountState,
-      modals: initialModalsState,
-      notifications: initialNotificationsState,
-      queries: initialQueriesState,
-      budgets: state?.budgets || initialBudgetsState,
+      accounts: getInitialAccountsState(),
+      modals: getInitialModalsState(),
+      notifications: getInitialNotificationsState(),
+      queries: getInitialQueriesState(),
+      budgets: state?.budgets || getInitialBudgetsState(),
       user: state?.user || initialUserState,
       prefs: {
-        local: initialPrefsState.local,
-        global: state?.prefs?.global || initialPrefsState.global,
-        synced: initialPrefsState.synced,
+        ...getInitialPrefsState(),
+        global: state?.prefs?.global || getInitialPrefsState().global,
       },
       app: {
-        ...initialAppState,
+        ...getInitialAppState(),
         managerHasInitialized: state?.app?.managerHasInitialized || false,
         loadingText: state?.app?.loadingText || null,
       },
@@ -48,6 +84,7 @@ export const store = configureStore({
     }),
 });
 
+export type AppStore = typeof store;
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
 export type GetRootState = typeof store.getState;

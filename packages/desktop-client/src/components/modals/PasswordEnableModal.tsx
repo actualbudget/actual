@@ -1,10 +1,15 @@
 import { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { closeBudget } from 'loot-core/client/budgets/budgetsSlice';
+import {
+  type Modal as ModalType,
+  popModal,
+} from 'loot-core/client/modals/modalsSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import * as asyncStorage from 'loot-core/src/platform/server/asyncStorage';
 
-import { useActions } from '../../hooks/useActions';
+import { useDispatch } from '../../redux';
 import { theme, styles } from '../../style';
 import { Error as ErrorAlert } from '../alerts';
 import { Button } from '../common/Button2';
@@ -22,17 +27,18 @@ import {
   useRefreshLoginMethods,
 } from '../ServerContext';
 
-type PasswordEnableModalProps = {
-  onSave?: () => void;
-};
+type PasswordEnableModalProps = Extract<
+  ModalType,
+  { name: 'enable-password-auth' }
+>['options'];
 
 export function PasswordEnableModal({
   onSave: originalOnSave,
 }: PasswordEnableModalProps) {
   const { t } = useTranslation();
+  const dispatch = useDispatch();
 
   const [error, setError] = useState<string | null>(null);
-  const { closeBudget, popModal } = useActions();
   const multiuserEnabled = useMultiuserEnabled();
   const availableLoginMethods = useAvailableLoginMethods();
   const refreshLoginMethods = useRefreshLoginMethods();
@@ -59,7 +65,7 @@ export function PasswordEnableModal({
       originalOnSave?.();
       await refreshLoginMethods();
       await asyncStorage.removeItem('user-token');
-      await closeBudget();
+      await dispatch(closeBudget());
     } else {
       setError(getErrorMessage(error));
     }
@@ -84,7 +90,7 @@ export function PasswordEnableModal({
                     <Button
                       variant="bare"
                       style={{ fontSize: 15, marginRight: 10 }}
-                      onPress={() => popModal()}
+                      onPress={() => dispatch(popModal())}
                     >
                       <Trans>Cancel</Trans>
                     </Button>
@@ -101,7 +107,7 @@ export function PasswordEnableModal({
                     <Button
                       variant="bare"
                       style={{ fontSize: 15, marginRight: 10 }}
-                      onPress={() => popModal()}
+                      onPress={() => dispatch(popModal())}
                     >
                       <Trans>Cancel</Trans>
                     </Button>

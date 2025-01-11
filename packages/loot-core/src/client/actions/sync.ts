@@ -1,10 +1,9 @@
 import { send } from '../../platform/client/fetch';
 import { getUploadError } from '../../shared/errors';
+import { syncAccounts } from '../accounts/accountsSlice';
+import { pushModal } from '../modals/modalsSlice';
+import { loadPrefs } from '../prefs/prefsSlice';
 import { type AppDispatch, type GetRootState } from '../store';
-
-import { syncAccounts } from './account';
-import { pushModal } from './modals';
-import { loadPrefs } from './prefs';
 
 export function resetSync() {
   return async (dispatch: AppDispatch) => {
@@ -19,15 +18,23 @@ export function resetSync() {
         error.reason === 'file-has-new-key'
       ) {
         dispatch(
-          pushModal('fix-encryption-key', {
-            onSuccess: () => {
-              // TODO: There won't be a loading indicator for this
-              dispatch(resetSync());
+          pushModal({
+            name: 'fix-encryption-key',
+            options: {
+              onSuccess: () => {
+                // TODO: There won't be a loading indicator for this
+                dispatch(resetSync());
+              },
             },
           }),
         );
       } else if (error.reason === 'encrypt-failure') {
-        dispatch(pushModal('create-encryption-key', { recreate: true }));
+        dispatch(
+          pushModal({
+            name: 'create-encryption-key',
+            options: { recreate: true },
+          }),
+        );
       }
     } else {
       await dispatch(sync());
@@ -64,7 +71,7 @@ export function syncAndDownload(accountId?: string) {
       return { error: syncState.error };
     }
 
-    const hasDownloaded = await dispatch(syncAccounts(accountId));
+    const hasDownloaded = await dispatch(syncAccounts({ id: accountId }));
 
     if (hasDownloaded) {
       // Sync again afterwards if new transactions were created

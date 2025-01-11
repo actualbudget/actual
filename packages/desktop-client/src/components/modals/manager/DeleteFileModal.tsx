@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
-import { deleteBudget } from 'loot-core/client/actions';
-import { type File } from 'loot-core/src/types/file';
+import { deleteBudget } from 'loot-core/client/budgets/budgetsSlice';
+import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
 
 import { useDispatch } from '../../../redux';
 import { theme } from '../../../style';
@@ -11,11 +11,12 @@ import { Modal, ModalCloseButton, ModalHeader } from '../../common/Modal';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
 
-type DeleteFileProps = {
-  file: File;
-};
+type DeleteFileModalProps = Extract<
+  ModalType,
+  { name: 'delete-budget' }
+>['options'];
 
-export function DeleteFileModal({ file }: DeleteFileProps) {
+export function DeleteFileModal({ file }: DeleteFileModalProps) {
   const { t } = useTranslation();
 
   // If the state is "broken" that means it was created by another
@@ -70,10 +71,10 @@ export function DeleteFileModal({ file }: DeleteFileProps) {
                   onPress={async () => {
                     setLoadingState('cloud');
                     await dispatch(
-                      deleteBudget(
-                        'id' in file ? file.id : undefined,
-                        file.cloudFileId,
-                      ),
+                      deleteBudget({
+                        id: 'id' in file ? file.id : undefined,
+                        cloudFileId: file.cloudFileId,
+                      }),
                     );
                     setLoadingState(null);
 
@@ -136,7 +137,7 @@ export function DeleteFileModal({ file }: DeleteFileProps) {
                   }}
                   onPress={async () => {
                     setLoadingState('local');
-                    await dispatch(deleteBudget(file.id));
+                    await dispatch(deleteBudget({ id: file.id }));
                     setLoadingState(null);
 
                     close();
