@@ -68,7 +68,6 @@ export function Header({
 }: HeaderProps) {
   const { t } = useTranslation();
   const { isNarrowWidth } = useResponsive();
-  //debugger;
   function convertToMonth(
     start: string,
     end: string,

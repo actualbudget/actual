@@ -172,7 +172,6 @@ export function calculateTimeRange(
   timeFrame?: Partial<TimeFrame>,
   defaultTimeFrame?: TimeFrame,
 ) {
-  debugger;
   const start =
     timeFrame?.start ??
     defaultTimeFrame?.start ??
