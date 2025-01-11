@@ -1,3 +1,4 @@
+import { ImportTransactionsOpts } from '@actual-app/api';
 import { type batchUpdateTransactions } from '../server/accounts/transactions';
 import type {
   APIAccountEntity,
@@ -80,6 +81,7 @@ export interface ApiHandlers {
     accountId;
     transactions;
     isPreview?;
+    opts?: ImportTransactionsOpts;
   }) => Promise<{
     errors?: { message: string }[];
     added;

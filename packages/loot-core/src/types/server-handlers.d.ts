@@ -1,3 +1,4 @@
+import { ImportTransactionsOpts } from '@actual-app/api';
 import { ParseFileResult } from '../server/accounts/parse-file';
 import { batchUpdateTransactions } from '../server/accounts/transactions';
 import { Backup } from '../server/backups';
@@ -239,6 +240,7 @@ export interface ServerHandlers {
     accountId;
     transactions;
     isPreview;
+    opts?: ImportTransactionsOpts;
   }) => Promise<{
     errors?: { message: string }[];
     added;
