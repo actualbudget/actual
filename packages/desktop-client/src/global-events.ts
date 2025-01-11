@@ -113,13 +113,15 @@ export function handleGlobalEvents(store: AppStore) {
   const unlistenFallbackWriteError = listen('fallback-write-error', () => {
     store.dispatch(
       addNotification({
-        type: 'error',
-        title: 'Unable to save changes',
-        sticky: true,
-        message:
-          'This browser only supports using the app in one tab at a time, ' +
-          'and another tab has opened the app. No changes will be saved ' +
-          'from this tab; please close it and continue working in the other one.',
+        notification: {
+          type: 'error',
+          title: 'Unable to save changes',
+          sticky: true,
+          message:
+            'This browser only supports using the app in one tab at a time, ' +
+            'and another tab has opened the app. No changes will be saved ' +
+            'from this tab; please close it and continue working in the other one.',
+        },
       }),
     );
   });

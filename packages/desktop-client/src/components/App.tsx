@@ -139,14 +139,16 @@ function AppInner() {
     if (userData?.tokenExpired) {
       dispatch(
         addNotification({
-          type: 'error',
-          id: 'login-expired',
-          title: t('Login expired'),
-          sticky: true,
-          message: t('Login expired, please log in again.'),
-          button: {
-            title: t('Go to log in'),
-            action: () => dispatch(signOut()),
+          notification: {
+            type: 'error',
+            id: 'login-expired',
+            title: t('Login expired'),
+            sticky: true,
+            message: t('Login expired, please log in again.'),
+            button: {
+              title: t('Go to log in'),
+              action: () => dispatch(signOut()),
+            },
           },
         }),
       );

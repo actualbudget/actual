@@ -76,8 +76,10 @@ export function ConfirmChangeDocumentDirModal({
 
       dispatch(
         addNotification({
-          type: 'message',
-          message: t('Actual’s data directory successfully changed.'),
+          notification: {
+            type: 'message',
+            message: t('Actual’s data directory successfully changed.'),
+          },
         }),
       );
       close();

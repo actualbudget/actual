@@ -167,24 +167,28 @@ function UserDirectoryContent({
       if (error === 'token-expired') {
         dispatch(
           addNotification({
-            type: 'error',
-            id: 'login-expired',
-            title: t('Login expired'),
-            sticky: true,
-            message: getUserDirectoryErrors(error),
-            button: {
-              title: t('Go to login'),
-              action: () => dispatch(signOut()),
+            notification: {
+              type: 'error',
+              id: 'login-expired',
+              title: t('Login expired'),
+              sticky: true,
+              message: getUserDirectoryErrors(error),
+              button: {
+                title: t('Go to login'),
+                action: () => dispatch(signOut()),
+              },
             },
           }),
         );
       } else {
         dispatch(
           addNotification({
-            type: 'error',
-            title: t('Something happened while deleting users'),
-            sticky: true,
-            message: getUserDirectoryErrors(error),
+            notification: {
+              type: 'error',
+              title: t('Something happened while deleting users'),
+              sticky: true,
+              message: getUserDirectoryErrors(error),
+            },
           }),
         );
       }

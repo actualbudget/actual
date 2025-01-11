@@ -30,13 +30,15 @@ export function useUndo(): UndoActions {
 
       dispatch(
         addNotification({
-          type: 'message',
-          timeout,
-          button: {
-            title: 'Undo',
-            action: undo,
+          notification: {
+            type: 'message',
+            timeout,
+            button: {
+              title: 'Undo',
+              action: undo,
+            },
+            ...notification,
           },
-          ...notification,
         }),
       );
     },
@@ -51,13 +53,15 @@ export function useUndo(): UndoActions {
 
       dispatch(
         addNotification({
-          type: 'message',
-          timeout,
-          button: {
-            title: 'Redo',
-            action: redo,
+          notification: {
+            type: 'message',
+            timeout,
+            button: {
+              title: 'Redo',
+              action: redo,
+            },
+            ...notification,
           },
-          ...notification,
         }),
       );
     },

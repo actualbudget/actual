@@ -20,10 +20,12 @@ export function listenForSyncEvent(store: AppStore) {
     if (type === 'unauthorized') {
       store.dispatch(
         addNotification({
-          type: 'warning',
-          message: 'Unable to authenticate with server',
-          sticky: true,
-          id: 'auth-issue',
+          notification: {
+            type: 'warning',
+            message: 'Unable to authenticate with server',
+            sticky: true,
+            id: 'auth-issue',
+          },
         }),
       );
     }
@@ -44,9 +46,11 @@ export function listenForSyncEvent(store: AppStore) {
 
         store.dispatch(
           addNotification({
-            title: t('Syncing has been fixed!'),
-            message: t('Happy budgeting!'),
-            type: 'message',
+            notification: {
+              title: t('Syncing has been fixed!'),
+              message: t('Happy budgeting!'),
+              type: 'message',
+            },
           }),
         );
       }
@@ -357,7 +361,9 @@ export function listenForSyncEvent(store: AppStore) {
       }
 
       if (notif) {
-        store.dispatch(addNotification({ type: 'error', ...notif }));
+        store.dispatch(
+          addNotification({ notification: { type: 'error', ...notif } }),
+        );
       }
     }
   });

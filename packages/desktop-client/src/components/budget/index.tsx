@@ -148,11 +148,13 @@ function BudgetInner(props: BudgetInnerProps) {
   const categoryNameAlreadyExistsNotification = name => {
     dispatch(
       addNotification({
-        type: 'error',
-        message: t(
-          'Category “{{name}}” already exists in group (it may be hidden)',
-          { name },
-        ),
+        notification: {
+          type: 'error',
+          message: t(
+            'Category “{{name}}” already exists in group (it may be hidden)',
+            { name },
+          ),
+        },
       }),
     );
   };

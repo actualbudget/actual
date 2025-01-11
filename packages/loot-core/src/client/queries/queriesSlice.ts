@@ -317,11 +317,13 @@ export const deleteCategory = createAppAsyncThunk(
         case 'category-type':
           dispatch(
             addNotification({
-              id: `${sliceName}/deleteCategory/transfer`,
-              type: 'error',
-              message: t(
-                'A category must be transferred to another of the same type (expense or income)',
-              ),
+              notification: {
+                id: `${sliceName}/deleteCategory/transfer`,
+                type: 'error',
+                message: t(
+                  'A category must be transferred to another of the same type (expense or income)',
+                ),
+              },
             }),
           );
           break;
@@ -587,18 +589,26 @@ export const applyBudgetAction = createAppAsyncThunk(
         await send('budget/set-12month-avg', { month });
         break;
       case 'check-templates':
-        dispatch(addNotification(await send('budget/check-templates')));
+        dispatch(
+          addNotification({
+            notification: await send('budget/check-templates'),
+          }),
+        );
         break;
       case 'apply-goal-template':
         dispatch(
-          addNotification(await send('budget/apply-goal-template', { month })),
+          addNotification({
+            notification: await send('budget/apply-goal-template', { month }),
+          }),
         );
         break;
       case 'overwrite-goal-template':
         dispatch(
-          addNotification(
-            await send('budget/overwrite-goal-template', { month }),
-          ),
+          addNotification({
+            notification: await send('budget/overwrite-goal-template', {
+              month,
+            }),
+          }),
         );
         break;
       case 'apply-single-category-template':
@@ -613,9 +623,9 @@ export const applyBudgetAction = createAppAsyncThunk(
         break;
       case 'cleanup-goal-template':
         dispatch(
-          addNotification(
-            await send('budget/cleanup-goal-template', { month }),
-          ),
+          addNotification({
+            notification: await send('budget/cleanup-goal-template', { month }),
+          }),
         );
         break;
       case 'hold':
@@ -665,12 +675,12 @@ export const applyBudgetAction = createAppAsyncThunk(
       }
       case 'apply-multiple-templates':
         dispatch(
-          addNotification(
-            await send('budget/apply-multiple-templates', {
+          addNotification({
+            notification: await send('budget/apply-multiple-templates', {
               month,
               categoryIds: args.categories,
             }),
-          ),
+          }),
         );
         break;
       case 'set-single-3-avg':
@@ -728,8 +738,10 @@ export const importPreviewTransactions = createAppAsyncThunk(
     errors.forEach(error => {
       dispatch(
         addNotification({
-          type: 'error',
-          message: error.message,
+          notification: {
+            type: 'error',
+            message: error.message,
+          },
         }),
       );
     });
@@ -772,8 +784,10 @@ export const importTransactions = createAppAsyncThunk(
     errors.forEach(error => {
       dispatch(
         addNotification({
-          type: 'error',
-          message: error.message,
+          notification: {
+            type: 'error',
+            message: error.message,
+          },
         }),
       );
     });

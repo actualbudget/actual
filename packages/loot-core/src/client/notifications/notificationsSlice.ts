@@ -6,7 +6,7 @@ const sliceName = 'notifications';
 
 export type Notification = {
   id?: string | undefined;
-  type: 'message' | 'error' | 'warning';
+  type?: 'message' | 'error' | 'warning' | undefined;
   pre?: string | undefined;
   title?: string | undefined;
   message: string;
@@ -39,9 +39,15 @@ const initialState: NotificationsState = {
   inset: {},
 };
 
-type AddNotificationPayload = Notification;
-type RemoveNotificationPayload = NotificationWithId['id'];
-type SetNotificationInsetPayload = NotificationsState['inset'];
+type AddNotificationPayload = {
+  notification: Notification;
+};
+type RemoveNotificationPayload = {
+  id: NotificationWithId['id'];
+};
+type SetNotificationInsetPayload = {
+  inset: NotificationsState['inset'];
+} | null;
 
 const notificationsSlice = createSlice({
   name: sliceName,
@@ -49,8 +55,8 @@ const notificationsSlice = createSlice({
   reducers: {
     addNotification(state, action: PayloadAction<AddNotificationPayload>) {
       const notification = {
-        ...action.payload,
-        id: action.payload.id || uuidv4(),
+        ...action.payload.notification,
+        id: action.payload.notification.id || uuidv4(),
       };
 
       if (state.notifications.find(n => n.id === notification.id)) {
@@ -60,11 +66,13 @@ const notificationsSlice = createSlice({
     },
     addGenericErrorNotification() {
       addNotification({
-        type: 'error',
-        message: t(
-          'Something internally went wrong. You may want to restart the app if anything looks wrong. ' +
-            'Please report this as a new issue on GitHub.',
-        ),
+        notification: {
+          type: 'error',
+          message: t(
+            'Something internally went wrong. You may want to restart the app if anything looks wrong. ' +
+              'Please report this as a new issue on GitHub.',
+          ),
+        },
       });
     },
     removeNotification(
@@ -72,14 +80,14 @@ const notificationsSlice = createSlice({
       action: PayloadAction<RemoveNotificationPayload>,
     ) {
       state.notifications = state.notifications.filter(
-        notif => notif.id !== action.payload,
+        notif => notif.id !== action.payload.id,
       );
     },
     setNotificationInset(
       state,
       action: PayloadAction<SetNotificationInsetPayload>,
     ) {
-      state.inset = action.payload ? action.payload : {};
+      state.inset = action.payload?.inset ? action.payload.inset : {};
     },
   },
 });

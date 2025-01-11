@@ -113,9 +113,11 @@ export function ServerProvider({ children }: { children: ReactNode }) {
       if ('error' in data) {
         dispatch(
           addNotification({
-            type: 'error',
-            title: t('Failed to refresh login methods'),
-            message: data.error ?? t('Unknown'),
+            notification: {
+              type: 'error',
+              title: t('Failed to refresh login methods'),
+              message: data.error ?? t('Unknown'),
+            },
           }),
         );
         setAvailableLoginMethods([]);

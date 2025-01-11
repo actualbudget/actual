@@ -53,12 +53,14 @@ export const UserAccessRow = memo(
         if (someDeletionsFailed) {
           dispatch(
             addNotification({
-              type: 'error',
-              title: t('Access Revocation Incomplete'),
-              message: t(
-                'Some access permissions were not revoked successfully.',
-              ),
-              sticky: true,
+              notification: {
+                type: 'error',
+                title: t('Access Revocation Incomplete'),
+                message: t(
+                  'Some access permissions were not revoked successfully.',
+                ),
+                sticky: true,
+              },
             }),
           );
         }
@@ -70,15 +72,17 @@ export const UserAccessRow = memo(
       if (error === 'token-expired') {
         dispatch(
           addNotification({
-            type: 'error',
-            id: 'login-expired',
-            title: t('Login expired'),
-            sticky: true,
-            message: getUserAccessErrors(error),
-            button: {
-              title: t('Go to login'),
-              action: () => {
-                dispatch(signOut());
+            notification: {
+              type: 'error',
+              id: 'login-expired',
+              title: t('Login expired'),
+              sticky: true,
+              message: getUserAccessErrors(error),
+              button: {
+                title: t('Go to login'),
+                action: () => {
+                  dispatch(signOut());
+                },
               },
             },
           }),
@@ -86,10 +90,12 @@ export const UserAccessRow = memo(
       } else {
         dispatch(
           addNotification({
-            type: 'error',
-            title: t('Something happened while editing access'),
-            sticky: true,
-            message: getUserAccessErrors(error),
+            notification: {
+              type: 'error',
+              title: t('Something happened while editing access'),
+              sticky: true,
+              message: getUserAccessErrors(error),
+            },
           }),
         );
       }
