@@ -156,6 +156,9 @@ global.Actual = {
   openURLInBrowser: url => {
     window.open(url, '_blank');
   },
+  downloadActualServer: () => {},
+  startActualServer: () => {},
+  exposeActualServer: () => {},
   onEventFromMain: () => {},
   isUpdateReadyForDownload: () => isUpdateReadyForDownload,
   waitForUpdateReadyForDownload: () => isUpdateReadyForDownloadPromise,
