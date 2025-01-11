@@ -74,11 +74,13 @@ export function OpenIdForm({
           if ('error' in config) {
             dispatch(
               addNotification({
-                type: 'error',
-                id: 'error',
-                title: t('Error getting OpenID config'),
-                sticky: true,
-                message: config.error,
+                notification: {
+                  type: 'error',
+                  id: 'error',
+                  title: t('Error getting OpenID config'),
+                  sticky: true,
+                  message: config.error,
+                },
               }),
             );
           } else if ('openId' in config) {

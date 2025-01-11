@@ -172,16 +172,20 @@ function handleSyncResponse(
     if (error.type === 'SyncError') {
       dispatch(
         addNotification({
-          type: 'error',
-          message: error.message,
+          notification: {
+            type: 'error',
+            message: error.message,
+          },
         }),
       );
     } else {
       dispatch(
         addNotification({
-          type: 'error',
-          message: error.message,
-          internal: error.internal,
+          notification: {
+            type: 'error',
+            message: error.message,
+            internal: error.internal,
+          },
         }),
       );
     }

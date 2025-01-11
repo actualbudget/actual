@@ -55,12 +55,14 @@ export function TransferOwnership({
         } else if ('error' in data) {
           dispatch(
             addNotification({
-              type: 'error',
-              title: t('Error getting users'),
-              message: t(
-                'Failed to complete ownership transfer. Please try again.',
-              ),
-              sticky: true,
+              notification: {
+                type: 'error',
+                title: t('Error getting users'),
+                message: t(
+                  'Failed to complete ownership transfer. Please try again.',
+                ),
+                sticky: true,
+              },
             }),
           );
         } else {
@@ -194,12 +196,14 @@ export function TransferOwnership({
                 } catch (error) {
                   dispatch(
                     addNotification({
-                      type: 'error',
-                      title: t('Failed to transfer ownership'),
-                      message: t(
-                        'Failed to complete ownership transfer. Please try again.',
-                      ),
-                      sticky: true,
+                      notification: {
+                        type: 'error',
+                        title: t('Failed to transfer ownership'),
+                        message: t(
+                          'Failed to complete ownership transfer. Please try again.',
+                        ),
+                        sticky: true,
+                      },
                     }),
                   );
                   setIsTransferring(false);

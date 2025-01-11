@@ -87,11 +87,13 @@ function UserAccessContent({
     if ('error' in data) {
       dispatch(
         addNotification({
-          type: 'error',
-          id: 'error',
-          title: t('Error getting available users'),
-          sticky: true,
-          message: data.error,
+          notification: {
+            type: 'error',
+            id: 'error',
+            title: t('Error getting available users'),
+            sticky: true,
+            message: data.error,
+          },
         }),
       );
       return [];

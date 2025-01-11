@@ -185,8 +185,10 @@ function SummaryInner({ widget }: SummaryInnerProps) {
     if (!widget) {
       dispatch(
         addNotification({
-          type: 'error',
-          message: t('Cannot save: No widget available.'),
+          notification: {
+            type: 'error',
+            message: t('Cannot save: No widget available.'),
+          },
         }),
       );
       return;
@@ -213,8 +215,10 @@ function SummaryInner({ widget }: SummaryInnerProps) {
     if (!widget) {
       dispatch(
         addNotification({
-          type: 'error',
-          message: t('Cannot save: No widget available.'),
+          notification: {
+            type: 'error',
+            message: t('Cannot save: No widget available.'),
+          },
         }),
       );
       return;
@@ -236,8 +240,10 @@ function SummaryInner({ widget }: SummaryInnerProps) {
     });
     dispatch(
       addNotification({
-        type: 'message',
-        message: t('Dashboard widget successfully saved.'),
+        notification: {
+          type: 'message',
+          message: t('Dashboard widget successfully saved.'),
+        },
       }),
     );
   }
