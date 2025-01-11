@@ -1256,7 +1256,7 @@ handlers['transactions-import'] = mutator(function ({
         false,
         true,
         isPreview,
-        opts.defaultCleared,
+        opts?.defaultCleared,
       );
     } catch (err) {
       if (err instanceof TransactionError) {
