@@ -21,7 +21,7 @@ export function LearnCategoriesSettings() {
       primaryAction={
         <View style={{ flexDirection: 'row', gap: '1em' }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 20 }}>
-            <View title={t('Upcoming Length')}>
+            <View title={t('Category Learning')}>
               <Button
                 onPress={() =>
                   setLearnCategories(String(!isLearnCategoriesEnabled))
@@ -56,7 +56,7 @@ export function LearnCategoriesSettings() {
         </Text>
         <Button
           onPress={() => setExpanded(false)}
-          aria-label="Close upcoming length settings"
+          aria-label="Close Category Learning settings"
         >
           <Trans>Close</Trans>
         </Button>
