@@ -125,7 +125,7 @@ export interface CustomReportData {
   date_range: string;
   mode: string;
   group_by: string;
-  sort_by: SortByOpType;
+  sort_by: sortByOpType;
   balance_type: string;
   show_empty: number;
   show_offbudget: number;
