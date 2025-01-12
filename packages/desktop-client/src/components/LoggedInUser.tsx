@@ -1,17 +1,17 @@
 import React, { useState, useEffect, useRef, type CSSProperties } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { useDispatch, useSelector } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 
-import { closeBudget, getUserData, signOut } from 'loot-core/client/actions';
-import { type State } from 'loot-core/src/client/state-types';
 import { listen } from 'loot-core/src/platform/client/fetch';
+import { closeBudget, getUserData, signOut } from 'loot-core/client/actions';
 import { type RemoteFile, type SyncedLocalFile } from 'loot-core/types/file';
+import { type TransObjectLiteral } from 'loot-core/types/util';
 
 import { useAuth } from '../auth/AuthProvider';
 import { Permissions } from '../auth/types';
 import { useMetadataPref } from '../hooks/useMetadataPref';
 import { useNavigate } from '../hooks/useNavigate';
+import { useSelector, useDispatch } from '../redux';
 import { theme, styles } from '../style';
 
 import { Button } from './common/Button2';
@@ -36,7 +36,7 @@ export function LoggedInUser({
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const userData = useSelector((state: State) => state.user.data);
+  const userData = useSelector(state => state.user.data);
   const [loading, setLoading] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
   const serverUrl = useServerURL();
@@ -51,7 +51,7 @@ export function LoggedInUser({
     f => f.state === 'remote' || f.state === 'synced' || f.state === 'detached',
   ) as (SyncedLocalFile | RemoteFile)[];
   const currentFile = remoteFiles.find(f => f.cloudFileId === cloudFileId);
-  const hasSyncedPrefs = useSelector((state: State) => state.prefs.synced);
+  const hasSyncedPrefs = useSelector(state => state.prefs.synced);
 
   const initializeUserData = async () => {
     try {
@@ -233,9 +233,14 @@ export function LoggedInUser({
         userData?.displayName &&
         !hasSyncedPrefs && (
           <small>
+            (
             <Trans>
-              (logged in as: <span>{userData?.displayName}</span>)
+              logged in as:{' '}
+              <span>
+                {{ userName: userData?.displayName } as TransObjectLiteral}
+              </span>
             </Trans>
+            )
           </small>
         )}
       {!loading &&
@@ -244,13 +249,16 @@ export function LoggedInUser({
         userData?.displayName &&
         hasSyncedPrefs && (
           <small>
+            (
             <Trans>
-              (logged in as:{' '}
+              logged in as:{' '}
               <span>
-                <PrivacyFilter>{userData?.displayName}</PrivacyFilter>
+                <PrivacyFilter>
+                  {{ userName: userData?.displayName } as TransObjectLiteral}
+                </PrivacyFilter>
               </span>
-              )
             </Trans>
+            )
           </small>
         )}
 

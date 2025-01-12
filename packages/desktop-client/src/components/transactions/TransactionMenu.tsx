@@ -1,11 +1,11 @@
 import React, { type ComponentPropsWithoutRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
 
 import { pushModal } from 'loot-core/client/actions';
 import { isPreviewId } from 'loot-core/shared/transactions';
 import { type TransactionEntity } from 'loot-core/types/models';
 
+import { useDispatch } from '../../redux';
 import { Menu } from '../common/Menu';
 
 type BalanceMenuProps = Omit<

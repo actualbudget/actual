@@ -45,7 +45,7 @@ export function pagedQuery<TResponse = unknown>(
   );
 }
 
-type Data<TResponse> = ReadonlyArray<TResponse>;
+type Data<TResponse> = TResponse[];
 
 type Listener<TResponse = unknown> = (
   data: Data<TResponse>,
@@ -62,7 +62,7 @@ export class LiveQuery<TResponse = unknown> {
   private _data: Data<TResponse>;
   private _dependencies: Set<string>;
   private _listeners: Array<Listener<TResponse>>;
-  private _supportedSyncTypes: Set<string>;
+  private _supportedSyncTypes: Set<'applied' | 'success'>;
   private _query: Query;
   private _onError: (error: Error) => void;
 
@@ -107,8 +107,8 @@ export class LiveQuery<TResponse = unknown> {
 
     // TODO: error types?
     this._supportedSyncTypes = options.onlySync
-      ? new Set<string>(['success'])
-      : new Set<string>(['applied', 'success']);
+      ? new Set(['success'])
+      : new Set(['applied', 'success']);
 
     if (onData) {
       this.addListener(onData);
@@ -162,15 +162,18 @@ export class LiveQuery<TResponse = unknown> {
 
   protected subscribe = () => {
     if (this._unsubscribeSyncEvent == null) {
-      this._unsubscribeSyncEvent = listen('sync-event', ({ type, tables }) => {
+      this._unsubscribeSyncEvent = listen('sync-event', event => {
         // If the user is doing optimistic updates, they don't want to
         // always refetch whenever something changes because it would
         // refetch all data after they've already updated the UI. This
         // voids the perf benefits of optimistic updates. Allow querys
         // to only react to remote syncs. By default, queries will
         // always update to all changes.
-        if (this._supportedSyncTypes.has(type)) {
-          this.onUpdate(tables);
+        if (
+          (event.type === 'applied' || event.type === 'success') &&
+          this._supportedSyncTypes.has(event.type)
+        ) {
+          this.onUpdate(event.tables);
         }
       });
     }

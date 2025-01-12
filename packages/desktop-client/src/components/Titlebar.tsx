@@ -1,7 +1,6 @@
 import React, { useState, useEffect, type CSSProperties } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
 import { Routes, Route, useLocation } from 'react-router-dom';
 
 import { css } from '@emotion/css';
@@ -26,6 +25,7 @@ import {
   SvgViewHide,
   SvgViewShow,
 } from '../icons/v2';
+import { useDispatch } from '../redux';
 import { theme, styles } from '../style';
 
 import { AccountSyncCheck } from './accounts/AccountSyncCheck';
@@ -117,8 +117,8 @@ function SyncButton({ style, isMobile = false }: SyncButtonProps) {
   >(null);
 
   useEffect(() => {
-    const unlisten = listen('sync-event', ({ type, subtype, syncDisabled }) => {
-      if (type === 'start') {
+    const unlisten = listen('sync-event', event => {
+      if (event.type === 'start') {
         setSyncing(true);
         setSyncState(null);
       } else {
@@ -130,19 +130,19 @@ function SyncButton({ style, isMobile = false }: SyncButtonProps) {
         }, 200);
       }
 
-      if (type === 'error') {
+      if (event.type === 'error') {
         // Use the offline state if either there is a network error or
         // if this file isn't a "cloud file". You can't sync a local
         // file.
-        if (subtype === 'network') {
+        if (event.subtype === 'network') {
           setSyncState('offline');
         } else if (!cloudFileId) {
           setSyncState('local');
         } else {
           setSyncState('error');
         }
-      } else if (type === 'success') {
-        setSyncState(syncDisabled ? 'disabled' : null);
+      } else if (event.type === 'success') {
+        setSyncState(event.syncDisabled ? 'disabled' : null);
       }
     });
 

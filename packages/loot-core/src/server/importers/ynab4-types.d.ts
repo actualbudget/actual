@@ -1,5 +1,3 @@
-/* eslint-disable import/no-unused-modules */
-
 export namespace YNAB4 {
   export interface YFull {
     masterCategories: MasterCategory[];

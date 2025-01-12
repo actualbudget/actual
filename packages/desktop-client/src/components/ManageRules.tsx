@@ -8,7 +8,6 @@ import React, {
   type Dispatch,
 } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
 
 import { useSchedules } from 'loot-core/client/data-hooks/schedules';
 import { q } from 'loot-core/shared/query';
@@ -25,6 +24,7 @@ import { useAccounts } from '../hooks/useAccounts';
 import { useCategories } from '../hooks/useCategories';
 import { usePayees } from '../hooks/usePayees';
 import { useSelected, SelectedProvider } from '../hooks/useSelected';
+import { useDispatch } from '../redux';
 import { theme } from '../style';
 
 import { Button } from './common/Button2';

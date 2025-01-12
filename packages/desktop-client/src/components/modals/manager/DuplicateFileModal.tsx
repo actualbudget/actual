@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
 
 import {
   addNotification,
@@ -10,6 +9,7 @@ import {
 } from 'loot-core/client/actions';
 import { type File } from 'loot-core/src/types/file';
 
+import { useDispatch } from '../../../redux';
 import { theme } from '../../../style';
 import { Button, ButtonWithLoading } from '../../common/Button2';
 import { FormError } from '../../common/FormError';
@@ -42,7 +42,7 @@ export function DuplicateFileModal({
   onComplete,
 }: DuplicateFileProps) {
   const { t } = useTranslation();
-  const fileEndingTranslation = t(' - copy');
+  const fileEndingTranslation = ' - ' + t('copy');
   const [newName, setNewName] = useState(file.name + fileEndingTranslation);
   const [nameError, setNameError] = useState<string | null>(null);
 
@@ -227,8 +227,11 @@ export function DuplicateFileModal({
                   }}
                   onPress={() => handleDuplicate('localOnly')}
                 >
-                  <Trans>Duplicate</Trans>
-                  {isCloudFile && <Trans> locally</Trans>}
+                  {isCloudFile ? (
+                    <Trans>Duplicate locally</Trans>
+                  ) : (
+                    <Trans>Duplicate</Trans>
+                  )}
                 </ButtonWithLoading>
               )}
             </ModalButtons>

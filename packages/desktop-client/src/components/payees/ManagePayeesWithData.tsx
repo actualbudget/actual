@@ -1,18 +1,18 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 
 import {
   getPayees,
   initiallyLoadPayees,
   pushModal,
-  setLastUndoState,
 } from 'loot-core/client/actions';
 import { type UndoState } from 'loot-core/server/undo';
 import { send, listen } from 'loot-core/src/platform/client/fetch';
+import * as undo from 'loot-core/src/platform/client/undo';
 import { applyChanges, type Diff } from 'loot-core/src/shared/util';
 import { type NewRuleEntity, type PayeeEntity } from 'loot-core/types/models';
 
 import { usePayees } from '../../hooks/usePayees';
+import { useDispatch } from '../../redux';
 
 import { ManagePayees } from './ManagePayees';
 
@@ -24,7 +24,6 @@ export function ManagePayeesWithData({
   initialSelectedIds,
 }: ManagePayeesWithDataProps) {
   const payees = usePayees();
-  const lastUndoState = useSelector(state => state.app.lastUndoState);
   const dispatch = useDispatch();
 
   const [ruleCounts, setRuleCounts] = useState({ value: new Map() });
@@ -49,9 +48,9 @@ export function ManagePayeesWithData({
     }
     loadData();
 
-    const unlisten = listen('sync-event', async ({ type, tables }) => {
-      if (type === 'applied') {
-        if (tables.includes('rules')) {
+    const unlisten = listen('sync-event', async event => {
+      if (event.type === 'applied') {
+        if (event.tables.includes('rules')) {
           await refetchRuleCounts();
         }
       }
@@ -80,15 +79,16 @@ export function ManagePayeesWithData({
         await refetchRuleCounts();
       }
 
-      await dispatch(setLastUndoState(null));
+      undo.setUndoState('undoEvent', null);
     }
 
-    if (lastUndoState.current) {
-      onUndo(lastUndoState.current);
+    const lastUndoEvent = undo.getUndoState('undoEvent');
+    if (lastUndoEvent) {
+      onUndo(lastUndoEvent);
     }
 
     return listen('undo-event', onUndo);
-  }, [dispatch, lastUndoState, refetchRuleCounts, refetchOrphanedPayees]);
+  }, [dispatch, refetchRuleCounts, refetchOrphanedPayees]);
 
   function onViewRules(id: PayeeEntity['id']) {
     dispatch(pushModal('manage-rules', { payeeId: id }));

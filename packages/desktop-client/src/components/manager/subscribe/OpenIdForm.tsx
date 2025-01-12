@@ -74,7 +74,7 @@ export function OpenIdForm({
             addNotification({
               type: 'error',
               id: 'error',
-              title: t('Error getting openid config'),
+              title: t('Error getting OpenID config'),
               sticky: true,
               message: config.error,
             });
@@ -363,7 +363,7 @@ const openIdProviders: (OpenIdProviderOption | typeof Menu.line)[] = [
       ),
     },
     {
-      label: 'Authentik',
+      label: 'authentik',
       value: 'authentik',
       issuer: 'https://{domain}/application/o/{provider-slug-name}/',
       clientIdRequired: true,
@@ -372,7 +372,7 @@ const openIdProviders: (OpenIdProviderOption | typeof Menu.line)[] = [
       tip: (
         <Text style={{ color: theme.warningText }}>
           <Trans>
-            Note that the URL depends on your Authentik domain and provider slug
+            Note that the URL depends on your authentik domain and provider slug
             name.
           </Trans>{' '}
           <Link

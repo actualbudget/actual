@@ -1,15 +1,21 @@
 // @ts-strict-ignore
-import mitt from 'mitt';
+import mitt, { type Emitter } from 'mitt';
 
 import { captureException } from '../platform/exceptions';
+import { ServerEvents } from '../types/server-events';
 
 // This is a simple helper abstraction for defining methods exposed to
 // the client. It doesn't do much, but checks for naming conflicts and
 // makes it cleaner to combine methods. We call a group of related
 // methods an "app".
 
+type Events = {
+  sync: ServerEvents['sync-event'];
+  'load-budget': { id: string };
+};
+
 class App<Handlers> {
-  events;
+  events: Emitter<Events>;
   handlers: Handlers;
   services;
   unlistenServices;
