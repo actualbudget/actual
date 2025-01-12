@@ -29,6 +29,7 @@ import { TableHeader, Cell, SelectCell } from '../table';
 
 import { PayeeMenu } from './PayeeMenu';
 import { PayeeTable } from './PayeeTable';
+import { LearnCategoriesSettings } from '../settings/LearnCategories';
 
 const getPayeesById = memoizeOne((payees: PayeeEntity[]) => groupById(payees));
 
@@ -273,6 +274,23 @@ export const ManagePayees = ({
           value={filter}
           onChange={applyFilter}
         />
+      </View>
+
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          padding: '0 0 15px',
+        }}
+      >
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+          }}
+        >
+          <LearnCategoriesSettings />
+        </View>
       </View>
 
       <SelectedProvider instance={selected} fetchAllIds={getSelectableIds}>

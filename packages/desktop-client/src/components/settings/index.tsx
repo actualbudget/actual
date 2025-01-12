@@ -198,7 +198,6 @@ export function Settings() {
         <ThemeSettings />
         <FormatSettings />
         <LanguageSettings />
-        <LearnCategoriesSettings />
         <AuthSettings />
         <EncryptionSettings />
         <BudgetTypeSettings />
