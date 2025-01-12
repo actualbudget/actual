@@ -16,5 +16,5 @@
   "coverageReporters": ["html", "lcov", "text", "text-summary"],
   "resetMocks": true,
   "restoreMocks": true,
-  "transformIgnorePatterns": ["/node_modules/(?!@actual-app/crdt)"]
+  "transformIgnorePatterns": ["<rootDir>/node_modules/(?!@actual-app/crdt)"]
 }
