@@ -6,6 +6,7 @@ import { type PayeeEntity } from 'loot-core/src/types/models';
 
 import { useContextMenu } from '../../hooks/useContextMenu';
 import { useSelectedDispatch } from '../../hooks/useSelected';
+import { useSyncedPref } from '../../hooks/useSyncedPref';
 import { SvgArrowThinRight, SvgBookmark, SvgLightBulb } from '../../icons/v1';
 import { theme } from '../../style';
 import { Menu } from '../common/Menu';
@@ -20,7 +21,6 @@ import {
   Row,
   SelectCell,
 } from '../table';
-import { useSyncedPref } from '../../hooks/useSyncedPref';
 
 type RuleButtonProps = {
   ruleCount: number;

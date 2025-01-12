@@ -2,12 +2,12 @@ import { useTranslation, Trans } from 'react-i18next';
 
 import { type PayeeEntity } from 'loot-core/src/types/models';
 
+import { useSyncedPref } from '../../hooks/useSyncedPref';
 import { SvgDelete, SvgMerge } from '../../icons/v0';
 import { SvgBookmark, SvgLightBulb } from '../../icons/v1';
 import { theme } from '../../style';
 import { Menu } from '../common/Menu';
 import { View } from '../common/View';
-import { useSyncedPref } from '../../hooks/useSyncedPref';
 
 type PayeeMenuProps = {
   payeesById: Record<PayeeEntity['id'], PayeeEntity>;

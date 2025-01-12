@@ -25,11 +25,11 @@ import { Button } from '../common/Button2';
 import { Popover } from '../common/Popover';
 import { Search } from '../common/Search';
 import { View } from '../common/View';
+import { LearnCategoriesSettings } from '../settings/LearnCategories';
 import { TableHeader, Cell, SelectCell } from '../table';
 
 import { PayeeMenu } from './PayeeMenu';
 import { PayeeTable } from './PayeeTable';
-import { LearnCategoriesSettings } from '../settings/LearnCategories';
 
 const getPayeesById = memoizeOne((payees: PayeeEntity[]) => groupById(payees));
 

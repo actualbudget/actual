@@ -5,9 +5,9 @@ import { useSyncedPref } from '../../hooks/useSyncedPref';
 import { Button } from '../common/Button2';
 import { Link } from '../common/Link';
 import { Text } from '../common/Text';
+import { View } from '../common/View';
 
 import { Setting } from './UI';
-import { View } from '../common/View';
 
 export function LearnCategoriesSettings() {
   const { t } = useTranslation();
