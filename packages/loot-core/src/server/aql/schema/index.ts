@@ -142,6 +142,7 @@ export const schema = {
     date_range: f('string'),
     mode: f('string', { default: 'total' }),
     group_by: f('string', { default: 'Category' }),
+    sort_by: f('string', { default: 'asc' }),
     balance_type: f('string', { default: 'Expense' }),
     show_empty: f('integer', { default: 0 }),
     show_offbudget: f('integer', { default: 0 }),

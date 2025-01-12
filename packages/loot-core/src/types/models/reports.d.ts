@@ -31,9 +31,7 @@ export type balanceTypeOpType =
   | 'netAssets'
   | 'netDebts';
 
-export type sortByOpType =
-  | 'asc'
-  | 'desc';
+export type sortByOpType = 'asc' | 'desc';
 
 export type SpendingMonthEntity = Record<
   string | number,
@@ -127,6 +125,7 @@ export interface CustomReportData {
   date_range: string;
   mode: string;
   group_by: string;
+  sort_by: SortByOpType;
   balance_type: string;
   show_empty: number;
   show_offbudget: number;
