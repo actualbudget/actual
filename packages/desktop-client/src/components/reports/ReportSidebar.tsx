@@ -160,6 +160,14 @@ export function ReportSidebar({
     return options;
   }, [customReportItems, dateRangeLine]);
 
+  const disableSort =
+    customReportItems.groupBy === 'Interval' ||
+    (disabledList.mode
+      .find(m => m.description === customReportItems.mode)
+      .graphs.find(g => g.description === customReportItems.graphType)
+      .disableSort ??
+      false);
+
   return (
     <View
       style={{
@@ -274,26 +282,28 @@ export function ReportSidebar({
           />
         </View>
 
-        <View
-          style={{
-            flexDirection: 'row',
-            padding: 5,
-            alignItems: 'center',
-          }}
-        >
-          <Text style={{ width: 50, textAlign: 'right', marginRight: 5 }}>
-            {t('Sort:')}
-          </Text>
-          <Select
-            value={customReportItems.sortBy}
-            onChange={e => onChangeSortBy(e)}
-            options={ReportOptions.sortBy.map(option => [
-              option.description,
-              option.description,
-            ])}
-            disabledKeys={disabledItems('sort')}
-          />
-        </View>
+        {!disableSort && (
+          <View
+            style={{
+              flexDirection: 'row',
+              padding: 5,
+              alignItems: 'center',
+            }}
+          >
+            <Text style={{ width: 50, textAlign: 'right', marginRight: 5 }}>
+              {t('Sort:')}
+            </Text>
+            <Select
+              value={customReportItems.sortBy}
+              onChange={e => onChangeSortBy(e)}
+              options={ReportOptions.sortBy.map(option => [
+                option.description,
+                option.description,
+              ])}
+              disabledKeys={disabledItems('sort')}
+            />
+          </View>
+        )}
 
         <View
           style={{
