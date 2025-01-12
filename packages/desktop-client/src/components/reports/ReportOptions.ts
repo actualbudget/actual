@@ -23,7 +23,7 @@ export const defaultReport: CustomReportEntity = {
   groupBy: 'Category',
   interval: 'Monthly',
   balanceType: 'Payment',
-  sortBy: 'Descending',
+  sortBy: 'Ascending',
   showEmpty: false,
   showOffBudget: false,
   showHiddenCategories: false,
