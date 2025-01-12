@@ -162,12 +162,13 @@ export function ReportSidebar({
   }, [customReportItems, dateRangeLine]);
 
   const disableSort =
-    customReportItems.groupBy === 'Interval' ||
-    (disabledList?.mode
-      ?.find(m => m.description === customReportItems.mode)
-      ?.graphs.find(g => g.description === customReportItems.graphType)
-      ?.disableSort ??
-      false);
+    customReportItems.graphType !== 'TableGraph' &&
+    (customReportItems.groupBy === 'Interval' ||
+      (disabledList?.mode
+        ?.find(m => m.description === customReportItems.mode)
+        ?.graphs.find(g => g.description === customReportItems.graphType)
+        ?.disableSort ??
+        false));
 
   return (
     <View
