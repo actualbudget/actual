@@ -203,11 +203,10 @@ export function BarGraph({
 
   const leftMargin = Math.abs(largestValue) > 1000000 ? 20 : 0;
 
-  // Sort the data in the bar chart
-  const unsortedData = data[splitData];
-  const sortedData = useMemo(() => {
-    return unsortedData.sort((a, b) => a[balanceTypeOp] - b[balanceTypeOp]);
-  }, [unsortedData, balanceTypeOp]);
+  // Sort the data
+  data.data = useMemo(() => {
+    return [...data.data].sort((a, b) => a[balanceTypeOp] - b[balanceTypeOp]);
+  }, [data.data, balanceTypeOp]);
 
   return (
     <Container
@@ -225,7 +224,7 @@ export function BarGraph({
                 width={width}
                 height={height}
                 stackOffset="sign"
-                data={sortedData}
+                data={data[splitData]}
                 style={{ cursor: pointer }}
                 margin={{
                   top: labelsMargin,
