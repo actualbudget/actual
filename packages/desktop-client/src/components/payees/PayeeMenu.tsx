@@ -6,7 +6,7 @@ import { useSyncedPref } from '../../hooks/useSyncedPref';
 import { SvgDelete, SvgMerge } from '../../icons/v0';
 import { SvgBookmark, SvgLightBulb } from '../../icons/v1';
 import { theme } from '../../style';
-import { Menu } from '../common/Menu';
+import { Menu, type MenuItem } from '../common/Menu';
 import { View } from '../common/View';
 
 type PayeeMenuProps = {
@@ -41,6 +41,41 @@ export function PayeeMenu({
     .slice(0, 4)
     .map(id => payeesById[id].name)
     .join(', ');
+
+  const items: MenuItem[] = [
+    {
+      icon: SvgDelete,
+      name: 'delete',
+      text: t('Delete'),
+      disabled: isDisabled,
+    },
+    {
+      icon: SvgBookmark,
+      iconSize: 9,
+      name: 'favorite',
+      text: t('Favorite'),
+      disabled: isDisabled,
+    },
+    {
+      icon: SvgMerge,
+      iconSize: 9,
+      name: 'merge',
+      text: t('Merge'),
+      disabled: isDisabled || selectedPayees.size < 2,
+    },
+  ];
+
+  if (isLearnCategoriesEnabled) {
+    items.push({
+      icon: SvgLightBulb,
+      iconSize: 9,
+      name: 'learn',
+      text: t('Category Learning'),
+      disabled: isDisabled,
+    });
+  }
+
+  items.push(Menu.line);
 
   return (
     <Menu
@@ -78,36 +113,7 @@ export function PayeeMenu({
           )}
         </View>
       }
-      items={[
-        {
-          icon: SvgDelete,
-          name: 'delete',
-          text: t('Delete'),
-          disabled: isDisabled,
-        },
-        {
-          icon: SvgBookmark,
-          iconSize: 9,
-          name: 'favorite',
-          text: t('Favorite'),
-          disabled: isDisabled,
-        },
-        {
-          icon: SvgMerge,
-          iconSize: 9,
-          name: 'merge',
-          text: t('Merge'),
-          disabled: isDisabled || selectedPayees.size < 2,
-        },
-        isLearnCategoriesEnabled && {
-          icon: SvgLightBulb,
-          iconSize: 9,
-          name: 'learn',
-          text: t('Category Learning'),
-          disabled: isDisabled,
-        },
-        Menu.line,
-      ]}
+      items={items}
     />
   );
 }
