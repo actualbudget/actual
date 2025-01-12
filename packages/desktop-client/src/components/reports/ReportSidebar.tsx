@@ -72,6 +72,7 @@ export function ReportSidebar({
   setGroupBy,
   setInterval,
   setBalanceType,
+  setSortBy,
   setMode,
   setIsDateStatic,
   setShowEmpty,
@@ -139,6 +140,12 @@ export function ReportSidebar({
     setSessionReport('balanceType', cond);
     onReportChange({ type: 'modify' });
     setBalanceType(cond);
+  };
+
+  const onChangeSortBy = (cond: string) => {
+    setSessionReport('sortBy', cond);
+    onReportChange({ type: 'modify' });
+    setSortBy(cond);
   };
 
   const rangeOptions = useMemo(() => {
@@ -266,6 +273,28 @@ export function ReportSidebar({
             disabledKeys={[]}
           />
         </View>
+
+        <View
+          style={{
+            flexDirection: 'row',
+            padding: 5,
+            alignItems: 'center',
+          }}
+        >
+          <Text style={{ width: 50, textAlign: 'right', marginRight: 5 }}>
+            {t('Sort:')}
+          </Text>
+          <Select
+            value={customReportItems.sortBy}
+            onChange={e => onChangeSortBy(e)}
+            options={ReportOptions.sortBy.map(option => [
+              option.description,
+              option.description,
+            ])}
+            disabledKeys={disabledItems('sort')}
+          />
+        </View>
+
         <View
           style={{
             flexDirection: 'row',

@@ -75,6 +75,7 @@ const totalGraphOptions: graphOptions[] = [
     disabledType: [],
     defaultType: 'Payment',
     disableLegend: true,
+    disableSort: true,
   },
   {
     description: 'DonutGraph',
@@ -94,6 +95,7 @@ const timeGraphOptions: graphOptions[] = [
     defaultType: 'Payment',
     disableLegend: true,
     disableLabel: true,
+    disableSort: true,
   },
   {
     description: 'StackedBarGraph',
@@ -101,6 +103,7 @@ const timeGraphOptions: graphOptions[] = [
     defaultSplit: 'Category',
     disabledType: [],
     defaultType: 'Payment',
+    disableSort: true,
   },
   {
     description: 'LineGraph',
@@ -110,6 +113,7 @@ const timeGraphOptions: graphOptions[] = [
     defaultType: 'Payment',
     disableLegend: false,
     disableLabel: true,
+    disableSort: true,
   },
 ];
 

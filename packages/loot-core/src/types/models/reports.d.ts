@@ -11,6 +11,7 @@ export interface CustomReportEntity {
   groupBy: string;
   interval: string;
   balanceType: string;
+  sortBy: string;
   showEmpty: boolean;
   showOffBudget: boolean;
   showHiddenCategories: boolean;
@@ -29,6 +30,10 @@ export type balanceTypeOpType =
   | 'totalTotals'
   | 'netAssets'
   | 'netDebts';
+
+export type sortByOpType =
+  | 'asc'
+  | 'desc';
 
 export type SpendingMonthEntity = Record<
   string | number,

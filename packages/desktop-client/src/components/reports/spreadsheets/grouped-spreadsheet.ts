@@ -27,6 +27,7 @@ export function createGroupedSpreadsheet({
   showHiddenCategories,
   showUncategorized,
   balanceTypeOp,
+  sortByOp,
   firstDayOfWeekIdx,
 }: createCustomSpreadsheetProps) {
   const [categoryList, categoryGroup] = categoryLists(categories);
@@ -135,10 +136,22 @@ export function createGroupedSpreadsheet({
       },
       [startDate, endDate],
     );
-    setData(
-      groupedData.filter(i =>
-        filterEmptyRows({ showEmpty, data: i, balanceTypeOp }),
-      ),
+
+    const groupedDataFiltered = groupedData.filter(i =>
+      filterEmptyRows({ showEmpty, data: i, balanceTypeOp }),
     );
+
+    const sortedGroupedDataFiltered = [...groupedDataFiltered].sort((a, b) => {
+      let comparison;
+      if (sortByOp === 'asc') {
+        comparison = a[balanceTypeOp] - b[balanceTypeOp];
+      } else if (sortByOp === 'desc') {
+        comparison = b[balanceTypeOp] - a[balanceTypeOp];
+      }
+
+      return comparison;
+    });
+
+    setData(sortedGroupedDataFiltered);
   };
 }
