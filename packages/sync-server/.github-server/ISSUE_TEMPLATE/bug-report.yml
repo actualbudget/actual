@@ -1,0 +1,80 @@
+name: Bug Report
+description: File a bug report also known as an issue or problem.
+title: '[Bug]: '
+labels: ['bug']
+body:
+  - type: markdown
+    id: intro-md
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this bug report! Please ensure you provide as much information as possible to better assist in confirming and identifying a fix for the bug.
+  - type: checkboxes
+    id: existing-issue
+    attributes:
+      label: 'Verified issue does not already exist?'
+      description: 'Please search to see if an issue already exists for the issue you encountered.'
+      options:
+        - label: 'I have searched and found no existing issue'
+          required: true
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Also tell us, what did you expect to happen? If you’re reporting an issue with imports, please attach a (redacted) version of the file you’re having trouble importing. You may need to zip it before uploading.
+      placeholder: Tell us what you see!
+      value: 'A bug happened!'
+    validations:
+      required: true
+  - type: textarea
+    id: errors-received
+    attributes:
+      label: 'What error did you receive?'
+      description: 'If you received an error or a message on the screen, please provide that here.'
+    validations:
+      required: false
+  - type: markdown
+    id: env-info
+    attributes:
+      value: '## Environment Details'
+  - type: dropdown
+    id: hosting
+    attributes:
+      label: Where are you hosting Actual?
+      description: Where are you running your instance of Actual from?
+      options:
+        - Locally via Yarn
+        - Docker
+        - Fly.io
+        - NAS
+        - Desktop App (Electron)
+        - Other
+    validations:
+      required: false
+  - type: dropdown
+    id: browsers
+    attributes:
+      label: What browsers are you seeing the problem on?
+      multiple: true
+      options:
+        - Firefox
+        - Chrome
+        - Safari
+        - Microsoft Edge
+        - Desktop App (Electron)
+        - Other
+  - type: dropdown
+    id: operating-system
+    attributes:
+      label: Operating System
+      description: What operating system are you using?
+      options:
+        - Windows 11
+        - Windows 10
+        - Mac OSX
+        - Linux
+        - Mobile Device
+        - Other
+    validations:
+      required: false

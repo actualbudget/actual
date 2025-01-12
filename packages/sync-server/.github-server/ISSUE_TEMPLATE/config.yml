@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Feature request
+    url: https://github.com/actualbudget/actual/issues/new/choose
+    about: Please use the main Actual repository to make feature requests.
+  - name: Bank-sync issues
+    url: https://discord.gg/pRYNYr4W5A
+    about: Is bank-sync not working? Returning too much or too little information? Reach out to the community on Discord.
+  - name: Support
+    url: https://discord.gg/pRYNYr4W5A
+    about: Need help with something? Having troubles setting up? Or perhaps issues using the API? Reach out to the community on Discord.

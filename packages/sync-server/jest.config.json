@@ -1,0 +1,14 @@
+{
+  "globalSetup": "./jest.global-setup.js",
+  "globalTeardown": "./jest.global-teardown.js",
+  "testPathIgnorePatterns": ["dist", "/node_modules/", "/build/"],
+  "roots": ["<rootDir>"],
+  "moduleFileExtensions": ["ts", "js", "json"],
+  "testEnvironment": "node",
+  "collectCoverage": true,
+  "collectCoverageFrom": ["**/*.{js,ts,tsx}"],
+  "coveragePathIgnorePatterns": ["dist", "/node_modules/", "/build/", "/coverage/"],
+  "coverageReporters": ["html", "lcov", "text", "text-summary"],
+  "resetMocks": true,
+  "restoreMocks": true
+}
