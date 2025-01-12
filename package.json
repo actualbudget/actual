@@ -32,7 +32,7 @@
     "build:desktop": "./bin/package-electron",
     "build:api": "yarn workspace @actual-app/api build",
     "generate:i18n": "yarn workspace @actual-app/web generate:i18n",
-    "test": "yarn workspaces foreach --all --parallel --verbose run test",
+    "test": "yarn workspace @actual-app/crdt build && yarn workspaces foreach --all --parallel --verbose run test",
     "test:debug": "yarn workspaces foreach --all --verbose run test",
     "e2e": "yarn workspaces foreach --all --parallel --verbose run e2e",
     "vrt": "yarn workspaces foreach --all --parallel --verbose run vrt",
