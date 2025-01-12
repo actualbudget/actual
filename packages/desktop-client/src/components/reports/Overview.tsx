@@ -296,7 +296,7 @@ export function Overview() {
   };
 
   const accounts = useAccounts();
-  const enableSankey = useFeatureFlag('sankeyChart');
+  const enableSankey = false; //useFeatureFlag('sankeyChart');
 
   if (isLoading) {
     return <LoadingIndicator message={t('Loading reports...')} />;
@@ -560,7 +560,7 @@ export function Overview() {
                     onMetaChange={newMeta => onMetaChange(item, newMeta)}
                     onRemove={() => onRemoveWidget(item.i)}
                   />
-                ) : item.type === 'sankey-card' ? (
+                ) : (enableSankey && item.type === 'sankey-card') ? (
                   <SankeyCard
                     widgetId={item.i}
                     isEditing={isEditing}
