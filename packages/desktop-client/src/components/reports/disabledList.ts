@@ -50,6 +50,7 @@ type graphOptions = {
   defaultType: string;
   disableLegend?: boolean;
   disableLabel?: boolean;
+  disableSort?: boolean;
 };
 const totalGraphOptions: graphOptions[] = [
   {

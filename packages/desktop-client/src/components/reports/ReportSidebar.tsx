@@ -39,6 +39,7 @@ type ReportSidebarProps = {
   setGroupBy: (value: string) => void;
   setInterval: (value: string) => void;
   setBalanceType: (value: string) => void;
+  setSortBy: (value: string) => void;
   setMode: (value: string) => void;
   setIsDateStatic: (value: boolean) => void;
   setShowEmpty: (value: boolean) => void;
@@ -162,10 +163,10 @@ export function ReportSidebar({
 
   const disableSort =
     customReportItems.groupBy === 'Interval' ||
-    (disabledList.mode
-      .find(m => m.description === customReportItems.mode)
-      .graphs.find(g => g.description === customReportItems.graphType)
-      .disableSort ??
+    (disabledList?.mode
+      ?.find(m => m.description === customReportItems.mode)
+      ?.graphs.find(g => g.description === customReportItems.graphType)
+      ?.disableSort ??
       false);
 
   return (

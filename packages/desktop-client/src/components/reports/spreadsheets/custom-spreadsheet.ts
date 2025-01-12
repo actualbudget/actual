@@ -48,7 +48,7 @@ export type createCustomSpreadsheetProps = {
   showUncategorized: boolean;
   groupBy?: string;
   balanceTypeOp?: balanceTypeOpType;
-  sortBy?: sortByOpType;
+  sortByOp?: sortByOpType;
   payees?: PayeeEntity[];
   accounts?: AccountEntity[];
   graphType?: string;

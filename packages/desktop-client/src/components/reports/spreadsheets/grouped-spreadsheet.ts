@@ -14,6 +14,7 @@ import { type createCustomSpreadsheetProps } from './custom-spreadsheet';
 import { filterEmptyRows } from './filterEmptyRows';
 import { makeQuery } from './makeQuery';
 import { recalculate } from './recalculate';
+import { sortData } from './sortData';
 
 export function createGroupedSpreadsheet({
   startDate,
