@@ -6,7 +6,6 @@ import React, {
   useCallback,
 } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { useDispatch, useSelector } from 'react-redux';
 
 import {
   closeAndDownloadBudget,
@@ -43,6 +42,7 @@ import {
   SvgUserGroup,
 } from '../../icons/v1';
 import { SvgCloudUnknown, SvgKey, SvgRefreshArrow } from '../../icons/v2';
+import { useSelector, useDispatch } from '../../redux';
 import { styles, theme } from '../../style';
 import { tokens } from '../../tokens';
 import { Button } from '../common/Button2';

@@ -6,13 +6,15 @@ import React, {
   useReducer,
   type Dispatch,
   type ReactNode,
+  useRef,
 } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
 
-import {
-  type SplitMode,
-  type SplitState,
-} from 'loot-core/client/state-types/app';
+type SplitMode = 'collapse' | 'expand';
+type SplitState = {
+  ids: Set<string>;
+  mode: SplitMode;
+  transitionId: string | null;
+};
 
 type ToggleSplitAction = {
   type: 'toggle-split';
@@ -59,7 +61,7 @@ type SplitsStateContext = {
 const SplitsExpandedContext = createContext<SplitsStateContext>({
   state: {
     mode: 'collapse',
-    ids: new Set(),
+    ids: new Set<string>(),
     transitionId: null,
   },
   dispatch: () => {
@@ -73,10 +75,11 @@ export function useSplitsExpanded() {
   return useMemo(
     () => ({
       ...data,
-      isExpanded: (id: string) =>
-        data.state.mode === 'collapse'
+      isExpanded: (id: string) => {
+        return data.state.mode === 'collapse'
           ? !data.state.ids.has(id)
-          : data.state.ids.has(id),
+          : data.state.ids.has(id);
+      },
     }),
     [data],
   );
@@ -91,8 +94,7 @@ export function SplitsExpandedProvider({
   children,
   initialMode = 'expand',
 }: SplitsExpandedProviderProps) {
-  const cachedState = useSelector(state => state.app.lastSplitState);
-  const reduxDispatch = useDispatch();
+  const previousState = useRef<SplitState | null>(null);
 
   const [state, dispatch] = useReducer(
     (state: SplitState, action: Actions): SplitState => {
@@ -152,7 +154,7 @@ export function SplitsExpandedProvider({
           return { ...state, transitionId: null };
       }
     },
-    cachedState.current || {
+    previousState.current || {
       ids: new Set<string>(),
       mode: initialMode,
       transitionId: null,
@@ -171,9 +173,9 @@ export function SplitsExpandedProvider({
   useEffect(() => {
     // In a finished state, cache the state
     if (state.transitionId == null) {
-      reduxDispatch({ type: 'SET_LAST_SPLIT_STATE', splitState: state });
+      previousState.current = state;
     }
-  }, [reduxDispatch, state]);
+  }, [state]);
 
   const value = useMemo(() => ({ state, dispatch }), [state, dispatch]);
 

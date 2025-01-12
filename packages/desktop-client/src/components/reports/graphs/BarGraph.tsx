@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { useState, type CSSProperties } from 'react';
+import React, { useMemo, useState, type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { css } from '@emotion/css';
@@ -186,10 +186,6 @@ export function BarGraph({
   const labelsMargin = viewLabels ? 30 : 0;
 
   const getVal = obj => {
-    if (balanceTypeOp === 'totalTotals' && groupBy === 'Interval') {
-      return obj.totalAssets;
-    }
-
     if (['totalDebts', 'netDebts'].includes(balanceTypeOp)) {
       return -1 * obj[balanceTypeOp];
     }
@@ -207,6 +203,12 @@ export function BarGraph({
 
   const leftMargin = Math.abs(largestValue) > 1000000 ? 20 : 0;
 
+  // Sort the data in the bar chart
+  const unsortedData = data[splitData];
+  const sortedData = useMemo(() => {
+    return unsortedData.sort((a, b) => a[balanceTypeOp] - b[balanceTypeOp]);
+  }, [unsortedData, balanceTypeOp]);
+
   return (
     <Container
       style={{
@@ -223,7 +225,7 @@ export function BarGraph({
                 width={width}
                 height={height}
                 stackOffset="sign"
-                data={data[splitData]}
+                data={sortedData}
                 style={{ cursor: pointer }}
                 margin={{
                   top: labelsMargin,
@@ -311,23 +313,6 @@ export function BarGraph({
                     />
                   ))}
                 </Bar>
-                {yAxis === 'date' && balanceTypeOp === 'totalTotals' && (
-                  <Bar dataKey="totalDebts" stackId="a">
-                    {viewLabels && !compact && (
-                      <LabelList
-                        dataKey="totalDebts"
-                        content={e => customLabel(e, balanceTypeOp)}
-                      />
-                    )}
-                    {data[splitData].map((entry, index) => (
-                      <Cell
-                        key={`cell-${index}`}
-                        fill={theme.reportsRed}
-                        name={entry.name}
-                      />
-                    ))}
-                  </Bar>
-                )}
               </BarChart>
             </div>
           </ResponsiveContainer>

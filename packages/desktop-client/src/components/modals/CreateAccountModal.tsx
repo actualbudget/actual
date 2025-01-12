@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { DialogTrigger } from 'react-aria-components';
 import { Trans, useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
 
 import { pushModal } from 'loot-core/client/actions';
 import { send } from 'loot-core/src/platform/client/fetch';
@@ -13,6 +12,7 @@ import { useGoCardlessStatus } from '../../hooks/useGoCardlessStatus';
 import { useSimpleFinStatus } from '../../hooks/useSimpleFinStatus';
 import { useSyncServerStatus } from '../../hooks/useSyncServerStatus';
 import { SvgDotsHorizontalTriple } from '../../icons/v1';
+import { useDispatch } from '../../redux';
 import { theme } from '../../style';
 import { Warning } from '../alerts';
 import { Button, ButtonWithLoading } from '../common/Button2';
@@ -177,12 +177,12 @@ export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
     setIsSimpleFinSetupComplete(configuredSimpleFin);
   }, [configuredSimpleFin]);
 
-  let title = t('Add Account');
+  let title = t('Add account');
   const [loadingSimpleFinAccounts, setLoadingSimpleFinAccounts] =
     useState(false);
 
   if (upgradingAccountId != null) {
-    title = t('Link Account');
+    title = t('Link account');
   }
 
   const canSetSecrets =
@@ -209,23 +209,23 @@ export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
                     }}
                     onPress={onCreateLocalAccount}
                   >
-                    {t('Create local account')}
+                    {t('Create a local account')}
                   </Button>
                 </InitialFocus>
                 <View style={{ lineHeight: '1.4em', fontSize: 15 }}>
                   <Text>
-                    <strong>{t('Create a local account')}</strong>{' '}
-                    {t(
-                      'if you want to add transactions manually. You can also',
-                    )}{' '}
-                    <Link
-                      variant="external"
-                      to="https://actualbudget.org/docs/transactions/importing"
-                      linkColor="muted"
-                    >
-                      {t('import QIF/OFX/QFX files into a local account')}
-                    </Link>
-                    .
+                    <Trans>
+                      <strong>Create a local account</strong> if you want to add
+                      transactions manually. You can also{' '}
+                      <Link
+                        variant="external"
+                        to="https://actualbudget.org/docs/transactions/importing"
+                        linkColor="muted"
+                      >
+                        import QIF/OFX/QFX files into a local account
+                      </Link>
+                      .
+                    </Trans>
                   </Text>
                 </View>
               </View>
@@ -288,13 +288,16 @@ export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
                         )}
                       </View>
                       <Text style={{ lineHeight: '1.4em', fontSize: 15 }}>
-                        <strong>
-                          {t('Link a')} <em>{t('European')}</em>{' '}
-                          {t('bank account')}
-                        </strong>{' '}
-                        {t(
-                          'to automatically download transactions. GoCardless provides reliable, up-to-date information from hundreds of banks.',
-                        )}
+                        <Trans>
+                          <strong>
+                            Link a <em>European</em> bank account
+                          </strong>{' '}
+                          to automatically download transactions.
+                        </Trans>
+                        <Trans>
+                          GoCardless provides reliable, up-to-date information
+                          from hundreds of banks.
+                        </Trans>
                       </Text>
                       <View
                         style={{
@@ -350,13 +353,16 @@ export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
                         )}
                       </View>
                       <Text style={{ lineHeight: '1.4em', fontSize: 15 }}>
-                        <strong>
-                          {t('Link a')} <em>{t('North American')}</em>
-                          {t(' bank account')}
-                        </strong>{' '}
-                        {t(
-                          'to automatically download transactions. SimpleFIN provides reliable, up-to-date information from hundreds of banks.',
-                        )}{' '}
+                        <Trans>
+                          <strong>
+                            Link a <em>North American</em> bank account
+                          </strong>{' '}
+                          to automatically download transactions.
+                        </Trans>
+                        <Trans>
+                          SimpleFIN provides reliable, up-to-date information
+                          from hundreds of banks.
+                        </Trans>
                       </Text>
                     </>
                   )}
@@ -387,18 +393,20 @@ export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
                       fontWeight: 600,
                     }}
                   >
-                    {t('Set up bank sync')}
+                    <Trans>Set up bank sync</Trans>
                   </Button>
                   <Paragraph style={{ fontSize: 15 }}>
-                    {t('Connect to an Actual server to set up')}{' '}
-                    <Link
-                      variant="external"
-                      to="https://actualbudget.org/docs/advanced/bank-sync"
-                      linkColor="muted"
-                    >
-                      {t('automatic syncing')}
-                    </Link>
-                    .
+                    <Trans>
+                      Connect to an Actual server to set up{' '}
+                      <Link
+                        variant="external"
+                        to="https://actualbudget.org/docs/advanced/bank-sync"
+                        linkColor="muted"
+                      >
+                        automatic syncing
+                      </Link>
+                      .
+                    </Trans>
                   </Paragraph>
                 </>
               )}

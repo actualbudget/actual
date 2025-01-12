@@ -1,6 +1,5 @@
 // @ts-strict-ignore
 import React, { useCallback, useEffect, useState } from 'react';
-import { useDispatch } from 'react-redux';
 
 import {
   applyBudgetAction,
@@ -25,6 +24,7 @@ import { useCategories } from '../../../hooks/useCategories';
 import { useLocalPref } from '../../../hooks/useLocalPref';
 import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { AnimatedLoading } from '../../../icons/AnimatedLoading';
+import { useDispatch } from '../../../redux';
 import { theme } from '../../../style';
 import { prewarmMonth } from '../../budget/util';
 import { View } from '../../common/View';
@@ -69,15 +69,17 @@ export function Budget() {
 
     init();
 
-    const unlisten = listen('sync-event', ({ type, tables }) => {
-      if (
-        type === 'success' &&
-        (tables.includes('categories') ||
+    const unlisten = listen('sync-event', event => {
+      if (event.type === 'success') {
+        const tables = event.tables;
+        if (
+          tables.includes('categories') ||
           tables.includes('category_mapping') ||
-          tables.includes('category_groups'))
-      ) {
-        // TODO: is this loading every time?
-        dispatch(getCategories());
+          tables.includes('category_groups')
+        ) {
+          // TODO: is this loading every time?
+          dispatch(getCategories());
+        }
       }
     });
 

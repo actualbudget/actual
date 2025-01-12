@@ -9,7 +9,6 @@ import {
   type CSSProperties,
 } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
 
 import { pushModal } from 'loot-core/src/client/actions/modals';
 import { send } from 'loot-core/src/platform/client/fetch';
@@ -21,6 +20,7 @@ import {
 
 import { useActions } from '../../../hooks/useActions';
 import { SelectedProvider, useSelected } from '../../../hooks/useSelected';
+import { useDispatch } from '../../../redux';
 import { theme } from '../../../style';
 import { Button } from '../../common/Button2';
 import { Link } from '../../common/Link';
@@ -46,7 +46,7 @@ function useGetUserDirectoryErrors() {
       case 'unauthorized':
         return t('You are not logged in.');
       case 'token-expired':
-        return t('Login expired, please login again.');
+        return t('Login expired, please log in again.');
       case 'user-cant-be-empty':
         return t(
           'Please enter a value for the username; the field cannot be empty.',
@@ -232,15 +232,15 @@ function UserDirectoryContent({
             <Text>
               <Trans>
                 Manage and view users who can create new budgets or be invited
-                to access existing ones.{' '}
-                <Link
-                  variant="external"
-                  to="https://actualbudget.org/docs/budgeting/users/"
-                  linkColor="muted"
-                >
-                  Learn more
-                </Link>
-              </Trans>
+                to access existing ones.
+              </Trans>{' '}
+              <Link
+                variant="external"
+                to="https://actualbudget.org/docs/budgeting/users/"
+                linkColor="muted"
+              >
+                <Trans>Learn more</Trans>
+              </Link>
             </Text>
           </View>
           <View style={{ flex: 1 }} />
@@ -282,7 +282,7 @@ function UserDirectoryContent({
           <Stack direction="row" align="center" justify="flex-end" spacing={2}>
             {selectedInst.items.size > 0 && (
               <Button onPress={onDeleteSelected}>
-                <Trans> Delete {selectedInst.items.size} users </Trans>
+                <Trans>Delete {{ count: selectedInst.items.size }} users</Trans>
               </Button>
             )}
             <Button variant="primary" onPress={onAddUser}>

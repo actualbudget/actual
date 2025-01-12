@@ -8,16 +8,14 @@ import type { Notification } from './state-types/notifications';
 export function listenForSyncEvent(actions, store) {
   let attemptedSyncRepair = false;
 
-  listen('sync-event', info => {
-    const { type, subtype, meta, tables } = info;
-
+  listen('sync-event', event => {
     const prefs = store.getState().prefs.local;
     if (!prefs || !prefs.id) {
       // Do nothing if no budget is loaded
       return;
     }
 
-    if (type === 'success') {
+    if (event.type === 'success') {
       if (attemptedSyncRepair) {
         attemptedSyncRepair = false;
 
@@ -27,6 +25,8 @@ export function listenForSyncEvent(actions, store) {
           type: 'message',
         });
       }
+
+      const tables = event.tables;
 
       if (tables.includes('prefs')) {
         actions.loadPrefs();
@@ -47,15 +47,13 @@ export function listenForSyncEvent(actions, store) {
       if (tables.includes('accounts')) {
         actions.getAccounts();
       }
-    } else if (type === 'error') {
+    } else if (event.type === 'error') {
       let notif: Notification | null = null;
-      const learnMore = t(
-        '[Learn more](https://actualbudget.org/docs/getting-started/sync/#debugging-sync-issues)',
-      );
+      const learnMore = `[${t('Learn more')}](https://actualbudget.org/docs/getting-started/sync/#debugging-sync-issues)`;
       const githubIssueLink =
         'https://github.com/actualbudget/actual/issues/new?assignees=&labels=bug&template=bug-report.yml&title=%5BBug%5D%3A+';
 
-      switch (subtype) {
+      switch (event.subtype) {
         case 'out-of-sync':
           if (attemptedSyncRepair) {
             notif = {
@@ -217,7 +215,7 @@ export function listenForSyncEvent(actions, store) {
           break;
         case 'encrypt-failure':
         case 'decrypt-failure':
-          if (meta.isMissingKey) {
+          if (event.meta.isMissingKey) {
             notif = {
               title: t('Missing encryption key'),
               message: t(
@@ -254,7 +252,7 @@ export function listenForSyncEvent(actions, store) {
           }
           break;
         case 'invalid-schema':
-          console.trace('invalid-schema', meta);
+          console.trace('invalid-schema', event.meta);
           notif = {
             title: t('Update required'),
             message: t(
@@ -265,7 +263,7 @@ export function listenForSyncEvent(actions, store) {
           };
           break;
         case 'apply-failure':
-          console.trace('apply-failure', meta);
+          console.trace('apply-failure', event.meta);
           notif = {
             message: t(
               'We couldn’t apply that change to the database. Please report this as a bug by [opening a Github issue]({{githubIssueLink}}).',
@@ -289,7 +287,7 @@ export function listenForSyncEvent(actions, store) {
           };
           break;
         default:
-          console.trace('unknown error', info);
+          console.trace('unknown error', event);
           notif = {
             message: t(
               'We had problems syncing your changes. Please report this as a bug by [opening a Github issue]({{githubIssueLink}}).',
