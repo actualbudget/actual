@@ -34,6 +34,7 @@ import { filterEmptyRows } from './filterEmptyRows';
 import { filterHiddenItems } from './filterHiddenItems';
 import { makeQuery } from './makeQuery';
 import { recalculate } from './recalculate';
+import { sortData } from './sortData';
 
 export type createCustomSpreadsheetProps = {
   startDate: string;
@@ -284,16 +285,9 @@ export function createCustomSpreadsheet({
       balanceTypeOp,
     );
 
-    const sortedCalcDataFiltered = [...calcDataFiltered].sort((a, b) => {
-      let comparison;
-      if (sortByOp === 'asc') {
-        comparison = a[balanceTypeOp] - b[balanceTypeOp];
-      } else if (sortByOp === 'desc') {
-        comparison = b[balanceTypeOp] - a[balanceTypeOp];
-      }
-
-      return comparison;
-    });
+    const sortedCalcDataFiltered = [...calcDataFiltered].sort(
+      sortData({ balanceTypeOp, sortByOp }),
+    );
 
     setData({
       data: sortedCalcDataFiltered,

@@ -142,16 +142,14 @@ export function createGroupedSpreadsheet({
       filterEmptyRows({ showEmpty, data: i, balanceTypeOp }),
     );
 
-    const sortedGroupedDataFiltered = [...groupedDataFiltered].sort((a, b) => {
-      let comparison;
-      if (sortByOp === 'asc') {
-        comparison = a[balanceTypeOp] - b[balanceTypeOp];
-      } else if (sortByOp === 'desc') {
-        comparison = b[balanceTypeOp] - a[balanceTypeOp];
-      }
-
-      return comparison;
-    });
+    const sortedGroupedDataFiltered = [...groupedDataFiltered]
+      .sort(sortData({ balanceTypeOp, sortByOp }))
+      .map(g => {
+        g.categories = [...(g.categories ?? [])].sort(
+          sortData({ balanceTypeOp, sortByOp }),
+        );
+        return g;
+      });
 
     setData(sortedGroupedDataFiltered);
   };
