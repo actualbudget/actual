@@ -9,7 +9,7 @@ import { calculateTimeRange } from '../reportRanges';
 import { LoadingIndicator } from '../LoadingIndicator';
 import { useResponsive } from '../../responsive/ResponsiveProvider';
 import { useReport } from '../useReport';
-import { createSpreadsheet as sankeySpreadsheet } from '../spreadsheets/Sankey-spreadsheet';
+import { createSpreadsheet as sankeySpreadsheet } from '../spreadsheets/sankey-spreadsheet';
 import { SankeyGraph } from '../graphs/SankeyGraph';
 
 type SankeyCardProps = {

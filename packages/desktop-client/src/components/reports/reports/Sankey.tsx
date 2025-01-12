@@ -17,7 +17,7 @@ import { Header } from '../Header';
 import { useMemo, useState } from 'react';
 import { calculateTimeRange } from '../reportRanges';
 import { useReport } from '../useReport';
-import { createSpreadsheet as sankeySpreadsheet } from '../spreadsheets/Sankey-spreadsheet';
+import { createSpreadsheet as sankeySpreadsheet } from '../spreadsheets/sankey-spreadsheet';
 import { useFilters } from '../../../hooks/useFilters';
 import { Trans } from 'react-i18next';
 import { Button } from '../../common/Button2';
