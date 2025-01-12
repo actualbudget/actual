@@ -5,7 +5,6 @@
   "description": "CRDT layer of Actual",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "type": "module",
   "files": [
     "dist"
   ],
