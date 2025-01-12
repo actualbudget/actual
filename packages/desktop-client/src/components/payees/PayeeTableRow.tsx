@@ -219,33 +219,29 @@ export const PayeeTableRow = memo(
           }}
         />
         <CustomCell
-          width={10}
+          width={20}
           exposed={!payee.transfer_acct}
           onBlur={() => {}}
           onUpdate={() => {}}
           onClick={() => {}}
-        >
-          {() => {
-            return isLearnCategoriesEnabled && !payee.learn_categories ? (
-              <Tooltip content={t('Category learning disabled')}>
-                <SvgLightBulb style={{ color: 'red' }} />
-              </Tooltip>
-            ) : null;
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            flexDirection: 'row',
           }}
-        </CustomCell>
-        <CustomCell
-          width={10}
-          exposed={!payee.transfer_acct}
-          onBlur={() => {}}
-          onUpdate={() => {}}
-          onClick={() => {}}
         >
           {() => {
-            if (payee.favorite) {
-              return <SvgBookmark />;
-            } else {
-              return;
-            }
+            return (
+              <>
+                {payee.favorite ? <SvgBookmark style={{ width: 10 }} /> : null}
+                {isLearnCategoriesEnabled && !payee.learn_categories && (
+                  <Tooltip content={t('Category learning disabled')}>
+                    <SvgLightBulb style={{ color: 'red', width: 10 }} />
+                  </Tooltip>
+                )}
+              </>
+            );
           }}
         </CustomCell>
         <InputCell
