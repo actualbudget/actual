@@ -195,10 +195,6 @@ export function SelectedTransactionsButton({
     onEdit,
     selectedIds,
   ]);
-  useHotkeys('r', () => onRunRules(selectedIds), hotKeyOptions, [
-    onRunRules,
-    selectedIds,
-  ]);
   useHotkeys(
     's',
     () =>
