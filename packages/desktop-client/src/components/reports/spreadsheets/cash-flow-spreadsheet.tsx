@@ -16,7 +16,7 @@ export function simpleCashFlow(
   startMonth: string,
   endMonth: string,
   conditions: RuleConditionEntity[] = [],
-  conditionsOp: 'and' | 'or' = 'and',
+  conditionsOp: RuleConditionEntity['conditionsOp'] = 'and',
 ) {
   const start = monthUtils.firstDayOfMonth(startMonth);
   const end = monthUtils.lastDayOfMonth(endMonth);
@@ -71,7 +71,7 @@ export function cashFlowByDate(
   endMonth: string,
   isConcise: boolean,
   conditions: RuleConditionEntity[] = [],
-  conditionsOp: 'and' | 'or',
+  conditionsOp: RuleConditionEntity['conditionsOp'],
 ) {
   const start = monthUtils.firstDayOfMonth(startMonth);
   const end = monthUtils.lastDayOfMonth(endMonth);
