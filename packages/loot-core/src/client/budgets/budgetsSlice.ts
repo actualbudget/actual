@@ -357,7 +357,7 @@ export const downloadBudget = createAppAsyncThunk(
 type LoadBackupPayload = {
   budgetId: string;
   backupId: string;
-}
+};
 
 // Take in the budget id so that backups can be loaded when a budget isn't opened
 export const loadBackup = createAppAsyncThunk(
