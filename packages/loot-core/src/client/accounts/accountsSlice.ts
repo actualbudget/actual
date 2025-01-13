@@ -78,7 +78,7 @@ export const unlinkAccount = createAppAsyncThunk(
 type LinkAccountPayload = {
   requisitionId: string;
   account: unknown;
-  upgradingId?: string;
+  upgradingId?: AccountEntity['id'];
   offBudget?: boolean;
 };
 
@@ -121,20 +121,22 @@ export const linkAccountSimpleFin = createAppAsyncThunk(
   },
 );
 
+type SyncResponse = {
+  errors: Array<{
+    type: string;
+    category: string;
+    code: string;
+    message: string;
+    internal?: string;
+  }>;
+  newTransactions: Array<TransactionEntity['id']>;
+  matchedTransactions: Array<TransactionEntity['id']>;
+  updatedAccounts: Array<AccountEntity['id']>;
+};
+
 function handleSyncResponse(
   accountId: AccountEntity['id'],
-  res: {
-    errors: Array<{
-      type: string;
-      category: string;
-      code: string;
-      message: string;
-      internal?: string;
-    }>;
-    newTransactions: Array<TransactionEntity['id']>;
-    matchedTransactions: Array<TransactionEntity['id']>;
-    updatedAccounts: Array<AccountEntity['id']>;
-  },
+  res: SyncResponse,
   dispatch: AppDispatch,
   resNewTransactions: Array<TransactionEntity['id']>,
   resMatchedTransactions: Array<TransactionEntity['id']>,
