@@ -24,7 +24,7 @@ const rootReducer: typeof appReducer = (state, action) => {
     // Reset the state and only keep around things intentionally. This
     // blows away everything else
     state = {
-      accounts: getInitialAccountsState(),
+      account: getInitialAccountsState(),
       modals: initialModalsState,
       notifications: initialNotificationsState,
       queries: initialQueriesState,

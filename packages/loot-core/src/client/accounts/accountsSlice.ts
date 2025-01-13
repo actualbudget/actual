@@ -7,7 +7,7 @@ import * as constants from '../constants';
 import { createAppAsyncThunk } from '../redux';
 import { type AppDispatch } from '../store';
 
-const sliceName = 'accounts';
+const sliceName = 'account';
 
 const initialState: AccountState = {
   failedAccounts: {},
@@ -198,7 +198,7 @@ export const syncAccounts = createAppAsyncThunk(
   `${sliceName}/syncAccounts`,
   async ({ id }: SyncAccountsPayload, { dispatch, getState }) => {
     // Disallow two parallel sync operations
-    const accountsState = getState().accounts;
+    const accountsState = getState().account;
     if (accountsState.accountsSyncing.length > 0) {
       return false;
     }
