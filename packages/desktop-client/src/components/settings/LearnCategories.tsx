@@ -56,7 +56,7 @@ export function LearnCategoriesSettings() {
         </Text>
         <Button
           onPress={() => setExpanded(false)}
-          aria-label="Close Category Learning settings"
+          aria-label={t('Close Category Learning settings')}
         >
           <Trans>Close</Trans>
         </Button>
@@ -65,7 +65,7 @@ export function LearnCategoriesSettings() {
   ) : (
     <View>
       <Button
-        aria-label="Edit Category Learning Settings"
+        aria-label={t('Edit Category Learning Settings')}
         variant="primary"
         onPress={() => setExpanded(true)}
       >
