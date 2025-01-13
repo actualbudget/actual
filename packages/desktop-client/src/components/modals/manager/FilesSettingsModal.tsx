@@ -31,10 +31,12 @@ function FileLocationSettings() {
 
       dispatch(
         pushModal({
-          name: 'confirm-change-document-dir',
-          options: {
-            currentBudgetDirectory: documentDir,
-            newDirectory: chosenDirectory[0],
+          modal: {
+            name: 'confirm-change-document-dir',
+            options: {
+              currentBudgetDirectory: documentDir,
+              newDirectory: chosenDirectory[0],
+            },
           },
         }),
       );

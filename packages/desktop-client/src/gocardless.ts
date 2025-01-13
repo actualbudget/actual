@@ -15,24 +15,26 @@ function _authorize(
 ) {
   dispatch(
     pushModal({
-      name: 'gocardless-external-msg',
-      options: {
-        onMoveExternal: async ({ institutionId }) => {
-          const resp = await send('gocardless-create-web-token', {
-            institutionId,
-            accessValidForDays: 90,
-          });
+      modal: {
+        name: 'gocardless-external-msg',
+        options: {
+          onMoveExternal: async ({ institutionId }) => {
+            const resp = await send('gocardless-create-web-token', {
+              institutionId,
+              accessValidForDays: 90,
+            });
 
-          if ('error' in resp) return resp;
-          const { link, requisitionId } = resp;
-          window.Actual.openURLInBrowser(link);
+            if ('error' in resp) return resp;
+            const { link, requisitionId } = resp;
+            window.Actual.openURLInBrowser(link);
 
-          return send('gocardless-poll-web-token', {
-            requisitionId,
-          });
+            return send('gocardless-poll-web-token', {
+              requisitionId,
+            });
+          },
+          onClose,
+          onSuccess,
         },
-        onClose,
-        onSuccess,
       },
     }),
   );
@@ -43,11 +45,13 @@ export async function authorizeBank(dispatch: AppDispatch) {
     onSuccess: async data => {
       dispatch(
         pushModal({
-          name: 'select-linked-accounts',
-          options: {
-            externalAccounts: data.accounts,
-            requisitionId: data.id,
-            syncSource: 'goCardless',
+          modal: {
+            name: 'select-linked-accounts',
+            options: {
+              externalAccounts: data.accounts,
+              requisitionId: data.id,
+              syncSource: 'goCardless',
+            },
           },
         }),
       );

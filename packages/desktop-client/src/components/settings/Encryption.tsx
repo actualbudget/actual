@@ -23,7 +23,9 @@ export function EncryptionSettings() {
 
   function onChangeKey() {
     dispatch(
-      pushModal({ name: 'create-encryption-key', options: { recreate: true } }),
+      pushModal({
+        modal: { name: 'create-encryption-key', options: { recreate: true } },
+      }),
     );
   }
 
@@ -82,7 +84,11 @@ export function EncryptionSettings() {
       primaryAction={
         <Button
           onPress={() =>
-            dispatch(pushModal({ name: 'create-encryption-key', options: {} }))
+            dispatch(
+              pushModal({
+                modal: { name: 'create-encryption-key', options: {} },
+              }),
+            )
           }
         >
           <Trans>Enable encryption</Trans>

@@ -43,9 +43,11 @@ export function AuthSettings() {
                 onPress={() =>
                   dispatch(
                     pushModal({
-                      name: 'enable-openid',
-                      options: {
-                        onSave: async () => {},
+                      modal: {
+                        name: 'enable-openid',
+                        options: {
+                          onSave: async () => {},
+                        },
                       },
                     }),
                   )
@@ -69,9 +71,11 @@ export function AuthSettings() {
                 onPress={() =>
                   dispatch(
                     pushModal({
-                      name: 'enable-password-auth',
-                      options: {
-                        onSave: async () => {},
+                      modal: {
+                        name: 'enable-password-auth',
+                        options: {
+                          onSave: async () => {},
+                        },
                       },
                     }),
                   )

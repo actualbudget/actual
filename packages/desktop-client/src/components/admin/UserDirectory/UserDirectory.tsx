@@ -205,12 +205,14 @@ function UserDirectoryContent({
     user => {
       dispatch(
         pushModal({
-          name: 'edit-user',
-          options: {
-            user,
-            onSave: async () => {
-              await loadUsers();
-              setLoading(false);
+          modal: {
+            name: 'edit-user',
+            options: {
+              user,
+              onSave: async () => {
+                await loadUsers();
+                setLoading(false);
+              },
             },
           },
         }),
@@ -229,12 +231,14 @@ function UserDirectoryContent({
 
     dispatch(
       pushModal({
-        name: 'edit-user',
-        options: {
-          user,
-          onSave: async () => {
-            await loadUsers();
-            setLoading(false);
+        modal: {
+          name: 'edit-user',
+          options: {
+            user,
+            onSave: async () => {
+              await loadUsers();
+              setLoading(false);
+            },
           },
         },
       }),

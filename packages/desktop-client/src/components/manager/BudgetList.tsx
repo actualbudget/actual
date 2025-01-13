@@ -592,7 +592,9 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
         <BudgetListHeader
           quickSwitchMode={quickSwitchMode}
           onRefresh={refresh}
-          onOpenSettings={() => dispatch(pushModal({ name: 'files-settings' }))}
+          onOpenSettings={() =>
+            dispatch(pushModal({ modal: { name: 'files-settings' } }))
+          }
         />
       )}
       <BudgetFiles
@@ -601,14 +603,18 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
         quickSwitchMode={quickSwitchMode}
         onSelect={onSelect}
         onDelete={(file: File) =>
-          dispatch(pushModal({ name: 'delete-budget', options: { file } }))
+          dispatch(
+            pushModal({ modal: { name: 'delete-budget', options: { file } } }),
+          )
         }
         onDuplicate={(file: File) => {
           if (file && 'id' in file) {
             dispatch(
               pushModal({
-                name: 'duplicate-budget',
-                options: { file, managePage: true },
+                modal: {
+                  name: 'duplicate-budget',
+                  options: { file, managePage: true },
+                },
               }),
             );
           } else {
@@ -636,7 +642,7 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
               color: theme.pageTextLight,
             }}
             onPress={() => {
-              dispatch(pushModal({ name: 'import' }));
+              dispatch(pushModal({ modal: { name: 'import' } }));
             }}
           >
             <Trans>Import file</Trans>

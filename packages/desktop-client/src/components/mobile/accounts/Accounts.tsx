@@ -323,7 +323,7 @@ export function Accounts() {
   );
 
   const onAddAccount = useCallback(() => {
-    dispatch(replaceModal({ name: 'add-account', options: {} }));
+    dispatch(replaceModal({ modal: { name: 'add-account', options: {} } }));
   }, [dispatch]);
 
   const onSync = useCallback(async () => {

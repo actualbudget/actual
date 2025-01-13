@@ -523,10 +523,12 @@ function PayeeCell({
         onSelect={() =>
           dispatch(
             pushModal({
-              name: 'payee-autocomplete',
-              options: {
-                onSelect: payeeId => {
-                  onUpdate('payee', payeeId);
+              modal: {
+                name: 'payee-autocomplete',
+                options: {
+                  onSelect: payeeId => {
+                    onUpdate('payee', payeeId);
+                  },
                 },
               },
             }),
@@ -863,16 +865,18 @@ const Transaction = memo(function Transaction({
           setShowReconciliationWarning(true);
           dispatch(
             pushModal({
-              name: 'confirm-transaction-edit',
-              options: {
-                onCancel: () => {
-                  setShowReconciliationWarning(false);
+              modal: {
+                name: 'confirm-transaction-edit',
+                options: {
+                  onCancel: () => {
+                    setShowReconciliationWarning(false);
+                  },
+                  onConfirm: () => {
+                    setShowReconciliationWarning(false);
+                    onUpdateAfterConfirm(name, value);
+                  },
+                  confirmReason: 'editReconciled',
                 },
-                onConfirm: () => {
-                  setShowReconciliationWarning(false);
-                  onUpdateAfterConfirm(name, value);
-                },
-                confirmReason: 'editReconciled',
               },
             }),
           );
@@ -886,12 +890,14 @@ const Transaction = memo(function Transaction({
     if (name === 'cleared' && transaction.reconciled) {
       dispatch(
         pushModal({
-          name: 'confirm-transaction-edit',
-          options: {
-            onConfirm: () => {
-              onUpdateAfterConfirm('reconciled', false);
+          modal: {
+            name: 'confirm-transaction-edit',
+            options: {
+              onConfirm: () => {
+                onUpdateAfterConfirm('reconciled', false);
+              },
+              confirmReason: 'unlockReconciled',
             },
-            confirmReason: 'unlockReconciled',
           },
         }),
       );

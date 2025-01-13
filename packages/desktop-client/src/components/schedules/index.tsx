@@ -25,17 +25,19 @@ export function Schedules() {
 
   const onEdit = useCallback(
     (id: ScheduleEntity['id']) => {
-      dispatch(pushModal({ name: 'schedule-edit', options: { id } }));
+      dispatch(
+        pushModal({ modal: { name: 'schedule-edit', options: { id } } }),
+      );
     },
     [dispatch],
   );
 
   const onAdd = useCallback(() => {
-    dispatch(pushModal({ name: 'schedule-edit', options: {} }));
+    dispatch(pushModal({ modal: { name: 'schedule-edit', options: {} } }));
   }, [dispatch]);
 
   const onDiscover = useCallback(() => {
-    dispatch(pushModal({ name: 'schedules-discover' }));
+    dispatch(pushModal({ modal: { name: 'schedules-discover' } }));
   }, [dispatch]);
 
   const onChangeUpcomingLength = useCallback(() => {

@@ -47,24 +47,26 @@ export function EnvelopeBudgetSummaryModal({
   const openTransferAvailableModal = () => {
     dispatch(
       pushModal({
-        name: 'transfer',
-        options: {
-          title: t('Transfer to category'),
-          month,
-          amount: sheetValue,
-          onSubmit: (amount, toCategoryId) => {
-            onBudgetAction(month, 'transfer-available', {
-              amount,
-              month,
-              category: toCategoryId,
-            });
-            dispatch(collapseModals({ rootModalName: 'transfer' }));
-            showUndoNotification({
-              message: t('Transferred {{amount}} to {{categoryName}}', {
-                amount: integerToCurrency(amount),
-                categoryName: categoriesById[toCategoryId].name,
-              }),
-            });
+        modal: {
+          name: 'transfer',
+          options: {
+            title: t('Transfer to category'),
+            month,
+            amount: sheetValue,
+            onSubmit: (amount, toCategoryId) => {
+              onBudgetAction(month, 'transfer-available', {
+                amount,
+                month,
+                category: toCategoryId,
+              });
+              dispatch(collapseModals({ rootModalName: 'transfer' }));
+              showUndoNotification({
+                message: t('Transferred {{amount}} to {{categoryName}}', {
+                  amount: integerToCurrency(amount),
+                  categoryName: categoriesById[toCategoryId].name,
+                }),
+              });
+            },
           },
         },
       }),
@@ -74,21 +76,23 @@ export function EnvelopeBudgetSummaryModal({
   const openCoverOverbudgetedModal = () => {
     dispatch(
       pushModal({
-        name: 'cover',
-        options: {
-          title: t('Cover overbudgeted'),
-          month,
-          showToBeBudgeted: false,
-          onSubmit: categoryId => {
-            onBudgetAction(month, 'cover-overbudgeted', {
-              category: categoryId,
-            });
-            dispatch(collapseModals({ rootModalName: 'cover' }));
-            showUndoNotification({
-              message: t('Covered overbudgeted from {{categoryName}}', {
-                categoryName: categoriesById[categoryId].name,
-              }),
-            });
+        modal: {
+          name: 'cover',
+          options: {
+            title: t('Cover overbudgeted'),
+            month,
+            showToBeBudgeted: false,
+            onSubmit: categoryId => {
+              onBudgetAction(month, 'cover-overbudgeted', {
+                category: categoryId,
+              });
+              dispatch(collapseModals({ rootModalName: 'cover' }));
+              showUndoNotification({
+                message: t('Covered overbudgeted from {{categoryName}}', {
+                  categoryName: categoriesById[categoryId].name,
+                }),
+              });
+            },
           },
         },
       }),
@@ -98,12 +102,14 @@ export function EnvelopeBudgetSummaryModal({
   const onHoldBuffer = () => {
     dispatch(
       pushModal({
-        name: 'hold-buffer',
-        options: {
-          month,
-          onSubmit: amount => {
-            onBudgetAction(month, 'hold', { amount });
-            dispatch(collapseModals({ rootModalName: 'hold-buffer' }));
+        modal: {
+          name: 'hold-buffer',
+          options: {
+            month,
+            onSubmit: amount => {
+              onBudgetAction(month, 'hold', { amount });
+              dispatch(collapseModals({ rootModalName: 'hold-buffer' }));
+            },
           },
         },
       }),
@@ -117,16 +123,18 @@ export function EnvelopeBudgetSummaryModal({
   const onClick = ({ close }: { close: () => void }) => {
     dispatch(
       pushModal({
-        name: 'envelope-summary-to-budget-menu',
-        options: {
-          month,
-          onTransfer: openTransferAvailableModal,
-          onCover: openCoverOverbudgetedModal,
-          onResetHoldBuffer: () => {
-            onResetHoldBuffer();
-            close();
+        modal: {
+          name: 'envelope-summary-to-budget-menu',
+          options: {
+            month,
+            onTransfer: openTransferAvailableModal,
+            onCover: openCoverOverbudgetedModal,
+            onResetHoldBuffer: () => {
+              onResetHoldBuffer();
+              close();
+            },
+            onHoldBuffer,
           },
-          onHoldBuffer,
         },
       }),
     );

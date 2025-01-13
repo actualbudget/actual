@@ -80,19 +80,23 @@ export function Budget() {
     if (budgetType === 'report') {
       dispatch(
         pushModal({
-          name: 'tracking-budget-summary',
-          options: {
-            month: startMonth,
+          modal: {
+            name: 'tracking-budget-summary',
+            options: {
+              month: startMonth,
+            },
           },
         }),
       );
     } else {
       dispatch(
         pushModal({
-          name: 'envelope-budget-summary',
-          options: {
-            month: startMonth,
-            onBudgetAction,
+          modal: {
+            name: 'envelope-budget-summary',
+            options: {
+              month: startMonth,
+              onBudgetAction,
+            },
           },
         }),
       );
@@ -102,12 +106,14 @@ export function Budget() {
   const onOpenNewCategoryGroupModal = useCallback(() => {
     dispatch(
       pushModal({
-        name: 'new-category-group',
-        options: {
-          onValidate: name => (!name ? 'Name is required.' : null),
-          onSubmit: async name => {
-            dispatch(collapseModals({ rootModalName: 'budget-page-menu' }));
-            dispatch(createGroup({ name }));
+        modal: {
+          name: 'new-category-group',
+          options: {
+            onValidate: name => (!name ? 'Name is required.' : null),
+            onSubmit: async name => {
+              dispatch(collapseModals({ rootModalName: 'budget-page-menu' }));
+              dispatch(createGroup({ name }));
+            },
           },
         },
       }),
@@ -118,16 +124,18 @@ export function Budget() {
     (groupId, isIncome) => {
       dispatch(
         pushModal({
-          name: 'new-category',
-          options: {
-            onValidate: name => (!name ? 'Name is required.' : null),
-            onSubmit: async name => {
-              dispatch(
-                collapseModals({ rootModalName: 'category-group-menu' }),
-              );
-              dispatch(
-                createCategory({ name, groupId, isIncome, isHidden: false }),
-              );
+          modal: {
+            name: 'new-category',
+            options: {
+              onValidate: name => (!name ? 'Name is required.' : null),
+              onSubmit: async name => {
+                dispatch(
+                  collapseModals({ rootModalName: 'category-group-menu' }),
+                );
+                dispatch(
+                  createCategory({ name, groupId, isIncome, isHidden: false }),
+                );
+              },
             },
           },
         }),
@@ -162,16 +170,18 @@ export function Budget() {
       if (mustTransfer) {
         dispatch(
           pushModal({
-            name: 'confirm-category-delete',
-            options: {
-              group: groupId,
-              onDelete: transferCategory => {
-                dispatch(
-                  collapseModals({ rootModalName: 'category-group-menu' }),
-                );
-                dispatch(
-                  deleteGroup({ id: groupId, transferId: transferCategory }),
-                );
+            modal: {
+              name: 'confirm-category-delete',
+              options: {
+                group: groupId,
+                onDelete: transferCategory => {
+                  dispatch(
+                    collapseModals({ rootModalName: 'category-group-menu' }),
+                  );
+                  dispatch(
+                    deleteGroup({ id: groupId, transferId: transferCategory }),
+                  );
+                },
               },
             },
           }),
@@ -212,19 +222,23 @@ export function Budget() {
       if (mustTransfer) {
         dispatch(
           pushModal({
-            name: 'confirm-category-delete',
-            options: {
-              category: categoryId,
-              onDelete: transferCategory => {
-                if (categoryId !== transferCategory) {
-                  dispatch(collapseModals({ rootModalName: 'category-menu' }));
-                  dispatch(
-                    deleteCategory({
-                      id: categoryId,
-                      transferId: transferCategory,
-                    }),
-                  );
-                }
+            modal: {
+              name: 'confirm-category-delete',
+              options: {
+                category: categoryId,
+                onDelete: transferCategory => {
+                  if (categoryId !== transferCategory) {
+                    dispatch(
+                      collapseModals({ rootModalName: 'category-menu' }),
+                    );
+                    dispatch(
+                      deleteCategory({
+                        id: categoryId,
+                        transferId: transferCategory,
+                      }),
+                    );
+                  }
+                },
               },
             },
           }),
@@ -363,11 +377,13 @@ export function Budget() {
       const group = categoryGroups.find(g => g.id === id);
       dispatch(
         pushModal({
-          name: 'notes',
-          options: {
-            id,
-            name: group.name,
-            onSave: onSaveNotes,
+          modal: {
+            name: 'notes',
+            options: {
+              id,
+              name: group.name,
+              onSave: onSaveNotes,
+            },
           },
         }),
       );
@@ -380,11 +396,13 @@ export function Budget() {
       const category = categories.find(c => c.id === id);
       dispatch(
         pushModal({
-          name: 'notes',
-          options: {
-            id,
-            name: category.name,
-            onSave: onSaveNotes,
+          modal: {
+            name: 'notes',
+            options: {
+              id,
+              name: category.name,
+              onSave: onSaveNotes,
+            },
           },
         }),
       );
@@ -397,14 +415,16 @@ export function Budget() {
       const group = categoryGroups.find(g => g.id === id);
       dispatch(
         pushModal({
-          name: 'category-group-menu',
-          options: {
-            groupId: group.id,
-            onSave: onSaveGroup,
-            onAddCategory: onOpenNewCategoryModal,
-            onEditNotes: onOpenCategoryGroupNotesModal,
-            onDelete: onDeleteGroup,
-            onToggleVisibility: onToggleGroupVisibility,
+          modal: {
+            name: 'category-group-menu',
+            options: {
+              groupId: group.id,
+              onSave: onSaveGroup,
+              onAddCategory: onOpenNewCategoryModal,
+              onEditNotes: onOpenCategoryGroupNotesModal,
+              onDelete: onDeleteGroup,
+              onToggleVisibility: onToggleGroupVisibility,
+            },
           },
         }),
       );
@@ -425,13 +445,15 @@ export function Budget() {
       const category = categories.find(c => c.id === id);
       dispatch(
         pushModal({
-          name: 'category-menu',
-          options: {
-            categoryId: category.id,
-            onSave: onSaveCategory,
-            onEditNotes: onOpenCategoryNotesModal,
-            onDelete: onDeleteCategory,
-            onToggleVisibility: onToggleCategoryVisibility,
+          modal: {
+            name: 'category-menu',
+            options: {
+              categoryId: category.id,
+              onSave: onSaveCategory,
+              onEditNotes: onOpenCategoryNotesModal,
+              onDelete: onDeleteCategory,
+              onToggleVisibility: onToggleCategoryVisibility,
+            },
           },
         }),
       );
@@ -459,11 +481,13 @@ export function Budget() {
     month => {
       dispatch(
         pushModal({
-          name: 'notes',
-          options: {
-            id: `budget-${month}`,
-            name: monthUtils.format(month, 'MMMM ‘yy'),
-            onSave: onSaveNotes,
+          modal: {
+            name: 'notes',
+            options: {
+              id: `budget-${month}`,
+              name: monthUtils.format(month, 'MMMM ‘yy'),
+              onSave: onSaveNotes,
+            },
           },
         }),
       );
@@ -472,18 +496,20 @@ export function Budget() {
   );
 
   const onSwitchBudgetFile = useCallback(() => {
-    dispatch(pushModal({ name: 'budget-list' }));
+    dispatch(pushModal({ modal: { name: 'budget-list' } }));
   }, [dispatch]);
 
   const onOpenBudgetMonthMenu = useCallback(
     month => {
       dispatch(
         pushModal({
-          name: `${budgetType === 'report' ? 'tracking' : 'envelope'}-budget-month-menu`,
-          options: {
-            month,
-            onBudgetAction,
-            onEditNotes: onOpenBudgetMonthNotesModal,
+          modal: {
+            name: `${budgetType === 'report' ? 'tracking' : 'envelope'}-budget-month-menu`,
+            options: {
+              month,
+              onBudgetAction,
+              onEditNotes: onOpenBudgetMonthNotesModal,
+            },
           },
         }),
       );
@@ -494,11 +520,13 @@ export function Budget() {
   const onOpenBudgetPageMenu = useCallback(() => {
     dispatch(
       pushModal({
-        name: 'budget-page-menu',
-        options: {
-          onAddCategoryGroup: onOpenNewCategoryGroupModal,
-          onToggleHiddenCategories,
-          onSwitchBudgetFile,
+        modal: {
+          name: 'budget-page-menu',
+          options: {
+            onAddCategoryGroup: onOpenNewCategoryGroupModal,
+            onToggleHiddenCategories,
+            onSwitchBudgetFile,
+          },
         },
       }),
     );
