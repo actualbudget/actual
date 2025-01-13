@@ -48,8 +48,10 @@ type graphOptions = {
   defaultSplit: string;
   disabledType: string[];
   defaultType: string;
+  defaultSort: string;
   disableLegend?: boolean;
   disableLabel?: boolean;
+  disableSort?: boolean;
 };
 const totalGraphOptions: graphOptions[] = [
   {
@@ -60,6 +62,7 @@ const totalGraphOptions: graphOptions[] = [
     defaultType: 'Payment',
     disableLegend: true,
     disableLabel: true,
+    defaultSort: 'Budget',
   },
   {
     description: 'BarGraph',
@@ -67,6 +70,7 @@ const totalGraphOptions: graphOptions[] = [
     defaultSplit: 'Category',
     disabledType: [],
     defaultType: 'Payment',
+    defaultSort: 'Descending',
   },
   {
     description: 'AreaGraph',
@@ -75,6 +79,8 @@ const totalGraphOptions: graphOptions[] = [
     disabledType: [],
     defaultType: 'Payment',
     disableLegend: true,
+    disableSort: true,
+    defaultSort: 'Descending',
   },
   {
     description: 'DonutGraph',
@@ -82,6 +88,7 @@ const totalGraphOptions: graphOptions[] = [
     defaultSplit: 'Category',
     disabledType: ['Net'],
     defaultType: 'Payment',
+    defaultSort: 'Descending',
   },
 ];
 
@@ -94,6 +101,8 @@ const timeGraphOptions: graphOptions[] = [
     defaultType: 'Payment',
     disableLegend: true,
     disableLabel: true,
+    disableSort: true,
+    defaultSort: 'Descending',
   },
   {
     description: 'StackedBarGraph',
@@ -101,6 +110,8 @@ const timeGraphOptions: graphOptions[] = [
     defaultSplit: 'Category',
     disabledType: [],
     defaultType: 'Payment',
+    disableSort: true,
+    defaultSort: 'Descending',
   },
   {
     description: 'LineGraph',
@@ -110,6 +121,8 @@ const timeGraphOptions: graphOptions[] = [
     defaultType: 'Payment',
     disableLegend: false,
     disableLabel: true,
+    disableSort: true,
+    defaultSort: 'Descending',
   },
 ];
 
@@ -169,7 +182,7 @@ export function disabledLegendLabel(
 export function defaultsGraphList(
   item: string,
   newGraph: string,
-  type: 'defaultSplit' | 'defaultType',
+  type: 'defaultSplit' | 'defaultType' | 'defaultSort',
 ) {
   const graphList = modeOptions.find(d => d.description === item);
   if (!graphList) {

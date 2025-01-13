@@ -12,6 +12,7 @@ import { amountToCurrency } from 'loot-core/src/shared/util';
 import { type CategoryEntity } from 'loot-core/types/models/category';
 import {
   type balanceTypeOpType,
+  type sortByOpType,
   type CustomReportEntity,
   type DataEntity,
 } from 'loot-core/types/models/reports';
@@ -230,6 +231,8 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
   const [groupBy, setGroupBy] = useState(loadReport.groupBy);
   const [interval, setInterval] = useState(loadReport.interval);
   const [balanceType, setBalanceType] = useState(loadReport.balanceType);
+  const [sortBy, setSortBy] = useState(loadReport.sortBy);
+
   const [showEmpty, setShowEmpty] = useState(loadReport.showEmpty);
   const [showOffBudget, setShowOffBudget] = useState(loadReport.showOffBudget);
   const [includeCurrentInterval, setIncludeCurrentInterval] = useState(
@@ -359,6 +362,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
 
   const balanceTypeOp: balanceTypeOpType =
     ReportOptions.balanceTypeMap.get(balanceType) || 'totalDebts';
+  const sortByOp: sortByOpType = ReportOptions.sortByMap.get(sortBy) || 'desc';
   const payees = usePayees();
   const accounts = useAccounts();
 
@@ -381,6 +385,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
       showHiddenCategories,
       showUncategorized,
       balanceTypeOp,
+      sortByOp,
       firstDayOfWeekIdx,
     });
   }, [
@@ -395,6 +400,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
     showOffBudget,
     showHiddenCategories,
     showUncategorized,
+    sortByOp,
     firstDayOfWeekIdx,
   ]);
 
@@ -414,6 +420,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
       showUncategorized,
       groupBy,
       balanceTypeOp,
+      sortByOp,
       payees,
       accounts,
       graphType,
@@ -435,6 +442,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
     showOffBudget,
     showHiddenCategories,
     showUncategorized,
+    sortByOp,
     graphType,
     firstDayOfWeekIdx,
   ]);
@@ -454,6 +462,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
     groupBy,
     interval,
     balanceType,
+    sortBy,
     showEmpty,
     showOffBudget,
     showHiddenCategories,
@@ -533,6 +542,12 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
       setSessionReport('balanceType', cond);
       setBalanceType(cond);
     }
+
+    const defaultSort = defaultsGraphList(mode, chooseGraph, 'defaultSort');
+    if (defaultSort) {
+      setSessionReport('sortBy', defaultSort);
+      setSortBy(defaultSort);
+    }
   };
 
   const isItemDisabled = (type: string) => {
@@ -592,6 +607,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
     setGroupBy(input.groupBy);
     setInterval(input.interval);
     setBalanceType(input.balanceType);
+    setSortBy(input.sortBy);
     setShowEmpty(input.showEmpty);
     setShowOffBudget(input.showOffBudget);
     setShowHiddenCategories(input.showHiddenCategories);
@@ -722,6 +738,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
             setGroupBy={setGroupBy}
             setInterval={setInterval}
             setBalanceType={setBalanceType}
+            setSortBy={setSortBy}
             setMode={setMode}
             setIsDateStatic={setIsDateStatic}
             setShowEmpty={setShowEmpty}
