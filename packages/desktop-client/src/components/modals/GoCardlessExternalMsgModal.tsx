@@ -134,9 +134,11 @@ export function GoCardlessExternalMsgModal({
   const onGoCardlessInit = () => {
     dispatch(
       pushModal({
-        name: 'gocardless-init',
-        options: {
-          onSuccess: () => setIsGoCardlessSetupComplete(true),
+        modal: {
+          name: 'gocardless-init',
+          options: {
+            onSuccess: () => setIsGoCardlessSetupComplete(true),
+          },
         },
       }),
     );

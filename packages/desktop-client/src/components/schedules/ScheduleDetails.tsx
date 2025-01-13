@@ -534,12 +534,14 @@ export function ScheduleDetails({ id, transaction }: ScheduleDetailsProps) {
 
     globalDispatch(
       pushModal({
-        name: 'edit-rule',
-        options: {
-          rule,
-          onSave: async () => {
-            const schedule = await loadSchedule();
-            dispatch({ type: 'set-schedule', schedule });
+        modal: {
+          name: 'edit-rule',
+          options: {
+            rule,
+            onSave: async () => {
+              const schedule = await loadSchedule();
+              dispatch({ type: 'set-schedule', schedule });
+            },
           },
         },
       }),

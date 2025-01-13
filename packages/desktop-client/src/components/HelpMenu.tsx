@@ -84,10 +84,10 @@ export const HelpMenu = () => {
         openDocsForCurrentPage();
         break;
       case 'keyboard-shortcuts':
-        dispatch(pushModal({ name: 'keyboard-shortcuts' }));
+        dispatch(pushModal({ modal: { name: 'keyboard-shortcuts' } }));
         break;
       case 'goal-templates':
-        dispatch(pushModal({ name: 'goal-templates' }));
+        dispatch(pushModal({ modal: { name: 'goal-templates' } }));
         break;
     }
   };

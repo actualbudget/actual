@@ -16,27 +16,29 @@ function _authorize(
 ) {
   dispatch(
     pushModal({
-      name: 'gocardless-external-msg',
-      options: {
-        onMoveExternal: async ({ institutionId }) => {
-          const resp = await send('gocardless-create-web-token', {
-            upgradingAccountId,
-            institutionId,
-            accessValidForDays: 90,
-          });
+      modal: {
+        name: 'gocardless-external-msg',
+        options: {
+          onMoveExternal: async ({ institutionId }) => {
+            const resp = await send('gocardless-create-web-token', {
+              upgradingAccountId,
+              institutionId,
+              accessValidForDays: 90,
+            });
 
-          if ('error' in resp) return resp;
-          const { link, requisitionId } = resp;
-          global.Actual.openURLInBrowser(link);
+            if ('error' in resp) return resp;
+            const { link, requisitionId } = resp;
+            global.Actual.openURLInBrowser(link);
 
-          return send('gocardless-poll-web-token', {
-            upgradingAccountId,
-            requisitionId,
-          });
+            return send('gocardless-poll-web-token', {
+              upgradingAccountId,
+              requisitionId,
+            });
+          },
+
+          onClose,
+          onSuccess,
         },
-
-        onClose,
-        onSuccess,
       },
     }),
   );
@@ -50,12 +52,14 @@ export async function authorizeBank(
     onSuccess: async data => {
       dispatch(
         pushModal({
-          name: 'select-linked-accounts',
-          options: {
-            externalAccounts: data.accounts,
-            requisitionId: data.id,
-            upgradingAccountId,
-            syncSource: 'goCardless',
+          modal: {
+            name: 'select-linked-accounts',
+            options: {
+              externalAccounts: data.accounts,
+              requisitionId: data.id,
+              upgradingAccountId,
+              syncSource: 'goCardless',
+            },
           },
         }),
       );

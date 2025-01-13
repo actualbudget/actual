@@ -30,17 +30,21 @@ export function handleGlobalEvents(store: AppStore) {
     // Right now, it prompts to merge into the first payee
     store.dispatch(
       pushModal({
-        name: 'merge-unused-payees',
-        options: {
-          payeeIds: orphanedIds,
-          targetPayeeId: updatedPayeeIds[0],
+        modal: {
+          name: 'merge-unused-payees',
+          options: {
+            payeeIds: orphanedIds,
+            targetPayeeId: updatedPayeeIds[0],
+          },
         },
       }),
     );
   });
 
   listen('schedules-offline', () => {
-    store.dispatch(pushModal({ name: 'schedule-posts-offline-notification' }));
+    store.dispatch(
+      pushModal({ modal: { name: 'schedule-posts-offline-notification' } }),
+    );
   });
 
   // This is experimental: we sync data locally automatically when
@@ -106,7 +110,7 @@ export function handleGlobalEvents(store: AppStore) {
             modalStack.length === 0 ||
             modalStack[modalStack.length - 1].name !== tagged.openModal.name
           ) {
-            store.dispatch(replaceModal(tagged.openModal));
+            store.dispatch(replaceModal({ modal: tagged.openModal }));
           }
         } else {
           store.dispatch(closeModal());

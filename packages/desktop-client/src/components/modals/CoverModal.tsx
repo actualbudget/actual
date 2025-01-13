@@ -50,12 +50,14 @@ export function CoverModal({
   const onCategoryClick = useCallback(() => {
     dispatch(
       pushModal({
-        name: 'category-autocomplete',
-        options: {
-          categoryGroups,
-          month,
-          onSelect: categoryId => {
-            setFromCategoryId(categoryId);
+        modal: {
+          name: 'category-autocomplete',
+          options: {
+            categoryGroups,
+            month,
+            onSelect: categoryId => {
+              setFromCategoryId(categoryId);
+            },
           },
         },
       }),

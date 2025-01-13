@@ -29,13 +29,13 @@ export function ImportModal() {
   function onSelectType(type: 'ynab4' | 'ynab5' | 'actual') {
     switch (type) {
       case 'ynab4':
-        dispatch(pushModal({ name: 'import-ynab4' }));
+        dispatch(pushModal({ modal: { name: 'import-ynab4' } }));
         break;
       case 'ynab5':
-        dispatch(pushModal({ name: 'import-ynab5' }));
+        dispatch(pushModal({ modal: { name: 'import-ynab5' } }));
         break;
       case 'actual':
-        dispatch(pushModal({ name: 'import-actual' }));
+        dispatch(pushModal({ modal: { name: 'import-actual' } }));
         break;
       default:
     }

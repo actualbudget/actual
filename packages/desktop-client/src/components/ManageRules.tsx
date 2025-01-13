@@ -220,12 +220,14 @@ export function ManageRules({
   const onEditRule = useCallback(rule => {
     dispatch(
       pushModal({
-        name: 'edit-rule',
-        options: {
-          rule,
-          onSave: async () => {
-            await loadRules();
-            setLoading(false);
+        modal: {
+          name: 'edit-rule',
+          options: {
+            rule,
+            onSave: async () => {
+              await loadRules();
+              setLoading(false);
+            },
           },
         },
       }),
@@ -256,12 +258,14 @@ export function ManageRules({
 
     dispatch(
       pushModal({
-        name: 'edit-rule',
-        options: {
-          rule,
-          onSave: async () => {
-            await loadRules();
-            setLoading(false);
+        modal: {
+          name: 'edit-rule',
+          options: {
+            rule,
+            onSave: async () => {
+              await loadRules();
+              setLoading(false);
+            },
           },
         },
       }),

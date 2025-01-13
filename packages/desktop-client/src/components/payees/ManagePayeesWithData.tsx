@@ -91,7 +91,9 @@ export function ManagePayeesWithData({
   }, [dispatch, refetchRuleCounts, refetchOrphanedPayees]);
 
   function onViewRules(id: PayeeEntity['id']) {
-    dispatch(pushModal({ name: 'manage-rules', options: { payeeId: id } }));
+    dispatch(
+      pushModal({ modal: { name: 'manage-rules', options: { payeeId: id } } }),
+    );
   }
 
   function onCreateRule(id: PayeeEntity['id']) {
@@ -115,7 +117,7 @@ export function ManagePayeesWithData({
         },
       ],
     };
-    dispatch(pushModal({ name: 'edit-rule', options: { rule } }));
+    dispatch(pushModal({ modal: { name: 'edit-rule', options: { rule } } }));
   }
 
   return (

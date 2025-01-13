@@ -221,13 +221,17 @@ function BudgetInner(props: BudgetInnerProps) {
     if (mustTransfer) {
       dispatch(
         pushModal({
-          name: 'confirm-category-delete',
-          options: {
-            category: id,
-            onDelete: transferCategory => {
-              if (id !== transferCategory) {
-                dispatch(deleteCategory({ id, transferId: transferCategory }));
-              }
+          modal: {
+            name: 'confirm-category-delete',
+            options: {
+              category: id,
+              onDelete: transferCategory => {
+                if (id !== transferCategory) {
+                  dispatch(
+                    deleteCategory({ id, transferId: transferCategory }),
+                  );
+                }
+              },
             },
           },
         }),
@@ -259,11 +263,13 @@ function BudgetInner(props: BudgetInnerProps) {
     if (mustTransfer) {
       dispatch(
         pushModal({
-          name: 'confirm-category-delete',
-          options: {
-            group: id,
-            onDelete: transferCategory => {
-              dispatch(deleteGroup({ id, transferId: transferCategory }));
+          modal: {
+            name: 'confirm-category-delete',
+            options: {
+              group: id,
+              onDelete: transferCategory => {
+                dispatch(deleteGroup({ id, transferId: transferCategory }));
+              },
             },
           },
         }),

@@ -160,7 +160,9 @@ export function SelectedTransactionsButton({
 
     if (scheduleId) {
       dispatch(
-        pushModal({ name: 'schedule-edit', options: { id: scheduleId } }),
+        pushModal({
+          modal: { name: 'schedule-edit', options: { id: scheduleId } },
+        }),
       );
     }
   }

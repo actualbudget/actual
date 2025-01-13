@@ -126,11 +126,13 @@ function AccountHeader({ account }: { readonly account: AccountEntity }) {
     (id: string) => {
       dispatch(
         pushModal({
-          name: 'notes',
-          options: {
-            id: `account-${id}`,
-            name: account.name,
-            onSave: onSaveNotes,
+          modal: {
+            name: 'notes',
+            options: {
+              id: `account-${id}`,
+              name: account.name,
+              onSave: onSaveNotes,
+            },
           },
         }),
       );
@@ -149,13 +151,15 @@ function AccountHeader({ account }: { readonly account: AccountEntity }) {
   const onClick = useCallback(() => {
     dispatch(
       pushModal({
-        name: 'account-menu',
-        options: {
-          accountId: account.id,
-          onSave,
-          onEditNotes,
-          onCloseAccount,
-          onReopenAccount,
+        modal: {
+          name: 'account-menu',
+          options: {
+            accountId: account.id,
+            onSave,
+            onEditNotes,
+            onCloseAccount,
+            onReopenAccount,
+          },
         },
       }),
     );
@@ -306,26 +310,28 @@ function TransactionListWithPreviews({
       } else {
         dispatch(
           pushModal({
-            name: 'scheduled-transaction-menu',
-            options: {
-              transactionId: transaction.id,
-              onPost: async transactionId => {
-                const parts = transactionId.split('/');
-                await send('schedule/post-transaction', { id: parts[1] });
-                dispatch(
-                  collapseModals({
-                    rootModalName: 'scheduled-transaction-menu',
-                  }),
-                );
-              },
-              onSkip: async transactionId => {
-                const parts = transactionId.split('/');
-                await send('schedule/skip-next-date', { id: parts[1] });
-                dispatch(
-                  collapseModals({
-                    rootModalName: 'scheduled-transaction-menu',
-                  }),
-                );
+            modal: {
+              name: 'scheduled-transaction-menu',
+              options: {
+                transactionId: transaction.id,
+                onPost: async transactionId => {
+                  const parts = transactionId.split('/');
+                  await send('schedule/post-transaction', { id: parts[1] });
+                  dispatch(
+                    collapseModals({
+                      rootModalName: 'scheduled-transaction-menu',
+                    }),
+                  );
+                },
+                onSkip: async transactionId => {
+                  const parts = transactionId.split('/');
+                  await send('schedule/skip-next-date', { id: parts[1] });
+                  dispatch(
+                    collapseModals({
+                      rootModalName: 'scheduled-transaction-menu',
+                    }),
+                  );
+                },
               },
             },
           }),

@@ -123,7 +123,9 @@ export function listenForSyncEvent(store: AppStore) {
             messageActions: {
               makeKey: () =>
                 store.dispatch(
-                  pushModal({ name: 'create-encryption-key', options: {} }),
+                  pushModal({
+                    modal: { name: 'create-encryption-key', options: {} },
+                  }),
                 ),
             },
             sticky: true,
@@ -153,7 +155,9 @@ export function listenForSyncEvent(store: AppStore) {
               title: t('Reset key'),
               action: () => {
                 store.dispatch(
-                  pushModal({ name: 'create-encryption-key', options: {} }),
+                  pushModal({
+                    modal: { name: 'create-encryption-key', options: {} },
+                  }),
                 );
               },
             },
@@ -252,9 +256,11 @@ export function listenForSyncEvent(store: AppStore) {
                 action: () => {
                   store.dispatch(
                     pushModal({
-                      name: 'fix-encryption-key',
-                      options: {
-                        onSuccess: () => store.dispatch(sync()),
+                      modal: {
+                        name: 'fix-encryption-key',
+                        options: {
+                          onSuccess: () => store.dispatch(sync()),
+                        },
                       },
                     }),
                   );
@@ -274,7 +280,9 @@ export function listenForSyncEvent(store: AppStore) {
                 title: t('Reset key'),
                 action: () => {
                   store.dispatch(
-                    pushModal({ name: 'create-encryption-key', options: {} }),
+                    pushModal({
+                      modal: { name: 'create-encryption-key', options: {} },
+                    }),
                   );
                 },
               },

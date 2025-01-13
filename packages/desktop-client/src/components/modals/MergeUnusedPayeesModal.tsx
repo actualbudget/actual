@@ -84,7 +84,9 @@ export function MergeUnusedPayeesModal({
 
       if (ruleId) {
         const rule = await send('rule-get', { id: ruleId });
-        dispatch(replaceModal({ name: 'edit-rule', options: { rule } }));
+        dispatch(
+          replaceModal({ modal: { name: 'edit-rule', options: { rule } } }),
+        );
       }
     },
     [onMerge, dispatch],

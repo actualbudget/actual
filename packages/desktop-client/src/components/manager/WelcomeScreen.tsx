@@ -80,7 +80,9 @@ export function WelcomeScreen() {
           flexShrink: 0,
         }}
       >
-        <Button onPress={() => dispatch(pushModal({ name: 'import' }))}>
+        <Button
+          onPress={() => dispatch(pushModal({ modal: { name: 'import' } }))}
+        >
           {t('Import my budget')}
         </Button>
         <View

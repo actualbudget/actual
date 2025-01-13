@@ -60,10 +60,12 @@ export function ScheduleLink({
   async function onCreate() {
     dispatch(
       pushModal({
-        name: 'schedule-edit',
-        options: {
-          id: null,
-          transaction: getTransaction(ids[0]),
+        modal: {
+          name: 'schedule-edit',
+          options: {
+            id: null,
+            transaction: getTransaction(ids[0]),
+          },
         },
       }),
     );

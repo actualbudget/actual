@@ -193,7 +193,11 @@ export function TransactionList({
   });
 
   const onNavigateToSchedule = useCallback(scheduleId => {
-    dispatch(pushModal({ name: 'schedule-edit', options: { id: scheduleId } }));
+    dispatch(
+      pushModal({
+        modal: { name: 'schedule-edit', options: { id: scheduleId } },
+      }),
+    );
   });
 
   const onNotesTagClick = useCallback(tag => {

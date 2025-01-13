@@ -55,13 +55,15 @@ export function TransferModal({
   const openCategoryModal = () => {
     dispatch(
       pushModal({
-        name: 'category-autocomplete',
-        options: {
-          categoryGroups,
-          month,
-          showHiddenCategories: true,
-          onSelect: categoryId => {
-            setToCategoryId(categoryId);
+        modal: {
+          name: 'category-autocomplete',
+          options: {
+            categoryGroups,
+            month,
+            showHiddenCategories: true,
+            onSelect: categoryId => {
+              setToCategoryId(categoryId);
+            },
           },
         },
       }),

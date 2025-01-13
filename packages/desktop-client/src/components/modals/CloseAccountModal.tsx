@@ -184,10 +184,12 @@ export function CloseAccountModal({
                           onClick: () => {
                             dispatch(
                               pushModal({
-                                name: 'account-autocomplete',
-                                options: {
-                                  includeClosedAccounts: false,
-                                  onSelect: onSelectAccount,
+                                modal: {
+                                  name: 'account-autocomplete',
+                                  options: {
+                                    includeClosedAccounts: false,
+                                    onSelect: onSelectAccount,
+                                  },
                                 },
                               }),
                             );
@@ -227,11 +229,13 @@ export function CloseAccountModal({
                             onClick: () => {
                               dispatch(
                                 pushModal({
-                                  name: 'category-autocomplete',
-                                  options: {
-                                    categoryGroups,
-                                    showHiddenCategories: true,
-                                    onSelect: onSelectCategory,
+                                  modal: {
+                                    name: 'category-autocomplete',
+                                    options: {
+                                      categoryGroups,
+                                      showHiddenCategories: true,
+                                      onSelect: onSelectCategory,
+                                    },
                                   },
                                 }),
                               );

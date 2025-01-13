@@ -280,9 +280,11 @@ function LockToggle({ style, onToggleSave }: LockToggleProps) {
       onPress={() =>
         dispatch(
           pushModal({
-            name: 'transfer-ownership',
-            options: {
-              onSave: () => onToggleSave(),
+            modal: {
+              name: 'transfer-ownership',
+              options: {
+                onSave: () => onToggleSave(),
+              },
             },
           }),
         )

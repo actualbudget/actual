@@ -55,7 +55,9 @@ export function TransactionMenu({
 
     if (scheduleId) {
       dispatch(
-        pushModal({ name: 'schedule-edit', options: { id: scheduleId } }),
+        pushModal({
+          modal: { name: 'schedule-edit', options: { id: scheduleId } },
+        }),
       );
     }
   }
