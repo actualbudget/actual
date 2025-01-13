@@ -542,6 +542,12 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
       setSessionReport('balanceType', cond);
       setBalanceType(cond);
     }
+
+    const defaultSort = defaultsGraphList(mode, chooseGraph, 'defaultSort');
+    if (defaultSort) {
+      setSessionReport('sortBy', defaultSort);
+      setSortBy(defaultSort);
+    }
   };
 
   const isItemDisabled = (type: string) => {
