@@ -143,7 +143,7 @@ export function Header({
           </SpaceBetween>
         </SpaceBetween>
 
-        <SpaceBetween>
+        <SpaceBetween gap={3}>
           {show1Month && (
             <Button
               variant="bare"
