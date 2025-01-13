@@ -70,7 +70,7 @@ export function createCustomSpreadsheet({
   showUncategorized,
   groupBy = '',
   balanceTypeOp = 'totalDebts',
-  sortByOp = 'asc',
+  sortByOp = 'desc',
   payees = [],
   accounts = [],
   graphType,

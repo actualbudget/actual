@@ -23,7 +23,7 @@ export const defaultReport: CustomReportEntity = {
   groupBy: 'Category',
   interval: 'Monthly',
   balanceType: 'Payment',
-  sortBy: 'Ascending',
+  sortBy: 'Descending',
   showEmpty: false,
   showOffBudget: false,
   showHiddenCategories: false,
@@ -53,6 +53,8 @@ const groupByOptions = [
 const sortByOptions = [
   { description: t('Ascending'), format: 'asc' as const },
   { description: t('Descending'), format: 'desc' as const },
+  { description: t('Name'), format: 'name' as const },
+  { description: t('Budget'), format: 'budget' as const },
 ];
 
 export type dateRangeProps = {

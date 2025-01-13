@@ -31,7 +31,7 @@ export type balanceTypeOpType =
   | 'netAssets'
   | 'netDebts';
 
-export type sortByOpType = 'asc' | 'desc';
+export type sortByOpType = 'asc' | 'desc' | 'name' | 'budget';
 
 export type SpendingMonthEntity = Record<
   string | number,
