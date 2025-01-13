@@ -354,6 +354,35 @@ export const downloadBudget = createAppAsyncThunk(
   },
 );
 
+type LoadBackupPayload = {
+  budgetId: string;
+  backupId: string;
+}
+
+// Take in the budget id so that backups can be loaded when a budget isn't opened
+export const loadBackup = createAppAsyncThunk(
+  `${sliceName}/loadBackup`,
+  async ({ budgetId, backupId }: LoadBackupPayload, { dispatch, getState }) => {
+    const prefs = getState().prefs.local;
+    if (prefs && prefs.id) {
+      await dispatch(closeBudget());
+    }
+
+    await send('backup-load', { id: budgetId, backupId });
+    await dispatch(loadBudget({ id: budgetId }));
+  },
+);
+
+export const makeBackup = createAppAsyncThunk(
+  `${sliceName}/makeBackup`,
+  async (_, { getState }) => {
+    const prefs = getState().prefs.local;
+    if (prefs && prefs.id) {
+      await send('backup-make', { id: prefs.id });
+    }
+  },
+);
+
 type BudgetsState = {
   budgets: Budget[];
   remoteFiles: RemoteFile[] | null;
@@ -429,6 +458,8 @@ export const actions = {
   closeAndLoadBudget,
   closeAndDownloadBudget,
   downloadBudget,
+  loadBackup,
+  makeBackup,
 };
 
 export const { setBudgets, setRemoteFiles, setAllFiles, signOut } = actions;
