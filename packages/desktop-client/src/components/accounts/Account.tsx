@@ -15,6 +15,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { unlinkAccount } from 'loot-core/client/accounts/accountsSlice';
 import {
+  addNotification,
   createPayee,
   getPayees,
   initiallyLoadPayees,
@@ -749,10 +750,10 @@ class AccountInternal extends PureComponent<
       this.fetchTransactions();
     } catch (error) {
       console.error('Error applying rules:', error);
-      this.props.addNotification({
+      this.props.dispatch(addNotification({
         type: 'error',
         message: 'Failed to apply rules to transactions',
-      });
+      }));
     } finally {
       this.setState({ workingHard: false });
     }
