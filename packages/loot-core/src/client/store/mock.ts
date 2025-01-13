@@ -6,7 +6,7 @@ import {
 } from '../accounts/accountsSlice';
 import {
   name as queriesSliceName,
-  reducer as qeriesSliceReducer,
+  reducer as queriesSliceReducer,
 } from '../queries/queriesSlice';
 import { reducers } from '../reducers';
 
@@ -15,7 +15,7 @@ import { type store as realStore } from './index';
 const appReducer = combineReducers({
   ...reducers,
   [accountsSliceName]: accountsSliceReducer,
-  [queriesSliceName]: qeriesSliceReducer,
+  [queriesSliceName]: queriesSliceReducer,
 });
 
 export let mockStore: typeof realStore = configureStore({
