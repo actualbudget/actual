@@ -13,6 +13,7 @@ import { Provider } from 'react-redux';
 import { bindActionCreators } from '@reduxjs/toolkit';
 import { createRoot } from 'react-dom/client';
 
+import * as accountsSlice from 'loot-core/src/client/accounts/accountsSlice';
 import * as actions from 'loot-core/src/client/actions';
 import { runQuery } from 'loot-core/src/client/query-helpers';
 import { store } from 'loot-core/src/client/store';
@@ -23,24 +24,28 @@ import { AuthProvider } from './auth/AuthProvider';
 import { App } from './components/App';
 import { ServerProvider } from './components/ServerContext';
 import { handleGlobalEvents } from './global-events';
-import { type BoundActions } from './hooks/useActions';
 
 // See https://github.com/WICG/focus-visible. Only makes the blue
 // focus outline appear from keyboard events.
 import 'focus-visible';
 
 const boundActions = bindActionCreators(
-  actions,
+  {
+    ...actions,
+    ...accountsSlice.actions,
+  },
   store.dispatch,
-) as unknown as BoundActions;
+);
 
 // Listen for global events from the server or main process
-handleGlobalEvents(boundActions, store);
+handleGlobalEvents(store);
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
   interface Window {
-    __actionsForMenu: BoundActions & { inputFocused: typeof inputFocused };
+    __actionsForMenu: typeof boundActions & {
+      inputFocused: typeof inputFocused;
+    };
 
     $send: typeof send;
     $query: typeof runQuery;
