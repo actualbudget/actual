@@ -750,10 +750,12 @@ class AccountInternal extends PureComponent<
       this.fetchTransactions();
     } catch (error) {
       console.error('Error applying rules:', error);
-      this.props.dispatch(addNotification({
-        type: 'error',
-        message: 'Failed to apply rules to transactions',
-      }));
+      this.props.dispatch(
+        addNotification({
+          type: 'error',
+          message: 'Failed to apply rules to transactions',
+        }),
+      );
     } finally {
       this.setState({ workingHard: false });
     }
