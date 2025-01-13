@@ -1,5 +1,4 @@
 import config from '../load-config.js';
-import proxyaddr from 'proxy-addr';
 import ipaddr from 'ipaddr.js';
 import { getSession } from '../account-db.js';
 
@@ -45,24 +44,23 @@ export default function validateSession(req, res) {
 }
 
 export function validateAuthHeader(req) {
-  if (config.trustedProxies.length == 0) {
-    return true;
-  }
-
-  let sender = proxyaddr(req, 'uniquelocal');
-  let sender_ip = ipaddr.process(sender);
+  // fallback to trustedProxies when trustedAuthProxies not set
+  const trustedAuthProxies = config.trustedAuthProxies ?? config.trustedProxies;
+  // ensure the first hop from our server is trusted
+  let peer = req.socket.remoteAddress;
+  let peerIp = ipaddr.process(peer);
   const rangeList = {
-    allowed_ips: config.trustedProxies.map((q) => ipaddr.parseCIDR(q)),
+    allowed_ips: trustedAuthProxies.map((q) => ipaddr.parseCIDR(q)),
   };
   /* eslint-disable @typescript-eslint/ban-ts-comment */
   // @ts-ignore : there is an error in the ts definition for the function, but this is valid
-  var matched = ipaddr.subnetMatch(sender_ip, rangeList, 'fail');
+  var matched = ipaddr.subnetMatch(peerIp, rangeList, 'fail');
   /* eslint-enable @typescript-eslint/ban-ts-comment */
   if (matched == 'allowed_ips') {
-    console.info(`Header Auth Login permitted from ${sender}`);
+    console.info(`Header Auth Login permitted from ${peer}`);
     return true;
   } else {
-    console.warn(`Header Auth Login attempted from ${sender}`);
+    console.warn(`Header Auth Login attempted from ${peer}`);
     return false;
   }
 }

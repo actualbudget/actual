@@ -54,7 +54,8 @@ if (process.env.ACTUAL_CONFIG_PATH) {
 /** @type {Omit<import('./config-types.js').Config, 'mode' | 'dataDir' | 'serverFiles' | 'userFiles'>} */
 let defaultConfig = {
   loginMethod: 'password',
-  // assume local networks are trusted for header authentication
+  allowedLoginMethods: ['password', 'header', 'openid'],
+  // assume local networks are trusted
   trustedProxies: [
     '10.0.0.0/8',
     '172.16.0.0/12',
@@ -62,6 +63,9 @@ let defaultConfig = {
     'fc00::/7',
     '::1/128',
   ],
+  // fallback to trustedProxies, but in the future trustedProxies will only be used for express trust
+  // and trustedAuthProxies will just be for header auth
+  trustedAuthProxies: null,
   port: 5006,
   hostname: '::',
   webRoot: path.join(
@@ -116,9 +120,21 @@ const finalConfig = {
         return value === 'true';
       })()
     : config.multiuser,
+  allowedLoginMethods: process.env.ACTUAL_ALLOWED_LOGIN_METHODS
+    ? process.env.ACTUAL_ALLOWED_LOGIN_METHODS.split(',')
+        .map((q) => q.trim().toLowerCase())
+        .filter(Boolean)
+    : config.allowedLoginMethods,
   trustedProxies: process.env.ACTUAL_TRUSTED_PROXIES
-    ? process.env.ACTUAL_TRUSTED_PROXIES.split(',').map((q) => q.trim())
+    ? process.env.ACTUAL_TRUSTED_PROXIES.split(',')
+        .map((q) => q.trim())
+        .filter(Boolean)
     : config.trustedProxies,
+  trustedAuthProxies: process.env.ACTUAL_TRUSTED_AUTH_PROXIES
+    ? process.env.ACTUAL_TRUSTED_AUTH_PROXIES.split(',')
+        .map((q) => q.trim())
+        .filter(Boolean)
+    : config.trustedAuthProxies,
   port: +process.env.ACTUAL_PORT || +process.env.PORT || config.port,
   hostname: process.env.ACTUAL_HOSTNAME || config.hostname,
   serverFiles: process.env.ACTUAL_SERVER_FILES || config.serverFiles,
@@ -208,6 +224,11 @@ debug(`using user files directory ${finalConfig.userFiles}`);
 debug(`using web root directory ${finalConfig.webRoot}`);
 debug(`using login method ${finalConfig.loginMethod}`);
 debug(`using trusted proxies ${finalConfig.trustedProxies.join(', ')}`);
+debug(
+  `using trusted auth proxies ${
+    finalConfig.trustedAuthProxies?.join(', ') ?? 'same as trusted proxies'
+  }`,
+);
 
 if (finalConfig.https) {
   debug(`using https key: ${'*'.repeat(finalConfig.https.key.length)}`);

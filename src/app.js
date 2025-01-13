@@ -22,6 +22,7 @@ process.on('unhandledRejection', (reason) => {
 
 app.disable('x-powered-by');
 app.use(cors());
+app.set('trust proxy', config.trustedProxies);
 app.use(
   rateLimit({
     windowMs: 60 * 1000,
