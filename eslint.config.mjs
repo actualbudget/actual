@@ -628,11 +628,38 @@ export default [
       'no-restricted-imports': [
         'warn',
         {
-          patterns: [
+          paths: [
             {
-              group: ['react-router-dom'],
+              name: 'react-router-dom',
               importNames: ['useNavigate'],
-              message: "Please use Actual's useNavigate() hook instead.",
+              message:
+                "Please import Actual's useNavigate() hook from `src/hooks` instead.",
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    files: ['packages/desktop-client/**/*', 'packages/loot-core/**/*'],
+    ignores: ['packages/desktop-client/src/redux/index.{ts,tsx}'],
+
+    rules: {
+      'no-restricted-imports': [
+        'warn',
+        {
+          paths: [
+            {
+              name: 'react-redux',
+              importNames: ['useDispatch'],
+              message:
+                "Please import Actual's useDispatch() hook from `src/redux` instead.",
+            },
+            {
+              name: 'react-redux',
+              importNames: ['useSelector'],
+              message:
+                "Please import Actual's useSelector() hook from `src/redux` instead.",
             },
           ],
         },

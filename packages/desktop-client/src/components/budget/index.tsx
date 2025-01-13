@@ -108,14 +108,16 @@ function BudgetInner(props: BudgetInnerProps) {
     run();
 
     const unlistens = [
-      listen('sync-event', ({ type, tables }) => {
-        if (
-          type === 'success' &&
-          (tables.includes('categories') ||
+      listen('sync-event', event => {
+        if (event.type === 'success') {
+          const tables = event.tables;
+          if (
+            tables.includes('categories') ||
             tables.includes('category_mapping') ||
-            tables.includes('category_groups'))
-        ) {
-          loadCategories();
+            tables.includes('category_groups')
+          ) {
+            loadCategories();
+          }
         }
       }),
 
