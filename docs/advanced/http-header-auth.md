@@ -18,7 +18,7 @@ Be careful! A misconfiguration on this next step could make your instance availa
 The SSO provider then needs to be configured to pass an extra HTTP header to Actual. The details on how to do this are unique to the SSO provider, but the header `x-actual-password` needs to be set to your actual password.
 
 
-If your setup needs it, it is possible to config trusted proxies. See [`trustedProxies` configuration](../config/index.md#trustedProxies) for details.
+If your setup needs it, it is possible to configure trusted proxies for authentication. See [`trustedAuthProxies` configuration](../config/index.md#trustedAuthProxies) for details.
 
 :::note
 This feature is not an HTTP basic auth, but a different form of using a password. For HTTP basic auth or user accounts see [this issue](https://github.com/actualbudget/actual/issues/524)
