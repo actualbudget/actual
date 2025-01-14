@@ -20,7 +20,6 @@ import {
   reducer as budgetsSliceReducer,
   getInitialState as getInitialBudgetsState,
 } from '../budgets/budgetsSlice';
-import * as constants from '../constants';
 import {
   name as modalsSliceName,
   reducer as modalsSliceReducer,
@@ -58,8 +57,11 @@ const appReducer = combineReducers({
   [queriesSliceName]: queriesSliceReducer,
   [usersSliceName]: usersSliceReducer,
 });
+
+export const CLOSE_BUDGET = 'CLOSE_BUDGET';
+
 const rootReducer: typeof appReducer = (state, action) => {
-  if (action.type === constants.CLOSE_BUDGET) {
+  if (action.type === CLOSE_BUDGET) {
     // Reset the state and only keep around things intentionally. This
     // blows away everything else
     state = {
