@@ -653,7 +653,7 @@ export const importPreviewTransactions = createAppAsyncThunk(
 );
 
 type ImportTransactionsPayload = {
-  id: string;
+  accountId: string;
   transactions: TransactionEntity[];
   reconcile: boolean;
 };
@@ -661,12 +661,12 @@ type ImportTransactionsPayload = {
 export const importTransactions = createAppAsyncThunk(
   `${sliceName}/importTransactions`,
   async (
-    { id, transactions, reconcile }: ImportTransactionsPayload,
+    { accountId, transactions, reconcile }: ImportTransactionsPayload,
     { dispatch },
   ) => {
     if (!reconcile) {
       await send('api/transactions-add', {
-        accountId: id,
+        accountId,
         transactions,
       });
 
@@ -678,7 +678,7 @@ export const importTransactions = createAppAsyncThunk(
       added,
       updated,
     } = await send('transactions-import', {
-      accountId: id,
+      accountId,
       transactions,
       isPreview: false,
     });
@@ -698,7 +698,7 @@ export const importTransactions = createAppAsyncThunk(
       setNewTransactions({
         newTransactions: added,
         matchedTransactions: updated,
-        updatedAccounts: added.length > 0 ? [id] : [],
+        updatedAccounts: added.length > 0 ? [accountId] : [],
       }),
     );
 

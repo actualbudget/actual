@@ -657,7 +657,7 @@ export function ImportTransactionsModal({ options }) {
 
     const didChange = await dispatch(
       importTransactions({
-        id: accountId,
+        accountId,
         transactions: finalTransactions,
         reconcile,
       }),
