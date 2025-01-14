@@ -5,6 +5,7 @@ import { getUploadError } from '../../shared/errors';
 import { type AccountEntity } from '../../types/models';
 import { type AtLeastOne } from '../../types/util';
 import { syncAccounts } from '../accounts/accountsSlice';
+import { closeBudget, closeBudgetUI } from '../budgets/budgetsSlice';
 import { pushModal } from '../modals/modalsSlice';
 import { loadPrefs } from '../prefs/prefsSlice';
 import { createAppAsyncThunk } from '../redux';
@@ -145,6 +146,18 @@ const appSlice = createSlice({
         ...action.payload,
       };
     },
+  },
+  extraReducers: builder => {
+    builder.addMatcher(
+      action =>
+        closeBudget.fulfilled.match(action) ||
+        closeBudgetUI.fulfilled.match(action),
+      state => ({
+        ...getInitialState(),
+        managerHasInitialized: state.managerHasInitialized || false,
+        loadingText: state.loadingText || null,
+      }),
+    );
   },
 });
 

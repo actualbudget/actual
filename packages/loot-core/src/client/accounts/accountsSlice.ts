@@ -2,6 +2,7 @@ import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
 import { send } from '../../platform/client/fetch';
 import { type AccountEntity, type TransactionEntity } from '../../types/models';
+import { closeBudget, closeBudgetUI } from '../budgets/budgetsSlice';
 import { addNotification } from '../notifications/notificationsSlice';
 import {
   getAccounts,
@@ -61,6 +62,14 @@ const accountsSlice = createSlice({
     ) {
       delete state.failedAccounts[action.payload.id];
     },
+  },
+  extraReducers: builder => {
+    builder.addMatcher(
+      action =>
+        closeBudget.fulfilled.match(action) ||
+        closeBudgetUI.fulfilled.match(action),
+      () => getInitialState(),
+    );
   },
 });
 

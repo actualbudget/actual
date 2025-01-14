@@ -12,6 +12,7 @@ import {
   type AccountEntity,
   type PayeeEntity,
 } from '../../types/models';
+import { closeBudget, closeBudgetUI } from '../budgets/budgetsSlice';
 import {
   addGenericErrorNotification,
   addNotification,
@@ -813,6 +814,13 @@ const queriesSlice = createSlice({
       state.payees = action.payload;
       state.payeesLoaded = true;
     });
+
+    builder.addMatcher(
+      action =>
+        closeBudget.fulfilled.match(action) ||
+        closeBudgetUI.fulfilled.match(action),
+      () => getInitialState(),
+    );
   },
 });
 

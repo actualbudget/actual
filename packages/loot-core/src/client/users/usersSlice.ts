@@ -2,7 +2,11 @@ import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
 import { send } from '../../platform/client/fetch';
 import { type Handlers } from '../../types/handlers';
-import { closeBudget, loadAllFiles } from '../budgets/budgetsSlice';
+import {
+  closeBudget,
+  closeBudgetUI,
+  loadAllFiles,
+} from '../budgets/budgetsSlice';
 import { loadGlobalPrefs } from '../prefs/prefsSlice';
 import { createAppAsyncThunk } from '../redux';
 
@@ -72,6 +76,14 @@ const usersSlice = createSlice({
     loadUserData(state, action: PayloadAction<GetUserDataPayload>) {
       state.data = action.payload.data;
     },
+  },
+  extraReducers: builder => {
+    builder.addMatcher(
+      action =>
+        closeBudget.fulfilled.match(action) ||
+        closeBudgetUI.fulfilled.match(action),
+      () => getInitialState(),
+    );
   },
 });
 

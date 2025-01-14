@@ -18,6 +18,7 @@ import {
   type NoteEntity,
 } from '../../types/models';
 import { setAppState } from '../app/appSlice';
+import { closeBudget, closeBudgetUI } from '../budgets/budgetsSlice';
 import { createAppAsyncThunk } from '../redux';
 import { signOut } from '../users/usersSlice';
 
@@ -607,7 +608,13 @@ const modalsSlice = createSlice({
       .addCase(setAppState, (state, action) => {
         state.isHidden = action.payload.loadingText !== null;
       })
-      .addCase(signOut.fulfilled, () => initialState);
+      .addCase(signOut.fulfilled, () => getInitialState())
+      .addMatcher(
+        action =>
+          closeBudget.fulfilled.match(action) ||
+          closeBudgetUI.fulfilled.match(action),
+        () => getInitialState(),
+      );
   },
 });
 

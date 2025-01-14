@@ -7,6 +7,7 @@ import {
   type MetadataPrefs,
   type SyncedPrefs,
 } from '../../types/prefs';
+import { closeBudget, closeBudgetUI } from '../budgets/budgetsSlice';
 import { closeModal } from '../modals/modalsSlice';
 import { createAppAsyncThunk } from '../redux';
 
@@ -147,6 +148,17 @@ const prefsSlice = createSlice({
     mergeSyncedPrefs(state, action: PayloadAction<MergeSyncedPrefsPayload>) {
       state.synced = { ...state.synced, ...action.payload };
     },
+  },
+  extraReducers: builder => {
+    builder.addMatcher(
+      action =>
+        closeBudget.fulfilled.match(action) ||
+        closeBudgetUI.fulfilled.match(action),
+      state => ({
+        ...getInitialState(),
+        global: state.global || getInitialState().global,
+      }),
+    );
   },
 });
 

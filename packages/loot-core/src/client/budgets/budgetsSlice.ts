@@ -12,7 +12,6 @@ import { closeModal, pushModal } from '../modals/modalsSlice';
 import { loadGlobalPrefs, loadPrefs } from '../prefs/prefsSlice';
 import { createAppAsyncThunk } from '../redux';
 import { signOut } from '../users/usersSlice';
-import { CLOSE_BUDGET } from '../store';
 
 const sliceName = 'budgets';
 
@@ -101,28 +100,24 @@ export const closeBudget = createAppAsyncThunk(
   `${sliceName}/closeBudget`,
   async (_, { dispatch, getState }) => {
     const prefs = getState().prefs.local;
-    if (prefs && prefs.id) {
-      // This clears out all the app state so the user starts fresh
-      // TODO: Change to use an action once CLOSE_BUDGET is migrated to redux toolkit.
-      await dispatch({ type: CLOSE_BUDGET });
-
-      await dispatch(setAppState({ loadingText: t('Closing...') }));
-      await send('close-budget');
-      await dispatch(setAppState({ loadingText: null }));
-      if (localStorage.getItem('SharedArrayBufferOverride')) {
-        window.location.reload();
-      }
+    if (!prefs || !prefs.id) {
+      throw new Error('No open budget.');
+    }
+    await dispatch(setAppState({ loadingText: t('Closing...') }));
+    await send('close-budget');
+    await dispatch(setAppState({ loadingText: null }));
+    if (localStorage.getItem('SharedArrayBufferOverride')) {
+      window.location.reload();
     }
   },
 );
 
 export const closeBudgetUI = createAppAsyncThunk(
   `${sliceName}/closeBudgetUI`,
-  async (_, { dispatch, getState }) => {
+  async (_, { getState }) => {
     const prefs = getState().prefs.local;
-    if (prefs && prefs.id) {
-      // TODO: Change to use an action once CLOSE_BUDGET is migrated to redux toolkit.
-      await dispatch({ type: CLOSE_BUDGET });
+    if (!prefs || !prefs.id) {
+      throw new Error('No open budget.');
     }
   },
 );
@@ -444,9 +439,16 @@ const budgetsSlice = createSlice({
     },
   },
   extraReducers: builder => {
-    builder.addCase(signOut.fulfilled, state => {
-      state.allFiles = null;
-    });
+    builder
+      .addCase(signOut.fulfilled, state => {
+        state.allFiles = null;
+      })
+      .addMatcher(
+        action =>
+          closeBudget.fulfilled.match(action) ||
+          closeBudgetUI.fulfilled.match(action),
+        state => state || getInitialState(),
+      );
   },
 });
 
