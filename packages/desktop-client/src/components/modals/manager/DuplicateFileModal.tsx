@@ -101,9 +101,9 @@ export function DuplicateFileModal({
         );
         if (onComplete) onComplete({ status: 'success' });
       } catch (e) {
-        const newError = new Error(t('Failed to duplicate budget'));
+        const newError = new Error(t('Failed to duplicate budget file'));
         if (onComplete) onComplete({ status: 'failed', error: newError });
-        else console.error('Failed to duplicate budget:', e);
+        else console.error('Failed to duplicate budget file:', e);
         dispatch(
           addNotification({
             type: 'error',

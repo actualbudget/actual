@@ -197,7 +197,7 @@ export function ConfirmChangeDocumentDirModal({
                 }}
                 onPress={() => moveDirectory(close)}
               >
-                <Trans>Change Directory</Trans>
+                <Trans>Change directory</Trans>
               </ButtonWithLoading>
             </View>
           </View>

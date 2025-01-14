@@ -187,7 +187,7 @@ function HeaderLogin({ error }) {
           style={{ fontSize: 15 }}
           to={'/login/password?error=' + error}
         >
-          <Trans>Login with Password</Trans>
+          <Trans>Log in with Password</Trans>
         </Link>
       ) : (
         <span>

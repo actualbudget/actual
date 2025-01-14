@@ -21,17 +21,24 @@ import { Setting } from './UI';
 
 // Follows Pikaday 'firstDay' numbering
 // https://github.com/Pikaday/Pikaday
-const daysOfWeek: { value: SyncedPrefs['firstDayOfWeekIdx']; label: string }[] =
-  [
-    { value: '0', label: 'Sunday' },
-    { value: '1', label: 'Monday' },
-    { value: '2', label: 'Tuesday' },
-    { value: '3', label: 'Wednesday' },
-    { value: '4', label: 'Thursday' },
-    { value: '5', label: 'Friday' },
-    { value: '6', label: 'Saturday' },
-  ];
+function useDaysOfWeek() {
+  const { t } = useTranslation();
 
+  const daysOfWeek: {
+    value: SyncedPrefs['firstDayOfWeekIdx'];
+    label: string;
+  }[] = [
+    { value: '0', label: t('Sunday') },
+    { value: '1', label: t('Monday') },
+    { value: '2', label: t('Tuesday') },
+    { value: '3', label: t('Wednesday') },
+    { value: '4', label: t('Thursday') },
+    { value: '5', label: t('Friday') },
+    { value: '6', label: t('Saturday') },
+  ] as const;
+
+  return { daysOfWeek };
+}
 const dateFormats: { value: SyncedPrefs['dateFormat']; label: string }[] = [
   { value: 'MM/dd/yyyy', label: 'MM/DD/YYYY' },
   { value: 'dd/MM/yyyy', label: 'DD/MM/YYYY' },
@@ -68,6 +75,8 @@ export function FormatSettings() {
   const [_numberFormat, setNumberFormatPref] = useSyncedPref('numberFormat');
   const numberFormat = _numberFormat || 'comma-dot';
   const [hideFraction, setHideFractionPref] = useSyncedPref('hideFraction');
+
+  const { daysOfWeek } = useDaysOfWeek();
 
   const selectButtonClassName = css({
     '&[data-hovered]': {

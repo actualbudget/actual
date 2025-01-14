@@ -82,23 +82,23 @@ export function ReconcilingMessage({
           <View style={{ color: theme.tableText }}>
             <Text style={{ fontStyle: 'italic', textAlign: 'center' }}>
               <Trans>
-                Your cleared balance <strong>{clearedBalance}</strong> needs{' '}
-                <strong>{difference}</strong> to match
+                Your cleared balance <strong>{{ clearedBalance }}</strong> needs{' '}
+                <strong>{{ difference }}</strong> to match
                 <br /> your bank&apos;s balance of{' '}
-                <Text style={{ fontWeight: 700 }}>{bankBalance}</Text>
+                <Text style={{ fontWeight: 700 }}>{{ bankBalance }}</Text>
               </Trans>
             </Text>
           </View>
         )}
         <View style={{ marginLeft: 15 }}>
           <Button variant="primary" onPress={onDone}>
-            <Trans>Done Reconciling</Trans>
+            <Trans>Done reconciling</Trans>
           </Button>
         </View>
         {targetDiff !== 0 && (
           <View style={{ marginLeft: 15 }}>
             <Button onPress={() => onCreateTransaction(targetDiff)}>
-              <Trans>Create Reconciliation Transaction</Trans>
+              <Trans>Create reconciliation transaction</Trans>
             </Button>
           </View>
         )}

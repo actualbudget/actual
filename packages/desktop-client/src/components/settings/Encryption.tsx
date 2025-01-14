@@ -54,7 +54,7 @@ export function EncryptionSettings() {
     <Setting
       primaryAction={
         <Button isDisabled>
-          <Trans>Enable encryption…</Trans>
+          <Trans>Enable encryption</Trans>
         </Button>
       }
     >

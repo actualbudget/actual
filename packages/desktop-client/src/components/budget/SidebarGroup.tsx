@@ -228,7 +228,7 @@ export function SidebarGroup({
         style={{ fontWeight: 600 }}
         inputProps={{
           style: { marginLeft: 20 },
-          placeholder: temporary ? t('New Group Name') : '',
+          placeholder: temporary ? t('New group name') : '',
         }}
       />
     </View>

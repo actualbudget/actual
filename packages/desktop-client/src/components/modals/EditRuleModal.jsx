@@ -334,7 +334,7 @@ function ScheduleDescription({ id }) {
             textOverflow: 'ellipsis',
           }}
         >
-          <Trans>Payee</Trans>:{' '}
+          <Trans>Payee:</Trans>{' '}
           <DisplayId
             type="payees"
             id={schedule._payee}
@@ -343,11 +343,11 @@ function ScheduleDescription({ id }) {
         </Text>
         <Text style={{ margin: '0 5px' }}> — </Text>
         <Text style={{ flexShrink: 0 }}>
-          <Trans>Amount</Trans>: {formatAmount(schedule._amount)}
+          <Trans>Amount:</Trans> {formatAmount(schedule._amount)}
         </Text>
         <Text style={{ margin: '0 5px' }}> — </Text>
         <Text style={{ flexShrink: 0 }}>
-          <Trans>Next</Trans>:{' '}
+          <Trans>Next:</Trans>{' '}
           {monthUtils.format(schedule.next_date, dateFormat)}
         </Text>
       </View>

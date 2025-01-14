@@ -43,7 +43,7 @@ export function ToBudgetMenu({
       ? [
           {
             name: 'cover',
-            text: t('Cover from a category'),
+            text: t('Cover from category'),
           },
         ]
       : []),

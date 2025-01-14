@@ -636,7 +636,7 @@ class AccountInternal extends PureComponent<
       const res = await window.Actual.openFileDialog({
         filters: [
           {
-            name: t('Financial Files'),
+            name: t('Financial files'),
             extensions: ['qif', 'ofx', 'qfx', 'csv', 'tsv', 'xml'],
           },
         ],
@@ -671,7 +671,7 @@ class AccountInternal extends PureComponent<
     window.Actual.saveFile(
       exportedTransactions,
       filename,
-      t('Export Transactions'),
+      t('Export transactions'),
     );
   };
 

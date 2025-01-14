@@ -1,5 +1,5 @@
 import React, { type CSSProperties, useCallback } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useTranslation, Trans } from 'react-i18next';
 
 import { css } from '@emotion/css';
 
@@ -44,7 +44,7 @@ function AccountHeader<SheetFieldName extends SheetFields<'account'>>({
   return (
     <Button
       variant="bare"
-      aria-label={`View ${name} transactions`}
+      aria-label={t('View {{name}} transactions')}
       onPress={() => navigate(`/accounts/${id}`)}
       style={{
         flex: 1,
@@ -192,13 +192,14 @@ function AccountCard({
 }
 
 function EmptyMessage() {
-  const { t } = useTranslation();
   return (
     <View style={{ flex: 1, padding: 30 }}>
       <Text style={styles.text}>
-        {t(
-          'For Actual to be useful, you need to add an account. You can link an account to automatically download transactions, or manage it locally yourself.',
-        )}
+        <Trans>
+          For Actual to be useful, you need to <strong>add an account</strong>.
+          You can link an account to automatically download transactions, or
+          manage it locally yourself.
+        </Trans>
       </Text>
     </View>
   );
@@ -255,7 +256,7 @@ function AccountList({
     >
       {accounts.length === 0 && <EmptyMessage />}
       <PullToRefresh onRefresh={onSync}>
-        <View aria-label="Account list" style={{ margin: 10 }}>
+        <View aria-label={t('Account list')} style={{ margin: 10 }}>
           {onBudgetAccounts.length > 0 && (
             <AccountHeader
               id="onbudget"
