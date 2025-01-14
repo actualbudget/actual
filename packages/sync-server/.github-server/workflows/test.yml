@@ -1,0 +1,29 @@
+name: Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches: '*'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+      - name: Cache
+        uses: actions/cache@v4
+        id: cache
+        with:
+          path: '**/node_modules'
+          key: yarn-v1-${{ hashFiles('**/yarn.lock') }}
+      - name: Install
+        run: yarn --immutable
+        if: steps.cache.outputs.cache-hit != 'true'
+      - name: Test
+        run: yarn test

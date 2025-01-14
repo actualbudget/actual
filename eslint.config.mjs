@@ -113,6 +113,7 @@ export default [
       'packages/loot-core/**/node_modules/*',
       'packages/loot-core/**/lib-dist/*',
       'packages/loot-core/**/proto/*',
+      'packages/sync-server',
       '.yarn/*',
       '.github/*',
     ],
