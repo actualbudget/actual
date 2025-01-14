@@ -17,6 +17,7 @@ import {
   type DataEntity,
 } from 'loot-core/types/models/reports';
 import { type RuleConditionEntity } from 'loot-core/types/models/rule';
+import { type TransObjectLiteral } from 'loot-core/types/util';
 
 import { useAccounts } from '../../../hooks/useAccounts';
 import { useCategories } from '../../../hooks/useCategories';
@@ -708,7 +709,11 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
               <Trans>
                 <Text>Custom Report:</Text>{' '}
                 <Text style={{ marginLeft: 5, color: theme.pageTextPositive }}>
-                  {{ name: report.name ?? t('Unsaved report') }}
+                  {
+                    {
+                      name: report.name ?? t('Unsaved report'),
+                    } as TransObjectLiteral
+                  }
                 </Text>
               </Trans>
             }

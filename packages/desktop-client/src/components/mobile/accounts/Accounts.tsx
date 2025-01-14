@@ -39,12 +39,13 @@ function AccountHeader<SheetFieldName extends SheetFields<'account'>>({
   amount,
   style = {},
 }: AccountHeaderProps<SheetFieldName>) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   return (
     <Button
       variant="bare"
-      aria-label={t('View {{name}} transactions')}
+      aria-label={t('View {{name}} transactions', { name })}
       onPress={() => navigate(`/accounts/${id}`)}
       style={{
         flex: 1,

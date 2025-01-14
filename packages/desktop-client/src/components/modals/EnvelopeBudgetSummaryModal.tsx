@@ -76,7 +76,7 @@ export function EnvelopeBudgetSummaryModal({
           dispatch(collapseModals('cover'));
           showUndoNotification({
             message: t('Covered overbudgeted from {{categoryName}}', {
-              categoryName: categoriesById[toCategoryId].name,
+              categoryName: categoriesById[categoryId].name,
             }),
           });
         },

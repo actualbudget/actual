@@ -5,6 +5,7 @@ import * as queries from 'loot-core/src/client/queries';
 import { type Query } from 'loot-core/src/shared/query';
 import { currencyToInteger } from 'loot-core/src/shared/util';
 import { type AccountEntity } from 'loot-core/types/models';
+import { type TransObjectLiteral } from 'loot-core/types/util';
 
 import { SvgCheckCircle1 } from '../../icons/v2';
 import { styles, theme } from '../../style';
@@ -82,10 +83,14 @@ export function ReconcilingMessage({
           <View style={{ color: theme.tableText }}>
             <Text style={{ fontStyle: 'italic', textAlign: 'center' }}>
               <Trans>
-                Your cleared balance <strong>{{ clearedBalance }}</strong> needs{' '}
-                <strong>{{ difference }}</strong> to match
+                Your cleared balance{' '}
+                <strong>{{ clearedBalance } as TransObjectLiteral}</strong>{' '}
+                needs <strong>{{ difference } as TransObjectLiteral}</strong> to
+                match
                 <br /> your bank&apos;s balance of{' '}
-                <Text style={{ fontWeight: 700 }}>{{ bankBalance }}</Text>
+                <Text style={{ fontWeight: 700 }}>
+                  {{ bankBalance } as TransObjectLiteral}
+                </Text>
               </Trans>
             </Text>
           </View>

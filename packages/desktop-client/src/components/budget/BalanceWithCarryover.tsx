@@ -9,6 +9,8 @@ import { useTranslation, Trans } from 'react-i18next';
 
 import { css } from '@emotion/css';
 
+import { type TransObjectLiteral } from 'loot-core/types/util';
+
 import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { SvgArrowThinRight } from '../../icons/v1';
 import { theme, styles } from '../../style';
@@ -182,16 +184,24 @@ export function BalanceWithCarryover({
                   <Trans>
                     <div>Goal Type:</div>
                     <div>
-                      {{
-                        type: longGoalValue === 1 ? t('Long') : t('Template'),
-                      }}
+                      {
+                        {
+                          type: longGoalValue === 1 ? t('Long') : t('Template'),
+                        } as TransObjectLiteral
+                      }
                     </div>
                   </Trans>
                 </GoalTooltipRow>
                 <GoalTooltipRow>
                   <Trans>
                     <div>Goal:</div>
-                    <div>{{ amount: format(goalValue, 'financial') }}</div>
+                    <div>
+                      {
+                        {
+                          amount: format(goalValue, 'financial'),
+                        } as TransObjectLiteral
+                      }
+                    </div>
                   </Trans>
                 </GoalTooltipRow>
                 <GoalTooltipRow>
@@ -199,13 +209,23 @@ export function BalanceWithCarryover({
                     <Trans>
                       <div>Budgeted:</div>
                       <div>
-                        {{ amount: format(budgetedValue, 'financial') }}
+                        {
+                          {
+                            amount: format(budgetedValue, 'financial'),
+                          } as TransObjectLiteral
+                        }
                       </div>
                     </Trans>
                   ) : (
                     <Trans>
                       <div>Balance:</div>
-                      <div>{{ amount: format(balanceValue, type) }}</div>
+                      <div>
+                        {
+                          {
+                            amount: format(balanceValue, type),
+                          } as TransObjectLiteral
+                        }
+                      </div>
                     </Trans>
                   )}
                 </GoalTooltipRow>
