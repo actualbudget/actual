@@ -78,11 +78,7 @@ export const init: T.Init = async function () {
   return new Promise(connectSocket);
 };
 
-export const send: T.Send = function (
-  name,
-  args,
-  { catchErrors = false } = {},
-) {
+export const send = function (name, args, { catchErrors = false } = {}) {
   return new Promise((resolve, reject) => {
     const id = uuidv4();
     replyHandlers.set(id, { resolve, reject });
@@ -107,7 +103,7 @@ export const send: T.Send = function (
   });
 };
 
-export const sendCatch: T.SendCatch = function (name, args) {
+export const sendCatch = function (name, args) {
   return send(name, args, { catchErrors: true });
 };
 
