@@ -17,8 +17,8 @@ export interface DashboardHandlers {
   'dashboard-import': (args: {
     filepath: string;
   }) => Promise<
-    | { status: 'ok' }
-    | { error: 'json-parse-error' | 'internal-error' }
+    | { error?: undefined; message?: undefined; status: 'ok' }
+    | { error: 'json-parse-error' | 'internal-error'; message?: undefined }
     | { error: 'validation-error'; message: string }
   >;
 }

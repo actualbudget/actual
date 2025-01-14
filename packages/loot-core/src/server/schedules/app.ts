@@ -306,6 +306,8 @@ export async function updateSchedule({
 
     await db.updateWithSchema('schedules', schedule);
   });
+
+  return schedule.id;
 }
 
 export async function deleteSchedule({ id }) {

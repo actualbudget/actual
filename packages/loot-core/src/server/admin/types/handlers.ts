@@ -6,15 +6,21 @@ export interface AdminHandlers {
 
   'user-delete-all': (
     ids: string[],
-  ) => Promise<{ someDeletionsFailed: boolean; ids?: number[] }>;
+  ) => Promise<
+    { someDeletionsFailed: boolean; ids?: number[] } | { error: string }
+  >;
 
   'user-add': (
     user: Omit<UserEntity, 'id'>,
-  ) => Promise<{ error?: string } | { id: string }>;
+  ) => Promise<
+    { error?: string; id?: undefined } | { error?: undefined; id: string }
+  >;
 
   'user-update': (
     user: Omit<UserEntity, 'id'>,
-  ) => Promise<{ error?: string } | { id: string }>;
+  ) => Promise<
+    { error?: string; id?: undefined } | { error?: undefined; id: string }
+  >;
 
   'access-add': (
     user: NewUserAccessEntity,

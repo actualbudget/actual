@@ -15,7 +15,7 @@ export interface SchedulesHandlers {
     schedule;
     conditions?;
     resetNextDate?: boolean;
-  }) => Promise<void>;
+  }) => Promise<string>;
 
   'schedule/delete': (arg: { id: string }) => Promise<void>;
 

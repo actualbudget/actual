@@ -1005,7 +1005,9 @@ export type SchemaConfig = {
     | Record<string, unknown>
     | ((name: string, config: { withDead; isJoin; tableOptions }) => unknown);
   tableFilters?: (name: string) => unknown[];
-  customizeQuery?: <T extends { table: string; orderExpressions: unknown[] }>(
+  customizeQuery?: <
+    T extends { table: string; orderExpressions: readonly unknown[] },
+  >(
     queryString: T,
   ) => T;
   views?: Record<

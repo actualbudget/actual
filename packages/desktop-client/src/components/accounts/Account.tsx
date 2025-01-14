@@ -480,7 +480,11 @@ class AccountInternal extends PureComponent<
   }
 
   fetchAllIds = async () => {
-    const { data } = await runQuery(this.paged?.query.select('id'));
+    if (!this.paged) {
+      return [];
+    }
+
+    const { data } = await runQuery(this.paged.query.select('id'));
     // Remember, this is the `grouped` split type so we need to deal
     // with the `subtransactions` property
     return data.reduce((arr: string[], t: TransactionEntity) => {
@@ -709,7 +713,7 @@ class AccountInternal extends PureComponent<
   };
 
   async calculateBalances() {
-    if (!this.canCalculateBalance()) {
+    if (!this.canCalculateBalance() || !this.paged) {
       return null;
     }
 
@@ -930,6 +934,10 @@ class AccountInternal extends PureComponent<
   }
 
   getFilteredAmount = async () => {
+    if (!this.paged) {
+      return 0;
+    }
+
     const { data: amount } = await runQuery(
       this.paged?.query.calculate({ $sum: '$amount' }),
     );
