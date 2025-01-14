@@ -18,8 +18,8 @@ import {
   type NoteEntity,
 } from '../../types/models';
 import { setAppState } from '../app/appSlice';
-import { signOut } from '../budgets/budgetsSlice';
 import { createAppAsyncThunk } from '../redux';
+import { signOut } from '../users/usersSlice';
 
 const sliceName = 'modals';
 
@@ -630,7 +630,7 @@ const modalsSlice = createSlice({
       .addCase(setAppState, (state, action) => {
         state.isHidden = action.payload.loadingText !== null;
       })
-      .addCase(signOut, () => initialState);
+      .addCase(signOut.fulfilled, () => initialState);
   },
 });
 
