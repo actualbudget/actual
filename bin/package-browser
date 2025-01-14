@@ -11,6 +11,7 @@ fi
 pushd packages/desktop-client/locale > /dev/null
 git pull
 popd > /dev/null
+packages/desktop-client/bin/remove-untranslated-languages
 
 yarn workspace loot-core build:browser
 yarn workspace @actual-app/web build:browser
