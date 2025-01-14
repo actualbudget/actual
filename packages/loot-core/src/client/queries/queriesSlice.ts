@@ -623,18 +623,18 @@ export const applyBudgetAction = createAppAsyncThunk(
 // Transaction actions
 
 type ImportPreviewTransactionsPayload = {
-  id: string;
+  accountId: string;
   transactions: TransactionEntity[];
 };
 
 export const importPreviewTransactions = createAppAsyncThunk(
   `${sliceName}/importPreviewTransactions`,
   async (
-    { id, transactions }: ImportPreviewTransactionsPayload,
+    { accountId, transactions }: ImportPreviewTransactionsPayload,
     { dispatch },
   ) => {
     const { errors = [], updatedPreview } = await send('transactions-import', {
-      accountId: id,
+      accountId,
       transactions,
       isPreview: true,
     });
