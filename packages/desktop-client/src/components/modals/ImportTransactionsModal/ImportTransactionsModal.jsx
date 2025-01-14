@@ -268,8 +268,11 @@ export function ImportTransactionsModal({ options }) {
 
       // Retreive the transactions that would be updated (along with the existing trx)
       const previewTrx = await dispatch(
-        importPreviewTransactions(accountId, previewTransactions),
-      ).unwrap();
+        importPreviewTransactions({
+          id: accountId,
+          transactions: previewTransactions,
+        }),
+      )?.unwrap();
       const matchedUpdateMap = previewTrx.reduce((map, entry) => {
         map[entry.transaction.trx_id] = entry;
         return map;
