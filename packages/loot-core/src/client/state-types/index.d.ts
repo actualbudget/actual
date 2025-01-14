@@ -15,7 +15,6 @@ export type Action =
   | CloseBudgetAction;
 
 export type State = {
-  modals: ModalsState;
   notifications: NotificationsState;
   prefs: PrefsState;
   user: UserState;
