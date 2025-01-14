@@ -8,6 +8,7 @@ import { syncAccounts } from '../accounts/accountsSlice';
 import { pushModal } from '../modals/modalsSlice';
 import { loadPrefs } from '../prefs/prefsSlice';
 import { createAppAsyncThunk } from '../redux';
+import { loadPrefs } from '../prefs/prefsSlice';
 
 const sliceName = 'app';
 
