@@ -241,17 +241,13 @@ export function DonutGraph({
 
   const [activeIndex, setActiveIndex] = useState(0);
 
-  // Sort the data in the pie chart
-  const unsortedData = data[splitData];
-  const sortedData = unsortedData.slice().sort((a, b) => getVal(b) - getVal(a));
-
   return (
     <Container style={style}>
       {(width, height) => {
         const compact = height <= 300 || width <= 300;
 
         return (
-          sortedData && (
+          data[splitData] && (
             <ResponsiveContainer>
               <div>
                 {!compact && <div style={{ marginTop: '15px' }} />}
@@ -272,7 +268,7 @@ export function DonutGraph({
                     dataKey={val => getVal(val)}
                     nameKey={yAxis}
                     isAnimationActive={false}
-                    data={sortedData}
+                    data={data[splitData]}
                     innerRadius={Math.min(width, height) * 0.2}
                     fill="#8884d8"
                     labelLine={false}

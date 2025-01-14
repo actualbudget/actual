@@ -14,6 +14,7 @@ import { type createCustomSpreadsheetProps } from './custom-spreadsheet';
 import { filterEmptyRows } from './filterEmptyRows';
 import { makeQuery } from './makeQuery';
 import { recalculate } from './recalculate';
+import { sortData } from './sortData';
 
 export function createGroupedSpreadsheet({
   startDate,
@@ -27,6 +28,7 @@ export function createGroupedSpreadsheet({
   showHiddenCategories,
   showUncategorized,
   balanceTypeOp,
+  sortByOp,
   firstDayOfWeekIdx,
 }: createCustomSpreadsheetProps) {
   const [categoryList, categoryGroup] = categoryLists(categories);
@@ -135,10 +137,20 @@ export function createGroupedSpreadsheet({
       },
       [startDate, endDate],
     );
-    setData(
-      groupedData.filter(i =>
-        filterEmptyRows({ showEmpty, data: i, balanceTypeOp }),
-      ),
+
+    const groupedDataFiltered = groupedData.filter(i =>
+      filterEmptyRows({ showEmpty, data: i, balanceTypeOp }),
     );
+
+    const sortedGroupedDataFiltered = [...groupedDataFiltered]
+      .sort(sortData({ balanceTypeOp, sortByOp }))
+      .map(g => {
+        g.categories = [...(g.categories ?? [])].sort(
+          sortData({ balanceTypeOp, sortByOp }),
+        );
+        return g;
+      });
+
+    setData(sortedGroupedDataFiltered);
   };
 }

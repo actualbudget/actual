@@ -2,12 +2,12 @@ import React, { useState } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 
 import {
-  closeModal,
   linkAccount,
   linkAccountPluggyAi,
   linkAccountSimpleFin,
   unlinkAccount,
-} from 'loot-core/client/actions';
+} from 'loot-core/client/accounts/accountsSlice';
+import { closeModal } from 'loot-core/client/actions';
 
 import { useAccounts } from '../../hooks/useAccounts';
 import { useDispatch } from '../../redux';
@@ -62,7 +62,7 @@ export function SelectLinkedAccountsModal({
     localAccounts
       .filter(acc => acc.account_id)
       .filter(acc => !chosenLocalAccountIds.includes(acc.id))
-      .forEach(acc => dispatch(unlinkAccount(acc.id)));
+      .forEach(acc => dispatch(unlinkAccount({ id: acc.id })));
 
     // Link new accounts
     Object.entries(chosenAccounts).forEach(
@@ -81,14 +81,15 @@ export function SelectLinkedAccountsModal({
         // Finally link the matched account
         if (syncSource === 'simpleFin') {
           dispatch(
-            linkAccountSimpleFin(
+            linkAccountSimpleFin({
               externalAccount,
-              chosenLocalAccountId !== addOnBudgetAccountOption.id &&
+              upgradingId:
+                chosenLocalAccountId !== addOnBudgetAccountOption.id &&
                 chosenLocalAccountId !== addOffBudgetAccountOption.id
-                ? chosenLocalAccountId
-                : undefined,
+                  ? chosenLocalAccountId
+                  : undefined,
               offBudget,
-            ),
+            }),
           );
         } else if (syncSource === 'pluggyai') {
           dispatch(
@@ -103,15 +104,16 @@ export function SelectLinkedAccountsModal({
           );
         } else {
           dispatch(
-            linkAccount(
+            linkAccount({
               requisitionId,
-              externalAccount,
-              chosenLocalAccountId !== addOnBudgetAccountOption.id &&
+              account: externalAccount,
+              upgradingId:
+                chosenLocalAccountId !== addOnBudgetAccountOption.id &&
                 chosenLocalAccountId !== addOffBudgetAccountOption.id
-                ? chosenLocalAccountId
-                : undefined,
+                  ? chosenLocalAccountId
+                  : undefined,
               offBudget,
-            ),
+            }),
           );
         }
       },

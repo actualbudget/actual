@@ -267,8 +267,9 @@ function TransactionListWithPreviews({
   }, [accountId, dispatch]);
 
   useEffect(() => {
-    return listen('sync-event', ({ type, tables }) => {
-      if (type === 'applied') {
+    return listen('sync-event', event => {
+      if (event.type === 'applied') {
+        const tables = event.tables;
         if (
           tables.includes('transactions') ||
           tables.includes('category_mapping') ||

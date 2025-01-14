@@ -1,0 +1,48 @@
+#!/usr/bin/env node
+const fs = require('fs');
+const path = require('path');
+
+// Local path to the cloned translations repository
+const localRepoPath = './packages/desktop-client/locale';
+
+// Compare JSON files and delete incomplete ones
+const processTranslations = () => {
+  try {
+    const files = fs.readdirSync(localRepoPath);
+    const enJsonPath = path.join(localRepoPath, 'en.json');
+
+    if (!fs.existsSync(enJsonPath)) {
+      throw new Error('en.json not found in the repository.');
+    }
+
+    const enJson = JSON.parse(fs.readFileSync(enJsonPath, 'utf8'));
+    const enKeysCount = Object.keys(enJson).length;
+
+    console.log(`en.json has ${enKeysCount} keys.`);
+
+    files.forEach((file) => {
+      if (file === 'en.json' || path.extname(file) !== '.json') return;
+
+      const filePath = path.join(localRepoPath, file);
+      const jsonData = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+      const fileKeysCount = Object.keys(jsonData).length;
+
+      // Calculate the percentage of keys present compared to en.json
+      const percentage = (fileKeysCount / enKeysCount) * 100;
+      console.log(`${file} has ${fileKeysCount} keys (${percentage.toFixed(2)}%).`);
+
+      if (percentage < 50) {
+        fs.unlinkSync(filePath);
+        console.log(`Deleted ${file} due to insufficient keys.`);
+      } else {
+        console.log(`Keeping ${file}.`);
+      }
+    });
+
+    console.log('Processing completed.');
+  } catch (error) {
+    console.error(`Error: ${error.message}`);
+  }
+};
+
+processTranslations();

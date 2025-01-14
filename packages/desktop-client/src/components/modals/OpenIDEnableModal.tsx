@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { closeBudget, popModal } from 'loot-core/client/actions';
 import { send } from 'loot-core/platform/client/fetch';
 import * as asyncStorage from 'loot-core/platform/server/asyncStorage';
 import { getOpenIdErrors } from 'loot-core/shared/errors';
 import { type OpenIdConfig } from 'loot-core/types/models/openid';
 
-import { useActions } from '../../hooks/useActions';
+import { useDispatch } from '../../redux';
 import { theme, styles } from '../../style';
 import { Error } from '../alerts';
 import { Button } from '../common/Button2';
@@ -24,10 +25,9 @@ export function OpenIDEnableModal({
   onSave: originalOnSave,
 }: OpenIDEnableModalProps) {
   const { t } = useTranslation();
+  const dispatch = useDispatch();
 
   const [error, setError] = useState('');
-  const actions = useActions();
-  const { closeBudget } = useActions();
   const refreshLoginMethods = useRefreshLoginMethods();
 
   async function onSave(config: OpenIdConfig) {
@@ -38,7 +38,7 @@ export function OpenIDEnableModal({
         try {
           await refreshLoginMethods();
           await asyncStorage.removeItem('user-token');
-          await closeBudget();
+          await dispatch(closeBudget());
         } catch (e) {
           console.error('Failed to cleanup after OpenID enable:', e);
           setError(
@@ -73,7 +73,7 @@ export function OpenIDEnableModal({
                   key="cancel"
                   variant="bare"
                   style={{ marginRight: 10 }}
-                  onPress={actions.popModal}
+                  onPress={() => dispatch(popModal())}
                 >
                   <Trans>Cancel</Trans>
                 </Button>,

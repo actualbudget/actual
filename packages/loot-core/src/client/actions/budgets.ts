@@ -231,7 +231,7 @@ export function importBudget(
   };
 }
 
-export function uploadBudget(id: string) {
+export function uploadBudget(id?: string) {
   return async (dispatch: AppDispatch) => {
     const { error } = await send('upload-budget', { id });
     if (error) {
