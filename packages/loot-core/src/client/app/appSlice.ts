@@ -6,8 +6,8 @@ import { type AccountEntity } from '../../types/models';
 import { type AtLeastOne } from '../../types/util';
 import { syncAccounts } from '../accounts/accountsSlice';
 import { pushModal } from '../modals/modalsSlice';
-import { createAppAsyncThunk } from '../redux';
 import { loadPrefs } from '../prefs/prefsSlice';
+import { createAppAsyncThunk } from '../redux';
 
 const sliceName = 'app';
 
