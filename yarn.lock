@@ -19,7 +19,20 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@actual-app/api@npm:*, @actual-app/api@workspace:packages/api":
+"@actual-app/api@npm:*":
+  version: 25.1.0
+  resolution: "@actual-app/api@npm:25.1.0"
+  dependencies:
+    "@actual-app/crdt": "npm:^2.1.0"
+    better-sqlite3: "npm:^11.7.0"
+    compare-versions: "npm:^6.1.0"
+    node-fetch: "npm:^3.3.2"
+    uuid: "npm:^9.0.1"
+  checksum: 10/66510e50d4515d40b1bdbf6d93f2a0994203472b4d46246d5d4d0b72f5067e00dc04529705d7f016692703bfb6c381223d9de76f7589952104a2db9920ecf7ca
+  languageName: node
+  linkType: hard
+
+"@actual-app/api@workspace:packages/api":
   version: 0.0.0-use.local
   resolution: "@actual-app/api@workspace:packages/api"
   dependencies:
@@ -38,7 +51,18 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@actual-app/crdt@npm:*, @actual-app/crdt@npm:2.1.0, @actual-app/crdt@workspace:^, @actual-app/crdt@workspace:packages/crdt":
+"@actual-app/crdt@npm:*, @actual-app/crdt@npm:2.1.0, @actual-app/crdt@npm:^2.1.0":
+  version: 2.1.0
+  resolution: "@actual-app/crdt@npm:2.1.0"
+  dependencies:
+    google-protobuf: "npm:^3.12.0-rc.1"
+    murmurhash: "npm:^2.0.1"
+    uuid: "npm:^9.0.0"
+  checksum: 10/1007e78eb9bdfdca8ce5c6fc72543d6a9fb34cd13ea2eefd2176abcb181100418b51774fd6217f0b62418567a51f7724b4c72f7ebc9231f0ee13b6c1bdc729ba
+  languageName: node
+  linkType: hard
+
+"@actual-app/crdt@workspace:^, @actual-app/crdt@workspace:packages/crdt":
   version: 0.0.0-use.local
   resolution: "@actual-app/crdt@workspace:packages/crdt"
   dependencies:
@@ -55,7 +79,14 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@actual-app/web@workspace:*, @actual-app/web@workspace:packages/desktop-client":
+"@actual-app/web@npm:25.1.0":
+  version: 25.1.0
+  resolution: "@actual-app/web@npm:25.1.0"
+  checksum: 10/b88257dd0d4ebcfa71b108a33bb9708e3c699def76677a124e1d6855ffba0d1db8e052a1fe67125c9d3c905f7d9bfdf04fe75cadcade41e1c4d4fc9300d76b96
+  languageName: node
+  linkType: hard
+
+"@actual-app/web@workspace:packages/desktop-client":
   version: 0.0.0-use.local
   resolution: "@actual-app/web@workspace:packages/desktop-client"
   dependencies:
@@ -7485,7 +7516,7 @@ __metadata:
   resolution: "actual-sync@workspace:packages/sync-server"
   dependencies:
     "@actual-app/crdt": "npm:2.1.0"
-    "@actual-app/web": "workspace:*"
+    "@actual-app/web": "npm:25.1.0"
     "@babel/preset-typescript": "npm:^7.20.2"
     "@types/bcrypt": "npm:^5.0.2"
     "@types/better-sqlite3": "npm:^7.6.12"

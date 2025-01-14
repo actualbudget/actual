@@ -66,6 +66,8 @@ let defaultConfig = {
   hostname: '::',
   webRoot: path.join(
     projectRoot,
+    '../',
+    '../',
     'node_modules',
     '@actual-app',
     'web',
