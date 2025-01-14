@@ -356,7 +356,11 @@ export type Transaction = {
   /**
    * Account reference, conditional
    */
-  creditorAccount?: string;
+  creditorAccount?:
+    | string
+    | {
+        iban?: string;
+      };
 
   /**
    * BICFI

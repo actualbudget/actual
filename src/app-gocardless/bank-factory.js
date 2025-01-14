@@ -8,6 +8,7 @@ import BelfiusGkccbebb from './banks/belfius_gkccbebb.js';
 import BerlinerSparkasseBeladebexxx from './banks/berliner_sparkasse_beladebexxx.js';
 import BnpBeGebabebb from './banks/bnp_be_gebabebb.js';
 import CbcCregbebb from './banks/cbc_cregbebb.js';
+import CommerzbankCobadeff from './banks/commerzbank_cobadeff.js';
 import DanskebankDabno22 from './banks/danskebank_dabno22.js';
 import EasybankBawaatww from './banks/easybank_bawaatww.js';
 import EntercardSwednokk from './banks/entercard_swednokk.js';
@@ -47,6 +48,7 @@ export const banks = [
   BerlinerSparkasseBeladebexxx,
   BnpBeGebabebb,
   CbcCregbebb,
+  CommerzbankCobadeff,
   DanskebankDabno22,
   EasybankBawaatww,
   EntercardSwednokk,
