@@ -52,11 +52,13 @@ export const resetSync = createAppAsyncThunk(
       ) {
         dispatch(
           pushModal({
-            name: 'fix-encryption-key',
-            options: {
-              onSuccess: () => {
-                // TODO: There won't be a loading indicator for this
-                dispatch(resetSync());
+            modal: {
+              name: 'fix-encryption-key',
+              options: {
+                onSuccess: () => {
+                  // TODO: There won't be a loading indicator for this
+                  dispatch(resetSync());
+                },
               },
             },
           }),
@@ -64,8 +66,10 @@ export const resetSync = createAppAsyncThunk(
       } else if (error.reason === 'encrypt-failure') {
         dispatch(
           pushModal({
-            name: 'create-encryption-key',
-            options: { recreate: true },
+            modal: {
+              name: 'create-encryption-key',
+              options: { recreate: true },
+            },
           }),
         );
       }
