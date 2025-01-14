@@ -3,7 +3,7 @@ import { initReactI18next } from 'react-i18next';
 import i18n from 'i18next';
 import resourcesToBackend from 'i18next-resources-to-backend';
 
-const languages = import.meta.glob('/locale/*.json');
+const languages = import.meta.glob(['/locale/*.json', '!/locale/*_old.json']);
 
 export const availableLanguages = Object.keys(languages).map(
   path => path.split('/')[2].split('.')[0],
