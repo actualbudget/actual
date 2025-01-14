@@ -107,14 +107,16 @@ export function LoadBackupModal({
                   </Block>
                   <Button
                     variant="primary"
-                    onPress={() =>
-                      dispatch(
-                        loadBackup({
-                          budgetId: budgetIdToLoad,
-                          backupId: latestBackup.id,
-                        }),
-                      )
-                    }
+                    onPress={() => {
+                      if (budgetIdToLoad && latestBackup.id) {
+                        dispatch(
+                          loadBackup({
+                            budgetId: budgetIdToLoad,
+                            backupId: latestBackup.id,
+                          }),
+                        );
+                      }
+                    }}
                   >
                     {t('Revert to original version')}
                   </Button>
@@ -148,11 +150,13 @@ export function LoadBackupModal({
             ) : (
               <BackupTable
                 backups={previousBackups}
-                onSelect={id =>
-                  dispatch(
-                    loadBackup({ budgetId: budgetIdToLoad, backupId: id }),
-                  )
-                }
+                onSelect={id => {
+                  if (budgetIdToLoad && id) {
+                    dispatch(
+                      loadBackup({ budgetId: budgetIdToLoad, backupId: id }),
+                    );
+                  }
+                }}
               />
             )}
           </View>
