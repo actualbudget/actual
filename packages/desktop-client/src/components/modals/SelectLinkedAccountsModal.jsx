@@ -92,15 +92,17 @@ export function SelectLinkedAccountsModal({
             }),
           );
         } else if (syncSource === 'pluggyai') {
+          debugger;
           dispatch(
-            linkAccountPluggyAi(
+            linkAccountPluggyAi({
               externalAccount,
-              chosenLocalAccountId !== addOnBudgetAccountOption.id &&
+              upgradingId:
+                chosenLocalAccountId !== addOnBudgetAccountOption.id &&
                 chosenLocalAccountId !== addOffBudgetAccountOption.id
-                ? chosenLocalAccountId
-                : undefined,
+                  ? chosenLocalAccountId
+                  : undefined,
               offBudget,
-            ),
+            }),
           );
         } else {
           dispatch(

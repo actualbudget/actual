@@ -246,14 +246,12 @@ async function downloadSimpleFinTransactions(
 }
 
 async function downloadPluggyAiTransactions(
-  acctId: AccountEntity['id'] | AccountEntity['id'][],
-  since: string | string[],
-  to: string | string[],
+  acctId: AccountEntity['id'],
+  since: string,
+  to: string,
 ) {
   const userToken = await asyncStorage.getItem('user-token');
   if (!userToken) return;
-
-  const batchSync = Array.isArray(acctId);
 
   console.log('Pulling transactions from Pluggy.ai');
 
@@ -277,33 +275,12 @@ async function downloadPluggyAiTransactions(
   }
 
   let retVal = {};
-  if (batchSync) {
-    for (const [accountId, data] of Object.entries(
-      res as SimpleFinBatchSyncResponse,
-    )) {
-      if (accountId === 'errors') continue;
-
-      const error = res?.errors?.[accountId]?.[0];
-
-      retVal[accountId] = {
-        transactions: data?.transactions?.all,
-        accountBalance: data?.balances,
-        startingBalance: data?.startingBalance,
-      };
-
-      if (error) {
-        retVal[accountId].error_type = error.error_type;
-        retVal[accountId].error_code = error.error_code;
-      }
-    }
-  } else {
-    const singleRes = res as BankSyncResponse;
-    retVal = {
-      transactions: singleRes.transactions.all,
-      accountBalance: singleRes.balances,
-      startingBalance: singleRes.startingBalance,
-    };
-  }
+  const singleRes = res as BankSyncResponse;
+  retVal = {
+    transactions: singleRes.transactions.all,
+    accountBalance: singleRes.balances,
+    startingBalance: singleRes.startingBalance,
+  };
 
   console.log('Response:', retVal);
   return retVal;
@@ -820,7 +797,7 @@ async function processBankSyncDownload(
         (total, trans) => total - trans.transactionAmount.amount * 100,
         currentBalance,
       );
-      balanceToUse = previousBalance;
+      balanceToUse = Math.trunc(previousBalance);
     }
 
     const oldestTransaction = transactions[transactions.length - 1];

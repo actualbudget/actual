@@ -2,13 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { DialogTrigger } from 'react-aria-components';
 import { Trans, useTranslation } from 'react-i18next';
 
-import { pushModal } from 'loot-core/client/actions';
+import { addNotification, pushModal } from 'loot-core/client/actions';
 import { send } from 'loot-core/src/platform/client/fetch';
 
 import { useAuth } from '../../auth/AuthProvider';
 import { Permissions } from '../../auth/types';
 import { authorizeBank } from '../../gocardless';
-import { useActions } from '../../hooks/useActions';
 import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { useGoCardlessStatus } from '../../hooks/useGoCardlessStatus';
 import { usePluggyAiStatus } from '../../hooks/usePluggyAiStatus';
@@ -51,7 +50,7 @@ export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
   >(null);
   const { hasPermission } = useAuth();
   const multiuserEnabled = useMultiuserEnabled();
-  const actions = useActions();
+  //const actions = useActions();
 
   const onConnectGoCardless = () => {
     if (!isGoCardlessSetupComplete) {
@@ -178,7 +177,7 @@ export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
       );
     } catch (err) {
       console.error(err);
-      actions.addNotification({
+      addNotification({
         type: 'error',
         title: 'Error when trying to contact Pluggy.ai',
         message: (err as Error).message,
@@ -186,7 +185,7 @@ export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
       });
       dispatch(
         pushModal('pluggyai-init', {
-          onSuccess: () => setIsSimpleFinSetupComplete(true),
+          onSuccess: () => setIsPluggyAiSetupComplete(true),
         }),
       );
     }

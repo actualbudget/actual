@@ -121,6 +121,31 @@ export const linkAccountSimpleFin = createAppAsyncThunk(
   },
 );
 
+type LinkAccountPluggyAiPayload = {
+  externalAccount: unknown;
+  upgradingId?: AccountEntity['id'];
+  offBudget?: boolean;
+};
+
+export const linkAccountPluggyAi = createAppAsyncThunk(
+  `${sliceName}/linkAccountPluggyAi`,
+  async (
+    { externalAccount,
+      upgradingId,
+      offBudget, }: LinkAccountPluggyAiPayload,
+    { dispatch },
+  ) => {
+    debugger;
+    await send('pluggyai-accounts-link', {
+      externalAccount,
+      upgradingId,
+      offBudget,
+    });
+    await dispatch(getPayees());
+    await dispatch(getAccounts());
+  },
+);
+
 type SyncResponse = {
   errors: Array<{
     type: string;
@@ -211,15 +236,15 @@ export const syncAccounts = createAppAsyncThunk(
     let accountIdsToSync = !batchSync
       ? [id]
       : queriesState.accounts
-          .filter(
-            ({ bank, closed, tombstone }) => !!bank && !closed && !tombstone,
-          )
-          .sort((a, b) =>
-            a.offbudget === b.offbudget
-              ? a.sort_order - b.sort_order
-              : a.offbudget - b.offbudget,
-          )
-          .map(({ id }) => id);
+        .filter(
+          ({ bank, closed, tombstone }) => !!bank && !closed && !tombstone,
+        )
+        .sort((a, b) =>
+          a.offbudget === b.offbudget
+            ? a.sort_order - b.sort_order
+            : a.offbudget - b.offbudget,
+        )
+        .map(({ id }) => id);
 
     const { setAccountsSyncing } = accountsSlice.actions;
     dispatch(setAccountsSyncing({ ids: accountIdsToSync }));
