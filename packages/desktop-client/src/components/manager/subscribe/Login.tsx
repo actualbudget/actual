@@ -3,8 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
 
+import { loggedIn } from 'loot-core/client/users/usersSlice';
 import { isElectron } from 'loot-core/shared/environment';
-import { loggedIn } from 'loot-core/src/client/actions/user';
 import { send } from 'loot-core/src/platform/client/fetch';
 import { type OpenIdConfig } from 'loot-core/types/models/openid';
 

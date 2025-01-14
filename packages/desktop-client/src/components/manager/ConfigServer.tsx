@@ -2,8 +2,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
-import { loggedIn, signOut } from 'loot-core/client/actions';
 import { createBudget } from 'loot-core/client/budgets/budgetsSlice';
+import { loggedIn, signOut } from 'loot-core/client/users/usersSlice';
 import {
   isNonProductionEnvironment,
   isElectron,

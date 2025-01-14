@@ -24,6 +24,7 @@ import * as queriesSlice from 'loot-core/src/client/queries/queriesSlice';
 import { runQuery } from 'loot-core/src/client/query-helpers';
 import { store } from 'loot-core/src/client/store';
 import { redo, undo } from 'loot-core/src/client/undo';
+import * as usersSlice from 'loot-core/src/client/users/usersSlice';
 import { send } from 'loot-core/src/platform/client/fetch';
 import { q } from 'loot-core/src/shared/query';
 
@@ -46,6 +47,7 @@ const boundActions = bindActionCreators(
     ...notificationsSlice.actions,
     ...prefsSlice.actions,
     ...queriesSlice.actions,
+    ...usersSlice.actions,
   },
   store.dispatch,
 );

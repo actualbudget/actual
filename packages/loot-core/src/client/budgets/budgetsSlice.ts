@@ -12,6 +12,7 @@ import * as constants from '../constants';
 import { closeModal, pushModal } from '../modals/modalsSlice';
 import { loadGlobalPrefs, loadPrefs } from '../prefs/prefsSlice';
 import { createAppAsyncThunk } from '../redux';
+import { signOut } from '../users/usersSlice';
 
 const sliceName = 'budgets';
 
@@ -441,9 +442,11 @@ const budgetsSlice = createSlice({
         action.payload.remoteFiles,
       );
     },
-    signOut(state) {
+  },
+  extraReducers: builder => {
+    builder.addCase(signOut.fulfilled, state => {
       state.allFiles = null;
-    },
+    });
   },
 });
 
@@ -469,7 +472,7 @@ export const actions = {
   makeBackup,
 };
 
-export const { setBudgets, setRemoteFiles, setAllFiles, signOut } = actions;
+export const { setBudgets, setRemoteFiles, setAllFiles } = actions;
 
 function sortFiles(arr: File[]) {
   arr.sort((x, y) => {

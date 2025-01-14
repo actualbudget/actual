@@ -7,7 +7,6 @@ import React, {
 } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
-import { getUserData } from 'loot-core/client/actions';
 import {
   closeAndDownloadBudget,
   closeAndLoadBudget,
@@ -17,6 +16,7 @@ import {
   loadBudget,
 } from 'loot-core/client/budgets/budgetsSlice';
 import { pushModal } from 'loot-core/client/modals/modalsSlice';
+import { getUserData } from 'loot-core/client/users/usersSlice';
 import {
   isElectron,
   isNonProductionEnvironment,

@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 
-import { loggedIn } from 'loot-core/src/client/actions/user';
+import { loggedIn } from 'loot-core/client/users/usersSlice';
 import { send } from 'loot-core/src/platform/client/fetch';
 
 import { useDispatch } from '../../../redux';
