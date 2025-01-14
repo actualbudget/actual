@@ -797,7 +797,7 @@ async function processBankSyncDownload(
         (total, trans) => total - trans.transactionAmount.amount * 100,
         currentBalance,
       );
-      balanceToUse = Math.trunc(previousBalance);
+      balanceToUse = Math.round(previousBalance);
     }
 
     const oldestTransaction = transactions[transactions.length - 1];
