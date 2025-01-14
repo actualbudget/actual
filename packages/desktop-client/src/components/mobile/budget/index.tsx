@@ -1,7 +1,8 @@
 // @ts-strict-ignore
 import React, { useCallback, useEffect, useState } from 'react';
 
-import { collapseModals, pushModal, sync } from 'loot-core/client/actions';
+import { collapseModals, pushModal } from 'loot-core/client/actions';
+import { sync } from 'loot-core/client/app/appSlice';
 import {
   applyBudgetAction,
   createCategory,
