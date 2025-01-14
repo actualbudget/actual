@@ -26,4 +26,9 @@ export interface TransactionEntity {
   subtransactions?: TransactionEntity[];
   _unmatched?: boolean;
   _deleted?: boolean;
+  error?: {
+    type: 'SplitTransactionError';
+    version: 1;
+    difference: number;
+  };
 }
