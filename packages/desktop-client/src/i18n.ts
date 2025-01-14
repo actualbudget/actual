@@ -42,7 +42,7 @@ i18n
 
 export const setI18NextLanguage = (language: string) => {
   if (language === 'en' && !isLanguageAvailable(language)) {
-    // English is always ~available since we use natural-language keys.
+    // English is always available since we use natural-language keys.
     return;
   }
 
