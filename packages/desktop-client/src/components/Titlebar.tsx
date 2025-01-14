@@ -5,7 +5,7 @@ import { Routes, Route, useLocation } from 'react-router-dom';
 
 import { css } from '@emotion/css';
 
-import { sync } from 'loot-core/client/actions';
+import { sync } from 'loot-core/client/app/appSlice';
 import * as Platform from 'loot-core/src/client/platform';
 import * as queries from 'loot-core/src/client/queries';
 import { listen } from 'loot-core/src/platform/client/fetch';

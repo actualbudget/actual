@@ -19,8 +19,8 @@ import {
   openAccountCloseModal,
   pushModal,
   replaceModal,
-  syncAndDownload,
 } from 'loot-core/client/actions';
+import { syncAndDownload } from 'loot-core/client/app/appSlice';
 import {
   createPayee,
   getPayees,
@@ -625,7 +625,7 @@ class AccountInternal extends PureComponent<
     const account = this.props.accounts.find(acct => acct.id === accountId);
 
     await this.props.dispatch(
-      syncAndDownload(account ? account.id : undefined),
+      syncAndDownload({ accountId: account ? account.id : undefined }),
     );
   };
 

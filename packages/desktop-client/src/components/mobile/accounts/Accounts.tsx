@@ -3,7 +3,8 @@ import { useTranslation } from 'react-i18next';
 
 import { css } from '@emotion/css';
 
-import { replaceModal, syncAndDownload } from 'loot-core/src/client/actions';
+import { syncAndDownload } from 'loot-core/client/app/appSlice';
+import { replaceModal } from 'loot-core/src/client/actions';
 import * as queries from 'loot-core/src/client/queries';
 import { type AccountEntity } from 'loot-core/types/models';
 
@@ -323,7 +324,7 @@ export function Accounts() {
   }, [dispatch]);
 
   const onSync = useCallback(async () => {
-    dispatch(syncAndDownload());
+    dispatch(syncAndDownload({}));
   }, [dispatch]);
 
   return (

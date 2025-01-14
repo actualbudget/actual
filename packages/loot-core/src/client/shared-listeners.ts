@@ -8,11 +8,10 @@ import {
   closeAndDownloadBudget,
   loadPrefs,
   pushModal,
-  resetSync,
   signOut,
-  sync,
   uploadBudget,
 } from './actions';
+import { resetSync, sync } from './app/appSlice';
 import { getAccounts, getCategories, getPayees } from './queries/queriesSlice';
 import type { Notification } from './state-types/notifications';
 import { type AppStore } from './store';
@@ -82,7 +81,9 @@ export function listenForSyncEvent(store: AppStore) {
               id: 'reset-sync',
               button: {
                 title: t('Reset sync'),
-                action: () => store.dispatch(resetSync()),
+                action: () => {
+                  store.dispatch(resetSync());
+                },
               },
             };
           } else {
@@ -131,7 +132,9 @@ export function listenForSyncEvent(store: AppStore) {
             id: 'old-file',
             button: {
               title: t('Reset sync'),
-              action: () => store.dispatch(resetSync()),
+              action: () => {
+                store.dispatch(resetSync());
+              },
             },
           };
           break;
@@ -197,7 +200,9 @@ export function listenForSyncEvent(store: AppStore) {
             id: 'upload-file',
             button: {
               title: t('Upload'),
-              action: () => store.dispatch(resetSync()),
+              action: () => {
+                store.dispatch(resetSync());
+              },
             },
           };
           break;
