@@ -14,6 +14,7 @@ import {
 } from 'loot-core/src/types/models';
 import {
   type balanceTypeOpType,
+  type sortByOpType,
   type DataEntity,
   type GroupedEntity,
   type IntervalEntity,
@@ -33,6 +34,7 @@ import { filterEmptyRows } from './filterEmptyRows';
 import { filterHiddenItems } from './filterHiddenItems';
 import { makeQuery } from './makeQuery';
 import { recalculate } from './recalculate';
+import { sortData } from './sortData';
 
 export type createCustomSpreadsheetProps = {
   startDate: string;
@@ -47,6 +49,7 @@ export type createCustomSpreadsheetProps = {
   showUncategorized: boolean;
   groupBy?: string;
   balanceTypeOp?: balanceTypeOpType;
+  sortByOp?: sortByOpType;
   payees?: PayeeEntity[];
   accounts?: AccountEntity[];
   graphType?: string;
@@ -67,6 +70,7 @@ export function createCustomSpreadsheet({
   showUncategorized,
   groupBy = '',
   balanceTypeOp = 'totalDebts',
+  sortByOp = 'desc',
   payees = [],
   accounts = [],
   graphType,
@@ -281,8 +285,12 @@ export function createCustomSpreadsheet({
       balanceTypeOp,
     );
 
+    const sortedCalcDataFiltered = [...calcDataFiltered].sort(
+      sortData({ balanceTypeOp, sortByOp }),
+    );
+
     setData({
-      data: calcDataFiltered,
+      data: sortedCalcDataFiltered,
       intervalData,
       legend,
       startDate,

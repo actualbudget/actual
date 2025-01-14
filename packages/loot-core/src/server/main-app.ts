@@ -6,6 +6,6 @@ import { createApp } from './app';
 // Main app
 export const app = createApp<Handlers>();
 
-app.events.on('sync', info => {
-  connection.send('sync-event', info);
+app.events.on('sync', event => {
+  connection.send('sync-event', event);
 });
