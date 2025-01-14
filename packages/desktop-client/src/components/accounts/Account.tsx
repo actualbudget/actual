@@ -7,7 +7,12 @@ import React, {
   useEffect,
 } from 'react';
 import { Trans } from 'react-i18next';
-import { Navigate, useParams, useLocation } from 'react-router-dom';
+import {
+  Navigate,
+  useParams,
+  useLocation,
+  useSearchParams,
+} from 'react-router-dom';
 
 import { debounce } from 'debounce';
 import { t } from 'i18next';
@@ -266,7 +271,7 @@ function getField(field?: string) {
 
 type AccountInternalProps = {
   accountId?: AccountEntity['id'] | 'onbudget' | 'offbudget' | 'uncategorized';
-  filterConditions: RuleConditionEntity[];
+  filterConditions?: RuleConditionEntity[];
   showBalances?: boolean;
   setShowBalances: (newValue: boolean) => void;
   showCleared?: boolean;
@@ -302,6 +307,7 @@ type AccountInternalProps = {
   hideFraction: boolean;
   accountsSyncing: string[];
   dispatch: AppDispatch;
+  searchParams: ReturnType<typeof useSearchParams>;
 };
 type AccountInternalState = {
   search: string;
@@ -358,7 +364,7 @@ class AccountInternal extends PureComponent<
 
     this.state = {
       search: '',
-      filterConditions: props.filterConditions || [],
+      filterConditions: props.filterConditions ?? [],
       filterId: undefined,
       filterConditionsOp: 'and',
       loading: true,
@@ -467,6 +473,10 @@ class AccountInternal extends PureComponent<
     //Resest sort/filter/search on account change
     if (this.props.accountId !== prevProps.accountId) {
       this.setState({ sort: null, search: '', filterConditions: [] });
+    }
+
+    if (this.props.filterConditions !== prevProps.filterConditions) {
+      this.setState({ filterConditions: this.props.filterConditions ?? [] });
     }
   }
 
@@ -1522,6 +1532,11 @@ class AccountInternal extends PureComponent<
         [conditionsOpKey]: [...queryFilters, ...customQueryFilters],
       });
 
+      this.props.searchParams[1]((params: URLSearchParams) => {
+        params.set('filter', JSON.stringify(conditions));
+        return params;
+      });
+
       this.setState(
         {
           filterConditions: conditions,
@@ -1531,6 +1546,11 @@ class AccountInternal extends PureComponent<
         },
       );
     } else {
+      this.props.searchParams[1]((params: URLSearchParams) => {
+        params.delete('filter');
+        return params;
+      });
+
       this.setState(
         {
           transactions: [],
@@ -1956,9 +1976,21 @@ export function Account() {
   );
   const modalShowing = useSelector(state => state.modals.modalStack.length > 0);
   const accountsSyncing = useSelector(state => state.account.accountsSyncing);
-  const filterConditions = location?.state?.filterConditions || [];
 
   const savedFiters = useFilters();
+  const searchParams = useSearchParams();
+
+  const filterConditions = useMemo(() => {
+    if (location?.state?.filterConditions) {
+      return location.state.filterConditions;
+    }
+
+    if (searchParams[0].has('filter')) {
+      return JSON.parse(searchParams[0].get('filter')!);
+    }
+
+    return [];
+  }, [location, searchParams]);
 
   const schedulesQuery = useMemo(
     () => accountSchedulesQuery(params.id),
@@ -1999,6 +2031,7 @@ export function Account() {
           categoryId={location?.state?.categoryId}
           location={location}
           savedFilters={savedFiters}
+          searchParams={searchParams}
         />
       </SplitsExpandedProvider>
     </SchedulesProvider>
