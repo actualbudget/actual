@@ -80,6 +80,7 @@ export function calendarSpreadsheet(
           $and: [
             { date: { $gte: d.format(startDay, 'yyyy-MM-dd') } },
             { date: { $lte: d.format(endDay, 'yyyy-MM-dd') } },
+            { transfer_id: { $eq: null } },
           ],
         })
         .filter({

@@ -203,6 +203,7 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
             $and: [
               { date: { $gte: monthUtils.firstDayOfMonth(start) } },
               { date: { $lte: monthUtils.lastDayOfMonth(end) } },
+              { transfer_id: { $eq: null } },
             ],
           })
           .select('*');
