@@ -1163,7 +1163,7 @@ function TransactionEditUnconnected({
       if (isAdding.current) {
         // The first one is always the "parent" and the only one we care
         // about
-        dispatch(setLastTransaction(newTransactions[0]));
+        dispatch(setLastTransaction({ transaction: newTransactions[0] }));
       }
     },
     [dispatch, fetchedTransactions],
