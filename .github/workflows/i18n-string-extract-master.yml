@@ -41,7 +41,7 @@ jobs:
           wlc \
             --url https://hosted.weblate.org/api/ \
             --key "${{ secrets.WEBLATE_API_KEY_CI_STRINGS }}" \
-            pull \
+            push \
             actualbudget/actual
       - name: Check out updated translations
         uses: actions/checkout@v4
@@ -69,6 +69,13 @@ jobs:
           else
             echo "No changes to commit"
           fi
+      - name: Update Weblate with latest translations
+        run: |
+          wlc \
+            --url https://hosted.weblate.org/api/ \
+            --key "${{ secrets.WEBLATE_API_KEY_CI_STRINGS }}" \
+            pull \
+            actualbudget/actual
 
       - name: Unlock translations
         if: always()  # Clean up even on failure
