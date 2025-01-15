@@ -59,7 +59,7 @@ export function TransactionListItem({
   const transferAccount = useAccount(payee?.transfer_acct || '');
   const isPreview = isPreviewId(transaction?.id || '');
 
-  const newTransactions = useSelector((state) => state.queries.newTransactions);
+  const newTransactions = useSelector(state => state.queries.newTransactions);
 
   const { longPressProps } = useLongPress({
     accessibilityDescription: 'Long press to select multiple transactions',
@@ -104,10 +104,10 @@ export function TransactionListItem({
   const specialCategory = account?.offbudget
     ? 'Off budget'
     : transferAccount && !transferAccount.offbudget
-    ? 'Transfer'
-    : isParent
-    ? 'Split'
-    : null;
+      ? 'Transfer'
+      : isParent
+        ? 'Split'
+        : null;
 
   const prettyCategory = specialCategory || categoryName;
 
