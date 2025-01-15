@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, { type CSSProperties } from 'react';
 
 import {
@@ -13,7 +14,24 @@ import { theme } from '../../../style';
 import { Container } from '../Container';
 import { numberFormatterTooltip } from '../numberFormatter';
 
-function SankeyNode({ x, y, width, height, index, payload, containerWidth }) {
+type SankeyNodeProps = {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  index: number;
+  payload: { name: string; value: number };
+  containerWidth: number;
+};
+function SankeyNode({
+  x,
+  y,
+  width,
+  height,
+  index,
+  payload,
+  containerWidth,
+}: SankeyNodeProps) {
   const privacyMode = usePrivacyMode();
   const isOut = x + width + 6 > containerWidth;
   let payloadValue = Math.round(payload.value / 1000).toString();
@@ -56,7 +74,7 @@ function SankeyNode({ x, y, width, height, index, payload, containerWidth }) {
   );
 }
 
-function convertToCondensed(data) {
+function convertToCondensed(data: SankeyGraphProps['data']) {
   const budgetNodeIndex = data.nodes.findIndex(node => node.name === 'Budget');
 
   // Calculate total income (links going into the "Budget" node)
@@ -78,7 +96,7 @@ function convertToCondensed(data) {
   };
 }
 
-type SankeyGraphType = {
+type SankeyGraphProps = {
   style?: CSSProperties;
   data: Sankey['props']['data'];
   compact?: boolean;
@@ -89,7 +107,7 @@ export function SankeyGraph({
   data,
   compact = false,
   showTooltip = true,
-}: SankeyGraphType) {
+}: SankeyGraphProps) {
   const sankeyData = compact ? convertToCondensed(data) : data;
 
   if (!data.links || data.links.length === 0) return null;
