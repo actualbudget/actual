@@ -279,10 +279,6 @@ function TransactionListWithPreviews({
         ) {
           reloadTransactions();
         }
-
-        if (tables.includes('payees') || tables.includes('payee_mapping')) {
-          dispatch(getPayees());
-        }
       }
     });
   }, [dispatch, reloadTransactions]);

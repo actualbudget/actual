@@ -662,6 +662,12 @@ export default [
               message:
                 "Please import Actual's useSelector() hook from `src/redux` instead.",
             },
+            {
+              name: 'react-redux',
+              importNames: ['useStore'],
+              message:
+                "Please import Actual's useStore() hook from `src/redux` instead.",
+            },
           ],
         },
       ],
