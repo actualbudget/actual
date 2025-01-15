@@ -92,7 +92,6 @@ export function SelectLinkedAccountsModal({
             }),
           );
         } else if (syncSource === 'pluggyai') {
-          debugger;
           dispatch(
             linkAccountPluggyAi({
               externalAccount,

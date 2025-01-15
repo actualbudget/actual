@@ -135,7 +135,6 @@ export const linkAccountPluggyAi = createAppAsyncThunk(
       offBudget, }: LinkAccountPluggyAiPayload,
     { dispatch },
   ) => {
-    debugger;
     await send('pluggyai-accounts-link', {
       externalAccount,
       upgradingId,
