@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { useMemo, useState, type CSSProperties } from 'react';
+import React, { useState, type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { css } from '@emotion/css';
@@ -203,12 +203,6 @@ export function BarGraph({
 
   const leftMargin = Math.abs(largestValue) > 1000000 ? 20 : 0;
 
-  // Sort the data in the bar chart
-  const unsortedData = data[splitData];
-  const sortedData = useMemo(() => {
-    return unsortedData.sort((a, b) => a[balanceTypeOp] - b[balanceTypeOp]);
-  }, [unsortedData, balanceTypeOp]);
-
   return (
     <Container
       style={{
@@ -225,7 +219,7 @@ export function BarGraph({
                 width={width}
                 height={height}
                 stackOffset="sign"
-                data={sortedData}
+                data={data[splitData]}
                 style={{ cursor: pointer }}
                 margin={{
                   top: labelsMargin,

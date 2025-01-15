@@ -6,3 +6,6 @@ contact_links:
   - name: Support
     url: https://discord.gg/pRYNYr4W5A
     about: Need help with something? Having troubles setting up? Or perhaps issues using the API? Reach out to the community on Discord.
+  - name: Translations
+    url: https://hosted.weblate.org/projects/actualbudget/actual/
+    about: Found a string that needs a better translation? Add your suggestion or upvote an existing one in Weblate.

@@ -87,7 +87,7 @@ export function useSplitsExpanded() {
 
 type SplitsExpandedProviderProps = {
   children?: ReactNode;
-  initialMode: SplitMode;
+  initialMode?: SplitMode;
 };
 
 export function SplitsExpandedProvider({
