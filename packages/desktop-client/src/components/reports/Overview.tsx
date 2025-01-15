@@ -19,6 +19,7 @@ import {
 } from 'loot-core/src/types/models';
 
 import { useAccounts } from '../../hooks/useAccounts';
+import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { useNavigate } from '../../hooks/useNavigate';
 import { useSyncedPref } from '../../hooks/useSyncedPref';
 import { useDispatch } from '../../redux';
@@ -39,6 +40,7 @@ import { CashFlowCard } from './reports/CashFlowCard';
 import { CustomReportListCards } from './reports/CustomReportListCards';
 import { MarkdownCard } from './reports/MarkdownCard';
 import { NetWorthCard } from './reports/NetWorthCard';
+import { SankeyCard } from './reports/SankeyCard';
 import { SpendingCard } from './reports/SpendingCard';
 import './overview.scss';
 import { SummaryCard } from './reports/SummaryCard';
@@ -68,6 +70,7 @@ export function Overview() {
   const { data: customReports, isLoading: isCustomReportsLoading } =
     useReports();
   const { data: widgets, isLoading: isWidgetsLoading } = useDashboard();
+  const sankeyFeatureFlag = useFeatureFlag('sankeyReport');
 
   const customReportMap = useMemo(
     () => new Map(customReports.map(report => [report.id, report])),
@@ -392,6 +395,10 @@ export function Overview() {
                           text: t('Calendar card'),
                         },
                         {
+                          name: 'sankey-card' as const,
+                          text: t('Sankey card'),
+                        },
+                        {
                           name: 'custom-report' as const,
                           text: t('New custom report'),
                         },
@@ -511,6 +518,8 @@ export function Overview() {
                     onMetaChange={newMeta => onMetaChange(item, newMeta)}
                     onRemove={() => onRemoveWidget(item.i)}
                   />
+                ) : item.type === 'sankey-card' && sankeyFeatureFlag ? (
+                  <SankeyCard />
                 ) : item.type === 'spending-card' ? (
                   <SpendingCard
                     widgetId={item.i}
