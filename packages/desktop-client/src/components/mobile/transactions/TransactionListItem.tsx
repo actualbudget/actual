@@ -1,46 +1,46 @@
 import React, {
   type CSSProperties,
   type ComponentPropsWithoutRef,
-} from 'react';
-import { mergeProps } from 'react-aria';
-import { ListBoxItem } from 'react-aria-components';
+} from "react";
+import { mergeProps } from "react-aria";
+import { ListBoxItem } from "react-aria-components";
 
 import {
   PressResponder,
   usePress,
   useLongPress,
-} from '@react-aria/interactions';
+} from "@react-aria/interactions";
 
-import { isPreviewId } from 'loot-core/src/shared/transactions';
-import { integerToCurrency } from 'loot-core/src/shared/util';
-import { type TransactionEntity } from 'loot-core/types/models';
+import { isPreviewId } from "loot-core/src/shared/transactions";
+import { integerToCurrency } from "loot-core/src/shared/util";
+import { type TransactionEntity } from "loot-core/types/models";
 
-import { useAccount } from '../../../hooks/useAccount';
-import { useCategories } from '../../../hooks/useCategories';
-import { usePayee } from '../../../hooks/usePayee';
-import { SvgSplit } from '../../../icons/v0';
+import { useAccount } from "../../../hooks/useAccount";
+import { useCategories } from "../../../hooks/useCategories";
+import { usePayee } from "../../../hooks/usePayee";
+import { SvgSplit } from "../../../icons/v0";
 import {
   SvgArrowsSynchronize,
   SvgCheckCircle1,
   SvgLockClosed,
-} from '../../../icons/v2';
-import { useSelector } from '../../../redux';
-import { styles, theme } from '../../../style';
-import { makeAmountFullStyle } from '../../budget/util';
-import { Button } from '../../common/Button2';
-import { Text } from '../../common/Text';
-import { TextOneLine } from '../../common/TextOneLine';
-import { View } from '../../common/View';
-import { getPrettyPayee } from '../utils';
+} from "../../../icons/v2";
+import { useSelector } from "../../../redux";
+import { styles, theme } from "../../../style";
+import { makeAmountFullStyle } from "../../budget/util";
+import { Button } from "../../common/Button2";
+import { Text } from "../../common/Text";
+import { TextOneLine } from "../../common/TextOneLine";
+import { View } from "../../common/View";
+import { getPrettyPayee } from "../utils";
 
-import { lookupName, Status } from './TransactionEdit';
+import { lookupName, Status } from "./TransactionEdit";
 
 const ROW_HEIGHT = 60;
 
 type TransactionListItemProps = ComponentPropsWithoutRef<
   typeof ListBoxItem<TransactionEntity>
 > & {
-  isNewTransaction: (transaction: TransactionEntity['id']) => boolean;
+  isNewTransaction: (transaction: TransactionEntity["id"]) => boolean;
   onPress: (transaction: TransactionEntity) => void;
   onLongPress: (transaction: TransactionEntity) => void;
 };
@@ -54,15 +54,15 @@ export function TransactionListItem({
 
   const { value: transaction } = props;
 
-  const payee = usePayee(transaction?.payee || '');
-  const account = useAccount(transaction?.account || '');
-  const transferAccount = useAccount(payee?.transfer_acct || '');
-  const isPreview = isPreviewId(transaction?.id || '');
+  const payee = usePayee(transaction?.payee || "");
+  const account = useAccount(transaction?.account || "");
+  const transferAccount = useAccount(payee?.transfer_acct || "");
+  const isPreview = isPreviewId(transaction?.id || "");
 
-  const newTransactions = useSelector(state => state.queries.newTransactions);
+  const newTransactions = useSelector((state) => state.queries.newTransactions);
 
   const { longPressProps } = useLongPress({
-    accessibilityDescription: 'Long press to select multiple transactions',
+    accessibilityDescription: "Long press to select multiple transactions",
     onLongPress: () => {
       if (isPreview) {
         return;
@@ -102,12 +102,12 @@ export function TransactionListItem({
     transferAccount,
   });
   const specialCategory = account?.offbudget
-    ? 'Off budget'
+    ? "Off budget"
     : transferAccount && !transferAccount.offbudget
-      ? 'Transfer'
-      : isParent
-        ? 'Split'
-        : null;
+    ? "Transfer"
+    : isParent
+    ? "Split"
+    : null;
 
   const prettyCategory = specialCategory || categoryName;
 
@@ -116,7 +116,7 @@ export function TransactionListItem({
     fontSize: 14,
     ...(isPreview
       ? {
-          fontStyle: 'italic',
+          fontStyle: "italic",
           color: theme.pageTextLight,
         }
       : {}),
@@ -128,20 +128,20 @@ export function TransactionListItem({
         <PressResponder {...mergeProps(pressProps, longPressProps)}>
           <Button
             style={{
-              userSelect: 'none',
+              userSelect: "none",
               height: ROW_HEIGHT,
-              width: '100%',
+              width: "100%",
               borderRadius: 0,
               ...(isSelected
                 ? {
-                    borderWidth: '0 0 0 4px',
+                    borderWidth: "0 0 0 4px",
                     borderColor: theme.mobileTransactionSelected,
-                    borderStyle: 'solid',
+                    borderStyle: "solid",
                   }
                 : {
-                    borderWidth: '0 0 1px 0',
+                    borderWidth: "0 0 1px 0",
                     borderColor: theme.tableBorder,
-                    borderStyle: 'solid',
+                    borderStyle: "solid",
                   }),
               ...(isPreview
                 ? {
@@ -154,15 +154,15 @@ export function TransactionListItem({
           >
             <View
               style={{
-                flexDirection: 'row',
+                flexDirection: "row",
                 flex: 1,
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '0 4px',
+                alignItems: "center",
+                justifyContent: "space-between",
+                padding: "0 4px",
               }}
             >
               <View>
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <View style={{ flexDirection: "row", alignItems: "center" }}>
                   {scheduleId && (
                     <SvgArrowsSynchronize
                       style={{
@@ -176,35 +176,35 @@ export function TransactionListItem({
                   <TextOneLine
                     style={{
                       ...textStyle,
-                      fontWeight: isAdded ? '600' : '400',
-                      ...(prettyPayee === '' && {
+                      fontWeight: isAdded ? "600" : "400",
+                      ...(prettyPayee === "" && {
                         color: theme.tableTextLight,
-                        fontStyle: 'italic',
+                        fontStyle: "italic",
                       }),
                     }}
                   >
-                    {prettyPayee || '(No payee)'}
+                    {prettyPayee || "(No payee)"}
                   </TextOneLine>
                 </View>
                 {notes && (
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <TextOneLine
-                  style={{
-                    fontSize: 12,
-                    paddingTop: '2px',
-                  }}
-                >
-                  {notes.length > 25 ? `${notes.slice(0, 25)}...` : notes}
-                </TextOneLine>
-              </View>
-            )}
+                  <View style={{ flexDirection: "row", alignItems: "center" }}>
+                    <TextOneLine
+                      style={{
+                        fontSize: 12,
+                        paddingTop: "2px",
+                      }}
+                    >
+                      {notes.length > 25 ? `${notes.slice(0, 25)}...` : notes}
+                    </TextOneLine>
+                  </View>
+                )}
                 {isPreview ? (
                   <Status status={categoryId} isSplit={isParent || isChild} />
                 ) : (
                   <View
                     style={{
-                      flexDirection: 'row',
-                      alignItems: 'center',
+                      flexDirection: "row",
+                      alignItems: "center",
                       marginTop: 3,
                     }}
                   >
@@ -242,23 +242,23 @@ export function TransactionListItem({
                       style={{
                         fontSize: 11,
                         marginTop: 1,
-                        fontWeight: '400',
+                        fontWeight: "400",
                         color: prettyCategory
                           ? theme.tableText
                           : theme.menuItemTextSelected,
                         fontStyle:
                           specialCategory || !prettyCategory
-                            ? 'italic'
+                            ? "italic"
                             : undefined,
-                        textAlign: 'left',
+                        textAlign: "left",
                       }}
                     >
-                      {prettyCategory || 'Uncategorized'}
+                      {prettyCategory || "Uncategorized"}
                     </TextOneLine>
                   </View>
                 )}
               </View>
-              <View style={{ justifyContent: 'center' }}>
+              <View style={{ justifyContent: "center" }}>
                 <Text
                   style={{
                     ...textStyle,
