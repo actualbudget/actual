@@ -437,7 +437,7 @@ export async function reconcileTransactions(
         category: existing.category || trans.category || null,
         imported_payee: trans.imported_payee || null,
         notes: existing.notes || trans.notes || null,
-        cleared: trans.cleared != null ? trans.cleared : existing.cleared,
+        cleared: trans.cleared ?? existing.cleared,
       };
 
       if (hasFieldsChanged(existing, updates, Object.keys(updates))) {
@@ -469,7 +469,7 @@ export async function reconcileTransactions(
         ...newTrans,
         id: uuidv4(),
         category: trans.category || null,
-        cleared: trans.cleared != null ? trans.cleared : defaultCleared,
+        cleared: trans.cleared ?? defaultCleared,
       };
 
       if (subtransactions && subtransactions.length > 0) {
