@@ -313,7 +313,6 @@ export const goCardlessService = {
     await goCardlessService.setToken();
 
     const institution = await goCardlessService.getInstitution(institutionId);
-    const bank = BankFactory(institutionId);
 
     let response;
     try {
@@ -321,7 +320,7 @@ export const goCardlessService = {
         redirectUrl: host + '/gocardless/link',
         institutionId,
         referenceId: uuid.v4(),
-        accessValidForDays: bank.accessValidForDays,
+        accessValidForDays: institution.max_access_valid_for_days,
         maxHistoricalDays: BANKS_WITH_LIMITED_HISTORY.includes(institutionId)
           ? Number(institution.transaction_total_days) >= 90
             ? '89'

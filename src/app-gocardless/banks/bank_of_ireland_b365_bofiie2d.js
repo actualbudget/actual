@@ -6,8 +6,6 @@ export default {
 
   institutionIds: ['BANK_OF_IRELAND_B365_BOFIIE2D'],
 
-  accessValidForDays: 180,
-
   normalizeTransaction(transaction, booked) {
     transaction.remittanceInformationUnstructured = fixupPayee(
       transaction.remittanceInformationUnstructured,

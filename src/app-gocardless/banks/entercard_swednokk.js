@@ -11,8 +11,6 @@ export default {
 
   institutionIds: ['ENTERCARD_SWEDNOKK'],
 
-  accessValidForDays: 180,
-
   normalizeTransaction(transaction, _booked) {
     // GoCardless's Entercard integration returns forex transactions with the
     // foreign amount in `transactionAmount`, but at least the amount actually

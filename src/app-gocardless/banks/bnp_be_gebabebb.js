@@ -12,8 +12,6 @@ export default {
     'BNP_BE_GEBABEBB',
   ],
 
-  accessValidForDays: 180,
-
   /** BNP_BE_GEBABEBB provides a lot of useful information via the 'additionalField'
    *  There does not seem to be a specification of this field, but the following information is contained in its subfields:
    *  - for pending transactions: the 'atmPosName'

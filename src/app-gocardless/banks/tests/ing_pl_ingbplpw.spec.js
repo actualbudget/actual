@@ -26,6 +26,7 @@ describe('IngPlIngbplpw', () => {
         name: 'ING',
         bic: 'INGBPLPW',
         transaction_total_days: '365',
+        max_access_valid_for_days: '90',
         countries: ['PL'],
         logo: 'https://cdn.nordigen.com/ais/ING_PL_INGBPLPW.png',
         supported_payments: {},
@@ -43,34 +44,35 @@ describe('IngPlIngbplpw', () => {
     it('returns normalized account data returned to Frontend', () => {
       const normalizedAccount = IngPlIngbplpw.normalizeAccount(accountRaw);
       expect(normalizedAccount).toMatchInlineSnapshot(`
-          {
-            "account_id": "d3eccc94-9536-48d3-98be-813f79199ee3",
-            "iban": "PL00000000000000000987654321",
-            "institution": {
-              "bic": "INGBPLPW",
-              "countries": [
-                "PL",
-              ],
-              "id": "ING_PL_INGBPLPW",
-              "logo": "https://cdn.nordigen.com/ais/ING_PL_INGBPLPW.png",
-              "name": "ING",
-              "supported_features": [
-                "access_scopes",
-                "business_accounts",
-                "card_accounts",
-                "corporate_accounts",
-                "pending_transactions",
-                "private_accounts",
-              ],
-              "supported_payments": {},
-              "transaction_total_days": "365",
-            },
-            "mask": "4321",
-            "name": "Current Account for Individuals (Retail) (XXX 4321) PLN",
-            "official_name": "Current Account for Individuals (Retail)",
-            "type": "checking",
-          }
-        `);
+        {
+          "account_id": "d3eccc94-9536-48d3-98be-813f79199ee3",
+          "iban": "PL00000000000000000987654321",
+          "institution": {
+            "bic": "INGBPLPW",
+            "countries": [
+              "PL",
+            ],
+            "id": "ING_PL_INGBPLPW",
+            "logo": "https://cdn.nordigen.com/ais/ING_PL_INGBPLPW.png",
+            "max_access_valid_for_days": "90",
+            "name": "ING",
+            "supported_features": [
+              "access_scopes",
+              "business_accounts",
+              "card_accounts",
+              "corporate_accounts",
+              "pending_transactions",
+              "private_accounts",
+            ],
+            "supported_payments": {},
+            "transaction_total_days": "365",
+          },
+          "mask": "4321",
+          "name": "Current Account for Individuals (Retail) (XXX 4321) PLN",
+          "official_name": "Current Account for Individuals (Retail)",
+          "type": "checking",
+        }
+      `);
     });
   });
 

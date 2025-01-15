@@ -8,8 +8,6 @@ export default {
 
   institutionIds: ['SWEDBANK_HABALV22'],
 
-  accessValidForDays: 180,
-
   /**
    * The actual transaction date for card transactions is only available in the remittanceInformationUnstructured field when the transaction is booked.
    */

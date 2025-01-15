@@ -20,6 +20,7 @@ describe('IngIngddeff', () => {
         name: 'ING',
         bic: 'INGDDEFFXXX',
         transaction_total_days: '390',
+        max_access_valid_for_days: '90',
         countries: ['DE'],
         logo: 'https://storage.googleapis.com/gc-prd-institution_icons-production/DE/PNG/ing.png',
         supported_payments: {
@@ -59,6 +60,7 @@ describe('IngIngddeff', () => {
             'single-payment': ['SCT'],
           },
           transaction_total_days: '390',
+          max_access_valid_for_days: '90',
         },
         mask: '5030',
         name: 'Girokonto (XXX 5030) EUR',

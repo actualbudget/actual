@@ -9,8 +9,6 @@ export default {
 
   institutionIds: ['NBG_ETHNGRAAXXX'],
 
-  accessValidForDays: 180,
-
   /**
    * Fixes for the pending transactions:
    * - Corrects amount to negative (nbg erroneously omits the minus sign in pending transactions)

@@ -9,8 +9,6 @@ export default {
 
   institutionIds: ['ABNAMRO_ABNANL2A'],
 
-  accessValidForDays: 180,
-
   normalizeTransaction(transaction, _booked) {
     // There is no remittanceInformationUnstructured, so we'll make it
     transaction.remittanceInformationUnstructured =

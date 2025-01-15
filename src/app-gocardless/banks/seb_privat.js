@@ -10,8 +10,6 @@ export default {
 
   institutionIds: ['SEB_ESSESESS_PRIVATE'],
 
-  accessValidForDays: 180,
-
   normalizeTransaction(transaction, _booked) {
     const date =
       transaction.bookingDate ||

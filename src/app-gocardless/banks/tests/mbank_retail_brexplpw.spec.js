@@ -26,6 +26,7 @@ describe('MbankRetailBrexplpw', () => {
         name: 'mBank Retail',
         bic: 'BREXPLPW',
         transaction_total_days: '90',
+        max_access_valid_for_days: '90',
         countries: ['PL'],
         logo: 'https://cdn.nordigen.com/ais/MBANK_RETAIL_BREXCZPP.png',
         supported_payments: {},
@@ -42,34 +43,35 @@ describe('MbankRetailBrexplpw', () => {
     it('returns normalized account data returned to Frontend', () => {
       expect(MbankRetailBrexplpw.normalizeAccount(accountRaw))
         .toMatchInlineSnapshot(`
-                  {
-                    "account_id": "d3eccc94-9536-48d3-98be-813f79199ee3",
-                    "iban": "PL00000000000000000987654321",
-                    "institution": {
-                      "bic": "BREXPLPW",
-                      "countries": [
-                        "PL",
-                      ],
-                      "id": "MBANK_RETAIL_BREXPLPW",
-                      "logo": "https://cdn.nordigen.com/ais/MBANK_RETAIL_BREXCZPP.png",
-                      "name": "mBank Retail",
-                      "supported_features": [
-                        "access_scopes",
-                        "business_accounts",
-                        "card_accounts",
-                        "corporate_accounts",
-                        "pending_transactions",
-                        "private_accounts",
-                      ],
-                      "supported_payments": {},
-                      "transaction_total_days": "90",
-                    },
-                    "mask": "4321",
-                    "name": "EKONTO (XXX 4321) PLN",
-                    "official_name": "RACHUNEK BIEŻĄCY",
-                    "type": "checking",
-                  }
-              `);
+        {
+          "account_id": "d3eccc94-9536-48d3-98be-813f79199ee3",
+          "iban": "PL00000000000000000987654321",
+          "institution": {
+            "bic": "BREXPLPW",
+            "countries": [
+              "PL",
+            ],
+            "id": "MBANK_RETAIL_BREXPLPW",
+            "logo": "https://cdn.nordigen.com/ais/MBANK_RETAIL_BREXCZPP.png",
+            "max_access_valid_for_days": "90",
+            "name": "mBank Retail",
+            "supported_features": [
+              "access_scopes",
+              "business_accounts",
+              "card_accounts",
+              "corporate_accounts",
+              "pending_transactions",
+              "private_accounts",
+            ],
+            "supported_payments": {},
+            "transaction_total_days": "90",
+          },
+          "mask": "4321",
+          "name": "EKONTO (XXX 4321) PLN",
+          "official_name": "RACHUNEK BIEŻĄCY",
+          "type": "checking",
+        }
+      `);
     });
   });
 

@@ -9,8 +9,6 @@ export default {
 
   institutionIds: ['ING_INGDDEFF'],
 
-  accessValidForDays: 180,
-
   normalizeTransaction(transaction, _booked) {
     const remittanceInformationMatch = /remittanceinformation:(.*)$/.exec(
       transaction.remittanceInformationUnstructured,

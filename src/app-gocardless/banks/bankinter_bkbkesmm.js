@@ -8,8 +8,6 @@ export default {
 
   institutionIds: ['BANKINTER_BKBKESMM'],
 
-  accessValidForDays: 180,
-
   normalizeTransaction(transaction, _booked) {
     transaction.remittanceInformationUnstructured =
       transaction.remittanceInformationUnstructured

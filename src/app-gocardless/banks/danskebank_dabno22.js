@@ -9,8 +9,6 @@ export default {
 
   institutionIds: ['DANSKEBANK_DABANO22'],
 
-  accessValidForDays: 180,
-
   normalizeTransaction(transaction, _booked) {
     /**
      * Danske Bank appends the EndToEndID: NOTPROVIDED to

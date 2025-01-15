@@ -13,7 +13,6 @@ import DanskebankDabno22 from './banks/danskebank_dabno22.js';
 import EasybankBawaatww from './banks/easybank_bawaatww.js';
 import EntercardSwednokk from './banks/entercard_swednokk.js';
 import FortuneoFtnofrp1xxx from './banks/fortuneo_ftnofrp1xxx.js';
-import HanseaticHstbdehh from './banks/hanseatic_hstbdehh.js';
 import HypeHyeeit22 from './banks/hype_hyeeit22.js';
 import IngIngbrobu from './banks/ing_ingbrobu.js';
 import IngIngddeff from './banks/ing_ingddeff.js';
@@ -53,7 +52,6 @@ export const banks = [
   EasybankBawaatww,
   EntercardSwednokk,
   FortuneoFtnofrp1xxx,
-  HanseaticHstbdehh,
   HypeHyeeit22,
   IngIngbrobu,
   IngIngddeff,

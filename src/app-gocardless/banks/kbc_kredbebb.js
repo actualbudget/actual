@@ -7,8 +7,6 @@ export default {
 
   institutionIds: ['KBC_KREDBEBB'],
 
-  accessValidForDays: 180,
-
   /**
    * For negative amounts, the only payee information we have is returned in
    * remittanceInformationUnstructured.

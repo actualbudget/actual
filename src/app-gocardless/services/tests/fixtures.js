@@ -104,6 +104,7 @@ export const mockInstitution = {
   name: 'N26 Bank',
   bic: 'NTSBDEB1',
   transaction_total_days: '90',
+  max_access_valid_for_days: '90',
   countries: ['GB', 'NO', 'SE'],
   logo: 'https://cdn.nordigen.com/ais/N26_SANDBOX_NTSBDEB1.png',
 };

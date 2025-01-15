@@ -6,8 +6,6 @@ export default {
 
   institutionIds: ['ISYBANK_ITBBITMM'],
 
-  accessValidForDays: 180,
-
   // It has been reported that valueDate is more accurate than booking date
   // when it is provided
   normalizeTransaction(transaction, booked) {

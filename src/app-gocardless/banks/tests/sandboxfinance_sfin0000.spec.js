@@ -22,6 +22,7 @@ describe('SandboxfinanceSfin0000', () => {
         name: 'Sandbox Finance',
         bic: 'SFIN0000',
         transaction_total_days: '90',
+        max_access_valid_for_days: '90',
         countries: ['XX'],
         logo: 'https://cdn.nordigen.com/ais/SANDBOXFINANCE_SFIN0000.png',
         supported_payments: {},
@@ -32,27 +33,28 @@ describe('SandboxfinanceSfin0000', () => {
     it('returns normalized account data returned to Frontend', () => {
       expect(SandboxfinanceSfin0000.normalizeAccount(accountRaw))
         .toMatchInlineSnapshot(`
-          {
-            "account_id": "99a0bfe2-0bef-46df-bff2-e9ae0c6c5838",
-            "iban": "GL0865354374424724",
-            "institution": {
-              "bic": "SFIN0000",
-              "countries": [
-                "XX",
-              ],
-              "id": "SANDBOXFINANCE_SFIN0000",
-              "logo": "https://cdn.nordigen.com/ais/SANDBOXFINANCE_SFIN0000.png",
-              "name": "Sandbox Finance",
-              "supported_features": [],
-              "supported_payments": {},
-              "transaction_total_days": "90",
-            },
-            "mask": "4724",
-            "name": "Main Account (XXX 4724) EUR",
-            "official_name": "Checkings",
-            "type": "checking",
-          }
-        `);
+        {
+          "account_id": "99a0bfe2-0bef-46df-bff2-e9ae0c6c5838",
+          "iban": "GL0865354374424724",
+          "institution": {
+            "bic": "SFIN0000",
+            "countries": [
+              "XX",
+            ],
+            "id": "SANDBOXFINANCE_SFIN0000",
+            "logo": "https://cdn.nordigen.com/ais/SANDBOXFINANCE_SFIN0000.png",
+            "max_access_valid_for_days": "90",
+            "name": "Sandbox Finance",
+            "supported_features": [],
+            "supported_payments": {},
+            "transaction_total_days": "90",
+          },
+          "mask": "4724",
+          "name": "Main Account (XXX 4724) EUR",
+          "official_name": "Checkings",
+          "type": "checking",
+        }
+      `);
     });
   });
 

@@ -8,8 +8,6 @@ export default {
 
   institutionIds: ['HYPE_HYEEIT22'],
 
-  accessValidForDays: 180,
-
   normalizeTransaction(transaction, _booked) {
     /** Online card payments - identified by "crd" transaction code
      *  always start with PAGAMENTO PRESSO + <payee name>

@@ -8,8 +8,6 @@ export default {
 
   institutionIds: ['BANCSABADELL_BSABESBB'],
 
-  accessValidForDays: 180,
-
   // Sabadell transactions don't get the creditorName/debtorName properly
   normalizeTransaction(transaction, _booked) {
     const amount = transaction.transactionAmount.amount;

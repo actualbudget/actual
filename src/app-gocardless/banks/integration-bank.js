@@ -20,13 +20,6 @@ const SORTED_BALANCE_TYPE_LIST = [
 export default {
   institutionIds: ['IntegrationBank'],
 
-  // EEA need to allow at least 180 days now but this doesn't apply to UK
-  // banks, and it's possible that there are EEA banks which still don't follow
-  // the new requirements. See:
-  // - https://nordigen.zendesk.com/hc/en-gb/articles/13239212055581-EEA-180-day-access
-  // - https://nordigen.zendesk.com/hc/en-gb/articles/6760902653085-Extended-history-and-continuous-access-edge-cases
-  accessValidForDays: 90,
-
   normalizeAccount(account) {
     console.debug(
       'Available account properties for new institution integration',

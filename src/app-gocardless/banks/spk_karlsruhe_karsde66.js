@@ -9,8 +9,6 @@ export default {
 
   institutionIds: ['SPK_KARLSRUHE_KARSDE66XXX'],
 
-  accessValidForDays: 180,
-
   /**
    * Following the GoCardless documentation[0] we should prefer `bookingDate`
    * here, though some of their bank integrations uses the date field

@@ -16,8 +16,6 @@ export default {
     'NORWEGIAN_FI_NORWNOK1',
   ],
 
-  accessValidForDays: 180,
-
   normalizeTransaction(transaction, booked) {
     if (booked) {
       return {

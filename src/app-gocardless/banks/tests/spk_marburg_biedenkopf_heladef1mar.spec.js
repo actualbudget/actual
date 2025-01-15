@@ -22,6 +22,7 @@ describe('SpkMarburgBiedenkopfHeladef1mar', () => {
         name: 'Sparkasse Marburg-Biedenkopf',
         bic: 'HELADEF1MAR',
         transaction_total_days: '360',
+        max_access_valid_for_days: '90',
         countries: ['DE'],
         logo: 'https://storage.googleapis.com/gc-prd-institution_icons-production/DE/PNG/sparkasse.png',
         supported_payments: {
@@ -57,6 +58,7 @@ describe('SpkMarburgBiedenkopfHeladef1mar', () => {
             'single-payment': ['SCT', 'ISCT'],
           },
           transaction_total_days: '360',
+          max_access_valid_for_days: '90',
         },
         mask: '6789',
         name: 'Sichteinlagen (XXX 6789) EUR',

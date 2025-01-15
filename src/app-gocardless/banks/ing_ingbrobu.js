@@ -6,8 +6,6 @@ export default {
 
   institutionIds: ['ING_INGBROBU'],
 
-  accessValidForDays: 180,
-
   normalizeTransaction(transaction, booked) {
     //Merchant transactions all have the same transactionId of 'NOTPROVIDED'.
     //For booked transactions, this can be set to the internalTransactionId

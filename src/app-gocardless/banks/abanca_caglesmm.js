@@ -8,8 +8,6 @@ export default {
 
   institutionIds: ['ABANCA_CAGLESMM', 'ABANCA_CAGLPTPL'],
 
-  accessValidForDays: 180,
-
   // Abanca transactions doesn't get the creditorName/debtorName properly
   normalizeTransaction(transaction, _booked) {
     transaction.creditorName = transaction.remittanceInformationStructured;

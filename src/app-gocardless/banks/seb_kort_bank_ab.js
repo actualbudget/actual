@@ -13,8 +13,6 @@ export default {
     'SEB_CARD_ESSESESS',
   ],
 
-  accessValidForDays: 180,
-
   /**
    * Sign of transaction amount needs to be flipped for SEB credit cards
    */

@@ -9,8 +9,6 @@ export default {
 
   institutionIds: ['AMERICAN_EXPRESS_AESUDEF1'],
 
-  accessValidForDays: 180,
-
   normalizeAccount(account) {
     return {
       ...Fallback.normalizeAccount(account),

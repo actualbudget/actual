@@ -9,8 +9,6 @@ export default {
 
   institutionIds: ['MBANK_RETAIL_BREXPLPW'],
 
-  accessValidForDays: 179,
-
   normalizeTransaction(transaction, _booked) {
     return {
       ...transaction,

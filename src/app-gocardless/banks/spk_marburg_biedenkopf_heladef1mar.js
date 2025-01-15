@@ -10,8 +10,6 @@ export default {
 
   institutionIds: ['SPK_MARBURG_BIEDENKOPF_HELADEF1MAR'],
 
-  accessValidForDays: 180,
-
   normalizeTransaction(transaction, _booked) {
     const date =
       transaction.bookingDate ||

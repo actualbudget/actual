@@ -9,8 +9,6 @@ export default {
 
   institutionIds: ['ING_PL_INGBPLPW'],
 
-  accessValidForDays: 180,
-
   normalizeTransaction(transaction, _booked) {
     return {
       ...transaction,

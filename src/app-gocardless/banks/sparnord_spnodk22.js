@@ -12,8 +12,6 @@ export default {
     'ANDELSKASSEN_FALLESKASSEN_FAELDKK1',
   ],
 
-  accessValidForDays: 180,
-
   /**
    * Banks on the BEC backend only give information regarding the transaction in additionalInformation
    */
