@@ -1,17 +1,26 @@
 // @ts-strict-ignore
+import { type useSpreadsheet } from 'loot-core/client/SpreadsheetProvider';
 import { runQuery } from 'loot-core/src/client/query-helpers';
 import { send } from 'loot-core/src/platform/client/fetch';
+import * as monthUtils from 'loot-core/src/shared/months';
 import { q } from 'loot-core/src/shared/query';
 import { integerToAmount } from 'loot-core/src/shared/util';
+import {
+  type CategoryGroupEntity,
+  type RuleConditionEntity,
+} from 'loot-core/types/models';
 
 export function createSpreadsheet(
-  start,
-  end,
-  categories,
-  conditions = [],
-  conditionsOp,
+  start: string,
+  end: string,
+  categories: CategoryGroupEntity[],
+  conditions: RuleConditionEntity[] = [],
+  conditionsOp: 'and' | 'or' = 'and',
 ) {
-  return async (spreadsheet, setData) => {
+  return async (
+    spreadsheet: ReturnType<typeof useSpreadsheet>,
+    setData: (data: ReturnType<typeof transformToSankeyData>) => void,
+  ) => {
     // gather filters user has set
     const { filters } = await send('make-filters-from-conditions', {
       conditions: conditions.filter(cond => !cond.customName),
@@ -21,7 +30,7 @@ export function createSpreadsheet(
     // create list of Income subcategories
     const allIncomeSubcategories = [].concat(
       ...categories
-        .filter(category => category.is_income === 1)
+        .filter(category => category.is_income)
         .map(category => category.categories),
     );
 
@@ -41,8 +50,8 @@ export function createSpreadsheet(
                       })
                       .filter({
                         $and: [
-                          { date: { $gte: start + '-01' } },
-                          { date: { $lte: end + '-31' } },
+                          { date: { $gte: monthUtils.firstDayOfMonth(start) } },
+                          { date: { $lte: monthUtils.lastDayOfMonth(end) } },
                         ],
                       })
                       .filter({ category: subcategory.id })
@@ -79,8 +88,8 @@ export function createSpreadsheet(
             })
             .filter({
               $and: [
-                { date: { $gte: start + '-01' } },
-                { date: { $lte: end + '-31' } },
+                { date: { $gte: monthUtils.firstDayOfMonth(start) } },
+                { date: { $lte: monthUtils.lastDayOfMonth(end) } },
               ],
             })
             .filter({ category: subcategory.id })

@@ -27,6 +27,7 @@ export function ReportRouter() {
       <Route path="/calendar" element={<Calendar />} />
       <Route path="/calendar/:id" element={<Calendar />} />
       <Route path="/sankey" element={<Sankey />} />
+      <Route path="/sankey/:id" element={<Sankey />} />
     </Routes>
   );
 }

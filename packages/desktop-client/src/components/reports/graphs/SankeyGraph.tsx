@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { type CSSProperties } from 'react';
 
 import {
   Sankey,
@@ -45,7 +45,7 @@ function SankeyNode({ x, y, width, height, index, payload, containerWidth }) {
         textAnchor={isOut ? 'end' : 'start'}
         x={isOut ? x - 6 : x + width + 6}
         y={y + height / 2 + 13}
-        fontSize="9"
+        fontSize="11"
         strokeOpacity="0.5"
         fill={theme.pageText}
         {...(privacyMode && { fontFamily: 'Redacted Script' })}
@@ -78,56 +78,59 @@ function convertToCondensed(data) {
   };
 }
 
-type ComponentType = {
+type SankeyGraphType = {
+  style?: CSSProperties;
   data: Sankey['props']['data'];
-  containerWidth?: number;
   compact?: boolean;
+  showTooltip?: boolean;
 };
-function Component({ compact = false, containerWidth, data }: ComponentType) {
-  return (
-    <ResponsiveContainer>
-      <Sankey
-        data={data}
-        node={props => (
-          <SankeyNode {...props} containerWidth={containerWidth} />
-        )}
-        link={{
-          stroke: theme.reportsGray,
-        }}
-        sort
-        iterations={1000}
-        nodePadding={23}
-        margin={{
-          left: 0,
-          right: 0,
-          top: compact ? 0 : 10,
-          bottom: compact ? 0 : 25,
-        }}
-      >
-        <Tooltip
-          formatter={numberFormatterTooltip}
-          isAnimationActive={false}
-          separator=": "
-        />
-      </Sankey>
-    </ResponsiveContainer>
-  );
-}
-
-export function SankeyGraph({ style, data, compact }) {
+export function SankeyGraph({
+  style,
+  data,
+  compact = false,
+  showTooltip = true,
+}: SankeyGraphType) {
   const sankeyData = compact ? convertToCondensed(data) : data;
 
   if (!data.links || data.links.length === 0) return null;
 
-  return compact ? (
-    <Component data={sankeyData} compact />
-  ) : (
+  return (
     <Container
       style={{
         ...style,
+        ...(compact && { height: 'auto' }),
       }}
     >
-      {width => <Component data={sankeyData} containerWidth={width} />}
+      {(width, height) => (
+        <ResponsiveContainer>
+          <Sankey
+            data={sankeyData}
+            node={props => <SankeyNode {...props} containerWidth={width} />}
+            link={{
+              stroke: theme.reportsGray,
+            }}
+            sort
+            iterations={1000}
+            nodePadding={23}
+            width={width}
+            height={height}
+            margin={{
+              left: 0,
+              right: 0,
+              top: compact ? 0 : 10,
+              bottom: compact ? 0 : 25,
+            }}
+          >
+            {showTooltip && (
+              <Tooltip
+                formatter={numberFormatterTooltip}
+                isAnimationActive={false}
+                separator=": "
+              />
+            )}
+          </Sankey>
+        </ResponsiveContainer>
+      )}
     </Container>
   );
 }

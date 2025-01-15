@@ -519,7 +519,13 @@ export function Overview() {
                     onRemove={() => onRemoveWidget(item.i)}
                   />
                 ) : item.type === 'sankey-card' && sankeyFeatureFlag ? (
-                  <SankeyCard />
+                  <SankeyCard
+                    widgetId={item.i}
+                    isEditing={isEditing}
+                    meta={item.meta}
+                    onMetaChange={newMeta => onMetaChange(item, newMeta)}
+                    onRemove={() => onRemoveWidget(item.i)}
+                  />
                 ) : item.type === 'spending-card' ? (
                   <SpendingCard
                     widgetId={item.i}
