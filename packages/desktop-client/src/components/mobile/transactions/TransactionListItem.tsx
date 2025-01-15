@@ -90,6 +90,7 @@ export function TransactionListItem({
     reconciled: isReconciled,
     is_parent: isParent,
     is_child: isChild,
+    notes,
     schedule: scheduleId,
   } = transaction;
 
@@ -185,6 +186,18 @@ export function TransactionListItem({
                     {prettyPayee || '(No payee)'}
                   </TextOneLine>
                 </View>
+                {notes && (
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <TextOneLine
+                  style={{
+                    fontSize: 12,
+                    paddingTop: '2px',
+                  }}
+                >
+                  {notes.length > 25 ? `${notes.slice(0, 25)}...` : notes}
+                </TextOneLine>
+              </View>
+            )}
                 {isPreview ? (
                   <Status status={categoryId} isSplit={isParent || isChild} />
                 ) : (
