@@ -1,44 +1,86 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useParams } from 'react-router-dom';
 
 import * as d from 'date-fns';
 
+import { addNotification } from 'loot-core/client/actions';
+import { useWidget } from 'loot-core/client/data-hooks/widget';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
+import { type TimeFrame, type SankeyWidget } from 'loot-core/types/models';
 
 import { useCategories } from '../../../hooks/useCategories';
 import { useFilters } from '../../../hooks/useFilters';
+import { useNavigate } from '../../../hooks/useNavigate';
+import { useDispatch } from '../../../redux';
 import { theme, styles } from '../../../style';
+import { Button } from '../../common/Button2';
 import { Paragraph } from '../../common/Paragraph';
 import { View } from '../../common/View';
+import { EditablePageHeaderTitle } from '../../EditablePageHeaderTitle';
+import { MobileBackButton } from '../../mobile/MobileBackButton';
+import { MobilePageHeader, Page, PageHeader } from '../../Page';
+import { useResponsive } from '../../responsive/ResponsiveProvider';
 import { SankeyGraph } from '../graphs/SankeyGraph';
 import { Header } from '../Header';
+import { LoadingIndicator } from '../LoadingIndicator';
+import { calculateTimeRange } from '../reportRanges';
 import { createSpreadsheet as sankeySpreadsheet } from '../spreadsheets/sankey-spreadsheet';
 import { useReport } from '../useReport';
 import { fromDateRepr } from '../util';
 
 export function Sankey() {
+  const params = useParams();
+  const { data: widget, isLoading } = useWidget<SankeyWidget>(
+    params.id ?? '',
+    'sankey-card',
+  );
+
+  if (isLoading) {
+    return <LoadingIndicator />;
+  }
+
+  return <SankeyInner widget={widget} />;
+}
+
+type SankeyInnerProps = {
+  widget?: SankeyWidget;
+};
+function SankeyInner({ widget }: SankeyInnerProps) {
+  const dispatch = useDispatch();
+  const { t } = useTranslation();
+
+  const navigate = useNavigate();
+  const { isNarrowWidth } = useResponsive();
+
   const { grouped: categoryGroups } = useCategories();
   const {
-    filters,
-    saved,
+    conditions,
     conditionsOp,
     onApply: onApplyFilter,
     onDelete: onDeleteFilter,
     onUpdate: onUpdateFilter,
-    onCondOpChange,
-  } = useFilters();
+    onConditionsOpChange,
+  } = useFilters(widget?.meta?.conditions, widget?.meta?.conditionsOp);
 
-  const [allMonths, setAllMonths] = useState(null);
-  const [start, setStart] = useState(
-    monthUtils.subMonths(monthUtils.currentMonth(), 5),
+  const [allMonths, setAllMonths] = useState<Array<{
+    name: string;
+    pretty: string;
+  }> | null>(null);
+  const [initialStart, initialEnd, initialMode] = calculateTimeRange(
+    widget?.meta?.timeFrame,
   );
-  const [end, setEnd] = useState(monthUtils.currentMonth());
+  const [start, setStart] = useState(initialStart);
+  const [end, setEnd] = useState(initialEnd);
+  const [mode, setMode] = useState(initialMode);
 
-  const params = useMemo(
-    () => sankeySpreadsheet(start, end, categoryGroups, filters, conditionsOp),
-    [start, end, categoryGroups, filters, conditionsOp],
+  const reportParams = useMemo(
+    () =>
+      sankeySpreadsheet(start, end, categoryGroups, conditions, conditionsOp),
+    [start, end, categoryGroups, conditions, conditionsOp],
   );
-  const data = useReport('sankey', params);
+  const data = useReport('sankey', reportParams);
   useEffect(() => {
     async function run() {
       const trans = await send('get-earliest-transaction');
@@ -68,31 +110,105 @@ export function Sankey() {
     run();
   }, []);
 
-  function onChangeDates(start, end) {
+  function onChangeDates(start: string, end: string, mode: TimeFrame['mode']) {
     setStart(start);
     setEnd(end);
+    setMode(mode);
   }
+
+  async function onSaveWidget() {
+    if (!widget) {
+      throw new Error('No widget that could be saved.');
+    }
+
+    await send('dashboard-update-widget', {
+      id: widget.id,
+      meta: {
+        ...(widget.meta ?? {}),
+        conditions,
+        conditionsOp,
+        timeFrame: {
+          start,
+          end,
+          mode,
+        },
+      },
+    });
+    dispatch(
+      addNotification({
+        type: 'message',
+        message: t('Dashboard widget successfully saved.'),
+      }),
+    );
+  }
+
+  const onSaveWidgetName = async (newName: string) => {
+    if (!widget) {
+      throw new Error('No widget that could be saved.');
+    }
+
+    const name = newName || t('Sankey');
+    await send('dashboard-update-widget', {
+      id: widget.id,
+      meta: {
+        ...(widget.meta ?? {}),
+        name,
+      },
+    });
+  };
+
+  const title = widget?.meta?.name || t('Sankey');
 
   if (!allMonths || !data) {
     return null;
   }
 
   return (
-    <View style={{ ...styles.page, minWidth: 650, overflow: 'hidden' }}>
+    <Page
+      header={
+        isNarrowWidth ? (
+          <MobilePageHeader
+            title={title}
+            leftContent={
+              <MobileBackButton onPress={() => navigate('/reports')} />
+            }
+          />
+        ) : (
+          <PageHeader
+            title={
+              widget ? (
+                <EditablePageHeaderTitle
+                  title={title}
+                  onSave={onSaveWidgetName}
+                />
+              ) : (
+                title
+              )
+            }
+          />
+        )
+      }
+      padding={0}
+    >
       <Header
-        title="Sankey"
         allMonths={allMonths}
         start={start}
         end={end}
+        mode={mode}
         onChangeDates={onChangeDates}
-        filters={filters}
-        saved={saved}
+        filters={conditions}
         onApply={onApplyFilter}
         onUpdateFilter={onUpdateFilter}
         onDeleteFilter={onDeleteFilter}
         conditionsOp={conditionsOp}
-        onCondOpChange={onCondOpChange}
-      />
+        onConditionsOpChange={onConditionsOpChange}
+      >
+        {widget && (
+          <Button variant="primary" onPress={onSaveWidget}>
+            {t('Save widget')}
+          </Button>
+        )}
+      </Header>
 
       <View
         style={{
@@ -100,7 +216,7 @@ export function Sankey() {
           padding: 30,
           paddingTop: 0,
           overflow: 'auto',
-          flexGrow: 1,
+          flex: '1 0 auto',
         }}
       >
         <View
@@ -130,6 +246,6 @@ export function Sankey() {
           </Paragraph>
         </View>
       </View>
-    </View>
+    </Page>
   );
 }
