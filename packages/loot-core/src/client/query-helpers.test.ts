@@ -122,7 +122,9 @@ function initPagingServer(
 
 describe('query helpers', () => {
   it('runQuery runs a query', async () => {
-    initServer({ query: query => ({ data: query, dependencies: [] }) });
+    initServer({
+      query: query => Promise.resolve({ data: query, dependencies: [] }),
+    });
 
     const query = q('transactions').select('*');
     const { data } = await runQuery(query);

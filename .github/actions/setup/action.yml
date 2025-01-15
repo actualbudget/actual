@@ -38,3 +38,7 @@ runs:
         repository: actualbudget/translations
         path: ${{ inputs.working-directory }}/packages/desktop-client/locale
       if: ${{ inputs.download-translations == 'true' }}
+    - name: Remove untranslated languages
+      run: packages/desktop-client/bin/remove-untranslated-languages
+      shell: bash
+      if: ${{ inputs.download-translations == 'true' }}

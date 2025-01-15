@@ -1,4 +1,5 @@
 import type { Handlers } from '../../../types/handlers';
+import type { CategoryGroupEntity } from '../../../types/models';
 import type { ServerEvents } from '../../../types/server-events';
 
 export function init(socketName: string): Promise<unknown>;
@@ -38,7 +39,14 @@ export function unlisten(name: string): void;
 export type Unlisten = typeof unlisten;
 
 /** Mock functions */
-export function initServer(handlers: unknown): void;
+export function initServer(handlers: {
+  query: (query: { table: string; selectExpressions: unknown }) => Promise<{
+    data: unknown;
+    dependencies: string[];
+  }>;
+  getCell?: () => { value: number };
+  'get-categories'?: () => { grouped: CategoryGroupEntity[] };
+}): void;
 export type InitServer = typeof initServer;
 
 export function serverPush(name: string, args: unknown): void;

@@ -1,28 +1,40 @@
 // @ts-strict-ignore
-import { type Store } from 'redux';
-
+import {
+  addGenericErrorNotification,
+  addNotification,
+  closeBudgetUI,
+  closeModal,
+  getAccounts,
+  getCategories,
+  getPayees,
+  loadPrefs,
+  pushModal,
+  reloadApp,
+  replaceModal,
+  setAppState,
+} from 'loot-core/client/actions';
+import { type AppStore } from 'loot-core/client/store';
 import * as sharedListeners from 'loot-core/src/client/shared-listeners';
-import type { State } from 'loot-core/src/client/state-types';
 import { listen } from 'loot-core/src/platform/client/fetch';
 import * as undo from 'loot-core/src/platform/client/undo';
 
-import { type BoundActions } from './hooks/useActions';
-
-export function handleGlobalEvents(actions: BoundActions, store: Store<State>) {
+export function handleGlobalEvents(store: AppStore) {
   listen('server-error', () => {
-    actions.addGenericErrorNotification();
+    store.dispatch(addGenericErrorNotification());
   });
 
   listen('orphaned-payees', ({ orphanedIds, updatedPayeeIds }) => {
     // Right now, it prompts to merge into the first payee
-    actions.pushModal('merge-unused-payees', {
-      payeeIds: orphanedIds,
-      targetPayeeId: updatedPayeeIds[0],
-    });
+    store.dispatch(
+      pushModal('merge-unused-payees', {
+        payeeIds: orphanedIds,
+        targetPayeeId: updatedPayeeIds[0],
+      }),
+    );
   });
 
   listen('schedules-offline', () => {
-    actions.pushModal('schedule-posts-offline-notification');
+    store.dispatch(pushModal('schedule-posts-offline-notification'));
   });
 
   // This is experimental: we sync data locally automatically when
@@ -36,7 +48,7 @@ export function handleGlobalEvents(actions: BoundActions, store: Store<State>) {
       if (event.type === 'applied') {
         const tables = event.tables;
         if (tables.includes('payees') || tables.includes('payee_mapping')) {
-          actions.getPayees();
+          store.dispatch(getPayees());
         }
       }
     }
@@ -45,16 +57,18 @@ export function handleGlobalEvents(actions: BoundActions, store: Store<State>) {
   // TODO: Should this run on mobile too?
   listen('sync-event', async ({ type }) => {
     if (type === 'unauthorized') {
-      actions.addNotification({
-        type: 'warning',
-        message: 'Unable to authenticate with server',
-        sticky: true,
-        id: 'auth-issue',
-      });
+      store.dispatch(
+        addNotification({
+          type: 'warning',
+          message: 'Unable to authenticate with server',
+          sticky: true,
+          id: 'auth-issue',
+        }),
+      );
     }
   });
 
-  sharedListeners.listenForSyncEvent(actions, store);
+  sharedListeners.listenForSyncEvent(store);
 
   listen('undo-event', undoState => {
     const { tables, undoTag } = undoState;
@@ -65,11 +79,11 @@ export function handleGlobalEvents(actions: BoundActions, store: Store<State>) {
       tables.includes('category_groups') ||
       tables.includes('category_mapping')
     ) {
-      promises.push(actions.getCategories());
+      promises.push(store.dispatch(getCategories()));
     }
 
     if (tables.includes('accounts')) {
-      promises.push(actions.getAccounts());
+      promises.push(store.dispatch(getAccounts()));
     }
 
     const tagged = undo.getTaggedState(undoTag);
@@ -86,10 +100,10 @@ export function handleGlobalEvents(actions: BoundActions, store: Store<State>) {
             modalStack.length === 0 ||
             modalStack[modalStack.length - 1].name !== tagged.openModal
           ) {
-            actions.replaceModal(tagged.openModal);
+            store.dispatch(replaceModal(tagged.openModal));
           }
         } else {
-          actions.closeModal();
+          store.dispatch(closeModal());
 
           if (
             window.location.href.replace(window.location.origin, '') !==
@@ -107,44 +121,46 @@ export function handleGlobalEvents(actions: BoundActions, store: Store<State>) {
   });
 
   listen('fallback-write-error', () => {
-    actions.addNotification({
-      type: 'error',
-      title: 'Unable to save changes',
-      sticky: true,
-      message:
-        'This browser only supports using the app in one tab at a time, ' +
-        'and another tab has opened the app. No changes will be saved ' +
-        'from this tab; please close it and continue working in the other one.',
-    });
+    store.dispatch(
+      addNotification({
+        type: 'error',
+        title: 'Unable to save changes',
+        sticky: true,
+        message:
+          'This browser only supports using the app in one tab at a time, ' +
+          'and another tab has opened the app. No changes will be saved ' +
+          'from this tab; please close it and continue working in the other one.',
+      }),
+    );
   });
 
   listen('start-load', () => {
-    actions.closeBudgetUI();
-    actions.setAppState({ loadingText: '' });
+    store.dispatch(closeBudgetUI());
+    store.dispatch(setAppState({ loadingText: '' }));
   });
 
   listen('finish-load', () => {
-    actions.closeModal();
-    actions.setAppState({ loadingText: null });
-    actions.loadPrefs();
+    store.dispatch(closeModal());
+    store.dispatch(setAppState({ loadingText: null }));
+    store.dispatch(loadPrefs());
   });
 
   listen('start-import', () => {
-    actions.closeBudgetUI();
+    store.dispatch(closeBudgetUI());
   });
 
   listen('finish-import', () => {
-    actions.closeModal();
-    actions.setAppState({ loadingText: null });
-    actions.loadPrefs();
+    store.dispatch(closeModal());
+    store.dispatch(setAppState({ loadingText: null }));
+    store.dispatch(loadPrefs());
   });
 
   listen('show-budgets', () => {
-    actions.closeBudgetUI();
-    actions.setAppState({ loadingText: null });
+    store.dispatch(closeBudgetUI());
+    store.dispatch(setAppState({ loadingText: null }));
   });
 
   listen('api-fetch-redirected', () => {
-    actions.reloadApp();
+    store.dispatch(reloadApp());
   });
 }

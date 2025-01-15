@@ -11,6 +11,7 @@ import {
 } from 'loot-core/client/actions';
 import { amountToInteger } from 'loot-core/src/shared/util';
 
+import { useCategories } from '../../../hooks/useCategories';
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import { useSyncedPrefs } from '../../../hooks/useSyncedPrefs';
 import { useDispatch } from '../../../redux';
@@ -145,6 +146,7 @@ export function ImportTransactionsModal({ options }) {
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const [prefs, savePrefs] = useSyncedPrefs();
   const dispatch = useDispatch();
+  const categories = useCategories();
 
   const [multiplierAmount, setMultiplierAmount] = useState('');
   const [loadingState, setLoadingState] = useState('parsing');
@@ -157,7 +159,7 @@ export function ImportTransactionsModal({ options }) {
   const [flipAmount, setFlipAmount] = useState(false);
   const [multiplierEnabled, setMultiplierEnabled] = useState(false);
   const [reconcile, setReconcile] = useState(true);
-  const { accountId, categories, onImported } = options;
+  const { accountId, onImported } = options;
 
   // This cannot be set after parsing the file, because changing it
   // requires re-parsing the file. This is different from the other
