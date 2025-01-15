@@ -79,6 +79,8 @@ jobs:
         with:
           name: patch
       - name: Apply patch and push
+        env:
+          BRANCH_NAME: ${{ steps.comment-branch.outputs.head_ref }}
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
@@ -89,7 +91,7 @@ jobs:
             exit 0
           fi
           git commit -m "Update VRT"
-          git push origin HEAD:${{ steps.comment-branch.outputs.head_ref }}
+          git push origin HEAD:${BRANCH_NAME}
       - name: Add finished reaction
         uses: dkershner6/reaction-action@v2
         with:
