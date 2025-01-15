@@ -56,7 +56,7 @@ const initialState: QueriesState = {
 };
 
 type MarkAccountReadPayload = {
-  accountId: AccountEntity['id'];
+  id: AccountEntity['id'];
 };
 
 // Account actions
@@ -82,7 +82,7 @@ export const createAccount = createAppAsyncThunk(
 );
 
 type CloseAccountPayload = {
-  accountId: AccountEntity['id'];
+  id: AccountEntity['id'];
   transferAccountId?: AccountEntity['id'];
   categoryId?: CategoryEntity['id'];
   forced?: boolean;
@@ -91,11 +91,11 @@ type CloseAccountPayload = {
 export const closeAccount = createAppAsyncThunk(
   `${sliceName}/closeAccount`,
   async (
-    { accountId, transferAccountId, categoryId, forced }: CloseAccountPayload,
+    { id, transferAccountId, categoryId, forced }: CloseAccountPayload,
     { dispatch },
   ) => {
     await send('account-close', {
-      id: accountId,
+      id,
       transferAccountId: transferAccountId || null,
       categoryId: categoryId || null,
       forced,
@@ -105,13 +105,13 @@ export const closeAccount = createAppAsyncThunk(
 );
 
 type ReopenAccountPayload = {
-  accountId: AccountEntity['id'];
+  id: AccountEntity['id'];
 };
 
 export const reopenAccount = createAppAsyncThunk(
   `${sliceName}/reopenAccount`,
-  async ({ accountId }: ReopenAccountPayload, { dispatch }) => {
-    await send('account-reopen', { id: accountId });
+  async ({ id }: ReopenAccountPayload, { dispatch }) => {
+    await send('account-reopen', { id });
     dispatch(getAccounts());
   },
 );
@@ -757,7 +757,7 @@ const queriesSlice = createSlice({
     },
     markAccountRead(state, action: PayloadAction<MarkAccountReadPayload>) {
       state.updatedAccounts = state.updatedAccounts.filter(
-        id => id !== action.payload.accountId,
+        id => id !== action.payload.id,
       );
     },
   },

@@ -99,7 +99,7 @@ export function CloseAccountModal({
 
       dispatch(
         closeAccount({
-          accountId: account.id,
+          id: account.id,
           transferAccountId: transferAccountId || null,
           categoryId: categoryId || null,
         }),
@@ -254,7 +254,7 @@ export function CloseAccountModal({
                           setLoading(true);
                           dispatch(
                             closeAccount({
-                              accountId: account.id,
+                              id: account.id,
                               forced: true,
                             }),
                           );

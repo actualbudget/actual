@@ -140,7 +140,7 @@ function AccountHeader({ account }: { readonly account: AccountEntity }) {
   }, [account.id, dispatch]);
 
   const onReopenAccount = useCallback(() => {
-    dispatch(reopenAccount({ accountId: account.id }));
+    dispatch(reopenAccount({ id: account.id }));
   }, [account.id, dispatch]);
 
   const onClick = useCallback(() => {
@@ -264,7 +264,7 @@ function TransactionListWithPreviews({
 
   useEffect(() => {
     if (accountId) {
-      dispatch(markAccountRead({ accountId }));
+      dispatch(markAccountRead({ id: accountId }));
     }
   }, [accountId, dispatch]);
 

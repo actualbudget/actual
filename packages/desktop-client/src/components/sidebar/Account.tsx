@@ -235,7 +235,7 @@ export function Account<FieldName extends SheetFields<'account'>>({
                       break;
                     }
                     case 'reopen': {
-                      dispatch(reopenAccount({ accountId: account.id }));
+                      dispatch(reopenAccount({ id: account.id }));
                       break;
                     }
                     case 'rename': {

@@ -502,7 +502,7 @@ class AccountInternal extends PureComponent<
     else this.updateQuery(query);
 
     if (this.props.accountId) {
-      this.props.dispatch(markAccountRead({ accountId: this.props.accountId }));
+      this.props.dispatch(markAccountRead({ id: this.props.accountId }));
     }
   };
 
@@ -832,7 +832,7 @@ class AccountInternal extends PureComponent<
         this.props.dispatch(openAccountCloseModal(accountId));
         break;
       case 'reopen':
-        this.props.dispatch(reopenAccount({ accountId }));
+        this.props.dispatch(reopenAccount({ id: accountId }));
         break;
       case 'export':
         const accountName = this.getAccountTitle(account, accountId);
