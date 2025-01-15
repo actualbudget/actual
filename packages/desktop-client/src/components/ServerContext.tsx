@@ -93,7 +93,11 @@ export function ServerProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     async function run() {
-      setServerURL(await send('get-server-url'));
+      const serverURL = await send('get-server-url');
+      if (!serverURL) {
+        return;
+      }
+      setServerURL(serverURL);
       setVersion(await getServerVersion());
     }
     run();
@@ -135,7 +139,8 @@ export function ServerProvider({ children }: { children: ReactNode }) {
     async (url: string, opts: { validate?: boolean } = {}) => {
       const { error } = await send('set-server-url', { ...opts, url });
       if (!error) {
-        setServerURL(await send('get-server-url'));
+        const serverURL = await send('get-server-url');
+        setServerURL(serverURL!);
         setVersion(await getServerVersion());
       }
       return { error };
