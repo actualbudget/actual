@@ -2,7 +2,6 @@ import React, {
   type InputHTMLAttributes,
   type KeyboardEvent,
   type Ref,
-  type CSSProperties,
   useRef,
 } from 'react';
 
@@ -10,7 +9,7 @@ import { css, cx } from '@emotion/css';
 
 import { useMergedRefs } from '../../hooks/useMergedRefs';
 import { useProperFocus } from '../../hooks/useProperFocus';
-import { styles, theme } from '../../style';
+import { styles, theme, type CSSProperties } from '../../style';
 
 export const defaultInputStyle = {
   outline: 0,

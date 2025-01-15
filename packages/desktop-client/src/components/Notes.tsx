@@ -1,12 +1,12 @@
 // @ts-strict-ignore
-import React, { useEffect, useRef, type CSSProperties } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import ReactMarkdown from 'react-markdown';
 
 import { css } from '@emotion/css';
 import remarkGfm from 'remark-gfm';
 
-import { theme } from '../style';
+import { type CSSProperties, theme } from '../style';
 import { remarkBreaks, sequentialNewlinesPlugin } from '../util/markdown';
 
 import { Text } from './common/Text';
