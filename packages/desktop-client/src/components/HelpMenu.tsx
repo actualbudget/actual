@@ -37,7 +37,7 @@ const getPageDocs = (page: string) => {
 };
 
 function openDocsForCurrentPage() {
-  global.Actual.openURLInBrowser(getPageDocs(window.location.pathname));
+  window.Actual.openURLInBrowser(getPageDocs(window.location.pathname));
 }
 
 type HelpMenuItem = 'docs' | 'keyboard-shortcuts' | 'goal-templates';

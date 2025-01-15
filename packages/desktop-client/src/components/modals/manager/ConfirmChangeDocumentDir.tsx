@@ -51,7 +51,7 @@ export function ConfirmChangeDocumentDirModal({
   const dispatch = useDispatch();
 
   const restartElectronServer = useCallback(() => {
-    global.Actual.restartElectronServer();
+    window.Actual.restartElectronServer();
   }, []);
 
   const [_documentDir, setDocumentDirPref] = useGlobalPref(
@@ -64,7 +64,7 @@ export function ConfirmChangeDocumentDirModal({
     setLoading(true);
     try {
       if (moveFiles) {
-        await global.Actual.moveBudgetDirectory(
+        await window.Actual.moveBudgetDirectory(
           currentBudgetDirectory,
           newDirectory,
         );

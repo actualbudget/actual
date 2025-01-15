@@ -162,6 +162,6 @@ export function handleGlobalEvents(store: AppStore) {
   });
 
   listen('api-fetch-redirected', () => {
-    global.Actual.reload();
+    window.Actual.reload();
   });
 }

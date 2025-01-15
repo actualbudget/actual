@@ -69,7 +69,7 @@ export function UpdateNotification() {
                   textDecoration: 'underline',
                 }}
                 onClick={() =>
-                  global.Actual.openURLInBrowser(
+                  window.Actual.openURLInBrowser(
                     'https://actualbudget.org/docs/releases',
                   )
                 }

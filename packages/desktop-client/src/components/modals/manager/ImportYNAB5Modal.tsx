@@ -33,7 +33,7 @@ export function ImportYNAB5Modal() {
   const [importing, setImporting] = useState(false);
 
   async function onImport() {
-    const res = await global.Actual.openFileDialog({
+    const res = await window.Actual.openFileDialog({
       properties: ['openFile'],
       filters: [{ name: 'ynab', extensions: ['json'] }],
     });

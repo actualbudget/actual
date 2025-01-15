@@ -211,14 +211,14 @@ export function Overview() {
       }),
     } satisfies ExportImportDashboard;
 
-    global.Actual.saveFile(
+    window.Actual.saveFile(
       JSON.stringify(data, null, 2),
       'dashboard.json',
       'Export Dashboard',
     );
   };
   const onImport = async () => {
-    const openFileDialog = global.Actual.openFileDialog;
+    const openFileDialog = window.Actual.openFileDialog;
 
     if (!openFileDialog) {
       dispatch(

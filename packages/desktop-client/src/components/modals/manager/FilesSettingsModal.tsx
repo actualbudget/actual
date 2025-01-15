@@ -19,7 +19,7 @@ function FileLocationSettings() {
   const dispatch = useDispatch();
 
   async function onChooseDocumentDir() {
-    const chosenDirectory = await global.Actual.openFileDialog({
+    const chosenDirectory = await window.Actual.openFileDialog({
       properties: ['openDirectory'],
     });
 

@@ -35,7 +35,7 @@ export function ConfigServer() {
   const [error, setError] = useState<string | null>(null);
 
   const restartElectronServer = useCallback(() => {
-    global.Actual.restartElectronServer();
+    globalThis.window.Actual.restartElectronServer();
     setError(null);
   }, []);
 
@@ -88,7 +88,7 @@ export function ConfigServer() {
   }
 
   async function onSelectSelfSignedCertificate() {
-    const selfSignedCertificateLocation = await global.Actual.openFileDialog({
+    const selfSignedCertificateLocation = await window.Actual.openFileDialog({
       properties: ['openFile'],
       filters: [
         {

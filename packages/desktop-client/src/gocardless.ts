@@ -25,7 +25,7 @@ function _authorize(
 
         if ('error' in resp) return resp;
         const { link, requisitionId } = resp;
-        global.Actual.openURLInBrowser(link);
+        window.Actual.openURLInBrowser(link);
 
         return send('gocardless-poll-web-token', {
           upgradingAccountId,
