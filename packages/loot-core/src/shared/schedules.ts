@@ -358,6 +358,15 @@ export function getUpcomingDays(upcomingLength) {
       const end = monthUtils.getDay(monthUtils.getMonthEnd(today));
       return end - day + 1;
     }
+    case 'oneMonth': {
+      const month = monthUtils.getMonth(today);
+      return (
+        monthUtils.differenceInCalendarDays(
+          monthUtils.nextMonth(month),
+          month,
+        ) + 1
+      );
+    }
     default:
       return parseInt(upcomingLength, 10);
   }
