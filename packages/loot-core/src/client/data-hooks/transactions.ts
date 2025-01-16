@@ -146,7 +146,9 @@ export function usePreviewTransactions(): UsePreviewTransactionsResult {
 
   const [upcomingLength] = useSyncedPref('upcomingScheduledTransactionLength');
 
-  const upcomingPeriodEnd = parseDate(addDays(currentDay(), upcomingLength));
+  const upcomingPeriodEnd = parseDate(
+    addDays(currentDay(), parseInt(upcomingLength ?? '7')),
+  );
 
   const scheduleTransactions = useMemo(() => {
     if (isSchedulesLoading) {
@@ -165,7 +167,7 @@ export function usePreviewTransactions(): UsePreviewTransactionsResult {
         );
         let day = parseDate(schedule.next_date);
 
-        const dates = new Set();
+        const dates: Set<string> = new Set();
         while (day <= upcomingPeriodEnd) {
           const nextDate = getNextDate(dateConditions, day);
           day = parseDate(addDays(nextDate, 1));
@@ -176,7 +178,15 @@ export function usePreviewTransactions(): UsePreviewTransactionsResult {
           dates.add(nextDate);
         }
 
-        const schedules = [];
+        const schedules: {
+          id: string;
+          payee: string;
+          account: string;
+          amount: number;
+          date: string;
+          schedule: string;
+          upcoming: boolean;
+        }[] = [];
         dates.forEach(date => {
           schedules.push({
             id: 'preview/' + schedule.id + date,
@@ -192,7 +202,9 @@ export function usePreviewTransactions(): UsePreviewTransactionsResult {
         return schedules;
       })
       .flat()
-      .sort((a, b) => parseDate(b.date) - parseDate(a.date));
+      .sort(
+        (a, b) => parseDate(b.date).getTime() - parseDate(a.date).getTime(),
+      );
   }, [isSchedulesLoading, schedules, statuses]);
 
   useEffect(() => {

@@ -1,12 +1,13 @@
 // @ts-strict-ignore
 import * as monthUtils from '../../shared/months';
-import { getNextDate, extractScheduleConds } from '../../shared/schedules';
+import {
+  getNextDate,
+  getDateWithSkippedWeekend,
+  extractScheduleConds,
+} from '../../shared/schedules';
 import { CategoryEntity } from '../../types/models';
 import * as db from '../db';
-import {
-  getRuleForSchedule,
-  getDateWithSkippedWeekend,
-} from '../schedules/app';
+import { getRuleForSchedule } from '../schedules/app';
 
 import { isReflectBudget } from './actions';
 import { ScheduleTemplate, Template } from './types/templates';

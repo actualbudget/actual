@@ -14,6 +14,7 @@ import {
   getStatus,
   recurConfigToRSchedule,
   getNextDate,
+  getDateWithSkippedWeekend,
 } from '../../shared/schedules';
 import { Rule } from '../accounts/rules';
 import { addTransactions } from '../accounts/sync';
@@ -547,19 +548,3 @@ app.events.on('sync', ({ type }) => {
     }
   }
 });
-
-export function getDateWithSkippedWeekend(
-  date: Date,
-  solveMode: 'after' | 'before',
-) {
-  if (d.isWeekend(date)) {
-    if (solveMode === 'after') {
-      return d.nextMonday(date);
-    } else if (solveMode === 'before') {
-      return d.previousFriday(date);
-    } else {
-      throw new Error('Unknown weekend solve mode, this should not happen!');
-    }
-  }
-  return date;
-}
