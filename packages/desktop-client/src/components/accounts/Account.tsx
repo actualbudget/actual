@@ -782,9 +782,10 @@ class AccountInternal extends PureComponent<
       const account = this.props.accounts.find(
         account => account.id === this.props.accountId,
       );
-      this.props.dispatch(
-        updateAccount({ account: { ...account, name } as AccountEntity }),
-      );
+      if (!account) {
+        throw new Error(`Account with ID ${this.props.accountId} not found.`);
+      }
+      this.props.dispatch(updateAccount({ account: { ...account, name } }));
       this.setState({ editingName: false, nameError: '' });
     }
   };
