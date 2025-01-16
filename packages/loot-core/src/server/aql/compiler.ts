@@ -1,4 +1,5 @@
 import { getNormalisedString } from '../../shared/normalisation';
+import { QueryState } from '../../shared/query';
 
 // @ts-strict-ignore
 let _uid = 0;
@@ -1005,11 +1006,7 @@ export type SchemaConfig = {
     | Record<string, unknown>
     | ((name: string, config: { withDead; isJoin; tableOptions }) => unknown);
   tableFilters?: (name: string) => unknown[];
-  customizeQuery?: <
-    T extends { table: string; orderExpressions: readonly unknown[] },
-  >(
-    queryString: T,
-  ) => T;
+  customizeQuery?: (queryString: QueryState) => QueryState;
   views?: Record<
     string,
     {

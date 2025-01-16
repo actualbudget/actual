@@ -45,7 +45,7 @@ export interface RulesHandlers {
 
   'rules-get': () => Promise<RuleEntity[]>;
 
-  'rule-get': (arg: { id: string }) => Promise<RuleEntity>;
+  'rule-get': (arg: { id: RuleEntity['id'] }) => Promise<RuleEntity>;
 
   'rules-run': (arg: {
     transaction: TransactionEntity;

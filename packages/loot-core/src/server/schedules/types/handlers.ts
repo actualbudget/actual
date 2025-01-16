@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import { DiscoverScheduleEntity } from '../../../types/models';
+import { DiscoverScheduleEntity, ScheduleEntity } from '../../../types/models';
 
 export interface SchedulesHandlers {
   'schedule/create': (arg: {
@@ -15,13 +15,17 @@ export interface SchedulesHandlers {
     schedule;
     conditions?;
     resetNextDate?: boolean;
-  }) => Promise<string>;
+  }) => Promise<ScheduleEntity['id']>;
 
-  'schedule/delete': (arg: { id: string }) => Promise<void>;
+  'schedule/delete': (arg: { id: ScheduleEntity['id'] }) => Promise<void>;
 
-  'schedule/skip-next-date': (arg: { id: string }) => Promise<void>;
+  'schedule/skip-next-date': (arg: {
+    id: ScheduleEntity['id'];
+  }) => Promise<void>;
 
-  'schedule/post-transaction': (arg: { id: string }) => Promise<void>;
+  'schedule/post-transaction': (arg: {
+    id: ScheduleEntity['id'];
+  }) => Promise<void>;
 
   'schedule/force-run-service': () => Promise<unknown>;
 

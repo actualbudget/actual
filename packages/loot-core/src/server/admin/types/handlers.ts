@@ -12,15 +12,11 @@ export interface AdminHandlers {
 
   'user-add': (
     user: Omit<UserEntity, 'id'>,
-  ) => Promise<
-    { error?: string; id?: undefined } | { error?: undefined; id: string }
-  >;
+  ) => Promise<{ error: string } | { id: string }>;
 
   'user-update': (
     user: Omit<UserEntity, 'id'>,
-  ) => Promise<
-    { error?: string; id?: undefined } | { error?: undefined; id: string }
-  >;
+  ) => Promise<{ error: string } | { id: string }>;
 
   'access-add': (
     user: NewUserAccessEntity,

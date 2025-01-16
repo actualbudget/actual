@@ -718,7 +718,7 @@ class AccountInternal extends PureComponent<
     }
 
     const { data } = await runQuery(
-      this.paged?.query
+      this.paged.query
         .options({ splits: 'none' })
         .select([{ balance: { $sumOver: '$amount' } }]),
     );
@@ -939,7 +939,7 @@ class AccountInternal extends PureComponent<
     }
 
     const { data: amount } = await runQuery(
-      this.paged?.query.calculate({ $sum: '$amount' }),
+      this.paged.query.calculate({ $sum: '$amount' }),
     );
     return amount;
   };

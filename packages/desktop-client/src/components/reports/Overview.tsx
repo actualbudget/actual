@@ -247,7 +247,7 @@ export function Overview() {
     const res = await send('dashboard-import', { filepath });
     setIsImporting(false);
 
-    if (res.error) {
+    if ('error' in res) {
       switch (res.error) {
         case 'json-parse-error':
           dispatch(

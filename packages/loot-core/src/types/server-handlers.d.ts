@@ -109,7 +109,7 @@ export interface ServerHandlers {
 
   'payees-get': () => Promise<PayeeEntity[]>;
 
-  'payees-get-rule-counts': () => Promise<Record<string, number>>;
+  'payees-get-rule-counts': () => Promise<Record<PayeeEntity['id'], number>>;
 
   'payees-merge': (arg: { targetId; mergeIds }) => Promise<void>;
 
@@ -141,7 +141,8 @@ export interface ServerHandlers {
 
   'create-query': (arg: { sheetName; name; query }) => Promise<unknown>;
 
-  query: (query: Query) => Promise<{ data: unknown; dependencies: string[] }>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  query: (query: Query) => Promise<{ data: any; dependencies: string[] }>;
 
   'account-update': (arg: { id; name }) => Promise<unknown>;
 
