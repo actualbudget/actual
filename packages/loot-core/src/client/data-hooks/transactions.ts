@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 
 import { useSyncedPref } from '@actual-app/web/src/hooks/useSyncedPref';
+import * as d from 'date-fns';
 import debounce from 'lodash/debounce';
 
 import { send } from '../../platform/client/fetch';
@@ -146,14 +147,15 @@ export function usePreviewTransactions(): UsePreviewTransactionsResult {
 
   const [upcomingLength] = useSyncedPref('upcomingScheduledTransactionLength');
 
-  const upcomingPeriodEnd = parseDate(
-    addDays(currentDay(), parseInt(upcomingLength ?? '7')),
-  );
-
   const scheduleTransactions = useMemo(() => {
     if (isSchedulesLoading) {
       return [];
     }
+
+    const today = d.startOfDay(parseDate(currentDay()));
+    const upcomingPeriodEnd = d.startOfDay(
+      parseDate(addDays(today, parseInt(upcomingLength ?? '7'))),
+    );
 
     // Kick off an async rules application
     const schedulesForPreview = schedules.filter(s =>
@@ -205,7 +207,7 @@ export function usePreviewTransactions(): UsePreviewTransactionsResult {
       .sort(
         (a, b) => parseDate(b.date).getTime() - parseDate(a.date).getTime(),
       );
-  }, [isSchedulesLoading, schedules, statuses]);
+  }, [isSchedulesLoading, schedules, statuses, upcomingLength]);
 
   useEffect(() => {
     let isUnmounted = false;
@@ -253,7 +255,7 @@ export function usePreviewTransactions(): UsePreviewTransactionsResult {
     return () => {
       isUnmounted = true;
     };
-  }, [scheduleTransactions, schedules, statuses]);
+  }, [scheduleTransactions, schedules, statuses, upcomingLength]);
 
   return {
     data: previewTransactions,
