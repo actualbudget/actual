@@ -1025,9 +1025,13 @@ const Transaction = memo(function Transaction({
     category: categoryId,
     cleared,
     reconciled,
+    upcoming,
     is_parent: isParent,
     _unmatched = false,
   } = transaction;
+
+  let previewStatus = categoryId;
+  if (upcoming) previewStatus = 'upcoming';
 
   // Join in some data
   const payee = payees && payeeId && getPayeesById(payees)[payeeId];
@@ -1352,17 +1356,17 @@ const Transaction = memo(function Transaction({
             <View
               style={{
                 color:
-                  categoryId === 'missed'
+                  previewStatus === 'missed'
                     ? theme.errorText
-                    : categoryId === 'due'
+                    : previewStatus === 'due'
                       ? theme.warningText
                       : selected
                         ? theme.formLabelText
                         : theme.upcomingText,
                 backgroundColor:
-                  categoryId === 'missed'
+                  previewStatus === 'missed'
                     ? theme.errorBackground
-                    : categoryId === 'due'
+                    : previewStatus === 'due'
                       ? theme.warningBackground
                       : selected
                         ? theme.formLabelBackground
@@ -1375,7 +1379,7 @@ const Transaction = memo(function Transaction({
                 display: 'inline-block',
               }}
             >
-              {titleFirst(categoryId)}
+              {titleFirst(previewStatus)}
             </View>
           )}
           <CellButton
@@ -1604,7 +1608,9 @@ const Transaction = memo(function Transaction({
           isPreview={isPreview}
           status={
             isPreview
-              ? categoryId
+              ? upcoming === true
+                ? 'upcoming'
+                : categoryId
               : reconciled
                 ? 'reconciled'
                 : cleared

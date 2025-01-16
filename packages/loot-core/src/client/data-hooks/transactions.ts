@@ -185,6 +185,7 @@ export function usePreviewTransactions(): UsePreviewTransactionsResult {
             amount: getScheduledAmount(schedule._amount),
             date,
             schedule: schedule.id,
+            upcoming: schedules.length > 0,
           });
         });
 
