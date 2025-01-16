@@ -394,10 +394,14 @@ export function Overview() {
                           name: 'calendar-card' as const,
                           text: t('Calendar card'),
                         },
-                        {
-                          name: 'sankey-card' as const,
-                          text: t('Sankey card'),
-                        },
+                        ...(sankeyFeatureFlag
+                          ? [
+                              {
+                                name: 'sankey-card' as const,
+                                text: t('Sankey card'),
+                              },
+                            ]
+                          : []),
                         {
                           name: 'custom-report' as const,
                           text: t('New custom report'),
