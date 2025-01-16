@@ -601,8 +601,20 @@ const TransactionEditInner = memo(function TransactionEditInner({
       if (name === 'account') {
         hasAccountChanged.current = serializedTransaction.account !== value;
       }
+      if (newTransaction.amount < 0 && name === 'category') {
+        const selectedCategory = categories.find(c => c.id === value);
+        if (selectedCategory['is_income'] === 1) {
+          const newTransaction = {
+            ...serializedTransaction,
+            [name]: value,
+            amount: serializedTransaction.amount * -1,
+          };
+          await onUpdate(newTransaction);
+          onClearActiveEdit();
+        }
+      }
     },
-    [onClearActiveEdit, onUpdate],
+    [onClearActiveEdit, onUpdate, categories],
   );
 
   const onTotalAmountUpdate = useCallback(
