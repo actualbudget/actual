@@ -40,8 +40,8 @@ export function Schedules() {
     dispatch(pushModal('schedules-discover'));
   }, [dispatch]);
 
-  const onEditUpcomingLength = useCallback(() => {
-    dispatch(pushModal('schedules-edit-upcoming-length'));
+  const onChangeUpcomingLength = useCallback(() => {
+    dispatch(pushModal('schedules-upcoming-length'));
   }, [dispatch]);
 
   const onAction = useCallback(
@@ -135,8 +135,8 @@ export function Schedules() {
             <Trans>Find schedules</Trans>
           </Button>
           {upcomingLengthEnabled && (
-            <Button onPress={onEditUpcomingLength}>
-              <Trans>Edit upcoming length</Trans>
+            <Button onPress={onChangeUpcomingLength}>
+              <Trans>Change upcoming length</Trans>
             </Button>
           )}
         </View>

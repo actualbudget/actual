@@ -374,7 +374,7 @@ export function Modals() {
         case 'schedules-discover':
           return <DiscoverSchedules key={name} />;
 
-        case 'schedules-edit-upcoming-length':
+        case 'schedules-upcoming-length':
           return <UpcomingLength key={name} />;
 
         case 'schedule-posts-offline-notification':

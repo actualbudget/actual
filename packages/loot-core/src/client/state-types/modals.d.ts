@@ -181,7 +181,7 @@ type FinanceModals = {
 
   'schedules-discover': null;
 
-  'schedules-edit-upcoming-length': null;
+  'schedules-upcoming-length': null;
 
   'schedule-posts-offline-notification': null;
   'account-menu': {

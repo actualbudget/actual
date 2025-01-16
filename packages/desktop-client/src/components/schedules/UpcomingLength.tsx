@@ -38,13 +38,13 @@ export function UpcomingLength() {
 
   return (
     <Modal
-      name="schedules-edit-upcoming-length"
+      name="schedules-upcoming-length"
       containerProps={{ style: { width: 600 } }}
     >
       {({ state: { close } }) => (
         <>
           <ModalHeader
-            title={t('Edit upcoming length')}
+            title={t('Change upcoming length')}
             rightContent={<ModalCloseButton onPress={close} />}
           />
           <Paragraph>
