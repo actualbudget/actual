@@ -78,8 +78,8 @@ export function PostsOfflineNotification() {
           <Paragraph>
             <Trans>
               You can always manually post a transaction later for a due
-              schedule by selecting the schedule and clicking “Post transaction”
-              in the action menu.
+              schedule by selecting the schedule and clicking “Post transaction
+              today” in the action menu.
             </Trans>
           </Paragraph>
           <Stack
