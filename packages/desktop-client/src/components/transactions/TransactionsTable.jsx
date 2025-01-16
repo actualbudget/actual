@@ -1025,13 +1025,12 @@ const Transaction = memo(function Transaction({
     category: categoryId,
     cleared,
     reconciled,
-    upcoming,
+    forceUpcoming,
     is_parent: isParent,
     _unmatched = false,
   } = transaction;
 
-  let previewStatus = categoryId;
-  if (upcoming) previewStatus = 'upcoming';
+  const previewStatus = forceUpcoming ? 'upcoming' : categoryId;
 
   // Join in some data
   const payee = payees && payeeId && getPayeesById(payees)[payeeId];
@@ -1608,9 +1607,7 @@ const Transaction = memo(function Transaction({
           isPreview={isPreview}
           status={
             isPreview
-              ? upcoming === true
-                ? 'upcoming'
-                : categoryId
+              ? previewStatus
               : reconciled
                 ? 'reconciled'
                 : cleared
