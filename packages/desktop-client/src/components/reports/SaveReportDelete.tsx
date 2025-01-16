@@ -27,7 +27,7 @@ export function SaveReportDelete({
           <Text style={{ color: theme.errorText, marginBottom: 5 }}>
             Are you sure you want to delete the report named{' '}
           </Text>
-          '<View>{{ name } as TransObjectLiteral}</View>'?
+          ‘<View>{{ name } as TransObjectLiteral}</View>’?
         </Trans>
       </View>
 
