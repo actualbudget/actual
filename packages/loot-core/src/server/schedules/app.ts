@@ -13,8 +13,9 @@ import {
   getScheduledAmount,
   getStatus,
   recurConfigToRSchedule,
+  getNextDate,
 } from '../../shared/schedules';
-import { Condition, Rule } from '../accounts/rules';
+import { Rule } from '../accounts/rules';
 import { addTransactions } from '../accounts/sync';
 import {
   getRules,
@@ -64,41 +65,6 @@ export function updateConditions(conditions, newConditions) {
     .map(x => x[1]);
 
   return updated.concat(added);
-}
-
-export function getNextDate(
-  dateCond,
-  start = new Date(currentDay()),
-  noSkipWeekend = false,
-) {
-  start = d.startOfDay(start);
-
-  const cond = new Condition(dateCond.op, 'date', dateCond.value, null);
-  const value = cond.getValue();
-
-  if (value.type === 'date') {
-    return value.date;
-  } else if (value.type === 'recur') {
-    let dates = value.schedule.occurrences({ start, take: 1 }).toArray();
-
-    if (dates.length === 0) {
-      // Could be a schedule with limited occurrences, so we try to
-      // find the last occurrence
-      dates = value.schedule.occurrences({ reverse: true, take: 1 }).toArray();
-    }
-
-    if (dates.length > 0) {
-      let date = dates[0].date;
-      if (value.schedule.data.skipWeekend && !noSkipWeekend) {
-        date = getDateWithSkippedWeekend(
-          date,
-          value.schedule.data.weekendSolve,
-        );
-      }
-      return dayFromDate(date);
-    }
-  }
-  return null;
 }
 
 export async function getRuleForSchedule(id: string | null): Promise<Rule> {

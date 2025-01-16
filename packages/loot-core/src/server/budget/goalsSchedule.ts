@@ -1,11 +1,10 @@
 // @ts-strict-ignore
 import * as monthUtils from '../../shared/months';
-import { extractScheduleConds } from '../../shared/schedules';
+import { getNextDate, extractScheduleConds } from '../../shared/schedules';
 import { CategoryEntity } from '../../types/models';
 import * as db from '../db';
 import {
   getRuleForSchedule,
-  getNextDate,
   getDateWithSkippedWeekend,
 } from '../schedules/app';
 

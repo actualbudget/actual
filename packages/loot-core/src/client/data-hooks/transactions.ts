@@ -1,10 +1,16 @@
 import { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 
+import { useSyncedPref } from '@actual-app/web/src/hooks/useSyncedPref';
 import debounce from 'lodash/debounce';
 
 import { send } from '../../platform/client/fetch';
+import { currentDay, addDays, parseDate } from '../../shared/months';
 import { type Query } from '../../shared/query';
-import { getScheduledAmount } from '../../shared/schedules';
+import {
+  getScheduledAmount,
+  extractScheduleConds,
+  getNextDate,
+} from '../../shared/schedules';
 import { ungroupTransactions } from '../../shared/transactions';
 import {
   type ScheduleEntity,
@@ -138,6 +144,10 @@ export function usePreviewTransactions(): UsePreviewTransactionsResult {
   const [isLoading, setIsLoading] = useState(isSchedulesLoading);
   const [error, setError] = useState<Error | undefined>(undefined);
 
+  const [upcomingLength] = useSyncedPref('upcomingScheduledTransactionLength');
+
+  const upcomingPeriodEnd = parseDate(addDays(currentDay(), upcomingLength));
+
   const scheduleTransactions = useMemo(() => {
     if (isSchedulesLoading) {
       return [];
@@ -148,14 +158,40 @@ export function usePreviewTransactions(): UsePreviewTransactionsResult {
       isForPreview(s, statuses),
     );
 
-    return schedulesForPreview.map(schedule => ({
-      id: 'preview/' + schedule.id,
-      payee: schedule._payee,
-      account: schedule._account,
-      amount: getScheduledAmount(schedule._amount),
-      date: schedule.next_date,
-      schedule: schedule.id,
-    }));
+    return schedulesForPreview
+      .map(schedule => {
+        const { date: dateConditions } = extractScheduleConds(
+          schedule._conditions,
+        );
+        let day = parseDate(schedule.next_date);
+
+        const dates = new Set();
+        while (day <= upcomingPeriodEnd) {
+          const nextDate = getNextDate(dateConditions, day);
+          day = parseDate(addDays(nextDate, 1));
+
+          if (dates.has(nextDate)) break;
+          if (parseDate(nextDate) > upcomingPeriodEnd) break;
+
+          dates.add(nextDate);
+        }
+
+        const schedules = [];
+        dates.forEach(date => {
+          schedules.push({
+            id: 'preview/' + schedule.id + date,
+            payee: schedule._payee,
+            account: schedule._account,
+            amount: getScheduledAmount(schedule._amount),
+            date,
+            schedule: schedule.id,
+          });
+        });
+
+        return schedules;
+      })
+      .flat()
+      .sort((a, b) => parseDate(b.date) - parseDate(a.date));
   }, [isSchedulesLoading, schedules, statuses]);
 
   useEffect(() => {
