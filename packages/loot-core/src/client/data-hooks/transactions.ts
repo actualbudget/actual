@@ -11,6 +11,7 @@ import {
   getScheduledAmount,
   extractScheduleConds,
   getNextDate,
+  getUpcomingDays,
 } from '../../shared/schedules';
 import { ungroupTransactions } from '../../shared/transactions';
 import {
@@ -152,14 +153,15 @@ export function usePreviewTransactions(): UsePreviewTransactionsResult {
       return [];
     }
 
-    const today = d.startOfDay(parseDate(currentDay()));
-    const upcomingPeriodEnd = d.startOfDay(
-      parseDate(addDays(today, parseInt(upcomingLength ?? '7'))),
-    );
-
     // Kick off an async rules application
     const schedulesForPreview = schedules.filter(s =>
       isForPreview(s, statuses),
+    );
+
+    const today = d.startOfDay(parseDate(currentDay()));
+
+    const upcomingPeriodEnd = d.startOfDay(
+      parseDate(addDays(today, getUpcomingDays(upcomingLength))),
     );
 
     return schedulesForPreview
