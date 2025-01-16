@@ -74,6 +74,7 @@ import { DiscoverSchedules } from './schedules/DiscoverSchedules';
 import { PostsOfflineNotification } from './schedules/PostsOfflineNotification';
 import { ScheduleDetails } from './schedules/ScheduleDetails';
 import { ScheduleLink } from './schedules/ScheduleLink';
+import { UpcomingLength } from './schedules/UpcomingLength';
 import { NamespaceContext } from './spreadsheet/NamespaceContext';
 
 export function Modals() {
@@ -372,6 +373,9 @@ export function Modals() {
 
         case 'schedules-discover':
           return <DiscoverSchedules key={name} />;
+
+        case 'schedules-upcoming-length':
+          return <UpcomingLength key={name} />;
 
         case 'schedule-posts-offline-notification':
           return <PostsOfflineNotification key={name} />;
