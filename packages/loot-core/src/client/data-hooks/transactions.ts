@@ -1,10 +1,17 @@
 import { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 
+import { useSyncedPref } from '@actual-app/web/src/hooks/useSyncedPref';
+import * as d from 'date-fns';
 import debounce from 'lodash/debounce';
 
 import { send } from '../../platform/client/fetch';
+import { currentDay, addDays, parseDate } from '../../shared/months';
 import { type Query } from '../../shared/query';
-import { getScheduledAmount } from '../../shared/schedules';
+import {
+  getScheduledAmount,
+  extractScheduleConds,
+  getNextDate,
+} from '../../shared/schedules';
 import { ungroupTransactions } from '../../shared/transactions';
 import {
   type ScheduleEntity,
@@ -138,25 +145,69 @@ export function usePreviewTransactions(): UsePreviewTransactionsResult {
   const [isLoading, setIsLoading] = useState(isSchedulesLoading);
   const [error, setError] = useState<Error | undefined>(undefined);
 
+  const [upcomingLength] = useSyncedPref('upcomingScheduledTransactionLength');
+
   const scheduleTransactions = useMemo(() => {
     if (isSchedulesLoading) {
       return [];
     }
+
+    const today = d.startOfDay(parseDate(currentDay()));
+    const upcomingPeriodEnd = d.startOfDay(
+      parseDate(addDays(today, parseInt(upcomingLength ?? '7'))),
+    );
 
     // Kick off an async rules application
     const schedulesForPreview = schedules.filter(s =>
       isForPreview(s, statuses),
     );
 
-    return schedulesForPreview.map(schedule => ({
-      id: 'preview/' + schedule.id,
-      payee: schedule._payee,
-      account: schedule._account,
-      amount: getScheduledAmount(schedule._amount),
-      date: schedule.next_date,
-      schedule: schedule.id,
-    }));
-  }, [isSchedulesLoading, schedules, statuses]);
+    return schedulesForPreview
+      .map(schedule => {
+        const { date: dateConditions } = extractScheduleConds(
+          schedule._conditions,
+        );
+        let day = parseDate(schedule.next_date);
+
+        const dates: Set<string> = new Set();
+        while (day <= upcomingPeriodEnd) {
+          const nextDate = getNextDate(dateConditions, day);
+          day = parseDate(addDays(nextDate, 1));
+
+          if (dates.has(nextDate)) break;
+          if (parseDate(nextDate) > upcomingPeriodEnd) break;
+
+          dates.add(nextDate);
+        }
+
+        const schedules: {
+          id: string;
+          payee: string;
+          account: string;
+          amount: number;
+          date: string;
+          schedule: string;
+          forceUpcoming: boolean;
+        }[] = [];
+        dates.forEach(date => {
+          schedules.push({
+            id: 'preview/' + schedule.id + date,
+            payee: schedule._payee,
+            account: schedule._account,
+            amount: getScheduledAmount(schedule._amount),
+            date,
+            schedule: schedule.id,
+            forceUpcoming: schedules.length > 0,
+          });
+        });
+
+        return schedules;
+      })
+      .flat()
+      .sort(
+        (a, b) => parseDate(b.date).getTime() - parseDate(a.date).getTime(),
+      );
+  }, [isSchedulesLoading, schedules, statuses, upcomingLength]);
 
   useEffect(() => {
     let isUnmounted = false;
@@ -204,7 +255,7 @@ export function usePreviewTransactions(): UsePreviewTransactionsResult {
     return () => {
       isUnmounted = true;
     };
-  }, [scheduleTransactions, schedules, statuses]);
+  }, [scheduleTransactions, schedules, statuses, upcomingLength]);
 
   return {
     data: previewTransactions,
