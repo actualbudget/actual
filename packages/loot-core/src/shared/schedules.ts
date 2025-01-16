@@ -349,7 +349,7 @@ export function describeSchedule(schedule, payee) {
   }
 }
 
-export function getUpcomingDays(upcomingLength) {
+export function getUpcomingDays(upcomingLength = '7') {
   const today = monthUtils.currentDay();
 
   switch (upcomingLength) {
