@@ -25,9 +25,9 @@ export function SaveReportDelete({
       <View style={{ align: 'center' }}>
         <Trans>
           <Text style={{ color: theme.errorText, marginBottom: 5 }}>
-            Are you sure you want to delete the report named{' '}
+            Are you sure you want to delete the report named{' ‘'}
           </Text>
-          ‘<View>{{ name } as TransObjectLiteral}</View>’?
+          <View>{{ name } as TransObjectLiteral}</View>{'’?'}
         </Trans>
       </View>
 
