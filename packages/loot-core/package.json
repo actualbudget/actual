@@ -40,8 +40,8 @@
     "uuid": "^9.0.1"
   },
   "devDependencies": {
-    "@actual-app/api": "*",
-    "@actual-app/crdt": "*",
+    "@actual-app/api": "workspace:^",
+    "@actual-app/crdt": "workspace:^",
     "@swc/core": "^1.5.3",
     "@swc/helpers": "^0.5.11",
     "@swc/jest": "^0.2.36",
