@@ -23,7 +23,6 @@ import {
 } from 'loot-core/client/actions';
 import {
   createPayee,
-  getPayees,
   initiallyLoadPayees,
   markAccountRead,
   reopenAccount,
@@ -1326,7 +1325,8 @@ class AccountInternal extends PureComponent<
     const onConfirmTransfer = async (ids: string[]) => {
       this.setState({ workingHard: true });
 
-      const payees = await this.props.dispatch(getPayees()).unwrap();
+      const payees = this.props.payees;
+
       const { data: transactions } = await runQuery(
         q('transactions')
           .filter({ id: { $oneof: ids } })
