@@ -309,7 +309,7 @@ export const initiallyLoadPayees = createAppAsyncThunk(
   async (_, { dispatch, getState }) => {
     const queriesState = getState().queries;
     if (queriesState.payees.length === 0) {
-      return dispatch(getPayees());
+      dispatch(getPayees());
     }
   },
 );
