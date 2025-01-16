@@ -91,7 +91,10 @@ export function TransactionListItem({
     is_parent: isParent,
     is_child: isChild,
     schedule: scheduleId,
+    forceUpcoming,
   } = transaction;
+
+  const previewStatus = forceUpcoming ? 'upcoming' : categoryId;
 
   const isAdded = newTransactions.includes(id);
   const categoryName = lookupName(categories, categoryId);
@@ -186,7 +189,10 @@ export function TransactionListItem({
                   </TextOneLine>
                 </View>
                 {isPreview ? (
-                  <Status status={categoryId} isSplit={isParent || isChild} />
+                  <Status
+                    status={previewStatus}
+                    isSplit={isParent || isChild}
+                  />
                 ) : (
                   <View
                     style={{
