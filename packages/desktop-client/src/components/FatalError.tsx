@@ -1,16 +1,17 @@
 import React, { useState, type ReactNode } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
+import { View } from '@actual-app/components/view';
+
 import { LazyLoadFailedError } from 'loot-core/src/shared/errors';
 
 import { Block } from './common/Block';
-import { Button } from './common/Button2';
 import { Link } from './common/Link';
 import { Modal, ModalHeader } from './common/Modal';
 import { Paragraph } from './common/Paragraph';
 import { Stack } from './common/Stack';
 import { Text } from './common/Text';
-import { View } from './common/View';
 import { Checkbox } from './forms';
 
 type AppError = Error & {
