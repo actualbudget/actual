@@ -97,8 +97,8 @@ export function TransactionMenu({
         isPreview
           ? [
               { name: 'view-schedule', text: t('View schedule') },
-              { name: 'post-transaction', text: t('Post transaction') },
-              { name: 'skip', text: t('Skip scheduled date') },
+              { name: 'post-transaction', text: t('Post transaction today') },
+              { name: 'skip', text: t('Skip next scheduled date') },
             ]
           : [
               {

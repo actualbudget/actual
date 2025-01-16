@@ -169,17 +169,24 @@ export function usePreviewTransactions(): UsePreviewTransactionsResult {
         const { date: dateConditions } = extractScheduleConds(
           schedule._conditions,
         );
-        let day = parseDate(schedule.next_date);
+        let day = d.startOfDay(parseDate(schedule.next_date));
+
+        const status = statuses.get(schedule.id);
 
         const dates: Set<string> = new Set();
         while (day <= upcomingPeriodEnd) {
           const nextDate = getNextDate(dateConditions, day);
-          day = parseDate(addDays(nextDate, 1));
+
+          if (status === 'paid' && day.getTime() === today.getTime()) {
+            day = parseDate(addDays(nextDate, 1));
+            continue;
+          }
 
           if (dates.has(nextDate)) break;
           if (parseDate(nextDate) > upcomingPeriodEnd) break;
 
           dates.add(nextDate);
+          day = parseDate(addDays(nextDate, 1));
         }
 
         const schedules: {
@@ -193,13 +200,13 @@ export function usePreviewTransactions(): UsePreviewTransactionsResult {
         }[] = [];
         dates.forEach(date => {
           schedules.push({
-            id: 'preview/' + schedule.id + date,
+            id: 'preview/' + schedule.id + `/${date}`,
             payee: schedule._payee,
             account: schedule._account,
             amount: getScheduledAmount(schedule._amount),
             date,
             schedule: schedule.id,
-            forceUpcoming: schedules.length > 0,
+            forceUpcoming: schedules.length > 0 || status === 'paid',
           });
         });
 
@@ -316,6 +323,6 @@ function isForPreview(schedule: ScheduleEntity, statuses: ScheduleStatuses) {
   const status = statuses.get(schedule.id);
   return (
     !schedule.completed &&
-    (status === 'due' || status === 'upcoming' || status === 'missed')
+    ['due', 'upcoming', 'missed', 'paid'].includes(status!)
   );
 }

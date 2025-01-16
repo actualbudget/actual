@@ -117,7 +117,7 @@ function ScheduledTransactionMenu({
       items={[
         {
           name: 'post',
-          text: t('Post transaction'),
+          text: t('Post transaction today'),
         },
         {
           name: 'skip',

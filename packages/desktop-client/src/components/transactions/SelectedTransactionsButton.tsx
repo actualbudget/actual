@@ -220,9 +220,9 @@ export function SelectedTransactionsButton({
               } as const,
               {
                 name: 'post-transaction',
-                text: t('Post transaction'),
+                text: t('Post transaction today'),
               } as const,
-              { name: 'skip', text: t('Skip scheduled date') } as const,
+              { name: 'skip', text: t('Skip next scheduled date') } as const,
             ]
           : [
               { name: 'show', text: t('Show'), key: 'F' } as const,
