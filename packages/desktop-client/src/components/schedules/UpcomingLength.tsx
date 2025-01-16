@@ -58,11 +58,6 @@ export function UpcomingLength() {
               data is stored. It can be changed at any time.
             </Trans>
           </Paragraph>
-          <Paragraph>
-            <Trans>
-              Only the first instance of a recurring transaction will be shown.
-            </Trans>
-          </Paragraph>
           <View>
             <Select
               options={upcomingLengthOptions.map(x => [
