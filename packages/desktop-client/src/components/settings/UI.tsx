@@ -1,10 +1,10 @@
-import React, { useState, type ReactNode, type CSSProperties } from 'react';
+import React, { useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 
 import { css } from '@emotion/css';
 
-import { theme } from '../../style';
+import { type CSSProperties, theme } from '../../style';
 import { tokens } from '../../tokens';
 import { Link } from '../common/Link';
 import { View } from '../common/View';

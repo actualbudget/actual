@@ -4,7 +4,6 @@ import React, {
   useLayoutEffect,
   useRef,
   type UIEventHandler,
-  type CSSProperties,
 } from 'react';
 
 import {
@@ -14,6 +13,7 @@ import {
 } from 'loot-core/src/types/models/reports';
 import { type RuleConditionEntity } from 'loot-core/types/models/rule';
 
+import { type CSSProperties } from '../../../../style';
 import { Block } from '../../../common/Block';
 import { View } from '../../../common/View';
 
