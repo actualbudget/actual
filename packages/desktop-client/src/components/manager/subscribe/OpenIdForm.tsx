@@ -377,7 +377,7 @@ const openIdProviders: (OpenIdProviderOption | typeof Menu.line)[] = [
           </Trans>{' '}
           <Link
             variant="external"
-            to="https://docs.goauthentik.io/docs/providers/oauth2/"
+            to="https://docs.goauthentik.io/integrations/services/actual-budget/"
           >
             <Trans>Configure OAuth2 Provider</Trans>
           </Link>
