@@ -5,13 +5,18 @@ import throttle from 'throttleit';
 import { send } from '../../platform/client/fetch';
 import { type AccountEntity } from '../../types/models';
 import * as constants from '../constants';
+import {
+  type MarkAccountReadAction,
+  type SetLastTransactionAction,
+  type UpdateNewTransactionsAction,
+} from '../state-types/queries';
+import { type AppDispatch, type GetRootState } from '../store';
 
 import { pushModal } from './modals';
 import { addNotification, addGenericErrorNotification } from './notifications';
-import type { Dispatch, GetState } from './types';
 
 export function applyBudgetAction(month, type, args) {
-  return async (dispatch: Dispatch) => {
+  return async (dispatch: AppDispatch) => {
     switch (type) {
       case 'budget-amount':
         await send('budget/budget-amount', {
@@ -28,6 +33,12 @@ export function applyBudgetAction(month, type, args) {
         break;
       case 'set-3-avg':
         await send('budget/set-3month-avg', { month });
+        break;
+      case 'set-6-avg':
+        await send('budget/set-6month-avg', { month });
+        break;
+      case 'set-12-avg':
+        await send('budget/set-12month-avg', { month });
         break;
       case 'check-templates':
         dispatch(addNotification(await send('budget/check-templates')));
@@ -145,7 +156,7 @@ export function applyBudgetAction(month, type, args) {
 }
 
 export function getCategories() {
-  return async (dispatch: Dispatch) => {
+  return async (dispatch: AppDispatch) => {
     const categories = await send('get-categories');
     dispatch({
       type: constants.LOAD_CATEGORIES,
@@ -161,7 +172,7 @@ export function createCategory(
   isIncome: boolean,
   hidden: boolean,
 ) {
-  return async (dispatch: Dispatch) => {
+  return async (dispatch: AppDispatch) => {
     const id = await send('category-create', {
       name,
       groupId,
@@ -174,7 +185,7 @@ export function createCategory(
 }
 
 export function deleteCategory(id: string, transferId?: string) {
-  return async (dispatch: Dispatch) => {
+  return async (dispatch: AppDispatch) => {
     const { error } = await send('category-delete', { id, transferId });
 
     if (error) {
@@ -204,28 +215,28 @@ export function deleteCategory(id: string, transferId?: string) {
 }
 
 export function updateCategory(category) {
-  return async (dispatch: Dispatch) => {
+  return async (dispatch: AppDispatch) => {
     await send('category-update', category);
     dispatch(getCategories());
   };
 }
 
 export function moveCategory(id, groupId, targetId) {
-  return async (dispatch: Dispatch) => {
+  return async (dispatch: AppDispatch) => {
     await send('category-move', { id, groupId, targetId });
     await dispatch(getCategories());
   };
 }
 
 export function moveCategoryGroup(id, targetId) {
-  return async (dispatch: Dispatch) => {
+  return async (dispatch: AppDispatch) => {
     await send('category-group-move', { id, targetId });
     await dispatch(getCategories());
   };
 }
 
 export function createGroup(name) {
-  return async (dispatch: Dispatch) => {
+  return async (dispatch: AppDispatch) => {
     const id = await send('category-group-create', { name });
     dispatch(getCategories());
     return id;
@@ -254,7 +265,7 @@ export function deleteGroup(id, transferId?) {
 }
 
 export function getPayees() {
-  return async (dispatch: Dispatch) => {
+  return async (dispatch: AppDispatch) => {
     const payees = await send('payees-get');
     dispatch({
       type: constants.LOAD_PAYEES,
@@ -265,7 +276,7 @@ export function getPayees() {
 }
 
 export function getCommonPayees() {
-  return async (dispatch: Dispatch) => {
+  return async (dispatch: AppDispatch) => {
     const payees = await send('common-payees-get');
     dispatch({
       type: constants.LOAD_COMMON_PAYEES,
@@ -276,7 +287,7 @@ export function getCommonPayees() {
 }
 
 export function initiallyLoadPayees() {
-  return async (dispatch: Dispatch, getState: GetState) => {
+  return async (dispatch: AppDispatch, getState: GetRootState) => {
     if (getState().queries.payees.length === 0) {
       return dispatch(getPayees());
     }
@@ -284,7 +295,7 @@ export function initiallyLoadPayees() {
 }
 
 export function createPayee(name: string) {
-  return async (dispatch: Dispatch) => {
+  return async (dispatch: AppDispatch) => {
     const id = await send('payee-create', { name: name.trim() });
     dispatch(getPayees());
     return id;
@@ -292,7 +303,7 @@ export function createPayee(name: string) {
 }
 
 export function getAccounts() {
-  return async (dispatch: Dispatch) => {
+  return async (dispatch: AppDispatch) => {
     const accounts = await send('accounts-get');
     dispatch({ type: constants.LOAD_ACCOUNTS, accounts });
     return accounts;
@@ -300,14 +311,14 @@ export function getAccounts() {
 }
 
 export function updateAccount(account: AccountEntity) {
-  return async (dispatch: Dispatch) => {
+  return async (dispatch: AppDispatch) => {
     dispatch({ type: constants.UPDATE_ACCOUNT, account });
     await send('account-update', account);
   };
 }
 
 export function createAccount(name, balance, offBudget) {
-  return async (dispatch: Dispatch) => {
+  return async (dispatch: AppDispatch) => {
     const id = await send('account-create', { name, balance, offBudget });
     await dispatch(getAccounts());
     await dispatch(getPayees());
@@ -316,7 +327,7 @@ export function createAccount(name, balance, offBudget) {
 }
 
 export function openAccountCloseModal(accountId) {
-  return async (dispatch: Dispatch, getState: GetState) => {
+  return async (dispatch: AppDispatch, getState: GetRootState) => {
     const { balance, numTransactions } = await send('account-properties', {
       id: accountId,
     });
@@ -340,7 +351,7 @@ export function closeAccount(
   categoryId: string,
   forced?: boolean,
 ) {
-  return async (dispatch: Dispatch) => {
+  return async (dispatch: AppDispatch) => {
     await send('account-close', {
       id: accountId,
       transferAccountId,
@@ -352,7 +363,7 @@ export function closeAccount(
 }
 
 export function reopenAccount(accountId) {
-  return async (dispatch: Dispatch) => {
+  return async (dispatch: AppDispatch) => {
     await send('account-reopen', { id: accountId });
     dispatch(getAccounts());
   };
@@ -360,6 +371,101 @@ export function reopenAccount(accountId) {
 
 export function forceCloseAccount(accountId) {
   return closeAccount(accountId, null, null, true);
+}
+
+// Remember the last transaction manually added to the system
+export function setLastTransaction(
+  transaction: SetLastTransactionAction['transaction'],
+): SetLastTransactionAction {
+  return {
+    type: constants.SET_LAST_TRANSACTION,
+    transaction,
+  };
+}
+
+export function parseTransactions(filepath, options) {
+  return async () => {
+    return await send('transactions-parse-file', {
+      filepath,
+      options,
+    });
+  };
+}
+
+export function importPreviewTransactions(id: string, transactions) {
+  return async (dispatch: AppDispatch): Promise<boolean> => {
+    const { errors = [], updatedPreview } = await send('transactions-import', {
+      accountId: id,
+      transactions,
+      isPreview: true,
+    });
+
+    errors.forEach(error => {
+      dispatch(
+        addNotification({
+          type: 'error',
+          message: error.message,
+        }),
+      );
+    });
+
+    return updatedPreview;
+  };
+}
+
+export function importTransactions(id: string, transactions, reconcile = true) {
+  return async (dispatch: AppDispatch): Promise<boolean> => {
+    if (!reconcile) {
+      await send('api/transactions-add', {
+        accountId: id,
+        transactions,
+      });
+
+      return true;
+    }
+
+    const {
+      errors = [],
+      added,
+      updated,
+    } = await send('transactions-import', {
+      accountId: id,
+      transactions,
+      isPreview: false,
+    });
+
+    errors.forEach(error => {
+      dispatch(
+        addNotification({
+          type: 'error',
+          message: error.message,
+        }),
+      );
+    });
+
+    dispatch({
+      type: constants.SET_NEW_TRANSACTIONS,
+      newTransactions: added,
+      matchedTransactions: updated,
+      updatedAccounts: added.length > 0 ? [id] : [],
+    });
+
+    return added.length > 0 || updated.length > 0;
+  };
+}
+
+export function updateNewTransactions(changedId): UpdateNewTransactionsAction {
+  return {
+    type: constants.UPDATE_NEW_TRANSACTIONS,
+    changedId,
+  };
+}
+
+export function markAccountRead(accountId): MarkAccountReadAction {
+  return {
+    type: constants.MARK_ACCOUNT_READ,
+    accountId,
+  };
 }
 
 const _undo = throttle(() => send('undo'), 100);

@@ -34,7 +34,7 @@ export function getUploadError({
       return t('Uploading the file failed. Check your network connection.');
     default:
       return t(
-        'An internal error occurred, sorry! Visit https://actualbudget.org/contact/ for support. (ref: {reason})',
+        'An internal error occurred, sorry! Visit https://actualbudget.org/contact/ for support. (ref: {{reason}})',
         { reason },
       );
   }
@@ -67,7 +67,7 @@ export function getDownloadError({ reason, meta, fileName }) {
     default:
       const info = meta && meta.fileId ? `, fileId: ${meta.fileId}` : '';
       return t(
-        'Something went wrong trying to download that file, sorry! Visit https://actualbudget.org/contact/ for support. reason: {reason}{info}',
+        'Something went wrong trying to download that file, sorry! Visit https://actualbudget.org/contact/ for support. reason: {{reason}}{{info}}',
         { reason, info },
       );
   }
@@ -105,7 +105,7 @@ export function getSyncError(error, id) {
       { id },
     );
   } else {
-    return t('We had an unknown problem opening “{id}”.', { id });
+    return t('We had an unknown problem opening “{{id}}”.', { id });
   }
 }
 
@@ -121,5 +121,56 @@ export class LazyLoadFailedError extends Error {
     super(`Error: failed loading lazy-loaded module ${name}`);
     this.meta = { name };
     this.cause = cause;
+  }
+}
+
+export function getUserAccessErrors(reason: string) {
+  switch (reason) {
+    case 'unauthorized':
+      return t('You are not logged in.');
+    case 'token-expired':
+      return t('Login expired, please log in again.');
+    case 'user-cant-be-empty':
+      return t('Please select a user.');
+    case 'invalid-file-id':
+      return t('This file is invalid.');
+    case 'file-denied':
+      return t('You don`t have permissions over this file.');
+    case 'user-already-have-access':
+      return t('User already has access.');
+    default:
+      return t(
+        'An internal error occurred, sorry! Visit https://actualbudget.org/contact/ for support. (ref: {{reason}})',
+        { reason },
+      );
+  }
+}
+
+export function getSecretsError(error: string, reason: string) {
+  switch (reason) {
+    case 'unauthorized':
+      return t('You are not logged in.');
+    case 'not-admin':
+      return t('You have to be admin to set secrets');
+    default:
+      return error;
+  }
+}
+
+export function getOpenIdErrors(reason: string) {
+  switch (reason) {
+    case 'unauthorized':
+      return t('You are not logged in.');
+    case 'configuration-error':
+      return t('This configuration is not valid. Please check it again.');
+    case 'unable-to-change-file-config-enabled':
+      return t(
+        'Unable to enable OpenID. Please update the config.json file in this case.',
+      );
+    default:
+      return t(
+        'An internal error occurred, sorry! Visit https://actualbudget.org/contact/ for support. (ref: {{reason}})',
+        { reason },
+      );
   }
 }

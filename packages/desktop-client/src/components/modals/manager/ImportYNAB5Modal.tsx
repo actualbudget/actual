@@ -1,10 +1,11 @@
 // @ts-strict-ignore
 import React, { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
 
 import { importBudget } from 'loot-core/src/client/actions/budgets';
 
+import { useNavigate } from '../../../hooks/useNavigate';
+import { useDispatch } from '../../../redux';
 import { styles, theme } from '../../../style';
 import { Block } from '../../common/Block';
 import { ButtonWithLoading } from '../../common/Button2';
@@ -26,7 +27,7 @@ function getErrorMessage(error: string): string {
 
 export function ImportYNAB5Modal() {
   const { t } = useTranslation();
-
+  const navigate = useNavigate();
   const dispatch = useDispatch();
   const [error, setError] = useState<string | null>(null);
   const [importing, setImporting] = useState(false);
@@ -41,6 +42,7 @@ export function ImportYNAB5Modal() {
       setError(null);
       try {
         await dispatch(importBudget(res[0], 'ynab5'));
+        navigate('/budget');
       } catch (err) {
         setError(err.message);
       } finally {

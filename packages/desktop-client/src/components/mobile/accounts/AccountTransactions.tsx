@@ -5,7 +5,6 @@ import React, {
   useMemo,
   useState,
 } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 
 import {
   collapseModals,
@@ -22,7 +21,6 @@ import {
   SchedulesProvider,
 } from 'loot-core/client/data-hooks/schedules';
 import {
-  usePreviewTransactions,
   useTransactions,
   useTransactionsSearch,
 } from 'loot-core/client/data-hooks/transactions';
@@ -35,9 +33,11 @@ import {
   type TransactionEntity,
 } from 'loot-core/types/models';
 
+import { useAccountPreviewTransactions } from '../../../hooks/useAccountPreviewTransactions';
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import { useFailedAccounts } from '../../../hooks/useFailedAccounts';
 import { useNavigate } from '../../../hooks/useNavigate';
+import { useSelector, useDispatch } from '../../../redux';
 import { styles, theme } from '../../../style';
 import { Button } from '../../common/Button2';
 import { Text } from '../../common/Text';
@@ -53,7 +53,11 @@ export function AccountTransactions({
   accountName,
 }: {
   readonly account?: AccountEntity;
-  readonly accountId?: string;
+  readonly accountId?:
+    | AccountEntity['id']
+    | 'onbudget'
+    | 'offbudget'
+    | 'uncategorized';
   readonly accountName: string;
 }) {
   const schedulesQuery = useMemo(
@@ -73,7 +77,9 @@ export function AccountTransactions({
             )
           }
           leftContent={<MobileBackButton />}
-          rightContent={<AddTransactionButton accountId={accountId} />}
+          rightContent={
+            <AddTransactionButton accountId={account ? accountId : undefined} />
+          }
         />
       }
       padding={0}
@@ -216,7 +222,7 @@ function TransactionListWithPreviews({
   readonly account?: AccountEntity;
   readonly accountId?:
     | AccountEntity['id']
-    | 'budgeted'
+    | 'onbudget'
     | 'offbudget'
     | 'uncategorized';
   readonly accountName: AccountEntity['name'] | string;
@@ -234,13 +240,15 @@ function TransactionListWithPreviews({
     transactions,
     isLoading,
     reload: reloadTransactions,
+    isLoadingMore,
     loadMore: loadMoreTransactions,
   } = useTransactions({
     query: transactionsQuery,
   });
 
-  const { data: previewTransactions, isLoading: isPreviewTransactionsLoading } =
-    usePreviewTransactions();
+  const { previewTransactions } = useAccountPreviewTransactions({
+    accountId: account?.id || '',
+  });
 
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const dispatch = useDispatch();
@@ -259,14 +267,15 @@ function TransactionListWithPreviews({
   }, [accountId, dispatch]);
 
   useEffect(() => {
-    return listen('sync-event', ({ type, tables }) => {
-      if (type === 'applied') {
+    return listen('sync-event', event => {
+      if (event.type === 'applied') {
+        const tables = event.tables;
         if (
           tables.includes('transactions') ||
           tables.includes('category_mapping') ||
           tables.includes('payee_mapping')
         ) {
-          reloadTransactions?.();
+          reloadTransactions();
         }
 
         if (tables.includes('payees') || tables.includes('payee_mapping')) {
@@ -318,11 +327,12 @@ function TransactionListWithPreviews({
 
   return (
     <TransactionListWithBalances
-      isLoading={isLoading || isPreviewTransactionsLoading}
+      isLoading={isLoading}
       transactions={transactionsToDisplay}
       balance={balanceQueries.balance}
       balanceCleared={balanceQueries.cleared}
       balanceUncleared={balanceQueries.uncleared}
+      isLoadingMore={isLoadingMore}
       onLoadMore={loadMoreTransactions}
       searchPlaceholder={`Search ${accountName}`}
       onSearch={onSearch}
@@ -337,13 +347,13 @@ function queriesFromAccountId(
   entity: AccountEntity | undefined,
 ) {
   switch (id) {
-    case 'budgeted':
+    case 'onbudget':
       return {
-        balance: queries.budgetedAccountBalance(),
+        balance: queries.onBudgetAccountBalance(),
       };
     case 'offbudget':
       return {
-        balance: queries.offbudgetAccountBalance(),
+        balance: queries.offBudgetAccountBalance(),
       };
     case 'uncategorized':
       return {

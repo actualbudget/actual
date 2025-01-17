@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { useDispatch } from 'react-redux';
+import { useTranslation } from 'react-i18next';
 
 import { loadBackup, makeBackup } from 'loot-core/client/actions';
 import { type Backup } from 'loot-core/server/backups';
 import { send, listen, unlisten } from 'loot-core/src/platform/client/fetch';
 
 import { useMetadataPref } from '../../hooks/useMetadataPref';
+import { useDispatch } from '../../redux';
 import { theme } from '../../style';
 import { Block } from '../common/Block';
 import { Button } from '../common/Button2';
@@ -73,13 +74,14 @@ export function LoadBackupModal({
   const previousBackups = backups.filter(
     backup => !('isLatest' in backup ? backup.isLatest : false),
   );
+  const { t } = useTranslation();
 
   return (
     <Modal name="load-backup" containerProps={{ style: { maxWidth: '30vw' } }}>
       {({ state: { close } }) => (
         <>
           <ModalHeader
-            title="Load Backup"
+            title={t('Load Backup')}
             rightContent={<ModalCloseButton onPress={close} />}
           />
           <View style={{ marginBottom: 30 }}>
@@ -95,10 +97,11 @@ export function LoadBackupModal({
                 <Block>
                   <Block style={{ marginBottom: 10 }}>
                     <Text style={{ fontWeight: 600 }}>
-                      You are currently working from a backup.
+                      {t('You are currently working from a backup.')}
                     </Text>{' '}
-                    You can load a different backup or revert to the original
-                    version below.
+                    {t(
+                      'You can load a different backup or revert to the original version below.',
+                    )}
                   </Block>
                   <Button
                     variant="primary"
@@ -106,18 +109,19 @@ export function LoadBackupModal({
                       dispatch(loadBackup(budgetIdToLoad, latestBackup.id))
                     }
                   >
-                    Revert to original version
+                    {t('Revert to original version')}
                   </Button>
                 </Block>
               ) : (
                 <View style={{ alignItems: 'flex-start' }}>
                   <Block style={{ marginBottom: 10 }}>
-                    Select a backup to load. After loading a backup, you will
-                    have a chance to revert to the current version in this
-                    screen.{' '}
+                    {t(
+                      'Select a backup to load. After loading a backup, you will have a chance to revert to the current version in this screen.',
+                    )}{' '}
                     <Text style={{ fontWeight: 600 }}>
-                      If you use a backup, you will have to setup all your
-                      devices to sync from the new budget.
+                      {t(
+                        'If you use a backup, you will have to set up all your devices to sync from the new budget.',
+                      )}
                     </Text>
                   </Block>
                   <Button
@@ -125,14 +129,14 @@ export function LoadBackupModal({
                     isDisabled={backupDisabled}
                     onPress={() => dispatch(makeBackup())}
                   >
-                    Backup now
+                    {t('Back up now')}
                   </Button>
                 </View>
               )}
             </View>
             {previousBackups.length === 0 ? (
               <Block style={{ color: theme.tableTextLight, marginLeft: 20 }}>
-                No backups available
+                {t('No backups available')}
               </Block>
             ) : (
               <BackupTable

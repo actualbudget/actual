@@ -7,7 +7,7 @@ import * as constants from '../constants';
 import type { Action } from '../state-types';
 import type { QueriesState } from '../state-types/queries';
 
-const initialState: QueriesState = {
+export const initialState: QueriesState = {
   newTransactions: [],
   matchedTransactions: [],
   lastTransaction: null,
@@ -23,7 +23,6 @@ const initialState: QueriesState = {
   commonPayeesLoaded: false,
   payees: [],
   payeesLoaded: false,
-  earliestTransaction: null,
 };
 
 export function update(state = initialState, action: Action): QueriesState {

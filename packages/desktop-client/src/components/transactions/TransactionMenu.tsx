@@ -1,11 +1,11 @@
 import React, { type ComponentPropsWithoutRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
 
 import { pushModal } from 'loot-core/client/actions';
 import { isPreviewId } from 'loot-core/shared/transactions';
 import { type TransactionEntity } from 'loot-core/types/models';
 
+import { useDispatch } from '../../redux';
 import { Menu } from '../common/Menu';
 
 type BalanceMenuProps = Omit<
@@ -97,8 +97,8 @@ export function TransactionMenu({
         isPreview
           ? [
               { name: 'view-schedule', text: t('View schedule') },
-              { name: 'post-transaction', text: t('Post transaction') },
-              { name: 'skip', text: t('Skip scheduled date') },
+              { name: 'post-transaction', text: t('Post transaction today') },
+              { name: 'skip', text: t('Skip next scheduled date') },
             ]
           : [
               {

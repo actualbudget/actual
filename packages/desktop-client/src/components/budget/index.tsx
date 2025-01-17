@@ -1,7 +1,6 @@
 // @ts-strict-ignore
 import React, { memo, useMemo, useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
 
 import {
   addNotification,
@@ -26,6 +25,7 @@ import { useGlobalPref } from '../../hooks/useGlobalPref';
 import { useLocalPref } from '../../hooks/useLocalPref';
 import { useNavigate } from '../../hooks/useNavigate';
 import { useSyncedPref } from '../../hooks/useSyncedPref';
+import { useDispatch } from '../../redux';
 import { styles } from '../../style';
 import { View } from '../common/View';
 import { NamespaceContext } from '../spreadsheet/NamespaceContext';
@@ -108,14 +108,16 @@ function BudgetInner(props: BudgetInnerProps) {
     run();
 
     const unlistens = [
-      listen('sync-event', ({ type, tables }) => {
-        if (
-          type === 'success' &&
-          (tables.includes('categories') ||
+      listen('sync-event', event => {
+        if (event.type === 'success') {
+          const tables = event.tables;
+          if (
+            tables.includes('categories') ||
             tables.includes('category_mapping') ||
-            tables.includes('category_groups'))
-        ) {
-          loadCategories();
+            tables.includes('category_groups')
+          ) {
+            loadCategories();
+          }
         }
       }),
 
@@ -355,6 +357,7 @@ function BudgetInner(props: BudgetInnerProps) {
           onShowActivity={onShowActivity}
           onReorderCategory={onReorderCategory}
           onReorderGroup={onReorderGroup}
+          onApplyBudgetTemplatesInGroup={onApplyBudgetTemplatesInGroup}
         />
       </TrackingBudgetProvider>
     );
@@ -375,13 +378,13 @@ function BudgetInner(props: BudgetInnerProps) {
           onMonthSelect={onMonthSelect}
           onDeleteCategory={onDeleteCategory}
           onDeleteGroup={onDeleteGroup}
-          onApplyBudgetTemplatesInGroup={onApplyBudgetTemplatesInGroup}
           onSaveCategory={onSaveCategory}
           onSaveGroup={onSaveGroup}
           onBudgetAction={onBudgetAction}
           onShowActivity={onShowActivity}
           onReorderCategory={onReorderCategory}
           onReorderGroup={onReorderGroup}
+          onApplyBudgetTemplatesInGroup={onApplyBudgetTemplatesInGroup}
         />
       </EnvelopeBudgetProvider>
     );

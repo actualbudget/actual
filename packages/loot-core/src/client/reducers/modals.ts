@@ -2,7 +2,7 @@ import * as constants from '../constants';
 import type { Action } from '../state-types';
 import type { ModalsState } from '../state-types/modals';
 
-const initialState: ModalsState = {
+export const initialState: ModalsState = {
   modalStack: [],
   isHidden: false,
 };

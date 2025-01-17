@@ -2,9 +2,10 @@
 
 import * as monthUtils from '../../shared/months';
 import { amountToInteger } from '../../shared/util';
+import { CategoryEntity } from '../../types/models';
 import * as db from '../db';
 
-import { getSheetValue } from './actions';
+import { getSheetValue, getSheetBoolean } from './actions';
 import { goalsSchedule } from './goalsSchedule';
 import { getActiveSchedules } from './statements';
 import { Template } from './types/templates';
@@ -16,11 +17,10 @@ export class CategoryTemplate {
    *    templates: all templates for this category (including templates and goals)
    *    categoryID: the ID of the category that this Class will be for
    *    month: the month string of the month for templates being applied
-   * 2. gather needed data for external use.  ex: remainder weights, priorities
+   * 2. gather needed data for external use.  ex: remainder weights, priorities, limitExcess
    * 3. run each priority level that is needed via runTemplatesForPriority
-   * 4. run applyLimits to apply any existing limit to the category
-   * 5. run the remainder templates via runRemainder()
-   * 6. finish processing by running getValues() and saving values for batch processing.
+   * 4. run the remainder templates via runRemainder()
+   * 5. finish processing by running getValues() and saving values for batch processing.
    * Alternate:
    * If the situation calls for it you can run all templates in a catagory in one go using the
    * method runAll which will run all templates and goals for reference, and can optionally be saved
@@ -30,17 +30,30 @@ export class CategoryTemplate {
   // Class interface
 
   // set up the class and check all templates
-  static async init(templates: Template[], categoryID: string, month) {
+  static async init(templates: Template[], category: CategoryEntity, month) {
     // get all the needed setup values
-    const fromLastMonth = await getSheetValue(
-      monthUtils.sheetForMonth(monthUtils.subMonths(month, 1)),
-      `leftover-${categoryID}`,
+    const lastMonthSheet = monthUtils.sheetForMonth(
+      monthUtils.subMonths(month, 1),
     );
+    const lastMonthBalance = await getSheetValue(
+      lastMonthSheet,
+      `leftover-${category.id}`,
+    );
+    const carryover = await getSheetBoolean(
+      lastMonthSheet,
+      `carryover-${category.id}`,
+    );
+    let fromLastMonth;
+    if (lastMonthBalance < 0 && !carryover) {
+      fromLastMonth = 0;
+    } else {
+      fromLastMonth = lastMonthBalance;
+    }
     // run all checks
     await CategoryTemplate.checkByAndScheduleAndSpend(templates, month);
     await CategoryTemplate.checkPercentage(templates);
     // call the private constructor
-    return new CategoryTemplate(templates, categoryID, month, fromLastMonth);
+    return new CategoryTemplate(templates, category, month, fromLastMonth);
   }
 
   getPriorities(): number[] {
@@ -48,6 +61,9 @@ export class CategoryTemplate {
   }
   getRemainderWeight(): number {
     return this.remainderWeight;
+  }
+  getLimitExcess(): number {
+    return this.limitExcess;
   }
 
   // what is the full requested amount this month
@@ -69,6 +85,7 @@ export class CategoryTemplate {
     availStart: number,
   ): Promise<number> {
     if (!this.priorities.includes(priority)) return 0;
+    if (this.limitMet) return 0;
 
     const t = this.templates.filter(t => t.priority === priority);
     let available = budgetAvail || 0;
@@ -78,31 +95,32 @@ export class CategoryTemplate {
     let scheduleFlag = false;
     // switch on template type and calculate the amount for the line
     for (let i = 0; i < t.length; i++) {
+      let newBudget = 0;
       switch (t[i].type) {
         case 'simple': {
-          toBudget += this.runSimple(t[i], this.limitAmount);
+          newBudget = this.runSimple(t[i], this.limitAmount);
           break;
         }
         case 'copy': {
-          toBudget += await this.runCopy(t[i]);
+          newBudget = await this.runCopy(t[i]);
           break;
         }
         case 'week': {
-          toBudget += this.runWeek(t[i]);
+          newBudget = this.runWeek(t[i]);
           break;
         }
         case 'spend': {
-          toBudget += await this.runSpend(t[i]);
+          newBudget = await this.runSpend(t[i]);
           break;
         }
         case 'percentage': {
-          toBudget += await this.runPercentage(t[i], availStart);
+          newBudget = await this.runPercentage(t[i], availStart);
           break;
         }
         case 'by': {
           //TODO add the logic to run all of these at once or whatever is needed
           const ret = this.runBy(t[i], first, remainder);
-          toBudget += ret.ret;
+          newBudget = ret.ret;
           remainder = ret.remainder;
           first = false;
           break;
@@ -110,7 +128,7 @@ export class CategoryTemplate {
         case 'schedule': {
           const budgeted = await getSheetValue(
             monthUtils.sheetForMonth(this.month),
-            `leftover-${this.categoryID}`,
+            `leftover-${this.category.id}`,
           );
           const ret = await goalsSchedule(
             scheduleFlag,
@@ -121,22 +139,37 @@ export class CategoryTemplate {
             this.fromLastMonth,
             toBudget,
             [],
-            this.categoryID,
+            this.category,
           );
-          toBudget = ret.to_budget;
+          // Schedules assume that its to budget value is the whole thing so this
+          // needs to remove the previous funds so they aren't double counted
+          newBudget = ret.to_budget - toBudget;
           remainder = ret.remainder;
           scheduleFlag = ret.scheduleFlag;
           break;
         }
         case 'average': {
-          toBudget += await this.runAverage(t[i]);
+          newBudget = await this.runAverage(t[i]);
           break;
         }
       }
 
-      available = available - toBudget;
+      available = available - newBudget;
+      toBudget += newBudget;
     }
 
+    //check limit
+    if (this.limitCheck) {
+      if (
+        toBudget + this.toBudgetAmount + this.fromLastMonth >=
+        this.limitAmount
+      ) {
+        const orig = toBudget;
+        toBudget = this.limitAmount - this.toBudgetAmount - this.fromLastMonth;
+        this.limitMet = true;
+        available = available + orig - toBudget;
+      }
+    }
     // don't overbudget when using a priority
     if (priority > 0 && available < 0) {
       this.fullAmount += toBudget;
@@ -147,25 +180,6 @@ export class CategoryTemplate {
       this.toBudgetAmount += toBudget;
     }
     return toBudget;
-  }
-
-  applyLimit(): number {
-    if (this.limitCheck === false) {
-      return 0;
-    }
-    if (this.limitHold && this.fromLastMonth >= this.limitAmount) {
-      const orig = this.toBudgetAmount;
-      this.fullAmount = 0;
-      this.toBudgetAmount = 0;
-      return orig;
-    }
-    if (this.toBudgetAmount + this.fromLastMonth > this.limitAmount) {
-      const orig = this.toBudgetAmount;
-      this.toBudgetAmount = this.limitAmount - this.fromLastMonth;
-      this.fullAmount = this.toBudgetAmount;
-      return orig - this.toBudgetAmount;
-    }
-    return 0;
   }
 
   // run all of the 'remainder' type templates
@@ -194,7 +208,7 @@ export class CategoryTemplate {
 
   //-----------------------------------------------------------------------------
   // Implementation
-  readonly categoryID: string; //readonly so we can double check the category this is using
+  readonly category: CategoryEntity; //readonly so we can double check the category this is using
   private month: string;
   private templates = [];
   private remainder = [];
@@ -206,17 +220,19 @@ export class CategoryTemplate {
   private isLongGoal: boolean = null; //defaulting the goals to null so templates can be unset
   private goalAmount: number = null;
   private fromLastMonth = 0; // leftover from last month
+  private limitMet = false;
+  private limitExcess: number = 0;
   private limitAmount = 0;
   private limitCheck = false;
   private limitHold = false;
 
   private constructor(
     templates: Template[],
-    categoryID: string,
+    category: CategoryEntity,
     month: string,
     fromLastMonth: number,
   ) {
-    this.categoryID = categoryID;
+    this.category = category;
     this.month = month;
     this.fromLastMonth = fromLastMonth;
     // sort the template lines into regular template, goals, and remainder templates
@@ -344,31 +360,43 @@ export class CategoryTemplate {
       if (!t.limit) continue;
       if (this.limitCheck) {
         throw new Error('Only one `up to` allowed per category');
-      } else if (t.limit) {
-        if (t.limit.period === 'daily') {
-          const numDays = monthUtils.differenceInCalendarDays(
-            monthUtils.addMonths(this.month, 1),
-            this.month,
-          );
-          this.limitAmount += amountToInteger(t.limit.amount) * numDays;
-        } else if (t.limit.period === 'weekly') {
-          const nextMonth = monthUtils.nextMonth(this.month);
-          let week = t.limit.start;
-          const baseLimit = amountToInteger(t.limit.amount);
-          while (week < nextMonth) {
-            if (week >= this.month) {
-              this.limitAmount += baseLimit;
-            }
-            week = monthUtils.addWeeks(week, 1);
+      }
+      if (t.limit.period === 'daily') {
+        const numDays = monthUtils.differenceInCalendarDays(
+          monthUtils.addMonths(this.month, 1),
+          this.month,
+        );
+        this.limitAmount += amountToInteger(t.limit.amount) * numDays;
+      } else if (t.limit.period === 'weekly') {
+        const nextMonth = monthUtils.nextMonth(this.month);
+        let week = t.limit.start;
+        const baseLimit = amountToInteger(t.limit.amount);
+        while (week < nextMonth) {
+          if (week >= this.month) {
+            this.limitAmount += baseLimit;
           }
-        } else if (t.limit.period === 'monthly') {
-          this.limitAmount = amountToInteger(t.limit.amount);
-        } else {
-          throw new Error('Invalid limit period. Check template syntax');
+          week = monthUtils.addWeeks(week, 1);
         }
-        //amount is good save the rest
-        this.limitCheck = true;
-        this.limitHold = t.limit.hold ? true : false;
+      } else if (t.limit.period === 'monthly') {
+        this.limitAmount = amountToInteger(t.limit.amount);
+      } else {
+        throw new Error('Invalid limit period. Check template syntax');
+      }
+      //amount is good save the rest
+      this.limitCheck = true;
+      this.limitHold = t.limit.hold ? true : false;
+      // check if the limit is already met and save the excess
+      if (this.fromLastMonth >= this.limitAmount) {
+        this.limitMet = true;
+        if (this.limitHold) {
+          this.limitExcess = 0;
+          this.toBudgetAmount = 0;
+          this.fullAmount = 0;
+        } else {
+          this.limitExcess = this.fromLastMonth - this.limitAmount;
+          this.toBudgetAmount = -this.limitExcess;
+          this.fullAmount = -this.limitExcess;
+        }
       }
     }
   }
@@ -401,7 +429,7 @@ export class CategoryTemplate {
     const sheetName = monthUtils.sheetForMonth(
       monthUtils.subMonths(this.month, template.lookBack),
     );
-    return await getSheetValue(sheetName, `budget-${this.categoryID}`);
+    return await getSheetValue(sheetName, `budget-${this.category.id}`);
   }
 
   private runWeek(template): number {
@@ -421,10 +449,23 @@ export class CategoryTemplate {
   }
 
   private async runSpend(template): Promise<number> {
-    const fromMonth = `${template.from}`;
-    const toMonth = `${template.month}`;
+    let fromMonth = `${template.from}`;
+    let toMonth = `${template.month}`;
     let alreadyBudgeted = this.fromLastMonth;
     let firstMonth = true;
+
+    //update months if needed
+    const repeat = template.annual
+      ? (template.repeat || 1) * 12
+      : template.repeat;
+    let m = monthUtils.differenceInCalendarMonths(toMonth, this.month);
+    if (repeat && m < 0) {
+      while (m < 0) {
+        toMonth = monthUtils.addMonths(toMonth, repeat);
+        fromMonth = monthUtils.addMonths(fromMonth, repeat);
+        m = monthUtils.differenceInCalendarMonths(toMonth, this.month);
+      }
+    }
 
     for (
       let m = fromMonth;
@@ -436,18 +477,18 @@ export class CategoryTemplate {
         //TODO figure out if I already  found these values and can pass them in
         const spent = await getSheetValue(
           sheetName,
-          `sum-amount-${this.categoryID}`,
+          `sum-amount-${this.category.id}`,
         );
         const balance = await getSheetValue(
           sheetName,
-          `leftover-${this.categoryID}`,
+          `leftover-${this.category.id}`,
         );
         alreadyBudgeted = balance - spent;
         firstMonth = false;
       } else {
         alreadyBudgeted += await getSheetValue(
           sheetName,
-          `budget-${this.categoryID}`,
+          `budget-${this.category.id}`,
         );
       }
     }
@@ -500,7 +541,7 @@ export class CategoryTemplate {
       const sheetName = monthUtils.sheetForMonth(
         monthUtils.subMonths(this.month, i),
       );
-      sum += await getSheetValue(sheetName, `sum-amount-${this.categoryID}`);
+      sum += await getSheetValue(sheetName, `sum-amount-${this.category.id}`);
     }
     return -Math.round(sum / template.numMonths);
   }

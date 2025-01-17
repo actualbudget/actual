@@ -3,33 +3,49 @@ import { t } from 'i18next';
 
 import { listen, send } from '../platform/client/fetch';
 
+import {
+  addNotification,
+  closeAndDownloadBudget,
+  getAccounts,
+  getCategories,
+  getPayees,
+  loadPrefs,
+  pushModal,
+  resetSync,
+  signOut,
+  sync,
+  uploadBudget,
+} from './actions';
 import type { Notification } from './state-types/notifications';
+import { type AppStore } from './store';
 
-export function listenForSyncEvent(actions, store) {
+export function listenForSyncEvent(store: AppStore) {
   let attemptedSyncRepair = false;
 
-  listen('sync-event', info => {
-    const { type, subtype, meta, tables } = info;
-
+  listen('sync-event', event => {
     const prefs = store.getState().prefs.local;
     if (!prefs || !prefs.id) {
       // Do nothing if no budget is loaded
       return;
     }
 
-    if (type === 'success') {
+    if (event.type === 'success') {
       if (attemptedSyncRepair) {
         attemptedSyncRepair = false;
 
-        actions.addNotification({
-          title: t('Syncing has been fixed!'),
-          message: t('Happy budgeting!'),
-          type: 'message',
-        });
+        store.dispatch(
+          addNotification({
+            title: t('Syncing has been fixed!'),
+            message: t('Happy budgeting!'),
+            type: 'message',
+          }),
+        );
       }
 
+      const tables = event.tables;
+
       if (tables.includes('prefs')) {
-        actions.loadPrefs();
+        store.dispatch(loadPrefs());
       }
 
       if (
@@ -37,25 +53,23 @@ export function listenForSyncEvent(actions, store) {
         tables.includes('category_groups') ||
         tables.includes('category_mapping')
       ) {
-        actions.getCategories();
+        store.dispatch(getCategories());
       }
 
       if (tables.includes('payees') || tables.includes('payee_mapping')) {
-        actions.getPayees();
+        store.dispatch(getPayees());
       }
 
       if (tables.includes('accounts')) {
-        actions.getAccounts();
+        store.dispatch(getAccounts());
       }
-    } else if (type === 'error') {
+    } else if (event.type === 'error') {
       let notif: Notification | null = null;
-      const learnMore = t(
-        '[Learn more](https://actualbudget.org/docs/getting-started/sync/#debugging-sync-issues)',
-      );
+      const learnMore = `[${t('Learn more')}](https://actualbudget.org/docs/getting-started/sync/#debugging-sync-issues)`;
       const githubIssueLink =
         'https://github.com/actualbudget/actual/issues/new?assignees=&labels=bug&template=bug-report.yml&title=%5BBug%5D%3A+';
 
-      switch (subtype) {
+      switch (event.subtype) {
         case 'out-of-sync':
           if (attemptedSyncRepair) {
             notif = {
@@ -70,7 +84,7 @@ export function listenForSyncEvent(actions, store) {
               id: 'reset-sync',
               button: {
                 title: t('Reset sync'),
-                action: actions.resetSync,
+                action: () => store.dispatch(resetSync()),
               },
             };
           } else {
@@ -92,7 +106,7 @@ export function listenForSyncEvent(actions, store) {
                 action: async () => {
                   attemptedSyncRepair = true;
                   await send('sync-repair');
-                  actions.sync();
+                  store.dispatch(sync());
                 },
               },
             };
@@ -113,13 +127,13 @@ export function listenForSyncEvent(actions, store) {
                 'Old encryption keys are not migrated. If using encryption, [reset encryption here](#makeKey).',
             ),
             messageActions: {
-              makeKey: () => actions.pushModal('create-encryption-key'),
+              makeKey: () => store.dispatch(pushModal('create-encryption-key')),
             },
             sticky: true,
             id: 'old-file',
             button: {
               title: t('Reset sync'),
-              action: actions.resetSync,
+              action: () => store.dispatch(resetSync()),
             },
           };
           break;
@@ -138,7 +152,9 @@ export function listenForSyncEvent(actions, store) {
             id: 'invalid-key-state',
             button: {
               title: t('Reset key'),
-              action: () => actions.pushModal('create-encryption-key'),
+              action: () => {
+                store.dispatch(pushModal('create-encryption-key'));
+              },
             },
           };
 
@@ -161,9 +177,9 @@ export function listenForSyncEvent(actions, store) {
             button: {
               title: t('Register'),
               action: async () => {
-                await actions.uploadBudget();
-                actions.sync();
-                actions.loadPrefs();
+                await store.dispatch(uploadBudget());
+                store.dispatch(sync());
+                store.dispatch(loadPrefs());
               },
             },
           };
@@ -183,7 +199,7 @@ export function listenForSyncEvent(actions, store) {
             id: 'upload-file',
             button: {
               title: t('Upload'),
-              action: actions.resetSync,
+              action: () => store.dispatch(resetSync()),
             },
           };
           break;
@@ -206,18 +222,18 @@ export function listenForSyncEvent(actions, store) {
               ) +
               ' ' +
               learnMore,
-            messageActions: { upload: actions.resetSync },
+            messageActions: { upload: () => store.dispatch(resetSync()) },
             sticky: true,
             id: 'needs-revert',
             button: {
               title: t('Revert'),
-              action: () => actions.closeAndDownloadBudget(cloudFileId),
+              action: () => store.dispatch(closeAndDownloadBudget(cloudFileId)),
             },
           };
           break;
         case 'encrypt-failure':
         case 'decrypt-failure':
-          if (meta.isMissingKey) {
+          if (event.meta.isMissingKey) {
             notif = {
               title: t('Missing encryption key'),
               message: t(
@@ -228,10 +244,13 @@ export function listenForSyncEvent(actions, store) {
               id: 'encrypt-failure-missing',
               button: {
                 title: t('Create key'),
-                action: () =>
-                  actions.pushModal('fix-encryption-key', {
-                    onSuccess: () => actions.sync(),
-                  }),
+                action: () => {
+                  store.dispatch(
+                    pushModal('fix-encryption-key', {
+                      onSuccess: () => store.dispatch(sync()),
+                    }),
+                  );
+                },
               },
             };
           } else {
@@ -245,16 +264,15 @@ export function listenForSyncEvent(actions, store) {
               id: 'encrypt-failure',
               button: {
                 title: t('Reset key'),
-                action: () =>
-                  actions.pushModal('create-encryption-key', {
-                    onSuccess: () => actions.sync(),
-                  }),
+                action: () => {
+                  store.dispatch(pushModal('create-encryption-key'));
+                },
               },
             };
           }
           break;
         case 'invalid-schema':
-          console.trace('invalid-schema', meta);
+          console.trace('invalid-schema', event.meta);
           notif = {
             title: t('Update required'),
             message: t(
@@ -265,7 +283,7 @@ export function listenForSyncEvent(actions, store) {
           };
           break;
         case 'apply-failure':
-          console.trace('apply-failure', meta);
+          console.trace('apply-failure', event.meta);
           notif = {
             message: t(
               'We couldn’t apply that change to the database. Please report this as a bug by [opening a Github issue]({{githubIssueLink}}).',
@@ -276,8 +294,20 @@ export function listenForSyncEvent(actions, store) {
         case 'network':
           // Show nothing
           break;
+        case 'token-expired':
+          notif = {
+            title: 'Login expired',
+            message: 'Please login again.',
+            sticky: true,
+            id: 'login-expired',
+            button: {
+              title: 'Go to login',
+              action: () => store.dispatch(signOut()),
+            },
+          };
+          break;
         default:
-          console.trace('unknown error', info);
+          console.trace('unknown error', event);
           notif = {
             message: t(
               'We had problems syncing your changes. Please report this as a bug by [opening a Github issue]({{githubIssueLink}}).',
@@ -287,7 +317,7 @@ export function listenForSyncEvent(actions, store) {
       }
 
       if (notif) {
-        actions.addNotification({ type: 'error', ...notif });
+        store.dispatch(addNotification({ type: 'error', ...notif }));
       }
     }
   });

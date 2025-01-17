@@ -85,8 +85,22 @@ export function addTransactions(
   });
 }
 
-export function importTransactions(accountId, transactions) {
-  return send('api/transactions-import', { accountId, transactions });
+export interface ImportTransactionsOpts {
+  defaultCleared?: boolean;
+}
+
+export function importTransactions(
+  accountId,
+  transactions,
+  opts: ImportTransactionsOpts = {
+    defaultCleared: true,
+  },
+) {
+  return send('api/transactions-import', {
+    accountId,
+    transactions,
+    opts,
+  });
 }
 
 export function getTransactions(accountId, startDate, endDate) {

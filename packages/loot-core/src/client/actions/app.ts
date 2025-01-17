@@ -1,13 +1,8 @@
 // @ts-strict-ignore
 import { send } from '../../platform/client/fetch';
 import * as constants from '../constants';
-import type {
-  AppState,
-  SetAppStateAction,
-  SetLastUndoStateAction,
-} from '../state-types/app';
-
-import type { Dispatch } from './types';
+import type { AppState, SetAppStateAction } from '../state-types/app';
+import { type AppDispatch } from '../store';
 
 export function setAppState(state: Partial<AppState>): SetAppStateAction {
   return {
@@ -17,18 +12,9 @@ export function setAppState(state: Partial<AppState>): SetAppStateAction {
 }
 
 export function updateApp() {
-  return async (dispatch: Dispatch) => {
+  return async (dispatch: AppDispatch) => {
     await global.Actual.applyAppUpdate();
     dispatch(setAppState({ updateInfo: null }));
-  };
-}
-
-export function setLastUndoState(
-  undoState: SetLastUndoStateAction['undoState'],
-): SetLastUndoStateAction {
-  return {
-    type: constants.SET_LAST_UNDO_STATE,
-    undoState,
   };
 }
 

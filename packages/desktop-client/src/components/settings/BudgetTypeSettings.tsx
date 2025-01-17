@@ -1,6 +1,5 @@
 import React from 'react';
-
-import { t } from 'i18next';
+import { Trans } from 'react-i18next';
 
 import { useSyncedPref } from '../../hooks/useSyncedPref';
 import { Button } from '../common/Button2';
@@ -21,35 +20,42 @@ export function BudgetTypeSettings() {
     <Setting
       primaryAction={
         <Button onPress={onSwitchType}>
-          Switch to {budgetType === 'report' ? 'envelope' : 'tracking'}{' '}
-          budgeting
+          {budgetType === 'report' ? (
+            <Trans>Switch to envelope budgeting</Trans>
+          ) : (
+            <Trans>Switch to tracking budgeting</Trans>
+          )}
         </Button>
       }
     >
       <Text>
-        <strong>Envelope budgeting</strong> (recommended) digitally mimics
-        physical envelope budgeting system by allocating funds into virtual
-        envelopes for different expenses. It helps track spending and ensure you
-        don‘t overspend in any category.{' '}
+        <Trans>
+          <strong>Envelope budgeting</strong> (recommended) digitally mimics
+          physical envelope budgeting system by allocating funds into virtual
+          envelopes for different expenses. It helps track spending and ensure
+          you don‘t overspend in any category.
+        </Trans>{' '}
         <Link
           variant="external"
           to="https://actualbudget.org/docs/getting-started/envelope-budgeting"
           linkColor="purple"
         >
-          {t('Learn more…')}
+          <Trans>Learn more</Trans>
         </Link>
       </Text>
       <Text>
-        With <strong>tracking budgeting</strong>, category balances reset each
-        month, and funds are managed using a “Saved” metric instead of “To Be
-        Budgeted.” Income is forecasted to plan future spending, rather than
-        relying on current available funds.{' '}
+        <Trans>
+          With <strong>tracking budgeting</strong>, category balances reset each
+          month, and funds are managed using a “Saved” metric instead of “To Be
+          Budgeted.” Income is forecasted to plan future spending, rather than
+          relying on current available funds.
+        </Trans>{' '}
         <Link
           variant="external"
-          to="https://actualbudget.org/docs/experimental/tracking-budget"
+          to="https://actualbudget.org/docs/getting-started/tracking-budget"
           linkColor="purple"
         >
-          {t('Learn more…')}
+          <Trans>Learn more</Trans>
         </Link>
       </Text>
     </Setting>

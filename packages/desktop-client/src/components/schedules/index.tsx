@@ -1,6 +1,5 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
 
 import { pushModal } from 'loot-core/client/actions';
 import { q } from 'loot-core/shared/query';
@@ -8,12 +7,13 @@ import { useSchedules } from 'loot-core/src/client/data-hooks/schedules';
 import { send } from 'loot-core/src/platform/client/fetch';
 import { type ScheduleEntity } from 'loot-core/src/types/models';
 
+import { useFeatureFlag } from '../../hooks/useFeatureFlag';
+import { useDispatch } from '../../redux';
 import { theme } from '../../style';
 import { Button } from '../common/Button2';
 import { Search } from '../common/Search';
 import { View } from '../common/View';
 import { Page } from '../Page';
-import { UpcomingLengthSettings } from '../settings/Upcoming';
 
 import { type ScheduleItemAction, SchedulesTable } from './SchedulesTable';
 
@@ -22,6 +22,8 @@ export function Schedules() {
 
   const dispatch = useDispatch();
   const [filter, setFilter] = useState('');
+
+  const upcomingLengthEnabled = useFeatureFlag('upcomingLengthAdjustment');
 
   const onEdit = useCallback(
     (id: ScheduleEntity['id']) => {
@@ -36,6 +38,10 @@ export function Schedules() {
 
   const onDiscover = useCallback(() => {
     dispatch(pushModal('schedules-discover'));
+  }, [dispatch]);
+
+  const onChangeUpcomingLength = useCallback(() => {
+    dispatch(pushModal('schedules-upcoming-length'));
   }, [dispatch]);
 
   const onAction = useCallback(
@@ -86,15 +92,6 @@ export function Schedules() {
       >
         <View
           style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            padding: '15px 0 0',
-          }}
-        >
-          <UpcomingLengthSettings />
-        </View>
-        <View
-          style={{
             flex: 1,
             flexDirection: 'row',
             justifyContent: 'flex-end',
@@ -127,9 +124,22 @@ export function Schedules() {
           flexShrink: 0,
         }}
       >
-        <Button onPress={onDiscover}>
-          <Trans>Find schedules</Trans>
-        </Button>
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: '1em',
+          }}
+        >
+          <Button onPress={onDiscover}>
+            <Trans>Find schedules</Trans>
+          </Button>
+          {upcomingLengthEnabled && (
+            <Button onPress={onChangeUpcomingLength}>
+              <Trans>Change upcoming length</Trans>
+            </Button>
+          )}
+        </View>
         <Button variant="primary" onPress={onAdd}>
           <Trans>Add new schedule</Trans>
         </Button>

@@ -2,6 +2,7 @@ import React, {
   type ComponentPropsWithoutRef,
   type CSSProperties,
 } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { trackingBudget } from 'loot-core/client/queries';
 
@@ -37,6 +38,7 @@ export function TrackingBalanceMenuModal({
     borderTop: `1px solid ${theme.pillBorder}`,
   };
 
+  const { t } = useTranslation();
   const category = useCategory(categoryId);
 
   if (!category) {
@@ -64,7 +66,7 @@ export function TrackingBalanceMenuModal({
                 fontWeight: 400,
               }}
             >
-              Balance
+              {t('Balance')}
             </Text>
             <BalanceWithCarryover
               isDisabled

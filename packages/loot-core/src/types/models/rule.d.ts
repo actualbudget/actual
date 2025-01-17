@@ -1,4 +1,4 @@
-import { type ScheduleEntity } from './schedule';
+import { type RecurConfig, type ScheduleEntity } from './schedule';
 
 export interface NewRuleEntity {
   stage: 'pre' | null | 'post';
@@ -26,18 +26,23 @@ export type RuleConditionOp =
   | 'contains'
   | 'doesNotContain'
   | 'hasTags'
-  | 'matches';
+  | 'and'
+  | 'matches'
+  | 'onBudget'
+  | 'offBudget';
 
-type FieldValueTypes = {
+export type FieldValueTypes = {
   account: string;
   amount: number;
   category: string;
-  date: string;
+  date: string | RecurConfig;
   notes: string;
   payee: string;
   payee_name: string;
   imported_payee: string;
   saved: string;
+  transfer: boolean;
+  parent: boolean;
   cleared: boolean;
   reconciled: boolean;
 };
@@ -50,7 +55,9 @@ type BaseConditionEntity<
   op: Op;
   value: Op extends 'oneOf' | 'notOneOf'
     ? Array<FieldValueTypes[Field]>
-    : FieldValueTypes[Field];
+    : Op extends 'isbetween'
+      ? { num1: number; num2: number }
+      : FieldValueTypes[Field];
   options?: {
     inflow?: boolean;
     outflow?: boolean;
@@ -73,6 +80,8 @@ export type RuleConditionEntity =
       | 'contains'
       | 'doesNotContain'
       | 'matches'
+      | 'onBudget'
+      | 'offBudget'
     >
   | BaseConditionEntity<
       'category',

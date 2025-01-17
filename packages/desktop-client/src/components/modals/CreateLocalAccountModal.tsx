@@ -1,15 +1,14 @@
 // @ts-strict-ignore
 import { type FormEvent, useState } from 'react';
 import { Form } from 'react-aria-components';
-import { useDispatch } from 'react-redux';
-
-import { t } from 'i18next';
+import { useTranslation } from 'react-i18next';
 
 import { closeModal, createAccount } from 'loot-core/client/actions';
 import { toRelaxedNumber } from 'loot-core/src/shared/util';
 
 import * as useAccounts from '../../hooks/useAccounts';
 import { useNavigate } from '../../hooks/useNavigate';
+import { useDispatch } from '../../redux';
 import { theme } from '../../style';
 import { Button } from '../common/Button2';
 import { FormError } from '../common/FormError';
@@ -30,6 +29,7 @@ import { Checkbox } from '../forms';
 import { validateAccountName } from '../util/accountValidation';
 
 export function CreateLocalAccountModal() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const accounts = useAccounts.useAccounts();
@@ -127,7 +127,7 @@ export function CreateLocalAccountModal() {
                         verticalAlign: 'center',
                       }}
                     >
-                      {t('Off-budget')}
+                      {t('Off budget')}
                     </label>
                   </View>
                   <div

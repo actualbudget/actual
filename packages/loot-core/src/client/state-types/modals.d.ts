@@ -8,6 +8,8 @@ import type {
   TransactionEntity,
 } from '../../types/models';
 import type { NewRuleEntity, RuleEntity } from '../../types/models/rule';
+import { type NewUserEntity, type UserEntity } from '../../types/models/user';
+import { type UserAccessEntity } from '../../types/models/userAccess';
 import type { EmptyObject, StripNever } from '../../types/util';
 import type * as constants from '../constants';
 export type ModalType = keyof FinanceModals;
@@ -78,6 +80,37 @@ type FinanceModals = {
 
   'delete-budget': { file: File };
 
+  'duplicate-budget': {
+    /** The budget file to be duplicated */
+    file: File;
+    /**
+     * Indicates whether the duplication is initiated from the budget
+     * management page. This may affect the behavior or UI of the
+     * duplication process.
+     */
+    managePage?: boolean;
+    /**
+     * loadBudget indicates whether to open the 'original' budget, the
+     * new duplicated 'copy' budget, or no budget ('none'). If 'none'
+     * duplicate-budget stays on the same page.
+     */
+    loadBudget?: 'none' | 'original' | 'copy';
+    /**
+     * onComplete is called when the DuplicateFileModal is closed.
+     * @param event the event object will pass back the status of the
+     * duplicate process.
+     * 'success' if the budget was duplicated.
+     * 'failed' if the budget could not be duplicated.  This will also
+     * pass an error on the event object.
+     * 'canceled' if the DuplicateFileModal was canceled.
+     * @returns
+     */
+    onComplete?: (event: {
+      status: 'success' | 'failed' | 'canceled';
+      error?: Error;
+    }) => void;
+  };
+
   import: null;
 
   'import-ynab4': null;
@@ -147,6 +180,8 @@ type FinanceModals = {
   };
 
   'schedules-discover': null;
+
+  'schedules-upcoming-length': null;
 
   'schedule-posts-offline-notification': null;
   'account-menu': {
@@ -280,6 +315,23 @@ type FinanceModals = {
   'confirm-transaction-delete': {
     message?: string;
     onConfirm: () => void;
+  };
+  'edit-user': {
+    user: UserEntity | NewUserEntity;
+    onSave: (rule: UserEntity) => void;
+  };
+  'edit-access': {
+    access: UserAccessEntity | NewUserAccessEntity;
+    onSave: (rule: UserEntity) => void;
+  };
+  'transfer-ownership': {
+    onSave: () => void;
+  };
+  'enable-openid': {
+    onSave: () => void;
+  };
+  'enable-password-auth': {
+    onSave: () => void;
   };
   'confirm-unlink-account': {
     accountName: string;

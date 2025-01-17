@@ -1,16 +1,16 @@
 import React, { type ReactNode, useEffect } from 'react';
+import { useTranslation, Trans } from 'react-i18next';
 
 import { css } from '@emotion/css';
-import { t } from 'i18next';
 
+import { closeBudget, loadPrefs } from 'loot-core/client/actions';
 import { isElectron } from 'loot-core/shared/environment';
 import { listen } from 'loot-core/src/platform/client/fetch';
 
-import { useActions } from '../../hooks/useActions';
-import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { useGlobalPref } from '../../hooks/useGlobalPref';
 import { useIsOutdated, useLatestVersion } from '../../hooks/useLatestVersion';
 import { useMetadataPref } from '../../hooks/useMetadataPref';
+import { useDispatch } from '../../redux';
 import { theme } from '../../style';
 import { tokens } from '../../tokens';
 import { Button } from '../common/Button2';
@@ -24,6 +24,7 @@ import { Page } from '../Page';
 import { useResponsive } from '../responsive/ResponsiveProvider';
 import { useServerVersion } from '../ServerContext';
 
+import { AuthSettings } from './AuthSettings';
 import { Backups } from './Backups';
 import { BudgetTypeSettings } from './BudgetTypeSettings';
 import { EncryptionSettings } from './Encryption';
@@ -43,8 +44,10 @@ function About() {
   return (
     <Setting>
       <Text>
-        <strong>{t('Actual')}</strong>
-        {t(' is a super fast privacy-focused app for managing your finances.')}
+        <Trans>
+          <strong>Actual</strong> is a super fast privacy-focused app for
+          managing your finances.
+        </Trans>
       </Text>
       <View
         style={{
@@ -62,19 +65,25 @@ function About() {
         })}
         data-vrt-mask
       >
-        <Text>Client version: v{window.Actual?.ACTUAL_VERSION}</Text>
-        <Text>Server version: {version}</Text>
+        <Text>
+          <Trans>
+            Client version: {{ version: `v${window.Actual?.ACTUAL_VERSION}` }}
+          </Trans>
+        </Text>
+        <Text>
+          <Trans>Server version: {{ version }}</Trans>
+        </Text>
         {isOutdated ? (
           <Link
             variant="external"
             to="https://actualbudget.org/docs/releases"
             linkColor="purple"
           >
-            {t('New version available:')} {latestVersion}
+            <Trans>New version available: {{ latestVersion }}</Trans>
           </Link>
         ) : (
           <Text style={{ color: theme.noticeText, fontWeight: 600 }}>
-            {t('You’re up to date!')}
+            <Trans>You’re up to date!</Trans>
           </Text>
         )}
         <Text>
@@ -83,7 +92,7 @@ function About() {
             to="https://actualbudget.org/docs/releases"
             linkColor="purple"
           >
-            {t('Release Notes')}
+            <Trans>Release Notes</Trans>
           </Link>
         </Text>
       </View>
@@ -102,16 +111,22 @@ function AdvancedAbout() {
   return (
     <Setting>
       <Text>
-        <strong>{t('IDs')}</strong>
-        {t(
-          ' are the names Actual uses to identify your budget internally. There are several different IDs associated with your budget. The Budget ID is used to identify your budget file. The Sync ID is used to access the budget on the server.',
-        )}
+        <Trans>
+          <strong>IDs</strong> are the names Actual uses to identify your budget
+          internally. There are several different IDs associated with your
+          budget. The Budget ID is used to identify your budget file. The Sync
+          ID is used to access the budget on the server.
+        </Trans>
       </Text>
       <Text>
-        <IDName>{t('Budget ID:')}</IDName> {budgetId}
+        <Trans>
+          <IDName>Budget ID:</IDName> {{ budgetId }}
+        </Trans>
       </Text>
       <Text style={{ color: theme.pageText }}>
-        <IDName>{t('Sync ID:')}</IDName> {groupId || '(none)'}
+        <Trans>
+          <IDName>Sync ID:</IDName> {{ syncId: groupId || '(none)' }}
+        </Trans>
       </Text>
       {/* low priority todo: eliminate some or all of these, or decide when/if to show them */}
       {/* <Text>
@@ -125,19 +140,23 @@ function AdvancedAbout() {
 }
 
 export function Settings() {
+  const { t } = useTranslation();
   const [floatingSidebar] = useGlobalPref('floatingSidebar');
   const [budgetName] = useMetadataPref('budgetName');
+  const dispatch = useDispatch();
 
-  const { loadPrefs, closeBudget } = useActions();
+  const onCloseBudget = () => {
+    dispatch(closeBudget());
+  };
 
   useEffect(() => {
     const unlisten = listen('prefs-updated', () => {
-      loadPrefs();
+      dispatch(loadPrefs());
     });
 
-    loadPrefs();
+    dispatch(loadPrefs());
     return () => unlisten();
-  }, [loadPrefs]);
+  }, [dispatch]);
 
   const { isNarrowWidth } = useResponsive();
 
@@ -170,14 +189,15 @@ export function Settings() {
                 style={{ color: theme.buttonNormalDisabledText }}
               />
             </FormField>
-            <Button onPress={closeBudget}>{t('Close Budget')}</Button>
+            <Button onPress={onCloseBudget}>{t('Close Budget')}</Button>
           </View>
         )}
         <About />
         <ThemeSettings />
         <FormatSettings />
+        <AuthSettings />
         <EncryptionSettings />
-        {useFeatureFlag('reportBudget') && <BudgetTypeSettings />}
+        <BudgetTypeSettings />
         {isElectron() && <Backups />}
         <ExportBudget />
         <AdvancedToggle>

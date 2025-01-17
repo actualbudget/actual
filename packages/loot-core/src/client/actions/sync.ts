@@ -1,13 +1,13 @@
 import { send } from '../../platform/client/fetch';
 import { getUploadError } from '../../shared/errors';
+import { syncAccounts } from '../accounts/accountsSlice';
+import { type AppDispatch, type GetRootState } from '../store';
 
-import { syncAccounts } from './account';
 import { pushModal } from './modals';
 import { loadPrefs } from './prefs';
-import type { Dispatch, GetState } from './types';
 
 export function resetSync() {
-  return async (dispatch: Dispatch) => {
+  return async (dispatch: AppDispatch) => {
     const { error } = await send('sync-reset');
 
     if (error) {
@@ -36,7 +36,7 @@ export function resetSync() {
 }
 
 export function sync() {
-  return async (dispatch: Dispatch, getState: GetState) => {
+  return async (dispatch: AppDispatch, getState: GetRootState) => {
     const prefs = getState().prefs.local;
     if (prefs && prefs.id) {
       const result = await send('sync');
@@ -53,7 +53,7 @@ export function sync() {
 }
 
 export function syncAndDownload(accountId?: string) {
-  return async (dispatch: Dispatch) => {
+  return async (dispatch: AppDispatch) => {
     // It is *critical* that we sync first because of transaction
     // reconciliation. We want to get all transactions that other
     // clients have already made, so that imported transactions can be
@@ -64,7 +64,7 @@ export function syncAndDownload(accountId?: string) {
       return { error: syncState.error };
     }
 
-    const hasDownloaded = await dispatch(syncAccounts(accountId));
+    const hasDownloaded = await dispatch(syncAccounts({ id: accountId }));
 
     if (hasDownloaded) {
       // Sync again afterwards if new transactions were created

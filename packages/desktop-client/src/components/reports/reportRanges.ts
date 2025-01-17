@@ -161,7 +161,10 @@ export function getFullRange(start: string) {
 
 export function getLatestRange(offset: number) {
   const end = monthUtils.currentMonth();
-  const start = monthUtils.subMonths(end, offset);
+  let start = end;
+  if (offset !== 1) {
+    start = monthUtils.subMonths(end, offset);
+  }
   return [start, end, 'sliding-window'] as const;
 }
 
@@ -192,6 +195,20 @@ export function calculateTimeRange(
     }
 
     return getLatestRange(offset);
+  }
+  if (mode === 'lastYear') {
+    return [
+      monthUtils.getYearStart(monthUtils.prevYear(monthUtils.currentMonth())),
+      monthUtils.getYearEnd(monthUtils.prevYear(monthUtils.currentDate())),
+      'lastYear',
+    ] as const;
+  }
+  if (mode === 'yearToDate') {
+    return [
+      monthUtils.currentYear() + '-01',
+      monthUtils.currentMonth(),
+      'yearToDate',
+    ] as const;
   }
 
   return [start, end, 'static'] as const;

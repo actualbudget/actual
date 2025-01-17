@@ -9,14 +9,15 @@ import {
 } from 'react-error-boundary';
 import { HotkeysProvider } from 'react-hotkeys-hook';
 import { useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
 import { BrowserRouter } from 'react-router-dom';
 
 import {
+  addNotification,
   closeBudget,
   loadBudget,
   loadGlobalPrefs,
   setAppState,
+  signOut,
   sync,
 } from 'loot-core/client/actions';
 import { SpreadsheetProvider } from 'loot-core/client/SpreadsheetProvider';
@@ -28,6 +29,7 @@ import {
 
 import { useMetadataPref } from '../hooks/useMetadataPref';
 import { installPolyfills } from '../polyfills';
+import { useDispatch, useSelector } from '../redux';
 import { styles, hasHiddenScrollbars, ThemeStyle, useTheme } from '../style';
 import { ExposeNavigate } from '../util/router-tools';
 
@@ -40,7 +42,6 @@ import { FinancesApp } from './FinancesApp';
 import { ManagementApp } from './manager/ManagementApp';
 import { Modals } from './Modals';
 import { ResponsiveProvider } from './responsive/ResponsiveProvider';
-import { ScrollProvider } from './ScrollProvider';
 import { SidebarProvider } from './sidebar/SidebarProvider';
 import { UpdateNotification } from './UpdateNotification';
 
@@ -50,6 +51,7 @@ function AppInner() {
   const { t } = useTranslation();
   const { showBoundary: showErrorBoundary } = useErrorBoundary();
   const dispatch = useDispatch();
+  const userData = useSelector(state => state.user.data);
 
   const maybeUpdate = async <T,>(cb?: () => T): Promise<T> => {
     if (global.Actual.isUpdateReadyForDownload()) {
@@ -124,6 +126,24 @@ function AppInner() {
     global.Actual.updateAppMenu(budgetId);
   }, [budgetId]);
 
+  useEffect(() => {
+    if (userData?.tokenExpired) {
+      dispatch(
+        addNotification({
+          type: 'error',
+          id: 'login-expired',
+          title: t('Login expired'),
+          sticky: true,
+          message: t('Login expired, please login again.'),
+          button: {
+            title: t('Go to login'),
+            action: () => dispatch(signOut()),
+          },
+        }),
+      );
+    }
+  }, [userData, userData?.tokenExpired]);
+
   return budgetId ? <FinancesApp /> : <ManagementApp />;
 }
 
@@ -180,36 +200,34 @@ export function App() {
             <SidebarProvider>
               <BudgetMonthCountProvider>
                 <DndProvider backend={HTML5Backend}>
-                  <ScrollProvider>
+                  <View
+                    data-theme={theme}
+                    style={{
+                      height: '100%',
+                      display: 'flex',
+                      flexDirection: 'column',
+                    }}
+                  >
                     <View
-                      data-theme={theme}
+                      key={
+                        hiddenScrollbars ? 'hidden-scrollbars' : 'scrollbars'
+                      }
                       style={{
-                        height: '100%',
-                        display: 'flex',
-                        flexDirection: 'column',
+                        flexGrow: 1,
+                        overflow: 'hidden',
+                        ...styles.lightScrollbar,
                       }}
                     >
-                      <View
-                        key={
-                          hiddenScrollbars ? 'hidden-scrollbars' : 'scrollbars'
-                        }
-                        style={{
-                          flexGrow: 1,
-                          overflow: 'hidden',
-                          ...styles.lightScrollbar,
-                        }}
-                      >
-                        <ErrorBoundary FallbackComponent={ErrorFallback}>
-                          {process.env.REACT_APP_REVIEW_ID &&
-                            !Platform.isPlaywright && <DevelopmentTopBar />}
-                          <AppInner />
-                        </ErrorBoundary>
-                        <ThemeStyle />
-                        <Modals />
-                        <UpdateNotification />
-                      </View>
+                      <ErrorBoundary FallbackComponent={ErrorFallback}>
+                        {process.env.REACT_APP_REVIEW_ID &&
+                          !Platform.isPlaywright && <DevelopmentTopBar />}
+                        <AppInner />
+                      </ErrorBoundary>
+                      <ThemeStyle />
+                      <Modals />
+                      <UpdateNotification />
                     </View>
-                  </ScrollProvider>
+                  </View>
                 </DndProvider>
               </BudgetMonthCountProvider>
             </SidebarProvider>

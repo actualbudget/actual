@@ -397,8 +397,8 @@ export function nameForMonth(month: DateLike): string {
   return d.format(_parse(month), 'MMMM ‘yy');
 }
 
-export function format(month: DateLike, str: string): string {
-  return d.format(_parse(month), str);
+export function format(month: DateLike, format: string): string {
+  return d.format(_parse(month), format);
 }
 
 export const getDateFormatRegex = memoizeOne((format: string) => {

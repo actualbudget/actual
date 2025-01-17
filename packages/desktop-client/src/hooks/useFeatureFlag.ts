@@ -3,12 +3,11 @@ import type { FeatureFlag } from 'loot-core/src/types/prefs';
 import { useSyncedPref } from './useSyncedPref';
 
 const DEFAULT_FEATURE_FLAG_STATE: Record<FeatureFlag, boolean> = {
-  reportBudget: false,
   goalTemplatesEnabled: false,
-  dashboards: false,
   actionTemplating: false,
   upcomingLengthAdjustment: false,
   contextMenus: false,
+  openidAuth: false,
 };
 
 export function useFeatureFlag(name: FeatureFlag): boolean {

@@ -4,6 +4,7 @@ import React, {
   useEffect,
   type CSSProperties,
 } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { trackingBudget } from 'loot-core/client/queries';
 import { amountToInteger, integerToAmount } from 'loot-core/shared/util';
@@ -43,6 +44,7 @@ export function TrackingBudgetMenuModal({
     borderTop: `1px solid ${theme.pillBorder}`,
   };
 
+  const { t } = useTranslation();
   const budgeted = useTrackingSheetValue(
     trackingBudget.catBudgeted(categoryId),
   );
@@ -82,7 +84,7 @@ export function TrackingBudgetMenuModal({
                 fontWeight: 400,
               }}
             >
-              Budgeted
+              {t('Budgeted')}
             </Text>
             <FocusableAmountInput
               value={integerToAmount(budgeted || 0)}

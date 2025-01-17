@@ -1,7 +1,8 @@
 // @ts-strict-ignore
 import React, { useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useTranslation, Trans } from 'react-i18next';
 
+import { getSecretsError } from 'loot-core/shared/errors';
 import { send } from 'loot-core/src/platform/client/fetch';
 
 import { Error } from '../alerts';
@@ -29,6 +30,7 @@ export const SimpleFinInitialiseModal = ({
   const [token, setToken] = useState('');
   const [isValid, setIsValid] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(t('It is required to provide a token.'));
 
   const onSubmit = async (close: () => void) => {
     if (!token) {
@@ -38,12 +40,18 @@ export const SimpleFinInitialiseModal = ({
 
     setIsLoading(true);
 
-    await send('secret-set', {
-      name: 'simplefin_token',
-      value: token,
-    });
+    const { error, reason } =
+      (await send('secret-set', {
+        name: 'simplefin_token',
+        value: token,
+      })) || {};
 
-    onSuccess();
+    if (error) {
+      setIsValid(false);
+      setError(getSecretsError(error, reason));
+    } else {
+      onSuccess();
+    }
     setIsLoading(false);
     close();
   };
@@ -58,17 +66,19 @@ export const SimpleFinInitialiseModal = ({
           />
           <View style={{ display: 'flex', gap: 10 }}>
             <Text>
-              {t(
-                'In order to enable bank-sync via SimpleFIN (only for North American banks), you will need to create a token. This can be done by creating an account with',
-              )}{' '}
-              <Link
-                variant="external"
-                to="https://bridge.simplefin.org/"
-                linkColor="purple"
-              >
-                SimpleFIN
-              </Link>
-              .
+              <Trans>
+                In order to enable bank-sync via SimpleFIN (only for North
+                American banks), you will need to create a token. This can be
+                done by creating an account with{' '}
+                <Link
+                  variant="external"
+                  to="https://bridge.simplefin.org/"
+                  linkColor="purple"
+                >
+                  SimpleFIN
+                </Link>
+                .
+              </Trans>
             </Text>
 
             <FormField>
@@ -84,7 +94,7 @@ export const SimpleFinInitialiseModal = ({
               />
             </FormField>
 
-            {!isValid && <Error>It is required to provide a token.</Error>}
+            {!isValid && <Error>{error}</Error>}
           </View>
 
           <ModalButtons>
@@ -96,7 +106,7 @@ export const SimpleFinInitialiseModal = ({
                 onSubmit(close);
               }}
             >
-              {t('Save and continue')}
+              <Trans>Save and continue</Trans>
             </ButtonWithLoading>
           </ModalButtons>
         </>

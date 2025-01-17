@@ -1,11 +1,16 @@
-// @ts-strict-ignore
 import React, { useState, useEffect, useRef, type CSSProperties } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
+import { useLocation } from 'react-router-dom';
 
-import { type State } from 'loot-core/src/client/state-types';
+import { closeBudget, getUserData, signOut } from 'loot-core/client/actions';
+import { type RemoteFile, type SyncedLocalFile } from 'loot-core/types/file';
+import { type TransObjectLiteral } from 'loot-core/types/util';
 
-import { useActions } from '../hooks/useActions';
+import { useAuth } from '../auth/AuthProvider';
+import { Permissions } from '../auth/types';
+import { useMetadataPref } from '../hooks/useMetadataPref';
+import { useNavigate } from '../hooks/useNavigate';
+import { useSelector, useDispatch } from '../redux';
 import { theme, styles } from '../style';
 
 import { Button } from './common/Button2';
@@ -13,37 +18,58 @@ import { Menu } from './common/Menu';
 import { Popover } from './common/Popover';
 import { Text } from './common/Text';
 import { View } from './common/View';
-import { useServerURL } from './ServerContext';
+import { PrivacyFilter } from './PrivacyFilter';
+import { useMultiuserEnabled, useServerURL } from './ServerContext';
 
 type LoggedInUserProps = {
   hideIfNoServer?: boolean;
   style?: CSSProperties;
   color?: string;
 };
+
 export function LoggedInUser({
   hideIfNoServer,
   style,
   color,
 }: LoggedInUserProps) {
   const { t } = useTranslation();
-
-  const userData = useSelector((state: State) => state.user.data);
-  const { getUserData, signOut, closeBudget } = useActions();
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const userData = useSelector(state => state.user.data);
   const [loading, setLoading] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
   const serverUrl = useServerURL();
-  const triggerRef = useRef(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const [budgetId] = useMetadataPref('id');
+  const [cloudFileId] = useMetadataPref('cloudFileId');
+  const location = useLocation();
+  const { hasPermission } = useAuth();
+  const multiuserEnabled = useMultiuserEnabled();
+  const allFiles = useSelector(state => state.budgets.allFiles || []);
+  const remoteFiles = allFiles.filter(
+    f => f.state === 'remote' || f.state === 'synced' || f.state === 'detached',
+  ) as (SyncedLocalFile | RemoteFile)[];
+  const currentFile = remoteFiles.find(f => f.cloudFileId === cloudFileId);
+  const hasSyncedPrefs = useSelector(state => state.prefs.synced);
 
   useEffect(() => {
-    getUserData().then(() => setLoading(false));
+    async function init() {
+      await dispatch(getUserData());
+    }
+
+    init().then(() => setLoading(false));
   }, []);
 
-  async function onChangePassword() {
-    await closeBudget();
-    window.__navigate('/change-password');
+  async function onCloseBudget() {
+    await dispatch(closeBudget());
   }
 
-  async function onMenuSelect(type) {
+  async function onChangePassword() {
+    await onCloseBudget();
+    navigate('/change-password');
+  }
+
+  const handleMenuSelect = async (type: string) => {
     setMenuOpen(false);
 
     switch (type) {
@@ -51,19 +77,29 @@ export function LoggedInUser({
         onChangePassword();
         break;
       case 'sign-in':
-        await closeBudget();
-        window.__navigate('/login');
+        await onCloseBudget();
+        navigate('/login');
+        break;
+      case 'user-access':
+        navigate('/user-access');
+        break;
+      case 'user-directory':
+        navigate('/user-directory');
+        break;
+      case 'index':
+        navigate('/');
         break;
       case 'sign-out':
-        signOut();
+        dispatch(signOut());
         break;
       case 'config-server':
-        await closeBudget();
-        window.__navigate('/config-server');
+        await onCloseBudget();
+        navigate('/config-server');
         break;
       default:
+        break;
     }
-  }
+  };
 
   function serverMessage() {
     if (!serverUrl) {
@@ -77,9 +113,7 @@ export function LoggedInUser({
     return t('Server online');
   }
 
-  if (hideIfNoServer && !serverUrl) {
-    return null;
-  }
+  if (hideIfNoServer && !serverUrl) return null;
 
   if (loading && serverUrl) {
     return (
@@ -96,16 +130,109 @@ export function LoggedInUser({
     );
   }
 
+  type MenuItem = {
+    name: string;
+    text: string;
+  };
+
+  const getMenuItems = (): (MenuItem | typeof Menu.line)[] => {
+    const isAdmin = hasPermission(Permissions.ADMINISTRATOR);
+
+    const baseMenu: (MenuItem | typeof Menu.line)[] = [];
+    if (
+      serverUrl &&
+      !userData?.offline &&
+      userData?.loginMethod === 'password'
+    ) {
+      baseMenu.push({ name: 'change-password', text: t('Change password') });
+    }
+    if (serverUrl) {
+      baseMenu.push({ name: 'sign-out', text: t('Sign out') });
+    }
+    baseMenu.push({
+      name: 'config-server',
+      text: serverUrl ? t('Change server URL') : t('Start using a server'),
+    });
+
+    const adminMenu: (MenuItem | typeof Menu.line)[] = [];
+    if (multiuserEnabled && isAdmin) {
+      if (!budgetId && location.pathname !== '/') {
+        adminMenu.push({ name: 'index', text: t('View file list') });
+      } else if (
+        serverUrl &&
+        !userData?.offline &&
+        location.pathname !== '/user-directory'
+      ) {
+        adminMenu.push({ name: 'user-directory', text: t('User Directory') });
+      }
+    }
+
+    if (
+      multiuserEnabled &&
+      ((currentFile && userData && currentFile.owner === userData.userId) ||
+        isAdmin) &&
+      serverUrl &&
+      !userData?.offline &&
+      cloudFileId &&
+      location.pathname !== '/user-access'
+    ) {
+      adminMenu.push({
+        name: 'user-access',
+        text: t('User Access Management'),
+      });
+    }
+
+    if (adminMenu.length > 0) {
+      adminMenu.push(Menu.line);
+    }
+
+    return [...adminMenu, ...baseMenu];
+  };
+
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', ...style }}>
       <Button
         ref={triggerRef}
         variant="bare"
         onPress={() => setMenuOpen(true)}
-        style={color && { color }}
+        style={{ color: color || 'inherit' }}
       >
         {serverMessage()}
       </Button>
+      {!loading &&
+        multiuserEnabled &&
+        userData &&
+        userData?.displayName &&
+        !hasSyncedPrefs && (
+          <small>
+            (
+            <Trans>
+              logged in as:{' '}
+              <span>
+                {{ userName: userData?.displayName } as TransObjectLiteral}
+              </span>
+            </Trans>
+            )
+          </small>
+        )}
+      {!loading &&
+        multiuserEnabled &&
+        userData &&
+        userData?.displayName &&
+        hasSyncedPrefs && (
+          <small>
+            (
+            <Trans>
+              logged in as:{' '}
+              <span>
+                <PrivacyFilter>
+                  {{ userName: userData?.displayName } as TransObjectLiteral}
+                </PrivacyFilter>
+              </span>
+            </Trans>
+            )
+          </small>
+        )}
 
       <Popover
         offset={8}
@@ -114,21 +241,8 @@ export function LoggedInUser({
         onOpenChange={() => setMenuOpen(false)}
       >
         <Menu
-          onMenuSelect={onMenuSelect}
-          items={[
-            serverUrl &&
-              !userData?.offline && {
-                name: 'change-password',
-                text: t('Change password'),
-              },
-            serverUrl && { name: 'sign-out', text: t('Sign out') },
-            {
-              name: 'config-server',
-              text: serverUrl
-                ? t('Change server URL')
-                : t('Start using a server'),
-            },
-          ]}
+          onMenuSelect={handleMenuSelect}
+          items={getMenuItems().filter(Boolean)}
         />
       </Popover>
     </View>

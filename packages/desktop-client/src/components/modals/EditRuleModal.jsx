@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
+import { useTranslation, Trans } from 'react-i18next';
 
 import { css } from '@emotion/css';
-import { t } from 'i18next';
 import { v4 as uuid } from 'uuid';
 
 import {
@@ -37,6 +36,7 @@ import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { useSelected, SelectedProvider } from '../../hooks/useSelected';
 import { SvgDelete, SvgAdd, SvgSubtract } from '../../icons/v0';
 import { SvgAlignLeft, SvgCode, SvgInformationOutline } from '../../icons/v1';
+import { useDispatch } from '../../redux';
 import { styles, theme } from '../../style';
 import { Button } from '../common/Button2';
 import { Menu } from '../common/Menu';
@@ -262,6 +262,7 @@ function ConditionEditor({
         field={field}
         type={type}
         value={value}
+        op={op}
         multi={op === 'oneOf' || op === 'notOneOf'}
         onChange={v => onChange('value', v)}
         numberFormatType="currency"
@@ -335,7 +336,7 @@ function ScheduleDescription({ id }) {
             textOverflow: 'ellipsis',
           }}
         >
-          {t('Payee')}:{' '}
+          <Trans>Payee</Trans>:{' '}
           <DisplayId
             type="payees"
             id={schedule._payee}
@@ -344,11 +345,12 @@ function ScheduleDescription({ id }) {
         </Text>
         <Text style={{ margin: '0 5px' }}> — </Text>
         <Text style={{ flexShrink: 0 }}>
-          {t('Amount')}: {formatAmount(schedule._amount)}
+          <Trans>Amount</Trans>: {formatAmount(schedule._amount)}
         </Text>
         <Text style={{ margin: '0 5px' }}> — </Text>
         <Text style={{ flexShrink: 0 }}>
-          {t('Next')}: {monthUtils.format(schedule.next_date, dateFormat)}
+          <Trans>Next</Trans>:{' '}
+          {monthUtils.format(schedule.next_date, dateFormat)}
         </Text>
       </View>
       <StatusBadge status={status} />
@@ -372,6 +374,7 @@ const splitActionFields = actionFields.filter(
 );
 const allocationMethodOptions = Object.entries(ALLOCATION_METHODS);
 function ActionEditor({ action, editorStyle, onChange, onDelete, onAdd }) {
+  const { t } = useTranslation();
   const {
     field,
     op,
@@ -461,6 +464,7 @@ function ActionEditor({ action, editorStyle, onChange, onDelete, onAdd }) {
               <GenericInput
                 key={inputKey}
                 field={field}
+                op={op}
                 type="number"
                 numberFormatType={
                   options.method === 'fixed-percent' ? 'percentage' : 'currency'
@@ -522,11 +526,11 @@ function StageInfo() {
     <View style={{ position: 'relative', marginLeft: 5 }}>
       <Tooltip
         content={
-          <>
+          <Trans>
             The stage of a rule allows you to force a specific order. Pre rules
             always run first, and post rules always run last. Within each stage
             rules are automatically ordered from least to most specific.
-          </>
+          </Trans>
         }
         placement="bottom start"
         style={{
@@ -700,7 +704,7 @@ function ConditionsList({
 
   return conditions.length === 0 ? (
     <Button style={{ alignSelf: 'flex-start' }} onPress={addInitialCondition}>
-      Add condition
+      <Trans>Add condition</Trans>
     </Button>
   ) : (
     <Stack spacing={2} data-testid="condition-list">
@@ -760,6 +764,7 @@ const conditionFields = [
   ]);
 
 export function EditRuleModal({ defaultRule, onSave: originalOnSave }) {
+  const { t } = useTranslation();
   const [conditions, setConditions] = useState(
     defaultRule.conditions.map(parse).map(c => ({ ...c, inputKey: uuid() })),
   );
@@ -1041,26 +1046,28 @@ export function EditRuleModal({ defaultRule, onSave: originalOnSave }) {
                 padding: '0 20px',
               }}
             >
-              <Text style={{ marginRight: 15 }}>{t('Stage of rule:')}</Text>
+              <Text style={{ marginRight: 15 }}>
+                <Trans>Stage of rule:</Trans>
+              </Text>
 
               <Stack direction="row" align="center" spacing={1}>
                 <StageButton
                   selected={stage === 'pre'}
                   onSelect={() => onChangeStage('pre')}
                 >
-                  {t('Pre')}
+                  <Trans>Pre</Trans>
                 </StageButton>
                 <StageButton
                   selected={stage === null}
                   onSelect={() => onChangeStage(null)}
                 >
-                  {t('Default')}
+                  <Trans>Default</Trans>
                 </StageButton>
                 <StageButton
                   selected={stage === 'post'}
                   onSelect={() => onChangeStage('post')}
                 >
-                  {t('Post')}
+                  <Trans>Post</Trans>
                 </StageButton>
 
                 <StageInfo />
@@ -1079,18 +1086,20 @@ export function EditRuleModal({ defaultRule, onSave: originalOnSave }) {
               <View style={{ flexShrink: 0 }}>
                 <View style={{ marginBottom: 30 }}>
                   <Text style={{ marginBottom: 15 }}>
-                    {t('If')}
-                    <FieldSelect
-                      data-testid="conditions-op"
-                      style={{ display: 'inline-flex' }}
-                      fields={[
-                        ['and', 'all'],
-                        ['or', 'any'],
-                      ]}
-                      value={conditionsOp}
-                      onChange={onChangeConditionsOp}
-                    />
-                    {t('of these conditions match:')}
+                    <Trans>
+                      If{' '}
+                      <FieldSelect
+                        data-testid="conditions-op"
+                        style={{ display: 'inline-flex' }}
+                        fields={[
+                          ['and', 'all'],
+                          ['or', 'any'],
+                        ]}
+                        value={conditionsOp}
+                        onChange={onChangeConditionsOp}
+                      />
+                      {{ allOrAny: '' }} of these conditions match:
+                    </Trans>
                   </Text>
 
                   <ConditionsList
@@ -1103,7 +1112,7 @@ export function EditRuleModal({ defaultRule, onSave: originalOnSave }) {
                 </View>
 
                 <Text style={{ marginBottom: 15 }}>
-                  {t('Then apply these actions:')}
+                  <Trans>Then apply these actions:</Trans>
                 </Text>
                 <View style={{ flex: 1 }}>
                   {actionSplits.length === 0 && (
@@ -1111,7 +1120,7 @@ export function EditRuleModal({ defaultRule, onSave: originalOnSave }) {
                       style={{ alignSelf: 'flex-start' }}
                       onPress={addInitialAction}
                     >
-                      {t('Add action')}
+                      <Trans>Add action</Trans>
                     </Button>
                   )}
                   <Stack spacing={2} data-testid="action-split-list">
@@ -1200,7 +1209,7 @@ export function EditRuleModal({ defaultRule, onSave: originalOnSave }) {
                               addActionToSplitAfterIndex(splitIndex, -1)
                             }
                           >
-                            {t('Add action')}
+                            <Trans>Add action</Trans>
                           </Button>
                         )}
                       </View>
@@ -1233,7 +1242,7 @@ export function EditRuleModal({ defaultRule, onSave: originalOnSave }) {
                   }}
                 >
                   <Text style={{ color: theme.pageTextLight, marginBottom: 0 }}>
-                    {t('This rule applies to these transactions:')}
+                    <Trans>This rule applies to these transactions:</Trans>
                   </Text>
 
                   <View style={{ flex: 1 }} />
@@ -1241,7 +1250,7 @@ export function EditRuleModal({ defaultRule, onSave: originalOnSave }) {
                     isDisabled={selectedInst.items.size === 0}
                     onPress={onApply}
                   >
-                    {t('Apply actions')} ({selectedInst.items.size})
+                    <Trans>Apply actions</Trans> ({selectedInst.items.size})
                   </Button>
                 </View>
 
@@ -1264,7 +1273,7 @@ export function EditRuleModal({ defaultRule, onSave: originalOnSave }) {
                 >
                   <Button onClick={close}>{t('Cancel')}</Button>
                   <Button variant="primary" onPress={() => onSave(close)}>
-                    {t('Save')}
+                    <Trans>Save</Trans>
                   </Button>
                 </Stack>
               </View>

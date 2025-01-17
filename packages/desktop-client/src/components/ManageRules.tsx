@@ -8,7 +8,6 @@ import React, {
   type Dispatch,
 } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
 
 import { useSchedules } from 'loot-core/client/data-hooks/schedules';
 import { q } from 'loot-core/shared/query';
@@ -25,17 +24,18 @@ import { useAccounts } from '../hooks/useAccounts';
 import { useCategories } from '../hooks/useCategories';
 import { usePayees } from '../hooks/usePayees';
 import { useSelected, SelectedProvider } from '../hooks/useSelected';
+import { useDispatch } from '../redux';
 import { theme } from '../style';
 
 import { Button } from './common/Button2';
 import { Link } from './common/Link';
 import { Search } from './common/Search';
+import { SimpleTable } from './common/SimpleTable';
 import { Stack } from './common/Stack';
 import { Text } from './common/Text';
 import { View } from './common/View';
 import { RulesHeader } from './rules/RulesHeader';
 import { RulesList } from './rules/RulesList';
-import { SimpleTable } from './rules/SimpleTable';
 
 function mapValue(
   field,

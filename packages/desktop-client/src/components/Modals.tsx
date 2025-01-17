@@ -1,7 +1,6 @@
 // @ts-strict-ignore
 import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 
 import { closeModal } from 'loot-core/client/actions';
@@ -10,6 +9,7 @@ import * as monthUtils from 'loot-core/src/shared/months';
 
 import { useMetadataPref } from '../hooks/useMetadataPref';
 import { useModalState } from '../hooks/useModalState';
+import { useDispatch } from '../redux';
 
 import { ModalTitle, ModalHeader } from './common/Modal';
 import { AccountAutocompleteModal } from './modals/AccountAutocompleteModal';
@@ -28,8 +28,10 @@ import { CoverModal } from './modals/CoverModal';
 import { CreateAccountModal } from './modals/CreateAccountModal';
 import { CreateEncryptionKeyModal } from './modals/CreateEncryptionKeyModal';
 import { CreateLocalAccountModal } from './modals/CreateLocalAccountModal';
+import { EditUserAccess } from './modals/EditAccess';
 import { EditFieldModal } from './modals/EditFieldModal';
 import { EditRuleModal } from './modals/EditRuleModal';
+import { EditUserFinanceApp } from './modals/EditUser';
 import { EnvelopeBalanceMenuModal } from './modals/EnvelopeBalanceMenuModal';
 import { EnvelopeBudgetMenuModal } from './modals/EnvelopeBudgetMenuModal';
 import { EnvelopeBudgetMonthMenuModal } from './modals/EnvelopeBudgetMonthMenuModal';
@@ -45,6 +47,7 @@ import { KeyboardShortcutModal } from './modals/KeyboardShortcutModal';
 import { LoadBackupModal } from './modals/LoadBackupModal';
 import { ConfirmChangeDocumentDirModal } from './modals/manager/ConfirmChangeDocumentDir';
 import { DeleteFileModal } from './modals/manager/DeleteFileModal';
+import { DuplicateFileModal } from './modals/manager/DuplicateFileModal';
 import { FilesSettingsModal } from './modals/manager/FilesSettingsModal';
 import { ImportActualModal } from './modals/manager/ImportActualModal';
 import { ImportModal } from './modals/manager/ImportModal';
@@ -53,7 +56,9 @@ import { ImportYNAB5Modal } from './modals/manager/ImportYNAB5Modal';
 import { ManageRulesModal } from './modals/ManageRulesModal';
 import { MergeUnusedPayeesModal } from './modals/MergeUnusedPayeesModal';
 import { NotesModal } from './modals/NotesModal';
+import { OpenIDEnableModal } from './modals/OpenIDEnableModal';
 import { OutOfSyncMigrationsModal } from './modals/OutOfSyncMigrationsModal';
+import { PasswordEnableModal } from './modals/PasswordEnableModal';
 import { PayeeAutocompleteModal } from './modals/PayeeAutocompleteModal';
 import { ScheduledTransactionMenuModal } from './modals/ScheduledTransactionMenuModal';
 import { SelectLinkedAccountsModal } from './modals/SelectLinkedAccountsModal';
@@ -64,10 +69,12 @@ import { TrackingBudgetMenuModal } from './modals/TrackingBudgetMenuModal';
 import { TrackingBudgetMonthMenuModal } from './modals/TrackingBudgetMonthMenuModal';
 import { TrackingBudgetSummaryModal } from './modals/TrackingBudgetSummaryModal';
 import { TransferModal } from './modals/TransferModal';
+import { TransferOwnership } from './modals/TransferOwnership';
 import { DiscoverSchedules } from './schedules/DiscoverSchedules';
 import { PostsOfflineNotification } from './schedules/PostsOfflineNotification';
 import { ScheduleDetails } from './schedules/ScheduleDetails';
 import { ScheduleLink } from './schedules/ScheduleLink';
+import { UpcomingLength } from './schedules/UpcomingLength';
 import { NamespaceContext } from './spreadsheet/NamespaceContext';
 
 export function Modals() {
@@ -296,7 +303,7 @@ export function Modals() {
                 />
               )}
               inputPlaceholder={t('Category name')}
-              buttonText="Add"
+              buttonText={t('Add')}
               onValidate={options.onValidate}
               onSubmit={options.onSubmit}
             />
@@ -366,6 +373,9 @@ export function Modals() {
 
         case 'schedules-discover':
           return <DiscoverSchedules key={name} />;
+
+        case 'schedules-upcoming-length':
+          return <UpcomingLength key={name} />;
 
         case 'schedule-posts-offline-notification':
           return <PostsOfflineNotification key={name} />;
@@ -586,6 +596,16 @@ export function Modals() {
           return <BudgetListModal key={name} />;
         case 'delete-budget':
           return <DeleteFileModal key={name} file={options.file} />;
+        case 'duplicate-budget':
+          return (
+            <DuplicateFileModal
+              key={name}
+              file={options.file}
+              managePage={options?.managePage}
+              loadBudget={options?.loadBudget}
+              onComplete={options?.onComplete}
+            />
+          );
         case 'import':
           return <ImportModal key={name} />;
         case 'files-settings':
@@ -604,8 +624,44 @@ export function Modals() {
           return <ImportYNAB5Modal key={name} />;
         case 'import-actual':
           return <ImportActualModal key={name} />;
+        case 'manager-load-backup':
+          return (
+            <LoadBackupModal
+              key={name}
+              budgetId={options.budgetId}
+              backupDisabled={true}
+              watchUpdates={false}
+            />
+          );
         case 'out-of-sync-migrations':
           return <OutOfSyncMigrationsModal key={name} />;
+
+        case 'edit-access':
+          return (
+            <EditUserAccess
+              key={name}
+              defaultUserAccess={options.access}
+              onSave={options.onSave}
+            />
+          );
+
+        case 'edit-user':
+          return (
+            <EditUserFinanceApp
+              key={name}
+              defaultUser={options.user}
+              onSave={options.onSave}
+            />
+          );
+
+        case 'transfer-ownership':
+          return <TransferOwnership key={name} onSave={options.onSave} />;
+
+        case 'enable-openid':
+          return <OpenIDEnableModal key={name} onSave={options.onSave} />;
+
+        case 'enable-password-auth':
+          return <PasswordEnableModal key={name} onSave={options.onSave} />;
 
         default:
           throw new Error('Unknown modal');

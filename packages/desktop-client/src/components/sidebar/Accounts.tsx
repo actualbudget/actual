@@ -1,19 +1,18 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useDispatch, useSelector } from 'react-redux';
 
-import { moveAccount } from 'loot-core/src/client/actions';
-import * as queries from 'loot-core/src/client/queries';
-import { type State } from 'loot-core/src/client/state-types';
+import { moveAccount } from 'loot-core/client/accounts/accountsSlice';
+import * as queries from 'loot-core/client/queries';
 import { type AccountEntity } from 'loot-core/types/models';
 
 import { useAccounts } from '../../hooks/useAccounts';
-import { useBudgetedAccounts } from '../../hooks/useBudgetedAccounts';
 import { useClosedAccounts } from '../../hooks/useClosedAccounts';
 import { useFailedAccounts } from '../../hooks/useFailedAccounts';
 import { useLocalPref } from '../../hooks/useLocalPref';
 import { useOffBudgetAccounts } from '../../hooks/useOffBudgetAccounts';
+import { useOnBudgetAccounts } from '../../hooks/useOnBudgetAccounts';
 import { useUpdatedAccounts } from '../../hooks/useUpdatedAccounts';
+import { useSelector, useDispatch } from '../../redux';
 import { theme } from '../../style';
 import { View } from '../common/View';
 
@@ -30,11 +29,9 @@ export function Accounts() {
   const failedAccounts = useFailedAccounts();
   const updatedAccounts = useUpdatedAccounts();
   const offbudgetAccounts = useOffBudgetAccounts();
-  const budgetedAccounts = useBudgetedAccounts();
+  const onBudgetAccounts = useOnBudgetAccounts();
   const closedAccounts = useClosedAccounts();
-  const syncingAccountIds = useSelector(
-    (state: State) => state.account.accountsSyncing,
-  );
+  const syncingAccountIds = useSelector(state => state.account.accountsSyncing);
 
   const getAccountPath = (account: AccountEntity) => `/accounts/${account.id}`;
 
@@ -67,7 +64,7 @@ export function Accounts() {
       targetIdToMove = idx < accounts.length ? accounts[idx].id : null;
     }
 
-    dispatch(moveAccount(id, targetIdToMove));
+    dispatch(moveAccount({ id, targetId: targetIdToMove as string }));
   }
 
   const onToggleClosedAccounts = () => {
@@ -100,11 +97,11 @@ export function Accounts() {
           style={{ fontWeight, marginTop: 15 }}
         />
 
-        {budgetedAccounts.length > 0 && (
+        {onBudgetAccounts.length > 0 && (
           <Account
-            name={t('For budget')}
-            to="/accounts/budgeted"
-            query={queries.budgetedAccountBalance()}
+            name={t('On budget')}
+            to="/accounts/onbudget"
+            query={queries.onBudgetAccountBalance()}
             style={{
               fontWeight,
               marginTop: 13,
@@ -113,15 +110,15 @@ export function Accounts() {
           />
         )}
 
-        {budgetedAccounts.map((account, i) => (
+        {onBudgetAccounts.map((account, i) => (
           <Account
             key={account.id}
             name={account.name}
             account={account}
             connected={!!account.bank}
             pending={syncingAccountIds.includes(account.id)}
-            failed={failedAccounts?.has(account.id)}
-            updated={updatedAccounts?.includes(account.id)}
+            failed={failedAccounts.has(account.id)}
+            updated={updatedAccounts.includes(account.id)}
             to={getAccountPath(account)}
             query={queries.accountBalance(account)}
             onDragChange={onDragChange}
@@ -134,7 +131,7 @@ export function Accounts() {
           <Account
             name={t('Off budget')}
             to="/accounts/offbudget"
-            query={queries.offbudgetAccountBalance()}
+            query={queries.offBudgetAccountBalance()}
             style={{
               fontWeight,
               marginTop: 13,
@@ -150,8 +147,8 @@ export function Accounts() {
             account={account}
             connected={!!account.bank}
             pending={syncingAccountIds.includes(account.id)}
-            failed={failedAccounts?.has(account.id)}
-            updated={updatedAccounts?.includes(account.id)}
+            failed={failedAccounts.has(account.id)}
+            updated={updatedAccounts.includes(account.id)}
             to={getAccountPath(account)}
             query={queries.accountBalance(account)}
             onDragChange={onDragChange}

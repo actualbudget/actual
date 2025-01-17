@@ -1,5 +1,4 @@
 import React from 'react';
-import { useSelector } from 'react-redux';
 
 import { useReports } from 'loot-core/client/data-hooks/reports';
 import { getMonthYearFormat } from 'loot-core/src/shared/months';
@@ -7,6 +6,7 @@ import { integerToAmount, amountToInteger } from 'loot-core/src/shared/util';
 
 import { useCategories } from '../../hooks/useCategories';
 import { useDateFormat } from '../../hooks/useDateFormat';
+import { useSelector } from '../../redux';
 import { AccountAutocomplete } from '../autocomplete/AccountAutocomplete';
 import { Autocomplete } from '../autocomplete/Autocomplete';
 import { CategoryAutocomplete } from '../autocomplete/CategoryAutocomplete';
@@ -32,6 +32,7 @@ export function GenericInput({
   inputRef,
   style,
   onChange,
+  op = undefined,
 }) {
   const { grouped: categoryGroups } = useCategories();
   const { data: savedReports } = useReports();
@@ -100,18 +101,26 @@ export function GenericInput({
           break;
 
         case 'account':
-          content = (
-            <AccountAutocomplete
-              type={autocompleteType}
-              value={value}
-              openOnFocus={true}
-              onSelect={onChange}
-              inputProps={{
-                inputRef,
-                ...(showPlaceholder ? { placeholder: 'nothing' } : null),
-              }}
-            />
-          );
+          switch (op) {
+            case 'onBudget':
+            case 'offBudget':
+              content = null;
+              break;
+            default:
+              content = (
+                <AccountAutocomplete
+                  type={autocompleteType}
+                  value={value}
+                  openOnFocus={true}
+                  onSelect={onChange}
+                  inputProps={{
+                    inputRef,
+                    ...(showPlaceholder ? { placeholder: 'nothing' } : null),
+                  }}
+                />
+              );
+              break;
+          }
           break;
 
         case 'category':

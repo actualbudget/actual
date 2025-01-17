@@ -694,7 +694,7 @@ const compileOp = saveStack('op', (state, fieldRef, opData) => {
     }
     case '$ne': {
       if (castInput(state, rhs, lhs.type).type === 'null') {
-        return `${val(state, lhs)} IS NULL`;
+        return `${val(state, lhs)} IS NOT NULL`;
       }
 
       const [left, right] = valArray(state, [lhs, rhs], [null, lhs.type]);
@@ -757,7 +757,7 @@ function compileConditions(state, conds) {
           }
           return compileAnd(state, cond);
         } else if (field === '$or') {
-          if (!cond) {
+          if (!cond || (Array.isArray(cond) && cond.length === 0)) {
             return null;
           }
           return compileOr(state, cond);

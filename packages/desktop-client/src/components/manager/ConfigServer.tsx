@@ -2,14 +2,15 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { createBudget, loggedIn, signOut } from 'loot-core/client/actions';
 import {
   isNonProductionEnvironment,
   isElectron,
 } from 'loot-core/src/shared/environment';
 
-import { useActions } from '../../hooks/useActions';
 import { useGlobalPref } from '../../hooks/useGlobalPref';
 import { useNavigate } from '../../hooks/useNavigate';
+import { useDispatch } from '../../redux';
 import { theme } from '../../style';
 import { Button, ButtonWithLoading } from '../common/Button2';
 import { BigInput } from '../common/Input';
@@ -22,7 +23,7 @@ import { Title } from './subscribe/common';
 
 export function ConfigServer() {
   const { t } = useTranslation();
-  const { createBudget, signOut, loggedIn } = useActions();
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const [url, setUrl] = useState('');
   const currentUrl = useServerURL();
@@ -63,28 +64,21 @@ export function ConfigServer() {
 
     setError(null);
     setLoading(true);
-    const { error } = await setServerUrl(url);
 
-    if (
-      ['network-failure', 'get-server-failure'].includes(error) &&
-      !url.startsWith('http://') &&
-      !url.startsWith('https://')
-    ) {
-      const { error } = await setServerUrl('https://' + url);
-      if (error) {
-        setUrl('https://' + url);
-        setError(error);
-      } else {
-        await signOut();
-        navigate('/');
-      }
-      setLoading(false);
-    } else if (error) {
+    let httpUrl = url;
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      httpUrl = 'https://' + url;
+    }
+
+    const { error } = await setServerUrl(httpUrl);
+    setUrl(httpUrl);
+
+    if (error) {
       setLoading(false);
       setError(error);
     } else {
       setLoading(false);
-      await signOut();
+      await dispatch(signOut());
       navigate('/');
     }
   }
@@ -111,14 +105,14 @@ export function ConfigServer() {
 
   async function onSkip() {
     await setServerUrl(null);
-    await loggedIn();
+    await dispatch(loggedIn());
     navigate('/');
   }
 
   async function onCreateTestFile() {
     await setServerUrl(null);
-    await createBudget({ testMode: true });
-    window.__navigate('/');
+    await dispatch(createBudget({ testMode: true }));
+    navigate('/');
   }
 
   return (
@@ -257,7 +251,10 @@ export function ConfigServer() {
               <Button
                 variant="primary"
                 style={{ marginLeft: 15 }}
-                onPress={onCreateTestFile}
+                onPress={async () => {
+                  await onCreateTestFile();
+                  navigate('/');
+                }}
               >
                 {t('Create test file')}
               </Button>

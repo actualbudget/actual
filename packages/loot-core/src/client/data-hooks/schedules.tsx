@@ -11,7 +11,11 @@ import React, {
 import { useSyncedPref } from '@actual-app/web/src/hooks/useSyncedPref';
 
 import { q, type Query } from '../../shared/query';
-import { getHasTransactionsQuery, getStatus } from '../../shared/schedules';
+import {
+  getUpcomingDays,
+  getHasTransactionsQuery,
+  getStatus,
+} from '../../shared/schedules';
 import {
   type TransactionEntity,
   type ScheduleEntity,
@@ -27,7 +31,7 @@ function loadStatuses(
   schedules: readonly ScheduleEntity[],
   onData: (data: ScheduleStatuses) => void,
   onError: (error: Error) => void,
-  upcomingLength: string,
+  upcomingLength: number,
 ) {
   return liveQuery<TransactionEntity>(getHasTransactionsQuery(schedules), {
     onData: data => {
@@ -66,13 +70,14 @@ type UseSchedulesResult = ScheduleData & {
 export function useSchedules({
   query,
 }: UseSchedulesProps = {}): UseSchedulesResult {
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | undefined>(undefined);
   const [data, setData] = useState<ScheduleData>({
     schedules: [],
     statuses: new Map(),
   });
   const [upcomingLength] = useSyncedPref('upcomingScheduledTransactionLength');
+  const upcomingDays = getUpcomingDays(upcomingLength);
 
   const scheduleQueryRef = useRef<LiveQuery<ScheduleEntity> | null>(null);
   const statusQueryRef = useRef<LiveQuery<TransactionEntity> | null>(null);
@@ -111,7 +116,7 @@ export function useSchedules({
             }
           },
           onError,
-          upcomingLength,
+          upcomingDays,
         );
       },
       onError,
@@ -122,7 +127,7 @@ export function useSchedules({
       scheduleQueryRef.current?.unsubscribe();
       statusQueryRef.current?.unsubscribe();
     };
-  }, [query, upcomingLength]);
+  }, [query, upcomingDays]);
 
   return {
     isLoading,
@@ -161,7 +166,7 @@ export function useCachedSchedules() {
 }
 
 export function accountSchedulesQuery(
-  accountId?: AccountEntity['id'] | 'budgeted' | 'offbudget' | 'uncategorized',
+  accountId?: AccountEntity['id'] | 'onbudget' | 'offbudget' | 'uncategorized',
 ) {
   const filterByAccount = accountFilter(accountId, '_account');
   const filterByPayee = accountFilter(accountId, '_payee.transfer_acct');

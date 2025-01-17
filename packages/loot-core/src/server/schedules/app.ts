@@ -13,8 +13,10 @@ import {
   getScheduledAmount,
   getStatus,
   recurConfigToRSchedule,
+  getNextDate,
+  getDateWithSkippedWeekend,
 } from '../../shared/schedules';
-import { Condition, Rule } from '../accounts/rules';
+import { Rule } from '../accounts/rules';
 import { addTransactions } from '../accounts/sync';
 import {
   getRules,
@@ -64,41 +66,6 @@ export function updateConditions(conditions, newConditions) {
     .map(x => x[1]);
 
   return updated.concat(added);
-}
-
-export function getNextDate(
-  dateCond,
-  start = new Date(currentDay()),
-  noSkipWeekend = false,
-) {
-  start = d.startOfDay(start);
-
-  const cond = new Condition(dateCond.op, 'date', dateCond.value, null);
-  const value = cond.getValue();
-
-  if (value.type === 'date') {
-    return value.date;
-  } else if (value.type === 'recur') {
-    let dates = value.schedule.occurrences({ start, take: 1 }).toArray();
-
-    if (dates.length === 0) {
-      // Could be a schedule with limited occurrences, so we try to
-      // find the last occurrence
-      dates = value.schedule.occurrences({ reverse: true, take: 1 }).toArray();
-    }
-
-    if (dates.length > 0) {
-      let date = dates[0].date;
-      if (value.schedule.data.skipWeekend && !noSkipWeekend) {
-        date = getDateWithSkippedWeekend(
-          date,
-          value.schedule.data.weekendSolve,
-        );
-      }
-      return dayFromDate(date);
-    }
-  }
-  return null;
 }
 
 export async function getRuleForSchedule(id: string | null): Promise<Rule> {
@@ -533,7 +500,7 @@ async function advanceSchedulesService(syncSuccess) {
   }
 
   if (failedToPost.length > 0) {
-    connection.send('schedules-offline', { payees: failedToPost });
+    connection.send('schedules-offline');
   } else if (didPost) {
     // This forces a full refresh of transactions because it
     // simulates them coming in from a full sync. This not a
@@ -542,7 +509,7 @@ async function advanceSchedulesService(syncSuccess) {
     connection.send('sync-event', {
       type: 'success',
       tables: ['transactions'],
-      syncDisabled: 'false',
+      syncDisabled: false,
     });
   }
 }
@@ -581,19 +548,3 @@ app.events.on('sync', ({ type }) => {
     }
   }
 });
-
-export function getDateWithSkippedWeekend(
-  date: Date,
-  solveMode: 'after' | 'before',
-) {
-  if (d.isWeekend(date)) {
-    if (solveMode === 'after') {
-      return d.nextMonday(date);
-    } else if (solveMode === 'before') {
-      return d.previousFriday(date);
-    } else {
-      throw new Error('Unknown weekend solve mode, this should not happen!');
-    }
-  }
-  return date;
-}

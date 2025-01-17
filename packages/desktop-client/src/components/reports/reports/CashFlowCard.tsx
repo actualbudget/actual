@@ -6,7 +6,6 @@ import { Bar, BarChart, LabelList, ResponsiveContainer } from 'recharts';
 import { integerToCurrency } from 'loot-core/src/shared/util';
 import { type CashFlowWidget } from 'loot-core/src/types/models';
 
-import { useFeatureFlag } from '../../../hooks/useFeatureFlag';
 import { theme } from '../../../style';
 import { View } from '../../common/View';
 import { PrivacyFilter } from '../../PrivacyFilter';
@@ -98,7 +97,6 @@ export function CashFlowCard({
   onMetaChange,
   onRemove,
 }: CashFlowCardProps) {
-  const isDashboardsFeatureEnabled = useFeatureFlag('dashboards');
   const { t } = useTranslation();
 
   const [start, end] = calculateTimeRange(meta?.timeFrame, defaultTimeFrame);
@@ -121,11 +119,8 @@ export function CashFlowCard({
   return (
     <ReportCard
       isEditing={isEditing}
-      to={
-        isDashboardsFeatureEnabled
-          ? `/reports/cash-flow/${widgetId}`
-          : '/reports/cash-flow'
-      }
+      disableClick={nameMenuOpen}
+      to={`/reports/cash-flow/${widgetId}`}
       menuItems={[
         {
           name: 'rename',

@@ -3,10 +3,11 @@ import userEvent from '@testing-library/user-event';
 import { vi } from 'vitest';
 
 import { generateAccount } from 'loot-core/src/mocks';
-import { TestProvider } from 'loot-core/src/mocks/redux';
 import type { AccountEntity, PayeeEntity } from 'loot-core/types/models';
 
+import { AuthProvider } from '../../auth/AuthProvider';
 import { useCommonPayees } from '../../hooks/usePayees';
+import { TestProvider } from '../../redux/mock';
 import { ResponsiveProvider } from '../responsive/ResponsiveProvider';
 
 import {
@@ -63,17 +64,19 @@ function renderPayeeAutocomplete(
 
   render(
     <TestProvider>
-      <ResponsiveProvider>
-        <div data-testid="autocomplete-test">
-          <PayeeAutocomplete
-            {...autocompleteProps}
-            onSelect={vi.fn()}
-            type="single"
-            value={null}
-            embedded={false}
-          />
-        </div>
-      </ResponsiveProvider>
+      <AuthProvider>
+        <ResponsiveProvider>
+          <div data-testid="autocomplete-test">
+            <PayeeAutocomplete
+              {...autocompleteProps}
+              onSelect={vi.fn()}
+              type="single"
+              value={null}
+              embedded={false}
+            />
+          </div>
+        </ResponsiveProvider>
+      </AuthProvider>
     </TestProvider>,
   );
   return screen.getByTestId('autocomplete-test');

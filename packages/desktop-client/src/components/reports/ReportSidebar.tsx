@@ -1,6 +1,5 @@
 import React, { useMemo, useRef, useState } from 'react';
-
-import { t } from 'i18next';
+import { useTranslation } from 'react-i18next';
 
 import * as monthUtils from 'loot-core/src/shared/months';
 import { type CategoryEntity } from 'loot-core/types/models/category';
@@ -40,6 +39,7 @@ type ReportSidebarProps = {
   setGroupBy: (value: string) => void;
   setInterval: (value: string) => void;
   setBalanceType: (value: string) => void;
+  setSortBy: (value: string) => void;
   setMode: (value: string) => void;
   setIsDateStatic: (value: boolean) => void;
   setShowEmpty: (value: boolean) => void;
@@ -73,6 +73,7 @@ export function ReportSidebar({
   setGroupBy,
   setInterval,
   setBalanceType,
+  setSortBy,
   setMode,
   setIsDateStatic,
   setShowEmpty,
@@ -90,6 +91,7 @@ export function ReportSidebar({
   firstDayOfWeekIdx,
   isComplexCategoryCondition = false,
 }: ReportSidebarProps) {
+  const { t } = useTranslation();
   const [menuOpen, setMenuOpen] = useState(false);
   const triggerRef = useRef(null);
 
@@ -141,6 +143,12 @@ export function ReportSidebar({
     setBalanceType(cond);
   };
 
+  const onChangeSortBy = (cond: string) => {
+    setSessionReport('sortBy', cond);
+    onReportChange({ type: 'modify' });
+    setSortBy(cond);
+  };
+
   const rangeOptions = useMemo(() => {
     const options: SelectOption[] = ReportOptions.dateRange
       .filter(f => f[customReportItems.interval as keyof dateRangeProps])
@@ -152,6 +160,15 @@ export function ReportSidebar({
     }
     return options;
   }, [customReportItems, dateRangeLine]);
+
+  const disableSort =
+    customReportItems.graphType !== 'TableGraph' &&
+    (customReportItems.groupBy === 'Interval' ||
+      (disabledList?.mode
+        ?.find(m => m.description === customReportItems.mode)
+        ?.graphs.find(g => g.description === customReportItems.graphType)
+        ?.disableSort ??
+        false));
 
   return (
     <View
@@ -266,6 +283,30 @@ export function ReportSidebar({
             disabledKeys={[]}
           />
         </View>
+
+        {!disableSort && (
+          <View
+            style={{
+              flexDirection: 'row',
+              padding: 5,
+              alignItems: 'center',
+            }}
+          >
+            <Text style={{ width: 50, textAlign: 'right', marginRight: 5 }}>
+              {t('Sort:')}
+            </Text>
+            <Select
+              value={customReportItems.sortBy}
+              onChange={e => onChangeSortBy(e)}
+              options={ReportOptions.sortBy.map(option => [
+                option.description,
+                option.description,
+              ])}
+              disabledKeys={disabledItems('sort')}
+            />
+          </View>
+        )}
+
         <View
           style={{
             flexDirection: 'row',

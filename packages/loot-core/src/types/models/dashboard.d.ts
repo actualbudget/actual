@@ -4,7 +4,7 @@ import { type RuleConditionEntity } from './rule';
 export type TimeFrame = {
   start: string;
   end: string;
-  mode: 'sliding-window' | 'static' | 'full';
+  mode: 'sliding-window' | 'static' | 'full' | 'lastYear' | 'yearToDate';
 };
 
 type AbstractWidget<
@@ -65,7 +65,9 @@ type SpecializedWidget =
   | NetWorthWidget
   | CashFlowWidget
   | SpendingWidget
-  | MarkdownWidget;
+  | MarkdownWidget
+  | SummaryWidget
+  | CalendarWidget;
 export type Widget = SpecializedWidget | CustomReportWidget;
 export type NewWidget = Omit<Widget, 'id' | 'tombstone'>;
 
@@ -88,3 +90,39 @@ export type ExportImportDashboard = {
   version: 1;
   widgets: ExportImportDashboardWidget[];
 };
+
+export type SummaryWidget = AbstractWidget<
+  'summary-card',
+  {
+    name?: string;
+    conditions?: RuleConditionEntity[];
+    conditionsOp?: 'and' | 'or';
+    timeFrame?: TimeFrame;
+    content?: string;
+  } | null
+>;
+
+export type BaseSummaryContent = {
+  type: 'sum' | 'avgPerMonth' | 'avgPerTransact';
+  fontSize?: number;
+};
+
+export type PercentageSummaryContent = {
+  type: 'percentage';
+  divisorConditions: RuleConditionEntity[];
+  divisorConditionsOp: 'and' | 'or';
+  divisorAllTimeDateRange?: boolean;
+  fontSize?: number;
+};
+
+export type SummaryContent = BaseSummaryContent | PercentageSummaryContent;
+
+export type CalendarWidget = AbstractWidget<
+  'calendar-card',
+  {
+    name?: string;
+    conditions?: RuleConditionEntity[];
+    conditionsOp?: 'and' | 'or';
+    timeFrame?: TimeFrame;
+  } | null
+>;

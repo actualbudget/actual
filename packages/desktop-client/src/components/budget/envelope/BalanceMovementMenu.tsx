@@ -20,9 +20,9 @@ export function BalanceMovementMenu({
   onBudgetAction,
   onClose = () => {},
 }: BalanceMovementMenuProps) {
-  const catBalance = useEnvelopeSheetValue(
-    envelopeBudget.catBalance(categoryId),
-  );
+  const catBalance =
+    useEnvelopeSheetValue(envelopeBudget.catBalance(categoryId)) ?? 0;
+
   const [menu, _setMenu] = useState('menu');
 
   const ref = useRef<HTMLSpanElement>(null);

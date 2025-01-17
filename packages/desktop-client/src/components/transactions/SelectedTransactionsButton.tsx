@@ -1,7 +1,6 @@
 import { useMemo } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
 
 import { pushModal } from 'loot-core/client/actions';
 import { isPreviewId } from 'loot-core/shared/transactions';
@@ -9,6 +8,7 @@ import { validForTransfer } from 'loot-core/src/client/transfer';
 import { type TransactionEntity } from 'loot-core/types/models';
 
 import { useSelectedItems } from '../../hooks/useSelected';
+import { useDispatch } from '../../redux';
 import { Menu } from '../common/Menu';
 import { SelectedItemsButton } from '../table';
 
@@ -31,6 +31,7 @@ type SelectedTransactionsButtonProps = {
   onLinkSchedule: (selectedIds: string[]) => void;
   onUnlinkSchedule: (selectedIds: string[]) => void;
   onCreateRule: (selectedIds: string[]) => void;
+  onRunRules: (selectedIds: string[]) => void;
   onSetTransfer: (selectedIds: string[]) => void;
   onScheduleAction: (
     action: 'post-transaction' | 'skip',
@@ -50,6 +51,7 @@ export function SelectedTransactionsButton({
   onLinkSchedule,
   onUnlinkSchedule,
   onCreateRule,
+  onRunRules,
   onSetTransfer,
   onScheduleAction,
   showMakeTransfer,
@@ -218,9 +220,9 @@ export function SelectedTransactionsButton({
               } as const,
               {
                 name: 'post-transaction',
-                text: t('Post transaction'),
+                text: t('Post transaction today'),
               } as const,
-              { name: 'skip', text: t('Skip scheduled date') } as const,
+              { name: 'skip', text: t('Skip next scheduled date') } as const,
             ]
           : [
               { name: 'show', text: t('Show'), key: 'F' } as const,
@@ -253,7 +255,12 @@ export function SelectedTransactionsButton({
                       name: 'create-rule',
                       text: t('Create rule'),
                     } as const,
+                    {
+                      name: 'run-rules',
+                      text: t('Run Rules'),
+                    } as const,
                   ]),
+
               ...(showMakeTransfer
                 ? [
                     {
@@ -324,6 +331,9 @@ export function SelectedTransactionsButton({
             break;
           case 'create-rule':
             onCreateRule(selectedIds);
+            break;
+          case 'run-rules':
+            onRunRules(selectedIds);
             break;
           case 'set-transfer':
             onSetTransfer(selectedIds);
