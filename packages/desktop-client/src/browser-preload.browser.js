@@ -121,6 +121,7 @@ global.Actual = {
           reader.readAsArrayBuffer(file);
           reader.onload = async function (ev) {
             const filepath = `/uploads/${filename}`;
+
             window.__actionsForMenu
               .uploadFile(filename, ev.target.result)
               .then(() => resolve([filepath]));
