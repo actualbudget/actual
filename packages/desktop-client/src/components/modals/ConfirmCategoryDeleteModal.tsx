@@ -78,7 +78,7 @@ export function ConfirmCategoryDeleteModal({
               </Block>
             ) : (
               <Block>
-                <strong>{category.name}</strong>is used by existing transactions
+                <strong>{category.name}</strong> is used by existing transactions
                 {!isIncome &&
                   ' or it has a positive leftover balance currently'}
                 . <strong>Are you sure you want to delete it?</strong> If so,
