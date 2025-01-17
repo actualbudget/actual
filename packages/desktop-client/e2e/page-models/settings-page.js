@@ -24,8 +24,6 @@ export class SettingsPage {
   }
 
   async useBudgetType(budgetType) {
-    await this.enableExperimentalFeature('Budget mode toggle');
-
     await this.switchBudgetTypeButton.waitFor();
 
     const buttonText = await this.switchBudgetTypeButton.textContent();
