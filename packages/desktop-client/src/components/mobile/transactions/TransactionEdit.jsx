@@ -782,6 +782,8 @@ const TransactionEditInner = memo(function TransactionEditInner({
           }}
         >
           <FieldLabel title={t('Amount')} flush style={{ marginBottom: 0 }} />
+          Agent: {JSON.stringify(agent.browser)}
+          Name: {JSON.stringify(agent.browser.name)}
           <FocusableAmountInput
             value={transaction.amount}
             zeroSign="-"
