@@ -49,6 +49,13 @@ async function appFocused() {
   await send('app-focused');
 }
 
+async function uploadFile(filename: string, contents: ArrayBuffer) {
+  send('upload-file-web', {
+    filename,
+    contents,
+  });
+}
+
 function inputFocused() {
   return (
     window.document.activeElement.tagName === 'INPUT' ||
@@ -64,6 +71,7 @@ window.__actionsForMenu = {
   redo,
   appFocused,
   inputFocused,
+  uploadFile,
 };
 
 // Expose send for fun!
@@ -91,6 +99,7 @@ declare global {
       redo: typeof redo;
       appFocused: typeof appFocused;
       inputFocused: typeof inputFocused;
+      uploadFile: typeof uploadFile;
     };
 
     $send: typeof send;

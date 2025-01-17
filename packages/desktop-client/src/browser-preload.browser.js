@@ -2,7 +2,6 @@ import { initBackend as initSQLBackend } from 'absurd-sql/dist/indexeddb-main-th
 // eslint-disable-next-line import/no-unresolved
 import { registerSW } from 'virtual:pwa-register';
 
-import { send } from 'loot-core/platform/client/fetch';
 import * as Platform from 'loot-core/src/client/platform';
 
 import packageJson from '../package.json';
@@ -122,10 +121,9 @@ global.Actual = {
           reader.readAsArrayBuffer(file);
           reader.onload = async function (ev) {
             const filepath = `/uploads/${filename}`;
-            send('upload-file-web', {
-              filename,
-              contents: ev.target.result,
-            }).then(() => resolve([filepath]));
+            window.__actionsForMenu
+              .uploadFile(filename, ev.target.result)
+              .then(() => resolve([filepath]));
           };
           reader.onerror = function () {
             alert('Error reading file');
