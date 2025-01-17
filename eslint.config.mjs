@@ -736,6 +736,12 @@ export default [
       'import/no-default-export': 'off',
     },
   },
+  {
+    files: ['packages/api/index.ts'],
+    rules: {
+      'import/no-unresolved': 'off',
+    },
+  },
   {},
   {
     // TODO: fix the issues in these files
