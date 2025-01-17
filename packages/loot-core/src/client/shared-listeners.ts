@@ -6,9 +6,6 @@ import { listen, send } from '../platform/client/fetch';
 import {
   addNotification,
   closeAndDownloadBudget,
-  getAccounts,
-  getCategories,
-  getPayees,
   loadPrefs,
   pushModal,
   resetSync,
@@ -16,6 +13,7 @@ import {
   sync,
   uploadBudget,
 } from './actions';
+import { getAccounts, getCategories, getPayees } from './queries/queriesSlice';
 import type { Notification } from './state-types/notifications';
 import { type AppStore } from './store';
 

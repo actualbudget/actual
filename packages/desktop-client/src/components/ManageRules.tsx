@@ -10,9 +10,9 @@ import React, {
 import { useTranslation } from 'react-i18next';
 
 import { useSchedules } from 'loot-core/client/data-hooks/schedules';
+import { initiallyLoadPayees } from 'loot-core/client/queries/queriesSlice';
 import { q } from 'loot-core/shared/query';
 import { pushModal } from 'loot-core/src/client/actions/modals';
-import { initiallyLoadPayees } from 'loot-core/src/client/actions/queries';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as undo from 'loot-core/src/platform/client/undo';
 import { getNormalisedString } from 'loot-core/src/shared/normalisation';

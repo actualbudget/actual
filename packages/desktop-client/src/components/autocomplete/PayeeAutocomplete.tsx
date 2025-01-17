@@ -15,8 +15,10 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { css, cx } from '@emotion/css';
 
-import { createPayee } from 'loot-core/src/client/actions/queries';
-import { getActivePayees } from 'loot-core/src/client/reducers/queries';
+import {
+  createPayee,
+  getActivePayees,
+} from 'loot-core/client/queries/queriesSlice';
 import { getNormalisedString } from 'loot-core/src/shared/normalisation';
 import {
   type AccountEntity,
@@ -326,7 +328,8 @@ export function PayeeAutocomplete({
     if (!clearOnBlur) {
       onSelect?.(makeNew(idOrIds, rawInputValue), rawInputValue);
     } else {
-      const create = payeeName => dispatch(createPayee(payeeName));
+      const create = payeeName =>
+        dispatch(createPayee({ name: payeeName })).unwrap();
 
       if (Array.isArray(idOrIds)) {
         idOrIds = await Promise.all(
