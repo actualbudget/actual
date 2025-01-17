@@ -71,6 +71,7 @@ import { getPrettyPayee } from '../utils';
 import { FocusableAmountInput } from './FocusableAmountInput';
 
 const agent = UAParser(navigator.userAgent);
+const isIOSAgent = agent.browser.name === 'Mobile Safari';
 
 function getFieldName(transactionId, field) {
   return `${field}-${transactionId}`;
@@ -471,7 +472,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
   const [totalAmountFocused, setTotalAmountFocused] = useState(
     // iOS does not support automatically opening up the keyboard for the
     // total amount field. Hence we should not focus on it on page render.
-    agent.browser.name === 'Mobile Safari' ? false : true,
+    isIOSAgent === 'Mobile Safari' ? false : true,
   );
   const childTransactionElementRefMap = useRef({});
   const hasAccountChanged = useRef(false);
@@ -489,7 +490,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
   const isInitialMount = useInitialMount();
 
   useEffect(() => {
-    if (isInitialMount && isAdding) {
+    if (isInitialMount && isAdding && !isIOSAgent) {
       onTotalAmountEdit();
     }
   }, [isAdding, isInitialMount, onTotalAmountEdit]);
