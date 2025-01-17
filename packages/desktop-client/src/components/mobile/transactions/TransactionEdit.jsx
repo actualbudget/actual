@@ -471,7 +471,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
   const [totalAmountFocused, setTotalAmountFocused] = useState(
     // iOS does not support automatically opening up the keyboard for the
     // total amount field. Hence we should not focus on it on page render.
-    agent.browser.name === 'Safari Mobile' ? false : true,
+    agent.browser.name === 'Mobile Safari' ? false : true,
   );
   const childTransactionElementRefMap = useRef({});
   const hasAccountChanged = useRef(false);
@@ -782,8 +782,6 @@ const TransactionEditInner = memo(function TransactionEditInner({
           }}
         >
           <FieldLabel title={t('Amount')} flush style={{ marginBottom: 0 }} />
-          Agent: {JSON.stringify(agent.browser)}
-          Name: {JSON.stringify(agent.browser.name)}
           <FocusableAmountInput
             value={transaction.amount}
             zeroSign="-"
