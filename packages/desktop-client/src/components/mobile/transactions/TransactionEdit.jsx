@@ -337,8 +337,6 @@ const ChildTransactionEdit = forwardRef(
             }}
           >
             <FieldLabel title={t('Amount')} style={{ padding: 0 }} />
-            Agent: {agent.browser.name}
-            Is IOS: {isIOSAgent ? 'yes' : 'no'}
             <AmountInput
               disabled={
                 editingField &&
