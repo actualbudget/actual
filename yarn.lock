@@ -123,6 +123,7 @@ __metadata:
     sass: "npm:^1.70.0"
     swc-loader: "npm:^0.2.6"
     terser-webpack-plugin: "npm:^5.3.10"
+    ua-parser-js: "npm:^2.0.0"
     usehooks-ts: "npm:^3.0.1"
     uuid: "npm:^9.0.1"
     vite: "npm:^5.2.14"
@@ -8871,6 +8872,13 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"detect-europe-js@npm:^0.1.2":
+  version: 0.1.2
+  resolution: "detect-europe-js@npm:0.1.2"
+  checksum: 10/3d6dcf6ac451baa3050ff00e05cf1841e208bc4f27c69ec2c8df5fdf2375403cf2911f8059c9c18f258d7e176c8d308e4e0e8552500d0e30a9e95a514366ef13
+  languageName: node
+  linkType: hard
+
 "detect-libc@npm:^2.0.0, detect-libc@npm:^2.0.1":
   version: 2.0.2
   resolution: "detect-libc@npm:2.0.2"
@@ -12297,6 +12305,13 @@ __metadata:
   dependencies:
     call-bind: "npm:^1.0.7"
   checksum: 10/bc5402900dc62b96ebb2548bf5b0a0bcfacc2db122236fe3ab3b3e3c884293a0d5eb777e73f059bcbf8dc8563bb65eae972fee0fb97e38a9ae27c8678f62bcfe
+  languageName: node
+  linkType: hard
+
+"is-standalone-pwa@npm:^0.1.1":
+  version: 0.1.1
+  resolution: "is-standalone-pwa@npm:0.1.1"
+  checksum: 10/bbd2ee7cbea985139f66fe8785e7699f52311e9c14d74190659885222b79dd1e8845b02f69b9221a23a2b4b00e8d4bea0a5a2603b2f26cb6d2071d46093ccf84
   languageName: node
   linkType: hard
 
@@ -19037,6 +19052,26 @@ __metadata:
   version: 1.1.0
   resolution: "typify-parser@npm:1.1.0"
   checksum: 10/269ecd7919aa4612e4e7795a2bab224bdb9c1944774af13ac1565163a94e57cd1799616bf9daa3bccbc8a151a64093b2f9f4ca9b3b8981b8b794a823b6126c34
+  languageName: node
+  linkType: hard
+
+"ua-is-frozen@npm:^0.1.2":
+  version: 0.1.2
+  resolution: "ua-is-frozen@npm:0.1.2"
+  checksum: 10/0113bed77d437a3752323175f01057dd01911506225e9d33799799188a89a230ab63d2445b096d4399ea8eb94e3163608f7ac2425fb8edd0844d891490607e14
+  languageName: node
+  linkType: hard
+
+"ua-parser-js@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "ua-parser-js@npm:2.0.0"
+  dependencies:
+    detect-europe-js: "npm:^0.1.2"
+    is-standalone-pwa: "npm:^0.1.1"
+    ua-is-frozen: "npm:^0.1.2"
+  bin:
+    ua-parser-js: script/cli.js
+  checksum: 10/9f8f82509c5aad02d87c2a76a69c19d5a3079b8eb0156fa5a603f20db14727357922dba32647dde41b6bc3511b3e80ba563aa3093694e16dd2b8e10bd40ff8a9
   languageName: node
   linkType: hard
 
