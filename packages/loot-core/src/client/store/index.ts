@@ -1,10 +1,16 @@
-import { combineReducers, configureStore } from '@reduxjs/toolkit';
+import {
+  combineReducers,
+  configureStore,
+  createListenerMiddleware,
+  isRejected,
+} from '@reduxjs/toolkit';
 
 import {
   name as accountsSliceName,
   reducer as accountsSliceReducer,
   getInitialState as getInitialAccountsState,
 } from '../accounts/accountsSlice';
+import { addNotification } from '../actions';
 import * as constants from '../constants';
 import {
   name as queriesSliceName,
@@ -51,13 +57,28 @@ const rootReducer: typeof appReducer = (state, action) => {
   return appReducer(state, action);
 };
 
+const notifyOnRejectedActionsMiddleware = createListenerMiddleware();
+notifyOnRejectedActionsMiddleware.startListening({
+  matcher: isRejected,
+  effect: (action, { dispatch }) => {
+    console.error(action.error);
+    dispatch(
+      addNotification({
+        id: action.type,
+        type: 'error',
+        message: action.error.message || 'An unexpected error occurred.',
+      }),
+    );
+  },
+});
+
 export const store = configureStore({
   reducer: rootReducer,
   middleware: getDefaultMiddleware =>
     getDefaultMiddleware({
       // TODO: Fix this in a separate PR. Remove non-serializable states in the store.
       serializableCheck: false,
-    }),
+    }).prepend(notifyOnRejectedActionsMiddleware.middleware),
 });
 
 export type AppStore = typeof store;

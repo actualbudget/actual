@@ -55,9 +55,104 @@ const initialState: QueriesState = {
   payeesLoaded: false,
 };
 
+type SetNewTransactionsPayload = {
+  newTransactions: QueriesState['newTransactions'];
+  matchedTransactions: QueriesState['matchedTransactions'];
+  updatedAccounts: QueriesState['updatedAccounts'];
+};
+
+type UpdateNewTransactionsPayload = {
+  id: TransactionEntity['id'];
+};
+
+type SetLastTransactionPayload = {
+  transaction: TransactionEntity;
+};
+
 type MarkAccountReadPayload = {
   id: AccountEntity['id'];
 };
+
+const queriesSlice = createSlice({
+  name: sliceName,
+  initialState,
+  reducers: {
+    setNewTransactions(
+      state,
+      action: PayloadAction<SetNewTransactionsPayload>,
+    ) {
+      state.newTransactions = action.payload.newTransactions
+        ? [...state.newTransactions, ...action.payload.newTransactions]
+        : state.newTransactions;
+
+      state.matchedTransactions = action.payload.matchedTransactions
+        ? [...state.matchedTransactions, ...action.payload.matchedTransactions]
+        : state.matchedTransactions;
+
+      state.updatedAccounts = action.payload.updatedAccounts
+        ? [...state.updatedAccounts, ...action.payload.updatedAccounts]
+        : state.updatedAccounts;
+    },
+    updateNewTransactions(
+      state,
+      action: PayloadAction<UpdateNewTransactionsPayload>,
+    ) {
+      state.newTransactions = state.newTransactions.filter(
+        id => id !== action.payload.id,
+      );
+      state.matchedTransactions = state.matchedTransactions.filter(
+        id => id !== action.payload.id,
+      );
+    },
+    setLastTransaction(
+      state,
+      action: PayloadAction<SetLastTransactionPayload>,
+    ) {
+      state.lastTransaction = action.payload.transaction;
+    },
+    markAccountRead(state, action: PayloadAction<MarkAccountReadPayload>) {
+      state.updatedAccounts = state.updatedAccounts.filter(
+        id => id !== action.payload.id,
+      );
+    },
+  },
+  extraReducers: builder => {
+    // Accounts
+    builder.addCase(updateAccount.fulfilled, (state, action) => {
+      const payloadAccount = action.payload;
+      state.accounts = state.accounts.map(account => {
+        if (account.id === payloadAccount.id) {
+          return { ...account, ...payloadAccount };
+        }
+        return account;
+      });
+    });
+
+    builder.addCase(getAccounts.fulfilled, (state, action) => {
+      state.accounts = action.payload;
+      state.accountsLoaded = true;
+    });
+
+    // Categories
+
+    builder.addCase(getCategories.fulfilled, (state, action) => {
+      state.categories = action.payload;
+      state.categoriesLoaded = true;
+    });
+
+    // Payees
+
+    builder.addCase(getCommonPayees.fulfilled, (state, action) => {
+      state.commonPayees = action.payload;
+      state.commonPayeesLoaded = true;
+    });
+
+    builder.addCase(getPayees.fulfilled, (state, action) => {
+      state.payees = action.payload;
+      state.payeesLoaded = true;
+    });
+  },
+});
 
 // Account actions
 
@@ -75,8 +170,8 @@ export const createAccount = createAppAsyncThunk(
       balance,
       offBudget,
     });
-    await dispatch(getAccounts());
-    await dispatch(getPayees());
+    dispatch(getAccounts());
+    dispatch(getPayees());
     return id;
   },
 );
@@ -138,46 +233,46 @@ export const getAccounts = createAppAsyncThunk(
 
 // Category actions
 
-type CreateGroupPayload = {
+type CreateCategoryGroupPayload = {
   name: CategoryGroupEntity['name'];
 };
 
 export const createGroup = createAppAsyncThunk(
   `${sliceName}/createGroup`,
-  async ({ name }: CreateGroupPayload, { dispatch }) => {
+  async ({ name }: CreateCategoryGroupPayload, { dispatch }) => {
     const id = await send('category-group-create', { name });
     dispatch(getCategories());
     return id;
   },
 );
 
-type UpdateGroupPayload = {
+type UpdateCategoryGroupPayload = {
   group: CategoryGroupEntity;
 };
 
 export const updateGroup = createAppAsyncThunk(
   `${sliceName}/updateGroup`,
-  async ({ group }: UpdateGroupPayload, { dispatch }) => {
+  async ({ group }: UpdateCategoryGroupPayload, { dispatch }) => {
     // Strip off the categories field if it exist. It's not a real db
     // field but groups have this extra field in the client most of the time
     const { categories: _, ...groupNoCategories } = group;
     await send('category-group-update', groupNoCategories);
-    await dispatch(getCategories());
+    dispatch(getCategories());
   },
 );
 
-type DeleteGroupPayload = {
+type DeleteCategoryGroupPayload = {
   id: CategoryGroupEntity['id'];
   transferId?: CategoryGroupEntity['id'];
 };
 
 export const deleteGroup = createAppAsyncThunk(
   `${sliceName}/deleteGroup`,
-  async ({ id, transferId }: DeleteGroupPayload, { dispatch }) => {
+  async ({ id, transferId }: DeleteCategoryGroupPayload, { dispatch }) => {
     await send('category-group-delete', { id, transferId });
-    await dispatch(getCategories());
+    dispatch(getCategories());
     // See `deleteCategory` for why we need this
-    await dispatch(getPayees());
+    dispatch(getPayees());
   },
 );
 
@@ -199,7 +294,7 @@ export const createCategory = createAppAsyncThunk(
       isIncome,
       hidden: isHidden,
     });
-    await dispatch(getCategories());
+    dispatch(getCategories());
     return id;
   },
 );
@@ -212,7 +307,7 @@ export const updateCategory = createAppAsyncThunk(
   `${sliceName}/updateCategory`,
   async ({ category }: UpdateCategoryPayload, { dispatch }) => {
     await send('category-update', category);
-    await dispatch(getCategories());
+    dispatch(getCategories());
   },
 );
 
@@ -231,6 +326,7 @@ export const deleteCategory = createAppAsyncThunk(
         case 'category-type':
           dispatch(
             addNotification({
+              id: `${sliceName}/deleteCategory/transfer`,
               type: 'error',
               message: t(
                 'A category must be transferred to another of the same type (expense or income)',
@@ -244,10 +340,10 @@ export const deleteCategory = createAppAsyncThunk(
 
       throw new Error(error);
     } else {
-      await dispatch(getCategories());
+      dispatch(getCategories());
       // Also need to refresh payees because they might use one of the
       // deleted categories as the default category
-      await dispatch(getPayees());
+      dispatch(getPayees());
     }
   },
 );
@@ -262,7 +358,7 @@ export const moveCategory = createAppAsyncThunk(
   `${sliceName}/moveCategory`,
   async ({ id, groupId, targetId }: MoveCategoryPayload, { dispatch }) => {
     await send('category-move', { id, groupId, targetId });
-    await dispatch(getCategories());
+    dispatch(getCategories());
   },
 );
 
@@ -275,7 +371,7 @@ export const moveCategoryGroup = createAppAsyncThunk(
   `${sliceName}/moveCategoryGroup`,
   async ({ id, targetId }: MoveCategoryGroupPayload, { dispatch }) => {
     await send('category-group-move', { id, targetId });
-    await dispatch(getCategories());
+    dispatch(getCategories());
   },
 );
 
@@ -322,10 +418,13 @@ export const getCommonPayees = createAppAsyncThunk(
   },
 );
 
-export const getPayees = createAppAsyncThunk('queries/getPayees', async () => {
-  const payees: PayeeEntity[] = await send('payees-get');
-  return payees;
-});
+export const getPayees = createAppAsyncThunk(
+  `${sliceName}/getPayees`,
+  async () => {
+    const payees: PayeeEntity[] = await send('payees-get');
+    return payees;
+  },
+);
 
 // Budget actions
 
@@ -705,99 +804,6 @@ export const importTransactions = createAppAsyncThunk(
     return added.length > 0 || updated.length > 0;
   },
 );
-
-type SetNewTransactionsPayload = {
-  newTransactions: QueriesState['newTransactions'];
-  matchedTransactions: QueriesState['matchedTransactions'];
-  updatedAccounts: QueriesState['updatedAccounts'];
-};
-type UpdateNewTransactionsPayload = {
-  id: TransactionEntity['id'];
-};
-type SetLastTransactionPayload = {
-  transaction: TransactionEntity;
-};
-
-const queriesSlice = createSlice({
-  name: sliceName,
-  initialState,
-  reducers: {
-    setNewTransactions(
-      state,
-      action: PayloadAction<SetNewTransactionsPayload>,
-    ) {
-      state.newTransactions = action.payload.newTransactions
-        ? [...state.newTransactions, ...action.payload.newTransactions]
-        : state.newTransactions;
-
-      state.matchedTransactions = action.payload.matchedTransactions
-        ? [...state.matchedTransactions, ...action.payload.matchedTransactions]
-        : state.matchedTransactions;
-
-      state.updatedAccounts = action.payload.updatedAccounts
-        ? [...state.updatedAccounts, ...action.payload.updatedAccounts]
-        : state.updatedAccounts;
-    },
-    updateNewTransactions(
-      state,
-      action: PayloadAction<UpdateNewTransactionsPayload>,
-    ) {
-      state.newTransactions = state.newTransactions.filter(
-        id => id !== action.payload.id,
-      );
-      state.matchedTransactions = state.matchedTransactions.filter(
-        id => id !== action.payload.id,
-      );
-    },
-    setLastTransaction(
-      state,
-      action: PayloadAction<SetLastTransactionPayload>,
-    ) {
-      state.lastTransaction = action.payload.transaction;
-    },
-    markAccountRead(state, action: PayloadAction<MarkAccountReadPayload>) {
-      state.updatedAccounts = state.updatedAccounts.filter(
-        id => id !== action.payload.id,
-      );
-    },
-  },
-  extraReducers: builder => {
-    // Accounts
-    builder.addCase(updateAccount.fulfilled, (state, action) => {
-      const payloadAccount = action.payload;
-      state.accounts = state.accounts.map(account => {
-        if (account.id === payloadAccount.id) {
-          return { ...account, ...payloadAccount };
-        }
-        return account;
-      });
-    });
-
-    builder.addCase(getAccounts.fulfilled, (state, action) => {
-      state.accounts = action.payload;
-      state.accountsLoaded = true;
-    });
-
-    // Categories
-
-    builder.addCase(getCategories.fulfilled, (state, action) => {
-      state.categories = action.payload;
-      state.categoriesLoaded = true;
-    });
-
-    // Payees
-
-    builder.addCase(getCommonPayees.fulfilled, (state, action) => {
-      state.commonPayees = action.payload;
-      state.commonPayeesLoaded = true;
-    });
-
-    builder.addCase(getPayees.fulfilled, (state, action) => {
-      state.payees = action.payload;
-      state.payeesLoaded = true;
-    });
-  },
-});
 
 // Helper functions
 

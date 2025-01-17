@@ -13,6 +13,13 @@ import { type AppDispatch } from '../store';
 
 const sliceName = 'account';
 
+type AccountState = {
+  failedAccounts: {
+    [key: AccountEntity['id']]: { type: string; code: string };
+  };
+  accountsSyncing: Array<AccountEntity['id']>;
+};
+
 const initialState: AccountState = {
   failedAccounts: {},
   accountsSyncing: [],
@@ -30,13 +37,6 @@ type MarkAccountFailedPayload = {
 
 type MarkAccountSuccessPayload = {
   id: AccountEntity['id'];
-};
-
-type AccountState = {
-  failedAccounts: {
-    [key: AccountEntity['id']]: { type: string; code: string };
-  };
-  accountsSyncing: Array<AccountEntity['id']>;
 };
 
 const accountsSlice = createSlice({
@@ -69,13 +69,12 @@ type UnlinkAccountPayload = {
 };
 
 export const unlinkAccount = createAppAsyncThunk(
-  'accounts/unlinkAccount',
+  `${sliceName}/unlinkAccount`,
   async ({ id }: UnlinkAccountPayload, { dispatch }) => {
     const { markAccountSuccess } = accountsSlice.actions;
-
     await send('account-unlink', { id });
     dispatch(markAccountSuccess({ id }));
-    await dispatch(getAccounts());
+    dispatch(getAccounts());
   },
 );
 
@@ -98,8 +97,8 @@ export const linkAccount = createAppAsyncThunk(
       upgradingId,
       offBudget,
     });
-    await dispatch(getPayees());
-    await dispatch(getAccounts());
+    dispatch(getPayees());
+    dispatch(getAccounts());
   },
 );
 
@@ -120,8 +119,8 @@ export const linkAccountSimpleFin = createAppAsyncThunk(
       upgradingId,
       offBudget,
     });
-    await dispatch(getPayees());
-    await dispatch(getAccounts());
+    dispatch(getPayees());
+    dispatch(getAccounts());
   },
 );
 
@@ -311,8 +310,8 @@ export const moveAccount = createAppAsyncThunk(
   `${sliceName}/moveAccount`,
   async ({ id, targetId }: MoveAccountPayload, { dispatch }) => {
     await send('account-move', { id, targetId });
-    await dispatch(getAccounts());
-    await dispatch(getPayees());
+    dispatch(getAccounts());
+    dispatch(getPayees());
   },
 );
 
