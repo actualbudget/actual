@@ -17,7 +17,7 @@ const IS_DEV = process.env.NODE_ENV === 'development';
 const ACTUAL_VERSION = Platform.isPlaywright
   ? '99.9.9'
   : process.env.REACT_APP_REVIEW_ID
-    ? 'preview'
+    ? '.preview'
     : packageJson.version;
 
 // *** Start the backend ***
