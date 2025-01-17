@@ -1,11 +1,8 @@
-import React, {
-  forwardRef,
-  type HTMLProps,
-  type Ref,
-  type CSSProperties,
-} from 'react';
+import React, { forwardRef, type HTMLProps, type Ref } from 'react';
 
 import { css, cx } from '@emotion/css';
+
+import { type CSSProperties } from '../../style';
 
 type ViewProps = HTMLProps<HTMLDivElement> & {
   className?: string;

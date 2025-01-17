@@ -35,9 +35,9 @@ export function ManagePayeesWithData({
   }, []);
 
   const refetchRuleCounts = useCallback(async () => {
-    let counts = await send('payees-get-rule-counts');
-    counts = new Map(Object.entries(counts));
-    setRuleCounts({ value: counts });
+    const counts = await send('payees-get-rule-counts');
+    const countsMap = new Map(Object.entries(counts));
+    setRuleCounts({ value: countsMap });
   }, []);
 
   useEffect(() => {

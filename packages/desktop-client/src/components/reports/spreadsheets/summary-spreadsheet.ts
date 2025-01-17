@@ -27,7 +27,7 @@ export function summarySpreadsheet(
       toRange: string;
     }) => void,
   ) => {
-    let filters = [];
+    let filters: unknown[] = [];
     try {
       const response = await send('make-filters-from-conditions', {
         conditions: conditions.filter(cond => !cond.customName),

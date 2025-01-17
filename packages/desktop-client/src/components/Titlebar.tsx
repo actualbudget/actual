@@ -1,4 +1,4 @@
-import React, { useState, useEffect, type CSSProperties } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { useTranslation } from 'react-i18next';
 import { Routes, Route, useLocation } from 'react-router-dom';
@@ -26,7 +26,7 @@ import {
   SvgViewShow,
 } from '../icons/v2';
 import { useDispatch } from '../redux';
-import { theme, styles } from '../style';
+import { theme, styles, type CSSProperties } from '../style';
 
 import { AccountSyncCheck } from './accounts/AccountSyncCheck';
 import { AnimatedRefresh } from './AnimatedRefresh';

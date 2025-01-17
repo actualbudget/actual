@@ -19,7 +19,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@actual-app/api@npm:*, @actual-app/api@workspace:packages/api":
+"@actual-app/api@workspace:^, @actual-app/api@workspace:packages/api":
   version: 0.0.0-use.local
   resolution: "@actual-app/api@workspace:packages/api"
   dependencies:
@@ -38,7 +38,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@actual-app/crdt@npm:*, @actual-app/crdt@workspace:^, @actual-app/crdt@workspace:packages/crdt":
+"@actual-app/crdt@workspace:^, @actual-app/crdt@workspace:packages/crdt":
   version: 0.0.0-use.local
   resolution: "@actual-app/crdt@workspace:packages/crdt"
   dependencies:
@@ -13728,8 +13728,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "loot-core@workspace:packages/loot-core"
   dependencies:
-    "@actual-app/api": "npm:*"
-    "@actual-app/crdt": "npm:*"
+    "@actual-app/api": "workspace:^"
+    "@actual-app/crdt": "workspace:^"
     "@jlongster/sql.js": "npm:^1.6.7"
     "@reduxjs/toolkit": "npm:^2.5.0"
     "@rschedule/core": "npm:^1.5.0"
