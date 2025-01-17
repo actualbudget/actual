@@ -14,7 +14,6 @@ import React, {
   type ReactElement,
   type Ref,
   type MutableRefObject,
-  type CSSProperties,
 } from 'react';
 import AutoSizer from 'react-virtualized-auto-sizer';
 
@@ -27,7 +26,7 @@ import { useSelectedItems } from '../hooks/useSelected';
 import { AnimatedLoading } from '../icons/AnimatedLoading';
 import { SvgDelete, SvgExpandArrow } from '../icons/v0';
 import { SvgCheckmark } from '../icons/v1';
-import { styles, theme } from '../style';
+import { type CSSProperties, styles, theme } from '../style';
 
 import { Button } from './common/Button2';
 import { Input } from './common/Input';

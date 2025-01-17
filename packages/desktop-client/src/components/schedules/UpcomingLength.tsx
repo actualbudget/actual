@@ -19,7 +19,8 @@ function useUpcomingLengthOptions() {
     { value: '1', label: t('1 day') },
     { value: '7', label: t('1 week') },
     { value: '14', label: t('2 weeks') },
-    { value: '30', label: t('1 month') },
+    { value: 'oneMonth', label: t('1 month') },
+    { value: 'currentMonth', label: t('end of the current month') },
   ];
 
   return { upcomingLengthOptions };
@@ -56,11 +57,6 @@ export function UpcomingLength() {
             <Trans>
               This only affects how schedules are displayed and not how budget
               data is stored. It can be changed at any time.
-            </Trans>
-          </Paragraph>
-          <Paragraph>
-            <Trans>
-              Only the first instance of a recurring transaction will be shown.
             </Trans>
           </Paragraph>
           <View>

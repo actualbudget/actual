@@ -40,7 +40,6 @@ const ROW_HEIGHT = 60;
 type TransactionListItemProps = ComponentPropsWithoutRef<
   typeof ListBoxItem<TransactionEntity>
 > & {
-  isNewTransaction: (transaction: TransactionEntity['id']) => boolean;
   onPress: (transaction: TransactionEntity) => void;
   onLongPress: (transaction: TransactionEntity) => void;
 };
@@ -92,7 +91,10 @@ export function TransactionListItem({
     is_child: isChild,
     notes,
     schedule: scheduleId,
+    forceUpcoming,
   } = transaction;
+
+  const previewStatus = forceUpcoming ? 'upcoming' : categoryId;
 
   const isAdded = newTransactions.includes(id);
   const categoryName = lookupName(categories, categoryId);
@@ -199,7 +201,10 @@ export function TransactionListItem({
                   </View>
                 )}
                 {isPreview ? (
-                  <Status status={categoryId} isSplit={isParent || isChild} />
+                  <Status
+                    status={previewStatus}
+                    isSplit={isParent || isChild}
+                  />
                 ) : (
                   <View
                     style={{
