@@ -1348,6 +1348,9 @@ handlers['save-global-prefs'] = async function (prefs) {
   if ('floatingSidebar' in prefs) {
     await asyncStorage.setItem('floating-sidebar', '' + prefs.floatingSidebar);
   }
+  if ('language' in prefs) {
+    await asyncStorage.setItem('language', prefs.language);
+  }
   if ('theme' in prefs) {
     await asyncStorage.setItem('theme', prefs.theme);
   }
@@ -1372,6 +1375,7 @@ handlers['load-global-prefs'] = async function () {
     [, maxMonths],
     [, documentDir],
     [, encryptKey],
+    [, language],
     [, theme],
     [, preferredDarkTheme],
     [, serverSelfSignedCert],
@@ -1380,6 +1384,7 @@ handlers['load-global-prefs'] = async function () {
     'max-months',
     'document-dir',
     'encrypt-key',
+    'language',
     'theme',
     'preferred-dark-theme',
     'server-self-signed-cert',
@@ -1389,6 +1394,7 @@ handlers['load-global-prefs'] = async function () {
     maxMonths: stringToInteger(maxMonths || ''),
     documentDir: documentDir || getDefaultDocumentDir(),
     keyId: encryptKey && JSON.parse(encryptKey).id,
+    language,
     theme:
       theme === 'light' ||
       theme === 'dark' ||
