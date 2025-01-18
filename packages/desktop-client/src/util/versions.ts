@@ -19,7 +19,7 @@ function cmpSemanticVersion(
 }
 
 export async function getLatestVersion(): Promise<string | 'unknown'> {
-  if (Platform.isPlaywright) {
+  if (Platform.isPlaywright || process.env.REACT_APP_REVIEW_ID) {
     return Promise.resolve('v99.9.9');
   }
 
