@@ -35,7 +35,7 @@ export async function getLatestVersion(): Promise<string | 'unknown'> {
 
     return tags[tags.length - 1];
   } catch {
-    // Rate limit exceeded? Or perhaps Github is down?
+    // Rate limit exceeded? Or perhaps GitHub is down?
     return 'unknown';
   }
 }

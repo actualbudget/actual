@@ -14,7 +14,6 @@ const isLanguageAvailable = (language: string) =>
 
 const loadLanguage = (language: string) => {
   if (!isLanguageAvailable(language)) {
-    console.error(`Unknown locale ${language}`);
     throw new Error(`Unknown locale ${language}`);
   }
   return languages[`/locale/${language}.json`]();
@@ -41,26 +40,39 @@ i18n
   });
 
 export const setI18NextLanguage = (language: string) => {
-  if (language === 'en' && !isLanguageAvailable(language)) {
-    // English is always available since we use natural-language keys.
-    return;
-  }
-
   if (!language) {
     // System default
     setI18NextLanguage(navigator.language || 'en');
     return;
   }
 
-  language = language.toLowerCase();
-  if (!availableLanguages.includes(language)) {
-    if (language.includes('-')) {
-      setI18NextLanguage(language.split('-')[0]);
+  if (!isLanguageAvailable(language)) {
+    if (language === 'en') {
+      // English is always available since we use natural-language keys.
       return;
     }
 
-    console.error(`Unknown locale ${language}`);
-    throw new Error(`Unknown locale ${language}`);
+    if (language.includes('-')) {
+      const fallback = language.split('-')[0];
+      console.error(`Unknown locale ${language}, falling back to ${fallback}`);
+      setI18NextLanguage(fallback);
+      return;
+    }
+
+    const lowercaseLanguage = language.toLowerCase();
+    if (lowercaseLanguage !== language) {
+      console.error(
+        `Unknown locale ${language}, falling back to ${lowercaseLanguage}`,
+      );
+      setI18NextLanguage(lowercaseLanguage);
+      return;
+    }
+
+    // Fall back to English
+    console.error(`Unknown locale ${language}, falling back to en`);
+    setI18NextLanguage('en');
+    return;
   }
+
   i18n.changeLanguage(language || 'en');
 };

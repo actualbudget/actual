@@ -51,7 +51,7 @@ export function ExportBudget() {
           {error && (
             <Block style={{ color: theme.errorText, marginTop: 15 }}>
               {t(
-                'An unknown error occurred while exporting. Please report this as a new issue on Github.',
+                'An unknown error occurred while exporting. Please report this as a new issue on GitHub.',
               )}
             </Block>
           )}

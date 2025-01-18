@@ -736,6 +736,12 @@ export default [
       'import/no-default-export': 'off',
     },
   },
+  {
+    files: ['packages/api/index.ts'],
+    rules: {
+      'import/no-unresolved': 'off',
+    },
+  },
   {},
   {
     // TODO: fix the issues in these files
@@ -743,7 +749,6 @@ export default [
       'packages/desktop-client/src/components/accounts/Account.jsx',
       'packages/desktop-client/src/components/accounts/MobileAccount.jsx',
       'packages/desktop-client/src/components/accounts/MobileAccounts.jsx',
-      'packages/desktop-client/src/components/App.tsx',
       'packages/desktop-client/src/components/budget/BudgetCategories.jsx',
       'packages/desktop-client/src/components/budget/BudgetSummaries.tsx',
       'packages/desktop-client/src/components/budget/DynamicBudgetTable.tsx',
