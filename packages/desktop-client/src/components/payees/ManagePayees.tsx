@@ -5,10 +5,11 @@ import {
   useCallback,
   type ComponentProps,
 } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import memoizeOne from 'memoize-one';
 
+import { pushModal } from 'loot-core/client/actions';
 import { getNormalisedString } from 'loot-core/src/shared/normalisation';
 import { type Diff, groupById } from 'loot-core/src/shared/util';
 import { type PayeeEntity } from 'loot-core/types/models';
@@ -20,12 +21,12 @@ import {
   useSelectedItems,
 } from '../../hooks/useSelected';
 import { SvgExpandArrow } from '../../icons/v0';
+import { useDispatch } from '../../redux';
 import { theme } from '../../style';
 import { Button } from '../common/Button2';
 import { Popover } from '../common/Popover';
 import { Search } from '../common/Search';
 import { View } from '../common/View';
-import { LearnCategoriesSettings } from '../settings/LearnCategories';
 import { TableHeader, Cell, SelectCell } from '../table';
 
 import { PayeeMenu } from './PayeeMenu';
@@ -92,6 +93,7 @@ export const ManagePayees = ({
   const triggerRef = useRef(null);
   const [orphanedOnly, setOrphanedOnly] = useState(false);
   const { t } = useTranslation();
+  const dispatch = useDispatch();
 
   const filteredPayees = useMemo(() => {
     let filtered = payees;
@@ -196,6 +198,10 @@ export const ManagePayees = ({
     selected.dispatch({ type: 'select-none' });
   }
 
+  const onChangeCategoryLearning = useCallback(() => {
+    dispatch(pushModal('payee-category-learning'));
+  }, [dispatch]);
+
   const buttonsDisabled = selected.items.size === 0;
 
   const payeesById = getPayeesById(payees);
@@ -276,23 +282,6 @@ export const ManagePayees = ({
         />
       </View>
 
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          padding: '0 0 15px',
-        }}
-      >
-        <View
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-          }}
-        >
-          <LearnCategoriesSettings />
-        </View>
-      </View>
-
       <SelectedProvider instance={selected} fetchAllIds={getSelectableIds}>
         <View
           style={{
@@ -329,6 +318,31 @@ export const ManagePayees = ({
           )}
         </View>
       </SelectedProvider>
+
+      <View
+        style={{
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          margin: '20px 0',
+          flexShrink: 0,
+        }}
+      >
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: '1em',
+          }}
+        >
+          <Button
+            aria-label={t('Change Category Learning')}
+            variant="normal"
+            onPress={onChangeCategoryLearning}
+          >
+            <Trans>Change Category Learning</Trans>
+          </Button>
+        </View>
+      </View>
     </View>
   );
 };

@@ -76,6 +76,7 @@ import { ScheduleDetails } from './schedules/ScheduleDetails';
 import { ScheduleLink } from './schedules/ScheduleLink';
 import { UpcomingLength } from './schedules/UpcomingLength';
 import { NamespaceContext } from './spreadsheet/NamespaceContext';
+import { CategoryLearning } from './payees/CategoryLearning';
 
 export function Modals() {
   const location = useLocation();
@@ -288,6 +289,9 @@ export function Modals() {
               onClose={options.onClose}
             />
           );
+
+        case 'payee-category-learning':
+          return <CategoryLearning key={name} />;
 
         case 'new-category':
           return (
