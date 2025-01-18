@@ -12,6 +12,7 @@ import {
   extractScheduleConds,
   getNextDate,
   getUpcomingDays,
+  scheduleIsRecurring,
 } from '../../shared/schedules';
 import { ungroupTransactions } from '../../shared/transactions';
 import {
@@ -169,24 +170,27 @@ export function usePreviewTransactions(): UsePreviewTransactionsResult {
         const { date: dateConditions } = extractScheduleConds(
           schedule._conditions,
         );
-        let day = d.startOfDay(parseDate(schedule.next_date));
 
         const status = statuses.get(schedule.id);
+        const isRecurring = scheduleIsRecurring(dateConditions);
 
-        const dates: Set<string> = new Set();
-        while (day <= upcomingPeriodEnd) {
-          const nextDate = getNextDate(dateConditions, day);
+        const dates: string[] = [];
+        let day = d.startOfDay(parseDate(schedule.next_date));
+        if (isRecurring) {
+          while (day <= upcomingPeriodEnd) {
+            const nextDate = getNextDate(dateConditions, day);
 
-          if (status === 'paid' && day.getTime() === today.getTime()) {
+            if (parseDate(nextDate) > upcomingPeriodEnd) break;
+
+            dates.push(nextDate);
             day = parseDate(addDays(nextDate, 1));
-            continue;
           }
+        } else {
+          dates.push(getNextDate(dateConditions, day));
+        }
 
-          if (dates.has(nextDate)) break;
-          if (parseDate(nextDate) > upcomingPeriodEnd) break;
-
-          dates.add(nextDate);
-          day = parseDate(addDays(nextDate, 1));
+        if (status === 'paid') {
+          dates.shift();
         }
 
         const schedules: {

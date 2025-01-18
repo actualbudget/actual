@@ -371,3 +371,10 @@ export function getUpcomingDays(upcomingLength = '7') {
       return parseInt(upcomingLength, 10);
   }
 }
+
+export function scheduleIsRecurring(dateCond) {
+  const cond = new Condition(dateCond.op, 'date', dateCond.value, null);
+  const value = cond.getValue();
+
+  return value.type === 'recur';
+}
