@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 
+import { pushModal } from 'loot-core/client/actions';
 import {
   getPayees,
   initiallyLoadPayees,
-  pushModal,
-} from 'loot-core/client/actions';
+} from 'loot-core/client/queries/queriesSlice';
 import { type UndoState } from 'loot-core/server/undo';
 import { send, listen } from 'loot-core/src/platform/client/fetch';
 import * as undo from 'loot-core/src/platform/client/undo';

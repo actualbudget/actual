@@ -14,16 +14,19 @@ type Events = {
   'load-budget': { id: string };
 };
 
+type UnlistenService = () => void;
+type Service = () => UnlistenService;
+
 class App<Handlers> {
   events: Emitter<Events>;
   handlers: Handlers;
-  services;
-  unlistenServices;
+  services: Service[];
+  unlistenServices: UnlistenService[];
 
   constructor() {
     this.handlers = {} as Handlers;
     this.services = [];
-    this.events = mitt();
+    this.events = mitt<Events>();
     this.unlistenServices = [];
   }
 
@@ -39,7 +42,7 @@ class App<Handlers> {
     this.handlers[name] = func;
   }
 
-  service(func) {
+  service(func: Service) {
     this.services.push(func);
   }
 

@@ -19,7 +19,7 @@ function cmpSemanticVersion(
 }
 
 export async function getLatestVersion(): Promise<string | 'unknown'> {
-  if (Platform.isPlaywright) {
+  if (Platform.isPlaywright || process.env.REACT_APP_REVIEW_ID) {
     return Promise.resolve('v99.9.9');
   }
 
@@ -35,7 +35,7 @@ export async function getLatestVersion(): Promise<string | 'unknown'> {
 
     return tags[tags.length - 1];
   } catch {
-    // Rate limit exceeded? Or perhaps Github is down?
+    // Rate limit exceeded? Or perhaps GitHub is down?
     return 'unknown';
   }
 }

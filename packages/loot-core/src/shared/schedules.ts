@@ -11,7 +11,7 @@ export function getStatus(
   nextDate: string,
   completed: boolean,
   hasTrans: boolean,
-  upcomingLength: string,
+  upcomingLength: number,
 ) {
   const today = monthUtils.currentDay();
   if (completed) {
@@ -22,7 +22,7 @@ export function getStatus(
     return 'due';
   } else if (
     nextDate > today &&
-    nextDate <= monthUtils.addDays(today, parseInt(upcomingLength ?? '7'))
+    nextDate <= monthUtils.addDays(today, upcomingLength)
   ) {
     return 'upcoming';
   } else if (nextDate < today) {
@@ -346,5 +346,28 @@ export function describeSchedule(schedule, payee) {
     return `${payee.name} (${schedule.next_date})`;
   } else {
     return `Next: ${schedule.next_date}`;
+  }
+}
+
+export function getUpcomingDays(upcomingLength = '7') {
+  const today = monthUtils.currentDay();
+
+  switch (upcomingLength) {
+    case 'currentMonth': {
+      const day = monthUtils.getDay(today);
+      const end = monthUtils.getDay(monthUtils.getMonthEnd(today));
+      return end - day + 1;
+    }
+    case 'oneMonth': {
+      const month = monthUtils.getMonth(today);
+      return (
+        monthUtils.differenceInCalendarDays(
+          monthUtils.nextMonth(month),
+          month,
+        ) + 1
+      );
+    }
+    default:
+      return parseInt(upcomingLength, 10);
   }
 }

@@ -71,7 +71,7 @@ function OverflowMenu({
 
     menuItems.push({
       name: 'post-transaction',
-      text: t('Post transaction'),
+      text: t('Post transaction today'),
     });
 
     if (status === 'completed') {
@@ -83,7 +83,7 @@ function OverflowMenu({
       menuItems.push(
         {
           name: 'skip',
-          text: t('Skip next date'),
+          text: t('Skip next scheduled date'),
         },
         {
           name: 'complete',

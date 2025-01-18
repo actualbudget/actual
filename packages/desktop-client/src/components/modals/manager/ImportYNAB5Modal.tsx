@@ -21,7 +21,7 @@ function getErrorMessage(error: string): string {
     case 'not-ynab5':
       return 'This file is not valid. Please select a JSON file exported from nYNAB.';
     default:
-      return 'An unknown error occurred while importing. Please report this as a new issue on Github.';
+      return 'An unknown error occurred while importing. Please report this as a new issue on GitHub.';
   }
 }
 

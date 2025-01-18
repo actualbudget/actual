@@ -3,11 +3,8 @@ import React, { type FormEvent, useState, type CSSProperties } from 'react';
 import { Form } from 'react-aria-components';
 import { useTranslation, Trans } from 'react-i18next';
 
-import {
-  closeAccount,
-  forceCloseAccount,
-  pushModal,
-} from 'loot-core/client/actions';
+import { pushModal } from 'loot-core/client/actions';
+import { closeAccount } from 'loot-core/client/queries/queriesSlice';
 import { integerToCurrency } from 'loot-core/src/shared/util';
 import { type AccountEntity } from 'loot-core/src/types/models';
 import { type TransObjectLiteral } from 'loot-core/types/util';
@@ -101,7 +98,11 @@ export function CloseAccountModal({
       setLoading(true);
 
       dispatch(
-        closeAccount(account.id, transferAccountId || null, categoryId || null),
+        closeAccount({
+          id: account.id,
+          transferAccountId: transferAccountId || null,
+          categoryId: categoryId || null,
+        }),
       );
     }
   };
@@ -251,8 +252,12 @@ export function CloseAccountModal({
                         variant="text"
                         onClick={() => {
                           setLoading(true);
-
-                          dispatch(forceCloseAccount(account.id));
+                          dispatch(
+                            closeAccount({
+                              id: account.id,
+                              forced: true,
+                            }),
+                          );
                           close();
                         }}
                         style={{ color: theme.errorText }}
