@@ -1,13 +1,43 @@
+import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
+
 import { send } from '../../platform/client/fetch';
 import { getUploadError } from '../../shared/errors';
+import { type AccountEntity } from '../../types/models';
 import { syncAccounts } from '../accounts/accountsSlice';
-import { type AppDispatch, type GetRootState } from '../store';
+import { loadPrefs, pushModal } from '../actions';
+import { createAppAsyncThunk } from '../redux';
 
-import { pushModal } from './modals';
-import { loadPrefs } from './prefs';
+const sliceName = 'app';
 
-export function resetSync() {
-  return async (dispatch: AppDispatch) => {
+type AppState = {
+  loadingText: string | null;
+  updateInfo: {
+    version: string;
+    releaseDate: string;
+    releaseNotes: string;
+  } | null;
+  showUpdateNotification: boolean;
+  managerHasInitialized: boolean;
+};
+
+const initialState: AppState = {
+  loadingText: null,
+  updateInfo: null,
+  showUpdateNotification: true,
+  managerHasInitialized: false,
+};
+
+export const updateApp = createAppAsyncThunk(
+  `${sliceName}/updateApp`,
+  async (_, { dispatch }) => {
+    await global.Actual.applyAppUpdate();
+    dispatch(setAppState({ updateInfo: null }));
+  },
+);
+
+export const resetSync = createAppAsyncThunk(
+  `${sliceName}/resetSync`,
+  async (_, { dispatch }) => {
     const { error } = await send('sync-reset');
 
     if (error) {
@@ -32,11 +62,12 @@ export function resetSync() {
     } else {
       await dispatch(sync());
     }
-  };
-}
+  },
+);
 
-export function sync() {
-  return async (dispatch: AppDispatch, getState: GetRootState) => {
+export const sync = createAppAsyncThunk(
+  `${sliceName}/sync`,
+  async (_, { dispatch, getState }) => {
     const prefs = getState().prefs.local;
     if (prefs && prefs.id) {
       const result = await send('sync');
@@ -49,17 +80,22 @@ export function sync() {
     }
 
     return {};
-  };
-}
+  },
+);
 
-export function syncAndDownload(accountId?: string) {
-  return async (dispatch: AppDispatch) => {
+type SyncAndDownloadPayload = {
+  accountId?: AccountEntity['id'] | string;
+};
+
+export const syncAndDownload = createAppAsyncThunk(
+  `${sliceName}/syncAndDownload`,
+  async ({ accountId }: SyncAndDownloadPayload, { dispatch }) => {
     // It is *critical* that we sync first because of transaction
     // reconciliation. We want to get all transactions that other
     // clients have already made, so that imported transactions can be
     // reconciled against them. Otherwise, two clients will each add
     // new transactions from the bank and create duplicate ones.
-    const syncState = await dispatch(sync());
+    const syncState = await dispatch(sync()).unwrap();
     if (syncState.error) {
       return { error: syncState.error };
     }
@@ -68,7 +104,7 @@ export function syncAndDownload(accountId?: string) {
 
     if (hasDownloaded) {
       // Sync again afterwards if new transactions were created
-      const syncState = await dispatch(sync());
+      const syncState = await dispatch(sync()).unwrap();
       if (syncState.error) {
         return { error: syncState.error };
       }
@@ -78,5 +114,32 @@ export function syncAndDownload(accountId?: string) {
       return true;
     }
     return { hasUpdated: hasDownloaded };
-  };
-}
+  },
+);
+
+type SetAppStatePayload = Partial<AppState>;
+
+const appSlice = createSlice({
+  name: sliceName,
+  initialState,
+  reducers: {
+    setAppState(state, action: PayloadAction<SetAppStatePayload>) {
+      return {
+        ...state,
+        ...action.payload,
+      };
+    },
+  },
+});
+
+export const { name, reducer, getInitialState } = appSlice;
+
+export const actions = {
+  ...appSlice.actions,
+  updateApp,
+  resetSync,
+  sync,
+  syncAndDownload,
+};
+
+export const { setAppState } = actions;

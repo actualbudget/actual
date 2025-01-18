@@ -10,8 +10,8 @@ import {
   collapseModals,
   openAccountCloseModal,
   pushModal,
-  syncAndDownload,
 } from 'loot-core/client/actions';
+import { syncAndDownload } from 'loot-core/client/app/appSlice';
 import {
   accountSchedulesQuery,
   SchedulesProvider,
@@ -258,7 +258,7 @@ function TransactionListWithPreviews({
 
   const onRefresh = useCallback(() => {
     if (accountId) {
-      dispatch(syncAndDownload(accountId));
+      dispatch(syncAndDownload({ accountId }));
     }
   }, [accountId, dispatch]);
 

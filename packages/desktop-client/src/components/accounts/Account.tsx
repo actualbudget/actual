@@ -19,8 +19,8 @@ import {
   openAccountCloseModal,
   pushModal,
   replaceModal,
-  syncAndDownload,
 } from 'loot-core/client/actions';
+import { syncAndDownload } from 'loot-core/client/app/appSlice';
 import {
   createPayee,
   initiallyLoadPayees,
@@ -624,7 +624,7 @@ class AccountInternal extends PureComponent<
     const account = this.props.accounts.find(acct => acct.id === accountId);
 
     await this.props.dispatch(
-      syncAndDownload(account ? account.id : undefined),
+      syncAndDownload({ accountId: account ? account.id : undefined }),
     );
   };
 
@@ -633,7 +633,7 @@ class AccountInternal extends PureComponent<
     const account = this.props.accounts.find(acct => acct.id === accountId);
 
     if (account) {
-      const res = await window.Actual?.openFileDialog({
+      const res = await window.Actual.openFileDialog({
         filters: [
           {
             name: t('Financial Files'),
@@ -668,7 +668,7 @@ class AccountInternal extends PureComponent<
       accountName && accountName.replace(/[()]/g, '').replace(/\s+/g, '-');
     const filename = `${normalizedName || 'transactions'}.csv`;
 
-    window.Actual?.saveFile(
+    window.Actual.saveFile(
       exportedTransactions,
       filename,
       t('Export Transactions'),
