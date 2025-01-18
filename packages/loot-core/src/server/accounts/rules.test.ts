@@ -677,7 +677,7 @@ describe('Rule', () => {
       );
     });
 
-    test('remainder rounds correctly', () => {
+    test('remainder rounds correctly and only if necessary', () => {
       const rule = new Rule({
         conditionsOp: 'and',
         conditions: [{ op: 'is', field: 'imported_payee', value: 'James' }],
@@ -704,6 +704,12 @@ describe('Rule', () => {
       expect(rule.exec({ imported_payee: 'James', amount: 123 })).toMatchObject(
         {
           subtransactions: [{ amount: 62 }, { amount: 61 }],
+        },
+      );
+
+      expect(rule.exec({ imported_payee: 'James', amount: 100 })).toMatchObject(
+        {
+          subtransactions: [{ amount: 50 }, { amount: 50 }],
         },
       );
     });
