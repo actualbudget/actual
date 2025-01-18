@@ -1,6 +1,6 @@
 // @ts-strict-ignore
 import React from 'react';
-import { useTranslation, Trans } from 'react-i18next'; // Import useTranslation
+import { useTranslation, Trans } from 'react-i18next';
 
 import { Block } from '../common/Block';
 import { Button } from '../common/Button2';
