@@ -284,7 +284,7 @@ export function listenForSyncEvent(store: AppStore) {
           console.trace('apply-failure', event.meta);
           notif = {
             message: t(
-              'We couldn’t apply that change to the database. Please report this as a bug by [opening a Github issue]({{githubIssueLink}}).',
+              'We couldn’t apply that change to the database. Please report this as a bug by [opening a GitHub issue]({{githubIssueLink}}).',
               { githubIssueLink },
             ),
           };
@@ -308,7 +308,7 @@ export function listenForSyncEvent(store: AppStore) {
           console.trace('unknown error', event);
           notif = {
             message: t(
-              'We had problems syncing your changes. Please report this as a bug by [opening a Github issue]({{githubIssueLink}}).',
+              'We had problems syncing your changes. Please report this as a bug by [opening a GitHub issue]({{githubIssueLink}}).',
               { githubIssueLink },
             ),
           };
