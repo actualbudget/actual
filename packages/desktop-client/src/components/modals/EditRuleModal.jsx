@@ -348,7 +348,7 @@ function ScheduleDescription({ id }) {
         <Text style={{ margin: '0 5px' }}> — </Text>
         <Text style={{ flexShrink: 0 }}>
           <Trans>
-            Next: {{month: monthUtils.format(schedule.next_date, dateFormat)}}
+            Next: {{ month: monthUtils.format(schedule.next_date, dateFormat) }}
           </Trans>
         </Text>
       </View>
