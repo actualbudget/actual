@@ -23,11 +23,11 @@ describe('setI18NextLanguage', () => {
   afterEach(vi.unstubAllGlobals);
 
   test('should set system default language when no language is provided', () => {
-    vi.stubGlobal('navigator', { language: 'fr' });
+    vi.stubGlobal('navigator', { language: 'uk' });
 
     setI18NextLanguage('');
 
-    expect(i18n.changeLanguage).toHaveBeenCalledWith('fr');
+    expect(i18n.changeLanguage).toHaveBeenCalledWith('uk');
   });
 
   test('should set the provided language if it is available', () => {
@@ -60,12 +60,12 @@ describe('setI18NextLanguage', () => {
   test('should fallback to base language if the provided language has an unknown region code', () => {
     vi.spyOn(console, 'error');
 
-    setI18NextLanguage('fr-ZZ');
+    setI18NextLanguage('uk-ZZ');
 
     expect(console.error).toHaveBeenCalledWith(
-      'Unknown locale fr-ZZ, falling back to fr',
+      'Unknown locale uk-ZZ, falling back to uk',
     );
-    expect(i18n.changeLanguage).toHaveBeenCalledWith('fr');
+    expect(i18n.changeLanguage).toHaveBeenCalledWith('uk');
   });
 
   test('should fallback to lowercase language if the provided language has uppercase letters', () => {
