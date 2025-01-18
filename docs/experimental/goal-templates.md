@@ -97,7 +97,7 @@ For example:
 
 Templates can be given a priority flag to change the order that the templates get applied to your budget. Set a priority by adding `-X` to the `#template` flag. EX `#template-4` will be priority level 4. Any template with a priority other than 0 will not apply more funds than are available.
 
-#### Notes
+#### Notes on Priorities
 
 - Lower priority values get run first. EX 0 is run first, then 1, then 2, etc.
 - A `#template` with no priority flag defaults to priority 0 and is the same as a standard template.
@@ -122,6 +122,7 @@ Templates can be given a priority flag to change the order that the templates ge
 
 ### Notes on all templates
 
+- All templates are a single line in the category notes.  Depending on your screen size, they may visually render as multiple lines.  When adding a template, do not put a return (or "enter") within a single template, or the parsing will not properly handle your template.
 - Don't add a currency symbol to your template amounts.
 - Number formats that use comma for the decimal separator are not supported (e.g., 123,45). You must use 123.45.
 - Thousands separators are not supported (e.g., 1,234). You must use 1234.
@@ -205,7 +206,7 @@ If the new car will cost $ 10,000 and you plan to buy it in December, you will u
 |Syntax| Budgeted Amount |
 |---|:---:|
 |#template 10000 by 2025-12 | $ 833.33 |
-Thats example is pretty basic.
+That example is pretty basic.
 The by template is smarter than just 10000/12.
 Lets say the example is the same, but you already have $ 1,500 saved.
 In that case you get this.
@@ -444,7 +445,7 @@ When using the `#goal` option, the indication is based on the total balance.
 This shifts the indication to a long-term goal you are saving up to instead of just the current monthly portion.
 A few examples have been given to illustrate this difference.
 
-#### Notes
+#### Notes on The Goal Directive
 * The `#goal` templates are run the same way as the regular `#templates`.
 * If there is a `#goal` directive in a category, the goal indicator for that category will be based on the goal, not the templates.
 * The `#goal` directive will not budget any funds, and funds budgeted by hand will not get reset by running templates.
