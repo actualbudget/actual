@@ -2106,7 +2106,7 @@ function TransactionTableInner({
 }
 
 export const TransactionTable = forwardRef((props, ref) => {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const [newTransactions, setNewTransactions] = useState(null);
   const [prevIsAdding, setPrevIsAdding] = useState(false);
   const splitsExpanded = useSplitsExpanded();
