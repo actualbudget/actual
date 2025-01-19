@@ -164,7 +164,7 @@ type CreateAccountPayload = {
 
 export const createAccount = createAppAsyncThunk(
   `${sliceName}/createAccount`,
-  async ({ name, balance, offBudget }: CreateAccountPayload, { dispatch }) => {
+  async ({ name, balance, offBudget }: CreateAccountPayload) => {
     const id: AccountEntity['id'] = await send('account-create', {
       name,
       balance,
