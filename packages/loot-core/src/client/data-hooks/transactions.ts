@@ -182,6 +182,11 @@ export function usePreviewTransactions(): UsePreviewTransactionsResult {
 
             if (parseDate(nextDate) > upcomingPeriodEnd) break;
 
+            if (dates.includes(nextDate)) {
+              day = parseDate(addDays(day, 1));
+              continue;
+            }
+
             dates.push(nextDate);
             day = parseDate(addDays(nextDate, 1));
           }
