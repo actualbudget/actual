@@ -335,7 +335,7 @@ export const ManagePayees = ({
           }}
         >
           <Button
-            aria-label={t('Change Category Learning')}
+            aria-label={t('Category learning settings')}
             variant="normal"
             onPress={onChangeCategoryLearning}
           >
