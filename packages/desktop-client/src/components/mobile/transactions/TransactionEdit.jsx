@@ -584,11 +584,9 @@ const TransactionEditInner = memo(function TransactionEditInner({
     value => {
       if (transaction.amount !== value) {
         onUpdateInner(transaction, 'amount', value.toString());
-      } else {
-        onClearActiveEdit();
       }
     },
-    [onClearActiveEdit, onUpdateInner, transaction],
+    [onUpdateInner, transaction],
   );
 
   const onEditFieldInner = useCallback(
@@ -788,6 +786,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
             zeroSign="-"
             focused={totalAmountFocused}
             onFocus={onTotalAmountEdit}
+            onBlur={onClearActiveEdit}
             onUpdateAmount={onTotalAmountUpdate}
             focusedStyle={{
               width: 'auto',
