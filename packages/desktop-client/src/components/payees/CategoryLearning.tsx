@@ -54,7 +54,7 @@ export function CategoryLearning() {
             {isLearnCategoriesEnabled ? (
               <Trans>Disable category learning</Trans>
             ) : (
-              <Trans>Enable Category Learning</Trans>
+              <Trans>Enable category learning</Trans>
             )}
           </Button>
         </>
