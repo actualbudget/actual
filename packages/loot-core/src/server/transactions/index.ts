@@ -187,5 +187,6 @@ export async function batchUpdateTransactions({
   return {
     added: resultAdded,
     updated: runTransfers ? transfersUpdated : resultUpdated,
+    deleted: allDeleted,
   };
 }
