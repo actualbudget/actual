@@ -7,7 +7,7 @@ import * as asyncStorage from 'loot-core/platform/server/asyncStorage';
 import { getOpenIdErrors } from 'loot-core/shared/errors';
 import { type OpenIdConfig } from 'loot-core/types/models/openid';
 
-import { useDispatch } from '../../redux';
+import { useAppDispatch } from '../../redux';
 import { theme, styles } from '../../style';
 import { Error } from '../alerts';
 import { Button } from '../common/Button2';
@@ -25,7 +25,7 @@ export function OpenIDEnableModal({
   onSave: originalOnSave,
 }: OpenIDEnableModalProps) {
   const { t } = useTranslation();
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
   const [error, setError] = useState('');
   const refreshLoginMethods = useRefreshLoginMethods();

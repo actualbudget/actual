@@ -7,7 +7,7 @@ import { getUserAccessErrors } from 'loot-core/shared/errors';
 import { type Handlers } from 'loot-core/types/handlers';
 import { type UserAccessEntity } from 'loot-core/types/models/userAccess';
 
-import { useDispatch } from '../../redux';
+import { useAppDispatch } from '../../redux';
 import { styles, theme } from '../../style';
 import { Button } from '../common/Button2';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
@@ -27,7 +27,7 @@ export function EditUserAccess({
   onSave: originalOnSave,
 }: EditUserAccessProps) {
   const { t } = useTranslation();
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
   const [userId, setUserId] = useState(defaultUserAccess.userId ?? '');
   const [error, setSetError] = useState('');

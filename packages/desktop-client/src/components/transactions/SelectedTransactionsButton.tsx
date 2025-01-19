@@ -8,7 +8,7 @@ import { validForTransfer } from 'loot-core/src/client/transfer';
 import { type TransactionEntity } from 'loot-core/types/models';
 
 import { useSelectedItems } from '../../hooks/useSelected';
-import { useDispatch } from '../../redux';
+import { useAppDispatch } from '../../redux';
 import { Menu } from '../common/Menu';
 import { SelectedItemsButton } from '../table';
 
@@ -59,7 +59,7 @@ export function SelectedTransactionsButton({
   onMakeAsNonSplitTransactions,
 }: SelectedTransactionsButtonProps) {
   const { t } = useTranslation();
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const selectedItems = useSelectedItems();
   const selectedIds = useMemo(() => [...selectedItems], [selectedItems]);
 

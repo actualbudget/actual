@@ -20,7 +20,7 @@ import { type UserAccessEntity } from 'loot-core/types/models/userAccess';
 import { useMetadataPref } from '../../../hooks/useMetadataPref';
 import { SvgLockOpen } from '../../../icons/v1';
 import { SvgLockClosed } from '../../../icons/v2';
-import { useDispatch } from '../../../redux';
+import { useAppDispatch } from '../../../redux';
 import { theme } from '../../../style';
 import { Button } from '../../common/Button2';
 import { Link } from '../../common/Link';
@@ -269,7 +269,7 @@ type LockToggleProps = {
 
 function LockToggle({ style, onToggleSave }: LockToggleProps) {
   const [hover, setHover] = useState(false);
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
   return (
     <Button

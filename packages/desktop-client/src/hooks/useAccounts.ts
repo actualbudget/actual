@@ -2,11 +2,11 @@ import { useEffect } from 'react';
 
 import { getAccounts } from 'loot-core/client/queries/queriesSlice';
 
-import { useSelector, useDispatch } from '../redux';
+import { useAppSelector, useAppDispatch } from '../redux';
 
 export function useAccounts() {
-  const dispatch = useDispatch();
-  const accountsLoaded = useSelector(state => state.queries.accountsLoaded);
+  const dispatch = useAppDispatch();
+  const accountsLoaded = useAppSelector(state => state.queries.accountsLoaded);
 
   useEffect(() => {
     if (!accountsLoaded) {
@@ -14,5 +14,5 @@ export function useAccounts() {
     }
   }, []);
 
-  return useSelector(state => state.queries.accounts);
+  return useAppSelector(state => state.queries.accounts);
 }

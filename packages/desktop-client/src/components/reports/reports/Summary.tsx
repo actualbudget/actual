@@ -22,7 +22,7 @@ import { SvgEquals } from '../../../icons/v1';
 import { SvgCloseParenthesis } from '../../../icons/v2/CloseParenthesis';
 import { SvgOpenParenthesis } from '../../../icons/v2/OpenParenthesis';
 import { SvgSum } from '../../../icons/v2/Sum';
-import { useDispatch } from '../../../redux';
+import { useAppDispatch } from '../../../redux';
 import { theme } from '../../../style';
 import { Button } from '../../common/Button2';
 import { Text } from '../../common/Text';
@@ -181,7 +181,7 @@ function SummaryInner({ widget }: SummaryInnerProps) {
     run();
   }, []);
 
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { isNarrowWidth } = useResponsive();
   const title = widget?.meta?.name || t('Summary');

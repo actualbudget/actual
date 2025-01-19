@@ -6,7 +6,7 @@ import { integerToAmount, amountToInteger } from 'loot-core/src/shared/util';
 
 import { useCategories } from '../../hooks/useCategories';
 import { useDateFormat } from '../../hooks/useDateFormat';
-import { useSelector } from '../../redux';
+import { useAppSelector } from '../../redux';
 import { AccountAutocomplete } from '../autocomplete/AccountAutocomplete';
 import { Autocomplete } from '../autocomplete/Autocomplete';
 import { CategoryAutocomplete } from '../autocomplete/CategoryAutocomplete';
@@ -36,7 +36,7 @@ export function GenericInput({
 }) {
   const { grouped: categoryGroups } = useCategories();
   const { data: savedReports } = useReports();
-  const saved = useSelector(state => state.queries.saved);
+  const saved = useAppSelector(state => state.queries.saved);
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
 
   const getNumberInputByFormatType = numberFormatType => {

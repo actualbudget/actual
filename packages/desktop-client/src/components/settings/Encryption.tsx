@@ -4,7 +4,7 @@ import { Trans } from 'react-i18next';
 import { pushModal } from 'loot-core/client/actions';
 
 import { useMetadataPref } from '../../hooks/useMetadataPref';
-import { useDispatch } from '../../redux';
+import { useAppDispatch } from '../../redux';
 import { theme } from '../../style';
 import { Button } from '../common/Button2';
 import { Link } from '../common/Link';
@@ -14,7 +14,7 @@ import { useServerURL } from '../ServerContext';
 import { Setting } from './UI';
 
 export function EncryptionSettings() {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const serverURL = useServerURL();
   const [encryptKeyId] = useMetadataPref('encryptKeyId');
 

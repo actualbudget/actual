@@ -20,7 +20,7 @@ import {
 } from 'loot-core/types/models/user';
 
 import { SelectedProvider, useSelected } from '../../../hooks/useSelected';
-import { useDispatch } from '../../../redux';
+import { useAppDispatch } from '../../../redux';
 import { theme } from '../../../style';
 import { Button } from '../../common/Button2';
 import { Link } from '../../common/Link';
@@ -85,7 +85,7 @@ function UserDirectoryContent({
   const [allUsers, setAllUsers] = useState([]);
   const [page, setPage] = useState(0);
   const [filter, setFilter] = useState('');
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
   const { getUserDirectoryErrors } = useGetUserDirectoryErrors();
 

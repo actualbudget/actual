@@ -7,7 +7,7 @@ import { setAppState } from 'loot-core/client/app/appSlice';
 import { ProtectedRoute } from '../../auth/ProtectedRoute';
 import { Permissions } from '../../auth/types';
 import { useMetaThemeColor } from '../../hooks/useMetaThemeColor';
-import { useSelector, useDispatch } from '../../redux';
+import { useAppSelector, useAppDispatch } from '../../redux';
 import { theme } from '../../style';
 import { tokens } from '../../tokens';
 import {
@@ -63,16 +63,16 @@ export function ManagementApp() {
     isNarrowWidth ? theme.mobileConfigServerViewTheme : undefined,
   );
 
-  const files = useSelector(state => state.budgets.allFiles);
-  const isLoading = useSelector(state => state.app.loadingText !== null);
-  const userData = useSelector(state => state.user.data);
+  const files = useAppSelector(state => state.budgets.allFiles);
+  const isLoading = useAppSelector(state => state.app.loadingText !== null);
+  const userData = useAppSelector(state => state.user.data);
   const multiuserEnabled = useMultiuserEnabled();
 
-  const managerHasInitialized = useSelector(
+  const managerHasInitialized = useAppSelector(
     state => state.app.managerHasInitialized,
   );
 
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
   // runs on mount only
   useEffect(() => {

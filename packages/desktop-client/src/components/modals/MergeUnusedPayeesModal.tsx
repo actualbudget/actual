@@ -6,7 +6,7 @@ import { send } from 'loot-core/src/platform/client/fetch';
 import { type PayeeEntity } from 'loot-core/types/models';
 
 import { usePayees } from '../../hooks/usePayees';
-import { useSelector, useDispatch } from '../../redux';
+import { useAppSelector, useAppDispatch } from '../../redux';
 import { theme } from '../../style';
 import { Information } from '../alerts';
 import { Button } from '../common/Button2';
@@ -28,9 +28,9 @@ export function MergeUnusedPayeesModal({
 }: MergeUnusedPayeesModalProps) {
   const { t } = useTranslation();
   const allPayees = usePayees();
-  const modalStack = useSelector(state => state.modals.modalStack);
+  const modalStack = useAppSelector(state => state.modals.modalStack);
   const isEditingRule = !!modalStack.find(m => m.name === 'edit-rule');
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const [shouldCreateRule, setShouldCreateRule] = useState(true);
   const flashRef = useRef<HTMLUListElement | null>(null);
 

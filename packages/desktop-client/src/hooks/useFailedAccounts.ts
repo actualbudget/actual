@@ -1,9 +1,9 @@
 import { useMemo } from 'react';
 
-import { useSelector } from '../redux';
+import { useAppSelector } from '../redux';
 
 export function useFailedAccounts() {
-  const failedAccounts = useSelector(state => state.account.failedAccounts);
+  const failedAccounts = useAppSelector(state => state.account.failedAccounts);
   return useMemo(
     () => new Map(Object.entries(failedAccounts)),
     [failedAccounts],

@@ -5,7 +5,7 @@ import { type Notification } from 'loot-core/client/state-types/notifications';
 import { redo, undo } from 'loot-core/client/undo';
 
 import { useResponsive } from '../components/responsive/ResponsiveProvider';
-import { useDispatch } from '../redux';
+import { useAppDispatch } from '../redux';
 
 type UndoActions = {
   undo: () => void;
@@ -17,7 +17,7 @@ type UndoActions = {
 const timeout = 10000;
 
 export function useUndo(): UndoActions {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const { isNarrowWidth } = useResponsive();
 
   const showUndoNotification = useCallback(

@@ -5,7 +5,7 @@ import { resetSync } from 'loot-core/client/app/appSlice';
 import { send } from 'loot-core/src/platform/client/fetch';
 
 import { useMetadataPref } from '../../hooks/useMetadataPref';
-import { useDispatch } from '../../redux';
+import { useAppDispatch } from '../../redux';
 import { ButtonWithLoading } from '../common/Button2';
 import { Text } from '../common/Text';
 
@@ -44,7 +44,7 @@ export function ResetCache() {
 export function ResetSync() {
   const [groupId] = useMetadataPref('groupId');
   const isEnabled = !!groupId;
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
   const [resetting, setResetting] = useState(false);
 

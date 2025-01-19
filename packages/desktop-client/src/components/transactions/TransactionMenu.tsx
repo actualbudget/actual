@@ -5,7 +5,7 @@ import { pushModal } from 'loot-core/client/actions';
 import { isPreviewId } from 'loot-core/shared/transactions';
 import { type TransactionEntity } from 'loot-core/types/models';
 
-import { useDispatch } from '../../redux';
+import { useAppDispatch } from '../../redux';
 import { Menu } from '../common/Menu';
 
 type BalanceMenuProps = Omit<
@@ -36,7 +36,7 @@ export function TransactionMenu({
   ...props
 }: BalanceMenuProps) {
   const { t } = useTranslation();
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
   const isPreview = isPreviewId(transaction.id);
   const linked = !!transaction.schedule;

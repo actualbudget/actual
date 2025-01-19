@@ -28,7 +28,7 @@ import { useUndo } from '../../../hooks/useUndo';
 import { AnimatedLoading } from '../../../icons/AnimatedLoading';
 import { SvgDelete } from '../../../icons/v0';
 import { SvgDotsHorizontalTriple } from '../../../icons/v1';
-import { useDispatch } from '../../../redux';
+import { useAppDispatch } from '../../../redux';
 import { styles, theme } from '../../../style';
 import { Button } from '../../common/Button2';
 import { Menu, type MenuItemObject } from '../../common/Menu';
@@ -276,7 +276,7 @@ function SelectedTransactionsFloatingActionBar({
   const { list: categories } = useCategories();
   const categoriesById = useMemo(() => groupById(categories), [categories]);
 
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   useEffect(() => {
     dispatch(setNotificationInset({ bottom: NOTIFICATION_BOTTOM_INSET }));
     return () => {

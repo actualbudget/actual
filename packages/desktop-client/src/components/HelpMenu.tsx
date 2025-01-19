@@ -9,7 +9,7 @@ import { pushModal } from 'loot-core/client/actions/modals';
 
 import { useFeatureFlag } from '../hooks/useFeatureFlag';
 import { SvgHelp } from '../icons/v2/Help';
-import { useDispatch } from '../redux';
+import { useAppDispatch } from '../redux';
 
 import { Button } from './common/Button2';
 import { Menu } from './common/Menu';
@@ -75,7 +75,7 @@ export const HelpMenu = () => {
   const [isMenuOpen, toggleMenuOpen, setMenuOpen] = useToggle();
   const menuButtonRef = useRef(null);
 
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const page = useLocation().pathname;
 
   const handleItemSelect = (item: HelpMenuItem) => {

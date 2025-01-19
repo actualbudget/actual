@@ -5,11 +5,11 @@ import {
   getPayees,
 } from 'loot-core/client/queries/queriesSlice';
 
-import { useSelector, useDispatch } from '../redux';
+import { useAppSelector, useAppDispatch } from '../redux';
 
 export function useCommonPayees() {
-  const dispatch = useDispatch();
-  const commonPayeesLoaded = useSelector(
+  const dispatch = useAppDispatch();
+  const commonPayeesLoaded = useAppSelector(
     state => state.queries.commonPayeesLoaded,
   );
 
@@ -19,12 +19,12 @@ export function useCommonPayees() {
     }
   }, []);
 
-  return useSelector(state => state.queries.commonPayees);
+  return useAppSelector(state => state.queries.commonPayees);
 }
 
 export function usePayees() {
-  const dispatch = useDispatch();
-  const payeesLoaded = useSelector(state => state.queries.payeesLoaded);
+  const dispatch = useAppDispatch();
+  const payeesLoaded = useAppSelector(state => state.queries.payeesLoaded);
 
   useEffect(() => {
     if (!payeesLoaded) {
@@ -32,5 +32,5 @@ export function usePayees() {
     }
   }, []);
 
-  return useSelector(state => state.queries.payees);
+  return useAppSelector(state => state.queries.payees);
 }

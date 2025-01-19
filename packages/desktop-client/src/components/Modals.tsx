@@ -9,7 +9,7 @@ import * as monthUtils from 'loot-core/src/shared/months';
 
 import { useMetadataPref } from '../hooks/useMetadataPref';
 import { useModalState } from '../hooks/useModalState';
-import { useDispatch } from '../redux';
+import { useAppDispatch } from '../redux';
 
 import { ModalTitle, ModalHeader } from './common/Modal';
 import { AccountAutocompleteModal } from './modals/AccountAutocompleteModal';
@@ -79,7 +79,7 @@ import { NamespaceContext } from './spreadsheet/NamespaceContext';
 
 export function Modals() {
   const location = useLocation();
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const { modalStack } = useModalState();
   const [budgetId] = useMetadataPref('id');
 
