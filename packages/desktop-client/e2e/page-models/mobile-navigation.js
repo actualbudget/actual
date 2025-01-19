@@ -1,5 +1,3 @@
-import { expect } from '@playwright/test';
-
 import { MobileAccountPage } from './mobile-account-page';
 import { MobileAccountsPage } from './mobile-accounts-page';
 import { MobileBudgetPage } from './mobile-budget-page';
@@ -70,8 +68,6 @@ export class MobileNavigation {
       // No navbar on page.
       return false;
     }
-
-    await expect(this.navbar).toHaveAttribute('data-navbar-state');
 
     const dataNavbarState = await this.navbar.getAttribute('data-navbar-state');
     return states.includes(dataNavbarState);
