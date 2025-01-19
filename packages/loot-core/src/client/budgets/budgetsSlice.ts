@@ -345,7 +345,7 @@ export const downloadBudget = createAppAsyncThunk(
       await Promise.all([
         dispatch(loadGlobalPrefs()),
         dispatch(loadAllFiles()),
-        dispatch(loadBudget(id)),
+        dispatch(loadBudget({ id })),
       ]);
       await dispatch(setAppState({ loadingText: null }));
     }

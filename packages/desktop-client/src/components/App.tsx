@@ -94,7 +94,7 @@ function AppInner() {
       );
       const budgetId = await send('get-last-opened-backup');
       if (budgetId) {
-        await dispatch(loadBudget(budgetId));
+        await dispatch(loadBudget({ id: budgetId }));
 
         // Check to see if this file has been remotely deleted (but
         // don't block on this in case they are offline or something)
