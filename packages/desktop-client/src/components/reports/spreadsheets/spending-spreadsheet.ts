@@ -46,9 +46,17 @@ export function createSpendingSpreadsheet({
       conditions: conditions.filter(cond => !cond.customName),
     });
 
-    const {filters: budgetFilters} = await send('make-filters-from-conditions', {
-      conditions: conditions.filter(cond => !cond.customName && cond.field == "category"),
-    });
+    const { filters: budgetFilters } = await send(
+      'make-filters-from-conditions',
+      {
+        conditions: conditions.filter(
+          cond =>
+            !cond.customName &&
+            cond.field === 'category' &&
+            !['contains', 'doesNotContain', 'matches'].includes(cond.op),
+        ),
+      },
+    );
 
     const conditionsOpKey = conditionsOp === 'or' ? '$or' : '$and';
 
