@@ -17,18 +17,18 @@ describe('schedules', () => {
 
   describe('getStatus', () => {
     it('returns completed if completed', () => {
-      expect(getStatus(todayString, true, false, 7)).toBe('completed');
+      expect(getStatus(todayString, true, false, '7')).toBe('completed');
     });
 
     it('returns paid if has transactions', () => {
-      expect(getStatus(todayString, false, true, 7)).toBe('paid');
+      expect(getStatus(todayString, false, true, '7')).toBe('paid');
     });
 
     it('returns due if today', () => {
-      expect(getStatus(todayString, false, false, 7)).toBe('due');
+      expect(getStatus(todayString, false, false, '7')).toBe('due');
     });
 
-    it.each([1, 7, 14, 30])(
+    it.each(['1', '7', '14', '30'])(
       'returns upcoming if within upcoming range %n',
       (upcomingLength: number) => {
         const daysOut = upcomingLength;
@@ -48,13 +48,13 @@ describe('schedules', () => {
     );
 
     it('returns missed if past', () => {
-      expect(getStatus(monthUtils.addDays(today, -1), false, false, 7)).toBe(
+      expect(getStatus(monthUtils.addDays(today, -1), false, false, '7')).toBe(
         'missed',
       );
     });
 
     it('returns scheduled if not due, upcoming, or missed', () => {
-      expect(getStatus(monthUtils.addDays(today, 8), false, false, 7)).toBe(
+      expect(getStatus(monthUtils.addDays(today, 8), false, false, '7')).toBe(
         'scheduled',
       );
     });
