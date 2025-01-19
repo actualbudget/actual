@@ -176,11 +176,18 @@ export function usePreviewTransactions(): UsePreviewTransactionsResult {
 
         const dates: string[] = [];
         let day = d.startOfDay(parseDate(schedule.next_date));
+        let i = 0;
         if (isRecurring) {
-          while (day <= upcomingPeriodEnd) {
+          while (day <= upcomingPeriodEnd && i < 400) {
+            i++;
             const nextDate = getNextDate(dateConditions, day);
 
             if (parseDate(nextDate) > upcomingPeriodEnd) break;
+
+            if (dates.includes(nextDate)) {
+              day = parseDate(addDays(day, 1));
+              continue;
+            }
 
             dates.push(nextDate);
             day = parseDate(addDays(nextDate, 1));
