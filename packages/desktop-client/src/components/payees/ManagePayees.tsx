@@ -5,10 +5,11 @@ import {
   useCallback,
   type ComponentProps,
 } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import memoizeOne from 'memoize-one';
 
+import { pushModal } from 'loot-core/client/actions';
 import { getNormalisedString } from 'loot-core/src/shared/normalisation';
 import { type Diff, groupById } from 'loot-core/src/shared/util';
 import { type PayeeEntity } from 'loot-core/types/models';
@@ -20,6 +21,7 @@ import {
   useSelectedItems,
 } from '../../hooks/useSelected';
 import { SvgExpandArrow } from '../../icons/v0';
+import { useDispatch } from '../../redux';
 import { theme } from '../../style';
 import { Button } from '../common/Button2';
 import { Popover } from '../common/Popover';
@@ -91,6 +93,7 @@ export const ManagePayees = ({
   const triggerRef = useRef(null);
   const [orphanedOnly, setOrphanedOnly] = useState(false);
   const { t } = useTranslation();
+  const dispatch = useDispatch();
 
   const filteredPayees = useMemo(() => {
     let filtered = payees;
@@ -116,7 +119,7 @@ export const ManagePayees = ({
   }
 
   const onUpdate = useCallback(
-    <T extends 'name' | 'favorite'>(
+    <T extends 'name' | 'favorite' | 'learn_categories'>(
       id: PayeeEntity['id'],
       name: T,
       value: PayeeEntity[T],
@@ -168,12 +171,36 @@ export const ManagePayees = ({
     selected.dispatch({ type: 'select-none' });
   }
 
+  function onLearn() {
+    const allLearnCategories = [...selected.items]
+      .map(id => payeesById[id].learn_categories)
+      .every(f => f === 1);
+    if (allLearnCategories) {
+      onBatchChange({
+        updated: [...selected.items].map(id => ({ id, learn_categories: 0 })),
+        added: [],
+        deleted: [],
+      });
+    } else {
+      onBatchChange({
+        updated: [...selected.items].map(id => ({ id, learn_categories: 1 })),
+        added: [],
+        deleted: [],
+      });
+    }
+    selected.dispatch({ type: 'select-none' });
+  }
+
   async function onMerge() {
     const ids = [...selected.items];
     await props.onMerge(ids);
 
     selected.dispatch({ type: 'select-none' });
   }
+
+  const onChangeCategoryLearning = useCallback(() => {
+    dispatch(pushModal('payee-category-learning'));
+  }, [dispatch]);
 
   const buttonsDisabled = selected.items.size === 0;
 
@@ -220,6 +247,7 @@ export const ManagePayees = ({
               onDelete={onDelete}
               onMerge={onMerge}
               onFavorite={onFavorite}
+              onLearn={onLearn}
             />
           </Popover>
         </View>
@@ -290,6 +318,31 @@ export const ManagePayees = ({
           )}
         </View>
       </SelectedProvider>
+
+      <View
+        style={{
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          margin: '20px 0',
+          flexShrink: 0,
+        }}
+      >
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: '1em',
+          }}
+        >
+          <Button
+            aria-label={t('Category learning settings')}
+            variant="normal"
+            onPress={onChangeCategoryLearning}
+          >
+            <Trans>Category learning settings</Trans>
+          </Button>
+        </View>
+      </View>
     </View>
   );
 };
