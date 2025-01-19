@@ -52,7 +52,7 @@ export function CategoryLearning() {
             variant={isLearnCategoriesEnabled ? 'normal' : 'primary'}
           >
             {isLearnCategoriesEnabled ? (
-              <Trans>Disable Category Learning</Trans>
+              <Trans>Disable category learning</Trans>
             ) : (
               <Trans>Enable Category Learning</Trans>
             )}
