@@ -186,7 +186,10 @@ export function BalanceWithCarryover({
                     <div>
                       {
                         {
-                          type: longGoalValue === 1 ? t('Long') : t('Template'),
+                          type:
+                            longGoalValue === 1
+                              ? t('Long', { context: 'noun' })
+                              : t('Template'),
                         } as TransObjectLiteral
                       }
                     </div>
