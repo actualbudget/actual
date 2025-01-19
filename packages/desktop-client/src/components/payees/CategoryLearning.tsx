@@ -34,7 +34,7 @@ export function CategoryLearning() {
                 to="https://actualbudget.org/docs/budgeting/rules/#automatic-rules"
                 linkColor="purple"
               >
-                <Trans>Learn more</Trans>
+                Learn more
               </Link>
             </Trans>
           </Paragraph>
