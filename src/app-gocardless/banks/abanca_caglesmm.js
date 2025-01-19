@@ -6,7 +6,11 @@ import { formatPayeeName } from '../../util/payee-name.js';
 export default {
   ...Fallback,
 
-  institutionIds: ['ABANCA_CAGLESMM', 'ABANCA_CAGLPTPL'],
+  institutionIds: [
+    'ABANCA_CAGLESMM',
+    'ABANCA_CAGLPTPL',
+    'ABANCA_CORP_CAGLPTPL',
+  ],
 
   // Abanca transactions doesn't get the creditorName/debtorName properly
   normalizeTransaction(transaction, _booked) {
