@@ -9,13 +9,12 @@ import { currentDay, dayFromDate, parseDate } from '../../shared/months';
 import { q } from '../../shared/query';
 import {
   extractScheduleConds,
+  getDateWithSkippedWeekend,
   getHasTransactionsQuery,
+  getNextDate,
   getScheduledAmount,
   getStatus,
-  getUpcomingDays,
   recurConfigToRSchedule,
-  getNextDate,
-  getDateWithSkippedWeekend,
 } from '../../shared/schedules';
 import { Rule } from '../accounts/rules';
 import { addTransactions } from '../accounts/sync';
@@ -455,14 +454,12 @@ async function advanceSchedulesService(syncSuccess) {
       .select('value'),
   );
 
-  const upcomingLengthValue = getUpcomingDays(upcomingLength[0]?.value ?? '7');
-
   for (const schedule of schedules) {
     const status = getStatus(
       schedule.next_date,
       schedule.completed,
       hasTrans.has(schedule.id),
-      upcomingLengthValue,
+      upcomingLength[0]?.value ?? '7',
     );
 
     if (status === 'paid') {

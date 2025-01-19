@@ -1,25 +1,21 @@
 // @ts-strict-ignore
 import React, {
   createContext,
+  type PropsWithChildren,
   useContext,
   useEffect,
-  useState,
   useRef,
-  type PropsWithChildren,
+  useState,
 } from 'react';
 
 import { useSyncedPref } from '@actual-app/web/src/hooks/useSyncedPref';
 
 import { q, type Query } from '../../shared/query';
+import { getHasTransactionsQuery, getStatus } from '../../shared/schedules';
 import {
-  getUpcomingDays,
-  getHasTransactionsQuery,
-  getStatus,
-} from '../../shared/schedules';
-import {
-  type TransactionEntity,
-  type ScheduleEntity,
   type AccountEntity,
+  type ScheduleEntity,
+  type TransactionEntity,
 } from '../../types/models';
 import { accountFilter } from '../queries';
 import { type LiveQuery, liveQuery } from '../query-helpers';
@@ -31,7 +27,7 @@ function loadStatuses(
   schedules: readonly ScheduleEntity[],
   onData: (data: ScheduleStatuses) => void,
   onError: (error: Error) => void,
-  upcomingLength: number,
+  upcomingLength: string,
 ) {
   return liveQuery<TransactionEntity>(getHasTransactionsQuery(schedules), {
     onData: data => {
@@ -77,7 +73,6 @@ export function useSchedules({
     statuses: new Map(),
   });
   const [upcomingLength] = useSyncedPref('upcomingScheduledTransactionLength');
-  const upcomingDays = getUpcomingDays(upcomingLength);
 
   const scheduleQueryRef = useRef<LiveQuery<ScheduleEntity> | null>(null);
   const statusQueryRef = useRef<LiveQuery<TransactionEntity> | null>(null);
@@ -116,7 +111,7 @@ export function useSchedules({
             }
           },
           onError,
-          upcomingDays,
+          upcomingLength,
         );
       },
       onError,
@@ -127,7 +122,7 @@ export function useSchedules({
       scheduleQueryRef.current?.unsubscribe();
       statusQueryRef.current?.unsubscribe();
     };
-  }, [query, upcomingDays]);
+  }, [query, upcomingLength]);
 
   return {
     isLoading,
