@@ -753,7 +753,7 @@ function execSplitActions(actions: Action[], transaction) {
     });
 
     // The last remainder split will be adjusted for any leftovers from rounding.
-    newTransactions[lastNonFixedTransactionIndex].amount -=
+    newTransactions[lastNonFixedTransactionIndex].amount +=
       getSplitRemainder(newTransactions);
   }
 
