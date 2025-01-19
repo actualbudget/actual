@@ -249,6 +249,9 @@ function BudgetCell({
             category: category.id,
             amount,
           });
+          showUndoNotification({
+            message: `${category.name} budget has been updated to ${integerToCurrency(amount)}.`,
+          });
         },
         onCopyLastMonthAverage: () => {
           onBudgetAction(month, 'copy-single-last', {
