@@ -339,7 +339,7 @@ export const ManagePayees = ({
             variant="normal"
             onPress={onChangeCategoryLearning}
           >
-            <Trans>Change Category Learning</Trans>
+            <Trans>Category learning settings</Trans>
           </Button>
         </View>
       </View>
