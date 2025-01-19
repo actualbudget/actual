@@ -30,7 +30,7 @@ describe('schedules', () => {
 
     it.each(['1', '7', '14', '30'])(
       'returns upcoming if within upcoming range %n',
-      (upcomingLength: number) => {
+      (upcomingLength: string) => {
         const daysOut = upcomingLength;
         const tomorrow = monthUtils.addDays(today, 1);
         const upcomingDate = monthUtils.addDays(today, daysOut);
