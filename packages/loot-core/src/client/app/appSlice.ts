@@ -1,4 +1,4 @@
-import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
+import { createAsyncThunk, createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
 import { send } from '../../platform/client/fetch';
 import { getUploadError } from '../../shared/errors';
@@ -6,6 +6,7 @@ import { type AccountEntity } from '../../types/models';
 import { syncAccounts } from '../accounts/accountsSlice';
 import { loadPrefs, pushModal } from '../actions';
 import { createAppAsyncThunk } from '../redux';
+import { enUS, ptBR } from 'date-fns/locale';
 
 const sliceName = 'app';
 
@@ -18,6 +19,7 @@ type AppState = {
   } | null;
   showUpdateNotification: boolean;
   managerHasInitialized: boolean;
+  locale: Locale;
 };
 
 const initialState: AppState = {
@@ -25,6 +27,7 @@ const initialState: AppState = {
   updateInfo: null,
   showUpdateNotification: true,
   managerHasInitialized: false,
+  locale: enUS
 };
 
 export const updateApp = createAppAsyncThunk(
@@ -117,6 +120,28 @@ export const syncAndDownload = createAppAsyncThunk(
   },
 );
 
+export const fetchLocale = createAppAsyncThunk(
+  'app/fetchLocale',
+  async ({ language }: { language: string }, {}) => {
+    try {
+      debugger;
+      switch(language) {
+        case 'pt-BR':
+          return ptBR;
+
+        default:
+          return enUS;
+      }
+      // const localeModule = await import(/* @vite-ignore */ `date-fns/locale/${language.replace('-', '')}`);
+      // return localeModule.default;
+    } catch (error) {
+      console.error(`Locale for language "${language}" not found. Falling back to default.`);
+      return enUS;
+    }
+  }
+);
+
+
 type SetAppStatePayload = Partial<AppState>;
 
 const appSlice = createSlice({
@@ -130,7 +155,14 @@ const appSlice = createSlice({
       };
     },
   },
+  extraReducers: (builder) => {
+    builder.addCase(fetchLocale.fulfilled, (state, action) => {
+      debugger;
+      state.locale = action.payload; // Update the locale when loaded
+    });
+  },
 });
+
 
 export const { name, reducer, getInitialState } = appSlice;
 
@@ -140,6 +172,7 @@ export const actions = {
   resetSync,
   sync,
   syncAndDownload,
+  fetchLocale
 };
 
 export const { setAppState } = actions;

@@ -11,6 +11,8 @@ import { Link } from '../common/Link';
 import { View } from '../common/View';
 
 import { type MonthBounds } from './MonthsContext';
+import { RootState } from 'loot-core/client/store';
+import { useSelector } from '../../redux';
 
 type MonthPickerProps = {
   startMonth: string;
@@ -27,6 +29,7 @@ export const MonthPicker = ({
   style,
   onSelect,
 }: MonthPickerProps) => {
+  const locale = useSelector(state => state.app.locale);
   const { t } = useTranslation();
   const [hoverId, setHoverId] = useState(null);
   const [targetMonthCount, setTargetMonthCount] = useState(12);
@@ -101,7 +104,7 @@ export const MonthPicker = ({
           </View>
         </Link>
         {range.map((month, idx) => {
-          const monthName = monthUtils.format(month, 'MMM');
+          const monthName = monthUtils.format(month, 'MMM', locale);
           const selected =
             idx >= firstSelectedIndex && idx <= lastSelectedIndex;
 

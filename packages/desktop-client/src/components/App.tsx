@@ -43,6 +43,7 @@ import { Modals } from './Modals';
 import { ResponsiveProvider } from './responsive/ResponsiveProvider';
 import { SidebarProvider } from './sidebar/SidebarProvider';
 import { UpdateNotification } from './UpdateNotification';
+import { useSyncLocale } from '../hooks/useSyncLocale';
 
 function AppInner() {
   const [budgetId] = useMetadataPref('id');
@@ -160,6 +161,8 @@ function ErrorFallback({ error }: FallbackProps) {
 }
 
 export function App() {
+  useSyncLocale();
+
   const [hiddenScrollbars, setHiddenScrollbars] = useState(
     hasHiddenScrollbars(),
   );
