@@ -10,6 +10,8 @@ import { Paragraph } from '../common/Paragraph';
 import { Select } from '../common/Select';
 import { View } from '../common/View';
 
+import { CustomUpcomingLength } from './CustomUpcomingLength';
+
 function useUpcomingLengthOptions() {
   const { t } = useTranslation();
 
@@ -22,9 +24,14 @@ function useUpcomingLengthOptions() {
     { value: '14', label: t('2 weeks') },
     { value: 'oneMonth', label: t('1 month') },
     { value: 'currentMonth', label: t('End of the current month') },
+    { value: 'custom', label: t('Custom length') },
   ];
 
   return { upcomingLengthOptions };
+}
+
+function nonCustomUpcomingLengthValues() {
+  return ['1', '7', '14', 'oneMonth', 'currentMonth'];
 }
 
 export function UpcomingLength() {
@@ -42,6 +49,10 @@ export function UpcomingLength() {
   const upcomingLength = _upcomingLength || '7';
 
   const [tempUpcomingLength, setTempUpcomingLength] = useState(upcomingLength);
+  const [useCustomLength, setUseCustomLength] = useState(
+    nonCustomUpcomingLengthValues().findIndex(x => x === tempUpcomingLength) ===
+      -1,
+  );
   const [saveActive, setSaveActive] = useState(false);
 
   useEffect(() => {
@@ -83,9 +94,16 @@ export function UpcomingLength() {
               ])}
               value={tempUpcomingLength}
               onChange={newValue => {
+                setUseCustomLength(newValue === 'custom');
                 setTempUpcomingLength(newValue);
               }}
             />
+            {useCustomLength && (
+              <CustomUpcomingLength
+                onChange={setTempUpcomingLength}
+                tempValue={tempUpcomingLength}
+              />
+            )}
           </View>
           <div
             style={{
