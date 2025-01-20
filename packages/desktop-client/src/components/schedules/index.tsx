@@ -41,7 +41,7 @@ export function Schedules() {
   }, [dispatch]);
 
   const onChangeUpcomingLength = useCallback(() => {
-    dispatch(pushModal({ name: 'schedules-upcoming-length' }));
+    dispatch(pushModal({ modal: { name: 'schedules-upcoming-length' } }));
   }, [dispatch]);
 
   const onAction = useCallback(
