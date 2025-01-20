@@ -141,7 +141,7 @@ describe('Spreadsheet', () => {
     });
   });
 
-  test('async cells work', done => {
+  test('async cells work', () => {
     const spreadsheet = new Spreadsheet();
 
     spreadsheet.createDynamic('foo', 'x', {
@@ -154,13 +154,12 @@ describe('Spreadsheet', () => {
 
     spreadsheet.onFinish(() => {
       expect(spreadsheet.getValue('foo!x')).toBe(5);
-      done();
     });
 
     expect(spreadsheet.getValue('foo!x')).toBe(1);
   });
 
-  test('async cells work2', done => {
+  test('async cells work2', () => {
     const spreadsheet = new Spreadsheet();
 
     spreadsheet.transaction(() => {
@@ -184,7 +183,6 @@ describe('Spreadsheet', () => {
     spreadsheet.onFinish(() => {
       expect(spreadsheet.getValue('foo!x')).toBe(5);
       expect(spreadsheet.getValue('foo!y')).toBe(15);
-      done();
     });
 
     expect(spreadsheet.getValue('foo!x')).toBe(1);

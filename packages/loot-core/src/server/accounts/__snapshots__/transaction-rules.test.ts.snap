@@ -1,9 +1,9 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Learning categories updates rules correctly even if multiple rules exist 1`] = `
-Array [
+exports[`Learning categories > updates rules correctly even if multiple rules exist 1`] = `
+[
   Rule {
-    "actions": Array [
+    "actions": [
       Action {
         "field": "category",
         "handlebarsTemplate": undefined,
@@ -14,7 +14,34 @@ Array [
         "value": "food",
       },
     ],
-    "conditions": Array [
+    "conditions": [
+      Condition {
+        "field": "payee",
+        "op": "is",
+        "options": undefined,
+        "rawValue": "foo",
+        "type": "id",
+        "unparsedValue": "foo",
+        "value": "foo",
+      },
+    ],
+    "conditionsOp": "and",
+    "id": "id1",
+    "stage": null,
+  },
+  Rule {
+    "actions": [
+      Action {
+        "field": "category",
+        "handlebarsTemplate": undefined,
+        "op": "set",
+        "options": undefined,
+        "rawValue": "food",
+        "type": "id",
+        "value": "food",
+      },
+    ],
+    "conditions": [
       Condition {
         "field": "payee",
         "op": "is",
@@ -30,34 +57,7 @@ Array [
     "stage": null,
   },
   Rule {
-    "actions": Array [
-      Action {
-        "field": "category",
-        "handlebarsTemplate": undefined,
-        "op": "set",
-        "options": undefined,
-        "rawValue": "food",
-        "type": "id",
-        "value": "food",
-      },
-    ],
-    "conditions": Array [
-      Condition {
-        "field": "payee",
-        "op": "is",
-        "options": undefined,
-        "rawValue": "foo",
-        "type": "id",
-        "unparsedValue": "foo",
-        "value": "foo",
-      },
-    ],
-    "conditionsOp": "and",
-    "id": "id3",
-    "stage": null,
-  },
-  Rule {
-    "actions": Array [
+    "actions": [
       Action {
         "field": "category",
         "handlebarsTemplate": undefined,
@@ -68,7 +68,7 @@ Array [
         "value": "beer",
       },
     ],
-    "conditions": Array [
+    "conditions": [
       Condition {
         "field": "payee",
         "op": "is",
@@ -80,16 +80,16 @@ Array [
       },
     ],
     "conditionsOp": "and",
-    "id": "id4",
+    "id": "id3",
     "stage": null,
   },
 ]
 `;
 
-exports[`Learning categories updates rules correctly even if multiple rules exist 2`] = `
-Array [
+exports[`Learning categories > updates rules correctly even if multiple rules exist 2`] = `
+[
   Rule {
-    "actions": Array [
+    "actions": [
       Action {
         "field": "category",
         "handlebarsTemplate": undefined,
@@ -100,7 +100,34 @@ Array [
         "value": "beer",
       },
     ],
-    "conditions": Array [
+    "conditions": [
+      Condition {
+        "field": "payee",
+        "op": "is",
+        "options": undefined,
+        "rawValue": "foo",
+        "type": "id",
+        "unparsedValue": "foo",
+        "value": "foo",
+      },
+    ],
+    "conditionsOp": "and",
+    "id": "id1",
+    "stage": null,
+  },
+  Rule {
+    "actions": [
+      Action {
+        "field": "category",
+        "handlebarsTemplate": undefined,
+        "op": "set",
+        "options": undefined,
+        "rawValue": "beer",
+        "type": "id",
+        "value": "beer",
+      },
+    ],
+    "conditions": [
       Condition {
         "field": "payee",
         "op": "is",
@@ -116,7 +143,7 @@ Array [
     "stage": null,
   },
   Rule {
-    "actions": Array [
+    "actions": [
       Action {
         "field": "category",
         "handlebarsTemplate": undefined,
@@ -127,34 +154,7 @@ Array [
         "value": "beer",
       },
     ],
-    "conditions": Array [
-      Condition {
-        "field": "payee",
-        "op": "is",
-        "options": undefined,
-        "rawValue": "foo",
-        "type": "id",
-        "unparsedValue": "foo",
-        "value": "foo",
-      },
-    ],
-    "conditionsOp": "and",
-    "id": "id3",
-    "stage": null,
-  },
-  Rule {
-    "actions": Array [
-      Action {
-        "field": "category",
-        "handlebarsTemplate": undefined,
-        "op": "set",
-        "options": undefined,
-        "rawValue": "beer",
-        "type": "id",
-        "value": "beer",
-      },
-    ],
-    "conditions": Array [
+    "conditions": [
       Condition {
         "field": "payee",
         "op": "is",
@@ -166,7 +166,7 @@ Array [
       },
     ],
     "conditionsOp": "and",
-    "id": "id4",
+    "id": "id3",
     "stage": null,
   },
 ]

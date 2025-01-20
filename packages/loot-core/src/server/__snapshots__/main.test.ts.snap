@@ -1,8 +1,8 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Accounts Transfers are properly updated 1`] = `
-Array [
-  Object {
+exports[`Accounts > Transfers are properly updated 1`] = `
+[
+  {
     "acct": "one",
     "amount": 5000,
     "category": null,
@@ -24,10 +24,10 @@ Array [
     "sort_order": 123456789,
     "starting_balance_flag": 0,
     "tombstone": 0,
-    "transferred_id": "id2",
+    "transferred_id": "id1",
     "type": null,
   },
-  Object {
+  {
     "acct": "two",
     "amount": -5000,
     "category": null,
@@ -36,7 +36,7 @@ Array [
     "description": "transfer-one",
     "error": null,
     "financial_id": null,
-    "id": "id2",
+    "id": "id1",
     "imported_description": null,
     "isChild": 0,
     "isParent": 0,
@@ -55,99 +55,99 @@ Array [
 ]
 `;
 
-exports[`Accounts Transfers are properly updated 2`] = `
+exports[`Accounts > Transfers are properly updated 2`] = `
 "Snapshot Diff:
 - First value
 + Second value
 
 @@ -2,12 +2,12 @@
     Object {
-      \\"acct\\": \\"one\\",
-      \\"amount\\": 5000,
-      \\"category\\": null,
-      \\"cleared\\": 1,
--     \\"date\\": 20170101,
--     \\"description\\": \\"transfer-two\\",
-+     \\"date\\": 20170103,
-+     \\"description\\": \\"transfer-three\\",
-      \\"error\\": null,
-      \\"financial_id\\": null,
-      \\"id\\": \\"test-transfer\\",
-      \\"imported_description\\": null,
-      \\"isChild\\": 0,
+      "acct": "one",
+      "amount": 5000,
+      "category": null,
+      "cleared": 1,
+-     "date": 20170101,
+-     "description": "transfer-two",
++     "date": 20170103,
++     "description": "transfer-three",
+      "error": null,
+      "financial_id": null,
+      "id": "test-transfer",
+      "imported_description": null,
+      "isChild": 0,
 @@ -23,15 +23,15 @@
-      \\"tombstone\\": 0,
-      \\"transferred_id\\": \\"id2\\",
-      \\"type\\": null,
+      "tombstone": 0,
+      "transferred_id": "id1",
+      "type": null,
     },
     Object {
--     \\"acct\\": \\"two\\",
-+     \\"acct\\": \\"three\\",
-      \\"amount\\": -5000,
-      \\"category\\": null,
-      \\"cleared\\": 0,
--     \\"date\\": 20170101,
-+     \\"date\\": 20170103,
-      \\"description\\": \\"transfer-one\\",
-      \\"error\\": null,
-      \\"financial_id\\": null,
-      \\"id\\": \\"id2\\",
-      \\"imported_description\\": null,"
+-     "acct": "two",
++     "acct": "three",
+      "amount": -5000,
+      "category": null,
+      "cleared": 0,
+-     "date": 20170101,
++     "date": 20170103,
+      "description": "transfer-one",
+      "error": null,
+      "financial_id": null,
+      "id": "id1",
+      "imported_description": null,"
 `;
 
-exports[`Accounts Transfers are properly updated 3`] = `
+exports[`Accounts > Transfers are properly updated 3`] = `
 "Snapshot Diff:
 - First value
 + Second value
 
 @@ -18,12 +18,12 @@
-      \\"pending\\": 0,
-      \\"reconciled\\": 0,
-      \\"schedule\\": null,
-      \\"sort_order\\": 123456789,
-      \\"starting_balance_flag\\": 0,
--     \\"tombstone\\": 0,
--     \\"transferred_id\\": \\"id2\\",
-+     \\"tombstone\\": 1,
-+     \\"transferred_id\\": null,
-      \\"type\\": null,
+      "pending": 0,
+      "reconciled": 0,
+      "schedule": null,
+      "sort_order": 123456789,
+      "starting_balance_flag": 0,
+-     "tombstone": 0,
+-     "transferred_id": "id1",
++     "tombstone": 1,
++     "transferred_id": null,
+      "type": null,
     },
     Object {
-      \\"acct\\": \\"three\\",
-      \\"amount\\": -5000,
+      "acct": "three",
+      "amount": -5000,
 @@ -43,10 +43,10 @@
-      \\"pending\\": 0,
-      \\"reconciled\\": 0,
-      \\"schedule\\": null,
-      \\"sort_order\\": 123456789,
-      \\"starting_balance_flag\\": 0,
--     \\"tombstone\\": 0,
-+     \\"tombstone\\": 1,
-      \\"transferred_id\\": \\"test-transfer\\",
-      \\"type\\": null,
+      "pending": 0,
+      "reconciled": 0,
+      "schedule": null,
+      "sort_order": 123456789,
+      "starting_balance_flag": 0,
+-     "tombstone": 0,
++     "tombstone": 1,
+      "transferred_id": "test-transfer",
+      "type": null,
     },
   ]"
 `;
 
-exports[`Budget budget updates when changing a category 1`] = `
-Array [
-  "budget201702!sum-amount-id2",
+exports[`Budget > budget updates when changing a category 1`] = `
+[
+  "budget201702!sum-amount-id1",
 ]
 `;
 
-exports[`Budget budget updates when changing a category 2`] = `
-Array [
-  "budget201702!sum-amount-id2",
+exports[`Budget > budget updates when changing a category 2`] = `
+[
+  "budget201702!sum-amount-id1",
 ]
 `;
 
-exports[`Budget budget updates when changing a category 3`] = `
-Array [
-  "budget201702!sum-amount-id2",
+exports[`Budget > budget updates when changing a category 3`] = `
+[
+  "budget201702!sum-amount-id1",
 ]
 `;
 
-exports[`Budget new budgets should be created 1`] = `
+exports[`Budget > new budgets should be created 1`] = `
 Set {
   "2016-10",
   "2016-11",
@@ -168,7 +168,7 @@ Set {
 }
 `;
 
-exports[`Budget new budgets should be created 2`] = `
+exports[`Budget > new budgets should be created 2`] = `
 Set {
   "2016-10",
   "2016-11",

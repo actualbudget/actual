@@ -1,9 +1,9 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Spreadsheet transferring a category triggers an update 1`] = `"=from transactions where category = \\"cat2\\" calculate { sum(amount) }"`;
+exports[`Spreadsheet > transferring a category triggers an update 1`] = `"=from transactions where category = "cat2" calculate { sum(amount) }"`;
 
-exports[`Spreadsheet transferring a category triggers an update 2`] = `"=from transactions where category = \\"cat2\\" calculate { sum(amount) }"`;
+exports[`Spreadsheet > transferring a category triggers an update 2`] = `"=from transactions where category = "cat2" calculate { sum(amount) }"`;
 
-exports[`Spreadsheet updating still works after transferring categories 1`] = `"=from transactions where category = \\"cat2\\" calculate { sum(amount) }"`;
+exports[`Spreadsheet > updating still works after transferring categories 1`] = `"=from transactions where category = "cat2" calculate { sum(amount) }"`;
 
-exports[`Spreadsheet updating still works after transferring categories 2`] = `"=from transactions where category = \\"cat2\\" calculate { sum(amount) }"`;
+exports[`Spreadsheet > updating still works after transferring categories 2`] = `"=from transactions where category = "cat2" calculate { sum(amount) }"`;

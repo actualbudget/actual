@@ -1,22 +1,23 @@
+import { Rule } from '../accounts/rules';
 import * as db from '../db';
 import { getRuleForSchedule } from '../schedules/app';
 
 import { isReflectBudget } from './actions';
 import { goalsSchedule } from './goalsSchedule';
 
-jest.mock('../db');
-jest.mock('./actions');
-jest.mock('../schedules/app', () => {
-  const actualModule = jest.requireActual('../schedules/app');
+vi.mock('../db');
+vi.mock('./actions');
+vi.mock('../schedules/app', async () => {
+  const actualModule = await vi.importActual('../schedules/app');
   return {
     ...actualModule,
-    getRuleForSchedule: jest.fn(),
+    getRuleForSchedule: vi.fn(),
   };
 });
 
 describe('goalsSchedule', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return correct budget when recurring schedule set', async () => {
@@ -37,9 +38,12 @@ describe('goalsSchedule', () => {
     const errors: string[] = [];
     const category = { id: '1', name: 'Test Category' };
 
-    (db.first as jest.Mock).mockResolvedValue({ id: 1, completed: 0 });
-    (getRuleForSchedule as jest.Mock).mockResolvedValue({
-      serialize: () => ({
+    vi.mocked(db.first).mockResolvedValue({ id: 1, completed: 0 });
+    vi.mocked(getRuleForSchedule).mockResolvedValue(
+      new Rule({
+        id: 'test',
+        stage: 'pre',
+        conditionsOp: 'and',
         conditions: [
           {
             op: 'is',
@@ -64,10 +68,10 @@ describe('goalsSchedule', () => {
             type: 'number',
           },
         ],
+        actions: [],
       }),
-      execActions: () => ({ amount: -10000, subtransactions: [] }),
-    });
-    (isReflectBudget as jest.Mock).mockReturnValue(false);
+    );
+    vi.mocked(isReflectBudget).mockReturnValue(false);
 
     // When
     const result = await goalsSchedule(
@@ -107,9 +111,12 @@ describe('goalsSchedule', () => {
     const errors: string[] = [];
     const category = { id: '1', name: 'Test Category' };
 
-    (db.first as jest.Mock).mockResolvedValue({ id: 1, completed: 0 });
-    (getRuleForSchedule as jest.Mock).mockResolvedValue({
-      serialize: () => ({
+    vi.mocked(db.first).mockResolvedValue({ id: 1, completed: 0 });
+    vi.mocked(getRuleForSchedule).mockResolvedValue(
+      new Rule({
+        id: 'test',
+        stage: 'pre',
+        conditionsOp: 'and',
         conditions: [
           {
             op: 'is',
@@ -134,10 +141,10 @@ describe('goalsSchedule', () => {
             type: 'number',
           },
         ],
+        actions: [],
       }),
-      execActions: () => ({ amount: -12000, subtransactions: [] }),
-    });
-    (isReflectBudget as jest.Mock).mockReturnValue(false);
+    );
+    vi.mocked(isReflectBudget).mockReturnValue(false);
 
     // When
     const result = await goalsSchedule(

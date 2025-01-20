@@ -126,7 +126,7 @@ export default [
       globals: {
         ...globals.browser,
         ...globals.commonjs,
-        ...globals.jest,
+        ...globals.vitest,
         ...globals.node,
         globalThis: false,
         vi: true,
@@ -742,6 +742,19 @@ export default [
       'import/no-unresolved': 'off',
     },
   },
+
+  // Allow configuring vitest with default exports (recommended as per vitest docs)
+  {
+    files: [
+      'packages/loot-core/vitest.config.ts',
+      'packages/loot-core/vitest.web.config.ts',
+    ],
+    rules: {
+      'import/no-anonymous-default-export': 'off',
+      'import/no-default-export': 'off',
+    },
+  },
+
   {},
   {
     // TODO: fix the issues in these files

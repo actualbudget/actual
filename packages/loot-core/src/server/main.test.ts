@@ -19,7 +19,7 @@ import {
 import * as prefs from './prefs';
 import * as sheet from './sheet';
 
-jest.mock('./post');
+vi.mock('./post');
 
 beforeEach(async () => {
   await global.emptyDatabase()();
@@ -87,7 +87,7 @@ describe('Budgets', () => {
     await db.openDatabase('test-budget');
     await db.runQuery('INSERT INTO __migrations__ (id) VALUES (1000)');
 
-    const spy = jest.spyOn(console, 'warn').mockImplementation();
+    const spy = vi.spyOn(console, 'warn').mockImplementation(() => null);
 
     const { error } = await runHandler(handlers['load-budget'], {
       id: 'test-budget',

@@ -18,7 +18,7 @@
     "build:migrations": "cp migrations/*.sql dist/migrations",
     "build:default-db": "cp default-db.sqlite dist/",
     "build": "yarn run clean && yarn run build:app && yarn run build:node && yarn run build:migrations && yarn run build:default-db",
-    "test": "yarn run build:app && jest -c jest.config.js",
+    "test": "yarn run build:app && vitest --globals --dangerouslyIgnoreUnhandledErrors",
     "clean": "rm -rf dist @types"
   },
   "dependencies": {
@@ -29,12 +29,9 @@
     "uuid": "^9.0.1"
   },
   "devDependencies": {
-    "@swc/core": "^1.5.3",
-    "@swc/jest": "^0.2.36",
-    "@types/jest": "^27.5.2",
     "@types/uuid": "^9.0.2",
-    "jest": "^27.5.1",
     "tsc-alias": "^1.8.8",
-    "typescript": "^5.5.4"
+    "typescript": "^5.5.4",
+    "vitest": "^3.0.2"
   }
 }

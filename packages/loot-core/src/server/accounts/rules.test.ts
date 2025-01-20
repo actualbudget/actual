@@ -53,7 +53,7 @@ describe('Condition', () => {
   });
 
   test('ops handles undefined fields', () => {
-    const spy = jest.spyOn(console, 'warn').mockImplementation();
+    const spy = vi.spyOn(console, 'warn').mockImplementation(() => null);
 
     let cond = new Condition('is', 'payee', null, null);
     // null is strict and won't match undefined
@@ -420,7 +420,7 @@ describe('Action', () => {
         template: '{{debug notes}}',
       });
       const item = { notes: 'Sarah' };
-      const spy = jest.spyOn(console, 'log').mockImplementation();
+      const spy = vi.spyOn(console, 'log').mockImplementation(() => null);
       action.exec(item);
       expect(spy).toHaveBeenCalledWith('Sarah');
       spy.mockRestore();

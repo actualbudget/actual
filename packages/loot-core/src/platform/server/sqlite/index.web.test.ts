@@ -31,7 +31,7 @@ describe('Web sqlite', () => {
     // @ts-expect-error Property 'number' does not exist on type 'unknown'
     expect(rows[0].number).toBe(4);
 
-    const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => null);
     expect(() => {
       transaction(db, () => {
         runQuery(db, "INSERT INTO numbers (id, number) VALUES ('id2', 5)");
@@ -65,7 +65,9 @@ describe('Web sqlite', () => {
       runQuery(db, "INSERT INTO numbers (id, number) VALUES ('id3', 6)");
 
       // Only this transaction should fail
-      const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+      const consoleSpy = vi
+        .spyOn(console, 'log')
+        .mockImplementation(() => null);
       expect(() => {
         transaction(db, () => {
           runQuery(db, "INSERT INTO numbers (id, number) VALUES ('id4', 7)");
