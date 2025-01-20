@@ -11,16 +11,22 @@ import {
   useLongPress,
 } from '@react-aria/interactions';
 
+import { useCachedSchedules } from 'loot-core/client/data-hooks/schedules';
 import { isPreviewId } from 'loot-core/src/shared/transactions';
 import { integerToCurrency } from 'loot-core/src/shared/util';
-import { type TransactionEntity } from 'loot-core/types/models';
+import {
+  type AccountEntity,
+  type TransactionEntity,
+} from 'loot-core/types/models';
 
 import { useAccount } from '../../../hooks/useAccount';
 import { useCategories } from '../../../hooks/useCategories';
+import { useDisplayPayee } from '../../../hooks/useDisplayPayee';
 import { usePayee } from '../../../hooks/usePayee';
-import { SvgSplit } from '../../../icons/v0';
+import { SvgLeftArrow2, SvgRightArrow2, SvgSplit } from '../../../icons/v0';
 import {
   SvgArrowsSynchronize,
+  SvgCalendar,
   SvgCheckCircle1,
   SvgLockClosed,
 } from '../../../icons/v2';
@@ -31,11 +37,32 @@ import { Button } from '../../common/Button2';
 import { Text } from '../../common/Text';
 import { TextOneLine } from '../../common/TextOneLine';
 import { View } from '../../common/View';
-import { getPrettyPayee } from '../utils';
 
 import { lookupName, Status } from './TransactionEdit';
 
 const ROW_HEIGHT = 60;
+
+const getTextStyle = ({
+  isPreview,
+}: {
+  isPreview: boolean;
+}): CSSProperties => ({
+  ...styles.text,
+  fontSize: 14,
+  ...(isPreview
+    ? {
+        fontStyle: 'italic',
+        color: theme.pageTextLight,
+      }
+    : {}),
+});
+
+const getScheduleIconStyle = ({ isPreview }: { isPreview: boolean }) => ({
+  width: 12,
+  height: 12,
+  marginRight: 5,
+  color: isPreview ? theme.pageTextLight : theme.menuItemText,
+});
 
 type TransactionListItemProps = ComponentPropsWithoutRef<
   typeof ListBoxItem<TransactionEntity>
@@ -54,6 +81,8 @@ export function TransactionListItem({
   const { value: transaction } = props;
 
   const payee = usePayee(transaction?.payee || '');
+  const displayPayee = useDisplayPayee({ transaction });
+
   const account = useAccount(transaction?.account || '');
   const transferAccount = useAccount(payee?.transfer_acct || '');
   const isPreview = isPreviewId(transaction?.id || '');
@@ -90,7 +119,6 @@ export function TransactionListItem({
     is_parent: isParent,
     is_child: isChild,
     notes,
-    schedule: scheduleId,
     forceUpcoming,
   } = transaction;
 
@@ -98,11 +126,6 @@ export function TransactionListItem({
 
   const isAdded = newTransactions.includes(id);
   const categoryName = lookupName(categories, categoryId);
-  const prettyPayee = getPrettyPayee({
-    transaction,
-    payee,
-    transferAccount,
-  });
   const specialCategory = account?.offbudget
     ? 'Off budget'
     : transferAccount && !transferAccount.offbudget
@@ -112,17 +135,7 @@ export function TransactionListItem({
         : null;
 
   const prettyCategory = specialCategory || categoryName;
-
-  const textStyle: CSSProperties = {
-    ...styles.text,
-    fontSize: 14,
-    ...(isPreview
-      ? {
-          fontStyle: 'italic',
-          color: theme.pageTextLight,
-        }
-      : {}),
-  };
+  const textStyle = getTextStyle({ isPreview });
 
   return (
     <ListBoxItem textValue={id} {...props}>
@@ -165,27 +178,20 @@ export function TransactionListItem({
             >
               <View style={{ flex: 1 }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  {scheduleId && (
-                    <SvgArrowsSynchronize
-                      style={{
-                        width: 12,
-                        height: 12,
-                        marginRight: 5,
-                        color: textStyle.color || theme.menuItemText,
-                      }}
-                    />
-                  )}
+                  <PayeeIcons
+                    transaction={transaction}
+                    transferAccount={transferAccount}
+                  />
                   <TextOneLine
                     style={{
                       ...textStyle,
                       fontWeight: isAdded ? '600' : '400',
-                      ...(prettyPayee === '' && {
-                        color: theme.tableTextLight,
+                      ...(!displayPayee && {
                         fontStyle: 'italic',
                       }),
                     }}
                   >
-                    {prettyPayee || '(No payee)'}
+                    {displayPayee || '(No payee)'}
                   </TextOneLine>
                 </View>
                 {isPreview ? (
@@ -280,5 +286,41 @@ export function TransactionListItem({
         </PressResponder>
       )}
     </ListBoxItem>
+  );
+}
+
+type PayeeIconsProps = {
+  transaction: TransactionEntity;
+  transferAccount?: AccountEntity;
+};
+
+function PayeeIcons({ transaction, transferAccount }: PayeeIconsProps) {
+  const { id, schedule: scheduleId } = transaction;
+  const { isLoading: isSchedulesLoading, schedules = [] } =
+    useCachedSchedules();
+  const isPreview = isPreviewId(id);
+  const schedule = schedules.find(s => s.id === scheduleId);
+  const isScheduleRecurring =
+    schedule && schedule._date && !!schedule._date.frequency;
+
+  if (isSchedulesLoading) {
+    return null;
+  }
+
+  return (
+    <>
+      {schedule &&
+        (isScheduleRecurring ? (
+          <SvgArrowsSynchronize style={getScheduleIconStyle({ isPreview })} />
+        ) : (
+          <SvgCalendar style={getScheduleIconStyle({ isPreview })} />
+        ))}
+      {transferAccount &&
+        (transaction.amount > 0 ? (
+          <SvgLeftArrow2 style={{ width: 12, height: 12, marginRight: 5 }} />
+        ) : (
+          <SvgRightArrow2 style={{ width: 12, height: 12, marginRight: 5 }} />
+        ))}
+    </>
   );
 }
