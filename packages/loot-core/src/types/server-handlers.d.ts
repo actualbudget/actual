@@ -52,7 +52,7 @@ export interface ServerHandlers {
     payees;
   }) => Promise<unknown>;
 
-  'transactions-export-query': (arg: { query: QueryState }) => Promise<unknown>;
+  'transactions-export-query': (arg: { query: QueryState }) => Promise<string>;
 
   'get-categories': () => Promise<{
     grouped: Array<CategoryGroupEntity>;
@@ -109,7 +109,7 @@ export interface ServerHandlers {
 
   'payees-get': () => Promise<PayeeEntity[]>;
 
-  'payees-get-rule-counts': () => Promise<unknown>;
+  'payees-get-rule-counts': () => Promise<Record<PayeeEntity['id'], number>>;
 
   'payees-merge': (arg: { targetId; mergeIds }) => Promise<void>;
 
@@ -141,7 +141,8 @@ export interface ServerHandlers {
 
   'create-query': (arg: { sheetName; name; query }) => Promise<unknown>;
 
-  query: (query: Query) => Promise<{ data: unknown; dependencies }>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  query: (query: Query) => Promise<{ data: any; dependencies: string[] }>;
 
   'account-update': (arg: { id; name }) => Promise<unknown>;
 
@@ -182,7 +183,10 @@ export interface ServerHandlers {
 
   'account-move': (arg: { id; targetId }) => Promise<unknown>;
 
-  'secret-set': (arg: { name: string; value: string | null }) => Promise<null>;
+  'secret-set': (arg: {
+    name: string;
+    value: string | null;
+  }) => Promise<{ error?: string; reason?: string }>;
   'secret-check': (arg: string) => Promise<string | { error?: string }>;
 
   'gocardless-poll-web-token': (arg: {
@@ -196,7 +200,11 @@ export interface ServerHandlers {
 
   'simplefin-status': () => Promise<{ configured: boolean }>;
 
-  'simplefin-accounts': () => Promise<{ accounts: SimpleFinAccount[] }>;
+  'simplefin-accounts': () => Promise<{
+    accounts?: SimpleFinAccount[];
+    error_code?: string;
+    reason?: string;
+  }>;
 
   'simplefin-batch-sync': ({ ids }: { ids: string[] }) => Promise<
     {
@@ -326,7 +334,7 @@ export interface ServerHandlers {
           return_url;
           loginMethod?: 'openid';
         },
-  ) => Promise<{ error?: string }>;
+  ) => Promise<{ error?: string; redirect_url?: string }>;
 
   'subscribe-sign-out': () => Promise<'ok'>;
 
