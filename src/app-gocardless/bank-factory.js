@@ -10,6 +10,7 @@ import BnpBeGebabebb from './banks/bnp_be_gebabebb.js';
 import CbcCregbebb from './banks/cbc_cregbebb.js';
 import CommerzbankCobadeff from './banks/commerzbank_cobadeff.js';
 import DanskebankDabno22 from './banks/danskebank_dabno22.js';
+import DirektHeladef1822 from './banks/direkt_heladef1822.js';
 import EasybankBawaatww from './banks/easybank_bawaatww.js';
 import EntercardSwednokk from './banks/entercard_swednokk.js';
 import FortuneoFtnofrp1xxx from './banks/fortuneo_ftnofrp1xxx.js';
@@ -49,6 +50,7 @@ export const banks = [
   CbcCregbebb,
   CommerzbankCobadeff,
   DanskebankDabno22,
+  DirektHeladef1822,
   EasybankBawaatww,
   EntercardSwednokk,
   FortuneoFtnofrp1xxx,
