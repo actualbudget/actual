@@ -369,6 +369,21 @@ export function getUpcomingDays(upcomingLength = '7'): number {
       );
     }
     default:
+      if (upcomingLength.includes('-')) {
+        const [num, unit] = upcomingLength.split('-');
+        switch (unit) {
+          case 'day':
+            return parseInt(num, 10);
+          case 'week':
+            return parseInt(num, 10) * 7;
+          case 'month':
+            return parseInt(num, 10) * 30;
+          case 'year':
+            return parseInt(num, 10) * 365;
+          default:
+            return 7;
+        }
+      }
       return parseInt(upcomingLength, 10);
   }
 }
