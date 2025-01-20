@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { type SyncedPrefs } from 'loot-core/types/prefs';
 
 import { useSyncedPref } from '../../hooks/useSyncedPref';
+import { Button } from '../common/Button2';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { Paragraph } from '../common/Paragraph';
 import { Select } from '../common/Select';
@@ -20,7 +21,7 @@ function useUpcomingLengthOptions() {
     { value: '7', label: t('1 week') },
     { value: '14', label: t('2 weeks') },
     { value: 'oneMonth', label: t('1 month') },
-    { value: 'currentMonth', label: t('end of the current month') },
+    { value: 'currentMonth', label: t('End of the current month') },
   ];
 
   return { upcomingLengthOptions };
@@ -32,9 +33,24 @@ export function UpcomingLength() {
     'upcomingScheduledTransactionLength',
   );
 
+  const saveUpcomingLength = () => {
+    setUpcomingLength(tempUpcomingLength);
+  };
+
   const { upcomingLengthOptions } = useUpcomingLengthOptions();
 
   const upcomingLength = _upcomingLength || '7';
+
+  const [tempUpcomingLength, setTempUpcomingLength] = useState(upcomingLength);
+  const [saveActive, setSaveActive] = useState(false);
+
+  useEffect(() => {
+    if (tempUpcomingLength !== upcomingLength) {
+      setSaveActive(true);
+    } else {
+      setSaveActive(false);
+    }
+  }, [tempUpcomingLength, upcomingLength]);
 
   return (
     <Modal
@@ -65,10 +81,29 @@ export function UpcomingLength() {
                 x.value || '7',
                 x.label,
               ])}
-              value={upcomingLength}
-              onChange={newValue => setUpcomingLength(newValue)}
+              value={tempUpcomingLength}
+              onChange={newValue => {
+                setTempUpcomingLength(newValue);
+              }}
             />
           </View>
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'row',
+              justifyContent: 'end',
+              marginTop: 20,
+            }}
+          >
+            <Button
+              isDisabled={!saveActive}
+              onPress={saveUpcomingLength}
+              type="submit"
+              variant="primary"
+            >
+              <Trans>Save</Trans>
+            </Button>
+          </div>
         </>
       )}
     </Modal>
