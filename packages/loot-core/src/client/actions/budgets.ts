@@ -148,14 +148,11 @@ export function createBudget({ testMode = false, demoMode = false } = {}) {
   };
 }
 
-export function validateBudgetName(name: string): {
-  valid: boolean;
-  message?: string;
-} {
+export function validateBudgetName(name: string) {
   return send('validate-budget-name', { name });
 }
 
-export function uniqueBudgetName(name: string): string {
+export function uniqueBudgetName(name: string) {
   return send('unique-budget-name', { name });
 }
 
