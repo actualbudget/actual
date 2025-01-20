@@ -121,7 +121,10 @@ export function UpcomingLength() {
           >
             <Button
               isDisabled={!saveActive}
-              onPress={saveUpcomingLength}
+              onPress={() => {
+                saveUpcomingLength();
+                close();
+              }}
               type="submit"
               variant="primary"
             >
