@@ -188,18 +188,6 @@ export function TransactionListItem({
                     {prettyPayee || '(No payee)'}
                   </TextOneLine>
                 </View>
-                {notes && (
-                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <TextOneLine
-                      style={{
-                        fontSize: 12,
-                        paddingTop: '2px',
-                      }}
-                    >
-                      {notes.length > 25 ? `${notes.slice(0, 25)}...` : notes}
-                    </TextOneLine>
-                  </View>
-                )}
                 {isPreview ? (
                   <Status
                     status={previewStatus}
@@ -259,6 +247,18 @@ export function TransactionListItem({
                       }}
                     >
                       {prettyCategory || 'Uncategorized'}
+                    </TextOneLine>
+                    <TextOneLine
+                      style={{
+                        fontSize: 11,
+                        marginTop: 1,
+                        fontWeight: '400',
+                        color: theme.tableText,
+                        textAlign: 'left',
+                        opacity: 0.75,
+                      }}
+                    >
+                      {notes}
                     </TextOneLine>
                   </View>
                 )}
