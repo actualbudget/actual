@@ -1,7 +1,6 @@
 import { useMemo } from 'react';
 
 import { useTransactions } from 'loot-core/client/data-hooks/transactions';
-import { getPayeesById } from 'loot-core/client/queries/queriesSlice';
 import { q } from 'loot-core/shared/query';
 import {
   type AccountEntity,
@@ -20,7 +19,7 @@ type Counts = {
 };
 
 type UseDisplayPayeeProps = {
-  transaction: TransactionEntity;
+  transaction?: TransactionEntity | undefined;
 };
 
 export function useDisplayPayee({ transaction }: UseDisplayPayeeProps) {
@@ -44,7 +43,7 @@ export function useDisplayPayee({ transaction }: UseDisplayPayeeProps) {
         transferAccount: accounts.find(
           a =>
             a.id ===
-            payees.find(p => p.id === transaction.payee)?.transfer_acct,
+            payees.find(p => p.id === transaction?.payee)?.transfer_acct,
         ),
       });
     }
@@ -71,8 +70,13 @@ export function useDisplayPayee({ transaction }: UseDisplayPayeeProps) {
       return 'Split (no payee)';
     }
 
-    const mostCommonPayee =
-      getPayeesById(payees)[mostCommonPayeeTransaction.payee];
+    const mostCommonPayee = payees.find(
+      p => p.id === mostCommonPayeeTransaction.payee,
+    );
+
+    if (!mostCommonPayee) {
+      return 'Split (no payee)';
+    }
 
     const numDistinctPayees = Object.keys(counts).length;
 
@@ -87,14 +91,14 @@ export function useDisplayPayee({ transaction }: UseDisplayPayeeProps) {
       ),
       numHiddenPayees: numDistinctPayees - 1,
     });
-  }, [subtransactions, payees]);
+  }, [subtransactions, payees, accounts, transaction, payee]);
 }
 
 type GetPrettyPayeeProps = {
-  transaction: TransactionEntity;
-  payee: PayeeEntity;
-  transferAccount: AccountEntity | null;
-  numHiddenPayees?: number;
+  transaction?: TransactionEntity | undefined;
+  payee?: PayeeEntity | undefined;
+  transferAccount?: AccountEntity | undefined;
+  numHiddenPayees?: number | undefined;
 };
 
 function getPrettyPayee({
@@ -103,6 +107,10 @@ function getPrettyPayee({
   transferAccount,
   numHiddenPayees = 0,
 }: GetPrettyPayeeProps) {
+  if (!transaction) {
+    return '';
+  }
+
   const formatPayeeName = (payeeName: string) =>
     numHiddenPayees > 0 ? `${payeeName} (+${numHiddenPayees} more)` : payeeName;
 
