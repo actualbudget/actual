@@ -10,7 +10,6 @@ import {
   reducer as accountsSliceReducer,
   getInitialState as getInitialAccountsState,
 } from '../accounts/accountsSlice';
-import { addNotification } from '../actions';
 import {
   name as appSliceName,
   reducer as appSliceReducer,
@@ -31,6 +30,7 @@ import {
   name as notificationsSliceName,
   reducer as notificationsSliceReducer,
   getInitialState as getInitialNotificationsState,
+  addNotification,
 } from '../notifications/notificationsSlice';
 import {
   name as queriesSliceName,
@@ -84,9 +84,11 @@ notifyOnRejectedActionsMiddleware.startListening({
     console.error(action.error);
     dispatch(
       addNotification({
-        id: action.type,
-        type: 'error',
-        message: action.error.message || 'An unexpected error occurred.',
+        notification: {
+          id: action.type,
+          type: 'error',
+          message: action.error.message || 'An unexpected error occurred.',
+        },
       }),
     );
   },
