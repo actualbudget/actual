@@ -196,58 +196,58 @@ export function TransactionListItem({
                 ) : (
                   <View
                     style={{
-                      flexDirection: 'row',
-                      alignItems: 'center',
+                      flexDirection: 'column',
+                      alignItems: 'flex-start',
                       marginTop: 3,
                     }}
                   >
-                    {isReconciled ? (
-                      <SvgLockClosed
-                        style={{
-                          width: 11,
-                          height: 11,
-                          color: theme.noticeTextLight,
-                          marginRight: 5,
-                        }}
-                      />
-                    ) : (
-                      <SvgCheckCircle1
-                        style={{
-                          width: 11,
-                          height: 11,
-                          color: isCleared
-                            ? theme.noticeTextLight
-                            : theme.pageTextSubdued,
-                          marginRight: 5,
-                        }}
-                      />
-                    )}
-                    {(isParent || isChild) && (
-                      <SvgSplit
-                        style={{
-                          width: 12,
-                          height: 12,
-                          marginRight: 5,
-                        }}
-                      />
-                    )}
-                    <TextOneLine
-                      style={{
-                        fontSize: 11,
-                        marginTop: 1,
-                        fontWeight: '400',
-                        color: prettyCategory
-                          ? theme.tableText
-                          : theme.menuItemTextSelected,
-                        fontStyle:
-                          specialCategory || !prettyCategory
-                            ? 'italic'
-                            : undefined,
-                        textAlign: 'left',
-                      }}
+                    <View
+                      style={{ flexDirection: 'row', alignItems: 'center' }}
                     >
-                      {prettyCategory || 'Uncategorized'}
-                    </TextOneLine>
+                      {isReconciled ? (
+                        <SvgLockClosed
+                          style={{
+                            width: 11,
+                            height: 11,
+                            color: theme.noticeTextLight,
+                            marginRight: 5,
+                          }}
+                        />
+                      ) : (
+                        <SvgCheckCircle1
+                          style={{
+                            width: 11,
+                            height: 11,
+                            color: isCleared
+                              ? theme.noticeTextLight
+                              : theme.pageTextSubdued,
+                            marginRight: 5,
+                          }}
+                        />
+                      )}
+                      {(isParent || isChild) && (
+                        <SvgSplit
+                          style={{ width: 12, height: 12, marginRight: 5 }}
+                        />
+                      )}
+                      <TextOneLine
+                        style={{
+                          fontSize: 11,
+                          marginTop: 1,
+                          fontWeight: '400',
+                          color: prettyCategory
+                            ? theme.tableText
+                            : theme.menuItemTextSelected,
+                          fontStyle:
+                            specialCategory || !prettyCategory
+                              ? 'italic'
+                              : undefined,
+                          textAlign: 'left',
+                        }}
+                      >
+                        {prettyCategory || 'Uncategorized'}
+                      </TextOneLine>
+                    </View>
                     <TextOneLine
                       style={{
                         fontSize: 11,
