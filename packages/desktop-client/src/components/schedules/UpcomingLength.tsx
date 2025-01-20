@@ -30,8 +30,11 @@ function useUpcomingLengthOptions() {
   return { upcomingLengthOptions };
 }
 
-function nonCustomUpcomingLengthValues() {
-  return ['1', '7', '14', 'oneMonth', 'currentMonth'];
+function nonCustomUpcomingLengthValues(value: string) {
+  return (
+    ['1', '7', '14', 'oneMonth', 'currentMonth'].findIndex(x => x === value) ===
+    -1
+  );
 }
 
 export function UpcomingLength() {
@@ -50,8 +53,7 @@ export function UpcomingLength() {
 
   const [tempUpcomingLength, setTempUpcomingLength] = useState(upcomingLength);
   const [useCustomLength, setUseCustomLength] = useState(
-    nonCustomUpcomingLengthValues().findIndex(x => x === tempUpcomingLength) ===
-      -1,
+    nonCustomUpcomingLengthValues(tempUpcomingLength),
   );
   const [saveActive, setSaveActive] = useState(false);
 
@@ -92,7 +94,11 @@ export function UpcomingLength() {
                 x.value || '7',
                 x.label,
               ])}
-              value={tempUpcomingLength}
+              value={
+                nonCustomUpcomingLengthValues(tempUpcomingLength)
+                  ? 'custom'
+                  : tempUpcomingLength
+              }
               onChange={newValue => {
                 setUseCustomLength(newValue === 'custom');
                 setTempUpcomingLength(newValue);
