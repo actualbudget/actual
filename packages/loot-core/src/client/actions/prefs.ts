@@ -1,3 +1,5 @@
+import { setI18NextLanguage } from '@actual-app/web/src/i18n';
+
 import { send } from '../../platform/client/fetch';
 import { parseNumberFormat, setNumberFormat } from '../../shared/util';
 import {
@@ -39,6 +41,9 @@ export function loadPrefs() {
         hideFraction: syncedPrefs.hideFraction,
       }),
     );
+
+    // We need to load translations before the app renders
+    setI18NextLanguage(globalPrefs.language);
 
     return prefs;
   };

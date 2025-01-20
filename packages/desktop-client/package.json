@@ -70,6 +70,7 @@
     "sass": "^1.70.0",
     "swc-loader": "^0.2.6",
     "terser-webpack-plugin": "^5.3.10",
+    "ua-parser-js": "^2.0.0",
     "usehooks-ts": "^3.0.1",
     "uuid": "^9.0.1",
     "vite": "^5.2.14",

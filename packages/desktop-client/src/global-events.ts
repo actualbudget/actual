@@ -4,15 +4,16 @@ import {
   addNotification,
   closeBudgetUI,
   closeModal,
+  loadPrefs,
+  pushModal,
+  replaceModal,
+} from 'loot-core/client/actions';
+import { setAppState } from 'loot-core/client/app/appSlice';
+import {
   getAccounts,
   getCategories,
   getPayees,
-  loadPrefs,
-  pushModal,
-  reloadApp,
-  replaceModal,
-  setAppState,
-} from 'loot-core/client/actions';
+} from 'loot-core/client/queries/queriesSlice';
 import { type AppStore } from 'loot-core/client/store';
 import * as sharedListeners from 'loot-core/src/client/shared-listeners';
 import { listen } from 'loot-core/src/platform/client/fetch';
@@ -161,6 +162,6 @@ export function handleGlobalEvents(store: AppStore) {
   });
 
   listen('api-fetch-redirected', () => {
-    store.dispatch(reloadApp());
+    window.Actual.reload();
   });
 }

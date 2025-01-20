@@ -16,12 +16,14 @@ import {
   parseISO,
   isValid as isValidDate,
 } from 'date-fns';
+import { UAParser } from 'ua-parser-js';
 
-import { pushModal, setLastTransaction } from 'loot-core/client/actions';
-import { runQuery } from 'loot-core/src/client/query-helpers';
-import { send } from 'loot-core/src/platform/client/fetch';
-import * as monthUtils from 'loot-core/src/shared/months';
-import { q } from 'loot-core/src/shared/query';
+import { pushModal } from 'loot-core/client/actions';
+import { setLastTransaction } from 'loot-core/client/queries/queriesSlice';
+import { runQuery } from 'loot-core/client/query-helpers';
+import { send } from 'loot-core/platform/client/fetch';
+import * as monthUtils from 'loot-core/shared/months';
+import { q } from 'loot-core/shared/query';
 import {
   ungroupTransactions,
   updateTransaction,
@@ -30,7 +32,7 @@ import {
   addSplitTransaction,
   deleteTransaction,
   makeChild,
-} from 'loot-core/src/shared/transactions';
+} from 'loot-core/shared/transactions';
 import {
   titleFirst,
   integerToCurrency,
@@ -39,7 +41,7 @@ import {
   getChangedValues,
   diffItems,
   groupById,
-} from 'loot-core/src/shared/util';
+} from 'loot-core/shared/util';
 
 import { useAccounts } from '../../../hooks/useAccounts';
 import { useCategories } from '../../../hooks/useCategories';
@@ -67,6 +69,9 @@ import { FieldLabel, TapField, InputField, ToggleField } from '../MobileForms';
 import { getPrettyPayee } from '../utils';
 
 import { FocusableAmountInput } from './FocusableAmountInput';
+
+const agent = UAParser(navigator.userAgent);
+const isIOSAgent = agent.browser.name === 'Mobile Safari';
 
 function getFieldName(transactionId, field) {
   return `${field}-${transactionId}`;
@@ -464,7 +469,11 @@ const TransactionEditInner = memo(function TransactionEditInner({
 
   const { editingField, onRequestActiveEdit, onClearActiveEdit } =
     useSingleActiveEditForm();
-  const [totalAmountFocused, setTotalAmountFocused] = useState(true);
+  const [totalAmountFocused, setTotalAmountFocused] = useState(
+    // iOS does not support automatically opening up the keyboard for the
+    // total amount field. Hence we should not focus on it on page render.
+    !isIOSAgent,
+  );
   const childTransactionElementRefMap = useRef({});
   const hasAccountChanged = useRef(false);
 
@@ -481,7 +490,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
   const isInitialMount = useInitialMount();
 
   useEffect(() => {
-    if (isInitialMount && isAdding) {
+    if (isInitialMount && isAdding && !isIOSAgent) {
       onTotalAmountEdit();
     }
   }, [isAdding, isInitialMount, onTotalAmountEdit]);
@@ -575,11 +584,9 @@ const TransactionEditInner = memo(function TransactionEditInner({
     value => {
       if (transaction.amount !== value) {
         onUpdateInner(transaction, 'amount', value.toString());
-      } else {
-        onClearActiveEdit();
       }
     },
-    [onClearActiveEdit, onUpdateInner, transaction],
+    [onUpdateInner, transaction],
   );
 
   const onEditFieldInner = useCallback(
@@ -779,6 +786,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
             zeroSign="-"
             focused={totalAmountFocused}
             onFocus={onTotalAmountEdit}
+            onBlur={onClearActiveEdit}
             onUpdateAmount={onTotalAmountUpdate}
             focusedStyle={{
               width: 'auto',
@@ -1162,7 +1170,7 @@ function TransactionEditUnconnected({
       if (isAdding.current) {
         // The first one is always the "parent" and the only one we care
         // about
-        dispatch(setLastTransaction(newTransactions[0]));
+        dispatch(setLastTransaction({ transaction: newTransactions[0] }));
       }
     },
     [dispatch, fetchedTransactions],

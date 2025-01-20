@@ -11,8 +11,9 @@ export function getStatus(
   nextDate: string,
   completed: boolean,
   hasTrans: boolean,
-  upcomingLength: number,
+  upcomingLength: string,
 ) {
+  const upcomingDays = getUpcomingDays(upcomingLength);
   const today = monthUtils.currentDay();
   if (completed) {
     return 'completed';
@@ -22,7 +23,7 @@ export function getStatus(
     return 'due';
   } else if (
     nextDate > today &&
-    nextDate <= monthUtils.addDays(today, upcomingLength)
+    nextDate <= monthUtils.addDays(today, upcomingDays)
   ) {
     return 'upcoming';
   } else if (nextDate < today) {
@@ -349,7 +350,7 @@ export function describeSchedule(schedule, payee) {
   }
 }
 
-export function getUpcomingDays(upcomingLength = '7') {
+export function getUpcomingDays(upcomingLength = '7'): number {
   const today = monthUtils.currentDay();
 
   switch (upcomingLength) {
@@ -370,4 +371,11 @@ export function getUpcomingDays(upcomingLength = '7') {
     default:
       return parseInt(upcomingLength, 10);
   }
+}
+
+export function scheduleIsRecurring(dateCond) {
+  const cond = new Condition(dateCond.op, 'date', dateCond.value, null);
+  const value = cond.getValue();
+
+  return value.type === 'recur';
 }

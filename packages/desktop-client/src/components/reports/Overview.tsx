@@ -21,6 +21,7 @@ import {
 import { useAccounts } from '../../hooks/useAccounts';
 import { useNavigate } from '../../hooks/useNavigate';
 import { useSyncedPref } from '../../hooks/useSyncedPref';
+import { useUndo } from '../../hooks/useUndo';
 import { useDispatch } from '../../redux';
 import { breakpoints } from '../../tokens';
 import { Button } from '../common/Button2';
@@ -109,6 +110,8 @@ export function Overview() {
     [closeNotifications],
   );
 
+  const { undo } = useUndo();
+
   const onDispatchSucessNotification = (message: string) => {
     dispatch(
       addNotification({
@@ -120,7 +123,7 @@ export function Overview() {
         messageActions: {
           undo: () => {
             closeNotifications();
-            window.__actionsForMenu.undo();
+            undo();
           },
         },
       }),
@@ -208,14 +211,14 @@ export function Overview() {
       }),
     } satisfies ExportImportDashboard;
 
-    window.Actual?.saveFile(
+    window.Actual.saveFile(
       JSON.stringify(data, null, 2),
       'dashboard.json',
       'Export Dashboard',
     );
   };
   const onImport = async () => {
-    const openFileDialog = window.Actual?.openFileDialog;
+    const openFileDialog = window.Actual.openFileDialog;
 
     if (!openFileDialog) {
       dispatch(

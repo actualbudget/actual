@@ -15,8 +15,11 @@ import { createRoot } from 'react-dom/client';
 
 import * as accountsSlice from 'loot-core/src/client/accounts/accountsSlice';
 import * as actions from 'loot-core/src/client/actions';
+import * as appSlice from 'loot-core/src/client/app/appSlice';
+import * as queriesSlice from 'loot-core/src/client/queries/queriesSlice';
 import { runQuery } from 'loot-core/src/client/query-helpers';
 import { store } from 'loot-core/src/client/store';
+import { redo, undo } from 'loot-core/src/client/undo';
 import { send } from 'loot-core/src/platform/client/fetch';
 import { q } from 'loot-core/src/shared/query';
 
@@ -33,6 +36,8 @@ const boundActions = bindActionCreators(
   {
     ...actions,
     ...accountsSlice.actions,
+    ...appSlice.actions,
+    ...queriesSlice.actions,
   },
   store.dispatch,
 );
@@ -40,17 +45,15 @@ const boundActions = bindActionCreators(
 // Listen for global events from the server or main process
 handleGlobalEvents(store);
 
-declare global {
-  // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-  interface Window {
-    __actionsForMenu: typeof boundActions & {
-      inputFocused: typeof inputFocused;
-    };
+async function appFocused() {
+  await send('app-focused');
+}
 
-    $send: typeof send;
-    $query: typeof runQuery;
-    $q: typeof q;
-  }
+async function uploadFile(filename: string, contents: ArrayBuffer) {
+  send('upload-file-web', {
+    filename,
+    contents,
+  });
 }
 
 function inputFocused() {
@@ -62,7 +65,14 @@ function inputFocused() {
 }
 
 // Expose this to the main process to menu items can access it
-window.__actionsForMenu = { ...boundActions, inputFocused };
+window.__actionsForMenu = {
+  ...boundActions,
+  undo,
+  redo,
+  appFocused,
+  inputFocused,
+  uploadFile,
+};
 
 // Expose send for fun!
 window.$send = send;
@@ -80,3 +90,20 @@ root.render(
     </ServerProvider>
   </Provider>,
 );
+
+declare global {
+  // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+  interface Window {
+    __actionsForMenu: typeof boundActions & {
+      undo: typeof undo;
+      redo: typeof redo;
+      appFocused: typeof appFocused;
+      inputFocused: typeof inputFocused;
+      uploadFile: typeof uploadFile;
+    };
+
+    $send: typeof send;
+    $query: typeof runQuery;
+    $q: typeof q;
+  }
+}

@@ -71,7 +71,7 @@ contextBridge.exposeInMainWorld('Actual', {
   isUpdateReadyForDownload: () => false,
   waitForUpdateReadyForDownload: () => new Promise<void>(() => {}),
 
-  getServerSocket: () => {
+  getServerSocket: async () => {
     return null;
   },
 
@@ -89,4 +89,12 @@ contextBridge.exposeInMainWorld('Actual', {
       newDirectory,
     );
   },
-});
+
+  reload: async () => {
+    throw new Error('Reload not implemented in electron app');
+  },
+
+  applyAppUpdate: async () => {
+    throw new Error('applyAppUpdate not implemented in electron app');
+  },
+} satisfies typeof global.Actual);
