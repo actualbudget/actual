@@ -81,6 +81,8 @@ const categoryGroups = generateCategoryGroups([
 ]);
 const usualGroup = categoryGroups[1];
 
+let transactions = generateTransactions(5, [6]);
+
 function generateTransactions(
   count: number,
   splitAtIndexes: number[] = [],
@@ -212,6 +214,11 @@ function initBasicServer() {
           return { data: payees, dependencies: [] };
         case 'accounts':
           return { data: accounts, dependencies: [] };
+        case 'transactions':
+          return {
+            data: transactions,
+            dependencies: [],
+          };
         default:
           throw new Error(`queried unknown table: ${query.table}`);
       }
@@ -246,7 +253,7 @@ function prettyDate(date: string) {
 }
 
 function renderTransactions(extraProps?: Partial<LiveTransactionTableProps>) {
-  let transactions = generateTransactions(5, [6]);
+  transactions = generateTransactions(5, [6]);
   // Hardcoding the first value makes it easier for tests to do
   // various this
   transactions[0].amount = -2777;
