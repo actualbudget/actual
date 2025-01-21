@@ -181,7 +181,7 @@ export function duplicateBudget({
     try {
       dispatch(
         setAppState({
-          loadingText: t('Duplicating:  {{oldName}}  --  to:  {{newName}}', {
+          loadingText: t('Duplicating: {{oldName}} to: {{newName}}', {
             oldName,
             newName,
           }),

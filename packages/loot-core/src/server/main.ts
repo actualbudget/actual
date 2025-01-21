@@ -2032,7 +2032,7 @@ handlers['duplicate-budget'] = async function ({
         await fs.removeDirRecursively(newBudgetDir);
       }
     } catch {} // Ignore cleanup errors
-    throw new Error(`Failed to duplicate budget: ${error.message}`);
+    throw new Error(`Failed to duplicate budget file: ${error.message}`);
   }
 
   // load in and validate

@@ -271,7 +271,11 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
         >
           <AlignedText
             style={{ marginBottom: 5, minWidth: 160 }}
-            left={<Block>Income:</Block>}
+            left={
+              <Block>
+                <Trans>Income:</Trans>
+              </Block>
+            }
             right={
               <Text style={{ fontWeight: 600 }}>
                 <PrivacyFilter>{integerToCurrency(totalIncome)}</PrivacyFilter>

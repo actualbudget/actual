@@ -183,14 +183,16 @@ export function Settings() {
           >
             {/* The only spot to close a budget on mobile */}
             <FormField>
-              <FormLabel title={t('Budget Name')} />
+              <FormLabel title={t('Budget name')} />
               <Input
                 value={budgetName}
                 disabled
                 style={{ color: theme.buttonNormalDisabledText }}
               />
             </FormField>
-            <Button onPress={onCloseBudget}>{t('Close Budget')}</Button>
+            <Button onPress={onCloseBudget}>
+              <Trans>Close budget</Trans>
+            </Button>
           </View>
         )}
         <About />

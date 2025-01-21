@@ -79,7 +79,7 @@ export function ScheduleLink({
       {({ state: { close } }) => (
         <>
           <ModalHeader
-            title={t('Link Schedule')}
+            title={t('Link schedule')}
             rightContent={<ModalCloseButton onPress={close} />}
           />
           <View
