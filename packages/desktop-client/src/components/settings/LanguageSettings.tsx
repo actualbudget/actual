@@ -12,7 +12,7 @@ import { Text } from '../common/Text';
 
 import { Setting } from './UI';
 
-const languageDisplayNameOverride = {
+const languageDisplayNameOverride: { [key: string]: string } = {
   'pt-BR': 'Português (Brasil)',
 };
 
@@ -23,11 +23,11 @@ const languageOptions = (t: TFunction): SelectOption[] =>
   ].concat(
     availableLanguages.map(lang => [
       lang,
-      languageDisplayNameOverride[lang] ||
-        new Intl.DisplayNames([lang], {
-          type: 'language',
-        }).of(lang) ||
-        lang,
+      lang in languageDisplayNameOverride
+        ? languageDisplayNameOverride[lang]
+        : new Intl.DisplayNames([lang], {
+            type: 'language',
+          }).of(lang) || lang,
     ]),
   );
 

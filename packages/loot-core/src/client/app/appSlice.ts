@@ -125,9 +125,10 @@ export const fetchLocale = createAppAsyncThunk(
   async ({ language }: { language: string }) => {
     try {
       const localeModule = await import(/* @vite-ignore */ `date-fns/locale`);
+      const localeKey = language.replace('-', '') as keyof typeof localeModule;
 
-      if (localeModule[language.replace('-', '')]) {
-        return localeModule[language.replace('-', '')];
+      if (localeModule[localeKey]) {
+        return localeModule[localeKey] as Locale;
       } else {
         return enUS;
       }
