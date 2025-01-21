@@ -1,8 +1,8 @@
 import React, { useEffect } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 
-import { loggedIn } from 'loot-core/client/actions';
 import { setAppState } from 'loot-core/client/app/appSlice';
+import { loggedIn } from 'loot-core/client/users/usersSlice';
 
 import { ProtectedRoute } from '../../auth/ProtectedRoute';
 import { Permissions } from '../../auth/types';

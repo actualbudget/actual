@@ -10,9 +10,9 @@ import {
 } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
-import { signOut } from 'loot-core/client/actions';
 import { pushModal } from 'loot-core/client/modals/modalsSlice';
 import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
+import { signOut } from 'loot-core/client/users/usersSlice';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as undo from 'loot-core/src/platform/client/undo';
 import {
@@ -171,7 +171,9 @@ function UserDirectoryContent({
               message: getUserDirectoryErrors(error),
               button: {
                 title: t('Go to login'),
-                action: () => dispatch(signOut()),
+                action: () => {
+                  dispatch(signOut());
+                },
               },
             },
           }),
