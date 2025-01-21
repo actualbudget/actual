@@ -91,7 +91,7 @@ function BudgetPageMenu({
         },
         {
           name: 'toggle-hidden-categories',
-          text: `${!showHiddenCategories ? t('Show') : t('Hide')} ${t('hidden categories')}`,
+          text: `${!showHiddenCategories ? t('Show hidden categories') : t('Hide hidden categories')}`,
         },
         {
           name: 'switch-budget-file',

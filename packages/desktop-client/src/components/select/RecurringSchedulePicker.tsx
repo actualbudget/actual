@@ -235,7 +235,11 @@ function reducer(state: ReducerState, action: ReducerAction): ReducerState {
   }
 }
 
-function SchedulePreview({ previewDates }: { previewDates: Date[] }) {
+function SchedulePreview({
+  previewDates,
+}: {
+  previewDates: string[] | string;
+}) {
   const locale = useSelector(state => state.app.locale);
   const dateFormat = (useDateFormat() || 'MM/dd/yyyy')
     .replace('MM', 'M')
@@ -371,7 +375,9 @@ function RecurringScheduleTooltip({
   onSave: (config: RecurConfig) => void;
 }) {
   const { t } = useTranslation();
-  const [previewDates, setPreviewDates] = useState(null);
+  const [previewDates, setPreviewDates] = useState<string[] | string | null>(
+    null,
+  );
 
   const { FREQUENCY_OPTIONS } = useFrequencyOptions();
 

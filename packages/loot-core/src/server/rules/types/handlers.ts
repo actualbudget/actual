@@ -45,9 +45,9 @@ export interface RulesHandlers {
 
   'rules-get': () => Promise<RuleEntity[]>;
 
-  // TODO: change return value to `RuleEntity`
-  'rule-get': (arg: { id: string }) => Promise<unknown>;
+  'rule-get': (arg: { id: RuleEntity['id'] }) => Promise<RuleEntity>;
 
-  // TODO: change types to `TransactionEntity`
-  'rules-run': (arg: { transaction }) => Promise<unknown>;
+  'rules-run': (arg: {
+    transaction: TransactionEntity;
+  }) => Promise<TransactionEntity>;
 }

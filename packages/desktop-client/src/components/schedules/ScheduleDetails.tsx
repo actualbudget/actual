@@ -972,7 +972,7 @@ function NoTransactionsMessage(props: NoTransactionsMessageProps) {
     >
       {props.error ? (
         <Text style={{ color: theme.errorText }}>
-          <Trans>Could not search: {props.error}</Trans>
+          <Trans>Could not search: {{ errorReason: props.error }}</Trans>
         </Text>
       ) : props.transactionsMode === 'matched' ? (
         t('No matching transactions')

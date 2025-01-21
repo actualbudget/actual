@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useTranslation, Trans } from 'react-i18next';
 import { useLocation, useParams } from 'react-router-dom';
 
 import * as d from 'date-fns';
@@ -17,6 +17,7 @@ import {
   type DataEntity,
 } from 'loot-core/types/models/reports';
 import { type RuleConditionEntity } from 'loot-core/types/models/rule';
+import { type TransObjectLiteral } from 'loot-core/types/util';
 
 import { useAccounts } from '../../../hooks/useAccounts';
 import { useCategories } from '../../../hooks/useCategories';
@@ -699,22 +700,27 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
       header={
         isNarrowWidth ? (
           <MobilePageHeader
-            title={
-              report.name
-                ? t('Custom Report: {{name}}', { name: report.name })
-                : t('Custom Report: Unsaved report')
-            }
+            title={t('Custom Report: {{name}}', {
+              name: report.name ?? t('Unsaved report'),
+            })}
             leftContent={<MobileBackButton onPress={onBackClick} />}
           />
         ) : (
           <PageHeader
             title={
-              <>
-                <Text>{t('Custom Report:')}</Text>
+              <Trans>
+                <Text>Custom Report:</Text>{' '}
                 <Text style={{ marginLeft: 5, color: theme.pageTextPositive }}>
-                  {report.name || t('Unsaved report')}
+                  {
+                    {
+                      name:
+                        report.name?.length > 0
+                          ? report.name
+                          : t('Unsaved report'),
+                    } as TransObjectLiteral
+                  }
                 </Text>
-              </>
+              </Trans>
             }
           />
         )
