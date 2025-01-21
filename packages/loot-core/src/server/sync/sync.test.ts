@@ -28,7 +28,6 @@ describe('Sync', () => {
     prefs.savePrefs({ groupId: 'group' });
 
     let timestamp = Timestamp.send();
-    console.log(timestamp);
     await sendMessages([
       {
         dataset: 'transactions',

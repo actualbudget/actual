@@ -19,7 +19,7 @@
     "build:migrations": "cp migrations/*.sql dist/migrations",
     "build:default-db": "cp default-db.sqlite dist/",
     "build": "yarn run clean && yarn run build:app && yarn run build:node && yarn run build:migrations && yarn run build:default-db",
-    "test": "yarn run build:app && yarn run build:crdt && vitest --globals --dangerouslyIgnoreUnhandledErrors",
+    "test": "yarn run build:app && yarn run build:crdt && vitest --dangerouslyIgnoreUnhandledErrors",
     "clean": "rm -rf dist @types"
   },
   "dependencies": {

@@ -745,10 +745,7 @@ export default [
 
   // Allow configuring vitest with default exports (recommended as per vitest docs)
   {
-    files: [
-      'packages/loot-core/vitest.config.ts',
-      'packages/loot-core/vitest.web.config.ts',
-    ],
+    files: ['**/vitest.config.ts', '**/vitest.web.config.ts'],
     rules: {
       'import/no-anonymous-default-export': 'off',
       'import/no-default-export': 'off',

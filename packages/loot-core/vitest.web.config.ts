@@ -1,4 +1,5 @@
 import path from 'path';
+
 import peggyLoader from 'vite-plugin-peggy-loader';
 
 const resolveExtensions = [
