@@ -3,7 +3,7 @@ import { listen, send } from '../platform/client/fetch';
 import { once } from '../shared/async';
 import { getPrimaryOrderBy, type Query } from '../shared/query';
 
-export async function runQuery(query) {
+export async function runQuery(query: Query) {
   return send('query', query.serialize());
 }
 
@@ -207,7 +207,7 @@ export class LiveQuery<TResponse = unknown> {
   protected fetchData = async (
     runQuery: () => Promise<{
       data: Data<TResponse>;
-      dependencies: Set<string>;
+      dependencies: string[];
     }>,
   ) => {
     // TODO: precompile queries, or cache compilation results on the
