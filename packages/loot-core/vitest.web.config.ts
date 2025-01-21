@@ -1,3 +1,4 @@
+import path from 'path';
 import peggyLoader from 'vite-plugin-peggy-loader';
 
 const resolveExtensions = [
@@ -20,6 +21,9 @@ export default {
     include: ['src/**/*.web.test.(js|jsx|ts|tsx)'],
   },
   resolve: {
+    alias: {
+      '@actual-app/crdt': path.resolve('../crdt'),
+    },
     extensions: resolveExtensions,
   },
   plugins: [peggyLoader()],

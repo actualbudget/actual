@@ -9,7 +9,7 @@ exports[`Account sync > reconcile handles transactions with undefined fields 1`]
     "cleared": 1,
     "date": 20200102,
     "error": null,
-    "id": "id2",
+    "id": "id3",
     "imported_id": null,
     "imported_payee": null,
     "is_child": 0,

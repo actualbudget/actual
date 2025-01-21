@@ -5,7 +5,7 @@ exports[`Database > transactions are sorted by date 1`] = `
   {
     "amount": -23,
     "date": "2018-01-05",
-    "id": "id1",
+    "id": "id2",
     "is_child": false,
     "is_parent": false,
     "payee": null,
@@ -15,7 +15,7 @@ exports[`Database > transactions are sorted by date 1`] = `
   {
     "amount": 12,
     "date": "2018-01-04",
-    "id": "id3",
+    "id": "id4",
     "is_child": false,
     "is_parent": false,
     "payee": null,
@@ -25,7 +25,7 @@ exports[`Database > transactions are sorted by date 1`] = `
   {
     "amount": -5,
     "date": "2018-01-03",
-    "id": "id5",
+    "id": "id6",
     "is_child": false,
     "is_parent": false,
     "payee": null,
@@ -35,7 +35,7 @@ exports[`Database > transactions are sorted by date 1`] = `
   {
     "amount": -24,
     "date": "2018-01-02",
-    "id": "id2",
+    "id": "id3",
     "is_child": false,
     "is_parent": false,
     "payee": null,
@@ -45,7 +45,7 @@ exports[`Database > transactions are sorted by date 1`] = `
   {
     "amount": 2,
     "date": "2018-01-01",
-    "id": "id4",
+    "id": "id5",
     "is_child": false,
     "is_parent": false,
     "payee": null,
@@ -60,7 +60,7 @@ exports[`Database > transactions are sorted by id as a last resort 1`] = `
   {
     "amount": -23,
     "date": "2018-01-05",
-    "id": "id1",
+    "id": "id2",
     "is_child": false,
     "is_parent": false,
     "payee": null,
@@ -105,7 +105,7 @@ exports[`Database > transactions are sorted by sort order 1`] = `
   {
     "amount": -23,
     "date": "2018-01-05",
-    "id": "id1",
+    "id": "id2",
     "is_child": false,
     "is_parent": false,
     "payee": null,
@@ -115,7 +115,7 @@ exports[`Database > transactions are sorted by sort order 1`] = `
   {
     "amount": -24,
     "date": "2018-01-03",
-    "id": "id2",
+    "id": "id3",
     "is_child": false,
     "is_parent": false,
     "payee": null,
@@ -125,7 +125,7 @@ exports[`Database > transactions are sorted by sort order 1`] = `
   {
     "amount": 2,
     "date": "2018-01-03",
-    "id": "id4",
+    "id": "id5",
     "is_child": false,
     "is_parent": false,
     "payee": null,
@@ -135,7 +135,7 @@ exports[`Database > transactions are sorted by sort order 1`] = `
   {
     "amount": 12,
     "date": "2018-01-03",
-    "id": "id3",
+    "id": "id4",
     "is_child": false,
     "is_parent": false,
     "payee": null,
@@ -145,7 +145,7 @@ exports[`Database > transactions are sorted by sort order 1`] = `
   {
     "amount": -5,
     "date": "2018-01-03",
-    "id": "id5",
+    "id": "id6",
     "is_child": false,
     "is_parent": false,
     "payee": null,
@@ -160,7 +160,7 @@ exports[`Database > transactions are sorted by starting balance flag 1`] = `
   {
     "amount": -23,
     "date": "2018-01-05",
-    "id": "id1",
+    "id": "id2",
     "is_child": false,
     "is_parent": false,
     "payee": null,
@@ -170,7 +170,7 @@ exports[`Database > transactions are sorted by starting balance flag 1`] = `
   {
     "amount": -25,
     "date": "2018-01-03",
-    "id": "id3",
+    "id": "id4",
     "is_child": false,
     "is_parent": false,
     "payee": null,
@@ -180,7 +180,7 @@ exports[`Database > transactions are sorted by starting balance flag 1`] = `
   {
     "amount": -5,
     "date": "2018-01-03",
-    "id": "id4",
+    "id": "id5",
     "is_child": false,
     "is_parent": false,
     "payee": null,
@@ -190,7 +190,7 @@ exports[`Database > transactions are sorted by starting balance flag 1`] = `
   {
     "amount": 12,
     "date": "2018-01-03",
-    "id": "id2",
+    "id": "id3",
     "is_child": false,
     "is_parent": false,
     "payee": null,
@@ -205,7 +205,7 @@ exports[`Database > transactions don’t show orphaned child transactions 1`] = 
   {
     "amount": -23,
     "date": "2018-01-05",
-    "id": "id1",
+    "id": "id2",
     "is_child": false,
     "is_parent": false,
     "payee": null,
@@ -220,7 +220,7 @@ exports[`Database > transactions get child transactions in the right order 1`] =
   {
     "amount": -23,
     "date": "2018-01-05",
-    "id": "id1",
+    "id": "id2",
     "is_child": false,
     "is_parent": false,
     "payee": null,

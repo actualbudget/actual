@@ -24,7 +24,7 @@ exports[`Accounts > Transfers are properly updated 1`] = `
     "sort_order": 123456789,
     "starting_balance_flag": 0,
     "tombstone": 0,
-    "transferred_id": "id1",
+    "transferred_id": "id2",
     "type": null,
   },
   {
@@ -36,7 +36,7 @@ exports[`Accounts > Transfers are properly updated 1`] = `
     "description": "transfer-one",
     "error": null,
     "financial_id": null,
-    "id": "id1",
+    "id": "id2",
     "imported_description": null,
     "isChild": 0,
     "isParent": 0,
@@ -77,7 +77,7 @@ exports[`Accounts > Transfers are properly updated 2`] = `
       "isChild": 0,
 @@ -23,15 +23,15 @@
       "tombstone": 0,
-      "transferred_id": "id1",
+      "transferred_id": "id2",
       "type": null,
     },
     Object {
@@ -91,7 +91,7 @@ exports[`Accounts > Transfers are properly updated 2`] = `
       "description": "transfer-one",
       "error": null,
       "financial_id": null,
-      "id": "id1",
+      "id": "id2",
       "imported_description": null,"
 `;
 
@@ -107,7 +107,7 @@ exports[`Accounts > Transfers are properly updated 3`] = `
       "sort_order": 123456789,
       "starting_balance_flag": 0,
 -     "tombstone": 0,
--     "transferred_id": "id1",
+-     "transferred_id": "id2",
 +     "tombstone": 1,
 +     "transferred_id": null,
       "type": null,
@@ -131,19 +131,19 @@ exports[`Accounts > Transfers are properly updated 3`] = `
 
 exports[`Budget > budget updates when changing a category 1`] = `
 [
-  "budget201702!sum-amount-id1",
+  "budget201702!sum-amount-id2",
 ]
 `;
 
 exports[`Budget > budget updates when changing a category 2`] = `
 [
-  "budget201702!sum-amount-id1",
+  "budget201702!sum-amount-id2",
 ]
 `;
 
 exports[`Budget > budget updates when changing a category 3`] = `
 [
-  "budget201702!sum-amount-id1",
+  "budget201702!sum-amount-id2",
 ]
 `;
 

@@ -26,7 +26,7 @@ exports[`Learning categories > updates rules correctly even if multiple rules ex
       },
     ],
     "conditionsOp": "and",
-    "id": "id1",
+    "id": "id2",
     "stage": null,
   },
   Rule {
@@ -53,7 +53,7 @@ exports[`Learning categories > updates rules correctly even if multiple rules ex
       },
     ],
     "conditionsOp": "and",
-    "id": "id2",
+    "id": "id3",
     "stage": null,
   },
   Rule {
@@ -80,7 +80,7 @@ exports[`Learning categories > updates rules correctly even if multiple rules ex
       },
     ],
     "conditionsOp": "and",
-    "id": "id3",
+    "id": "id4",
     "stage": null,
   },
 ]
@@ -112,7 +112,7 @@ exports[`Learning categories > updates rules correctly even if multiple rules ex
       },
     ],
     "conditionsOp": "and",
-    "id": "id1",
+    "id": "id2",
     "stage": null,
   },
   Rule {
@@ -139,7 +139,7 @@ exports[`Learning categories > updates rules correctly even if multiple rules ex
       },
     ],
     "conditionsOp": "and",
-    "id": "id2",
+    "id": "id3",
     "stage": null,
   },
   Rule {
@@ -166,7 +166,7 @@ exports[`Learning categories > updates rules correctly even if multiple rules ex
       },
     ],
     "conditionsOp": "and",
-    "id": "id3",
+    "id": "id4",
     "stage": null,
   },
 ]
