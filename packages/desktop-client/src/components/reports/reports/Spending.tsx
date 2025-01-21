@@ -4,8 +4,8 @@ import { useParams } from 'react-router-dom';
 
 import * as d from 'date-fns';
 
-import { addNotification } from 'loot-core/client/actions';
 import { useWidget } from 'loot-core/client/data-hooks/widget';
+import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { amountToCurrency } from 'loot-core/src/shared/util';
@@ -151,8 +151,10 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
     });
     dispatch(
       addNotification({
-        type: 'message',
-        message: t('Dashboard widget successfully saved.'),
+        notification: {
+          type: 'message',
+          message: t('Dashboard widget successfully saved.'),
+        },
       }),
     );
   }

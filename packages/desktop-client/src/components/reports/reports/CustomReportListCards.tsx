@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
 import { send, sendCatch } from 'loot-core/platform/client/fetch/index';
-import { addNotification } from 'loot-core/src/client/actions';
 import { calculateHasWarning } from 'loot-core/src/client/reports';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { type CustomReportEntity } from 'loot-core/types/models/reports';
@@ -101,8 +101,10 @@ function CustomReportListCardsInner({
     if (response.error) {
       dispatch(
         addNotification({
-          type: 'error',
-          message: `Failed saving report name: ${response.error.message}`,
+          notification: {
+            type: 'error',
+            message: `Failed saving report name: ${response.error.message}`,
+          },
         }),
       );
       setNameMenuOpen(true);

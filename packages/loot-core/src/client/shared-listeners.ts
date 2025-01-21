@@ -3,12 +3,15 @@ import { t } from 'i18next';
 
 import { listen, send } from '../platform/client/fetch';
 
-import { addNotification, loadPrefs, signOut } from './actions';
+import { loadPrefs, signOut } from './actions';
 import { resetSync, sync } from './app/appSlice';
 import { closeAndDownloadBudget, uploadBudget } from './budgets/budgetsSlice';
 import { pushModal } from './modals/modalsSlice';
+import {
+  addNotification,
+  type Notification,
+} from './notifications/notificationsSlice';
 import { getAccounts, getCategories, getPayees } from './queries/queriesSlice';
-import type { Notification } from './state-types/notifications';
 import { type AppStore } from './store';
 
 export function listenForSyncEvent(store: AppStore) {
@@ -27,9 +30,11 @@ export function listenForSyncEvent(store: AppStore) {
 
         store.dispatch(
           addNotification({
-            title: t('Syncing has been fixed!'),
-            message: t('Happy budgeting!'),
-            type: 'message',
+            notification: {
+              title: t('Syncing has been fixed!'),
+              message: t('Happy budgeting!'),
+              type: 'message',
+            },
           }),
         );
       }
@@ -335,7 +340,9 @@ export function listenForSyncEvent(store: AppStore) {
       }
 
       if (notif) {
-        store.dispatch(addNotification({ type: 'error', ...notif }));
+        store.dispatch(
+          addNotification({ notification: { type: 'error', ...notif } }),
+        );
       }
     }
   });

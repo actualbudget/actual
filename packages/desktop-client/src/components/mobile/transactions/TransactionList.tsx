@@ -9,7 +9,7 @@ import React, {
 import { ListBox, Section, Header, Collection } from 'react-aria-components';
 import { useTranslation } from 'react-i18next';
 
-import { setNotificationInset } from 'loot-core/client/actions';
+import { setNotificationInset } from 'loot-core/client/notifications/notificationsSlice';
 import { groupById, integerToCurrency } from 'loot-core/shared/util';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { isPreviewId } from 'loot-core/src/shared/transactions';
@@ -278,7 +278,9 @@ function SelectedTransactionsFloatingActionBar({
 
   const dispatch = useDispatch();
   useEffect(() => {
-    dispatch(setNotificationInset({ bottom: NOTIFICATION_BOTTOM_INSET }));
+    dispatch(
+      setNotificationInset({ inset: { bottom: NOTIFICATION_BOTTOM_INSET } }),
+    );
     return () => {
       dispatch(setNotificationInset(null));
     };

@@ -10,8 +10,9 @@ import {
 } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
-import { addNotification, signOut } from 'loot-core/client/actions';
+import { signOut } from 'loot-core/client/actions';
 import { pushModal } from 'loot-core/client/modals/modalsSlice';
+import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as undo from 'loot-core/src/platform/client/undo';
 import {
@@ -162,24 +163,28 @@ function UserDirectoryContent({
       if (error === 'token-expired') {
         dispatch(
           addNotification({
-            type: 'error',
-            id: 'login-expired',
-            title: t('Login expired'),
-            sticky: true,
-            message: getUserDirectoryErrors(error),
-            button: {
-              title: t('Go to login'),
-              action: () => dispatch(signOut()),
+            notification: {
+              type: 'error',
+              id: 'login-expired',
+              title: t('Login expired'),
+              sticky: true,
+              message: getUserDirectoryErrors(error),
+              button: {
+                title: t('Go to login'),
+                action: () => dispatch(signOut()),
+              },
             },
           }),
         );
       } else {
         dispatch(
           addNotification({
-            type: 'error',
-            title: t('Something happened while deleting users'),
-            sticky: true,
-            message: getUserDirectoryErrors(error),
+            notification: {
+              type: 'error',
+              title: t('Something happened while deleting users'),
+              sticky: true,
+              message: getUserDirectoryErrors(error),
+            },
           }),
         );
       }
