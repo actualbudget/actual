@@ -250,18 +250,20 @@ export function TransactionListItem({
                     </TextOneLine>
                   </View>
                 )}
-                {notes && (<TextOneLine
-                  style={{
-                    fontSize: 11,
-                    marginTop: 4,
-                    fontWeight: '400',
-                    color: theme.tableText,
-                    textAlign: 'left',
-                    opacity: 0.85,
-                  }}
-                >
-                  {notes}
-                </TextOneLine>)}
+                {notes && (
+                  <TextOneLine
+                    style={{
+                      fontSize: 11,
+                      marginTop: 4,
+                      fontWeight: '400',
+                      color: theme.tableText,
+                      textAlign: 'left',
+                      opacity: 0.85,
+                    }}
+                  >
+                    {notes}
+                  </TextOneLine>
+                )}
               </View>
               <View style={{ justifyContent: 'center' }}>
                 <Text
