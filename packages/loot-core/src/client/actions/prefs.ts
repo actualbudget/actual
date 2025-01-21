@@ -8,9 +8,8 @@ import {
   type SyncedPrefs,
 } from '../../types/prefs';
 import * as constants from '../constants';
+import { closeModal } from '../modals/modalsSlice';
 import { type AppDispatch, type GetRootState } from '../store';
-
-import { closeModal } from './modals';
 
 export function loadPrefs() {
   return async (dispatch: AppDispatch, getState: GetRootState) => {

@@ -1,8 +1,11 @@
 import { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
-import { popModal } from 'loot-core/client/actions';
 import { closeBudget } from 'loot-core/client/budgets/budgetsSlice';
+import {
+  type Modal as ModalType,
+  popModal,
+} from 'loot-core/client/modals/modalsSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import * as asyncStorage from 'loot-core/src/platform/server/asyncStorage';
 
@@ -24,9 +27,10 @@ import {
   useRefreshLoginMethods,
 } from '../ServerContext';
 
-type PasswordEnableModalProps = {
-  onSave?: () => void;
-};
+type PasswordEnableModalProps = Extract<
+  ModalType,
+  { name: 'enable-password-auth' }
+>['options'];
 
 export function PasswordEnableModal({
   onSave: originalOnSave,

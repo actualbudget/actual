@@ -762,7 +762,10 @@ const conditionFields = [
     ['amount-outflow', mapField('amount', { outflow: true })],
   ]);
 
-export function EditRuleModal({ defaultRule, onSave: originalOnSave }) {
+export function EditRuleModal({
+  rule: defaultRule,
+  onSave: originalOnSave = undefined,
+}) {
   const { t } = useTranslation();
   const [conditions, setConditions] = useState(
     defaultRule.conditions.map(parse).map(c => ({ ...c, inputKey: uuid() })),

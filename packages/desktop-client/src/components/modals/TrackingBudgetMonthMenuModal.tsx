@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import { css } from '@emotion/css';
 
+import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
 import * as monthUtils from 'loot-core/src/shared/months';
 
 import { useNotes } from '../../hooks/useNotes';
@@ -17,11 +18,10 @@ import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { View } from '../common/View';
 import { Notes } from '../Notes';
 
-type TrackingBudgetMonthMenuModalProps = {
-  month: string;
-  onBudgetAction: (month: string, action: string, arg?: unknown) => void;
-  onEditNotes: (month: string) => void;
-};
+type TrackingBudgetMonthMenuModalProps = Extract<
+  ModalType,
+  { name: 'tracking-budget-month-menu' }
+>['options'];
 
 export function TrackingBudgetMonthMenuModal({
   month,

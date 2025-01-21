@@ -1,9 +1,7 @@
-import React, {
-  type ComponentPropsWithoutRef,
-  type CSSProperties,
-} from 'react';
+import React, { type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
 import { trackingBudget } from 'loot-core/client/queries';
 
 import { useCategory } from '../../hooks/useCategory';
@@ -23,8 +21,9 @@ import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { CellValueText } from '../spreadsheet/CellValue';
 
-type TrackingBalanceMenuModalProps = ComponentPropsWithoutRef<
-  typeof BalanceMenu
+type TrackingBalanceMenuModalProps = Omit<
+  Extract<ModalType, { name: 'tracking-balance-menu' }>['options'],
+  'month'
 >;
 
 export function TrackingBalanceMenuModal({

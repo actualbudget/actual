@@ -9,7 +9,7 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import memoizeOne from 'memoize-one';
 
-import { pushModal } from 'loot-core/client/actions';
+import { pushModal } from 'loot-core/client/modals/modalsSlice';
 import { getNormalisedString } from 'loot-core/src/shared/normalisation';
 import { type Diff, groupById } from 'loot-core/src/shared/util';
 import { type PayeeEntity } from 'loot-core/types/models';
@@ -199,7 +199,7 @@ export const ManagePayees = ({
   }
 
   const onChangeCategoryLearning = useCallback(() => {
-    dispatch(pushModal('payee-category-learning'));
+    dispatch(pushModal({ modal: { name: 'payee-category-learning' } }));
   }, [dispatch]);
 
   const buttonsDisabled = selected.items.size === 0;

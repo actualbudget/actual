@@ -1,6 +1,6 @@
 import React, { useRef, useCallback, useLayoutEffect } from 'react';
 
-import { pushModal } from 'loot-core/client/actions';
+import { pushModal } from 'loot-core/client/modals/modalsSlice';
 import { send } from 'loot-core/src/platform/client/fetch';
 import {
   splitTransaction,
@@ -202,7 +202,11 @@ export function TransactionList({
   });
 
   const onNavigateToSchedule = useCallback(scheduleId => {
-    dispatch(pushModal('schedule-edit', { id: scheduleId }));
+    dispatch(
+      pushModal({
+        modal: { name: 'schedule-edit', options: { id: scheduleId } },
+      }),
+    );
   });
 
   const onNotesTagClick = useCallback(tag => {

@@ -2,23 +2,24 @@
 import React from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 
+import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
+
 import { Block } from '../common/Block';
 import { Button } from '../common/Button2';
 import { InitialFocus } from '../common/InitialFocus';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { View } from '../common/View';
 
-type ConfirmTransactionEditProps = {
-  onCancel?: () => void;
-  onConfirm: () => void;
-  confirmReason: string;
-};
+type ConfirmTransactionEditModalProps = Extract<
+  ModalType,
+  { name: 'confirm-transaction-edit' }
+>['options'];
 
 export function ConfirmTransactionEditModal({
   onCancel,
   onConfirm,
   confirmReason,
-}: ConfirmTransactionEditProps) {
+}: ConfirmTransactionEditModalProps) {
   const { t } = useTranslation();
 
   return (

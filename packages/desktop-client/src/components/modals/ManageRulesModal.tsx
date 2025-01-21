@@ -3,14 +3,16 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 
+import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
 import { isNonProductionEnvironment } from 'loot-core/src/shared/environment';
 
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { ManageRules } from '../ManageRules';
 
-type ManageRulesModalProps = {
-  payeeId?: string;
-};
+type ManageRulesModalProps = Extract<
+  ModalType,
+  { name: 'manage-rules' }
+>['options'];
 
 export function ManageRulesModal({ payeeId }: ManageRulesModalProps) {
   const { t } = useTranslation();

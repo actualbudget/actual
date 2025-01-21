@@ -3,7 +3,7 @@ import { type FormEvent, useState } from 'react';
 import { Form } from 'react-aria-components';
 import { useTranslation, Trans } from 'react-i18next';
 
-import { closeModal } from 'loot-core/client/actions';
+import { closeModal } from 'loot-core/client/modals/modalsSlice';
 import { createAccount } from 'loot-core/client/queries/queriesSlice';
 import { toRelaxedNumber } from 'loot-core/src/shared/util';
 
