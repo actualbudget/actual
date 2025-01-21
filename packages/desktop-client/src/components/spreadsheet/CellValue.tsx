@@ -3,6 +3,7 @@ import React, {
   type ComponentPropsWithoutRef,
   type ReactNode,
   type CSSProperties,
+  Children,
 } from 'react';
 
 import { styles } from '../../style';
@@ -44,7 +45,7 @@ export function CellValue<
   const { fullSheetName } = useSheetName(binding);
   const sheetValue = useSheetValue(binding);
 
-  return children && React.Children.toArray(children).length ? (
+  return children && Children.toArray(children).length ? (
     <>{children({ type, name: fullSheetName, value: sheetValue })}</>
   ) : (
     <CellValueText
