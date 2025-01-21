@@ -711,7 +711,10 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
                 <Text style={{ marginLeft: 5, color: theme.pageTextPositive }}>
                   {
                     {
-                      name: report.name ?? t('Unsaved report'),
+                      name:
+                        report.name?.length > 0
+                          ? report.name
+                          : t('Unsaved report'),
                     } as TransObjectLiteral
                   }
                 </Text>
