@@ -42,7 +42,7 @@ export function SavedFilterMenuButton({
   const [adding, setAdding] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const triggerRef = useRef(null);
-  const [err, setErr] = useState(null);
+  const [err, setErr] = useState<string | null>(null);
   const [menuItem, setMenuItem] = useState('');
   const [name, setName] = useState(filterId?.name ?? '');
   const id = filterId?.id;

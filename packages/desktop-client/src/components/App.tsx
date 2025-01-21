@@ -16,10 +16,9 @@ import {
   closeBudget,
   loadBudget,
   loadGlobalPrefs,
-  setAppState,
   signOut,
-  sync,
 } from 'loot-core/client/actions';
+import { setAppState, sync } from 'loot-core/client/app/appSlice';
 import { SpreadsheetProvider } from 'loot-core/client/SpreadsheetProvider';
 import * as Platform from 'loot-core/src/client/platform';
 import {
@@ -53,74 +52,78 @@ function AppInner() {
   const dispatch = useDispatch();
   const userData = useSelector(state => state.user.data);
 
-  const maybeUpdate = async <T,>(cb?: () => T): Promise<T> => {
-    if (global.Actual.isUpdateReadyForDownload()) {
-      dispatch(
-        setAppState({
-          loadingText: t('Downloading and applying update...'),
-        }),
-      );
-      await global.Actual.applyAppUpdate();
-    }
-    return cb?.();
-  };
-
-  async function init() {
-    const socketName = await maybeUpdate(() => global.Actual.getServerSocket());
-
-    dispatch(
-      setAppState({
-        loadingText: t('Initializing the connection to the local database...'),
-      }),
-    );
-    await initConnection(socketName);
-
-    // Load any global prefs
-    dispatch(
-      setAppState({
-        loadingText: t('Loading global preferences...'),
-      }),
-    );
-    await dispatch(loadGlobalPrefs());
-
-    // Open the last opened budget, if any
-    dispatch(
-      setAppState({
-        loadingText: t('Opening last budget...'),
-      }),
-    );
-    const budgetId = await send('get-last-opened-backup');
-    if (budgetId) {
-      await dispatch(loadBudget(budgetId));
-
-      // Check to see if this file has been remotely deleted (but
-      // don't block on this in case they are offline or something)
-      dispatch(
-        setAppState({
-          loadingText: t('Retrieving remote files...'),
-        }),
-      );
-
-      const files = await send('get-remote-files');
-      if (files) {
-        const remoteFile = files.find(f => f.fileId === cloudFileId);
-        if (remoteFile && remoteFile.deleted) {
-          dispatch(closeBudget());
-        }
-      }
-
-      await maybeUpdate();
-    }
-  }
-
   useEffect(() => {
+    const maybeUpdate = async <T,>(cb?: () => T): Promise<T> => {
+      if (global.Actual.isUpdateReadyForDownload()) {
+        dispatch(
+          setAppState({
+            loadingText: t('Downloading and applying update...'),
+          }),
+        );
+        await global.Actual.applyAppUpdate();
+      }
+      return cb?.();
+    };
+
+    async function init() {
+      const socketName = await maybeUpdate(() =>
+        global.Actual.getServerSocket(),
+      );
+
+      dispatch(
+        setAppState({
+          loadingText: t(
+            'Initializing the connection to the local database...',
+          ),
+        }),
+      );
+      await initConnection(socketName);
+
+      // Load any global prefs
+      dispatch(
+        setAppState({
+          loadingText: t('Loading global preferences...'),
+        }),
+      );
+      await dispatch(loadGlobalPrefs());
+
+      // Open the last opened budget, if any
+      dispatch(
+        setAppState({
+          loadingText: t('Opening last budget...'),
+        }),
+      );
+      const budgetId = await send('get-last-opened-backup');
+      if (budgetId) {
+        await dispatch(loadBudget(budgetId));
+
+        // Check to see if this file has been remotely deleted (but
+        // don't block on this in case they are offline or something)
+        dispatch(
+          setAppState({
+            loadingText: t('Retrieving remote files...'),
+          }),
+        );
+
+        const files = await send('get-remote-files');
+        if (files) {
+          const remoteFile = files.find(f => f.fileId === cloudFileId);
+          if (remoteFile && remoteFile.deleted) {
+            dispatch(closeBudget());
+          }
+        }
+
+        await maybeUpdate();
+      }
+    }
+
     async function initAll() {
       await Promise.all([installPolyfills(), init()]);
       dispatch(setAppState({ loadingText: null }));
     }
 
     initAll().catch(showErrorBoundary);
-  }, []);
+  }, [cloudFileId, dispatch, showErrorBoundary, t]);
 
   useEffect(() => {
     global.Actual.updateAppMenu(budgetId);
@@ -142,7 +145,7 @@ function AppInner() {
         }),
       );
     }
-  }, [userData, userData?.tokenExpired]);
+  }, [dispatch, t, userData?.tokenExpired]);
 
   return budgetId ? <FinancesApp /> : <ManagementApp />;
 }
@@ -187,7 +190,7 @@ export function App() {
       window.removeEventListener('focus', checkScrollbars);
       window.removeEventListener('visibilitychange', onVisibilityChange);
     };
-  }, [dispatch]);
+  }, [dispatch, hiddenScrollbars]);
 
   const [theme] = useTheme();
 

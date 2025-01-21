@@ -83,12 +83,14 @@ function useSaveUser() {
     user: User,
     setError: (error: string) => void,
   ): Promise<boolean> {
-    const { error, id: newId } = (await send(method, user)) || {};
-    if (!error) {
+    const res = await send(method, user);
+    if (!('error' in res)) {
+      const newId = res.id;
       if (newId) {
         user.id = newId;
       }
     } else {
+      const error = res.error;
       setError(getUserDirectoryErrors(error));
       if (error === 'token-expired') {
         dispatch(

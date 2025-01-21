@@ -88,7 +88,7 @@ export function ConfigServer() {
   }
 
   async function onSelectSelfSignedCertificate() {
-    const selfSignedCertificateLocation = await window.Actual?.openFileDialog({
+    const selfSignedCertificateLocation = await window.Actual.openFileDialog({
       properties: ['openFile'],
       filters: [
         {

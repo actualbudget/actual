@@ -294,8 +294,9 @@ export const categoryLists = (categories: {
   list: CategoryEntity[];
   grouped: CategoryGroupEntity[];
 }) => {
+  const categoriesToSort = [...categories.list];
   const categoryList: UncategorizedEntity[] = [
-    ...categories.list.sort((a, b) => {
+    ...categoriesToSort.sort((a, b) => {
       //The point of this sorting is to make the graphs match the "budget" page
       const catGroupA = categories.grouped.find(f => f.id === a.cat_group);
       const catGroupB = categories.grouped.find(f => f.id === b.cat_group);

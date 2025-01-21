@@ -19,14 +19,14 @@
     "noFallthroughCasesInSwitch": true,
     "skipLibCheck": true,
     "jsx": "preserve",
-    "types": ["vite/client", "jest"],
+    "types": ["vite/client", "jest", "vitest/globals"],
     // Check JS files too
     "allowJs": true,
     "checkJs": false,
     // Used for temp builds
     "outDir": "build",
-    "moduleResolution": "Node10",
-    "module": "ES2022",
+    "moduleResolution": "bundler",
+    "module": "es2022",
     // Until/if we build using tsc
     "noEmit": true,
     "paths": {

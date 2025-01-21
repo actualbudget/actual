@@ -4,6 +4,7 @@ import React, {
   useMemo,
   useRef,
   useState,
+  type CSSProperties,
 } from 'react';
 import { ListBox, Section, Header, Collection } from 'react-aria-components';
 import { useTranslation } from 'react-i18next';
@@ -12,6 +13,7 @@ import { setNotificationInset } from 'loot-core/client/actions';
 import { groupById, integerToCurrency } from 'loot-core/shared/util';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { isPreviewId } from 'loot-core/src/shared/transactions';
+import { type TransactionEntity } from 'loot-core/types/models/transaction';
 
 import { useAccounts } from '../../../hooks/useAccounts';
 import { useCategories } from '../../../hooks/useCategories';
@@ -29,7 +31,7 @@ import { SvgDotsHorizontalTriple } from '../../../icons/v1';
 import { useDispatch } from '../../../redux';
 import { styles, theme } from '../../../style';
 import { Button } from '../../common/Button2';
-import { Menu } from '../../common/Menu';
+import { Menu, type MenuItemObject } from '../../common/Menu';
 import { Popover } from '../../common/Popover';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
@@ -40,7 +42,12 @@ import { TransactionListItem } from './TransactionListItem';
 
 const NOTIFICATION_BOTTOM_INSET = 75;
 
-function Loading({ style, 'aria-label': ariaLabel }) {
+type LoadingProps = {
+  style?: CSSProperties;
+  'aria-label': string;
+};
+
+function Loading({ style, 'aria-label': ariaLabel }: LoadingProps) {
   return (
     <View
       aria-label={ariaLabel || 'Loading...'}
@@ -57,17 +64,29 @@ function Loading({ style, 'aria-label': ariaLabel }) {
   );
 }
 
+type TransactionListProps = {
+  isLoading: boolean;
+  transactions: readonly TransactionEntity[];
+  onOpenTransaction?: (transaction: TransactionEntity) => void;
+  isLoadingMore: boolean;
+  onLoadMore: () => void;
+};
+
 export function TransactionList({
   isLoading,
   transactions,
   onOpenTransaction,
   isLoadingMore,
   onLoadMore,
-}) {
+}: TransactionListProps) {
   const { t } = useTranslation();
   const sections = useMemo(() => {
     // Group by date. We can assume transactions is ordered
-    const sections = [];
+    const sections: {
+      id: string;
+      date: TransactionEntity['date'];
+      transactions: TransactionEntity[];
+    }[] = [];
     transactions.forEach(transaction => {
       if (
         sections.length === 0 ||
@@ -88,13 +107,16 @@ export function TransactionList({
   const dispatchSelected = useSelectedDispatch();
   const selectedTransactions = useSelectedItems();
 
-  const onTransactionPress = useCallback(
+  const onTransactionPress: (
+    transaction: TransactionEntity,
+    isLongPress?: boolean,
+  ) => void = useCallback(
     (transaction, isLongPress = false) => {
       const isPreview = isPreviewId(transaction.id);
       if (!isPreview && (isLongPress || selectedTransactions.size > 0)) {
         dispatchSelected({ type: 'select', id: transaction.id });
       } else {
-        onOpenTransaction(transaction);
+        onOpenTransaction?.(transaction);
       }
     },
     [dispatchSelected, onOpenTransaction, selectedTransactions],
@@ -185,13 +207,21 @@ export function TransactionList({
   );
 }
 
-function SelectedTransactionsFloatingActionBar({ transactions, style }) {
+type SelectedTransactionsFloatingActionBarProps = {
+  transactions: readonly TransactionEntity[];
+  style?: CSSProperties;
+};
+
+function SelectedTransactionsFloatingActionBar({
+  transactions,
+  style = {},
+}: SelectedTransactionsFloatingActionBarProps) {
   const editMenuTriggerRef = useRef(null);
   const [isEditMenuOpen, setIsEditMenuOpen] = useState(false);
   const moreOptionsMenuTriggerRef = useRef(null);
   const [isMoreOptionsMenuOpen, setIsMoreOptionsMenuOpen] = useState(false);
   const getMenuItemStyle = useCallback(
-    item => ({
+    <T extends string>(item: MenuItemObject<T>) => ({
       ...styles.mobileMenuItem,
       color: theme.mobileHeaderText,
       ...(item.name === 'delete' && { color: theme.errorTextMenu }),
@@ -326,16 +356,20 @@ function SelectedTransactionsFloatingActionBar({ transactions, style }) {
                     let displayValue = value;
                     switch (name) {
                       case 'account':
-                        displayValue = accountsById[value]?.name ?? value;
+                        displayValue =
+                          accountsById[String(value)]?.name ?? value;
                         break;
                       case 'category':
-                        displayValue = categoriesById[value]?.name ?? value;
+                        displayValue =
+                          categoriesById[String(value)]?.name ?? value;
                         break;
                       case 'payee':
-                        displayValue = payeesById[value]?.name ?? value;
+                        displayValue = payeesById[String(value)]?.name ?? value;
                         break;
                       case 'amount':
-                        displayValue = integerToCurrency(value);
+                        displayValue = Number.isNaN(Number(value))
+                          ? value
+                          : integerToCurrency(Number(value));
                         break;
                       case 'notes':
                         displayValue = `${mode} with ${value}`;

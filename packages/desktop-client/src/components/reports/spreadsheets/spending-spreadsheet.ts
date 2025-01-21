@@ -109,7 +109,7 @@ export function createSpendingSpreadsheet({
             $and: [{ month: { $eq: budgetMonth } }],
           })
           .filter({
-            [conditionsOpKey]: filters.filter(filter => filter.category),
+            [conditionsOpKey]: filters.filter(filter => filter['category']),
           })
           .groupBy([{ $id: '$category' }])
           .select([

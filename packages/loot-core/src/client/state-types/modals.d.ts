@@ -164,6 +164,8 @@ type FinanceModals = {
     onClose?: () => void;
   };
 
+  'payee-category-learning': null;
+
   'budget-summary': {
     month: string;
   };
@@ -180,6 +182,8 @@ type FinanceModals = {
   };
 
   'schedules-discover': null;
+
+  'schedules-upcoming-length': null;
 
   'schedule-posts-offline-notification': null;
   'account-menu': {

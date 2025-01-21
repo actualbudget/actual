@@ -1,6 +1,8 @@
-import { type HTMLProps, type CSSProperties } from 'react';
+import { type HTMLProps } from 'react';
 
 import { css } from '@emotion/css';
+
+import { type CSSProperties } from '../../style';
 
 type ParagraphProps = HTMLProps<HTMLDivElement> & {
   style?: CSSProperties;

@@ -18,7 +18,7 @@ function getErrorMessage(error: string): string {
     case 'not-ynab4':
       return 'This file is not valid. Please select a compressed ynab4 zip file.';
     default:
-      return 'An unknown error occurred while importing. Please report this as a new issue on Github.';
+      return 'An unknown error occurred while importing. Please report this as a new issue on GitHub.';
   }
 }
 
@@ -30,7 +30,7 @@ export function ImportYNAB4Modal() {
   const [importing, setImporting] = useState(false);
 
   async function onImport() {
-    const res = await window.Actual?.openFileDialog({
+    const res = await window.Actual.openFileDialog({
       properties: ['openFile'],
       filters: [{ name: 'ynab', extensions: ['zip'] }],
     });

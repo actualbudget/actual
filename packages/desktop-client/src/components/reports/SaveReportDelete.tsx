@@ -23,12 +23,15 @@ export function SaveReportDelete({
   return (
     <>
       <View style={{ align: 'center' }}>
-        <Trans>
-          <Text style={{ color: theme.errorText, marginBottom: 5 }}>
-            Are you sure you want to delete report:{' '}
-          </Text>
-          <View>{{ name } as TransObjectLiteral}</View>
-        </Trans>
+        <Text style={{ color: theme.errorText, marginBottom: 5 }}>
+          <Trans>
+            Are you sure you want to delete the report named{' ‘'}
+            <Text style={{ display: 'inline' }}>
+              {{ name } as TransObjectLiteral}
+            </Text>
+            ’?
+          </Trans>
+        </Text>
       </View>
 
       <Stack

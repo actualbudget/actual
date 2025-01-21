@@ -19,7 +19,7 @@ function cmpSemanticVersion(
 }
 
 export async function getLatestVersion(): Promise<string | 'unknown'> {
-  if (Platform.isPlaywright) {
+  if (Platform.isPlaywright || process.env.REACT_APP_REVIEW_ID) {
     return Promise.resolve('v99.9.9');
   }
 
@@ -30,18 +30,18 @@ export async function getLatestVersion(): Promise<string | 'unknown'> {
     const json = await response.json();
     const tags = json
       .map(t => t.name)
-      .concat([`v${window.Actual?.ACTUAL_VERSION}`]);
+      .concat([`v${window.Actual.ACTUAL_VERSION}`]);
     tags.sort(cmpSemanticVersion);
 
     return tags[tags.length - 1];
   } catch {
-    // Rate limit exceeded? Or perhaps Github is down?
+    // Rate limit exceeded? Or perhaps GitHub is down?
     return 'unknown';
   }
 }
 
 export async function getIsOutdated(latestVersion: string): Promise<boolean> {
-  const clientVersion = window.Actual?.ACTUAL_VERSION;
+  const clientVersion = window.Actual.ACTUAL_VERSION;
   if (latestVersion === 'unknown') {
     return Promise.resolve(false);
   }
