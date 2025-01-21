@@ -1,13 +1,16 @@
-import { test, expect } from '@playwright/test';
+import { type Page } from '@playwright/test';
+
+import { test, expect } from '../playwright.config';
 
 import { ConfigurationPage } from './page-models/configuration-page';
 import { Navigation } from './page-models/navigation';
+import { type RulesPage } from './page-models/rules-page';
 
 test.describe('Rules', () => {
-  let page;
-  let navigation;
-  let rulesPage;
-  let configurationPage;
+  let page: Page;
+  let navigation: Navigation;
+  let rulesPage: RulesPage;
+  let configurationPage: ConfigurationPage;
 
   test.beforeAll(async ({ browser }) => {
     page = await browser.newPage();

@@ -1,12 +1,14 @@
-import { test, expect } from '@playwright/test';
+import { type Page } from '@playwright/test';
+
+import { expect, test } from '../playwright.config';
 
 import { ConfigurationPage } from './page-models/configuration-page';
 import { MobileNavigation } from './page-models/mobile-navigation';
 
 test.describe('Mobile Accounts', () => {
-  let page;
-  let navigation;
-  let configurationPage;
+  let page: Page;
+  let navigation: MobileNavigation;
+  let configurationPage: ConfigurationPage;
 
   test.beforeEach(async ({ browser }) => {
     page = await browser.newPage();

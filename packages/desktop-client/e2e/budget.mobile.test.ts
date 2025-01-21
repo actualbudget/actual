@@ -1,7 +1,9 @@
-import { test, expect } from '@playwright/test';
+import { type Page } from '@playwright/test';
 
 import { amountToCurrency, currencyToAmount } from 'loot-core/shared/util';
 import * as monthUtils from 'loot-core/src/shared/months';
+
+import { test, expect } from '../playwright.config';
 
 import { ConfigurationPage } from './page-models/configuration-page';
 import { MobileNavigation } from './page-models/mobile-navigation';
@@ -62,10 +64,10 @@ const budgetTypes = ['Envelope', 'Tracking'];
 
 budgetTypes.forEach(budgetType => {
   test.describe(`Mobile Budget [${budgetType}]`, () => {
-    let page;
-    let navigation;
-    let configurationPage;
-    let previousGlobalIsTesting;
+    let page: Page;
+    let navigation: MobileNavigation;
+    let configurationPage: ConfigurationPage;
+    let previousGlobalIsTesting: boolean;
 
     test.beforeAll(() => {
       // TODO: Hack, properly mock the currentMonth function

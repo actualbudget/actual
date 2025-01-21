@@ -1,13 +1,17 @@
-import { test, expect } from '@playwright/test';
+import { type Page } from '@playwright/test';
+
+import { test, expect } from '../playwright.config';
 
 import { ConfigurationPage } from './page-models/configuration-page';
+import { type CustomReportPage } from './page-models/custom-report-page';
 import { Navigation } from './page-models/navigation';
+import { type ReportsPage } from './page-models/reports-page';
 
 test.describe.parallel('Reports', () => {
-  let page;
-  let navigation;
-  let reportsPage;
-  let configurationPage;
+  let page: Page;
+  let navigation: Navigation;
+  let reportsPage: ReportsPage;
+  let configurationPage: ConfigurationPage;
 
   test.beforeAll(async ({ browser }) => {
     page = await browser.newPage();
@@ -45,7 +49,7 @@ test.describe.parallel('Reports', () => {
   });
 
   test.describe.parallel('custom reports', () => {
-    let customReportPage;
+    let customReportPage: CustomReportPage;
 
     test.beforeEach(async () => {
       customReportPage = await reportsPage.goToCustomReportPage();

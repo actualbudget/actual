@@ -1,7 +1,13 @@
-import { expect, defineConfig } from '@playwright/test';
+import {
+  expect as baseExpect,
+  defineConfig,
+  type Locator,
+} from '@playwright/test';
 
-expect.extend({
-  async toMatchThemeScreenshots(locator) {
+export { test } from '@playwright/test';
+
+export const expect = baseExpect.extend({
+  async toMatchThemeScreenshots(locator: Locator) {
     // Disable screenshot assertions in regular e2e tests;
     // only enable them when doing VRT tests
     if (!process.env.VRT) {
@@ -27,32 +33,25 @@ expect.extend({
 
     // Check lightmode
     await locator.evaluate(() => window.Actual.setTheme('auto'));
-    await expect(dataThemeLocator).toHaveAttribute('data-theme', 'auto');
-    const lightmode = await expect(locator).toHaveScreenshot(config);
+    await baseExpect(dataThemeLocator).toHaveAttribute('data-theme', 'auto');
+    await baseExpect(locator).toHaveScreenshot(config);
 
-    if (lightmode && !lightmode.pass) {
-      return lightmode;
-    }
+    // if (lightmode && !lightmode.pass) {
+    //   return lightmode;
+    // }
 
     // Switch to darkmode and check
     await locator.evaluate(() => window.Actual.setTheme('dark'));
-    await expect(dataThemeLocator).toHaveAttribute('data-theme', 'dark');
-    const darkmode = await expect(locator).toHaveScreenshot(config);
-
-    // Assert on
-    if (darkmode && !darkmode.pass) {
-      return darkmode;
-    }
+    await baseExpect(dataThemeLocator).toHaveAttribute('data-theme', 'dark');
+    await baseExpect(locator).toHaveScreenshot(config);
 
     // Switch to midnight theme and check
     await locator.evaluate(() => window.Actual.setTheme('midnight'));
-    await expect(dataThemeLocator).toHaveAttribute('data-theme', 'midnight');
-    const midnightMode = await expect(locator).toHaveScreenshot(config);
-
-    // Assert on
-    if (midnightMode && !midnightMode.pass) {
-      return midnightMode;
-    }
+    await baseExpect(dataThemeLocator).toHaveAttribute(
+      'data-theme',
+      'midnight',
+    );
+    await expect(locator).toHaveScreenshot(config);
 
     // Switch back to lightmode
     await locator.evaluate(() => window.Actual.setTheme('auto'));

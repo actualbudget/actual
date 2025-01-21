@@ -1,15 +1,18 @@
 import { join } from 'path';
 
-import { test, expect } from '@playwright/test';
+import { type Page } from '@playwright/test';
 
+import { test, expect } from '../playwright.config';
+
+import { type AccountPage } from './page-models/account-page';
 import { ConfigurationPage } from './page-models/configuration-page';
 import { Navigation } from './page-models/navigation';
 
 test.describe('Accounts', () => {
-  let page;
-  let navigation;
-  let configurationPage;
-  let accountPage;
+  let page: Page;
+  let navigation: Navigation;
+  let configurationPage: ConfigurationPage;
+  let accountPage: AccountPage;
 
   test.beforeEach(async ({ browser }) => {
     page = await browser.newPage();
