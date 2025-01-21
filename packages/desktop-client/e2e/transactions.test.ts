@@ -40,7 +40,7 @@ test.describe('Transactions', () => {
 
     test('by date', async () => {
       const filterTooltip = await accountPage.filterBy('Date');
-      await expect(filterTooltip.locator).toMatchThemeScreenshots();
+      await expect(filterTooltip.page).toMatchThemeScreenshots();
 
       // Open datepicker
       await page.keyboard.press('Space');
@@ -58,7 +58,7 @@ test.describe('Transactions', () => {
 
     test('by category', async () => {
       const filterTooltip = await accountPage.filterBy('Category');
-      await expect(filterTooltip.locator).toMatchThemeScreenshots();
+      await expect(filterTooltip.page).toMatchThemeScreenshots();
 
       // Type in the autocomplete box
       const autocomplete = page.getByTestId('autocomplete');
