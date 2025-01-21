@@ -352,6 +352,7 @@ export function describeSchedule(schedule, payee) {
 
 export function getUpcomingDays(upcomingLength = '7'): number {
   const today = monthUtils.currentDay();
+  const month = monthUtils.getMonth(today);
 
   switch (upcomingLength) {
     case 'currentMonth': {
@@ -360,7 +361,6 @@ export function getUpcomingDays(upcomingLength = '7'): number {
       return end - day + 1;
     }
     case 'oneMonth': {
-      const month = monthUtils.getMonth(today);
       return (
         monthUtils.differenceInCalendarDays(
           monthUtils.nextMonth(month),
@@ -371,15 +371,18 @@ export function getUpcomingDays(upcomingLength = '7'): number {
     default:
       if (upcomingLength.includes('-')) {
         const [num, unit] = upcomingLength.split('-');
+        const value = Math.max(1, parseInt(num, 10));
         switch (unit) {
           case 'day':
-            return parseInt(num, 10);
+            return value;
           case 'week':
-            return parseInt(num, 10) * 7;
+            return value * 7;
           case 'month':
-            return parseInt(num, 10) * 30;
+            const future = monthUtils.addMonths(today, value);
+            return monthUtils.differenceInCalendarDays(future, today);
           case 'year':
-            return parseInt(num, 10) * 365;
+            const futureYear = monthUtils.addYears(today, value);
+            return monthUtils.differenceInCalendarDays(futureYear, today);
           default:
             return 7;
         }
