@@ -7,6 +7,7 @@ import {
   type NetWorthWidget,
 } from 'loot-core/src/types/models';
 
+import { useSelector } from '../../../redux';
 import { styles } from '../../../style';
 import { Block } from '../../common/Block';
 import { View } from '../../common/View';
@@ -21,7 +22,6 @@ import { ReportCardName } from '../ReportCardName';
 import { calculateTimeRange } from '../reportRanges';
 import { createSpreadsheet as netWorthSpreadsheet } from '../spreadsheets/net-worth-spreadsheet';
 import { useReport } from '../useReport';
-import { useSelector } from '../../../redux';
 
 type NetWorthCardProps = {
   widgetId: string;

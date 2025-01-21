@@ -444,7 +444,7 @@ export function Budget() {
         }),
       );
     },
-    [dispatch, onSaveNotes],
+    [dispatch, onSaveNotes, locale],
   );
 
   const onSwitchBudgetFile = useCallback(() => {

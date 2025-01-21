@@ -116,7 +116,7 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
       setAllIntervals(allMonths);
     }
     run();
-  }, []);
+  }, [locale]);
 
   const getGraphData = useMemo(
     () =>
@@ -476,7 +476,8 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                         style={{ marginBottom: 5, minWidth: 210 }}
                         left={
                           <Block>
-                            Spent {monthUtils.format(compare, 'MMM, yyyy', locale)}
+                            Spent{' '}
+                            {monthUtils.format(compare, 'MMM, yyyy', locale)}
                             {compare === monthUtils.currentMonth() && ' MTD'}:
                           </Block>
                         }
@@ -496,7 +497,8 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                         style={{ marginBottom: 5, minWidth: 210 }}
                         left={
                           <Block>
-                            Spent {monthUtils.format(compareTo, 'MMM, yyyy', locale)}
+                            Spent{' '}
+                            {monthUtils.format(compareTo, 'MMM, yyyy', locale)}
                             {compare === monthUtils.currentMonth() && ' MTD'}:
                           </Block>
                         }

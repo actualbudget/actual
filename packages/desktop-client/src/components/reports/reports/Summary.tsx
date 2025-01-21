@@ -122,7 +122,7 @@ function SummaryInner({ widget }: SummaryInnerProps) {
         dividendFilters.conditions,
         dividendFilters.conditionsOp,
         content,
-        locale
+        locale,
       ),
     [
       start,
@@ -130,7 +130,7 @@ function SummaryInner({ widget }: SummaryInnerProps) {
       dividendFilters.conditions,
       dividendFilters.conditionsOp,
       content,
-      locale
+      locale,
     ],
   );
 
@@ -182,7 +182,7 @@ function SummaryInner({ widget }: SummaryInnerProps) {
       setAllMonths(allMonths);
     }
     run();
-  }, []);
+  }, [locale]);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();

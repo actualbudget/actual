@@ -13,8 +13,8 @@ import { Text } from '../common/Text';
 import { Setting } from './UI';
 
 const languageDisplayNameOverride = {
-  'pt-BR': 'Português (Brasil)'
-}
+  'pt-BR': 'Português (Brasil)',
+};
 
 const languageOptions = (t: TFunction): SelectOption[] =>
   [
@@ -23,9 +23,11 @@ const languageOptions = (t: TFunction): SelectOption[] =>
   ].concat(
     availableLanguages.map(lang => [
       lang,
-      languageDisplayNameOverride[lang] || new Intl.DisplayNames([lang], {
-        type: 'language',
-      }).of(lang) || lang,
+      languageDisplayNameOverride[lang] ||
+        new Intl.DisplayNames([lang], {
+          type: 'language',
+        }).of(lang) ||
+        lang,
     ]),
   );
 

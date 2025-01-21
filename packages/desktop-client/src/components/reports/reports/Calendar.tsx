@@ -277,7 +277,7 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
       }
     }
     run();
-  }, []);
+  }, [locale]);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();

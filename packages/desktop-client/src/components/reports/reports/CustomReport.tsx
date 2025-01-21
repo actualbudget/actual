@@ -26,6 +26,7 @@ import { useLocalPref } from '../../../hooks/useLocalPref';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { usePayees } from '../../../hooks/usePayees';
 import { useSyncedPref } from '../../../hooks/useSyncedPref';
+import { useSelector } from '../../../redux';
 import { theme, styles } from '../../../style';
 import { Warning } from '../../alerts';
 import { AlignedText } from '../../common/AlignedText';
@@ -61,7 +62,6 @@ import { createCustomSpreadsheet } from '../spreadsheets/custom-spreadsheet';
 import { createGroupedSpreadsheet } from '../spreadsheets/grouped-spreadsheet';
 import { useReport } from '../useReport';
 import { fromDateRepr } from '../util';
-import { useSelector } from '../../../redux';
 
 /**
  * Transform `selectedCategories` into `conditions`.
@@ -319,7 +319,8 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
           name: inter,
           pretty: monthUtils.format(
             inter,
-            ReportOptions.intervalFormat.get(interval) || '', locale
+            ReportOptions.intervalFormat.get(interval) || '',
+            locale,
           ),
         }))
         .reverse();
@@ -346,6 +347,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
     onApplyFilter,
     report.conditions,
     includeCurrentInterval,
+    locale,
   ]);
 
   useEffect(() => {

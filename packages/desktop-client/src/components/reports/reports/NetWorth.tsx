@@ -80,8 +80,16 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
   const [mode, setMode] = useState(initialMode);
 
   const reportParams = useMemo(
-    () => netWorthSpreadsheet(start, end, accounts, conditions, conditionsOp, locale),
-    [start, end, accounts, conditions, conditionsOp],
+    () =>
+      netWorthSpreadsheet(
+        start,
+        end,
+        accounts,
+        conditions,
+        conditionsOp,
+        locale,
+      ),
+    [start, end, accounts, conditions, conditionsOp, locale],
   );
   const data = useReport('net_worth', reportParams);
   useEffect(() => {
@@ -111,7 +119,7 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
       setAllMonths(allMonths);
     }
     run();
-  }, []);
+  }, [locale]);
 
   function onChangeDates(start: string, end: string, mode: TimeFrame['mode']) {
     setStart(start);

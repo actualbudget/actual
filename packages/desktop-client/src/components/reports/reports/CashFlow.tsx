@@ -105,7 +105,8 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
   });
 
   const params = useMemo(
-    () => cashFlowByDate(start, end, isConcise, conditions, conditionsOp, locale),
+    () =>
+      cashFlowByDate(start, end, isConcise, conditions, conditionsOp, locale),
     [start, end, isConcise, conditions, conditionsOp, locale],
   );
   const data = useReport('cash_flow', params);
@@ -128,7 +129,7 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
       setAllMonths(allMonths);
     }
     run();
-  }, []);
+  }, [locale]);
 
   function onChangeDates(start: string, end: string, mode: TimeFrame['mode']) {
     const numDays = d.differenceInCalendarDays(

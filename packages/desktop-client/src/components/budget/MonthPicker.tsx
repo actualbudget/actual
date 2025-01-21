@@ -6,13 +6,12 @@ import * as monthUtils from 'loot-core/src/shared/months';
 
 import { useResizeObserver } from '../../hooks/useResizeObserver';
 import { SvgCalendar } from '../../icons/v2';
+import { useSelector } from '../../redux';
 import { styles, theme } from '../../style';
 import { Link } from '../common/Link';
 import { View } from '../common/View';
 
 import { type MonthBounds } from './MonthsContext';
-import { RootState } from 'loot-core/client/store';
-import { useSelector } from '../../redux';
 
 type MonthPickerProps = {
   startMonth: string;

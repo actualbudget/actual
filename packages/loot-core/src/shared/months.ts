@@ -397,7 +397,11 @@ export function nameForMonth(month: DateLike, locale?: Locale): string {
   return d.format(_parse(month), 'MMMM ‘yy', { locale });
 }
 
-export function format(month: DateLike, format: string, locale?: Locale): string {
+export function format(
+  month: DateLike,
+  format: string,
+  locale?: Locale,
+): string {
   return d.format(_parse(month), format, { locale });
 }
 

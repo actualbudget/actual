@@ -12,13 +12,13 @@ import {
   type DataEntity,
 } from 'loot-core/src/types/models/reports';
 
+import { useSelector } from '../../redux';
 import { theme, styles } from '../../style';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { PrivacyFilter } from '../PrivacyFilter';
 
 import { ReportOptions } from './ReportOptions';
-import { useSelector } from '../../redux';
 
 type ReportSummaryProps = {
   startDate: string;
@@ -73,20 +73,24 @@ export function ReportSummary({
         >
           {monthUtils.format(
             startDate,
-            ReportOptions.intervalFormat.get(interval) || '', locale
+            ReportOptions.intervalFormat.get(interval) || '',
+            locale,
           )}
           {monthUtils.format(
             startDate,
-            ReportOptions.intervalFormat.get(interval) || '', locale
+            ReportOptions.intervalFormat.get(interval) || '',
+            locale,
           ) !==
             monthUtils.format(
               endDate,
-              ReportOptions.intervalFormat.get(interval) || '', locale
+              ReportOptions.intervalFormat.get(interval) || '',
+              locale,
             ) &&
             ` ${t('to')} ` +
               monthUtils.format(
                 endDate,
-                ReportOptions.intervalFormat.get(interval) || '', locale
+                ReportOptions.intervalFormat.get(interval) || '',
+                locale,
               )}
         </Text>
       </View>

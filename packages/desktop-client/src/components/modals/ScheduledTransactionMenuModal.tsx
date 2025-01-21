@@ -9,6 +9,7 @@ import { useSchedules } from 'loot-core/client/data-hooks/schedules';
 import { format } from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
 
+import { useSelector } from '../../redux';
 import { theme, styles } from '../../style';
 import { Menu } from '../common/Menu';
 import {
@@ -19,7 +20,6 @@ import {
 } from '../common/Modal';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
-import { useSelector } from '../../redux';
 
 type ScheduledTransactionMenuModalProps = ScheduledTransactionMenuProps;
 

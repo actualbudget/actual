@@ -7,6 +7,7 @@ import {
   type SummaryWidget,
 } from 'loot-core/types/models';
 
+import { useSelector } from '../../../redux';
 import { View } from '../../common/View';
 import { DateRange } from '../DateRange';
 import { LoadingIndicator } from '../LoadingIndicator';
@@ -16,7 +17,6 @@ import { calculateTimeRange } from '../reportRanges';
 import { summarySpreadsheet } from '../spreadsheets/summary-spreadsheet';
 import { SummaryNumber } from '../SummaryNumber';
 import { useReport } from '../useReport';
-import { useSelector } from '../../../redux';
 
 type SummaryCardProps = {
   widgetId: string;
@@ -64,7 +64,7 @@ export function SummaryCard({
         meta?.conditions,
         meta?.conditionsOp,
         content,
-        locale
+        locale,
       ),
     [start, end, meta?.conditions, meta?.conditionsOp, content, locale],
   );

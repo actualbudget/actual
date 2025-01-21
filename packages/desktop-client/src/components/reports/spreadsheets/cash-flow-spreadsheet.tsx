@@ -208,7 +208,9 @@ function recalculate(
         <div>
           <div style={{ marginBottom: 10 }}>
             <strong>
-              {d.format(x, isConcise ? 'MMMM yyyy' : 'MMMM d, yyyy', { locale })}
+              {d.format(x, isConcise ? 'MMMM yyyy' : 'MMMM d, yyyy', {
+                locale,
+              })}
             </strong>
           </div>
           <div style={{ lineHeight: 1.5 }}>

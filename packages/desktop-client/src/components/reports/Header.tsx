@@ -8,6 +8,7 @@ import {
 } from 'loot-core/types/models';
 import { type SyncedPrefs } from 'loot-core/types/prefs';
 
+import { useSelector } from '../../redux';
 import { Button } from '../common/Button2';
 import { Select } from '../common/Select';
 import { SpaceBetween } from '../common/SpaceBetween';
@@ -24,7 +25,6 @@ import {
   validateEnd,
   validateStart,
 } from './reportRanges';
-import { useSelector } from '../../redux';
 
 type HeaderProps = {
   start: TimeFrame['start'];
