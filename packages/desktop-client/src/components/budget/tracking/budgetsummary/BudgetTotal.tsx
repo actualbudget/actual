@@ -50,15 +50,24 @@ export function BudgetTotal<
         </View>
 
         <Text>
-          <CellValue binding={current} type="financial" />
-          <Text style={{ color: theme.pageTextSubdued, fontStyle: 'italic' }}>
-            <Trans>
-              {{ usedAmount: '' }} of {{ allocatedAmount: '' }}
-            </Trans>
-            <CellValue binding={target} type="financial">
-              {props => <CellValueText {...props} style={styles.notFixed} />}
-            </CellValue>
-          </Text>
+          <Trans
+            i18nKey="<allocatedAmount /> <italic>of <totalAmount /></italic>"
+            components={{
+              allocatedAmount: <CellValue binding={current} type="financial" />,
+              italic: (
+                <Text
+                  style={{ color: theme.pageTextSubdued, fontStyle: 'italic' }}
+                />
+              ),
+              totalAmount: (
+                <CellValue binding={target} type="financial">
+                  {props => (
+                    <CellValueText {...props} style={styles.notFixed} />
+                  )}
+                </CellValue>
+              ),
+            }}
+          />
         </Text>
       </View>
     </View>
