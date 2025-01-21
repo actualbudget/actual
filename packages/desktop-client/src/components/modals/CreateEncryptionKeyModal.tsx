@@ -5,10 +5,10 @@ import { useTranslation, Trans } from 'react-i18next';
 
 import { css } from '@emotion/css';
 
-import { loadGlobalPrefs } from 'loot-core/client/actions';
 import { sync } from 'loot-core/client/app/appSlice';
 import { loadAllFiles } from 'loot-core/client/budgets/budgetsSlice';
 import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
+import { loadGlobalPrefs } from 'loot-core/client/prefs/prefsSlice';
 import { send } from 'loot-core/src/platform/client/fetch';
 import { getCreateKeyError } from 'loot-core/src/shared/errors';
 
