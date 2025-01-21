@@ -1442,7 +1442,9 @@ const Transaction = memo(function Transaction({
               : isOffBudget
                 ? 'Off budget'
                 : isBudgetTransfer
-                  ? 'Transfer'
+                  ? categoryId != null
+                    ? 'BROKEN'
+                    : 'Transfer'
                   : ''
           }
           valueStyle={valueStyle}
