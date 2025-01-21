@@ -81,8 +81,6 @@ const categoryGroups = generateCategoryGroups([
 ]);
 const usualGroup = categoryGroups[1];
 
-let transactions = generateTransactions(5, [6]);
-
 function generateTransactions(
   count: number,
   splitAtIndexes: number[] = [],
@@ -217,7 +215,7 @@ function initBasicServer() {
           return { data: accounts, dependencies: [] };
         case 'transactions':
           return {
-            data: transactions,
+            data: [],
             dependencies: [],
           };
         default:
@@ -254,7 +252,7 @@ function prettyDate(date: string) {
 }
 
 function renderTransactions(extraProps?: Partial<LiveTransactionTableProps>) {
-  transactions = generateTransactions(5, [6]);
+  let transactions = generateTransactions(5, [6]);
   // Hardcoding the first value makes it easier for tests to do
   // various this
   transactions[0].amount = -2777;
