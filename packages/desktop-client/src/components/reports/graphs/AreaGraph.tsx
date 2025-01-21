@@ -33,11 +33,11 @@ import { renderCustomLabel } from './renderCustomLabel';
 type PayloadItem = {
   payload: {
     date: string;
-    totalAssets: number | string;
-    totalDebts: number | string;
-    netAssets: number | string;
-    netDebts: number | string;
-    totalTotals: number | string;
+    totalAssets: number;
+    totalDebts: number;
+    netAssets: number;
+    netDebts: number;
+    totalTotals: number;
   };
 };
 
@@ -141,7 +141,9 @@ const customLabel = ({
     ((typeof props.value === 'number' ? props.value : 0) > 0 ? 10 : -10);
   const textAnchor = props.index === 0 ? 'left' : 'middle';
   const display =
-    props.value !== 0 ? `${amountToCurrencyNoDecimal(props.value)}` : '';
+    typeof props.value !== 'string' && props.value !== 0
+      ? `${amountToCurrencyNoDecimal(props.value || 0)}`
+      : '';
   const textSize = adjustTextSize({ sized: width, type: 'area' });
 
   return renderCustomLabel(calcX, calcY, textAnchor, display, textSize);
