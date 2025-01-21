@@ -36,10 +36,6 @@ export const expect = baseExpect.extend({
     await baseExpect(dataThemeLocator).toHaveAttribute('data-theme', 'auto');
     await baseExpect(locator).toHaveScreenshot(config);
 
-    // if (lightmode && !lightmode.pass) {
-    //   return lightmode;
-    // }
-
     // Switch to darkmode and check
     await locator.evaluate(() => window.Actual.setTheme('dark'));
     await baseExpect(dataThemeLocator).toHaveAttribute('data-theme', 'dark');
