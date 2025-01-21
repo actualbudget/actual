@@ -30,7 +30,7 @@ import { BudgetTypeSettings } from './BudgetTypeSettings';
 import { EncryptionSettings } from './Encryption';
 import { ExperimentalFeatures } from './Experimental';
 import { ExportBudget } from './Export';
-import { FixSplits } from './FixSplits';
+import { RepairTransactions } from './RepairTransactions';
 import { FormatSettings } from './Format';
 import { ResetCache, ResetSync } from './Reset';
 import { ThemeSettings } from './Themes';
@@ -204,7 +204,7 @@ export function Settings() {
           <AdvancedAbout />
           <ResetCache />
           <ResetSync />
-          <FixSplits />
+          <RepairTransactions />
           <ExperimentalFeatures />
         </AdvancedToggle>
       </View>
