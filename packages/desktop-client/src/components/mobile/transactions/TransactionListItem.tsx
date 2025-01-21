@@ -163,7 +163,7 @@ export function TransactionListItem({
                 padding: '0 4px',
               }}
             >
-              <View>
+              <View style={{ flex: 1 }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                   {scheduleId && (
                     <SvgArrowsSynchronize
@@ -196,72 +196,72 @@ export function TransactionListItem({
                 ) : (
                   <View
                     style={{
-                      flexDirection: 'column',
-                      alignItems: 'flex-start',
+                      flexDirection: 'row',
+                      alignItems: 'center',
                       marginTop: 3,
                     }}
                   >
-                    <View
-                      style={{ flexDirection: 'row', alignItems: 'center' }}
-                    >
-                      {isReconciled ? (
-                        <SvgLockClosed
-                          style={{
-                            width: 11,
-                            height: 11,
-                            color: theme.noticeTextLight,
-                            marginRight: 5,
-                          }}
-                        />
-                      ) : (
-                        <SvgCheckCircle1
-                          style={{
-                            width: 11,
-                            height: 11,
-                            color: isCleared
-                              ? theme.noticeTextLight
-                              : theme.pageTextSubdued,
-                            marginRight: 5,
-                          }}
-                        />
-                      )}
-                      {(isParent || isChild) && (
-                        <SvgSplit
-                          style={{ width: 12, height: 12, marginRight: 5 }}
-                        />
-                      )}
-                      <TextOneLine
+                    {isReconciled ? (
+                      <SvgLockClosed
                         style={{
-                          fontSize: 11,
-                          marginTop: 1,
-                          fontWeight: '400',
-                          color: prettyCategory
-                            ? theme.tableText
-                            : theme.menuItemTextSelected,
-                          fontStyle:
-                            specialCategory || !prettyCategory
-                              ? 'italic'
-                              : undefined,
-                          textAlign: 'left',
+                          width: 11,
+                          height: 11,
+                          color: theme.noticeTextLight,
+                          marginRight: 5,
                         }}
-                      >
-                        {prettyCategory || 'Uncategorized'}
-                      </TextOneLine>
-                    </View>
+                      />
+                    ) : (
+                      <SvgCheckCircle1
+                        style={{
+                          width: 11,
+                          height: 11,
+                          color: isCleared
+                            ? theme.noticeTextLight
+                            : theme.pageTextSubdued,
+                          marginRight: 5,
+                        }}
+                      />
+                    )}
+                    {(isParent || isChild) && (
+                      <SvgSplit
+                        style={{
+                          width: 12,
+                          height: 12,
+                          marginRight: 5,
+                        }}
+                      />
+                    )}
                     <TextOneLine
                       style={{
                         fontSize: 11,
                         marginTop: 1,
                         fontWeight: '400',
-                        color: theme.tableText,
+                        color: prettyCategory
+                          ? theme.tableText
+                          : theme.menuItemTextSelected,
+                        fontStyle:
+                          specialCategory || !prettyCategory
+                            ? 'italic'
+                            : undefined,
                         textAlign: 'left',
-                        opacity: 0.75,
                       }}
                     >
-                      {notes}
+                      {prettyCategory || 'Uncategorized'}
                     </TextOneLine>
                   </View>
                 )}
+                <TextOneLine
+                  style={{
+                    fontSize: 11,
+                    marginTop: 1,
+                    fontWeight: '400',
+                    color: theme.tableText,
+                    textAlign: 'left',
+                    opacity: 0.75,
+                  }}
+                >
+                  {notes}
+                </TextOneLine>
               </View>
               <View style={{ justifyContent: 'center' }}>
                 <Text
