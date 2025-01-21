@@ -50,10 +50,7 @@ export function createSpendingSpreadsheet({
       'make-filters-from-conditions',
       {
         conditions: conditions.filter(
-          cond =>
-            !cond.customName &&
-            cond.field === 'category' &&
-            !['contains', 'doesNotContain', 'matches'].includes(cond.op),
+          cond => !cond.customName && cond.field === 'category',
         ),
       },
     );
