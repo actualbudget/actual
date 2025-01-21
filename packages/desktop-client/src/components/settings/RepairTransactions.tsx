@@ -154,7 +154,7 @@ export function RepairTransactions() {
             locate and fix the amounts.
           </li>
           <li>
-            Check if you have any budget transfers that erroniously contain a
+            Check if you have any budget transfers that erroneous contain a
             category, and remove the category.
           </li>
         </ul>
