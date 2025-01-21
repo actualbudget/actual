@@ -18,14 +18,20 @@ function useRenderResults() {
   const { t } = useTranslation();
 
   function renderResults(results: Results) {
-    const { numBlankPayees, numCleared, numDeleted, mismatchedSplits } =
-      results;
+    const {
+      numBlankPayees,
+      numCleared,
+      numDeleted,
+      numTransfersFixed,
+      mismatchedSplits,
+    } = results;
     const result: string[] = [];
 
     if (
       numBlankPayees === 0 &&
       numCleared === 0 &&
       numDeleted === 0 &&
+      numTransfersFixed === 0 &&
       mismatchedSplits.length === 0
     ) {
       result.push(t('No split transactions found needing repair.'));
@@ -48,6 +54,13 @@ function useRenderResults() {
         result.push(
           t('Fixed {{count}} splits that weren’t properly deleted.', {
             count: numDeleted,
+          }),
+        );
+      }
+      if (numTransfersFixed > 0) {
+        result.push(
+          t('Fixed {{count}} transfers.', {
+            count: numTransfersFixed,
           }),
         );
       }
