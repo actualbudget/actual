@@ -3,6 +3,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 
 import { closeBudget, getUserData, signOut } from 'loot-core/client/actions';
+import { listen } from 'loot-core/src/platform/client/fetch';
 import { type RemoteFile, type SyncedLocalFile } from 'loot-core/types/file';
 import { type TransObjectLiteral } from 'loot-core/types/util';
 
@@ -52,13 +53,40 @@ export function LoggedInUser({
   const currentFile = remoteFiles.find(f => f.cloudFileId === cloudFileId);
   const hasSyncedPrefs = useSelector(state => state.prefs.synced);
 
-  useEffect(() => {
-    async function init() {
+  const initializeUserData = async () => {
+    try {
       await dispatch(getUserData());
+    } catch (error) {
+      console.error('Failed to initialize user data:', error);
+    } finally {
+      setLoading(false);
     }
+  };
 
-    init().then(() => setLoading(false));
+  useEffect(() => {
+    initializeUserData();
   }, []);
+
+  useEffect(() => {
+    return listen('sync-event', ({ type }) => {
+      if (type === 'start') {
+        setLoading(true);
+
+        return;
+      }
+
+      const shouldReinitialize =
+        userData &&
+        ((type === 'success' && userData.offline) ||
+          (type === 'error' && !userData.offline));
+
+      if (shouldReinitialize) {
+        initializeUserData();
+      } else {
+        setLoading(false);
+      }
+    });
+  }, [userData]);
 
   async function onCloseBudget() {
     await dispatch(closeBudget());

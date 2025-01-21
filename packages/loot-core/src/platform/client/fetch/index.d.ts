@@ -41,7 +41,8 @@ export type Unlisten = typeof unlisten;
 /** Mock functions */
 export function initServer(handlers: {
   query: (query: { table: string; selectExpressions: unknown }) => Promise<{
-    data: unknown;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    data: any;
     dependencies: string[];
   }>;
   getCell?: () => { value: number };

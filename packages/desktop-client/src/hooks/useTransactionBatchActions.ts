@@ -42,7 +42,7 @@ type BatchDeleteProps = {
 
 type BatchLinkScheduleProps = {
   ids: Array<TransactionEntity['id']>;
-  account?: AccountEntity;
+  account?: AccountEntity | undefined;
   onSuccess?: (
     ids: Array<TransactionEntity['id']>,
     schedule: ScheduleEntity,

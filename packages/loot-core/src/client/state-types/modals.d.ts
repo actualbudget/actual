@@ -148,7 +148,7 @@ type FinanceModals = {
   'category-autocomplete': {
     categoryGroups?: CategoryGroupEntity[];
     onSelect: (categoryId: string, categoryName: string) => void;
-    month?: string;
+    month?: string | undefined;
     showHiddenCategories?: boolean;
     onClose?: () => void;
   };
@@ -163,6 +163,8 @@ type FinanceModals = {
     onSelect: (payeeId: string) => void;
     onClose?: () => void;
   };
+
+  'payee-category-learning': null;
 
   'budget-summary': {
     month: string;
@@ -313,7 +315,7 @@ type FinanceModals = {
     confirmReason: string;
   };
   'confirm-transaction-delete': {
-    message?: string;
+    message?: string | undefined;
     onConfirm: () => void;
   };
   'edit-user': {

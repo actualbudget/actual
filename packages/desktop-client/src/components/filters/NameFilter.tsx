@@ -50,7 +50,7 @@ export function NameFilter({
           >
             <FormField style={{ flex: 1 }}>
               <FormLabel
-                title={t('Filter Name')}
+                title={t('Filter name')}
                 htmlFor="name-field"
                 style={{ userSelect: 'none' }}
               />

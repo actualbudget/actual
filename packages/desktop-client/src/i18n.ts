@@ -3,6 +3,8 @@ import { initReactI18next } from 'react-i18next';
 import i18n from 'i18next';
 import resourcesToBackend from 'i18next-resources-to-backend';
 
+import * as Platform from 'loot-core/client/platform';
+
 const languages = import.meta.glob(['/locale/*.json', '!/locale/*_old.json']);
 
 export const availableLanguages = Object.keys(languages).map(
@@ -23,7 +25,6 @@ i18n
   .use(initReactI18next)
   .use(resourcesToBackend(loadLanguage))
   .init({
-    // Set this to 'cimode' to see the exact keys without interpolation.
     lng: 'en',
 
     // allow keys to be phrases having `:`, `.`
@@ -42,7 +43,9 @@ i18n
 export const setI18NextLanguage = (language: string) => {
   if (!language) {
     // System default
-    setI18NextLanguage(navigator.language || 'en');
+    setI18NextLanguage(
+      Platform.isPlaywright ? 'cimode' : navigator.language || 'en',
+    );
     return;
   }
 

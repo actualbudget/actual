@@ -182,6 +182,11 @@ export function usePreviewTransactions(): UsePreviewTransactionsResult {
 
             if (parseDate(nextDate) > upcomingPeriodEnd) break;
 
+            if (dates.includes(nextDate)) {
+              day = parseDate(addDays(day, 1));
+              continue;
+            }
+
             dates.push(nextDate);
             day = parseDate(addDays(nextDate, 1));
           }
@@ -243,7 +248,7 @@ export function usePreviewTransactions(): UsePreviewTransactionsResult {
         if (!isUnmounted) {
           const withDefaults = newTrans.map(t => ({
             ...t,
-            category: statuses.get(t.schedule),
+            category: t.schedule != null ? statuses.get(t.schedule) : undefined,
             schedule: t.schedule,
             subtransactions: t.subtransactions?.map(
               (st: TransactionEntity) => ({

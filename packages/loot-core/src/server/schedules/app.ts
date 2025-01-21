@@ -9,12 +9,12 @@ import { currentDay, dayFromDate, parseDate } from '../../shared/months';
 import { q } from '../../shared/query';
 import {
   extractScheduleConds,
+  getDateWithSkippedWeekend,
   getHasTransactionsQuery,
+  getNextDate,
   getScheduledAmount,
   getStatus,
   recurConfigToRSchedule,
-  getNextDate,
-  getDateWithSkippedWeekend,
 } from '../../shared/schedules';
 import { Rule } from '../accounts/rules';
 import { addTransactions } from '../accounts/sync';
@@ -306,6 +306,8 @@ export async function updateSchedule({
 
     await db.updateWithSchema('schedules', schedule);
   });
+
+  return schedule.id;
 }
 
 export async function deleteSchedule({ id }) {
@@ -454,14 +456,12 @@ async function advanceSchedulesService(syncSuccess) {
       .select('value'),
   );
 
-  const upcomingLengthValue = upcomingLength[0]?.value ?? '7'; // Default to 7 days if not set
-
   for (const schedule of schedules) {
     const status = getStatus(
       schedule.next_date,
       schedule.completed,
       hasTrans.has(schedule.id),
-      upcomingLengthValue,
+      upcomingLength[0]?.value ?? '7',
     );
 
     if (status === 'paid') {
