@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { moveAccount } from 'loot-core/src/client/actions';
-import * as queries from 'loot-core/src/client/queries';
+import { moveAccount } from 'loot-core/client/accounts/accountsSlice';
+import * as queries from 'loot-core/client/queries';
 import { type AccountEntity } from 'loot-core/types/models';
 
 import { useAccounts } from '../../hooks/useAccounts';
@@ -64,7 +64,7 @@ export function Accounts() {
       targetIdToMove = idx < accounts.length ? accounts[idx].id : null;
     }
 
-    dispatch(moveAccount(id, targetIdToMove));
+    dispatch(moveAccount({ id, targetId: targetIdToMove as string }));
   }
 
   const onToggleClosedAccounts = () => {

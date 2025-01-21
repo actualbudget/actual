@@ -2,7 +2,7 @@ import React, { useCallback, useRef, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 
-import { unlinkAccount } from 'loot-core/client/actions';
+import { unlinkAccount } from 'loot-core/client/accounts/accountsSlice';
 import { type AccountEntity } from 'loot-core/types/models';
 
 import { authorizeBank } from '../../gocardless';
@@ -104,7 +104,7 @@ export function AccountSyncCheck() {
   const unlink = useCallback(
     (acc: AccountEntity) => {
       if (acc.id) {
-        dispatch(unlinkAccount(acc.id));
+        dispatch(unlinkAccount({ id: acc.id }));
       }
 
       setOpen(false);
