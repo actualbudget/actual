@@ -47,7 +47,7 @@ export const expect = baseExpect.extend({
       'data-theme',
       'midnight',
     );
-    await expect(locator).toHaveScreenshot(config);
+    await baseExpect(locator).toHaveScreenshot(config);
 
     // Switch back to lightmode
     await locator.evaluate(() => window.Actual.setTheme('auto'));
