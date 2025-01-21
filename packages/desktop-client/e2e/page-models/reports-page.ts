@@ -1,7 +1,12 @@
+import { type Locator, type Page } from '@playwright/test';
+
 import { CustomReportPage } from './custom-report-page';
 
 export class ReportsPage {
-  constructor(page) {
+  readonly page: Page;
+  readonly pageContent: Locator;
+
+  constructor(page: Page) {
     this.page = page;
     this.pageContent = page.getByTestId('reports-page');
   }

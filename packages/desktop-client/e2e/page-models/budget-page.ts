@@ -1,7 +1,14 @@
+import { type Locator, type Page } from '@playwright/test';
+
 import { AccountPage } from './account-page';
 
 export class BudgetPage {
-  constructor(page) {
+  readonly page: Page;
+  readonly budgetSummary: Locator;
+  readonly budgetTable: Locator;
+  readonly budgetTableTotals: Locator;
+
+  constructor(page: Page) {
     this.page = page;
 
     this.budgetSummary = page.getByTestId('budget-summary');
@@ -34,7 +41,7 @@ export class BudgetPage {
     await this.page.getByTestId('calendar-icon').first().click();
   }
 
-  async getBalanceForRow(idx) {
+  async getBalanceForRow(idx: number) {
     return Math.round(
       parseFloat(
         (
@@ -48,7 +55,7 @@ export class BudgetPage {
     );
   }
 
-  async getCategoryNameForRow(idx) {
+  async getCategoryNameForRow(idx: number) {
     return this.budgetTable
       .getByTestId('row')
       .nth(idx)
@@ -56,7 +63,7 @@ export class BudgetPage {
       .textContent();
   }
 
-  async clickOnSpentAmountForRow(idx) {
+  async clickOnSpentAmountForRow(idx: number) {
     await this.budgetTable
       .getByTestId('row')
       .nth(idx)
@@ -65,7 +72,7 @@ export class BudgetPage {
     return new AccountPage(this.page);
   }
 
-  async transferAllBalance(fromIdx, toIdx) {
+  async transferAllBalance(fromIdx: number, toIdx: number) {
     const toName = await this.getCategoryNameForRow(toIdx);
 
     await this.budgetTable

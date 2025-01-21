@@ -1,3 +1,5 @@
+import { type Locator, type Page } from '@playwright/test';
+
 import { MobileAccountPage } from './mobile-account-page';
 import { MobileAccountsPage } from './mobile-accounts-page';
 import { MobileBudgetPage } from './mobile-budget-page';
@@ -6,7 +8,13 @@ import { MobileTransactionEntryPage } from './mobile-transaction-entry-page';
 import { SettingsPage } from './settings-page';
 
 export class MobileNavigation {
-  constructor(page) {
+  readonly page: Page;
+  readonly heading: Locator;
+  readonly navbar: Locator;
+  readonly mainContentSelector: string;
+  readonly navbarSelector: string;
+
+  constructor(page: Page) {
     this.page = page;
     this.heading = page.getByRole('heading');
     this.navbar = page.getByRole('navigation');

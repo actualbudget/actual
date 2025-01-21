@@ -1,7 +1,13 @@
+import { type Locator, type Page } from '@playwright/test';
+
 import { MobileAccountPage } from './mobile-account-page';
 
 export class MobileAccountsPage {
-  constructor(page) {
+  readonly page: Page;
+  readonly accountList: Locator;
+  readonly accountListItems: Locator;
+
+  constructor(page: Page) {
     this.page = page;
 
     this.accountList = this.page.getByLabel('Account list');

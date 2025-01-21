@@ -1,5 +1,14 @@
+import { type Locator, type Page } from '@playwright/test';
+
 export class SettingsPage {
-  constructor(page) {
+  readonly page: Page;
+  readonly settings: Locator;
+  readonly exportDataButton: Locator;
+  readonly switchBudgetTypeButton: Locator;
+  readonly advancedSettingsButton: Locator;
+  readonly experimentalSettingsButton: Locator;
+
+  constructor(page: Page) {
     this.page = page;
     this.settings = page.getByTestId('settings');
     this.exportDataButton = this.settings.getByRole('button', {

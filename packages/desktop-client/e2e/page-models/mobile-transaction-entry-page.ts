@@ -1,7 +1,17 @@
+import { type Locator, type Page } from '@playwright/test';
+
 import { MobileAccountPage } from './mobile-account-page';
 
 export class MobileTransactionEntryPage {
-  constructor(page) {
+  readonly page: Page;
+  readonly header: Locator;
+  readonly amountField: Locator;
+  readonly add: Locator;
+  readonly transactionForm: Locator;
+  readonly footer: Locator;
+  readonly addTransactionButton: Locator;
+
+  constructor(page: Page) {
     this.page = page;
     this.header = page.getByRole('heading');
     this.transactionForm = page.getByTestId('transaction-form');
@@ -16,7 +26,7 @@ export class MobileTransactionEntryPage {
     await this.transactionForm.waitFor(options);
   }
 
-  async fillField(fieldLocator, content) {
+  async fillField(fieldLocator: Locator, content: string) {
     await fieldLocator.click();
     await this.page.locator('css=[role=combobox] input').fill(content);
     await this.page.keyboard.press('Enter');
