@@ -44,7 +44,7 @@ export function CellValue<
   const { fullSheetName } = useSheetName(binding);
   const sheetValue = useSheetValue(binding);
 
-  return children && children.length > 0 ? (
+  return children && React.Children.toArray(children).length ? (
     <>{children({ type, name: fullSheetName, value: sheetValue })}</>
   ) : (
     <CellValueText
