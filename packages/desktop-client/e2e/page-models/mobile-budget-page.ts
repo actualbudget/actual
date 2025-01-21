@@ -121,13 +121,19 @@ export class MobileBudgetPage {
       await this.page.waitForTimeout(1000);
     }
 
-    throw new Error('Budgeted/Spent columns could not be located on the page');
+    throw new Error('Budgeted/Spent columns could not be located on the page.');
   }
 
   async getSelectedMonth() {
-    return await this.heading
+    const selectedMonth = await this.heading
       .locator('[data-month]')
       .getAttribute('data-month');
+
+    if (!selectedMonth) {
+      throw new Error('Failed to get the selected month.');
+    }
+
+    return selectedMonth;
   }
 
   async openBudgetPageMenu() {
@@ -135,7 +141,11 @@ export class MobileBudgetPage {
   }
 
   async getCategoryGroupNameForRow(idx: number) {
-    return this.categoryGroupNames.nth(idx).textContent();
+    const groupNameText = await this.categoryGroupNames.nth(idx).textContent();
+    if (!groupNameText) {
+      throw new Error(`Failed to get category group name for row ${idx}.`);
+    }
+    return groupNameText;
   }
 
   #getButtonForCategoryGroup(categoryGroupName: string | RegExp) {
@@ -152,7 +162,11 @@ export class MobileBudgetPage {
   }
 
   async getCategoryNameForRow(idx: number) {
-    return this.categoryNames.nth(idx).textContent();
+    const categoryNameText = await this.categoryNames.nth(idx).textContent();
+    if (!categoryNameText) {
+      throw new Error(`Failed to get category name for row ${idx}.`);
+    }
+    return categoryNameText;
   }
 
   #getButtonForCategory(categoryName: string | RegExp) {
@@ -192,7 +206,7 @@ export class MobileBudgetPage {
     }
 
     throw new Error(
-      `${buttonType} button for category ${categoryName} could not be located on the page`,
+      `${buttonType} button for category ${categoryName} could not be located on the page.`,
     );
   }
 
@@ -228,7 +242,7 @@ export class MobileBudgetPage {
       return new BalanceMenuModal(this.page, this.page.getByRole('dialog'));
     } else {
       throw new Error(
-        `Balance button for category ${categoryName} not found or not visible`,
+        `Balance button for category ${categoryName} not found or not visible.`,
       );
     }
   }
@@ -262,7 +276,7 @@ export class MobileBudgetPage {
       currentMonth,
       maxAttempts,
       errorMessage:
-        'Failed to navigate to the previous month after maximum attempts',
+        'Failed to navigate to the previous month after maximum attempts.',
     });
   }
 
@@ -279,7 +293,7 @@ export class MobileBudgetPage {
       currentMonth,
       maxAttempts,
       errorMessage:
-        'Failed to navigate to the next month after maximum attempts',
+        'Failed to navigate to the next month after maximum attempts.',
     });
   }
 
@@ -299,7 +313,7 @@ export class MobileBudgetPage {
     }
 
     throw new Error(
-      'Neither “To Budget” nor “Overbudgeted” button could be located on the page',
+      'Neither “To Budget” nor “Overbudgeted” button could be located on the page.',
     );
   }
 
@@ -333,7 +347,7 @@ export class MobileBudgetPage {
     }
 
     throw new Error(
-      'None of “Saved”, “Projected savings”, or “Overspent” buttons could be located on the page',
+      'None of “Saved”, “Projected savings”, or “Overspent” buttons could be located on the page.',
     );
   }
 

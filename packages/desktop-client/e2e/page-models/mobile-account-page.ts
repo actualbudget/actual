@@ -34,7 +34,11 @@ export class MobileAccountPage {
    * Retrieve the balance of the account as a number
    */
   async getBalance() {
-    return parseInt(await this.balance.textContent(), 10);
+    const balanceText = await this.balance.textContent();
+    if (!balanceText) {
+      throw new Error('Failed to get balance.');
+    }
+    return parseInt(balanceText, 10);
   }
 
   /**

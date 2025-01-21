@@ -136,10 +136,8 @@ export class AccountPage {
   }
 
   _getTransactionDetails(row: Locator) {
-    const account = row.getByTestId('account');
-
     return {
-      ...(account ? { account } : {}),
+      account: row.getByTestId('account'),
       payee: row.getByTestId('payee'),
       notes: row.getByTestId('notes'),
       category: row.getByTestId('category'),
