@@ -1,7 +1,6 @@
 import { type Page } from '@playwright/test';
 
-import { test, expect } from '../playwright.config';
-
+import { expect, test } from './fixtures';
 import { ConfigurationPage } from './page-models/configuration-page';
 import { type CustomReportPage } from './page-models/custom-report-page';
 import { Navigation } from './page-models/navigation';

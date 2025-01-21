@@ -1,7 +1,6 @@
 import { type Page } from '@playwright/test';
 
-import { test, expect } from '../playwright.config';
-
+import { expect, test } from './fixtures';
 import { type AccountPage } from './page-models/account-page';
 import { ConfigurationPage } from './page-models/configuration-page';
 import { Navigation } from './page-models/navigation';
@@ -41,7 +40,7 @@ test.describe('Transactions', () => {
 
     test('by date', async () => {
       const filterTooltip = await accountPage.filterBy('Date');
-      await expect(filterTooltip.page).toMatchThemeScreenshots();
+      await expect(filterTooltip.locator).toMatchThemeScreenshots();
 
       // Open datepicker
       await page.keyboard.press('Space');
@@ -59,7 +58,7 @@ test.describe('Transactions', () => {
 
     test('by category', async () => {
       const filterTooltip = await accountPage.filterBy('Category');
-      await expect(filterTooltip.page).toMatchThemeScreenshots();
+      await expect(filterTooltip.locator).toMatchThemeScreenshots();
 
       // Type in the autocomplete box
       const autocomplete = page.getByTestId('autocomplete');

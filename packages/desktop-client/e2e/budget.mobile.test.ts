@@ -3,8 +3,7 @@ import { type Page } from '@playwright/test';
 import { amountToCurrency, currencyToAmount } from 'loot-core/shared/util';
 import * as monthUtils from 'loot-core/src/shared/months';
 
-import { test, expect } from '../playwright.config';
-
+import { expect, test } from './fixtures';
 import { ConfigurationPage } from './page-models/configuration-page';
 import { MobileNavigation } from './page-models/mobile-navigation';
 

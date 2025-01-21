@@ -2,8 +2,7 @@ import path from 'path';
 
 import { type Page } from '@playwright/test';
 
-import { test, expect } from '../playwright.config';
-
+import { expect, test } from './fixtures';
 import { AccountPage } from './page-models/account-page';
 import { ConfigurationPage } from './page-models/configuration-page';
 import { Navigation } from './page-models/navigation';
