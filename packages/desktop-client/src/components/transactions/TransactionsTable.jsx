@@ -1443,7 +1443,7 @@ const Transaction = memo(function Transaction({
                 ? 'Off budget'
                 : isBudgetTransfer
                   ? categoryId != null
-                    ? 'BROKEN: Duplicate to FIX'
+                    ? 'Needs Repair'
                     : 'Transfer'
                   : ''
           }
