@@ -21,7 +21,7 @@ import {
 import { useDateFormat } from '../../hooks/useDateFormat';
 import { usePayees } from '../../hooks/usePayees';
 import { useSelected, SelectedProvider } from '../../hooks/useSelected';
-import { useDispatch } from '../../redux';
+import { useDispatch, useSelector } from '../../redux';
 import { theme } from '../../style';
 import { AccountAutocomplete } from '../autocomplete/AccountAutocomplete';
 import { PayeeAutocomplete } from '../autocomplete/PayeeAutocomplete';
@@ -106,6 +106,7 @@ type ScheduleDetailsProps = {
 };
 
 export function ScheduleDetails({ id, transaction }: ScheduleDetailsProps) {
+  const locale = useSelector(state => state.app.locale);
   const { t } = useTranslation();
 
   const adding = id == null;
@@ -741,7 +742,7 @@ export function ScheduleDetails({ id, transaction }: ScheduleDetailsProps) {
                   >
                     {state.upcomingDates.map(date => (
                       <View key={date}>
-                        {monthUtils.format(date, `${dateFormat} EEEE`)}
+                        {monthUtils.format(date, `${dateFormat} EEEE`, locale)}
                       </View>
                     ))}
                   </Stack>

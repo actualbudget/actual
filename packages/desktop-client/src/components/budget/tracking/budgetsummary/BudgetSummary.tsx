@@ -22,11 +22,13 @@ import { BudgetMonthMenu } from './BudgetMonthMenu';
 import { ExpenseTotal } from './ExpenseTotal';
 import { IncomeTotal } from './IncomeTotal';
 import { Saved } from './Saved';
+import { useSelector } from '../../../../redux';
 
 type BudgetSummaryProps = {
   month?: string;
 };
 export function BudgetSummary({ month }: BudgetSummaryProps) {
+  const locale = useSelector(state => state.app.locale);
   const { t } = useTranslation();
   const {
     currentMonth,
@@ -51,7 +53,7 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
     ? SvgArrowButtonDown1
     : SvgArrowButtonUp1;
 
-  const displayMonth = monthUtils.format(month, 'MMMM ‘yy');
+  const displayMonth = monthUtils.format(month, 'MMMM ‘yy', locale);
 
   return (
     <View
@@ -120,7 +122,7 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
               textDecorationSkip: 'ink',
             })}
           >
-            {monthUtils.format(month, 'MMMM')}
+            {monthUtils.format(month, 'MMMM', locale)}
           </div>
 
           <View

@@ -15,7 +15,7 @@ import { useAccounts } from '../../../hooks/useAccounts';
 import { useFilters } from '../../../hooks/useFilters';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { useSyncedPref } from '../../../hooks/useSyncedPref';
-import { useDispatch } from '../../../redux';
+import { useDispatch, useSelector } from '../../../redux';
 import { theme, styles } from '../../../style';
 import { Button } from '../../common/Button2';
 import { Paragraph } from '../../common/Paragraph';
@@ -53,6 +53,7 @@ type NetWorthInnerProps = {
 };
 
 function NetWorthInner({ widget }: NetWorthInnerProps) {
+  const locale = useSelector(state => state.app.locale);
   const dispatch = useDispatch();
   const { t } = useTranslation();
 
@@ -79,7 +80,7 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
   const [mode, setMode] = useState(initialMode);
 
   const reportParams = useMemo(
-    () => netWorthSpreadsheet(start, end, accounts, conditions, conditionsOp),
+    () => netWorthSpreadsheet(start, end, accounts, conditions, conditionsOp, locale),
     [start, end, accounts, conditions, conditionsOp],
   );
   const data = useReport('net_worth', reportParams);
@@ -103,7 +104,7 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
         .rangeInclusive(earliestMonth, monthUtils.currentMonth())
         .map(month => ({
           name: month,
-          pretty: monthUtils.format(month, 'MMMM, yyyy'),
+          pretty: monthUtils.format(month, 'MMMM, yyyy', locale),
         }))
         .reverse();
 

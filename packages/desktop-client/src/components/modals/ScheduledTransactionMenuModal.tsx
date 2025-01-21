@@ -19,6 +19,7 @@ import {
 } from '../common/Modal';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
+import { useSelector } from '../../redux';
 
 type ScheduledTransactionMenuModalProps = ScheduledTransactionMenuProps;
 
@@ -27,6 +28,7 @@ export function ScheduledTransactionMenuModal({
   onSkip,
   onPost,
 }: ScheduledTransactionMenuModalProps) {
+  const locale = useSelector(state => state.app.locale);
   const { t } = useTranslation();
   const defaultMenuItemStyle: CSSProperties = {
     ...styles.mobileMenuItem,
@@ -68,7 +70,7 @@ export function ScheduledTransactionMenuModal({
               {t('Scheduled date')}
             </Text>
             <Text style={{ fontSize: 17, fontWeight: 700 }}>
-              {format(schedule?.next_date || '', 'MMMM dd, yyyy')}
+              {format(schedule?.next_date || '', 'MMMM dd, yyyy', locale)}
             </Text>
           </View>
           <ScheduledTransactionMenu

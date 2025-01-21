@@ -60,6 +60,7 @@ import { createCustomSpreadsheet } from '../spreadsheets/custom-spreadsheet';
 import { createGroupedSpreadsheet } from '../spreadsheets/grouped-spreadsheet';
 import { useReport } from '../useReport';
 import { fromDateRepr } from '../util';
+import { useSelector } from '../../../redux';
 
 /**
  * Transform `selectedCategories` into `conditions`.
@@ -120,6 +121,7 @@ type CustomReportInnerProps = {
 };
 
 function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
+  const locale = useSelector(state => state.app.locale);
   const { t } = useTranslation();
   const categories = useCategories();
   const { isNarrowWidth } = useResponsive();
@@ -316,7 +318,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
           name: inter,
           pretty: monthUtils.format(
             inter,
-            ReportOptions.intervalFormat.get(interval) || '',
+            ReportOptions.intervalFormat.get(interval) || '', locale
           ),
         }))
         .reverse();

@@ -19,12 +19,14 @@ import { useEnvelopeBudget } from '../EnvelopeBudgetContext';
 import { BudgetMonthMenu } from './BudgetMonthMenu';
 import { ToBudget } from './ToBudget';
 import { TotalsList } from './TotalsList';
+import { useSelector } from '../../../../redux';
 
 type BudgetSummaryProps = {
   month: string;
   isGoalTemplatesEnabled?: boolean;
 };
 export function BudgetSummary({ month }: BudgetSummaryProps) {
+  const locale = useSelector(state => state.app.locale);
   const {
     currentMonth,
     summaryCollapsed: collapsed,
@@ -44,13 +46,13 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
     setMenuOpen(false);
   }
 
-  const prevMonthName = monthUtils.format(monthUtils.prevMonth(month), 'MMM');
+  const prevMonthName = monthUtils.format(monthUtils.prevMonth(month), 'MMM', locale);
 
   const ExpandOrCollapseIcon = collapsed
     ? SvgArrowButtonDown1
     : SvgArrowButtonUp1;
 
-  const displayMonth = monthUtils.format(month, 'MMMM ‘yy');
+  const displayMonth = monthUtils.format(month, 'MMMM ‘yy', locale);
   const { t } = useTranslation();
 
   return (
@@ -124,7 +126,7 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
               currentMonth === month && { fontWeight: 'bold' },
             ])}
           >
-            {monthUtils.format(month, 'MMMM')}
+            {monthUtils.format(month, 'MMMM', locale)}
           </div>
 
           <View

@@ -47,7 +47,7 @@ import {
   SvgCheveronDown,
   SvgCheveronUp,
 } from '../../../icons/v1';
-import { useDispatch } from '../../../redux';
+import { useDispatch, useSelector } from '../../../redux';
 import { styles, theme } from '../../../style';
 import { Button } from '../../common/Button2';
 import { View } from '../../common/View';
@@ -95,6 +95,7 @@ type CalendarInnerProps = {
 };
 
 function CalendarInner({ widget, parameters }: CalendarInnerProps) {
+  const locale = useSelector(state => state.app.locale);
   const { t } = useTranslation();
   const [initialStart, initialEnd, initialMode] = calculateTimeRange(
     widget?.meta?.timeFrame,
@@ -266,7 +267,7 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
           .rangeInclusive(earliestMonth, monthUtils.currentMonth())
           .map(month => ({
             name: month,
-            pretty: monthUtils.format(month, 'MMMM, yyyy'),
+            pretty: monthUtils.format(month, 'MMMM, yyyy', locale),
           }))
           .reverse();
 

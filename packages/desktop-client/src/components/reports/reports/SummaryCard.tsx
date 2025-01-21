@@ -16,6 +16,7 @@ import { calculateTimeRange } from '../reportRanges';
 import { summarySpreadsheet } from '../spreadsheets/summary-spreadsheet';
 import { SummaryNumber } from '../SummaryNumber';
 import { useReport } from '../useReport';
+import { useSelector } from '../../../redux';
 
 type SummaryCardProps = {
   widgetId: string;
@@ -32,6 +33,7 @@ export function SummaryCard({
   onMetaChange,
   onRemove,
 }: SummaryCardProps) {
+  const locale = useSelector(state => state.app.locale);
   const { t } = useTranslation();
   const [start, end] = calculateTimeRange(meta?.timeFrame, {
     start: monthUtils.dayFromDate(monthUtils.currentMonth()),
@@ -62,8 +64,9 @@ export function SummaryCard({
         meta?.conditions,
         meta?.conditionsOp,
         content,
+        locale
       ),
-    [start, end, meta?.conditions, meta?.conditionsOp, content],
+    [start, end, meta?.conditions, meta?.conditionsOp, content, locale],
   );
 
   const data = useReport('summary', params);

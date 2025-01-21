@@ -18,6 +18,7 @@ import { View } from '../common/View';
 import { PrivacyFilter } from '../PrivacyFilter';
 
 import { ReportOptions } from './ReportOptions';
+import { useSelector } from '../../redux';
 
 type ReportSummaryProps = {
   startDate: string;
@@ -36,6 +37,7 @@ export function ReportSummary({
   interval,
   intervalsCount,
 }: ReportSummaryProps) {
+  const locale = useSelector(state => state.app.locale);
   const { t } = useTranslation();
   const net =
     balanceTypeOp === 'netAssets'
@@ -71,20 +73,20 @@ export function ReportSummary({
         >
           {monthUtils.format(
             startDate,
-            ReportOptions.intervalFormat.get(interval) || '',
+            ReportOptions.intervalFormat.get(interval) || '', locale
           )}
           {monthUtils.format(
             startDate,
-            ReportOptions.intervalFormat.get(interval) || '',
+            ReportOptions.intervalFormat.get(interval) || '', locale
           ) !==
             monthUtils.format(
               endDate,
-              ReportOptions.intervalFormat.get(interval) || '',
+              ReportOptions.intervalFormat.get(interval) || '', locale
             ) &&
-            ' to ' +
+            ` ${t('to')} ` +
               monthUtils.format(
                 endDate,
-                ReportOptions.intervalFormat.get(interval) || '',
+                ReportOptions.intervalFormat.get(interval) || '', locale
               )}
         </Text>
       </View>

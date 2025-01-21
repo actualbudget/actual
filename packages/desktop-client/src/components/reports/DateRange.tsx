@@ -9,6 +9,7 @@ import { theme } from '../../style';
 import { styles } from '../../style/styles';
 import { Block } from '../common/Block';
 import { Text } from '../common/Text';
+import { useSelector } from '../../redux';
 
 type DateRangeProps = {
   start: string;
@@ -26,6 +27,7 @@ function checkDate(date: string) {
 }
 
 export function DateRange({ start, end, type }: DateRangeProps): ReactElement {
+  const locale = useSelector(state => state.app.locale);
   const checkStart = checkDate(start);
   const checkEnd = checkDate(end);
 
@@ -42,8 +44,8 @@ export function DateRange({ start, end, type }: DateRangeProps): ReactElement {
     );
   }
 
-  const formattedStartDate = d.format(startDate, 'MMM yyyy');
-  const formattedEndDate = d.format(endDate, 'MMM yyyy');
+  const formattedStartDate = d.format(startDate, 'MMM yyyy', { locale });
+  const formattedEndDate = d.format(endDate, 'MMM yyyy', { locale });
   let typeOrFormattedEndDate: string;
 
   if (type && ['budget', 'average'].includes(type)) {
@@ -79,7 +81,7 @@ export function DateRange({ start, end, type }: DateRangeProps): ReactElement {
       </div>
     );
   } else {
-    content = d.format(endDate, 'MMMM yyyy');
+    content = d.format(endDate, 'MMMM yyyy', { locale });
   }
 
   return <Block style={{ color: theme.pageTextSubdued }}>{content}</Block>;

@@ -22,7 +22,7 @@ import { SvgEquals } from '../../../icons/v1';
 import { SvgCloseParenthesis } from '../../../icons/v2/CloseParenthesis';
 import { SvgOpenParenthesis } from '../../../icons/v2/OpenParenthesis';
 import { SvgSum } from '../../../icons/v2/Sum';
-import { useDispatch } from '../../../redux';
+import { useDispatch, useSelector } from '../../../redux';
 import { theme } from '../../../style';
 import { Button } from '../../common/Button2';
 import { Text } from '../../common/Text';
@@ -65,6 +65,7 @@ type SummaryInnerProps = {
 type FilterObject = ReturnType<typeof useFilters>;
 
 function SummaryInner({ widget }: SummaryInnerProps) {
+  const locale = useSelector(state => state.app.locale);
   const { t } = useTranslation();
   const [initialStart, initialEnd, initialMode] = calculateTimeRange(
     widget?.meta?.timeFrame,
@@ -121,6 +122,7 @@ function SummaryInner({ widget }: SummaryInnerProps) {
         dividendFilters.conditions,
         dividendFilters.conditionsOp,
         content,
+        locale
       ),
     [
       start,
@@ -128,6 +130,7 @@ function SummaryInner({ widget }: SummaryInnerProps) {
       dividendFilters.conditions,
       dividendFilters.conditionsOp,
       content,
+      locale
     ],
   );
 
@@ -172,7 +175,7 @@ function SummaryInner({ widget }: SummaryInnerProps) {
         .rangeInclusive(earliestMonth, monthUtils.currentMonth())
         .map(month => ({
           name: month,
-          pretty: monthUtils.format(month, 'MMMM, yyyy'),
+          pretty: monthUtils.format(month, 'MMMM, yyyy', locale),
         }))
         .reverse();
 

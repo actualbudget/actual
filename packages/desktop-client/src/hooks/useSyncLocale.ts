@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
-import { useDispatch } from 'react-redux';
 import { useGlobalPref } from './useGlobalPref';
 import { fetchLocale } from 'loot-core/client/app/appSlice';
+import { useDispatch } from '../redux';
 
 export const useSyncLocale = () => {
   const dispatch = useDispatch();

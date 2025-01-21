@@ -18,7 +18,7 @@ import {
 import { useFilters } from '../../../hooks/useFilters';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { useSyncedPref } from '../../../hooks/useSyncedPref';
-import { useDispatch } from '../../../redux';
+import { useDispatch, useSelector } from '../../../redux';
 import { theme } from '../../../style';
 import { AlignedText } from '../../common/AlignedText';
 import { Block } from '../../common/Block';
@@ -64,6 +64,7 @@ type CashFlowInnerProps = {
 };
 
 function CashFlowInner({ widget }: CashFlowInnerProps) {
+  const locale = useSelector(state => state.app.locale);
   const dispatch = useDispatch();
   const { t } = useTranslation();
 
@@ -104,8 +105,8 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
   });
 
   const params = useMemo(
-    () => cashFlowByDate(start, end, isConcise, conditions, conditionsOp),
-    [start, end, isConcise, conditions, conditionsOp],
+    () => cashFlowByDate(start, end, isConcise, conditions, conditionsOp, locale),
+    [start, end, isConcise, conditions, conditionsOp, locale],
   );
   const data = useReport('cash_flow', params);
 
@@ -120,7 +121,7 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
         .rangeInclusive(earliestMonth, monthUtils.currentMonth())
         .map(month => ({
           name: month,
-          pretty: monthUtils.format(month, 'MMMM, yyyy'),
+          pretty: monthUtils.format(month, 'MMMM, yyyy', locale),
         }))
         .reverse();
 

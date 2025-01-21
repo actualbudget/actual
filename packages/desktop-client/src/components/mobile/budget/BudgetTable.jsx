@@ -30,7 +30,7 @@ import {
   SvgCheveronRight,
 } from '../../../icons/v1';
 import { SvgViewShow } from '../../../icons/v2';
-import { useDispatch } from '../../../redux';
+import { useDispatch, useSelector } from '../../../redux';
 import { theme, styles } from '../../../style';
 import { BalanceWithCarryover } from '../../budget/BalanceWithCarryover';
 import { makeAmountGrey, makeBalanceAmountStyle } from '../../budget/util';
@@ -1973,6 +1973,7 @@ function MonthSelector({
   onPrevMonth,
   onNextMonth,
 }) {
+  const locale = useSelector(state => state.app.locale);
   const { t } = useTranslation();
   const prevEnabled = month > monthBounds.start;
   const nextEnabled = month < monthUtils.subMonths(monthBounds.end, 1);
@@ -2017,7 +2018,7 @@ function MonthSelector({
         data-month={month}
       >
         <Text style={styles.underlinedText}>
-          {monthUtils.format(month, 'MMMM ‘yy')}
+          {monthUtils.format(month, 'MMMM ‘yy', locale)}
         </Text>
       </Button>
       <Button

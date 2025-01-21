@@ -21,6 +21,7 @@ import { ReportCardName } from '../ReportCardName';
 import { calculateTimeRange } from '../reportRanges';
 import { createSpreadsheet as netWorthSpreadsheet } from '../spreadsheets/net-worth-spreadsheet';
 import { useReport } from '../useReport';
+import { useSelector } from '../../../redux';
 
 type NetWorthCardProps = {
   widgetId: string;
@@ -39,6 +40,7 @@ export function NetWorthCard({
   onMetaChange,
   onRemove,
 }: NetWorthCardProps) {
+  const locale = useSelector(state => state.app.locale);
   const { t } = useTranslation();
   const { isNarrowWidth } = useResponsive();
 
@@ -57,8 +59,9 @@ export function NetWorthCard({
         accounts,
         meta?.conditions,
         meta?.conditionsOp,
+        locale,
       ),
-    [start, end, accounts, meta?.conditions, meta?.conditionsOp],
+    [start, end, accounts, meta?.conditions, meta?.conditionsOp, locale],
   );
   const data = useReport('net_worth', params);
 

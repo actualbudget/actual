@@ -17,7 +17,7 @@ import {
 
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import { useNavigate } from '../../../hooks/useNavigate';
-import { useDispatch } from '../../../redux';
+import { useDispatch, useSelector } from '../../../redux';
 import { TextOneLine } from '../../common/TextOneLine';
 import { View } from '../../common/View';
 import { MobilePageHeader, Page } from '../../Page';
@@ -34,6 +34,7 @@ export function CategoryTransactions({
   category,
   month,
 }: CategoryTransactionsProps) {
+  const locale = useSelector(state => state.app.locale);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -108,7 +109,7 @@ export function CategoryTransactions({
             <View>
               <TextOneLine>{category.name}</TextOneLine>
               <TextOneLine>
-                ({monthUtils.format(month, 'MMMM ‘yy')})
+                ({monthUtils.format(month, 'MMMM ‘yy', locale)})
               </TextOneLine>
             </View>
           }

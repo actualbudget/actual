@@ -16,6 +16,7 @@ import { Button } from '../common/Button2';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { View } from '../common/View';
 import { Notes } from '../Notes';
+import { useSelector } from '../../redux';
 
 type TrackingBudgetMonthMenuModalProps = {
   month: string;
@@ -28,6 +29,7 @@ export function TrackingBudgetMonthMenuModal({
   onBudgetAction,
   onEditNotes,
 }: TrackingBudgetMonthMenuModalProps) {
+  const locale = useSelector(state => state.app.locale);
   const { t } = useTranslation();
   const originalNotes = useNotes(`budget-${month}`);
   const { showUndoNotification } = useUndo();
@@ -57,7 +59,7 @@ export function TrackingBudgetMonthMenuModal({
     setShowMore(!showMore);
   };
 
-  const displayMonth = monthUtils.format(month, 'MMMM ‘yy');
+  const displayMonth = monthUtils.format(month, 'MMMM ‘yy', locale);
 
   return (
     <Modal

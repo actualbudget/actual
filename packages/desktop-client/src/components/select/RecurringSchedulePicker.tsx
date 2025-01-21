@@ -32,6 +32,7 @@ import { View } from '../common/View';
 import { Checkbox } from '../forms';
 
 import { DateSelect } from './DateSelect';
+import { useSelector } from '../../redux';
 
 // ex: There is no 6th Friday of the Month
 const MAX_DAY_OF_WEEK_INTERVAL = 5;
@@ -235,6 +236,7 @@ function reducer(state: ReducerState, action: ReducerAction): ReducerState {
 }
 
 function SchedulePreview({ previewDates }: { previewDates: Date[] }) {
+  const locale = useSelector(state => state.app.locale);
   const dateFormat = (useDateFormat() || 'MM/dd/yyyy')
     .replace('MM', 'M')
     .replace('dd', 'd');
@@ -254,7 +256,7 @@ function SchedulePreview({ previewDates }: { previewDates: Date[] }) {
           {previewDates.map((d, idx) => (
             <View key={idx}>
               <Text>{monthUtils.format(d, dateFormat)}</Text>
-              <Text>{monthUtils.format(d, 'EEEE')}</Text>
+              <Text>{monthUtils.format(d, 'EEEE', locale)}</Text>
             </View>
           ))}
         </Stack>

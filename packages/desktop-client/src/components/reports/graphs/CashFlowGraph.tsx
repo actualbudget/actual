@@ -26,6 +26,7 @@ import { theme } from '../../../style';
 import { AlignedText } from '../../common/AlignedText';
 import { chartTheme } from '../chart-theme';
 import { Container } from '../Container';
+import { useSelector } from '../../../redux';
 
 const MAX_BAR_SIZE = 50;
 const ANIMATION_DURATION = 1000; // in ms
@@ -35,6 +36,7 @@ type CustomTooltipProps = TooltipProps<number, 'date'> & {
 };
 
 function CustomTooltip({ active, payload, isConcise }: CustomTooltipProps) {
+  const locale = useSelector(state => state.app.locale);
   const { t } = useTranslation();
 
   if (!active || !payload || !Array.isArray(payload) || !payload[0]) {
@@ -57,7 +59,7 @@ function CustomTooltip({ active, payload, isConcise }: CustomTooltipProps) {
       <div>
         <div style={{ marginBottom: 10 }}>
           <strong>
-            {d.format(data.date, isConcise ? 'MMMM yyyy' : 'MMMM dd, yyyy')}
+            {d.format(data.date, isConcise ? 'MMMM yyyy' : 'MMMM dd, yyyy', { locale })}
           </strong>
         </div>
         <div style={{ lineHeight: 1.5 }}>
@@ -108,6 +110,7 @@ export function CashFlowGraph({
   showBalance = true,
   style,
 }: CashFlowGraphProps) {
+  const locale = useSelector(state => state.app.locale);
   const privacyMode = usePrivacyMode();
   const [yAxisIsHovered, setYAxisIsHovered] = useState(false);
 
@@ -135,7 +138,7 @@ export function CashFlowGraph({
               tick={{ fill: theme.reportsLabel }}
               tickFormatter={x => {
                 // eslint-disable-next-line rulesdir/typography
-                return d.format(x, isConcise ? "MMM ''yy" : 'MMM d');
+                return d.format(x, isConcise ? "MMM ''yy" : 'MMM d', { locale });
               }}
               minTickGap={50}
             />
@@ -153,7 +156,7 @@ export function CashFlowGraph({
             <Tooltip
               labelFormatter={x => {
                 // eslint-disable-next-line rulesdir/typography
-                return d.format(x, isConcise ? "MMM ''yy" : 'MMM d');
+                return d.format(x, isConcise ? "MMM ''yy" : 'MMM d', { locale });
               }}
               content={<CustomTooltip isConcise={isConcise} />}
               isAnimationActive={false}

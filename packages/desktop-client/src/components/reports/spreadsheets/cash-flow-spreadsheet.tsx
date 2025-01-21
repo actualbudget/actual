@@ -72,6 +72,7 @@ export function cashFlowByDate(
   isConcise: boolean,
   conditions: RuleConditionEntity[] = [],
   conditionsOp: 'and' | 'or',
+  locale: Locale,
 ) {
   const start = monthUtils.firstDayOfMonth(startMonth);
   const end = monthUtils.lastDayOfMonth(endMonth);
@@ -132,7 +133,7 @@ export function cashFlowByDate(
         makeQuery().filter({ amount: { $lt: 0 } }),
       ],
       data => {
-        setData(recalculate(data, start, fixedEnd, isConcise));
+        setData(recalculate(data, start, fixedEnd, isConcise, locale));
       },
     );
   };
@@ -147,6 +148,7 @@ function recalculate(
   start: string,
   end: string,
   isConcise: boolean,
+  locale: Locale,
 ) {
   const [startingBalance, income, expense] = data;
   const convIncome = income.map(t => {
@@ -205,7 +207,7 @@ function recalculate(
         <div>
           <div style={{ marginBottom: 10 }}>
             <strong>
-              {d.format(x, isConcise ? 'MMMM yyyy' : 'MMMM d, yyyy')}
+              {d.format(x, isConcise ? 'MMMM yyyy' : 'MMMM d, yyyy', { locale })}
             </strong>
           </div>
           <div style={{ lineHeight: 1.5 }}>

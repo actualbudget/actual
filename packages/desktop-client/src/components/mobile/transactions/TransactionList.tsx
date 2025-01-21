@@ -28,7 +28,7 @@ import { useUndo } from '../../../hooks/useUndo';
 import { AnimatedLoading } from '../../../icons/AnimatedLoading';
 import { SvgDelete } from '../../../icons/v0';
 import { SvgDotsHorizontalTriple } from '../../../icons/v1';
-import { useDispatch } from '../../../redux';
+import { useDispatch, useSelector } from '../../../redux';
 import { styles, theme } from '../../../style';
 import { Button } from '../../common/Button2';
 import { Menu, type MenuItemObject } from '../../common/Menu';
@@ -79,6 +79,7 @@ export function TransactionList({
   isLoadingMore,
   onLoadMore,
 }: TransactionListProps) {
+  const locale = useSelector(state => state.app.locale);
   const { t } = useTranslation();
   const sections = useMemo(() => {
     // Group by date. We can assume transactions is ordered
@@ -169,7 +170,7 @@ export function TransactionList({
                 zIndex: 10,
               }}
             >
-              {monthUtils.format(section.date, 'MMMM dd, yyyy')}
+              {monthUtils.format(section.date, 'MMMM dd, yyyy', locale)}
             </Header>
             <Collection
               items={section.transactions.filter(

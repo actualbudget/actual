@@ -24,6 +24,7 @@ import {
   validateEnd,
   validateStart,
 } from './reportRanges';
+import { useSelector } from '../../redux';
 
 type HeaderProps = {
   start: TimeFrame['start'];
@@ -66,6 +67,7 @@ export function Header({
   onConditionsOpChange,
   children,
 }: HeaderProps) {
+  const locale = useSelector(state => state.app.locale);
   const { t } = useTranslation();
   const { isNarrowWidth } = useResponsive();
   function convertToMonth(
@@ -122,7 +124,7 @@ export function Header({
                 )
               }
               value={start}
-              defaultLabel={monthUtils.format(start, 'MMMM, yyyy')}
+              defaultLabel={monthUtils.format(start, 'MMMM, yyyy', locale)}
               options={allMonths.map(({ name, pretty }) => [name, pretty])}
             />
             <View>{t('to')}</View>
