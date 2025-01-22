@@ -677,6 +677,43 @@ describe('Rule', () => {
       );
     });
 
+    test('remainder rounds correctly and only if necessary', () => {
+      const rule = new Rule({
+        conditionsOp: 'and',
+        conditions: [{ op: 'is', field: 'imported_payee', value: 'James' }],
+        actions: [
+          {
+            op: 'set-split-amount',
+            field: 'amount',
+            options: { splitIndex: 1, method: 'remainder' },
+          },
+          {
+            op: 'set-split-amount',
+            field: 'amount',
+            options: { splitIndex: 2, method: 'remainder' },
+          },
+        ],
+      });
+
+      expect(
+        rule.exec({ imported_payee: 'James', amount: -2397 }),
+      ).toMatchObject({
+        subtransactions: [{ amount: -1198 }, { amount: -1199 }],
+      });
+
+      expect(rule.exec({ imported_payee: 'James', amount: 123 })).toMatchObject(
+        {
+          subtransactions: [{ amount: 62 }, { amount: 61 }],
+        },
+      );
+
+      expect(rule.exec({ imported_payee: 'James', amount: 100 })).toMatchObject(
+        {
+          subtransactions: [{ amount: 50 }, { amount: 50 }],
+        },
+      );
+    });
+
     test('generate errors when fixed amounts exceed the total', () => {
       expect(
         fixedAmountRule.exec({ imported_payee: 'James', amount: 100 }),

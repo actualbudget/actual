@@ -16,18 +16,19 @@ import { v4 as uuidv4 } from 'uuid';
 import { unlinkAccount } from 'loot-core/client/accounts/accountsSlice';
 import {
   addNotification,
-  createPayee,
-  getPayees,
-  initiallyLoadPayees,
-  markAccountRead,
   openAccountCloseModal,
   pushModal,
-  reopenAccount,
   replaceModal,
-  syncAndDownload,
+} from 'loot-core/client/actions';
+import { syncAndDownload } from 'loot-core/client/app/appSlice';
+import {
+  createPayee,
+  initiallyLoadPayees,
+  markAccountRead,
+  reopenAccount,
   updateAccount,
   updateNewTransactions,
-} from 'loot-core/client/actions';
+} from 'loot-core/client/queries/queriesSlice';
 import { type AppDispatch } from 'loot-core/client/store';
 import { validForTransfer } from 'loot-core/client/transfer';
 import { type UndoState } from 'loot-core/server/undo';
@@ -59,7 +60,6 @@ import {
   type NewRuleEntity,
   type RuleActionEntity,
   type AccountEntity,
-  type PayeeEntity,
   type RuleConditionEntity,
   type TransactionEntity,
   type TransactionFilterEntity,
@@ -153,11 +153,11 @@ function EmptyMessage({ onAdd }: EmptyMessageProps) {
 }
 
 type AllTransactionsProps = {
-  account?: AccountEntity;
+  account?: AccountEntity | undefined;
   transactions: TransactionEntity[];
   balances: Record<string, { balance: number }> | null;
-  showBalances?: boolean;
-  filtered?: boolean;
+  showBalances?: boolean | undefined;
+  filtered?: boolean | undefined;
   children: (
     transactions: TransactionEntity[],
     balances: Record<string, { balance: number }> | null,
@@ -265,7 +265,12 @@ function getField(field?: string) {
 }
 
 type AccountInternalProps = {
-  accountId?: AccountEntity['id'] | 'onbudget' | 'offbudget' | 'uncategorized';
+  accountId?:
+    | AccountEntity['id']
+    | 'onbudget'
+    | 'offbudget'
+    | 'uncategorized'
+    | undefined;
   filterConditions: RuleConditionEntity[];
   showBalances?: boolean;
   setShowBalances: (newValue: boolean) => void;
@@ -280,7 +285,7 @@ type AccountInternalProps = {
   newTransactions: Array<TransactionEntity['id']>;
   matchedTransactions: Array<TransactionEntity['id']>;
   splitsExpandedDispatch: ReturnType<typeof useSplitsExpanded>['dispatch'];
-  expandSplits?: boolean;
+  expandSplits?: boolean | undefined;
   savedFilters: TransactionFilterEntity[];
   onBatchEdit: ReturnType<typeof useTransactionBatchActions>['onBatchEdit'];
   onBatchDuplicate: ReturnType<
@@ -306,7 +311,7 @@ type AccountInternalProps = {
 type AccountInternalState = {
   search: string;
   filterConditions: ConditionEntity[];
-  filterId?: SavedFilter;
+  filterId?: SavedFilter | undefined;
   filterConditionsOp: 'and' | 'or';
   loading: boolean;
   workingHard: boolean;
@@ -314,10 +319,10 @@ type AccountInternalState = {
   transactions: TransactionEntity[];
   transactionCount: number;
   transactionsFiltered?: boolean;
-  showBalances?: boolean;
+  showBalances?: boolean | undefined;
   balances: Record<string, { balance: number }> | null;
-  showCleared?: boolean;
-  prevShowCleared?: boolean;
+  showCleared?: boolean | undefined;
+  prevShowCleared?: boolean | undefined;
   showReconciled: boolean;
   editingName: boolean;
   nameError: string;
@@ -326,8 +331,8 @@ type AccountInternalState = {
   sort: {
     ascDesc: 'asc' | 'desc';
     field: string;
-    prevField?: string;
-    prevAscDesc?: 'asc' | 'desc';
+    prevField?: string | undefined;
+    prevAscDesc?: 'asc' | 'desc' | undefined;
   } | null;
   filteredAmount: null | number;
 };
@@ -480,7 +485,11 @@ class AccountInternal extends PureComponent<
   }
 
   fetchAllIds = async () => {
-    const { data } = await runQuery(this.paged?.query.select('id'));
+    if (!this.paged) {
+      return [];
+    }
+
+    const { data } = await runQuery(this.paged.query.select('id'));
     // Remember, this is the `grouped` split type so we need to deal
     // with the `subtransactions` property
     return data.reduce((arr: string[], t: TransactionEntity) => {
@@ -501,7 +510,7 @@ class AccountInternal extends PureComponent<
     else this.updateQuery(query);
 
     if (this.props.accountId) {
-      this.props.dispatch(markAccountRead(this.props.accountId));
+      this.props.dispatch(markAccountRead({ id: this.props.accountId }));
     }
   };
 
@@ -624,7 +633,7 @@ class AccountInternal extends PureComponent<
     const account = this.props.accounts.find(acct => acct.id === accountId);
 
     await this.props.dispatch(
-      syncAndDownload(account ? account.id : undefined),
+      syncAndDownload({ accountId: account ? account.id : undefined }),
     );
   };
 
@@ -633,10 +642,10 @@ class AccountInternal extends PureComponent<
     const account = this.props.accounts.find(acct => acct.id === accountId);
 
     if (account) {
-      const res = await window.Actual?.openFileDialog({
+      const res = await window.Actual.openFileDialog({
         filters: [
           {
-            name: t('Financial Files'),
+            name: t('Financial files'),
             extensions: ['qif', 'ofx', 'qfx', 'csv', 'tsv', 'xml'],
           },
         ],
@@ -668,10 +677,10 @@ class AccountInternal extends PureComponent<
       accountName && accountName.replace(/[()]/g, '').replace(/\s+/g, '-');
     const filename = `${normalizedName || 'transactions'}.csv`;
 
-    window.Actual?.saveFile(
+    window.Actual.saveFile(
       exportedTransactions,
       filename,
-      t('Export Transactions'),
+      t('Export transactions'),
     );
   };
 
@@ -687,7 +696,7 @@ class AccountInternal extends PureComponent<
       }
     });
 
-    this.props.dispatch(updateNewTransactions(updatedTransaction.id));
+    this.props.dispatch(updateNewTransactions({ id: updatedTransaction.id }));
   };
 
   canCalculateBalance = () => {
@@ -709,12 +718,12 @@ class AccountInternal extends PureComponent<
   };
 
   async calculateBalances() {
-    if (!this.canCalculateBalance()) {
+    if (!this.canCalculateBalance() || !this.paged) {
       return null;
     }
 
     const { data } = await runQuery(
-      this.paged?.query
+      this.paged.query
         .options({ splits: 'none' })
         .select([{ balance: { $sumOver: '$amount' } }]),
     );
@@ -781,7 +790,10 @@ class AccountInternal extends PureComponent<
       const account = this.props.accounts.find(
         account => account.id === this.props.accountId,
       );
-      this.props.dispatch(updateAccount({ ...account, name } as AccountEntity));
+      if (!account) {
+        throw new Error(`Account with ID ${this.props.accountId} not found.`);
+      }
+      this.props.dispatch(updateAccount({ account: { ...account, name } }));
       this.setState({ editingName: false, nameError: '' });
     }
   };
@@ -829,7 +841,7 @@ class AccountInternal extends PureComponent<
         this.props.dispatch(openAccountCloseModal(accountId));
         break;
       case 'reopen':
-        this.props.dispatch(reopenAccount(accountId));
+        this.props.dispatch(reopenAccount({ id: accountId }));
         break;
       case 'export':
         const accountName = this.getAccountTitle(account, accountId);
@@ -927,8 +939,12 @@ class AccountInternal extends PureComponent<
   }
 
   getFilteredAmount = async () => {
+    if (!this.paged) {
+      return 0;
+    }
+
     const { data: amount } = await runQuery(
-      this.paged?.query.calculate({ $sum: '$amount' }),
+      this.paged.query.calculate({ $sum: '$amount' }),
     );
     return amount;
   };
@@ -944,7 +960,7 @@ class AccountInternal extends PureComponent<
   onCreatePayee = (name: string) => {
     const trimmed = name.trim();
     if (trimmed !== '') {
-      return this.props.dispatch(createPayee(name));
+      return this.props.dispatch(createPayee({ name })).unwrap();
     }
     return null;
   };
@@ -1322,7 +1338,8 @@ class AccountInternal extends PureComponent<
     const onConfirmTransfer = async (ids: string[]) => {
       this.setState({ workingHard: true });
 
-      const payees: PayeeEntity[] = await this.props.dispatch(getPayees());
+      const payees = this.props.payees;
+
       const { data: transactions } = await runQuery(
         q('transactions')
           .filter({ id: { $oneof: ids } })

@@ -5,7 +5,6 @@ import { useLocation } from 'react-router-dom';
 
 import { useToggle } from 'usehooks-ts';
 
-import { openDocsForCurrentPage } from 'loot-core/client/actions';
 import { pushModal } from 'loot-core/client/actions/modals';
 
 import { useFeatureFlag } from '../hooks/useFeatureFlag';
@@ -16,6 +15,30 @@ import { Button } from './common/Button2';
 import { Menu } from './common/Menu';
 import { Popover } from './common/Popover';
 import { SpaceBetween } from './common/SpaceBetween';
+
+const getPageDocs = (page: string) => {
+  switch (page) {
+    case '/budget':
+      return 'https://actualbudget.org/docs/getting-started/envelope-budgeting';
+    case '/reports':
+      return 'https://actualbudget.org/docs/reports/';
+    case '/schedules':
+      return 'https://actualbudget.org/docs/schedules';
+    case '/payees':
+      return 'https://actualbudget.org/docs/transactions/payees';
+    case '/rules':
+      return 'https://actualbudget.org/docs/budgeting/rules';
+    case '/settings':
+      return 'https://actualbudget.org/docs/settings';
+    default:
+      // All pages under /accounts, plus any missing pages
+      return 'https://actualbudget.org/docs';
+  }
+};
+
+function openDocsForCurrentPage() {
+  window.Actual.openURLInBrowser(getPageDocs(window.location.pathname));
+}
 
 type HelpMenuItem = 'docs' | 'keyboard-shortcuts' | 'goal-templates';
 
@@ -58,7 +81,7 @@ export const HelpMenu = () => {
   const handleItemSelect = (item: HelpMenuItem) => {
     switch (item) {
       case 'docs':
-        dispatch(openDocsForCurrentPage());
+        openDocsForCurrentPage();
         break;
       case 'keyboard-shortcuts':
         dispatch(pushModal('keyboard-shortcuts'));

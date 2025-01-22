@@ -277,16 +277,16 @@ export function createCustomSpreadsheet({
       filterEmptyRows({ showEmpty, data: i, balanceTypeOp }),
     );
 
+    const sortedCalcDataFiltered = [...calcDataFiltered].sort(
+      sortData({ balanceTypeOp, sortByOp }),
+    );
+
     const legend = calculateLegend(
       intervalData,
-      calcDataFiltered,
+      sortedCalcDataFiltered,
       groupBy,
       graphType,
       balanceTypeOp,
-    );
-
-    const sortedCalcDataFiltered = [...calcDataFiltered].sort(
-      sortData({ balanceTypeOp, sortByOp }),
     );
 
     setData({

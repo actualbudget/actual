@@ -127,7 +127,7 @@ export function CalendarGraph({
                           marginRight: 4,
                         }}
                       >
-                        <Trans>Income</Trans>:
+                        <Trans>Income:</Trans>
                       </View>
                       <View
                         style={{
@@ -156,7 +156,7 @@ export function CalendarGraph({
                           marginRight: 4,
                         }}
                       >
-                        <Trans>Expenses</Trans>:
+                        <Trans>Expenses:</Trans>
                       </View>
                       <View
                         style={{

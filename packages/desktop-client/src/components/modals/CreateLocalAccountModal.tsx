@@ -1,9 +1,10 @@
 // @ts-strict-ignore
 import { type FormEvent, useState } from 'react';
 import { Form } from 'react-aria-components';
-import { useTranslation } from 'react-i18next';
+import { useTranslation, Trans } from 'react-i18next';
 
-import { closeModal, createAccount } from 'loot-core/client/actions';
+import { closeModal } from 'loot-core/client/actions';
+import { createAccount } from 'loot-core/client/queries/queriesSlice';
 import { toRelaxedNumber } from 'loot-core/src/shared/util';
 
 import * as useAccounts from '../../hooks/useAccounts';
@@ -63,8 +64,12 @@ export function CreateLocalAccountModal() {
     if (!nameError && !balanceError) {
       dispatch(closeModal());
       const id = await dispatch(
-        createAccount(name, toRelaxedNumber(balance), offbudget),
-      );
+        createAccount({
+          name,
+          balance: toRelaxedNumber(balance),
+          offBudget: offbudget,
+        }),
+      ).unwrap();
       navigate('/accounts/' + id);
     }
   };
@@ -127,7 +132,7 @@ export function CreateLocalAccountModal() {
                         verticalAlign: 'center',
                       }}
                     >
-                      {t('Off budget')}
+                      <Trans>Off budget</Trans>
                     </label>
                   </View>
                   <div
@@ -139,16 +144,17 @@ export function CreateLocalAccountModal() {
                     }}
                   >
                     <Text>
-                      {t('This cannot be changed later.')} <br /> {'\n'}
-                      {t('See')}{' '}
-                      <Link
-                        variant="external"
-                        linkColor="muted"
-                        to="https://actualbudget.org/docs/accounts/#off-budget-accounts"
-                      >
-                        {t('Accounts Overview')}
-                      </Link>{' '}
-                      {t('for more information.')}
+                      <Trans>
+                        This cannot be changed later. See{' '}
+                        <Link
+                          variant="external"
+                          linkColor="muted"
+                          to="https://actualbudget.org/docs/accounts/#off-budget-accounts"
+                        >
+                          Accounts Overview
+                        </Link>{' '}
+                        for more information.
+                      </Trans>
                     </Text>
                   </div>
                 </View>

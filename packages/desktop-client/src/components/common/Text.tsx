@@ -3,10 +3,11 @@ import React, {
   type Ref,
   type ReactNode,
   forwardRef,
-  type CSSProperties,
 } from 'react';
 
 import { css, cx } from '@emotion/css';
+
+import { type CSSProperties } from '../../style';
 
 type TextProps = HTMLProps<HTMLSpanElement> & {
   innerRef?: Ref<HTMLSpanElement>;

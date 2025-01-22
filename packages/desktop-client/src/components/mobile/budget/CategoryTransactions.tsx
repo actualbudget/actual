@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
 
-import { getPayees } from 'loot-core/client/actions';
 import {
   useTransactions,
   useTransactionsSearch,
@@ -71,10 +70,6 @@ export function CategoryTransactions({
           tables.includes('payee_mapping')
         ) {
           reloadTransactions();
-        }
-
-        if (tables.includes('payees') || tables.includes('payee_mapping')) {
-          dispatch(getPayees());
         }
       }
     });

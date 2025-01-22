@@ -2,14 +2,13 @@ import React, {
   type MouseEventHandler,
   type ComponentProps,
   type ReactNode,
-  type CSSProperties,
 } from 'react';
 import { NavLink, useMatch } from 'react-router-dom';
 
 import { css } from '@emotion/css';
 
 import { useNavigate } from '../../hooks/useNavigate';
-import { styles } from '../../style';
+import { type CSSProperties, styles } from '../../style';
 import { theme } from '../../style/theme';
 
 import { Button } from './Button2';

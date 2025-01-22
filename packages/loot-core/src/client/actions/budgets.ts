@@ -4,10 +4,10 @@ import { t } from 'i18next';
 import { send } from '../../platform/client/fetch';
 import { getDownloadError, getSyncError } from '../../shared/errors';
 import type { Handlers } from '../../types/handlers';
+import { setAppState } from '../app/appSlice';
 import * as constants from '../constants';
 import { type AppDispatch, type GetRootState } from '../store';
 
-import { setAppState } from './app';
 import { closeModal, pushModal } from './modals';
 import { loadPrefs, loadGlobalPrefs } from './prefs';
 
@@ -148,14 +148,14 @@ export function createBudget({ testMode = false, demoMode = false } = {}) {
   };
 }
 
-export function validateBudgetName(name: string): {
+export async function validateBudgetName(name: string): Promise<{
   valid: boolean;
   message?: string;
-} {
+}> {
   return send('validate-budget-name', { name });
 }
 
-export function uniqueBudgetName(name: string): string {
+export async function uniqueBudgetName(name: string): Promise<string> {
   return send('unique-budget-name', { name });
 }
 
@@ -184,7 +184,7 @@ export function duplicateBudget({
     try {
       dispatch(
         setAppState({
-          loadingText: t('Duplicating:  {{oldName}}  --  to:  {{newName}}', {
+          loadingText: t('Duplicating: {{oldName}} to: {{newName}}', {
             oldName,
             newName,
           }),

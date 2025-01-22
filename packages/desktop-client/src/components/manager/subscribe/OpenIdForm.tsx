@@ -337,7 +337,7 @@ const openIdProviders: (OpenIdProviderOption | typeof Menu.line)[] = [
       ),
     },
     {
-      label: 'Github',
+      label: 'GitHub',
       value: 'github',
       clientIdRequired: true,
       clientSecretRequired: true,
@@ -348,7 +348,7 @@ const openIdProviders: (OpenIdProviderOption | typeof Menu.line)[] = [
         <>
           <Text style={{ color: theme.errorText }}>
             <Trans>
-              Github does not support discovery. You need to configure it in the
+              GitHub does not support discovery. You need to configure it in the
               server.
             </Trans>
           </Text>{' '}
@@ -377,9 +377,9 @@ const openIdProviders: (OpenIdProviderOption | typeof Menu.line)[] = [
           </Trans>{' '}
           <Link
             variant="external"
-            to="https://docs.goauthentik.io/docs/providers/oauth2/"
+            to="https://docs.goauthentik.io/integrations/services/actual-budget/"
           >
-            <Trans>Configure OAuth2 Provider</Trans>
+            <Trans>Configure OAuth2 provider</Trans>
           </Link>
         </Text>
       ),
@@ -434,7 +434,7 @@ function OpenIdProviderSelector({
 
   return (
     <FormField style={{ flex: 1, marginTop: 20 }}>
-      <FormLabel title={t('OpenID Provider')} htmlFor="provider-selector" />
+      <FormLabel title={t('OpenID provider')} htmlFor="provider-selector" />
       <Select
         options={openIdProviders.map(provider =>
           provider === Menu.line ? Menu.line : [provider.value, provider.label],

@@ -1,7 +1,6 @@
 export type FeatureFlag =
   | 'goalTemplatesEnabled'
   | 'actionTemplating'
-  | 'upcomingLengthAdjustment'
   | 'contextMenus'
   | 'openidAuth';
 
@@ -31,7 +30,8 @@ export type SyncedPrefs = Partial<
     | `csv-has-header-${string}`
     | `ofx-fallback-missing-payee-${string}`
     | `flip-amount-${string}-${'csv' | 'qif'}`
-    | `flags.${FeatureFlag}`,
+    | `flags.${FeatureFlag}`
+    | `learn-categories`,
     string
   >
 >;
@@ -77,6 +77,7 @@ export type GlobalPrefs = Partial<{
   floatingSidebar: boolean;
   maxMonths: number;
   keyId?: string;
+  language: string;
   theme: Theme;
   preferredDarkTheme: DarkTheme;
   documentDir: string; // Electron only

@@ -1,12 +1,8 @@
-import React, {
-  type ReactNode,
-  type ComponentProps,
-  type CSSProperties,
-} from 'react';
+import React, { type ReactNode, type ComponentProps } from 'react';
 
 import { css } from '@emotion/css';
 
-import { theme } from '../style';
+import { theme, type CSSProperties } from '../style';
 
 import { Text } from './common/Text';
 import { View } from './common/View';

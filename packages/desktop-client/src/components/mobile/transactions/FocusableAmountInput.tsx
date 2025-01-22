@@ -97,9 +97,12 @@ const AmountInput = memo(function AmountInput({
   };
 
   const onUpdate = (value: string) => {
-    props.onUpdate?.(value);
+    const originalAmount = Math.abs(props.value);
     const amount = applyText();
-    props.onUpdateAmount?.(amount);
+    if (amount !== originalAmount) {
+      props.onUpdate?.(value);
+      props.onUpdateAmount?.(amount);
+    }
   };
 
   const onBlur: HTMLProps<HTMLInputElement>['onBlur'] = e => {
@@ -151,7 +154,7 @@ const AmountInput = memo(function AmountInput({
           pointerEvents: 'none',
           ...textStyle,
         }}
-        data-testid="amount-fake-input"
+        data-testid="amount-input-text"
       >
         {editing ? text : amountToCurrency(value)}
       </Text>

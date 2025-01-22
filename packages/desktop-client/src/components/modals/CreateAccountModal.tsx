@@ -88,7 +88,7 @@ export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
         balance: number;
       };
 
-      for (const oldAccount of results.accounts) {
+      for (const oldAccount of results.accounts ?? []) {
         const newAccount: NormalizedAccount = {
           account_id: oldAccount.id,
           name: oldAccount.name,
