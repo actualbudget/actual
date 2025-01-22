@@ -12,6 +12,7 @@ import { useAccounts } from '../../hooks/useAccounts';
 import { useCategories } from '../../hooks/useCategories';
 import { useDateFormat } from '../../hooks/useDateFormat';
 import { usePayees } from '../../hooks/usePayees';
+import { useSelector } from '../../redux';
 import { theme } from '../../style';
 import { Link } from '../common/Link';
 import { Text } from '../common/Text';
@@ -45,6 +46,7 @@ export function Value<T>({
     color: theme.pageTextPositive,
     ...style,
   };
+  const locale = useSelector(state => state.app.locale);
 
   const data =
     dataProp ||
@@ -75,7 +77,7 @@ export function Value<T>({
         case 'date':
           if (value) {
             if (value.frequency) {
-              return getRecurringDescription(value, dateFormat);
+              return getRecurringDescription(value, dateFormat, locale);
             }
             return formatDate(parseISO(value), dateFormat);
           }

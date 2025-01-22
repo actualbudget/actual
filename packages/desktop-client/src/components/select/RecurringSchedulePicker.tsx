@@ -2,6 +2,7 @@ import {
   type CSSProperties,
   type Dispatch,
   useEffect,
+  useMemo,
   useReducer,
   useRef,
   useState,
@@ -592,11 +593,17 @@ export function RecurringSchedulePicker({
   const triggerRef = useRef(null);
   const [isOpen, setIsOpen] = useState(false);
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
+  const locale = useSelector(state => state.app.locale);
 
   function onSave(config: RecurConfig) {
     onChange(config);
     setIsOpen(false);
   }
+
+  const recurringDescription = useMemo(
+    () => getRecurringDescription(value, dateFormat, locale),
+    [locale, value, dateFormat],
+  );
 
   return (
     <View>
@@ -605,9 +612,7 @@ export function RecurringSchedulePicker({
         style={{ textAlign: 'left', ...buttonStyle }}
         onPress={() => setIsOpen(true)}
       >
-        {value
-          ? getRecurringDescription(value, dateFormat)
-          : t('No recurring date')}
+        {value ? recurringDescription : t('No recurring date')}
       </Button>
 
       <Popover

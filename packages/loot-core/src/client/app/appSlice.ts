@@ -3,6 +3,7 @@ import { enUS } from 'date-fns/locale';
 
 import { send } from '../../platform/client/fetch';
 import { getUploadError } from '../../shared/errors';
+import { getLocale } from '../../shared/locale';
 import { type AccountEntity } from '../../types/models';
 import { syncAccounts } from '../accounts/accountsSlice';
 import { loadPrefs, pushModal } from '../actions';
@@ -123,23 +124,8 @@ export const syncAndDownload = createAppAsyncThunk(
 export const fetchLocale = createAppAsyncThunk(
   'app/fetchLocale',
   async ({ language }: { language: string }) => {
-    try {
-      const localeModule = await import(/* @vite-ignore */ `date-fns/locale`);
-      const localeKey = language.replace('-', '') as keyof typeof localeModule;
-
-      if (localeModule[localeKey]) {
-        return localeModule[localeKey] as Locale;
-      } else {
-        return enUS;
-      }
-
-      // return localeModule.default;
-    } catch (error) {
-      console.error(
-        `Locale for language ${language} not found. Falling back to default.`,
-      );
-      return enUS;
-    }
+    const locale = await getLocale(language);
+    return locale;
   },
 );
 

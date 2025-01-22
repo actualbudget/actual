@@ -1,6 +1,7 @@
 // @ts-strict-ignore
 import type { IRuleOptions } from '@rschedule/core';
 import * as d from 'date-fns';
+import { t } from 'i18next';
 
 import { Condition } from '../server/accounts/rules';
 
@@ -56,66 +57,67 @@ export function getHasTransactionsQuery(schedules) {
     .select(['schedule', 'date']);
 }
 
-function makeNumberSuffix(num: number) {
+function makeNumberSuffix(num: number, locale: Locale) {
   // Slight abuse of date-fns to turn a number like "1" into the full
   // form "1st" but formatting a date with that number
-  return monthUtils.format(new Date(2020, 0, num, 12), 'do');
+  return monthUtils.format(new Date(2020, 0, num, 12), 'do', locale);
 }
 
 function prettyDayName(day) {
   const days = {
-    SU: 'Sunday',
-    MO: 'Monday',
-    TU: 'Tuesday',
-    WE: 'Wednesday',
-    TH: 'Thursday',
-    FR: 'Friday',
-    SA: 'Saturday',
+    SU: t('Sunday'),
+    MO: t('Monday'),
+    TU: t('Tuesday'),
+    WE: t('Wednesday'),
+    TH: t('Thursday'),
+    FR: t('Friday'),
+    SA: t('Saturday'),
   };
   return days[day];
 }
 
-export function getRecurringDescription(config, dateFormat) {
+export function getRecurringDescription(config, dateFormat, locale: Locale) {
   const interval = config.interval || 1;
 
   let endModeSuffix = '';
   switch (config.endMode) {
     case 'after_n_occurrences':
       if (config.endOccurrences === 1) {
-        endModeSuffix = `, once`;
+        endModeSuffix = `, ${t('once')}`;
       } else {
-        endModeSuffix = `, ${config.endOccurrences} times`;
+        endModeSuffix = `, ${t('{{endOccurrences}} times', { endOccurences: config.endOccurrences })}`;
       }
       break;
     case 'on_date':
-      endModeSuffix = `, until ${monthUtils.format(
-        config.endDate,
-        dateFormat,
-      )}`;
+      endModeSuffix = `, ${t('until {{date}}', {
+        date: monthUtils.format(config.endDate, dateFormat),
+      })}`;
       break;
     default:
   }
 
   const weekendSolveSuffix = config.skipWeekend
-    ? ` (${config.weekendSolveMode} weekend) `
+    ? ` (${config.weekendSolveMode} ${t('weekend')}) `
     : '';
   const suffix = endModeSuffix + weekendSolveSuffix;
 
   switch (config.frequency) {
     case 'daily': {
-      let desc = 'Every ';
-      desc += interval !== 1 ? `${interval} days` : 'day';
+      let desc = `${t('Every')} `;
+      desc += interval !== 1 ? t(`{{interval}} days`, { interval }) : t('day');
       return desc + suffix;
     }
     case 'weekly': {
-      let desc = 'Every ';
-      desc += interval !== 1 ? `${interval} weeks` : 'week';
-      desc += ' on ' + monthUtils.format(config.start, 'EEEE');
+      let desc = `${t('Every')} `;
+      desc +=
+        interval !== 1 ? t(`{{interval}} weeks`, { interval }) : t('week');
+      desc += ` ${t('on')} ` + monthUtils.format(config.start, 'EEEE', locale);
       return desc + suffix;
     }
     case 'monthly': {
-      let desc = 'Every ';
-      desc += interval !== 1 ? `${interval} months` : 'month';
+      let desc = `${t('Every')} `;
+      desc +=
+        interval !== 1 ? t(`{{interval}} months`, { interval }) : t('month');
 
       if (config.patterns && config.patterns.length > 0) {
         // Sort the days ascending. We filter out -1 because that
@@ -137,55 +139,57 @@ export function getRecurringDescription(config, dateFormat) {
         // Add on all -1 values to the end
         patterns = patterns.concat(config.patterns.filter(p => p.value === -1));
 
-        desc += ' on the ';
+        desc += ` ${t('on the')} `;
 
         const strs: string[] = [];
 
         const uniqueDays = new Set(patterns.map(p => p.type));
         const isSameDay = uniqueDays.size === 1 && !uniqueDays.has('day');
-
         for (const pattern of patterns) {
           if (pattern.type === 'day') {
             if (pattern.value === -1) {
-              strs.push('last day');
+              strs.push(t('last day'));
             } else {
               // Example: 15th day
-              strs.push(makeNumberSuffix(pattern.value));
+              strs.push(makeNumberSuffix(pattern.value, locale));
             }
           } else {
             const dayName = isSameDay ? '' : ' ' + prettyDayName(pattern.type);
 
             if (pattern.value === -1) {
               // Example: last Monday
-              strs.push('last' + dayName);
+              strs.push(t('last') + dayName);
             } else {
               // Example: 3rd Monday
-              strs.push(makeNumberSuffix(pattern.value) + dayName);
+              strs.push(makeNumberSuffix(pattern.value, locale) + dayName);
             }
           }
         }
 
         if (strs.length > 2) {
           desc += strs.slice(0, strs.length - 1).join(', ');
-          desc += ', and ';
+          desc += `, ${t('and')} `;
           desc += strs[strs.length - 1];
         } else {
-          desc += strs.join(' and ');
+          desc += strs.join(` ${t('and')} `);
         }
 
         if (isSameDay) {
           desc += ' ' + prettyDayName(patterns[0].type);
         }
       } else {
-        desc += ' on the ' + monthUtils.format(config.start, 'do');
+        desc +=
+          ` ${t('on the')} ` + monthUtils.format(config.start, 'do', locale);
       }
 
       return desc + suffix;
     }
     case 'yearly': {
-      let desc = 'Every ';
-      desc += interval !== 1 ? `${interval} years` : 'year';
-      desc += ' on ' + monthUtils.format(config.start, 'LLL do');
+      let desc = `${t('Every')} `;
+      desc +=
+        interval !== 1 ? t(`{{interval}} years`, { interval }) : t('year');
+      desc +=
+        ` ${t('on')} ` + monthUtils.format(config.start, 'LLL do', locale);
       return desc + suffix;
     }
     default:
@@ -346,7 +350,7 @@ export function describeSchedule(schedule, payee) {
   if (payee) {
     return `${payee.name} (${schedule.next_date})`;
   } else {
-    return `Next: ${schedule.next_date}`;
+    return `${t('Next:')} ${schedule.next_date}`;
   }
 }
 

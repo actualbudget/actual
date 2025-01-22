@@ -1,5 +1,7 @@
 // @ts-strict-ignore
 
+import * as asyncStorage from '../../platform/server/asyncStorage';
+import { getLocale } from '../../shared/locale';
 import * as monthUtils from '../../shared/months';
 import { integerToCurrency, safeNumber } from '../../shared/util';
 import * as db from '../db';
@@ -552,7 +554,12 @@ async function addMovementNotes({
     ])?.note,
   );
 
-  const displayDay = monthUtils.format(monthUtils.currentDate(), 'MMMM dd');
+  const locale = await getLocale(await asyncStorage.getItem('language'));
+  const displayDay = monthUtils.format(
+    monthUtils.currentDate(),
+    'MMMM dd',
+    locale,
+  );
   const categories = await db.getCategories(
     [from, to].filter(c => c !== 'to-be-budgeted' && c !== 'overbudgeted'),
   );

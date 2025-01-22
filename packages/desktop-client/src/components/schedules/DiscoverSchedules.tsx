@@ -16,6 +16,7 @@ import {
   SelectedProvider,
 } from '../../hooks/useSelected';
 import { useSendPlatformRequest } from '../../hooks/useSendPlatformRequest';
+import { useSelector } from '../../redux';
 import { theme } from '../../style';
 import { ButtonWithLoading } from '../common/Button2';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
@@ -41,11 +42,16 @@ function DiscoverSchedulesTable({
   const selectedItems = useSelectedItems();
   const dispatchSelected = useSelectedDispatch();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
+  const locale = useSelector(state => state.app.locale);
 
   function renderItem({ item }: { item: DiscoverScheduleEntity }) {
     const selected = selectedItems.has(item.id);
     const amountOp = item._conditions.find(c => c.field === 'amount').op;
-    const recurDescription = getRecurringDescription(item.date, dateFormat);
+    const recurDescription = getRecurringDescription(
+      item.date,
+      dateFormat,
+      locale,
+    );
 
     return (
       <Row
