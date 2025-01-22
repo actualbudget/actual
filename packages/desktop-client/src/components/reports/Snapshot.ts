@@ -1,10 +1,9 @@
-import html2canvas from 'html2canvas';
+import { toPng } from 'html-to-image';
 
 export const downloadSnapshot = async () => {
   const reportElement = document.getElementById('custom-report-content');
   if (reportElement) {
-    const canvas = await html2canvas(reportElement);
-    const dataUrl = canvas.toDataURL('image/png');
+    const dataUrl = await toPng(reportElement);
     const link = document.createElement('a');
     link.href = dataUrl;
     link.download = 'custom-report.png';
