@@ -32,6 +32,8 @@ import {
   defaultMappings,
   mappingsFromString,
 } from '../util/custom-sync-mapping';
+import { runRules } from '../transactions/transaction-rules';
+import { batchUpdateTransactions } from '../transactions';
 
 import { getStartingBalancePayee } from './payees';
 import { title } from './title';
