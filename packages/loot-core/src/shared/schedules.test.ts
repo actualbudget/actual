@@ -3,6 +3,55 @@ import MockDate from 'mockdate';
 
 import * as monthUtils from './months';
 import { getRecurringDescription, getStatus } from './schedules';
+import i18next from 'i18next';
+
+i18next.init({
+  lng: 'en',
+  fallbackLng: 'en',
+  resources: {
+    en: {
+      translation: {
+        Every: 'Every',
+        day: 'day',
+        week: 'week',
+        month: 'month',
+        year: 'year',
+        on: 'on',
+        'on the': 'on the',
+        and: 'and',
+        'until {{date}}': 'until {{date}}',
+        once: 'once',
+        times: '{{endOccurrences}} times',
+        weekend: 'weekend',
+        last: 'last',
+        'Next:': 'Next:',
+        'last day': 'last day',
+        '{{interval}} days': '{{interval}} days',
+        '{{interval}} weeks': '{{interval}} weeks',
+        '{{interval}} months': '{{interval}} months',
+        '{{interval}} years': '{{interval}} years',
+
+        Sunday: 'Sunday',
+        Monday: 'Monday',
+        Tuesday: 'Tuesday',
+        Wednesday: 'Wednesday',
+        Thursday: 'Thursday',
+        Friday: 'Friday',
+        Saturday: 'Saturday',
+
+        '{{value}}th day': '{{value}}th day',
+        '{{value}}th': '{{value}}th',
+        '{{value}}th {{dayName}}': '{{value}}th {{dayName}}',
+        'last {{dayName}}': 'last {{dayName}}',
+
+        '({{weekendSolveMode}} weekend)': '({{weekendSolveMode}} weekend)',
+      },
+    },
+  },
+  interpolation: {
+    escapeValue: false,
+  },
+});
 
 describe('schedules', () => {
   const today = new Date(2017, 0, 1); // Global date when testing is set to 2017-01-01 per monthUtils.currentDay()

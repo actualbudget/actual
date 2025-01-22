@@ -85,7 +85,7 @@ export function getRecurringDescription(config, dateFormat, locale: Locale) {
       if (config.endOccurrences === 1) {
         endModeSuffix = `, ${t('once')}`;
       } else {
-        endModeSuffix = `, ${t('{{endOccurrences}} times', { endOccurences: config.endOccurrences })}`;
+        endModeSuffix = `, ${t('{{endOccurrences}} times', { endOccurrences: config.endOccurrences })}`;
       }
       break;
     case 'on_date':
