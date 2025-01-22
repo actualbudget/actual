@@ -36,7 +36,7 @@ export function useDisplayPayee({ transaction }: UseDisplayPayeeProps) {
   const payee = usePayee(transaction?.payee || '');
 
   return useMemo(() => {
-    if (subtransactions?.length === 0) {
+    if (subtransactions.length === 0) {
       return getPrettyPayee({
         transaction,
         payee,

@@ -48,6 +48,10 @@ vi.mock('../../hooks/useFeatureFlag', () => ({
 }));
 
 const accounts = [generateAccount('Bank of America')];
+vi.mock('../../hooks/useAccounts', () => ({
+  useAccounts: () => accounts,
+}));
+
 const payees: PayeeEntity[] = [
   {
     id: 'bob-id',
@@ -65,6 +69,15 @@ const payees: PayeeEntity[] = [
     name: 'This guy on the side of the road',
   },
 ];
+vi.mock('../../hooks/usePayees', async importOriginal => {
+  // eslint-disable-next-line @typescript-eslint/consistent-type-imports
+  const actual = await importOriginal<typeof import('../../hooks/usePayees')>();
+  return {
+    ...actual,
+    usePayees: () => payees,
+  };
+});
+
 const categoryGroups = generateCategoryGroups([
   {
     name: 'Investments and Savings',
@@ -79,6 +92,13 @@ const categoryGroups = generateCategoryGroups([
     categories: [{ name: 'Big Projects' }, { name: 'Shed' }],
   },
 ]);
+vi.mock('../../hooks/useCategories', () => ({
+  useCategories: () => ({
+    list: categoryGroups.flatMap(g => g.categories),
+    grouped: categoryGroups,
+  }),
+}));
+
 const usualGroup = categoryGroups[1];
 
 function generateTransactions(
@@ -214,7 +234,7 @@ function initBasicServer() {
           return { data: accounts, dependencies: [] };
         case 'transactions':
           return {
-            data: [],
+            data: generateTransactions(5, [6]),
             dependencies: [],
           };
         default:
