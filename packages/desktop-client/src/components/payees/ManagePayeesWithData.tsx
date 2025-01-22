@@ -67,7 +67,6 @@ export function ManagePayeesWithData({
         return;
       }
 
-      await dispatch(getPayees());
       await refetchOrphanedPayees();
 
       const targetId =
