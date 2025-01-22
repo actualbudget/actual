@@ -15,19 +15,15 @@ import * as sqlite from '../platform/server/sqlite';
 import { isNonProductionEnvironment } from '../shared/environment';
 import * as monthUtils from '../shared/months';
 import { dayFromDate } from '../shared/months';
-import { q, Query } from '../shared/query';
+import { q } from '../shared/query';
 import { amountToInteger, stringToInteger } from '../shared/util';
 import { type Budget } from '../types/budget';
 import { Handlers } from '../types/handlers';
 import { OpenIdConfig } from '../types/models/openid';
 
-import { exportToCSV, exportQueryToCSV } from './accounts/export-to-csv';
 import * as link from './accounts/link';
-import { parseFile } from './accounts/parse-file';
 import { getStartingBalancePayee } from './accounts/payees';
 import * as bankSync from './accounts/sync';
-import * as rules from './accounts/transaction-rules';
-import { batchUpdateTransactions } from './accounts/transactions';
 import { app as adminApp } from './admin/app';
 import { installAPI } from './api';
 import { runQuery as aqlQuery } from './aql';
@@ -73,6 +69,8 @@ import {
 } from './sync';
 import * as syncMigrations from './sync/migrate';
 import { app as toolsApp } from './tools/app';
+import { app as transactionsApp } from './transactions/app';
+import * as rules from './transactions/transaction-rules';
 import { withUndo, clearUndo, undo, redo } from './undo';
 import { updateVersion } from './update';
 import {
@@ -107,56 +105,6 @@ handlers['undo'] = mutator(async function () {
 handlers['redo'] = mutator(function () {
   return redo();
 });
-
-handlers['transactions-batch-update'] = mutator(async function ({
-  added,
-  deleted,
-  updated,
-  learnCategories,
-}) {
-  return withUndo(async () => {
-    const result = await batchUpdateTransactions({
-      added,
-      updated,
-      deleted,
-      learnCategories,
-    });
-
-    return result;
-  });
-});
-
-handlers['transaction-add'] = mutator(async function (transaction) {
-  await handlers['transactions-batch-update']({ added: [transaction] });
-  return {};
-});
-
-handlers['transaction-update'] = mutator(async function (transaction) {
-  await handlers['transactions-batch-update']({ updated: [transaction] });
-  return {};
-});
-
-handlers['transaction-delete'] = mutator(async function (transaction) {
-  await handlers['transactions-batch-update']({ deleted: [transaction] });
-  return {};
-});
-
-handlers['transactions-parse-file'] = async function ({ filepath, options }) {
-  return parseFile(filepath, options);
-};
-
-handlers['transactions-export'] = async function ({
-  transactions,
-  accounts,
-  categoryGroups,
-  payees,
-}) {
-  return exportToCSV(transactions, accounts, categoryGroups, payees);
-};
-
-handlers['transactions-export-query'] = async function ({ query: queryState }) {
-  return exportQueryToCSV(new Query(queryState));
-};
 
 handlers['get-categories'] = async function () {
   return {
@@ -2452,6 +2400,7 @@ app.combine(
   reportsApp,
   rulesApp,
   adminApp,
+  transactionsApp,
 );
 
 function getDefaultDocumentDir() {

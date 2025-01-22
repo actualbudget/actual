@@ -4,9 +4,9 @@ import csv2json from 'csv-parse/lib/sync';
 import * as fs from '../../platform/server/fs';
 import { looselyParseAmount } from '../../shared/util';
 
-import { ofx2json } from './ofx2json';
-import { qif2json } from './qif2json';
-import { xmlCAMT2json } from './xmlcamt2json';
+import { ofx2json } from './import/ofx2json';
+import { qif2json } from './import/qif2json';
+import { xmlCAMT2json } from './import/xmlcamt2json';
 
 type ParseError = { message: string; internal: string };
 export type ParseFileResult = {

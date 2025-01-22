@@ -1,6 +1,5 @@
 import { ImportTransactionsOpts } from '@actual-app/api';
 
-import { type batchUpdateTransactions } from '../server/accounts/transactions';
 import type {
   APIAccountEntity,
   APICategoryEntity,
@@ -8,6 +7,7 @@ import type {
   APIFileEntity,
   APIPayeeEntity,
 } from '../server/api-models';
+import { type batchUpdateTransactions } from '../server/transactions';
 
 import type { NewRuleEntity, RuleEntity, TransactionEntity } from './models';
 import { type ServerHandlers } from './server-handlers';

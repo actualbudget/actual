@@ -8,6 +8,7 @@ import type { ReportsHandlers } from '../server/reports/types/handlers';
 import type { RulesHandlers } from '../server/rules/types/handlers';
 import type { SchedulesHandlers } from '../server/schedules/types/handlers';
 import type { ToolsHandlers } from '../server/tools/types/handlers';
+import type { TransactionHandlers } from '../server/transactions/app';
 
 import type { ApiHandlers } from './api-handlers';
 import type { ServerHandlers } from './server-handlers';
@@ -23,6 +24,7 @@ export interface Handlers
     ReportsHandlers,
     RulesHandlers,
     SchedulesHandlers,
+    TransactionHandlers,
     AdminHandlers,
     ToolsHandlers {}
 

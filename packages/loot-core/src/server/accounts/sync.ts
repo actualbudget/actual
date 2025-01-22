@@ -30,11 +30,11 @@ import {
   defaultMappings,
   mappingsFromString,
 } from '../util/custom-sync-mapping';
+import { runRules } from '../transactions/transaction-rules';
+import { batchUpdateTransactions } from '../transactions';
 
 import { getStartingBalancePayee } from './payees';
 import { title } from './title';
-import { runRules } from './transaction-rules';
-import { batchUpdateTransactions } from './transactions';
 
 function BankSyncError(type: string, code: string, details?: object) {
   return { type: 'BankSyncError', category: type, code, details };

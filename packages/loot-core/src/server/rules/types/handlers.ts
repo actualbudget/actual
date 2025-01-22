@@ -4,7 +4,7 @@ import {
   type TransactionEntity,
   type RuleActionEntity,
 } from '../../../types/models';
-import { type Action } from '../../accounts/rules';
+import { type Action } from '..';
 
 type ValidationError = {
   conditionErrors: string[];
