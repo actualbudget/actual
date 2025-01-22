@@ -19,4 +19,11 @@ services:
       # Change './actual-data' below to the path to the folder you want Actual to store its data in on your server.
       # '/data' is the path Actual will look for its files in by default, so leave that as-is.
       - ./actual-data:/data
+    healthcheck:
+      # Enable health check for the instance
+      test: ["CMD-SHELL", "node src/scripts/health-check.js"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
     restart: unless-stopped
