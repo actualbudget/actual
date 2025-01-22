@@ -9,6 +9,7 @@ import {
   SvgListBullet,
   SvgQueue,
   SvgTag,
+  SvgCamera,
   SvgChartArea,
 } from '@actual-app/components/icons/v1';
 import { SpaceBetween } from '@actual-app/components/space-between';
@@ -25,6 +26,7 @@ import { FilterButton } from '../filters/FiltersMenu';
 import { GraphButton } from './GraphButton';
 import { SaveReport } from './SaveReport';
 import { setSessionReport } from './setSessionReport';
+import { downloadSnapshot } from './Snapshot';
 
 type ReportTopbarProps = {
   customReportItems: CustomReportEntity;
@@ -180,6 +182,13 @@ export function ReportTopbar({
       >
         <SvgTag width={15} height={15} />
       </GraphButton>
+      <SnapshotButton
+        style={{ marginRight: 15 }}
+        title={t('Download Snapshot')}
+        onSelect={downloadSnapshot}
+      >
+        <SvgCamera width={15} height={15} />
+      </SnapshotButton>
 
       <View
         style={{
