@@ -5,37 +5,54 @@ import * as monthUtils from 'loot-core/src/shared/months';
 
 import { expect, test } from './fixtures';
 import { ConfigurationPage } from './page-models/configuration-page';
+import { type MobileBudgetPage } from './page-models/mobile-budget-page';
 import { MobileNavigation } from './page-models/mobile-navigation';
 
-const copyLastMonthBudget = async (budgetPage, categoryName) => {
+const copyLastMonthBudget = async (
+  budgetPage: MobileBudgetPage,
+  categoryName: string,
+) => {
   const budgetMenuModal = await budgetPage.openBudgetMenu(categoryName);
   await budgetMenuModal.copyLastMonthBudget();
   await budgetMenuModal.close();
 };
 
-const setTo3MonthAverage = async (budgetPage, categoryName) => {
+const setTo3MonthAverage = async (
+  budgetPage: MobileBudgetPage,
+  categoryName: string,
+) => {
   const budgetMenuModal = await budgetPage.openBudgetMenu(categoryName);
   await budgetMenuModal.setTo3MonthAverage();
   await budgetMenuModal.close();
 };
 
-const setTo6MonthAverage = async (budgetPage, categoryName) => {
+const setTo6MonthAverage = async (
+  budgetPage: MobileBudgetPage,
+  categoryName: string,
+) => {
   const budgetMenuModal = await budgetPage.openBudgetMenu(categoryName);
   await budgetMenuModal.setTo6MonthAverage();
   await budgetMenuModal.close();
 };
 
-const setToYearlyAverage = async (budgetPage, categoryName) => {
+const setToYearlyAverage = async (
+  budgetPage: MobileBudgetPage,
+  categoryName: string,
+) => {
   const budgetMenuModal = await budgetPage.openBudgetMenu(categoryName);
   await budgetMenuModal.setToYearlyAverage();
   await budgetMenuModal.close();
 };
 
 async function setBudgetAverage(
-  budgetPage,
-  categoryName,
-  numberOfMonths,
-  setBudgetAverageFn,
+  budgetPage: MobileBudgetPage,
+  categoryName: string,
+  numberOfMonths: number,
+  setBudgetAverageFn: (
+    budgetPage: MobileBudgetPage,
+    categoryName: string,
+    numberOfMonths: number,
+  ) => Promise<void>,
 ) {
   let totalSpent = 0;
 
@@ -43,7 +60,7 @@ async function setBudgetAverage(
     await budgetPage.goToPreviousMonth();
     const spentButton = await budgetPage.getButtonForSpent(categoryName);
     const spent = await spentButton.textContent();
-    totalSpent += currencyToAmount(spent);
+    totalSpent += currencyToAmount(spent) ?? 0;
   }
 
   // Calculate average amount
@@ -271,11 +288,13 @@ budgetTypes.forEach(budgetType => {
       await expect(page).toMatchThemeScreenshots();
     });
 
-    [
-      [3, setTo3MonthAverage],
-      [6, setTo6MonthAverage],
-      [12, setToYearlyAverage],
-    ].forEach(([numberOfMonths, setBudgetAverageFn]) => {
+    (
+      [
+        [3, setTo3MonthAverage],
+        [6, setTo6MonthAverage],
+        [12, setToYearlyAverage],
+      ] as const
+    ).forEach(([numberOfMonths, setBudgetAverageFn]) => {
       test(`set budget to ${numberOfMonths} month average`, async () => {
         const budgetPage = await navigation.goToBudgetPage();
 
