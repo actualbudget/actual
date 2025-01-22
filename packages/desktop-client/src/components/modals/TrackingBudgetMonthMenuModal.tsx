@@ -6,18 +6,17 @@ import { css } from '@emotion/css';
 
 import * as monthUtils from 'loot-core/src/shared/months';
 
+import { useLocale } from '../../hooks/useLocale';
 import { useNotes } from '../../hooks/useNotes';
 import { useUndo } from '../../hooks/useUndo';
 import { SvgCheveronDown, SvgCheveronUp } from '../../icons/v1';
 import { SvgNotesPaper } from '../../icons/v2';
-import { useSelector } from '../../redux';
 import { type CSSProperties, styles, theme } from '../../style';
 import { BudgetMonthMenu } from '../budget/tracking/budgetsummary/BudgetMonthMenu';
 import { Button } from '../common/Button2';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { View } from '../common/View';
 import { Notes } from '../Notes';
-import { useLocale } from '../../hooks/useLocale';
 
 type TrackingBudgetMonthMenuModalProps = {
   month: string;

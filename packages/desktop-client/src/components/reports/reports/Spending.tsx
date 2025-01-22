@@ -13,8 +13,9 @@ import { type SpendingWidget } from 'loot-core/types/models';
 import { type RuleConditionEntity } from 'loot-core/types/models/rule';
 
 import { useFilters } from '../../../hooks/useFilters';
+import { useLocale } from '../../../hooks/useLocale';
 import { useNavigate } from '../../../hooks/useNavigate';
-import { useDispatch, useSelector } from '../../../redux';
+import { useDispatch } from '../../../redux';
 import { theme, styles } from '../../../style';
 import { AlignedText } from '../../common/AlignedText';
 import { Block } from '../../common/Block';
@@ -40,7 +41,6 @@ import { calculateSpendingReportTimeRange } from '../reportRanges';
 import { createSpendingSpreadsheet } from '../spreadsheets/spending-spreadsheet';
 import { useReport } from '../useReport';
 import { fromDateRepr } from '../util';
-import { useLocale } from '../../../hooks/useLocale';
 
 export function Spending() {
   const params = useParams();

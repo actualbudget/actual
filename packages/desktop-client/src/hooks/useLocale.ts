@@ -1,6 +1,8 @@
 import { useMemo } from 'react';
-import { useGlobalPref } from './useGlobalPref';
+
 import { getLocale } from 'loot-core/shared/locale';
+
+import { useGlobalPref } from './useGlobalPref';
 
 export function useLocale() {
   const [language] = useGlobalPref('language');

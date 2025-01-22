@@ -21,13 +21,12 @@ import {
   amountToCurrencyNoDecimal,
 } from 'loot-core/src/shared/util';
 
+import { useLocale } from '../../../hooks/useLocale';
 import { usePrivacyMode } from '../../../hooks/usePrivacyMode';
-import { useSelector } from '../../../redux';
 import { theme } from '../../../style';
 import { AlignedText } from '../../common/AlignedText';
 import { chartTheme } from '../chart-theme';
 import { Container } from '../Container';
-import { useLocale } from '../../../hooks/useLocale';
 
 const MAX_BAR_SIZE = 50;
 const ANIMATION_DURATION = 1000; // in ms

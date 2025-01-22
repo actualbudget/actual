@@ -4,15 +4,14 @@ import { useTranslation } from 'react-i18next';
 
 import * as monthUtils from 'loot-core/src/shared/months';
 
+import { useLocale } from '../../hooks/useLocale';
 import { useResizeObserver } from '../../hooks/useResizeObserver';
 import { SvgCalendar } from '../../icons/v2';
-import { useSelector } from '../../redux';
 import { styles, theme } from '../../style';
 import { Link } from '../common/Link';
 import { View } from '../common/View';
 
 import { type MonthBounds } from './MonthsContext';
-import { useLocale } from '../../hooks/useLocale';
 
 type MonthPickerProps = {
   startMonth: string;

@@ -5,12 +5,11 @@ import * as d from 'date-fns';
 
 import * as monthUtils from 'loot-core/src/shared/months';
 
-import { useSelector } from '../../redux';
+import { useLocale } from '../../hooks/useLocale';
 import { theme } from '../../style';
 import { styles } from '../../style/styles';
 import { Block } from '../common/Block';
 import { Text } from '../common/Text';
-import { useLocale } from '../../hooks/useLocale';
 
 type DateRangeProps = {
   start: string;

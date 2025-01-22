@@ -17,6 +17,7 @@ import { type TransactionEntity } from 'loot-core/types/models/transaction';
 
 import { useAccounts } from '../../../hooks/useAccounts';
 import { useCategories } from '../../../hooks/useCategories';
+import { useLocale } from '../../../hooks/useLocale';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { usePayees } from '../../../hooks/usePayees';
 import {
@@ -28,7 +29,7 @@ import { useUndo } from '../../../hooks/useUndo';
 import { AnimatedLoading } from '../../../icons/AnimatedLoading';
 import { SvgDelete } from '../../../icons/v0';
 import { SvgDotsHorizontalTriple } from '../../../icons/v1';
-import { useDispatch, useSelector } from '../../../redux';
+import { useDispatch } from '../../../redux';
 import { styles, theme } from '../../../style';
 import { Button } from '../../common/Button2';
 import { Menu, type MenuItemObject } from '../../common/Menu';
@@ -39,7 +40,6 @@ import { useScrollListener } from '../../ScrollProvider';
 import { FloatingActionBar } from '../FloatingActionBar';
 
 import { TransactionListItem } from './TransactionListItem';
-import { useLocale } from '../../../hooks/useLocale';
 
 const NOTIFICATION_BOTTOM_INSET = 75;
 

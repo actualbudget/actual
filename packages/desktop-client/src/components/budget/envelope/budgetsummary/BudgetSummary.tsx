@@ -5,10 +5,10 @@ import { css } from '@emotion/css';
 
 import * as monthUtils from 'loot-core/src/shared/months';
 
+import { useLocale } from '../../../../hooks/useLocale';
 import { useUndo } from '../../../../hooks/useUndo';
 import { SvgDotsHorizontalTriple } from '../../../../icons/v1';
 import { SvgArrowButtonDown1, SvgArrowButtonUp1 } from '../../../../icons/v2';
-import { useSelector } from '../../../../redux';
 import { theme, styles } from '../../../../style';
 import { Button } from '../../../common/Button2';
 import { Popover } from '../../../common/Popover';
@@ -20,7 +20,6 @@ import { useEnvelopeBudget } from '../EnvelopeBudgetContext';
 import { BudgetMonthMenu } from './BudgetMonthMenu';
 import { ToBudget } from './ToBudget';
 import { TotalsList } from './TotalsList';
-import { useLocale } from '../../../../hooks/useLocale';
 
 type BudgetSummaryProps = {
   month: string;

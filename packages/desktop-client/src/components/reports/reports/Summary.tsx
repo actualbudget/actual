@@ -16,13 +16,14 @@ import {
 } from 'loot-core/types/models';
 
 import { useFilters } from '../../../hooks/useFilters';
+import { useLocale } from '../../../hooks/useLocale';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { SvgEquals } from '../../../icons/v1';
 import { SvgCloseParenthesis } from '../../../icons/v2/CloseParenthesis';
 import { SvgOpenParenthesis } from '../../../icons/v2/OpenParenthesis';
 import { SvgSum } from '../../../icons/v2/Sum';
-import { useDispatch, useSelector } from '../../../redux';
+import { useDispatch } from '../../../redux';
 import { theme } from '../../../style';
 import { Button } from '../../common/Button2';
 import { Text } from '../../common/Text';
@@ -43,7 +44,6 @@ import { calculateTimeRange } from '../reportRanges';
 import { summarySpreadsheet } from '../spreadsheets/summary-spreadsheet';
 import { useReport } from '../useReport';
 import { fromDateRepr } from '../util';
-import { useLocale } from '../../../hooks/useLocale';
 
 export function Summary() {
   const params = useParams();

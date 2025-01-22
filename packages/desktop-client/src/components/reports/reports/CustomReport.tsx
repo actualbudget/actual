@@ -22,11 +22,11 @@ import { type TransObjectLiteral } from 'loot-core/types/util';
 import { useAccounts } from '../../../hooks/useAccounts';
 import { useCategories } from '../../../hooks/useCategories';
 import { useFilters } from '../../../hooks/useFilters';
+import { useLocale } from '../../../hooks/useLocale';
 import { useLocalPref } from '../../../hooks/useLocalPref';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { usePayees } from '../../../hooks/usePayees';
 import { useSyncedPref } from '../../../hooks/useSyncedPref';
-import { useSelector } from '../../../redux';
 import { theme, styles } from '../../../style';
 import { Warning } from '../../alerts';
 import { AlignedText } from '../../common/AlignedText';
@@ -62,7 +62,6 @@ import { createCustomSpreadsheet } from '../spreadsheets/custom-spreadsheet';
 import { createGroupedSpreadsheet } from '../spreadsheets/grouped-spreadsheet';
 import { useReport } from '../useReport';
 import { fromDateRepr } from '../util';
-import { useLocale } from '../../../hooks/useLocale';
 
 /**
  * Transform `selectedCategories` into `conditions`.

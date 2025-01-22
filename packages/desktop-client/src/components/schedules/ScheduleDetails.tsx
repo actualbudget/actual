@@ -19,9 +19,10 @@ import {
 } from 'loot-core/types/models';
 
 import { useDateFormat } from '../../hooks/useDateFormat';
+import { useLocale } from '../../hooks/useLocale';
 import { usePayees } from '../../hooks/usePayees';
 import { useSelected, SelectedProvider } from '../../hooks/useSelected';
-import { useDispatch, useSelector } from '../../redux';
+import { useDispatch } from '../../redux';
 import { theme } from '../../style';
 import { AccountAutocomplete } from '../autocomplete/AccountAutocomplete';
 import { PayeeAutocomplete } from '../autocomplete/PayeeAutocomplete';
@@ -39,7 +40,6 @@ import { SelectedItemsButton } from '../table';
 import { SimpleTransactionsTable } from '../transactions/SimpleTransactionsTable';
 import { AmountInput, BetweenAmountInput } from '../util/AmountInput';
 import { GenericInput } from '../util/GenericInput';
-import { useLocale } from '../../hooks/useLocale';
 
 type Fields = {
   payee: null | string;

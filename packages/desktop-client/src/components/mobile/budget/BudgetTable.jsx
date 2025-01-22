@@ -16,6 +16,7 @@ import * as monthUtils from 'loot-core/src/shared/months';
 
 import { useCategories } from '../../../hooks/useCategories';
 import { useFeatureFlag } from '../../../hooks/useFeatureFlag';
+import { useLocale } from '../../../hooks/useLocale';
 import { useLocalPref } from '../../../hooks/useLocalPref';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { useNotes } from '../../../hooks/useNotes';
@@ -30,7 +31,7 @@ import {
   SvgCheveronRight,
 } from '../../../icons/v1';
 import { SvgViewShow } from '../../../icons/v2';
-import { useDispatch, useSelector } from '../../../redux';
+import { useDispatch } from '../../../redux';
 import { theme, styles } from '../../../style';
 import { BalanceWithCarryover } from '../../budget/BalanceWithCarryover';
 import { makeAmountGrey, makeBalanceAmountStyle } from '../../budget/util';
@@ -50,7 +51,6 @@ import { MOBILE_NAV_HEIGHT } from '../MobileNavTabs';
 import { PullToRefresh } from '../PullToRefresh';
 
 import { ListItem } from './ListItem';
-import { useLocale } from '../../../hooks/useLocale';
 
 const PILL_STYLE = {
   borderRadius: 16,

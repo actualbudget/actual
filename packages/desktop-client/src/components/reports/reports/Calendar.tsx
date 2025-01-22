@@ -34,6 +34,7 @@ import { useAccounts } from '../../../hooks/useAccounts';
 import { useCategories } from '../../../hooks/useCategories';
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import { useFilters } from '../../../hooks/useFilters';
+import { useLocale } from '../../../hooks/useLocale';
 import { useMergedRefs } from '../../../hooks/useMergedRefs';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { usePayees } from '../../../hooks/usePayees';
@@ -47,7 +48,7 @@ import {
   SvgCheveronDown,
   SvgCheveronUp,
 } from '../../../icons/v1';
-import { useDispatch, useSelector } from '../../../redux';
+import { useDispatch } from '../../../redux';
 import { styles, theme } from '../../../style';
 import { Button } from '../../common/Button2';
 import { View } from '../../common/View';
@@ -70,7 +71,6 @@ import {
 } from '../spreadsheets/calendar-spreadsheet';
 import { useReport } from '../useReport';
 import { fromDateRepr } from '../util';
-import { useLocale } from '../../../hooks/useLocale';
 
 const CHEVRON_HEIGHT = 42;
 const SUMMARY_HEIGHT = 140;

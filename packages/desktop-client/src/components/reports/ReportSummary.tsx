@@ -12,14 +12,13 @@ import {
   type DataEntity,
 } from 'loot-core/src/types/models/reports';
 
-import { useSelector } from '../../redux';
+import { useLocale } from '../../hooks/useLocale';
 import { theme, styles } from '../../style';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { PrivacyFilter } from '../PrivacyFilter';
 
 import { ReportOptions } from './ReportOptions';
-import { useLocale } from '../../hooks/useLocale';
 
 type ReportSummaryProps = {
   startDate: string;

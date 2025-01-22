@@ -13,9 +13,10 @@ import { type TimeFrame, type NetWorthWidget } from 'loot-core/types/models';
 
 import { useAccounts } from '../../../hooks/useAccounts';
 import { useFilters } from '../../../hooks/useFilters';
+import { useLocale } from '../../../hooks/useLocale';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { useSyncedPref } from '../../../hooks/useSyncedPref';
-import { useDispatch, useSelector } from '../../../redux';
+import { useDispatch } from '../../../redux';
 import { theme, styles } from '../../../style';
 import { Button } from '../../common/Button2';
 import { Paragraph } from '../../common/Paragraph';
@@ -33,7 +34,6 @@ import { calculateTimeRange } from '../reportRanges';
 import { createSpreadsheet as netWorthSpreadsheet } from '../spreadsheets/net-worth-spreadsheet';
 import { useReport } from '../useReport';
 import { fromDateRepr } from '../util';
-import { useLocale } from '../../../hooks/useLocale';
 
 export function NetWorth() {
   const params = useParams();

@@ -9,6 +9,7 @@ import { getRecurringDescription } from 'loot-core/src/shared/schedules';
 import type { DiscoverScheduleEntity } from 'loot-core/src/types/models';
 
 import { useDateFormat } from '../../hooks/useDateFormat';
+import { useLocale } from '../../hooks/useLocale';
 import {
   useSelected,
   useSelectedDispatch,
@@ -16,7 +17,6 @@ import {
   SelectedProvider,
 } from '../../hooks/useSelected';
 import { useSendPlatformRequest } from '../../hooks/useSendPlatformRequest';
-import { useSelector } from '../../redux';
 import { theme } from '../../style';
 import { ButtonWithLoading } from '../common/Button2';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
@@ -27,7 +27,6 @@ import { Table, TableHeader, Row, Field, SelectCell } from '../table';
 import { DisplayId } from '../util/DisplayId';
 
 import { ScheduleAmountCell } from './SchedulesTable';
-import { useLocale } from '../../hooks/useLocale';
 
 const ROW_HEIGHT = 43;
 

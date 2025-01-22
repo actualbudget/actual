@@ -19,8 +19,8 @@ import {
 } from 'loot-core/types/util';
 
 import { useDateFormat } from '../../hooks/useDateFormat';
+import { useLocale } from '../../hooks/useLocale';
 import { SvgAdd, SvgSubtract } from '../../icons/v0';
-import { useSelector } from '../../redux';
 import { theme } from '../../style';
 import { Button } from '../common/Button2';
 import { InitialFocus } from '../common/InitialFocus';
@@ -34,7 +34,6 @@ import { View } from '../common/View';
 import { Checkbox } from '../forms';
 
 import { DateSelect } from './DateSelect';
-import { useLocale } from '../../hooks/useLocale';
 
 // ex: There is no 6th Friday of the Month
 const MAX_DAY_OF_WEEK_INTERVAL = 5;
