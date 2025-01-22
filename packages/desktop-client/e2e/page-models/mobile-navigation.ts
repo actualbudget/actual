@@ -18,7 +18,7 @@ const NAV_LINKS_HIDDEN_BY_DEFAULT = [
 const ROUTES_BY_PAGE = {
   Budget: '/budget',
   Accounts: '/accounts',
-  Transactions: '/transactions/new',
+  Transaction: '/transactions/new',
   Reports: '/reports',
   Settings: '/settings',
 };
@@ -152,7 +152,7 @@ export class MobileNavigation {
 
   async goToTransactionEntryPage() {
     return await this.navigateToPage(
-      'Transactions',
+      'Transaction',
       () => new MobileTransactionEntryPage(this.page),
     );
   }
