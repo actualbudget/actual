@@ -1,9 +1,17 @@
+import { type Locator, type Page } from '@playwright/test';
+
 import { EditNotesModal } from './mobile-edit-notes-modal';
 
 export class CategoryMenuModal {
-  constructor(page, locator) {
-    this.page = page;
+  readonly page: Page;
+  readonly locator: Locator;
+  readonly heading: Locator;
+  readonly budgetAmountInput: Locator;
+  readonly editNotesButton: Locator;
+
+  constructor(locator: Locator) {
     this.locator = locator;
+    this.page = locator.page();
 
     this.heading = locator.getByRole('heading');
     this.budgetAmountInput = locator.getByTestId('amount-input');
@@ -17,6 +25,6 @@ export class CategoryMenuModal {
   async editNotes() {
     await this.editNotesButton.click();
 
-    return new EditNotesModal(this.page, this.page.getByRole('dialog'));
+    return new EditNotesModal(this.page.getByRole('dialog'));
   }
 }

@@ -1,5 +1,10 @@
+import { type Locator, type Page } from '@playwright/test';
+
 export class MobileReportsPage {
-  constructor(page) {
+  readonly page: Page;
+  readonly overview: Locator;
+
+  constructor(page: Page) {
     this.page = page;
 
     this.overview = page.getByTestId('reports-overview');

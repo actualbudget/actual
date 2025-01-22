@@ -180,7 +180,7 @@ export class MobileBudgetPage {
     const categoryButton = await this.#getButtonForCategory(categoryName);
     await categoryButton.click();
 
-    return new CategoryMenuModal(this.page, this.page.getByRole('dialog'));
+    return new CategoryMenuModal(this.page.getByRole('dialog'));
   }
 
   async #getButtonForCell(
@@ -222,7 +222,7 @@ export class MobileBudgetPage {
     const budgetedButton = await this.getButtonForBudgeted(categoryName);
     await budgetedButton.click();
 
-    return new BudgetMenuModal(this.page, this.page.getByRole('dialog'));
+    return new BudgetMenuModal(this.page.getByRole('dialog'));
   }
 
   async openSpentPage(categoryName: string) {
@@ -239,7 +239,7 @@ export class MobileBudgetPage {
 
     if (await balanceButton.isVisible()) {
       await balanceButton.click();
-      return new BalanceMenuModal(this.page, this.page.getByRole('dialog'));
+      return new BalanceMenuModal(this.page.getByRole('dialog'));
     } else {
       throw new Error(
         `Balance button for category ${categoryName} not found or not visible.`,
@@ -321,10 +321,7 @@ export class MobileBudgetPage {
     const budgetSummaryButton = await this.#getButtonForEnvelopeBudgetSummary();
     await budgetSummaryButton.click();
 
-    return new EnvelopeBudgetSummaryModal(
-      this.page,
-      this.page.getByRole('dialog'),
-    );
+    return new EnvelopeBudgetSummaryModal(this.page.getByRole('dialog'));
   }
 
   async #getButtonForTrackingBudgetSummary({
@@ -355,9 +352,6 @@ export class MobileBudgetPage {
     const budgetSummaryButton = await this.#getButtonForTrackingBudgetSummary();
     await budgetSummaryButton.click();
 
-    return new TrackingBudgetSummaryModal(
-      this.page,
-      this.page.getByRole('dialog'),
-    );
+    return new TrackingBudgetSummaryModal(this.page.getByRole('dialog'));
   }
 }

@@ -1,7 +1,19 @@
+import { type Locator, type Page } from '@playwright/test';
+
 export class BudgetMenuModal {
-  constructor(page, locator) {
-    this.page = page;
+  readonly page: Page;
+  readonly locator: Locator;
+  readonly heading: Locator;
+  readonly budgetAmountInput: Locator;
+  readonly copyLastMonthBudgetButton: Locator;
+  readonly setTo3MonthAverageButton: Locator;
+  readonly setTo6MonthAverageButton: Locator;
+  readonly setToYearlyAverageButton: Locator;
+  readonly applyBudgetTemplateButton: Locator;
+
+  constructor(locator: Locator) {
     this.locator = locator;
+    this.page = locator.page();
 
     this.heading = locator.getByRole('heading');
     this.budgetAmountInput = locator.getByTestId('amount-input');
