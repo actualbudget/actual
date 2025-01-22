@@ -7,7 +7,6 @@ import { useSchedules } from 'loot-core/src/client/data-hooks/schedules';
 import { send } from 'loot-core/src/platform/client/fetch';
 import { type ScheduleEntity } from 'loot-core/src/types/models';
 
-import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { useDispatch } from '../../redux';
 import { theme } from '../../style';
 import { Button } from '../common/Button2';
@@ -22,8 +21,6 @@ export function Schedules() {
 
   const dispatch = useDispatch();
   const [filter, setFilter] = useState('');
-
-  const upcomingLengthEnabled = useFeatureFlag('upcomingLengthAdjustment');
 
   const onEdit = useCallback(
     (id: ScheduleEntity['id']) => {
@@ -134,11 +131,9 @@ export function Schedules() {
           <Button onPress={onDiscover}>
             <Trans>Find schedules</Trans>
           </Button>
-          {upcomingLengthEnabled && (
-            <Button onPress={onChangeUpcomingLength}>
-              <Trans>Change upcoming length</Trans>
-            </Button>
-          )}
+          <Button onPress={onChangeUpcomingLength}>
+            <Trans>Change upcoming length</Trans>
+          </Button>
         </View>
         <Button variant="primary" onPress={onAdd}>
           <Trans>Add new schedule</Trans>
