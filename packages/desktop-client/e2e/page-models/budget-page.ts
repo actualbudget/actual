@@ -54,9 +54,9 @@ export class BudgetPage {
 
   async getTableTotals() {
     return {
-      budgeted: this.getTotalBudgeted(),
-      spent: this.getTotalSpent(),
-      balance: this.getTotalLeftover(),
+      budgeted: await this.getTotalBudgeted(),
+      spent: await this.getTotalSpent(),
+      balance: await this.getTotalLeftover(),
     };
   }
 
