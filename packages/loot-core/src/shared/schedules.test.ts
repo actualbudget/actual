@@ -1,9 +1,9 @@
 import { enUS } from 'date-fns/locale';
+import i18next from 'i18next';
 import MockDate from 'mockdate';
 
 import * as monthUtils from './months';
 import { getRecurringDescription, getStatus } from './schedules';
-import i18next from 'i18next';
 
 i18next.init({
   lng: 'en',
