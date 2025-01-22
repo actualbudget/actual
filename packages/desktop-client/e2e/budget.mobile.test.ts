@@ -76,7 +76,7 @@ async function setBudgetAverage(
   return averageSpent;
 }
 
-const budgetTypes = ['Envelope', 'Tracking'];
+const budgetTypes = ['Envelope', 'Tracking'] as const;
 
 budgetTypes.forEach(budgetType => {
   test.describe(`Mobile Budget [${budgetType}]`, () => {
