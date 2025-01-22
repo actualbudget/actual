@@ -21,6 +21,7 @@ import IngPlIngbplpw from './banks/ing_pl_ingbplpw.js';
 import IntegrationBank from './banks/integration-bank.js';
 import IsyBankItbbitmm from './banks/isybank_itbbitmm.js';
 import KbcKredbebb from './banks/kbc_kredbebb.js';
+import LhvLhvbee22 from './banks/lhv-lhvbee22.js';
 import MbankRetailBrexplpw from './banks/mbank_retail_brexplpw.js';
 import NationwideNaiagb21 from './banks/nationwide_naiagb21.js';
 import NbgEthngraaxxx from './banks/nbg_ethngraaxxx.js';
@@ -60,6 +61,7 @@ export const banks = [
   IngPlIngbplpw,
   IsyBankItbbitmm,
   KbcKredbebb,
+  LhvLhvbee22,
   MbankRetailBrexplpw,
   NationwideNaiagb21,
   NbgEthngraaxxx,
