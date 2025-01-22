@@ -43,6 +43,7 @@ import { calculateTimeRange } from '../reportRanges';
 import { summarySpreadsheet } from '../spreadsheets/summary-spreadsheet';
 import { useReport } from '../useReport';
 import { fromDateRepr } from '../util';
+import { useLocale } from '../../../hooks/useLocale';
 
 export function Summary() {
   const params = useParams();
@@ -65,7 +66,7 @@ type SummaryInnerProps = {
 type FilterObject = ReturnType<typeof useFilters>;
 
 function SummaryInner({ widget }: SummaryInnerProps) {
-  const locale = useSelector(state => state.app.locale);
+  const locale = useLocale();
   const { t } = useTranslation();
   const [initialStart, initialEnd, initialMode] = calculateTimeRange(
     widget?.meta?.timeFrame,

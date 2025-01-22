@@ -39,6 +39,7 @@ import { SelectedItemsButton } from '../table';
 import { SimpleTransactionsTable } from '../transactions/SimpleTransactionsTable';
 import { AmountInput, BetweenAmountInput } from '../util/AmountInput';
 import { GenericInput } from '../util/GenericInput';
+import { useLocale } from '../../hooks/useLocale';
 
 type Fields = {
   payee: null | string;
@@ -106,7 +107,7 @@ type ScheduleDetailsProps = {
 };
 
 export function ScheduleDetails({ id, transaction }: ScheduleDetailsProps) {
-  const locale = useSelector(state => state.app.locale);
+  const locale = useLocale();
   const { t } = useTranslation();
 
   const adding = id == null;

@@ -25,6 +25,7 @@ import {
   validateEnd,
   validateStart,
 } from './reportRanges';
+import { useLocale } from '../../hooks/useLocale';
 
 type HeaderProps = {
   start: TimeFrame['start'];
@@ -67,7 +68,7 @@ export function Header({
   onConditionsOpChange,
   children,
 }: HeaderProps) {
-  const locale = useSelector(state => state.app.locale);
+  const locale = useLocale();
   const { t } = useTranslation();
   const { isNarrowWidth } = useResponsive();
   function convertToMonth(

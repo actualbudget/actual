@@ -17,6 +17,7 @@ import { Button } from '../common/Button2';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { View } from '../common/View';
 import { Notes } from '../Notes';
+import { useLocale } from '../../hooks/useLocale';
 
 type TrackingBudgetMonthMenuModalProps = {
   month: string;
@@ -29,7 +30,7 @@ export function TrackingBudgetMonthMenuModal({
   onBudgetAction,
   onEditNotes,
 }: TrackingBudgetMonthMenuModalProps) {
-  const locale = useSelector(state => state.app.locale);
+  const locale = useLocale();
   const { t } = useTranslation();
   const originalNotes = useNotes(`budget-${month}`);
   const { showUndoNotification } = useUndo();

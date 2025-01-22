@@ -39,6 +39,7 @@ import { useScrollListener } from '../../ScrollProvider';
 import { FloatingActionBar } from '../FloatingActionBar';
 
 import { TransactionListItem } from './TransactionListItem';
+import { useLocale } from '../../../hooks/useLocale';
 
 const NOTIFICATION_BOTTOM_INSET = 75;
 
@@ -79,7 +80,7 @@ export function TransactionList({
   isLoadingMore,
   onLoadMore,
 }: TransactionListProps) {
-  const locale = useSelector(state => state.app.locale);
+  const locale = useLocale();
   const { t } = useTranslation();
   const sections = useMemo(() => {
     // Group by date. We can assume transactions is ordered

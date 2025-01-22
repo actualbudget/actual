@@ -34,6 +34,7 @@ import { View } from '../common/View';
 import { Checkbox } from '../forms';
 
 import { DateSelect } from './DateSelect';
+import { useLocale } from '../../hooks/useLocale';
 
 // ex: There is no 6th Friday of the Month
 const MAX_DAY_OF_WEEK_INTERVAL = 5;
@@ -241,7 +242,7 @@ function SchedulePreview({
 }: {
   previewDates: string[] | string;
 }) {
-  const locale = useSelector(state => state.app.locale);
+  const locale = useLocale();
   const dateFormat = (useDateFormat() || 'MM/dd/yyyy')
     .replace('MM', 'M')
     .replace('dd', 'd');
@@ -593,7 +594,7 @@ export function RecurringSchedulePicker({
   const triggerRef = useRef(null);
   const [isOpen, setIsOpen] = useState(false);
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
-  const locale = useSelector(state => state.app.locale);
+  const locale = useLocale();
 
   function onSave(config: RecurConfig) {
     onChange(config);

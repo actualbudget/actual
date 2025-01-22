@@ -23,12 +23,13 @@ import { BudgetMonthMenu } from './BudgetMonthMenu';
 import { ExpenseTotal } from './ExpenseTotal';
 import { IncomeTotal } from './IncomeTotal';
 import { Saved } from './Saved';
+import { useLocale } from '../../../../hooks/useLocale';
 
 type BudgetSummaryProps = {
   month?: string;
 };
 export function BudgetSummary({ month }: BudgetSummaryProps) {
-  const locale = useSelector(state => state.app.locale);
+  const locale = useLocale();
   const { t } = useTranslation();
   const {
     currentMonth,

@@ -554,7 +554,7 @@ async function addMovementNotes({
     ])?.note,
   );
 
-  const locale = await getLocale(await asyncStorage.getItem('language'));
+  const locale = getLocale(await asyncStorage.getItem('language'));
   const displayDay = monthUtils.format(
     monthUtils.currentDate(),
     'MMMM dd',

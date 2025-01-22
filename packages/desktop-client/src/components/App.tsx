@@ -27,7 +27,6 @@ import {
 } from 'loot-core/src/platform/client/fetch';
 
 import { useMetadataPref } from '../hooks/useMetadataPref';
-import { useSyncLocale } from '../hooks/useSyncLocale';
 import { installPolyfills } from '../polyfills';
 import { useDispatch, useSelector } from '../redux';
 import { styles, hasHiddenScrollbars, ThemeStyle, useTheme } from '../style';
@@ -161,8 +160,6 @@ function ErrorFallback({ error }: FallbackProps) {
 }
 
 export function App() {
-  useSyncLocale();
-
   const [hiddenScrollbars, setHiddenScrollbars] = useState(
     hasHiddenScrollbars(),
   );

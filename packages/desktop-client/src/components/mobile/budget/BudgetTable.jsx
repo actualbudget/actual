@@ -50,6 +50,7 @@ import { MOBILE_NAV_HEIGHT } from '../MobileNavTabs';
 import { PullToRefresh } from '../PullToRefresh';
 
 import { ListItem } from './ListItem';
+import { useLocale } from '../../../hooks/useLocale';
 
 const PILL_STYLE = {
   borderRadius: 16,
@@ -1973,7 +1974,7 @@ function MonthSelector({
   onPrevMonth,
   onNextMonth,
 }) {
-  const locale = useSelector(state => state.app.locale);
+  const locale = useLocale();
   const { t } = useTranslation();
   const prevEnabled = month > monthBounds.start;
   const nextEnabled = month < monthUtils.subMonths(monthBounds.end, 1);

@@ -40,6 +40,7 @@ import { calculateSpendingReportTimeRange } from '../reportRanges';
 import { createSpendingSpreadsheet } from '../spreadsheets/spending-spreadsheet';
 import { useReport } from '../useReport';
 import { fromDateRepr } from '../util';
+import { useLocale } from '../../../hooks/useLocale';
 
 export function Spending() {
   const params = useParams();
@@ -60,7 +61,7 @@ type SpendingInternalProps = {
 };
 
 function SpendingInternal({ widget }: SpendingInternalProps) {
-  const locale = useSelector(state => state.app.locale);
+  const locale = useLocale();
   const dispatch = useDispatch();
   const { t } = useTranslation();
 

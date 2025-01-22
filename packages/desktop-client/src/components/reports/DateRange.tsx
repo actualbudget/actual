@@ -10,6 +10,7 @@ import { theme } from '../../style';
 import { styles } from '../../style/styles';
 import { Block } from '../common/Block';
 import { Text } from '../common/Text';
+import { useLocale } from '../../hooks/useLocale';
 
 type DateRangeProps = {
   start: string;
@@ -27,7 +28,7 @@ function checkDate(date: string) {
 }
 
 export function DateRange({ start, end, type }: DateRangeProps): ReactElement {
-  const locale = useSelector(state => state.app.locale);
+  const locale = useLocale();
   const checkStart = checkDate(start);
   const checkEnd = checkDate(end);
 

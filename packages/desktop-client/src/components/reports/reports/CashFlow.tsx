@@ -38,6 +38,7 @@ import { LoadingIndicator } from '../LoadingIndicator';
 import { calculateTimeRange } from '../reportRanges';
 import { cashFlowByDate } from '../spreadsheets/cash-flow-spreadsheet';
 import { useReport } from '../useReport';
+import { useLocale } from '../../../hooks/useLocale';
 
 export const defaultTimeFrame = {
   start: monthUtils.dayFromDate(monthUtils.currentMonth()),
@@ -64,7 +65,7 @@ type CashFlowInnerProps = {
 };
 
 function CashFlowInner({ widget }: CashFlowInnerProps) {
-  const locale = useSelector(state => state.app.locale);
+  const locale = useLocale();
   const dispatch = useDispatch();
   const { t } = useTranslation();
 

@@ -16,6 +16,7 @@ import { useSelector } from '../../redux';
 import { theme } from '../../style';
 import { Link } from '../common/Link';
 import { Text } from '../common/Text';
+import { useLocale } from '../../hooks/useLocale';
 
 type ValueProps<T> = {
   value: T;
@@ -46,7 +47,7 @@ export function Value<T>({
     color: theme.pageTextPositive,
     ...style,
   };
-  const locale = useSelector(state => state.app.locale);
+  const locale = useLocale();
 
   const data =
     dataProp ||

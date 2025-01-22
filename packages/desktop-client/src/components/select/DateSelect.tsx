@@ -35,6 +35,7 @@ import { View } from '../common/View';
 
 import DateSelectLeft from './DateSelect.left.png';
 import DateSelectRight from './DateSelect.right.png';
+import { useLocale } from '../../hooks/useLocale';
 
 const pickerStyles: CSSProperties = {
   '& .pika-single.actual-date-picker': {
@@ -127,7 +128,7 @@ type DatePickerForwardedRef = {
 };
 const DatePicker = forwardRef<DatePickerForwardedRef, DatePickerProps>(
   ({ value, firstDayOfWeekIdx, dateFormat, onUpdate, onSelect }, ref) => {
-    const locale = useSelector(state => state.app.locale);
+    const locale = useLocale();
     const picker = useRef(null);
     const mountPoint = useRef(null);
 

@@ -70,6 +70,7 @@ import {
 } from '../spreadsheets/calendar-spreadsheet';
 import { useReport } from '../useReport';
 import { fromDateRepr } from '../util';
+import { useLocale } from '../../../hooks/useLocale';
 
 const CHEVRON_HEIGHT = 42;
 const SUMMARY_HEIGHT = 140;
@@ -95,7 +96,7 @@ type CalendarInnerProps = {
 };
 
 function CalendarInner({ widget, parameters }: CalendarInnerProps) {
-  const locale = useSelector(state => state.app.locale);
+  const locale = useLocale();
   const { t } = useTranslation();
   const [initialStart, initialEnd, initialMode] = calculateTimeRange(
     widget?.meta?.timeFrame,

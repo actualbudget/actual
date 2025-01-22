@@ -27,6 +27,7 @@ import { Table, TableHeader, Row, Field, SelectCell } from '../table';
 import { DisplayId } from '../util/DisplayId';
 
 import { ScheduleAmountCell } from './SchedulesTable';
+import { useLocale } from '../../hooks/useLocale';
 
 const ROW_HEIGHT = 43;
 
@@ -42,7 +43,7 @@ function DiscoverSchedulesTable({
   const selectedItems = useSelectedItems();
   const dispatchSelected = useSelectedDispatch();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
-  const locale = useSelector(state => state.app.locale);
+  const locale = useLocale();
 
   function renderItem({ item }: { item: DiscoverScheduleEntity }) {
     const selected = selectedItems.has(item.id);

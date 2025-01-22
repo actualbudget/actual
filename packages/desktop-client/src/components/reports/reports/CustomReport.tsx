@@ -62,6 +62,7 @@ import { createCustomSpreadsheet } from '../spreadsheets/custom-spreadsheet';
 import { createGroupedSpreadsheet } from '../spreadsheets/grouped-spreadsheet';
 import { useReport } from '../useReport';
 import { fromDateRepr } from '../util';
+import { useLocale } from '../../../hooks/useLocale';
 
 /**
  * Transform `selectedCategories` into `conditions`.
@@ -122,7 +123,7 @@ type CustomReportInnerProps = {
 };
 
 function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
-  const locale = useSelector(state => state.app.locale);
+  const locale = useLocale();
   const { t } = useTranslation();
   const categories = useCategories();
   const { isNarrowWidth } = useResponsive();

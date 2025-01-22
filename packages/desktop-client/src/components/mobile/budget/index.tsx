@@ -31,13 +31,14 @@ import { NamespaceContext } from '../../spreadsheet/NamespaceContext';
 import { SyncRefresh } from '../../SyncRefresh';
 
 import { BudgetTable } from './BudgetTable';
+import { useLocale } from '../../../hooks/useLocale';
 
 function isBudgetType(input?: string): input is 'rollover' | 'report' {
   return ['rollover', 'report'].includes(input);
 }
 
 export function Budget() {
-  const locale = useSelector(state => state.app.locale);
+  const locale = useLocale();
   const { list: categories, grouped: categoryGroups } = useCategories();
   const [budgetTypePref] = useSyncedPref('budgetType');
   const budgetType = isBudgetType(budgetTypePref) ? budgetTypePref : 'rollover';

@@ -20,13 +20,14 @@ import { useEnvelopeBudget } from '../EnvelopeBudgetContext';
 import { BudgetMonthMenu } from './BudgetMonthMenu';
 import { ToBudget } from './ToBudget';
 import { TotalsList } from './TotalsList';
+import { useLocale } from '../../../../hooks/useLocale';
 
 type BudgetSummaryProps = {
   month: string;
   isGoalTemplatesEnabled?: boolean;
 };
 export function BudgetSummary({ month }: BudgetSummaryProps) {
-  const locale = useSelector(state => state.app.locale);
+  const locale = useLocale();
   const {
     currentMonth,
     summaryCollapsed: collapsed,

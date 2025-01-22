@@ -15,6 +15,7 @@ import { TotalsList } from '../budget/envelope/budgetsummary/TotalsList';
 import { useEnvelopeSheetValue } from '../budget/envelope/EnvelopeBudgetComponents';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { NamespaceContext } from '../spreadsheet/NamespaceContext';
+import { useLocale } from '../../hooks/useLocale';
 
 type EnvelopeBudgetSummaryModalProps = {
   onBudgetAction: (month: string, action: string, arg?: unknown) => void;
@@ -27,7 +28,7 @@ export function EnvelopeBudgetSummaryModal({
 }: EnvelopeBudgetSummaryModalProps) {
   const { t } = useTranslation();
 
-  const locale = useSelector(state => state.app.locale);
+  const locale = useLocale();
   const dispatch = useDispatch();
   const prevMonthName = format(prevMonth(month), 'MMM', locale);
   const sheetValue =

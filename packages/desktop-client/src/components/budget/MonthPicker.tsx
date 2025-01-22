@@ -12,6 +12,7 @@ import { Link } from '../common/Link';
 import { View } from '../common/View';
 
 import { type MonthBounds } from './MonthsContext';
+import { useLocale } from '../../hooks/useLocale';
 
 type MonthPickerProps = {
   startMonth: string;
@@ -28,7 +29,7 @@ export const MonthPicker = ({
   style,
   onSelect,
 }: MonthPickerProps) => {
-  const locale = useSelector(state => state.app.locale);
+  const locale = useLocale();
   const { t } = useTranslation();
   const [hoverId, setHoverId] = useState(null);
   const [targetMonthCount, setTargetMonthCount] = useState(12);

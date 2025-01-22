@@ -1,9 +1,7 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
-import { enUS } from 'date-fns/locale';
 
 import { send } from '../../platform/client/fetch';
 import { getUploadError } from '../../shared/errors';
-import { getLocale } from '../../shared/locale';
 import { type AccountEntity } from '../../types/models';
 import { syncAccounts } from '../accounts/accountsSlice';
 import { loadPrefs, pushModal } from '../actions';
@@ -20,7 +18,6 @@ type AppState = {
   } | null;
   showUpdateNotification: boolean;
   managerHasInitialized: boolean;
-  locale: Locale;
 };
 
 const initialState: AppState = {
@@ -28,7 +25,6 @@ const initialState: AppState = {
   updateInfo: null,
   showUpdateNotification: true,
   managerHasInitialized: false,
-  locale: enUS,
 };
 
 export const updateApp = createAppAsyncThunk(
@@ -121,14 +117,6 @@ export const syncAndDownload = createAppAsyncThunk(
   },
 );
 
-export const fetchLocale = createAppAsyncThunk(
-  'app/fetchLocale',
-  async ({ language }: { language: string }) => {
-    const locale = await getLocale(language);
-    return locale;
-  },
-);
-
 type SetAppStatePayload = Partial<AppState>;
 
 const appSlice = createSlice({
@@ -142,11 +130,6 @@ const appSlice = createSlice({
       };
     },
   },
-  extraReducers: builder => {
-    builder.addCase(fetchLocale.fulfilled, (state, action) => {
-      state.locale = action.payload; // Update the locale when loaded
-    });
-  },
 });
 
 export const { name, reducer, getInitialState } = appSlice;
@@ -157,7 +140,6 @@ export const actions = {
   resetSync,
   sync,
   syncAndDownload,
-  fetchLocale,
 };
 
 export const { setAppState } = actions;

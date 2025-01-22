@@ -22,6 +22,7 @@ import { ReportCardName } from '../ReportCardName';
 import { calculateTimeRange } from '../reportRanges';
 import { createSpreadsheet as netWorthSpreadsheet } from '../spreadsheets/net-worth-spreadsheet';
 import { useReport } from '../useReport';
+import { useLocale } from '../../../hooks/useLocale';
 
 type NetWorthCardProps = {
   widgetId: string;
@@ -40,7 +41,7 @@ export function NetWorthCard({
   onMetaChange,
   onRemove,
 }: NetWorthCardProps) {
-  const locale = useSelector(state => state.app.locale);
+  const locale = useLocale();
   const { t } = useTranslation();
   const { isNarrowWidth } = useResponsive();
 

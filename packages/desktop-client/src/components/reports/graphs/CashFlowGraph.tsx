@@ -27,6 +27,7 @@ import { theme } from '../../../style';
 import { AlignedText } from '../../common/AlignedText';
 import { chartTheme } from '../chart-theme';
 import { Container } from '../Container';
+import { useLocale } from '../../../hooks/useLocale';
 
 const MAX_BAR_SIZE = 50;
 const ANIMATION_DURATION = 1000; // in ms
@@ -36,7 +37,7 @@ type CustomTooltipProps = TooltipProps<number, 'date'> & {
 };
 
 function CustomTooltip({ active, payload, isConcise }: CustomTooltipProps) {
-  const locale = useSelector(state => state.app.locale);
+  const locale = useLocale();
   const { t } = useTranslation();
 
   if (!active || !payload || !Array.isArray(payload) || !payload[0]) {
@@ -112,7 +113,7 @@ export function CashFlowGraph({
   showBalance = true,
   style,
 }: CashFlowGraphProps) {
-  const locale = useSelector(state => state.app.locale);
+  const locale = useLocale();
   const privacyMode = usePrivacyMode();
   const [yAxisIsHovered, setYAxisIsHovered] = useState(false);
 

@@ -17,6 +17,7 @@ import { calculateTimeRange } from '../reportRanges';
 import { summarySpreadsheet } from '../spreadsheets/summary-spreadsheet';
 import { SummaryNumber } from '../SummaryNumber';
 import { useReport } from '../useReport';
+import { useLocale } from '../../../hooks/useLocale';
 
 type SummaryCardProps = {
   widgetId: string;
@@ -33,7 +34,7 @@ export function SummaryCard({
   onMetaChange,
   onRemove,
 }: SummaryCardProps) {
-  const locale = useSelector(state => state.app.locale);
+  const locale = useLocale();
   const { t } = useTranslation();
   const [start, end] = calculateTimeRange(meta?.timeFrame, {
     start: monthUtils.dayFromDate(monthUtils.currentMonth()),

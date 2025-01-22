@@ -20,6 +20,7 @@ import {
 } from '../common/Modal';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
+import { useLocale } from '../../hooks/useLocale';
 
 type ScheduledTransactionMenuModalProps = ScheduledTransactionMenuProps;
 
@@ -28,7 +29,7 @@ export function ScheduledTransactionMenuModal({
   onSkip,
   onPost,
 }: ScheduledTransactionMenuModalProps) {
-  const locale = useSelector(state => state.app.locale);
+  const locale = useLocale();
   const { t } = useTranslation();
   const defaultMenuItemStyle: CSSProperties = {
     ...styles.mobileMenuItem,

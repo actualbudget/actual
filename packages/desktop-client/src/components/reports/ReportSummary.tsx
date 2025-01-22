@@ -19,6 +19,7 @@ import { View } from '../common/View';
 import { PrivacyFilter } from '../PrivacyFilter';
 
 import { ReportOptions } from './ReportOptions';
+import { useLocale } from '../../hooks/useLocale';
 
 type ReportSummaryProps = {
   startDate: string;
@@ -37,7 +38,7 @@ export function ReportSummary({
   interval,
   intervalsCount,
 }: ReportSummaryProps) {
-  const locale = useSelector(state => state.app.locale);
+  const locale = useLocale();
   const { t } = useTranslation();
   const net =
     balanceTypeOp === 'netAssets'

@@ -24,6 +24,7 @@ import { MobilePageHeader, Page } from '../../Page';
 import { MobileBackButton } from '../MobileBackButton';
 import { AddTransactionButton } from '../transactions/AddTransactionButton';
 import { TransactionListWithBalances } from '../transactions/TransactionListWithBalances';
+import { useLocale } from '../../../hooks/useLocale';
 
 type CategoryTransactionsProps = {
   category: CategoryEntity;
@@ -34,7 +35,7 @@ export function CategoryTransactions({
   category,
   month,
 }: CategoryTransactionsProps) {
-  const locale = useSelector(state => state.app.locale);
+  const locale = useLocale();
   const dispatch = useDispatch();
   const navigate = useNavigate();
 

@@ -33,6 +33,7 @@ import { calculateTimeRange } from '../reportRanges';
 import { createSpreadsheet as netWorthSpreadsheet } from '../spreadsheets/net-worth-spreadsheet';
 import { useReport } from '../useReport';
 import { fromDateRepr } from '../util';
+import { useLocale } from '../../../hooks/useLocale';
 
 export function NetWorth() {
   const params = useParams();
@@ -53,7 +54,7 @@ type NetWorthInnerProps = {
 };
 
 function NetWorthInner({ widget }: NetWorthInnerProps) {
-  const locale = useSelector(state => state.app.locale);
+  const locale = useLocale();
   const dispatch = useDispatch();
   const { t } = useTranslation();
 
