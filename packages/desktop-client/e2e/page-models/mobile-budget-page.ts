@@ -102,8 +102,8 @@ export class MobileBudgetPage {
       : 'Tracking';
   }
 
-  async waitFor(options) {
-    await this.budgetTable.waitFor(options);
+  async waitFor(...options: Parameters<Locator['waitFor']>) {
+    await this.budgetTable.waitFor(...options);
   }
 
   async toggleVisibleColumns({
@@ -319,6 +319,9 @@ export class MobileBudgetPage {
 
   async openEnvelopeBudgetSummary() {
     const budgetSummaryButton = await this.#getButtonForEnvelopeBudgetSummary();
+    if (!budgetSummaryButton) {
+      throw new Error('Envelope budget summary button not found.');
+    }
     await budgetSummaryButton.click();
 
     return new EnvelopeBudgetSummaryModal(this.page.getByRole('dialog'));
@@ -350,6 +353,9 @@ export class MobileBudgetPage {
 
   async openTrackingBudgetSummary() {
     const budgetSummaryButton = await this.#getButtonForTrackingBudgetSummary();
+    if (!budgetSummaryButton) {
+      throw new Error('Tracking budget summary button not found.');
+    }
     await budgetSummaryButton.click();
 
     return new TrackingBudgetSummaryModal(this.page.getByRole('dialog'));

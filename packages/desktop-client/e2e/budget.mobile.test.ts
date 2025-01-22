@@ -60,6 +60,9 @@ async function setBudgetAverage(
     await budgetPage.goToPreviousMonth();
     const spentButton = await budgetPage.getButtonForSpent(categoryName);
     const spent = await spentButton.textContent();
+    if (!spent) {
+      throw new Error('Failed to get spent amount');
+    }
     totalSpent += currencyToAmount(spent) ?? 0;
   }
 
@@ -279,6 +282,10 @@ budgetTypes.forEach(budgetType => {
       await budgetPage.goToPreviousMonth();
 
       const lastMonthBudget = await budgetedButton.textContent();
+
+      if (!lastMonthBudget) {
+        throw new Error('Failed to get last month budget');
+      }
 
       await budgetPage.goToNextMonth();
 

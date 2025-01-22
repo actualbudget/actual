@@ -10,7 +10,7 @@ export class MobileReportsPage {
     this.overview = page.getByTestId('reports-overview');
   }
 
-  async waitFor(options) {
-    await this.overview.waitFor(options);
+  async waitFor(...options: Parameters<Locator['waitFor']>) {
+    await this.overview.waitFor(...options);
   }
 }

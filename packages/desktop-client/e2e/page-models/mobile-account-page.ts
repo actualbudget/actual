@@ -26,8 +26,8 @@ export class MobileAccountPage {
     });
   }
 
-  async waitFor() {
-    await this.transactionList.waitFor();
+  async waitFor(...options: Parameters<Locator['waitFor']>) {
+    await this.transactionList.waitFor(...options);
   }
 
   /**

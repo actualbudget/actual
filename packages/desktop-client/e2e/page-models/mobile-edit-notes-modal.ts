@@ -20,7 +20,7 @@ export class EditNotesModal {
     await this.heading.getByRole('button', { name: 'Close' }).click();
   }
 
-  async updateNotes(notes) {
+  async updateNotes(notes: string) {
     await this.textArea.fill(notes);
     await this.saveNotesButton.click();
   }

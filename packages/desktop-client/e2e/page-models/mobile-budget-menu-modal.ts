@@ -38,8 +38,8 @@ export class BudgetMenuModal {
     await this.heading.getByRole('button', { name: 'Close' }).click();
   }
 
-  async setBudgetAmount(newAmount) {
-    await this.budgetAmountInput.fill(String(newAmount));
+  async setBudgetAmount(newAmount: string) {
+    await this.budgetAmountInput.fill(newAmount);
     await this.budgetAmountInput.blur();
     await this.close();
   }

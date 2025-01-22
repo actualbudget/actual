@@ -56,8 +56,8 @@ export class AccountPage {
     this.selectTooltip = this.page.getByTestId('transactions-select-tooltip');
   }
 
-  async waitFor() {
-    await this.transactionTable.waitFor();
+  async waitFor(...options: Parameters<Locator['waitFor']>) {
+    await this.transactionTable.waitFor(...options);
   }
 
   /**

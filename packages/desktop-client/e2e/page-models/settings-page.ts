@@ -24,24 +24,24 @@ export class SettingsPage {
     );
   }
 
-  async waitFor(options) {
-    await this.settings.waitFor(options);
+  async waitFor(...options: Parameters<Locator['waitFor']>) {
+    await this.settings.waitFor(...options);
   }
 
   async exportData() {
     await this.exportDataButton.click();
   }
 
-  async useBudgetType(budgetType) {
+  async useBudgetType(budgetType: 'Envelope' | 'Tracking') {
     await this.switchBudgetTypeButton.waitFor();
 
     const buttonText = await this.switchBudgetTypeButton.textContent();
-    if (buttonText.includes(budgetType.toLowerCase())) {
+    if (buttonText?.includes(budgetType.toLowerCase())) {
       await this.switchBudgetTypeButton.click();
     }
   }
 
-  async enableExperimentalFeature(featureName) {
+  async enableExperimentalFeature(featureName: string) {
     if (await this.advancedSettingsButton.isVisible()) {
       await this.advancedSettingsButton.click();
     }

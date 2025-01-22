@@ -6,7 +6,6 @@ export class MobileTransactionEntryPage {
   readonly page: Page;
   readonly header: Locator;
   readonly amountField: Locator;
-  readonly add: Locator;
   readonly transactionForm: Locator;
   readonly footer: Locator;
   readonly addTransactionButton: Locator;
@@ -22,8 +21,8 @@ export class MobileTransactionEntryPage {
     });
   }
 
-  async waitFor(options) {
-    await this.transactionForm.waitFor(options);
+  async waitFor(...options: Parameters<Locator['waitFor']>) {
+    await this.transactionForm.waitFor(...options);
   }
 
   async fillField(fieldLocator: Locator, content: string) {

@@ -14,14 +14,14 @@ export class MobileAccountsPage {
     this.accountListItems = this.accountList.getByTestId('account-list-item');
   }
 
-  async waitFor() {
-    await this.accountList.waitFor();
+  async waitFor(...options: Parameters<Locator['waitFor']>) {
+    await this.accountList.waitFor(...options);
   }
 
   /**
    * Get the name and balance of the nth account
    */
-  async getNthAccount(idx) {
+  async getNthAccount(idx: number) {
     const accountRow = this.accountListItems.nth(idx);
 
     return {
@@ -33,7 +33,7 @@ export class MobileAccountsPage {
   /**
    * Click on the n-th account to open it up
    */
-  async openNthAccount(idx) {
+  async openNthAccount(idx: number) {
     await this.accountListItems.nth(idx).click();
 
     return new MobileAccountPage(this.page);
