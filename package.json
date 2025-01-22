@@ -90,5 +90,8 @@
   "browserslist": [
     "electron 24.0",
     "defaults"
-  ]
+  ],
+  "dependencies": {
+    "html2canvas": "^1.4.1"
+  }
 }
