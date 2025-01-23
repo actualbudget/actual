@@ -117,9 +117,7 @@ export function Schedules() {
             style={{ backgroundColor: theme.tableBackground }}
           />
         }
-        calendarComponent={
-        <CalendarView
-          schedules={schedules} />}
+        calendarComponent={<CalendarView schedules={schedules} />}
       />
       <View
         style={{

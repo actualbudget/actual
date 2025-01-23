@@ -1,7 +1,16 @@
 import { useEffect, useState } from 'react';
-import * as d from 'date-fns';
 
+import * as d from 'date-fns';
 import { addMonths, addYears, format, startOfYear } from 'date-fns';
+
+import { addDays, parseDate } from 'loot-core/shared/months';
+import {
+  extractScheduleConds,
+  getNextDate,
+  getScheduledAmount,
+  scheduleIsRecurring,
+} from 'loot-core/shared/schedules';
+import { type ScheduleEntity } from 'loot-core/types/models';
 
 import { useSyncedPref } from '../../hooks/useSyncedPref';
 import { theme } from '../../style';
@@ -10,10 +19,6 @@ import { MonthPicker } from '../budget/MonthPicker';
 import { View } from '../common/View';
 
 import { CalendarMonth } from './CalendarMonth';
-import { ScheduleEntity } from 'loot-core/types/models';
-import { currentDay, addDays, parseDate } from 'loot-core/shared/months';
-
-import { extractScheduleConds, getNextDate, getScheduledAmount, scheduleIsRecurring } from 'loot-core/shared/schedules';
 
 type CalendarViewProps = {
   schedules: readonly ScheduleEntity[];
@@ -28,7 +33,7 @@ export type CalendarRecurrences = {
   dateObject: Date;
   schedule: string;
   forceUpcoming: boolean;
-}
+};
 
 export function CalendarView({ schedules }: CalendarViewProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -36,7 +41,9 @@ export function CalendarView({ schedules }: CalendarViewProps) {
   const [months, setMonths] = useState<Date[]>([]);
   const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
   const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
-  const [visibleRecurrences, setVisibleRecurrences] = useState<CalendarRecurrences[]>([]);
+  const [visibleRecurrences, setVisibleRecurrences] = useState<
+    CalendarRecurrences[]
+  >([]);
 
   useEffect(() => {
     if (currentDate) {
@@ -52,29 +59,33 @@ export function CalendarView({ schedules }: CalendarViewProps) {
           const { date: dateConditions } = extractScheduleConds(
             schedule._conditions,
           );
-  
+
           const isRecurring = scheduleIsRecurring(dateConditions);
-  
+
           const dates: string[] = [];
           let day = d.startOfDay(parseDate(currentDate));
           if (isRecurring) {
             while (day <= addMonths(currentDate, numberOfMonths)) {
               const nextDate = getNextDate(dateConditions, day);
-  
-              if (parseDate(nextDate) > addMonths(currentDate, numberOfMonths)) break;
-  
+
+              if (
+                parseDate(nextDate) > addMonths(currentDate, numberOfMonths)
+              ) {
+                break;
+              }
+
               if (dates.includes(nextDate)) {
                 day = parseDate(addDays(day, 1));
                 continue;
               }
-  
+
               dates.push(nextDate);
               day = parseDate(addDays(nextDate, 1));
             }
           } else {
             dates.push(getNextDate(dateConditions, day));
           }
-  
+
           const schedules: CalendarRecurrences[] = [];
           dates.forEach(date => {
             schedules.push({
@@ -85,19 +96,17 @@ export function CalendarView({ schedules }: CalendarViewProps) {
               date,
               dateObject: parseDate(date),
               schedule: schedule.id,
-              forceUpcoming: schedules.length > 0 || status === 'paid',
+              forceUpcoming: schedules.length > 0,
             });
           });
-  
+
           return schedules;
         })
         .flat();
-    }
+    };
 
     setVisibleRecurrences(calculateRecurrences());
-  }, [currentDate, numberOfMonths]);
-
-  
+  }, [currentDate, numberOfMonths, schedules]);
 
   return (
     <View
@@ -154,7 +163,9 @@ export function CalendarView({ schedules }: CalendarViewProps) {
               key={index}
               start={m}
               firstDayOfWeekIdx={firstDayOfWeekIdx}
-              recurrences={visibleRecurrences.filter(r => d.isSameMonth(m, r.dateObject))}
+              recurrences={visibleRecurrences.filter(r =>
+                d.isSameMonth(m, r.dateObject),
+              )}
             />
           </View>
         ))}

@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import * as d from 'date-fns';
 
+import * as d from 'date-fns';
 import {
   addDays,
   format,
@@ -16,7 +16,8 @@ import { type SyncedPrefs } from 'loot-core/types/prefs';
 import { theme } from '../../style';
 import { Button } from '../common/Button2';
 import { View } from '../common/View';
-import { CalendarRecurrences } from './CalendarView';
+
+import { type CalendarRecurrences } from './CalendarView';
 
 type CalendarMonthProps = {
   start: Date;
@@ -116,22 +117,27 @@ export function CalendarMonth({
               {getDate(day)}
             </Button>
 
-            {isSameMonth(start, day) && recurrences.filter(r => d.isSameDay(day, r.dateObject)).length > 0 && (
-              <View
-                style={{
-                  position: 'absolute',
-                  top: 0,
-                  right: 3,
-                  pointerEvents: 'none',
-                  fontSize: 10,
-                  opacity: 0.8,
-                  color: theme.pageTextPositive,
-                  fontWeight: 'bold',
-                }}
-              >
-                {recurrences.filter(r => d.isSameDay(day, r.dateObject)).length}
-              </View>
-            )}
+            {isSameMonth(start, day) &&
+              recurrences.filter(r => d.isSameDay(day, r.dateObject)).length >
+                0 && (
+                <View
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    right: 3,
+                    pointerEvents: 'none',
+                    fontSize: 10,
+                    opacity: 0.8,
+                    color: theme.pageTextPositive,
+                    fontWeight: 'bold',
+                  }}
+                >
+                  {
+                    recurrences.filter(r => d.isSameDay(day, r.dateObject))
+                      .length
+                  }
+                </View>
+              )}
             {isSameDay(day, today) && (
               <View
                 style={{
@@ -143,7 +149,7 @@ export function CalendarMonth({
                   backgroundColor: theme.pageTextPositive,
                   borderRadius: 4,
                   pointerEvents: 'none',
-                  opacity: 0.3
+                  opacity: 0.3,
                 }}
               />
             )}
