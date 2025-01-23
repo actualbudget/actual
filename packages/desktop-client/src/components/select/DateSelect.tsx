@@ -1,6 +1,5 @@
 // @ts-strict-ignore
 import React, {
-  type CSSProperties,
   forwardRef,
   useEffect,
   useImperativeHandle,
@@ -28,7 +27,7 @@ import {
 } from 'loot-core/src/shared/months';
 
 import { useSyncedPref } from '../../hooks/useSyncedPref';
-import { styles, theme } from '../../style';
+import { styles, theme, type CSSProperties } from '../../style';
 import { Input } from '../common/Input';
 import { Popover } from '../common/Popover';
 import { View } from '../common/View';

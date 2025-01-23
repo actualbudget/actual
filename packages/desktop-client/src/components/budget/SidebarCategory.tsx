@@ -192,7 +192,7 @@ export function SidebarCategory({
         onBlur={() => onEditName(null)}
         style={{ paddingLeft: 13, ...(isLast && { borderBottomWidth: 0 }) }}
         inputProps={{
-          placeholder: temporary ? t('New Category Name') : '',
+          placeholder: temporary ? t('New category name') : '',
         }}
       />
     </View>

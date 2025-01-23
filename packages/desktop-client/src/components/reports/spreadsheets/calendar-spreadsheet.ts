@@ -34,7 +34,7 @@ export function calendarSpreadsheet(
       }[];
     }) => void,
   ) => {
-    let filters;
+    let filters: unknown[];
 
     try {
       const { filters: filtersLocal } = await send(

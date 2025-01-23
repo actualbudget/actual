@@ -30,8 +30,9 @@ import { BudgetTypeSettings } from './BudgetTypeSettings';
 import { EncryptionSettings } from './Encryption';
 import { ExperimentalFeatures } from './Experimental';
 import { ExportBudget } from './Export';
-import { FixSplits } from './FixSplits';
 import { FormatSettings } from './Format';
+import { LanguageSettings } from './LanguageSettings';
+import { RepairTransactions } from './RepairTransactions';
 import { ResetCache, ResetSync } from './Reset';
 import { ThemeSettings } from './Themes';
 import { AdvancedToggle, Setting } from './UI';
@@ -169,6 +170,7 @@ export function Settings() {
       }}
     >
       <View
+        data-testid="settings"
         style={{
           marginTop: 10,
           flexShrink: 0,
@@ -182,19 +184,22 @@ export function Settings() {
           >
             {/* The only spot to close a budget on mobile */}
             <FormField>
-              <FormLabel title={t('Budget Name')} />
+              <FormLabel title={t('Budget name')} />
               <Input
                 value={budgetName}
                 disabled
                 style={{ color: theme.buttonNormalDisabledText }}
               />
             </FormField>
-            <Button onPress={onCloseBudget}>{t('Close Budget')}</Button>
+            <Button onPress={onCloseBudget}>
+              <Trans>Close budget</Trans>
+            </Button>
           </View>
         )}
         <About />
         <ThemeSettings />
         <FormatSettings />
+        <LanguageSettings />
         <AuthSettings />
         <EncryptionSettings />
         <BudgetTypeSettings />
@@ -204,7 +209,7 @@ export function Settings() {
           <AdvancedAbout />
           <ResetCache />
           <ResetSync />
-          <FixSplits />
+          <RepairTransactions />
           <ExperimentalFeatures />
         </AdvancedToggle>
       </View>

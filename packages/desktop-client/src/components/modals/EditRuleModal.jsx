@@ -4,10 +4,8 @@ import { useTranslation, Trans } from 'react-i18next';
 import { css } from '@emotion/css';
 import { v4 as uuid } from 'uuid';
 
-import {
-  initiallyLoadPayees,
-  setUndoEnabled,
-} from 'loot-core/src/client/actions/queries';
+import { initiallyLoadPayees } from 'loot-core/client/queries/queriesSlice';
+import { enableUndo, disableUndo } from 'loot-core/client/undo';
 import { useSchedules } from 'loot-core/src/client/data-hooks/schedules';
 import { runQuery } from 'loot-core/src/client/query-helpers';
 import { send } from 'loot-core/src/platform/client/fetch';
@@ -336,7 +334,7 @@ function ScheduleDescription({ id }) {
             textOverflow: 'ellipsis',
           }}
         >
-          <Trans>Payee</Trans>:{' '}
+          <Trans>Payee:</Trans>{' '}
           <DisplayId
             type="payees"
             id={schedule._payee}
@@ -345,12 +343,13 @@ function ScheduleDescription({ id }) {
         </Text>
         <Text style={{ margin: '0 5px' }}> — </Text>
         <Text style={{ flexShrink: 0 }}>
-          <Trans>Amount</Trans>: {formatAmount(schedule._amount)}
+          <Trans>Amount:</Trans> {formatAmount(schedule._amount)}
         </Text>
         <Text style={{ margin: '0 5px' }}> — </Text>
         <Text style={{ flexShrink: 0 }}>
-          <Trans>Next</Trans>:{' '}
-          {monthUtils.format(schedule.next_date, dateFormat)}
+          <Trans>
+            Next: {{ month: monthUtils.format(schedule.next_date, dateFormat) }}
+          </Trans>
         </Text>
       </View>
       <StatusBadge status={status} />
@@ -795,8 +794,8 @@ export function EditRuleModal({ defaultRule, onSave: originalOnSave }) {
     dispatch(initiallyLoadPayees());
 
     // Disable undo while this modal is open
-    setUndoEnabled(false);
-    return () => setUndoEnabled(true);
+    disableUndo();
+    return () => enableUndo();
   }, [dispatch]);
 
   useEffect(() => {

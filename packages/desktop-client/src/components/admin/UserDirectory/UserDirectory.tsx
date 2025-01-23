@@ -116,11 +116,24 @@ function UserDirectoryContent({
     setLoading(true);
 
     const loadedUsers = (await send('users-get')) ?? [];
+    if ('error' in loadedUsers) {
+      dispatch(
+        addNotification({
+          type: 'error',
+          id: 'error',
+          title: t('Error getting users'),
+          sticky: true,
+          message: getUserDirectoryErrors(loadedUsers.error),
+        }),
+      );
+      setLoading(false);
+      return;
+    }
 
     setAllUsers(loadedUsers);
     setLoading(false);
     return loadedUsers;
-  }, [setLoading]);
+  }, [dispatch, getUserDirectoryErrors, setLoading, t]);
 
   useEffect(() => {
     async function loadData() {
@@ -141,9 +154,11 @@ function UserDirectoryContent({
 
   const onDeleteSelected = useCallback(async () => {
     setLoading(true);
-    const { error } = await send('user-delete-all', [...selectedInst.items]);
+    const res = await send('user-delete-all', [...selectedInst.items]);
 
-    if (error) {
+    const error = res['error'];
+    const someDeletionsFailed = res['someDeletionsFailed'];
+    if (error || someDeletionsFailed) {
       if (error === 'token-expired') {
         dispatch(
           addNotification({

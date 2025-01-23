@@ -4,7 +4,7 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { t } from 'i18next';
 
-import { getPayeesById } from 'loot-core/client/reducers/queries';
+import { getPayeesById } from 'loot-core/client/queries/queriesSlice';
 import { pushModal } from 'loot-core/src/client/actions/modals';
 import { runQuery, liveQuery } from 'loot-core/src/client/query-helpers';
 import { send, sendCatch } from 'loot-core/src/platform/client/fetch';
@@ -971,7 +971,7 @@ function NoTransactionsMessage(props: NoTransactionsMessageProps) {
     >
       {props.error ? (
         <Text style={{ color: theme.errorText }}>
-          <Trans>Could not search: {props.error}</Trans>
+          <Trans>Could not search: {{ errorReason: props.error }}</Trans>
         </Text>
       ) : props.transactionsMode === 'matched' ? (
         t('No matching transactions')

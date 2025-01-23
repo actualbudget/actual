@@ -1,5 +1,5 @@
 import { type CSSProperties } from 'react';
-import { useTranslation } from 'react-i18next'; // Import useTranslation from i18next
+import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 
 import * as Platform from 'loot-core/src/client/platform';
@@ -151,7 +151,7 @@ function Shortcut({
 
 export function KeyboardShortcutModal() {
   const location = useLocation();
-  const { t } = useTranslation(); // Initialize useTranslation
+  const { t } = useTranslation();
   const onBudget = location.pathname.startsWith('/budget');
   const onAccounts = location.pathname.startsWith('/accounts');
   const ctrl = Platform.OS === 'mac' ? '⌘' : 'Ctrl';
@@ -160,7 +160,7 @@ export function KeyboardShortcutModal() {
       {({ state: { close } }) => (
         <>
           <ModalHeader
-            title={t('Keyboard Shortcuts')} // Translate title
+            title={t('Keyboard shortcuts')}
             rightContent={<ModalCloseButton onPress={close} />}
           />
           <View
@@ -212,7 +212,7 @@ export function KeyboardShortcutModal() {
                     description={t('Bank sync')}
                     meta={ctrl}
                   />
-                  <GroupHeading group={t('With transaction(s) selected')} />
+                  <GroupHeading group={t('With transactions selected')} />
                   <Shortcut
                     shortcut="F"
                     description={t('Filter to the selected transactions')}

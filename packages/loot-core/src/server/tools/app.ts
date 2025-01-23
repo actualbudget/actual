@@ -73,10 +73,30 @@ app.method('tools/fix-split-transactions', async () => {
     return subValue !== t.amount;
   });
 
+  // 5. Fix transfers that should not have categories
+  const brokenTransfers = await db.all(`
+    SELECT t1.id
+    FROM v_transactions_internal t1
+           JOIN accounts a1 ON t1.account = a1.id
+           JOIN v_transactions_internal t2 ON t1.transfer_id = t2.id
+           JOIN accounts a2 ON t2.account = a2.id
+    WHERE a1.offbudget = a2.offbudget
+      AND t1.category IS NOT NULL
+  `);
+
+  await runMutator(async () => {
+    const updated = brokenTransfers.map(row => ({
+      id: row.id,
+      category: null,
+    }));
+    await batchUpdateTransactions({ updated });
+  });
+
   return {
     numBlankPayees: blankPayeeRows.length,
     numCleared: clearedRows.length,
     numDeleted: deletedRows.length,
+    numTransfersFixed: brokenTransfers.length,
     mismatchedSplits,
   };
 });
