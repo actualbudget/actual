@@ -17,16 +17,30 @@ import type { Notification } from './state-types/notifications';
 import { type AppStore } from './store';
 
 export function listenForSyncEvent(store: AppStore) {
+  // TODO: Should this run on mobile too?
+  const unlistenUnauthorized = listen('sync-event', async ({ type }) => {
+    if (type === 'unauthorized') {
+      store.dispatch(
+        addNotification({
+          type: 'warning',
+          message: 'Unable to authenticate with server',
+          sticky: true,
+          id: 'auth-issue',
+        }),
+      );
+    }
+  });
+
   let attemptedSyncRepair = false;
 
-  listen('sync-event', event => {
+  const unlistenSuccess = listen('sync-event', event => {
     const prefs = store.getState().prefs.local;
     if (!prefs || !prefs.id) {
       // Do nothing if no budget is loaded
       return;
     }
 
-    if (event.type === 'success') {
+    if (event.type === 'success' || event.type === 'applied') {
       if (attemptedSyncRepair) {
         attemptedSyncRepair = false;
 
@@ -53,7 +67,12 @@ export function listenForSyncEvent(store: AppStore) {
         store.dispatch(getCategories());
       }
 
-      if (tables.includes('payees') || tables.includes('payee_mapping')) {
+      if (
+        // Sync on accounts change because so that transfer payees are updated
+        tables.includes('accounts') ||
+        tables.includes('payees') ||
+        tables.includes('payee_mapping')
+      ) {
         store.dispatch(getPayees());
       }
 
@@ -324,4 +343,9 @@ export function listenForSyncEvent(store: AppStore) {
       }
     }
   });
+
+  return () => {
+    unlistenUnauthorized();
+    unlistenSuccess();
+  };
 }

@@ -26,7 +26,6 @@ import { q } from 'loot-core/src/shared/query';
 import { AuthProvider } from './auth/AuthProvider';
 import { App } from './components/App';
 import { ServerProvider } from './components/ServerContext';
-import { handleGlobalEvents } from './global-events';
 
 // See https://github.com/WICG/focus-visible. Only makes the blue
 // focus outline appear from keyboard events.
@@ -41,9 +40,6 @@ const boundActions = bindActionCreators(
   },
   store.dispatch,
 );
-
-// Listen for global events from the server or main process
-handleGlobalEvents(store);
 
 async function appFocused() {
   await send('app-focused');

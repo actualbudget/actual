@@ -588,11 +588,7 @@ export default [
       'packages/desktop-client/**/*.{ts,tsx}',
       'packages/loot-core/src/client/**/*.{ts,tsx}',
     ],
-
     rules: {
-      // enforce type over interface
-      '@typescript-eslint/consistent-type-definitions': ['warn', 'type'],
-
       // enforce import type
       '@typescript-eslint/consistent-type-imports': [
         'warn',
@@ -661,6 +657,12 @@ export default [
               importNames: ['useSelector'],
               message:
                 "Please import Actual's useSelector() hook from `src/redux` instead.",
+            },
+            {
+              name: 'react-redux',
+              importNames: ['useStore'],
+              message:
+                "Please import Actual's useStore() hook from `src/redux` instead.",
             },
           ],
         },
@@ -817,6 +819,17 @@ export default [
 
     rules: {
       'rulesdir/typography': 'off',
+    },
+  },
+  {
+    files: [
+      'packages/desktop-client/**/*.{ts,tsx}',
+      'packages/loot-core/src/client/**/*.{ts,tsx}',
+    ],
+    ignores: ['**/**/globals.d.ts'],
+    rules: {
+      // enforce type over interface
+      '@typescript-eslint/consistent-type-definitions': ['warn', 'type'],
     },
   },
 ];

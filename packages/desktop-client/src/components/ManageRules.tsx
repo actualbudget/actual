@@ -131,18 +131,22 @@ export function ManageRules({
     [payees, accounts, schedules, categories],
   );
 
-  const filteredRules = useMemo(
-    () =>
-      (filter === ''
-        ? allRules
-        : allRules.filter(rule =>
+  const filteredRules = useMemo(() => {
+    const rules = allRules.filter(rule => {
+      const schedule = schedules.find(schedule => schedule.rule === rule.id);
+      return schedule ? schedule.completed === false : true;
+    });
+
+    return (
+      filter === ''
+        ? rules
+        : rules.filter(rule =>
             getNormalisedString(ruleToString(rule, filterData)).includes(
               getNormalisedString(filter),
             ),
           )
-      ).slice(0, 100 + page * 50),
-    [allRules, filter, filterData, page],
-  );
+    ).slice(0, 100 + page * 50);
+  }, [allRules, filter, filterData, page]);
   const selectedInst = useSelected('manage-rules', allRules, []);
   const [hoveredRule, setHoveredRule] = useState(null);
 
