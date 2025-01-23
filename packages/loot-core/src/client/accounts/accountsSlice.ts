@@ -1,7 +1,12 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
 import { send } from '../../platform/client/fetch';
-import { type AccountEntity, type TransactionEntity } from '../../types/models';
+import {
+  type SyncServerGoCardlessAccount,
+  type AccountEntity,
+  type TransactionEntity,
+  type SyncServerSimpleFinAccount,
+} from '../../types/models';
 import { addNotification } from '../actions';
 import {
   getAccounts,
@@ -80,9 +85,9 @@ export const unlinkAccount = createAppAsyncThunk(
 
 type LinkAccountPayload = {
   requisitionId: string;
-  account: unknown;
-  upgradingId?: AccountEntity['id'];
-  offBudget?: boolean;
+  account: SyncServerGoCardlessAccount;
+  upgradingId?: AccountEntity['id'] | undefined;
+  offBudget?: boolean | undefined;
 };
 
 export const linkAccount = createAppAsyncThunk(
@@ -103,9 +108,9 @@ export const linkAccount = createAppAsyncThunk(
 );
 
 type LinkAccountSimpleFinPayload = {
-  externalAccount: unknown;
-  upgradingId?: AccountEntity['id'];
-  offBudget?: boolean;
+  externalAccount: SyncServerSimpleFinAccount;
+  upgradingId?: AccountEntity['id'] | undefined;
+  offBudget?: boolean | undefined;
 };
 
 export const linkAccountSimpleFin = createAppAsyncThunk(

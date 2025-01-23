@@ -53,9 +53,7 @@ export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
     if (upgradingAccountId == null) {
       authorizeBank(dispatch);
     } else {
-      authorizeBank(dispatch, {
-        upgradingAccountId,
-      });
+      authorizeBank(dispatch);
     }
   };
 

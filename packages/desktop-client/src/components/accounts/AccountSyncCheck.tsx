@@ -95,7 +95,7 @@ export function AccountSyncCheck() {
       setOpen(false);
 
       if (acc.account_id) {
-        authorizeBank(dispatch, { upgradingAccountId: acc.account_id });
+        authorizeBank(dispatch);
       }
     },
     [dispatch],
