@@ -8,6 +8,10 @@ import { useTranslation } from 'react-i18next';
 import { useSchedules } from 'loot-core/client/data-hooks/schedules';
 import { format } from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
+import {
+  scheduleIsRecurring,
+  extractScheduleConds,
+} from 'loot-core/shared/schedules';
 
 import { useLocale } from '../../hooks/useLocale';
 import { theme, styles } from '../../style';
@@ -27,6 +31,7 @@ export function ScheduledTransactionMenuModal({
   transactionId,
   onSkip,
   onPost,
+  onComplete,
 }: ScheduledTransactionMenuModalProps) {
   const locale = useLocale();
   const { t } = useTranslation();
@@ -50,6 +55,10 @@ export function ScheduledTransactionMenuModal({
   }
 
   const schedule = schedules?.[0];
+  const { date: dateCond } = extractScheduleConds(schedule._conditions);
+
+  const canBeSkipped = scheduleIsRecurring(dateCond);
+  const canBeCompleted = !scheduleIsRecurring(dateCond);
 
   return (
     <Modal name="scheduled-transaction-menu">
@@ -77,6 +86,9 @@ export function ScheduledTransactionMenuModal({
             transactionId={transactionId}
             onPost={onPost}
             onSkip={onSkip}
+            onComplete={onComplete}
+            canBeSkipped={canBeSkipped}
+            canBeCompleted={canBeCompleted}
             getItemStyle={() => defaultMenuItemStyle}
           />
         </>
@@ -92,15 +104,23 @@ type ScheduledTransactionMenuProps = Omit<
   transactionId: string;
   onSkip: (transactionId: string) => void;
   onPost: (transactionId: string) => void;
+  onComplete: (transactionId: string) => void;
 };
 
 function ScheduledTransactionMenu({
   transactionId,
   onSkip,
   onPost,
+  onComplete,
+  canBeSkipped,
+  canBeCompleted,
   ...props
-}: ScheduledTransactionMenuProps) {
+}: ScheduledTransactionMenuProps & {
+  canBeCompleted: boolean;
+  canBeSkipped: boolean;
+}) {
   const { t } = useTranslation();
+
   return (
     <Menu
       {...props}
@@ -112,19 +132,21 @@ function ScheduledTransactionMenu({
           case 'skip':
             onSkip?.(transactionId);
             break;
+          case 'complete':
+            onComplete?.(transactionId);
+            break;
           default:
             throw new Error(`Unrecognized menu option: ${name}`);
         }
       }}
       items={[
-        {
-          name: 'post',
-          text: t('Post transaction today'),
-        },
-        {
-          name: 'skip',
-          text: t('Skip scheduled date'),
-        },
+        { name: 'post', text: t('Post transaction today') },
+        ...(canBeSkipped
+          ? [{ name: 'skip', text: t('Skip next scheduled date') }]
+          : []),
+        ...(canBeCompleted
+          ? [{ name: 'complete', text: t('Mark as completed') }]
+          : []),
       ]}
     />
   );
