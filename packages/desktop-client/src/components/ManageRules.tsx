@@ -200,14 +200,12 @@ export function ManageRules({
     setPage(page => page + 1);
   }
 
-  const rulesToDelete = useMemo(
-    () =>
-      // @ts-ignore `intersection` is fully compatible with browser versions
-      selectedInst.items.intersection(
-        new Set(filteredRules.map(r => r.id)),
-      ) as Set<string>,
-    [selectedInst.items, filteredRules],
-  );
+  const rulesToDelete = useMemo(() => {
+    const filteredRuleIds = new Set(filteredRules.map(r => r.id));
+    return new Set(
+      [...selectedInst.items].filter(item => filteredRuleIds.has(item)),
+    );
+  }, [selectedInst.items, filteredRules]);
 
   const onDeleteSelected = useCallback(async () => {
     setLoading(true);
