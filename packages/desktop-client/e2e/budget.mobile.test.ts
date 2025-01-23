@@ -343,7 +343,7 @@ budgetTypes.forEach(budgetType => {
       await expect(budgetedButton).toHaveText(
         amountToCurrency(amountToTemplate),
       );
-      const notification = page.getByRole('alert');
+      const notification = page.getByRole('alert').first();
       await expect(notification).toContainText(templateNotes);
       await expect(page).toMatchThemeScreenshots();
     });
