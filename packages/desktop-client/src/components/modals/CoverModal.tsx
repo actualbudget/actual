@@ -80,7 +80,7 @@ export function CoverModal({
             rightContent={<ModalCloseButton onPress={close} />}
           />
           <View>
-            <FieldLabel title={t('Cover from category:')} />
+            <FieldLabel title={t('Cover from a category:')} />
             <TapField value={fromCategory?.name} onClick={onCategoryClick} />
           </View>
 

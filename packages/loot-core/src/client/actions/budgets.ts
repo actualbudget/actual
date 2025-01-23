@@ -148,11 +148,14 @@ export function createBudget({ testMode = false, demoMode = false } = {}) {
   };
 }
 
-export function validateBudgetName(name: string) {
+export async function validateBudgetName(name: string): Promise<{
+  valid: boolean;
+  message?: string;
+}> {
   return send('validate-budget-name', { name });
 }
 
-export function uniqueBudgetName(name: string) {
+export async function uniqueBudgetName(name: string): Promise<string> {
   return send('unique-budget-name', { name });
 }
 
@@ -181,7 +184,7 @@ export function duplicateBudget({
     try {
       dispatch(
         setAppState({
-          loadingText: t('Duplicating:  {{oldName}}  --  to:  {{newName}}', {
+          loadingText: t('Duplicating: {{oldName}} to: {{newName}}', {
             oldName,
             newName,
           }),

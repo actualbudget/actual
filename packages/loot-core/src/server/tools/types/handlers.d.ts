@@ -5,6 +5,7 @@ export interface ToolsHandlers {
     numBlankPayees: number;
     numCleared: number;
     numDeleted: number;
+    numTransfersFixed: number;
     mismatchedSplits: TransactionEntity[];
   }>;
 }

@@ -16,7 +16,7 @@ import {
 } from 'loot-core/client/queries/queriesSlice';
 import { addNotification, pushModal } from 'loot-core/src/client/actions';
 import { useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
-import { send, listen } from 'loot-core/src/platform/client/fetch';
+import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 
 import { useCategories } from '../../hooks/useCategories';
@@ -83,13 +83,9 @@ function BudgetInner(props: BudgetInnerProps) {
   const [initialized, setInitialized] = useState(false);
   const { grouped: categoryGroups } = useCategories();
 
-  function loadCategories() {
-    dispatch(getCategories());
-  }
-
   useEffect(() => {
     async function run() {
-      loadCategories();
+      await dispatch(getCategories());
 
       const { start, end } = await send('get-budget-bounds');
       setBounds({ start, end });
@@ -105,31 +101,6 @@ function BudgetInner(props: BudgetInnerProps) {
     }
 
     run();
-
-    const unlistens = [
-      listen('sync-event', event => {
-        if (event.type === 'success') {
-          const tables = event.tables;
-          if (
-            tables.includes('categories') ||
-            tables.includes('category_mapping') ||
-            tables.includes('category_groups')
-          ) {
-            loadCategories();
-          }
-        }
-      }),
-
-      listen('undo-event', ({ tables }) => {
-        if (tables.includes('categories')) {
-          loadCategories();
-        }
-      }),
-    ];
-
-    return () => {
-      unlistens.forEach(unlisten => unlisten());
-    };
   }, []);
 
   useEffect(() => {
@@ -177,7 +148,7 @@ function BudgetInner(props: BudgetInnerProps) {
       addNotification({
         type: 'error',
         message: t(
-          'Category ‘{{name}}‘ already exists in group (May be Hidden)',
+          'Category “{{name}}” already exists in group (it may be hidden)',
           { name },
         ),
       }),

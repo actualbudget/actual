@@ -218,12 +218,12 @@ export function Transaction({
                 : {}),
             }}
             title={
-              inflow === null && outflow === null
+              outflow === null
                 ? 'Invalid: unable to parse the value'
                 : amountToCurrency(outflow)
             }
           >
-            {amountToCurrency(outflow)}
+            {amountToCurrency(outflow || 0)}
           </Field>
           <Field
             width={90}
@@ -235,12 +235,12 @@ export function Transaction({
                 : {}),
             }}
             title={
-              inflow === null && outflow === null
+              inflow === null
                 ? 'Invalid: unable to parse the value'
                 : amountToCurrency(inflow)
             }
           >
-            {amountToCurrency(inflow)}
+            {amountToCurrency(inflow || 0)}
           </Field>
         </>
       ) : (
@@ -271,7 +271,7 @@ export function Transaction({
                 : amountToCurrency(amount)
             }
           >
-            {amountToCurrency(amount)}
+            {amountToCurrency(amount || 0)}
           </Field>
         </>
       )}

@@ -22,7 +22,6 @@ import {
 } from 'loot-core/client/data-hooks/transactions';
 import * as queries from 'loot-core/client/queries';
 import {
-  getPayees,
   markAccountRead,
   reopenAccount,
   updateAccount,
@@ -278,10 +277,6 @@ function TransactionListWithPreviews({
           tables.includes('payee_mapping')
         ) {
           reloadTransactions();
-        }
-
-        if (tables.includes('payees') || tables.includes('payee_mapping')) {
-          dispatch(getPayees());
         }
       }
     });

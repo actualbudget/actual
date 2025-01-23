@@ -26,9 +26,10 @@ import {
   send,
 } from 'loot-core/src/platform/client/fetch';
 
+import { handleGlobalEvents } from '../global-events';
 import { useMetadataPref } from '../hooks/useMetadataPref';
 import { installPolyfills } from '../polyfills';
-import { useDispatch, useSelector } from '../redux';
+import { useDispatch, useSelector, useStore } from '../redux';
 import { styles, hasHiddenScrollbars, ThemeStyle, useTheme } from '../style';
 import { ExposeNavigate } from '../util/router-tools';
 
@@ -137,9 +138,9 @@ function AppInner() {
           id: 'login-expired',
           title: t('Login expired'),
           sticky: true,
-          message: t('Login expired, please login again.'),
+          message: t('Login expired, please log in again.'),
           button: {
-            title: t('Go to login'),
+            title: t('Go to log in'),
             action: () => dispatch(signOut()),
           },
         }),
@@ -160,6 +161,10 @@ function ErrorFallback({ error }: FallbackProps) {
 }
 
 export function App() {
+  const store = useStore();
+
+  useEffect(() => handleGlobalEvents(store), [store]);
+
   const [hiddenScrollbars, setHiddenScrollbars] = useState(
     hasHiddenScrollbars(),
   );
