@@ -278,7 +278,7 @@ export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
   const { configuredPluggyAi } = usePluggyAiStatus();
   useEffect(() => {
     setIsPluggyAiSetupComplete(configuredPluggyAi);
-  }, [configuredSimpleFin]);
+  }, [configuredPluggyAi]);
 
   let title = t('Add account');
   const [loadingSimpleFinAccounts, setLoadingSimpleFinAccounts] =
