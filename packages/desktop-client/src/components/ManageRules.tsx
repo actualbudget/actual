@@ -206,7 +206,7 @@ export function ManageRules({
       selectedInst.items.intersection(
         new Set(filteredRules.map(r => r.id)),
       ) as Set<string>,
-    [selectedInst, filteredRules],
+    [selectedInst.items, filteredRules],
   );
 
   const onDeleteSelected = useCallback(async () => {
