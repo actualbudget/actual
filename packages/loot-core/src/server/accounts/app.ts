@@ -11,8 +11,10 @@ import { amountToInteger } from '../../shared/util';
 import {
   AccountEntity,
   CategoryEntity,
+  SyncServerGoCardlessAccount,
   PayeeEntity,
   TransactionEntity,
+  SyncServerSimpleFinAccount,
 } from '../../types/models';
 import { BankEntity } from '../../types/models/bank';
 import { createApp } from '../app';
@@ -33,7 +35,7 @@ import * as link from './link';
 import { getStartingBalancePayee } from './payees';
 import * as bankSync from './sync';
 
-type AccountHandlers = {
+export type AccountHandlers = {
   'account-update': typeof updateAccount;
   'accounts-get': typeof getAccounts;
   'account-balance': typeof getAccountBalance;
@@ -99,18 +101,12 @@ async function linkGoCardlessAccount({
   requisitionId,
   account,
   upgradingId,
-  offBudget,
+  offBudget = false,
 }: {
   requisitionId: string;
-  account: {
-    institution: string;
-    account_id: string;
-    mask: string;
-    name: string;
-    official_name: string;
-  };
-  upgradingId?: AccountEntity['id'];
-  offBudget: boolean;
+  account: SyncServerGoCardlessAccount;
+  upgradingId?: AccountEntity['id'] | undefined;
+  offBudget?: boolean | undefined;
 }) {
   let id;
   const bank = await link.findOrCreateBank(account.institution, requisitionId);
@@ -160,20 +156,15 @@ async function linkGoCardlessAccount({
 
   return 'ok';
 }
+
 async function linkSimpleFinAccount({
   externalAccount,
   upgradingId,
-  offBudget,
+  offBudget = false,
 }: {
-  externalAccount: {
-    account_id: string;
-    institution?: string;
-    orgDomain?: string;
-    orgId?: string;
-    name: string;
-  };
-  upgradingId?: AccountEntity['id'];
-  offBudget: boolean;
+  externalAccount: SyncServerSimpleFinAccount;
+  upgradingId?: AccountEntity['id'] | undefined;
+  offBudget?: boolean | undefined;
 }) {
   let id;
 
@@ -233,14 +224,14 @@ async function linkSimpleFinAccount({
 
 async function createAccount({
   name,
-  balance,
-  offBudget,
-  closed,
+  balance = 0,
+  offBudget = false,
+  closed = false,
 }: {
   name: string;
-  balance: number;
-  offBudget: boolean;
-  closed: boolean;
+  balance?: number | undefined;
+  offBudget?: boolean | undefined;
+  closed?: boolean | undefined;
 }) {
   const id: AccountEntity['id'] = await db.insertAccount({
     name,
@@ -274,12 +265,12 @@ async function closeAccount({
   id,
   transferAccountId,
   categoryId,
-  forced,
+  forced = false,
 }: {
   id: AccountEntity['id'];
-  transferAccountId: AccountEntity['id'];
-  categoryId: CategoryEntity['id'];
-  forced: boolean;
+  transferAccountId?: AccountEntity['id'] | undefined;
+  categoryId?: CategoryEntity['id'] | undefined;
+  forced?: boolean | undefined;
 }) {
   // Unlink the account if it's linked. This makes sure to remove it from
   // bank-sync providers. (This should not be undo-able, as it mutates the
@@ -348,7 +339,7 @@ async function closeAccount({
 
       // If there is a balance we need to transfer it to the specified
       // account (and possibly categorize it)
-      if (balance !== 0) {
+      if (balance !== 0 && transferAccountId) {
         const { id: payeeId }: Pick<PayeeEntity, 'id'> = await db.first(
           'SELECT id FROM payees WHERE transfer_acct = ?',
           [transferAccountId],
@@ -382,7 +373,13 @@ async function moveAccount({
   await db.moveAccount(id, targetId);
 }
 
-async function setSecret({ name, value }: { name: string; value: string }) {
+async function setSecret({
+  name,
+  value,
+}: {
+  name: string;
+  value: string | null;
+}) {
   const userToken = await asyncStorage.getItem('user-token');
 
   if (!userToken) {
@@ -437,10 +434,8 @@ async function checkSecret(name: string) {
 let stopPolling = false;
 
 async function pollGoCardlessWebToken({
-  upgradingAccountId,
   requisitionId,
 }: {
-  upgradingAccountId: AccountEntity['id'];
   requisitionId: string;
 }) {
   const userToken = await asyncStorage.getItem('user-token');
@@ -469,7 +464,6 @@ async function pollGoCardlessWebToken({
     const data = await post(
       serverConfig.GOCARDLESS_SERVER + '/get-accounts',
       {
-        upgradingAccountId,
         requisitionId,
       },
       {
@@ -594,11 +588,9 @@ async function getGoCardlessBanks(country: string) {
 }
 
 async function createGoCardlessWebToken({
-  upgradingAccountId,
   institutionId,
   accessValidForDays,
 }: {
-  upgradingAccountId: AccountEntity['id'];
   institutionId: string;
   accessValidForDays: number;
 }) {
@@ -617,7 +609,6 @@ async function createGoCardlessWebToken({
     return await post(
       serverConfig.GOCARDLESS_SERVER + '/create-web-token',
       {
-        upgradingAccountId,
         institutionId,
         accessValidForDays,
       },

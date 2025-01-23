@@ -73,3 +73,11 @@ export type GoCardlessTransaction = {
   valueDate?: string;
   valueDateTime?: string;
 };
+
+export type SyncServerGoCardlessAccount = {
+  institution: string;
+  account_id: string;
+  mask: string;
+  name: string;
+  official_name: string;
+};
