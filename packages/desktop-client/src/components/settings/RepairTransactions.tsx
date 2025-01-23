@@ -18,14 +18,20 @@ function useRenderResults() {
   const { t } = useTranslation();
 
   function renderResults(results: Results) {
-    const { numBlankPayees, numCleared, numDeleted, mismatchedSplits } =
-      results;
+    const {
+      numBlankPayees,
+      numCleared,
+      numDeleted,
+      numTransfersFixed,
+      mismatchedSplits,
+    } = results;
     const result: string[] = [];
 
     if (
       numBlankPayees === 0 &&
       numCleared === 0 &&
       numDeleted === 0 &&
+      numTransfersFixed === 0 &&
       mismatchedSplits.length === 0
     ) {
       result.push(t('No split transactions found needing repair.'));
@@ -48,6 +54,13 @@ function useRenderResults() {
         result.push(
           t('Fixed {{count}} splits that weren’t properly deleted.', {
             count: numDeleted,
+          }),
+        );
+      }
+      if (numTransfersFixed > 0) {
+        result.push(
+          t('Fixed {{count}} transfers.', {
+            count: numTransfersFixed,
           }),
         );
       }
@@ -83,7 +96,7 @@ function useRenderResults() {
   return { renderResults };
 }
 
-export function FixSplits() {
+export function RepairTransactions() {
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<Results | null>(null);
 
@@ -108,7 +121,7 @@ export function FixSplits() {
           }}
         >
           <ButtonWithLoading isLoading={loading} onPress={onFix}>
-            <Trans>Repair split transactions</Trans>
+            <Trans>Repair transactions</Trans>
           </ButtonWithLoading>
           {results && renderResults(results)}
         </View>
@@ -116,11 +129,11 @@ export function FixSplits() {
     >
       <Trans>
         <Text>
-          <strong>Repair split transactions</strong> if you are experiencing
-          bugs relating to split transactions and the “Reset budget cache”
-          button above does not help, this tool may fix them. Some examples of
-          bugs include seeing blank payees on splits or incorrect account
-          balances. This tool does three things:
+          <strong>Repair transactions</strong> if you are experiencing bugs
+          relating to split transactions or transfers and the “Reset budget
+          cache” button above does not help, this tool may fix them. Some
+          examples of bugs include seeing blank payees on splits or incorrect
+          account balances. This tool does four things:
         </Text>
         <ul style={{ margin: 0, paddingLeft: '1.5em' }}>
           <li style={{ marginBottom: '0.5em' }}>
@@ -139,6 +152,10 @@ export function FixSplits() {
             Checks that the sum of all child transactions adds up to the total
             amount. If not, these will be flagged below to allow you to easily
             locate and fix the amounts.
+          </li>
+          <li>
+            Check if you have any budget transfers that erroneous contain a
+            category, and remove the category.
           </li>
         </ul>
       </Trans>
