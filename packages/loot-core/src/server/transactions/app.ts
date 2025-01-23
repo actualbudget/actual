@@ -16,9 +16,9 @@ import { batchUpdateTransactions } from '.';
 
 export type TransactionHandlers = {
   'transactions-batch-update': typeof handleBatchUpdateTransactions;
-  'transactions-add': typeof addTransaction;
-  'transactions-update': typeof updateTransaction;
-  'transactions-delete': typeof deleteTransaction;
+  'transaction-add': typeof addTransaction;
+  'transaction-update': typeof updateTransaction;
+  'transaction-delete': typeof deleteTransaction;
   'transactions-parse-file': typeof parseTransactionsFile;
   'transactions-export': typeof exportTransactions;
   'transactions-export-query': typeof exportTransactionsQuery;
@@ -94,9 +94,9 @@ app.method(
   mutator(undoable(handleBatchUpdateTransactions)),
 );
 
-app.method('transactions-add', mutator(addTransaction));
-app.method('transactions-update', mutator(updateTransaction));
-app.method('transactions-delete', mutator(deleteTransaction));
+app.method('transaction-add', mutator(addTransaction));
+app.method('transaction-update', mutator(updateTransaction));
+app.method('transaction-delete', mutator(deleteTransaction));
 app.method('transactions-parse-file', mutator(parseTransactionsFile));
 app.method('transactions-export', mutator(exportTransactions));
 app.method('transactions-export-query', mutator(exportTransactionsQuery));
