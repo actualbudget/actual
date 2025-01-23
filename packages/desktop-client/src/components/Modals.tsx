@@ -561,6 +561,7 @@ export function Modals() {
               transactionId={options.transactionId}
               onPost={options.onPost}
               onSkip={options.onSkip}
+              onComplete={options.onComplete}
             />
           );
 

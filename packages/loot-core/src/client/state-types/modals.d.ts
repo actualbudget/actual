@@ -295,6 +295,7 @@ type FinanceModals = {
     transactionId: string;
     onPost: (transactionId: string) => void;
     onSkip: (transactionId: string) => void;
+    onComplete: (transactionId: string) => void;
   };
   'budget-page-menu': {
     onAddCategoryGroup: () => void;
