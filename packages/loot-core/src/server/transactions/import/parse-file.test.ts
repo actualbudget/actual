@@ -64,7 +64,7 @@ describe('File import', () => {
     await db.insertAccount({ id: 'one', name: 'one' });
     const { errors } = await importFileWithRealTime(
       'one',
-      __dirname + '/../../mocks/files/data.qif',
+      __dirname + '/../../../mocks/files/data.qif',
       'MM/dd/yy',
     );
     expect(errors.length).toBe(0);
@@ -77,7 +77,7 @@ describe('File import', () => {
 
     const { errors } = await importFileWithRealTime(
       'one',
-      __dirname + '/../../mocks/files/data.ofx',
+      __dirname + '/../../../mocks/files/data.ofx',
     );
     expect(errors.length).toBe(0);
     expect(await getTransactions('one')).toMatchSnapshot();
@@ -89,7 +89,7 @@ describe('File import', () => {
 
     const { errors } = await importFileWithRealTime(
       'one',
-      __dirname + '/../../mocks/files/credit-card.ofx',
+      __dirname + '/../../../mocks/files/credit-card.ofx',
     );
     expect(errors.length).toBe(0);
     expect(await getTransactions('one')).toMatchSnapshot();
@@ -101,7 +101,7 @@ describe('File import', () => {
 
     const { errors } = await importFileWithRealTime(
       'one',
-      __dirname + '/../../mocks/files/data.qfx',
+      __dirname + '/../../../mocks/files/data.qfx',
     );
     expect(errors.length).toBe(0);
     expect(await getTransactions('one')).toMatchSnapshot();
@@ -113,13 +113,13 @@ describe('File import', () => {
 
     let res = await importFileWithRealTime(
       'one',
-      __dirname + '/../../mocks/files/best.data-ever$.QFX',
+      __dirname + '/../../../mocks/files/best.data-ever$.QFX',
     );
     expect(res.errors.length).toBe(0);
 
     res = await importFileWithRealTime(
       'one',
-      __dirname + '/../../mocks/files/big.data.QiF',
+      __dirname + '/../../../mocks/files/big.data.QiF',
       'MM/dd/yy',
     );
     expect(res.errors.length).toBe(0);
@@ -135,7 +135,7 @@ describe('File import', () => {
 
     const { errors } = await importFileWithRealTime(
       'one',
-      __dirname + '/../../mocks/files/8859-1.qfx',
+      __dirname + '/../../../mocks/files/8859-1.qfx',
       'yyyy-MM-dd',
     );
     expect(errors.length).toBe(0);
@@ -148,7 +148,7 @@ describe('File import', () => {
 
     const { errors } = await importFileWithRealTime(
       'one',
-      __dirname + '/../../mocks/files/html-vals.qfx',
+      __dirname + '/../../../mocks/files/html-vals.qfx',
       'yyyy-MM-dd',
     );
     expect(errors.length).toBe(0);
@@ -161,7 +161,7 @@ describe('File import', () => {
 
     const { errors } = await importFileWithRealTime(
       'one',
-      __dirname + '/../../mocks/files/camt/camt.053.xml',
+      __dirname + '/../../../mocks/files/camt/camt.053.xml',
     );
     expect(errors.length).toBe(0);
     expect(await getTransactions('one')).toMatchSnapshot();
