@@ -379,10 +379,10 @@ export function getUpcomingDays(upcomingLength = '7'): number {
             return value * 7;
           case 'month':
             const future = monthUtils.addMonths(today, value);
-            return monthUtils.differenceInCalendarDays(future, today);
+            return monthUtils.differenceInCalendarDays(future, month);
           case 'year':
             const futureYear = monthUtils.addYears(today, value);
-            return monthUtils.differenceInCalendarDays(futureYear, today);
+            return monthUtils.differenceInCalendarDays(futureYear, month);
           default:
             return 7;
         }
