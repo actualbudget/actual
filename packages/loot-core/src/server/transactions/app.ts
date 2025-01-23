@@ -52,7 +52,7 @@ async function updateTransaction(transaction: TransactionEntity) {
   return {};
 }
 
-async function deleteTransaction(transaction: TransactionEntity) {
+async function deleteTransaction(transaction: Pick<TransactionEntity, 'id'>) {
   await handleBatchUpdateTransactions({ deleted: [transaction] });
   return {};
 }
