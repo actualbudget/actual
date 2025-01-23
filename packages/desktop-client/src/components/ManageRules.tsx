@@ -18,7 +18,10 @@ import * as undo from 'loot-core/src/platform/client/undo';
 import { getNormalisedString } from 'loot-core/src/shared/normalisation';
 import { mapField, friendlyOp } from 'loot-core/src/shared/rules';
 import { describeSchedule } from 'loot-core/src/shared/schedules';
-import { type NewRuleEntity } from 'loot-core/src/types/models';
+import {
+  type RuleEntity,
+  type NewRuleEntity,
+} from 'loot-core/src/types/models';
 
 import { useAccounts } from '../hooks/useAccounts';
 import { useCategories } from '../hooks/useCategories';
@@ -110,7 +113,7 @@ export function ManageRules({
   payeeId,
   setLoading = () => {},
 }: ManageRulesProps) {
-  const [allRules, setAllRules] = useState([]);
+  const [allRules, setAllRules] = useState<RuleEntity[]>([]);
   const [page, setPage] = useState(0);
   const [filter, setFilter] = useState('');
   const dispatch = useDispatch();
@@ -197,10 +200,20 @@ export function ManageRules({
     setPage(page => page + 1);
   }
 
-  async function onDeleteSelected() {
+  const rulesToDelete = useMemo(
+    () =>
+      // @ts-ignore `intersection` is fully compatible with browser versions
+      selectedInst.items.intersection(
+        new Set(filteredRules.map(r => r.id)),
+      ) as Set<string>,
+    [selectedInst, filteredRules],
+  );
+
+  const onDeleteSelected = useCallback(async () => {
     setLoading(true);
+
     const { someDeletionsFailed } = await send('rule-delete-all', [
-      ...selectedInst.items,
+      ...rulesToDelete,
     ]);
 
     if (someDeletionsFailed) {
@@ -212,7 +225,7 @@ export function ManageRules({
     await loadRules();
     selectedInst.dispatch({ type: 'select-none' });
     setLoading(false);
-  }
+  }, [rulesToDelete]);
 
   async function onDeleteRule(id: string) {
     setLoading(true);
@@ -338,9 +351,9 @@ export function ManageRules({
           }}
         >
           <Stack direction="row" align="center" justify="flex-end" spacing={2}>
-            {selectedInst.items.size > 0 && (
+            {rulesToDelete.size > 0 && (
               <Button onPress={onDeleteSelected}>
-                Delete {selectedInst.items.size} rules
+                Delete {rulesToDelete.size} rules
               </Button>
             )}
             <Button variant="primary" onPress={onCreateRule}>
