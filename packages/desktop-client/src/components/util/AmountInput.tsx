@@ -8,8 +8,7 @@ import React, {
   type KeyboardEventHandler,
   type CSSProperties,
 } from 'react';
-
-import { t } from 'i18next';
+import { useTranslation } from 'react-i18next';
 
 import { evalArithmetic } from 'loot-core/src/shared/arithmetic';
 import { amountToInteger, appendDecimals } from 'loot-core/src/shared/util';
@@ -155,7 +154,16 @@ export function AmountInput({
   );
 }
 
-export function BetweenAmountInput({ defaultValue, onChange }) {
+type BetweenAmountInputProps = {
+  defaultValue: { num1: number; num2: number };
+  onChange: (newValue: { num1: number; num2: number }) => void;
+};
+
+export function BetweenAmountInput({
+  defaultValue,
+  onChange,
+}: BetweenAmountInputProps) {
+  const { t } = useTranslation();
   const [num1, setNum1] = useState(defaultValue.num1);
   const [num2, setNum2] = useState(defaultValue.num2);
 

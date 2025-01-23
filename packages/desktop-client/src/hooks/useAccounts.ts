@@ -1,14 +1,12 @@
 import { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 
-import { getAccounts } from 'loot-core/src/client/actions';
-import { type State } from 'loot-core/src/client/state-types';
+import { getAccounts } from 'loot-core/client/queries/queriesSlice';
+
+import { useSelector, useDispatch } from '../redux';
 
 export function useAccounts() {
   const dispatch = useDispatch();
-  const accountsLoaded = useSelector(
-    (state: State) => state.queries.accountsLoaded,
-  );
+  const accountsLoaded = useSelector(state => state.queries.accountsLoaded);
 
   useEffect(() => {
     if (!accountsLoaded) {

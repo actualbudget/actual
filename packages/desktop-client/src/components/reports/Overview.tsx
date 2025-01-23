@@ -2,7 +2,6 @@ import React, { useMemo, useRef, useState } from 'react';
 import { Responsive, WidthProvider, type Layout } from 'react-grid-layout';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { Trans, useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 
 import {
@@ -21,6 +20,9 @@ import {
 
 import { useAccounts } from '../../hooks/useAccounts';
 import { useNavigate } from '../../hooks/useNavigate';
+import { useSyncedPref } from '../../hooks/useSyncedPref';
+import { useUndo } from '../../hooks/useUndo';
+import { useDispatch } from '../../redux';
 import { breakpoints } from '../../tokens';
 import { Button } from '../common/Button2';
 import { Menu } from '../common/Menu';
@@ -33,6 +35,7 @@ import { useResponsive } from '../responsive/ResponsiveProvider';
 
 import { NON_DRAGGABLE_AREA_CLASS_NAME } from './constants';
 import { LoadingIndicator } from './LoadingIndicator';
+import { CalendarCard } from './reports/CalendarCard';
 import { CashFlowCard } from './reports/CashFlowCard';
 import { CustomReportListCards } from './reports/CustomReportListCards';
 import { MarkdownCard } from './reports/MarkdownCard';
@@ -50,6 +53,8 @@ function isCustomReportWidget(widget: Widget): widget is CustomReportWidget {
 export function Overview() {
   const { t } = useTranslation();
   const dispatch = useDispatch();
+  const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
+  const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
 
   const triggerRef = useRef(null);
   const extraMenuTriggerRef = useRef(null);
@@ -105,6 +110,8 @@ export function Overview() {
     [closeNotifications],
   );
 
+  const { undo } = useUndo();
+
   const onDispatchSucessNotification = (message: string) => {
     dispatch(
       addNotification({
@@ -116,7 +123,7 @@ export function Overview() {
         messageActions: {
           undo: () => {
             closeNotifications();
-            window.__actionsForMenu.undo();
+            undo();
           },
         },
       }),
@@ -204,14 +211,14 @@ export function Overview() {
       }),
     } satisfies ExportImportDashboard;
 
-    window.Actual?.saveFile(
+    window.Actual.saveFile(
       JSON.stringify(data, null, 2),
       'dashboard.json',
       'Export Dashboard',
     );
   };
   const onImport = async () => {
-    const openFileDialog = window.Actual?.openFileDialog;
+    const openFileDialog = window.Actual.openFileDialog;
 
     if (!openFileDialog) {
       dispatch(
@@ -240,7 +247,7 @@ export function Overview() {
     const res = await send('dashboard-import', { filepath });
     setIsImporting(false);
 
-    if (res.error) {
+    if ('error' in res) {
       switch (res.error) {
         case 'json-parse-error':
           dispatch(
@@ -355,9 +362,7 @@ export function Overview() {
 
                         if (item === 'markdown-card') {
                           onAddWidget<MarkdownWidget>(item, {
-                            content: t(
-                              '### Text Widget\n\nEdit this widget to change the **markdown** content.',
-                            ),
+                            content: `### ${t('Text Widget')}\n\n${t('Edit this widget to change the **markdown** content.')}`,
                           });
                           return;
                         }
@@ -384,6 +389,10 @@ export function Overview() {
                         {
                           name: 'summary-card' as const,
                           text: t('Summary card'),
+                        },
+                        {
+                          name: 'calendar-card' as const,
+                          text: t('Calendar card'),
                         },
                         {
                           name: 'custom-report' as const,
@@ -472,7 +481,7 @@ export function Overview() {
       {isImporting ? (
         <LoadingIndicator message={t('Import is running...')} />
       ) : (
-        <View style={{ userSelect: 'none' }}>
+        <View data-testid="reports-overview" style={{ userSelect: 'none' }}>
           <ResponsiveGridLayout
             breakpoints={{ desktop: breakpoints.medium, mobile: 1 }}
             layouts={{ desktop: layout, mobile: layout }}
@@ -531,6 +540,15 @@ export function Overview() {
                     widgetId={item.i}
                     isEditing={isEditing}
                     meta={item.meta}
+                    onMetaChange={newMeta => onMetaChange(item, newMeta)}
+                    onRemove={() => onRemoveWidget(item.i)}
+                  />
+                ) : item.type === 'calendar-card' ? (
+                  <CalendarCard
+                    widgetId={item.i}
+                    isEditing={isEditing}
+                    meta={item.meta}
+                    firstDayOfWeekIdx={firstDayOfWeekIdx}
                     onMetaChange={newMeta => onMetaChange(item, newMeta)}
                     onRemove={() => onRemoveWidget(item.i)}
                   />

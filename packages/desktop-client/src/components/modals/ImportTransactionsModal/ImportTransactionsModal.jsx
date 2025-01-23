@@ -1,13 +1,20 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import deepEqual from 'deep-equal';
-import { t } from 'i18next';
 
+import {
+  getPayees,
+  importPreviewTransactions,
+  importTransactions,
+} from 'loot-core/client/queries/queriesSlice';
+import { send } from 'loot-core/platform/client/fetch';
 import { amountToInteger } from 'loot-core/src/shared/util';
 
-import { useActions } from '../../../hooks/useActions';
+import { useCategories } from '../../../hooks/useCategories';
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import { useSyncedPrefs } from '../../../hooks/useSyncedPrefs';
+import { useDispatch } from '../../../redux';
 import { theme } from '../../../style';
 import { Button, ButtonWithLoading } from '../../common/Button2';
 import { Input } from '../../common/Input';
@@ -135,14 +142,11 @@ function parseCategoryFields(trans, categories) {
 }
 
 export function ImportTransactionsModal({ options }) {
+  const { t } = useTranslation();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const [prefs, savePrefs] = useSyncedPrefs();
-  const {
-    parseTransactions,
-    importTransactions,
-    importPreviewTransactions,
-    getPayees,
-  } = useActions();
+  const dispatch = useDispatch();
+  const categories = useCategories();
 
   const [multiplierAmount, setMultiplierAmount] = useState('');
   const [loadingState, setLoadingState] = useState('parsing');
@@ -155,7 +159,7 @@ export function ImportTransactionsModal({ options }) {
   const [flipAmount, setFlipAmount] = useState(false);
   const [multiplierEnabled, setMultiplierEnabled] = useState(false);
   const [reconcile, setReconcile] = useState(true);
-  const { accountId, categories, onImported } = options;
+  const { accountId, onImported } = options;
 
   // This cannot be set after parsing the file, because changing it
   // requires re-parsing the file. This is different from the other
@@ -263,10 +267,12 @@ export function ImportTransactionsModal({ options }) {
       }
 
       // Retreive the transactions that would be updated (along with the existing trx)
-      const previewTrx = await importPreviewTransactions(
-        accountId,
-        previewTransactions,
-      );
+      const previewTrx = await dispatch(
+        importPreviewTransactions({
+          accountId,
+          transactions: previewTransactions,
+        }),
+      ).unwrap();
       const matchedUpdateMap = previewTrx.reduce((map, entry) => {
         map[entry.transaction.trx_id] = entry;
         return map;
@@ -309,7 +315,7 @@ export function ImportTransactionsModal({ options }) {
           return next;
         }, []);
     },
-    [accountId, categories.list, clearOnImport, importPreviewTransactions],
+    [accountId, categories.list, clearOnImport, dispatch],
   );
 
   const parse = useCallback(
@@ -320,8 +326,13 @@ export function ImportTransactionsModal({ options }) {
       setFilename(filename);
       setFileType(filetype);
 
-      const { errors, transactions: parsedTransactions = [] } =
-        await parseTransactions(filename, options);
+      const { errors, transactions: parsedTransactions = [] } = await send(
+        'transactions-parse-file',
+        {
+          filepath: filename,
+          options,
+        },
+      );
 
       let index = 0;
       const transactions = parsedTransactions.map(trans => {
@@ -397,15 +408,7 @@ export function ImportTransactionsModal({ options }) {
         setTransactions(transactionPreview);
       }
     },
-    [
-      accountId,
-      getImportPreview,
-      inOutMode,
-      multiplierAmount,
-      outValue,
-      parseTransactions,
-      prefs,
-    ],
+    [accountId, getImportPreview, inOutMode, multiplierAmount, outValue, prefs],
   );
 
   function onMultiplierChange(e) {
@@ -427,7 +430,6 @@ export function ImportTransactionsModal({ options }) {
 
     parse(options.filename, parseOptions);
   }, [
-    parseTransactions,
     options.filename,
     delimiter,
     hasHeaderRow,
@@ -469,7 +471,7 @@ export function ImportTransactionsModal({ options }) {
   }
 
   async function onNewFile() {
-    const res = await window.Actual?.openFileDialog({
+    const res = await window.Actual.openFileDialog({
       filters: [
         {
           name: 'Financial Files',
@@ -653,13 +655,15 @@ export function ImportTransactionsModal({ options }) {
       });
     }
 
-    const didChange = await importTransactions(
-      accountId,
-      finalTransactions,
-      reconcile,
-    );
+    const didChange = await dispatch(
+      importTransactions({
+        accountId,
+        transactions: finalTransactions,
+        reconcile,
+      }),
+    ).unwrap();
     if (didChange) {
-      await getPayees();
+      await dispatch(getPayees());
     }
 
     if (onImported) {

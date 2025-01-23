@@ -48,7 +48,7 @@ export class SchedulesPage {
    * 0-based index
    */
   async postNthSchedule(index) {
-    await this._performNthAction(index, 'Post transaction');
+    await this._performNthAction(index, 'Post transaction today');
     await this.page.waitForTimeout(1000);
   }
 

@@ -1,11 +1,11 @@
 // @ts-strict-ignore
 import React, {
   createContext,
+  type PropsWithChildren,
   useContext,
   useEffect,
-  useState,
   useRef,
-  type PropsWithChildren,
+  useState,
 } from 'react';
 
 import { useSyncedPref } from '@actual-app/web/src/hooks/useSyncedPref';
@@ -13,9 +13,9 @@ import { useSyncedPref } from '@actual-app/web/src/hooks/useSyncedPref';
 import { q, type Query } from '../../shared/query';
 import { getHasTransactionsQuery, getStatus } from '../../shared/schedules';
 import {
-  type TransactionEntity,
-  type ScheduleEntity,
   type AccountEntity,
+  type ScheduleEntity,
+  type TransactionEntity,
 } from '../../types/models';
 import { accountFilter } from '../queries';
 import { type LiveQuery, liveQuery } from '../query-helpers';
@@ -161,7 +161,7 @@ export function useCachedSchedules() {
 }
 
 export function accountSchedulesQuery(
-  accountId?: AccountEntity['id'] | 'budgeted' | 'offbudget' | 'uncategorized',
+  accountId?: AccountEntity['id'] | 'onbudget' | 'offbudget' | 'uncategorized',
 ) {
   const filterByAccount = accountFilter(accountId, '_account');
   const filterByPayee = accountFilter(accountId, '_payee.transfer_acct');

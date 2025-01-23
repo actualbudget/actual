@@ -1,3 +1,5 @@
+import { ImportTransactionsOpts } from '@actual-app/api';
+
 import { ParseFileResult } from '../server/accounts/parse-file';
 import { batchUpdateTransactions } from '../server/accounts/transactions';
 import { Backup } from '../server/backups';
@@ -17,7 +19,9 @@ import {
   RuleEntity,
   PayeeEntity,
 } from './models';
+import { OpenIdConfig } from './models/openid';
 import { GlobalPrefs, MetadataPrefs } from './prefs';
+// eslint-disable-next-line import/no-unresolved
 import { Query } from './query';
 import { EmptyObject } from './util';
 
@@ -48,7 +52,7 @@ export interface ServerHandlers {
     payees;
   }) => Promise<unknown>;
 
-  'transactions-export-query': (arg: { query: QueryState }) => Promise<unknown>;
+  'transactions-export-query': (arg: { query: QueryState }) => Promise<string>;
 
   'get-categories': () => Promise<{
     grouped: Array<CategoryGroupEntity>;
@@ -105,7 +109,7 @@ export interface ServerHandlers {
 
   'payees-get': () => Promise<PayeeEntity[]>;
 
-  'payees-get-rule-counts': () => Promise<unknown>;
+  'payees-get-rule-counts': () => Promise<Record<PayeeEntity['id'], number>>;
 
   'payees-merge': (arg: { targetId; mergeIds }) => Promise<void>;
 
@@ -121,7 +125,7 @@ export interface ServerHandlers {
   'payees-get-rules': (arg: { id: string }) => Promise<RuleEntity[]>;
 
   'make-filters-from-conditions': (arg: {
-    conditions;
+    conditions: unknown;
   }) => Promise<{ filters: unknown[] }>;
 
   getCell: (arg: {
@@ -137,7 +141,8 @@ export interface ServerHandlers {
 
   'create-query': (arg: { sheetName; name; query }) => Promise<unknown>;
 
-  query: (query: Query) => Promise<{ data: unknown; dependencies }>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  query: (query: Query) => Promise<{ data: any; dependencies: string[] }>;
 
   'account-update': (arg: { id; name }) => Promise<unknown>;
 
@@ -178,7 +183,10 @@ export interface ServerHandlers {
 
   'account-move': (arg: { id; targetId }) => Promise<unknown>;
 
-  'secret-set': (arg: { name: string; value: string }) => Promise<null>;
+  'secret-set': (arg: {
+    name: string;
+    value: string | null;
+  }) => Promise<{ error?: string; reason?: string }>;
   'secret-check': (arg: string) => Promise<string | { error?: string }>;
 
   'gocardless-poll-web-token': (arg: {
@@ -192,7 +200,11 @@ export interface ServerHandlers {
 
   'simplefin-status': () => Promise<{ configured: boolean }>;
 
-  'simplefin-accounts': () => Promise<{ accounts: SimpleFinAccount[] }>;
+  'simplefin-accounts': () => Promise<{
+    accounts?: SimpleFinAccount[];
+    error_code?: string;
+    reason?: string;
+  }>;
 
   'simplefin-batch-sync': ({ ids }: { ids: string[] }) => Promise<
     {
@@ -237,6 +249,7 @@ export interface ServerHandlers {
     accountId;
     transactions;
     isPreview;
+    opts?: ImportTransactionsOpts;
   }) => Promise<{
     errors?: { message: string }[];
     added;
@@ -269,26 +282,63 @@ export interface ServerHandlers {
 
   'get-did-bootstrap': () => Promise<boolean>;
 
-  'subscribe-needs-bootstrap': (args: {
-    url;
-  }) => Promise<
-    { error: string } | { bootstrapped: unknown; hasServer: boolean }
+  'subscribe-needs-bootstrap': (args: { url }) => Promise<
+    | { error: string }
+    | {
+        bootstrapped: boolean;
+        hasServer: false;
+      }
+    | {
+        bootstrapped: boolean;
+        hasServer: true;
+        availableLoginMethods: {
+          method: string;
+          displayName: string;
+          active: boolean;
+        }[];
+        multiuser: boolean;
+      }
   >;
 
-  'subscribe-bootstrap': (arg: { password }) => Promise<{ error?: string }>;
+  'subscribe-get-login-methods': () => Promise<{
+    methods?: { method: string; displayName: string; active: boolean }[];
+    error?: string;
+  }>;
 
-  'subscribe-get-user': () => Promise<{ offline: boolean } | null>;
+  'subscribe-bootstrap': (arg: {
+    password?: string;
+    openId?: OpenIdConfig;
+  }) => Promise<{ error?: string }>;
+
+  'subscribe-get-user': () => Promise<{
+    offline: boolean;
+    userName?: string;
+    userId?: string;
+    displayName?: string;
+    permission?: string;
+    loginMethod?: string;
+    tokenExpired?: boolean;
+  } | null>;
 
   'subscribe-change-password': (arg: {
     password;
   }) => Promise<{ error?: string }>;
 
-  'subscribe-sign-in': (arg: {
-    password;
-    loginMethod?: string;
-  }) => Promise<{ error?: string }>;
+  'subscribe-sign-in': (
+    arg:
+      | {
+          password;
+          loginMethod?: string;
+        }
+      | {
+          return_url;
+          loginMethod?: 'openid';
+        },
+  ) => Promise<{ error?: string; redirect_url?: string }>;
 
   'subscribe-sign-out': () => Promise<'ok'>;
+
+  'subscribe-set-token': (arg: { token: string }) => Promise<void>;
 
   'get-server-version': () => Promise<{ error?: string } | { version: string }>;
 
@@ -304,9 +354,17 @@ export interface ServerHandlers {
     | { messages: Message[] }
   >;
 
+  'validate-budget-name': (arg: {
+    name: string;
+  }) => Promise<{ valid: boolean; message?: string }>;
+
+  'unique-budget-name': (arg: { name: string }) => Promise<string>;
+
   'get-budgets': () => Promise<Budget[]>;
 
   'get-remote-files': () => Promise<RemoteFile[]>;
+
+  'get-user-file-info': (fileId: string) => Promise<RemoteFile | null>;
 
   'reset-budget-cache': () => Promise<unknown>;
 
@@ -327,7 +385,24 @@ export interface ServerHandlers {
   'delete-budget': (arg: {
     id?: string;
     cloudFileId?: string;
-  }) => Promise<'ok'>;
+  }) => Promise<'ok' | 'fail'>;
+
+  /**
+   * Duplicates a budget file.
+   * @param {Object} arg - The arguments for duplicating a budget.
+   * @param {string} [arg.id] - The ID of the local budget to duplicate.
+   * @param {string} [arg.cloudId] - The ID of the cloud-synced budget to duplicate.
+   * @param {string} arg.newName - The name for the duplicated budget.
+   * @param {boolean} [arg.cloudSync] - Whether to sync the duplicated budget to the cloud.
+   * @returns {Promise<string>} The ID of the newly created budget.
+   */
+  'duplicate-budget': (arg: {
+    id?: string;
+    cloudId?: string;
+    newName: string;
+    cloudSync?: boolean;
+    open: 'none' | 'original' | 'copy';
+  }) => Promise<string>;
 
   'create-budget': (arg: {
     budgetName?;
@@ -357,4 +432,18 @@ export interface ServerHandlers {
   'get-last-opened-backup': () => Promise<string | null>;
 
   'app-focused': () => Promise<void>;
+
+  'enable-openid': (arg: {
+    openId?: OpenIdConfig;
+  }) => Promise<{ error?: string }>;
+
+  'enable-password': (arg: { password: string }) => Promise<{ error?: string }>;
+
+  'get-openid-config': () => Promise<
+    | {
+        openId: OpenIdConfig;
+      }
+    | { error: string }
+    | null
+  >;
 }

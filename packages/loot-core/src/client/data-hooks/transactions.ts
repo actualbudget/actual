@@ -1,10 +1,19 @@
-import { useEffect, useRef, useState, useMemo } from 'react';
+import { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 
+import { useSyncedPref } from '@actual-app/web/src/hooks/useSyncedPref';
+import * as d from 'date-fns';
 import debounce from 'lodash/debounce';
 
 import { send } from '../../platform/client/fetch';
+import { currentDay, addDays, parseDate } from '../../shared/months';
 import { type Query } from '../../shared/query';
-import { getScheduledAmount } from '../../shared/schedules';
+import {
+  getScheduledAmount,
+  extractScheduleConds,
+  getNextDate,
+  getUpcomingDays,
+  scheduleIsRecurring,
+} from '../../shared/schedules';
 import { ungroupTransactions } from '../../shared/transactions';
 import {
   type ScheduleEntity,
@@ -24,10 +33,11 @@ type UseTransactionsProps = {
 
 type UseTransactionsResult = {
   transactions: ReadonlyArray<TransactionEntity>;
-  isLoading?: boolean;
+  isLoading: boolean;
   error?: Error;
-  reload?: () => void;
-  loadMore?: () => void;
+  reload: () => void;
+  loadMore: () => void;
+  isLoadingMore: boolean;
 };
 
 export function useTransactions({
@@ -35,6 +45,7 @@ export function useTransactions({
   options = { pageCount: 50 },
 }: UseTransactionsProps): UseTransactionsResult {
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [error, setError] = useState<Error | undefined>(undefined);
   const [transactions, setTransactions] = useState<
     ReadonlyArray<TransactionEntity>
@@ -88,12 +99,32 @@ export function useTransactions({
     };
   }, [query]);
 
+  const loadMore = useCallback(async () => {
+    if (!pagedQueryRef.current) {
+      return;
+    }
+
+    setIsLoadingMore(true);
+
+    await pagedQueryRef.current
+      .fetchNext()
+      .catch(setError)
+      .finally(() => {
+        setIsLoadingMore(false);
+      });
+  }, []);
+
+  const reload = useCallback(() => {
+    pagedQueryRef.current?.run();
+  }, []);
+
   return {
     transactions,
     isLoading,
     error,
-    reload: pagedQueryRef.current?.run,
-    loadMore: pagedQueryRef.current?.fetchNext,
+    reload,
+    loadMore,
+    isLoadingMore,
   };
 }
 
@@ -116,6 +147,8 @@ export function usePreviewTransactions(): UsePreviewTransactionsResult {
   const [isLoading, setIsLoading] = useState(isSchedulesLoading);
   const [error, setError] = useState<Error | undefined>(undefined);
 
+  const [upcomingLength] = useSyncedPref('upcomingScheduledTransactionLength');
+
   const scheduleTransactions = useMemo(() => {
     if (isSchedulesLoading) {
       return [];
@@ -126,15 +159,73 @@ export function usePreviewTransactions(): UsePreviewTransactionsResult {
       isForPreview(s, statuses),
     );
 
-    return schedulesForPreview.map(schedule => ({
-      id: 'preview/' + schedule.id,
-      payee: schedule._payee,
-      account: schedule._account,
-      amount: getScheduledAmount(schedule._amount),
-      date: schedule.next_date,
-      schedule: schedule.id,
-    }));
-  }, [isSchedulesLoading, schedules, statuses]);
+    const today = d.startOfDay(parseDate(currentDay()));
+
+    const upcomingPeriodEnd = d.startOfDay(
+      parseDate(addDays(today, getUpcomingDays(upcomingLength))),
+    );
+
+    return schedulesForPreview
+      .map(schedule => {
+        const { date: dateConditions } = extractScheduleConds(
+          schedule._conditions,
+        );
+
+        const status = statuses.get(schedule.id);
+        const isRecurring = scheduleIsRecurring(dateConditions);
+
+        const dates: string[] = [];
+        let day = d.startOfDay(parseDate(schedule.next_date));
+        if (isRecurring) {
+          while (day <= upcomingPeriodEnd) {
+            const nextDate = getNextDate(dateConditions, day);
+
+            if (parseDate(nextDate) > upcomingPeriodEnd) break;
+
+            if (dates.includes(nextDate)) {
+              day = parseDate(addDays(day, 1));
+              continue;
+            }
+
+            dates.push(nextDate);
+            day = parseDate(addDays(nextDate, 1));
+          }
+        } else {
+          dates.push(getNextDate(dateConditions, day));
+        }
+
+        if (status === 'paid') {
+          dates.shift();
+        }
+
+        const schedules: {
+          id: string;
+          payee: string;
+          account: string;
+          amount: number;
+          date: string;
+          schedule: string;
+          forceUpcoming: boolean;
+        }[] = [];
+        dates.forEach(date => {
+          schedules.push({
+            id: 'preview/' + schedule.id + `/${date}`,
+            payee: schedule._payee,
+            account: schedule._account,
+            amount: getScheduledAmount(schedule._amount),
+            date,
+            schedule: schedule.id,
+            forceUpcoming: schedules.length > 0 || status === 'paid',
+          });
+        });
+
+        return schedules;
+      })
+      .flat()
+      .sort(
+        (a, b) => parseDate(b.date).getTime() - parseDate(a.date).getTime(),
+      );
+  }, [isSchedulesLoading, schedules, statuses, upcomingLength]);
 
   useEffect(() => {
     let isUnmounted = false;
@@ -157,7 +248,7 @@ export function usePreviewTransactions(): UsePreviewTransactionsResult {
         if (!isUnmounted) {
           const withDefaults = newTrans.map(t => ({
             ...t,
-            category: statuses.get(t.schedule),
+            category: t.schedule != null ? statuses.get(t.schedule) : undefined,
             schedule: t.schedule,
             subtransactions: t.subtransactions?.map(
               (st: TransactionEntity) => ({
@@ -182,7 +273,7 @@ export function usePreviewTransactions(): UsePreviewTransactionsResult {
     return () => {
       isUnmounted = true;
     };
-  }, [scheduleTransactions, schedules, statuses]);
+  }, [scheduleTransactions, schedules, statuses, upcomingLength]);
 
   return {
     data: previewTransactions,
@@ -241,6 +332,6 @@ function isForPreview(schedule: ScheduleEntity, statuses: ScheduleStatuses) {
   const status = statuses.get(schedule.id);
   return (
     !schedule.completed &&
-    (status === 'due' || status === 'upcoming' || status === 'missed')
+    ['due', 'upcoming', 'missed', 'paid'].includes(status!)
   );
 }

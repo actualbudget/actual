@@ -1,9 +1,8 @@
 import React, { memo, useCallback, useRef } from 'react';
-import { useDispatch } from 'react-redux';
+import { useTranslation } from 'react-i18next';
 
 import { css } from '@emotion/css';
 import { AutoTextSize } from 'auto-text-size';
-import { t } from 'i18next';
 import memoizeOne from 'memoize-one';
 
 import { collapseModals, pushModal } from 'loot-core/client/actions';
@@ -31,6 +30,7 @@ import {
   SvgCheveronRight,
 } from '../../../icons/v1';
 import { SvgViewShow } from '../../../icons/v2';
+import { useDispatch } from '../../../redux';
 import { theme, styles } from '../../../style';
 import { BalanceWithCarryover } from '../../budget/BalanceWithCarryover';
 import { makeAmountGrey, makeBalanceAmountStyle } from '../../budget/util';
@@ -67,6 +67,7 @@ function getColumnWidth({ show3Cols, isSidebar = false, offset = 0 } = {}) {
 }
 
 function ToBudget({ toBudget, onPress, show3Cols }) {
+  const { t } = useTranslation();
   const amount = useSheetValue(toBudget);
   const format = useFormat();
   const sidebarColumnWidth = getColumnWidth({ show3Cols, isSidebar: true });
@@ -129,6 +130,7 @@ function ToBudget({ toBudget, onPress, show3Cols }) {
 }
 
 function Saved({ projected, onPress, show3Cols }) {
+  const { t } = useTranslation();
   const binding = projected
     ? trackingBudget.totalBudgetedSaved
     : trackingBudget.totalSaved;
@@ -156,7 +158,7 @@ function Saved({ projected, onPress, show3Cols }) {
                 minFontSizePx={6}
                 maxFontSizePx={12}
                 mode="oneline"
-                title="Projected Savings"
+                title="Projected savings"
                 style={{
                   color: theme.formInputText,
                   textAlign: 'left',
@@ -226,6 +228,7 @@ function BudgetCell({
   children,
   ...props
 }) {
+  const { t } = useTranslation();
   const columnWidth = getColumnWidth();
   const dispatch = useDispatch();
   const format = useFormat();
@@ -245,6 +248,9 @@ function BudgetCell({
           onBudgetAction(month, 'budget-amount', {
             category: category.id,
             amount,
+          });
+          showUndoNotification({
+            message: `${category.name} budget has been updated to ${integerToCurrency(amount)}.`,
           });
         },
         onCopyLastMonthAverage: () => {
@@ -398,6 +404,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
 }) {
   const opacity = blank ? 0 : 1;
 
+  const { t } = useTranslation();
   const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
   const goalTemp = useSheetValue(goal);
   const goalValue = isGoalTemplatesEnabled ? goalTemp : null;
@@ -1138,6 +1145,7 @@ const IncomeCategory = memo(function IncomeCategory({
   onEdit,
   onBudgetAction,
 }) {
+  const { t } = useTranslation();
   const listItemRef = useRef();
   const format = useFormat();
   const sidebarColumnWidth = getColumnWidth({ isSidebar: true, offset: -10 });
@@ -1413,6 +1421,7 @@ function IncomeGroup({
   collapsed,
   onToggleCollapse,
 }) {
+  const { t } = useTranslation();
   const columnWidth = getColumnWidth();
   return (
     <View>
@@ -1633,6 +1642,7 @@ export function BudgetTable({
   onOpenBudgetPageMenu,
   onOpenBudgetMonthMenu,
 }) {
+  const { t } = useTranslation();
   const { width } = useResponsive();
   const show3Cols = width >= 360;
 
@@ -1737,6 +1747,7 @@ function BudgetTableHeader({
   showSpentColumn,
   toggleSpentColumn,
 }) {
+  const { t } = useTranslation();
   const format = useFormat();
   const buttonStyle = {
     padding: 0,
@@ -1962,6 +1973,7 @@ function MonthSelector({
   onPrevMonth,
   onNextMonth,
 }) {
+  const { t } = useTranslation();
   const prevEnabled = month > monthBounds.start;
   const nextEnabled = month < monthUtils.subMonths(monthBounds.end, 1);
 

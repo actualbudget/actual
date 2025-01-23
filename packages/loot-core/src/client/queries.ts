@@ -25,15 +25,16 @@ type BudgetType<SheetName extends SheetNames> = Record<
 >;
 
 const accountParametrizedField = parametrizedField<'account'>();
+const categoryParametrizedField = parametrizedField<'category'>();
 const envelopeParametrizedField = parametrizedField<'envelope-budget'>();
 const trackingParametrizedField = parametrizedField<'tracking-budget'>();
 
 export function accountFilter(
-  accountId?: AccountEntity['id'] | 'budgeted' | 'offbudget' | 'uncategorized',
+  accountId?: AccountEntity['id'] | 'onbudget' | 'offbudget' | 'uncategorized',
   field = 'account',
 ) {
   if (accountId) {
-    if (accountId === 'budgeted') {
+    if (accountId === 'onbudget') {
       return {
         $and: [
           { [`${field}.offbudget`]: false },
@@ -68,7 +69,7 @@ export function accountFilter(
 }
 
 export function transactions(
-  accountId?: AccountEntity['id'] | 'budgeted' | 'offbudget' | 'uncategorized',
+  accountId?: AccountEntity['id'] | 'onbudget' | 'offbudget' | 'uncategorized',
 ) {
   let query = q('transactions').options({ splits: 'grouped' });
 
@@ -159,16 +160,16 @@ export function allAccountBalance() {
   } satisfies Binding<'account', 'accounts-balance'>;
 }
 
-export function budgetedAccountBalance() {
+export function onBudgetAccountBalance() {
   return {
-    name: `budgeted-accounts-balance`,
+    name: `onbudget-accounts-balance`,
     query: q('transactions')
       .filter({ 'account.offbudget': false, 'account.closed': false })
       .calculate({ $sum: '$amount' }),
-  } satisfies Binding<'account', 'budgeted-accounts-balance'>;
+  } satisfies Binding<'account', 'onbudget-accounts-balance'>;
 }
 
-export function offbudgetAccountBalance() {
+export function offBudgetAccountBalance() {
   return {
     name: `offbudget-accounts-balance`,
     query: q('transactions')
@@ -179,7 +180,7 @@ export function offbudgetAccountBalance() {
 
 export function categoryBalance(category: CategoryEntity, month: string) {
   return {
-    name: `balance-${category.id}`,
+    name: categoryParametrizedField('balance')(category.id),
     query: q('transactions')
       .filter({
         category: category.id,
@@ -187,7 +188,7 @@ export function categoryBalance(category: CategoryEntity, month: string) {
       })
       .options({ splits: 'inline' })
       .calculate({ $sum: '$amount' }),
-  };
+  } satisfies Binding<'category', 'balance'>;
 }
 
 export function categoryBalanceCleared(
@@ -195,7 +196,7 @@ export function categoryBalanceCleared(
   month: string,
 ) {
   return {
-    name: `balanceCleared-${category.id}`,
+    name: categoryParametrizedField('balanceCleared')(category.id),
     query: q('transactions')
       .filter({
         category: category.id,
@@ -204,7 +205,7 @@ export function categoryBalanceCleared(
       })
       .options({ splits: 'inline' })
       .calculate({ $sum: '$amount' }),
-  };
+  } satisfies Binding<'category', 'balanceCleared'>;
 }
 
 export function categoryBalanceUncleared(
@@ -212,7 +213,7 @@ export function categoryBalanceUncleared(
   month: string,
 ) {
   return {
-    name: `balanceUncleared-${category.id}`,
+    name: categoryParametrizedField('balanceUncleared')(category.id),
     query: q('transactions')
       .filter({
         category: category.id,
@@ -221,7 +222,7 @@ export function categoryBalanceUncleared(
       })
       .options({ splits: 'inline' })
       .calculate({ $sum: '$amount' }),
-  };
+  } satisfies Binding<'category', 'balanceUncleared'>;
 }
 
 const uncategorizedQuery = q('transactions').filter({
@@ -235,11 +236,11 @@ const uncategorizedQuery = q('transactions').filter({
   ],
 });
 
-export function uncategorizedBalance() {
+export function uncategorizedBalance<SheetName extends SheetNames>() {
   return {
     name: 'uncategorized-balance',
     query: uncategorizedQuery.calculate({ $sum: '$amount' }),
-  };
+  } satisfies Binding<SheetName, 'uncategorized-balance'>;
 }
 
 export function uncategorizedCount<SheetName extends SheetNames>() {

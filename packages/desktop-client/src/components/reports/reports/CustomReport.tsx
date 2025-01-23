@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useTranslation, Trans } from 'react-i18next';
 import { useLocation, useParams } from 'react-router-dom';
 
 import * as d from 'date-fns';
@@ -12,10 +12,12 @@ import { amountToCurrency } from 'loot-core/src/shared/util';
 import { type CategoryEntity } from 'loot-core/types/models/category';
 import {
   type balanceTypeOpType,
+  type sortByOpType,
   type CustomReportEntity,
   type DataEntity,
 } from 'loot-core/types/models/reports';
 import { type RuleConditionEntity } from 'loot-core/types/models/rule';
+import { type TransObjectLiteral } from 'loot-core/types/util';
 
 import { useAccounts } from '../../../hooks/useAccounts';
 import { useCategories } from '../../../hooks/useCategories';
@@ -230,6 +232,8 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
   const [groupBy, setGroupBy] = useState(loadReport.groupBy);
   const [interval, setInterval] = useState(loadReport.interval);
   const [balanceType, setBalanceType] = useState(loadReport.balanceType);
+  const [sortBy, setSortBy] = useState(loadReport.sortBy);
+
   const [showEmpty, setShowEmpty] = useState(loadReport.showEmpty);
   const [showOffBudget, setShowOffBudget] = useState(loadReport.showOffBudget);
   const [includeCurrentInterval, setIncludeCurrentInterval] = useState(
@@ -359,6 +363,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
 
   const balanceTypeOp: balanceTypeOpType =
     ReportOptions.balanceTypeMap.get(balanceType) || 'totalDebts';
+  const sortByOp: sortByOpType = ReportOptions.sortByMap.get(sortBy) || 'desc';
   const payees = usePayees();
   const accounts = useAccounts();
 
@@ -381,6 +386,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
       showHiddenCategories,
       showUncategorized,
       balanceTypeOp,
+      sortByOp,
       firstDayOfWeekIdx,
     });
   }, [
@@ -395,6 +401,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
     showOffBudget,
     showHiddenCategories,
     showUncategorized,
+    sortByOp,
     firstDayOfWeekIdx,
   ]);
 
@@ -414,6 +421,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
       showUncategorized,
       groupBy,
       balanceTypeOp,
+      sortByOp,
       payees,
       accounts,
       graphType,
@@ -435,6 +443,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
     showOffBudget,
     showHiddenCategories,
     showUncategorized,
+    sortByOp,
     graphType,
     firstDayOfWeekIdx,
   ]);
@@ -454,6 +463,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
     groupBy,
     interval,
     balanceType,
+    sortBy,
     showEmpty,
     showOffBudget,
     showHiddenCategories,
@@ -533,6 +543,12 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
       setSessionReport('balanceType', cond);
       setBalanceType(cond);
     }
+
+    const defaultSort = defaultsGraphList(mode, chooseGraph, 'defaultSort');
+    if (defaultSort) {
+      setSessionReport('sortBy', defaultSort);
+      setSortBy(defaultSort);
+    }
   };
 
   const isItemDisabled = (type: string) => {
@@ -592,6 +608,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
     setGroupBy(input.groupBy);
     setInterval(input.interval);
     setBalanceType(input.balanceType);
+    setSortBy(input.sortBy);
     setShowEmpty(input.showEmpty);
     setShowOffBudget(input.showOffBudget);
     setShowHiddenCategories(input.showHiddenCategories);
@@ -681,22 +698,27 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
       header={
         isNarrowWidth ? (
           <MobilePageHeader
-            title={
-              report.name
-                ? t('Custom Report: {{name}}', { name: report.name })
-                : t('Custom Report: Unsaved report')
-            }
+            title={t('Custom Report: {{name}}', {
+              name: report.name ?? t('Unsaved report'),
+            })}
             leftContent={<MobileBackButton onPress={onBackClick} />}
           />
         ) : (
           <PageHeader
             title={
-              <>
-                <Text>{t('Custom Report:')}</Text>
+              <Trans>
+                <Text>Custom Report:</Text>{' '}
                 <Text style={{ marginLeft: 5, color: theme.pageTextPositive }}>
-                  {report.name || t('Unsaved report')}
+                  {
+                    {
+                      name:
+                        report.name?.length > 0
+                          ? report.name
+                          : t('Unsaved report'),
+                    } as TransObjectLiteral
+                  }
                 </Text>
-              </>
+              </Trans>
             }
           />
         )
@@ -722,6 +744,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
             setGroupBy={setGroupBy}
             setInterval={setInterval}
             setBalanceType={setBalanceType}
+            setSortBy={setSortBy}
             setMode={setMode}
             setIsDateStatic={setIsDateStatic}
             setShowEmpty={setShowEmpty}

@@ -1,16 +1,18 @@
 // @ts-strict-ignore
-import { memo, useRef, useState, type CSSProperties } from 'react';
+import { memo, useRef, type CSSProperties } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { type PayeeEntity } from 'loot-core/src/types/models';
 
-import { useFeatureFlag } from '../../hooks/useFeatureFlag';
+import { useContextMenu } from '../../hooks/useContextMenu';
 import { useSelectedDispatch } from '../../hooks/useSelected';
-import { SvgArrowThinRight, SvgBookmark } from '../../icons/v1';
+import { useSyncedPref } from '../../hooks/useSyncedPref';
+import { SvgArrowThinRight, SvgBookmark, SvgLightBulb } from '../../icons/v1';
 import { theme } from '../../style';
 import { Menu } from '../common/Menu';
 import { Popover } from '../common/Popover';
 import { Text } from '../common/Text';
+import { Tooltip } from '../common/Tooltip';
 import {
   Cell,
   CellButton,
@@ -63,7 +65,10 @@ function RuleButton({ ruleCount, focused, onEdit, onClick }: RuleButtonProps) {
   );
 }
 
-type EditablePayeeFields = keyof Pick<PayeeEntity, 'name' | 'favorite'>;
+type EditablePayeeFields = keyof Pick<
+  PayeeEntity,
+  'name' | 'favorite' | 'learn_categories'
+>;
 
 type PayeeTableRowProps = {
   payee: PayeeEntity;
@@ -107,14 +112,14 @@ export const PayeeTableRow = memo(
       ? theme.tableBorderSelected
       : theme.tableBorder;
     const backgroundFocus = hovered || focusedField === 'select';
+    const [learnCategories = 'true'] = useSyncedPref('learn-categories');
+    const isLearnCategoriesEnabled = String(learnCategories) === 'true';
 
     const { t } = useTranslation();
 
     const triggerRef = useRef(null);
-    const [menuOpen, setMenuOpen] = useState(false);
-    const [crossOffset, setCrossOffset] = useState(0);
-    const [offset, setOffset] = useState(0);
-    const contextMenusEnabled = useFeatureFlag('contextMenus');
+    const { setMenuOpen, menuOpen, handleContextMenu, position } =
+      useContextMenu();
 
     return (
       <Row
@@ -137,22 +142,14 @@ export const PayeeTableRow = memo(
         }}
         data-focus-key={payee.id}
         onMouseEnter={() => onHover && onHover(payee.id)}
-        onContextMenu={e => {
-          if (!contextMenusEnabled) return;
-          e.preventDefault();
-          setMenuOpen(true);
-          const rect = e.currentTarget.getBoundingClientRect();
-          setCrossOffset(e.clientX - rect.left);
-          setOffset(e.clientY - rect.bottom);
-        }}
+        onContextMenu={handleContextMenu}
       >
         <Popover
           triggerRef={triggerRef}
           placement="bottom start"
           isOpen={menuOpen}
           onOpenChange={() => setMenuOpen(false)}
-          crossOffset={crossOffset}
-          offset={offset}
+          {...position}
           style={{ width: 200, margin: 1 }}
           isNonModal
         >
@@ -168,6 +165,13 @@ export const PayeeTableRow = memo(
               },
               ruleCount > 0 && { name: 'view-rules', text: t('View rules') },
               { name: 'create-rule', text: t('Create rule') },
+              isLearnCategoriesEnabled &&
+                (payee.learn_categories
+                  ? {
+                      name: 'learn',
+                      text: t('Disable learning'),
+                    }
+                  : { name: 'learn', text: t('Enable learning') }),
             ]}
             onMenuSelect={name => {
               switch (name) {
@@ -176,6 +180,13 @@ export const PayeeTableRow = memo(
                   break;
                 case 'favorite':
                   onUpdate(id, 'favorite', payee.favorite ? 0 : 1);
+                  break;
+                case 'learn':
+                  onUpdate(
+                    id,
+                    'learn_categories',
+                    payee.learn_categories ? 0 : 1,
+                  );
                   break;
                 case 'view-rules':
                   onViewRules(id);
@@ -208,18 +219,29 @@ export const PayeeTableRow = memo(
           }}
         />
         <CustomCell
-          width={10}
+          width={20}
           exposed={!payee.transfer_acct}
           onBlur={() => {}}
           onUpdate={() => {}}
           onClick={() => {}}
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            flexDirection: 'row',
+          }}
         >
           {() => {
-            if (payee.favorite) {
-              return <SvgBookmark />;
-            } else {
-              return;
-            }
+            return (
+              <>
+                {payee.favorite ? <SvgBookmark style={{ width: 10 }} /> : null}
+                {isLearnCategoriesEnabled && !payee.learn_categories && (
+                  <Tooltip content={t('Category learning disabled')}>
+                    <SvgLightBulb style={{ color: 'red', width: 10 }} />
+                  </Tooltip>
+                )}
+              </>
+            );
           }}
         </CustomCell>
         <InputCell

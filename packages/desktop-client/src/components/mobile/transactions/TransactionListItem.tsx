@@ -4,7 +4,6 @@ import React, {
 } from 'react';
 import { mergeProps } from 'react-aria';
 import { ListBoxItem } from 'react-aria-components';
-import { useSelector } from 'react-redux';
 
 import {
   PressResponder,
@@ -25,6 +24,7 @@ import {
   SvgCheckCircle1,
   SvgLockClosed,
 } from '../../../icons/v2';
+import { useSelector } from '../../../redux';
 import { styles, theme } from '../../../style';
 import { makeAmountFullStyle } from '../../budget/util';
 import { Button } from '../../common/Button2';
@@ -40,7 +40,6 @@ const ROW_HEIGHT = 60;
 type TransactionListItemProps = ComponentPropsWithoutRef<
   typeof ListBoxItem<TransactionEntity>
 > & {
-  isNewTransaction: (transaction: TransactionEntity['id']) => boolean;
   onPress: (transaction: TransactionEntity) => void;
   onLongPress: (transaction: TransactionEntity) => void;
 };
@@ -90,8 +89,12 @@ export function TransactionListItem({
     reconciled: isReconciled,
     is_parent: isParent,
     is_child: isChild,
+    notes,
     schedule: scheduleId,
+    forceUpcoming,
   } = transaction;
+
+  const previewStatus = forceUpcoming ? 'upcoming' : categoryId;
 
   const isAdded = newTransactions.includes(id);
   const categoryName = lookupName(categories, categoryId);
@@ -101,7 +104,7 @@ export function TransactionListItem({
     transferAccount,
   });
   const specialCategory = account?.offbudget
-    ? 'Off Budget'
+    ? 'Off budget'
     : transferAccount && !transferAccount.offbudget
       ? 'Transfer'
       : isParent
@@ -160,7 +163,7 @@ export function TransactionListItem({
                 padding: '0 4px',
               }}
             >
-              <View>
+              <View style={{ flex: 1 }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                   {scheduleId && (
                     <SvgArrowsSynchronize
@@ -186,7 +189,10 @@ export function TransactionListItem({
                   </TextOneLine>
                 </View>
                 {isPreview ? (
-                  <Status status={categoryId} isSplit={isParent || isChild} />
+                  <Status
+                    status={previewStatus}
+                    isSplit={isParent || isChild}
+                  />
                 ) : (
                   <View
                     style={{
@@ -243,6 +249,20 @@ export function TransactionListItem({
                       {prettyCategory || 'Uncategorized'}
                     </TextOneLine>
                   </View>
+                )}
+                {notes && (
+                  <TextOneLine
+                    style={{
+                      fontSize: 11,
+                      marginTop: 4,
+                      fontWeight: '400',
+                      color: theme.tableText,
+                      textAlign: 'left',
+                      opacity: 0.85,
+                    }}
+                  >
+                    {notes}
+                  </TextOneLine>
                 )}
               </View>
               <View style={{ justifyContent: 'center' }}>

@@ -12,12 +12,13 @@ import React, {
   type CSSProperties,
 } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
 
 import { css, cx } from '@emotion/css';
 
-import { createPayee } from 'loot-core/src/client/actions/queries';
-import { getActivePayees } from 'loot-core/src/client/reducers/queries';
+import {
+  createPayee,
+  getActivePayees,
+} from 'loot-core/client/queries/queriesSlice';
 import { getNormalisedString } from 'loot-core/src/shared/normalisation';
 import {
   type AccountEntity,
@@ -27,6 +28,7 @@ import {
 import { useAccounts } from '../../hooks/useAccounts';
 import { useCommonPayees, usePayees } from '../../hooks/usePayees';
 import { SvgAdd, SvgBookmark } from '../../icons/v1';
+import { useDispatch } from '../../redux';
 import { theme, styles } from '../../style';
 import { Button } from '../common/Button';
 import { TextOneLine } from '../common/TextOneLine';
@@ -326,7 +328,8 @@ export function PayeeAutocomplete({
     if (!clearOnBlur) {
       onSelect?.(makeNew(idOrIds, rawInputValue), rawInputValue);
     } else {
-      const create = payeeName => dispatch(createPayee(payeeName));
+      const create = payeeName =>
+        dispatch(createPayee({ name: payeeName })).unwrap();
 
       if (Array.isArray(idOrIds)) {
         idOrIds = await Promise.all(
@@ -454,12 +457,12 @@ export function PayeeAutocomplete({
                     setFocusTransferPayees(!focusTransferPayees);
                   }}
                 >
-                  <Trans>Make Transfer</Trans>
+                  <Trans>Make transfer</Trans>
                 </Button>
               )}
               {showManagePayees && (
                 <Button type="menu" onClick={() => onManagePayees()}>
-                  <Trans>Manage Payees</Trans>
+                  <Trans>Manage payees</Trans>
                 </Button>
               )}
             </AutocompleteFooter>
@@ -479,7 +482,6 @@ type CreatePayeeButtonProps = {
   style?: CSSProperties;
 };
 
-// eslint-disable-next-line import/no-unused-modules
 export function CreatePayeeButton({
   Icon,
   payeeName,
@@ -529,7 +531,7 @@ export function CreatePayeeButton({
           style={{ marginRight: 5, display: 'inline-block' }}
         />
       )}
-      <Trans>Create Payee “{{ payeeName }}”</Trans>
+      <Trans>Create payee “{{ payeeName }}”</Trans>
     </View>
   );
 }

@@ -1,8 +1,11 @@
 import { useCallback } from 'react';
-import { useDispatch } from 'react-redux';
 
-import { undo, redo, addNotification } from 'loot-core/client/actions';
+import { addNotification } from 'loot-core/client/actions';
 import { type Notification } from 'loot-core/client/state-types/notifications';
+import { redo, undo } from 'loot-core/client/undo';
+
+import { useResponsive } from '../components/responsive/ResponsiveProvider';
+import { useDispatch } from '../redux';
 
 type UndoActions = {
   undo: () => void;
@@ -15,52 +18,53 @@ const timeout = 10000;
 
 export function useUndo(): UndoActions {
   const dispatch = useDispatch();
-
-  const dispatchUndo = useCallback(() => {
-    dispatch(undo());
-  }, [dispatch]);
-
-  const dispatchRedo = useCallback(() => {
-    dispatch(redo());
-  }, [dispatch]);
+  const { isNarrowWidth } = useResponsive();
 
   const showUndoNotification = useCallback(
     (notification: Notification) => {
+      if (!isNarrowWidth) {
+        return;
+      }
+
       dispatch(
         addNotification({
           type: 'message',
           timeout,
           button: {
             title: 'Undo',
-            action: dispatchUndo,
+            action: undo,
           },
           ...notification,
         }),
       );
     },
-    [dispatch, dispatchUndo],
+    [dispatch, isNarrowWidth],
   );
 
   const showRedoNotification = useCallback(
-    (notificaton: Notification) => {
+    (notification: Notification) => {
+      if (!isNarrowWidth) {
+        return;
+      }
+
       dispatch(
         addNotification({
           type: 'message',
           timeout,
           button: {
             title: 'Redo',
-            action: dispatchRedo,
+            action: redo,
           },
-          ...notificaton,
+          ...notification,
         }),
       );
     },
-    [dispatch, dispatchRedo],
+    [dispatch, isNarrowWidth],
   );
 
   return {
-    undo: dispatchUndo,
-    redo: dispatchRedo,
+    undo,
+    redo,
     showUndoNotification,
     showRedoNotification,
   };

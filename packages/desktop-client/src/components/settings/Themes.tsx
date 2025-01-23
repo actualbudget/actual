@@ -1,7 +1,7 @@
 import React, { type ReactNode } from 'react';
+import { useTranslation, Trans } from 'react-i18next';
 
 import { css } from '@emotion/css';
-import { t } from 'i18next';
 
 import { type DarkTheme, type Theme } from 'loot-core/types/prefs';
 
@@ -37,6 +37,7 @@ function Column({ title, children }: { title: string; children: ReactNode }) {
 }
 
 export function ThemeSettings() {
+  const { t } = useTranslation();
   const sidebar = useSidebar();
   const [theme, switchTheme] = useTheme();
   const [darkTheme, switchDarkTheme] = usePreferredDarkTheme();
@@ -58,7 +59,7 @@ export function ThemeSettings() {
             },
           }}
         >
-          <Column title="Theme">
+          <Column title={t('Theme')}>
             <Select<Theme>
               onChange={value => {
                 switchTheme(value);
@@ -73,7 +74,7 @@ export function ThemeSettings() {
             />
           </Column>
           {theme === 'auto' && (
-            <Column title="Dark theme">
+            <Column title={t('Dark theme')}>
               <Select<DarkTheme>
                 onChange={value => {
                   switchDarkTheme(value);
@@ -92,8 +93,9 @@ export function ThemeSettings() {
       }
     >
       <Text>
-        <strong>{t('Themes')}</strong>
-        {t(' change the user interface colors.')}
+        <Trans>
+          <strong>Themes</strong> change the user interface colors.
+        </Trans>
       </Text>
     </Setting>
   );

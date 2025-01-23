@@ -2,13 +2,13 @@
 import MockDate from 'mockdate';
 
 import { q } from '../../shared/query';
+import { getNextDate } from '../../shared/schedules';
 import { loadRules, updateRule } from '../accounts/transaction-rules';
 import { runQuery as aqlQuery } from '../aql';
 import { loadMappings } from '../db/mappings';
 
 import {
   updateConditions,
-  getNextDate,
   createSchedule,
   updateSchedule,
   deleteSchedule,

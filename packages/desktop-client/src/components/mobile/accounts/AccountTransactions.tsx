@@ -5,18 +5,13 @@ import React, {
   useMemo,
   useState,
 } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 
 import {
   collapseModals,
-  getPayees,
-  markAccountRead,
   openAccountCloseModal,
   pushModal,
-  reopenAccount,
-  syncAndDownload,
-  updateAccount,
 } from 'loot-core/client/actions';
+import { syncAndDownload } from 'loot-core/client/app/appSlice';
 import {
   accountSchedulesQuery,
   SchedulesProvider,
@@ -26,6 +21,11 @@ import {
   useTransactionsSearch,
 } from 'loot-core/client/data-hooks/transactions';
 import * as queries from 'loot-core/client/queries';
+import {
+  markAccountRead,
+  reopenAccount,
+  updateAccount,
+} from 'loot-core/client/queries/queriesSlice';
 import { listen, send } from 'loot-core/platform/client/fetch';
 import { type Query } from 'loot-core/shared/query';
 import { isPreviewId } from 'loot-core/shared/transactions';
@@ -38,6 +38,7 @@ import { useAccountPreviewTransactions } from '../../../hooks/useAccountPreviewT
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import { useFailedAccounts } from '../../../hooks/useFailedAccounts';
 import { useNavigate } from '../../../hooks/useNavigate';
+import { useSelector, useDispatch } from '../../../redux';
 import { styles, theme } from '../../../style';
 import { Button } from '../../common/Button2';
 import { Text } from '../../common/Text';
@@ -53,7 +54,11 @@ export function AccountTransactions({
   accountName,
 }: {
   readonly account?: AccountEntity;
-  readonly accountId?: string;
+  readonly accountId?:
+    | AccountEntity['id']
+    | 'onbudget'
+    | 'offbudget'
+    | 'uncategorized';
   readonly accountName: string;
 }) {
   const schedulesQuery = useMemo(
@@ -73,7 +78,9 @@ export function AccountTransactions({
             )
           }
           leftContent={<MobileBackButton />}
-          rightContent={<AddTransactionButton accountId={accountId} />}
+          rightContent={
+            <AddTransactionButton accountId={account ? accountId : undefined} />
+          }
         />
       }
       padding={0}
@@ -105,7 +112,7 @@ function AccountHeader({ account }: { readonly account: AccountEntity }) {
 
   const onSave = useCallback(
     (account: AccountEntity) => {
-      dispatch(updateAccount(account));
+      dispatch(updateAccount({ account }));
     },
     [dispatch],
   );
@@ -132,7 +139,7 @@ function AccountHeader({ account }: { readonly account: AccountEntity }) {
   }, [account.id, dispatch]);
 
   const onReopenAccount = useCallback(() => {
-    dispatch(reopenAccount(account.id));
+    dispatch(reopenAccount({ id: account.id }));
   }, [account.id, dispatch]);
 
   const onClick = useCallback(() => {
@@ -216,7 +223,7 @@ function TransactionListWithPreviews({
   readonly account?: AccountEntity;
   readonly accountId?:
     | AccountEntity['id']
-    | 'budgeted'
+    | 'onbudget'
     | 'offbudget'
     | 'uncategorized';
   readonly accountName: AccountEntity['name'] | string;
@@ -234,6 +241,7 @@ function TransactionListWithPreviews({
     transactions,
     isLoading,
     reload: reloadTransactions,
+    isLoadingMore,
     loadMore: loadMoreTransactions,
   } = useTransactions({
     query: transactionsQuery,
@@ -249,29 +257,26 @@ function TransactionListWithPreviews({
 
   const onRefresh = useCallback(() => {
     if (accountId) {
-      dispatch(syncAndDownload(accountId));
+      dispatch(syncAndDownload({ accountId }));
     }
   }, [accountId, dispatch]);
 
   useEffect(() => {
     if (accountId) {
-      dispatch(markAccountRead(accountId));
+      dispatch(markAccountRead({ id: accountId }));
     }
   }, [accountId, dispatch]);
 
   useEffect(() => {
-    return listen('sync-event', ({ type, tables }) => {
-      if (type === 'applied') {
+    return listen('sync-event', event => {
+      if (event.type === 'applied') {
+        const tables = event.tables;
         if (
           tables.includes('transactions') ||
           tables.includes('category_mapping') ||
           tables.includes('payee_mapping')
         ) {
-          reloadTransactions?.();
-        }
-
-        if (tables.includes('payees') || tables.includes('payee_mapping')) {
-          dispatch(getPayees());
+          reloadTransactions();
         }
       }
     });
@@ -301,6 +306,13 @@ function TransactionListWithPreviews({
               await send('schedule/skip-next-date', { id: parts[1] });
               dispatch(collapseModals('scheduled-transaction-menu'));
             },
+            onComplete: async transactionId => {
+              const parts = transactionId.split('/');
+              await send('schedule/update', {
+                schedule: { id: parts[1], completed: true },
+              });
+              dispatch(collapseModals('scheduled-transaction-menu'));
+            },
           }),
         );
       }
@@ -324,6 +336,7 @@ function TransactionListWithPreviews({
       balance={balanceQueries.balance}
       balanceCleared={balanceQueries.cleared}
       balanceUncleared={balanceQueries.uncleared}
+      isLoadingMore={isLoadingMore}
       onLoadMore={loadMoreTransactions}
       searchPlaceholder={`Search ${accountName}`}
       onSearch={onSearch}
@@ -338,13 +351,13 @@ function queriesFromAccountId(
   entity: AccountEntity | undefined,
 ) {
   switch (id) {
-    case 'budgeted':
+    case 'onbudget':
       return {
-        balance: queries.budgetedAccountBalance(),
+        balance: queries.onBudgetAccountBalance(),
       };
     case 'offbudget':
       return {
-        balance: queries.offbudgetAccountBalance(),
+        balance: queries.offBudgetAccountBalance(),
       };
     case 'uncategorized':
       return {

@@ -1,6 +1,8 @@
 // @ts-strict-ignore
+import { q } from '../../shared/query';
 import { batchUpdateTransactions } from '../accounts/transactions';
 import { createApp } from '../app';
+import { runQuery } from '../aql';
 import * as db from '../db';
 import { runMutator } from '../mutators';
 
@@ -54,9 +56,47 @@ app.method('tools/fix-split-transactions', async () => {
     await batchUpdateTransactions({ updated });
   });
 
+  const splitTransactions = (
+    await runQuery(
+      q('transactions')
+        .options({ splits: 'grouped' })
+        .filter({
+          is_parent: true,
+        })
+        .select('*'),
+    )
+  ).data;
+
+  const mismatchedSplits = splitTransactions.filter(t => {
+    const subValue = t.subtransactions.reduce((acc, st) => acc + st.amount, 0);
+
+    return subValue !== t.amount;
+  });
+
+  // 5. Fix transfers that should not have categories
+  const brokenTransfers = await db.all(`
+    SELECT t1.id
+    FROM v_transactions_internal t1
+           JOIN accounts a1 ON t1.account = a1.id
+           JOIN v_transactions_internal t2 ON t1.transfer_id = t2.id
+           JOIN accounts a2 ON t2.account = a2.id
+    WHERE a1.offbudget = a2.offbudget
+      AND t1.category IS NOT NULL
+  `);
+
+  await runMutator(async () => {
+    const updated = brokenTransfers.map(row => ({
+      id: row.id,
+      category: null,
+    }));
+    await batchUpdateTransactions({ updated });
+  });
+
   return {
     numBlankPayees: blankPayeeRows.length,
     numCleared: clearedRows.length,
     numDeleted: deletedRows.length,
+    numTransfersFixed: brokenTransfers.length,
+    mismatchedSplits,
   };
 });

@@ -1,6 +1,7 @@
 // @ts-strict-ignore
 import { Notification } from '../../client/state-types/notifications';
 import * as monthUtils from '../../shared/months';
+import { CategoryEntity } from '../../types/models';
 import * as db from '../db';
 import { batchMessages } from '../sync';
 
@@ -46,7 +47,7 @@ export function runCheckTemplates() {
   return checkTemplates();
 }
 
-async function getCategories() {
+async function getCategories(): Promise<CategoryEntity[]> {
   return await db.all(
     `
     SELECT categories.* FROM categories
@@ -130,7 +131,7 @@ async function processTemplate(
     const isReflect = isReflectBudget();
     const categoriesLong = await getCategories();
     categoriesLong.forEach(c => {
-      if (!isReflect && !c.is_income) {
+      if (isReflect || !c.is_income) {
         categories.push(c);
       }
     });
@@ -150,7 +151,8 @@ async function processTemplate(
   const budgetList = [];
   const goalList = [];
   for (let i = 0; i < categories.length; i++) {
-    const id = categories[i].id;
+    const category = categories[i];
+    const { id } = category;
     const sheetName = monthUtils.sheetForMonth(month);
     const templates = categoryTemplates[id];
     const budgeted = await getSheetValue(sheetName, `budget-${id}`);
@@ -162,7 +164,7 @@ async function processTemplate(
       // gather needed priorities
       // gather remainder weights
       try {
-        const obj = await CategoryTemplate.init(templates, id, month);
+        const obj = await CategoryTemplate.init(templates, category, month);
         availBudget += budgeted;
         availBudget += obj.getLimitExcess();
         const p = obj.getPriorities();
@@ -230,9 +232,9 @@ async function processTemplate(
   // finish
   catObjects.forEach(o => {
     const ret = o.getValues();
-    budgetList.push({ category: o.categoryID, budgeted: ret.budgeted });
+    budgetList.push({ category: o.category.id, budgeted: ret.budgeted });
     goalList.push({
-      category: o.categoryID,
+      category: o.category.id,
       goal: ret.goal,
       longGoal: ret.longGoal ? 1 : null,
     });

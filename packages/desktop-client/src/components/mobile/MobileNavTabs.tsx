@@ -1,8 +1,9 @@
 import React, {
-  useCallback,
   type ComponentProps,
   type ComponentType,
   type CSSProperties,
+  useCallback,
+  useState,
 } from 'react';
 import { NavLink } from 'react-router-dom';
 import { useSpring, animated, config } from 'react-spring';
@@ -36,6 +37,9 @@ export const MOBILE_NAV_HEIGHT = ROW_HEIGHT + PILL_HEIGHT;
 
 export function MobileNavTabs() {
   const { isNarrowWidth } = useResponsive();
+  const [navbarState, setNavbarState] = useState<'default' | 'open' | 'hidden'>(
+    'default',
+  );
 
   const navTabStyle = {
     flex: `1 1 ${100 / COLUMN_COUNT}%`,
@@ -49,6 +53,7 @@ export function MobileNavTabs() {
     ({ canceled }: { canceled?: boolean }) => {
       // when cancel is true, it means that the user passed the upwards threshold
       // so we change the spring config to create a nice wobbly effect
+      setNavbarState('open');
       api.start({
         y: OPEN_FULL_Y,
         immediate: false,
@@ -60,6 +65,7 @@ export function MobileNavTabs() {
 
   const openDefault = useCallback(
     (velocity = 0) => {
+      setNavbarState('default');
       api.start({
         y: OPEN_DEFAULT_Y,
         immediate: false,
@@ -71,6 +77,7 @@ export function MobileNavTabs() {
 
   const hide = useCallback(
     (velocity = 0) => {
+      setNavbarState('hidden');
       api.start({
         y: HIDDEN_Y,
         immediate: false,
@@ -138,10 +145,10 @@ export function MobileNavTabs() {
     <div key={idx} style={navTabStyle} />
   ));
 
-  useScrollListener(({ isScrolling }) => {
-    if (isScrolling('down')) {
+  useScrollListener(({ isScrolling, hasScrolledToEnd }) => {
+    if (isScrolling('down') && !hasScrolledToEnd('up')) {
       hide();
-    } else if (isScrolling('up')) {
+    } else if (isScrolling('up') && !hasScrolledToEnd('down')) {
       openDefault();
     }
   });
@@ -201,6 +208,7 @@ export function MobileNavTabs() {
         bottom: 0,
         ...(!isNarrowWidth && { display: 'none' }),
       }}
+      data-navbar-state={navbarState}
     >
       <View>
         <div
@@ -254,6 +262,7 @@ function NavTab({ Icon: TabIcon, name, path, style, onClick }: NavTabProps) {
         flexDirection: 'column',
         textDecoration: 'none',
         textAlign: 'center',
+        userSelect: 'none',
         ...style,
       })}
       onClick={onClick}

@@ -235,7 +235,7 @@ const NUMBER_FORMATS = [
 
 type NumberFormats = (typeof NUMBER_FORMATS)[number];
 
-export function isNumberFormat(input: string = ''): input is NumberFormats {
+function isNumberFormat(input: string = ''): input is NumberFormats {
   return (NUMBER_FORMATS as readonly string[]).includes(input);
 }
 
@@ -258,6 +258,19 @@ let numberFormatConfig: {
   format: 'comma-dot',
   hideFraction: false,
 };
+
+export function parseNumberFormat({
+  format,
+  hideFraction,
+}: {
+  format?: string;
+  hideFraction?: string | boolean;
+}) {
+  return {
+    format: isNumberFormat(format) ? format : 'comma-dot',
+    hideFraction: String(hideFraction) === 'true',
+  };
+}
 
 export function setNumberFormat(config: typeof numberFormatConfig) {
   numberFormatConfig = config;
@@ -316,6 +329,21 @@ export function getNumberFormat({
 
 // Number utilities
 
+/**
+ * The exact amount.
+ */
+export type Amount = number;
+/**
+ * The exact amount that is formatted based on the configured number format.
+ * For example, 123.45 would be '123.45' or '123,45'.
+ */
+export type CurrencyAmount = string;
+/**
+ * The amount with the decimal point removed.
+ * For example, 123.45 would be 12345.
+ */
+export type IntegerAmount = number;
+
 // We dont use `Number.MAX_SAFE_NUMBER` and such here because those
 // numbers are so large that it's not safe to convert them to floats
 // (i.e. N / 100). For example, `9007199254740987 / 100 ===
@@ -340,39 +368,41 @@ export function safeNumber(value: number) {
   return value;
 }
 
-export function toRelaxedNumber(value: string) {
-  return integerToAmount(currencyToInteger(value) || 0);
+export function toRelaxedNumber(currencyAmount: CurrencyAmount): Amount {
+  return integerToAmount(currencyToInteger(currencyAmount) || 0);
 }
 
 export function integerToCurrency(
-  n: number,
+  integerAmount: IntegerAmount,
   formatter = getNumberFormat().formatter,
 ) {
-  return formatter.format(safeNumber(n) / 100);
+  return formatter.format(safeNumber(integerAmount) / 100);
 }
 
-export function amountToCurrency(n) {
-  return getNumberFormat().formatter.format(n);
+export function amountToCurrency(amount: Amount): CurrencyAmount {
+  return getNumberFormat().formatter.format(amount);
 }
 
-export function amountToCurrencyNoDecimal(n) {
+export function amountToCurrencyNoDecimal(amount: Amount): CurrencyAmount {
   return getNumberFormat({
     ...numberFormatConfig,
     hideFraction: true,
-  }).formatter.format(n);
+  }).formatter.format(amount);
 }
 
-export function currencyToAmount(str: string) {
+export function currencyToAmount(
+  currencyAmount: CurrencyAmount,
+): Amount | null {
   let amount;
   if (getNumberFormat().separatorRegex) {
     amount = parseFloat(
-      str
+      currencyAmount
         .replace(getNumberFormat().regex, '')
         .replace(getNumberFormat().separatorRegex, '.'),
     );
   } else {
     amount = parseFloat(
-      str
+      currencyAmount
         .replace(getNumberFormat().regex, '')
         .replace(getNumberFormat().separator, '.'),
     );
@@ -380,12 +410,14 @@ export function currencyToAmount(str: string) {
   return isNaN(amount) ? null : amount;
 }
 
-export function currencyToInteger(str: string) {
-  const amount = currencyToAmount(str);
+export function currencyToInteger(
+  currencyAmount: CurrencyAmount,
+): IntegerAmount | null {
+  const amount = currencyToAmount(currencyAmount);
   return amount == null ? null : amountToInteger(amount);
 }
 
-export function stringToInteger(str: string) {
+export function stringToInteger(str: string): number | null {
   const amount = parseInt(str.replace(/[^-0-9.,]/g, ''));
   if (!isNaN(amount)) {
     return amount;
@@ -393,12 +425,12 @@ export function stringToInteger(str: string) {
   return null;
 }
 
-export function amountToInteger(n: number) {
-  return Math.round(n * 100);
+export function amountToInteger(amount: Amount): IntegerAmount {
+  return Math.round(amount * 100);
 }
 
-export function integerToAmount(n) {
-  return parseFloat((safeNumber(n) / 100).toFixed(2));
+export function integerToAmount(integerAmount: IntegerAmount): Amount {
+  return parseFloat((safeNumber(integerAmount) / 100).toFixed(2));
 }
 
 // This is used when the input format could be anything (from

@@ -1,10 +1,11 @@
 // @ts-strict-ignore
 import React, { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
 
 import { importBudget } from 'loot-core/src/client/actions/budgets';
 
+import { useNavigate } from '../../../hooks/useNavigate';
+import { useDispatch } from '../../../redux';
 import { styles, theme } from '../../../style';
 import { Block } from '../../common/Block';
 import { ButtonWithLoading } from '../../common/Button2';
@@ -20,19 +21,19 @@ function getErrorMessage(error: string): string {
     case 'not-ynab5':
       return 'This file is not valid. Please select a JSON file exported from nYNAB.';
     default:
-      return 'An unknown error occurred while importing. Please report this as a new issue on Github.';
+      return 'An unknown error occurred while importing. Please report this as a new issue on GitHub.';
   }
 }
 
 export function ImportYNAB5Modal() {
   const { t } = useTranslation();
-
+  const navigate = useNavigate();
   const dispatch = useDispatch();
   const [error, setError] = useState<string | null>(null);
   const [importing, setImporting] = useState(false);
 
   async function onImport() {
-    const res = await window.Actual?.openFileDialog({
+    const res = await window.Actual.openFileDialog({
       properties: ['openFile'],
       filters: [{ name: 'ynab', extensions: ['json'] }],
     });
@@ -41,6 +42,7 @@ export function ImportYNAB5Modal() {
       setError(null);
       try {
         await dispatch(importBudget(res[0], 'ynab5'));
+        navigate('/budget');
       } catch (err) {
         setError(err.message);
       } finally {

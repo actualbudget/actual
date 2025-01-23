@@ -33,7 +33,7 @@ export function HoldBufferModal({ onSubmit }: HoldBufferModalProps) {
       {({ state: { close } }) => (
         <>
           <ModalHeader
-            title={t('Hold Buffer')}
+            title={t('Hold for next month')}
             rightContent={<ModalCloseButton onPress={close} />}
           />
           <View>
@@ -42,6 +42,7 @@ export function HoldBufferModal({ onSubmit }: HoldBufferModalProps) {
               <AmountInput
                 value={available}
                 autoDecimals={true}
+                zeroSign="+"
                 style={{
                   marginLeft: styles.mobileEditingPadding,
                   marginRight: styles.mobileEditingPadding,

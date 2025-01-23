@@ -201,6 +201,8 @@ const CONDITION_TYPES = {
       'doesNotContain',
       'notOneOf',
       'and',
+      'onBudget',
+      'offBudget',
     ],
     nullable: true,
     parse(op, value, fieldName) {
@@ -358,6 +360,12 @@ export class Condition {
 
   eval(object) {
     let fieldValue = object[this.field];
+    const type = this.type;
+
+    if (type === 'string') {
+      fieldValue ??= '';
+    }
+
     if (fieldValue === undefined) {
       return false;
     }
@@ -365,8 +373,6 @@ export class Condition {
     if (typeof fieldValue === 'string') {
       fieldValue = fieldValue.toLowerCase();
     }
-
-    const type = this.type;
 
     if (type === 'number' && this.options) {
       if (this.options.outflow) {
@@ -518,6 +524,21 @@ export class Condition {
           console.log('invalid regexp in matches condition', e);
           return false;
         }
+
+      case 'onBudget':
+        if (!object._account) {
+          return false;
+        }
+
+        return object._account.offbudget === 0;
+
+      case 'offBudget':
+        if (!object._account) {
+          return false;
+        }
+
+        return object._account.offbudget === 1;
+
       default:
     }
 
@@ -732,7 +753,7 @@ function execSplitActions(actions: Action[], transaction) {
     });
 
     // The last remainder split will be adjusted for any leftovers from rounding.
-    newTransactions[lastNonFixedTransactionIndex].amount -=
+    newTransactions[lastNonFixedTransactionIndex].amount +=
       getSplitRemainder(newTransactions);
   }
 
@@ -948,6 +969,8 @@ const OP_SCORES: Record<RuleConditionEntity['op'], number> = {
   doesNotContain: 0,
   matches: 0,
   hasTags: 0,
+  onBudget: 0,
+  offBudget: 0,
 };
 
 function computeScore(rule: Rule): number {

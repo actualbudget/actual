@@ -1,8 +1,8 @@
 export type FeatureFlag =
   | 'goalTemplatesEnabled'
   | 'actionTemplating'
-  | 'upcomingLengthAdjustment'
-  | 'contextMenus';
+  | 'contextMenus'
+  | 'openidAuth';
 
 /**
  * Cross-device preferences. These sync across devices when they are changed.
@@ -30,7 +30,8 @@ export type SyncedPrefs = Partial<
     | `csv-has-header-${string}`
     | `ofx-fallback-missing-payee-${string}`
     | `flip-amount-${string}-${'csv' | 'qif'}`
-    | `flags.${FeatureFlag}`,
+    | `flags.${FeatureFlag}`
+    | `learn-categories`,
     string
   >
 >;
@@ -76,8 +77,11 @@ export type GlobalPrefs = Partial<{
   floatingSidebar: boolean;
   maxMonths: number;
   keyId?: string;
+  language: string;
   theme: Theme;
   preferredDarkTheme: DarkTheme;
   documentDir: string; // Electron only
   serverSelfSignedCert: string; // Electron only
 }>;
+
+export type AuthMethods = 'password' | 'openid';

@@ -48,6 +48,7 @@ function reconcileFiles(
           deleted: false,
           state: 'unknown',
           hasKey: true,
+          owner: '',
         };
       }
 
@@ -66,6 +67,8 @@ function reconcileFiles(
             encryptKeyId: remote.encryptKeyId,
             hasKey: remote.hasKey,
             state: 'synced',
+            owner: remote.owner,
+            usersWithAccess: remote.usersWithAccess,
           };
         } else {
           return {
@@ -77,6 +80,8 @@ function reconcileFiles(
             encryptKeyId: remote.encryptKeyId,
             hasKey: remote.hasKey,
             state: 'detached',
+            owner: remote.owner,
+            usersWithAccess: remote.usersWithAccess,
           };
         }
       } else {
@@ -87,6 +92,7 @@ function reconcileFiles(
           deleted: false,
           state: 'broken',
           hasKey: true,
+          owner: '',
         };
       }
     } else {
@@ -108,6 +114,8 @@ function reconcileFiles(
               encryptKeyId: f.encryptKeyId,
               hasKey: f.hasKey,
               state: 'remote',
+              owner: f.owner,
+              usersWithAccess: f.usersWithAccess,
             };
           }),
       )
@@ -121,7 +129,7 @@ function reconcileFiles(
     .concat(sorted.filter(f => f.state === 'broken'));
 }
 
-const initialState: BudgetsState = {
+export const initialState: BudgetsState = {
   budgets: [],
   remoteFiles: null,
   allFiles: null,

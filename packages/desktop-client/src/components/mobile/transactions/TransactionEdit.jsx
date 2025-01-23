@@ -7,7 +7,7 @@ import React, {
   useMemo,
   useCallback,
 } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useTranslation } from 'react-i18next';
 import { useLocation, useParams } from 'react-router-dom';
 
 import {
@@ -16,13 +16,14 @@ import {
   parseISO,
   isValid as isValidDate,
 } from 'date-fns';
-import { t } from 'i18next';
+import { UAParser } from 'ua-parser-js';
 
-import { pushModal, setLastTransaction } from 'loot-core/client/actions';
-import { runQuery } from 'loot-core/src/client/query-helpers';
-import { send } from 'loot-core/src/platform/client/fetch';
-import * as monthUtils from 'loot-core/src/shared/months';
-import { q } from 'loot-core/src/shared/query';
+import { pushModal } from 'loot-core/client/actions';
+import { setLastTransaction } from 'loot-core/client/queries/queriesSlice';
+import { runQuery } from 'loot-core/client/query-helpers';
+import { send } from 'loot-core/platform/client/fetch';
+import * as monthUtils from 'loot-core/shared/months';
+import { q } from 'loot-core/shared/query';
 import {
   ungroupTransactions,
   updateTransaction,
@@ -31,7 +32,7 @@ import {
   addSplitTransaction,
   deleteTransaction,
   makeChild,
-} from 'loot-core/src/shared/transactions';
+} from 'loot-core/shared/transactions';
 import {
   titleFirst,
   integerToCurrency,
@@ -40,7 +41,7 @@ import {
   getChangedValues,
   diffItems,
   groupById,
-} from 'loot-core/src/shared/util';
+} from 'loot-core/shared/util';
 
 import { useAccounts } from '../../../hooks/useAccounts';
 import { useCategories } from '../../../hooks/useCategories';
@@ -55,6 +56,7 @@ import {
 import { SvgSplit } from '../../../icons/v0';
 import { SvgAdd, SvgPiggyBank, SvgTrash } from '../../../icons/v1';
 import { SvgPencilWriteAlternate } from '../../../icons/v2';
+import { useSelector, useDispatch } from '../../../redux';
 import { styles, theme } from '../../../style';
 import { Button } from '../../common/Button';
 import { Text } from '../../common/Text';
@@ -67,6 +69,9 @@ import { FieldLabel, TapField, InputField, ToggleField } from '../MobileForms';
 import { getPrettyPayee } from '../utils';
 
 import { FocusableAmountInput } from './FocusableAmountInput';
+
+const agent = UAParser(navigator.userAgent);
+const isIOSAgent = agent.browser.name === 'Mobile Safari';
 
 function getFieldName(transactionId, field) {
   return `${field}-${transactionId}`;
@@ -156,7 +161,7 @@ export function Status({ status, isSplit }) {
 
 function Footer({
   transactions,
-  adding,
+  isAdding,
   onAdd,
   onSave,
   onSplit,
@@ -181,6 +186,7 @@ function Footer({
 
   return (
     <View
+      data-testid="transaction-form-footer"
       style={{
         paddingLeft: styles.mobileEditingPadding,
         paddingRight: styles.mobileEditingPadding,
@@ -232,7 +238,7 @@ function Footer({
             Select account
           </Text>
         </Button>
-      ) : adding ? (
+      ) : isAdding ? (
         <Button
           type="primary"
           style={{ height: styles.mobileMinHeight }}
@@ -290,6 +296,7 @@ const ChildTransactionEdit = forwardRef(
     },
     ref,
   ) => {
+    const { t } = useTranslation();
     const { editingField, onRequestActiveEdit, onClearActiveEdit } =
       useSingleActiveEditForm();
     const prettyPayee = getPrettyPayee({
@@ -436,7 +443,7 @@ const ChildTransactionEdit = forwardRef(
 ChildTransactionEdit.displayName = 'ChildTransactionEdit';
 
 const TransactionEditInner = memo(function TransactionEditInner({
-  adding,
+  isAdding,
   accounts,
   categories,
   payees,
@@ -448,6 +455,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
   onSplit,
   onAddSplit,
 }) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const transactions = useMemo(
@@ -462,7 +470,11 @@ const TransactionEditInner = memo(function TransactionEditInner({
 
   const { editingField, onRequestActiveEdit, onClearActiveEdit } =
     useSingleActiveEditForm();
-  const [totalAmountFocused, setTotalAmountFocused] = useState(true);
+  const [totalAmountFocused, setTotalAmountFocused] = useState(
+    // iOS does not support automatically opening up the keyboard for the
+    // total amount field. Hence we should not focus on it on page render.
+    !isIOSAgent,
+  );
   const childTransactionElementRefMap = useRef({});
   const hasAccountChanged = useRef(false);
 
@@ -479,10 +491,10 @@ const TransactionEditInner = memo(function TransactionEditInner({
   const isInitialMount = useInitialMount();
 
   useEffect(() => {
-    if (isInitialMount && adding) {
+    if (isInitialMount && isAdding && !isIOSAgent) {
       onTotalAmountEdit();
     }
-  }, [adding, isInitialMount, onTotalAmountEdit]);
+  }, [isAdding, isInitialMount, onTotalAmountEdit]);
 
   const getAccount = useCallback(
     trans => {
@@ -517,7 +529,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
   const getCategory = useCallback(
     (trans, isOffBudget) => {
       if (isOffBudget) {
-        return 'Off Budget';
+        return 'Off budget';
       } else if (isBudgetTransfer(trans)) {
         return 'Transfer';
       } else {
@@ -532,24 +544,12 @@ const TransactionEditInner = memo(function TransactionEditInner({
 
     const onConfirmSave = () => {
       let transactionsToSave = unserializedTransactions;
-      if (adding) {
+      if (isAdding) {
         transactionsToSave = realizeTempTransactions(unserializedTransactions);
       }
 
       onSave(transactionsToSave);
-
-      if (adding || hasAccountChanged.current) {
-        const { account: accountId } = unserializedTransaction;
-        const account = accountsById?.[accountId];
-        if (account) {
-          navigate(`/accounts/${account.id}`, { replace: true });
-        } else {
-          // Handle the case where account is undefined
-          navigate(-1);
-        }
-      } else {
-        navigate(-1);
-      }
+      navigate(-1);
     };
 
     if (unserializedTransaction.reconciled) {
@@ -566,14 +566,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
     } else {
       onConfirmSave();
     }
-  }, [
-    accountsById,
-    adding,
-    dispatch,
-    navigate,
-    onSave,
-    unserializedTransactions,
-  ]);
+  }, [isAdding, dispatch, navigate, onSave, unserializedTransactions]);
 
   const onUpdateInner = useCallback(
     async (serializedTransaction, name, value) => {
@@ -592,11 +585,9 @@ const TransactionEditInner = memo(function TransactionEditInner({
     value => {
       if (transaction.amount !== value) {
         onUpdateInner(transaction, 'amount', value.toString());
-      } else {
-        onClearActiveEdit();
       }
     },
-    [onClearActiveEdit, onUpdateInner, transaction],
+    [onUpdateInner, transaction],
   );
 
   const onEditFieldInner = useCallback(
@@ -757,7 +748,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
         <MobilePageHeader
           title={
             transaction.payee == null
-              ? adding
+              ? isAdding
                 ? 'New Transaction'
                 : 'Transaction'
               : title
@@ -772,7 +763,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
       footer={
         <Footer
           transactions={transactions}
-          adding={adding}
+          isAdding={isAdding}
           onAdd={onSaveInner}
           onSave={onSaveInner}
           onSplit={onSplit}
@@ -784,7 +775,10 @@ const TransactionEditInner = memo(function TransactionEditInner({
       }
       padding={0}
     >
-      <View style={{ flexShrink: 0, marginTop: 20, marginBottom: 20 }}>
+      <View
+        data-testid="transaction-form"
+        style={{ flexShrink: 0, marginTop: 20, marginBottom: 20 }}
+      >
         <View
           style={{
             alignItems: 'center',
@@ -796,6 +790,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
             zeroSign="-"
             focused={totalAmountFocused}
             onFocus={onTotalAmountEdit}
+            onBlur={onClearActiveEdit}
             onUpdateAmount={onTotalAmountUpdate}
             focusedStyle={{
               width: 'auto',
@@ -976,7 +971,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
           />
         </View>
 
-        {!adding && (
+        {!isAdding && (
           <View style={{ alignItems: 'center' }}>
             <Button
               onClick={() => onDeleteInner(transaction.id)}
@@ -1042,8 +1037,8 @@ function TransactionEditUnconnected({
   const dispatch = useDispatch();
   const [transactions, setTransactions] = useState([]);
   const [fetchedTransactions, setFetchedTransactions] = useState([]);
-  const adding = useRef(false);
-  const deleted = useRef(false);
+  const isAdding = useRef(false);
+  const isDeleted = useRef(false);
 
   useEffect(() => {
     let unmounted = false;
@@ -1074,7 +1069,7 @@ function TransactionEditUnconnected({
     if (transactionId !== 'new') {
       fetchTransaction();
     } else {
-      adding.current = true;
+      isAdding.current = true;
     }
 
     return () => {
@@ -1083,7 +1078,7 @@ function TransactionEditUnconnected({
   }, [transactionId]);
 
   useEffect(() => {
-    if (adding.current) {
+    if (isAdding.current) {
       setTransactions(
         makeTemporaryTransactions(
           locationState?.accountId || lastTransaction?.account || null,
@@ -1152,7 +1147,7 @@ function TransactionEditUnconnected({
 
   const onSave = useCallback(
     async newTransactions => {
-      if (deleted.current) {
+      if (isDeleted.current) {
         return;
       }
 
@@ -1176,10 +1171,10 @@ function TransactionEditUnconnected({
         // }
       }
 
-      if (adding.current) {
+      if (isAdding.current) {
         // The first one is always the "parent" and the only one we care
         // about
-        dispatch(setLastTransaction(newTransactions[0]));
+        dispatch(setLastTransaction({ transaction: newTransactions[0] }));
       }
     },
     [dispatch, fetchedTransactions],
@@ -1189,9 +1184,9 @@ function TransactionEditUnconnected({
     async id => {
       const changes = deleteTransaction(transactions, id);
 
-      if (adding.current) {
+      if (isAdding.current) {
         // Adding a new transactions, this disables saving when the component unmounts
-        deleted.current = true;
+        isDeleted.current = true;
       } else {
         const _remoteUpdates = await send('transactions-batch-update', {
           deleted: changes.diff.deleted,
@@ -1244,7 +1239,7 @@ function TransactionEditUnconnected({
     >
       <TransactionEditInner
         transactions={transactions}
-        adding={adding.current}
+        isAdding={isAdding.current}
         categories={categories}
         accounts={accounts}
         payees={payees}

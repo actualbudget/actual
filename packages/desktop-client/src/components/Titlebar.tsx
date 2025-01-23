@@ -1,10 +1,11 @@
-import React, { useState, useEffect, type CSSProperties } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
+import { useTranslation } from 'react-i18next';
 import { Routes, Route, useLocation } from 'react-router-dom';
 
 import { css } from '@emotion/css';
-import { t } from 'i18next';
 
+import { sync } from 'loot-core/client/app/appSlice';
 import * as Platform from 'loot-core/src/client/platform';
 import * as queries from 'loot-core/src/client/queries';
 import { listen } from 'loot-core/src/platform/client/fetch';
@@ -13,7 +14,6 @@ import {
   isElectron,
 } from 'loot-core/src/shared/environment';
 
-import { useActions } from '../hooks/useActions';
 import { useGlobalPref } from '../hooks/useGlobalPref';
 import { useMetadataPref } from '../hooks/useMetadataPref';
 import { useNavigate } from '../hooks/useNavigate';
@@ -25,7 +25,8 @@ import {
   SvgViewHide,
   SvgViewShow,
 } from '../icons/v2';
-import { theme, styles } from '../style';
+import { useDispatch } from '../redux';
+import { theme, styles, type CSSProperties } from '../style';
 
 import { AccountSyncCheck } from './accounts/AccountSyncCheck';
 import { AnimatedRefresh } from './AnimatedRefresh';
@@ -107,17 +108,17 @@ type SyncButtonProps = {
   isMobile?: boolean;
 };
 function SyncButton({ style, isMobile = false }: SyncButtonProps) {
+  const { t } = useTranslation();
   const [cloudFileId] = useMetadataPref('cloudFileId');
-  const { sync } = useActions();
-
+  const dispatch = useDispatch();
   const [syncing, setSyncing] = useState(false);
   const [syncState, setSyncState] = useState<
     null | 'offline' | 'local' | 'disabled' | 'error'
   >(null);
 
   useEffect(() => {
-    const unlisten = listen('sync-event', ({ type, subtype, syncDisabled }) => {
-      if (type === 'start') {
+    const unlisten = listen('sync-event', event => {
+      if (event.type === 'start') {
         setSyncing(true);
         setSyncState(null);
       } else {
@@ -129,19 +130,19 @@ function SyncButton({ style, isMobile = false }: SyncButtonProps) {
         }, 200);
       }
 
-      if (type === 'error') {
+      if (event.type === 'error') {
         // Use the offline state if either there is a network error or
         // if this file isn't a "cloud file". You can't sync a local
         // file.
-        if (subtype === 'network') {
+        if (event.subtype === 'network') {
           setSyncState('offline');
         } else if (!cloudFileId) {
           setSyncState('local');
         } else {
           setSyncState('error');
         }
-      } else if (type === 'success') {
-        setSyncState(syncDisabled ? 'disabled' : null);
+      } else if (event.type === 'success') {
+        setSyncState(event.syncDisabled ? 'disabled' : null);
       }
     });
 
@@ -193,15 +194,17 @@ function SyncButton({ style, isMobile = false }: SyncButtonProps) {
     marginRight: 5,
   };
 
+  const onSync = () => dispatch(sync());
+
   useHotkeys(
     'ctrl+s, cmd+s, meta+s',
-    sync,
+    onSync,
     {
       enableOnFormTags: true,
       preventDefault: true,
       scopes: ['app'],
     },
-    [sync],
+    [onSync],
   );
 
   return (
@@ -223,7 +226,7 @@ function SyncButton({ style, isMobile = false }: SyncButtonProps) {
         '&[data-hovered]': hoveredStyle,
         '&[data-pressed]': activeStyle,
       })}
-      onPress={sync}
+      onPress={onSync}
     >
       {isMobile ? (
         syncState === 'error' ? (
@@ -265,6 +268,7 @@ type TitlebarProps = {
 };
 
 export function Titlebar({ style }: TitlebarProps) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   const sidebar = useSidebar();

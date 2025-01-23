@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
 
 import { loadAllFiles, pushModal } from 'loot-core/client/actions';
 
 import { useGlobalPref } from '../../../hooks/useGlobalPref';
 import { SvgPencil1 } from '../../../icons/v2';
+import { useDispatch } from '../../../redux';
 import { theme, styles } from '../../../style';
 import { Button } from '../../common/Button2';
 import { Modal, ModalCloseButton, ModalHeader } from '../../common/Modal';
@@ -19,7 +19,7 @@ function FileLocationSettings() {
   const dispatch = useDispatch();
 
   async function onChooseDocumentDir() {
-    const chosenDirectory = await window.Actual?.openFileDialog({
+    const chosenDirectory = await window.Actual.openFileDialog({
       properties: ['openDirectory'],
     });
 
@@ -109,14 +109,12 @@ function SelfSignedCertLocationSettings() {
       }}
     >
       <Text>
-        <strong>
-          <Trans>Server self-signed certificate</Trans>
-        </strong>{' '}
-        <small style={{ marginLeft: '0.5rem' }}>
-          <i>
-            <Trans>enables a secure connection</Trans>
-          </i>
-        </small>
+        <Trans>
+          <strong>Server self-signed certificate</strong>{' '}
+          <small style={{ marginLeft: '0.5rem' }}>
+            <i>enables a secure connection</i>
+          </small>
+        </Trans>
       </Text>
       <View style={{ flexDirection: 'row', gap: '0.5rem', width: '100%' }}>
         <Text
@@ -142,6 +140,8 @@ function SelfSignedCertLocationSettings() {
 }
 
 export function FilesSettingsModal() {
+  const { t } = useTranslation();
+
   const dispatch = useDispatch();
 
   function closeModal(close: () => void) {
@@ -154,7 +154,7 @@ export function FilesSettingsModal() {
       {({ state: { close } }) => (
         <>
           <ModalHeader
-            title="Settings"
+            title={t('Settings')}
             rightContent={
               <ModalCloseButton onPress={() => closeModal(close)} />
             }

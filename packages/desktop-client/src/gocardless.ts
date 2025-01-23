@@ -1,10 +1,10 @@
-import { type Dispatch } from 'loot-core/client/actions/types';
+import { type AppDispatch } from 'loot-core/client/store';
 import { pushModal } from 'loot-core/src/client/actions/modals';
 import { send } from 'loot-core/src/platform/client/fetch';
 import { type GoCardlessToken } from 'loot-core/src/types/models';
 
 function _authorize(
-  dispatch: Dispatch,
+  dispatch: AppDispatch,
   upgradingAccountId: string | undefined,
   {
     onSuccess,
@@ -25,7 +25,7 @@ function _authorize(
 
         if ('error' in resp) return resp;
         const { link, requisitionId } = resp;
-        window.Actual?.openURLInBrowser(link);
+        window.Actual.openURLInBrowser(link);
 
         return send('gocardless-poll-web-token', {
           upgradingAccountId,
@@ -40,7 +40,7 @@ function _authorize(
 }
 
 export async function authorizeBank(
-  dispatch: Dispatch,
+  dispatch: AppDispatch,
   { upgradingAccountId }: { upgradingAccountId?: string } = {},
 ) {
   _authorize(dispatch, upgradingAccountId, {

@@ -1,7 +1,6 @@
 // @ts-strict-ignore
 import React, { useMemo, useRef, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
 
 import { pushModal } from 'loot-core/client/actions';
 import { useSchedules } from 'loot-core/src/client/data-hooks/schedules';
@@ -13,6 +12,7 @@ import {
 } from 'loot-core/src/types/models';
 
 import { SvgAdd } from '../../icons/v0';
+import { useDispatch } from '../../redux';
 import { Button } from '../common/Button2';
 import { InitialFocus } from '../common/InitialFocus';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
@@ -79,7 +79,7 @@ export function ScheduleLink({
       {({ state: { close } }) => (
         <>
           <ModalHeader
-            title={t('Link Schedule')}
+            title={t('Link schedule')}
             rightContent={<ModalCloseButton onPress={close} />}
           />
           <View

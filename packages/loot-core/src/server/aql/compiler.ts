@@ -1,4 +1,5 @@
 import { getNormalisedString } from '../../shared/normalisation';
+import { QueryState } from '../../shared/query';
 
 // @ts-strict-ignore
 let _uid = 0;
@@ -757,7 +758,7 @@ function compileConditions(state, conds) {
           }
           return compileAnd(state, cond);
         } else if (field === '$or') {
-          if (!cond) {
+          if (!cond || (Array.isArray(cond) && cond.length === 0)) {
             return null;
           }
           return compileOr(state, cond);
@@ -1005,9 +1006,7 @@ export type SchemaConfig = {
     | Record<string, unknown>
     | ((name: string, config: { withDead; isJoin; tableOptions }) => unknown);
   tableFilters?: (name: string) => unknown[];
-  customizeQuery?: <T extends { table: string; orderExpressions: unknown[] }>(
-    queryString: T,
-  ) => T;
+  customizeQuery?: (queryString: QueryState) => QueryState;
   views?: Record<
     string,
     {

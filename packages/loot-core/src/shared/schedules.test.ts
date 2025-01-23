@@ -1,7 +1,11 @@
 import MockDate from 'mockdate';
 
 import * as monthUtils from './months';
-import { getRecurringDescription, getStatus } from './schedules';
+import {
+  getRecurringDescription,
+  getStatus,
+  getUpcomingDays,
+} from './schedules';
 
 describe('schedules', () => {
   const today = new Date(2017, 0, 1); // Global date when testing is set to 2017-01-01 per monthUtils.currentDay()
@@ -337,6 +341,22 @@ describe('schedules', () => {
           'yyyy-MM-dd',
         ),
       ).toBe('Every 2 months on the 17th, until 2021-06-01');
+    });
+  });
+
+  describe('getUpcomingDays', () => {
+    it.each([
+      ['1', 1],
+      ['7', 7],
+      ['14', 14],
+      ['oneMonth', 32],
+      ['currentMonth', 31],
+      ['2-day', 2],
+      ['5-week', 35],
+      ['3-month', 91],
+      ['4-year', 1462],
+    ])('value of %s returns %i days', (value: string, expected: number) => {
+      expect(getUpcomingDays(value)).toEqual(expected);
     });
   });
 });

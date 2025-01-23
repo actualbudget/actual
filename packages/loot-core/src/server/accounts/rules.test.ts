@@ -47,6 +47,9 @@ describe('Condition', () => {
 
     cond = new Condition('is', 'payee', null, null);
     expect(cond.eval({ payee: null })).toBe(true);
+
+    cond = new Condition('is', 'notes', '', null);
+    expect(cond.eval({ notes: null })).toBe(true);
   });
 
   test('ops handles undefined fields', () => {
@@ -544,7 +547,6 @@ describe('Rule', () => {
       expect(
         fixedAmountRule.exec({ imported_payee: 'James', amount: 200 }),
       ).toMatchObject({
-        error: null,
         subtransactions: [{ amount: 100 }, { amount: 100 }],
       });
     });
@@ -571,7 +573,6 @@ describe('Rule', () => {
 
       expect(rule.exec({ imported_payee: 'James', amount: 200 })).toMatchObject(
         {
-          error: null,
           subtransactions: [{ amount: 100 }, { amount: 100 }],
         },
       );
@@ -597,7 +598,6 @@ describe('Rule', () => {
 
       expect(rule.exec({ imported_payee: 'James', amount: 200 })).toMatchObject(
         {
-          error: null,
           subtransactions: [{ amount: 100 }, { amount: 100 }],
         },
       );
@@ -632,7 +632,6 @@ describe('Rule', () => {
       expect(
         prioritizationRule.exec({ imported_payee: 'James', amount: 200 }),
       ).toMatchObject({
-        error: null,
         subtransactions: [{ amount: 100 }, { amount: 50 }, { amount: 50 }],
       });
     });
@@ -642,7 +641,6 @@ describe('Rule', () => {
       expect(
         prioritizationRule.exec({ imported_payee: 'James', amount: 50 }),
       ).toMatchObject({
-        error: null,
         subtransactions: [{ amount: 100 }, { amount: -25 }, { amount: -25 }],
       });
     });
@@ -674,8 +672,44 @@ describe('Rule', () => {
 
       expect(rule.exec({ imported_payee: 'James', amount: 150 })).toMatchObject(
         {
-          error: null,
           subtransactions: [{ amount: 100 }, { amount: 50 }, { amount: 0 }],
+        },
+      );
+    });
+
+    test('remainder rounds correctly and only if necessary', () => {
+      const rule = new Rule({
+        conditionsOp: 'and',
+        conditions: [{ op: 'is', field: 'imported_payee', value: 'James' }],
+        actions: [
+          {
+            op: 'set-split-amount',
+            field: 'amount',
+            options: { splitIndex: 1, method: 'remainder' },
+          },
+          {
+            op: 'set-split-amount',
+            field: 'amount',
+            options: { splitIndex: 2, method: 'remainder' },
+          },
+        ],
+      });
+
+      expect(
+        rule.exec({ imported_payee: 'James', amount: -2397 }),
+      ).toMatchObject({
+        subtransactions: [{ amount: -1198 }, { amount: -1199 }],
+      });
+
+      expect(rule.exec({ imported_payee: 'James', amount: 123 })).toMatchObject(
+        {
+          subtransactions: [{ amount: 62 }, { amount: 61 }],
+        },
+      );
+
+      expect(rule.exec({ imported_payee: 'James', amount: 100 })).toMatchObject(
+        {
+          subtransactions: [{ amount: 50 }, { amount: 50 }],
         },
       );
     });

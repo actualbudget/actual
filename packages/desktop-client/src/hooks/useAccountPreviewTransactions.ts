@@ -11,7 +11,7 @@ import { useAccounts } from './useAccounts';
 import { usePayees } from './usePayees';
 
 type UseAccountPreviewTransactionsProps = {
-  accountId?: AccountEntity['id'];
+  accountId?: AccountEntity['id'] | undefined;
 };
 
 type UseAccountPreviewTransactionsResult = {
@@ -32,10 +32,6 @@ export function useAccountPreviewTransactions({
   const payees = usePayees();
 
   const previewTransactions = useMemo(() => {
-    if (isLoading) {
-      return [];
-    }
-
     if (!accountId) {
       return originalPreviewTransactions;
     }
@@ -50,9 +46,12 @@ export function useAccountPreviewTransactions({
           a => a.id === payees.find(p => p.id === payeeId)?.transfer_acct,
         ),
     });
-  }, [accountId, accounts, isLoading, originalPreviewTransactions, payees]);
+  }, [accountId, accounts, originalPreviewTransactions, payees]);
 
-  return { isLoading, previewTransactions };
+  return {
+    isLoading,
+    previewTransactions,
+  };
 }
 
 type AccountPreviewProps = {
@@ -74,25 +73,26 @@ function accountPreview({
 }: AccountPreviewProps): TransactionEntity[] {
   return transactions.map(transaction => {
     const inverse = transaction.account !== accountId;
+    const subtransactions = transaction.subtransactions?.map(st => ({
+      ...st,
+      amount: inverse ? -st.amount : st.amount,
+      payee:
+        (inverse ? getPayeeByTransferAccount(st.account)?.id : st.payee) || '',
+      account: inverse
+        ? getTransferAccountByPayee(st.payee)?.id || ''
+        : st.account,
+    }));
     return {
       ...transaction,
       amount: inverse ? -transaction.amount : transaction.amount,
-      payee: inverse
-        ? getPayeeByTransferAccount(transaction.account)?.id || ''
-        : transaction.payee,
+      payee:
+        (inverse
+          ? getPayeeByTransferAccount(transaction.account)?.id
+          : transaction.payee) || '',
       account: inverse
         ? getTransferAccountByPayee(transaction.payee)?.id || ''
         : transaction.account,
-      subtransactions: transaction.subtransactions?.map(st => ({
-        ...st,
-        amount: inverse ? -st.amount : st.amount,
-        payee: inverse
-          ? getPayeeByTransferAccount(st.account)?.id || ''
-          : st.payee,
-        account: inverse
-          ? getTransferAccountByPayee(st.payee)?.id || ''
-          : st.account,
-      })),
+      ...(subtransactions && { subtransactions }),
     };
   });
 }

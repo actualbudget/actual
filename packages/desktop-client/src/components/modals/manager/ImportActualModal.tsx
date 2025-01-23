@@ -1,10 +1,11 @@
 // @ts-strict-ignore
 import React, { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
 
 import { importBudget } from 'loot-core/src/client/actions/budgets';
 
+import { useNavigate } from '../../../hooks/useNavigate';
+import { useDispatch } from '../../../redux';
 import { styles, theme } from '../../../style';
 import { Block } from '../../common/Block';
 import { ButtonWithLoading } from '../../common/Button2';
@@ -25,19 +26,19 @@ function getErrorMessage(error: string): string {
     case 'invalid-metadata-file':
       return 'The metadata file in the given archive is corrupted.';
     default:
-      return 'An unknown error occurred while importing. Please report this as a new issue on Github.';
+      return 'An unknown error occurred while importing. Please report this as a new issue on GitHub.';
   }
 }
 
 export function ImportActualModal() {
   const { t } = useTranslation();
-
+  const navigate = useNavigate();
   const dispatch = useDispatch();
   const [error, setError] = useState<string | null>(null);
   const [importing, setImporting] = useState(false);
 
   async function onImport() {
-    const res = await window.Actual?.openFileDialog({
+    const res = await window.Actual.openFileDialog({
       properties: ['openFile'],
       filters: [{ name: 'actual', extensions: ['zip', 'blob'] }],
     });
@@ -46,6 +47,7 @@ export function ImportActualModal() {
       setError(null);
       try {
         await dispatch(importBudget(res[0], 'actual'));
+        navigate('/budget');
       } catch (err) {
         setError(err.message);
       } finally {

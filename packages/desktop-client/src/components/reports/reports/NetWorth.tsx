@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
 
 import * as d from 'date-fns';
@@ -15,6 +14,8 @@ import { type TimeFrame, type NetWorthWidget } from 'loot-core/types/models';
 import { useAccounts } from '../../../hooks/useAccounts';
 import { useFilters } from '../../../hooks/useFilters';
 import { useNavigate } from '../../../hooks/useNavigate';
+import { useSyncedPref } from '../../../hooks/useSyncedPref';
+import { useDispatch } from '../../../redux';
 import { theme, styles } from '../../../style';
 import { Button } from '../../common/Button2';
 import { Paragraph } from '../../common/Paragraph';
@@ -162,6 +163,10 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
     });
   };
 
+  const [earliestTransaction, _] = useState('');
+  const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
+  const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
+
   if (!allMonths || !data) {
     return null;
   }
@@ -197,6 +202,8 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
         allMonths={allMonths}
         start={start}
         end={end}
+        earliestTransaction={earliestTransaction}
+        firstDayOfWeekIdx={firstDayOfWeekIdx}
         mode={mode}
         onChangeDates={onChangeDates}
         filters={conditions}
@@ -244,16 +251,20 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
         />
 
         <View style={{ marginTop: 30, userSelect: 'none' }}>
-          <Trans>
-            <Paragraph>
-              <strong>{t('How is net worth calculated?')}</strong>
-            </Paragraph>
-            <Paragraph>
-              {t(
-                'Net worth shows the balance of all accounts over time, including all of your investments. Your “net worth” is considered to be the amount you’d have if you sold all your assets and paid off as much debt as possible. If you hover over the graph, you can also see the amount of assets and debt individually.',
-              )}
-            </Paragraph>
-          </Trans>
+          <Paragraph>
+            <strong>
+              <Trans>How is net worth calculated?</Trans>
+            </strong>
+          </Paragraph>
+          <Paragraph>
+            <Trans>
+              Net worth shows the balance of all accounts over time, including
+              all of your investments. Your “net worth” is considered to be the
+              amount you’d have if you sold all your assets and paid off as much
+              debt as possible. If you hover over the graph, you can also see
+              the amount of assets and debt individually.
+            </Trans>
+          </Paragraph>
         </View>
       </View>
     </Page>

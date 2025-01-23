@@ -1,15 +1,15 @@
 import React from 'react';
-import { useSelector } from 'react-redux';
-
-import { t } from 'i18next';
+import { useTranslation } from 'react-i18next';
 
 import { useMetadataPref } from '../../hooks/useMetadataPref';
+import { useSelector } from '../../redux';
 import { Modal, ModalHeader, ModalCloseButton } from '../common/Modal';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { BudgetList } from '../manager/BudgetList';
 
 export function BudgetListModal() {
+  const { t } = useTranslation();
   const [id] = useMetadataPref('id');
   const currentFile = useSelector(state =>
     state.budgets.allFiles?.find(f => 'id' in f && f.id === id),

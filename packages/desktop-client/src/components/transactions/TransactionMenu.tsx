@@ -1,11 +1,17 @@
-import React, { type ComponentPropsWithoutRef } from 'react';
+import React, { useMemo, type ComponentPropsWithoutRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
 
 import { pushModal } from 'loot-core/client/actions';
+import {
+  scheduleIsRecurring,
+  extractScheduleConds,
+} from 'loot-core/shared/schedules';
 import { isPreviewId } from 'loot-core/shared/transactions';
+import { useSchedules } from 'loot-core/src/client/data-hooks/schedules';
+import { q } from 'loot-core/src/shared/query';
 import { type TransactionEntity } from 'loot-core/types/models';
 
+import { useDispatch } from '../../redux';
 import { Menu } from '../common/Menu';
 
 type BalanceMenuProps = Omit<
@@ -43,6 +49,29 @@ export function TransactionMenu({
   const canUnsplitTransactions =
     !transaction.reconciled && (transaction.is_parent || transaction.is_child);
 
+  const scheduleId = isPreview ? transaction.id?.split('/')?.[1] : null;
+  const schedulesQuery = useMemo(
+    () => q('schedules').filter({ id: scheduleId }).select('*'),
+    [scheduleId],
+  );
+  const { isLoading: isSchedulesLoading, schedules } = useSchedules({
+    query: schedulesQuery,
+  });
+
+  if (isSchedulesLoading) {
+    return null;
+  }
+
+  let canBeSkipped = false;
+  let canBeCompleted = false;
+  if (isPreview) {
+    const schedule = schedules?.[0];
+    const { date: dateCond } = extractScheduleConds(schedule._conditions);
+
+    canBeSkipped = scheduleIsRecurring(dateCond);
+    canBeCompleted = !scheduleIsRecurring(dateCond);
+  }
+
   function onViewSchedule() {
     const firstId = transaction.id;
     let scheduleId;
@@ -74,6 +103,7 @@ export function TransactionMenu({
             break;
           case 'post-transaction':
           case 'skip':
+          case 'complete':
             onScheduleAction(name, transaction.id);
             break;
           case 'view-schedule':
@@ -97,8 +127,13 @@ export function TransactionMenu({
         isPreview
           ? [
               { name: 'view-schedule', text: t('View schedule') },
-              { name: 'post-transaction', text: t('Post transaction') },
-              { name: 'skip', text: t('Skip scheduled date') },
+              { name: 'post-transaction', text: t('Post transaction today') },
+              ...(canBeSkipped
+                ? [{ name: 'skip', text: t('Skip next scheduled date') }]
+                : []),
+              ...(canBeCompleted
+                ? [{ name: 'complete', text: t('Mark as completed') }]
+                : []),
             ]
           : [
               {

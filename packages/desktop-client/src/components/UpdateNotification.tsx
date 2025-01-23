@@ -1,11 +1,10 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
 
-import { type State } from 'loot-core/src/client/state-types';
+import { setAppState, updateApp } from 'loot-core/client/app/appSlice';
 
-import { useActions } from '../hooks/useActions';
 import { SvgClose } from '../icons/v1';
+import { useSelector, useDispatch } from '../redux';
 import { theme } from '../style';
 
 import { Button } from './common/Button2';
@@ -15,12 +14,15 @@ import { View } from './common/View';
 
 export function UpdateNotification() {
   const { t } = useTranslation();
-  const updateInfo = useSelector((state: State) => state.app.updateInfo);
+  const updateInfo = useSelector(state => state.app.updateInfo);
   const showUpdateNotification = useSelector(
-    (state: State) => state.app.showUpdateNotification,
+    state => state.app.showUpdateNotification,
   );
 
-  const { updateApp, setAppState } = useActions();
+  const dispatch = useDispatch();
+  const onRestart = () => {
+    dispatch(updateApp());
+  };
 
   if (updateInfo && showUpdateNotification) {
     const notes = updateInfo.releaseNotes;
@@ -51,7 +53,7 @@ export function UpdateNotification() {
             <Text>
               <Link
                 variant="text"
-                onClick={updateApp}
+                onClick={onRestart}
                 style={{
                   color: theme.buttonPrimaryText,
                   textDecoration: 'underline',
@@ -67,7 +69,7 @@ export function UpdateNotification() {
                   textDecoration: 'underline',
                 }}
                 onClick={() =>
-                  window.Actual?.openURLInBrowser(
+                  window.Actual.openURLInBrowser(
                     'https://actualbudget.org/docs/releases',
                   )
                 }
@@ -81,10 +83,12 @@ export function UpdateNotification() {
                 style={{ display: 'inline', padding: '1px 7px 2px 7px' }}
                 onPress={() => {
                   // Set a flag to never show an update notification again for this session
-                  setAppState({
-                    updateInfo: null,
-                    showUpdateNotification: false,
-                  });
+                  dispatch(
+                    setAppState({
+                      updateInfo: null,
+                      showUpdateNotification: false,
+                    }),
+                  );
                 }}
               >
                 <SvgClose

@@ -13,7 +13,6 @@ contextBridge.exposeInMainWorld('Actual', {
   IS_DEV,
   ACTUAL_VERSION: VERSION,
   logToTerminal: console.log,
-
   ipcConnect: (
     func: (payload: {
       on: IpcRenderer['on'];
@@ -29,6 +28,8 @@ contextBridge.exposeInMainWorld('Actual', {
       },
     });
   },
+
+  startOAuthServer: () => ipcRenderer.invoke('start-oauth-server'),
 
   relaunch: () => {
     ipcRenderer.invoke('relaunch');
@@ -70,7 +71,7 @@ contextBridge.exposeInMainWorld('Actual', {
   isUpdateReadyForDownload: () => false,
   waitForUpdateReadyForDownload: () => new Promise<void>(() => {}),
 
-  getServerSocket: () => {
+  getServerSocket: async () => {
     return null;
   },
 
@@ -88,4 +89,12 @@ contextBridge.exposeInMainWorld('Actual', {
       newDirectory,
     );
   },
-});
+
+  reload: async () => {
+    throw new Error('Reload not implemented in electron app');
+  },
+
+  applyAppUpdate: async () => {
+    throw new Error('applyAppUpdate not implemented in electron app');
+  },
+} satisfies typeof global.Actual);

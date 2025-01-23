@@ -5,13 +5,13 @@ import React, {
   type CSSProperties,
   type ReactNode,
 } from 'react';
+import { useTranslation, Trans } from 'react-i18next';
 
 import {
   format as formatDate,
   isValid as isDateValid,
   parseISO,
 } from 'date-fns';
-import { t } from 'i18next';
 
 import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToCurrency } from 'loot-core/src/shared/util';
@@ -53,6 +53,8 @@ const TransactionRow = memo(function TransactionRow({
   fields,
   selected,
 }: TransactionRowProps) {
+  const { t } = useTranslation();
+
   const category = useCategory(transaction.category || '');
   const account = useAccount(transaction.account);
 
@@ -124,8 +126,12 @@ const TransactionRow = memo(function TransactionRow({
             );
           case 'account':
             return (
-              <Field key={i} width="flex" title={account?.name || 'No account'}>
-                {account?.name || 'No account'}
+              <Field
+                key={i}
+                width="flex"
+                title={account?.name || t('No account')}
+              >
+                {account?.name || t('No account')}
               </Field>
             );
           case 'notes':
@@ -211,43 +217,43 @@ export function SimpleTransactionsTable({
               case 'date':
                 return (
                   <Field key={i} width={100}>
-                    {t('Date')}
+                    <Trans>Date</Trans>
                   </Field>
                 );
               case 'imported_payee':
                 return (
                   <Field key={i} width="flex">
-                    {t('Imported payee')}
+                    <Trans>Imported payee</Trans>
                   </Field>
                 );
               case 'payee':
                 return (
                   <Field key={i} width="flex">
-                    {t('Payee')}
+                    <Trans>Payee</Trans>
                   </Field>
                 );
               case 'category':
                 return (
                   <Field key={i} width="flex">
-                    {t('Category')}
+                    <Trans>Category</Trans>
                   </Field>
                 );
               case 'account':
                 return (
                   <Field key={i} width="flex">
-                    {t('Account')}
+                    <Trans>Account</Trans>
                   </Field>
                 );
               case 'notes':
                 return (
                   <Field key={i} width="flex">
-                    {t('Notes')}
+                    <Trans>Notes</Trans>
                   </Field>
                 );
               case 'amount':
                 return (
                   <Field key={i} width={75} style={{ textAlign: 'right' }}>
-                    {t('Amount')}
+                    <Trans>Amount</Trans>
                   </Field>
                 );
               default:

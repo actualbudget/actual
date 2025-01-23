@@ -1,6 +1,5 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
 
 import { collapseModals, pushModal } from 'loot-core/client/actions';
 import { envelopeBudget } from 'loot-core/client/queries';
@@ -9,6 +8,7 @@ import { format, sheetForMonth, prevMonth } from 'loot-core/src/shared/months';
 
 import { useCategories } from '../../hooks/useCategories';
 import { useUndo } from '../../hooks/useUndo';
+import { useDispatch } from '../../redux';
 import { styles } from '../../style';
 import { ToBudgetAmount } from '../budget/envelope/budgetsummary/ToBudgetAmount';
 import { TotalsList } from '../budget/envelope/budgetsummary/TotalsList';
@@ -25,6 +25,8 @@ export function EnvelopeBudgetSummaryModal({
   month,
   onBudgetAction,
 }: EnvelopeBudgetSummaryModalProps) {
+  const { t } = useTranslation();
+
   const dispatch = useDispatch();
   const prevMonthName = format(prevMonth(month), 'MMM');
   const sheetValue =
@@ -36,12 +38,11 @@ export function EnvelopeBudgetSummaryModal({
   const { showUndoNotification } = useUndo();
   const { list: categories } = useCategories();
   const categoriesById = groupById(categories);
-  const { t } = useTranslation();
 
   const openTransferAvailableModal = () => {
     dispatch(
       pushModal('transfer', {
-        title: t('Transfer: To Budget'),
+        title: t('Transfer to category'),
         month,
         amount: sheetValue,
         onSubmit: (amount, toCategoryId) => {
@@ -52,7 +53,10 @@ export function EnvelopeBudgetSummaryModal({
           });
           dispatch(collapseModals('transfer'));
           showUndoNotification({
-            message: `Transferred ${integerToCurrency(amount)} to ${categoriesById[toCategoryId].name}`,
+            message: t('Transferred {{amount}} to {{categoryName}}', {
+              amount: integerToCurrency(amount),
+              categoryName: categoriesById[toCategoryId].name,
+            }),
           });
         },
       }),
@@ -62,7 +66,7 @@ export function EnvelopeBudgetSummaryModal({
   const openCoverOverbudgetedModal = () => {
     dispatch(
       pushModal('cover', {
-        title: t('Cover: Overbudgeted'),
+        title: t('Cover overbudgeted'),
         month,
         showToBeBudgeted: false,
         onSubmit: categoryId => {
@@ -71,7 +75,9 @@ export function EnvelopeBudgetSummaryModal({
           });
           dispatch(collapseModals('cover'));
           showUndoNotification({
-            message: `Covered overbudgeted from ${categoriesById[categoryId].name}`,
+            message: t('Covered overbudgeted from {{categoryName}}', {
+              categoryName: categoriesById[categoryId].name,
+            }),
           });
         },
       }),

@@ -1,10 +1,10 @@
 import React, { useCallback, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
 
 import { addNotification } from 'loot-core/client/actions';
 
 import { useGlobalPref } from '../../../hooks/useGlobalPref';
+import { useDispatch } from '../../../redux';
 import { theme, styles } from '../../../style';
 import { Information } from '../../alerts';
 import { Button, ButtonWithLoading } from '../../common/Button2';
@@ -51,7 +51,7 @@ export function ConfirmChangeDocumentDirModal({
   const dispatch = useDispatch();
 
   const restartElectronServer = useCallback(() => {
-    globalThis.window.Actual?.restartElectronServer();
+    globalThis.window.Actual.restartElectronServer();
   }, []);
 
   const [_documentDir, setDocumentDirPref] = useGlobalPref(
@@ -64,7 +64,7 @@ export function ConfirmChangeDocumentDirModal({
     setLoading(true);
     try {
       if (moveFiles) {
-        await globalThis.window.Actual?.moveBudgetDirectory(
+        await globalThis.window.Actual.moveBudgetDirectory(
           currentBudgetDirectory,
           newDirectory,
         );
@@ -197,7 +197,7 @@ export function ConfirmChangeDocumentDirModal({
                 }}
                 onPress={() => moveDirectory(close)}
               >
-                <Trans>Change Directory</Trans>
+                <Trans>Change directory</Trans>
               </ButtonWithLoading>
             </View>
           </View>

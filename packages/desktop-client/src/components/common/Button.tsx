@@ -1,14 +1,9 @@
-import React, {
-  forwardRef,
-  type ElementType,
-  type HTMLProps,
-  type CSSProperties,
-} from 'react';
+import React, { forwardRef, type ElementType, type HTMLProps } from 'react';
 
 import { css } from '@emotion/css';
 
 import { AnimatedLoading } from '../../icons/AnimatedLoading';
-import { styles, theme } from '../../style';
+import { styles, theme, type CSSProperties } from '../../style';
 
 import { View } from './View';
 
@@ -139,7 +134,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       bounce = true,
       as = 'button',
       ...nativeProps
-    },
+    }: ButtonProps,
     ref,
   ) => {
     const typeWithDisabled: ButtonType | `${ButtonType}Disabled` = disabled

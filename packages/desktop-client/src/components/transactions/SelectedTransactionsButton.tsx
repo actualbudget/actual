@@ -1,14 +1,20 @@
 import { useMemo } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
 
 import { pushModal } from 'loot-core/client/actions';
+import {
+  scheduleIsRecurring,
+  extractScheduleConds,
+} from 'loot-core/shared/schedules';
 import { isPreviewId } from 'loot-core/shared/transactions';
+import { useSchedules } from 'loot-core/src/client/data-hooks/schedules';
 import { validForTransfer } from 'loot-core/src/client/transfer';
+import { q } from 'loot-core/src/shared/query';
 import { type TransactionEntity } from 'loot-core/types/models';
 
 import { useSelectedItems } from '../../hooks/useSelected';
+import { useDispatch } from '../../redux';
 import { Menu } from '../common/Menu';
 import { SelectedItemsButton } from '../table';
 
@@ -31,9 +37,10 @@ type SelectedTransactionsButtonProps = {
   onLinkSchedule: (selectedIds: string[]) => void;
   onUnlinkSchedule: (selectedIds: string[]) => void;
   onCreateRule: (selectedIds: string[]) => void;
+  onRunRules: (selectedIds: string[]) => void;
   onSetTransfer: (selectedIds: string[]) => void;
   onScheduleAction: (
-    action: 'post-transaction' | 'skip',
+    action: 'post-transaction' | 'skip' | 'complete',
     selectedIds: string[],
   ) => void;
   showMakeTransfer: boolean;
@@ -50,6 +57,7 @@ export function SelectedTransactionsButton({
   onLinkSchedule,
   onUnlinkSchedule,
   onCreateRule,
+  onRunRules,
   onSetTransfer,
   onScheduleAction,
   showMakeTransfer,
@@ -60,6 +68,22 @@ export function SelectedTransactionsButton({
   const dispatch = useDispatch();
   const selectedItems = useSelectedItems();
   const selectedIds = useMemo(() => [...selectedItems], [selectedItems]);
+
+  const scheduleIds = useMemo(() => {
+    return selectedIds
+      .filter(id => isPreviewId(id))
+      .map(id => id.split('/')[1]);
+  }, [selectedIds]);
+
+  const scheduleQuery = useMemo(() => {
+    return q('schedules')
+      .filter({ id: { $oneof: scheduleIds } })
+      .select('*');
+  }, [scheduleIds]);
+
+  const { schedules: selectedSchedules } = useSchedules({
+    query: scheduleQuery,
+  });
 
   const types = useMemo(() => {
     const items = selectedIds;
@@ -100,6 +124,24 @@ export function SelectedTransactionsButton({
 
     return validForTransfer(fromTrans, toTrans);
   }, [selectedIds, getTransaction]);
+
+  const canBeSkipped = useMemo(() => {
+    const recurringSchedules = selectedSchedules.filter(s => {
+      const { date: dateCond } = extractScheduleConds(s._conditions);
+      return scheduleIsRecurring(dateCond);
+    });
+
+    return recurringSchedules.length === selectedSchedules.length;
+  }, [selectedSchedules]);
+
+  const canBeCompleted = useMemo(() => {
+    const singleSchedules = selectedSchedules.filter(s => {
+      const { date: dateCond } = extractScheduleConds(s._conditions);
+      return !scheduleIsRecurring(dateCond);
+    });
+
+    return singleSchedules.length === selectedSchedules.length;
+  }, [selectedSchedules]);
 
   const canMakeAsSplitTransaction = useMemo(() => {
     if (selectedIds.length <= 1 || types.preview) {
@@ -218,9 +260,15 @@ export function SelectedTransactionsButton({
               } as const,
               {
                 name: 'post-transaction',
-                text: t('Post transaction'),
+                text: t('Post transaction today'),
               } as const,
-              { name: 'skip', text: t('Skip scheduled date') } as const,
+              canBeSkipped &&
+                ({
+                  name: 'skip',
+                  text: t('Skip next scheduled date'),
+                } as const),
+              canBeCompleted &&
+                ({ name: 'complete', text: t('Mark as completed') } as const),
             ]
           : [
               { name: 'show', text: t('Show'), key: 'F' } as const,
@@ -253,7 +301,12 @@ export function SelectedTransactionsButton({
                       name: 'create-rule',
                       text: t('Create rule'),
                     } as const,
+                    {
+                      name: 'run-rules',
+                      text: t('Run Rules'),
+                    } as const,
                   ]),
+
               ...(showMakeTransfer
                 ? [
                     {
@@ -311,6 +364,7 @@ export function SelectedTransactionsButton({
             break;
           case 'post-transaction':
           case 'skip':
+          case 'complete':
             onScheduleAction(name, selectedIds);
             break;
           case 'view-schedule':
@@ -324,6 +378,9 @@ export function SelectedTransactionsButton({
             break;
           case 'create-rule':
             onCreateRule(selectedIds);
+            break;
+          case 'run-rules':
+            onRunRules(selectedIds);
             break;
           case 'set-transfer':
             onSetTransfer(selectedIds);

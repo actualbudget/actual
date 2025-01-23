@@ -66,7 +66,7 @@ const injectShims = (): Plugin[] => {
 };
 
 // https://vitejs.dev/config/
-// eslint-disable-next-line import/no-default-export
+
 export default defineConfig(async ({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
   const devHeaders = {
@@ -158,6 +158,13 @@ export default defineConfig(async ({ mode }) => {
                 '**/*.{js,css,html,txt,wasm,sql,sqlite,ico,png,woff2,webmanifest}',
               ],
               ignoreURLParametersMatching: [/^v$/],
+              navigateFallback: '/index.html',
+              navigateFallbackDenylist: [
+                /^\/account\/.*$/,
+                /^\/admin\/.*$/,
+                /^\/secret\/.*$/,
+                /^\/openid\/.*$/,
+              ],
             },
           }),
       injectShims(),

@@ -23,6 +23,7 @@ export const defaultReport: CustomReportEntity = {
   groupBy: 'Category',
   interval: 'Monthly',
   balanceType: 'Payment',
+  sortBy: 'Descending',
   showEmpty: false,
   showOffBudget: false,
   showHiddenCategories: false,
@@ -47,6 +48,13 @@ const groupByOptions = [
   { description: 'Payee' },
   { description: 'Account' },
   { description: 'Interval' },
+];
+
+const sortByOptions = [
+  { description: t('Ascending'), format: 'asc' as const },
+  { description: t('Descending'), format: 'desc' as const },
+  { description: t('Name'), format: 'name' as const },
+  { description: t('Budget'), format: 'budget' as const },
 ];
 
 export type dateRangeProps = {
@@ -198,6 +206,10 @@ export const ReportOptions = {
   balanceTypeMap: new Map(
     balanceTypeOptions.map(item => [item.description, item.format]),
   ),
+  sortBy: sortByOptions,
+  sortByMap: new Map(
+    sortByOptions.map(item => [item.description, item.format]),
+  ),
   dateRange: dateRangeOptions,
   dateRangeMap: new Map(
     dateRangeOptions.map(item => [item.description, item.name]),
@@ -257,7 +269,7 @@ const transferCategory: UncategorizedEntity = {
 };
 const offBudgetCategory: UncategorizedEntity = {
   id: '',
-  name: t('Off Budget'),
+  name: t('Off budget'),
   uncategorized_id: 'off_budget',
   hidden: false,
 };
@@ -271,7 +283,7 @@ type UncategorizedGroupEntity = Pick<
 };
 
 const uncategorizedGroup: UncategorizedGroupEntity = {
-  name: t('Uncategorized & Off Budget'),
+  name: t('Uncategorized & Off budget'),
   id: 'uncategorized',
   hidden: false,
   uncategorized_id: 'all',
@@ -282,8 +294,9 @@ export const categoryLists = (categories: {
   list: CategoryEntity[];
   grouped: CategoryGroupEntity[];
 }) => {
+  const categoriesToSort = [...categories.list];
   const categoryList: UncategorizedEntity[] = [
-    ...categories.list.sort((a, b) => {
+    ...categoriesToSort.sort((a, b) => {
       //The point of this sorting is to make the graphs match the "budget" page
       const catGroupA = categories.grouped.find(f => f.id === a.cat_group);
       const catGroupB = categories.grouped.find(f => f.id === b.cat_group);

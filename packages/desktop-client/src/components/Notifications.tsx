@@ -6,17 +6,16 @@ import React, {
   type SetStateAction,
   type CSSProperties,
 } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useTranslation } from 'react-i18next';
 
 import { css } from '@emotion/css';
-import { t } from 'i18next';
 
 import { removeNotification } from 'loot-core/client/actions';
-import { type State } from 'loot-core/src/client/state-types';
 import type { NotificationWithId } from 'loot-core/src/client/state-types/notifications';
 
 import { AnimatedLoading } from '../icons/AnimatedLoading';
 import { SvgDelete } from '../icons/v0';
+import { useSelector, useDispatch } from '../redux';
 import { styles, theme } from '../style';
 
 import { Button, ButtonWithLoading } from './common/Button2';
@@ -91,6 +90,7 @@ function Notification({
   notification: NotificationWithId;
   onRemove: () => void;
 }) {
+  const { t } = useTranslation();
   const {
     type,
     title,
@@ -131,6 +131,7 @@ function Notification({
 
   return (
     <View
+      role="alert"
       style={{
         marginTop: 10,
         color: positive
@@ -264,12 +265,8 @@ function Notification({
 export function Notifications({ style }: { style?: CSSProperties }) {
   const dispatch = useDispatch();
   const { isNarrowWidth } = useResponsive();
-  const notifications = useSelector(
-    (state: State) => state.notifications.notifications,
-  );
-  const notificationInset = useSelector(
-    (state: State) => state.notifications.inset,
-  );
+  const notifications = useSelector(state => state.notifications.notifications);
+  const notificationInset = useSelector(state => state.notifications.inset);
   return (
     <View
       style={{

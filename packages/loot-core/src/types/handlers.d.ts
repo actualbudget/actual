@@ -1,3 +1,4 @@
+import type { AdminHandlers } from '../server/admin/types/handlers';
 import type { BudgetHandlers } from '../server/budget/types/handlers';
 import type { DashboardHandlers } from '../server/dashboard/types/handlers';
 import type { FiltersHandlers } from '../server/filters/types/handlers';
@@ -22,6 +23,7 @@ export interface Handlers
     ReportsHandlers,
     RulesHandlers,
     SchedulesHandlers,
+    AdminHandlers,
     ToolsHandlers {}
 
 export type HandlerFunctions = Handlers[keyof Handlers];

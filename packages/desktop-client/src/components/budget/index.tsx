@@ -1,10 +1,8 @@
 // @ts-strict-ignore
 import React, { memo, useMemo, useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
 
 import {
-  addNotification,
   applyBudgetAction,
   createCategory,
   createGroup,
@@ -13,12 +11,12 @@ import {
   getCategories,
   moveCategory,
   moveCategoryGroup,
-  pushModal,
   updateCategory,
   updateGroup,
-} from 'loot-core/src/client/actions';
+} from 'loot-core/client/queries/queriesSlice';
+import { addNotification, pushModal } from 'loot-core/src/client/actions';
 import { useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
-import { send, listen } from 'loot-core/src/platform/client/fetch';
+import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 
 import { useCategories } from '../../hooks/useCategories';
@@ -26,6 +24,7 @@ import { useGlobalPref } from '../../hooks/useGlobalPref';
 import { useLocalPref } from '../../hooks/useLocalPref';
 import { useNavigate } from '../../hooks/useNavigate';
 import { useSyncedPref } from '../../hooks/useSyncedPref';
+import { useDispatch } from '../../redux';
 import { styles } from '../../style';
 import { View } from '../common/View';
 import { NamespaceContext } from '../spreadsheet/NamespaceContext';
@@ -84,13 +83,9 @@ function BudgetInner(props: BudgetInnerProps) {
   const [initialized, setInitialized] = useState(false);
   const { grouped: categoryGroups } = useCategories();
 
-  function loadCategories() {
-    dispatch(getCategories());
-  }
-
   useEffect(() => {
     async function run() {
-      loadCategories();
+      await dispatch(getCategories());
 
       const { start, end } = await send('get-budget-bounds');
       setBounds({ start, end });
@@ -106,29 +101,6 @@ function BudgetInner(props: BudgetInnerProps) {
     }
 
     run();
-
-    const unlistens = [
-      listen('sync-event', ({ type, tables }) => {
-        if (
-          type === 'success' &&
-          (tables.includes('categories') ||
-            tables.includes('category_mapping') ||
-            tables.includes('category_groups'))
-        ) {
-          loadCategories();
-        }
-      }),
-
-      listen('undo-event', ({ tables }) => {
-        if (tables.includes('categories')) {
-          loadCategories();
-        }
-      }),
-    ];
-
-    return () => {
-      unlistens.forEach(unlisten => unlisten());
-    };
   }, []);
 
   useEffect(() => {
@@ -176,7 +148,7 @@ function BudgetInner(props: BudgetInnerProps) {
       addNotification({
         type: 'error',
         message: t(
-          'Category ‘{{name}}‘ already exists in group (May be Hidden)',
+          'Category “{{name}}” already exists in group (it may be hidden)',
           { name },
         ),
       }),
@@ -201,15 +173,15 @@ function BudgetInner(props: BudgetInnerProps) {
 
     if (category.id === 'new') {
       dispatch(
-        createCategory(
-          category.name,
-          category.cat_group,
-          category.is_income,
-          category.hidden,
-        ),
+        createCategory({
+          name: category.name,
+          groupId: category.cat_group,
+          isIncome: category.is_income,
+          isHidden: category.hidden,
+        }),
       );
     } else {
-      dispatch(updateCategory(category));
+      dispatch(updateCategory({ category }));
     }
   };
 
@@ -222,21 +194,21 @@ function BudgetInner(props: BudgetInnerProps) {
           category: id,
           onDelete: transferCategory => {
             if (id !== transferCategory) {
-              dispatch(deleteCategory(id, transferCategory));
+              dispatch(deleteCategory({ id, transferId: transferCategory }));
             }
           },
         }),
       );
     } else {
-      dispatch(deleteCategory(id));
+      dispatch(deleteCategory({ id }));
     }
   };
 
   const onSaveGroup = group => {
     if (group.id === 'new') {
-      dispatch(createGroup(group.name));
+      dispatch(createGroup({ name: group.name }));
     } else {
-      dispatch(updateGroup(group));
+      dispatch(updateGroup({ group }));
     }
   };
 
@@ -256,26 +228,29 @@ function BudgetInner(props: BudgetInnerProps) {
         pushModal('confirm-category-delete', {
           group: id,
           onDelete: transferCategory => {
-            dispatch(deleteGroup(id, transferCategory));
+            dispatch(deleteGroup({ id, transferId: transferCategory }));
           },
         }),
       );
     } else {
-      dispatch(deleteGroup(id));
+      dispatch(deleteGroup({ id }));
     }
   };
 
   const onApplyBudgetTemplatesInGroup = async categories => {
     dispatch(
-      applyBudgetAction(startMonth, 'apply-multiple-templates', {
+      applyBudgetAction({
         month: startMonth,
-        categories,
+        type: 'apply-multiple-templates',
+        args: {
+          categories,
+        },
       }),
     );
   };
 
   const onBudgetAction = (month, type, args) => {
-    dispatch(applyBudgetAction(month, type, args));
+    dispatch(applyBudgetAction({ month, type, args }));
   };
 
   const onShowActivity = (categoryId, month) => {
@@ -314,11 +289,19 @@ function BudgetInner(props: BudgetInnerProps) {
       return;
     }
 
-    dispatch(moveCategory(sortInfo.id, sortInfo.groupId, sortInfo.targetId));
+    dispatch(
+      moveCategory({
+        id: sortInfo.id,
+        groupId: sortInfo.groupId,
+        targetId: sortInfo.targetId,
+      }),
+    );
   };
 
   const onReorderGroup = async sortInfo => {
-    dispatch(moveCategoryGroup(sortInfo.id, sortInfo.targetId));
+    dispatch(
+      moveCategoryGroup({ id: sortInfo.id, targetId: sortInfo.targetId }),
+    );
   };
 
   const onToggleCollapse = () => {
@@ -355,6 +338,7 @@ function BudgetInner(props: BudgetInnerProps) {
           onShowActivity={onShowActivity}
           onReorderCategory={onReorderCategory}
           onReorderGroup={onReorderGroup}
+          onApplyBudgetTemplatesInGroup={onApplyBudgetTemplatesInGroup}
         />
       </TrackingBudgetProvider>
     );
@@ -375,13 +359,13 @@ function BudgetInner(props: BudgetInnerProps) {
           onMonthSelect={onMonthSelect}
           onDeleteCategory={onDeleteCategory}
           onDeleteGroup={onDeleteGroup}
-          onApplyBudgetTemplatesInGroup={onApplyBudgetTemplatesInGroup}
           onSaveCategory={onSaveCategory}
           onSaveGroup={onSaveGroup}
           onBudgetAction={onBudgetAction}
           onShowActivity={onShowActivity}
           onReorderCategory={onReorderCategory}
           onReorderGroup={onReorderGroup}
+          onApplyBudgetTemplatesInGroup={onApplyBudgetTemplatesInGroup}
         />
       </EnvelopeBudgetProvider>
     );

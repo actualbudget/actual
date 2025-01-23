@@ -13,10 +13,11 @@ import {
   type TransactionEntity,
   type RuleActionEntity,
   type RuleEntity,
+  AccountEntity,
 } from '../../types/models';
 import { schemaConfig } from '../aql';
 import * as db from '../db';
-import { getPayee, getPayeeByName, insertPayee } from '../db';
+import { getPayee, getPayeeByName, insertPayee, getAccount } from '../db';
 import { getMappings } from '../db/mappings';
 import { RuleError } from '../errors';
 import { requiredFields, toDateRepr } from '../models';
@@ -274,8 +275,20 @@ function onApplySync(oldValues, newValues) {
 }
 
 // Runner
-export async function runRules(trans) {
-  let finalTrans = await prepareTransactionForRules({ ...trans });
+export async function runRules(
+  trans,
+  accounts: Map<string, AccountEntity> | null = null,
+) {
+  let accountsMap = null;
+  if (accounts === null) {
+    accountsMap = new Map(
+      (await db.getAccounts()).map(account => [account.id, account]),
+    );
+  } else {
+    accountsMap = accounts;
+  }
+
+  let finalTrans = await prepareTransactionForRules({ ...trans }, accountsMap);
 
   const rules = rankRules(
     fastSetMerge(
@@ -291,7 +304,11 @@ export async function runRules(trans) {
   return await finalizeTransactionForRules(finalTrans);
 }
 
-function conditionSpecialCases(cond: Condition): Condition {
+function conditionSpecialCases(cond: Condition | null): Condition | null {
+  if (!cond) {
+    return cond;
+  }
+
   //special cases that require multiple conditions
   if (cond.op === 'is' && cond.field === 'category' && cond.value === null) {
     return new Condition(
@@ -555,6 +572,12 @@ export function conditionsToAQL(conditions, { recurDateBounds = 100 } = {}) {
         return {
           $and: getValue(value).map(subExpr => mapConditionToActualQL(subExpr)),
         };
+
+      case 'onBudget':
+        return { 'account.offbudget': false };
+      case 'offBudget':
+        return { 'account.offbudget': true };
+
       default:
         throw new Error('Unhandled operator: ' + op);
     }
@@ -604,8 +627,14 @@ export async function applyActions(
     return null;
   }
 
+  const accounts: AccountEntity[] = await db.getAccounts();
   const transactionsForRules = await Promise.all(
-    transactions.map(prepareTransactionForRules),
+    transactions.map(transactions =>
+      prepareTransactionForRules(
+        transactions,
+        new Map(accounts.map(account => [account.id, account])),
+      ),
+    ),
   );
 
   const updated = transactionsForRules.flatMap(trans => {
@@ -772,7 +801,8 @@ export async function updateCategoryRules(transactions) {
   const register: TransactionEntity[] = await db.all(
     `SELECT t.* FROM v_transactions t
      LEFT JOIN accounts a ON a.id = t.account
-     WHERE date >= ? AND date <= ? AND is_parent = 0 AND a.closed = 0
+     LEFT JOIN payees p ON p.id = t.payee
+     WHERE date >= ? AND date <= ? AND is_parent = 0 AND a.closed = 0 AND p.learn_categories = 1
      ORDER BY date DESC`,
     [toDateRepr(oldestDate), toDateRepr(addDays(currentDay(), 180))],
   );
@@ -836,16 +866,26 @@ export async function updateCategoryRules(transactions) {
 
 export type TransactionForRules = TransactionEntity & {
   payee_name?: string;
+  _account?: AccountEntity;
 };
 
 export async function prepareTransactionForRules(
   trans: TransactionEntity,
+  accounts: Map<string, AccountEntity> | null = null,
 ): Promise<TransactionForRules> {
   const r: TransactionForRules = { ...trans };
   if (trans.payee) {
     const payee = await getPayee(trans.payee);
     if (payee) {
       r.payee_name = payee.name;
+    }
+  }
+
+  if (trans.account) {
+    if (accounts !== null && accounts.has(trans.account)) {
+      r._account = accounts.get(trans.account);
+    } else {
+      r._account = await getAccount(trans.account);
     }
   }
 

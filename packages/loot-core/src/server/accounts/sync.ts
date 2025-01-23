@@ -32,8 +32,8 @@ import { title } from './title';
 import { runRules } from './transaction-rules';
 import { batchUpdateTransactions } from './transactions';
 
-function BankSyncError(type: string, code: string) {
-  return { type: 'BankSyncError', category: type, code };
+function BankSyncError(type: string, code: string, details?: object) {
+  return { type: 'BankSyncError', category: type, code, details };
 }
 
 function makeSplitTransaction(trans, subtransactions) {
@@ -152,7 +152,11 @@ async function downloadGoCardlessTransactions(
   );
 
   if (res.error_code) {
-    throw BankSyncError(res.error_type, res.error_code);
+    const errorDetails = {
+      rateLimitHeaders: res.rateLimitHeaders,
+    };
+
+    throw BankSyncError(res.error_type, res.error_code, errorDetails);
   }
 
   if (includeBalance) {
@@ -201,6 +205,9 @@ async function downloadSimpleFinTransactions(
     60000,
   );
 
+  if (Object.keys(res).length === 0) {
+    throw BankSyncError('NO_DATA', 'NO_DATA');
+  }
   if (res.error_code) {
     throw BankSyncError(res.error_type, res.error_code);
   }
@@ -386,6 +393,7 @@ export async function reconcileTransactions(
   isBankSyncAccount = false,
   strictIdChecking = true,
   isPreview = false,
+  defaultCleared = true,
 ) {
   console.log('Performing transaction reconciliation');
 
@@ -429,7 +437,7 @@ export async function reconcileTransactions(
         category: existing.category || trans.category || null,
         imported_payee: trans.imported_payee || null,
         notes: existing.notes || trans.notes || null,
-        cleared: trans.cleared != null ? trans.cleared : true,
+        cleared: trans.cleared ?? existing.cleared,
       };
 
       if (hasFieldsChanged(existing, updates, Object.keys(updates))) {
@@ -461,7 +469,7 @@ export async function reconcileTransactions(
         ...newTrans,
         id: uuidv4(),
         category: trans.category || null,
-        cleared: trans.cleared != null ? trans.cleared : true,
+        cleared: trans.cleared ?? defaultCleared,
       };
 
       if (subtransactions && subtransactions.length > 0) {
@@ -519,6 +527,9 @@ export async function matchTransactions(
   );
 
   // The first pass runs the rules, and preps data for fuzzy matching
+  const accounts: AccountEntity[] = await db.getAccounts();
+  const accountsMap = new Map(accounts.map(account => [account.id, account]));
+
   const transactionsStep1 = [];
   for (const {
     payee_name,
@@ -526,7 +537,7 @@ export async function matchTransactions(
     subtransactions,
   } of normalized) {
     // Run the rules
-    const trans = await runRules(originalTrans);
+    const trans = await runRules(originalTrans, accountsMap);
 
     let match = null;
     let fuzzyDataset = null;
@@ -669,9 +680,12 @@ export async function addTransactions(
     { rawPayeeName: true },
   );
 
+  const accounts: AccountEntity[] = await db.getAccounts();
+  const accountsMap = new Map(accounts.map(account => [account.id, account]));
+
   for (const { trans: originalTrans, subtransactions } of normalized) {
     // Run the rules
-    const trans = await runRules(originalTrans);
+    const trans = await runRules(originalTrans, accountsMap);
 
     const finalTransaction = {
       id: uuidv4(),
