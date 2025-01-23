@@ -461,12 +461,14 @@ handlers['api/transactions-export'] = async function ({
   transactions,
   categoryGroups,
   payees,
+  accounts,
 }) {
   checkFileOpen();
   return handlers['transactions-export']({
     transactions,
     categoryGroups,
     payees,
+    accounts,
   });
 };
 
