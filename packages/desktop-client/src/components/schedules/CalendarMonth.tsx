@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import * as d from 'date-fns';
 
 import {
   addDays,
@@ -15,13 +16,16 @@ import { type SyncedPrefs } from 'loot-core/types/prefs';
 import { theme } from '../../style';
 import { Button } from '../common/Button2';
 import { View } from '../common/View';
+import { CalendarRecurrences } from './CalendarView';
 
 type CalendarMonthProps = {
   start: Date;
+  recurrences: CalendarRecurrences[];
   firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'];
 };
 export function CalendarMonth({
   start,
+  recurrences,
   firstDayOfWeekIdx,
 }: CalendarMonthProps) {
   const [calendarDays, setCalendarDays] = useState<Date[]>([]);
@@ -111,6 +115,23 @@ export function CalendarMonth({
             >
               {getDate(day)}
             </Button>
+
+            {isSameMonth(start, day) && recurrences.filter(r => d.isSameDay(day, r.dateObject)).length > 0 && (
+              <View
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  right: 3,
+                  pointerEvents: 'none',
+                  fontSize: 10,
+                  opacity: 0.8,
+                  color: theme.pageTextPositive,
+                  fontWeight: 'bold',
+                }}
+              >
+                {recurrences.filter(r => d.isSameDay(day, r.dateObject)).length}
+              </View>
+            )}
             {isSameDay(day, today) && (
               <View
                 style={{
@@ -119,10 +140,10 @@ export function CalendarMonth({
                   left: 0,
                   width: '100%',
                   height: '100%',
-                  border: '1px solid',
-                  borderColor: theme.pageTextPositive,
-                  borderRadius: 200,
+                  backgroundColor: theme.pageTextPositive,
+                  borderRadius: 4,
                   pointerEvents: 'none',
+                  opacity: 0.3
                 }}
               />
             )}
