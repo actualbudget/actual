@@ -32,6 +32,6 @@ jobs:
 
             <!-- feature-auto-close-comment -->
       - name: Close Issue
-        run: gh issue close "https://github.com/actualbudget/actual/issues/${{ github.event.issue.number }}"
+        run: gh issue close "https://github.com/actualbudget/actual/issues/${{ github.event.issue.number }}" --reason "not_planned"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
