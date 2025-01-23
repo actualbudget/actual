@@ -128,7 +128,7 @@ function AccountCard({
         boxShadow: `0 1px 1px ${theme.mobileAccountShadow}`,
         marginTop: 10,
       }}
-      data-testid="account"
+      data-testid="account-list-item"
     >
       <View
         style={{

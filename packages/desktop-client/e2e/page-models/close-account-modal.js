@@ -1,15 +1,15 @@
 export class CloseAccountModal {
-  constructor(page, rootPage) {
+  constructor(page, locator) {
     this.page = page;
-    this.rootPage = rootPage;
+    this.locator = locator;
   }
 
   async selectTransferAccount(accountName) {
-    await this.page.getByPlaceholder('Select account...').fill(accountName);
-    await this.rootPage.keyboard.press('Enter');
+    await this.locator.getByPlaceholder('Select account...').fill(accountName);
+    await this.page.keyboard.press('Enter');
   }
 
   async closeAccount() {
-    await this.page.getByRole('button', { name: 'Close account' }).click();
+    await this.locator.getByRole('button', { name: 'Close account' }).click();
   }
 }

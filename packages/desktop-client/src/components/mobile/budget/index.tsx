@@ -9,14 +9,13 @@ import {
   createGroup,
   deleteCategory,
   deleteGroup,
-  getCategories,
   moveCategory,
   moveCategoryGroup,
   updateCategory,
   updateGroup,
 } from 'loot-core/client/queries/queriesSlice';
 import { useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
-import { send, listen } from 'loot-core/src/platform/client/fetch';
+import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 
 import { useCategories } from '../../../hooks/useCategories';
@@ -69,22 +68,6 @@ export function Budget() {
     }
 
     init();
-
-    const unlisten = listen('sync-event', event => {
-      if (event.type === 'success') {
-        const tables = event.tables;
-        if (
-          tables.includes('categories') ||
-          tables.includes('category_mapping') ||
-          tables.includes('category_groups')
-        ) {
-          // TODO: is this loading every time?
-          dispatch(getCategories());
-        }
-      }
-    });
-
-    return () => unlisten();
   }, [budgetType, startMonth, dispatch, spreadsheet]);
 
   const onBudgetAction = useCallback(

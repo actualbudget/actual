@@ -26,9 +26,10 @@ import {
   send,
 } from 'loot-core/src/platform/client/fetch';
 
+import { handleGlobalEvents } from '../global-events';
 import { useMetadataPref } from '../hooks/useMetadataPref';
 import { installPolyfills } from '../polyfills';
-import { useDispatch, useSelector } from '../redux';
+import { useDispatch, useSelector, useStore } from '../redux';
 import { styles, hasHiddenScrollbars, ThemeStyle, useTheme } from '../style';
 import { ExposeNavigate } from '../util/router-tools';
 
@@ -160,6 +161,10 @@ function ErrorFallback({ error }: FallbackProps) {
 }
 
 export function App() {
+  const store = useStore();
+
+  useEffect(() => handleGlobalEvents(store), [store]);
+
   const [hiddenScrollbars, setHiddenScrollbars] = useState(
     hasHiddenScrollbars(),
   );

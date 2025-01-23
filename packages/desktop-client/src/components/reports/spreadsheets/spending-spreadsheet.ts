@@ -45,6 +45,16 @@ export function createSpendingSpreadsheet({
     const { filters } = await send('make-filters-from-conditions', {
       conditions: conditions.filter(cond => !cond.customName),
     });
+
+    const { filters: budgetFilters } = await send(
+      'make-filters-from-conditions',
+      {
+        conditions: conditions.filter(
+          cond => !cond.customName && cond.field === 'category',
+        ),
+      },
+    );
+
     const conditionsOpKey = conditionsOp === 'or' ? '$or' : '$and';
 
     const [assets, debts] = await Promise.all([
@@ -109,7 +119,7 @@ export function createSpendingSpreadsheet({
             $and: [{ month: { $eq: budgetMonth } }],
           })
           .filter({
-            [conditionsOpKey]: filters.filter(filter => filter['category']),
+            [conditionsOpKey]: budgetFilters,
           })
           .groupBy([{ $id: '$category' }])
           .select([
