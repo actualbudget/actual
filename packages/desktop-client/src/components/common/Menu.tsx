@@ -31,7 +31,7 @@ function Keybinding({ keyName }: KeybindingProps) {
   );
 }
 
-type MenuItemObject<NameType, Type extends string | symbol = string> = {
+export type MenuItemObject<NameType, Type extends string | symbol = string> = {
   type?: Type;
   name: NameType;
   disabled?: boolean;

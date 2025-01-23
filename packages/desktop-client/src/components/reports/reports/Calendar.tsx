@@ -460,6 +460,8 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
     },
   );
 
+  const [earliestTransaction, _] = useState('');
+
   return (
     <Page
       header={
@@ -492,6 +494,8 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
           allMonths={allMonths}
           start={start}
           end={end}
+          earliestTransaction={earliestTransaction}
+          firstDayOfWeekIdx={firstDayOfWeekIdx}
           mode={mode}
           onChangeDates={onChangeDates}
           filters={conditions}
@@ -914,7 +918,7 @@ function CalendarCardHeader({
                 marginRight: 4,
               }}
             >
-              <Trans>Income</Trans>:
+              <Trans>Income:</Trans>
             </View>
             <View style={{ color: chartTheme.colors.blue }}>
               <PrivacyFilter>{amountToCurrency(totalIncome)}</PrivacyFilter>
@@ -926,7 +930,7 @@ function CalendarCardHeader({
                 marginRight: 4,
               }}
             >
-              <Trans>Expenses</Trans>:
+              <Trans>Expenses:</Trans>
             </View>
             <View style={{ color: chartTheme.colors.red }}>
               <PrivacyFilter>{amountToCurrency(totalExpense)}</PrivacyFilter>

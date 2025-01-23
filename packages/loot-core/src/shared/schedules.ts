@@ -1,5 +1,8 @@
 // @ts-strict-ignore
 import type { IRuleOptions } from '@rschedule/core';
+import * as d from 'date-fns';
+
+import { Condition } from '../server/accounts/rules';
 
 import * as monthUtils from './months';
 import { q } from './query';
@@ -10,6 +13,7 @@ export function getStatus(
   hasTrans: boolean,
   upcomingLength: string,
 ) {
+  const upcomingDays = getUpcomingDays(upcomingLength);
   const today = monthUtils.currentDay();
   if (completed) {
     return 'completed';
@@ -19,7 +23,7 @@ export function getStatus(
     return 'due';
   } else if (
     nextDate > today &&
-    nextDate <= monthUtils.addDays(today, parseInt(upcomingLength ?? '7'))
+    nextDate <= monthUtils.addDays(today, upcomingDays)
   ) {
     return 'upcoming';
   } else if (nextDate < today) {
@@ -272,6 +276,57 @@ export function extractScheduleConds(conditions) {
   };
 }
 
+export function getNextDate(
+  dateCond,
+  start = new Date(monthUtils.currentDay()),
+  noSkipWeekend = false,
+) {
+  start = d.startOfDay(start);
+
+  const cond = new Condition(dateCond.op, 'date', dateCond.value, null);
+  const value = cond.getValue();
+
+  if (value.type === 'date') {
+    return value.date;
+  } else if (value.type === 'recur') {
+    let dates = value.schedule.occurrences({ start, take: 1 }).toArray();
+
+    if (dates.length === 0) {
+      // Could be a schedule with limited occurrences, so we try to
+      // find the last occurrence
+      dates = value.schedule.occurrences({ reverse: true, take: 1 }).toArray();
+    }
+
+    if (dates.length > 0) {
+      let date = dates[0].date;
+      if (value.schedule.data.skipWeekend && !noSkipWeekend) {
+        date = getDateWithSkippedWeekend(
+          date,
+          value.schedule.data.weekendSolve,
+        );
+      }
+      return monthUtils.dayFromDate(date);
+    }
+  }
+  return null;
+}
+
+export function getDateWithSkippedWeekend(
+  date: Date,
+  solveMode: 'after' | 'before',
+) {
+  if (d.isWeekend(date)) {
+    if (solveMode === 'after') {
+      return d.nextMonday(date);
+    } else if (solveMode === 'before') {
+      return d.previousFriday(date);
+    } else {
+      throw new Error('Unknown weekend solve mode, this should not happen!');
+    }
+  }
+  return date;
+}
+
 export function getScheduledAmount(
   amount: number | { num1: number; num2: number },
   inverse: boolean = false,
@@ -293,4 +348,34 @@ export function describeSchedule(schedule, payee) {
   } else {
     return `Next: ${schedule.next_date}`;
   }
+}
+
+export function getUpcomingDays(upcomingLength = '7'): number {
+  const today = monthUtils.currentDay();
+
+  switch (upcomingLength) {
+    case 'currentMonth': {
+      const day = monthUtils.getDay(today);
+      const end = monthUtils.getDay(monthUtils.getMonthEnd(today));
+      return end - day + 1;
+    }
+    case 'oneMonth': {
+      const month = monthUtils.getMonth(today);
+      return (
+        monthUtils.differenceInCalendarDays(
+          monthUtils.nextMonth(month),
+          month,
+        ) + 1
+      );
+    }
+    default:
+      return parseInt(upcomingLength, 10);
+  }
+}
+
+export function scheduleIsRecurring(dateCond) {
+  const cond = new Condition(dateCond.op, 'date', dateCond.value, null);
+  const value = cond.getValue();
+
+  return value.type === 'recur';
 }

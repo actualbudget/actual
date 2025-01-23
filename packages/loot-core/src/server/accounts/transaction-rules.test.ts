@@ -869,6 +869,29 @@ describe('Learning categories', () => {
     expect(getRules().length).toBe(0);
   });
 
+  test('avoids remembering categories for payees specified by the user', async () => {
+    await loadData();
+
+    expect(getRules().length).toBe(0);
+    await db.insertPayee({
+      id: 'supermarket_id',
+      name: 'supermarket',
+      learn_categories: 0,
+    });
+
+    const trans = {
+      date: '2016-12-01',
+      account: 'acct',
+      payee: 'supermarket_id',
+      category: 'food',
+    };
+    await db.insertTransaction({ ...trans, id: 'one' });
+    await db.insertTransaction({ ...trans, id: 'two' });
+    await db.insertTransaction({ ...trans, id: 'three' });
+    await updateCategoryRules([{ ...trans, id: 'three' }]);
+    expect(getRules().length).toBe(0);
+  });
+
   test('adding transaction with `null` payee never changes rules', async () => {
     await loadData();
 

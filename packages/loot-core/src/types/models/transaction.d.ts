@@ -22,8 +22,14 @@ export interface TransactionEntity {
   cleared?: boolean;
   reconciled?: boolean;
   tombstone?: boolean;
+  forceUpcoming?: boolean;
   schedule?: ScheduleEntity['id'];
   subtransactions?: TransactionEntity[];
   _unmatched?: boolean;
   _deleted?: boolean;
+  error?: {
+    type: 'SplitTransactionError';
+    version: 1;
+    difference: number;
+  };
 }

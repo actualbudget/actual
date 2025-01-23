@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 
-import { getCategories } from 'loot-core/src/client/actions';
+import { getCategories } from 'loot-core/client/queries/queriesSlice';
 
 import { useSelector, useDispatch } from '../redux';
 

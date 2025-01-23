@@ -85,12 +85,6 @@ export function ExperimentalFeatures() {
               <Trans>Rule action templating</Trans>
             </FeatureToggle>
             <FeatureToggle
-              flag="upcomingLengthAdjustment"
-              feedbackLink="https://github.com/actualbudget/actual/issues/3660"
-            >
-              <Trans>Scheduled transaction upcoming length adjustment</Trans>
-            </FeatureToggle>
-            <FeatureToggle
               flag="contextMenus"
               feedbackLink="https://github.com/actualbudget/actual/issues/3706"
             >

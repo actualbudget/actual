@@ -14,7 +14,11 @@ const backendWorkerUrl = new URL('./browser-server.js', import.meta.url);
 // everything else.
 
 const IS_DEV = process.env.NODE_ENV === 'development';
-const ACTUAL_VERSION = Platform.isPlaywright ? '99.9.9' : packageJson.version;
+const ACTUAL_VERSION = Platform.isPlaywright
+  ? '99.9.9'
+  : process.env.REACT_APP_REVIEW_ID
+    ? '.preview'
+    : packageJson.version;
 
 // *** Start the backend ***
 let worker;

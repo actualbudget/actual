@@ -113,6 +113,7 @@ export default [
       'packages/loot-core/**/node_modules/*',
       'packages/loot-core/**/lib-dist/*',
       'packages/loot-core/**/proto/*',
+      'packages/sync-server',
       '.yarn/*',
       '.github/*',
     ],
@@ -587,11 +588,7 @@ export default [
       'packages/desktop-client/**/*.{ts,tsx}',
       'packages/loot-core/src/client/**/*.{ts,tsx}',
     ],
-
     rules: {
-      // enforce type over interface
-      '@typescript-eslint/consistent-type-definitions': ['warn', 'type'],
-
       // enforce import type
       '@typescript-eslint/consistent-type-imports': [
         'warn',
@@ -660,6 +657,12 @@ export default [
               importNames: ['useSelector'],
               message:
                 "Please import Actual's useSelector() hook from `src/redux` instead.",
+            },
+            {
+              name: 'react-redux',
+              importNames: ['useStore'],
+              message:
+                "Please import Actual's useStore() hook from `src/redux` instead.",
             },
           ],
         },
@@ -735,6 +738,12 @@ export default [
       'import/no-default-export': 'off',
     },
   },
+  {
+    files: ['packages/api/index.ts'],
+    rules: {
+      'import/no-unresolved': 'off',
+    },
+  },
   {},
   {
     // TODO: fix the issues in these files
@@ -742,7 +751,6 @@ export default [
       'packages/desktop-client/src/components/accounts/Account.jsx',
       'packages/desktop-client/src/components/accounts/MobileAccount.jsx',
       'packages/desktop-client/src/components/accounts/MobileAccounts.jsx',
-      'packages/desktop-client/src/components/App.tsx',
       'packages/desktop-client/src/components/budget/BudgetCategories.jsx',
       'packages/desktop-client/src/components/budget/BudgetSummaries.tsx',
       'packages/desktop-client/src/components/budget/DynamicBudgetTable.tsx',
@@ -811,6 +819,17 @@ export default [
 
     rules: {
       'rulesdir/typography': 'off',
+    },
+  },
+  {
+    files: [
+      'packages/desktop-client/**/*.{ts,tsx}',
+      'packages/loot-core/src/client/**/*.{ts,tsx}',
+    ],
+    ignores: ['**/**/globals.d.ts'],
+    rules: {
+      // enforce type over interface
+      '@typescript-eslint/consistent-type-definitions': ['warn', 'type'],
     },
   },
 ];
