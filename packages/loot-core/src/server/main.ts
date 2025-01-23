@@ -113,17 +113,6 @@ handlers['get-categories'] = async function () {
   };
 };
 
-handlers['get-earliest-transaction'] = async function () {
-  const { data } = await aqlQuery(
-    q('transactions')
-      .options({ splits: 'none' })
-      .orderBy({ date: 'asc' })
-      .select('*')
-      .limit(1),
-  );
-  return data[0] || null;
-};
-
 handlers['get-budget-bounds'] = async function () {
   return budget.createAllBudgets();
 };

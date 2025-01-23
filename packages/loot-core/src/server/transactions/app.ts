@@ -1,4 +1,4 @@
-import { Query, QueryState } from '../../shared/query';
+import { q, Query, QueryState } from '../../shared/query';
 import {
   AccountEntity,
   CategoryGroupEntity,
@@ -6,6 +6,7 @@ import {
   TransactionEntity,
 } from '../../types/models';
 import { createApp } from '../app';
+import { runQuery } from '../aql';
 import { mutator } from '../mutators';
 import { undoable } from '../undo';
 
@@ -22,6 +23,7 @@ export type TransactionHandlers = {
   'transactions-parse-file': typeof parseTransactionsFile;
   'transactions-export': typeof exportTransactions;
   'transactions-export-query': typeof exportTransactionsQuery;
+  'get-earliest-transaction': typeof getEarliestTransaction;
 };
 
 async function handleBatchUpdateTransactions({
@@ -87,6 +89,17 @@ async function exportTransactionsQuery({
   return exportQueryToCSV(new Query(queryState));
 }
 
+async function getEarliestTransaction() {
+  const { data } = await runQuery(
+    q('transactions')
+      .options({ splits: 'none' })
+      .orderBy({ date: 'asc' })
+      .select('*')
+      .limit(1),
+  );
+  return data[0] || null;
+}
+
 export const app = createApp<TransactionHandlers>();
 
 app.method(
@@ -100,3 +113,4 @@ app.method('transaction-delete', mutator(deleteTransaction));
 app.method('transactions-parse-file', mutator(parseTransactionsFile));
 app.method('transactions-export', mutator(exportTransactions));
 app.method('transactions-export-query', mutator(exportTransactionsQuery));
+app.method('get-earliest-transaction', getEarliestTransaction);
