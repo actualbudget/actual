@@ -1,10 +1,10 @@
 // @ts-strict-ignore
+import { type Action } from '..';
 import {
   type RuleEntity,
   type TransactionEntity,
   type RuleActionEntity,
 } from '../../../types/models';
-import { type Action } from '..';
 
 type ValidationError = {
   conditionErrors: string[];

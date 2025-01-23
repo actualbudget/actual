@@ -14,7 +14,7 @@ export type ParseFileResult = {
   transactions?: unknown[];
 };
 
-type ParseFileOptions = {
+export type ParseFileOptions = {
   hasHeaderRow?: boolean;
   delimiter?: string;
   fallbackMissingPayeeToMemo?: boolean;

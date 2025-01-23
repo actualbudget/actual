@@ -4,8 +4,8 @@ import { Backup } from '../server/backups';
 import { RemoteFile } from '../server/cloud-storage';
 import { Node as SpreadsheetNode } from '../server/spreadsheet/spreadsheet';
 import { Message } from '../server/sync';
-import { ParseFileResult } from '../server/transactions/import/parse-file';
 import { batchUpdateTransactions } from '../server/transactions';
+import { ParseFileResult } from '../server/transactions/import/parse-file';
 import { QueryState } from '../shared/query';
 
 import { Budget } from './budget';

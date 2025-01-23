@@ -1,10 +1,16 @@
-import { Query } from '../../shared/query';
+import { Query, QueryState } from '../../shared/query';
+import {
+  AccountEntity,
+  CategoryGroupEntity,
+  PayeeEntity,
+  TransactionEntity,
+} from '../../types/models';
 import { createApp } from '../app';
 import { mutator } from '../mutators';
 import { undoable } from '../undo';
 
 import { exportQueryToCSV, exportToCSV } from './export/export-to-csv';
-import { parseFile } from './import/parse-file';
+import { parseFile, ParseFileOptions } from './import/parse-file';
 
 import { batchUpdateTransactions } from '.';
 
@@ -34,22 +40,28 @@ async function handleBatchUpdateTransactions({
   return result;
 }
 
-async function addTransaction(transaction) {
+async function addTransaction(transaction: TransactionEntity) {
   await handleBatchUpdateTransactions({ added: [transaction] });
   return {};
 }
 
-async function updateTransaction(transaction) {
+async function updateTransaction(transaction: TransactionEntity) {
   await handleBatchUpdateTransactions({ updated: [transaction] });
   return {};
 }
 
-async function deleteTransaction(transaction) {
+async function deleteTransaction(transaction: TransactionEntity) {
   await handleBatchUpdateTransactions({ deleted: [transaction] });
   return {};
 }
 
-async function parseTransactionsFile({ filepath, options }) {
+async function parseTransactionsFile({
+  filepath,
+  options,
+}: {
+  filepath: string;
+  options: ParseFileOptions;
+}) {
   return parseFile(filepath, options);
 }
 
@@ -58,11 +70,20 @@ async function exportTransactions({
   accounts,
   categoryGroups,
   payees,
+}: {
+  transactions: TransactionEntity[];
+  accounts: AccountEntity[];
+  categoryGroups: CategoryGroupEntity[];
+  payees: PayeeEntity[];
 }) {
   return exportToCSV(transactions, accounts, categoryGroups, payees);
 }
 
-async function exportTransactionsQuery({ query: queryState }) {
+async function exportTransactionsQuery({
+  query: queryState,
+}: {
+  query: QueryState;
+}) {
   return exportQueryToCSV(new Query(queryState));
 }
 
