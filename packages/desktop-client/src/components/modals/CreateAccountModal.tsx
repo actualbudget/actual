@@ -50,7 +50,6 @@ export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
   >(null);
   const { hasPermission } = useAuth();
   const multiuserEnabled = useMultiuserEnabled();
-  //const actions = useActions();
 
   const onConnectGoCardless = () => {
     if (!isGoCardlessSetupComplete) {
@@ -274,6 +273,11 @@ export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
   const { configuredSimpleFin } = useSimpleFinStatus();
   useEffect(() => {
     setIsSimpleFinSetupComplete(configuredSimpleFin);
+  }, [configuredSimpleFin]);
+
+  const { configuredPluggyAi } = usePluggyAiStatus();
+  useEffect(() => {
+    setIsPluggyAiSetupComplete(configuredPluggyAi);
   }, [configuredSimpleFin]);
 
   let title = t('Add account');
