@@ -353,8 +353,8 @@ describe('schedules', () => {
       ['currentMonth', 31],
       ['2-day', 2],
       ['5-week', 35],
-      ['3-month', 90],
-      ['4-year', 1461],
+      ['3-month', 91],
+      ['4-year', 1462],
     ])('value of %s returns %i days', (value: string, expected: number) => {
       expect(getUpcomingDays(value)).toEqual(expected);
     });
