@@ -19,6 +19,7 @@ import { type Budget } from '../types/budget';
 import { Handlers } from '../types/handlers';
 import { OpenIdConfig } from '../types/models/openid';
 
+import { app as accountsApp } from './accounts/app';
 import { app as adminApp } from './admin/app';
 import { installAPI } from './api';
 import { runQuery as aqlQuery } from './aql';
@@ -1599,6 +1600,7 @@ app.combine(
   rulesApp,
   adminApp,
   transactionsApp,
+  accountsApp,
 );
 
 function getDefaultDocumentDir() {
