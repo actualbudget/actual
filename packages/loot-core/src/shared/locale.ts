@@ -1,11 +1,11 @@
-import { enUS, ptBR } from 'date-fns/locale';
+import * as locales from 'date-fns/locale';
 
 export function getLocale(language: string) {
-  switch (language) {
-    case 'pt-BR':
-      return ptBR;
+  const localeKey = language.replace('-', '') as keyof typeof locales;
 
-    default:
-      return enUS;
+  if (localeKey in locales) {
+    return locales[localeKey];
   }
+
+  return locales.enUS;
 }
