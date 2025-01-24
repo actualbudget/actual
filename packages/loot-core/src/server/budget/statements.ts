@@ -1,5 +1,5 @@
+import { ScheduleEntity } from '../../types/models';
 import * as db from '../db';
-import { Schedule } from '../db/types';
 
 import { GOAL_PREFIX, TEMPLATE_PREFIX } from './template-notes';
 
@@ -41,7 +41,7 @@ export async function getCategoriesWithTemplateNotes(): Promise<
   );
 }
 
-export async function getActiveSchedules(): Promise<Schedule[]> {
+export async function getActiveSchedules(): Promise<ScheduleEntity[]> {
   return await db.all(
     'SELECT id, rule, active, completed, posts_transaction, tombstone, name from schedules WHERE name NOT NULL AND tombstone = 0',
   );

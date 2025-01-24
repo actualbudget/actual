@@ -176,7 +176,7 @@ async function importDashboard({ filepath }: { filepath: string }) {
 
     exportModel.validate(parsedContent);
 
-    const customReportIds: CustomReportEntity[] = await db.all(
+    const customReportIds: Pick<CustomReportEntity, 'id'>[] = await db.all(
       'SELECT id from custom_reports',
     );
     const customReportIdSet = new Set(customReportIds.map(({ id }) => id));

@@ -118,10 +118,9 @@ describe('sync migrations', () => {
           await sendMessages(msgs);
           await tracer.expect('applied');
 
-          const transactions = await db.all<TransactionEntity>(
-            'SELECT * FROM transactions',
-            [],
-          );
+          const transactions = await db.all<
+            TransactionEntity & { isChild: number }
+          >('SELECT * FROM transactions', []);
           for (const trans of transactions) {
             const transMsgs = msgs
               .filter(msg => msg.row === trans.id)
@@ -138,7 +137,7 @@ describe('sync migrations', () => {
             const msg = transMsgs.find(m => m.column === 'parent_id');
 
             if (
-              !!trans.is_child &&
+              trans.isChild === 1 &&
               trans.id.includes('/') &&
               (msg == null || msg.value == null)
             ) {

@@ -23,6 +23,7 @@ export interface ScheduleEntity {
   id: string;
   name?: string;
   rule: RuleEntity['id'];
+  active: boolean | 1 | 0;
   next_date: string;
   completed: boolean | 1 | 0;
   posts_transaction: boolean | 1 | 0;

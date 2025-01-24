@@ -1,5 +1,5 @@
+import { ScheduleEntity } from '../../types/models';
 import * as db from '../db';
-import { Schedule } from '../db/types';
 
 import {
   CategoryWithTemplateNote,
@@ -20,7 +20,7 @@ function mockGetTemplateNotesForCategories(
   );
 }
 
-function mockGetActiveSchedules(schedules: Schedule[]) {
+function mockGetActiveSchedules(schedules: Partial<ScheduleEntity>[]) {
   (getActiveSchedules as jest.Mock).mockResolvedValue(schedules);
 }
 
@@ -245,7 +245,7 @@ describe('checkTemplates', () => {
   );
 });
 
-function mockSchedules(): Schedule[] {
+function mockSchedules(): Partial<ScheduleEntity>[] {
   return [
     {
       id: 'mock-schedule-1',
