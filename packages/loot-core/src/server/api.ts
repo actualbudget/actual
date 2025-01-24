@@ -17,6 +17,7 @@ import {
 } from '../shared/transactions';
 import { integerToAmount } from '../shared/util';
 import { Handlers } from '../types/handlers';
+import { CategoryEntity, CrdtMessageEntity } from '../types/models';
 import { ServerHandlers } from '../types/server-handlers';
 
 import { addTransactions } from './accounts/sync';
@@ -53,7 +54,7 @@ function withMutation<Params extends Array<unknown>, ReturnType>(
         const latestTimestamp = getClock().timestamp.toString();
         const result = await handler(...args);
 
-        const rows = await db.all(
+        const rows = await db.all<CrdtMessageEntity>(
           'SELECT DISTINCT dataset FROM messages_crdt WHERE timestamp > ?',
           [latestTimestamp],
         );
@@ -94,9 +95,10 @@ async function validateExpenseCategory(debug, id) {
     throw APIError(`${debug}: category id is required`);
   }
 
-  const row = await db.first('SELECT is_income FROM categories WHERE id = ?', [
-    id,
-  ]);
+  const row = await db.first<Pick<CategoryEntity, 'is_income'>>(
+    'SELECT is_income FROM categories WHERE id = ?',
+    [id],
+  );
 
   if (!row) {
     throw APIError(`${debug}: category “${id}” does not exist`);

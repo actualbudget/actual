@@ -1,3 +1,4 @@
+import { PreferenceEntity } from '../../types/models';
 import { type SyncedPrefs } from '../../types/prefs';
 import { createApp } from '../app';
 import * as db from '../db';
@@ -19,7 +20,9 @@ const savePreferences = async ({
 };
 
 const getPreferences = async (): Promise<SyncedPrefs> => {
-  const prefs = (await db.all('SELECT id, value FROM preferences')) as Array<{
+  const prefs = (await db.all<PreferenceEntity>(
+    'SELECT id, value FROM preferences',
+  )) as Array<{
     id: string;
     value: string;
   }>;

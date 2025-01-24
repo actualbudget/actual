@@ -220,7 +220,7 @@ export const syncAccounts = createAppAsyncThunk(
           .sort((a, b) =>
             a.offbudget === b.offbudget
               ? a.sort_order - b.sort_order
-              : a.offbudget - b.offbudget,
+              : (a.offbudget ? 1 : 0) - (b.offbudget ? 1 : 0),
           )
           .map(({ id }) => id);
 

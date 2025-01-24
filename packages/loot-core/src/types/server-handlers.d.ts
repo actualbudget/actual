@@ -18,6 +18,7 @@ import {
   SimpleFinAccount,
   RuleEntity,
   PayeeEntity,
+  TransactionEntity,
 } from './models';
 import { OpenIdConfig } from './models/openid';
 import { GlobalPrefs, MetadataPrefs } from './prefs';
@@ -26,7 +27,9 @@ import { Query } from './query';
 import { EmptyObject } from './util';
 
 export interface ServerHandlers {
-  'transaction-update': (transaction: { id: string }) => Promise<EmptyObject>;
+  'transaction-update': (
+    transaction: Partial<TransactionEntity>,
+  ) => Promise<EmptyObject>;
 
   undo: () => Promise<void>;
 
@@ -120,7 +123,7 @@ export interface ServerHandlers {
   }) => Promise<unknown>;
 
   'payees-check-orphaned': (arg: { ids }) => Promise<unknown>;
-  'payees-get-orphaned': () => Promise<PayeeEntity[]>;
+  'payees-get-orphaned': () => Promise<Array<Pick<PayeeEntity, 'id'>>>;
 
   'payees-get-rules': (arg: { id: string }) => Promise<RuleEntity[]>;
 

@@ -4,6 +4,7 @@ import fc from 'fast-check';
 
 import * as arbs from '../../mocks/arbitrary-schema';
 import { execTracer } from '../../shared/test-helpers';
+import { TransactionEntity } from '../../types/models';
 import { convertInputType, schema, schemaConfig } from '../aql';
 import * as db from '../db';
 
@@ -79,7 +80,11 @@ describe('sync migrations', () => {
     tracer.expectNow('applied', ['trans1/child1']);
     await tracer.expectWait('applied', ['trans1/child1']);
 
-    const transactions = db.runQuery('SELECT * FROM transactions', [], true);
+    const transactions = db.runQuery<TransactionEntity>(
+      'SELECT * FROM transactions',
+      [],
+      true,
+    );
     expect(transactions.length).toBe(1);
     expect(transactions[0].parent_id).toBe('trans1');
 
@@ -113,7 +118,10 @@ describe('sync migrations', () => {
           await sendMessages(msgs);
           await tracer.expect('applied');
 
-          const transactions = await db.all('SELECT * FROM transactions', []);
+          const transactions = await db.all<TransactionEntity>(
+            'SELECT * FROM transactions',
+            [],
+          );
           for (const trans of transactions) {
             const transMsgs = msgs
               .filter(msg => msg.row === trans.id)
@@ -130,7 +138,7 @@ describe('sync migrations', () => {
             const msg = transMsgs.find(m => m.column === 'parent_id');
 
             if (
-              trans.isChild === 1 &&
+              !!trans.is_child &&
               trans.id.includes('/') &&
               (msg == null || msg.value == null)
             ) {

@@ -454,7 +454,7 @@ export async function reconcileTransactions(
       }
 
       if (existing.is_parent && existing.cleared !== updates.cleared) {
-        const children = await db.all(
+        const children = await db.all<Pick<TransactionEntity, 'id'>>(
           'SELECT id FROM v_transactions WHERE parent_id = ?',
           [existing.id],
         );
@@ -546,7 +546,7 @@ export async function matchTransactions(
     // is the highest fidelity match and should always be attempted
     // first.
     if (trans.imported_id) {
-      match = await db.first(
+      match = await db.first<TransactionEntity>(
         'SELECT * FROM v_transactions WHERE imported_id = ? AND account = ?',
         [trans.imported_id, acctId],
       );
@@ -816,7 +816,7 @@ export async function syncAccount(
   acctId: string,
   bankId: string,
 ) {
-  const acctRow = await db.select('accounts', id);
+  const acctRow = await db.select<AccountEntity>('accounts', id);
 
   const syncStartDate = await getAccountSyncStartDate(id);
   const oldestTransaction = await getAccountOldestTransaction(id);

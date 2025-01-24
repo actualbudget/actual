@@ -61,7 +61,7 @@ export function CategoryGroupMenuModal({
   };
 
   const _onAddCategory = () => {
-    onAddCategory?.(group.id, group.is_income);
+    onAddCategory?.(group.id, !!group.is_income);
   };
 
   const _onEditNotes = () => {

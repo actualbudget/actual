@@ -18,7 +18,7 @@ type AbstractWidget<
   width: number;
   height: number;
   meta: Meta;
-  tombstone: boolean;
+  tombstone: boolean | 1 | 0;
 };
 
 export type NetWorthWidget = AbstractWidget<

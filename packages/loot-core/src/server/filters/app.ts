@@ -1,6 +1,7 @@
 // @ts-strict-ignore
 import { v4 as uuidv4 } from 'uuid';
 
+import { TransactionFilterEntity } from '../../types/models';
 import { parseConditionsOrActions } from '../accounts/transaction-rules';
 import { createApp } from '../app';
 import * as db from '../db';
@@ -42,7 +43,7 @@ const filterModel = {
 };
 
 async function filterNameExists(name, filterId, newItem) {
-  const idForName = await db.first(
+  const idForName = await db.first<Pick<TransactionFilterEntity, 'id'>>(
     'SELECT id from transaction_filters WHERE tombstone = 0 AND name = ?',
     [name],
   );

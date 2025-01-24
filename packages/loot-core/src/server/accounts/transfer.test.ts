@@ -1,5 +1,6 @@
 // @ts-strict-ignore
 import { expectSnapshotWithDiffer } from '../../mocks/util';
+import { PayeeEntity, TransactionEntity } from '../../types/models';
 import * as db from '../db';
 
 import * as transfer from './transfer';
@@ -35,22 +36,11 @@ async function prepareDatabase() {
   });
 }
 
-type Transaction = {
-  account: string;
-  amount: number;
-  category?: string;
-  date: string;
-  id?: string;
-  notes?: string;
-  payee: string;
-  transfer_id?: string;
-};
-
 describe('Transfer', () => {
   test('transfers are properly inserted/updated/deleted', async () => {
     await prepareDatabase();
 
-    let transaction: Transaction = {
+    let transaction: Partial<TransactionEntity> = {
       account: 'one',
       amount: 5000,
       payee: await db.insertPayee({ name: 'Non-transfer' }),
@@ -61,10 +51,10 @@ describe('Transfer', () => {
 
     const differ = expectSnapshotWithDiffer(await getAllTransactions());
 
-    const transferTwo = await db.first(
+    const transferTwo = await db.first<PayeeEntity>(
       "SELECT * FROM payees WHERE transfer_acct = 'two'",
     );
-    const transferThree = await db.first(
+    const transferThree = await db.first<PayeeEntity>(
       "SELECT * FROM payees WHERE transfer_acct = 'three'",
     );
 
@@ -131,14 +121,14 @@ describe('Transfer', () => {
   test('transfers are properly de-categorized', async () => {
     await prepareDatabase();
 
-    const transferTwo = await db.first(
+    const transferTwo = await db.first<PayeeEntity>(
       "SELECT * FROM payees WHERE transfer_acct = 'two'",
     );
-    const transferThree = await db.first(
+    const transferThree = await db.first<PayeeEntity>(
       "SELECT * FROM payees WHERE transfer_acct = 'three'",
     );
 
-    let transaction: Transaction = {
+    let transaction: Partial<TransactionEntity> = {
       account: 'one',
       amount: 5000,
       payee: await db.insertPayee({ name: 'Non-transfer' }),

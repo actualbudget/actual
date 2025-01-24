@@ -1,5 +1,6 @@
 // @ts-strict-ignore
 import { q } from '../../shared/query';
+import { RawRuleEntity, RuleEntity } from '../../types/models';
 import { runQuery } from '../aql';
 import * as db from '../db';
 import { loadMappings } from '../db/mappings';
@@ -377,10 +378,7 @@ describe('Transaction rules', () => {
       cat_group: categoryGroupId,
     });
     const krogerId = await db.insertPayee({ name: 'kroger' });
-    const lowesId = await db.insertPayee({
-      name: 'lowes',
-      category: foodCategoryId,
-    });
+    const lowesId = await db.insertPayee({ name: 'lowes' });
 
     await db.insertTransaction({
       id: '1',
@@ -943,11 +941,17 @@ describe('Learning categories', () => {
 
     // Internally, it should still be stored with the internal names
     // so that it's backwards compatible
-    const rawRule = await db.first('SELECT * FROM rules');
-    rawRule.conditions = JSON.parse(rawRule.conditions);
-    rawRule.actions = JSON.parse(rawRule.actions);
-    expect(rawRule.conditions[0].field).toBe('imported_description');
-    expect(rawRule.actions[0].field).toBe('description');
+    const { conditions, actions, ...rawRule } = await db.first<RawRuleEntity>(
+      'SELECT * FROM rules',
+    );
+    const parsedRule: RuleEntity = {
+      conditions: JSON.parse(conditions),
+      actions: JSON.parse(actions),
+      ...rawRule,
+    };
+    expect(parsedRule.conditions[0].field).toBe('imported_description');
+    const action = parsedRule.actions[0];
+    expect('field' in action ? action.field : null).toBe('description');
 
     await loadRules();
 
@@ -973,11 +977,17 @@ describe('Learning categories', () => {
     // This rule internally has been stored with the public names.
     // Making this work now allows us to switch to it by default in
     // the future
-    const rawRule = await db.first('SELECT * FROM rules');
-    rawRule.conditions = JSON.parse(rawRule.conditions);
-    rawRule.actions = JSON.parse(rawRule.actions);
-    expect(rawRule.conditions[0].field).toBe('imported_payee');
-    expect(rawRule.actions[0].field).toBe('payee');
+    const { conditions, actions, ...rawRule } = await db.first<RawRuleEntity>(
+      'SELECT * FROM rules',
+    );
+    const parsedRule: RuleEntity = {
+      conditions: JSON.parse(conditions),
+      actions: JSON.parse(actions),
+      ...rawRule,
+    };
+    expect(parsedRule.conditions[0].field).toBe('imported_payee');
+    const action = parsedRule.actions[0];
+    expect('field' in action ? action.field : null).toBe('payee');
 
     const [rule] = getRules();
     expect(rule.conditions[0].field).toBe('imported_payee');

@@ -96,12 +96,12 @@ export function generateCategoryGroups(
   definition: Partial<NewCategoryGroupEntity>[],
 ): CategoryGroupEntity[] {
   return definition.map(group => {
-    const g = generateCategoryGroup(group.name ?? '', group.is_income);
+    const g = generateCategoryGroup(group.name ?? '', !!group.is_income);
 
     return {
       ...g,
       categories: group.categories?.map(cat =>
-        generateCategory(cat.name, g.id, cat.is_income),
+        generateCategory(cat.name, g.id, !!cat.is_income),
       ),
     };
   });

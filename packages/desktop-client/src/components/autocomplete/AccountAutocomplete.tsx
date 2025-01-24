@@ -127,8 +127,8 @@ export function AccountAutocomplete({
     })
     .sort(
       (a, b) =>
-        a.closed - b.closed ||
-        a.offbudget - b.offbudget ||
+        (a.closed ? 1 : 0) - (b.closed ? 1 : 0) ||
+        (a.offbudget ? 1 : 0) - (b.offbudget ? 1 : 0) ||
         a.sort_order - b.sort_order,
     );
 

@@ -16,6 +16,7 @@ import {
   getStatus,
   recurConfigToRSchedule,
 } from '../../shared/schedules';
+import { ScheduleNextDateEntity } from '../../types/models';
 import { Rule } from '../accounts/rules';
 import { addTransactions } from '../accounts/sync';
 import {
@@ -140,7 +141,9 @@ export async function setNextDate({
     if (newNextDate !== nextDate) {
       // Our `update` functon requires the id of the item and we don't
       // have it, so we need to query it
-      const nd = await db.first(
+      const nd = await db.first<
+        Pick<ScheduleNextDateEntity, 'id' | 'base_next_date_ts'>
+      >(
         'SELECT id, base_next_date_ts FROM schedules_next_date WHERE schedule_id = ?',
         [id],
       );

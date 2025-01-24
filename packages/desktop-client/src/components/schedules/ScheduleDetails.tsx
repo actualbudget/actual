@@ -198,7 +198,7 @@ export function ScheduleDetails({ id, transaction }: ScheduleDetailsProps) {
               amount: schedule._amount || 0,
               amountOp: schedule._amountOp || 'isapprox',
               date: schedule._date ?? null,
-              posts_transaction: action.schedule.posts_transaction ?? false,
+              posts_transaction: !!action.schedule.posts_transaction,
               name: schedule.name ?? null,
             },
           };

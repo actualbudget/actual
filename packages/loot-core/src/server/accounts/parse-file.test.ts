@@ -2,6 +2,7 @@
 import * as d from 'date-fns';
 
 import { amountToInteger } from '../../shared/util';
+import { TransactionEntity } from '../../types/models';
 import * as db from '../db';
 import * as prefs from '../prefs';
 
@@ -22,7 +23,7 @@ afterAll(() => {
 });
 
 async function getTransactions(accountId) {
-  return db.runQuery(
+  return db.runQuery<TransactionEntity>(
     'SELECT * FROM transactions WHERE acct = ?',
     [accountId],
     true,

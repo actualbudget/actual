@@ -4,6 +4,12 @@ import { type Database } from '@jlongster/sql.js';
 import { captureBreadcrumb } from '../platform/exceptions';
 import * as sqlite from '../platform/server/sqlite';
 import { sheetForMonth } from '../shared/months';
+import {
+  ReflectBudgetEntity,
+  ZeroBudgetEntity,
+  ZeroBudgetMonthEntity,
+} from '../types/models';
+import { PreferenceEntity } from '../types/models/preference';
 
 import * as Platform from './platform';
 import { Spreadsheet } from './spreadsheet/spreadsheet';
@@ -92,7 +98,7 @@ function isCacheDirty(mainDb: Database, cacheDb: Database): boolean {
 }
 
 export async function loadSpreadsheet(
-  db,
+  db: typeof import('./db'),
   onSheetChange?,
 ): Promise<Spreadsheet> {
   const cacheEnabled = process.env.NODE_ENV !== 'test';
@@ -182,26 +188,31 @@ export function unloadSpreadsheet(): void {
   }
 }
 
-export async function reloadSpreadsheet(db): Promise<Spreadsheet> {
+export async function reloadSpreadsheet(
+  db: typeof import('./db'),
+): Promise<Spreadsheet> {
   if (globalSheet) {
     unloadSpreadsheet();
     return loadSpreadsheet(db, globalOnChange);
   }
 }
 
-export async function loadUserBudgets(db): Promise<void> {
+export async function loadUserBudgets(
+  db: typeof import('./db'),
+): Promise<void> {
   const sheet = globalSheet;
 
   // TODO: Clear out the cache here so make sure future loads of the app
   // don't load any extra values that aren't set here
 
   const { value: budgetType = 'rollover' } =
-    (await db.first('SELECT value from preferences WHERE id = ?', [
-      'budgetType',
-    ])) ?? {};
+    (await db.first<Pick<PreferenceEntity, 'value'>>(
+      'SELECT value from preferences WHERE id = ?',
+      ['budgetType'],
+    )) ?? {};
 
   const table = budgetType === 'report' ? 'reflect_budgets' : 'zero_budgets';
-  const budgets = await db.all(`
+  const budgets = await db.all<ReflectBudgetEntity | ZeroBudgetEntity>(`
       SELECT * FROM ${table} b
       LEFT JOIN categories c ON c.id = b.category
       WHERE c.tombstone = 0
@@ -225,7 +236,9 @@ export async function loadUserBudgets(db): Promise<void> {
 
   // For zero-based budgets, load the buffered amounts
   if (budgetType !== 'report') {
-    const budgetMonths = await db.all('SELECT * FROM zero_budget_months');
+    const budgetMonths = await db.all<ZeroBudgetMonthEntity>(
+      'SELECT * FROM zero_budget_months',
+    );
     for (const budgetMonth of budgetMonths) {
       const sheetName = sheetForMonth(budgetMonth.id);
       sheet.set(`${sheetName}!buffered`, budgetMonth.buffered);

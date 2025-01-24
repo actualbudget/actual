@@ -13,6 +13,7 @@ import * as connection from '../../platform/server/connection';
 import { logger } from '../../platform/server/log';
 import { sequential, once } from '../../shared/async';
 import { setIn, getIn } from '../../shared/util';
+import { ClockMessageEntity, CrdtMessageEntity } from '../../types/models';
 import { type MetadataPrefs } from '../../types/prefs';
 import { triggerBudgetChanges, setType as setBudgetType } from '../budget/base';
 import * as db from '../db';
@@ -198,7 +199,7 @@ async function compareMessages(messages: Message[]): Promise<Message[]> {
     const { dataset, row, column, timestamp } = message;
     const timestampStr = timestamp.toString();
 
-    const res = db.runQuery(
+    const res = db.runQuery<CrdtMessageEntity>(
       db.cache(
         'SELECT timestamp FROM messages_crdt WHERE dataset = ? AND row = ? AND column = ? AND timestamp >= ?',
       ),
@@ -744,11 +745,13 @@ async function _fullSync(
 
       if (rebuiltMerkle.trie.hash === res.merkle.hash) {
         // Rebuilding the merkle worked... but why?
-        const clocks = await db.all('SELECT * FROM messages_clock');
+        const clocks = await db.all<ClockMessageEntity>(
+          'SELECT * FROM messages_clock',
+        );
         if (clocks.length !== 1) {
           console.log('Bad number of clocks:', clocks.length);
         }
-        const hash = deserializeClock(clocks[0]).merkle.hash;
+        const hash = deserializeClock(clocks[0].clock).merkle.hash;
         console.log('Merkle hash in db:', hash);
       }
 

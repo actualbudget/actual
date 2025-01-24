@@ -1,6 +1,7 @@
 // @ts-strict-ignore
 import * as monthUtils from '../../shared/months';
 import { getChangedValues } from '../../shared/util';
+import { CategoryEntity, TransactionEntity } from '../../types/models';
 import * as db from '../db';
 import * as sheet from '../sheet';
 import { resolveName } from '../spreadsheet/util';
@@ -41,7 +42,7 @@ function createCategory(cat, sheetName, prevSheetName, start, end) {
     initialValue: 0,
     run: () => {
       // Making this sync is faster!
-      const rows = db.runQuery(
+      const rows = db.runQuery<{ amount: number }>(
         `SELECT SUM(amount) as amount FROM v_transactions_internal_alive t
            LEFT JOIN accounts a ON a.id = t.account
          WHERE t.date >= ${start} AND t.date <= ${end}
@@ -86,7 +87,7 @@ function createCategoryGroup(group, sheetName) {
 
 function handleAccountChange(months, oldValue, newValue) {
   if (!oldValue || oldValue.offbudget !== newValue.offbudget) {
-    const rows = db.runQuery(
+    const rows = db.runQuery<Pick<TransactionEntity, 'category'>>(
       `
         SELECT DISTINCT(category) as category FROM transactions
         WHERE acct = ?
@@ -289,7 +290,7 @@ function handleCategoryGroupChange(months, oldValue, newValue) {
         // OK because we're leveraging the sync nature of queries. Ideally we
         // wouldn't be querying here. But I think we have to. At least for now
         // we do
-        const categories = db.runQuery(
+        const categories = db.runQuery<CategoryEntity>(
           'SELECT * FROM categories WHERE tombstone = 0 AND cat_group = ?',
           [group.id],
           true,
@@ -442,11 +443,11 @@ export async function createBudget(months) {
 }
 
 export async function createAllBudgets() {
-  const earliestTransaction = await db.first(
+  const earliestTransaction = await db.first<TransactionEntity>(
     'SELECT * FROM transactions WHERE isChild=0 AND date IS NOT NULL ORDER BY date ASC LIMIT 1',
   );
   const earliestDate =
-    earliestTransaction && db.fromDateRepr(earliestTransaction.date);
+    earliestTransaction && db.fromDateRepr(Number(earliestTransaction.date));
   const currentMonth = monthUtils.currentMonth();
 
   // Get the range based off of the earliest transaction and the

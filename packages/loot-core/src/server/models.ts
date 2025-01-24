@@ -50,7 +50,10 @@ export function fromDateRepr(number: number) {
 }
 
 export const accountModel = {
-  validate(account: AccountEntity, { update }: { update?: boolean } = {}) {
+  validate(
+    account: Partial<AccountEntity>,
+    { update }: { update?: boolean } = {},
+  ) {
     requiredFields(
       'account',
       account,
@@ -63,7 +66,10 @@ export const accountModel = {
 };
 
 export const categoryModel = {
-  validate(category: CategoryEntity, { update }: { update?: boolean } = {}) {
+  validate(
+    category: Partial<CategoryEntity>,
+    { update }: { update?: boolean } = {},
+  ) {
     requiredFields(
       'category',
       category,
@@ -72,13 +78,13 @@ export const categoryModel = {
     );
 
     const { sort_order, ...rest } = category;
-    return { ...rest, hidden: rest.hidden ? 1 : 0 };
+    return { ...rest, hidden: rest.hidden ? (1 as const) : (0 as const) };
   },
 };
 
 export const categoryGroupModel = {
   validate(
-    categoryGroup: CategoryGroupEntity,
+    categoryGroup: Partial<CategoryGroupEntity>,
     { update }: { update?: boolean } = {},
   ) {
     requiredFields(
@@ -94,7 +100,7 @@ export const categoryGroupModel = {
 };
 
 export const payeeModel = {
-  validate(payee: PayeeEntity, { update }: { update?: boolean } = {}) {
+  validate(payee: Partial<PayeeEntity>, { update }: { update?: boolean } = {}) {
     requiredFields('payee', payee, ['name'], update);
     return payee;
   },

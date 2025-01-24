@@ -1,4 +1,5 @@
 // @ts-strict-ignore
+import { CategoryMappingEntity, PayeeMappingEntity } from '../../types/models';
 import { addSyncListener } from '../sync/index';
 
 import * as db from './index';
@@ -22,17 +23,15 @@ let unlistenSync;
 export async function loadMappings() {
   // The mappings are separated into tables specific to the type of
   // data. But you know, we really could keep a global mapping table.
-  const categories = (await db.all('SELECT * FROM category_mapping')).map(r => [
-    r.id,
-    r.transferId,
-  ]);
-  const payees = (await db.all('SELECT * FROM payee_mapping')).map(r => [
-    r.id,
-    r.targetId,
-  ]);
+  const categories = (
+    await db.all<CategoryMappingEntity>('SELECT * FROM category_mapping')
+  ).map(r => [r.id, r.transferId]);
+  const payees = (
+    await db.all<PayeeMappingEntity>('SELECT * FROM payee_mapping')
+  ).map(r => [r.id, r.targetId]);
 
   // All ids are unique, so we can just keep a global table of mappings
-  allMappings = new Map(categories.concat(payees));
+  allMappings = new Map(categories.concat(payees) as [string, string][]);
 
   if (unlistenSync) {
     unlistenSync();

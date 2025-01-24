@@ -19,6 +19,14 @@ import { q, Query } from '../shared/query';
 import { amountToInteger, stringToInteger } from '../shared/util';
 import { type Budget } from '../types/budget';
 import { Handlers } from '../types/handlers';
+import {
+  AccountEntity,
+  BankEntity,
+  CategoryEntity,
+  PayeeEntity,
+  PreferenceEntity,
+  TransactionEntity,
+} from '../types/models';
 import { OpenIdConfig } from '../types/models/openid';
 
 import { exportToCSV, exportQueryToCSV } from './accounts/export-to-csv';
@@ -326,7 +334,7 @@ handlers['category-delete'] = mutator(async function ({ id, transferId }) {
   return withUndo(async () => {
     let result = {};
     await batchMessages(async () => {
-      const row = await db.first(
+      const row = await db.first<Pick<CategoryEntity, 'is_income'>>(
         'SELECT is_income FROM categories WHERE id = ?',
         [id],
       );
@@ -337,9 +345,10 @@ handlers['category-delete'] = mutator(async function ({ id, transferId }) {
 
       const transfer =
         transferId &&
-        (await db.first('SELECT is_income FROM categories WHERE id = ?', [
-          transferId,
-        ]));
+        (await db.first<Pick<CategoryEntity, 'is_income'>>(
+          'SELECT is_income FROM categories WHERE id = ?',
+          [transferId],
+        ));
 
       if (!row || (transferId && !transfer)) {
         result = { error: 'no-categories' };
@@ -400,7 +409,7 @@ handlers['category-group-delete'] = mutator(async function ({
   transferId,
 }) {
   return withUndo(async () => {
-    const groupCategories = await db.all(
+    const groupCategories = await db.all<Pick<CategoryEntity, 'id'>>(
       'SELECT id FROM categories WHERE cat_group = ? AND tombstone = 0',
       [id],
     );
@@ -418,7 +427,7 @@ handlers['category-group-delete'] = mutator(async function ({
 });
 
 handlers['must-category-transfer'] = async function ({ id }) {
-  const res = await db.runQuery(
+  const res = await db.runQuery<{ count: number }>(
     `SELECT count(t.id) as count FROM transactions t
        LEFT JOIN category_mapping cm ON cm.id = t.category
        WHERE cm.transferId = ? AND t.tombstone = 0`,
@@ -572,7 +581,7 @@ handlers['accounts-get'] = async function () {
 };
 
 handlers['account-balance'] = async function ({ id, cutoff }) {
-  const { balance } = await db.first(
+  const { balance } = await db.first<{ balance: number }>(
     'SELECT sum(amount) as balance FROM transactions WHERE acct = ? AND isParent = 0 AND tombstone = 0 AND date <= ?',
     [id, db.toDateRepr(dayFromDate(cutoff))],
   );
@@ -580,11 +589,11 @@ handlers['account-balance'] = async function ({ id, cutoff }) {
 };
 
 handlers['account-properties'] = async function ({ id }) {
-  const { balance } = await db.first(
+  const { balance } = await db.first<{ balance: number }>(
     'SELECT sum(amount) as balance FROM transactions WHERE acct = ? AND isParent = 0 AND tombstone = 0',
     [id],
   );
-  const { count } = await db.first(
+  const { count } = await db.first<{ count: number }>(
     'SELECT count(id) as count FROM transactions WHERE acct = ? AND tombstone = 0',
     [id],
   );
@@ -602,9 +611,10 @@ handlers['gocardless-accounts-link'] = async function ({
   const bank = await link.findOrCreateBank(account.institution, requisitionId);
 
   if (upgradingId) {
-    const accRow = await db.first('SELECT * FROM accounts WHERE id = ?', [
-      upgradingId,
-    ]);
+    const accRow = await db.first<AccountEntity>(
+      'SELECT * FROM accounts WHERE id = ?',
+      [upgradingId],
+    );
     id = accRow.id;
     await db.update('accounts', {
       id,
@@ -663,9 +673,10 @@ handlers['simplefin-accounts-link'] = async function ({
   );
 
   if (upgradingId) {
-    const accRow = await db.first('SELECT * FROM accounts WHERE id = ?', [
-      upgradingId,
-    ]);
+    const accRow = await db.first<AccountEntity>(
+      'SELECT * FROM accounts WHERE id = ?',
+      [upgradingId],
+    );
     id = accRow.id;
     await db.update('accounts', {
       id,
@@ -754,7 +765,7 @@ handlers['account-close'] = mutator(async function ({
   await handlers['account-unlink']({ id });
 
   return withUndo(async () => {
-    const account = await db.first(
+    const account = await db.first<AccountEntity>(
       'SELECT * FROM accounts WHERE id = ? AND tombstone = 0',
       [id],
     );
@@ -773,13 +784,15 @@ handlers['account-close'] = mutator(async function ({
     if (numTransactions === 0) {
       await db.deleteAccount({ id });
     } else if (forced) {
-      const rows = await db.runQuery(
+      const rows = await db.runQuery<
+        Pick<TransactionEntity, 'id' | 'transfer_id'>
+      >(
         'SELECT id, transfer_id FROM v_transactions WHERE account = ?',
         [id],
         true,
       );
 
-      const { id: payeeId } = await db.first(
+      const { id: payeeId } = await db.first<Pick<PayeeEntity, 'id'>>(
         'SELECT id FROM payees WHERE transfer_acct = ?',
         [id],
       );
@@ -816,7 +829,7 @@ handlers['account-close'] = mutator(async function ({
       // If there is a balance we need to transfer it to the specified
       // account (and possibly categorize it)
       if (balance !== 0) {
-        const { id: payeeId } = await db.first(
+        const { id: payeeId } = await db.first<Pick<PayeeEntity, 'id'>>(
           'SELECT id FROM payees WHERE transfer_acct = ?',
           [transferAccountId],
         );
@@ -1096,7 +1109,9 @@ handlers['accounts-bank-sync'] = async function ({ ids = [] }) {
     'user-key',
   ]);
 
-  const accounts = await db.runQuery(
+  const accounts = await db.runQuery<
+    AccountEntity & { bankId: BankEntity['bank_id'] }
+  >(
     `
     SELECT a.*, b.bank_id as bankId
     FROM accounts a
@@ -1155,7 +1170,9 @@ handlers['accounts-bank-sync'] = async function ({ ids = [] }) {
 };
 
 handlers['simplefin-batch-sync'] = async function ({ ids = [] }) {
-  const accounts = await db.runQuery(
+  const accounts = await db.runQuery<
+    AccountEntity & { bankId: BankEntity['bank_id'] }
+  >(
     `SELECT a.*, b.bank_id as bankId FROM accounts a
          LEFT JOIN banks b ON a.bank = b.id
          WHERE
@@ -1214,7 +1231,7 @@ handlers['simplefin-batch-sync'] = async function ({ ids = [] }) {
     const errors = [];
     for (const account of accounts) {
       retVal.push({
-        accountId: account.accountId,
+        accountId: account.id,
         res: {
           errors,
           newTransactions: [],
@@ -1274,7 +1291,7 @@ handlers['transactions-import'] = mutator(function ({
 });
 
 handlers['account-unlink'] = mutator(async function ({ id }) {
-  const { bank: bankId } = await db.first(
+  const { bank: bankId } = await db.first<Pick<AccountEntity, 'bank'>>(
     'SELECT bank FROM accounts WHERE id = ?',
     [id],
   );
@@ -1283,7 +1300,10 @@ handlers['account-unlink'] = mutator(async function ({ id }) {
     return 'ok';
   }
 
-  const accRow = await db.first('SELECT * FROM accounts WHERE id = ?', [id]);
+  const accRow = await db.first<AccountEntity>(
+    'SELECT * FROM accounts WHERE id = ?',
+    [id],
+  );
 
   const isGoCardless = accRow.account_sync_source === 'goCardless';
 
@@ -1301,7 +1321,7 @@ handlers['account-unlink'] = mutator(async function ({ id }) {
     return;
   }
 
-  const { count } = await db.first(
+  const { count } = await db.first<{ count: number }>(
     'SELECT COUNT(*) as count FROM accounts WHERE bank = ?',
     [bankId],
   );
@@ -1314,10 +1334,9 @@ handlers['account-unlink'] = mutator(async function ({ id }) {
   }
 
   if (count === 0) {
-    const { bank_id: requisitionId } = await db.first(
-      'SELECT bank_id FROM banks WHERE id = ?',
-      [bankId],
-    );
+    const { bank_id: requisitionId } = await db.first<
+      Pick<BankEntity, 'bank_id'>
+    >('SELECT bank_id FROM banks WHERE id = ?', [bankId]);
     try {
       await post(
         getServer().GOCARDLESS_SERVER + '/remove-account',
@@ -2339,9 +2358,10 @@ async function loadBudget(id: string) {
 
   // This is a bit leaky, but we need to set the initial budget type
   const { value: budgetType = 'rollover' } =
-    (await db.first('SELECT value from preferences WHERE id = ?', [
-      'budgetType',
-    ])) ?? {};
+    (await db.first<Pick<PreferenceEntity, 'value'>>(
+      'SELECT value from preferences WHERE id = ?',
+      ['budgetType'],
+    )) ?? {};
   sheet.get().meta().budgetType = budgetType;
   await budget.createAllBudgets();
 

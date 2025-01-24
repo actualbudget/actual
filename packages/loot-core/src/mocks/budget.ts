@@ -461,20 +461,20 @@ async function fillOther(handlers, account, payees, groups) {
 async function createBudget(accounts, payees, groups) {
   const primaryAccount = accounts.find(a => (a.name = 'Bank of America'));
   const earliestDate = (
-    await db.first(
+    await db.first<TransactionEntity>(
       `SELECT * FROM v_transactions t LEFT JOIN accounts a ON t.account = a.id
        WHERE a.offbudget = 0 AND t.is_child = 0 ORDER BY date ASC LIMIT 1`,
     )
   ).date;
   const earliestPrimaryDate = (
-    await db.first(
+    await db.first<TransactionEntity>(
       `SELECT * FROM v_transactions t LEFT JOIN accounts a ON t.account = a.id
        WHERE a.id = ? AND a.offbudget = 0 AND t.is_child = 0 ORDER BY date ASC LIMIT 1`,
       [primaryAccount.id],
     )
   ).date;
 
-  const start = monthUtils.monthFromDate(db.fromDateRepr(earliestDate));
+  const start = monthUtils.monthFromDate(db.fromDateRepr(Number(earliestDate)));
   const end = monthUtils.currentMonth();
   const months = monthUtils.rangeInclusive(start, end);
 
@@ -507,7 +507,7 @@ async function createBudget(accounts, payees, groups) {
       for (const month of months) {
         if (
           month >=
-          monthUtils.monthFromDate(db.fromDateRepr(earliestPrimaryDate))
+          monthUtils.monthFromDate(db.fromDateRepr(Number(earliestPrimaryDate)))
         ) {
           setBudget(month, category('Food'), 40000);
           setBudget(month, category('Restaurants'), 30000);
@@ -549,7 +549,9 @@ async function createBudget(accounts, payees, groups) {
       for (const month of months) {
         if (
           month >=
-            monthUtils.monthFromDate(db.fromDateRepr(earliestPrimaryDate)) &&
+            monthUtils.monthFromDate(
+              db.fromDateRepr(Number(earliestPrimaryDate)),
+            ) &&
           month <= monthUtils.currentMonth()
         ) {
           const sheetName = monthUtils.sheetForMonth(month);
@@ -691,7 +693,7 @@ export async function createTestBudget(handlers: Handlers) {
     for (const group of newCategoryGroups) {
       const groupId = await handlers['category-group-create']({
         name: group.name,
-        isIncome: group.is_income,
+        isIncome: !!group.is_income,
       });
 
       categoryGroups.push({
@@ -700,10 +702,11 @@ export async function createTestBudget(handlers: Handlers) {
         categories: [],
       });
 
-      for (const category of group.categories) {
+      for (const { is_income, hidden, ...category } of group.categories) {
         const categoryId = await handlers['category-create']({
           ...category,
-          isIncome: category.is_income ? 1 : 0,
+          isIncome: !!is_income,
+          hidden: !!hidden,
           groupId,
         });
 

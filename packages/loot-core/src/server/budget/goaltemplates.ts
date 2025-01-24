@@ -60,7 +60,7 @@ async function getCategories(): Promise<CategoryEntity[]> {
 
 async function getTemplates(category) {
   //retrieves template definitions from the database
-  const goalDef = await db.all(
+  const goalDef = await db.all<CategoryEntity>(
     'SELECT * FROM categories WHERE goal_def IS NOT NULL',
   );
 

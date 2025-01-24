@@ -62,7 +62,7 @@ describe('Migrations', () => {
     return withMigrationsDir(
       __dirname + '/../../mocks/migrations',
       async () => {
-        let desc = await db.first(
+        let desc = await db.first<{ sql: string }>(
           "SELECT * FROM sqlite_master WHERE name = 'poop'",
         );
         expect(desc).toBe(null);

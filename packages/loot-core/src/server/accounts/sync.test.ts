@@ -1,5 +1,6 @@
 // @ts-strict-ignore
 import * as monthUtils from '../../shared/months';
+import { TransactionEntity } from '../../types/models';
 import * as db from '../db';
 import { loadMappings } from '../db/mappings';
 import { post } from '../post';
@@ -24,7 +25,7 @@ beforeEach(async () => {
 });
 
 function getAllTransactions() {
-  return db.all(
+  return db.all<TransactionEntity & { payee_name: string }>(
     `SELECT t.*, p.name as payee_name
        FROM v_transactions_internal t
        LEFT JOIN payees p ON p.id = t.payee

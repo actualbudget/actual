@@ -14,6 +14,8 @@ import {
   type RuleActionEntity,
   type RuleEntity,
   AccountEntity,
+  ScheduleEntity,
+  RawRuleEntity,
 } from '../../types/models';
 import { schemaConfig } from '../aql';
 import * as db from '../db';
@@ -175,14 +177,14 @@ export function makeRule(data) {
 export async function loadRules() {
   resetState();
 
-  const rules = await db.all(`
+  const rules = await db.all<RawRuleEntity>(`
     SELECT * FROM rules
       WHERE conditions IS NOT NULL AND actions IS NOT NULL AND tombstone = 0
   `);
 
   for (let i = 0; i < rules.length; i++) {
     const desc = rules[i];
-    // These are old stages, can be removed before release
+    // @ts-expect-error These are old stages, can be removed before release
     if (desc.stage === 'cleanup' || desc.stage === 'modify') {
       desc.stage = 'pre';
     }
@@ -219,9 +221,10 @@ export async function updateRule(rule) {
 }
 
 export async function deleteRule(id: string) {
-  const schedule = await db.first('SELECT id FROM schedules WHERE rule = ?', [
-    id,
-  ]);
+  const schedule = await db.first<ScheduleEntity>(
+    'SELECT id FROM schedules WHERE rule = ?',
+    [id],
+  );
 
   if (schedule) {
     return false;

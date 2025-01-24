@@ -21,7 +21,7 @@ export interface CustomReportEntity {
   conditions?: RuleConditionEntity[];
   conditionsOp: 'and' | 'or';
   data?: GroupedEntity;
-  tombstone?: boolean;
+  tombstone?: boolean | 1 | 0;
 }
 
 export type balanceTypeOpType =

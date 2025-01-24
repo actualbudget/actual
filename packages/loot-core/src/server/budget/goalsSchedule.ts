@@ -5,7 +5,7 @@ import {
   getDateWithSkippedWeekend,
   extractScheduleConds,
 } from '../../shared/schedules';
-import { CategoryEntity } from '../../types/models';
+import { CategoryEntity, ScheduleEntity } from '../../types/models';
 import * as db from '../db';
 import { getRuleForSchedule } from '../schedules/app';
 
@@ -21,7 +21,7 @@ async function createScheduleList(
   const errors = [];
 
   for (let ll = 0; ll < template.length; ll++) {
-    const { id: sid, completed: complete } = await db.first(
+    const { id: sid, completed: complete } = await db.first<ScheduleEntity>(
       'SELECT * FROM schedules WHERE TRIM(name) = ? AND tombstone = 0',
       [template[ll].name.trim()],
     );

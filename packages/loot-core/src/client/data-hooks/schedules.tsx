@@ -38,7 +38,7 @@ function loadStatuses(
           s.id,
           getStatus(
             s.next_date,
-            s.completed,
+            !!s.completed,
             hasTrans.has(s.id),
             upcomingLength,
           ),
