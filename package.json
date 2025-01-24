@@ -65,6 +65,7 @@
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-rulesdir": "^0.2.2",
     "globals": "^15.13.0",
+    "html-to-image": "^1.11.11",
     "husky": "^9.1.7",
     "lint-staged": "^15.5.0",
     "node-jq": "^4.0.2",
@@ -90,8 +91,5 @@
   "browserslist": [
     "electron 24.0",
     "defaults"
-  ],
-  "dependencies": {
-    "html-to-image": "^1.11.11"
-  }
+  ]
 }

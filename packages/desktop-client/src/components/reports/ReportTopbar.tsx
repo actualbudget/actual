@@ -1,6 +1,8 @@
 import React, { type ComponentProps } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { toPng } from 'html-to-image';
+
 import {
   SvgCalculator,
   SvgChart,
@@ -26,7 +28,7 @@ import { FilterButton } from '../filters/FiltersMenu';
 import { GraphButton } from './GraphButton';
 import { SaveReport } from './SaveReport';
 import { setSessionReport } from './setSessionReport';
-import { downloadSnapshot } from './Snapshot';
+import { getToday } from './util';
 
 type ReportTopbarProps = {
   customReportItems: CustomReportEntity;
@@ -63,6 +65,21 @@ export function ReportTopbar({
     onReportChange({ type: 'modify' });
     setGraphType(cond);
     defaultItems(cond);
+  };
+
+  const downloadSnapshot = async () => {
+    const reportElement = document.getElementById('custom-report-content');
+    const title = report.name;
+    console.log(title);
+    if (reportElement) {
+      const dataUrl = await toPng(reportElement);
+      const link = document.createElement('a');
+      link.href = dataUrl;
+      link.download = `${getToday()} - ${title}.png`;
+      link.click();
+    } else {
+      console.error('Report container not found.');
+    }
   };
 
   return (
