@@ -13,7 +13,7 @@
 
 - **Q.** _Can I import my Actual Budget from the hosted instance of Actual to my Self Hosted version_.
 
-  **A.** The hosted subscription service was shut down in 2024, but if you are still using he old Actual Budget Desktop App, we have a [migration guide in place for this](/docs/migration/#migration-from-the-old-actual-budget-desktop-app).
+  **A.** The hosted subscription service was shut down in 2024, but if you are still using the old Actual Budget Desktop App, we have a [migration guide in place for this](/docs/migration/#migration-from-the-old-actual-budget-desktop-app).
 
 - **Q.** _How do I update my version of Actual after it has been updated?_
 
