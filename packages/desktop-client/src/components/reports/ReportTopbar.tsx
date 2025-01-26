@@ -70,7 +70,6 @@ export function ReportTopbar({
   const downloadSnapshot = async () => {
     const reportElement = document.getElementById('custom-report-content');
     const title = report.name;
-    console.log(title);
     if (reportElement) {
       const dataUrl = await toPng(reportElement);
       const link = document.createElement('a');
