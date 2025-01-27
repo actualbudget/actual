@@ -12,7 +12,7 @@ By clicking on the green balance in the header of the account view, two more cat
 
 ## Starting the Reconciliation Tool
 
-Click the lock icon in the right hand corner of the account ledger.
+Click the 🔒 lock icon in the top right-hand corner of the account ledger.
 
 ![](/img/reconcile/reconcile-11.png)
 
