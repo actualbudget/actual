@@ -6,7 +6,7 @@ You’ll need to enable HTTPS on your server in order to safely use all of Actua
 
 ## 1. Acquire a certificate to use on your server
 
-There are two methods to do this and both refer to not exposing Actual on the internet. If this is desired, refer to [Using a Reverse Proxy](/docs/config/reverse-proxies).
+There are two methods to do this and both refer to not exposing Actual on the internet. If access from the internet is desired, refer to [Using a Reverse Proxy](/docs/config/reverse-proxies).
 
 ### Use a self-signed certificate
 
