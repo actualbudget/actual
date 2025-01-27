@@ -1018,7 +1018,7 @@ describe('Transactions', () => {
         category: undefined,
         cleared: false,
         date: '2017-01-01',
-        error: undefined,
+        error: null,
         id: expect.any(String),
         is_parent: true,
         notes: 'Notes',
