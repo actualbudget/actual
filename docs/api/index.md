@@ -107,7 +107,7 @@ Check out the [YNAB4](https://github.com/actualbudget/actual/blob/master/package
 
 ## Methods
 
-These are the public methods that you can use. The API also exports low-level functions like `init`, `send`, `disconnect`, and `loadBudget` if you want to manually manage the connection. You can [read the source](https://github.com/actualbudget/actual/blob/master/packages/loot-core/src/server/main.js) to learn about those methods (search for `export const lib`).
+These are the public methods that you can use. The API also exports low-level functions like `init`, `send`, `disconnect`, and `loadBudget` if you want to manually manage the connection. You can [read the source](https://github.com/actualbudget/actual/blob/master/packages/loot-core/src/server/main.ts) to learn about those methods (search for `export const lib`).
 
 #### `init`
 
