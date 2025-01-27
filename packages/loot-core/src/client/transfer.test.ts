@@ -1,5 +1,6 @@
 // @ts-strict-ignore
 import * as db from '../server/db';
+import { transactionModel } from '../server/models';
 
 import * as transfer from './transfer';
 
@@ -22,7 +23,7 @@ async function createTransaction(account: string, amount: number, extra = {}) {
     ...extra,
   };
   transaction.id = await db.insertTransaction(transaction);
-  return await db.getTransaction(transaction.id);
+  return transactionModel.fromDbView(await db.getTransaction(transaction.id));
 }
 
 describe('Transfer', () => {

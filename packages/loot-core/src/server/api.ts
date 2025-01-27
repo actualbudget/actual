@@ -17,7 +17,7 @@ import {
 } from '../shared/transactions';
 import { integerToAmount } from '../shared/util';
 import { Handlers } from '../types/handlers';
-import { CategoryEntity, CrdtMessageEntity } from '../types/models';
+import { AccountEntity } from '../types/models';
 import { ServerHandlers } from '../types/server-handlers';
 
 import { addTransactions } from './accounts/sync';
@@ -34,6 +34,10 @@ import * as cloudStorage from './cloud-storage';
 import { type RemoteFile } from './cloud-storage';
 import * as db from './db';
 import { APIError } from './errors';
+import {
+  categoryGroupModel as categoryGroupServerModel,
+  accountModel as accountServerModel,
+} from './models';
 import { runMutator } from './mutators';
 import * as prefs from './prefs';
 import * as sheet from './sheet';
@@ -54,7 +58,7 @@ function withMutation<Params extends Array<unknown>, ReturnType>(
         const latestTimestamp = getClock().timestamp.toString();
         const result = await handler(...args);
 
-        const rows = await db.all<CrdtMessageEntity>(
+        const rows = await db.all<db.DbCrdtMessage>(
           'SELECT DISTINCT dataset FROM messages_crdt WHERE timestamp > ?',
           [latestTimestamp],
         );
@@ -95,7 +99,7 @@ async function validateExpenseCategory(debug, id) {
     throw APIError(`${debug}: category id is required`);
   }
 
-  const row = await db.first<Pick<CategoryEntity, 'is_income'>>(
+  const row = await db.first<Pick<db.DbCategory, 'is_income'>>(
     'SELECT is_income FROM categories WHERE id = ?',
     [id],
   );
@@ -356,7 +360,8 @@ handlers['api/budget-month'] = async function ({ month }) {
   checkFileOpen();
   await validateMonth(month);
 
-  const groups = await db.getCategoriesGrouped();
+  const grouped = await db.getCategoriesGrouped();
+  const groups = categoryGroupServerModel.fromDbArray(grouped);
   const sheetName = monthUtils.sheetForMonth(month);
 
   function value(name) {
@@ -555,8 +560,10 @@ handlers['api/transaction-delete'] = withMutation(async function ({ id }) {
 
 handlers['api/accounts-get'] = async function () {
   checkFileOpen();
-  const accounts = await db.getAccounts();
-  return accounts.map(account => accountModel.toExternal(account));
+  const accounts = accountServerModel.fromDbArray(await db.getAccounts());
+  return accounts.map(account =>
+    accountModel.toExternal({ ...account } as AccountEntity),
+  );
 };
 
 handlers['api/account-create'] = withMutation(async function ({

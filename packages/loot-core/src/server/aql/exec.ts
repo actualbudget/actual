@@ -38,6 +38,14 @@ export async function execQuery(
   return data;
 }
 
+/**
+ * The run pre-compiled AQL query.
+ * @param query The pre-compiled AQL query.
+ * @param pieces The compiled SQL pieces.
+ * @param state The query state.
+ * @param options The query options.
+ * @returns The queried data.
+ */
 export async function runCompiledQuery(
   query,
   pieces,
@@ -79,6 +87,14 @@ export async function runCompiledQuery(
   return data;
 }
 
+/**
+ * Compile and run the AQL query.
+ * @param schema The schema.
+ * @param schemaConfig The schema configuration.
+ * @param query The AQL query.
+ * @param options The query options.
+ * @returns The queried data and its dependencies.
+ */
 export async function runQuery(schema, schemaConfig, query, options) {
   const { sqlPieces, state } = compileQuery(query, schema, schemaConfig);
   const data = await runCompiledQuery(query, sqlPieces, state, options);

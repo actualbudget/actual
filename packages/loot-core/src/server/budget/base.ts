@@ -1,8 +1,8 @@
 // @ts-strict-ignore
 import * as monthUtils from '../../shared/months';
 import { getChangedValues } from '../../shared/util';
-import { CategoryEntity, TransactionEntity } from '../../types/models';
 import * as db from '../db';
+import { categoryGroupModel, categoryModel } from '../models';
 import * as sheet from '../sheet';
 import { resolveName } from '../spreadsheet/util';
 
@@ -87,7 +87,7 @@ function createCategoryGroup(group, sheetName) {
 
 function handleAccountChange(months, oldValue, newValue) {
   if (!oldValue || oldValue.offbudget !== newValue.offbudget) {
-    const rows = db.runQuery<Pick<TransactionEntity, 'category'>>(
+    const rows = db.runQuery<Pick<db.DbTransaction, 'category'>>(
       `
         SELECT DISTINCT(category) as category FROM transactions
         WHERE acct = ?
@@ -290,7 +290,7 @@ function handleCategoryGroupChange(months, oldValue, newValue) {
         // OK because we're leveraging the sync nature of queries. Ideally we
         // wouldn't be querying here. But I think we have to. At least for now
         // we do
-        const categories = db.runQuery<CategoryEntity>(
+        const categories = db.runQuery<db.DbCategory>(
           'SELECT * FROM categories WHERE tombstone = 0 AND cat_group = ?',
           [group.id],
           true,
@@ -391,8 +391,9 @@ export async function doTransfer(categoryIds, transferId) {
 }
 
 export async function createBudget(months) {
-  const categories = await db.getCategories();
-  const groups = await db.getCategoriesGrouped();
+  const categories = categoryModel.fromDbArray(await db.getCategories());
+  const grouped = await db.getCategoriesGrouped();
+  const groups = categoryGroupModel.fromDbArray(grouped);
 
   sheet.startTransaction();
   const meta = sheet.get().meta();
@@ -443,16 +444,15 @@ export async function createBudget(months) {
 }
 
 export async function createAllBudgets() {
-  const earliestTransaction = await db.first<TransactionEntity>(
+  const earliestTransaction = await db.first<db.DbTransaction>(
     'SELECT * FROM transactions WHERE isChild=0 AND date IS NOT NULL ORDER BY date ASC LIMIT 1',
   );
   const earliestDate =
-    earliestTransaction && db.fromDateRepr(Number(earliestTransaction.date));
+    earliestTransaction && db.fromDateRepr(earliestTransaction.date);
   const currentMonth = monthUtils.currentMonth();
 
   // Get the range based off of the earliest transaction and the
-  // current month. If no transactions currently exist the current
-  // month is also used as the starting month
+  // current month. If no transactions currently exist the currentc
   const { start, end, range } = getBudgetRange(
     earliestDate || currentMonth,
     currentMonth,

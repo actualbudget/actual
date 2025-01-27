@@ -3,7 +3,6 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { q } from '../../shared/query';
 import { makeChild } from '../../shared/transactions';
-import { TransactionEntity } from '../../types/models';
 import * as db from '../db';
 
 import * as aql from './exec';
@@ -262,7 +261,7 @@ describe('runQuery', () => {
   it('fetches all data required for $oneof', async () => {
     await insertTransactions();
 
-    const rows = await db.all<Pick<TransactionEntity, 'id'>>(
+    const rows = await db.all<Pick<db.DbTransaction, 'id'>>(
       'SELECT id FROM transactions WHERE amount < -50',
     );
     const ids = rows.slice(0, 3).map(row => row.id);

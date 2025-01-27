@@ -29,10 +29,10 @@ export const accountModel = {
   fromExternal(account: APIAccountEntity) {
     const result = { ...account } as unknown as AccountEntity;
     if ('offbudget' in account) {
-      result.offbudget = account.offbudget ? 1 : 0;
+      result.offbudget = account.offbudget ? true : false;
     }
     if ('closed' in account) {
-      result.closed = account.closed ? 1 : 0;
+      result.closed = account.closed ? true : false;
     }
     return result;
   },

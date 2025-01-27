@@ -1,11 +1,7 @@
 // @ts-strict-ignore
 import * as connection from '../../platform/server/connection';
 import { Diff } from '../../shared/util';
-import {
-  AccountEntity,
-  PayeeEntity,
-  TransactionEntity,
-} from '../../types/models';
+import { TransactionEntity } from '../../types/models';
 import * as db from '../db';
 import { incrFetch, whereIn } from '../db/util';
 import { batchMessages } from '../sync';
@@ -15,7 +11,7 @@ import * as transfer from './transfer';
 
 async function idsWithChildren(ids: string[]) {
   const whereIds = whereIn(ids, 'parent_id');
-  const rows = await db.all<Pick<TransactionEntity, 'id'>>(
+  const rows = await db.all<Pick<db.DbViewTransactionInternal, 'id'>>(
     `SELECT id FROM v_transactions_internal WHERE ${whereIds}`,
   );
   const set = new Set(ids);
@@ -26,8 +22,8 @@ async function idsWithChildren(ids: string[]) {
 }
 
 async function getTransactionsByIds(
-  ids: string[],
-): Promise<TransactionEntity[]> {
+  ids: Array<db.DbTransaction['id']>,
+): Promise<db.DbViewTransactionInternal[]> {
   // TODO: convert to whereIn
   //
   // or better yet, use ActualQL
@@ -59,8 +55,8 @@ export async function batchUpdateTransactions({
     ? await idsWithChildren(deleted.map(d => d.id))
     : [];
 
-  const oldPayees = new Set<PayeeEntity['id']>();
-  const accounts = await db.all<AccountEntity>(
+  const oldPayees = new Set<db.DbPayee['id']>();
+  const accounts = await db.all<db.DbAccount>(
     'SELECT * FROM accounts WHERE tombstone = 0',
   );
 

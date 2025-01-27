@@ -5,7 +5,6 @@ import {
   getDateWithSkippedWeekend,
   extractScheduleConds,
 } from '../../shared/schedules';
-import { CategoryEntity, ScheduleEntity } from '../../types/models';
 import * as db from '../db';
 import { getRuleForSchedule } from '../schedules/app';
 
@@ -15,13 +14,13 @@ import { ScheduleTemplate, Template } from './types/templates';
 async function createScheduleList(
   template: ScheduleTemplate[],
   current_month: string,
-  category: CategoryEntity,
+  category: db.DbCategory,
 ) {
   const t = [];
   const errors = [];
 
   for (let ll = 0; ll < template.length; ll++) {
-    const { id: sid, completed: complete } = await db.first<ScheduleEntity>(
+    const { id: sid, completed: complete } = await db.first<db.DbSchedule>(
       'SELECT * FROM schedules WHERE TRIM(name) = ? AND tombstone = 0',
       [template[ll].name.trim()],
     );
@@ -200,7 +199,7 @@ export async function goalsSchedule(
   last_month_balance: number,
   to_budget: number,
   errors: string[],
-  category: CategoryEntity,
+  category: db.DbCategory,
 ) {
   if (!scheduleFlag) {
     scheduleFlag = true;

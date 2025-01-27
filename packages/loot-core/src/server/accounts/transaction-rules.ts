@@ -13,9 +13,6 @@ import {
   type TransactionEntity,
   type RuleActionEntity,
   type RuleEntity,
-  AccountEntity,
-  ScheduleEntity,
-  RawRuleEntity,
 } from '../../types/models';
 import { schemaConfig } from '../aql';
 import * as db from '../db';
@@ -177,14 +174,13 @@ export function makeRule(data) {
 export async function loadRules() {
   resetState();
 
-  const rules = await db.all<RawRuleEntity>(`
+  const rules = await db.all<db.DbRule>(`
     SELECT * FROM rules
       WHERE conditions IS NOT NULL AND actions IS NOT NULL AND tombstone = 0
   `);
 
   for (let i = 0; i < rules.length; i++) {
     const desc = rules[i];
-    // @ts-expect-error These are old stages, can be removed before release
     if (desc.stage === 'cleanup' || desc.stage === 'modify') {
       desc.stage = 'pre';
     }
@@ -221,7 +217,7 @@ export async function updateRule(rule) {
 }
 
 export async function deleteRule(id: string) {
-  const schedule = await db.first<ScheduleEntity>(
+  const schedule = await db.first<db.DbSchedule>(
     'SELECT id FROM schedules WHERE rule = ?',
     [id],
   );
@@ -280,7 +276,7 @@ function onApplySync(oldValues, newValues) {
 // Runner
 export async function runRules(
   trans,
-  accounts: Map<string, AccountEntity> | null = null,
+  accounts: Map<string, db.DbAccount> | null = null,
 ) {
   let accountsMap = null;
   if (accounts === null) {
@@ -630,7 +626,7 @@ export async function applyActions(
     return null;
   }
 
-  const accounts: AccountEntity[] = await db.getAccounts();
+  const accounts = await db.getAccounts();
   const transactionsForRules = await Promise.all(
     transactions.map(transactions =>
       prepareTransactionForRules(
@@ -869,12 +865,12 @@ export async function updateCategoryRules(transactions) {
 
 export type TransactionForRules = TransactionEntity & {
   payee_name?: string;
-  _account?: AccountEntity;
+  _account?: db.DbAccount;
 };
 
 export async function prepareTransactionForRules(
   trans: TransactionEntity,
-  accounts: Map<string, AccountEntity> | null = null,
+  accounts: Map<string, db.DbAccount> | null = null,
 ): Promise<TransactionForRules> {
   const r: TransactionForRules = { ...trans };
   if (trans.payee) {

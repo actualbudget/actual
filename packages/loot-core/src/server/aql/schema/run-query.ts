@@ -9,6 +9,14 @@ import { schemaExecutors } from './executors';
 
 import { schema, schemaConfig } from './index';
 
+/**
+ * Run the pre-compiled AQL query.
+ * @param query The pre-compiled AQL query.
+ * @param sqlPieces The compiled SQL pieces.
+ * @param state The query state.
+ * @param params The query parameters.
+ * @returns The queried data.
+ */
 export function runCompiledQuery(query, sqlPieces, state, params?: unknown) {
   return _runCompiledQuery(query, sqlPieces, state, {
     params,
@@ -16,6 +24,12 @@ export function runCompiledQuery(query, sqlPieces, state, params?: unknown) {
   });
 }
 
+/**
+ * Compile and run the AQL query.
+ * @param query The AQL query to compile and run.
+ * @param params The query parameters.
+ * @returns The queried data and its dependencies.
+ */
 export function runQuery(query: Query | QueryState, params?: unknown) {
   if (query instanceof Query) {
     query = query.serialize();

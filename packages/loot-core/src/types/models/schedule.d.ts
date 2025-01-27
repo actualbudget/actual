@@ -23,11 +23,11 @@ export interface ScheduleEntity {
   id: string;
   name?: string;
   rule: RuleEntity['id'];
-  active: boolean | 1 | 0;
+  active: boolean;
   next_date: string;
-  completed: boolean | 1 | 0;
-  posts_transaction: boolean | 1 | 0;
-  tombstone: boolean | 1 | 0;
+  completed: boolean;
+  posts_transaction: boolean;
+  tombstone: boolean;
 
   // These are special fields that are actually pulled from the
   // underlying rule

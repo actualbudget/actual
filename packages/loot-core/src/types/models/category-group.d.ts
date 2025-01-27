@@ -2,10 +2,10 @@ import { CategoryEntity } from './category';
 
 export interface NewCategoryGroupEntity {
   name: string;
-  is_income?: boolean | 1 | 0;
+  is_income?: boolean;
   sort_order?: number;
-  tombstone?: boolean | 1 | 0;
-  hidden?: boolean | 1 | 0;
+  tombstone?: boolean;
+  hidden?: boolean;
   categories?: Omit<CategoryEntity, 'id'>[];
 }
 

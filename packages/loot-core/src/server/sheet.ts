@@ -4,13 +4,8 @@ import { type Database } from '@jlongster/sql.js';
 import { captureBreadcrumb } from '../platform/exceptions';
 import * as sqlite from '../platform/server/sqlite';
 import { sheetForMonth } from '../shared/months';
-import {
-  ReflectBudgetEntity,
-  ZeroBudgetEntity,
-  ZeroBudgetMonthEntity,
-} from '../types/models';
-import { PreferenceEntity } from '../types/models/preference';
 
+import * as db from './db';
 import * as Platform from './platform';
 import { Spreadsheet } from './spreadsheet/spreadsheet';
 import { resolveName } from './spreadsheet/util';
@@ -206,13 +201,13 @@ export async function loadUserBudgets(
   // don't load any extra values that aren't set here
 
   const { value: budgetType = 'rollover' } =
-    (await db.first<Pick<PreferenceEntity, 'value'>>(
+    (await db.first<Pick<db.DbPreference, 'value'>>(
       'SELECT value from preferences WHERE id = ?',
       ['budgetType'],
     )) ?? {};
 
   const table = budgetType === 'report' ? 'reflect_budgets' : 'zero_budgets';
-  const budgets = await db.all<ReflectBudgetEntity | ZeroBudgetEntity>(`
+  const budgets = await db.all<db.DbReflectBudget | db.DbZeroBudget>(`
       SELECT * FROM ${table} b
       LEFT JOIN categories c ON c.id = b.category
       WHERE c.tombstone = 0
@@ -236,7 +231,7 @@ export async function loadUserBudgets(
 
   // For zero-based budgets, load the buffered amounts
   if (budgetType !== 'report') {
-    const budgetMonths = await db.all<ZeroBudgetMonthEntity>(
+    const budgetMonths = await db.all<db.DbZeroBudgetMonth>(
       'SELECT * FROM zero_budget_months',
     );
     for (const budgetMonth of budgetMonths) {

@@ -2,7 +2,6 @@
 
 import * as monthUtils from '../../shared/months';
 import { amountToInteger } from '../../shared/util';
-import { CategoryEntity } from '../../types/models';
 import * as db from '../db';
 
 import { getSheetValue, getSheetBoolean } from './actions';
@@ -30,7 +29,7 @@ export class CategoryTemplate {
   // Class interface
 
   // set up the class and check all templates
-  static async init(templates: Template[], category: CategoryEntity, month) {
+  static async init(templates: Template[], category: db.DbCategory, month) {
     // get all the needed setup values
     const lastMonthSheet = monthUtils.sheetForMonth(
       monthUtils.subMonths(month, 1),
@@ -208,7 +207,7 @@ export class CategoryTemplate {
 
   //-----------------------------------------------------------------------------
   // Implementation
-  readonly category: CategoryEntity; //readonly so we can double check the category this is using
+  readonly category: db.DbCategory; //readonly so we can double check the category this is using
   private month: string;
   private templates = [];
   private remainder = [];
@@ -228,7 +227,7 @@ export class CategoryTemplate {
 
   private constructor(
     templates: Template[],
-    category: CategoryEntity,
+    category: db.DbCategory,
     month: string,
     fromLastMonth: number,
   ) {

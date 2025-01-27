@@ -30,11 +30,11 @@ function needsCategory(
   accounts: AccountEntity[],
 ) {
   const acct = accounts.find(a => a.id === currentTransfer);
-  const isOffBudget = acct && acct.offbudget === 1;
+  const isOffBudget = acct && acct.offbudget;
 
   // The user must select a category if transferring from a budgeted
   // account to an off budget account
-  return account.offbudget === 0 && isOffBudget;
+  return !account.offbudget && isOffBudget;
 }
 
 type CloseAccountModalProps = {
@@ -49,7 +49,7 @@ export function CloseAccountModal({
   canDelete,
 }: CloseAccountModalProps) {
   const { t } = useTranslation(); // Initialize translation hook
-  const accounts = useAccounts().filter(a => a.closed === 0);
+  const accounts = useAccounts().filter(a => !a.closed);
   const { grouped: categoryGroups, list: categories } = useCategories();
   const [loading, setLoading] = useState(false);
   const [transferAccountId, setTransferAccountId] = useState('');

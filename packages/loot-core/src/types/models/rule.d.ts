@@ -12,11 +12,6 @@ export interface RuleEntity extends NewRuleEntity {
   id: string;
 }
 
-export type RawRuleEntity = Omit<RuleEntity, 'conditions' | 'actions'> & {
-  conditions: string;
-  actions: string;
-};
-
 export type RuleConditionOp =
   | 'is'
   | 'isNot'

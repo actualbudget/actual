@@ -1,6 +1,5 @@
 // @ts-strict-ignore
 import { q } from '../../shared/query';
-import { TransactionEntity } from '../../types/models';
 import { batchUpdateTransactions } from '../accounts/transactions';
 import { createApp } from '../app';
 import { runQuery } from '../aql';
@@ -15,8 +14,8 @@ app.method('tools/fix-split-transactions', async () => {
   // 1. Check for child transactions that have a blank payee, and set
   //    the payee to whatever the parent has
   const blankPayeeRows = await db.all<
-    TransactionEntity & {
-      parentPayee: string;
+    db.DbViewTransactionInternal & {
+      parentPayee: db.DbViewTransactionInternal['payee'];
     }
   >(`
     SELECT t.*, p.payee AS parentPayee FROM v_transactions_internal t
@@ -34,7 +33,9 @@ app.method('tools/fix-split-transactions', async () => {
 
   // 2. Make sure the "cleared" flag is synced up with the parent
   // transactions
-  const clearedRows = await db.all<TransactionEntity>(`
+  const clearedRows = await db.all<
+    Pick<db.DbViewTransactionInternal, 'id' | 'cleared'>
+  >(`
     SELECT t.id, p.cleared FROM v_transactions_internal t
     LEFT JOIN v_transactions_internal p ON t.parent_id = p.id
     WHERE t.is_child = 1 AND t.cleared != p.cleared
@@ -43,14 +44,14 @@ app.method('tools/fix-split-transactions', async () => {
   await runMutator(async () => {
     const updated = clearedRows.map(row => ({
       id: row.id,
-      cleared: row.cleared,
+      cleared: row.cleared === 1,
     }));
     await batchUpdateTransactions({ updated });
   });
 
   // 3. Mark the `tombstone` field as true on any child transactions
   //    that have a dead parent
-  const deletedRows = await db.all<TransactionEntity>(`
+  const deletedRows = await db.all<db.DbViewTransactionInternal>(`
     SELECT t.* FROM v_transactions_internal t
     LEFT JOIN v_transactions_internal p ON t.parent_id = p.id
     WHERE t.is_child = 1 AND t.tombstone = 0 AND (p.tombstone = 1 OR p.id IS NULL)
@@ -79,7 +80,9 @@ app.method('tools/fix-split-transactions', async () => {
   });
 
   // 5. Fix transfers that should not have categories
-  const brokenTransfers = await db.all<Pick<TransactionEntity, 'id'>>(`
+  const brokenTransfers = await db.all<
+    Pick<db.DbViewTransactionInternal, 'id'>
+  >(`
     SELECT t1.id
     FROM v_transactions_internal t1
            JOIN accounts a1 ON t1.account = a1.id

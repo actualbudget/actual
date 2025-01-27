@@ -1,6 +1,6 @@
 // @ts-strict-ignore
 import { q } from '../../shared/query';
-import { RawRuleEntity, RuleEntity } from '../../types/models';
+import { RuleEntity } from '../../types/models';
 import { runQuery } from '../aql';
 import * as db from '../db';
 import { loadMappings } from '../db/mappings';
@@ -941,13 +941,13 @@ describe('Learning categories', () => {
 
     // Internally, it should still be stored with the internal names
     // so that it's backwards compatible
-    const { conditions, actions, ...rawRule } = await db.first<RawRuleEntity>(
-      'SELECT * FROM rules',
-    );
+    const rawRule = await db.first<db.DbRule>('SELECT * FROM rules');
     const parsedRule: RuleEntity = {
-      conditions: JSON.parse(conditions),
-      actions: JSON.parse(actions),
       ...rawRule,
+      conditions: JSON.parse(rawRule.conditions),
+      actions: JSON.parse(rawRule.actions),
+      conditionsOp: rawRule.conditions_op as RuleEntity['conditionsOp'],
+      stage: rawRule.stage as RuleEntity['stage'],
     };
     expect(parsedRule.conditions[0].field).toBe('imported_description');
     const action = parsedRule.actions[0];
@@ -977,13 +977,13 @@ describe('Learning categories', () => {
     // This rule internally has been stored with the public names.
     // Making this work now allows us to switch to it by default in
     // the future
-    const { conditions, actions, ...rawRule } = await db.first<RawRuleEntity>(
-      'SELECT * FROM rules',
-    );
+    const rawRule = await db.first<db.DbRule>('SELECT * FROM rules');
     const parsedRule: RuleEntity = {
-      conditions: JSON.parse(conditions),
-      actions: JSON.parse(actions),
       ...rawRule,
+      conditions: JSON.parse(rawRule.conditions),
+      actions: JSON.parse(rawRule.actions),
+      conditionsOp: rawRule.conditions_op as RuleEntity['conditionsOp'],
+      stage: rawRule.stage as RuleEntity['stage'],
     };
     expect(parsedRule.conditions[0].field).toBe('imported_payee');
     const action = parsedRule.actions[0];

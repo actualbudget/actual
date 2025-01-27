@@ -52,16 +52,16 @@ const payees: PayeeEntity[] = [
   {
     id: 'bob-id',
     name: 'Bob',
-    favorite: 1,
+    favorite: true,
   },
   {
     id: 'alice-id',
     name: 'Alice',
-    favorite: 1,
+    favorite: true,
   },
   {
     id: 'guy',
-    favorite: 0,
+    favorite: false,
     name: 'This guy on the side of the road',
   },
 ];

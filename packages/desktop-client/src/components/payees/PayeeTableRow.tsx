@@ -179,13 +179,13 @@ export const PayeeTableRow = memo(
                   onDelete(id);
                   break;
                 case 'favorite':
-                  onUpdate(id, 'favorite', payee.favorite ? 0 : 1);
+                  onUpdate(id, 'favorite', payee.favorite ? false : true);
                   break;
                 case 'learn':
                   onUpdate(
                     id,
                     'learn_categories',
-                    payee.learn_categories ? 0 : 1,
+                    payee.learn_categories ? false : true,
                   );
                   break;
                 case 'view-rules':

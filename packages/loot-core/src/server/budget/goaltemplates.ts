@@ -1,7 +1,6 @@
 // @ts-strict-ignore
 import { Notification } from '../../client/state-types/notifications';
 import * as monthUtils from '../../shared/months';
-import { CategoryEntity } from '../../types/models';
 import * as db from '../db';
 import { batchMessages } from '../sync';
 
@@ -26,7 +25,7 @@ export async function overwriteTemplate({ month }): Promise<Notification> {
 export async function applyMultipleCategoryTemplates({ month, categoryIds }) {
   const placeholders = categoryIds.map(() => '?').join(', ');
   const query = `SELECT * FROM v_categories WHERE id IN (${placeholders})`;
-  const categories = await db.all(query, categoryIds);
+  const categories = await db.all<db.DbViewCategory>(query, categoryIds);
   await storeTemplates();
   const categoryTemplates = await getTemplates(categories);
   const ret = await processTemplate(month, true, categoryTemplates, categories);
@@ -34,9 +33,10 @@ export async function applyMultipleCategoryTemplates({ month, categoryIds }) {
 }
 
 export async function applySingleCategoryTemplate({ month, category }) {
-  const categories = await db.all(`SELECT * FROM v_categories WHERE id = ?`, [
-    category,
-  ]);
+  const categories = await db.all<db.DbViewCategory>(
+    `SELECT * FROM v_categories WHERE id = ?`,
+    [category],
+  );
   await storeTemplates();
   const categoryTemplates = await getTemplates(categories[0]);
   const ret = await processTemplate(month, true, categoryTemplates, categories);
@@ -47,7 +47,7 @@ export function runCheckTemplates() {
   return checkTemplates();
 }
 
-async function getCategories(): Promise<CategoryEntity[]> {
+async function getCategories(): Promise<db.DbCategory[]> {
   return await db.all(
     `
     SELECT categories.* FROM categories
@@ -60,7 +60,7 @@ async function getCategories(): Promise<CategoryEntity[]> {
 
 async function getTemplates(category) {
   //retrieves template definitions from the database
-  const goalDef = await db.all<CategoryEntity>(
+  const goalDef = await db.all<db.DbCategory>(
     'SELECT * FROM categories WHERE goal_def IS NOT NULL',
   );
 
@@ -123,7 +123,7 @@ async function processTemplate(
   month,
   force: boolean,
   categoryTemplates,
-  categoriesIn?,
+  categoriesIn?: db.DbViewCategory[],
 ): Promise<Notification> {
   // setup categories
   let categories = [];

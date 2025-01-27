@@ -16,17 +16,6 @@ import * as sqlite from '../../platform/server/sqlite';
 import * as monthUtils from '../../shared/months';
 import { groupById } from '../../shared/util';
 import {
-  AccountEntity,
-  CategoryEntity,
-  CategoryGroupEntity,
-  PayeeEntity,
-  TransactionEntity,
-  BankEntity,
-  CategoryMappingEntity,
-  PayeeMappingEntity,
-} from '../../types/models';
-import { WithRequired } from '../../types/util';
-import {
   schema,
   schemaConfig,
   convertForInsert,
@@ -43,6 +32,20 @@ import {
 import { sendMessages, batchMessages } from '../sync';
 
 import { shoveSortOrders, SORT_INCREMENT } from './sort';
+import {
+  DbAccount,
+  DbBank,
+  DbCategory,
+  DbCategoryGroup,
+  DbCategoryMapping,
+  DbClockMessage,
+  DbPayee,
+  DbPayeeMapping,
+  DbTransaction,
+  DbViewTransaction,
+} from './types';
+
+export * from './types';
 
 export { toDateRepr, fromDateRepr } from '../models';
 
@@ -83,7 +86,7 @@ export function getDatabase() {
 }
 
 export async function loadClock() {
-  const row = await first<{ clock: string }>('SELECT * FROM messages_clock');
+  const row = await first<DbClockMessage>('SELECT * FROM messages_clock');
   if (row) {
     const clock = deserializeClock(row.clock);
     setClock(clock);
@@ -296,16 +299,16 @@ export function updateWithSchema(table, fields) {
 // different files
 
 export async function getCategories(
-  ids?: Array<CategoryEntity['id']>,
-): Promise<CategoryEntity[]> {
+  ids?: Array<DbCategory['id']>,
+): Promise<DbCategory[]> {
   const whereIn = ids ? `c.id IN (${toSqlQueryParameters(ids)}) AND` : '';
   const query = `SELECT c.* FROM categories c WHERE ${whereIn} c.tombstone = 0 ORDER BY c.sort_order, c.id`;
   return ids ? await all(query, [...ids]) : await all(query);
 }
 
 export async function getCategoriesGrouped(
-  ids?: Array<CategoryGroupEntity['id']>,
-): Promise<Array<CategoryGroupEntity>> {
+  ids?: Array<DbCategoryGroup['id']>,
+): Promise<[DbCategoryGroup, ...DbCategory[]][]> {
   const categoryGroupWhereIn = ids
     ? `cg.id IN (${toSqlQueryParameters(ids)}) AND`
     : '';
@@ -319,25 +322,23 @@ export async function getCategoriesGrouped(
     ORDER BY c.sort_order, c.id`;
 
   const groups = ids
-    ? await all<CategoryGroupEntity>(categoryGroupQuery, [...ids])
-    : await all<CategoryGroupEntity>(categoryGroupQuery);
+    ? await all<DbCategoryGroup>(categoryGroupQuery, [...ids])
+    : await all<DbCategoryGroup>(categoryGroupQuery);
 
   const categories = ids
-    ? await all<CategoryEntity>(categoryQuery, [...ids])
-    : await all<CategoryEntity>(categoryQuery);
+    ? await all<DbCategory>(categoryQuery, [...ids])
+    : await all<DbCategory>(categoryQuery);
 
-  return groups.map(group => {
-    return {
-      ...group,
-      categories: categories.filter(c => c.cat_group === group.id),
-    };
-  });
+  return groups.map(group => [
+    group,
+    ...categories.filter(c => c.cat_group === group.id),
+  ]);
 }
 
 export async function insertCategoryGroup(group) {
   // Don't allow duplicate group
   const existingGroup = await first<
-    Pick<CategoryGroupEntity, 'id' | 'name' | 'hidden'>
+    Pick<DbCategoryGroup, 'id' | 'name' | 'hidden'>
   >(
     `SELECT id, name, hidden FROM category_groups WHERE UPPER(name) = ? and tombstone = 0 LIMIT 1`,
     [group.name.toUpperCase()],
@@ -348,7 +349,7 @@ export async function insertCategoryGroup(group) {
     );
   }
 
-  const lastGroup = await first<Pick<CategoryGroupEntity, 'sort_order'>>(`
+  const lastGroup = await first<Pick<DbCategoryGroup, 'sort_order'>>(`
     SELECT sort_order FROM category_groups WHERE tombstone = 0 ORDER BY sort_order DESC, id DESC LIMIT 1
   `);
   const sort_order = (lastGroup ? lastGroup.sort_order : 0) + SORT_INCREMENT;
@@ -366,9 +367,7 @@ export function updateCategoryGroup(group) {
 }
 
 export async function moveCategoryGroup(id, targetId) {
-  const groups = await all<
-    WithRequired<Pick<CategoryGroupEntity, 'id' | 'sort_order'>, 'sort_order'>
-  >(
+  const groups = await all<Pick<DbCategoryGroup, 'id' | 'sort_order'>>(
     `SELECT id, sort_order FROM category_groups WHERE tombstone = 0 ORDER BY sort_order, id`,
   );
 
@@ -380,7 +379,7 @@ export async function moveCategoryGroup(id, targetId) {
 }
 
 export async function deleteCategoryGroup(group, transferId?: string) {
-  const categories = await all<CategoryEntity>(
+  const categories = await all<DbCategory>(
     'SELECT * FROM categories WHERE cat_group = ?',
     [group.id],
   );
@@ -399,7 +398,7 @@ export async function insertCategory(
   let id_;
   await batchMessages(async () => {
     // Dont allow duplicated names in groups
-    const existingCatInGroup = await first<Pick<CategoryEntity, 'id'>>(
+    const existingCatInGroup = await first<Pick<DbCategory, 'id'>>(
       `SELECT id FROM categories WHERE cat_group = ? and UPPER(name) = ? and tombstone = 0 LIMIT 1`,
       [category.cat_group, category.name.toUpperCase()],
     );
@@ -410,16 +409,14 @@ export async function insertCategory(
     }
 
     if (atEnd) {
-      const lastCat = await first<Pick<CategoryEntity, 'sort_order'>>(`
+      const lastCat = await first<Pick<DbCategory, 'sort_order'>>(`
         SELECT sort_order FROM categories WHERE tombstone = 0 ORDER BY sort_order DESC, id DESC LIMIT 1
       `);
       sort_order = (lastCat ? lastCat.sort_order : 0) + SORT_INCREMENT;
     } else {
       // Unfortunately since we insert at the beginning, we need to shove
       // the sort orders to make sure there's room for it
-      const categories = await all<
-        WithRequired<Pick<CategoryEntity, 'id' | 'sort_order'>, 'sort_order'>
-      >(
+      const categories = await all<Pick<DbCategory, 'id' | 'sort_order'>>(
         `SELECT id, sort_order FROM categories WHERE cat_group = ? AND tombstone = 0 ORDER BY sort_order, id`,
         [category.cat_group],
       );
@@ -447,23 +444,21 @@ export async function insertCategory(
   return id_;
 }
 
-export function updateCategory(category: Partial<CategoryEntity>) {
+export function updateCategory(category: Partial<DbCategory>) {
   category = categoryModel.validate(category, { update: true });
   return update('categories', category);
 }
 
 export async function moveCategory(
-  id: CategoryEntity['id'],
-  groupId: CategoryGroupEntity['id'],
-  targetId?: CategoryEntity['id'],
+  id: DbCategory['id'],
+  groupId: DbCategoryGroup['id'],
+  targetId?: DbCategory['id'],
 ) {
   if (!groupId) {
     throw new Error('moveCategory: groupId is required');
   }
 
-  const categories = await all<
-    WithRequired<Pick<CategoryEntity, 'id' | 'sort_order'>, 'sort_order'>
-  >(
+  const categories = await all<Pick<DbCategory, 'id' | 'sort_order'>>(
     `SELECT id, sort_order FROM categories WHERE cat_group = ? AND tombstone = 0 ORDER BY sort_order, id`,
     [groupId],
   );
@@ -476,14 +471,14 @@ export async function moveCategory(
 }
 
 export async function deleteCategory(
-  category: Pick<CategoryEntity, 'id'>,
-  transferId?: CategoryEntity['id'],
+  category: Pick<DbCategory, 'id'>,
+  transferId?: DbCategory['id'],
 ) {
   if (transferId) {
     // We need to update all the deleted categories that currently
     // point to the one we're about to delete so they all are
     // "forwarded" to the new transferred category.
-    const existingTransfers = await all<CategoryMappingEntity>(
+    const existingTransfers = await all<DbCategoryMapping>(
       'SELECT * FROM category_mapping WHERE transferId = ?',
       [category.id],
     );
@@ -498,15 +493,15 @@ export async function deleteCategory(
   return delete_('categories', category.id);
 }
 
-export async function getPayee(id: PayeeEntity['id']) {
-  return first<PayeeEntity>(`SELECT * FROM payees WHERE id = ?`, [id]);
+export async function getPayee(id: DbPayee['id']) {
+  return first<DbPayee>(`SELECT * FROM payees WHERE id = ?`, [id]);
 }
 
-export async function getAccount(id: AccountEntity['id']) {
-  return first<AccountEntity>(`SELECT * FROM accounts WHERE id = ?`, [id]);
+export async function getAccount(id: DbAccount['id']) {
+  return first<DbAccount>(`SELECT * FROM accounts WHERE id = ?`, [id]);
 }
 
-export async function insertPayee(payee: Partial<PayeeEntity>) {
+export async function insertPayee(payee: Partial<DbPayee>) {
   payee = payeeModel.validate(payee);
   let id;
   await batchMessages(async () => {
@@ -516,8 +511,8 @@ export async function insertPayee(payee: Partial<PayeeEntity>) {
   return id;
 }
 
-export async function deletePayee(payee: Pick<PayeeEntity, 'id'>) {
-  const { transfer_acct } = await first<PayeeEntity>(
+export async function deletePayee(payee: Pick<DbPayee, 'id'>) {
+  const { transfer_acct } = await first<DbPayee>(
     'SELECT * FROM payees WHERE id = ?',
     [payee.id],
   );
@@ -536,22 +531,22 @@ export async function deletePayee(payee: Pick<PayeeEntity, 'id'>) {
   return delete_('payees', payee.id);
 }
 
-export async function deleteTransferPayee(payee: Pick<PayeeEntity, 'id'>) {
+export async function deleteTransferPayee(payee: Pick<DbPayee, 'id'>) {
   // This allows deleting transfer payees
   return delete_('payees', payee.id);
 }
 
-export function updatePayee(payee: Partial<PayeeEntity>) {
+export function updatePayee(payee: Partial<DbPayee>) {
   payee = payeeModel.validate(payee, { update: true });
   return update('payees', payee);
 }
 
 export async function mergePayees(
-  target: PayeeEntity['id'],
-  ids: Array<PayeeEntity['id']>,
+  target: DbPayee['id'],
+  ids: Array<DbPayee['id']>,
 ) {
   // Load in payees so we can check some stuff
-  const dbPayees: PayeeEntity[] = await all('SELECT * FROM payees');
+  const dbPayees: DbPayee[] = await all('SELECT * FROM payees');
   const payees = groupById(dbPayees);
 
   // Filter out any transfer payees
@@ -563,7 +558,7 @@ export async function mergePayees(
   await batchMessages(async () => {
     await Promise.all(
       ids.map(async id => {
-        const mappings = await all<Pick<PayeeMappingEntity, 'id'>>(
+        const mappings = await all<Pick<DbPayeeMapping, 'id'>>(
           'SELECT id FROM payee_mapping WHERE targetId = ?',
           [id],
         );
@@ -587,7 +582,11 @@ export async function mergePayees(
 }
 
 export function getPayees() {
-  return all<PayeeEntity>(`
+  return all<
+    DbPayee & {
+      name: DbPayee['name'] | DbAccount['name'];
+    }
+  >(`
     SELECT p.*, COALESCE(a.name, p.name) AS name FROM payees p
     LEFT JOIN accounts a ON (p.transfer_acct = a.id AND a.tombstone = 0)
     WHERE p.tombstone = 0 AND (p.transfer_acct IS NULL OR a.id IS NOT NULL)
@@ -600,7 +599,14 @@ export function getCommonPayees() {
     monthUtils.subWeeks(monthUtils.currentDate(), 12),
   );
   const limit = 10;
-  return all<PayeeEntity>(`
+  return all<
+    DbPayee & {
+      common: boolean;
+      transfer_acct: string | null;
+      c: number;
+      latest: number;
+    }
+  >(`
     SELECT     p.id as id, p.name as name, p.favorite as favorite,
       p.category as category, TRUE as common, NULL as transfer_acct,
     count(*) as c,
@@ -638,25 +644,23 @@ const orphanedPayeesQuery = `
 /* eslint-enable rulesdir/typography */
 
 export function syncGetOrphanedPayees() {
-  return all<Pick<PayeeEntity, 'id'>>(orphanedPayeesQuery);
+  return all<Pick<DbPayee, 'id'>>(orphanedPayeesQuery);
 }
 
 export async function getOrphanedPayees() {
-  const rows = await all<Pick<PayeeEntity, 'id'>>(orphanedPayeesQuery);
+  const rows = await all<Pick<DbPayee, 'id'>>(orphanedPayeesQuery);
   return rows.map(row => row.id);
 }
 
-export async function getPayeeByName(name: PayeeEntity['name']) {
-  return first<PayeeEntity>(
+export async function getPayeeByName(name: DbPayee['name']) {
+  return first<DbPayee>(
     `SELECT * FROM payees WHERE UNICODE_LOWER(name) = ? AND tombstone = 0`,
     [name.toLowerCase()],
   );
 }
 
 export function getAccounts() {
-  return all<
-    AccountEntity & { bankName: BankEntity['name']; bankId: BankEntity['id'] }
-  >(
+  return all<DbAccount & { bankName: DbBank['name']; bankId: DbBank['id'] }>(
     `SELECT a.*, b.name as bankName, b.id as bankId FROM accounts a
        LEFT JOIN banks b ON a.bank = b.id
        WHERE a.tombstone = 0
@@ -664,8 +668,8 @@ export function getAccounts() {
   );
 }
 
-export async function insertAccount(account: Partial<AccountEntity>) {
-  const accounts = await all<AccountEntity>(
+export async function insertAccount(account: Partial<DbAccount>) {
+  const accounts = await all<DbAccount>(
     'SELECT * FROM accounts WHERE offbudget = ? ORDER BY sort_order, name',
     [account.offbudget ? 1 : 0],
   );
@@ -687,20 +691,20 @@ export function deleteAccount(account) {
 }
 
 export async function moveAccount(
-  id: AccountEntity['id'],
-  targetId: AccountEntity['id'],
+  id: DbAccount['id'],
+  targetId: DbAccount['id'],
 ) {
-  const account = await first<AccountEntity>(
+  const account = await first<DbAccount>(
     'SELECT * FROM accounts WHERE id = ?',
     [id],
   );
   let accounts;
   if (account.closed) {
-    accounts = await all<Pick<AccountEntity, 'id' | 'sort_order'>>(
+    accounts = await all<Pick<DbAccount, 'id' | 'sort_order'>>(
       `SELECT id, sort_order FROM accounts WHERE closed = 1 ORDER BY sort_order, name`,
     );
   } else {
-    accounts = await all<Pick<AccountEntity, 'id' | 'sort_order'>>(
+    accounts = await all<Pick<DbAccount, 'id' | 'sort_order'>>(
       `SELECT id, sort_order FROM accounts WHERE tombstone = 0 AND offbudget = ? ORDER BY sort_order, name`,
       [account.offbudget ? 1 : 0],
     );
@@ -715,16 +719,16 @@ export async function moveAccount(
   });
 }
 
-export async function getTransaction(id: TransactionEntity['id']) {
-  const rows = await selectWithSchema<TransactionEntity>(
+export async function getTransaction(id: DbViewTransaction['id']) {
+  const rows = await selectWithSchema<DbViewTransaction>(
     'transactions',
     'SELECT * FROM v_transactions WHERE id = ?',
     [id],
   );
-  return rows[0] as TransactionEntity;
+  return rows[0];
 }
 
-export async function getTransactions(accountId: AccountEntity['id']) {
+export async function getTransactions(accountId: DbTransaction['acct']) {
   if (arguments.length > 1) {
     throw new Error(
       '`getTransactions` was given a second argument, it now only takes a single argument `accountId`',
@@ -732,11 +736,11 @@ export async function getTransactions(accountId: AccountEntity['id']) {
   }
 
   // TODO: Make selectWithSchema generic.
-  return selectWithSchema<TransactionEntity>(
+  return selectWithSchema<DbViewTransaction>(
     'transactions',
     'SELECT * FROM v_transactions WHERE account = ?',
     [accountId],
-  ) as unknown as TransactionEntity[];
+  );
 }
 
 export function insertTransaction(transaction) {

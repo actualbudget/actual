@@ -1,14 +1,6 @@
 // @ts-strict-ignore
 import * as monthUtils from '../../shared/months';
 import { integerToCurrency, safeNumber } from '../../shared/util';
-import {
-  CategoryEntity,
-  NoteEntity,
-  PreferenceEntity,
-  ReflectBudgetEntity,
-  ZeroBudgetEntity,
-  ZeroBudgetMonthEntity,
-} from '../../types/models';
 import * as db from '../db';
 import * as sheet from '../sheet';
 import { batchMessages } from '../sync';
@@ -47,7 +39,7 @@ function getBudgetTable(): 'reflect_budgets' | 'zero_budgets' {
 }
 
 export function isReflectBudget(): boolean {
-  const budgetType = db.firstSync<Pick<PreferenceEntity, 'value'>>(
+  const budgetType = db.firstSync<Pick<db.DbPreference, 'value'>>(
     `SELECT value FROM preferences WHERE id = ?`,
     ['budgetType'],
   );
@@ -99,7 +91,7 @@ export function getBudget({
 }): number {
   const table = getBudgetTable();
   const existing = db.firstSync<
-    Pick<ReflectBudgetEntity, 'amount'> | Pick<ZeroBudgetEntity, 'amount'>
+    Pick<db.DbReflectBudget, 'amount'> | Pick<db.DbZeroBudget, 'amount'>
   >(`SELECT amount FROM ${table} WHERE month = ? AND category = ?`, [
     dbMonth(month),
     category,
@@ -120,7 +112,7 @@ export function setBudget({
   const table = getBudgetTable();
 
   const existing = db.firstSync<
-    Pick<ReflectBudgetEntity, 'id'> | Pick<ZeroBudgetEntity, 'id'>
+    Pick<db.DbReflectBudget, 'id'> | Pick<db.DbZeroBudget, 'id'>
   >(`SELECT id FROM ${table} WHERE month = ? AND category = ?`, [
     dbMonth(month),
     category,
@@ -139,7 +131,7 @@ export function setBudget({
 export function setGoal({ month, category, goal, long_goal }): Promise<void> {
   const table = getBudgetTable();
   const existing = db.firstSync<
-    Pick<ReflectBudgetEntity, 'id'> | Pick<ZeroBudgetEntity, 'id'>
+    Pick<db.DbReflectBudget, 'id'> | Pick<db.DbZeroBudget, 'id'>
   >(`SELECT id FROM ${table} WHERE month = ? AND category = ?`, [
     dbMonth(month),
     category,
@@ -161,7 +153,7 @@ export function setGoal({ month, category, goal, long_goal }): Promise<void> {
 }
 
 export function setBuffer(month: string, amount: unknown): Promise<void> {
-  const existing = db.firstSync<Pick<ZeroBudgetEntity, 'id'>>(
+  const existing = db.firstSync<Pick<db.DbZeroBudgetMonth, 'id'>>(
     `SELECT id FROM zero_budget_months WHERE id = ?`,
     [month],
   );
@@ -181,7 +173,7 @@ function setCarryover(
   flag: boolean,
 ): Promise<void> {
   const existing = db.firstSync<
-    Pick<ReflectBudgetEntity, 'id'> | Pick<ZeroBudgetEntity, 'id'>
+    Pick<db.DbReflectBudget, 'id'> | Pick<db.DbZeroBudget, 'id'>
   >(`SELECT id FROM ${table} WHERE month = ? AND category = ?`, [
     month,
     category,
@@ -240,7 +232,7 @@ export async function copySinglePreviousMonth({
 }
 
 export async function setZero({ month }: { month: string }): Promise<void> {
-  const categories = await db.all<CategoryEntity>(
+  const categories = await db.all<db.DbViewCategory>(
     'SELECT * FROM v_categories WHERE tombstone = 0',
   );
 
@@ -259,7 +251,7 @@ export async function set3MonthAvg({
 }: {
   month: string;
 }): Promise<void> {
-  const categories = await db.all<CategoryEntity>(
+  const categories = await db.all<db.DbViewCategory>(
     'SELECT * FROM v_categories WHERE tombstone = 0',
   );
 
@@ -302,7 +294,7 @@ export async function set12MonthAvg({
 }: {
   month: string;
 }): Promise<void> {
-  const categories = await db.all<CategoryEntity>(
+  const categories = await db.all<db.DbViewCategory>(
     'SELECT * FROM v_categories WHERE tombstone = 0',
   );
 
@@ -321,7 +313,7 @@ export async function set6MonthAvg({
 }: {
   month: string;
 }): Promise<void> {
-  const categories = await db.all<CategoryEntity>(
+  const categories = await db.all<db.DbViewCategory>(
     'SELECT * FROM v_categories WHERE tombstone = 0',
   );
 
@@ -344,7 +336,7 @@ export async function setNMonthAvg({
   N: number;
   category: string;
 }): Promise<void> {
-  const categoryFromDb = await db.first<Pick<CategoryEntity, 'is_income'>>(
+  const categoryFromDb = await db.first<Pick<db.DbViewCategory, 'is_income'>>(
     'SELECT is_income FROM v_categories WHERE id = ?',
     [category],
   );
@@ -376,7 +368,7 @@ export async function holdForNextMonth({
   month: string;
   amount: number;
 }): Promise<boolean> {
-  const row = await db.first<Pick<ZeroBudgetMonthEntity, 'buffered'>>(
+  const row = await db.first<Pick<db.DbZeroBudgetMonth, 'buffered'>>(
     'SELECT buffered FROM zero_budget_months WHERE id = ?',
     [month],
   );
@@ -562,7 +554,7 @@ async function addMovementNotes({
 
   const monthBudgetNotesId = `budget-${month}`;
   const existingMonthBudgetNotes = addNewLine(
-    db.firstSync<Pick<NoteEntity, 'note'>>(
+    db.firstSync<Pick<db.DbNote, 'note'>>(
       `SELECT n.note FROM notes n WHERE n.id = ?`,
       [monthBudgetNotesId],
     )?.note,

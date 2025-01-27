@@ -5,5 +5,5 @@ export interface TransactionFilterEntity {
   name: string;
   conditionsOp: 'and' | 'or';
   conditions: RuleConditionEntity[];
-  tombstone: boolean | 1 | 0;
+  tombstone: boolean;
 }

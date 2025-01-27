@@ -25,10 +25,10 @@ export function generateAccount(
     name,
     bankId: null,
     bankName: null,
-    offbudget: offbudget ? 1 : 0,
+    offbudget: offbudget ? true : false,
     sort_order: 0,
-    tombstone: 0,
-    closed: 0,
+    tombstone: false,
+    closed: false,
     ...emptySyncFields(),
   };
 

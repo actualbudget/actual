@@ -19,14 +19,6 @@ import { q, Query } from '../shared/query';
 import { amountToInteger, stringToInteger } from '../shared/util';
 import { type Budget } from '../types/budget';
 import { Handlers } from '../types/handlers';
-import {
-  AccountEntity,
-  BankEntity,
-  CategoryEntity,
-  PayeeEntity,
-  PreferenceEntity,
-  TransactionEntity,
-} from '../types/models';
 import { OpenIdConfig } from '../types/models/openid';
 
 import { exportToCSV, exportQueryToCSV } from './accounts/export-to-csv';
@@ -57,6 +49,12 @@ import { APIError, TransactionError, PostError } from './errors';
 import { app as filtersApp } from './filters/app';
 import { handleBudgetImport } from './importers';
 import { app } from './main-app';
+import {
+  accountModel,
+  categoryGroupModel,
+  categoryModel,
+  payeeModel,
+} from './models';
 import { mutator, runHandler } from './mutators';
 import { app as notesApp } from './notes/app';
 import * as Platform from './platform';
@@ -168,8 +166,8 @@ handlers['transactions-export-query'] = async function ({ query: queryState }) {
 
 handlers['get-categories'] = async function () {
   return {
-    grouped: await db.getCategoriesGrouped(),
-    list: await db.getCategories(),
+    grouped: categoryGroupModel.fromDbArray(await db.getCategoriesGrouped()),
+    list: categoryModel.fromDbArray(await db.getCategories()),
   };
 };
 
@@ -189,7 +187,9 @@ handlers['get-budget-bounds'] = async function () {
 };
 
 handlers['envelope-budget-month'] = async function ({ month }) {
-  const groups = await db.getCategoriesGrouped();
+  const groups = categoryGroupModel.fromDbArray(
+    await db.getCategoriesGrouped(),
+  );
   const sheetName = monthUtils.sheetForMonth(month);
 
   function value(name) {
@@ -241,7 +241,9 @@ handlers['envelope-budget-month'] = async function ({ month }) {
 };
 
 handlers['tracking-budget-month'] = async function ({ month }) {
-  const groups = await db.getCategoriesGrouped();
+  const groups = categoryGroupModel.fromDbArray(
+    await db.getCategoriesGrouped(),
+  );
   const sheetName = monthUtils.sheetForMonth(month);
 
   function value(name) {
@@ -334,7 +336,7 @@ handlers['category-delete'] = mutator(async function ({ id, transferId }) {
   return withUndo(async () => {
     let result = {};
     await batchMessages(async () => {
-      const row = await db.first<Pick<CategoryEntity, 'is_income'>>(
+      const row = await db.first<Pick<db.DbCategory, 'is_income'>>(
         'SELECT is_income FROM categories WHERE id = ?',
         [id],
       );
@@ -345,7 +347,7 @@ handlers['category-delete'] = mutator(async function ({ id, transferId }) {
 
       const transfer =
         transferId &&
-        (await db.first<Pick<CategoryEntity, 'is_income'>>(
+        (await db.first<Pick<db.DbCategory, 'is_income'>>(
           'SELECT is_income FROM categories WHERE id = ?',
           [transferId],
         ));
@@ -374,7 +376,7 @@ handlers['category-delete'] = mutator(async function ({ id, transferId }) {
 });
 
 handlers['get-category-groups'] = async function () {
-  return await db.getCategoriesGrouped();
+  return categoryGroupModel.fromDbArray(await db.getCategoriesGrouped());
 };
 
 handlers['category-group-create'] = mutator(async function ({
@@ -409,7 +411,7 @@ handlers['category-group-delete'] = mutator(async function ({
   transferId,
 }) {
   return withUndo(async () => {
-    const groupCategories = await db.all<Pick<CategoryEntity, 'id'>>(
+    const groupCategories = await db.all<Pick<db.DbCategory, 'id'>>(
       'SELECT id FROM categories WHERE cat_group = ? AND tombstone = 0',
       [id],
     );
@@ -458,11 +460,11 @@ handlers['payee-create'] = mutator(async function ({ name }) {
 });
 
 handlers['common-payees-get'] = async function () {
-  return db.getCommonPayees();
+  return payeeModel.fromDbArray(await db.getCommonPayees());
 };
 
 handlers['payees-get'] = async function () {
-  return db.getPayees();
+  return payeeModel.fromDbArray(await db.getPayees());
 };
 
 handlers['payees-get-orphaned'] = async function () {
@@ -577,7 +579,7 @@ handlers['account-update'] = mutator(async function ({ id, name }) {
 });
 
 handlers['accounts-get'] = async function () {
-  return db.getAccounts();
+  return accountModel.fromDbArray(await db.getAccounts());
 };
 
 handlers['account-balance'] = async function ({ id, cutoff }) {
@@ -611,7 +613,7 @@ handlers['gocardless-accounts-link'] = async function ({
   const bank = await link.findOrCreateBank(account.institution, requisitionId);
 
   if (upgradingId) {
-    const accRow = await db.first<AccountEntity>(
+    const accRow = await db.first<db.DbAccount>(
       'SELECT * FROM accounts WHERE id = ?',
       [upgradingId],
     );
@@ -673,7 +675,7 @@ handlers['simplefin-accounts-link'] = async function ({
   );
 
   if (upgradingId) {
-    const accRow = await db.first<AccountEntity>(
+    const accRow = await db.first<db.DbAccount>(
       'SELECT * FROM accounts WHERE id = ?',
       [upgradingId],
     );
@@ -765,7 +767,7 @@ handlers['account-close'] = mutator(async function ({
   await handlers['account-unlink']({ id });
 
   return withUndo(async () => {
-    const account = await db.first<AccountEntity>(
+    const account = await db.first<db.DbAccount>(
       'SELECT * FROM accounts WHERE id = ? AND tombstone = 0',
       [id],
     );
@@ -785,14 +787,14 @@ handlers['account-close'] = mutator(async function ({
       await db.deleteAccount({ id });
     } else if (forced) {
       const rows = await db.runQuery<
-        Pick<TransactionEntity, 'id' | 'transfer_id'>
+        Pick<db.DbViewTransaction, 'id' | 'transfer_id'>
       >(
         'SELECT id, transfer_id FROM v_transactions WHERE account = ?',
         [id],
         true,
       );
 
-      const { id: payeeId } = await db.first<Pick<PayeeEntity, 'id'>>(
+      const { id: payeeId } = await db.first<Pick<db.DbPayee, 'id'>>(
         'SELECT id FROM payees WHERE transfer_acct = ?',
         [id],
       );
@@ -829,7 +831,7 @@ handlers['account-close'] = mutator(async function ({
       // If there is a balance we need to transfer it to the specified
       // account (and possibly categorize it)
       if (balance !== 0) {
-        const { id: payeeId } = await db.first<Pick<PayeeEntity, 'id'>>(
+        const { id: payeeId } = await db.first<Pick<db.DbPayee, 'id'>>(
           'SELECT id FROM payees WHERE transfer_acct = ?',
           [transferAccountId],
         );
@@ -1110,7 +1112,7 @@ handlers['accounts-bank-sync'] = async function ({ ids = [] }) {
   ]);
 
   const accounts = await db.runQuery<
-    AccountEntity & { bankId: BankEntity['bank_id'] }
+    db.DbAccount & { bankId: db.DbBank['bank_id'] }
   >(
     `
     SELECT a.*, b.bank_id as bankId
@@ -1171,7 +1173,7 @@ handlers['accounts-bank-sync'] = async function ({ ids = [] }) {
 
 handlers['simplefin-batch-sync'] = async function ({ ids = [] }) {
   const accounts = await db.runQuery<
-    AccountEntity & { bankId: BankEntity['bank_id'] }
+    db.DbAccount & { bankId: db.DbBank['bank_id'] }
   >(
     `SELECT a.*, b.bank_id as bankId FROM accounts a
          LEFT JOIN banks b ON a.bank = b.id
@@ -1291,7 +1293,7 @@ handlers['transactions-import'] = mutator(function ({
 });
 
 handlers['account-unlink'] = mutator(async function ({ id }) {
-  const { bank: bankId } = await db.first<Pick<AccountEntity, 'bank'>>(
+  const { bank: bankId } = await db.first<Pick<db.DbAccount, 'bank'>>(
     'SELECT bank FROM accounts WHERE id = ?',
     [id],
   );
@@ -1300,7 +1302,7 @@ handlers['account-unlink'] = mutator(async function ({ id }) {
     return 'ok';
   }
 
-  const accRow = await db.first<AccountEntity>(
+  const accRow = await db.first<db.DbAccount>(
     'SELECT * FROM accounts WHERE id = ?',
     [id],
   );
@@ -1335,7 +1337,7 @@ handlers['account-unlink'] = mutator(async function ({ id }) {
 
   if (count === 0) {
     const { bank_id: requisitionId } = await db.first<
-      Pick<BankEntity, 'bank_id'>
+      Pick<db.DbBank, 'bank_id'>
     >('SELECT bank_id FROM banks WHERE id = ?', [bankId]);
     try {
       await post(
@@ -2358,7 +2360,7 @@ async function loadBudget(id: string) {
 
   // This is a bit leaky, but we need to set the initial budget type
   const { value: budgetType = 'rollover' } =
-    (await db.first<Pick<PreferenceEntity, 'value'>>(
+    (await db.first<Pick<db.DbPreference, 'value'>>(
       'SELECT value from preferences WHERE id = ?',
       ['budgetType'],
     )) ?? {};

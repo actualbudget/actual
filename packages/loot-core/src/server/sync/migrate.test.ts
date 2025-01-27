@@ -4,7 +4,6 @@ import fc from 'fast-check';
 
 import * as arbs from '../../mocks/arbitrary-schema';
 import { execTracer } from '../../shared/test-helpers';
-import { TransactionEntity } from '../../types/models';
 import { convertInputType, schema, schemaConfig } from '../aql';
 import * as db from '../db';
 
@@ -80,7 +79,7 @@ describe('sync migrations', () => {
     tracer.expectNow('applied', ['trans1/child1']);
     await tracer.expectWait('applied', ['trans1/child1']);
 
-    const transactions = db.runQuery<TransactionEntity>(
+    const transactions = db.runQuery<db.DbTransaction>(
       'SELECT * FROM transactions',
       [],
       true,
@@ -118,9 +117,10 @@ describe('sync migrations', () => {
           await sendMessages(msgs);
           await tracer.expect('applied');
 
-          const transactions = await db.all<
-            TransactionEntity & { isChild: number }
-          >('SELECT * FROM transactions', []);
+          const transactions = await db.all<db.DbTransaction>(
+            'SELECT * FROM transactions',
+            [],
+          );
           for (const trans of transactions) {
             const transMsgs = msgs
               .filter(msg => msg.row === trans.id)

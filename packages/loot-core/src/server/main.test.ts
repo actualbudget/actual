@@ -5,12 +5,12 @@ import { expectSnapshotWithDiffer } from '../mocks/util';
 import * as connection from '../platform/server/connection';
 import * as fs from '../platform/server/fs';
 import * as monthUtils from '../shared/months';
-import { ClockMessageEntity } from '../types/models';
 
 import * as budgetActions from './budget/actions';
 import * as budget from './budget/base';
 import * as db from './db';
 import { handlers } from './main';
+import { transactionModel } from './models';
 import {
   runHandler,
   runMutator,
@@ -68,7 +68,7 @@ describe('Budgets', () => {
 
     // Grab the clock to compare later
     await db.openDatabase('test-budget');
-    const row = await db.first<ClockMessageEntity>(
+    const row = await db.first<db.DbClockMessage>(
       'SELECT * FROM messages_clock',
     );
 
@@ -139,15 +139,15 @@ describe('Accounts', () => {
       await db.all('SELECT * FROM transactions'),
     );
 
-    let transaction = await db.getTransaction(id);
+    let transaction = transactionModel.fromDbView(await db.getTransaction(id));
     await runHandler(handlers['transaction-update'], {
-      ...(await db.getTransaction(id)),
+      ...transactionModel.fromDbView(await db.getTransaction(id)),
       payee: 'transfer-three',
       date: '2017-01-03',
     });
     differ.expectToMatchDiff(await db.all('SELECT * FROM transactions'));
 
-    transaction = await db.getTransaction(id);
+    transaction = transactionModel.fromDbView(await db.getTransaction(id));
     await runHandler(handlers['transaction-delete'], transaction);
     differ.expectToMatchDiff(await db.all('SELECT * FROM transactions'));
   });
@@ -267,7 +267,7 @@ describe('Budget', () => {
     // Test updates
     changed = await captureChangedCells(async () => {
       await runHandler(handlers['transaction-update'], {
-        ...(await db.getTransaction(trans.id)),
+        ...transactionModel.fromDbView(await db.getTransaction(trans.id)),
         amount: 7000,
       });
     });

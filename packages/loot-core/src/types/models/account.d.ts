@@ -1,10 +1,10 @@
 export type AccountEntity = {
   id: string;
   name: string;
-  offbudget: boolean | 0 | 1;
-  closed: boolean | 0 | 1;
+  offbudget: boolean;
+  closed: boolean;
   sort_order: number;
-  tombstone: boolean | 0 | 1;
+  tombstone: boolean;
 } & (_SyncFields<true> | _SyncFields<false>);
 
 type _SyncFields<T> = {

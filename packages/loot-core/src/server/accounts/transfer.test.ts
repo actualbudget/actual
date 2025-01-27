@@ -1,7 +1,8 @@
 // @ts-strict-ignore
 import { expectSnapshotWithDiffer } from '../../mocks/util';
-import { PayeeEntity, TransactionEntity } from '../../types/models';
+import { TransactionEntity } from '../../types/models';
 import * as db from '../db';
+import { transactionModel } from '../models';
 
 import * as transfer from './transfer';
 
@@ -51,10 +52,10 @@ describe('Transfer', () => {
 
     const differ = expectSnapshotWithDiffer(await getAllTransactions());
 
-    const transferTwo = await db.first<PayeeEntity>(
+    const transferTwo = await db.first<db.DbPayee>(
       "SELECT * FROM payees WHERE transfer_acct = 'two'",
     );
-    const transferThree = await db.first<PayeeEntity>(
+    const transferThree = await db.first<db.DbPayee>(
       "SELECT * FROM payees WHERE transfer_acct = 'three'",
     );
 
@@ -69,7 +70,9 @@ describe('Transfer', () => {
     differ.expectToMatchDiff(await getAllTransactions());
 
     // Fill the transaction out
-    transaction = await db.getTransaction(transaction.id);
+    transaction = transactionModel.fromDbView(
+      await db.getTransaction(transaction.id),
+    );
     expect(transaction.transfer_id).toBeDefined();
 
     transaction = {
@@ -98,7 +101,9 @@ describe('Transfer', () => {
     differ.expectToMatchDiff(await getAllTransactions());
 
     // Make sure it's not a linked transaction anymore
-    transaction = await db.getTransaction(transaction.id);
+    transaction = transactionModel.fromDbView(
+      await db.getTransaction(transaction.id),
+    );
     expect(transaction.transfer_id).toBeNull();
 
     // Re-transfer it
@@ -110,7 +115,9 @@ describe('Transfer', () => {
     await transfer.onUpdate(transaction);
     differ.expectToMatchDiff(await getAllTransactions());
 
-    transaction = await db.getTransaction(transaction.id);
+    transaction = transactionModel.fromDbView(
+      await db.getTransaction(transaction.id),
+    );
     expect(transaction.transfer_id).toBeDefined();
 
     await db.deleteTransaction(transaction);
@@ -121,10 +128,10 @@ describe('Transfer', () => {
   test('transfers are properly de-categorized', async () => {
     await prepareDatabase();
 
-    const transferTwo = await db.first<PayeeEntity>(
+    const transferTwo = await db.first<db.DbPayee>(
       "SELECT * FROM payees WHERE transfer_acct = 'two'",
     );
-    const transferThree = await db.first<PayeeEntity>(
+    const transferThree = await db.first<db.DbPayee>(
       "SELECT * FROM payees WHERE transfer_acct = 'three'",
     );
 
@@ -141,7 +148,7 @@ describe('Transfer', () => {
     const differ = expectSnapshotWithDiffer(await getAllTransactions());
 
     transaction = {
-      ...(await db.getTransaction(transaction.id)),
+      ...transactionModel.fromDbView(await db.getTransaction(transaction.id)),
       payee: transferThree.id,
       notes: 'hi',
     };
@@ -150,7 +157,7 @@ describe('Transfer', () => {
     differ.expectToMatchDiff(await getAllTransactions());
 
     transaction = {
-      ...(await db.getTransaction(transaction.id)),
+      ...transactionModel.fromDbView(await db.getTransaction(transaction.id)),
       payee: transferTwo.id,
     };
     await db.updateTransaction(transaction);

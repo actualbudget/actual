@@ -1,5 +1,4 @@
 // @ts-strict-ignore
-import { TransactionEntity } from '../../../types/models';
 import * as db from '../../db';
 import { whereIn } from '../../db/util';
 import { isAggregateQuery } from '../compiler';
@@ -172,7 +171,7 @@ async function execTransactionsGrouped(
     ${sql.orderBy}
   `;
 
-  const allRows = await db.all<TransactionEntity & { _parent_id: string }>(
+  const allRows = await db.all<db.DbTransaction & { _parent_id: string }>(
     finalSql,
   );
 

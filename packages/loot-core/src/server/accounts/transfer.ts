@@ -1,13 +1,8 @@
 // @ts-strict-ignore
-import {
-  AccountEntity,
-  PayeeEntity,
-  TransactionEntity,
-} from '../../types/models';
 import * as db from '../db';
 
-async function getPayee(acct: PayeeEntity['transfer_acct']) {
-  return db.first<PayeeEntity>('SELECT * FROM payees WHERE transfer_acct = ?', [
+async function getPayee(acct: db.DbPayee['transfer_acct']) {
+  return db.first<db.DbPayee>('SELECT * FROM payees WHERE transfer_acct = ?', [
     acct,
   ]);
 }
@@ -15,7 +10,7 @@ async function getPayee(acct: PayeeEntity['transfer_acct']) {
 async function getTransferredAccount(transaction) {
   if (transaction.payee) {
     const { transfer_acct } = await db.first<
-      Pick<PayeeEntity, 'transfer_acct'>
+      Pick<db.DbViewPayee, 'transfer_acct'>
     >('SELECT transfer_acct FROM v_payees WHERE id = ?', [transaction.payee]);
     return transfer_acct;
   }
@@ -24,10 +19,10 @@ async function getTransferredAccount(transaction) {
 
 async function clearCategory(transaction, transferAcct) {
   const { offbudget: fromOffBudget } = await db.first<
-    Pick<AccountEntity, 'offbudget'>
+    Pick<db.DbAccount, 'offbudget'>
   >('SELECT offbudget FROM accounts WHERE id = ?', [transaction.account]);
   const { offbudget: toOffBudget } = await db.first<
-    Pick<AccountEntity, 'offbudget'>
+    Pick<db.DbAccount, 'offbudget'>
   >('SELECT offbudget FROM accounts WHERE id = ?', [transferAcct]);
 
   // If the transfer is between two on budget or two off budget accounts,
@@ -54,7 +49,7 @@ export async function addTransfer(transaction, transferredAccount) {
     return null;
   }
 
-  const { id: fromPayee } = await db.first<Pick<PayeeEntity, 'id'>>(
+  const { id: fromPayee } = await db.first<Pick<db.DbPayee, 'id'>>(
     'SELECT id FROM payees WHERE transfer_acct = ?',
     [transaction.account],
   );
@@ -62,7 +57,7 @@ export async function addTransfer(transaction, transferredAccount) {
   // We need to enforce certain constraints with child transaction transfers
   if (transaction.parent_id) {
     const row = await db.first<
-      Pick<TransactionEntity, 'id'> & Pick<PayeeEntity, 'transfer_acct'>
+      Pick<db.DbViewTransaction, 'id'> & Pick<db.DbPayee, 'transfer_acct'>
     >(
       `
         SELECT p.id, p.transfer_acct FROM v_transactions t

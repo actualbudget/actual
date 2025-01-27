@@ -5,8 +5,8 @@ import { ScheduleEntity } from './schedule';
 
 export interface TransactionEntity {
   id: string;
-  is_parent?: boolean | 1 | 0;
-  is_child?: boolean | 1 | 0;
+  is_parent?: boolean;
+  is_child?: boolean;
   parent_id?: TransactionEntity['id'];
   account: AccountEntity['id'];
   category?: CategoryEntity['id'];
@@ -16,13 +16,13 @@ export interface TransactionEntity {
   date: string;
   imported_id?: string;
   imported_payee?: string;
-  starting_balance_flag?: boolean | 1 | 0;
+  starting_balance_flag?: boolean;
   transfer_id?: TransactionEntity['id'];
   sort_order?: number;
-  cleared?: boolean | 1 | 0;
-  reconciled?: boolean | 1 | 0;
-  tombstone?: boolean | 1 | 0;
-  forceUpcoming?: boolean | 1 | 0;
+  cleared?: boolean;
+  reconciled?: boolean;
+  tombstone?: boolean;
+  forceUpcoming?: boolean;
   schedule?: ScheduleEntity['id'];
   subtransactions?: TransactionEntity[];
   _unmatched?: boolean;
