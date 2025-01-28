@@ -2,6 +2,7 @@
 import * as monthUtils from '../../shared/months';
 import { getChangedValues } from '../../shared/util';
 import * as db from '../db';
+import { categoryGroupModel } from '../models';
 import * as sheet from '../sheet';
 import { resolveName } from '../spreadsheet/util';
 
@@ -391,7 +392,8 @@ export async function doTransfer(categoryIds, transferId) {
 
 export async function createBudget(months) {
   const categories = await db.getCategories();
-  const groups = await db.getCategoriesGrouped();
+  const grouped = await db.getCategoriesGrouped();
+  const groups = categoryGroupModel.fromDbArray(grouped);
 
   sheet.startTransaction();
   const meta = sheet.get().meta();

@@ -117,7 +117,10 @@ describe('sync migrations', () => {
           await sendMessages(msgs);
           await tracer.expect('applied');
 
-          const transactions = await db.all('SELECT * FROM transactions', []);
+          const transactions = await db.all<db.DbTransaction>(
+            'SELECT * FROM transactions',
+            [],
+          );
           for (const trans of transactions) {
             const transMsgs = msgs
               .filter(msg => msg.row === trans.id)

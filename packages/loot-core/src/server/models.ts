@@ -1,4 +1,9 @@
-import { PayeeEntity } from '../types/models';
+import {
+  AccountEntity,
+  CategoryEntity,
+  CategoryGroupEntity,
+  PayeeEntity,
+} from '../types/models';
 
 import {
   convertForInsert,
@@ -7,7 +12,13 @@ import {
   schema,
   schemaConfig,
 } from './aql';
-import { DbAccount, DbCategory, DbCategoryGroup, DbPayee } from './db';
+import {
+  DbAccount,
+  DbCategory,
+  DbCategoryGroup,
+  DbPayee,
+  DbTransaction,
+} from './db';
 import { ValidationError } from './errors';
 
 export function requiredFields<T extends object, K extends keyof T>(
@@ -63,6 +74,27 @@ export const accountModel = {
 
     return account as DbAccount;
   },
+  fromDbArray(accounts: DbAccount[]): AccountEntity[] {
+    return accounts.map(account => accountModel.fromDb(account));
+  },
+  fromDb(account: DbAccount): AccountEntity {
+    return convertFromSelect(
+      schema,
+      schemaConfig,
+      'accounts',
+      account,
+    ) as AccountEntity;
+  },
+  toDb(
+    account: AccountEntity,
+    { update }: { update?: boolean } = {},
+  ): DbAccount {
+    return (
+      update
+        ? convertForUpdate(schema, schemaConfig, 'accounts', account)
+        : convertForInsert(schema, schemaConfig, 'accounts', account)
+    ) as DbAccount;
+  },
 };
 
 export const categoryModel = {
@@ -80,6 +112,27 @@ export const categoryModel = {
     const { sort_order, ...rest } = category;
     return { ...rest, hidden: rest.hidden ? 1 : 0 } as DbCategory;
   },
+  fromDbArray(categories: DbCategory[]): CategoryEntity[] {
+    return categories.map(category => categoryModel.fromDb(category));
+  },
+  fromDb(category: DbCategory): CategoryEntity {
+    return convertFromSelect(
+      schema,
+      schemaConfig,
+      'categories',
+      category,
+    ) as CategoryEntity;
+  },
+  toDb(
+    category: CategoryEntity,
+    { update }: { update?: boolean } = {},
+  ): DbCategory {
+    return (
+      update
+        ? convertForUpdate(schema, schemaConfig, 'categories', category)
+        : convertForInsert(schema, schemaConfig, 'categories', category)
+    ) as DbCategory;
+  },
 };
 
 export const categoryGroupModel = {
@@ -96,6 +149,54 @@ export const categoryGroupModel = {
 
     const { sort_order, ...rest } = categoryGroup;
     return { ...rest, hidden: rest.hidden ? 1 : 0 } as DbCategoryGroup;
+  },
+  fromDbArray(
+    grouped: [DbCategoryGroup, ...DbCategory[]][],
+  ): CategoryGroupEntity[] {
+    return grouped.map(([group, ...categories]) =>
+      categoryGroupModel.fromDb(group, ...categories),
+    );
+  },
+  fromDb(
+    categoryGroup: DbCategoryGroup,
+    ...categories: DbCategory[]
+  ): CategoryGroupEntity {
+    const group = convertFromSelect(
+      schema,
+      schemaConfig,
+      'category_groups',
+      categoryGroup,
+    ) as CategoryGroupEntity;
+    return {
+      ...group,
+      categories: categories
+        .filter(category => category.cat_group === categoryGroup.id)
+        .map(category => categoryModel.fromDb(category)),
+    };
+  },
+  toDb(
+    categoryGroup: CategoryGroupEntity,
+    { update }: { update?: boolean } = {},
+  ): [DbCategoryGroup, ...DbCategory[]] {
+    const group = (
+      update
+        ? convertForUpdate(
+            schema,
+            schemaConfig,
+            'category_groups',
+            categoryGroup,
+          )
+        : convertForInsert(
+            schema,
+            schemaConfig,
+            'category_groups',
+            categoryGroup,
+          )
+    ) as DbCategoryGroup;
+    const categories =
+      categoryGroup.categories?.map(category => categoryModel.toDb(category)) ||
+      [];
+    return [group, ...categories];
   },
 };
 
@@ -118,5 +219,23 @@ export const payeeModel = {
       'payees',
       payee,
     ) as PayeeEntity;
+  },
+  fromDbArray(payees: DbPayee[]): PayeeEntity[] {
+    return payees.map(payee => payeeModel.fromDb(payee));
+  },
+};
+
+export const transactionModel = {
+  validate(
+    transaction: Partial<DbTransaction>,
+    { update }: { update?: boolean } = {},
+  ) {
+    requiredFields(
+      'transaction',
+      transaction,
+      ['date', 'amount', 'acct'],
+      update,
+    );
+    return transaction;
   },
 };
