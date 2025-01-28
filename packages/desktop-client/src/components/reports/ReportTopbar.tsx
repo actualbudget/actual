@@ -157,6 +157,17 @@ export function ReportTopbar({
       >
         <SvgChartPie width={15} height={15} />
       </GraphButton>
+      <GraphButton
+        title={t('Combined Graph')}
+        selected={customReportItems.graphType === 'BarLineGraph'}
+        onSelect={() => {
+          onChangeGraph('BarLineGraph');
+        }}
+        style={{ marginRight: 15 }}
+        disabled={isItemDisabled('BarLineGraph')}
+      >
+        <SvgChartPie width={15} height={15} />
+      </GraphButton>
       <View
         style={{
           width: 1,
@@ -198,14 +209,6 @@ export function ReportTopbar({
       >
         <SvgTag width={15} height={15} />
       </GraphButton>
-      <SnapshotButton
-        style={{ marginRight: 15 }}
-        title={t('Download Snapshot')}
-        onSelect={downloadSnapshot}
-      >
-        <SvgCamera width={15} height={15} />
-      </SnapshotButton>
-
       <View
         style={{
           width: 1,
@@ -215,7 +218,22 @@ export function ReportTopbar({
           flexShrink: 0,
         }}
       />
-
+      <SnapshotButton
+        style={{ marginRight: 15 }}
+        title={t('Download Snapshot')}
+        onSelect={downloadSnapshot}
+      >
+        <SvgCamera width={15} height={15} />
+      </SnapshotButton>
+      <View
+        style={{
+          width: 1,
+          height: 30,
+          backgroundColor: theme.pillBorderDark,
+          marginRight: 15,
+          flexShrink: 0,
+        }}
+      />
       <SpaceBetween
         style={{
           flexWrap: 'nowrap',
