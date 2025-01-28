@@ -186,16 +186,16 @@ export async function run(sql, params?: (string | number)[]) {
   return runQuery(sql, params);
 }
 
-export async function select(table, id) {
-  const rows = await runQuery(
+export async function select<T extends { id: string }>(
+  table: string,
+  id: T['id'],
+) {
+  const rows = await runQuery<T>(
     'SELECT * FROM ' + table + ' WHERE id = ?',
     [id],
     true,
   );
-  // TODO: In the next phase, we will make this function generic
-  // and pass the type of the return type to `runQuery`.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return rows[0] as any;
+  return rows[0];
 }
 
 export async function update(table, params) {
@@ -270,18 +270,45 @@ export async function deleteAll(table: string) {
   await Promise.all(rows.map(({ id }) => delete_(table, id)));
 }
 
-export async function selectWithSchema(table, sql, params) {
-  const rows = await runQuery(sql, params, true);
+/**
+ * AQL-schema aware version of `select` that converts the query results
+ * according to the schema config.
+ *
+ * @param table The name of the table in the AQL schema.
+ * @param sql The SQL query.
+ * @param params The parameters for the SQL query.
+ * @returns The results of the query, converted according to the AQL schema config.
+ */
+export async function selectWithSchema<T, TAfterConvert = T>(
+  table: keyof typeof schema,
+  sql: string,
+  params?: Array<string | number> | undefined,
+) {
+  const rows = await runQuery<T>(sql, params, true);
   const convertedRows = rows
-    .map(row => convertFromSelect(schema, schemaConfig, table, row))
+    .map(
+      row =>
+        convertFromSelect(schema, schemaConfig, table, row) as TAfterConvert,
+    )
     .filter(Boolean);
-  // TODO: Make convertFromSelect generic so we don't need this cast
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return convertedRows as any[];
+  return convertedRows;
 }
 
-export async function selectFirstWithSchema(table, sql, params) {
-  const rows = await selectWithSchema(table, sql, params);
+/**
+ * AQL-schema aware version of `first` that converts the query results
+ * according to the schema config.
+ *
+ * @param table The name of the table in the AQL schema.
+ * @param sql The SQL query.
+ * @param params The parameters for the SQL query.
+ * @returns The first result of the query, converted according to the AQL schema config.
+ */
+export async function selectFirstWithSchema<T, TAfterConvert = T>(
+  table: keyof typeof schema,
+  sql: string,
+  params?: Array<string | number> | undefined,
+) {
+  const rows = await selectWithSchema<T, TAfterConvert>(table, sql, params);
   return rows.length > 0 ? rows[0] : null;
 }
 
@@ -735,7 +762,7 @@ export async function moveAccount(
 }
 
 export async function getTransaction(id: DbViewTransaction['id']) {
-  const rows = await selectWithSchema(
+  const rows = await selectWithSchema<DbViewTransaction>(
     'transactions',
     'SELECT * FROM v_transactions WHERE id = ?',
     [id],
@@ -750,7 +777,7 @@ export async function getTransactions(accountId: DbTransaction['acct']) {
     );
   }
 
-  return selectWithSchema(
+  return selectWithSchema<DbViewTransaction>(
     'transactions',
     'SELECT * FROM v_transactions WHERE account = ?',
     [accountId],
