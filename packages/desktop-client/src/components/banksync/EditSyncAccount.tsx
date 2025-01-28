@@ -123,7 +123,13 @@ export function EditSyncAccount({ account }: EditSyncAccountProps) {
 
   const exampleTransaction = useMemo(() => {
     const data = transactions?.[0]?.raw_synced_data;
-    return data ? JSON.parse(data) : undefined;
+    if (!data) return undefined;
+    try {
+      return JSON.parse(data);
+    } catch (error) {
+      console.error('Failed to parse transaction data:', error);
+      return undefined;
+    }
   }, [transactions]);
 
   const onSave = async (close: () => void) => {

@@ -43,7 +43,9 @@ export function BankSync() {
   const dispatch = useDispatch();
   const { isNarrowWidth } = useResponsive();
 
-  const [hoveredAccount, setHoveredAccount] = useState<AccountEntity['id']>('');
+  const [hoveredAccount, setHoveredAccount] = useState<
+    AccountEntity['id'] | null
+  >(null);
 
   const groupedAccounts = useMemo(() => {
     const unsorted = accounts
@@ -90,7 +92,7 @@ export function BankSync() {
     }
   };
 
-  const onHover = useCallback((id: AccountEntity['id']) => {
+  const onHover = useCallback((id: AccountEntity['id'] | null) => {
     setHoveredAccount(id);
   }, []);
 

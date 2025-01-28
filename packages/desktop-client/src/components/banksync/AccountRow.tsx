@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import React, { memo } from 'react';
 import { Trans } from 'react-i18next';
 
@@ -10,19 +9,17 @@ import { theme } from '../../style';
 import { Button } from '../common/Button2';
 import { Row, Cell } from '../table';
 
-const tsToString = (ts, dateFormat) => {
+const tsToString = (ts: string | null, dateFormat: string) => {
   if (!ts) return 'Unknown';
 
-  const tsObj = new Date(parseInt(ts, 10));
-  const date = format(tsObj, dateFormat);
-
-  return `${date} ${tsObj.toLocaleTimeString()}`;
+  const parsed = new Date(parseInt(ts, 10));
+  return `${format(parsed, dateFormat)} ${format(parsed, 'HH:mm:ss')}`;
 };
 
 type AccountRowProps = {
   account: AccountEntity;
   hovered: boolean;
-  onHover: (id: AccountEntity['id']) => void;
+  onHover: (id: AccountEntity['id'] | null) => void;
   onAction: (account: AccountEntity, action: 'link' | 'edit') => void;
 };
 
@@ -48,7 +45,7 @@ export const AccountRow = memo(
         onMouseLeave={() => onHover && onHover(null)}
       >
         <Cell
-          name="stage"
+          name="accountName"
           width={250}
           plain
           style={{ color: theme.tableText, padding: '10px' }}
@@ -57,7 +54,7 @@ export const AccountRow = memo(
         </Cell>
 
         <Cell
-          name="stage"
+          name="bankName"
           width="flex"
           plain
           style={{ color: theme.tableText, padding: '10px' }}
@@ -66,7 +63,7 @@ export const AccountRow = memo(
         </Cell>
 
         <Cell
-          name="stage"
+          name="lastSync"
           width={200}
           plain
           style={{ color: theme.tableText, padding: '10px' }}

@@ -52,6 +52,7 @@ export function FieldMapping({
   return (
     <>
       <Select
+        aria-label={t('Transaction direction')}
         options={transactionDirectionOptions.map(x => [x.value, x.label])}
         value={transactionDirection}
         onChange={newValue =>
@@ -113,6 +114,9 @@ export function FieldMapping({
             </Text>
 
             <Select
+              aria-label={t('Synced field to map to {{field}}', {
+                field: field.actualField,
+              })}
               options={field.syncFields.map(({ field }) => [field, field])}
               value={mapping.get(field.actualField)}
               style={{

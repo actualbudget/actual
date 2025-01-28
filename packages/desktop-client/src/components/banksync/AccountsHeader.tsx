@@ -11,7 +11,7 @@ export function AccountsHeader({ unlinked }: AccountsHeaderProps) {
   const { t } = useTranslation();
 
   return (
-    <TableHeader style={{}}>
+    <TableHeader>
       <Cell
         value={t('Account')}
         width={!unlinked ? 250 : 'flex'}

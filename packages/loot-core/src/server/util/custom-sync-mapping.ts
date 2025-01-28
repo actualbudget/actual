@@ -10,13 +10,23 @@ export const mappingsToString = (mapping: Mappings): string =>
     ),
   );
 
-export const mappingsFromString = (str: string): Mappings =>
-  new Map(
-    Object.entries(JSON.parse(str)).map(([key, value]) => [
-      key,
-      new Map(Object.entries(value as object)),
-    ]),
-  );
+export const mappingsFromString = (str: string): Mappings => {
+  try {
+    const parsed = JSON.parse(str);
+    if (typeof parsed !== 'object' || parsed === null) {
+      throw new Error('Invalid mapping format');
+    }
+    return new Map(
+      Object.entries(parsed).map(([key, value]) => [
+        key,
+        new Map(Object.entries(value as object)),
+      ]),
+    );
+  } catch (e) {
+    const message = e instanceof Error ? e.message : e;
+    throw new Error(`Failed to parse mapping: ${message}`);
+  }
+};
 
 export const defaultMappings: Mappings = new Map([
   [

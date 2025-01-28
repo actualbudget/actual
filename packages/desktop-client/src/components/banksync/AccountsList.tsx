@@ -8,8 +8,8 @@ import { AccountRow } from './AccountRow';
 
 type AccountsListProps = {
   accounts: AccountEntity[];
-  hoveredAccount?: string | undefined;
-  onHover: (id: AccountEntity['id']) => void;
+  hoveredAccount?: string | null;
+  onHover: (id: AccountEntity['id'] | null) => void;
   onAction: (account: AccountEntity, action: 'link' | 'edit') => void;
 };
 
