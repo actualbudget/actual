@@ -26,7 +26,7 @@ export function AccountsHeader({ unlinked }: AccountsHeaderProps) {
           />
           <Cell
             value={t('Last sync')}
-            width={100}
+            width={160}
             style={{ paddingLeft: '10px' }}
           />
           <Cell value="" width={100} style={{ paddingLeft: '10px' }} />

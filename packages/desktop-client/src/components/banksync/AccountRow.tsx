@@ -2,11 +2,22 @@
 import React, { memo } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { format } from 'loot-core/src/shared/months';
 import { type AccountEntity } from 'loot-core/src/types/models';
 
+import { useDateFormat } from '../../hooks/useDateFormat';
 import { theme } from '../../style';
 import { Button } from '../common/Button2';
 import { Row, Cell } from '../table';
+
+const tsToString = (ts, dateFormat) => {
+  if (!ts) return 'Unknown';
+
+  const tsObj = new Date(parseInt(ts, 10));
+  const date = format(tsObj, dateFormat);
+
+  return `${date} ${tsObj.toLocaleTimeString()}`;
+};
 
 type AccountRowProps = {
   account: AccountEntity;
@@ -19,6 +30,10 @@ export const AccountRow = memo(
   ({ account, hovered, onHover, onAction }: AccountRowProps) => {
     const { t } = useTranslation();
     const backgroundFocus = hovered;
+
+    const dateFormat = useDateFormat() || 'MM/dd/yyyy';
+
+    const lastSync = tsToString(account.last_sync, dateFormat);
 
     return (
       <Row
@@ -53,11 +68,11 @@ export const AccountRow = memo(
 
         <Cell
           name="stage"
-          width={140}
+          width={200}
           plain
           style={{ color: theme.tableText, padding: '10px' }}
         >
-          {account.account_sync_source ? 'Unknown' : ''}
+          {lastSync}
         </Cell>
 
         {account.account_sync_source ? (

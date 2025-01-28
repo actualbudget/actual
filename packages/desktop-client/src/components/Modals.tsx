@@ -386,12 +386,7 @@ export function Modals() {
           return <PostsOfflineNotification key={name} />;
 
         case 'synced-account-edit':
-          return (
-            <EditSyncAccount
-              key={name}
-              account={options.account}
-            />
-          );
+          return <EditSyncAccount key={name} account={options.account} />;
 
         case 'account-menu':
           return (
