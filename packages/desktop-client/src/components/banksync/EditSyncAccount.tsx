@@ -1,7 +1,13 @@
 import React, { useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
-//import { useTransactions } from 'loot-core/client/data-hooks/transactions';
+import { useTransactions } from 'loot-core/client/data-hooks/transactions';
+import {
+  defaultMappings,
+  type Mappings,
+  mappingsFromString,
+  mappingsToString,
+} from 'loot-core/server/util/custom-sync-mapping';
 import { q } from 'loot-core/src/shared/query';
 import {
   type TransactionEntity,
@@ -9,51 +15,31 @@ import {
 } from 'loot-core/src/types/models';
 
 import { useSyncedPref } from '../../hooks/useSyncedPref';
-import { SvgRightArrow2 } from '../../icons/v0';
-import { SvgEquals } from '../../icons/v1';
-import { theme } from '../../style';
 import { Button } from '../common/Button2';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
-import { Select } from '../common/Select';
 import { Stack } from '../common/Stack';
 import { Text } from '../common/Text';
 import { CheckboxOption } from '../modals/ImportTransactionsModal/CheckboxOption';
-import { Row, Cell, TableHeader } from '../table';
 
-type EditSyncAccountProps = {
-  account: AccountEntity;
+import { FieldMapping } from './FieldMapping';
+
+export type TransactionDirection = 'payment' | 'deposit';
+
+type MappableActualFields = 'date' | 'payee' | 'notes';
+
+export type MappableField = {
+  actualField: MappableActualFields;
+  syncFields: string[];
+};
+export type MappableFieldWithExample = {
+  actualField: MappableActualFields;
+  syncFields: {
+    field: string;
+    example: string;
+  }[];
 };
 
-type Mappings = Map<string, Map<string, string>>;
-
-const transactions = [
-  {
-    bookingDate: '2024-11-18',
-    valueDate: '2024-11-19',
-    amount: 12345,
-    bookingDateTime: '2024-11-18T00:00:00+00:00',
-    valueDateTime: '2024-11-19T00:00:00+00:00',
-    debtorName: 'TESCO',
-    remittanceInformationUnstructured: 'TESCO STORE XXX LOCATION',
-    additionalInformation: 'ATXXXXXXXXXXXXXXXX',
-    payeeName: 'Tesco',
-    date: '2024-11-18',
-  },
-  {
-    bookingDate: '2024-11-18',
-    valueDate: '2024-11-19',
-    amount: -12345,
-    bookingDateTime: '2024-11-18T00:00:00+00:00',
-    valueDateTime: '2024-11-19T00:00:00+00:00',
-    creditorName: 'TESCO',
-    remittanceInformationUnstructured: 'TESCO STORE XXX LOCATION',
-    additionalInformation: 'ATXXXXXXXXXXXXXXXX',
-    payeeName: 'Tesco',
-    date: '2024-11-18',
-  },
-];
-
-const mappableFields = [
+const mappableFields: MappableField[] = [
   {
     actualField: 'date',
     syncFields: ['date', 'bookingDate', 'valueDate'],
@@ -79,79 +65,26 @@ const mappableFields = [
   },
 ];
 
-const useTransactionDirectionOptions = () => {
-  const { t } = useTranslation();
-
-  const transactionDirectionOptions = [
-    {
-      value: 'payment',
-      label: t('Payment'),
-    },
-    {
-      value: 'deposit',
-      label: t('Deposit'),
-    },
-  ];
-
-  return { transactionDirectionOptions };
-};
-
-const getFields = (transaction: TransactionEntity | object) =>
+const getFields = (transaction: TransactionEntity) =>
   mappableFields.map(field => ({
     actualField: field.actualField,
     syncFields: field.syncFields
-      .filter(syncField => transaction[syncField])
+      .filter(syncField => transaction[syncField as keyof TransactionEntity])
       .map(syncField => ({
         field: syncField,
-        example: transaction[syncField],
+        example: transaction[syncField as keyof TransactionEntity],
       })),
   }));
 
-const mappingsToString = (mapping: Mappings): string =>
-  JSON.stringify(
-    Object.fromEntries(
-      [...mapping.entries()].map(([key, value]) => [
-        key,
-        Object.fromEntries(value),
-      ]),
-    ),
-  );
-
-const mappingsFromString = (str: string): Mappings =>
-  new Map(
-    Object.entries(JSON.parse(str)).map(([key, value]) => [
-      key,
-      new Map(Object.entries(value)),
-    ]),
-  );
+export type EditSyncAccountProps = {
+  account: AccountEntity;
+};
 
 export function EditSyncAccount({ account }: EditSyncAccountProps) {
   const { t } = useTranslation();
-  const { transactionDirectionOptions } = useTransactionDirectionOptions();
 
-  const [
-    savedMappings = mappingsToString(
-      new Map([
-        [
-          'payment',
-          new Map([
-            ['date', 'date'],
-            ['payee', 'creditorName'],
-            ['notes', 'remittanceInformationUnstructured'],
-          ]),
-        ],
-        [
-          'deposit',
-          new Map([
-            ['date', 'date'],
-            ['payee', 'debtorName'],
-            ['notes', 'remittanceInformationUnstructured'],
-          ]),
-        ],
-      ]),
-    ),
-    setSavedMappings,
-  ] = useSyncedPref(`custom-sync-mappings-${account.id}`);
+  const [savedMappings = mappingsToString(defaultMappings), setSavedMappings] =
+    useSyncedPref(`custom-sync-mappings-${account.id}`);
   const [savedImportNotes = true, setSavedImportNotes] = useSyncedPref(
     `sync-import-notes-${account.id}`,
   );
@@ -159,7 +92,8 @@ export function EditSyncAccount({ account }: EditSyncAccountProps) {
     `sync-import-pending-${account.id}`,
   );
 
-  const [transactionDirection, setTransactionDirection] = useState('payment');
+  const [transactionDirection, setTransactionDirection] =
+    useState<TransactionDirection>('payment');
   const [importPending, setImportPending] = useState(
     String(savedImportPending) === 'true',
   );
@@ -170,25 +104,27 @@ export function EditSyncAccount({ account }: EditSyncAccountProps) {
     mappingsFromString(savedMappings),
   );
 
-  const filteredTransactions = useMemo(
-    () =>
-      transactions.filter(({ amount }) =>
-        transactionDirection === 'payment' ? amount <= 0 : amount > 0,
-      ),
-    [transactionDirection],
-  );
-
-  const _transactionQuery = useMemo(
+  const transactionQuery = useMemo(
     () =>
       q('transactions')
         .filter({
           account: account.id,
           amount: transactionDirection === 'payment' ? { $lte: 0 } : { $gt: 0 },
+          raw_synced_data: { $ne: null },
         })
-        .limit(1)
+        .options({ splits: 'none' })
         .select('*'),
-    [account, transactionDirection],
+    [account.id, transactionDirection],
   );
+
+  const { transactions, isLoading } = useTransactions({
+    query: transactionQuery,
+  });
+
+  const exampleTransaction = useMemo(() => {
+    const data = transactions?.[0]?.raw_synced_data;
+    return data ? JSON.parse(data) : undefined;
+  }, [transactions]);
 
   const onSave = async (close: () => void) => {
     const mappingsStr = mappingsToString(mappings);
@@ -201,20 +137,14 @@ export function EditSyncAccount({ account }: EditSyncAccountProps) {
   const setMapping = (field: string, value: string) => {
     setMappings(prev => {
       const updated = new Map(prev);
-      updated.get(transactionDirection).set(field, value);
+      updated?.get(transactionDirection)?.set(field, value);
       return updated;
     });
   };
 
-  // const { transactions: _transactions2, isLoading } = useTransactions({
-  //   query: transactionQuery,
-  // });
+  if (isLoading) return null;
 
-  //  if (isLoading) return null;
-
-  const fields =
-    filteredTransactions.length > 0 ? getFields(filteredTransactions[0]) : [];
-
+  const fields = exampleTransaction ? getFields(exampleTransaction) : [];
   const mapping = mappings.get(transactionDirection);
 
   return (
@@ -225,114 +155,41 @@ export function EditSyncAccount({ account }: EditSyncAccountProps) {
       {({ state: { close } }) => (
         <>
           <ModalHeader
-            title={t('Edit synced account')}
+            title={t('Account settings')}
             rightContent={<ModalCloseButton onPress={close} />}
           />
 
-          <Text style={{ fontSize: 15 }}>Field mapping</Text>
+          <Text style={{ fontSize: 15 }}>
+            <Trans>Field mapping</Trans>
+          </Text>
 
-          <Select
-            options={transactionDirectionOptions.map(x => [x.value, x.label])}
-            value={transactionDirection}
-            onChange={newValue => setTransactionDirection(newValue)}
-            style={{
-              width: '25%',
-              margin: '1em 0',
-            }}
-          />
-
-          <TableHeader style={{}}>
-            <Cell
-              value={t('Actual field')}
-              width={100}
-              style={{ paddingLeft: '10px' }}
+          {fields.length > 0 ? (
+            <FieldMapping
+              transactionDirection={transactionDirection}
+              setTransactionDirection={setTransactionDirection}
+              fields={fields as MappableFieldWithExample[]}
+              mapping={mapping!}
+              setMapping={setMapping}
             />
-            <Cell
-              value={t('Bank field')}
-              width={330}
-              style={{ paddingLeft: '10px' }}
-            />
-            <Cell
-              value={t('Example')}
-              width="flex"
-              style={{ paddingLeft: '10px' }}
-            />
-          </TableHeader>
+          ) : (
+            <Text style={{ margin: '1em 0 .5em 0' }}>
+              <Trans>
+                No transactions found with mappable fields, accounts must have
+                been synced at least once for this function to be available.
+              </Trans>
+            </Text>
+          )}
 
-          {fields.map(field => {
-            return (
-              <Row
-                key={field.actualField}
-                style={{
-                  fontSize: 13,
-                  backgroundColor: theme.tableRowBackgroundHover,
-                  display: 'flex',
-                  alignItems: 'center',
-                  border: '1px solid var(--color-tableBorder)',
-                  minHeight: '40px',
-                }}
-                collapsed={true}
-              >
-                <Cell
-                  value={field.actualField}
-                  width={75}
-                  style={{ paddingLeft: '10px', height: '100%', border: 0 }}
-                />
-
-                <Text>
-                  <SvgRightArrow2
-                    style={{
-                      width: 15,
-                      height: 15,
-                      color: theme.tableText,
-                      marginRight: '20px',
-                    }}
-                  />
-                </Text>
-
-                <Select
-                  options={field.syncFields.map(({ field }) => [field, field])}
-                  value={mapping.get(field.actualField)}
-                  style={{
-                    width: 290,
-                  }}
-                  onChange={newValue => {
-                    setMapping(field.actualField, newValue);
-                  }}
-                />
-
-                <Text>
-                  <SvgEquals
-                    style={{
-                      width: 12,
-                      height: 12,
-                      color: theme.tableText,
-                      marginLeft: '20px',
-                    }}
-                  />
-                </Text>
-
-                <Cell
-                  value={
-                    field.syncFields.find(
-                      f => f.field === mapping.get(field.actualField),
-                    )?.example
-                  }
-                  width="flex"
-                  style={{ paddingLeft: '10px', height: '100%', border: 0 }}
-                />
-              </Row>
-            );
-          })}
-
-          <Text style={{ fontSize: 15, margin: '1em 0 .5em 0' }}>Options</Text>
+          <Text style={{ fontSize: 15, margin: '1em 0 .5em 0' }}>
+            <Trans>Options</Trans>
+          </Text>
 
           <CheckboxOption
             id="form_pending"
             checked={importPending}
             onChange={() => setImportPending(!importPending)}
           >
-            {t('Import pending transactions')}
+            <Trans>Import pending transactions</Trans>
           </CheckboxOption>
 
           <CheckboxOption
@@ -340,7 +197,7 @@ export function EditSyncAccount({ account }: EditSyncAccountProps) {
             checked={importNotes}
             onChange={() => setImportNotes(!importNotes)}
           >
-            {t('Import transaction notes')}
+            <Trans>Import transaction notes</Trans>
           </CheckboxOption>
 
           <Stack

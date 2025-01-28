@@ -21,15 +21,23 @@ import { AccountsList } from './AccountsList';
 
 type SyncProviders = BankSyncProviders | 'unlinked';
 
-const syncSourceReadable: Record<SyncProviders, string> = {
-  goCardless: 'GoCardless',
-  simpleFin: 'SimpleFIN',
-  unlinked: 'Unlinked',
+const useSyncSourceReadable = () => {
+  const { t } = useTranslation();
+
+  const syncSourceReadable: Record<SyncProviders, string> = {
+    goCardless: 'GoCardless',
+    simpleFin: 'SimpleFIN',
+    unlinked: t('Unlinked'),
+  };
+
+  return { syncSourceReadable };
 };
 
 export function BankSync() {
   const { t } = useTranslation();
   const [floatingSidebar] = useGlobalPref('floatingSidebar');
+
+  const { syncSourceReadable } = useSyncSourceReadable();
 
   const accounts = useAccounts();
   const dispatch = useDispatch();
@@ -37,21 +45,33 @@ export function BankSync() {
 
   const [hoveredAccount, setHoveredAccount] = useState<AccountEntity['id']>('');
 
-  const groupedAccounts: Record<SyncProviders, AccountEntity[]> = useMemo(
-    () =>
-      accounts
-        .filter(a => !a.closed)
-        .reduce(
-          (acc, a) => {
-            const syncSource = a.account_sync_source ?? 'unlinked';
-            acc[syncSource] = acc[syncSource] || [];
-            acc[syncSource].push(a);
-            return acc;
-          },
-          {} as Record<SyncProviders, AccountEntity[]>,
-        ),
-    [accounts],
-  );
+  const groupedAccounts = useMemo(() => {
+    const unsorted = accounts
+      .filter(a => !a.closed)
+      .reduce(
+        (acc, a) => {
+          const syncSource = a.account_sync_source ?? 'unlinked';
+          acc[syncSource] = acc[syncSource] || [];
+          acc[syncSource].push(a);
+          return acc;
+        },
+        {} as Record<SyncProviders, AccountEntity[]>,
+      );
+
+    const sortedKeys = Object.keys(unsorted).sort((keyA, keyB) => {
+      if (keyA === 'unlinked') return 1;
+      if (keyB === 'unlinked') return -1;
+      return keyA.localeCompare(keyB);
+    });
+
+    return sortedKeys.reduce(
+      (sorted, key) => {
+        sorted[key as SyncProviders] = unsorted[key as SyncProviders];
+        return sorted;
+      },
+      {} as Record<SyncProviders, AccountEntity[]>,
+    );
+  }, [accounts]);
 
   const onAction = async (account: AccountEntity, action: 'link' | 'edit') => {
     switch (action) {

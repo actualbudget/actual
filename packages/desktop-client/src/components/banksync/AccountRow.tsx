@@ -1,6 +1,6 @@
 // @ts-strict-ignore
 import React, { memo } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans } from 'react-i18next';
 
 import { format } from 'loot-core/src/shared/months';
 import { type AccountEntity } from 'loot-core/src/types/models';
@@ -28,7 +28,6 @@ type AccountRowProps = {
 
 export const AccountRow = memo(
   ({ account, hovered, onHover, onAction }: AccountRowProps) => {
-    const { t } = useTranslation();
     const backgroundFocus = hovered;
 
     const dateFormat = useDateFormat() || 'MM/dd/yyyy';
@@ -72,19 +71,19 @@ export const AccountRow = memo(
           plain
           style={{ color: theme.tableText, padding: '10px' }}
         >
-          {lastSync}
+          {account.account_sync_source ? lastSync : ''}
         </Cell>
 
         {account.account_sync_source ? (
           <Cell name="edit" plain style={{ paddingRight: '10px' }}>
             <Button onPress={() => onAction(account, 'edit')}>
-              {t('Edit')}
+              <Trans>Edit</Trans>
             </Button>
           </Cell>
         ) : (
           <Cell name="link" plain style={{ paddingRight: '10px' }}>
             <Button onPress={() => onAction(account, 'link')}>
-              {t('Link account')}
+              <Trans>Link account</Trans>
             </Button>
           </Cell>
         )}
