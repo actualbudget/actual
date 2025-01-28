@@ -171,7 +171,9 @@ async function execTransactionsGrouped(
     ${sql.orderBy}
   `;
 
-  const allRows = await db.all(finalSql);
+  const allRows = await db.all<
+    db.DbTransaction & { _parent_id: db.DbTransaction['id'] }
+  >(finalSql);
 
   // Group the parents and children up
   const { parents, children } = allRows.reduce(
