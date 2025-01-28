@@ -39,7 +39,6 @@ import { type SheetFields, type Binding } from '../spreadsheet';
 import { CellValue } from '../spreadsheet/CellValue';
 import { useFormat } from '../spreadsheet/useFormat';
 import { useSheetValue } from '../spreadsheet/useSheetValue';
-import { InputCell } from '../table';
 
 export const accountNameStyle: CSSProperties = {
   marginTop: -2,
