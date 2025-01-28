@@ -418,7 +418,7 @@ handlers['category-group-delete'] = mutator(async function ({
 });
 
 handlers['must-category-transfer'] = async function ({ id }) {
-  const res = await db.runQuery(
+  const res = await db.runQuery<{ count: number }>(
     `SELECT count(t.id) as count FROM transactions t
        LEFT JOIN category_mapping cm ON cm.id = t.category
        WHERE cm.transferId = ? AND t.tombstone = 0`,
@@ -773,7 +773,9 @@ handlers['account-close'] = mutator(async function ({
     if (numTransactions === 0) {
       await db.deleteAccount({ id });
     } else if (forced) {
-      const rows = await db.runQuery(
+      const rows = await db.runQuery<
+        Pick<db.DbViewTransaction, 'id' | 'transfer_id'>
+      >(
         'SELECT id, transfer_id FROM v_transactions WHERE account = ?',
         [id],
         true,
@@ -1096,7 +1098,9 @@ handlers['accounts-bank-sync'] = async function ({ ids = [] }) {
     'user-key',
   ]);
 
-  const accounts = await db.runQuery(
+  const accounts = await db.runQuery<
+    db.DbAccount & { bankId: db.DbBank['bank_id'] }
+  >(
     `
     SELECT a.*, b.bank_id as bankId
     FROM accounts a
@@ -1155,7 +1159,9 @@ handlers['accounts-bank-sync'] = async function ({ ids = [] }) {
 };
 
 handlers['simplefin-batch-sync'] = async function ({ ids = [] }) {
-  const accounts = await db.runQuery(
+  const accounts = await db.runQuery<
+    db.DbAccount & { bankId: db.DbBank['bank_id'] }
+  >(
     `SELECT a.*, b.bank_id as bankId FROM accounts a
          LEFT JOIN banks b ON a.bank = b.id
          WHERE
@@ -1214,7 +1220,7 @@ handlers['simplefin-batch-sync'] = async function ({ ids = [] }) {
     const errors = [];
     for (const account of accounts) {
       retVal.push({
-        accountId: account.accountId,
+        accountId: account.id,
         res: {
           errors,
           newTransactions: [],
