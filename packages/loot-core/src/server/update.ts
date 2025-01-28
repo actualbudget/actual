@@ -13,9 +13,10 @@ async function runMigrations() {
 
 async function updateViews() {
   const hashKey = 'view-hash';
-  const row = await db.first('SELECT value FROM __meta__ WHERE key = ?', [
-    hashKey,
-  ]);
+  const row = await db.first<{ value: string }>(
+    'SELECT value FROM __meta__ WHERE key = ?',
+    [hashKey],
+  );
   const { value: hash } = row || {};
 
   const views = makeViews(schema, schemaConfig);

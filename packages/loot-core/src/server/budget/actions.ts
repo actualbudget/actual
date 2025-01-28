@@ -329,7 +329,7 @@ export async function setNMonthAvg({
   N: number;
   category: string;
 }): Promise<void> {
-  const categoryFromDb = await db.first(
+  const categoryFromDb = await db.first<Pick<db.DbViewCategory, 'is_income'>>(
     'SELECT is_income FROM v_categories WHERE id = ?',
     [category],
   );
@@ -361,7 +361,7 @@ export async function holdForNextMonth({
   month: string;
   amount: number;
 }): Promise<boolean> {
-  const row = await db.first(
+  const row = await db.first<Pick<db.DbZeroBudgetMonth, 'buffered'>>(
     'SELECT buffered FROM zero_budget_months WHERE id = ?',
     [month],
   );
