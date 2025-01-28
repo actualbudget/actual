@@ -1,13 +1,17 @@
 // @ts-strict-ignore
-export async function incrFetch(
-  runQuery,
-  terms,
-  compare,
-  makeQuery,
-  params = [],
+export async function incrFetch<T>(
+  runQuery: (
+    query: string,
+    params?: Array<string | number> | undefined,
+    fetchAll?: true,
+  ) => Promise<T[]>,
+  terms: string[],
+  compare: (id: string) => string,
+  makeQuery: (sqlFilter: string) => string,
+  params: Array<string | number> | undefined = [],
 ) {
   const pageCount = 500;
-  let results = [];
+  let results: T[] = [];
 
   let fetchedIds = new Set();
 
