@@ -9,6 +9,7 @@ import React, {
 import { Trans } from 'react-i18next';
 
 import { css } from '@emotion/css';
+import { endOfMonth } from 'date-fns';
 
 import { trackingBudget } from 'loot-core/src/client/queries';
 import { evalArithmetic } from 'loot-core/src/shared/arithmetic';
@@ -63,7 +64,11 @@ const cellStyle: CSSProperties = {
   fontWeight: 600,
 };
 
-export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
+export const BudgetTotalsMonth = memo(function BudgetTotalsMonth({
+  month,
+}: {
+  month: string;
+}) {
   return (
     <View
       style={{
@@ -93,6 +98,19 @@ export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
           {props => <CellValueText {...props} style={cellStyle} />}
         </TrackingCellValue>
       </View>
+      {monthUtils.isAfter(month + '-01', endOfMonth(new Date())) && (
+        <View style={headerLabelStyle}>
+          <Text style={{ color: theme.pageTextLight }}>
+            <Trans>Scheduled</Trans>
+          </Text>
+          <TrackingCellValue
+            binding={trackingBudget.totalProjected}
+            type="financial"
+          >
+            {props => <CellValueText {...props} style={cellStyle} />}
+          </TrackingCellValue>
+        </View>
+      )}
       <View style={headerLabelStyle}>
         <Text style={{ color: theme.pageTextLight }}>
           <Trans>Balance</Trans>
@@ -171,6 +189,19 @@ export const GroupMonth = memo(function GroupMonth({
           type: 'financial',
         }}
       />
+      {!group.is_income &&
+        monthUtils.isAfter(month + '-01', endOfMonth(new Date())) && (
+          <TrackingSheetCell
+            name="spent"
+            width="flex"
+            textAlign="right"
+            style={{ fontWeight: 600, ...styles.tnum }}
+            valueProps={{
+              binding: trackingBudget.groupProjectedAmount(id),
+              type: 'financial',
+            }}
+          />
+        )}
       {!group.is_income && (
         <TrackingSheetCell
           name="balance"
@@ -385,6 +416,34 @@ export const CategoryMonth = memo(function CategoryMonth({
           </TrackingCellValue>
         </span>
       </Field>
+
+      {!category.is_income &&
+        monthUtils.isAfter(month + '-01', endOfMonth(new Date())) && (
+          <Field name="spent" width="flex" style={{ textAlign: 'right' }}>
+            <span
+              data-testid="category-month-spent"
+              onClick={() => onShowActivity(category.id, month)}
+            >
+              <TrackingCellValue
+                binding={trackingBudget.catProjectedAmount(category.id)}
+                type="financial"
+              >
+                {props => (
+                  <CellValueText
+                    {...props}
+                    className={css({
+                      cursor: 'pointer',
+                      ':hover': {
+                        textDecoration: 'underline',
+                      },
+                      ...makeAmountGrey(props.value),
+                    })}
+                  />
+                )}
+              </TrackingCellValue>
+            </span>
+          </Field>
+        )}
 
       {!category.is_income && (
         <Field

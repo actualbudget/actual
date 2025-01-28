@@ -72,6 +72,15 @@ export function createSummary(groups, categories, sheetName) {
     run: sumAmounts,
   });
 
+  sheet.get().createDynamic(sheetName, 'total-projected', {
+    initialValue: 0,
+    refresh: true,
+    dependencies: groups
+      .filter(group => !group.is_income)
+      .map(group => `${sheetName}!group-projected-amount-${group.id}`),
+    run: sumAmounts,
+  });
+
   sheet.get().createDynamic(sheetName, 'total-spent', {
     initialValue: 0,
     refresh: true,
@@ -94,6 +103,12 @@ export function createSummary(groups, categories, sheetName) {
   });
 
   sheet.get().createDynamic(sheetName, 'total-budget-income', {
+    initialValue: 0,
+    dependencies: [`group-budget-${incomeGroup.id}`],
+    run: amount => amount,
+  });
+
+  sheet.get().createDynamic(sheetName, 'total-budget-projected', {
     initialValue: 0,
     dependencies: [`group-budget-${incomeGroup.id}`],
     run: amount => amount,

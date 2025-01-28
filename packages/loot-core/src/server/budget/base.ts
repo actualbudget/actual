@@ -1,5 +1,6 @@
 // @ts-strict-ignore
 import * as monthUtils from '../../shared/months';
+import { extractScheduleConds, getNextDate } from '../../shared/schedules';
 import { getChangedValues } from '../../shared/util';
 import * as db from '../db';
 import * as sheet from '../sheet';
@@ -55,6 +56,48 @@ function createCategory(cat, sheetName, prevSheetName, start, end) {
     },
   });
 
+  sheet.get().createDynamic(sheetName, 'projected-amount-' + cat.id, {
+    initialValue: 0,
+    run: () => {
+      const startDate = `${start.toString().slice(0, 4)}-${start.toString().slice(4, 6)}-${start.toString().slice(6)}`;
+
+      if (monthUtils.isAfter(startDate, new Date())) {
+        let toSum = 0;
+        const ret = db.runQuery(`select * from v_schedules`, [], true);
+        ret.forEach(schedule => {
+          const actions = JSON.parse(schedule._actions);
+          if (
+            !actions.some(
+              action =>
+                action.type === 'id' &&
+                action.field === 'category' &&
+                action.op === 'set' &&
+                action.value === cat.id,
+            )
+          ) {
+            return;
+          }
+
+          const { date: dateCond } = extractScheduleConds(
+            JSON.parse(schedule._conditions),
+          );
+
+          const newNextDate = getNextDate(dateCond, new Date(startDate));
+          if (
+            monthUtils.monthFromDate(newNextDate) ===
+            monthUtils.monthFromDate(startDate)
+          ) {
+            toSum += schedule._amount;
+          }
+        });
+
+        return toSum;
+      }
+
+      return 0;
+    },
+  });
+
   if (getBudgetType() === 'rollover') {
     envelopeBudget.createCategory(cat, sheetName, prevSheetName);
   } else {
@@ -66,6 +109,12 @@ function createCategoryGroup(group, sheetName) {
   sheet.get().createDynamic(sheetName, 'group-sum-amount-' + group.id, {
     initialValue: 0,
     dependencies: group.categories.map(cat => `sum-amount-${cat.id}`),
+    run: sumAmounts,
+  });
+
+  sheet.get().createDynamic(sheetName, 'group-projected-amount-' + group.id, {
+    initialValue: 0,
+    dependencies: group.categories.map(cat => `projected-amount-${cat.id}`),
     run: sumAmounts,
   });
 
@@ -138,6 +187,30 @@ function handleCategoryMappingChange(months, oldValue, newValue) {
     sheet
       .get()
       .recompute(resolveName(sheetName, 'sum-amount-' + newValue.transferId));
+  });
+}
+
+function handleRuleChange(months) {
+  const categories = db.runQuery(
+    'SELECT * FROM categories WHERE tombstone = 0',
+    [],
+    true,
+  );
+
+  months.forEach(month => {
+    const sheetName = monthUtils.sheetForMonth(month);
+
+    categories.forEach(cat => {
+      sheet
+        .get()
+        .recompute(resolveName(sheetName, 'projected-amount-' + cat.id));
+
+      sheet
+        .get()
+        .recompute(
+          resolveName(sheetName, 'group-projected-amount-' + cat.group_id),
+        );
+    });
   });
 }
 
@@ -358,6 +431,8 @@ export function triggerBudgetChanges(oldValues, newValues) {
           handleCategoryGroupChange(createdMonths, oldValue, newValue);
         } else if (table === 'accounts') {
           handleAccountChange(createdMonths, oldValue, newValue);
+        } else if (table === 'rules' || table === 'schedules') {
+          handleRuleChange(createdMonths);
         }
       });
     });

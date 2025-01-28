@@ -260,9 +260,11 @@ export const envelopeBudget = {
   fromLastMonth: 'from-last-month',
   totalIncome: 'total-income',
   totalSpent: 'total-spent',
+  totalProjected: 'total-projected',
   totalBalance: 'total-leftover',
 
   groupSumAmount: envelopeParametrizedField('group-sum-amount'),
+  groupProjectedAmount: envelopeParametrizedField('group-projected-amount'),
   groupIncomeReceived: 'total-income',
 
   groupBudgeted: envelopeParametrizedField('group-budget'),
@@ -270,6 +272,7 @@ export const envelopeBudget = {
 
   catBudgeted: envelopeParametrizedField('budget'),
   catSumAmount: envelopeParametrizedField('sum-amount'),
+  catProjectedAmount: envelopeParametrizedField('projected-amount'),
   catBalance: envelopeParametrizedField('leftover'),
   catCarryover: envelopeParametrizedField('carryover'),
   catGoal: envelopeParametrizedField('goal'),
@@ -283,10 +286,12 @@ export const trackingBudget = {
 
   totalIncome: 'total-income',
   totalSpent: 'total-spent',
+  totalProjected: 'total-projected',
   totalSaved: 'real-saved',
 
   totalLeftover: 'total-leftover',
   groupSumAmount: trackingParametrizedField('group-sum-amount'),
+  groupProjectedAmount: envelopeParametrizedField('group-projected-amount'),
   groupIncomeReceived: 'total-income',
 
   groupBudgeted: trackingParametrizedField('group-budget'),
@@ -294,6 +299,7 @@ export const trackingBudget = {
 
   catBudgeted: trackingParametrizedField('budget'),
   catSumAmount: trackingParametrizedField('sum-amount'),
+  catProjectedAmount: trackingParametrizedField('projected-amount'),
   catBalance: trackingParametrizedField('leftover'),
   catCarryover: trackingParametrizedField('carryover'),
   catGoal: trackingParametrizedField('goal'),
