@@ -140,7 +140,9 @@ export async function setNextDate({
     if (newNextDate !== nextDate) {
       // Our `update` functon requires the id of the item and we don't
       // have it, so we need to query it
-      const nd = await db.first(
+      const nd = await db.first<
+        Pick<db.DbScheduleNextDate, 'id' | 'base_next_date_ts'>
+      >(
         'SELECT id, base_next_date_ts FROM schedules_next_date WHERE schedule_id = ?',
         [id],
       );
@@ -166,7 +168,7 @@ export async function setNextDate({
 // Methods
 
 async function checkIfScheduleExists(name, scheduleId) {
-  const idForName = await db.first(
+  const idForName = await db.first<Pick<db.DbSchedule, 'id'>>(
     'SELECT id from schedules WHERE tombstone = 0 AND name = ?',
     [name],
   );

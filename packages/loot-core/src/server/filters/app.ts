@@ -42,7 +42,7 @@ const filterModel = {
 };
 
 async function filterNameExists(name, filterId, newItem) {
-  const idForName = await db.first(
+  const idForName = await db.first<Pick<db.DbTransactionFilter, 'id'>>(
     'SELECT id from transaction_filters WHERE tombstone = 0 AND name = ?',
     [name],
   );
