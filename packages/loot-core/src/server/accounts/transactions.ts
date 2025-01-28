@@ -11,7 +11,7 @@ import * as transfer from './transfer';
 
 async function idsWithChildren(ids: string[]) {
   const whereIds = whereIn(ids, 'parent_id');
-  const rows = await db.all(
+  const rows = await db.all<db.DbViewTransactionInternal>(
     `SELECT id FROM v_transactions_internal WHERE ${whereIds}`,
   );
   const set = new Set(ids);
@@ -22,13 +22,18 @@ async function idsWithChildren(ids: string[]) {
 }
 
 async function getTransactionsByIds(
-  ids: string[],
-): Promise<TransactionEntity[]> {
+  ids: Array<db.DbTransaction['id']>,
+): Promise<db.DbViewTransactionInternal[]> {
   // TODO: convert to whereIn
   //
   // or better yet, use ActualQL
-  return incrFetch(
-    (query, params) => db.selectWithSchema('transactions', query, params),
+  return incrFetch<db.DbViewTransactionInternal>(
+    (sql, params) =>
+      db.selectWithSchema<db.DbViewTransactionInternal>(
+        'transactions',
+        sql,
+        params,
+      ),
     ids,
     // eslint-disable-next-line rulesdir/typography
     id => `id = '${id}'`,
@@ -56,7 +61,9 @@ export async function batchUpdateTransactions({
     : [];
 
   const oldPayees = new Set<PayeeEntity['id']>();
-  const accounts = await db.all('SELECT * FROM accounts WHERE tombstone = 0');
+  const accounts = await db.all<db.DbAccount>(
+    'SELECT * FROM accounts WHERE tombstone = 0',
+  );
 
   // We need to get all the payees of updated transactions _before_
   // making changes

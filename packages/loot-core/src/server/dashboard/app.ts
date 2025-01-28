@@ -5,7 +5,6 @@ import * as fs from '../../platform/server/fs';
 import { DEFAULT_DASHBOARD_STATE } from '../../shared/dashboard';
 import { q } from '../../shared/query';
 import {
-  type CustomReportEntity,
   type ExportImportDashboard,
   type ExportImportDashboardWidget,
   type ExportImportCustomReportWidget,
@@ -144,7 +143,9 @@ async function addDashboardWidget(
   // If no x & y was provided - calculate it dynamically
   // The new widget should be the very last one in the list of all widgets
   if (!('x' in widget) && !('y' in widget)) {
-    const data = await db.first(
+    const data = await db.first<
+      Pick<db.DbDashboard, 'x' | 'y' | 'width' | 'height'>
+    >(
       'SELECT x, y, width, height FROM dashboard WHERE tombstone = 0 ORDER BY y DESC, x DESC',
     );
 
@@ -176,7 +177,7 @@ async function importDashboard({ filepath }: { filepath: string }) {
 
     exportModel.validate(parsedContent);
 
-    const customReportIds: CustomReportEntity[] = await db.all(
+    const customReportIds = await db.all<Pick<db.DbCustomReport, 'id'>>(
       'SELECT id from custom_reports',
     );
     const customReportIdSet = new Set(customReportIds.map(({ id }) => id));

@@ -7,7 +7,7 @@ import * as transfer from './transfer';
 beforeEach(global.emptyDatabase());
 
 function getAllTransactions() {
-  return db.all(
+  return db.all<db.DbViewTransaction & { payee_name: db.DbPayee['name'] }>(
     `SELECT t.*, p.name as payee_name
        FROM v_transactions t
        LEFT JOIN payees p ON p.id = t.payee
@@ -61,10 +61,10 @@ describe('Transfer', () => {
 
     const differ = expectSnapshotWithDiffer(await getAllTransactions());
 
-    const transferTwo = await db.first(
+    const transferTwo = await db.first<db.DbPayee>(
       "SELECT * FROM payees WHERE transfer_acct = 'two'",
     );
-    const transferThree = await db.first(
+    const transferThree = await db.first<db.DbPayee>(
       "SELECT * FROM payees WHERE transfer_acct = 'three'",
     );
 
@@ -131,10 +131,10 @@ describe('Transfer', () => {
   test('transfers are properly de-categorized', async () => {
     await prepareDatabase();
 
-    const transferTwo = await db.first(
+    const transferTwo = await db.first<db.DbPayee>(
       "SELECT * FROM payees WHERE transfer_acct = 'two'",
     );
-    const transferThree = await db.first(
+    const transferThree = await db.first<db.DbPayee>(
       "SELECT * FROM payees WHERE transfer_acct = 'three'",
     );
 

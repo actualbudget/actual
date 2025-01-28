@@ -53,7 +53,7 @@ function withMutation<Params extends Array<unknown>, ReturnType>(
         const latestTimestamp = getClock().timestamp.toString();
         const result = await handler(...args);
 
-        const rows = await db.all(
+        const rows = await db.all<Pick<db.DbCrdtMessage, 'dataset'>>(
           'SELECT DISTINCT dataset FROM messages_crdt WHERE timestamp > ?',
           [latestTimestamp],
         );
@@ -94,9 +94,10 @@ async function validateExpenseCategory(debug, id) {
     throw APIError(`${debug}: category id is required`);
   }
 
-  const row = await db.first('SELECT is_income FROM categories WHERE id = ?', [
-    id,
-  ]);
+  const row = await db.first<Pick<db.DbCategory, 'is_income'>>(
+    'SELECT is_income FROM categories WHERE id = ?',
+    [id],
+  );
 
   if (!row) {
     throw APIError(`${debug}: category “${id}” does not exist`);
@@ -354,7 +355,8 @@ handlers['api/budget-month'] = async function ({ month }) {
   checkFileOpen();
   await validateMonth(month);
 
-  const groups = await db.getCategoriesGrouped();
+  const grouped = await db.getCategoriesGrouped();
+  const groups = categoryGroupModel.fromDbArray(grouped);
   const sheetName = monthUtils.sheetForMonth(month);
 
   function value(name) {
@@ -553,7 +555,7 @@ handlers['api/transaction-delete'] = withMutation(async function ({ id }) {
 
 handlers['api/accounts-get'] = async function () {
   checkFileOpen();
-  const accounts = await db.getAccounts();
+  const accounts = accountModel.fromDbArray(await db.getAccounts());
   return accounts.map(account => accountModel.toExternal(account));
 };
 

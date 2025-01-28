@@ -35,12 +35,14 @@ function calcBufferedAmount(
   return buffered + amount;
 }
 
-function getBudgetTable(): string {
+type BudgetTable = 'reflect_budgets' | 'zero_budgets';
+
+function getBudgetTable(): BudgetTable {
   return isReflectBudget() ? 'reflect_budgets' : 'zero_budgets';
 }
 
 export function isReflectBudget(): boolean {
-  const budgetType = db.firstSync(
+  const budgetType = db.firstSync<Pick<db.DbPreference, 'value'>>(
     `SELECT value FROM preferences WHERE id = ?`,
     ['budgetType'],
   );
@@ -59,8 +61,14 @@ type BudgetData = {
   amount: number;
 };
 
-function getBudgetData(table: string, month: string): Promise<BudgetData[]> {
-  return db.all(
+function getBudgetData(
+  table: BudgetTable,
+  month: string,
+): Promise<BudgetData[]> {
+  return db.all<
+    (db.DbZeroBudget | db.DbReflectBudget) &
+      Pick<db.DbViewCategory, 'is_income'>
+  >(
     `
     SELECT b.*, c.is_income FROM v_categories c
     LEFT JOIN ${table} b ON b.category = c.id
@@ -91,7 +99,7 @@ export function getBudget({
   month: string;
 }): number {
   const table = getBudgetTable();
-  const existing = db.firstSync(
+  const existing = db.firstSync<db.DbZeroBudget | db.DbReflectBudget>(
     `SELECT * FROM ${table} WHERE month = ? AND category = ?`,
     [dbMonth(month), category],
   );
@@ -110,10 +118,12 @@ export function setBudget({
   amount = safeNumber(typeof amount === 'number' ? amount : 0);
   const table = getBudgetTable();
 
-  const existing = db.firstSync(
-    `SELECT id FROM ${table} WHERE month = ? AND category = ?`,
-    [dbMonth(month), category],
-  );
+  const existing = db.firstSync<
+    Pick<db.DbZeroBudget | db.DbReflectBudget, 'id'>
+  >(`SELECT id FROM ${table} WHERE month = ? AND category = ?`, [
+    dbMonth(month),
+    category,
+  ]);
   if (existing) {
     return db.update(table, { id: existing.id, amount });
   }
@@ -127,10 +137,12 @@ export function setBudget({
 
 export function setGoal({ month, category, goal, long_goal }): Promise<void> {
   const table = getBudgetTable();
-  const existing = db.firstSync(
-    `SELECT id FROM ${table} WHERE month = ? AND category = ?`,
-    [dbMonth(month), category],
-  );
+  const existing = db.firstSync<
+    Pick<db.DbZeroBudget | db.DbReflectBudget, 'id'>
+  >(`SELECT id FROM ${table} WHERE month = ? AND category = ?`, [
+    dbMonth(month),
+    category,
+  ]);
   if (existing) {
     return db.update(table, {
       id: existing.id,
@@ -148,7 +160,7 @@ export function setGoal({ month, category, goal, long_goal }): Promise<void> {
 }
 
 export function setBuffer(month: string, amount: unknown): Promise<void> {
-  const existing = db.firstSync(
+  const existing = db.firstSync<Pick<db.DbZeroBudget, 'id'>>(
     `SELECT id FROM zero_budget_months WHERE id = ?`,
     [month],
   );
@@ -167,10 +179,12 @@ function setCarryover(
   month: string,
   flag: boolean,
 ): Promise<void> {
-  const existing = db.firstSync(
-    `SELECT id FROM ${table} WHERE month = ? AND category = ?`,
-    [month, category],
-  );
+  const existing = db.firstSync<
+    Pick<db.DbZeroBudget | db.DbReflectBudget, 'id'>
+  >(`SELECT id FROM ${table} WHERE month = ? AND category = ?`, [
+    month,
+    category,
+  ]);
   if (existing) {
     return db.update(table, { id: existing.id, carryover: flag ? 1 : 0 });
   }
@@ -225,7 +239,7 @@ export async function copySinglePreviousMonth({
 }
 
 export async function setZero({ month }: { month: string }): Promise<void> {
-  const categories = await db.all(
+  const categories = await db.all<db.DbViewCategory>(
     'SELECT * FROM v_categories WHERE tombstone = 0',
   );
 
@@ -244,7 +258,7 @@ export async function set3MonthAvg({
 }: {
   month: string;
 }): Promise<void> {
-  const categories = await db.all(
+  const categories = await db.all<db.DbViewCategory>(
     'SELECT * FROM v_categories WHERE tombstone = 0',
   );
 
@@ -287,7 +301,7 @@ export async function set12MonthAvg({
 }: {
   month: string;
 }): Promise<void> {
-  const categories = await db.all(
+  const categories = await db.all<db.DbViewCategory>(
     'SELECT * FROM v_categories WHERE tombstone = 0',
   );
 
@@ -306,7 +320,7 @@ export async function set6MonthAvg({
 }: {
   month: string;
 }): Promise<void> {
-  const categories = await db.all(
+  const categories = await db.all<db.DbViewCategory>(
     'SELECT * FROM v_categories WHERE tombstone = 0',
   );
 
@@ -329,7 +343,7 @@ export async function setNMonthAvg({
   N: number;
   category: string;
 }): Promise<void> {
-  const categoryFromDb = await db.first(
+  const categoryFromDb = await db.first<Pick<db.DbViewCategory, 'is_income'>>(
     'SELECT is_income FROM v_categories WHERE id = ?',
     [category],
   );
@@ -361,7 +375,7 @@ export async function holdForNextMonth({
   month: string;
   amount: number;
 }): Promise<boolean> {
-  const row = await db.first(
+  const row = await db.first<Pick<db.DbZeroBudgetMonth, 'buffered'>>(
     'SELECT buffered FROM zero_budget_months WHERE id = ?',
     [month],
   );
@@ -547,9 +561,10 @@ async function addMovementNotes({
 
   const monthBudgetNotesId = `budget-${month}`;
   const existingMonthBudgetNotes = addNewLine(
-    db.firstSync(`SELECT n.note FROM notes n WHERE n.id = ?`, [
-      monthBudgetNotesId,
-    ])?.note,
+    db.firstSync<Pick<db.DbNote, 'note'>>(
+      `SELECT n.note FROM notes n WHERE n.id = ?`,
+      [monthBudgetNotesId],
+    )?.note,
   );
 
   const displayDay = monthUtils.format(monthUtils.currentDate(), 'MMMM dd');

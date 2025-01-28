@@ -16,11 +16,6 @@ import * as sqlite from '../../platform/server/sqlite';
 import * as monthUtils from '../../shared/months';
 import { groupById } from '../../shared/util';
 import {
-  CategoryEntity,
-  CategoryGroupEntity,
-  PayeeEntity,
-} from '../../types/models';
-import {
   schema,
   schemaConfig,
   convertForInsert,
@@ -37,6 +32,21 @@ import {
 import { sendMessages, batchMessages } from '../sync';
 
 import { shoveSortOrders, SORT_INCREMENT } from './sort';
+import {
+  DbAccount,
+  DbBank,
+  DbCategory,
+  DbCategoryGroup,
+  DbCategoryMapping,
+  DbClockMessage,
+  DbPayee,
+  DbPayeeMapping,
+  DbTransaction,
+  DbViewTransaction,
+  DbViewTransactionInternalAlive,
+} from './types';
+
+export * from './types';
 
 export { toDateRepr, fromDateRepr } from '../models';
 
@@ -77,7 +87,7 @@ export function getDatabase() {
 }
 
 export async function loadClock() {
-  const row = await first('SELECT * FROM messages_clock');
+  const row = await first<DbClockMessage>('SELECT * FROM messages_clock');
   if (row) {
     const clock = deserializeClock(row.clock);
     setClock(clock);
@@ -100,17 +110,24 @@ export function runQuery(
   sql: string,
   params?: Array<string | number>,
   fetchAll?: false,
-);
-export function runQuery(
+): { changes: unknown };
+
+export function runQuery<T>(
   sql: string,
   params: Array<string | number> | undefined,
   fetchAll: true,
-);
-export function runQuery(sql, params, fetchAll) {
-  // const unrecord = perf.record('sqlite');
-  const result = sqlite.runQuery(db, sql, params, fetchAll);
-  // unrecord();
-  return result;
+): T[];
+
+export function runQuery<T>(
+  sql: string,
+  params: (string | number)[],
+  fetchAll: boolean,
+) {
+  if (fetchAll) {
+    return sqlite.runQuery<T>(db, sql, params, true);
+  } else {
+    return sqlite.runQuery(db, sql, params, false);
+  }
 }
 
 export function execQuery(sql: string) {
@@ -146,19 +163,19 @@ export function asyncTransaction(fn: () => Promise<void>) {
 // This function is marked as async because `runQuery` is no longer
 // async. We return a promise here until we've audited all the code to
 // make sure nothing calls `.then` on this.
-export async function all(sql, params?: (string | number)[]) {
-  return runQuery(sql, params, true);
+export async function all<T>(sql, params?: (string | number)[]) {
+  return runQuery<T>(sql, params, true);
 }
 
-export async function first(sql, params?: (string | number)[]) {
-  const arr = await runQuery(sql, params, true);
+export async function first<T>(sql, params?: (string | number)[]) {
+  const arr = await runQuery<T>(sql, params, true);
   return arr.length === 0 ? null : arr[0];
 }
 
 // The underlying sql system is now sync, but we can't update `first` yet
 // without auditing all uses of it
-export function firstSync(sql, params?: (string | number)[]) {
-  const arr = runQuery(sql, params, true);
+export function firstSync<T>(sql, params?: (string | number)[]) {
+  const arr = runQuery<T>(sql, params, true);
   return arr.length === 0 ? null : arr[0];
 }
 
@@ -169,8 +186,11 @@ export async function run(sql, params?: (string | number)[]) {
   return runQuery(sql, params);
 }
 
-export async function select(table, id) {
-  const rows = await runQuery(
+export async function select<T extends { id: string }>(
+  table: string,
+  id: T['id'],
+) {
+  const rows = await runQuery<T>(
     'SELECT * FROM ' + table + ' WHERE id = ?',
     [id],
     true,
@@ -250,15 +270,45 @@ export async function deleteAll(table: string) {
   await Promise.all(rows.map(({ id }) => delete_(table, id)));
 }
 
-export async function selectWithSchema(table, sql, params) {
-  const rows = await runQuery(sql, params, true);
-  return rows
-    .map(row => convertFromSelect(schema, schemaConfig, table, row))
+/**
+ * AQL-schema aware version of `select` that converts the query results
+ * according to the schema config.
+ *
+ * @param table The name of the table in the AQL schema.
+ * @param sql The SQL query.
+ * @param params The parameters for the SQL query.
+ * @returns The results of the query, converted according to the AQL schema config.
+ */
+export async function selectWithSchema<T, TAfterConvert = T>(
+  table: keyof typeof schema,
+  sql: string,
+  params?: Array<string | number> | undefined,
+) {
+  const rows = await runQuery<T>(sql, params, true);
+  const convertedRows = rows
+    .map(
+      row =>
+        convertFromSelect(schema, schemaConfig, table, row) as TAfterConvert,
+    )
     .filter(Boolean);
+  return convertedRows;
 }
 
-export async function selectFirstWithSchema(table, sql, params) {
-  const rows = await selectWithSchema(table, sql, params);
+/**
+ * AQL-schema aware version of `first` that converts the query results
+ * according to the schema config.
+ *
+ * @param table The name of the table in the AQL schema.
+ * @param sql The SQL query.
+ * @param params The parameters for the SQL query.
+ * @returns The first result of the query, converted according to the AQL schema config.
+ */
+export async function selectFirstWithSchema<T, TAfterConvert = T>(
+  table: keyof typeof schema,
+  sql: string,
+  params?: Array<string | number> | undefined,
+) {
+  const rows = await selectWithSchema<T, TAfterConvert>(table, sql, params);
   return rows.length > 0 ? rows[0] : null;
 }
 
@@ -283,16 +333,24 @@ export function updateWithSchema(table, fields) {
 // different files
 
 export async function getCategories(
-  ids?: Array<CategoryEntity['id']>,
-): Promise<CategoryEntity[]> {
+  ids?: Array<DbCategory['id']>,
+): Promise<DbCategory[]> {
   const whereIn = ids ? `c.id IN (${toSqlQueryParameters(ids)}) AND` : '';
   const query = `SELECT c.* FROM categories c WHERE ${whereIn} c.tombstone = 0 ORDER BY c.sort_order, c.id`;
-  return ids ? await all(query, [...ids]) : await all(query);
+  return ids
+    ? await all<DbCategory>(query, [...ids])
+    : await all<DbCategory>(query);
 }
 
+/**
+ * Get all categories grouped by their category group.
+ * @param ids The IDs of the category groups to get.
+ * @returns The categories grouped by their category group.
+ * The first element of each tuple is the category group, and the rest are the categories that belong to that group.
+ */
 export async function getCategoriesGrouped(
-  ids?: Array<CategoryGroupEntity['id']>,
-): Promise<Array<CategoryGroupEntity>> {
+  ids?: Array<DbCategoryGroup['id']>,
+): Promise<Array<[DbCategoryGroup, ...DbCategory[]]>> {
   const categoryGroupWhereIn = ids
     ? `cg.id IN (${toSqlQueryParameters(ids)}) AND`
     : '';
@@ -306,24 +364,23 @@ export async function getCategoriesGrouped(
     ORDER BY c.sort_order, c.id`;
 
   const groups = ids
-    ? await all(categoryGroupQuery, [...ids])
-    : await all(categoryGroupQuery);
+    ? await all<DbCategoryGroup>(categoryGroupQuery, [...ids])
+    : await all<DbCategoryGroup>(categoryGroupQuery);
 
   const categories = ids
-    ? await all(categoryQuery, [...ids])
-    : await all(categoryQuery);
+    ? await all<DbCategory>(categoryQuery, [...ids])
+    : await all<DbCategory>(categoryQuery);
 
   return groups.map(group => {
-    return {
-      ...group,
-      categories: categories.filter(c => c.cat_group === group.id),
-    };
+    return [group, ...categories.filter(c => c.cat_group === group.id)];
   });
 }
 
 export async function insertCategoryGroup(group) {
   // Don't allow duplicate group
-  const existingGroup = await first(
+  const existingGroup = await first<
+    Pick<DbCategoryGroup, 'id' | 'name' | 'hidden'>
+  >(
     `SELECT id, name, hidden FROM category_groups WHERE UPPER(name) = ? and tombstone = 0 LIMIT 1`,
     [group.name.toUpperCase()],
   );
@@ -333,7 +390,7 @@ export async function insertCategoryGroup(group) {
     );
   }
 
-  const lastGroup = await first(`
+  const lastGroup = await first<Pick<DbCategoryGroup, 'sort_order'>>(`
     SELECT sort_order FROM category_groups WHERE tombstone = 0 ORDER BY sort_order DESC, id DESC LIMIT 1
   `);
   const sort_order = (lastGroup ? lastGroup.sort_order : 0) + SORT_INCREMENT;
@@ -351,7 +408,7 @@ export function updateCategoryGroup(group) {
 }
 
 export async function moveCategoryGroup(id, targetId) {
-  const groups = await all(
+  const groups = await all<Pick<DbCategoryGroup, 'id' | 'sort_order'>>(
     `SELECT id, sort_order FROM category_groups WHERE tombstone = 0 ORDER BY sort_order, id`,
   );
 
@@ -363,9 +420,10 @@ export async function moveCategoryGroup(id, targetId) {
 }
 
 export async function deleteCategoryGroup(group, transferId?: string) {
-  const categories = await all('SELECT * FROM categories WHERE cat_group = ?', [
-    group.id,
-  ]);
+  const categories = await all<DbCategory>(
+    'SELECT * FROM categories WHERE cat_group = ?',
+    [group.id],
+  );
 
   // Delete all the categories within a group
   await Promise.all(categories.map(cat => deleteCategory(cat, transferId)));
@@ -381,7 +439,7 @@ export async function insertCategory(
   let id_;
   await batchMessages(async () => {
     // Dont allow duplicated names in groups
-    const existingCatInGroup = await first(
+    const existingCatInGroup = await first<Pick<DbCategory, 'id'>>(
       `SELECT id FROM categories WHERE cat_group = ? and UPPER(name) = ? and tombstone = 0 LIMIT 1`,
       [category.cat_group, category.name.toUpperCase()],
     );
@@ -392,14 +450,14 @@ export async function insertCategory(
     }
 
     if (atEnd) {
-      const lastCat = await first(`
+      const lastCat = await first<Pick<DbCategoryGroup, 'sort_order'>>(`
         SELECT sort_order FROM categories WHERE tombstone = 0 ORDER BY sort_order DESC, id DESC LIMIT 1
       `);
       sort_order = (lastCat ? lastCat.sort_order : 0) + SORT_INCREMENT;
     } else {
       // Unfortunately since we insert at the beginning, we need to shove
       // the sort orders to make sure there's room for it
-      const categories = await all(
+      const categories = await all<Pick<DbCategory, 'id' | 'sort_order'>>(
         `SELECT id, sort_order FROM categories WHERE cat_group = ? AND tombstone = 0 ORDER BY sort_order, id`,
         [category.cat_group],
       );
@@ -432,12 +490,16 @@ export function updateCategory(category) {
   return update('categories', category);
 }
 
-export async function moveCategory(id, groupId, targetId?: string) {
+export async function moveCategory(
+  id: DbCategory['id'],
+  groupId: DbCategoryGroup['id'],
+  targetId?: DbCategory['id'],
+) {
   if (!groupId) {
     throw new Error('moveCategory: groupId is required');
   }
 
-  const categories = await all(
+  const categories = await all<Pick<DbCategory, 'id' | 'sort_order'>>(
     `SELECT id, sort_order FROM categories WHERE cat_group = ? AND tombstone = 0 ORDER BY sort_order, id`,
     [groupId],
   );
@@ -449,12 +511,15 @@ export async function moveCategory(id, groupId, targetId?: string) {
   await update('categories', { id, sort_order, cat_group: groupId });
 }
 
-export async function deleteCategory(category, transferId?: string) {
+export async function deleteCategory(
+  category: Pick<DbCategory, 'id'>,
+  transferId?: DbCategory['id'],
+) {
   if (transferId) {
     // We need to update all the deleted categories that currently
     // point to the one we're about to delete so they all are
     // "forwarded" to the new transferred category.
-    const existingTransfers = await all(
+    const existingTransfers = await all<DbCategoryMapping>(
       'SELECT * FROM category_mapping WHERE transferId = ?',
       [category.id],
     );
@@ -469,12 +534,12 @@ export async function deleteCategory(category, transferId?: string) {
   return delete_('categories', category.id);
 }
 
-export async function getPayee(id) {
-  return first(`SELECT * FROM payees WHERE id = ?`, [id]);
+export async function getPayee(id: DbPayee['id']) {
+  return first<DbPayee>(`SELECT * FROM payees WHERE id = ?`, [id]);
 }
 
-export async function getAccount(id) {
-  return first(`SELECT * FROM accounts WHERE id = ?`, [id]);
+export async function getAccount(id: DbAccount['id']) {
+  return first<DbAccount>(`SELECT * FROM accounts WHERE id = ?`, [id]);
 }
 
 export async function insertPayee(payee) {
@@ -487,10 +552,11 @@ export async function insertPayee(payee) {
   return id;
 }
 
-export async function deletePayee(payee) {
-  const { transfer_acct } = await first('SELECT * FROM payees WHERE id = ?', [
-    payee.id,
-  ]);
+export async function deletePayee(payee: Pick<DbPayee, 'id'>) {
+  const { transfer_acct } = await first<DbPayee>(
+    'SELECT * FROM payees WHERE id = ?',
+    [payee.id],
+  );
   if (transfer_acct) {
     // You should never be able to delete transfer payees
     return;
@@ -506,7 +572,7 @@ export async function deletePayee(payee) {
   return delete_('payees', payee.id);
 }
 
-export async function deleteTransferPayee(payee) {
+export async function deleteTransferPayee(payee: Pick<DbPayee, 'id'>) {
   // This allows deleting transfer payees
   return delete_('payees', payee.id);
 }
@@ -516,9 +582,12 @@ export function updatePayee(payee) {
   return update('payees', payee);
 }
 
-export async function mergePayees(target: string, ids: string[]) {
+export async function mergePayees(
+  target: DbPayee['id'],
+  ids: Array<DbPayee['id']>,
+) {
   // Load in payees so we can check some stuff
-  const dbPayees: PayeeEntity[] = await all('SELECT * FROM payees');
+  const dbPayees: DbPayee[] = await all('SELECT * FROM payees');
   const payees = groupById(dbPayees);
 
   // Filter out any transfer payees
@@ -530,7 +599,7 @@ export async function mergePayees(target: string, ids: string[]) {
   await batchMessages(async () => {
     await Promise.all(
       ids.map(async id => {
-        const mappings = await all(
+        const mappings = await all<Pick<DbPayeeMapping, 'id'>>(
           'SELECT id FROM payee_mapping WHERE targetId = ?',
           [id],
         );
@@ -554,7 +623,7 @@ export async function mergePayees(target: string, ids: string[]) {
 }
 
 export function getPayees() {
-  return all(`
+  return all<DbPayee & { name: DbAccount['name'] | DbPayee['name'] }>(`
     SELECT p.*, COALESCE(a.name, p.name) AS name FROM payees p
     LEFT JOIN accounts a ON (p.transfer_acct = a.id AND a.tombstone = 0)
     WHERE p.tombstone = 0 AND (p.transfer_acct IS NULL OR a.id IS NOT NULL)
@@ -567,7 +636,14 @@ export function getCommonPayees() {
     monthUtils.subWeeks(monthUtils.currentDate(), 12),
   );
   const limit = 10;
-  return all(`
+  return all<
+    Pick<DbPayee, 'id' | 'name' | 'favorite' | 'category'> & {
+      common: true;
+      transfer_acct: null;
+      c: number;
+      latest: DbViewTransactionInternalAlive['date'];
+    }
+  >(`
     SELECT     p.id as id, p.name as name, p.favorite as favorite,
       p.category as category, TRUE as common, NULL as transfer_acct,
     count(*) as c,
@@ -605,23 +681,28 @@ const orphanedPayeesQuery = `
 /* eslint-enable rulesdir/typography */
 
 export function syncGetOrphanedPayees() {
-  return all(orphanedPayeesQuery);
+  return all<Pick<DbPayee, 'id'>>(orphanedPayeesQuery);
 }
 
 export async function getOrphanedPayees() {
-  const rows = await all(orphanedPayeesQuery);
+  const rows = await all<Pick<DbPayee, 'id'>>(orphanedPayeesQuery);
   return rows.map(row => row.id);
 }
 
-export async function getPayeeByName(name) {
-  return first(
+export async function getPayeeByName(name: DbPayee['name']) {
+  return first<DbPayee>(
     `SELECT * FROM payees WHERE UNICODE_LOWER(name) = ? AND tombstone = 0`,
     [name.toLowerCase()],
   );
 }
 
 export function getAccounts() {
-  return all(
+  return all<
+    DbAccount & {
+      bankName: DbBank['name'];
+      bankId: DbBank['id'];
+    }
+  >(
     `SELECT a.*, b.name as bankName, b.id as bankId FROM accounts a
        LEFT JOIN banks b ON a.bank = b.id
        WHERE a.tombstone = 0
@@ -630,9 +711,9 @@ export function getAccounts() {
 }
 
 export async function insertAccount(account) {
-  const accounts = await all(
+  const accounts = await all<DbAccount>(
     'SELECT * FROM accounts WHERE offbudget = ? ORDER BY sort_order, name',
-    [account.offbudget != null ? account.offbudget : 0],
+    [account.offbudget ? 1 : 0],
   );
 
   // Don't pass a target in, it will default to appending at the end
@@ -651,8 +732,14 @@ export function deleteAccount(account) {
   return delete_('accounts', account.id);
 }
 
-export async function moveAccount(id, targetId) {
-  const account = await first('SELECT * FROM accounts WHERE id = ?', [id]);
+export async function moveAccount(
+  id: DbAccount['id'],
+  targetId: DbAccount['id'],
+) {
+  const account = await first<DbAccount>(
+    'SELECT * FROM accounts WHERE id = ?',
+    [id],
+  );
   let accounts;
   if (account.closed) {
     accounts = await all(
@@ -661,7 +748,7 @@ export async function moveAccount(id, targetId) {
   } else {
     accounts = await all(
       `SELECT id, sort_order FROM accounts WHERE tombstone = 0 AND offbudget = ? ORDER BY sort_order, name`,
-      [account.offbudget],
+      [account.offbudget ? 1 : 0],
     );
   }
 
@@ -674,8 +761,8 @@ export async function moveAccount(id, targetId) {
   });
 }
 
-export async function getTransaction(id) {
-  const rows = await selectWithSchema(
+export async function getTransaction(id: DbViewTransaction['id']) {
+  const rows = await selectWithSchema<DbViewTransaction>(
     'transactions',
     'SELECT * FROM v_transactions WHERE id = ?',
     [id],
@@ -683,14 +770,14 @@ export async function getTransaction(id) {
   return rows[0];
 }
 
-export async function getTransactions(accountId) {
+export async function getTransactions(accountId: DbTransaction['acct']) {
   if (arguments.length > 1) {
     throw new Error(
       '`getTransactions` was given a second argument, it now only takes a single argument `accountId`',
     );
   }
 
-  return selectWithSchema(
+  return selectWithSchema<DbViewTransaction>(
     'transactions',
     'SELECT * FROM v_transactions WHERE account = ?',
     [accountId],

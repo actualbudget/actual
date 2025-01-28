@@ -64,7 +64,7 @@ async function applyGroupCleanups(
         );
         const to_budget = budgeted + Math.abs(balance);
         const categoryId = generalGroup[ii].category;
-        let carryover = await db.first(
+        let carryover = await db.first<Pick<db.DbZeroBudget, 'carryover'>>(
           `SELECT carryover FROM zero_budgets WHERE month = ? and category = ?`,
           [db_month, categoryId],
         );
@@ -132,7 +132,7 @@ async function processCleanup(month: string): Promise<Notification> {
   const db_month = parseInt(month.replace('-', ''));
 
   const category_templates = await getCategoryTemplates();
-  const categories = await db.all(
+  const categories = await db.all<db.DbViewCategory>(
     'SELECT * FROM v_categories WHERE tombstone = 0',
   );
   const sheetName = monthUtils.sheetForMonth(month);
@@ -220,7 +220,7 @@ async function processCleanup(month: string): Promise<Notification> {
         } else {
           warnings.push(category.name + ' does not have available funds.');
         }
-        const carryover = await db.first(
+        const carryover = await db.first<Pick<db.DbZeroBudget, 'carryover'>>(
           `SELECT carryover FROM zero_budgets WHERE month = ? and category = ?`,
           [db_month, category.id],
         );
@@ -249,7 +249,7 @@ async function processCleanup(month: string): Promise<Notification> {
     const budgeted = await getSheetValue(sheetName, `budget-${category.id}`);
     const to_budget = budgeted + Math.abs(balance);
     const categoryId = category.id;
-    let carryover = await db.first(
+    let carryover = await db.first<Pick<db.DbZeroBudget, 'carryover'>>(
       `SELECT carryover FROM zero_budgets WHERE month = ? and category = ?`,
       [db_month, categoryId],
     );
@@ -364,7 +364,7 @@ const TEMPLATE_PREFIX = '#cleanup ';
 async function getCategoryTemplates() {
   const templates = {};
 
-  const notes = await db.all(
+  const notes = await db.all<db.DbNote>(
     `SELECT * FROM notes WHERE lower(note) like '%${TEMPLATE_PREFIX}%'`,
   );
 
