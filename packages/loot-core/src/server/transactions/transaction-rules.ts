@@ -14,7 +14,6 @@ import {
   type TransactionEntity,
   type RuleActionEntity,
   type RuleEntity,
-  AccountEntity,
 } from '../../types/models';
 import { schemaConfig } from '../aql';
 import * as db from '../db';
@@ -220,9 +219,10 @@ export async function updateRule(rule) {
 }
 
 export async function deleteRule(id: string) {
-  const schedule = await db.first('SELECT id FROM schedules WHERE rule = ?', [
-    id,
-  ]);
+  const schedule = await db.first<Pick<db.DbSchedule, 'id'>>(
+    'SELECT id FROM schedules WHERE rule = ?',
+    [id],
+  );
 
   if (schedule) {
     return false;
@@ -278,7 +278,7 @@ function onApplySync(oldValues, newValues) {
 // Runner
 export async function runRules(
   trans,
-  accounts: Map<string, AccountEntity> | null = null,
+  accounts: Map<string, db.DbAccount> | null = null,
 ) {
   let accountsMap = null;
   if (accounts === null) {
@@ -631,13 +631,11 @@ export async function applyActions(
     return null;
   }
 
-  const accounts: AccountEntity[] = await db.getAccounts();
+  const accounts: db.DbAccount[] = await db.getAccounts();
+  const accountsMap = new Map(accounts.map(account => [account.id, account]));
   const transactionsForRules = await Promise.all(
     transactions.map(transactions =>
-      prepareTransactionForRules(
-        transactions,
-        new Map(accounts.map(account => [account.id, account])),
-      ),
+      prepareTransactionForRules(transactions, accountsMap),
     ),
   );
 
@@ -870,12 +868,12 @@ export async function updateCategoryRules(transactions) {
 
 export type TransactionForRules = TransactionEntity & {
   payee_name?: string;
-  _account?: AccountEntity;
+  _account?: db.DbAccount;
 };
 
 export async function prepareTransactionForRules(
   trans: TransactionEntity,
-  accounts: Map<string, AccountEntity> | null = null,
+  accounts: Map<string, db.DbAccount> | null = null,
 ): Promise<TransactionForRules> {
   const r: TransactionForRules = { ...trans };
   if (trans.payee) {
