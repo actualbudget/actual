@@ -189,10 +189,6 @@ type FinanceModals = {
 
   'synced-account-edit': {
     account: AccountEntity;
-    onSave: (
-      account: AccountEntity,
-      mappings: Map<string, Map<string, string>>,
-    ) => void;
   };
 
   'account-menu': {

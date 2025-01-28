@@ -8,6 +8,7 @@ import {
   type AccountEntity,
 } from 'loot-core/src/types/models';
 
+import { useSyncedPref } from '../../hooks/useSyncedPref';
 import { SvgRightArrow2 } from '../../icons/v0';
 import { SvgEquals } from '../../icons/v1';
 import { theme } from '../../style';
@@ -21,11 +22,9 @@ import { Row, Cell, TableHeader } from '../table';
 
 type EditSyncAccountProps = {
   account: AccountEntity;
-  onSave: (
-    account: AccountEntity,
-    mappings: Map<string, Map<string, string>>,
-  ) => void;
 };
+
+type Mappings = Map<string, Map<string, string>>;
 
 const transactions = [
   {
@@ -108,13 +107,76 @@ const getFields = (transaction: TransactionEntity | object) =>
       })),
   }));
 
-export function EditSyncAccount({ account, onSave }: EditSyncAccountProps) {
+const mappingsToString = (mapping: Mappings): string =>
+  JSON.stringify(
+    Object.fromEntries(
+      [...mapping.entries()].map(([key, value]) => [
+        key,
+        Object.fromEntries(value),
+      ]),
+    ),
+  );
+
+const mappingsFromString = (str: string): Mappings =>
+  new Map(
+    Object.entries(JSON.parse(str)).map(([key, value]) => [
+      key,
+      new Map(Object.entries(value)),
+    ]),
+  );
+
+export function EditSyncAccount({ account }: EditSyncAccountProps) {
   const { t } = useTranslation();
   const { transactionDirectionOptions } = useTransactionDirectionOptions();
 
+  const [
+    savedMappings = mappingsToString(
+      new Map([
+        [
+          'payment',
+          new Map([
+            ['date', 'date'],
+            ['payee', 'creditorName'],
+            ['notes', 'remittanceInformationUnstructured'],
+          ]),
+        ],
+        [
+          'deposit',
+          new Map([
+            ['date', 'date'],
+            ['payee', 'debtorName'],
+            ['notes', 'remittanceInformationUnstructured'],
+          ]),
+        ],
+      ]),
+    ),
+    setSavedMappings,
+  ] = useSyncedPref(`custom-sync-mappings-${account.id}`);
+  const [savedImportNotes = true, setSavedImportNotes] = useSyncedPref(
+    `sync-import-notes-${account.id}`,
+  );
+  const [savedImportPending = true, setSavedImportPending] = useSyncedPref(
+    `sync-import-pending-${account.id}`,
+  );
+
   const [transactionDirection, setTransactionDirection] = useState('payment');
-  const [importPending, setImportPending] = useState(true);
-  const [importNotes, setImportNotes] = useState(true);
+  const [importPending, setImportPending] = useState(
+    String(savedImportPending) === 'true',
+  );
+  const [importNotes, setImportNotes] = useState(
+    String(savedImportNotes) === 'true',
+  );
+  const [mappings, setMappings] = useState<Mappings>(
+    mappingsFromString(savedMappings),
+  );
+
+  const filteredTransactions = useMemo(
+    () =>
+      transactions.filter(({ amount }) =>
+        transactionDirection === 'payment' ? amount <= 0 : amount > 0,
+      ),
+    [transactionDirection],
+  );
 
   const _transactionQuery = useMemo(
     () =>
@@ -128,43 +190,13 @@ export function EditSyncAccount({ account, onSave }: EditSyncAccountProps) {
     [account, transactionDirection],
   );
 
-  // const { transactions: _transactions2, isLoading } = useTransactions({
-  //   query: transactionQuery,
-  // });
-
-  const filteredTransactions = useMemo(
-    () =>
-      transactions.filter(({ amount }) =>
-        transactionDirection === 'payment' ? amount <= 0 : amount > 0,
-      ),
-    [transactionDirection],
-  );
-
-  const fields =
-    filteredTransactions.length > 0 ? getFields(filteredTransactions[0]) : [];
-
-  const [mappings, setMappings] = useState(
-    new Map([
-      [
-        'payment',
-        new Map([
-          ['date', 'date'],
-          ['payee', 'creditorName'],
-          ['notes', 'remittanceInformationUnstructured'],
-        ]),
-      ],
-      [
-        'deposit',
-        new Map([
-          ['date', 'date'],
-          ['payee', 'debtorName'],
-          ['notes', 'remittanceInformationUnstructured'],
-        ]),
-      ],
-    ]),
-  );
-
-  //  if (isLoading) return null;
+  const onSave = async (close: () => void) => {
+    const mappingsStr = mappingsToString(mappings);
+    setSavedMappings(mappingsStr);
+    setSavedImportPending(String(importPending));
+    setSavedImportNotes(String(importNotes));
+    close();
+  };
 
   const setMapping = (field: string, value: string) => {
     setMappings(prev => {
@@ -173,6 +205,15 @@ export function EditSyncAccount({ account, onSave }: EditSyncAccountProps) {
       return updated;
     });
   };
+
+  // const { transactions: _transactions2, isLoading } = useTransactions({
+  //   query: transactionQuery,
+  // });
+
+  //  if (isLoading) return null;
+
+  const fields =
+    filteredTransactions.length > 0 ? getFields(filteredTransactions[0]) : [];
 
   const mapping = mappings.get(transactionDirection);
 
@@ -314,8 +355,7 @@ export function EditSyncAccount({ account, onSave }: EditSyncAccountProps) {
             <Button
               variant="primary"
               onPress={() => {
-                onSave(account, mappings);
-                close();
+                onSave(close);
               }}
             >
               <Trans>Save</Trans>

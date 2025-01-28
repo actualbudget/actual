@@ -390,7 +390,6 @@ export function Modals() {
             <EditSyncAccount
               key={name}
               account={options.account}
-              onSave={options.onSave}
             />
           );
 

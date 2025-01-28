@@ -53,21 +53,12 @@ export function BankSync() {
     [accounts],
   );
 
-  const onSave = async (
-    account: AccountEntity,
-    mappings: Map<string, Map<string, string>>,
-  ) => {
-    console.log(account);
-    console.log(mappings);
-  };
-
   const onAction = async (account: AccountEntity, action: 'link' | 'edit') => {
     switch (action) {
       case 'edit':
         dispatch(
           pushModal('synced-account-edit', {
             account,
-            onSave,
           }),
         );
         break;
