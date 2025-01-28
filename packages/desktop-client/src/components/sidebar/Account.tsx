@@ -1,5 +1,6 @@
 // @ts-strict-ignore
 import React, { type CSSProperties, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { css, cx } from '@emotion/css';
 
@@ -9,9 +10,11 @@ import {
   reopenAccount,
   updateAccount,
 } from 'loot-core/client/queries/queriesSlice';
+import { currencyToInteger } from 'loot-core/shared/util';
 import { type AccountEntity } from 'loot-core/src/types/models';
 
 import { useContextMenu } from '../../hooks/useContextMenu';
+import { useNavigate } from '../../hooks/useNavigate';
 import { useNotes } from '../../hooks/useNotes';
 import { useDispatch } from '../../redux';
 import { styles, theme } from '../../style';
@@ -34,6 +37,9 @@ import {
 } from '../sort';
 import { type SheetFields, type Binding } from '../spreadsheet';
 import { CellValue } from '../spreadsheet/CellValue';
+import { useFormat } from '../spreadsheet/useFormat';
+import { useSheetValue } from '../spreadsheet/useSheetValue';
+import { InputCell } from '../table';
 
 export const accountNameStyle: CSSProperties = {
   marginTop: -2,
@@ -77,6 +83,8 @@ export function Account<FieldName extends SheetFields<'account'>>({
   onDragChange,
   onDrop,
 }: AccountProps<FieldName>) {
+  const { t } = useTranslation();
+
   const type = account
     ? account.closed
       ? 'account-closed'
@@ -104,10 +112,15 @@ export function Account<FieldName extends SheetFields<'account'>>({
 
   const dispatch = useDispatch();
 
-  const [isEditing, setIsEditing] = useState(false);
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [isEditingBalance, setIsEditingBalance] = useState(false);
 
   const accountNote = useNotes(`account-${account?.id}`);
   const needsTooltip = !!account?.id;
+
+  const accountValue = useSheetValue(query);
+  const navigate = useNavigate();
+  const format = useFormat();
 
   const accountRow = (
     <View
@@ -121,7 +134,7 @@ export function Account<FieldName extends SheetFields<'account'>>({
           <Link
             variant="internal"
             to={to}
-            isDisabled={isEditing}
+            isDisabled={isEditingName}
             style={{
               ...accountNameStyle,
               ...style,
@@ -183,14 +196,14 @@ export function Account<FieldName extends SheetFields<'account'>>({
                 }
               }
               left={
-                isEditing ? (
+                isEditingName ? (
                   <InitialFocus>
                     <Input
                       style={{
                         padding: 0,
                         width: '100%',
                       }}
-                      onBlur={() => setIsEditing(false)}
+                      onBlur={() => setIsEditingName(false)}
                       onEnter={e => {
                         const inputEl = e.target as HTMLInputElement;
                         const newAccountName = inputEl.value;
@@ -204,9 +217,9 @@ export function Account<FieldName extends SheetFields<'account'>>({
                             }),
                           );
                         }
-                        setIsEditing(false);
+                        setIsEditingName(false);
                       }}
-                      onEscape={() => setIsEditing(false)}
+                      onEscape={() => setIsEditingName(false)}
                       defaultValue={name}
                     />
                   </InitialFocus>
@@ -214,7 +227,34 @@ export function Account<FieldName extends SheetFields<'account'>>({
                   name
                 )
               }
-              right={<CellValue binding={query} type="financial" />}
+              right={
+                isEditingBalance ? (
+                  <InitialFocus>
+                    <Input
+                      style={{
+                        padding: 0,
+                        width: '100%',
+                        textAlign: 'right',
+                        ...styles.tnum,
+                      }}
+                      onBlur={() => setIsEditingBalance(false)}
+                      onEnter={e => {
+                        const inputEl = e.target as HTMLInputElement;
+                        const newValue = inputEl.value;
+                        if (newValue.trim() !== '') {
+                          const v = currencyToInteger(newValue);
+                          navigate(to, { state: { reconcileAmount: v } });
+                        }
+                        setIsEditingBalance(false);
+                      }}
+                      onEscape={() => setIsEditingBalance(false)}
+                      defaultValue={format(accountValue, 'financial')}
+                    />
+                  </InitialFocus>
+                ) : (
+                  <CellValue binding={query} type="financial" />
+                )
+              }
             />
           </Link>
           {account && (
@@ -239,17 +279,22 @@ export function Account<FieldName extends SheetFields<'account'>>({
                       break;
                     }
                     case 'rename': {
-                      setIsEditing(true);
+                      setIsEditingName(true);
+                      break;
+                    }
+                    case 'reconcile': {
+                      setIsEditingBalance(true);
                       break;
                     }
                   }
                   setMenuOpen(false);
                 }}
                 items={[
-                  { name: 'rename', text: 'Rename' },
+                  { name: 'rename', text: t('Rename') },
+                  { name: 'reconcile', text: t('Reconcile') },
                   account.closed
-                    ? { name: 'reopen', text: 'Reopen' }
-                    : { name: 'close', text: 'Close' },
+                    ? { name: 'reopen', text: t('Reopen') }
+                    : { name: 'close', text: t('Close') },
                 ]}
               />
             </Popover>
