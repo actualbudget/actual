@@ -1,23 +1,23 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`merkle trie adding an item works 1`] = `
-Object {
-  "1": Object {
-    "2": Object {
-      "1": Object {
-        "0": Object {
-          "1": Object {
-            "0": Object {
-              "0": Object {
-                "2": Object {
-                  "0": Object {
-                    "1": Object {
-                      "1": Object {
-                        "0": Object {
-                          "2": Object {
-                            "2": Object {
-                              "0": Object {
-                                "0": Object {
+exports[`merkle trie > adding an item works 1`] = `
+{
+  "1": {
+    "2": {
+      "1": {
+        "0": {
+          "1": {
+            "0": {
+              "0": {
+                "2": {
+                  "0": {
+                    "1": {
+                      "1": {
+                        "0": {
+                          "2": {
+                            "2": {
+                              "0": {
+                                "0": {
                                   "hash": 1983295247,
                                 },
                                 "hash": 1983295247,
@@ -34,14 +34,14 @@ Object {
                     },
                     "hash": 1983295247,
                   },
-                  "1": Object {
-                    "0": Object {
-                      "1": Object {
-                        "0": Object {
-                          "2": Object {
-                            "0": Object {
-                              "0": Object {
-                                "0": Object {
+                  "1": {
+                    "0": {
+                      "1": {
+                        "0": {
+                          "2": {
+                            "0": {
+                              "0": {
+                                "0": {
                                   "hash": 1469038940,
                                 },
                                 "hash": 1469038940,
@@ -78,33 +78,33 @@ Object {
 }
 `;
 
-exports[`merkle trie pruning works and keeps correct hashes 1`] = `
-Object {
-  "1": Object {
-    "2": Object {
-      "1": Object {
-        "0": Object {
-          "0": Object {
-            "2": Object {
-              "2": Object {
-                "2": Object {
-                  "1": Object {
-                    "2": Object {
-                      "2": Object {
-                        "0": Object {
-                          "0": Object {
-                            "1": Object {
-                              "2": Object {
-                                "0": Object {
+exports[`merkle trie > pruning works and keeps correct hashes 1`] = `
+{
+  "1": {
+    "2": {
+      "1": {
+        "0": {
+          "0": {
+            "2": {
+              "2": {
+                "2": {
+                  "1": {
+                    "2": {
+                      "2": {
+                        "0": {
+                          "0": {
+                            "1": {
+                              "2": {
+                                "0": {
                                   "hash": 1000,
                                 },
                                 "hash": 1000,
                               },
                               "hash": 1000,
                             },
-                            "2": Object {
-                              "2": Object {
-                                "0": Object {
+                            "2": {
+                              "2": {
+                                "0": {
                                   "hash": 1100,
                                 },
                                 "hash": 1100,
@@ -113,28 +113,28 @@ Object {
                             },
                             "hash": 1956,
                           },
-                          "1": Object {
-                            "0": Object {
-                              "2": Object {
-                                "0": Object {
+                          "1": {
+                            "0": {
+                              "2": {
+                                "0": {
                                   "hash": 1200,
                                 },
                                 "hash": 1200,
                               },
                               "hash": 1200,
                             },
-                            "1": Object {
-                              "2": Object {
-                                "0": Object {
+                            "1": {
+                              "2": {
+                                "0": {
                                   "hash": 1300,
                                 },
                                 "hash": 1300,
                               },
                               "hash": 1300,
                             },
-                            "2": Object {
-                              "2": Object {
-                                "0": Object {
+                            "2": {
+                              "2": {
+                                "0": {
                                   "hash": 1400,
                                 },
                                 "hash": 1400,
@@ -143,28 +143,28 @@ Object {
                             },
                             "hash": 1244,
                           },
-                          "2": Object {
-                            "0": Object {
-                              "2": Object {
-                                "0": Object {
+                          "2": {
+                            "0": {
+                              "2": {
+                                "0": {
                                   "hash": 1500,
                                 },
                                 "hash": 1500,
                               },
                               "hash": 1500,
                             },
-                            "1": Object {
-                              "2": Object {
-                                "0": Object {
+                            "1": {
+                              "2": {
+                                "0": {
                                   "hash": 1600,
                                 },
                                 "hash": 1600,
                               },
                               "hash": 1600,
                             },
-                            "2": Object {
-                              "2": Object {
-                                "0": Object {
+                            "2": {
+                              "2": {
+                                "0": {
                                   "hash": 1700,
                                 },
                                 "hash": 1700,
@@ -175,29 +175,29 @@ Object {
                           },
                           "hash": 1600,
                         },
-                        "1": Object {
-                          "0": Object {
-                            "0": Object {
-                              "1": Object {
-                                "1": Object {
+                        "1": {
+                          "0": {
+                            "0": {
+                              "1": {
+                                "1": {
                                   "hash": 1800,
                                 },
                                 "hash": 1800,
                               },
                               "hash": 1800,
                             },
-                            "1": Object {
-                              "1": Object {
-                                "1": Object {
+                            "1": {
+                              "1": {
+                                "1": {
                                   "hash": 1900,
                                 },
                                 "hash": 1900,
                               },
                               "hash": 1900,
                             },
-                            "2": Object {
-                              "1": Object {
-                                "1": Object {
+                            "2": {
+                              "1": {
+                                "1": {
                                   "hash": 2000,
                                 },
                                 "hash": 2000,
@@ -206,10 +206,10 @@ Object {
                             },
                             "hash": 1972,
                           },
-                          "1": Object {
-                            "0": Object {
-                              "1": Object {
-                                "1": Object {
+                          "1": {
+                            "0": {
+                              "1": {
+                                "1": {
                                   "hash": 2100,
                                 },
                                 "hash": 2100,
@@ -246,33 +246,33 @@ Object {
 }
 `;
 
-exports[`merkle trie pruning works and keeps correct hashes 2`] = `
-Object {
-  "1": Object {
-    "2": Object {
-      "1": Object {
-        "0": Object {
-          "0": Object {
-            "2": Object {
-              "2": Object {
-                "2": Object {
-                  "1": Object {
-                    "2": Object {
-                      "2": Object {
-                        "0": Object {
-                          "1": Object {
-                            "1": Object {
-                              "2": Object {
-                                "0": Object {
+exports[`merkle trie > pruning works and keeps correct hashes 2`] = `
+{
+  "1": {
+    "2": {
+      "1": {
+        "0": {
+          "0": {
+            "2": {
+              "2": {
+                "2": {
+                  "1": {
+                    "2": {
+                      "2": {
+                        "0": {
+                          "1": {
+                            "1": {
+                              "2": {
+                                "0": {
                                   "hash": 1300,
                                 },
                                 "hash": 1300,
                               },
                               "hash": 1300,
                             },
-                            "2": Object {
-                              "2": Object {
-                                "0": Object {
+                            "2": {
+                              "2": {
+                                "0": {
                                   "hash": 1400,
                                 },
                                 "hash": 1400,
@@ -281,19 +281,19 @@ Object {
                             },
                             "hash": 1244,
                           },
-                          "2": Object {
-                            "1": Object {
-                              "2": Object {
-                                "0": Object {
+                          "2": {
+                            "1": {
+                              "2": {
+                                "0": {
                                   "hash": 1600,
                                 },
                                 "hash": 1600,
                               },
                               "hash": 1600,
                             },
-                            "2": Object {
-                              "2": Object {
-                                "0": Object {
+                            "2": {
+                              "2": {
+                                "0": {
                                   "hash": 1700,
                                 },
                                 "hash": 1700,
@@ -304,20 +304,20 @@ Object {
                           },
                           "hash": 1600,
                         },
-                        "1": Object {
-                          "0": Object {
-                            "1": Object {
-                              "1": Object {
-                                "1": Object {
+                        "1": {
+                          "0": {
+                            "1": {
+                              "1": {
+                                "1": {
                                   "hash": 1900,
                                 },
                                 "hash": 1900,
                               },
                               "hash": 1900,
                             },
-                            "2": Object {
-                              "1": Object {
-                                "1": Object {
+                            "2": {
+                              "1": {
+                                "1": {
                                   "hash": 2000,
                                 },
                                 "hash": 2000,
@@ -326,10 +326,10 @@ Object {
                             },
                             "hash": 1972,
                           },
-                          "1": Object {
-                            "0": Object {
-                              "1": Object {
-                                "1": Object {
+                          "1": {
+                            "0": {
+                              "1": {
+                                "1": {
                                   "hash": 2100,
                                 },
                                 "hash": 2100,

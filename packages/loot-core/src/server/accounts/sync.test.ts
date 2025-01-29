@@ -8,16 +8,16 @@ import { getServer } from '../server-config';
 import { reconcileTransactions, addTransactions } from './sync';
 import { loadRules, insertRule } from './transaction-rules';
 
-jest.mock('../../shared/months', () => ({
-  ...jest.requireActual('../../shared/months'),
-  currentDay: jest.fn(),
-  currentMonth: jest.fn(),
+vi.mock('../../shared/months', async () => ({
+  ...(await vi.importActual('../../shared/months')),
+  currentDay: vi.fn(),
+  currentMonth: vi.fn(),
 }));
 
 beforeEach(async () => {
-  jest.resetAllMocks();
-  (monthUtils.currentDay as jest.Mock).mockReturnValue('2017-10-15');
-  (monthUtils.currentMonth as jest.Mock).mockReturnValue('2017-10');
+  vi.resetAllMocks();
+  vi.mocked(monthUtils.currentDay).mockReturnValue('2017-10-15');
+  vi.mocked(monthUtils.currentMonth).mockReturnValue('2017-10');
   await global.emptyDatabase()();
   await loadMappings();
   await loadRules();

@@ -311,7 +311,7 @@ async function run(msgs) {
 }
 
 describe('sync property test', () => {
-  xit('should always sync clients into the same state', async () => {
+  it.skip('should always sync clients into the same state', async () => {
     const test = await jsc.check(
       jsc.forall(
         jsc.tuple(Array.from(new Array(100)).map(() => jsc.oneof(generators))),
@@ -356,7 +356,7 @@ describe('sync property test', () => {
     }
   }, 50000);
 
-  xit('should run a counterexample that needs to be fixed', async () => {
+  it.skip('should run a counterexample that needs to be fixed', async () => {
     function convert(data) {
       return data.map(x => ({
         ...x,

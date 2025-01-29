@@ -1,8 +1,8 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Sync should send messages to the server 1`] = `
-Array [
-  Object {
+exports[`Sync > should send messages to the server 1`] = `
+[
+  {
     "column": "amount",
     "dataset": "transactions",
     "id": 1,
@@ -10,7 +10,7 @@ Array [
     "timestamp": "1970-01-02T10:17:36.789Z-0000-0000000000000id1",
     "value": "N:3200",
   },
-  Object {
+  {
     "column": "amount",
     "dataset": "transactions",
     "id": 2,
@@ -21,10 +21,10 @@ Array [
 ]
 `;
 
-exports[`Sync should send messages to the server 2`] = `
-Array [
-  Object {
-    "clock": "{\\"timestamp\\":\\"1970-01-02T10:17:37.789Z-0000-0000000000000id1\\",\\"merkle\\":{\\"2\\":{\\"2\\":{\\"1\\":{\\"1\\":{\\"0\\":{\\"1\\":{\\"2\\":{\\"hash\\":-1992470180},\\"hash\\":-1992470180},\\"hash\\":-1992470180},\\"hash\\":-1992470180},\\"hash\\":-1992470180},\\"hash\\":-1992470180},\\"hash\\":-1992470180},\\"hash\\":-1992470180}}",
+exports[`Sync > should send messages to the server 2`] = `
+[
+  {
+    "clock": "{"timestamp":"1970-01-02T10:17:37.789Z-0000-0000000000000id1","merkle":{"2":{"2":{"1":{"1":{"0":{"1":{"2":{"hash":-1992470180},"hash":-1992470180},"hash":-1992470180},"hash":-1992470180},"hash":-1992470180},"hash":-1992470180},"hash":-1992470180},"hash":-1992470180}}",
     "id": 1,
   },
 ]

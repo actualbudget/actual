@@ -1,7 +1,7 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`range returns a full range 1`] = `
-Array [
+[
   "2016-10",
   "2016-11",
   "2016-12",

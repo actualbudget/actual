@@ -1,8 +1,8 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Database transactions are sorted by date 1`] = `
-Array [
-  Object {
+exports[`Database > transactions are sorted by date 1`] = `
+[
+  {
     "amount": -23,
     "date": "2018-01-05",
     "id": "id2",
@@ -12,7 +12,7 @@ Array [
     "sort_order": 123456789,
     "starting_balance_flag": false,
   },
-  Object {
+  {
     "amount": 12,
     "date": "2018-01-04",
     "id": "id4",
@@ -22,7 +22,7 @@ Array [
     "sort_order": 123456789,
     "starting_balance_flag": false,
   },
-  Object {
+  {
     "amount": -5,
     "date": "2018-01-03",
     "id": "id6",
@@ -32,7 +32,7 @@ Array [
     "sort_order": 123456789,
     "starting_balance_flag": false,
   },
-  Object {
+  {
     "amount": -24,
     "date": "2018-01-02",
     "id": "id3",
@@ -42,7 +42,7 @@ Array [
     "sort_order": 123456789,
     "starting_balance_flag": false,
   },
-  Object {
+  {
     "amount": 2,
     "date": "2018-01-01",
     "id": "id5",
@@ -55,9 +55,9 @@ Array [
 ]
 `;
 
-exports[`Database transactions are sorted by id as a last resort 1`] = `
-Array [
-  Object {
+exports[`Database > transactions are sorted by id as a last resort 1`] = `
+[
+  {
     "amount": -23,
     "date": "2018-01-05",
     "id": "id2",
@@ -67,7 +67,7 @@ Array [
     "sort_order": 5,
     "starting_balance_flag": false,
   },
-  Object {
+  {
     "amount": 12,
     "date": "2018-01-03",
     "id": "foo1",
@@ -77,7 +77,7 @@ Array [
     "sort_order": 4,
     "starting_balance_flag": false,
   },
-  Object {
+  {
     "amount": 2,
     "date": "2018-01-03",
     "id": "foo2",
@@ -87,7 +87,7 @@ Array [
     "sort_order": 4,
     "starting_balance_flag": false,
   },
-  Object {
+  {
     "amount": -24,
     "date": "2018-01-03",
     "id": "foo3",
@@ -100,9 +100,9 @@ Array [
 ]
 `;
 
-exports[`Database transactions are sorted by sort order 1`] = `
-Array [
-  Object {
+exports[`Database > transactions are sorted by sort order 1`] = `
+[
+  {
     "amount": -23,
     "date": "2018-01-05",
     "id": "id2",
@@ -112,7 +112,7 @@ Array [
     "sort_order": 5,
     "starting_balance_flag": false,
   },
-  Object {
+  {
     "amount": -24,
     "date": "2018-01-03",
     "id": "id3",
@@ -122,7 +122,7 @@ Array [
     "sort_order": 8,
     "starting_balance_flag": false,
   },
-  Object {
+  {
     "amount": 2,
     "date": "2018-01-03",
     "id": "id5",
@@ -132,7 +132,7 @@ Array [
     "sort_order": 4,
     "starting_balance_flag": false,
   },
-  Object {
+  {
     "amount": 12,
     "date": "2018-01-03",
     "id": "id4",
@@ -142,7 +142,7 @@ Array [
     "sort_order": 2,
     "starting_balance_flag": false,
   },
-  Object {
+  {
     "amount": -5,
     "date": "2018-01-03",
     "id": "id6",
@@ -155,9 +155,9 @@ Array [
 ]
 `;
 
-exports[`Database transactions are sorted by starting balance flag 1`] = `
-Array [
-  Object {
+exports[`Database > transactions are sorted by starting balance flag 1`] = `
+[
+  {
     "amount": -23,
     "date": "2018-01-05",
     "id": "id2",
@@ -167,7 +167,7 @@ Array [
     "sort_order": 123456789,
     "starting_balance_flag": false,
   },
-  Object {
+  {
     "amount": -25,
     "date": "2018-01-03",
     "id": "id4",
@@ -177,7 +177,7 @@ Array [
     "sort_order": 123456789,
     "starting_balance_flag": false,
   },
-  Object {
+  {
     "amount": -5,
     "date": "2018-01-03",
     "id": "id5",
@@ -187,7 +187,7 @@ Array [
     "sort_order": 123456789,
     "starting_balance_flag": false,
   },
-  Object {
+  {
     "amount": 12,
     "date": "2018-01-03",
     "id": "id3",
@@ -200,9 +200,9 @@ Array [
 ]
 `;
 
-exports[`Database transactions don’t show orphaned child transactions 1`] = `
-Array [
-  Object {
+exports[`Database > transactions don’t show orphaned child transactions 1`] = `
+[
+  {
     "amount": -23,
     "date": "2018-01-05",
     "id": "id2",
@@ -215,9 +215,9 @@ Array [
 ]
 `;
 
-exports[`Database transactions get child transactions in the right order 1`] = `
-Array [
-  Object {
+exports[`Database > transactions get child transactions in the right order 1`] = `
+[
+  {
     "amount": -23,
     "date": "2018-01-05",
     "id": "id2",
@@ -227,7 +227,7 @@ Array [
     "sort_order": 5,
     "starting_balance_flag": false,
   },
-  Object {
+  {
     "amount": -24,
     "date": "2018-01-03",
     "id": "foo",
@@ -237,7 +237,7 @@ Array [
     "sort_order": 8,
     "starting_balance_flag": false,
   },
-  Object {
+  {
     "amount": 12,
     "date": "2018-01-03",
     "id": "child1",
@@ -247,7 +247,7 @@ Array [
     "sort_order": 7.99,
     "starting_balance_flag": false,
   },
-  Object {
+  {
     "amount": 2,
     "date": "2018-01-03",
     "id": "child2",
@@ -257,7 +257,7 @@ Array [
     "sort_order": 7.98,
     "starting_balance_flag": false,
   },
-  Object {
+  {
     "amount": -5,
     "date": "2018-01-03",
     "id": "child3",

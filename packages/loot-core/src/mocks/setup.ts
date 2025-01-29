@@ -5,6 +5,7 @@ import * as fetchClient from '../platform/client/fetch';
 import * as sqlite from '../platform/server/sqlite';
 import * as rules from '../server/accounts/transaction-rules';
 import * as db from '../server/db';
+import * as MigrationsType from '../server/migrate/migrations';
 import {
   enableGlobalMutations,
   disableGlobalMutations,
@@ -15,7 +16,7 @@ import { setSyncingMode } from '../server/sync';
 import { updateVersion } from '../server/update';
 import { resetTracer, tracer } from '../shared/test-helpers';
 
-jest.mock('../server/post');
+vi.mock('../server/post');
 
 // By default, syncing is disabled
 setSyncingMode('disabled');
@@ -53,13 +54,15 @@ global.resetRandomId = () => {
   _id = 1;
 };
 
-jest.mock('uuid', () => ({
+vi.mock('uuid', () => ({
   v4: () => {
     return 'id' + _id++;
   },
 }));
-jest.mock('../server/migrate/migrations', () => {
-  const realMigrations = jest.requireActual('../server/migrate/migrations');
+vi.mock('../server/migrate/migrations', async () => {
+  const realMigrations = await vi.importActual<typeof MigrationsType>(
+    '../server/migrate/migrations',
+  );
   return {
     ...realMigrations,
     migrate: async db => {
@@ -118,7 +121,8 @@ global.getDatabaseDump = async function (tables) {
 
 // If you want to test the sql.js backend, you need this so it knows
 // where to find the webassembly file
-// process.env.PUBLIC_URL = __dirname + '/../../../../node_modules/sql.js/dist/';
+// process.env.PUBLIC_URL =
+//   __dirname + '/../../../../node_modules/@jlongster/sql.js/dist/';
 
 global.emptyDatabase = function (avoidUpdate) {
   return async () => {

@@ -187,6 +187,10 @@ export default defineConfig(async ({ mode }) => {
       environment: 'jsdom',
       globals: true,
       setupFiles: './src/setupTests.js',
+      onConsoleLog(log: string, type: 'stdout' | 'stderr'): boolean | void {
+        // print only console.error
+        return type === 'stderr';
+      },
     },
   };
 });

@@ -1,8 +1,8 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`File import CAMT.053 import works 1`] = `
-Array [
-  Object {
+exports[`File import > CAMT.053 import works 1`] = `
+[
+  {
     "acct": "one",
     "amount": 60,
     "category": null,
@@ -29,7 +29,7 @@ Array [
     "transferred_id": null,
     "type": null,
   },
-  Object {
+  {
     "acct": "one",
     "amount": 50,
     "category": null,
@@ -56,7 +56,7 @@ Array [
     "transferred_id": null,
     "type": null,
   },
-  Object {
+  {
     "acct": "one",
     "amount": -8985,
     "category": null,
@@ -81,7 +81,7 @@ Array [
     "transferred_id": null,
     "type": null,
   },
-  Object {
+  {
     "acct": "one",
     "amount": 120,
     "category": null,
@@ -109,7 +109,7 @@ Array [
     "transferred_id": null,
     "type": null,
   },
-  Object {
+  {
     "acct": "one",
     "amount": -8000,
     "category": null,
@@ -134,7 +134,7 @@ Array [
     "transferred_id": null,
     "type": null,
   },
-  Object {
+  {
     "acct": "one",
     "amount": 225,
     "category": null,
@@ -159,7 +159,7 @@ Array [
     "transferred_id": null,
     "type": null,
   },
-  Object {
+  {
     "acct": "one",
     "amount": 120,
     "category": null,
@@ -187,9 +187,9 @@ Array [
 ]
 `;
 
-exports[`File import handles html escaped plaintext 1`] = `
-Array [
-  Object {
+exports[`File import > handles html escaped plaintext 1`] = `
+[
+  {
     "acct": "one",
     "amount": -100,
     "category": null,
@@ -214,7 +214,7 @@ Array [
     "transferred_id": null,
     "type": null,
   },
-  Object {
+  {
     "acct": "one",
     "amount": -100,
     "category": null,
@@ -242,9 +242,9 @@ Array [
 ]
 `;
 
-exports[`File import handles non-ASCII characters 1`] = `
-Array [
-  Object {
+exports[`File import > handles non-ASCII characters 1`] = `
+[
+  {
     "acct": "one",
     "amount": -2000,
     "category": null,
@@ -272,9 +272,9 @@ Array [
 ]
 `;
 
-exports[`File import ofx import works (credit card) 1`] = `
-Array [
-  Object {
+exports[`File import > ofx import works (credit card) 1`] = `
+[
+  {
     "acct": "one",
     "amount": -600,
     "category": null,
@@ -302,9 +302,9 @@ Array [
 ]
 `;
 
-exports[`File import ofx import works 1`] = `
-Array [
-  Object {
+exports[`File import > ofx import works 1`] = `
+[
+  {
     "acct": "one",
     "amount": -3000,
     "category": null,
@@ -329,7 +329,7 @@ Array [
     "transferred_id": null,
     "type": null,
   },
-  Object {
+  {
     "acct": "one",
     "amount": -377,
     "category": null,
@@ -354,7 +354,7 @@ Array [
     "transferred_id": null,
     "type": null,
   },
-  Object {
+  {
     "acct": "one",
     "amount": -962,
     "category": null,
@@ -379,7 +379,7 @@ Array [
     "transferred_id": null,
     "type": null,
   },
-  Object {
+  {
     "acct": "one",
     "amount": -11599,
     "category": null,
@@ -404,7 +404,7 @@ Array [
     "transferred_id": null,
     "type": null,
   },
-  Object {
+  {
     "acct": "one",
     "amount": -1034,
     "category": null,
@@ -429,7 +429,7 @@ Array [
     "transferred_id": null,
     "type": null,
   },
-  Object {
+  {
     "acct": "one",
     "amount": -2253,
     "category": null,
@@ -454,7 +454,7 @@ Array [
     "transferred_id": null,
     "type": null,
   },
-  Object {
+  {
     "acct": "one",
     "amount": -10871,
     "category": null,
@@ -479,7 +479,7 @@ Array [
     "transferred_id": null,
     "type": null,
   },
-  Object {
+  {
     "acct": "one",
     "amount": -2500,
     "category": null,
@@ -504,7 +504,7 @@ Array [
     "transferred_id": null,
     "type": null,
   },
-  Object {
+  {
     "acct": "one",
     "amount": -3238,
     "category": null,
@@ -529,7 +529,7 @@ Array [
     "transferred_id": null,
     "type": null,
   },
-  Object {
+  {
     "acct": "one",
     "amount": -607,
     "category": null,
@@ -557,9 +557,9 @@ Array [
 ]
 `;
 
-exports[`File import qfx import works 1`] = `
-Array [
-  Object {
+exports[`File import > qfx import works 1`] = `
+[
+  {
     "acct": "one",
     "amount": -3000,
     "category": null,
@@ -584,7 +584,7 @@ Array [
     "transferred_id": null,
     "type": null,
   },
-  Object {
+  {
     "acct": "one",
     "amount": -377,
     "category": null,
@@ -609,7 +609,7 @@ Array [
     "transferred_id": null,
     "type": null,
   },
-  Object {
+  {
     "acct": "one",
     "amount": -962,
     "category": null,
@@ -634,7 +634,7 @@ Array [
     "transferred_id": null,
     "type": null,
   },
-  Object {
+  {
     "acct": "one",
     "amount": -11599,
     "category": null,
@@ -659,7 +659,7 @@ Array [
     "transferred_id": null,
     "type": null,
   },
-  Object {
+  {
     "acct": "one",
     "amount": -1034,
     "category": null,
@@ -684,7 +684,7 @@ Array [
     "transferred_id": null,
     "type": null,
   },
-  Object {
+  {
     "acct": "one",
     "amount": -2253,
     "category": null,
@@ -709,7 +709,7 @@ Array [
     "transferred_id": null,
     "type": null,
   },
-  Object {
+  {
     "acct": "one",
     "amount": -10871,
     "category": null,
@@ -734,7 +734,7 @@ Array [
     "transferred_id": null,
     "type": null,
   },
-  Object {
+  {
     "acct": "one",
     "amount": -2500,
     "category": null,
@@ -759,7 +759,7 @@ Array [
     "transferred_id": null,
     "type": null,
   },
-  Object {
+  {
     "acct": "one",
     "amount": -3238,
     "category": null,
@@ -784,7 +784,7 @@ Array [
     "transferred_id": null,
     "type": null,
   },
-  Object {
+  {
     "acct": "one",
     "amount": -607,
     "category": null,
@@ -812,9 +812,9 @@ Array [
 ]
 `;
 
-exports[`File import qif import works 1`] = `
-Array [
-  Object {
+exports[`File import > qif import works 1`] = `
+[
+  {
     "acct": "one",
     "amount": -2500,
     "category": null,
@@ -839,7 +839,7 @@ Array [
     "transferred_id": null,
     "type": null,
   },
-  Object {
+  {
     "acct": "one",
     "amount": -4500,
     "category": null,
@@ -864,7 +864,7 @@ Array [
     "transferred_id": null,
     "type": null,
   },
-  Object {
+  {
     "acct": "one",
     "amount": -3133,
     "category": null,
@@ -889,7 +889,7 @@ Array [
     "transferred_id": null,
     "type": null,
   },
-  Object {
+  {
     "acct": "one",
     "amount": -631,
     "category": null,
@@ -914,7 +914,7 @@ Array [
     "transferred_id": null,
     "type": null,
   },
-  Object {
+  {
     "acct": "one",
     "amount": -4192,
     "category": null,
@@ -939,7 +939,7 @@ Array [
     "transferred_id": null,
     "type": null,
   },
-  Object {
+  {
     "acct": "one",
     "amount": -2401,
     "category": null,
@@ -964,7 +964,7 @@ Array [
     "transferred_id": null,
     "type": null,
   },
-  Object {
+  {
     "acct": "one",
     "amount": -1200,
     "category": null,
@@ -989,7 +989,7 @@ Array [
     "transferred_id": null,
     "type": null,
   },
-  Object {
+  {
     "acct": "one",
     "amount": 87485,
     "category": null,
@@ -1014,7 +1014,7 @@ Array [
     "transferred_id": null,
     "type": null,
   },
-  Object {
+  {
     "acct": "one",
     "amount": -1263,
     "category": null,
@@ -1039,7 +1039,7 @@ Array [
     "transferred_id": null,
     "type": null,
   },
-  Object {
+  {
     "acct": "one",
     "amount": -3600,
     "category": null,
@@ -1064,7 +1064,7 @@ Array [
     "transferred_id": null,
     "type": null,
   },
-  Object {
+  {
     "acct": "one",
     "amount": -521,
     "category": null,
@@ -1089,7 +1089,7 @@ Array [
     "transferred_id": null,
     "type": null,
   },
-  Object {
+  {
     "acct": "one",
     "amount": -3470,
     "category": null,
@@ -1114,7 +1114,7 @@ Array [
     "transferred_id": null,
     "type": null,
   },
-  Object {
+  {
     "acct": "one",
     "amount": -541,
     "category": null,
@@ -1139,7 +1139,7 @@ Array [
     "transferred_id": null,
     "type": null,
   },
-  Object {
+  {
     "acct": "one",
     "amount": -10529,
     "category": null,
@@ -1164,7 +1164,7 @@ Array [
     "transferred_id": null,
     "type": null,
   },
-  Object {
+  {
     "acct": "one",
     "amount": -736,
     "category": null,
@@ -1189,7 +1189,7 @@ Array [
     "transferred_id": null,
     "type": null,
   },
-  Object {
+  {
     "acct": "one",
     "amount": -1285,
     "category": null,
@@ -1214,7 +1214,7 @@ Array [
     "transferred_id": null,
     "type": null,
   },
-  Object {
+  {
     "acct": "one",
     "amount": -1299,
     "category": null,
@@ -1239,7 +1239,7 @@ Array [
     "transferred_id": null,
     "type": null,
   },
-  Object {
+  {
     "acct": "one",
     "amount": -6278,
     "category": null,

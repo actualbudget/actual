@@ -1,15 +1,15 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Migrations gets the latest migrations 1`] = `
-Array [
+exports[`Migrations > gets the latest migrations 1`] = `
+[
   "1508717984291_up_add-poop.sql",
   "1508718036311_up_modify-poop.sql",
   "1508727787513_remove-is_income.sql",
 ]
 `;
 
-exports[`Migrations gets the latest migrations 2`] = `
-Array [
+exports[`Migrations > gets the latest migrations 2`] = `
+[
   "1508717984291_up_add-poop.sql",
   "1508718036311_up_modify-poop.sql",
   "1508727787513_remove-is_income.sql",
