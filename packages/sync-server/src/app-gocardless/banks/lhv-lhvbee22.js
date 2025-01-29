@@ -9,6 +9,8 @@ export default {
   institutionIds: ['LHV_LHVBEE22'],
 
   normalizeTransaction(transaction, booked) {
+    const editedTrans = { ...transaction };
+
     // extract bookingDate and creditorName for card transactions, e.g.
     // (..1234) 2025-01-02 09:32 CrustumOU\Poordi 3\Tallinn\10156     ESTEST
     // bookingDate: 2025-01-02
@@ -22,19 +24,13 @@ export default {
     if (cardTxMatch) {
       const extractedDate = d.parse(cardTxMatch[2], 'yyyy-MM-dd', new Date());
 
-      transaction = {
-        ...transaction,
-        creditorName: cardTxMatch[4].split('\\')[0].trim(),
-      };
+      editedTrans.creditorName = cardTxMatch[4].split('\\')[0].trim();
 
       if (booked && d.isValid(extractedDate)) {
-        transaction = {
-          ...transaction,
-          bookingDate: d.format(extractedDate, 'yyyy-MM-dd'),
-        };
+        editedTrans.date = d.format(extractedDate, 'yyyy-MM-dd');
       }
     }
 
-    return Fallback.normalizeTransaction(transaction, booked);
+    return Fallback.normalizeTransaction(transaction, booked, editedTrans);
   },
 };

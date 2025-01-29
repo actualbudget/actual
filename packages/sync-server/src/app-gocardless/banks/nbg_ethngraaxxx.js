@@ -1,7 +1,6 @@
 import Fallback from './integration-bank.js';
 
 import { amountToInteger } from '../utils.js';
-import { formatPayeeName } from '../../util/payee-name.js';
 
 /** @type {import('./bank.interface.js').IBank} */
 export default {
@@ -14,27 +13,22 @@ export default {
    * - Corrects amount to negative (nbg erroneously omits the minus sign in pending transactions)
    * - Removes prefix 'ΑΓΟΡΑ' from remittance information to align with the booked transaction (necessary for fuzzy matching to work)
    */
-  normalizeTransaction(transaction, _booked) {
+  normalizeTransaction(transaction, booked) {
+    const editedTrans = { ...transaction };
+
     if (
       !transaction.transactionId &&
       transaction.remittanceInformationUnstructured.startsWith('ΑΓΟΡΑ ')
     ) {
-      transaction = {
-        ...transaction,
-        transactionAmount: {
-          amount: '-' + transaction.transactionAmount.amount,
-          currency: transaction.transactionAmount.currency,
-        },
-        remittanceInformationUnstructured:
-          transaction.remittanceInformationUnstructured.substring(6),
+      editedTrans.transactionAmount = {
+        amount: '-' + transaction.transactionAmount.amount,
+        currency: transaction.transactionAmount.currency,
       };
+      editedTrans.remittanceInformationUnstructured =
+        transaction.remittanceInformationUnstructured.substring(6);
     }
 
-    return {
-      ...transaction,
-      payeeName: formatPayeeName(transaction),
-      date: transaction.bookingDate || transaction.valueDate,
-    };
+    return Fallback.normalizeTransaction(transaction, booked, editedTrans);
   },
 
   /**

@@ -1,20 +1,20 @@
 import Fallback from './integration-bank.js';
 
-import { formatPayeeName } from '../../util/payee-name.js';
-
 /** @type {import('./bank.interface.js').IBank} */
 export default {
   ...Fallback,
 
   institutionIds: ['HYPE_HYEEIT22'],
 
-  normalizeTransaction(transaction, _booked) {
+  normalizeTransaction(transaction, booked) {
+    const editedTrans = { ...transaction };
+
     /** Online card payments - identified by "crd" transaction code
      *  always start with PAGAMENTO PRESSO + <payee name>
      */
     if (transaction.proprietaryBankTransactionCode == 'crd') {
       // remove PAGAMENTO PRESSO and set payee name
-      transaction.debtorName =
+      editedTrans.debtorName =
         transaction.remittanceInformationUnstructured?.slice(
           'PAGAMENTO PRESSO '.length,
         );
@@ -32,7 +32,7 @@ export default {
       // NOTE: if {payee_name} contains dashes (unlikely / impossible?), this probably gets bugged!
       let infoIdx =
         transaction.remittanceInformationUnstructured.indexOf(' - ') + 3;
-      transaction.remittanceInformationUnstructured =
+      editedTrans.remittanceInformationUnstructured =
         infoIdx == -1
           ? transaction.remittanceInformationUnstructured
           : transaction.remittanceInformationUnstructured.slice(infoIdx).trim();
@@ -64,12 +64,11 @@ export default {
         idx = str.indexOf('\\U'); // slight inefficiency?
         start_idx = idx;
       }
-      transaction.remittanceInformationUnstructured = str;
+      editedTrans.remittanceInformationUnstructured = str;
     }
-    return {
-      ...transaction,
-      payeeName: formatPayeeName(transaction),
-      date: transaction.valueDate || transaction.bookingDate,
-    };
+
+    editedTrans.date = transaction.valueDate || transaction.bookingDate;
+
+    return Fallback.normalizeTransaction(transaction, booked, editedTrans);
   },
 };

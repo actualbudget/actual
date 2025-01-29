@@ -1,7 +1,5 @@
 import Fallback from './integration-bank.js';
 
-import { formatPayeeName } from '../../util/payee-name.js';
-
 /** @type {import('./bank.interface.js').IBank} */
 export default {
   ...Fallback,
@@ -22,7 +20,9 @@ export default {
    *  The goal of the  normalization is to place any relevant information of the additionalInformation
    *  field in the remittanceInformationUnstructuredArray field.
    */
-  normalizeTransaction(transaction, _booked) {
+  normalizeTransaction(transaction, booked) {
+    const editedTrans = { ...transaction };
+
     // Extract the creditor name to fill it in with information from the
     // additionalInformation field in case it's not yet defined.
     let creditorName = transaction.creditorName;
@@ -49,7 +49,7 @@ export default {
           additionalInformationObject[key] = value;
         }
         // Keep existing unstructuredArray and add atmPosName and narrative
-        transaction.remittanceInformationUnstructuredArray = [
+        editedTrans.remittanceInformationUnstructuredArray = [
           transaction.remittanceInformationUnstructuredArray ?? '',
           additionalInformationObject?.atmPosName ?? '',
           additionalInformationObject?.narrative ?? '',
@@ -66,12 +66,8 @@ export default {
       }
     }
 
-    transaction.creditorName = creditorName;
+    editedTrans.creditorName = creditorName;
 
-    return {
-      ...transaction,
-      payeeName: formatPayeeName(transaction),
-      date: transaction.valueDate || transaction.bookingDate,
-    };
+    return Fallback.normalizeTransaction(transaction, booked, editedTrans);
   },
 };
