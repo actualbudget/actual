@@ -42,7 +42,13 @@ export type MappableFieldWithExample = {
 const mappableFields: MappableField[] = [
   {
     actualField: 'date',
-    syncFields: ['date', 'bookingDate', 'valueDate'],
+    syncFields: [
+      'date',
+      'bookingDate',
+      'valueDate',
+      'postedDate',
+      'transactedDate',
+    ],
   },
   {
     actualField: 'payee',
@@ -51,15 +57,20 @@ const mappableFields: MappableField[] = [
       'creditorName',
       'debtorName',
       'remittanceInformationUnstructured',
+      'remittanceInformationUnstructuredArrayString',
       'remittanceInformationStructured',
+      'remittanceInformationStructuredArrayString',
       'additionalInformation',
     ],
   },
   {
     actualField: 'notes',
     syncFields: [
+      'notes',
       'remittanceInformationUnstructured',
+      'remittanceInformationUnstructuredArrayString',
       'remittanceInformationStructured',
+      'remittanceInformationStructuredArrayString',
       'additionalInformation',
     ],
   },
@@ -117,7 +128,7 @@ export function EditSyncAccount({ account }: EditSyncAccountProps) {
     [account.id, transactionDirection],
   );
 
-  const { transactions, isLoading } = useTransactions({
+  const { transactions } = useTransactions({
     query: transactionQuery,
   });
 
@@ -147,8 +158,6 @@ export function EditSyncAccount({ account }: EditSyncAccountProps) {
       return updated;
     });
   };
-
-  if (isLoading) return null;
 
   const fields = exampleTransaction ? getFields(exampleTransaction) : [];
   const mapping = mappings.get(transactionDirection);

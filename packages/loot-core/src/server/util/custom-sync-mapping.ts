@@ -34,7 +34,7 @@ export const defaultMappings: Mappings = new Map([
     new Map([
       ['date', 'date'],
       ['payee', 'payeeName'],
-      ['notes', 'remittanceInformationUnstructured'],
+      ['notes', 'notes'],
     ]),
   ],
   [
@@ -42,7 +42,7 @@ export const defaultMappings: Mappings = new Map([
     new Map([
       ['date', 'date'],
       ['payee', 'payeeName'],
-      ['notes', 'remittanceInformationUnstructured'],
+      ['notes', 'notes'],
     ]),
   ],
 ]);
