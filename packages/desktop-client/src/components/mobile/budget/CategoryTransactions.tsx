@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 import { SchedulesProvider } from 'loot-core/client/data-hooks/schedules';
 import {
