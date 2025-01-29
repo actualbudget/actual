@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { useTransactions } from 'loot-core/client/data-hooks/transactions';
 import { q } from 'loot-core/shared/query';
@@ -23,6 +24,7 @@ type UseDisplayPayeeProps = {
 };
 
 export function useDisplayPayee({ transaction }: UseDisplayPayeeProps) {
+  const { t } = useTranslation();
   const subtransactionsQuery = useMemo(
     () => q('transactions').filter({ parent_id: transaction?.id }).select('*'),
     [transaction?.id],
@@ -38,6 +40,7 @@ export function useDisplayPayee({ transaction }: UseDisplayPayeeProps) {
   return useMemo(() => {
     if (subtransactions.length === 0) {
       return getPrettyPayee({
+        t,
         transaction,
         payee,
         transferAccount: accounts.find(
@@ -67,7 +70,7 @@ export function useDisplayPayee({ transaction }: UseDisplayPayeeProps) {
       ) || {};
 
     if (!mostCommonPayeeTransaction) {
-      return 'Split (no payee)';
+      return t('Split (no payee)');
     }
 
     const mostCommonPayee = payees.find(
@@ -75,12 +78,13 @@ export function useDisplayPayee({ transaction }: UseDisplayPayeeProps) {
     );
 
     if (!mostCommonPayee) {
-      return 'Split (no payee)';
+      return t('Split (no payee)');
     }
 
     const numDistinctPayees = Object.keys(counts).length;
 
     return getPrettyPayee({
+      t,
       transaction: mostCommonPayeeTransaction,
       payee: mostCommonPayee,
       transferAccount: accounts.find(
@@ -91,10 +95,11 @@ export function useDisplayPayee({ transaction }: UseDisplayPayeeProps) {
       ),
       numHiddenPayees: numDistinctPayees - 1,
     });
-  }, [subtransactions, payees, accounts, transaction, payee]);
+  }, [subtransactions, payees, accounts, transaction, payee, t]);
 }
 
 type GetPrettyPayeeProps = {
+  t: ReturnType<typeof useTranslation>['t'];
   transaction?: TransactionEntity | undefined;
   payee?: PayeeEntity | undefined;
   transferAccount?: AccountEntity | undefined;
@@ -102,6 +107,7 @@ type GetPrettyPayeeProps = {
 };
 
 function getPrettyPayee({
+  t,
   transaction,
   payee,
   transferAccount,
@@ -112,7 +118,11 @@ function getPrettyPayee({
   }
 
   const formatPayeeName = (payeeName: string) =>
-    numHiddenPayees > 0 ? `${payeeName} (+${numHiddenPayees} more)` : payeeName;
+    numHiddenPayees > 0
+      ? `${payeeName} ${t('(+{{numHiddenPayees}} more)', {
+          numHiddenPayees,
+        })}`
+      : payeeName;
 
   const { payee: payeeId } = transaction;
 
