@@ -55,29 +55,6 @@ export async function addTransfer(transaction, transferredAccount) {
     [transaction.account],
   );
 
-  // We need to enforce certain constraints with child transaction transfers
-  if (transaction.parent_id) {
-    const row = await db.first(
-      `
-        SELECT p.id, p.transfer_acct FROM v_transactions t
-        LEFT JOIN payees p ON p.id = t.payee
-        WHERE t.id = ?
-      `,
-      [transaction.parent_id],
-    );
-
-    if (row.transfer_acct) {
-      if (row.id !== transaction.payee) {
-        // This child transaction is trying to use a transfer payee,
-        // but the parent is already using a different transfer payee.
-        // This is not allowed, so not only do we do nothing, we clear
-        // the payee of the child transaction to make it clear
-        await db.updateTransaction({ id: transaction.id, payee: null });
-        return { id: transaction.id, payee: null };
-      }
-    }
-  }
-
   const id = await db.insertTransaction({
     account: transferredAccount,
     amount: -transaction.amount,
