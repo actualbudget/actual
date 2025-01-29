@@ -150,7 +150,7 @@ export function ManageRules({
           )
     ).slice(0, 100 + page * 50);
   }, [allRules, filter, filterData, page]);
-  const selectedInst = useSelected('manage-rules', allRules, []);
+  const selectedInst = useSelected('manage-rules', filteredRules, []);
   const [hoveredRule, setHoveredRule] = useState(null);
 
   const onSearchChange = useCallback(
@@ -200,18 +200,11 @@ export function ManageRules({
     setPage(page => page + 1);
   }
 
-  const rulesToDelete = useMemo(() => {
-    const filteredRuleIds = new Set(filteredRules.map(r => r.id));
-    return new Set(
-      [...selectedInst.items].filter(item => filteredRuleIds.has(item)),
-    );
-  }, [selectedInst.items, filteredRules]);
-
   const onDeleteSelected = useCallback(async () => {
     setLoading(true);
 
     const { someDeletionsFailed } = await send('rule-delete-all', [
-      ...rulesToDelete,
+      ...selectedInst.items,
     ]);
 
     if (someDeletionsFailed) {
@@ -223,7 +216,7 @@ export function ManageRules({
     await loadRules();
     selectedInst.dispatch({ type: 'select-none' });
     setLoading(false);
-  }, [rulesToDelete]);
+  }, [selectedInst]);
 
   async function onDeleteRule(id: string) {
     setLoading(true);
@@ -349,9 +342,9 @@ export function ManageRules({
           }}
         >
           <Stack direction="row" align="center" justify="flex-end" spacing={2}>
-            {rulesToDelete.size > 0 && (
+            {selectedInst.items.size > 0 && (
               <Button onPress={onDeleteSelected}>
-                Delete {rulesToDelete.size} rules
+                Delete {selectedInst.items.size} rules
               </Button>
             )}
             <Button variant="primary" onPress={onCreateRule}>
