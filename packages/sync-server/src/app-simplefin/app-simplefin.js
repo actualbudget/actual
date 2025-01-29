@@ -218,10 +218,18 @@ function getAccountResponse(results, accountId, startDate) {
 
     newTrans.date = getDate(transactionDate);
     newTrans.payeeName = trans.payee;
-    newTrans.remittanceInformationUnstructured = trans.description;
+    newTrans.notes = trans.description;
     newTrans.transactionAmount = { amount: trans.amount, currency: 'USD' };
     newTrans.transactionId = trans.id;
     newTrans.valueDate = newTrans.bookingDate;
+
+    if (trans.transacted_at) {
+      newTrans.transactedDate = getDate(new Date(trans.transacted_at * 1000));
+    }
+
+    if (trans.posted) {
+      newTrans.postedDate = getDate(new Date(trans.posted * 1000));
+    }
 
     if (newTrans.booked) {
       booked.push(newTrans);
