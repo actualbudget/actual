@@ -20,7 +20,7 @@ export default {
       !transaction.transactionId &&
       transaction.remittanceInformationUnstructured.startsWith('ΑΓΟΡΑ ')
     ) {
-      editedTrans.transactionAmount = {
+      transaction.transactionAmount = {
         amount: '-' + transaction.transactionAmount.amount,
         currency: transaction.transactionAmount.currency,
       };

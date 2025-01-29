@@ -47,7 +47,7 @@ export default {
     const trans = editedTransaction ?? transaction;
 
     const date =
-      editedTransaction.date ||
+      trans.date ||
       transaction.bookingDate ||
       transaction.bookingDateTime ||
       transaction.valueDate ||
@@ -61,8 +61,9 @@ export default {
     }
 
     const notes =
+      trans.notes ??
       trans.remittanceInformationUnstructured ??
-      trans.remittanceInformationUnstructuredArray.join(' ');
+      trans.remittanceInformationUnstructuredArray?.join(' ');
 
     transaction.remittanceInformationUnstructuredArrayString =
       transaction.remittanceInformationUnstructuredArray?.join(',');

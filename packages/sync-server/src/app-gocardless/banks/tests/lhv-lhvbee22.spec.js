@@ -18,16 +18,11 @@ describe('#normalizeTransaction', () => {
 
   it('extracts booked card transaction creditor name', () => {
     expect(
-      LhvLhvbee22.normalizeTransaction(bookedCardTransaction, true)
-        .creditorName,
+      LhvLhvbee22.normalizeTransaction(bookedCardTransaction, true).payeeName,
     ).toEqual('CrustumOU');
   });
 
   it('extracts booked card transaction date', () => {
-    expect(
-      LhvLhvbee22.normalizeTransaction(bookedCardTransaction, true).bookingDate,
-    ).toEqual('2025-01-02');
-
     expect(
       LhvLhvbee22.normalizeTransaction(bookedCardTransaction, true).date,
     ).toEqual('2025-01-02');
@@ -45,7 +40,6 @@ describe('#normalizeTransaction', () => {
     };
     const normalized = LhvLhvbee22.normalizeTransaction(transaction, true);
 
-    expect(normalized.bookingDate).toEqual('2025-01-03');
     expect(normalized.date).toEqual('2025-01-03');
   });
 
@@ -62,17 +56,11 @@ describe('#normalizeTransaction', () => {
 
   it('extracts pending card transaction creditor name', () => {
     expect(
-      LhvLhvbee22.normalizeTransaction(pendingCardTransaction, false)
-        .creditorName,
+      LhvLhvbee22.normalizeTransaction(pendingCardTransaction, false).payeeName,
     ).toEqual('CrustumOU');
   });
 
   it('extracts pending card transaction date', () => {
-    expect(
-      LhvLhvbee22.normalizeTransaction(pendingCardTransaction, false)
-        .bookingDate,
-    ).toEqual(undefined);
-
     expect(
       LhvLhvbee22.normalizeTransaction(pendingCardTransaction, false).date,
     ).toEqual('2025-01-03');

@@ -11,6 +11,7 @@ export default {
   // They will set an internalTransactionId which is unique
   normalizeTransaction(transaction, booked) {
     transaction.transactionId = transaction.internalTransactionId;
+
     return Fallback.normalizeTransaction(transaction, booked);
   },
 };

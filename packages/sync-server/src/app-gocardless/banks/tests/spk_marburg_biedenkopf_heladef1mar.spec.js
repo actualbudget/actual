@@ -148,7 +148,7 @@ describe('SpkMarburgBiedenkopfHeladef1mar', () => {
 
       expect(
         SpkMarburgBiedenkopfHeladef1mar.normalizeTransaction(transaction, true)
-          .remittanceInformationUnstructured,
+          .notes,
       ).toEqual('AUTORISATION  28.12. 18:30');
     });
 
@@ -172,7 +172,7 @@ describe('SpkMarburgBiedenkopfHeladef1mar', () => {
 
       expect(
         SpkMarburgBiedenkopfHeladef1mar.normalizeTransaction(transaction, true)
-          .remittanceInformationUnstructured,
+          .notes,
       ).toEqual('Entgeltabrechnung siehe Anlage');
     });
   });

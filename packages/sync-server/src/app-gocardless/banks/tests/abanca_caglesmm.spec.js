@@ -9,17 +9,13 @@ describe('Abanca', () => {
         internalTransactionId: 'D202301180000003',
         transactionAmount: mockTransactionAmount,
         remittanceInformationStructured: 'some-creditor-name',
+        date: new Date().toISOString(),
       };
       const normalizedTransaction = Abanca.normalizeTransaction(
         transaction,
         true,
       );
-      expect(normalizedTransaction.creditorName).toEqual(
-        transaction.remittanceInformationStructured,
-      );
-      expect(normalizedTransaction.debtorName).toEqual(
-        transaction.remittanceInformationStructured,
-      );
+      expect(normalizedTransaction.payeeName).toEqual('Some-Creditor-Name');
     });
   });
 });

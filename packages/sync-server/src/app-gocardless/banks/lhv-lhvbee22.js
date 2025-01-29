@@ -24,7 +24,7 @@ export default {
     if (cardTxMatch) {
       const extractedDate = d.parse(cardTxMatch[2], 'yyyy-MM-dd', new Date());
 
-      editedTrans.creditorName = cardTxMatch[4].split('\\')[0].trim();
+      editedTrans.payeeName = cardTxMatch[4].split('\\')[0].trim();
 
       if (booked && d.isValid(extractedDate)) {
         editedTrans.date = d.format(extractedDate, 'yyyy-MM-dd');

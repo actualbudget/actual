@@ -7,6 +7,7 @@ describe('kbc_kredbebb', () => {
         remittanceInformationUnstructured:
           'CARREFOUR ST GIL BE1060 BRUXELLES Betaling met Google Pay via Debit Mastercard 28-08-2024 om 19.15 uur 5127 04XX XXXX 1637 5853 98XX XXXX 2266 JOHN SMITH',
         transactionAmount: { amount: '-10.99', currency: 'EUR' },
+        date: new Date().toISOString(),
       };
       const normalizedTransaction = KBCkredbebb.normalizeTransaction(
         transaction,
@@ -23,6 +24,7 @@ describe('kbc_kredbebb', () => {
         remittanceInformationUnstructured:
           'CARREFOUR ST GIL BE1060 BRUXELLES Betaling met Google Pay via Debit Mastercard 28-08-2024 om 19.15 uur 5127 04XX XXXX 1637 5853 98XX XXXX 2266 JOHN SMITH',
         transactionAmount: { amount: '10.99', currency: 'EUR' },
+        date: new Date().toISOString(),
       };
       const normalizedTransaction = KBCkredbebb.normalizeTransaction(
         transaction,
