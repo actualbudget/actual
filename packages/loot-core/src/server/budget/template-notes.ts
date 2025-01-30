@@ -40,7 +40,7 @@ export async function checkTemplates(): Promise<Notification> {
   const scheduleNames = schedules.map(({ name }) => name);
   const errors: string[] = [];
 
-  categoryWithTemplates.forEach(({ id, name, templates }) => {
+  categoryWithTemplates.forEach(({ name, templates }) => {
     templates.forEach(template => {
       if (template.type === 'error') {
         errors.push(`${name}: ${template.line}`);
