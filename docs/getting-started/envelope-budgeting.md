@@ -57,7 +57,7 @@ A basic idea with zero-sum budgeting is that you can only budget what you have, 
 budgeted. If you budget more than you have one month, the over budgeted amount will be deducted from what
 you have available the next month. So to start, decide what your most important categories are. Those
 important categories might be rent, food, and utilities. Assign what you need for those categories, then
-repeat the process for the next most important categories until your to budget amount for the month reaches
+repeat the process for the next most important categories until your _To Budget_ amount for the month reaches
 zero. When you get a paycheck, or other income, continue filling in where the funds are needed.
 
 As you go along you will start to get a good view of where your money is going. If you don't like how things
@@ -70,7 +70,7 @@ It can be hard to know where to budget your funds when you get paid in the middl
 paychecks per month. One way to handle this is called the *month ahead* method. This consists of holding everything
 you make this month and only budgeting it next month. The goal is to not need any of this month's income for this
 month's bills, but pay all of this month's bills with last month's income. Actual makes this easy by allowing you
-to hold your available funds for the next month by clicking the To Budget amount at the top of the budgeting screen
+to hold your available funds for the next month by clicking the _To Budget_ amount at the top of the budgeting screen
 and selecting the *Hold for next month* option. You can read more about this on [the budgeting page](/docs/budgeting/).
 
 For example, if you make $ 3,000 this month, instead of spending it on this month's bills, you save it and use it to
