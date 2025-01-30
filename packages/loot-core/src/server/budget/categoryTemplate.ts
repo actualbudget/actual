@@ -143,7 +143,6 @@ export class CategoryTemplate {
           newBudget = ret.to_budget - toBudget;
           remainder = ret.remainder;
           scheduleFlag = ret.scheduleFlag;
-          first=false;
           break;
         }
         case 'average': {
