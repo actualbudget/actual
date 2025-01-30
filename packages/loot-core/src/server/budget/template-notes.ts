@@ -45,9 +45,7 @@ export async function checkTemplates(): Promise<Notification> {
       if (template.type === 'error') {
         // Only show detailed error for adjustment-related errors
         if (template.error && template.error.includes('adjustment')) {
-          errors.push(
-            `${name}: ${template.line}\nError: ${template.error}`,
-          );
+          errors.push(`${name}: ${template.line}\nError: ${template.error}`);
         } else {
           errors.push(`${name}: ${template.line}`);
         }

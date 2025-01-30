@@ -258,7 +258,7 @@ describe('checkTemplates', () => {
         message: 'There were errors interpreting some templates:',
         pre: 'Category 1: #template schedule Mock Schedule 1 [decrease 101%]\nError: Invalid adjustment percentage (-101%). Must be between -100% and 1000%',
       },
-    }
+    },
   ];
 
   it.each(testCases)(
