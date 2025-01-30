@@ -104,7 +104,7 @@ Actual needs some more deliberate handling of that debt.
 Our docs [show how to do this in Actual](../../docs/budgeting/credit-cards).
 The tl;dr is that you put your existing debt in a category on your budget and any new debt has to be manually added into that category.
 Principal and interest payments, get categorized into this category.
-If you use credit cards, but don't carry any debt, the don't worry, you don't have to do anything special.
+If you use credit cards, but don't carry any debt, then don't worry, you don't have to do anything special.
 Envelope budgeting handles that process natively by using funds budgeted in your categories and paying off your balance.
 
 
