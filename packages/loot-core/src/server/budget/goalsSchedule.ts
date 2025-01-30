@@ -36,11 +36,6 @@ async function createScheduleList(
         : amountCondition.value;
     // Apply adjustment percentage if specified
     if (template[ll].adjustment) {
-      // Validate adjustment bounds (e.g., -100% to +1000%)
-      if (template[ll].adjustment <= -100 || template[ll].adjustment > 1000) {
-        errors.push(`Invalid adjustment percentage for schedule ${template[ll].name}`);
-        continue;
-      }
       const adjustmentFactor = 1 + template[ll].adjustment / 100;
       scheduleAmount = Math.round(scheduleAmount * adjustmentFactor);
     }
