@@ -40,7 +40,7 @@ export async function checkTemplates(): Promise<Notification> {
   const scheduleNames = schedules.map(({ name }) => name);
   const errors: string[] = [];
 
-  categoryWithTemplates.forEach(({ id, name, templates }) => {
+  categoryWithTemplates.forEach(({ name, templates }) => {
     templates.forEach(template => {
       if (template.type === 'error') {
         errors.push(`${name}: ${template.line}`);
@@ -48,7 +48,7 @@ export async function checkTemplates(): Promise<Notification> {
         template.type === 'schedule' &&
         !scheduleNames.includes(template.name)
       ) {
-        errors.push(`${id}: Schedule “${template.name}” does not exist`);
+        errors.push(`${name}: Schedule “${template.name}” does not exist`);
       }
     });
   });
