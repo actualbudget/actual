@@ -1,13 +1,16 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { type SyncedPrefs } from 'loot-core/types/prefs';
 
 import { useSyncedPref } from '../../hooks/useSyncedPref';
+import { Button } from '../common/Button2';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { Paragraph } from '../common/Paragraph';
 import { Select } from '../common/Select';
 import { View } from '../common/View';
+
+import { CustomUpcomingLength } from './CustomUpcomingLength';
 
 function useUpcomingLengthOptions() {
   const { t } = useTranslation();
@@ -20,10 +23,18 @@ function useUpcomingLengthOptions() {
     { value: '7', label: t('1 week') },
     { value: '14', label: t('2 weeks') },
     { value: 'oneMonth', label: t('1 month') },
-    { value: 'currentMonth', label: t('end of the current month') },
+    { value: 'currentMonth', label: t('End of the current month') },
+    { value: 'custom', label: t('Custom length') },
   ];
 
   return { upcomingLengthOptions };
+}
+
+function nonCustomUpcomingLengthValues(value: string) {
+  return (
+    ['1', '7', '14', 'oneMonth', 'currentMonth'].findIndex(x => x === value) ===
+    -1
+  );
 }
 
 export function UpcomingLength() {
@@ -32,9 +43,27 @@ export function UpcomingLength() {
     'upcomingScheduledTransactionLength',
   );
 
+  const saveUpcomingLength = () => {
+    setUpcomingLength(tempUpcomingLength);
+  };
+
   const { upcomingLengthOptions } = useUpcomingLengthOptions();
 
   const upcomingLength = _upcomingLength || '7';
+
+  const [tempUpcomingLength, setTempUpcomingLength] = useState(upcomingLength);
+  const [useCustomLength, setUseCustomLength] = useState(
+    nonCustomUpcomingLengthValues(tempUpcomingLength),
+  );
+  const [saveActive, setSaveActive] = useState(false);
+
+  useEffect(() => {
+    if (tempUpcomingLength !== upcomingLength) {
+      setSaveActive(true);
+    } else {
+      setSaveActive(false);
+    }
+  }, [tempUpcomingLength, upcomingLength]);
 
   return (
     <Modal
@@ -65,10 +94,43 @@ export function UpcomingLength() {
                 x.value || '7',
                 x.label,
               ])}
-              value={upcomingLength}
-              onChange={newValue => setUpcomingLength(newValue)}
+              value={
+                nonCustomUpcomingLengthValues(tempUpcomingLength)
+                  ? 'custom'
+                  : tempUpcomingLength
+              }
+              onChange={newValue => {
+                setUseCustomLength(newValue === 'custom');
+                setTempUpcomingLength(newValue);
+              }}
             />
+            {useCustomLength && (
+              <CustomUpcomingLength
+                onChange={setTempUpcomingLength}
+                tempValue={tempUpcomingLength}
+              />
+            )}
           </View>
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'row',
+              justifyContent: 'end',
+              marginTop: 20,
+            }}
+          >
+            <Button
+              isDisabled={!saveActive}
+              onPress={() => {
+                saveUpcomingLength();
+                close();
+              }}
+              type="submit"
+              variant="primary"
+            >
+              <Trans>Save</Trans>
+            </Button>
+          </div>
         </>
       )}
     </Modal>

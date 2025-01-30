@@ -82,9 +82,8 @@ export function recalculateSplit(trans: TransactionEntity) {
   const { error, ...rest } = trans;
   return {
     ...rest,
-    ...(total === num(trans.amount)
-      ? {}
-      : { error: SplitTransactionError(total, trans) }),
+    error:
+      total === num(trans.amount) ? null : SplitTransactionError(total, trans),
   } satisfies TransactionEntity;
 }
 
@@ -313,9 +312,7 @@ export function splitTransaction(
     return {
       ...rest,
       is_parent: true,
-      ...(num(trans.amount) === 0
-        ? {}
-        : { error: SplitTransactionError(0, trans) }),
+      error: num(trans.amount) === 0 ? null : SplitTransactionError(0, trans),
       subtransactions: subtransactions.map(t => ({
         ...t,
         sort_order: t.sort_order || -1,

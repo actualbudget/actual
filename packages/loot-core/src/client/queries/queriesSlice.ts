@@ -164,14 +164,12 @@ type CreateAccountPayload = {
 
 export const createAccount = createAppAsyncThunk(
   `${sliceName}/createAccount`,
-  async ({ name, balance, offBudget }: CreateAccountPayload, { dispatch }) => {
+  async ({ name, balance, offBudget }: CreateAccountPayload) => {
     const id: AccountEntity['id'] = await send('account-create', {
       name,
       balance,
       offBudget,
     });
-    dispatch(getAccounts());
-    dispatch(getPayees());
     return id;
   },
 );
@@ -185,17 +183,18 @@ type CloseAccountPayload = {
 
 export const closeAccount = createAppAsyncThunk(
   `${sliceName}/closeAccount`,
-  async (
-    { id, transferAccountId, categoryId, forced }: CloseAccountPayload,
-    { dispatch },
-  ) => {
+  async ({
+    id,
+    transferAccountId,
+    categoryId,
+    forced,
+  }: CloseAccountPayload) => {
     await send('account-close', {
       id,
       transferAccountId: transferAccountId || null,
       categoryId: categoryId || null,
       forced,
     });
-    dispatch(getAccounts());
   },
 );
 
@@ -205,9 +204,8 @@ type ReopenAccountPayload = {
 
 export const reopenAccount = createAppAsyncThunk(
   `${sliceName}/reopenAccount`,
-  async ({ id }: ReopenAccountPayload, { dispatch }) => {
+  async ({ id }: ReopenAccountPayload) => {
     await send('account-reopen', { id });
-    dispatch(getAccounts());
   },
 );
 
@@ -239,9 +237,8 @@ type CreateCategoryGroupPayload = {
 
 export const createGroup = createAppAsyncThunk(
   `${sliceName}/createGroup`,
-  async ({ name }: CreateCategoryGroupPayload, { dispatch }) => {
+  async ({ name }: CreateCategoryGroupPayload) => {
     const id = await send('category-group-create', { name });
-    dispatch(getCategories());
     return id;
   },
 );
@@ -252,12 +249,11 @@ type UpdateCategoryGroupPayload = {
 
 export const updateGroup = createAppAsyncThunk(
   `${sliceName}/updateGroup`,
-  async ({ group }: UpdateCategoryGroupPayload, { dispatch }) => {
+  async ({ group }: UpdateCategoryGroupPayload) => {
     // Strip off the categories field if it exist. It's not a real db
     // field but groups have this extra field in the client most of the time
     const { categories: _, ...groupNoCategories } = group;
     await send('category-group-update', groupNoCategories);
-    dispatch(getCategories());
   },
 );
 
@@ -268,11 +264,8 @@ type DeleteCategoryGroupPayload = {
 
 export const deleteGroup = createAppAsyncThunk(
   `${sliceName}/deleteGroup`,
-  async ({ id, transferId }: DeleteCategoryGroupPayload, { dispatch }) => {
+  async ({ id, transferId }: DeleteCategoryGroupPayload) => {
     await send('category-group-delete', { id, transferId });
-    dispatch(getCategories());
-    // See `deleteCategory` for why we need this
-    dispatch(getPayees());
   },
 );
 
@@ -284,17 +277,13 @@ type CreateCategoryPayload = {
 };
 export const createCategory = createAppAsyncThunk(
   `${sliceName}/createCategory`,
-  async (
-    { name, groupId, isIncome, isHidden }: CreateCategoryPayload,
-    { dispatch },
-  ) => {
+  async ({ name, groupId, isIncome, isHidden }: CreateCategoryPayload) => {
     const id = await send('category-create', {
       name,
       groupId,
       isIncome,
       hidden: isHidden,
     });
-    dispatch(getCategories());
     return id;
   },
 );
@@ -305,9 +294,8 @@ type UpdateCategoryPayload = {
 
 export const updateCategory = createAppAsyncThunk(
   `${sliceName}/updateCategory`,
-  async ({ category }: UpdateCategoryPayload, { dispatch }) => {
+  async ({ category }: UpdateCategoryPayload) => {
     await send('category-update', category);
-    dispatch(getCategories());
   },
 );
 
@@ -339,11 +327,6 @@ export const deleteCategory = createAppAsyncThunk(
       }
 
       throw new Error(error);
-    } else {
-      dispatch(getCategories());
-      // Also need to refresh payees because they might use one of the
-      // deleted categories as the default category
-      dispatch(getPayees());
     }
   },
 );
@@ -356,9 +339,8 @@ type MoveCategoryPayload = {
 
 export const moveCategory = createAppAsyncThunk(
   `${sliceName}/moveCategory`,
-  async ({ id, groupId, targetId }: MoveCategoryPayload, { dispatch }) => {
+  async ({ id, groupId, targetId }: MoveCategoryPayload) => {
     await send('category-move', { id, groupId, targetId });
-    dispatch(getCategories());
   },
 );
 
@@ -369,9 +351,8 @@ type MoveCategoryGroupPayload = {
 
 export const moveCategoryGroup = createAppAsyncThunk(
   `${sliceName}/moveCategoryGroup`,
-  async ({ id, targetId }: MoveCategoryGroupPayload, { dispatch }) => {
+  async ({ id, targetId }: MoveCategoryGroupPayload) => {
     await send('category-group-move', { id, targetId });
-    dispatch(getCategories());
   },
 );
 
@@ -391,11 +372,10 @@ type CreatePayeePayload = {
 
 export const createPayee = createAppAsyncThunk(
   `${sliceName}/createPayee`,
-  async ({ name }: CreatePayeePayload, { dispatch }) => {
+  async ({ name }: CreatePayeePayload) => {
     const id: PayeeEntity['id'] = await send('payee-create', {
       name: name.trim(),
     });
-    dispatch(getPayees());
     return id;
   },
 );
@@ -618,6 +598,16 @@ export const applyBudgetAction = createAppAsyncThunk(
           ),
         );
         break;
+      case 'apply-single-category-template':
+        dispatch(
+          addNotification(
+            await send('budget/apply-single-template', {
+              month,
+              category: args.category,
+            }),
+          ),
+        );
+        break;
       case 'cleanup-goal-template':
         dispatch(
           addNotification(
@@ -670,12 +660,6 @@ export const applyBudgetAction = createAppAsyncThunk(
         });
         break;
       }
-      case 'apply-single-category-template':
-        await send('budget/apply-single-template', {
-          month,
-          category: args.category,
-        });
-        break;
       case 'apply-multiple-templates':
         dispatch(
           addNotification(

@@ -50,13 +50,13 @@ type PayloadChild = {
 type PayloadItem = {
   payload: {
     name: string;
-    totalAssets: number | string;
-    totalDebts: number | string;
-    netAssets: number | string;
-    netDebts: number | string;
-    totalTotals: number | string;
-    networth: number | string;
-    totalChange: number | string;
+    totalAssets: number;
+    totalDebts: number;
+    netAssets: number;
+    netDebts: number;
+    totalTotals: number;
+    networth: number;
+    totalChange: number;
     children: [PayloadChild];
   };
 };

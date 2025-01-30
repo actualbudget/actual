@@ -1,6 +1,7 @@
 import React from 'react';
 
 import * as d from 'date-fns';
+import { t } from 'i18next';
 
 import { type useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
 import { send } from 'loot-core/src/platform/client/fetch';
@@ -149,11 +150,11 @@ function recalculate(
   isConcise: boolean,
 ) {
   const [startingBalance, income, expense] = data;
-  const convIncome = income.map(t => {
-    return { ...t, isTransfer: t.isTransfer !== null };
+  const convIncome = income.map(trans => {
+    return { ...trans, isTransfer: trans.isTransfer !== null };
   });
-  const convExpense = expense.map(t => {
-    return { ...t, isTransfer: t.isTransfer !== null };
+  const convExpense = expense.map(trans => {
+    return { ...trans, isTransfer: trans.isTransfer !== null };
   });
   const dates = isConcise
     ? monthUtils.rangeInclusive(
@@ -209,19 +210,28 @@ function recalculate(
             </strong>
           </div>
           <div style={{ lineHeight: 1.5 }}>
-            <AlignedText left="Income:" right={integerToCurrency(income)} />
-            <AlignedText left="Expenses:" right={integerToCurrency(expense)} />
             <AlignedText
-              left="Change:"
+              left={t('Income:')}
+              right={integerToCurrency(income)}
+            />
+            <AlignedText
+              left={t('Expenses:')}
+              right={integerToCurrency(expense)}
+            />
+            <AlignedText
+              left={t('Change:')}
               right={<strong>{integerToCurrency(income + expense)}</strong>}
             />
             {creditTransfers + debitTransfers !== 0 && (
               <AlignedText
-                left="Transfers:"
+                left={t('Transfers:')}
                 right={integerToCurrency(creditTransfers + debitTransfers)}
               />
             )}
-            <AlignedText left="Balance:" right={integerToCurrency(balance)} />
+            <AlignedText
+              left={t('Balance:')}
+              right={integerToCurrency(balance)}
+            />
           </div>
         </div>
       );

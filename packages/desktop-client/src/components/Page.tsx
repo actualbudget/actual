@@ -140,6 +140,7 @@ export function Page({ header, style, padding, children, footer }: PageProps) {
     >
       {headerToRender}
       <View
+        role="main"
         style={{
           flex: 1,
           overflowY: isNarrowWidth ? 'auto' : undefined,

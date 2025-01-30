@@ -148,7 +148,7 @@ type FinanceModals = {
   'category-autocomplete': {
     categoryGroups?: CategoryGroupEntity[];
     onSelect: (categoryId: string, categoryName: string) => void;
-    month?: string;
+    month?: string | undefined;
     showHiddenCategories?: boolean;
     onClose?: () => void;
   };
@@ -292,6 +292,7 @@ type FinanceModals = {
     transactionId: string;
     onPost: (transactionId: string) => void;
     onSkip: (transactionId: string) => void;
+    onComplete: (transactionId: string) => void;
   };
   'budget-page-menu': {
     onAddCategoryGroup: () => void;
@@ -315,7 +316,7 @@ type FinanceModals = {
     confirmReason: string;
   };
   'confirm-transaction-delete': {
-    message?: string;
+    message?: string | undefined;
     onConfirm: () => void;
   };
   'edit-user': {

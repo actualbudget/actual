@@ -1,4 +1,9 @@
 import { MobileAccountPage } from './mobile-account-page';
+import { BalanceMenuModal } from './mobile-balance-menu-modal';
+import { BudgetMenuModal } from './mobile-budget-menu-modal';
+import { CategoryMenuModal } from './mobile-category-menu-modal';
+import { EnvelopeBudgetSummaryModal } from './mobile-envelope-budget-summary-modal';
+import { TrackingBudgetSummaryModal } from './mobile-tracking-budget-summary-modal';
 
 export class MobileBudgetPage {
   MONTH_HEADER_DATE_FORMAT = 'MMMM ‘yy';
@@ -78,8 +83,8 @@ export class MobileBudgetPage {
     });
   }
 
-  async waitForBudgetTable() {
-    await this.budgetTable.waitFor();
+  async waitFor(options) {
+    await this.budgetTable.waitFor(options);
   }
 
   async toggleVisibleColumns(maxAttempts = 3) {
@@ -139,6 +144,8 @@ export class MobileBudgetPage {
   async openCategoryMenu(categoryName) {
     const categoryButton = await this.#getButtonForCategory(categoryName);
     await categoryButton.click();
+
+    return new CategoryMenuModal(this.page, this.page.getByRole('dialog'));
   }
 
   async #getButtonForCell(buttonType, categoryName) {
@@ -176,14 +183,8 @@ export class MobileBudgetPage {
   async openBudgetMenu(categoryName) {
     const budgetedButton = await this.getButtonForBudgeted(categoryName);
     await budgetedButton.click();
-  }
 
-  async setBudget(categoryName, newAmount) {
-    const budgetedButton = await this.getButtonForBudgeted(categoryName);
-    await budgetedButton.click();
-
-    await this.page.keyboard.type(String(newAmount));
-    await this.page.keyboard.press('Enter');
+    return new BudgetMenuModal(this.page, this.page.getByRole('dialog'));
   }
 
   async openSpentPage(categoryName) {
@@ -200,6 +201,7 @@ export class MobileBudgetPage {
 
     if (await balanceButton.isVisible()) {
       await balanceButton.click();
+      return new BalanceMenuModal(this.page, this.page.getByRole('dialog'));
     } else {
       throw new Error(
         `Balance button for category ${categoryName} not found or not visible`,
@@ -271,9 +273,14 @@ export class MobileBudgetPage {
     );
   }
 
-  async openEnvelopeBudgetSummaryMenu() {
+  async openEnvelopeBudgetSummary() {
     const budgetSummaryButton = await this.#getButtonForEnvelopeBudgetSummary();
     await budgetSummaryButton.click();
+
+    return new EnvelopeBudgetSummaryModal(
+      this.page,
+      this.page.getByRole('dialog'),
+    );
   }
 
   async #getButtonForTrackingBudgetSummary({ throwIfNotFound = true } = {}) {
@@ -298,8 +305,13 @@ export class MobileBudgetPage {
     );
   }
 
-  async openTrackingBudgetSummaryMenu() {
+  async openTrackingBudgetSummary() {
     const budgetSummaryButton = await this.#getButtonForTrackingBudgetSummary();
     await budgetSummaryButton.click();
+
+    return new TrackingBudgetSummaryModal(
+      this.page,
+      this.page.getByRole('dialog'),
+    );
   }
 }

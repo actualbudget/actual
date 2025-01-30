@@ -48,7 +48,7 @@ export function CoverMenu({
   return (
     <View style={{ padding: 10 }}>
       <View style={{ marginBottom: 5 }}>
-        <Trans>Cover from category:</Trans>
+        <Trans>Cover from a category:</Trans>
       </View>
 
       <InitialFocus>

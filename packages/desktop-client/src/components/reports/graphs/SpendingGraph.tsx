@@ -1,6 +1,6 @@
 // @ts-strict-ignore
 import React, { type ComponentProps, type CSSProperties } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useTranslation, Trans } from 'react-i18next';
 
 import { css } from '@emotion/css';
 import {
@@ -78,10 +78,15 @@ const CustomTooltip = ({
         <div>
           <div style={{ marginBottom: 10 }}>
             <strong>
-              {t('Day:') + ' '}
-              {Number(payload[0].payload.day) >= 28
-                ? t('28+')
-                : payload[0].payload.day}
+              <Trans>
+                Day:{' '}
+                {{
+                  dayOfMonth:
+                    Number(payload[0].payload.day) >= 28
+                      ? t('28+')
+                      : payload[0].payload.day,
+                }}
+              </Trans>
             </strong>
           </div>
           <div style={{ lineHeight: 1.5 }}>

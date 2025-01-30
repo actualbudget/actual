@@ -22,7 +22,6 @@ import {
 } from 'loot-core/client/data-hooks/transactions';
 import * as queries from 'loot-core/client/queries';
 import {
-  getPayees,
   markAccountRead,
   reopenAccount,
   updateAccount,
@@ -279,10 +278,6 @@ function TransactionListWithPreviews({
         ) {
           reloadTransactions();
         }
-
-        if (tables.includes('payees') || tables.includes('payee_mapping')) {
-          dispatch(getPayees());
-        }
       }
     });
   }, [dispatch, reloadTransactions]);
@@ -309,6 +304,13 @@ function TransactionListWithPreviews({
             onSkip: async transactionId => {
               const parts = transactionId.split('/');
               await send('schedule/skip-next-date', { id: parts[1] });
+              dispatch(collapseModals('scheduled-transaction-menu'));
+            },
+            onComplete: async transactionId => {
+              const parts = transactionId.split('/');
+              await send('schedule/update', {
+                schedule: { id: parts[1], completed: true },
+              });
               dispatch(collapseModals('scheduled-transaction-menu'));
             },
           }),

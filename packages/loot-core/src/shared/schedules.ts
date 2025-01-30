@@ -352,6 +352,7 @@ export function describeSchedule(schedule, payee) {
 
 export function getUpcomingDays(upcomingLength = '7'): number {
   const today = monthUtils.currentDay();
+  const month = monthUtils.getMonth(today);
 
   switch (upcomingLength) {
     case 'currentMonth': {
@@ -360,7 +361,6 @@ export function getUpcomingDays(upcomingLength = '7'): number {
       return end - day + 1;
     }
     case 'oneMonth': {
-      const month = monthUtils.getMonth(today);
       return (
         monthUtils.differenceInCalendarDays(
           monthUtils.nextMonth(month),
@@ -369,6 +369,24 @@ export function getUpcomingDays(upcomingLength = '7'): number {
       );
     }
     default:
+      if (upcomingLength.includes('-')) {
+        const [num, unit] = upcomingLength.split('-');
+        const value = Math.max(1, parseInt(num, 10));
+        switch (unit) {
+          case 'day':
+            return value;
+          case 'week':
+            return value * 7;
+          case 'month':
+            const future = monthUtils.addMonths(today, value);
+            return monthUtils.differenceInCalendarDays(future, month) + 1;
+          case 'year':
+            const futureYear = monthUtils.addYears(today, value);
+            return monthUtils.differenceInCalendarDays(futureYear, month) + 1;
+          default:
+            return 7;
+        }
+      }
       return parseInt(upcomingLength, 10);
   }
 }

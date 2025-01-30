@@ -5,7 +5,6 @@ import {
   useTransactionsSearch,
 } from 'loot-core/client/data-hooks/transactions';
 import * as queries from 'loot-core/client/queries';
-import { getPayees } from 'loot-core/client/queries/queriesSlice';
 import { listen } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
@@ -71,10 +70,6 @@ export function CategoryTransactions({
           tables.includes('payee_mapping')
         ) {
           reloadTransactions();
-        }
-
-        if (tables.includes('payees') || tables.includes('payee_mapping')) {
-          dispatch(getPayees());
         }
       }
     });

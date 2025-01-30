@@ -153,11 +153,11 @@ function EmptyMessage({ onAdd }: EmptyMessageProps) {
 }
 
 type AllTransactionsProps = {
-  account?: AccountEntity;
+  account?: AccountEntity | undefined;
   transactions: TransactionEntity[];
   balances: Record<string, { balance: number }> | null;
-  showBalances?: boolean;
-  filtered?: boolean;
+  showBalances?: boolean | undefined;
+  filtered?: boolean | undefined;
   children: (
     transactions: TransactionEntity[],
     balances: Record<string, { balance: number }> | null,
@@ -265,7 +265,12 @@ function getField(field?: string) {
 }
 
 type AccountInternalProps = {
-  accountId?: AccountEntity['id'] | 'onbudget' | 'offbudget' | 'uncategorized';
+  accountId?:
+    | AccountEntity['id']
+    | 'onbudget'
+    | 'offbudget'
+    | 'uncategorized'
+    | undefined;
   filterConditions: RuleConditionEntity[];
   showBalances?: boolean;
   setShowBalances: (newValue: boolean) => void;
@@ -280,7 +285,7 @@ type AccountInternalProps = {
   newTransactions: Array<TransactionEntity['id']>;
   matchedTransactions: Array<TransactionEntity['id']>;
   splitsExpandedDispatch: ReturnType<typeof useSplitsExpanded>['dispatch'];
-  expandSplits?: boolean;
+  expandSplits?: boolean | undefined;
   savedFilters: TransactionFilterEntity[];
   onBatchEdit: ReturnType<typeof useTransactionBatchActions>['onBatchEdit'];
   onBatchDuplicate: ReturnType<
@@ -306,7 +311,7 @@ type AccountInternalProps = {
 type AccountInternalState = {
   search: string;
   filterConditions: ConditionEntity[];
-  filterId?: SavedFilter;
+  filterId?: SavedFilter | undefined;
   filterConditionsOp: 'and' | 'or';
   loading: boolean;
   workingHard: boolean;
@@ -314,10 +319,10 @@ type AccountInternalState = {
   transactions: TransactionEntity[];
   transactionCount: number;
   transactionsFiltered?: boolean;
-  showBalances?: boolean;
+  showBalances?: boolean | undefined;
   balances: Record<string, { balance: number }> | null;
-  showCleared?: boolean;
-  prevShowCleared?: boolean;
+  showCleared?: boolean | undefined;
+  prevShowCleared?: boolean | undefined;
   showReconciled: boolean;
   editingName: boolean;
   nameError: string;
@@ -326,8 +331,8 @@ type AccountInternalState = {
   sort: {
     ascDesc: 'asc' | 'desc';
     field: string;
-    prevField?: string;
-    prevAscDesc?: 'asc' | 'desc';
+    prevField?: string | undefined;
+    prevAscDesc?: 'asc' | 'desc' | undefined;
   } | null;
   filteredAmount: null | number;
 };
@@ -640,7 +645,7 @@ class AccountInternal extends PureComponent<
       const res = await window.Actual.openFileDialog({
         filters: [
           {
-            name: t('Financial Files'),
+            name: t('Financial files'),
             extensions: ['qif', 'ofx', 'qfx', 'csv', 'tsv', 'xml'],
           },
         ],
@@ -675,7 +680,7 @@ class AccountInternal extends PureComponent<
     window.Actual.saveFile(
       exportedTransactions,
       filename,
-      t('Export Transactions'),
+      t('Export transactions'),
     );
   };
 
@@ -1492,21 +1497,26 @@ class AccountInternal extends PureComponent<
   };
 
   onScheduleAction = async (
-    name: 'skip' | 'post-transaction',
+    name: 'skip' | 'post-transaction' | 'complete',
     ids: string[],
   ) => {
+    const scheduleIds = ids.map(id => id.split('/')[1]);
+
     switch (name) {
       case 'post-transaction':
-        for (const id of ids) {
-          const parts = id.split('/');
-          await send('schedule/post-transaction', { id: parts[1] });
+        for (const id of scheduleIds) {
+          await send('schedule/post-transaction', { id });
         }
         this.refetchTransactions();
         break;
       case 'skip':
-        for (const id of ids) {
-          const parts = id.split('/');
-          await send('schedule/skip-next-date', { id: parts[1] });
+        for (const id of scheduleIds) {
+          await send('schedule/skip-next-date', { id });
+        }
+        break;
+      case 'complete':
+        for (const id of scheduleIds) {
+          await send('schedule/update', { schedule: { id, completed: true } });
         }
         break;
       default:

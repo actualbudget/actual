@@ -75,7 +75,7 @@ export function ToBudget({
           prevMonthName={prevMonthName}
           style={style}
           amountStyle={amountStyle}
-          isTotalsListTooltipDisabled={!isCollapsed || asContextMenu}
+          isTotalsListTooltipDisabled={!isCollapsed || menuOpen}
           onContextMenu={handleContextMenu}
         />
       </View>

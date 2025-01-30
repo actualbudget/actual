@@ -20,58 +20,30 @@ import { listen } from 'loot-core/src/platform/client/fetch';
 import * as undo from 'loot-core/src/platform/client/undo';
 
 export function handleGlobalEvents(store: AppStore) {
-  listen('server-error', () => {
+  const unlistenServerError = listen('server-error', () => {
     store.dispatch(addGenericErrorNotification());
   });
 
-  listen('orphaned-payees', ({ orphanedIds, updatedPayeeIds }) => {
-    // Right now, it prompts to merge into the first payee
-    store.dispatch(
-      pushModal('merge-unused-payees', {
-        payeeIds: orphanedIds,
-        targetPayeeId: updatedPayeeIds[0],
-      }),
-    );
-  });
+  const unlistenOrphanedPayees = listen(
+    'orphaned-payees',
+    ({ orphanedIds, updatedPayeeIds }) => {
+      // Right now, it prompts to merge into the first payee
+      store.dispatch(
+        pushModal('merge-unused-payees', {
+          payeeIds: orphanedIds,
+          targetPayeeId: updatedPayeeIds[0],
+        }),
+      );
+    },
+  );
 
-  listen('schedules-offline', () => {
+  const unlistenSchedulesOffline = listen('schedules-offline', () => {
     store.dispatch(pushModal('schedule-posts-offline-notification'));
   });
 
-  // This is experimental: we sync data locally automatically when
-  // data changes from the backend
-  listen('sync-event', async event => {
-    // We don't need to query anything until the file is loaded, and
-    // sync events might come in if the file is being synced before
-    // being loaded (happens when downloading)
-    const prefs = store.getState().prefs.local;
-    if (prefs && prefs.id) {
-      if (event.type === 'applied') {
-        const tables = event.tables;
-        if (tables.includes('payees') || tables.includes('payee_mapping')) {
-          store.dispatch(getPayees());
-        }
-      }
-    }
-  });
+  const unlistenSync = sharedListeners.listenForSyncEvent(store);
 
-  // TODO: Should this run on mobile too?
-  listen('sync-event', async ({ type }) => {
-    if (type === 'unauthorized') {
-      store.dispatch(
-        addNotification({
-          type: 'warning',
-          message: 'Unable to authenticate with server',
-          sticky: true,
-          id: 'auth-issue',
-        }),
-      );
-    }
-  });
-
-  sharedListeners.listenForSyncEvent(store);
-
-  listen('undo-event', undoState => {
+  const unlistenUndo = listen('undo-event', undoState => {
     const { tables, undoTag } = undoState;
     const promises: Promise<unknown>[] = [];
 
@@ -81,6 +53,14 @@ export function handleGlobalEvents(store: AppStore) {
       tables.includes('category_mapping')
     ) {
       promises.push(store.dispatch(getCategories()));
+    }
+
+    if (
+      tables.includes('accounts') ||
+      tables.includes('payees') ||
+      tables.includes('payee_mapping')
+    ) {
+      promises.push(store.dispatch(getPayees()));
     }
 
     if (tables.includes('accounts')) {
@@ -121,7 +101,7 @@ export function handleGlobalEvents(store: AppStore) {
     }
   });
 
-  listen('fallback-write-error', () => {
+  const unlistenFallbackWriteError = listen('fallback-write-error', () => {
     store.dispatch(
       addNotification({
         type: 'error',
@@ -135,33 +115,48 @@ export function handleGlobalEvents(store: AppStore) {
     );
   });
 
-  listen('start-load', () => {
+  const unlistenStartLoad = listen('start-load', () => {
     store.dispatch(closeBudgetUI());
     store.dispatch(setAppState({ loadingText: '' }));
   });
 
-  listen('finish-load', () => {
+  const unlistenFinishLoad = listen('finish-load', () => {
     store.dispatch(closeModal());
     store.dispatch(setAppState({ loadingText: null }));
     store.dispatch(loadPrefs());
   });
 
-  listen('start-import', () => {
+  const unlistenStartImport = listen('start-import', () => {
     store.dispatch(closeBudgetUI());
   });
 
-  listen('finish-import', () => {
+  const unlistenFinishImport = listen('finish-import', () => {
     store.dispatch(closeModal());
     store.dispatch(setAppState({ loadingText: null }));
     store.dispatch(loadPrefs());
   });
 
-  listen('show-budgets', () => {
+  const unlistenShowBudgets = listen('show-budgets', () => {
     store.dispatch(closeBudgetUI());
     store.dispatch(setAppState({ loadingText: null }));
   });
 
-  listen('api-fetch-redirected', () => {
+  const unlistenApiFetchRedirected = listen('api-fetch-redirected', () => {
     window.Actual.reload();
   });
+
+  return () => {
+    unlistenServerError();
+    unlistenOrphanedPayees();
+    unlistenSchedulesOffline();
+    unlistenSync();
+    unlistenUndo();
+    unlistenFallbackWriteError();
+    unlistenStartLoad();
+    unlistenFinishLoad();
+    unlistenStartImport();
+    unlistenFinishImport();
+    unlistenShowBudgets();
+    unlistenApiFetchRedirected();
+  };
 }

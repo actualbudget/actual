@@ -44,7 +44,7 @@ export function CellValue<
   const { fullSheetName } = useSheetName(binding);
   const sheetValue = useSheetValue(binding);
 
-  return children ? (
+  return typeof children === 'function' ? (
     <>{children({ type, name: fullSheetName, value: sheetValue })}</>
   ) : (
     <CellValueText
