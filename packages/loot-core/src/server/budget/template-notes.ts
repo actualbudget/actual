@@ -48,7 +48,7 @@ export async function checkTemplates(): Promise<Notification> {
         template.type === 'schedule' &&
         !scheduleNames.includes(template.name)
       ) {
-        errors.push(`${id}: Schedule “${template.name}” does not exist`);
+        errors.push(`${name}: Schedule “${template.name}” does not exist`);
       }
     });
   });
