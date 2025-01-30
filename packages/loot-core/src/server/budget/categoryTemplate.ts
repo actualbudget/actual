@@ -126,11 +126,12 @@ export class CategoryTemplate {
           break;
         }
         case 'schedule': {
+          const budgeted = this.fromLastMonth + toBudget;
           const ret = await goalsSchedule(
             scheduleFlag,
             t,
             this.month,
-            toBudget,
+            budgeted,
             remainder,
             this.fromLastMonth,
             toBudget,
