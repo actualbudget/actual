@@ -36,7 +36,7 @@ async function createScheduleList(
         : amountCondition.value;
     // Apply adjustment percentage if specified
     if (template[ll].adjustment) {
-      const adjustmentFactor = 1 + (template[ll].adjustment / 100);
+      const adjustmentFactor = 1 + template[ll].adjustment / 100;
       scheduleAmount = scheduleAmount * adjustmentFactor;
     }
     const { amount: postRuleAmount, subtransactions } = rule.execActions({
