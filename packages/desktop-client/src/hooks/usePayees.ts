@@ -7,17 +7,21 @@ import {
 
 import { useSelector, useDispatch } from '../redux';
 
+import { useInitialMount } from './useInitialMount';
+
 export function useCommonPayees() {
   const dispatch = useDispatch();
   const commonPayeesLoaded = useSelector(
     state => state.queries.commonPayeesLoaded,
   );
 
+  const initialMount = useInitialMount();
+
   useEffect(() => {
-    if (!commonPayeesLoaded) {
+    if (initialMount && !commonPayeesLoaded) {
       dispatch(getCommonPayees());
     }
-  }, []);
+  }, [commonPayeesLoaded, dispatch, initialMount]);
 
   return useSelector(state => state.queries.commonPayees);
 }
@@ -26,11 +30,13 @@ export function usePayees() {
   const dispatch = useDispatch();
   const payeesLoaded = useSelector(state => state.queries.payeesLoaded);
 
+  const initialMount = useInitialMount();
+
   useEffect(() => {
-    if (!payeesLoaded) {
+    if (initialMount && !payeesLoaded) {
       dispatch(getPayees());
     }
-  }, []);
+  }, [dispatch, initialMount, payeesLoaded]);
 
   return useSelector(state => state.queries.payees);
 }
