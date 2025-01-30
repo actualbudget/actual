@@ -126,15 +126,11 @@ export class CategoryTemplate {
           break;
         }
         case 'schedule': {
-          const budgeted = await getSheetValue(
-            monthUtils.sheetForMonth(this.month),
-            `leftover-${this.category.id}`,
-          );
           const ret = await goalsSchedule(
             scheduleFlag,
             t,
             this.month,
-            budgeted,
+            toBudget,
             remainder,
             this.fromLastMonth,
             toBudget,
@@ -146,6 +142,7 @@ export class CategoryTemplate {
           newBudget = ret.to_budget - toBudget;
           remainder = ret.remainder;
           scheduleFlag = ret.scheduleFlag;
+          first=false;
           break;
         }
         case 'average': {
