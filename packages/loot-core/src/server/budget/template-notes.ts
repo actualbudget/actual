@@ -43,9 +43,14 @@ export async function checkTemplates(): Promise<Notification> {
   categoryWithTemplates.forEach(({ id, name, templates }) => {
     templates.forEach(template => {
       if (template.type === 'error') {
-        errors.push(
-          `${name}: ${template.line}${template.error ? '\nError: ' + template.error : ''}`,
-        );
+        // Only show detailed error for adjustment-related errors
+        if (template.error && template.error.includes('adjustment')) {
+          errors.push(
+            `${name}: ${template.line}\nError: ${template.error}`,
+          );
+        } else {
+          errors.push(`${name}: ${template.line}`);
+        }
       } else if (
         template.type === 'schedule' &&
         !scheduleNames.includes(template.name)
