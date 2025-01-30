@@ -15,13 +15,13 @@ export function useCommonPayees() {
     state => state.queries.commonPayeesLoaded,
   );
 
-  const initialMount = useInitialMount();
+  const isInitialMount = useInitialMount();
 
   useEffect(() => {
-    if (initialMount && !commonPayeesLoaded) {
+    if (isInitialMount && !commonPayeesLoaded) {
       dispatch(getCommonPayees());
     }
-  }, [commonPayeesLoaded, dispatch, initialMount]);
+  }, [commonPayeesLoaded, dispatch, isInitialMount]);
 
   return useSelector(state => state.queries.commonPayees);
 }
@@ -30,13 +30,13 @@ export function usePayees() {
   const dispatch = useDispatch();
   const payeesLoaded = useSelector(state => state.queries.payeesLoaded);
 
-  const initialMount = useInitialMount();
+  const isInitialMount = useInitialMount();
 
   useEffect(() => {
-    if (initialMount && !payeesLoaded) {
+    if (isInitialMount && !payeesLoaded) {
       dispatch(getPayees());
     }
-  }, [dispatch, initialMount, payeesLoaded]);
+  }, [dispatch, isInitialMount, payeesLoaded]);
 
   return useSelector(state => state.queries.payees);
 }
