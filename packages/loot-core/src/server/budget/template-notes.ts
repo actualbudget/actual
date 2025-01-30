@@ -43,7 +43,9 @@ export async function checkTemplates(): Promise<Notification> {
   categoryWithTemplates.forEach(({ id, name, templates }) => {
     templates.forEach(template => {
       if (template.type === 'error') {
-        errors.push(`${name}: ${template.line}${template.error ? '\nError: ' + template.error : ''}`);
+        errors.push(
+          `${name}: ${template.line}${template.error ? '\nError: ' + template.error : ''}`,
+        );
       } else if (
         template.type === 'schedule' &&
         !scheduleNames.includes(template.name)
@@ -92,9 +94,17 @@ async function getCategoriesWithTemplates(): Promise<CategoryWithTemplates[]> {
         const parsedTemplate: Template = parse(trimmedLine);
 
         // Validate schedule adjustments
-        if (parsedTemplate.type === 'schedule' && parsedTemplate.adjustment !== undefined) {
-          if (parsedTemplate.adjustment <= -100 || parsedTemplate.adjustment > 1000) {
-            throw new Error(`Invalid adjustment percentage (${parsedTemplate.adjustment}%). Must be between -100% and 1000%`);
+        if (
+          parsedTemplate.type === 'schedule' &&
+          parsedTemplate.adjustment !== undefined
+        ) {
+          if (
+            parsedTemplate.adjustment <= -100 ||
+            parsedTemplate.adjustment > 1000
+          ) {
+            throw new Error(
+              `Invalid adjustment percentage (${parsedTemplate.adjustment}%). Must be between -100% and 1000%`,
+            );
           }
         }
 
