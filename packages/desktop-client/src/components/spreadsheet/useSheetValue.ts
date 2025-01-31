@@ -1,4 +1,4 @@
-import { useState, useRef, useLayoutEffect, useMemo } from 'react';
+import { useState, useRef, useLayoutEffect } from 'react';
 
 import { type Query } from 'loot-core/shared/query';
 import { useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
@@ -10,6 +10,7 @@ import {
   type SheetFields,
   type SheetNames,
   type Binding,
+  type BindingObject,
 } from '.';
 
 type SheetValueResult<
@@ -18,7 +19,7 @@ type SheetValueResult<
 > = {
   name: string;
   value: Spreadsheets[SheetName][FieldName] | null;
-  query?: Query;
+  query?: Query | undefined;
 };
 
 export function useSheetValue<
@@ -30,12 +31,10 @@ export function useSheetValue<
 ): SheetValueResult<SheetName, FieldName>['value'] {
   const { sheetName, fullSheetName } = useSheetName(binding);
 
-  const bindingObj = useMemo(
+  const bindingObj = useMemoizedBinding(
     () =>
-      typeof binding === 'string'
-        ? { name: binding, value: null, query: undefined }
-        : binding,
-    [binding],
+      typeof binding === 'string' ? { name: binding, value: null } : binding,
+    binding,
   );
 
   const spreadsheet = useSpreadsheet();
@@ -75,12 +74,53 @@ export function useSheetValue<
       isMounted = false;
       unbind();
     };
-  }, [
-    spreadsheet,
-    sheetName,
-    bindingObj.name,
-    bindingObj.query?.serializeAsString(),
-  ]);
+  }, [spreadsheet, sheetName, bindingObj]);
 
   return result.value;
+}
+
+type MemoKey<
+  SheetName extends SheetNames,
+  FieldName extends SheetFields<SheetName>,
+> = {
+  name: string;
+  value?: Spreadsheets[SheetName][FieldName] | undefined;
+  // We check the serialized query to see if it has changed
+  serializedQuery?: string;
+};
+
+function useMemoizedBinding<
+  SheetName extends SheetNames,
+  FieldName extends SheetFields<SheetName>,
+>(
+  memoBinding: () => BindingObject<SheetName, FieldName>,
+  key: Binding<SheetName, FieldName>,
+): BindingObject<SheetName, FieldName> {
+  const ref = useRef<{
+    key: MemoKey<SheetName, FieldName>;
+    value: BindingObject<SheetName, FieldName>;
+  } | null>(null);
+
+  const bindingName = typeof key === 'string' ? key : key.name;
+  const bindingValue = typeof key === 'string' ? undefined : key.value;
+  const serializedBindingQuery =
+    typeof key === 'string' ? undefined : key.query?.serializeAsString();
+
+  if (
+    !ref.current ||
+    bindingName !== ref.current.key.name ||
+    bindingValue !== ref.current.key.value ||
+    serializedBindingQuery !== ref.current.key.serializedQuery
+  ) {
+    ref.current = {
+      key: {
+        name: bindingName,
+        value: bindingValue,
+        serializedQuery: serializedBindingQuery,
+      },
+      value: memoBinding(),
+    };
+  }
+
+  return ref.current.value;
 }
