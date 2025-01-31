@@ -126,10 +126,7 @@ export class CategoryTemplate {
           break;
         }
         case 'schedule': {
-          const budgeted = await getSheetValue(
-            monthUtils.sheetForMonth(this.month),
-            `leftover-${this.category.id}`,
-          );
+          const budgeted = this.fromLastMonth + toBudget;
           const ret = await goalsSchedule(
             scheduleFlag,
             t,

@@ -563,6 +563,31 @@ describe('Rule', () => {
   });
 
   describe('split actions', () => {
+    test('splits can change the payee', () => {
+      const rule = new Rule({
+        conditionsOp: 'and',
+        conditions: [{ op: 'is', field: 'payee', value: '123' }],
+        actions: [
+          {
+            op: 'set-split-amount',
+            field: 'amount',
+            value: 100,
+            options: { splitIndex: 1, method: 'fixed-amount' },
+          },
+          {
+            op: 'set',
+            field: 'payee',
+            value: '456',
+            options: { splitIndex: 1 },
+          },
+        ],
+      });
+
+      expect(rule.exec({ payee: '123' })).toMatchObject({
+        subtransactions: [{ payee: '456' }],
+      });
+    });
+
     const fixedAmountRule = new Rule({
       conditionsOp: 'and',
       conditions: [{ op: 'is', field: 'imported_payee', value: 'James' }],
