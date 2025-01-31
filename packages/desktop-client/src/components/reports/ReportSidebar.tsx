@@ -147,7 +147,7 @@ export function ReportSidebar({
   };
 
   const onChangeSortBy = (cond?: sortByOpType) => {
-    cond ??= 'asc';
+    cond ??= 'desc';
     setSessionReport('sortBy', cond);
     onReportChange({ type: 'modify' });
     setSortBy(cond);
