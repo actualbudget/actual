@@ -8,7 +8,6 @@ import React, {
   useMemo,
   useCallback,
   useEffect,
-  useLayoutEffect,
 } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { useTranslation } from 'react-i18next';
