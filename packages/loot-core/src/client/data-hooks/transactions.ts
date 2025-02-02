@@ -174,8 +174,8 @@ export function usePreviewTransactions(): UsePreviewTransactionsResult {
         const status = statuses.get(schedule.id);
         const isRecurring = scheduleIsRecurring(dateConditions);
 
-        const dates: string[] = [];
-        let day = today;
+        const dates: string[] = [schedule.next_date];
+        let day = d.startOfDay(parseDate(schedule.next_date));
         if (isRecurring) {
           while (day <= upcomingPeriodEnd) {
             const nextDate = getNextDate(dateConditions, day);
