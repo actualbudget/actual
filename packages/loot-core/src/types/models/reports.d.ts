@@ -11,7 +11,7 @@ export interface CustomReportEntity {
   groupBy: string;
   interval: string;
   balanceType: string;
-  sortBy: string;
+  sortBy?: sortByOpType;
   showEmpty: boolean;
   showOffBudget: boolean;
   showHiddenCategories: boolean;

@@ -5,7 +5,10 @@ import * as monthUtils from 'loot-core/src/shared/months';
 import { type CategoryEntity } from 'loot-core/types/models/category';
 import { type CategoryGroupEntity } from 'loot-core/types/models/category-group';
 import { type TimeFrame } from 'loot-core/types/models/dashboard';
-import { type CustomReportEntity } from 'loot-core/types/models/reports';
+import {
+  type CustomReportEntity,
+  type sortByOpType,
+} from 'loot-core/types/models/reports';
 import { type SyncedPrefs } from 'loot-core/types/prefs';
 
 import { styles } from '../../style/styles';
@@ -143,7 +146,8 @@ export function ReportSidebar({
     setBalanceType(cond);
   };
 
-  const onChangeSortBy = (cond: string) => {
+  const onChangeSortBy = (cond?: sortByOpType) => {
+    cond ??= 'desc';
     setSessionReport('sortBy', cond);
     onReportChange({ type: 'modify' });
     setSortBy(cond);
@@ -297,12 +301,12 @@ export function ReportSidebar({
             </Text>
             <Select
               value={customReportItems.sortBy}
-              onChange={e => onChangeSortBy(e)}
+              onChange={(e?: sortByOpType) => onChangeSortBy(e)}
               options={ReportOptions.sortBy.map(option => [
-                option.description,
+                option.format,
                 option.description,
               ])}
-              disabledKeys={disabledItems('sort')}
+              disabledKeys={disabledItems('sort') as sortByOpType[]}
             />
           </View>
         )}
