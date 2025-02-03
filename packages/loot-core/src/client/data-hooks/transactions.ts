@@ -190,8 +190,6 @@ export function usePreviewTransactions(): UsePreviewTransactionsResult {
             dates.push(nextDate);
             day = parseDate(addDays(nextDate, 1));
           }
-        } else {
-          dates.push(getNextDate(dateConditions, day));
         }
 
         if (status === 'paid') {
@@ -215,7 +213,7 @@ export function usePreviewTransactions(): UsePreviewTransactionsResult {
             amount: getScheduledAmount(schedule._amount),
             date,
             schedule: schedule.id,
-            forceUpcoming: schedules.length > 0 || status === 'paid',
+            forceUpcoming: date !== schedule.next_date || status === 'paid',
           });
         });
 
