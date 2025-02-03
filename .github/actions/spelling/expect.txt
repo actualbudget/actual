@@ -1,9 +1,10 @@
 ABNAMRO
 ABNANL
 Activo
-Anglais
 AESUDEF
 ALZEY
+Anglais
+Authentik
 BANKA
 BANKINTER
 BAWAATWW
@@ -23,6 +24,7 @@ datadir
 DIREKT
 Dominguez
 ENTERCARD
+Entra
 fidd
 Fineco
 Fintro
@@ -30,6 +32,7 @@ FORTUNEO
 FTNOFRP
 gernes
 gocardless
+Grafana
 HABAL
 HELADEF
 INGBPLPW
@@ -37,6 +40,7 @@ INVSTMTMSGSRS
 ISYBANK
 ITBBITMM
 jfdoming
+Keycloak
 KORT
 Kreditbank
 modals
@@ -44,6 +48,7 @@ murmurhash
 nginx
 overbudgeting
 Paribas
+passwordless
 Postgre
 prefs
 revolut
@@ -64,13 +69,9 @@ systemctl
 tada
 templating
 ubuntu
+userinfo
 vrt
 VUB
 websecure
 WOR
 youngcw
-Authentik
-Entra
-Keycloak
-userinfo
-passwordless
