@@ -157,17 +157,6 @@ export function ReportTopbar({
       >
         <SvgChartPie width={15} height={15} />
       </GraphButton>
-      <GraphButton
-        title={t('Combined Graph')}
-        selected={customReportItems.graphType === 'BarLineGraph'}
-        onSelect={() => {
-          onChangeGraph('BarLineGraph');
-        }}
-        style={{ marginRight: 15 }}
-        disabled={isItemDisabled('BarLineGraph')}
-      >
-        <SvgChartPie width={15} height={15} />
-      </GraphButton>
       <View
         style={{
           width: 1,
