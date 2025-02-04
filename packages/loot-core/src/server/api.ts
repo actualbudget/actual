@@ -628,7 +628,10 @@ handlers['api/category-group-create'] = withMutation(async function ({
   group,
 }) {
   checkFileOpen();
-  return handlers['category-group-create']({ name: group.name, hidden: group.hidden });
+  return handlers['category-group-create']({
+    name: group.name,
+    hidden: group.hidden,
+  });
 });
 
 handlers['api/category-group-update'] = withMutation(async function ({
