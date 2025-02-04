@@ -114,9 +114,9 @@ async function importCategories(
             default: {
               let run = true;
               let count = 1;
-              let origName = cat.name;
-              while(run) {
-                try{
+              const origName = cat.name;
+              while (run) {
+                try {
                   const id = await actual.createCategory({
                     name: cat.name,
                     group_id: groupId,
@@ -124,13 +124,12 @@ async function importCategories(
                   entityIdMap.set(cat.id, id);
                   run = false;
                   break;
-                }
-                catch(e){
-                  cat.name = origName+"-"+count.toString();
-                  count +=1;
-                  if(count>=100){
-                    run=false;
-                    throw Error(e.message)
+                } catch (e) {
+                  cat.name = origName + '-' + count.toString();
+                  count += 1;
+                  if (count >= 100) {
+                    run = false;
+                    throw Error(e.message);
                   }
                 }
               }
