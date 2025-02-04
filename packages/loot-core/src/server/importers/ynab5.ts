@@ -79,13 +79,30 @@ async function importCategories(
       if (
         !equalsIgnoreCase(group.name, 'Internal Master Category') &&
         !equalsIgnoreCase(group.name, 'Credit Card Payments') &&
+        !equalsIgnoreCase(group.name, 'Hidden Categories') &&
         !equalsIgnoreCase(group.name, 'Income')
       ) {
-        groupId = await actual.createCategoryGroup({
-          name: group.name,
-          is_income: false,
-        });
-        entityIdMap.set(group.id, groupId);
+        let run = true;
+        const MAX_RETRY = 10;
+        let count = 1;
+        const origName = group.name;
+        while (run) {
+          try {
+            groupId = await actual.createCategoryGroup({
+              name: group.name,
+              is_income: false,
+            });
+            entityIdMap.set(group.id, groupId);
+            run = false;
+          } catch (e) {
+            group.name = origName + '-' + count.toString();
+            count += 1;
+            if (count >= MAX_RETRY) {
+              run = false;
+              throw Error(e.message);
+            }
+          }
+        }
       }
 
       if (equalsIgnoreCase(group.name, 'Income')) {
@@ -113,7 +130,7 @@ async function importCategories(
               break;
             default: {
               let run = true;
-              const MAX_RETRY = 100;
+              const MAX_RETRY = 10;
               let count = 1;
               const origName = cat.name;
               while (run) {
