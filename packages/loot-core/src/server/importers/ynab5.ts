@@ -112,12 +112,28 @@ async function importCategories(
             case 'internal': // uncategorized is ignored too, handled by actual
               break;
             default: {
-              const id = await actual.createCategory({
-                name: cat.name,
-                group_id: groupId,
-              });
-              entityIdMap.set(cat.id, id);
-              break;
+              let run = true;
+              let count = 1;
+              let origName = cat.name;
+              while(run) {
+                try{
+                  const id = await actual.createCategory({
+                    name: cat.name,
+                    group_id: groupId,
+                  });
+                  entityIdMap.set(cat.id, id);
+                  run = false;
+                  break;
+                }
+                catch(e){
+                  cat.name = origName+"-"+count.toString();
+                  count +=1;
+                  if(count>=100){
+                    run=false;
+                    throw Error(e.message)
+                  }
+                }
+              }
             }
           }
         }
