@@ -113,6 +113,7 @@ async function importCategories(
               break;
             default: {
               let run = true;
+              const MAX_RETRY = 100;
               let count = 1;
               const origName = cat.name;
               while (run) {
@@ -123,11 +124,10 @@ async function importCategories(
                   });
                   entityIdMap.set(cat.id, id);
                   run = false;
-                  break;
                 } catch (e) {
                   cat.name = origName + '-' + count.toString();
                   count += 1;
-                  if (count >= 100) {
+                  if (count >= MAX_RETRY) {
                     run = false;
                     throw Error(e.message);
                   }
