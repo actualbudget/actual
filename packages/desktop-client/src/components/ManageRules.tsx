@@ -18,7 +18,10 @@ import * as undo from 'loot-core/src/platform/client/undo';
 import { getNormalisedString } from 'loot-core/src/shared/normalisation';
 import { mapField, friendlyOp } from 'loot-core/src/shared/rules';
 import { describeSchedule } from 'loot-core/src/shared/schedules';
-import { type NewRuleEntity } from 'loot-core/src/types/models';
+import {
+  type RuleEntity,
+  type NewRuleEntity,
+} from 'loot-core/src/types/models';
 
 import { useAccounts } from '../hooks/useAccounts';
 import { useCategories } from '../hooks/useCategories';
@@ -110,7 +113,7 @@ export function ManageRules({
   payeeId,
   setLoading = () => {},
 }: ManageRulesProps) {
-  const [allRules, setAllRules] = useState([]);
+  const [allRules, setAllRules] = useState<RuleEntity[]>([]);
   const [page, setPage] = useState(0);
   const [filter, setFilter] = useState('');
   const dispatch = useDispatch();
@@ -147,7 +150,7 @@ export function ManageRules({
           )
     ).slice(0, 100 + page * 50);
   }, [allRules, filter, filterData, page]);
-  const selectedInst = useSelected('manage-rules', allRules, []);
+  const selectedInst = useSelected('manage-rules', filteredRules, []);
   const [hoveredRule, setHoveredRule] = useState(null);
 
   const onSearchChange = useCallback(
@@ -197,8 +200,9 @@ export function ManageRules({
     setPage(page => page + 1);
   }
 
-  async function onDeleteSelected() {
+  const onDeleteSelected = useCallback(async () => {
     setLoading(true);
+
     const { someDeletionsFailed } = await send('rule-delete-all', [
       ...selectedInst.items,
     ]);
@@ -212,7 +216,7 @@ export function ManageRules({
     await loadRules();
     selectedInst.dispatch({ type: 'select-none' });
     setLoading(false);
-  }
+  }, [selectedInst]);
 
   async function onDeleteRule(id: string) {
     setLoading(true);
