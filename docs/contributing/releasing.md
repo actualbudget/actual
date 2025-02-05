@@ -64,7 +64,16 @@ yarn npm publish --access public
 
 ### @actual-app/web
 
-In the root of actual (not just desktop-client), run:
+First, pull the latest translations:
+```bash
+cd packages/desktop-client
+! [ -d locale ] && git clone https://github.com/actualbudget/translations.git locale
+cd locale
+git checkout -- .
+git pull
+```
+
+Next, in the root of actual (not just desktop-client), run:
 
 ```bash
 yarn build:browser
