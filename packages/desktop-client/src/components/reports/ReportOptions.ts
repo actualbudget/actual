@@ -7,6 +7,7 @@ import {
   type CategoryEntity,
   type CategoryGroupEntity,
   type PayeeEntity,
+  type sortByOpType,
 } from 'loot-core/src/types/models';
 
 const startDate = monthUtils.subMonths(monthUtils.currentMonth(), 5) + '-01';
@@ -23,7 +24,7 @@ export const defaultReport: CustomReportEntity = {
   groupBy: 'Category',
   interval: 'Monthly',
   balanceType: 'Payment',
-  sortBy: 'Descending',
+  sortBy: 'desc',
   showEmpty: false,
   showOffBudget: false,
   showHiddenCategories: false,
@@ -50,7 +51,10 @@ const groupByOptions = [
   { description: 'Interval' },
 ];
 
-const sortByOptions = [
+const sortByOptions: {
+  description: string;
+  format: sortByOpType;
+}[] = [
   { description: t('Ascending'), format: 'asc' as const },
   { description: t('Descending'), format: 'desc' as const },
   { description: t('Name'), format: 'name' as const },

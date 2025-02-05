@@ -31,5 +31,5 @@ export interface TransactionEntity {
     type: 'SplitTransactionError';
     version: 1;
     difference: number;
-  };
+  } | null;
 }
