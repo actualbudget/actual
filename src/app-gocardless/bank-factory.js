@@ -1,83 +1,29 @@
-import AbancaCaglesmm from './banks/abanca_caglesmm.js';
-import AbnamroAbnanl2a from './banks/abnamro_abnanl2a.js';
-import AmericanExpressAesudef1 from './banks/american_express_aesudef1.js';
-import BancsabadellBsabesbb from './banks/bancsabadell_bsabesbbb.js';
-import BankinterBkbkesmm from './banks/bankinter_bkbkesmm.js';
-import BankOfIrelandB365Bofiie2d from './banks/bank_of_ireland_b365_bofiie2d.js';
-import BelfiusGkccbebb from './banks/belfius_gkccbebb.js';
-import BerlinerSparkasseBeladebexxx from './banks/berliner_sparkasse_beladebexxx.js';
-import BnpBeGebabebb from './banks/bnp_be_gebabebb.js';
-import CbcCregbebb from './banks/cbc_cregbebb.js';
-import CommerzbankCobadeff from './banks/commerzbank_cobadeff.js';
-import DanskebankDabno22 from './banks/danskebank_dabno22.js';
-import DirektHeladef1822 from './banks/direkt_heladef1822.js';
-import EasybankBawaatww from './banks/easybank_bawaatww.js';
-import EntercardSwednokk from './banks/entercard_swednokk.js';
-import FortuneoFtnofrp1xxx from './banks/fortuneo_ftnofrp1xxx.js';
-import HypeHyeeit22 from './banks/hype_hyeeit22.js';
-import IngIngbrobu from './banks/ing_ingbrobu.js';
-import IngIngddeff from './banks/ing_ingddeff.js';
-import IngPlIngbplpw from './banks/ing_pl_ingbplpw.js';
-import IntegrationBank from './banks/integration-bank.js';
-import IsyBankItbbitmm from './banks/isybank_itbbitmm.js';
-import KbcKredbebb from './banks/kbc_kredbebb.js';
-import LhvLhvbee22 from './banks/lhv-lhvbee22.js';
-import MbankRetailBrexplpw from './banks/mbank_retail_brexplpw.js';
-import NationwideNaiagb21 from './banks/nationwide_naiagb21.js';
-import NbgEthngraaxxx from './banks/nbg_ethngraaxxx.js';
-import NorwegianXxNorwnok1 from './banks/norwegian_xx_norwnok1.js';
-import RevolutRevolt21 from './banks/revolut_revolt21.js';
-import SebKortBankAb from './banks/seb_kort_bank_ab.js';
-import SebPrivat from './banks/seb_privat.js';
-import SandboxfinanceSfin0000 from './banks/sandboxfinance_sfin0000.js';
-import SparnordSpnodk22 from './banks/sparnord_spnodk22.js';
-import SpkKarlsruheKarsde66 from './banks/spk_karlsruhe_karsde66.js';
-import SpkMarburgBiedenkopfHeladef1mar from './banks/spk_marburg_biedenkopf_heladef1mar.js';
-import SpkWormsAlzeyRiedMalade51wor from './banks/spk_worms_alzey_ried_malade51wor.js';
-import SskDusseldorfDussdeddxxx from './banks/ssk_dusseldorf_dussdeddxxx.js';
-import SwedbankHabalv22 from './banks/swedbank_habalv22.js';
-import VirginNrnbgb22 from './banks/virgin_nrnbgb22.js';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-export const banks = [
-  AbancaCaglesmm,
-  AbnamroAbnanl2a,
-  AmericanExpressAesudef1,
-  BancsabadellBsabesbb,
-  BankinterBkbkesmm,
-  BankOfIrelandB365Bofiie2d,
-  BelfiusGkccbebb,
-  BerlinerSparkasseBeladebexxx,
-  BnpBeGebabebb,
-  CbcCregbebb,
-  CommerzbankCobadeff,
-  DanskebankDabno22,
-  DirektHeladef1822,
-  EasybankBawaatww,
-  EntercardSwednokk,
-  FortuneoFtnofrp1xxx,
-  HypeHyeeit22,
-  IngIngbrobu,
-  IngIngddeff,
-  IngPlIngbplpw,
-  IsyBankItbbitmm,
-  KbcKredbebb,
-  LhvLhvbee22,
-  MbankRetailBrexplpw,
-  NationwideNaiagb21,
-  NbgEthngraaxxx,
-  NorwegianXxNorwnok1,
-  RevolutRevolt21,
-  SebKortBankAb,
-  SebPrivat,
-  SandboxfinanceSfin0000,
-  SparnordSpnodk22,
-  SpkKarlsruheKarsde66,
-  SpkMarburgBiedenkopfHeladef1mar,
-  SpkWormsAlzeyRiedMalade51wor,
-  SskDusseldorfDussdeddxxx,
-  SwedbankHabalv22,
-  VirginNrnbgb22,
-];
+import IntegrationBank from './banks/integration-bank.js';
+
+const dirname = path.resolve(fileURLToPath(import.meta.url), '..');
+const banksDir = path.resolve(dirname, 'banks');
+
+async function loadBanks() {
+  const bankHandlers = fs
+    .readdirSync(banksDir)
+    .filter((filename) => filename.includes('_') && filename.endsWith('.js'));
+
+  const imports = await Promise.all(
+    bankHandlers.map((file) => {
+      return import(path.resolve(banksDir, file)).then(
+        (handler) => handler.default,
+      );
+    }),
+  );
+
+  return imports;
+}
+
+export const banks = await loadBanks();
 
 export default (institutionId) =>
   banks.find((b) => b.institutionIds.includes(institutionId)) ||
