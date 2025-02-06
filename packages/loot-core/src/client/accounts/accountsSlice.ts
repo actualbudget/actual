@@ -124,6 +124,28 @@ export const linkAccountSimpleFin = createAppAsyncThunk(
   },
 );
 
+type LinkAccountPluggyAiPayload = {
+  externalAccount: unknown;
+  upgradingId?: AccountEntity['id'];
+  offBudget?: boolean;
+};
+
+export const linkAccountPluggyAi = createAppAsyncThunk(
+  `${sliceName}/linkAccountPluggyAi`,
+  async (
+    { externalAccount, upgradingId, offBudget }: LinkAccountPluggyAiPayload,
+    { dispatch },
+  ) => {
+    await send('pluggyai-accounts-link', {
+      externalAccount,
+      upgradingId,
+      offBudget,
+    });
+    await dispatch(getPayees());
+    await dispatch(getAccounts());
+  },
+);
+
 type SyncResponse = {
   errors: Array<{
     type: string;

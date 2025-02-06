@@ -96,6 +96,12 @@ export function ExperimentalFeatures() {
             >
               <Trans>OpenID authentication method</Trans>
             </FeatureToggle>
+            <FeatureToggle
+              flag="pluggyAiBankSync"
+              feedbackLink="https://github.com/actualbudget/actual/pull/4049"
+            >
+              <Trans>Pluggy.ai Bank Sync (Brazilian banks only)</Trans>
+            </FeatureToggle>
           </View>
         ) : (
           <Link
