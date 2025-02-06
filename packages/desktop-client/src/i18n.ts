@@ -81,6 +81,5 @@ export const setI18NextLanguage = (language: string) => {
     return; // langugage is already set
   }
 
-  console.info('changeLanguage:', language || 'en');
   i18n.changeLanguage(language || 'en');
 };
