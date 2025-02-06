@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { ReactElement, Ref } from 'react';
 
 import { useReports } from 'loot-core/client/data-hooks/reports';
 import { getMonthYearFormat } from 'loot-core/src/shared/months';
@@ -21,6 +21,38 @@ import { RecurringSchedulePicker } from '../select/RecurringSchedulePicker';
 
 import { AmountInput } from './AmountInput';
 import { PercentInput } from './PercentInput';
+import { RuleConditionOp } from 'loot-core/types/models';
+import { CSSProperties } from '../../style';
+
+type BaseProps = {
+  inputRef?: Ref<HTMLInputElement>;
+  style?: CSSProperties;
+  op?: RuleConditionOp;
+}
+
+type SingleProps<T> = BaseProps & {
+  multi?: false;
+  value?: T;
+  onChange: (value: T) => void;
+}
+
+type MultiProps<T> = BaseProps & {
+  multi: true;
+  value?: T[];
+  onChange: (value: T[]) => void;
+}
+
+type NumberFormat = 'currency' | 'percentage';
+type IdField = 'payee' | 'account' | 'category';
+type SavedField = 'saved' | 'report';
+
+type IdInputProps = { type: 'id'; field: IdField } & (SingleProps<unknown> | MultiProps<unknown>)
+type SavedInputProps = { type: 'saved'; field: SavedField } & (SingleProps<unknown> | MultiProps<unknown>)
+type DateInputProps = { type: 'date'; subfield?: 'month' | 'year' } & SingleProps<Date | string | { frequency: string; }>
+type BooleanInputProps = { type: 'bolean' } & SingleProps<boolean>
+type NumberInputProps = { type: 'number'; numberFormatType?: NumberFormat } & SingleProps<number>
+
+type GenericInputProps = IdInputProps | SavedInputProps | DateInputProps | BooleanInputProps | NumberInputProps;
 
 export function GenericInput({
   field,
@@ -33,13 +65,13 @@ export function GenericInput({
   style,
   onChange,
   op = undefined,
-}) {
+}: GenericInputProps): ReactElement {
   const { grouped: categoryGroups } = useCategories();
   const { data: savedReports } = useReports();
   const saved = useSelector(state => state.queries.saved);
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
 
-  const getNumberInputByFormatType = numberFormatType => {
+  const getNumberInputByFormatType = (numberFormatType?: NumberFormat) => {
     switch (numberFormatType) {
       case 'currency':
         return (
@@ -80,7 +112,7 @@ export function GenericInput({
   const showPlaceholder = multi ? value.length === 0 : true;
   const autocompleteType = multi ? 'multi' : 'single';
 
-  let content;
+  let content: ReactElement = null;
   switch (type) {
     case 'id':
       switch (field) {
