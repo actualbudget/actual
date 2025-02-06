@@ -156,7 +156,7 @@ export function ReportSidebar({
   const rangeOptions = useMemo(() => {
     const options: SelectOption[] = ReportOptions.dateRange
       .filter(f => f[customReportItems.interval as keyof dateRangeProps])
-      .map(option => [option.description, option.description]);
+      .map(option => [option.key, option.description]);
 
     // Append separator if necessary
     if (dateRangeLine > 0) {
@@ -230,7 +230,10 @@ export function ReportSidebar({
           <Select
             value={customReportItems.groupBy}
             onChange={e => onChangeSplit(e)}
-            options={ReportOptions.groupBy.map(option => [option, option])}
+            options={ReportOptions.groupBy.map(option => [
+              option.key,
+              option.description,
+            ])}
             disabledKeys={disabledItems('split')}
           />
         </View>
@@ -249,7 +252,7 @@ export function ReportSidebar({
             value={customReportItems.balanceType}
             onChange={e => onChangeBalanceType(e)}
             options={ReportOptions.balanceType.map(option => [
-              option.description,
+              option.key,
               option.description,
             ])}
             disabledKeys={disabledItems('type')}
@@ -274,14 +277,14 @@ export function ReportSidebar({
               if (
                 ReportOptions.dateRange
                   .filter(d => !d[e as keyof dateRangeProps])
-                  .map(int => int.description)
+                  .map(int => int.key)
                   .includes(customReportItems.dateRange)
               ) {
                 onSelectRange(defaultsList.intervalRange.get(e) || '');
               }
             }}
             options={ReportOptions.interval.map(option => [
-              option.description,
+              option.key,
               option.description,
             ])}
             disabledKeys={[]}
