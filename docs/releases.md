@@ -1,5 +1,17 @@
 # Release Notes
 
+## 25.2.1
+
+The primary intent of this release is to patch regressions that prevented the reports page from loading when the selected language was not English, and the desktop apps from working.
+
+### Actual
+
+#### Bugfix
+
+- [#4303](https://github.com/actualbudget/actual/pull/4303) Fix crashes on reports page with translations enabled — thanks @jfdoming
+- [#4312](https://github.com/actualbudget/actual/pull/4312) Fix broken Weblate URL in settings if the language option has never been set — thanks @matt-fidd
+- [#4317](https://github.com/actualbudget/actual/pull/4317) Fix Electron language support — thanks @MikesGlitch
+
 ## 25.2.0
 
 The release has the following notable improvements:
