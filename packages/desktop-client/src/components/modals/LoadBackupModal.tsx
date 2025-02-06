@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { loadBackup, makeBackup } from 'loot-core/client/actions';
+import { loadBackup, makeBackup } from 'loot-core/client/budgets/budgetsSlice';
 import { type Backup } from 'loot-core/server/backups';
 import { send, listen, unlisten } from 'loot-core/src/platform/client/fetch';
 
@@ -106,7 +106,12 @@ export function LoadBackupModal({
                   <Button
                     variant="primary"
                     onPress={() =>
-                      dispatch(loadBackup(budgetIdToLoad, latestBackup.id))
+                      dispatch(
+                        loadBackup({
+                          budgetId: budgetIdToLoad,
+                          backupId: latestBackup.id,
+                        }),
+                      )
                     }
                   >
                     {t('Revert to original version')}
@@ -141,7 +146,11 @@ export function LoadBackupModal({
             ) : (
               <BackupTable
                 backups={previousBackups}
-                onSelect={id => dispatch(loadBackup(budgetIdToLoad, id))}
+                onSelect={id =>
+                  dispatch(
+                    loadBackup({ budgetId: budgetIdToLoad, backupId: id }),
+                  )
+                }
               />
             )}
           </View>

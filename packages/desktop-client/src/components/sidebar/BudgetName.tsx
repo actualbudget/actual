@@ -1,7 +1,7 @@
 import React, { type ReactNode, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { closeBudget } from 'loot-core/src/client/actions';
+import { closeBudget } from 'loot-core/client/budgets/budgetsSlice';
 import * as Platform from 'loot-core/src/client/platform';
 
 import { useContextMenu } from '../../hooks/useContextMenu';

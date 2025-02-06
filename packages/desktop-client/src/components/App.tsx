@@ -13,12 +13,11 @@ import { BrowserRouter } from 'react-router-dom';
 
 import {
   addNotification,
-  closeBudget,
-  loadBudget,
   loadGlobalPrefs,
   signOut,
 } from 'loot-core/client/actions';
 import { setAppState, sync } from 'loot-core/client/app/appSlice';
+import { closeBudget, loadBudget } from 'loot-core/client/budgets/budgetsSlice';
 import { SpreadsheetProvider } from 'loot-core/client/SpreadsheetProvider';
 import * as Platform from 'loot-core/src/client/platform';
 import {
@@ -96,7 +95,7 @@ function AppInner() {
       );
       const budgetId = await send('get-last-opened-backup');
       if (budgetId) {
-        await dispatch(loadBudget(budgetId));
+        await dispatch(loadBudget({ id: budgetId }));
 
         // Check to see if this file has been remotely deleted (but
         // don't block on this in case they are offline or something)

@@ -7,16 +7,15 @@ import React, {
 } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { getUserData, pushModal } from 'loot-core/client/actions';
 import {
   closeAndDownloadBudget,
   closeAndLoadBudget,
   createBudget,
   downloadBudget,
-  getUserData,
   loadAllFiles,
   loadBudget,
-  pushModal,
-} from 'loot-core/client/actions';
+} from 'loot-core/client/budgets/budgetsSlice';
 import {
   isElectron,
   isNonProductionEnvironment,
@@ -559,14 +558,14 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
 
     if (!id) {
       if (isRemoteFile) {
-        await dispatch(downloadBudget(file.cloudFileId));
+        await dispatch(downloadBudget({ cloudFileId: file.cloudFileId }));
       } else {
-        await dispatch(loadBudget(file.id));
+        await dispatch(loadBudget({ id: file.id }));
       }
     } else if (!isRemoteFile && file.id !== id) {
-      await dispatch(closeAndLoadBudget(file.id));
+      await dispatch(closeAndLoadBudget({ fileId: file.id }));
     } else if (isRemoteFile) {
-      await dispatch(closeAndDownloadBudget(file.cloudFileId));
+      await dispatch(closeAndDownloadBudget({ cloudFileId: file.cloudFileId }));
     }
   };
 

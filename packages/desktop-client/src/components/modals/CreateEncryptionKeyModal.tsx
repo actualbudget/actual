@@ -5,8 +5,9 @@ import { useTranslation, Trans } from 'react-i18next';
 
 import { css } from '@emotion/css';
 
-import { loadAllFiles, loadGlobalPrefs } from 'loot-core/client/actions';
+import { loadGlobalPrefs } from 'loot-core/client/actions';
 import { sync } from 'loot-core/client/app/appSlice';
+import { loadAllFiles } from 'loot-core/client/budgets/budgetsSlice';
 import { send } from 'loot-core/src/platform/client/fetch';
 import { getCreateKeyError } from 'loot-core/src/shared/errors';
 

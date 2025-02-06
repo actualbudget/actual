@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef, type CSSProperties } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 
-import { closeBudget, getUserData, signOut } from 'loot-core/client/actions';
+import { getUserData, signOut } from 'loot-core/client/actions';
+import { closeBudget } from 'loot-core/client/budgets/budgetsSlice';
 import { listen } from 'loot-core/src/platform/client/fetch';
 import { type RemoteFile, type SyncedLocalFile } from 'loot-core/types/file';
 import { type TransObjectLiteral } from 'loot-core/types/util';

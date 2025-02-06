@@ -1,11 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
-import {
-  addNotification,
-  closeAndLoadBudget,
-  popModal,
-} from 'loot-core/client/actions';
+import { addNotification, popModal } from 'loot-core/client/actions';
+import { closeAndLoadBudget } from 'loot-core/client/budgets/budgetsSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import { getUserAccessErrors } from 'loot-core/shared/errors';
 import { type Budget } from 'loot-core/types/budget';
@@ -186,7 +183,7 @@ export function TransferOwnership({
                 try {
                   await onSave();
                   await dispatch(
-                    closeAndLoadBudget((currentFile as Budget).id),
+                    closeAndLoadBudget({ fileId: (currentFile as Budget).id }),
                   );
                   close();
                 } catch (error) {

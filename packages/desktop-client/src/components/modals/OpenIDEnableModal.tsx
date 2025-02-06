@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
-import { closeBudget, popModal } from 'loot-core/client/actions';
+import { popModal } from 'loot-core/client/actions';
+import { closeBudget } from 'loot-core/client/budgets/budgetsSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import * as asyncStorage from 'loot-core/platform/server/asyncStorage';
 import { getOpenIdErrors } from 'loot-core/shared/errors';
