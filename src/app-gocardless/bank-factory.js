@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import IntegrationBank from './banks/integration-bank.js';
 
@@ -14,7 +14,8 @@ async function loadBanks() {
 
   const imports = await Promise.all(
     bankHandlers.map((file) => {
-      return import(path.resolve(banksDir, file)).then(
+      const fileUrlToBank = pathToFileURL(path.resolve(banksDir, file)); // pathToFileURL for ESM compatibility
+      return import(fileUrlToBank.toString()).then(
         (handler) => handler.default,
       );
     }),
