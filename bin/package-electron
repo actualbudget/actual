@@ -36,7 +36,16 @@ fi
 
 yarn workspace loot-core build:node
 
-yarn workspace @actual-app/web generate:i18n
+# Get translations
+echo "Updating translations..."
+if ! [ -d packages/desktop-client/locale ]; then
+    git clone https://github.com/actualbudget/translations packages/desktop-client/locale
+fi
+pushd packages/desktop-client/locale > /dev/null
+git pull
+popd > /dev/null
+packages/desktop-client/bin/remove-untranslated-languages
+
 yarn workspace @actual-app/web build --mode=desktop # electron specific build
 
 yarn workspace desktop-electron update-client
