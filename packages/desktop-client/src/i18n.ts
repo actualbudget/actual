@@ -38,6 +38,7 @@ i18n
     react: {
       transSupportBasicHtmlNodes: false,
     },
+    debug: true,
   });
 
 export const setI18NextLanguage = (language: string) => {
@@ -50,6 +51,7 @@ export const setI18NextLanguage = (language: string) => {
   }
 
   if (!isLanguageAvailable(language)) {
+    console.info('Language not available:', language);
     if (language === 'en') {
       // English is always available since we use natural-language keys.
       return;
@@ -77,5 +79,10 @@ export const setI18NextLanguage = (language: string) => {
     return;
   }
 
+  if (language === i18n.language) {
+    return; // langugage is already set
+  }
+
+  console.info('changeLanguage:', language || 'en');
   i18n.changeLanguage(language || 'en');
 };
