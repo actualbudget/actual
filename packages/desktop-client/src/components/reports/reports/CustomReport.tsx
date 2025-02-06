@@ -524,7 +524,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
   };
 
   const defaultItems = (item: string) => {
-    const chooseGraph = ReportOptions.groupBy.includes(item) ? graphType : item;
+    const chooseGraph = ReportOptions.groupByItems.has(item) ? graphType : item;
     if (
       (disabledGraphList(mode, chooseGraph, 'disabledSplit') || []).includes(
         groupBy,
