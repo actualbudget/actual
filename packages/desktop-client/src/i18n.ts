@@ -5,7 +5,10 @@ import resourcesToBackend from 'i18next-resources-to-backend';
 
 import * as Platform from 'loot-core/client/platform';
 
-const languages = import.meta.glob(['/locale/*.json', '!/locale/*_old.json']);
+const languages = import.meta.glob([
+  '../locale/*.json',
+  '!../locale/*_old.json',
+]);
 
 export const availableLanguages = Object.keys(languages).map(
   path => path.split('/')[2].split('.')[0],
@@ -18,7 +21,7 @@ const loadLanguage = (language: string) => {
   if (!isLanguageAvailable(language)) {
     throw new Error(`Unknown locale ${language}`);
   }
-  return languages[`/locale/${language}.json`]();
+  return languages[`../locale/${language}.json`]();
 };
 
 i18n
