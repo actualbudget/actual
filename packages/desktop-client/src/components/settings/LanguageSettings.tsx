@@ -59,7 +59,7 @@ export function LanguageSettings() {
               variant="external"
               to={
                 'https://hosted.weblate.org/projects/actualbudget/actual/' +
-                language
+                (language ?? '')
               }
               linkColor="purple"
             >
