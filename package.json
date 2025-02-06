@@ -71,7 +71,7 @@
     "rollup": "4.9.4"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=18.20.0"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx,md,json}": "prettier --write"
