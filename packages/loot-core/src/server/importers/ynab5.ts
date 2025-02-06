@@ -91,6 +91,7 @@ async function importCategories(
             groupId = await actual.createCategoryGroup({
               name: group.name,
               is_income: false,
+              hidden: group.hidden,
             });
             entityIdMap.set(group.id, groupId);
             run = false;
@@ -138,6 +139,7 @@ async function importCategories(
                   const id = await actual.createCategory({
                     name: cat.name,
                     group_id: groupId,
+                    hidden: cat.hidden,
                   });
                   entityIdMap.set(cat.id, id);
                   run = false;
