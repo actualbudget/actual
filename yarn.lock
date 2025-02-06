@@ -8864,7 +8864,7 @@ __metadata:
     better-sqlite3: "npm:^11.7.0"
     copyfiles: "npm:^2.4.1"
     cross-env: "npm:^7.0.3"
-    electron: "npm:30.0.6"
+    electron: "npm:30.5.1"
     electron-builder: "npm:24.13.3"
     fs-extra: "npm:^11.2.0"
     promise-retry: "npm:^2.0.1"
@@ -9220,16 +9220,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"electron@npm:30.0.6":
-  version: 30.0.6
-  resolution: "electron@npm:30.0.6"
+"electron@npm:30.5.1":
+  version: 30.5.1
+  resolution: "electron@npm:30.5.1"
   dependencies:
     "@electron/get": "npm:^2.0.0"
     "@types/node": "npm:^20.9.0"
     extract-zip: "npm:^2.0.1"
   bin:
     electron: cli.js
-  checksum: 10/3e48725701c348d6152cbed53266bb349b93687ba241a051235af6425e509413d1430a3b50e9be9dd153996eee2c2e9ab529cc16f58b28589db679effb69a2f8
+  checksum: 10/2dd971883bcaae63e63ae2549aa029922f4935816d71b8a52b5d3ee2f2f242cf0236d7284778902d8a0cebdd8b75cf9ece1523e687b1ade81aeb000126ebaa19
   languageName: node
   linkType: hard
 

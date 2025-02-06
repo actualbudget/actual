@@ -96,7 +96,7 @@
     "@types/fs-extra": "^11",
     "copyfiles": "^2.4.1",
     "cross-env": "^7.0.3",
-    "electron": "30.0.6",
+    "electron": "30.5.1",
     "electron-builder": "24.13.3",
     "typescript": "^5.5.4"
   }
