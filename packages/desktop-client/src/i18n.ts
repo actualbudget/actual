@@ -78,7 +78,7 @@ export const setI18NextLanguage = (language: string) => {
   }
 
   if (language === i18n.language) {
-    return; // langugage is already set
+    return; // language is already set
   }
 
   i18n.changeLanguage(language || 'en');
