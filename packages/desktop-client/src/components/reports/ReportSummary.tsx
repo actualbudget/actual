@@ -12,6 +12,7 @@ import {
   type DataEntity,
 } from 'loot-core/src/types/models/reports';
 
+import { useLocale } from '../../hooks/useLocale';
 import { theme, styles } from '../../style';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
@@ -36,6 +37,7 @@ export function ReportSummary({
   interval,
   intervalsCount,
 }: ReportSummaryProps) {
+  const locale = useLocale();
   const { t } = useTranslation();
   const net =
     balanceTypeOp === 'netAssets'
@@ -72,19 +74,23 @@ export function ReportSummary({
           {monthUtils.format(
             startDate,
             ReportOptions.intervalFormat.get(interval) || '',
+            locale,
           )}
           {monthUtils.format(
             startDate,
             ReportOptions.intervalFormat.get(interval) || '',
+            locale,
           ) !==
             monthUtils.format(
               endDate,
               ReportOptions.intervalFormat.get(interval) || '',
+              locale,
             ) &&
-            ' to ' +
+            ` ${t('to')} ` +
               monthUtils.format(
                 endDate,
                 ReportOptions.intervalFormat.get(interval) || '',
+                locale,
               )}
         </Text>
       </View>

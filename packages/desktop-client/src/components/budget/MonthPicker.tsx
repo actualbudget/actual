@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import * as monthUtils from 'loot-core/src/shared/months';
 
+import { useLocale } from '../../hooks/useLocale';
 import { useResizeObserver } from '../../hooks/useResizeObserver';
 import { SvgCalendar } from '../../icons/v2';
 import { styles, theme } from '../../style';
@@ -27,6 +28,7 @@ export const MonthPicker = ({
   style,
   onSelect,
 }: MonthPickerProps) => {
+  const locale = useLocale();
   const { t } = useTranslation();
   const [hoverId, setHoverId] = useState(null);
   const [targetMonthCount, setTargetMonthCount] = useState(12);
@@ -101,7 +103,7 @@ export const MonthPicker = ({
           </View>
         </Link>
         {range.map((month, idx) => {
-          const monthName = monthUtils.format(month, 'MMM');
+          const monthName = monthUtils.format(month, 'MMM', locale);
           const selected =
             idx >= firstSelectedIndex && idx <= lastSelectedIndex;
 

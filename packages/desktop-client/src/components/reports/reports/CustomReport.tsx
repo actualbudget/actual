@@ -22,6 +22,7 @@ import { type TransObjectLiteral } from 'loot-core/types/util';
 import { useAccounts } from '../../../hooks/useAccounts';
 import { useCategories } from '../../../hooks/useCategories';
 import { useFilters } from '../../../hooks/useFilters';
+import { useLocale } from '../../../hooks/useLocale';
 import { useLocalPref } from '../../../hooks/useLocalPref';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { usePayees } from '../../../hooks/usePayees';
@@ -121,6 +122,7 @@ type CustomReportInnerProps = {
 };
 
 function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
+  const locale = useLocale();
   const { t } = useTranslation();
   const categories = useCategories();
   const { isNarrowWidth } = useResponsive();
@@ -318,6 +320,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
           pretty: monthUtils.format(
             inter,
             ReportOptions.intervalFormat.get(interval) || '',
+            locale,
           ),
         }))
         .reverse();
@@ -344,6 +347,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
     onApplyFilter,
     report.conditions,
     includeCurrentInterval,
+    locale,
   ]);
 
   useEffect(() => {

@@ -5,6 +5,7 @@ import { css } from '@emotion/css';
 
 import * as monthUtils from 'loot-core/src/shared/months';
 
+import { useLocale } from '../../../../hooks/useLocale';
 import { useUndo } from '../../../../hooks/useUndo';
 import { SvgDotsHorizontalTriple } from '../../../../icons/v1';
 import { SvgArrowButtonDown1, SvgArrowButtonUp1 } from '../../../../icons/v2';
@@ -25,6 +26,7 @@ type BudgetSummaryProps = {
   isGoalTemplatesEnabled?: boolean;
 };
 export function BudgetSummary({ month }: BudgetSummaryProps) {
+  const locale = useLocale();
   const {
     currentMonth,
     summaryCollapsed: collapsed,
@@ -44,13 +46,17 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
     setMenuOpen(false);
   }
 
-  const prevMonthName = monthUtils.format(monthUtils.prevMonth(month), 'MMM');
+  const prevMonthName = monthUtils.format(
+    monthUtils.prevMonth(month),
+    'MMM',
+    locale,
+  );
 
   const ExpandOrCollapseIcon = collapsed
     ? SvgArrowButtonDown1
     : SvgArrowButtonUp1;
 
-  const displayMonth = monthUtils.format(month, 'MMMM ‘yy');
+  const displayMonth = monthUtils.format(month, 'MMMM ‘yy', locale);
   const { t } = useTranslation();
 
   return (
@@ -124,7 +130,7 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
               currentMonth === month && { fontWeight: 'bold' },
             ])}
           >
-            {monthUtils.format(month, 'MMMM')}
+            {monthUtils.format(month, 'MMMM', locale)}
           </div>
 
           <View

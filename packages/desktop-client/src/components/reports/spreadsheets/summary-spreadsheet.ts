@@ -16,6 +16,7 @@ export function summarySpreadsheet(
   conditions: RuleConditionEntity[] = [],
   conditionsOp: 'and' | 'or' = 'and',
   summaryContent: SummaryContent,
+  locale: Locale,
 ) {
   return async (
     spreadsheet: ReturnType<typeof useSpreadsheet>,
@@ -118,8 +119,8 @@ export function summarySpreadsheet(
     }
 
     const dateRanges = {
-      fromRange: d.format(startDay, 'MMM yy'),
-      toRange: d.format(endDay, 'MMM yy'),
+      fromRange: d.format(startDay, 'MMM yy', { locale }),
+      toRange: d.format(endDay, 'MMM yy', { locale }),
     };
 
     switch (summaryContent.type) {

@@ -13,6 +13,7 @@ import {
   extractScheduleConds,
 } from 'loot-core/shared/schedules';
 
+import { useLocale } from '../../hooks/useLocale';
 import { theme, styles } from '../../style';
 import { Menu } from '../common/Menu';
 import {
@@ -32,6 +33,7 @@ export function ScheduledTransactionMenuModal({
   onPost,
   onComplete,
 }: ScheduledTransactionMenuModalProps) {
+  const locale = useLocale();
   const { t } = useTranslation();
   const defaultMenuItemStyle: CSSProperties = {
     ...styles.mobileMenuItem,
@@ -77,7 +79,7 @@ export function ScheduledTransactionMenuModal({
               {t('Scheduled date')}
             </Text>
             <Text style={{ fontSize: 17, fontWeight: 700 }}>
-              {format(schedule?.next_date || '', 'MMMM dd, yyyy')}
+              {format(schedule?.next_date || '', 'MMMM dd, yyyy', locale)}
             </Text>
           </View>
           <ScheduledTransactionMenu

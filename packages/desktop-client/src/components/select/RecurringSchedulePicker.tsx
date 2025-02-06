@@ -2,6 +2,7 @@ import {
   type CSSProperties,
   type Dispatch,
   useEffect,
+  useMemo,
   useReducer,
   useRef,
   useState,
@@ -18,6 +19,7 @@ import {
 } from 'loot-core/types/util';
 
 import { useDateFormat } from '../../hooks/useDateFormat';
+import { useLocale } from '../../hooks/useLocale';
 import { SvgAdd, SvgSubtract } from '../../icons/v0';
 import { theme } from '../../style';
 import { Button } from '../common/Button2';
@@ -239,6 +241,7 @@ function SchedulePreview({
 }: {
   previewDates: string[] | string;
 }) {
+  const locale = useLocale();
   const dateFormat = (useDateFormat() || 'MM/dd/yyyy')
     .replace('MM', 'M')
     .replace('dd', 'd');
@@ -258,7 +261,7 @@ function SchedulePreview({
           {previewDates.map((d, idx) => (
             <View key={idx}>
               <Text>{monthUtils.format(d, dateFormat)}</Text>
-              <Text>{monthUtils.format(d, 'EEEE')}</Text>
+              <Text>{monthUtils.format(d, 'EEEE', locale)}</Text>
             </View>
           ))}
         </Stack>
@@ -590,11 +593,17 @@ export function RecurringSchedulePicker({
   const triggerRef = useRef(null);
   const [isOpen, setIsOpen] = useState(false);
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
+  const locale = useLocale();
 
   function onSave(config: RecurConfig) {
     onChange(config);
     setIsOpen(false);
   }
+
+  const recurringDescription = useMemo(
+    () => getRecurringDescription(value, dateFormat, locale),
+    [locale, value, dateFormat],
+  );
 
   return (
     <View>
@@ -603,9 +612,7 @@ export function RecurringSchedulePicker({
         style={{ textAlign: 'left', ...buttonStyle }}
         onPress={() => setIsOpen(true)}
       >
-        {value
-          ? getRecurringDescription(value, dateFormat)
-          : t('No recurring date')}
+        {value ? recurringDescription : t('No recurring date')}
       </Button>
 
       <Popover

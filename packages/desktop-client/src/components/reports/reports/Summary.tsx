@@ -16,6 +16,7 @@ import {
 } from 'loot-core/types/models';
 
 import { useFilters } from '../../../hooks/useFilters';
+import { useLocale } from '../../../hooks/useLocale';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { SvgEquals } from '../../../icons/v1';
@@ -65,6 +66,7 @@ type SummaryInnerProps = {
 type FilterObject = ReturnType<typeof useFilters>;
 
 function SummaryInner({ widget }: SummaryInnerProps) {
+  const locale = useLocale();
   const { t } = useTranslation();
   const [initialStart, initialEnd, initialMode] = calculateTimeRange(
     widget?.meta?.timeFrame,
@@ -121,6 +123,7 @@ function SummaryInner({ widget }: SummaryInnerProps) {
         dividendFilters.conditions,
         dividendFilters.conditionsOp,
         content,
+        locale,
       ),
     [
       start,
@@ -128,6 +131,7 @@ function SummaryInner({ widget }: SummaryInnerProps) {
       dividendFilters.conditions,
       dividendFilters.conditionsOp,
       content,
+      locale,
     ],
   );
 
@@ -172,14 +176,14 @@ function SummaryInner({ widget }: SummaryInnerProps) {
         .rangeInclusive(earliestMonth, monthUtils.currentMonth())
         .map(month => ({
           name: month,
-          pretty: monthUtils.format(month, 'MMMM, yyyy'),
+          pretty: monthUtils.format(month, 'MMMM, yyyy', locale),
         }))
         .reverse();
 
       setAllMonths(allMonths);
     }
     run();
-  }, []);
+  }, [locale]);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();

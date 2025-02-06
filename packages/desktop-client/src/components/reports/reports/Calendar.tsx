@@ -34,6 +34,7 @@ import { useAccounts } from '../../../hooks/useAccounts';
 import { useCategories } from '../../../hooks/useCategories';
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import { useFilters } from '../../../hooks/useFilters';
+import { useLocale } from '../../../hooks/useLocale';
 import { useMergedRefs } from '../../../hooks/useMergedRefs';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { usePayees } from '../../../hooks/usePayees';
@@ -95,6 +96,7 @@ type CalendarInnerProps = {
 };
 
 function CalendarInner({ widget, parameters }: CalendarInnerProps) {
+  const locale = useLocale();
   const { t } = useTranslation();
   const [initialStart, initialEnd, initialMode] = calculateTimeRange(
     widget?.meta?.timeFrame,
@@ -266,7 +268,7 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
           .rangeInclusive(earliestMonth, monthUtils.currentMonth())
           .map(month => ({
             name: month,
-            pretty: monthUtils.format(month, 'MMMM, yyyy'),
+            pretty: monthUtils.format(month, 'MMMM, yyyy', locale),
           }))
           .reverse();
 
@@ -276,7 +278,7 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
       }
     }
     run();
-  }, []);
+  }, [locale]);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();

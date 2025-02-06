@@ -7,6 +7,7 @@ import {
   type NetWorthWidget,
 } from 'loot-core/src/types/models';
 
+import { useLocale } from '../../../hooks/useLocale';
 import { styles } from '../../../style';
 import { Block } from '../../common/Block';
 import { View } from '../../common/View';
@@ -39,6 +40,7 @@ export function NetWorthCard({
   onMetaChange,
   onRemove,
 }: NetWorthCardProps) {
+  const locale = useLocale();
   const { t } = useTranslation();
   const { isNarrowWidth } = useResponsive();
 
@@ -57,8 +59,9 @@ export function NetWorthCard({
         accounts,
         meta?.conditions,
         meta?.conditionsOp,
+        locale,
       ),
-    [start, end, accounts, meta?.conditions, meta?.conditionsOp],
+    [start, end, accounts, meta?.conditions, meta?.conditionsOp, locale],
   );
   const data = useReport('net_worth', params);
 

@@ -6,6 +6,7 @@ import { css } from '@emotion/css';
 
 import * as monthUtils from 'loot-core/src/shared/months';
 
+import { useLocale } from '../../hooks/useLocale';
 import { useNotes } from '../../hooks/useNotes';
 import { useUndo } from '../../hooks/useUndo';
 import { SvgCheveronDown, SvgCheveronUp } from '../../icons/v1';
@@ -28,6 +29,7 @@ export function EnvelopeBudgetMonthMenuModal({
   onBudgetAction,
   onEditNotes,
 }: EnvelopeBudgetMonthMenuModalProps) {
+  const locale = useLocale();
   const originalNotes = useNotes(`budget-${month}`);
   const { showUndoNotification } = useUndo();
 
@@ -56,7 +58,7 @@ export function EnvelopeBudgetMonthMenuModal({
     setShowMore(!showMore);
   };
 
-  const displayMonth = monthUtils.format(month, 'MMMM ‘yy');
+  const displayMonth = monthUtils.format(month, 'MMMM ‘yy', locale);
   const { t } = useTranslation();
 
   return (
