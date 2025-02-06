@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 
 version="${1#v}"
 
@@ -13,6 +14,10 @@ for file in "${files_to_bump[@]}"; do
         # version format: YY.MM.patch
         # logic: if before the 25th, bump patch, else set minor/major to next month
         version="$(jq -r .version "$file" | perl -e '($y,$m,$p)=split/\./,<>;$d=(localtime)[3];$d>25?($p=0,++$m,$m>12&&($m=1,++$y)):$p++;print"$y.$m.$p\n"')"
+        if [ -z "$version" ]; then
+            echo "Error: Failed to calculate new version" >&2
+            exit 1
+        fi
     fi
 
     echo "Bumping $file to version $version"
