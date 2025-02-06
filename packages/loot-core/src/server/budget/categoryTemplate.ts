@@ -46,6 +46,8 @@ export class CategoryTemplate {
     let fromLastMonth;
     if (lastMonthBalance < 0 && !carryover) {
       fromLastMonth = 0;
+    } else if (category.is_income) {
+      fromLastMonth = 0;
     } else {
       fromLastMonth = lastMonthBalance;
     }
