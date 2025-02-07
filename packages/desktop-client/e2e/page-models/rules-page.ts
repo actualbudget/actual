@@ -1,5 +1,35 @@
+import { type Locator, type Page } from '@playwright/test';
+
+type ConditionsEntry = {
+  field: string;
+  op: string;
+  value: string;
+};
+
+type ActionsEntry = {
+  field: string;
+  op?: string;
+  value: string;
+};
+
+type SplitsEntry = {
+  field: string;
+  op?: string;
+  value?: string;
+};
+
+type RuleEntry = {
+  conditionsOp?: string | RegExp;
+  conditions?: ConditionsEntry[];
+  actions?: ActionsEntry[];
+  splits?: Array<SplitsEntry[]>;
+};
+
 export class RulesPage {
-  constructor(page) {
+  readonly page: Page;
+  readonly searchBox: Locator;
+
+  constructor(page: Page) {
     this.page = page;
     this.searchBox = page.getByPlaceholder('Filter rules...');
   }
@@ -7,7 +37,7 @@ export class RulesPage {
   /**
    * Create a new rule
    */
-  async createRule(data) {
+  async createRule(data: RuleEntry) {
     await this.page
       .getByRole('button', {
         name: 'Create new rule',
@@ -23,7 +53,7 @@ export class RulesPage {
    * Retrieve the data for the nth-rule.
    * 0-based index
    */
-  getNthRule(index) {
+  getNthRule(index: number) {
     const row = this.page.getByTestId('table').getByTestId('row').nth(index);
 
     return {
@@ -32,11 +62,11 @@ export class RulesPage {
     };
   }
 
-  async searchFor(text) {
+  async searchFor(text: string) {
     await this.searchBox.fill(text);
   }
 
-  async _fillRuleFields(data) {
+  async _fillRuleFields(data: RuleEntry) {
     if (data.conditionsOp) {
       await this.page
         .getByTestId('conditions-op')
@@ -76,9 +106,13 @@ export class RulesPage {
     }
   }
 
-  async _fillEditorFields(data, rootElement, fieldFirst = false) {
-    for (const idx in data) {
-      const { field, op, value } = data[idx];
+  async _fillEditorFields(
+    data: Array<ConditionsEntry | ActionsEntry | SplitsEntry>,
+    rootElement: Locator,
+    fieldFirst = false,
+  ) {
+    for (const [idx, entry] of data.entries()) {
+      const { field, op, value } = entry;
 
       const row = rootElement.getByTestId('editor-row').nth(idx);
 

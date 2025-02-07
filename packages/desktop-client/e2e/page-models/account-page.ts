@@ -1,7 +1,33 @@
+import { type Locator, type Page } from '@playwright/test';
+
 import { CloseAccountModal } from './close-account-modal';
 
+type TransactionEntry = {
+  debit?: string;
+  credit?: string;
+  account?: string;
+  payee?: string;
+  notes?: string;
+  category?: string;
+};
+
 export class AccountPage {
-  constructor(page) {
+  readonly page: Page;
+  readonly accountName: Locator;
+  readonly accountBalance: Locator;
+  readonly addNewTransactionButton: Locator;
+  readonly newTransactionRow: Locator;
+  readonly addTransactionButton: Locator;
+  readonly cancelTransactionButton: Locator;
+  readonly accountMenuButton: Locator;
+  readonly transactionTable: Locator;
+  readonly transactionTableRow: Locator;
+  readonly filterButton: Locator;
+  readonly filterSelectTooltip: Locator;
+  readonly selectButton: Locator;
+  readonly selectTooltip: Locator;
+
+  constructor(page: Page) {
     this.page = page;
 
     this.accountName = this.page.getByTestId('account-name');
@@ -30,14 +56,14 @@ export class AccountPage {
     this.selectTooltip = this.page.getByTestId('transactions-select-tooltip');
   }
 
-  async waitFor() {
-    await this.transactionTable.waitFor();
+  async waitFor(...options: Parameters<Locator['waitFor']>) {
+    await this.transactionTable.waitFor(...options);
   }
 
   /**
    * Enter details of a transaction
    */
-  async enterSingleTransaction(transaction) {
+  async enterSingleTransaction(transaction: TransactionEntry) {
     await this.addNewTransactionButton.click();
     await this._fillTransactionFields(this.newTransactionRow, transaction);
   }
@@ -53,7 +79,7 @@ export class AccountPage {
   /**
    * Create a single transaction
    */
-  async createSingleTransaction(transaction) {
+  async createSingleTransaction(transaction: TransactionEntry) {
     await this.enterSingleTransaction(transaction);
     await this.addEnteredTransaction();
   }
@@ -61,7 +87,10 @@ export class AccountPage {
   /**
    * Create split transactions
    */
-  async createSplitTransaction([rootTransaction, ...transactions]) {
+  async createSplitTransaction([
+    rootTransaction,
+    ...transactions
+  ]: TransactionEntry[]) {
     await this.addNewTransactionButton.click();
 
     // Root transaction
@@ -87,7 +116,7 @@ export class AccountPage {
     await this.cancelTransactionButton.click();
   }
 
-  async selectNthTransaction(index) {
+  async selectNthTransaction(index: number) {
     const row = this.transactionTableRow.nth(index);
     await row.getByTestId('select').click();
   }
@@ -96,7 +125,7 @@ export class AccountPage {
    * Retrieve the data for the nth-transaction.
    * 0-based index
    */
-  getNthTransaction(index) {
+  getNthTransaction(index: number) {
     const row = this.transactionTableRow.nth(index);
 
     return this._getTransactionDetails(row);
@@ -106,11 +135,9 @@ export class AccountPage {
     return this._getTransactionDetails(this.newTransactionRow);
   }
 
-  _getTransactionDetails(row) {
-    const account = row.getByTestId('account');
-
+  _getTransactionDetails(row: Locator) {
     return {
-      ...(account ? { account } : {}),
+      account: row.getByTestId('account'),
       payee: row.getByTestId('payee'),
       notes: row.getByTestId('notes'),
       category: row.getByTestId('category'),
@@ -119,7 +146,7 @@ export class AccountPage {
     };
   }
 
-  async clickSelectAction(action) {
+  async clickSelectAction(action: string | RegExp) {
     await this.selectButton.click();
     await this.selectTooltip.getByRole('button', { name: action }).click();
   }
@@ -130,16 +157,13 @@ export class AccountPage {
   async clickCloseAccount() {
     await this.accountMenuButton.click();
     await this.page.getByRole('button', { name: 'Close Account' }).click();
-    return new CloseAccountModal(
-      this.page,
-      this.page.getByTestId('close-account-modal'),
-    );
+    return new CloseAccountModal(this.page.getByTestId('close-account-modal'));
   }
 
   /**
    * Open the filtering popover.
    */
-  async filterBy(field) {
+  async filterBy(field: string | RegExp) {
     await this.filterButton.click();
     await this.filterSelectTooltip.getByRole('button', { name: field }).click();
 
@@ -149,7 +173,7 @@ export class AccountPage {
   /**
    * Filter to a specific note
    */
-  async filterByNote(note) {
+  async filterByNote(note: string) {
     const filterTooltip = await this.filterBy('Note');
     await this.page.keyboard.type(note);
     await filterTooltip.applyButton.click();
@@ -158,14 +182,17 @@ export class AccountPage {
   /**
    * Remove the nth filter
    */
-  async removeFilter(idx) {
+  async removeFilter(idx: number) {
     await this.page
       .getByRole('button', { name: 'Delete filter' })
       .nth(idx)
       .click();
   }
 
-  async _fillTransactionFields(transactionRow, transaction) {
+  async _fillTransactionFields(
+    transactionRow: Locator,
+    transaction: TransactionEntry,
+  ) {
     if (transaction.debit) {
       await transactionRow.getByTestId('debit').click();
       await this.page.keyboard.type(transaction.debit);
@@ -210,8 +237,11 @@ export class AccountPage {
 }
 
 class FilterTooltip {
-  constructor(page) {
-    this.page = page;
-    this.applyButton = page.getByRole('button', { name: 'Apply' });
+  readonly locator: Locator;
+  readonly applyButton: Locator;
+
+  constructor(locator: Locator) {
+    this.locator = locator;
+    this.applyButton = locator.getByRole('button', { name: 'Apply' });
   }
 }

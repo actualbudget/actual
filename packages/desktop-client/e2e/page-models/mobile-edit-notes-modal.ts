@@ -1,7 +1,15 @@
+import { type Locator, type Page } from '@playwright/test';
+
 export class EditNotesModal {
-  constructor(page, locator) {
-    this.page = page;
+  readonly page: Page;
+  readonly locator: Locator;
+  readonly heading: Locator;
+  readonly textArea: Locator;
+  readonly saveNotesButton: Locator;
+
+  constructor(locator: Locator) {
     this.locator = locator;
+    this.page = locator.page();
 
     this.heading = locator.getByRole('heading');
     this.textArea = locator.getByRole('textbox');
@@ -12,7 +20,7 @@ export class EditNotesModal {
     await this.heading.getByRole('button', { name: 'Close' }).click();
   }
 
-  async updateNotes(notes) {
+  async updateNotes(notes: string) {
     await this.textArea.fill(notes);
     await this.saveNotesButton.click();
   }

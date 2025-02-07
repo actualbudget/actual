@@ -1,5 +1,17 @@
+import { type Locator, type Page } from '@playwright/test';
+
+type ScheduleEntry = {
+  payee?: string;
+  account?: string;
+  amount?: number;
+};
+
 export class SchedulesPage {
-  constructor(page) {
+  readonly page: Page;
+  readonly addNewScheduleButton: Locator;
+  readonly schedulesTableRow: Locator;
+
+  constructor(page: Page) {
     this.page = page;
 
     this.addNewScheduleButton = this.page.getByRole('button', {
@@ -11,7 +23,7 @@ export class SchedulesPage {
   /**
    * Add a new schedule
    */
-  async addNewSchedule(data) {
+  async addNewSchedule(data: ScheduleEntry) {
     await this.addNewScheduleButton.click();
 
     await this._fillScheduleFields(data);
@@ -23,7 +35,7 @@ export class SchedulesPage {
    * Retrieve the row element for the nth-schedule.
    * 0-based index
    */
-  getNthScheduleRow(index) {
+  getNthScheduleRow(index: number) {
     return this.schedulesTableRow.nth(index);
   }
 
@@ -31,7 +43,7 @@ export class SchedulesPage {
    * Retrieve the data for the nth-schedule.
    * 0-based index
    */
-  getNthSchedule(index) {
+  getNthSchedule(index: number) {
     const row = this.getNthScheduleRow(index);
 
     return {
@@ -47,7 +59,7 @@ export class SchedulesPage {
    * Create a transaction for the nth-schedule.
    * 0-based index
    */
-  async postNthSchedule(index) {
+  async postNthSchedule(index: number) {
     await this._performNthAction(index, 'Post transaction today');
     await this.page.waitForTimeout(1000);
   }
@@ -56,12 +68,12 @@ export class SchedulesPage {
    * Complete the nth-schedule.
    * 0-based index
    */
-  async completeNthSchedule(index) {
+  async completeNthSchedule(index: number) {
     await this._performNthAction(index, 'Complete');
     await this.page.waitForTimeout(1000);
   }
 
-  async _performNthAction(index, actionName) {
+  async _performNthAction(index: number, actionName: string | RegExp) {
     const row = this.getNthScheduleRow(index);
     const actions = row.getByTestId('actions');
 
@@ -69,7 +81,7 @@ export class SchedulesPage {
     await this.page.getByRole('button', { name: actionName }).click();
   }
 
-  async _fillScheduleFields(data) {
+  async _fillScheduleFields(data: ScheduleEntry) {
     if (data.payee) {
       await this.page.getByRole('textbox', { name: 'Payee' }).fill(data.payee);
       await this.page.keyboard.press('Enter');
