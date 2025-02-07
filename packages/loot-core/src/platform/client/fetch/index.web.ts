@@ -79,10 +79,9 @@ export const init: T.Init = async function () {
 };
 
 export const send: T.Send = function (
-  name,
-  args,
-  { catchErrors = false } = {},
-) {
+  ...params: Parameters<T.Send>
+): ReturnType<T.Send> {
+  const [name, args, { catchErrors = false } = {}] = params;
   return new Promise((resolve, reject) => {
     const id = uuidv4();
     replyHandlers.set(id, { resolve, reject });

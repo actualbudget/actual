@@ -4,7 +4,6 @@ import { Trans, useTranslation } from 'react-i18next';
 import { addNotification, popModal, signOut } from 'loot-core/client/actions';
 import { send } from 'loot-core/platform/client/fetch';
 import { getUserAccessErrors } from 'loot-core/shared/errors';
-import { type Handlers } from 'loot-core/types/handlers';
 import { type UserAccessEntity } from 'loot-core/types/models/userAccess';
 
 import { useDispatch } from '../../redux';
@@ -34,22 +33,20 @@ export function EditUserAccess({
   const [availableUsers, setAvailableUsers] = useState<[string, string][]>([]);
 
   useEffect(() => {
-    send('access-get-available-users', defaultUserAccess.fileId).then(
-      (data: Awaited<ReturnType<Handlers['access-get-available-users']>>) => {
-        if ('error' in data) {
-          setSetError(data.error);
-        } else {
-          setAvailableUsers(
-            data.map(user => [
-              user.userId,
-              user.displayName
-                ? `${user.displayName} (${user.userName})`
-                : user.userName,
-            ]),
-          );
-        }
-      },
-    );
+    send('access-get-available-users', defaultUserAccess.fileId).then(data => {
+      if ('error' in data) {
+        setSetError(data.error);
+      } else {
+        setAvailableUsers(
+          data.map(user => [
+            user.userId,
+            user.displayName
+              ? `${user.displayName} (${user.userName})`
+              : user.userName,
+          ]),
+        );
+      }
+    });
   }, [defaultUserAccess.fileId]);
 
   async function onSave(close: () => void) {
