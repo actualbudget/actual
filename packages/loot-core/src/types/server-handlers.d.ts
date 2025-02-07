@@ -191,7 +191,7 @@ export interface ServerHandlers {
   'secret-check': (arg: string) => Promise<string | { error?: string }>;
 
   'gocardless-poll-web-token': (arg: {
-    upgradingAccountId?: string;
+    upgradingAccountId?: string | undefined;
     requisitionId: string;
   }) => Promise<
     { error: 'unknown' } | { error: 'timeout' } | { data: GoCardlessToken }
@@ -227,7 +227,7 @@ export interface ServerHandlers {
   'gocardless-poll-web-token-stop': () => Promise<'ok'>;
 
   'gocardless-create-web-token': (arg: {
-    upgradingAccountId?: string;
+    upgradingAccountId?: string | undefined;
     institutionId: string;
     accessValidForDays: number;
   }) => Promise<
@@ -384,8 +384,8 @@ export interface ServerHandlers {
   'close-budget': () => Promise<'ok'>;
 
   'delete-budget': (arg: {
-    id?: string;
-    cloudFileId?: string;
+    id?: string | undefined;
+    cloudFileId?: string | undefined;
   }) => Promise<'ok' | 'fail'>;
 
   /**
@@ -398,8 +398,8 @@ export interface ServerHandlers {
    * @returns {Promise<string>} The ID of the newly created budget.
    */
   'duplicate-budget': (arg: {
-    id?: string;
-    cloudId?: string;
+    id?: string | undefined;
+    cloudId?: string | undefined;
     newName: string;
     cloudSync?: boolean;
     open: 'none' | 'original' | 'copy';

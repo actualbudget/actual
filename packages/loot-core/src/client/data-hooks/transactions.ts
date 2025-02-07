@@ -90,7 +90,9 @@ export function useTransactions({
         }
       },
       onError,
-      options: { pageCount: optionsRef.current.pageCount },
+      options: optionsRef.current.pageCount
+        ? { pageCount: optionsRef.current.pageCount }
+        : {},
     });
 
     return () => {
@@ -121,7 +123,7 @@ export function useTransactions({
   return {
     transactions,
     isLoading,
-    error,
+    ...(error && { error }),
     reload,
     loadMore,
     isLoadingMore,
@@ -273,10 +275,11 @@ export function usePreviewTransactions(): UsePreviewTransactionsResult {
     };
   }, [scheduleTransactions, schedules, statuses, upcomingLength]);
 
+  const returnError = error || scheduleQueryError;
   return {
     data: previewTransactions,
     isLoading: isLoading || isSchedulesLoading,
-    error: error || scheduleQueryError,
+    ...(returnError && { error: returnError }),
   };
 }
 

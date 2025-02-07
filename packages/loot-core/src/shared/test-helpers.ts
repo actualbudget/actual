@@ -19,7 +19,7 @@ export function resetTracer() {
 }
 
 export function execTracer<T>() {
-  const queue: Array<{ name: string; data?: T }> = [];
+  const queue: Array<{ name: string; data?: T | undefined }> = [];
   let hasStarted = false;
   let waitingFor: null | {
     name: string;

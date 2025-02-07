@@ -1,21 +1,23 @@
 import type * as constants from '../constants';
 
 export type Notification = {
-  id?: string;
+  id?: string | undefined;
   // 'warning' is unhandled??
   type?: 'message' | 'error' | 'warning';
-  pre?: string;
-  title?: string;
+  pre?: string | undefined;
+  title?: string | undefined;
   message: string;
-  sticky?: boolean;
-  timeout?: number;
-  button?: {
-    title: string;
-    action: () => void | Promise<void>;
-  };
-  messageActions?: Record<string, () => void>;
-  onClose?: () => void;
-  internal?: string;
+  sticky?: boolean | undefined;
+  timeout?: number | undefined;
+  button?:
+    | {
+        title: string;
+        action: () => void | Promise<void>;
+      }
+    | undefined;
+  messageActions?: Record<string, () => void> | undefined;
+  onClose?: (() => void) | undefined;
+  internal?: string | undefined;
 };
 type NotificationWithId = Notification & { id: string };
 

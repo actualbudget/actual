@@ -42,7 +42,7 @@ type FinanceModals = {
   'select-linked-accounts': {
     accounts: unknown[];
     requisitionId?: string;
-    upgradingAccountId?: string;
+    upgradingAccountId?: string | undefined;
     syncSource?: AccountSyncSource;
   };
 
@@ -74,7 +74,7 @@ type FinanceModals = {
     onMoveExternal: (arg: {
       institutionId: string;
     }) => Promise<{ error: string } | { data: unknown }>;
-    onClose?: () => void;
+    onClose?: (() => void) | undefined;
     onSuccess: (data: GoCardlessToken) => Promise<void>;
   };
 

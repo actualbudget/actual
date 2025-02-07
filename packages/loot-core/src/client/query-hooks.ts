@@ -53,6 +53,6 @@ export function useQuery<Response = unknown>(
   return {
     data,
     isLoading,
-    error,
+    ...(error && { error }),
   };
 }

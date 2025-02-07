@@ -54,7 +54,7 @@ export const categoryModel = {
       name: category.name,
       is_income: category.is_income ? true : false,
       hidden: category.hidden ? true : false,
-      group_id: category.cat_group,
+      ...(category.cat_group && { group_id: category.cat_group }),
     };
   },
 
