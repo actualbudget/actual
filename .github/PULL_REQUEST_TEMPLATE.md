@@ -1,1 +1,0 @@
-<!-- Thank you for submitting a pull request! Make sure to follow the instructions to write release notes for your PR — it should only take a minute or two: https://github.com/actualbudget/docs#writing-good-release-notes -->
