@@ -6,6 +6,7 @@ defaults:
 
 env:
   CI: true
+  CSC_FOR_PULL_REQUEST: ${{ secrets.CSC_FOR_PULL_REQUEST }}
 
 on:
   pull_request:
