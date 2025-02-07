@@ -1,0 +1,88 @@
+name: Build Stable Docker Image
+
+# Stable Docker images are built for every new tag
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+    paths-ignore:
+      - README.md
+      - LICENSE.txt
+
+env:
+  IMAGES: |
+    actualbudget/actual-server
+    ghcr.io/actualbudget/actual-server
+
+  # Creates the following tags:
+  # - actual-server:latest (see docker/metadata-action flavor inputs, below)
+  # - actual-server:1.3
+  # - actual-server:1.3.7
+  # - actual-server:sha-90dd603
+  TAGS: |
+    type=semver,pattern={{version}}
+
+jobs:
+  build:
+    name: Build Docker image
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          # Push to both Docker Hub and Github Container Registry
+          images: ${{ env.IMAGES }}
+          # Automatically update :latest
+          flavor: latest=true
+          tags: ${{ env.TAGS }}
+
+      - name: Docker meta for Alpine image
+        id: alpine-meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGES }}
+          # Automatically update :latest
+          flavor: |
+            latest=true
+            suffix=-alpine,onlatest=true
+          tags: ${{ env.TAGS }}
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push ubuntu image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          file: docker/stable-ubuntu.Dockerfile
+          platforms: linux/amd64,linux/arm64,linux/arm/v7
+          tags: ${{ steps.meta.outputs.tags }}
+
+      - name: Build and push alpine image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          file: docker/stable-alpine.Dockerfile
+          platforms: linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v6
+          tags: ${{ steps.alpine-meta.outputs.tags }}
