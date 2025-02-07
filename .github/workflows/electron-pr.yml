@@ -7,6 +7,10 @@ defaults:
 env:
   CI: true
   CSC_FOR_PULL_REQUEST: ${{ secrets.CSC_FOR_PULL_REQUEST }}
+  APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+  APPLE_ID: ${{ secrets.APPLE_ID }}
+  CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
+  CSC_LINK: ${{ secrets.CSC_LINK }}
 
 on:
   pull_request:
