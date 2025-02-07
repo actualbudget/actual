@@ -67,7 +67,8 @@ type SpecializedWidget =
   | SpendingWidget
   | MarkdownWidget
   | SummaryWidget
-  | CalendarWidget;
+  | CalendarWidget
+  | SankeyWidget;
 export type Widget = SpecializedWidget | CustomReportWidget;
 export type NewWidget = Omit<Widget, 'id' | 'tombstone'>;
 
@@ -119,6 +120,16 @@ export type SummaryContent = BaseSummaryContent | PercentageSummaryContent;
 
 export type CalendarWidget = AbstractWidget<
   'calendar-card',
+  {
+    name?: string;
+    conditions?: RuleConditionEntity[];
+    conditionsOp?: 'and' | 'or';
+    timeFrame?: TimeFrame;
+  } | null
+>;
+
+export type SankeyWidget = AbstractWidget<
+  'sankey-card',
   {
     name?: string;
     conditions?: RuleConditionEntity[];

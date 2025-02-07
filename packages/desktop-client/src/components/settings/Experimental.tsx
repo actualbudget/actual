@@ -96,6 +96,12 @@ export function ExperimentalFeatures() {
             >
               <Trans>OpenID authentication method</Trans>
             </FeatureToggle>
+            <FeatureToggle
+              flag="sankeyReport"
+              feedbackLink="https://github.com/actualbudget/actual/issues/1919"
+            >
+              Sankey report
+            </FeatureToggle>
           </View>
         ) : (
           <Link
