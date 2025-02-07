@@ -1,6 +1,8 @@
 import React, { type ComponentProps } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { toPng } from 'html-to-image';
+
 import { type CustomReportEntity } from 'loot-core/types/models/reports';
 import { type RuleConditionEntity } from 'loot-core/types/models/rule';
 
@@ -12,9 +14,11 @@ import {
   SvgListBullet,
   SvgQueue,
   SvgTag,
+  SvgCamera,
 } from '../../icons/v1';
 import { SvgChartArea } from '../../icons/v1/ChartArea';
 import { theme } from '../../style';
+import { SnapshotButton } from '../common/SnapshotButton';
 import { SpaceBetween } from '../common/SpaceBetween';
 import { View } from '../common/View';
 import { FilterButton } from '../filters/FiltersMenu';
@@ -22,6 +26,7 @@ import { FilterButton } from '../filters/FiltersMenu';
 import { GraphButton } from './GraphButton';
 import { SaveReport } from './SaveReport';
 import { setSessionReport } from './setSessionReport';
+import { getToday } from './util';
 
 type ReportTopbarProps = {
   customReportItems: CustomReportEntity;
@@ -58,6 +63,20 @@ export function ReportTopbar({
     onReportChange({ type: 'modify' });
     setGraphType(cond);
     defaultItems(cond);
+  };
+
+  const downloadSnapshot = async () => {
+    const reportElement = document.getElementById('custom-report-content');
+    const title = report.name;
+    if (reportElement) {
+      const dataUrl = await toPng(reportElement);
+      const link = document.createElement('a');
+      link.href = dataUrl;
+      link.download = `${getToday()} - ${title}.png`;
+      link.click();
+    } else {
+      console.error('Report container not found.');
+    }
   };
 
   return (
@@ -177,7 +196,6 @@ export function ReportTopbar({
       >
         <SvgTag width={15} height={15} />
       </GraphButton>
-
       <View
         style={{
           width: 1,
@@ -187,7 +205,22 @@ export function ReportTopbar({
           flexShrink: 0,
         }}
       />
-
+      <SnapshotButton
+        style={{ marginRight: 15 }}
+        title={t('Download Snapshot')}
+        onSelect={downloadSnapshot}
+      >
+        <SvgCamera width={15} height={15} />
+      </SnapshotButton>
+      <View
+        style={{
+          width: 1,
+          height: 30,
+          backgroundColor: theme.pillBorderDark,
+          marginRight: 15,
+          flexShrink: 0,
+        }}
+      />
       <SpaceBetween
         style={{
           flexWrap: 'nowrap',
