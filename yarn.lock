@@ -73,7 +73,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@actual-app/web@workspace:packages/desktop-client":
+"@actual-app/web@workspace:^, @actual-app/web@workspace:packages/desktop-client":
   version: 0.0.0-use.local
   resolution: "@actual-app/web@workspace:packages/desktop-client"
   dependencies:
@@ -15976,6 +15976,7 @@ __metadata:
   dependencies:
     "@actual-app/api": "workspace:^"
     "@actual-app/crdt": "workspace:^"
+    "@actual-app/web": "workspace:^"
     "@jlongster/sql.js": "npm:^1.6.7"
     "@reduxjs/toolkit": "npm:^2.5.0"
     "@rschedule/core": "npm:^1.5.0"

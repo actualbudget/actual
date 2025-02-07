@@ -68,3 +68,17 @@ jobs:
         with:
           name: build-stats
           path: packages/desktop-client/build-stats
+
+  server:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up environment
+        uses: ./.github/actions/setup
+      - name: Build Server
+        run: cd packages/sync-server && yarn build
+      - name: Upload Build
+        uses: actions/upload-artifact@v4
+        with:
+          name: sync-server
+          path: packages/sync-server/build

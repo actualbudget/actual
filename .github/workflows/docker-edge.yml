@@ -71,7 +71,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Download artifacts
-        run: ./docker/download-artifacts.sh
+        run: ./packages/sync-server/docker/download-artifacts.sh
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -80,7 +80,7 @@ jobs:
         with:
           context: .
           push: ${{ github.event_name != 'pull_request' }}
-          file: docker/edge-${{ matrix.os }}.Dockerfile
+          file: packages/sync-server/docker/edge-${{ matrix.os }}.Dockerfile
           platforms: linux/amd64,linux/arm64,linux/arm/v7${{ matrix.os == 'alpine' && ',linux/arm/v6' || '' }}
           tags: ${{ steps.meta.outputs.tags }}
           build-args: |
