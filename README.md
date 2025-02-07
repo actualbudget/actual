@@ -9,6 +9,7 @@ If you are interested in contributing, or want to know how development works, se
 
 Want to say thanks? Click the ⭐ at the top of the page.
 
+
 ## Key Links
 
 - Actual [discord](https://discord.gg/pRYNYr4W5A) community.
