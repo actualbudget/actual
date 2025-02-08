@@ -28,9 +28,9 @@ WORKDIR /app
 ENV NODE_ENV production
 COPY --from=base /app/node_modules /app/node_modules
 COPY --from=base /public /public
-COPY package.json app.js ./
-COPY src ./src
-COPY migrations ./migrations
+COPY /packags/sync-server/package.json /packags/sync-server/app.js ./
+COPY /packags/sync-server/src ./src
+COPY /packags/sync-server/migrations ./migrations
 ENTRYPOINT ["/sbin/tini","-g",  "--"]
 ENV ACTUAL_WEB_ROOT=/public
 EXPOSE 5006

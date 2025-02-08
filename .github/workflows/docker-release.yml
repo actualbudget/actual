@@ -81,7 +81,7 @@ jobs:
       - name: Build and push alpine image
         uses: docker/build-push-action@v5
         with:
-          context: ./packages/sync-server
+          context: .
           push: true
           file: packages/sync-server/docker/stable-alpine.Dockerfile
           platforms: linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v6
