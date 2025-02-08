@@ -77,6 +77,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
+          push: true
           file: packages/sync-server/docker/edge-${{ matrix.os }}.Dockerfile
           platforms: linux/amd64,linux/arm64,linux/arm/v7${{ matrix.os == 'alpine' && ',linux/arm/v6' || '' }}
           tags: ${{ steps.meta.outputs.tags }}
