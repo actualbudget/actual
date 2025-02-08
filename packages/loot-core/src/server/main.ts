@@ -1624,6 +1624,7 @@ handlers['subscribe-get-user'] = async function () {
       },
     });
     let tokenExpired = false;
+    console.info('subscribe-get-user res', res);
     const {
       status,
       reason,
