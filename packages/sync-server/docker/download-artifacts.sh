@@ -1,10 +1,13 @@
 #!/bin/bash
 
+echo "yo im here"
 URL="https://api.github.com/repos/actualbudget/actual/actions/artifacts?name=actual-web&per_page=100"
 
 if [ -n "$GITHUB_TOKEN" ]; then
+  echo "i have a token"
   curl -L -o artifacts.json --header "Authorization: Bearer ${GITHUB_TOKEN}" $URL
 else
+  echo "i dont have a token"
   curl -L -o artifacts.json $URL
 fi
 
