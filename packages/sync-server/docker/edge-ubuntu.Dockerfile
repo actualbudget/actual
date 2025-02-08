@@ -2,7 +2,7 @@ FROM node:18-bookworm AS base
 RUN apt-get update && apt-get install -y openssl jq
 WORKDIR /app
 COPY .yarn ./.yarn
-COPY yarn.lock package.json .yarnrc.yml ./
+COPY yarn.lock packages/sync-server/package.json .yarnrc.yml ./
 RUN if [ "$(uname -m)" = "armv7l" ]; then yarn config set taskPoolConcurrency 2; yarn config set networkConcurrency 5; fi
 RUN yarn workspaces focus actual-sync --production
 
