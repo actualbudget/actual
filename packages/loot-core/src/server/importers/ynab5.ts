@@ -79,13 +79,31 @@ async function importCategories(
       if (
         !equalsIgnoreCase(group.name, 'Internal Master Category') &&
         !equalsIgnoreCase(group.name, 'Credit Card Payments') &&
+        !equalsIgnoreCase(group.name, 'Hidden Categories') &&
         !equalsIgnoreCase(group.name, 'Income')
       ) {
-        groupId = await actual.createCategoryGroup({
-          name: group.name,
-          is_income: false,
-        });
-        entityIdMap.set(group.id, groupId);
+        let run = true;
+        const MAX_RETRY = 10;
+        let count = 1;
+        const origName = group.name;
+        while (run) {
+          try {
+            groupId = await actual.createCategoryGroup({
+              name: group.name,
+              is_income: false,
+              hidden: group.hidden,
+            });
+            entityIdMap.set(group.id, groupId);
+            run = false;
+          } catch (e) {
+            group.name = origName + '-' + count.toString();
+            count += 1;
+            if (count >= MAX_RETRY) {
+              run = false;
+              throw Error(e.message);
+            }
+          }
+        }
       }
 
       if (equalsIgnoreCase(group.name, 'Income')) {
@@ -112,12 +130,28 @@ async function importCategories(
             case 'internal': // uncategorized is ignored too, handled by actual
               break;
             default: {
-              const id = await actual.createCategory({
-                name: cat.name,
-                group_id: groupId,
-              });
-              entityIdMap.set(cat.id, id);
-              break;
+              let run = true;
+              const MAX_RETRY = 10;
+              let count = 1;
+              const origName = cat.name;
+              while (run) {
+                try {
+                  const id = await actual.createCategory({
+                    name: cat.name,
+                    group_id: groupId,
+                    hidden: cat.hidden,
+                  });
+                  entityIdMap.set(cat.id, id);
+                  run = false;
+                } catch (e) {
+                  cat.name = origName + '-' + count.toString();
+                  count += 1;
+                  if (count >= MAX_RETRY) {
+                    run = false;
+                    throw Error(e.message);
+                  }
+                }
+              }
             }
           }
         }
