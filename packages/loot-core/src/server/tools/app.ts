@@ -52,7 +52,7 @@ app.method('tools/fix-split-transactions', async () => {
   `);
 
   await runMutator(async () => {
-    const updated = deletedRows.map(row => ({ id: row.id, tombstone: 1 }));
+    const updated = deletedRows.map(row => ({ id: row.id, tombstone: true }));
     await batchUpdateTransactions({ updated });
   });
 
