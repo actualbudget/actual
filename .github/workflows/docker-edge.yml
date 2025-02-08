@@ -78,7 +78,7 @@ jobs:
       - name: Build and push image
         uses: docker/build-push-action@v5
         with:
-          context: .
+          context: ./packages/sync-server
           push: ${{ github.event_name != 'pull_request' }}
           file: packages/sync-server/docker/edge-${{ matrix.os }}.Dockerfile
           platforms: linux/amd64,linux/arm64,linux/arm/v7${{ matrix.os == 'alpine' && ',linux/arm/v6' || '' }}
