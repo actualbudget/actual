@@ -378,7 +378,7 @@ async function normalizeBankSyncTransactions(transactions, acctId) {
     if (trans.imported_payee) {
       trans.imported_payee = trans.imported_payee.trim();
     }
-    
+
     let imported_id = trans.transactionId;
     if (trans.cleared && !trans.transactionId && trans.internalTransactionId) {
       imported_id = `${trans.account}-${trans.internalTransactionId}`;
