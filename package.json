@@ -41,6 +41,7 @@
     "rebuild-node": "yarn workspace loot-core rebuild",
     "lint": "eslint . --max-warnings 0",
     "lint:verbose": "DEBUG=eslint:cli-engine eslint . --max-warnings 0",
+    "install:server": "yarn workspaces focus actual-sync --production",
     "typecheck": "yarn tsc && tsc-strict",
     "jq": "./node_modules/node-jq/bin/jq",
     "prepare": "husky"

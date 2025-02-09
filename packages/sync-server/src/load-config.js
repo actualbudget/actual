@@ -2,7 +2,9 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import createDebug from 'debug';
+import { createRequire } from 'module';
 
+const require = createRequire(import.meta.url);
 const debug = createDebug('actual:config');
 const debugSensitive = createDebug('actual-sensitive:config');
 
@@ -51,6 +53,14 @@ if (process.env.ACTUAL_CONFIG_PATH) {
   userConfig = parseJSON(configFile, true);
 }
 
+const actualAppWebBuildPath = path.join(
+  // require.resolve is used to recursively search up the workspace to find the node_modules directory
+  path.dirname(require.resolve('@actual-app/web/package.json')),
+  'build',
+);
+
+debug(`Actual web build path: '${actualAppWebBuildPath}'`);
+
 /** @type {Omit<import('./config-types.js').Config, 'mode' | 'dataDir' | 'serverFiles' | 'userFiles'>} */
 let defaultConfig = {
   loginMethod: 'password',
@@ -68,13 +78,7 @@ let defaultConfig = {
   trustedAuthProxies: null,
   port: 5006,
   hostname: '::',
-  webRoot: path.join(
-    projectRoot,
-    'node_modules',
-    '@actual-app',
-    'web',
-    'build',
-  ),
+  webRoot: actualAppWebBuildPath,
   upload: {
     fileSizeSyncLimitMB: 20,
     syncEncryptedFileSizeLimitMB: 50,
