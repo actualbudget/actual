@@ -18,6 +18,7 @@ Array [
     "parent_id": null,
     "payee": "id3",
     "payee_name": "",
+    "raw_synced_data": null,
     "reconciled": 0,
     "schedule": null,
     "sort_order": 123456789,
@@ -41,6 +42,7 @@ Array [
     "parent_id": null,
     "payee": "id2",
     "payee_name": "",
+    "raw_synced_data": null,
     "reconciled": 0,
     "schedule": null,
     "sort_order": 123456789,
@@ -68,7 +70,7 @@ exports[`Transfer split transfers are retained on child transactions 2`] = `
       \\"parent_id\\": null,
       \\"payee\\": \\"id3\\",
       \\"payee_name\\": \\"\\",
-      \\"reconciled\\": 0,"
+      \\"raw_synced_data\\": null,"
 `;
 
 exports[`Transfer split transfers are retained on child transactions 3`] = `
@@ -76,7 +78,7 @@ exports[`Transfer split transfers are retained on child transactions 3`] = `
 - First value
 + Second value
 
-@@ -21,10 +21,56 @@
+@@ -22,10 +22,58 @@
       \\"starting_balance_flag\\": 0,
       \\"tombstone\\": 0,
       \\"transfer_id\\": \\"id6\\",
@@ -97,6 +99,7 @@ exports[`Transfer split transfers are retained on child transactions 3`] = `
 +     \\"parent_id\\": \\"id5\\",
 +     \\"payee\\": \\"id2\\",
 +     \\"payee_name\\": \\"\\",
++     \\"raw_synced_data\\": null,
 +     \\"reconciled\\": 0,
 +     \\"schedule\\": null,
 +     \\"sort_order\\": 123456789,
@@ -120,6 +123,7 @@ exports[`Transfer split transfers are retained on child transactions 3`] = `
 +     \\"parent_id\\": null,
 +     \\"payee\\": \\"id2\\",
 +     \\"payee_name\\": \\"\\",
++     \\"raw_synced_data\\": null,
 +     \\"reconciled\\": 0,
 +     \\"schedule\\": null,
 +     \\"sort_order\\": 123456789,
