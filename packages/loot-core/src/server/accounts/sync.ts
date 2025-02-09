@@ -397,7 +397,7 @@ async function normalizeBankSyncTransactions(transactions, acctId) {
         payee: trans.payee,
         account: trans.account,
         date,
-        notes: importNotes ? notes.trim().replace('#', '##') : null,
+        notes: importNotes && notes ? notes.trim().replace(/#/g, '##') : null,
         category: trans.category ?? null,
         imported_id,
         imported_payee: trans.imported_payee,
