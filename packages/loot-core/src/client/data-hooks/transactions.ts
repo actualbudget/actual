@@ -25,6 +25,10 @@ import { type PagedQuery, pagedQuery } from '../query-helpers';
 import { type ScheduleStatuses, useCachedSchedules } from './schedules';
 
 type UseTransactionsProps = {
+  /**
+   * The Query class is immutable so it is important to memoize the query object
+   * to prevent unnecessary re-renders i.e. `useMemo`, `useState`, etc.
+   */
   query?: Query;
   options?: {
     pageCount?: number;
