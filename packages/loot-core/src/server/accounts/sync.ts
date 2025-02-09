@@ -378,6 +378,11 @@ async function normalizeBankSyncTransactions(transactions, acctId) {
     if (trans.imported_payee) {
       trans.imported_payee = trans.imported_payee.trim();
     }
+    
+    let imported_id = trans.transactionId;
+    if (trans.cleared && !trans.transactionId && trans.internalTransactionId) {
+      imported_id = `${trans.account}-${trans.internalTransactionId}`;
+    }
 
     // It's important to resolve both the account and payee early so
     // when rules are run, they have the right data. Resolving payees
@@ -394,7 +399,7 @@ async function normalizeBankSyncTransactions(transactions, acctId) {
         date,
         notes: importNotes ? notes.trim().replace('#', '##') : null,
         category: trans.category ?? null,
-        imported_id: trans.transactionId,
+        imported_id,
         imported_payee: trans.imported_payee,
         cleared: trans.cleared,
         raw_synced_data: JSON.stringify(trans),

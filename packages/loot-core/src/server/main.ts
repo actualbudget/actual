@@ -371,11 +371,13 @@ handlers['get-category-groups'] = async function () {
 handlers['category-group-create'] = mutator(async function ({
   name,
   isIncome,
+  hidden,
 }) {
   return withUndo(async () => {
     return db.insertCategoryGroup({
       name,
       is_income: isIncome ? 1 : 0,
+      hidden,
     });
   });
 });

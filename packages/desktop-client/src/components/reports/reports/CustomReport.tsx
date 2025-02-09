@@ -363,7 +363,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
 
   const balanceTypeOp: balanceTypeOpType =
     ReportOptions.balanceTypeMap.get(balanceType) || 'totalDebts';
-  const sortByOp: sortByOpType = ReportOptions.sortByMap.get(sortBy) || 'desc';
+  const sortByOp: sortByOpType = sortBy || 'desc';
   const payees = usePayees();
   const accounts = useAccounts();
 
@@ -524,7 +524,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
   };
 
   const defaultItems = (item: string) => {
-    const chooseGraph = ReportOptions.groupBy.includes(item) ? graphType : item;
+    const chooseGraph = ReportOptions.groupByItems.has(item) ? graphType : item;
     if (
       (disabledGraphList(mode, chooseGraph, 'disabledSplit') || []).includes(
         groupBy,

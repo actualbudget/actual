@@ -23,6 +23,11 @@ const processTranslations = () => {
     files.forEach((file) => {
       if (file === 'en.json' || path.extname(file) !== '.json') return;
 
+      if (file.startsWith('en-')) {
+        console.log(`Keeping ${file} as it's an English language.`);
+        return;
+      }
+
       const filePath = path.join(localRepoPath, file);
       const jsonData = JSON.parse(fs.readFileSync(filePath, 'utf8'));
       const fileKeysCount = Object.keys(jsonData).length;

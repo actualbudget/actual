@@ -129,6 +129,7 @@ export function GetCardData({
       showUncategorized: report.showUncategorized,
       balanceTypeOp: ReportOptions.balanceTypeMap.get(report.balanceType),
       firstDayOfWeekIdx,
+      sortByOp: report.sortBy,
     });
   }, [report, categories, startDate, endDate, firstDayOfWeekIdx]);
   const getGraphData = useMemo(() => {
@@ -149,6 +150,7 @@ export function GetCardData({
       accounts,
       graphType: report.graphType,
       firstDayOfWeekIdx,
+      sortByOp: report.sortBy,
     });
   }, [
     report,
