@@ -24,6 +24,7 @@ import { theme } from '../style';
 import { getIsOutdated, getLatestVersion } from '../util/versions';
 
 import { UserAccessPage } from './admin/UserAccess/UserAccessPage';
+import { BankSync } from './banksync';
 import { BankSyncStatus } from './BankSyncStatus';
 import { View } from './common/View';
 import { GlobalKeys } from './GlobalKeys';
@@ -248,6 +249,7 @@ export function FinancesApp() {
 
                 <Route path="/payees" element={<ManagePayeesPage />} />
                 <Route path="/rules" element={<ManageRulesPage />} />
+                <Route path="/bank-sync" element={<BankSync />} />
                 <Route path="/settings" element={<Settings />} />
 
                 <Route

@@ -1047,7 +1047,7 @@ handlers['gocardless-create-web-token'] = async function ({
   }
 };
 
-function handleSyncResponse(
+async function handleSyncResponse(
   res,
   acct,
   newTransactions,
@@ -1062,6 +1062,10 @@ function handleSyncResponse(
   if (added.length > 0) {
     updatedAccounts.push(acct.id);
   }
+
+  const ts = new Date().getTime().toString();
+  const id = acct.id;
+  await db.runQuery(`UPDATE accounts SET last_sync = ? WHERE id = ?`, [ts, id]);
 }
 
 function handleSyncError(err, acct) {
@@ -1129,7 +1133,7 @@ handlers['accounts-bank-sync'] = async function ({ ids = [] }) {
           acct.bankId,
         );
 
-        handleSyncResponse(
+        await handleSyncResponse(
           res,
           acct,
           newTransactions,
@@ -1198,7 +1202,7 @@ handlers['simplefin-batch-sync'] = async function ({ ids = [] }) {
           ),
         );
       } else {
-        handleSyncResponse(
+        await handleSyncResponse(
           account.res,
           accounts.find(a => a.id === account.accountId),
           newTransactions,

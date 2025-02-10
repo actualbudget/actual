@@ -16,15 +16,10 @@ export function generateAccount(
   name: AccountEntity['name'],
   isConnected?: boolean,
   offbudget?: boolean,
-): AccountEntity & { bankId: number | null; bankName: string | null } {
-  const offlineAccount: AccountEntity & {
-    bankId: number | null;
-    bankName: string | null;
-  } = {
+): AccountEntity {
+  const offlineAccount: AccountEntity = {
     id: uuidv4(),
     name,
-    bankId: null,
-    bankName: null,
     offbudget: offbudget ? 1 : 0,
     sort_order: 0,
     tombstone: 0,
@@ -45,6 +40,7 @@ export function generateAccount(
       balance_available: 0,
       balance_limit: 0,
       account_sync_source: 'goCardless',
+      last_sync: new Date().getTime().toString(),
     };
   }
 
@@ -55,12 +51,15 @@ function emptySyncFields(): _SyncFields<false> {
   return {
     account_id: null,
     bank: null,
+    bankId: null,
+    bankName: null,
     mask: null,
     official_name: null,
     balance_current: null,
     balance_available: null,
     balance_limit: null,
     account_sync_source: null,
+    last_sync: null,
   };
 }
 

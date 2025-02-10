@@ -6,6 +6,7 @@ import {
   SvgCheveronDown,
   SvgCheveronRight,
   SvgCog,
+  SvgCreditCard,
   SvgReports,
   SvgStoreFront,
   SvgTuning,
@@ -23,9 +24,13 @@ export function PrimaryButtons() {
   const onToggle = useCallback(() => setOpen(open => !open), []);
   const location = useLocation();
 
-  const isActive = ['/payees', '/rules', '/settings', '/tools'].some(route =>
-    location.pathname.startsWith(route),
-  );
+  const isActive = [
+    '/payees',
+    '/rules',
+    '/bank-sync',
+    '/settings',
+    '/tools',
+  ].some(route => location.pathname.startsWith(route));
 
   useEffect(() => {
     if (isActive) {
@@ -57,6 +62,12 @@ export function PrimaryButtons() {
             title={t('Rules')}
             Icon={SvgTuning}
             to="/rules"
+            indent={15}
+          />
+          <SecondaryItem
+            title={t('Bank Sync')}
+            Icon={SvgCreditCard}
+            to="/bank-sync"
             indent={15}
           />
           <SecondaryItem

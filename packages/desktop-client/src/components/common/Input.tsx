@@ -54,6 +54,9 @@ export function Input({
         css(
           defaultInputStyle,
           {
+            color: nativeProps.disabled
+              ? theme.formInputTextPlaceholder
+              : theme.formInputText,
             whiteSpace: 'nowrap',
             overflow: 'hidden',
             flexShrink: 0,
