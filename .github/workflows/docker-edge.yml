@@ -6,12 +6,12 @@ on:
     branches:
       - master
     paths:
-      - packages/sync-server
+      - packages/sync-server/**
   pull_request:
     branches:
       - master
     paths:
-      - packages/sync-server
+      - packages/sync-server/**
   schedule:
     - cron: '0 0 * * *'
   workflow_dispatch:
