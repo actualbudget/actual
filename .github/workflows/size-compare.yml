@@ -13,6 +13,8 @@ name: Compare Sizes
 
 on:
   pull_request_target:
+    paths-ignore:
+      - packages/sync-server
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
