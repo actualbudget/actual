@@ -1,0 +1,24 @@
+{
+  "name": "@actual-app/components",
+  "version": "0.0.1",
+  "license": "MIT",
+  "peerDependencies": {
+    "react": ">=18.2"
+  },
+  "dependencies": {
+    "@emotion/css": "^11.13.4",
+    "react-aria-components": "^1.4.1"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.0",
+    "react": "18.2.0"
+  },
+  "exports": {
+    "./icons/*": "./src/icons/*.tsx",
+    "./button": "./src/Button.tsx",
+    "./styles": "./src/styles.ts",
+    "./theme": "./src/theme.ts",
+    "./tokens": "./src/tokens.ts",
+    "./view": "./src/View.tsx"
+  }
+}
