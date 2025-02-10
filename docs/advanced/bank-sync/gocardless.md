@@ -117,13 +117,13 @@ If your bank limits the amount of historical data you can fetch, you need to add
 
 To achieve this:
 
-1. Read the instructions about integrating with GoCardless: https://github.com/actualbudget/actual-server/blob/master/src/app-gocardless/README.md
+1. Read the instructions about integrating with GoCardless: https://github.com/actualbudget/actual/blob/master/packages/sync-server/src/app-gocardless/README.md
 2. Toward the top is a link to the Google Docs containing data points for the GoCardless integration. Locate your bank's ID in the document.
-3. Fork the Actual server repository: https://github.com/actualbudget/actual-server/fork
-4. Edit the file `src/app-gocardless/bank-factory.js`.
+3. Fork the Actual repository: https://github.com/actualbudget/actual/fork
+4. Edit the file `packages/sync-server/src/app-gocardless/bank-factory.js`.
 5. Add your bank's ID (from the Google Docs) to the `BANKS_WITH_LIMITED_HISTORY` list.
 6. Commit your changes and push to your fork.
-7. Create a pull request to the main Actual server repository.
+7. Create a pull request to the main Actual repository.
 8. Add a release note in `upcoming-release-notes/` describing your change (see [writing good release notes](/docs/contributing/#writing-good-release-notes)).
 9. Commit your changes and push to your fork.
 

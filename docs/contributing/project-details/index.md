@@ -4,8 +4,7 @@ Actual is made up of lots of different _packages_. This article covers how they 
 
 All of the repositories can be found in the [Actual Budget](https://github.com/actualbudget) organization on GitHub, within that organization you will then find the following repositories
 
-- [Actual](https://github.com/actualbudget/actual)
-- [Actual Server](https://github.com/actualbudget/actual-server)
+- [Actual & Actual Server](https://github.com/actualbudget/actual)
 - [docs](https://github.com/actualbudget/docs)
 
 ## Actual
@@ -20,7 +19,7 @@ This repository holds all of the front end code for the Actual Budget applicatio
         └── desktop-client
         └── desktop-electron
         └── loot-core
-        └── node-libofx
+        └── sync-server
         ...
 │
 ```
@@ -37,13 +36,11 @@ This is the source code for the Desktop application, in its current state it is 
 
 The shared underlying functionality component used by both the web/desktop frontend and the in-browser database server.
 
-### Node Libofx
+## Sync Server
 
-## Actual Server
+The Sync Server, also known as Actual Server, holds all of the code for the synchronization element of the Actual Budget application. Actual server has a dependency of Actual so when you pull Actual Server and deploy it to your hosting method of choice, be that Fly, Local etc. and run `yarn install:server` Actual will be downloaded as a dependency from NPM and installed into the Actual Server deployment.
 
-Actual Server holds all of the code for the synchronization element of the Actual Budget application. Actual server has a dependency of Actual so when you pull Actual Server and deploy it to your hosting method of choice, be that Fly, Local etc. and run `yarn install` Actual will be downloaded as a dependency from NPM and installed into the Actual Server deployment.
-
-You can see this in the [package.json](https://github.com/actualbudget/actual-server/blob/master/package.json) file;
+You can see this in the [package.json](https://github.com/actualbudget/actual/blob/master/packages/sync-server/package.json) file;
 
 ```json
 "dependencies": {

@@ -23,7 +23,7 @@ For example:
 - `v23.4.0` - first release launched on 9th of April, 2023;
 
 ## Setting up the PRs
-Pull requests will need to be opened in all three repositories - [docs](https://github.com/actualbudget/docs), [actual](https://github.com/actualbudget/actual) and [actual-server](https://github.com/actualbudget/actual-server).
+Pull requests will need to be opened in all two repositories - [docs](https://github.com/actualbudget/docs), [actual](https://github.com/actualbudget/actual).
 
 Make sure to name the branch `release/X.Y.Z` where `X.Y.Z` is the version number. This will trigger the release notes tooling, which will comment on your PR with the generated release notes. You can then copy-paste the release notes into the `Release-Notes.md` file in the `docs ` repository.
 
@@ -34,22 +34,12 @@ This automation will also delete all the outdated release note files from the `u
    - `packages/api/package.json`
    - `packages/desktop-client/package.json`
    - `packages/desktop-electron/package.json`
+   - `packages/sync-server/package.json`
 2. Open the pull request, the release notes workflow will run and collate the release notes into a comment in the PR.
 3. The PR can now be marked as ready for review.
 
-### actual-server
-1. Bump the version in `package.json`
-2. Open the pull request, the release notes workflow will run and collate the release notes into a comment in the PR.
-3. The PR can not be finalized until the web package has been released as it uses the new version as a dependency.
-
-Once the `actual` PR has been approved and the new web package has been [published to NPM](#building-and-releasing), the server PR can be finalized.
-1. Bump the web dependency version in `package.json`
-2. Run `yarn install`
-3. Push the updated `package.json` and `yarn.lock`
-4. The PR can now be marked as ready for review.
-
 ### docs
-After the release notes workflows in the actual and actual-server PRs have been run, copy the collated notes into a new blog post using a previous release as a template. The release notes will also need adding to the `docs/releases.md` file.
+After the release notes workflows in the actual PR has been run, copy the collated notes into a new blog post using a previous release as a template. The release notes will also need adding to the `docs/releases.md` file.
 
 ## Building and Publishing to NPM
 Once the web PR has been approved, the new version of the API and web packages need to be published to NPM. If you haven't done this before, another maintainer will need to give you access.
@@ -90,7 +80,7 @@ yarn npm publish --access public
 
 ## GitHub Tags and Releases
 
-Once the web and server releases have been merged, they need to be tagged. When the tag is pushed to `actual-server` it will trigger the Docker stable image to be built and published.
+Once the release has been merged, it need to be tagged. When the tag is pushed to `actual` it will trigger the Docker stable image to be built and published.
 
 Run the below in each repository, or use the GitHub UI.
 ```bash
@@ -145,6 +135,6 @@ During the "Certification" stage the app is checked by Microsoft to ensure quali
 
 ## Announcement
 
-After the release is out on `actual-server` - remember to deploy it and do a quick smoke test to verify things still work as expected. If they do: continue with sending an announcement on Discord and Twitter.
+After the release is out on `actual` - remember to deploy it and do a quick smoke test to verify things still work as expected. If they do: continue with sending an announcement on Discord and Twitter.
 
 :tada:

@@ -29,7 +29,7 @@ The `edge` tag is updated every time a commit is pushed to the `master` branch. 
 
 Pre-requisites: Docker
 
-You can use the [`docker-compose.yml` file included in the `actual-server` repository](https://github.com/actualbudget/actual-server/blob/master/docker-compose.yml) to run the latest stable version of the server.
+You can use the [`docker-compose.yml` file included in the `actual` repository](https://github.com/actualbudget/actual/blob/master/packages/sync-server/docker-compose.yml) to run the latest stable version of the server.
 
 To create and run the container:
 
