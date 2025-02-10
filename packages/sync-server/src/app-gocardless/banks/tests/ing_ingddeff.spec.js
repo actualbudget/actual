@@ -246,7 +246,7 @@ describe('IngIngddeff', () => {
     });
 
     it('returns sorted array for unsorted inputs', () => {
-      const normalizeTransactions = transactionsRaw.map((tx) =>
+      const normalizeTransactions = transactionsRaw.map(tx =>
         IngIngddeff.normalizeTransaction(tx, true),
       );
       const originalOrder = Array.from(normalizeTransactions);
@@ -276,7 +276,7 @@ describe('IngIngddeff', () => {
     ];
 
     it('should calculate the starting balance correctly', () => {
-      const normalizeTransactions = transactionsRaw.map((tx) =>
+      const normalizeTransactions = transactionsRaw.map(tx =>
         IngIngddeff.normalizeTransaction(tx, true),
       );
       const sortedTransactions = IngIngddeff.sortTransactions(

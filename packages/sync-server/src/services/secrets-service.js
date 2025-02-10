@@ -60,7 +60,7 @@ export const secretsService = {
    * @param {SecretName} name - The name of the secret to retrieve.
    * @returns {string|null} The value of the secret, or null if the secret does not exist.
    */
-  get: (name) => {
+  get: name => {
     return _cachedSecrets.get(name) ?? secretsDb.get(name)?.value ?? null;
   },
 
@@ -84,7 +84,7 @@ export const secretsService = {
    * @param {SecretName} name - The name of the secret to check for existence.
    * @returns {boolean} True if a secret with the given name exists, false otherwise.
    */
-  exists: (name) => {
+  exists: name => {
     return Boolean(secretsService.get(name));
   },
 };

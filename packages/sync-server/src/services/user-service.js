@@ -32,7 +32,7 @@ export function getFileById(fileId) {
 
 export function validateRole(roleId) {
   const possibleRoles = ['BASIC', 'ADMIN'];
-  return possibleRoles.some((a) => a === roleId);
+  return possibleRoles.some(a => a === roleId);
 }
 
 export function getOwnerCount() {

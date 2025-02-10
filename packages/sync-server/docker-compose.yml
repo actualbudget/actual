@@ -21,7 +21,7 @@ services:
       - ./actual-data:/data
     healthcheck:
       # Enable health check for the instance
-      test: ["CMD-SHELL", "node src/scripts/health-check.js"]
+      test: ['CMD-SHELL', 'node src/scripts/health-check.js']
       interval: 60s
       timeout: 10s
       retries: 3

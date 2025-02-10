@@ -25,7 +25,7 @@ export function needsBootstrap() {
 export function listLoginMethods() {
   let accountDb = getAccountDb();
   let rows = accountDb.all('SELECT method, display_name, active FROM auth');
-  return rows.map((r) => ({
+  return rows.map(r => ({
     method: r.method,
     active: r.active,
     displayName: r.display_name,

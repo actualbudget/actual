@@ -36,7 +36,7 @@ export default {
 
   calculateStartingBalance(sortedTransactions = [], balances = []) {
     const currentBalance = balances.find(
-      (balance) => balance.balanceType === 'interimAvailable',
+      balance => balance.balanceType === 'interimAvailable',
     );
 
     return sortedTransactions.reduce((total, trans) => {

@@ -144,13 +144,13 @@ function logAccountError(results, accountId, data) {
 
 function getAccountResponse(results, accountId, startDate) {
   const account =
-    !results?.accounts || results.accounts.find((a) => a.id === accountId);
+    !results?.accounts || results.accounts.find(a => a.id === accountId);
   if (!account) {
     console.log(
       `The account "${accountId}" was not found. Here were the accounts returned:`,
     );
     if (results?.accounts)
-      results.accounts.forEach((a) => console.log(`${a.id} - ${a.org.name}`));
+      results.accounts.forEach(a => console.log(`${a.id} - ${a.org.name}`));
     logAccountError(results, accountId, {
       error_type: 'ACCOUNT_MISSING',
       error_code: 'ACCOUNT_MISSING',
@@ -160,7 +160,7 @@ function getAccountResponse(results, accountId, startDate) {
   }
 
   const needsAttention = results.sferrors.find(
-    (e) => e === `Connection to ${account.org.name} may need attention`,
+    e => e === `Connection to ${account.org.name} may need attention`,
   );
   if (needsAttention) {
     logAccountError(results, accountId, {
@@ -290,12 +290,12 @@ async function getAccessKey(base64Token) {
     headers: { 'Content-Length': 0 },
   };
   return new Promise((resolve, reject) => {
-    const req = https.request(new URL(token), options, (res) => {
-      res.on('data', (d) => {
+    const req = https.request(new URL(token), options, res => {
+      res.on('data', d => {
         resolve(d.toString());
       });
     });
-    req.on('error', (e) => {
+    req.on('error', e => {
       reject(e);
     });
     req.end();
@@ -348,7 +348,7 @@ async function getAccounts(
   }
 
   if (accounts) {
-    accounts.forEach((id) => {
+    accounts.forEach(id => {
       params.push(`account=${encodeURIComponent(id)}`);
     });
   }
@@ -361,9 +361,9 @@ async function getAccounts(
     const req = https.request(
       new URL(`${sfin.baseUrl}/accounts${queryString}`),
       options,
-      (res) => {
+      res => {
         let data = '';
-        res.on('data', (d) => {
+        res.on('data', d => {
           data += d;
         });
         res.on('end', () => {
@@ -384,7 +384,7 @@ async function getAccounts(
         });
       },
     );
-    req.on('error', (e) => {
+    req.on('error', e => {
       reject(e);
     });
     req.end();

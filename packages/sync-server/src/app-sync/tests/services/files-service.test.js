@@ -32,18 +32,18 @@ describe('FilesService', () => {
     accountDb.mutate('DELETE FROM files');
   };
 
-  beforeAll((done) => {
+  beforeAll(done => {
     accountDb = getAccountDb();
     filesService = new FilesService(accountDb);
     done();
   });
 
-  beforeEach((done) => {
+  beforeEach(done => {
     insertToyExampleData();
     done();
   });
 
-  afterEach((done) => {
+  afterEach(done => {
     clearDatabase();
     done();
   });
@@ -93,7 +93,7 @@ describe('FilesService', () => {
 
   test.each([true, false])(
     'set should insert a new file with deleted: %p',
-    (deleted) => {
+    deleted => {
       const fileId = crypto.randomBytes(16).toString('hex');
       const newFile = new File({
         id: fileId,
@@ -225,7 +225,7 @@ describe('FilesService', () => {
 
   test.each([['update-group', null]])(
     'update should modify a single attribute with groupId = $groupId',
-    (newGroupId) => {
+    newGroupId => {
       const fileUpdate = new FileUpdate({
         groupId: newGroupId,
       });

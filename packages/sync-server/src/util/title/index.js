@@ -9,8 +9,8 @@ const regex = new RegExp(
   'g',
 );
 
-const convertToRegExp = (specials) =>
-  specials.map((s) => [new RegExp(`\\b${s}\\b`, 'gi'), s]);
+const convertToRegExp = specials =>
+  specials.map(s => [new RegExp(`\\b${s}\\b`, 'gi'), s]);
 
 function parseMatch(match) {
   const firstCharacter = match[0];

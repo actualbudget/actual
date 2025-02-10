@@ -72,7 +72,7 @@ app.post(
         data: {
           ...requisition,
           accounts: await Promise.all(
-            accounts.map(async (account) =>
+            accounts.map(async account =>
               account?.iban
                 ? { ...account, iban: await sha256String(account.iban) }
                 : account,
@@ -209,7 +209,7 @@ app.post(
         ),
       );
 
-      const sendErrorResponse = (data) =>
+      const sendErrorResponse = data =>
         res.send({
           status: 'ok',
           data: { ...data, details: error.details, rateLimitHeaders },

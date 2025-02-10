@@ -10,14 +10,12 @@ const banksDir = path.resolve(dirname, 'banks');
 async function loadBanks() {
   const bankHandlers = fs
     .readdirSync(banksDir)
-    .filter((filename) => filename.includes('_') && filename.endsWith('.js'));
+    .filter(filename => filename.includes('_') && filename.endsWith('.js'));
 
   const imports = await Promise.all(
-    bankHandlers.map((file) => {
+    bankHandlers.map(file => {
       const fileUrlToBank = pathToFileURL(path.resolve(banksDir, file)); // pathToFileURL for ESM compatibility
-      return import(fileUrlToBank.toString()).then(
-        (handler) => handler.default,
-      );
+      return import(fileUrlToBank.toString()).then(handler => handler.default);
     }),
   );
 
@@ -26,9 +24,8 @@ async function loadBanks() {
 
 export const banks = await loadBanks();
 
-export default (institutionId) =>
-  banks.find((b) => b.institutionIds.includes(institutionId)) ||
-  IntegrationBank;
+export default institutionId =>
+  banks.find(b => b.institutionIds.includes(institutionId)) || IntegrationBank;
 
 export const BANKS_WITH_LIMITED_HISTORY = [
   'BANCA_AIDEXA_AIDXITMM',

@@ -39,7 +39,7 @@ export default {
       return oldestKnownBalance - oldestTransactionAmount;
     } else {
       return amountToInteger(
-        balances.find((balance) => 'interimBooked' === balance.balanceType)
+        balances.find(balance => 'interimBooked' === balance.balanceType)
           .balanceAmount.amount,
       );
     }
