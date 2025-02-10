@@ -746,12 +746,6 @@ export default [
   },
   {},
   {
-    files: ['packages/api/index.ts'],
-    rules: {
-      'import/no-unresolved': 'off',
-    },
-  },
-  {
     // TODO: fix the issues in these files
     files: [
       'packages/desktop-client/src/components/accounts/Account.jsx',
