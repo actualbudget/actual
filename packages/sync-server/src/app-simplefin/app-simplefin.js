@@ -76,13 +76,13 @@ app.post(
     }
 
     if (Array.isArray(accountId) != Array.isArray(startDate)) {
-      console.log(accountId, startDate);
+      console.log({ accountId, startDate });
       throw new Error(
         'accountId and startDate must either both be arrays or both be strings',
       );
     }
     if (Array.isArray(accountId) && accountId.length !== startDate.length) {
-      console.log(accountId, startDate);
+      console.log({ accountId, startDate });
       throw new Error('accountId and startDate arrays must be the same length');
     }
 
