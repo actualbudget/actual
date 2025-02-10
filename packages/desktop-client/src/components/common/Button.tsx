@@ -118,6 +118,7 @@ const _getActiveStyles = (type: ButtonType, bounce: boolean): CSSProperties => {
   }
 };
 
+/** @deprecated please use `import { Button } from '@actual-app/components/button';` */
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   (
     {
