@@ -10,7 +10,7 @@ import {
   type GroupedEntity,
   type DataEntity,
   type balanceTypeOpType,
-} from 'loot-core/src/types/models/reports';
+} from 'loot-core/types/models/reports';
 import { type RuleConditionEntity } from 'loot-core/types/models/rule';
 
 import { type CSSProperties } from '../../../../style';

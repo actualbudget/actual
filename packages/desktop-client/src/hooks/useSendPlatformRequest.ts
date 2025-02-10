@@ -1,8 +1,8 @@
 // @ts-strict-ignore
 import { useEffect, useState } from 'react';
 
-import { send } from 'loot-core/src/platform/client/fetch';
-import type { Handlers } from 'loot-core/src/types/handlers';
+import { send } from 'loot-core/platform/client/fetch';
+import type { Handlers } from 'loot-core/types/handlers';
 
 export function useSendPlatformRequest<K extends keyof Handlers>(
   name: K,

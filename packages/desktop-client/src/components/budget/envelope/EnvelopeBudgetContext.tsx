@@ -1,6 +1,6 @@
 import React, { type ReactNode, createContext, useContext } from 'react';
 
-import * as monthUtils from 'loot-core/src/shared/months';
+import * as monthUtils from 'loot-core/shared/months';
 
 type EnvelopeBudgetContextDefinition = {
   summaryCollapsed: boolean;

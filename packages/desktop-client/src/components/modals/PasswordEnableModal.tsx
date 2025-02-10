@@ -3,7 +3,7 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { closeBudget, popModal } from 'loot-core/client/actions';
 import { send } from 'loot-core/platform/client/fetch';
-import * as asyncStorage from 'loot-core/src/platform/server/asyncStorage';
+import * as asyncStorage from 'loot-core/platform/server/asyncStorage';
 
 import { useDispatch } from '../../redux';
 import { theme, styles } from '../../style';

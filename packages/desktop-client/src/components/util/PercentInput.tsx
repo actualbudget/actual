@@ -8,7 +8,7 @@ import React, {
   type CSSProperties,
 } from 'react';
 
-import { evalArithmetic } from 'loot-core/src/shared/arithmetic';
+import { evalArithmetic } from 'loot-core/shared/arithmetic';
 
 import { useMergedRefs } from '../../hooks/useMergedRefs';
 import { Input } from '../common/Input';

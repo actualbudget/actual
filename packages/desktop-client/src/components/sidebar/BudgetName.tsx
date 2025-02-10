@@ -1,8 +1,8 @@
 import React, { type ReactNode, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { closeBudget } from 'loot-core/src/client/actions';
-import * as Platform from 'loot-core/src/client/platform';
+import { closeBudget } from 'loot-core/client/actions';
+import * as Platform from 'loot-core/client/platform';
 
 import { useContextMenu } from '../../hooks/useContextMenu';
 import { useMetadataPref } from '../../hooks/useMetadataPref';

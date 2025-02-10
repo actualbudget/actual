@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import {
   type CategoryEntity,
   type CategoryGroupEntity,
-} from 'loot-core/src/types/models';
+} from 'loot-core/types/models';
 
 import {
   SvgCheckAll,

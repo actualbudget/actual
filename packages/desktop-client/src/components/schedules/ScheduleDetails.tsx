@@ -4,13 +4,13 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { t } from 'i18next';
 
+import { pushModal } from 'loot-core/client/actions/modals';
 import { getPayeesById } from 'loot-core/client/queries/queriesSlice';
-import { pushModal } from 'loot-core/src/client/actions/modals';
-import { runQuery, liveQuery } from 'loot-core/src/client/query-helpers';
-import { send, sendCatch } from 'loot-core/src/platform/client/fetch';
-import * as monthUtils from 'loot-core/src/shared/months';
-import { q } from 'loot-core/src/shared/query';
-import { extractScheduleConds } from 'loot-core/src/shared/schedules';
+import { runQuery, liveQuery } from 'loot-core/client/query-helpers';
+import { send, sendCatch } from 'loot-core/platform/client/fetch';
+import * as monthUtils from 'loot-core/shared/months';
+import { q } from 'loot-core/shared/query';
+import { extractScheduleConds } from 'loot-core/shared/schedules';
 import {
   type TransactionEntity,
   type ScheduleEntity,

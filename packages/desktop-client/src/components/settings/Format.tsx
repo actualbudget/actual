@@ -4,8 +4,8 @@ import { useTranslation, Trans } from 'react-i18next';
 
 import { css } from '@emotion/css';
 
-import { numberFormats } from 'loot-core/src/shared/util';
-import { type SyncedPrefs } from 'loot-core/src/types/prefs';
+import { numberFormats } from 'loot-core/shared/util';
+import { type SyncedPrefs } from 'loot-core/types/prefs';
 
 import { useDateFormat } from '../../hooks/useDateFormat';
 import { useSyncedPref } from '../../hooks/useSyncedPref';

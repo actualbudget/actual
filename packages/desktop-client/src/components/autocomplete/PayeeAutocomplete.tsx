@@ -19,11 +19,8 @@ import {
   createPayee,
   getActivePayees,
 } from 'loot-core/client/queries/queriesSlice';
-import { getNormalisedString } from 'loot-core/src/shared/normalisation';
-import {
-  type AccountEntity,
-  type PayeeEntity,
-} from 'loot-core/src/types/models';
+import { getNormalisedString } from 'loot-core/shared/normalisation';
+import { type AccountEntity, type PayeeEntity } from 'loot-core/types/models';
 
 import { useAccounts } from '../../hooks/useAccounts';
 import { useCommonPayees, usePayees } from '../../hooks/usePayees';

@@ -1,7 +1,7 @@
 import React, { useRef, useState, type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import type { Theme } from 'loot-core/src/types/prefs';
+import type { Theme } from 'loot-core/types/prefs';
 
 import { SvgMoonStars, SvgSun, SvgSystem } from '../icons/v2';
 import { themeOptions, useTheme } from '../style';

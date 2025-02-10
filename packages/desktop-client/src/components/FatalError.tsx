@@ -4,7 +4,7 @@ import { useTranslation, Trans } from 'react-i18next';
 import { Button } from '@actual-app/components/button';
 import { View } from '@actual-app/components/view';
 
-import { LazyLoadFailedError } from 'loot-core/src/shared/errors';
+import { LazyLoadFailedError } from 'loot-core/shared/errors';
 
 import { Block } from './common/Block';
 import { Link } from './common/Link';

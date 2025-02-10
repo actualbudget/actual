@@ -10,8 +10,8 @@ import { Trans, useTranslation } from 'react-i18next';
 import memoizeOne from 'memoize-one';
 
 import { pushModal } from 'loot-core/client/actions';
-import { getNormalisedString } from 'loot-core/src/shared/normalisation';
-import { type Diff, groupById } from 'loot-core/src/shared/util';
+import { getNormalisedString } from 'loot-core/shared/normalisation';
+import { type Diff, groupById } from 'loot-core/shared/util';
 import { type PayeeEntity } from 'loot-core/types/models';
 
 import {

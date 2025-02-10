@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import {
   type CategoryGroupEntity,
   type CategoryEntity,
-} from 'loot-core/src/types/models';
+} from 'loot-core/types/models';
 
 import { useContextMenu } from '../../hooks/useContextMenu';
 import { SvgCheveronDown } from '../../icons/v1';

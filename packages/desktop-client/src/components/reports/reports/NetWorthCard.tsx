@@ -1,11 +1,11 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { integerToCurrency } from 'loot-core/src/shared/util';
+import { integerToCurrency } from 'loot-core/shared/util';
 import {
   type AccountEntity,
   type NetWorthWidget,
-} from 'loot-core/src/types/models';
+} from 'loot-core/types/models';
 
 import { styles } from '../../../style';
 import { Block } from '../../common/Block';

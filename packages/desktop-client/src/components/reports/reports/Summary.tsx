@@ -4,11 +4,11 @@ import { useParams } from 'react-router-dom';
 
 import { parseISO } from 'date-fns';
 
+import { addNotification } from 'loot-core/client/actions';
 import { useWidget } from 'loot-core/client/data-hooks/widget';
 import { send } from 'loot-core/platform/client/fetch';
+import * as monthUtils from 'loot-core/shared/months';
 import { amountToCurrency } from 'loot-core/shared/util';
-import { addNotification } from 'loot-core/src/client/actions';
-import * as monthUtils from 'loot-core/src/shared/months';
 import {
   type SummaryContent,
   type SummaryWidget,

@@ -1,7 +1,7 @@
 import React, { type ComponentPropsWithoutRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { trackingBudget } from 'loot-core/src/client/queries';
+import { trackingBudget } from 'loot-core/client/queries';
 
 import { Menu } from '../../common/Menu';
 

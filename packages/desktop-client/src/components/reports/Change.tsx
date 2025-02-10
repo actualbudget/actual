@@ -1,6 +1,6 @@
 import React, { type CSSProperties } from 'react';
 
-import { integerToCurrency } from 'loot-core/src/shared/util';
+import { integerToCurrency } from 'loot-core/shared/util';
 
 import { styles } from '../../style/styles';
 import { theme } from '../../style/theme';

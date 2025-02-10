@@ -1,8 +1,8 @@
 import React, { createRef, useRef, useState } from 'react';
 
 import { useReports } from 'loot-core/client/data-hooks/reports';
-import { send, sendCatch } from 'loot-core/src/platform/client/fetch';
-import { type CustomReportEntity } from 'loot-core/src/types/models';
+import { send, sendCatch } from 'loot-core/platform/client/fetch';
+import { type CustomReportEntity } from 'loot-core/types/models';
 
 import { SvgExpandArrow } from '../../icons/v0';
 import { Button } from '../common/Button2';

@@ -4,8 +4,8 @@ import { useTranslation, Trans } from 'react-i18next';
 import { css } from '@emotion/css';
 
 import { closeBudget, loadPrefs } from 'loot-core/client/actions';
+import { listen } from 'loot-core/platform/client/fetch';
 import { isElectron } from 'loot-core/shared/environment';
-import { listen } from 'loot-core/src/platform/client/fetch';
 
 import { useGlobalPref } from '../../hooks/useGlobalPref';
 import { useIsOutdated, useLatestVersion } from '../../hooks/useLatestVersion';

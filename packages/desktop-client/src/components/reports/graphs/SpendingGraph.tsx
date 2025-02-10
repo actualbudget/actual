@@ -16,8 +16,8 @@ import {
 import {
   amountToCurrency,
   amountToCurrencyNoDecimal,
-} from 'loot-core/src/shared/util';
-import { type SpendingEntity } from 'loot-core/src/types/models/reports';
+} from 'loot-core/shared/util';
+import { type SpendingEntity } from 'loot-core/types/models/reports';
 
 import { usePrivacyMode } from '../../../hooks/usePrivacyMode';
 import { theme } from '../../../style';

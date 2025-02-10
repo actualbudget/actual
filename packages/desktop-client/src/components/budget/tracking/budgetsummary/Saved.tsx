@@ -3,7 +3,7 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { css } from '@emotion/css';
 
-import { trackingBudget } from 'loot-core/src/client/queries';
+import { trackingBudget } from 'loot-core/client/queries';
 
 import { theme, styles } from '../../../../style';
 import { AlignedText } from '../../../common/AlignedText';

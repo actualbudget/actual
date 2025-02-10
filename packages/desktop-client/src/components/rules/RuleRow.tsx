@@ -4,8 +4,8 @@ import { useTranslation } from 'react-i18next';
 
 import { v4 as uuid } from 'uuid';
 
-import { friendlyOp } from 'loot-core/src/shared/rules';
-import { type RuleEntity } from 'loot-core/src/types/models';
+import { friendlyOp } from 'loot-core/shared/rules';
+import { type RuleEntity } from 'loot-core/types/models';
 
 import { useContextMenu } from '../../hooks/useContextMenu';
 import { useSelectedDispatch } from '../../hooks/useSelected';

@@ -10,7 +10,7 @@ import { useTranslation } from 'react-i18next';
 import {
   type GroupedEntity,
   type DataEntity,
-} from 'loot-core/src/types/models/reports';
+} from 'loot-core/types/models/reports';
 
 import { theme } from '../../../../style';
 import { styles } from '../../../../style/styles';
