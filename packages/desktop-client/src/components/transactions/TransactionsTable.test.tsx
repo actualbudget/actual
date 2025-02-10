@@ -130,13 +130,14 @@ type LiveTransactionTableProps = {
 };
 
 function LiveTransactionTable(props: LiveTransactionTableProps) {
-  const [transactions, setTransactions] = useState(props.transactions);
+  const { transactions: transactionsProp, onTransactionsChange } = props;
+
+  const [transactions, setTransactions] = useState(transactionsProp);
 
   useEffect(() => {
-    if (transactions === props.transactions) return;
-    props.onTransactionsChange?.(transactions);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [transactions]);
+    if (transactions === transactionsProp) return;
+    onTransactionsChange?.(transactions);
+  }, [transactions, transactionsProp, onTransactionsChange]);
 
   const onSplit = (id: string) => {
     const { data, diff } = splitTransaction(transactions, id);
