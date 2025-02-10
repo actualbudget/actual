@@ -5,9 +5,8 @@ on:
   push:
     branches:
       - master
-    paths-ignore:
-      - README.md
-      - LICENSE.txt
+    paths:
+      - packages/sync-server
   pull_request:
     branches:
       - master
