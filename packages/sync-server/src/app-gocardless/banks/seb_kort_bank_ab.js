@@ -43,15 +43,19 @@ export default {
    */
   calculateStartingBalance(sortedTransactions = [], balances = []) {
     const currentBalance = balances.find(
-      (balance) => 'expected' === balance.balanceType,
+      balance => 'expected' === balance.balanceType,
     );
 
     const nonInvoiced = balances.find(
-      (balance) => 'nonInvoiced' === balance.balanceType,
+      balance => 'nonInvoiced' === balance.balanceType,
     );
 
-    return sortedTransactions.reduce((total, trans) => {
-      return total - amountToInteger(trans.transactionAmount.amount);
-    }, -amountToInteger(currentBalance.balanceAmount.amount) + amountToInteger(nonInvoiced.balanceAmount.amount));
+    return sortedTransactions.reduce(
+      (total, trans) => {
+        return total - amountToInteger(trans.transactionAmount.amount);
+      },
+      -amountToInteger(currentBalance.balanceAmount.amount) +
+        amountToInteger(nonInvoiced.balanceAmount.amount),
+    );
   },
 };

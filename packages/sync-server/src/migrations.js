@@ -7,7 +7,7 @@ export default function run(direction = 'up') {
     `Checking if there are any migrations to run for direction "${direction}"...`,
   );
 
-  return new Promise((resolve) =>
+  return new Promise(resolve =>
     migrate.load(
       {
         stateStore: `${path.join(config.dataDir, '.migrate')}${
@@ -20,7 +20,7 @@ export default function run(direction = 'up') {
           throw err;
         }
 
-        set[direction]((err) => {
+        set[direction](err => {
           if (err) {
             throw err;
           }

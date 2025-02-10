@@ -73,7 +73,7 @@ export default {
    */
   calculateStartingBalance(sortedTransactions = [], balances = []) {
     const currentBalance = balances.find(
-      (balance) => 'expected' === balance.balanceType,
+      balance => 'expected' === balance.balanceType,
     );
 
     return sortedTransactions.reduce((total, trans) => {

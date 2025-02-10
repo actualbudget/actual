@@ -28,7 +28,7 @@ app.get('/owner-created/', (req, res) => {
 app.get('/users/', validateSessionMiddleware, (req, res) => {
   const users = UserService.getAllUsers();
   res.json(
-    users.map((u) => ({
+    users.map(u => ({
       ...u,
       owner: u.owner === 1,
       enabled: u.enabled === 1,
@@ -152,7 +152,7 @@ app.delete('/users', validateSessionMiddleware, async (req, res) => {
 
   const ids = req.body.ids;
   let totalDeleted = 0;
-  ids.forEach((item) => {
+  ids.forEach(item => {
     const ownerId = UserService.getOwnerId();
 
     if (item === ownerId) return;

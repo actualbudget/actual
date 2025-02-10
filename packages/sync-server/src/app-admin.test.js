@@ -14,7 +14,7 @@ const createUser = (userId, userName, role, owner = 0, enabled = 1) => {
   );
 };
 
-const deleteUser = (userId) => {
+const deleteUser = userId => {
   getAccountDb().mutate('DELETE FROM user_access WHERE user_id = ?', [userId]);
   getAccountDb().mutate('DELETE FROM users WHERE id = ?', [userId]);
 };

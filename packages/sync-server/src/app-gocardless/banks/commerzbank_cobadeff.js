@@ -25,7 +25,7 @@ export default {
       'Kartenzahlung',
       'Dauerauftrag',
     ];
-    keywords.forEach((keyword) => {
+    keywords.forEach(keyword => {
       transaction.remittanceInformationUnstructured =
         transaction.remittanceInformationUnstructured.replace(
           // There can be spaces in keywords

@@ -82,14 +82,17 @@ export default {
     );
 
     const currentBalance = balances
-      .filter((item) => SORTED_BALANCE_TYPE_LIST.includes(item.balanceType))
+      .filter(item => SORTED_BALANCE_TYPE_LIST.includes(item.balanceType))
       .sort(
         (a, b) =>
           SORTED_BALANCE_TYPE_LIST.indexOf(a.balanceType) -
           SORTED_BALANCE_TYPE_LIST.indexOf(b.balanceType),
       )[0];
-    return sortedTransactions.reduce((total, trans) => {
-      return total - amountToInteger(trans.transactionAmount.amount);
-    }, amountToInteger(currentBalance?.balanceAmount?.amount || 0));
+    return sortedTransactions.reduce(
+      (total, trans) => {
+        return total - amountToInteger(trans.transactionAmount.amount);
+      },
+      amountToInteger(currentBalance?.balanceAmount?.amount || 0),
+    );
   },
 };

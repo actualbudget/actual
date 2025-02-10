@@ -50,7 +50,7 @@ export function validateAuthHeader(req) {
   let peer = req.socket.remoteAddress;
   let peerIp = ipaddr.process(peer);
   const rangeList = {
-    allowed_ips: trustedAuthProxies.map((q) => ipaddr.parseCIDR(q)),
+    allowed_ips: trustedAuthProxies.map(q => ipaddr.parseCIDR(q)),
   };
   /* eslint-disable @typescript-eslint/ban-ts-comment */
   // @ts-ignore : there is an error in the ts definition for the function, but this is valid

@@ -33,8 +33,11 @@ export default {
   },
 
   calculateStartingBalance(sortedTransactions = [], balances = []) {
-    return sortedTransactions.reduce((total, trans) => {
-      return total - amountToInteger(trans.transactionAmount.amount);
-    }, amountToInteger(balances[0]?.balanceAmount?.amount || 0));
+    return sortedTransactions.reduce(
+      (total, trans) => {
+        return total - amountToInteger(trans.transactionAmount.amount);
+      },
+      amountToInteger(balances[0]?.balanceAmount?.amount || 0),
+    );
   },
 };

@@ -44,7 +44,8 @@
     "install:server": "yarn workspaces focus actual-sync --production",
     "typecheck": "yarn tsc && tsc-strict",
     "jq": "./node_modules/node-jq/bin/jq",
-    "prepare": "husky"
+    "prepare": "husky",
+    "prettier": "prettier ./packages/sync-server/**/* --write"
   },
   "devDependencies": {
     "@typescript-eslint/parser": "^8.18.1",

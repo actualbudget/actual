@@ -294,7 +294,7 @@ describe('/upload-user-file', () => {
       ],
     );
 
-    await fs.writeFile(getPathForUserFile(fileId), oldFileContent, (err) => {
+    await fs.writeFile(getPathForUserFile(fileId), oldFileContent, err => {
       if (err) throw err;
     });
 

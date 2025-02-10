@@ -17,8 +17,8 @@ export default {
     // Remove clutter to extract the payee from remittanceInformationUnstructured ...
     // ... when not otherwise provided.
     const payeeName = transaction.remittanceInformationUnstructuredArray
-      .map((el) => el.match(/^(?:.*\*)?(.+),PAS\d+$/))
-      .find((match) => match)?.[1];
+      .map(el => el.match(/^(?:.*\*)?(.+),PAS\d+$/))
+      .find(match => match)?.[1];
     transaction.debtorName = transaction.debtorName || payeeName;
     transaction.creditorName = transaction.creditorName || payeeName;
 
@@ -49,7 +49,7 @@ export default {
       return oldestKnownBalance - oldestTransactionAmount;
     } else {
       return amountToInteger(
-        balances.find((balance) => 'interimBooked' === balance.balanceType)
+        balances.find(balance => 'interimBooked' === balance.balanceType)
           .balanceAmount.amount,
       );
     }

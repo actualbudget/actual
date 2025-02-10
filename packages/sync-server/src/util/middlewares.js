@@ -46,7 +46,7 @@ const requestLoggerMiddleware = expressWinston.logger({
   format: winston.format.combine(
     winston.format.colorize(),
     winston.format.timestamp(),
-    winston.format.printf((args) => {
+    winston.format.printf(args => {
       const { timestamp, level, meta } = args;
       const { res, req } = meta;
 

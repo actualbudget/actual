@@ -16,7 +16,7 @@ import * as openidApp from './app-openid.js';
 
 const app = express();
 
-process.on('unhandledRejection', (reason) => {
+process.on('unhandledRejection', reason => {
   console.log('Rejection:', reason);
 });
 

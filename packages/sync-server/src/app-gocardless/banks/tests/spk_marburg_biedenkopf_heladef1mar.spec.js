@@ -192,7 +192,7 @@ describe('SpkMarburgBiedenkopfHeladef1mar', () => {
     });
 
     it('returns sorted array for unsorted inputs', () => {
-      const normalizeTransactions = transactionsRaw.map((tx) =>
+      const normalizeTransactions = transactionsRaw.map(tx =>
         SpkMarburgBiedenkopfHeladef1mar.normalizeTransaction(tx, true),
       );
       const originalOrder = Array.from(normalizeTransactions);
@@ -227,7 +227,7 @@ describe('SpkMarburgBiedenkopfHeladef1mar', () => {
     });
 
     it('should calculate the starting balance correctly', () => {
-      const normalizeTransactions = transactionsRaw.map((tx) =>
+      const normalizeTransactions = transactionsRaw.map(tx =>
         SpkMarburgBiedenkopfHeladef1mar.normalizeTransaction(tx, true),
       );
       const sortedTransactions =

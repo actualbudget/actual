@@ -105,7 +105,7 @@ app.post('/sync', async (req, res) => {
   // encode it back...
   let responsePb = new SyncProtoBuf.SyncResponse();
   responsePb.setMerkle(JSON.stringify(trie));
-  newMessages.forEach((msg) => responsePb.addMessages(msg));
+  newMessages.forEach(msg => responsePb.addMessages(msg));
 
   res.set('Content-Type', 'application/actual-sync');
   res.set('X-ACTUAL-SYNC-METHOD', 'simple');
@@ -315,19 +315,17 @@ app.get('/list-user-files', (req, res) => {
   const rows = fileService.find({ userId: res.locals.user_id });
   res.send({
     status: 'ok',
-    data: rows.map((row) => ({
+    data: rows.map(row => ({
       deleted: boolToInt(row.deleted),
       fileId: row.id,
       groupId: row.groupId,
       name: row.name,
       encryptKeyId: row.encryptKeyId,
       owner: row.owner,
-      usersWithAccess: fileService
-        .findUsersWithAccess(row.id)
-        .map((access) => ({
-          ...access,
-          owner: access.userId === row.owner,
-        })),
+      usersWithAccess: fileService.findUsersWithAccess(row.id).map(access => ({
+        ...access,
+        owner: access.userId === row.owner,
+      })),
     })),
   });
 });
@@ -363,12 +361,10 @@ app.get('/get-user-file-info', (req, res) => {
       groupId: file.groupId,
       name: file.name,
       encryptMeta: file.encryptMeta ? JSON.parse(file.encryptMeta) : null,
-      usersWithAccess: fileService
-        .findUsersWithAccess(file.id)
-        .map((access) => ({
-          ...access,
-          owner: access.userId === file.owner,
-        })),
+      usersWithAccess: fileService.findUsersWithAccess(file.id).map(access => ({
+        ...access,
+        owner: access.userId === file.owner,
+      })),
     },
   });
 });

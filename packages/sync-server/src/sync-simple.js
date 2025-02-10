@@ -84,7 +84,7 @@ export function sync(messages, since, groupId) {
 
   return {
     trie,
-    newMessages: newMessages.map((msg) => {
+    newMessages: newMessages.map(msg => {
       const envelopePb = new SyncProtoBuf.MessageEnvelope();
       envelopePb.setTimestamp(msg.timestamp);
       envelopePb.setIsencrypted(msg.is_encrypted);

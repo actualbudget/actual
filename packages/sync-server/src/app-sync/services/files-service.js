@@ -84,7 +84,7 @@ class FileUpdate extends FileBase {
   }
 }
 
-const boolToInt = (bool) => {
+const boolToInt = bool => {
   return bool ? 1 : 0;
 };
 

@@ -6,8 +6,8 @@ export async function prompt(message) {
     output: process.stdout,
   });
 
-  let promise = new Promise((resolve) => {
-    rl.question(message, (answer) => {
+  let promise = new Promise(resolve => {
+    rl.question(message, answer => {
       resolve(answer);
       rl.close();
     });
@@ -41,12 +41,12 @@ export async function promptPassword() {
 async function askForPassword(prompt) {
   let dataListener, endListener;
 
-  let promise = new Promise((resolve) => {
+  let promise = new Promise(resolve => {
     let result = '';
     process.stdout.write(prompt);
     process.stdin.setRawMode(true);
     process.stdin.resume();
-    dataListener = (key) => {
+    dataListener = key => {
       switch (key[0]) {
         case 0x03: // ^C
           process.exit();

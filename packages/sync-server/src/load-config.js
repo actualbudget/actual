@@ -126,17 +126,17 @@ const finalConfig = {
     : config.multiuser,
   allowedLoginMethods: process.env.ACTUAL_ALLOWED_LOGIN_METHODS
     ? process.env.ACTUAL_ALLOWED_LOGIN_METHODS.split(',')
-        .map((q) => q.trim().toLowerCase())
+        .map(q => q.trim().toLowerCase())
         .filter(Boolean)
     : config.allowedLoginMethods,
   trustedProxies: process.env.ACTUAL_TRUSTED_PROXIES
     ? process.env.ACTUAL_TRUSTED_PROXIES.split(',')
-        .map((q) => q.trim())
+        .map(q => q.trim())
         .filter(Boolean)
     : config.trustedProxies,
   trustedAuthProxies: process.env.ACTUAL_TRUSTED_AUTH_PROXIES
     ? process.env.ACTUAL_TRUSTED_AUTH_PROXIES.split(',')
-        .map((q) => q.trim())
+        .map(q => q.trim())
         .filter(Boolean)
     : config.trustedAuthProxies,
   port: +process.env.ACTUAL_PORT || +process.env.PORT || config.port,
