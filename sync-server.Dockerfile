@@ -3,6 +3,14 @@ RUN apt-get update && apt-get install -y openssl
 WORKDIR /app
 COPY .yarn ./.yarn
 COPY yarn.lock packages/sync-server/package.json .yarnrc.yml ./
+
+# Working here - this should work - will need to do it for the stable docker images too
+
+# First install everything for the build process
+RUN yarn worksapces focus --all
+# Then build the browser
+RUN yarn build:browser
+# Then cleanup the node_modules by installing only what we to run the server
 RUN yarn workspaces focus actual-sync --production
 
 FROM node:18-bookworm-slim as prod

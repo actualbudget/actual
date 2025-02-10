@@ -22,7 +22,7 @@ async function errorMiddleware(err, req, res, next) {
     // Source: https://expressjs.com/en/guide/error-handling.html
     return next(err);
   }
-  console.log(`Error on endpoint ${req.url}`, err.message, err.stack);
+  console.log(`Error on endpoint %s`, { request: req.url, err });
   res.status(500).send({ status: 'error', reason: 'internal-error' });
 }
 
