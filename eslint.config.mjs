@@ -671,7 +671,6 @@ export default [
   },
   {
     files: ['packages/loot-core/src/**/*'],
-
     rules: {
       'no-restricted-imports': [
         'warn',
@@ -690,6 +689,10 @@ export default [
               group: ['loot-core/**'],
               message:
                 'Please use relative imports in loot-core instead of importing from `loot-core/*`',
+            },
+            {
+              group: ['@actual-app/web/*'],
+              message: 'Please do not import `@actual-app/web` in `loot-core`',
             },
           ],
         },

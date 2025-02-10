@@ -8,6 +8,7 @@ import React, {
   useState,
 } from 'react';
 
+// eslint-disable-next-line no-restricted-imports -- fix me -- do not import @actual-app/web in loot-core
 import { useSyncedPref } from '@actual-app/web/src/hooks/useSyncedPref';
 
 import { q, type Query } from '../../shared/query';
