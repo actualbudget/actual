@@ -16,22 +16,23 @@ import {
 import { useHotkeysContext } from 'react-hotkeys-hook';
 import { useTranslation } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
+import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
+import { styles } from '@actual-app/components/styles';
+import { Text } from '@actual-app/components/text';
+import { TextOneLine } from '@actual-app/components/text-one-line';
+import { theme } from '@actual-app/components/theme';
+import { tokens } from '@actual-app/components/tokens';
+import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 import { AutoTextSize } from 'auto-text-size';
 
 import { useModalState } from '../../hooks/useModalState';
-import { AnimatedLoading } from '../../icons/AnimatedLoading';
 import { SvgLogo } from '../../icons/logo';
 import { SvgDelete } from '../../icons/v0';
-import { styles, theme } from '../../style';
-import { tokens } from '../../tokens';
 import { useResponsive } from '../responsive/ResponsiveProvider';
 
-import { Button } from './Button2';
 import { Input } from './Input';
-import { Text } from './Text';
-import { TextOneLine } from './TextOneLine';
-import { View } from './View';
 
 type ModalProps = ComponentPropsWithRef<typeof ReactAriaModal> & {
   name: string;

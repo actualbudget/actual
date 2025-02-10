@@ -15,10 +15,26 @@
   },
   "exports": {
     "./icons/*": "./src/icons/*.tsx",
+    "./aligned-text": "./src/AlignedText.tsx",
+    "./block": "./src/Block.tsx",
     "./button": "./src/Button.tsx",
+    "./card": "./src/Card.tsx",
+    "./form-error": "./src/FormError.tsx",
+    "./initial-focus": "./src/InitialFocus.ts",
+    "./inline-field": "./src/InlineField.tsx",
+    "./label": "./src/Label.tsx",
+    "./menu": "./src/Menu.tsx",
+    "./paragraph": "./src/Paragraph.tsx",
+    "./popover": "./src/Popover.tsx",
+    "./space-between": "./src/SpaceBetween.tsx",
+    "./stack": "./src/Stack.tsx",
     "./styles": "./src/styles.ts",
+    "./text": "./src/Text.tsx",
+    "./text-one-line": "./src/TextOneLine.tsx",
     "./theme": "./src/theme.ts",
     "./tokens": "./src/tokens.ts",
+    "./toggle": "./src/Toggle.tsx",
+    "./tooltip": "./src/Tooltip.tsx",
     "./view": "./src/View.tsx"
   }
 }

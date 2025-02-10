@@ -2,7 +2,7 @@ import { type HTMLProps } from 'react';
 
 import { css } from '@emotion/css';
 
-import { type CSSProperties } from '../../style';
+import { type CSSProperties } from './styles';
 
 type ParagraphProps = HTMLProps<HTMLDivElement> & {
   style?: CSSProperties;

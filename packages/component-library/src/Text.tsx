@@ -7,7 +7,7 @@ import React, {
 
 import { css, cx } from '@emotion/css';
 
-import { type CSSProperties } from '../../style';
+import { type CSSProperties } from './styles';
 
 type TextProps = HTMLProps<HTMLSpanElement> & {
   innerRef?: Ref<HTMLSpanElement>;

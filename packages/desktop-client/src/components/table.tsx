@@ -17,23 +17,25 @@ import React, {
 } from 'react';
 import AutoSizer from 'react-virtualized-auto-sizer';
 
+import { Button } from '@actual-app/components/button';
+import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
+import { Menu, type MenuItem } from '@actual-app/components/menu';
+import { Popover } from '@actual-app/components/popover';
+import { type CSSProperties, styles } from '@actual-app/components/styles';
+import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
+import { View } from '@actual-app/components/view';
+
 import { useModalState } from '../hooks/useModalState';
 import {
   AvoidRefocusScrollProvider,
   useProperFocus,
 } from '../hooks/useProperFocus';
 import { useSelectedItems } from '../hooks/useSelected';
-import { AnimatedLoading } from '../icons/AnimatedLoading';
 import { SvgDelete, SvgExpandArrow } from '../icons/v0';
 import { SvgCheckmark } from '../icons/v1';
-import { type CSSProperties, styles, theme } from '../style';
 
-import { Button } from './common/Button2';
 import { Input } from './common/Input';
-import { Menu, type MenuItem } from './common/Menu';
-import { Popover } from './common/Popover';
-import { Text } from './common/Text';
-import { View } from './common/View';
 import { FixedSizeList } from './FixedSizeList';
 import {
   ConditionalPrivacyFilter,

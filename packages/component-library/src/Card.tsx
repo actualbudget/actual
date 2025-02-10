@@ -1,7 +1,6 @@
 import { type ComponentProps, forwardRef } from 'react';
 
-import { theme } from '../../style';
-
+import { theme } from './theme';
 import { View } from './View';
 
 type CardProps = ComponentProps<typeof View>;
