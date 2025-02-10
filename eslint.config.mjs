@@ -746,6 +746,12 @@ export default [
   },
   {},
   {
+    files: ['packages/api/index.ts'],
+    rules: {
+      'import/no-unresolved': 'off',
+    },
+  },
+  {
     // TODO: fix the issues in these files
     files: [
       'packages/desktop-client/src/components/accounts/Account.jsx',
@@ -758,7 +764,7 @@ export default [
       'packages/desktop-client/src/components/budget/MobileBudget.tsx',
       'packages/desktop-client/src/components/budget/envelope/HoldMenu.tsx',
       'packages/desktop-client/src/components/budget/envelope/TransferMenu.tsx',
-      'packages/desktop-client/src/components/common/Menu.tsx',
+      'packages/component-library/src/Menu.tsx',
       'packages/desktop-client/src/components/FinancesApp.tsx',
       'packages/desktop-client/src/components/GlobalKeys.ts',
       'packages/desktop-client/src/components/LoggedInUser.tsx',

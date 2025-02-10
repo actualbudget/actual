@@ -2,7 +2,7 @@ import { type ReactNode } from 'react';
 
 import { css } from '@emotion/css';
 
-import { type CSSProperties } from '../../style';
+import { type CSSProperties } from './styles';
 
 type InlineFieldProps = {
   label: ReactNode;
