@@ -66,14 +66,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@actual-app/web@npm:25.2.1":
-  version: 25.2.1
-  resolution: "@actual-app/web@npm:25.2.1"
-  checksum: 10/b6dc258b7de1b710c6a9cbfd35edebb82a29b84ac031b90a0cafa2af1618c482b0f3b81e47901b9beba457e77d962fe7083f82ed0091d0fa63724cf2bd3c8f56
-  languageName: node
-  linkType: hard
-
-"@actual-app/web@workspace:^, @actual-app/web@workspace:packages/desktop-client":
+"@actual-app/web@workspace:*, @actual-app/web@workspace:^, @actual-app/web@workspace:packages/desktop-client":
   version: 0.0.0-use.local
   resolution: "@actual-app/web@workspace:packages/desktop-client"
   dependencies:
@@ -7476,7 +7469,7 @@ __metadata:
   resolution: "actual-sync@workspace:packages/sync-server"
   dependencies:
     "@actual-app/crdt": "npm:2.1.0"
-    "@actual-app/web": "npm:25.2.1"
+    "@actual-app/web": "workspace:*"
     "@babel/preset-typescript": "npm:^7.20.2"
     "@types/bcrypt": "npm:^5.0.2"
     "@types/better-sqlite3": "npm:^7.6.12"
