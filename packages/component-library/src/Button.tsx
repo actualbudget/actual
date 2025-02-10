@@ -9,9 +9,9 @@ import { Button as ReactAriaButton } from 'react-aria-components';
 
 import { css } from '@emotion/css';
 
-import { AnimatedLoading } from '../../icons/AnimatedLoading';
-import { styles, theme } from '../../style';
-
+import { AnimatedLoading } from './icons/AnimatedLoading';
+import { styles } from './styles';
+import { theme } from './theme';
 import { View } from './View';
 
 const backgroundColor: {
