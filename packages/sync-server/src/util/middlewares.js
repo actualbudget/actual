@@ -23,7 +23,10 @@ async function errorMiddleware(err, req, res, next) {
     return next(err);
   }
 
-  console.log(`Error on endpoint %s`, { requestUrl: req.url, err });
+  console.log(`Error on endpoint %s`, {
+    requestUrl: req.url,
+    stacktrace: err.stack,
+  });
   res.status(500).send({ status: 'error', reason: 'internal-error' });
 }
 
