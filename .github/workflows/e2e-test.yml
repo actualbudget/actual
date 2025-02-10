@@ -4,6 +4,7 @@ on:
   pull_request:
     paths-ignore:
       - packages/sync-server
+      - upcoming-release-notes
 
 env:
   GITHUB_PR_NUMBER: ${{github.event.pull_request.number}}

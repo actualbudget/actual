@@ -15,6 +15,7 @@ on:
   pull_request_target:
     paths-ignore:
       - packages/sync-server
+      - upcoming-release-notes
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
