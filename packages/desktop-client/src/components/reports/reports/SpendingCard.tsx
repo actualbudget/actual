@@ -136,7 +136,7 @@ export function SpendingCard({
                 <PrivacyFilter activationFilters={[!isCardHovered]}>
                   {data &&
                     (difference && difference > 0 ? '+' : '') +
-                      amountToCurrency(difference)}
+                      amountToCurrency(difference || 0)}
                 </PrivacyFilter>
               </Block>
             </View>

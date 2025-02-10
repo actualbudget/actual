@@ -16,10 +16,9 @@ import {
   closeBudget,
   loadBudget,
   loadGlobalPrefs,
-  setAppState,
   signOut,
-  sync,
 } from 'loot-core/client/actions';
+import { setAppState, sync } from 'loot-core/client/app/appSlice';
 import { SpreadsheetProvider } from 'loot-core/client/SpreadsheetProvider';
 import * as Platform from 'loot-core/src/client/platform';
 import {
@@ -27,9 +26,10 @@ import {
   send,
 } from 'loot-core/src/platform/client/fetch';
 
+import { handleGlobalEvents } from '../global-events';
 import { useMetadataPref } from '../hooks/useMetadataPref';
 import { installPolyfills } from '../polyfills';
-import { useDispatch, useSelector } from '../redux';
+import { useDispatch, useSelector, useStore } from '../redux';
 import { styles, hasHiddenScrollbars, ThemeStyle, useTheme } from '../style';
 import { ExposeNavigate } from '../util/router-tools';
 
@@ -124,7 +124,9 @@ function AppInner() {
     }
 
     initAll().catch(showErrorBoundary);
-  }, [cloudFileId, dispatch, showErrorBoundary, t]);
+    // Removed cloudFileId from dependencies to prevent hard crash when closing budget in Electron
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dispatch, showErrorBoundary, t]);
 
   useEffect(() => {
     global.Actual.updateAppMenu(budgetId);
@@ -138,9 +140,9 @@ function AppInner() {
           id: 'login-expired',
           title: t('Login expired'),
           sticky: true,
-          message: t('Login expired, please login again.'),
+          message: t('Login expired, please log in again.'),
           button: {
-            title: t('Go to login'),
+            title: t('Go to log in'),
             action: () => dispatch(signOut()),
           },
         }),
@@ -161,6 +163,10 @@ function ErrorFallback({ error }: FallbackProps) {
 }
 
 export function App() {
+  const store = useStore();
+
+  useEffect(() => handleGlobalEvents(store), [store]);
+
   const [hiddenScrollbars, setHiddenScrollbars] = useState(
     hasHiddenScrollbars(),
   );

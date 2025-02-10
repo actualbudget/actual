@@ -1,5 +1,140 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`Transfer split transfers are retained on child transactions 1`] = `
+Array [
+  Object {
+    "account": "one",
+    "amount": 5000,
+    "category": null,
+    "cleared": 1,
+    "date": 20170101,
+    "error": null,
+    "id": "id5",
+    "imported_id": null,
+    "imported_payee": null,
+    "is_child": 0,
+    "is_parent": 0,
+    "notes": null,
+    "parent_id": null,
+    "payee": "id3",
+    "payee_name": "",
+    "reconciled": 0,
+    "schedule": null,
+    "sort_order": 123456789,
+    "starting_balance_flag": 0,
+    "tombstone": 0,
+    "transfer_id": "id6",
+  },
+  Object {
+    "account": "two",
+    "amount": -5000,
+    "category": null,
+    "cleared": 0,
+    "date": 20170101,
+    "error": null,
+    "id": "id6",
+    "imported_id": null,
+    "imported_payee": null,
+    "is_child": 0,
+    "is_parent": 0,
+    "notes": null,
+    "parent_id": null,
+    "payee": "id2",
+    "payee_name": "",
+    "reconciled": 0,
+    "schedule": null,
+    "sort_order": 123456789,
+    "starting_balance_flag": 0,
+    "tombstone": 0,
+    "transfer_id": "id5",
+  },
+]
+`;
+
+exports[`Transfer split transfers are retained on child transactions 2`] = `
+"Snapshot Diff:
+- First value
++ Second value
+
+@@ -8,11 +8,11 @@
+      \\"error\\": null,
+      \\"id\\": \\"id5\\",
+      \\"imported_id\\": null,
+      \\"imported_payee\\": null,
+      \\"is_child\\": 0,
+-     \\"is_parent\\": 0,
++     \\"is_parent\\": 1,
+      \\"notes\\": null,
+      \\"parent_id\\": null,
+      \\"payee\\": \\"id3\\",
+      \\"payee_name\\": \\"\\",
+      \\"reconciled\\": 0,"
+`;
+
+exports[`Transfer split transfers are retained on child transactions 3`] = `
+"Snapshot Diff:
+- First value
++ Second value
+
+@@ -21,10 +21,56 @@
+      \\"starting_balance_flag\\": 0,
+      \\"tombstone\\": 0,
+      \\"transfer_id\\": \\"id6\\",
+    },
+    Object {
++     \\"account\\": \\"one\\",
++     \\"amount\\": 2000,
++     \\"category\\": null,
++     \\"cleared\\": 1,
++     \\"date\\": 20170101,
++     \\"error\\": null,
++     \\"id\\": \\"id7\\",
++     \\"imported_id\\": null,
++     \\"imported_payee\\": null,
++     \\"is_child\\": 1,
++     \\"is_parent\\": 0,
++     \\"notes\\": null,
++     \\"parent_id\\": \\"id5\\",
++     \\"payee\\": \\"id2\\",
++     \\"payee_name\\": \\"\\",
++     \\"reconciled\\": 0,
++     \\"schedule\\": null,
++     \\"sort_order\\": 123456789,
++     \\"starting_balance_flag\\": 0,
++     \\"tombstone\\": 0,
++     \\"transfer_id\\": \\"id8\\",
++   },
++   Object {
++     \\"account\\": \\"one\\",
++     \\"amount\\": -2000,
++     \\"category\\": null,
++     \\"cleared\\": 0,
++     \\"date\\": 20170101,
++     \\"error\\": null,
++     \\"id\\": \\"id8\\",
++     \\"imported_id\\": null,
++     \\"imported_payee\\": null,
++     \\"is_child\\": 0,
++     \\"is_parent\\": 0,
++     \\"notes\\": null,
++     \\"parent_id\\": null,
++     \\"payee\\": \\"id2\\",
++     \\"payee_name\\": \\"\\",
++     \\"reconciled\\": 0,
++     \\"schedule\\": null,
++     \\"sort_order\\": 123456789,
++     \\"starting_balance_flag\\": 0,
++     \\"tombstone\\": 0,
++     \\"transfer_id\\": \\"id7\\",
++   },
++   Object {
+      \\"account\\": \\"two\\",
+      \\"amount\\": -5000,
+      \\"category\\": null,
+      \\"cleared\\": 0,
+      \\"date\\": 20170101,"
+`;
+
 exports[`Transfer transfers are properly de-categorized 1`] = `
 Array [
   Object {

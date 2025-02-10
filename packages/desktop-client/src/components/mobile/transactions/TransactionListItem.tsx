@@ -89,6 +89,7 @@ export function TransactionListItem({
     reconciled: isReconciled,
     is_parent: isParent,
     is_child: isChild,
+    notes,
     schedule: scheduleId,
     forceUpcoming,
   } = transaction;
@@ -162,7 +163,7 @@ export function TransactionListItem({
                 padding: '0 4px',
               }}
             >
-              <View>
+              <View style={{ flex: 1 }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                   {scheduleId && (
                     <SvgArrowsSynchronize
@@ -248,6 +249,20 @@ export function TransactionListItem({
                       {prettyCategory || 'Uncategorized'}
                     </TextOneLine>
                   </View>
+                )}
+                {notes && (
+                  <TextOneLine
+                    style={{
+                      fontSize: 11,
+                      marginTop: 4,
+                      fontWeight: '400',
+                      color: theme.tableText,
+                      textAlign: 'left',
+                      opacity: 0.85,
+                    }}
+                  >
+                    {notes}
+                  </TextOneLine>
                 )}
               </View>
               <View style={{ justifyContent: 'center' }}>

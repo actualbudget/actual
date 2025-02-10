@@ -169,7 +169,7 @@ export const schema = {
   zero_budgets: {
     id: f('id'),
     month: f('integer'),
-    category: f('string'),
+    category: f('string', { ref: 'categories' }),
     amount: f('integer'),
     carryover: f('integer'),
     goal: f('integer'),

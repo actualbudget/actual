@@ -11,6 +11,11 @@ import {
   getInitialState as getInitialAccountsState,
 } from '../accounts/accountsSlice';
 import { addNotification } from '../actions';
+import {
+  name as appSliceName,
+  reducer as appSliceReducer,
+  getInitialState as getInitialAppState,
+} from '../app/appSlice';
 import * as constants from '../constants';
 import {
   name as queriesSliceName,
@@ -18,7 +23,6 @@ import {
   getInitialState as getInitialQueriesState,
 } from '../queries/queriesSlice';
 import { reducers } from '../reducers';
-import { initialState as initialAppState } from '../reducers/app';
 import { initialState as initialBudgetsState } from '../reducers/budgets';
 import { initialState as initialModalsState } from '../reducers/modals';
 import { initialState as initialNotificationsState } from '../reducers/notifications';
@@ -28,6 +32,7 @@ import { initialState as initialUserState } from '../reducers/user';
 const appReducer = combineReducers({
   ...reducers,
   [accountsSliceName]: accountsSliceReducer,
+  [appSliceName]: appSliceReducer,
   [queriesSliceName]: queriesSliceReducer,
 });
 const rootReducer: typeof appReducer = (state, action) => {
@@ -47,7 +52,7 @@ const rootReducer: typeof appReducer = (state, action) => {
         synced: initialPrefsState.synced,
       },
       app: {
-        ...initialAppState,
+        ...getInitialAppState(),
         managerHasInitialized: state?.app?.managerHasInitialized || false,
         loadingText: state?.app?.loadingText || null,
       },

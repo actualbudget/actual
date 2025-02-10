@@ -19,6 +19,7 @@ import { Link } from '../../common/Link';
 import { Select } from '../../common/Select';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
+import { useResponsive } from '../../responsive/ResponsiveProvider';
 import { useAvailableLoginMethods, useLoginMethod } from '../../ServerContext';
 
 import { useBootstrapped, Title } from './common';
@@ -28,6 +29,7 @@ function PasswordLogin({ setError, dispatch }) {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const { t } = useTranslation();
+  const { isNarrowWidth } = useResponsive();
 
   async function onSubmitPassword() {
     if (password === '' || loading) {
@@ -50,19 +52,25 @@ function PasswordLogin({ setError, dispatch }) {
   }
 
   return (
-    <View style={{ flexDirection: 'row', marginTop: 5 }}>
+    <View
+      style={{
+        flexDirection: isNarrowWidth ? 'column' : 'row',
+        marginTop: 5,
+        gap: '1rem',
+      }}
+    >
       <BigInput
         autoFocus={true}
         placeholder={t('Password')}
         type="password"
         onChangeValue={newValue => setPassword(newValue)}
-        style={{ flex: 1, marginRight: 10 }}
+        style={{ flex: 1 }}
         onEnter={onSubmitPassword}
       />
       <ButtonWithLoading
         variant="primary"
         isLoading={loading}
-        style={{ fontSize: 15, width: 170 }}
+        style={{ fontSize: 15, width: isNarrowWidth ? '100%' : 170 }}
         onPress={onSubmitPassword}
       >
         <Trans>Sign in</Trans>
@@ -187,7 +195,7 @@ function HeaderLogin({ error }) {
           style={{ fontSize: 15 }}
           to={'/login/password?error=' + error}
         >
-          <Trans>Login with Password</Trans>
+          <Trans>Log in with password</Trans>
         </Link>
       ) : (
         <span>

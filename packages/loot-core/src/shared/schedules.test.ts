@@ -1,7 +1,11 @@
 import MockDate from 'mockdate';
 
 import * as monthUtils from './months';
-import { getRecurringDescription, getStatus } from './schedules';
+import {
+  getRecurringDescription,
+  getStatus,
+  getUpcomingDays,
+} from './schedules';
 
 describe('schedules', () => {
   const today = new Date(2017, 0, 1); // Global date when testing is set to 2017-01-01 per monthUtils.currentDay()
@@ -17,15 +21,15 @@ describe('schedules', () => {
 
   describe('getStatus', () => {
     it('returns completed if completed', () => {
-      expect(getStatus(todayString, true, false, 7)).toBe('completed');
+      expect(getStatus(todayString, true, false, '7')).toBe('completed');
     });
 
     it('returns paid if has transactions', () => {
-      expect(getStatus(todayString, false, true, 7)).toBe('paid');
+      expect(getStatus(todayString, false, true, '7')).toBe('paid');
     });
 
     it('returns due if today', () => {
-      expect(getStatus(todayString, false, false, 7)).toBe('due');
+      expect(getStatus(todayString, false, false, '7')).toBe('due');
     });
 
     it.each([1, 7, 14, 30])(
@@ -35,26 +39,26 @@ describe('schedules', () => {
         const tomorrow = monthUtils.addDays(today, 1);
         const upcomingDate = monthUtils.addDays(today, daysOut);
         const scheduledDate = monthUtils.addDays(today, daysOut + 1);
-        expect(getStatus(tomorrow, false, false, upcomingLength)).toBe(
-          'upcoming',
-        );
-        expect(getStatus(upcomingDate, false, false, upcomingLength)).toBe(
-          'upcoming',
-        );
-        expect(getStatus(scheduledDate, false, false, upcomingLength)).toBe(
-          'scheduled',
-        );
+        expect(
+          getStatus(tomorrow, false, false, upcomingLength.toString()),
+        ).toBe('upcoming');
+        expect(
+          getStatus(upcomingDate, false, false, upcomingLength.toString()),
+        ).toBe('upcoming');
+        expect(
+          getStatus(scheduledDate, false, false, upcomingLength.toString()),
+        ).toBe('scheduled');
       },
     );
 
     it('returns missed if past', () => {
-      expect(getStatus(monthUtils.addDays(today, -1), false, false, 7)).toBe(
+      expect(getStatus(monthUtils.addDays(today, -1), false, false, '7')).toBe(
         'missed',
       );
     });
 
     it('returns scheduled if not due, upcoming, or missed', () => {
-      expect(getStatus(monthUtils.addDays(today, 8), false, false, 7)).toBe(
+      expect(getStatus(monthUtils.addDays(today, 8), false, false, '7')).toBe(
         'scheduled',
       );
     });
@@ -337,6 +341,22 @@ describe('schedules', () => {
           'yyyy-MM-dd',
         ),
       ).toBe('Every 2 months on the 17th, until 2021-06-01');
+    });
+  });
+
+  describe('getUpcomingDays', () => {
+    it.each([
+      ['1', 1],
+      ['7', 7],
+      ['14', 14],
+      ['oneMonth', 32],
+      ['currentMonth', 31],
+      ['2-day', 2],
+      ['5-week', 35],
+      ['3-month', 91],
+      ['4-year', 1462],
+    ])('value of %s returns %i days', (value: string, expected: number) => {
+      expect(getUpcomingDays(value)).toEqual(expected);
     });
   });
 });

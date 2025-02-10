@@ -70,6 +70,7 @@ import { TrackingBudgetMonthMenuModal } from './modals/TrackingBudgetMonthMenuMo
 import { TrackingBudgetSummaryModal } from './modals/TrackingBudgetSummaryModal';
 import { TransferModal } from './modals/TransferModal';
 import { TransferOwnership } from './modals/TransferOwnership';
+import { CategoryLearning } from './payees/CategoryLearning';
 import { DiscoverSchedules } from './schedules/DiscoverSchedules';
 import { PostsOfflineNotification } from './schedules/PostsOfflineNotification';
 import { ScheduleDetails } from './schedules/ScheduleDetails';
@@ -288,6 +289,9 @@ export function Modals() {
               onClose={options.onClose}
             />
           );
+
+        case 'payee-category-learning':
+          return <CategoryLearning key={name} />;
 
         case 'new-category':
           return (
@@ -551,6 +555,7 @@ export function Modals() {
               transactionId={options.transactionId}
               onPost={options.onPost}
               onSkip={options.onSkip}
+              onComplete={options.onComplete}
             />
           );
 

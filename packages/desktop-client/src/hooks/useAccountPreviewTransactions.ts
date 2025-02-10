@@ -11,7 +11,7 @@ import { useAccounts } from './useAccounts';
 import { usePayees } from './usePayees';
 
 type UseAccountPreviewTransactionsProps = {
-  accountId?: AccountEntity['id'];
+  accountId?: AccountEntity['id'] | undefined;
 };
 
 type UseAccountPreviewTransactionsResult = {
@@ -73,25 +73,26 @@ function accountPreview({
 }: AccountPreviewProps): TransactionEntity[] {
   return transactions.map(transaction => {
     const inverse = transaction.account !== accountId;
+    const subtransactions = transaction.subtransactions?.map(st => ({
+      ...st,
+      amount: inverse ? -st.amount : st.amount,
+      payee:
+        (inverse ? getPayeeByTransferAccount(st.account)?.id : st.payee) || '',
+      account: inverse
+        ? getTransferAccountByPayee(st.payee)?.id || ''
+        : st.account,
+    }));
     return {
       ...transaction,
       amount: inverse ? -transaction.amount : transaction.amount,
-      payee: inverse
-        ? getPayeeByTransferAccount(transaction.account)?.id || ''
-        : transaction.payee,
+      payee:
+        (inverse
+          ? getPayeeByTransferAccount(transaction.account)?.id
+          : transaction.payee) || '',
       account: inverse
         ? getTransferAccountByPayee(transaction.payee)?.id || ''
         : transaction.account,
-      subtransactions: transaction.subtransactions?.map(st => ({
-        ...st,
-        amount: inverse ? -st.amount : st.amount,
-        payee: inverse
-          ? getPayeeByTransferAccount(st.account)?.id || ''
-          : st.payee,
-        account: inverse
-          ? getTransferAccountByPayee(st.payee)?.id || ''
-          : st.account,
-      })),
+      ...(subtransactions && { subtransactions }),
     };
   });
 }

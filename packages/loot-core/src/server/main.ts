@@ -371,11 +371,13 @@ handlers['get-category-groups'] = async function () {
 handlers['category-group-create'] = mutator(async function ({
   name,
   isIncome,
+  hidden,
 }) {
   return withUndo(async () => {
     return db.insertCategoryGroup({
       name,
       is_income: isIncome ? 1 : 0,
+      hidden,
     });
   });
 });
@@ -2032,7 +2034,7 @@ handlers['duplicate-budget'] = async function ({
         await fs.removeDirRecursively(newBudgetDir);
       }
     } catch {} // Ignore cleanup errors
-    throw new Error(`Failed to duplicate budget: ${error.message}`);
+    throw new Error(`Failed to duplicate budget file: ${error.message}`);
   }
 
   // load in and validate

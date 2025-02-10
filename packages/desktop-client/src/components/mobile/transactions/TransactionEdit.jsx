@@ -186,6 +186,7 @@ function Footer({
 
   return (
     <View
+      data-testid="transaction-form-footer"
       style={{
         paddingLeft: styles.mobileEditingPadding,
         paddingRight: styles.mobileEditingPadding,
@@ -584,11 +585,9 @@ const TransactionEditInner = memo(function TransactionEditInner({
     value => {
       if (transaction.amount !== value) {
         onUpdateInner(transaction, 'amount', value.toString());
-      } else {
-        onClearActiveEdit();
       }
     },
-    [onClearActiveEdit, onUpdateInner, transaction],
+    [onUpdateInner, transaction],
   );
 
   const onEditFieldInner = useCallback(
@@ -776,7 +775,10 @@ const TransactionEditInner = memo(function TransactionEditInner({
       }
       padding={0}
     >
-      <View style={{ flexShrink: 0, marginTop: 20, marginBottom: 20 }}>
+      <View
+        data-testid="transaction-form"
+        style={{ flexShrink: 0, marginTop: 20, marginBottom: 20 }}
+      >
         <View
           style={{
             alignItems: 'center',
@@ -788,6 +790,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
             zeroSign="-"
             focused={totalAmountFocused}
             onFocus={onTotalAmountEdit}
+            onBlur={onClearActiveEdit}
             onUpdateAmount={onTotalAmountUpdate}
             focusedStyle={{
               width: 'auto',

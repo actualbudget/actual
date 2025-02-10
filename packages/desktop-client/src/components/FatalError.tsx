@@ -218,7 +218,7 @@ export function FatalError({ error }: FatalErrorProps) {
         )}
 
         <Paragraph>
-          <Button onPress={() => window.Actual?.relaunch()}>
+          <Button onPress={() => window.Actual.relaunch()}>
             <Trans>Restart app</Trans>
           </Button>
         </Paragraph>

@@ -10,8 +10,8 @@ import {
   collapseModals,
   openAccountCloseModal,
   pushModal,
-  syncAndDownload,
 } from 'loot-core/client/actions';
+import { syncAndDownload } from 'loot-core/client/app/appSlice';
 import {
   accountSchedulesQuery,
   SchedulesProvider,
@@ -22,7 +22,6 @@ import {
 } from 'loot-core/client/data-hooks/transactions';
 import * as queries from 'loot-core/client/queries';
 import {
-  getPayees,
   markAccountRead,
   reopenAccount,
   updateAccount,
@@ -258,7 +257,7 @@ function TransactionListWithPreviews({
 
   const onRefresh = useCallback(() => {
     if (accountId) {
-      dispatch(syncAndDownload(accountId));
+      dispatch(syncAndDownload({ accountId }));
     }
   }, [accountId, dispatch]);
 
@@ -278,10 +277,6 @@ function TransactionListWithPreviews({
           tables.includes('payee_mapping')
         ) {
           reloadTransactions();
-        }
-
-        if (tables.includes('payees') || tables.includes('payee_mapping')) {
-          dispatch(getPayees());
         }
       }
     });
@@ -309,6 +304,13 @@ function TransactionListWithPreviews({
             onSkip: async transactionId => {
               const parts = transactionId.split('/');
               await send('schedule/skip-next-date', { id: parts[1] });
+              dispatch(collapseModals('scheduled-transaction-menu'));
+            },
+            onComplete: async transactionId => {
+              const parts = transactionId.split('/');
+              await send('schedule/update', {
+                schedule: { id: parts[1], completed: true },
+              });
               dispatch(collapseModals('scheduled-transaction-menu'));
             },
           }),
