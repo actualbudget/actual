@@ -788,7 +788,6 @@ export default [
       'packages/desktop-client/src/components/sidebar/Tools.tsx',
       'packages/desktop-client/src/components/sort.tsx',
       'packages/desktop-client/src/components/spreadsheet/useSheetValue.ts',
-      'packages/desktop-client/src/components/table.tsx',
       'packages/desktop-client/src/components/Titlebar.tsx',
       'packages/desktop-client/src/components/transactions/MobileTransaction.jsx',
       'packages/desktop-client/src/components/transactions/SelectedTransactions.jsx',
