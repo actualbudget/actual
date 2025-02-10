@@ -9,6 +9,13 @@ import React, {
 import { ListBox, Section, Header, Collection } from 'react-aria-components';
 import { useTranslation } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
+import { Menu, type MenuItemObject } from '@actual-app/components/menu';
+import { Popover } from '@actual-app/components/popover';
+import { styles } from '@actual-app/components/styles';
+import { Text } from '@actual-app/components/text';
+import { View } from '@actual-app/components/view';
+
 import { setNotificationInset } from 'loot-core/client/actions';
 import { groupById, integerToCurrency } from 'loot-core/shared/util';
 import * as monthUtils from 'loot-core/src/shared/months';
@@ -29,12 +36,7 @@ import { AnimatedLoading } from '../../../icons/AnimatedLoading';
 import { SvgDelete } from '../../../icons/v0';
 import { SvgDotsHorizontalTriple } from '../../../icons/v1';
 import { useDispatch } from '../../../redux';
-import { styles, theme } from '../../../style';
-import { Button } from '../../common/Button2';
-import { Menu, type MenuItemObject } from '../../common/Menu';
-import { Popover } from '../../common/Popover';
-import { Text } from '../../common/Text';
-import { View } from '../../common/View';
+import { theme } from '../../../style';
 import { useScrollListener } from '../../ScrollProvider';
 import { FloatingActionBar } from '../FloatingActionBar';
 
