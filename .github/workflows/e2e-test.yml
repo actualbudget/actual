@@ -1,6 +1,10 @@
 name: E2E Tests
 
-on: [pull_request]
+on:
+  pull_request:
+    paths-ignore:
+      - packages/sync-server
+      - upcoming-release-notes
 
 env:
   GITHUB_PR_NUMBER: ${{github.event.pull_request.number}}
