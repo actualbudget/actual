@@ -2,7 +2,7 @@ import path from 'node:path';
 
 import migrate from 'migrate';
 
-import config from './load-config.js';
+import { config } from './load-config.js';
 
 export function run(direction = 'up') {
   console.log(

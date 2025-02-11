@@ -14,7 +14,7 @@ import {
   errorMiddleware,
   requestLoggerMiddleware,
 } from './util/middlewares.js';
-import validateSession, { validateAuthHeader } from './util/validate-user.js';
+import { validateAuthHeader, validateSession } from './util/validate-user.js';
 
 const app = express();
 app.use(express.json());

@@ -3,7 +3,7 @@ import * as nordigenNode from 'nordigen-node';
 import { v4 as uuidv4 } from 'uuid';
 
 import { SecretName, secretsService } from '../../services/secrets-service.js';
-import BankFactory, { BANKS_WITH_LIMITED_HISTORY } from '../bank-factory.js';
+import { BankFactory, BANKS_WITH_LIMITED_HISTORY } from '../bank-factory.js';
 import {
   AccessDeniedError,
   AccountNotLinkedToRequisition,

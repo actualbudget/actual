@@ -3,8 +3,8 @@ import { join } from 'node:path';
 
 import { merkle, SyncProtoBuf, Timestamp } from '@actual-app/crdt';
 
-import openDatabase from './db.js';
-import { sqlDir } from './load-config.js';
+import { openDatabase } from './db.js';
+import { config } from './load-config.js';
 import { getPathForGroupFile } from './util/paths.js';
 
 function getGroupDb(groupId) {
@@ -14,7 +14,7 @@ function getGroupDb(groupId) {
   const db = openDatabase(path);
 
   if (needsInit) {
-    const sql = readFileSync(join(sqlDir, 'messages.sql'), 'utf8');
+    const sql = readFileSync(join(config.sqlDir, 'messages.sql'), 'utf8');
     db.exec(sql);
   }
 

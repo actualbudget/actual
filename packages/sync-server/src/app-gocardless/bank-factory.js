@@ -24,8 +24,11 @@ async function loadBanks() {
 
 export const banks = await loadBanks();
 
-export default institutionId =>
-  banks.find(b => b.institutionIds.includes(institutionId)) || IntegrationBank;
+export function BankFactory(institutionId) {
+  return (
+    banks.find(b => b.institutionIds.includes(institutionId)) || IntegrationBank
+  );
+}
 
 export const BANKS_WITH_LIMITED_HISTORY = [
   'BANCA_AIDEXA_AIDXITMM',

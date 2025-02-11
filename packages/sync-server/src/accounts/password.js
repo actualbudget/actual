@@ -2,7 +2,7 @@ import * as bcrypt from 'bcrypt';
 import { v4 as uuidv4 } from 'uuid';
 
 import { clearExpiredSessions, getAccountDb } from '../account-db.js';
-import finalConfig from '../load-config.js';
+import { config } from '../load-config.js';
 import { TOKEN_EXPIRATION_NEVER } from '../util/validate-user.js';
 
 function isValidPassword(password) {
@@ -85,12 +85,11 @@ export function loginWithPassword(password) {
 
   let expiration = TOKEN_EXPIRATION_NEVER;
   if (
-    finalConfig.token_expiration !== 'never' &&
-    finalConfig.token_expiration !== 'openid-provider' &&
-    typeof finalConfig.token_expiration === 'number'
+    config.token_expiration !== 'never' &&
+    config.token_expiration !== 'openid-provider' &&
+    typeof config.token_expiration === 'number'
   ) {
-    expiration =
-      Math.floor(Date.now() / 1000) + finalConfig.token_expiration * 60;
+    expiration = Math.floor(Date.now() / 1000) + config.token_expiration * 60;
   }
 
   if (!sessionRow) {
