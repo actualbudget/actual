@@ -1,15 +1,16 @@
 import React, { type CSSProperties } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { AlignedText } from '@actual-app/components/aligned-text';
+import { styles } from '@actual-app/components/styles';
+import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
+import { Tooltip } from '@actual-app/components/tooltip';
+import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
 import { trackingBudget } from 'loot-core/client/queries';
 
-import { theme, styles } from '../../../../style';
-import { AlignedText } from '../../../common/AlignedText';
-import { Text } from '../../../common/Text';
-import { Tooltip } from '../../../common/Tooltip';
-import { View } from '../../../common/View';
 import { PrivacyFilter } from '../../../PrivacyFilter';
 import { useFormat } from '../../../spreadsheet/useFormat';
 import { makeAmountFullStyle } from '../../util';

@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { Block } from '@actual-app/components/block';
+import { ButtonWithLoading } from '@actual-app/components/button';
+import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
 import { format } from 'date-fns';
 
 import { send } from 'loot-core/platform/client/fetch';
 
 import { useMetadataPref } from '../../hooks/useMetadataPref';
-import { theme } from '../../style';
-import { Block } from '../common/Block';
-import { ButtonWithLoading } from '../common/Button2';
-import { Text } from '../common/Text';
 
 import { Setting } from './UI';
 
