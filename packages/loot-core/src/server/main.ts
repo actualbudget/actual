@@ -515,8 +515,11 @@ handlers['payees-get-rules'] = async function ({ id }) {
   return rules.getRulesForPayee(id).map(rule => rule.serialize());
 };
 
-handlers['make-filters-from-conditions'] = async function ({ conditions }) {
-  return rules.conditionsToAQL(conditions);
+handlers['make-filters-from-conditions'] = async function ({
+  conditions,
+  applySpecialCases,
+}) {
+  return rules.conditionsToAQL(conditions, { applySpecialCases });
 };
 
 handlers['getCell'] = async function ({ sheetName, name }) {

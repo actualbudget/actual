@@ -44,6 +44,7 @@ export function createSpendingSpreadsheet({
   ) => {
     const { filters } = await send('make-filters-from-conditions', {
       conditions: conditions.filter(cond => !cond.customName),
+      applySpecialCases: false,
     });
 
     const { filters: budgetFilters } = await send(
