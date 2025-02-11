@@ -1,7 +1,7 @@
 import React, { type ComponentPropsWithoutRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import * as monthUtils from 'loot-core/src/shared/months';
+import * as monthUtils from 'loot-core/shared/months';
 
 import { theme } from '../../style';
 import { CategoryAutocomplete } from '../autocomplete/CategoryAutocomplete';

@@ -19,7 +19,7 @@ import {
 import {
   amountToCurrency,
   amountToCurrencyNoDecimal,
-} from 'loot-core/src/shared/util';
+} from 'loot-core/shared/util';
 
 import { usePrivacyMode } from '../../../hooks/usePrivacyMode';
 import { theme } from '../../../style';

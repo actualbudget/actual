@@ -9,7 +9,7 @@ import {
   reopenAccount,
   updateAccount,
 } from 'loot-core/client/queries/queriesSlice';
-import { type AccountEntity } from 'loot-core/src/types/models';
+import { type AccountEntity } from 'loot-core/types/models';
 
 import { useContextMenu } from '../../hooks/useContextMenu';
 import { useNotes } from '../../hooks/useNotes';

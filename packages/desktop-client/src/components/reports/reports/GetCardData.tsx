@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { useTranslation } from 'react-i18next';
 
-import * as monthUtils from 'loot-core/src/shared/months';
+import * as monthUtils from 'loot-core/shared/months';
 import { type AccountEntity } from 'loot-core/types/models/account';
 import { type CategoryEntity } from 'loot-core/types/models/category';
 import { type CategoryGroupEntity } from 'loot-core/types/models/category-group';

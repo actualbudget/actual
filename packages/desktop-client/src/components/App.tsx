@@ -19,12 +19,9 @@ import {
   signOut,
 } from 'loot-core/client/actions';
 import { setAppState, sync } from 'loot-core/client/app/appSlice';
+import * as Platform from 'loot-core/client/platform';
 import { SpreadsheetProvider } from 'loot-core/client/SpreadsheetProvider';
-import * as Platform from 'loot-core/src/client/platform';
-import {
-  init as initConnection,
-  send,
-} from 'loot-core/src/platform/client/fetch';
+import { init as initConnection, send } from 'loot-core/platform/client/fetch';
 
 import { handleGlobalEvents } from '../global-events';
 import { useMetadataPref } from '../hooks/useMetadataPref';

@@ -13,8 +13,8 @@ import { Trans, useTranslation } from 'react-i18next';
 import { format } from 'date-fns';
 import { debounce } from 'debounce';
 
+import * as monthUtils from 'loot-core/shared/months';
 import { amountToCurrency } from 'loot-core/shared/util';
-import * as monthUtils from 'loot-core/src/shared/months';
 import { type CalendarWidget } from 'loot-core/types/models';
 import { type SyncedPrefs } from 'loot-core/types/prefs';
 

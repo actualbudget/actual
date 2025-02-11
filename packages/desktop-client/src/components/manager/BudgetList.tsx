@@ -20,7 +20,7 @@ import {
 import {
   isElectron,
   isNonProductionEnvironment,
-} from 'loot-core/src/shared/environment';
+} from 'loot-core/shared/environment';
 import {
   type RemoteFile,
   type File,

@@ -3,15 +3,15 @@ import { type CSSProperties } from 'react';
 
 import { t } from 'i18next';
 
-import { type useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
-import { send } from 'loot-core/src/platform/client/fetch';
-import * as monthUtils from 'loot-core/src/shared/months';
-import { type Handlers } from 'loot-core/src/types/handlers';
+import { type useSpreadsheet } from 'loot-core/client/SpreadsheetProvider';
+import { send } from 'loot-core/platform/client/fetch';
+import * as monthUtils from 'loot-core/shared/months';
+import { type Handlers } from 'loot-core/types/handlers';
 import {
   type CategoryEntity,
   type CategoryGroupEntity,
-} from 'loot-core/src/types/models';
-import { type SyncedPrefs } from 'loot-core/src/types/prefs';
+} from 'loot-core/types/models';
+import { type SyncedPrefs } from 'loot-core/types/prefs';
 
 import { styles, theme } from '../../style';
 import { type DropPosition } from '../sort';

@@ -11,8 +11,8 @@ import {
   useLongPress,
 } from '@react-aria/interactions';
 
-import { isPreviewId } from 'loot-core/src/shared/transactions';
-import { integerToCurrency } from 'loot-core/src/shared/util';
+import { isPreviewId } from 'loot-core/shared/transactions';
+import { integerToCurrency } from 'loot-core/shared/util';
 import { type TransactionEntity } from 'loot-core/types/models';
 
 import { useAccount } from '../../../hooks/useAccount';

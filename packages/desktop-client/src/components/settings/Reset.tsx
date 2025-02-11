@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Trans } from 'react-i18next';
 
 import { resetSync } from 'loot-core/client/app/appSlice';
-import { send } from 'loot-core/src/platform/client/fetch';
+import { send } from 'loot-core/platform/client/fetch';
 
 import { useMetadataPref } from '../../hooks/useMetadataPref';
 import { useDispatch } from '../../redux';

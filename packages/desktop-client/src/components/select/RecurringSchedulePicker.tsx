@@ -8,9 +8,9 @@ import {
 } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 
-import { sendCatch } from 'loot-core/src/platform/client/fetch';
-import * as monthUtils from 'loot-core/src/shared/months';
-import { getRecurringDescription } from 'loot-core/src/shared/schedules';
+import { sendCatch } from 'loot-core/platform/client/fetch';
+import * as monthUtils from 'loot-core/shared/months';
+import { getRecurringDescription } from 'loot-core/shared/schedules';
 import { type RecurConfig, type RecurPattern } from 'loot-core/types/models';
 import {
   type TransObjectLiteral,
