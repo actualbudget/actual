@@ -1,6 +1,6 @@
 import express from 'express';
 
-import getAccountDb, { isAdmin } from './account-db.js';
+import { getAccountDb, isAdmin } from './account-db.js';
 import { secretsService } from './services/secrets-service.js';
 import {
   requestLoggerMiddleware,

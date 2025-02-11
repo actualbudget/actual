@@ -1,7 +1,7 @@
 import { generators, Issuer } from 'openid-client';
 import * as uuid from 'uuid';
 
-import getAccountDb, { clearExpiredSessions } from '../account-db.js';
+import { clearExpiredSessions, getAccountDb } from '../account-db.js';
 import finalConfig from '../load-config.js';
 import {
   getUserByUsername,
