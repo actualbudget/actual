@@ -1,6 +1,7 @@
 name: E2E Tests
 
-on: [pull_request]
+on:
+  pull_request:
 
 env:
   GITHUB_PR_NUMBER: ${{github.event.pull_request.number}}

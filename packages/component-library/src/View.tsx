@@ -2,7 +2,7 @@ import React, { forwardRef, type HTMLProps, type Ref } from 'react';
 
 import { css, cx } from '@emotion/css';
 
-import { type CSSProperties } from '../../style';
+import { type CSSProperties } from './styles';
 
 type ViewProps = HTMLProps<HTMLDivElement> & {
   className?: string;
