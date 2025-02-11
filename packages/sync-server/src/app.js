@@ -1,18 +1,19 @@
 import fs from 'node:fs';
-import express from 'express';
-import actuator from 'express-actuator';
+
 import bodyParser from 'body-parser';
 import cors from 'cors';
-import config from './load-config.js';
+import express from 'express';
+import actuator from 'express-actuator';
 import rateLimit from 'express-rate-limit';
 
 import * as accountApp from './app-account.js';
-import * as syncApp from './app-sync.js';
-import * as goCardlessApp from './app-gocardless/app-gocardless.js';
-import * as simpleFinApp from './app-simplefin/app-simplefin.js';
-import * as secretApp from './app-secrets.js';
 import * as adminApp from './app-admin.js';
+import * as goCardlessApp from './app-gocardless/app-gocardless.js';
 import * as openidApp from './app-openid.js';
+import * as secretApp from './app-secrets.js';
+import * as simpleFinApp from './app-simplefin/app-simplefin.js';
+import * as syncApp from './app-sync.js';
+import config from './load-config.js';
 
 const app = express();
 

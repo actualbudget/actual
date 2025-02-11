@@ -25,13 +25,14 @@ export default {
       transaction.remittanceInformationStructured ??
       transaction.remittanceInformationStructuredArray?.join(' ');
 
-    if (transaction.additionalInformation)
+    if (transaction.additionalInformation) {
       remittanceInformationUnstructured = [
         remittanceInformationUnstructured,
         transaction.additionalInformation,
       ]
         .filter(Boolean)
         .join(' ');
+    }
 
     const usefulCreditorName =
       transaction.ultimateCreditor ||

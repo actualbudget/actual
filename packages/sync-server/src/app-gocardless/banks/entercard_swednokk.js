@@ -1,9 +1,9 @@
 import * as d from 'date-fns';
 
-import Fallback from './integration-bank.js';
-
-import { amountToInteger } from '../utils.js';
 import { formatPayeeName } from '../../util/payee-name.js';
+import { amountToInteger } from '../utils.js';
+
+import Fallback from './integration-bank.js';
 
 /** @type {import('./bank.interface.js').IBank} */
 export default {

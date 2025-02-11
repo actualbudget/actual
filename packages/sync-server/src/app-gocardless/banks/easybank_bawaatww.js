@@ -1,8 +1,9 @@
-import Fallback from './integration-bank.js';
+import d from 'date-fns';
 
 import { formatPayeeName } from '../../util/payee-name.js';
-import d from 'date-fns';
 import { title } from '../../util/title/index.js';
+
+import Fallback from './integration-bank.js';
 
 /** @type {import('./bank.interface.js').IBank} */
 export default {
@@ -35,7 +36,7 @@ export default {
 
     return {
       ...transaction,
-      payeeName: payeeName,
+      payeeName,
       date: d.format(d.parseISO(date), 'yyyy-MM-dd'),
     };
   },

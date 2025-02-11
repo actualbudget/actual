@@ -1,6 +1,6 @@
-import Fallback from './integration-bank.js';
-
 import { formatPayeeName } from '../../util/payee-name.js';
+
+import Fallback from './integration-bank.js';
 
 /** @type {import('./bank.interface.js').IBank} */
 export default {
@@ -30,7 +30,7 @@ export default {
     ) {
       // keep only {payment_info} portion of remittance info
       // NOTE: if {payee_name} contains dashes (unlikely / impossible?), this probably gets bugged!
-      let infoIdx =
+      const infoIdx =
         transaction.remittanceInformationUnstructured.indexOf(' - ') + 3;
       transaction.remittanceInformationUnstructured =
         infoIdx == -1
@@ -51,7 +51,7 @@ export default {
       let codepoints = [];
       while (idx !== -1) {
         codepoints.push(parseInt(str.slice(idx + 2, idx + 6), 16));
-        let next_idx = str.indexOf('\\U', idx + 6);
+        const next_idx = str.indexOf('\\U', idx + 6);
         if (next_idx == idx + 6) {
           idx = next_idx;
           continue;

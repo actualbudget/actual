@@ -1,5 +1,5 @@
-import Abanca from '../abanca_caglesmm.js';
 import { mockTransactionAmount } from '../../services/tests/fixtures.js';
+import Abanca from '../abanca_caglesmm.js';
 
 describe('Abanca', () => {
   describe('#normalizeTransaction', () => {
