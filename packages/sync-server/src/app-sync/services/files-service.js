@@ -209,7 +209,7 @@ class FilesService {
 
       const res = this.accountDb.mutate(query, params);
 
-      if (res.changes != 1) {
+      if (res.changes !== 1) {
         throw new GenericFileError('Could not update File', { id });
       }
     }
