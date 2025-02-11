@@ -124,7 +124,9 @@ function AppInner() {
     }
 
     initAll().catch(showErrorBoundary);
-  }, [cloudFileId, dispatch, showErrorBoundary, t]);
+    // Removed cloudFileId from dependencies to prevent hard crash when closing budget in Electron
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dispatch, showErrorBoundary, t]);
 
   useEffect(() => {
     global.Actual.updateAppMenu(budgetId);

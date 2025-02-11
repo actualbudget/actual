@@ -1,11 +1,12 @@
 {
   "name": "@actual-app/web",
-  "version": "25.2.0",
+  "version": "25.2.1",
   "license": "MIT",
   "files": [
     "build"
   ],
   "devDependencies": {
+    "@actual-app/components": "workspace:*",
     "@emotion/css": "^11.13.4",
     "@fontsource/redacted-script": "^5.0.21",
     "@juggle/resize-observer": "^3.4.0",

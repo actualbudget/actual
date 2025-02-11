@@ -5,18 +5,22 @@ import { type sortByOpType } from 'loot-core/types/models';
 const intervalOptions = [
   {
     description: t('Daily'),
+    key: 'Daily',
     defaultRange: 'This month',
   },
   {
     description: t('Weekly'),
+    key: 'Weekly',
     defaultRange: 'Last 3 months',
   },
   {
     description: t('Monthly'),
+    key: 'Monthly',
     defaultRange: 'Last 6 months',
   },
   {
     description: t('Yearly'),
+    key: 'Yearly',
     defaultRange: 'Year to date',
   },
 ];
@@ -215,6 +219,6 @@ export const defaultsList = {
     modeOptions.map(item => [item.description, item.defaultGraph]),
   ),
   intervalRange: new Map(
-    intervalOptions.map(item => [item.description, item.defaultRange]),
+    intervalOptions.map(item => [item.key, item.defaultRange]),
   ),
 };

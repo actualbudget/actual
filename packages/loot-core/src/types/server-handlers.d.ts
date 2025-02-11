@@ -93,6 +93,7 @@ export interface ServerHandlers {
   'category-group-create': (arg: {
     name;
     isIncome?: boolean;
+    hidden?: boolean;
   }) => Promise<string>;
 
   'category-group-update': (group) => Promise<unknown>;
