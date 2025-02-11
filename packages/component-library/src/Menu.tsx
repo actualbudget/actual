@@ -8,9 +8,8 @@ import {
   type CSSProperties,
 } from 'react';
 
-import { theme } from '../../style';
-
 import { Text } from './Text';
+import { theme } from './theme';
 import { Toggle } from './Toggle';
 import { View } from './View';
 

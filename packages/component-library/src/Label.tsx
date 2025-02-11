@@ -1,8 +1,8 @@
 import { forwardRef, type ReactNode, type CSSProperties } from 'react';
 
-import { theme, styles } from '../../style';
-
+import { styles } from './styles';
 import { Text } from './Text';
+import { theme } from './theme';
 
 type LabelProps = {
   title: ReactNode;
