@@ -3,7 +3,7 @@ import fs from 'node:fs/promises';
 
 import { SyncProtoBuf } from '@actual-app/crdt';
 import express from 'express';
-import * as uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 import { getAccountDb } from './account-db.js';
 import { FileNotFound } from './app-sync/errors.js';
@@ -239,7 +239,7 @@ app.post('/upload-user-file', async (req, res) => {
 
   if (!currentFile) {
     // it's new
-    groupId = uuid.v4();
+    groupId = uuidv4();
 
     filesService.set(
       new File({
@@ -262,7 +262,7 @@ app.post('/upload-user-file', async (req, res) => {
 
   if (!groupId) {
     // sync state was reset, create new group
-    groupId = uuid.v4();
+    groupId = uuidv4();
     filesService.update(fileId, new FileUpdate({ groupId }));
   }
 
