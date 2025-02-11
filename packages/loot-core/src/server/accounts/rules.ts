@@ -45,8 +45,6 @@ function registerHandlebarsHelpers() {
 
   function mathHelper(fn: (a: number, b: number) => number) {
     return (a: unknown, ...b: unknown[]) => {
-      // Last argument is the Handlebars options object
-      b.splice(-1, 1);
       return b.map(Number).reduce(fn, Number(a));
     };
   }
@@ -111,35 +109,35 @@ function registerHandlebarsHelpers() {
     year: (date?: string) => date && format(date, 'yyyy'),
     format: (date?: string, f?: string) => date && f && format(date, f),
     addDays: (date?: string, days?: number) => {
-      if (!days || !days) return date;
+      if (!date || !days) return date;
       return format(addDays(date, days), 'yyyy-MM-dd');
     },
     subDays: (date?: string, days?: number) => {
-      if (!days || !days) return date;
+      if (!date || !days) return date;
       return format(subDays(date, days), 'yyyy-MM-dd');
     },
     addMonths: (date?: string, months?: number) => {
-      if (!months || !months) return date;
+      if (!date || !months) return date;
       return format(addMonths(parseDate(date), months), 'yyyy-MM-dd');
     },
     subMonths: (date?: string, months?: number) => {
-      if (!months || !months) return date;
+      if (!date || !months) return date;
       return format(subMonths(parseDate(date), months), 'yyyy-MM-dd');
     },
     addWeeks: (date?: string, weeks?: number) => {
-      if (!weeks || !weeks) return date;
+      if (!date || !weeks) return date;
       return format(addWeeks(parseDate(date), weeks), 'yyyy-MM-dd');
     },
     subWeeks: (date?: string, weeks?: number) => {
-      if (!weeks || !weeks) return date;
+      if (!date || !weeks) return date;
       return format(subWeeks(parseDate(date), weeks), 'yyyy-MM-dd');
     },
     addYears: (date?: string, years?: number) => {
-      if (!years || !years) return date;
+      if (!date || !years) return date;
       return format(addYears(parseDate(date), years), 'yyyy-MM-dd');
     },
     subYears: (date?: string, years?: number) => {
-      if (!years || !years) return date;
+      if (!date || !years) return date;
       return format(subYears(parseDate(date), years), 'yyyy-MM-dd');
     },
     setDay: (date?: string, day?: number) => {
@@ -150,11 +148,14 @@ function registerHandlebarsHelpers() {
     debug: (value: unknown) => {
       console.log(value);
     },
-    concat: (...args: unknown[]) => args.slice(0, -1).join(''),
-  };
+    concat: (...args: unknown[]) => args.join(''),
+  } as Record<string, Handlebars.HelperDelegate>;
 
   for (const [name, fn] of Object.entries(helpers)) {
-    Handlebars.registerHelper(name, fn);
+    Handlebars.registerHelper(name, (...args: unknown[]) => {
+      //The last argument is the Handlebars options object
+      return fn(...args.slice(0, -1));
+    });
   }
 }
 
