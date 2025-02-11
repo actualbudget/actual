@@ -1,6 +1,6 @@
 import jwt from 'jws';
 import * as nordigenNode from 'nordigen-node';
-import * as uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 import { SecretName, secretsService } from '../../services/secrets-service.js';
 import BankFactory, { BANKS_WITH_LIMITED_HISTORY } from '../bank-factory.js';
@@ -319,7 +319,7 @@ export const goCardlessService = {
       response = await client.initSession({
         redirectUrl: host + '/gocardless/link',
         institutionId,
-        referenceId: uuid.v4(),
+        referenceId: uuidv4(),
         accessValidForDays: institution.max_access_valid_for_days,
         maxHistoricalDays: BANKS_WITH_LIMITED_HISTORY.includes(institutionId)
           ? Number(institution.transaction_total_days) >= 90
