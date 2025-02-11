@@ -1,4 +1,5 @@
 import { jest } from '@jest/globals';
+
 import {
   AccessDeniedError,
   AccountNotLinkedToRequisition,
@@ -12,6 +13,11 @@ import {
   ServiceError,
   UnknownError,
 } from '../../errors.js';
+import {
+  goCardlessService,
+  handleGoCardlessError,
+  client,
+} from '../gocardless-service.js';
 
 import {
   mockedBalances,
@@ -28,12 +34,6 @@ import {
   mockDetailedAccountExample2,
   mockExtendAccountsAboutInstitutions,
 } from './fixtures.js';
-
-import {
-  goCardlessService,
-  handleGoCardlessError,
-  client,
-} from '../gocardless-service.js';
 
 describe('goCardlessService', () => {
   const accountId = mockAccountMetaData.id;

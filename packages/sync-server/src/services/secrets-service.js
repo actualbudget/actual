@@ -1,4 +1,5 @@
 import createDebug from 'debug';
+
 import getAccountDb from '../account-db.js';
 
 /**

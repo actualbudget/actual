@@ -1,10 +1,11 @@
 import * as d from 'date-fns';
+
+import { formatPayeeName } from '../../util/payee-name.js';
 import {
   amountToInteger,
   printIban,
   sortByBookingDateOrValueDate,
 } from '../utils.js';
-import { formatPayeeName } from '../../util/payee-name.js';
 
 const SORTED_BALANCE_TYPE_LIST = [
   'closingBooked',

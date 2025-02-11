@@ -1,6 +1,7 @@
 import * as bcrypt from 'bcrypt';
-import getAccountDb, { clearExpiredSessions } from '../account-db.js';
 import * as uuid from 'uuid';
+
+import getAccountDb, { clearExpiredSessions } from '../account-db.js';
 import finalConfig from '../load-config.js';
 import { TOKEN_EXPIRATION_NEVER } from '../util/validate-user.js';
 
@@ -17,8 +18,8 @@ export function bootstrapPassword(password) {
     return { error: 'invalid-password' };
   }
 
-  let hashed = hashPassword(password);
-  let accountDb = getAccountDb();
+  const hashed = hashPassword(password);
+  const accountDb = getAccountDb();
   accountDb.transaction(() => {
     accountDb.mutate('DELETE FROM auth WHERE method = ?', ['password']);
     accountDb.mutate('UPDATE auth SET active = 0');
@@ -36,7 +37,7 @@ export function loginWithPassword(password) {
     return { error: 'invalid-password' };
   }
 
-  let accountDb = getAccountDb();
+  const accountDb = getAccountDb();
   const { extra_data: passwordHash } =
     accountDb.first('SELECT extra_data FROM auth WHERE method = ?', [
       'password',
@@ -46,20 +47,20 @@ export function loginWithPassword(password) {
     return { error: 'invalid-password' };
   }
 
-  let confirmed = bcrypt.compareSync(password, passwordHash);
+  const confirmed = bcrypt.compareSync(password, passwordHash);
 
   if (!confirmed) {
     return { error: 'invalid-password' };
   }
 
-  let sessionRow = accountDb.first(
+  const sessionRow = accountDb.first(
     'SELECT * FROM sessions WHERE auth_method = ?',
     ['password'],
   );
 
-  let token = sessionRow ? sessionRow.token : uuid.v4();
+  const token = sessionRow ? sessionRow.token : uuid.v4();
 
-  let { totalOfUsers } = accountDb.first(
+  const { totalOfUsers } = accountDb.first(
     'SELECT count(*) as totalOfUsers FROM users',
   );
   let userId = null;
@@ -70,7 +71,7 @@ export function loginWithPassword(password) {
       [userId, '', '', 'ADMIN'],
     );
   } else {
-    let { id: userIdFromDb } = accountDb.first(
+    const { id: userIdFromDb } = accountDb.first(
       'SELECT id FROM users WHERE user_name = ?',
       [''],
     );
@@ -110,13 +111,13 @@ export function loginWithPassword(password) {
 }
 
 export function changePassword(newPassword) {
-  let accountDb = getAccountDb();
+  const accountDb = getAccountDb();
 
   if (!isValidPassword(newPassword)) {
     return { error: 'invalid-password' };
   }
 
-  let hashed = hashPassword(newPassword);
+  const hashed = hashPassword(newPassword);
   accountDb.mutate("UPDATE auth SET extra_data = ? WHERE method = 'password'", [
     hashed,
   ]);

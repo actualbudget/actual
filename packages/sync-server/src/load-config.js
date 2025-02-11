@@ -1,8 +1,9 @@
+import { createRequire } from 'module';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+
 import createDebug from 'debug';
-import { createRequire } from 'module';
 
 const require = createRequire(import.meta.url);
 const debug = createDebug('actual:config');
@@ -62,7 +63,7 @@ const actualAppWebBuildPath = path.join(
 debug(`Actual web build path: '${actualAppWebBuildPath}'`);
 
 /** @type {Omit<import('./config-types.js').Config, 'mode' | 'dataDir' | 'serverFiles' | 'userFiles'>} */
-let defaultConfig = {
+const defaultConfig = {
   loginMethod: 'password',
   allowedLoginMethods: ['password', 'header', 'openid'],
   // assume local networks are trusted
