@@ -13,8 +13,8 @@ import {
   parseISO,
 } from 'date-fns';
 
-import * as monthUtils from 'loot-core/src/shared/months';
-import { integerToCurrency } from 'loot-core/src/shared/util';
+import * as monthUtils from 'loot-core/shared/months';
+import { integerToCurrency } from 'loot-core/shared/util';
 import { type TransactionEntity } from 'loot-core/types/models';
 
 import { useAccount } from '../../hooks/useAccount';

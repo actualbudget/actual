@@ -4,7 +4,7 @@ import React, { type ComponentProps } from 'react';
 import {
   type CategoryGroupEntity,
   type CategoryEntity,
-} from 'loot-core/src/types/models';
+} from 'loot-core/types/models';
 
 import { theme } from '../../style';
 import { View } from '../common/View';

@@ -24,7 +24,7 @@ import {
   getShortYearFormat,
   getShortYearRegex,
   currentDate,
-} from 'loot-core/src/shared/months';
+} from 'loot-core/shared/months';
 
 import { useSyncedPref } from '../../hooks/useSyncedPref';
 import { styles, theme, type CSSProperties } from '../../style';

@@ -6,9 +6,9 @@ import * as d from 'date-fns';
 
 import { addNotification } from 'loot-core/client/actions';
 import { useWidget } from 'loot-core/client/data-hooks/widget';
-import { send } from 'loot-core/src/platform/client/fetch';
-import * as monthUtils from 'loot-core/src/shared/months';
-import { integerToCurrency } from 'loot-core/src/shared/util';
+import { send } from 'loot-core/platform/client/fetch';
+import * as monthUtils from 'loot-core/shared/months';
+import { integerToCurrency } from 'loot-core/shared/util';
 import {
   type CashFlowWidget,
   type RuleConditionEntity,

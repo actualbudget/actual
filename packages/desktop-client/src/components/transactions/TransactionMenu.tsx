@@ -2,13 +2,13 @@ import React, { useMemo, type ComponentPropsWithoutRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { pushModal } from 'loot-core/client/actions';
+import { useSchedules } from 'loot-core/client/data-hooks/schedules';
+import { q } from 'loot-core/shared/query';
 import {
   scheduleIsRecurring,
   extractScheduleConds,
 } from 'loot-core/shared/schedules';
 import { isPreviewId } from 'loot-core/shared/transactions';
-import { useSchedules } from 'loot-core/src/client/data-hooks/schedules';
-import { q } from 'loot-core/src/shared/query';
 import { type TransactionEntity } from 'loot-core/types/models';
 
 import { useDispatch } from '../../redux';

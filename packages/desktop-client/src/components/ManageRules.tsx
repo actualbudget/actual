@@ -9,19 +9,16 @@ import React, {
 } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { pushModal } from 'loot-core/client/actions/modals';
 import { useSchedules } from 'loot-core/client/data-hooks/schedules';
 import { initiallyLoadPayees } from 'loot-core/client/queries/queriesSlice';
+import { send } from 'loot-core/platform/client/fetch';
+import * as undo from 'loot-core/platform/client/undo';
+import { getNormalisedString } from 'loot-core/shared/normalisation';
 import { q } from 'loot-core/shared/query';
-import { pushModal } from 'loot-core/src/client/actions/modals';
-import { send } from 'loot-core/src/platform/client/fetch';
-import * as undo from 'loot-core/src/platform/client/undo';
-import { getNormalisedString } from 'loot-core/src/shared/normalisation';
-import { mapField, friendlyOp } from 'loot-core/src/shared/rules';
-import { describeSchedule } from 'loot-core/src/shared/schedules';
-import {
-  type RuleEntity,
-  type NewRuleEntity,
-} from 'loot-core/src/types/models';
+import { mapField, friendlyOp } from 'loot-core/shared/rules';
+import { describeSchedule } from 'loot-core/shared/schedules';
+import { type RuleEntity, type NewRuleEntity } from 'loot-core/types/models';
 
 import { useAccounts } from '../hooks/useAccounts';
 import { useCategories } from '../hooks/useCategories';

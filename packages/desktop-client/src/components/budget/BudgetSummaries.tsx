@@ -9,7 +9,7 @@ import { useSpring, animated } from 'react-spring';
 
 import { css } from '@emotion/css';
 
-import { addMonths, subMonths } from 'loot-core/src/shared/months';
+import { addMonths, subMonths } from 'loot-core/shared/months';
 
 import { useResizeObserver } from '../../hooks/useResizeObserver';
 import { View } from '../common/View';

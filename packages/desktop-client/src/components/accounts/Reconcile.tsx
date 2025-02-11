@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { Trans } from 'react-i18next';
 
-import * as queries from 'loot-core/src/client/queries';
-import { type Query } from 'loot-core/src/shared/query';
-import { currencyToInteger } from 'loot-core/src/shared/util';
+import * as queries from 'loot-core/client/queries';
+import { type Query } from 'loot-core/shared/query';
+import { currencyToInteger } from 'loot-core/shared/util';
 import { type AccountEntity } from 'loot-core/types/models';
 import { type TransObjectLiteral } from 'loot-core/types/util';
 

@@ -19,11 +19,11 @@ import {
 import {
   amountToCurrency,
   amountToCurrencyNoDecimal,
-} from 'loot-core/src/shared/util';
+} from 'loot-core/shared/util';
 import {
   type balanceTypeOpType,
   type DataEntity,
-} from 'loot-core/src/types/models/reports';
+} from 'loot-core/types/models/reports';
 import { type RuleConditionEntity } from 'loot-core/types/models/rule';
 
 import { useAccounts } from '../../../hooks/useAccounts';
