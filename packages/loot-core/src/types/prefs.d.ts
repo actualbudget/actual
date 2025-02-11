@@ -74,8 +74,8 @@ export type LocalPrefs = Partial<{
 export type Theme = 'light' | 'dark' | 'auto' | 'midnight' | 'development';
 export type DarkTheme = 'dark' | 'midnight';
 export type GlobalPrefs = Partial<{
-  floatingSidebar: boolean;
-  maxMonths: number;
+  floatingSidebar: string; // "true" or "false"
+  maxMonths: string; // e.g. "2" or "3"
   keyId?: string;
   language: string;
   theme: Theme;

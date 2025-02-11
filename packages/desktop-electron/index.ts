@@ -130,7 +130,7 @@ if (isDev) {
 }
 
 async function loadGlobalPrefs() {
-  let state: { [key: string]: unknown } | undefined = undefined;
+  let state: GlobalPrefs | undefined = undefined;
   try {
     state = JSON.parse(
       fs.readFileSync(
@@ -204,9 +204,11 @@ async function createBackgroundProcess() {
   });
 }
 
-function startSyncServer(ngrokConfig: GlobalPrefs['ngrokConfig']) {
+async function startSyncServer() {
+  const globalPrefs = await loadGlobalPrefs(); // load global prefs
+
   const syncServerConfig = {
-    port: ngrokConfig.port,
+    port: globalPrefs?.ngrokConfig?.port || 5007,
     ACTUAL_SERVER_DATA_DIR: path.resolve(
       process.env.ACTUAL_DATA_DIR,
       'actual-server',
@@ -508,7 +510,7 @@ app.on('ready', async () => {
   if (ngrokConfig?.autoStart) {
     // wait for both server and ngrok to start before starting the Actual client to ensure server is available
     await Promise.allSettled([
-      startSyncServer(globalPrefs.ngrokConfig),
+      startSyncServer(),
       exposeSyncServer(globalPrefs.ngrokConfig),
     ]);
   }

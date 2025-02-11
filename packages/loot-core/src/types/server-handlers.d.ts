@@ -262,7 +262,12 @@ export interface ServerHandlers {
 
   'save-global-prefs': (prefs) => Promise<'ok'>;
 
-  'load-global-prefs': () => Promise<GlobalPrefs>;
+  'load-global-prefs': () => Promise<
+    Omit<GlobalPrefs, 'floatingSidebar' | 'maxMonths'> & {
+      floatingSidebar: boolean;
+      maxMonths: number;
+    }
+  >;
 
   'save-prefs': (prefsToSet) => Promise<'ok'>;
 

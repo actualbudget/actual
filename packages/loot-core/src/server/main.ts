@@ -1098,7 +1098,7 @@ handlers['accounts-bank-sync'] = async function ({ ids = [] }) {
   const [[, userId], [, userKey]] = await asyncStorage.multiGet([
     'user-id',
     'user-key',
-  ]);
+  ] as const);
 
   const accounts = await db.runQuery(
     `
@@ -1399,13 +1399,13 @@ handlers['load-global-prefs'] = async function () {
     'preferred-dark-theme',
     'server-self-signed-cert',
     'ngrokConfig',
-  ]);
+  ] as const);
   return {
     floatingSidebar: floatingSidebar === 'true' ? true : false,
-    maxMonths: stringToInteger((maxMonths as string) || ''),
-    documentDir: (documentDir as string) || getDefaultDocumentDir(),
-    keyId: encryptKey && JSON.parse(encryptKey as string).id,
-    language: language as string,
+    maxMonths: stringToInteger(maxMonths || ''),
+    documentDir: documentDir || getDefaultDocumentDir(),
+    keyId: encryptKey && JSON.parse(encryptKey).id,
+    language,
     theme:
       theme === 'light' ||
       theme === 'dark' ||
@@ -1418,8 +1418,8 @@ handlers['load-global-prefs'] = async function () {
       preferredDarkTheme === 'dark' || preferredDarkTheme === 'midnight'
         ? preferredDarkTheme
         : 'dark',
-    serverSelfSignedCert: (serverSelfSignedCert as string) || undefined,
-    ngrokConfig: (ngrokConfig as GlobalPrefs['ngrokConfig']) || undefined,
+    serverSelfSignedCert: serverSelfSignedCert || undefined,
+    ngrokConfig: ngrokConfig || undefined,
   };
 };
 
@@ -1718,6 +1718,7 @@ handlers['subscribe-sign-in'] = async function (loginInfo) {
 
 handlers['subscribe-sign-out'] = async function () {
   encryption.unloadAllKeys();
+
   await asyncStorage.multiRemove([
     'user-token',
     'encrypt-keys',
