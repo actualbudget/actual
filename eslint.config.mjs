@@ -113,7 +113,6 @@ export default [
       'packages/loot-core/**/node_modules/*',
       'packages/loot-core/**/lib-dist/*',
       'packages/loot-core/**/proto/*',
-      'packages/sync-server',
       '.yarn/*',
       '.github/*',
     ],
@@ -818,6 +817,7 @@ export default [
       '**/*.test.ts',
       '**/*.test.jsx',
       '**/*.test.tsx',
+      '**/*.spec.js',
     ],
 
     rules: {
@@ -833,6 +833,23 @@ export default [
     rules: {
       // enforce type over interface
       '@typescript-eslint/consistent-type-definitions': ['warn', 'type'],
+    },
+  },
+  {
+    files: ['packages/sync-server/**/*'],
+    // TODO: fix the issues in these files
+    rules: {
+      'import/extensions': 'off',
+      'rulesdir/typography': 'off',
+    },
+  },
+  {
+    files: ['packages/sync-server/src/app-gocardless/banks/*.js'],
+    rules: {
+      'import/no-anonymous-default-export': 'off',
+      'import/no-default-export': 'off',
+      // can be re-enabled after https://github.com/actualbudget/actual/pull/4253
+      '@typescript-eslint/no-unused-vars': 'off',
     },
   },
 ];
