@@ -13,7 +13,7 @@ import * as openidApp from './app-openid.js';
 import * as secretApp from './app-secrets.js';
 import * as simpleFinApp from './app-simplefin/app-simplefin.js';
 import * as syncApp from './app-sync.js';
-import config from './load-config.js';
+import { config } from './load-config.js';
 
 const app = express();
 
@@ -78,7 +78,7 @@ function parseHTTPSConfig(value) {
   return fs.readFileSync(value);
 }
 
-export default async function run() {
+export async function run() {
   if (config.https) {
     const https = await import('node:https');
     const httpsOptions = {

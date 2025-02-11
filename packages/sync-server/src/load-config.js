@@ -250,4 +250,4 @@ if (finalConfig.upload) {
   debug(`using file limit ${finalConfig.upload.fileSizeLimitMB}mb`);
 }
 
-export default finalConfig;
+export { finalConfig as config };

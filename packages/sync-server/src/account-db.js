@@ -4,8 +4,8 @@ import * as bcrypt from 'bcrypt';
 
 import { bootstrapOpenId } from './accounts/openid.js';
 import { bootstrapPassword, loginWithPassword } from './accounts/password.js';
-import openDatabase from './db.js';
-import config from './load-config.js';
+import { openDatabase } from './db.js';
+import { config } from './load-config.js';
 
 let _accountDb;
 

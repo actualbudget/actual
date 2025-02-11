@@ -49,7 +49,7 @@ export default {
       let idx = str.indexOf('\\U');
       let start_idx = idx;
       let codepoints = [];
-      while (idx !=== -1) {
+      while (idx !== -1) {
         codepoints.push(parseInt(str.slice(idx + 2, idx + 6), 16));
         const next_idx = str.indexOf('\\U', idx + 6);
         if (next_idx === idx + 6) {

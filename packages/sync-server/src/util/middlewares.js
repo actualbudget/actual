@@ -1,7 +1,7 @@
 import * as expressWinston from 'express-winston';
 import * as winston from 'winston';
 
-import validateSession from './validate-user.js';
+import { validateSession } from './validate-user.js';
 
 /**
  * @param {Error} err

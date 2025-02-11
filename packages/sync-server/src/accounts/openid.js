@@ -2,7 +2,7 @@ import { generators, Issuer } from 'openid-client';
 import { v4 as uuidv4 } from 'uuid';
 
 import { clearExpiredSessions, getAccountDb } from '../account-db.js';
-import finalConfig from '../load-config.js';
+import { config as finalConfig } from '../load-config.js';
 import {
   getUserByUsername,
   transferAllFilesFromUser,

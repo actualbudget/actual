@@ -53,6 +53,6 @@ class WrappedDatabase {
 }
 
 /** @param {string} filename */
-export default function openDatabase(filename) {
+export function openDatabase(filename) {
   return new WrappedDatabase(new Database(filename));
 }

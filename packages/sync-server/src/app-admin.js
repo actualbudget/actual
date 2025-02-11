@@ -8,7 +8,7 @@ import {
   requestLoggerMiddleware,
   validateSessionMiddleware,
 } from './util/middlewares.js';
-import validateSession from './util/validate-user.js';
+import { validateSession } from './util/validate-user.js';
 
 const app = express();
 app.use(express.json());
