@@ -351,6 +351,12 @@ async function normalizeBankSyncTransactions(transactions, acctId) {
 
     trans.cleared = Boolean(trans.booked);
 
+    let imported_id = trans.transactionId;
+
+    if (trans.cleared && !trans.transactionId && trans.internalTransactionId) {
+      imported_id = `${trans.account}-${trans.internalTransactionId}`;
+    }
+
     const notes =
       trans.remittanceInformationUnstructured ||
       (trans.remittanceInformationUnstructuredArray || []).join(', ');
@@ -364,7 +370,7 @@ async function normalizeBankSyncTransactions(transactions, acctId) {
         date: trans.date,
         notes: notes.trim().replace('#', '##'),
         category: trans.category ?? null,
-        imported_id: trans.transactionId,
+        imported_id,
         imported_payee: trans.imported_payee,
         cleared: trans.cleared,
       },
