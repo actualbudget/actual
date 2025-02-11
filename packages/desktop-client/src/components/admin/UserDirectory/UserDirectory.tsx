@@ -11,9 +11,9 @@ import {
 import { Trans, useTranslation } from 'react-i18next';
 
 import { addNotification, signOut } from 'loot-core/client/actions';
-import { pushModal } from 'loot-core/src/client/actions/modals';
-import { send } from 'loot-core/src/platform/client/fetch';
-import * as undo from 'loot-core/src/platform/client/undo';
+import { pushModal } from 'loot-core/client/actions/modals';
+import { send } from 'loot-core/platform/client/fetch';
+import * as undo from 'loot-core/platform/client/undo';
 import {
   type NewUserEntity,
   type UserEntity,

@@ -10,8 +10,8 @@ import React, {
 } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { evalArithmetic } from 'loot-core/src/shared/arithmetic';
-import { amountToInteger, appendDecimals } from 'loot-core/src/shared/util';
+import { evalArithmetic } from 'loot-core/shared/arithmetic';
+import { amountToInteger, appendDecimals } from 'loot-core/shared/util';
 
 import { useMergedRefs } from '../../hooks/useMergedRefs';
 import { useSyncedPref } from '../../hooks/useSyncedPref';

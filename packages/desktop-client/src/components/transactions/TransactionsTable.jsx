@@ -21,15 +21,15 @@ import {
 } from 'date-fns';
 
 import { addNotification, pushModal } from 'loot-core/client/actions';
-import { useCachedSchedules } from 'loot-core/src/client/data-hooks/schedules';
+import { useCachedSchedules } from 'loot-core/client/data-hooks/schedules';
 import {
   getAccountsById,
   getPayeesById,
   getCategoriesById,
-} from 'loot-core/src/client/queries/queriesSlice';
-import { evalArithmetic } from 'loot-core/src/shared/arithmetic';
-import { currentDay } from 'loot-core/src/shared/months';
-import * as monthUtils from 'loot-core/src/shared/months';
+} from 'loot-core/client/queries/queriesSlice';
+import { evalArithmetic } from 'loot-core/shared/arithmetic';
+import { currentDay } from 'loot-core/shared/months';
+import * as monthUtils from 'loot-core/shared/months';
 import {
   splitTransaction,
   updateTransaction,
@@ -39,12 +39,12 @@ import {
   ungroupTransactions,
   isTemporaryId,
   isPreviewId,
-} from 'loot-core/src/shared/transactions';
+} from 'loot-core/shared/transactions';
 import {
   integerToCurrency,
   amountToInteger,
   titleFirst,
-} from 'loot-core/src/shared/util';
+} from 'loot-core/shared/util';
 
 import { useContextMenu } from '../../hooks/useContextMenu';
 import { useMergedRefs } from '../../hooks/useMergedRefs';

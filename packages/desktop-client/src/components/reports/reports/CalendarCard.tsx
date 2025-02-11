@@ -13,8 +13,8 @@ import { Trans, useTranslation } from 'react-i18next';
 import { format } from 'date-fns';
 import { debounce } from 'debounce';
 
+import * as monthUtils from 'loot-core/shared/months';
 import { amountToCurrency } from 'loot-core/shared/util';
-import * as monthUtils from 'loot-core/src/shared/months';
 import { type CalendarWidget } from 'loot-core/types/models';
 import { type SyncedPrefs } from 'loot-core/types/prefs';
 
@@ -302,6 +302,7 @@ export function CalendarCard({
                   selectedMonthNameFormat={selectedMonthNameFormat}
                   index={index}
                   widgetId={widgetId}
+                  isEditing={isEditing}
                 />
               ))
             ) : (
@@ -327,6 +328,7 @@ type CalendarCardInnerProps = {
   selectedMonthNameFormat: string;
   index: number;
   widgetId: string;
+  isEditing?: boolean;
 };
 function CalendarCardInner({
   calendar,
@@ -335,6 +337,7 @@ function CalendarCardInner({
   selectedMonthNameFormat,
   index,
   widgetId,
+  isEditing,
 }: CalendarCardInnerProps) {
   const [monthNameVisible, setMonthNameVisible] = useState(true);
   const monthFormatSizeContainers = useRef<(HTMLSpanElement | null)[]>(
@@ -513,6 +516,7 @@ function CalendarCardInner({
         data={calendar.data}
         start={calendar.start}
         firstDayOfWeekIdx={firstDayOfWeekIdx}
+        isEditing={isEditing}
         onDayClick={date => {
           if (date) {
             navigate(

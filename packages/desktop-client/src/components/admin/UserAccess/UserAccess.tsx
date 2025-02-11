@@ -11,8 +11,8 @@ import React, {
 import { Trans, useTranslation } from 'react-i18next';
 
 import { addNotification, pushModal } from 'loot-core/client/actions';
-import { send } from 'loot-core/src/platform/client/fetch';
-import * as undo from 'loot-core/src/platform/client/undo';
+import { send } from 'loot-core/platform/client/fetch';
+import * as undo from 'loot-core/platform/client/undo';
 import { type Handlers } from 'loot-core/types/handlers';
 import { type UserAvailable } from 'loot-core/types/models';
 import { type UserAccessEntity } from 'loot-core/types/models/userAccess';

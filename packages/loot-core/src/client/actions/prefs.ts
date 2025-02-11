@@ -1,3 +1,4 @@
+// eslint-disable-next-line no-restricted-imports -- fix me -- do not import @actual-app/web in loot-core
 import { setI18NextLanguage } from '@actual-app/web/src/i18n';
 
 import { send } from '../../platform/client/fetch';

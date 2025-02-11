@@ -2,8 +2,8 @@
 import React, { useState } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 
+import { send } from 'loot-core/platform/client/fetch';
 import { getSecretsError } from 'loot-core/shared/errors';
-import { send } from 'loot-core/src/platform/client/fetch';
 
 import { Error } from '../alerts';
 import { ButtonWithLoading } from '../common/Button2';

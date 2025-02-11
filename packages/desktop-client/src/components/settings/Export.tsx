@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import { format } from 'date-fns';
 
-import { send } from 'loot-core/src/platform/client/fetch';
+import { send } from 'loot-core/platform/client/fetch';
 
 import { useMetadataPref } from '../../hooks/useMetadataPref';
 import { theme } from '../../style';

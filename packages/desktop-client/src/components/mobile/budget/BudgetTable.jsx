@@ -6,13 +6,13 @@ import { AutoTextSize } from 'auto-text-size';
 import memoizeOne from 'memoize-one';
 
 import { collapseModals, pushModal } from 'loot-core/client/actions';
-import { groupById, integerToCurrency } from 'loot-core/shared/util';
 import {
   envelopeBudget,
   trackingBudget,
   uncategorizedCount,
-} from 'loot-core/src/client/queries';
-import * as monthUtils from 'loot-core/src/shared/months';
+} from 'loot-core/client/queries';
+import * as monthUtils from 'loot-core/shared/months';
+import { groupById, integerToCurrency } from 'loot-core/shared/util';
 
 import { useCategories } from '../../../hooks/useCategories';
 import { useFeatureFlag } from '../../../hooks/useFeatureFlag';

@@ -3,11 +3,11 @@ import React from 'react';
 import * as d from 'date-fns';
 import { t } from 'i18next';
 
-import { type useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
-import { send } from 'loot-core/src/platform/client/fetch';
-import * as monthUtils from 'loot-core/src/shared/months';
-import { q } from 'loot-core/src/shared/query';
-import { integerToCurrency, integerToAmount } from 'loot-core/src/shared/util';
+import { type useSpreadsheet } from 'loot-core/client/SpreadsheetProvider';
+import { send } from 'loot-core/platform/client/fetch';
+import * as monthUtils from 'loot-core/shared/months';
+import { q } from 'loot-core/shared/query';
+import { integerToCurrency, integerToAmount } from 'loot-core/shared/util';
 import { type RuleConditionEntity } from 'loot-core/types/models';
 
 import { AlignedText } from '../../common/AlignedText';

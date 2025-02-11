@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
-import { importBudget } from 'loot-core/src/client/actions/budgets';
+import { importBudget } from 'loot-core/client/actions/budgets';
 
 import { useNavigate } from '../../../hooks/useNavigate';
 import { useDispatch } from '../../../redux';

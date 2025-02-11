@@ -10,9 +10,9 @@ import { ListBox, Section, Header, Collection } from 'react-aria-components';
 import { useTranslation } from 'react-i18next';
 
 import { setNotificationInset } from 'loot-core/client/actions';
+import * as monthUtils from 'loot-core/shared/months';
+import { isPreviewId } from 'loot-core/shared/transactions';
 import { groupById, integerToCurrency } from 'loot-core/shared/util';
-import * as monthUtils from 'loot-core/src/shared/months';
-import { isPreviewId } from 'loot-core/src/shared/transactions';
 import { type TransactionEntity } from 'loot-core/types/models/transaction';
 
 import { useAccounts } from '../../../hooks/useAccounts';

@@ -1,6 +1,6 @@
 import React, { useCallback, useRef, useState } from 'react';
 
-import { envelopeBudget } from 'loot-core/src/client/queries';
+import { envelopeBudget } from 'loot-core/client/queries';
 
 import { BalanceMenu } from './BalanceMenu';
 import { CoverMenu } from './CoverMenu';

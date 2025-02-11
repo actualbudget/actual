@@ -1,16 +1,16 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
-import * as monthUtils from 'loot-core/src/shared/months';
+import * as monthUtils from 'loot-core/shared/months';
 import {
   amountToCurrency,
   integerToCurrency,
   amountToInteger,
-} from 'loot-core/src/shared/util';
+} from 'loot-core/shared/util';
 import {
   type balanceTypeOpType,
   type DataEntity,
-} from 'loot-core/src/types/models/reports';
+} from 'loot-core/types/models/reports';
 
 import { theme, styles } from '../../style';
 import { Text } from '../common/Text';
