@@ -34,8 +34,6 @@ if [ "$OSTYPE" == "msys" ]; then
     fi
 fi
 
-yarn workspace loot-core build:node
-
 # Get translations
 echo "Updating translations..."
 if ! [ -d packages/desktop-client/locale ]; then
@@ -46,7 +44,12 @@ git pull
 popd > /dev/null
 packages/desktop-client/bin/remove-untranslated-languages
 
+yarn workspace loot-core build:node
 yarn workspace @actual-app/web build --mode=desktop # electron specific build
+
+# required for when running in web server (exposed via ngrok)
+yarn workspace loot-core build:browser
+yarn workspace @actual-app/web build:browser
 
 yarn workspace desktop-electron update-client
 

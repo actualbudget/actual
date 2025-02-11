@@ -5,6 +5,8 @@ import * as injectAPI from '@actual-app/api/injected';
 import * as CRDT from '@actual-app/crdt';
 import { v4 as uuidv4 } from 'uuid';
 
+import { GlobalPrefs } from 'loot-core/types/prefs';
+
 import { createTestBudget } from '../mocks/budget';
 import { captureException, captureBreadcrumb } from '../platform/exceptions';
 import * as asyncStorage from '../platform/server/asyncStorage';
@@ -1368,6 +1370,11 @@ handlers['save-global-prefs'] = async function (prefs) {
       prefs.serverSelfSignedCert,
     );
   }
+
+  if ('ngrokConfig' in prefs) {
+    await asyncStorage.setItem('ngrokConfig', prefs.ngrokConfig);
+  }
+
   return 'ok';
 };
 
@@ -1381,6 +1388,7 @@ handlers['load-global-prefs'] = async function () {
     [, theme],
     [, preferredDarkTheme],
     [, serverSelfSignedCert],
+    [, ngrokConfig],
   ] = await asyncStorage.multiGet([
     'floating-sidebar',
     'max-months',
@@ -1390,13 +1398,14 @@ handlers['load-global-prefs'] = async function () {
     'theme',
     'preferred-dark-theme',
     'server-self-signed-cert',
+    'ngrokConfig',
   ]);
   return {
     floatingSidebar: floatingSidebar === 'true' ? true : false,
-    maxMonths: stringToInteger(maxMonths || ''),
-    documentDir: documentDir || getDefaultDocumentDir(),
-    keyId: encryptKey && JSON.parse(encryptKey).id,
-    language,
+    maxMonths: stringToInteger((maxMonths as string) || ''),
+    documentDir: (documentDir as string) || getDefaultDocumentDir(),
+    keyId: encryptKey && JSON.parse(encryptKey as string).id,
+    language: language as string,
     theme:
       theme === 'light' ||
       theme === 'dark' ||
@@ -1409,7 +1418,8 @@ handlers['load-global-prefs'] = async function () {
       preferredDarkTheme === 'dark' || preferredDarkTheme === 'midnight'
         ? preferredDarkTheme
         : 'dark',
-    serverSelfSignedCert: serverSelfSignedCert || undefined,
+    serverSelfSignedCert: (serverSelfSignedCert as string) || undefined,
+    ngrokConfig: (ngrokConfig as GlobalPrefs['ngrokConfig']) || undefined,
   };
 };
 

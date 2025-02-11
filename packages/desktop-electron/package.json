@@ -85,6 +85,8 @@
     "npmRebuild": false
   },
   "dependencies": {
+    "@ngrok/ngrok": "^1.4.1",
+    "actual-sync": "workspace:*",
     "better-sqlite3": "^11.7.0",
     "fs-extra": "^11.2.0",
     "promise-retry": "^2.0.1"
