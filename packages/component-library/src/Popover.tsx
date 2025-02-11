@@ -3,7 +3,7 @@ import { Popover as ReactAriaPopover } from 'react-aria-components';
 
 import { css } from '@emotion/css';
 
-import { styles } from '../../style';
+import { styles } from './styles';
 
 type PopoverProps = ComponentProps<typeof ReactAriaPopover>;
 
