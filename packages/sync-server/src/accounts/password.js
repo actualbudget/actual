@@ -85,8 +85,8 @@ export function loginWithPassword(password) {
 
   let expiration = TOKEN_EXPIRATION_NEVER;
   if (
-    finalConfig.token_expiration != 'never' &&
-    finalConfig.token_expiration != 'openid-provider' &&
+    finalConfig.token_expiration !== 'never' &&
+    finalConfig.token_expiration !== 'openid-provider' &&
     typeof finalConfig.token_expiration === 'number'
   ) {
     expiration =

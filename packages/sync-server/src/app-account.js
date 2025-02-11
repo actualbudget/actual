@@ -66,7 +66,7 @@ app.post('/login', async (req, res) => {
       const obfuscated =
         '*'.repeat(headerVal.length) || 'No password provided.';
       console.debug('HEADER VALUE: ' + obfuscated);
-      if (headerVal == '') {
+      if (headerVal === '') {
         res.send({ status: 'error', reason: 'invalid-header' });
         return;
       } else {
