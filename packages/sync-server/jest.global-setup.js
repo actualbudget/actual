@@ -1,5 +1,5 @@
 import { getAccountDb } from './src/account-db.js';
-import runMigrations from './src/migrations.js';
+import { run as runMigrations } from './src/migrations.js';
 
 const GENERIC_ADMIN_ID = 'genericAdmin';
 const GENERIC_USER_ID = 'genericUser';
