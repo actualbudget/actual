@@ -6,7 +6,7 @@ async function ensureExists(path) {
   try {
     await fs.mkdir(path);
   } catch (err) {
-    if (err.code == 'EEXIST') {
+    if (err.code === 'EEXIST') {
       return null;
     }
 

@@ -1,6 +1,6 @@
-import * as uuid from 'uuid';
+import { v4 } from 'uuid';
 
-import getAccountDb from '../src/account-db.js';
+import { getAccountDb } from '../src/account-db.js';
 
 export const up = async function () {
   const accountDb = getAccountDb();
@@ -10,7 +10,7 @@ export const up = async function () {
       `
     CREATE TABLE users
         (id TEXT PRIMARY KEY,
-        user_name TEXT, 
+        user_name TEXT,
         display_name TEXT,
         role TEXT,
         enabled INTEGER NOT NULL DEFAULT 1,
@@ -22,11 +22,11 @@ export const up = async function () {
       PRIMARY KEY (user_id, file_id),
       FOREIGN KEY (user_id) REFERENCES users(id),
       FOREIGN KEY (file_id) REFERENCES files(id)
-      );      
+      );
 
     ALTER TABLE files
         ADD COLUMN owner TEXT;
-        
+
     ALTER TABLE sessions
         ADD COLUMN expires_at INTEGER;
 
@@ -38,7 +38,7 @@ export const up = async function () {
         `,
     );
 
-    const userId = uuid.v4();
+    const userId = v4();
     accountDb.mutate(
       'INSERT INTO users (id, user_name, display_name, enabled, owner, role) VALUES (?, ?, ?, 1, 1, ?)',
       [userId, '', '', 'ADMIN'],
@@ -66,7 +66,7 @@ export const down = async function () {
       SELECT token FROM sessions;
 
       DROP TABLE sessions;
-      
+
       ALTER TABLE sessions_backup RENAME TO sessions;
 
       CREATE TABLE files_backup (

@@ -9,7 +9,7 @@ import config from './load-config.js';
 
 let _accountDb;
 
-export default function getAccountDb() {
+export function getAccountDb() {
   if (_accountDb === undefined) {
     const dbPath = join(config.serverFiles, 'account.sqlite');
     _accountDb = openDatabase(dbPath);
@@ -179,10 +179,10 @@ export async function disableOpenID(loginSettings) {
     accountDb.transaction(() => {
       accountDb.mutate('DELETE FROM sessions');
       accountDb.mutate(
-        `DELETE FROM user_access 
+        `DELETE FROM user_access
                               WHERE user_access.user_id IN (
-                                  SELECT users.id 
-                                  FROM users 
+                                  SELECT users.id
+                                  FROM users
                                   WHERE users.user_name <> ?
                               );`,
         [''],

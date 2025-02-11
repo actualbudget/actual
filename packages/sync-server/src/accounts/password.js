@@ -1,7 +1,7 @@
 import * as bcrypt from 'bcrypt';
 import * as uuid from 'uuid';
 
-import getAccountDb, { clearExpiredSessions } from '../account-db.js';
+import { clearExpiredSessions, getAccountDb } from '../account-db.js';
 import finalConfig from '../load-config.js';
 import { TOKEN_EXPIRATION_NEVER } from '../util/validate-user.js';
 

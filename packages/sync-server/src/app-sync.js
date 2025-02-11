@@ -5,7 +5,7 @@ import { SyncProtoBuf } from '@actual-app/crdt';
 import express from 'express';
 import * as uuid from 'uuid';
 
-import getAccountDb from './account-db.js';
+import { getAccountDb } from './account-db.js';
 import { FileNotFound } from './app-sync/errors.js';
 import {
   File,
