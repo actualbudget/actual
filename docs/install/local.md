@@ -23,7 +23,7 @@ Actual server is used for syncing changes across devices. It comes with the late
   git clone https://github.com/actualbudget/actual.git
   ```
 
-2. Navigate to the Actual in your project root director.
+2. Navigate to the Actual in your project root directory.
     ```bash
     cd actual
     ```
@@ -95,3 +95,16 @@ When accessing Actual for the first time, you may be prompted to provide a URL f
 4. Restart the server by running `yarn start`.
 
 Actual is constantly evolving to include new features and improve the user's experience. It is always recommended that your local installation be updated with our [latest releases](https://actualbudget.org/docs/releases).
+
+## Translations
+
+If you would like to use Actual in a language other than English, additional setup is needed. Run the following commands in order.
+1. Navigate to the Actual in your project root directory, and the `packages/desktop-client` directory inside that.
+    ```bash
+    cd actual  # project root
+    cd packages/desktop-client
+    ```
+2. Clone the separate translations repository.
+    ```bash
+    git clone https://github.com/actualbudget/translations locale
+    ```
