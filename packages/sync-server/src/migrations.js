@@ -2,9 +2,9 @@ import path from 'node:path';
 
 import migrate from 'migrate';
 
-import config from './load-config.js';
+import { config } from './load-config.js';
 
-export default function run(direction = 'up') {
+export function run(direction = 'up') {
   console.log(
     `Checking if there are any migrations to run for direction "${direction}"...`,
   );

@@ -14,7 +14,7 @@ import {
   errorMiddleware,
   requestLoggerMiddleware,
 } from './util/middlewares.js';
-import validateSession, { validateAuthHeader } from './util/validate-user.js';
+import { validateAuthHeader, validateSession } from './util/validate-user.js';
 
 const app = express();
 app.use(express.json());
@@ -66,7 +66,7 @@ app.post('/login', async (req, res) => {
       const obfuscated =
         '*'.repeat(headerVal.length) || 'No password provided.';
       console.debug('HEADER VALUE: ' + obfuscated);
-      if (headerVal == '') {
+      if (headerVal === '') {
         res.send({ status: 'error', reason: 'invalid-header' });
         return;
       } else {

@@ -1,6 +1,6 @@
 import crypto from 'node:crypto';
 
-import getAccountDb from '../../../account-db.js';
+import { getAccountDb } from '../../../account-db.js';
 import { FileNotFound } from '../../errors.js';
 import {
   FilesService,

@@ -1,8 +1,8 @@
 import { generators, Issuer } from 'openid-client';
-import * as uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
-import getAccountDb, { clearExpiredSessions } from '../account-db.js';
-import finalConfig from '../load-config.js';
+import { clearExpiredSessions, getAccountDb } from '../account-db.js';
+import { config as finalConfig } from '../load-config.js';
 import {
   getUserByUsername,
   transferAllFilesFromUser,
@@ -207,7 +207,7 @@ export async function loginWithOpenIdFinalize(body) {
           [''],
         );
         if (countUsersWithUserName === 0) {
-          userId = uuid.v4();
+          userId = uuidv4();
           // Check if user was created by another transaction
           const existingUser = accountDb.first(
             'SELECT id FROM users WHERE user_name = ?',
@@ -261,7 +261,7 @@ export async function loginWithOpenIdFinalize(body) {
       }
     }
 
-    const token = uuid.v4();
+    const token = uuidv4();
 
     let expiration;
     if (finalConfig.token_expiration === 'openid-provider') {

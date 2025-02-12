@@ -189,6 +189,7 @@ const finalConfig = {
               userinfo_endpoint: process.env.ACTUAL_OPENID_USERINFO_ENDPOINT,
             };
             const missing = Object.entries(required)
+              // eslint-disable-next-line @typescript-eslint/no-unused-vars
               .filter(([_, value]) => !value)
               .map(([key]) => key);
             if (missing.length > 0) {
@@ -250,4 +251,4 @@ if (finalConfig.upload) {
   debug(`using file limit ${finalConfig.upload.fileSizeLimitMB}mb`);
 }
 
-export default finalConfig;
+export { finalConfig as config };

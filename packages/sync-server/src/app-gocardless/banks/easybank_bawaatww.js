@@ -17,7 +17,7 @@ export default {
       const diff =
         +new Date(b.valueDate || b.bookingDate) -
         +new Date(a.valueDate || a.bookingDate);
-      if (diff != 0) return diff;
+      if (diff !== 0) return diff;
       return parseInt(b.transactionId) - parseInt(a.transactionId);
     }),
 

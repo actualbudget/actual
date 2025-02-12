@@ -1,12 +1,12 @@
 import fs from 'node:fs/promises';
 
-import config from '../src/load-config.js';
+import { config } from '../src/load-config.js';
 
 async function ensureExists(path) {
   try {
     await fs.mkdir(path);
   } catch (err) {
-    if (err.code == 'EEXIST') {
+    if (err.code === 'EEXIST') {
       return null;
     }
 

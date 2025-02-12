@@ -12,7 +12,7 @@ export default {
     /** Online card payments - identified by "crd" transaction code
      *  always start with PAGAMENTO PRESSO + <payee name>
      */
-    if (transaction.proprietaryBankTransactionCode == 'crd') {
+    if (transaction.proprietaryBankTransactionCode === 'crd') {
       // remove PAGAMENTO PRESSO and set payee name
       editedTrans.debtorName =
         transaction.remittanceInformationUnstructured?.slice(
@@ -25,15 +25,15 @@ export default {
      * HAI (INVIATO/RICEVUTO) UN BONIFICO (A/DA) {payee_name} - {payment_info} (bon)
      */
     if (
-      transaction.proprietaryBankTransactionCode == 'p2p' ||
-      transaction.proprietaryBankTransactionCode == 'bon'
+      transaction.proprietaryBankTransactionCode === 'p2p' ||
+      transaction.proprietaryBankTransactionCode === 'bon'
     ) {
       // keep only {payment_info} portion of remittance info
       // NOTE: if {payee_name} contains dashes (unlikely / impossible?), this probably gets bugged!
       const infoIdx =
         transaction.remittanceInformationUnstructured.indexOf(' - ') + 3;
       editedTrans.remittanceInformationUnstructured =
-        infoIdx == -1
+        infoIdx === -1
           ? transaction.remittanceInformationUnstructured
           : transaction.remittanceInformationUnstructured.slice(infoIdx).trim();
     }
@@ -44,7 +44,7 @@ export default {
      * so it groups them in 4bytes bundles
      * the code below assumes this is always the case
      */
-    if (transaction.proprietaryBankTransactionCode == 'p2p') {
+    if (transaction.proprietaryBankTransactionCode === 'p2p') {
       let str = transaction.remittanceInformationUnstructured;
       let idx = str.indexOf('\\U');
       let start_idx = idx;
@@ -52,7 +52,7 @@ export default {
       while (idx !== -1) {
         codepoints.push(parseInt(str.slice(idx + 2, idx + 6), 16));
         const next_idx = str.indexOf('\\U', idx + 6);
-        if (next_idx == idx + 6) {
+        if (next_idx === idx + 6) {
           idx = next_idx;
           continue;
         }

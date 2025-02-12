@@ -3,7 +3,7 @@ import { join } from 'node:path';
 
 import { merkle, SyncProtoBuf, Timestamp } from '@actual-app/crdt';
 
-import openDatabase from './db.js';
+import { openDatabase } from './db.js';
 import { sqlDir } from './load-config.js';
 import { getPathForGroupFile } from './util/paths.js';
 
