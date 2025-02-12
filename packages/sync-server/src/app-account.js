@@ -1,9 +1,5 @@
 import express from 'express';
-import {
-  errorMiddleware,
-  requestLoggerMiddleware,
-} from './util/middlewares.js';
-import validateSession, { validateAuthHeader } from './util/validate-user.js';
+
 import {
   bootstrap,
   needsBootstrap,
@@ -12,10 +8,15 @@ import {
   getUserInfo,
   getActiveLoginMethod,
 } from './account-db.js';
-import { changePassword, loginWithPassword } from './accounts/password.js';
 import { isValidRedirectUrl, loginWithOpenIdSetup } from './accounts/openid.js';
+import { changePassword, loginWithPassword } from './accounts/password.js';
+import {
+  errorMiddleware,
+  requestLoggerMiddleware,
+} from './util/middlewares.js';
+import validateSession, { validateAuthHeader } from './util/validate-user.js';
 
-let app = express();
+const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(errorMiddleware);
@@ -41,7 +42,7 @@ app.get('/needs-bootstrap', (req, res) => {
 });
 
 app.post('/bootstrap', async (req, res) => {
-  let boot = await bootstrap(req.body);
+  const boot = await bootstrap(req.body);
 
   if (boot?.error) {
     res.status(400).send({ status: 'error', reason: boot?.error });
@@ -51,17 +52,17 @@ app.post('/bootstrap', async (req, res) => {
 });
 
 app.get('/login-methods', (req, res) => {
-  let methods = listLoginMethods();
+  const methods = listLoginMethods();
   res.send({ status: 'ok', methods });
 });
 
 app.post('/login', async (req, res) => {
-  let loginMethod = getLoginMethod(req);
+  const loginMethod = getLoginMethod(req);
   console.log('Logging in via ' + loginMethod);
   let tokenRes = null;
   switch (loginMethod) {
     case 'header': {
-      let headerVal = req.get('x-actual-password') || '';
+      const headerVal = req.get('x-actual-password') || '';
       const obfuscated =
         '*'.repeat(headerVal.length) || 'No password provided.';
       console.debug('HEADER VALUE: ' + obfuscated);
@@ -86,7 +87,7 @@ app.post('/login', async (req, res) => {
         return;
       }
 
-      let { error, url } = await loginWithOpenIdSetup(req.body.return_url);
+      const { error, url } = await loginWithOpenIdSetup(req.body.return_url);
       if (error) {
         res.status(400).send({ status: 'error', reason: error });
         return;
@@ -99,7 +100,7 @@ app.post('/login', async (req, res) => {
       tokenRes = loginWithPassword(req.body.password);
       break;
   }
-  let { error, token } = tokenRes;
+  const { error, token } = tokenRes;
 
   if (error) {
     res.status(400).send({ status: 'error', reason: error });
@@ -110,10 +111,10 @@ app.post('/login', async (req, res) => {
 });
 
 app.post('/change-password', (req, res) => {
-  let session = validateSession(req, res);
+  const session = validateSession(req, res);
   if (!session) return;
 
-  let { error } = changePassword(req.body.password);
+  const { error } = changePassword(req.body.password);
 
   if (error) {
     res.status(400).send({ status: 'error', reason: error });
@@ -124,7 +125,7 @@ app.post('/change-password', (req, res) => {
 });
 
 app.get('/validate', (req, res) => {
-  let session = validateSession(req, res);
+  const session = validateSession(req, res);
   if (session) {
     const user = getUserInfo(session.user_id);
     if (!user) {

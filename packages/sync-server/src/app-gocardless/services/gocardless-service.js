@@ -1,3 +1,8 @@
+import jwt from 'jws';
+import * as nordigenNode from 'nordigen-node';
+import * as uuid from 'uuid';
+
+import { SecretName, secretsService } from '../../services/secrets-service.js';
 import BankFactory, { BANKS_WITH_LIMITED_HISTORY } from '../bank-factory.js';
 import {
   AccessDeniedError,
@@ -12,10 +17,6 @@ import {
   ServiceError,
   UnknownError,
 } from '../errors.js';
-import * as nordigenNode from 'nordigen-node';
-import * as uuid from 'uuid';
-import jwt from 'jws';
-import { SecretName, secretsService } from '../../services/secrets-service.js';
 
 const GoCardlessClient = nordigenNode.default;
 
@@ -145,7 +146,7 @@ export const goCardlessService = {
     const requisition =
       await goCardlessService.getLinkedRequisition(requisitionId);
 
-    let institutionIdSet = new Set();
+    const institutionIdSet = new Set();
     const detailedAccounts = await Promise.all(
       requisition.accounts.map(async accountId => {
         const account = await goCardlessService.getDetailedAccount(accountId);

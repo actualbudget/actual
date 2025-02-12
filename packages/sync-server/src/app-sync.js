@@ -1,28 +1,28 @@
-import fs from 'node:fs/promises';
 import { Buffer } from 'node:buffer';
+import fs from 'node:fs/promises';
+
+import { SyncProtoBuf } from '@actual-app/crdt';
 import express from 'express';
 import * as uuid from 'uuid';
+
+import getAccountDb from './account-db.js';
+import { FileNotFound } from './app-sync/errors.js';
+import {
+  File,
+  FilesService,
+  FileUpdate,
+} from './app-sync/services/files-service.js';
+import {
+  validateSyncedFile,
+  validateUploadedFile,
+} from './app-sync/validation.js';
+import * as simpleSync from './sync-simple.js';
 import {
   errorMiddleware,
   requestLoggerMiddleware,
   validateSessionMiddleware,
 } from './util/middlewares.js';
 import { getPathForUserFile, getPathForGroupFile } from './util/paths.js';
-
-import * as simpleSync from './sync-simple.js';
-
-import { SyncProtoBuf } from '@actual-app/crdt';
-import getAccountDb from './account-db.js';
-import {
-  File,
-  FilesService,
-  FileUpdate,
-} from './app-sync/services/files-service.js';
-import { FileNotFound } from './app-sync/errors.js';
-import {
-  validateSyncedFile,
-  validateUploadedFile,
-} from './app-sync/validation.js';
 
 const app = express();
 app.use(validateSessionMiddleware);
@@ -66,11 +66,11 @@ app.post('/sync', async (req, res) => {
     return;
   }
 
-  let fileId = requestPb.getFileid() || null;
-  let groupId = requestPb.getGroupid() || null;
-  let keyId = requestPb.getKeyid() || null;
-  let since = requestPb.getSince() || null;
-  let messages = requestPb.getMessagesList();
+  const fileId = requestPb.getFileid() || null;
+  const groupId = requestPb.getGroupid() || null;
+  const keyId = requestPb.getKeyid() || null;
+  const since = requestPb.getSince() || null;
+  const messages = requestPb.getMessagesList();
 
   if (!since) {
     return res.status(422).send({
@@ -100,10 +100,10 @@ app.post('/sync', async (req, res) => {
     return;
   }
 
-  let { trie, newMessages } = simpleSync.sync(messages, since, groupId);
+  const { trie, newMessages } = simpleSync.sync(messages, since, groupId);
 
   // encode it back...
-  let responsePb = new SyncProtoBuf.SyncResponse();
+  const responsePb = new SyncProtoBuf.SyncResponse();
   responsePb.setMerkle(JSON.stringify(trie));
   newMessages.forEach(msg => responsePb.addMessages(msg));
 
@@ -115,7 +115,7 @@ app.post('/sync', async (req, res) => {
 app.post('/user-get-key', (req, res) => {
   if (!res.locals) return;
 
-  let { fileId } = req.body;
+  const { fileId } = req.body;
 
   const filesService = new FilesService(getAccountDb());
   const file = verifyFileExists(fileId, filesService, res, 'file-not-found');
@@ -135,7 +135,7 @@ app.post('/user-get-key', (req, res) => {
 });
 
 app.post('/user-create-key', (req, res) => {
-  let { fileId, keyId, keySalt, testContent } = req.body;
+  const { fileId, keyId, keySalt, testContent } = req.body;
 
   const filesService = new FilesService(getAccountDb());
 
@@ -156,7 +156,7 @@ app.post('/user-create-key', (req, res) => {
 });
 
 app.post('/reset-user-file', async (req, res) => {
-  let { fileId } = req.body;
+  const { fileId } = req.body;
 
   const filesService = new FilesService(getAccountDb());
   const file = verifyFileExists(
@@ -193,8 +193,8 @@ app.post('/upload-user-file', async (req, res) => {
     return;
   }
 
-  let name = decodeURIComponent(req.headers['x-actual-name']);
-  let fileId = req.headers['x-actual-file-id'];
+  const name = decodeURIComponent(req.headers['x-actual-name']);
+  const fileId = req.headers['x-actual-file-id'];
 
   if (!fileId || typeof fileId !== 'string') {
     res.status(400).send('fileId is required');
@@ -202,10 +202,10 @@ app.post('/upload-user-file', async (req, res) => {
   }
 
   let groupId = req.headers['x-actual-group-id'] || null;
-  let encryptMeta = req.headers['x-actual-encrypt-meta'] || null;
-  let syncFormatVersion = req.headers['x-actual-format'] || null;
+  const encryptMeta = req.headers['x-actual-encrypt-meta'] || null;
+  const syncFormatVersion = req.headers['x-actual-format'] || null;
 
-  let keyId =
+  const keyId =
     encryptMeta && typeof encryptMeta === 'string'
       ? JSON.parse(encryptMeta).keyId
       : null;
@@ -244,10 +244,10 @@ app.post('/upload-user-file', async (req, res) => {
     filesService.set(
       new File({
         id: fileId,
-        groupId: groupId,
+        groupId,
         syncVersion: syncFormatVersion,
-        name: name,
-        encryptMeta: encryptMeta,
+        name,
+        encryptMeta,
         owner:
           res.locals.user_id ||
           (() => {
@@ -263,7 +263,7 @@ app.post('/upload-user-file', async (req, res) => {
   if (!groupId) {
     // sync state was reset, create new group
     groupId = uuid.v4();
-    filesService.update(fileId, new FileUpdate({ groupId: groupId }));
+    filesService.update(fileId, new FileUpdate({ groupId }));
   }
 
   // Regardless, update some properties
@@ -271,8 +271,8 @@ app.post('/upload-user-file', async (req, res) => {
     fileId,
     new FileUpdate({
       syncVersion: syncFormatVersion,
-      encryptMeta: encryptMeta,
-      name: name,
+      encryptMeta,
+      name,
     }),
   );
 
@@ -280,7 +280,7 @@ app.post('/upload-user-file', async (req, res) => {
 });
 
 app.get('/download-user-file', async (req, res) => {
-  let fileId = req.headers['x-actual-file-id'];
+  const fileId = req.headers['x-actual-file-id'];
   if (typeof fileId !== 'string') {
     // FIXME: Not sure how this cannot be a string when the header is
     // set.
@@ -298,7 +298,7 @@ app.get('/download-user-file', async (req, res) => {
 });
 
 app.post('/update-user-filename', (req, res) => {
-  let { fileId, name } = req.body;
+  const { fileId, name } = req.body;
 
   const filesService = new FilesService(getAccountDb());
 
@@ -306,7 +306,7 @@ app.post('/update-user-filename', (req, res) => {
     return;
   }
 
-  filesService.update(fileId, new FileUpdate({ name: name }));
+  filesService.update(fileId, new FileUpdate({ name }));
   res.send(OK_RESPONSE);
 });
 
@@ -331,7 +331,7 @@ app.get('/list-user-files', (req, res) => {
 });
 
 app.get('/get-user-file-info', (req, res) => {
-  let fileId = req.headers['x-actual-file-id'];
+  const fileId = req.headers['x-actual-file-id'];
 
   // TODO: Return 422 if fileId is not provided. Need to make sure frontend can handle it
   // if (!fileId) {
@@ -370,7 +370,7 @@ app.get('/get-user-file-info', (req, res) => {
 });
 
 app.post('/delete-user-file', (req, res) => {
-  let { fileId } = req.body;
+  const { fileId } = req.body;
 
   if (!fileId) {
     return res.status(422).send({

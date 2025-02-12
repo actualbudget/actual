@@ -1,7 +1,9 @@
-import Fallback from './integration-bank.js';
+import d from 'date-fns';
 
 import { formatPayeeName } from '../../util/payee-name.js';
 import { title } from '../../util/title/index.js';
+
+import Fallback from './integration-bank.js';
 
 /** @type {import('./bank.interface.js').IBank} */
 export default {

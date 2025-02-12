@@ -1,9 +1,11 @@
 import { join } from 'node:path';
+
+import * as bcrypt from 'bcrypt';
+
+import { bootstrapOpenId } from './accounts/openid.js';
+import { bootstrapPassword, loginWithPassword } from './accounts/password.js';
 import openDatabase from './db.js';
 import config from './load-config.js';
-import * as bcrypt from 'bcrypt';
-import { bootstrapPassword, loginWithPassword } from './accounts/password.js';
-import { bootstrapOpenId } from './accounts/openid.js';
 
 let _accountDb;
 
@@ -17,14 +19,14 @@ export default function getAccountDb() {
 }
 
 export function needsBootstrap() {
-  let accountDb = getAccountDb();
-  let rows = accountDb.all('SELECT * FROM auth');
+  const accountDb = getAccountDb();
+  const rows = accountDb.all('SELECT * FROM auth');
   return rows.length === 0;
 }
 
 export function listLoginMethods() {
-  let accountDb = getAccountDb();
-  let rows = accountDb.all('SELECT method, display_name, active FROM auth');
+  const accountDb = getAccountDb();
+  const rows = accountDb.all('SELECT method, display_name, active FROM auth');
   return rows.map(r => ({
     method: r.method,
     active: r.active,
@@ -33,8 +35,8 @@ export function listLoginMethods() {
 }
 
 export function getActiveLoginMethod() {
-  let accountDb = getAccountDb();
-  let { method } =
+  const accountDb = getAccountDb();
+  const { method } =
     accountDb.first('SELECT method FROM auth WHERE active = 1') || {};
   return method;
 }
@@ -97,7 +99,7 @@ export async function bootstrap(loginSettings) {
     }
 
     if (passEnabled) {
-      let { error } = bootstrapPassword(loginSettings.password);
+      const { error } = bootstrapPassword(loginSettings.password);
       if (error) {
         accountDb.mutate('ROLLBACK');
         return { error };
@@ -105,7 +107,7 @@ export async function bootstrap(loginSettings) {
     }
 
     if (openIdEnabled) {
-      let { error } = await bootstrapOpenId(loginSettings.openId);
+      const { error } = await bootstrapOpenId(loginSettings.openId);
       if (error) {
         accountDb.mutate('ROLLBACK');
         return { error };
@@ -133,7 +135,7 @@ export async function enableOpenID(loginSettings) {
     return { error: 'invalid-login-settings' };
   }
 
-  let { error } = (await bootstrapOpenId(loginSettings.openId)) || {};
+  const { error } = (await bootstrapOpenId(loginSettings.openId)) || {};
   if (error) {
     return { error };
   }
@@ -146,7 +148,7 @@ export async function disableOpenID(loginSettings) {
     return { error: 'invalid-login-settings' };
   }
 
-  let accountDb = getAccountDb();
+  const accountDb = getAccountDb();
   const { extra_data: passwordHash } =
     accountDb.first('SELECT extra_data FROM auth WHERE method = ?', [
       'password',
@@ -161,14 +163,14 @@ export async function disableOpenID(loginSettings) {
   }
 
   if (passwordHash) {
-    let confirmed = bcrypt.compareSync(loginSettings.password, passwordHash);
+    const confirmed = bcrypt.compareSync(loginSettings.password, passwordHash);
 
     if (!confirmed) {
       return { error: 'invalid-password' };
     }
   }
 
-  let { error } = (await bootstrapPassword(loginSettings.password)) || {};
+  const { error } = (await bootstrapPassword(loginSettings.password)) || {};
   if (error) {
     return { error };
   }
@@ -195,17 +197,17 @@ export async function disableOpenID(loginSettings) {
 }
 
 export function getSession(token) {
-  let accountDb = getAccountDb();
+  const accountDb = getAccountDb();
   return accountDb.first('SELECT * FROM sessions WHERE token = ?', [token]);
 }
 
 export function getUserInfo(userId) {
-  let accountDb = getAccountDb();
+  const accountDb = getAccountDb();
   return accountDb.first('SELECT * FROM users WHERE id = ?', [userId]);
 }
 
 export function getUserPermission(userId) {
-  let accountDb = getAccountDb();
+  const accountDb = getAccountDb();
   const { role } = accountDb.first(
     `SELECT role FROM users
           WHERE users.id = ?`,

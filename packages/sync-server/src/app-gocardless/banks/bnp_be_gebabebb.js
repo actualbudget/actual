@@ -28,18 +28,18 @@ export default {
     let creditorName = transaction.creditorName;
 
     if (transaction.additionalInformation) {
-      let additionalInformationObject = {};
+      const additionalInformationObject = {};
       const additionalInfoRegex = /(, )?([^:]+): ((\[.*?\])|([^,]*))/g;
-      let matches =
+      const matches =
         transaction.additionalInformation.matchAll(additionalInfoRegex);
       if (matches) {
         let creditorNameFromNarrative; // Possible value for creditorName
-        for (let match of matches) {
-          let key = match[2].trim();
+        for (const match of matches) {
+          const key = match[2].trim();
           let value = (match[4] || match[5]).trim();
           if (key === 'narrative') {
             // Set narrativeName to the first element in the "narrative" array.
-            let first_value = value.matchAll(/'(.+?)'/g)?.next().value;
+            const first_value = value.matchAll(/'(.+?)'/g)?.next().value;
             creditorNameFromNarrative = first_value
               ? first_value[1].trim()
               : undefined;

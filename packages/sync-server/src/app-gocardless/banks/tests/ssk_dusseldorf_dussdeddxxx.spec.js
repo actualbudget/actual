@@ -1,4 +1,5 @@
 import { jest } from '@jest/globals';
+
 import SskDusseldorfDussdeddxxx from '../ssk_dusseldorf_dussdeddxxx.js';
 
 describe('ssk_dusseldorf_dussdeddxxx', () => {

@@ -1,5 +1,7 @@
-import migrate from 'migrate';
 import path from 'node:path';
+
+import migrate from 'migrate';
+
 import config from './load-config.js';
 
 export default function run(direction = 'up') {

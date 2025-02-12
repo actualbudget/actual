@@ -1,20 +1,20 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import openDatabase from './db.js';
-import { getPathForGroupFile } from './util/paths.js';
-
-import { sqlDir } from './load-config.js';
 
 import { merkle, SyncProtoBuf, Timestamp } from '@actual-app/crdt';
 
-function getGroupDb(groupId) {
-  let path = getPathForGroupFile(groupId);
-  let needsInit = !existsSync(path);
+import openDatabase from './db.js';
+import { sqlDir } from './load-config.js';
+import { getPathForGroupFile } from './util/paths.js';
 
-  let db = openDatabase(path);
+function getGroupDb(groupId) {
+  const path = getPathForGroupFile(groupId);
+  const needsInit = !existsSync(path);
+
+  const db = openDatabase(path);
 
   if (needsInit) {
-    let sql = readFileSync(join(sqlDir, 'messages.sql'), 'utf8');
+    const sql = readFileSync(join(sqlDir, 'messages.sql'), 'utf8');
     db.exec(sql);
   }
 
@@ -27,8 +27,8 @@ function addMessages(db, messages) {
     let trie = getMerkle(db);
 
     if (messages.length > 0) {
-      for (let msg of messages) {
-        let info = db.mutate(
+      for (const msg of messages) {
+        const info = db.mutate(
           `INSERT OR IGNORE INTO messages_binary (timestamp, is_encrypted, content)
              VALUES (?, ?, ?)`,
           [
@@ -58,7 +58,7 @@ function addMessages(db, messages) {
 }
 
 function getMerkle(db) {
-  let rows = db.all('SELECT * FROM messages_merkles');
+  const rows = db.all('SELECT * FROM messages_merkles');
 
   if (rows.length > 0) {
     return JSON.parse(rows[0].merkle);
@@ -70,15 +70,15 @@ function getMerkle(db) {
 }
 
 export function sync(messages, since, groupId) {
-  let db = getGroupDb(groupId);
-  let newMessages = db.all(
+  const db = getGroupDb(groupId);
+  const newMessages = db.all(
     `SELECT * FROM messages_binary
          WHERE timestamp > ?
          ORDER BY timestamp`,
     [since],
   );
 
-  let trie = addMessages(db, messages);
+  const trie = addMessages(db, messages);
 
   db.close();
 

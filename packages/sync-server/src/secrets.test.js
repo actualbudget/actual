@@ -1,6 +1,7 @@
-import { secretsService } from './services/secrets-service.js';
 import request from 'supertest';
+
 import { handlers as app } from './app-secrets.js';
+import { secretsService } from './services/secrets-service.js';
 describe('secretsService', () => {
   const testSecretName = 'testSecret';
   const testSecretValue = 'testValue';

@@ -1,5 +1,7 @@
 import Fallback from './integration-bank.js';
 
+import Fallback from './integration-bank.js';
+
 /** @type {import('./bank.interface.js').IBank} */
 export default {
   ...Fallback,
