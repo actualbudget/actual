@@ -6,7 +6,6 @@ type Actual = {
   IS_DEV: boolean;
   ACTUAL_VERSION: string;
   openURLInBrowser: (url: string) => void;
-  downloadActualServer: (releaseVersion: string) => Promise<void>;
   startActualServer: (releaseVersion: string) => Promise<void>;
   exposeActualServer: (
     settings: GlobalPrefs['ngrokConfig'],

@@ -74,7 +74,7 @@ export type LocalPrefs = Partial<{
 export type Theme = 'light' | 'dark' | 'auto' | 'midnight' | 'development';
 export type DarkTheme = 'dark' | 'midnight';
 
-// GlobalPrefs are the values global-store.json values after they have been parsed
+// GlobalPrefs are the parsed global-store.json values
 export type GlobalPrefs = Partial<{
   floatingSidebar: boolean;
   maxMonths: number;
@@ -93,7 +93,7 @@ export type GlobalPrefs = Partial<{
   };
 }>;
 
-// GlobalPrefsJson are the values saved in the global-store.json file
+// GlobalPrefsJson represents what's saved in the global-store.json file
 export type GlobalPrefsJson = Partial<{
   'user-id'?: string;
   'user-key'?: string;
