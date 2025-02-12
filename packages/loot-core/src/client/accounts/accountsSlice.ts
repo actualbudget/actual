@@ -194,7 +194,7 @@ function handleSyncResponse(
 }
 
 type SyncAccountsPayload = {
-  id?: AccountEntity['id'];
+  id?: AccountEntity['id'] | undefined;
 };
 
 export const syncAccounts = createAppAsyncThunk(
