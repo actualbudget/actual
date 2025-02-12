@@ -1,8 +1,8 @@
 import * as bcrypt from 'bcrypt';
-import * as uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
-import getAccountDb, { clearExpiredSessions } from '../account-db.js';
-import finalConfig from '../load-config.js';
+import { clearExpiredSessions, getAccountDb } from '../account-db.js';
+import { config } from '../load-config.js';
 import { TOKEN_EXPIRATION_NEVER } from '../util/validate-user.js';
 
 function isValidPassword(password) {
@@ -58,14 +58,14 @@ export function loginWithPassword(password) {
     ['password'],
   );
 
-  const token = sessionRow ? sessionRow.token : uuid.v4();
+  const token = sessionRow ? sessionRow.token : uuidv4();
 
   const { totalOfUsers } = accountDb.first(
     'SELECT count(*) as totalOfUsers FROM users',
   );
   let userId = null;
   if (totalOfUsers === 0) {
-    userId = uuid.v4();
+    userId = uuidv4();
     accountDb.mutate(
       'INSERT INTO users (id, user_name, display_name, enabled, owner, role) VALUES (?, ?, ?, 1, 1, ?)',
       [userId, '', '', 'ADMIN'],
@@ -85,12 +85,11 @@ export function loginWithPassword(password) {
 
   let expiration = TOKEN_EXPIRATION_NEVER;
   if (
-    finalConfig.token_expiration != 'never' &&
-    finalConfig.token_expiration != 'openid-provider' &&
-    typeof finalConfig.token_expiration === 'number'
+    config.token_expiration !== 'never' &&
+    config.token_expiration !== 'openid-provider' &&
+    typeof config.token_expiration === 'number'
   ) {
-    expiration =
-      Math.floor(Date.now() / 1000) + finalConfig.token_expiration * 60;
+    expiration = Math.floor(Date.now() / 1000) + config.token_expiration * 60;
   }
 
   if (!sessionRow) {

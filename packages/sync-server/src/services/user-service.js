@@ -1,4 +1,4 @@
-import getAccountDb from '../account-db.js';
+import { getAccountDb } from '../account-db.js';
 
 export function getUserByUsername(userName) {
   if (!userName || typeof userName !== 'string') {

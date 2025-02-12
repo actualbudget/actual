@@ -3,7 +3,7 @@ import {
   getActiveLoginMethod,
   needsBootstrap,
 } from '../account-db.js';
-import finalConfig from '../load-config.js';
+import { config } from '../load-config.js';
 
 if (needsBootstrap()) {
   console.log(
@@ -21,7 +21,7 @@ if (needsBootstrap()) {
       console.log('OpenID already enabled.');
       process.exit(0);
     }
-    const { error } = (await enableOpenID(finalConfig)) || {};
+    const { error } = (await enableOpenID(config)) || {};
 
     if (error) {
       console.log('Error enabling openid:', error);
