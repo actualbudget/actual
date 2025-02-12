@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { GlobalPrefsJson } from '../../../types/prefs';
 
 import * as T from '.';
