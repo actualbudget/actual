@@ -1,6 +1,8 @@
 import React, { type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { AlignedText } from '@actual-app/components/aligned-text';
+import { theme } from '@actual-app/components/theme';
 import { css } from '@emotion/css';
 import {
   AreaChart,
@@ -23,8 +25,6 @@ import {
 } from 'loot-core/types/models/reports';
 
 import { usePrivacyMode } from '../../../hooks/usePrivacyMode';
-import { theme } from '../../../style';
-import { AlignedText } from '../../common/AlignedText';
 import { Container } from '../Container';
 
 import { adjustTextSize } from './adjustTextSize';

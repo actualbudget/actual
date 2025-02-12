@@ -7,9 +7,10 @@ import React, {
   type CSSProperties,
 } from 'react';
 
-import { styles, theme } from '../../style';
-import { Block } from '../common/Block';
-import { View } from '../common/View';
+import { Block } from '@actual-app/components/block';
+import { styles } from '@actual-app/components/styles';
+import { theme } from '@actual-app/components/theme';
+import { View } from '@actual-app/components/view';
 
 import { ItemContent } from './ItemContent';
 

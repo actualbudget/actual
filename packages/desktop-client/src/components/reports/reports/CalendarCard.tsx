@@ -10,6 +10,12 @@ import React, {
 } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { Block } from '@actual-app/components/block';
+import { Button } from '@actual-app/components/button';
+import { styles } from '@actual-app/components/styles';
+import { theme } from '@actual-app/components/theme';
+import { Tooltip } from '@actual-app/components/tooltip';
+import { View } from '@actual-app/components/view';
 import { format } from 'date-fns';
 import { debounce } from 'debounce';
 
@@ -22,11 +28,6 @@ import { useMergedRefs } from '../../../hooks/useMergedRefs';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { useResizeObserver } from '../../../hooks/useResizeObserver';
 import { SvgArrowThickDown, SvgArrowThickUp } from '../../../icons/v1';
-import { styles, theme } from '../../../style';
-import { Block } from '../../common/Block';
-import { Button } from '../../common/Button2';
-import { Tooltip } from '../../common/Tooltip';
-import { View } from '../../common/View';
 import { PrivacyFilter } from '../../PrivacyFilter';
 import { useResponsive } from '../../responsive/ResponsiveProvider';
 import { chartTheme } from '../chart-theme';
