@@ -1,9 +1,10 @@
 import React from 'react';
 
-import { AnimatedLoading } from '../../icons/AnimatedLoading';
-import { theme, styles } from '../../style';
-import { Block } from '../common/Block';
-import { View } from '../common/View';
+import { Block } from '@actual-app/components/block';
+import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
+import { styles } from '@actual-app/components/styles';
+import { theme } from '@actual-app/components/theme';
+import { View } from '@actual-app/components/view';
 
 type LoadingIndicatorProps = {
   message?: string;

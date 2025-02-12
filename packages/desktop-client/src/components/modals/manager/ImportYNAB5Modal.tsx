@@ -2,17 +2,19 @@
 import React, { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { Block } from '@actual-app/components/block';
+import { ButtonWithLoading } from '@actual-app/components/button';
+import { Paragraph } from '@actual-app/components/paragraph';
+import { styles } from '@actual-app/components/styles';
+import { theme } from '@actual-app/components/theme';
+import { View } from '@actual-app/components/view';
+
 import { importBudget } from 'loot-core/client/actions/budgets';
 
 import { useNavigate } from '../../../hooks/useNavigate';
 import { useDispatch } from '../../../redux';
-import { styles, theme } from '../../../style';
-import { Block } from '../../common/Block';
-import { ButtonWithLoading } from '../../common/Button2';
 import { Link } from '../../common/Link';
 import { Modal, ModalCloseButton, ModalHeader } from '../../common/Modal';
-import { Paragraph } from '../../common/Paragraph';
-import { View } from '../../common/View';
 
 function getErrorMessage(error: string): string {
   switch (error) {

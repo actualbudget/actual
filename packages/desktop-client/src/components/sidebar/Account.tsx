@@ -1,6 +1,15 @@
 // @ts-strict-ignore
 import React, { type CSSProperties, useRef, useState } from 'react';
 
+import { AlignedText } from '@actual-app/components/aligned-text';
+import { InitialFocus } from '@actual-app/components/initial-focus';
+import { Menu } from '@actual-app/components/menu';
+import { Popover } from '@actual-app/components/popover';
+import { styles } from '@actual-app/components/styles';
+import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
+import { Tooltip } from '@actual-app/components/tooltip';
+import { View } from '@actual-app/components/view';
 import { css, cx } from '@emotion/css';
 
 import { openAccountCloseModal } from 'loot-core/client/actions';
@@ -14,16 +23,8 @@ import { type AccountEntity } from 'loot-core/types/models';
 import { useContextMenu } from '../../hooks/useContextMenu';
 import { useNotes } from '../../hooks/useNotes';
 import { useDispatch } from '../../redux';
-import { styles, theme } from '../../style';
-import { AlignedText } from '../common/AlignedText';
-import { InitialFocus } from '../common/InitialFocus';
 import { Input } from '../common/Input';
 import { Link } from '../common/Link';
-import { Menu } from '../common/Menu';
-import { Popover } from '../common/Popover';
-import { Text } from '../common/Text';
-import { Tooltip } from '../common/Tooltip';
-import { View } from '../common/View';
 import { Notes } from '../Notes';
 import {
   useDraggable,

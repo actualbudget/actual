@@ -2,6 +2,12 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 import { useLocation, useParams } from 'react-router-dom';
 
+import { AlignedText } from '@actual-app/components/aligned-text';
+import { Block } from '@actual-app/components/block';
+import { styles } from '@actual-app/components/styles';
+import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
+import { View } from '@actual-app/components/view';
 import * as d from 'date-fns';
 
 import { useReport as useCustomReport } from 'loot-core/client/data-hooks/reports';
@@ -26,12 +32,7 @@ import { useLocalPref } from '../../../hooks/useLocalPref';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { usePayees } from '../../../hooks/usePayees';
 import { useSyncedPref } from '../../../hooks/useSyncedPref';
-import { theme, styles } from '../../../style';
 import { Warning } from '../../alerts';
-import { AlignedText } from '../../common/AlignedText';
-import { Block } from '../../common/Block';
-import { Text } from '../../common/Text';
-import { View } from '../../common/View';
 import { AppliedFilters } from '../../filters/AppliedFilters';
 import { MobileBackButton } from '../../mobile/MobileBackButton';
 import { MobilePageHeader, Page, PageHeader } from '../../Page';

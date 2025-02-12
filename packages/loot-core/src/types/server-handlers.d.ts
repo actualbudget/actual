@@ -127,6 +127,7 @@ export interface ServerHandlers {
 
   'make-filters-from-conditions': (arg: {
     conditions: unknown;
+    applySpecialCases?: boolean;
   }) => Promise<{ filters: unknown[] }>;
 
   getCell: (arg: {

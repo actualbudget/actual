@@ -1,14 +1,13 @@
 import React, { type ReactElement } from 'react';
 import { Trans } from 'react-i18next';
 
+import { Block } from '@actual-app/components/block';
+import { styles } from '@actual-app/components/styles';
+import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
 import * as d from 'date-fns';
 
 import * as monthUtils from 'loot-core/shared/months';
-
-import { theme } from '../../style';
-import { styles } from '../../style/styles';
-import { Block } from '../common/Block';
-import { Text } from '../common/Text';
 
 type DateRangeProps = {
   start: string;

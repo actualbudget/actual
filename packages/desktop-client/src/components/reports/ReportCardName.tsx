@@ -1,8 +1,9 @@
 import React from 'react';
 
-import { styles } from '../../style';
-import { Block } from '../common/Block';
-import { InitialFocus } from '../common/InitialFocus';
+import { Block } from '@actual-app/components/block';
+import { InitialFocus } from '@actual-app/components/initial-focus';
+import { styles } from '@actual-app/components/styles';
+
 import { Input } from '../common/Input';
 
 import { NON_DRAGGABLE_AREA_CLASS_NAME } from './constants';

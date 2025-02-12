@@ -52,6 +52,7 @@ export function createSpendingSpreadsheet({
         conditions: conditions.filter(
           cond => !cond.customName && cond.field === 'category',
         ),
+        applySpecialCases: false,
       },
     );
 
