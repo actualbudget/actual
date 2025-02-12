@@ -104,7 +104,6 @@ export type GlobalPrefsJson = Partial<{
   theme?: GlobalPrefs['theme'];
   'preferred-dark-theme'?: GlobalPrefs['preferredDarkTheme'];
   'server-self-signed-cert'?: GlobalPrefs['serverSelfSignedCert'];
-  ngrokConfig?: GlobalPrefs['ngrokConfig'];
 }>;
 
 export type AuthMethods = 'password' | 'openid';
