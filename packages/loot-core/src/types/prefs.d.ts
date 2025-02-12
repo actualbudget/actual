@@ -73,9 +73,11 @@ export type LocalPrefs = Partial<{
 
 export type Theme = 'light' | 'dark' | 'auto' | 'midnight' | 'development';
 export type DarkTheme = 'dark' | 'midnight';
+
+// GlobalPrefs are the values global-store.json values after they have been parsed
 export type GlobalPrefs = Partial<{
-  floatingSidebar: string; // "true" or "false"
-  maxMonths: string; // e.g. "2" or "3"
+  floatingSidebar: boolean;
+  maxMonths: number;
   keyId?: string;
   language: string;
   theme: Theme;
@@ -89,6 +91,27 @@ export type GlobalPrefs = Partial<{
     port?: number;
     domain?: string;
   };
+}>;
+
+// GlobalPrefsJson are the values saved in the global-store.json file
+export type GlobalPrefsJson = Partial<{
+  'user-id'?: string;
+  'user-key'?: string;
+  'encrypt-keys'?: string;
+  lastBudget?: string;
+  readOnly?: string;
+  'server-url'?: string;
+  'did-bootstrap'?: boolean;
+  'user-token'?: string;
+  'floating-sidebar'?: string; // "true" or "false"
+  'max-months'?: string; // e.g. "2" or "3"
+  'document-dir'?: GlobalPrefs['documentDir'];
+  'encrypt-key'?: string;
+  language?: GlobalPrefs['language'];
+  theme?: GlobalPrefs['theme'];
+  'preferred-dark-theme'?: GlobalPrefs['preferredDarkTheme'];
+  'server-self-signed-cert'?: GlobalPrefs['serverSelfSignedCert'];
+  ngrokConfig?: GlobalPrefs['ngrokConfig'];
 }>;
 
 export type AuthMethods = 'password' | 'openid';

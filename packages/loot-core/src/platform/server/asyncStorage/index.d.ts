@@ -1,58 +1,38 @@
-import { GlobalPrefs } from 'loot-core/types/prefs';
-
-interface ConfigMap {
-  'user-id'?: string;
-  'user-key'?: string;
-  'encrypt-keys'?: string;
-  lastBudget?: string;
-  readOnly?: string;
-  'server-url'?: string;
-  'did-bootstrap'?: boolean;
-  'user-token'?: string;
-  'floating-sidebar'?: GlobalPrefs['floatingSidebar'];
-  'max-months'?: GlobalPrefs['maxMonths'];
-  'document-dir'?: GlobalPrefs['documentDir'];
-  'encrypt-key'?: string;
-  language?: GlobalPrefs['language'];
-  theme?: GlobalPrefs['theme'];
-  'preferred-dark-theme'?: GlobalPrefs['preferredDarkTheme'];
-  'server-self-signed-cert'?: GlobalPrefs['serverSelfSignedCert'];
-  ngrokConfig?: GlobalPrefs['ngrokConfig'];
-}
+import { GlobalPrefs, GlobalPrefsJson } from '../../../types/prefs';
 
 export function init(opts?: { persist?: boolean }): void;
 export type Init = typeof init;
 
-type InferType<K extends keyof ConfigMap> = GlobalPrefs[K];
+type InferType<K extends keyof GlobalPrefsJson> = GlobalPrefs[K];
 
-export function getItem<K extends keyof ConfigMap>(
+export function getItem<K extends keyof GlobalPrefsJson>(
   key: K,
-): Promise<ConfigMap[K]>;
+): Promise<GlobalPrefsJson[K]>;
 export type GetItem = typeof getItem;
 
-export function setItem<K extends keyof ConfigMap>(
+export function setItem<K extends keyof GlobalPrefsJson>(
   key: K,
-  value: ConfigMap[K],
+  value: GlobalPrefsJson[K],
 ): void;
 export type SetItem = typeof setItem;
 
-export function removeItem(key: keyof ConfigMap): void;
+export function removeItem(key: keyof GlobalPrefsJson): void;
 export type RemoveItem = typeof removeItem;
 
 export async function multiGet<
-  K extends ReadonlyArray<keyof ConfigMap>, // or keyed config
+  K extends ReadonlyArray<keyof GlobalPrefsJson>, // or keyed config
 >(
   keys: [...K],
 ): Promise<{
-  [I in keyof K]: [K[I], ConfigMap[K[I]]];
+  [I in keyof K]: [K[I], GlobalPrefsJson[K[I]]];
 }>;
 export type MultiGet = typeof multiGet;
 
-export function multiSet<K extends keyof ConfigMap>(
-  keyValues: Array<[K, ConfigMap[K]]>,
+export function multiSet<K extends keyof GlobalPrefsJson>(
+  keyValues: Array<[K, GlobalPrefsJson[K]]>,
 ): void;
 
 export type MultiSet = typeof multiSet;
 
-export function multiRemove(keys: (keyof ConfigMap)[]): void;
+export function multiRemove(keys: (keyof GlobalPrefsJson)[]): void;
 export type MultiRemove = typeof multiRemove;
