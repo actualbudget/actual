@@ -1,5 +1,3 @@
-import Fallback from './integration-bank.js';
-
 import { formatPayeeName } from '../../util/payee-name.js';
 
 import Fallback from './integration-bank.js';
