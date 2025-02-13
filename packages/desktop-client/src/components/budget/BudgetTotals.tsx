@@ -17,6 +17,7 @@ type BudgetTotalsProps = {
   toggleHiddenCategories: () => void;
   expandAllCategories: () => void;
   collapseAllCategories: () => void;
+  toggleProgressBars: () => void;
 };
 
 export const BudgetTotals = memo(function BudgetTotals({
@@ -24,6 +25,7 @@ export const BudgetTotals = memo(function BudgetTotals({
   toggleHiddenCategories,
   expandAllCategories,
   collapseAllCategories,
+  toggleProgressBars,
 }: BudgetTotalsProps) {
   const { t } = useTranslation();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -84,6 +86,8 @@ export const BudgetTotals = memo(function BudgetTotals({
             onMenuSelect={type => {
               if (type === 'toggle-visibility') {
                 toggleHiddenCategories();
+              } else if (type === 'toggle-progress-bars') {
+                toggleProgressBars();
               } else if (type === 'expandAllCategories') {
                 expandAllCategories();
               } else if (type === 'collapseAllCategories') {
@@ -95,6 +99,10 @@ export const BudgetTotals = memo(function BudgetTotals({
               {
                 name: 'toggle-visibility',
                 text: t('Toggle hidden categories'),
+              },
+              {
+                name: 'toggle-progress-bars',
+                text: t('Toggle progress bars'),
               },
               {
                 name: 'expandAllCategories',
