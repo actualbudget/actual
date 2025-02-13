@@ -16,6 +16,7 @@ import { Popover } from '../common/Popover';
 import { View } from '../common/View';
 import { NotesButton } from '../NotesButton';
 import { InputCell } from '../table';
+import { CategoryVisual } from './CategoryVisual';
 
 type SidebarCategoryProps = {
   innerRef: Ref<HTMLDivElement>;
@@ -195,6 +196,7 @@ export function SidebarCategory({
           placeholder: temporary ? t('New category name') : '',
         }}
       />
+      <CategoryVisual category={category} />
     </View>
   );
 }
