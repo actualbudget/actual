@@ -16,6 +16,7 @@ import { Popover } from '../common/Popover';
 import { View } from '../common/View';
 import { NotesButton } from '../NotesButton';
 import { InputCell } from '../table';
+
 import { CategoryVisual } from './CategoryVisual';
 
 type SidebarCategoryProps = {
