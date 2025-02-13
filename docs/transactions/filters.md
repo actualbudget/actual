@@ -17,11 +17,7 @@ Inevitably, there are some restrictions but these offer a great opportunity for 
 
 Well, having got that out of the way please don’t let any of this put you off. Filters are a great tool – and there is lots more scope for further development.
 
-First go to the **All Accounts** view. This is to be sure that you are picking up all relevant transactions, rather than those from just one Account or Credit Card.
-
-![](/img/filtering/accounts@2x.png)
-
-Now select **Filter**. You will see from this drop-down that there are a number of options to choose from:
+First go to the relevant account screen and select **Filter**. You will see from this drop-down that there are a number of options to choose from:
 
 ![](/img/filtering/filter.png)
 
@@ -29,35 +25,33 @@ The great thing is that you are not limited to just one Filter. You can select m
 
 There are further options within each area to narrow the filter further. Here are a couple to illustrate the choices – Dates and Categories:
 
-`Matches` is *[regular expressions](https://regextutorial.org/)*, the other condition types are further explained at [Rules Page](../budgeting/rules/#condition-types).
+The `matches` operator uses *[regular expressions](https://regextutorial.org/)*, the other condition types are further explained at [Rules Page](../budgeting/rules/#condition-types).
 
 ![](/img/filtering/conditions-1.png)
 
 ![](/img/filtering/conditions-2.png)
 
-**Note**: There are further options available by clicking the down arrow under **Date** and **Amount**. The **Date** options are *Year* and *Month*. The **Amount** options are to choose between  *Inflow* and *Outflow*.
+**Note**: There are further options available by clicking the down arrow under **Date** and **Amount**.
 
 ### Example
 
-In this example we are finding out how much the Mercedes car cost to run during the 2021 calendar year. To enhance this analysis a Note of each vehicle owned was added to transactions in the “Car” category group. Adding such a note is made much easier by ensuring that the Note is added to each relevant scheduled (recurring) transaction. In this instance the Note was added using the tag symbol (#Merc) but the # is not needed. It is a personal preference. Alternatively, you could just be more granular in your creation of Categories.
+In this example we are finding out how much the Mercedes car cost to run during the 2024 calendar year. To enhance this analysis a tag of each vehicle owned was added to transactions in the “Car” category group. Alternatively, you could just be more granular in your creation of Categories.
 
 ![](/img/filtering/multiple-filters.png)
 
-Here is an image of the multiple filters that have been selected. In this example, these include a Date range, multiple Categories, and a Note.
+Now we want to see the total spent on the Mercedes car in 2021. This is shown at the top center of the page.
 
-![](/img/filtering/highlight.png)
+![](/img/filtering/filtered-total.png)
 
-Now we want to see the total spent on the Mercedes car in 2021. This is shown at the top center of the following image.
+But what if we need to drill down further and calculate just the costs were for maintenance of this particular car? By selecting the applicable transactions a revised total appears as shown below. Alternatively just remove the non-applicable category filters.
 
-![](/img/filtering/highlight-2.png)
-
-But what if we need to drill down further and calculate just the costs were for servicing this particular car? By deselecting the non-applicable transactions a revised total appears as shown below. Alternatively just remove the non-applicable category filters.
+![](/img/filtering/selected-total.png)
 
 In the above Example we used the **Date is greater than** and **Date is less than** filters to illustrate the fine tuning that is possible. However, in this example of a simple calendar year it would have been quicker simply to click on the down arrow below **Date** and select as follows:
 
- ![](/img/filtering/Dates1@2x.png)
+![](/img/filtering/year-1.png)
 
- ![](/img/filtering/Dates2@2x.png)
+![](/img/filtering/year-2.png)
 
 ### Saving Filters
 
@@ -69,7 +63,7 @@ You'll then get a window that asks for you to name the saved filter. Type in wha
 
 ![](/img/filtering/set-filter-name.png)
 
-When you want to re-visit a previously saved filter, go to the **All accounts** tab, click on **Filter**, and select **Saved** in the dropdown.
+When you want to re-visit a previously saved filter, go to the relevant account page, click on **Filter**, and select **Saved** in the dropdown.
 
 ![](/img/filtering/select-saved-1.png)
 
