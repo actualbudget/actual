@@ -18,37 +18,31 @@ When a payee is matched, if it has a **default category** the transaction will a
 
 ## Editing a Payee
 
-1. Open the **Manage Payees** screen
+1. Open the **Payees** page
 2. To **rename** a payee, click the name and type in a new one.
 3. To **delete** a payee, select it and press the **1 payee** button in the top-left and select **Delete**.
-4. Edit the default category by clicking it and selecting one from the dropdown.
+4. To mark a payee as a **favourite**, select it and press the **1 payee** button in the top-left and select **Favourite**. This will make it appear at the top of the suggestions box when entering a payee in the account ledger.
 5. Edit the rules by clicking on the "# rules" button and a dropdown will appear with the list of rules to match this payee with.
 
 ## Merging Payees
 
 A powerful feature is merging payees. You may already have months worth of data and a lot of ugly **Morrisons** payees that all vary slightly. You want to merge all of these together into one payee.
 
-1. Click the three dots next to your budget name
+1. Open the **Payees** page
 
-![](/img/payees/BudgetOptionButton.png)
+2. Type "Morrisons" into the filter to only show those payees.
 
-2. Click Manage Payees
+![](/img/payees/MergePayeesSearch.png)
 
-![](/img/payees/ManagingPayees.png)
-
-3. Type "Morrisons" into the filter to only show those payees.
-
-![](/img/payees/Payees.png)
-
-4. Click the checkbox in the table header next to the **Name** column to select all of the different variations of "Morrisons"
+3. Click the checkbox in the table header next to the **Name** column to select all of the different variations of "Morrisons"
 
 ![](/img/payees/PayeesSelected.png)
 
-5. Click the button in the top-left to open the menu, and select **Merge**
+4. Click the button in the top-left to open the menu, and select **Merge**
 
 ![](/img/payees/MergePayeesOption.png)
 
-6. All of the payees will merge into one and the name will be editable. Type in a name for the final payee.
+5. All of the payees will merge into one. Actual will choose one of the payee names to retain but you can edit the payee name by clicking it and typing in the desired name for the final payee.
 
 ![](/img/payees/PayeesMerged.png)
 
@@ -56,4 +50,4 @@ You can individually select payees and merge them if you like, but filtering & m
 
 ## Transfer Payees
 
-[Transfers](./transfers.md) are just special payees that indicate which account to transfer to/from. Since they are payees, you can create rules like normal which will automatically create transfers. Find them at the bottom of the **Manage Payees** screen if you want to create custom rules.
+[Transfers](./transfers.md) are just special payees that indicate which account to transfer to/from. Since they are payees, you can create rules like normal which will automatically create transfers. You will find them at the bottom of the **Payees** page if you want to create custom rules.
