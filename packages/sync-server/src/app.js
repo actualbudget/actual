@@ -89,7 +89,6 @@ if (process.env.NODE_ENV === 'development') {
           !pathname.startsWith('/account') &&
           !pathname.startsWith('/gocardless') &&
           !pathname.startsWith('/simplefin') &&
-          !pathname.startsWith('/pluggyai') &&
           !pathname.startsWith('/secret') &&
           !pathname.startsWith('/admin') &&
           !pathname.startsWith('/openid') &&
