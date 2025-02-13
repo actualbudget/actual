@@ -208,6 +208,7 @@ const sidebars = {
             'experimental/monthly-cleanup',
             'experimental/oauth-auth',
             'experimental/multi-user',
+            'experimental/rule-templating',
           ],
         },
         'getting-started/tips-tricks',
