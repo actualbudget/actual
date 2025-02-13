@@ -20,6 +20,7 @@
   "scripts": {
     "start": "yarn start:browser",
     "start:server": "yarn workspace actual-sync start",
+    "start:server-dev": "NODE_ENV=development yarn npm-run-all --parallel 'start:server' 'start'",
     "start:desktop": "yarn rebuild-electron && npm-run-all --parallel 'start:desktop-*'",
     "start:desktop-node": "yarn workspace loot-core watch:node",
     "start:desktop-client": "yarn workspace @actual-app/web watch",

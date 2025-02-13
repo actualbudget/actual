@@ -57,6 +57,7 @@
     "@typescript-eslint/parser": "^5.51.0",
     "eslint": "^8.33.0",
     "eslint-plugin-prettier": "^4.2.1",
+    "http-proxy-middleware": "^3.0.3",
     "jest": "^29.3.1",
     "prettier": "^2.8.3",
     "supertest": "^6.3.1",
