@@ -371,11 +371,13 @@ handlers['get-category-groups'] = async function () {
 handlers['category-group-create'] = mutator(async function ({
   name,
   isIncome,
+  hidden,
 }) {
   return withUndo(async () => {
     return db.insertCategoryGroup({
       name,
       is_income: isIncome ? 1 : 0,
+      hidden,
     });
   });
 });
@@ -513,8 +515,11 @@ handlers['payees-get-rules'] = async function ({ id }) {
   return rules.getRulesForPayee(id).map(rule => rule.serialize());
 };
 
-handlers['make-filters-from-conditions'] = async function ({ conditions }) {
-  return rules.conditionsToAQL(conditions);
+handlers['make-filters-from-conditions'] = async function ({
+  conditions,
+  applySpecialCases,
+}) {
+  return rules.conditionsToAQL(conditions, { applySpecialCases });
 };
 
 handlers['getCell'] = async function ({ sheetName, name }) {

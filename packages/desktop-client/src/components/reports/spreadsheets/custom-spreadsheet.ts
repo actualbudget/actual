@@ -1,24 +1,24 @@
 import * as d from 'date-fns';
 
-import { runQuery } from 'loot-core/src/client/query-helpers';
-import { type useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
-import { send } from 'loot-core/src/platform/client/fetch';
-import * as monthUtils from 'loot-core/src/shared/months';
-import { integerToAmount } from 'loot-core/src/shared/util';
+import { runQuery } from 'loot-core/client/query-helpers';
+import { type useSpreadsheet } from 'loot-core/client/SpreadsheetProvider';
+import { send } from 'loot-core/platform/client/fetch';
+import * as monthUtils from 'loot-core/shared/months';
+import { integerToAmount } from 'loot-core/shared/util';
 import {
   type AccountEntity,
   type PayeeEntity,
   type CategoryEntity,
   type RuleConditionEntity,
   type CategoryGroupEntity,
-} from 'loot-core/src/types/models';
+} from 'loot-core/types/models';
 import {
   type balanceTypeOpType,
   type sortByOpType,
   type DataEntity,
   type GroupedEntity,
   type IntervalEntity,
-} from 'loot-core/src/types/models/reports';
+} from 'loot-core/types/models/reports';
 import { type SyncedPrefs } from 'loot-core/types/prefs';
 
 import {

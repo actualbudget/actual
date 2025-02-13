@@ -1,6 +1,6 @@
 import { useTranslation, Trans } from 'react-i18next';
 
-import { type PayeeEntity } from 'loot-core/src/types/models';
+import { type PayeeEntity } from 'loot-core/types/models';
 
 import { useSyncedPref } from '../../hooks/useSyncedPref';
 import { SvgDelete, SvgMerge } from '../../icons/v0';

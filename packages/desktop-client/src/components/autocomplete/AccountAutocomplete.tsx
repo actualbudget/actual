@@ -10,7 +10,7 @@ import { useTranslation } from 'react-i18next';
 
 import { css, cx } from '@emotion/css';
 
-import { type AccountEntity } from 'loot-core/src/types/models';
+import { type AccountEntity } from 'loot-core/types/models';
 
 import { useAccounts } from '../../hooks/useAccounts';
 import { theme, styles } from '../../style';

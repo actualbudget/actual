@@ -3,8 +3,8 @@ import { useTranslation } from 'react-i18next';
 
 import { Bar, BarChart, LabelList, ResponsiveContainer } from 'recharts';
 
-import { integerToCurrency } from 'loot-core/src/shared/util';
-import { type CashFlowWidget } from 'loot-core/src/types/models';
+import { integerToCurrency } from 'loot-core/shared/util';
+import { type CashFlowWidget } from 'loot-core/types/models';
 
 import { theme } from '../../../style';
 import { View } from '../../common/View';

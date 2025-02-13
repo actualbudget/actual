@@ -31,12 +31,14 @@ type CalendarGraphProps = {
   }[];
   start: Date;
   firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'];
+  isEditing?: boolean;
   onDayClick: (date: Date | null) => void;
 };
 export function CalendarGraph({
   data,
   start,
   firstDayOfWeekIdx,
+  isEditing,
   onDayClick,
 }: CalendarGraphProps) {
   const startingDate = startOfWeek(new Date(), {
@@ -97,6 +99,7 @@ export function CalendarGraph({
           gap: 2,
           width: '100%',
           height: '100%',
+          zIndex: isEditing ? -1 : 'auto', // Prevents interaction with calendar buttons when editing dashboard.
         }}
       >
         {data.map((day, index) =>

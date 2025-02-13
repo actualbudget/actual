@@ -1,12 +1,13 @@
 import React, { type CSSProperties } from 'react';
 
-import { envelopeBudget } from 'loot-core/src/client/queries';
+import { AlignedText } from '@actual-app/components/aligned-text';
+import { Block } from '@actual-app/components/block';
+import { styles } from '@actual-app/components/styles';
+import { Tooltip } from '@actual-app/components/tooltip';
+import { View } from '@actual-app/components/view';
 
-import { styles } from '../../../../style';
-import { AlignedText } from '../../../common/AlignedText';
-import { Block } from '../../../common/Block';
-import { Tooltip } from '../../../common/Tooltip';
-import { View } from '../../../common/View';
+import { envelopeBudget } from 'loot-core/client/queries';
+
 import { CellValueText } from '../../../spreadsheet/CellValue';
 import { useFormat } from '../../../spreadsheet/useFormat';
 import { EnvelopeCellValue } from '../EnvelopeBudgetComponents';

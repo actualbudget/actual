@@ -3,9 +3,9 @@ import React, { useState } from 'react';
 import { Form } from 'react-aria-components';
 import { useTranslation } from 'react-i18next';
 
-import { type FinanceModals } from 'loot-core/src/client/state-types/modals';
-import { send } from 'loot-core/src/platform/client/fetch';
-import { getTestKeyError } from 'loot-core/src/shared/errors';
+import { type FinanceModals } from 'loot-core/client/state-types/modals';
+import { send } from 'loot-core/platform/client/fetch';
+import { getTestKeyError } from 'loot-core/shared/errors';
 
 import { styles, theme } from '../../style';
 import { Button, ButtonWithLoading } from '../common/Button2';

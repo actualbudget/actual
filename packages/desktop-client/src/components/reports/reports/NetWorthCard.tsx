@@ -1,15 +1,16 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { integerToCurrency } from 'loot-core/src/shared/util';
+import { Block } from '@actual-app/components/block';
+import { styles } from '@actual-app/components/styles';
+import { View } from '@actual-app/components/view';
+
+import { integerToCurrency } from 'loot-core/shared/util';
 import {
   type AccountEntity,
   type NetWorthWidget,
-} from 'loot-core/src/types/models';
+} from 'loot-core/types/models';
 
-import { styles } from '../../../style';
-import { Block } from '../../common/Block';
-import { View } from '../../common/View';
 import { PrivacyFilter } from '../../PrivacyFilter';
 import { useResponsive } from '../../responsive/ResponsiveProvider';
 import { Change } from '../Change';

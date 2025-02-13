@@ -15,7 +15,7 @@ import {
   amountToCurrency,
   appendDecimals,
   currencyToAmount,
-} from 'loot-core/src/shared/util';
+} from 'loot-core/shared/util';
 
 import { useMergedRefs } from '../../../hooks/useMergedRefs';
 import { useSyncedPref } from '../../../hooks/useSyncedPref';

@@ -1,11 +1,14 @@
 import React, { useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import * as monthUtils from 'loot-core/src/shared/months';
+import * as monthUtils from 'loot-core/shared/months';
 import { type CategoryEntity } from 'loot-core/types/models/category';
 import { type CategoryGroupEntity } from 'loot-core/types/models/category-group';
 import { type TimeFrame } from 'loot-core/types/models/dashboard';
-import { type CustomReportEntity } from 'loot-core/types/models/reports';
+import {
+  type CustomReportEntity,
+  type sortByOpType,
+} from 'loot-core/types/models/reports';
 import { type SyncedPrefs } from 'loot-core/types/prefs';
 
 import { styles } from '../../style/styles';
@@ -143,7 +146,8 @@ export function ReportSidebar({
     setBalanceType(cond);
   };
 
-  const onChangeSortBy = (cond: string) => {
+  const onChangeSortBy = (cond?: sortByOpType) => {
+    cond ??= 'desc';
     setSessionReport('sortBy', cond);
     onReportChange({ type: 'modify' });
     setSortBy(cond);
@@ -152,7 +156,7 @@ export function ReportSidebar({
   const rangeOptions = useMemo(() => {
     const options: SelectOption[] = ReportOptions.dateRange
       .filter(f => f[customReportItems.interval as keyof dateRangeProps])
-      .map(option => [option.description, option.description]);
+      .map(option => [option.key, option.description]);
 
     // Append separator if necessary
     if (dateRangeLine > 0) {
@@ -226,7 +230,10 @@ export function ReportSidebar({
           <Select
             value={customReportItems.groupBy}
             onChange={e => onChangeSplit(e)}
-            options={ReportOptions.groupBy.map(option => [option, option])}
+            options={ReportOptions.groupBy.map(option => [
+              option.key,
+              option.description,
+            ])}
             disabledKeys={disabledItems('split')}
           />
         </View>
@@ -245,7 +252,7 @@ export function ReportSidebar({
             value={customReportItems.balanceType}
             onChange={e => onChangeBalanceType(e)}
             options={ReportOptions.balanceType.map(option => [
-              option.description,
+              option.key,
               option.description,
             ])}
             disabledKeys={disabledItems('type')}
@@ -270,14 +277,14 @@ export function ReportSidebar({
               if (
                 ReportOptions.dateRange
                   .filter(d => !d[e as keyof dateRangeProps])
-                  .map(int => int.description)
+                  .map(int => int.key)
                   .includes(customReportItems.dateRange)
               ) {
                 onSelectRange(defaultsList.intervalRange.get(e) || '');
               }
             }}
             options={ReportOptions.interval.map(option => [
-              option.description,
+              option.key,
               option.description,
             ])}
             disabledKeys={[]}
@@ -297,12 +304,12 @@ export function ReportSidebar({
             </Text>
             <Select
               value={customReportItems.sortBy}
-              onChange={e => onChangeSortBy(e)}
+              onChange={(e?: sortByOpType) => onChangeSortBy(e)}
               options={ReportOptions.sortBy.map(option => [
-                option.description,
+                option.format,
                 option.description,
               ])}
-              disabledKeys={disabledItems('sort')}
+              disabledKeys={disabledItems('sort') as sortByOpType[]}
             />
           </View>
         )}
