@@ -8,6 +8,7 @@ import { type Handlers } from 'loot-core/types/handlers';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { theme } from '../../../style';
 import {
+  useSetAutoLogin,
   useSetLoginMethods,
   useSetMultiuserEnabled,
   useSetServerURL,
@@ -29,6 +30,7 @@ export function useBootstrapped(redirect = true) {
   const setServerURL = useSetServerURL();
   const setMultiuserEnabled = useSetMultiuserEnabled();
   const setLoginMethods = useSetLoginMethods();
+  const setAutoLogin = useSetAutoLogin();
 
   useEffect(() => {
     async function run() {
@@ -63,6 +65,7 @@ export function useBootstrapped(redirect = true) {
 
         setMultiuserEnabled(result.multiuser);
         setLoginMethods(result.availableLoginMethods);
+        setAutoLogin(result.autoLogin);
 
         if (result.bootstrapped) {
           ensure(`/login`);
@@ -82,6 +85,7 @@ export function useBootstrapped(redirect = true) {
           if ('hasServer' in result && result.hasServer) {
             setMultiuserEnabled(result.multiuser);
             setLoginMethods(result.availableLoginMethods);
+            setAutoLogin(result.autoLogin);
           }
         } else {
           ensure('/bootstrap');

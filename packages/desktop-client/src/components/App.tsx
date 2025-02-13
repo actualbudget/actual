@@ -142,7 +142,7 @@ function AppInner() {
           message: t('Login expired, please log in again.'),
           button: {
             title: t('Go to log in'),
-            action: () => dispatch(signOut()),
+            action: () => dispatch(signOut(true)),
           },
         }),
       );

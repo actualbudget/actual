@@ -25,6 +25,7 @@ export interface Config {
     fileSizeLimitMB: number;
   };
   openId?: {
+    autoLogin?: boolean;
     issuer:
       | string
       | {

@@ -176,7 +176,20 @@ const finalConfig = {
       !process.env.ACTUAL_OPENID_DISCOVERY_URL &&
       !process.env.ACTUAL_OPENID_AUTHORIZATION_ENDPOINT
     ) {
-      return config.openId;
+      return {
+        ...config.openId,
+        autoLogin: process.env.ACTUAL_OPENID_AUTO_LOGIN?.toLowerCase()
+          ? (() => {
+              const value = process.env.ACTUAL_OPENID_AUTO_LOGIN.toLowerCase();
+              if (!['true', 'false'].includes(value)) {
+                throw new Error(
+                  'ACTUAL_OPENID_AUTO_LOGIN must be either "true" or "false"',
+                );
+              }
+              return value === 'true';
+            })()
+          : config.openId?.autoLogin,
+      };
     }
     const baseConfig = process.env.ACTUAL_OPENID_DISCOVERY_URL
       ? { issuer: process.env.ACTUAL_OPENID_DISCOVERY_URL }

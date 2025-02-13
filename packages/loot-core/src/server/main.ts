@@ -1588,6 +1588,7 @@ handlers['subscribe-needs-bootstrap'] = async function ({
     ],
     multiuser: res.data.multiuser || false,
     hasServer: true,
+    autoLogin: res.data.autoLogin || false,
   };
 };
 
@@ -1728,6 +1729,34 @@ handlers['subscribe-sign-out'] = async function () {
     'readOnly',
   ]);
   return 'ok';
+};
+
+handlers['subscribe-logout-openid'] = async function ({ returnUrl }) {
+  let res;
+
+  try {
+    res = JSON.parse(
+      await get(
+        getServer().BASE_SERVER +
+          `/openid/logout?returnUrl=${encodeURIComponent(returnUrl)}`,
+      ),
+    );
+  } catch (err) {
+    return {
+      error:
+        err.reason === 'unauthorized'
+          ? 'unauthorized'
+          : err.reason === 'invalid-url'
+            ? 'invalid-url'
+            : 'network-failure',
+    };
+  }
+
+  if (res.status === 'ok' && res.url) {
+    return { redirect_url: res.url };
+  }
+
+  return { error: 'unknown' };
 };
 
 handlers['subscribe-set-token'] = async function ({ token }) {
