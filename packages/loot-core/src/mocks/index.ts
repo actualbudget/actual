@@ -97,9 +97,13 @@ export function generateCategoryGroups(
   return definition.map(group => {
     const g = generateCategoryGroup(group.name ?? '', group.is_income);
 
+    if (!group.categories) {
+      return g;
+    }
+
     return {
       ...g,
-      categories: group.categories?.map(cat =>
+      categories: group.categories.map(cat =>
         generateCategory(cat.name, g.id, cat.is_income),
       ),
     };
@@ -116,9 +120,9 @@ function _generateTransaction(
     notes: 'Notes',
     account: data.account,
     date: data.date || monthUtils.currentDay(),
-    category: data.category,
     sort_order: data.sort_order != null ? data.sort_order : 1,
     cleared: false,
+    ...(data.category && { category: data.category }),
   };
 }
 
@@ -185,7 +189,7 @@ export function generateTransactions(
         {
           account: accountId,
           category: groupId,
-          amount: isSplit ? 50 : undefined,
+          ...(isSplit && { amount: 50 }),
           sort_order: i,
         },
         isSplit ? 30 : undefined,
