@@ -29,11 +29,16 @@ async function createScheduleList(
     const conditions = rule.serialize().conditions;
     const { date: dateConditions, amount: amountCondition } =
       extractScheduleConds(conditions);
-    const scheduleAmount =
+    let scheduleAmount =
       amountCondition.op === 'isbetween'
         ? Math.round(amountCondition.value.num1 + amountCondition.value.num2) /
           2
         : amountCondition.value;
+    // Apply adjustment percentage if specified
+    if (template[ll].adjustment) {
+      const adjustmentFactor = 1 + template[ll].adjustment / 100;
+      scheduleAmount = Math.round(scheduleAmount * adjustmentFactor);
+    }
     const { amount: postRuleAmount, subtransactions } = rule.execActions({
       amount: scheduleAmount,
       category: category.id,
