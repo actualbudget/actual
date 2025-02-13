@@ -19,6 +19,8 @@ import { theme } from '../../style';
 import { NotesButton } from '../NotesButton';
 import { InputCell } from '../table';
 
+import { ProgressBar } from './ProgressBar';
+
 import { CategoryAutomationButton } from './goals/CategoryAutomationButton';
 
 type SidebarCategoryProps = {

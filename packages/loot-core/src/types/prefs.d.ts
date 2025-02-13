@@ -88,6 +88,7 @@ export type GlobalPrefs = Partial<{
   preferredDarkTheme: DarkTheme;
   documentDir: string; // Electron only
   serverSelfSignedCert: string; // Electron only
+  useProgressBars: boolean;
 }>;
 
 // GlobalPrefsJson represents what's saved in the global-store.json file
