@@ -2,6 +2,7 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 
+import { useSyncServerStatus } from '../../hooks/useSyncServerStatus';
 import {
   SvgCheveronDown,
   SvgCheveronRight,
@@ -23,6 +24,9 @@ export function PrimaryButtons() {
   const [isOpen, setOpen] = useState(false);
   const onToggle = useCallback(() => setOpen(open => !open), []);
   const location = useLocation();
+
+  const syncServerStatus = useSyncServerStatus();
+  const isUsingServer = syncServerStatus !== 'no-server';
 
   const isActive = [
     '/payees',
@@ -64,12 +68,14 @@ export function PrimaryButtons() {
             to="/rules"
             indent={15}
           />
-          <SecondaryItem
-            title={t('Bank Sync')}
-            Icon={SvgCreditCard}
-            to="/bank-sync"
-            indent={15}
-          />
+          {isUsingServer && (
+            <SecondaryItem
+              title={t('Bank Sync')}
+              Icon={SvgCreditCard}
+              to="/bank-sync"
+              indent={15}
+            />
+          )}
           <SecondaryItem
             title={t('Settings')}
             Icon={SvgCog}

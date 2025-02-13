@@ -1,5 +1,5 @@
 import { useMemo, useState, useCallback } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { pushModal } from 'loot-core/src/client/actions/modals';
 import {
@@ -105,6 +105,13 @@ export function BankSync() {
       }}
     >
       <View style={{ marginTop: '1em' }}>
+        {accounts.length === 0 && (
+          <Text style={{ fontSize: '1.1rem' }}>
+            <Trans>
+              To use the bank syncing features, you must first add an account.
+            </Trans>
+          </Text>
+        )}
         {Object.entries(groupedAccounts).map(([syncProvider, accounts]) => {
           return (
             <View key={syncProvider}>
