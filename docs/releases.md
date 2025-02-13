@@ -2,6 +2,8 @@
 
 ## 25.2.1
 
+Release date: 2025-02-06
+
 The primary intent of this release is to patch regressions that prevented the reports page from loading when the selected language was not English, and the desktop apps from working.
 
 ### Actual
@@ -13,6 +15,8 @@ The primary intent of this release is to patch regressions that prevented the re
 - [#4317](https://github.com/actualbudget/actual/pull/4317) Fix Electron language support — thanks @MikesGlitch
 
 ## 25.2.0
+
+Release date: 2025-02-05
 
 The release has the following notable improvements:
 
@@ -162,6 +166,8 @@ The release has the following notable improvements:
 
 ## 25.1.0
 
+Release date: 2025-01-07
+
 The release has the following notable improvements:
 - New calendar report card type
 - Ability to duplicate budgets
@@ -245,6 +251,8 @@ The release has the following notable improvements:
 - [#524](https://github.com/actualbudget/actual-server/pull/524) Support for Node v22+, by upgrading the better-sqlite3 dependency. — thanks @FliegendeWurst
 
 ## 24.12.0
+
+Release date: 2024-12-06
 
 The release has the following notable improvements:
 - Dashboards (also called Reports) officially released as first-party feature (for details see: https://actualbudget.org/docs/tour/reports)
@@ -354,6 +362,8 @@ The release has the following notable improvements:
 - [#479](https://github.com/actualbudget/actual-server/pull/479) Updates the docker images base version and set node_env env variable to production — thanks @rare-magma
 
 ## 24.11.0
+
+Release date: 2024-11-03
 
 The release has the following notable improvements:
 - Optimizations to some SimpleFIN API calls
@@ -474,6 +484,8 @@ The release has the following notable improvements:
 
 ## 24.10.1
 
+Release date: 2024-10-08
+
 The primary intent of this release is to patch a performance regression in user preferences that can cause faulty views displayed in accounts or for goal templates.
 
 ### Actual
@@ -489,6 +501,8 @@ The primary intent of this release is to patch a performance regression in user 
 - [#3574](https://github.com/actualbudget/actual/pull/3574) [Mobile] Fix budget list on mobile auto selecting a budget file under the Switch budget file menu — thanks @joel-jeremy
 
 ## 24.10.0
+
+Release date: 2024-10-03
 
 The release has the following notable improvements:
 
@@ -631,6 +645,8 @@ Important notice about the `@actual-app/api` package: starting from this release
 
 ## 24.9.0
 
+Release date: 2024-09-03
+
 The release has the following notable improvements:
 
 - mobile: long-press transactions to reveal more actions
@@ -765,6 +781,8 @@ The release has the following notable improvements:
 - [#436](https://github.com/actualbudget/actual-server/pull/436) Optimise GoCardless sync to reduce API usage by removing balance information — thanks @matt-fidd
 
 ## 24.8.0
+
+Release date: 2024-08-03
 
 The release has the following notable improvements:
 
@@ -913,6 +931,8 @@ The release has the following notable improvements:
 
 ## 24.7.0
 
+Release date: 2024-07-02
+
 The release has the following notable improvements:
 
 - Custom reports are officially released
@@ -1010,6 +1030,8 @@ The release has the following notable improvements:
 
 ## 24.6.0
 
+Release date: 2024-06-03
+
 The release has the following notable improvements:
 
 - API: ability to run 3rd party bank-sync (GoCardless, SimpleFin) programmatically
@@ -1103,6 +1125,8 @@ The release has the following notable improvements:
 - [#357](https://github.com/actualbudget/actual-server/pull/357) Update better-sqlite3 to 9.6.0 — thanks @MikesGlitch
 
 ## 24.5.0
+
+Release date: 2024-05-03
 
 The release has the following notable improvements:
 
@@ -1248,6 +1272,8 @@ Version: v24.5.0
 
 ## 24.4.0
 
+Release date: 2024-04-02
+
 The release has the following notable improvements:
 
 - Stability improvements and various edge-case bug fixes
@@ -1324,6 +1350,8 @@ Version: v24.4.0
 - [#325](https://github.com/actualbudget/actual-server/pull/325) Add custom bank adapter for 'SEB Kort Bank AB' to properly sync credit card transactions. — thanks @walleb
 
 ## 24.3.0
+
+Release date: 2024-03-03
 
 The release has the following notable improvements:
 
@@ -1425,6 +1453,8 @@ Version: v24.3.0
 - [#307](https://github.com/actualbudget/actual-server/pull/307) Upgrade deprecated github actions — thanks @MatissJanis
 
 ## 24.2.0
+
+Release date: 2024-02-02
 
 The release has the following notable improvements:
 
@@ -1557,6 +1587,8 @@ Version: v24.2.0
 
 ## 24.1.0
 
+Release date: 2024-01-06
+
 The release has the following notable improvements:
 
 - Mobile split transactions
@@ -1642,6 +1674,8 @@ Version: 24.1.0
 
 ## 23.12.1
 
+Release date: 2023-12-07
+
 This release does not have any UI changes or feature improvements. It features only `actual-server` fix for Synology NAS users.
 
 Bug report: https://github.com/actualbudget/actual/issues/2011
@@ -1655,6 +1689,8 @@ Version: 23.12.1
 - [#289](https://github.com/actualbudget/actual-server/pull/289) Store the migrations statestore in the datadir instead of the application root. — thanks @bjw-s
 
 ## 23.12.0
+
+Release date: 2023-12-02
 
 The release has the following notable improvements:
 
@@ -1781,6 +1817,8 @@ Version: 23.12.0
 
 ## 23.11.0
 
+Release date: 2023-11-04
+
 The release has the following notable improvements:
 
 - Mobile: budget management - editing amounts, renaming names, etc.
@@ -1847,6 +1885,8 @@ Version: 23.11.0
 - [#268](https://github.com/actualbudget/actual-server/pull/268) Upgrade `better-sqlite3` to v8.6.0 to align with the version used in frontend — thanks @MatissJanis
 
 ## 23.10.0
+
+Release date: 2023-10-04
 
 ### Actual
 
@@ -1948,6 +1988,8 @@ Version: 23.10.0
 - [#265](https://github.com/actualbudget/actual-server/pull/265) Make edge builds fetch master builds from correct repository. — thanks @kyrias
 
 ## 23.9.0
+
+Release date: 2023-09-03
 
 **Docker tag: 23.9.0**
 
@@ -2054,6 +2096,8 @@ Version: 23.9.0
 
 ## 23.8.1
 
+Release date: 2023-08-07
+
 **Docker tag: 23.8.1**
 
 ### Actual
@@ -2095,6 +2139,8 @@ Version: 23.8.1
 No changes from the previous version.
 
 ## 23.8.0
+
+Release date: 2023-08-02
 
 **Docker tag: 23.8.0**
 
@@ -2202,6 +2248,8 @@ Version: 23.8.0
 
 ## 23.7.2
 
+Release date: 2023-07-09
+
 **Docker tag: 23.7.2**
 
 ### Actual
@@ -2229,6 +2277,8 @@ Version: 23.7.2
 
 ## 23.7.1
 
+Release date: 2023-07-05
+
 **Docker tag: 23.7.1**
 
 ### Actual
@@ -2246,6 +2296,8 @@ Version: 23.7.1
 Version: 23.7.1
 
 ## 23.7.0
+
+Release date: 2023-07-04
 
 :::warning
 
@@ -2387,6 +2439,8 @@ Version: 23.7.0
 
 ## 23.6.0
 
+Release date: 2023-06-01
+
 **Docker tag: 23.6.0**
 
 ### Actual
@@ -2462,6 +2516,8 @@ Version: 23.6.0
 - [#208](https://github.com/actualbudget/actual-server/pull/208) Migrate to the combined release notes action from the main repo — thanks @j-f1
 
 ## 23.5.0
+
+Release date: 2023-05-04
 
 **Docker tag: 23.5.0**
 
@@ -2541,6 +2597,8 @@ Version: 23.5.0
 
 ## 23.4.2
 
+Release date: 2023-04-22
+
 **Docker tag: 23.4.2**
 
 ### Actual
@@ -2578,6 +2636,8 @@ Version: 23.4.2
 - [#189](https://github.com/actualbudget/actual-server/pull/189) More clearly report the problem with Nordigen requests that fail with an unexpected status code — thanks @j-f1
 
 ## 23.4.1
+
+Release date: 2023-04-16
 
 **Docker tag: 23.4.1**
 
@@ -2633,6 +2693,8 @@ Version: 23.4.1
 - [#185](https://github.com/actualbudget/actual-server/pull/185) Use the proper Typescript Babel preset — thanks @albertogasparin
 
 ## 23.4.0
+
+Release date: 2023-04-16
 
 **Docker tag: 23.4.0**
 
@@ -2762,6 +2824,8 @@ Version: 23.4.0
 
 ## 23.3.2
 
+Release date: 2023-03-13
+
 **Docker tag: 23.3.2**
 
 The release has the following notable features:
@@ -2808,6 +2872,8 @@ Version: 23.3.2
 
 ## 23.3.1
 
+Release date: 2023-03-09
+
 **Docker tag: 23.3.1**
 
 ### Actual Server
@@ -2819,6 +2885,8 @@ Version: 23.3.1
 - [#155](https://github.com/actualbudget/actual-server/pull/155) fix nordigen usage in fly.io — thanks @MatissJanis
 
 ## 23.3.0
+
+Release date: 2023-03-01
 
 **Docker tag: 23.3.0**
 
@@ -2923,6 +2991,8 @@ Version: 23.3.0
 
 ## 23.2.9
 
+Release date: 2023-02-09
+
 **Docker tag: 23.2.9**
 
 :::info
@@ -2963,6 +3033,8 @@ Version: 23.2.9
 - [#131](https://github.com/actualbudget/actual-server/pull/131) Move source code to an src/ directory — thanks @j-f1
 
 ## 23.2.5
+
+Release date: 2023-02-05
 
 **Docker tag: 23.2.5**
 
@@ -3059,6 +3131,8 @@ Version: 23.2.5
 
 ## 23.1.12
 
+Release date: 2023-01-12
+
 **Docker tag: 23.1.12**
 
 The release has notable of improvements of:
@@ -3110,6 +3184,8 @@ No pull requests were merged in this release.
 
 ## 22.12.03
 
+Release date: 2022-12-03
+
 **Docker tag: 22.12.9**
 
 :::warning
@@ -3152,6 +3228,8 @@ Version : 22.12.09
 Builds with Actual 22.12.03 and API 4.1.5.
 
 ## 22.10.25
+
+Release date: 2022-10-25
 
 **Docker tag: 22.10.25**
 
