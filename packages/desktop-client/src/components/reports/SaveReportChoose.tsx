@@ -2,12 +2,12 @@ import React, { createRef, useEffect, useState } from 'react';
 import { Form } from 'react-aria-components';
 import { useTranslation } from 'react-i18next';
 
+import { Stack } from '@actual-app/components/stack';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
 import { theme } from '../../style/theme';
 import { Button } from '../common/Button2';
-import { Stack } from '../common/Stack';
 import { GenericInput } from '../util/GenericInput';
 
 type SaveReportChooseProps = {

@@ -2,6 +2,7 @@
 import React, { memo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { Stack } from '@actual-app/components/stack';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 import { v4 as uuid } from 'uuid';
@@ -16,7 +17,6 @@ import { styles, theme } from '../../style';
 import { Button } from '../common/Button2';
 import { Menu } from '../common/Menu';
 import { Popover } from '../common/Popover';
-import { Stack } from '../common/Stack';
 import { SelectCell, Row, Field, Cell } from '../table';
 
 import { ActionExpression } from './ActionExpression';

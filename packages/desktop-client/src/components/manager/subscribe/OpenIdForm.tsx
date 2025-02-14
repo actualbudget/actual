@@ -2,6 +2,7 @@ import { type ReactNode, useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useLocation, type Location } from 'react-router-dom';
 
+import { Stack } from '@actual-app/components/stack';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
@@ -16,7 +17,6 @@ import { Input } from '../../common/Input';
 import { Link } from '../../common/Link';
 import { Menu } from '../../common/Menu';
 import { Select } from '../../common/Select';
-import { Stack } from '../../common/Stack';
 import { FormField, FormLabel } from '../../forms';
 import { useServerURL } from '../../ServerContext';
 

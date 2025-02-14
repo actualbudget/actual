@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { Stack } from '@actual-app/components/stack';
 import { View } from '@actual-app/components/view';
 
 import { runQuery } from 'loot-core/client/query-helpers';
@@ -22,7 +23,6 @@ import { theme } from '../../style';
 import { ButtonWithLoading } from '../common/Button2';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { Paragraph } from '../common/Paragraph';
-import { Stack } from '../common/Stack';
 import { Table, TableHeader, Row, Field, SelectCell } from '../table';
 import { DisplayId } from '../util/DisplayId';
 

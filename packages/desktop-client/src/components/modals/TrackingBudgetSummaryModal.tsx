@@ -1,6 +1,8 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { Stack } from '@actual-app/components/stack';
+
 import { sheetForMonth } from 'loot-core/shared/months';
 import * as monthUtils from 'loot-core/shared/months';
 
@@ -9,7 +11,6 @@ import { ExpenseTotal } from '../budget/tracking/budgetsummary/ExpenseTotal';
 import { IncomeTotal } from '../budget/tracking/budgetsummary/IncomeTotal';
 import { Saved } from '../budget/tracking/budgetsummary/Saved';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
-import { Stack } from '../common/Stack';
 import { NamespaceContext } from '../spreadsheet/NamespaceContext';
 
 type TrackingBudgetSummaryModalProps = {

@@ -8,6 +8,7 @@ import React, {
 import { useHotkeys } from 'react-hotkeys-hook';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { Stack } from '@actual-app/components/stack';
 import { View } from '@actual-app/components/view';
 
 import {
@@ -38,7 +39,6 @@ import { Menu } from '../common/Menu';
 import { MenuButton } from '../common/MenuButton';
 import { Popover } from '../common/Popover';
 import { Search } from '../common/Search';
-import { Stack } from '../common/Stack';
 import { FilterButton } from '../filters/FiltersMenu';
 import { FiltersStack } from '../filters/FiltersStack';
 import { type SavedFilter } from '../filters/SavedFilterMenuButton';

@@ -8,6 +8,7 @@ import React, {
 } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { Stack } from '@actual-app/components/stack';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
@@ -22,7 +23,6 @@ import { styles, theme } from '../style';
 
 import { Button, ButtonWithLoading } from './common/Button2';
 import { Link } from './common/Link';
-import { Stack } from './common/Stack';
 import { useResponsive } from './responsive/ResponsiveProvider';
 
 function compileMessage(

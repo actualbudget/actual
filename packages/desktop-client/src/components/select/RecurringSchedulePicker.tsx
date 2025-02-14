@@ -8,6 +8,7 @@ import {
 } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 
+import { Stack } from '@actual-app/components/stack';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
@@ -29,7 +30,6 @@ import { Input } from '../common/Input';
 import { Menu } from '../common/Menu';
 import { Popover } from '../common/Popover';
 import { Select } from '../common/Select';
-import { Stack } from '../common/Stack';
 import { Checkbox } from '../forms';
 
 import { DateSelect } from './DateSelect';

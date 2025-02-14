@@ -1,5 +1,6 @@
 import React, { type ComponentProps, useMemo } from 'react';
 
+import { Stack } from '@actual-app/components/stack';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 
@@ -8,7 +9,6 @@ import { type CategoryEntity } from 'loot-core/types/models';
 
 import { SvgDownAndRightArrow } from '../../../icons/v2';
 import { theme, styles } from '../../../style';
-import { Stack } from '../../common/Stack';
 import { Checkbox } from '../../forms';
 import { Row, Field } from '../../table';
 
