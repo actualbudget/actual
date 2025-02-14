@@ -1,6 +1,7 @@
 import React, { useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { SpaceBetween } from '@actual-app/components/space-between';
 import { Text } from '@actual-app/components/text';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
@@ -22,7 +23,6 @@ import { Button } from '../common/Button2';
 import { Menu } from '../common/Menu';
 import { Popover } from '../common/Popover';
 import { Select, type SelectOption } from '../common/Select';
-import { SpaceBetween } from '../common/SpaceBetween';
 
 import { CategorySelector } from './CategorySelector';
 import { defaultsList, disabledList } from './disabledList';

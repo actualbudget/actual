@@ -1,6 +1,7 @@
 import React, { type ComponentProps } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { SpaceBetween } from '@actual-app/components/space-between';
 import { View } from '@actual-app/components/view';
 
 import { type CustomReportEntity } from 'loot-core/types/models/reports';
@@ -17,7 +18,6 @@ import {
 } from '../../icons/v1';
 import { SvgChartArea } from '../../icons/v1/ChartArea';
 import { theme } from '../../style';
-import { SpaceBetween } from '../common/SpaceBetween';
 import { FilterButton } from '../filters/FiltersMenu';
 
 import { GraphButton } from './GraphButton';

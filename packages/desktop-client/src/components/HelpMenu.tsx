@@ -3,6 +3,7 @@ import { useHotkeys } from 'react-hotkeys-hook';
 import { Trans, useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 
+import { SpaceBetween } from '@actual-app/components/space-between';
 import { useToggle } from 'usehooks-ts';
 
 import { pushModal } from 'loot-core/client/actions/modals';
@@ -14,7 +15,6 @@ import { useDispatch } from '../redux';
 import { Button } from './common/Button2';
 import { Menu } from './common/Menu';
 import { Popover } from './common/Popover';
-import { SpaceBetween } from './common/SpaceBetween';
 
 const getPageDocs = (page: string) => {
   switch (page) {
