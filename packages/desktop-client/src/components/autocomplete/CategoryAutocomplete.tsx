@@ -12,6 +12,7 @@ import React, {
 } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { TextOneLine } from '@actual-app/components/text-one-line';
 import { View } from '@actual-app/components/view';
 import { css, cx } from '@emotion/css';
 
@@ -30,7 +31,6 @@ import { theme, styles } from '../../style';
 import { useEnvelopeSheetValue } from '../budget/envelope/EnvelopeBudgetComponents';
 import { makeAmountFullStyle } from '../budget/util';
 import { Text } from '../common/Text';
-import { TextOneLine } from '../common/TextOneLine';
 import { useResponsive } from '../responsive/ResponsiveProvider';
 import { useSheetValue } from '../spreadsheet/useSheetValue';
 
