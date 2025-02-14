@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
 import { Stack } from '@actual-app/components/stack';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
@@ -19,7 +20,6 @@ import { type Handlers } from 'loot-core/types/handlers';
 import { useMetadataPref } from '../../hooks/useMetadataPref';
 import { useDispatch, useSelector } from '../../redux';
 import { styles, theme } from '../../style';
-import { Button } from '../common/Button2';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { Select } from '../common/Select';
 import { FormField, FormLabel } from '../forms';

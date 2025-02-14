@@ -2,6 +2,7 @@
 import React, { type CSSProperties, type Ref, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
 import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
 import { View } from '@actual-app/components/view';
@@ -14,7 +15,6 @@ import {
 import { useContextMenu } from '../../hooks/useContextMenu';
 import { SvgCheveronDown } from '../../icons/v1';
 import { theme } from '../../style';
-import { Button } from '../common/Button2';
 import { NotesButton } from '../NotesButton';
 import { InputCell } from '../table';
 

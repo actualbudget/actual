@@ -3,6 +3,7 @@ import { useHotkeys } from 'react-hotkeys-hook';
 import { Trans, useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 
+import { Button } from '@actual-app/components/button';
 import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
 import { SpaceBetween } from '@actual-app/components/space-between';
@@ -13,8 +14,6 @@ import { pushModal } from 'loot-core/client/actions/modals';
 import { useFeatureFlag } from '../hooks/useFeatureFlag';
 import { SvgHelp } from '../icons/v2/Help';
 import { useDispatch } from '../redux';
-
-import { Button } from './common/Button2';
 
 const getPageDocs = (page: string) => {
   switch (page) {

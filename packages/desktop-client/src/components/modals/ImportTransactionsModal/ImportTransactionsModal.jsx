@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { Button, ButtonWithLoading } from '@actual-app/components/button';
 import { Stack } from '@actual-app/components/stack';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
@@ -19,7 +20,6 @@ import { useDateFormat } from '../../../hooks/useDateFormat';
 import { useSyncedPrefs } from '../../../hooks/useSyncedPrefs';
 import { useDispatch } from '../../../redux';
 import { theme } from '../../../style';
-import { Button, ButtonWithLoading } from '../../common/Button2';
 import { Input } from '../../common/Input';
 import { Modal, ModalCloseButton, ModalHeader } from '../../common/Modal';
 import { Select } from '../../common/Select';

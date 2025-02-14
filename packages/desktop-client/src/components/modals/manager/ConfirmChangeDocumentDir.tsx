@@ -1,6 +1,7 @@
 import React, { useCallback, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { Button, ButtonWithLoading } from '@actual-app/components/button';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
@@ -10,7 +11,6 @@ import { useGlobalPref } from '../../../hooks/useGlobalPref';
 import { useDispatch } from '../../../redux';
 import { theme, styles } from '../../../style';
 import { Information } from '../../alerts';
-import { Button, ButtonWithLoading } from '../../common/Button2';
 import { Modal, ModalCloseButton, ModalHeader } from '../../common/Modal';
 import { Checkbox } from '../../forms';
 

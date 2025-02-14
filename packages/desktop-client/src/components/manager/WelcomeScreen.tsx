@@ -1,6 +1,7 @@
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
 import { Paragraph } from '@actual-app/components/paragraph';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
@@ -9,7 +10,6 @@ import { createBudget, pushModal } from 'loot-core/client/actions';
 
 import { useDispatch } from '../../redux';
 import { styles, theme } from '../../style';
-import { Button } from '../common/Button2';
 import { Link } from '../common/Link';
 
 export function WelcomeScreen() {

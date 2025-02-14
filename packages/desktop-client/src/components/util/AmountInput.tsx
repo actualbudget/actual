@@ -10,6 +10,7 @@ import React, {
 } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
 import { View } from '@actual-app/components/view';
 
 import { evalArithmetic } from 'loot-core/shared/arithmetic';
@@ -19,7 +20,6 @@ import { useMergedRefs } from '../../hooks/useMergedRefs';
 import { useSyncedPref } from '../../hooks/useSyncedPref';
 import { SvgAdd, SvgSubtract } from '../../icons/v1';
 import { theme } from '../../style';
-import { Button } from '../common/Button2';
 import { InputWithContent } from '../common/InputWithContent';
 import { useFormat } from '../spreadsheet/useFormat';
 

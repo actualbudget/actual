@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo, type CSSProperties } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 
+import { Button } from '@actual-app/components/button';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 import { parseISO } from 'date-fns';
@@ -26,7 +27,6 @@ import { SvgOpenParenthesis } from '../../../icons/v2/OpenParenthesis';
 import { SvgSum } from '../../../icons/v2/Sum';
 import { useDispatch } from '../../../redux';
 import { theme } from '../../../style';
-import { Button } from '../../common/Button2';
 import { EditablePageHeaderTitle } from '../../EditablePageHeaderTitle';
 import { AppliedFilters } from '../../filters/AppliedFilters';
 import { FilterButton } from '../../filters/FiltersMenu';

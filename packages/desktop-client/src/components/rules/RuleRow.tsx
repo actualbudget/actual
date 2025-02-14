@@ -2,6 +2,7 @@
 import React, { memo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
 import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
 import { Stack } from '@actual-app/components/stack';
@@ -16,7 +17,6 @@ import { useContextMenu } from '../../hooks/useContextMenu';
 import { useSelectedDispatch } from '../../hooks/useSelected';
 import { SvgRightArrow2 } from '../../icons/v0';
 import { styles, theme } from '../../style';
-import { Button } from '../common/Button2';
 import { SelectCell, Row, Field, Cell } from '../table';
 
 import { ActionExpression } from './ActionExpression';

@@ -8,6 +8,7 @@ import React, {
 } from 'react';
 import { Trans } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
 import { Popover } from '@actual-app/components/popover';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
@@ -21,7 +22,6 @@ import { integerToCurrency, amountToInteger } from 'loot-core/shared/util';
 import { useUndo } from '../../../hooks/useUndo';
 import { SvgCheveronDown } from '../../../icons/v1';
 import { styles, theme } from '../../../style';
-import { Button } from '../../common/Button2';
 import { type Binding, type SheetFields } from '../../spreadsheet';
 import { CellValue, CellValueText } from '../../spreadsheet/CellValue';
 import { useSheetValue } from '../../spreadsheet/useSheetValue';

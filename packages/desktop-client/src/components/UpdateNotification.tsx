@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
@@ -10,7 +11,6 @@ import { SvgClose } from '../icons/v1';
 import { useSelector, useDispatch } from '../redux';
 import { theme } from '../style';
 
-import { Button } from './common/Button2';
 import { Link } from './common/Link';
 
 export function UpdateNotification() {

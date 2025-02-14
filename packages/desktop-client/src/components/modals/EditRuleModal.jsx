@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
 import { Menu } from '@actual-app/components/menu';
 import { Stack } from '@actual-app/components/stack';
 import { Text } from '@actual-app/components/text';
@@ -41,7 +42,6 @@ import { SvgDelete, SvgAdd, SvgSubtract } from '../../icons/v0';
 import { SvgAlignLeft, SvgCode, SvgInformationOutline } from '../../icons/v1';
 import { useDispatch } from '../../redux';
 import { styles, theme } from '../../style';
-import { Button } from '../common/Button2';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { Select } from '../common/Select';
 import { StatusBadge } from '../schedules/StatusBadge';

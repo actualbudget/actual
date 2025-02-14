@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Trans } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
 import { InitialFocus } from '@actual-app/components/initial-focus';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
@@ -13,7 +14,6 @@ import { type TransObjectLiteral } from 'loot-core/types/util';
 
 import { SvgCheckCircle1 } from '../../icons/v2';
 import { styles, theme } from '../../style';
-import { Button } from '../common/Button2';
 import { Input } from '../common/Input';
 import { useFormat } from '../spreadsheet/useFormat';
 import { useSheetValue } from '../spreadsheet/useSheetValue';

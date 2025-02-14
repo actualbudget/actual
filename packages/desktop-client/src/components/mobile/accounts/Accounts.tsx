@@ -1,6 +1,7 @@
 import React, { type CSSProperties, useCallback } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
 import { Text } from '@actual-app/components/text';
 import { TextOneLine } from '@actual-app/components/text-one-line';
 import { View } from '@actual-app/components/view';
@@ -19,7 +20,6 @@ import { SvgAdd, SvgCheveronRight } from '../../../icons/v1';
 import { useDispatch, useSelector } from '../../../redux';
 import { theme, styles } from '../../../style';
 import { makeAmountFullStyle } from '../../budget/util';
-import { Button } from '../../common/Button2';
 import { MobilePageHeader, Page } from '../../Page';
 import { type Binding, type SheetFields } from '../../spreadsheet';
 import { CellValue, CellValueText } from '../../spreadsheet/CellValue';

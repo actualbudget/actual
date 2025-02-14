@@ -1,10 +1,10 @@
 import React, { type ReactNode } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
 import { View } from '@actual-app/components/view';
 
 import { useNavigate } from '../../../hooks/useNavigate';
-import { Button } from '../../common/Button2';
 import { Page } from '../../Page';
 
 import { UserDirectory } from './UserDirectory';

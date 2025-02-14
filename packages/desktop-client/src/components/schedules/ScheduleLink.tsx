@@ -2,6 +2,7 @@
 import React, { useMemo, useRef, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
 import { InitialFocus } from '@actual-app/components/initial-focus';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
@@ -17,7 +18,6 @@ import {
 
 import { SvgAdd } from '../../icons/v0';
 import { useDispatch } from '../../redux';
-import { Button } from '../common/Button2';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { Search } from '../common/Search';
 

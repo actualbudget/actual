@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
 import { Stack } from '@actual-app/components/stack';
 import { Text } from '@actual-app/components/text';
 
@@ -18,7 +19,6 @@ import {
 } from 'loot-core/src/types/models';
 
 import { useSyncedPref } from '../../hooks/useSyncedPref';
-import { Button } from '../common/Button2';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { CheckboxOption } from '../modals/ImportTransactionsModal/CheckboxOption';
 

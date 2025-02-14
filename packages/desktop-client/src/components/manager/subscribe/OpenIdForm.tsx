@@ -2,6 +2,7 @@ import { type ReactNode, useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useLocation, type Location } from 'react-router-dom';
 
+import { ButtonWithLoading } from '@actual-app/components/button';
 import { Menu } from '@actual-app/components/menu';
 import { Stack } from '@actual-app/components/stack';
 import { Text } from '@actual-app/components/text';
@@ -13,7 +14,6 @@ import { type Handlers } from 'loot-core/types/handlers';
 import { type OpenIdConfig } from 'loot-core/types/models/openid';
 
 import { theme, styles } from '../../../style';
-import { ButtonWithLoading } from '../../common/Button2';
 import { Input } from '../../common/Input';
 import { Link } from '../../common/Link';
 import { Select } from '../../common/Select';

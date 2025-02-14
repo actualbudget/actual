@@ -3,6 +3,7 @@ import { useHotkeys } from 'react-hotkeys-hook';
 import { useTranslation } from 'react-i18next';
 import { Routes, Route, useLocation } from 'react-router-dom';
 
+import { Button } from '@actual-app/components/button';
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
@@ -34,7 +35,6 @@ import { theme, styles, type CSSProperties } from '../style';
 import { AccountSyncCheck } from './accounts/AccountSyncCheck';
 import { AnimatedRefresh } from './AnimatedRefresh';
 import { MonthCountSelector } from './budget/MonthCountSelector';
-import { Button } from './common/Button2';
 import { Link } from './common/Link';
 import { HelpMenu } from './HelpMenu';
 import { LoggedInUser } from './LoggedInUser';

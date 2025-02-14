@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
 import { Stack } from '@actual-app/components/stack';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
@@ -11,7 +12,6 @@ import { PossibleRoles, type UserEntity } from 'loot-core/types/models/user';
 
 import { useDispatch } from '../../redux';
 import { styles, theme } from '../../style';
-import { Button } from '../common/Button2';
 import { Input } from '../common/Input';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { Select } from '../common/Select';

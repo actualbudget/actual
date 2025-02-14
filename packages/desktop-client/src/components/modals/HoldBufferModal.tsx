@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
 import { InitialFocus } from '@actual-app/components/initial-focus';
 import { View } from '@actual-app/components/view';
 
@@ -8,7 +9,6 @@ import { envelopeBudget } from 'loot-core/client/queries';
 
 import { styles } from '../../style';
 import { useEnvelopeSheetValue } from '../budget/envelope/EnvelopeBudgetComponents';
-import { Button } from '../common/Button2';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { FieldLabel } from '../mobile/MobileForms';
 import { AmountInput } from '../util/AmountInput';

@@ -8,6 +8,7 @@ import {
 } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
 import { InitialFocus } from '@actual-app/components/initial-focus';
 import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
@@ -27,7 +28,6 @@ import {
 import { useDateFormat } from '../../hooks/useDateFormat';
 import { SvgAdd, SvgSubtract } from '../../icons/v0';
 import { theme } from '../../style';
-import { Button } from '../common/Button2';
 import { Input } from '../common/Input';
 import { Select } from '../common/Select';
 import { Checkbox } from '../forms';

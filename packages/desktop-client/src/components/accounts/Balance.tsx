@@ -1,6 +1,7 @@
 import React, { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 import { useHover } from 'usehooks-ts';
@@ -14,7 +15,6 @@ import { type AccountEntity } from 'loot-core/types/models';
 import { useSelectedItems } from '../../hooks/useSelected';
 import { SvgArrowButtonRight1 } from '../../icons/v2';
 import { theme } from '../../style';
-import { Button } from '../common/Button2';
 import { PrivacyFilter } from '../PrivacyFilter';
 import { type Binding } from '../spreadsheet';
 import { CellValue, CellValueText } from '../spreadsheet/CellValue';

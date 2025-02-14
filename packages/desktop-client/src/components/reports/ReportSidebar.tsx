@@ -1,6 +1,7 @@
 import React, { useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
 import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
 import { SpaceBetween } from '@actual-app/components/space-between';
@@ -21,7 +22,6 @@ import { type SyncedPrefs } from 'loot-core/types/prefs';
 import { styles } from '../../style/styles';
 import { theme } from '../../style/theme';
 import { Information } from '../alerts';
-import { Button } from '../common/Button2';
 import { Select, type SelectOption } from '../common/Select';
 
 import { CategorySelector } from './CategorySelector';

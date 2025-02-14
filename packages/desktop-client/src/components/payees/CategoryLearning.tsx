@@ -1,10 +1,10 @@
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
 import { Paragraph } from '@actual-app/components/paragraph';
 
 import { useSyncedPref } from '../../hooks/useSyncedPref';
-import { Button } from '../common/Button2';
 import { Link } from '../common/Link';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 

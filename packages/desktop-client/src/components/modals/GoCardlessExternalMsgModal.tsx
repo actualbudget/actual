@@ -2,6 +2,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
 import { Paragraph } from '@actual-app/components/paragraph';
 import { View } from '@actual-app/components/view';
 
@@ -18,7 +19,6 @@ import { useDispatch } from '../../redux';
 import { theme } from '../../style';
 import { Error, Warning } from '../alerts';
 import { Autocomplete } from '../autocomplete/Autocomplete';
-import { Button } from '../common/Button2';
 import { Link } from '../common/Link';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { FormField, FormLabel } from '../forms';

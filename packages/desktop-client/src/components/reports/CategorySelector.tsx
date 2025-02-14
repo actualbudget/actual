@@ -2,6 +2,7 @@
 import React, { Fragment, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
@@ -16,7 +17,6 @@ import {
   SvgViewHide,
   SvgViewShow,
 } from '../../icons/v2';
-import { Button } from '../common/Button2';
 import { Checkbox } from '../forms';
 
 import { GraphButton } from './GraphButton';

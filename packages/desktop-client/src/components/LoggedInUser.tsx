@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, type CSSProperties } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 
+import { Button } from '@actual-app/components/button';
 import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
 import { Text } from '@actual-app/components/text';
@@ -19,7 +20,6 @@ import { useNavigate } from '../hooks/useNavigate';
 import { useSelector, useDispatch } from '../redux';
 import { theme, styles } from '../style';
 
-import { Button } from './common/Button2';
 import { PrivacyFilter } from './PrivacyFilter';
 import { useMultiuserEnabled, useServerURL } from './ServerContext';
 

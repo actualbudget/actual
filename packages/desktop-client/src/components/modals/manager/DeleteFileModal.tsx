@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { ButtonWithLoading } from '@actual-app/components/button';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
@@ -9,7 +10,6 @@ import { type File } from 'loot-core/types/file';
 
 import { useDispatch } from '../../../redux';
 import { theme } from '../../../style';
-import { ButtonWithLoading } from '../../common/Button2';
 import { Modal, ModalCloseButton, ModalHeader } from '../../common/Modal';
 
 type DeleteFileProps = {

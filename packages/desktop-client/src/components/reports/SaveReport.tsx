@@ -1,5 +1,6 @@
 import React, { createRef, useRef, useState } from 'react';
 
+import { Button } from '@actual-app/components/button';
 import { Popover } from '@actual-app/components/popover';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
@@ -9,7 +10,6 @@ import { send, sendCatch } from 'loot-core/platform/client/fetch';
 import { type CustomReportEntity } from 'loot-core/types/models';
 
 import { SvgExpandArrow } from '../../icons/v0';
-import { Button } from '../common/Button2';
 
 import { SaveReportChoose } from './SaveReportChoose';
 import { SaveReportDelete } from './SaveReportDelete';

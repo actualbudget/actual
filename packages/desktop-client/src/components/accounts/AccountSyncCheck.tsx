@@ -2,6 +2,7 @@ import React, { useCallback, useRef, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 
+import { Button } from '@actual-app/components/button';
 import { Popover } from '@actual-app/components/popover';
 import { View } from '@actual-app/components/view';
 
@@ -14,7 +15,6 @@ import { useFailedAccounts } from '../../hooks/useFailedAccounts';
 import { SvgExclamationOutline } from '../../icons/v1';
 import { useDispatch } from '../../redux';
 import { theme } from '../../style';
-import { Button } from '../common/Button2';
 import { Link } from '../common/Link';
 
 function useErrorMessage() {

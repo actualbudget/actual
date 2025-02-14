@@ -10,6 +10,7 @@ import React, {
 } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
@@ -25,7 +26,6 @@ import { SvgLockOpen } from '../../../icons/v1';
 import { SvgLockClosed } from '../../../icons/v2';
 import { useDispatch } from '../../../redux';
 import { theme } from '../../../style';
-import { Button } from '../../common/Button2';
 import { Link } from '../../common/Link';
 import { Search } from '../../common/Search';
 import { SimpleTable } from '../../common/SimpleTable';

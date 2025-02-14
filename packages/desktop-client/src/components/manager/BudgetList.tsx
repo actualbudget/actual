@@ -7,6 +7,7 @@ import React, {
 } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
 import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
 import { Text } from '@actual-app/components/text';
@@ -51,7 +52,6 @@ import { SvgCloudUnknown, SvgKey, SvgRefreshArrow } from '../../icons/v2';
 import { useSelector, useDispatch } from '../../redux';
 import { styles, theme } from '../../style';
 import { tokens } from '../../tokens';
-import { Button } from '../common/Button2';
 import { useResponsive } from '../responsive/ResponsiveProvider';
 import { useMultiuserEnabled } from '../ServerContext';
 

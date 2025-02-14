@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
 
+import { Button, ButtonWithLoading } from '@actual-app/components/button';
 import { Label } from '@actual-app/components/label';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
@@ -16,7 +17,6 @@ import { useNavigate } from '../../../hooks/useNavigate';
 import { AnimatedLoading } from '../../../icons/AnimatedLoading';
 import { useDispatch } from '../../../redux';
 import { styles, theme } from '../../../style';
-import { Button, ButtonWithLoading } from '../../common/Button2';
 import { BigInput } from '../../common/Input';
 import { Link } from '../../common/Link';
 import { Select } from '../../common/Select';

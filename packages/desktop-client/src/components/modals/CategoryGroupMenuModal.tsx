@@ -7,6 +7,7 @@ import React, {
 } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
 import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
 import { View } from '@actual-app/components/view';
@@ -18,7 +19,6 @@ import { useNotes } from '../../hooks/useNotes';
 import { SvgDotsHorizontalTriple, SvgAdd, SvgTrash } from '../../icons/v1';
 import { SvgNotesPaper, SvgViewHide, SvgViewShow } from '../../icons/v2';
 import { styles, theme } from '../../style';
-import { Button } from '../common/Button2';
 import {
   Modal,
   ModalCloseButton,

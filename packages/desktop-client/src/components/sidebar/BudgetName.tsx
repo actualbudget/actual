@@ -1,6 +1,7 @@
 import React, { type ReactNode, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
 import { InitialFocus } from '@actual-app/components/initial-focus';
 import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
@@ -16,7 +17,6 @@ import { useNavigate } from '../../hooks/useNavigate';
 import { SvgExpandArrow } from '../../icons/v0';
 import { useDispatch } from '../../redux';
 import { theme } from '../../style';
-import { Button } from '../common/Button2';
 import { Input } from '../common/Input';
 
 type BudgetNameProps = {

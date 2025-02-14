@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { Button, ButtonWithLoading } from '@actual-app/components/button';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
@@ -15,7 +16,6 @@ import { useGlobalPref } from '../../hooks/useGlobalPref';
 import { useNavigate } from '../../hooks/useNavigate';
 import { useDispatch } from '../../redux';
 import { theme } from '../../style';
-import { Button, ButtonWithLoading } from '../common/Button2';
 import { BigInput } from '../common/Input';
 import { Link } from '../common/Link';
 import { useServerURL, useSetServerURL } from '../ServerContext';

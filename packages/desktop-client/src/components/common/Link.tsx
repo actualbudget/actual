@@ -5,14 +5,13 @@ import React, {
 } from 'react';
 import { NavLink, useMatch } from 'react-router-dom';
 
+import { Button } from '@actual-app/components/button';
 import { Text } from '@actual-app/components/text';
 import { css } from '@emotion/css';
 
 import { useNavigate } from '../../hooks/useNavigate';
 import { type CSSProperties, styles } from '../../style';
 import { theme } from '../../style/theme';
-
-import { Button } from './Button2';
 
 type TextLinkProps = {
   style?: CSSProperties;

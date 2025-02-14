@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
 import { Paragraph } from '@actual-app/components/paragraph';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
@@ -13,7 +14,6 @@ import { usePayees } from '../../hooks/usePayees';
 import { useSelector, useDispatch } from '../../redux';
 import { theme } from '../../style';
 import { Information } from '../alerts';
-import { Button } from '../common/Button2';
 import { Modal, ModalButtons } from '../common/Modal';
 
 const highlightStyle = { color: theme.pageTextPositive };

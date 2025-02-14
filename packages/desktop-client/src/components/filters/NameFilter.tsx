@@ -2,11 +2,11 @@ import React, { useRef, useEffect } from 'react';
 import { Form } from 'react-aria-components';
 import { useTranslation } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
 import { Stack } from '@actual-app/components/stack';
 import { Text } from '@actual-app/components/text';
 
 import { theme } from '../../style';
-import { Button } from '../common/Button2';
 import { Input } from '../common/Input';
 import { FormField, FormLabel } from '../forms';
 

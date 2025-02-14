@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Form } from 'react-aria-components';
 import { useTranslation, Trans } from 'react-i18next';
 
+import { ButtonWithLoading } from '@actual-app/components/button';
 import { InitialFocus } from '@actual-app/components/initial-focus';
 import { Paragraph } from '@actual-app/components/paragraph';
 import { Text } from '@actual-app/components/text';
@@ -16,7 +17,6 @@ import { getCreateKeyError } from 'loot-core/shared/errors';
 
 import { useDispatch } from '../../redux';
 import { styles, theme } from '../../style';
-import { ButtonWithLoading } from '../common/Button2';
 import { Input } from '../common/Input';
 import { Link } from '../common/Link';
 import {

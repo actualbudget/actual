@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
 import { InitialFocus } from '@actual-app/components/initial-focus';
 import { View } from '@actual-app/components/view';
 
@@ -8,7 +9,6 @@ import { type CategoryEntity } from 'loot-core/types/models';
 
 import { useCategories } from '../../../hooks/useCategories';
 import { CategoryAutocomplete } from '../../autocomplete/CategoryAutocomplete';
-import { Button } from '../../common/Button2';
 import { addToBeBudgetedGroup, removeCategoriesFromGroups } from '../util';
 
 type CoverMenuProps = {

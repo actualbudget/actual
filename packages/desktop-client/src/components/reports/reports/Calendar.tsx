@@ -10,6 +10,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { useSpring, animated, config } from 'react-spring';
 
+import { Button } from '@actual-app/components/button';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 import { useDrag } from '@use-gesture/react';
@@ -50,7 +51,6 @@ import {
 } from '../../../icons/v1';
 import { useDispatch } from '../../../redux';
 import { styles, theme } from '../../../style';
-import { Button } from '../../common/Button2';
 import { EditablePageHeaderTitle } from '../../EditablePageHeaderTitle';
 import { MobileBackButton } from '../../mobile/MobileBackButton';
 import { TransactionList as TransactionListMobile } from '../../mobile/transactions/TransactionList';

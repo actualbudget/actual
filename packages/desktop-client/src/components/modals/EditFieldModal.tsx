@@ -6,6 +6,7 @@ import React, {
 } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
 import { View } from '@actual-app/components/view';
 import { parseISO, format as formatDate, parse as parseDate } from 'date-fns';
 
@@ -14,7 +15,6 @@ import { amountToInteger } from 'loot-core/shared/util';
 
 import { useDateFormat } from '../../hooks/useDateFormat';
 import { theme } from '../../style';
-import { Button } from '../common/Button2';
 import { Input } from '../common/Input';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { SectionLabel } from '../forms';

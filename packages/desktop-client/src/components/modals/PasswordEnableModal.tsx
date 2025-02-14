@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
 import { Label } from '@actual-app/components/label';
 import { View } from '@actual-app/components/view';
 
@@ -11,7 +12,6 @@ import * as asyncStorage from 'loot-core/platform/server/asyncStorage';
 import { useDispatch } from '../../redux';
 import { theme, styles } from '../../style';
 import { Error as ErrorAlert } from '../alerts';
-import { Button } from '../common/Button2';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { FormField } from '../forms';
 import {

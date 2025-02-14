@@ -3,6 +3,7 @@ import React, { type FormEvent, useState, type CSSProperties } from 'react';
 import { Form } from 'react-aria-components';
 import { useTranslation, Trans } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
 import { FormError } from '@actual-app/components/form-error';
 import { Paragraph } from '@actual-app/components/paragraph';
 import { Text } from '@actual-app/components/text';
@@ -20,7 +21,6 @@ import { useDispatch } from '../../redux';
 import { styles, theme } from '../../style';
 import { AccountAutocomplete } from '../autocomplete/AccountAutocomplete';
 import { CategoryAutocomplete } from '../autocomplete/CategoryAutocomplete';
-import { Button } from '../common/Button2';
 import { Link } from '../common/Link';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { useResponsive } from '../responsive/ResponsiveProvider';

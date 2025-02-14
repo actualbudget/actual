@@ -1,6 +1,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
 import { View } from '@actual-app/components/view';
 
 import { pushModal } from 'loot-core/client/actions';
@@ -13,7 +14,6 @@ import {
   addToBeBudgetedGroup,
   removeCategoriesFromGroups,
 } from '../budget/util';
-import { Button } from '../common/Button2';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { FieldLabel, TapField } from '../mobile/MobileForms';
 

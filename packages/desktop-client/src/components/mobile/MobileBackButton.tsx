@@ -1,12 +1,12 @@
 import React, { type ComponentPropsWithoutRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
 import { Text } from '@actual-app/components/text';
 
 import { useNavigate } from '../../hooks/useNavigate';
 import { SvgCheveronLeft } from '../../icons/v1';
 import { styles } from '../../style';
-import { Button } from '../common/Button2';
 
 type MobileBackButtonProps = ComponentPropsWithoutRef<typeof Button>;
 

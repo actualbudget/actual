@@ -7,6 +7,7 @@ import {
 } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
 import { Popover } from '@actual-app/components/popover';
 import { View } from '@actual-app/components/view';
 import memoizeOne from 'memoize-one';
@@ -25,7 +26,6 @@ import {
 import { SvgExpandArrow } from '../../icons/v0';
 import { useDispatch } from '../../redux';
 import { theme } from '../../style';
-import { Button } from '../common/Button2';
 import { Search } from '../common/Search';
 import { TableHeader, Cell, SelectCell } from '../table';
 
