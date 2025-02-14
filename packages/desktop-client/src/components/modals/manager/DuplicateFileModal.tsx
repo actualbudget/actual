@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { FormError } from '@actual-app/components/form-error';
 import { InitialFocus } from '@actual-app/components/initial-focus';
 import { InlineField } from '@actual-app/components/inline-field';
 import { Text } from '@actual-app/components/text';
@@ -17,7 +18,6 @@ import { type File } from 'loot-core/types/file';
 import { useDispatch } from '../../../redux';
 import { theme } from '../../../style';
 import { Button, ButtonWithLoading } from '../../common/Button2';
-import { FormError } from '../../common/FormError';
 import { Input } from '../../common/Input';
 import {
   Modal,
