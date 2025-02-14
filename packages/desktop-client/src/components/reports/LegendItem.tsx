@@ -1,7 +1,8 @@
 import React, { type CSSProperties } from 'react';
 
+import { View } from '@actual-app/components/view';
+
 import { Text } from '../common/Text';
-import { View } from '../common/View';
 
 export function LegendItem({
   color,

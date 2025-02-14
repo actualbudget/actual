@@ -1,8 +1,9 @@
 import React, { memo, useState, useMemo } from 'react';
 
+import { View } from '@actual-app/components/view';
+
 import { useLocalPref } from '../../hooks/useLocalPref';
 import { theme, styles } from '../../style';
-import { View } from '../common/View';
 import { DropHighlightPosContext } from '../sort';
 import { Row } from '../table';
 

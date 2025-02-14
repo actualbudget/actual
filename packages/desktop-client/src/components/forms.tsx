@@ -1,11 +1,11 @@
 import React, { type ReactNode, type ComponentProps } from 'react';
 
+import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
 import { theme, type CSSProperties } from '../style';
 
 import { Text } from './common/Text';
-import { View } from './common/View';
 
 type SectionLabelProps = {
   title?: string;

@@ -1,6 +1,8 @@
 import { type ComponentProps, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { View } from '@actual-app/components/view';
+
 import * as monthUtils from 'loot-core/shared/months';
 import {
   type RuleConditionEntity,
@@ -11,7 +13,6 @@ import { type SyncedPrefs } from 'loot-core/types/prefs';
 import { Button } from '../common/Button2';
 import { Select } from '../common/Select';
 import { SpaceBetween } from '../common/SpaceBetween';
-import { View } from '../common/View';
 import { AppliedFilters } from '../filters/AppliedFilters';
 import { FilterButton } from '../filters/FiltersMenu';
 import { useResponsive } from '../responsive/ResponsiveProvider';

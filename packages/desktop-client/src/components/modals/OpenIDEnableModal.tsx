@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { View } from '@actual-app/components/view';
+
 import { closeBudget, popModal } from 'loot-core/client/actions';
 import { send } from 'loot-core/platform/client/fetch';
 import * as asyncStorage from 'loot-core/platform/server/asyncStorage';
@@ -13,7 +15,6 @@ import { Error } from '../alerts';
 import { Button } from '../common/Button2';
 import { Label } from '../common/Label';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
-import { View } from '../common/View';
 import { OpenIdForm } from '../manager/subscribe/OpenIdForm';
 import { useRefreshLoginMethods } from '../ServerContext';
 

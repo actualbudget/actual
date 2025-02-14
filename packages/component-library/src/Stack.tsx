@@ -10,7 +10,8 @@ import React, {
 } from 'react';
 
 import { Text } from './Text';
-import { View } from './View';
+
+import { View } from '@actual-app/components/view';
 
 function getChildren(key, children) {
   return Children.toArray(children).reduce(

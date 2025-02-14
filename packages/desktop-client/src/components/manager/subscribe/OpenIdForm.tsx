@@ -2,6 +2,8 @@ import { type ReactNode, useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useLocation, type Location } from 'react-router-dom';
 
+import { View } from '@actual-app/components/view';
+
 import { addNotification } from 'loot-core/client/actions';
 import { send } from 'loot-core/platform/client/fetch';
 import { type Handlers } from 'loot-core/types/handlers';
@@ -15,7 +17,6 @@ import { Menu } from '../../common/Menu';
 import { Select } from '../../common/Select';
 import { Stack } from '../../common/Stack';
 import { Text } from '../../common/Text';
-import { View } from '../../common/View';
 import { FormField, FormLabel } from '../../forms';
 import { useServerURL } from '../../ServerContext';
 

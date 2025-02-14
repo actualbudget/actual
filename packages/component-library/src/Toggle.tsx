@@ -3,7 +3,8 @@ import React, { type CSSProperties } from 'react';
 import { css } from '@emotion/css';
 
 import { theme } from './theme';
-import { View } from './View';
+
+import { View } from '@actual-app/components/view';
 
 type ToggleProps = {
   id: string;

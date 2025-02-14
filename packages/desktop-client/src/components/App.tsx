@@ -11,6 +11,8 @@ import { HotkeysProvider } from 'react-hotkeys-hook';
 import { useTranslation } from 'react-i18next';
 import { BrowserRouter } from 'react-router-dom';
 
+import { View } from '@actual-app/components/view';
+
 import {
   addNotification,
   closeBudget,
@@ -32,7 +34,6 @@ import { ExposeNavigate } from '../util/router-tools';
 
 import { AppBackground } from './AppBackground';
 import { BudgetMonthCountProvider } from './budget/BudgetMonthCountContext';
-import { View } from './common/View';
 import { DevelopmentTopBar } from './DevelopmentTopBar';
 import { FatalError } from './FatalError';
 import { FinancesApp } from './FinancesApp';

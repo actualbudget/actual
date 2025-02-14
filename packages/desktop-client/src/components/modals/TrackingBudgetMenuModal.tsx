@@ -6,6 +6,8 @@ import React, {
 } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { View } from '@actual-app/components/view';
+
 import { trackingBudget } from 'loot-core/client/queries';
 import { amountToInteger, integerToAmount } from 'loot-core/shared/util';
 
@@ -20,7 +22,6 @@ import {
   ModalTitle,
 } from '../common/Modal';
 import { Text } from '../common/Text';
-import { View } from '../common/View';
 import { FocusableAmountInput } from '../mobile/transactions/FocusableAmountInput';
 
 type TrackingBudgetMenuModalProps = ComponentPropsWithoutRef<

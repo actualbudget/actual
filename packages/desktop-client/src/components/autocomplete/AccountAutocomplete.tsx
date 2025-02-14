@@ -8,6 +8,7 @@ import React, {
 } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { View } from '@actual-app/components/view';
 import { css, cx } from '@emotion/css';
 
 import { type AccountEntity } from 'loot-core/types/models';
@@ -15,7 +16,6 @@ import { type AccountEntity } from 'loot-core/types/models';
 import { useAccounts } from '../../hooks/useAccounts';
 import { theme, styles } from '../../style';
 import { TextOneLine } from '../common/TextOneLine';
-import { View } from '../common/View';
 import { useResponsive } from '../responsive/ResponsiveProvider';
 
 import { Autocomplete } from './Autocomplete';

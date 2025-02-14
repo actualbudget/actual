@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { View } from '@actual-app/components/view';
 import deepEqual from 'deep-equal';
 
 import {
@@ -22,7 +23,6 @@ import { Modal, ModalCloseButton, ModalHeader } from '../../common/Modal';
 import { Select } from '../../common/Select';
 import { Stack } from '../../common/Stack';
 import { Text } from '../../common/Text';
-import { View } from '../../common/View';
 import { SectionLabel } from '../../forms';
 import { TableHeader, TableWithNavigator } from '../../table';
 

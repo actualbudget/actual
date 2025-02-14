@@ -1,6 +1,7 @@
 import React, { type CSSProperties, useCallback } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 
+import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
 import { replaceModal } from 'loot-core/client/actions';
@@ -19,7 +20,6 @@ import { makeAmountFullStyle } from '../../budget/util';
 import { Button } from '../../common/Button2';
 import { Text } from '../../common/Text';
 import { TextOneLine } from '../../common/TextOneLine';
-import { View } from '../../common/View';
 import { MobilePageHeader, Page } from '../../Page';
 import { type Binding, type SheetFields } from '../../spreadsheet';
 import { CellValue, CellValueText } from '../../spreadsheet/CellValue';

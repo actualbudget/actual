@@ -1,6 +1,8 @@
 import React, { type ReactNode, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { View } from '@actual-app/components/view';
+
 import { closeBudget } from 'loot-core/client/actions';
 import * as Platform from 'loot-core/client/platform';
 
@@ -16,7 +18,6 @@ import { Input } from '../common/Input';
 import { Menu } from '../common/Menu';
 import { Popover } from '../common/Popover';
 import { Text } from '../common/Text';
-import { View } from '../common/View';
 
 type BudgetNameProps = {
   children?: ReactNode;

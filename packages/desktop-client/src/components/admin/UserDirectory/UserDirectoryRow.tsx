@@ -2,12 +2,13 @@
 import React, { memo } from 'react';
 import { Trans } from 'react-i18next';
 
+import { View } from '@actual-app/components/view';
+
 import { PossibleRoles, type UserEntity } from 'loot-core/types/models/user';
 
 import { useSelectedDispatch } from '../../../hooks/useSelected';
 import { theme } from '../../../style';
 import { Button } from '../../common/Button2';
-import { View } from '../../common/View';
 import { Checkbox } from '../../forms';
 import { SelectCell, Row, Cell } from '../../table';
 

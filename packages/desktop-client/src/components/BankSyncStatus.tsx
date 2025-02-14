@@ -2,12 +2,13 @@ import React from 'react';
 import { Trans } from 'react-i18next';
 import { useTransition, animated } from 'react-spring';
 
+import { View } from '@actual-app/components/view';
+
 import { useSelector } from '../redux';
 import { theme, styles } from '../style';
 
 import { AnimatedRefresh } from './AnimatedRefresh';
 import { Text } from './common/Text';
-import { View } from './common/View';
 
 export function BankSyncStatus() {
   const accountsSyncing = useSelector(state => state.account.accountsSyncing);

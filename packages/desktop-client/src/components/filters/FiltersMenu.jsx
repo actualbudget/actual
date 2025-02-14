@@ -4,6 +4,7 @@ import { Form } from 'react-aria-components';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { View } from '@actual-app/components/view';
 import {
   parse as parseDate,
   format as formatDate,
@@ -32,7 +33,6 @@ import { Select } from '../common/Select';
 import { Stack } from '../common/Stack';
 import { Text } from '../common/Text';
 import { Tooltip } from '../common/Tooltip';
-import { View } from '../common/View';
 import { GenericInput } from '../util/GenericInput';
 
 import { CompactFiltersButton } from './CompactFiltersButton';

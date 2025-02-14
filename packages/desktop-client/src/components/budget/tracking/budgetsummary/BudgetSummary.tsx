@@ -2,6 +2,7 @@
 import React, { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
 import * as monthUtils from 'loot-core/shared/months';
@@ -13,7 +14,6 @@ import { theme, styles } from '../../../../style';
 import { Button } from '../../../common/Button2';
 import { Popover } from '../../../common/Popover';
 import { Stack } from '../../../common/Stack';
-import { View } from '../../../common/View';
 import { NotesButton } from '../../../NotesButton';
 import { NamespaceContext } from '../../../spreadsheet/NamespaceContext';
 import { useTrackingBudget } from '../TrackingBudgetContext';

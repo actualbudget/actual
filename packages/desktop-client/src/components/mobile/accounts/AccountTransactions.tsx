@@ -6,6 +6,8 @@ import React, {
   useState,
 } from 'react';
 
+import { View } from '@actual-app/components/view';
+
 import {
   collapseModals,
   openAccountCloseModal,
@@ -42,7 +44,6 @@ import { useSelector, useDispatch } from '../../../redux';
 import { styles, theme } from '../../../style';
 import { Button } from '../../common/Button2';
 import { Text } from '../../common/Text';
-import { View } from '../../common/View';
 import { MobilePageHeader, Page } from '../../Page';
 import { MobileBackButton } from '../MobileBackButton';
 import { AddTransactionButton } from '../transactions/AddTransactionButton';

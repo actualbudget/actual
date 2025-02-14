@@ -1,6 +1,7 @@
 import React, { memo, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 import { AutoTextSize } from 'auto-text-size';
 import memoizeOne from 'memoize-one';
@@ -39,7 +40,6 @@ import { Card } from '../../common/Card';
 import { Label } from '../../common/Label';
 import { Link } from '../../common/Link';
 import { Text } from '../../common/Text';
-import { View } from '../../common/View';
 import { MobilePageHeader, Page } from '../../Page';
 import { PrivacyFilter } from '../../PrivacyFilter';
 import { useResponsive } from '../../responsive/ResponsiveProvider';

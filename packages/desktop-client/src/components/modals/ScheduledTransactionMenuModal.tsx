@@ -5,6 +5,8 @@ import React, {
 } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { View } from '@actual-app/components/view';
+
 import { useSchedules } from 'loot-core/client/data-hooks/schedules';
 import { format } from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
@@ -22,7 +24,6 @@ import {
   ModalTitle,
 } from '../common/Modal';
 import { Text } from '../common/Text';
-import { View } from '../common/View';
 
 type ScheduledTransactionMenuModalProps = ScheduledTransactionMenuProps;
 

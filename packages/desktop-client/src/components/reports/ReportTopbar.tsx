@@ -1,6 +1,8 @@
 import React, { type ComponentProps } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { View } from '@actual-app/components/view';
+
 import { type CustomReportEntity } from 'loot-core/types/models/reports';
 import { type RuleConditionEntity } from 'loot-core/types/models/rule';
 
@@ -16,7 +18,6 @@ import {
 import { SvgChartArea } from '../../icons/v1/ChartArea';
 import { theme } from '../../style';
 import { SpaceBetween } from '../common/SpaceBetween';
-import { View } from '../common/View';
 import { FilterButton } from '../filters/FiltersMenu';
 
 import { GraphButton } from './GraphButton';

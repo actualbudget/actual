@@ -6,6 +6,7 @@ import React, {
 } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { View } from '@actual-app/components/view';
 import { parseISO, format as formatDate, parse as parseDate } from 'date-fns';
 
 import { currentDay, dayFromDate } from 'loot-core/shared/months';
@@ -16,7 +17,6 @@ import { theme } from '../../style';
 import { Button } from '../common/Button2';
 import { Input } from '../common/Input';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
-import { View } from '../common/View';
 import { SectionLabel } from '../forms';
 import { useResponsive } from '../responsive/ResponsiveProvider';
 import { DateSelect } from '../select/DateSelect';

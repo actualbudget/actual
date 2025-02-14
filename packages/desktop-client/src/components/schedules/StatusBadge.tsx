@@ -1,5 +1,7 @@
 import React from 'react';
 
+import { View } from '@actual-app/components/view';
+
 import { type ScheduleStatusType } from 'loot-core/client/data-hooks/schedules';
 import { titleFirst } from 'loot-core/shared/util';
 
@@ -15,7 +17,6 @@ import {
 } from '../../icons/v2';
 import { theme } from '../../style';
 import { Text } from '../common/Text';
-import { View } from '../common/View';
 
 // Consists of Schedule Statuses + Transaction statuses
 type StatusTypes = ScheduleStatusType | 'cleared' | 'pending' | 'reconciled';

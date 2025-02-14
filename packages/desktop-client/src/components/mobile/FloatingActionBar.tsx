@@ -1,7 +1,8 @@
 import { type PropsWithChildren, type CSSProperties } from 'react';
 
+import { View } from '@actual-app/components/view';
+
 import { theme } from '../../style';
-import { View } from '../common/View';
 
 type FloatingActionBarProps = PropsWithChildren & {
   style: CSSProperties;

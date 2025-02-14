@@ -7,6 +7,7 @@ import React, {
 } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 
+import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
 import { type TransObjectLiteral } from 'loot-core/types/util';
@@ -15,7 +16,6 @@ import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { SvgArrowThinRight } from '../../icons/v1';
 import { theme, styles } from '../../style';
 import { Tooltip } from '../common/Tooltip';
-import { View } from '../common/View';
 import { useResponsive } from '../responsive/ResponsiveProvider';
 import { type Binding } from '../spreadsheet';
 import { CellValue, CellValueText } from '../spreadsheet/CellValue';

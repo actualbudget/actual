@@ -11,7 +11,8 @@ import {
 import { Text } from './Text';
 import { theme } from './theme';
 import { Toggle } from './Toggle';
-import { View } from './View';
+
+import { View } from '@actual-app/components/view';
 
 const MenuLine: unique symbol = Symbol('menu-line');
 const MenuLabel: unique symbol = Symbol('menu-label');

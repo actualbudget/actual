@@ -4,6 +4,8 @@ import React, {
 } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { View } from '@actual-app/components/view';
+
 import { envelopeBudget } from 'loot-core/client/queries';
 
 import { useCategory } from '../../hooks/useCategory';
@@ -20,7 +22,6 @@ import {
   ModalTitle,
 } from '../common/Modal';
 import { Text } from '../common/Text';
-import { View } from '../common/View';
 import { CellValueText } from '../spreadsheet/CellValue';
 
 type EnvelopeBalanceMenuModalProps = ComponentPropsWithoutRef<

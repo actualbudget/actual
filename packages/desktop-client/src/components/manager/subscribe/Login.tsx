@@ -3,6 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
 
+import { View } from '@actual-app/components/view';
+
 import { loggedIn } from 'loot-core/client/actions/user';
 import { send } from 'loot-core/platform/client/fetch';
 import { isElectron } from 'loot-core/shared/environment';
@@ -18,7 +20,6 @@ import { Label } from '../../common/Label';
 import { Link } from '../../common/Link';
 import { Select } from '../../common/Select';
 import { Text } from '../../common/Text';
-import { View } from '../../common/View';
 import { useResponsive } from '../../responsive/ResponsiveProvider';
 import { useAvailableLoginMethods, useLoginMethod } from '../../ServerContext';
 

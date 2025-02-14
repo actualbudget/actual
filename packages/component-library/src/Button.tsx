@@ -12,7 +12,8 @@ import { css } from '@emotion/css';
 import { AnimatedLoading } from './icons/AnimatedLoading';
 import { styles } from './styles';
 import { theme } from './theme';
-import { View } from './View';
+
+import { View } from '@actual-app/components/view';
 
 const backgroundColor: {
   [key in ButtonVariant | `${ButtonVariant}Disabled`]?: string;

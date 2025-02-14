@@ -8,6 +8,8 @@ import {
 } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 
+import { View } from '@actual-app/components/view';
+
 import { sendCatch } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 import { getRecurringDescription } from 'loot-core/shared/schedules';
@@ -28,7 +30,6 @@ import { Popover } from '../common/Popover';
 import { Select } from '../common/Select';
 import { Stack } from '../common/Stack';
 import { Text } from '../common/Text';
-import { View } from '../common/View';
 import { Checkbox } from '../forms';
 
 import { DateSelect } from './DateSelect';

@@ -10,6 +10,8 @@ import React, {
 } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { View } from '@actual-app/components/view';
+
 import { evalArithmetic } from 'loot-core/shared/arithmetic';
 import { amountToInteger, appendDecimals } from 'loot-core/shared/util';
 
@@ -19,7 +21,6 @@ import { SvgAdd, SvgSubtract } from '../../icons/v1';
 import { theme } from '../../style';
 import { Button } from '../common/Button2';
 import { InputWithContent } from '../common/InputWithContent';
-import { View } from '../common/View';
 import { useFormat } from '../spreadsheet/useFormat';
 
 type AmountInputProps = {

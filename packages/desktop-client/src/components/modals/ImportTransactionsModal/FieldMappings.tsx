@@ -1,7 +1,8 @@
 import React from 'react';
 
+import { View } from '@actual-app/components/view';
+
 import { Stack } from '../../common/Stack';
-import { View } from '../../common/View';
 import { SectionLabel } from '../../forms';
 
 import { SelectField } from './SelectField';

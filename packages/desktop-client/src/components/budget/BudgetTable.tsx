@@ -4,6 +4,8 @@ import React, {
   useState,
 } from 'react';
 
+import { View } from '@actual-app/components/view';
+
 import {
   type CategoryEntity,
   type CategoryGroupEntity,
@@ -12,7 +14,6 @@ import {
 import { useCategories } from '../../hooks/useCategories';
 import { useLocalPref } from '../../hooks/useLocalPref';
 import { theme, styles } from '../../style';
-import { View } from '../common/View';
 import { type DropPosition } from '../sort';
 
 import { BudgetCategories } from './BudgetCategories';

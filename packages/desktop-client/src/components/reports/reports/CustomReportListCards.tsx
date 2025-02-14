@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { View } from '@actual-app/components/view';
+
 import { addNotification } from 'loot-core/client/actions';
 import { calculateHasWarning } from 'loot-core/client/reports';
 import { send, sendCatch } from 'loot-core/platform/client/fetch/index';
@@ -17,7 +19,6 @@ import { styles } from '../../../style/index';
 import { theme } from '../../../style/theme';
 import { Text } from '../../common/Text';
 import { Tooltip } from '../../common/Tooltip';
-import { View } from '../../common/View';
 import { DateRange } from '../DateRange';
 import { ReportCard } from '../ReportCard';
 import { ReportCardName } from '../ReportCardName';

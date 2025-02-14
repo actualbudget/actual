@@ -2,6 +2,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { View } from '@actual-app/components/view';
+
 import { createBudget, loggedIn, signOut } from 'loot-core/client/actions';
 import {
   isNonProductionEnvironment,
@@ -16,7 +18,6 @@ import { Button, ButtonWithLoading } from '../common/Button2';
 import { BigInput } from '../common/Input';
 import { Link } from '../common/Link';
 import { Text } from '../common/Text';
-import { View } from '../common/View';
 import { useServerURL, useSetServerURL } from '../ServerContext';
 
 import { Title } from './subscribe/common';

@@ -1,6 +1,8 @@
 import { useMemo, useState, useCallback } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { View } from '@actual-app/components/view';
+
 import { pushModal } from 'loot-core/src/client/actions/modals';
 import {
   type BankSyncProviders,
@@ -11,7 +13,6 @@ import { useAccounts } from '../../hooks/useAccounts';
 import { useGlobalPref } from '../../hooks/useGlobalPref';
 import { useDispatch } from '../../redux';
 import { Text } from '../common/Text';
-import { View } from '../common/View';
 import { MOBILE_NAV_HEIGHT } from '../mobile/MobileNavTabs';
 import { Page } from '../Page';
 import { useResponsive } from '../responsive/ResponsiveProvider';

@@ -2,6 +2,8 @@
 import React, { useRef, useState, type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { View } from '@actual-app/components/view';
+
 import { type CategoryEntity } from 'loot-core/types/models';
 
 import { useCategory } from '../../hooks/useCategory';
@@ -19,7 +21,6 @@ import {
   ModalTitle,
 } from '../common/Modal';
 import { Popover } from '../common/Popover';
-import { View } from '../common/View';
 import { Notes } from '../Notes';
 
 type CategoryMenuModalProps = {

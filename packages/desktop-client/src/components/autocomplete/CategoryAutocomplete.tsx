@@ -12,6 +12,7 @@ import React, {
 } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { View } from '@actual-app/components/view';
 import { css, cx } from '@emotion/css';
 
 import { trackingBudget, envelopeBudget } from 'loot-core/client/queries';
@@ -30,7 +31,6 @@ import { useEnvelopeSheetValue } from '../budget/envelope/EnvelopeBudgetComponen
 import { makeAmountFullStyle } from '../budget/util';
 import { Text } from '../common/Text';
 import { TextOneLine } from '../common/TextOneLine';
-import { View } from '../common/View';
 import { useResponsive } from '../responsive/ResponsiveProvider';
 import { useSheetValue } from '../spreadsheet/useSheetValue';
 

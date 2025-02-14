@@ -2,6 +2,7 @@
 import React, { memo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { View } from '@actual-app/components/view';
 import { v4 as uuid } from 'uuid';
 
 import { friendlyOp } from 'loot-core/shared/rules';
@@ -16,7 +17,6 @@ import { Menu } from '../common/Menu';
 import { Popover } from '../common/Popover';
 import { Stack } from '../common/Stack';
 import { Text } from '../common/Text';
-import { View } from '../common/View';
 import { SelectCell, Row, Field, Cell } from '../table';
 
 import { ActionExpression } from './ActionExpression';

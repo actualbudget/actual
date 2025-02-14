@@ -2,6 +2,8 @@
 import React, { useRef, useState, useMemo, type CSSProperties } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { View } from '@actual-app/components/view';
+
 import {
   type ScheduleStatusType,
   type ScheduleStatuses,
@@ -23,7 +25,6 @@ import { Button } from '../common/Button2';
 import { Menu } from '../common/Menu';
 import { Popover } from '../common/Popover';
 import { Text } from '../common/Text';
-import { View } from '../common/View';
 import { PrivacyFilter } from '../PrivacyFilter';
 import { Table, TableHeader, Row, Field, Cell } from '../table';
 import { DisplayId } from '../util/DisplayId';

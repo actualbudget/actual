@@ -1,8 +1,9 @@
 import React from 'react';
 import { Trans } from 'react-i18next';
 
+import { View } from '@actual-app/components/view';
+
 import { Button } from '../common/Button2';
-import { View } from '../common/View';
 
 import { RenderMonths } from './RenderMonths';
 

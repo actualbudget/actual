@@ -3,6 +3,7 @@ import { useHotkeys } from 'react-hotkeys-hook';
 import { useTranslation } from 'react-i18next';
 import { Routes, Route, useLocation } from 'react-router-dom';
 
+import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
 import { sync } from 'loot-core/client/app/appSlice';
@@ -35,7 +36,6 @@ import { Button } from './common/Button2';
 import { Link } from './common/Link';
 import { SpaceBetween } from './common/SpaceBetween';
 import { Text } from './common/Text';
-import { View } from './common/View';
 import { HelpMenu } from './HelpMenu';
 import { LoggedInUser } from './LoggedInUser';
 import { useResponsive } from './responsive/ResponsiveProvider';

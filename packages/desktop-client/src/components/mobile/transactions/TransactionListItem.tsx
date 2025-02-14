@@ -5,6 +5,7 @@ import React, {
 import { mergeProps } from 'react-aria';
 import { ListBoxItem } from 'react-aria-components';
 
+import { View } from '@actual-app/components/view';
 import {
   PressResponder,
   usePress,
@@ -30,7 +31,6 @@ import { makeAmountFullStyle } from '../../budget/util';
 import { Button } from '../../common/Button2';
 import { Text } from '../../common/Text';
 import { TextOneLine } from '../../common/TextOneLine';
-import { View } from '../../common/View';
 import { getPrettyPayee } from '../utils';
 
 import { lookupName, Status } from './TransactionEdit';

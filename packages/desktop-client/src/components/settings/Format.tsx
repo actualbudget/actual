@@ -2,6 +2,7 @@
 import React, { type ReactNode } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 
+import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
 import { numberFormats } from 'loot-core/shared/util';
@@ -13,7 +14,6 @@ import { theme } from '../../style';
 import { tokens } from '../../tokens';
 import { Select } from '../common/Select';
 import { Text } from '../common/Text';
-import { View } from '../common/View';
 import { Checkbox } from '../forms';
 import { useSidebar } from '../sidebar/SidebarProvider';
 

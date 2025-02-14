@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 
+import { View } from '@actual-app/components/view';
+
 import {
   linkAccount,
   linkAccountSimpleFin,
@@ -15,7 +17,6 @@ import { Autocomplete } from '../autocomplete/Autocomplete';
 import { Button } from '../common/Button2';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { Text } from '../common/Text';
-import { View } from '../common/View';
 import { PrivacyFilter } from '../PrivacyFilter';
 import { TableHeader, Table, Row, Field } from '../table';
 

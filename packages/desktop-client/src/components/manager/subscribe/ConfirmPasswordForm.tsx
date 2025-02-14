@@ -2,10 +2,11 @@
 import React, { type ChangeEvent, type ReactNode, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { View } from '@actual-app/components/view';
+
 import { theme } from '../../../style';
 import { ButtonWithLoading } from '../../common/Button2';
 import { BigInput } from '../../common/Input';
-import { View } from '../../common/View';
 
 type ConfirmPasswordFormProps = {
   buttons: ReactNode;

@@ -2,6 +2,8 @@
 import React, { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { View } from '@actual-app/components/view';
+
 import { createBudget } from 'loot-core/client/actions/budgets';
 import { send } from 'loot-core/platform/client/fetch';
 
@@ -12,7 +14,6 @@ import { Button } from '../../common/Button2';
 import { Link } from '../../common/Link';
 import { Paragraph } from '../../common/Paragraph';
 import { Text } from '../../common/Text';
-import { View } from '../../common/View';
 import { useRefreshLoginMethods } from '../../ServerContext';
 
 import { useBootstrapped, Title } from './common';

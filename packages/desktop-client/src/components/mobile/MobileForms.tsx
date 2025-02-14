@@ -6,6 +6,7 @@ import React, {
   type CSSProperties,
 } from 'react';
 
+import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
 import { theme, styles } from '../../style';
@@ -13,7 +14,6 @@ import { Button } from '../common/Button';
 import { Input } from '../common/Input';
 import { Text } from '../common/Text';
 import { Toggle } from '../common/Toggle';
-import { View } from '../common/View';
 
 type FieldLabelProps = {
   title: string;

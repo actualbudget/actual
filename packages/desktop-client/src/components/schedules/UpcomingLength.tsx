@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { View } from '@actual-app/components/view';
+
 import { type SyncedPrefs } from 'loot-core/types/prefs';
 
 import { useSyncedPref } from '../../hooks/useSyncedPref';
@@ -8,7 +10,6 @@ import { Button } from '../common/Button2';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { Paragraph } from '../common/Paragraph';
 import { Select } from '../common/Select';
-import { View } from '../common/View';
 
 import { CustomUpcomingLength } from './CustomUpcomingLength';
 

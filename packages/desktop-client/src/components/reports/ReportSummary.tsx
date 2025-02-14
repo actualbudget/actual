@@ -1,6 +1,8 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { View } from '@actual-app/components/view';
+
 import * as monthUtils from 'loot-core/shared/months';
 import {
   amountToCurrency,
@@ -14,7 +16,6 @@ import {
 
 import { theme, styles } from '../../style';
 import { Text } from '../common/Text';
-import { View } from '../common/View';
 import { PrivacyFilter } from '../PrivacyFilter';
 
 import { ReportOptions } from './ReportOptions';

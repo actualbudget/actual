@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { View } from '@actual-app/components/view';
+
 import { replaceModal } from 'loot-core/client/actions/modals';
 import { send } from 'loot-core/platform/client/fetch';
 import { type PayeeEntity } from 'loot-core/types/models';
@@ -13,7 +15,6 @@ import { Button } from '../common/Button2';
 import { Modal, ModalButtons } from '../common/Modal';
 import { Paragraph } from '../common/Paragraph';
 import { Text } from '../common/Text';
-import { View } from '../common/View';
 
 const highlightStyle = { color: theme.pageTextPositive };
 

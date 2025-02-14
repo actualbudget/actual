@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { DialogTrigger } from 'react-aria-components';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { View } from '@actual-app/components/view';
+
 import { pushModal } from 'loot-core/client/actions';
 import { send } from 'loot-core/platform/client/fetch';
 
@@ -23,7 +25,6 @@ import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { Paragraph } from '../common/Paragraph';
 import { Popover } from '../common/Popover';
 import { Text } from '../common/Text';
-import { View } from '../common/View';
 import { useMultiuserEnabled } from '../ServerContext';
 
 type CreateAccountProps = {

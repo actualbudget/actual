@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo, type CSSProperties } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 
+import { View } from '@actual-app/components/view';
 import { parseISO } from 'date-fns';
 
 import { addNotification } from 'loot-core/client/actions';
@@ -26,7 +27,6 @@ import { useDispatch } from '../../../redux';
 import { theme } from '../../../style';
 import { Button } from '../../common/Button2';
 import { Text } from '../../common/Text';
-import { View } from '../../common/View';
 import { EditablePageHeaderTitle } from '../../EditablePageHeaderTitle';
 import { AppliedFilters } from '../../filters/AppliedFilters';
 import { FilterButton } from '../../filters/FiltersMenu';

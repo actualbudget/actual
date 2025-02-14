@@ -1,6 +1,8 @@
 import React, { type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { View } from '@actual-app/components/view';
+
 import {
   mapField,
   friendlyOp,
@@ -17,7 +19,6 @@ import {
 
 import { theme } from '../../style';
 import { Text } from '../common/Text';
-import { View } from '../common/View';
 
 import { ScheduleValue } from './ScheduleValue';
 import { Value } from './Value';

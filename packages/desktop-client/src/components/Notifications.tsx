@@ -8,6 +8,7 @@ import React, {
 } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
 import { removeNotification } from 'loot-core/client/actions';
@@ -22,7 +23,6 @@ import { Button, ButtonWithLoading } from './common/Button2';
 import { Link } from './common/Link';
 import { Stack } from './common/Stack';
 import { Text } from './common/Text';
-import { View } from './common/View';
 import { useResponsive } from './responsive/ResponsiveProvider';
 
 function compileMessage(

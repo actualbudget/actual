@@ -7,6 +7,8 @@ import React, {
 } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { View } from '@actual-app/components/view';
+
 import {
   type GroupedEntity,
   type DataEntity,
@@ -14,7 +16,6 @@ import {
 
 import { theme } from '../../../../style';
 import { styles } from '../../../../style/styles';
-import { View } from '../../../common/View';
 
 import { type renderTotalsProps } from './ReportTable';
 

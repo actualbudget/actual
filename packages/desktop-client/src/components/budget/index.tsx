@@ -2,6 +2,8 @@
 import React, { memo, useMemo, useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { View } from '@actual-app/components/view';
+
 import { addNotification, pushModal } from 'loot-core/client/actions';
 import {
   applyBudgetAction,
@@ -26,7 +28,6 @@ import { useNavigate } from '../../hooks/useNavigate';
 import { useSyncedPref } from '../../hooks/useSyncedPref';
 import { useDispatch } from '../../redux';
 import { styles } from '../../style';
-import { View } from '../common/View';
 import { NamespaceContext } from '../spreadsheet/NamespaceContext';
 
 import { DynamicBudgetTable } from './DynamicBudgetTable';

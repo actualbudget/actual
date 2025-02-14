@@ -2,6 +2,8 @@ import React, { useCallback, useRef, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 
+import { View } from '@actual-app/components/view';
+
 import { unlinkAccount } from 'loot-core/client/accounts/accountsSlice';
 import { type AccountEntity } from 'loot-core/types/models';
 
@@ -14,7 +16,6 @@ import { theme } from '../../style';
 import { Button } from '../common/Button2';
 import { Link } from '../common/Link';
 import { Popover } from '../common/Popover';
-import { View } from '../common/View';
 
 function useErrorMessage() {
   const { t } = useTranslation();

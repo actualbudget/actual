@@ -10,6 +10,7 @@ import React, {
 import { useTranslation } from 'react-i18next';
 import { useLocation, useParams } from 'react-router-dom';
 
+import { View } from '@actual-app/components/view';
 import {
   format as formatDate,
   parse as parseDate,
@@ -61,7 +62,6 @@ import { styles, theme } from '../../../style';
 import { Button } from '../../common/Button';
 import { Text } from '../../common/Text';
 import { Toggle } from '../../common/Toggle';
-import { View } from '../../common/View';
 import { MobilePageHeader, Page } from '../../Page';
 import { AmountInput } from '../../util/AmountInput';
 import { MobileBackButton } from '../MobileBackButton';

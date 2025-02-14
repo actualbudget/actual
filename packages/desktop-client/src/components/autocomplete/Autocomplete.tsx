@@ -11,6 +11,7 @@ import React, {
   useState,
 } from 'react';
 
+import { View } from '@actual-app/components/view';
 import { css, cx } from '@emotion/css';
 import Downshift, { type StateChangeTypes } from 'downshift';
 
@@ -21,7 +22,6 @@ import { styles, theme } from '../../style';
 import { Button } from '../common/Button';
 import { Input } from '../common/Input';
 import { Popover } from '../common/Popover';
-import { View } from '../common/View';
 import { useResponsive } from '../responsive/ResponsiveProvider';
 
 type CommonAutocompleteProps<T extends Item> = {

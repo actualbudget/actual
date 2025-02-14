@@ -7,6 +7,8 @@ import React, {
 } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { View } from '@actual-app/components/view';
+
 import { type CategoryGroupEntity } from 'loot-core/types/models';
 
 import { useCategories } from '../../hooks/useCategories';
@@ -23,7 +25,6 @@ import {
   ModalTitle,
 } from '../common/Modal';
 import { Popover } from '../common/Popover';
-import { View } from '../common/View';
 import { Notes } from '../Notes';
 
 type CategoryGroupMenuModalProps = {

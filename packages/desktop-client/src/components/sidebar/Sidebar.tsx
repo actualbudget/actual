@@ -1,6 +1,7 @@
 import React, { type CSSProperties, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 import { Resizable } from 're-resizable';
 
@@ -13,7 +14,6 @@ import { useResizeObserver } from '../../hooks/useResizeObserver';
 import { SvgAdd } from '../../icons/v1';
 import { useDispatch } from '../../redux';
 import { styles, theme } from '../../style';
-import { View } from '../common/View';
 import { useResponsive } from '../responsive/ResponsiveProvider';
 
 import { Accounts } from './Accounts';

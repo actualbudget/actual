@@ -1,6 +1,7 @@
 import React, { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { View } from '@actual-app/components/view';
 import { useHover } from 'usehooks-ts';
 
 import { useCachedSchedules } from 'loot-core/client/data-hooks/schedules';
@@ -14,7 +15,6 @@ import { SvgArrowButtonRight1 } from '../../icons/v2';
 import { theme } from '../../style';
 import { Button } from '../common/Button2';
 import { Text } from '../common/Text';
-import { View } from '../common/View';
 import { PrivacyFilter } from '../PrivacyFilter';
 import { type Binding } from '../spreadsheet';
 import { CellValue, CellValueText } from '../spreadsheet/CellValue';

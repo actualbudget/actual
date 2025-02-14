@@ -1,13 +1,14 @@
 import React from 'react';
 import { Trans } from 'react-i18next';
 
+import { View } from '@actual-app/components/view';
+
 import { type TransObjectLiteral } from 'loot-core/types/util';
 
 import { theme } from '../../style/theme';
 import { Button } from '../common/Button2';
 import { Stack } from '../common/Stack';
 import { Text } from '../common/Text';
-import { View } from '../common/View';
 
 type SaveReportDeleteProps = {
   onDelete: () => void;

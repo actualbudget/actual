@@ -2,6 +2,8 @@
 import React, { Fragment, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { View } from '@actual-app/components/view';
+
 import {
   type CategoryEntity,
   type CategoryGroupEntity,
@@ -15,7 +17,6 @@ import {
 } from '../../icons/v2';
 import { Button } from '../common/Button2';
 import { Text } from '../common/Text';
-import { View } from '../common/View';
 import { Checkbox } from '../forms';
 
 import { GraphButton } from './GraphButton';

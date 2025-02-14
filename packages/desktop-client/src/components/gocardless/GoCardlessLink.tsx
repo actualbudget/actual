@@ -1,9 +1,10 @@
 import React from 'react';
 import { Trans } from 'react-i18next';
 
+import { View } from '@actual-app/components/view';
+
 import { Modal, ModalHeader } from '../common/Modal';
 import { Paragraph } from '../common/Paragraph';
-import { View } from '../common/View';
 
 export function GoCardlessLink() {
   window.close();

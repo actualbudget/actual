@@ -12,6 +12,7 @@ import React, {
   type MutableRefObject,
 } from 'react';
 
+import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 import { parse, parseISO, format, subDays, addDays, isValid } from 'date-fns';
 import Pikaday from 'pikaday';
@@ -30,7 +31,6 @@ import { useSyncedPref } from '../../hooks/useSyncedPref';
 import { styles, theme, type CSSProperties } from '../../style';
 import { Input } from '../common/Input';
 import { Popover } from '../common/Popover';
-import { View } from '../common/View';
 
 import DateSelectLeft from './DateSelect.left.png';
 import DateSelectRight from './DateSelect.right.png';

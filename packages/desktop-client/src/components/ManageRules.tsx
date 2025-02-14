@@ -9,6 +9,8 @@ import React, {
 } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { View } from '@actual-app/components/view';
+
 import { pushModal } from 'loot-core/client/actions/modals';
 import { useSchedules } from 'loot-core/client/data-hooks/schedules';
 import { initiallyLoadPayees } from 'loot-core/client/queries/queriesSlice';
@@ -33,7 +35,6 @@ import { Search } from './common/Search';
 import { SimpleTable } from './common/SimpleTable';
 import { Stack } from './common/Stack';
 import { Text } from './common/Text';
-import { View } from './common/View';
 import { RulesHeader } from './rules/RulesHeader';
 import { RulesList } from './rules/RulesList';
 

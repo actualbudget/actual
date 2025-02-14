@@ -3,6 +3,8 @@ import { type FormEvent, useState } from 'react';
 import { Form } from 'react-aria-components';
 import { useTranslation, Trans } from 'react-i18next';
 
+import { View } from '@actual-app/components/view';
+
 import { closeModal } from 'loot-core/client/actions';
 import { createAccount } from 'loot-core/client/queries/queriesSlice';
 import { toRelaxedNumber } from 'loot-core/shared/util';
@@ -25,7 +27,6 @@ import {
   ModalTitle,
 } from '../common/Modal';
 import { Text } from '../common/Text';
-import { View } from '../common/View';
 import { Checkbox } from '../forms';
 import { validateAccountName } from '../util/accountValidation';
 

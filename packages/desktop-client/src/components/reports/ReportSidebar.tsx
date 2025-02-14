@@ -1,6 +1,8 @@
 import React, { useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { View } from '@actual-app/components/view';
+
 import * as monthUtils from 'loot-core/shared/months';
 import { type CategoryEntity } from 'loot-core/types/models/category';
 import { type CategoryGroupEntity } from 'loot-core/types/models/category-group';
@@ -21,7 +23,6 @@ import { Select, type SelectOption } from '../common/Select';
 import { SpaceBetween } from '../common/SpaceBetween';
 import { Text } from '../common/Text';
 import { Tooltip } from '../common/Tooltip';
-import { View } from '../common/View';
 
 import { CategorySelector } from './CategorySelector';
 import { defaultsList, disabledList } from './disabledList';

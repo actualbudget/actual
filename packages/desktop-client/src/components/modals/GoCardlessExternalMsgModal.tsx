@@ -2,6 +2,8 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { View } from '@actual-app/components/view';
+
 import { pushModal } from 'loot-core/client/actions/modals';
 import { sendCatch } from 'loot-core/platform/client/fetch';
 import {
@@ -19,7 +21,6 @@ import { Button } from '../common/Button2';
 import { Link } from '../common/Link';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { Paragraph } from '../common/Paragraph';
-import { View } from '../common/View';
 import { FormField, FormLabel } from '../forms';
 import { COUNTRY_OPTIONS } from '../util/countries';
 

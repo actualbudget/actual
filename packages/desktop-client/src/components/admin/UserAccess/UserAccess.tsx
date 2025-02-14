@@ -10,6 +10,8 @@ import React, {
 } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { View } from '@actual-app/components/view';
+
 import { addNotification, pushModal } from 'loot-core/client/actions';
 import { send } from 'loot-core/platform/client/fetch';
 import * as undo from 'loot-core/platform/client/undo';
@@ -27,7 +29,6 @@ import { Link } from '../../common/Link';
 import { Search } from '../../common/Search';
 import { SimpleTable } from '../../common/SimpleTable';
 import { Text } from '../../common/Text';
-import { View } from '../../common/View';
 
 import { UserAccessHeader } from './UserAccessHeader';
 import { UserAccessRow } from './UserAccessRow';

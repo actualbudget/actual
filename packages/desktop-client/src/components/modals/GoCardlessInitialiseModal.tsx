@@ -2,6 +2,8 @@
 import React, { useState } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 
+import { View } from '@actual-app/components/view';
+
 import { send } from 'loot-core/platform/client/fetch';
 import { getSecretsError } from 'loot-core/shared/errors';
 
@@ -17,7 +19,6 @@ import {
   ModalHeader,
 } from '../common/Modal';
 import { Text } from '../common/Text';
-import { View } from '../common/View';
 import { FormField, FormLabel } from '../forms';
 
 type GoCardlessInitialiseProps = {

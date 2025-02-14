@@ -1,6 +1,6 @@
 import React, { type ComponentType, type SVGProps } from 'react';
 
-import { View } from '../common/View';
+import { View } from '@actual-app/components/view';
 
 import { SecondaryItem } from './SecondaryItem';
 

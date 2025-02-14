@@ -1,6 +1,7 @@
 import React, { type ReactNode } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 
+import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
 import { type DarkTheme, type Theme } from 'loot-core/types/prefs';
@@ -15,7 +16,6 @@ import {
 import { tokens } from '../../tokens';
 import { Select } from '../common/Select';
 import { Text } from '../common/Text';
-import { View } from '../common/View';
 import { useSidebar } from '../sidebar/SidebarProvider';
 
 import { Setting } from './UI';

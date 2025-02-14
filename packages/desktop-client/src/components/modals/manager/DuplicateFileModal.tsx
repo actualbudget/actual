@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { View } from '@actual-app/components/view';
+
 import {
   addNotification,
   duplicateBudget,
@@ -23,7 +25,6 @@ import {
   ModalHeader,
 } from '../../common/Modal';
 import { Text } from '../../common/Text';
-import { View } from '../../common/View';
 
 type DuplicateFileProps = {
   file: File;
