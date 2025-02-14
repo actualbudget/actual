@@ -28,6 +28,7 @@ import {
   SvgArrowThinRight,
   SvgArrowThickRight,
   SvgCheveronRight,
+  SvgCalendar,
 } from '../../../icons/v1';
 import { SvgViewShow } from '../../../icons/v2';
 import { useDispatch } from '../../../redux';
@@ -1627,6 +1628,7 @@ export function BudgetTable({
   // editMode,
   onPrevMonth,
   onNextMonth,
+  onCurrentMonth,
   onSaveGroup,
   onDeleteGroup,
   onAddCategory,
@@ -1691,6 +1693,16 @@ export function BudgetTable({
                 width="14"
                 height="14"
               />
+            </Button>
+          }
+          rightContent={
+            <Button
+              variant="bare"
+              onPress={onCurrentMonth}
+              aria-label={t('Today')}
+              style={{ margin: 10 }}
+            >
+              <SvgCalendar width={20} height={20} />
             </Button>
           }
         />

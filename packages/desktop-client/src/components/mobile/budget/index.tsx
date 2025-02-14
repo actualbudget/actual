@@ -286,6 +286,13 @@ export function Budget() {
     setInitialized(true);
   }, [budgetType, setStartMonthPref, spreadsheet, startMonth]);
 
+  const onCurrentMonth = useCallback(async () => {
+    const month = currMonth;
+    await prewarmMonth(budgetType, spreadsheet, month);
+    setStartMonthPref(month);
+    setInitialized(true);
+  }, [budgetType, setStartMonthPref, spreadsheet, startMonth]);
+
   // const onOpenMonthActionMenu = () => {
   //   const options = [
   //     'Copy last month’s budget',
@@ -500,6 +507,7 @@ export function Budget() {
             onShowBudgetSummary={onShowBudgetSummary}
             onPrevMonth={onPrevMonth}
             onNextMonth={onNextMonth}
+            onCurrentMonth={onCurrentMonth}
             onSaveGroup={onSaveGroup}
             onDeleteGroup={onDeleteGroup}
             onAddCategory={onOpenNewCategoryModal}
