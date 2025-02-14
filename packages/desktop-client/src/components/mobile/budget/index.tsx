@@ -287,11 +287,10 @@ export function Budget() {
   }, [budgetType, setStartMonthPref, spreadsheet, startMonth]);
 
   const onCurrentMonth = useCallback(async () => {
-    const month = currMonth;
-    await prewarmMonth(budgetType, spreadsheet, month);
-    setStartMonthPref(month);
+    await prewarmMonth(budgetType, spreadsheet, currMonth);
+    setStartMonthPref(currMonth);
     setInitialized(true);
-  }, [budgetType, setStartMonthPref, spreadsheet, startMonth]);
+  }, [budgetType, setStartMonthPref, spreadsheet, currMonth]);
 
   // const onOpenMonthActionMenu = () => {
   //   const options = [
