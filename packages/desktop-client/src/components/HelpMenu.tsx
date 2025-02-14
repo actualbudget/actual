@@ -3,6 +3,7 @@ import { useHotkeys } from 'react-hotkeys-hook';
 import { Trans, useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 
+import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { useToggle } from 'usehooks-ts';
@@ -14,7 +15,6 @@ import { SvgHelp } from '../icons/v2/Help';
 import { useDispatch } from '../redux';
 
 import { Button } from './common/Button2';
-import { Menu } from './common/Menu';
 
 const getPageDocs = (page: string) => {
   switch (page) {

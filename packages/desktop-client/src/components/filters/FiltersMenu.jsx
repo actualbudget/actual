@@ -4,6 +4,7 @@ import { Form } from 'react-aria-components';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
 import { Stack } from '@actual-app/components/stack';
 import { Text } from '@actual-app/components/text';
@@ -31,7 +32,6 @@ import { titleFirst } from 'loot-core/shared/util';
 import { useDateFormat } from '../../hooks/useDateFormat';
 import { styles, theme } from '../../style';
 import { Button } from '../common/Button2';
-import { Menu } from '../common/Menu';
 import { Select } from '../common/Select';
 import { GenericInput } from '../util/GenericInput';
 

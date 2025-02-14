@@ -4,9 +4,10 @@ import React, {
 } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { Menu } from '@actual-app/components/menu';
+
 import { useLocalPref } from '../../hooks/useLocalPref';
 import { theme, styles } from '../../style';
-import { Menu } from '../common/Menu';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 
 type BudgetPageMenuModalProps = ComponentPropsWithoutRef<typeof BudgetPageMenu>;

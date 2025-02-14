@@ -5,6 +5,7 @@ import React, {
   type CSSProperties,
 } from 'react';
 
+import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
 import { View } from '@actual-app/components/view';
 
@@ -12,7 +13,6 @@ import { useContextMenu } from '../../hooks/useContextMenu';
 import { useIsInViewport } from '../../hooks/useIsInViewport';
 import { useNavigate } from '../../hooks/useNavigate';
 import { theme } from '../../style';
-import { Menu } from '../common/Menu';
 import { MenuButton } from '../common/MenuButton';
 import { useResponsive } from '../responsive/ResponsiveProvider';
 

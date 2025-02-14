@@ -1,12 +1,12 @@
 import { useRef, useState, type CSSProperties } from 'react';
 
+import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
 import { View } from '@actual-app/components/view';
 
 import { SvgExpandArrow } from '../../icons/v0';
 
 import { Button } from './Button2';
-import { Menu } from './Menu';
 
 function isValueOption<Value>(
   option: readonly [Value, string] | typeof Menu.line,

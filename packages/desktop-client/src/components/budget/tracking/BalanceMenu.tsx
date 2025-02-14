@@ -1,9 +1,9 @@
 import React, { type ComponentPropsWithoutRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { trackingBudget } from 'loot-core/client/queries';
+import { Menu } from '@actual-app/components/menu';
 
-import { Menu } from '../../common/Menu';
+import { trackingBudget } from 'loot-core/client/queries';
 
 import { useTrackingSheetValue } from './TrackingBudgetComponents';
 

@@ -8,6 +8,7 @@ import {
 } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 
+import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
 import { Stack } from '@actual-app/components/stack';
 import { Text } from '@actual-app/components/text';
@@ -28,7 +29,6 @@ import { theme } from '../../style';
 import { Button } from '../common/Button2';
 import { InitialFocus } from '../common/InitialFocus';
 import { Input } from '../common/Input';
-import { Menu } from '../common/Menu';
 import { Select } from '../common/Select';
 import { Checkbox } from '../forms';
 

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { DialogTrigger } from 'react-aria-components';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
@@ -22,7 +23,6 @@ import { Warning } from '../alerts';
 import { Button, ButtonWithLoading } from '../common/Button2';
 import { InitialFocus } from '../common/InitialFocus';
 import { Link } from '../common/Link';
-import { Menu } from '../common/Menu';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { Paragraph } from '../common/Paragraph';
 import { useMultiuserEnabled } from '../ServerContext';
