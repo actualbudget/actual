@@ -18,11 +18,6 @@ describe('#normalizeTransaction', () => {
 
   it('extracts card transaction date', () => {
     expect(
-      SwedbankHabaLV22.normalizeTransaction(bookedCardTransaction, true)
-        .bookingDate,
-    ).toEqual('2024-10-28');
-
-    expect(
       SwedbankHabaLV22.normalizeTransaction(bookedCardTransaction, true).date,
     ).toEqual('2024-10-28');
   });
@@ -56,7 +51,7 @@ describe('#normalizeTransaction', () => {
   it('extracts pending card transaction creditor name', () => {
     expect(
       SwedbankHabaLV22.normalizeTransaction(pendingCardTransaction, false)
-        .creditorName,
-    ).toEqual('SOME CREDITOR NAME');
+        .payeeName,
+    ).toEqual('Some Creditor Name');
   });
 });

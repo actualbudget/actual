@@ -4,6 +4,14 @@ import {
   NormalizedAccountDetails,
 } from '../gocardless.types.js';
 
+type TransactionExtended = Transaction & {
+  date?: string;
+  payeeName?: string;
+  notes?: string;
+  remittanceInformationUnstructuredArrayString?: string;
+  remittanceInformationStructuredArrayString?: string;
+};
+
 export interface IBank {
   institutionIds: string[];
 
@@ -23,9 +31,10 @@ export interface IBank {
    * transaction date.
    */
   normalizeTransaction: (
-    transaction: Transaction,
+    transaction: TransactionExtended,
     booked: boolean,
-  ) => (Transaction & { date?: string; payeeName: string }) | null;
+    editedTransaction?: TransactionExtended,
+  ) => TransactionExtended | null;
 
   /**
    * Function sorts an array of transactions from newest to oldest

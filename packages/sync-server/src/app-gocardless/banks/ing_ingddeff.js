@@ -1,4 +1,3 @@
-import { formatPayeeName } from '../../util/payee-name.js';
 import { amountToInteger } from '../utils.js';
 
 import Fallback from './integration-bank.js';
@@ -9,20 +8,18 @@ export default {
 
   institutionIds: ['ING_INGDDEFF'],
 
-  normalizeTransaction(transaction, _booked) {
+  normalizeTransaction(transaction, booked) {
+    const editedTrans = { ...transaction };
+
     const remittanceInformationMatch = /remittanceinformation:(.*)$/.exec(
       transaction.remittanceInformationUnstructured,
     );
 
-    transaction.remittanceInformationUnstructured = remittanceInformationMatch
+    editedTrans.remittanceInformationUnstructured = remittanceInformationMatch
       ? remittanceInformationMatch[1]
       : transaction.remittanceInformationUnstructured;
 
-    return {
-      ...transaction,
-      payeeName: formatPayeeName(transaction),
-      date: transaction.bookingDate || transaction.valueDate,
-    };
+    return Fallback.normalizeTransaction(transaction, booked, editedTrans);
   },
 
   sortTransactions(transactions = []) {

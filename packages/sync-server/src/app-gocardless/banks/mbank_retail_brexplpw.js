@@ -1,4 +1,3 @@
-import { formatPayeeName } from '../../util/payee-name.js';
 import { amountToInteger } from '../utils.js';
 
 import Fallback from './integration-bank.js';
@@ -8,14 +7,6 @@ export default {
   ...Fallback,
 
   institutionIds: ['MBANK_RETAIL_BREXPLPW'],
-
-  normalizeTransaction(transaction, _booked) {
-    return {
-      ...transaction,
-      payeeName: formatPayeeName(transaction),
-      date: transaction.bookingDate || transaction.valueDate,
-    };
-  },
 
   sortTransactions(transactions = []) {
     return transactions.sort(

@@ -190,6 +190,8 @@ function handleSyncResponse(
   resMatchedTransactions.push(...matchedTransactions);
   resUpdatedAccounts.push(...updatedAccounts);
 
+  dispatch(getAccounts());
+
   return newTransactions.length > 0 || matchedTransactions.length > 0;
 }
 

@@ -1,4 +1,3 @@
-import { formatPayeeName } from '../../util/payee-name.js';
 import { amountToInteger } from '../utils.js';
 
 import Fallback from './integration-bank.js';
@@ -9,27 +8,8 @@ export default {
 
   institutionIds: ['BERLINER_SPARKASSE_BELADEBEXXX'],
 
-  /**
-   * Following the GoCardless documentation[0] we should prefer `bookingDate`
-   * here, though some of their bank integrations uses the date field
-   * differently from what's described in their documentation and so it's
-   * sometimes necessary to use `valueDate` instead.
-   *
-   *   [0]: https://nordigen.zendesk.com/hc/en-gb/articles/7899367372829-valueDate-and-bookingDate-for-transactions
-   */
-  normalizeTransaction(transaction, _booked) {
-    const date =
-      transaction.bookingDate ||
-      transaction.bookingDateTime ||
-      transaction.valueDate ||
-      transaction.valueDateTime;
-
-    // If we couldn't find a valid date field we filter out this transaction
-    // and hope that we will import it again once the bank has processed the
-    // transaction further.
-    if (!date) {
-      return null;
-    }
+  normalizeTransaction(transaction, booked) {
+    const editedTrans = { ...transaction };
 
     let remittanceInformationUnstructured;
 
@@ -54,15 +34,11 @@ export default {
       transaction.creditorName ||
       transaction.debtorName;
 
-    transaction.creditorName = usefulCreditorName;
-    transaction.remittanceInformationUnstructured =
+    editedTrans.creditorName = usefulCreditorName;
+    editedTrans.remittanceInformationUnstructured =
       remittanceInformationUnstructured;
 
-    return {
-      ...transaction,
-      payeeName: formatPayeeName(transaction),
-      date: transaction.bookingDate || transaction.valueDate,
-    };
+    return Fallback.normalizeTransaction(transaction, booked, editedTrans);
   },
 
   /**

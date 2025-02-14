@@ -1,4 +1,3 @@
-import { formatPayeeName } from '../../util/payee-name.js';
 import { amountToInteger } from '../utils.js';
 
 import Fallback from './integration-bank.js';
@@ -9,7 +8,9 @@ export default {
 
   institutionIds: ['DANSKEBANK_DABANO22'],
 
-  normalizeTransaction(transaction, _booked) {
+  normalizeTransaction(transaction, booked) {
+    const editedTrans = { ...transaction };
+
     /**
      * Danske Bank appends the EndToEndID: NOTPROVIDED to
      * remittanceInformationUnstructured, cluttering the data.
@@ -17,21 +18,13 @@ export default {
      * We clean thais up by removing any instances of this string from all transactions.
      *
      */
-    transaction.remittanceInformationUnstructured =
+    editedTrans.remittanceInformationUnstructured =
       transaction.remittanceInformationUnstructured.replace(
         '\nEndToEndID: NOTPROVIDED',
         '',
       );
 
-    /**
-     * The valueDate in transactions from Danske Bank is not the one expected, but rather the date
-     * the funds are expected to be paid back for credit accounts.
-     */
-    return {
-      ...transaction,
-      payeeName: formatPayeeName(transaction),
-      date: transaction.bookingDate,
-    };
+    return Fallback.normalizeTransaction(transaction, booked, editedTrans);
   },
 
   calculateStartingBalance(sortedTransactions = [], balances = []) {

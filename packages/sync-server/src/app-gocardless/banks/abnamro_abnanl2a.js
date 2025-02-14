@@ -1,4 +1,3 @@
-import { formatPayeeName } from '../../util/payee-name.js';
 import { amountToInteger } from '../utils.js';
 
 import Fallback from './integration-bank.js';
@@ -9,9 +8,11 @@ export default {
 
   institutionIds: ['ABNAMRO_ABNANL2A'],
 
-  normalizeTransaction(transaction, _booked) {
+  normalizeTransaction(transaction, booked) {
+    const editedTrans = { ...transaction };
+
     // There is no remittanceInformationUnstructured, so we'll make it
-    transaction.remittanceInformationUnstructured =
+    editedTrans.remittanceInformationUnstructured =
       transaction.remittanceInformationUnstructuredArray.join(', ');
 
     // Remove clutter to extract the payee from remittanceInformationUnstructured ...
@@ -19,14 +20,13 @@ export default {
     const payeeName = transaction.remittanceInformationUnstructuredArray
       .map(el => el.match(/^(?:.*\*)?(.+),PAS\d+$/))
       .find(match => match)?.[1];
-    transaction.debtorName = transaction.debtorName || payeeName;
-    transaction.creditorName = transaction.creditorName || payeeName;
 
-    return {
-      ...transaction,
-      payeeName: formatPayeeName(transaction),
-      date: transaction.valueDateTime.slice(0, 10),
-    };
+    editedTrans.debtorName = transaction.debtorName || payeeName;
+    editedTrans.creditorName = transaction.creditorName || payeeName;
+
+    editedTrans.date = transaction.valueDateTime.slice(0, 10);
+
+    return Fallback.normalizeTransaction(transaction, booked, editedTrans);
   },
 
   sortTransactions(transactions = []) {

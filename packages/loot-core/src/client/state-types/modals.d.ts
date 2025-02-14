@@ -186,6 +186,11 @@ type FinanceModals = {
   'schedules-upcoming-length': null;
 
   'schedule-posts-offline-notification': null;
+
+  'synced-account-edit': {
+    account: AccountEntity;
+  };
+
   'account-menu': {
     accountId: string;
     onSave: (account: AccountEntity) => void;
