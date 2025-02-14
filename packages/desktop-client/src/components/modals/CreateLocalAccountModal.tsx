@@ -3,6 +3,7 @@ import { type FormEvent, useState } from 'react';
 import { Form } from 'react-aria-components';
 import { useTranslation, Trans } from 'react-i18next';
 
+import { InlineField } from '@actual-app/components/inline-field';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
@@ -17,7 +18,6 @@ import { theme } from '../../style';
 import { Button } from '../common/Button2';
 import { FormError } from '../common/FormError';
 import { InitialFocus } from '../common/InitialFocus';
-import { InlineField } from '../common/InlineField';
 import { Input } from '../common/Input';
 import { Link } from '../common/Link';
 import {
