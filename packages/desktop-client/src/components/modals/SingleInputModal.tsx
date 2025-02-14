@@ -7,12 +7,12 @@ import React, {
 } from 'react';
 import { Form } from 'react-aria-components';
 
+import { InitialFocus } from '@actual-app/components/initial-focus';
 import { View } from '@actual-app/components/view';
 
 import { styles } from '../../style';
 import { Button } from '../common/Button2';
 import { FormError } from '../common/FormError';
-import { InitialFocus } from '../common/InitialFocus';
 import { Modal, ModalCloseButton, type ModalHeader } from '../common/Modal';
 import { InputField } from '../mobile/MobileForms';
 
