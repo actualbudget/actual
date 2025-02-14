@@ -1,6 +1,7 @@
 import React, { memo, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { Card } from '@actual-app/components/card';
 import { Label } from '@actual-app/components/label';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
@@ -38,7 +39,6 @@ import { theme, styles } from '../../../style';
 import { BalanceWithCarryover } from '../../budget/BalanceWithCarryover';
 import { makeAmountGrey, makeBalanceAmountStyle } from '../../budget/util';
 import { Button } from '../../common/Button2';
-import { Card } from '../../common/Card';
 import { Link } from '../../common/Link';
 import { MobilePageHeader, Page } from '../../Page';
 import { PrivacyFilter } from '../../PrivacyFilter';
