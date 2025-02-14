@@ -1,6 +1,7 @@
 import React, { useRef, useState, type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { Popover } from '@actual-app/components/popover';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
@@ -11,7 +12,6 @@ import { type RuleConditionEntity } from 'loot-core/types/models';
 import { SvgDelete } from '../../icons/v0';
 import { theme } from '../../style';
 import { Button } from '../common/Button2';
-import { Popover } from '../common/Popover';
 import { Value } from '../rules/Value';
 
 import { FilterEditor } from './FiltersMenu';

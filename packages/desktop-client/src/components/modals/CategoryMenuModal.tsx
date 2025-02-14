@@ -2,6 +2,7 @@
 import React, { useRef, useState, type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { Popover } from '@actual-app/components/popover';
 import { View } from '@actual-app/components/view';
 
 import { type CategoryEntity } from 'loot-core/types/models';
@@ -20,7 +21,6 @@ import {
   ModalHeader,
   ModalTitle,
 } from '../common/Modal';
-import { Popover } from '../common/Popover';
 import { Notes } from '../Notes';
 
 type CategoryMenuModalProps = {

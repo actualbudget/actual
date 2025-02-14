@@ -11,6 +11,7 @@ import React, {
   useState,
 } from 'react';
 
+import { Popover } from '@actual-app/components/popover';
 import { View } from '@actual-app/components/view';
 import { css, cx } from '@emotion/css';
 import Downshift, { type StateChangeTypes } from 'downshift';
@@ -21,7 +22,6 @@ import { SvgRemove } from '../../icons/v2';
 import { styles, theme } from '../../style';
 import { Button } from '../common/Button';
 import { Input } from '../common/Input';
-import { Popover } from '../common/Popover';
 import { useResponsive } from '../responsive/ResponsiveProvider';
 
 type CommonAutocompleteProps<T extends Item> = {

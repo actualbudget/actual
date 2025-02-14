@@ -2,6 +2,7 @@
 import React, { useRef, useState, useMemo, type CSSProperties } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { Popover } from '@actual-app/components/popover';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
@@ -24,7 +25,6 @@ import { SvgCheck } from '../../icons/v2';
 import { theme } from '../../style';
 import { Button } from '../common/Button2';
 import { Menu } from '../common/Menu';
-import { Popover } from '../common/Popover';
 import { PrivacyFilter } from '../PrivacyFilter';
 import { Table, TableHeader, Row, Field, Cell } from '../table';
 import { DisplayId } from '../util/DisplayId';

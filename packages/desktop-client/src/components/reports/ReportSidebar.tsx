@@ -1,6 +1,7 @@
 import React, { useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { Popover } from '@actual-app/components/popover';
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { Text } from '@actual-app/components/text';
 import { Tooltip } from '@actual-app/components/tooltip';
@@ -21,7 +22,6 @@ import { theme } from '../../style/theme';
 import { Information } from '../alerts';
 import { Button } from '../common/Button2';
 import { Menu } from '../common/Menu';
-import { Popover } from '../common/Popover';
 import { Select, type SelectOption } from '../common/Select';
 
 import { CategorySelector } from './CategorySelector';

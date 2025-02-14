@@ -2,6 +2,7 @@
 import React, { type CSSProperties, type Ref, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { Popover } from '@actual-app/components/popover';
 import { View } from '@actual-app/components/view';
 
 import {
@@ -14,7 +15,6 @@ import { SvgCheveronDown } from '../../icons/v1';
 import { theme } from '../../style';
 import { Button } from '../common/Button2';
 import { Menu } from '../common/Menu';
-import { Popover } from '../common/Popover';
 import { NotesButton } from '../NotesButton';
 import { InputCell } from '../table';
 

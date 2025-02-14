@@ -8,6 +8,7 @@ import React, {
 import { useHotkeys } from 'react-hotkeys-hook';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { Popover } from '@actual-app/components/popover';
 import { Stack } from '@actual-app/components/stack';
 import { View } from '@actual-app/components/view';
 
@@ -37,7 +38,6 @@ import { InitialFocus } from '../common/InitialFocus';
 import { Input } from '../common/Input';
 import { Menu } from '../common/Menu';
 import { MenuButton } from '../common/MenuButton';
-import { Popover } from '../common/Popover';
 import { Search } from '../common/Search';
 import { FilterButton } from '../filters/FiltersMenu';
 import { FiltersStack } from '../filters/FiltersStack';

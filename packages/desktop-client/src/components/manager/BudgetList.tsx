@@ -7,6 +7,7 @@ import React, {
 } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { Popover } from '@actual-app/components/popover';
 import { Text } from '@actual-app/components/text';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
@@ -51,7 +52,6 @@ import { styles, theme } from '../../style';
 import { tokens } from '../../tokens';
 import { Button } from '../common/Button2';
 import { Menu } from '../common/Menu';
-import { Popover } from '../common/Popover';
 import { useResponsive } from '../responsive/ResponsiveProvider';
 import { useMultiuserEnabled } from '../ServerContext';
 
