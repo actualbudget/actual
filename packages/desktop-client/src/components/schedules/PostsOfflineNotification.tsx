@@ -2,6 +2,7 @@ import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 
+import { Paragraph } from '@actual-app/components/paragraph';
 import { Stack } from '@actual-app/components/stack';
 import { Text } from '@actual-app/components/text';
 
@@ -14,7 +15,6 @@ import { useDispatch } from '../../redux';
 import { theme } from '../../style';
 import { Button } from '../common/Button2';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
-import { Paragraph } from '../common/Paragraph';
 import { DisplayId } from '../util/DisplayId';
 
 export function PostsOfflineNotification() {

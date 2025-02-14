@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 
+import { Paragraph } from '@actual-app/components/paragraph';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
@@ -9,7 +10,6 @@ import { type Handlers } from 'loot-core/types/handlers';
 
 import { theme } from '../../style';
 import { ButtonWithLoading } from '../common/Button2';
-import { Paragraph } from '../common/Paragraph';
 
 import { Setting } from './UI';
 

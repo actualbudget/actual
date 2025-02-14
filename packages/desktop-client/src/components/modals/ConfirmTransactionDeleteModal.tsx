@@ -1,13 +1,13 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { Paragraph } from '@actual-app/components/paragraph';
 import { View } from '@actual-app/components/view';
 
 import { styles } from '../../style';
 import { Button } from '../common/Button2';
 import { InitialFocus } from '../common/InitialFocus';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
-import { Paragraph } from '../common/Paragraph';
 import { useResponsive } from '../responsive/ResponsiveProvider';
 
 type ConfirmTransactionDeleteProps = {

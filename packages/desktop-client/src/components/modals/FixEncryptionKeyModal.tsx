@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Form } from 'react-aria-components';
 import { useTranslation } from 'react-i18next';
 
+import { Paragraph } from '@actual-app/components/paragraph';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
@@ -21,7 +22,6 @@ import {
   ModalCloseButton,
   ModalHeader,
 } from '../common/Modal';
-import { Paragraph } from '../common/Paragraph';
 import { useResponsive } from '../responsive/ResponsiveProvider';
 
 type FixEncryptionKeyModalProps = {

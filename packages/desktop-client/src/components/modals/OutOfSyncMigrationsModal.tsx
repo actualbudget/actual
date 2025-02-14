@@ -1,6 +1,7 @@
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { Paragraph } from '@actual-app/components/paragraph';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
@@ -10,7 +11,6 @@ import { useDispatch } from '../../redux';
 import { Button } from '../common/Button2';
 import { Link } from '../common/Link';
 import { Modal, ModalHeader, ModalTitle } from '../common/Modal';
-import { Paragraph } from '../common/Paragraph';
 
 export function OutOfSyncMigrationsModal() {
   const dispatch = useDispatch();
