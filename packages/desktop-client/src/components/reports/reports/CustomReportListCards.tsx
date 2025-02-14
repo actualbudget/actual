@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { Text } from '@actual-app/components/text';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 
@@ -18,7 +19,6 @@ import { SvgExclamationSolid } from '../../../icons/v1';
 import { useDispatch } from '../../../redux';
 import { styles } from '../../../style/index';
 import { theme } from '../../../style/theme';
-import { Text } from '../../common/Text';
 import { DateRange } from '../DateRange';
 import { ReportCard } from '../ReportCard';
 import { ReportCardName } from '../ReportCardName';

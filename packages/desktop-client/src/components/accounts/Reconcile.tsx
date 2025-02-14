@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Trans } from 'react-i18next';
 
+import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
 import * as queries from 'loot-core/client/queries';
@@ -14,7 +15,6 @@ import { styles, theme } from '../../style';
 import { Button } from '../common/Button2';
 import { InitialFocus } from '../common/InitialFocus';
 import { Input } from '../common/Input';
-import { Text } from '../common/Text';
 import { useFormat } from '../spreadsheet/useFormat';
 import { useSheetValue } from '../spreadsheet/useSheetValue';
 

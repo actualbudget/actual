@@ -2,6 +2,7 @@
 import React, { useEffect, useReducer } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 import { t } from 'i18next';
 
@@ -30,7 +31,6 @@ import { Button } from '../common/Button2';
 import { InitialFocus } from '../common/InitialFocus';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { Stack } from '../common/Stack';
-import { Text } from '../common/Text';
 import { FormField, FormLabel, Checkbox } from '../forms';
 import { OpSelect } from '../modals/EditRuleModal';
 import { DateSelect } from '../select/DateSelect';

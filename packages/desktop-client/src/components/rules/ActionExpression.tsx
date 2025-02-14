@@ -1,6 +1,7 @@
 import React, { type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
 import {
@@ -18,7 +19,6 @@ import {
 } from 'loot-core/types/models';
 
 import { theme } from '../../style';
-import { Text } from '../common/Text';
 
 import { ScheduleValue } from './ScheduleValue';
 import { Value } from './Value';

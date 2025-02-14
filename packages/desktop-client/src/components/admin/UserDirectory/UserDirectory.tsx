@@ -10,6 +10,7 @@ import {
 } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
 import { addNotification, signOut } from 'loot-core/client/actions';
@@ -29,7 +30,6 @@ import { Link } from '../../common/Link';
 import { Search } from '../../common/Search';
 import { SimpleTable } from '../../common/SimpleTable';
 import { Stack } from '../../common/Stack';
-import { Text } from '../../common/Text';
 
 import { UserDirectoryHeader } from './UserDirectoryHeader';
 import { UserDirectoryRow } from './UserDirectoryRow';

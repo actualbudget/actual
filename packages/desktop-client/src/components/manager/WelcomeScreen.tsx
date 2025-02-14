@@ -1,6 +1,7 @@
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
 import { createBudget, pushModal } from 'loot-core/client/actions';
@@ -10,7 +11,6 @@ import { styles, theme } from '../../style';
 import { Button } from '../common/Button2';
 import { Link } from '../common/Link';
 import { Paragraph } from '../common/Paragraph';
-import { Text } from '../common/Text';
 
 export function WelcomeScreen() {
   const { t } = useTranslation();

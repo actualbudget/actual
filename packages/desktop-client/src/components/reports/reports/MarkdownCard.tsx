@@ -3,6 +3,7 @@ import { TextArea } from 'react-aria-components';
 import { useTranslation } from 'react-i18next';
 import ReactMarkdown from 'react-markdown';
 
+import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
@@ -10,7 +11,6 @@ import { type MarkdownWidget } from 'loot-core/types/models';
 
 import { styles, theme } from '../../../style';
 import { Menu } from '../../common/Menu';
-import { Text } from '../../common/Text';
 import { NON_DRAGGABLE_AREA_CLASS_NAME } from '../constants';
 import { ReportCard } from '../ReportCard';
 

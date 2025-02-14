@@ -4,6 +4,7 @@ import React, {
 } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
 import { trackingBudget } from 'loot-core/client/queries';
@@ -21,7 +22,6 @@ import {
   ModalHeader,
   ModalTitle,
 } from '../common/Modal';
-import { Text } from '../common/Text';
 import { CellValueText } from '../spreadsheet/CellValue';
 
 type TrackingBalanceMenuModalProps = ComponentPropsWithoutRef<

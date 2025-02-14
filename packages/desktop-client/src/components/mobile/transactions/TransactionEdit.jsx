@@ -10,6 +10,7 @@ import React, {
 import { useTranslation } from 'react-i18next';
 import { useLocation, useParams } from 'react-router-dom';
 
+import { Text } from '@actual-app/components/text';
 import { Toggle } from '@actual-app/components/toggle';
 import { View } from '@actual-app/components/view';
 import {
@@ -61,7 +62,6 @@ import { SvgPencilWriteAlternate } from '../../../icons/v2';
 import { useSelector, useDispatch } from '../../../redux';
 import { styles, theme } from '../../../style';
 import { Button } from '../../common/Button';
-import { Text } from '../../common/Text';
 import { MobilePageHeader, Page } from '../../Page';
 import { AmountInput } from '../../util/AmountInput';
 import { MobileBackButton } from '../MobileBackButton';

@@ -1,6 +1,7 @@
 import React, { type ReactNode } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 
+import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
@@ -15,7 +16,6 @@ import {
 } from '../../style';
 import { tokens } from '../../tokens';
 import { Select } from '../common/Select';
-import { Text } from '../common/Text';
 import { useSidebar } from '../sidebar/SidebarProvider';
 
 import { Setting } from './UI';

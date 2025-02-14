@@ -1,6 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
 import { send, sendCatch } from 'loot-core/platform/client/fetch';
@@ -10,7 +11,6 @@ import { type RuleConditionEntity } from 'loot-core/types/models/rule';
 import { SvgExpandArrow } from '../../icons/v0';
 import { Button } from '../common/Button2';
 import { Popover } from '../common/Popover';
-import { Text } from '../common/Text';
 
 import { FilterMenu } from './FilterMenu';
 import { NameFilter } from './NameFilter';

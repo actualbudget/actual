@@ -6,6 +6,7 @@ import React, {
 } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 
+import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
@@ -20,7 +21,6 @@ import { SvgCheveronDown } from '../../../icons/v1';
 import { styles, theme } from '../../../style';
 import { Button } from '../../common/Button2';
 import { Popover } from '../../common/Popover';
-import { Text } from '../../common/Text';
 import { type Binding, type SheetFields } from '../../spreadsheet';
 import { CellValue, CellValueText } from '../../spreadsheet/CellValue';
 import { useSheetName } from '../../spreadsheet/useSheetName';

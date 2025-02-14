@@ -5,6 +5,7 @@ import React, {
   type CSSProperties,
 } from 'react';
 
+import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
 import {
@@ -22,7 +23,6 @@ import { useAccounts } from '../../../../hooks/useAccounts';
 import { useCategories } from '../../../../hooks/useCategories';
 import { useNavigate } from '../../../../hooks/useNavigate';
 import { theme } from '../../../../style';
-import { Text } from '../../../common/Text';
 import { useResponsive } from '../../../responsive/ResponsiveProvider';
 import { Row, Cell } from '../../../table';
 import { showActivity } from '../showActivity';

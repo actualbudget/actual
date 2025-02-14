@@ -9,6 +9,7 @@ import React, {
   type CSSProperties,
 } from 'react';
 
+import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
@@ -23,7 +24,6 @@ import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { theme } from '../../../style';
 import { makeAmountFullStyle } from '../../budget/util';
 import { Button } from '../../common/Button2';
-import { Text } from '../../common/Text';
 
 type AmountInputProps = {
   value: number;

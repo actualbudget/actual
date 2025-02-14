@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 
+import { Text } from '@actual-app/components/text';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
@@ -43,7 +44,6 @@ import { Menu } from '../common/Menu';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { Select } from '../common/Select';
 import { Stack } from '../common/Stack';
-import { Text } from '../common/Text';
 import { StatusBadge } from '../schedules/StatusBadge';
 import { SimpleTransactionsTable } from '../transactions/SimpleTransactionsTable';
 import { BetweenAmountInput } from '../util/AmountInput';

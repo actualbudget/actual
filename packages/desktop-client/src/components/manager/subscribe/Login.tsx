@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
 
+import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
 import { loggedIn } from 'loot-core/client/actions/user';
@@ -19,7 +20,6 @@ import { BigInput } from '../../common/Input';
 import { Label } from '../../common/Label';
 import { Link } from '../../common/Link';
 import { Select } from '../../common/Select';
-import { Text } from '../../common/Text';
 import { useResponsive } from '../../responsive/ResponsiveProvider';
 import { useAvailableLoginMethods, useLoginMethod } from '../../ServerContext';
 

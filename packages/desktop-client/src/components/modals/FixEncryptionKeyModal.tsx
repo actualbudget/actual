@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Form } from 'react-aria-components';
 import { useTranslation } from 'react-i18next';
 
+import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
 import { type FinanceModals } from 'loot-core/client/state-types/modals';
@@ -21,7 +22,6 @@ import {
   ModalHeader,
 } from '../common/Modal';
 import { Paragraph } from '../common/Paragraph';
-import { Text } from '../common/Text';
 import { useResponsive } from '../responsive/ResponsiveProvider';
 
 type FixEncryptionKeyModalProps = {

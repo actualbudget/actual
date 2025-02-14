@@ -2,6 +2,8 @@ import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 
+import { Text } from '@actual-app/components/text';
+
 import { popModal } from 'loot-core/client/actions';
 import { send } from 'loot-core/platform/client/fetch';
 import { type PayeeEntity } from 'loot-core/types/models';
@@ -13,7 +15,6 @@ import { Button } from '../common/Button2';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { Paragraph } from '../common/Paragraph';
 import { Stack } from '../common/Stack';
-import { Text } from '../common/Text';
 import { DisplayId } from '../util/DisplayId';
 
 export function PostsOfflineNotification() {

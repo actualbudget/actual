@@ -3,6 +3,7 @@ import { type FormEvent, useState } from 'react';
 import { Form } from 'react-aria-components';
 import { useTranslation, Trans } from 'react-i18next';
 
+import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
 import { closeModal } from 'loot-core/client/actions';
@@ -26,7 +27,6 @@ import {
   ModalHeader,
   ModalTitle,
 } from '../common/Modal';
-import { Text } from '../common/Text';
 import { Checkbox } from '../forms';
 import { validateAccountName } from '../util/accountValidation';
 

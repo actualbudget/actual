@@ -1,6 +1,7 @@
 import React, { useRef, useState, type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
 import { mapField, friendlyOp } from 'loot-core/shared/rules';
@@ -11,7 +12,6 @@ import { SvgDelete } from '../../icons/v0';
 import { theme } from '../../style';
 import { Button } from '../common/Button2';
 import { Popover } from '../common/Popover';
-import { Text } from '../common/Text';
 import { Value } from '../rules/Value';
 
 import { FilterEditor } from './FiltersMenu';

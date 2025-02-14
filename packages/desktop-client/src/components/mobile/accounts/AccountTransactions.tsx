@@ -6,6 +6,7 @@ import React, {
   useState,
 } from 'react';
 
+import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
 import {
@@ -43,7 +44,6 @@ import { useNavigate } from '../../../hooks/useNavigate';
 import { useSelector, useDispatch } from '../../../redux';
 import { styles, theme } from '../../../style';
 import { Button } from '../../common/Button2';
-import { Text } from '../../common/Text';
 import { MobilePageHeader, Page } from '../../Page';
 import { MobileBackButton } from '../MobileBackButton';
 import { AddTransactionButton } from '../transactions/AddTransactionButton';

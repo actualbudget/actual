@@ -1,6 +1,7 @@
 import React, { useCallback, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
 import { addNotification } from 'loot-core/client/actions';
@@ -11,7 +12,6 @@ import { theme, styles } from '../../../style';
 import { Information } from '../../alerts';
 import { Button, ButtonWithLoading } from '../../common/Button2';
 import { Modal, ModalCloseButton, ModalHeader } from '../../common/Modal';
-import { Text } from '../../common/Text';
 import { Checkbox } from '../../forms';
 
 function DirectoryDisplay({ directory }: { directory: string }) {

@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 
+import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
 import { loggedIn } from 'loot-core/client/actions';
@@ -17,7 +18,6 @@ import {
   UserDirectoryPage,
 } from '../admin/UserDirectory/UserDirectoryPage';
 import { AppBackground } from '../AppBackground';
-import { Text } from '../common/Text';
 import { LoggedInUser } from '../LoggedInUser';
 import { Notifications } from '../Notifications';
 import { useResponsive } from '../responsive/ResponsiveProvider';

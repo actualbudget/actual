@@ -6,10 +6,10 @@ import React, {
 } from 'react';
 import { Trans } from 'react-i18next';
 
+import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
 import { theme, styles } from '../../../../style';
-import { Text } from '../../../common/Text';
 import { type SheetFields, type Binding } from '../../../spreadsheet';
 import { CellValue, CellValueText } from '../../../spreadsheet/CellValue';
 

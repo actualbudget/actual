@@ -2,6 +2,7 @@
 import React, { useMemo, useRef, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
 import { pushModal } from 'loot-core/client/actions';
@@ -19,7 +20,6 @@ import { Button } from '../common/Button2';
 import { InitialFocus } from '../common/InitialFocus';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { Search } from '../common/Search';
-import { Text } from '../common/Text';
 
 import { ROW_HEIGHT, SchedulesTable } from './SchedulesTable';
 

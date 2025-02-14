@@ -1,6 +1,7 @@
 import { type ReactNode, useState } from 'react';
 import { Trans } from 'react-i18next';
 
+import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
 import type { FeatureFlag } from 'loot-core/types/prefs';
@@ -9,7 +10,6 @@ import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { useSyncedPref } from '../../hooks/useSyncedPref';
 import { theme } from '../../style';
 import { Link } from '../common/Link';
-import { Text } from '../common/Text';
 import { Checkbox } from '../forms';
 
 import { Setting } from './UI';

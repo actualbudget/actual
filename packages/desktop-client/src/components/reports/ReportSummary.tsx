@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
 import * as monthUtils from 'loot-core/shared/months';
@@ -15,7 +16,6 @@ import {
 } from 'loot-core/types/models/reports';
 
 import { theme, styles } from '../../style';
-import { Text } from '../common/Text';
 import { PrivacyFilter } from '../PrivacyFilter';
 
 import { ReportOptions } from './ReportOptions';

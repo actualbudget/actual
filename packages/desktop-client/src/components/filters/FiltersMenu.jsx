@@ -4,6 +4,7 @@ import { Form } from 'react-aria-components';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { Text } from '@actual-app/components/text';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 import {
@@ -32,7 +33,6 @@ import { Menu } from '../common/Menu';
 import { Popover } from '../common/Popover';
 import { Select } from '../common/Select';
 import { Stack } from '../common/Stack';
-import { Text } from '../common/Text';
 import { GenericInput } from '../util/GenericInput';
 
 import { CompactFiltersButton } from './CompactFiltersButton';

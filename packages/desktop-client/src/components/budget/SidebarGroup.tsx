@@ -3,6 +3,7 @@ import React, { type CSSProperties, useRef } from 'react';
 import { type ConnectDragSource } from 'react-dnd';
 import { useTranslation } from 'react-i18next';
 
+import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
 import { useContextMenu } from '../../hooks/useContextMenu';
@@ -13,7 +14,6 @@ import { theme } from '../../style';
 import { Button } from '../common/Button2';
 import { Menu } from '../common/Menu';
 import { Popover } from '../common/Popover';
-import { Text } from '../common/Text';
 import { NotesButton } from '../NotesButton';
 import { InputCell } from '../table';
 

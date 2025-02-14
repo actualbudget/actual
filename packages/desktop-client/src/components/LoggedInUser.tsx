@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, type CSSProperties } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 
+import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
 import { closeBudget, getUserData, signOut } from 'loot-core/client/actions';
@@ -19,7 +20,6 @@ import { theme, styles } from '../style';
 import { Button } from './common/Button2';
 import { Menu } from './common/Menu';
 import { Popover } from './common/Popover';
-import { Text } from './common/Text';
 import { PrivacyFilter } from './PrivacyFilter';
 import { useMultiuserEnabled, useServerURL } from './ServerContext';
 

@@ -1,6 +1,7 @@
 import React, { type ReactNode, useEffect } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 
+import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
@@ -17,7 +18,6 @@ import { tokens } from '../../tokens';
 import { Button } from '../common/Button2';
 import { Input } from '../common/Input';
 import { Link } from '../common/Link';
-import { Text } from '../common/Text';
 import { FormField, FormLabel } from '../forms';
 import { MOBILE_NAV_HEIGHT } from '../mobile/MobileNavTabs';
 import { Page } from '../Page';

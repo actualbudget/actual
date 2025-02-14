@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
 import { type ScheduleStatusType } from 'loot-core/client/data-hooks/schedules';
@@ -16,7 +17,6 @@ import {
   SvgValidationCheck,
 } from '../../icons/v2';
 import { theme } from '../../style';
-import { Text } from '../common/Text';
 
 // Consists of Schedule Statuses + Transaction statuses
 type StatusTypes = ScheduleStatusType | 'cleared' | 'pending' | 'reconciled';

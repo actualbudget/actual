@@ -1,9 +1,9 @@
 import React from 'react';
 
+import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
 import { theme, styles } from '../../style';
-import { Text } from '../common/Text';
 
 import { LegendItem } from './LegendItem';
 import { ReportOptions } from './ReportOptions';

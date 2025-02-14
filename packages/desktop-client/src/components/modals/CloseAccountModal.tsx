@@ -3,6 +3,7 @@ import React, { type FormEvent, useState, type CSSProperties } from 'react';
 import { Form } from 'react-aria-components';
 import { useTranslation, Trans } from 'react-i18next';
 
+import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
 import { pushModal } from 'loot-core/client/actions';
@@ -22,7 +23,6 @@ import { FormError } from '../common/FormError';
 import { Link } from '../common/Link';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { Paragraph } from '../common/Paragraph';
-import { Text } from '../common/Text';
 import { useResponsive } from '../responsive/ResponsiveProvider';
 
 function needsCategory(

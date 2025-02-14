@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
 import { addNotification, popModal, signOut } from 'loot-core/client/actions';
@@ -15,7 +16,6 @@ import { Button } from '../common/Button2';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { Select } from '../common/Select';
 import { Stack } from '../common/Stack';
-import { Text } from '../common/Text';
 import { FormField, FormLabel } from '../forms';
 
 type EditUserAccessProps = {

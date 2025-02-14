@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
 import { loadAllFiles, pushModal } from 'loot-core/client/actions';
@@ -11,7 +12,6 @@ import { useDispatch } from '../../../redux';
 import { theme, styles } from '../../../style';
 import { Button } from '../../common/Button2';
 import { Modal, ModalCloseButton, ModalHeader } from '../../common/Modal';
-import { Text } from '../../common/Text';
 
 function FileLocationSettings() {
   const [documentDir, _setDocumentDirPref] = useGlobalPref('documentDir');

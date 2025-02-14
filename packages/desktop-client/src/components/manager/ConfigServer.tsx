@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
 import { createBudget, loggedIn, signOut } from 'loot-core/client/actions';
@@ -17,7 +18,6 @@ import { theme } from '../../style';
 import { Button, ButtonWithLoading } from '../common/Button2';
 import { BigInput } from '../common/Input';
 import { Link } from '../common/Link';
-import { Text } from '../common/Text';
 import { useServerURL, useSetServerURL } from '../ServerContext';
 
 import { Title } from './subscribe/common';

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
 import {
@@ -24,7 +25,6 @@ import {
   ModalCloseButton,
   ModalHeader,
 } from '../../common/Modal';
-import { Text } from '../../common/Text';
 
 type DuplicateFileProps = {
   file: File;
