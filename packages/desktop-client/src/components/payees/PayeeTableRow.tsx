@@ -2,6 +2,8 @@
 import { memo, useRef, type CSSProperties } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { Tooltip } from '@actual-app/components/tooltip';
+
 import { type PayeeEntity } from 'loot-core/types/models';
 
 import { useContextMenu } from '../../hooks/useContextMenu';
@@ -12,7 +14,6 @@ import { theme } from '../../style';
 import { Menu } from '../common/Menu';
 import { Popover } from '../common/Popover';
 import { Text } from '../common/Text';
-import { Tooltip } from '../common/Tooltip';
 import {
   Cell,
   CellButton,

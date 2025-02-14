@@ -13,6 +13,7 @@ import React, {
 import { useHotkeys } from 'react-hotkeys-hook';
 import { useTranslation } from 'react-i18next';
 
+import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 import {
@@ -68,7 +69,6 @@ import { PayeeAutocomplete } from '../autocomplete/PayeeAutocomplete';
 import { Button } from '../common/Button2';
 import { Popover } from '../common/Popover';
 import { Text } from '../common/Text';
-import { Tooltip } from '../common/Tooltip';
 import { getStatusProps } from '../schedules/StatusBadge';
 import { DateSelect } from '../select/DateSelect';
 import { NamespaceContext } from '../spreadsheet/NamespaceContext';

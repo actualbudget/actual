@@ -7,6 +7,7 @@ import React, {
 } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 
 import { send } from 'loot-core/platform/client/fetch';
@@ -17,7 +18,6 @@ import { theme } from '../style';
 
 import { Button } from './common/Button2';
 import { Popover } from './common/Popover';
-import { Tooltip } from './common/Tooltip';
 import { Notes } from './Notes';
 
 type NotesButtonProps = {

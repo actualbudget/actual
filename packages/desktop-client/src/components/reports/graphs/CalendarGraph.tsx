@@ -1,6 +1,7 @@
 import { type Ref, useEffect, useState } from 'react';
 import { Trans } from 'react-i18next';
 
+import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 import {
   addDays,
@@ -17,7 +18,6 @@ import { type SyncedPrefs } from 'loot-core/types/prefs';
 import { useResizeObserver } from '../../../hooks/useResizeObserver';
 import { styles, theme } from '../../../style';
 import { Button } from '../../common/Button2';
-import { Tooltip } from '../../common/Tooltip';
 import { PrivacyFilter } from '../../PrivacyFilter';
 import { chartTheme } from '../chart-theme';
 

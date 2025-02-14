@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 
 import { addNotification } from 'loot-core/client/actions';
@@ -18,7 +19,6 @@ import { useDispatch } from '../../../redux';
 import { styles } from '../../../style/index';
 import { theme } from '../../../style/theme';
 import { Text } from '../../common/Text';
-import { Tooltip } from '../../common/Tooltip';
 import { DateRange } from '../DateRange';
 import { ReportCard } from '../ReportCard';
 import { ReportCardName } from '../ReportCardName';
