@@ -1,6 +1,7 @@
 import React, { type ComponentProps, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { Label } from '@actual-app/components/label';
 import { View } from '@actual-app/components/view';
 
 import { type TransactionEntity } from 'loot-core/types/models/transaction';
@@ -9,7 +10,6 @@ import { SelectedProvider, useSelected } from '../../../hooks/useSelected';
 import { SvgSearchAlternate } from '../../../icons/v2';
 import { styles, theme } from '../../../style';
 import { InputWithContent } from '../../common/InputWithContent';
-import { Label } from '../../common/Label';
 import type { Binding, SheetNames, SheetFields } from '../../spreadsheet';
 import { CellValue, CellValueText } from '../../spreadsheet/CellValue';
 import { useSheetValue } from '../../spreadsheet/useSheetValue';
