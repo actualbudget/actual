@@ -298,7 +298,7 @@ export function getNumberFormat({
       break;
     case 'apostrophe-dot':
       locale = 'de-CH';
-      thousandsSep = "'";
+      thousandsSep = '’';
       decimalSep = '.';
       break;
     case 'comma-dot-in':
@@ -387,8 +387,8 @@ export function amountToCurrencyNoDecimal(amount: Amount): CurrencyAmount {
   }).formatter.format(amount);
 }
 
-export function currencyToAmount(currencyAmount: String): Amount | null {
-  let amount, integer, fraction;
+export function currencyToAmount(currencyAmount: string): Amount | null {
+  let integer, fraction;
 
   // match the last dot or comma in the string
   const match = currencyAmount.match(/[,.](?=[^.,]*$)/);
@@ -405,7 +405,7 @@ export function currencyToAmount(currencyAmount: String): Amount | null {
     fraction = currencyAmount.slice(match.index + 1);
   }
 
-  amount = parseFloat(integer + '.' + fraction);
+  const amount = parseFloat(integer + '.' + fraction);
   return isNaN(amount) ? null : amount;
 }
 
