@@ -16,7 +16,9 @@ export default {
 
     if (Number(transaction.transactionAmount.amount) > 0) {
       editedTrans.payeeName =
-        transaction.debtorName || transaction.remittanceInformationUnstructured;
+        transaction.debtorName ||
+        transaction.remittanceInformationUnstructured ||
+        'undefined';
     } else {
       editedTrans.payeeName =
         transaction.creditorName ||
