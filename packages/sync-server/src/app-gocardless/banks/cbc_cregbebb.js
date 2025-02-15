@@ -25,7 +25,8 @@ export default {
         extractPayeeNameFromRemittanceInfo(
           transaction.remittanceInformationUnstructured,
           ['Paiement', 'Domiciliation', 'Transfert', 'Ordre permanent'],
-        );
+        ) ||
+        'undefined';
     }
 
     return Fallback.normalizeTransaction(transaction, booked, editedTrans);
