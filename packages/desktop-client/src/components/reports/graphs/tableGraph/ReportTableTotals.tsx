@@ -7,6 +7,7 @@ import React, {
 } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { styles } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
 
 import {
@@ -15,7 +16,6 @@ import {
 } from 'loot-core/types/models/reports';
 
 import { theme } from '../../../../style';
-import { styles } from '../../../../style/styles';
 
 import { type renderTotalsProps } from './ReportTable';
 

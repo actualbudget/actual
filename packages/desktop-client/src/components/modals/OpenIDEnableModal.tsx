@@ -3,6 +3,7 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { Label } from '@actual-app/components/label';
+import { styles } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
 
 import { closeBudget, popModal } from 'loot-core/client/actions';
@@ -12,7 +13,7 @@ import { getOpenIdErrors } from 'loot-core/shared/errors';
 import { type OpenIdConfig } from 'loot-core/types/models/openid';
 
 import { useDispatch } from '../../redux';
-import { theme, styles } from '../../style';
+import { theme } from '../../style';
 import { Error } from '../alerts';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { OpenIdForm } from '../manager/subscribe/OpenIdForm';

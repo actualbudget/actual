@@ -5,6 +5,7 @@ import { useLocation } from 'react-router-dom';
 import { Button } from '@actual-app/components/button';
 import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
+import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
@@ -18,7 +19,7 @@ import { Permissions } from '../auth/types';
 import { useMetadataPref } from '../hooks/useMetadataPref';
 import { useNavigate } from '../hooks/useNavigate';
 import { useSelector, useDispatch } from '../redux';
-import { theme, styles } from '../style';
+import { theme } from '../style';
 
 import { PrivacyFilter } from './PrivacyFilter';
 import { useMultiuserEnabled, useServerURL } from './ServerContext';

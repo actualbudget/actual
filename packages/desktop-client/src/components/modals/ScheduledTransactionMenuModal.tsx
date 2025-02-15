@@ -6,6 +6,7 @@ import React, {
 import { useTranslation } from 'react-i18next';
 
 import { Menu } from '@actual-app/components/menu';
+import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
@@ -17,7 +18,7 @@ import {
   extractScheduleConds,
 } from 'loot-core/shared/schedules';
 
-import { theme, styles } from '../../style';
+import { theme } from '../../style';
 import {
   Modal,
   ModalCloseButton,

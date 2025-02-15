@@ -6,6 +6,7 @@ import { mergeProps } from 'react-aria';
 import { ListBoxItem } from 'react-aria-components';
 
 import { Button } from '@actual-app/components/button';
+import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { TextOneLine } from '@actual-app/components/text-one-line';
 import { View } from '@actual-app/components/view';
@@ -29,7 +30,7 @@ import {
   SvgLockClosed,
 } from '../../../icons/v2';
 import { useSelector } from '../../../redux';
-import { styles, theme } from '../../../style';
+import { theme } from '../../../style';
 import { makeAmountFullStyle } from '../../budget/util';
 import { getPrettyPayee } from '../utils';
 

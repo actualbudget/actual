@@ -4,6 +4,7 @@ import React, {
   useState,
 } from 'react';
 
+import { styles } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
 
 import {
@@ -13,7 +14,7 @@ import {
 
 import { useCategories } from '../../hooks/useCategories';
 import { useLocalPref } from '../../hooks/useLocalPref';
-import { theme, styles } from '../../style';
+import { theme } from '../../style';
 import { type DropPosition } from '../sort';
 
 import { BudgetCategories } from './BudgetCategories';

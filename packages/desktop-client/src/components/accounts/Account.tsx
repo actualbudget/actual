@@ -10,6 +10,7 @@ import { Trans } from 'react-i18next';
 import { Navigate, useParams, useLocation } from 'react-router-dom';
 
 import { Button } from '@actual-app/components/button';
+import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 import { debounce } from 'debounce';
@@ -86,7 +87,7 @@ import {
 import { useSyncedPref } from '../../hooks/useSyncedPref';
 import { useTransactionBatchActions } from '../../hooks/useTransactionBatchActions';
 import { useSelector, useDispatch } from '../../redux';
-import { styles, theme } from '../../style';
+import { theme } from '../../style';
 import { type SavedFilter } from '../filters/SavedFilterMenuButton';
 import { TransactionList } from '../transactions/TransactionList';
 import { validateAccountName } from '../util/accountValidation';

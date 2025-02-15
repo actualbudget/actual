@@ -4,9 +4,9 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@actual-app/components/button';
 import { InitialFocus } from '@actual-app/components/initial-focus';
 import { Paragraph } from '@actual-app/components/paragraph';
+import { styles } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
 
-import { styles } from '../../style';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { useResponsive } from '../responsive/ResponsiveProvider';
 

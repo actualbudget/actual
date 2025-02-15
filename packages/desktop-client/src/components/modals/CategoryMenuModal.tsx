@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@actual-app/components/button';
 import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
+import { styles } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
 
 import { type CategoryEntity } from 'loot-core/types/models';
@@ -14,7 +15,7 @@ import { useCategoryGroup } from '../../hooks/useCategoryGroup';
 import { useNotes } from '../../hooks/useNotes';
 import { SvgDotsHorizontalTriple, SvgTrash } from '../../icons/v1';
 import { SvgNotesPaper, SvgViewHide, SvgViewShow } from '../../icons/v2';
-import { styles, theme } from '../../style';
+import { theme } from '../../style';
 import {
   Modal,
   ModalCloseButton,

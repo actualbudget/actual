@@ -4,10 +4,11 @@ import { useTranslation, Trans } from 'react-i18next';
 import { Button } from '@actual-app/components/button';
 import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
+import { styles } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
 
 import { SvgDotsHorizontalTriple } from '../../icons/v1';
-import { theme, styles } from '../../style';
+import { theme } from '../../style';
 
 import { RenderMonths } from './RenderMonths';
 import { getScrollbarWidth } from './util';

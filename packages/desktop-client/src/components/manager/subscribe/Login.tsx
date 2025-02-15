@@ -5,6 +5,7 @@ import { useSearchParams } from 'react-router-dom';
 
 import { Button, ButtonWithLoading } from '@actual-app/components/button';
 import { Label } from '@actual-app/components/label';
+import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
@@ -16,7 +17,7 @@ import { type OpenIdConfig } from 'loot-core/types/models/openid';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { AnimatedLoading } from '../../../icons/AnimatedLoading';
 import { useDispatch } from '../../../redux';
-import { styles, theme } from '../../../style';
+import { theme } from '../../../style';
 import { BigInput } from '../../common/Input';
 import { Link } from '../../common/Link';
 import { Select } from '../../common/Select';

@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import { styles } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
@@ -12,7 +13,7 @@ import { useNotes } from '../../hooks/useNotes';
 import { useUndo } from '../../hooks/useUndo';
 import { SvgCheveronDown, SvgCheveronUp } from '../../icons/v1';
 import { SvgNotesPaper } from '../../icons/v2';
-import { styles, theme, type CSSProperties } from '../../style';
+import { theme, type CSSProperties } from '../../style';
 import { BudgetMonthMenu } from '../budget/envelope/budgetsummary/BudgetMonthMenu';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { Notes } from '../Notes';

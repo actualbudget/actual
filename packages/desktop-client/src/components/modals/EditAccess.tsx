@@ -3,6 +3,7 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { Stack } from '@actual-app/components/stack';
+import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
@@ -13,7 +14,7 @@ import { type Handlers } from 'loot-core/types/handlers';
 import { type UserAccessEntity } from 'loot-core/types/models/userAccess';
 
 import { useDispatch } from '../../redux';
-import { styles, theme } from '../../style';
+import { theme } from '../../style';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { Select } from '../common/Select';
 import { FormField, FormLabel } from '../forms';

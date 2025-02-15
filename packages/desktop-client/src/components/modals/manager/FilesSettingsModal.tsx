@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
@@ -10,7 +11,7 @@ import { loadAllFiles, pushModal } from 'loot-core/client/actions';
 import { useGlobalPref } from '../../../hooks/useGlobalPref';
 import { SvgPencil1 } from '../../../icons/v2';
 import { useDispatch } from '../../../redux';
-import { theme, styles } from '../../../style';
+import { theme } from '../../../style';
 import { Modal, ModalCloseButton, ModalHeader } from '../../common/Modal';
 
 function FileLocationSettings() {

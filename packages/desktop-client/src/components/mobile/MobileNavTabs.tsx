@@ -8,6 +8,7 @@ import React, {
 import { NavLink } from 'react-router-dom';
 import { useSpring, animated, config } from 'react-spring';
 
+import { styles } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
 import { useDrag } from '@use-gesture/react';
 
@@ -21,7 +22,7 @@ import {
 } from '../../icons/v1';
 import { SvgReports } from '../../icons/v1/Reports';
 import { SvgCalendar } from '../../icons/v2';
-import { theme, styles } from '../../style';
+import { theme } from '../../style';
 import { useResponsive } from '../responsive/ResponsiveProvider';
 import { useScrollListener } from '../ScrollProvider';
 

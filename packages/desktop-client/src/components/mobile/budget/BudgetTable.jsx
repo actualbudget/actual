@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@actual-app/components/button';
 import { Card } from '@actual-app/components/card';
 import { Label } from '@actual-app/components/label';
+import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
@@ -36,7 +37,7 @@ import {
 } from '../../../icons/v1';
 import { SvgCalendar, SvgViewShow } from '../../../icons/v2';
 import { useDispatch } from '../../../redux';
-import { theme, styles } from '../../../style';
+import { theme } from '../../../style';
 import { BalanceWithCarryover } from '../../budget/BalanceWithCarryover';
 import { makeAmountGrey, makeBalanceAmountStyle } from '../../budget/util';
 import { Link } from '../../common/Link';

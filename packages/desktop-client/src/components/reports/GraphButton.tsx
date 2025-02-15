@@ -1,10 +1,11 @@
 import React, { type HTMLProps, type CSSProperties } from 'react';
 
 import { Button } from '@actual-app/components/button';
+import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { Tooltip } from '@actual-app/components/tooltip';
 
-import { styles, theme } from '../../style';
+import { theme } from '../../style';
 
 type GraphButtonProps = HTMLProps<HTMLButtonElement> & {
   selected?: boolean;

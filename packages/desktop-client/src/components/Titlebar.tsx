@@ -5,6 +5,7 @@ import { Routes, Route, useLocation } from 'react-router-dom';
 
 import { Button } from '@actual-app/components/button';
 import { SpaceBetween } from '@actual-app/components/space-between';
+import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
@@ -30,7 +31,7 @@ import {
   SvgViewShow,
 } from '../icons/v2';
 import { useDispatch } from '../redux';
-import { theme, styles, type CSSProperties } from '../style';
+import { theme, type CSSProperties } from '../style';
 
 import { AccountSyncCheck } from './accounts/AccountSyncCheck';
 import { AnimatedRefresh } from './AnimatedRefresh';

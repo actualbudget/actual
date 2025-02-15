@@ -10,9 +10,9 @@ import { Form } from 'react-aria-components';
 import { Button } from '@actual-app/components/button';
 import { FormError } from '@actual-app/components/form-error';
 import { InitialFocus } from '@actual-app/components/initial-focus';
+import { styles } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
 
-import { styles } from '../../style';
 import { Modal, ModalCloseButton, type ModalHeader } from '../common/Modal';
 import { InputField } from '../mobile/MobileForms';
 

@@ -13,6 +13,7 @@ import { InitialFocus } from '@actual-app/components/initial-focus';
 import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
 import { Stack } from '@actual-app/components/stack';
+import { styles } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
 
 import {
@@ -34,7 +35,7 @@ import {
   SvgLockClosed,
   SvgPencil1,
 } from '../../icons/v2';
-import { theme, styles } from '../../style';
+import { theme } from '../../style';
 import { AnimatedRefresh } from '../AnimatedRefresh';
 import { Input } from '../common/Input';
 import { MenuButton } from '../common/MenuButton';

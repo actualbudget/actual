@@ -5,6 +5,7 @@ import { useLocation, type Location } from 'react-router-dom';
 import { ButtonWithLoading } from '@actual-app/components/button';
 import { Menu } from '@actual-app/components/menu';
 import { Stack } from '@actual-app/components/stack';
+import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
@@ -13,7 +14,7 @@ import { send } from 'loot-core/platform/client/fetch';
 import { type Handlers } from 'loot-core/types/handlers';
 import { type OpenIdConfig } from 'loot-core/types/models/openid';
 
-import { theme, styles } from '../../../style';
+import { theme } from '../../../style';
 import { Input } from '../../common/Input';
 import { Link } from '../../common/Link';
 import { Select } from '../../common/Select';

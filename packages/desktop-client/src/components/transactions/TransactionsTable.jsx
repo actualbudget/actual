@@ -15,6 +15,7 @@ import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { Popover } from '@actual-app/components/popover';
+import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
@@ -65,7 +66,7 @@ import {
   SvgHyperlink2,
 } from '../../icons/v2';
 import { useDispatch } from '../../redux';
-import { styles, theme } from '../../style';
+import { theme } from '../../style';
 import { AccountAutocomplete } from '../autocomplete/AccountAutocomplete';
 import { CategoryAutocomplete } from '../autocomplete/CategoryAutocomplete';
 import { PayeeAutocomplete } from '../autocomplete/PayeeAutocomplete';

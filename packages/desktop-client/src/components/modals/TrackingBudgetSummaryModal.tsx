@@ -2,11 +2,11 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Stack } from '@actual-app/components/stack';
+import { styles } from '@actual-app/components/styles';
 
 import { sheetForMonth } from 'loot-core/shared/months';
 import * as monthUtils from 'loot-core/shared/months';
 
-import { styles } from '../../style';
 import { ExpenseTotal } from '../budget/tracking/budgetsummary/ExpenseTotal';
 import { IncomeTotal } from '../budget/tracking/budgetsummary/IncomeTotal';
 import { Saved } from '../budget/tracking/budgetsummary/Saved';

@@ -2,11 +2,12 @@ import React from 'react';
 import { Trans } from 'react-i18next';
 import { useTransition, animated } from 'react-spring';
 
+import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
 import { useSelector } from '../redux';
-import { theme, styles } from '../style';
+import { theme } from '../style';
 
 import { AnimatedRefresh } from './AnimatedRefresh';
 

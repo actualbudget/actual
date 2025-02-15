@@ -1,9 +1,10 @@
 import React from 'react';
 
+import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
-import { theme, styles } from '../../style';
+import { theme } from '../../style';
 
 import { LegendItem } from './LegendItem';
 import { ReportOptions } from './ReportOptions';
