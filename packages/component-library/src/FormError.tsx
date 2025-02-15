@@ -1,6 +1,6 @@
 import { type ReactNode, type CSSProperties } from 'react';
 
-import { View } from '@actual-app/components/view';
+import { View } from './View';
 
 type FormErrorProps = {
   style?: CSSProperties;

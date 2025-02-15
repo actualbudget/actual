@@ -1,6 +1,6 @@
 import React, { type CSSProperties, type ReactNode } from 'react';
 
-import { View } from '@actual-app/components/view';
+import { View } from './View';
 
 type SpaceBetweenProps = {
   direction?: 'horizontal' | 'vertical';

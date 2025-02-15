@@ -9,8 +9,7 @@ import React, {
 import { Tooltip as AriaTooltip, TooltipTrigger } from 'react-aria-components';
 
 import { styles } from './styles';
-
-import { View } from '@actual-app/components/view';
+import { View } from './View';
 
 type TooltipProps = Partial<ComponentProps<typeof AriaTooltip>> & {
   children: ReactNode;

@@ -1,8 +1,7 @@
 import { type ComponentProps, type ReactNode, type CSSProperties } from 'react';
 
 import { Block } from './Block';
-
-import { View } from '@actual-app/components/view';
+import { View } from './View';
 
 type AlignedTextProps = ComponentProps<typeof View> & {
   left: ReactNode;
