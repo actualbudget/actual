@@ -374,7 +374,8 @@ class AccountInternal extends PureComponent<
       transactionCount: 0,
       showBalances: props.showBalances,
       balances: null,
-      showCleared: props.showCleared,
+      showCleared: props.reconcileAmount == null ? props.showCleared : true,
+      prevShowCleared: props.showCleared,
       showReconciled: props.showReconciled,
       editingName: false,
       nameError: '',
@@ -476,7 +477,12 @@ class AccountInternal extends PureComponent<
     }
 
     if (this.props.reconcileAmount !== prevProps.reconcileAmount) {
-      this.setState({ reconcileAmount: this.props.reconcileAmount });
+      this.setState({
+        reconcileAmount: this.props.reconcileAmount,
+        showCleared:
+          this.props.reconcileAmount == null ? this.props.showCleared : true,
+        prevShowCleared: this.props.showCleared,
+      });
     }
   }
 
