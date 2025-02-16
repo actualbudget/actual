@@ -31,7 +31,7 @@ You can’t specify this option in `config.json` since it needs to be used to fi
 
 ## `https`
 
-If you want to Actual to serve over HTTPS, you can set this key to an object with the following keys:
+If you want Actual to serve over HTTPS, you can set this key to an object with the following keys:
 
 - `key`: The path to the private key file. (environment variable: `ACTUAL_HTTPS_KEY`)
 - `cert`: The path to the certificate file. (environment variable: `ACTUAL_HTTPS_CERT`)
@@ -89,4 +89,4 @@ Updates the servers request forwarding trust to remove known proxy IPs from the 
 
 ## `trustedAuthProxies`
 
-Configure the clients that are allowed to authentic with HTTP headers. This defaults to what is set in `trustedProxies`, but can be overridden independently. (environment variable: `ACTUAL_TRUSTED_AUTH_PROXIES`, comma separated string).
+Configure the clients that are allowed to authenticate with HTTP headers. This defaults to what is set in `trustedProxies`, but can be overridden independently. (environment variable: `ACTUAL_TRUSTED_AUTH_PROXIES`, comma separated string).
