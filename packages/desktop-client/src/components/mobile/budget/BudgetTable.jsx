@@ -28,9 +28,8 @@ import {
   SvgArrowThinRight,
   SvgArrowThickRight,
   SvgCheveronRight,
-  SvgCalendar,
 } from '../../../icons/v1';
-import { SvgViewShow } from '../../../icons/v2';
+import { SvgCalendar, SvgViewShow } from '../../../icons/v2';
 import { useDispatch } from '../../../redux';
 import { theme, styles } from '../../../style';
 import { BalanceWithCarryover } from '../../budget/BalanceWithCarryover';
