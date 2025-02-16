@@ -2,6 +2,15 @@
 import React, { type CSSProperties, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { AlignedText } from '@actual-app/components/aligned-text';
+import { InitialFocus } from '@actual-app/components/initial-focus';
+import { Menu } from '@actual-app/components/menu';
+import { Popover } from '@actual-app/components/popover';
+import { styles } from '@actual-app/components/styles';
+import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
+import { Tooltip } from '@actual-app/components/tooltip';
+import { View } from '@actual-app/components/view';
 import { css, cx } from '@emotion/css';
 
 import { openAccountCloseModal } from 'loot-core/client/actions';
@@ -11,22 +20,14 @@ import {
   updateAccount,
 } from 'loot-core/client/queries/queriesSlice';
 import { currencyToInteger } from 'loot-core/shared/util';
-import { type AccountEntity } from 'loot-core/src/types/models';
+import { type AccountEntity } from 'loot-core/types/models';
 
 import { useContextMenu } from '../../hooks/useContextMenu';
 import { useNavigate } from '../../hooks/useNavigate';
 import { useNotes } from '../../hooks/useNotes';
 import { useDispatch } from '../../redux';
-import { styles, theme } from '../../style';
-import { AlignedText } from '../common/AlignedText';
-import { InitialFocus } from '../common/InitialFocus';
 import { Input } from '../common/Input';
 import { Link } from '../common/Link';
-import { Menu } from '../common/Menu';
-import { Popover } from '../common/Popover';
-import { Text } from '../common/Text';
-import { Tooltip } from '../common/Tooltip';
-import { View } from '../common/View';
 import { Notes } from '../Notes';
 import {
   useDraggable,

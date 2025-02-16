@@ -46,6 +46,8 @@ export class CategoryTemplate {
     let fromLastMonth;
     if (lastMonthBalance < 0 && !carryover) {
       fromLastMonth = 0;
+    } else if (category.is_income) {
+      fromLastMonth = 0;
     } else {
       fromLastMonth = lastMonthBalance;
     }
@@ -126,10 +128,7 @@ export class CategoryTemplate {
           break;
         }
         case 'schedule': {
-          const budgeted = await getSheetValue(
-            monthUtils.sheetForMonth(this.month),
-            `leftover-${this.category.id}`,
-          );
+          const budgeted = this.fromLastMonth + toBudget;
           const ret = await goalsSchedule(
             scheduleFlag,
             t,

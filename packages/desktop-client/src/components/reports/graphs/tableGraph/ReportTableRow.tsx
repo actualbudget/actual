@@ -9,7 +9,7 @@ import {
   amountToCurrency,
   amountToInteger,
   integerToCurrency,
-} from 'loot-core/src/shared/util';
+} from 'loot-core/shared/util';
 import {
   type balanceTypeOpType,
   type GroupedEntity,

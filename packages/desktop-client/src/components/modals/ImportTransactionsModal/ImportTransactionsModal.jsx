@@ -9,7 +9,7 @@ import {
   importTransactions,
 } from 'loot-core/client/queries/queriesSlice';
 import { send } from 'loot-core/platform/client/fetch';
-import { amountToInteger } from 'loot-core/src/shared/util';
+import { amountToInteger } from 'loot-core/shared/util';
 
 import { useCategories } from '../../../hooks/useCategories';
 import { useDateFormat } from '../../../hooks/useDateFormat';

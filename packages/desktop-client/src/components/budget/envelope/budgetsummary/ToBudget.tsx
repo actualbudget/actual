@@ -5,7 +5,7 @@ import React, {
   useState,
 } from 'react';
 
-import { envelopeBudget } from 'loot-core/src/client/queries';
+import { envelopeBudget } from 'loot-core/client/queries';
 
 import { useContextMenu } from '../../../../hooks/useContextMenu';
 import { Popover } from '../../../common/Popover';
@@ -75,7 +75,7 @@ export function ToBudget({
           prevMonthName={prevMonthName}
           style={style}
           amountStyle={amountStyle}
-          isTotalsListTooltipDisabled={!isCollapsed || asContextMenu}
+          isTotalsListTooltipDisabled={!isCollapsed || menuOpen}
           onContextMenu={handleContextMenu}
         />
       </View>
