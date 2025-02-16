@@ -63,6 +63,8 @@ Paribas
 passwordless
 Postgre
 prefs
+Primoco
+Priotecs
 proactively
 revolut
 RIED
