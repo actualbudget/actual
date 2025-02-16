@@ -8,7 +8,7 @@ import { useTranslation } from 'react-i18next';
 import {
   type balanceTypeOpType,
   type IntervalEntity,
-} from 'loot-core/src/types/models/reports';
+} from 'loot-core/types/models/reports';
 
 import { theme } from '../../../../style';
 import { View } from '../../../common/View';

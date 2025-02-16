@@ -3,10 +3,7 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { addNotification, popModal, signOut } from 'loot-core/client/actions';
 import { send } from 'loot-core/platform/client/fetch';
-import {
-  PossibleRoles,
-  type UserEntity,
-} from 'loot-core/src/types/models/user';
+import { PossibleRoles, type UserEntity } from 'loot-core/types/models/user';
 
 import { useDispatch } from '../../redux';
 import { styles, theme } from '../../style';

@@ -7,8 +7,8 @@ import { css } from '@emotion/css';
 
 import { loadAllFiles, loadGlobalPrefs } from 'loot-core/client/actions';
 import { sync } from 'loot-core/client/app/appSlice';
-import { send } from 'loot-core/src/platform/client/fetch';
-import { getCreateKeyError } from 'loot-core/src/shared/errors';
+import { send } from 'loot-core/platform/client/fetch';
+import { getCreateKeyError } from 'loot-core/shared/errors';
 
 import { useDispatch } from '../../redux';
 import { styles, theme } from '../../style';

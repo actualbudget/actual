@@ -11,9 +11,9 @@ import React, {
   type ReactNode,
 } from 'react';
 
-import { listen } from 'loot-core/src/platform/client/fetch';
-import * as undo from 'loot-core/src/platform/client/undo';
-import { type UndoState } from 'loot-core/src/server/undo';
+import { listen } from 'loot-core/platform/client/fetch';
+import * as undo from 'loot-core/platform/client/undo';
+import { type UndoState } from 'loot-core/server/undo';
 
 type Range<T> = { start: T; end: T | null };
 type Item = { id: string };

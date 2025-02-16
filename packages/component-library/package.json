@@ -1,0 +1,40 @@
+{
+  "name": "@actual-app/components",
+  "version": "0.0.1",
+  "license": "MIT",
+  "peerDependencies": {
+    "react": ">=18.2"
+  },
+  "dependencies": {
+    "@emotion/css": "^11.13.4",
+    "react-aria-components": "^1.4.1"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.0",
+    "react": "18.2.0"
+  },
+  "exports": {
+    "./icons/*": "./src/icons/*.tsx",
+    "./aligned-text": "./src/AlignedText.tsx",
+    "./block": "./src/Block.tsx",
+    "./button": "./src/Button.tsx",
+    "./card": "./src/Card.tsx",
+    "./form-error": "./src/FormError.tsx",
+    "./initial-focus": "./src/InitialFocus.ts",
+    "./inline-field": "./src/InlineField.tsx",
+    "./label": "./src/Label.tsx",
+    "./menu": "./src/Menu.tsx",
+    "./paragraph": "./src/Paragraph.tsx",
+    "./popover": "./src/Popover.tsx",
+    "./space-between": "./src/SpaceBetween.tsx",
+    "./stack": "./src/Stack.tsx",
+    "./styles": "./src/styles.ts",
+    "./text": "./src/Text.tsx",
+    "./text-one-line": "./src/TextOneLine.tsx",
+    "./theme": "./src/theme.ts",
+    "./tokens": "./src/tokens.ts",
+    "./toggle": "./src/Toggle.tsx",
+    "./tooltip": "./src/Tooltip.tsx",
+    "./view": "./src/View.tsx"
+  }
+}

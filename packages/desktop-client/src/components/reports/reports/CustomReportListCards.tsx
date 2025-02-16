@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { addNotification } from 'loot-core/client/actions';
+import { calculateHasWarning } from 'loot-core/client/reports';
 import { send, sendCatch } from 'loot-core/platform/client/fetch/index';
-import { addNotification } from 'loot-core/src/client/actions';
-import { calculateHasWarning } from 'loot-core/src/client/reports';
-import * as monthUtils from 'loot-core/src/shared/months';
+import * as monthUtils from 'loot-core/shared/months';
 import { type CustomReportEntity } from 'loot-core/types/models/reports';
 
 import { useAccounts } from '../../../hooks/useAccounts';

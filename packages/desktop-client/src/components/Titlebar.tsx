@@ -6,13 +6,13 @@ import { Routes, Route, useLocation } from 'react-router-dom';
 import { css } from '@emotion/css';
 
 import { sync } from 'loot-core/client/app/appSlice';
-import * as Platform from 'loot-core/src/client/platform';
-import * as queries from 'loot-core/src/client/queries';
-import { listen } from 'loot-core/src/platform/client/fetch';
+import * as Platform from 'loot-core/client/platform';
+import * as queries from 'loot-core/client/queries';
+import { listen } from 'loot-core/platform/client/fetch';
 import {
   isDevelopmentEnvironment,
   isElectron,
-} from 'loot-core/src/shared/environment';
+} from 'loot-core/shared/environment';
 
 import { useGlobalPref } from '../hooks/useGlobalPref';
 import { useMetadataPref } from '../hooks/useMetadataPref';

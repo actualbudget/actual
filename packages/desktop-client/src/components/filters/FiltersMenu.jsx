@@ -10,9 +10,9 @@ import {
   isValid as isDateValid,
 } from 'date-fns';
 
-import { useFilters } from 'loot-core/src/client/data-hooks/filters';
-import { send } from 'loot-core/src/platform/client/fetch';
-import { getMonthYearFormat } from 'loot-core/src/shared/months';
+import { useFilters } from 'loot-core/client/data-hooks/filters';
+import { send } from 'loot-core/platform/client/fetch';
+import { getMonthYearFormat } from 'loot-core/shared/months';
 import {
   mapField,
   deserializeField,
@@ -20,8 +20,8 @@ import {
   unparse,
   FIELD_TYPES,
   getValidOps,
-} from 'loot-core/src/shared/rules';
-import { titleFirst } from 'loot-core/src/shared/util';
+} from 'loot-core/shared/rules';
+import { titleFirst } from 'loot-core/shared/util';
 
 import { useDateFormat } from '../../hooks/useDateFormat';
 import { styles, theme } from '../../style';

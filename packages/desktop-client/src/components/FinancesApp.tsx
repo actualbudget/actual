@@ -11,7 +11,7 @@ import {
 
 import { addNotification } from 'loot-core/client/actions';
 import { sync } from 'loot-core/client/app/appSlice';
-import * as undo from 'loot-core/src/platform/client/undo';
+import * as undo from 'loot-core/platform/client/undo';
 
 import { ProtectedRoute } from '../auth/ProtectedRoute';
 import { Permissions } from '../auth/types';
@@ -24,6 +24,7 @@ import { theme } from '../style';
 import { getIsOutdated, getLatestVersion } from '../util/versions';
 
 import { UserAccessPage } from './admin/UserAccess/UserAccessPage';
+import { BankSync } from './banksync';
 import { BankSyncStatus } from './BankSyncStatus';
 import { View } from './common/View';
 import { GlobalKeys } from './GlobalKeys';
@@ -248,6 +249,7 @@ export function FinancesApp() {
 
                 <Route path="/payees" element={<ManagePayeesPage />} />
                 <Route path="/rules" element={<ManageRulesPage />} />
+                <Route path="/bank-sync" element={<BankSync />} />
                 <Route path="/settings" element={<Settings />} />
 
                 <Route
