@@ -1,8 +1,13 @@
+import { type Locator, type Page } from '@playwright/test';
+
 import { AccountPage } from './account-page';
 import { BudgetPage } from './budget-page';
 
 export class ConfigurationPage {
-  constructor(page) {
+  readonly page: Page;
+  readonly heading: Locator;
+
+  constructor(page: Page) {
     this.page = page;
 
     this.heading = page.getByRole('heading');
@@ -23,7 +28,7 @@ export class ConfigurationPage {
     return new AccountPage(this.page);
   }
 
-  async importBudget(type, file) {
+  async importBudget(type: 'YNAB4' | 'nYNAB' | 'Actual', file: string) {
     const fileChooserPromise = this.page.waitForEvent('filechooser');
     await this.page.getByRole('button', { name: 'Import my budget' }).click();
 

@@ -1,10 +1,15 @@
+import { type Locator, type Page } from '@playwright/test';
+
 export class CloseAccountModal {
-  constructor(page, locator) {
-    this.page = page;
+  readonly locator: Locator;
+  readonly page: Page;
+
+  constructor(locator: Locator) {
     this.locator = locator;
+    this.page = locator.page();
   }
 
-  async selectTransferAccount(accountName) {
+  async selectTransferAccount(accountName: string) {
     await this.locator.getByPlaceholder('Select account...').fill(accountName);
     await this.page.keyboard.press('Enter');
   }

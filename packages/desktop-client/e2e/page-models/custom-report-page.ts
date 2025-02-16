@@ -1,5 +1,13 @@
+import { type Locator, type Page } from '@playwright/test';
+
 export class CustomReportPage {
-  constructor(page) {
+  readonly page: Page;
+  readonly pageContent: Locator;
+  readonly showLegendButton: Locator;
+  readonly showSummaryButton: Locator;
+  readonly showLabelsButton: Locator;
+
+  constructor(page: Page) {
     this.page = page;
     this.pageContent = page.getByTestId('reports-page');
 
@@ -14,11 +22,11 @@ export class CustomReportPage {
     });
   }
 
-  async selectViz(vizName) {
+  async selectViz(vizName: string | RegExp) {
     await this.pageContent.getByRole('button', { name: vizName }).click();
   }
 
-  async selectMode(mode) {
+  async selectMode(mode: 'total' | 'time') {
     switch (mode) {
       case 'total':
         await this.pageContent.getByRole('button', { name: 'Total' }).click();

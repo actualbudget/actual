@@ -1,5 +1,14 @@
+import { type Locator, type Page } from '@playwright/test';
+
 export class SettingsPage {
-  constructor(page) {
+  readonly page: Page;
+  readonly settings: Locator;
+  readonly exportDataButton: Locator;
+  readonly switchBudgetTypeButton: Locator;
+  readonly advancedSettingsButton: Locator;
+  readonly experimentalSettingsButton: Locator;
+
+  constructor(page: Page) {
     this.page = page;
     this.settings = page.getByTestId('settings');
     this.exportDataButton = this.settings.getByRole('button', {
@@ -15,24 +24,24 @@ export class SettingsPage {
     );
   }
 
-  async waitFor(options) {
-    await this.settings.waitFor(options);
+  async waitFor(...options: Parameters<Locator['waitFor']>) {
+    await this.settings.waitFor(...options);
   }
 
   async exportData() {
     await this.exportDataButton.click();
   }
 
-  async useBudgetType(budgetType) {
+  async useBudgetType(budgetType: 'Envelope' | 'Tracking') {
     await this.switchBudgetTypeButton.waitFor();
 
     const buttonText = await this.switchBudgetTypeButton.textContent();
-    if (buttonText.includes(budgetType.toLowerCase())) {
+    if (buttonText?.includes(budgetType.toLowerCase())) {
       await this.switchBudgetTypeButton.click();
     }
   }
 
-  async enableExperimentalFeature(featureName) {
+  async enableExperimentalFeature(featureName: string) {
     if (await this.advancedSettingsButton.isVisible()) {
       await this.advancedSettingsButton.click();
     }
