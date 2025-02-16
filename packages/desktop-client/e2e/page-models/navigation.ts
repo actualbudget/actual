@@ -1,15 +1,25 @@
+import { type Page } from '@playwright/test';
+
 import { AccountPage } from './account-page';
 import { ReportsPage } from './reports-page';
 import { RulesPage } from './rules-page';
 import { SchedulesPage } from './schedules-page';
 import { SettingsPage } from './settings-page';
 
+type AccountEntry = {
+  name: string;
+  balance: number;
+  offBudget: boolean;
+};
+
 export class Navigation {
-  constructor(page) {
+  readonly page: Page;
+
+  constructor(page: Page) {
     this.page = page;
   }
 
-  async goToAccountPage(accountName) {
+  async goToAccountPage(accountName: string) {
     await this.page
       .getByRole('link', { name: new RegExp(`^${accountName}`) })
       .click();
@@ -55,7 +65,7 @@ export class Navigation {
     return new SettingsPage(this.page);
   }
 
-  async createAccount(data) {
+  async createAccount(data: AccountEntry) {
     await this.page.getByRole('button', { name: 'Add account' }).click();
     await this.page
       .getByRole('button', { name: 'Create a local account' })

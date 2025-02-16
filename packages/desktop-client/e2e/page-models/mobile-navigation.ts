@@ -1,3 +1,5 @@
+import { type Locator, type Page } from '@playwright/test';
+
 import { MobileAccountPage } from './mobile-account-page';
 import { MobileAccountsPage } from './mobile-accounts-page';
 import { MobileBudgetPage } from './mobile-budget-page';
@@ -5,8 +7,30 @@ import { MobileReportsPage } from './mobile-reports-page';
 import { MobileTransactionEntryPage } from './mobile-transaction-entry-page';
 import { SettingsPage } from './settings-page';
 
+const NAVBAR_ROWS = 3;
+const NAV_LINKS_HIDDEN_BY_DEFAULT = [
+  'Reports',
+  'Schedules',
+  'Payees',
+  'Rules',
+  'Settings',
+];
+const ROUTES_BY_PAGE = {
+  Budget: '/budget',
+  Accounts: '/accounts',
+  Transaction: '/transactions/new',
+  Reports: '/reports',
+  Settings: '/settings',
+};
+
 export class MobileNavigation {
-  constructor(page) {
+  readonly page: Page;
+  readonly heading: Locator;
+  readonly navbar: Locator;
+  readonly mainContentSelector: string;
+  readonly navbarSelector: string;
+
+  constructor(page: Page) {
     this.page = page;
     this.heading = page.getByRole('heading');
     this.navbar = page.getByRole('navigation');
@@ -14,30 +38,22 @@ export class MobileNavigation {
     this.navbarSelector = '[role=navigation]';
   }
 
-  static #NAVBAR_ROWS = 3;
-  static #NAV_LINKS_HIDDEN_BY_DEFAULT = [
-    'Reports',
-    'Schedules',
-    'Payees',
-    'Rules',
-    'Settings',
-  ];
-  static #ROUTES_BY_PAGE = {
-    Budget: '/budget',
-    Accounts: '/accounts',
-    Transactions: '/transactions/new',
-    Reports: '/reports',
-    Settings: '/settings',
-  };
-
   async dragNavbarUp() {
     const mainContentBoundingBox = await this.page
       .locator(this.mainContentSelector)
       .boundingBox();
 
+    if (!mainContentBoundingBox) {
+      throw new Error('Unable to get bounding box of main content.');
+    }
+
     const navbarBoundingBox = await this.page
       .locator(this.navbarSelector)
       .boundingBox();
+
+    if (!navbarBoundingBox) {
+      throw new Error('Unable to get bounding box of navbar.');
+    }
 
     await this.page.dragAndDrop(this.navbarSelector, this.mainContentSelector, {
       sourcePosition: { x: 1, y: 0 },
@@ -53,39 +69,47 @@ export class MobileNavigation {
       .locator(this.navbarSelector)
       .boundingBox();
 
+    if (!boundingBox) {
+      throw new Error('Unable to get bounding box of navbar.');
+    }
+
     await this.page.dragAndDrop(this.navbarSelector, this.navbarSelector, {
       sourcePosition: { x: 1, y: 0 },
       targetPosition: {
         x: 1,
         // Only scroll until bottom of screen i.e. bottom of first navbar row.
-        y: boundingBox.height / MobileNavigation.#NAVBAR_ROWS,
+        y: boundingBox.height / NAVBAR_ROWS,
       },
     });
   }
 
-  async hasNavbarState(...states) {
+  async hasNavbarState(...states: string[]) {
     if ((await this.navbar.count()) === 0) {
       // No navbar on page.
       return false;
     }
 
     const dataNavbarState = await this.navbar.getAttribute('data-navbar-state');
+    if (!dataNavbarState) {
+      throw new Error('Navbar does not have data-navbar-state attribute.');
+    }
     return states.includes(dataNavbarState);
   }
 
-  async navigateToPage(pageName, pageModelFactory) {
+  async navigateToPage<T extends { waitFor: Locator['waitFor'] }>(
+    pageName: keyof typeof ROUTES_BY_PAGE,
+    pageModelFactory: () => T,
+  ): Promise<T> {
     const pageInstance = pageModelFactory();
 
-    if (this.page.url().endsWith(MobileNavigation.#ROUTES_BY_PAGE[pageName])) {
+    if (this.page.url().endsWith(ROUTES_BY_PAGE[pageName])) {
       // Already on the page.
       return pageInstance;
     }
 
     await this.navbar.waitFor();
 
-    const navbarStates = MobileNavigation.#NAV_LINKS_HIDDEN_BY_DEFAULT.includes(
-      pageName,
-    )
+    const navbarStates = NAV_LINKS_HIDDEN_BY_DEFAULT.includes(pageName)
       ? ['default', 'hidden']
       : ['hidden'];
 
