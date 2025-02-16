@@ -10,10 +10,10 @@ import { Trans } from 'react-i18next';
 
 import { css } from '@emotion/css';
 
-import { trackingBudget } from 'loot-core/src/client/queries';
-import { evalArithmetic } from 'loot-core/src/shared/arithmetic';
-import * as monthUtils from 'loot-core/src/shared/months';
-import { integerToCurrency, amountToInteger } from 'loot-core/src/shared/util';
+import { trackingBudget } from 'loot-core/client/queries';
+import { evalArithmetic } from 'loot-core/shared/arithmetic';
+import * as monthUtils from 'loot-core/shared/months';
+import { integerToCurrency, amountToInteger } from 'loot-core/shared/util';
 
 import { useUndo } from '../../../hooks/useUndo';
 import { SvgCheveronDown } from '../../../icons/v1';

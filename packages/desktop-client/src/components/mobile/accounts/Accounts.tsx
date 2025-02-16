@@ -3,9 +3,9 @@ import { useTranslation, Trans } from 'react-i18next';
 
 import { css } from '@emotion/css';
 
+import { replaceModal } from 'loot-core/client/actions';
 import { syncAndDownload } from 'loot-core/client/app/appSlice';
-import { replaceModal } from 'loot-core/src/client/actions';
-import * as queries from 'loot-core/src/client/queries';
+import * as queries from 'loot-core/client/queries';
 import { type AccountEntity } from 'loot-core/types/models';
 
 import { useAccounts } from '../../../hooks/useAccounts';

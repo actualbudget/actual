@@ -8,8 +8,8 @@ import { useTranslation } from 'react-i18next';
 
 import { parseISO, format as formatDate, parse as parseDate } from 'date-fns';
 
-import { currentDay, dayFromDate } from 'loot-core/src/shared/months';
-import { amountToInteger } from 'loot-core/src/shared/util';
+import { currentDay, dayFromDate } from 'loot-core/shared/months';
+import { amountToInteger } from 'loot-core/shared/util';
 
 import { useDateFormat } from '../../hooks/useDateFormat';
 import { theme } from '../../style';

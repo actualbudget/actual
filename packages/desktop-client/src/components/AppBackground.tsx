@@ -1,15 +1,15 @@
 import React from 'react';
 import { useTransition, animated } from 'react-spring';
 
+import { Block } from '@actual-app/components/block';
+import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
+import { theme } from '@actual-app/components/theme';
+import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
-import { AnimatedLoading } from '../icons/AnimatedLoading';
 import { useSelector } from '../redux';
-import { theme } from '../style';
 
 import { Background } from './Background';
-import { Block } from './common/Block';
-import { View } from './common/View';
 
 type AppBackgroundProps = {
   isLoading?: boolean;

@@ -1,7 +1,7 @@
 import React from 'react';
 
-import { type ScheduleStatusType } from 'loot-core/src/client/data-hooks/schedules';
-import { titleFirst } from 'loot-core/src/shared/util';
+import { type ScheduleStatusType } from 'loot-core/client/data-hooks/schedules';
+import { titleFirst } from 'loot-core/shared/util';
 
 import {
   SvgAlertTriangle,

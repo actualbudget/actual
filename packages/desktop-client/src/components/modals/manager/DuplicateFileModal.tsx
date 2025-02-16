@@ -7,7 +7,7 @@ import {
   uniqueBudgetName,
   validateBudgetName,
 } from 'loot-core/client/actions';
-import { type File } from 'loot-core/src/types/file';
+import { type File } from 'loot-core/types/file';
 
 import { useDispatch } from '../../../redux';
 import { theme } from '../../../style';

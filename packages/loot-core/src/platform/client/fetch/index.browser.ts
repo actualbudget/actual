@@ -96,11 +96,15 @@ function connectWorker(worker, onOpen, onError) {
     // ready to handle messages.
     if (msg.type === 'connect') {
       // Send any messages that were queued while closed
-      if (messageQueue.length > 0) {
+      if (messageQueue?.length > 0) {
         messageQueue.forEach(msg => worker.postMessage(msg));
         messageQueue = null;
       }
 
+      // signal to the backend that we're connected to it
+      globalWorker.postMessage({
+        name: 'client-connected-to-backend',
+      });
       onOpen();
     } else if (msg.type === 'app-init-failure') {
       onError(msg);

@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 
-import { saveGlobalPrefs } from 'loot-core/src/client/actions';
-import { type GlobalPrefs } from 'loot-core/src/types/prefs';
+import { saveGlobalPrefs } from 'loot-core/client/actions';
+import { type GlobalPrefs } from 'loot-core/types/prefs';
 
 import { useSelector, useDispatch } from '../redux';
 

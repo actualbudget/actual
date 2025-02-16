@@ -4,9 +4,9 @@ import { useTranslation } from 'react-i18next';
 
 import { format as formatDate, parseISO } from 'date-fns';
 
-import { getMonthYearFormat } from 'loot-core/src/shared/months';
-import { getRecurringDescription } from 'loot-core/src/shared/schedules';
-import { integerToCurrency } from 'loot-core/src/shared/util';
+import { getMonthYearFormat } from 'loot-core/shared/months';
+import { getRecurringDescription } from 'loot-core/shared/schedules';
+import { integerToCurrency } from 'loot-core/shared/util';
 
 import { useAccounts } from '../../hooks/useAccounts';
 import { useCategories } from '../../hooks/useCategories';

@@ -1,8 +1,8 @@
 import React, { useMemo, useState } from 'react';
 import { Trans } from 'react-i18next';
 
-import { evalArithmetic } from 'loot-core/src/shared/arithmetic';
-import { integerToCurrency, amountToInteger } from 'loot-core/src/shared/util';
+import { evalArithmetic } from 'loot-core/shared/arithmetic';
+import { integerToCurrency, amountToInteger } from 'loot-core/shared/util';
 import { type CategoryEntity } from 'loot-core/types/models';
 
 import { useCategories } from '../../../hooks/useCategories';

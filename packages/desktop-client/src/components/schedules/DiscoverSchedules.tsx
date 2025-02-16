@@ -2,11 +2,11 @@
 import React, { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
-import { runQuery } from 'loot-core/src/client/query-helpers';
-import { send } from 'loot-core/src/platform/client/fetch';
-import { q } from 'loot-core/src/shared/query';
-import { getRecurringDescription } from 'loot-core/src/shared/schedules';
-import type { DiscoverScheduleEntity } from 'loot-core/src/types/models';
+import { runQuery } from 'loot-core/client/query-helpers';
+import { send } from 'loot-core/platform/client/fetch';
+import { q } from 'loot-core/shared/query';
+import { getRecurringDescription } from 'loot-core/shared/schedules';
+import type { DiscoverScheduleEntity } from 'loot-core/types/models';
 
 import { useDateFormat } from '../../hooks/useDateFormat';
 import {
