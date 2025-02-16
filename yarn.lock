@@ -79,6 +79,50 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@actual-app/sync-server@workspace:packages/sync-server":
+  version: 0.0.0-use.local
+  resolution: "@actual-app/sync-server@workspace:packages/sync-server"
+  dependencies:
+    "@actual-app/crdt": "npm:2.1.0"
+    "@actual-app/web": "npm:25.2.1"
+    "@babel/preset-typescript": "npm:^7.20.2"
+    "@types/bcrypt": "npm:^5.0.2"
+    "@types/better-sqlite3": "npm:^7.6.12"
+    "@types/cors": "npm:^2.8.13"
+    "@types/express": "npm:^4.17.17"
+    "@types/express-actuator": "npm:^1.8.0"
+    "@types/jest": "npm:^29.2.3"
+    "@types/node": "npm:^17.0.45"
+    "@types/supertest": "npm:^2.0.12"
+    "@types/uuid": "npm:^9.0.0"
+    "@typescript-eslint/eslint-plugin": "npm:^5.51.0"
+    "@typescript-eslint/parser": "npm:^5.51.0"
+    bcrypt: "npm:^5.1.1"
+    better-sqlite3: "npm:^11.7.0"
+    body-parser: "npm:^1.20.3"
+    cors: "npm:^2.8.5"
+    date-fns: "npm:^2.30.0"
+    debug: "npm:^4.3.4"
+    eslint: "npm:^8.33.0"
+    eslint-plugin-prettier: "npm:^4.2.1"
+    express: "npm:4.20.0"
+    express-actuator: "npm:1.8.4"
+    express-rate-limit: "npm:^6.7.0"
+    express-response-size: "npm:^0.0.3"
+    express-winston: "npm:^4.2.0"
+    jest: "npm:^29.3.1"
+    jws: "npm:^4.0.0"
+    migrate: "npm:^2.0.1"
+    nordigen-node: "npm:^1.4.0"
+    openid-client: "npm:^5.4.2"
+    prettier: "npm:^2.8.3"
+    supertest: "npm:^6.3.1"
+    typescript: "npm:^4.9.5"
+    uuid: "npm:^9.0.0"
+    winston: "npm:^3.14.2"
+  languageName: unknown
+  linkType: soft
+
 "@actual-app/web@npm:25.2.1":
   version: 25.2.1
   resolution: "@actual-app/web@npm:25.2.1"
@@ -7484,50 +7528,6 @@ __metadata:
   checksum: 10/6df29c35556782ca9e632db461a7f97947772c6c1d5438a81f0c873a3da3a792487e83e404d1c6c25f70513e91aa18745f6eafb1fcc3a43ecd1920b21dd173d2
   languageName: node
   linkType: hard
-
-"actual-sync@workspace:packages/sync-server":
-  version: 0.0.0-use.local
-  resolution: "actual-sync@workspace:packages/sync-server"
-  dependencies:
-    "@actual-app/crdt": "npm:2.1.0"
-    "@actual-app/web": "npm:25.2.1"
-    "@babel/preset-typescript": "npm:^7.20.2"
-    "@types/bcrypt": "npm:^5.0.2"
-    "@types/better-sqlite3": "npm:^7.6.12"
-    "@types/cors": "npm:^2.8.13"
-    "@types/express": "npm:^4.17.17"
-    "@types/express-actuator": "npm:^1.8.0"
-    "@types/jest": "npm:^29.2.3"
-    "@types/node": "npm:^17.0.45"
-    "@types/supertest": "npm:^2.0.12"
-    "@types/uuid": "npm:^9.0.0"
-    "@typescript-eslint/eslint-plugin": "npm:^5.51.0"
-    "@typescript-eslint/parser": "npm:^5.51.0"
-    bcrypt: "npm:^5.1.1"
-    better-sqlite3: "npm:^11.7.0"
-    body-parser: "npm:^1.20.3"
-    cors: "npm:^2.8.5"
-    date-fns: "npm:^2.30.0"
-    debug: "npm:^4.3.4"
-    eslint: "npm:^8.33.0"
-    eslint-plugin-prettier: "npm:^4.2.1"
-    express: "npm:4.20.0"
-    express-actuator: "npm:1.8.4"
-    express-rate-limit: "npm:^6.7.0"
-    express-response-size: "npm:^0.0.3"
-    express-winston: "npm:^4.2.0"
-    jest: "npm:^29.3.1"
-    jws: "npm:^4.0.0"
-    migrate: "npm:^2.0.1"
-    nordigen-node: "npm:^1.4.0"
-    openid-client: "npm:^5.4.2"
-    prettier: "npm:^2.8.3"
-    supertest: "npm:^6.3.1"
-    typescript: "npm:^4.9.5"
-    uuid: "npm:^9.0.0"
-    winston: "npm:^3.14.2"
-  languageName: unknown
-  linkType: soft
 
 "actual@workspace:.":
   version: 0.0.0-use.local
