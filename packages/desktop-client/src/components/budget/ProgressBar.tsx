@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { View } from '@actual-app/components/view';
 
@@ -96,11 +97,13 @@ function getColorBars(
   return [leftBar, rightBar];
 }
 
-type CategoryVisualProps = {
+type ProgressBarProps = {
   category: CategoryEntity;
 };
 
-export function CategoryVisual({ category }: CategoryVisualProps) {
+export function ProgressBar({ category }: ProgressBarProps) {
+  const { t } = useTranslation();
+
   const [leftBar, setLeftBar] = useState<ColorBar>(new ColorBar());
   const [rightBar, setRightBar] = useState<ColorBar>(new ColorBar());
 
@@ -175,7 +178,7 @@ export function CategoryVisual({ category }: CategoryVisualProps) {
           borderBottomLeftRadius: borderRadius,
           transition: 'width 0.5s ease-in-out',
         }}
-        title={`${leftBar.category}: ${leftBar.rawValue}`}
+        title={`${t(leftBar.category)}: ${leftBar.rawValue}`}
       />
       {/* Right side of the bar */}
       <View
@@ -188,7 +191,7 @@ export function CategoryVisual({ category }: CategoryVisualProps) {
           borderBottomRightRadius: borderRadius,
           transition: 'width 0.5s ease-in-out',
         }}
-        title={`${rightBar.category}: ${rightBar.rawValue}`}
+        title={`${t(rightBar.category)}: ${rightBar.rawValue}`}
       />
     </View>
   );

@@ -1,10 +1,12 @@
 import React, { type ReactNode } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 
+import { Text } from '@actual-app/components/text';
 import { css } from '@emotion/css';
 
 import { type DarkTheme, type Theme } from 'loot-core/types/prefs';
 
+import { useGlobalPref } from '../../hooks/useGlobalPref';
 import {
   themeOptions,
   useTheme,
@@ -14,8 +16,8 @@ import {
 } from '../../style';
 import { tokens } from '../../tokens';
 import { Select } from '../common/Select';
-import { Text } from '../common/Text';
 import { View } from '../common/View';
+import { Checkbox } from '../forms';
 import { useSidebar } from '../sidebar/SidebarProvider';
 
 import { Setting } from './UI';
@@ -41,6 +43,7 @@ export function ThemeSettings() {
   const sidebar = useSidebar();
   const [theme, switchTheme] = useTheme();
   const [darkTheme, switchDarkTheme] = usePreferredDarkTheme();
+  const [progressBars, setProgressBars] = useGlobalPref('useProgressBars');
 
   return (
     <Setting
@@ -72,6 +75,20 @@ export function ThemeSettings() {
                 },
               })}
             />
+            <Text style={{ display: 'flex' }}>
+              <Checkbox
+                id="settings-progressBar"
+                checked={progressBars}
+                onChange={e => {
+                  setProgressBars(e.currentTarget.checked);
+                }}
+              />
+              <Trans>
+                <label htmlFor="settings-progressBar">
+                  Use category progress bars
+                </label>
+              </Trans>
+            </Text>
           </Column>
           {theme === 'auto' && (
             <Column title={t('Dark theme')}>
