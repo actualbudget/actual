@@ -73,7 +73,7 @@ root@server:/etc/systemd/system# systemctl status actual-server
              ├─842870 /usr/bin/node /var/www/html/actual-server/.yarn/releases/yarn->
              └─842881 /usr/bin/node app
 ```
-5. You should see output similar to below. The main thing to check for is the "Active: active (running)" section. From here you can consider [Setting up a Reverse Proxy](https://actualbudget.org/docs/config/reverse-proxies) and [Activating HTTPS](https://actualbudget.org/docs/config/https)
+5. You should see output similar to above. The main thing to check for is the "Active: active (running)" section. From here you can consider [Setting up a Reverse Proxy](https://actualbudget.org/docs/config/reverse-proxies) and [Activating HTTPS](https://actualbudget.org/docs/config/https)
 6. To stop / start / restart the server use the commands
    - ```systemctl stop actual-server```
    - ```systemctl start actual-server```
