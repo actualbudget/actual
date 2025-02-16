@@ -83,5 +83,5 @@ To modify or delete the filter, click on the top-right dropdown menu. It will pr
 
 ![](/img/filtering/modify-saved.png)
 
-To clear out the any filtered transactions, click on the dropdown menu in the top-right corner above your transactions table and click **Clear all conditions**.
+To clear out any filtered transactions, click on the dropdown menu in the top-right corner above your transactions table and click **Clear all conditions**.
 
