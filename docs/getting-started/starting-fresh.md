@@ -90,7 +90,7 @@ different from other people. Add the categories that make sense for you as your 
 
 When creating your categories don't just think of your bills, think of your goals too.
 The categories aren't just a name of an expense, it is a bucket that will hold your money.
-That bucket can be assigned to both normal expenses, like bill and groceries, and to savings goals like a down payment on a house or a vacation to Bali.
+That bucket can be assigned to both normal expenses, like bills and groceries, and to savings goals like a down payment on a house or a vacation to Bali.
 If you have an investment account that you contribute to, make a category for that.
 
 You also have the ability to make multiple income categories.
