@@ -36,7 +36,7 @@ You can resolve this issue in one of two ways.
 
 ## How to use rules with Schedules
 
-Many times it's desired to add notes to the scheduled transactions or to assign categories automatically. This is done with the [Rules][rules] tool.
+Many times it's desired to add notes to the scheduled transactions or to assign categories automatically. This is done with the [Rules](/docs/budgeting/rules) tool.
 
 Create a schedule.
 
@@ -65,7 +65,7 @@ To create a Schedule from an existing transaction:
 1. Navigate to the Accounts page
 2. Select the tick box in the left hand column for the transaction you wish to copy.
 3. Once selected, go to the drop-down menu on the top right of the page
-4. Click Link Selection
+4. Click Link Schedule
 5. In the Pop up that appears click "Create New"
 6. All fields will populate from the transaction,
 7. Adjust any additional fields and click Add.
