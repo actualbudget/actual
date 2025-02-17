@@ -138,14 +138,10 @@ export default defineConfig(async ({ mode }) => {
       headers: mode === 'development' ? devHeaders : undefined,
       port: +env.PORT || 5173,
       open: env.BROWSER
-            ? [
-                'chrome',
-                'firefox',
-                'edge',
-                'browser',
-                'browserPrivate',
-              ].includes(env.BROWSER)
-            : browserOpen,
+        ? ['chrome', 'firefox', 'edge', 'browser', 'browserPrivate'].includes(
+            env.BROWSER,
+          )
+        : browserOpen,
       watch: {
         disableGlobbing: false,
       },

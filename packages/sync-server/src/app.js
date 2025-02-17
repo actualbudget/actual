@@ -81,7 +81,7 @@ if (process.env.NODE_ENV === 'development') {
       target: 'http://localhost:3001',
       changeOrigin: true,
       ws: true,
-      logLevel: 'debug'
+      logLevel: 'debug',
     }),
   );
 } else {
