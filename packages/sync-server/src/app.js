@@ -25,7 +25,7 @@ process.on('unhandledRejection', reason => {
 app.disable('x-powered-by');
 app.use(cors());
 app.set('trust proxy', config.trustedProxies);
-if (process.env.NODE_ENV !== 'development') {
+if (process.env.ACTUAL_SERVER_MODE !== 'development') {
   app.use(
     rateLimit({
       windowMs: 60 * 1000,
@@ -71,7 +71,7 @@ app.use((req, res, next) => {
   res.set('Cross-Origin-Embedder-Policy', 'require-corp');
   next();
 });
-if (process.env.NODE_ENV === 'development') {
+if (process.env.ACTUAL_SERVER_MODE === 'development') {
   console.log(
     'Running in development mode - Proxying frontend routes to React Dev Server',
   );
@@ -81,21 +81,7 @@ if (process.env.NODE_ENV === 'development') {
       target: 'http://localhost:3001',
       changeOrigin: true,
       ws: true,
-      logLevel: 'debug',
-      context: (pathname, req) => {
-        return (
-          !pathname.startsWith('/api') &&
-          !pathname.startsWith('/sync') &&
-          !pathname.startsWith('/account') &&
-          !pathname.startsWith('/gocardless') &&
-          !pathname.startsWith('/simplefin') &&
-          !pathname.startsWith('/secret') &&
-          !pathname.startsWith('/admin') &&
-          !pathname.startsWith('/openid') &&
-          !pathname.startsWith('/mode') &&
-          !req.url.includes('.')
-        );
-      },
+      logLevel: 'debug'
     }),
   );
 } else {
