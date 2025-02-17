@@ -44,22 +44,38 @@ export default {
     };
   },
 
-  normalizeTransaction(transaction, _booked) {
+  normalizeTransaction(transaction, _booked, editedTransaction = null) {
+    const trans = editedTransaction ?? transaction;
+
     const date =
+      trans.date ||
       transaction.bookingDate ||
       transaction.bookingDateTime ||
       transaction.valueDate ||
       transaction.valueDateTime;
+
     // If we couldn't find a valid date field we filter out this transaction
     // and hope that we will import it again once the bank has processed the
     // transaction further.
     if (!date) {
       return null;
     }
+
+    const notes =
+      trans.notes ??
+      trans.remittanceInformationUnstructured ??
+      trans.remittanceInformationUnstructuredArray?.join(' ');
+
+    transaction.remittanceInformationUnstructuredArrayString =
+      transaction.remittanceInformationUnstructuredArray?.join(',');
+    transaction.remittanceInformationStructuredArrayString =
+      transaction.remittanceInformationStructuredArray?.join(',');
+
     return {
       ...transaction,
-      payeeName: formatPayeeName(transaction),
+      payeeName: trans.payeeName ?? formatPayeeName(trans),
       date: d.format(d.parseISO(date), 'yyyy-MM-dd'),
+      notes,
     };
   },
 

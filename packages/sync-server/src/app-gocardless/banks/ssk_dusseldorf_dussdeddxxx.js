@@ -6,12 +6,14 @@ export default {
 
   institutionIds: ['SSK_DUSSELDORF_DUSSDEDDXXX'],
 
-  normalizeTransaction(transaction, _booked) {
+  normalizeTransaction(transaction, booked) {
+    const editedTrans = { ...transaction };
+
     // If the transaction is not booked yet by the bank, don't import it.
     // Reason being that the transaction doesn't have the information yet
     // to make the payee and notes field be of any use. It's filled with
     // a placeholder text and wouldn't be corrected on the next sync.
-    if (!_booked) {
+    if (!booked) {
       console.debug(
         'Skipping unbooked transaction:',
         transaction.transactionId,
@@ -39,10 +41,10 @@ export default {
       transaction.creditorName ||
       transaction.debtorName;
 
-    transaction.creditorName = usefulCreditorName;
-    transaction.remittanceInformationUnstructured =
+    editedTrans.creditorName = usefulCreditorName;
+    editedTrans.remittanceInformationUnstructured =
       remittanceInformationUnstructured;
 
-    return Fallback.normalizeTransaction(transaction, _booked);
+    return Fallback.normalizeTransaction(transaction, booked, editedTrans);
   },
 };

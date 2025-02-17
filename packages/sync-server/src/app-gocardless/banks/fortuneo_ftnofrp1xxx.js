@@ -1,5 +1,3 @@
-import * as d from 'date-fns';
-
 import { formatPayeeName } from '../../util/payee-name.js';
 
 import Fallback from './integration-bank.js';
@@ -10,18 +8,8 @@ export default {
 
   institutionIds: ['FORTUNEO_FTNOFRP1XXX'],
 
-  normalizeTransaction(transaction, _booked) {
-    const date =
-      transaction.bookingDate ||
-      transaction.bookingDateTime ||
-      transaction.valueDate ||
-      transaction.valueDateTime;
-    // If we couldn't find a valid date field we filter out this transaction
-    // and hope that we will import it again once the bank has processed the
-    // transaction further.
-    if (!date) {
-      return null;
-    }
+  normalizeTransaction(transaction, booked) {
+    const editedTrans = { ...transaction };
 
     // Most of the information from the transaction is in the remittanceInformationUnstructuredArray field.
     // We extract the creditor and debtor names from this field.
@@ -50,13 +38,9 @@ export default {
     const creditorName = isCreditorPayee ? payeeName : null;
     const debtorName = isCreditorPayee ? null : payeeName;
 
-    transaction.creditorName = creditorName;
-    transaction.debtorName = debtorName;
+    editedTrans.creditorName = creditorName;
+    editedTrans.debtorName = debtorName;
 
-    return {
-      ...transaction,
-      payeeName: formatPayeeName(transaction),
-      date: d.format(d.parseISO(date), 'yyyy-MM-dd'),
-    };
+    return Fallback.normalizeTransaction(transaction, booked, editedTrans);
   },
 };

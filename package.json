@@ -19,8 +19,8 @@
   },
   "scripts": {
     "start": "yarn start:browser",
-    "start:server": "yarn workspace actual-sync start",
-    "start:server-monitor": "yarn workspace actual-sync start-monitor",
+    "start:server": "yarn workspace @actual-app/sync-server start",
+    "start:server-monitor": "yarn workspace @actual-app/sync-server start-monitor",
     "start:server-dev": "ACTUAL_SERVER_MODE=development yarn npm-run-all --parallel 'start:server-monitor' 'start'",
     "start:desktop": "yarn rebuild-electron && npm-run-all --parallel 'start:desktop-*'",
     "start:desktop-node": "yarn workspace loot-core watch:node",
@@ -43,7 +43,7 @@
     "rebuild-node": "yarn workspace loot-core rebuild",
     "lint": "eslint . --max-warnings 0",
     "lint:verbose": "DEBUG=eslint:cli-engine eslint . --max-warnings 0",
-    "install:server": "yarn workspaces focus actual-sync --production",
+    "install:server": "yarn workspaces focus @actual-app/sync-server --production",
     "typecheck": "yarn tsc && tsc-strict",
     "jq": "./node_modules/node-jq/bin/jq",
     "prepare": "husky"

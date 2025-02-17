@@ -1,5 +1,3 @@
-import { formatPayeeName } from '../../util/payee-name.js';
-
 import Fallback from './integration-bank.js';
 
 /** @type {import('./bank.interface.js').IBank} */
@@ -9,7 +7,9 @@ export default {
   institutionIds: ['BANCSABADELL_BSABESBB'],
 
   // Sabadell transactions don't get the creditorName/debtorName properly
-  normalizeTransaction(transaction, _booked) {
+  normalizeTransaction(transaction, booked) {
+    const editedTrans = { ...transaction };
+
     const amount = transaction.transactionAmount.amount;
 
     // The amount is negative for outgoing transactions, positive for incoming transactions.
@@ -23,13 +23,9 @@ export default {
     const creditorName = isCreditorPayee ? payeeName : null;
     const debtorName = isCreditorPayee ? null : payeeName;
 
-    transaction.creditorName = creditorName;
-    transaction.debtorName = debtorName;
+    editedTrans.creditorName = creditorName;
+    editedTrans.debtorName = debtorName;
 
-    return {
-      ...transaction,
-      payeeName: formatPayeeName(transaction),
-      date: transaction.bookingDate || transaction.valueDate,
-    };
+    return Fallback.normalizeTransaction(transaction, booked, editedTrans);
   },
 };

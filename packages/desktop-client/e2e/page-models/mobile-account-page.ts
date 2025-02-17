@@ -1,7 +1,18 @@
+import { type Locator, type Page } from '@playwright/test';
+
 import { MobileTransactionEntryPage } from './mobile-transaction-entry-page';
 
 export class MobileAccountPage {
-  constructor(page) {
+  readonly page: Page;
+  readonly heading: Locator;
+  readonly balance: Locator;
+  readonly noTransactionsMessage: Locator;
+  readonly searchBox: Locator;
+  readonly transactionList: Locator;
+  readonly transactions: Locator;
+  readonly createTransactionButton: Locator;
+
+  constructor(page: Page) {
     this.page = page;
 
     this.heading = page.getByRole('heading');
@@ -15,21 +26,25 @@ export class MobileAccountPage {
     });
   }
 
-  async waitFor() {
-    await this.transactionList.waitFor();
+  async waitFor(...options: Parameters<Locator['waitFor']>) {
+    await this.transactionList.waitFor(...options);
   }
 
   /**
    * Retrieve the balance of the account as a number
    */
   async getBalance() {
-    return parseInt(await this.balance.textContent(), 10);
+    const balanceText = await this.balance.textContent();
+    if (!balanceText) {
+      throw new Error('Failed to get balance.');
+    }
+    return parseInt(balanceText, 10);
   }
 
   /**
    * Search by the given term
    */
-  async searchByText(term) {
+  async searchByText(term: string) {
     await this.searchBox.fill(term);
   }
 

@@ -7,6 +7,8 @@ export default {
   institutionIds: ['VIRGIN_NRNBGB22'],
 
   normalizeTransaction(transaction, booked) {
+    const editedTrans = { ...transaction };
+
     const transferPrefixes = ['MOB', 'FPS'];
     const methodRegex = /^(Card|WLT)\s\d+/;
 
@@ -17,21 +19,21 @@ export default {
       // the second field contains the payee and the third contains the
       // reference
 
-      transaction.creditorName = parts[1];
-      transaction.debtorName = parts[1];
-      transaction.remittanceInformationUnstructured = parts[2];
+      editedTrans.creditorName = parts[1];
+      editedTrans.debtorName = parts[1];
+      editedTrans.remittanceInformationUnstructured = parts[2];
     } else if (parts[0].match(methodRegex)) {
       // The payee is prefixed with the payment method, eg "Card 11, {payee}"
 
-      transaction.creditorName = parts[1];
-      transaction.debtorName = parts[1];
+      editedTrans.creditorName = parts[1];
+      editedTrans.debtorName = parts[1];
     } else {
       // Simple payee name
 
-      transaction.creditorName = transaction.remittanceInformationUnstructured;
-      transaction.debtorName = transaction.remittanceInformationUnstructured;
+      editedTrans.creditorName = transaction.remittanceInformationUnstructured;
+      editedTrans.debtorName = transaction.remittanceInformationUnstructured;
     }
 
-    return Fallback.normalizeTransaction(transaction, booked);
+    return Fallback.normalizeTransaction(transaction, booked, editedTrans);
   },
 };

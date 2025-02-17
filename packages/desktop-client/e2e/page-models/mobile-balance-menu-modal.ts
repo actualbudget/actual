@@ -1,7 +1,18 @@
+import { type Page, type Locator } from '@playwright/test';
+
 export class BalanceMenuModal {
-  constructor(page, locator) {
-    this.page = page;
+  readonly page: Page;
+  readonly locator: Locator;
+  readonly heading: Locator;
+  readonly balanceAmountInput: Locator;
+  readonly transferToAnotherCategoryButton: Locator;
+  readonly coverOverspendingButton: Locator;
+  readonly rolloverOverspendingButton: Locator;
+  readonly removeOverspendingRolloverButton: Locator;
+
+  constructor(locator: Locator) {
     this.locator = locator;
+    this.page = locator.page();
 
     this.heading = locator.getByRole('heading');
     this.balanceAmountInput = locator.getByTestId('amount-input');
