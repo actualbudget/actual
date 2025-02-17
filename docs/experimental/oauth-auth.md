@@ -16,7 +16,7 @@ This feature requires use of [Actual Server](../config/)
 
 If you require a more robust authentication method than a server password, it is recommended to use an OpenID provider. Most OpenID providers support multi-factor authentication, enhancing your application's security. Additionally, if you need support for multiple users, you must enable this feature.
 
-To enable this feature, you can use a configuration file `config.json` on the Actual server, or use the UI.
+To enable this feature, you can use a [configuration file](https://actualbudget.com/docs/config/) `config.json` on the Actual server, or use the UI.
 
 ### Configuration Using a Configuration File
 

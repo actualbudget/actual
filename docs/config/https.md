@@ -21,7 +21,7 @@ Use a service like [Tailscale](https://tailscale.com/kb/1153/enabling-https/) or
 Once you have the certificate, you’ll need to configure Actual to use it. There are two methods to do this:
 
 ### Configuring with `config.json`:
-Create a `config.json` file in the same folder where you run Actual. Put the paths to the `.key` and `.crt` files in the file. Note: if you’re using Docker or a similar container environment, make sure the paths are accessible to the container.
+Create a `config.json` file in the same folder where you run the Actual Sync Server. If you are running a [local installation](https://actualbudget.com/docs/install/local) this will be in ```packages/sync-server/```. Put the paths to the `.key` and `.crt` files in the config file. Note: if you’re using Docker or a similar container environment, make sure the paths are accessible to the container.
 
 If using a Docker container, this folder is `/data` within the container. If you mounted a volume for the container, the folder on the host where `/data` is mounted is where you can place the `config.json` file.
 
@@ -35,7 +35,7 @@ If using a Docker container, this folder is `/data` within the container. If you
      }
    }
    ```
-  
+
 ### Configuring with environment variables:
 If you can’t easily create new files, you can also configure HTTPS using environment variables. Set the `ACTUAL_HTTPS_KEY` and `ACTUAL_HTTPS_CERT` environment variables to the contents of the `.key` and `.crt` files, respectively. If you’re unable to include newlines in the environment variable values, you can replace any newlines with `\n` and Actual will automatically convert them back to newlines.
 

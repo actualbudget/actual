@@ -2,7 +2,7 @@
 title: Configuring the Server
 ---
 
-When it starts up, Actual looks for an optional `config.json` file in the same directory as its `package.json`. If present, any keys you define there will override the default values. All values can also be specified as environment variables, which will override the values in the `config.json` file.
+When it starts up, Actual looks for an optional `config.json` file in the same directory as the sync-server's `package.json`. If you are running a [local installation](https://actualbudget.com/docs/install/local) this will be in ```packages/sync-server/```. If present, any keys you define there will override the default values. All values can also be specified as environment variables, which will override the values in the `config.json` file.
 
 :::info
 
@@ -22,7 +22,7 @@ See also sections on `userFiles` and `serverFiles`.
 ## `ACTUAL_CONFIG_PATH`
 
 This is the path to the config file. If not specified, the server will look for a `config.json` file either in the
-`/data` folder if it is present or in the same directory as the `package.json` if `/data` is absent.
+`/data` folder if it is present or in the same directory as the sync-server's `package.json` if `/data` is absent.
 
 See the `ACTUAL_DATA_DIR` section above to override the data folder location.
 
