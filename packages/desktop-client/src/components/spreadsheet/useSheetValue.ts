@@ -111,6 +111,9 @@ function useMemoizedBinding<
     bindingValue !== ref.current.key.value ||
     serializedBindingQuery !== ref.current.key.serializedQuery
   ) {
+    // This should not update the binding reference if the binding name, value, and query values are the same.
+    // Since query objects are immutable, we compare the serialized query string to make sure that we don't cause
+    // a re-render whenever a new query object with the same parameter values (QueryState) is passed in.
     ref.current = {
       key: {
         name: bindingName,
