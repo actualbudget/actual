@@ -1,5 +1,5 @@
 {
-  "name": "actual-sync",
+  "name": "@actual-app/sync-server",
   "version": "25.2.1",
   "license": "MIT",
   "description": "actual syncing server",

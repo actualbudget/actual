@@ -3,7 +3,7 @@ RUN apt-get update && apt-get install -y openssl
 WORKDIR /app
 COPY .yarn ./.yarn
 COPY yarn.lock packages/sync-server/package.json .yarnrc.yml ./
-RUN yarn workspaces focus actual-sync --production
+RUN yarn workspaces focus @actual-app/sync-server --production
 
 FROM node:18-bookworm-slim as prod
 RUN apt-get update && apt-get install tini && apt-get clean -y && rm -rf /var/lib/apt/lists/*
