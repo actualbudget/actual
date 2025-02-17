@@ -25,7 +25,7 @@ process.on('unhandledRejection', reason => {
 app.disable('x-powered-by');
 app.use(cors());
 app.set('trust proxy', config.trustedProxies);
-if (process.env.ACTUAL_SERVER_MODE !== 'development') {
+if (process.env.NODE_ENV !== 'development') {
   app.use(
     rateLimit({
       windowMs: 60 * 1000,
@@ -71,7 +71,7 @@ app.use((req, res, next) => {
   res.set('Cross-Origin-Embedder-Policy', 'require-corp');
   next();
 });
-if (process.env.ACTUAL_SERVER_MODE === 'development') {
+if (process.env.NODE_ENV === 'development') {
   console.log(
     'Running in development mode - Proxying frontend routes to React Dev Server',
   );

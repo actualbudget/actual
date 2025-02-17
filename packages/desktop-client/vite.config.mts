@@ -135,10 +135,7 @@ export default defineConfig(async ({ mode }) => {
       host: true,
       headers: mode === 'development' ? devHeaders : undefined,
       port: +env.PORT || 5173,
-      open:
-        env.ACTUAL_SERVER_MODE === 'development'
-          ? 'http://localhost:5006'
-          : env.BROWSER
+      open: env.BROWSER
             ? [
                 'chrome',
                 'firefox',
