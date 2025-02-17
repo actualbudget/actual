@@ -1,7 +1,6 @@
 import React, { type ReactNode } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 
-import { Text } from '../common/Text';
 import { css } from '@emotion/css';
 
 import { type DarkTheme, type Theme } from 'loot-core/types/prefs';
@@ -16,6 +15,7 @@ import {
 } from '../../style';
 import { tokens } from '../../tokens';
 import { Select } from '../common/Select';
+import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { Checkbox } from '../forms';
 import { useResponsive } from '../responsive/ResponsiveProvider';
