@@ -38,7 +38,7 @@ The shared underlying functionality component used by both the web/desktop front
 
 ## Sync Server
 
-The Sync Server, also known as Actual Server, holds all of the code for the synchronization element of the Actual Budget application. Actual server has a dependency of Actual so when you pull Actual Server and deploy it to your hosting method of choice, be that Fly, Local etc. and run `yarn install:server` Actual will be downloaded as a dependency from NPM and installed into the Actual Server deployment.
+The Sync Server, also known as Actual Server, holds all of the code for the synchronization element of the Actual Budget application. Actual server has a dependency of Actual so when you pull Actual Server and deploy it to your hosting method of choice, be that Fly, Local etc. and run `yarn workspaces focus @actual-app/sync-server --production` Actual will be downloaded as a dependency from NPM and installed into the Actual Server deployment.
 
 You can see this in the [package.json](https://github.com/actualbudget/actual/blob/master/packages/sync-server/package.json) file;
 
