@@ -5,6 +5,7 @@ import cors from 'cors';
 import express from 'express';
 import actuator from 'express-actuator';
 import rateLimit from 'express-rate-limit';
+import { createProxyMiddleware } from 'http-proxy-middleware';
 
 import * as accountApp from './app-account.js';
 import * as adminApp from './app-admin.js';
@@ -24,14 +25,17 @@ process.on('unhandledRejection', reason => {
 app.disable('x-powered-by');
 app.use(cors());
 app.set('trust proxy', config.trustedProxies);
-app.use(
-  rateLimit({
-    windowMs: 60 * 1000,
-    max: 500,
-    legacyHeaders: false,
-    standardHeaders: true,
-  }),
-);
+if (process.env.NODE_ENV !== 'development') {
+  app.use(
+    rateLimit({
+      windowMs: 60 * 1000,
+      max: 500,
+      legacyHeaders: false,
+      standardHeaders: true,
+    }),
+  );
+}
+
 app.use(bodyParser.json({ limit: `${config.upload.fileSizeLimitMB}mb` }));
 app.use(
   bodyParser.raw({
@@ -67,9 +71,25 @@ app.use((req, res, next) => {
   res.set('Cross-Origin-Embedder-Policy', 'require-corp');
   next();
 });
-app.use(express.static(config.webRoot, { index: false }));
+if (process.env.NODE_ENV === 'development') {
+  console.log(
+    'Running in development mode - Proxying frontend routes to React Dev Server',
+  );
 
-app.get('/*', (req, res) => res.sendFile(config.webRoot + '/index.html'));
+  app.use(
+    createProxyMiddleware({
+      target: 'http://localhost:3001',
+      changeOrigin: true,
+      ws: true,
+      logLevel: 'debug',
+    }),
+  );
+} else {
+  console.log('Running in production mode - Serving static React app');
+
+  app.use(express.static(config.webRoot, { index: false }));
+  app.get('/*', (req, res) => res.sendFile(config.webRoot + '/index.html'));
+}
 
 function parseHTTPSConfig(value) {
   if (value.startsWith('-----BEGIN')) {
