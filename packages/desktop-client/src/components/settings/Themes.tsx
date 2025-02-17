@@ -1,7 +1,7 @@
 import React, { type ReactNode } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 
-import { Text } from '@actual-app/components/text';
+import { Text } from '../common/Text';
 import { css } from '@emotion/css';
 
 import { type DarkTheme, type Theme } from 'loot-core/types/prefs';
@@ -18,6 +18,7 @@ import { tokens } from '../../tokens';
 import { Select } from '../common/Select';
 import { View } from '../common/View';
 import { Checkbox } from '../forms';
+import { useResponsive } from '../responsive/ResponsiveProvider';
 import { useSidebar } from '../sidebar/SidebarProvider';
 
 import { Setting } from './UI';
@@ -44,6 +45,7 @@ export function ThemeSettings() {
   const [theme, switchTheme] = useTheme();
   const [darkTheme, switchDarkTheme] = usePreferredDarkTheme();
   const [progressBars, setProgressBars] = useGlobalPref('useProgressBars');
+  const { isNarrowWidth } = useResponsive();
 
   return (
     <Setting
@@ -75,20 +77,22 @@ export function ThemeSettings() {
                 },
               })}
             />
-            <Text style={{ display: 'flex' }}>
-              <Checkbox
-                id="settings-progressBar"
-                checked={progressBars}
-                onChange={e => {
-                  setProgressBars(e.currentTarget.checked);
-                }}
-              />
-              <Trans>
-                <label htmlFor="settings-progressBar">
-                  Use category progress bars
-                </label>
-              </Trans>
-            </Text>
+            {!isNarrowWidth && (
+              <Text style={{ display: 'flex' }}>
+                <Checkbox
+                  id="settings-progressBar"
+                  checked={progressBars}
+                  onChange={e => {
+                    setProgressBars(e.currentTarget.checked);
+                  }}
+                />
+                <Trans>
+                  <label htmlFor="settings-progressBar">
+                    Use category progress bars
+                  </label>
+                </Trans>
+              </Text>
+            )}
           </Column>
           {theme === 'auto' && (
             <Column title={t('Dark theme')}>
