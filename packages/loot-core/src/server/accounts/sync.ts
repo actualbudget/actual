@@ -474,9 +474,20 @@ export async function reconcileTransactions(
         imported_payee: trans.imported_payee || null,
         notes: existing.notes || trans.notes || null,
         cleared: trans.cleared ?? existing.cleared,
+        raw_synced_data:
+          existing.raw_synced_data ?? trans.raw_synced_data ?? null,
       };
 
-      if (hasFieldsChanged(existing, updates, Object.keys(updates))) {
+      const fieldsToMarkUpdated = Object.keys(updates).filter(k => {
+        // do not mark raw_synced_data if it's gone from falsy to falsy
+        if (!existing.raw_synced_data && !trans.raw_synced_data) {
+          return k !== 'raw_synced_data';
+        }
+
+        return true;
+      });
+
+      if (hasFieldsChanged(existing, updates, fieldsToMarkUpdated)) {
         updated.push({ id: existing.id, ...updates });
         if (!existingPayeeMap.has(existing.payee)) {
           const payee = await db.getPayee(existing.payee);
