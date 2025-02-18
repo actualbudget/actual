@@ -1,12 +1,13 @@
 import { type Ref } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
+import { View } from '@actual-app/components/view';
+
 import { SvgRemove, SvgSearchAlternate } from '../../icons/v2';
 import { theme } from '../../style';
 
-import { Button } from './Button2';
 import { InputWithContent } from './InputWithContent';
-import { View } from './View';
 
 type SearchProps = {
   inputRef?: Ref<HTMLInputElement>;

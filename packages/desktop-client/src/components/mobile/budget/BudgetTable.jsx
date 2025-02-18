@@ -1,6 +1,12 @@
 import React, { memo, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
+import { Card } from '@actual-app/components/card';
+import { Label } from '@actual-app/components/label';
+import { styles } from '@actual-app/components/styles';
+import { Text } from '@actual-app/components/text';
+import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 import { AutoTextSize } from 'auto-text-size';
 import memoizeOne from 'memoize-one';
@@ -29,17 +35,12 @@ import {
   SvgArrowThickRight,
   SvgCheveronRight,
 } from '../../../icons/v1';
-import { SvgViewShow } from '../../../icons/v2';
+import { SvgCalendar, SvgViewShow } from '../../../icons/v2';
 import { useDispatch } from '../../../redux';
-import { theme, styles } from '../../../style';
+import { theme } from '../../../style';
 import { BalanceWithCarryover } from '../../budget/BalanceWithCarryover';
 import { makeAmountGrey, makeBalanceAmountStyle } from '../../budget/util';
-import { Button } from '../../common/Button2';
-import { Card } from '../../common/Card';
-import { Label } from '../../common/Label';
 import { Link } from '../../common/Link';
-import { Text } from '../../common/Text';
-import { View } from '../../common/View';
 import { MobilePageHeader, Page } from '../../Page';
 import { PrivacyFilter } from '../../PrivacyFilter';
 import { useResponsive } from '../../responsive/ResponsiveProvider';
@@ -1627,6 +1628,7 @@ export function BudgetTable({
   // editMode,
   onPrevMonth,
   onNextMonth,
+  onCurrentMonth,
   onSaveGroup,
   onDeleteGroup,
   onAddCategory,
@@ -1691,6 +1693,16 @@ export function BudgetTable({
                 width="14"
                 height="14"
               />
+            </Button>
+          }
+          rightContent={
+            <Button
+              variant="bare"
+              onPress={onCurrentMonth}
+              aria-label={t('Today')}
+              style={{ margin: 10 }}
+            >
+              <SvgCalendar width={20} height={20} />
             </Button>
           }
         />

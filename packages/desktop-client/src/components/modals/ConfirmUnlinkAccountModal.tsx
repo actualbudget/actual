@@ -1,11 +1,12 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { Button } from '../common/Button2';
-import { InitialFocus } from '../common/InitialFocus';
+import { Button } from '@actual-app/components/button';
+import { InitialFocus } from '@actual-app/components/initial-focus';
+import { Paragraph } from '@actual-app/components/paragraph';
+import { View } from '@actual-app/components/view';
+
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
-import { Paragraph } from '../common/Paragraph';
-import { View } from '../common/View';
 
 type ConfirmUnlinkAccountProps = {
   accountName: string;

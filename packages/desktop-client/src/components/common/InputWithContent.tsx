@@ -1,9 +1,10 @@
 import { useState, type ComponentProps, type ReactNode } from 'react';
 
+import { View } from '@actual-app/components/view';
+
 import { theme, type CSSProperties } from '../../style';
 
 import { Input, defaultInputStyle } from './Input';
-import { View } from './View';
 
 type InputWithContentProps = ComponentProps<typeof Input> & {
   leftContent?: ReactNode;

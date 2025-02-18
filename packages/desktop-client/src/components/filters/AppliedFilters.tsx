@@ -1,8 +1,8 @@
 import React from 'react';
 
-import { type RuleConditionEntity } from 'loot-core/types/models';
+import { View } from '@actual-app/components/view';
 
-import { View } from '../common/View';
+import { type RuleConditionEntity } from 'loot-core/types/models';
 
 import { ConditionsOpMenu } from './ConditionsOpMenu';
 import { FilterExpression } from './FilterExpression';

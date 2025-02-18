@@ -4,7 +4,7 @@ WORKDIR /app
 COPY .yarn ./.yarn
 COPY yarn.lock packages/sync-server/package.json .yarnrc.yml ./
 RUN if [ "$(uname -m)" = "armv7l" ]; then yarn config set taskPoolConcurrency 2; yarn config set networkConcurrency 5; fi
-RUN yarn workspaces focus actual-sync --production
+RUN yarn workspaces focus @actual-app/sync-server --production
 
 FROM node:18-bookworm-slim AS prod
 RUN apt-get update && apt-get install tini && apt-get clean -y && rm -rf /var/lib/apt/lists/*

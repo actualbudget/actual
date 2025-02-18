@@ -1,7 +1,8 @@
 import React from 'react';
 
+import { Button } from '@actual-app/components/button';
+
 import { SvgFilter } from '../../icons/v1/Filter';
-import { Button } from '../common/Button2';
 
 export function FiltersButton({ onPress }: { onPress: () => void }) {
   return (

@@ -8,10 +8,11 @@ import {
   type ComponentRef,
 } from 'react';
 
+import { View } from '@actual-app/components/view';
+
 import { type PayeeEntity } from 'loot-core/types/models';
 
 import { useSelectedItems } from '../../hooks/useSelected';
-import { View } from '../common/View';
 import { useTableNavigator, Table } from '../table';
 
 import { PayeeTableRow } from './PayeeTableRow';

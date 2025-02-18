@@ -2,13 +2,15 @@
 import React, { type CSSProperties, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { styles } from '@actual-app/components/styles';
+import { View } from '@actual-app/components/view';
+
 import * as monthUtils from 'loot-core/shared/months';
 
 import { useResizeObserver } from '../../hooks/useResizeObserver';
 import { SvgCalendar } from '../../icons/v2';
-import { styles, theme } from '../../style';
+import { theme } from '../../style';
 import { Link } from '../common/Link';
-import { View } from '../common/View';
 
 import { type MonthBounds } from './MonthsContext';
 

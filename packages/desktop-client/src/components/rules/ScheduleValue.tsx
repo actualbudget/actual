@@ -1,5 +1,7 @@
 import React, { useMemo } from 'react';
 
+import { View } from '@actual-app/components/view';
+
 import { useSchedules } from 'loot-core/client/data-hooks/schedules';
 import { getPayeesById } from 'loot-core/client/queries/queriesSlice';
 import { q } from 'loot-core/shared/query';
@@ -8,7 +10,6 @@ import { type ScheduleEntity } from 'loot-core/types/models';
 
 import { usePayees } from '../../hooks/usePayees';
 import { AnimatedLoading } from '../../icons/AnimatedLoading';
-import { View } from '../common/View';
 
 import { Value } from './Value';
 

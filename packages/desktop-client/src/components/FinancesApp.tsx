@@ -9,6 +9,8 @@ import {
   useHref,
 } from 'react-router-dom';
 
+import { View } from '@actual-app/components/view';
+
 import { addNotification } from 'loot-core/client/actions';
 import { sync } from 'loot-core/client/app/appSlice';
 import * as undo from 'loot-core/platform/client/undo';
@@ -26,7 +28,6 @@ import { getIsOutdated, getLatestVersion } from '../util/versions';
 import { UserAccessPage } from './admin/UserAccess/UserAccessPage';
 import { BankSync } from './banksync';
 import { BankSyncStatus } from './BankSyncStatus';
-import { View } from './common/View';
 import { GlobalKeys } from './GlobalKeys';
 import { ManageRulesPage } from './ManageRulesPage';
 import { Category } from './mobile/budget/Category';

@@ -2,11 +2,14 @@
 import React, { useState } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 
+import { ButtonWithLoading } from '@actual-app/components/button';
+import { Text } from '@actual-app/components/text';
+import { View } from '@actual-app/components/view';
+
 import { send } from 'loot-core/platform/client/fetch';
 import { getSecretsError } from 'loot-core/shared/errors';
 
 import { Error } from '../alerts';
-import { ButtonWithLoading } from '../common/Button2';
 import { Input } from '../common/Input';
 import { Link } from '../common/Link';
 import {
@@ -15,8 +18,6 @@ import {
   ModalCloseButton,
   ModalHeader,
 } from '../common/Modal';
-import { Text } from '../common/Text';
-import { View } from '../common/View';
 import { FormField, FormLabel } from '../forms';
 
 type SimpleFinInitialiseProps = {
