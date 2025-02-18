@@ -1,15 +1,17 @@
 import React, { memo, useState, useMemo } from 'react';
 
 import { styles } from '@actual-app/components/styles';
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import { useLocalPref } from '../../hooks/useLocalPref';
-import { theme } from '../../style';
 import { DropHighlightPosContext } from '../sort';
 import { Row } from '../table';
 
+import { BudgetGoalRow } from './BudgetGoalRow';
 import { ExpenseCategory } from './ExpenseCategory';
 import { ExpenseGroup } from './ExpenseGroup';
+import { useBudgetAutomationCategories } from './goals/useBudgetAutomationCategories';
 import { IncomeCategory } from './IncomeCategory';
 import { IncomeGroup } from './IncomeGroup';
 import { IncomeHeader } from './IncomeHeader';
@@ -17,11 +19,26 @@ import { SidebarCategory } from './SidebarCategory';
 import { SidebarGroup } from './SidebarGroup';
 import { separateGroups } from './util';
 
+// TODO(jfdoming): replace with real data source later
+const MOCK_GOALS = [
+  {
+    id: 'goal1',
+    type: 'simple',
+    monthly: 1000,
+  },
+  {
+    id: 'goal2',
+    type: 'simple',
+    monthly: 500,
+  },
+];
+
 export const BudgetCategories = memo(
   ({
     categoryGroups,
     editingCell,
     dataComponents,
+    schedules,
     onBudgetAction,
     onShowActivity,
     onEditName,
@@ -33,6 +50,7 @@ export const BudgetCategories = memo(
     onApplyBudgetTemplatesInGroup,
     onReorderCategory,
     onReorderGroup,
+    showGoals,
   }) => {
     const [collapsedGroupIds = [], setCollapsedGroupIdsPref] =
       useLocalPref('budget.collapsed');
@@ -43,6 +61,7 @@ export const BudgetCategories = memo(
 
     const [isAddingGroup, setIsAddingGroup] = useState(false);
     const [newCategoryForGroup, setNewCategoryForGroup] = useState(null);
+    const goalCategories = useBudgetAutomationCategories();
     const items = useMemo(() => {
       const [expenseGroups, incomeGroup] = separateGroups(categoryGroups);
 
@@ -67,12 +86,19 @@ export const BudgetCategories = memo(
             ...items,
             ...(collapsedGroupIds.includes(group.id)
               ? []
-              : groupCategories
-            ).map(cat => ({
-              type: 'expense-category',
-              value: cat,
-              group,
-            })),
+              : groupCategories.flatMap(cat => [
+                  {
+                    type: 'expense-category',
+                    value: cat,
+                    group,
+                  },
+                  ...(showGoals
+                    ? MOCK_GOALS.map(goal => ({
+                        type: 'goal',
+                        value: { ...goal, id: `${cat.id}-${goal.id}` },
+                      }))
+                    : []),
+                ])),
           ];
         }),
       );
@@ -107,6 +133,7 @@ export const BudgetCategories = memo(
       newCategoryForGroup,
       isAddingGroup,
       showHiddenCategories,
+      showGoals,
     ]);
 
     const [dragState, setDragState] = useState(null);
@@ -268,6 +295,7 @@ export const BudgetCategories = memo(
                   onReorder={onReorderCategory}
                   onBudgetAction={onBudgetAction}
                   onShowActivity={onShowActivity}
+                  goalsShown={showGoals}
                 />
               );
               break;
@@ -315,6 +343,22 @@ export const BudgetCategories = memo(
                   onReorder={onReorderCategory}
                   onBudgetAction={onBudgetAction}
                   onShowActivity={onShowActivity}
+                  goalsShown={showGoals}
+                />
+              );
+              break;
+            case 'goal':
+              content = (
+                <BudgetGoalRow
+                  template={item.value}
+                  categories={goalCategories}
+                  schedules={schedules}
+                  onSaveTemplate={() => {
+                    // Handle template editing
+                  }}
+                  onDeleteTemplate={() => {
+                    // Handle template deletion
+                  }}
                 />
               );
               break;
