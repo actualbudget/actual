@@ -171,8 +171,7 @@ async function processTemplate(
           budgeted,
         );
         // don't use the funds that are not from templates
-        let goalthing = obj.getGoalOnly();
-        if (!goalthing) {
+        if (!obj.getGoalOnly()) {
           availBudget += budgeted;
         }
         availBudget += obj.getLimitExcess();

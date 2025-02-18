@@ -73,8 +73,8 @@ export class CategoryTemplate {
   getGoalOnly(): boolean {
     // if there is only a goal
     return (
-      this.templates.length == 0 &&
-      this.remainder.length == 0 &&
+      this.templates.length === 0 &&
+      this.remainder.length === 0 &&
       this.goals.length > 0
     );
   }
