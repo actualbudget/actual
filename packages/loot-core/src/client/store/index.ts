@@ -20,7 +20,6 @@ import {
   reducer as budgetsSliceReducer,
   getInitialState as getInitialBudgetsState,
 } from '../budgets/budgetsSlice';
-import * as constants from '../constants';
 import {
   name as modalsSliceName,
   reducer as modalsSliceReducer,
@@ -42,11 +41,13 @@ import {
   reducer as queriesSliceReducer,
   getInitialState as getInitialQueriesState,
 } from '../queries/queriesSlice';
-import { reducers } from '../reducers';
-import { initialState as initialUserState } from '../reducers/user';
+import {
+  name as usersSliceName,
+  reducer as usersSliceReducer,
+  getInitialState as getInitialUsersState,
+} from '../users/usersSlice';
 
 const appReducer = combineReducers({
-  ...reducers,
   [accountsSliceName]: accountsSliceReducer,
   [appSliceName]: appSliceReducer,
   [budgetsSliceName]: budgetsSliceReducer,
@@ -54,9 +55,13 @@ const appReducer = combineReducers({
   [notificationsSliceName]: notificationsSliceReducer,
   [prefsSliceName]: prefsSliceReducer,
   [queriesSliceName]: queriesSliceReducer,
+  [usersSliceName]: usersSliceReducer,
 });
+
+export const CLOSE_BUDGET = 'CLOSE_BUDGET';
+
 const rootReducer: typeof appReducer = (state, action) => {
-  if (action.type === constants.CLOSE_BUDGET) {
+  if (action.type === CLOSE_BUDGET) {
     // Reset the state and only keep around things intentionally. This
     // blows away everything else
     state = {
@@ -65,7 +70,7 @@ const rootReducer: typeof appReducer = (state, action) => {
       notifications: getInitialNotificationsState(),
       queries: getInitialQueriesState(),
       budgets: state?.budgets || getInitialBudgetsState(),
-      user: state?.user || initialUserState,
+      user: state?.user || getInitialUsersState(),
       prefs: {
         ...getInitialPrefsState(),
         global: state?.prefs?.global || getInitialPrefsState().global,

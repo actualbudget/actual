@@ -9,8 +9,8 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
-import { getUserData, signOut } from 'loot-core/client/actions';
 import { closeBudget } from 'loot-core/client/budgets/budgetsSlice';
+import { getUserData, signOut } from 'loot-core/client/users/usersSlice';
 import { listen } from 'loot-core/platform/client/fetch';
 import { type RemoteFile, type SyncedLocalFile } from 'loot-core/types/file';
 import { type TransObjectLiteral } from 'loot-core/types/util';

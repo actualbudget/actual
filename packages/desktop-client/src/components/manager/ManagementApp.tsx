@@ -4,8 +4,8 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
-import { loggedIn } from 'loot-core/client/actions';
 import { setAppState } from 'loot-core/client/app/appSlice';
+import { loggedIn } from 'loot-core/client/users/usersSlice';
 
 import { ProtectedRoute } from '../../auth/ProtectedRoute';
 import { Permissions } from '../../auth/types';

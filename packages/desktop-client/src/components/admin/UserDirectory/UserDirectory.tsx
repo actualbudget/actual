@@ -15,9 +15,9 @@ import { Stack } from '@actual-app/components/stack';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
-import { signOut } from 'loot-core/client/actions';
 import { pushModal } from 'loot-core/client/modals/modalsSlice';
 import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
+import { signOut } from 'loot-core/client/users/usersSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import * as undo from 'loot-core/platform/client/undo';
 import {
@@ -177,7 +177,9 @@ function UserDirectoryContent({
               message: getUserDirectoryErrors(error),
               button: {
                 title: t('Go to login'),
-                action: () => dispatch(signOut()),
+                action: () => {
+                  dispatch(signOut());
+                },
               },
             },
           }),
