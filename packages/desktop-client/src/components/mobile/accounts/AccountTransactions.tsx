@@ -331,17 +331,17 @@ function TransactionListWithPreviews({
                     }),
                   );
                 },
-              },
-              onComplete: async transactionId => {
-                const parts = transactionId.split('/');
-                await send('schedule/update', {
-                  schedule: { id: parts[1], completed: true },
-                });
-                dispatch(
-                  collapseModals({
-                    rootModalName: 'scheduled-transaction-menu',
-                  }),
-                );
+                onComplete: async transactionId => {
+                  const parts = transactionId.split('/');
+                  await send('schedule/update', {
+                    schedule: { id: parts[1], completed: true },
+                  });
+                  dispatch(
+                    collapseModals({
+                      rootModalName: 'scheduled-transaction-menu',
+                    }),
+                  );
+                },
               },
             },
           }),
