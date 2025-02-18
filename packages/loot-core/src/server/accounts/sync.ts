@@ -26,12 +26,12 @@ import { runMutator } from '../mutators';
 import { post } from '../post';
 import { getServer } from '../server-config';
 import { batchMessages } from '../sync';
+import { batchUpdateTransactions } from '../transactions';
+import { runRules } from '../transactions/transaction-rules';
 import {
   defaultMappings,
   mappingsFromString,
 } from '../util/custom-sync-mapping';
-import { batchUpdateTransactions } from '../transactions';
-import { runRules } from '../transactions/transaction-rules';
 
 import { getStartingBalancePayee } from './payees';
 import { title } from './title';
