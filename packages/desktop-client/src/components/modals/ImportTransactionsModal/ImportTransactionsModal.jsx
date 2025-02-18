@@ -233,7 +233,7 @@ export function ImportTransactionsModal({ options }) {
         const { amount } = parseAmountFields(
           trans,
           splitMode,
-          inOutMode,
+          isOfxFile(filetype) ? false : inOutMode,
           outValue,
           flipAmount,
           multiplierAmount,
@@ -575,7 +575,7 @@ export function ImportTransactionsModal({ options }) {
       const { amount } = parseAmountFields(
         trans,
         splitMode,
-        inOutMode,
+        isOfxFile(filetype) ? false : inOutMode,
         outValue,
         flipAmount,
         multiplierAmount,
