@@ -5,6 +5,7 @@ import { css } from '@emotion/css';
 
 import { type DarkTheme, type Theme } from 'loot-core/types/prefs';
 
+import { useGlobalPref } from '../../hooks/useGlobalPref';
 import {
   themeOptions,
   useTheme,
@@ -16,6 +17,8 @@ import { tokens } from '../../tokens';
 import { Select } from '../common/Select';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
+import { Checkbox } from '../forms';
+import { useResponsive } from '../responsive/ResponsiveProvider';
 import { useSidebar } from '../sidebar/SidebarProvider';
 
 import { Setting } from './UI';
@@ -41,6 +44,8 @@ export function ThemeSettings() {
   const sidebar = useSidebar();
   const [theme, switchTheme] = useTheme();
   const [darkTheme, switchDarkTheme] = usePreferredDarkTheme();
+  const [progressBars, setProgressBars] = useGlobalPref('useProgressBars');
+  const { isNarrowWidth } = useResponsive();
 
   return (
     <Setting
@@ -72,6 +77,22 @@ export function ThemeSettings() {
                 },
               })}
             />
+            {!isNarrowWidth && (
+              <Text style={{ display: 'flex' }}>
+                <Checkbox
+                  id="settings-progressBar"
+                  checked={progressBars}
+                  onChange={e => {
+                    setProgressBars(e.currentTarget.checked);
+                  }}
+                />
+                <Trans>
+                  <label htmlFor="settings-progressBar">
+                    Use category progress bars
+                  </label>
+                </Trans>
+              </Text>
+            )}
           </Column>
           {theme === 'auto' && (
             <Column title={t('Dark theme')}>
