@@ -1,7 +1,7 @@
 import React from 'react';
 import { Trans } from 'react-i18next';
 
-import { Text } from '../common/Text';
+import { Text } from '@actual-app/components/text';
 
 import { Setting } from './UI';
 

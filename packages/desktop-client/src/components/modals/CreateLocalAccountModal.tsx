@@ -3,6 +3,13 @@ import { type FormEvent, useState } from 'react';
 import { Form } from 'react-aria-components';
 import { useTranslation, Trans } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
+import { FormError } from '@actual-app/components/form-error';
+import { InitialFocus } from '@actual-app/components/initial-focus';
+import { InlineField } from '@actual-app/components/inline-field';
+import { Text } from '@actual-app/components/text';
+import { View } from '@actual-app/components/view';
+
 import { closeModal } from 'loot-core/client/actions';
 import { createAccount } from 'loot-core/client/queries/queriesSlice';
 import { toRelaxedNumber } from 'loot-core/shared/util';
@@ -11,10 +18,6 @@ import * as useAccounts from '../../hooks/useAccounts';
 import { useNavigate } from '../../hooks/useNavigate';
 import { useDispatch } from '../../redux';
 import { theme } from '../../style';
-import { Button } from '../common/Button2';
-import { FormError } from '../common/FormError';
-import { InitialFocus } from '../common/InitialFocus';
-import { InlineField } from '../common/InlineField';
 import { Input } from '../common/Input';
 import { Link } from '../common/Link';
 import {
@@ -24,8 +27,6 @@ import {
   ModalHeader,
   ModalTitle,
 } from '../common/Modal';
-import { Text } from '../common/Text';
-import { View } from '../common/View';
 import { Checkbox } from '../forms';
 import { validateAccountName } from '../util/accountValidation';
 

@@ -6,14 +6,15 @@ import React, {
 } from 'react';
 import { Trans } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
+import { InitialFocus } from '@actual-app/components/initial-focus';
+import { View } from '@actual-app/components/view';
+
 import { useSpreadsheet } from 'loot-core/client/SpreadsheetProvider';
 import { evalArithmetic } from 'loot-core/shared/arithmetic';
 import { integerToCurrency, amountToInteger } from 'loot-core/shared/util';
 
-import { Button } from '../../common/Button2';
-import { InitialFocus } from '../../common/InitialFocus';
 import { Input } from '../../common/Input';
-import { View } from '../../common/View';
 import { NamespaceContext } from '../../spreadsheet/NamespaceContext';
 
 type HoldMenuProps = {

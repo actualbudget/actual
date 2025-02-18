@@ -2,20 +2,22 @@ import { type ReactNode, useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useLocation, type Location } from 'react-router-dom';
 
+import { ButtonWithLoading } from '@actual-app/components/button';
+import { Menu } from '@actual-app/components/menu';
+import { Stack } from '@actual-app/components/stack';
+import { styles } from '@actual-app/components/styles';
+import { Text } from '@actual-app/components/text';
+import { View } from '@actual-app/components/view';
+
 import { addNotification } from 'loot-core/client/actions';
 import { send } from 'loot-core/platform/client/fetch';
 import { type Handlers } from 'loot-core/types/handlers';
 import { type OpenIdConfig } from 'loot-core/types/models/openid';
 
-import { theme, styles } from '../../../style';
-import { ButtonWithLoading } from '../../common/Button2';
+import { theme } from '../../../style';
 import { Input } from '../../common/Input';
 import { Link } from '../../common/Link';
-import { Menu } from '../../common/Menu';
 import { Select } from '../../common/Select';
-import { Stack } from '../../common/Stack';
-import { Text } from '../../common/Text';
-import { View } from '../../common/View';
 import { FormField, FormLabel } from '../../forms';
 import { useServerURL } from '../../ServerContext';
 

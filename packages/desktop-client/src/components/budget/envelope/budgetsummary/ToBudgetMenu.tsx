@@ -1,9 +1,10 @@
 import React, { type ComponentPropsWithoutRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { Menu } from '@actual-app/components/menu';
+
 import { envelopeBudget } from 'loot-core/client/queries';
 
-import { Menu } from '../../../common/Menu';
 import { useEnvelopeSheetValue } from '../EnvelopeBudgetComponents';
 
 type ToBudgetMenuProps = Omit<

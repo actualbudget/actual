@@ -5,11 +5,12 @@ import React, {
   useRef,
 } from 'react';
 
+import { styles } from '@actual-app/components/styles';
 import { css, cx } from '@emotion/css';
 
 import { useMergedRefs } from '../../hooks/useMergedRefs';
 import { useProperFocus } from '../../hooks/useProperFocus';
-import { styles, theme, type CSSProperties } from '../../style';
+import { theme, type CSSProperties } from '../../style';
 
 export const defaultInputStyle = {
   outline: 0,

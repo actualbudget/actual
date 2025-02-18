@@ -3,13 +3,18 @@ import React, { useState } from 'react';
 import { Form } from 'react-aria-components';
 import { useTranslation } from 'react-i18next';
 
+import { Button, ButtonWithLoading } from '@actual-app/components/button';
+import { InitialFocus } from '@actual-app/components/initial-focus';
+import { Paragraph } from '@actual-app/components/paragraph';
+import { styles } from '@actual-app/components/styles';
+import { Text } from '@actual-app/components/text';
+import { View } from '@actual-app/components/view';
+
 import { type FinanceModals } from 'loot-core/client/state-types/modals';
 import { send } from 'loot-core/platform/client/fetch';
 import { getTestKeyError } from 'loot-core/shared/errors';
 
-import { styles, theme } from '../../style';
-import { Button, ButtonWithLoading } from '../common/Button2';
-import { InitialFocus } from '../common/InitialFocus';
+import { theme } from '../../style';
 import { Input } from '../common/Input';
 import { Link } from '../common/Link';
 import {
@@ -18,9 +23,6 @@ import {
   ModalCloseButton,
   ModalHeader,
 } from '../common/Modal';
-import { Paragraph } from '../common/Paragraph';
-import { Text } from '../common/Text';
-import { View } from '../common/View';
 import { useResponsive } from '../responsive/ResponsiveProvider';
 
 type FixEncryptionKeyModalProps = {

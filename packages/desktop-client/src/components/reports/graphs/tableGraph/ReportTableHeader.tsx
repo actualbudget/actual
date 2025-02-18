@@ -5,13 +5,14 @@ import React, {
 } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { View } from '@actual-app/components/view';
+
 import {
   type balanceTypeOpType,
   type IntervalEntity,
 } from 'loot-core/types/models/reports';
 
 import { theme } from '../../../../style';
-import { View } from '../../../common/View';
 import { Row, Cell } from '../../../table';
 import { ReportOptions } from '../../ReportOptions';
 
