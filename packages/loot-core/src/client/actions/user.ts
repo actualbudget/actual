@@ -1,9 +1,8 @@
 import { send } from '../../platform/client/fetch';
 import { closeBudget, loadAllFiles } from '../budgets/budgetsSlice';
 import * as constants from '../constants';
+import { loadGlobalPrefs } from '../prefs/prefsSlice';
 import { type AppDispatch } from '../store';
-
-import { loadGlobalPrefs } from './prefs';
 
 export function getUserData() {
   return async (dispatch: AppDispatch) => {
