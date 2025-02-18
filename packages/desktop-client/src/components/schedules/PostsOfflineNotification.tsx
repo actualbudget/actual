@@ -7,7 +7,7 @@ import { Paragraph } from '@actual-app/components/paragraph';
 import { Stack } from '@actual-app/components/stack';
 import { Text } from '@actual-app/components/text';
 
-import { popModal } from 'loot-core/client/actions';
+import { popModal } from 'loot-core/client/modals/modalsSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import { type PayeeEntity } from 'loot-core/types/models';
 

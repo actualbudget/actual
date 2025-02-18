@@ -4,7 +4,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
-import { pushModal } from 'loot-core/src/client/actions/modals';
+import { pushModal } from 'loot-core/client/modals/modalsSlice';
 import {
   type BankSyncProviders,
   type AccountEntity,
@@ -80,13 +80,25 @@ export function BankSync() {
     switch (action) {
       case 'edit':
         dispatch(
-          pushModal('synced-account-edit', {
-            account,
+          pushModal({
+            modal: {
+              name: 'synced-account-edit',
+              options: {
+                account,
+              },
+            },
           }),
         );
         break;
       case 'link':
-        dispatch(pushModal('add-account', { upgradingAccountId: account.id }));
+        dispatch(
+          pushModal({
+            modal: {
+              name: 'add-account',
+              options: { upgradingAccountId: account.id },
+            },
+          }),
+        );
         break;
       default:
         break;

@@ -10,7 +10,10 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
-import { pushModal } from 'loot-core/client/actions';
+import {
+  type Modal as ModalType,
+  pushModal,
+} from 'loot-core/client/modals/modalsSlice';
 import { closeAccount } from 'loot-core/client/queries/queriesSlice';
 import { integerToCurrency } from 'loot-core/shared/util';
 import { type AccountEntity } from 'loot-core/types/models';
@@ -39,11 +42,10 @@ function needsCategory(
   return account.offbudget === 0 && isOffBudget;
 }
 
-type CloseAccountModalProps = {
-  account: AccountEntity;
-  balance: number;
-  canDelete: boolean;
-};
+type CloseAccountModalProps = Extract<
+  ModalType,
+  { name: 'close-account' }
+>['options'];
 
 export function CloseAccountModal({
   account,
@@ -183,9 +185,14 @@ export function CloseAccountModal({
                           },
                           onClick: () => {
                             dispatch(
-                              pushModal('account-autocomplete', {
-                                includeClosedAccounts: false,
-                                onSelect: onSelectAccount,
+                              pushModal({
+                                modal: {
+                                  name: 'account-autocomplete',
+                                  options: {
+                                    includeClosedAccounts: false,
+                                    onSelect: onSelectAccount,
+                                  },
+                                },
                               }),
                             );
                           },
@@ -223,10 +230,15 @@ export function CloseAccountModal({
                             },
                             onClick: () => {
                               dispatch(
-                                pushModal('category-autocomplete', {
-                                  categoryGroups,
-                                  showHiddenCategories: true,
-                                  onSelect: onSelectCategory,
+                                pushModal({
+                                  modal: {
+                                    name: 'category-autocomplete',
+                                    options: {
+                                      categoryGroups,
+                                      showHiddenCategories: true,
+                                      onSelect: onSelectCategory,
+                                    },
+                                  },
                                 }),
                               );
                             },

@@ -7,11 +7,14 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
-import { addNotification, popModal, signOut } from 'loot-core/client/actions';
+import { addNotification, signOut } from 'loot-core/client/actions';
+import {
+  type Modal as ModalType,
+  popModal,
+} from 'loot-core/client/modals/modalsSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import { getUserAccessErrors } from 'loot-core/shared/errors';
 import { type Handlers } from 'loot-core/types/handlers';
-import { type UserAccessEntity } from 'loot-core/types/models/userAccess';
 
 import { useDispatch } from '../../redux';
 import { theme } from '../../style';
@@ -19,13 +22,13 @@ import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { Select } from '../common/Select';
 import { FormField, FormLabel } from '../forms';
 
-type EditUserAccessProps = {
-  defaultUserAccess: UserAccessEntity;
-  onSave?: (userAccess: UserAccessEntity) => void;
-};
+type EditUserAccessProps = Extract<
+  ModalType,
+  { name: 'edit-access' }
+>['options'];
 
 export function EditUserAccess({
-  defaultUserAccess,
+  access: defaultUserAccess,
   onSave: originalOnSave,
 }: EditUserAccessProps) {
   const { t } = useTranslation();

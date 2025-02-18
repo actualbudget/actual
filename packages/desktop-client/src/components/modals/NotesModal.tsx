@@ -5,16 +5,14 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@actual-app/components/button';
 import { View } from '@actual-app/components/view';
 
+import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
+
 import { useNotes } from '../../hooks/useNotes';
 import { SvgCheck } from '../../icons/v2';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { Notes } from '../Notes';
 
-type NotesModalProps = {
-  id: string;
-  name: string;
-  onSave: (id: string, notes: string) => void;
-};
+type NotesModalProps = Extract<ModalType, { name: 'notes' }>['options'];
 
 export function NotesModal({ id, name, onSave }: NotesModalProps) {
   const { t } = useTranslation();

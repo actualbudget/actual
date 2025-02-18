@@ -10,7 +10,7 @@ import { InlineField } from '@actual-app/components/inline-field';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
-import { closeModal } from 'loot-core/client/actions';
+import { closeModal } from 'loot-core/client/modals/modalsSlice';
 import { createAccount } from 'loot-core/client/queries/queriesSlice';
 import { toRelaxedNumber } from 'loot-core/shared/util';
 

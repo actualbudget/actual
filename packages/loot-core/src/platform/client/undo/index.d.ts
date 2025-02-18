@@ -1,12 +1,9 @@
-import { OptionlessModal } from '../../../client/state-types/modals';
+import { Modal } from '../../../client/modals/modalsSlice';
 import { UndoState as ServerUndoState } from '../../../server/undo';
 
 export type UndoState = {
   url: string | null;
-  // Right now, only the payees page uses this. It's only being set to
-  // `manage-rules` which is an optionless modal. Do we want to also
-  // support modals with options?
-  openModal: OptionlessModal | null;
+  openModal: Modal | null;
   selectedItems: {
     name: string;
     items: Set<string>;

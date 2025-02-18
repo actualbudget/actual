@@ -3,9 +3,10 @@ import { t } from 'i18next';
 
 import { listen, send } from '../platform/client/fetch';
 
-import { addNotification, loadPrefs, pushModal, signOut } from './actions';
+import { addNotification, loadPrefs, signOut } from './actions';
 import { resetSync, sync } from './app/appSlice';
 import { closeAndDownloadBudget, uploadBudget } from './budgets/budgetsSlice';
+import { pushModal } from './modals/modalsSlice';
 import { getAccounts, getCategories, getPayees } from './queries/queriesSlice';
 import type { Notification } from './state-types/notifications';
 import { type AppStore } from './store';
@@ -139,7 +140,12 @@ export function listenForSyncEvent(store: AppStore) {
                 'Old encryption keys are not migrated. If using encryption, [reset encryption here](#makeKey).',
             ),
             messageActions: {
-              makeKey: () => store.dispatch(pushModal('create-encryption-key')),
+              makeKey: () =>
+                store.dispatch(
+                  pushModal({
+                    modal: { name: 'create-encryption-key', options: {} },
+                  }),
+                ),
             },
             sticky: true,
             id: 'old-file',
@@ -167,7 +173,11 @@ export function listenForSyncEvent(store: AppStore) {
             button: {
               title: t('Reset key'),
               action: () => {
-                store.dispatch(pushModal('create-encryption-key'));
+                store.dispatch(
+                  pushModal({
+                    modal: { name: 'create-encryption-key', options: {} },
+                  }),
+                );
               },
             },
           };
@@ -264,8 +274,13 @@ export function listenForSyncEvent(store: AppStore) {
                 title: t('Create key'),
                 action: () => {
                   store.dispatch(
-                    pushModal('fix-encryption-key', {
-                      onSuccess: () => store.dispatch(sync()),
+                    pushModal({
+                      modal: {
+                        name: 'fix-encryption-key',
+                        options: {
+                          onSuccess: () => store.dispatch(sync()),
+                        },
+                      },
                     }),
                   );
                 },
@@ -283,7 +298,11 @@ export function listenForSyncEvent(store: AppStore) {
               button: {
                 title: t('Reset key'),
                 action: () => {
-                  store.dispatch(pushModal('create-encryption-key'));
+                  store.dispatch(
+                    pushModal({
+                      modal: { name: 'create-encryption-key', options: {} },
+                    }),
+                  );
                 },
               },
             };

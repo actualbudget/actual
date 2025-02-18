@@ -10,7 +10,7 @@ import {
   linkAccountSimpleFin,
   unlinkAccount,
 } from 'loot-core/client/accounts/accountsSlice';
-import { closeModal } from 'loot-core/client/actions';
+import { closeModal } from 'loot-core/client/modals/modalsSlice';
 
 import { useAccounts } from '../../hooks/useAccounts';
 import { useDispatch } from '../../redux';
@@ -36,9 +36,9 @@ function useAddBudgetAccountOptions() {
 }
 
 export function SelectLinkedAccountsModal({
-  requisitionId,
+  requisitionId = undefined,
   externalAccounts,
-  syncSource,
+  syncSource = undefined,
 }) {
   externalAccounts.sort((a, b) => a.name.localeCompare(b.name));
   const { t } = useTranslation();
