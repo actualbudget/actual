@@ -42,37 +42,40 @@ type ManageUserDirectoryContentProps = {
 function useGetUserDirectoryErrors() {
   const { t } = useTranslation();
 
-  function getUserDirectoryErrors(reason) {
-    switch (reason) {
-      case 'unauthorized':
-        return t('You are not logged in.');
-      case 'token-expired':
-        return t('Login expired, please log in again.');
-      case 'user-cant-be-empty':
-        return t(
-          'Please enter a value for the username; the field cannot be empty.',
-        );
-      case 'role-cant-be-empty':
-        return t('Select a role; the field cannot be empty.');
-      case 'user-already-exists':
-        return t(
-          'The username you entered already exists. Please choose a different username.',
-        );
-      case 'not-all-deleted':
-        return t(
-          'Not all users were deleted. Check if one of the selected users is the server owner.',
-        );
-      case 'role-does-not-exists':
-        return t(
-          'Selected role does not exists, possibly a bug? Visit https://actualbudget.org/contact/ for support.',
-        );
-      default:
-        return t(
-          'An internal error occurred, sorry! Visit https://actualbudget.org/contact/ for support. (ref: {{reason}})',
-          { reason },
-        );
-    }
-  }
+  const getUserDirectoryErrors = useCallback(
+    reason => {
+      switch (reason) {
+        case 'unauthorized':
+          return t('You are not logged in.');
+        case 'token-expired':
+          return t('Login expired, please log in again.');
+        case 'user-cant-be-empty':
+          return t(
+            'Please enter a value for the username; the field cannot be empty.',
+          );
+        case 'role-cant-be-empty':
+          return t('Select a role; the field cannot be empty.');
+        case 'user-already-exists':
+          return t(
+            'The username you entered already exists. Please choose a different username.',
+          );
+        case 'not-all-deleted':
+          return t(
+            'Not all users were deleted. Check if one of the selected users is the server owner.',
+          );
+        case 'role-does-not-exists':
+          return t(
+            'Selected role does not exist, possibly a bug? Visit https://actualbudget.org/contact/ for support.',
+          );
+        default:
+          return t(
+            'An internal error occurred, sorry! Visit https://actualbudget.org/contact/ for support. (ref: {{reason}})',
+            { reason },
+          );
+      }
+    },
+    [t],
+  );
 
   return { getUserDirectoryErrors };
 }
