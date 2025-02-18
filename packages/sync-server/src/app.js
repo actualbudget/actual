@@ -76,7 +76,6 @@ if (process.env.NODE_ENV === 'development') {
   );
 
   // Imported within Dev block to allow dev dependency in package.json (reduces package size in production)
-  // const { createProxyMiddleware } = import('http-proxy-middleware');
   const httpProxyMiddleware = await import('http-proxy-middleware');
 
   app.use(
