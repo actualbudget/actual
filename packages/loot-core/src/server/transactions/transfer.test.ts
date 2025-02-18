@@ -179,8 +179,8 @@ describe('Transfer', () => {
     await prepareDatabase();
 
     const [transferOne, transferTwo] = await Promise.all([
-      db.first("SELECT * FROM payees WHERE transfer_acct = 'one'"),
-      db.first("SELECT * FROM payees WHERE transfer_acct = 'two'"),
+      db.first<db.DbPayee>("SELECT * FROM payees WHERE transfer_acct = 'one'"),
+      db.first<db.DbPayee>("SELECT * FROM payees WHERE transfer_acct = 'two'"),
     ]);
 
     let parent: Transaction = {
