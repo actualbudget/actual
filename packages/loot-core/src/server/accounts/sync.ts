@@ -26,6 +26,10 @@ import { runMutator } from '../mutators';
 import { post } from '../post';
 import { getServer } from '../server-config';
 import { batchMessages } from '../sync';
+import {
+  defaultMappings,
+  mappingsFromString,
+} from '../util/custom-sync-mapping';
 
 import { getStartingBalancePayee } from './payees';
 import { title } from './title';
@@ -322,57 +326,83 @@ async function normalizeTransactions(
 async function normalizeBankSyncTransactions(transactions, acctId) {
   const payeesToCreate = new Map();
 
+  const [customMappingsRaw, importPending, importNotes] = await Promise.all([
+    runQuery(
+      q('preferences')
+        .filter({ id: `custom-sync-mappings-${acctId}` })
+        .select('value'),
+    ).then(data => data?.data?.[0]?.value),
+    runQuery(
+      q('preferences')
+        .filter({ id: `sync-import-pending-${acctId}` })
+        .select('value'),
+    ).then(data => String(data?.data?.[0]?.value ?? 'true') === 'true'),
+    runQuery(
+      q('preferences')
+        .filter({ id: `sync-import-notes-${acctId}` })
+        .select('value'),
+    ).then(data => String(data?.data?.[0]?.value ?? 'true') === 'true'),
+  ]);
+
+  const mappings = customMappingsRaw
+    ? mappingsFromString(customMappingsRaw)
+    : defaultMappings;
+
   const normalized = [];
   for (const trans of transactions) {
+    trans.cleared = Boolean(trans.booked);
+
+    if (!importPending && !trans.cleared) continue;
+
     if (!trans.amount) {
       trans.amount = trans.transactionAmount.amount;
     }
 
+    const mapping = mappings.get(trans.amount <= 0 ? 'payment' : 'deposit');
+
+    const date = trans[mapping.get('date')] ?? trans.date;
+    const payeeName = trans[mapping.get('payee')];
+    const notes = trans[mapping.get('notes')];
+
     // Validate the date because we do some stuff with it. The db
     // layer does better validation, but this will give nicer errors
-    if (trans.date == null) {
+    if (date == null) {
       throw new Error('`date` is required when adding a transaction');
     }
 
-    if (trans.payeeName == null) {
+    if (payeeName == null) {
       throw new Error('`payeeName` is required when adding a transaction');
     }
 
-    trans.imported_payee = trans.imported_payee || trans.payeeName;
+    trans.imported_payee = trans.imported_payee || payeeName;
     if (trans.imported_payee) {
       trans.imported_payee = trans.imported_payee.trim();
+    }
+
+    let imported_id = trans.transactionId;
+    if (trans.cleared && !trans.transactionId && trans.internalTransactionId) {
+      imported_id = `${trans.account}-${trans.internalTransactionId}`;
     }
 
     // It's important to resolve both the account and payee early so
     // when rules are run, they have the right data. Resolving payees
     // also simplifies the payee creation process
     trans.account = acctId;
-    trans.payee = await resolvePayee(trans, trans.payeeName, payeesToCreate);
-
-    trans.cleared = Boolean(trans.booked);
-
-    let imported_id = trans.transactionId;
-
-    if (trans.cleared && !trans.transactionId && trans.internalTransactionId) {
-      imported_id = `${trans.account}-${trans.internalTransactionId}`;
-    }
-
-    const notes =
-      trans.remittanceInformationUnstructured ||
-      (trans.remittanceInformationUnstructuredArray || []).join(', ');
+    trans.payee = await resolvePayee(trans, payeeName, payeesToCreate);
 
     normalized.push({
-      payee_name: trans.payeeName,
+      payee_name: payeeName,
       trans: {
         amount: amountToInteger(trans.amount),
         payee: trans.payee,
         account: trans.account,
-        date: trans.date,
-        notes: notes.trim().replace('#', '##'),
+        date,
+        notes: importNotes && notes ? notes.trim().replace(/#/g, '##') : null,
         category: trans.category ?? null,
         imported_id,
         imported_payee: trans.imported_payee,
         cleared: trans.cleared,
+        raw_synced_data: JSON.stringify(trans),
       },
     });
   }

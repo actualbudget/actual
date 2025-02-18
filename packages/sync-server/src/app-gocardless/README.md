@@ -10,9 +10,9 @@ If the default bank integration does not work for you, you can integrate a new b
 
    This will trigger the process of fetching the data from the bank and will log the data in the backend. Use this data to fill the logic of the bank class.
 
-4. Create new a bank class based on `app-gocardless/banks/sandboxfinance-sfin0000.js`.
+4. Create new a bank class based on an existing example in `app-gocardless/banks`.
 
-   Name of the file and class should be created based on the ID of the integrated institution, found in step 1.
+   Name of the file and class should follow the existing patterns and be created based on the ID of the integrated institution, found in step 1.
 
 5. Fill the logic of `normalizeAccount`, `normalizeTransaction`, `sortTransactions`, and `calculateStartingBalance` functions.
    You do not need to fill every function, only those which are necessary for the integration to work.
@@ -162,3 +162,34 @@ If the default bank integration does not work for you, you can integrate a new b
 6. Add new bank integration to `BankFactory` class in file `actual-server/app-gocardless/bank-factory.js`
 
 7. Remember to add tests for new bank integration in
+
+## normalizeTransaction
+This is the most commonly used override as it allows you to change the data that is returned to the client.
+
+Please follow the following patterns when implementing a custom normalizeTransaction method:
+1. If you need to edit the values of transaction fields (excluding the transaction amount) do not mutate the original transaction object. Instead, create a shallow copy and make your changes there.
+2. End the function by returning the result of calling the fallback normalizeTransaction method from integration-bank.js
+
+E.g.
+```js
+import Fallback from './integration-bank.js';
+
+export default {
+  ...
+
+  normalizeTransaction(transaction, booked) {
+    // create a shallow copy of the transaction object
+    const editedTrans = { ...transaction };
+
+    // make any changes required to the copy
+    editedTrans.remittanceInformationUnstructured = transaction.remittanceInformationStructured;
+
+    // call the fallback method, passing in your edited transaction as the 3rd parameter
+    // this will calculate the date, payee name and notes fields based on your changes
+    // but leave the original fields available for mapping in the UI
+    return Fallback.normalizeTransaction(transaction, booked, editedTrans);
+  }
+
+  ...
+}
+```

@@ -5,11 +5,11 @@ import React, {
   type ReactNode,
 } from 'react';
 
+import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
 import { usePrivacyMode } from '../hooks/usePrivacyMode';
 
-import { View } from './common/View';
 import { useResponsive } from './responsive/ResponsiveProvider';
 
 type ConditionalPrivacyFilterProps = {

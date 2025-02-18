@@ -47,14 +47,14 @@ describe('ssk_dusseldorf_dussdeddxxx', () => {
         SskDusseldorfDussdeddxxx.normalizeTransaction(
           bookedTransactionOne,
           true,
-        ).remittanceInformationUnstructured,
+        ).notes,
       ).toEqual('unstructured information some additional information');
 
       expect(
         SskDusseldorfDussdeddxxx.normalizeTransaction(
           bookedTransactionTwo,
           true,
-        ).remittanceInformationUnstructured,
+        ).notes,
       ).toEqual('structured information some additional information');
     });
 

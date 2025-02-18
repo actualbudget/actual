@@ -17,9 +17,7 @@ describe('RevolutRevolt21', () => {
         true,
       );
 
-      expect(normalizedTransaction.remittanceInformationUnstructured).toEqual(
-        'Bizum description',
-      );
+      expect(normalizedTransaction.notes).toEqual('Bizum description');
     });
   });
 
@@ -39,8 +37,6 @@ describe('RevolutRevolt21', () => {
     );
 
     expect(normalizedTransaction.payeeName).toEqual('DEBTOR NAME');
-    expect(normalizedTransaction.remittanceInformationUnstructured).toEqual(
-      'Bizum description',
-    );
+    expect(normalizedTransaction.notes).toEqual('Bizum description');
   });
 });

@@ -7,11 +7,13 @@ export default {
   institutionIds: ['BANK_OF_IRELAND_B365_BOFIIE2D'],
 
   normalizeTransaction(transaction, booked) {
-    transaction.remittanceInformationUnstructured = fixupPayee(
+    const editedTrans = { ...transaction };
+
+    editedTrans.remittanceInformationUnstructured = fixupPayee(
       transaction.remittanceInformationUnstructured,
     );
 
-    return Fallback.normalizeTransaction(transaction, booked);
+    return Fallback.normalizeTransaction(transaction, booked, editedTrans);
   },
 };
 

@@ -1,5 +1,3 @@
-import { formatPayeeName } from '../../util/payee-name.js';
-
 import Fallback from './integration-bank.js';
 
 /** @type {import('./bank.interface.js').IBank} */
@@ -8,20 +6,14 @@ export default {
 
   institutionIds: ['SPK_WORMS_ALZEY_RIED_MALADE51WOR'],
 
-  normalizeTransaction(transaction, _booked) {
-    const date = transaction.bookingDate || transaction.valueDate;
-    if (!date) {
-      return null;
-    }
+  normalizeTransaction(transaction, booked) {
+    const editedTrans = { ...transaction };
 
-    transaction.remittanceInformationUnstructured =
+    editedTrans.remittanceInformationUnstructured =
       transaction.remittanceInformationUnstructured ??
       transaction.remittanceInformationStructured ??
       transaction.remittanceInformationStructuredArray?.join(' ');
-    return {
-      ...transaction,
-      payeeName: formatPayeeName(transaction),
-      date: transaction.bookingDate || transaction.valueDate,
-    };
+
+    return Fallback.normalizeTransaction(transaction, booked, editedTrans);
   },
 };

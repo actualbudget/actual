@@ -1,8 +1,8 @@
 import React, { type ComponentPropsWithoutRef, forwardRef } from 'react';
 
-import { SvgDotsHorizontalTriple } from '../../icons/v1';
+import { Button } from '@actual-app/components/button';
 
-import { Button } from './Button2';
+import { SvgDotsHorizontalTriple } from '../../icons/v1';
 
 type MenuButtonProps = ComponentPropsWithoutRef<typeof Button>;
 

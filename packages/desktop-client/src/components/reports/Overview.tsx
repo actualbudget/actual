@@ -4,6 +4,11 @@ import { useHotkeys } from 'react-hotkeys-hook';
 import { Trans, useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 
+import { Button } from '@actual-app/components/button';
+import { Menu } from '@actual-app/components/menu';
+import { Popover } from '@actual-app/components/popover';
+import { View } from '@actual-app/components/view';
+
 import { addNotification, removeNotification } from 'loot-core/client/actions';
 import { useDashboard } from 'loot-core/client/data-hooks/dashboard';
 import { useReports } from 'loot-core/client/data-hooks/reports';
@@ -21,11 +26,7 @@ import { useSyncedPref } from '../../hooks/useSyncedPref';
 import { useUndo } from '../../hooks/useUndo';
 import { useDispatch } from '../../redux';
 import { breakpoints } from '../../tokens';
-import { Button } from '../common/Button2';
-import { Menu } from '../common/Menu';
 import { MenuButton } from '../common/MenuButton';
-import { Popover } from '../common/Popover';
-import { View } from '../common/View';
 import { MOBILE_NAV_HEIGHT } from '../mobile/MobileNavTabs';
 import { MobilePageHeader, Page, PageHeader } from '../Page';
 import { useResponsive } from '../responsive/ResponsiveProvider';

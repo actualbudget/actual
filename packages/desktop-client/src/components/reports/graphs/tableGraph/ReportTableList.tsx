@@ -1,12 +1,13 @@
 import React, { type ReactNode, type CSSProperties } from 'react';
 
+import { View } from '@actual-app/components/view';
+
 import {
   type GroupedEntity,
   type DataEntity,
 } from 'loot-core/types/models/reports';
 
 import { theme } from '../../../../style';
-import { View } from '../../../common/View';
 import { Row } from '../../../table';
 
 import { RenderTableRow } from './RenderTableRow';

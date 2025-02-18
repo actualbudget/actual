@@ -45,6 +45,7 @@ interface ScheduleTemplate extends BaseTemplate {
   type: 'schedule';
   name: string;
   full?: boolean;
+  adjustment?: number;
 }
 
 interface RemainderTemplate extends BaseTemplate {

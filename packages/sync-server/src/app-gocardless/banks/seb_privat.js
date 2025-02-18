@@ -1,6 +1,3 @@
-import * as d from 'date-fns';
-
-import { formatPayeeName } from '../../util/payee-name.js';
 import { amountToInteger } from '../utils.js';
 
 import Fallback from './integration-bank.js';
@@ -11,27 +8,13 @@ export default {
 
   institutionIds: ['SEB_ESSESESS_PRIVATE'],
 
-  normalizeTransaction(transaction, _booked) {
-    const date =
-      transaction.bookingDate ||
-      transaction.bookingDateTime ||
-      transaction.valueDate ||
-      transaction.valueDateTime;
-    // If we couldn't find a valid date field we filter out this transaction
-    // and hope that we will import it again once the bank has processed the
-    // transaction further.
-    if (!date) {
-      return null;
-    }
+  normalizeTransaction(transaction, booked) {
+    const editedTrans = { ...transaction };
 
     // Creditor name is stored in additionInformation for SEB
-    transaction.creditorName = transaction.additionalInformation;
+    editedTrans.creditorName = transaction.additionalInformation;
 
-    return {
-      ...transaction,
-      payeeName: formatPayeeName(transaction),
-      date: d.format(d.parseISO(date), 'yyyy-MM-dd'),
-    };
+    return Fallback.normalizeTransaction(transaction, booked, editedTrans);
   },
 
   calculateStartingBalance(sortedTransactions = [], balances = []) {

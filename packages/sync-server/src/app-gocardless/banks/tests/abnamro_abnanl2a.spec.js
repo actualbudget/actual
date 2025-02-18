@@ -24,7 +24,7 @@ describe('AbnamroAbnanl2a', () => {
         false,
       );
 
-      expect(normalizedTransaction.remittanceInformationUnstructured).toEqual(
+      expect(normalizedTransaction.notes).toEqual(
         'BEA, Betaalpas, My Payee Name,PAS123, NR:123A4B, 09.12.23/15:43, CITY',
       );
       expect(normalizedTransaction.payeeName).toEqual('My Payee Name');
@@ -52,7 +52,7 @@ describe('AbnamroAbnanl2a', () => {
         false,
       );
 
-      expect(normalizedTransaction.remittanceInformationUnstructured).toEqual(
+      expect(normalizedTransaction.notes).toEqual(
         'BEA, Google Pay, CCV*Other payee name,PAS123, NR:123A4B, 09.12.23/15:43, CITY',
       );
       expect(normalizedTransaction.payeeName).toEqual('Other Payee Name');

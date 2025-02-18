@@ -11,26 +11,24 @@ export default {
    * For negative amounts, the only payee information we have is returned in
    * remittanceInformationUnstructured.
    */
-  normalizeTransaction(transaction, _booked) {
-    if (Number(transaction.transactionAmount.amount) > 0) {
-      return {
-        ...transaction,
-        payeeName:
-          transaction.debtorName ||
-          transaction.remittanceInformationUnstructured,
-        date: transaction.bookingDate || transaction.valueDate,
-      };
-    }
+  normalizeTransaction(transaction, booked) {
+    const editedTrans = { ...transaction };
 
-    return {
-      ...transaction,
-      payeeName:
+    if (Number(transaction.transactionAmount.amount) > 0) {
+      editedTrans.payeeName =
+        transaction.debtorName ||
+        transaction.remittanceInformationUnstructured ||
+        'undefined';
+    } else {
+      editedTrans.payeeName =
         transaction.creditorName ||
         extractPayeeNameFromRemittanceInfo(
           transaction.remittanceInformationUnstructured,
           ['Paiement', 'Domiciliation', 'Transfert', 'Ordre permanent'],
-        ),
-      date: transaction.bookingDate || transaction.valueDate,
-    };
+        ) ||
+        'undefined';
+    }
+
+    return Fallback.normalizeTransaction(transaction, booked, editedTrans);
   },
 };

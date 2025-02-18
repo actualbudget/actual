@@ -1,5 +1,3 @@
-import { formatPayeeName } from '../../util/payee-name.js';
-
 import Fallback from './integration-bank.js';
 
 /** @type {import('./bank.interface.js').IBank} */
@@ -8,11 +6,13 @@ export default {
 
   institutionIds: ['COMMERZBANK_COBADEFF'],
 
-  normalizeTransaction(transaction, _booked) {
+  normalizeTransaction(transaction, booked) {
+    const editedTrans = { ...transaction };
+
     // remittanceInformationUnstructured is limited to 140 chars thus ...
     // ... missing information form remittanceInformationUnstructuredArray ...
     // ... so we recreate it.
-    transaction.remittanceInformationUnstructured =
+    editedTrans.remittanceInformationUnstructured =
       transaction.remittanceInformationUnstructuredArray.join(' ');
 
     // The limitations of remittanceInformationUnstructuredArray ...
@@ -27,8 +27,8 @@ export default {
       'Dauerauftrag',
     ];
     keywords.forEach(keyword => {
-      transaction.remittanceInformationUnstructured =
-        transaction.remittanceInformationUnstructured.replace(
+      editedTrans.remittanceInformationUnstructured =
+        editedTrans.remittanceInformationUnstructured.replace(
           // There can be spaces in keywords
           RegExp(keyword.split('').join('\\s*'), 'gi'),
           ', ' + keyword + ' ',
@@ -39,17 +39,13 @@ export default {
     // ... that are added to the remittanceInformation field), and ...
     // ... remove clutter like "End-to-End-Ref.: NOTPROVIDED"
     const payee = transaction.creditorName || transaction.debtorName || '';
-    transaction.remittanceInformationUnstructured =
-      transaction.remittanceInformationUnstructured
+    editedTrans.remittanceInformationUnstructured =
+      editedTrans.remittanceInformationUnstructured
         .replace(/\s*(,)?\s+/g, '$1 ')
         .replace(RegExp(payee.split(' ').join('(/*| )'), 'gi'), ' ')
         .replace(', End-to-End-Ref.: NOTPROVIDED', '')
         .trim();
 
-    return {
-      ...transaction,
-      payeeName: formatPayeeName(transaction),
-      date: transaction.bookingDate,
-    };
+    return Fallback.normalizeTransaction(transaction, booked, editedTrans);
   },
 };

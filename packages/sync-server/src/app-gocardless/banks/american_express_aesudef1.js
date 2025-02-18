@@ -1,4 +1,3 @@
-import { formatPayeeName } from '../../util/payee-name.js';
 import { amountToInteger } from '../utils.js';
 
 import Fallback from './integration-bank.js';
@@ -18,14 +17,6 @@ export default {
       iban: null,
       name: [account.details, `(${account.iban.slice(-5)})`].join(' '),
       official_name: account.details,
-    };
-  },
-
-  normalizeTransaction(transaction, _booked) {
-    return {
-      ...transaction,
-      payeeName: formatPayeeName(transaction),
-      date: transaction.bookingDate,
     };
   },
 
