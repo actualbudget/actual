@@ -137,7 +137,6 @@ export function SidebarCategory({
       {!goalsShown && goalTemplatesUIEnabled && (
         <View style={{ flexShrink: 0 }}>
           <CategoryAutomationButton
-            id={category.id}
             style={dragging && { color: 'currentColor' }}
             defaultColor={theme.pageTextLight}
           />

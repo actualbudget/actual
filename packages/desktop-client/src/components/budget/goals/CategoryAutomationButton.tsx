@@ -1,8 +1,7 @@
-import React, { type ComponentProps, type CSSProperties } from 'react';
+import React, { type CSSProperties } from 'react';
 
 import { Button } from '@actual-app/components/button';
 import { theme } from '@actual-app/components/theme';
-import { type Tooltip } from '@actual-app/components/tooltip';
 
 import { pushModal } from 'loot-core/client/actions';
 import { type Template } from 'loot-core/server/budget/types/templates';
@@ -12,11 +11,9 @@ import { SvgChartPie } from '../../../icons/v1';
 import { useDispatch } from '../../../redux';
 
 type CategoryAutomationButtonProps = {
-  id: string;
   width?: number;
   height?: number;
   defaultColor?: string;
-  tooltipPosition?: ComponentProps<typeof Tooltip>['placement'];
   style?: CSSProperties;
 };
 export function CategoryAutomationButton({
