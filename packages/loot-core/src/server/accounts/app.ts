@@ -352,7 +352,7 @@ async function closeAccount({
           account: id,
           date: monthUtils.currentDay(),
           notes: 'Closing account',
-          category: categoryId || null,
+          category: categoryId,
         });
       }
     }
@@ -812,7 +812,7 @@ async function simpleFinBatchSync({
     }> = await bankSync.simpleFinBatchSync(
       accounts.map(a => ({
         id: a.id,
-        account_id: a.account_id,
+        account_id: a.account_id || null,
       })),
     );
     for (const syncResponse of syncResponses) {
