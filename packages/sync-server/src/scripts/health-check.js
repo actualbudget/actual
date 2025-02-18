@@ -5,7 +5,14 @@ import { config } from '../load-config.js';
 const protocol = config.https ? 'https' : 'http';
 const hostname = config.hostname === '::' ? 'localhost' : config.hostname;
 
-fetch(`${protocol}://${hostname}:${config.port}/health`)
+fetch(`${protocol}://${hostname}:${config.port}/health`, {
+  headers: {
+    'X-Forwarded-Proto': protocol,
+  },
+  rejectUnauthorized: false,
+  strict: true,
+  localResolveHosts: true
+})
   .then(res => res.json())
   .then(res => {
     if (res.status !== 'UP') {
