@@ -1,8 +1,8 @@
 import React, { type CSSProperties } from 'react';
 
-import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
-
 import { styles } from '@actual-app/components/styles';
+
+import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
 
 import { theme } from '../../style';
 import { ToBudgetMenu } from '../budget/envelope/budgetsummary/ToBudgetMenu';
