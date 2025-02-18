@@ -84,6 +84,7 @@ export function useSchedules({
     setError(undefined);
 
     if (!query) {
+      console.error('No query provided to useSchedules');
       return;
     }
 

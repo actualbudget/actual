@@ -60,7 +60,7 @@ interface AverageTemplate extends BaseTemplate {
 }
 
 interface GoalTemplate extends BaseTemplate {
-  type: 'simple';
+  type: 'goal';
   amount: number;
 }
 
