@@ -124,11 +124,13 @@ function UserDirectoryContent({
     if ('error' in loadedUsers) {
       dispatch(
         addNotification({
-          type: 'error',
-          id: 'error',
-          title: t('Error getting users'),
-          sticky: true,
-          message: getUserDirectoryErrors(loadedUsers.error),
+          notification: {
+            type: 'error',
+            id: 'error',
+            title: t('Error getting users'),
+            sticky: true,
+            message: getUserDirectoryErrors(loadedUsers.error),
+          },
         }),
       );
       setLoading(false);
