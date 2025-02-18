@@ -5,7 +5,6 @@ import cors from 'cors';
 import express from 'express';
 import actuator from 'express-actuator';
 import rateLimit from 'express-rate-limit';
-import { createProxyMiddleware } from 'http-proxy-middleware';
 
 import * as accountApp from './app-account.js';
 import * as adminApp from './app-admin.js';
@@ -76,8 +75,12 @@ if (process.env.NODE_ENV === 'development') {
     'Running in development mode - Proxying frontend routes to React Dev Server',
   );
 
+  // Imported within Dev block to allow dev dependency in package.json (reduces package size in production)
+  // const { createProxyMiddleware } = import('http-proxy-middleware');
+  const httpProxyMiddleware = await import('http-proxy-middleware');
+
   app.use(
-    createProxyMiddleware({
+    httpProxyMiddleware.createProxyMiddleware({
       target: 'http://localhost:3001',
       changeOrigin: true,
       ws: true,
