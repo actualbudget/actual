@@ -179,22 +179,13 @@ export function EditSyncAccount({ account }: EditSyncAccountProps) {
             <Trans>Field mapping</Trans>
           </Text>
 
-          {fields.length > 0 ? (
-            <FieldMapping
-              transactionDirection={transactionDirection}
-              setTransactionDirection={setTransactionDirection}
-              fields={fields as MappableFieldWithExample[]}
-              mapping={mapping!}
-              setMapping={setMapping}
-            />
-          ) : (
-            <Text style={{ margin: '1em 0 .5em 0' }}>
-              <Trans>
-                No transactions found with mappable fields, accounts must have
-                been synced at least once for this function to be available.
-              </Trans>
-            </Text>
-          )}
+          <FieldMapping
+            transactionDirection={transactionDirection}
+            setTransactionDirection={setTransactionDirection}
+            fields={fields as MappableFieldWithExample[]}
+            mapping={mapping!}
+            setMapping={setMapping}
+          />
 
           <Text style={{ fontSize: 15, margin: '1em 0 .5em 0' }}>
             <Trans>Options</Trans>
