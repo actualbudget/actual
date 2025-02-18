@@ -15,12 +15,12 @@ import { styles } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
 
 import {
-  addNotification,
   loadGlobalPrefs,
   signOut,
 } from 'loot-core/client/actions';
 import { setAppState, sync } from 'loot-core/client/app/appSlice';
 import { closeBudget, loadBudget } from 'loot-core/client/budgets/budgetsSlice';
+import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
 import * as Platform from 'loot-core/client/platform';
 import { SpreadsheetProvider } from 'loot-core/client/SpreadsheetProvider';
 import { init as initConnection, send } from 'loot-core/platform/client/fetch';
@@ -134,14 +134,16 @@ function AppInner() {
     if (userData?.tokenExpired) {
       dispatch(
         addNotification({
-          type: 'error',
-          id: 'login-expired',
-          title: t('Login expired'),
-          sticky: true,
-          message: t('Login expired, please log in again.'),
-          button: {
-            title: t('Go to log in'),
-            action: () => dispatch(signOut()),
+          notification: {
+            type: 'error',
+            id: 'login-expired',
+            title: t('Login expired'),
+            sticky: true,
+            message: t('Login expired, please log in again.'),
+            button: {
+              title: t('Go to log in'),
+              action: () => dispatch(signOut()),
+            },
           },
         }),
       );

@@ -2,7 +2,7 @@ import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
 import { send } from '../../platform/client/fetch';
 import { type AccountEntity, type TransactionEntity } from '../../types/models';
-import { addNotification } from '../actions';
+import { addNotification } from '../notifications/notificationsSlice';
 import {
   getAccounts,
   getPayees,
@@ -171,16 +171,20 @@ function handleSyncResponse(
     if (error.type === 'SyncError') {
       dispatch(
         addNotification({
-          type: 'error',
-          message: error.message,
+          notification: {
+            type: 'error',
+            message: error.message,
+          },
         }),
       );
     } else {
       dispatch(
         addNotification({
-          type: 'error',
-          message: error.message,
-          internal: error.internal,
+          notification: {
+            type: 'error',
+            message: error.message,
+            internal: error.internal,
+          },
         }),
       );
     }

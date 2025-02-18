@@ -26,9 +26,9 @@ import {
   isValid as isDateValid,
 } from 'date-fns';
 
-import { addNotification } from 'loot-core/client/actions';
 import { useCachedSchedules } from 'loot-core/client/data-hooks/schedules';
 import { pushModal } from 'loot-core/client/modals/modalsSlice';
+import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
 import {
   getAccountsById,
   getPayeesById,
@@ -2260,8 +2260,10 @@ export const TransactionTable = forwardRef((props, ref) => {
       if (newTransactions[0].account == null) {
         dispatch(
           addNotification({
-            type: 'error',
-            message: 'Account is a required field',
+            notification: {
+              type: 'error',
+              message: 'Account is a required field',
+            },
           }),
         );
         newNavigator.onEdit('temp', 'account');
