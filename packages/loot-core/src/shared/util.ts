@@ -315,7 +315,7 @@ export function getNumberFormat({
 
   return {
     value: format,
-    thousandsSep,
+    thousandsSeparator,
     decimalSep,
     formatter: new Intl.NumberFormat(locale, {
       minimumFractionDigits: hideFraction ? 0 : 2,
