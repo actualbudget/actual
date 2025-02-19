@@ -4,6 +4,7 @@ import React, {
 } from 'react';
 import { mergeProps } from 'react-aria';
 import { ListBoxItem } from 'react-aria-components';
+import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { styles } from '@actual-app/components/styles';
@@ -50,6 +51,7 @@ export function TransactionListItem({
   onLongPress,
   ...props
 }: TransactionListItemProps) {
+  const { t } = useTranslation();
   const { list: categories } = useCategories();
 
   const { value: transaction } = props;
@@ -186,7 +188,7 @@ export function TransactionListItem({
                       }),
                     }}
                   >
-                    {prettyPayee || '(No payee)'}
+                    {prettyPayee || t('(No payee)')}
                   </TextOneLine>
                 </View>
                 {isPreview ? (
