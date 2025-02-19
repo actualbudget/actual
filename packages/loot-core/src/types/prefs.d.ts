@@ -118,24 +118,4 @@ export type GlobalPrefsJson = Partial<{
   ngrokConfig?: GlobalPrefs['ngrokConfig'];
 }>;
 
-// GlobalPrefsJson represents what's saved in the global-store.json file
-export type GlobalPrefsJson = Partial<{
-  'user-id'?: string;
-  'user-key'?: string;
-  'encrypt-keys'?: string;
-  lastBudget?: string;
-  readOnly?: string;
-  'server-url'?: string;
-  'did-bootstrap'?: boolean;
-  'user-token'?: string;
-  'floating-sidebar'?: string; // "true" or "false"
-  'max-months'?: string; // e.g. "2" or "3"
-  'document-dir'?: GlobalPrefs['documentDir'];
-  'encrypt-key'?: string;
-  language?: GlobalPrefs['language'];
-  theme?: GlobalPrefs['theme'];
-  'preferred-dark-theme'?: GlobalPrefs['preferredDarkTheme'];
-  'server-self-signed-cert'?: GlobalPrefs['serverSelfSignedCert'];
-}>;
-
 export type AuthMethods = 'password' | 'openid';
