@@ -148,7 +148,7 @@ function SyncButton({ style, isMobile = false }: SyncButtonProps) {
     });
 
     return unlisten;
-  }, []);
+  }, [cloudFileId]);
 
   const mobileColor =
     syncState === 'error'
