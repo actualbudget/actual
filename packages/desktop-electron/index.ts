@@ -22,6 +22,8 @@ import {
 import { copy, exists, remove } from 'fs-extra';
 import promiseRetry from 'promise-retry';
 
+import type { GlobalPrefsJson } from '../loot-core/src/types/prefs';
+
 import { getMenu } from './menu';
 import {
   get as getWindowState,
@@ -57,9 +59,36 @@ let serverProcess: UtilityProcess | null;
 
 let oAuthServer: ReturnType<typeof createServer> | null;
 
+let queuedClientWinLogs = []; // logs that are queued up until the client window is ready
+
+const logMessage = (loglevel: 'info' | 'error', message: string) => {
+  // Electron main process logs
+  switch (loglevel) {
+    case 'info':
+      console.info(message);
+      break;
+    case 'error':
+      console.error(message);
+      break;
+  }
+
+  if (!clientWin) {
+    // queue up the logs until the client window is ready
+    queuedClientWinLogs.push(
+      // eslint-disable-next-line rulesdir/typography
+      `console.${loglevel}('Actual Sync Server Log:', ${JSON.stringify(message)})`,
+    );
+  } else {
+    // Send the queued up logs to the devtools console
+    clientWin.webContents.executeJavaScript(
+      `console.${loglevel}('Actual Sync Server Log:', ${JSON.stringify(message)})`,
+    );
+  }
+};
+
 const createOAuthServer = async () => {
   const port = 3010;
-  console.log(`OAuth server running on port: ${port}`);
+  logMessage('info', `OAuth server running on port: ${port}`);
 
   if (oAuthServer) {
     return { url: `http://localhost:${port}`, server: oAuthServer };
@@ -101,7 +130,7 @@ if (isDev) {
 }
 
 async function loadGlobalPrefs() {
-  let state: { [key: string]: unknown } | undefined = undefined;
+  let state: GlobalPrefsJson | undefined = undefined;
   try {
     state = JSON.parse(
       fs.readFileSync(
@@ -110,7 +139,7 @@ async function loadGlobalPrefs() {
       ),
     );
   } catch (e) {
-    console.info('Could not load global state - using defaults'); // This could be the first time running the app - no global-store.json
+    logMessage('info', 'Could not load global state - using defaults');
     state = {};
   }
 
@@ -146,13 +175,13 @@ async function createBackgroundProcess() {
   );
 
   serverProcess.stdout?.on('data', (chunk: Buffer) => {
-    // Send the Server console.log messages to the main browser window
+    // Send the Server log messages to the main browser window
     clientWin?.webContents.executeJavaScript(`
       console.info('Server Log:', ${JSON.stringify(chunk.toString('utf8'))})`);
   });
 
   serverProcess.stderr?.on('data', (chunk: Buffer) => {
-    // Send the Server console.error messages out to the main browser window
+    // Send the Server log messages out to the main browser window
     clientWin?.webContents.executeJavaScript(`
       console.error('Server Log:', ${JSON.stringify(chunk.toString('utf8'))})`);
   });
@@ -170,7 +199,7 @@ async function createBackgroundProcess() {
         }
         break;
       default:
-        console.log('Unknown server message: ' + msg.type);
+        logMessage('info', 'Unknown server message: ' + msg.type);
     }
   });
 }
@@ -219,8 +248,9 @@ async function createWindow() {
   });
 
   win.on('unresponsive', () => {
-    console.log(
-      'browser window went unresponsive (maybe because of a modal though)',
+    logMessage(
+      'info',
+      'browser window went unresponsive (maybe because of a modal)',
     );
   });
 
@@ -262,6 +292,13 @@ async function createWindow() {
   }
 
   clientWin = win;
+
+  // Execute queued logs - displaying them in the client window
+  queuedClientWinLogs.map((log: string) =>
+    clientWin.webContents.executeJavaScript(log),
+  );
+
+  queuedClientWinLogs = [];
 }
 
 function isExternalUrl(url: string) {
@@ -357,10 +394,10 @@ app.on('ready', async () => {
   // This is mainly to aid debugging Sentry errors - it will add a
   // breadcrumb
   powerMonitor.on('suspend', () => {
-    console.log('Suspending', new Date());
+    logMessage('info', 'Suspending: ' + new Date());
   });
 
-  createBackgroundProcess();
+  await createBackgroundProcess();
 });
 
 app.on('window-all-closed', () => {
@@ -520,7 +557,10 @@ ipcMain.handle(
       });
       await remove(currentBudgetDirectory);
     } catch (error) {
-      console.error('There was an error moving your directory', error);
+      logMessage(
+        'error',
+        `There was an error moving your directory:  ${error}`,
+      );
       throw error;
     }
   },
