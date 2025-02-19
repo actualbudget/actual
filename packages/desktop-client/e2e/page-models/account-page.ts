@@ -194,7 +194,8 @@ export class AccountPage {
     transaction: TransactionEntry,
   ) {
     if (transaction.debit) {
-      await transactionRow.getByTestId('debit').click();
+      // double click to ensure the content is selected when adding split transactions
+      await transactionRow.getByTestId('debit').dblclick();
       await this.page.keyboard.type(transaction.debit);
       await this.page.keyboard.press('Tab');
     }
