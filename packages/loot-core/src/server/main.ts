@@ -528,7 +528,10 @@ handlers['getCell'] = async function ({ sheetName, name }) {
 };
 
 handlers['getCells'] = async function ({ names }) {
-  return names.map(name => ({ value: sheet.get()._getNode(name).value }));
+  return names.map(name => {
+    const node = sheet.get()._getNode(name);
+    return { name: node.name, value: node.value };
+  });
 };
 
 handlers['getCellNamesInSheet'] = async function ({ sheetName }) {

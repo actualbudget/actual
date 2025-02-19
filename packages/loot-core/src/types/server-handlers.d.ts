@@ -130,18 +130,24 @@ export interface ServerHandlers {
     applySpecialCases?: boolean;
   }) => Promise<{ filters: unknown[] }>;
 
-  getCell: (arg: {
+  getCell: (arg: { sheetName; name }) => Promise<{
+    name: SpreadsheetNode['name'];
+    value: SpreadsheetNode['value'];
+  }>;
+
+  getCells: (arg: {
+    names;
+  }) => Promise<
+    Array<{ name: SpreadsheetNode['name']; value?: SpreadsheetNode['value'] }>
+  >;
+
+  getCellNamesInSheet: (arg: {
     sheetName;
-    name;
-  }) => Promise<SpreadsheetNode | { value?: SpreadsheetNode['value'] }>;
-
-  getCells: (arg: { names }) => Promise<unknown>;
-
-  getCellNamesInSheet: (arg: { sheetName }) => Promise<unknown>;
+  }) => Promise<Array<SpreadsheetNode['name']>>;
 
   debugCell: (arg: { sheetName; name }) => Promise<unknown>;
 
-  'create-query': (arg: { sheetName; name; query }) => Promise<unknown>;
+  'create-query': (arg: { sheetName; name; query }) => Promise<'ok'>;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   query: (query: Query) => Promise<{ data: any; dependencies: string[] }>;
