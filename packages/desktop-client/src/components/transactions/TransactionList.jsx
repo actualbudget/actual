@@ -1,4 +1,4 @@
-import React, { useRef, useCallback } from 'react';
+import React, { useRef, useCallback, useLayoutEffect } from 'react';
 
 import { pushModal } from 'loot-core/client/actions';
 import { send } from 'loot-core/platform/client/fetch';
@@ -105,7 +105,9 @@ export function TransactionList({
   const isLearnCategoriesEnabled = String(learnCategories) === 'true';
 
   const transactionsLatest = useRef();
-  transactionsLatest.current = transactions;
+  useLayoutEffect(() => {
+    transactionsLatest.current = transactions;
+  }, [transactions]);
 
   const onAdd = useCallback(
     async newTransactions => {
