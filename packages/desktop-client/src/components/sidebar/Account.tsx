@@ -13,7 +13,10 @@ import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 import { css, cx } from '@emotion/css';
 
-import { openAccountCloseModal } from 'loot-core/client/actions';
+import {
+  addNotification,
+  openAccountCloseModal,
+} from 'loot-core/client/actions';
 import * as Platform from 'loot-core/client/platform';
 import {
   reopenAccount,
@@ -200,7 +203,6 @@ export function Account<FieldName extends SheetFields<'account'>>({
                   <InitialFocus>
                     <Input
                       style={{
-                        padding: 0,
                         width: '100%',
                       }}
                       onBlur={() => setIsEditingName(false)}
@@ -232,7 +234,6 @@ export function Account<FieldName extends SheetFields<'account'>>({
                   <InitialFocus>
                     <Input
                       style={{
-                        padding: 0,
                         width: '100%',
                         textAlign: 'right',
                         ...styles.tnum,
@@ -243,7 +244,18 @@ export function Account<FieldName extends SheetFields<'account'>>({
                         const newValue = inputEl.value;
                         if (newValue.trim() !== '') {
                           const v = currencyToInteger(newValue);
-                          navigate(to, { state: { reconcileAmount: v } });
+
+                          if (v === accountValue) {
+                            dispatch(
+                              addNotification({
+                                type: 'message',
+                                message:
+                                  'The new balance is the same as the current balance.',
+                              }),
+                            );
+                          } else {
+                            navigate(to, { state: { reconcileAmount: v } });
+                          }
                         }
                         setIsEditingBalance(false);
                       }}
