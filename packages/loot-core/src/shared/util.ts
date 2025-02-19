@@ -210,7 +210,7 @@ export function appendDecimals(
   amountText: string,
   hideDecimals = false,
 ): string {
-  const { decimalSep: separator } = getNumberFormat();
+  const { decimalSeparator: separator } = getNumberFormat();
   let result = amountText;
   if (result.slice(-1) === separator) {
     result = result.slice(0, -1);
@@ -283,34 +283,34 @@ export function getNumberFormat({
   format?: NumberFormats;
   hideFraction: boolean;
 } = numberFormatConfig) {
-  let locale, thousandsSep, decimalSep;
+  let locale, thousandsSeparator, decimalSeparator;
 
   switch (format) {
     case 'space-comma':
       locale = 'en-SE';
-      thousandsSep = '\xa0';
-      decimalSep = ',';
+      thousandsSeparator = '\xa0';
+      decimalSeparator = ',';
       break;
     case 'dot-comma':
       locale = 'de-DE';
-      thousandsSep = '.';
-      decimalSep = ',';
+      thousandsSeparator = '.';
+      decimalSeparator = ',';
       break;
     case 'apostrophe-dot':
       locale = 'de-CH';
-      thousandsSep = '’';
-      decimalSep = '.';
+      thousandsSeparator = '’';
+      decimalSeparator = '.';
       break;
     case 'comma-dot-in':
       locale = 'en-IN';
-      thousandsSep = ',';
-      decimalSep = '.';
+      thousandsSeparator = ',';
+      decimalSeparator = '.';
       break;
     case 'comma-dot':
     default:
       locale = 'en-US';
-      thousandsSep = ',';
-      decimalSep = '.';
+      thousandsSeparator = ',';
+      decimalSeparator = '.';
   }
 
   return {
@@ -395,7 +395,7 @@ export function currencyToAmount(currencyAmount: string): Amount | null {
 
   if (
     !match ||
-    (match[0] === getNumberFormat().thousandsSep &&
+    (match[0] === getNumberFormat().thousandsSeparator &&
       match.index + 4 === currencyAmount.length)
   ) {
     fraction = null;
