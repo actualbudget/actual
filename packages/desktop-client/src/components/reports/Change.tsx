@@ -1,10 +1,10 @@
 import React, { type CSSProperties } from 'react';
 
-import { integerToCurrency } from 'loot-core/src/shared/util';
+import { Block } from '@actual-app/components/block';
+import { styles } from '@actual-app/components/styles';
+import { theme } from '@actual-app/components/theme';
 
-import { styles } from '../../style/styles';
-import { theme } from '../../style/theme';
-import { Block } from '../common/Block';
+import { integerToCurrency } from 'loot-core/shared/util';
 
 export function Change({
   amount,

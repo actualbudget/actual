@@ -3,16 +3,21 @@ import { useHotkeys } from 'react-hotkeys-hook';
 import { useTranslation } from 'react-i18next';
 import { Routes, Route, useLocation } from 'react-router-dom';
 
+import { Button } from '@actual-app/components/button';
+import { SpaceBetween } from '@actual-app/components/space-between';
+import { styles } from '@actual-app/components/styles';
+import { Text } from '@actual-app/components/text';
+import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
 import { sync } from 'loot-core/client/app/appSlice';
-import * as Platform from 'loot-core/src/client/platform';
-import * as queries from 'loot-core/src/client/queries';
-import { listen } from 'loot-core/src/platform/client/fetch';
+import * as Platform from 'loot-core/client/platform';
+import * as queries from 'loot-core/client/queries';
+import { listen } from 'loot-core/platform/client/fetch';
 import {
   isDevelopmentEnvironment,
   isElectron,
-} from 'loot-core/src/shared/environment';
+} from 'loot-core/shared/environment';
 
 import { useGlobalPref } from '../hooks/useGlobalPref';
 import { useMetadataPref } from '../hooks/useMetadataPref';
@@ -26,16 +31,12 @@ import {
   SvgViewShow,
 } from '../icons/v2';
 import { useDispatch } from '../redux';
-import { theme, styles, type CSSProperties } from '../style';
+import { theme, type CSSProperties } from '../style';
 
 import { AccountSyncCheck } from './accounts/AccountSyncCheck';
 import { AnimatedRefresh } from './AnimatedRefresh';
 import { MonthCountSelector } from './budget/MonthCountSelector';
-import { Button } from './common/Button2';
 import { Link } from './common/Link';
-import { SpaceBetween } from './common/SpaceBetween';
-import { Text } from './common/Text';
-import { View } from './common/View';
 import { HelpMenu } from './HelpMenu';
 import { LoggedInUser } from './LoggedInUser';
 import { useResponsive } from './responsive/ResponsiveProvider';

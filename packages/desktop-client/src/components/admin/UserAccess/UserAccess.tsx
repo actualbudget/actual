@@ -10,9 +10,13 @@ import React, {
 } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
+import { Text } from '@actual-app/components/text';
+import { View } from '@actual-app/components/view';
+
 import { addNotification, pushModal } from 'loot-core/client/actions';
-import { send } from 'loot-core/src/platform/client/fetch';
-import * as undo from 'loot-core/src/platform/client/undo';
+import { send } from 'loot-core/platform/client/fetch';
+import * as undo from 'loot-core/platform/client/undo';
 import { type Handlers } from 'loot-core/types/handlers';
 import { type UserAvailable } from 'loot-core/types/models';
 import { type UserAccessEntity } from 'loot-core/types/models/userAccess';
@@ -22,12 +26,9 @@ import { SvgLockOpen } from '../../../icons/v1';
 import { SvgLockClosed } from '../../../icons/v2';
 import { useDispatch } from '../../../redux';
 import { theme } from '../../../style';
-import { Button } from '../../common/Button2';
 import { Link } from '../../common/Link';
 import { Search } from '../../common/Search';
 import { SimpleTable } from '../../common/SimpleTable';
-import { Text } from '../../common/Text';
-import { View } from '../../common/View';
 
 import { UserAccessHeader } from './UserAccessHeader';
 import { UserAccessRow } from './UserAccessRow';

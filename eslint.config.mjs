@@ -113,7 +113,6 @@ export default [
       'packages/loot-core/**/node_modules/*',
       'packages/loot-core/**/lib-dist/*',
       'packages/loot-core/**/proto/*',
-      'packages/sync-server',
       '.yarn/*',
       '.github/*',
     ],
@@ -671,7 +670,6 @@ export default [
   },
   {
     files: ['packages/loot-core/src/**/*'],
-
     rules: {
       'no-restricted-imports': [
         'warn',
@@ -690,6 +688,10 @@ export default [
               group: ['loot-core/**'],
               message:
                 'Please use relative imports in loot-core instead of importing from `loot-core/*`',
+            },
+            {
+              group: ['@actual-app/web/*'],
+              message: 'Please do not import `@actual-app/web` in `loot-core`',
             },
           ],
         },
@@ -758,7 +760,7 @@ export default [
       'packages/desktop-client/src/components/budget/MobileBudget.tsx',
       'packages/desktop-client/src/components/budget/envelope/HoldMenu.tsx',
       'packages/desktop-client/src/components/budget/envelope/TransferMenu.tsx',
-      'packages/desktop-client/src/components/common/Menu.tsx',
+      'packages/component-library/src/Menu.tsx',
       'packages/desktop-client/src/components/FinancesApp.tsx',
       'packages/desktop-client/src/components/GlobalKeys.ts',
       'packages/desktop-client/src/components/LoggedInUser.tsx',
@@ -797,10 +799,7 @@ export default [
       'packages/desktop-client/src/components/transactions/TransactionsTable.jsx',
       'packages/desktop-client/src/components/transactions/TransactionsTable.test.jsx',
       'packages/desktop-client/src/hooks/useAccounts.ts',
-      'packages/desktop-client/src/hooks/usePayees.ts',
       'packages/desktop-client/src/hooks/useProperFocus.tsx',
-      'packages/desktop-client/src/hooks/useSelected.tsx',
-      'packages/loot-core/src/client/query-hooks.tsx',
     ],
 
     rules: {
@@ -814,6 +813,7 @@ export default [
       '**/*.test.ts',
       '**/*.test.jsx',
       '**/*.test.tsx',
+      '**/*.spec.js',
     ],
 
     rules: {
@@ -829,6 +829,23 @@ export default [
     rules: {
       // enforce type over interface
       '@typescript-eslint/consistent-type-definitions': ['warn', 'type'],
+    },
+  },
+  {
+    files: ['packages/sync-server/**/*'],
+    // TODO: fix the issues in these files
+    rules: {
+      'import/extensions': 'off',
+      'rulesdir/typography': 'off',
+    },
+  },
+  {
+    files: ['packages/sync-server/src/app-gocardless/banks/*.js'],
+    rules: {
+      'import/no-anonymous-default-export': 'off',
+      'import/no-default-export': 'off',
+      // can be re-enabled after https://github.com/actualbudget/actual/pull/4253
+      '@typescript-eslint/no-unused-vars': 'off',
     },
   },
 ];

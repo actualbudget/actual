@@ -1,5 +1,5 @@
-import * as monthUtils from 'loot-core/src/shared/months';
-import { amountToInteger, integerToAmount } from 'loot-core/src/shared/util';
+import * as monthUtils from 'loot-core/shared/months';
+import { amountToInteger, integerToAmount } from 'loot-core/shared/util';
 import {
   type GroupedEntity,
   type IntervalEntity,

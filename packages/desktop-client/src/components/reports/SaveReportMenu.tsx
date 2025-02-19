@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { Menu, type MenuItem } from '../common/Menu';
+import { Menu, type MenuItem } from '@actual-app/components/menu';
 
 export function SaveReportMenu({
   onMenuSelect,

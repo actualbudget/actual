@@ -41,6 +41,7 @@
   "devDependencies": {
     "@actual-app/api": "workspace:^",
     "@actual-app/crdt": "workspace:^",
+    "@actual-app/web": "workspace:^",
     "@swc/core": "^1.5.3",
     "@swc/helpers": "^0.5.11",
     "@swc/jest": "^0.2.36",

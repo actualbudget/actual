@@ -1,9 +1,9 @@
 import React from 'react';
 
+import { View } from '@actual-app/components/view';
 import { useDebounceCallback } from 'usehooks-ts';
 
 import { useGlobalPref } from '../../hooks/useGlobalPref';
-import { View } from '../common/View';
 import { useResponsive } from '../responsive/ResponsiveProvider';
 
 import { Sidebar } from './Sidebar';

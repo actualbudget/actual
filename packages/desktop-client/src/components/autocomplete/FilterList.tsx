@@ -1,8 +1,9 @@
 import React, { type ComponentProps } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { View } from '@actual-app/components/view';
+
 import { theme } from '../../style/theme';
-import { View } from '../common/View';
 
 import { ItemHeader } from './ItemHeader';
 

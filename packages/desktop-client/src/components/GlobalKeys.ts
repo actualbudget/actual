@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 
-import * as Platform from 'loot-core/src/client/platform';
+import * as Platform from 'loot-core/client/platform';
 
 import { useNavigate } from '../hooks/useNavigate';
 

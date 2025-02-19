@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { Trans } from 'react-i18next';
 
+import { ButtonWithLoading } from '@actual-app/components/button';
+import { Text } from '@actual-app/components/text';
+
 import { resetSync } from 'loot-core/client/app/appSlice';
-import { send } from 'loot-core/src/platform/client/fetch';
+import { send } from 'loot-core/platform/client/fetch';
 
 import { useMetadataPref } from '../../hooks/useMetadataPref';
 import { useDispatch } from '../../redux';
-import { ButtonWithLoading } from '../common/Button2';
-import { Text } from '../common/Text';
 
 import { Setting } from './UI';
 
