@@ -59,7 +59,7 @@ let serverProcess: UtilityProcess | null;
 
 let oAuthServer: ReturnType<typeof createServer> | null;
 
-let queuedClientWinLogs = []; // logs that are queued up until the client window is ready
+let queuedClientWinLogs: string[] = []; // logs that are queued up until the client window is ready
 
 const logMessage = (loglevel: 'info' | 'error', message: string) => {
   // Electron main process logs
