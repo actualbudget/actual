@@ -796,7 +796,6 @@ export default [
       'packages/desktop-client/src/components/transactions/TransactionsTable.test.jsx',
       // 'packages/desktop-client/src/hooks/useAccounts.ts',
       'packages/desktop-client/src/hooks/useCategories.ts',
-      'packages/desktop-client/src/hooks/useProperFocus.tsx',
     ],
 
     rules: {
