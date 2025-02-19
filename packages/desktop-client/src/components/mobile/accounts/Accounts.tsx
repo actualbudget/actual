@@ -77,7 +77,7 @@ function AccountHeader<SheetFieldName extends SheetFields<'account'>>({
           }}
           data-testid="name"
         >
-          {name}
+          {t(name)}
         </Text>
         <SvgCheveronRight
           style={{

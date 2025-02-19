@@ -10,7 +10,7 @@ import React, {
   useEffect,
 } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { Popover } from '@actual-app/components/popover';
@@ -1807,7 +1807,7 @@ function NewTransaction({
           data-testid="cancel-button"
           ref={cancelButtonRef}
         >
-          Cancel
+          <Trans>Cancel</Trans>
         </Button>
         {error ? (
           <TransactionError
@@ -1827,7 +1827,7 @@ function NewTransaction({
             data-testid="add-button"
             ref={addButtonRef}
           >
-            Add
+            <Trans>Add</Trans>
           </Button>
         )}
       </View>

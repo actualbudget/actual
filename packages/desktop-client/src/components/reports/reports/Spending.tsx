@@ -457,8 +457,8 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                       reportMode === 'single-month'
                         ? monthUtils.format(compareTo, 'MMM, yyyy')
                         : reportMode === 'budget'
-                          ? 'Budgeted'
-                          : 'Average'
+                          ? t('Budgeted')
+                          : t('Average')
                     }
                     style={{ padding: 0, paddingBottom: 10 }}
                   />
@@ -476,8 +476,14 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                         style={{ marginBottom: 5, minWidth: 210 }}
                         left={
                           <Block>
-                            Spent {monthUtils.format(compare, 'MMM, yyyy')}
-                            {compare === monthUtils.currentMonth() && ' MTD'}:
+                            {t('Spent {{monthYearFormatted}} {{MTD}}', {
+                              monthYearFormatted: monthUtils.format(
+                                compare,
+                                'MMM, yyyy',
+                              ),
+                              MTD: compare === monthUtils.currentMonth(),
+                            })}
+                            {' MTD'}:
                           </Block>
                         }
                         right={
@@ -496,8 +502,13 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                         style={{ marginBottom: 5, minWidth: 210 }}
                         left={
                           <Block>
-                            Spent {monthUtils.format(compareTo, 'MMM, yyyy')}
-                            {compare === monthUtils.currentMonth() && ' MTD'}:
+                            {t('Spent {{monthYearFormatted}} {{MTD}}', {
+                              monthYearFormatted: monthUtils.format(
+                                compare,
+                                'MMM, yyyy',
+                              ),
+                              MTD: compare === monthUtils.currentMonth(),
+                            })}
                           </Block>
                         }
                         right={
@@ -517,7 +528,7 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                       style={{ marginBottom: 5, minWidth: 210 }}
                       left={
                         <Block>
-                          Budgeted
+                          <Trans>Budgeted</Trans>
                           {compare === monthUtils.currentMonth() && ' MTD'}:
                         </Block>
                       }
@@ -537,8 +548,13 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                       style={{ marginBottom: 5, minWidth: 210 }}
                       left={
                         <Block>
-                          Spent Average
-                          {compare === monthUtils.currentMonth() && ' MTD'}:
+                          {t('Spent Average {{monthYearFormatted}} {{MTD}}', {
+                            monthYearFormatted: monthUtils.format(
+                              compare,
+                              'MMM, yyyy',
+                            ),
+                            MTD: compare === monthUtils.currentMonth(),
+                          })}
                         </Block>
                       }
                       right={

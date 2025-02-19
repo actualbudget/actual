@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Block } from '@actual-app/components/block';
 import { ButtonWithLoading } from '@actual-app/components/button';
@@ -59,17 +59,21 @@ export function ExportBudget() {
       }
     >
       <Text>
-        <strong>Export</strong> your data as a zip file containing{' '}
-        <code>db.sqlite</code> and <code>metadata.json</code> files. It can be
-        imported into another Actual instance by closing an open file (if any),
-        then clicking the “Import file” button, then choosing “Actual.”
+        <Trans>
+          <strong>Export</strong> your data as a zip file containing{' '}
+          <code>db.sqlite</code> and <code>metadata.json</code> files. It can be
+          imported into another Actual instance by closing an open file (if
+          any), then clicking the “Import file” button, then choosing “Actual.”
+        </Trans>
       </Text>
       {encryptKeyId ? (
-        <Text>
-          {t(
-            'Even though encryption is enabled, the exported zip file will not have any encryption.',
-          )}
-        </Text>
+        <Trans>
+          <Text>
+            {t(
+              'Even though encryption is enabled, the exported zip file will not have any encryption.',
+            )}
+          </Text>
+        </Trans>
       ) : null}
     </Setting>
   );

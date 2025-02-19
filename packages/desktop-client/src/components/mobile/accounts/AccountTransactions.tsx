@@ -5,6 +5,7 @@ import React, {
   useMemo,
   useState,
 } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { styles } from '@actual-app/components/styles';
@@ -230,6 +231,7 @@ function TransactionListWithPreviews({
     | 'uncategorized';
   readonly accountName: AccountEntity['name'] | string;
 }) {
+  const { t } = useTranslation();
   const baseTransactionsQuery = useCallback(
     () =>
       queries.transactions(accountId).options({ splits: 'none' }).select('*'),
@@ -340,7 +342,7 @@ function TransactionListWithPreviews({
       balanceUncleared={balanceQueries.uncleared}
       isLoadingMore={isLoadingMore}
       onLoadMore={loadMoreTransactions}
-      searchPlaceholder={`Search ${accountName}`}
+      searchPlaceholder={`${t('Search')} ${accountName}`}
       onSearch={onSearch}
       onOpenTransaction={onOpenTransaction}
       onRefresh={onRefresh}
