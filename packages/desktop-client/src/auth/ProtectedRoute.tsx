@@ -1,8 +1,9 @@
 import { useEffect, useState, type ReactElement } from 'react';
 
+import { View } from '@actual-app/components/view';
+
 import { type RemoteFile, type SyncedLocalFile } from 'loot-core/types/file';
 
-import { View } from '../components/common/View';
 import { useMetadataPref } from '../hooks/useMetadataPref';
 import { useSelector } from '../redux';
 

@@ -5,10 +5,10 @@ import {
   getPayees,
   initiallyLoadPayees,
 } from 'loot-core/client/queries/queriesSlice';
+import { send, listen } from 'loot-core/platform/client/fetch';
+import * as undo from 'loot-core/platform/client/undo';
 import { type UndoState } from 'loot-core/server/undo';
-import { send, listen } from 'loot-core/src/platform/client/fetch';
-import * as undo from 'loot-core/src/platform/client/undo';
-import { applyChanges, type Diff } from 'loot-core/src/shared/util';
+import { applyChanges, type Diff } from 'loot-core/shared/util';
 import { type NewRuleEntity, type PayeeEntity } from 'loot-core/types/models';
 
 import { usePayees } from '../../hooks/usePayees';

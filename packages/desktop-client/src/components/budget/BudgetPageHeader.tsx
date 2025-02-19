@@ -1,7 +1,7 @@
 // @ts-strict-ignore
 import React, { type ComponentProps, memo } from 'react';
 
-import { View } from '../common/View';
+import { View } from '@actual-app/components/view';
 
 import { MonthPicker } from './MonthPicker';
 import { getScrollbarWidth } from './util';

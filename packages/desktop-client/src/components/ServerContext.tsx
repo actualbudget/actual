@@ -10,7 +10,7 @@ import React, {
 import { t } from 'i18next';
 
 import { addNotification } from 'loot-core/client/actions';
-import { send } from 'loot-core/src/platform/client/fetch';
+import { send } from 'loot-core/platform/client/fetch';
 import { type Handlers } from 'loot-core/types/handlers';
 
 type LoginMethods = {

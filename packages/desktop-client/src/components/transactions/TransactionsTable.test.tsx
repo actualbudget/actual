@@ -5,21 +5,21 @@ import userEvent from '@testing-library/user-event';
 import { format as formatDate, parse as parseDate } from 'date-fns';
 import { v4 as uuidv4 } from 'uuid';
 
-import { SchedulesProvider } from 'loot-core/src/client/data-hooks/schedules';
-import { SpreadsheetProvider } from 'loot-core/src/client/SpreadsheetProvider';
+import { SchedulesProvider } from 'loot-core/client/data-hooks/schedules';
+import { SpreadsheetProvider } from 'loot-core/client/SpreadsheetProvider';
 import {
   generateTransaction,
   generateAccount,
   generateCategoryGroups,
-} from 'loot-core/src/mocks';
-import { initServer } from 'loot-core/src/platform/client/fetch';
+} from 'loot-core/mocks';
+import { initServer } from 'loot-core/platform/client/fetch';
 import {
   addSplitTransaction,
   realizeTempTransactions,
   splitTransaction,
   updateTransaction,
-} from 'loot-core/src/shared/transactions';
-import { integerToCurrency } from 'loot-core/src/shared/util';
+} from 'loot-core/shared/transactions';
+import { integerToCurrency } from 'loot-core/shared/util';
 import {
   type AccountEntity,
   type CategoryEntity,
@@ -36,7 +36,7 @@ import { ResponsiveProvider } from '../responsive/ResponsiveProvider';
 
 import { TransactionTable } from './TransactionsTable';
 
-vi.mock('loot-core/src/platform/client/fetch');
+vi.mock('loot-core/platform/client/fetch');
 vi.mock('../../hooks/useFeatureFlag', () => ({
   default: vi.fn().mockReturnValue(false),
 }));

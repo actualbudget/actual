@@ -1,7 +1,7 @@
 import { useState, useRef, useLayoutEffect, useMemo } from 'react';
 
+import { useSpreadsheet } from 'loot-core/client/SpreadsheetProvider';
 import { type Query } from 'loot-core/shared/query';
-import { useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
 
 import { useSheetName } from './useSheetName';
 

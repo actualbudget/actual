@@ -164,15 +164,22 @@ async function processTemplate(
       // gather needed priorities
       // gather remainder weights
       try {
-        const obj = await CategoryTemplate.init(templates, category, month);
-        availBudget += budgeted;
+        const obj = await CategoryTemplate.init(
+          templates,
+          category,
+          month,
+          budgeted,
+        );
+        // don't use the funds that are not from templates
+        if (!obj.getGoalOnly()) {
+          availBudget += budgeted;
+        }
         availBudget += obj.getLimitExcess();
         const p = obj.getPriorities();
         p.forEach(pr => priorities.push(pr));
         remainderWeight += obj.getRemainderWeight();
         catObjects.push(obj);
       } catch (e) {
-        //console.log(`${categories[i].name}: ${e}`);
         errors.push(`${categories[i].name}: ${e.message}`);
       }
 
@@ -183,7 +190,6 @@ async function processTemplate(
         goal: null,
         longGoal: null,
       });
-      //await setGoal({ month, category: id, goal: null, long_goal: null });
     }
   }
 

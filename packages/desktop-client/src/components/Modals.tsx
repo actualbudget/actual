@@ -4,13 +4,14 @@ import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 
 import { closeModal } from 'loot-core/client/actions';
-import { send } from 'loot-core/src/platform/client/fetch';
-import * as monthUtils from 'loot-core/src/shared/months';
+import { send } from 'loot-core/platform/client/fetch';
+import * as monthUtils from 'loot-core/shared/months';
 
 import { useMetadataPref } from '../hooks/useMetadataPref';
 import { useModalState } from '../hooks/useModalState';
 import { useDispatch } from '../redux';
 
+import { EditSyncAccount } from './banksync/EditSyncAccount';
 import { ModalTitle, ModalHeader } from './common/Modal';
 import { AccountAutocompleteModal } from './modals/AccountAutocompleteModal';
 import { AccountMenuModal } from './modals/AccountMenuModal';
@@ -383,6 +384,9 @@ export function Modals() {
 
         case 'schedule-posts-offline-notification':
           return <PostsOfflineNotification key={name} />;
+
+        case 'synced-account-edit':
+          return <EditSyncAccount key={name} account={options.account} />;
 
         case 'account-menu':
           return (

@@ -2,13 +2,20 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 
+import { AlignedText } from '@actual-app/components/aligned-text';
+import { Block } from '@actual-app/components/block';
+import { Button } from '@actual-app/components/button';
+import { Paragraph } from '@actual-app/components/paragraph';
+import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
+import { View } from '@actual-app/components/view';
 import * as d from 'date-fns';
 
 import { addNotification } from 'loot-core/client/actions';
 import { useWidget } from 'loot-core/client/data-hooks/widget';
-import { send } from 'loot-core/src/platform/client/fetch';
-import * as monthUtils from 'loot-core/src/shared/months';
-import { integerToCurrency } from 'loot-core/src/shared/util';
+import { send } from 'loot-core/platform/client/fetch';
+import * as monthUtils from 'loot-core/shared/months';
+import { integerToCurrency } from 'loot-core/shared/util';
 import {
   type CashFlowWidget,
   type RuleConditionEntity,
@@ -19,13 +26,6 @@ import { useFilters } from '../../../hooks/useFilters';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { useDispatch } from '../../../redux';
-import { theme } from '../../../style';
-import { AlignedText } from '../../common/AlignedText';
-import { Block } from '../../common/Block';
-import { Button } from '../../common/Button2';
-import { Paragraph } from '../../common/Paragraph';
-import { Text } from '../../common/Text';
-import { View } from '../../common/View';
 import { EditablePageHeaderTitle } from '../../EditablePageHeaderTitle';
 import { MobileBackButton } from '../../mobile/MobileBackButton';
 import { MobilePageHeader, Page, PageHeader } from '../../Page';

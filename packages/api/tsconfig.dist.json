@@ -11,7 +11,6 @@
     "outDir": "dist",
     "declarationDir": "@types",
     "paths": {
-      "loot-core/src/*": ["./loot-core/*"],
       "loot-core/*": ["./@types/loot-core/*"]
     }
   },

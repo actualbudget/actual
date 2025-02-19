@@ -30,7 +30,12 @@ export class CategoryTemplate {
   // Class interface
 
   // set up the class and check all templates
-  static async init(templates: Template[], category: CategoryEntity, month) {
+  static async init(
+    templates: Template[],
+    category: CategoryEntity,
+    month,
+    budgeted: number,
+  ) {
     // get all the needed setup values
     const lastMonthSheet = monthUtils.sheetForMonth(
       monthUtils.subMonths(month, 1),
@@ -46,6 +51,9 @@ export class CategoryTemplate {
     let fromLastMonth;
     if (lastMonthBalance < 0 && !carryover) {
       fromLastMonth = 0;
+    } else if (category.is_income) {
+      //for tracking budget
+      fromLastMonth = 0;
     } else {
       fromLastMonth = lastMonthBalance;
     }
@@ -53,9 +61,23 @@ export class CategoryTemplate {
     await CategoryTemplate.checkByAndScheduleAndSpend(templates, month);
     await CategoryTemplate.checkPercentage(templates);
     // call the private constructor
-    return new CategoryTemplate(templates, category, month, fromLastMonth);
+    return new CategoryTemplate(
+      templates,
+      category,
+      month,
+      fromLastMonth,
+      budgeted,
+    );
   }
 
+  getGoalOnly(): boolean {
+    // if there is only a goal
+    return (
+      this.templates.length === 0 &&
+      this.remainder.length === 0 &&
+      this.goals.length > 0
+    );
+  }
   getPriorities(): number[] {
     return this.priorities;
   }
@@ -222,16 +244,19 @@ export class CategoryTemplate {
   private limitAmount = 0;
   private limitCheck = false;
   private limitHold = false;
+  readonly previouslyBudgeted: number = 0;
 
   private constructor(
     templates: Template[],
     category: CategoryEntity,
     month: string,
     fromLastMonth: number,
+    budgeted: number,
   ) {
     this.category = category;
     this.month = month;
     this.fromLastMonth = fromLastMonth;
+    this.previouslyBudgeted = budgeted;
     // sort the template lines into regular template, goals, and remainder templates
     if (templates) {
       templates.forEach(t => {
@@ -277,6 +302,7 @@ export class CategoryTemplate {
 
   private runGoal() {
     if (this.goals.length > 0) {
+      if (this.getGoalOnly()) this.toBudgetAmount = this.previouslyBudgeted;
       this.isLongGoal = true;
       this.goalAmount = amountToInteger(this.goals[0].amount);
       return;

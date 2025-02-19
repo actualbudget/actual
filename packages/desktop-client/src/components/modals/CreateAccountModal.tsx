@@ -2,8 +2,16 @@ import React, { useEffect, useState } from 'react';
 import { DialogTrigger } from 'react-aria-components';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { Button, ButtonWithLoading } from '@actual-app/components/button';
+import { InitialFocus } from '@actual-app/components/initial-focus';
+import { Menu } from '@actual-app/components/menu';
+import { Paragraph } from '@actual-app/components/paragraph';
+import { Popover } from '@actual-app/components/popover';
+import { Text } from '@actual-app/components/text';
+import { View } from '@actual-app/components/view';
+
 import { pushModal } from 'loot-core/client/actions';
-import { send } from 'loot-core/src/platform/client/fetch';
+import { send } from 'loot-core/platform/client/fetch';
 
 import { useAuth } from '../../auth/AuthProvider';
 import { Permissions } from '../../auth/types';
@@ -15,15 +23,8 @@ import { SvgDotsHorizontalTriple } from '../../icons/v1';
 import { useDispatch } from '../../redux';
 import { theme } from '../../style';
 import { Warning } from '../alerts';
-import { Button, ButtonWithLoading } from '../common/Button2';
-import { InitialFocus } from '../common/InitialFocus';
 import { Link } from '../common/Link';
-import { Menu } from '../common/Menu';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
-import { Paragraph } from '../common/Paragraph';
-import { Popover } from '../common/Popover';
-import { Text } from '../common/Text';
-import { View } from '../common/View';
 import { useMultiuserEnabled } from '../ServerContext';
 
 type CreateAccountProps = {
