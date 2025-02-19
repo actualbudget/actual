@@ -67,13 +67,12 @@ export function ExportBudget() {
         </Trans>
       </Text>
       {encryptKeyId ? (
-        {encryptKeyId ? (
-          <Text>
-            <Trans>
-              Even though encryption is enabled, the exported zip file will not have any encryption.
-            </Trans>
-          </Text>
-        ) : null}
+        <Text>
+          <Trans>
+            Even though encryption is enabled, the exported zip file will not
+            have any encryption.
+          </Trans>
+        </Text>
       ) : null}
     </Setting>
   );
