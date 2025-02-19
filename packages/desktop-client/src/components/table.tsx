@@ -251,7 +251,6 @@ export function Cell({
       exposed,
       children,
       plain,
-      exposed,
       valueStyle,
       onExpose,
       name,
