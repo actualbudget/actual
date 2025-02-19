@@ -13,10 +13,13 @@ import {
 } from 'loot-core/types/models';
 
 import { useContextMenu } from '../../hooks/useContextMenu';
+import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { SvgCheveronDown } from '../../icons/v1';
 import { theme } from '../../style';
 import { NotesButton } from '../NotesButton';
 import { InputCell } from '../table';
+
+import { CategoryAutomationButton } from './goals/CategoryAutomationButton';
 
 type SidebarCategoryProps = {
   innerRef: Ref<HTMLDivElement>;
@@ -25,6 +28,7 @@ type SidebarCategoryProps = {
   dragPreview?: boolean;
   dragging?: boolean;
   editing: boolean;
+  goalsShown?: boolean;
   style?: CSSProperties;
   borderColor?: string;
   isLast?: boolean;
@@ -41,6 +45,7 @@ export function SidebarCategory({
   dragPreview,
   dragging,
   editing,
+  goalsShown = false,
   style,
   isLast,
   onEditName,
@@ -49,6 +54,7 @@ export function SidebarCategory({
   onHideNewCategory,
 }: SidebarCategoryProps) {
   const { t } = useTranslation();
+  const goalTemplatesUIEnabled = useFeatureFlag('goalTemplatesUIEnabled');
 
   const temporary = category.id === 'new';
   const { setMenuOpen, menuOpen, handleContextMenu, resetPosition, position } =
@@ -129,6 +135,14 @@ export function SidebarCategory({
         </Popover>
       </View>
       <View style={{ flex: 1 }} />
+      {!goalsShown && goalTemplatesUIEnabled && (
+        <View style={{ flexShrink: 0 }}>
+          <CategoryAutomationButton
+            style={dragging && { color: 'currentColor' }}
+            defaultColor={theme.pageTextLight}
+          />
+        </View>
+      )}
       <View style={{ flexShrink: 0 }}>
         <NotesButton
           id={category.id}
