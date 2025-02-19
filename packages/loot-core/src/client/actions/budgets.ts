@@ -168,8 +168,8 @@ export function duplicateBudget({
   loadBudget = 'none',
   cloudSync,
 }: {
-  id?: string;
-  cloudId?: string;
+  id?: string | undefined;
+  cloudId?: string | undefined;
   oldName: string;
   newName: string;
   managePage?: boolean;
@@ -178,7 +178,7 @@ export function duplicateBudget({
    * cloudSync is used to determine if the duplicate budget
    * should be synced to the server
    */
-  cloudSync?: boolean;
+  cloudSync: boolean;
 }) {
   return async (dispatch: AppDispatch) => {
     try {

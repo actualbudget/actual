@@ -12,6 +12,8 @@ export default {
    * The actual transaction date for card transactions is only available in the remittanceInformationUnstructured field when the transaction is booked.
    */
   normalizeTransaction(transaction, booked) {
+    const editedTrans = { ...transaction };
+
     const isCardTransaction =
       transaction.remittanceInformationUnstructured?.startsWith('PIRKUMS');
 
@@ -23,10 +25,7 @@ export default {
           );
 
         if (creditorNameMatch) {
-          transaction = {
-            ...transaction,
-            creditorName: creditorNameMatch[1],
-          };
+          editedTrans.creditorName = creditorNameMatch[1];
         }
       }
 
@@ -35,15 +34,14 @@ export default {
       );
 
       if (dateMatch) {
-        const extractedDate = d.parse(dateMatch[1], 'dd.MM.yyyy', new Date());
+        const extractedDate = d
+          .parse(dateMatch[1], 'dd.MM.yyyy', new Date())
+          .toISOString();
 
-        transaction = {
-          ...transaction,
-          bookingDate: d.format(extractedDate, 'yyyy-MM-dd'),
-        };
+        editedTrans.date = extractedDate;
       }
     }
 
-    return Fallback.normalizeTransaction(transaction, booked);
+    return Fallback.normalizeTransaction(transaction, booked, editedTrans);
   },
 };

@@ -4,9 +4,10 @@ import React, {
   type ComponentProps,
 } from 'react';
 
+import { View } from '@actual-app/components/view';
+
 import { type CSSProperties } from '../../style';
 import { Link } from '../common/Link';
-import { View } from '../common/View';
 
 type ItemContentProps = {
   style: ComponentProps<typeof View>['style'];

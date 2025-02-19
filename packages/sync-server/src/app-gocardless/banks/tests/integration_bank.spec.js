@@ -1,9 +1,10 @@
 import { jest } from '@jest/globals';
-import IntegrationBank from '../integration-bank.js';
+
 import {
   mockExtendAccountsAboutInstitutions,
   mockInstitution,
 } from '../../services/tests/fixtures.js';
+import IntegrationBank from '../integration-bank.js';
 
 describe('IntegrationBank', () => {
   let consoleSpy;

@@ -2,11 +2,12 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
+import { View } from '@actual-app/components/view';
+
 import { useNotes } from '../../hooks/useNotes';
 import { SvgCheck } from '../../icons/v2';
-import { Button } from '../common/Button2';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
-import { View } from '../common/View';
 import { Notes } from '../Notes';
 
 type NotesModalProps = {

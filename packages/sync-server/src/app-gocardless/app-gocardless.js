@@ -1,21 +1,23 @@
-import { isAxiosError } from 'axios';
-import express from 'express';
 import path from 'path';
 import { inspect } from 'util';
 
-import { goCardlessService } from './services/gocardless-service.js';
+import { isAxiosError } from 'axios';
+import express from 'express';
+
+import { sha256String } from '../util/hash.js';
+import {
+  requestLoggerMiddleware,
+  validateSessionMiddleware,
+} from '../util/middlewares.js';
+
 import {
   AccountNotLinkedToRequisition,
   GenericGoCardlessError,
   RateLimitError,
   RequisitionNotLinked,
 } from './errors.js';
+import { goCardlessService } from './services/gocardless-service.js';
 import { handleError } from './util/handle-error.js';
-import { sha256String } from '../util/hash.js';
-import {
-  requestLoggerMiddleware,
-  validateSessionMiddleware,
-} from '../util/middlewares.js';
 
 const app = express();
 app.use(requestLoggerMiddleware);
@@ -96,7 +98,7 @@ app.post(
 app.post(
   '/get-banks',
   handleError(async (req, res) => {
-    let { country, showDemo = false } = req.body;
+    const { country, showDemo = false } = req.body;
 
     await goCardlessService.setToken();
     const data = await goCardlessService.getInstitutions(country);
@@ -119,7 +121,7 @@ app.post(
 app.post(
   '/remove-account',
   handleError(async (req, res) => {
-    let { requisitionId } = req.body;
+    const { requisitionId } = req.body;
 
     const data = await goCardlessService.deleteRequisition(requisitionId);
     if (data.summary === 'Requisition deleted') {

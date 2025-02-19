@@ -113,7 +113,6 @@ export default [
       'packages/loot-core/**/node_modules/*',
       'packages/loot-core/**/lib-dist/*',
       'packages/loot-core/**/proto/*',
-      'packages/sync-server',
       '.yarn/*',
       '.github/*',
     ],
@@ -791,20 +790,7 @@ export default [
       'packages/desktop-client/src/components/sidebar/Tools.tsx',
       'packages/desktop-client/src/components/sort.tsx',
       'packages/desktop-client/src/components/spreadsheet/useSheetValue.ts',
-      'packages/desktop-client/src/components/table.tsx',
-      'packages/desktop-client/src/components/Titlebar.tsx',
-      'packages/desktop-client/src/components/transactions/MobileTransaction.jsx',
-      'packages/desktop-client/src/components/transactions/SelectedTransactions.jsx',
-      'packages/desktop-client/src/components/transactions/SimpleTransactionsTable.jsx',
       'packages/desktop-client/src/components/transactions/TransactionList.jsx',
-      'packages/desktop-client/src/components/transactions/TransactionsTable.jsx',
-      'packages/desktop-client/src/components/transactions/TransactionsTable.test.jsx',
-      'packages/desktop-client/src/hooks/useAccounts.ts',
-      'packages/desktop-client/src/hooks/useCategories.ts',
-      'packages/desktop-client/src/hooks/usePayees.ts',
-      'packages/desktop-client/src/hooks/useProperFocus.tsx',
-      'packages/desktop-client/src/hooks/useSelected.tsx',
-      'packages/loot-core/src/client/query-hooks.tsx',
     ],
 
     rules: {
@@ -818,6 +804,7 @@ export default [
       '**/*.test.ts',
       '**/*.test.jsx',
       '**/*.test.tsx',
+      '**/*.spec.js',
     ],
 
     rules: {
@@ -833,6 +820,23 @@ export default [
     rules: {
       // enforce type over interface
       '@typescript-eslint/consistent-type-definitions': ['warn', 'type'],
+    },
+  },
+  {
+    files: ['packages/sync-server/**/*'],
+    // TODO: fix the issues in these files
+    rules: {
+      'import/extensions': 'off',
+      'rulesdir/typography': 'off',
+    },
+  },
+  {
+    files: ['packages/sync-server/src/app-gocardless/banks/*.js'],
+    rules: {
+      'import/no-anonymous-default-export': 'off',
+      'import/no-default-export': 'off',
+      // can be re-enabled after https://github.com/actualbudget/actual/pull/4253
+      '@typescript-eslint/no-unused-vars': 'off',
     },
   },
 ];

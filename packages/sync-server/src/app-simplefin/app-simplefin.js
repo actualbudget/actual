@@ -1,7 +1,9 @@
-import express from 'express';
 import https from 'https';
-import { SecretName, secretsService } from '../services/secrets-service.js';
+
+import express from 'express';
+
 import { handleError } from '../app-gocardless/util/handle-error.js';
+import { SecretName, secretsService } from '../services/secrets-service.js';
 import { requestLoggerMiddleware } from '../util/middlewares.js';
 
 const app = express();
@@ -18,7 +20,7 @@ app.post(
     res.send({
       status: 'ok',
       data: {
-        configured: configured,
+        configured,
       },
     });
   }),
@@ -75,7 +77,7 @@ app.post(
       return;
     }
 
-    if (Array.isArray(accountId) != Array.isArray(startDate)) {
+    if (Array.isArray(accountId) !== Array.isArray(startDate)) {
       console.log({ accountId, startDate });
       throw new Error(
         'accountId and startDate must either both be arrays or both be strings',
@@ -149,8 +151,9 @@ function getAccountResponse(results, accountId, startDate) {
     console.log(
       `The account "${accountId}" was not found. Here were the accounts returned:`,
     );
-    if (results?.accounts)
+    if (results?.accounts) {
       results.accounts.forEach(a => console.log(`${a.id} - ${a.org.name}`));
+    }
     logAccountError(results, accountId, {
       error_type: 'ACCOUNT_MISSING',
       error_code: 'ACCOUNT_MISSING',
@@ -202,7 +205,7 @@ function getAccountResponse(results, accountId, startDate) {
 
     let dateToUse = 0;
 
-    if (trans.pending ?? trans.posted == 0) {
+    if (trans.pending ?? trans.posted === 0) {
       newTrans.booked = false;
       dateToUse = trans.transacted_at;
     } else {
@@ -219,10 +222,18 @@ function getAccountResponse(results, accountId, startDate) {
     newTrans.sortOrder = dateToUse;
     newTrans.date = getDate(transactionDate);
     newTrans.payeeName = trans.payee;
-    newTrans.remittanceInformationUnstructured = trans.description;
+    newTrans.notes = trans.description;
     newTrans.transactionAmount = { amount: trans.amount, currency: 'USD' };
     newTrans.transactionId = trans.id;
     newTrans.valueDate = newTrans.bookingDate;
+
+    if (trans.transacted_at) {
+      newTrans.transactedDate = getDate(new Date(trans.transacted_at * 1000));
+    }
+
+    if (trans.posted) {
+      newTrans.postedDate = getDate(new Date(trans.posted * 1000));
+    }
 
     if (newTrans.booked) {
       booked.push(newTrans);
@@ -291,9 +302,9 @@ function parseAccessKey(accessKey) {
   [username, password] = auth.split(':');
   baseUrl = `${scheme}//${rest}`;
   return {
-    baseUrl: baseUrl,
-    username: username,
-    password: password,
+    baseUrl,
+    username,
+    password,
   };
 }
 

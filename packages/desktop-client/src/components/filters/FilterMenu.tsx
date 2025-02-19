@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { Menu } from '../common/Menu';
+import { Menu } from '@actual-app/components/menu';
 
 import { type SavedFilter } from './SavedFilterMenuButton';
 

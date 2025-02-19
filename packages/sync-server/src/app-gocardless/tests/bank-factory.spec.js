@@ -1,5 +1,4 @@
-import BankFactory from '../bank-factory.js';
-import { banks } from '../bank-factory.js';
+import { BankFactory, banks } from '../bank-factory.js';
 import IntegrationBank from '../banks/integration-bank.js';
 
 describe('BankFactory', () => {

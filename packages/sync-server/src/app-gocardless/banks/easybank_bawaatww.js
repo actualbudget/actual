@@ -1,8 +1,9 @@
-import Fallback from './integration-bank.js';
+import d from 'date-fns';
 
 import { formatPayeeName } from '../../util/payee-name.js';
-import d from 'date-fns';
 import { title } from '../../util/title/index.js';
+
+import Fallback from './integration-bank.js';
 
 /** @type {import('./bank.interface.js').IBank} */
 export default {
@@ -16,28 +17,18 @@ export default {
       const diff =
         +new Date(b.valueDate || b.bookingDate) -
         +new Date(a.valueDate || a.bookingDate);
-      if (diff != 0) return diff;
+      if (diff !== 0) return diff;
       return parseInt(b.transactionId) - parseInt(a.transactionId);
     }),
 
-  normalizeTransaction(transaction, _booked) {
-    const date = transaction.bookingDate || transaction.valueDate;
-
-    // If we couldn't find a valid date field we filter out this transaction
-    // and hope that we will import it again once the bank has processed the
-    // transaction further.
-    if (!date) {
-      return null;
-    }
+  normalizeTransaction(transaction, booked) {
+    const editedTrans = { ...transaction };
 
     let payeeName = formatPayeeName(transaction);
     if (!payeeName) payeeName = extractPayeeName(transaction);
+    editedTrans.payeeName = payeeName;
 
-    return {
-      ...transaction,
-      payeeName: payeeName,
-      date: d.format(d.parseISO(date), 'yyyy-MM-dd'),
-    };
+    return Fallback.normalizeTransaction(transaction, booked, editedTrans);
   },
 };
 

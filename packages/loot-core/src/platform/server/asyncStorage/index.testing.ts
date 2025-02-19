@@ -3,7 +3,7 @@ import { GlobalPrefsJson } from '../../../types/prefs';
 
 import * as T from '.';
 
-const store: Partial<GlobalPrefsJson> = {};
+const store: GlobalPrefsJson = {};
 
 export const init: T.Init = function () {};
 

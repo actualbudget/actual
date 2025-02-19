@@ -1,17 +1,18 @@
 import express from 'express';
-import {
-  errorMiddleware,
-  requestLoggerMiddleware,
-  validateSessionMiddleware,
-} from './util/middlewares.js';
+
 import { disableOpenID, enableOpenID, isAdmin } from './account-db.js';
 import {
   isValidRedirectUrl,
   loginWithOpenIdFinalize,
 } from './accounts/openid.js';
 import * as UserService from './services/user-service.js';
+import {
+  errorMiddleware,
+  requestLoggerMiddleware,
+  validateSessionMiddleware,
+} from './util/middlewares.js';
 
-let app = express();
+const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(requestLoggerMiddleware);
@@ -27,7 +28,7 @@ app.post('/enable', validateSessionMiddleware, async (req, res) => {
     return;
   }
 
-  let { error } = (await enableOpenID(req.body)) || {};
+  const { error } = (await enableOpenID(req.body)) || {};
 
   if (error) {
     res.status(500).send({ status: 'error', reason: error });
@@ -46,7 +47,7 @@ app.post('/disable', validateSessionMiddleware, async (req, res) => {
     return;
   }
 
-  let { error } = (await disableOpenID(req.body)) || {};
+  const { error } = (await disableOpenID(req.body)) || {};
 
   if (error) {
     res.status(401).send({ status: 'error', reason: error });
@@ -83,7 +84,7 @@ app.get('/config', async (req, res) => {
 });
 
 app.get('/callback', async (req, res) => {
-  let { error, url } = await loginWithOpenIdFinalize(req.query);
+  const { error, url } = await loginWithOpenIdFinalize(req.query);
 
   if (error) {
     res.status(400).send({ status: 'error', reason: error });

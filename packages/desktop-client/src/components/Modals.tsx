@@ -11,6 +11,7 @@ import { useMetadataPref } from '../hooks/useMetadataPref';
 import { useModalState } from '../hooks/useModalState';
 import { useDispatch } from '../redux';
 
+import { EditSyncAccount } from './banksync/EditSyncAccount';
 import { ModalTitle, ModalHeader } from './common/Modal';
 import { AccountAutocompleteModal } from './modals/AccountAutocompleteModal';
 import { AccountMenuModal } from './modals/AccountMenuModal';
@@ -383,6 +384,9 @@ export function Modals() {
 
         case 'schedule-posts-offline-notification':
           return <PostsOfflineNotification key={name} />;
+
+        case 'synced-account-edit':
+          return <EditSyncAccount key={name} account={options.account} />;
 
         case 'account-menu':
           return (

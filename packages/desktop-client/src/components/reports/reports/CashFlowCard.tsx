@@ -1,13 +1,13 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { View } from '@actual-app/components/view';
 import { Bar, BarChart, LabelList, ResponsiveContainer } from 'recharts';
 
 import { integerToCurrency } from 'loot-core/shared/util';
 import { type CashFlowWidget } from 'loot-core/types/models';
 
 import { theme } from '../../../style';
-import { View } from '../../common/View';
 import { PrivacyFilter } from '../../PrivacyFilter';
 import { Change } from '../Change';
 import { chartTheme } from '../chart-theme';

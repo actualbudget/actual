@@ -1,15 +1,16 @@
 import express from 'express';
-import * as uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
+
+import { isAdmin } from './account-db.js';
+import * as UserService from './services/user-service.js';
 import {
   errorMiddleware,
   requestLoggerMiddleware,
   validateSessionMiddleware,
 } from './util/middlewares.js';
-import validateSession from './util/validate-user.js';
-import { isAdmin } from './account-db.js';
-import * as UserService from './services/user-service.js';
+import { validateSession } from './util/validate-user.js';
 
-let app = express();
+const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(requestLoggerMiddleware);
@@ -77,7 +78,7 @@ app.post('/users', validateSessionMiddleware, async (req, res) => {
     return;
   }
 
-  const userId = uuid.v4();
+  const userId = uuidv4();
   UserService.insertUser(
     userId,
     userName,
@@ -301,7 +302,7 @@ app.delete('/access', (req, res) => {
   }
 
   const ids = req.body.ids;
-  let totalDeleted = UserService.deleteUserAccessByFileId(ids, fileId);
+  const totalDeleted = UserService.deleteUserAccessByFileId(ids, fileId);
 
   if (ids.length === totalDeleted) {
     res

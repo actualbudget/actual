@@ -1,4 +1,5 @@
 import { jest } from '@jest/globals';
+
 import {
   AccessDeniedError,
   AccountNotLinkedToRequisition,
@@ -12,6 +13,11 @@ import {
   ServiceError,
   UnknownError,
 } from '../../errors.js';
+import {
+  goCardlessService,
+  handleGoCardlessError,
+  client,
+} from '../gocardless-service.js';
 
 import {
   mockedBalances,
@@ -28,12 +34,6 @@ import {
   mockDetailedAccountExample2,
   mockExtendAccountsAboutInstitutions,
 } from './fixtures.js';
-
-import {
-  goCardlessService,
-  handleGoCardlessError,
-  client,
-} from '../gocardless-service.js';
 
 describe('goCardlessService', () => {
   const accountId = mockAccountMetaData.id;
@@ -417,42 +417,51 @@ describe('goCardlessService', () => {
             "booked": [
               {
                 "bankTransactionCode": "string",
-                "bookingDate": "date",
-                "date": "date",
+                "bookingDate": "2000-01-01",
+                "date": "2000-01-01",
                 "debtorAccount": {
                   "iban": "string",
                 },
                 "debtorName": "string",
+                "notes": undefined,
                 "payeeName": "String (stri XXX ring)",
+                "remittanceInformationStructuredArrayString": undefined,
+                "remittanceInformationUnstructuredArrayString": undefined,
                 "transactionAmount": {
                   "amount": "328.18",
                   "currency": "EUR",
                 },
                 "transactionId": "string",
-                "valueDate": "date",
+                "valueDate": "2000-01-01",
               },
               {
                 "bankTransactionCode": "string",
-                "bookingDate": "date",
-                "date": "date",
+                "bookingDate": "2000-01-01",
+                "date": "2000-01-01",
+                "notes": undefined,
                 "payeeName": "",
+                "remittanceInformationStructuredArrayString": undefined,
+                "remittanceInformationUnstructuredArrayString": undefined,
                 "transactionAmount": {
                   "amount": "947.26",
                   "currency": "EUR",
                 },
                 "transactionId": "string",
-                "valueDate": "date",
+                "valueDate": "2000-01-01",
               },
             ],
             "pending": [
               {
-                "date": "date",
+                "date": "2000-01-01",
+                "notes": undefined,
                 "payeeName": "",
+                "remittanceInformationStructuredArrayString": undefined,
+                "remittanceInformationUnstructuredArrayString": undefined,
                 "transactionAmount": {
                   "amount": "947.26",
                   "currency": "EUR",
                 },
-                "valueDate": "date",
+                "valueDate": "2000-01-01",
               },
             ],
           },

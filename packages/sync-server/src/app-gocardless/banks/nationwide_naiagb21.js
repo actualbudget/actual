@@ -7,6 +7,8 @@ export default {
   institutionIds: ['NATIONWIDE_NAIAGB21'],
 
   normalizeTransaction(transaction, booked) {
+    const editedTrans = { ...transaction };
+
     // Nationwide can sometimes return pending transactions with a date
     // representing the latest a transaction could be booked. This stops
     // actual's deduplication logic from working as it only checks 7 days
@@ -19,7 +21,7 @@ export default {
           new Date().getTime(),
         ),
       );
-      transaction.bookingDate = useDate.toISOString().slice(0, 10);
+      editedTrans.date = useDate.toISOString().slice(0, 10);
     }
 
     // Nationwide also occasionally returns erroneous transaction_ids
@@ -39,6 +41,6 @@ export default {
       transaction.transactionId = null;
     }
 
-    return Fallback.normalizeTransaction(transaction, booked);
+    return Fallback.normalizeTransaction(transaction, booked, editedTrans);
   },
 };

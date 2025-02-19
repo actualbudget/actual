@@ -9,6 +9,11 @@ import React, {
 } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
+import { Stack } from '@actual-app/components/stack';
+import { Text } from '@actual-app/components/text';
+import { View } from '@actual-app/components/view';
+
 import { pushModal } from 'loot-core/client/actions/modals';
 import { useSchedules } from 'loot-core/client/data-hooks/schedules';
 import { initiallyLoadPayees } from 'loot-core/client/queries/queriesSlice';
@@ -27,13 +32,9 @@ import { useSelected, SelectedProvider } from '../hooks/useSelected';
 import { useDispatch } from '../redux';
 import { theme } from '../style';
 
-import { Button } from './common/Button2';
 import { Link } from './common/Link';
 import { Search } from './common/Search';
 import { SimpleTable } from './common/SimpleTable';
-import { Stack } from './common/Stack';
-import { Text } from './common/Text';
-import { View } from './common/View';
 import { RulesHeader } from './rules/RulesHeader';
 import { RulesList } from './rules/RulesList';
 

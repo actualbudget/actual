@@ -16,15 +16,10 @@ export function generateAccount(
   name: AccountEntity['name'],
   isConnected?: boolean,
   offbudget?: boolean,
-): AccountEntity & { bankId: number | null; bankName: string | null } {
-  const offlineAccount: AccountEntity & {
-    bankId: number | null;
-    bankName: string | null;
-  } = {
+): AccountEntity {
+  const offlineAccount: AccountEntity = {
     id: uuidv4(),
     name,
-    bankId: null,
-    bankName: null,
     offbudget: offbudget ? 1 : 0,
     sort_order: 0,
     tombstone: 0,
@@ -45,6 +40,7 @@ export function generateAccount(
       balance_available: 0,
       balance_limit: 0,
       account_sync_source: 'goCardless',
+      last_sync: new Date().getTime().toString(),
     };
   }
 
@@ -55,12 +51,15 @@ function emptySyncFields(): _SyncFields<false> {
   return {
     account_id: null,
     bank: null,
+    bankId: null,
+    bankName: null,
     mask: null,
     official_name: null,
     balance_current: null,
     balance_available: null,
     balance_limit: null,
     account_sync_source: null,
+    last_sync: null,
   };
 }
 
@@ -98,9 +97,13 @@ export function generateCategoryGroups(
   return definition.map(group => {
     const g = generateCategoryGroup(group.name ?? '', group.is_income);
 
+    if (!group.categories) {
+      return g;
+    }
+
     return {
       ...g,
-      categories: group.categories?.map(cat =>
+      categories: group.categories.map(cat =>
         generateCategory(cat.name, g.id, cat.is_income),
       ),
     };
@@ -117,9 +120,9 @@ function _generateTransaction(
     notes: 'Notes',
     account: data.account,
     date: data.date || monthUtils.currentDay(),
-    category: data.category,
     sort_order: data.sort_order != null ? data.sort_order : 1,
     cleared: false,
+    ...(data.category && { category: data.category }),
   };
 }
 
@@ -186,7 +189,7 @@ export function generateTransactions(
         {
           account: accountId,
           category: groupId,
-          amount: isSplit ? 50 : undefined,
+          ...(isSplit && { amount: 50 }),
           sort_order: i,
         },
         isSplit ? 30 : undefined,

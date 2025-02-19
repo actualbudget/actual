@@ -9,9 +9,8 @@ import {
   type CSSProperties,
 } from 'react';
 
+import { View } from '@actual-app/components/view';
 import memoizeOne from 'memoize-one';
-
-import { View } from './common/View';
 
 const IS_SCROLLING_DEBOUNCE_INTERVAL = 150;
 

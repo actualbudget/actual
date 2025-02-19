@@ -1,13 +1,15 @@
 import React, { type ComponentProps, useMemo } from 'react';
 
+import { Stack } from '@actual-app/components/stack';
+import { styles } from '@actual-app/components/styles';
+import { Tooltip } from '@actual-app/components/tooltip';
+import { View } from '@actual-app/components/view';
+
 import { amountToCurrency } from 'loot-core/shared/util';
 import { type CategoryEntity } from 'loot-core/types/models';
 
 import { SvgDownAndRightArrow } from '../../../icons/v2';
-import { theme, styles } from '../../../style';
-import { Stack } from '../../common/Stack';
-import { Tooltip } from '../../common/Tooltip';
-import { View } from '../../common/View';
+import { theme } from '../../../style';
 import { Checkbox } from '../../forms';
 import { Row, Field } from '../../table';
 

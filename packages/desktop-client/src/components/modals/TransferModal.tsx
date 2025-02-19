@@ -1,20 +1,21 @@
 import React, { useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
+import { InitialFocus } from '@actual-app/components/initial-focus';
+import { styles } from '@actual-app/components/styles';
+import { View } from '@actual-app/components/view';
+
 import { pushModal } from 'loot-core/client/actions';
 import { type CategoryEntity } from 'loot-core/types/models';
 
 import { useCategories } from '../../hooks/useCategories';
 import { useDispatch } from '../../redux';
-import { styles } from '../../style';
 import {
   addToBeBudgetedGroup,
   removeCategoriesFromGroups,
 } from '../budget/util';
-import { Button } from '../common/Button2';
-import { InitialFocus } from '../common/InitialFocus';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
-import { View } from '../common/View';
 import { FieldLabel, TapField } from '../mobile/MobileForms';
 import { AmountInput } from '../util/AmountInput';
 

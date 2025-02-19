@@ -1,4 +1,4 @@
-import getAccountDb, { isAdmin } from '../../account-db.js';
+import { getAccountDb, isAdmin } from '../../account-db.js';
 import { FileNotFound, GenericFileError } from '../errors.js';
 
 class FileBase {
@@ -130,7 +130,7 @@ class FilesService {
             limit,
           ])
         : this.accountDb.all(
-            `SELECT files.* 
+            `SELECT files.*
         FROM files
         WHERE files.owner = ? and deleted = 0
       UNION
@@ -152,7 +152,7 @@ class FilesService {
               FROM files
                 JOIN user_access UA ON UA.file_id = files.id
                 JOIN users on users.id = UA.user_id
-              WHERE files.id = ? 
+              WHERE files.id = ?
           UNION ALL
         SELECT users.id, users.display_name, users.user_name
               FROM files
@@ -209,7 +209,7 @@ class FilesService {
 
       const res = this.accountDb.mutate(query, params);
 
-      if (res.changes != 1) {
+      if (res.changes !== 1) {
         throw new GenericFileError('Could not update File', { id });
       }
     }

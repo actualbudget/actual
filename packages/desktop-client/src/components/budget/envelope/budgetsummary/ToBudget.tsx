@@ -5,11 +5,12 @@ import React, {
   useState,
 } from 'react';
 
+import { Popover } from '@actual-app/components/popover';
+import { View } from '@actual-app/components/view';
+
 import { envelopeBudget } from 'loot-core/client/queries';
 
 import { useContextMenu } from '../../../../hooks/useContextMenu';
-import { Popover } from '../../../common/Popover';
-import { View } from '../../../common/View';
 import { CoverMenu } from '../CoverMenu';
 import { useEnvelopeSheetValue } from '../EnvelopeBudgetComponents';
 import { HoldMenu } from '../HoldMenu';

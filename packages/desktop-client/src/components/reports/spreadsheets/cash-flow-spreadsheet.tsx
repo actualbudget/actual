@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { AlignedText } from '@actual-app/components/aligned-text';
 import * as d from 'date-fns';
 import { t } from 'i18next';
 
@@ -10,7 +11,6 @@ import { q } from 'loot-core/shared/query';
 import { integerToCurrency, integerToAmount } from 'loot-core/shared/util';
 import { type RuleConditionEntity } from 'loot-core/types/models';
 
-import { AlignedText } from '../../common/AlignedText';
 import { runAll, indexCashFlow } from '../util';
 
 export function simpleCashFlow(

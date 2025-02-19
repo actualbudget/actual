@@ -1,7 +1,5 @@
 import Fallback from './integration-bank.js';
 
-import { formatPayeeName } from '../../util/payee-name.js';
-
 /** @type {import('./bank.interface.js').IBank} */
 export default {
   ...Fallback,
@@ -15,14 +13,12 @@ export default {
   /**
    * Banks on the BEC backend only give information regarding the transaction in additionalInformation
    */
-  normalizeTransaction(transaction, _booked) {
-    transaction.remittanceInformationUnstructured =
+  normalizeTransaction(transaction, booked) {
+    const editedTrans = { ...transaction };
+
+    editedTrans.remittanceInformationUnstructured =
       transaction.additionalInformation;
 
-    return {
-      ...transaction,
-      payeeName: formatPayeeName(transaction),
-      date: transaction.bookingDate,
-    };
+    return Fallback.normalizeTransaction(transaction, booked, editedTrans);
   },
 };

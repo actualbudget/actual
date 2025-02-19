@@ -1,11 +1,12 @@
-import getAccountDb from '../../../account-db.js';
+import crypto from 'node:crypto';
+
+import { getAccountDb } from '../../../account-db.js';
 import { FileNotFound } from '../../errors.js';
 import {
   FilesService,
   File,
   FileUpdate,
 } from '../../services/files-service.js'; // Adjust the path as necessary
-import crypto from 'node:crypto';
 describe('FilesService', () => {
   let filesService;
   let accountDb;
@@ -101,7 +102,7 @@ describe('FilesService', () => {
         syncVersion: 1,
         name: 'file2',
         encryptMeta: '{"key":"value2"}',
-        deleted: deleted,
+        deleted,
       });
 
       filesService.set(newFile);
@@ -116,7 +117,7 @@ describe('FilesService', () => {
         encryptSalt: null, // default value
         encryptTest: null, // default value
         encryptKeyId: null, // default value
-        deleted: deleted,
+        deleted,
       });
 
       expect(file).toEqual(expectedFile);

@@ -1,18 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { Block } from '@actual-app/components/block';
+import { Button } from '@actual-app/components/button';
+import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
+import { View } from '@actual-app/components/view';
+
 import { loadBackup, makeBackup } from 'loot-core/client/actions';
 import { send, listen, unlisten } from 'loot-core/platform/client/fetch';
 import { type Backup } from 'loot-core/server/backups';
 
 import { useMetadataPref } from '../../hooks/useMetadataPref';
 import { useDispatch } from '../../redux';
-import { theme } from '../../style';
-import { Block } from '../common/Block';
-import { Button } from '../common/Button2';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
-import { Text } from '../common/Text';
-import { View } from '../common/View';
 import { Row, Cell } from '../table';
 
 type BackupTableProps = {

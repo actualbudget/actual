@@ -1,8 +1,10 @@
-import migrate from 'migrate';
 import path from 'node:path';
-import config from './load-config.js';
 
-export default function run(direction = 'up') {
+import migrate from 'migrate';
+
+import { config } from './load-config.js';
+
+export function run(direction = 'up') {
   console.log(
     `Checking if there are any migrations to run for direction "${direction}"...`,
   );

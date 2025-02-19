@@ -1,4 +1,9 @@
-import BankFactory, { BANKS_WITH_LIMITED_HISTORY } from '../bank-factory.js';
+import jwt from 'jws';
+import * as nordigenNode from 'nordigen-node';
+import { v4 as uuidv4 } from 'uuid';
+
+import { SecretName, secretsService } from '../../services/secrets-service.js';
+import { BankFactory, BANKS_WITH_LIMITED_HISTORY } from '../bank-factory.js';
 import {
   AccessDeniedError,
   AccountNotLinkedToRequisition,
@@ -12,10 +17,6 @@ import {
   ServiceError,
   UnknownError,
 } from '../errors.js';
-import * as nordigenNode from 'nordigen-node';
-import * as uuid from 'uuid';
-import jwt from 'jws';
-import { SecretName, secretsService } from '../../services/secrets-service.js';
 
 const GoCardlessClient = nordigenNode.default;
 
@@ -145,7 +146,7 @@ export const goCardlessService = {
     const requisition =
       await goCardlessService.getLinkedRequisition(requisitionId);
 
-    let institutionIdSet = new Set();
+    const institutionIdSet = new Set();
     const detailedAccounts = await Promise.all(
       requisition.accounts.map(async accountId => {
         const account = await goCardlessService.getDetailedAccount(accountId);
@@ -318,7 +319,7 @@ export const goCardlessService = {
       response = await client.initSession({
         redirectUrl: host + '/gocardless/link',
         institutionId,
-        referenceId: uuid.v4(),
+        referenceId: uuidv4(),
         accessValidForDays: institution.max_access_valid_for_days,
         maxHistoricalDays: BANKS_WITH_LIMITED_HISTORY.includes(institutionId)
           ? Number(institution.transaction_total_days) >= 90
