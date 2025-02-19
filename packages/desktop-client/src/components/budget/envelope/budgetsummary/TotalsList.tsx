@@ -121,20 +121,21 @@ export function TotalsList({ prevMonthName, style }: TotalsListProps) {
       </View>
 
       <View>
-        <Trans>
-          <Block>Available funds</Block>
-        </Trans>
+        <Block>
+          <Trans>Available funds</Trans>
+        </Block>
 
         <Block>
           <Trans>Overspent in {{ prevMonthName }}</Trans>
         </Block>
 
-        <Trans>
-          <Block>Budgeted</Block>
-        </Trans>
-        <Trans>
-          <Block>For next month</Block>
-        </Trans>
+        <Block>
+          <Trans>Budgeted</Trans>
+        </Block>
+
+        <Block>
+          <Trans>For next month</Trans>
+        </Block>
       </View>
     </View>
   );

@@ -113,6 +113,26 @@ export function ReportSidebar({
     );
   };
 
+  const [includeCurrentIntervalText, includeCurrentIntervalTooltip] =
+    useMemo(() => {
+      const rangeType = (
+        ReportOptions.dateRangeType.get(customReportItems.dateRange) || ''
+      ).toLowerCase();
+
+      let text = t('Include current period');
+      let tooltip = t('Include current period in live range');
+
+      if (rangeType === 'month') {
+        text = t('Include current Month');
+        tooltip = t('Include current Month in live range');
+      } else if (rangeType === 'year') {
+        text = t('Include current Year');
+        tooltip = t('Include current Year in live range');
+      }
+
+      return [text, tooltip];
+    }, [customReportItems.dateRange, t]);
+
   const onChangeMode = (cond: string) => {
     setSessionReport('mode', cond);
     onReportChange({ type: 'modify' });
@@ -381,23 +401,8 @@ export function ReportSidebar({
               items={[
                 {
                   name: 'include-current-interval',
-                  text: t('Include current {{reportOptionRangeType}}', {
-                    reportOptionRangeType: (
-                      ReportOptions.dateRangeType.get(
-                        customReportItems.dateRange,
-                      ) || ''
-                    ).toLowerCase(),
-                  }),
-                  tooltip: t(
-                    'Include current {{reportOptionRangeType}} in live range',
-                    {
-                      reportOptionRangeType: (
-                        ReportOptions.dateRangeType.get(
-                          customReportItems.dateRange,
-                        ) || ''
-                      ).toLowerCase(),
-                    },
-                  ),
+                  text: includeCurrentIntervalText,
+                  tooltip: includeCurrentIntervalTooltip,
                   toggle: customReportItems.includeCurrentInterval,
                   disabled:
                     customReportItems.isDateStatic ||
