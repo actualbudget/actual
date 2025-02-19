@@ -77,6 +77,8 @@ export type LocalPrefs = Partial<{
 
 export type Theme = 'light' | 'dark' | 'auto' | 'midnight' | 'development';
 export type DarkTheme = 'dark' | 'midnight';
+
+// GlobalPrefs are the parsed global-store.json values
 export type GlobalPrefs = Partial<{
   floatingSidebar: boolean;
   maxMonths: number;
@@ -86,6 +88,26 @@ export type GlobalPrefs = Partial<{
   preferredDarkTheme: DarkTheme;
   documentDir: string; // Electron only
   serverSelfSignedCert: string; // Electron only
+}>;
+
+// GlobalPrefsJson represents what's saved in the global-store.json file
+export type GlobalPrefsJson = Partial<{
+  'user-id'?: string;
+  'user-key'?: string;
+  'encrypt-keys'?: string;
+  lastBudget?: string;
+  readOnly?: string;
+  'server-url'?: string;
+  'did-bootstrap'?: boolean;
+  'user-token'?: string;
+  'floating-sidebar'?: string; // "true" or "false"
+  'max-months'?: string; // e.g. "2" or "3"
+  'document-dir'?: GlobalPrefs['documentDir'];
+  'encrypt-key'?: string;
+  language?: GlobalPrefs['language'];
+  theme?: GlobalPrefs['theme'];
+  'preferred-dark-theme'?: GlobalPrefs['preferredDarkTheme'];
+  'server-self-signed-cert'?: GlobalPrefs['serverSelfSignedCert'];
 }>;
 
 export type AuthMethods = 'password' | 'openid';
