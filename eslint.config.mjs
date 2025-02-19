@@ -802,8 +802,6 @@ export default [
       'packages/desktop-client/src/hooks/useCategories.ts',
       'packages/desktop-client/src/hooks/usePayees.ts',
       'packages/desktop-client/src/hooks/useProperFocus.tsx',
-      'packages/desktop-client/src/hooks/useSelected.tsx',
-      'packages/loot-core/src/client/query-hooks.tsx',
     ],
 
     rules: {
