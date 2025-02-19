@@ -791,7 +791,6 @@ export default [
       'packages/desktop-client/src/components/sort.tsx',
       'packages/desktop-client/src/components/spreadsheet/useSheetValue.ts',
       'packages/desktop-client/src/components/transactions/TransactionList.jsx',
-      'packages/desktop-client/src/hooks/useCategories.ts',
     ],
 
     rules: {
