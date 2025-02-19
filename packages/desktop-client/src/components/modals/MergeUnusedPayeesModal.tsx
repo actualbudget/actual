@@ -1,6 +1,11 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
+import { Paragraph } from '@actual-app/components/paragraph';
+import { Text } from '@actual-app/components/text';
+import { View } from '@actual-app/components/view';
+
 import { replaceModal } from 'loot-core/client/actions/modals';
 import { send } from 'loot-core/platform/client/fetch';
 import { type PayeeEntity } from 'loot-core/types/models';
@@ -9,11 +14,7 @@ import { usePayees } from '../../hooks/usePayees';
 import { useSelector, useDispatch } from '../../redux';
 import { theme } from '../../style';
 import { Information } from '../alerts';
-import { Button } from '../common/Button2';
 import { Modal, ModalButtons } from '../common/Modal';
-import { Paragraph } from '../common/Paragraph';
-import { Text } from '../common/Text';
-import { View } from '../common/View';
 
 const highlightStyle = { color: theme.pageTextPositive };
 

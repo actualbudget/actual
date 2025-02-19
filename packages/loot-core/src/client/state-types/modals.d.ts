@@ -347,6 +347,7 @@ type FinanceModals = {
   };
   'keyboard-shortcuts': EmptyObject;
   'goal-templates': EmptyObject;
+  'category-automations-edit': EmptyObject;
 };
 
 export type PushModalAction = {

@@ -151,10 +151,9 @@ export const init: T.Init = async function (worker) {
 };
 
 export const send: T.Send = function (
-  name,
-  args,
-  { catchErrors = false } = {},
-) {
+  ...params: Parameters<T.Send>
+): ReturnType<T.Send> {
+  const [name, args, { catchErrors = false } = {}] = params;
   return new Promise((resolve, reject) => {
     const id = uuidv4();
 
@@ -171,8 +170,7 @@ export const send: T.Send = function (
     } else {
       globalWorker.postMessage(message);
     }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  }) as any;
+  });
 };
 
 export const sendCatch: T.SendCatch = function (name, args) {

@@ -1,12 +1,13 @@
 import React, { memo } from 'react';
 import { Trans } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
+
 import { format } from 'loot-core/src/shared/months';
 import { type AccountEntity } from 'loot-core/src/types/models';
 
 import { useDateFormat } from '../../hooks/useDateFormat';
 import { theme } from '../../style';
-import { Button } from '../common/Button2';
 import { Row, Cell } from '../table';
 
 const tsToString = (ts: string | null, dateFormat: string) => {

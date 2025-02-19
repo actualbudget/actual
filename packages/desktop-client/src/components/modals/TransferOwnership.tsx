@@ -1,6 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
+import { Stack } from '@actual-app/components/stack';
+import { styles } from '@actual-app/components/styles';
+import { Text } from '@actual-app/components/text';
+import { View } from '@actual-app/components/view';
+
 import {
   addNotification,
   closeAndLoadBudget,
@@ -14,13 +20,9 @@ import { type Handlers } from 'loot-core/types/handlers';
 
 import { useMetadataPref } from '../../hooks/useMetadataPref';
 import { useDispatch, useSelector } from '../../redux';
-import { styles, theme } from '../../style';
-import { Button } from '../common/Button2';
+import { theme } from '../../style';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { Select } from '../common/Select';
-import { Stack } from '../common/Stack';
-import { Text } from '../common/Text';
-import { View } from '../common/View';
 import { FormField, FormLabel } from '../forms';
 
 type TransferOwnershipProps = {

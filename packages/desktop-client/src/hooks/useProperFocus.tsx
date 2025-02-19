@@ -98,5 +98,5 @@ export function useProperFocus(
     }
 
     prevShouldFocus.current = shouldFocus;
-  }, [shouldFocus]);
+  }, [context, ref, shouldFocus]);
 }

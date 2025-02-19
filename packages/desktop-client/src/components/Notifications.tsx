@@ -8,6 +8,11 @@ import React, {
 } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { Button, ButtonWithLoading } from '@actual-app/components/button';
+import { Stack } from '@actual-app/components/stack';
+import { styles } from '@actual-app/components/styles';
+import { Text } from '@actual-app/components/text';
+import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
 import { removeNotification } from 'loot-core/client/actions';
@@ -16,13 +21,9 @@ import type { NotificationWithId } from 'loot-core/client/state-types/notificati
 import { AnimatedLoading } from '../icons/AnimatedLoading';
 import { SvgDelete } from '../icons/v0';
 import { useSelector, useDispatch } from '../redux';
-import { styles, theme } from '../style';
+import { theme } from '../style';
 
-import { Button, ButtonWithLoading } from './common/Button2';
 import { Link } from './common/Link';
-import { Stack } from './common/Stack';
-import { Text } from './common/Text';
-import { View } from './common/View';
 import { useResponsive } from './responsive/ResponsiveProvider';
 
 function compileMessage(

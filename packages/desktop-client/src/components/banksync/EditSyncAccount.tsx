@@ -1,6 +1,10 @@
 import React, { useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
+import { Stack } from '@actual-app/components/stack';
+import { Text } from '@actual-app/components/text';
+
 import { useTransactions } from 'loot-core/client/data-hooks/transactions';
 import {
   defaultMappings,
@@ -15,10 +19,7 @@ import {
 } from 'loot-core/src/types/models';
 
 import { useSyncedPref } from '../../hooks/useSyncedPref';
-import { Button } from '../common/Button2';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
-import { Stack } from '../common/Stack';
-import { Text } from '../common/Text';
 import { CheckboxOption } from '../modals/ImportTransactionsModal/CheckboxOption';
 
 import { FieldMapping } from './FieldMapping';
@@ -178,22 +179,13 @@ export function EditSyncAccount({ account }: EditSyncAccountProps) {
             <Trans>Field mapping</Trans>
           </Text>
 
-          {fields.length > 0 ? (
-            <FieldMapping
-              transactionDirection={transactionDirection}
-              setTransactionDirection={setTransactionDirection}
-              fields={fields as MappableFieldWithExample[]}
-              mapping={mapping!}
-              setMapping={setMapping}
-            />
-          ) : (
-            <Text style={{ margin: '1em 0 .5em 0' }}>
-              <Trans>
-                No transactions found with mappable fields, accounts must have
-                been synced at least once for this function to be available.
-              </Trans>
-            </Text>
-          )}
+          <FieldMapping
+            transactionDirection={transactionDirection}
+            setTransactionDirection={setTransactionDirection}
+            fields={fields as MappableFieldWithExample[]}
+            mapping={mapping!}
+            setMapping={setMapping}
+          />
 
           <Text style={{ fontSize: 15, margin: '1em 0 .5em 0' }}>
             <Trans>Options</Trans>

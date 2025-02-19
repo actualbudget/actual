@@ -1,6 +1,13 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
+import { Menu } from '@actual-app/components/menu';
+import { Stack } from '@actual-app/components/stack';
+import { styles } from '@actual-app/components/styles';
+import { Text } from '@actual-app/components/text';
+import { Tooltip } from '@actual-app/components/tooltip';
+import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 import { v4 as uuid } from 'uuid';
 
@@ -35,15 +42,9 @@ import { useSelected, SelectedProvider } from '../../hooks/useSelected';
 import { SvgDelete, SvgAdd, SvgSubtract } from '../../icons/v0';
 import { SvgAlignLeft, SvgCode, SvgInformationOutline } from '../../icons/v1';
 import { useDispatch } from '../../redux';
-import { styles, theme } from '../../style';
-import { Button } from '../common/Button2';
-import { Menu } from '../common/Menu';
+import { theme } from '../../style';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { Select } from '../common/Select';
-import { Stack } from '../common/Stack';
-import { Text } from '../common/Text';
-import { Tooltip } from '../common/Tooltip';
-import { View } from '../common/View';
 import { StatusBadge } from '../schedules/StatusBadge';
 import { SimpleTransactionsTable } from '../transactions/SimpleTransactionsTable';
 import { BetweenAmountInput } from '../util/AmountInput';
@@ -201,14 +202,7 @@ function FieldError({ type }) {
 function Editor({ error, style, children }) {
   return (
     <View style={style} data-testid="editor-row">
-      <Stack
-        direction="row"
-        align="center"
-        spacing={1}
-        style={{
-          padding: '3px 5px',
-        }}
-      >
+      <Stack direction="row" align="center" spacing={1}>
         {children}
       </Stack>
       {error && <FieldError type={error} />}
@@ -1008,12 +1002,6 @@ export function EditRuleModal({ defaultRule, onSave: originalOnSave }) {
     }
   }
 
-  const editorStyle = {
-    color: theme.pillText,
-    backgroundColor: theme.pillBackground,
-    borderRadius: 4,
-  };
-
   // Enable editing existing split rules even if the feature has since been disabled.
   const showSplitButton = actionSplits.length > 0;
 
@@ -1104,7 +1092,7 @@ export function EditRuleModal({ defaultRule, onSave: originalOnSave }) {
                   <ConditionsList
                     conditionsOp={conditionsOp}
                     conditions={conditions}
-                    editorStyle={editorStyle}
+                    editorStyle={styles.editorPill}
                     isSchedule={isSchedule}
                     onChangeConditions={conds => setConditions(conds)}
                   />
@@ -1185,7 +1173,7 @@ export function EditRuleModal({ defaultRule, onSave: originalOnSave }) {
                                   'append-notes',
                                 ]}
                                 action={action}
-                                editorStyle={editorStyle}
+                                editorStyle={styles.editorPill}
                                 onChange={(name, value) => {
                                   onChangeAction(action, name, value);
                                 }}

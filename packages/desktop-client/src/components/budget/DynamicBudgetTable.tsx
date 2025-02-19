@@ -3,9 +3,9 @@ import React, { useEffect, type ComponentProps } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import AutoSizer from 'react-virtualized-auto-sizer';
 
-import * as monthUtils from 'loot-core/shared/months';
+import { View } from '@actual-app/components/view';
 
-import { View } from '../common/View';
+import * as monthUtils from 'loot-core/shared/months';
 
 import { useBudgetMonthCount } from './BudgetMonthCountContext';
 import { BudgetPageHeader } from './BudgetPageHeader';
