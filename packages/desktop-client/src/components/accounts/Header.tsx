@@ -8,6 +8,14 @@ import React, {
 import { useHotkeys } from 'react-hotkeys-hook';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
+import { InitialFocus } from '@actual-app/components/initial-focus';
+import { Menu } from '@actual-app/components/menu';
+import { Popover } from '@actual-app/components/popover';
+import { Stack } from '@actual-app/components/stack';
+import { styles } from '@actual-app/components/styles';
+import { View } from '@actual-app/components/view';
+
 import {
   type AccountEntity,
   type RuleConditionEntity,
@@ -27,17 +35,11 @@ import {
   SvgLockClosed,
   SvgPencil1,
 } from '../../icons/v2';
-import { theme, styles } from '../../style';
+import { theme } from '../../style';
 import { AnimatedRefresh } from '../AnimatedRefresh';
-import { Button } from '../common/Button2';
-import { InitialFocus } from '../common/InitialFocus';
 import { Input } from '../common/Input';
-import { Menu } from '../common/Menu';
 import { MenuButton } from '../common/MenuButton';
-import { Popover } from '../common/Popover';
 import { Search } from '../common/Search';
-import { Stack } from '../common/Stack';
-import { View } from '../common/View';
 import { FilterButton } from '../filters/FiltersMenu';
 import { FiltersStack } from '../filters/FiltersStack';
 import { type SavedFilter } from '../filters/SavedFilterMenuButton';

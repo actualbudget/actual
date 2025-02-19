@@ -2,13 +2,14 @@
 import React, { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
-import { send } from 'loot-core/src/platform/client/fetch';
+import { Button } from '@actual-app/components/button';
+import { Text } from '@actual-app/components/text';
+import { View } from '@actual-app/components/view';
+
+import { send } from 'loot-core/platform/client/fetch';
 
 import { useNavigate } from '../../../hooks/useNavigate';
 import { theme } from '../../../style';
-import { Button } from '../../common/Button2';
-import { Text } from '../../common/Text';
-import { View } from '../../common/View';
 
 import { Title } from './common';
 import { ConfirmPasswordForm } from './ConfirmPasswordForm';

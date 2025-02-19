@@ -1,5 +1,6 @@
 export type FeatureFlag =
   | 'goalTemplatesEnabled'
+  | 'goalTemplatesUIEnabled'
   | 'actionTemplating'
   | 'contextMenus'
   | 'openidAuth';
@@ -28,6 +29,9 @@ export type SyncedPrefs = Partial<
     | `csv-in-out-mode-${string}`
     | `csv-out-value-${string}`
     | `csv-has-header-${string}`
+    | `custom-sync-mappings-${string}`
+    | `sync-import-pending-${string}`
+    | `sync-import-notes-${string}`
     | `ofx-fallback-missing-payee-${string}`
     | `flip-amount-${string}-${'csv' | 'qif'}`
     | `flags.${FeatureFlag}`

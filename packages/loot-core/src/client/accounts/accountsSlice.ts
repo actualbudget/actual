@@ -190,11 +190,13 @@ function handleSyncResponse(
   resMatchedTransactions.push(...matchedTransactions);
   resUpdatedAccounts.push(...updatedAccounts);
 
+  dispatch(getAccounts());
+
   return newTransactions.length > 0 || matchedTransactions.length > 0;
 }
 
 type SyncAccountsPayload = {
-  id?: AccountEntity['id'];
+  id?: AccountEntity['id'] | undefined;
 };
 
 export const syncAccounts = createAppAsyncThunk(

@@ -2,12 +2,12 @@ import React, { useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 
+import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
 import { type CSSProperties, theme } from '../../style';
 import { tokens } from '../../tokens';
 import { Link } from '../common/Link';
-import { View } from '../common/View';
 
 type SettingProps = {
   primaryAction?: ReactNode;

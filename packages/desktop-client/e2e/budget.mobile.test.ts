@@ -1,7 +1,7 @@
 import { type Page } from '@playwright/test';
 
+import * as monthUtils from 'loot-core/shared/months';
 import { amountToCurrency, currencyToAmount } from 'loot-core/shared/util';
-import * as monthUtils from 'loot-core/src/shared/months';
 
 import { expect, test } from './fixtures';
 import { ConfigurationPage } from './page-models/configuration-page';
@@ -60,6 +60,9 @@ async function setBudgetAverage(
     await budgetPage.goToPreviousMonth();
     const spentButton = await budgetPage.getButtonForSpent(categoryName);
     const spent = await spentButton.textContent();
+    if (!spent) {
+      throw new Error('Failed to get spent amount');
+    }
     totalSpent += currencyToAmount(spent) ?? 0;
   }
 
@@ -279,6 +282,10 @@ budgetTypes.forEach(budgetType => {
       await budgetPage.goToPreviousMonth();
 
       const lastMonthBudget = await budgetedButton.textContent();
+
+      if (!lastMonthBudget) {
+        throw new Error('Failed to get last month budget');
+      }
 
       await budgetPage.goToNextMonth();
 

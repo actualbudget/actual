@@ -1,5 +1,4 @@
 import * as db from '../db';
-import { Schedule } from '../db/types';
 
 import {
   CategoryWithTemplateNote,
@@ -20,7 +19,7 @@ function mockGetTemplateNotesForCategories(
   );
 }
 
-function mockGetActiveSchedules(schedules: Schedule[]) {
+function mockGetActiveSchedules(schedules: db.DbSchedule[]) {
   (getActiveSchedules as jest.Mock).mockResolvedValue(schedules);
 }
 
@@ -224,7 +223,39 @@ describe('checkTemplates', () => {
       expected: {
         sticky: true,
         message: 'There were errors interpreting some templates:',
-        pre: 'cat1: Schedule “Non-existent Schedule” does not exist',
+        pre: 'Category 1: Schedule “Non-existent Schedule” does not exist',
+      },
+    },
+    {
+      description: 'Returns errors for invalid increase schedule adjustments',
+      mockTemplateNotes: [
+        {
+          id: 'cat1',
+          name: 'Category 1',
+          note: '#template schedule Mock Schedule 1 [increase 1001%]',
+        },
+      ],
+      mockSchedules: mockSchedules(),
+      expected: {
+        sticky: true,
+        message: 'There were errors interpreting some templates:',
+        pre: 'Category 1: #template schedule Mock Schedule 1 [increase 1001%]\nError: Invalid adjustment percentage (1001%). Must be between -100% and 1000%',
+      },
+    },
+    {
+      description: 'Returns errors for invalid decrease schedule adjustments',
+      mockTemplateNotes: [
+        {
+          id: 'cat1',
+          name: 'Category 1',
+          note: '#template schedule Mock Schedule 1 [decrease 101%]',
+        },
+      ],
+      mockSchedules: mockSchedules(),
+      expected: {
+        sticky: true,
+        message: 'There were errors interpreting some templates:',
+        pre: 'Category 1: #template schedule Mock Schedule 1 [decrease 101%]\nError: Invalid adjustment percentage (-101%). Must be between -100% and 1000%',
       },
     },
   ];
@@ -245,7 +276,7 @@ describe('checkTemplates', () => {
   );
 });
 
-function mockSchedules(): Schedule[] {
+function mockSchedules(): db.DbSchedule[] {
   return [
     {
       id: 'mock-schedule-1',

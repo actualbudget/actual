@@ -1,4 +1,4 @@
-import { resetMockStore } from 'loot-core/src/client/store/mock';
+import { resetMockStore } from 'loot-core/client/store/mock';
 
 import { installPolyfills } from './polyfills';
 

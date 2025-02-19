@@ -1,9 +1,9 @@
 import React, { type ComponentPropsWithoutRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { envelopeBudget } from 'loot-core/src/client/queries';
+import { Menu } from '@actual-app/components/menu';
 
-import { Menu } from '../../common/Menu';
+import { envelopeBudget } from 'loot-core/client/queries';
 
 import { useEnvelopeSheetValue } from './EnvelopeBudgetComponents';
 

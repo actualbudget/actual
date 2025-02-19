@@ -1,8 +1,8 @@
-import { runQuery } from 'loot-core/src/client/query-helpers';
-import { type useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
-import { send } from 'loot-core/src/platform/client/fetch';
-import * as monthUtils from 'loot-core/src/shared/months';
-import { type GroupedEntity } from 'loot-core/src/types/models/reports';
+import { runQuery } from 'loot-core/client/query-helpers';
+import { type useSpreadsheet } from 'loot-core/client/SpreadsheetProvider';
+import { send } from 'loot-core/platform/client/fetch';
+import * as monthUtils from 'loot-core/shared/months';
+import { type GroupedEntity } from 'loot-core/types/models/reports';
 
 import {
   categoryLists,

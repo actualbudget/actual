@@ -30,6 +30,7 @@ export namespace YNAB5 {
     id: string;
     name: string;
     deleted: boolean;
+    hidden: boolean;
   }
 
   interface Category {
@@ -37,6 +38,7 @@ export namespace YNAB5 {
     category_group_id: string;
     name: string;
     deleted: boolean;
+    hidden: boolean;
   }
 
   interface Transaction {
