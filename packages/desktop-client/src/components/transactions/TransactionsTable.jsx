@@ -12,6 +12,12 @@ import React, {
 import { useHotkeys } from 'react-hotkeys-hook';
 import { useTranslation } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
+import { Popover } from '@actual-app/components/popover';
+import { styles } from '@actual-app/components/styles';
+import { Text } from '@actual-app/components/text';
+import { Tooltip } from '@actual-app/components/tooltip';
+import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 import {
   format as formatDate,
@@ -20,15 +26,15 @@ import {
 } from 'date-fns';
 
 import { addNotification, pushModal } from 'loot-core/client/actions';
-import { useCachedSchedules } from 'loot-core/src/client/data-hooks/schedules';
+import { useCachedSchedules } from 'loot-core/client/data-hooks/schedules';
 import {
   getAccountsById,
   getPayeesById,
   getCategoriesById,
-} from 'loot-core/src/client/queries/queriesSlice';
-import { evalArithmetic } from 'loot-core/src/shared/arithmetic';
-import { currentDay } from 'loot-core/src/shared/months';
-import * as monthUtils from 'loot-core/src/shared/months';
+} from 'loot-core/client/queries/queriesSlice';
+import { evalArithmetic } from 'loot-core/shared/arithmetic';
+import { currentDay } from 'loot-core/shared/months';
+import * as monthUtils from 'loot-core/shared/months';
 import {
   splitTransaction,
   updateTransaction,
@@ -38,12 +44,12 @@ import {
   ungroupTransactions,
   isTemporaryId,
   isPreviewId,
-} from 'loot-core/src/shared/transactions';
+} from 'loot-core/shared/transactions';
 import {
   integerToCurrency,
   amountToInteger,
   titleFirst,
-} from 'loot-core/src/shared/util';
+} from 'loot-core/shared/util';
 
 import { useContextMenu } from '../../hooks/useContextMenu';
 import { useMergedRefs } from '../../hooks/useMergedRefs';
@@ -59,15 +65,10 @@ import {
   SvgHyperlink2,
 } from '../../icons/v2';
 import { useDispatch } from '../../redux';
-import { styles, theme } from '../../style';
+import { theme } from '../../style';
 import { AccountAutocomplete } from '../autocomplete/AccountAutocomplete';
 import { CategoryAutocomplete } from '../autocomplete/CategoryAutocomplete';
 import { PayeeAutocomplete } from '../autocomplete/PayeeAutocomplete';
-import { Button } from '../common/Button2';
-import { Popover } from '../common/Popover';
-import { Text } from '../common/Text';
-import { Tooltip } from '../common/Tooltip';
-import { View } from '../common/View';
 import { getStatusProps } from '../schedules/StatusBadge';
 import { DateSelect } from '../select/DateSelect';
 import { NamespaceContext } from '../spreadsheet/NamespaceContext';

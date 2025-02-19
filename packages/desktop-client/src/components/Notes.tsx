@@ -3,13 +3,13 @@ import React, { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import ReactMarkdown from 'react-markdown';
 
+import { Text } from '@actual-app/components/text';
 import { css } from '@emotion/css';
 import remarkGfm from 'remark-gfm';
 
 import { type CSSProperties, theme } from '../style';
 import { remarkBreaks, sequentialNewlinesPlugin } from '../util/markdown';
 
-import { Text } from './common/Text';
 import { useResponsive } from './responsive/ResponsiveProvider';
 
 const remarkPlugins = [sequentialNewlinesPlugin, remarkGfm, remarkBreaks];

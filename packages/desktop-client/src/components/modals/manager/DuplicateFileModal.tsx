@@ -1,20 +1,23 @@
 import React, { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { Button, ButtonWithLoading } from '@actual-app/components/button';
+import { FormError } from '@actual-app/components/form-error';
+import { InitialFocus } from '@actual-app/components/initial-focus';
+import { InlineField } from '@actual-app/components/inline-field';
+import { Text } from '@actual-app/components/text';
+import { View } from '@actual-app/components/view';
+
 import {
   addNotification,
   duplicateBudget,
   uniqueBudgetName,
   validateBudgetName,
 } from 'loot-core/client/actions';
-import { type File } from 'loot-core/src/types/file';
+import { type File } from 'loot-core/types/file';
 
 import { useDispatch } from '../../../redux';
 import { theme } from '../../../style';
-import { Button, ButtonWithLoading } from '../../common/Button2';
-import { FormError } from '../../common/FormError';
-import { InitialFocus } from '../../common/InitialFocus';
-import { InlineField } from '../../common/InlineField';
 import { Input } from '../../common/Input';
 import {
   Modal,
@@ -22,8 +25,6 @@ import {
   ModalCloseButton,
   ModalHeader,
 } from '../../common/Modal';
-import { Text } from '../../common/Text';
-import { View } from '../../common/View';
 
 type DuplicateFileProps = {
   file: File;

@@ -337,7 +337,10 @@ function conditionSpecialCases(cond: Condition | null): Condition | null {
 }
 
 // This does the inverse: finds all the transactions matching a rule
-export function conditionsToAQL(conditions, { recurDateBounds = 100 } = {}) {
+export function conditionsToAQL(
+  conditions,
+  { recurDateBounds = 100, applySpecialCases = true } = {},
+) {
   const errors = [];
 
   conditions = conditions
@@ -354,7 +357,7 @@ export function conditionsToAQL(conditions, { recurDateBounds = 100 } = {}) {
         return null;
       }
     })
-    .map(conditionSpecialCases)
+    .map(cond => (applySpecialCases ? conditionSpecialCases(cond) : cond))
     .filter(Boolean);
 
   // rule -> actualql

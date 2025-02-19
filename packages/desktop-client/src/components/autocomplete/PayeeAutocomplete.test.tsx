@@ -2,7 +2,7 @@ import { render, type Screen, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { vi } from 'vitest';
 
-import { generateAccount } from 'loot-core/src/mocks';
+import { generateAccount } from 'loot-core/mocks';
 import type { AccountEntity, PayeeEntity } from 'loot-core/types/models';
 
 import { AuthProvider } from '../../auth/AuthProvider';

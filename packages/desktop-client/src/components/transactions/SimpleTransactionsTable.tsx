@@ -7,14 +7,15 @@ import React, {
 } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 
+import { styles } from '@actual-app/components/styles';
 import {
   format as formatDate,
   isValid as isDateValid,
   parseISO,
 } from 'date-fns';
 
-import * as monthUtils from 'loot-core/src/shared/months';
-import { integerToCurrency } from 'loot-core/src/shared/util';
+import * as monthUtils from 'loot-core/shared/months';
+import { integerToCurrency } from 'loot-core/shared/util';
 import { type TransactionEntity } from 'loot-core/types/models';
 
 import { useAccount } from '../../hooks/useAccount';
@@ -22,7 +23,7 @@ import { useCategory } from '../../hooks/useCategory';
 import { useDateFormat } from '../../hooks/useDateFormat';
 import { useSelectedItems, useSelectedDispatch } from '../../hooks/useSelected';
 import { SvgArrowsSynchronize } from '../../icons/v2';
-import { styles, theme } from '../../style';
+import { theme } from '../../style';
 import { Cell, Field, Row, SelectCell, Table } from '../table';
 import { DisplayId } from '../util/DisplayId';
 

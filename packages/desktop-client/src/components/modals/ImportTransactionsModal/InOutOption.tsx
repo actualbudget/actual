@@ -1,7 +1,8 @@
 import React from 'react';
 
+import { View } from '@actual-app/components/view';
+
 import { Input } from '../../common/Input';
-import { View } from '../../common/View';
 
 import { CheckboxOption } from './CheckboxOption';
 

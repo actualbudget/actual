@@ -14,10 +14,10 @@ import {
   getCategories,
   getPayees,
 } from 'loot-core/client/queries/queriesSlice';
+import * as sharedListeners from 'loot-core/client/shared-listeners';
 import { type AppStore } from 'loot-core/client/store';
-import * as sharedListeners from 'loot-core/src/client/shared-listeners';
-import { listen } from 'loot-core/src/platform/client/fetch';
-import * as undo from 'loot-core/src/platform/client/undo';
+import { listen } from 'loot-core/platform/client/fetch';
+import * as undo from 'loot-core/platform/client/undo';
 
 export function handleGlobalEvents(store: AppStore) {
   const unlistenServerError = listen('server-error', () => {

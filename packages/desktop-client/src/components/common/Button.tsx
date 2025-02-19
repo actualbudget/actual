@@ -1,11 +1,10 @@
 import React, { forwardRef, type ElementType, type HTMLProps } from 'react';
 
+import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
+import { styles, type CSSProperties } from '@actual-app/components/styles';
+import { theme } from '@actual-app/components/theme';
+import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
-
-import { AnimatedLoading } from '../../icons/AnimatedLoading';
-import { styles, theme, type CSSProperties } from '../../style';
-
-import { View } from './View';
 
 type ButtonProps = HTMLProps<HTMLButtonElement> & {
   pressed?: boolean;
@@ -118,6 +117,7 @@ const _getActiveStyles = (type: ButtonType, bounce: boolean): CSSProperties => {
   }
 };
 
+/** @deprecated please use `import { Button } from '@actual-app/components/button';` */
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   (
     {

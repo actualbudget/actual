@@ -7,14 +7,15 @@ import React, {
 } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { styles } from '@actual-app/components/styles';
+import { View } from '@actual-app/components/view';
+
 import {
   type GroupedEntity,
   type DataEntity,
-} from 'loot-core/src/types/models/reports';
+} from 'loot-core/types/models/reports';
 
 import { theme } from '../../../../style';
-import { styles } from '../../../../style/styles';
-import { View } from '../../../common/View';
 
 import { type renderTotalsProps } from './ReportTable';
 

@@ -12,25 +12,26 @@ import React, {
 } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { styles } from '@actual-app/components/styles';
+import { Text } from '@actual-app/components/text';
+import { TextOneLine } from '@actual-app/components/text-one-line';
+import { View } from '@actual-app/components/view';
 import { css, cx } from '@emotion/css';
 
 import { trackingBudget, envelopeBudget } from 'loot-core/client/queries';
+import { getNormalisedString } from 'loot-core/shared/normalisation';
 import { integerToCurrency } from 'loot-core/shared/util';
-import { getNormalisedString } from 'loot-core/src/shared/normalisation';
 import {
   type CategoryEntity,
   type CategoryGroupEntity,
-} from 'loot-core/src/types/models';
+} from 'loot-core/types/models';
 
 import { useCategories } from '../../hooks/useCategories';
 import { useSyncedPref } from '../../hooks/useSyncedPref';
 import { SvgSplit } from '../../icons/v0';
-import { theme, styles } from '../../style';
+import { theme } from '../../style';
 import { useEnvelopeSheetValue } from '../budget/envelope/EnvelopeBudgetComponents';
 import { makeAmountFullStyle } from '../budget/util';
-import { Text } from '../common/Text';
-import { TextOneLine } from '../common/TextOneLine';
-import { View } from '../common/View';
 import { useResponsive } from '../responsive/ResponsiveProvider';
 import { useSheetValue } from '../spreadsheet/useSheetValue';
 

@@ -5,14 +5,19 @@ import React, {
 import { mergeProps } from 'react-aria';
 import { ListBoxItem } from 'react-aria-components';
 
+import { Button } from '@actual-app/components/button';
+import { styles } from '@actual-app/components/styles';
+import { Text } from '@actual-app/components/text';
+import { TextOneLine } from '@actual-app/components/text-one-line';
+import { View } from '@actual-app/components/view';
 import {
   PressResponder,
   usePress,
   useLongPress,
 } from '@react-aria/interactions';
 
-import { isPreviewId } from 'loot-core/src/shared/transactions';
-import { integerToCurrency } from 'loot-core/src/shared/util';
+import { isPreviewId } from 'loot-core/shared/transactions';
+import { integerToCurrency } from 'loot-core/shared/util';
 import { type TransactionEntity } from 'loot-core/types/models';
 
 import { useAccount } from '../../../hooks/useAccount';
@@ -25,12 +30,8 @@ import {
   SvgLockClosed,
 } from '../../../icons/v2';
 import { useSelector } from '../../../redux';
-import { styles, theme } from '../../../style';
+import { theme } from '../../../style';
 import { makeAmountFullStyle } from '../../budget/util';
-import { Button } from '../../common/Button2';
-import { Text } from '../../common/Text';
-import { TextOneLine } from '../../common/TextOneLine';
-import { View } from '../../common/View';
 import { getPrettyPayee } from '../utils';
 
 import { lookupName, Status } from './TransactionEdit';

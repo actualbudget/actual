@@ -19,3 +19,5 @@ export type BankSyncResponse = {
   error_type: string;
   error_code: string;
 };
+
+export type BankSyncProviders = 'goCardless' | 'simpleFin';

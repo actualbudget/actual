@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 
-import { isNonProductionEnvironment } from 'loot-core/src/shared/environment';
+import { isNonProductionEnvironment } from 'loot-core/shared/environment';
 
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { ManageRules } from '../ManageRules';

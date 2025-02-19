@@ -198,7 +198,7 @@ async function compareMessages(messages: Message[]): Promise<Message[]> {
     const { dataset, row, column, timestamp } = message;
     const timestampStr = timestamp.toString();
 
-    const res = db.runQuery(
+    const res = db.runQuery<Pick<db.DbCrdtMessage, 'timestamp'>>(
       db.cache(
         'SELECT timestamp FROM messages_crdt WHERE dataset = ? AND row = ? AND column = ? AND timestamp >= ?',
       ),

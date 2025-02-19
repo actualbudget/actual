@@ -2,17 +2,18 @@
 import { memo, useRef, type CSSProperties } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
-import { type PayeeEntity } from 'loot-core/src/types/models';
+import { Menu } from '@actual-app/components/menu';
+import { Popover } from '@actual-app/components/popover';
+import { Text } from '@actual-app/components/text';
+import { Tooltip } from '@actual-app/components/tooltip';
+
+import { type PayeeEntity } from 'loot-core/types/models';
 
 import { useContextMenu } from '../../hooks/useContextMenu';
 import { useSelectedDispatch } from '../../hooks/useSelected';
 import { useSyncedPref } from '../../hooks/useSyncedPref';
 import { SvgArrowThinRight, SvgBookmark, SvgLightBulb } from '../../icons/v1';
 import { theme } from '../../style';
-import { Menu } from '../common/Menu';
-import { Popover } from '../common/Popover';
-import { Text } from '../common/Text';
-import { Tooltip } from '../common/Tooltip';
 import {
   Cell,
   CellButton,
