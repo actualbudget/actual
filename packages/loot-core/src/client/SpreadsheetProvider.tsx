@@ -35,6 +35,8 @@ type CellCache = { [name: string]: Promise<CellCacheValue> | null };
 type CellObserverCallback = (node: CellCacheValue) => void;
 type CellObservers = { [name: string]: CellObserverCallback[] };
 
+const GLOBAL_SHEET_NAME = '__global';
+
 function makeSpreadsheet() {
   const cellObservers: CellObservers = {};
   const LRUValueCache = new LRUCache<string, CellCacheValue>({ max: 1200 });
@@ -42,14 +44,14 @@ function makeSpreadsheet() {
   let observersDisabled = false;
 
   class Spreadsheet {
-    observeCell(name: string, cb: CellObserverCallback): () => void {
+    observeCell(name: string, callback: CellObserverCallback): () => void {
       if (!cellObservers[name]) {
         cellObservers[name] = [];
       }
-      cellObservers[name].push(cb);
+      cellObservers[name].push(callback);
 
       return () => {
-        cellObservers[name] = cellObservers[name].filter(x => x !== cb);
+        cellObservers[name] = cellObservers[name].filter(cb => cb !== callback);
 
         if (cellObservers[name].length === 0) {
           cellCache[name] = null;
@@ -86,7 +88,7 @@ function makeSpreadsheet() {
     }
 
     bind(
-      sheetName: string = '__global',
+      sheetName: string = GLOBAL_SHEET_NAME,
       binding: Binding,
       callback: CellObserverCallback,
     ): () => void {
