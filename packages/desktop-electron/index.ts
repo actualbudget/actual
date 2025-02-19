@@ -295,7 +295,7 @@ async function createWindow() {
 
   // Execute queued logs - displaying them in the client window
   queuedClientWinLogs.map((log: string) =>
-    clientWin.webContents.executeJavaScript(log),
+    win.webContents.executeJavaScript(log),
   );
 
   queuedClientWinLogs = [];
