@@ -1,14 +1,15 @@
 import React, { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import * as monthUtils from 'loot-core/src/shared/months';
-import { amountToCurrency } from 'loot-core/src/shared/util';
-import { type SpendingWidget } from 'loot-core/src/types/models';
+import { Block } from '@actual-app/components/block';
+import { styles } from '@actual-app/components/styles';
+import { theme } from '@actual-app/components/theme';
+import { View } from '@actual-app/components/view';
 
-import { styles } from '../../../style/styles';
-import { theme } from '../../../style/theme';
-import { Block } from '../../common/Block';
-import { View } from '../../common/View';
+import * as monthUtils from 'loot-core/shared/months';
+import { amountToCurrency } from 'loot-core/shared/util';
+import { type SpendingWidget } from 'loot-core/types/models';
+
 import { PrivacyFilter } from '../../PrivacyFilter';
 import { DateRange } from '../DateRange';
 import { SpendingGraph } from '../graphs/SpendingGraph';

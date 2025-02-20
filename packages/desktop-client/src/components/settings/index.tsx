@@ -1,11 +1,14 @@
 import React, { type ReactNode, useEffect } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
+import { Text } from '@actual-app/components/text';
+import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
 import { closeBudget, loadPrefs } from 'loot-core/client/actions';
+import { listen } from 'loot-core/platform/client/fetch';
 import { isElectron } from 'loot-core/shared/environment';
-import { listen } from 'loot-core/src/platform/client/fetch';
 
 import { useGlobalPref } from '../../hooks/useGlobalPref';
 import { useIsOutdated, useLatestVersion } from '../../hooks/useLatestVersion';
@@ -13,11 +16,8 @@ import { useMetadataPref } from '../../hooks/useMetadataPref';
 import { useDispatch } from '../../redux';
 import { theme } from '../../style';
 import { tokens } from '../../tokens';
-import { Button } from '../common/Button2';
 import { Input } from '../common/Input';
 import { Link } from '../common/Link';
-import { Text } from '../common/Text';
-import { View } from '../common/View';
 import { FormField, FormLabel } from '../forms';
 import { MOBILE_NAV_HEIGHT } from '../mobile/MobileNavTabs';
 import { Page } from '../Page';

@@ -358,6 +358,20 @@ describe('Action', () => {
       testHelper('{{regex notes "/Klaas/" "Jantje"}}', 'Sarah Condition');
       // no regex format (/.../flags)
       testHelper('{{regex notes "Sarah" "Jantje"}}', 'Jantje Condition');
+
+      // should not use regex when not in regex format
+      testHelper('{{replace notes "[a-z]" "a"}}', 'Sarah Condition');
+      // should use regex when in regex format
+      testHelper('{{replace notes "/[a-z]/g" "a"}}', 'Saaaa Caaaaaaaa');
+      // should replace once with non regex
+      testHelper('{{replace notes "a" "b"}}', 'Sbrah Condition');
+
+      // should not use regex when not in regex format
+      testHelper('{{replaceAll notes "[a-z]" "a"}}', 'Sarah Condition');
+      // should use regex when in regex format
+      testHelper('{{replaceAll notes "/[a-z]/g" "a"}}', 'Saaaa Caaaaaaaa');
+      // should replace all with non regex
+      testHelper('{{replaceAll notes "a" "b"}}', 'Sbrbh Condition');
     });
 
     describe('math helpers', () => {
@@ -412,7 +426,45 @@ describe('Action', () => {
       testHelper('{{day undefined}}', '');
       testHelper('{{month undefined}}', '');
       testHelper('{{year undefined}}', '');
+      testHelper('{{day}}', '');
+      testHelper('{{month}}', '');
+      testHelper('{{year}}', '');
       testHelper('{{format undefined undefined}}', '');
+      testHelper('{{format}}', '');
+      testHelper('{{addDays "2002-07-25" 5}}', '2002-07-30');
+      testHelper('{{addDays}}', '');
+      testHelper('{{subDays "2002-07-25" 5}}', '2002-07-20');
+      testHelper('{{subDays}}', '');
+      testHelper('{{addMonths "2002-07-25" 5}}', '2002-12-25');
+      testHelper('{{addMonths}}', '');
+      testHelper('{{subMonths "2002-07-25" 5}}', '2002-02-25');
+      testHelper('{{subMonths}}', '');
+      testHelper('{{addYears "2002-07-25" 5}}', '2007-07-25');
+      testHelper('{{addYears}}', '');
+      testHelper('{{subYears "2002-07-25" 5}}', '1997-07-25');
+      testHelper('{{subYears}}', '');
+      testHelper('{{addWeeks "2002-07-25" 1}}', '2002-08-01');
+      testHelper('{{addWeeks}}', '');
+      testHelper('{{subWeeks "2002-07-25" 1}}', '2002-07-18');
+      testHelper('{{subWeeks}}', '');
+      testHelper('{{setDay "2002-07-25" 1}}', '2002-07-01');
+      testHelper('{{setDay "2002-07-25" 32}}', '2002-08-01');
+      testHelper('{{setDay "2002-07-25" 0}}', '2002-06-30');
+      testHelper('{{setDay}}', '');
+    });
+
+    describe('other helpers', () => {
+      function testHelper(template: string, expected: unknown) {
+        test(template, () => {
+          const action = new Action('set', 'notes', '', { template });
+          const item = { notes: '' };
+          action.exec(item);
+          expect(item.notes).toBe(expected);
+        });
+      }
+
+      testHelper('{{concat "Sarah" "Trops"}}', 'SarahTrops');
+      testHelper('{{concat "Sarah" "Trops" 12 "Wow"}}', 'SarahTrops12Wow');
     });
 
     test('{{debug}} should log the item', () => {
@@ -524,6 +576,31 @@ describe('Rule', () => {
   });
 
   describe('split actions', () => {
+    test('splits can change the payee', () => {
+      const rule = new Rule({
+        conditionsOp: 'and',
+        conditions: [{ op: 'is', field: 'payee', value: '123' }],
+        actions: [
+          {
+            op: 'set-split-amount',
+            field: 'amount',
+            value: 100,
+            options: { splitIndex: 1, method: 'fixed-amount' },
+          },
+          {
+            op: 'set',
+            field: 'payee',
+            value: '456',
+            options: { splitIndex: 1 },
+          },
+        ],
+      });
+
+      expect(rule.exec({ payee: '123' })).toMatchObject({
+        subtransactions: [{ payee: '456' }],
+      });
+    });
+
     const fixedAmountRule = new Rule({
       conditionsOp: 'and',
       conditions: [{ op: 'is', field: 'imported_payee', value: 'James' }],

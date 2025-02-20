@@ -1,7 +1,7 @@
 import * as d from 'date-fns';
 
-import { format as formatDate_ } from 'loot-core/src/shared/months';
-import { looselyParseAmount } from 'loot-core/src/shared/util';
+import { format as formatDate_ } from 'loot-core/shared/months';
+import { looselyParseAmount } from 'loot-core/shared/util';
 
 export const dateFormats = [
   { format: 'yyyy mm dd', label: 'YYYY MM DD' },

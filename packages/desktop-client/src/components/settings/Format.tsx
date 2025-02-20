@@ -2,18 +2,18 @@
 import React, { type ReactNode } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 
+import { Text } from '@actual-app/components/text';
+import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
-import { numberFormats } from 'loot-core/src/shared/util';
-import { type SyncedPrefs } from 'loot-core/src/types/prefs';
+import { numberFormats } from 'loot-core/shared/util';
+import { type SyncedPrefs } from 'loot-core/types/prefs';
 
 import { useDateFormat } from '../../hooks/useDateFormat';
 import { useSyncedPref } from '../../hooks/useSyncedPref';
 import { theme } from '../../style';
 import { tokens } from '../../tokens';
 import { Select } from '../common/Select';
-import { Text } from '../common/Text';
-import { View } from '../common/View';
 import { Checkbox } from '../forms';
 import { useSidebar } from '../sidebar/SidebarProvider';
 

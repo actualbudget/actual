@@ -1,6 +1,8 @@
 // @ts-strict-ignore
 import React, { useCallback, useEffect, useState } from 'react';
 
+import { View } from '@actual-app/components/view';
+
 import { collapseModals, pushModal } from 'loot-core/client/actions';
 import { sync } from 'loot-core/client/app/appSlice';
 import {
@@ -14,9 +16,9 @@ import {
   updateCategory,
   updateGroup,
 } from 'loot-core/client/queries/queriesSlice';
-import { useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
-import { send } from 'loot-core/src/platform/client/fetch';
-import * as monthUtils from 'loot-core/src/shared/months';
+import { useSpreadsheet } from 'loot-core/client/SpreadsheetProvider';
+import { send } from 'loot-core/platform/client/fetch';
+import * as monthUtils from 'loot-core/shared/months';
 
 import { useCategories } from '../../../hooks/useCategories';
 import { useLocale } from '../../../hooks/useLocale';
@@ -26,7 +28,6 @@ import { AnimatedLoading } from '../../../icons/AnimatedLoading';
 import { useDispatch } from '../../../redux';
 import { theme } from '../../../style';
 import { prewarmMonth } from '../../budget/util';
-import { View } from '../../common/View';
 import { NamespaceContext } from '../../spreadsheet/NamespaceContext';
 import { SyncRefresh } from '../../SyncRefresh';
 
@@ -288,6 +289,12 @@ export function Budget() {
     setInitialized(true);
   }, [budgetType, setStartMonthPref, spreadsheet, startMonth]);
 
+  const onCurrentMonth = useCallback(async () => {
+    await prewarmMonth(budgetType, spreadsheet, currMonth);
+    setStartMonthPref(currMonth);
+    setInitialized(true);
+  }, [budgetType, setStartMonthPref, spreadsheet, currMonth]);
+
   // const onOpenMonthActionMenu = () => {
   //   const options = [
   //     'Copy last month’s budget',
@@ -502,6 +509,7 @@ export function Budget() {
             onShowBudgetSummary={onShowBudgetSummary}
             onPrevMonth={onPrevMonth}
             onNextMonth={onNextMonth}
+            onCurrentMonth={onCurrentMonth}
             onSaveGroup={onSaveGroup}
             onDeleteGroup={onDeleteGroup}
             onAddCategory={onOpenNewCategoryModal}

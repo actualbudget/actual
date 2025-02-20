@@ -44,6 +44,9 @@ type Transaction = {
   notes?: string;
   payee: string;
   transfer_id?: string;
+  is_parent?: boolean;
+  is_child?: boolean;
+  parent_id?: string;
 };
 
 describe('Transfer', () => {
@@ -166,5 +169,53 @@ describe('Transfer', () => {
     await db.updateTransaction(transaction);
     await transfer.onUpdate(transaction);
     differ.expectToMatchDiff(await getAllTransactions());
+  });
+
+  test('split transfers are retained on child transactions', async () => {
+    // test: first add a txn having a transfer acct payee
+    // then mark it as `is_parent` and add a child txn
+    // the child txn should have a different transfer acct payee
+    // and `is_child` set to true
+    await prepareDatabase();
+
+    const [transferOne, transferTwo] = await Promise.all([
+      db.first("SELECT * FROM payees WHERE transfer_acct = 'one'"),
+      db.first("SELECT * FROM payees WHERE transfer_acct = 'two'"),
+    ]);
+
+    let parent: Transaction = {
+      account: 'one',
+      amount: 5000,
+      payee: transferTwo.id,
+      date: '2017-01-01',
+    };
+    parent.id = await db.insertTransaction(parent);
+    await transfer.onInsert(parent);
+    parent = await db.getTransaction(parent.id);
+
+    const differ = expectSnapshotWithDiffer(await getAllTransactions());
+
+    // mark the txn as parent
+    await db.updateTransaction({ id: parent.id, is_parent: true });
+    await transfer.onUpdate(parent);
+    differ.expectToMatchDiff(await getAllTransactions());
+
+    // add a child txn
+    let child: Transaction = {
+      account: 'one',
+      amount: 2000,
+      payee: transferOne.id,
+      date: '2017-01-01',
+      is_child: true,
+      parent_id: parent.id,
+    };
+    child.id = await db.insertTransaction(child);
+    await transfer.onInsert(child);
+    differ.expectToMatchDiff(await getAllTransactions());
+
+    // ensure that the child txn has the correct transfer acct payee
+    child = await db.getTransaction(child.id);
+    expect(child.transfer_id).not.toBe(parent.transfer_id);
+    expect(child.payee).toBe(transferOne.id);
   });
 });

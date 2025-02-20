@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { View } from '@actual-app/components/view';
+
 import { moveAccount } from 'loot-core/client/accounts/accountsSlice';
 import * as queries from 'loot-core/client/queries';
 import { type AccountEntity } from 'loot-core/types/models';
@@ -14,7 +16,6 @@ import { useOnBudgetAccounts } from '../../hooks/useOnBudgetAccounts';
 import { useUpdatedAccounts } from '../../hooks/useUpdatedAccounts';
 import { useSelector, useDispatch } from '../../redux';
 import { theme } from '../../style';
-import { View } from '../common/View';
 
 import { Account } from './Account';
 import { SecondaryItem } from './SecondaryItem';

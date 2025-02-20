@@ -1,8 +1,10 @@
 import React from 'react';
 
+import { View } from '@actual-app/components/view';
+
 import { useReports } from 'loot-core/client/data-hooks/reports';
-import { getMonthYearFormat } from 'loot-core/src/shared/months';
-import { integerToAmount, amountToInteger } from 'loot-core/src/shared/util';
+import { getMonthYearFormat } from 'loot-core/shared/months';
+import { integerToAmount, amountToInteger } from 'loot-core/shared/util';
 
 import { useCategories } from '../../hooks/useCategories';
 import { useDateFormat } from '../../hooks/useDateFormat';
@@ -14,7 +16,6 @@ import { FilterAutocomplete } from '../autocomplete/FilterAutocomplete';
 import { PayeeAutocomplete } from '../autocomplete/PayeeAutocomplete';
 import { ReportAutocomplete } from '../autocomplete/ReportAutocomplete';
 import { Input } from '../common/Input';
-import { View } from '../common/View';
 import { Checkbox } from '../forms';
 import { DateSelect } from '../select/DateSelect';
 import { RecurringSchedulePicker } from '../select/RecurringSchedulePicker';

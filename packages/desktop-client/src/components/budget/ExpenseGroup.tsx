@@ -1,8 +1,9 @@
 // @ts-strict-ignore
 import React, { type ComponentProps } from 'react';
 
+import { View } from '@actual-app/components/view';
+
 import { theme } from '../../style';
-import { View } from '../common/View';
 import {
   useDraggable,
   useDroppable,

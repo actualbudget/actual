@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-import { useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
+import { useSpreadsheet } from 'loot-core/client/SpreadsheetProvider';
 
 export function useReport<T>(
   sheetName: string,

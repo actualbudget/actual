@@ -1,5 +1,8 @@
 import React, { useCallback, useEffect, useState } from 'react';
 
+import { TextOneLine } from '@actual-app/components/text-one-line';
+import { View } from '@actual-app/components/view';
+
 import {
   useTransactions,
   useTransactionsSearch,
@@ -18,8 +21,6 @@ import { useDateFormat } from '../../../hooks/useDateFormat';
 import { useLocale } from '../../../hooks/useLocale';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { useDispatch } from '../../../redux';
-import { TextOneLine } from '../../common/TextOneLine';
-import { View } from '../../common/View';
 import { MobilePageHeader, Page } from '../../Page';
 import { MobileBackButton } from '../MobileBackButton';
 import { AddTransactionButton } from '../transactions/AddTransactionButton';

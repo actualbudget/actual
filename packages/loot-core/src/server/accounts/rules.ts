@@ -1,5 +1,13 @@
 // @ts-strict-ignore
 import * as dateFns from 'date-fns';
+import {
+  addMonths,
+  addWeeks,
+  addYears,
+  subMonths,
+  subWeeks,
+  subYears,
+} from 'date-fns';
 import * as Handlebars from 'handlebars';
 
 import {
@@ -37,14 +45,16 @@ function registerHandlebarsHelpers() {
 
   function mathHelper(fn: (a: number, b: number) => number) {
     return (a: unknown, ...b: unknown[]) => {
-      // Last argument is the Handlebars options object
-      b.splice(-1, 1);
       return b.map(Number).reduce(fn, Number(a));
     };
   }
 
-  const helpers = {
-    regex: (value: unknown, regex: unknown, replace: unknown) => {
+  function regexHelper(
+    mapRegex: (regex: string, flags: string) => string | RegExp,
+    mapNonRegex: (value: string) => string | RegExp,
+    apply: (value: string, regex: string | RegExp, replace: string) => string,
+  ) {
+    return (value: unknown, regex: unknown, replace: unknown) => {
       if (value == null) {
         return null;
       }
@@ -53,17 +63,35 @@ function registerHandlebarsHelpers() {
         return '';
       }
 
-      let regexp: RegExp;
+      let regexp: string | RegExp;
       const match = regexTest.exec(regex);
       // Regex is in format /regex/flags
       if (match) {
-        regexp = new RegExp(match[1], match[2]);
+        regexp = mapRegex(match[1], match[2]);
       } else {
-        regexp = new RegExp(regex);
+        regexp = mapNonRegex(regex);
       }
 
-      return String(value).replace(regexp, replace);
-    },
+      return apply(String(value), regexp, replace);
+    };
+  }
+
+  const helpers = {
+    regex: regexHelper(
+      (regex, flags) => new RegExp(regex, flags),
+      value => new RegExp(value),
+      (value, regex, replace) => value.replace(regex, replace),
+    ),
+    replace: regexHelper(
+      (regex, flags) => new RegExp(regex, flags),
+      value => value,
+      (value, regex, replace) => value.replace(regex, replace),
+    ),
+    replaceAll: regexHelper(
+      (regex, flags) => new RegExp(regex, flags),
+      value => value,
+      (value, regex, replace) => value.replaceAll(regex, replace),
+    ),
     add: mathHelper((a, b) => a + b),
     sub: mathHelper((a, b) => a - b),
     div: mathHelper((a, b) => a / b),
@@ -80,13 +108,54 @@ function registerHandlebarsHelpers() {
     month: (date?: string) => date && format(date, 'M'),
     year: (date?: string) => date && format(date, 'yyyy'),
     format: (date?: string, f?: string) => date && f && format(date, f),
+    addDays: (date?: string, days?: number) => {
+      if (!date || !days) return date;
+      return format(addDays(date, days), 'yyyy-MM-dd');
+    },
+    subDays: (date?: string, days?: number) => {
+      if (!date || !days) return date;
+      return format(subDays(date, days), 'yyyy-MM-dd');
+    },
+    addMonths: (date?: string, months?: number) => {
+      if (!date || !months) return date;
+      return format(addMonths(parseDate(date), months), 'yyyy-MM-dd');
+    },
+    subMonths: (date?: string, months?: number) => {
+      if (!date || !months) return date;
+      return format(subMonths(parseDate(date), months), 'yyyy-MM-dd');
+    },
+    addWeeks: (date?: string, weeks?: number) => {
+      if (!date || !weeks) return date;
+      return format(addWeeks(parseDate(date), weeks), 'yyyy-MM-dd');
+    },
+    subWeeks: (date?: string, weeks?: number) => {
+      if (!date || !weeks) return date;
+      return format(subWeeks(parseDate(date), weeks), 'yyyy-MM-dd');
+    },
+    addYears: (date?: string, years?: number) => {
+      if (!date || !years) return date;
+      return format(addYears(parseDate(date), years), 'yyyy-MM-dd');
+    },
+    subYears: (date?: string, years?: number) => {
+      if (!date || !years) return date;
+      return format(subYears(parseDate(date), years), 'yyyy-MM-dd');
+    },
+    setDay: (date?: string, day?: number) => {
+      if (!date) return date;
+      const actualDay = Number(format(date, 'd'));
+      return format(addDays(date, day - actualDay), 'yyyy-MM-dd');
+    },
     debug: (value: unknown) => {
       console.log(value);
     },
-  };
+    concat: (...args: unknown[]) => args.join(''),
+  } as Record<string, Handlebars.HelperDelegate>;
 
   for (const [name, fn] of Object.entries(helpers)) {
-    Handlebars.registerHelper(name, fn);
+    Handlebars.registerHelper(name, (...args: unknown[]) => {
+      //The last argument is the Handlebars options object
+      return fn(...args.slice(0, -1));
+    });
   }
 }
 

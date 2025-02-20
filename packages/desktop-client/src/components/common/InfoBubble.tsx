@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { useLocation } from 'react-router-dom';
 
+import { Text } from '@actual-app/components/text';
+import { View } from '@actual-app/components/view';
+
 import { SvgInformationCircle } from '../../icons/v2';
 import { theme } from '../../style';
-
-import { Text } from './Text';
-import { View } from './View';
 
 type InfoBubbleProps = {
   label: string;

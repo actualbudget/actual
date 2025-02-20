@@ -1,9 +1,10 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
+
 import { useNavigate } from '../../../hooks/useNavigate';
 import { SvgAdd } from '../../../icons/v1';
-import { Button } from '../../common/Button2';
 
 type AddTransactionButtonProps = {
   to?: string;

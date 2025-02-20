@@ -1,16 +1,16 @@
 import * as d from 'date-fns';
 import keyBy from 'lodash/keyBy';
 
-import { runQuery } from 'loot-core/src/client/query-helpers';
-import { type useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
-import { send } from 'loot-core/src/platform/client/fetch';
-import * as monthUtils from 'loot-core/src/shared/months';
-import { q } from 'loot-core/src/shared/query';
+import { runQuery } from 'loot-core/client/query-helpers';
+import { type useSpreadsheet } from 'loot-core/client/SpreadsheetProvider';
+import { send } from 'loot-core/platform/client/fetch';
+import * as monthUtils from 'loot-core/shared/months';
+import { q } from 'loot-core/shared/query';
 import {
   integerToCurrency,
   integerToAmount,
   amountToInteger,
-} from 'loot-core/src/shared/util';
+} from 'loot-core/shared/util';
 import {
   type AccountEntity,
   type RuleConditionEntity,

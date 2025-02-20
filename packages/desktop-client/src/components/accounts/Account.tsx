@@ -9,6 +9,10 @@ import React, {
 import { Trans } from 'react-i18next';
 import { Navigate, useParams, useLocation } from 'react-router-dom';
 
+import { Button } from '@actual-app/components/button';
+import { styles } from '@actual-app/components/styles';
+import { Text } from '@actual-app/components/text';
+import { View } from '@actual-app/components/view';
 import { debounce } from 'debounce';
 import { t } from 'i18next';
 import { v4 as uuidv4 } from 'uuid';
@@ -21,6 +25,12 @@ import {
   replaceModal,
 } from 'loot-core/client/actions';
 import { syncAndDownload } from 'loot-core/client/app/appSlice';
+import { useFilters } from 'loot-core/client/data-hooks/filters';
+import {
+  SchedulesProvider,
+  accountSchedulesQuery,
+} from 'loot-core/client/data-hooks/schedules';
+import * as queries from 'loot-core/client/queries';
 import {
   createPayee,
   initiallyLoadPayees,
@@ -29,24 +39,18 @@ import {
   updateAccount,
   updateNewTransactions,
 } from 'loot-core/client/queries/queriesSlice';
-import { type AppDispatch } from 'loot-core/client/store';
-import { validForTransfer } from 'loot-core/client/transfer';
-import { type UndoState } from 'loot-core/server/undo';
-import { useFilters } from 'loot-core/src/client/data-hooks/filters';
-import {
-  SchedulesProvider,
-  accountSchedulesQuery,
-} from 'loot-core/src/client/data-hooks/schedules';
-import * as queries from 'loot-core/src/client/queries';
 import {
   runQuery,
   pagedQuery,
   type PagedQuery,
-} from 'loot-core/src/client/query-helpers';
-import { send, listen } from 'loot-core/src/platform/client/fetch';
-import * as undo from 'loot-core/src/platform/client/undo';
-import { currentDay } from 'loot-core/src/shared/months';
-import { q, type Query } from 'loot-core/src/shared/query';
+} from 'loot-core/client/query-helpers';
+import { type AppDispatch } from 'loot-core/client/store';
+import { validForTransfer } from 'loot-core/client/transfer';
+import { send, listen } from 'loot-core/platform/client/fetch';
+import * as undo from 'loot-core/platform/client/undo';
+import { type UndoState } from 'loot-core/server/undo';
+import { currentDay } from 'loot-core/shared/months';
+import { q, type Query } from 'loot-core/shared/query';
 import {
   updateTransaction,
   realizeTempTransactions,
@@ -54,8 +58,8 @@ import {
   ungroupTransactions,
   makeChild,
   makeAsNonChildTransactions,
-} from 'loot-core/src/shared/transactions';
-import { applyChanges, groupById } from 'loot-core/src/shared/util';
+} from 'loot-core/shared/transactions';
+import { applyChanges, groupById } from 'loot-core/shared/util';
 import {
   type NewRuleEntity,
   type RuleActionEntity,
@@ -63,7 +67,7 @@ import {
   type RuleConditionEntity,
   type TransactionEntity,
   type TransactionFilterEntity,
-} from 'loot-core/src/types/models';
+} from 'loot-core/types/models';
 
 import { useAccountPreviewTransactions } from '../../hooks/useAccountPreviewTransactions';
 import { useAccounts } from '../../hooks/useAccounts';
@@ -83,10 +87,7 @@ import {
 import { useSyncedPref } from '../../hooks/useSyncedPref';
 import { useTransactionBatchActions } from '../../hooks/useTransactionBatchActions';
 import { useSelector, useDispatch } from '../../redux';
-import { styles, theme } from '../../style';
-import { Button } from '../common/Button2';
-import { Text } from '../common/Text';
-import { View } from '../common/View';
+import { theme } from '../../style';
 import { type SavedFilter } from '../filters/SavedFilterMenuButton';
 import { TransactionList } from '../transactions/TransactionList';
 import { validateAccountName } from '../util/accountValidation';

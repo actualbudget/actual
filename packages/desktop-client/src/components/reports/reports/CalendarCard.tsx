@@ -10,11 +10,17 @@ import React, {
 } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { Block } from '@actual-app/components/block';
+import { Button } from '@actual-app/components/button';
+import { styles } from '@actual-app/components/styles';
+import { theme } from '@actual-app/components/theme';
+import { Tooltip } from '@actual-app/components/tooltip';
+import { View } from '@actual-app/components/view';
 import { format } from 'date-fns';
 import { debounce } from 'debounce';
 
+import * as monthUtils from 'loot-core/shared/months';
 import { amountToCurrency } from 'loot-core/shared/util';
-import * as monthUtils from 'loot-core/src/shared/months';
 import { type CalendarWidget } from 'loot-core/types/models';
 import { type SyncedPrefs } from 'loot-core/types/prefs';
 
@@ -22,11 +28,6 @@ import { useMergedRefs } from '../../../hooks/useMergedRefs';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { useResizeObserver } from '../../../hooks/useResizeObserver';
 import { SvgArrowThickDown, SvgArrowThickUp } from '../../../icons/v1';
-import { styles, theme } from '../../../style';
-import { Block } from '../../common/Block';
-import { Button } from '../../common/Button2';
-import { Tooltip } from '../../common/Tooltip';
-import { View } from '../../common/View';
 import { PrivacyFilter } from '../../PrivacyFilter';
 import { useResponsive } from '../../responsive/ResponsiveProvider';
 import { chartTheme } from '../chart-theme';
@@ -302,6 +303,7 @@ export function CalendarCard({
                   selectedMonthNameFormat={selectedMonthNameFormat}
                   index={index}
                   widgetId={widgetId}
+                  isEditing={isEditing}
                 />
               ))
             ) : (
@@ -327,6 +329,7 @@ type CalendarCardInnerProps = {
   selectedMonthNameFormat: string;
   index: number;
   widgetId: string;
+  isEditing?: boolean;
 };
 function CalendarCardInner({
   calendar,
@@ -335,6 +338,7 @@ function CalendarCardInner({
   selectedMonthNameFormat,
   index,
   widgetId,
+  isEditing,
 }: CalendarCardInnerProps) {
   const [monthNameVisible, setMonthNameVisible] = useState(true);
   const monthFormatSizeContainers = useRef<(HTMLSpanElement | null)[]>(
@@ -513,6 +517,7 @@ function CalendarCardInner({
         data={calendar.data}
         start={calendar.start}
         firstDayOfWeekIdx={firstDayOfWeekIdx}
+        isEditing={isEditing}
         onDayClick={date => {
           if (date) {
             navigate(

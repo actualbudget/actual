@@ -1,7 +1,11 @@
 import { type ComponentProps, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import * as monthUtils from 'loot-core/src/shared/months';
+import { Button } from '@actual-app/components/button';
+import { SpaceBetween } from '@actual-app/components/space-between';
+import { View } from '@actual-app/components/view';
+
+import * as monthUtils from 'loot-core/shared/months';
 import {
   type RuleConditionEntity,
   type TimeFrame,
@@ -9,10 +13,7 @@ import {
 import { type SyncedPrefs } from 'loot-core/types/prefs';
 
 import { useLocale } from '../../hooks/useLocale';
-import { Button } from '../common/Button2';
 import { Select } from '../common/Select';
-import { SpaceBetween } from '../common/SpaceBetween';
-import { View } from '../common/View';
 import { AppliedFilters } from '../filters/AppliedFilters';
 import { FilterButton } from '../filters/FiltersMenu';
 import { useResponsive } from '../responsive/ResponsiveProvider';

@@ -1,15 +1,15 @@
 import React, { useRef, useCallback, useLayoutEffect } from 'react';
 
 import { pushModal } from 'loot-core/client/actions';
-import { send } from 'loot-core/src/platform/client/fetch';
+import { send } from 'loot-core/platform/client/fetch';
 import {
   splitTransaction,
   updateTransaction,
   addSplitTransaction,
   realizeTempTransactions,
   applyTransactionDiff,
-} from 'loot-core/src/shared/transactions';
-import { getChangedValues, applyChanges } from 'loot-core/src/shared/util';
+} from 'loot-core/shared/transactions';
+import { getChangedValues, applyChanges } from 'loot-core/shared/util';
 
 import { useNavigate } from '../../hooks/useNavigate';
 import { useSyncedPref } from '../../hooks/useSyncedPref';

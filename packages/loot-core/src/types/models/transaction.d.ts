@@ -31,5 +31,6 @@ export interface TransactionEntity {
     type: 'SplitTransactionError';
     version: 1;
     difference: number;
-  };
+  } | null;
+  raw_synced_data?: string | undefined;
 }

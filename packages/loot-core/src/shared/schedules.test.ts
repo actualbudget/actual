@@ -3,7 +3,11 @@ import i18next from 'i18next';
 import MockDate from 'mockdate';
 
 import * as monthUtils from './months';
-import { getRecurringDescription, getStatus } from './schedules';
+import {
+  getRecurringDescription,
+  getStatus,
+  getUpcomingDays,
+} from './schedules';
 
 i18next.init({
   lng: 'en',
@@ -409,6 +413,22 @@ describe('schedules', () => {
           enUS,
         ),
       ).toBe('Every 2 months on the 17th, until 2021-06-01');
+    });
+  });
+
+  describe('getUpcomingDays', () => {
+    it.each([
+      ['1', 1],
+      ['7', 7],
+      ['14', 14],
+      ['oneMonth', 32],
+      ['currentMonth', 31],
+      ['2-day', 2],
+      ['5-week', 35],
+      ['3-month', 91],
+      ['4-year', 1462],
+    ])('value of %s returns %i days', (value: string, expected: number) => {
+      expect(getUpcomingDays(value)).toEqual(expected);
     });
   });
 });

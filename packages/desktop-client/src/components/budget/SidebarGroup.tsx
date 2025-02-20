@@ -3,16 +3,17 @@ import React, { type CSSProperties, useRef } from 'react';
 import { type ConnectDragSource } from 'react-dnd';
 import { useTranslation } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
+import { Menu } from '@actual-app/components/menu';
+import { Popover } from '@actual-app/components/popover';
+import { Text } from '@actual-app/components/text';
+import { View } from '@actual-app/components/view';
+
 import { useContextMenu } from '../../hooks/useContextMenu';
 import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { SvgExpandArrow } from '../../icons/v0';
 import { SvgCheveronDown } from '../../icons/v1';
 import { theme } from '../../style';
-import { Button } from '../common/Button2';
-import { Menu } from '../common/Menu';
-import { Popover } from '../common/Popover';
-import { Text } from '../common/Text';
-import { View } from '../common/View';
 import { NotesButton } from '../NotesButton';
 import { InputCell } from '../table';
 

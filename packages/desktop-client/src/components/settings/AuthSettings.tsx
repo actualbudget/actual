@@ -1,14 +1,15 @@
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
+import { Label } from '@actual-app/components/label';
+import { Text } from '@actual-app/components/text';
+
 import { pushModal } from 'loot-core/client/actions';
 
 import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { useDispatch } from '../../redux';
 import { theme } from '../../style';
-import { Button } from '../common/Button2';
-import { Label } from '../common/Label';
-import { Text } from '../common/Text';
 import { useMultiuserEnabled, useLoginMethod } from '../ServerContext';
 
 import { Setting } from './UI';
