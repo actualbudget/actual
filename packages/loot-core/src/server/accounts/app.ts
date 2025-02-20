@@ -1,6 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
 
-import { send } from '../../platform/client/fetch';
 import { captureException } from '../../platform/exceptions';
 import * as asyncStorage from '../../platform/server/asyncStorage';
 import * as connection from '../../platform/server/connection';
@@ -29,6 +28,7 @@ import { mutator } from '../mutators';
 import { get, post } from '../post';
 import { getServer } from '../server-config';
 import { batchMessages } from '../sync';
+import { app as transactionsApp } from '../transactions/app';
 import { undoable, withUndo } from '../undo';
 
 import * as link from './link';
@@ -345,7 +345,7 @@ async function closeAccount({
           [transferAccountId],
         );
 
-        await send('transaction-add', {
+        transactionsApp.handlers['transaction-add']({
           id: uuidv4(),
           payee: payeeId,
           amount: -balance,
