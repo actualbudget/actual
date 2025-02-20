@@ -221,6 +221,17 @@ const finalConfig = {
   token_expiration: process.env.ACTUAL_TOKEN_EXPIRATION
     ? process.env.ACTUAL_TOKEN_EXPIRATION
     : config.token_expiration,
+  enforceOpenID: process.env.ACTUAL_OPENID_ENFORCE
+    ? (() => {
+        const value = process.env.ACTUAL_OPENID_ENFORCE.toLowerCase();
+        if (!['true', 'false'].includes(value)) {
+          throw new Error(
+            'ACTUAL_OPENID_ENFORCE must be either "true" or "false"',
+          );
+        }
+        return value === 'true';
+      })()
+    : config.multiuser,
 };
 debug(`using port ${finalConfig.port}`);
 debug(`using hostname ${finalConfig.hostname}`);
