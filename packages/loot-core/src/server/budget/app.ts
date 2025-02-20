@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import * as CRDT from '@actual-app/crdt';
 
 import { createTestBudget } from '../../mocks/budget';
@@ -12,6 +13,7 @@ import { startBackupService, stopBackupService } from '../backups';
 import * as cloudStorage from '../cloud-storage';
 import * as db from '../db';
 import * as mappings from '../db/mappings';
+import { FileDownloadError, FileUploadError } from '../errors';
 import { handleBudgetImport } from '../importers';
 import { app as mainApp } from '../main-app';
 import { mutator } from '../mutators';
@@ -173,48 +175,46 @@ function handleUniqueBudgetName({ name }: { name: string }) {
   return uniqueBudgetName(name);
 }
 
-async function getBudgets() {
+async function getBudgets(): Promise<Budget[]> {
   const paths = await fs.listDir(fs.getDocumentDir());
-  const budgets = (
-    await Promise.all(
-      paths.map(async name => {
-        const prefsPath = fs.join(fs.getDocumentDir(), name, 'metadata.json');
-        if (await fs.exists(prefsPath)) {
-          let prefs;
-          try {
-            prefs = JSON.parse(await fs.readFile(prefsPath));
-          } catch (e) {
-            console.log('Error parsing metadata:', e.stack);
-            return;
-          }
-
-          // We treat the directory name as the canonical id so that if
-          // the user moves it around/renames/etc, nothing breaks. The
-          // id is stored in prefs just for convenience (and the prefs
-          // will always update to the latest given id)
-          if (name !== DEMO_BUDGET_ID) {
-            return {
-              id: name,
-              ...(prefs.cloudFileId ? { cloudFileId: prefs.cloudFileId } : {}),
-              ...(prefs.encryptKeyId
-                ? { encryptKeyId: prefs.encryptKeyId }
-                : {}),
-              ...(prefs.groupId ? { groupId: prefs.groupId } : {}),
-              ...(prefs.owner ? { owner: prefs.owner } : {}),
-              name: prefs.budgetName || '(no name)',
-            } satisfies Budget;
-          }
+  const budgets: (Budget | null)[] = await Promise.all(
+    paths.map(async name => {
+      const prefsPath = fs.join(fs.getDocumentDir(), name, 'metadata.json');
+      if (await fs.exists(prefsPath)) {
+        let prefs;
+        try {
+          prefs = JSON.parse(await fs.readFile(prefsPath));
+        } catch (e) {
+          console.log('Error parsing metadata:', e.stack);
+          return null;
         }
 
-        return null;
-      }),
-    )
-  ).filter(x => x);
+        // We treat the directory name as the canonical id so that if
+        // the user moves it around/renames/etc, nothing breaks. The
+        // id is stored in prefs just for convenience (and the prefs
+        // will always update to the latest given id)
+        if (name !== DEMO_BUDGET_ID) {
+          return {
+            id: name,
+            ...(prefs.cloudFileId ? { cloudFileId: prefs.cloudFileId } : {}),
+            ...(prefs.encryptKeyId ? { encryptKeyId: prefs.encryptKeyId } : {}),
+            ...(prefs.groupId ? { groupId: prefs.groupId } : {}),
+            ...(prefs.owner ? { owner: prefs.owner } : {}),
+            name: prefs.budgetName || '(no name)',
+          } satisfies Budget;
+        }
+      }
 
-  return budgets;
+      return null;
+    }),
+  );
+
+  return budgets.filter(x => x != null);
 }
 
-async function uploadBudget({ id }: { id?: string } = {}) {
+async function uploadBudget({ id }: { id?: string } = {}): Promise<{
+  error?: ReturnType<typeof FileUploadError>;
+}> {
   if (id) {
     if (getPrefs()) {
       throw new Error('upload-budget: id given but prefs already loaded');
@@ -231,7 +231,7 @@ async function uploadBudget({ id }: { id?: string } = {}) {
       return { error: e };
     }
     captureException(e);
-    return { error: { reason: 'internal' } };
+    return { error: FileUploadError('internal') };
   } finally {
     if (id) {
       unloadPrefs();
@@ -241,7 +241,10 @@ async function uploadBudget({ id }: { id?: string } = {}) {
   return {};
 }
 
-async function downloadBudget({ fileId }: { fileId: string }) {
+async function downloadBudget({ fileId }: { fileId: string }): Promise<{
+  id?: string;
+  error?: ReturnType<typeof FileDownloadError>;
+}> {
   let result;
   try {
     result = await cloudStorage.download(fileId);
@@ -258,7 +261,7 @@ async function downloadBudget({ fileId }: { fileId: string }) {
       return { error: e };
     } else {
       captureException(e);
-      return { error: { reason: 'internal' } };
+      return { error: FileDownloadError('internal') };
     }
   }
 
@@ -340,8 +343,8 @@ async function deleteBudget({
   id,
   cloudFileId,
 }: {
-  id: string;
-  cloudFileId: string;
+  id?: string;
+  cloudFileId?: string;
 }) {
   // If it's a cloud file, you can delete it from the server by
   // passing its cloud id
@@ -537,7 +540,7 @@ async function importBudget({
   }
 }
 
-async function exportBudget(): Promise<{ data?: Buffer; error?: string }> {
+async function exportBudget(): Promise<{ data: Buffer } | { error: string }> {
   try {
     return {
       data: await cloudStorage.exportBuffer(),
