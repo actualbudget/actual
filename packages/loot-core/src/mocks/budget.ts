@@ -461,13 +461,13 @@ async function fillOther(handlers, account, payees, groups) {
 async function createBudget(accounts, payees, groups) {
   const primaryAccount = accounts.find(a => (a.name = 'Bank of America'));
   const earliestDate = (
-    await db.first<db.DbViewTransaction>(
+    await db.first<Pick<db.DbViewTransaction, 'date'>>(
       `SELECT t.date FROM v_transactions t LEFT JOIN accounts a ON t.account = a.id
        WHERE a.offbudget = 0 AND t.is_child = 0 ORDER BY date ASC LIMIT 1`,
     )
   ).date;
   const earliestPrimaryDate = (
-    await db.first<db.DbViewTransaction>(
+    await db.first<Pick<db.DbViewTransaction, 'date'>>(
       `SELECT t.date FROM v_transactions t LEFT JOIN accounts a ON t.account = a.id
        WHERE a.id = ? AND a.offbudget = 0 AND t.is_child = 0 ORDER BY date ASC LIMIT 1`,
       [primaryAccount.id],
