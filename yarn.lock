@@ -16086,7 +16086,7 @@ __metadata:
     i18next: "npm:^23.11.5"
     jest: "npm:^27.5.1"
     jsverify: "npm:^0.8.4"
-    lru-cache: "npm:^5.1.1"
+    lru-cache: "npm:^11.0.2"
     md5: "npm:^2.3.0"
     memfs: "npm:3.5.3"
     memoize-one: "npm:^6.0.0"
@@ -16142,6 +16142,13 @@ __metadata:
   version: 2.0.0
   resolution: "lowercase-keys@npm:2.0.0"
   checksum: 10/1c233d2da35056e8c49fae8097ee061b8c799b2f02e33c2bf32f9913c7de8fb481ab04dab7df35e94156c800f5f34e99acbf32b21781d87c3aa43ef7b748b79e
+  languageName: node
+  linkType: hard
+
+"lru-cache@npm:^11.0.2":
+  version: 11.0.2
+  resolution: "lru-cache@npm:11.0.2"
+  checksum: 10/25fcb66e9d91eaf17227c6abfe526a7bed5903de74f93bfde380eb8a13410c5e8d3f14fe447293f3f322a7493adf6f9f015c6f1df7a235ff24ec30f366e1c058
   languageName: node
   linkType: hard
 

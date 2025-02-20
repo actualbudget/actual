@@ -1,32 +1,57 @@
-// @ts-strict-ignore
-import React, { createContext, useEffect, useMemo, useContext } from 'react';
+import {
+  createContext,
+  useEffect,
+  useMemo,
+  useContext,
+  type ReactNode,
+} from 'react';
 
-import LRU from 'lru-cache';
+import { LRUCache } from 'lru-cache';
 
 import { listen, send } from '../platform/client/fetch';
+import { type Node } from '../server/spreadsheet/spreadsheet';
+import { type Query } from '../shared/query';
 
 type SpreadsheetContextValue = ReturnType<typeof makeSpreadsheet>;
-const SpreadsheetContext = createContext<SpreadsheetContextValue>(undefined);
+const SpreadsheetContext = createContext<SpreadsheetContextValue | undefined>(
+  undefined,
+);
 
 export function useSpreadsheet() {
-  return useContext(SpreadsheetContext);
+  const context = useContext(SpreadsheetContext);
+  if (!context) {
+    throw new Error('useSpreadsheet must be used within a SpreadsheetProvider');
+  }
+  return context;
 }
 
+// TODO: Make this generic and replace the Binding type in the desktop-client package.
+type Binding =
+  | string
+  | { name: string; value?: unknown | null; query?: Query | undefined };
+
+type CellCacheValue = { name: string; value: Node['value'] | null };
+type CellCache = { [name: string]: Promise<CellCacheValue> | null };
+type CellObserverCallback = (node: CellCacheValue) => void;
+type CellObservers = { [name: string]: CellObserverCallback[] };
+
+const GLOBAL_SHEET_NAME = '__global';
+
 function makeSpreadsheet() {
-  const cellObservers = {};
-  const LRUValueCache = new LRU({ max: 1200 });
-  const cellCache = {};
+  const cellObservers: CellObservers = {};
+  const LRUValueCache = new LRUCache<string, CellCacheValue>({ max: 1200 });
+  const cellCache: CellCache = {};
   let observersDisabled = false;
 
   class Spreadsheet {
-    observeCell(name, cb) {
+    observeCell(name: string, callback: CellObserverCallback): () => void {
       if (!cellObservers[name]) {
         cellObservers[name] = [];
       }
-      cellObservers[name].push(cb);
+      cellObservers[name].push(callback);
 
       return () => {
-        cellObservers[name] = cellObservers[name].filter(x => x !== cb);
+        cellObservers[name] = cellObservers[name].filter(cb => cb !== callback);
 
         if (cellObservers[name].length === 0) {
           cellCache[name] = null;
@@ -34,23 +59,23 @@ function makeSpreadsheet() {
       };
     }
 
-    disableObservers() {
+    disableObservers(): void {
       observersDisabled = true;
     }
 
-    enableObservers() {
+    enableObservers(): void {
       observersDisabled = false;
     }
 
-    prewarmCache(name, value) {
+    prewarmCache(name: string, value: CellCacheValue): void {
       LRUValueCache.set(name, value);
     }
 
-    listen() {
-      return listen('cells-changed', function (nodes) {
+    listen(): () => void {
+      return listen('cells-changed', event => {
         if (!observersDisabled) {
           // TODO: batch react so only renders once
-          nodes.forEach(node => {
+          event.forEach(node => {
             const observers = cellObservers[node.name];
             if (observers) {
               observers.forEach(func => func(node));
@@ -62,7 +87,11 @@ function makeSpreadsheet() {
       });
     }
 
-    bind(sheetName = '__global', binding, callback) {
+    bind(
+      sheetName: string = GLOBAL_SHEET_NAME,
+      binding: Binding,
+      callback: CellObserverCallback,
+    ): () => void {
       binding =
         typeof binding === 'string' ? { name: binding, value: null } : binding;
 
@@ -77,7 +106,10 @@ function makeSpreadsheet() {
       // This is a display optimization to avoid flicker. The LRU cache
       // will keep a number of recent nodes in memory.
       if (LRUValueCache.has(resolvedName)) {
-        callback(LRUValueCache.get(resolvedName));
+        const node = LRUValueCache.get(resolvedName);
+        if (node) {
+          callback(node);
+        }
       }
 
       if (cellCache[resolvedName] != null) {
@@ -102,15 +134,15 @@ function makeSpreadsheet() {
       return cleanup;
     }
 
-    get(sheetName, name) {
+    get(sheetName: string, name: string) {
       return send('getCell', { sheetName, name });
     }
 
-    getCellNames(sheetName) {
+    getCellNames(sheetName: string) {
       return send('getCellNamesInSheet', { sheetName });
     }
 
-    createQuery(sheetName, name, query) {
+    createQuery(sheetName: string, name: string, query: Query) {
       return send('create-query', {
         sheetName,
         name,
@@ -122,7 +154,11 @@ function makeSpreadsheet() {
   return new Spreadsheet();
 }
 
-export function SpreadsheetProvider({ children }) {
+type SpreadsheetProviderProps = {
+  children: ReactNode;
+};
+
+export function SpreadsheetProvider({ children }: SpreadsheetProviderProps) {
   const spreadsheet = useMemo(() => makeSpreadsheet(), []);
 
   useEffect(() => {
