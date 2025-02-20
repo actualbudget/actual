@@ -23,18 +23,18 @@
   },
   "dependencies": {
     "@actual-app/crdt": "workspace:^",
-    "better-sqlite3": "^11.7.0",
-    "compare-versions": "^6.1.0",
+    "better-sqlite3": "^11.7.2",
+    "compare-versions": "^6.1.1",
     "node-fetch": "^3.3.2",
     "uuid": "^9.0.1"
   },
   "devDependencies": {
-    "@swc/core": "^1.5.3",
-    "@swc/jest": "^0.2.36",
+    "@swc/core": "^1.5.29",
+    "@swc/jest": "^0.2.37",
     "@types/jest": "^27.5.2",
-    "@types/uuid": "^9.0.2",
+    "@types/uuid": "^9.0.8",
     "jest": "^27.5.1",
-    "tsc-alias": "^1.8.8",
+    "tsc-alias": "^1.8.10",
     "typescript": "^5.5.4"
   }
 }

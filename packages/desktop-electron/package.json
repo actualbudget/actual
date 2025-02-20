@@ -85,18 +85,18 @@
     "npmRebuild": false
   },
   "dependencies": {
-    "better-sqlite3": "^11.7.0",
+    "better-sqlite3": "^11.7.2",
     "fs-extra": "^11.2.0",
     "promise-retry": "^2.0.1"
   },
   "devDependencies": {
     "@electron/notarize": "2.4.0",
-    "@electron/rebuild": "3.6.0",
+    "@electron/rebuild": "3.6.2",
     "@types/copyfiles": "^2",
     "@types/fs-extra": "^11",
     "copyfiles": "^2.4.1",
     "cross-env": "^7.0.3",
-    "electron": "30.0.6",
+    "electron": "30.0.9",
     "electron-builder": "24.13.3",
     "typescript": "^5.5.4"
   }
