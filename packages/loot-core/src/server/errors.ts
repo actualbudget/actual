@@ -87,7 +87,12 @@ export function APIError(msg: string, meta?: Record<string, any>) {
 
 export function FileDownloadError(
   reason: string,
-  meta?: { fileId?: string; isMissingKey?: boolean },
+  meta?: {
+    fileId?: string;
+    isMissingKey?: boolean;
+    name?: string;
+    id?: string;
+  },
 ) {
   return { type: 'FileDownloadError', reason, meta };
 }
