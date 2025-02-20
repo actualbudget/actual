@@ -224,7 +224,7 @@ export function getRecurringDescription(config, dateFormat, locale: Locale) {
       return t('Recurring error');
   }
 
-  return `${desc}${suffix}`;
+  return `${desc}${suffix}`.trim();
 }
 
 export function recurConfigToRSchedule(config) {
