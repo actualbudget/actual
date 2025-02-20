@@ -1,7 +1,6 @@
-// @ts-strict-ignore
-import LRU from 'lru-cache';
+import { LRUCache } from 'lru-cache';
 
-const likePatternCache = new LRU({ max: 500 });
+const likePatternCache = new LRUCache<string, RegExp>({ max: 500 });
 
 export function unicodeLike(
   pattern: string | null,

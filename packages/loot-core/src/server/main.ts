@@ -15,19 +15,15 @@ import * as sqlite from '../platform/server/sqlite';
 import { isNonProductionEnvironment } from '../shared/environment';
 import * as monthUtils from '../shared/months';
 import { dayFromDate } from '../shared/months';
-import { q, Query } from '../shared/query';
+import { q } from '../shared/query';
 import { amountToInteger, stringToInteger } from '../shared/util';
 import { type Budget } from '../types/budget';
 import { Handlers } from '../types/handlers';
 import { OpenIdConfig } from '../types/models/openid';
 
-import { exportToCSV, exportQueryToCSV } from './accounts/export-to-csv';
 import * as link from './accounts/link';
-import { parseFile } from './accounts/parse-file';
 import { getStartingBalancePayee } from './accounts/payees';
 import * as bankSync from './accounts/sync';
-import * as rules from './accounts/transaction-rules';
-import { batchUpdateTransactions } from './accounts/transactions';
 import { app as adminApp } from './admin/app';
 import { installAPI } from './api';
 import { runQuery as aqlQuery } from './aql';
@@ -73,6 +69,8 @@ import {
 } from './sync';
 import * as syncMigrations from './sync/migrate';
 import { app as toolsApp } from './tools/app';
+import { app as transactionsApp } from './transactions/app';
+import * as rules from './transactions/transaction-rules';
 import { withUndo, clearUndo, undo, redo } from './undo';
 import { updateVersion } from './update';
 import {
@@ -108,72 +106,11 @@ handlers['redo'] = mutator(function () {
   return redo();
 });
 
-handlers['transactions-batch-update'] = mutator(async function ({
-  added,
-  deleted,
-  updated,
-  learnCategories,
-}) {
-  return withUndo(async () => {
-    const result = await batchUpdateTransactions({
-      added,
-      updated,
-      deleted,
-      learnCategories,
-    });
-
-    return result;
-  });
-});
-
-handlers['transaction-add'] = mutator(async function (transaction) {
-  await handlers['transactions-batch-update']({ added: [transaction] });
-  return {};
-});
-
-handlers['transaction-update'] = mutator(async function (transaction) {
-  await handlers['transactions-batch-update']({ updated: [transaction] });
-  return {};
-});
-
-handlers['transaction-delete'] = mutator(async function (transaction) {
-  await handlers['transactions-batch-update']({ deleted: [transaction] });
-  return {};
-});
-
-handlers['transactions-parse-file'] = async function ({ filepath, options }) {
-  return parseFile(filepath, options);
-};
-
-handlers['transactions-export'] = async function ({
-  transactions,
-  accounts,
-  categoryGroups,
-  payees,
-}) {
-  return exportToCSV(transactions, accounts, categoryGroups, payees);
-};
-
-handlers['transactions-export-query'] = async function ({ query: queryState }) {
-  return exportQueryToCSV(new Query(queryState));
-};
-
 handlers['get-categories'] = async function () {
   return {
     grouped: await db.getCategoriesGrouped(),
     list: await db.getCategories(),
   };
-};
-
-handlers['get-earliest-transaction'] = async function () {
-  const { data } = await aqlQuery(
-    q('transactions')
-      .options({ splits: 'none' })
-      .orderBy({ date: 'asc' })
-      .select('*')
-      .limit(1),
-  );
-  return data[0] || null;
 };
 
 handlers['get-budget-bounds'] = async function () {
@@ -528,7 +465,10 @@ handlers['getCell'] = async function ({ sheetName, name }) {
 };
 
 handlers['getCells'] = async function ({ names }) {
-  return names.map(name => ({ value: sheet.get()._getNode(name).value }));
+  return names.map(name => {
+    const node = sheet.get()._getNode(name);
+    return { name: node.name, value: node.value };
+  });
 };
 
 handlers['getCellNamesInSheet'] = async function ({ sheetName }) {
@@ -1105,7 +1045,7 @@ handlers['accounts-bank-sync'] = async function ({ ids = [] }) {
   const [[, userId], [, userKey]] = await asyncStorage.multiGet([
     'user-id',
     'user-key',
-  ]);
+  ] as const);
 
   const accounts = await db.runQuery<
     db.DbAccount & { bankId: db.DbBank['bank_id'] }
@@ -1403,7 +1343,7 @@ handlers['load-global-prefs'] = async function () {
     'theme',
     'preferred-dark-theme',
     'server-self-signed-cert',
-  ]);
+  ] as const);
   return {
     floatingSidebar: floatingSidebar === 'true' ? true : false,
     maxMonths: stringToInteger(maxMonths || ''),
@@ -2452,6 +2392,7 @@ app.combine(
   reportsApp,
   rulesApp,
   adminApp,
+  transactionsApp,
 );
 
 function getDefaultDocumentDir() {

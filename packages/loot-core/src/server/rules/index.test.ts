@@ -7,7 +7,7 @@ import {
   Action,
   Rule,
   RuleIndexer,
-} from './rules';
+} from '.';
 
 describe('Condition', () => {
   test('parses date formats correctly', () => {

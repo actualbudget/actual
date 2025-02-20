@@ -1,10 +1,10 @@
 // @ts-strict-ignore
 import { q } from '../../shared/query';
-import { batchUpdateTransactions } from '../accounts/transactions';
 import { createApp } from '../app';
 import { runQuery } from '../aql';
 import * as db from '../db';
 import { runMutator } from '../mutators';
+import { batchUpdateTransactions } from '../transactions';
 
 import { ToolsHandlers } from './types/handlers';
 

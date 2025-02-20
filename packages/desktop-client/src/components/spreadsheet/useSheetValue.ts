@@ -1,7 +1,6 @@
 import { useState, useRef, useLayoutEffect, useMemo } from 'react';
 
 import { useSpreadsheet } from 'loot-core/client/SpreadsheetProvider';
-import { type Query } from 'loot-core/shared/query';
 
 import { useSheetName } from './useSheetName';
 
@@ -18,7 +17,6 @@ type SheetValueResult<
 > = {
   name: string;
   value: Spreadsheets[SheetName][FieldName] | null;
-  query?: Query;
 };
 
 export function useSheetValue<
@@ -42,7 +40,6 @@ export function useSheetValue<
   const [result, setResult] = useState<SheetValueResult<SheetName, FieldName>>({
     name: fullSheetName,
     value: bindingObj.value ? bindingObj.value : null,
-    query: bindingObj.query,
   });
   const latestOnChange = useRef(onChange);
   latestOnChange.current = onChange;
@@ -53,23 +50,25 @@ export function useSheetValue<
   useLayoutEffect(() => {
     let isMounted = true;
 
-    const unbind = spreadsheet.bind(
-      sheetName,
-      bindingObj,
-      (newResult: SheetValueResult<SheetName, FieldName>) => {
-        if (!isMounted) {
-          return;
-        }
+    const unbind = spreadsheet.bind(sheetName, bindingObj, newResult => {
+      if (!isMounted) {
+        return;
+      }
 
-        if (latestOnChange.current) {
-          latestOnChange.current(newResult);
-        }
+      const newCastedResult = {
+        name: newResult.name,
+        // TODO: Spreadsheets, SheetNames, SheetFields, etc must be moved to the loot-core package
+        value: newResult.value as Spreadsheets[SheetName][FieldName],
+      };
 
-        if (newResult.value !== latestValue.current) {
-          setResult(newResult);
-        }
-      },
-    );
+      if (latestOnChange.current) {
+        latestOnChange.current(newCastedResult);
+      }
+
+      if (newResult.value !== latestValue.current) {
+        setResult(newCastedResult);
+      }
+    });
 
     return () => {
       isMounted = false;

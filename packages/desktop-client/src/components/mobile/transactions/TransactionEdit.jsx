@@ -7,7 +7,7 @@ import React, {
   useMemo,
   useCallback,
 } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import { useLocation, useParams } from 'react-router-dom';
 
 import { styles } from '@actual-app/components/styles';
@@ -236,7 +236,7 @@ function Footer({
               marginLeft: 6,
             }}
           >
-            Select account
+            <Trans>Select account</Trans>
           </Text>
         </Button>
       ) : isAdding ? (
@@ -254,7 +254,7 @@ function Footer({
               marginLeft: 5,
             }}
           >
-            Add transaction
+            <Trans>Add transaction</Trans>
           </Text>
         </Button>
       ) : (
@@ -750,8 +750,8 @@ const TransactionEditInner = memo(function TransactionEditInner({
           title={
             transaction.payee == null
               ? isAdding
-                ? 'New Transaction'
-                : 'Transaction'
+                ? t('New Transaction')
+                : t('Transaction')
               : title
           }
           leftContent={<MobileBackButton />}
