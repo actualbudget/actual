@@ -1,12 +1,9 @@
 import { ImportTransactionsOpts } from '@actual-app/api';
 
-import { ParseFileResult } from '../server/accounts/parse-file';
-import { batchUpdateTransactions } from '../server/accounts/transactions';
 import { Backup } from '../server/backups';
 import { RemoteFile } from '../server/cloud-storage';
 import { Node as SpreadsheetNode } from '../server/spreadsheet/spreadsheet';
 import { Message } from '../server/sync';
-import { QueryState } from '../shared/query';
 
 import { Budget } from './budget';
 import {
@@ -26,33 +23,8 @@ import { Query } from './query';
 import { EmptyObject } from './util';
 
 export interface ServerHandlers {
-  'transaction-update': (transaction: { id: string }) => Promise<EmptyObject>;
-
   undo: () => Promise<void>;
-
   redo: () => Promise<void>;
-
-  'transactions-batch-update': (
-    ...arg: Parameters<typeof batchUpdateTransactions>
-  ) => ReturnType<typeof batchUpdateTransactions>;
-
-  'transaction-add': (transaction) => Promise<EmptyObject>;
-
-  'transaction-delete': (transaction) => Promise<EmptyObject>;
-
-  'transactions-parse-file': (arg: {
-    filepath: string;
-    options;
-  }) => Promise<ParseFileResult>;
-
-  'transactions-export': (arg: {
-    transactions;
-    accounts?;
-    categoryGroups;
-    payees;
-  }) => Promise<unknown>;
-
-  'transactions-export-query': (arg: { query: QueryState }) => Promise<string>;
 
   'get-categories': () => Promise<{
     grouped: Array<CategoryGroupEntity>;

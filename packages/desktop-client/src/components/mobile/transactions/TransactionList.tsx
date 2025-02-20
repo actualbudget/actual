@@ -7,7 +7,7 @@ import React, {
   type CSSProperties,
 } from 'react';
 import { ListBox, Section, Header, Collection } from 'react-aria-components';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { Menu, type MenuItemObject } from '@actual-app/components/menu';
@@ -151,7 +151,9 @@ export function TransactionList({
               backgroundColor: theme.mobilePageBackground,
             }}
           >
-            <Text style={{ fontSize: 15 }}>No transactions</Text>
+            <Text style={{ fontSize: 15 }}>
+              <Trans>No transactions</Trans>
+            </Text>
           </View>
         )}
         items={sections}

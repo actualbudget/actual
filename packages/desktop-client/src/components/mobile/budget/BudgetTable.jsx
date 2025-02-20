@@ -489,7 +489,13 @@ const ExpenseCategory = memo(function ExpenseCategory({
           });
           dispatch(collapseModals(`${modalBudgetType}-balance-menu`));
           showUndoNotification({
-            message: `Covered ${category.name} overspending from ${categoriesById[fromCategoryId].name}.`,
+            message: t(
+              `Covered {{toCategoryName}} overspending from {{fromCategoryName}}.`,
+              {
+                toCategoryName: category.name,
+                fromCategoryName: categoriesById[fromCategoryId].name,
+              },
+            ),
           });
         },
       }),
@@ -503,6 +509,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
     month,
     onBudgetAction,
     showUndoNotification,
+    t,
   ]);
 
   const onOpenBalanceMenu = useCallback(() => {

@@ -1881,7 +1881,7 @@ class AccountInternal extends PureComponent<
                           fontStyle: 'italic',
                         }}
                       >
-                        No transactions
+                        <Trans>No transactions</Trans>
                       </View>
                     ) : null
                   }

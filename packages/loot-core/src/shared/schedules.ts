@@ -3,7 +3,7 @@ import type { IRuleOptions } from '@rschedule/core';
 import * as d from 'date-fns';
 import { t } from 'i18next';
 
-import { Condition } from '../server/accounts/rules';
+import { Condition } from '../server/rules';
 
 import * as monthUtils from './months';
 import { q } from './query';

@@ -459,8 +459,8 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                       reportMode === 'single-month'
                         ? monthUtils.format(compareTo, 'MMM, yyyy', locale)
                         : reportMode === 'budget'
-                          ? 'Budgeted'
-                          : 'Average'
+                          ? t('Budgeted')
+                          : t('Average')
                     }
                     style={{ padding: 0, paddingBottom: 10 }}
                   />
@@ -478,9 +478,20 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                         style={{ marginBottom: 5, minWidth: 210 }}
                         left={
                           <Block>
-                            Spent{' '}
-                            {monthUtils.format(compare, 'MMM, yyyy', locale)}
-                            {compare === monthUtils.currentMonth() && ' MTD'}:
+                            {compare === monthUtils.currentMonth()
+                              ? t('Spent {{monthYearFormatted}} MTD', {
+                                  monthYearFormatted: monthUtils.format(
+                                    compare,
+                                    'MMM, yyyy', locale
+                                  ),
+                                })
+                              : t('Spent {{monthYearFormatted}}:', {
+                                  monthYearFormatted: monthUtils.format(
+                                    compare,
+                                    'MMM, yyyy', locale
+                                  ),
+                                })}
+                            :
                           </Block>
                         }
                         right={
@@ -499,9 +510,19 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                         style={{ marginBottom: 5, minWidth: 210 }}
                         left={
                           <Block>
-                            Spent{' '}
-                            {monthUtils.format(compareTo, 'MMM, yyyy', locale)}
-                            {compare === monthUtils.currentMonth() && ' MTD'}:
+                            {compare === monthUtils.currentMonth()
+                              ? t('Spent {{monthYearFormatted}} MTD:', {
+                                  monthYearFormatted: monthUtils.format(
+                                    compare,
+                                    'MMM, yyyy', locale
+                                  ),
+                                })
+                              : t('Spent {{monthYearFormatted}}:', {
+                                  monthYearFormatted: monthUtils.format(
+                                    compare,
+                                    'MMM, yyyy', locale
+                                  ),
+                                })}
                           </Block>
                         }
                         right={
@@ -521,8 +542,11 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                       style={{ marginBottom: 5, minWidth: 210 }}
                       left={
                         <Block>
-                          Budgeted
-                          {compare === monthUtils.currentMonth() && ' MTD'}:
+                          {compare === monthUtils.currentMonth() ? (
+                            <Trans>Budgeted MTD</Trans>
+                          ) : (
+                            <Trans>Budgeted</Trans>
+                          )}
                         </Block>
                       }
                       right={
@@ -541,8 +565,19 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                       style={{ marginBottom: 5, minWidth: 210 }}
                       left={
                         <Block>
-                          Spent Average
-                          {compare === monthUtils.currentMonth() && ' MTD'}:
+                          {compare === monthUtils.currentMonth()
+                            ? t('Spent Average {{monthYearFormatted}} MTD:', {
+                                monthYearFormatted: monthUtils.format(
+                                  compare,
+                                  'MMM, yyyy',
+                                ),
+                              })
+                            : t('Spent Average {{monthYearFormatted}}:', {
+                                monthYearFormatted: monthUtils.format(
+                                  compare,
+                                  'MMM, yyyy',
+                                ),
+                              })}
                         </Block>
                       }
                       right={

@@ -86,7 +86,7 @@ export function CreateLocalAccountModal() {
           />
           <View>
             <Form onSubmit={onSubmit}>
-              <InlineField label="Name" width="100%">
+              <InlineField label={t('Name')} width="100%">
                 <InitialFocus>
                   <Input
                     name="name"
@@ -161,7 +161,7 @@ export function CreateLocalAccountModal() {
                 </View>
               </View>
 
-              <InlineField label="Balance" width="100%">
+              <InlineField label={t('Balance')} width="100%">
                 <Input
                   name="balance"
                   inputMode="decimal"

@@ -712,7 +712,9 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
           <PageHeader
             title={
               <Trans>
-                <Text>Custom Report:</Text>{' '}
+                <Text>
+                  <Trans>Custom Report:</Trans>
+                </Text>{' '}
                 <Text style={{ marginLeft: 5, color: theme.pageTextPositive }}>
                   {
                     {
