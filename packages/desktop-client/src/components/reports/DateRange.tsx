@@ -8,6 +8,7 @@ import { theme } from '@actual-app/components/theme';
 import * as d from 'date-fns';
 
 import * as monthUtils from 'loot-core/shared/months';
+
 import { useLocale } from '../../hooks/useLocale';
 
 type DateRangeProps = {

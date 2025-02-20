@@ -18,6 +18,7 @@ import {
   extractScheduleConds,
 } from 'loot-core/shared/schedules';
 
+import { useLocale } from '../../hooks/useLocale';
 import { theme } from '../../style';
 import {
   Modal,

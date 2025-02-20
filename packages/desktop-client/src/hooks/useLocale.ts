@@ -7,7 +7,7 @@ import { useGlobalPref } from './useGlobalPref';
 export function useLocale() {
   const [language] = useGlobalPref('language');
   const locale = useMemo(
-    () => getLocale(language ?? navigator.language ?? 'en-US'),
+    () => getLocale(language ? language : (navigator.language ?? 'en-US')),
     [language],
   );
   return locale;

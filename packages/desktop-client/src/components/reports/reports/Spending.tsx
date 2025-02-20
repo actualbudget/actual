@@ -482,13 +482,15 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                               ? t('Spent {{monthYearFormatted}} MTD', {
                                   monthYearFormatted: monthUtils.format(
                                     compare,
-                                    'MMM, yyyy', locale
+                                    'MMM, yyyy',
+                                    locale,
                                   ),
                                 })
                               : t('Spent {{monthYearFormatted}}:', {
                                   monthYearFormatted: monthUtils.format(
                                     compare,
-                                    'MMM, yyyy', locale
+                                    'MMM, yyyy',
+                                    locale,
                                   ),
                                 })}
                             :
@@ -514,13 +516,15 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                               ? t('Spent {{monthYearFormatted}} MTD:', {
                                   monthYearFormatted: monthUtils.format(
                                     compare,
-                                    'MMM, yyyy', locale
+                                    'MMM, yyyy',
+                                    locale,
                                   ),
                                 })
                               : t('Spent {{monthYearFormatted}}:', {
                                   monthYearFormatted: monthUtils.format(
                                     compare,
-                                    'MMM, yyyy', locale
+                                    'MMM, yyyy',
+                                    locale,
                                   ),
                                 })}
                           </Block>
