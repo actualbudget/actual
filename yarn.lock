@@ -6170,12 +6170,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/adm-zip@npm:^0.5.0":
-  version: 0.5.0
-  resolution: "@types/adm-zip@npm:0.5.0"
+"@types/adm-zip@npm:^0.5.7":
+  version: 0.5.7
+  resolution: "@types/adm-zip@npm:0.5.7"
   dependencies:
     "@types/node": "npm:*"
-  checksum: 10/59110171eb2a961c916487c8206decfb747611d68b8383bba896421261550c1b76d895826b53d5fdfd2192f4ea997504cbcd095abe9a2e1f16c37a884931bbd4
+  checksum: 10/24e9842bd6838879c60fe833af267489d8bc6b582d5feac6179543bf7a0b01a749931a9c6f21a20b8454e83925937a63bae0190493fa269d33a35c6daf4df209
   languageName: node
   linkType: hard
 
@@ -7755,10 +7755,10 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"adm-zip@npm:^0.5.10":
-  version: 0.5.10
-  resolution: "adm-zip@npm:0.5.10"
-  checksum: 10/c5ab79b77114d8277f0cbfd6cca830198d6c7ee4971f6960f48e08cd2375953b11dc71729b7f396abd51d2d6cce8c862fad185ea90cb2c84ab5161c37ed1b099
+"adm-zip@npm:0.5.12":
+  version: 0.5.12
+  resolution: "adm-zip@npm:0.5.12"
+  checksum: 10/258bfd115f452a0b259d8199ae826896dc53d16bc0cb9cf9ca50903d30b9cc901d093c5c33db68bcfccb5b230e49bea5f72155caf43510c2bbe2d67ad83ab6d4
   languageName: node
   linkType: hard
 
@@ -16689,7 +16689,7 @@ __metadata:
     "@swc/core": "npm:^1.5.29"
     "@swc/helpers": "npm:^0.5.15"
     "@swc/jest": "npm:^0.2.37"
-    "@types/adm-zip": "npm:^0.5.0"
+    "@types/adm-zip": "npm:^0.5.7"
     "@types/better-sqlite3": "npm:^7.6.12"
     "@types/jest": "npm:^27.5.2"
     "@types/jlongster__sql.js": "npm:@types/sql.js@latest"
@@ -16698,7 +16698,7 @@ __metadata:
     "@types/webpack": "npm:^5.28.5"
     "@types/webpack-bundle-analyzer": "npm:^4.6.4"
     absurd-sql: "npm:0.0.54"
-    adm-zip: "npm:^0.5.10"
+    adm-zip: "npm:0.5.12"
     assert: "npm:^2.1.0"
     better-sqlite3: "npm:^11.7.2"
     browserify-zlib: "npm:^0.2.0"
