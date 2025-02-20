@@ -423,6 +423,16 @@ async function createNewPayees(payeesToCreate, addsAndUpdates) {
   });
 }
 
+export type ReconcileTransactionsResult = {
+  added: string[];
+  updated: string[];
+  updatedPreview: Array<{
+    transaction: TransactionEntity;
+    existing?: TransactionEntity;
+    ignored?: boolean;
+  }>;
+};
+
 export async function reconcileTransactions(
   acctId,
   transactions,
@@ -430,7 +440,7 @@ export async function reconcileTransactions(
   strictIdChecking = true,
   isPreview = false,
   defaultCleared = true,
-) {
+): Promise<ReconcileTransactionsResult> {
   console.log('Performing transaction reconciliation');
 
   const updated = [];

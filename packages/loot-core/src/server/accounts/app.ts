@@ -659,8 +659,8 @@ type SyncError =
       type: 'SyncError';
       accountId: AccountEntity['id'];
       message: string;
-      category?: string;
-      code?: string;
+      category: string;
+      code: string;
     }
   | {
       accountId: AccountEntity['id'];
@@ -699,11 +699,15 @@ function handleSyncError(
   };
 }
 
+export type SyncResponseWithErrors = SyncResponse & {
+  errors: SyncError[];
+};
+
 async function accountsBankSync({
   ids = [],
 }: {
   ids: Array<AccountEntity['id']>;
-}) {
+}): Promise<SyncResponseWithErrors> {
   const [[, userId], [, userKey]] = await asyncStorage.multiGet([
     'user-id',
     'user-key',
@@ -734,8 +738,8 @@ async function accountsBankSync({
       try {
         console.group('Bank Sync operation for account:', acct.name);
         const syncResponse = await bankSync.syncAccount(
-          userId,
-          userKey,
+          userId as string,
+          userKey as string,
           acct.id,
           acct.account_id,
           acct.bankId,
@@ -773,7 +777,9 @@ async function simpleFinBatchSync({
   ids = [],
 }: {
   ids: Array<AccountEntity['id']>;
-}) {
+}): Promise<
+  Array<{ accountId: AccountEntity['id']; res: SyncResponseWithErrors }>
+> {
   const accounts = await db.runQuery<
     db.DbAccount & { bankId: db.DbBank['bank_id'] }
   >(
@@ -883,6 +889,12 @@ async function simpleFinBatchSync({
   return retVal;
 }
 
+type ImportTransactionsResult = bankSync.ReconcileTransactionsResult & {
+  errors: Array<{
+    message: string;
+  }>;
+};
+
 async function importTransactions({
   accountId,
   transactions,
@@ -895,13 +907,13 @@ async function importTransactions({
   opts?: {
     defaultCleared: boolean;
   };
-}) {
+}): Promise<ImportTransactionsResult> {
   if (typeof accountId !== 'string') {
     throw APIError('transactions-import: accountId must be an id');
   }
 
   try {
-    return await bankSync.reconcileTransactions(
+    const reconciled = await bankSync.reconcileTransactions(
       accountId,
       transactions,
       false,
@@ -909,6 +921,12 @@ async function importTransactions({
       isPreview,
       opts?.defaultCleared,
     );
+    return {
+      errors: [],
+      added: reconciled.added,
+      updated: reconciled.updated,
+      updatedPreview: reconciled.updatedPreview,
+    };
   } catch (err) {
     if (err instanceof TransactionError) {
       return {

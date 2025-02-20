@@ -1,6 +1,7 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
 import { send } from '../../platform/client/fetch';
+import { type SyncResponseWithErrors } from '../../server/accounts/app';
 import {
   type SyncServerGoCardlessAccount,
   type AccountEntity,
@@ -129,22 +130,9 @@ export const linkAccountSimpleFin = createAppAsyncThunk(
   },
 );
 
-type SyncResponse = {
-  errors: Array<{
-    type: string;
-    category: string;
-    code: string;
-    message: string;
-    internal?: string;
-  }>;
-  newTransactions: Array<TransactionEntity['id']>;
-  matchedTransactions: Array<TransactionEntity['id']>;
-  updatedAccounts: Array<AccountEntity['id']>;
-};
-
 function handleSyncResponse(
   accountId: AccountEntity['id'],
-  res: SyncResponse,
+  res: SyncResponseWithErrors,
   dispatch: AppDispatch,
   resNewTransactions: Array<TransactionEntity['id']>,
   resMatchedTransactions: Array<TransactionEntity['id']>,
@@ -158,7 +146,7 @@ function handleSyncResponse(
   if (error) {
     // We only want to mark the account as having problem if it
     // was a real syncing error.
-    if (error.type === 'SyncError') {
+    if ('type' in error && error.type === 'SyncError') {
       dispatch(
         markAccountFailed({
           id: accountId,
@@ -173,7 +161,7 @@ function handleSyncResponse(
 
   // Dispatch errors (if any)
   errors.forEach(error => {
-    if (error.type === 'SyncError') {
+    if ('type' in error && error.type === 'SyncError') {
       dispatch(
         addNotification({
           type: 'error',
@@ -185,7 +173,7 @@ function handleSyncResponse(
         addNotification({
           type: 'error',
           message: error.message,
-          internal: error.internal,
+          internal: 'internal' in error ? error.internal : undefined,
         }),
       );
     }
