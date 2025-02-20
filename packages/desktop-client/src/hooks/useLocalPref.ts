@@ -16,8 +16,11 @@ export function useLocalPref<K extends keyof LocalPrefs>(
 ): [LocalPrefs[K], SetLocalPrefAction<K>] {
   const [budgetId] = useMetadataPref('id');
 
-  return useLocalStorage<LocalPrefs[K]>(`${budgetId}-${prefName}`, undefined, {
-    deserializer: JSON.parse,
-    serializer: JSON.stringify,
-  });
+  const [value, setter] = useLocalStorage<LocalPrefs[K]>(
+    `${budgetId}-${prefName}`,
+    undefined,
+    {},
+  );
+
+  return [value, setter] as [LocalPrefs[K], SetLocalPrefAction<K>];
 }
