@@ -283,7 +283,11 @@ async function syncBudget() {
   return result;
 }
 
-async function loadBudget({ id }: { id: string }) {
+async function loadBudget({
+  id,
+}: {
+  id: string;
+}): Promise<{ error?: LoadBudgetError }> {
   const currentPrefs = getPrefs();
 
   if (currentPrefs) {
@@ -314,7 +318,7 @@ async function createDemoBudget() {
   });
 }
 
-async function closeBudget() {
+async function closeBudget(): Promise<'ok'> {
   captureBreadcrumb({ message: 'Closing budget' });
 
   // The spreadsheet may be running, wait for it to complete
@@ -345,7 +349,7 @@ async function deleteBudget({
 }: {
   id?: string;
   cloudFileId?: string;
-}) {
+}): Promise<'ok' | 'fail'> {
   // If it's a cloud file, you can delete it from the server by
   // passing its cloud id
   if (cloudFileId) {
@@ -465,7 +469,7 @@ async function createBudget({
   avoidUpload?: boolean;
   testMode?: boolean;
   testBudgetId?: string;
-} = {}) {
+} = {}): Promise<{ error?: LoadBudgetError }> {
   let id;
   if (testMode) {
     budgetName = budgetName || 'Test Budget';
@@ -552,7 +556,17 @@ async function exportBudget(): Promise<{ data: Buffer } | { error: string }> {
   }
 }
 
-async function _loadBudget(id: string) {
+type LoadBudgetError =
+  | 'budget-not-found'
+  | 'loading-budget'
+  | 'out-of-sync-migrations'
+  | 'out-of-sync-data'
+  | 'opening-budget'
+  | 'loading-budget';
+
+async function _loadBudget(id: string): Promise<{
+  error?: LoadBudgetError;
+}> {
   let dir: string;
   try {
     dir = fs.getBudgetDir(id);
