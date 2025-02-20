@@ -63,7 +63,7 @@ async function saveGlobalPrefs(prefs: GlobalPrefs) {
     await asyncStorage.setItem('max-months', '' + prefs.maxMonths);
   }
   if ('documentDir' in prefs) {
-    if (await fs.exists(prefs.documentDir)) {
+    if (prefs.documentDir && (await fs.exists(prefs.documentDir))) {
       await asyncStorage.setItem('document-dir', prefs.documentDir);
     }
   }
@@ -140,7 +140,12 @@ async function saveMetadataPrefs(prefsToSet: MetadataPrefs) {
   if (prefsToSet.budgetName && cloudFileId) {
     const userToken = await asyncStorage.getItem('user-token');
 
-    await post(getServer().SYNC_SERVER + '/update-user-filename', {
+    const syncServer = getServer()?.SYNC_SERVER;
+    if (!syncServer) {
+      throw new Error('No sync server set');
+    }
+
+    await post(syncServer + '/update-user-filename', {
       token: userToken,
       fileId: cloudFileId,
       name: prefsToSet.budgetName,
@@ -151,6 +156,6 @@ async function saveMetadataPrefs(prefsToSet: MetadataPrefs) {
   return 'ok';
 }
 
-function loadMetadataPrefs(): MetadataPrefs {
+async function loadMetadataPrefs(): Promise<MetadataPrefs> {
   return _getMetadataPrefs();
 }
