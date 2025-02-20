@@ -257,11 +257,13 @@ function SchedulePreview({
   } else {
     content = (
       <View>
-        <Text style={{ fontWeight: 600 }}>Upcoming dates</Text>
+        <Text style={{ fontWeight: 600 }}>
+          <Trans>Upcoming dates</Trans>
+        </Text>
         <Stack direction="row" spacing={4} style={{ marginTop: 10 }}>
           {previewDates.map((d, idx) => (
             <View key={idx}>
-              <Text>{monthUtils.format(d, dateFormat)}</Text>
+              <Text>{monthUtils.format(d, dateFormat, locale)}</Text>
               <Text>{monthUtils.format(d, 'EEEE', locale)}</Text>
             </View>
           ))}
@@ -412,10 +414,10 @@ function RecurringScheduleTooltip({
         config: unparseConfig(config),
         count: 4,
       });
-      setPreviewDates(error ? 'Invalid rule' : data);
+      setPreviewDates(error ? t('Invalid rule') : data);
     }
     run();
-  }, [config]);
+  }, [config, t]);
 
   if (previewDates == null) {
     return null;
@@ -430,7 +432,7 @@ function RecurringScheduleTooltip({
         <InitialFocus>
           <DateSelect
             id="start"
-            inputProps={{ placeholder: 'Start Date' }}
+            inputProps={{ placeholder: t('Start Date') }}
             value={config.start}
             onSelect={value => updateField('start', value)}
             containerProps={{ style: { width: 100 } }}
@@ -440,9 +442,9 @@ function RecurringScheduleTooltip({
         <Select
           id="repeat_end_dropdown"
           options={[
-            ['never', 'indefinitely'],
-            ['after_n_occurrences', 'for'],
-            ['on_date', 'until'],
+            ['never', t('indefinitely')],
+            ['after_n_occurrences', t('for')],
+            ['on_date', t('until')],
           ]}
           value={config.endMode}
           onChange={value => updateField('endMode', value)}
@@ -457,7 +459,11 @@ function RecurringScheduleTooltip({
               onChange={e => updateField('endOccurrences', e.target.value)}
               defaultValue={config.endOccurrences || 1}
             />
-            <Text>occurrence{config.endOccurrences === '1' ? '' : 's'}</Text>
+            {config.endOccurrences === '1' ? (
+              <Trans>ocurrence</Trans>
+            ) : (
+              <Trans>ocurrences</Trans>
+            )}
           </>
         )}
         {config.endMode === 'on_date' && (
@@ -543,8 +549,8 @@ function RecurringScheduleTooltip({
             <Select
               id="solve_dropdown"
               options={[
-                ['before', 'before'],
-                ['after', 'after'],
+                ['before', t('before')],
+                ['after', t('after')],
               ]}
               value={state.config.weekendSolveMode}
               onChange={value => dispatch({ type: 'set-weekend-solve', value })}

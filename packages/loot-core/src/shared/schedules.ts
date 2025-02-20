@@ -98,15 +98,16 @@ export function getRecurringDescription(config, dateFormat, locale: Locale) {
     default:
   }
 
-  const weekendSolveModeString =
-    config.weekendSolveMode === 'after'
-      ? t('after weekend')
-      : t('before weekend');
+  const weekendSolveModeString = config.weekendSolveMode
+    ? config.weekendSolveMode === 'after'
+      ? t('(after weekend)')
+      : t('(before weekend)')
+    : '';
 
   const weekendSolveSuffix = config.skipWeekend ? weekendSolveModeString : '';
-  const suffix = weekendSolveSuffix
+  const suffix = endModeSuffix
     ? `, ${endModeSuffix} ${weekendSolveSuffix}`
-    : `, ${endModeSuffix}`;
+    : `${weekendSolveSuffix}`;
 
   let desc = null;
 
