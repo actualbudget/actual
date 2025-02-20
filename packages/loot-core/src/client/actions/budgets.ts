@@ -48,12 +48,12 @@ export function loadAllFiles() {
   };
 }
 
-export function loadBudget(id: string, options = {}) {
+export function loadBudget(id: Parameters<Handlers['load-budget']>[0]['id']) {
   return async (dispatch: AppDispatch) => {
     dispatch(setAppState({ loadingText: t('Loading...') }));
 
     // Loading a budget may fail
-    const { error } = await send('load-budget', { id, ...options });
+    const { error } = await send('load-budget', { id });
 
     if (error) {
       const message = getSyncError(error, id);
@@ -115,7 +115,10 @@ export function closeBudgetUI() {
   };
 }
 
-export function deleteBudget(id?: string, cloudFileId?: string) {
+export function deleteBudget(
+  id?: Parameters<Handlers['delete-budget']>[0]['id'],
+  cloudFileId?: Parameters<Handlers['delete-budget']>[0]['cloudFileId'],
+) {
   return async (dispatch: AppDispatch) => {
     await send('delete-budget', { id, cloudFileId });
     await dispatch(loadAllFiles());
@@ -161,7 +164,6 @@ export async function uniqueBudgetName(name: string): Promise<string> {
 
 export function duplicateBudget({
   id,
-  cloudId,
   oldName,
   newName,
   managePage,
@@ -193,7 +195,6 @@ export function duplicateBudget({
 
       await send('duplicate-budget', {
         id,
-        cloudId,
         newName,
         cloudSync,
         open: loadBudget,
@@ -216,7 +217,7 @@ export function duplicateBudget({
 }
 
 export function importBudget(
-  filepath: string,
+  filepath: Parameters<Handlers['import-budget']>[0]['filepath'],
   type: Parameters<Handlers['import-budget']>[0]['type'],
 ) {
   return async (dispatch: AppDispatch) => {
@@ -231,7 +232,9 @@ export function importBudget(
   };
 }
 
-export function uploadBudget(id?: string) {
+export function uploadBudget(
+  id?: Parameters<Handlers['upload-budget']>[0]['id'],
+) {
   return async (dispatch: AppDispatch) => {
     const { error } = await send('upload-budget', { id });
     if (error) {
@@ -250,14 +253,19 @@ export function closeAndLoadBudget(fileId: string) {
   };
 }
 
-export function closeAndDownloadBudget(cloudFileId: string) {
+export function closeAndDownloadBudget(
+  cloudFileId: Parameters<typeof downloadBudget>[0],
+) {
   return async (dispatch: AppDispatch) => {
     await dispatch(closeBudget());
     dispatch(downloadBudget(cloudFileId, { replace: true }));
   };
 }
 
-export function downloadBudget(cloudFileId: string, { replace = false } = {}) {
+export function downloadBudget(
+  cloudFileId: Parameters<Handlers['download-budget']>[0]['fileId'],
+  { replace = false } = {},
+) {
   return async (dispatch: AppDispatch) => {
     dispatch(
       setAppState({
@@ -267,7 +275,6 @@ export function downloadBudget(cloudFileId: string, { replace = false } = {}) {
 
     const { id, error } = await send('download-budget', {
       fileId: cloudFileId,
-      replace,
     });
 
     if (error) {
