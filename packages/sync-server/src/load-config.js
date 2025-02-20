@@ -221,6 +221,9 @@ const finalConfig = {
   token_expiration: process.env.ACTUAL_TOKEN_EXPIRATION
     ? process.env.ACTUAL_TOKEN_EXPIRATION
     : config.token_expiration,
+  userCreationMode: process.env.ACTUAL_USER_CREATION_MODE
+    ? process.env.ACTUAL_USER_CREATION_MODE
+    : config.userCreationMode,
 };
 debug(`using port ${finalConfig.port}`);
 debug(`using hostname ${finalConfig.hostname}`);
