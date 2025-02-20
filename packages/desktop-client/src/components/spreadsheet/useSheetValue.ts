@@ -29,16 +29,18 @@ export function useSheetValue<
 ): SheetValueResult<SheetName, FieldName>['value'] {
   const { sheetName, fullSheetName } = useSheetName(binding);
 
-  const bindingObj = useMemoizedBinding(
+  const memoizedBinding = useMemoizedBinding(
     () =>
-      typeof binding === 'string' ? { name: binding, value: null } : binding,
+      typeof binding === 'string'
+        ? { name: binding, value: undefined, query: undefined }
+        : binding,
     binding,
   );
 
   const spreadsheet = useSpreadsheet();
   const [result, setResult] = useState<SheetValueResult<SheetName, FieldName>>({
     name: fullSheetName,
-    value: bindingObj.value ? bindingObj.value : null,
+    value: memoizedBinding.value ? memoizedBinding.value : null,
   });
   const latestOnChange = useRef(onChange);
   latestOnChange.current = onChange;
@@ -49,7 +51,7 @@ export function useSheetValue<
   useLayoutEffect(() => {
     let isMounted = true;
 
-    const unbind = spreadsheet.bind(sheetName, bindingObj, newResult => {
+    const unbind = spreadsheet.bind(sheetName, memoizedBinding, newResult => {
       if (!isMounted) {
         return;
       }
@@ -73,7 +75,7 @@ export function useSheetValue<
       isMounted = false;
       unbind();
     };
-  }, [spreadsheet, sheetName, bindingObj]);
+  }, [spreadsheet, sheetName, memoizedBinding]);
 
   return result.value;
 }

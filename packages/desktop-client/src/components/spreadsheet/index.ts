@@ -101,7 +101,13 @@ export type BindingObject<
 export type Binding<
   SheetName extends SheetNames,
   SheetFieldName extends SheetFields<SheetName>,
-> = SheetFieldName | BindingObject<SheetName, SheetFieldName>;
+> =
+  | SheetFieldName
+  | {
+      name: SheetFieldName;
+      value?: Spreadsheets[SheetName][SheetFieldName] | undefined;
+      query?: Query | undefined;
+    };
 export const parametrizedField =
   <SheetName extends SheetNames>() =>
   <SheetFieldName extends SheetFields<SheetName>>(field: SheetFieldName) =>
