@@ -266,7 +266,7 @@ async function downloadBudget({ fileId }: { fileId: string }): Promise<{
   }
 
   const id = result.id;
-  await _loadBudget(id);
+  await loadBudget({ id });
   result = await syncBudget();
 
   if (result.error) {
