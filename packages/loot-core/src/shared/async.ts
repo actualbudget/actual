@@ -6,7 +6,13 @@ export function sequential<T extends AnyFunction>(
 ): (...args: Parameters<T>) => Promise<Awaited<ReturnType<T>>> {
   const sequenceState: {
     running: Promise<Awaited<ReturnType<T>>> | null;
-    queue: Array<{ args: Parameters<T>; resolve; reject }>;
+    queue: Array<{
+      args: Parameters<T>;
+      resolve: (
+        value: Awaited<ReturnType<T>> | PromiseLike<Awaited<ReturnType<T>>>,
+      ) => void;
+      reject: (reason?: unknown) => void;
+    }>;
   } = {
     running: null,
     queue: [],
@@ -21,13 +27,19 @@ export function sequential<T extends AnyFunction>(
     }
   }
 
-  function run(args: Parameters<T>, resolve, reject) {
+  function run(
+    args: Parameters<T>,
+    resolve: (
+      value: Awaited<ReturnType<T>> | PromiseLike<Awaited<ReturnType<T>>>,
+    ) => void,
+    reject: (reason?: unknown) => void,
+  ) {
     sequenceState.running = fn.apply(null, args).then(
-      val => {
+      (val: Awaited<ReturnType<T>> | PromiseLike<Awaited<ReturnType<T>>>) => {
         pump();
         resolve(val);
       },
-      err => {
+      (err: unknown) => {
         pump();
         reject(err);
       },
