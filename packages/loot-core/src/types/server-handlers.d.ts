@@ -1,5 +1,3 @@
-import { ImportTransactionsOpts } from '@actual-app/api';
-
 import { Backup } from '../server/backups';
 import { RemoteFile } from '../server/cloud-storage';
 import { Node as SpreadsheetNode } from '../server/spreadsheet/spreadsheet';
@@ -7,12 +5,8 @@ import { Message } from '../server/sync';
 
 import { Budget } from './budget';
 import {
-  AccountEntity,
   CategoryEntity,
   CategoryGroupEntity,
-  GoCardlessToken,
-  GoCardlessInstitution,
-  SimpleFinAccount,
   RuleEntity,
   PayeeEntity,
 } from './models';
@@ -124,133 +118,6 @@ export interface ServerHandlers {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   query: (query: Query) => Promise<{ data: any; dependencies: string[] }>;
-
-  'account-update': (arg: { id; name }) => Promise<unknown>;
-
-  'accounts-get': () => Promise<AccountEntity[]>;
-
-  'account-properties': (arg: {
-    id;
-  }) => Promise<{ balance: number; numTransactions: number }>;
-
-  'gocardless-accounts-link': (arg: {
-    requisitionId;
-    account;
-    upgradingId;
-    offBudget;
-  }) => Promise<'ok'>;
-
-  'simplefin-accounts-link': (arg: {
-    externalAccount;
-    upgradingId;
-    offBudget;
-  }) => Promise<'ok'>;
-
-  'pluggyai-accounts-link': (arg: {
-    externalAccount;
-    upgradingId;
-    offBudget;
-  }) => Promise<'ok'>;
-
-  'account-create': (arg: {
-    name: string;
-    balance?: number;
-    offBudget?: boolean;
-    closed?: 0 | 1;
-  }) => Promise<string>;
-
-  'account-close': (arg: {
-    id;
-    transferAccountId?;
-    categoryId?;
-    forced?;
-  }) => Promise<unknown>;
-
-  'account-reopen': (arg: { id }) => Promise<unknown>;
-
-  'account-move': (arg: { id; targetId }) => Promise<unknown>;
-
-  'secret-set': (arg: {
-    name: string;
-    value: string | null;
-  }) => Promise<{ error?: string; reason?: string }>;
-  'secret-check': (arg: string) => Promise<string | { error?: string }>;
-
-  'gocardless-poll-web-token': (arg: {
-    upgradingAccountId?: string | undefined;
-    requisitionId: string;
-  }) => Promise<
-    { error: 'unknown' } | { error: 'timeout' } | { data: GoCardlessToken }
-  >;
-
-  'gocardless-status': () => Promise<{ configured: boolean }>;
-
-  'simplefin-status': () => Promise<{ configured: boolean }>;
-
-  'pluggyai-status': () => Promise<{ configured: boolean }>;
-
-  'simplefin-accounts': () => Promise<{
-    accounts?: SimpleFinAccount[];
-    error_code?: string;
-    reason?: string;
-  }>;
-
-  'pluggyai-accounts': () => Promise<
-    { accounts: PluggyAiAccount[] } | { error: string }
-  >;
-
-  'simplefin-batch-sync': ({ ids }: { ids: string[] }) => Promise<
-    {
-      accountId: string;
-      res: {
-        errors;
-        newTransactions;
-        matchedTransactions;
-        updatedAccounts;
-      };
-    }[]
-  >;
-
-  'gocardless-get-banks': (country: string) => Promise<{
-    data: GoCardlessInstitution[];
-    error?: { reason: string };
-  }>;
-
-  'gocardless-poll-web-token-stop': () => Promise<'ok'>;
-
-  'gocardless-create-web-token': (arg: {
-    upgradingAccountId?: string | undefined;
-    institutionId: string;
-    accessValidForDays: number;
-  }) => Promise<
-    | {
-        requisitionId: string;
-        link: string;
-      }
-    | { error: 'unauthorized' }
-    | { error: 'failed' }
-  >;
-
-  'accounts-bank-sync': (arg: { ids?: AccountEntity['id'][] }) => Promise<{
-    errors;
-    newTransactions;
-    matchedTransactions;
-    updatedAccounts;
-  }>;
-
-  'transactions-import': (arg: {
-    accountId;
-    transactions;
-    isPreview;
-    opts?: ImportTransactionsOpts;
-  }) => Promise<{
-    errors?: { message: string }[];
-    added;
-    updated;
-    updatedPreview;
-  }>;
-
-  'account-unlink': (arg: { id }) => Promise<'ok'>;
 
   'save-global-prefs': (prefs) => Promise<'ok'>;
 

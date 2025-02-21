@@ -12,6 +12,21 @@ export class PostError extends Error {
   }
 }
 
+export class BankSyncError extends Error {
+  reason: string;
+  category: string;
+  code: string;
+  type: 'BankSyncError';
+
+  constructor(reason: string, category: string, code: string) {
+    super('BankSyncError: ' + reason);
+    this.type = 'BankSyncError';
+    this.reason = reason;
+    this.category = category;
+    this.code = code;
+  }
+}
+
 export class HTTPError extends Error {
   statusCode: number;
   responseBody: string;
