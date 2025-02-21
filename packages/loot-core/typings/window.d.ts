@@ -1,15 +1,9 @@
-import type { GlobalPrefs } from 'loot-core/types/prefs';
-
 export {};
 
 type Actual = {
   IS_DEV: boolean;
   ACTUAL_VERSION: string;
   openURLInBrowser: (url: string) => void;
-  startActualServer: (releaseVersion: string) => Promise<void>;
-  exposeActualServer: (
-    settings: GlobalPrefs['ngrokConfig'],
-  ) => Promise<{ url?: string; error?: string } | undefined>;
   saveFile: (
     contents: string | Buffer,
     filename: string,

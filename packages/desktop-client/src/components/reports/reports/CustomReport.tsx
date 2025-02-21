@@ -147,6 +147,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
   const location = useLocation();
 
   const prevUrl = sessionStorage.getItem('url') || '';
+
   sessionStorage.setItem('prevUrl', prevUrl);
   sessionStorage.setItem('url', location.pathname);
 

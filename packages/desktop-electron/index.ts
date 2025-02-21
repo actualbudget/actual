@@ -86,33 +86,6 @@ const logMessage = (loglevel: 'info' | 'error', message: string) => {
   }
 };
 
-let queuedClientWinLogs: string[] = []; // logs that are queued up until the client window is ready
-
-const logMessage = (loglevel: 'info' | 'error', message: string) => {
-  // Electron main process logs
-  switch (loglevel) {
-    case 'info':
-      console.info(message);
-      break;
-    case 'error':
-      console.error(message);
-      break;
-  }
-
-  if (!clientWin) {
-    // queue up the logs until the client window is ready
-    queuedClientWinLogs.push(
-      // eslint-disable-next-line rulesdir/typography
-      `console.${loglevel}('Actual Sync Server Log:', ${JSON.stringify(message)})`,
-    );
-  } else {
-    // Send the queued up logs to the devtools console
-    clientWin.webContents.executeJavaScript(
-      `console.${loglevel}('Actual Sync Server Log:', ${JSON.stringify(message)})`,
-    );
-  }
-};
-
 const createOAuthServer = async () => {
   const port = 3010;
   logMessage('info', `OAuth server running on port: ${port}`);
@@ -362,7 +335,7 @@ async function startSyncServer() {
   return Promise.race([syncServerPromise, syncServerTimeout]); // Either the server has started or the timeout is reached
 }
 
-async function exposeSyncServer(ngrokConfig: GlobalPrefs['ngrokConfig']) {
+async function exposeSyncServer(ngrokConfig: GlobalPrefsJson['ngrokConfig']) {
   const hasRequiredConfig =
     ngrokConfig?.authToken && ngrokConfig?.domain && ngrokConfig?.port;
 
@@ -672,7 +645,7 @@ ipcMain.handle(
 export type SaveFileDialogPayload = {
   title: SaveDialogOptions['title'];
   defaultPath?: SaveDialogOptions['defaultPath'];
-  fileContents: string | NodeJS.ArrayBufferView;
+  fileContents: string | Buffer;
 };
 
 ipcMain.handle(
@@ -685,7 +658,11 @@ ipcMain.handle(
 
     return new Promise<void>((resolve, reject) => {
       if (fileLocation) {
-        fs.writeFile(fileLocation.filePath, fileContents, error => {
+        const contents =
+          typeof fileContents === 'string'
+            ? fileContents
+            : new Uint8Array(fileContents.buffer);
+        fs.writeFile(fileLocation.filePath, contents, error => {
           return reject(error);
         });
       }
@@ -702,7 +679,7 @@ ipcMain.handle('start-actual-server', async () => startSyncServer());
 
 ipcMain.handle(
   'expose-actual-server',
-  async (_event, payload: GlobalPrefs['ngrokConfig']) =>
+  async (_event, payload: GlobalPrefsJson['ngrokConfig']) =>
     exposeSyncServer(payload),
 );
 
