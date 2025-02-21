@@ -29,7 +29,7 @@ export function listLoginMethods() {
   const rows = accountDb.all('SELECT method, display_name, active FROM auth');
   return rows
     .filter(f =>
-      rows.length > 1 && config.enforceOpenID ? f.method === 'openid' : true,
+      rows.length > 1 && config.enforceOpenId ? f.method === 'openid' : true,
     )
     .map(r => ({
       method: r.method,

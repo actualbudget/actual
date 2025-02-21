@@ -221,7 +221,7 @@ const finalConfig = {
   token_expiration: process.env.ACTUAL_TOKEN_EXPIRATION
     ? process.env.ACTUAL_TOKEN_EXPIRATION
     : config.token_expiration,
-  enforceOpenID: process.env.ACTUAL_OPENID_ENFORCE
+  enforceOpenId: process.env.ACTUAL_OPENID_ENFORCE
     ? (() => {
         const value = process.env.ACTUAL_OPENID_ENFORCE.toLowerCase();
         if (!['true', 'false'].includes(value)) {
@@ -231,7 +231,7 @@ const finalConfig = {
         }
         return value === 'true';
       })()
-    : config.multiuser,
+    : config.enforceOpenId,
 };
 debug(`using port ${finalConfig.port}`);
 debug(`using hostname ${finalConfig.hostname}`);
