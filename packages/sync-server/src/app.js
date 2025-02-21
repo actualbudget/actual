@@ -6,6 +6,7 @@ import express from 'express';
 import actuator from 'express-actuator';
 import rateLimit from 'express-rate-limit';
 
+import { bootstrap } from './account-db.js';
 import * as accountApp from './app-account.js';
 import * as adminApp from './app-admin.js';
 import * as goCardlessApp from './app-gocardless/app-gocardless.js';
@@ -101,6 +102,20 @@ function parseHTTPSConfig(value) {
 }
 
 export async function run() {
+  if (config.openId) {
+    console.log('OpenID configuration found. Preparing server to use it');
+    try {
+      const { error } = await bootstrap({ openId: config.openId }, true);
+      if (error) {
+        console.log(error);
+      } else {
+        console.log('OpenID configured!');
+      }
+    } catch (err) {
+      console.err(err);
+    }
+  }
+
   if (config.https) {
     const https = await import('node:https');
     const httpsOptions = {

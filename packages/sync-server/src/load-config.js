@@ -64,7 +64,6 @@ debug(`Actual web build path: '${actualAppWebBuildPath}'`);
 
 /** @type {Omit<import('./config-types.js').Config, 'mode' | 'dataDir' | 'serverFiles' | 'userFiles'>} */
 const defaultConfig = {
-  loginMethod: 'password',
   allowedLoginMethods: ['password', 'header', 'openid'],
   // assume local networks are trusted
   trustedProxies: [
@@ -86,7 +85,6 @@ const defaultConfig = {
     fileSizeLimitMB: 20,
   },
   projectRoot,
-  multiuser: false,
   token_expiration: 'never',
 };
 
@@ -116,15 +114,6 @@ const finalConfig = {
   loginMethod: process.env.ACTUAL_LOGIN_METHOD
     ? process.env.ACTUAL_LOGIN_METHOD.toLowerCase()
     : config.loginMethod,
-  multiuser: process.env.ACTUAL_MULTIUSER
-    ? (() => {
-        const value = process.env.ACTUAL_MULTIUSER.toLowerCase();
-        if (!['true', 'false'].includes(value)) {
-          throw new Error('ACTUAL_MULTIUSER must be either "true" or "false"');
-        }
-        return value === 'true';
-      })()
-    : config.multiuser,
   allowedLoginMethods: process.env.ACTUAL_ALLOWED_LOGIN_METHODS
     ? process.env.ACTUAL_ALLOWED_LOGIN_METHODS.split(',')
         .map(q => q.trim().toLowerCase())

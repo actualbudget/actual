@@ -4,7 +4,7 @@ type LoginMethod = 'password' | 'header' | 'openid';
 
 export interface Config {
   mode: 'test' | 'development';
-  loginMethod: LoginMethod;
+  defaultLoginMethod?: LoginMethod;
   allowedLoginMethods: LoginMethod[];
   trustedProxies: string[];
   trustedAuthProxies?: string[];
@@ -38,6 +38,5 @@ export interface Config {
     server_hostname: string;
     authMethod?: 'openid' | 'oauth2';
   };
-  multiuser: boolean;
   token_expiration?: 'never' | 'openid-provider' | number;
 }
