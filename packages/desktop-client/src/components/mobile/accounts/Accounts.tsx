@@ -262,7 +262,7 @@ function AccountList({
           {onBudgetAccounts.length > 0 && (
             <AccountHeader
               id="onbudget"
-              name="On budget"
+              name={t('On budget')}
               amount={getOnBudgetBalance()}
             />
           )}
@@ -282,7 +282,7 @@ function AccountList({
           {offBudgetAccounts.length > 0 && (
             <AccountHeader
               id="offbudget"
-              name="Off budget"
+              name={t('Off budget')}
               amount={getOffBudgetBalance()}
               style={{ marginTop: 30 }}
             />

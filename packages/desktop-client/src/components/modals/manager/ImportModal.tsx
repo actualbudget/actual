@@ -67,8 +67,10 @@ export function ImportModal() {
             )}
 
             <Text style={{ marginBottom: 15 }}>
-              Select an app to import from, and we’ll guide you through the
-              process.
+              <Trans>
+                Select an app to import from, and we’ll guide you through the
+                process.
+              </Trans>
             </Text>
 
             <Button style={itemStyle} onPress={() => onSelectType('ynab4')}>

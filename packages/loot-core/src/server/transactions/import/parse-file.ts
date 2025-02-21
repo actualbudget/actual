@@ -1,8 +1,8 @@
 // @ts-strict-ignore
 import csv2json from 'csv-parse/lib/sync';
 
-import * as fs from '../../platform/server/fs';
-import { looselyParseAmount } from '../../shared/util';
+import * as fs from '../../../platform/server/fs';
+import { looselyParseAmount } from '../../../shared/util';
 
 import { ofx2json } from './ofx2json';
 import { qif2json } from './qif2json';
@@ -14,7 +14,7 @@ export type ParseFileResult = {
   transactions?: unknown[];
 };
 
-type ParseFileOptions = {
+export type ParseFileOptions = {
   hasHeaderRow?: boolean;
   delimiter?: string;
   fallbackMissingPayeeToMemo?: boolean;

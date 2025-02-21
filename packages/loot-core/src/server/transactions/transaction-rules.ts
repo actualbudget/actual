@@ -1,4 +1,5 @@
 // @ts-strict-ignore
+
 import {
   currentDay,
   addDays,
@@ -21,8 +22,6 @@ import { getPayee, getPayeeByName, insertPayee, getAccount } from '../db';
 import { getMappings } from '../db/mappings';
 import { RuleError } from '../errors';
 import { requiredFields, toDateRepr } from '../models';
-import { batchMessages, addSyncListener } from '../sync';
-
 import {
   Condition,
   Action,
@@ -32,15 +31,17 @@ import {
   migrateIds,
   iterateIds,
   execActions,
-} from './rules';
-import { batchUpdateTransactions } from './transactions';
+} from '../rules';
+import { batchMessages, addSyncListener } from '../sync';
+
+import { batchUpdateTransactions } from '.';
 
 // TODO: Detect if it looks like the user is creating a rename rule
 // and prompt to create it in the pre phase instead
 // * We could also make the "create rule" button a dropdown that
 //   provides different "templates" like "create renaming rule"
 
-export { iterateIds } from './rules';
+export { iterateIds } from '../rules';
 
 let allRules;
 let unlistenSync;

@@ -24,7 +24,7 @@ import {
 import { copy, exists, mkdir, remove } from 'fs-extra';
 import promiseRetry from 'promise-retry';
 
-import { GlobalPrefs } from 'loot-core/types/prefs';
+import type { GlobalPrefsJson } from '../loot-core/src/types/prefs';
 
 import { getMenu } from './menu';
 import {
@@ -86,6 +86,33 @@ const logMessage = (loglevel: 'info' | 'error', message: string) => {
   }
 };
 
+let queuedClientWinLogs: string[] = []; // logs that are queued up until the client window is ready
+
+const logMessage = (loglevel: 'info' | 'error', message: string) => {
+  // Electron main process logs
+  switch (loglevel) {
+    case 'info':
+      console.info(message);
+      break;
+    case 'error':
+      console.error(message);
+      break;
+  }
+
+  if (!clientWin) {
+    // queue up the logs until the client window is ready
+    queuedClientWinLogs.push(
+      // eslint-disable-next-line rulesdir/typography
+      `console.${loglevel}('Actual Sync Server Log:', ${JSON.stringify(message)})`,
+    );
+  } else {
+    // Send the queued up logs to the devtools console
+    clientWin.webContents.executeJavaScript(
+      `console.${loglevel}('Actual Sync Server Log:', ${JSON.stringify(message)})`,
+    );
+  }
+};
+
 const createOAuthServer = async () => {
   const port = 3010;
   logMessage('info', `OAuth server running on port: ${port}`);
@@ -130,7 +157,7 @@ if (isDev) {
 }
 
 async function loadGlobalPrefs() {
-  let state: GlobalPrefs | undefined = undefined;
+  let state: GlobalPrefsJson | undefined = undefined;
   try {
     state = JSON.parse(
       fs.readFileSync(
@@ -175,13 +202,13 @@ async function createBackgroundProcess() {
   );
 
   serverProcess.stdout?.on('data', (chunk: Buffer) => {
-    // Send the Server console.log messages to the main browser window
+    // Send the Server log messages to the main browser window
     clientWin?.webContents.executeJavaScript(`
       console.info('Server Log:', ${JSON.stringify(chunk.toString('utf8'))})`);
   });
 
   serverProcess.stderr?.on('data', (chunk: Buffer) => {
-    // Send the Server console.error messages out to the main browser window
+    // Send the Server log messages out to the main browser window
     clientWin?.webContents.executeJavaScript(`
       console.error('Server Log:', ${JSON.stringify(chunk.toString('utf8'))})`);
   });
@@ -451,9 +478,9 @@ async function createWindow() {
 
   clientWin = win;
 
-  // Execute any queued logs
+  // Execute queued logs - displaying them in the client window
   queuedClientWinLogs.map((log: string) =>
-    clientWin.webContents.executeJavaScript(log),
+    win.webContents.executeJavaScript(log),
   );
 
   queuedClientWinLogs = [];

@@ -40,4 +40,5 @@ export interface Config {
   };
   multiuser: boolean;
   token_expiration?: 'never' | 'openid-provider' | number;
+  enforceOpenId: boolean;
 }

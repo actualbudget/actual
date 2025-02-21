@@ -7,11 +7,12 @@ async function getPayee(acct) {
 
 async function getTransferredAccount(transaction) {
   if (transaction.payee) {
-    const { transfer_acct } = await db.first(
-      'SELECT id, transfer_acct FROM v_payees WHERE id = ?',
+    const result = await db.first(
+      'SELECT transfer_acct FROM v_payees WHERE id = ?',
       [transaction.payee],
     );
-    return transfer_acct;
+
+    return result?.transfer_acct || null;
   }
   return null;
 }
