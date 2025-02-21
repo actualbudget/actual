@@ -5,6 +5,7 @@ export type * from './category-group';
 export type * from './dashboard';
 export type * from './gocardless';
 export type * from './simplefin';
+export type * from './pluggyai';
 export type * from './note';
 export type * from './payee';
 export type * from './reports';

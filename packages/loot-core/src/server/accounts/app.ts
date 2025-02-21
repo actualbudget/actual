@@ -14,6 +14,7 @@ import {
   PayeeEntity,
   TransactionEntity,
   SyncServerSimpleFinAccount,
+  SyncServerPluggyAiAccount,
 } from '../../types/models';
 import { BankEntity } from '../../types/models/bank';
 import { createApp } from '../app';
@@ -230,7 +231,7 @@ async function linkPluggyAiAccount({
   upgradingId,
   offBudget = false,
 }: {
-  externalAccount: unknown;
+  externalAccount: SyncServerPluggyAiAccount;
   upgradingId?: AccountEntity['id'] | undefined;
   offBudget?: boolean | undefined;
 }) {
@@ -287,7 +288,7 @@ async function linkPluggyAiAccount({
   });
 
   return 'ok';
-};
+}
 
 async function createAccount({
   name,

@@ -7,6 +7,7 @@ import {
   type AccountEntity,
   type TransactionEntity,
   type SyncServerSimpleFinAccount,
+  type SyncServerPluggyAiAccount,
 } from '../../types/models';
 import { addNotification } from '../actions';
 import {
@@ -131,7 +132,7 @@ export const linkAccountSimpleFin = createAppAsyncThunk(
 );
 
 type LinkAccountPluggyAiPayload = {
-  externalAccount: unknown;
+  externalAccount: SyncServerPluggyAiAccount;
   upgradingId?: AccountEntity['id'];
   offBudget?: boolean;
 };

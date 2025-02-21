@@ -8,3 +8,11 @@ export type PluggyAiAccount = {
   name: string;
   org: PluggyAiOrganization;
 };
+
+export type SyncServerPluggyAiAccount = {
+  account_id: string;
+  institution?: string;
+  orgDomain?: string;
+  orgId?: string;
+  name: string;
+};

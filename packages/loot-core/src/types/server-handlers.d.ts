@@ -11,7 +11,6 @@ import {
   PayeeEntity,
 } from './models';
 import { OpenIdConfig } from './models/openid';
-import { PluggyAiAccount } from './models/pluggyai';
 import { GlobalPrefs, MetadataPrefs } from './prefs';
 // eslint-disable-next-line import/no-unresolved
 import { Query } from './query';
