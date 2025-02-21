@@ -903,7 +903,7 @@ export async function syncAccount(
   acctId: string,
   bankId: string,
 ) {
-  const acctRow = await db.select('accounts', id);
+  const acctRow = await db.select<db.DbAccount>('accounts', id);
 
   const syncStartDate = await getAccountSyncStartDate(id);
   const oldestTransaction = await getAccountOldestTransaction(id);
@@ -947,7 +947,7 @@ export async function simpleFinBatchSync(
     const account = accounts[i];
     const download = res[account.account_id];
 
-    const acctRow = await db.select('accounts', account.id);
+    const acctRow = await db.select<db.DbAccount>('accounts', account.id);
     const oldestTransaction = await getAccountOldestTransaction(account.id);
     const newAccount = oldestTransaction == null;
 
