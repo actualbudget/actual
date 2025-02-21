@@ -9,6 +9,10 @@ import {
   reducer as appSliceReducer,
 } from '../app/appSlice';
 import {
+  name as budgetsSliceName,
+  reducer as budgetsSliceReducer,
+} from '../budgets/budgetsSlice';
+import {
   name as queriesSliceName,
   reducer as queriesSliceReducer,
 } from '../queries/queriesSlice';
@@ -20,6 +24,7 @@ const appReducer = combineReducers({
   ...reducers,
   [accountsSliceName]: accountsSliceReducer,
   [appSliceName]: appSliceReducer,
+  [budgetsSliceName]: budgetsSliceReducer,
   [queriesSliceName]: queriesSliceReducer,
 });
 

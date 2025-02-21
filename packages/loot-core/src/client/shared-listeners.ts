@@ -3,15 +3,9 @@ import { t } from 'i18next';
 
 import { listen, send } from '../platform/client/fetch';
 
-import {
-  addNotification,
-  closeAndDownloadBudget,
-  loadPrefs,
-  pushModal,
-  signOut,
-  uploadBudget,
-} from './actions';
+import { addNotification, loadPrefs, pushModal, signOut } from './actions';
 import { resetSync, sync } from './app/appSlice';
+import { closeAndDownloadBudget, uploadBudget } from './budgets/budgetsSlice';
 import { getAccounts, getCategories, getPayees } from './queries/queriesSlice';
 import type { Notification } from './state-types/notifications';
 import { type AppStore } from './store';
@@ -197,7 +191,7 @@ export function listenForSyncEvent(store: AppStore) {
             button: {
               title: t('Register'),
               action: async () => {
-                await store.dispatch(uploadBudget());
+                await store.dispatch(uploadBudget({}));
                 store.dispatch(sync());
                 store.dispatch(loadPrefs());
               },
@@ -249,7 +243,9 @@ export function listenForSyncEvent(store: AppStore) {
             id: 'needs-revert',
             button: {
               title: t('Revert'),
-              action: () => store.dispatch(closeAndDownloadBudget(cloudFileId)),
+              action: () => {
+                store.dispatch(closeAndDownloadBudget({ cloudFileId }));
+              },
             },
           };
           break;

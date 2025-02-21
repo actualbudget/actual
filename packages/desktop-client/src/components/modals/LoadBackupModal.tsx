@@ -7,7 +7,7 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { loadBackup, makeBackup } from 'loot-core/client/actions';
+import { loadBackup, makeBackup } from 'loot-core/client/budgets/budgetsSlice';
 import { send, listen, unlisten } from 'loot-core/platform/client/fetch';
 import { type Backup } from 'loot-core/server/backups';
 
@@ -107,7 +107,12 @@ export function LoadBackupModal({
                   <Button
                     variant="primary"
                     onPress={() =>
-                      dispatch(loadBackup(budgetIdToLoad, latestBackup.id))
+                      dispatch(
+                        loadBackup({
+                          budgetId: budgetIdToLoad,
+                          backupId: latestBackup.id,
+                        }),
+                      )
                     }
                   >
                     {t('Revert to original version')}
@@ -142,7 +147,11 @@ export function LoadBackupModal({
             ) : (
               <BackupTable
                 backups={previousBackups}
-                onSelect={id => dispatch(loadBackup(budgetIdToLoad, id))}
+                onSelect={id =>
+                  dispatch(
+                    loadBackup({ budgetId: budgetIdToLoad, backupId: id }),
+                  )
+                }
               />
             )}
           </View>

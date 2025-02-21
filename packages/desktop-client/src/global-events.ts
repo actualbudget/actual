@@ -2,13 +2,13 @@
 import {
   addGenericErrorNotification,
   addNotification,
-  closeBudgetUI,
   closeModal,
   loadPrefs,
   pushModal,
   replaceModal,
 } from 'loot-core/client/actions';
 import { setAppState } from 'loot-core/client/app/appSlice';
+import { closeBudgetUI } from 'loot-core/client/budgets/budgetsSlice';
 import {
   getAccounts,
   getCategories,
