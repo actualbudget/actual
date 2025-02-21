@@ -488,7 +488,7 @@ async function duplicateBudget({
     }
   }
 
-  closeBudget();
+  await closeBudget();
   if (open === 'original') await _loadBudget(id);
   if (open === 'copy') await _loadBudget(newId);
 
