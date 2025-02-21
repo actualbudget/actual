@@ -1,4 +1,5 @@
 import { send } from '../../platform/client/fetch';
+import { isElectron } from '../../shared/environment';
 import * as constants from '../constants';
 import { type AppDispatch } from '../store';
 
@@ -39,13 +40,30 @@ export function loggedIn() {
   };
 }
 
-export function signOut() {
+export function signOut(openidEnabled: boolean) {
   return async (dispatch: AppDispatch) => {
     await send('subscribe-sign-out');
+    let redirect_url = null;
+    if (openidEnabled && !isElectron()) {
+      const ret =
+        (await send('subscribe-logout-openid', {
+          returnUrl: window.location.origin,
+        })) || {};
 
-    dispatch(getUserData());
-    dispatch(loadGlobalPrefs());
-    dispatch(closeBudget());
-    dispatch({ type: constants.SIGN_OUT });
+      redirect_url = ret.redirect_url;
+      if (redirect_url) {
+        window.location.href = redirect_url;
+      } else {
+        dispatch(getUserData());
+        dispatch(loadGlobalPrefs());
+        dispatch(closeBudget());
+        dispatch({ type: constants.SIGN_OUT });
+      }
+    } else {
+      dispatch(getUserData());
+      dispatch(loadGlobalPrefs());
+      dispatch(closeBudget());
+      dispatch({ type: constants.SIGN_OUT });
+    }
   };
 }

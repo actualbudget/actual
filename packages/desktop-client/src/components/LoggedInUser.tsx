@@ -120,7 +120,7 @@ export function LoggedInUser({
         navigate('/');
         break;
       case 'sign-out':
-        dispatch(signOut());
+        dispatch(signOut(multiuserEnabled));
         break;
       case 'config-server':
         await onCloseBudget();

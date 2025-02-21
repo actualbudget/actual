@@ -193,8 +193,7 @@ export async function loginWithOpenIdFinalize(body) {
       userInfo.login ??
       userInfo.email ??
       userInfo.id ??
-      userInfo.name ??
-      'default-username';
+      userInfo.sub;
     if (identity == null) {
       return { error: 'openid-grant-failed: no identification was found' };
     }
@@ -326,5 +325,48 @@ export function isValidRedirectUrl(url) {
     }
   } catch (err) {
     return false;
+  }
+}
+
+export async function loginOutOpenIdProvider(query) {
+  if (!query.returnUrl) {
+    return { error: 'return-url-missing' };
+  }
+  if (!isValidRedirectUrl(query.returnUrl)) {
+    return { error: 'invalid-return-url' };
+  }
+
+  const accountDb = getAccountDb();
+  let config = accountDb.first('SELECT extra_data FROM auth WHERE method = ?', [
+    'openid',
+  ]);
+  if (!config) {
+    return { error: 'openid-not-configured' };
+  }
+
+  try {
+    config = JSON.parse(config['extra_data']);
+  } catch (err) {
+    console.error('Error parsing OpenID configuration:', err);
+    return { error: 'openid-setup-failed' };
+  }
+
+  let client;
+  try {
+    client = await setupOpenIdClient(config);
+  } catch (err) {
+    console.error('Error setting up OpenID client:', err);
+    return { error: 'openid-setup-failed' };
+  }
+
+  try {
+    const endSessionUrl = client.endSessionUrl({
+      post_logout_redirect_uri: query.returnUrl,
+    });
+
+    return { url: endSessionUrl };
+  } catch (err) {
+    console.log('Could not generate logout URL', err);
+    return { url: query.returnUrl };
   }
 }
