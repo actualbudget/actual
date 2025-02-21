@@ -104,6 +104,7 @@ export const Modal = ({
           justifyContent: 'center',
           height: 'var(--visual-viewport-height)',
           overflowY: 'auto',
+          transition: 'height .25s',
         }}
       >
         <ReactAriaModal>
@@ -125,7 +126,7 @@ export const Modal = ({
                   willChange: 'opacity, transform',
                   maxWidth: '90vw',
                   minWidth: '90vw',
-                  maxHeight: '90vh',
+                  maxHeight: 'var(--visual-viewport-height)',
                   minHeight: 0,
                   borderRadius: 6,
                   //border: '1px solid ' + theme.modalBorder,
