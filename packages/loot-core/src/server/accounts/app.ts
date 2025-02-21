@@ -11,11 +11,9 @@ import {
   AccountEntity,
   CategoryEntity,
   SyncServerGoCardlessAccount,
-  PayeeEntity,
   TransactionEntity,
   SyncServerSimpleFinAccount,
 } from '../../types/models';
-import { BankEntity } from '../../types/models/bank';
 import { createApp } from '../app';
 import * as db from '../db';
 import {
@@ -77,7 +75,7 @@ async function getAccountBalance({
   id: string;
   cutoff: string | Date;
 }) {
-  const { balance }: { balance: number } = await db.first(
+  const { balance } = await db.first<{ balance: number }>(
     'SELECT sum(amount) as balance FROM transactions WHERE acct = ? AND isParent = 0 AND tombstone = 0 AND date <= ?',
     [id, db.toDateRepr(dayFromDate(cutoff))],
   );
@@ -85,11 +83,11 @@ async function getAccountBalance({
 }
 
 async function getAccountProperties({ id }: { id: AccountEntity['id'] }) {
-  const { balance }: { balance: number } = await db.first(
+  const { balance } = await db.first<{ balance: number }>(
     'SELECT sum(amount) as balance FROM transactions WHERE acct = ? AND isParent = 0 AND tombstone = 0',
     [id],
   );
-  const { count }: { count: number } = await db.first(
+  const { count } = await db.first<{ count: number }>(
     'SELECT count(id) as count FROM transactions WHERE acct = ? AND tombstone = 0',
     [id],
   );
@@ -112,7 +110,7 @@ async function linkGoCardlessAccount({
   const bank = await link.findOrCreateBank(account.institution, requisitionId);
 
   if (upgradingId) {
-    const accRow: AccountEntity = await db.first(
+    const accRow = await db.first<db.DbAccount>(
       'SELECT * FROM accounts WHERE id = ?',
       [upgradingId],
     );
@@ -178,7 +176,7 @@ async function linkSimpleFinAccount({
   );
 
   if (upgradingId) {
-    const accRow: AccountEntity = await db.first(
+    const accRow = await db.first<db.DbAccount>(
       'SELECT * FROM accounts WHERE id = ?',
       [upgradingId],
     );
@@ -278,7 +276,7 @@ async function closeAccount({
   await unlinkAccount({ id });
 
   return withUndo(async () => {
-    const account: AccountEntity = await db.first(
+    const account = await db.first<db.DbAccount>(
       'SELECT * FROM accounts WHERE id = ? AND tombstone = 0',
       [id],
     );
@@ -303,7 +301,7 @@ async function closeAccount({
         true,
       );
 
-      const { id: payeeId }: Pick<PayeeEntity, 'id'> = await db.first(
+      const { id: payeeId } = await db.first<Pick<db.DbPayee, 'id'>>(
         'SELECT id FROM payees WHERE transfer_acct = ?',
         [id],
       );
@@ -340,7 +338,7 @@ async function closeAccount({
       // If there is a balance we need to transfer it to the specified
       // account (and possibly categorize it)
       if (balance !== 0 && transferAccountId) {
-        const { id: payeeId }: Pick<PayeeEntity, 'id'> = await db.first(
+        const { id: payeeId } = await db.first<Pick<db.DbPayee, 'id'>>(
           'SELECT id FROM payees WHERE transfer_acct = ?',
           [transferAccountId],
         );
@@ -942,7 +940,7 @@ async function importTransactions({
 }
 
 async function unlinkAccount({ id }: { id: AccountEntity['id'] }) {
-  const { bank: bankId }: Pick<AccountEntity, 'bank'> = await db.first(
+  const { bank: bankId } = await db.first<Pick<db.DbAccount, 'bank'>>(
     'SELECT bank FROM accounts WHERE id = ?',
     [id],
   );
@@ -951,7 +949,7 @@ async function unlinkAccount({ id }: { id: AccountEntity['id'] }) {
     return 'ok';
   }
 
-  const accRow: AccountEntity = await db.first(
+  const accRow = await db.first<db.DbAccount>(
     'SELECT * FROM accounts WHERE id = ?',
     [id],
   );
@@ -972,7 +970,7 @@ async function unlinkAccount({ id }: { id: AccountEntity['id'] }) {
     return;
   }
 
-  const { count }: { count: number } = await db.first(
+  const { count } = await db.first<{ count: number }>(
     'SELECT COUNT(*) as count FROM accounts WHERE bank = ?',
     [bankId],
   );
@@ -985,8 +983,9 @@ async function unlinkAccount({ id }: { id: AccountEntity['id'] }) {
   }
 
   if (count === 0) {
-    const { bank_id: requisitionId }: Pick<BankEntity, 'bank_id'> =
-      await db.first('SELECT bank_id FROM banks WHERE id = ?', [bankId]);
+    const { bank_id: requisitionId } = await db.first<
+      Pick<db.DbBank, 'bank_id'>
+    >('SELECT bank_id FROM banks WHERE id = ?', [bankId]);
 
     const serverConfig = getServer();
     if (!serverConfig) {
