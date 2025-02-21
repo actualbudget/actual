@@ -19,7 +19,9 @@ const savePreferences = async ({
 };
 
 const getPreferences = async (): Promise<SyncedPrefs> => {
-  const prefs = (await db.all('SELECT id, value FROM preferences')) as Array<{
+  const prefs = (await db.all<Pick<db.DbPreference, 'id' | 'value'>>(
+    'SELECT id, value FROM preferences',
+  )) as Array<{
     id: string;
     value: string;
   }>;

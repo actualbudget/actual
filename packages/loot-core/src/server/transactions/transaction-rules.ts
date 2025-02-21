@@ -175,7 +175,7 @@ export function makeRule(data) {
 export async function loadRules() {
   resetState();
 
-  const rules = await db.all(`
+  const rules = await db.all<db.DbRule>(`
     SELECT * FROM rules
       WHERE conditions IS NOT NULL AND actions IS NOT NULL AND tombstone = 0
   `);
@@ -800,7 +800,7 @@ export async function updateCategoryRules(transactions) {
 
   // Also look 180 days in the future to get any future transactions
   // (this might change when we think about scheduled transactions)
-  const register: TransactionEntity[] = await db.all(
+  const register = await db.all<db.DbViewTransaction>(
     `SELECT t.* FROM v_transactions t
      LEFT JOIN accounts a ON a.id = t.account
      LEFT JOIN payees p ON p.id = t.payee

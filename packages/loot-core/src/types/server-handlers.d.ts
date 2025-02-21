@@ -86,10 +86,12 @@ export interface ServerHandlers {
     updated?;
   }) => Promise<unknown>;
 
-  'payees-check-orphaned': (arg: { ids }) => Promise<unknown>;
-  'payees-get-orphaned': () => Promise<PayeeEntity[]>;
+  'payees-check-orphaned': (arg: {
+    ids: Array<PayeeEntity['id']>;
+  }) => Promise<Array<PayeeEntity['id']>>;
+  'payees-get-orphaned': () => Promise<Array<Pick<PayeeEntity, 'id'>>>;
 
-  'payees-get-rules': (arg: { id: string }) => Promise<RuleEntity[]>;
+  'payees-get-rules': (arg: { id: PayeeEntity['id'] }) => Promise<RuleEntity[]>;
 
   'make-filters-from-conditions': (arg: {
     conditions: unknown;
