@@ -112,7 +112,7 @@ export async function run() {
         console.log('OpenID configured!');
       }
     } catch (err) {
-      console.err(err);
+      console.error(err);
     }
   }
 
