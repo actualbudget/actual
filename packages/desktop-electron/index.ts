@@ -675,14 +675,6 @@ ipcMain.handle('open-external-url', (event, url) => {
   shell.openExternal(url);
 });
 
-ipcMain.handle('start-actual-server', async () => startSyncServer());
-
-ipcMain.handle(
-  'expose-actual-server',
-  async (_event, payload: GlobalPrefsJson['ngrokConfig']) =>
-    exposeSyncServer(payload),
-);
-
 ipcMain.on('message', (_event, msg) => {
   if (!serverProcess) {
     return;
