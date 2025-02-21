@@ -25,7 +25,6 @@ export interface Config {
     fileSizeLimitMB: number;
   };
   openId?: {
-    autoLogin?: boolean;
     issuer:
       | string
       | {
@@ -41,4 +40,5 @@ export interface Config {
   };
   multiuser: boolean;
   token_expiration?: 'never' | 'openid-provider' | number;
+  openIdAutoRedirect?: boolean;
 }

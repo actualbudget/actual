@@ -88,6 +88,7 @@ const defaultConfig = {
   projectRoot,
   multiuser: false,
   token_expiration: 'never',
+  openIdAutoRedirect: false,
 };
 
 /** @type {import('./config-types.js').Config} */
@@ -178,17 +179,6 @@ const finalConfig = {
     ) {
       return {
         ...config.openId,
-        autoLogin: process.env.ACTUAL_OPENID_AUTO_LOGIN?.toLowerCase()
-          ? (() => {
-              const value = process.env.ACTUAL_OPENID_AUTO_LOGIN.toLowerCase();
-              if (!['true', 'false'].includes(value)) {
-                throw new Error(
-                  'ACTUAL_OPENID_AUTO_LOGIN must be either "true" or "false"',
-                );
-              }
-              return value === 'true';
-            })()
-          : config.openId?.autoLogin,
       };
     }
     const baseConfig = process.env.ACTUAL_OPENID_DISCOVERY_URL
@@ -234,6 +224,17 @@ const finalConfig = {
   token_expiration: process.env.ACTUAL_TOKEN_EXPIRATION
     ? process.env.ACTUAL_TOKEN_EXPIRATION
     : config.token_expiration,
+  openIdAutoRedirect: process.env.ACTUAL_OPENID_AUTO_REDIRECT?.toLowerCase()
+    ? (() => {
+        const value = process.env.ACTUAL_OPENID_AUTO_REDIRECT.toLowerCase();
+        if (!['true', 'false'].includes(value)) {
+          throw new Error(
+            'ACTUAL_OPENID_AUTO_REDIRECT must be either "true" or "false"',
+          );
+        }
+        return value === 'true';
+      })()
+    : config.openId?.openIdAutoRedirect,
 };
 debug(`using port ${finalConfig.port}`);
 debug(`using hostname ${finalConfig.hostname}`);
