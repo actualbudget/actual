@@ -3,7 +3,6 @@ import { RemoteFile } from '../server/cloud-storage';
 import { Node as SpreadsheetNode } from '../server/spreadsheet/spreadsheet';
 import { Message } from '../server/sync';
 
-import { CategoryEntity, CategoryGroupEntity } from './models';
 import { OpenIdConfig } from './models/openid';
 // eslint-disable-next-line import/no-unresolved
 import { Query } from './query';
@@ -13,55 +12,7 @@ export interface ServerHandlers {
   undo: () => Promise<void>;
   redo: () => Promise<void>;
 
-  'get-categories': () => Promise<{
-    grouped: Array<CategoryGroupEntity>;
-    list: Array<CategoryEntity>;
-  }>;
-
   'get-earliest-transaction': () => Promise<{ date: string }>;
-
-  'get-budget-bounds': () => Promise<{ start: string; end: string }>;
-
-  'envelope-budget-month': (arg: { month }) => Promise<
-    {
-      value: string | number | boolean;
-      name: string;
-    }[]
-  >;
-
-  'tracking-budget-month': (arg: { month }) => Promise<
-    {
-      value: string | number | boolean;
-      name: string;
-    }[]
-  >;
-
-  'category-create': (arg: {
-    name;
-    groupId;
-    isIncome?;
-    hidden?: boolean;
-  }) => Promise<string>;
-
-  'category-update': (category) => Promise<unknown>;
-
-  'category-move': (arg: { id; groupId; targetId }) => Promise<unknown>;
-
-  'category-delete': (arg: { id; transferId? }) => Promise<{ error?: string }>;
-
-  'category-group-create': (arg: {
-    name;
-    isIncome?: boolean;
-    hidden?: boolean;
-  }) => Promise<string>;
-
-  'category-group-update': (group) => Promise<unknown>;
-
-  'category-group-move': (arg: { id; targetId }) => Promise<unknown>;
-
-  'category-group-delete': (arg: { id; transferId }) => Promise<unknown>;
-
-  'must-category-transfer': (arg: { id }) => Promise<unknown>;
 
   'make-filters-from-conditions': (arg: {
     conditions: unknown;
