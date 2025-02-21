@@ -88,6 +88,7 @@ const defaultConfig = {
   projectRoot,
   multiuser: false,
   token_expiration: 'never',
+  enforceOpenId: false,
 };
 
 /** @type {import('./config-types.js').Config} */
