@@ -110,8 +110,8 @@ async function execTransactionsGrouped(
     return execQuery(queryState, state, s, params, outputTypes);
   }
 
-  let rows;
-  let matched = null;
+  let rows: Array<{ group_id: db.DbTransaction['id']; matched: string }>;
+  let matched: Set<db.DbTransaction['id']> = null;
 
   if (isHappyPathQuery(queryState)) {
     // This is just an optimization - we can just filter out children
