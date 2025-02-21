@@ -7,13 +7,15 @@ import * as asyncStorage from '../../platform/server/asyncStorage';
 import * as connection from '../../platform/server/connection';
 import * as fs from '../../platform/server/fs';
 import { logger } from '../../platform/server/log';
+import * as monthUtils from '../../shared/months';
 import { Budget } from '../../types/budget';
+import { CategoryEntity, CategoryGroupEntity } from '../../types/models';
 import { createApp } from '../app';
 import { startBackupService, stopBackupService } from '../backups';
 import * as cloudStorage from '../cloud-storage';
 import * as db from '../db';
 import * as mappings from '../db/mappings';
-import { FileDownloadError, FileUploadError } from '../errors';
+import { APIError, FileDownloadError, FileUploadError } from '../errors';
 import { handleBudgetImport } from '../importers';
 import { app as mainApp } from '../main-app';
 import { mutator } from '../mutators';
@@ -27,7 +29,13 @@ import {
 } from '../prefs';
 import { getServer } from '../server-config';
 import * as sheet from '../sheet';
-import { clearFullSyncTimeout, initialFullSync, setSyncingMode } from '../sync';
+import { resolveName } from '../spreadsheet/util';
+import {
+  batchMessages,
+  clearFullSyncTimeout,
+  initialFullSync,
+  setSyncingMode,
+} from '../sync';
 import * as syncMigrations from '../sync/migrate';
 import * as rules from '../transactions/transaction-rules';
 import { clearUndo, undoable } from '../undo';
@@ -80,6 +88,20 @@ export interface BudgetHandlers {
   'import-budget': typeof importBudget;
   'export-budget': typeof exportBudget;
   'reset-budget-cache': typeof resetBudgetCache;
+  'get-budget-bounds': typeof getBudgetBounds;
+  'envelope-budget-month': typeof envelopeBudgetMonth;
+  'tracking-budget-month': typeof trackingBudgetMonth;
+  'get-categories': typeof getCategories;
+  'category-create': typeof createCategory;
+  'category-update': typeof updateCategory;
+  'category-move': typeof moveCategory;
+  'category-delete': typeof deleteCategory;
+  'get-category-groups': typeof getCategoryGroups;
+  'category-group-create': typeof createCategoryGroup;
+  'category-group-update': typeof updateCategoryGroup;
+  'category-group-move': typeof moveCategoryGroup;
+  'category-group-delete': typeof deleteCategoryGroup;
+  'must-category-transfer': typeof isCategoryTransferIsRequired;
 }
 
 const DEMO_BUDGET_ID = '_demo-budget';
@@ -166,6 +188,20 @@ app.method('create-budget', createBudget);
 app.method('import-budget', importBudget);
 app.method('export-budget', exportBudget);
 app.method('reset-budget-cache', mutator(resetBudgetCache));
+app.method('get-budget-bounds', getBudgetBounds);
+app.method('envelope-budget-month', envelopeBudgetMonth);
+app.method('tracking-budget-month', trackingBudgetMonth);
+app.method('get-categories', getCategories);
+app.method('category-create', mutator(undoable(createCategory)));
+app.method('category-update', mutator(undoable(updateCategory)));
+app.method('category-move', mutator(undoable(moveCategory)));
+app.method('category-delete', mutator(undoable(deleteCategory)));
+app.method('get-category-groups', getCategoryGroups);
+app.method('category-group-create', mutator(undoable(createCategoryGroup)));
+app.method('category-group-update', mutator(undoable(updateCategoryGroup)));
+app.method('category-group-move', mutator(undoable(moveCategoryGroup)));
+app.method('category-group-delete', mutator(undoable(deleteCategoryGroup)));
+app.method('must-category-transfer', isCategoryTransferIsRequired);
 
 function handleValidateBudgetName({ name }: { name: string }) {
   return validateBudgetName(name);
@@ -701,6 +737,299 @@ async function resetBudgetCache() {
   await sheet.loadUserBudgets(db);
   sheet.get().recomputeAll();
   await sheet.waitOnSpreadsheet();
+}
+
+async function getCategories() {
+  return {
+    grouped: await db.getCategoriesGrouped(),
+    list: await db.getCategories(),
+  };
+}
+
+async function getBudgetBounds() {
+  return await budget.createAllBudgets();
+}
+
+async function envelopeBudgetMonth({ month }: { month: string }) {
+  const groups = await db.getCategoriesGrouped();
+  const sheetName = monthUtils.sheetForMonth(month);
+
+  function value(name) {
+    const v = sheet.getCellValue(sheetName, name);
+    return { value: v === '' ? 0 : v, name: resolveName(sheetName, name) };
+  }
+
+  let values = [
+    value('available-funds'),
+    value('last-month-overspent'),
+    value('buffered'),
+    value('total-budgeted'),
+    value('to-budget'),
+
+    value('from-last-month'),
+    value('total-income'),
+    value('total-spent'),
+    value('total-leftover'),
+  ];
+
+  for (const group of groups) {
+    if (group.is_income) {
+      values.push(value('total-income'));
+
+      for (const cat of group.categories) {
+        values.push(value(`sum-amount-${cat.id}`));
+      }
+    } else {
+      values = values.concat([
+        value(`group-budget-${group.id}`),
+        value(`group-sum-amount-${group.id}`),
+        value(`group-leftover-${group.id}`),
+      ]);
+
+      for (const cat of group.categories) {
+        values = values.concat([
+          value(`budget-${cat.id}`),
+          value(`sum-amount-${cat.id}`),
+          value(`leftover-${cat.id}`),
+          value(`carryover-${cat.id}`),
+          value(`goal-${cat.id}`),
+          value(`long-goal-${cat.id}`),
+        ]);
+      }
+    }
+  }
+
+  return values;
+}
+
+async function trackingBudgetMonth({ month }: { month: string }) {
+  const groups = await db.getCategoriesGrouped();
+  const sheetName = monthUtils.sheetForMonth(month);
+
+  function value(name) {
+    const v = sheet.getCellValue(sheetName, name);
+    return { value: v === '' ? 0 : v, name: resolveName(sheetName, name) };
+  }
+
+  let values = [
+    value('total-budgeted'),
+    value('total-budget-income'),
+    value('total-saved'),
+    value('total-income'),
+    value('total-spent'),
+    value('real-saved'),
+    value('total-leftover'),
+  ];
+
+  for (const group of groups) {
+    values = values.concat([
+      value(`group-budget-${group.id}`),
+      value(`group-sum-amount-${group.id}`),
+      value(`group-leftover-${group.id}`),
+    ]);
+
+    for (const cat of group.categories) {
+      values = values.concat([
+        value(`budget-${cat.id}`),
+        value(`sum-amount-${cat.id}`),
+        value(`leftover-${cat.id}`),
+        value(`goal-${cat.id}`),
+        value(`long-goal-${cat.id}`),
+      ]);
+
+      if (!group.is_income) {
+        values.push(value(`carryover-${cat.id}`));
+      }
+    }
+  }
+
+  return values;
+}
+
+async function createCategory({
+  name,
+  groupId,
+  isIncome,
+  hidden,
+}: {
+  name: CategoryEntity['name'];
+  groupId: CategoryGroupEntity['id'];
+  isIncome: CategoryEntity['is_income'];
+  hidden: CategoryEntity['hidden'];
+}): Promise<CategoryEntity['id']> {
+  if (!groupId) {
+    throw APIError('Creating a category: groupId is required');
+  }
+
+  return await db.insertCategory({
+    name: name.trim(),
+    cat_group: groupId,
+    is_income: isIncome ? 1 : 0,
+    hidden: hidden ? 1 : 0,
+  });
+}
+
+async function updateCategory(
+  category: CategoryEntity,
+): Promise<{ error?: { type: 'category-exists' } }> {
+  try {
+    await db.updateCategory({
+      ...category,
+      name: category.name.trim(),
+    });
+  } catch (e) {
+    if (e.message.toLowerCase().includes('unique constraint')) {
+      return { error: { type: 'category-exists' } };
+    }
+    throw e;
+  }
+  return {};
+}
+
+async function moveCategory({
+  id,
+  groupId,
+  targetId,
+}: {
+  id: CategoryEntity['id'];
+  groupId: CategoryGroupEntity['id'];
+  targetId: CategoryEntity['id'];
+}) {
+  await batchMessages(async () => {
+    await db.moveCategory(id, groupId, targetId);
+  });
+  return 'ok';
+}
+
+async function deleteCategory({
+  id,
+  transferId,
+}: {
+  id: CategoryEntity['id'];
+  transferId?: CategoryEntity['id'];
+}): Promise<{ error?: 'no-categories' | 'category-type' }> {
+  let result = {};
+  await batchMessages(async () => {
+    const row = await db.first(
+      'SELECT is_income FROM categories WHERE id = ?',
+      [id],
+    );
+    if (!row) {
+      result = { error: 'no-categories' };
+      return;
+    }
+
+    const transfer =
+      transferId &&
+      (await db.first('SELECT is_income FROM categories WHERE id = ?', [
+        transferId,
+      ]));
+
+    if (!row || (transferId && !transfer)) {
+      result = { error: 'no-categories' };
+      return;
+    } else if (transferId && row.is_income !== transfer.is_income) {
+      result = { error: 'category-type' };
+      return;
+    }
+
+    // Update spreadsheet values if it's an expense category
+    // TODO: We should do this for income too if it's a reflect budget
+    if (row.is_income === 0) {
+      if (transferId) {
+        await budget.doTransfer([id], transferId);
+      }
+    }
+
+    await db.deleteCategory({ id }, transferId);
+  });
+
+  return result;
+}
+
+async function getCategoryGroups() {
+  return await db.getCategoriesGrouped();
+}
+
+async function createCategoryGroup({
+  name,
+  isIncome,
+  hidden,
+}: {
+  name: CategoryGroupEntity['name'];
+  isIncome: CategoryGroupEntity['is_income'];
+  hidden: CategoryGroupEntity['hidden'];
+}): Promise<CategoryGroupEntity['id']> {
+  return await db.insertCategoryGroup({
+    name,
+    is_income: isIncome ? 1 : 0,
+    hidden,
+  });
+}
+
+async function updateCategoryGroup(group: CategoryGroupEntity) {
+  return await db.updateCategoryGroup(group);
+}
+
+async function moveCategoryGroup({
+  id,
+  targetId,
+}: {
+  id: CategoryGroupEntity['id'];
+  targetId: CategoryGroupEntity['id'];
+}) {
+  await batchMessages(async () => {
+    await db.moveCategoryGroup(id, targetId);
+  });
+  return 'ok';
+}
+
+async function deleteCategoryGroup({
+  id,
+  transferId,
+}: {
+  id: CategoryGroupEntity['id'];
+  transferId?: CategoryGroupEntity['id'];
+}): Promise<void> {
+  const groupCategories = await db.all(
+    'SELECT id FROM categories WHERE cat_group = ? AND tombstone = 0',
+    [id],
+  );
+
+  await batchMessages(async () => {
+    if (transferId) {
+      await budget.doTransfer(
+        groupCategories.map(c => c.id),
+        transferId,
+      );
+    }
+    await db.deleteCategoryGroup({ id }, transferId);
+  });
+}
+
+async function isCategoryTransferIsRequired({ id }) {
+  const res = await db.runQuery<{ count: number }>(
+    `SELECT count(t.id) as count FROM transactions t
+       LEFT JOIN category_mapping cm ON cm.id = t.category
+       WHERE cm.transferId = ? AND t.tombstone = 0`,
+    [id],
+    true,
+  );
+
+  // If there are transactions with this category, return early since
+  // we already know it needs to be tranferred
+  if (res[0].count !== 0) {
+    return true;
+  }
+
+  // If there are any non-zero budget values, also force the user to
+  // transfer the category.
+  return [...sheet.get().meta().createdMonths].some(month => {
+    const sheetName = monthUtils.sheetForMonth(month);
+    const value = sheet.get().getCellValue(sheetName, 'budget-' + id);
+
+    return value != null && value !== 0;
+  });
 }
 
 // util
