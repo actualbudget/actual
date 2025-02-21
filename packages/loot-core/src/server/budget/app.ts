@@ -854,8 +854,8 @@ async function createCategory({
 }: {
   name: CategoryEntity['name'];
   groupId: CategoryGroupEntity['id'];
-  isIncome: CategoryEntity['is_income'];
-  hidden: CategoryEntity['hidden'];
+  isIncome?: CategoryEntity['is_income'] | undefined;
+  hidden?: CategoryEntity['hidden'] | undefined;
 }): Promise<CategoryEntity['id']> {
   if (!groupId) {
     throw APIError('Creating a category: groupId is required');
@@ -957,8 +957,8 @@ async function createCategoryGroup({
   hidden,
 }: {
   name: CategoryGroupEntity['name'];
-  isIncome: CategoryGroupEntity['is_income'];
-  hidden: CategoryGroupEntity['hidden'];
+  isIncome?: CategoryGroupEntity['is_income'] | undefined;
+  hidden?: CategoryGroupEntity['hidden'] | undefined;
 }): Promise<CategoryGroupEntity['id']> {
   return await db.insertCategoryGroup({
     name,
