@@ -112,7 +112,7 @@ async function loadGlobalPrefs() {
     'server-self-signed-cert',
   ] as const);
   return {
-    floatingSidebar: floatingSidebar === 'true' ? true : false,
+    floatingSidebar: floatingSidebar === 'true',
     maxMonths: stringToInteger(maxMonths || ''),
     documentDir: documentDir || getDefaultDocumentDir(),
     keyId: encryptKey && JSON.parse(encryptKey).id,
