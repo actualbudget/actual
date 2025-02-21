@@ -488,7 +488,7 @@ async function duplicateBudget({
     }
   }
 
-  closeBudget();
+  await closeBudget();
   if (open === 'original') await _loadBudget(id);
   if (open === 'copy') await _loadBudget(newId);
 
@@ -634,7 +634,7 @@ async function _loadBudget(id: string): Promise<{
   // so now
   if (!getPrefs().userId) {
     const userId = await asyncStorage.getItem('user-token');
-    savePrefs({ userId });
+    await savePrefs({ userId });
   }
 
   try {
