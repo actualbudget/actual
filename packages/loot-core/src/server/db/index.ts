@@ -265,7 +265,7 @@ export async function delete_(table, id) {
 }
 
 export async function deleteAll(table: string) {
-  const rows: Array<{ id: string }> = await all(`
+  const rows = await all<{ id: string }>(`
     SELECT id FROM ${table} WHERE tombstone = 0
   `);
   await Promise.all(rows.map(({ id }) => delete_(table, id)));
@@ -563,7 +563,7 @@ export async function mergePayees(
   ids: Array<DbPayee['id']>,
 ) {
   // Load in payees so we can check some stuff
-  const dbPayees: DbPayee[] = await all('SELECT * FROM payees');
+  const dbPayees = await all<DbPayee>('SELECT * FROM payees');
   const payees = groupById(dbPayees);
 
   // Filter out any transfer payees
@@ -716,7 +716,7 @@ export async function moveAccount(
     'SELECT * FROM accounts WHERE id = ?',
     [id],
   );
-  let accounts;
+  let accounts: Pick<DbAccount, 'id' | 'sort_order'>[];
   if (account.closed) {
     accounts = await all(
       `SELECT id, sort_order FROM accounts WHERE closed = 1 ORDER BY sort_order, name`,
