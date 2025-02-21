@@ -773,7 +773,6 @@ handlers['subscribe-sign-in'] = async function (loginInfo) {
 
 handlers['subscribe-sign-out'] = async function () {
   encryption.unloadAllKeys();
-
   await asyncStorage.multiRemove([
     'user-token',
     'encrypt-keys',
