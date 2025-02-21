@@ -27,11 +27,15 @@ export function needsBootstrap() {
 export function listLoginMethods() {
   const accountDb = getAccountDb();
   const rows = accountDb.all('SELECT method, display_name, active FROM auth');
-  return rows.map(r => ({
-    method: r.method,
-    active: r.active,
-    displayName: r.display_name,
-  }));
+  return rows
+    .filter(f =>
+      rows.length > 1 && config.enforceOpenId ? f.method === 'openid' : true,
+    )
+    .map(r => ({
+      method: r.method,
+      active: r.active,
+      displayName: r.display_name,
+    }));
 }
 
 export function getActiveLoginMethod() {
