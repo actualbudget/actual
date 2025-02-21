@@ -126,7 +126,7 @@ export const Modal = ({
                   willChange: 'opacity, transform',
                   maxWidth: '90vw',
                   minWidth: '90vw',
-                  maxHeight: 'var(--visual-viewport-height)',
+                  maxHeight: 'calc(var(--visual-viewport-height) * 0.9)',
                   minHeight: 0,
                   borderRadius: 6,
                   //border: '1px solid ' + theme.modalBorder,
