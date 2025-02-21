@@ -199,10 +199,9 @@ function calculatePerMonth(
     amount: monthlyData[d.format(m, 'yyyy-MM')] || 0,
   }));
 
-  const dayOfMonth = months.at(-1)!.getDate();
-  const daysInMonth = monthUtils.getDay(
-    monthUtils.lastDayOfMonth(months.at(-1)!),
-  );
+  const lastMonth = months.at(-1)!;
+  const dayOfMonth = lastMonth.getDate();
+  const daysInMonth = monthUtils.getDay(monthUtils.lastDayOfMonth(lastMonth));
   const numMonths = months.length - 1 + dayOfMonth / daysInMonth;
 
   const totalAmount = monthsSum.reduce((sum, month) => sum + month.amount, 0);
