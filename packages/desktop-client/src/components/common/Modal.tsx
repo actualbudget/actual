@@ -82,10 +82,6 @@ export const Modal = ({
         position: 'fixed',
         inset: 0,
         zIndex: 3000,
-        overflowY: 'auto',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
         fontSize: 14,
         willChange: 'transform',
         // on mobile, we disable the blurred background for performance reasons
@@ -100,69 +96,80 @@ export const Modal = ({
       }}
       {...props}
     >
-      <ReactAriaModal>
-        {modalProps => (
-          <Dialog
-            aria-label={t('Modal dialog')}
-            className={css(styles.lightScrollbar)}
-            style={{
-              outline: 'none', // remove focus outline
-            }}
-          >
-            <ModalContentContainer
-              noAnimation={noAnimation}
-              isActive={isActive(name)}
-              {...containerProps}
+      {/* A container for positioning the modal relative to the visual viewport */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          height: 'var(--visual-viewport-height)',
+          overflowY: 'auto',
+        }}
+      >
+        <ReactAriaModal>
+          {modalProps => (
+            <Dialog
+              aria-label={t('Modal dialog')}
+              className={css(styles.lightScrollbar)}
               style={{
-                flex: 1,
-                padding: 10,
-                willChange: 'opacity, transform',
-                maxWidth: '90vw',
-                minWidth: '90vw',
-                maxHeight: '90vh',
-                minHeight: 0,
-                borderRadius: 6,
-                //border: '1px solid ' + theme.modalBorder,
-                color: theme.pageText,
-                backgroundColor: theme.modalBackground,
-                opacity: isHidden ? 0 : 1,
-                [`@media (min-width: ${tokens.breakpoint_small})`]: {
-                  minWidth: tokens.breakpoint_small,
-                },
-                overflowY: 'auto',
-                ...styles.shadowLarge,
-                ...containerProps?.style,
+                outline: 'none', // remove focus outline
               }}
             >
-              <View style={{ paddingTop: 0, flex: 1, flexShrink: 0 }}>
-                {typeof children === 'function'
-                  ? children(modalProps)
-                  : children}
-              </View>
-              {isLoading && (
-                <View
-                  style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    backgroundColor: theme.pageBackground,
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    zIndex: 1000,
-                  }}
-                >
-                  <AnimatedLoading
-                    style={{ width: 20, height: 20 }}
-                    color={theme.pageText}
-                  />
+              <ModalContentContainer
+                noAnimation={noAnimation}
+                isActive={isActive(name)}
+                {...containerProps}
+                style={{
+                  flex: 1,
+                  padding: 10,
+                  willChange: 'opacity, transform',
+                  maxWidth: '90vw',
+                  minWidth: '90vw',
+                  maxHeight: '90vh',
+                  minHeight: 0,
+                  borderRadius: 6,
+                  //border: '1px solid ' + theme.modalBorder,
+                  color: theme.pageText,
+                  backgroundColor: theme.modalBackground,
+                  opacity: isHidden ? 0 : 1,
+                  [`@media (min-width: ${tokens.breakpoint_small})`]: {
+                    minWidth: tokens.breakpoint_small,
+                  },
+                  overflowY: 'auto',
+                  ...styles.shadowLarge,
+                  ...containerProps?.style,
+                }}
+              >
+                <View style={{ paddingTop: 0, flex: 1, flexShrink: 0 }}>
+                  {typeof children === 'function'
+                    ? children(modalProps)
+                    : children}
                 </View>
-              )}
-            </ModalContentContainer>
-          </Dialog>
-        )}
-      </ReactAriaModal>
+                {isLoading && (
+                  <View
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      backgroundColor: theme.pageBackground,
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      zIndex: 1000,
+                    }}
+                  >
+                    <AnimatedLoading
+                      style={{ width: 20, height: 20 }}
+                      color={theme.pageText}
+                    />
+                  </View>
+                )}
+              </ModalContentContainer>
+            </Dialog>
+          )}
+        </ReactAriaModal>
+      </div>
     </ReactAriaModalOverlay>
   );
 };
@@ -311,6 +318,7 @@ export function ModalHeader({
         alignItems: 'center',
         position: 'relative',
         height: 60,
+        flex: 'none',
       }}
     >
       <View
