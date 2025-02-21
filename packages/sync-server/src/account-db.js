@@ -60,8 +60,8 @@ export function getLoginMethod(req) {
     return 'openid';
   }
 
-  if (config.defaultLoginMethod) {
-    return config.defaultLoginMethod;
+  if (config.loginMethod) {
+    return config.loginMethod;
   }
 
   const activeMethod = getActiveLoginMethod();

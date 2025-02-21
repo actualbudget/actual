@@ -4,7 +4,7 @@ type LoginMethod = 'password' | 'header' | 'openid';
 
 export interface Config {
   mode: 'test' | 'development';
-  defaultLoginMethod?: LoginMethod;
+  loginMethod?: LoginMethod;
   allowedLoginMethods: LoginMethod[];
   trustedProxies: string[];
   trustedAuthProxies?: string[];
