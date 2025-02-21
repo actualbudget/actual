@@ -1,7 +1,7 @@
-// @ts-strict-ignore
-import { type HandlerFunctions } from '../types/handlers';
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AnyFunction = (...args: any[]) => any;
 
-export function sequential<T extends HandlerFunctions>(
+export function sequential<T extends AnyFunction>(
   fn: T,
 ): (...args: Parameters<T>) => Promise<Awaited<ReturnType<T>>> {
   const sequenceState: {
@@ -47,7 +47,7 @@ export function sequential<T extends HandlerFunctions>(
   };
 }
 
-export function once<T extends HandlerFunctions>(
+export function once<T extends AnyFunction>(
   fn: T,
 ): (...args: Parameters<T>) => Promise<Awaited<ReturnType<T>>> | null {
   let promise: Promise<Awaited<ReturnType<T>>> | null = null;
