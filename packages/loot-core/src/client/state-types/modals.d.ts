@@ -42,7 +42,7 @@ type FinanceModals = {
   'select-linked-accounts': {
     accounts: unknown[];
     requisitionId?: string;
-    upgradingAccountId?: string;
+    upgradingAccountId?: string | undefined;
     syncSource?: AccountSyncSource;
   };
 
@@ -77,7 +77,7 @@ type FinanceModals = {
     onMoveExternal: (arg: {
       institutionId: string;
     }) => Promise<{ error: string } | { data: unknown }>;
-    onClose?: () => void;
+    onClose?: (() => void) | undefined;
     onSuccess: (data: GoCardlessToken) => Promise<void>;
   };
 
@@ -189,6 +189,11 @@ type FinanceModals = {
   'schedules-upcoming-length': null;
 
   'schedule-posts-offline-notification': null;
+
+  'synced-account-edit': {
+    account: AccountEntity;
+  };
+
   'account-menu': {
     accountId: string;
     onSave: (account: AccountEntity) => void;
@@ -345,6 +350,7 @@ type FinanceModals = {
   };
   'keyboard-shortcuts': EmptyObject;
   'goal-templates': EmptyObject;
+  'category-automations-edit': EmptyObject;
 };
 
 export type PushModalAction = {

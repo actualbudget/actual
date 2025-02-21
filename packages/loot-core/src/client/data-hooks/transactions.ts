@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 
+// eslint-disable-next-line no-restricted-imports -- fix me -- do not import @actual-app/web in loot-core
 import { useSyncedPref } from '@actual-app/web/src/hooks/useSyncedPref';
 import * as d from 'date-fns';
 import debounce from 'lodash/debounce';
@@ -25,6 +26,10 @@ import { type PagedQuery, pagedQuery } from '../query-helpers';
 import { type ScheduleStatuses, useCachedSchedules } from './schedules';
 
 type UseTransactionsProps = {
+  /**
+   * The Query class is immutable so it is important to memoize the query object
+   * to prevent unnecessary re-renders i.e. `useMemo`, `useState`, etc.
+   */
   query?: Query;
   options?: {
     pageCount?: number;
@@ -90,7 +95,9 @@ export function useTransactions({
         }
       },
       onError,
-      options: { pageCount: optionsRef.current.pageCount },
+      options: optionsRef.current.pageCount
+        ? { pageCount: optionsRef.current.pageCount }
+        : {},
     });
 
     return () => {
@@ -121,7 +128,7 @@ export function useTransactions({
   return {
     transactions,
     isLoading,
-    error,
+    ...(error && { error }),
     reload,
     loadMore,
     isLoadingMore,
@@ -174,7 +181,7 @@ export function usePreviewTransactions(): UsePreviewTransactionsResult {
         const status = statuses.get(schedule.id);
         const isRecurring = scheduleIsRecurring(dateConditions);
 
-        const dates: string[] = [];
+        const dates: string[] = [schedule.next_date];
         let day = d.startOfDay(parseDate(schedule.next_date));
         if (isRecurring) {
           while (day <= upcomingPeriodEnd) {
@@ -190,8 +197,6 @@ export function usePreviewTransactions(): UsePreviewTransactionsResult {
             dates.push(nextDate);
             day = parseDate(addDays(nextDate, 1));
           }
-        } else {
-          dates.push(getNextDate(dateConditions, day));
         }
 
         if (status === 'paid') {
@@ -215,7 +220,7 @@ export function usePreviewTransactions(): UsePreviewTransactionsResult {
             amount: getScheduledAmount(schedule._amount),
             date,
             schedule: schedule.id,
-            forceUpcoming: schedules.length > 0 || status === 'paid',
+            forceUpcoming: date !== schedule.next_date || status === 'paid',
           });
         });
 
@@ -275,10 +280,11 @@ export function usePreviewTransactions(): UsePreviewTransactionsResult {
     };
   }, [scheduleTransactions, schedules, statuses, upcomingLength]);
 
+  const returnError = error || scheduleQueryError;
   return {
     data: previewTransactions,
     isLoading: isLoading || isSchedulesLoading,
-    error: error || scheduleQueryError,
+    ...(returnError && { error: returnError }),
   };
 }
 

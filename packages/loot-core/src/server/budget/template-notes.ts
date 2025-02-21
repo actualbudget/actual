@@ -40,15 +40,20 @@ export async function checkTemplates(): Promise<Notification> {
   const scheduleNames = schedules.map(({ name }) => name);
   const errors: string[] = [];
 
-  categoryWithTemplates.forEach(({ id, name, templates }) => {
+  categoryWithTemplates.forEach(({ name, templates }) => {
     templates.forEach(template => {
       if (template.type === 'error') {
-        errors.push(`${name}: ${template.line}`);
+        // Only show detailed error for adjustment-related errors
+        if (template.error && template.error.includes('adjustment')) {
+          errors.push(`${name}: ${template.line}\nError: ${template.error}`);
+        } else {
+          errors.push(`${name}: ${template.line}`);
+        }
       } else if (
         template.type === 'schedule' &&
         !scheduleNames.includes(template.name)
       ) {
-        errors.push(`${id}: Schedule “${template.name}” does not exist`);
+        errors.push(`${name}: Schedule “${template.name}” does not exist`);
       }
     });
   });
@@ -90,6 +95,21 @@ async function getCategoriesWithTemplates(): Promise<CategoryWithTemplates[]> {
 
       try {
         const parsedTemplate: Template = parse(trimmedLine);
+
+        // Validate schedule adjustments
+        if (
+          parsedTemplate.type === 'schedule' &&
+          parsedTemplate.adjustment !== undefined
+        ) {
+          if (
+            parsedTemplate.adjustment <= -100 ||
+            parsedTemplate.adjustment > 1000
+          ) {
+            throw new Error(
+              `Invalid adjustment percentage (${parsedTemplate.adjustment}%). Must be between -100% and 1000%`,
+            );
+          }
+        }
 
         parsedTemplates.push(parsedTemplate);
       } catch (e: unknown) {

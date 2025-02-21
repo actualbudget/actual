@@ -1,14 +1,15 @@
 import React from 'react';
 import { Trans } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
+import { Text } from '@actual-app/components/text';
+
 import { pushModal } from 'loot-core/client/actions';
 
 import { useMetadataPref } from '../../hooks/useMetadataPref';
 import { useDispatch } from '../../redux';
 import { theme } from '../../style';
-import { Button } from '../common/Button2';
 import { Link } from '../common/Link';
-import { Text } from '../common/Text';
 import { useServerURL } from '../ServerContext';
 
 import { Setting } from './UI';

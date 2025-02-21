@@ -1,20 +1,20 @@
 import React, { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
+import { Text } from '@actual-app/components/text';
+import { View } from '@actual-app/components/view';
 import { useHover } from 'usehooks-ts';
 
+import { useCachedSchedules } from 'loot-core/client/data-hooks/schedules';
+import { q, type Query } from 'loot-core/shared/query';
+import { getScheduledAmount } from 'loot-core/shared/schedules';
 import { isPreviewId } from 'loot-core/shared/transactions';
-import { useCachedSchedules } from 'loot-core/src/client/data-hooks/schedules';
-import { q, type Query } from 'loot-core/src/shared/query';
-import { getScheduledAmount } from 'loot-core/src/shared/schedules';
 import { type AccountEntity } from 'loot-core/types/models';
 
 import { useSelectedItems } from '../../hooks/useSelected';
 import { SvgArrowButtonRight1 } from '../../icons/v2';
 import { theme } from '../../style';
-import { Button } from '../common/Button2';
-import { Text } from '../common/Text';
-import { View } from '../common/View';
 import { PrivacyFilter } from '../PrivacyFilter';
 import { type Binding } from '../spreadsheet';
 import { CellValue, CellValueText } from '../spreadsheet/CellValue';

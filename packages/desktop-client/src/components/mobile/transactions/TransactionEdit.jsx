@@ -7,9 +7,13 @@ import React, {
   useMemo,
   useCallback,
 } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import { useLocation, useParams } from 'react-router-dom';
 
+import { styles } from '@actual-app/components/styles';
+import { Text } from '@actual-app/components/text';
+import { Toggle } from '@actual-app/components/toggle';
+import { View } from '@actual-app/components/view';
 import {
   format as formatDate,
   parse as parseDate,
@@ -57,11 +61,8 @@ import { SvgSplit } from '../../../icons/v0';
 import { SvgAdd, SvgPiggyBank, SvgTrash } from '../../../icons/v1';
 import { SvgPencilWriteAlternate } from '../../../icons/v2';
 import { useSelector, useDispatch } from '../../../redux';
-import { styles, theme } from '../../../style';
+import { theme } from '../../../style';
 import { Button } from '../../common/Button';
-import { Text } from '../../common/Text';
-import { Toggle } from '../../common/Toggle';
-import { View } from '../../common/View';
 import { MobilePageHeader, Page } from '../../Page';
 import { AmountInput } from '../../util/AmountInput';
 import { MobileBackButton } from '../MobileBackButton';
@@ -235,7 +236,7 @@ function Footer({
               marginLeft: 6,
             }}
           >
-            Select account
+            <Trans>Select account</Trans>
           </Text>
         </Button>
       ) : isAdding ? (
@@ -253,7 +254,7 @@ function Footer({
               marginLeft: 5,
             }}
           >
-            Add transaction
+            <Trans>Add transaction</Trans>
           </Text>
         </Button>
       ) : (
@@ -749,8 +750,8 @@ const TransactionEditInner = memo(function TransactionEditInner({
           title={
             transaction.payee == null
               ? isAdding
-                ? 'New Transaction'
-                : 'Transaction'
+                ? t('New Transaction')
+                : t('Transaction')
               : title
           }
           leftContent={<MobileBackButton />}

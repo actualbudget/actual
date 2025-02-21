@@ -6,14 +6,15 @@ import React, {
   type CSSProperties,
 } from 'react';
 
+import { styles } from '@actual-app/components/styles';
+import { Text } from '@actual-app/components/text';
+import { Toggle } from '@actual-app/components/toggle';
+import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
-import { theme, styles } from '../../style';
+import { theme } from '../../style';
 import { Button } from '../common/Button';
 import { Input } from '../common/Input';
-import { Text } from '../common/Text';
-import { Toggle } from '../common/Toggle';
-import { View } from '../common/View';
 
 type FieldLabelProps = {
   title: string;

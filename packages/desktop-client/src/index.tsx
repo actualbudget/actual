@@ -13,15 +13,15 @@ import { Provider } from 'react-redux';
 import { bindActionCreators } from '@reduxjs/toolkit';
 import { createRoot } from 'react-dom/client';
 
-import * as accountsSlice from 'loot-core/src/client/accounts/accountsSlice';
-import * as actions from 'loot-core/src/client/actions';
-import * as appSlice from 'loot-core/src/client/app/appSlice';
-import * as queriesSlice from 'loot-core/src/client/queries/queriesSlice';
-import { runQuery } from 'loot-core/src/client/query-helpers';
-import { store } from 'loot-core/src/client/store';
-import { redo, undo } from 'loot-core/src/client/undo';
-import { send } from 'loot-core/src/platform/client/fetch';
-import { q } from 'loot-core/src/shared/query';
+import * as accountsSlice from 'loot-core/client/accounts/accountsSlice';
+import * as actions from 'loot-core/client/actions';
+import * as appSlice from 'loot-core/client/app/appSlice';
+import * as queriesSlice from 'loot-core/client/queries/queriesSlice';
+import { runQuery } from 'loot-core/client/query-helpers';
+import { store } from 'loot-core/client/store';
+import { redo, undo } from 'loot-core/client/undo';
+import { send } from 'loot-core/platform/client/fetch';
+import { q } from 'loot-core/shared/query';
 
 import { AuthProvider } from './auth/AuthProvider';
 import { App } from './components/App';

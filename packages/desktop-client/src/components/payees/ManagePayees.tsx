@@ -7,11 +7,14 @@ import {
 } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
+import { Popover } from '@actual-app/components/popover';
+import { View } from '@actual-app/components/view';
 import memoizeOne from 'memoize-one';
 
 import { pushModal } from 'loot-core/client/actions';
-import { getNormalisedString } from 'loot-core/src/shared/normalisation';
-import { type Diff, groupById } from 'loot-core/src/shared/util';
+import { getNormalisedString } from 'loot-core/shared/normalisation';
+import { type Diff, groupById } from 'loot-core/shared/util';
 import { type PayeeEntity } from 'loot-core/types/models';
 
 import {
@@ -23,10 +26,7 @@ import {
 import { SvgExpandArrow } from '../../icons/v0';
 import { useDispatch } from '../../redux';
 import { theme } from '../../style';
-import { Button } from '../common/Button2';
-import { Popover } from '../common/Popover';
 import { Search } from '../common/Search';
-import { View } from '../common/View';
 import { TableHeader, Cell, SelectCell } from '../table';
 
 import { PayeeMenu } from './PayeeMenu';

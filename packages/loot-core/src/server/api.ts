@@ -461,12 +461,14 @@ handlers['api/transactions-export'] = async function ({
   transactions,
   categoryGroups,
   payees,
+  accounts,
 }) {
   checkFileOpen();
   return handlers['transactions-export']({
     transactions,
     categoryGroups,
     payees,
+    accounts,
   });
 };
 
@@ -628,7 +630,10 @@ handlers['api/category-group-create'] = withMutation(async function ({
   group,
 }) {
   checkFileOpen();
-  return handlers['category-group-create']({ name: group.name });
+  return handlers['category-group-create']({
+    name: group.name,
+    hidden: group.hidden,
+  });
 });
 
 handlers['api/category-group-update'] = withMutation(async function ({

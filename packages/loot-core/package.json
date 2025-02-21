@@ -30,7 +30,7 @@
     "date-fns": "^2.30.0",
     "deep-equal": "^2.2.3",
     "handlebars": "^4.7.8",
-    "lru-cache": "^5.1.1",
+    "lru-cache": "^11.0.2",
     "md5": "^2.3.0",
     "memoize-one": "^6.0.0",
     "mitt": "^3.0.1",
@@ -41,6 +41,7 @@
   "devDependencies": {
     "@actual-app/api": "workspace:^",
     "@actual-app/crdt": "workspace:^",
+    "@actual-app/web": "workspace:^",
     "@swc/core": "^1.5.3",
     "@swc/helpers": "^0.5.11",
     "@swc/jest": "^0.2.36",

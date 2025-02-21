@@ -2,10 +2,14 @@
 import React, { Fragment, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
+import { Text } from '@actual-app/components/text';
+import { View } from '@actual-app/components/view';
+
 import {
   type CategoryEntity,
   type CategoryGroupEntity,
-} from 'loot-core/src/types/models';
+} from 'loot-core/types/models';
 
 import {
   SvgCheckAll,
@@ -13,9 +17,6 @@ import {
   SvgViewHide,
   SvgViewShow,
 } from '../../icons/v2';
-import { Button } from '../common/Button2';
-import { Text } from '../common/Text';
-import { View } from '../common/View';
 import { Checkbox } from '../forms';
 
 import { GraphButton } from './GraphButton';

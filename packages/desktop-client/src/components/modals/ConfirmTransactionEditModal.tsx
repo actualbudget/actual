@@ -2,11 +2,12 @@
 import React from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 
-import { Block } from '../common/Block';
-import { Button } from '../common/Button2';
-import { InitialFocus } from '../common/InitialFocus';
+import { Block } from '@actual-app/components/block';
+import { Button } from '@actual-app/components/button';
+import { InitialFocus } from '@actual-app/components/initial-focus';
+import { View } from '@actual-app/components/view';
+
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
-import { View } from '../common/View';
 
 type ConfirmTransactionEditProps = {
   onCancel?: () => void;

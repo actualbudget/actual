@@ -2,14 +2,15 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next'; // Import useTranslation
 
+import { Block } from '@actual-app/components/block';
+import { Button } from '@actual-app/components/button';
+import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
+import { View } from '@actual-app/components/view';
+
 import { useCategories } from '../../hooks/useCategories';
-import { theme } from '../../style';
 import { CategoryAutocomplete } from '../autocomplete/CategoryAutocomplete';
-import { Block } from '../common/Block';
-import { Button } from '../common/Button2';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
-import { Text } from '../common/Text';
-import { View } from '../common/View';
 
 type ConfirmCategoryDeleteProps = {
   category: string;

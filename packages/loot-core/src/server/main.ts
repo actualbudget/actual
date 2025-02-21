@@ -15,19 +15,15 @@ import * as sqlite from '../platform/server/sqlite';
 import { isNonProductionEnvironment } from '../shared/environment';
 import * as monthUtils from '../shared/months';
 import { dayFromDate } from '../shared/months';
-import { q, Query } from '../shared/query';
+import { q } from '../shared/query';
 import { amountToInteger, stringToInteger } from '../shared/util';
 import { type Budget } from '../types/budget';
 import { Handlers } from '../types/handlers';
 import { OpenIdConfig } from '../types/models/openid';
 
-import { exportToCSV, exportQueryToCSV } from './accounts/export-to-csv';
 import * as link from './accounts/link';
-import { parseFile } from './accounts/parse-file';
 import { getStartingBalancePayee } from './accounts/payees';
 import * as bankSync from './accounts/sync';
-import * as rules from './accounts/transaction-rules';
-import { batchUpdateTransactions } from './accounts/transactions';
 import { app as adminApp } from './admin/app';
 import { installAPI } from './api';
 import { runQuery as aqlQuery } from './aql';
@@ -73,6 +69,8 @@ import {
 } from './sync';
 import * as syncMigrations from './sync/migrate';
 import { app as toolsApp } from './tools/app';
+import { app as transactionsApp } from './transactions/app';
+import * as rules from './transactions/transaction-rules';
 import { withUndo, clearUndo, undo, redo } from './undo';
 import { updateVersion } from './update';
 import {
@@ -108,72 +106,11 @@ handlers['redo'] = mutator(function () {
   return redo();
 });
 
-handlers['transactions-batch-update'] = mutator(async function ({
-  added,
-  deleted,
-  updated,
-  learnCategories,
-}) {
-  return withUndo(async () => {
-    const result = await batchUpdateTransactions({
-      added,
-      updated,
-      deleted,
-      learnCategories,
-    });
-
-    return result;
-  });
-});
-
-handlers['transaction-add'] = mutator(async function (transaction) {
-  await handlers['transactions-batch-update']({ added: [transaction] });
-  return {};
-});
-
-handlers['transaction-update'] = mutator(async function (transaction) {
-  await handlers['transactions-batch-update']({ updated: [transaction] });
-  return {};
-});
-
-handlers['transaction-delete'] = mutator(async function (transaction) {
-  await handlers['transactions-batch-update']({ deleted: [transaction] });
-  return {};
-});
-
-handlers['transactions-parse-file'] = async function ({ filepath, options }) {
-  return parseFile(filepath, options);
-};
-
-handlers['transactions-export'] = async function ({
-  transactions,
-  accounts,
-  categoryGroups,
-  payees,
-}) {
-  return exportToCSV(transactions, accounts, categoryGroups, payees);
-};
-
-handlers['transactions-export-query'] = async function ({ query: queryState }) {
-  return exportQueryToCSV(new Query(queryState));
-};
-
 handlers['get-categories'] = async function () {
   return {
     grouped: await db.getCategoriesGrouped(),
     list: await db.getCategories(),
   };
-};
-
-handlers['get-earliest-transaction'] = async function () {
-  const { data } = await aqlQuery(
-    q('transactions')
-      .options({ splits: 'none' })
-      .orderBy({ date: 'asc' })
-      .select('*')
-      .limit(1),
-  );
-  return data[0] || null;
 };
 
 handlers['get-budget-bounds'] = async function () {
@@ -371,11 +308,13 @@ handlers['get-category-groups'] = async function () {
 handlers['category-group-create'] = mutator(async function ({
   name,
   isIncome,
+  hidden,
 }) {
   return withUndo(async () => {
     return db.insertCategoryGroup({
       name,
       is_income: isIncome ? 1 : 0,
+      hidden,
     });
   });
 });
@@ -418,7 +357,7 @@ handlers['category-group-delete'] = mutator(async function ({
 });
 
 handlers['must-category-transfer'] = async function ({ id }) {
-  const res = await db.runQuery(
+  const res = await db.runQuery<{ count: number }>(
     `SELECT count(t.id) as count FROM transactions t
        LEFT JOIN category_mapping cm ON cm.id = t.category
        WHERE cm.transferId = ? AND t.tombstone = 0`,
@@ -513,8 +452,11 @@ handlers['payees-get-rules'] = async function ({ id }) {
   return rules.getRulesForPayee(id).map(rule => rule.serialize());
 };
 
-handlers['make-filters-from-conditions'] = async function ({ conditions }) {
-  return rules.conditionsToAQL(conditions);
+handlers['make-filters-from-conditions'] = async function ({
+  conditions,
+  applySpecialCases,
+}) {
+  return rules.conditionsToAQL(conditions, { applySpecialCases });
 };
 
 handlers['getCell'] = async function ({ sheetName, name }) {
@@ -523,7 +465,10 @@ handlers['getCell'] = async function ({ sheetName, name }) {
 };
 
 handlers['getCells'] = async function ({ names }) {
-  return names.map(name => ({ value: sheet.get()._getNode(name).value }));
+  return names.map(name => {
+    const node = sheet.get()._getNode(name);
+    return { name: node.name, value: node.value };
+  });
 };
 
 handlers['getCellNamesInSheet'] = async function ({ sheetName }) {
@@ -833,7 +778,9 @@ handlers['account-close'] = mutator(async function ({
     if (numTransactions === 0) {
       await db.deleteAccount({ id });
     } else if (forced) {
-      const rows = await db.runQuery(
+      const rows = await db.runQuery<
+        Pick<db.DbViewTransaction, 'id' | 'transfer_id'>
+      >(
         'SELECT id, transfer_id FROM v_transactions WHERE account = ?',
         [id],
         true,
@@ -1142,7 +1089,7 @@ handlers['gocardless-create-web-token'] = async function ({
   }
 };
 
-function handleSyncResponse(
+async function handleSyncResponse(
   res,
   acct,
   newTransactions,
@@ -1157,6 +1104,10 @@ function handleSyncResponse(
   if (added.length > 0) {
     updatedAccounts.push(acct.id);
   }
+
+  const ts = new Date().getTime().toString();
+  const id = acct.id;
+  await db.runQuery(`UPDATE accounts SET last_sync = ? WHERE id = ?`, [ts, id]);
 }
 
 function handleSyncError(err, acct) {
@@ -1191,9 +1142,11 @@ handlers['accounts-bank-sync'] = async function ({ ids = [] }) {
   const [[, userId], [, userKey]] = await asyncStorage.multiGet([
     'user-id',
     'user-key',
-  ]);
+  ] as const);
 
-  const accounts = await db.runQuery(
+  const accounts = await db.runQuery<
+    db.DbAccount & { bankId: db.DbBank['bank_id'] }
+  >(
     `
     SELECT a.*, b.bank_id as bankId
     FROM accounts a
@@ -1224,7 +1177,7 @@ handlers['accounts-bank-sync'] = async function ({ ids = [] }) {
           acct.bankId,
         );
 
-        handleSyncResponse(
+        await handleSyncResponse(
           res,
           acct,
           newTransactions,
@@ -1252,7 +1205,9 @@ handlers['accounts-bank-sync'] = async function ({ ids = [] }) {
 };
 
 handlers['simplefin-batch-sync'] = async function ({ ids = [] }) {
-  const accounts = await db.runQuery(
+  const accounts = await db.runQuery<
+    db.DbAccount & { bankId: db.DbBank['bank_id'] }
+  >(
     `SELECT a.*, b.bank_id as bankId FROM accounts a
          LEFT JOIN banks b ON a.bank = b.id
          WHERE
@@ -1293,7 +1248,7 @@ handlers['simplefin-batch-sync'] = async function ({ ids = [] }) {
           ),
         );
       } else {
-        handleSyncResponse(
+        await handleSyncResponse(
           account.res,
           accounts.find(a => a.id === account.accountId),
           newTransactions,
@@ -1311,7 +1266,7 @@ handlers['simplefin-batch-sync'] = async function ({ ids = [] }) {
     const errors = [];
     for (const account of accounts) {
       retVal.push({
-        accountId: account.accountId,
+        accountId: account.id,
         res: {
           errors,
           newTransactions: [],
@@ -1485,7 +1440,7 @@ handlers['load-global-prefs'] = async function () {
     'theme',
     'preferred-dark-theme',
     'server-self-signed-cert',
-  ]);
+  ] as const);
   return {
     floatingSidebar: floatingSidebar === 'true' ? true : false,
     maxMonths: stringToInteger(maxMonths || ''),
@@ -2534,6 +2489,7 @@ app.combine(
   reportsApp,
   rulesApp,
   adminApp,
+  transactionsApp,
 );
 
 function getDefaultDocumentDir() {

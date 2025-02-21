@@ -1,14 +1,15 @@
 import { type ReactNode, useState } from 'react';
 import { Trans } from 'react-i18next';
 
-import type { FeatureFlag } from 'loot-core/src/types/prefs';
+import { Text } from '@actual-app/components/text';
+import { View } from '@actual-app/components/view';
+
+import type { FeatureFlag } from 'loot-core/types/prefs';
 
 import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { useSyncedPref } from '../../hooks/useSyncedPref';
 import { theme } from '../../style';
 import { Link } from '../common/Link';
-import { Text } from '../common/Text';
-import { View } from '../common/View';
 import { Checkbox } from '../forms';
 
 import { Setting } from './UI';
@@ -70,6 +71,13 @@ function FeatureToggle({
 export function ExperimentalFeatures() {
   const [expanded, setExpanded] = useState(false);
 
+  const goalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
+  const goalTemplatesUIEnabled = useFeatureFlag('goalTemplatesUIEnabled');
+  const showGoalTemplatesUI =
+    goalTemplatesUIEnabled ||
+    (goalTemplatesEnabled &&
+      localStorage.getItem('devEnableGoalTemplatesUI') === 'true');
+
   return (
     <Setting
       primaryAction={
@@ -78,6 +86,13 @@ export function ExperimentalFeatures() {
             <FeatureToggle flag="goalTemplatesEnabled">
               <Trans>Goal templates</Trans>
             </FeatureToggle>
+            {showGoalTemplatesUI && (
+              <View style={{ paddingLeft: 22 }}>
+                <FeatureToggle flag="goalTemplatesUIEnabled">
+                  <Trans>Subfeature: Budget automations UI</Trans>
+                </FeatureToggle>
+              </View>
+            )}
             <FeatureToggle
               flag="actionTemplating"
               feedbackLink="https://github.com/actualbudget/actual/issues/3606"

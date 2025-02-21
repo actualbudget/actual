@@ -1,4 +1,5 @@
 // @ts-strict-ignore
+import { GlobalPrefsJson } from '../../../types/prefs';
 import { getDatabase } from '../indexeddb';
 
 import * as T from '.';
@@ -53,7 +54,9 @@ export const removeItem: T.RemoveItem = async function (key) {
   });
 };
 
-export const multiGet: T.MultiGet = async function (keys) {
+export async function multiGet<K extends readonly (keyof GlobalPrefsJson)[]>(
+  keys: K,
+) {
   const db = await getDatabase();
 
   const transaction = db.transaction(['asyncStorage'], 'readonly');
@@ -71,7 +74,7 @@ export const multiGet: T.MultiGet = async function (keys) {
 
   commit(transaction);
   return promise;
-};
+}
 
 export const multiSet: T.MultiSet = async function (keyValues) {
   const db = await getDatabase();

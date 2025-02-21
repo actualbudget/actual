@@ -2,12 +2,15 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { ButtonWithLoading } from '@actual-app/components/button';
+import { InitialFocus } from '@actual-app/components/initial-focus';
+import { Text } from '@actual-app/components/text';
+import { View } from '@actual-app/components/view';
+
 import { getSecretsError } from 'loot-core/shared/errors';
 import { send } from 'loot-core/src/platform/client/fetch';
 
 import { Error } from '../alerts';
-import { ButtonWithLoading } from '../common/Button2';
-import { InitialFocus } from '../common/InitialFocus';
 import { Input } from '../common/Input';
 import { Link } from '../common/Link';
 import {
@@ -16,8 +19,6 @@ import {
   ModalCloseButton,
   ModalHeader,
 } from '../common/Modal';
-import { Text } from '../common/Text';
-import { View } from '../common/View';
 import { FormField, FormLabel } from '../forms';
 
 type PluggyAiInitialiseProps = {

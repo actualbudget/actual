@@ -1,10 +1,10 @@
 // @ts-strict-ignore
 import { q } from '../../shared/query';
-import { batchUpdateTransactions } from '../accounts/transactions';
 import { createApp } from '../app';
 import { runQuery } from '../aql';
 import * as db from '../db';
 import { runMutator } from '../mutators';
+import { batchUpdateTransactions } from '../transactions';
 
 import { ToolsHandlers } from './types/handlers';
 
@@ -52,7 +52,7 @@ app.method('tools/fix-split-transactions', async () => {
   `);
 
   await runMutator(async () => {
-    const updated = deletedRows.map(row => ({ id: row.id, tombstone: 1 }));
+    const updated = deletedRows.map(row => ({ id: row.id, tombstone: true }));
     await batchUpdateTransactions({ updated });
   });
 
