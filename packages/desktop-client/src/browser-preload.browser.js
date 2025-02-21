@@ -2,7 +2,7 @@ import { initBackend as initSQLBackend } from 'absurd-sql/dist/indexeddb-main-th
 // eslint-disable-next-line import/no-unresolved
 import { registerSW } from 'virtual:pwa-register';
 
-import * as Platform from 'loot-core/src/client/platform';
+import * as Platform from 'loot-core/client/platform';
 
 import packageJson from '../package.json';
 

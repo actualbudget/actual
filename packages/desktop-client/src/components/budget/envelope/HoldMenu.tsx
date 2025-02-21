@@ -1,37 +1,26 @@
-import React, {
-  useState,
-  useContext,
-  useEffect,
-  type ChangeEvent,
-} from 'react';
+import React, { useState, type ChangeEvent } from 'react';
 import { Trans } from 'react-i18next';
 
-import { useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
-import { evalArithmetic } from 'loot-core/src/shared/arithmetic';
-import { integerToCurrency, amountToInteger } from 'loot-core/src/shared/util';
+import { Button } from '@actual-app/components/button';
+import { InitialFocus } from '@actual-app/components/initial-focus';
+import { View } from '@actual-app/components/view';
 
-import { Button } from '../../common/Button2';
-import { InitialFocus } from '../../common/InitialFocus';
+import { evalArithmetic } from 'loot-core/shared/arithmetic';
+import { integerToCurrency, amountToInteger } from 'loot-core/shared/util';
+
 import { Input } from '../../common/Input';
-import { View } from '../../common/View';
-import { NamespaceContext } from '../../spreadsheet/NamespaceContext';
+import { useSheetValue } from '../../spreadsheet/useSheetValue';
 
 type HoldMenuProps = {
   onSubmit: (amount: number) => void;
   onClose: () => void;
 };
 export function HoldMenu({ onSubmit, onClose }: HoldMenuProps) {
-  const spreadsheet = useSpreadsheet();
-  const sheetName = useContext(NamespaceContext);
-
   const [amount, setAmount] = useState<string | null>(null);
 
-  useEffect(() => {
-    (async () => {
-      const node = await spreadsheet.get(sheetName, 'to-budget');
-      setAmount(integerToCurrency(Math.max(node.value as number, 0)));
-    })();
-  }, []);
+  useSheetValue<'envelope-budget', 'to-budget'>('to-budget', ({ value }) => {
+    setAmount(integerToCurrency(Math.max(value || 0, 0)));
+  });
 
   function submit(newAmount: string) {
     const parsedAmount = evalArithmetic(newAmount);

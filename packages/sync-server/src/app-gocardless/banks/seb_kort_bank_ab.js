@@ -1,7 +1,6 @@
-import Fallback from './integration-bank.js';
-
 import { amountToInteger } from '../utils.js';
-import { formatPayeeName } from '../../util/payee-name.js';
+
+import Fallback from './integration-bank.js';
 
 /** @type {import('./bank.interface.js').IBank} */
 export default {
@@ -16,20 +15,18 @@ export default {
   /**
    * Sign of transaction amount needs to be flipped for SEB credit cards
    */
-  normalizeTransaction(transaction, _booked) {
+  normalizeTransaction(transaction, booked) {
+    const editedTrans = { ...transaction };
+
     // Creditor name is stored in additionInformation for SEB
-    transaction.creditorName = transaction.additionalInformation;
+    editedTrans.creditorName = transaction.additionalInformation;
     transaction.transactionAmount = {
       // Flip transaction amount sign
       amount: (-parseFloat(transaction.transactionAmount.amount)).toString(),
       currency: transaction.transactionAmount.currency,
     };
 
-    return {
-      ...transaction,
-      payeeName: formatPayeeName(transaction),
-      date: transaction.valueDate,
-    };
+    return Fallback.normalizeTransaction(transaction, booked, editedTrans);
   },
 
   /**

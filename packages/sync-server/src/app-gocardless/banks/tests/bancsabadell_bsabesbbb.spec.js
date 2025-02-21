@@ -15,10 +15,7 @@ describe('BancSabadell', () => {
           transaction,
           true,
         );
-        expect(normalizedTransaction.creditorName).toEqual(
-          'some-creditor-name',
-        );
-        expect(normalizedTransaction.debtorName).toEqual(null);
+        expect(normalizedTransaction.payeeName).toEqual('Some-Creditor-Name');
       });
 
       it('creditor role - amount > 0', () => {
@@ -33,8 +30,7 @@ describe('BancSabadell', () => {
           transaction,
           true,
         );
-        expect(normalizedTransaction.debtorName).toEqual('some-debtor-name');
-        expect(normalizedTransaction.creditorName).toEqual(null);
+        expect(normalizedTransaction.payeeName).toEqual('Some-Debtor-Name');
       });
     });
 

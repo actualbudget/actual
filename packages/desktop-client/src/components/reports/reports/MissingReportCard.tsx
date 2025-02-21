@@ -1,6 +1,7 @@
 import React, { type ReactNode } from 'react';
 
-import { View } from '../../common/View';
+import { View } from '@actual-app/components/view';
+
 import { ReportCard } from '../ReportCard';
 
 type MissingReportCardProps = {

@@ -1,7 +1,5 @@
 import Fallback from './integration-bank.js';
 
-import { formatPayeeName } from '../../util/payee-name.js';
-
 /** @type {import('./bank.interface.js').IBank} */
 export default {
   ...Fallback,
@@ -22,24 +20,26 @@ export default {
    *  The goal of the  normalization is to place any relevant information of the additionalInformation
    *  field in the remittanceInformationUnstructuredArray field.
    */
-  normalizeTransaction(transaction, _booked) {
+  normalizeTransaction(transaction, booked) {
+    const editedTrans = { ...transaction };
+
     // Extract the creditor name to fill it in with information from the
     // additionalInformation field in case it's not yet defined.
     let creditorName = transaction.creditorName;
 
     if (transaction.additionalInformation) {
-      let additionalInformationObject = {};
+      const additionalInformationObject = {};
       const additionalInfoRegex = /(, )?([^:]+): ((\[.*?\])|([^,]*))/g;
-      let matches =
+      const matches =
         transaction.additionalInformation.matchAll(additionalInfoRegex);
       if (matches) {
         let creditorNameFromNarrative; // Possible value for creditorName
-        for (let match of matches) {
-          let key = match[2].trim();
+        for (const match of matches) {
+          const key = match[2].trim();
           let value = (match[4] || match[5]).trim();
           if (key === 'narrative') {
             // Set narrativeName to the first element in the "narrative" array.
-            let first_value = value.matchAll(/'(.+?)'/g)?.next().value;
+            const first_value = value.matchAll(/'(.+?)'/g)?.next().value;
             creditorNameFromNarrative = first_value
               ? first_value[1].trim()
               : undefined;
@@ -49,7 +49,7 @@ export default {
           additionalInformationObject[key] = value;
         }
         // Keep existing unstructuredArray and add atmPosName and narrative
-        transaction.remittanceInformationUnstructuredArray = [
+        editedTrans.remittanceInformationUnstructuredArray = [
           transaction.remittanceInformationUnstructuredArray ?? '',
           additionalInformationObject?.atmPosName ?? '',
           additionalInformationObject?.narrative ?? '',
@@ -66,12 +66,8 @@ export default {
       }
     }
 
-    transaction.creditorName = creditorName;
+    editedTrans.creditorName = creditorName;
 
-    return {
-      ...transaction,
-      payeeName: formatPayeeName(transaction),
-      date: transaction.valueDate || transaction.bookingDate,
-    };
+    return Fallback.normalizeTransaction(transaction, booked, editedTrans);
   },
 };

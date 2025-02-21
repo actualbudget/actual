@@ -1,9 +1,6 @@
-import * as d from 'date-fns';
+import { amountToInteger } from '../utils.js';
 
 import Fallback from './integration-bank.js';
-
-import { amountToInteger } from '../utils.js';
-import { formatPayeeName } from '../../util/payee-name.js';
 
 /** @type {import('./bank.interface.js').IBank} */
 export default {
@@ -11,7 +8,9 @@ export default {
 
   institutionIds: ['ENTERCARD_SWEDNOKK'],
 
-  normalizeTransaction(transaction, _booked) {
+  normalizeTransaction(transaction, booked) {
+    const editedTrans = { ...transaction };
+
     // GoCardless's Entercard integration returns forex transactions with the
     // foreign amount in `transactionAmount`, but at least the amount actually
     // billed to the account is now available in
@@ -25,11 +24,9 @@ export default {
       };
     }
 
-    return {
-      ...transaction,
-      payeeName: formatPayeeName(transaction),
-      date: d.format(d.parseISO(transaction.valueDate), 'yyyy-MM-dd'),
-    };
+    editedTrans.date = transaction.valueDate;
+
+    return Fallback.normalizeTransaction(transaction, booked, editedTrans);
   },
 
   calculateStartingBalance(sortedTransactions = [], balances = []) {

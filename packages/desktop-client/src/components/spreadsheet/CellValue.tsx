@@ -5,8 +5,9 @@ import React, {
   type CSSProperties,
 } from 'react';
 
-import { styles } from '../../style';
-import { Text } from '../common/Text';
+import { styles } from '@actual-app/components/styles';
+import { Text } from '@actual-app/components/text';
+
 import { PrivacyFilter } from '../PrivacyFilter';
 
 import { type FormatType, useFormat } from './useFormat';

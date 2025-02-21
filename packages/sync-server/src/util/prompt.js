@@ -1,32 +1,32 @@
 import { createInterface, cursorTo } from 'node:readline';
 
 export async function prompt(message) {
-  let rl = createInterface({
+  const rl = createInterface({
     input: process.stdin,
     output: process.stdout,
   });
 
-  let promise = new Promise(resolve => {
+  const promise = new Promise(resolve => {
     rl.question(message, answer => {
       resolve(answer);
       rl.close();
     });
   });
 
-  let answer = await promise;
+  const answer = await promise;
 
   return answer;
 }
 
 export async function promptPassword() {
-  let password = await askForPassword('Enter a password, then press enter: ');
+  const password = await askForPassword('Enter a password, then press enter: ');
 
   if (password === '') {
     console.log('Password cannot be empty.');
     return promptPassword();
   }
 
-  let password2 = await askForPassword(
+  const password2 = await askForPassword(
     'Enter the password again, then press enter: ',
   );
 
@@ -41,7 +41,7 @@ export async function promptPassword() {
 async function askForPassword(prompt) {
   let dataListener, endListener;
 
-  let promise = new Promise(resolve => {
+  const promise = new Promise(resolve => {
     let result = '';
     process.stdout.write(prompt);
     process.stdin.setRawMode(true);
@@ -77,7 +77,7 @@ async function askForPassword(prompt) {
     process.stdin.on('end', endListener);
   });
 
-  let answer = await promise;
+  const answer = await promise;
 
   process.stdin.off('data', dataListener);
   process.stdin.off('end', endListener);

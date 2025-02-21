@@ -1,5 +1,5 @@
-import { extractPayeeNameFromRemittanceInfo } from './util/extract-payeeName-from-remittanceInfo.js';
 import Fallback from './integration-bank.js';
+import { extractPayeeNameFromRemittanceInfo } from './util/extract-payeeName-from-remittanceInfo.js';
 
 /** @type {import('./bank.interface.js').IBank} */
 export default {
@@ -11,27 +11,23 @@ export default {
    * For negative amounts, the only payee information we have is returned in
    * remittanceInformationUnstructured.
    */
-  normalizeTransaction(transaction, _booked) {
-    if (Number(transaction.transactionAmount.amount) > 0) {
-      return {
-        ...transaction,
-        payeeName:
-          transaction.debtorName ||
-          transaction.remittanceInformationUnstructured ||
-          'undefined',
-        date: transaction.bookingDate || transaction.valueDate,
-      };
-    }
+  normalizeTransaction(transaction, booked) {
+    const editedTrans = { ...transaction };
 
-    return {
-      ...transaction,
-      payeeName:
+    if (Number(transaction.transactionAmount.amount) > 0) {
+      editedTrans.payeeName =
+        transaction.debtorName ||
+        transaction.remittanceInformationUnstructured ||
+        'undefined';
+    } else {
+      editedTrans.payeeName =
         transaction.creditorName ||
         extractPayeeNameFromRemittanceInfo(
           transaction.remittanceInformationUnstructured,
           ['Betaling met', 'Domiciliëring', 'Overschrijving'],
-        ),
-      date: transaction.bookingDate || transaction.valueDate,
-    };
+        );
+    }
+
+    return Fallback.normalizeTransaction(transaction, booked, editedTrans);
   },
 };

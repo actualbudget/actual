@@ -7,6 +7,8 @@ export default {
   institutionIds: ['ING_INGBROBU'],
 
   normalizeTransaction(transaction, booked) {
+    const editedTrans = { ...transaction };
+
     //Merchant transactions all have the same transactionId of 'NOTPROVIDED'.
     //For booked transactions, this can be set to the internalTransactionId
     //For pending transactions, this needs to be removed for them to show up in Actual
@@ -19,7 +21,7 @@ export default {
         transaction.proprietaryBankTransactionCode &&
         !transaction.remittanceInformationUnstructured
       ) {
-        transaction.remittanceInformationUnstructured =
+        editedTrans.remittanceInformationUnstructured =
           transaction.proprietaryBankTransactionCode;
       }
 
@@ -31,11 +33,11 @@ export default {
             .toLowerCase()
             .includes('card no:')
         ) {
-          transaction.creditorName =
+          editedTrans.creditorName =
             transaction.remittanceInformationUnstructured.split(',')[0];
           //Catch all case for other types of payees
         } else {
-          transaction.creditorName =
+          editedTrans.creditorName =
             transaction.remittanceInformationUnstructured;
         }
       } else {
@@ -47,22 +49,22 @@ export default {
             .toLowerCase()
             .includes('card no:')
         ) {
-          transaction.creditorName =
+          editedTrans.creditorName =
             transaction.remittanceInformationUnstructured.replace(
               /x{4}/g,
               'Xxxx ',
             );
           //Catch all case for other types of payees
         } else {
-          transaction.creditorName =
+          editedTrans.creditorName =
             transaction.remittanceInformationUnstructured;
         }
         //Remove remittanceInformationUnstructured from pending transactions, so the `notes` field remains empty (there is no merchant information)
         //Once booked, the right `notes` (containing the merchant) will be populated
-        transaction.remittanceInformationUnstructured = null;
+        editedTrans.remittanceInformationUnstructured = null;
       }
     }
 
-    return Fallback.normalizeTransaction(transaction, booked);
+    return Fallback.normalizeTransaction(transaction, booked, editedTrans);
   },
 };

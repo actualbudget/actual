@@ -1,5 +1,5 @@
-import getAccountDb from './src/account-db.js';
-import runMigrations from './src/migrations.js';
+import { getAccountDb } from './src/account-db.js';
+import { run as runMigrations } from './src/migrations.js';
 
 const GENERIC_ADMIN_ID = 'genericAdmin';
 const GENERIC_USER_ID = 'genericUser';
@@ -60,6 +60,7 @@ const setSessionUser = (userId, token = 'valid-token') => {
   }
 };
 
+// eslint-disable-next-line import/no-default-export
 export default async function setup() {
   const NEVER_EXPIRES = -1; // or consider using a far future timestamp
 

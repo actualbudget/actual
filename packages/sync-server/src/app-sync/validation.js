@@ -22,7 +22,7 @@ const validateSyncedFile = (groupId, keyId, currentFile) => {
   // encrypted with the same key it is registered with (this might
   // be wrong if there was an error during the key creation
   // process)
-  let uploadedKeyId = currentFile.encryptMeta
+  const uploadedKeyId = currentFile.encryptMeta
     ? JSON.parse(currentFile.encryptMeta).keyId
     : null;
   if (uploadedKeyId !== currentFile.encryptKeyId) {

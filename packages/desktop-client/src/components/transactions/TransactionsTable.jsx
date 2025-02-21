@@ -7,12 +7,17 @@ import React, {
   useRef,
   useMemo,
   useCallback,
-  useLayoutEffect,
   useEffect,
 } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
+import { Popover } from '@actual-app/components/popover';
+import { styles } from '@actual-app/components/styles';
+import { Text } from '@actual-app/components/text';
+import { Tooltip } from '@actual-app/components/tooltip';
+import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 import {
   format as formatDate,
@@ -21,15 +26,15 @@ import {
 } from 'date-fns';
 
 import { addNotification, pushModal } from 'loot-core/client/actions';
-import { useCachedSchedules } from 'loot-core/src/client/data-hooks/schedules';
+import { useCachedSchedules } from 'loot-core/client/data-hooks/schedules';
 import {
   getAccountsById,
   getPayeesById,
   getCategoriesById,
-} from 'loot-core/src/client/queries/queriesSlice';
-import { evalArithmetic } from 'loot-core/src/shared/arithmetic';
-import { currentDay } from 'loot-core/src/shared/months';
-import * as monthUtils from 'loot-core/src/shared/months';
+} from 'loot-core/client/queries/queriesSlice';
+import { evalArithmetic } from 'loot-core/shared/arithmetic';
+import { currentDay } from 'loot-core/shared/months';
+import * as monthUtils from 'loot-core/shared/months';
 import {
   splitTransaction,
   updateTransaction,
@@ -39,14 +44,15 @@ import {
   ungroupTransactions,
   isTemporaryId,
   isPreviewId,
-} from 'loot-core/src/shared/transactions';
+} from 'loot-core/shared/transactions';
 import {
   integerToCurrency,
   amountToInteger,
   titleFirst,
-} from 'loot-core/src/shared/util';
+} from 'loot-core/shared/util';
 
 import { useContextMenu } from '../../hooks/useContextMenu';
+import { useDisplayPayee } from '../../hooks/useDisplayPayee';
 import { useMergedRefs } from '../../hooks/useMergedRefs';
 import { usePrevious } from '../../hooks/usePrevious';
 import { useProperFocus } from '../../hooks/useProperFocus';
@@ -60,15 +66,10 @@ import {
   SvgHyperlink2,
 } from '../../icons/v2';
 import { useDispatch } from '../../redux';
-import { styles, theme } from '../../style';
+import { theme } from '../../style';
 import { AccountAutocomplete } from '../autocomplete/AccountAutocomplete';
 import { CategoryAutocomplete } from '../autocomplete/CategoryAutocomplete';
 import { PayeeAutocomplete } from '../autocomplete/PayeeAutocomplete';
-import { Button } from '../common/Button2';
-import { Popover } from '../common/Popover';
-import { Text } from '../common/Text';
-import { Tooltip } from '../common/Tooltip';
-import { View } from '../common/View';
 import { getStatusProps } from '../schedules/StatusBadge';
 import { DateSelect } from '../select/DateSelect';
 import { NamespaceContext } from '../spreadsheet/NamespaceContext';
@@ -344,32 +345,6 @@ const TransactionHeader = memo(
 
 TransactionHeader.displayName = 'TransactionHeader';
 
-function getPayeePretty(transaction, payee, transferAcct, numHiddenPayees = 0) {
-  const formatPayeeName = payeeName =>
-    numHiddenPayees > 0 ? `${payeeName} (+${numHiddenPayees} more)` : payeeName;
-
-  const { payee: payeeId } = transaction;
-
-  if (transferAcct) {
-    return (
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-        }}
-      >
-        {formatPayeeName(transferAcct.name)}
-      </View>
-    );
-  } else if (payee) {
-    return formatPayeeName(payee.name);
-  } else if (payeeId && payeeId.startsWith('new:')) {
-    return formatPayeeName(payeeId.slice('new:'.length));
-  }
-
-  return '';
-}
-
 function StatusCell({
   id,
   focused,
@@ -497,49 +472,6 @@ function HeaderCell({
   );
 }
 
-const useParentPayee = (
-  payees,
-  subtransactions,
-  transferAccountsByTransaction,
-) =>
-  useMemo(() => {
-    if (!subtransactions) {
-      return null;
-    }
-
-    const { counts, mostCommonPayeeTransaction } =
-      subtransactions?.reduce(
-        ({ counts, ...result }, sub) => {
-          if (sub.payee) {
-            counts[sub.payee] = (counts[sub.payee] || 0) + 1;
-            if (counts[sub.payee] > result.maxCount) {
-              return {
-                counts,
-                maxCount: counts[sub.payee],
-                mostCommonPayeeTransaction: sub,
-              };
-            }
-          }
-          return { counts, ...result };
-        },
-        { counts: {}, maxCount: 0, mostCommonPayeeTransaction: null },
-      ) || {};
-
-    if (!mostCommonPayeeTransaction) {
-      return 'Split (no payee)';
-    }
-
-    const mostCommonPayee =
-      getPayeesById(payees)[mostCommonPayeeTransaction.payee];
-    const numDistinctPayees = Object.keys(counts).length;
-    return getPayeePretty(
-      mostCommonPayeeTransaction,
-      mostCommonPayee,
-      transferAccountsByTransaction[mostCommonPayeeTransaction.id],
-      numDistinctPayees - 1,
-    );
-  }, [subtransactions, payees, transferAccountsByTransaction]);
-
 function PayeeCell({
   id,
   payee,
@@ -549,7 +481,6 @@ function PayeeCell({
   transferAccountsByTransaction,
   valueStyle,
   transaction,
-  subtransactions,
   importedPayee,
   isPreview,
   onEdit,
@@ -563,13 +494,9 @@ function PayeeCell({
 
   const dispatch = useDispatch();
 
-  const parentPayee = useParentPayee(
-    payees,
-    subtransactions,
-    transferAccountsByTransaction,
-  );
-
   const transferAccount = transferAccountsByTransaction[transaction.id];
+
+  const displayPayee = useDisplayPayee({ transaction });
 
   return transaction.is_parent ? (
     <Cell
@@ -651,10 +578,10 @@ function PayeeCell({
                 placement="bottom"
                 triggerProps={{ delay: 750 }}
               >
-                {parentPayee}
+                {displayPayee}
               </Tooltip>
             ) : (
-              parentPayee
+              displayPayee
             )}
           </Text>
         </View>
@@ -680,11 +607,10 @@ function PayeeCell({
         }
       }}
       formatter={() => {
-        const payeeName = getPayeePretty(transaction, payee, transferAccount);
-        if (!payeeName && isPreview) {
+        if (!displayPayee && isPreview) {
           return '(No payee)';
         }
-        return payeeName;
+        return displayPayee;
       }}
       unexposedContent={props => {
         const payeeName = (
@@ -1307,7 +1233,6 @@ const Transaction = memo(function Transaction({
           )}
           valueStyle={valueStyle}
           transaction={transaction}
-          subtransactions={subtransactions}
           transferAccountsByTransaction={transferAccountsByTransaction}
           importedPayee={importedPayee}
           isPreview={isPreview}
@@ -1807,7 +1732,7 @@ function NewTransaction({
           data-testid="cancel-button"
           ref={cancelButtonRef}
         >
-          Cancel
+          <Trans>Cancel</Trans>
         </Button>
         {error ? (
           <TransactionError
@@ -1827,7 +1752,7 @@ function NewTransaction({
             data-testid="add-button"
             ref={addButtonRef}
           >
-            Add
+            <Trans>Add</Trans>
           </Button>
         )}
       </View>
@@ -1855,28 +1780,35 @@ function TransactionTableInner({
     setScrollWidth(!width ? 0 : width);
   }
 
+  const {
+    onCloseAddTransaction: onCloseAddTransactionProp,
+    onNavigateToTransferAccount: onNavigateToTransferAccountProp,
+    onNavigateToSchedule: onNavigateToScheduleProp,
+    onNotesTagClick: onNotesTagClickProp,
+  } = props;
+
   const onNavigateToTransferAccount = useCallback(
     accountId => {
-      props.onCloseAddTransaction();
-      props.onNavigateToTransferAccount(accountId);
+      onCloseAddTransactionProp();
+      onNavigateToTransferAccountProp(accountId);
     },
-    [props.onCloseAddTransaction, props.onNavigateToTransferAccount],
+    [onCloseAddTransactionProp, onNavigateToTransferAccountProp],
   );
 
   const onNavigateToSchedule = useCallback(
     scheduleId => {
-      props.onCloseAddTransaction();
-      props.onNavigateToSchedule(scheduleId);
+      onCloseAddTransactionProp();
+      onNavigateToScheduleProp(scheduleId);
     },
-    [props.onCloseAddTransaction, props.onNavigateToSchedule],
+    [onCloseAddTransactionProp, onNavigateToScheduleProp],
   );
 
   const onNotesTagClick = useCallback(
     noteTag => {
-      props.onCloseAddTransaction();
-      props.onNotesTagClick(noteTag);
+      onCloseAddTransactionProp();
+      onNotesTagClickProp(noteTag);
     },
-    [props.onCloseAddTransaction, props.onNotesTagClick],
+    [onCloseAddTransactionProp, onNotesTagClickProp],
   );
 
   useEffect(() => {
@@ -2112,6 +2044,7 @@ export const TransactionTable = forwardRef((props, ref) => {
   const [newTransactions, setNewTransactions] = useState(null);
   const [prevIsAdding, setPrevIsAdding] = useState(false);
   const splitsExpanded = useSplitsExpanded();
+  const splitsExpandedDispatch = splitsExpanded.dispatch;
   const prevSplitsExpanded = useRef(null);
 
   const tableRef = useRef(null);
@@ -2190,6 +2123,8 @@ export const TransactionTable = forwardRef((props, ref) => {
     );
   }, [props.transactions, props.payees, props.accounts]);
 
+  const hasPrevSplitsExpanded = prevSplitsExpanded.current;
+
   useEffect(() => {
     // If it's anchored that means we've also disabled animations. To
     // reduce the chance for side effect collision, only do this if
@@ -2198,7 +2133,7 @@ export const TransactionTable = forwardRef((props, ref) => {
       tableRef.current.unanchor();
       tableRef.current.setRowAnimation(true);
     }
-  }, [prevSplitsExpanded.current]);
+  }, [hasPrevSplitsExpanded]);
 
   const newNavigator = useTableNavigator(
     newTransactions,
@@ -2216,14 +2151,12 @@ export const TransactionTable = forwardRef((props, ref) => {
   const [_, forceRerender] = useState({});
   const selectedItems = useSelectedItems();
 
-  useLayoutEffect(() => {
-    latestState.current = {
-      newTransactions,
-      newNavigator,
-      tableNavigator,
-      transactions: props.transactions,
-    };
-  });
+  latestState.current = {
+    newTransactions,
+    newNavigator,
+    tableNavigator,
+    transactions: props.transactions,
+  };
 
   // Derive new transactions from the `isAdding` prop
   if (prevIsAdding !== props.isAdding) {
@@ -2238,32 +2171,30 @@ export const TransactionTable = forwardRef((props, ref) => {
     setPrevIsAdding(props.isAdding);
   }
 
-  useEffect(() => {
-    if (shouldAdd.current) {
-      if (newTransactions[0].account == null) {
-        dispatch(
-          addNotification({
-            type: 'error',
-            message: 'Account is a required field',
-          }),
-        );
-        newNavigator.onEdit('temp', 'account');
-      } else {
-        const transactions = latestState.current.newTransactions;
-        const lastDate = transactions.length > 0 ? transactions[0].date : null;
-        setNewTransactions(
-          makeTemporaryTransactions(
-            props.currentAccountId,
-            props.currentCategoryId,
-            lastDate,
-          ),
-        );
-        newNavigator.onEdit('temp', 'date');
-        props.onAdd(transactions);
-      }
-      shouldAdd.current = false;
+  if (shouldAdd.current) {
+    if (newTransactions[0].account == null) {
+      dispatch(
+        addNotification({
+          type: 'error',
+          message: 'Account is a required field',
+        }),
+      );
+      newNavigator.onEdit('temp', 'account');
+    } else {
+      const transactions = latestState.current.newTransactions;
+      const lastDate = transactions.length > 0 ? transactions[0].date : null;
+      setNewTransactions(
+        makeTemporaryTransactions(
+          props.currentAccountId,
+          props.currentCategoryId,
+          lastDate,
+        ),
+      );
+      newNavigator.onEdit('temp', 'date');
+      props.onAdd(transactions);
     }
-  });
+    shouldAdd.current = false;
+  }
 
   useEffect(() => {
     if (savePending.current && afterSaveFunc.current) {
@@ -2272,7 +2203,7 @@ export const TransactionTable = forwardRef((props, ref) => {
     }
 
     savePending.current = false;
-  }, [newTransactions, props.transactions]);
+  }, [newTransactions, props, props.transactions]);
 
   function getFieldsNewTransaction(item) {
     const fields = [
@@ -2409,7 +2340,20 @@ export const TransactionTable = forwardRef((props, ref) => {
     // effect we want to run. We have to wait for all updates to be
     // committed (the input could still be saving a value).
     forceRerender({});
-  }, [props.onAdd, newNavigator.onEdit]);
+  }, []);
+
+  const {
+    onSave: onSaveProp,
+    onApplyRules: onApplyRulesProp,
+    onBatchDelete,
+    onBatchDuplicate,
+    onBatchLinkSchedule,
+    onBatchUnlinkSchedule,
+    onCreateRule: onCreateRuleProp,
+    onScheduleAction: onScheduleActionProp,
+    onMakeAsNonSplitTransactions: onMakeAsNonSplitTransactionsProp,
+    onSplit: onSplitProp,
+  } = props;
 
   const onSave = useCallback(
     async (transaction, subtransactions = null, updatedFieldName = null) => {
@@ -2420,8 +2364,8 @@ export const TransactionTable = forwardRef((props, ref) => {
         : transaction;
 
       if (isTemporaryId(transaction.id)) {
-        if (props.onApplyRules) {
-          groupedTransaction = await props.onApplyRules(
+        if (onApplyRulesProp) {
+          groupedTransaction = await onApplyRulesProp(
             groupedTransaction,
             updatedFieldName,
           );
@@ -2436,48 +2380,69 @@ export const TransactionTable = forwardRef((props, ref) => {
           ),
         );
       } else {
-        props.onSave(groupedTransaction);
+        onSaveProp(groupedTransaction);
       }
     },
-    [props.onSave],
+    [onSaveProp, onApplyRulesProp],
   );
 
-  const onDelete = useCallback(id => {
-    const temporary = isTemporaryId(id);
+  const onDelete = useCallback(
+    id => {
+      const temporary = isTemporaryId(id);
 
-    if (temporary) {
-      const newTrans = latestState.current.newTransactions;
+      if (temporary) {
+        const newTrans = latestState.current.newTransactions;
 
-      if (id === newTrans[0].id) {
-        // You can never delete the parent new transaction
-        return;
+        if (id === newTrans[0].id) {
+          // You can never delete the parent new transaction
+          return;
+        }
+
+        setNewTransactions(deleteTransaction(newTrans, id).data);
+      } else {
+        onBatchDelete([id]);
       }
+    },
+    [onBatchDelete],
+  );
 
-      setNewTransactions(deleteTransaction(newTrans, id).data);
-    } else {
-      props.onBatchDelete([id]);
-    }
-  }, []);
+  const onDuplicate = useCallback(
+    id => {
+      onBatchDuplicate([id]);
+    },
+    [onBatchDuplicate],
+  );
 
-  const onDuplicate = useCallback(id => {
-    props.onBatchDuplicate([id]);
-  }, []);
-
-  const onLinkSchedule = useCallback(id => {
-    props.onBatchLinkSchedule([id]);
-  }, []);
-  const onUnlinkSchedule = useCallback(id => {
-    props.onBatchUnlinkSchedule([id]);
-  }, []);
-  const onCreateRule = useCallback(id => {
-    props.onCreateRule([id]);
-  }, []);
-  const onScheduleAction = useCallback((action, id) => {
-    props.onScheduleAction(action, [id]);
-  }, []);
-  const onMakeAsNonSplitTransactions = useCallback(id => {
-    props.onMakeAsNonSplitTransactions([id]);
-  }, []);
+  const onLinkSchedule = useCallback(
+    id => {
+      onBatchLinkSchedule([id]);
+    },
+    [onBatchLinkSchedule],
+  );
+  const onUnlinkSchedule = useCallback(
+    id => {
+      onBatchUnlinkSchedule([id]);
+    },
+    [onBatchUnlinkSchedule],
+  );
+  const onCreateRule = useCallback(
+    id => {
+      onCreateRuleProp([id]);
+    },
+    [onCreateRuleProp],
+  );
+  const onScheduleAction = useCallback(
+    (action, id) => {
+      onScheduleActionProp(action, [id]);
+    },
+    [onScheduleActionProp],
+  );
+  const onMakeAsNonSplitTransactions = useCallback(
+    id => {
+      onMakeAsNonSplitTransactionsProp([id]);
+    },
+    [onMakeAsNonSplitTransactionsProp],
+  );
 
   const onSplit = useMemo(() => {
     return id => {
@@ -2500,9 +2465,9 @@ export const TransactionTable = forwardRef((props, ref) => {
         }
       } else {
         const trans = latestState.current.transactions.find(t => t.id === id);
-        const newId = props.onSplit(id);
+        const newId = onSplitProp(id);
 
-        splitsExpanded.dispatch({ type: 'open-split', id: trans.id });
+        splitsExpandedDispatch({ type: 'open-split', id: trans.id });
 
         const { tableNavigator } = latestState.current;
         if (trans.amount === null) {
@@ -2512,12 +2477,19 @@ export const TransactionTable = forwardRef((props, ref) => {
         }
       }
     };
-  }, [props.onSplit, splitsExpanded.dispatch]);
+  }, [onSplitProp, splitsExpandedDispatch]);
+
+  const { onAddSplit: onAddSplitProp } = props;
 
   const onAddSplit = useCallback(
     id => {
+      const {
+        tableNavigator,
+        newNavigator,
+        newTransactions: newTrans,
+      } = latestState.current;
+
       if (isTemporaryId(id)) {
-        const newTrans = latestState.current.newTransactions;
         const { data, diff } = addSplitTransaction(newTrans, id);
         setNewTransactions(data);
         newNavigator.onEdit(
@@ -2525,19 +2497,19 @@ export const TransactionTable = forwardRef((props, ref) => {
           latestState.current.newNavigator.focusedField,
         );
       } else {
-        const newId = props.onAddSplit(id);
+        const newId = onAddSplitProp(id);
         tableNavigator.onEdit(
           newId,
           latestState.current.tableNavigator.focusedField,
         );
       }
     },
-    [props.onAddSplit],
+    [onAddSplitProp],
   );
 
   const onDistributeRemainder = useCallback(
     async id => {
-      const { transactions, tableNavigator, newTransactions } =
+      const { transactions, newNavigator, tableNavigator, newTransactions } =
         latestState.current;
 
       const targetTransactions = isTemporaryId(id)
@@ -2591,7 +2563,7 @@ export const TransactionTable = forwardRef((props, ref) => {
         });
       }
     },
-    [latestState],
+    [onSave],
   );
 
   function onCloseAddTransaction() {
@@ -2605,8 +2577,8 @@ export const TransactionTable = forwardRef((props, ref) => {
   }
 
   const onToggleSplit = useCallback(
-    id => splitsExpanded.dispatch({ type: 'toggle-split', id }),
-    [splitsExpanded.dispatch],
+    id => splitsExpandedDispatch({ type: 'toggle-split', id }),
+    [splitsExpandedDispatch],
   );
 
   return (

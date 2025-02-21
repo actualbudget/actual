@@ -1,11 +1,16 @@
 import React, { type CSSProperties, useCallback } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
+import { styles } from '@actual-app/components/styles';
+import { Text } from '@actual-app/components/text';
+import { TextOneLine } from '@actual-app/components/text-one-line';
+import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
+import { replaceModal } from 'loot-core/client/actions';
 import { syncAndDownload } from 'loot-core/client/app/appSlice';
-import { replaceModal } from 'loot-core/src/client/actions';
-import * as queries from 'loot-core/src/client/queries';
+import * as queries from 'loot-core/client/queries';
 import { type AccountEntity } from 'loot-core/types/models';
 
 import { useAccounts } from '../../../hooks/useAccounts';
@@ -14,12 +19,8 @@ import { useNavigate } from '../../../hooks/useNavigate';
 import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { SvgAdd, SvgCheveronRight } from '../../../icons/v1';
 import { useDispatch, useSelector } from '../../../redux';
-import { theme, styles } from '../../../style';
+import { theme } from '../../../style';
 import { makeAmountFullStyle } from '../../budget/util';
-import { Button } from '../../common/Button2';
-import { Text } from '../../common/Text';
-import { TextOneLine } from '../../common/TextOneLine';
-import { View } from '../../common/View';
 import { MobilePageHeader, Page } from '../../Page';
 import { type Binding, type SheetFields } from '../../spreadsheet';
 import { CellValue, CellValueText } from '../../spreadsheet/CellValue';
@@ -261,7 +262,7 @@ function AccountList({
           {onBudgetAccounts.length > 0 && (
             <AccountHeader
               id="onbudget"
-              name="On budget"
+              name={t('On budget')}
               amount={getOnBudgetBalance()}
             />
           )}
@@ -281,7 +282,7 @@ function AccountList({
           {offBudgetAccounts.length > 0 && (
             <AccountHeader
               id="offbudget"
-              name="Off budget"
+              name={t('Off budget')}
               amount={getOffBudgetBalance()}
               style={{ marginTop: 30 }}
             />

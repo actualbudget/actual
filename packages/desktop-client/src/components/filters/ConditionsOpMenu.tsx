@@ -1,10 +1,11 @@
 import React from 'react';
 
+import { Text } from '@actual-app/components/text';
+import { View } from '@actual-app/components/view';
+
 import { type RuleConditionEntity } from 'loot-core/types/models';
 
 import { theme } from '../../style';
-import { Text } from '../common/Text';
-import { View } from '../common/View';
 import { FieldSelect } from '../modals/EditRuleModal';
 
 export function ConditionsOpMenu({

@@ -1,7 +1,9 @@
 // @ts-strict-ignore
+import { GlobalPrefsJson } from '../../../types/prefs';
+
 import * as T from '.';
 
-const store = {};
+const store: GlobalPrefsJson = {};
 
 export const init: T.Init = function () {};
 
@@ -19,15 +21,17 @@ export const removeItem: T.RemoveItem = function (key) {
   delete store[key];
 };
 
-export const multiGet: T.MultiGet = function (keys) {
+export async function multiGet<K extends readonly (keyof GlobalPrefsJson)[]>(
+  keys: K,
+) {
   return new Promise(function (resolve) {
     return resolve(
       keys.map(function (key) {
         return [key, store[key]];
-      }),
+      }) as { [P in keyof K]: [K[P], GlobalPrefsJson[K[P]]] },
     );
   });
-};
+}
 
 export const multiSet: T.MultiSet = function (keyValues) {
   keyValues.forEach(function ([key, value]) {
