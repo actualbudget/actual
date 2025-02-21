@@ -1,7 +1,5 @@
 import { ipcRenderer, contextBridge, IpcRenderer } from 'electron';
 
-import { GlobalPrefs } from 'loot-core/types/prefs';
-
 import {
   GetBootstrapDataPayload,
   OpenFileDialogPayload,
