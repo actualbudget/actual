@@ -43,6 +43,7 @@ export class Spreadsheet {
     this.events = mitt();
     this._meta = {
       createdMonths: new Set(),
+      budgetType: undefined,
     };
   }
 

@@ -40,7 +40,15 @@ export function getUploadError({
   }
 }
 
-export function getDownloadError({ reason, meta, fileName }) {
+export function getDownloadError({
+  reason,
+  meta,
+  fileName,
+}: {
+  reason: string;
+  meta?: Record<string, unknown>;
+  fileName?: string;
+}) {
   switch (reason) {
     case 'network':
     case 'download-failure':
