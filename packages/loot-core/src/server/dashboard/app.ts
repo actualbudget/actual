@@ -144,7 +144,9 @@ async function addDashboardWidget(
   // If no x & y was provided - calculate it dynamically
   // The new widget should be the very last one in the list of all widgets
   if (!('x' in widget) && !('y' in widget)) {
-    const data = await db.first(
+    const data = await db.first<
+      Pick<db.DbDashboard, 'x' | 'y' | 'width' | 'height'>
+    >(
       'SELECT x, y, width, height FROM dashboard WHERE tombstone = 0 ORDER BY y DESC, x DESC',
     );
 

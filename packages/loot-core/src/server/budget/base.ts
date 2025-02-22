@@ -442,7 +442,7 @@ export async function createBudget(months) {
 }
 
 export async function createAllBudgets() {
-  const earliestTransaction = await db.first(
+  const earliestTransaction = await db.first<db.DbTransaction>(
     'SELECT * FROM transactions WHERE isChild=0 AND date IS NOT NULL ORDER BY date ASC LIMIT 1',
   );
   const earliestDate =
