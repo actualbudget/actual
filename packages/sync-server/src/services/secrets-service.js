@@ -12,6 +12,10 @@ export const SecretName = {
   gocardless_secretKey: 'gocardless_secretKey',
   simplefin_token: 'simplefin_token',
   simplefin_accessKey: 'simplefin_accessKey',
+  pluggyai_clientId: 'pluggyai_clientId',
+  pluggyai_clientSecret: 'pluggyai_clientSecret',
+  pluggyai_itemIds: 'pluggyai_itemIds',
+  pluggyai_apiKey: 'pluggyai_apiKey',
 };
 
 class SecretsDb {
