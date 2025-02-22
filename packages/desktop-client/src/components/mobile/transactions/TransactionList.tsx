@@ -24,6 +24,7 @@ import { type TransactionEntity } from 'loot-core/types/models/transaction';
 
 import { useAccounts } from '../../../hooks/useAccounts';
 import { useCategories } from '../../../hooks/useCategories';
+import { useLocale } from '../../../hooks/useLocale';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { usePayees } from '../../../hooks/usePayees';
 import {
@@ -81,6 +82,7 @@ export function TransactionList({
   isLoadingMore,
   onLoadMore,
 }: TransactionListProps) {
+  const locale = useLocale();
   const { t } = useTranslation();
   const sections = useMemo(() => {
     // Group by date. We can assume transactions is ordered
@@ -173,7 +175,7 @@ export function TransactionList({
                 zIndex: 10,
               }}
             >
-              {monthUtils.format(section.date, 'MMMM dd, yyyy')}
+              {monthUtils.format(section.date, 'MMMM dd, yyyy', locale)}
             </Header>
             <Collection
               items={section.transactions.filter(

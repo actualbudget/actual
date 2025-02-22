@@ -12,6 +12,10 @@ import { Select, type SelectOption } from '../common/Select';
 
 import { Setting } from './UI';
 
+const languageDisplayNameOverride: { [key: string]: string } = {
+  'pt-BR': 'Português (Brasil)',
+};
+
 const languageOptions = (t: TFunction): SelectOption[] =>
   [
     ['', t('System default')] as [string, string],
@@ -19,9 +23,11 @@ const languageOptions = (t: TFunction): SelectOption[] =>
   ].concat(
     availableLanguages.map(lang => [
       lang,
-      new Intl.DisplayNames([lang], {
-        type: 'language',
-      }).of(lang) || lang,
+      lang in languageDisplayNameOverride
+        ? languageDisplayNameOverride[lang]
+        : new Intl.DisplayNames([lang], {
+            type: 'language',
+          }).of(lang) || lang,
     ]),
   );
 
