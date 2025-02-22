@@ -34,18 +34,20 @@ export function getStatus(
 }
 
 export function getHasTransactionsQuery(schedules) {
+  // A transaction belong to a schedule occurence if
+  // 1. the transaction is associated with the schedule AND
+  // 2. the transaction's date is between this occurence and the previous one.
   const filters = schedules.map(schedule => {
     const dateCond = schedule._conditions.find(c => c.field === 'date');
+    const previousDate = getPreviousDate(dateCond);
+
+    const dateFilter = {
+      $lte: schedule.next_date,
+      ...(previousDate && { $gt: previousDate }),
+    };
+
     return {
-      $and: {
-        schedule: schedule.id,
-        date: {
-          $gte:
-            dateCond && dateCond.op === 'is'
-              ? schedule.next_date
-              : monthUtils.subDays(schedule.next_date, 2),
-        },
-      },
+      $and: [{ schedule: schedule.id }, { date: dateFilter }],
     };
   });
 
@@ -305,6 +307,27 @@ export function getNextDate(
           value.schedule.data.weekendSolve,
         );
       }
+      return monthUtils.dayFromDate(date);
+    }
+  }
+  return null;
+}
+
+export function getPreviousDate(dateCond): string | null {
+  const cond = new Condition(dateCond.op, 'date', dateCond.value, null);
+  const value = cond.getValue();
+
+  if (value.type === 'recur') {
+    const previous = value.schedule
+      .occurrences({ reverse: true, end: monthUtils.currentDay() })
+      .toArray()[0];
+    if (previous) {
+      const date = value.schedule.data.skipWeekend
+        ? getDateWithSkippedWeekend(
+            previous.date,
+            value.schedule.data.weekendSolve,
+          )
+        : previous.date;
       return monthUtils.dayFromDate(date);
     }
   }
