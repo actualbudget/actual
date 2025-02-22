@@ -347,7 +347,7 @@ async function createDemoBudget() {
   // demo budget)
   await asyncStorage.setItem('readOnly', '');
 
-  return createBudget({
+  return await createBudget({
     budgetName: 'Demo Budget',
     testMode: true,
     testBudgetId: DEMO_BUDGET_ID,
