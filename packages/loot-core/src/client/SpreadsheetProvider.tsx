@@ -26,9 +26,7 @@ export function useSpreadsheet() {
 }
 
 // TODO: Make this generic and replace the Binding type in the desktop-client package.
-type Binding =
-  | string
-  | { name: string; value?: unknown | null; query?: Query | undefined };
+type Binding = string | { name: string; query?: Query | undefined };
 
 type CellCacheValue = { name: string; value: Node['value'] | null };
 type CellCache = { [name: string]: Promise<CellCacheValue> | null };
@@ -92,8 +90,7 @@ function makeSpreadsheet() {
       binding: Binding,
       callback: CellObserverCallback,
     ): () => void {
-      binding =
-        typeof binding === 'string' ? { name: binding, value: null } : binding;
+      binding = typeof binding === 'string' ? { name: binding } : binding;
 
       if (binding.query) {
         this.createQuery(sheetName, binding.name, binding.query);
