@@ -26,6 +26,8 @@ import { runMutator } from '../mutators';
 import { post } from '../post';
 import { getServer } from '../server-config';
 import { batchMessages } from '../sync';
+import { batchUpdateTransactions } from '../transactions';
+import { runRules } from '../transactions/transaction-rules';
 import {
   defaultMappings,
   mappingsFromString,
@@ -33,8 +35,6 @@ import {
 
 import { getStartingBalancePayee } from './payees';
 import { title } from './title';
-import { runRules } from './transaction-rules';
-import { batchUpdateTransactions } from './transactions';
 
 function BankSyncError(type: string, code: string, details?: object) {
   return { type: 'BankSyncError', category: type, code, details };
@@ -423,6 +423,16 @@ async function createNewPayees(payeesToCreate, addsAndUpdates) {
   });
 }
 
+export type ReconcileTransactionsResult = {
+  added: string[];
+  updated: string[];
+  updatedPreview: Array<{
+    transaction: TransactionEntity;
+    existing?: TransactionEntity;
+    ignored?: boolean;
+  }>;
+};
+
 export async function reconcileTransactions(
   acctId,
   transactions,
@@ -430,7 +440,7 @@ export async function reconcileTransactions(
   strictIdChecking = true,
   isPreview = false,
   defaultCleared = true,
-) {
+): Promise<ReconcileTransactionsResult> {
   console.log('Performing transaction reconciliation');
 
   const updated = [];
@@ -857,8 +867,8 @@ async function processBankSyncDownload(
 }
 
 export async function syncAccount(
-  userId: string,
-  userKey: string,
+  userId: string | undefined,
+  userKey: string | undefined,
   id: string,
   acctId: string,
   bankId: string,
@@ -890,25 +900,22 @@ export async function syncAccount(
   return processBankSyncDownload(download, id, acctRow, newAccount);
 }
 
-export async function SimpleFinBatchSync(
-  accounts: {
-    id: AccountEntity['id'];
-    accountId: AccountEntity['account_id'];
-  }[],
+export async function simpleFinBatchSync(
+  accounts: Array<Pick<AccountEntity, 'id' | 'account_id'>>,
 ) {
   const startDates = await Promise.all(
     accounts.map(async a => getAccountSyncStartDate(a.id)),
   );
 
   const res = await downloadSimpleFinTransactions(
-    accounts.map(a => a.accountId),
+    accounts.map(a => a.account_id),
     startDates,
   );
 
   const promises = [];
   for (let i = 0; i < accounts.length; i++) {
     const account = accounts[i];
-    const download = res[account.accountId];
+    const download = res[account.account_id];
 
     const acctRow = await db.select('accounts', account.id);
     const oldestTransaction = await getAccountOldestTransaction(account.id);

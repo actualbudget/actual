@@ -3,6 +3,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { TextOneLine } from '@actual-app/components/text-one-line';
 import { View } from '@actual-app/components/view';
 
+import { SchedulesProvider } from 'loot-core/client/data-hooks/schedules';
 import {
   useTransactions,
   useTransactionsSearch,
@@ -114,19 +115,21 @@ export function CategoryTransactions({
       }
       padding={0}
     >
-      <TransactionListWithBalances
-        isLoading={isLoading}
-        transactions={transactions}
-        balance={balance}
-        balanceCleared={balanceCleared}
-        balanceUncleared={balanceUncleared}
-        searchPlaceholder={`Search ${category.name}`}
-        onSearch={onSearch}
-        isLoadingMore={isLoadingMore}
-        onLoadMore={loadMoreTransactions}
-        onOpenTransaction={onOpenTransaction}
-        onRefresh={undefined}
-      />
+      <SchedulesProvider>
+        <TransactionListWithBalances
+          isLoading={isLoading}
+          transactions={transactions}
+          balance={balance}
+          balanceCleared={balanceCleared}
+          balanceUncleared={balanceUncleared}
+          searchPlaceholder={`Search ${category.name}`}
+          onSearch={onSearch}
+          isLoadingMore={isLoadingMore}
+          onLoadMore={loadMoreTransactions}
+          onOpenTransaction={onOpenTransaction}
+          onRefresh={undefined}
+        />
+      </SchedulesProvider>
     </Page>
   );
 }

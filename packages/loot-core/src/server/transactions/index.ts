@@ -1,4 +1,5 @@
 // @ts-strict-ignore
+
 import * as connection from '../../platform/server/connection';
 import { Diff } from '../../shared/util';
 import { PayeeEntity, TransactionEntity } from '../../types/models';

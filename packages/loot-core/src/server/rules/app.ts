@@ -1,14 +1,15 @@
 // @ts-strict-ignore
 import { type RuleEntity } from '../../types/models';
-import { Condition, Action, rankRules } from '../accounts/rules';
-import * as rules from '../accounts/transaction-rules';
 import { createApp } from '../app';
 import { RuleError } from '../errors';
 import { mutator } from '../mutators';
 import { batchMessages } from '../sync';
+import * as rules from '../transactions/transaction-rules';
 import { undoable } from '../undo';
 
 import { RulesHandlers } from './types/handlers';
+
+import { Condition, Action, rankRules } from '.';
 
 function validateRule(rule: Partial<RuleEntity>) {
   // Returns an array of errors, the array is the same link as the

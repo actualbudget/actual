@@ -116,7 +116,9 @@ export function CategoryMenuModal({
               }}
             >
               <Notes
-                notes={originalNotes?.length > 0 ? originalNotes : 'No notes'}
+                notes={
+                  originalNotes?.length > 0 ? originalNotes : t('No notes')
+                }
                 editable={false}
                 focused={false}
                 getStyle={() => ({
@@ -199,14 +201,14 @@ function AdditionalCategoryMenu({
             items={[
               !categoryGroup?.hidden && {
                 name: 'toggleVisibility',
-                text: category.hidden ? 'Show' : 'Hide',
+                text: category.hidden ? t('Show') : t('Hide'),
                 icon: category.hidden ? SvgViewShow : SvgViewHide,
                 iconSize: 16,
               },
               !categoryGroup?.hidden && Menu.line,
               {
                 name: 'delete',
-                text: 'Delete',
+                text: t('Delete'),
                 icon: SvgTrash,
                 iconSize: 15,
               },

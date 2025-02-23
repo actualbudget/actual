@@ -124,12 +124,12 @@ export function SidebarCategory({
               setMenuOpen(false);
             }}
             items={[
-              { name: 'rename', text: 'Rename' },
+              { name: 'rename', text: t('Rename') },
               !categoryGroup?.hidden && {
                 name: 'toggle-visibility',
-                text: category.hidden ? 'Show' : 'Hide',
+                text: category.hidden ? t('Show') : t('Hide'),
               },
-              { name: 'delete', text: 'Delete' },
+              { name: 'delete', text: t('Delete') },
             ]}
           />
         </Popover>

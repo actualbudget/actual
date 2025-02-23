@@ -1,7 +1,7 @@
 // @ts-strict-ignore
 import { parseStringPromise } from 'xml2js';
 
-import { dayFromDate } from '../../shared/months';
+import { dayFromDate } from '../../../shared/months';
 
 type OFXTransaction = {
   amount: string;

@@ -108,6 +108,7 @@ export function Accounts() {
               marginTop: 13,
               marginBottom: 5,
             }}
+            titleAccount={true}
           />
         )}
 
@@ -138,6 +139,7 @@ export function Accounts() {
               marginTop: 13,
               marginBottom: 5,
             }}
+            titleAccount={true}
           />
         )}
 
