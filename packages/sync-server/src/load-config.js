@@ -88,6 +88,7 @@ const defaultConfig = {
   projectRoot,
   multiuser: false,
   token_expiration: 'never',
+  enforceOpenId: false,
   userCreationMode: 'manual',
 };
 
@@ -222,6 +223,17 @@ const finalConfig = {
   token_expiration: process.env.ACTUAL_TOKEN_EXPIRATION
     ? process.env.ACTUAL_TOKEN_EXPIRATION
     : config.token_expiration,
+  enforceOpenId: process.env.ACTUAL_OPENID_ENFORCE
+    ? (() => {
+        const value = process.env.ACTUAL_OPENID_ENFORCE.toLowerCase();
+        if (!['true', 'false'].includes(value)) {
+          throw new Error(
+            'ACTUAL_OPENID_ENFORCE must be either "true" or "false"',
+          );
+        }
+        return value === 'true';
+      })()
+    : config.enforceOpenId,
   userCreationMode: process.env.ACTUAL_USER_CREATION_MODE
     ? process.env.ACTUAL_USER_CREATION_MODE
     : config.userCreationMode,

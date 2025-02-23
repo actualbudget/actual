@@ -17,3 +17,11 @@ export type SimpleFinAccount = {
 export interface SimpleFinBatchSyncResponse {
   [accountId: AccountEntity['account_id']]: BankSyncResponse;
 }
+
+export type SyncServerSimpleFinAccount = {
+  account_id: string;
+  institution?: string;
+  orgDomain?: string;
+  orgId?: string;
+  name: string;
+};
