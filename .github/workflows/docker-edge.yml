@@ -33,6 +33,7 @@ env:
 
 jobs:
   build:
+    if: ${{ github.event.repository.fork == false }}
     name: Build Docker image
     runs-on: ubuntu-latest
     strategy:

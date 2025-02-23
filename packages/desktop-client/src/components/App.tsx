@@ -28,6 +28,7 @@ import { init as initConnection, send } from 'loot-core/platform/client/fetch';
 
 import { handleGlobalEvents } from '../global-events';
 import { useMetadataPref } from '../hooks/useMetadataPref';
+import { setI18NextLanguage } from '../i18n';
 import { installPolyfills } from '../polyfills';
 import { useDispatch, useSelector, useStore } from '../redux';
 import { hasHiddenScrollbars, ThemeStyle, useTheme } from '../style';
@@ -66,6 +67,8 @@ function AppInner() {
     };
 
     async function init() {
+      setI18NextLanguage(null);
+
       const socketName = await maybeUpdate(() =>
         global.Actual.getServerSocket(),
       );
