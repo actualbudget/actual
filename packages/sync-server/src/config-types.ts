@@ -39,4 +39,5 @@ export interface Config {
     authMethod?: 'openid' | 'oauth2';
   };
   token_expiration?: 'never' | 'openid-provider' | number;
+  enforceOpenId: boolean;
 }

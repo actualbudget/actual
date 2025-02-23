@@ -86,6 +86,7 @@ const defaultConfig = {
   },
   projectRoot,
   token_expiration: 'never',
+  enforceOpenId: false,
 };
 
 /** @type {import('./config-types.js').Config} */
@@ -210,6 +211,17 @@ const finalConfig = {
   token_expiration: process.env.ACTUAL_TOKEN_EXPIRATION
     ? process.env.ACTUAL_TOKEN_EXPIRATION
     : config.token_expiration,
+  enforceOpenId: process.env.ACTUAL_OPENID_ENFORCE
+    ? (() => {
+        const value = process.env.ACTUAL_OPENID_ENFORCE.toLowerCase();
+        if (!['true', 'false'].includes(value)) {
+          throw new Error(
+            'ACTUAL_OPENID_ENFORCE must be either "true" or "false"',
+          );
+        }
+        return value === 'true';
+      })()
+    : config.enforceOpenId,
 };
 debug(`using port ${finalConfig.port}`);
 debug(`using hostname ${finalConfig.hostname}`);

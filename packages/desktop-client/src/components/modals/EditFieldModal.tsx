@@ -244,7 +244,9 @@ export function EditFieldModal({
       onClose={onClose}
       containerProps={{
         style: {
-          height: isNarrowWidth ? '85vh' : 275,
+          height: isNarrowWidth
+            ? 'calc(var(--visual-viewport-height) * 0.85)'
+            : 275,
           padding: '15px 10px',
           ...(minWidth && { minWidth }),
           backgroundColor: theme.menuAutoCompleteBackground,
