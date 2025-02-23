@@ -3,7 +3,9 @@ import React, {
   type CSSProperties,
 } from 'react';
 
-import { theme, styles } from '../../style';
+import { styles } from '@actual-app/components/styles';
+
+import { theme } from '../../style';
 import { ToBudgetMenu } from '../budget/envelope/budgetsummary/ToBudgetMenu';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 

@@ -48,6 +48,10 @@ vi.mock('../../hooks/useFeatureFlag', () => ({
 }));
 
 const accounts = [generateAccount('Bank of America')];
+vi.mock('../../hooks/useAccounts', () => ({
+  useAccounts: () => accounts,
+}));
+
 const payees: PayeeEntity[] = [
   {
     id: 'bob-id',
@@ -65,6 +69,15 @@ const payees: PayeeEntity[] = [
     name: 'This guy on the side of the road',
   },
 ];
+vi.mock('../../hooks/usePayees', async importOriginal => {
+  // eslint-disable-next-line @typescript-eslint/consistent-type-imports
+  const actual = await importOriginal<typeof import('../../hooks/usePayees')>();
+  return {
+    ...actual,
+    usePayees: () => payees,
+  };
+});
+
 const categoryGroups = generateCategoryGroups([
   {
     name: 'Investments and Savings',
@@ -79,6 +92,13 @@ const categoryGroups = generateCategoryGroups([
     categories: [{ name: 'Big Projects' }, { name: 'Shed' }],
   },
 ]);
+vi.mock('../../hooks/useCategories', () => ({
+  useCategories: () => ({
+    list: categoryGroups.flatMap(g => g.categories),
+    grouped: categoryGroups,
+  }),
+}));
+
 const usualGroup = categoryGroups[1];
 
 function generateTransactions(
@@ -130,13 +150,14 @@ type LiveTransactionTableProps = {
 };
 
 function LiveTransactionTable(props: LiveTransactionTableProps) {
-  const [transactions, setTransactions] = useState(props.transactions);
+  const { transactions: transactionsProp, onTransactionsChange } = props;
+
+  const [transactions, setTransactions] = useState(transactionsProp);
 
   useEffect(() => {
-    if (transactions === props.transactions) return;
-    props.onTransactionsChange?.(transactions);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [transactions]);
+    if (transactions === transactionsProp) return;
+    onTransactionsChange?.(transactions);
+  }, [transactions, transactionsProp, onTransactionsChange]);
 
   const onSplit = (id: string) => {
     const { data, diff } = splitTransaction(transactions, id);
@@ -212,6 +233,11 @@ function initBasicServer() {
           return { data: payees, dependencies: [] };
         case 'accounts':
           return { data: accounts, dependencies: [] };
+        case 'transactions':
+          return {
+            data: generateTransactions(5, [6]),
+            dependencies: [],
+          };
         default:
           throw new Error(`queried unknown table: ${query.table}`);
       }

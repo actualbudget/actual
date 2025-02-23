@@ -2,20 +2,24 @@
 import React, { type CSSProperties, type Ref, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
+import { Menu } from '@actual-app/components/menu';
+import { Popover } from '@actual-app/components/popover';
+import { View } from '@actual-app/components/view';
+
 import {
   type CategoryGroupEntity,
   type CategoryEntity,
 } from 'loot-core/types/models';
 
 import { useContextMenu } from '../../hooks/useContextMenu';
+import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { SvgCheveronDown } from '../../icons/v1';
 import { theme } from '../../style';
-import { Button } from '../common/Button2';
-import { Menu } from '../common/Menu';
-import { Popover } from '../common/Popover';
-import { View } from '../common/View';
 import { NotesButton } from '../NotesButton';
 import { InputCell } from '../table';
+
+import { CategoryAutomationButton } from './goals/CategoryAutomationButton';
 
 type SidebarCategoryProps = {
   innerRef: Ref<HTMLDivElement>;
@@ -24,6 +28,7 @@ type SidebarCategoryProps = {
   dragPreview?: boolean;
   dragging?: boolean;
   editing: boolean;
+  goalsShown?: boolean;
   style?: CSSProperties;
   borderColor?: string;
   isLast?: boolean;
@@ -40,6 +45,7 @@ export function SidebarCategory({
   dragPreview,
   dragging,
   editing,
+  goalsShown = false,
   style,
   isLast,
   onEditName,
@@ -48,6 +54,7 @@ export function SidebarCategory({
   onHideNewCategory,
 }: SidebarCategoryProps) {
   const { t } = useTranslation();
+  const goalTemplatesUIEnabled = useFeatureFlag('goalTemplatesUIEnabled');
 
   const temporary = category.id === 'new';
   const { setMenuOpen, menuOpen, handleContextMenu, resetPosition, position } =
@@ -117,17 +124,25 @@ export function SidebarCategory({
               setMenuOpen(false);
             }}
             items={[
-              { name: 'rename', text: 'Rename' },
+              { name: 'rename', text: t('Rename') },
               !categoryGroup?.hidden && {
                 name: 'toggle-visibility',
-                text: category.hidden ? 'Show' : 'Hide',
+                text: category.hidden ? t('Show') : t('Hide'),
               },
-              { name: 'delete', text: 'Delete' },
+              { name: 'delete', text: t('Delete') },
             ]}
           />
         </Popover>
       </View>
       <View style={{ flex: 1 }} />
+      {!goalsShown && goalTemplatesUIEnabled && (
+        <View style={{ flexShrink: 0 }}>
+          <CategoryAutomationButton
+            style={dragging && { color: 'currentColor' }}
+            defaultColor={theme.pageTextLight}
+          />
+        </View>
+      )}
       <View style={{ flexShrink: 0 }}>
         <NotesButton
           id={category.id}

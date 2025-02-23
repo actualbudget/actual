@@ -2,6 +2,10 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 
+import { Button } from '@actual-app/components/button';
+import { Paragraph } from '@actual-app/components/paragraph';
+import { styles } from '@actual-app/components/styles';
+import { View } from '@actual-app/components/view';
 import * as d from 'date-fns';
 
 import { addNotification } from 'loot-core/client/actions';
@@ -16,10 +20,7 @@ import { useFilters } from '../../../hooks/useFilters';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { useDispatch } from '../../../redux';
-import { theme, styles } from '../../../style';
-import { Button } from '../../common/Button2';
-import { Paragraph } from '../../common/Paragraph';
-import { View } from '../../common/View';
+import { theme } from '../../../style';
 import { EditablePageHeaderTitle } from '../../EditablePageHeaderTitle';
 import { MobileBackButton } from '../../mobile/MobileBackButton';
 import { MobilePageHeader, Page, PageHeader } from '../../Page';

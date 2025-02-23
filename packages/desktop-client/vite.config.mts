@@ -103,6 +103,8 @@ export default defineConfig(async ({ mode }) => {
     ];
   }
 
+  const browserOpen = env.BROWSER_OPEN ? `//${env.BROWSER_OPEN}` : true;
+
   return {
     base: '/',
     envPrefix: 'REACT_APP_',
@@ -139,7 +141,7 @@ export default defineConfig(async ({ mode }) => {
         ? ['chrome', 'firefox', 'edge', 'browser', 'browserPrivate'].includes(
             env.BROWSER,
           )
-        : true,
+        : browserOpen,
       watch: {
         disableGlobbing: false,
       },

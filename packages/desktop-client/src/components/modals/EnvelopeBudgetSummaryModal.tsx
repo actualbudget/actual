@@ -1,6 +1,8 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { styles } from '@actual-app/components/styles';
+
 import { collapseModals, pushModal } from 'loot-core/client/actions';
 import { envelopeBudget } from 'loot-core/client/queries';
 import { format, sheetForMonth, prevMonth } from 'loot-core/shared/months';
@@ -9,7 +11,6 @@ import { groupById, integerToCurrency } from 'loot-core/shared/util';
 import { useCategories } from '../../hooks/useCategories';
 import { useUndo } from '../../hooks/useUndo';
 import { useDispatch } from '../../redux';
-import { styles } from '../../style';
 import { ToBudgetAmount } from '../budget/envelope/budgetsummary/ToBudgetAmount';
 import { TotalsList } from '../budget/envelope/budgetsummary/TotalsList';
 import { useEnvelopeSheetValue } from '../budget/envelope/EnvelopeBudgetComponents';

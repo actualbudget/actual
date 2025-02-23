@@ -1,7 +1,8 @@
 import React from 'react';
 
+import { View } from '@actual-app/components/view';
+
 import { Select } from '../../common/Select';
-import { View } from '../../common/View';
 import { SectionLabel } from '../../forms';
 
 import {

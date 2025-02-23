@@ -11,6 +11,9 @@ import { HotkeysProvider } from 'react-hotkeys-hook';
 import { useTranslation } from 'react-i18next';
 import { BrowserRouter } from 'react-router-dom';
 
+import { styles } from '@actual-app/components/styles';
+import { View } from '@actual-app/components/view';
+
 import {
   addNotification,
   closeBudget,
@@ -25,14 +28,14 @@ import { init as initConnection, send } from 'loot-core/platform/client/fetch';
 
 import { handleGlobalEvents } from '../global-events';
 import { useMetadataPref } from '../hooks/useMetadataPref';
+import { setI18NextLanguage } from '../i18n';
 import { installPolyfills } from '../polyfills';
 import { useDispatch, useSelector, useStore } from '../redux';
-import { styles, hasHiddenScrollbars, ThemeStyle, useTheme } from '../style';
+import { hasHiddenScrollbars, ThemeStyle, useTheme } from '../style';
 import { ExposeNavigate } from '../util/router-tools';
 
 import { AppBackground } from './AppBackground';
 import { BudgetMonthCountProvider } from './budget/BudgetMonthCountContext';
-import { View } from './common/View';
 import { DevelopmentTopBar } from './DevelopmentTopBar';
 import { FatalError } from './FatalError';
 import { FinancesApp } from './FinancesApp';
@@ -64,6 +67,8 @@ function AppInner() {
     };
 
     async function init() {
+      setI18NextLanguage(null);
+
       const socketName = await maybeUpdate(() =>
         global.Actual.getServerSocket(),
       );

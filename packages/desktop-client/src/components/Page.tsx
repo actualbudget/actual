@@ -1,9 +1,11 @@
 import React, { type ReactNode, type CSSProperties } from 'react';
 
-import { theme, styles } from '../style';
+import { styles } from '@actual-app/components/styles';
+import { Text } from '@actual-app/components/text';
+import { View } from '@actual-app/components/view';
 
-import { Text } from './common/Text';
-import { View } from './common/View';
+import { theme } from '../style';
+
 import { useResponsive } from './responsive/ResponsiveProvider';
 
 const HEADER_HEIGHT = 50;

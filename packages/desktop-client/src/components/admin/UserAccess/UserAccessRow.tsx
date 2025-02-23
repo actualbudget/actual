@@ -2,6 +2,8 @@
 import React, { memo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { View } from '@actual-app/components/view';
+
 import { addNotification, signOut } from 'loot-core/client/actions';
 import { send } from 'loot-core/platform/client/fetch';
 import { getUserAccessErrors } from 'loot-core/shared/errors';
@@ -10,7 +12,6 @@ import { type UserAvailable } from 'loot-core/types/models';
 import { useMetadataPref } from '../../../hooks/useMetadataPref';
 import { useDispatch } from '../../../redux';
 import { theme } from '../../../style';
-import { View } from '../../common/View';
 import { Checkbox } from '../../forms';
 import { Row, Cell } from '../../table';
 

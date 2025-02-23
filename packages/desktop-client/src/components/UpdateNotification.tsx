@@ -1,16 +1,17 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
+import { Text } from '@actual-app/components/text';
+import { View } from '@actual-app/components/view';
+
 import { setAppState, updateApp } from 'loot-core/client/app/appSlice';
 
 import { SvgClose } from '../icons/v1';
 import { useSelector, useDispatch } from '../redux';
 import { theme } from '../style';
 
-import { Button } from './common/Button2';
 import { Link } from './common/Link';
-import { Text } from './common/Text';
-import { View } from './common/View';
 
 export function UpdateNotification() {
   const { t } = useTranslation();
