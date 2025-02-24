@@ -5,7 +5,6 @@ import { useSearchParams } from 'react-router-dom';
 
 import { Button, ButtonWithLoading } from '@actual-app/components/button';
 import { Label } from '@actual-app/components/label';
-import { Paragraph } from '@actual-app/components/paragraph';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
@@ -27,7 +26,6 @@ import { useResponsive } from '../../responsive/ResponsiveProvider';
 import { useAvailableLoginMethods, useLoginMethod } from '../../ServerContext';
 
 import { useBootstrapped, Title } from './common';
-import { ConfirmOldPasswordForm } from './ConfirmPasswordForm';
 import { OpenIdForm } from './OpenIdForm';
 
 function PasswordLogin({ setError, dispatch }) {
@@ -164,7 +162,7 @@ function OpenIdLogin({ setError }) {
               isDisabled={firstLoginPassword === '' && warnMasterCreation}
             >
               {warnMasterCreation ? (
-                <Trans>Enable OpenID</Trans>
+                <Trans>Start using OpenID</Trans>
               ) : (
                 <Trans>Sign in with OpenID</Trans>
               )}
@@ -181,7 +179,20 @@ function OpenIdLogin({ setError }) {
               </label>
               <Button
                 variant="bare"
-                onPress={() => setReviewOpenIdConfiguration(true)}
+                isDisabled={firstLoginPassword === '' && warnMasterCreation}
+                onPress={() => {
+                  send('get-openid-config', {
+                    password: firstLoginPassword,
+                  }).then(config => {
+                    if ('error' in config) {
+                      setError(config.error);
+                    } else if ('openId' in config) {
+                      setError(null);
+                      setOpenIdConfig(config.openId);
+                      setReviewOpenIdConfiguration(true);
+                    }
+                  });
+                }}
                 style={{ marginTop: 5 }}
               >
                 <Trans>Review OpenID configuration</Trans>
@@ -191,46 +202,38 @@ function OpenIdLogin({ setError }) {
         </>
       )}
       {reviewOpenIdConfiguration && (
-        <View style={{ marginTop: 40 }}>
-          {!openIdConfig ? (
-            <>
-              <Paragraph>
-                Type the server password to review OpenID configuration
-              </Paragraph>
-              <ConfirmOldPasswordForm
-                style={{ marginTop: 0 }}
-                buttons={[]}
-                onSetPassword={async password => {
-                  const config = await send('get-openid-config', { password });
-                  if ('error' in config) {
-                    setError(config.error);
-                  } else if ('openId' in config) {
-                    setOpenIdConfig(config.openId);
-                  }
+        <View style={{ marginTop: 20 }}>
+          <Text
+            style={{
+              ...styles.verySmallText,
+              color: theme.pageTextLight,
+              fontWeight: 'bold ',
+              width: '100%',
+              textAlign: 'center',
+            }}
+          >
+            <Trans>Review OpenID configuration</Trans>
+          </Text>
+          <OpenIdForm
+            openIdData={openIdConfig}
+            otherButtons={[
+              <Button
+                key="cancel"
+                variant="bare"
+                style={{ marginRight: 10 }}
+                onPress={() => {
+                  setReviewOpenIdConfiguration(false);
+                  setOpenIdConfig(null);
+                  setFirstLoginPassword('');
                 }}
-              />
-            </>
-          ) : (
-            <OpenIdForm
-              openIdData={openIdConfig}
-              otherButtons={[
-                <Button
-                  key="cancel"
-                  variant="bare"
-                  style={{ marginRight: 10 }}
-                  onPress={() => {
-                    setReviewOpenIdConfiguration(false);
-                    setOpenIdConfig(null);
-                  }}
-                >
-                  <Trans>Cancel</Trans>
-                </Button>,
-              ]}
-              onSetOpenId={async config => {
-                onSetOpenId(config);
-              }}
-            />
-          )}
+              >
+                <Trans>Cancel</Trans>
+              </Button>,
+            ]}
+            onSetOpenId={async config => {
+              onSetOpenId(config);
+            }}
+          />
         </View>
       )}
     </View>
@@ -358,6 +361,14 @@ export function Login() {
         </View>
       )}
 
+      {method === 'password' && (
+        <PasswordLogin setError={setError} dispatch={dispatch} />
+      )}
+
+      {method === 'openid' && <OpenIdLogin setError={setError} />}
+
+      {method === 'header' && <HeaderLogin error={error} />}
+
       {error && (
         <Text
           style={{
@@ -370,14 +381,6 @@ export function Login() {
           {getErrorMessage(error)}
         </Text>
       )}
-
-      {method === 'password' && (
-        <PasswordLogin setError={setError} dispatch={dispatch} />
-      )}
-
-      {method === 'openid' && <OpenIdLogin setError={setError} />}
-
-      {method === 'header' && <HeaderLogin error={error} />}
     </View>
   );
 }
