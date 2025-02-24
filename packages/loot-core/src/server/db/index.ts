@@ -516,7 +516,7 @@ export async function getAccount(id: DbAccount['id']) {
 
 export async function insertPayee(payee) {
   payee = payeeModel.validate(payee);
-  let id;
+  let id: DbPayee['id'];
   await batchMessages(async () => {
     id = await insertWithUUID('payees', payee);
     await insert('payee_mapping', { id, targetId: id });
