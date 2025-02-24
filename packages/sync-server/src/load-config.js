@@ -81,6 +81,7 @@ const openIdSchema = convict({
     doc: 'Authentication method for OpenID.',
     format: ['openid', 'oauth2'],
     default: 'openid',
+    env: 'ACTUAL_OPENID_AUTH_METHOD',
   },
 });
 
@@ -212,12 +213,6 @@ const configSchema = convict({
     default: [],
     env: 'ACTUAL_TRUSTED_AUTH_PROXIES',
   },
-  multiuser: {
-    doc: 'Enable multi-user mode.',
-    format: Boolean,
-    default: false,
-    env: 'ACTUAL_MULTIUSER',
-  },
   https: {
     doc: 'HTTPS configuration.',
     format: Object,
@@ -288,7 +283,6 @@ debug(`Using server files directory: ${config.serverFiles}`);
 debug(`Using user files directory: ${config.userFiles}`);
 debug(`Using web root directory: ${config.webRoot}`);
 debug(`Using login method: ${config.loginMethod}`);
-debug(`Multiuser? ${config.multiuser}`);
 debug(`Allowed methods: ${config.allowedLoginMethods.join(', ')}`);
 debug(`Trusted proxies: ${config.trustedProxies.join(', ')}`);
 debug(`Trusted auth proxies: ${config.trustedAuthProxies.join(', ')}`);
