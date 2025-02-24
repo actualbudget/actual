@@ -235,7 +235,15 @@ const finalConfig = {
       })()
     : config.enforceOpenId,
   userCreationMode: process.env.ACTUAL_USER_CREATION_MODE
-    ? process.env.ACTUAL_USER_CREATION_MODE
+    ? (() => {
+        const value = process.env.ACTUAL_USER_CREATION_MODE.toLowerCase();
+        if (!['manual', 'login'].includes(value)) {
+          throw new Error(
+            'ACTUAL_USER_CREATION_MODE must be either "manual" or "login"',
+          );
+        }
+        return value;
+      })()
     : config.userCreationMode,
 };
 debug(`using port ${finalConfig.port}`);
