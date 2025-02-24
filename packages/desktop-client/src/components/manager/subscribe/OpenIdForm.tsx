@@ -9,9 +9,6 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
-import { addNotification } from 'loot-core/client/actions';
-import { send } from 'loot-core/platform/client/fetch';
-import { type Handlers } from 'loot-core/types/handlers';
 import { type OpenIdConfig } from 'loot-core/types/models/openid';
 
 import { theme } from '../../../style';
@@ -28,7 +25,7 @@ type OnProviderChangeCallback = (provider: OpenIdProviderOption) => void;
 type OpenIdFormProps = {
   onSetOpenId: OpenIdCallback;
   otherButtons?: ReactNode[];
-  loadData?: boolean;
+  openIdData?: OpenIdConfig;
 };
 
 type OpenIdProviderOption = {
@@ -48,7 +45,7 @@ type OpenIdProviderOption = {
 export function OpenIdForm({
   onSetOpenId,
   otherButtons,
-  loadData,
+  openIdData,
 }: OpenIdFormProps) {
   const { t } = useTranslation();
 
@@ -67,29 +64,13 @@ export function OpenIdForm({
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (loadData) {
-      send('get-openid-config').then(
-        (config: Awaited<ReturnType<Handlers['get-openid-config']>>) => {
-          if (!config) return;
-
-          if ('error' in config) {
-            addNotification({
-              type: 'error',
-              id: 'error',
-              title: t('Error getting OpenID config'),
-              sticky: true,
-              message: config.error,
-            });
-          } else if ('openId' in config) {
-            setProviderName(config?.openId?.selectedProvider ?? 'other');
-            setIssuer(config?.openId?.issuer ?? '');
-            setClientId(config?.openId?.client_id ?? '');
-            setClientSecret(config?.openId?.client_secret ?? '');
-          }
-        },
-      );
+    if (openIdData) {
+      setProviderName(openIdData.selectedProvider ?? 'other');
+      setIssuer(openIdData.issuer ?? '');
+      setClientId(openIdData.client_id ?? '');
+      setClientSecret(openIdData.client_secret ?? '');
     }
-  }, [loadData, t]);
+  }, [openIdData]);
 
   const handleProviderChange = (provider: OpenIdProviderOption) => {
     if (provider) {

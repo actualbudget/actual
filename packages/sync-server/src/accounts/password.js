@@ -122,3 +122,27 @@ export function changePassword(newPassword) {
   ]);
   return {};
 }
+
+export function checkPassword(password) {
+  if (!isValidPassword(password)) {
+    return false;
+  }
+
+  const accountDb = getAccountDb();
+  const { extra_data: passwordHash } =
+    accountDb.first('SELECT extra_data FROM auth WHERE method = ?', [
+      'password',
+    ]) || {};
+
+  if (!passwordHash) {
+    return false;
+  }
+
+  const confirmed = bcrypt.compareSync(password, passwordHash);
+
+  if (!confirmed) {
+    return false;
+  }
+
+  return true;
+}

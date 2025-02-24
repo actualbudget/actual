@@ -87,7 +87,10 @@ app.post('/login', async (req, res) => {
         return;
       }
 
-      const { error, url } = await loginWithOpenIdSetup(req.body.return_url);
+      const { error, url } = await loginWithOpenIdSetup(
+        req.body.return_url,
+        req.body.password,
+      );
       if (error) {
         res.status(400).send({ status: 'error', reason: error });
         return;

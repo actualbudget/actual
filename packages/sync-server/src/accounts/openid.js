@@ -9,6 +9,8 @@ import {
 } from '../services/user-service.js';
 import { TOKEN_EXPIRATION_NEVER } from '../util/validate-user.js';
 
+import { checkPassword } from './password.js';
+
 export async function bootstrapOpenId(config) {
   if (!('issuer' in config)) {
     return { error: 'missing-issuer' };
@@ -72,7 +74,10 @@ async function setupOpenIdClient(config) {
   return client;
 }
 
-export async function loginWithOpenIdSetup(returnUrl) {
+export async function loginWithOpenIdSetup(
+  returnUrl,
+  firstTimeLoginPassword = '',
+) {
   if (!returnUrl) {
     return { error: 'return-url-missing' };
   }
@@ -81,6 +86,19 @@ export async function loginWithOpenIdSetup(returnUrl) {
   }
 
   const accountDb = getAccountDb();
+
+  const { countUsersWithUserName } = accountDb.first(
+    'SELECT count(*) as countUsersWithUserName FROM users WHERE user_name <> ?',
+    [''],
+  );
+  if (countUsersWithUserName === 0) {
+    const valid = checkPassword(firstTimeLoginPassword);
+
+    if (!valid) {
+      return { error: 'invalid-password' };
+    }
+  }
+
   let config = accountDb.first('SELECT extra_data FROM auth WHERE method = ?', [
     'openid',
   ]);
