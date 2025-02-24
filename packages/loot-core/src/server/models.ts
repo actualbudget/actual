@@ -1,4 +1,8 @@
-import { PayeeEntity } from '../types/models';
+import {
+  CategoryEntity,
+  CategoryGroupEntity,
+  PayeeEntity,
+} from '../types/models';
 
 import {
   convertForInsert,
@@ -80,6 +84,22 @@ export const categoryModel = {
     const { sort_order, ...rest } = category;
     return { ...rest, hidden: rest.hidden ? 1 : 0 } as DbCategory;
   },
+  toDb(
+    category: CategoryEntity,
+    { update }: { update?: boolean } = {},
+  ): DbCategory {
+    return update
+      ? convertForUpdate(schema, schemaConfig, 'categories', category)
+      : convertForInsert(schema, schemaConfig, 'categories', category);
+  },
+  fromDb(category: DbCategory): CategoryEntity {
+    return convertFromSelect(
+      schema,
+      schemaConfig,
+      'categories',
+      category,
+    ) as CategoryEntity;
+  },
 };
 
 export const categoryGroupModel = {
@@ -96,6 +116,39 @@ export const categoryGroupModel = {
 
     const { sort_order, ...rest } = categoryGroup;
     return { ...rest, hidden: rest.hidden ? 1 : 0 } as DbCategoryGroup;
+  },
+  toDb(
+    categoryGroup: CategoryGroupEntity,
+    { update }: { update?: boolean } = {},
+  ): DbCategoryGroup {
+    return update
+      ? convertForUpdate(schema, schemaConfig, 'category_groups', categoryGroup)
+      : convertForInsert(
+          schema,
+          schemaConfig,
+          'category_groups',
+          categoryGroup,
+        );
+  },
+  fromDb(
+    categoryGroup: DbCategoryGroup & {
+      categories: DbCategory[];
+    },
+  ): CategoryGroupEntity {
+    const { categories, ...rest } = categoryGroup;
+    const categoryGroupEntity = convertFromSelect(
+      schema,
+      schemaConfig,
+      'category_groups',
+      rest,
+    ) as CategoryGroupEntity;
+
+    return {
+      ...categoryGroupEntity,
+      categories: categories
+        .filter(category => category.cat_group === categoryGroup.id)
+        .map(categoryModel.fromDb),
+    };
   },
 };
 

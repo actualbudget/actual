@@ -3,6 +3,7 @@ import { CategoryEntity, CategoryGroupEntity } from '../../types/models';
 import { createApp } from '../app';
 import * as db from '../db';
 import { APIError } from '../errors';
+import { categoryGroupModel, categoryModel } from '../models';
 import { mutator } from '../mutators';
 import * as sheet from '../sheet';
 import { resolveName } from '../spreadsheet/util';
@@ -132,10 +133,11 @@ app.method('category-group-move', mutator(undoable(moveCategoryGroup)));
 app.method('category-group-delete', mutator(undoable(deleteCategoryGroup)));
 app.method('must-category-transfer', isCategoryTransferRequired);
 
+// Server must return AQL entities not the raw DB data
 async function getCategories() {
   return {
-    grouped: await db.getCategoriesGrouped(),
-    list: await db.getCategories(),
+    grouped: await getCategoryGroups(),
+    list: (await db.getCategories()).map(categoryModel.fromDb),
   };
 }
 
@@ -346,8 +348,10 @@ async function deleteCategory({
   return result;
 }
 
+// Server must return AQL entities not the raw DB data
 async function getCategoryGroups() {
-  return await db.getCategoriesGrouped();
+  const categoryGroups = await db.getCategoriesGrouped();
+  return categoryGroups.map(categoryGroupModel.fromDb);
 }
 
 async function createCategoryGroup({
