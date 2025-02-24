@@ -343,7 +343,9 @@ export async function getCategoriesGrouped(
   }));
 }
 
-export async function insertCategoryGroup(group) {
+export async function insertCategoryGroup(
+  group,
+): Promise<CategoryGroupEntity['id']> {
   // Don't allow duplicate group
   const existingGroup = await first<
     Pick<DbCategoryGroup, 'id' | 'name' | 'hidden'>
@@ -366,7 +368,11 @@ export async function insertCategoryGroup(group) {
     ...categoryGroupModel.validate(group),
     sort_order,
   };
-  return insertWithUUID('category_groups', group);
+  const id: CategoryGroupEntity['id'] = await insertWithUUID(
+    'category_groups',
+    group,
+  );
+  return id;
 }
 
 export function updateCategoryGroup(group) {
@@ -400,10 +406,10 @@ export async function deleteCategoryGroup(group, transferId?: string) {
 export async function insertCategory(
   category,
   { atEnd } = { atEnd: undefined },
-) {
+): Promise<CategoryEntity['id']> {
   let sort_order;
 
-  let id_;
+  let id_: CategoryEntity['id'];
   await batchMessages(async () => {
     // Dont allow duplicated names in groups
     const existingCatInGroup = await first<Pick<DbCategory, 'id'>>(
