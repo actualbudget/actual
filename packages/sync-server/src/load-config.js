@@ -1,9 +1,10 @@
-import convict from 'convict';
+import { createRequire } from 'module';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+
+import convict from 'convict';
 import createDebug from 'debug';
-import { createRequire } from 'module';
 
 const require = createRequire(import.meta.url);
 const debug = createDebug('actual:config');
@@ -19,6 +20,15 @@ const actualAppWebBuildPath = path.join(
   'build',
 );
 debug(`Actual web build path: '${actualAppWebBuildPath}'`);
+
+convict.addFormat({
+  name: 'tokenExpiration',
+  validate(val) {
+    if (val === 'never' || val === 'openid-provider') return;
+    if (typeof val === 'number' && Number.isFinite(val) && val >= 0) return;
+    throw new Error(`Invalid token_expiration value: ${val}`);
+  },
+});
 
 /*
   Sub-Schemas
@@ -232,7 +242,7 @@ const configSchema = convict({
   },
   token_expiration: {
     doc: 'Token expiration time.',
-    format: ['never', 'openid-provider', 'nat'],
+    format: 'tokenExpiration',
     default: 'never',
     env: 'ACTUAL_TOKEN_EXPIRATION',
   },
@@ -253,7 +263,7 @@ const config = configSchema.getProperties();
 
 // OpenID
 if (config.openId) {
-  let loadedOpenId = loadSubConfig(openIdSchema, config.openId);
+  const loadedOpenId = loadSubConfig(openIdSchema, config.openId);
   if (loadedOpenId?.issuer && typeof loadedOpenId.issuer === 'object') {
     loadedOpenId.issuer = loadSubConfig(
       openIdIssuerSchema,
