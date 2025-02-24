@@ -106,6 +106,13 @@ export const payeeModel = {
     requiredFields('payee', payee, ['name'], update);
     return payee;
   },
+  toDb(payee: PayeeEntity, { update }: { update?: boolean } = {}): DbPayee {
+    return (
+      update
+        ? convertForUpdate(schema, schemaConfig, 'payees', payee)
+        : convertForInsert(schema, schemaConfig, 'payees', payee)
+    ) as DbPayee;
+  },
   fromDb(payee: DbPayee): PayeeEntity {
     return convertFromSelect(
       schema,
@@ -113,12 +120,5 @@ export const payeeModel = {
       'payees',
       payee,
     ) as PayeeEntity;
-  },
-  toDb(payee: PayeeEntity, { update }: { update?: boolean } = {}): DbPayee {
-    return (
-      update
-        ? convertForUpdate(schema, schemaConfig, 'payees', payee)
-        : convertForInsert(schema, schemaConfig, 'payees', payee)
-    ) as DbPayee;
   },
 };
