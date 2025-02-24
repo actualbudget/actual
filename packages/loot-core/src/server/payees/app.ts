@@ -1,6 +1,7 @@
 import { PayeeEntity, RuleEntity } from '../../types/models';
 import { createApp } from '../app';
 import * as db from '../db';
+import { payeeModel } from '../models';
 import { mutator } from '../mutators';
 import { batchMessages } from '../sync';
 import * as rules from '../transactions/transaction-rules';
@@ -33,12 +34,14 @@ async function createPayee({ name }: { name: PayeeEntity['name'] }) {
   return db.insertPayee({ name });
 }
 
+// Server must return AQL entities not the raw DB data
 async function getCommonPayees(): Promise<PayeeEntity[]> {
-  return await db.getCommonPayees();
+  return (await db.getCommonPayees()).map(payeeModel.fromDb);
 }
 
+// Server must return AQL entities not the raw DB data
 async function getPayees(): Promise<PayeeEntity[]> {
-  return await db.getPayees();
+  return (await db.getPayees()).map(payeeModel.fromDb);
 }
 
 async function getOrphanedPayees(): Promise<Array<Pick<PayeeEntity, 'id'>>> {
@@ -46,7 +49,7 @@ async function getOrphanedPayees(): Promise<Array<Pick<PayeeEntity, 'id'>>> {
 }
 
 async function getPayeeRuleCounts() {
-  const payeeCounts: Record<string, number> = {};
+  const payeeCounts: Record<PayeeEntity['id'], number> = {};
 
   rules.iterateIds(rules.getRules(), 'payee', (rule, id) => {
     if (payeeCounts[id] == null) {

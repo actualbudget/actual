@@ -5,6 +5,14 @@ import {
   PayeeEntity,
 } from '../types/models';
 
+import {
+  convertForInsert,
+  convertForUpdate,
+  convertFromSelect,
+  schema,
+  schemaConfig,
+} from './aql';
+import { DbPayee } from './db';
 import { ValidationError } from './errors';
 
 export function requiredFields<T extends object, K extends keyof T>(
@@ -97,5 +105,20 @@ export const payeeModel = {
   validate(payee: PayeeEntity, { update }: { update?: boolean } = {}) {
     requiredFields('payee', payee, ['name'], update);
     return payee;
+  },
+  fromDb(payee: DbPayee): PayeeEntity {
+    return convertFromSelect(
+      schema,
+      schemaConfig,
+      'payees',
+      payee,
+    ) as PayeeEntity;
+  },
+  toDb(payee: PayeeEntity, { update }: { update?: boolean } = {}): DbPayee {
+    return (
+      update
+        ? convertForUpdate(schema, schemaConfig, 'payees', payee)
+        : convertForInsert(schema, schemaConfig, 'payees', payee)
+    ) as DbPayee;
   },
 };

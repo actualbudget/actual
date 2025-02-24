@@ -594,7 +594,7 @@ export async function mergePayees(
   });
 }
 
-export function getPayees() {
+export function getPayees(): Promise<DbPayee[]> {
   return all(`
     SELECT p.*, COALESCE(a.name, p.name) AS name FROM payees p
     LEFT JOIN accounts a ON (p.transfer_acct = a.id AND a.tombstone = 0)
@@ -603,7 +603,7 @@ export function getPayees() {
   `);
 }
 
-export function getCommonPayees() {
+export function getCommonPayees(): Promise<DbPayee[]> {
   const twelveWeeksAgo = toDateRepr(
     monthUtils.subWeeks(monthUtils.currentDate(), 12),
   );
@@ -645,11 +645,11 @@ const orphanedPayeesQuery = `
 `;
 /* eslint-enable rulesdir/typography */
 
-export function syncGetOrphanedPayees() {
+export function syncGetOrphanedPayees(): Promise<Array<Pick<DbPayee, 'id'>>> {
   return all(orphanedPayeesQuery);
 }
 
-export async function getOrphanedPayees() {
+export async function getOrphanedPayees(): Promise<Array<DbPayee['id']>> {
   const rows = await all(orphanedPayeesQuery);
   return rows.map(row => row.id);
 }
