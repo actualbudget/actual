@@ -1,266 +1,242 @@
-import { createRequire } from 'module';
+import convict from 'convict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-
 import createDebug from 'debug';
+import { createRequire } from 'module';
 
 const require = createRequire(import.meta.url);
 const debug = createDebug('actual:config');
 const debugSensitive = createDebug('actual-sensitive:config');
 
 const projectRoot = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
-debug(`project root: '${projectRoot}'`);
+debug(`Project root: '${projectRoot}'`);
+
 export const sqlDir = path.join(projectRoot, 'src', 'sql');
 
-let defaultDataDir = fs.existsSync('/data') ? '/data' : projectRoot;
-
-if (process.env.ACTUAL_DATA_DIR) {
-  defaultDataDir = process.env.ACTUAL_DATA_DIR;
-}
-
-debug(`default data directory: '${defaultDataDir}'`);
-
-function parseJSON(path, allowMissing = false) {
-  let text;
-  try {
-    text = fs.readFileSync(path, 'utf8');
-  } catch (e) {
-    if (allowMissing) {
-      debug(`config file '${path}' not found, ignoring.`);
-      return {};
-    }
-    throw e;
-  }
-  return JSON.parse(text);
-}
-
-let userConfig;
-if (process.env.ACTUAL_CONFIG_PATH) {
-  debug(
-    `loading config from ACTUAL_CONFIG_PATH: '${process.env.ACTUAL_CONFIG_PATH}'`,
-  );
-  userConfig = parseJSON(process.env.ACTUAL_CONFIG_PATH);
-
-  defaultDataDir = userConfig.dataDir ?? defaultDataDir;
-} else {
-  let configFile = path.join(projectRoot, 'config.json');
-
-  if (!fs.existsSync(configFile)) {
-    configFile = path.join(defaultDataDir, 'config.json');
-  }
-
-  debug(`loading config from default path: '${configFile}'`);
-  userConfig = parseJSON(configFile, true);
-}
-
 const actualAppWebBuildPath = path.join(
-  // require.resolve is used to recursively search up the workspace to find the node_modules directory
   path.dirname(require.resolve('@actual-app/web/package.json')),
-  'build',
+  'build'
 );
-
 debug(`Actual web build path: '${actualAppWebBuildPath}'`);
 
-/** @type {Omit<import('./config-types.js').Config, 'mode' | 'dataDir' | 'serverFiles' | 'userFiles'>} */
-const defaultConfig = {
-  loginMethod: 'password',
-  allowedLoginMethods: ['password', 'header', 'openid'],
-  // assume local networks are trusted
-  trustedProxies: [
-    '10.0.0.0/8',
-    '172.16.0.0/12',
-    '192.168.0.0/16',
-    'fc00::/7',
-    '::1/128',
-  ],
-  // fallback to trustedProxies, but in the future trustedProxies will only be used for express trust
-  // and trustedAuthProxies will just be for header auth
-  trustedAuthProxies: null,
-  port: 5006,
-  hostname: '::',
-  webRoot: actualAppWebBuildPath,
-  upload: {
-    fileSizeSyncLimitMB: 20,
-    syncEncryptedFileSizeLimitMB: 50,
-    fileSizeLimitMB: 20,
+/*
+  Sub-Schemas
+*/
+const openIdIssuerSchema = convict({
+  name: { doc: 'OpenID provider name.', format: String, default: '' },
+  authorization_endpoint: { doc: 'OpenID authorization endpoint.', format: String, default: '' },
+  token_endpoint: { doc: 'OpenID token endpoint.', format: String, default: '' },
+  userinfo_endpoint: { doc: 'OpenID user info endpoint.', format: String, default: '' },
+});
+
+const openIdSchema = convict({
+  issuer: { doc: 'OpenID issuer URL or object.', format: '*', default: '', env: 'ACTUAL_OPENID_DISCOVERY_URL' },
+  client_id: { doc: 'OpenID client ID.', format: String, default: '', env: 'ACTUAL_OPENID_CLIENT_ID' },
+  client_secret: { doc: 'OpenID client secret.', format: String, default: '', env: 'ACTUAL_OPENID_CLIENT_SECRET' },
+  server_hostname: { doc: 'OpenID server hostname.', format: String, default: '', env: 'ACTUAL_OPENID_SERVER_HOSTNAME' },
+  authMethod: { doc: 'Authentication method for OpenID.', format: ['openid', 'oauth2'], default: 'openid' },
+});
+
+const httpsSchema = convict({
+  key: { doc: 'HTTPS key.', format: String, default: '' },
+  cert: { doc: 'HTTPS certificate.', format: String, default: '' },
+});
+
+const uploadSchema = convict({
+  fileSizeSyncLimitMB: { doc: 'Max file sync upload size.', format: 'nat', default: 20 },
+  syncEncryptedFileSizeLimitMB: { doc: 'Max encrypted file sync upload size.', format: 'nat', default: 50 },
+  fileSizeLimitMB: { doc: 'Max file upload size.', format: 'nat', default: 20 },
+});
+
+/*
+  Helper Functions
+*/
+function isAllEmpty(obj) {
+  if (!obj || typeof obj !== 'object') return true;
+  const keys = Object.keys(obj);
+  if (keys.length === 0) return true;
+  return keys.every(key => {
+    const val = obj[key];
+    if (!val) return true;
+    if (typeof val === 'object') return isAllEmpty(val);
+    return false;
+  });
+}
+
+function loadSubConfig(schema, data) {
+  if (!data || isAllEmpty(data)) return null;
+  const loaded = schema.load(data);
+  loaded.validate({ allowed: 'strict' });
+  const finalData = loaded.getProperties();
+  return isAllEmpty(finalData) ? null : finalData;
+}
+
+/*
+  Main Config Schema
+*/
+const configSchema = convict({
+  env: {
+    doc: 'The application environment.',
+    format: ['production', 'development', 'test'],
+    default: 'development',
+    env: 'NODE_ENV',
   },
-  projectRoot,
-  multiuser: false,
-  token_expiration: 'never',
-  enforceOpenId: false,
-};
+  mode: {
+    doc: 'Application mode.',
+    format: ['test', 'development'],
+    default: 'development',
+  },
+  projectRoot: {
+    doc: 'Project root directory.',
+    format: String,
+    default: projectRoot,
+  },
+  dataDir: {
+    doc: 'Default data directory.',
+    format: String,
+    default: fs.existsSync('/data') ? '/data' : projectRoot,
+    env: 'ACTUAL_DATA_DIR',
+  },
+  port: {
+    doc: 'Port to run the server on.',
+    format: 'port',
+    default: 5006,
+    env: ['ACTUAL_PORT', 'PORT'],
+  },
+  hostname: {
+    doc: 'Server hostname.',
+    format: String,
+    default: '::',
+    env: 'ACTUAL_HOSTNAME',
+  },
+  serverFiles: {
+    doc: 'Path to server files.',
+    format: String,
+    default: path.join(projectRoot, 'server-files'),
+    env: 'ACTUAL_SERVER_FILES',
+  },
+  userFiles: {
+    doc: 'Path to user files.',
+    format: String,
+    default: path.join(projectRoot, 'user-files'),
+    env: 'ACTUAL_USER_FILES',
+  },
+  webRoot: {
+    doc: 'Web root directory.',
+    format: String,
+    default: actualAppWebBuildPath,
+    env: 'ACTUAL_WEB_ROOT',
+  },
+  loginMethod: {
+    doc: 'Authentication method.',
+    format: ['password', 'header', 'openid'],
+    default: 'password',
+    env: 'ACTUAL_LOGIN_METHOD',
+  },
+  allowedLoginMethods: {
+    doc: 'Allowed authentication methods.',
+    format: Array,
+    default: ['password', 'header', 'openid'],
+    env: 'ACTUAL_ALLOWED_LOGIN_METHODS',
+  },
+  trustedProxies: {
+    doc: 'List of trusted proxies.',
+    format: Array,
+    default: [
+      '10.0.0.0/8',
+      '172.16.0.0/12',
+      '192.168.0.0/16',
+      'fc00::/7',
+      '::1/128',
+    ],
+    env: 'ACTUAL_TRUSTED_PROXIES',
+  },
+  trustedAuthProxies: {
+    doc: 'List of trusted authentication proxies.',
+    format: Array,
+    default: [],
+    env: 'ACTUAL_TRUSTED_AUTH_PROXIES',
+  },
+  multiuser: {
+    doc: 'Enable multi-user mode.',
+    format: Boolean,
+    default: false,
+    env: 'ACTUAL_MULTIUSER',
+  },
+  https: {
+    doc: 'HTTPS configuration.',
+    format: Object,
+    default: null,
+    nullable: true,
+  },
+  upload: {
+    doc: 'Upload configuration.',
+    format: Object,
+    default: {
+      fileSizeSyncLimitMB: 20,
+      syncEncryptedFileSizeLimitMB: 50,
+      fileSizeLimitMB: 20,
+    },
+    nullable: true,
+  },
+  openId: {
+    doc: 'OpenID authentication settings.',
+    format: Object,
+    default: null,
+    nullable: true,
+  },
+  token_expiration: {
+    doc: 'Token expiration time.',
+    format: ['never', 'openid-provider', 'nat'],
+    default: 'never',
+    env: 'ACTUAL_TOKEN_EXPIRATION',
+  },
+  enforceOpenId: {
+    doc: 'Enforce OpenID authentication.',
+    format: Boolean,
+    default: false,
+    env: 'ACTUAL_OPENID_ENFORCE',
+  },
+});
 
-/** @type {import('./config-types.js').Config} */
-let config;
-if (process.env.NODE_ENV === 'test') {
-  config = {
-    mode: 'test',
-    dataDir: projectRoot,
-    serverFiles: path.join(projectRoot, 'test-server-files'),
-    userFiles: path.join(projectRoot, 'test-user-files'),
-    ...defaultConfig,
-  };
-} else {
-  config = {
-    mode: 'development',
-    ...defaultConfig,
-    dataDir: defaultDataDir,
-    serverFiles: path.join(defaultDataDir, 'server-files'),
-    userFiles: path.join(defaultDataDir, 'user-files'),
-    ...(userConfig || {}),
-  };
+configSchema.validate({ allowed: 'strict' });
+const config = configSchema.getProperties();
+
+/*
+  Apply Sub-Schema Validation & Final Assembly
+*/
+
+// OpenID
+if (config.openId) {
+  let loadedOpenId = loadSubConfig(openIdSchema, config.openId);
+  if (loadedOpenId?.issuer && typeof loadedOpenId.issuer === 'object') {
+    loadedOpenId.issuer = loadSubConfig(openIdIssuerSchema, loadedOpenId.issuer);
+  }
+  config.openId = isAllEmpty(loadedOpenId) ? null : loadedOpenId;
 }
 
-const finalConfig = {
-  ...config,
-  loginMethod: process.env.ACTUAL_LOGIN_METHOD
-    ? process.env.ACTUAL_LOGIN_METHOD.toLowerCase()
-    : config.loginMethod,
-  multiuser: process.env.ACTUAL_MULTIUSER
-    ? (() => {
-        const value = process.env.ACTUAL_MULTIUSER.toLowerCase();
-        if (!['true', 'false'].includes(value)) {
-          throw new Error('ACTUAL_MULTIUSER must be either "true" or "false"');
-        }
-        return value === 'true';
-      })()
-    : config.multiuser,
-  allowedLoginMethods: process.env.ACTUAL_ALLOWED_LOGIN_METHODS
-    ? process.env.ACTUAL_ALLOWED_LOGIN_METHODS.split(',')
-        .map(q => q.trim().toLowerCase())
-        .filter(Boolean)
-    : config.allowedLoginMethods,
-  trustedProxies: process.env.ACTUAL_TRUSTED_PROXIES
-    ? process.env.ACTUAL_TRUSTED_PROXIES.split(',')
-        .map(q => q.trim())
-        .filter(Boolean)
-    : config.trustedProxies,
-  trustedAuthProxies: process.env.ACTUAL_TRUSTED_AUTH_PROXIES
-    ? process.env.ACTUAL_TRUSTED_AUTH_PROXIES.split(',')
-        .map(q => q.trim())
-        .filter(Boolean)
-    : config.trustedAuthProxies,
-  port: +process.env.ACTUAL_PORT || +process.env.PORT || config.port,
-  hostname: process.env.ACTUAL_HOSTNAME || config.hostname,
-  serverFiles: process.env.ACTUAL_SERVER_FILES || config.serverFiles,
-  userFiles: process.env.ACTUAL_USER_FILES || config.userFiles,
-  webRoot: process.env.ACTUAL_WEB_ROOT || config.webRoot,
-  https:
-    process.env.ACTUAL_HTTPS_KEY && process.env.ACTUAL_HTTPS_CERT
-      ? {
-          key: process.env.ACTUAL_HTTPS_KEY.replace(/\\n/g, '\n'),
-          cert: process.env.ACTUAL_HTTPS_CERT.replace(/\\n/g, '\n'),
-          ...(config.https || {}),
-        }
-      : config.https,
-  upload:
-    process.env.ACTUAL_UPLOAD_FILE_SYNC_SIZE_LIMIT_MB ||
-    process.env.ACTUAL_UPLOAD_SYNC_ENCRYPTED_FILE_SYNC_SIZE_LIMIT_MB ||
-    process.env.ACTUAL_UPLOAD_FILE_SIZE_LIMIT_MB
-      ? {
-          fileSizeSyncLimitMB:
-            +process.env.ACTUAL_UPLOAD_FILE_SYNC_SIZE_LIMIT_MB ||
-            +process.env.ACTUAL_UPLOAD_FILE_SIZE_LIMIT_MB ||
-            config.upload.fileSizeSyncLimitMB,
-          syncEncryptedFileSizeLimitMB:
-            +process.env.ACTUAL_UPLOAD_SYNC_ENCRYPTED_FILE_SYNC_SIZE_LIMIT_MB ||
-            +process.env.ACTUAL_UPLOAD_FILE_SIZE_LIMIT_MB ||
-            config.upload.syncEncryptedFileSizeLimitMB,
-          fileSizeLimitMB:
-            +process.env.ACTUAL_UPLOAD_FILE_SIZE_LIMIT_MB ||
-            config.upload.fileSizeLimitMB,
-        }
-      : config.upload,
-  openId: (() => {
-    if (
-      !process.env.ACTUAL_OPENID_DISCOVERY_URL &&
-      !process.env.ACTUAL_OPENID_AUTHORIZATION_ENDPOINT
-    ) {
-      return config.openId;
-    }
-    const baseConfig = process.env.ACTUAL_OPENID_DISCOVERY_URL
-      ? { issuer: process.env.ACTUAL_OPENID_DISCOVERY_URL }
-      : {
-          ...(() => {
-            const required = {
-              authorization_endpoint:
-                process.env.ACTUAL_OPENID_AUTHORIZATION_ENDPOINT,
-              token_endpoint: process.env.ACTUAL_OPENID_TOKEN_ENDPOINT,
-              userinfo_endpoint: process.env.ACTUAL_OPENID_USERINFO_ENDPOINT,
-            };
-            const missing = Object.entries(required)
-              // eslint-disable-next-line @typescript-eslint/no-unused-vars
-              .filter(([_, value]) => !value)
-              .map(([key]) => key);
-            if (missing.length > 0) {
-              throw new Error(
-                `Missing required OpenID configuration: ${missing.join(', ')}`,
-              );
-            }
-            return {};
-          })(),
-          issuer: {
-            name: process.env.ACTUAL_OPENID_PROVIDER_NAME,
-            authorization_endpoint:
-              process.env.ACTUAL_OPENID_AUTHORIZATION_ENDPOINT,
-            token_endpoint: process.env.ACTUAL_OPENID_TOKEN_ENDPOINT,
-            userinfo_endpoint: process.env.ACTUAL_OPENID_USERINFO_ENDPOINT,
-          },
-        };
-    return {
-      ...baseConfig,
-      client_id:
-        process.env.ACTUAL_OPENID_CLIENT_ID ?? config.openId?.client_id,
-      client_secret:
-        process.env.ACTUAL_OPENID_CLIENT_SECRET ?? config.openId?.client_secret,
-      server_hostname:
-        process.env.ACTUAL_OPENID_SERVER_HOSTNAME ??
-        config.openId?.server_hostname,
-    };
-  })(),
-  token_expiration: process.env.ACTUAL_TOKEN_EXPIRATION
-    ? process.env.ACTUAL_TOKEN_EXPIRATION
-    : config.token_expiration,
-  enforceOpenId: process.env.ACTUAL_OPENID_ENFORCE
-    ? (() => {
-        const value = process.env.ACTUAL_OPENID_ENFORCE.toLowerCase();
-        if (!['true', 'false'].includes(value)) {
-          throw new Error(
-            'ACTUAL_OPENID_ENFORCE must be either "true" or "false"',
-          );
-        }
-        return value === 'true';
-      })()
-    : config.enforceOpenId,
-};
-debug(`using port ${finalConfig.port}`);
-debug(`using hostname ${finalConfig.hostname}`);
-debug(`using data directory ${finalConfig.dataDir}`);
-debug(`using server files directory ${finalConfig.serverFiles}`);
-debug(`using user files directory ${finalConfig.userFiles}`);
-debug(`using web root directory ${finalConfig.webRoot}`);
-debug(`using login method ${finalConfig.loginMethod}`);
-debug(`using trusted proxies ${finalConfig.trustedProxies.join(', ')}`);
-debug(
-  `using trusted auth proxies ${
-    finalConfig.trustedAuthProxies?.join(', ') ?? 'same as trusted proxies'
-  }`,
-);
+// HTTPS
+config.https = loadSubConfig(httpsSchema, config.https);
 
-if (finalConfig.https) {
-  debug(`using https key: ${'*'.repeat(finalConfig.https.key.length)}`);
-  debugSensitive(`using https key ${finalConfig.https.key}`);
-  debug(`using https cert: ${'*'.repeat(finalConfig.https.cert.length)}`);
-  debugSensitive(`using https cert ${finalConfig.https.cert}`);
-}
+// Upload
+config.upload = loadSubConfig(uploadSchema, config.upload);
 
-if (finalConfig.upload) {
-  debug(`using file sync limit ${finalConfig.upload.fileSizeSyncLimitMB}mb`);
-  debug(
-    `using sync encrypted file limit ${finalConfig.upload.syncEncryptedFileSizeLimitMB}mb`,
-  );
-  debug(`using file limit ${finalConfig.upload.fileSizeLimitMB}mb`);
-}
+// Debug logs
+debug(`Using project root: ${config.projectRoot}`);
+debug(`Using port: ${config.port}`);
+debug(`Using hostname: ${config.hostname}`);
+debug(`Using data directory: ${config.dataDir}`);
+debug(`Using server files directory: ${config.serverFiles}`);
+debug(`Using user files directory: ${config.userFiles}`);
+debug(`Using web root directory: ${config.webRoot}`);
+debug(`Using login method: ${config.loginMethod}`);
+debug(`Multiuser? ${config.multiuser}`);
+debug(`Allowed methods: ${config.allowedLoginMethods.join(', ')}`);
+debug(`Trusted proxies: ${config.trustedProxies.join(', ')}`);
+debug(`Trusted auth proxies: ${config.trustedAuthProxies.join(', ')}`);
 
-export { finalConfig as config };
+debugSensitive(`HTTPS Key: ${config.https?.key ? '*'.repeat(config.https.key.length) : 'Not Set'}`);
+debugSensitive(`HTTPS Cert: ${config.https?.cert ? '*'.repeat(config.https.cert.length) : 'Not Set'}`);
+
+export { config };
