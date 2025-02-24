@@ -16,7 +16,7 @@ export const sqlDir = path.join(projectRoot, 'src', 'sql');
 
 const actualAppWebBuildPath = path.join(
   path.dirname(require.resolve('@actual-app/web/package.json')),
-  'build'
+  'build',
 );
 debug(`Actual web build path: '${actualAppWebBuildPath}'`);
 
@@ -25,17 +25,53 @@ debug(`Actual web build path: '${actualAppWebBuildPath}'`);
 */
 const openIdIssuerSchema = convict({
   name: { doc: 'OpenID provider name.', format: String, default: '' },
-  authorization_endpoint: { doc: 'OpenID authorization endpoint.', format: String, default: '' },
-  token_endpoint: { doc: 'OpenID token endpoint.', format: String, default: '' },
-  userinfo_endpoint: { doc: 'OpenID user info endpoint.', format: String, default: '' },
+  authorization_endpoint: {
+    doc: 'OpenID authorization endpoint.',
+    format: String,
+    default: '',
+  },
+  token_endpoint: {
+    doc: 'OpenID token endpoint.',
+    format: String,
+    default: '',
+  },
+  userinfo_endpoint: {
+    doc: 'OpenID user info endpoint.',
+    format: String,
+    default: '',
+  },
 });
 
 const openIdSchema = convict({
-  issuer: { doc: 'OpenID issuer URL or object.', format: '*', default: '', env: 'ACTUAL_OPENID_DISCOVERY_URL' },
-  client_id: { doc: 'OpenID client ID.', format: String, default: '', env: 'ACTUAL_OPENID_CLIENT_ID' },
-  client_secret: { doc: 'OpenID client secret.', format: String, default: '', env: 'ACTUAL_OPENID_CLIENT_SECRET' },
-  server_hostname: { doc: 'OpenID server hostname.', format: String, default: '', env: 'ACTUAL_OPENID_SERVER_HOSTNAME' },
-  authMethod: { doc: 'Authentication method for OpenID.', format: ['openid', 'oauth2'], default: 'openid' },
+  issuer: {
+    doc: 'OpenID issuer URL or object.',
+    format: '*',
+    default: '',
+    env: 'ACTUAL_OPENID_DISCOVERY_URL',
+  },
+  client_id: {
+    doc: 'OpenID client ID.',
+    format: String,
+    default: '',
+    env: 'ACTUAL_OPENID_CLIENT_ID',
+  },
+  client_secret: {
+    doc: 'OpenID client secret.',
+    format: String,
+    default: '',
+    env: 'ACTUAL_OPENID_CLIENT_SECRET',
+  },
+  server_hostname: {
+    doc: 'OpenID server hostname.',
+    format: String,
+    default: '',
+    env: 'ACTUAL_OPENID_SERVER_HOSTNAME',
+  },
+  authMethod: {
+    doc: 'Authentication method for OpenID.',
+    format: ['openid', 'oauth2'],
+    default: 'openid',
+  },
 });
 
 const httpsSchema = convict({
@@ -44,8 +80,16 @@ const httpsSchema = convict({
 });
 
 const uploadSchema = convict({
-  fileSizeSyncLimitMB: { doc: 'Max file sync upload size.', format: 'nat', default: 20 },
-  syncEncryptedFileSizeLimitMB: { doc: 'Max encrypted file sync upload size.', format: 'nat', default: 50 },
+  fileSizeSyncLimitMB: {
+    doc: 'Max file sync upload size.',
+    format: 'nat',
+    default: 20,
+  },
+  syncEncryptedFileSizeLimitMB: {
+    doc: 'Max encrypted file sync upload size.',
+    format: 'nat',
+    default: 50,
+  },
   fileSizeLimitMB: { doc: 'Max file upload size.', format: 'nat', default: 20 },
 });
 
@@ -211,7 +255,10 @@ const config = configSchema.getProperties();
 if (config.openId) {
   let loadedOpenId = loadSubConfig(openIdSchema, config.openId);
   if (loadedOpenId?.issuer && typeof loadedOpenId.issuer === 'object') {
-    loadedOpenId.issuer = loadSubConfig(openIdIssuerSchema, loadedOpenId.issuer);
+    loadedOpenId.issuer = loadSubConfig(
+      openIdIssuerSchema,
+      loadedOpenId.issuer,
+    );
   }
   config.openId = isAllEmpty(loadedOpenId) ? null : loadedOpenId;
 }
@@ -236,7 +283,15 @@ debug(`Allowed methods: ${config.allowedLoginMethods.join(', ')}`);
 debug(`Trusted proxies: ${config.trustedProxies.join(', ')}`);
 debug(`Trusted auth proxies: ${config.trustedAuthProxies.join(', ')}`);
 
-debugSensitive(`HTTPS Key: ${config.https?.key ? '*'.repeat(config.https.key.length) : 'Not Set'}`);
-debugSensitive(`HTTPS Cert: ${config.https?.cert ? '*'.repeat(config.https.cert.length) : 'Not Set'}`);
+debugSensitive(
+  `HTTPS Key: ${
+    config.https?.key ? '*'.repeat(config.https.key.length) : 'Not Set'
+  }`,
+);
+debugSensitive(
+  `HTTPS Cert: ${
+    config.https?.cert ? '*'.repeat(config.https.cert.length) : 'Not Set'
+  }`,
+);
 
 export { config };
