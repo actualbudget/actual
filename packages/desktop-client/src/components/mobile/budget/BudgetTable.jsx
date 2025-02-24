@@ -34,9 +34,8 @@ import {
   SvgArrowThinRight,
   SvgArrowThickRight,
   SvgCheveronRight,
-  SvgTime,
 } from '../../../icons/v1';
-import { SvgViewShow } from '../../../icons/v2';
+import { SvgCalendar, SvgViewShow } from '../../../icons/v2';
 import { useDispatch } from '../../../redux';
 import { theme } from '../../../style';
 import { BalanceWithCarryover } from '../../budget/BalanceWithCarryover';
@@ -1727,7 +1726,7 @@ export function BudgetTable({
               style={{ margin: 10 }}
             >
               {!monthUtils.isCurrentMonth(month) && (
-                <SvgTime width={20} height={20} />
+                <SvgCalendar width={20} height={20} />
               )}
             </Button>
           }
