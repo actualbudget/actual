@@ -1,10 +1,11 @@
 // @ts-strict-ignore
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
 
 import { Button, ButtonWithLoading } from '@actual-app/components/button';
-import { Label } from '@actual-app/components/label';
+import { Menu } from '@actual-app/components/menu';
+import { Popover } from '@actual-app/components/popover';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
@@ -16,12 +17,12 @@ import { type OpenIdConfig } from 'loot-core/types/models/openid';
 
 import { useNavigate } from '../../../hooks/useNavigate';
 import { AnimatedLoading } from '../../../icons/AnimatedLoading';
+import { SvgCheveronDown } from '../../../icons/v1';
 import { useDispatch } from '../../../redux';
 import { theme } from '../../../style';
 import { warningBackground } from '../../../style/themes/dark';
-import { BigInput } from '../../common/Input';
+import { Input } from '../../common/Input';
 import { Link } from '../../common/Link';
-import { Select } from '../../common/Select';
 import { useResponsive } from '../../responsive/ResponsiveProvider';
 import { useAvailableLoginMethods, useLoginMethod } from '../../ServerContext';
 
@@ -62,7 +63,7 @@ function PasswordLogin({ setError, dispatch }) {
         gap: '1rem',
       }}
     >
-      <BigInput
+      <Input
         autoFocus={true}
         placeholder={t('Password')}
         type="password"
@@ -139,7 +140,7 @@ function OpenIdLogin({ setError }) {
             }}
           >
             {warnMasterCreation && (
-              <BigInput
+              <Input
                 autoFocus={true}
                 placeholder={t('Enter server password')}
                 type="password"
@@ -154,7 +155,7 @@ function OpenIdLogin({ setError }) {
               onPress={onSubmitOpenId}
               style={
                 warningBackground && {
-                  padding: 10,
+                  padding: 6,
                   fontSize: 14,
                   width: 170,
                 }
@@ -278,6 +279,8 @@ export function Login() {
   const [error, setError] = useState(null);
   const { checked } = useBootstrapped();
   const loginMethods = useAvailableLoginMethods();
+  const loginMethodRef = useRef<HTMLButtonElement>(null);
+  const [loginMethodMenuOpen, setLoginMethodMenuOpen] = useState(false);
 
   useEffect(() => {
     if (checked && !searchParams.has('error')) {
@@ -340,27 +343,6 @@ export function Login() {
         </Text>
       )}
 
-      {loginMethods?.length > 1 && (
-        <View style={{ marginTop: 10 }}>
-          <Label
-            style={{
-              ...styles.verySmallText,
-              color: theme.pageTextLight,
-              paddingTop: 5,
-            }}
-            title={t('Select the login method')}
-          />
-          <Select
-            value={method}
-            onChange={newValue => {
-              setError(null);
-              setMethod(newValue);
-            }}
-            options={loginMethods?.map(m => [m.method, m.displayName])}
-          />
-        </View>
-      )}
-
       {method === 'password' && (
         <PasswordLogin setError={setError} dispatch={dispatch} />
       )}
@@ -368,6 +350,54 @@ export function Login() {
       {method === 'openid' && <OpenIdLogin setError={setError} />}
 
       {method === 'header' && <HeaderLogin error={error} />}
+
+      {loginMethods?.length > 1 && (
+        <View style={{ marginTop: 10 }}>
+          <View
+            style={{
+              width: '100%',
+              flexDirection: 'row',
+              justifyContent: 'end',
+            }}
+          >
+            <Button
+              variant="bare"
+              ref={loginMethodRef}
+              onPress={() => setLoginMethodMenuOpen(true)}
+              style={{
+                ...styles.verySmallText,
+                color: theme.pageTextLight,
+                paddingTop: 5,
+                width: 'fit-content',
+              }}
+            >
+              <Trans>Select the login method</Trans>{' '}
+              <SvgCheveronDown width={12} height={12} />
+            </Button>
+          </View>
+          <Popover
+            triggerRef={loginMethodRef}
+            onOpenChange={value => {
+              setLoginMethodMenuOpen(value);
+            }}
+            isOpen={loginMethodMenuOpen}
+          >
+            <Menu
+              items={loginMethods
+                ?.filter(f => f.method !== method)
+                .map(m => ({
+                  name: m.method,
+                  text: m.displayName,
+                }))}
+              onMenuSelect={selected => {
+                setError(null);
+                setMethod(selected);
+                setLoginMethodMenuOpen(false);
+              }}
+            />
+          </Popover>
+        </View>
+      )}
 
       {error && (
         <Text
