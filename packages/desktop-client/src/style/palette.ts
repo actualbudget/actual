@@ -1,5 +1,7 @@
 import * as oldColors from './colors';
 
+export const brand = '#8812E1';
+
 // Only for use in contextual color definitions
 export const gray50 = '#f6f8fa';
 export const gray80 = '#f0f4f6';

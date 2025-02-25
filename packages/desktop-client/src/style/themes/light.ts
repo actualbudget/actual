@@ -1,5 +1,7 @@
 import * as colorPalette from '../palette';
 
+export const brand = colorPalette.brand;
+
 export const pageBackground = colorPalette.navy100;
 export const pageBackgroundModalActive = colorPalette.navy200;
 export const pageBackgroundTopLeft = colorPalette.navy100;
@@ -20,6 +22,9 @@ export const cardBorder = colorPalette.purple700;
 export const cardShadow = colorPalette.navy700;
 
 export const tableBackground = colorPalette.white;
+export const tableRowBorder = colorPalette.navy100;
+export const tableRowBackground = colorPalette.white;
+export const tableRowBackgroundLight = colorPalette.navy50;
 export const tableRowBackgroundHover = colorPalette.navy50;
 export const tableText = pageText;
 export const tableTextLight = colorPalette.navy400;
@@ -67,14 +72,14 @@ export const menuAutoCompleteItemText = menuAutoCompleteText;
 
 export const modalBackground = colorPalette.white;
 export const modalBorder = colorPalette.white;
-export const mobileHeaderBackground = colorPalette.purple400;
+export const mobileHeaderBackground = brand;
 export const mobileHeaderText = colorPalette.navy50;
 export const mobileHeaderTextSubdued = colorPalette.gray200;
 export const mobileHeaderTextHover = 'rgba(200, 200, 200, .15)';
 export const mobilePageBackground = colorPalette.navy50;
 export const mobileNavBackground = colorPalette.white;
 export const mobileNavItem = colorPalette.gray300;
-export const mobileNavItemSelected = colorPalette.purple500;
+export const mobileNavItemSelected = brand;
 export const mobileAccountShadow = colorPalette.navy300;
 export const mobileAccountText = colorPalette.blue800;
 export const mobileTransactionSelected = colorPalette.purple500;

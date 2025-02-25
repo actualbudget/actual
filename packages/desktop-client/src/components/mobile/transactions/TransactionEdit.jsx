@@ -193,7 +193,7 @@ function Footer({
         paddingRight: styles.mobileEditingPadding,
         paddingTop: 10,
         paddingBottom: 10,
-        backgroundColor: theme.tableHeaderBackground,
+        backgroundColor: theme.mobileHeaderBackground,
         borderTopWidth: 1,
         borderColor: theme.tableBorder,
       }}

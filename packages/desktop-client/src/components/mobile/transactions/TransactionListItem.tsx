@@ -158,15 +158,15 @@ export function TransactionListItem({
                   }
                 : {
                     borderWidth: '0 0 1px 0',
-                    borderColor: theme.tableBorder,
+                    borderColor: theme.tableRowBorder,
                     borderStyle: 'solid',
                   }),
               ...(isPreview
                 ? {
-                    backgroundColor: theme.tableRowHeaderBackground,
+                    backgroundColor: theme.tableRowBackgroundLight,
                   }
                 : {
-                    backgroundColor: theme.tableBackground,
+                    backgroundColor: theme.tableRowBackground,
                   }),
             }}
           >

@@ -1,5 +1,7 @@
 import * as colorPalette from '../palette';
 
+export const brand = colorPalette.brand;
+
 export const pageBackground = colorPalette.gray600;
 export const pageBackgroundModalActive = colorPalette.gray700;
 export const pageBackgroundTopLeft = colorPalette.gray800;
@@ -20,6 +22,9 @@ export const cardBorder = colorPalette.purple300;
 export const cardShadow = colorPalette.gray900;
 
 export const tableBackground = colorPalette.gray800;
+export const tableRowBorder = colorPalette.gray600;
+export const tableRowBackground = colorPalette.gray800;
+export const tableRowBackgroundLight = colorPalette.gray700;
 export const tableRowBackgroundHover = colorPalette.gray500;
 export const tableText = colorPalette.gray150;
 export const tableTextLight = tableText;

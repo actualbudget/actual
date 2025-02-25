@@ -717,6 +717,10 @@ export function ScheduleDetails({ id, transaction }: ScheduleDetailsProps) {
                   onChange={value =>
                     dispatch({ type: 'set-field', field: 'date', value })
                   }
+                  buttonStyle={{
+                    backgroundColor: theme.tableBackground,
+                    borderColor: theme.formInputBorder,
+                  }}
                 />
               ) : (
                 <DateSelect

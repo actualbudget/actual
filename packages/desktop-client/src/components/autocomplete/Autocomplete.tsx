@@ -688,7 +688,7 @@ function MultiAutocomplete<T extends Item>({
             flexWrap: 'wrap',
             flexDirection: 'row',
             alignItems: 'center',
-            backgroundColor: theme.tableBackground,
+            backgroundColor: theme.formInputBackground,
             borderRadius: 4,
             border: '1px solid ' + theme.formInputBorder,
             ...(focused && {
