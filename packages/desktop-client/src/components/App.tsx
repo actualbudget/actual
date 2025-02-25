@@ -54,6 +54,10 @@ function AppInner() {
   const userData = useSelector(state => state.user.data);
 
   useEffect(() => {
+    setI18NextLanguage(null);
+  }, []);
+
+  useEffect(() => {
     const maybeUpdate = async <T,>(cb?: () => T): Promise<T> => {
       if (global.Actual.isUpdateReadyForDownload()) {
         dispatch(
@@ -67,8 +71,6 @@ function AppInner() {
     };
 
     async function init() {
-      setI18NextLanguage(null);
-
       const socketName = await maybeUpdate(() =>
         global.Actual.getServerSocket(),
       );
