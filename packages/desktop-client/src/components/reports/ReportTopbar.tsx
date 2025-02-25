@@ -3,6 +3,8 @@ import { useTranslation } from 'react-i18next';
 
 import { toPng } from 'html-to-image';
 
+import * as monthUtils from 'loot-core/shared/months';
+
 import {
   SvgCalculator,
   SvgChart,
@@ -28,7 +30,6 @@ import { FilterButton } from '../filters/FiltersMenu';
 import { GraphButton } from './GraphButton';
 import { SaveReport } from './SaveReport';
 import { setSessionReport } from './setSessionReport';
-import { getToday } from './util';
 
 type ReportTopbarProps = {
   customReportItems: CustomReportEntity;
@@ -74,7 +75,7 @@ export function ReportTopbar({
       const dataUrl = await toPng(reportElement);
       const link = document.createElement('a');
       link.href = dataUrl;
-      link.download = `${getToday()} - ${title}.png`;
+      link.download = `${monthUtils.currentDay()} - ${title}.png`;
       link.click();
     } else {
       console.error('Report container not found.');
