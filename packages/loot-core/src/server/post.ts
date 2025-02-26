@@ -12,7 +12,7 @@ function throwIfNot200(res: Response, text: string) {
   }
 
   if (res.status === 500) {
-    throw new PostError(res.status === 500 ? 'internal' : text);
+    throw new PostError('internal');
   }
 
   const contentType = res.headers.get('Content-Type') ?? '';
