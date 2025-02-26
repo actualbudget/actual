@@ -12,11 +12,12 @@ import { View } from '@actual-app/components/view';
 import { type OpenIdConfig } from 'loot-core/types/models/openid';
 
 import { theme } from '../../../style';
-import { Input } from '../../common/Input';
 import { Link } from '../../common/Link';
 import { Select } from '../../common/Select';
 import { FormField, FormLabel } from '../../forms';
 import { useServerURL } from '../../ServerContext';
+import { ResponsiveInput } from '../../common/Input';
+import { useResponsive } from '../../responsive/ResponsiveProvider';
 
 type OpenIdCallback = (config: OpenIdConfig) => Promise<void>;
 
@@ -48,7 +49,7 @@ export function OpenIdForm({
   openIdData,
 }: OpenIdFormProps) {
   const { t } = useTranslation();
-
+  const { isNarrowWidth } = useResponsive();
   const [issuer, setIssuer] = useState('');
   const [clientId, setClientId] = useState('');
   const [clientSecret, setClientSecret] = useState('');
@@ -133,7 +134,7 @@ export function OpenIdForm({
         <FormField style={{ flex: 1 }}>
           {!submitButtonDisabled && (
             <View>
-              <Input
+              <ResponsiveInput
                 id="issuer-field"
                 type="text"
                 value={issuer}
@@ -168,7 +169,7 @@ export function OpenIdForm({
       <Stack>
         <FormField style={{ flex: 1 }}>
           <FormLabel title={t('Client ID')} htmlFor="clientid-field" />
-          <Input
+          <ResponsiveInput
             type="text"
             id="clientid-field"
             value={clientId}
@@ -188,7 +189,7 @@ export function OpenIdForm({
         </FormField>
         <FormField style={{ flex: 1 }}>
           <FormLabel title={t('Client secret')} htmlFor="clientsecret-field" />
-          <Input
+          <ResponsiveInput
             type="text"
             id="clientsecret-field"
             value={clientSecret}
@@ -217,6 +218,7 @@ export function OpenIdForm({
             isLoading={loading}
             onPress={onSubmit}
             isDisabled={submitButtonDisabled}
+            style={isNarrowWidth ? { padding: 10} : undefined}
           >
             OK
           </ButtonWithLoading>
@@ -405,6 +407,7 @@ function OpenIdProviderSelector({
   defaultValue: string;
 }) {
   const { t } = useTranslation();
+  const { isNarrowWidth } = useResponsive();
 
   const handleProviderChange = (newValue: string) => {
     const selectedProvider = openIdProviders.find(provider =>
@@ -425,6 +428,7 @@ function OpenIdProviderSelector({
         defaultLabel={t('Select Provider')}
         value={defaultValue}
         onChange={handleProviderChange}
+        style={isNarrowWidth ? { padding: 10 } : undefined}
       />
     </FormField>
   );

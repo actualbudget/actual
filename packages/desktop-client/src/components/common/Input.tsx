@@ -11,6 +11,7 @@ import { css, cx } from '@emotion/css';
 import { useMergedRefs } from '../../hooks/useMergedRefs';
 import { useProperFocus } from '../../hooks/useProperFocus';
 import { theme, type CSSProperties } from '../../style';
+import { useResponsive } from '../responsive/ResponsiveProvider';
 
 export const defaultInputStyle = {
   outline: 0,
@@ -22,7 +23,7 @@ export const defaultInputStyle = {
   border: '1px solid ' + theme.formInputBorder,
 };
 
-type InputProps = InputHTMLAttributes<HTMLInputElement> & {
+export type InputProps = InputHTMLAttributes<HTMLInputElement> & {
   style?: CSSProperties;
   inputRef?: Ref<HTMLInputElement>;
   onEnter?: (event: KeyboardEvent<HTMLInputElement>) => void;
@@ -110,4 +111,10 @@ export function BigInput(props: InputProps) {
       }}
     />
   );
+}
+
+export function ResponsiveInput(props: InputProps) {
+  const { isNarrowWidth } = useResponsive();
+
+  return isNarrowWidth ? <BigInput {...props} /> : <Input {...props} />;
 }

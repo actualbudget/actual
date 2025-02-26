@@ -21,7 +21,7 @@ import { SvgCheveronDown } from '../../../icons/v1';
 import { useDispatch } from '../../../redux';
 import { theme } from '../../../style';
 import { warningBackground } from '../../../style/themes/dark';
-import { Input } from '../../common/Input';
+import { ResponsiveInput } from '../../common/Input';
 import { Link } from '../../common/Link';
 import { useResponsive } from '../../responsive/ResponsiveProvider';
 import { useAvailableLoginMethods, useLoginMethod } from '../../ServerContext';
@@ -63,7 +63,7 @@ function PasswordLogin({ setError, dispatch }) {
         gap: '1rem',
       }}
     >
-      <Input
+      <ResponsiveInput
         autoFocus={true}
         placeholder={t('Password')}
         type="password"
@@ -74,7 +74,11 @@ function PasswordLogin({ setError, dispatch }) {
       <ButtonWithLoading
         variant="primary"
         isLoading={loading}
-        style={{ fontSize: 15, width: isNarrowWidth ? '100%' : 170 }}
+        style={{
+          fontSize: 15,
+          width: isNarrowWidth ? '100%' : 170,
+          ...(isNarrowWidth ? { padding: 10 } : null),
+        }}
         onPress={onSubmitPassword}
       >
         <Trans>Sign in</Trans>
@@ -85,6 +89,7 @@ function PasswordLogin({ setError, dispatch }) {
 
 function OpenIdLogin({ setError }) {
   const { t } = useTranslation();
+  const { isNarrowWidth } = useResponsive();
   const [warnMasterCreation, setWarnMasterCreation] = useState(false);
   const [reviewOpenIdConfiguration, setReviewOpenIdConfiguration] =
     useState(false);
@@ -140,7 +145,7 @@ function OpenIdLogin({ setError }) {
             }}
           >
             {warnMasterCreation && (
-              <Input
+              <ResponsiveInput
                 autoFocus={true}
                 placeholder={t('Enter server password')}
                 type="password"
@@ -194,7 +199,10 @@ function OpenIdLogin({ setError }) {
                     }
                   });
                 }}
-                style={{ marginTop: 5 }}
+                style={{
+                  marginTop: 5,
+                  ...(isNarrowWidth ? { padding: 10 } : null),
+                }}
               >
                 <Trans>Review OpenID configuration</Trans>
               </Button>
@@ -221,7 +229,10 @@ function OpenIdLogin({ setError }) {
               <Button
                 key="cancel"
                 variant="bare"
-                style={{ marginRight: 10 }}
+                style={{
+                  marginRight: 10,
+                  ...(isNarrowWidth && { padding: 10 }),
+                }}
                 onPress={() => {
                   setReviewOpenIdConfiguration(false);
                   setOpenIdConfig(null);
@@ -271,6 +282,7 @@ function HeaderLogin({ error }) {
 
 export function Login() {
   const { t } = useTranslation();
+  const { isNarrowWidth } = useResponsive();
 
   const dispatch = useDispatch();
   const defaultLoginMethod = useLoginMethod();
@@ -369,6 +381,7 @@ export function Login() {
                 color: theme.pageTextLight,
                 paddingTop: 5,
                 width: 'fit-content',
+                ...(isNarrowWidth ? { padding: 10 } : null),
               }}
             >
               <Trans>Select the login method</Trans>{' '}
