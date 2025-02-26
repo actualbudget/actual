@@ -51,11 +51,8 @@ export function PrivacyFilter({
   ...props
 }: PrivacyFilterProps) {
   const privacyMode = usePrivacyMode();
-  // Limit mobile support for now.
-  const { isNarrowWidth } = useResponsive();
   const activate =
     privacyMode &&
-    !isNarrowWidth &&
     (!activationFilters ||
       activationFilters.every(value =>
         typeof value === 'boolean' ? value : value(),
