@@ -423,7 +423,9 @@ async function checkSecret(name: string) {
 
   try {
     return await get(serverConfig.BASE_SERVER + '/secret/' + name, {
-      'X-ACTUAL-TOKEN': userToken,
+      headers: {
+        'X-ACTUAL-TOKEN': userToken,
+      },
     });
   } catch (error) {
     console.error(error);
