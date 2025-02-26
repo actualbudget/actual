@@ -5,31 +5,35 @@ import { PostError } from './errors';
 import * as Platform from './platform';
 
 function throwIfNot200(res: Response, text: string) {
-  if (res.status !== 200) {
-    if (res.status === 500) {
-      throw new PostError(res.status === 500 ? 'internal' : text);
-    }
-
-    const contentType = res.headers.get('Content-Type');
-    if (contentType.toLowerCase().indexOf('application/json') !== -1) {
-      const json = JSON.parse(text);
-      throw new PostError(json.reason);
-    }
-
-    // Actual Sync Server may be exposed via a tunnel (e.g. ngrok). Tunnel errors should be treated as network errors.
-    const tunnelErrorHeaders = ['ngrok-error-code'];
-    const tunnelError = tunnelErrorHeaders.some(header =>
-      res.headers.has(header),
-    );
-
-    if (tunnelError) {
-      // Tunnel errors are present when the tunnel is active and the server is not reachable e.g. server is offline
-      // When we experience a tunnel error we treat it as a network failure
-      throw new PostError('network-failure');
-    }
-
-    throw new PostError(text);
+  //there are a few places where we return 204 (success, but no content)
+  //these should probably also not throw (along with other 2xx codes)
+  if (Math.floor(res.status / 100) === 2) {
+    return;
   }
+
+  if (res.status === 500) {
+    throw new PostError(res.status === 500 ? 'internal' : text);
+  }
+
+  const contentType = res.headers.get('Content-Type') ?? '';
+  if (contentType.toLowerCase().indexOf('application/json') !== -1) {
+    const json = JSON.parse(text);
+    throw new PostError(json.reason);
+  }
+
+  // Actual Sync Server may be exposed via a tunnel (e.g. ngrok). Tunnel errors should be treated as network errors.
+  const tunnelErrorHeaders = ['ngrok-error-code'];
+  const tunnelError = tunnelErrorHeaders.some(header =>
+    res.headers.has(header),
+  );
+
+  if (tunnelError) {
+    // Tunnel errors are present when the tunnel is active and the server is not reachable e.g. server is offline
+    // When we experience a tunnel error we treat it as a network failure
+    throw new PostError('network-failure');
+  }
+
+  throw new PostError(text);
 }
 
 export async function post(
