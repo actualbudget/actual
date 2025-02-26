@@ -21,6 +21,7 @@ const actualAppWebBuildPath = path.join(
 );
 debug(`Actual web build path: '${actualAppWebBuildPath}'`);
 
+// Custom formats
 convict.addFormat({
   name: 'tokenExpiration',
   validate(val) {
@@ -30,106 +31,26 @@ convict.addFormat({
   },
 });
 
-/*
-  Sub-Schemas
-*/
-const openIdIssuerSchema = convict({
-  name: { doc: 'OpenID provider name.', format: String, default: '' },
-  authorization_endpoint: {
-    doc: 'OpenID authorization endpoint.',
-    format: String,
-    default: '',
-  },
-  token_endpoint: {
-    doc: 'OpenID token endpoint.',
-    format: String,
-    default: '',
-  },
-  userinfo_endpoint: {
-    doc: 'OpenID user info endpoint.',
-    format: String,
-    default: '',
+convict.addFormat({
+  name: 'openIdIssuer',
+  validate(val) {
+    // Allow a string, or an object with the specified fields
+    if (typeof val === 'string') return;
+    if (
+      val &&
+      typeof val === 'object' &&
+      typeof val.name === 'string' &&
+      typeof val.authorization_endpoint === 'string' &&
+      typeof val.token_endpoint === 'string' &&
+      typeof val.userinfo_endpoint === 'string'
+    ) {
+      return;
+    }
+    throw new Error(`Invalid OpenID issuer value: ${JSON.stringify(val)}`);
   },
 });
 
-const openIdSchema = convict({
-  issuer: {
-    doc: 'OpenID issuer URL or object.',
-    format: '*',
-    default: '',
-    env: 'ACTUAL_OPENID_DISCOVERY_URL',
-  },
-  client_id: {
-    doc: 'OpenID client ID.',
-    format: String,
-    default: '',
-    env: 'ACTUAL_OPENID_CLIENT_ID',
-  },
-  client_secret: {
-    doc: 'OpenID client secret.',
-    format: String,
-    default: '',
-    env: 'ACTUAL_OPENID_CLIENT_SECRET',
-  },
-  server_hostname: {
-    doc: 'OpenID server hostname.',
-    format: String,
-    default: '',
-    env: 'ACTUAL_OPENID_SERVER_HOSTNAME',
-  },
-  authMethod: {
-    doc: 'Authentication method for OpenID.',
-    format: ['openid', 'oauth2'],
-    default: 'openid',
-    env: 'ACTUAL_OPENID_AUTH_METHOD',
-  },
-});
-
-const httpsSchema = convict({
-  key: { doc: 'HTTPS key.', format: String, default: '' },
-  cert: { doc: 'HTTPS certificate.', format: String, default: '' },
-});
-
-const uploadSchema = convict({
-  fileSizeSyncLimitMB: {
-    doc: 'Max file sync upload size.',
-    format: 'nat',
-    default: 20,
-  },
-  syncEncryptedFileSizeLimitMB: {
-    doc: 'Max encrypted file sync upload size.',
-    format: 'nat',
-    default: 50,
-  },
-  fileSizeLimitMB: { doc: 'Max file upload size.', format: 'nat', default: 20 },
-});
-
-/*
-  Helper Functions
-*/
-function isAllEmpty(obj) {
-  if (!obj || typeof obj !== 'object') return true;
-  const keys = Object.keys(obj);
-  if (keys.length === 0) return true;
-  return keys.every(key => {
-    const val = obj[key];
-    if (!val) return true;
-    if (typeof val === 'object') return isAllEmpty(val);
-    return false;
-  });
-}
-
-function loadSubConfig(schema, data) {
-  if (!data || isAllEmpty(data)) return null;
-  const loaded = schema.load(data);
-  loaded.validate({ allowed: 'strict' });
-  const finalData = loaded.getProperties();
-  return isAllEmpty(finalData) ? null : finalData;
-}
-
-/*
-  Main Config Schema
-*/
+// Main config schema
 const configSchema = convict({
   env: {
     doc: 'The application environment.',
@@ -207,18 +128,16 @@ const configSchema = convict({
     ],
     env: 'ACTUAL_TRUSTED_PROXIES',
   },
-  trustedAuthProxies: {
-    doc: 'List of trusted authentication proxies.',
-    format: Array,
-    default: [],
-    env: 'ACTUAL_TRUSTED_AUTH_PROXIES',
-  },
+
   https: {
     doc: 'HTTPS configuration.',
     format: Object,
-    default: null,
-    nullable: true,
+    default: {
+      key: '',
+      cert: '',
+    },
   },
+
   upload: {
     doc: 'Upload configuration.',
     format: Object,
@@ -227,20 +146,45 @@ const configSchema = convict({
       syncEncryptedFileSizeLimitMB: 50,
       fileSizeLimitMB: 20,
     },
-    nullable: true,
   },
+
   openId: {
     doc: 'OpenID authentication settings.',
-    format: Object,
-    default: null,
-    nullable: true,
+
+    issuer: {
+      doc: 'OpenID issuer (string or { name, authorization_endpoint, token_endpoint, userinfo_endpoint }).',
+      format: 'openIdIssuer',
+      default: '',
+    },
+    client_id: {
+      doc: 'OpenID client ID.',
+      format: String,
+      default: '',
+    },
+    client_secret: {
+      doc: 'OpenID client secret.',
+      format: String,
+      default: '',
+    },
+    server_hostname: {
+      doc: 'OpenID server hostname.',
+      format: String,
+      default: '',
+    },
+    authMethod: {
+      doc: 'OpenID authentication method.',
+      format: ['openid', 'oauth2'],
+      default: 'openid',
+    },
   },
+
   token_expiration: {
     doc: 'Token expiration time.',
     format: 'tokenExpiration',
     default: 'never',
     env: 'ACTUAL_TOKEN_EXPIRATION',
   },
+
   enforceOpenId: {
     doc: 'Enforce OpenID authentication.',
     format: Boolean,
@@ -250,52 +194,25 @@ const configSchema = convict({
 });
 
 configSchema.validate({ allowed: 'strict' });
-const config = configSchema.getProperties();
 
-/*
-  Apply Sub-Schema Validation & Final Assembly
-*/
+debug(`Project root: ${configSchema.get('projectRoot')}`);
+debug(`Port: ${configSchema.get('port')}`);
+debug(`Hostname: ${configSchema.get('hostname')}`);
+debug(`Data directory: ${configSchema.get('dataDir')}`);
+debug(`Server files: ${configSchema.get('serverFiles')}`);
+debug(`User files: ${configSchema.get('userFiles')}`);
+debug(`Web root: ${configSchema.get('webRoot')}`);
+debug(`Login method: ${configSchema.get('loginMethod')}`);
+debug(`Allowed methods: ${configSchema.get('allowedLoginMethods').join(', ')}`);
 
-// OpenID
-if (config.openId) {
-  const loadedOpenId = loadSubConfig(openIdSchema, config.openId);
-  if (loadedOpenId?.issuer && typeof loadedOpenId.issuer === 'object') {
-    loadedOpenId.issuer = loadSubConfig(
-      openIdIssuerSchema,
-      loadedOpenId.issuer,
-    );
-  }
-  config.openId = isAllEmpty(loadedOpenId) ? null : loadedOpenId;
-}
-
-// HTTPS
-config.https = loadSubConfig(httpsSchema, config.https);
-
-// Upload
-config.upload = loadSubConfig(uploadSchema, config.upload);
-
-// Debug logs
-debug(`Using project root: ${config.projectRoot}`);
-debug(`Using port: ${config.port}`);
-debug(`Using hostname: ${config.hostname}`);
-debug(`Using data directory: ${config.dataDir}`);
-debug(`Using server files directory: ${config.serverFiles}`);
-debug(`Using user files directory: ${config.userFiles}`);
-debug(`Using web root directory: ${config.webRoot}`);
-debug(`Using login method: ${config.loginMethod}`);
-debug(`Allowed methods: ${config.allowedLoginMethods.join(', ')}`);
-debug(`Trusted proxies: ${config.trustedProxies.join(', ')}`);
-debug(`Trusted auth proxies: ${config.trustedAuthProxies.join(', ')}`);
-
+const httpsKey = configSchema.get('https.key');
 debugSensitive(
-  `HTTPS Key: ${
-    config.https?.key ? '*'.repeat(config.https.key.length) : 'Not Set'
-  }`,
-);
-debugSensitive(
-  `HTTPS Cert: ${
-    config.https?.cert ? '*'.repeat(config.https.cert.length) : 'Not Set'
-  }`,
+  `HTTPS Key: ${httpsKey ? '*'.repeat(httpsKey.length) : 'Not Set'}`,
 );
 
-export { config };
+const httpsCert = configSchema.get('https.cert');
+debugSensitive(
+  `HTTPS Cert: ${httpsCert ? '*'.repeat(httpsCert.length) : 'Not Set'}`,
+);
+
+export { configSchema as config };
