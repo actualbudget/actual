@@ -523,7 +523,7 @@ export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
                           <Text style={{ lineHeight: '1.4em', fontSize: 15 }}>
                             <Trans>
                               <strong>
-                                Link a <em>{t('Brazilian')}</em> bank account
+                                Link a <em>Brazilian</em> bank account
                               </strong>{' '}
                               to automatically download transactions. Pluggy.ai
                               provides reliable, up-to-date information from

@@ -338,6 +338,7 @@ export const actions = {
   ...accountsSlice.actions,
   linkAccount,
   linkAccountSimpleFin,
+  linkAccountPluggyAi,
   moveAccount,
   unlinkAccount,
   syncAccounts,
