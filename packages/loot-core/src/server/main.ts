@@ -1287,7 +1287,6 @@ handlers['enable-password'] = async function (loginConfig) {
 
 handlers['get-openid-config'] = async function ({ password }) {
   try {
-    debugger;
     const userToken = await asyncStorage.getItem('user-token');
 
     const res = await post(
