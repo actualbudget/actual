@@ -317,6 +317,7 @@ export function useTransactionsSearch({
           resetQuery();
           setIsSearching(false);
         } else if (searchText) {
+          resetQuery();
           updateQuery(previousQuery =>
             queries.transactionsSearch(previousQuery, searchText, dateFormat),
           );
