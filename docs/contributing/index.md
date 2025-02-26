@@ -30,6 +30,7 @@ Here are some initial guidelines for how contributions will be treated:
 - @carkom
 - @jfdoming
 - @joel-jeremy
+- @lelemm
 - @MatissJanis
 - @matt-fidd
 - @MikesGlitch
