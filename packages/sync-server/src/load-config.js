@@ -71,7 +71,7 @@ const configSchema = convict({
   dataDir: {
     doc: 'Default data directory.',
     format: String,
-    default: fs.existsSync('/data') ? '/data' : projectRoot,
+    default: fs.existsSync('./data') ? '/data' : projectRoot,
     env: 'ACTUAL_DATA_DIR',
   },
   port: {
