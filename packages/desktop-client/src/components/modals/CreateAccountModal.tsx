@@ -145,7 +145,7 @@ export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
         account_id: string;
         name: string;
         institution: string;
-        orgDomain: string;
+        orgDomain: string | null;
         orgId: string;
         balance: number;
       };
