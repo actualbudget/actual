@@ -436,6 +436,14 @@ export function Budget() {
     [dispatch, onSaveNotes],
   );
 
+  const [isPrivacyEnabled, setPrivacyEnabledPref] =
+    useSyncedPref('isPrivacyEnabled');
+
+  const onTogglePrivacyMode = useCallback(() => {
+    setPrivacyEnabledPref(String(isPrivacyEnabled !== 'true'));
+    dispatch(collapseModals('budget-page-menu'));
+  }, [dispatch, isPrivacyEnabled, setPrivacyEnabledPref]);
+
   const onSwitchBudgetFile = useCallback(() => {
     dispatch(pushModal('budget-list'));
   }, [dispatch]);
@@ -462,6 +470,7 @@ export function Budget() {
         onAddCategoryGroup: onOpenNewCategoryGroupModal,
         onToggleHiddenCategories,
         onSwitchBudgetFile,
+        onTogglePrivacyMode,
       }),
     );
   }, [
@@ -469,6 +478,7 @@ export function Budget() {
     onOpenNewCategoryGroupModal,
     onSwitchBudgetFile,
     onToggleHiddenCategories,
+    onTogglePrivacyMode,
   ]);
 
   if (!categoryGroups || !initialized) {

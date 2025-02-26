@@ -8,6 +8,7 @@ import { Menu } from '@actual-app/components/menu';
 import { styles } from '@actual-app/components/styles';
 
 import { useLocalPref } from '../../hooks/useLocalPref';
+import { useSyncedPref } from '../../hooks/useSyncedPref';
 import { theme } from '../../style';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 
@@ -17,6 +18,7 @@ export function BudgetPageMenuModal({
   onAddCategoryGroup,
   onToggleHiddenCategories,
   onSwitchBudgetFile,
+  onTogglePrivacyMode,
 }: BudgetPageMenuModalProps) {
   const defaultMenuItemStyle: CSSProperties = {
     ...styles.mobileMenuItem,
@@ -38,6 +40,7 @@ export function BudgetPageMenuModal({
             onAddCategoryGroup={onAddCategoryGroup}
             onToggleHiddenCategories={onToggleHiddenCategories}
             onSwitchBudgetFile={onSwitchBudgetFile}
+            onTogglePrivacyMode={onTogglePrivacyMode}
           />
         </>
       )}
@@ -52,15 +55,18 @@ type BudgetPageMenuProps = Omit<
   onAddCategoryGroup: () => void;
   onToggleHiddenCategories: () => void;
   onSwitchBudgetFile: () => void;
+  onTogglePrivacyMode: () => void;
 };
 
 function BudgetPageMenu({
   onAddCategoryGroup,
   onToggleHiddenCategories,
   onSwitchBudgetFile,
+  onTogglePrivacyMode,
   ...props
 }: BudgetPageMenuProps) {
   const [showHiddenCategories] = useLocalPref('budget.showHiddenCategories');
+  const [isPrivacyEnabled] = useSyncedPref('isPrivacyEnabled');
 
   const onMenuSelect = (name: string) => {
     switch (name) {
@@ -75,6 +81,9 @@ function BudgetPageMenu({
         break;
       case 'switch-budget-file':
         onSwitchBudgetFile?.();
+        break;
+      case 'toggle-privacy-filter':
+        onTogglePrivacyMode?.();
         break;
       default:
         throw new Error(`Unrecognized menu item: ${name}`);
@@ -94,6 +103,13 @@ function BudgetPageMenu({
         {
           name: 'toggle-hidden-categories',
           text: `${!showHiddenCategories ? t('Show hidden categories') : t('Hide hidden categories')}`,
+        },
+        {
+          name: 'toggle-privacy-filter',
+          text:
+            isPrivacyEnabled === 'true'
+              ? t('Disable privacy mode')
+              : t('Enable privacy mode'),
         },
         {
           name: 'switch-budget-file',

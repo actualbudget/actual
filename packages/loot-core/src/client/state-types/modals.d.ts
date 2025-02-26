@@ -303,6 +303,7 @@ type FinanceModals = {
     onAddCategoryGroup: () => void;
     onToggleHiddenCategories: () => void;
     onSwitchBudgetFile: () => void;
+    onTogglePrivacyMode: () => void;
   };
   'envelope-budget-month-menu': {
     month: string;
