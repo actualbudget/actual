@@ -12,12 +12,12 @@ import { View } from '@actual-app/components/view';
 import { type OpenIdConfig } from 'loot-core/types/models/openid';
 
 import { theme } from '../../../style';
+import { ResponsiveInput } from '../../common/Input';
 import { Link } from '../../common/Link';
 import { Select } from '../../common/Select';
 import { FormField, FormLabel } from '../../forms';
-import { useServerURL } from '../../ServerContext';
-import { ResponsiveInput } from '../../common/Input';
 import { useResponsive } from '../../responsive/ResponsiveProvider';
+import { useServerURL } from '../../ServerContext';
 
 type OpenIdCallback = (config: OpenIdConfig) => Promise<void>;
 
@@ -218,7 +218,7 @@ export function OpenIdForm({
             isLoading={loading}
             onPress={onSubmit}
             isDisabled={submitButtonDisabled}
-            style={isNarrowWidth ? { padding: 10} : undefined}
+            style={isNarrowWidth ? { padding: 10 } : undefined}
           >
             OK
           </ButtonWithLoading>
