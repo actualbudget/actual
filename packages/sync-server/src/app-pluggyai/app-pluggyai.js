@@ -30,7 +30,6 @@ app.post(
   '/accounts',
   handleError(async (req, res) => {
     try {
-      await pluggyaiService.setToken();
       const itemIds = secretsService
         .get(SecretName.pluggyai_itemIds)
         .split(',')
@@ -63,15 +62,13 @@ app.post(
 app.post(
   '/transactions',
   handleError(async (req, res) => {
-    const { accountId, startDate, endDate } = req.body;
+    const { accountId, startDate } = req.body;
 
     try {
       let transactions = [];
-      await pluggyaiService.setToken();
       let result = await pluggyaiService.getTransactionsByAccountId(
         accountId,
         startDate,
-        endDate,
         500,
         1,
       );
@@ -81,7 +78,6 @@ app.post(
         result = await pluggyaiService.getTransactionsByAccountId(
           accountId,
           startDate,
-          endDate,
           500,
           result.page + 1,
         );

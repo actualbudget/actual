@@ -1,3 +1,4 @@
+import { t } from 'i18next';
 import { v4 as uuidv4 } from 'uuid';
 
 import { captureException } from '../../platform/exceptions';
@@ -173,7 +174,7 @@ async function linkSimpleFinAccount({
   let id;
 
   const institution = {
-    name: externalAccount.institution ?? 'Unknown',
+    name: externalAccount.institution ?? t('Unknown'),
   };
 
   const bank = await link.findOrCreateBank(
@@ -238,7 +239,7 @@ async function linkPluggyAiAccount({
   let id;
 
   const institution = {
-    name: externalAccount.institution ?? 'Unknown',
+    name: externalAccount.institution ?? t('Unknown'),
   };
 
   const bank = await link.findOrCreateBank(

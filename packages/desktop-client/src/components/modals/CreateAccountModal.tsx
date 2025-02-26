@@ -155,7 +155,7 @@ export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
           account_id: oldAccount.id,
           name: `${oldAccount.name.trim()} - ${oldAccount.type === 'BANK' ? oldAccount.taxNumber : oldAccount.owner}`,
           institution: oldAccount.name,
-          orgDomain: '',
+          orgDomain: null,
           orgId: oldAccount.id,
           balance:
             oldAccount.type === 'BANK'
@@ -177,7 +177,7 @@ export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
       console.error(err);
       addNotification({
         type: 'error',
-        title: 'Error when trying to contact Pluggy.ai',
+        title: t('Error when trying to contact Pluggy.ai'),
         message: (err as Error).message,
         timeout: 5000,
       });
@@ -521,13 +521,14 @@ export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
                             )}
                           </View>
                           <Text style={{ lineHeight: '1.4em', fontSize: 15 }}>
-                            <strong>
-                              {t('Link a')} <em>{t('Brazilian')}</em>{' '}
-                              {t('bank account')}
-                            </strong>{' '}
-                            {t(
-                              'to automatically download transactions. Pluggy.ai provides reliable, up-to-date information from hundreds of banks.',
-                            )}
+                            <Trans>
+                              <strong>
+                                Link a <em>{t('Brazilian')}</em> bank account
+                              </strong>{' '}
+                              to automatically download transactions. Pluggy.ai
+                              provides reliable, up-to-date information from
+                              hundreds of banks.
+                            </Trans>
                           </Text>
                         </>
                       )}

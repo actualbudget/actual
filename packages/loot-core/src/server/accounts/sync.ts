@@ -252,7 +252,6 @@ async function downloadSimpleFinTransactions(
 async function downloadPluggyAiTransactions(
   acctId: AccountEntity['id'],
   since: string,
-  to: string,
 ) {
   const userToken = await asyncStorage.getItem('user-token');
   if (!userToken) return;
@@ -264,7 +263,6 @@ async function downloadPluggyAiTransactions(
     {
       accountId: acctId,
       startDate: since,
-      endDate: to,
     },
     {
       'X-ACTUAL-TOKEN': userToken,
@@ -933,11 +931,7 @@ export async function syncAccount(
   if (acctRow.account_sync_source === 'simpleFin') {
     download = await downloadSimpleFinTransactions(acctId, syncStartDate);
   } else if (acctRow.account_sync_source === 'pluggyai') {
-    download = await downloadPluggyAiTransactions(
-      acctId,
-      syncStartDate,
-      dateFns.format(dateFns.addDays(new Date(), 1), 'yyyy-MM-dd'),
-    );
+    download = await downloadPluggyAiTransactions(acctId, syncStartDate);
   } else if (acctRow.account_sync_source === 'goCardless') {
     download = await downloadGoCardlessTransactions(
       userId,

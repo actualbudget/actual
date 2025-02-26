@@ -1,6 +1,6 @@
 // @ts-strict-ignore
 import React, { useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { ButtonWithLoading } from '@actual-app/components/button';
 import { InitialFocus } from '@actual-app/components/initial-focus';
@@ -102,22 +102,24 @@ export const PluggyAiInitialiseModal = ({
       {({ state: { close } }) => (
         <>
           <ModalHeader
-            title={t('Set-up Pluggy.ai')} // Translated title
+            title={t('Set-up Pluggy.ai')}
             rightContent={<ModalCloseButton onPress={close} />}
           />
           <View style={{ display: 'flex', gap: 10 }}>
             <Text>
-              {t(
-                'In order to enable bank-sync via Pluggy.ai (only for Brazilian banks) you will need to create access credentials. This can be done by creating an account with',
-              )}{' '}
-              <Link
-                variant="external"
-                to="https://actualbudget.org/docs/advanced/bank-sync/"
-                linkColor="purple"
-              >
-                {t('Pluggy.ai')}
-              </Link>
-              .
+              <Trans>
+                In order to enable bank-sync via Pluggy.ai (only for Brazilian
+                banks) you will need to create access credentials. This can be
+                done by creating an account with{' '}
+                <Link
+                  variant="external"
+                  to="https://actualbudget.org/docs/advanced/bank-sync/"
+                  linkColor="purple"
+                >
+                  Pluggy.ai
+                </Link>
+                .
+              </Trans>
             </Text>
 
             <FormField>

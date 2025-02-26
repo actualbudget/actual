@@ -148,8 +148,8 @@ export const linkAccountPluggyAi = createAppAsyncThunk(
       upgradingId,
       offBudget,
     });
-    await dispatch(getPayees());
-    await dispatch(getAccounts());
+    dispatch(getPayees());
+    dispatch(getAccounts());
   },
 );
 
