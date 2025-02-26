@@ -228,7 +228,9 @@ export function usePreviewTransactions(): UsePreviewTransactionsResult {
       })
       .flat()
       .sort(
-        (a, b) => parseDate(b.date).getTime() - parseDate(a.date).getTime(),
+        (a, b) =>
+          parseDate(b.date).getTime() - parseDate(a.date).getTime() ||
+          a.amount - b.amount,
       );
   }, [isSchedulesLoading, schedules, statuses, upcomingLength]);
 
