@@ -341,6 +341,18 @@ function AccountList({
       const accountIdToMove = e.keys[0] as AccountEntity['id'];
       const targetAccountId = e.target.key as AccountEntity['id'];
 
+      alert(
+        `onReorder: ${JSON.stringify({
+          dropPosition: e.target.dropPosition,
+          targetKey: e.target.key,
+          keys: e.keys,
+          id: accountIdToMove,
+          targetId: targetAccountId,
+          account: accountListData.getItem(accountIdToMove),
+          targetAccount: accountListData.getItem(targetAccountId),
+        })}`,
+      );
+
       if (e.target.dropPosition === 'before') {
         accountListData.moveBefore(e.target.key, e.keys);
         dispatch(
