@@ -324,6 +324,7 @@ function AccountList({
 
   const accountListData = useListData({
     initialItems: accounts,
+    getKey: account => account.id,
   });
 
   const { dragAndDropHooks } = useDragAndDrop({
@@ -332,8 +333,8 @@ function AccountList({
         'text/plain': accountListData.getItem(key).id,
       })),
     onReorder(e) {
-      const accountIdToMove = accountListData.getItem(e.keys[0]).id;
-      const targetAccountId = accountListData.getItem(e.target.key).id;
+      const accountIdToMove = e.keys[0] as AccountEntity['id'];
+      const targetAccountId = e.target.key as AccountEntity['id'];
 
       if (e.target.dropPosition === 'before') {
         accountListData.moveBefore(e.target.key, e.keys);
