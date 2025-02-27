@@ -18,30 +18,6 @@ function getPluggyClient() {
   return pluggyClient;
 }
 
-function getDate(date) {
-  return date.toISOString().split('T')[0];
-}
-
-function flattenObject(obj, prefix = '') {
-  const result = {};
-
-  for (const [key, value] of Object.entries(obj)) {
-    const newKey = prefix ? `${prefix}.${key}` : key;
-
-    if (value === null) {
-      continue;
-    }
-
-    if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
-      Object.assign(result, flattenObject(value, newKey));
-    } else {
-      result[newKey] = value;
-    }
-  }
-
-  return result;
-}
-
 export const pluggyaiService = {
   isConfigured: () => {
     return !!(
@@ -139,80 +115,7 @@ export const pluggyaiService = {
       transactions = transactions.concat(result.results);
     }
 
-    const account = await pluggyaiService.getAccountById(accountId);
-
-    let startingBalance = parseInt(
-      Math.round(account.balance * 100).toString(),
-    );
-    if (account.type === 'CREDIT') {
-      startingBalance = -startingBalance;
-    }
-    const date = getDate(new Date(account.updatedAt));
-
-    const balances = [
-      {
-        balanceAmount: {
-          amount: startingBalance,
-          currency: account.currencyCode,
-        },
-        balanceType: 'expected',
-        referenceDate: date,
-      },
-    ];
-
-    const all = [];
-    const booked = [];
-    const pending = [];
-
-    for (const trans of transactions) {
-      const newTrans = {};
-
-      newTrans.booked = !(trans.status === 'PENDING');
-
-      const transactionDate = new Date(trans.date);
-
-      if (transactionDate < startDate && !trans.sandbox) {
-        continue;
-      }
-
-      newTrans.date = getDate(transactionDate);
-      newTrans.payeeName = pluggyaiService.getPayeeName(trans);
-      newTrans.notes = trans.descriptionRaw || trans.description;
-
-      let amountInCurrency = trans.amountInAccountCurrency ?? trans.amount;
-      amountInCurrency = Math.round(amountInCurrency * 100) / 100;
-
-      newTrans.transactionAmount = {
-        amount: account.type === 'BANK' ? amountInCurrency : -amountInCurrency,
-        currency: trans.currencyCode,
-      };
-
-      newTrans.transactionId = trans.id;
-      newTrans.valueDate = trans.date;
-      newTrans.sortOrder = trans.date;
-
-      const finalTrans = { ...flattenObject(trans), ...newTrans };
-      if (newTrans.booked) {
-        booked.push(finalTrans);
-      } else {
-        pending.push(finalTrans);
-      }
-      all.push(finalTrans);
-    }
-
-    const sortFunction = (a, b) => b.sortOrder - a.sortOrder;
-
-    const bookedSorted = booked.sort(sortFunction);
-    const pendingSorted = pending.sort(sortFunction);
-    const allSorted = all.sort(sortFunction);
-
-    return {
-      balances,
-      startingBalance,
-      all: allSorted,
-      booked: bookedSorted,
-      pending: pendingSorted,
-    };
+    return transactions;
   },
   getPayeeName: trans => {
     if (
