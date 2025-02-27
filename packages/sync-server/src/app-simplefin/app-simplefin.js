@@ -358,6 +358,7 @@ async function getAccounts(
         `${sfin.username}:${sfin.password}`,
       ).toString('base64')}`,
     },
+    timeout: 300000, // 5 minutes
   };
   const params = [];
   if (!noTransactions) {
