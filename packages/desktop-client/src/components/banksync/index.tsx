@@ -115,7 +115,7 @@ export function BankSync() {
         )}
         {Object.entries(groupedAccounts).map(([syncProvider, accounts]) => {
           return (
-            <View key={syncProvider}>
+            <View key={syncProvider} style={{ minHeight: 'initial' }}>
               {Object.keys(groupedAccounts).length > 1 && (
                 <Text
                   style={{ fontWeight: 500, fontSize: 20, margin: '.5em 0' }}

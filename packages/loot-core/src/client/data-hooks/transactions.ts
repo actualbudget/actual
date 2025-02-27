@@ -228,7 +228,9 @@ export function usePreviewTransactions(): UsePreviewTransactionsResult {
       })
       .flat()
       .sort(
-        (a, b) => parseDate(b.date).getTime() - parseDate(a.date).getTime(),
+        (a, b) =>
+          parseDate(b.date).getTime() - parseDate(a.date).getTime() ||
+          a.amount - b.amount,
       );
   }, [isSchedulesLoading, schedules, statuses, upcomingLength]);
 
@@ -315,6 +317,7 @@ export function useTransactionsSearch({
           resetQuery();
           setIsSearching(false);
         } else if (searchText) {
+          resetQuery();
           updateQuery(previousQuery =>
             queries.transactionsSearch(previousQuery, searchText, dateFormat),
           );

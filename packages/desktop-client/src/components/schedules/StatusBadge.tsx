@@ -8,7 +8,7 @@ import { titleFirst } from 'loot-core/shared/util';
 
 import {
   SvgAlertTriangle,
-  SvgCalendar,
+  SvgCalendar3,
   SvgCheckCircle1,
   SvgCheckCircleHollow,
   SvgEditSkull1,
@@ -38,7 +38,7 @@ export function getStatusProps(status: StatusTypes) {
       return {
         color: theme.upcomingText,
         backgroundColor: theme.upcomingBackground,
-        Icon: SvgCalendar,
+        Icon: SvgCalendar3,
       };
     case 'paid':
       return {
@@ -56,13 +56,13 @@ export function getStatusProps(status: StatusTypes) {
       return {
         color: theme.noticeTextLight,
         backgroundColor: theme.noticeBackgroundLight,
-        Icon: SvgCalendar,
+        Icon: SvgCalendar3,
       };
     case 'scheduled':
       return {
         color: theme.tableRowHeaderText,
         backgroundColor: theme.tableRowHeaderBackground,
-        Icon: SvgCalendar,
+        Icon: SvgCalendar3,
       };
     case 'cleared':
       return {

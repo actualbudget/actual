@@ -28,6 +28,7 @@ import { init as initConnection, send } from 'loot-core/platform/client/fetch';
 
 import { handleGlobalEvents } from '../global-events';
 import { useMetadataPref } from '../hooks/useMetadataPref';
+import { setI18NextLanguage } from '../i18n';
 import { installPolyfills } from '../polyfills';
 import { useDispatch, useSelector, useStore } from '../redux';
 import { hasHiddenScrollbars, ThemeStyle, useTheme } from '../style';
@@ -51,6 +52,10 @@ function AppInner() {
   const { showBoundary: showErrorBoundary } = useErrorBoundary();
   const dispatch = useDispatch();
   const userData = useSelector(state => state.user.data);
+
+  useEffect(() => {
+    setI18NextLanguage(null);
+  }, []);
 
   useEffect(() => {
     const maybeUpdate = async <T,>(cb?: () => T): Promise<T> => {
