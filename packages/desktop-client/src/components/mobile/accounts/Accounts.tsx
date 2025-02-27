@@ -338,14 +338,15 @@ function AccountList({
         'text/plain': accountListData.getItem(key).id,
       })),
     onReorder(e) {
-      const accountIdToMove = e.keys[0] as AccountEntity['id'];
+      const [key] = e.keys;
+      const accountIdToMove = key;
       const targetAccountId = e.target.key as AccountEntity['id'];
 
       alert(
         `onReorder: ${JSON.stringify({
           dropPosition: e.target.dropPosition,
           targetKey: e.target.key,
-          keys: e.keys,
+          keys: [...e.keys],
           id: accountIdToMove,
           targetId: targetAccountId,
           account: accountListData.getItem(accountIdToMove),
