@@ -22,7 +22,7 @@ import {
   SvgWallet,
 } from '../../icons/v1';
 import { SvgReports } from '../../icons/v1/Reports';
-import { SvgCalendar } from '../../icons/v2';
+import { SvgCalendar3 } from '../../icons/v2';
 import { theme } from '../../style';
 import { useResponsive } from '../responsive/ResponsiveProvider';
 import { useScrollListener } from '../ScrollProvider';
@@ -119,7 +119,7 @@ export function MobileNavTabs() {
       name: t('Schedules (Soon)'),
       path: '/schedules/soon',
       style: navTabStyle,
-      Icon: SvgCalendar,
+      Icon: SvgCalendar3,
     },
     {
       name: t('Payees (Soon)'),

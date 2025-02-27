@@ -24,7 +24,11 @@ export function AccountsList({
   }
 
   return (
-    <View>
+    <View
+      style={{
+        minHeight: 'initial',
+      }}
+    >
       {accounts.map(account => {
         const hovered = hoveredAccount === account.id;
 

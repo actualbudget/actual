@@ -159,7 +159,7 @@ export function Budget() {
         );
       } else {
         dispatch(collapseModals('category-group-menu'));
-        dispatch(deleteGroup(groupId));
+        dispatch(deleteGroup({ id: groupId }));
       }
     },
     [categoryGroups, dispatch],

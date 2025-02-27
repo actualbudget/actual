@@ -291,11 +291,9 @@ export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
                           <strong>
                             Link a <em>European</em> bank account
                           </strong>{' '}
-                          to automatically download transactions.
-                        </Trans>
-                        <Trans>
-                          GoCardless provides reliable, up-to-date information
-                          from hundreds of banks.
+                          to automatically download transactions. GoCardless
+                          provides reliable, up-to-date information from
+                          hundreds of banks.
                         </Trans>
                       </Text>
                       <View
@@ -356,11 +354,9 @@ export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
                           <strong>
                             Link a <em>North American</em> bank account
                           </strong>{' '}
-                          to automatically download transactions.
-                        </Trans>
-                        <Trans>
-                          SimpleFIN provides reliable, up-to-date information
-                          from hundreds of banks.
+                          to automatically download transactions. SimpleFIN
+                          provides reliable, up-to-date information from
+                          hundreds of banks.
                         </Trans>
                       </Text>
                     </>

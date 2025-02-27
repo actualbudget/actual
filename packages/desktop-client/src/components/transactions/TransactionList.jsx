@@ -220,7 +220,7 @@ export function TransactionList({
 
   const onManagePayees = useCallback(
     id => {
-      navigate('/payees', { state: { selectedPayee: id } });
+      navigate('/payees', id && { state: { selectedPayee: id } });
     },
     [navigate],
   );
