@@ -23,25 +23,24 @@ function getDate(date) {
 }
 
 function flattenObject(obj, prefix = '') {
-  let result = {};
-  
+  const result = {};
+
   for (const [key, value] of Object.entries(obj)) {
     const newKey = prefix ? `${prefix}.${key}` : key;
 
     if (value === null) {
       continue;
     }
-    
+
     if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
       Object.assign(result, flattenObject(value, newKey));
     } else {
       result[newKey] = value;
     }
   }
-  
+
   return result;
 }
-
 
 export const pluggyaiService = {
   isConfigured: () => {
