@@ -4,9 +4,9 @@ import * as db from '../db';
 import { loadMappings } from '../db/mappings';
 import { post } from '../post';
 import { getServer } from '../server-config';
+import { loadRules, insertRule } from '../transactions/transaction-rules';
 
 import { reconcileTransactions, addTransactions } from './sync';
-import { loadRules, insertRule } from './transaction-rules';
 
 jest.mock('../../shared/months', () => ({
   ...jest.requireActual('../../shared/months'),

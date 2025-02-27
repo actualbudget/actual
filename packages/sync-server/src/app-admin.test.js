@@ -1,7 +1,8 @@
 import request from 'supertest';
-import { handlers as app } from './app-admin.js';
-import getAccountDb from './account-db.js';
 import { v4 as uuidv4 } from 'uuid';
+
+import { getAccountDb } from './account-db.js';
+import { handlers as app } from './app-admin.js';
 
 const ADMIN_ROLE = 'ADMIN';
 const BASIC_ROLE = 'BASIC';

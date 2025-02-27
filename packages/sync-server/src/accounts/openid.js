@@ -1,12 +1,13 @@
-import getAccountDb, { clearExpiredSessions } from '../account-db.js';
-import * as uuid from 'uuid';
 import { generators, Issuer } from 'openid-client';
-import finalConfig from '../load-config.js';
-import { TOKEN_EXPIRATION_NEVER } from '../util/validate-user.js';
+import { v4 as uuidv4 } from 'uuid';
+
+import { clearExpiredSessions, getAccountDb } from '../account-db.js';
+import { config as finalConfig } from '../load-config.js';
 import {
   getUserByUsername,
   transferAllFilesFromUser,
 } from '../services/user-service.js';
+import { TOKEN_EXPIRATION_NEVER } from '../util/validate-user.js';
 
 export async function bootstrapOpenId(config) {
   if (!('issuer' in config)) {
@@ -29,7 +30,7 @@ export async function bootstrapOpenId(config) {
     return { error: 'configuration-error' };
   }
 
-  let accountDb = getAccountDb();
+  const accountDb = getAccountDb();
   try {
     accountDb.transaction(() => {
       accountDb.mutate('DELETE FROM auth WHERE method = ?', ['openid']);
@@ -48,7 +49,7 @@ export async function bootstrapOpenId(config) {
 }
 
 async function setupOpenIdClient(config) {
-  let issuer =
+  const issuer =
     typeof config.issuer === 'string'
       ? await Issuer.discover(config.issuer)
       : new Issuer({
@@ -79,7 +80,7 @@ export async function loginWithOpenIdSetup(returnUrl) {
     return { error: 'invalid-return-url' };
   }
 
-  let accountDb = getAccountDb();
+  const accountDb = getAccountDb();
   let config = accountDb.first('SELECT extra_data FROM auth WHERE method = ?', [
     'openid',
   ]);
@@ -137,7 +138,7 @@ export async function loginWithOpenIdFinalize(body) {
     return { error: 'missing-state' };
   }
 
-  let accountDb = getAccountDb();
+  const accountDb = getAccountDb();
   let config = accountDb.first(
     "SELECT extra_data FROM auth WHERE method = 'openid' AND active = 1",
   );
@@ -158,7 +159,7 @@ export async function loginWithOpenIdFinalize(body) {
     return { error: 'openid-setup-failed' };
   }
 
-  let pendingRequest = accountDb.first(
+  const pendingRequest = accountDb.first(
     'SELECT code_verifier, return_url FROM pending_openid_requests WHERE state = ? AND expiry_time > ?',
     [body.state, Date.now()],
   );
@@ -167,7 +168,7 @@ export async function loginWithOpenIdFinalize(body) {
     return { error: 'invalid-or-expired-state' };
   }
 
-  let { code_verifier, return_url } = pendingRequest;
+  const { code_verifier, return_url } = pendingRequest;
 
   try {
     let tokenSet = null;
@@ -201,12 +202,12 @@ export async function loginWithOpenIdFinalize(body) {
     let userId = null;
     try {
       accountDb.transaction(() => {
-        let { countUsersWithUserName } = accountDb.first(
+        const { countUsersWithUserName } = accountDb.first(
           'SELECT count(*) as countUsersWithUserName FROM users WHERE user_name <> ?',
           [''],
         );
         if (countUsersWithUserName === 0) {
-          userId = uuid.v4();
+          userId = uuidv4();
           // Check if user was created by another transaction
           const existingUser = accountDb.first(
             'SELECT id FROM users WHERE user_name = ?',
@@ -230,7 +231,7 @@ export async function loginWithOpenIdFinalize(body) {
             transferAllFilesFromUser(userId, userFromPasswordMethod.user_id);
           }
         } else {
-          let { id: userIdFromDb, display_name: displayName } =
+          const { id: userIdFromDb, display_name: displayName } =
             accountDb.first(
               'SELECT id, display_name FROM users WHERE user_name = ? and enabled = 1',
               [identity],
@@ -260,7 +261,7 @@ export async function loginWithOpenIdFinalize(body) {
       }
     }
 
-    const token = uuid.v4();
+    const token = uuidv4();
 
     let expiration;
     if (finalConfig.token_expiration === 'openid-provider') {

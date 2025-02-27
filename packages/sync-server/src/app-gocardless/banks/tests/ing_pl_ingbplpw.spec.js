@@ -1,5 +1,5 @@
-import IngPlIngbplpw from '../ing_pl_ingbplpw.js';
 import { mockTransactionAmount } from '../../services/tests/fixtures.js';
+import IngPlIngbplpw from '../ing_pl_ingbplpw.js';
 
 describe('IngPlIngbplpw', () => {
   describe('#normalizeAccount', () => {

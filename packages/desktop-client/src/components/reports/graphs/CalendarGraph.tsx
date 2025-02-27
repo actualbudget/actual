@@ -1,6 +1,10 @@
 import { type Ref, useEffect, useState } from 'react';
 import { Trans } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
+import { styles } from '@actual-app/components/styles';
+import { Tooltip } from '@actual-app/components/tooltip';
+import { View } from '@actual-app/components/view';
 import {
   addDays,
   format,
@@ -14,10 +18,7 @@ import { amountToCurrency } from 'loot-core/shared/util';
 import { type SyncedPrefs } from 'loot-core/types/prefs';
 
 import { useResizeObserver } from '../../../hooks/useResizeObserver';
-import { styles, theme } from '../../../style';
-import { Button } from '../../common/Button2';
-import { Tooltip } from '../../common/Tooltip';
-import { View } from '../../common/View';
+import { theme } from '../../../style';
 import { PrivacyFilter } from '../../PrivacyFilter';
 import { chartTheme } from '../chart-theme';
 
@@ -31,12 +32,14 @@ type CalendarGraphProps = {
   }[];
   start: Date;
   firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'];
+  isEditing?: boolean;
   onDayClick: (date: Date | null) => void;
 };
 export function CalendarGraph({
   data,
   start,
   firstDayOfWeekIdx,
+  isEditing,
   onDayClick,
 }: CalendarGraphProps) {
   const startingDate = startOfWeek(new Date(), {
@@ -97,6 +100,7 @@ export function CalendarGraph({
           gap: 2,
           width: '100%',
           height: '100%',
+          zIndex: isEditing ? -1 : 'auto', // Prevents interaction with calendar buttons when editing dashboard.
         }}
       >
         {data.map((day, index) =>

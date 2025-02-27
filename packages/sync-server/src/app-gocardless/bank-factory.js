@@ -24,15 +24,20 @@ async function loadBanks() {
 
 export const banks = await loadBanks();
 
-export default institutionId =>
-  banks.find(b => b.institutionIds.includes(institutionId)) || IntegrationBank;
+export function BankFactory(institutionId) {
+  return (
+    banks.find(b => b.institutionIds.includes(institutionId)) || IntegrationBank
+  );
+}
 
 export const BANKS_WITH_LIMITED_HISTORY = [
   'BANCA_AIDEXA_AIDXITMM',
   'BANCA_PATRIMONI_SENVITT1',
   'BANCA_SELLA_SELBIT2B',
+  'BANK_MILLENNIUM_BIGBPLPW',
   'BANKINTER_BKBKESMM',
   'BBVA_BBVAESMM',
+  'BNP_PL_PPABPLPK',
   'BRED_BREDFRPPXXX',
   'CAIXA_GERAL_DEPOSITOS_CGDIPTPL',
   'CAIXABANK_CAIXESBB',
@@ -57,6 +62,7 @@ export const BANKS_WITH_LIMITED_HISTORY = [
   'LUMINOR_NDEALV2X',
   'LUMINOR_RIKOEE22',
   'LUMINOR_RIKOLV2X',
+  'MBANK_RETAIL_BREXPLPW',
   'MEDICINOSBANK_MDBALT22XXX',
   'NORDEA_NDEADKKK',
   'N26_NTSBDEB1',

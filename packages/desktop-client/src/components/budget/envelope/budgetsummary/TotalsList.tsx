@@ -1,12 +1,14 @@
 import React, { type CSSProperties } from 'react';
+import { Trans } from 'react-i18next';
 
-import { envelopeBudget } from 'loot-core/src/client/queries';
+import { AlignedText } from '@actual-app/components/aligned-text';
+import { Block } from '@actual-app/components/block';
+import { styles } from '@actual-app/components/styles';
+import { Tooltip } from '@actual-app/components/tooltip';
+import { View } from '@actual-app/components/view';
 
-import { styles } from '../../../../style';
-import { AlignedText } from '../../../common/AlignedText';
-import { Block } from '../../../common/Block';
-import { Tooltip } from '../../../common/Tooltip';
-import { View } from '../../../common/View';
+import { envelopeBudget } from 'loot-core/client/queries';
+
 import { CellValueText } from '../../../spreadsheet/CellValue';
 import { useFormat } from '../../../spreadsheet/useFormat';
 import { EnvelopeCellValue } from '../EnvelopeBudgetComponents';
@@ -119,10 +121,21 @@ export function TotalsList({ prevMonthName, style }: TotalsListProps) {
       </View>
 
       <View>
-        <Block>Available funds</Block>
-        <Block>Overspent in {prevMonthName}</Block>
-        <Block>Budgeted</Block>
-        <Block>For next month</Block>
+        <Block>
+          <Trans>Available funds</Trans>
+        </Block>
+
+        <Block>
+          <Trans>Overspent in {{ prevMonthName }}</Trans>
+        </Block>
+
+        <Block>
+          <Trans>Budgeted</Trans>
+        </Block>
+
+        <Block>
+          <Trans>For next month</Trans>
+        </Block>
       </View>
     </View>
   );

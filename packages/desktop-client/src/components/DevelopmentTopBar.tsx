@@ -1,7 +1,8 @@
+import { View } from '@actual-app/components/view';
+
 import { theme } from '../style';
 
 import { Link } from './common/Link';
-import { View } from './common/View';
 
 export function DevelopmentTopBar() {
   return (

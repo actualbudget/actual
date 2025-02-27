@@ -1,7 +1,9 @@
 import React, { type ComponentPropsWithoutRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import * as monthUtils from 'loot-core/src/shared/months';
+import { View } from '@actual-app/components/view';
+
+import * as monthUtils from 'loot-core/shared/months';
 
 import { theme } from '../../style';
 import { CategoryAutocomplete } from '../autocomplete/CategoryAutocomplete';
@@ -11,7 +13,6 @@ import {
   ModalTitle,
   ModalHeader,
 } from '../common/Modal';
-import { View } from '../common/View';
 import { SectionLabel } from '../forms';
 import { useResponsive } from '../responsive/ResponsiveProvider';
 import { NamespaceContext } from '../spreadsheet/NamespaceContext';
@@ -41,7 +42,9 @@ export function CategoryAutocompleteModal({
       onClose={onClose}
       containerProps={{
         style: {
-          height: isNarrowWidth ? '85vh' : 275,
+          height: isNarrowWidth
+            ? 'calc(var(--visual-viewport-height) * 0.85)'
+            : 275,
           backgroundColor: theme.menuAutoCompleteBackground,
         },
       }}

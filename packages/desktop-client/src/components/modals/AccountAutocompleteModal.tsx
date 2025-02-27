@@ -1,6 +1,8 @@
 import React, { type ComponentPropsWithoutRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { View } from '@actual-app/components/view';
+
 import { theme } from '../../style';
 import { AccountAutocomplete } from '../autocomplete/AccountAutocomplete';
 import {
@@ -9,7 +11,6 @@ import {
   ModalTitle,
   ModalHeader,
 } from '../common/Modal';
-import { View } from '../common/View';
 import { SectionLabel } from '../forms';
 import { useResponsive } from '../responsive/ResponsiveProvider';
 
@@ -35,7 +36,9 @@ export function AccountAutocompleteModal({
       onClose={onClose}
       containerProps={{
         style: {
-          height: isNarrowWidth ? '85vh' : 275,
+          height: isNarrowWidth
+            ? 'calc(var(--visual-viewport-height) * 0.85)'
+            : 275,
           backgroundColor: theme.menuAutoCompleteBackground,
         },
       }}

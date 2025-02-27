@@ -14,7 +14,7 @@
     "eslint-plugin-eslint-plugin": "^5.5.1",
     "eslint-plugin-node": "^11.1.0",
     "eslint-vitest-rule-tester": "^0.7.1",
-    "vitest": "^1.6.0"
+    "vitest": "^1.6.1"
   },
   "peerDependencies": {
     "eslint": ">=7"

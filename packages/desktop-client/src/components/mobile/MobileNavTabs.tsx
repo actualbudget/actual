@@ -5,9 +5,12 @@ import React, {
   useCallback,
   useState,
 } from 'react';
+import { useTranslation } from 'react-i18next';
 import { NavLink } from 'react-router-dom';
 import { useSpring, animated, config } from 'react-spring';
 
+import { styles } from '@actual-app/components/styles';
+import { View } from '@actual-app/components/view';
 import { useDrag } from '@use-gesture/react';
 
 import {
@@ -19,9 +22,8 @@ import {
   SvgWallet,
 } from '../../icons/v1';
 import { SvgReports } from '../../icons/v1/Reports';
-import { SvgCalendar } from '../../icons/v2';
-import { theme, styles } from '../../style';
-import { View } from '../common/View';
+import { SvgCalendar3 } from '../../icons/v2';
+import { theme } from '../../style';
 import { useResponsive } from '../responsive/ResponsiveProvider';
 import { useScrollListener } from '../ScrollProvider';
 
@@ -36,6 +38,7 @@ const HIDDEN_Y = TOTAL_HEIGHT;
 export const MOBILE_NAV_HEIGHT = ROW_HEIGHT + PILL_HEIGHT;
 
 export function MobileNavTabs() {
+  const { t } = useTranslation();
   const { isNarrowWidth } = useResponsive();
   const [navbarState, setNavbarState] = useState<'default' | 'open' | 'hidden'>(
     'default',
@@ -89,49 +92,49 @@ export function MobileNavTabs() {
 
   const navTabs = [
     {
-      name: 'Budget',
+      name: t('Budget'),
       path: '/budget',
       style: navTabStyle,
       Icon: SvgWallet,
     },
     {
-      name: 'Transaction',
+      name: t('Transaction'),
       path: '/transactions/new',
       style: navTabStyle,
       Icon: SvgAdd,
     },
     {
-      name: 'Accounts',
+      name: t('Accounts'),
       path: '/accounts',
       style: navTabStyle,
       Icon: SvgPiggyBank,
     },
     {
-      name: 'Reports',
+      name: t('Reports'),
       path: '/reports',
       style: navTabStyle,
       Icon: SvgReports,
     },
     {
-      name: 'Schedules (Soon)',
+      name: t('Schedules (Soon)'),
       path: '/schedules/soon',
       style: navTabStyle,
-      Icon: SvgCalendar,
+      Icon: SvgCalendar3,
     },
     {
-      name: 'Payees (Soon)',
+      name: t('Payees (Soon)'),
       path: '/payees/soon',
       style: navTabStyle,
       Icon: SvgStoreFront,
     },
     {
-      name: 'Rules (Soon)',
+      name: t('Rules (Soon)'),
       path: '/rules/soon',
       style: navTabStyle,
       Icon: SvgTuning,
     },
     {
-      name: 'Settings',
+      name: t('Settings'),
       path: '/settings',
       style: navTabStyle,
       Icon: SvgCog,

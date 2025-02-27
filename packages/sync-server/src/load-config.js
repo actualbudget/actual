@@ -1,8 +1,9 @@
+import { createRequire } from 'module';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+
 import createDebug from 'debug';
-import { createRequire } from 'module';
 
 const require = createRequire(import.meta.url);
 const debug = createDebug('actual:config');
@@ -62,7 +63,7 @@ const actualAppWebBuildPath = path.join(
 debug(`Actual web build path: '${actualAppWebBuildPath}'`);
 
 /** @type {Omit<import('./config-types.js').Config, 'mode' | 'dataDir' | 'serverFiles' | 'userFiles'>} */
-let defaultConfig = {
+const defaultConfig = {
   loginMethod: 'password',
   allowedLoginMethods: ['password', 'header', 'openid'],
   // assume local networks are trusted
@@ -87,6 +88,7 @@ let defaultConfig = {
   projectRoot,
   multiuser: false,
   token_expiration: 'never',
+  enforceOpenId: false,
 };
 
 /** @type {import('./config-types.js').Config} */
@@ -188,6 +190,7 @@ const finalConfig = {
               userinfo_endpoint: process.env.ACTUAL_OPENID_USERINFO_ENDPOINT,
             };
             const missing = Object.entries(required)
+              // eslint-disable-next-line @typescript-eslint/no-unused-vars
               .filter(([_, value]) => !value)
               .map(([key]) => key);
             if (missing.length > 0) {
@@ -219,6 +222,17 @@ const finalConfig = {
   token_expiration: process.env.ACTUAL_TOKEN_EXPIRATION
     ? process.env.ACTUAL_TOKEN_EXPIRATION
     : config.token_expiration,
+  enforceOpenId: process.env.ACTUAL_OPENID_ENFORCE
+    ? (() => {
+        const value = process.env.ACTUAL_OPENID_ENFORCE.toLowerCase();
+        if (!['true', 'false'].includes(value)) {
+          throw new Error(
+            'ACTUAL_OPENID_ENFORCE must be either "true" or "false"',
+          );
+        }
+        return value === 'true';
+      })()
+    : config.enforceOpenId,
 };
 debug(`using port ${finalConfig.port}`);
 debug(`using hostname ${finalConfig.hostname}`);
@@ -249,4 +263,4 @@ if (finalConfig.upload) {
   debug(`using file limit ${finalConfig.upload.fileSizeLimitMB}mb`);
 }
 
-export default finalConfig;
+export { finalConfig as config };

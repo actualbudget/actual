@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 
-import { View } from '../common/View';
+import { View } from '@actual-app/components/view';
+
 import { LoadComponent } from '../util/LoadComponent';
 
 export function Reports() {

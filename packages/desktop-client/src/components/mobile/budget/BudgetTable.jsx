@@ -1,18 +1,24 @@
 import React, { memo, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
+import { Card } from '@actual-app/components/card';
+import { Label } from '@actual-app/components/label';
+import { styles } from '@actual-app/components/styles';
+import { Text } from '@actual-app/components/text';
+import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 import { AutoTextSize } from 'auto-text-size';
 import memoizeOne from 'memoize-one';
 
 import { collapseModals, pushModal } from 'loot-core/client/actions';
-import { groupById, integerToCurrency } from 'loot-core/shared/util';
 import {
   envelopeBudget,
   trackingBudget,
   uncategorizedCount,
-} from 'loot-core/src/client/queries';
-import * as monthUtils from 'loot-core/src/shared/months';
+} from 'loot-core/client/queries';
+import * as monthUtils from 'loot-core/shared/months';
+import { groupById, integerToCurrency } from 'loot-core/shared/util';
 
 import { useCategories } from '../../../hooks/useCategories';
 import { useFeatureFlag } from '../../../hooks/useFeatureFlag';
@@ -29,17 +35,12 @@ import {
   SvgArrowThickRight,
   SvgCheveronRight,
 } from '../../../icons/v1';
-import { SvgViewShow } from '../../../icons/v2';
+import { SvgCalendar, SvgViewShow } from '../../../icons/v2';
 import { useDispatch } from '../../../redux';
-import { theme, styles } from '../../../style';
+import { theme } from '../../../style';
 import { BalanceWithCarryover } from '../../budget/BalanceWithCarryover';
 import { makeAmountGrey, makeBalanceAmountStyle } from '../../budget/util';
-import { Button } from '../../common/Button2';
-import { Card } from '../../common/Card';
-import { Label } from '../../common/Label';
 import { Link } from '../../common/Link';
-import { Text } from '../../common/Text';
-import { View } from '../../common/View';
 import { MobilePageHeader, Page } from '../../Page';
 import { PrivacyFilter } from '../../PrivacyFilter';
 import { useResponsive } from '../../responsive/ResponsiveProvider';
@@ -487,7 +488,13 @@ const ExpenseCategory = memo(function ExpenseCategory({
           });
           dispatch(collapseModals(`${modalBudgetType}-balance-menu`));
           showUndoNotification({
-            message: `Covered ${category.name} overspending from ${categoriesById[fromCategoryId].name}.`,
+            message: t(
+              `Covered {{toCategoryName}} overspending from {{fromCategoryName}}.`,
+              {
+                toCategoryName: category.name,
+                fromCategoryName: categoriesById[fromCategoryId].name,
+              },
+            ),
           });
         },
       }),
@@ -501,6 +508,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
     month,
     onBudgetAction,
     showUndoNotification,
+    t,
   ]);
 
   const onOpenBalanceMenu = useCallback(() => {
@@ -781,6 +789,7 @@ const ExpenseGroupHeader = memo(function ExpenseGroupHeader({
   showBudgetedCol,
   collapsed,
   onToggleCollapse,
+  style,
 }) {
   const opacity = blank ? 0 : 1;
   const listItemRef = useRef();
@@ -806,9 +815,9 @@ const ExpenseGroupHeader = memo(function ExpenseGroupHeader({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        backgroundColor: theme.tableRowHeaderBackground,
         opacity: !!group.hidden ? 0.5 : undefined,
         paddingLeft: 0,
+        ...style,
       }}
       data-testid="category-group-row"
       innerRef={listItemRef}
@@ -987,6 +996,7 @@ const IncomeGroupHeader = memo(function IncomeGroupHeader({
   onEdit,
   collapsed,
   onToggleCollapse,
+  style,
 }) {
   const listItemRef = useRef();
   const format = useFormat();
@@ -999,9 +1009,9 @@ const IncomeGroupHeader = memo(function IncomeGroupHeader({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        backgroundColor: theme.tableRowHeaderBackground,
         opacity: !!group.hidden ? 0.5 : undefined,
         paddingLeft: 0,
+        ...style,
       }}
       innerRef={listItemRef}
       data-testid="category-group-row"
@@ -1346,6 +1356,11 @@ const ExpenseGroup = memo(function ExpenseGroup({
         collapsed={collapsed}
         onToggleCollapse={onToggleCollapse}
         // onReorderCategory={onReorderCategory}
+        style={{
+          backgroundColor: monthUtils.isCurrentMonth(month)
+            ? theme.budgetHeaderCurrentMonth
+            : theme.budgetHeaderOtherMonth,
+        }}
       />
 
       {group.categories
@@ -1392,7 +1407,9 @@ const ExpenseGroup = memo(function ExpenseGroup({
                   : envelopeBudget.catCarryover(category.id)
               }
               style={{
-                backgroundColor: theme.tableBackground,
+                backgroundColor: monthUtils.isCurrentMonth(month)
+                  ? theme.budgetCurrentMonth
+                  : theme.budgetOtherMonth,
               }}
               showBudgetedCol={showBudgetedCol}
               editMode={editMode}
@@ -1457,6 +1474,11 @@ function IncomeGroup({
           onEdit={onEditGroup}
           collapsed={collapsed}
           onToggleCollapse={onToggleCollapse}
+          style={{
+            backgroundColor: monthUtils.isCurrentMonth(month)
+              ? theme.budgetHeaderCurrentMonth
+              : theme.budgetHeaderOtherMonth,
+          }}
         />
 
         {group.categories
@@ -1483,7 +1505,9 @@ function IncomeGroup({
                     : envelopeBudget.catSumAmount(category.id)
                 }
                 style={{
-                  backgroundColor: theme.tableBackground,
+                  backgroundColor: monthUtils.isCurrentMonth(month)
+                    ? theme.budgetCurrentMonth
+                    : theme.budgetOtherMonth,
                 }}
                 editMode={editMode}
                 onEdit={onEditCategory}
@@ -1627,6 +1651,7 @@ export function BudgetTable({
   // editMode,
   onPrevMonth,
   onNextMonth,
+  onCurrentMonth,
   onSaveGroup,
   onDeleteGroup,
   onAddCategory,
@@ -1691,6 +1716,18 @@ export function BudgetTable({
                 width="14"
                 height="14"
               />
+            </Button>
+          }
+          rightContent={
+            <Button
+              variant="bare"
+              onPress={onCurrentMonth}
+              aria-label={t('Today')}
+              style={{ margin: 10 }}
+            >
+              {!monthUtils.isCurrentMonth(month) && (
+                <SvgCalendar width={20} height={20} />
+              )}
             </Button>
           }
         />
@@ -1774,7 +1811,9 @@ function BudgetTableHeader({
         flexShrink: 0,
         padding: '10px 15px',
         paddingLeft: 10,
-        backgroundColor: theme.tableRowHeaderBackground,
+        backgroundColor: monthUtils.isCurrentMonth(month)
+          ? theme.budgetHeaderCurrentMonth
+          : theme.budgetHeaderOtherMonth,
         borderBottomWidth: 1,
         borderColor: theme.tableBorder,
       }}

@@ -1,4 +1,5 @@
 import { jest } from '@jest/globals';
+
 import SskDusseldorfDussdeddxxx from '../ssk_dusseldorf_dussdeddxxx.js';
 
 describe('ssk_dusseldorf_dussdeddxxx', () => {
@@ -46,14 +47,14 @@ describe('ssk_dusseldorf_dussdeddxxx', () => {
         SskDusseldorfDussdeddxxx.normalizeTransaction(
           bookedTransactionOne,
           true,
-        ).remittanceInformationUnstructured,
+        ).notes,
       ).toEqual('unstructured information some additional information');
 
       expect(
         SskDusseldorfDussdeddxxx.normalizeTransaction(
           bookedTransactionTwo,
           true,
-        ).remittanceInformationUnstructured,
+        ).notes,
       ).toEqual('structured information some additional information');
     });
 

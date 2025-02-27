@@ -1,58 +1,23 @@
-import { ImportTransactionsOpts } from '@actual-app/api';
-
-import { ParseFileResult } from '../server/accounts/parse-file';
-import { batchUpdateTransactions } from '../server/accounts/transactions';
 import { Backup } from '../server/backups';
 import { RemoteFile } from '../server/cloud-storage';
 import { Node as SpreadsheetNode } from '../server/spreadsheet/spreadsheet';
 import { Message } from '../server/sync';
-import { QueryState } from '../shared/query';
 
 import { Budget } from './budget';
 import {
-  AccountEntity,
   CategoryEntity,
   CategoryGroupEntity,
-  GoCardlessToken,
-  GoCardlessInstitution,
-  SimpleFinAccount,
   RuleEntity,
   PayeeEntity,
 } from './models';
 import { OpenIdConfig } from './models/openid';
-import { GlobalPrefs, MetadataPrefs } from './prefs';
 // eslint-disable-next-line import/no-unresolved
 import { Query } from './query';
 import { EmptyObject } from './util';
 
 export interface ServerHandlers {
-  'transaction-update': (transaction: { id: string }) => Promise<EmptyObject>;
-
   undo: () => Promise<void>;
-
   redo: () => Promise<void>;
-
-  'transactions-batch-update': (
-    ...arg: Parameters<typeof batchUpdateTransactions>
-  ) => ReturnType<typeof batchUpdateTransactions>;
-
-  'transaction-add': (transaction) => Promise<EmptyObject>;
-
-  'transaction-delete': (transaction) => Promise<EmptyObject>;
-
-  'transactions-parse-file': (arg: {
-    filepath: string;
-    options;
-  }) => Promise<ParseFileResult>;
-
-  'transactions-export': (arg: {
-    transactions;
-    accounts?;
-    categoryGroups;
-    payees;
-  }) => Promise<unknown>;
-
-  'transactions-export-query': (arg: { query: QueryState }) => Promise<string>;
 
   'get-categories': () => Promise<{
     grouped: Array<CategoryGroupEntity>;
@@ -127,146 +92,30 @@ export interface ServerHandlers {
 
   'make-filters-from-conditions': (arg: {
     conditions: unknown;
+    applySpecialCases?: boolean;
   }) => Promise<{ filters: unknown[] }>;
 
-  getCell: (arg: {
+  getCell: (arg: { sheetName; name }) => Promise<{
+    name: SpreadsheetNode['name'];
+    value: SpreadsheetNode['value'];
+  }>;
+
+  getCells: (arg: {
+    names;
+  }) => Promise<
+    Array<{ name: SpreadsheetNode['name']; value?: SpreadsheetNode['value'] }>
+  >;
+
+  getCellNamesInSheet: (arg: {
     sheetName;
-    name;
-  }) => Promise<SpreadsheetNode | { value?: SpreadsheetNode['value'] }>;
-
-  getCells: (arg: { names }) => Promise<unknown>;
-
-  getCellNamesInSheet: (arg: { sheetName }) => Promise<unknown>;
+  }) => Promise<Array<SpreadsheetNode['name']>>;
 
   debugCell: (arg: { sheetName; name }) => Promise<unknown>;
 
-  'create-query': (arg: { sheetName; name; query }) => Promise<unknown>;
+  'create-query': (arg: { sheetName; name; query }) => Promise<'ok'>;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   query: (query: Query) => Promise<{ data: any; dependencies: string[] }>;
-
-  'account-update': (arg: { id; name }) => Promise<unknown>;
-
-  'accounts-get': () => Promise<AccountEntity[]>;
-
-  'account-properties': (arg: {
-    id;
-  }) => Promise<{ balance: number; numTransactions: number }>;
-
-  'gocardless-accounts-link': (arg: {
-    requisitionId;
-    account;
-    upgradingId;
-    offBudget;
-  }) => Promise<'ok'>;
-
-  'simplefin-accounts-link': (arg: {
-    externalAccount;
-    upgradingId;
-    offBudget;
-  }) => Promise<'ok'>;
-
-  'account-create': (arg: {
-    name: string;
-    balance?: number;
-    offBudget?: boolean;
-    closed?: 0 | 1;
-  }) => Promise<string>;
-
-  'account-close': (arg: {
-    id;
-    transferAccountId?;
-    categoryId?;
-    forced?;
-  }) => Promise<unknown>;
-
-  'account-reopen': (arg: { id }) => Promise<unknown>;
-
-  'account-move': (arg: { id; targetId }) => Promise<unknown>;
-
-  'secret-set': (arg: {
-    name: string;
-    value: string | null;
-  }) => Promise<{ error?: string; reason?: string }>;
-  'secret-check': (arg: string) => Promise<string | { error?: string }>;
-
-  'gocardless-poll-web-token': (arg: {
-    upgradingAccountId?: string;
-    requisitionId: string;
-  }) => Promise<
-    { error: 'unknown' } | { error: 'timeout' } | { data: GoCardlessToken }
-  >;
-
-  'gocardless-status': () => Promise<{ configured: boolean }>;
-
-  'simplefin-status': () => Promise<{ configured: boolean }>;
-
-  'simplefin-accounts': () => Promise<{
-    accounts?: SimpleFinAccount[];
-    error_code?: string;
-    reason?: string;
-  }>;
-
-  'simplefin-batch-sync': ({ ids }: { ids: string[] }) => Promise<
-    {
-      accountId: string;
-      res: {
-        errors;
-        newTransactions;
-        matchedTransactions;
-        updatedAccounts;
-      };
-    }[]
-  >;
-
-  'gocardless-get-banks': (country: string) => Promise<{
-    data: GoCardlessInstitution[];
-    error?: { reason: string };
-  }>;
-
-  'gocardless-poll-web-token-stop': () => Promise<'ok'>;
-
-  'gocardless-create-web-token': (arg: {
-    upgradingAccountId?: string;
-    institutionId: string;
-    accessValidForDays: number;
-  }) => Promise<
-    | {
-        requisitionId: string;
-        link: string;
-      }
-    | { error: 'unauthorized' }
-    | { error: 'failed' }
-  >;
-
-  'accounts-bank-sync': (arg: { ids?: AccountEntity['id'][] }) => Promise<{
-    errors;
-    newTransactions;
-    matchedTransactions;
-    updatedAccounts;
-  }>;
-
-  'transactions-import': (arg: {
-    accountId;
-    transactions;
-    isPreview;
-    opts?: ImportTransactionsOpts;
-  }) => Promise<{
-    errors?: { message: string }[];
-    added;
-    updated;
-    updatedPreview;
-  }>;
-
-  'account-unlink': (arg: { id }) => Promise<'ok'>;
-
-  'save-global-prefs': (prefs) => Promise<'ok'>;
-
-  'load-global-prefs': () => Promise<GlobalPrefs>;
-
-  'save-prefs': (prefsToSet) => Promise<'ok'>;
-
-  'load-prefs': () => Promise<MetadataPrefs | null>;
 
   'sync-reset': () => Promise<{ error?: { reason: string; meta?: unknown } }>;
 
@@ -384,8 +233,8 @@ export interface ServerHandlers {
   'close-budget': () => Promise<'ok'>;
 
   'delete-budget': (arg: {
-    id?: string;
-    cloudFileId?: string;
+    id?: string | undefined;
+    cloudFileId?: string | undefined;
   }) => Promise<'ok' | 'fail'>;
 
   /**
@@ -398,8 +247,8 @@ export interface ServerHandlers {
    * @returns {Promise<string>} The ID of the newly created budget.
    */
   'duplicate-budget': (arg: {
-    id?: string;
-    cloudId?: string;
+    id?: string | undefined;
+    cloudId?: string | undefined;
     newName: string;
     cloudSync?: boolean;
     open: 'none' | 'original' | 'copy';

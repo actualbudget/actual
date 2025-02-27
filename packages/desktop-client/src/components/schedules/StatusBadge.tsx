@@ -1,11 +1,14 @@
 import React from 'react';
 
-import { type ScheduleStatusType } from 'loot-core/src/client/data-hooks/schedules';
-import { titleFirst } from 'loot-core/src/shared/util';
+import { Text } from '@actual-app/components/text';
+import { View } from '@actual-app/components/view';
+
+import { type ScheduleStatusType } from 'loot-core/client/data-hooks/schedules';
+import { titleFirst } from 'loot-core/shared/util';
 
 import {
   SvgAlertTriangle,
-  SvgCalendar,
+  SvgCalendar3,
   SvgCheckCircle1,
   SvgCheckCircleHollow,
   SvgEditSkull1,
@@ -14,8 +17,6 @@ import {
   SvgValidationCheck,
 } from '../../icons/v2';
 import { theme } from '../../style';
-import { Text } from '../common/Text';
-import { View } from '../common/View';
 
 // Consists of Schedule Statuses + Transaction statuses
 type StatusTypes = ScheduleStatusType | 'cleared' | 'pending' | 'reconciled';
@@ -37,7 +38,7 @@ export function getStatusProps(status: StatusTypes) {
       return {
         color: theme.upcomingText,
         backgroundColor: theme.upcomingBackground,
-        Icon: SvgCalendar,
+        Icon: SvgCalendar3,
       };
     case 'paid':
       return {
@@ -55,13 +56,13 @@ export function getStatusProps(status: StatusTypes) {
       return {
         color: theme.noticeTextLight,
         backgroundColor: theme.noticeBackgroundLight,
-        Icon: SvgCalendar,
+        Icon: SvgCalendar3,
       };
     case 'scheduled':
       return {
         color: theme.tableRowHeaderText,
         backgroundColor: theme.tableRowHeaderBackground,
-        Icon: SvgCalendar,
+        Icon: SvgCalendar3,
       };
     case 'cleared':
       return {

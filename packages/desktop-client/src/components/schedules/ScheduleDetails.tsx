@@ -2,15 +2,20 @@
 import React, { useEffect, useReducer } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
+import { InitialFocus } from '@actual-app/components/initial-focus';
+import { Stack } from '@actual-app/components/stack';
+import { Text } from '@actual-app/components/text';
+import { View } from '@actual-app/components/view';
 import { t } from 'i18next';
 
+import { pushModal } from 'loot-core/client/actions/modals';
 import { getPayeesById } from 'loot-core/client/queries/queriesSlice';
-import { pushModal } from 'loot-core/src/client/actions/modals';
-import { runQuery, liveQuery } from 'loot-core/src/client/query-helpers';
-import { send, sendCatch } from 'loot-core/src/platform/client/fetch';
-import * as monthUtils from 'loot-core/src/shared/months';
-import { q } from 'loot-core/src/shared/query';
-import { extractScheduleConds } from 'loot-core/src/shared/schedules';
+import { runQuery, liveQuery } from 'loot-core/client/query-helpers';
+import { send, sendCatch } from 'loot-core/platform/client/fetch';
+import * as monthUtils from 'loot-core/shared/months';
+import { q } from 'loot-core/shared/query';
+import { extractScheduleConds } from 'loot-core/shared/schedules';
 import {
   type TransactionEntity,
   type ScheduleEntity,
@@ -25,12 +30,7 @@ import { useDispatch } from '../../redux';
 import { theme } from '../../style';
 import { AccountAutocomplete } from '../autocomplete/AccountAutocomplete';
 import { PayeeAutocomplete } from '../autocomplete/PayeeAutocomplete';
-import { Button } from '../common/Button2';
-import { InitialFocus } from '../common/InitialFocus';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
-import { Stack } from '../common/Stack';
-import { Text } from '../common/Text';
-import { View } from '../common/View';
 import { FormField, FormLabel, Checkbox } from '../forms';
 import { OpSelect } from '../modals/EditRuleModal';
 import { DateSelect } from '../select/DateSelect';

@@ -1,7 +1,16 @@
 import React, { useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import * as monthUtils from 'loot-core/src/shared/months';
+import { Button } from '@actual-app/components/button';
+import { Menu } from '@actual-app/components/menu';
+import { Popover } from '@actual-app/components/popover';
+import { SpaceBetween } from '@actual-app/components/space-between';
+import { styles } from '@actual-app/components/styles';
+import { Text } from '@actual-app/components/text';
+import { Tooltip } from '@actual-app/components/tooltip';
+import { View } from '@actual-app/components/view';
+
+import * as monthUtils from 'loot-core/shared/months';
 import { type CategoryEntity } from 'loot-core/types/models/category';
 import { type CategoryGroupEntity } from 'loot-core/types/models/category-group';
 import { type TimeFrame } from 'loot-core/types/models/dashboard';
@@ -11,17 +20,9 @@ import {
 } from 'loot-core/types/models/reports';
 import { type SyncedPrefs } from 'loot-core/types/prefs';
 
-import { styles } from '../../style/styles';
 import { theme } from '../../style/theme';
 import { Information } from '../alerts';
-import { Button } from '../common/Button2';
-import { Menu } from '../common/Menu';
-import { Popover } from '../common/Popover';
 import { Select, type SelectOption } from '../common/Select';
-import { SpaceBetween } from '../common/SpaceBetween';
-import { Text } from '../common/Text';
-import { Tooltip } from '../common/Tooltip';
-import { View } from '../common/View';
 
 import { CategorySelector } from './CategorySelector';
 import { defaultsList, disabledList } from './disabledList';
@@ -111,6 +112,26 @@ export function ReportSidebar({
       ),
     );
   };
+
+  const [includeCurrentIntervalText, includeCurrentIntervalTooltip] =
+    useMemo(() => {
+      const rangeType = (
+        ReportOptions.dateRangeType.get(customReportItems.dateRange) || ''
+      ).toLowerCase();
+
+      let text = t('Include current period');
+      let tooltip = t('Include current period in live range');
+
+      if (rangeType === 'month') {
+        text = t('Include current Month');
+        tooltip = t('Include current Month in live range');
+      } else if (rangeType === 'year') {
+        text = t('Include current Year');
+        tooltip = t('Include current Year in live range');
+      }
+
+      return [text, tooltip];
+    }, [customReportItems.dateRange, t]);
 
   const onChangeMode = (cond: string) => {
     setSessionReport('mode', cond);
@@ -380,21 +401,8 @@ export function ReportSidebar({
               items={[
                 {
                   name: 'include-current-interval',
-                  text:
-                    'Include current ' +
-                    (
-                      ReportOptions.dateRangeType.get(
-                        customReportItems.dateRange,
-                      ) || ''
-                    ).toLowerCase(),
-                  tooltip:
-                    'Include current ' +
-                    (
-                      ReportOptions.dateRangeType.get(
-                        customReportItems.dateRange,
-                      ) || ''
-                    ).toLowerCase() +
-                    ' in live range',
+                  text: includeCurrentIntervalText,
+                  tooltip: includeCurrentIntervalTooltip,
                   toggle: customReportItems.includeCurrentInterval,
                   disabled:
                     customReportItems.isDateStatic ||
@@ -404,26 +412,26 @@ export function ReportSidebar({
                 },
                 {
                   name: 'show-hidden-categories',
-                  text: 'Show hidden categories',
-                  tooltip: 'Show hidden categories',
+                  text: t('Show hidden categories'),
+                  tooltip: t('Show hidden categories'),
                   toggle: customReportItems.showHiddenCategories,
                 },
                 {
                   name: 'show-empty-items',
-                  text: 'Show empty rows',
-                  tooltip: 'Show rows that are zero or blank',
+                  text: t('Show empty rows'),
+                  tooltip: t('Show rows that are zero or blank'),
                   toggle: customReportItems.showEmpty,
                 },
                 {
                   name: 'show-off-budget',
-                  text: 'Show off budget',
-                  tooltip: 'Show off budget accounts',
+                  text: t('Show off budget'),
+                  tooltip: t('Show off budget accounts'),
                   toggle: customReportItems.showOffBudget,
                 },
                 {
                   name: 'show-uncategorized',
-                  text: 'Show uncategorized',
-                  tooltip: 'Show uncategorized transactions',
+                  text: t('Show uncategorized'),
+                  tooltip: t('Show uncategorized transactions'),
                   toggle: customReportItems.showUncategorized,
                 },
               ]}

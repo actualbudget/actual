@@ -1,15 +1,15 @@
 import React, { useRef, useCallback, useLayoutEffect } from 'react';
 
 import { pushModal } from 'loot-core/client/actions';
-import { send } from 'loot-core/src/platform/client/fetch';
+import { send } from 'loot-core/platform/client/fetch';
 import {
   splitTransaction,
   updateTransaction,
   addSplitTransaction,
   realizeTempTransactions,
   applyTransactionDiff,
-} from 'loot-core/src/shared/transactions';
-import { getChangedValues, applyChanges } from 'loot-core/src/shared/util';
+} from 'loot-core/shared/transactions';
+import { getChangedValues, applyChanges } from 'loot-core/shared/util';
 
 import { useNavigate } from '../../hooks/useNavigate';
 import { useSyncedPref } from '../../hooks/useSyncedPref';
@@ -100,59 +100,84 @@ export function TransactionList({
   onMakeAsNonSplitTransactions,
 }) {
   const dispatch = useDispatch();
-  const transactionsLatest = useRef();
   const navigate = useNavigate();
   const [learnCategories = 'true'] = useSyncedPref('learn-categories');
   const isLearnCategoriesEnabled = String(learnCategories) === 'true';
 
+  const transactionsLatest = useRef();
   useLayoutEffect(() => {
     transactionsLatest.current = transactions;
   }, [transactions]);
 
-  const onAdd = useCallback(async newTransactions => {
-    newTransactions = realizeTempTransactions(newTransactions);
+  const onAdd = useCallback(
+    async newTransactions => {
+      newTransactions = realizeTempTransactions(newTransactions);
 
-    await saveDiff({ added: newTransactions }, isLearnCategoriesEnabled);
-    onRefetch();
-  }, []);
+      await saveDiff({ added: newTransactions }, isLearnCategoriesEnabled);
+      onRefetch();
+    },
+    [isLearnCategoriesEnabled, onRefetch],
+  );
 
-  const onSave = useCallback(async transaction => {
-    const changes = updateTransaction(transactionsLatest.current, transaction);
-    transactionsLatest.current = changes.data;
+  const onSave = useCallback(
+    async transaction => {
+      const changes = updateTransaction(
+        transactionsLatest.current,
+        transaction,
+      );
+      transactionsLatest.current = changes.data;
 
-    if (changes.diff.updated.length > 0) {
-      const dateChanged = !!changes.diff.updated[0].date;
-      if (dateChanged) {
-        // Make sure it stays at the top of the list of transactions
-        // for that date
-        changes.diff.updated[0].sort_order = Date.now();
-        await saveDiff(changes.diff, isLearnCategoriesEnabled);
-        onRefetch();
-      } else {
-        onChange(changes.newTransaction, changes.data);
-        saveDiffAndApply(
-          changes.diff,
-          changes,
-          onChange,
-          isLearnCategoriesEnabled,
-        );
+      if (changes.diff.updated.length > 0) {
+        const dateChanged = !!changes.diff.updated[0].date;
+        if (dateChanged) {
+          // Make sure it stays at the top of the list of transactions
+          // for that date
+          changes.diff.updated[0].sort_order = Date.now();
+          await saveDiff(changes.diff, isLearnCategoriesEnabled);
+          onRefetch();
+        } else {
+          onChange(changes.newTransaction, changes.data);
+          saveDiffAndApply(
+            changes.diff,
+            changes,
+            onChange,
+            isLearnCategoriesEnabled,
+          );
+        }
       }
-    }
-  }, []);
+    },
+    [isLearnCategoriesEnabled, onChange, onRefetch],
+  );
 
-  const onAddSplit = useCallback(id => {
-    const changes = addSplitTransaction(transactionsLatest.current, id);
-    onChange(changes.newTransaction, changes.data);
-    saveDiffAndApply(changes.diff, changes, onChange, isLearnCategoriesEnabled);
-    return changes.diff.added[0].id;
-  }, []);
+  const onAddSplit = useCallback(
+    id => {
+      const changes = addSplitTransaction(transactionsLatest.current, id);
+      onChange(changes.newTransaction, changes.data);
+      saveDiffAndApply(
+        changes.diff,
+        changes,
+        onChange,
+        isLearnCategoriesEnabled,
+      );
+      return changes.diff.added[0].id;
+    },
+    [isLearnCategoriesEnabled, onChange],
+  );
 
-  const onSplit = useCallback(id => {
-    const changes = splitTransaction(transactionsLatest.current, id);
-    onChange(changes.newTransaction, changes.data);
-    saveDiffAndApply(changes.diff, changes, onChange, isLearnCategoriesEnabled);
-    return changes.diff.added[0].id;
-  }, []);
+  const onSplit = useCallback(
+    id => {
+      const changes = splitTransaction(transactionsLatest.current, id);
+      onChange(changes.newTransaction, changes.data);
+      saveDiffAndApply(
+        changes.diff,
+        changes,
+        onChange,
+        isLearnCategoriesEnabled,
+      );
+      return changes.diff.added[0].id;
+    },
+    [isLearnCategoriesEnabled, onChange],
+  );
 
   const onApplyRules = useCallback(
     async (transaction, updatedFieldName = null) => {
@@ -193,26 +218,38 @@ export function TransactionList({
     [],
   );
 
-  const onManagePayees = useCallback(id => {
-    navigate('/payees', { state: { selectedPayee: id } });
-  });
+  const onManagePayees = useCallback(
+    id => {
+      navigate('/payees', id && { state: { selectedPayee: id } });
+    },
+    [navigate],
+  );
 
-  const onNavigateToTransferAccount = useCallback(accountId => {
-    navigate(`/accounts/${accountId}`);
-  });
+  const onNavigateToTransferAccount = useCallback(
+    accountId => {
+      navigate(`/accounts/${accountId}`);
+    },
+    [navigate],
+  );
 
-  const onNavigateToSchedule = useCallback(scheduleId => {
-    dispatch(pushModal('schedule-edit', { id: scheduleId }));
-  });
+  const onNavigateToSchedule = useCallback(
+    scheduleId => {
+      dispatch(pushModal('schedule-edit', { id: scheduleId }));
+    },
+    [dispatch],
+  );
 
-  const onNotesTagClick = useCallback(tag => {
-    onApplyFilter({
-      field: 'notes',
-      op: 'hasTags',
-      value: tag,
-      type: 'string',
-    });
-  });
+  const onNotesTagClick = useCallback(
+    tag => {
+      onApplyFilter({
+        field: 'notes',
+        op: 'hasTags',
+        value: tag,
+        type: 'string',
+      });
+    },
+    [onApplyFilter],
+  );
 
   return (
     <TransactionTable

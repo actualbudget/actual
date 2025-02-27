@@ -1,5 +1,5 @@
-import Virgin from '../virgin_nrnbgb22.js';
 import { mockTransactionAmount } from '../../services/tests/fixtures.js';
+import Virgin from '../virgin_nrnbgb22.js';
 
 describe('Virgin', () => {
   describe('#normalizeTransaction', () => {
@@ -15,13 +15,8 @@ describe('Virgin', () => {
         true,
       );
 
-      expect(normalizedTransaction.creditorName).toEqual(
-        'DIRECT DEBIT PAYMENT',
-      );
-      expect(normalizedTransaction.debtorName).toEqual('DIRECT DEBIT PAYMENT');
-      expect(normalizedTransaction.remittanceInformationUnstructured).toEqual(
-        'DIRECT DEBIT PAYMENT',
-      );
+      expect(normalizedTransaction.payeeName).toEqual('Direct Debit Payment');
+      expect(normalizedTransaction.notes).toEqual('DIRECT DEBIT PAYMENT');
     });
 
     it('formats bank transfer payee and references', () => {
@@ -36,11 +31,8 @@ describe('Virgin', () => {
         true,
       );
 
-      expect(normalizedTransaction.creditorName).toEqual('Joe Bloggs');
-      expect(normalizedTransaction.debtorName).toEqual('Joe Bloggs');
-      expect(normalizedTransaction.remittanceInformationUnstructured).toEqual(
-        'Food',
-      );
+      expect(normalizedTransaction.payeeName).toEqual('Joe Bloggs');
+      expect(normalizedTransaction.notes).toEqual('Food');
     });
 
     it('removes method information from payee name', () => {
@@ -55,11 +47,8 @@ describe('Virgin', () => {
         true,
       );
 
-      expect(normalizedTransaction.creditorName).toEqual('Tesco Express');
-      expect(normalizedTransaction.debtorName).toEqual('Tesco Express');
-      expect(normalizedTransaction.remittanceInformationUnstructured).toEqual(
-        'Card 99, Tesco Express',
-      );
+      expect(normalizedTransaction.payeeName).toEqual('Tesco Express');
+      expect(normalizedTransaction.notes).toEqual('Card 99, Tesco Express');
     });
   });
 });

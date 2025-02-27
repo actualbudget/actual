@@ -1,8 +1,9 @@
 import fetch from 'node-fetch';
-import config from '../load-config.js';
 
-let protocol = config.https ? 'https' : 'http';
-let hostname = config.hostname === '::' ? 'localhost' : config.hostname;
+import { config } from '../load-config.js';
+
+const protocol = config.https ? 'https' : 'http';
+const hostname = config.hostname === '::' ? 'localhost' : config.hostname;
 
 fetch(`${protocol}://${hostname}:${config.port}/health`)
   .then(res => res.json())

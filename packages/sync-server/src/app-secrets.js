@@ -1,6 +1,7 @@
 import express from 'express';
+
+import { getAccountDb, isAdmin } from './account-db.js';
 import { secretsService } from './services/secrets-service.js';
-import getAccountDb, { isAdmin } from './account-db.js';
 import {
   requestLoggerMiddleware,
   validateSessionMiddleware,
@@ -31,7 +32,7 @@ app.post('/', async (req, res) => {
   const { name, value } = req.body;
 
   if (method === 'openid') {
-    let canSaveSecrets = isAdmin(res.locals.user_id);
+    const canSaveSecrets = isAdmin(res.locals.user_id);
 
     if (!canSaveSecrets) {
       res.status(403).send({

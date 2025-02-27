@@ -1,16 +1,17 @@
 import React, { useMemo, useState } from 'react';
 import { Trans } from 'react-i18next';
 
-import { evalArithmetic } from 'loot-core/src/shared/arithmetic';
-import { integerToCurrency, amountToInteger } from 'loot-core/src/shared/util';
+import { Button } from '@actual-app/components/button';
+import { InitialFocus } from '@actual-app/components/initial-focus';
+import { View } from '@actual-app/components/view';
+
+import { evalArithmetic } from 'loot-core/shared/arithmetic';
+import { integerToCurrency, amountToInteger } from 'loot-core/shared/util';
 import { type CategoryEntity } from 'loot-core/types/models';
 
 import { useCategories } from '../../../hooks/useCategories';
 import { CategoryAutocomplete } from '../../autocomplete/CategoryAutocomplete';
-import { Button } from '../../common/Button2';
-import { InitialFocus } from '../../common/InitialFocus';
 import { Input } from '../../common/Input';
-import { View } from '../../common/View';
 import { addToBeBudgetedGroup, removeCategoriesFromGroups } from '../util';
 
 type TransferMenuProps = {

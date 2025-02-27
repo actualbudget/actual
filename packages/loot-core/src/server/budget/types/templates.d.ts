@@ -45,6 +45,7 @@ interface ScheduleTemplate extends BaseTemplate {
   type: 'schedule';
   name: string;
   full?: boolean;
+  adjustment?: number;
 }
 
 interface RemainderTemplate extends BaseTemplate {
@@ -59,7 +60,7 @@ interface AverageTemplate extends BaseTemplate {
 }
 
 interface GoalTemplate extends BaseTemplate {
-  type: 'simple';
+  type: 'goal';
   amount: number;
 }
 

@@ -1,7 +1,7 @@
-import validateSession from './validate-user.js';
-
-import * as winston from 'winston';
 import * as expressWinston from 'express-winston';
+import * as winston from 'winston';
+
+import { validateSession } from './validate-user.js';
 
 /**
  * @param {Error} err
@@ -36,7 +36,7 @@ async function errorMiddleware(err, req, res, next) {
  * @param {import('express').NextFunction} next
  */
 const validateSessionMiddleware = async (req, res, next) => {
-  let session = await validateSession(req, res);
+  const session = await validateSession(req, res);
   if (!session) {
     return;
   }

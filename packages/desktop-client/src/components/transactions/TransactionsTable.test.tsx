@@ -5,21 +5,21 @@ import userEvent from '@testing-library/user-event';
 import { format as formatDate, parse as parseDate } from 'date-fns';
 import { v4 as uuidv4 } from 'uuid';
 
-import { SchedulesProvider } from 'loot-core/src/client/data-hooks/schedules';
-import { SpreadsheetProvider } from 'loot-core/src/client/SpreadsheetProvider';
+import { SchedulesProvider } from 'loot-core/client/data-hooks/schedules';
+import { SpreadsheetProvider } from 'loot-core/client/SpreadsheetProvider';
 import {
   generateTransaction,
   generateAccount,
   generateCategoryGroups,
-} from 'loot-core/src/mocks';
-import { initServer } from 'loot-core/src/platform/client/fetch';
+} from 'loot-core/mocks';
+import { initServer } from 'loot-core/platform/client/fetch';
 import {
   addSplitTransaction,
   realizeTempTransactions,
   splitTransaction,
   updateTransaction,
-} from 'loot-core/src/shared/transactions';
-import { integerToCurrency } from 'loot-core/src/shared/util';
+} from 'loot-core/shared/transactions';
+import { integerToCurrency } from 'loot-core/shared/util';
 import {
   type AccountEntity,
   type CategoryEntity,
@@ -36,7 +36,7 @@ import { ResponsiveProvider } from '../responsive/ResponsiveProvider';
 
 import { TransactionTable } from './TransactionsTable';
 
-vi.mock('loot-core/src/platform/client/fetch');
+vi.mock('loot-core/platform/client/fetch');
 vi.mock('../../hooks/useFeatureFlag', () => ({
   default: vi.fn().mockReturnValue(false),
 }));
@@ -48,6 +48,10 @@ vi.mock('../../hooks/useFeatureFlag', () => ({
 }));
 
 const accounts = [generateAccount('Bank of America')];
+vi.mock('../../hooks/useAccounts', () => ({
+  useAccounts: () => accounts,
+}));
+
 const payees: PayeeEntity[] = [
   {
     id: 'bob-id',
@@ -65,6 +69,15 @@ const payees: PayeeEntity[] = [
     name: 'This guy on the side of the road',
   },
 ];
+vi.mock('../../hooks/usePayees', async importOriginal => {
+  // eslint-disable-next-line @typescript-eslint/consistent-type-imports
+  const actual = await importOriginal<typeof import('../../hooks/usePayees')>();
+  return {
+    ...actual,
+    usePayees: () => payees,
+  };
+});
+
 const categoryGroups = generateCategoryGroups([
   {
     name: 'Investments and Savings',
@@ -79,6 +92,13 @@ const categoryGroups = generateCategoryGroups([
     categories: [{ name: 'Big Projects' }, { name: 'Shed' }],
   },
 ]);
+vi.mock('../../hooks/useCategories', () => ({
+  useCategories: () => ({
+    list: categoryGroups.flatMap(g => g.categories),
+    grouped: categoryGroups,
+  }),
+}));
+
 const usualGroup = categoryGroups[1];
 
 function generateTransactions(
@@ -130,13 +150,14 @@ type LiveTransactionTableProps = {
 };
 
 function LiveTransactionTable(props: LiveTransactionTableProps) {
-  const [transactions, setTransactions] = useState(props.transactions);
+  const { transactions: transactionsProp, onTransactionsChange } = props;
+
+  const [transactions, setTransactions] = useState(transactionsProp);
 
   useEffect(() => {
-    if (transactions === props.transactions) return;
-    props.onTransactionsChange?.(transactions);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [transactions]);
+    if (transactions === transactionsProp) return;
+    onTransactionsChange?.(transactions);
+  }, [transactions, transactionsProp, onTransactionsChange]);
 
   const onSplit = (id: string) => {
     const { data, diff } = splitTransaction(transactions, id);
@@ -212,6 +233,11 @@ function initBasicServer() {
           return { data: payees, dependencies: [] };
         case 'accounts':
           return { data: accounts, dependencies: [] };
+        case 'transactions':
+          return {
+            data: generateTransactions(5, [6]),
+            dependencies: [],
+          };
         default:
           throw new Error(`queried unknown table: ${query.table}`);
       }

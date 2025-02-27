@@ -2,12 +2,13 @@
 import * as fs from 'fs';
 import { join } from 'path';
 
+import { GlobalPrefsJson } from '../../../types/prefs';
 import * as lootFs from '../fs';
 
 import * as T from '.';
 
 const getStorePath = () => join(lootFs.getDataDir(), 'global-store.json');
-let store;
+let store: GlobalPrefsJson;
 let persisted = true;
 
 export const init: T.Init = function ({ persist = true } = {}) {
@@ -55,15 +56,17 @@ export const removeItem: T.RemoveItem = function (key) {
   return _saveStore();
 };
 
-export const multiGet: T.MultiGet = function (keys) {
+export async function multiGet<K extends readonly (keyof GlobalPrefsJson)[]>(
+  keys: K,
+) {
   return new Promise(function (resolve) {
     return resolve(
       keys.map(function (key) {
         return [key, store[key]];
-      }),
+      }) as { [P in keyof K]: [K[P], GlobalPrefsJson[K[P]]] },
     );
   });
-};
+}
 
 export const multiSet: T.MultiSet = function (keyValues) {
   keyValues.forEach(function ([key, value]) {

@@ -16,21 +16,21 @@ import {
   getStatus,
   recurConfigToRSchedule,
 } from '../../shared/schedules';
-import { Rule } from '../accounts/rules';
 import { addTransactions } from '../accounts/sync';
-import {
-  getRules,
-  insertRule,
-  ruleModel,
-  updateRule,
-} from '../accounts/transaction-rules';
 import { createApp } from '../app';
 import { runQuery as aqlQuery } from '../aql';
 import * as db from '../db';
 import { toDateRepr } from '../models';
 import { mutator, runMutator } from '../mutators';
 import * as prefs from '../prefs';
+import { Rule } from '../rules';
 import { addSyncListener, batchMessages } from '../sync';
+import {
+  getRules,
+  insertRule,
+  ruleModel,
+  updateRule,
+} from '../transactions/transaction-rules';
 import { undoable } from '../undo';
 import { Schedule as RSchedule } from '../util/rschedule';
 

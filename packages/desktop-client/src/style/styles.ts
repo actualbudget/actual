@@ -1,12 +1,9 @@
 // @ts-strict-ignore
-import { styles as baseStyles } from '@actual-app/components/styles';
+import { styles } from '@actual-app/components/styles';
 
-import * as Platform from 'loot-core/src/client/platform';
+import * as Platform from 'loot-core/client/platform';
 
 export { type CSSProperties } from '@actual-app/components/styles';
-
-/** @deprecated please import styles from '@actual-app/components/styles' */
-export const styles = baseStyles;
 
 let hiddenScrollbars = false;
 

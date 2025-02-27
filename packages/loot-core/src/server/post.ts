@@ -4,7 +4,7 @@ import { fetch } from '../platform/server/fetch';
 import { PostError } from './errors';
 import * as Platform from './platform';
 
-function throwIfNot200(res, text) {
+function throwIfNot200(res: Response, text: string) {
   if (res.status !== 200) {
     if (res.status === 500) {
       throw new PostError(res.status === 500 ? 'internal' : text);
@@ -32,9 +32,14 @@ function throwIfNot200(res, text) {
   }
 }
 
-export async function post(url, data, headers = {}, timeout = null) {
-  let text;
-  let res;
+export async function post(
+  url: RequestInfo,
+  data: unknown,
+  headers = {},
+  timeout: number | null = null,
+) {
+  let text: string;
+  let res: Response;
 
   try {
     const controller = new AbortController();
@@ -57,14 +62,16 @@ export async function post(url, data, headers = {}, timeout = null) {
 
   throwIfNot200(res, text);
 
+  let responseData;
+
   try {
-    res = JSON.parse(text);
+    responseData = JSON.parse(text);
   } catch (err) {
     // Something seriously went wrong. TODO handle errors
     throw new PostError('parse-json', { meta: text });
   }
 
-  if (res.status !== 'ok') {
+  if (responseData.status !== 'ok') {
     console.log(
       'API call failed: ' +
         url +
@@ -74,10 +81,12 @@ export async function post(url, data, headers = {}, timeout = null) {
         JSON.stringify(res, null, 2),
     );
 
-    throw new PostError(res.description || res.reason || 'unknown');
+    throw new PostError(
+      responseData.description || responseData.reason || 'unknown',
+    );
   }
 
-  return res.data;
+  return responseData.data;
 }
 
 export async function del(url, data, headers = {}, timeout = null) {

@@ -1,6 +1,6 @@
 // TODO: normalize error types
 export class PostError extends Error {
-  meta?: { meta: string };
+  meta: { meta: string } | undefined;
   reason: string;
   type: 'PostError';
 
@@ -9,6 +9,21 @@ export class PostError extends Error {
     this.type = 'PostError';
     this.reason = reason;
     this.meta = meta;
+  }
+}
+
+export class BankSyncError extends Error {
+  reason: string;
+  category: string;
+  code: string;
+  type: 'BankSyncError';
+
+  constructor(reason: string, category: string, code: string) {
+    super('BankSyncError: ' + reason);
+    this.type = 'BankSyncError';
+    this.reason = reason;
+    this.category = category;
+    this.code = code;
   }
 }
 
@@ -24,14 +39,15 @@ export class HTTPError extends Error {
 }
 
 export class SyncError extends Error {
-  meta?:
+  meta:
     | {
         isMissingKey: boolean;
       }
     | {
         error: { message: string; stack: string };
         query: { sql: string; params: Array<string | number> };
-      };
+      }
+    | undefined;
   reason: string;
 
   constructor(

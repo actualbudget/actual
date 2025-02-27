@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 
-import { isNonProductionEnvironment } from 'loot-core/src/shared/environment';
-import type { DarkTheme, Theme } from 'loot-core/src/types/prefs';
+import { isNonProductionEnvironment } from 'loot-core/shared/environment';
+import type { DarkTheme, Theme } from 'loot-core/types/prefs';
 
 import { useGlobalPref } from '../hooks/useGlobalPref';
 

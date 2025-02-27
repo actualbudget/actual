@@ -1,7 +1,6 @@
-import Fallback from './integration-bank.js';
-
 import { amountToInteger } from '../utils.js';
-import { formatPayeeName } from '../../util/payee-name.js';
+
+import Fallback from './integration-bank.js';
 
 /** @type {import('./bank.interface.js').IBank} */
 export default {
@@ -17,12 +16,11 @@ export default {
   ],
 
   normalizeTransaction(transaction, booked) {
+    const editedTrans = { ...transaction };
+
     if (booked) {
-      return {
-        ...transaction,
-        payeeName: formatPayeeName(transaction),
-        date: transaction.bookingDate,
-      };
+      editedTrans.date = transaction.bookingDate;
+      return Fallback.normalizeTransaction(transaction, booked, editedTrans);
     }
 
     /**
@@ -38,11 +36,8 @@ export default {
      * once the bank has processed it further.
      */
     if (transaction.valueDate !== undefined) {
-      return {
-        ...transaction,
-        payeeName: formatPayeeName(transaction),
-        date: transaction.valueDate,
-      };
+      editedTrans.date = transaction.valueDate;
+      return Fallback.normalizeTransaction(transaction, booked, editedTrans);
     }
 
     if (transaction.remittanceInformationStructured) {
@@ -50,12 +45,8 @@ export default {
       const matches =
         transaction.remittanceInformationStructured.match(remittanceInfoRegex);
       if (matches) {
-        transaction.valueDate = matches[1];
-        return {
-          ...transaction,
-          payeeName: formatPayeeName(transaction),
-          date: matches[1],
-        };
+        editedTrans.date = matches[1];
+        return Fallback.normalizeTransaction(transaction, booked, editedTrans);
       }
     }
 

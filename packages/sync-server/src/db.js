@@ -10,7 +10,7 @@ class WrappedDatabase {
    * @param {string[]} params
    */
   all(sql, params = []) {
-    let stmt = this.db.prepare(sql);
+    const stmt = this.db.prepare(sql);
     return stmt.all(...params);
   }
 
@@ -19,7 +19,7 @@ class WrappedDatabase {
    * @param {string[]} params
    */
   first(sql, params = []) {
-    let rows = this.all(sql, params);
+    const rows = this.all(sql, params);
     return rows.length === 0 ? null : rows[0];
   }
 
@@ -35,8 +35,8 @@ class WrappedDatabase {
    * @param {string[]} params
    */
   mutate(sql, params = []) {
-    let stmt = this.db.prepare(sql);
-    let info = stmt.run(...params);
+    const stmt = this.db.prepare(sql);
+    const info = stmt.run(...params);
     return { changes: info.changes, insertId: info.lastInsertRowid };
   }
 
@@ -53,6 +53,6 @@ class WrappedDatabase {
 }
 
 /** @param {string} filename */
-export default function openDatabase(filename) {
+export function openDatabase(filename) {
   return new WrappedDatabase(new Database(filename));
 }

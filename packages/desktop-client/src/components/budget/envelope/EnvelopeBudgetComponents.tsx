@@ -6,21 +6,22 @@ import React, {
 } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
+import { Popover } from '@actual-app/components/popover';
+import { styles } from '@actual-app/components/styles';
+import { Text } from '@actual-app/components/text';
+import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
-import { envelopeBudget } from 'loot-core/src/client/queries';
-import { evalArithmetic } from 'loot-core/src/shared/arithmetic';
-import * as monthUtils from 'loot-core/src/shared/months';
-import { integerToCurrency, amountToInteger } from 'loot-core/src/shared/util';
+import { envelopeBudget } from 'loot-core/client/queries';
+import { evalArithmetic } from 'loot-core/shared/arithmetic';
+import * as monthUtils from 'loot-core/shared/months';
+import { integerToCurrency, amountToInteger } from 'loot-core/shared/util';
 
 import { useContextMenu } from '../../../hooks/useContextMenu';
 import { useUndo } from '../../../hooks/useUndo';
 import { SvgCheveronDown } from '../../../icons/v1';
-import { styles, theme } from '../../../style';
-import { Button } from '../../common/Button2';
-import { Popover } from '../../common/Popover';
-import { Text } from '../../common/Text';
-import { View } from '../../common/View';
+import { theme } from '../../../style';
 import { type Binding, type SheetFields } from '../../spreadsheet';
 import { CellValue, CellValueText } from '../../spreadsheet/CellValue';
 import { useSheetName } from '../../spreadsheet/useSheetName';
