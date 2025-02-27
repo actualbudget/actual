@@ -345,20 +345,25 @@ function AccountList({
       const accountIdToMove = key as AccountEntity['id'];
       const targetAccountId = e.target.key as AccountEntity['id'];
 
-      alert(
-        `onReorder: ${JSON.stringify({
-          dropPosition: e.target.dropPosition,
-          targetKey: e.target.key,
-          keys: [...e.keys],
-          id: accountIdToMove,
-          targetId: targetAccountId,
-          account: accountListData.getItem(accountIdToMove),
-          targetAccount: accountListData.getItem(targetAccountId),
-        })}`,
-      );
-
       if (e.target.dropPosition === 'before') {
         accountListData.moveBefore(e.target.key, e.keys);
+
+        alert(
+          `onReorder: ${JSON.stringify(
+            {
+              dropPosition: e.target.dropPosition,
+              id: accountIdToMove,
+              targetId: targetAccountId,
+              account: accountListData.getItem(accountIdToMove).name,
+              targetAccount: accountListData.getItem(targetAccountId).name,
+              index: accountListData.getItem(key).index,
+              targetIndex: accountListData.getItem(e.target.key).index,
+            },
+            null,
+            2,
+          )}`,
+        );
+
         dispatch(
           moveAccount({
             id: accountIdToMove,
@@ -367,9 +372,28 @@ function AccountList({
         );
       } else if (e.target.dropPosition === 'after') {
         accountListData.moveAfter(e.target.key, e.keys);
-        const targetAccount = accountListData.getItem(targetAccountId);
+        const targetAccount = accountListData.getItem(e.target.key);
         const nextToTargetAccount =
           accountListData.items[targetAccount.index + 1];
+
+        alert(
+          `onReorder after: ${JSON.stringify(
+            {
+              dropPosition: e.target.dropPosition,
+              id: accountIdToMove,
+              targetId: targetAccountId,
+              account: accountListData.getItem(accountIdToMove).name,
+              targetAccount: accountListData.getItem(targetAccountId).name,
+              nextToTargetAccount: nextToTargetAccount?.name || 'None',
+              index: accountListData.getItem(accountIdToMove).index,
+              targetIndex: targetAccount.index,
+              nextToTargetAccountIndex: nextToTargetAccount?.index || -1,
+            },
+            null,
+            2,
+          )}`,
+        );
+
         dispatch(
           moveAccount({
             id: accountIdToMove,
