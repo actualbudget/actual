@@ -744,13 +744,13 @@ type SyncResponse = {
   updatedAccounts: Array<AccountEntity['id']>;
 };
 
-function handleSyncResponse(
+async function handleSyncResponse(
   res: {
     added: Array<TransactionEntity['id']>;
     updated: Array<TransactionEntity['id']>;
   },
   acct: db.DbAccount,
-): SyncResponse {
+): Promise<SyncResponse> {
   const { added, updated } = res;
   const newTransactions: Array<TransactionEntity['id']> = [];
   const matchedTransactions: Array<TransactionEntity['id']> = [];
@@ -762,6 +762,9 @@ function handleSyncResponse(
   if (added.length > 0) {
     updatedAccounts.push(acct.id);
   }
+
+  const ts = new Date().getTime().toString();
+  await db.update('accounts', { id: acct.id, last_sync: ts });
 
   return {
     newTransactions,
@@ -861,7 +864,7 @@ async function accountsBankSync({
           acct.bankId,
         );
 
-        const syncResponseData = handleSyncResponse(syncResponse, acct);
+        const syncResponseData = await handleSyncResponse(syncResponse, acct);
 
         newTransactions.push(...syncResponseData.newTransactions);
         matchedTransactions.push(...syncResponseData.matchedTransactions);
@@ -964,7 +967,10 @@ async function simpleFinBatchSync({
           ),
         );
       } else {
-        const syncResponseData = handleSyncResponse(syncResponse.res, account);
+        const syncResponseData = await handleSyncResponse(
+          syncResponse.res,
+          account,
+        );
 
         newTransactions.push(...syncResponseData.newTransactions);
         matchedTransactions.push(...syncResponseData.matchedTransactions);
