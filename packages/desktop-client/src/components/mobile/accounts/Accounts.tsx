@@ -1,5 +1,11 @@
-import React, { type CSSProperties, useCallback } from 'react';
+import React, {
+  type ComponentPropsWithoutRef,
+  type CSSProperties,
+  useCallback,
+} from 'react';
+import { ListBox, ListBoxItem, useDragAndDrop } from 'react-aria-components';
 import { useTranslation, Trans } from 'react-i18next';
+import { useListData } from 'react-stately';
 
 import { Button } from '@actual-app/components/button';
 import { styles } from '@actual-app/components/styles';
@@ -101,8 +107,9 @@ function AccountHeader<SheetFieldName extends SheetFields<'account'>>({
   );
 }
 
-type AccountCardProps = {
-  account: AccountEntity;
+type AccountListItemProps = ComponentPropsWithoutRef<
+  typeof ListBoxItem<AccountEntity>
+> & {
   updated: boolean;
   connected: boolean;
   pending: boolean;
@@ -111,85 +118,92 @@ type AccountCardProps = {
   onSelect: (id: string) => void;
 };
 
-function AccountCard({
-  account,
+function AccountListItem({
   updated,
   connected,
   pending,
   failed,
   getBalanceQuery,
   onSelect,
-}: AccountCardProps) {
+  ...props
+}: AccountListItemProps) {
+  const { value: account } = props;
   return (
-    <Button
-      onPress={() => onSelect(account.id)}
-      style={{
-        border: `1px solid ${theme.pillBorder}`,
-        borderRadius: 6,
-        boxShadow: `0 1px 1px ${theme.mobileAccountShadow}`,
-        marginTop: 10,
-      }}
-      data-testid="account-list-item"
-    >
-      <View
-        style={{
-          flex: 1,
-          margin: '10px 0',
-        }}
-      >
-        <View
+    <ListBoxItem textValue={account.id} {...props}>
+      {({ isDragging, isDropTarget }) => (
+        <Button
+          onPress={() => onSelect(account.id)}
           style={{
-            flexDirection: 'row',
-            alignItems: 'center',
+            border: `1px solid ${theme.pillBorder}`,
+            borderRadius: 6,
+            boxShadow: `0 1px 1px ${theme.mobileAccountShadow}`,
+            marginTop: 10,
+            ...(isDragging ? { backgroundColor: 'red' } : {}),
+            ...(isDropTarget ? { backgroundColor: 'blue' } : {}),
           }}
+          data-testid="account-list-item"
         >
-          {
-            /* TODO: Should bankId be part of the AccountEntity type? */
-            'bankId' in account && account.bankId ? (
-              <View
-                style={{
-                  backgroundColor: pending
-                    ? theme.sidebarItemBackgroundPending
-                    : failed
-                      ? theme.sidebarItemBackgroundFailed
-                      : theme.sidebarItemBackgroundPositive,
-                  marginRight: '8px',
-                  width: 8,
-                  flexShrink: 0,
-                  height: 8,
-                  borderRadius: 8,
-                  opacity: connected ? 1 : 0,
-                }}
-              />
-            ) : null
-          }
-          <TextOneLine
+          <View
             style={{
-              ...styles.text,
-              fontSize: 17,
-              fontWeight: 600,
-              color: updated ? theme.mobileAccountText : theme.pillText,
-              paddingRight: 30,
+              flex: 1,
+              margin: '10px 0',
             }}
-            data-testid="account-name"
           >
-            {account.name}
-          </TextOneLine>
-        </View>
-      </View>
-      <CellValue binding={getBalanceQuery(account)} type="financial">
-        {props => (
-          <CellValueText<'account', 'balance'>
-            {...props}
-            style={{
-              fontSize: 16,
-              ...makeAmountFullStyle(props.value),
-            }}
-            data-testid="account-balance"
-          />
-        )}
-      </CellValue>
-    </Button>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+              }}
+            >
+              {
+                /* TODO: Should bankId be part of the AccountEntity type? */
+                'bankId' in account && account.bankId ? (
+                  <View
+                    style={{
+                      backgroundColor: pending
+                        ? theme.sidebarItemBackgroundPending
+                        : failed
+                          ? theme.sidebarItemBackgroundFailed
+                          : theme.sidebarItemBackgroundPositive,
+                      marginRight: '8px',
+                      width: 8,
+                      flexShrink: 0,
+                      height: 8,
+                      borderRadius: 8,
+                      opacity: connected ? 1 : 0,
+                    }}
+                  />
+                ) : null
+              }
+              <TextOneLine
+                style={{
+                  ...styles.text,
+                  fontSize: 17,
+                  fontWeight: 600,
+                  color: updated ? theme.mobileAccountText : theme.pillText,
+                  paddingRight: 30,
+                }}
+                data-testid="account-name"
+              >
+                {account.name}
+              </TextOneLine>
+            </View>
+          </View>
+          <CellValue binding={getBalanceQuery(account)} type="financial">
+            {props => (
+              <CellValueText<'account', 'balance'>
+                {...props}
+                style={{
+                  fontSize: 16,
+                  ...makeAmountFullStyle(props.value),
+                }}
+                data-testid="account-balance"
+              />
+            )}
+          </CellValue>
+        </Button>
+      )}
+    </ListBoxItem>
   );
 }
 
@@ -207,30 +221,26 @@ function EmptyMessage() {
   );
 }
 
-type AccountListProps = {
+type AllAccountListProps = {
   accounts: AccountEntity[];
-  updatedAccounts: Array<AccountEntity['id']>;
-  getBalanceQuery: (account: AccountEntity) => Binding<'account', 'balance'>;
+  getAccountBalance: (account: AccountEntity) => Binding<'account', 'balance'>;
   getOnBudgetBalance: () => Binding<'account', 'onbudget-accounts-balance'>;
   getOffBudgetBalance: () => Binding<'account', 'offbudget-accounts-balance'>;
   onAddAccount: () => void;
-  onSelectAccount: (id: string) => void;
+  onOpenAccount: (account: AccountEntity) => void;
   onSync: () => Promise<void>;
 };
 
-function AccountList({
+function AllAccountList({
   accounts,
-  updatedAccounts,
-  getBalanceQuery,
+  getAccountBalance,
   getOnBudgetBalance,
   getOffBudgetBalance,
   onAddAccount,
-  onSelectAccount,
+  onOpenAccount,
   onSync,
-}: AccountListProps) {
+}: AllAccountListProps) {
   const { t } = useTranslation();
-  const failedAccounts = useFailedAccounts();
-  const syncingAccountIds = useSelector(state => state.account.accountsSyncing);
   const onBudgetAccounts = accounts.filter(account => account.offbudget === 0);
   const offBudgetAccounts = accounts.filter(account => account.offbudget === 1);
 
@@ -266,19 +276,12 @@ function AccountList({
               amount={getOnBudgetBalance()}
             />
           )}
-          {onBudgetAccounts.map(acct => (
-            <AccountCard
-              account={acct}
-              key={acct.id}
-              updated={updatedAccounts && updatedAccounts.includes(acct.id)}
-              connected={!!acct.bank}
-              pending={syncingAccountIds.includes(acct.id)}
-              failed={failedAccounts && failedAccounts.has(acct.id)}
-              getBalanceQuery={getBalanceQuery}
-              onSelect={onSelectAccount}
-            />
-          ))}
-
+          <AccountList
+            aria-label={t('On budget accounts')}
+            accounts={onBudgetAccounts}
+            getAccountBalance={getAccountBalance}
+            onOpenAccount={onOpenAccount}
+          />
           {offBudgetAccounts.length > 0 && (
             <AccountHeader
               id="offbudget"
@@ -287,37 +290,86 @@ function AccountList({
               style={{ marginTop: 30 }}
             />
           )}
-          {offBudgetAccounts.map(acct => (
-            <AccountCard
-              account={acct}
-              key={acct.id}
-              updated={updatedAccounts && updatedAccounts.includes(acct.id)}
-              connected={!!acct.bank}
-              pending={syncingAccountIds.includes(acct.id)}
-              failed={failedAccounts && failedAccounts.has(acct.id)}
-              getBalanceQuery={getBalanceQuery}
-              onSelect={onSelectAccount}
-            />
-          ))}
+          <AccountList
+            aria-label={t('Off budget accounts')}
+            accounts={offBudgetAccounts}
+            getAccountBalance={getAccountBalance}
+            onOpenAccount={onOpenAccount}
+          />
         </View>
       </PullToRefresh>
     </Page>
   );
 }
 
+type AccountListProps = {
+  'aria-label': string;
+  accounts: AccountEntity[];
+  getAccountBalance: (account: AccountEntity) => Binding<'account', 'balance'>;
+  onOpenAccount: (account: AccountEntity) => void;
+};
+
+function AccountList({
+  'aria-label': ariaLabel,
+  accounts,
+  getAccountBalance: getBalanceBinding,
+  onOpenAccount,
+}: AccountListProps) {
+  const failedAccounts = useFailedAccounts();
+  const syncingAccountIds = useSelector(state => state.account.accountsSyncing);
+  const updatedAccounts = useSelector(state => state.queries.updatedAccounts);
+
+  const accountList = useListData({
+    initialItems: accounts,
+  });
+
+  const { dragAndDropHooks } = useDragAndDrop({
+    getItems: keys =>
+      [...keys].map(key => ({
+        'text/plain': accountList.getItem(key).id,
+      })),
+    onReorder(e) {
+      if (e.target.dropPosition === 'before') {
+        accountList.moveBefore(e.target.key, e.keys);
+      } else if (e.target.dropPosition === 'after') {
+        accountList.moveAfter(e.target.key, e.keys);
+      }
+    },
+  });
+  return (
+    <ListBox
+      aria-label={ariaLabel}
+      items={accountList.items}
+      dragAndDropHooks={dragAndDropHooks}
+    >
+      {account => (
+        <AccountListItem
+          key={account.id}
+          value={account}
+          updated={updatedAccounts && updatedAccounts.includes(account.id)}
+          connected={!!account.bank}
+          pending={syncingAccountIds.includes(account.id)}
+          failed={failedAccounts && failedAccounts.has(account.id)}
+          getBalanceQuery={getBalanceBinding}
+          onSelect={id => onOpenAccount(accountList.getItem(id))}
+        />
+      )}
+    </ListBox>
+  );
+}
+
 export function Accounts() {
   const dispatch = useDispatch();
   const accounts = useAccounts();
-  const updatedAccounts = useSelector(state => state.queries.updatedAccounts);
   const [_numberFormat] = useSyncedPref('numberFormat');
   const numberFormat = _numberFormat || 'comma-dot';
   const [hideFraction] = useSyncedPref('hideFraction');
 
   const navigate = useNavigate();
 
-  const onSelectAccount = useCallback(
-    (id: AccountEntity['id']) => {
-      navigate(`/accounts/${id}`);
+  const onOpenAccount = useCallback(
+    (account: AccountEntity) => {
+      navigate(`/accounts/${account.id}`);
     },
     [navigate],
   );
@@ -332,17 +384,16 @@ export function Accounts() {
 
   return (
     <View style={{ flex: 1 }}>
-      <AccountList
+      <AllAccountList
         // This key forces the whole table rerender when the number
         // format changes
         key={numberFormat + hideFraction}
         accounts={accounts.filter(account => !account.closed)}
-        updatedAccounts={updatedAccounts}
-        getBalanceQuery={queries.accountBalance}
+        getAccountBalance={queries.accountBalance}
         getOnBudgetBalance={queries.onBudgetAccountBalance}
         getOffBudgetBalance={queries.offBudgetAccountBalance}
         onAddAccount={onAddAccount}
-        onSelectAccount={onSelectAccount}
+        onOpenAccount={onOpenAccount}
         onSync={onSync}
       />
     </View>
