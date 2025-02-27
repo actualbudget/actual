@@ -648,8 +648,7 @@ async function handleSyncResponse(
   }
 
   const ts = new Date().getTime().toString();
-  const id = acct.id;
-  await db.runQuery(`UPDATE accounts SET last_sync = ? WHERE id = ?`, [ts, id]);
+  await db.update('accounts', { id: acct.id, last_sync: ts });
 
   return {
     newTransactions,
