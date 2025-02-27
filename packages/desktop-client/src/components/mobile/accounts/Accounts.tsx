@@ -368,12 +368,13 @@ function AccountList({
       } else if (e.target.dropPosition === 'after') {
         accountListData.moveAfter(e.target.key, e.keys);
         const targetAccount = accountListData.getItem(targetAccountId);
-        const nextToTargetAccount = accountListData[targetAccount.index + 1];
+        const nextToTargetAccount =
+          accountListData.items[targetAccount.index + 1];
         dispatch(
           moveAccount({
             id: accountIdToMove,
             // undefined is used to move to the end of the list
-            targetId: nextToTargetAccount ? nextToTargetAccount : undefined,
+            targetId: nextToTargetAccount?.id || undefined,
           }),
         );
       }
