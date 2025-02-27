@@ -634,7 +634,7 @@ async function handleSyncResponse(
     updated: Array<TransactionEntity['id']>;
   },
   acct: db.DbAccount,
-): SyncResponse {
+): Promise<SyncResponse> {
   const { added, updated } = res;
   const newTransactions: Array<TransactionEntity['id']> = [];
   const matchedTransactions: Array<TransactionEntity['id']> = [];
