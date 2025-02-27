@@ -134,6 +134,7 @@ function AccountListItem({
         <Button
           onPress={() => onSelect(account.id)}
           style={{
+            width: '100%',
             border: `1px solid ${theme.pillBorder}`,
             borderRadius: 6,
             boxShadow: `0 1px 1px ${theme.mobileAccountShadow}`,
@@ -319,27 +320,27 @@ function AccountList({
   const syncingAccountIds = useSelector(state => state.account.accountsSyncing);
   const updatedAccounts = useSelector(state => state.queries.updatedAccounts);
 
-  const accountList = useListData({
+  const accountListData = useListData({
     initialItems: accounts,
   });
 
   const { dragAndDropHooks } = useDragAndDrop({
     getItems: keys =>
       [...keys].map(key => ({
-        'text/plain': accountList.getItem(key).id,
+        'text/plain': accountListData.getItem(key).id,
       })),
     onReorder(e) {
       if (e.target.dropPosition === 'before') {
-        accountList.moveBefore(e.target.key, e.keys);
+        accountListData.moveBefore(e.target.key, e.keys);
       } else if (e.target.dropPosition === 'after') {
-        accountList.moveAfter(e.target.key, e.keys);
+        accountListData.moveAfter(e.target.key, e.keys);
       }
     },
   });
   return (
     <ListBox
       aria-label={ariaLabel}
-      items={accountList.items}
+      items={accountListData.items}
       dragAndDropHooks={dragAndDropHooks}
     >
       {account => (
@@ -351,7 +352,7 @@ function AccountList({
           pending={syncingAccountIds.includes(account.id)}
           failed={failedAccounts && failedAccounts.has(account.id)}
           getBalanceQuery={getBalanceBinding}
-          onSelect={id => onOpenAccount(accountList.getItem(id))}
+          onSelect={id => onOpenAccount(accountListData.getItem(id))}
         />
       )}
     </ListBox>
