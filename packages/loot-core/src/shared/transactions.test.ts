@@ -206,4 +206,23 @@ describe('Transactions', () => {
       expect.objectContaining({ amount: 3002 }),
     ]);
   });
+
+  test('deleting all child split transactions works', () => {
+    const transactions = [
+      makeTransaction({ amount: 2001 }),
+      ...makeSplitTransaction(
+        { id: 't1', amount: 2500, error: splitError(500) },
+        [{ id: 't2', amount: 2000 }],
+      ),
+      makeTransaction({ amount: 3002 }),
+    ];
+    const { data } = deleteTransaction(transactions, 't2');
+
+    expect(data).toEqual([
+      expect.objectContaining({ amount: 2001 }),
+      // Must delete error if no children
+      expect.objectContaining({ amount: 2500, error: null }),
+      expect.objectContaining({ amount: 3002 }),
+    ]);
+  });
 });

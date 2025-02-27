@@ -32,7 +32,7 @@ import { usePayee } from '../../../hooks/usePayee';
 import { SvgLeftArrow2, SvgRightArrow2, SvgSplit } from '../../../icons/v0';
 import {
   SvgArrowsSynchronize,
-  SvgCalendar,
+  SvgCalendar3,
   SvgCheckCircle1,
   SvgLockClosed,
 } from '../../../icons/v2';
@@ -319,7 +319,7 @@ function PayeeIcons({ transaction, transferAccount }: PayeeIconsProps) {
         (isScheduleRecurring ? (
           <SvgArrowsSynchronize style={getScheduleIconStyle({ isPreview })} />
         ) : (
-          <SvgCalendar style={getScheduleIconStyle({ isPreview })} />
+          <SvgCalendar3 style={getScheduleIconStyle({ isPreview })} />
         ))}
       {transferAccount &&
         (transaction.amount > 0 ? (
