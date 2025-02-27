@@ -64,7 +64,7 @@ async function applyGroupCleanups(
         );
         const to_budget = budgeted + Math.abs(balance);
         const categoryId = generalGroup[ii].category;
-        let carryover = await db.first(
+        let carryover = await db.first<Pick<db.DbZeroBudget, 'carryover'>>(
           `SELECT carryover FROM zero_budgets WHERE month = ? and category = ?`,
           [db_month, categoryId],
         );
@@ -220,7 +220,7 @@ async function processCleanup(month: string): Promise<Notification> {
         } else {
           warnings.push(category.name + ' does not have available funds.');
         }
-        const carryover = await db.first(
+        const carryover = await db.first<Pick<db.DbZeroBudget, 'carryover'>>(
           `SELECT carryover FROM zero_budgets WHERE month = ? and category = ?`,
           [db_month, category.id],
         );
@@ -249,7 +249,7 @@ async function processCleanup(month: string): Promise<Notification> {
     const budgeted = await getSheetValue(sheetName, `budget-${category.id}`);
     const to_budget = budgeted + Math.abs(balance);
     const categoryId = category.id;
-    let carryover = await db.first(
+    let carryover = await db.first<Pick<db.DbZeroBudget, 'carryover'>>(
       `SELECT carryover FROM zero_budgets WHERE month = ? and category = ?`,
       [db_month, categoryId],
     );
