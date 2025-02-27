@@ -65,7 +65,7 @@ export const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
           color: disabled ? theme.tableTextInactive : theme.tableText,
           backgroundColor: disabled
             ? theme.formInputTextReadOnlySelection
-            : theme.tableBackground,
+            : theme.formInputBackground,
         }}
         {...props}
       />
@@ -104,7 +104,7 @@ export const TapField = forwardRef<HTMLButtonElement, TapFieldProps>(
           alignItems: 'center',
           ...style,
           ...valueStyle,
-          backgroundColor: theme.tableBackground,
+          backgroundColor: theme.formInputBackground,
           ...(disabled && {
             backgroundColor: theme.formInputTextReadOnlySelection,
           }),

@@ -34,7 +34,6 @@ function TransactionSearchInput({
       style={{
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: theme.mobilePageBackground,
         padding: 10,
         width: '100%',
       }}
@@ -59,7 +58,7 @@ function TransactionSearchInput({
         }}
         placeholder={placeholder}
         style={{
-          backgroundColor: theme.tableBackground,
+          backgroundColor: theme.formInputBackground,
           border: `1px solid ${theme.formInputBorder}`,
           flex: 1,
           height: styles.mobileMinHeight,

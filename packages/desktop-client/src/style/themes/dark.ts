@@ -74,7 +74,7 @@ export const mobileHeaderBackground = colorPalette.navy800;
 export const mobileHeaderText = colorPalette.navy150;
 export const mobileHeaderTextSubdued = colorPalette.gray200;
 export const mobileHeaderTextHover = 'rgba(200, 200, 200, .15)';
-export const mobilePageBackground = colorPalette.navy700;
+export const mobilePageBackground = colorPalette.navy900;
 export const mobileNavBackground = colorPalette.navy800;
 export const mobileNavItem = colorPalette.navy150;
 export const mobileNavItemSelected = brand;
@@ -207,7 +207,7 @@ export const noteTagBackgroundHover = colorPalette.purple500;
 export const noteTagText = colorPalette.purple100;
 
 export const budgetOtherMonth = colorPalette.navy800;
-export const budgetCurrentMonth = tableBackground;
+export const budgetCurrentMonth = tableRowBackground;
 export const budgetHeaderOtherMonth = colorPalette.navy700;
 export const budgetHeaderCurrentMonth = tableRowHeaderBackground;
 
