@@ -328,7 +328,10 @@ function AccountList({
   const dispatch = useDispatch();
 
   const accountListData = useListData({
-    initialItems: accounts,
+    initialItems: accounts.map((account, index) => ({
+      ...account,
+      index,
+    })),
     getKey: account => account.id,
   });
 
@@ -339,7 +342,7 @@ function AccountList({
       })),
     onReorder(e) {
       const [key] = e.keys;
-      const accountIdToMove = key;
+      const accountIdToMove = key as AccountEntity['id'];
       const targetAccountId = e.target.key as AccountEntity['id'];
 
       alert(
@@ -364,10 +367,13 @@ function AccountList({
         );
       } else if (e.target.dropPosition === 'after') {
         accountListData.moveAfter(e.target.key, e.keys);
+        const targetAccount = accountListData.getItem(targetAccountId);
+        const nextToTargetAccount = accountListData[targetAccount.index + 1];
         dispatch(
           moveAccount({
-            id: targetAccountId,
-            targetId: accountIdToMove,
+            id: accountIdToMove,
+            // undefined is used to move to the end of the list
+            targetId: nextToTargetAccount ? nextToTargetAccount : undefined,
           }),
         );
       }
