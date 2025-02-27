@@ -14,6 +14,7 @@ import { TextOneLine } from '@actual-app/components/text-one-line';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
+import { moveAccount } from 'loot-core/client/accounts/accountsSlice';
 import { replaceModal } from 'loot-core/client/actions';
 import { syncAndDownload } from 'loot-core/client/app/appSlice';
 import * as queries from 'loot-core/client/queries';
@@ -319,6 +320,7 @@ function AccountList({
   const failedAccounts = useFailedAccounts();
   const syncingAccountIds = useSelector(state => state.account.accountsSyncing);
   const updatedAccounts = useSelector(state => state.queries.updatedAccounts);
+  const dispatch = useDispatch();
 
   const accountListData = useListData({
     initialItems: accounts,
@@ -332,8 +334,20 @@ function AccountList({
     onReorder(e) {
       if (e.target.dropPosition === 'before') {
         accountListData.moveBefore(e.target.key, e.keys);
+        dispatch(
+          moveAccount({
+            id: e.keys[0] as string,
+            targetId: e.target.key as string,
+          }),
+        );
       } else if (e.target.dropPosition === 'after') {
         accountListData.moveAfter(e.target.key, e.keys);
+        dispatch(
+          moveAccount({
+            id: e.target.key as string,
+            targetId: e.keys[0] as string,
+          }),
+        );
       }
     },
   });
