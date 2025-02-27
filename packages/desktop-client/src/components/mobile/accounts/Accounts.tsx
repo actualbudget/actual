@@ -112,23 +112,28 @@ type AccountListItemProps = ComponentPropsWithoutRef<
   typeof ListBoxItem<AccountEntity>
 > & {
   updated: boolean;
-  connected: boolean;
-  pending: boolean;
-  failed: boolean;
+  isConnected: boolean;
+  isPending: boolean;
+  isFailed: boolean;
   getBalanceQuery: (account: AccountEntity) => Binding<'account', 'balance'>;
   onSelect: (id: string) => void;
 };
 
 function AccountListItem({
   updated,
-  connected,
-  pending,
-  failed,
+  isConnected,
+  isPending,
+  isFailed,
   getBalanceQuery,
   onSelect,
   ...props
 }: AccountListItemProps) {
   const { value: account } = props;
+
+  if (!account) {
+    return null;
+  }
+
   return (
     <ListBoxItem textValue={account.id} {...props}>
       {({ isDragging, isDropTarget }) => (
@@ -162,9 +167,9 @@ function AccountListItem({
                 'bankId' in account && account.bankId ? (
                   <View
                     style={{
-                      backgroundColor: pending
+                      backgroundColor: isPending
                         ? theme.sidebarItemBackgroundPending
-                        : failed
+                        : isFailed
                           ? theme.sidebarItemBackgroundFailed
                           : theme.sidebarItemBackgroundPositive,
                       marginRight: '8px',
@@ -172,7 +177,7 @@ function AccountListItem({
                       flexShrink: 0,
                       height: 8,
                       borderRadius: 8,
-                      opacity: connected ? 1 : 0,
+                      opacity: isConnected ? 1 : 0,
                     }}
                   />
                 ) : null
@@ -366,9 +371,9 @@ function AccountList({
           key={account.id}
           value={account}
           updated={updatedAccounts && updatedAccounts.includes(account.id)}
-          connected={!!account.bank}
-          pending={syncingAccountIds.includes(account.id)}
-          failed={failedAccounts && failedAccounts.has(account.id)}
+          isConnected={!!account.bank}
+          isPending={syncingAccountIds.includes(account.id)}
+          isFailed={failedAccounts && failedAccounts.has(account.id)}
           getBalanceQuery={getBalanceBinding}
           onSelect={id => onOpenAccount(accountListData.getItem(id))}
         />
