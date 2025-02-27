@@ -120,7 +120,7 @@ app.post(
         };
 
         newTrans.transactionId = trans.id;
-        newTrans.sortOrder = trans.date;
+        newTrans.sortOrder = transactionDate.getTime();
 
         const finalTrans = { ...flattenObject(trans), ...newTrans };
         if (newTrans.booked) {
