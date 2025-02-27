@@ -117,26 +117,4 @@ export const pluggyaiService = {
 
     return transactions;
   },
-  getPayeeName: trans => {
-    if (
-      trans.merchant &&
-      (trans.merchant.name || trans.merchant.businessName)
-    ) {
-      return trans.merchant.name || trans.merchant.businessName || '';
-    }
-
-    if (trans.paymentData) {
-      const { receiver, payer } = trans.paymentData;
-
-      if (trans.type === 'DEBIT' && receiver) {
-        return receiver.name || receiver.documentNumber?.value || '';
-      }
-
-      if (trans.type === 'CREDIT' && payer) {
-        return payer.name || payer.documentNumber?.value || '';
-      }
-    }
-
-    return '';
-  },
 };
