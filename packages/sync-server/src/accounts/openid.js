@@ -10,8 +10,8 @@ import {
 import { TOKEN_EXPIRATION_NEVER } from '../util/validate-user.js';
 
 export async function bootstrapOpenId(configParameter) {
-  if (!('issuer' in configParameter)) {
-    return { error: 'missing-issuer' };
+  if (!('issuer' in configParameter) || !('discoveryURL' in configParameter)) {
+    return { error: 'missing-issuer-or-discoveryURL' };
   }
   if (!('client_id' in configParameter)) {
     return { error: 'missing-client-id' };
@@ -49,15 +49,14 @@ export async function bootstrapOpenId(configParameter) {
 }
 
 async function setupOpenIdClient(configParameter) {
-  const issuer =
-    typeof configParameter.issuer === 'string'
-      ? await Issuer.discover(configParameter.issuer)
-      : new Issuer({
-          issuer: configParameter.issuer.name,
-          authorization_endpoint: configParameter.issuer.authorization_endpoint,
-          token_endpoint: configParameter.issuer.token_endpoint,
-          userinfo_endpoint: configParameter.issuer.userinfo_endpoint,
-        });
+  const issuer = configParameter.discoveryURL
+    ? await Issuer.discover(configParameter.discoveryURL)
+    : new Issuer({
+        issuer: configParameter.issuer.name,
+        authorization_endpoint: configParameter.issuer.authorization_endpoint,
+        token_endpoint: configParameter.issuer.token_endpoint,
+        userinfo_endpoint: configParameter.issuer.userinfo_endpoint,
+      });
 
   const client = new issuer.Client({
     client_id: configParameter.client_id,

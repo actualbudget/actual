@@ -31,25 +31,6 @@ convict.addFormat({
   },
 });
 
-convict.addFormat({
-  name: 'openIdIssuer',
-  validate(val) {
-    // Allow a string, or an object with the specified fields
-    if (typeof val === 'string') return;
-    if (
-      val &&
-      typeof val === 'object' &&
-      typeof val.name === 'string' &&
-      typeof val.authorization_endpoint === 'string' &&
-      typeof val.token_endpoint === 'string' &&
-      typeof val.userinfo_endpoint === 'string'
-    ) {
-      return;
-    }
-    throw new Error(`Invalid OpenID issuer value: ${JSON.stringify(val)}`);
-  },
-});
-
 // Main config schema
 const configSchema = convict({
   env: {
@@ -151,30 +132,40 @@ const configSchema = convict({
   openId: {
     doc: 'OpenID authentication settings.',
 
-    issuer: {
-      doc: 'OpenID issuer (string or { name, authorization_endpoint, token_endpoint, userinfo_endpoint }).',
-      format: 'openIdIssuer',
+    discoveryURL: {
+      doc: 'OpenID Provider discovery URL.',
+      format: String,
       default: '',
+      env: 'ACTUAL_OPENID_DISCOVERY_URL',
+    },
+    issuer: {
+      doc: 'OpenID issuer object ({ name, authorization_endpoint, token_endpoint, userinfo_endpoint }).',
+      format: Object,
+      default: null,
     },
     client_id: {
       doc: 'OpenID client ID.',
       format: String,
       default: '',
+      env: 'ACTUAL_OPENID_CLIENT_ID',
     },
     client_secret: {
       doc: 'OpenID client secret.',
       format: String,
       default: '',
+      env: 'ACTUAL_OPENID_CLIENT_SECRET',
     },
     server_hostname: {
       doc: 'OpenID server hostname.',
       format: String,
       default: '',
+      env: 'ACTUAL_OPENID_SERVER_HOSTNAME',
     },
     authMethod: {
       doc: 'OpenID authentication method.',
       format: ['openid', 'oauth2'],
       default: 'openid',
+      env: 'ACTUAL_OPENID_AUTH_METHOD',
     },
   },
 
@@ -192,6 +183,8 @@ const configSchema = convict({
     env: 'ACTUAL_OPENID_ENFORCE',
   },
 });
+
+configSchema.loadFile('config.json');
 
 configSchema.validate({ allowed: 'strict' });
 
