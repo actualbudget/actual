@@ -332,20 +332,23 @@ function AccountList({
         'text/plain': accountListData.getItem(key).id,
       })),
     onReorder(e) {
+      const accountIdToMove = accountListData.getItem(e.keys[0]).id;
+      const targetAccountId = accountListData.getItem(e.target.key).id;
+
       if (e.target.dropPosition === 'before') {
         accountListData.moveBefore(e.target.key, e.keys);
         dispatch(
           moveAccount({
-            id: e.keys[0] as string,
-            targetId: e.target.key as string,
+            id: accountIdToMove,
+            targetId: targetAccountId,
           }),
         );
       } else if (e.target.dropPosition === 'after') {
         accountListData.moveAfter(e.target.key, e.keys);
         dispatch(
           moveAccount({
-            id: e.target.key as string,
-            targetId: e.keys[0] as string,
+            id: targetAccountId,
+            targetId: accountIdToMove,
           }),
         );
       }
