@@ -111,7 +111,7 @@ function AccountHeader<SheetFieldName extends SheetFields<'account'>>({
 type AccountListItemProps = ComponentPropsWithoutRef<
   typeof ListBoxItem<AccountEntity>
 > & {
-  updated: boolean;
+  isUpdated: boolean;
   isConnected: boolean;
   isPending: boolean;
   isFailed: boolean;
@@ -120,7 +120,7 @@ type AccountListItemProps = ComponentPropsWithoutRef<
 };
 
 function AccountListItem({
-  updated,
+  isUpdated,
   isConnected,
   isPending,
   isFailed,
@@ -187,7 +187,7 @@ function AccountListItem({
                   ...styles.text,
                   fontSize: 17,
                   fontWeight: 600,
-                  color: updated ? theme.mobileAccountText : theme.pillText,
+                  color: isUpdated ? theme.mobileAccountText : theme.pillText,
                   paddingRight: 30,
                 }}
                 data-testid="account-name"
@@ -370,7 +370,7 @@ function AccountList({
         <AccountListItem
           key={account.id}
           value={account}
-          updated={updatedAccounts && updatedAccounts.includes(account.id)}
+          isUpdated={updatedAccounts && updatedAccounts.includes(account.id)}
           isConnected={!!account.bank}
           isPending={syncingAccountIds.includes(account.id)}
           isFailed={failedAccounts && failedAccounts.has(account.id)}
