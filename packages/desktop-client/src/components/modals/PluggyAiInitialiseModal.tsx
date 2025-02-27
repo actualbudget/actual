@@ -181,7 +181,7 @@ export const PluggyAiInitialiseModal = ({
                 onSubmit(close);
               }}
             >
-              {t('Save and continue')}
+              <Trans>Save and continue</Trans>
             </ButtonWithLoading>
           </ModalButtons>
         </>
