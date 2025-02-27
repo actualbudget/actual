@@ -206,10 +206,10 @@ export const noteTagBackground = colorPalette.purple700;
 export const noteTagBackgroundHover = colorPalette.purple500;
 export const noteTagText = colorPalette.purple100;
 
-export const budgetOtherMonth = colorPalette.navy800;
-export const budgetCurrentMonth = tableRowBackground;
-export const budgetHeaderOtherMonth = colorPalette.navy700;
-export const budgetHeaderCurrentMonth = tableRowHeaderBackground;
+export const budgetOtherMonth = colorPalette.navy700;
+export const budgetCurrentMonth = colorPalette.navy800;
+export const budgetHeaderOtherMonth = colorPalette.navy800;
+export const budgetHeaderCurrentMonth = colorPalette.navy700;
 
 export const floatingActionBarBackground = colorPalette.purple800;
 export const floatingActionBarBorder = floatingActionBarBackground;
