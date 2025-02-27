@@ -4,20 +4,22 @@ import { useTranslation } from 'react-i18next';
 import { View } from '@actual-app/components/view';
 
 import { envelopeBudget } from 'loot-core/client/queries';
+import * as monthUtils from 'loot-core/shared/months';
 import { integerToCurrency } from 'loot-core/shared/util';
 
 import { type CategoryEntity } from '../../../../loot-core/src/types/models';
+import { theme } from '../../style';
 import { useSheetValue } from '../spreadsheet/useSheetValue';
 
-enum ColorDefinitions {
-  UnderBudgetRemaining = '#006309', // Dark green
-  UnderBudgetSpent = '#beffa8', // Light green
-  OverBudgetSpent = '#979797', // Dark gray
-  OverBudgetOverSpent = '#c40000', // Red
-  GoalRemaining = '#90a7fd', // Light blue 90a7fd
-  GoalSaved = '#001a7b', // Blue
-  Empty = '', // No color for default
-}
+import { useEnvelopeBudget } from './envelope/EnvelopeBudgetContext';
+
+const ColorDefUnderBudgetRemaining = theme.reportsGreen;
+const ColorDefUnderBudgetSpent = theme.reportsGray;
+const ColorDefOverBudgetSpent = theme.reportsGray;
+const ColorDefOverBudgetOverSpent = theme.reportsRed;
+const ColorDefGoalRemaining = theme.reportsLabel;
+const ColorDefGoalSaved = theme.reportsBlue;
+const ColorDefEmpty = ''; // No color for default
 
 class ColorBar {
   color: string;
@@ -26,7 +28,7 @@ class ColorBar {
   rawValue: string;
 
   constructor(
-    color: string = ColorDefinitions.Empty,
+    color: string = ColorDefEmpty,
     width: number = 50,
     category: string = '',
     rawValue: string = '',
@@ -50,19 +52,35 @@ function getColorBars(
   const rightBar = new ColorBar();
 
   if (isLongGoal) {
-    // We have a long-term goal set.
-    // Note that long term goals take visual precedence over a monthly template goal, even if both exist
-    leftBar.width = Math.min(Math.round((balance / goal) * 100), 100);
-    rightBar.width = 100 - leftBar.width;
+    // We have a long-term #goal set. These take visual precedence over a monthly template goal, even if both exist
+    if (balance < 0) {
+      // Standard goal with a non-negative balance
+      const toGoal = -1 * balance + goal;
+      leftBar.width = Math.min(Math.round((goal / toGoal) * 100), 100);
+      rightBar.width = 100 - leftBar.width;
 
-    leftBar.color = ColorDefinitions.GoalSaved;
-    rightBar.color = ColorDefinitions.GoalRemaining;
+      leftBar.color = ColorDefGoalRemaining;
+      rightBar.color = ColorDefOverBudgetOverSpent;
 
-    leftBar.rawValue = integerToCurrency(balance);
-    rightBar.rawValue = integerToCurrency(goal - balance);
+      leftBar.rawValue = integerToCurrency(toGoal);
+      rightBar.rawValue = integerToCurrency(balance);
 
-    leftBar.category = 'Saved';
-    rightBar.category = 'Remaining';
+      leftBar.category = 'Remaining';
+      rightBar.category = 'Overspent';
+    } else {
+      // Standard goal with a non-negative balance
+      leftBar.width = Math.min(Math.round((balance / goal) * 100), 100);
+      rightBar.width = 100 - leftBar.width;
+
+      leftBar.color = ColorDefGoalSaved;
+      rightBar.color = ColorDefGoalRemaining;
+
+      leftBar.rawValue = integerToCurrency(balance);
+      rightBar.rawValue = integerToCurrency(goal - balance);
+
+      leftBar.category = 'Saved';
+      rightBar.category = 'Remaining';
+    }
   } else if (spent * -1 >= budgeted) {
     // We overspent (or are exactly at budget)
     const overage = -1 * spent - budgeted;
@@ -70,8 +88,8 @@ function getColorBars(
     leftBar.width = Math.round((budgeted / total) * 100);
     rightBar.width = 100 - leftBar.width;
 
-    leftBar.color = ColorDefinitions.OverBudgetSpent;
-    rightBar.color = ColorDefinitions.OverBudgetOverSpent;
+    leftBar.color = ColorDefOverBudgetSpent;
+    rightBar.color = ColorDefOverBudgetOverSpent;
 
     leftBar.rawValue = integerToCurrency(budgeted);
     rightBar.rawValue = integerToCurrency(overage);
@@ -84,8 +102,8 @@ function getColorBars(
     leftBar.width = Math.round((remaining / budgeted) * 100);
     rightBar.width = 100 - leftBar.width;
 
-    leftBar.color = ColorDefinitions.UnderBudgetRemaining;
-    rightBar.color = ColorDefinitions.UnderBudgetSpent;
+    leftBar.color = ColorDefUnderBudgetRemaining;
+    rightBar.color = ColorDefUnderBudgetSpent;
 
     leftBar.rawValue = integerToCurrency(remaining);
     rightBar.rawValue = integerToCurrency(spent);
@@ -98,14 +116,16 @@ function getColorBars(
 }
 
 type ProgressBarProps = {
+  month: string;
   category: CategoryEntity;
 };
 
-export function ProgressBar({ category }: ProgressBarProps) {
+export function ProgressBar({ month, category }: ProgressBarProps) {
   const { t } = useTranslation();
-
   const [leftBar, setLeftBar] = useState<ColorBar>(new ColorBar());
   const [rightBar, setRightBar] = useState<ColorBar>(new ColorBar());
+  const { hoveredMonth } = useEnvelopeBudget();
+  const isCurrentMonth = monthUtils.isCurrentMonth(month);
 
   // The budgeted amount for this month
   const budgeted = Number(
@@ -159,21 +179,45 @@ export function ProgressBar({ category }: ProgressBarProps) {
     };
 
     setColorBars();
-  }, [category, budgeted, spent, balance, goal, isLongGoal]);
+  }, [category, budgeted, spent, balance, goal, isLongGoal, hoveredMonth]);
 
-  const barHeight = 5;
-  const borderRadius = 10;
+  const barHeight = 3;
+  const borderRadius = 30;
+
+  let barOpacity = '0';
+  if (isLongGoal) {
+    barOpacity = '0.5'; // By default, all goals are partly visible
+  }
+  if (isCurrentMonth) {
+    barOpacity = '1'; // If it's the current month, goals are fully visible
+  }
+  if (isCurrentMonth && hoveredMonth && hoveredMonth !== month) {
+    barOpacity = '0.5'; // Lower visibility for the current month when other months are hovered
+  } else if (isLongGoal && hoveredMonth === month) {
+    barOpacity = '1'; // If we're hovering over a month, make the goals fully visible
+  }
 
   return (
-    <View style={{ display: 'flex', flexDirection: 'row', width: '100%' }}>
+    <View
+      style={{
+        display: 'flex',
+        position: 'absolute',
+        bottom: 0,
+        marginBottom: 1,
+        width: '100%',
+        opacity: barOpacity,
+        transition: 'opacity 0.25s',
+      }}
+    >
       {/* Left side of the bar */}
       <View
         style={{
           height: barHeight,
           backgroundColor: leftBar.color,
           width: `${leftBar.width}%`,
-          float: 'left',
-          marginBottom: 2,
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
           borderTopLeftRadius: borderRadius,
           borderBottomLeftRadius: borderRadius,
           transition: 'width 0.5s ease-in-out',
@@ -186,7 +230,9 @@ export function ProgressBar({ category }: ProgressBarProps) {
           height: barHeight,
           backgroundColor: rightBar.color,
           width: `${rightBar.width}%`,
-          float: 'right',
+          position: 'absolute',
+          bottom: 0,
+          right: 0,
           borderTopRightRadius: borderRadius,
           borderBottomRightRadius: borderRadius,
           transition: 'width 0.5s ease-in-out',

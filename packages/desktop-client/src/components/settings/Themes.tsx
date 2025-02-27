@@ -1,16 +1,12 @@
 import React, { type ReactNode } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 
-<<<<<<< HEAD
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
-=======
->>>>>>> ab132db3 (Fix linting)
 import { css } from '@emotion/css';
 
 import { type DarkTheme, type Theme } from 'loot-core/types/prefs';
 
-import { useGlobalPref } from '../../hooks/useGlobalPref';
 import {
   themeOptions,
   useTheme,

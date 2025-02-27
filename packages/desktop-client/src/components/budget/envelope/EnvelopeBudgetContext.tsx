@@ -1,4 +1,9 @@
-import React, { type ReactNode, createContext, useContext } from 'react';
+import React, {
+  type ReactNode,
+  createContext,
+  useContext,
+  useState,
+} from 'react';
 
 import * as monthUtils from 'loot-core/shared/months';
 
@@ -7,6 +12,8 @@ type EnvelopeBudgetContextDefinition = {
   onBudgetAction: (month: string, action: string, arg?: unknown) => void;
   onToggleSummaryCollapse: () => void;
   currentMonth: string;
+  setHoveredMonth: (month: string) => void;
+  hoveredMonth: string;
 };
 
 const EnvelopeBudgetContext = createContext<EnvelopeBudgetContextDefinition>({
@@ -20,6 +27,10 @@ const EnvelopeBudgetContext = createContext<EnvelopeBudgetContextDefinition>({
     );
   },
   currentMonth: 'unknown',
+  hoveredMonth: 'unknown',
+  setHoveredMonth: (month: string) => {
+    throw new Error('Unitialised context method called: setHoveredMonth');
+  },
 });
 
 type EnvelopeBudgetProviderProps = Omit<
@@ -33,6 +44,8 @@ export function EnvelopeBudgetProvider({
   onBudgetAction,
   onToggleSummaryCollapse,
   children,
+  hoveredMonth,
+  setHoveredMonth,
 }: EnvelopeBudgetProviderProps) {
   const currentMonth = monthUtils.currentMonth();
 
@@ -43,6 +56,8 @@ export function EnvelopeBudgetProvider({
         summaryCollapsed,
         onBudgetAction,
         onToggleSummaryCollapse,
+        hoveredMonth,
+        setHoveredMonth,
       }}
     >
       {children}
