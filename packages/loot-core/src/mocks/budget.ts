@@ -703,7 +703,7 @@ export async function createTestBudget(handlers: Handlers) {
       for (const category of group.categories) {
         const categoryId = await handlers['category-create']({
           ...category,
-          isIncome: category.is_income ? 1 : 0,
+          isIncome: category.is_income,
           groupId,
         });
 
