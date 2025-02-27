@@ -351,7 +351,7 @@ async function processCleanup(month: string): Promise<Notification> {
         message: 'Global: Funds not available:',
         pre: warnings.join('\n\n'),
       };
-    } else if (budgetAvailable == 0) {
+    } else if (budgetAvailable === 0) {
       return {
         type: 'message',
         message: 'All categories were up to date.',
