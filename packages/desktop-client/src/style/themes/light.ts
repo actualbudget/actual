@@ -40,7 +40,7 @@ export const tableBorderHover = colorPalette.purple400;
 export const tableBorderSeparator = colorPalette.navy400;
 export const tableRowBackgroundHighlight = colorPalette.blue150;
 export const tableRowBackgroundHighlightText = colorPalette.navy700;
-export const tableRowHeaderBackground = colorPalette.navy50;
+export const tableRowHeaderBackground = colorPalette.navy100;
 export const tableRowHeaderText = colorPalette.navy800;
 
 export const sidebarBackground = colorPalette.navy900;
