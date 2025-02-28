@@ -6,6 +6,7 @@ export interface ToolsHandlers {
     numCleared: number;
     numDeleted: number;
     numTransfersFixed: number;
+    numNonParentErrorsFixed: number;
     mismatchedSplits: TransactionEntity[];
   }>;
 }
