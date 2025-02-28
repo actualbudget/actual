@@ -347,8 +347,11 @@ function AccountList({
           target={target}
           style={{
             backgroundColor: theme.tableBorderSeparator,
-            height: '2px',
-            width: '100%',
+            position: 'absolute',
+            left: 2,
+            right: 2,
+            borderRadius: 3,
+            height: 3,
           }}
         />
       );
