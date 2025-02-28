@@ -1,5 +1,12 @@
 import React, { memo, useCallback, useRef } from 'react';
+import {
+  DropIndicator,
+  ListBox,
+  ListBoxItem,
+  useDragAndDrop,
+} from 'react-aria-components';
 import { useTranslation } from 'react-i18next';
+import { useListData } from 'react-stately';
 
 import { Button } from '@actual-app/components/button';
 import { Card } from '@actual-app/components/card';
@@ -17,6 +24,7 @@ import {
   trackingBudget,
   uncategorizedCount,
 } from 'loot-core/client/queries';
+import { moveCategory } from 'loot-core/client/queries/queriesSlice';
 import * as monthUtils from 'loot-core/shared/months';
 import { groupById, integerToCurrency } from 'loot-core/shared/util';
 
@@ -1176,137 +1184,172 @@ const IncomeGroupHeader = memo(function IncomeGroupHeader({
   );
 });
 
-const IncomeCategory = memo(function IncomeCategory({
+function IncomeCategoryName({ category, onEdit }) {
+  const sidebarColumnWidth = getColumnWidth({ isSidebar: true, offset: -10 });
+  return (
+    <View
+      style={{
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'flex-start',
+        width: sidebarColumnWidth,
+      }}
+    >
+      <Button
+        variant="bare"
+        style={{
+          maxWidth: sidebarColumnWidth,
+        }}
+        onPress={() => onEdit?.(category.id)}
+      >
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'flex-start',
+          }}
+        >
+          <Text
+            style={{
+              ...styles.lineClamp(2),
+              width: sidebarColumnWidth,
+              textAlign: 'left',
+              ...styles.smallText,
+            }}
+            data-testid="category-name"
+          >
+            {category.name}
+          </Text>
+          <SvgCheveronRight
+            style={{ flexShrink: 0, color: theme.tableTextSubdued }}
+            width={14}
+            height={14}
+          />
+        </View>
+      </Button>
+    </View>
+  );
+}
+
+function IncomeCategoryCells({ category, month, onBudgetAction }) {
+  const { t } = useTranslation();
+  const format = useFormat();
+  const columnWidth = getColumnWidth();
+  const [budgetType = 'rollover'] = useSyncedPref('budgetType');
+
+  const budgeted =
+    budgetType === 'report' ? trackingBudget.catBudgeted(category.id) : null;
+
+  const balance =
+    budgetType === 'report'
+      ? trackingBudget.catSumAmount(category.id)
+      : envelopeBudget.catSumAmount(category.id);
+
+  return (
+    <View
+      style={{
+        flexDirection: 'row',
+        justifyContent: 'flex-end',
+        alignItems: 'center',
+      }}
+    >
+      {budgeted && (
+        <View
+          style={{
+            width: columnWidth,
+            justifyContent: 'center',
+            alignItems: 'flex-end',
+          }}
+        >
+          <BudgetCell
+            binding={budgeted}
+            type="financial"
+            category={category}
+            month={month}
+            onBudgetAction={onBudgetAction}
+          />
+        </View>
+      )}
+      <CellValue
+        binding={balance}
+        type="financial"
+        aria-label={t('Balance for {{categoryName}} category', {
+          categoryName: category.name,
+        })} // Translated aria-label
+      >
+        {({ type, value }) => (
+          <View>
+            <PrivacyFilter>
+              <AutoTextSize
+                key={value}
+                as={Text}
+                minFontSizePx={6}
+                maxFontSizePx={12}
+                mode="oneline"
+                style={{
+                  width: columnWidth,
+                  justifyContent: 'center',
+                  alignItems: 'flex-end',
+                  textAlign: 'right',
+                  fontSize: 12,
+                  paddingRight: 5,
+                }}
+              >
+                {format(value, type)}
+              </AutoTextSize>
+            </PrivacyFilter>
+          </View>
+        )}
+      </CellValue>
+    </View>
+  );
+}
+
+function IncomeCategoryListItem({
   index,
   category,
-  budgeted,
-  balance,
   month,
   style,
   onEdit,
   onBudgetAction,
+  ...props
 }) {
-  const { t } = useTranslation();
   const listItemRef = useRef();
-  const format = useFormat();
-  const sidebarColumnWidth = getColumnWidth({ isSidebar: true, offset: -10 });
-  const columnWidth = getColumnWidth();
 
   return (
-    <ListItem
-      style={{
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        backgroundColor: 'transparent',
-        borderBottomWidth: 0,
-        borderTopWidth: index > 0 ? 1 : 0,
-        opacity: !!category.hidden ? 0.5 : undefined,
-        ...style,
-      }}
+    <ListBoxItem
+      textValue={category.name}
       data-testid="category-row"
-      innerRef={listItemRef}
+      {...props}
     >
       <View
         style={{
-          flex: 1,
-          justifyContent: 'center',
-          alignItems: 'flex-start',
-          width: sidebarColumnWidth,
-        }}
-      >
-        <Button
-          variant="bare"
-          style={{
-            maxWidth: sidebarColumnWidth,
-          }}
-          onPress={() => onEdit?.(category.id)}
-        >
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'flex-start',
-            }}
-          >
-            <Text
-              style={{
-                ...styles.lineClamp(2),
-                width: sidebarColumnWidth,
-                textAlign: 'left',
-                ...styles.smallText,
-              }}
-              data-testid="category-name"
-            >
-              {category.name}
-            </Text>
-            <SvgCheveronRight
-              style={{ flexShrink: 0, color: theme.tableTextSubdued }}
-              width={14}
-              height={14}
-            />
-          </View>
-        </Button>
-      </View>
-      <View
-        style={{
+          height: 50,
+          borderColor: theme.tableBorder,
           flexDirection: 'row',
-          justifyContent: 'flex-end',
           alignItems: 'center',
+          paddingLeft: 5,
+          paddingRight: 5,
+          zIndex: 1,
+          justifyContent: 'space-between',
+          backgroundColor: 'transparent',
+          borderBottomWidth: 0,
+          borderTopWidth: index > 0 ? 1 : 0,
+          opacity: !!category.hidden ? 0.5 : undefined,
+          ...style,
         }}
+        innerRef={listItemRef}
       >
-        {budgeted && (
-          <View
-            style={{
-              width: columnWidth,
-              justifyContent: 'center',
-              alignItems: 'flex-end',
-            }}
-          >
-            <BudgetCell
-              binding={budgeted}
-              type="financial"
-              category={category}
-              month={month}
-              onBudgetAction={onBudgetAction}
-            />
-          </View>
-        )}
-        <CellValue
-          binding={balance}
-          type="financial"
-          aria-label={t('Balance for {{categoryName}} category', {
-            categoryName: category.name,
-          })} // Translated aria-label
-        >
-          {({ type, value }) => (
-            <View>
-              <PrivacyFilter>
-                <AutoTextSize
-                  key={value}
-                  as={Text}
-                  minFontSizePx={6}
-                  maxFontSizePx={12}
-                  mode="oneline"
-                  style={{
-                    width: columnWidth,
-                    justifyContent: 'center',
-                    alignItems: 'flex-end',
-                    textAlign: 'right',
-                    fontSize: 12,
-                    paddingRight: 5,
-                  }}
-                >
-                  {format(value, type)}
-                </AutoTextSize>
-              </PrivacyFilter>
-            </View>
-          )}
-        </CellValue>
+        <IncomeCategoryName category={category} onEdit={onEdit} />
+        <IncomeCategoryCells
+          category={category}
+          month={month}
+          onBudgetAction={onBudgetAction}
+        />
       </View>
-    </ListItem>
+    </ListBoxItem>
   );
-});
+}
 
 const ExpenseGroup = memo(function ExpenseGroup({
   type,
@@ -1511,8 +1554,17 @@ function IncomeGroup({
               : theme.budgetHeaderOtherMonth,
           }}
         />
-
-        {group.categories
+        <IncomeCategoryList
+          categories={group.categories.filter(
+            category =>
+              !collapsed && (!category.hidden || showHiddenCategories),
+          )}
+          month={month}
+          editMode={editMode}
+          onEditCategory={onEditCategory}
+          onBudgetAction={onBudgetAction}
+        />
+        {/* {group.categories
           .filter(
             category =>
               !collapsed && (!category.hidden || showHiddenCategories),
@@ -1545,9 +1597,107 @@ function IncomeGroup({
                 onBudgetAction={onBudgetAction}
               />
             );
-          })}
+          })} */}
       </Card>
     </View>
+  );
+}
+
+function IncomeCategoryList({
+  categories,
+  month,
+  onEditCategory,
+  onBudgetAction,
+}) {
+  const { t } = useTranslation();
+  const categoryListData = useListData({
+    initialItems: categories.map((category, index) => ({
+      ...category,
+      index,
+    })),
+    getKey: category => category.id,
+  });
+  const dispatch = useDispatch();
+
+  const { dragAndDropHooks } = useDragAndDrop({
+    getItems: keys =>
+      [...keys].map(key => ({
+        'text/plain': categoryListData.getItem(key).id,
+      })),
+    renderDropIndicator(target) {
+      return (
+        <DropIndicator
+          target={target}
+          style={{
+            backgroundColor: theme.tableBorderSeparator,
+            position: 'absolute',
+            left: 2,
+            right: 2,
+            borderRadius: 3,
+            height: 3,
+          }}
+        />
+      );
+    },
+    onReorder(e) {
+      const [key] = e.keys;
+      const categoryIdToMove = key;
+      const targetCategoryId = e.target.key;
+
+      if (e.target.dropPosition === 'before') {
+        categoryListData.moveBefore(e.target.key, e.keys);
+
+        dispatch(
+          moveCategory({
+            id: categoryIdToMove,
+            groupId: categoryListData.getItem(categoryIdToMove).group,
+            targetId: targetCategoryId,
+          }),
+        );
+      } else if (e.target.dropPosition === 'after') {
+        categoryListData.moveAfter(e.target.key, e.keys);
+
+        const { index: targetIndex } = categoryListData.getItem(e.target.key);
+        const nextToTargetCategory = categoryListData.items[targetIndex + 1];
+
+        dispatch(
+          moveCategory({
+            id: categoryIdToMove,
+            groupId: categoryListData.getItem(categoryIdToMove).group,
+            // Due to the way `moveCategory` works, we use the category next to the
+            // actual target category here because `moveCategory` always shoves the
+            // category *before* the target category.
+            // On the other hand, using `null` as `targetId` moves the category
+            // to the end of the list.
+            targetId: nextToTargetCategory?.id || null,
+          }),
+        );
+      }
+    },
+  });
+
+  return (
+    <ListBox
+      aria-label={t('Income categories')}
+      items={categoryListData.items}
+      dragAndDropHooks={dragAndDropHooks}
+    >
+      {category => (
+        <IncomeCategoryListItem
+          key={category.id}
+          index={category.index}
+          category={category}
+          month={month}
+          style={{
+            backgroundColor: monthUtils.isCurrentMonth(month)
+              ? theme.budgetCurrentMonth
+              : theme.budgetOtherMonth,
+          }}
+          onEdit={onEditCategory}
+          onBudgetAction={onBudgetAction}
+        />
+      )}
+    </ListBox>
   );
 }
 
