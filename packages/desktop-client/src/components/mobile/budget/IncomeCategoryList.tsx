@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { type ComponentPropsWithoutRef, useRef } from 'react';
 import {
   DropIndicator,
   ListBox,
@@ -6,7 +6,6 @@ import {
   useDragAndDrop,
 } from 'react-aria-components';
 import { useTranslation } from 'react-i18next';
-import { useListData } from 'react-stately';
 
 import { Button } from '@actual-app/components/button';
 import { styles } from '@actual-app/components/styles';
@@ -44,19 +43,12 @@ export function IncomeCategoryList({
   onBudgetAction,
 }: IncomeCategoryListProps) {
   const { t } = useTranslation();
-  const categoryListData = useListData({
-    initialItems: categories.map((category, index) => ({
-      ...category,
-      index,
-    })),
-    getKey: category => category.id,
-  });
   const dispatch = useDispatch();
 
   const { dragAndDropHooks } = useDragAndDrop({
     getItems: keys =>
       [...keys].map(key => ({
-        'text/plain': categoryListData.getItem(key).id,
+        'text/plain': categories.find(c => c.id === key)?.id,
       })),
     renderDropIndicator(target) {
       return (
@@ -76,12 +68,12 @@ export function IncomeCategoryList({
     onReorder(e) {
       const [key] = e.keys;
       const categoryIdToMove = key as CategoryEntity['id'];
-      const categoryGroupId = categoryListData.getItem(key).cat_group;
+      const categoryGroupId = categories.find(
+        c => c.id === categoryIdToMove,
+      )?.cat_group;
       const targetCategoryId = e.target.key as CategoryEntity['id'];
 
       if (e.target.dropPosition === 'before') {
-        categoryListData.moveBefore(e.target.key, e.keys);
-
         dispatch(
           moveCategory({
             id: categoryIdToMove,
@@ -90,10 +82,10 @@ export function IncomeCategoryList({
           }),
         );
       } else if (e.target.dropPosition === 'after') {
-        categoryListData.moveAfter(e.target.key, e.keys);
-
-        const { index: targetIndex } = categoryListData.getItem(e.target.key);
-        const nextToTargetCategory = categoryListData.items[targetIndex + 1];
+        const targetIndex = categories.findIndex(
+          c => c.id === targetCategoryId,
+        );
+        const nextToTargetCategory = categories[targetIndex + 1];
 
         dispatch(
           moveCategory({
@@ -114,7 +106,7 @@ export function IncomeCategoryList({
   return (
     <ListBox
       aria-label={t('Income categories')}
-      items={categoryListData.items}
+      items={categories}
       dragAndDropHooks={dragAndDropHooks}
     >
       {category => (
@@ -122,11 +114,6 @@ export function IncomeCategoryList({
           key={category.id}
           value={category}
           month={month}
-          style={{
-            backgroundColor: monthUtils.isCurrentMonth(month)
-              ? theme.budgetCurrentMonth
-              : theme.budgetOtherMonth,
-          }}
           onEdit={onEditCategory}
           onBudgetAction={onBudgetAction}
         />
@@ -135,7 +122,12 @@ export function IncomeCategoryList({
   );
 }
 
-function IncomeCategoryName({ category, onEdit }) {
+type IncomeCategoryNameProps = {
+  category: CategoryEntity;
+  onEdit: (id: CategoryEntity['id']) => void;
+};
+
+function IncomeCategoryName({ category, onEdit }: IncomeCategoryNameProps) {
   const sidebarColumnWidth = getColumnWidth({ isSidebar: true, offset: -10 });
   return (
     <View
@@ -256,13 +248,20 @@ function IncomeCategoryCells({ category, month, onBudgetAction }) {
   );
 }
 
+type IncomeCategoryListItemProps = ComponentPropsWithoutRef<
+  typeof ListBoxItem<CategoryEntity>
+> & {
+  month: string;
+  onEdit: (id: CategoryEntity['id']) => void;
+  onBudgetAction: (month: string, action: string, args: unknown) => void;
+};
+
 function IncomeCategoryListItem({
   month,
-  style,
   onEdit,
   onBudgetAction,
   ...props
-}) {
+}: IncomeCategoryListItemProps) {
   const listItemRef = useRef();
   const { value: category } = props;
 
@@ -282,11 +281,12 @@ function IncomeCategoryListItem({
           paddingRight: 5,
           zIndex: 1,
           justifyContent: 'space-between',
-          backgroundColor: 'transparent',
           borderBottomWidth: 0.5,
           borderTopWidth: 0.5,
           opacity: !!category.hidden ? 0.5 : undefined,
-          ...style,
+          backgroundColor: monthUtils.isCurrentMonth(month)
+            ? theme.budgetCurrentMonth
+            : theme.budgetOtherMonth,
         }}
         innerRef={listItemRef}
       >
