@@ -53,9 +53,11 @@ export function IncomeGroup({
 
   const categories = useMemo(
     () =>
-      group.categories.filter(
-        category => !isCollapsed && (!category.hidden || showHiddenCategories),
-      ),
+      isCollapsed
+        ? []
+        : (group.categories?.filter(
+            category => !category.hidden || showHiddenCategories,
+          ) ?? []),
     [group.categories, isCollapsed, showHiddenCategories],
   );
 
@@ -113,7 +115,7 @@ function IncomeGroupHeader({
   onToggleCollapse,
   style,
 }: IncomeGroupHeaderProps) {
-  const listItemRef = useRef();
+  const listItemRef = useRef<HTMLDivElement | null>(null);
 
   return (
     <ListItem
@@ -155,7 +157,11 @@ function IncomeGroupName({
   isCollapsed,
   onToggleCollapse,
 }: IncomeGroupNameProps) {
-  const sidebarColumnWidth = getColumnWidth({ isSidebar: true, offset: -13.5 });
+  const sidebarColumnWidth = getColumnWidth({
+    show3Cols: false,
+    isSidebar: true,
+    offset: -13.5,
+  });
   return (
     <View
       style={{
