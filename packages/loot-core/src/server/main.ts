@@ -1251,21 +1251,6 @@ handlers['enable-password'] = async function (loginConfig) {
   return {};
 };
 
-handlers['get-openid-config'] = async function () {
-  try {
-    const res = await get(getServer().BASE_SERVER + '/openid/config');
-
-    if (res) {
-      const config = JSON.parse(res) as OpenIdConfig;
-      return { openId: config };
-    }
-
-    return null;
-  } catch (err) {
-    return { error: 'config-fetch-failed' };
-  }
-};
-
 handlers['enable-openid'] = async function (loginConfig) {
   try {
     const userToken = await asyncStorage.getItem('user-token');
@@ -1300,18 +1285,25 @@ handlers['enable-password'] = async function (loginConfig) {
   return {};
 };
 
-handlers['get-openid-config'] = async function () {
+handlers['get-openid-config'] = async function ({ password }) {
   try {
-    const res = await get(getServer().BASE_SERVER + '/openid/config');
+    const userToken = await asyncStorage.getItem('user-token');
+
+    const res = await post(
+      getServer().BASE_SERVER + '/openid/config',
+      { password },
+      {
+        'X-ACTUAL-TOKEN': userToken,
+      },
+    );
 
     if (res) {
-      const config = JSON.parse(res) as OpenIdConfig;
-      return { openId: config };
+      return res as { openId: OpenIdConfig };
     }
 
     return null;
   } catch (err) {
-    return { error: 'config-fetch-failed' };
+    return { error: err.reason };
   }
 };
 
