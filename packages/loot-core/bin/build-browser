@@ -10,7 +10,7 @@ mkdir -p "$DATA_DIR"
 "$ROOT"/copy-migrations "$DATA_DIR"
 
 cd "$DATA_DIR"
-find * -type f | sort > ../data-file-index.txt
+/usr/bin/find * -type f | sort > ../data-file-index.txt
 cd "$ROOT"
 
 OUTPUT_HASH="[contenthash]"
