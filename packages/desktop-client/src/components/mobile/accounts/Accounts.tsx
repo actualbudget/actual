@@ -357,15 +357,17 @@ function AccountList({
       } else if (e.target.dropPosition === 'after') {
         accountListData.moveAfter(e.target.key, e.keys);
 
-        const targetAccount = accountListData.getItem(e.target.key);
-        const nextToTargetAccount =
-          accountListData.items[targetAccount.index + 1];
+        const { index: targetIndex } = accountListData.getItem(e.target.key);
+        const nextToTargetAccount = accountListData.items[targetIndex + 1];
 
         dispatch(
           moveAccount({
             id: accountIdToMove,
-            // Move before the account next to the target account.
-            // `undefined` is used to move to the end of the list.
+            // Due to the way `moveAccount` works, we use the account next to the
+            // actual target account here because `moveAccount` always shoves the
+            // account *before* the target account.
+            // On the other hand, using `undefined` as `targetId`moves the account
+            // to the end of the list.
             targetId: nextToTargetAccount?.id || undefined,
           }),
         );
