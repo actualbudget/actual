@@ -1306,7 +1306,6 @@ function IncomeCategoryCells({ category, month, onBudgetAction }) {
 }
 
 function IncomeCategoryListItem({
-  index,
   category,
   month,
   style,
@@ -1333,8 +1332,8 @@ function IncomeCategoryListItem({
           zIndex: 1,
           justifyContent: 'space-between',
           backgroundColor: 'transparent',
-          borderBottomWidth: 0,
-          borderTopWidth: index > 0 ? 1 : 0,
+          borderBottomWidth: 0.5,
+          borderTopWidth: 0.5,
           opacity: !!category.hidden ? 0.5 : undefined,
           ...style,
         }}
@@ -1577,10 +1576,7 @@ function IncomeCategoryList({
 }) {
   const { t } = useTranslation();
   const categoryListData = useListData({
-    initialItems: categories.map((category, index) => ({
-      ...category,
-      index,
-    })),
+    initialItems: categories,
     getKey: category => category.id,
   });
   const dispatch = useDispatch();
@@ -1595,7 +1591,7 @@ function IncomeCategoryList({
         <DropIndicator
           target={target}
           style={{
-            backgroundColor: theme.tableBorderSeparator,
+            backgroundColor: theme.tableRowBackgroundHighlight,
             position: 'absolute',
             left: 2,
             right: 2,
@@ -1652,7 +1648,6 @@ function IncomeCategoryList({
       {category => (
         <IncomeCategoryListItem
           key={category.id}
-          index={category.index}
           category={category}
           month={month}
           style={{
