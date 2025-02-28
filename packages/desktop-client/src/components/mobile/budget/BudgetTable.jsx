@@ -51,7 +51,7 @@ import { MOBILE_NAV_HEIGHT } from '../MobileNavTabs';
 import { PullToRefresh } from '../PullToRefresh';
 
 import { BudgetCell } from './BudgetCell';
-import { IncomeCategoryList } from './IncomeCategoryList';
+import { IncomeGroup } from './IncomeGroup';
 import { ListItem } from './ListItem';
 
 export const PILL_STYLE = {
@@ -895,162 +895,6 @@ const ExpenseGroupHeader = memo(function ExpenseGroupHeader({
   // </Droppable>
 });
 
-const IncomeGroupHeader = memo(function IncomeGroupHeader({
-  group,
-  budgeted,
-  balance,
-  onEdit,
-  collapsed,
-  onToggleCollapse,
-  style,
-}) {
-  const listItemRef = useRef();
-  const format = useFormat();
-  const sidebarColumnWidth = getColumnWidth({ isSidebar: true, offset: -13.5 });
-  const columnWidth = getColumnWidth();
-
-  return (
-    <ListItem
-      style={{
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        opacity: !!group.hidden ? 0.5 : undefined,
-        paddingLeft: 0,
-        ...style,
-      }}
-      innerRef={listItemRef}
-      data-testid="category-group-row"
-    >
-      <View
-        style={{
-          flex: 1,
-          flexDirection: 'row',
-          justifyContent: 'flex-start',
-          width: sidebarColumnWidth,
-        }}
-      >
-        <Button
-          variant="bare"
-          className={css({
-            flexShrink: 0,
-            color: theme.pageTextSubdued,
-            '&[data-pressed]': {
-              backgroundColor: 'transparent',
-            },
-          })}
-          onPress={() => onToggleCollapse?.(group.id)}
-        >
-          <SvgExpandArrow
-            width={8}
-            height={8}
-            style={{
-              flexShrink: 0,
-              transition: 'transform .1s',
-              transform: collapsed ? 'rotate(-90deg)' : '',
-            }}
-          />
-        </Button>
-        <Button
-          variant="bare"
-          style={{
-            maxWidth: sidebarColumnWidth,
-          }}
-          onPress={() => onEdit?.(group.id)}
-        >
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'flex-start',
-            }}
-          >
-            <Text
-              style={{
-                ...styles.lineClamp(2),
-                width: sidebarColumnWidth,
-                textAlign: 'left',
-                ...styles.smallText,
-              }}
-              data-testid="category-group-name"
-            >
-              {group.name}
-            </Text>
-            <SvgCheveronRight
-              style={{ flexShrink: 0, color: theme.tableTextSubdued }}
-              width={14}
-              height={14}
-            />
-          </View>
-        </Button>
-      </View>
-      <View
-        style={{
-          flexDirection: 'row',
-          justifyContent: 'flex-end',
-          alignItems: 'center',
-          paddingRight: 5,
-        }}
-      >
-        {budgeted && (
-          <CellValue binding={budgeted} type="financial">
-            {({ type, value }) => (
-              <View>
-                <PrivacyFilter>
-                  <AutoTextSize
-                    key={value}
-                    as={Text}
-                    minFontSizePx={6}
-                    maxFontSizePx={12}
-                    mode="oneline"
-                    style={{
-                      width: columnWidth,
-                      justifyContent: 'center',
-                      alignItems: 'flex-end',
-                      paddingLeft: 5,
-                      textAlign: 'right',
-                      fontSize: 12,
-                      fontWeight: '500',
-                    }}
-                  >
-                    {format(value, type)}
-                  </AutoTextSize>
-                </PrivacyFilter>
-              </View>
-            )}
-          </CellValue>
-        )}
-        <CellValue binding={balance} type="financial">
-          {({ type, value }) => (
-            <View>
-              <PrivacyFilter>
-                <AutoTextSize
-                  key={value}
-                  as={Text}
-                  minFontSizePx={6}
-                  maxFontSizePx={12}
-                  mode="oneline"
-                  style={{
-                    width: columnWidth,
-                    justifyContent: 'center',
-                    alignItems: 'flex-end',
-                    paddingLeft: 5,
-                    textAlign: 'right',
-                    fontSize: 12,
-                    fontWeight: '500',
-                  }}
-                >
-                  {format(value, type)}
-                </AutoTextSize>
-              </PrivacyFilter>
-            </View>
-          )}
-        </CellValue>
-      </View>
-    </ListItem>
-  );
-});
-
 const ExpenseGroup = memo(function ExpenseGroup({
   type,
   group,
@@ -1199,76 +1043,6 @@ const ExpenseGroup = memo(function ExpenseGroup({
   );
 });
 
-function IncomeGroup({
-  type,
-  group,
-  month,
-  onAddCategory,
-  showHiddenCategories,
-  editMode,
-  onEditGroup,
-  onEditCategory,
-  onBudgetAction,
-  collapsed,
-  onToggleCollapse,
-}) {
-  const { t } = useTranslation();
-  const columnWidth = getColumnWidth();
-  return (
-    <View>
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'flex-end',
-          marginTop: 50,
-          marginBottom: 5,
-          marginRight: 15,
-        }}
-      >
-        {type === 'report' && (
-          <Label title={t('Budgeted')} style={{ width: columnWidth }} />
-        )}
-        <Label title={t('Received')} style={{ width: columnWidth }} />
-      </View>
-
-      <Card style={{ marginTop: 0 }}>
-        <IncomeGroupHeader
-          group={group}
-          budgeted={
-            type === 'report' ? trackingBudget.groupBudgeted(group.id) : null
-          }
-          balance={
-            type === 'report'
-              ? trackingBudget.groupSumAmount(group.id)
-              : envelopeBudget.groupSumAmount(group.id)
-          }
-          onAddCategory={onAddCategory}
-          editMode={editMode}
-          onEdit={onEditGroup}
-          collapsed={collapsed}
-          onToggleCollapse={onToggleCollapse}
-          style={{
-            backgroundColor: monthUtils.isCurrentMonth(month)
-              ? theme.budgetHeaderCurrentMonth
-              : theme.budgetHeaderOtherMonth,
-          }}
-        />
-        <IncomeCategoryList
-          categories={group.categories.filter(
-            category =>
-              !collapsed && (!category.hidden || showHiddenCategories),
-          )}
-          month={month}
-          editMode={editMode}
-          onEditCategory={onEditCategory}
-          onBudgetAction={onBudgetAction}
-        />
-      </Card>
-    </View>
-  );
-}
-
 function UncategorizedButton() {
   const count = useSheetValue(uncategorizedCount());
   if (count === null || count <= 0) {
@@ -1373,18 +1147,13 @@ function BudgetGroups({
 
       {incomeGroup && (
         <IncomeGroup
-          type={type}
           group={incomeGroup}
           month={month}
-          onAddCategory={onAddCategory}
-          onSaveCategory={onSaveCategory}
-          onDeleteCategory={onDeleteCategory}
           showHiddenCategories={showHiddenCategories}
-          editMode={editMode}
           onEditGroup={onEditGroup}
           onEditCategory={onEditCategory}
           onBudgetAction={onBudgetAction}
-          collapsed={collapsedGroupIds.includes(incomeGroup.id)}
+          isCollapsed={collapsedGroupIds.includes(incomeGroup.id)}
           onToggleCollapse={onToggleCollapse}
         />
       )}
