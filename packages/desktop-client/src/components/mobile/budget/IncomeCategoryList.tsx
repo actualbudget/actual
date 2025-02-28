@@ -1,4 +1,5 @@
 import { type ComponentPropsWithoutRef, useRef } from 'react';
+import { type DragItem } from 'react-aria';
 import {
   DropIndicator,
   ListBox,
@@ -47,10 +48,13 @@ export function IncomeCategoryList({
 
   const { dragAndDropHooks } = useDragAndDrop({
     getItems: keys =>
-      [...keys].map(key => ({
-        'text/plain': categories.find(c => c.id === key)?.id,
-      })),
-    renderDropIndicator(target) {
+      [...keys].map(
+        key =>
+          ({
+            'text/plain': categories.find(c => c.id === key)?.id,
+          }) as DragItem,
+      ),
+    renderDropIndicator: target => {
       return (
         <DropIndicator
           target={target}
@@ -65,32 +69,50 @@ export function IncomeCategoryList({
         />
       );
     },
-    onReorder(e) {
+    onReorder: e => {
       const [key] = e.keys;
       const categoryIdToMove = key as CategoryEntity['id'];
-      const categoryGroupId = categories.find(
-        c => c.id === categoryIdToMove,
-      )?.cat_group;
+      const categoryToMove = categories.find(c => c.id === categoryIdToMove);
+
+      if (!categoryToMove) {
+        throw new Error(
+          `Internal error: category with ID ${categoryIdToMove} not found.`,
+        );
+      }
+
+      if (!categoryToMove.cat_group) {
+        throw new Error(
+          `Internal error: category ${categoryIdToMove} is not in a group and cannot be moved.`,
+        );
+      }
+
       const targetCategoryId = e.target.key as CategoryEntity['id'];
 
       if (e.target.dropPosition === 'before') {
         dispatch(
           moveCategory({
-            id: categoryIdToMove,
-            groupId: categoryGroupId,
+            id: categoryToMove.id,
+            groupId: categoryToMove.cat_group,
             targetId: targetCategoryId,
           }),
         );
       } else if (e.target.dropPosition === 'after') {
-        const targetIndex = categories.findIndex(
+        const targetCategoryIndex = categories.findIndex(
           c => c.id === targetCategoryId,
         );
-        const nextToTargetCategory = categories[targetIndex + 1];
+
+        if (targetCategoryIndex === -1) {
+          throw new Error(
+            `Internal error: category with ID ${targetCategoryId} not found.`,
+          );
+        }
+
+        const nextToTargetCategory = categories[targetCategoryIndex + 1];
 
         dispatch(
           moveCategory({
-            id: categoryIdToMove,
-            groupId: categoryGroupId,
+            id: categoryToMove.id,
+            groupId: categoryToMove.cat_group,
             // Due to the way `moveCategory` works, we use the category next to the
             // actual target category here because `moveCategory` always shoves the
             // category *before* the target category.
@@ -128,7 +150,11 @@ type IncomeCategoryNameProps = {
 };
 
 function IncomeCategoryName({ category, onEdit }: IncomeCategoryNameProps) {
-  const sidebarColumnWidth = getColumnWidth({ isSidebar: true, offset: -10 });
+  const sidebarColumnWidth = getColumnWidth({
+    show3Cols: false,
+    isSidebar: true,
+    offset: -10,
+  });
   return (
     <View
       style={{
@@ -174,7 +200,17 @@ function IncomeCategoryName({ category, onEdit }: IncomeCategoryNameProps) {
   );
 }
 
-function IncomeCategoryCells({ category, month, onBudgetAction }) {
+type IncomeCategoryCellsProps = {
+  category: CategoryEntity;
+  month: string;
+  onBudgetAction: (month: string, action: string, args: unknown) => void;
+};
+
+function IncomeCategoryCells({
+  category,
+  month,
+  onBudgetAction,
+}: IncomeCategoryCellsProps) {
   const { t } = useTranslation();
   const format = useFormat();
   const columnWidth = getColumnWidth();
@@ -262,8 +298,12 @@ function IncomeCategoryListItem({
   onBudgetAction,
   ...props
 }: IncomeCategoryListItemProps) {
-  const listItemRef = useRef();
+  const listItemRef = useRef<HTMLDivElement | null>(null);
   const { value: category } = props;
+
+  if (!category) {
+    return null;
+  }
 
   return (
     <ListBoxItem

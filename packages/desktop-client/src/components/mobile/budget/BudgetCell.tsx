@@ -99,7 +99,7 @@ export function BudgetCell<
           });
           showUndoNotification({
             message: `${category.name} budget templates have been applied.`,
-            pre: categoryNotes,
+            pre: categoryNotes ?? undefined,
           });
         },
       }),
