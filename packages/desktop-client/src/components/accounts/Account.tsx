@@ -1010,6 +1010,13 @@ class AccountInternal extends PureComponent<
 
   onDoneReconciling = async () => {
     const { accountId } = this.props;
+    const account = this.props.accounts.find(
+      account => account.id === accountId,
+    );
+    if (!account) {
+      throw new Error(`Account with ID ${accountId} not found.`);
+    }
+
     const { reconcileAmount } = this.state;
 
     const { data } = await runQuery(
@@ -1033,6 +1040,13 @@ class AccountInternal extends PureComponent<
     if (targetDiff === 0) {
       await this.lockTransactions();
     }
+
+    const lastReconciled = new Date().getTime().toString();
+    this.props.dispatch(
+      updateAccount({
+        account: { ...account, last_reconciled: lastReconciled },
+      }),
+    );
 
     this.setState({
       reconcileAmount: null,
