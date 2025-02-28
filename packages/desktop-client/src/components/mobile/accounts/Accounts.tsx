@@ -366,9 +366,9 @@ function AccountList({
             // Due to the way `moveAccount` works, we use the account next to the
             // actual target account here because `moveAccount` always shoves the
             // account *before* the target account.
-            // On the other hand, using `undefined` as `targetId`moves the account
+            // On the other hand, using `null` as `targetId`moves the account
             // to the end of the list.
-            targetId: nextToTargetAccount?.id || undefined,
+            targetId: nextToTargetAccount?.id || null,
           }),
         );
       }
