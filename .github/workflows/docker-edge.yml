@@ -24,6 +24,7 @@ env:
   IMAGES: |
     actualbudget/actual-server
     ghcr.io/actualbudget/actual-server
+    ghcr.io/actualbudget/actual
 
   # Creates the following tags:
   # - actual-server:edge
