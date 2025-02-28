@@ -348,22 +348,6 @@ function AccountList({
       if (e.target.dropPosition === 'before') {
         accountListData.moveBefore(e.target.key, e.keys);
 
-        alert(
-          `onReorder: ${JSON.stringify(
-            {
-              dropPosition: e.target.dropPosition,
-              id: accountIdToMove,
-              targetId: targetAccountId,
-              account: accountListData.getItem(accountIdToMove).name,
-              targetAccount: accountListData.getItem(targetAccountId).name,
-              index: accountListData.getItem(key).index,
-              targetIndex: accountListData.getItem(e.target.key).index,
-            },
-            null,
-            2,
-          )}`,
-        );
-
         dispatch(
           moveAccount({
             id: accountIdToMove,
@@ -372,32 +356,16 @@ function AccountList({
         );
       } else if (e.target.dropPosition === 'after') {
         accountListData.moveAfter(e.target.key, e.keys);
+
         const targetAccount = accountListData.getItem(e.target.key);
         const nextToTargetAccount =
           accountListData.items[targetAccount.index + 1];
 
-        alert(
-          `onReorder after: ${JSON.stringify(
-            {
-              dropPosition: e.target.dropPosition,
-              id: accountIdToMove,
-              targetId: targetAccountId,
-              account: accountListData.getItem(accountIdToMove).name,
-              targetAccount: accountListData.getItem(targetAccountId).name,
-              nextToTargetAccount: nextToTargetAccount?.name || 'None',
-              index: accountListData.getItem(accountIdToMove).index,
-              targetIndex: targetAccount.index,
-              nextToTargetAccountIndex: nextToTargetAccount?.index || -1,
-            },
-            null,
-            2,
-          )}`,
-        );
-
         dispatch(
           moveAccount({
             id: accountIdToMove,
-            // undefined is used to move to the end of the list
+            // Move before the account next to the target account.
+            // `undefined` is used to move to the end of the list.
             targetId: nextToTargetAccount?.id || undefined,
           }),
         );
