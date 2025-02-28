@@ -36,6 +36,7 @@ type ExpenseCategoryProps = {
   onBudgetAction: (month: number, action: string, arg: unknown) => void;
   onShowActivity: (id: string, month: string) => void;
   onReorder: OnDropCallback;
+  goalsShown: boolean;
 };
 
 export function ExpenseCategory({
@@ -52,6 +53,7 @@ export function ExpenseCategory({
   onShowActivity,
   onDragChange,
   onReorder,
+  goalsShown,
 }: ExpenseCategoryProps) {
   let dragging = dragState && dragState.item === cat;
 
@@ -98,6 +100,7 @@ export function ExpenseCategory({
           onEditName={onEditName}
           onSave={onSave}
           onDelete={onDelete}
+          goalsShown={goalsShown}
         />
 
         <RenderMonths
