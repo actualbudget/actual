@@ -47,7 +47,6 @@ export function TrackingBudgetMonthMenuModal({
   const buttonStyle: CSSProperties = {
     ...styles.mediumText,
     height: styles.mobileMinHeight,
-    color: theme.formLabelText,
     // Adjust based on desired number of buttons per row.
     flexBasis: '100%',
   };
