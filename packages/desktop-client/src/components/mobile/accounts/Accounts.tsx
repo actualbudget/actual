@@ -3,7 +3,12 @@ import React, {
   type CSSProperties,
   useCallback,
 } from 'react';
-import { ListBox, ListBoxItem, useDragAndDrop } from 'react-aria-components';
+import {
+  DropIndicator,
+  ListBox,
+  ListBoxItem,
+  useDragAndDrop,
+} from 'react-aria-components';
 import { useTranslation, Trans } from 'react-i18next';
 import { useListData } from 'react-stately';
 
@@ -136,79 +141,76 @@ function AccountListItem({
 
   return (
     <ListBoxItem textValue={account.id} {...props}>
-      {({ isDropTarget }) => (
-        <Button
-          onPress={() => onSelect(account.id)}
+      <Button
+        onPress={() => onSelect(account.id)}
+        style={{
+          width: '100%',
+          border: `1px solid ${theme.pillBorder}`,
+          borderRadius: 6,
+          boxShadow: `0 1px 1px ${theme.mobileAccountShadow}`,
+          marginTop: 10,
+        }}
+        data-testid="account-list-item"
+      >
+        <View
           style={{
-            width: '100%',
-            border: `1px solid ${theme.pillBorder}`,
-            borderRadius: 6,
-            boxShadow: `0 1px 1px ${theme.mobileAccountShadow}`,
-            marginTop: 10,
-            ...(isDropTarget ? { backgroundColor: 'blue' } : {}),
+            flex: 1,
+            margin: '10px 0',
           }}
-          data-testid="account-list-item"
         >
           <View
             style={{
-              flex: 1,
-              margin: '10px 0',
+              flexDirection: 'row',
+              alignItems: 'center',
             }}
           >
-            <View
+            {
+              /* TODO: Should bankId be part of the AccountEntity type? */
+              'bankId' in account && account.bankId ? (
+                <View
+                  style={{
+                    backgroundColor: isPending
+                      ? theme.sidebarItemBackgroundPending
+                      : isFailed
+                        ? theme.sidebarItemBackgroundFailed
+                        : theme.sidebarItemBackgroundPositive,
+                    marginRight: '8px',
+                    width: 8,
+                    flexShrink: 0,
+                    height: 8,
+                    borderRadius: 8,
+                    opacity: isConnected ? 1 : 0,
+                  }}
+                />
+              ) : null
+            }
+            <TextOneLine
               style={{
-                flexDirection: 'row',
-                alignItems: 'center',
+                ...styles.text,
+                fontSize: 17,
+                fontWeight: 600,
+                color: isUpdated ? theme.mobileAccountText : theme.pillText,
+                paddingRight: 30,
               }}
+              data-testid="account-name"
             >
-              {
-                /* TODO: Should bankId be part of the AccountEntity type? */
-                'bankId' in account && account.bankId ? (
-                  <View
-                    style={{
-                      backgroundColor: isPending
-                        ? theme.sidebarItemBackgroundPending
-                        : isFailed
-                          ? theme.sidebarItemBackgroundFailed
-                          : theme.sidebarItemBackgroundPositive,
-                      marginRight: '8px',
-                      width: 8,
-                      flexShrink: 0,
-                      height: 8,
-                      borderRadius: 8,
-                      opacity: isConnected ? 1 : 0,
-                    }}
-                  />
-                ) : null
-              }
-              <TextOneLine
-                style={{
-                  ...styles.text,
-                  fontSize: 17,
-                  fontWeight: 600,
-                  color: isUpdated ? theme.mobileAccountText : theme.pillText,
-                  paddingRight: 30,
-                }}
-                data-testid="account-name"
-              >
-                {account.name}
-              </TextOneLine>
-            </View>
+              {account.name}
+            </TextOneLine>
           </View>
-          <CellValue binding={getBalanceQuery(account)} type="financial">
-            {props => (
-              <CellValueText<'account', 'balance'>
-                {...props}
-                style={{
-                  fontSize: 16,
-                  ...makeAmountFullStyle(props.value),
-                }}
-                data-testid="account-balance"
-              />
-            )}
-          </CellValue>
-        </Button>
-      )}
+        </View>
+        <CellValue binding={getBalanceQuery(account)} type="financial">
+          {props => (
+            <CellValueText<'account', 'balance'>
+              {...props}
+              style={{
+                fontSize: 16,
+                ...makeAmountFullStyle(props.value),
+              }}
+              data-testid="account-balance"
+            />
+          )}
+        </CellValue>
+      </Button>
     </ListBoxItem>
   );
 }
@@ -339,14 +341,14 @@ function AccountList({
       [...keys].map(key => ({
         'text/plain': accountListData.getItem(key).id,
       })),
-    renderDropIndicator() {
+    renderDropIndicator(target) {
       return (
-        <View
+        <DropIndicator
+          target={target}
           style={{
+            backgroundColor: theme.tableBorderSeparator,
+            height: '2px',
             width: '100%',
-            height: 2,
-            backgroundColor: 'red',
-            opacity: 0.5,
           }}
         />
       );
