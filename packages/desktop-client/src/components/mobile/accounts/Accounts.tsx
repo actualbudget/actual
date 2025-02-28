@@ -136,7 +136,7 @@ function AccountListItem({
 
   return (
     <ListBoxItem textValue={account.id} {...props}>
-      {({ isDragging, isDropTarget }) => (
+      {({ isDropTarget }) => (
         <Button
           onPress={() => onSelect(account.id)}
           style={{
@@ -145,7 +145,6 @@ function AccountListItem({
             borderRadius: 6,
             boxShadow: `0 1px 1px ${theme.mobileAccountShadow}`,
             marginTop: 10,
-            ...(isDragging ? { backgroundColor: 'red' } : {}),
             ...(isDropTarget ? { backgroundColor: 'blue' } : {}),
           }}
           data-testid="account-list-item"
@@ -340,6 +339,18 @@ function AccountList({
       [...keys].map(key => ({
         'text/plain': accountListData.getItem(key).id,
       })),
+    renderDropIndicator() {
+      return (
+        <View
+          style={{
+            width: '100%',
+            height: 2,
+            backgroundColor: 'red',
+            opacity: 0.5,
+          }}
+        />
+      );
+    },
     onReorder(e) {
       const [key] = e.keys;
       const accountIdToMove = key as AccountEntity['id'];
