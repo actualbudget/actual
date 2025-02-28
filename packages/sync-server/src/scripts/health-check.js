@@ -7,7 +7,7 @@ const protocol =
 const hostname =
   config.get('hostname') === '::' ? 'localhost' : config.get('hostname');
 
-fetch(`${protocol}://${hostname}:${config.port}/health`)
+fetch(`${protocol}://${hostname}:${config.get('port')}/health`)
   .then(res => res.json())
   .then(res => {
     if (res.status !== 'UP') {

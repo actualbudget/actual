@@ -11,6 +11,8 @@ const debug = createDebug('actual:config');
 const debugSensitive = createDebug('actual-sensitive:config');
 
 const projectRoot = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
+const defaultDataDir = fs.existsSync('/data') ? '/data' : projectRoot;
+
 debug(`Project root: '${projectRoot}'`);
 
 export const sqlDir = path.join(projectRoot, 'src', 'sql');
@@ -52,7 +54,7 @@ const configSchema = convict({
   dataDir: {
     doc: 'Default data directory.',
     format: String,
-    default: fs.existsSync('./data') ? '/data' : projectRoot,
+    default: defaultDataDir,
     env: 'ACTUAL_DATA_DIR',
   },
   port: {
@@ -109,6 +111,12 @@ const configSchema = convict({
     ],
     env: 'ACTUAL_TRUSTED_PROXIES',
   },
+  trustedAuthProxies: {
+    doc: 'List of trusted auth proxies.',
+    forma: Array,
+    default: [],
+    env: 'ACTUAL_TRUSTED_AUTH_PROXIES',
+  },
 
   https: {
     doc: 'HTTPS configuration.',
@@ -144,18 +152,21 @@ const configSchema = convict({
       doc: 'Sync file size limit (in MB)',
       format: 'nat',
       default: 20,
+      env: 'ACTUAL_UPLOAD_FILE_SYNC_SIZE_LIMIT_MB',
     },
 
     syncEncryptedFileSizeLimitMB: {
       doc: 'Encrypted Sync file size limit (in MB)',
       format: 'nat',
       default: 50,
+      env: 'ACTUAL_UPLOAD_SYNC_ENCRYPTED_FILE_SYNC_SIZE_LIMIT_MB',
     },
 
     fileSizeLimitMB: {
       doc: 'General file size limit (in MB)',
       format: 'nat',
       default: 20,
+      env: 'ACTUAL_UPLOAD_FILE_SIZE_LIMIT_MB',
     },
   },
 
@@ -238,10 +249,29 @@ const configSchema = convict({
   },
 });
 
-if (fs.existsSync('config.json')) {
-  configSchema.loadFile('config.json');
+let configPath = null;
+
+if (process.env.ACTUAL_CONFIG_PATH) {
+  debug(
+    `loading config from ACTUAL_CONFIG_PATH: '${process.env.ACTUAL_CONFIG_PATH}'`,
+  );
+  configPath = process.env.ACTUAL_CONFIG_PATH;
+} else {
+  configPath = path.join(projectRoot, 'config.json');
+
+  if (!fs.existsSync(configPath)) {
+    configPath = path.join(defaultDataDir, 'config.json');
+  }
+
+  debug(`loading config from default path: '${configPath}'`);
 }
 
+if (fs.existsSync(configPath)) {
+  configSchema.loadFile(configPath);
+  debug(`Config loaded`);
+}
+
+debug(`Validating config`);
 configSchema.validate({ allowed: 'strict' });
 
 debug(`Project root: ${configSchema.get('projectRoot')}`);
