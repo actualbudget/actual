@@ -1,4 +1,4 @@
-import { type ComponentPropsWithoutRef } from 'react';
+import { useCallback, type ComponentPropsWithoutRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -51,12 +51,11 @@ export function BudgetCell<
   const format = useFormat();
   const { showUndoNotification } = useUndo();
   const [budgetType = 'rollover'] = useSyncedPref('budgetType');
-  const modalBudgetType = budgetType === 'rollover' ? 'envelope' : 'tracking';
-
-  const categoryBudgetMenuModal = `${modalBudgetType}-budget-menu` as const;
   const categoryNotes = useNotes(category.id);
 
-  const onOpenCategoryBudgetMenu = () => {
+  const onOpenCategoryBudgetMenu = useCallback(() => {
+    const modalBudgetType = budgetType === 'rollover' ? 'envelope' : 'tracking';
+    const categoryBudgetMenuModal = `${modalBudgetType}-budget-menu` as const;
     dispatch(
       pushModal(categoryBudgetMenuModal, {
         categoryId: category.id,
@@ -105,7 +104,16 @@ export function BudgetCell<
         },
       }),
     );
-  };
+  }, [
+    budgetType,
+    category.id,
+    category.name,
+    categoryNotes,
+    dispatch,
+    month,
+    onBudgetAction,
+    showUndoNotification,
+  ]);
 
   return (
     <CellValue
