@@ -117,6 +117,18 @@ const configSchema = convict({
       key: '',
       cert: '',
     },
+
+    key: {
+      doc: 'HTTPS Certificate key',
+      format: String,
+      default: '',
+    },
+
+    cert: {
+      doc: 'HTTPS Certificate',
+      format: String,
+      default: '',
+    },
   },
 
   upload: {
@@ -126,6 +138,24 @@ const configSchema = convict({
       fileSizeSyncLimitMB: 20,
       syncEncryptedFileSizeLimitMB: 50,
       fileSizeLimitMB: 20,
+    },
+
+    fileSizeSyncLimitMB: {
+      doc: 'Sync file size limit (in MB)',
+      format: 'nat',
+      default: 20,
+    },
+
+    syncEncryptedFileSizeLimitMB: {
+      doc: 'Encrypted Sync file size limit (in MB)',
+      format: 'nat',
+      default: 50,
+    },
+
+    fileSizeLimitMB: {
+      doc: 'General file size limit (in MB)',
+      format: 'nat',
+      default: 20,
     },
   },
 
@@ -139,9 +169,33 @@ const configSchema = convict({
       env: 'ACTUAL_OPENID_DISCOVERY_URL',
     },
     issuer: {
-      doc: 'OpenID issuer object ({ name, authorization_endpoint, token_endpoint, userinfo_endpoint }).',
+      doc: 'OpenID issuer',
       format: Object,
-      default: null,
+      default: {},
+      name: {
+        doc: 'Name of the provider',
+        default: '',
+        format: String,
+        env: 'ACTUAL_OPENID_PROVIDER_NAME',
+      },
+      authorization_endpoint: {
+        doc: 'Authorization endpoint',
+        default: '',
+        format: String,
+        env: 'ACTUAL_OPENID_AUTHORIZATION_ENDPOINT',
+      },
+      token_endpoint: {
+        doc: 'Token endpoint',
+        default: '',
+        format: String,
+        env: 'ACTUAL_OPENID_TOKEN_ENDPOINT',
+      },
+      userinfo_endpoint: {
+        doc: 'Userinfo endpoint',
+        default: '',
+        format: String,
+        env: 'ACTUAL_OPENID_USERINFO_ENDPOINT',
+      },
     },
     client_id: {
       doc: 'OpenID client ID.',
@@ -184,7 +238,9 @@ const configSchema = convict({
   },
 });
 
-configSchema.loadFile('config.json');
+if (fs.existsSync('config.json')) {
+  configSchema.loadFile('config.json');
+}
 
 configSchema.validate({ allowed: 'strict' });
 
@@ -199,13 +255,15 @@ debug(`Login method: ${configSchema.get('loginMethod')}`);
 debug(`Allowed methods: ${configSchema.get('allowedLoginMethods').join(', ')}`);
 
 const httpsKey = configSchema.get('https.key');
-debugSensitive(
-  `HTTPS Key: ${httpsKey ? '*'.repeat(httpsKey.length) : 'Not Set'}`,
-);
+if (httpsKey) {
+  debug(`HTTPS Key: ${'*'.repeat(httpsKey.length)}`);
+  debugSensitive(`HTTPS Key: ${httpsKey}`);
+}
 
 const httpsCert = configSchema.get('https.cert');
-debugSensitive(
-  `HTTPS Cert: ${httpsCert ? '*'.repeat(httpsCert.length) : 'Not Set'}`,
-);
+if (httpsCert) {
+  debug(`HTTPS Cert: ${'*'.repeat(httpsCert.length)}`);
+  debugSensitive(`HTTPS Cert: ${httpsCert}`);
+}
 
 export { configSchema as config };
