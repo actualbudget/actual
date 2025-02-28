@@ -3,6 +3,7 @@ import React, {
   type CSSProperties,
   useCallback,
 } from 'react';
+import { type DragItem } from 'react-aria';
 import {
   DropIndicator,
   ListBox,
@@ -10,7 +11,6 @@ import {
   useDragAndDrop,
 } from 'react-aria-components';
 import { useTranslation, Trans } from 'react-i18next';
-import { useListData } from 'react-stately';
 
 import { Button } from '@actual-app/components/button';
 import { styles } from '@actual-app/components/styles';
@@ -121,7 +121,7 @@ type AccountListItemProps = ComponentPropsWithoutRef<
   isPending: boolean;
   isFailed: boolean;
   getBalanceQuery: (account: AccountEntity) => Binding<'account', 'balance'>;
-  onSelect: (id: string) => void;
+  onSelect: (account: AccountEntity) => void;
 };
 
 function AccountListItem({
@@ -142,7 +142,7 @@ function AccountListItem({
   return (
     <ListBoxItem textValue={account.name} {...props}>
       <Button
-        onPress={() => onSelect(account.id)}
+        onPress={() => onSelect(account)}
         style={{
           width: '100%',
           border: `1px solid ${theme.pillBorder}`,
@@ -328,20 +328,15 @@ function AccountList({
   const updatedAccounts = useSelector(state => state.queries.updatedAccounts);
   const dispatch = useDispatch();
 
-  const accountListData = useListData({
-    initialItems: accounts.map((account, index) => ({
-      ...account,
-      index,
-    })),
-    getKey: account => account.id,
-  });
-
   const { dragAndDropHooks } = useDragAndDrop({
     getItems: keys =>
-      [...keys].map(key => ({
-        'text/plain': accountListData.getItem(key).id,
-      })),
-    renderDropIndicator(target) {
+      [...keys].map(
+        key =>
+          ({
+            'text/plain': accounts.find(account => account.id === key)?.id,
+          }) as DragItem,
+      ),
+    renderDropIndicator: target => {
       return (
         <DropIndicator
           target={target}
@@ -356,14 +351,12 @@ function AccountList({
         />
       );
     },
-    onReorder(e) {
+    onReorder: e => {
       const [key] = e.keys;
       const accountIdToMove = key as AccountEntity['id'];
       const targetAccountId = e.target.key as AccountEntity['id'];
 
       if (e.target.dropPosition === 'before') {
-        accountListData.moveBefore(e.target.key, e.keys);
-
         dispatch(
           moveAccount({
             id: accountIdToMove,
@@ -371,10 +364,16 @@ function AccountList({
           }),
         );
       } else if (e.target.dropPosition === 'after') {
-        accountListData.moveAfter(e.target.key, e.keys);
+        const targetAccountIndex = accounts.findIndex(
+          account => account.id === e.target.key,
+        );
+        if (targetAccountIndex === -1) {
+          throw new Error(
+            `Internal error: account with ID ${targetAccountId} not found.`,
+          );
+        }
 
-        const { index: targetIndex } = accountListData.getItem(e.target.key);
-        const nextToTargetAccount = accountListData.items[targetIndex + 1];
+        const nextToTargetAccount = accounts[targetAccountIndex + 1];
 
         dispatch(
           moveAccount({
@@ -393,7 +392,7 @@ function AccountList({
   return (
     <ListBox
       aria-label={ariaLabel}
-      items={accountListData.items}
+      items={accounts}
       dragAndDropHooks={dragAndDropHooks}
     >
       {account => (
@@ -405,7 +404,7 @@ function AccountList({
           isPending={syncingAccountIds.includes(account.id)}
           isFailed={failedAccounts && failedAccounts.has(account.id)}
           getBalanceQuery={getBalanceBinding}
-          onSelect={id => onOpenAccount(accountListData.getItem(id))}
+          onSelect={onOpenAccount}
         />
       )}
     </ListBox>
