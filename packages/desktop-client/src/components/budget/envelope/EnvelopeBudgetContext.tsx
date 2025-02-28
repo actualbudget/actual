@@ -1,9 +1,4 @@
-import React, {
-  type ReactNode,
-  createContext,
-  useContext,
-  useState,
-} from 'react';
+import React, { type ReactNode, createContext, useContext } from 'react';
 
 import * as monthUtils from 'loot-core/shared/months';
 
@@ -28,7 +23,7 @@ const EnvelopeBudgetContext = createContext<EnvelopeBudgetContextDefinition>({
   },
   currentMonth: 'unknown',
   hoveredMonth: 'unknown',
-  setHoveredMonth: (month: string) => {
+  setHoveredMonth: () => {
     throw new Error('Unitialised context method called: setHoveredMonth');
   },
 });
