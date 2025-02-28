@@ -140,7 +140,7 @@ function AccountListItem({
   }
 
   return (
-    <ListBoxItem textValue={account.id} {...props}>
+    <ListBoxItem textValue={account.name} {...props}>
       <Button
         onPress={() => onSelect(account.id)}
         style={{
