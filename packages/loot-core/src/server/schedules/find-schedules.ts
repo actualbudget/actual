@@ -338,7 +338,7 @@ export async function findSchedules() {
   for (const account of accounts) {
     // Find latest transaction-ish to start with
     const latestTrans = await db.first<Pick<db.DbViewTransaction, 'date'>>(
-      'SELECT data FROM v_transactions WHERE account = ? AND parent_id IS NULL ORDER BY date DESC LIMIT 1',
+      'SELECT date FROM v_transactions WHERE account = ? AND parent_id IS NULL ORDER BY date DESC LIMIT 1',
       [account.id],
     );
 
