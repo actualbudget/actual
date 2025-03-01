@@ -13,6 +13,7 @@ env:
   IMAGES: |
     actualbudget/actual-server
     ghcr.io/actualbudget/actual-server
+    ghcr.io/actualbudget/actual
 
   # Creates the following tags:
   # - actual-server:latest (see docker/metadata-action flavor inputs, below)
