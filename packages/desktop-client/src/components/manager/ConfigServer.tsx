@@ -6,8 +6,8 @@ import { Button, ButtonWithLoading } from '@actual-app/components/button';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
-import { loggedIn, signOut } from 'loot-core/client/actions';
 import { createBudget } from 'loot-core/client/budgets/budgetsSlice';
+import { loggedIn, signOut } from 'loot-core/client/users/usersSlice';
 import {
   isNonProductionEnvironment,
   isElectron,

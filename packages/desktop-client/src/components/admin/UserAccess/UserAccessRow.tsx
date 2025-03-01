@@ -4,8 +4,8 @@ import { useTranslation } from 'react-i18next';
 
 import { View } from '@actual-app/components/view';
 
-import { signOut } from 'loot-core/client/actions';
 import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
+import { signOut } from 'loot-core/client/users/usersSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import { getUserAccessErrors } from 'loot-core/shared/errors';
 import { type UserAvailable } from 'loot-core/types/models';

@@ -8,10 +8,11 @@ import { type Budget } from '../../types/budget';
 import { type File } from '../../types/file';
 import { type Handlers } from '../../types/handlers';
 import { setAppState } from '../app/appSlice';
-import * as constants from '../constants';
 import { closeModal, pushModal } from '../modals/modalsSlice';
 import { loadGlobalPrefs, loadPrefs } from '../prefs/prefsSlice';
 import { createAppAsyncThunk } from '../redux';
+import { signOut } from '../users/usersSlice';
+import { CLOSE_BUDGET } from '../store';
 
 const sliceName = 'budgets';
 
@@ -103,7 +104,7 @@ export const closeBudget = createAppAsyncThunk(
     if (prefs && prefs.id) {
       // This clears out all the app state so the user starts fresh
       // TODO: Change to use an action once CLOSE_BUDGET is migrated to redux toolkit.
-      await dispatch({ type: constants.CLOSE_BUDGET });
+      await dispatch({ type: CLOSE_BUDGET });
 
       await dispatch(setAppState({ loadingText: t('Closing...') }));
       await send('close-budget');
@@ -121,7 +122,7 @@ export const closeBudgetUI = createAppAsyncThunk(
     const prefs = getState().prefs.local;
     if (prefs && prefs.id) {
       // TODO: Change to use an action once CLOSE_BUDGET is migrated to redux toolkit.
-      await dispatch({ type: constants.CLOSE_BUDGET });
+      await dispatch({ type: CLOSE_BUDGET });
     }
   },
 );
@@ -445,9 +446,11 @@ const budgetsSlice = createSlice({
         action.payload.remoteFiles,
       );
     },
-    signOut(state) {
+  },
+  extraReducers: builder => {
+    builder.addCase(signOut.fulfilled, state => {
       state.allFiles = null;
-    },
+    });
   },
 });
 
@@ -473,7 +476,7 @@ export const actions = {
   makeBackup,
 };
 
-export const { setBudgets, setRemoteFiles, setAllFiles, signOut } = actions;
+export const { setBudgets, setRemoteFiles, setAllFiles } = actions;
 
 function sortFiles(arr: File[]) {
   arr.sort((x, y) => {
