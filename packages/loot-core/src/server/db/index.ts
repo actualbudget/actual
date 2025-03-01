@@ -419,7 +419,7 @@ export async function insertCategory(
     }
 
     if (atEnd) {
-      const lastCat = await first<Pick<DbCategoryGroup, 'sort_order'>>(`
+      const lastCat = await first<Pick<DbCategory, 'sort_order'>>(`
         SELECT sort_order FROM categories WHERE tombstone = 0 ORDER BY sort_order DESC, id DESC LIMIT 1
       `);
       sort_order = (lastCat ? lastCat.sort_order : 0) + SORT_INCREMENT;
