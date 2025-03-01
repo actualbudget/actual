@@ -11,8 +11,6 @@ import {
   createGroup,
   deleteCategory,
   deleteGroup,
-  moveCategory,
-  moveCategoryGroup,
   updateCategory,
   updateGroup,
 } from 'loot-core/client/queries/queriesSlice';
@@ -263,52 +261,6 @@ export function Budget() {
       dispatch(collapseModals({ rootModalName: 'category-menu' }));
     },
     [categories, dispatch, onSaveCategory],
-  );
-
-  const onReorderCategory = useCallback(
-    (id, { inGroup, aroundCategory }) => {
-      let groupId, targetId;
-
-      if (inGroup) {
-        groupId = inGroup;
-      } else if (aroundCategory) {
-        const { id: originalCatId, position } = aroundCategory;
-
-        let catId = originalCatId;
-        const group = categoryGroups.find(group =>
-          group.categories?.find(cat => cat.id === catId),
-        );
-
-        if (position === 'bottom') {
-          const idx =
-            group?.categories?.findIndex(cat => cat.id === catId) ?? -1;
-          catId = group?.categories
-            ? idx < group.categories.length - 1
-              ? group.categories[idx + 1].id
-              : null
-            : null;
-        }
-
-        groupId = group?.id;
-        targetId = catId;
-      }
-
-      dispatch(moveCategory({ id, groupId, targetId }));
-    },
-    [categoryGroups, dispatch],
-  );
-
-  const onReorderGroup = useCallback(
-    (id, targetId, position) => {
-      if (position === 'bottom') {
-        const idx = categoryGroups.findIndex(group => group.id === targetId);
-        targetId =
-          idx < categoryGroups.length - 1 ? categoryGroups[idx + 1].id : null;
-      }
-
-      dispatch(moveCategoryGroup({ id, targetId }));
-    },
-    [categoryGroups, dispatch],
   );
 
   const onPrevMonth = useCallback(async () => {
@@ -568,21 +520,12 @@ export function Budget() {
             // format changes
             key={`${numberFormat}${hideFraction}`}
             categoryGroups={categoryGroups}
-            type={budgetType}
             month={startMonth}
             monthBounds={bounds}
-            // editMode={editMode}
             onShowBudgetSummary={onShowBudgetSummary}
             onPrevMonth={onPrevMonth}
             onNextMonth={onNextMonth}
             onCurrentMonth={onCurrentMonth}
-            onSaveGroup={onSaveGroup}
-            onDeleteGroup={onDeleteGroup}
-            onAddCategory={onOpenNewCategoryModal}
-            onSaveCategory={onSaveCategory}
-            onDeleteCategory={onDeleteCategory}
-            onReorderCategory={onReorderCategory}
-            onReorderGroup={onReorderGroup}
             onBudgetAction={onBudgetAction}
             onRefresh={onRefresh}
             onEditGroup={onOpenCategoryGroupMenuModal}

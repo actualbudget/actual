@@ -151,7 +151,6 @@ type IncomeCategoryNameProps = {
 
 function IncomeCategoryName({ category, onEdit }: IncomeCategoryNameProps) {
   const sidebarColumnWidth = getColumnWidth({
-    show3Cols: false,
     isSidebar: true,
     offset: -10,
   });
@@ -317,10 +316,10 @@ function IncomeCategoryListItem({
           borderColor: theme.tableBorder,
           flexDirection: 'row',
           alignItems: 'center',
+          justifyContent: 'space-between',
           paddingLeft: 5,
           paddingRight: 5,
           zIndex: 1,
-          justifyContent: 'space-between',
           borderBottomWidth: 0.5,
           borderTopWidth: 0.5,
           opacity: !!category.hidden ? 0.5 : undefined,
