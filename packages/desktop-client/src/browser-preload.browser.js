@@ -24,28 +24,23 @@ const ACTUAL_VERSION = Platform.isPlaywright
 let worker;
 
 function createBackendWorker() {
+  worker = new Worker(backendWorkerUrl);
+  initSQLBackend(worker);
+
   if (window.SharedArrayBuffer) {
     localStorage.removeItem('SharedArrayBufferOverride');
   }
 
-  worker = new Worker(backendWorkerUrl);
-  initSQLBackend(worker);
-
-  worker.onmessage = event => {
-    // Send init only when the worker is ready to receive messages
-    if (event.data.name === 'worker-ready-for-messages') {
-      worker.postMessage({
-        type: 'init',
-        version: ACTUAL_VERSION,
-        isDev: IS_DEV,
-        publicUrl: process.env.PUBLIC_URL,
-        hash: process.env.REACT_APP_BACKEND_WORKER_HASH,
-        isSharedArrayBufferOverrideEnabled: localStorage.getItem(
-          'SharedArrayBufferOverride',
-        ),
-      });
-    }
-  };
+  worker.postMessage({
+    type: 'init',
+    version: ACTUAL_VERSION,
+    isDev: IS_DEV,
+    publicUrl: process.env.PUBLIC_URL,
+    hash: process.env.REACT_APP_BACKEND_WORKER_HASH,
+    isSharedArrayBufferOverrideEnabled: localStorage.getItem(
+      'SharedArrayBufferOverride',
+    ),
+  });
 }
 
 createBackendWorker();

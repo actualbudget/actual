@@ -107,6 +107,9 @@ function connectWorker(worker, onOpen, onError) {
       });
       onOpen();
     } else if (msg.type === 'app-init-failure') {
+      globalWorker.postMessage({
+        name: '__app-init-failure-acknowledged',
+      });
       onError(msg);
     } else if (msg.type === 'capture-exception') {
       captureException(
@@ -142,12 +145,6 @@ function connectWorker(worker, onOpen, onError) {
   if (worker instanceof MessagePort) {
     worker.start();
   }
-
-  // Signify that we're ready to receive messages
-  console.info('worker-ready-for-messages');
-  globalWorker.postMessage({
-    name: 'worker-ready-for-messages',
-  });
 }
 
 export const init: T.Init = async function (worker) {

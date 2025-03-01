@@ -44,11 +44,6 @@ export const init: T.Init = function (serverChn, handlers) {
         return;
       }
 
-      if (msg.name === 'worker-ready-for-messages') {
-        console.info('Backend: Ready for messages');
-        return;
-      }
-
       if (msg.name === 'client-connected-to-backend') {
         // the client is indicating that it is connected to this backend. Stop attempting to connect
         console.info('Backend: Client connected');
@@ -115,7 +110,7 @@ export const init: T.Init = function (serverChn, handlers) {
   let reconnectAttempts = 0;
 
   const reconnectToClientInterval = setInterval(() => {
-    console.info('Backend: Atempting to connect to client');
+    console.info('Backend: Trying to connect to client');
     serverChannel.postMessage({ type: 'connect' });
     reconnectAttempts++;
     if (reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
