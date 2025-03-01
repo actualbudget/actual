@@ -8,7 +8,6 @@ export default {
 
   institutionIds: ['MBANK_RETAIL_BREXPLPW'],
 
-
   /**
    * When requesting transaction details for MBANK_RETAIL_BREXPLPW
    * using gocardless API, it seems that bookingDate and valueDate are swapped.
@@ -20,12 +19,11 @@ export default {
   normalizeTransaction(transaction, _booked, editedTransaction = null) {
     const trans = editedTransaction ?? transaction;
 
-
     const date =
       trans.date ||
-      transaction.valueDate ||  // swapped this
+      transaction.valueDate || // swapped this
       transaction.valueDateTime ||
-      transaction.bookingDate ||  // with that
+      transaction.bookingDate || // with that
       transaction.bookingDateTime;
 
     trans.date = date;
