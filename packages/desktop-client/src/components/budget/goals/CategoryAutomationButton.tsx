@@ -45,7 +45,7 @@ export function CategoryAutomationButton({
         ...(hasAutomations && { display: 'flex !important' }),
       }}
       onPress={() => {
-        dispatch(pushModal({ name: 'category-automations-edit' }));
+        dispatch(pushModal({ modal: { name: 'category-automations-edit' } }));
       }}
     >
       <SvgChartPie style={{ width, height, flexShrink: 0 }} />
