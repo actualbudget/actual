@@ -128,6 +128,7 @@ function AccountCard({
         borderRadius: 6,
         boxShadow: `0 1px 1px ${theme.mobileAccountShadow}`,
         marginTop: 10,
+        backgroundColor: theme.tableRowBackground,
       }}
       data-testid="account-list-item"
     >

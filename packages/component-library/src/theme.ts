@@ -1,4 +1,5 @@
 export const theme = {
+  brand: 'var(--color-brand)',
   pageBackground: 'var(--color-pageBackground)',
   pageBackgroundModalActive: 'var(--color-pageBackgroundModalActive)',
   pageBackgroundTopLeft: 'var(--color-pageBackgroundTopLeft)',
@@ -17,6 +18,9 @@ export const theme = {
   cardBorder: 'var(--color-cardBorder)',
   cardShadow: 'var(--color-cardShadow)',
   tableBackground: 'var(--color-tableBackground)',
+  tableRowBorder: 'var(--color-tableRowBorder)',
+  tableRowBackground: 'var(--color-tableRowBackground)',
+  tableRowBackgroundLight: 'var(--color-tableRowBackgroundLight)',
   tableRowBackgroundHover: 'var(--color-tableRowBackgroundHover)',
   tableText: 'var(--color-tableText)',
   tableTextLight: 'var(--color-tableTextLight)',

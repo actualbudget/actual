@@ -9,6 +9,7 @@ import { integerToAmount, amountToInteger } from 'loot-core/shared/util';
 import { useCategories } from '../../hooks/useCategories';
 import { useDateFormat } from '../../hooks/useDateFormat';
 import { useSelector } from '../../redux';
+import { theme } from '../../style';
 import { AccountAutocomplete } from '../autocomplete/AccountAutocomplete';
 import { Autocomplete } from '../autocomplete/Autocomplete';
 import { CategoryAutocomplete } from '../autocomplete/CategoryAutocomplete';
@@ -213,7 +214,11 @@ export function GenericInput({
             content = (
               <RecurringSchedulePicker
                 value={value}
-                buttonStyle={{ justifyContent: 'flex-start' }}
+                buttonStyle={{
+                  justifyContent: 'flex-start',
+                  backgroundColor: theme.tableBackground,
+                  borderColor: theme.formInputBorder,
+                }}
                 onChange={onChange}
               />
             );

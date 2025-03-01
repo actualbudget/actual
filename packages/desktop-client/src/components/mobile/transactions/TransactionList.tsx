@@ -161,7 +161,7 @@ export function TransactionList({
             <Header
               style={{
                 ...styles.smallText,
-                backgroundColor: theme.pageBackground,
+                backgroundColor: theme.tableRowHeaderBackground,
                 color: theme.tableHeaderText,
                 display: 'flex',
                 justifyContent: 'center',

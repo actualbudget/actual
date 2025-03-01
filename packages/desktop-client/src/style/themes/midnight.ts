@@ -1,5 +1,7 @@
 import * as colorPalette from '../palette';
 
+export const brand = colorPalette.brand;
+
 export const pageBackground = colorPalette.gray600;
 export const pageBackgroundModalActive = colorPalette.gray700;
 export const pageBackgroundTopLeft = colorPalette.gray800;
@@ -20,6 +22,9 @@ export const cardBorder = colorPalette.purple300;
 export const cardShadow = colorPalette.gray900;
 
 export const tableBackground = colorPalette.gray800;
+export const tableRowBorder = colorPalette.gray600;
+export const tableRowBackground = colorPalette.gray800;
+export const tableRowBackgroundLight = colorPalette.gray700;
 export const tableRowBackgroundHover = colorPalette.gray500;
 export const tableText = colorPalette.gray150;
 export const tableTextLight = tableText;
@@ -35,7 +40,7 @@ export const tableBorderHover = colorPalette.purple300;
 export const tableBorderSeparator = colorPalette.gray400;
 export const tableRowBackgroundHighlight = colorPalette.purple150;
 export const tableRowBackgroundHighlightText = colorPalette.gray800;
-export const tableRowHeaderBackground = colorPalette.gray700;
+export const tableRowHeaderBackground = colorPalette.gray600;
 export const tableRowHeaderText = colorPalette.gray150;
 
 export const sidebarBackground = colorPalette.gray900;
@@ -204,9 +209,9 @@ export const noteTagBackgroundHover = colorPalette.purple600;
 export const noteTagText = colorPalette.purple100;
 
 export const budgetOtherMonth = colorPalette.gray700;
-export const budgetCurrentMonth = tableBackground;
+export const budgetCurrentMonth = colorPalette.gray800;
 export const budgetHeaderOtherMonth = colorPalette.gray800;
-export const budgetHeaderCurrentMonth = tableHeaderBackground;
+export const budgetHeaderCurrentMonth = colorPalette.gray900;
 
 export const floatingActionBarBackground = colorPalette.gray900;
 export const floatingActionBarBorder = colorPalette.purple300;
