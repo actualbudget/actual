@@ -46,7 +46,8 @@ export function validateSession(req, res) {
 
 export function validateAuthHeader(req) {
   // fallback to trustedProxies when trustedAuthProxies not set
-  const trustedAuthProxies = config.trustedAuthProxies ?? config.trustedProxies;
+  const trustedAuthProxies =
+    config.get('trustedAuthProxies') ?? config.get('trustedProxies');
   // ensure the first hop from our server is trusted
   const peer = req.socket.remoteAddress;
   const peerIp = ipaddr.process(peer);

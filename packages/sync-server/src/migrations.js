@@ -12,10 +12,10 @@ export function run(direction = 'up') {
   return new Promise(resolve =>
     migrate.load(
       {
-        stateStore: `${path.join(config.dataDir, '.migrate')}${
-          config.mode === 'test' ? '-test' : ''
+        stateStore: `${path.join(config.get('dataDir'), '.migrate')}${
+          config.get('mode') === 'test' ? '-test' : ''
         }`,
-        migrationsDirectory: `${path.join(config.projectRoot, 'migrations')}`,
+        migrationsDirectory: `${path.join(config.get('projectRoot'), 'migrations')}`,
       },
       (err, set) => {
         if (err) {
