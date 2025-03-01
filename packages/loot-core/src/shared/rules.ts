@@ -140,6 +140,22 @@ export function mapField(field, opts?) {
       return t('amount (inflow)');
     case 'amount-outflow':
       return t('amount (outflow)');
+    case 'account':
+      return t('account');
+    case 'date':
+      return t('date');
+    case 'category':
+      return t('category');
+    case 'notes':
+      return t('notes');
+    case 'payee':
+      return t('payee');
+    case 'saved':
+      return t('saved');
+    case 'cleared':
+      return t('cleared');
+    case 'reconciled':
+      return t('reconciled');
     default:
       return field;
   }
@@ -204,11 +220,11 @@ export function friendlyOp(op, type?) {
     case 'and':
       return t('and');
     case 'or':
-      return 'or';
+      return t('or');
     case 'onBudget':
-      return 'is on budget';
+      return t('is on budget');
     case 'offBudget':
-      return 'is off budget';
+      return t('is off budget');
     default:
       return '';
   }
