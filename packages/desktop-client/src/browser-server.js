@@ -59,7 +59,6 @@ self.addEventListener('message', async event => {
     const msg = event.data;
     if (!hasInitialized) {
       if (msg.type === 'init') {
-        console.info('init');
         hasInitialized = true;
         const isDev = !!msg.isDev;
         // let version = msg.version;
