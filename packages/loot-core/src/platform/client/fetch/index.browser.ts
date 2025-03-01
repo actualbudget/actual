@@ -146,7 +146,7 @@ function connectWorker(worker, onOpen, onError) {
   // Signify that we're ready to receive messages
   globalWorker.postMessage({
     type: 'init',
-    name: 'client-ready-to-receive-messages',
+    name: 'worker-ready-to-receive-messages',
   });
 }
 
