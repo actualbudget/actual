@@ -28,6 +28,7 @@ const useSyncSourceReadable = () => {
   const syncSourceReadable: Record<SyncProviders, string> = {
     goCardless: 'GoCardless',
     simpleFin: 'SimpleFIN',
+    pluggyai: 'Pluggy.ai',
     unlinked: t('Unlinked'),
   };
 

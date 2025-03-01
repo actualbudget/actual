@@ -61,6 +61,7 @@ import { OpenIDEnableModal } from './modals/OpenIDEnableModal';
 import { OutOfSyncMigrationsModal } from './modals/OutOfSyncMigrationsModal';
 import { PasswordEnableModal } from './modals/PasswordEnableModal';
 import { PayeeAutocompleteModal } from './modals/PayeeAutocompleteModal';
+import { PluggyAiInitialiseModal } from './modals/PluggyAiInitialiseModal';
 import { ScheduledTransactionMenuModal } from './modals/ScheduledTransactionMenuModal';
 import { SelectLinkedAccountsModal } from './modals/SelectLinkedAccountsModal';
 import { SimpleFinInitialiseModal } from './modals/SimpleFinInitialiseModal';
@@ -220,6 +221,11 @@ export function Modals() {
               key={name}
               onSuccess={options.onSuccess}
             />
+          );
+
+        case 'pluggyai-init':
+          return (
+            <PluggyAiInitialiseModal key={name} onSuccess={options.onSuccess} />
           );
 
         case 'gocardless-external-msg':

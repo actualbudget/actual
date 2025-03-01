@@ -10,6 +10,7 @@ import * as accountApp from './app-account.js';
 import * as adminApp from './app-admin.js';
 import * as goCardlessApp from './app-gocardless/app-gocardless.js';
 import * as openidApp from './app-openid.js';
+import * as pluggai from './app-pluggyai/app-pluggyai.js';
 import * as secretApp from './app-secrets.js';
 import * as simpleFinApp from './app-simplefin/app-simplefin.js';
 import * as syncApp from './app-sync.js';
@@ -53,6 +54,7 @@ app.use('/sync', syncApp.handlers);
 app.use('/account', accountApp.handlers);
 app.use('/gocardless', goCardlessApp.handlers);
 app.use('/simplefin', simpleFinApp.handlers);
+app.use('/pluggyai', pluggai.handlers);
 app.use('/secret', secretApp.handlers);
 
 app.use('/admin', adminApp.handlers);
