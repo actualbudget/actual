@@ -18,7 +18,6 @@ import { t } from 'i18next';
 import { v4 as uuidv4 } from 'uuid';
 
 import { unlinkAccount } from 'loot-core/client/accounts/accountsSlice';
-import { addNotification } from 'loot-core/client/actions';
 import { syncAndDownload } from 'loot-core/client/app/appSlice';
 import { useFilters } from 'loot-core/client/data-hooks/filters';
 import {
@@ -30,6 +29,7 @@ import {
   pushModal,
   replaceModal,
 } from 'loot-core/client/modals/modalsSlice';
+import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
 import * as queries from 'loot-core/client/queries';
 import {
   createPayee,
@@ -767,8 +767,10 @@ class AccountInternal extends PureComponent<
       console.error('Error applying rules:', error);
       this.props.dispatch(
         addNotification({
-          type: 'error',
-          message: 'Failed to apply rules to transactions',
+          notification: {
+            type: 'error',
+            message: 'Failed to apply rules to transactions',
+          },
         }),
       );
     } finally {
