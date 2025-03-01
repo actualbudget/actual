@@ -199,9 +199,10 @@ export function ProgressBar({ month, category }: ProgressBarProps) {
       style={{
         display: 'flex',
         position: 'absolute',
+        right: 0,
         bottom: 0,
         marginBottom: 1,
-        width: '100%',
+        width: '50%',
         opacity: barOpacity,
         transition: 'opacity 0.25s',
       }}
