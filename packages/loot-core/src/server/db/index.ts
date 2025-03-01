@@ -37,6 +37,7 @@ import {
   DbAccount,
   DbCategory,
   DbCategoryGroup,
+  DbClockMessage,
   DbPayee,
   DbTransaction,
   DbViewTransaction,
@@ -83,7 +84,7 @@ export function getDatabase() {
 }
 
 export async function loadClock() {
-  const row = await first('SELECT * FROM messages_clock');
+  const row = await first<DbClockMessage>('SELECT * FROM messages_clock');
   if (row) {
     const clock = deserializeClock(row.clock);
     setClock(clock);
@@ -166,12 +167,9 @@ export async function all(sql, params?: (string | number)[]) {
   return runQuery(sql, params, true) as any[];
 }
 
-export async function first(sql, params?: (string | number)[]) {
-  const arr = await runQuery(sql, params, true);
-  // TODO: In the next phase, we will make this function generic
-  // and pass the type of the return type to `runQuery`.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return arr.length === 0 ? null : (arr[0] as any);
+export async function first<T>(sql, params?: (string | number)[]) {
+  const arr = await runQuery<T>(sql, params, true);
+  return arr.length === 0 ? null : arr[0];
 }
 
 // The underlying sql system is now sync, but we can't update `first` yet
@@ -353,7 +351,9 @@ export async function getCategoriesGrouped(
 
 export async function insertCategoryGroup(group) {
   // Don't allow duplicate group
-  const existingGroup = await first(
+  const existingGroup = await first<
+    Pick<DbCategoryGroup, 'id' | 'name' | 'hidden'>
+  >(
     `SELECT id, name, hidden FROM category_groups WHERE UPPER(name) = ? and tombstone = 0 LIMIT 1`,
     [group.name.toUpperCase()],
   );
@@ -363,7 +363,7 @@ export async function insertCategoryGroup(group) {
     );
   }
 
-  const lastGroup = await first(`
+  const lastGroup = await first<Pick<DbCategoryGroup, 'sort_order'>>(`
     SELECT sort_order FROM category_groups WHERE tombstone = 0 ORDER BY sort_order DESC, id DESC LIMIT 1
   `);
   const sort_order = (lastGroup ? lastGroup.sort_order : 0) + SORT_INCREMENT;
@@ -411,7 +411,7 @@ export async function insertCategory(
   let id_;
   await batchMessages(async () => {
     // Dont allow duplicated names in groups
-    const existingCatInGroup = await first(
+    const existingCatInGroup = await first<Pick<DbCategory, 'id'>>(
       `SELECT id FROM categories WHERE cat_group = ? and UPPER(name) = ? and tombstone = 0 LIMIT 1`,
       [category.cat_group, category.name.toUpperCase()],
     );
@@ -422,7 +422,7 @@ export async function insertCategory(
     }
 
     if (atEnd) {
-      const lastCat = await first(`
+      const lastCat = await first<Pick<DbCategoryGroup, 'sort_order'>>(`
         SELECT sort_order FROM categories WHERE tombstone = 0 ORDER BY sort_order DESC, id DESC LIMIT 1
       `);
       sort_order = (lastCat ? lastCat.sort_order : 0) + SORT_INCREMENT;
@@ -507,11 +507,11 @@ export async function deleteCategory(
 }
 
 export async function getPayee(id: DbPayee['id']) {
-  return first(`SELECT * FROM payees WHERE id = ?`, [id]);
+  return first<DbPayee>(`SELECT * FROM payees WHERE id = ?`, [id]);
 }
 
 export async function getAccount(id: DbAccount['id']) {
-  return first(`SELECT * FROM accounts WHERE id = ?`, [id]);
+  return first<DbAccount>(`SELECT * FROM accounts WHERE id = ?`, [id]);
 }
 
 export async function insertPayee(payee) {
@@ -525,9 +525,10 @@ export async function insertPayee(payee) {
 }
 
 export async function deletePayee(payee: Pick<DbPayee, 'id'>) {
-  const { transfer_acct } = await first('SELECT * FROM payees WHERE id = ?', [
-    payee.id,
-  ]);
+  const { transfer_acct } = await first<DbPayee>(
+    'SELECT * FROM payees WHERE id = ?',
+    [payee.id],
+  );
   if (transfer_acct) {
     // You should never be able to delete transfer payees
     return;
@@ -654,7 +655,7 @@ export async function getOrphanedPayees() {
 }
 
 export async function getPayeeByName(name: DbPayee['name']) {
-  return first(
+  return first<DbPayee>(
     `SELECT * FROM payees WHERE UNICODE_LOWER(name) = ? AND tombstone = 0`,
     [name.toLowerCase()],
   );
@@ -695,7 +696,10 @@ export async function moveAccount(
   id: DbAccount['id'],
   targetId: DbAccount['id'],
 ) {
-  const account = await first('SELECT * FROM accounts WHERE id = ?', [id]);
+  const account = await first<DbAccount>(
+    'SELECT * FROM accounts WHERE id = ?',
+    [id],
+  );
   let accounts;
   if (account.closed) {
     accounts = await all(

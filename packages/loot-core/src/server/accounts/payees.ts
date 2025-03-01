@@ -1,11 +1,10 @@
 // @ts-strict-ignore
-import { CategoryEntity, PayeeEntity } from '../../types/models';
 import * as db from '../db';
 
 export async function createPayee(description) {
   // Check to make sure no payee already exists with exactly the same
   // name
-  const row: Pick<PayeeEntity, 'id'> = await db.first(
+  const row = await db.first<Pick<db.DbPayee, 'id'>>(
     `SELECT id FROM payees WHERE UNICODE_LOWER(name) = ? AND tombstone = 0`,
     [description.toLowerCase()],
   );
@@ -13,19 +12,19 @@ export async function createPayee(description) {
   if (row) {
     return row.id;
   } else {
-    return (await db.insertPayee({ name: description })) as PayeeEntity['id'];
+    return (await db.insertPayee({ name: description })) as db.DbPayee['id'];
   }
 }
 
 export async function getStartingBalancePayee() {
-  let category: CategoryEntity = await db.first(`
+  let category = await db.first<db.DbCategory>(`
     SELECT * FROM categories
       WHERE is_income = 1 AND
       LOWER(name) = 'starting balances' AND
       tombstone = 0
   `);
   if (category === null) {
-    category = await db.first(
+    category = await db.first<db.DbCategory>(
       'SELECT * FROM categories WHERE is_income = 1 AND tombstone = 0',
     );
   }
