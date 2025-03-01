@@ -25,7 +25,7 @@ The reasons for this change are as follows:
 - **Q.** _I use the [Local Installation](https://actualbudget.org/docs/install/local). How do I keep up to date?_
 
   **A.** Follow these instructions:
-  1. Clone the [Actual repository](https://github.comactualbudget/actual). You can use the following command:
+  1. Clone the [Actual repository](https://github.com/actualbudget/actual). You can use the following command:
   ```
   git clone https://github.com/actualbudget/actual.git
   ```
@@ -41,7 +41,8 @@ The reasons for this change are as follows:
   ```
   packages/sync-server
   ```
-  5. Run the server with:
+  5. Copy over the data from your `actual-server` directory (`user-files`, `server-files`, and `.migrate`) into the `packages/sync-server` directory.
+  6. Run the server with:
   ```
   yarn start:server
   ```
