@@ -1,8 +1,7 @@
 // @ts-strict-ignore
 
-import { numberSortComparer } from '@rschedule/core';
 import * as monthUtils from '../../shared/months';
-import { amountToInteger, numberFormats } from '../../shared/util';
+import { amountToInteger } from '../../shared/util';
 import { CategoryEntity } from '../../types/models';
 import * as db from '../db';
 
@@ -574,7 +573,7 @@ export class CategoryTemplate {
 
   private runBy(): number {
     const byTemplates = this.templates.filter(t => t.type === 'by');
-    let savedInfo = [];
+    const savedInfo = [];
     let totalNeeded = 0;
     let shortNumMonths;
     //find shortest time period
@@ -598,8 +597,9 @@ export class CategoryTemplate {
         );
       }
       savedInfo.push({ numMonths, period });
-      if (numMonths < shortNumMonths || !shortNumMonths)
+      if (numMonths < shortNumMonths || !shortNumMonths) {
         shortNumMonths = numMonths;
+      }
     }
 
     // calculate needed funds per template
