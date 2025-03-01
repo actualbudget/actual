@@ -184,17 +184,14 @@ export function ProgressBar({ month, category }: ProgressBarProps) {
   const barHeight = 3;
   const borderRadius = 30;
 
-  let barOpacity = '0';
-  if (isLongGoal) {
-    barOpacity = '0.5'; // By default, all goals are partly visible
-  }
+  let barOpacity = '0.5'; // By default, all categories in all months with some activity are partly visible
   if (isCurrentMonth) {
-    barOpacity = '1'; // If it's the current month, goals are fully visible
+    barOpacity = '1'; // By default, categories in the current month are fully visible
   }
   if (isCurrentMonth && hoveredMonth && hoveredMonth !== month) {
-    barOpacity = '0.5'; // Lower visibility for the current month when other months are hovered
-  } else if (isLongGoal && hoveredMonth === month) {
-    barOpacity = '1'; // If we're hovering over a month, make the goals fully visible
+    barOpacity = '0.5'; // If a non-current month is hovered over, lower visibility for the current month
+  } else if (hoveredMonth === month) {
+    barOpacity = '1'; // If a non-current month is hovered over, raise that month to fully visible
   }
 
   return (
