@@ -10,9 +10,11 @@ BANKINTER
 BAWAATWW
 Belfius
 Biedenkopf
+BIGBPLPW
 Bizum
 BKBKESMM
 BOFIIE
+BREXPLPW
 BYLADEM
 Caddyfile
 CAGLPTPL
@@ -55,6 +57,7 @@ KORT
 Kreditbank
 LHV
 LHVBEE
+MBANK
 modals
 murmurhash
 nginx
@@ -62,6 +65,7 @@ overbudgeting
 Paribas
 passwordless
 Postgre
+PPABPLPK
 prefs
 Primoco
 Priotecs
