@@ -130,6 +130,7 @@ export const MonthPicker = ({
             <View
               key={month}
               style={{
+                alignItems: 'center',
                 padding: '3px 3px',
                 width: size === 'big' ? '35px' : '20px',
                 textAlign: 'center',
@@ -190,23 +191,25 @@ export const MonthPicker = ({
               onMouseEnter={() => setHoverId(idx)}
               onMouseLeave={() => setHoverId(null)}
             >
-              {size === 'small' ? monthName[0] : monthName}
-              {showYearHeader && (
-                <View
-                  style={{
-                    position: 'absolute',
-                    top: -14,
-                    left: 0,
-                    fontSize: 10,
-                    fontWeight: 'bold',
-                    color: isMonthBudgeted
-                      ? theme.pageText
-                      : theme.pageTextSubdued,
-                  }}
-                >
-                  {year}
-                </View>
-              )}
+              <View>
+                {size === 'small' ? monthName[0] : monthName}
+                {showYearHeader && (
+                  <View
+                    style={{
+                      position: 'absolute',
+                      top: -16,
+                      left: 0,
+                      fontSize: 10,
+                      fontWeight: 'bold',
+                      color: isMonthBudgeted
+                        ? theme.pageText
+                        : theme.pageTextSubdued,
+                    }}
+                  >
+                    {year}
+                  </View>
+                )}
+              </View>
             </View>
           );
         })}

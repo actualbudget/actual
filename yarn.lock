@@ -84,7 +84,7 @@ __metadata:
   resolution: "@actual-app/sync-server@workspace:packages/sync-server"
   dependencies:
     "@actual-app/crdt": "npm:2.1.0"
-    "@actual-app/web": "npm:25.2.1"
+    "@actual-app/web": "npm:25.3.0"
     "@babel/preset-typescript": "npm:^7.20.2"
     "@types/bcrypt": "npm:^5.0.2"
     "@types/better-sqlite3": "npm:^7.6.12"
@@ -125,10 +125,10 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@actual-app/web@npm:25.2.1":
-  version: 25.2.1
-  resolution: "@actual-app/web@npm:25.2.1"
-  checksum: 10/b6dc258b7de1b710c6a9cbfd35edebb82a29b84ac031b90a0cafa2af1618c482b0f3b81e47901b9beba457e77d962fe7083f82ed0091d0fa63724cf2bd3c8f56
+"@actual-app/web@npm:25.3.0":
+  version: 25.3.0
+  resolution: "@actual-app/web@npm:25.3.0"
+  checksum: 10/cd63ec1b8ffe1a8e6b8339ee475633bf9c0f04223338f64ca2594c3dee66918b79a0c4ce24c8388abc5b9b9141654cc694a372f0b42126fada3504041c98ccb0
   languageName: node
   linkType: hard
 
