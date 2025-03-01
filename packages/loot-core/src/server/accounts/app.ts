@@ -11,11 +11,9 @@ import {
   AccountEntity,
   CategoryEntity,
   SyncServerGoCardlessAccount,
-  PayeeEntity,
   TransactionEntity,
   SyncServerSimpleFinAccount,
 } from '../../types/models';
-import { BankEntity } from '../../types/models/bank';
 import { createApp } from '../app';
 import * as db from '../db';
 import {
@@ -77,24 +75,27 @@ async function getAccountBalance({
   id: string;
   cutoff: string | Date;
 }) {
-  const { balance }: { balance: number } = await db.first(
+  const result = await db.first<{ balance: number }>(
     'SELECT sum(amount) as balance FROM transactions WHERE acct = ? AND isParent = 0 AND tombstone = 0 AND date <= ?',
     [id, db.toDateRepr(dayFromDate(cutoff))],
   );
-  return balance ? balance : 0;
+  return result?.balance ? result.balance : 0;
 }
 
 async function getAccountProperties({ id }: { id: AccountEntity['id'] }) {
-  const { balance }: { balance: number } = await db.first(
+  const balanceResult = await db.first<{ balance: number }>(
     'SELECT sum(amount) as balance FROM transactions WHERE acct = ? AND isParent = 0 AND tombstone = 0',
     [id],
   );
-  const { count }: { count: number } = await db.first(
+  const countResult = await db.first<{ count: number }>(
     'SELECT count(id) as count FROM transactions WHERE acct = ? AND tombstone = 0',
     [id],
   );
 
-  return { balance: balance || 0, numTransactions: count };
+  return {
+    balance: balanceResult?.balance || 0,
+    numTransactions: countResult?.count || 0,
+  };
 }
 
 async function linkGoCardlessAccount({
@@ -112,10 +113,15 @@ async function linkGoCardlessAccount({
   const bank = await link.findOrCreateBank(account.institution, requisitionId);
 
   if (upgradingId) {
-    const accRow: AccountEntity = await db.first(
+    const accRow = await db.first<db.DbAccount>(
       'SELECT * FROM accounts WHERE id = ?',
       [upgradingId],
     );
+
+    if (!accRow) {
+      throw new Error(`Account with ID ${upgradingId} not found.`);
+    }
+
     id = accRow.id;
     await db.update('accounts', {
       id,
@@ -178,10 +184,15 @@ async function linkSimpleFinAccount({
   );
 
   if (upgradingId) {
-    const accRow: AccountEntity = await db.first(
+    const accRow = await db.first<db.DbAccount>(
       'SELECT * FROM accounts WHERE id = ?',
       [upgradingId],
     );
+
+    if (!accRow) {
+      throw new Error(`Account with ID ${upgradingId} not found.`);
+    }
+
     id = accRow.id;
     await db.update('accounts', {
       id,
@@ -278,7 +289,7 @@ async function closeAccount({
   await unlinkAccount({ id });
 
   return withUndo(async () => {
-    const account: AccountEntity = await db.first(
+    const account = await db.first<db.DbAccount>(
       'SELECT * FROM accounts WHERE id = ? AND tombstone = 0',
       [id],
     );
@@ -303,10 +314,14 @@ async function closeAccount({
         true,
       );
 
-      const { id: payeeId }: Pick<PayeeEntity, 'id'> = await db.first(
+      const transferPayee = await db.first<Pick<db.DbPayee, 'id'>>(
         'SELECT id FROM payees WHERE transfer_acct = ?',
         [id],
       );
+
+      if (!transferPayee) {
+        throw new Error(`Transfer payee with account ID ${id} not found.`);
+      }
 
       await batchMessages(async () => {
         // TODO: what this should really do is send a special message that
@@ -328,7 +343,7 @@ async function closeAccount({
         });
 
         db.deleteAccount({ id });
-        db.deleteTransferPayee({ id: payeeId });
+        db.deleteTransferPayee({ id: transferPayee.id });
       });
     } else {
       if (balance !== 0 && transferAccountId == null) {
@@ -340,14 +355,20 @@ async function closeAccount({
       // If there is a balance we need to transfer it to the specified
       // account (and possibly categorize it)
       if (balance !== 0 && transferAccountId) {
-        const { id: payeeId }: Pick<PayeeEntity, 'id'> = await db.first(
+        const transferPayee = await db.first<Pick<db.DbPayee, 'id'>>(
           'SELECT id FROM payees WHERE transfer_acct = ?',
           [transferAccountId],
         );
 
+        if (!transferPayee) {
+          throw new Error(
+            `Transfer payee with account ID ${transferAccountId} not found.`,
+          );
+        }
+
         await mainApp.handlers['transaction-add']({
           id: uuidv4(),
-          payee: payeeId,
+          payee: transferPayee.id,
           amount: -balance,
           account: id,
           date: monthUtils.currentDay(),
@@ -948,19 +969,20 @@ async function importTransactions({
 }
 
 async function unlinkAccount({ id }: { id: AccountEntity['id'] }) {
-  const { bank: bankId }: Pick<AccountEntity, 'bank'> = await db.first(
-    'SELECT bank FROM accounts WHERE id = ?',
+  const accRow = await db.first<db.DbAccount>(
+    'SELECT * FROM accounts WHERE id = ?',
     [id],
   );
+
+  if (!accRow) {
+    throw new Error(`Account with ID ${id} not found.`);
+  }
+
+  const bankId = accRow.bank;
 
   if (!bankId) {
     return 'ok';
   }
-
-  const accRow: AccountEntity = await db.first(
-    'SELECT * FROM accounts WHERE id = ?',
-    [id],
-  );
 
   const isGoCardless = accRow.account_sync_source === 'goCardless';
 
@@ -978,7 +1000,7 @@ async function unlinkAccount({ id }: { id: AccountEntity['id'] }) {
     return;
   }
 
-  const { count }: { count: number } = await db.first(
+  const accountWithBankResult = await db.first<{ count: number }>(
     'SELECT COUNT(*) as count FROM accounts WHERE bank = ?',
     [bankId],
   );
@@ -990,14 +1012,22 @@ async function unlinkAccount({ id }: { id: AccountEntity['id'] }) {
     return 'ok';
   }
 
-  if (count === 0) {
-    const { bank_id: requisitionId }: Pick<BankEntity, 'bank_id'> =
-      await db.first('SELECT bank_id FROM banks WHERE id = ?', [bankId]);
+  if (!accountWithBankResult || accountWithBankResult.count === 0) {
+    const bank = await db.first<Pick<db.DbBank, 'bank_id'>>(
+      'SELECT bank_id FROM banks WHERE id = ?',
+      [bankId],
+    );
+
+    if (!bank) {
+      throw new Error(`Bank with ID ${bankId} not found.`);
+    }
 
     const serverConfig = getServer();
     if (!serverConfig) {
       throw new Error('Failed to get server config.');
     }
+
+    const requisitionId = bank.bank_id;
 
     try {
       await post(

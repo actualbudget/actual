@@ -5,6 +5,7 @@ import { captureBreadcrumb } from '../platform/exceptions';
 import * as sqlite from '../platform/server/sqlite';
 import { sheetForMonth } from '../shared/months';
 
+import { DbPreference } from './db';
 import * as Platform from './platform';
 import { Spreadsheet } from './spreadsheet/spreadsheet';
 import { resolveName } from './spreadsheet/util';
@@ -189,16 +190,19 @@ export async function reloadSpreadsheet(db): Promise<Spreadsheet> {
   }
 }
 
-export async function loadUserBudgets(db): Promise<void> {
+export async function loadUserBudgets(
+  db: typeof import('./db'),
+): Promise<void> {
   const sheet = globalSheet;
 
   // TODO: Clear out the cache here so make sure future loads of the app
   // don't load any extra values that aren't set here
 
   const { value: budgetType = 'rollover' } =
-    (await db.first('SELECT value from preferences WHERE id = ?', [
-      'budgetType',
-    ])) ?? {};
+    (await db.first<Pick<DbPreference, 'value'>>(
+      'SELECT value from preferences WHERE id = ?',
+      ['budgetType'],
+    )) ?? {};
 
   const table = budgetType === 'report' ? 'reflect_budgets' : 'zero_budgets';
   const budgets = await db.all(`
