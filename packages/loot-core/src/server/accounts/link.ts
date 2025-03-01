@@ -5,7 +5,7 @@ import * as db from '../db';
 
 export async function findOrCreateBank(institution, requisitionId) {
   const bank = await db.first<Pick<db.DbBank, 'id' | 'bank_id'>>(
-    'SELECT id, bank_id, name FROM banks WHERE bank_id = ?',
+    'SELECT id, bank_id FROM banks WHERE bank_id = ?',
     [requisitionId],
   );
 
