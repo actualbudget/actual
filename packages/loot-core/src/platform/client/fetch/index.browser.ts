@@ -142,6 +142,12 @@ function connectWorker(worker, onOpen, onError) {
   if (worker instanceof MessagePort) {
     worker.start();
   }
+
+  // Signify that we're ready to receive messages
+  globalWorker.postMessage({
+    type: 'init',
+    name: 'client-ready-to-receive-messages',
+  });
 }
 
 export const init: T.Init = async function (worker) {

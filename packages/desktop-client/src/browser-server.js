@@ -42,21 +42,11 @@ self.addEventListener('message', async event => {
       const msg = event.data;
 
       if (msg.type === 'init') {
+        console.info('received init');
         hasInitialized = true;
         const isDev = !!msg.isDev;
         // let version = msg.version;
         const hash = msg.hash;
-
-        if (
-          !self.SharedArrayBuffer &&
-          !msg.isSharedArrayBufferOverrideEnabled
-        ) {
-          self.postMessage({
-            type: 'app-init-failure',
-            SharedArrayBufferMissing: true,
-          });
-          return;
-        }
 
         await importScriptsWithRetry(
           `${msg.publicUrl}/kcab/kcab.worker.${hash}.js`,

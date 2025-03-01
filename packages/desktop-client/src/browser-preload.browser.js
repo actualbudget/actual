@@ -31,16 +31,24 @@ function createBackendWorker() {
     localStorage.removeItem('SharedArrayBufferOverride');
   }
 
-  worker.postMessage({
-    type: 'init',
-    version: ACTUAL_VERSION,
-    isDev: IS_DEV,
-    publicUrl: process.env.PUBLIC_URL,
-    hash: process.env.REACT_APP_BACKEND_WORKER_HASH,
-    isSharedArrayBufferOverrideEnabled: localStorage.getItem(
-      'SharedArrayBufferOverride',
-    ),
-  });
+  worker.onmessage = event => {
+    // Send init only when the worker is ready to receive messages
+    if (
+      event.data.type === 'init' &&
+      event.data.name === 'client-ready-to-receive-messages'
+    ) {
+      worker.postMessage({
+        type: 'init',
+        version: ACTUAL_VERSION,
+        isDev: IS_DEV,
+        publicUrl: process.env.PUBLIC_URL,
+        hash: process.env.REACT_APP_BACKEND_WORKER_HASH,
+        isSharedArrayBufferOverrideEnabled: localStorage.getItem(
+          'SharedArrayBufferOverride',
+        ),
+      });
+    }
+  };
 }
 
 createBackendWorker();
