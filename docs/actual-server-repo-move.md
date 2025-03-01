@@ -14,7 +14,7 @@ The reasons for this change are as follows:
 
 - **Q.** _I use Docker Hub/Github's container registry, how do I stay up to date?_
 
-  **A.** We will continue to push images to [Docker Hub](https://hub.docker.com/r/actualbudget/actual-server) and [Github's container registry](https://ghcr.io/actualbudget/actual-server) as usual.
+  **A.** We will continue to push images to [Docker Hub](https://hub.docker.com/r/actualbudget/actual-server) and [Github's container registry](https://ghcr.io/actualbudget/actual) as usual.
 
 
 - **Q.** _I build the docker image locally, can I still do that?_

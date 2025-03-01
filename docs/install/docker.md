@@ -5,7 +5,7 @@ sidebar_position: 2
 
 ## Hosting Actual on a home server with Docker
 
-Actual is also available as a Docker image ready to be run in your own custom environment. We publish the image both to [Docker Hub](https://hub.docker.com/r/actualbudget/actual-server) (as `actualbudget/actual-server`) and [GitHub’s container registry](https://ghcr.io/actualbudget/actual-server) (as `ghcr.io/actualbudget/actual-server`). Actual should function the same when pulled from either registry, so you can choose whichever one you prefer.
+Actual is also available as a Docker image ready to be run in your own custom environment. We publish the image both to [Docker Hub](https://hub.docker.com/r/actualbudget/actual-server) (as `actualbudget/actual-server`) and [GitHub’s container registry](https://ghcr.io/actualbudget/actual) (as `ghcr.io/actualbudget/actual`). Actual should function the same when pulled from either registry, so you can choose whichever one you prefer.
 
 ## Docker Tags
 
