@@ -147,6 +147,7 @@ export interface ServerHandlers {
           active: boolean;
         }[];
         multiuser: boolean;
+        autoLogin: boolean;
       }
   >;
 
@@ -187,6 +188,10 @@ export interface ServerHandlers {
   ) => Promise<{ error?: string; redirect_url?: string }>;
 
   'subscribe-sign-out': () => Promise<'ok'>;
+
+  'subscribe-logout-openid': (arg: {
+    returnUrl: string;
+  }) => Promise<{ error?: string; redirect_url?: string }>;
 
   'subscribe-set-token': (arg: { token: string }) => Promise<void>;
 
