@@ -53,7 +53,7 @@ curl -H "Authorization: Bearer <ACCESS_TOKEN>" https://api.youneedabudget.com/v1
 
 - Choose the exported JSON file
 
-### Optional: Cleanup
+### Cleanup
 
 #### Credit Cards (Fix Overspending)
 
@@ -85,3 +85,19 @@ To `hold` the leftover funds for the next month follow these steps:
 4. Repeat for all desired months.
 
 A full description of how funds rollover and the `hold` feature can be found in [this article.](../budgeting/#how-money-rolls-over)
+
+#### Duplicate Categories or Groups
+
+Actual does not allow duplicate category groups, or duplicate categories within a group.
+This happens sometimes in YNAB especially if you have an old hidden category or group that has been forgotten about.
+Actual is automatically rename these duplicates by appending a `-1` to the end of the name (potentially higher numbers if you have multiple duplicates).
+Make sure to show hidden categories to see if you have any of these duplicates.
+To see your hidden categories select the "Toggle Hidden Categories" option in the kebab menu next to the "Categories" header.
+
+**To Fix duplicate groups**:
+1. Move any categories inside the duplicate group to a different group.
+2. Delete the duplicate group by selecting "Delete" in the menu next to the group name.
+
+**To Fix Duplicate Categories**:
+1. Find the duplicate category and select "Delete" in the menu next to the category name.
+2. Choose what category to move any transactions to that are part of this duplicate category.
