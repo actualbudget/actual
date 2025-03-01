@@ -7,6 +7,7 @@ import { Popover } from '@actual-app/components/popover';
 import { styles } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
 
+import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { SvgDotsHorizontalTriple } from '../../icons/v1';
 import { theme } from '../../style';
 
@@ -18,6 +19,7 @@ type BudgetTotalsProps = {
   toggleHiddenCategories: () => void;
   expandAllCategories: () => void;
   collapseAllCategories: () => void;
+  toggleGoals: () => void;
 };
 
 export const BudgetTotals = memo(function BudgetTotals({
@@ -25,10 +27,13 @@ export const BudgetTotals = memo(function BudgetTotals({
   toggleHiddenCategories,
   expandAllCategories,
   collapseAllCategories,
+  toggleGoals,
 }: BudgetTotalsProps) {
   const { t } = useTranslation();
   const [menuOpen, setMenuOpen] = useState(false);
   const triggerRef = useRef(null);
+  const goalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
+  const goalTemplatesUIEnabled = useFeatureFlag('goalTemplatesUIEnabled');
 
   return (
     <View
@@ -89,6 +94,8 @@ export const BudgetTotals = memo(function BudgetTotals({
                 expandAllCategories();
               } else if (type === 'collapseAllCategories') {
                 collapseAllCategories();
+              } else if (type === 'toggle-goals') {
+                toggleGoals();
               }
               setMenuOpen(false);
             }}
@@ -105,6 +112,14 @@ export const BudgetTotals = memo(function BudgetTotals({
                 name: 'collapseAllCategories',
                 text: t('Collapse all'),
               },
+              ...(goalTemplatesEnabled && goalTemplatesUIEnabled
+                ? [
+                    {
+                      name: 'toggle-goals',
+                      text: t('Toggle budget automations'),
+                    },
+                  ]
+                : []),
             ]}
           />
         </Popover>
