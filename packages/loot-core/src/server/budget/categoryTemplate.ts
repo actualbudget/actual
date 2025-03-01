@@ -141,7 +141,7 @@ export class CategoryTemplate {
           break;
         }
         case 'by': {
-          //TODO add the logic to run all of these at once or whatever is needed
+          // all by's get run at once
           if (!byFlag) {
             newBudget = this.runBy();
           } else {
@@ -629,6 +629,4 @@ export class CategoryTemplate {
       (totalNeeded - this.fromLastMonth) / (shortNumMonths + 1),
     );
   }
-
-  //private async runSchedule(template_lines) {}
 }
