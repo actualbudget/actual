@@ -44,6 +44,11 @@ export const init: T.Init = function (serverChn, handlers) {
         return;
       }
 
+      if (msg.name === 'worker-ready-for-messages') {
+        console.info('Backend: Ready for messages');
+        return;
+      }
+
       if (msg.name === 'client-connected-to-backend') {
         // the client is indicating that it is connected to this backend. Stop attempting to connect
         console.info('Backend: Client connected');

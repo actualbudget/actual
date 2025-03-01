@@ -144,9 +144,9 @@ function connectWorker(worker, onOpen, onError) {
   }
 
   // Signify that we're ready to receive messages
+  console.info('worker-ready-for-messages');
   globalWorker.postMessage({
-    type: 'init',
-    name: 'worker-ready-to-receive-messages',
+    name: 'worker-ready-for-messages',
   });
 }
 

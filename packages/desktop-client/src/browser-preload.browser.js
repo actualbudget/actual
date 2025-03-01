@@ -24,19 +24,16 @@ const ACTUAL_VERSION = Platform.isPlaywright
 let worker;
 
 function createBackendWorker() {
-  worker = new Worker(backendWorkerUrl);
-  initSQLBackend(worker);
-
   if (window.SharedArrayBuffer) {
     localStorage.removeItem('SharedArrayBufferOverride');
   }
 
+  worker = new Worker(backendWorkerUrl);
+  initSQLBackend(worker);
+
   worker.onmessage = event => {
     // Send init only when the worker is ready to receive messages
-    if (
-      event.data.type === 'init' &&
-      event.data.name === 'client-ready-to-receive-messages'
-    ) {
+    if (event.data.name === 'worker-ready-for-messages') {
       worker.postMessage({
         type: 'init',
         version: ACTUAL_VERSION,
