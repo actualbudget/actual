@@ -51,11 +51,7 @@ export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
       return;
     }
 
-    if (upgradingAccountId == null) {
-      authorizeBank(dispatch);
-    } else {
-      authorizeBank(dispatch);
-    }
+    authorizeBank(dispatch);
   };
 
   const onConnectSimpleFin = async () => {

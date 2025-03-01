@@ -78,16 +78,18 @@ export function SelectLinkedAccountsModal({
           return;
         }
 
+        const upgradingId =
+          chosenLocalAccountId !== addOnBudgetAccountOption.id &&
+          chosenLocalAccountId !== addOffBudgetAccountOption.id
+            ? chosenLocalAccountId
+            : undefined;
+
         // Finally link the matched account
         if (syncSource === 'simpleFin') {
           dispatch(
             linkAccountSimpleFin({
               externalAccount,
-              upgradingId:
-                chosenLocalAccountId !== addOnBudgetAccountOption.id &&
-                chosenLocalAccountId !== addOffBudgetAccountOption.id
-                  ? chosenLocalAccountId
-                  : undefined,
+              upgradingId,
               offBudget,
             }),
           );
@@ -96,11 +98,7 @@ export function SelectLinkedAccountsModal({
             linkAccount({
               requisitionId,
               account: externalAccount,
-              upgradingId:
-                chosenLocalAccountId !== addOnBudgetAccountOption.id &&
-                chosenLocalAccountId !== addOffBudgetAccountOption.id
-                  ? chosenLocalAccountId
-                  : undefined,
+              upgradingId,
               offBudget,
             }),
           );
