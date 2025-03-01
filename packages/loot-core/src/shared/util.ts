@@ -399,9 +399,9 @@ export function currencyToAmount(currencyAmount: string): Amount | null {
       match.index + 4 === currencyAmount.length)
   ) {
     fraction = null;
-    integer = currencyAmount.replace(/\D/g, '');
+    integer = currencyAmount.replace(/[^\d-]/g, '');
   } else {
-    integer = currencyAmount.slice(0, match.index).replace(/\D/g, '');
+    integer = currencyAmount.slice(0, match.index).replace(/[^\d-]/g, '');
     fraction = currencyAmount.slice(match.index + 1);
   }
 

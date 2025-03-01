@@ -62,7 +62,7 @@ import { SvgLeftArrow2, SvgRightArrow2, SvgSplit } from '../../icons/v0';
 import { SvgArrowDown, SvgArrowUp, SvgCheveronDown } from '../../icons/v1';
 import {
   SvgArrowsSynchronize,
-  SvgCalendar,
+  SvgCalendar3,
   SvgHyperlink2,
 } from '../../icons/v2';
 import { useDispatch } from '../../redux';
@@ -742,7 +742,7 @@ function PayeeIcons({
           {recurring ? (
             <SvgArrowsSynchronize style={scheduleIconStyle} />
           ) : (
-            <SvgCalendar style={scheduleIconStyle} />
+            <SvgCalendar3 style={scheduleIconStyle} />
           )}
         </Button>
       )}
@@ -1861,6 +1861,7 @@ function TransactionTableInner({
       : trans.error;
 
     const hasSplitError =
+      (trans.is_parent || trans.is_child) &&
       (!expanded || isLastChild(transactions, index)) &&
       error &&
       error.type === 'SplitTransactionError';

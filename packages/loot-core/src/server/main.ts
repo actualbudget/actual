@@ -14,7 +14,6 @@ import { logger } from '../platform/server/log';
 import * as sqlite from '../platform/server/sqlite';
 import * as monthUtils from '../shared/months';
 import { q } from '../shared/query';
-import { stringToInteger } from '../shared/util';
 import { type Budget } from '../types/budget';
 import { Handlers } from '../types/handlers';
 import { OpenIdConfig } from '../types/models/openid';
@@ -500,103 +499,6 @@ handlers['query'] = async function (query) {
   }
 
   return aqlQuery(query);
-};
-
-handlers['save-global-prefs'] = async function (prefs) {
-  if ('maxMonths' in prefs) {
-    await asyncStorage.setItem('max-months', '' + prefs.maxMonths);
-  }
-  if ('documentDir' in prefs) {
-    if (await fs.exists(prefs.documentDir)) {
-      await asyncStorage.setItem('document-dir', prefs.documentDir);
-    }
-  }
-  if ('floatingSidebar' in prefs) {
-    await asyncStorage.setItem('floating-sidebar', '' + prefs.floatingSidebar);
-  }
-  if ('language' in prefs) {
-    await asyncStorage.setItem('language', prefs.language);
-  }
-  if ('theme' in prefs) {
-    await asyncStorage.setItem('theme', prefs.theme);
-  }
-  if ('preferredDarkTheme' in prefs) {
-    await asyncStorage.setItem(
-      'preferred-dark-theme',
-      prefs.preferredDarkTheme,
-    );
-  }
-  if ('serverSelfSignedCert' in prefs) {
-    await asyncStorage.setItem(
-      'server-self-signed-cert',
-      prefs.serverSelfSignedCert,
-    );
-  }
-  return 'ok';
-};
-
-handlers['load-global-prefs'] = async function () {
-  const [
-    [, floatingSidebar],
-    [, maxMonths],
-    [, documentDir],
-    [, encryptKey],
-    [, language],
-    [, theme],
-    [, preferredDarkTheme],
-    [, serverSelfSignedCert],
-  ] = await asyncStorage.multiGet([
-    'floating-sidebar',
-    'max-months',
-    'document-dir',
-    'encrypt-key',
-    'language',
-    'theme',
-    'preferred-dark-theme',
-    'server-self-signed-cert',
-  ] as const);
-  return {
-    floatingSidebar: floatingSidebar === 'true' ? true : false,
-    maxMonths: stringToInteger(maxMonths || ''),
-    documentDir: documentDir || getDefaultDocumentDir(),
-    keyId: encryptKey && JSON.parse(encryptKey).id,
-    language,
-    theme:
-      theme === 'light' ||
-      theme === 'dark' ||
-      theme === 'auto' ||
-      theme === 'development' ||
-      theme === 'midnight'
-        ? theme
-        : 'auto',
-    preferredDarkTheme:
-      preferredDarkTheme === 'dark' || preferredDarkTheme === 'midnight'
-        ? preferredDarkTheme
-        : 'dark',
-    serverSelfSignedCert: serverSelfSignedCert || undefined,
-  };
-};
-
-handlers['save-prefs'] = async function (prefsToSet) {
-  const { cloudFileId } = prefs.getPrefs();
-
-  // Need to sync the budget name on the server as well
-  if (prefsToSet.budgetName && cloudFileId) {
-    const userToken = await asyncStorage.getItem('user-token');
-
-    await post(getServer().SYNC_SERVER + '/update-user-filename', {
-      token: userToken,
-      fileId: cloudFileId,
-      name: prefsToSet.budgetName,
-    });
-  }
-
-  await prefs.savePrefs(prefsToSet);
-  return 'ok';
-};
-
-handlers['load-prefs'] = async function () {
-  return prefs.getPrefs();
 };
 
 handlers['sync-reset'] = async function () {
@@ -1608,7 +1510,7 @@ app.combine(
   accountsApp,
 );
 
-function getDefaultDocumentDir() {
+export function getDefaultDocumentDir() {
   if (Platform.isMobile) {
     // On mobile, unfortunately we need to be backwards compatible
     // with the old folder structure which does not store files inside

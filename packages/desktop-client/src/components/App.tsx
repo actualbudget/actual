@@ -16,18 +16,18 @@ import { View } from '@actual-app/components/view';
 
 import {
   addNotification,
-  closeBudget,
-  loadBudget,
   loadGlobalPrefs,
   signOut,
 } from 'loot-core/client/actions';
 import { setAppState, sync } from 'loot-core/client/app/appSlice';
+import { closeBudget, loadBudget } from 'loot-core/client/budgets/budgetsSlice';
 import * as Platform from 'loot-core/client/platform';
 import { SpreadsheetProvider } from 'loot-core/client/SpreadsheetProvider';
 import { init as initConnection, send } from 'loot-core/platform/client/fetch';
 
 import { handleGlobalEvents } from '../global-events';
 import { useMetadataPref } from '../hooks/useMetadataPref';
+import { setI18NextLanguage } from '../i18n';
 import { installPolyfills } from '../polyfills';
 import { useDispatch, useSelector, useStore } from '../redux';
 import { hasHiddenScrollbars, ThemeStyle, useTheme } from '../style';
@@ -51,6 +51,10 @@ function AppInner() {
   const { showBoundary: showErrorBoundary } = useErrorBoundary();
   const dispatch = useDispatch();
   const userData = useSelector(state => state.user.data);
+
+  useEffect(() => {
+    setI18NextLanguage(null);
+  }, []);
 
   useEffect(() => {
     const maybeUpdate = async <T,>(cb?: () => T): Promise<T> => {
@@ -95,7 +99,7 @@ function AppInner() {
       );
       const budgetId = await send('get-last-opened-backup');
       if (budgetId) {
-        await dispatch(loadBudget(budgetId));
+        await dispatch(loadBudget({ id: budgetId }));
 
         // Check to see if this file has been remotely deleted (but
         // don't block on this in case they are offline or something)
