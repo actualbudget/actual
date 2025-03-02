@@ -298,7 +298,7 @@ export const syncAccounts = createAppAsyncThunk(
 
 type MoveAccountPayload = {
   id: AccountEntity['id'];
-  targetId: AccountEntity['id'];
+  targetId: AccountEntity['id'] | null;
 };
 
 export const moveAccount = createAppAsyncThunk(

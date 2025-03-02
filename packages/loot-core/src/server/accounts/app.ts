@@ -389,7 +389,7 @@ async function moveAccount({
   targetId,
 }: {
   id: AccountEntity['id'];
-  targetId: AccountEntity['id'];
+  targetId: AccountEntity['id'] | null;
 }) {
   await db.moveAccount(id, targetId);
 }
