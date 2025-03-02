@@ -10,7 +10,11 @@ import { ListBox, Section, Header, Collection } from 'react-aria-components';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
-import { Menu, type MenuItemObject } from '@actual-app/components/menu';
+import {
+  Menu,
+  type MenuItem,
+  type MenuItemObject,
+} from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
@@ -41,6 +45,7 @@ import { useScrollListener } from '../../ScrollProvider';
 import { FloatingActionBar } from '../FloatingActionBar';
 
 import { TransactionListItem } from './TransactionListItem';
+import { validForTransfer } from 'loot-core/client/transfer';
 
 const NOTIFICATION_BOTTOM_INSET = 75;
 
@@ -72,6 +77,7 @@ type TransactionListProps = {
   onOpenTransaction?: (transaction: TransactionEntity) => void;
   isLoadingMore: boolean;
   onLoadMore: () => void;
+  showMakeTransfer: boolean;
 };
 
 export function TransactionList({
@@ -80,6 +86,7 @@ export function TransactionList({
   onOpenTransaction,
   isLoadingMore,
   onLoadMore,
+  showMakeTransfer,
 }: TransactionListProps) {
   const { t } = useTranslation();
   const sections = useMemo(() => {
@@ -205,7 +212,10 @@ export function TransactionList({
       )}
 
       {selectedTransactions.size > 0 && (
-        <SelectedTransactionsFloatingActionBar transactions={transactions} />
+        <SelectedTransactionsFloatingActionBar
+          transactions={transactions}
+          showMakeTransfer={showMakeTransfer}
+        />
       )}
     </>
   );
@@ -214,11 +224,13 @@ export function TransactionList({
 type SelectedTransactionsFloatingActionBarProps = {
   transactions: readonly TransactionEntity[];
   style?: CSSProperties;
+  showMakeTransfer: boolean;
 };
 
 function SelectedTransactionsFloatingActionBar({
   transactions,
   style = {},
+  showMakeTransfer,
 }: SelectedTransactionsFloatingActionBarProps) {
   const editMenuTriggerRef = useRef(null);
   const [isEditMenuOpen, setIsEditMenuOpen] = useState(false);
@@ -289,6 +301,58 @@ function SelectedTransactionsFloatingActionBar({
     };
   }, [dispatch]);
 
+  const canBeTransfer = useMemo(() => {
+    // only two selected
+    if (selectedTransactionsArray.length !== 2) {
+      return false;
+    }
+    const fromTrans = transactions.find(
+      t => t.id === selectedTransactionsArray[0],
+    );
+    const toTrans = transactions.find(
+      t => t.id === selectedTransactionsArray[1],
+    );
+
+    // previously selected transactions aren't always present in current transaction list
+    if (!fromTrans || !toTrans) {
+      return false;
+    }
+
+    return validForTransfer(fromTrans, toTrans);
+  }, [selectedTransactionsArray, transactions]);
+
+  const moreOptionsMenuItems: MenuItem<string>[] = [
+    {
+      name: 'duplicate',
+      text: 'Duplicate',
+    },
+  ];
+
+  if (allTransactionsAreLinked) {
+    moreOptionsMenuItems.push({
+      name: 'unlink-schedule',
+      text: 'Unlink schedule',
+    });
+  } else {
+    moreOptionsMenuItems.push({
+      name: 'link-schedule',
+      text: 'Link schedule',
+    });
+  }
+
+  if (showMakeTransfer) {
+    moreOptionsMenuItems.push({
+      name: 'transfer',
+      text: 'Make transfer',
+      disabled: !canBeTransfer,
+    });
+  }
+
+  moreOptionsMenuItems.push({
+    name: 'delete',
+    text: 'Delete',
+  });
+
   return (
     <FloatingActionBar style={style}>
       <View
@@ -358,7 +422,7 @@ function SelectedTransactionsFloatingActionBar({
                   name,
                   ids: selectedTransactionsArray,
                   onSuccess: (ids, name, value, mode) => {
-                    let displayValue = value;
+                    let displayValue;
                     switch (name) {
                       case 'account':
                         displayValue =
@@ -511,7 +575,7 @@ function SelectedTransactionsFloatingActionBar({
                     },
                   });
                 } else if (type === 'transfer') {
-                  onSetTransfer?.([...selectedTransactions], payees, ids =>
+                  onSetTransfer?.(selectedTransactionsArray, payees, ids =>
                     showUndoNotification({
                       message: `Successfully marked ${ids.length} as transfer`,
                     }),
@@ -519,33 +583,7 @@ function SelectedTransactionsFloatingActionBar({
                 }
                 setIsMoreOptionsMenuOpen(false);
               }}
-              items={[
-                {
-                  name: 'duplicate',
-                  text: 'Duplicate',
-                },
-                ...(allTransactionsAreLinked
-                  ? [
-                      {
-                        name: 'unlink-schedule',
-                        text: 'Unlink schedule',
-                      },
-                    ]
-                  : [
-                      {
-                        name: 'link-schedule',
-                        text: 'Link schedule',
-                      },
-                    ]),
-                {
-                  name: 'transfer',
-                  text: 'Make transfer',
-                },
-                {
-                  name: 'delete',
-                  text: 'Delete',
-                },
-              ]}
+              items={moreOptionsMenuItems}
             />
           </Popover>
         </View>
