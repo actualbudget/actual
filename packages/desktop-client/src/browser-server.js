@@ -36,11 +36,28 @@ const importScriptsWithRetry = async (script, { maxRetries = 5 } = {}) => {
   }
 };
 
+const RECONNECT_INTERVAL_MS = 200;
+const MAX_RECONNECT_ATTEMPTS = 500;
+let reconnectAttempts = 0;
+
+const postMessageWithRetry = message => {
+  const reconnectToClientInterval = setInterval(() => {
+    self.postMessage(message);
+
+    reconnectAttempts++;
+    if (reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
+      clearInterval(reconnectToClientInterval);
+    }
+  }, RECONNECT_INTERVAL_MS);
+
+  return reconnectToClientInterval;
+};
+
+let appInitFailureInterval;
 self.addEventListener('message', async event => {
   try {
+    const msg = event.data;
     if (!hasInitialized) {
-      const msg = event.data;
-
       if (msg.type === 'init') {
         hasInitialized = true;
         const isDev = !!msg.isDev;
@@ -51,10 +68,11 @@ self.addEventListener('message', async event => {
           !self.SharedArrayBuffer &&
           !msg.isSharedArrayBufferOverrideEnabled
         ) {
-          self.postMessage({
+          appInitFailureInterval = postMessageWithRetry({
             type: 'app-init-failure',
             SharedArrayBufferMissing: true,
           });
+
           return;
         }
 
@@ -65,19 +83,23 @@ self.addEventListener('message', async event => {
 
         backend.initApp(isDev, self).catch(err => {
           console.log(err);
-          const msg = {
+          appInitFailureInterval = postMessageWithRetry({
             type: 'app-init-failure',
             IDBFailure: err.message.includes('indexeddb-failure'),
-          };
-          self.postMessage(msg);
+          });
 
           throw err;
         });
       }
     }
+
+    if (msg.name === '__app-init-failure-acknowledged') {
+      // Clear the interval if the client has acknowledged the failure, otherwise keep retrying
+      clearInterval(appInitFailureInterval);
+    }
   } catch (error) {
     console.log('Failed initializing backend:', error);
-    self.postMessage({
+    appInitFailureInterval = postMessageWithRetry({
       type: 'app-init-failure',
       BackendInitFailure: true,
     });
