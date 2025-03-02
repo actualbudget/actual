@@ -578,7 +578,7 @@ ipcMain.handle(
             retry(error);
           }
         },
-        { maxTimeout: 200 },
+        { minTimeout: 200, maxTimeout: 500, factor: 1.25 },
       );
     } catch (error) {
       // Fail silently. The move worked, but the old directory wasn't cleaned up - most likely a permission issue.
