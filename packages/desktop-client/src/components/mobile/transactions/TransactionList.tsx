@@ -19,8 +19,10 @@ import { Popover } from '@actual-app/components/popover';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
+import { t } from 'i18next';
 
 import { setNotificationInset } from 'loot-core/client/actions';
+import { validForTransfer } from 'loot-core/client/transfer';
 import * as monthUtils from 'loot-core/shared/months';
 import { isPreviewId } from 'loot-core/shared/transactions';
 import { groupById, integerToCurrency } from 'loot-core/shared/util';
@@ -45,7 +47,6 @@ import { useScrollListener } from '../../ScrollProvider';
 import { FloatingActionBar } from '../FloatingActionBar';
 
 import { TransactionListItem } from './TransactionListItem';
-import { validForTransfer } from 'loot-core/client/transfer';
 
 const NOTIFICATION_BOTTOM_INSET = 75;
 
@@ -240,6 +241,7 @@ function SelectedTransactionsFloatingActionBar({
     <T extends string>(item: MenuItemObject<T>) => ({
       ...styles.mobileMenuItem,
       color: theme.mobileHeaderText,
+      ...(item.disabled === true && { color: theme.buttonBareDisabledText }),
       ...(item.name === 'delete' && { color: theme.errorTextMenu }),
     }),
     [],
@@ -324,33 +326,33 @@ function SelectedTransactionsFloatingActionBar({
   const moreOptionsMenuItems: MenuItem<string>[] = [
     {
       name: 'duplicate',
-      text: 'Duplicate',
+      text: t('Duplicate'),
     },
   ];
 
   if (allTransactionsAreLinked) {
     moreOptionsMenuItems.push({
       name: 'unlink-schedule',
-      text: 'Unlink schedule',
+      text: t('Unlink schedule'),
     });
   } else {
     moreOptionsMenuItems.push({
       name: 'link-schedule',
-      text: 'Link schedule',
+      text: t('Link schedule'),
     });
   }
 
   if (showMakeTransfer) {
     moreOptionsMenuItems.push({
       name: 'transfer',
-      text: 'Make transfer',
+      text: t('Make transfer'),
       disabled: !canBeTransfer,
     });
   }
 
   moreOptionsMenuItems.push({
     name: 'delete',
-    text: 'Delete',
+    text: t('Delete'),
   });
 
   return (
@@ -399,7 +401,7 @@ function SelectedTransactionsFloatingActionBar({
           <Button
             variant="bare"
             ref={editMenuTriggerRef}
-            aria-label="Edit fields"
+            aria-label={t('Edit fields')}
             onPress={() => {
               setIsEditMenuOpen(true);
             }}
@@ -482,19 +484,19 @@ function SelectedTransactionsFloatingActionBar({
                 // },
                 {
                   name: 'account',
-                  text: 'Account',
+                  text: t('Account'),
                 },
                 {
                   name: 'payee',
-                  text: 'Payee',
+                  text: t('Payee'),
                 },
                 {
                   name: 'notes',
-                  text: 'Notes',
+                  text: t('Notes'),
                 },
                 {
                   name: 'category',
-                  text: 'Category',
+                  text: t('Category'),
                 },
                 // Add support later on until we have more user friendly amount input modal.
                 // {
@@ -503,7 +505,7 @@ function SelectedTransactionsFloatingActionBar({
                 // },
                 {
                   name: 'cleared',
-                  text: 'Cleared',
+                  text: t('Cleared'),
                 },
               ]}
             />
@@ -512,7 +514,7 @@ function SelectedTransactionsFloatingActionBar({
           <Button
             variant="bare"
             ref={moreOptionsMenuTriggerRef}
-            aria-label="More options"
+            aria-label={t('More options')}
             onPress={() => {
               setIsMoreOptionsMenuOpen(true);
             }}
@@ -540,7 +542,10 @@ function SelectedTransactionsFloatingActionBar({
                     ids: selectedTransactionsArray,
                     onSuccess: ids => {
                       showUndoNotification({
-                        message: `Successfully duplicated ${ids.length} transaction${ids.length > 1 ? 's' : ''}.`,
+                        message: t(
+                          'Successfully duplicated {{count}} transactions.',
+                          { count: ids.length },
+                        ),
                       });
                     },
                   });
@@ -551,7 +556,10 @@ function SelectedTransactionsFloatingActionBar({
                       // TODO: When schedule becomes available in mobile, update undo notification message
                       // with `messageActions` to open the schedule when the schedule name is clicked.
                       showUndoNotification({
-                        message: `Successfully linked ${ids.length} transaction${ids.length > 1 ? 's' : ''} to ${schedule.name}.`,
+                        message: t(
+                          'Successfully linked {{count}} transactions to {{schedule}}.',
+                          { count: ids.length, schedule: schedule.name },
+                        ),
                       });
                     },
                   });
@@ -560,7 +568,10 @@ function SelectedTransactionsFloatingActionBar({
                     ids: selectedTransactionsArray,
                     onSuccess: ids => {
                       showUndoNotification({
-                        message: `Successfully unlinked ${ids.length} transaction${ids.length > 1 ? 's' : ''} from their respective schedules.`,
+                        message: t(
+                          'Successfully unlinked {{count}} transactions from their respective schedules.',
+                          { count: ids.length },
+                        ),
                       });
                     },
                   });
@@ -570,14 +581,22 @@ function SelectedTransactionsFloatingActionBar({
                     onSuccess: ids => {
                       showUndoNotification({
                         type: 'warning',
-                        message: `Successfully deleted ${ids.length} transaction${ids.length > 1 ? 's' : ''}.`,
+                        message: t(
+                          'Successfully deleted {{count}} transactions.',
+                          { count: ids.length },
+                        ),
                       });
                     },
                   });
                 } else if (type === 'transfer') {
                   onSetTransfer?.(selectedTransactionsArray, payees, ids =>
                     showUndoNotification({
-                      message: `Successfully marked ${ids.length} as transfer`,
+                      message: t(
+                        'Successfully marked {{count}} transactions as transfer.',
+                        {
+                          count: ids.length,
+                        },
+                      ),
                     }),
                   );
                 }
