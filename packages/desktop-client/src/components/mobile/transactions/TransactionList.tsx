@@ -268,6 +268,7 @@ function SelectedTransactionsFloatingActionBar({
     onBatchDelete,
     onBatchLinkSchedule,
     onBatchUnlinkSchedule,
+    onSetTransfer,
   } = useTransactionBatchActions();
 
   const navigate = useNavigate();
@@ -509,6 +510,12 @@ function SelectedTransactionsFloatingActionBar({
                       });
                     },
                   });
+                } else if (type === 'transfer') {
+                  onSetTransfer?.([...selectedTransactions], payees, ids =>
+                    showUndoNotification({
+                      message: `Successfully marked ${ids.length} as transfer`,
+                    }),
+                  );
                 }
                 setIsMoreOptionsMenuOpen(false);
               }}
@@ -530,6 +537,10 @@ function SelectedTransactionsFloatingActionBar({
                         text: 'Link schedule',
                       },
                     ]),
+                {
+                  name: 'transfer',
+                  text: 'Make transfer',
+                },
                 {
                   name: 'delete',
                   text: 'Delete',

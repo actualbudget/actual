@@ -45,7 +45,6 @@ import {
   type PagedQuery,
 } from 'loot-core/client/query-helpers';
 import { type AppDispatch } from 'loot-core/client/store';
-import { validForTransfer } from 'loot-core/client/transfer';
 import { send, listen } from 'loot-core/platform/client/fetch';
 import * as undo from 'loot-core/platform/client/undo';
 import { type UndoState } from 'loot-core/server/undo';
