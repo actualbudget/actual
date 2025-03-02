@@ -94,9 +94,10 @@ async function validateExpenseCategory(debug, id) {
     throw APIError(`${debug}: category id is required`);
   }
 
-  const row = await db.first('SELECT is_income FROM categories WHERE id = ?', [
-    id,
-  ]);
+  const row = await db.first<Pick<db.DbCategory, 'is_income'>>(
+    'SELECT is_income FROM categories WHERE id = ?',
+    [id],
+  );
 
   if (!row) {
     throw APIError(`${debug}: category “${id}” does not exist`);

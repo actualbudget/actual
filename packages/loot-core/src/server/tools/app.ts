@@ -92,11 +92,22 @@ app.method('tools/fix-split-transactions', async () => {
     await batchUpdateTransactions({ updated });
   });
 
+  // 6. Remove transaction errors from non-parent transactions
+  const errorRows = await db.all(`
+    SELECT id FROM v_transactions_internal WHERE error IS NOT NULL AND is_parent = 0
+  `);
+
+  await runMutator(async () => {
+    const updated = errorRows.map(({ id }) => ({ id, error: null }));
+    await batchUpdateTransactions({ updated });
+  });
+
   return {
     numBlankPayees: blankPayeeRows.length,
     numCleared: clearedRows.length,
     numDeleted: deletedRows.length,
     numTransfersFixed: brokenTransfers.length,
+    numNonParentErrorsFixed: errorRows.length,
     mismatchedSplits,
   };
 });
