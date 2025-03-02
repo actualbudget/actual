@@ -565,7 +565,13 @@ ipcMain.handle(
     }
 
     try {
-      await remove(currentBudgetDirectory);
+      await promiseRetry(retry => {
+        logMessage(
+          'info',
+          `Cleaning up old directory: ${currentBudgetDirectory}`,
+        );
+        return remove(currentBudgetDirectory).catch(retry);
+      });
     } catch (error) {
       // Fail silently. The move worked, but the old directory wasn't cleaned up - most likely a permission issue.
       // This call needs to succeed to allow the user to continue using the app with the files in the new location.
