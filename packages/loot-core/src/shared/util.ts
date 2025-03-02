@@ -396,7 +396,7 @@ export function currencyToAmount(currencyAmount: string): Amount | null {
   if (
     !match ||
     (match[0] === getNumberFormat().thousandsSeparator &&
-      match.index + 4 === currencyAmount.length)
+      match.index + 4 <= currencyAmount.length)
   ) {
     fraction = null;
     integer = currencyAmount.replace(/[^\d-]/g, '');
