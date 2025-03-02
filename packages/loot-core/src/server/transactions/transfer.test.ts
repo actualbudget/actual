@@ -64,10 +64,10 @@ describe('Transfer', () => {
 
     const differ = expectSnapshotWithDiffer(await getAllTransactions());
 
-    const transferTwo = await db.first(
+    const transferTwo = await db.first<db.DbPayee>(
       "SELECT * FROM payees WHERE transfer_acct = 'two'",
     );
-    const transferThree = await db.first(
+    const transferThree = await db.first<db.DbPayee>(
       "SELECT * FROM payees WHERE transfer_acct = 'three'",
     );
 
@@ -134,10 +134,10 @@ describe('Transfer', () => {
   test('transfers are properly de-categorized', async () => {
     await prepareDatabase();
 
-    const transferTwo = await db.first(
+    const transferTwo = await db.first<db.DbPayee>(
       "SELECT * FROM payees WHERE transfer_acct = 'two'",
     );
-    const transferThree = await db.first(
+    const transferThree = await db.first<db.DbPayee>(
       "SELECT * FROM payees WHERE transfer_acct = 'three'",
     );
 
@@ -179,8 +179,8 @@ describe('Transfer', () => {
     await prepareDatabase();
 
     const [transferOne, transferTwo] = await Promise.all([
-      db.first("SELECT * FROM payees WHERE transfer_acct = 'one'"),
-      db.first("SELECT * FROM payees WHERE transfer_acct = 'two'"),
+      db.first<db.DbPayee>("SELECT * FROM payees WHERE transfer_acct = 'one'"),
+      db.first<db.DbPayee>("SELECT * FROM payees WHERE transfer_acct = 'two'"),
     ]);
 
     let parent: Transaction = {
