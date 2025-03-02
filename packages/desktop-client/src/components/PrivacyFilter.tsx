@@ -10,8 +10,6 @@ import { css } from '@emotion/css';
 
 import { usePrivacyMode } from '../hooks/usePrivacyMode';
 
-import { useResponsive } from './responsive/ResponsiveProvider';
-
 type ConditionalPrivacyFilterProps = {
   children: ReactNode;
   privacyFilter?: boolean | PrivacyFilterProps;
