@@ -7,6 +7,7 @@ import { styles } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
+import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
 import * as monthUtils from 'loot-core/shared/months';
 
 import { useNotes } from '../../hooks/useNotes';
@@ -18,11 +19,10 @@ import { BudgetMonthMenu } from '../budget/envelope/budgetsummary/BudgetMonthMen
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { Notes } from '../Notes';
 
-type EnvelopeBudgetMonthMenuModalProps = {
-  month: string;
-  onBudgetAction: (month: string, action: string, arg?: unknown) => void;
-  onEditNotes: (month: string) => void;
-};
+type EnvelopeBudgetMonthMenuModalProps = Extract<
+  ModalType,
+  { name: 'envelope-budget-month-menu' }
+>['options'];
 
 export function EnvelopeBudgetMonthMenuModal({
   month,

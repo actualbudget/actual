@@ -8,21 +8,22 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
+import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
+
 import { useCategories } from '../../hooks/useCategories';
 import { CategoryAutocomplete } from '../autocomplete/CategoryAutocomplete';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 
-type ConfirmCategoryDeleteProps = {
-  category: string;
-  group: string;
-  onDelete: (categoryId: string) => void;
-};
+type ConfirmCategoryDeleteModalProps = Extract<
+  ModalType,
+  { name: 'confirm-category-delete' }
+>['options'];
 
 export function ConfirmCategoryDeleteModal({
   group: groupId,
   category: categoryId,
   onDelete,
-}: ConfirmCategoryDeleteProps) {
+}: ConfirmCategoryDeleteModalProps) {
   const { t } = useTranslation(); // Initialize translation hook
   const [transferCategory, setTransferCategory] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
