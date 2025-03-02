@@ -1,4 +1,9 @@
-import { looselyParseAmount, getNumberFormat, setNumberFormat } from './util';
+import {
+  looselyParseAmount,
+  getNumberFormat,
+  setNumberFormat,
+  currencyToAmount,
+} from './util';
 
 describe('utility functions', () => {
   test('looseParseAmount works with basic numbers', () => {
@@ -107,5 +112,64 @@ describe('utility functions', () => {
     setNumberFormat({ format: 'apostrophe-dot', hideFraction: true });
     formatter = getNumberFormat().formatter;
     expect(formatter.format(Number('1234.56'))).toBe('1’235');
+  });
+
+  test('currencyToAmount works with basic numbers', () => {
+    expect(currencyToAmount('3')).toBe(3);
+    expect(currencyToAmount('3.4')).toBe(3.4);
+    expect(currencyToAmount('3.45')).toBe(3.45);
+    expect(currencyToAmount('3.45060')).toBe(3.4506);
+  });
+
+  test('currencyToAmount works with varied formats', () => {
+    setNumberFormat({ format: 'comma-dot', hideFraction: true });
+    expect(currencyToAmount('3,45')).toBe(3.45);
+    expect(currencyToAmount('3,456')).toBe(3456);
+    expect(currencyToAmount('3,45000')).toBe(345000);
+    expect(currencyToAmount("3'456.78")).toBe(3456.78);
+    expect(currencyToAmount("3'456.78000")).toBe(3456.78);
+    expect(currencyToAmount('1,00,000.99')).toBe(100000.99);
+    expect(currencyToAmount('1,00,000.99000')).toBe(100000.99);
+  });
+
+  test('currencyToAmount works with leading decimal characters', () => {
+    expect(currencyToAmount('.45')).toBe(0.45);
+    expect(currencyToAmount(',45')).toBe(0.45);
+  });
+
+  test('currencyToAmount works with negative numbers', () => {
+    expect(currencyToAmount('-3')).toBe(-3);
+    expect(currencyToAmount('-3.45')).toBe(-3.45);
+    expect(currencyToAmount('-3,45')).toBe(-3.45);
+  });
+
+  test('currencyToAmount works with non-fractional numbers', () => {
+    setNumberFormat({ format: 'comma-dot', hideFraction: false });
+    expect(currencyToAmount('3.')).toBe(3);
+    expect(currencyToAmount('3,')).toBe(3);
+    expect(currencyToAmount('3,000')).toBe(3000);
+    expect(currencyToAmount('3,000.')).toBe(3000);
+  });
+
+  test('currencyToAmount works with hidden fractions', () => {
+    setNumberFormat({ format: 'comma-dot', hideFraction: true });
+    expect(currencyToAmount('3.45')).toBe(3.45);
+    expect(currencyToAmount('3.456')).toBe(3.456);
+    expect(currencyToAmount('3.4500')).toBe(3.45);
+    expect(currencyToAmount('3.')).toBe(3);
+    expect(currencyToAmount('3,')).toBe(3);
+    expect(currencyToAmount('3,000')).toBe(3000);
+    expect(currencyToAmount('3,000.')).toBe(3000);
+  });
+
+  test('currencyToAmount works with dot-comma', () => {
+    setNumberFormat({ format: 'dot-comma', hideFraction: false });
+    expect(currencyToAmount('3,45')).toBe(3.45);
+    expect(currencyToAmount('3,456')).toBe(3.456);
+    expect(currencyToAmount('3,4500')).toBe(3.45);
+    expect(currencyToAmount('3,')).toBe(3);
+    expect(currencyToAmount('3.')).toBe(3);
+    expect(currencyToAmount('3.000')).toBe(3000);
+    expect(currencyToAmount('3.000,')).toBe(3000);
   });
 });
