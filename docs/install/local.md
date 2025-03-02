@@ -69,7 +69,7 @@ root@server:/etc/systemd/system# systemctl status actual-server
      Memory: 45.9M
         CPU: 1.995s
      CGroup: /system.slice/actual-server.service
-             ├─842857 node /usr/bin/yarn start
+             ├─842857 node /usr/bin/yarn start:server
              ├─842870 /usr/bin/node /var/www/html/actual-server/.yarn/releases/yarn->
              └─842881 /usr/bin/node app
 ```
@@ -92,7 +92,7 @@ When accessing Actual for the first time, you may be prompted to provide a URL f
 1. Stop the server if it’s running. You can use the keyboard shortcut <kbd>CTRL-C</kbd> (even on macOS) to stop the server or close the terminal window it’s running from.
 2. Run `git pull` from the directory you cloned the project into. This will download the latest server code.
 3. Run `yarn workspaces focus @actual-app/sync-server --production` from that directory. This will download the latest web client code, along with any updated dependencies for the server.
-4. Restart the server by running `yarn start`.
+4. Restart the server by running `yarn start:server`.
 
 Actual is constantly evolving to include new features and improve the user's experience. It is always recommended that your local installation be updated with our [latest releases](https://actualbudget.org/docs/releases).
 
