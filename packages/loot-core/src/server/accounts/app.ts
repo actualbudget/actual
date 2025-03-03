@@ -696,13 +696,17 @@ function handleSyncError(
   err: Error | PostError | BankSyncError,
   acct: db.DbAccount,
 ): SyncError {
-  if (err instanceof BankSyncError) {
+  // TODO: refactor bank sync logic to use BankSyncError properly
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  if (err instanceof BankSyncError || (err as any)?.type === 'BankSyncError') {
+    const error = err as BankSyncError;
+
     return {
       type: 'SyncError',
       accountId: acct.id,
       message: 'Failed syncing account “' + acct.name + '.”',
-      category: err.category,
-      code: err.code,
+      category: error.category,
+      code: error.code,
     };
   }
 
