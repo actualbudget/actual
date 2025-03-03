@@ -347,7 +347,7 @@ function TransactionListWithPreviews({
       onSearch={onSearch}
       onOpenTransaction={onOpenTransaction}
       onRefresh={onRefresh}
-      showMakeTransfer={accountId === 'uncategorized'}
+      account={account}
     />
   );
 }
