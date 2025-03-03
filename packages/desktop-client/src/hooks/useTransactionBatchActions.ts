@@ -17,7 +17,9 @@ import {
   type TransactionEntity,
 } from 'loot-core/types/models';
 
+import { validForTransfer } from 'loot-core/client/transfer';
 import { useDispatch } from '../redux';
+import { usePayees } from './usePayees';
 
 type BatchEditProps = {
   name: keyof TransactionEntity;
@@ -57,6 +59,7 @@ type BatchUnlinkScheduleProps = {
 export function useTransactionBatchActions() {
   const dispatch = useDispatch();
 
+  const payees = usePayees();
   const onBatchEdit = async ({ name, ids, onSuccess }: BatchEditProps) => {
     const { data } = await runQuery(
       q('transactions')
@@ -277,6 +280,50 @@ export function useTransactionBatchActions() {
     );
   };
 
+  const onSetTransfer = async (ids: string[]) => {
+      const onConfirmTransfer = async (ids: string[]) => {
+  
+        const { data: transactions } = await runQuery(
+          q('transactions')
+            .filter({ id: { $oneof: ids } })
+            .select('*'),
+        );
+        const [fromTrans, toTrans] = transactions;
+  
+        if (transactions.length === 2 && validForTransfer(fromTrans, toTrans)) {
+          const fromPayee = payees.find(
+            p => p.transfer_acct === fromTrans.account,
+          );
+          const toPayee = payees.find(p => p.transfer_acct === toTrans.account);
+  
+          const changes = {
+            updated: [
+              {
+                ...fromTrans,
+                payee: toPayee?.id,
+                transfer_id: toTrans.id,
+              },
+              {
+                ...toTrans,
+                payee: fromPayee?.id,
+                transfer_id: fromTrans.id,
+              },
+            ],
+          };
+  
+          await send('transactions-batch-update', changes);
+        } 
+  
+        
+      };
+  
+      await checkForReconciledTransactions(
+        ids,
+        'batchEditWithReconciled',
+        onConfirmTransfer,
+      );
+    };
+
   const onBatchDelete = async ({ ids, onSuccess }: BatchDeleteProps) => {
     const onConfirmDelete = (ids: Array<TransactionEntity['id']>) => {
       dispatch(
@@ -414,5 +461,6 @@ export function useTransactionBatchActions() {
     onBatchDelete,
     onBatchLinkSchedule,
     onBatchUnlinkSchedule,
+    onSetTransfer,
   };
 }

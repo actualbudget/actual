@@ -40,6 +40,8 @@ import { theme } from '../../../style';
 import { useScrollListener } from '../../ScrollProvider';
 import { FloatingActionBar } from '../FloatingActionBar';
 
+import { validForTransfer } from 'loot-core/client/transfer';
+import {type AccountEntity} from 'loot-core/types/models';
 import { TransactionListItem } from './TransactionListItem';
 
 const NOTIFICATION_BOTTOM_INSET = 75;
@@ -72,6 +74,7 @@ type TransactionListProps = {
   onOpenTransaction?: (transaction: TransactionEntity) => void;
   isLoadingMore: boolean;
   onLoadMore: () => void;
+  account: AccountEntity;
 };
 
 export function TransactionList({
@@ -80,6 +83,7 @@ export function TransactionList({
   onOpenTransaction,
   isLoadingMore,
   onLoadMore,
+  account,
 }: TransactionListProps) {
   const { t } = useTranslation();
   const sections = useMemo(() => {
@@ -205,7 +209,11 @@ export function TransactionList({
       )}
 
       {selectedTransactions.size > 0 && (
-        <SelectedTransactionsFloatingActionBar transactions={transactions} />
+        <SelectedTransactionsFloatingActionBar 
+          transactions={transactions}
+          getTransaction={id => transactions.find(t => t.id === id)} 
+          account={account}
+        />
       )}
     </>
   );
@@ -214,11 +222,15 @@ export function TransactionList({
 type SelectedTransactionsFloatingActionBarProps = {
   transactions: readonly TransactionEntity[];
   style?: CSSProperties;
+  getTransaction: (id: string) => TransactionEntity | undefined;
+  account: AccountEntity;
 };
 
 function SelectedTransactionsFloatingActionBar({
   transactions,
+  getTransaction,
   style = {},
+  account,
 }: SelectedTransactionsFloatingActionBarProps) {
   const editMenuTriggerRef = useRef(null);
   const [isEditMenuOpen, setIsEditMenuOpen] = useState(false);
@@ -232,8 +244,11 @@ function SelectedTransactionsFloatingActionBar({
     }),
     [],
   );
+  // only show the make transfer button on all accounts view.
+  var showMakeTransfer = !account;
   const selectedTransactions = useSelectedItems();
   const selectedTransactionsArray = Array.from(selectedTransactions);
+  const selectedIds = useMemo(() => [...selectedTransactions], [selectedTransactions]);
   const dispatchSelected = useSelectedDispatch();
 
   const buttonProps = useMemo(
@@ -253,6 +268,21 @@ function SelectedTransactionsFloatingActionBar({
     [],
   );
 
+  const canBeTransfer = useMemo(() => {
+    // only two selected
+    if (selectedIds.length !== 2) {
+      return false;
+    }
+    const fromTrans = getTransaction(selectedIds[0]);
+    const toTrans = getTransaction(selectedIds[1]);
+
+    // previously selected transactions aren't always present in current transaction list
+    if (!fromTrans || !toTrans) {
+      return false;
+    }
+
+    return validForTransfer(fromTrans, toTrans);
+  }, [selectedIds, getTransaction]);
   const allTransactionsAreLinked = useMemo(() => {
     return transactions
       .filter(t => selectedTransactions.has(t.id))
@@ -268,6 +298,7 @@ function SelectedTransactionsFloatingActionBar({
     onBatchDelete,
     onBatchLinkSchedule,
     onBatchUnlinkSchedule,
+    onSetTransfer,
   } = useTransactionBatchActions();
 
   const navigate = useNavigate();
@@ -509,6 +540,8 @@ function SelectedTransactionsFloatingActionBar({
                       });
                     },
                   });
+                } else if (type === 'set-transfer') {
+                  onSetTransfer(selectedIds);
                 }
                 setIsMoreOptionsMenuOpen(false);
               }}
@@ -530,6 +563,14 @@ function SelectedTransactionsFloatingActionBar({
                         text: 'Link schedule',
                       },
                     ]),
+                ...(showMakeTransfer && canBeTransfer
+                  ? [
+                      {
+                        name: 'set-transfer',
+                        text: ('Make transfer'),
+                      } as const,
+                    ]
+                  : []),
                 {
                   name: 'delete',
                   text: 'Delete',

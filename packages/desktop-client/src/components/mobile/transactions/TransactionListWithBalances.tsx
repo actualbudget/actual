@@ -17,6 +17,7 @@ import { useSheetValue } from '../../spreadsheet/useSheetValue';
 import { PullToRefresh } from '../PullToRefresh';
 
 import { TransactionList } from './TransactionList';
+import {type AccountEntity} from 'loot-core/types/models';
 
 type TransactionSearchInputProps = {
   placeholder: string;
@@ -91,6 +92,7 @@ type TransactionListWithBalancesProps = {
   onLoadMore: () => void;
   onOpenTransaction: (transaction: TransactionEntity) => void;
   onRefresh?: () => void;
+  account: AccountEntity;
 };
 
 export function TransactionListWithBalances({
@@ -105,6 +107,7 @@ export function TransactionListWithBalances({
   onLoadMore,
   onOpenTransaction,
   onRefresh,
+  account,
 }: TransactionListWithBalancesProps) {
   const selectedInst = useSelected('transactions', [...transactions], []);
 
@@ -148,6 +151,7 @@ export function TransactionListWithBalances({
             isLoadingMore={isLoadingMore}
             onLoadMore={onLoadMore}
             onOpenTransaction={onOpenTransaction}
+            account={account}
           />
         </PullToRefresh>
       </>

@@ -347,6 +347,7 @@ function TransactionListWithPreviews({
       onSearch={onSearch}
       onOpenTransaction={onOpenTransaction}
       onRefresh={onRefresh}
+      account={account}
     />
   );
 }
