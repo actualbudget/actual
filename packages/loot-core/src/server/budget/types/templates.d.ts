@@ -23,7 +23,8 @@ interface ByTemplate extends BaseTemplate {
   type: 'by';
   amount: number;
   month: string;
-  repeat?: { annual: boolean; repeat?: number };
+  annual?: boolean;
+  repeat?: number;
   from?: string;
 }
 

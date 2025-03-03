@@ -59,8 +59,17 @@ export type AccountHandlers = {
   'account-unlink': typeof unlinkAccount;
 };
 
-async function updateAccount({ id, name }: Pick<AccountEntity, 'id' | 'name'>) {
-  await db.update('accounts', { id, name });
+async function updateAccount({
+  id,
+  name,
+  last_reconciled,
+}: Pick<AccountEntity, 'id' | 'name'> &
+  Partial<Pick<AccountEntity, 'last_reconciled'>>) {
+  await db.update('accounts', {
+    id,
+    name,
+    ...(last_reconciled && { last_reconciled }),
+  });
   return {};
 }
 
