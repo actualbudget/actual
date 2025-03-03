@@ -331,7 +331,9 @@ function SelectedTransactionsFloatingActionBar({
     },
     {
       name: allTransactionsAreLinked ? 'unlink-schedule' : 'link-schedule',
-      text: t((allTransactionsAreLinked ? 'Unlink' : 'Link') + ' schedule'),
+      text: allTransactionsAreLinked
+        ? t('Unlink schedule')
+        : t('Link schedule'),
     },
     {
       name: 'delete',
@@ -399,7 +401,7 @@ function SelectedTransactionsFloatingActionBar({
             }}
             {...buttonProps}
           >
-            Edit
+            {t('Edit')}
           </Button>
 
           <Popover
