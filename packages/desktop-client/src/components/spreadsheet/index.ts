@@ -14,6 +14,7 @@ export type Spreadsheets = {
     'offbudget-accounts-balance': number;
     balanceCleared: number;
     balanceUncleared: number;
+    lastReconciled: string | null;
   };
   category: {
     // Common fields
