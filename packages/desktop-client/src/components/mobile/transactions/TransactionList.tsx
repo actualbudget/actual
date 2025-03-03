@@ -329,32 +329,23 @@ function SelectedTransactionsFloatingActionBar({
       name: 'duplicate',
       text: t('Duplicate'),
     },
+    {
+      name: allTransactionsAreLinked ? 'unlink-schedule' : 'link-schedule',
+      text: t((allTransactionsAreLinked ? 'Unlink' : 'Link') + ' schedule'),
+    },
+    {
+      name: 'delete',
+      text: t('Delete'),
+    },
   ];
 
-  if (allTransactionsAreLinked) {
-    moreOptionsMenuItems.push({
-      name: 'unlink-schedule',
-      text: t('Unlink schedule'),
-    });
-  } else {
-    moreOptionsMenuItems.push({
-      name: 'link-schedule',
-      text: t('Link schedule'),
-    });
-  }
-
   if (showMakeTransfer) {
-    moreOptionsMenuItems.push({
+    moreOptionsMenuItems.splice(2, 0, {
       name: 'transfer',
       text: t('Make transfer'),
       disabled: !canBeTransfer,
     });
   }
-
-  moreOptionsMenuItems.push({
-    name: 'delete',
-    text: t('Delete'),
-  });
 
   return (
     <FloatingActionBar style={style}>
