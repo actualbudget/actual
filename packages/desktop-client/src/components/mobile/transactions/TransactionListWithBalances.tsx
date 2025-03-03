@@ -92,7 +92,7 @@ type TransactionListWithBalancesProps = {
   onLoadMore: () => void;
   onOpenTransaction: (transaction: TransactionEntity) => void;
   onRefresh?: () => void;
-  account: AccountEntity;
+  account?: AccountEntity;
 };
 
 export function TransactionListWithBalances({

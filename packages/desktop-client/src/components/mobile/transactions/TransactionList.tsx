@@ -25,7 +25,7 @@ import { validForTransfer } from 'loot-core/client/transfer';
 import * as monthUtils from 'loot-core/shared/months';
 import { isPreviewId } from 'loot-core/shared/transactions';
 import { groupById, integerToCurrency } from 'loot-core/shared/util';
-import { AccountEntity } from 'loot-core/types/models';
+import { type AccountEntity } from 'loot-core/types/models';
 import { type TransactionEntity } from 'loot-core/types/models/transaction';
 
 import { useAccounts } from '../../../hooks/useAccounts';
@@ -78,7 +78,7 @@ type TransactionListProps = {
   onOpenTransaction?: (transaction: TransactionEntity) => void;
   isLoadingMore: boolean;
   onLoadMore: () => void;
-  account: AccountEntity;
+  account?: AccountEntity;
 };
 
 export function TransactionList({
