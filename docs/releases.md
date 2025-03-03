@@ -1,5 +1,18 @@
 # Release Notes
 
+## 25.3.1
+
+Release date: 2025-03-03
+
+The primary intent of this release is to patch regressions in amount parsing in certain scenarios.
+
+**Docker tag: 25.3.1**
+
+#### Bugfix
+
+- [#4489](https://github.com/actualbudget/actual/pull/4489) Fix negative amount parsing — thanks @matt-fidd
+- [#4503](https://github.com/actualbudget/actual/pull/4503) Fix number input on mobile with hidden decimals — thanks @jfdoming
+
 ## 25.3.0
 
 Release date: 2025-03-01
