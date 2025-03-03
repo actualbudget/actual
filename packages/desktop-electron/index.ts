@@ -123,7 +123,7 @@ if (isDev) {
 }
 
 async function loadGlobalPrefs() {
-  let state: GlobalPrefsJson | undefined = undefined;
+  let state: GlobalPrefsJson = {};
   try {
     state = JSON.parse(
       fs.readFileSync(
@@ -145,10 +145,10 @@ async function createBackgroundProcess() {
     ...process.env, // required
   };
 
-  if (globalPrefs?.['server-self-signed-cert']) {
+  if (globalPrefs['server-self-signed-cert']) {
     envVariables = {
       ...envVariables,
-      NODE_EXTRA_CA_CERTS: globalPrefs?.['server-self-signed-cert'], // add self signed cert to env - fetch can pick it up
+      NODE_EXTRA_CA_CERTS: globalPrefs['server-self-signed-cert'], // add self signed cert to env - fetch can pick it up
     };
   }
 
@@ -197,34 +197,33 @@ async function createBackgroundProcess() {
 
 async function startSyncServer() {
   try {
-    const globalPrefs = await loadGlobalPrefs(); // load global prefs
+    const globalPrefs = await loadGlobalPrefs();
 
     const syncServerConfig = {
-      port: globalPrefs?.ngrokConfig?.port || 5007,
+      port: globalPrefs.ngrokConfig?.port || 5007,
       ACTUAL_SERVER_DATA_DIR: path.resolve(
-        process.env.ACTUAL_DATA_DIR,
+        process.env.ACTUAL_DATA_DIR!,
         'actual-server',
       ),
       ACTUAL_SERVER_FILES: path.resolve(
-        process.env.ACTUAL_DATA_DIR,
+        process.env.ACTUAL_DATA_DIR!,
         'actual-server',
         'server-files',
       ),
       ACTUAL_USER_FILES: path.resolve(
-        process.env.ACTUAL_DATA_DIR,
+        process.env.ACTUAL_DATA_DIR!,
         'actual-server',
         'user-files',
       ),
     };
 
     const serverPath = path.join(
-      // require.resolve is used to recursively search up the workspace to find the node_modules directory
+      // require.resolve will recursively search up the workspace for the module
       path.dirname(require.resolve('@actual-app/sync-server/package.json')),
       'app.js',
     );
 
-    // NOTE: config.json parameters will be relative to THIS directory at the moment - may need a fix?
-    // Or we can override the config.json location when starting the process
+    // Use env variables to configure the server
     let envVariables: Env = {
       ...process.env, // required
       ACTUAL_PORT: `${syncServerConfig.port}`,
@@ -234,15 +233,15 @@ async function startSyncServer() {
     };
 
     const webRoot = path.join(
-      // require.resolve is used to recursively search up the workspace to find the node_modules directory
+      // require.resolve will recursively search up the workspace for the module
       path.dirname(require.resolve('@actual-app/web/package.json')),
       'build',
     );
 
     envVariables = { ...envVariables, ACTUAL_WEB_ROOT: webRoot };
 
+    // ACTUAL_SERVER_DATA_DIR is the root directory for the sync-server
     if (!fs.existsSync(syncServerConfig.ACTUAL_SERVER_DATA_DIR)) {
-      // create directory for actual-server data
       mkdir(syncServerConfig.ACTUAL_SERVER_DATA_DIR, { recursive: true });
     }
 
@@ -298,7 +297,6 @@ async function startSyncServer() {
       }, SYNC_SERVER_WAIT_TIMEOUT);
     });
 
-    // This aint working...
     return Promise.race([syncServerPromise, syncServerTimeout]); // Either the server has started or the timeout is reached
   } catch (error) {
     logMessage('error', `Sync-Server: Error starting sync server: ${error}`);
@@ -319,7 +317,7 @@ async function exposeSyncServer(ngrokConfig: GlobalPrefsJson['ngrokConfig']) {
 
   try {
     const listener = await ngrok.forward({
-      schemes: ['https'], // change this to https and bind certificate - may need to generate cert and store in user-data
+      schemes: ['https'],
       addr: ngrokConfig.port,
       authtoken: ngrokConfig.authToken,
       domain: ngrokConfig.domain,
@@ -475,7 +473,7 @@ app.on('ready', async () => {
   // file no matter what URL it is. This allows us to use react-router
   // on the frontend
 
-  const globalPrefs = await loadGlobalPrefs(); // load global prefs
+  const globalPrefs = await loadGlobalPrefs();
 
   if (globalPrefs.ngrokConfig?.autoStart) {
     // wait for both server and ngrok to start before starting the Actual client to ensure server is available
