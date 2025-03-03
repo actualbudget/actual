@@ -308,6 +308,7 @@ type AccountInternalProps = {
   hideFraction: boolean;
   accountsSyncing: string[];
   dispatch: AppDispatch;
+  reconcileAmount: number | null;
 };
 type AccountInternalState = {
   search: string;
@@ -369,12 +370,13 @@ class AccountInternal extends PureComponent<
       filterConditionsOp: 'and',
       loading: true,
       workingHard: false,
-      reconcileAmount: null,
+      reconcileAmount: props.reconcileAmount,
       transactions: [],
       transactionCount: 0,
       showBalances: props.showBalances,
       balances: null,
-      showCleared: props.showCleared,
+      showCleared: props.reconcileAmount == null ? props.showCleared : true,
+      prevShowCleared: props.showCleared,
       showReconciled: props.showReconciled,
       editingName: false,
       nameError: '',
@@ -473,6 +475,15 @@ class AccountInternal extends PureComponent<
     //Resest sort/filter/search on account change
     if (this.props.accountId !== prevProps.accountId) {
       this.setState({ sort: null, search: '', filterConditions: [] });
+    }
+
+    if (this.props.reconcileAmount !== prevProps.reconcileAmount) {
+      this.setState({
+        reconcileAmount: this.props.reconcileAmount,
+        showCleared:
+          this.props.reconcileAmount == null ? this.props.showCleared : true,
+        prevShowCleared: this.props.showCleared,
+      });
     }
   }
 
@@ -2022,6 +2033,7 @@ export function Account() {
           categoryId={location?.state?.categoryId}
           location={location}
           savedFilters={savedFiters}
+          reconcileAmount={location?.state?.reconcileAmount ?? null}
         />
       </SplitsExpandedProvider>
     </SchedulesProvider>
