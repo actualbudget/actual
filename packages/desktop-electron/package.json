@@ -86,7 +86,7 @@
   },
   "dependencies": {
     "better-sqlite3": "^11.7.0",
-    "fs-extra": "^11.2.0",
+    "fs-extra": "^11.3.0",
     "promise-retry": "^2.0.1"
   },
   "devDependencies": {
