@@ -94,10 +94,6 @@ export function CategorySelector({
                 style={{
                   flexDirection: 'row',
                   alignItems: 'center',
-                  maxWidth: 100,
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
                 }}
               >
                 <SvgViewHide
@@ -105,7 +101,16 @@ export function CategorySelector({
                   height={15}
                   style={{ marginRight: 5 }}
                 />
-                <Text>{t('Hide unchecked')}</Text>
+                <Text
+                  style={{
+                    maxWidth: 100,
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                  }}
+                >
+                  {t('Hide unchecked')}
+                </Text>
               </View>
             )}
           </View>
