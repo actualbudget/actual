@@ -4,8 +4,6 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@actual-app/components/button';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
-import { formatDistanceToNow } from 'date-fns';
-import * as locales from 'date-fns/locale';
 import { useHover } from 'usehooks-ts';
 
 import { useCachedSchedules } from 'loot-core/client/data-hooks/schedules';
@@ -14,9 +12,7 @@ import { getScheduledAmount } from 'loot-core/shared/schedules';
 import { isPreviewId } from 'loot-core/shared/transactions';
 import { type AccountEntity } from 'loot-core/types/models';
 
-import { useGlobalPref } from '../../hooks/useGlobalPref';
 import { useSelectedItems } from '../../hooks/useSelected';
-import { SvgLockClosed } from '../../icons/v1';
 import { SvgArrowButtonRight1 } from '../../icons/v2';
 import { theme } from '../../style';
 import { PrivacyFilter } from '../PrivacyFilter';
@@ -147,23 +143,11 @@ function FilteredBalance({ filteredAmount }: FilteredBalanceProps) {
   );
 }
 
-const tsToRelativeTime = (ts: string | null, language: string): string => {
-  if (!ts) return 'Unknown';
-
-  const parsed = new Date(parseInt(ts, 10));
-  const locale =
-    locales[language.replace('-', '') as keyof typeof locales] ??
-    locales['enUS'];
-
-  return formatDistanceToNow(parsed, { addSuffix: true, locale });
-};
-
 type MoreBalancesProps = {
   balanceQuery: { name: `balance-query-${string}`; query: Query };
-  lastReconciled?: string | null;
 };
 
-function MoreBalances({ balanceQuery, lastReconciled }: MoreBalancesProps) {
+function MoreBalances({ balanceQuery }: MoreBalancesProps) {
   const { t } = useTranslation();
 
   const cleared = useSheetValue<'balance', `balance-query-${string}-cleared`>({
@@ -179,33 +163,10 @@ function MoreBalances({ balanceQuery, lastReconciled }: MoreBalancesProps) {
     query: balanceQuery.query.filter({ cleared: false }),
   });
 
-  const [language] = useGlobalPref('language');
-
   return (
     <View style={{ flexDirection: 'row' }}>
       <DetailedBalance name={t('Cleared total:')} balance={cleared ?? 0} />
       <DetailedBalance name={t('Uncleared total:')} balance={uncleared ?? 0} />
-      <Text
-        style={{
-          marginLeft: 15,
-          borderRadius: 4,
-          padding: '4px 6px',
-          color: theme.pillText,
-          backgroundColor: theme.pillBackground,
-        }}
-      >
-        <SvgLockClosed
-          style={{
-            width: 11,
-            height: 11,
-            color: theme.pillText,
-            marginRight: 5,
-          }}
-        />
-        {lastReconciled
-          ? `${t('Reconciled')} ${tsToRelativeTime(lastReconciled, language || 'en-US')}`
-          : t('Not yet reconciled')}
-      </Text>
     </View>
   );
 }
@@ -291,12 +252,7 @@ export function Balances({
         />
       </Button>
 
-      {showExtraBalances && (
-        <MoreBalances
-          balanceQuery={balanceQuery}
-          lastReconciled={account?.last_reconciled}
-        />
-      )}
+      {showExtraBalances && <MoreBalances balanceQuery={balanceQuery} />}
 
       {selectedItems.size > 0 && (
         <SelectedBalance selectedItems={selectedItems} account={account} />
