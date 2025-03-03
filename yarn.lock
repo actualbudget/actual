@@ -79,7 +79,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@actual-app/sync-server@workspace:packages/sync-server":
+"@actual-app/sync-server@workspace:*, @actual-app/sync-server@workspace:packages/sync-server":
   version: 0.0.0-use.local
   resolution: "@actual-app/sync-server@workspace:packages/sync-server"
   dependencies:
@@ -3390,6 +3390,145 @@ __metadata:
   bin:
     node-pre-gyp: bin/node-pre-gyp
   checksum: 10/59529a2444e44fddb63057152452b00705aa58059079191126c79ac1388ae4565625afa84ed4dd1bf017d1111ab6e47907f7c5192e06d83c9496f2f3e708680a
+  languageName: node
+  linkType: hard
+
+"@ngrok/ngrok-android-arm-eabi@npm:1.4.1":
+  version: 1.4.1
+  resolution: "@ngrok/ngrok-android-arm-eabi@npm:1.4.1"
+  conditions: os=android & cpu=arm
+  languageName: node
+  linkType: hard
+
+"@ngrok/ngrok-android-arm64@npm:1.4.1":
+  version: 1.4.1
+  resolution: "@ngrok/ngrok-android-arm64@npm:1.4.1"
+  conditions: os=android & cpu=arm64
+  languageName: node
+  linkType: hard
+
+"@ngrok/ngrok-darwin-arm64@npm:1.4.1":
+  version: 1.4.1
+  resolution: "@ngrok/ngrok-darwin-arm64@npm:1.4.1"
+  conditions: os=darwin & cpu=arm64
+  languageName: node
+  linkType: hard
+
+"@ngrok/ngrok-darwin-universal@npm:1.4.1":
+  version: 1.4.1
+  resolution: "@ngrok/ngrok-darwin-universal@npm:1.4.1"
+  conditions: os=darwin
+  languageName: node
+  linkType: hard
+
+"@ngrok/ngrok-darwin-x64@npm:1.4.1":
+  version: 1.4.1
+  resolution: "@ngrok/ngrok-darwin-x64@npm:1.4.1"
+  conditions: os=darwin & cpu=x64
+  languageName: node
+  linkType: hard
+
+"@ngrok/ngrok-freebsd-x64@npm:1.4.1":
+  version: 1.4.1
+  resolution: "@ngrok/ngrok-freebsd-x64@npm:1.4.1"
+  conditions: os=freebsd & cpu=x64
+  languageName: node
+  linkType: hard
+
+"@ngrok/ngrok-linux-arm-gnueabihf@npm:1.4.1":
+  version: 1.4.1
+  resolution: "@ngrok/ngrok-linux-arm-gnueabihf@npm:1.4.1"
+  conditions: os=linux & cpu=arm
+  languageName: node
+  linkType: hard
+
+"@ngrok/ngrok-linux-arm64-gnu@npm:1.4.1":
+  version: 1.4.1
+  resolution: "@ngrok/ngrok-linux-arm64-gnu@npm:1.4.1"
+  conditions: os=linux & cpu=arm64 & libc=glibc
+  languageName: node
+  linkType: hard
+
+"@ngrok/ngrok-linux-arm64-musl@npm:1.4.1":
+  version: 1.4.1
+  resolution: "@ngrok/ngrok-linux-arm64-musl@npm:1.4.1"
+  conditions: os=linux & cpu=arm64 & libc=musl
+  languageName: node
+  linkType: hard
+
+"@ngrok/ngrok-linux-x64-gnu@npm:1.4.1":
+  version: 1.4.1
+  resolution: "@ngrok/ngrok-linux-x64-gnu@npm:1.4.1"
+  conditions: os=linux & cpu=x64 & libc=glibc
+  languageName: node
+  linkType: hard
+
+"@ngrok/ngrok-linux-x64-musl@npm:1.4.1":
+  version: 1.4.1
+  resolution: "@ngrok/ngrok-linux-x64-musl@npm:1.4.1"
+  conditions: os=linux & cpu=x64 & libc=musl
+  languageName: node
+  linkType: hard
+
+"@ngrok/ngrok-win32-ia32-msvc@npm:1.4.1":
+  version: 1.4.1
+  resolution: "@ngrok/ngrok-win32-ia32-msvc@npm:1.4.1"
+  conditions: os=win32 & cpu=ia32
+  languageName: node
+  linkType: hard
+
+"@ngrok/ngrok-win32-x64-msvc@npm:1.4.1":
+  version: 1.4.1
+  resolution: "@ngrok/ngrok-win32-x64-msvc@npm:1.4.1"
+  conditions: os=win32 & cpu=x64
+  languageName: node
+  linkType: hard
+
+"@ngrok/ngrok@npm:^1.4.1":
+  version: 1.4.1
+  resolution: "@ngrok/ngrok@npm:1.4.1"
+  dependencies:
+    "@ngrok/ngrok-android-arm-eabi": "npm:1.4.1"
+    "@ngrok/ngrok-android-arm64": "npm:1.4.1"
+    "@ngrok/ngrok-darwin-arm64": "npm:1.4.1"
+    "@ngrok/ngrok-darwin-universal": "npm:1.4.1"
+    "@ngrok/ngrok-darwin-x64": "npm:1.4.1"
+    "@ngrok/ngrok-freebsd-x64": "npm:1.4.1"
+    "@ngrok/ngrok-linux-arm-gnueabihf": "npm:1.4.1"
+    "@ngrok/ngrok-linux-arm64-gnu": "npm:1.4.1"
+    "@ngrok/ngrok-linux-arm64-musl": "npm:1.4.1"
+    "@ngrok/ngrok-linux-x64-gnu": "npm:1.4.1"
+    "@ngrok/ngrok-linux-x64-musl": "npm:1.4.1"
+    "@ngrok/ngrok-win32-ia32-msvc": "npm:1.4.1"
+    "@ngrok/ngrok-win32-x64-msvc": "npm:1.4.1"
+  dependenciesMeta:
+    "@ngrok/ngrok-android-arm-eabi":
+      optional: true
+    "@ngrok/ngrok-android-arm64":
+      optional: true
+    "@ngrok/ngrok-darwin-arm64":
+      optional: true
+    "@ngrok/ngrok-darwin-universal":
+      optional: true
+    "@ngrok/ngrok-darwin-x64":
+      optional: true
+    "@ngrok/ngrok-freebsd-x64":
+      optional: true
+    "@ngrok/ngrok-linux-arm-gnueabihf":
+      optional: true
+    "@ngrok/ngrok-linux-arm64-gnu":
+      optional: true
+    "@ngrok/ngrok-linux-arm64-musl":
+      optional: true
+    "@ngrok/ngrok-linux-x64-gnu":
+      optional: true
+    "@ngrok/ngrok-linux-x64-musl":
+      optional: true
+    "@ngrok/ngrok-win32-ia32-msvc":
+      optional: true
+    "@ngrok/ngrok-win32-x64-msvc":
+      optional: true
+  checksum: 10/c86956756af6eb9f2cc47aba19ac14f59a0d031defc52ee6845b17363b051213abd29c984f11501d88a482f343fbadb0e7bf855803068bceb96bf5fb16dfb2cb
   languageName: node
   linkType: hard
 
@@ -10163,8 +10302,10 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "desktop-electron@workspace:packages/desktop-electron"
   dependencies:
+    "@actual-app/sync-server": "workspace:*"
     "@electron/notarize": "npm:2.4.0"
     "@electron/rebuild": "npm:3.6.0"
+    "@ngrok/ngrok": "npm:^1.4.1"
     "@types/copyfiles": "npm:^2"
     "@types/fs-extra": "npm:^11"
     better-sqlite3: "npm:^11.7.0"

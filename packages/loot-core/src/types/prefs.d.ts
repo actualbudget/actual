@@ -88,6 +88,13 @@ export type GlobalPrefs = Partial<{
   preferredDarkTheme: DarkTheme;
   documentDir: string; // Electron only
   serverSelfSignedCert: string; // Electron only
+  ngrokConfig?: {
+    // Electron only
+    autoStart?: boolean;
+    authToken?: string;
+    port?: number;
+    domain?: string;
+  };
 }>;
 
 // GlobalPrefsJson represents what's saved in the global-store.json file
@@ -108,6 +115,7 @@ export type GlobalPrefsJson = Partial<{
   theme?: GlobalPrefs['theme'];
   'preferred-dark-theme'?: GlobalPrefs['preferredDarkTheme'];
   'server-self-signed-cert'?: GlobalPrefs['serverSelfSignedCert'];
+  ngrokConfig?: GlobalPrefs['ngrokConfig'];
 }>;
 
 export type AuthMethods = 'password' | 'openid';

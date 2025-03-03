@@ -113,5 +113,7 @@ export async function run() {
     app.listen(config.port, config.hostname);
   }
 
+  // Signify to any parent process that the server has started. Used in electron desktop app
+  process.parentPort?.postMessage({ type: 'server-started' });
   console.log('Listening on ' + config.hostname + ':' + config.port + '...');
 }

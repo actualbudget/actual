@@ -4,8 +4,10 @@ import { config } from '../src/load-config.js';
 
 async function ensureExists(path) {
   try {
+    console.info('trying to make folder');
     await fs.mkdir(path);
   } catch (err) {
+    console.info('failed', err);
     if (err.code === 'EEXIST') {
       return null;
     }

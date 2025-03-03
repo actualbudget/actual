@@ -2,6 +2,7 @@ import fs from 'fs';
 import { createServer, Server } from 'http';
 import path from 'path';
 
+import ngrok from '@ngrok/ngrok';
 import {
   net,
   app,
@@ -19,7 +20,7 @@ import {
   Env,
   ForkOptions,
 } from 'electron';
-import { copy, exists, remove } from 'fs-extra';
+import { copy, exists, mkdir, remove } from 'fs-extra';
 import promiseRetry from 'promise-retry';
 
 import type { GlobalPrefsJson } from '../loot-core/src/types/prefs';
@@ -56,6 +57,7 @@ if (!isDev || !process.env.ACTUAL_DATA_DIR) {
 // be closed automatically when the JavaScript object is garbage collected.
 let clientWin: BrowserWindow | null;
 let serverProcess: UtilityProcess | null;
+let actualServerProcess: UtilityProcess | null;
 
 let oAuthServer: ReturnType<typeof createServer> | null;
 
@@ -63,25 +65,16 @@ let queuedClientWinLogs: string[] = []; // logs that are queued up until the cli
 
 const logMessage = (loglevel: 'info' | 'error', message: string) => {
   // Electron main process logs
-  switch (loglevel) {
-    case 'info':
-      console.info(message);
-      break;
-    case 'error':
-      console.error(message);
-      break;
-  }
+  const trimmedMessage = JSON.stringify(message.trim()); // ensure line endings are removed
+  console[loglevel](trimmedMessage);
 
   if (!clientWin) {
     // queue up the logs until the client window is ready
-    queuedClientWinLogs.push(
-      // eslint-disable-next-line rulesdir/typography
-      `console.${loglevel}('Actual Sync Server Log:', ${JSON.stringify(message)})`,
-    );
+    queuedClientWinLogs.push(`console.${loglevel}(${trimmedMessage})`);
   } else {
     // Send the queued up logs to the devtools console
     clientWin.webContents.executeJavaScript(
-      `console.${loglevel}('Actual Sync Server Log:', ${JSON.stringify(message)})`,
+      `console.${loglevel}(${trimmedMessage})`,
     );
   }
 };
@@ -176,14 +169,12 @@ async function createBackgroundProcess() {
 
   serverProcess.stdout?.on('data', (chunk: Buffer) => {
     // Send the Server log messages to the main browser window
-    clientWin?.webContents.executeJavaScript(`
-      console.info('Server Log:', ${JSON.stringify(chunk.toString('utf8'))})`);
+    logMessage('info', `Server Log: ${chunk.toString('utf8')}`);
   });
 
   serverProcess.stderr?.on('data', (chunk: Buffer) => {
     // Send the Server log messages out to the main browser window
-    clientWin?.webContents.executeJavaScript(`
-      console.error('Server Log:', ${JSON.stringify(chunk.toString('utf8'))})`);
+    logMessage('error', `Server Log: ${chunk.toString('utf8')}`);
   });
 
   serverProcess.on('message', msg => {
@@ -202,6 +193,147 @@ async function createBackgroundProcess() {
         logMessage('info', 'Unknown server message: ' + msg.type);
     }
   });
+}
+
+async function startSyncServer() {
+  try {
+    const globalPrefs = await loadGlobalPrefs(); // load global prefs
+
+    const syncServerConfig = {
+      port: globalPrefs?.ngrokConfig?.port || 5007,
+      ACTUAL_SERVER_DATA_DIR: path.resolve(
+        process.env.ACTUAL_DATA_DIR,
+        'actual-server',
+      ),
+      ACTUAL_SERVER_FILES: path.resolve(
+        process.env.ACTUAL_DATA_DIR,
+        'actual-server',
+        'server-files',
+      ),
+      ACTUAL_USER_FILES: path.resolve(
+        process.env.ACTUAL_DATA_DIR,
+        'actual-server',
+        'user-files',
+      ),
+    };
+
+    const serverPath = path.join(
+      // require.resolve is used to recursively search up the workspace to find the node_modules directory
+      path.dirname(require.resolve('@actual-app/sync-server/package.json')),
+      'app.js',
+    );
+
+    // NOTE: config.json parameters will be relative to THIS directory at the moment - may need a fix?
+    // Or we can override the config.json location when starting the process
+    let envVariables: Env = {
+      ...process.env, // required
+      ACTUAL_PORT: `${syncServerConfig.port}`,
+      ACTUAL_SERVER_FILES: `${syncServerConfig.ACTUAL_SERVER_FILES}`,
+      ACTUAL_USER_FILES: `${syncServerConfig.ACTUAL_USER_FILES}`,
+      ACTUAL_DATA_DIR: `${syncServerConfig.ACTUAL_SERVER_DATA_DIR}`,
+    };
+
+    const webRoot = path.join(
+      // require.resolve is used to recursively search up the workspace to find the node_modules directory
+      path.dirname(require.resolve('@actual-app/web/package.json')),
+      'build',
+    );
+
+    envVariables = { ...envVariables, ACTUAL_WEB_ROOT: webRoot };
+
+    if (!fs.existsSync(syncServerConfig.ACTUAL_SERVER_DATA_DIR)) {
+      // create directory for actual-server data
+      mkdir(syncServerConfig.ACTUAL_SERVER_DATA_DIR, { recursive: true });
+    }
+
+    let forkOptions: ForkOptions = {
+      stdio: 'pipe',
+      env: envVariables,
+    };
+
+    if (isDev) {
+      forkOptions = { ...forkOptions, execArgv: ['--inspect'] };
+    }
+
+    const SYNC_SERVER_WAIT_TIMEOUT = 15000; // wait 15 seconds for the server to start - if it doesn't, throw an error
+
+    let syncServerStarted = false;
+
+    const syncServerPromise = new Promise<void>(async resolve => {
+      actualServerProcess = utilityProcess.fork(serverPath, [], forkOptions);
+
+      actualServerProcess.stdout?.on('data', (chunk: Buffer) => {
+        // Send the Server console.log messages to the main browser window
+        logMessage('info', `Sync-Server: ${chunk.toString('utf8')}`);
+      });
+
+      actualServerProcess.stderr?.on('data', (chunk: Buffer) => {
+        // Send the Server console.error messages out to the main browser window
+        logMessage('error', `Sync-Server: ${chunk.toString('utf8')}`);
+      });
+
+      actualServerProcess.on('message', msg => {
+        switch (msg.type) {
+          case 'server-started':
+            logMessage('info', 'Sync-Server: Actual Sync Server has started!');
+            syncServerStarted = true;
+            resolve();
+            break;
+          default:
+            logMessage(
+              'info',
+              'Sync-Server: Unknown server message: ' + msg.type,
+            );
+        }
+      });
+    });
+
+    const syncServerTimeout = new Promise<void>((_, reject) => {
+      setTimeout(() => {
+        if (!syncServerStarted) {
+          const errorMessage = `Sync-Server: Failed to start within ${SYNC_SERVER_WAIT_TIMEOUT / 1000} seconds. Something is wrong. Please raise a github issue.`;
+          logMessage('error', errorMessage);
+          reject(new Error(errorMessage));
+        }
+      }, SYNC_SERVER_WAIT_TIMEOUT);
+    });
+
+    // This aint working...
+    return Promise.race([syncServerPromise, syncServerTimeout]); // Either the server has started or the timeout is reached
+  } catch (error) {
+    logMessage('error', `Sync-Server: Error starting sync server: ${error}`);
+  }
+}
+
+async function exposeSyncServer(ngrokConfig: GlobalPrefsJson['ngrokConfig']) {
+  const hasRequiredConfig =
+    ngrokConfig?.authToken && ngrokConfig?.domain && ngrokConfig?.port;
+
+  if (!hasRequiredConfig) {
+    logMessage(
+      'error',
+      'Sync-Server: Cannot expose sync server: missing ngrok settings',
+    );
+    return { error: 'Missing ngrok settings' };
+  }
+
+  try {
+    const listener = await ngrok.forward({
+      schemes: ['https'], // change this to https and bind certificate - may need to generate cert and store in user-data
+      addr: ngrokConfig.port,
+      authtoken: ngrokConfig.authToken,
+      domain: ngrokConfig.domain,
+    });
+
+    logMessage(
+      'info',
+      `Sync-Server: Exposing actual server on url: ${listener.url()}`,
+    );
+    return { url: listener.url() };
+  } catch (error) {
+    logMessage('error', `Unable to run ngrok: ${error}`);
+    return { error: `Unable to run ngrok. ${error}` };
+  }
 }
 
 async function createWindow() {
@@ -342,6 +474,17 @@ app.on('ready', async () => {
   // Install an `app://` protocol that always returns the base HTML
   // file no matter what URL it is. This allows us to use react-router
   // on the frontend
+
+  const globalPrefs = await loadGlobalPrefs(); // load global prefs
+
+  if (globalPrefs.ngrokConfig?.autoStart) {
+    // wait for both server and ngrok to start before starting the Actual client to ensure server is available
+    await Promise.allSettled([
+      startSyncServer(),
+      exposeSyncServer(globalPrefs.ngrokConfig),
+    ]);
+  }
+
   protocol.handle('app', request => {
     if (request.method !== 'GET') {
       return new Response(null, {
