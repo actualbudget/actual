@@ -19,7 +19,6 @@ import { Popover } from '@actual-app/components/popover';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
-import { t } from 'i18next';
 
 import { setNotificationInset } from 'loot-core/client/actions';
 import { validForTransfer } from 'loot-core/client/transfer';
@@ -233,6 +232,7 @@ function SelectedTransactionsFloatingActionBar({
   style = {},
   showMakeTransfer,
 }: SelectedTransactionsFloatingActionBarProps) {
+  const { t } = useTranslation();
   const editMenuTriggerRef = useRef(null);
   const [isEditMenuOpen, setIsEditMenuOpen] = useState(false);
   const moreOptionsMenuTriggerRef = useRef(null);
