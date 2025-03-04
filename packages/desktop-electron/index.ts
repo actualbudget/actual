@@ -223,22 +223,21 @@ async function startSyncServer() {
       'app.js',
     );
 
-    // Use env variables to configure the server
-    let envVariables: Env = {
-      ...process.env, // required
-      ACTUAL_PORT: `${syncServerConfig.port}`,
-      ACTUAL_SERVER_FILES: `${syncServerConfig.ACTUAL_SERVER_FILES}`,
-      ACTUAL_USER_FILES: `${syncServerConfig.ACTUAL_USER_FILES}`,
-      ACTUAL_DATA_DIR: `${syncServerConfig.ACTUAL_SERVER_DATA_DIR}`,
-    };
-
     const webRoot = path.join(
       // require.resolve will recursively search up the workspace for the module
       path.dirname(require.resolve('@actual-app/web/package.json')),
       'build',
     );
 
-    envVariables = { ...envVariables, ACTUAL_WEB_ROOT: webRoot };
+    // Use env variables to configure the server
+    const envVariables: Env = {
+      ...process.env, // required
+      ACTUAL_PORT: `${syncServerConfig.port}`,
+      ACTUAL_SERVER_FILES: `${syncServerConfig.ACTUAL_SERVER_FILES}`,
+      ACTUAL_USER_FILES: `${syncServerConfig.ACTUAL_USER_FILES}`,
+      ACTUAL_DATA_DIR: `${syncServerConfig.ACTUAL_SERVER_DATA_DIR}`,
+      ACTUAL_WEB_ROOT: webRoot,
+    };
 
     // ACTUAL_SERVER_DATA_DIR is the root directory for the sync-server
     if (!fs.existsSync(syncServerConfig.ACTUAL_SERVER_DATA_DIR)) {
@@ -253,8 +252,6 @@ async function startSyncServer() {
     if (isDev) {
       forkOptions = { ...forkOptions, execArgv: ['--inspect'] };
     }
-
-    const SYNC_SERVER_WAIT_TIMEOUT = 15000; // wait 15 seconds for the server to start - if it doesn't, throw an error
 
     let syncServerStarted = false;
 
@@ -286,6 +283,8 @@ async function startSyncServer() {
         }
       });
     });
+
+    const SYNC_SERVER_WAIT_TIMEOUT = 20000; // wait 20 seconds for the server to start - if it doesn't, throw an error
 
     const syncServerTimeout = new Promise<void>((_, reject) => {
       setTimeout(() => {
