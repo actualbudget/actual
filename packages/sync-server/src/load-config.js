@@ -14,8 +14,8 @@ const projectRoot = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const defaultDataDir = process.env.ACTUAL_DATA_DIR
   ? process.env.ACTUAL_DATA_DIR
   : fs.existsSync('/data')
-    ? '/data'
-    : projectRoot;
+  ? '/data'
+  : projectRoot;
 
 debug(`Project root: '${projectRoot}'`);
 
@@ -58,7 +58,7 @@ const configSchema = convict({
   dataDir: {
     doc: 'Default data directory.',
     format: String,
-    default: defaultDataDir,
+    default: process.env.NODE_ENV === 'test' ? projectRoot : defaultDataDir,
     env: 'ACTUAL_DATA_DIR',
   },
   port: {
