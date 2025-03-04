@@ -21,6 +21,7 @@ import { useAccounts } from '../hooks/useAccounts';
 import { useLocalPref } from '../hooks/useLocalPref';
 import { useMetaThemeColor } from '../hooks/useMetaThemeColor';
 import { useNavigate } from '../hooks/useNavigate';
+import { useSyncedPref } from '../hooks/useSyncedPref';
 import { useSelector, useDispatch } from '../redux';
 import { theme } from '../style';
 import { getIsOutdated, getLatestVersion } from '../util/versions';
@@ -84,12 +85,67 @@ function RouterBehaviors() {
   return null;
 }
 
+function checkForShake(isNarrowWidth, isPrivacyEnabled, setPrivacyEnabledPref) {
+  if (!isNarrowWidth) {
+    return;
+  }
+
+  let lastX = null,
+    lastY = null,
+    lastZ = null;
+  const shakeThreshold = 15;
+  let timeout = 0;
+
+  const handler = event => {
+    const { x, y, z } = event.accelerationIncludingGravity;
+    timeout = Math.max(0, timeout - event.interval);
+
+    if (timeout === 0) {
+      if (!x || !y || !z) return;
+
+      if (lastX !== null && lastY !== null && lastZ !== null) {
+        const deltaX = Math.abs(lastX - x);
+        const deltaY = Math.abs(lastY - y);
+        const deltaZ = Math.abs(lastZ - z);
+
+        if (
+          deltaX > shakeThreshold ||
+          deltaY > shakeThreshold ||
+          deltaZ > shakeThreshold
+        ) {
+          isPrivacyEnabled = !isPrivacyEnabled;
+          setPrivacyEnabledPref(String(isPrivacyEnabled));
+          timeout = 1000;
+        }
+      }
+    }
+
+    lastX = x;
+    lastY = y;
+    lastZ = z;
+  };
+
+  window.addEventListener('devicemotion', handler);
+  return () => window.removeEventListener('devicemotion', handler);
+}
+
 export function FinancesApp() {
   const { isNarrowWidth } = useResponsive();
   useMetaThemeColor(isNarrowWidth ? theme.mobileViewTheme : null);
 
   const dispatch = useDispatch();
   const { t } = useTranslation();
+  const [isPrivacyEnabledPref, setPrivacyEnabledPref] =
+    useSyncedPref('isPrivacyEnabled');
+  useEffect(
+    () =>
+      checkForShake(
+        isNarrowWidth,
+        isPrivacyEnabledPref === 'true',
+        setPrivacyEnabledPref,
+      ),
+    [isNarrowWidth, isPrivacyEnabledPref],
+  );
 
   const accounts = useAccounts();
   const accountsLoaded = useSelector(state => state.queries.accountsLoaded);
