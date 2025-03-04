@@ -1,7 +1,11 @@
 #!/bin/bash
 set -euo pipefail
 
-version="${1#v}"
+if [ "$#" -gt 0 ]; then
+    version="${1#v}"
+else
+    version=""
+fi
 
 files_to_bump=(
     packages/api/package.json

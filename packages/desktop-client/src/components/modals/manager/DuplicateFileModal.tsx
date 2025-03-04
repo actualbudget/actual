@@ -8,12 +8,9 @@ import { InlineField } from '@actual-app/components/inline-field';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
-import {
-  addNotification,
-  duplicateBudget,
-  uniqueBudgetName,
-  validateBudgetName,
-} from 'loot-core/client/actions';
+import { addNotification } from 'loot-core/client/actions';
+import { duplicateBudget } from 'loot-core/client/budgets/budgetsSlice';
+import { send } from 'loot-core/platform/client/fetch';
 import { type File } from 'loot-core/types/file';
 
 import { useDispatch } from '../../../redux';
@@ -241,4 +238,15 @@ export function DuplicateFileModal({
       )}
     </Modal>
   );
+}
+
+async function validateBudgetName(name: string): Promise<{
+  valid: boolean;
+  message?: string;
+}> {
+  return send('validate-budget-name', { name });
+}
+
+async function uniqueBudgetName(name: string): Promise<string> {
+  return send('unique-budget-name', { name });
 }

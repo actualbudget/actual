@@ -9,7 +9,7 @@ import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { importBudget } from 'loot-core/client/actions/budgets';
+import { importBudget } from 'loot-core/client/budgets/budgetsSlice';
 
 import { useNavigate } from '../../../hooks/useNavigate';
 import { useDispatch } from '../../../redux';
@@ -48,7 +48,7 @@ export function ImportActualModal() {
       setImporting(true);
       setError(null);
       try {
-        await dispatch(importBudget(res[0], 'actual'));
+        await dispatch(importBudget({ filepath: res[0], type: 'actual' }));
         navigate('/budget');
       } catch (err) {
         setError(err.message);

@@ -197,17 +197,24 @@ async function downloadSimpleFinTransactions(
 
   console.log('Pulling transactions from SimpleFin');
 
-  const res = await post(
-    getServer().SIMPLEFIN_SERVER + '/transactions',
-    {
-      accountId: acctId,
-      startDate: since,
-    },
-    {
-      'X-ACTUAL-TOKEN': userToken,
-    },
-    60000,
-  );
+  let res;
+  try {
+    res = await post(
+      getServer().SIMPLEFIN_SERVER + '/transactions',
+      {
+        accountId: acctId,
+        startDate: since,
+      },
+      {
+        'X-ACTUAL-TOKEN': userToken,
+      },
+      // 5 minute timeout for batch sync, one minute for individual accounts
+      Array.isArray(acctId) ? 300000 : 60000,
+    );
+  } catch (error) {
+    console.error('Suspected timeout during bank sync:', error);
+    throw BankSyncError('TIMED_OUT', 'TIMED_OUT');
+  }
 
   if (Object.keys(res).length === 0) {
     throw BankSyncError('NO_DATA', 'NO_DATA');
@@ -584,7 +591,7 @@ export async function matchTransactions(
   );
 
   // The first pass runs the rules, and preps data for fuzzy matching
-  const accounts: AccountEntity[] = await db.getAccounts();
+  const accounts: db.DbAccount[] = await db.getAccounts();
   const accountsMap = new Map(accounts.map(account => [account.id, account]));
 
   const transactionsStep1 = [];
@@ -603,7 +610,7 @@ export async function matchTransactions(
     // is the highest fidelity match and should always be attempted
     // first.
     if (trans.imported_id) {
-      match = await db.first(
+      match = await db.first<db.DbViewTransaction>(
         'SELECT * FROM v_transactions WHERE imported_id = ? AND account = ?',
         [trans.imported_id, acctId],
       );
@@ -737,7 +744,7 @@ export async function addTransactions(
     { rawPayeeName: true },
   );
 
-  const accounts: AccountEntity[] = await db.getAccounts();
+  const accounts: db.DbAccount[] = await db.getAccounts();
   const accountsMap = new Map(accounts.map(account => [account.id, account]));
 
   for (const { trans: originalTrans, subtransactions } of normalized) {

@@ -3,19 +3,12 @@ import { Trans } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 
-import { format } from 'loot-core/src/shared/months';
+import { tsToRelativeTime } from 'loot-core/shared/util';
 import { type AccountEntity } from 'loot-core/src/types/models';
 
-import { useDateFormat } from '../../hooks/useDateFormat';
+import { useGlobalPref } from '../../hooks/useGlobalPref';
 import { theme } from '../../style';
 import { Row, Cell } from '../table';
-
-const tsToString = (ts: string | null, dateFormat: string) => {
-  if (!ts) return 'Unknown';
-
-  const parsed = new Date(parseInt(ts, 10));
-  return `${format(parsed, dateFormat)} ${format(parsed, 'HH:mm:ss')}`;
-};
 
 type AccountRowProps = {
   account: AccountEntity;
@@ -28,9 +21,11 @@ export const AccountRow = memo(
   ({ account, hovered, onHover, onAction }: AccountRowProps) => {
     const backgroundFocus = hovered;
 
-    const dateFormat = useDateFormat() || 'MM/dd/yyyy';
+    const [language = 'en-US'] = useGlobalPref('language');
 
-    const lastSync = tsToString(account.last_sync, dateFormat);
+    const lastSync = tsToRelativeTime(account.last_sync, language, {
+      capitalize: true,
+    });
 
     return (
       <Row

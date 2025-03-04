@@ -107,6 +107,9 @@ function connectWorker(worker, onOpen, onError) {
       });
       onOpen();
     } else if (msg.type === 'app-init-failure') {
+      globalWorker.postMessage({
+        name: '__app-init-failure-acknowledged',
+      });
       onError(msg);
     } else if (msg.type === 'capture-exception') {
       captureException(

@@ -39,11 +39,11 @@ describe('setI18NextLanguage', () => {
   });
 
   test('should fallback to English if the provided language is unavailable', () => {
-    vi.spyOn(console, 'error');
+    vi.spyOn(console, 'info');
 
     setI18NextLanguage('unknown');
 
-    expect(console.error).toHaveBeenCalledWith(
+    expect(console.info).toHaveBeenCalledWith(
       'Unknown locale unknown, falling back to en',
     );
     expect(i18n.changeLanguage).toHaveBeenCalledWith('en');
@@ -58,22 +58,22 @@ describe('setI18NextLanguage', () => {
   });
 
   test('should fallback to base language if the provided language has an unknown region code', () => {
-    vi.spyOn(console, 'error');
+    vi.spyOn(console, 'info');
 
     setI18NextLanguage('uk-ZZ');
 
-    expect(console.error).toHaveBeenCalledWith(
+    expect(console.info).toHaveBeenCalledWith(
       'Unknown locale uk-ZZ, falling back to uk',
     );
     expect(i18n.changeLanguage).toHaveBeenCalledWith('uk');
   });
 
   test('should fallback to lowercase language if the provided language has uppercase letters', () => {
-    vi.spyOn(console, 'error');
+    vi.spyOn(console, 'info');
 
     setI18NextLanguage('EN');
 
-    expect(console.error).toHaveBeenCalledWith(
+    expect(console.info).toHaveBeenCalledWith(
       'Unknown locale EN, falling back to en',
     );
     expect(i18n.changeLanguage).toHaveBeenCalledWith('en');
