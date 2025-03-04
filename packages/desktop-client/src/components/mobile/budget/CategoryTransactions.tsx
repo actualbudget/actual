@@ -128,6 +128,7 @@ export function CategoryTransactions({
           onLoadMore={loadMoreTransactions}
           onOpenTransaction={onOpenTransaction}
           onRefresh={undefined}
+          account={undefined}
         />
       </SchedulesProvider>
     </Page>

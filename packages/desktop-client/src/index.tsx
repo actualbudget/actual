@@ -17,6 +17,7 @@ import * as accountsSlice from 'loot-core/client/accounts/accountsSlice';
 import * as actions from 'loot-core/client/actions';
 import * as appSlice from 'loot-core/client/app/appSlice';
 import * as budgetsSlice from 'loot-core/client/budgets/budgetsSlice';
+import * as modalsSlice from 'loot-core/client/modals/modalsSlice';
 import * as queriesSlice from 'loot-core/client/queries/queriesSlice';
 import { runQuery } from 'loot-core/client/query-helpers';
 import { store } from 'loot-core/client/store';
@@ -38,6 +39,7 @@ const boundActions = bindActionCreators(
     ...accountsSlice.actions,
     ...appSlice.actions,
     ...budgetsSlice.actions,
+    ...modalsSlice.actions,
     ...queriesSlice.actions,
   },
   store.dispatch,

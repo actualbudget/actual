@@ -10,6 +10,7 @@ import * as accountApp from './app-account.js';
 import * as adminApp from './app-admin.js';
 import * as goCardlessApp from './app-gocardless/app-gocardless.js';
 import * as openidApp from './app-openid.js';
+import * as pluggai from './app-pluggyai/app-pluggyai.js';
 import * as secretApp from './app-secrets.js';
 import * as simpleFinApp from './app-simplefin/app-simplefin.js';
 import * as syncApp from './app-sync.js';
@@ -23,7 +24,7 @@ process.on('unhandledRejection', reason => {
 
 app.disable('x-powered-by');
 app.use(cors());
-app.set('trust proxy', config.trustedProxies);
+app.set('trust proxy', config.get('trustedProxies'));
 if (process.env.NODE_ENV !== 'development') {
   app.use(
     rateLimit({
@@ -35,17 +36,19 @@ if (process.env.NODE_ENV !== 'development') {
   );
 }
 
-app.use(bodyParser.json({ limit: `${config.upload.fileSizeLimitMB}mb` }));
+app.use(
+  bodyParser.json({ limit: `${config.get('upload.fileSizeLimitMB')}mb` }),
+);
 app.use(
   bodyParser.raw({
     type: 'application/actual-sync',
-    limit: `${config.upload.fileSizeSyncLimitMB}mb`,
+    limit: `${config.get('upload.fileSizeSyncLimitMB')}mb`,
   }),
 );
 app.use(
   bodyParser.raw({
     type: 'application/encrypted-file',
-    limit: `${config.upload.syncEncryptedFileSizeLimitMB}mb`,
+    limit: `${config.get('upload.syncEncryptedFileSizeLimitMB')}mb`,
   }),
 );
 
@@ -53,13 +56,14 @@ app.use('/sync', syncApp.handlers);
 app.use('/account', accountApp.handlers);
 app.use('/gocardless', goCardlessApp.handlers);
 app.use('/simplefin', simpleFinApp.handlers);
+app.use('/pluggyai', pluggai.handlers);
 app.use('/secret', secretApp.handlers);
 
 app.use('/admin', adminApp.handlers);
 app.use('/openid', openidApp.handlers);
 
 app.get('/mode', (req, res) => {
-  res.send(config.mode);
+  res.send(config.get('mode'));
 });
 
 app.use(actuator()); // Provides /health, /metrics, /info
@@ -89,8 +93,10 @@ if (process.env.NODE_ENV === 'development') {
 } else {
   console.log('Running in production mode - Serving static React app');
 
-  app.use(express.static(config.webRoot, { index: false }));
-  app.get('/*', (req, res) => res.sendFile(config.webRoot + '/index.html'));
+  app.use(express.static(config.get('webRoot'), { index: false }));
+  app.get('/*', (req, res) =>
+    res.sendFile(config.get('webRoot') + '/index.html'),
+  );
 }
 
 function parseHTTPSConfig(value) {
@@ -101,19 +107,24 @@ function parseHTTPSConfig(value) {
 }
 
 export async function run() {
-  if (config.https) {
+  if (config.get('https.key') && config.get('https.cert')) {
     const https = await import('node:https');
     const httpsOptions = {
       ...config.https,
-      key: parseHTTPSConfig(config.https.key),
-      cert: parseHTTPSConfig(config.https.cert),
+      key: parseHTTPSConfig(config.get('https.key')),
+      cert: parseHTTPSConfig(config.get('https.cert')),
     };
-    https.createServer(httpsOptions, app).listen(config.port, config.hostname);
+    https
+      .createServer(httpsOptions, app)
+      .listen(config.get('port'), config.get('hostname'));
   } else {
-    app.listen(config.port, config.hostname);
+    app.listen(config.get('port'), config.get('hostname'));
   }
 
   // Signify to any parent process that the server has started. Used in electron desktop app
   process.parentPort?.postMessage({ type: 'server-started' });
-  console.log('Listening on ' + config.hostname + ':' + config.port + '...');
+
+  console.log(
+    'Listening on ' + config.get('hostname') + ':' + config.get('port') + '...',
+  );
 }

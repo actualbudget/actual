@@ -7,18 +7,20 @@ import { Paragraph } from '@actual-app/components/paragraph';
 import { styles } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
 
+import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
+
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { useResponsive } from '../responsive/ResponsiveProvider';
 
-type ConfirmTransactionDeleteProps = {
-  message?: string;
-  onConfirm: () => void;
-};
+type ConfirmTransactionDeleteModalProps = Extract<
+  ModalType,
+  { name: 'confirm-transaction-delete' }
+>['options'];
 
 export function ConfirmTransactionDeleteModal({
   message = 'Are you sure you want to delete the transaction?',
   onConfirm,
-}: ConfirmTransactionDeleteProps) {
+}: ConfirmTransactionDeleteModalProps) {
   const { t } = useTranslation();
   const { isNarrowWidth } = useResponsive();
   const narrowButtonStyle = isNarrowWidth
