@@ -904,35 +904,35 @@ const TransactionEditInner = memo(function TransactionEditInner({
         )}
         {childTransactions.length > 0 && (
           <View style={{ alignItems: 'center' }}>
-          <Button
-            disabled={editingField}
-            style={{
-              height: 40,
-              borderWidth: 0,
-              marginLeft: styles.mobileEditingPadding,
-              marginRight: styles.mobileEditingPadding,
-              marginTop: 10,
-              backgroundColor: 'transparent',
-            }}
-            onClick={() => onAddSplit(transaction.id)}
-            type="bare"
-          >
-            <SvgSplit
-              width={17}
-              height={17}
-              style={{ color: theme.formLabelText }}
-            />
-            <Text
+            <Button
+              disabled={editingField}
               style={{
-                marginLeft: 5,
-                userSelect: 'none',
-                color: theme.formLabelText,
+                height: 40,
+                borderWidth: 0,
+                marginLeft: styles.mobileEditingPadding,
+                marginRight: styles.mobileEditingPadding,
+                marginTop: 10,
+                backgroundColor: 'transparent',
               }}
+              onClick={() => onAddSplit(transaction.id)}
+              type="bare"
             >
-              {t('Add Split')}
-            </Text>
-          </Button>
-        </View>
+              <SvgSplit
+                width={17}
+                height={17}
+                style={{ color: theme.formLabelText }}
+              />
+              <Text
+                style={{
+                  marginLeft: 5,
+                  userSelect: 'none',
+                  color: theme.formLabelText,
+                }}
+              >
+                {t('Add Split')}
+              </Text>
+            </Button>
+          </View>
         )}
         <View>
           <FieldLabel title={t('Account')} />
