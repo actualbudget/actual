@@ -109,6 +109,10 @@ export default defineConfig(async ({ mode }) => {
     base: '/',
     envPrefix: 'REACT_APP_',
     build: {
+      terserOptions: {
+        compress: false,
+        mangle: false,
+      },
       target: 'es2022',
       sourcemap: true,
       outDir: mode === 'desktop' ? 'build-electron' : 'build',

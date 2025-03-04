@@ -11,6 +11,7 @@ import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
 import { useSchedules } from 'loot-core/client/data-hooks/schedules';
+import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
 import { format } from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
 import {
@@ -26,7 +27,10 @@ import {
   ModalTitle,
 } from '../common/Modal';
 
-type ScheduledTransactionMenuModalProps = ScheduledTransactionMenuProps;
+type ScheduledTransactionMenuModalProps = Extract<
+  ModalType,
+  { name: 'scheduled-transaction-menu' }
+>['options'];
 
 export function ScheduledTransactionMenuModal({
   transactionId,

@@ -10,6 +10,7 @@ import { Button } from '@actual-app/components/button';
 import { View } from '@actual-app/components/view';
 import { parseISO, format as formatDate, parse as parseDate } from 'date-fns';
 
+import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
 import { currentDay, dayFromDate } from 'loot-core/shared/months';
 import { amountToInteger } from 'loot-core/shared/util';
 
@@ -30,15 +31,10 @@ const itemStyle: CSSProperties = {
 
 type NoteAmendMode = 'replace' | 'prepend' | 'append';
 
-type EditFieldModalProps = {
-  name: string;
-  onSubmit: (
-    name: string,
-    value: string | number,
-    mode?: NoteAmendMode,
-  ) => void;
-  onClose: () => void;
-};
+type EditFieldModalProps = Extract<
+  ModalType,
+  { name: 'edit-field' }
+>['options'];
 
 export function EditFieldModal({
   name,
