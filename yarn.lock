@@ -88,6 +88,7 @@ __metadata:
     "@babel/preset-typescript": "npm:^7.20.2"
     "@types/bcrypt": "npm:^5.0.2"
     "@types/better-sqlite3": "npm:^7.6.12"
+    "@types/convict": "npm:^6"
     "@types/cors": "npm:^2.8.13"
     "@types/express": "npm:^5.0.0"
     "@types/express-actuator": "npm:^1.8.3"
@@ -100,6 +101,7 @@ __metadata:
     bcrypt: "npm:^5.1.1"
     better-sqlite3: "npm:^11.7.0"
     body-parser: "npm:^1.20.3"
+    convict: "npm:^6.2.4"
     cors: "npm:^2.8.5"
     date-fns: "npm:^2.30.0"
     debug: "npm:^4.3.4"
@@ -6112,6 +6114,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/convict@npm:^6":
+  version: 6.1.6
+  resolution: "@types/convict@npm:6.1.6"
+  dependencies:
+    "@types/node": "npm:*"
+  checksum: 10/680e6ec527545d4bf3a4a7368c71510b67a09f131a058c2c4616a3a445e9f2be58b42a21535a8078739439b98b1326130f270fff80940465dc40b83b9bf22f4c
+  languageName: node
+  linkType: hard
+
 "@types/cookiejar@npm:^2.1.5":
   version: 2.1.5
   resolution: "@types/cookiejar@npm:2.1.5"
@@ -9373,6 +9384,16 @@ __metadata:
   version: 2.0.0
   resolution: "convert-source-map@npm:2.0.0"
   checksum: 10/c987be3ec061348cdb3c2bfb924bec86dea1eacad10550a85ca23edb0fe3556c3a61c7399114f3331ccb3499d7fd0285ab24566e5745929412983494c3926e15
+  languageName: node
+  linkType: hard
+
+"convict@npm:^6.2.4":
+  version: 6.2.4
+  resolution: "convict@npm:6.2.4"
+  dependencies:
+    lodash.clonedeep: "npm:^4.5.0"
+    yargs-parser: "npm:^20.2.7"
+  checksum: 10/d4b9c50dcddf4b5da7a80c1d99d1cfae8a47d78d291f0cc11637ab25b6b4515f5f0e9029abd45bcc30cc3e33032aa8814ead22142b4563c4e4959d2e56bdf1ae
   languageName: node
   linkType: hard
 
@@ -15987,6 +16008,13 @@ __metadata:
   dependencies:
     p-locate: "npm:^5.0.0"
   checksum: 10/72eb661788a0368c099a184c59d2fee760b3831c9c1c33955e8a19ae4a21b4116e53fa736dc086cdeb9fce9f7cc508f2f92d2d3aae516f133e16a2bb59a39f5a
+  languageName: node
+  linkType: hard
+
+"lodash.clonedeep@npm:^4.5.0":
+  version: 4.5.0
+  resolution: "lodash.clonedeep@npm:4.5.0"
+  checksum: 10/957ed243f84ba6791d4992d5c222ffffca339a3b79dbe81d2eaf0c90504160b500641c5a0f56e27630030b18b8e971ea10b44f928a977d5ced3c8948841b555f
   languageName: node
   linkType: hard
 
@@ -23569,7 +23597,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"yargs-parser@npm:^20.2.2":
+"yargs-parser@npm:^20.2.2, yargs-parser@npm:^20.2.7":
   version: 20.2.9
   resolution: "yargs-parser@npm:20.2.9"
   checksum: 10/0188f430a0f496551d09df6719a9132a3469e47fe2747208b1dd0ab2bb0c512a95d0b081628bbca5400fb20dbf2fabe63d22badb346cecadffdd948b049f3fcc
