@@ -253,6 +253,13 @@ const configSchema = convict({
     default: false,
     env: 'ACTUAL_OPENID_ENFORCE',
   },
+
+  userCreationMode: {
+    doc: 'Determines how users can be created.',
+    format: ["manual", "login"],
+    default: "manual",
+    env: 'ACTUAL_USER_CREATION_MODE',
+  }
 });
 
 let configPath = null;

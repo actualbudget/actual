@@ -207,7 +207,7 @@ export async function loginWithOpenIdFinalize(body) {
         );
         if (
           countUsersWithUserName === 0 ||
-          finalConfig.userCreationMode === 'login'
+          config.get('userCreationMode') === 'login'
         ) {
           userId = uuidv4();
           // Check if user was created by another transaction
