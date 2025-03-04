@@ -311,7 +311,7 @@ async function deleteCategory({
 }): Promise<{ error?: 'no-categories' | 'category-type' }> {
   let result = {};
   await batchMessages(async () => {
-    const row = await db.first(
+    const row = await db.first<Pick<db.DbCategory, 'is_income'>>(
       'SELECT is_income FROM categories WHERE id = ?',
       [id],
     );
@@ -322,9 +322,10 @@ async function deleteCategory({
 
     const transfer =
       transferId &&
-      (await db.first('SELECT is_income FROM categories WHERE id = ?', [
-        transferId,
-      ]));
+      (await db.first<Pick<db.DbCategory, 'is_income'>>(
+        'SELECT is_income FROM categories WHERE id = ?',
+        [transferId],
+      ));
 
     if (!row || (transferId && !transfer)) {
       result = { error: 'no-categories' };
