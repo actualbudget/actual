@@ -39,7 +39,7 @@ export function FilterMenu({
               ]
             : [
                 { name: 'rename-filter', text: t('Rename') },
-                { name: 'update-filter', text: t('Update condtions') },
+                { name: 'update-filter', text: t('Update conditions') },
                 { name: 'reload-filter', text: t('Revert changes') },
                 { name: 'delete-filter', text: t('Delete') },
                 Menu.line,

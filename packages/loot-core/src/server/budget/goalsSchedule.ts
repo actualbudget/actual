@@ -21,8 +21,10 @@ async function createScheduleList(
   const errors = [];
 
   for (let ll = 0; ll < template.length; ll++) {
-    const { id: sid, completed: complete } = await db.first(
-      'SELECT * FROM schedules WHERE TRIM(name) = ? AND tombstone = 0',
+    const { id: sid, completed: complete } = await db.first<
+      Pick<db.DbSchedule, 'id' | 'completed'>
+    >(
+      'SELECT id, completed FROM schedules WHERE TRIM(name) = ? AND tombstone = 0',
       [template[ll].name.trim()],
     );
     const rule = await getRuleForSchedule(sid);

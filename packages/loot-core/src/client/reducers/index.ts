@@ -1,4 +1,3 @@
-import { update as budgets } from './budgets';
 import { update as modals } from './modals';
 import { update as notifications } from './notifications';
 import { update as prefs } from './prefs';
@@ -8,6 +7,5 @@ export const reducers = {
   prefs,
   modals,
   notifications,
-  budgets,
   user,
 };

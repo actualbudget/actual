@@ -1,4 +1,7 @@
 // @ts-strict-ignore
+import { formatDistanceToNow } from 'date-fns';
+import * as locales from 'date-fns/locale';
+
 export function last<T>(arr: Array<T>) {
   return arr[arr.length - 1];
 }
@@ -396,12 +399,12 @@ export function currencyToAmount(currencyAmount: string): Amount | null {
   if (
     !match ||
     (match[0] === getNumberFormat().thousandsSeparator &&
-      match.index + 4 === currencyAmount.length)
+      match.index + 4 <= currencyAmount.length)
   ) {
     fraction = null;
-    integer = currencyAmount.replace(/\D/g, '');
+    integer = currencyAmount.replace(/[^\d-]/g, '');
   } else {
-    integer = currencyAmount.slice(0, match.index).replace(/\D/g, '');
+    integer = currencyAmount.slice(0, match.index).replace(/[^\d-]/g, '');
     fraction = currencyAmount.slice(match.index + 1);
   }
 
@@ -480,4 +483,29 @@ export function sortByKey<T>(arr: T[], key: keyof T): T[] {
     }
     return 0;
   });
+}
+
+// Date utilities
+
+export function tsToRelativeTime(
+  ts: string | null,
+  language: string,
+  options: {
+    capitalize: boolean;
+  } = { capitalize: false },
+): string {
+  if (!ts) return 'Unknown';
+
+  const parsed = new Date(parseInt(ts, 10));
+  const locale =
+    locales[language.replace('-', '') as keyof typeof locales] ??
+    locales['enUS'];
+
+  let distance = formatDistanceToNow(parsed, { addSuffix: true, locale });
+
+  if (options.capitalize) {
+    distance = distance.charAt(0).toUpperCase() + distance.slice(1);
+  }
+
+  return distance;
 }
