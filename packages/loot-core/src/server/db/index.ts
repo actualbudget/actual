@@ -346,7 +346,7 @@ export async function getCategoriesGrouped(
 }
 
 export async function insertCategoryGroup(
-  group,
+  group: WithRequired<Partial<DbCategoryGroup>, 'name'>,
 ): Promise<DbCategoryGroup['id']> {
   // Don't allow duplicate group
   const existingGroup = await first<
@@ -377,12 +377,17 @@ export async function insertCategoryGroup(
   return id;
 }
 
-export function updateCategoryGroup(group) {
+export function updateCategoryGroup(
+  group: WithRequired<Partial<DbCategoryGroup>, 'name' | 'is_income'>,
+) {
   group = categoryGroupModel.validate(group, { update: true });
   return update('category_groups', group);
 }
 
-export async function moveCategoryGroup(id, targetId) {
+export async function moveCategoryGroup(
+  id: DbCategoryGroup['id'],
+  targetId: DbCategoryGroup['id'],
+) {
   const groups = await all<Pick<DbCategoryGroup, 'id' | 'sort_order'>>(
     `SELECT id, sort_order FROM category_groups WHERE tombstone = 0 ORDER BY sort_order, id`,
   );
@@ -394,7 +399,10 @@ export async function moveCategoryGroup(id, targetId) {
   await update('category_groups', { id, sort_order });
 }
 
-export async function deleteCategoryGroup(group, transferId?: string) {
+export async function deleteCategoryGroup(
+  group: Pick<DbCategoryGroup, 'id'>,
+  transferId?: string,
+) {
   const categories = await all<DbCategory>(
     'SELECT * FROM categories WHERE cat_group = ?',
     [group.id],
@@ -406,8 +414,8 @@ export async function deleteCategoryGroup(group, transferId?: string) {
 }
 
 export async function insertCategory(
-  category,
-  { atEnd } = { atEnd: undefined },
+  category: WithRequired<Partial<DbCategory>, 'name' | 'cat_group'>,
+  { atEnd }: { atEnd?: boolean | undefined } = { atEnd: undefined },
 ): Promise<DbCategory['id']> {
   let sort_order;
 
@@ -460,7 +468,12 @@ export async function insertCategory(
   return id_;
 }
 
-export function updateCategory(category) {
+export function updateCategory(
+  category: WithRequired<
+    Partial<DbCategory>,
+    'name' | 'is_income' | 'cat_group'
+  >,
+) {
   category = categoryModel.validate(category, { update: true });
   return update('categories', category);
 }

@@ -252,7 +252,7 @@ async function createCategory({
   hidden,
 }: {
   name: string;
-  groupId: number;
+  groupId: CategoryGroupEntity['id'];
   isIncome?: boolean;
   hidden?: boolean;
 }): Promise<CategoryEntity['id']> {
@@ -272,10 +272,12 @@ async function updateCategory(
   category: CategoryEntity,
 ): Promise<{ error?: { type: 'category-exists' } }> {
   try {
-    await db.updateCategory({
-      ...category,
-      name: category.name.trim(),
-    });
+    await db.updateCategory(
+      categoryModel.toDb({
+        ...category,
+        name: category.name.trim(),
+      }),
+    );
   } catch (e) {
     if (
       e instanceof Error &&
@@ -330,7 +332,12 @@ async function deleteCategory({
     if (!row || (transferId && !transfer)) {
       result = { error: 'no-categories' };
       return;
-    } else if (transferId && row.is_income !== transfer.is_income) {
+    } else if (
+      transferId &&
+      row &&
+      transfer &&
+      row.is_income !== transfer.is_income
+    ) {
       result = { error: 'category-type' };
       return;
     }
@@ -372,7 +379,7 @@ async function createCategoryGroup({
 }
 
 async function updateCategoryGroup(group: CategoryGroupEntity) {
-  await db.updateCategoryGroup(group);
+  await db.updateCategoryGroup(categoryGroupModel.toDb(group));
 }
 
 async function moveCategoryGroup({
