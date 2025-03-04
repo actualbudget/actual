@@ -24,7 +24,7 @@ import { FormField, FormLabel } from '../forms';
 
 type PluggyAiInitialiseProps = Extract<
   ModalType,
-  { name: 'simplefin-init' }
+  { name: 'pluggyai-init' }
 >['options'];
 
 export const PluggyAiInitialiseModal = ({
