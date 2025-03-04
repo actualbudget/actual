@@ -66,14 +66,14 @@ const notificationsSlice = createSlice({
     },
     addGenericErrorNotification(state) {
       const notification: NotificationWithId = {
-          id: uuidv4(),
-          type: 'error',
-          message: t(
-            'Something internally went wrong. You may want to restart the app if anything looks wrong. ' +
-              'Please report this as a new issue on GitHub.',
-          ),
-        };
-        state.notifications = [...state.notifications, notification];
+        id: uuidv4(),
+        type: 'error',
+        message: t(
+          'Something internally went wrong. You may want to restart the app if anything looks wrong. ' +
+            'Please report this as a new issue on GitHub.',
+        ),
+      };
+      state.notifications = [...state.notifications, notification];
     },
     removeNotification(
       state,
