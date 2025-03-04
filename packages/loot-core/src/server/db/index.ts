@@ -175,12 +175,9 @@ export async function first<T>(sql, params?: (string | number)[]) {
 
 // The underlying sql system is now sync, but we can't update `first` yet
 // without auditing all uses of it
-export function firstSync(sql, params?: (string | number)[]) {
-  const arr = runQuery(sql, params, true);
-  // TODO: In the next phase, we will make this function generic
-  // and pass the type of the return type to `runQuery`.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return arr.length === 0 ? null : (arr[0] as any);
+export function firstSync<T>(sql, params?: (string | number)[]) {
+  const arr = runQuery<T>(sql, params, true);
+  return arr.length === 0 ? null : arr[0];
 }
 
 // This function is marked as async because `runQuery` is no longer
@@ -423,7 +420,7 @@ export async function insertCategory(
     }
 
     if (atEnd) {
-      const lastCat = await first<Pick<DbCategoryGroup, 'sort_order'>>(`
+      const lastCat = await first<Pick<DbCategory, 'sort_order'>>(`
         SELECT sort_order FROM categories WHERE tombstone = 0 ORDER BY sort_order DESC, id DESC LIMIT 1
       `);
       sort_order = (lastCat ? lastCat.sort_order : 0) + SORT_INCREMENT;
