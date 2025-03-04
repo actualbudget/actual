@@ -223,21 +223,26 @@ async function startSyncServer() {
       'app.js',
     );
 
-    const webRoot = path.join(
-      // require.resolve will recursively search up the workspace for the module
-      path.dirname(require.resolve('@actual-app/web/package.json')),
-      'build',
-    );
-
     // Use env variables to configure the server
-    const envVariables: Env = {
+    let envVariables: Env = {
       ...process.env, // required
       ACTUAL_PORT: `${syncServerConfig.port}`,
       ACTUAL_SERVER_FILES: `${syncServerConfig.ACTUAL_SERVER_FILES}`,
       ACTUAL_USER_FILES: `${syncServerConfig.ACTUAL_USER_FILES}`,
       ACTUAL_DATA_DIR: `${syncServerConfig.ACTUAL_SERVER_DATA_DIR}`,
-      ACTUAL_WEB_ROOT: webRoot,
     };
+
+    if (isDev) {
+      // If we're in dev, use the workspace build of the web app - otherwise use what's in the sync-server (currently an npm package)
+      // We can remove this isDev condition when sync-server also uses the workspace build
+      const webRoot = path.join(
+        // require.resolve will recursively search up the workspace for the module
+        path.dirname(require.resolve('@actual-app/web/package.json')),
+        'build',
+      );
+
+      envVariables = { ...envVariables, ACTUAL_WEB_ROOT: webRoot };
+    }
 
     // ACTUAL_SERVER_DATA_DIR is the root directory for the sync-server
     if (!fs.existsSync(syncServerConfig.ACTUAL_SERVER_DATA_DIR)) {
