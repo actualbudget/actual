@@ -16,19 +16,18 @@ export default {
    * swapped dates back (by giving valueDate higher priority) and
    * called parent method with edited transaction as argument
    */
-  normalizeTransaction(transaction, _booked, editedTransaction = null) {
-    const trans = editedTransaction ?? transaction;
+  normalizeTransaction(transaction, booked) {
+    const editedTrans = { ...transaction };
 
     const date =
-      trans.date ||
-      transaction.valueDate || // swapped this
+      transaction.valueDate ||
       transaction.valueDateTime ||
-      transaction.bookingDate || // with that
+      transaction.bookingDate ||
       transaction.bookingDateTime;
 
-    trans.date = date;
+    editedTrans.date = date;
 
-    return Fallback.normalizeTransaction(transaction, _booked, trans);
+    return Fallback.normalizeTransaction(transaction, booked, editedTrans);
   },
 
   sortTransactions(transactions = []) {
