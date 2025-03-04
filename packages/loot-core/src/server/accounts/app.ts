@@ -1,3 +1,4 @@
+import { t } from 'i18next';
 import { v4 as uuidv4 } from 'uuid';
 
 import { captureException } from '../../platform/exceptions';
@@ -13,6 +14,7 @@ import {
   SyncServerGoCardlessAccount,
   TransactionEntity,
   SyncServerSimpleFinAccount,
+  SyncServerPluggyAiAccount,
 } from '../../types/models';
 import { createApp } from '../app';
 import * as db from '../db';
@@ -40,6 +42,7 @@ export type AccountHandlers = {
   'account-properties': typeof getAccountProperties;
   'gocardless-accounts-link': typeof linkGoCardlessAccount;
   'simplefin-accounts-link': typeof linkSimpleFinAccount;
+  'pluggyai-accounts-link': typeof linkPluggyAiAccount;
   'account-create': typeof createAccount;
   'account-close': typeof closeAccount;
   'account-reopen': typeof reopenAccount;
@@ -50,7 +53,9 @@ export type AccountHandlers = {
   'gocardless-poll-web-token-stop': typeof stopGoCardlessWebTokenPolling;
   'gocardless-status': typeof goCardlessStatus;
   'simplefin-status': typeof simpleFinStatus;
+  'pluggyai-status': typeof pluggyAiStatus;
   'simplefin-accounts': typeof simpleFinAccounts;
+  'pluggyai-accounts': typeof pluggyAiAccounts;
   'gocardless-get-banks': typeof getGoCardlessBanks;
   'gocardless-create-web-token': typeof createGoCardlessWebToken;
   'accounts-bank-sync': typeof accountsBankSync;
@@ -184,7 +189,7 @@ async function linkSimpleFinAccount({
   let id;
 
   const institution = {
-    name: externalAccount.institution ?? 'Unknown',
+    name: externalAccount.institution ?? t('Unknown'),
   };
 
   const bank = await link.findOrCreateBank(
@@ -219,6 +224,70 @@ async function linkSimpleFinAccount({
       bank: bank.id,
       offbudget: offBudget ? 1 : 0,
       account_sync_source: 'simpleFin',
+    });
+    await db.insertPayee({
+      name: '',
+      transfer_acct: id,
+    });
+  }
+
+  await bankSync.syncAccount(
+    undefined,
+    undefined,
+    id,
+    externalAccount.account_id,
+    bank.bank_id,
+  );
+
+  await connection.send('sync-event', {
+    type: 'success',
+    tables: ['transactions'],
+  });
+
+  return 'ok';
+}
+
+async function linkPluggyAiAccount({
+  externalAccount,
+  upgradingId,
+  offBudget = false,
+}: {
+  externalAccount: SyncServerPluggyAiAccount;
+  upgradingId?: AccountEntity['id'] | undefined;
+  offBudget?: boolean | undefined;
+}) {
+  let id;
+
+  const institution = {
+    name: externalAccount.institution ?? t('Unknown'),
+  };
+
+  const bank = await link.findOrCreateBank(
+    institution,
+    externalAccount.orgDomain ?? externalAccount.orgId,
+  );
+
+  if (upgradingId) {
+    const accRow = await db.first('SELECT * FROM accounts WHERE id = ?', [
+      upgradingId,
+    ]);
+    id = accRow.id;
+    await db.update('accounts', {
+      id,
+      account_id: externalAccount.account_id,
+      bank: bank.id,
+      account_sync_source: 'pluggyai',
+    });
+  } else {
+    id = uuidv4();
+    await db.insertWithUUID('accounts', {
+      id,
+      account_id: externalAccount.account_id,
+      name: externalAccount.name,
+      official_name: externalAccount.name,
+      bank: bank.id,
+      offbudget: offBudget ? 1 : 0,
+      account_sync_source: 'pluggyai',
     });
     await db.insertPayee({
       name: '',
@@ -570,6 +639,27 @@ async function simpleFinStatus() {
   );
 }
 
+async function pluggyAiStatus() {
+  const userToken = await asyncStorage.getItem('user-token');
+
+  if (!userToken) {
+    return { error: 'unauthorized' };
+  }
+
+  const serverConfig = getServer();
+  if (!serverConfig) {
+    throw new Error('Failed to get server config.');
+  }
+
+  return post(
+    serverConfig.PLUGGYAI_SERVER + '/status',
+    {},
+    {
+      'X-ACTUAL-TOKEN': userToken,
+    },
+  );
+}
+
 async function simpleFinAccounts() {
   const userToken = await asyncStorage.getItem('user-token');
 
@@ -585,6 +675,32 @@ async function simpleFinAccounts() {
   try {
     return await post(
       serverConfig.SIMPLEFIN_SERVER + '/accounts',
+      {},
+      {
+        'X-ACTUAL-TOKEN': userToken,
+      },
+      60000,
+    );
+  } catch (error) {
+    return { error_code: 'TIMED_OUT' };
+  }
+}
+
+async function pluggyAiAccounts() {
+  const userToken = await asyncStorage.getItem('user-token');
+
+  if (!userToken) {
+    return { error: 'unauthorized' };
+  }
+
+  const serverConfig = getServer();
+  if (!serverConfig) {
+    throw new Error('Failed to get server config.');
+  }
+
+  try {
+    return await post(
+      serverConfig.PLUGGYAI_SERVER + '/accounts',
       {},
       {
         'X-ACTUAL-TOKEN': userToken,
@@ -1068,6 +1184,7 @@ app.method('account-balance', getAccountBalance);
 app.method('account-properties', getAccountProperties);
 app.method('gocardless-accounts-link', linkGoCardlessAccount);
 app.method('simplefin-accounts-link', linkSimpleFinAccount);
+app.method('pluggyai-accounts-link', linkPluggyAiAccount);
 app.method('account-create', mutator(undoable(createAccount)));
 app.method('account-close', mutator(closeAccount));
 app.method('account-reopen', mutator(undoable(reopenAccount)));
@@ -1078,7 +1195,9 @@ app.method('gocardless-poll-web-token', pollGoCardlessWebToken);
 app.method('gocardless-poll-web-token-stop', stopGoCardlessWebTokenPolling);
 app.method('gocardless-status', goCardlessStatus);
 app.method('simplefin-status', simpleFinStatus);
+app.method('pluggyai-status', pluggyAiStatus);
 app.method('simplefin-accounts', simpleFinAccounts);
+app.method('pluggyai-accounts', pluggyAiAccounts);
 app.method('gocardless-get-banks', getGoCardlessBanks);
 app.method('gocardless-create-web-token', createGoCardlessWebToken);
 app.method('accounts-bank-sync', accountsBankSync);
