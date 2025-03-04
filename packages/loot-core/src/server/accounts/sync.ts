@@ -197,17 +197,24 @@ async function downloadSimpleFinTransactions(
 
   console.log('Pulling transactions from SimpleFin');
 
-  const res = await post(
-    getServer().SIMPLEFIN_SERVER + '/transactions',
-    {
-      accountId: acctId,
-      startDate: since,
-    },
-    {
-      'X-ACTUAL-TOKEN': userToken,
-    },
-    60000,
-  );
+  let res;
+  try {
+    res = await post(
+      getServer().SIMPLEFIN_SERVER + '/transactions',
+      {
+        accountId: acctId,
+        startDate: since,
+      },
+      {
+        'X-ACTUAL-TOKEN': userToken,
+      },
+      // 5 minute timeout for batch sync, one minute for individual accounts
+      Array.isArray(acctId) ? 300000 : 60000,
+    );
+  } catch (error) {
+    console.error('Suspected timeout during bank sync:', error);
+    throw BankSyncError('TIMED_OUT', 'TIMED_OUT');
+  }
 
   if (Object.keys(res).length === 0) {
     throw BankSyncError('NO_DATA', 'NO_DATA');
@@ -244,6 +251,45 @@ async function downloadSimpleFinTransactions(
       startingBalance: singleRes.startingBalance,
     };
   }
+
+  console.log('Response:', retVal);
+  return retVal;
+}
+
+async function downloadPluggyAiTransactions(
+  acctId: AccountEntity['id'],
+  since: string,
+) {
+  const userToken = await asyncStorage.getItem('user-token');
+  if (!userToken) return;
+
+  console.log('Pulling transactions from Pluggy.ai');
+
+  const res = await post(
+    getServer().PLUGGYAI_SERVER + '/transactions',
+    {
+      accountId: acctId,
+      startDate: since,
+    },
+    {
+      'X-ACTUAL-TOKEN': userToken,
+    },
+    60000,
+  );
+
+  if (res.error_code) {
+    throw BankSyncError(res.error_type, res.error_code);
+  } else if ('error' in res) {
+    throw BankSyncError('Connection', res.error);
+  }
+
+  let retVal = {};
+  const singleRes = res as BankSyncResponse;
+  retVal = {
+    transactions: singleRes.transactions.all,
+    accountBalance: singleRes.balances,
+    startingBalance: singleRes.startingBalance,
+  };
 
   console.log('Response:', retVal);
   return retVal;
@@ -584,7 +630,7 @@ export async function matchTransactions(
   );
 
   // The first pass runs the rules, and preps data for fuzzy matching
-  const accounts: AccountEntity[] = await db.getAccounts();
+  const accounts: db.DbAccount[] = await db.getAccounts();
   const accountsMap = new Map(accounts.map(account => [account.id, account]));
 
   const transactionsStep1 = [];
@@ -603,7 +649,7 @@ export async function matchTransactions(
     // is the highest fidelity match and should always be attempted
     // first.
     if (trans.imported_id) {
-      match = await db.first(
+      match = await db.first<db.DbViewTransaction>(
         'SELECT * FROM v_transactions WHERE imported_id = ? AND account = ?',
         [trans.imported_id, acctId],
       );
@@ -737,7 +783,7 @@ export async function addTransactions(
     { rawPayeeName: true },
   );
 
-  const accounts: AccountEntity[] = await db.getAccounts();
+  const accounts: db.DbAccount[] = await db.getAccounts();
   const accountsMap = new Map(accounts.map(account => [account.id, account]));
 
   for (const { trans: originalTrans, subtransactions } of normalized) {
@@ -806,6 +852,15 @@ async function processBankSyncDownload(
         );
       }, currentBalance);
       balanceToUse = previousBalance;
+    }
+
+    if (acctRow.account_sync_source === 'pluggyai') {
+      const currentBalance = download.startingBalance;
+      const previousBalance = transactions.reduce(
+        (total, trans) => total - trans.transactionAmount.amount * 100,
+        currentBalance,
+      );
+      balanceToUse = Math.round(previousBalance);
     }
 
     const oldestTransaction = transactions[transactions.length - 1];
@@ -882,6 +937,8 @@ export async function syncAccount(
   let download;
   if (acctRow.account_sync_source === 'simpleFin') {
     download = await downloadSimpleFinTransactions(acctId, syncStartDate);
+  } else if (acctRow.account_sync_source === 'pluggyai') {
+    download = await downloadPluggyAiTransactions(acctId, syncStartDate);
   } else if (acctRow.account_sync_source === 'goCardless') {
     download = await downloadGoCardlessTransactions(
       userId,

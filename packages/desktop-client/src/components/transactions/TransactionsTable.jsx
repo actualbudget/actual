@@ -25,8 +25,9 @@ import {
   isValid as isDateValid,
 } from 'date-fns';
 
-import { addNotification, pushModal } from 'loot-core/client/actions';
+import { addNotification } from 'loot-core/client/actions';
 import { useCachedSchedules } from 'loot-core/client/data-hooks/schedules';
+import { pushModal } from 'loot-core/client/modals/modalsSlice';
 import {
   getAccountsById,
   getPayeesById,
@@ -62,7 +63,7 @@ import { SvgLeftArrow2, SvgRightArrow2, SvgSplit } from '../../icons/v0';
 import { SvgArrowDown, SvgArrowUp, SvgCheveronDown } from '../../icons/v1';
 import {
   SvgArrowsSynchronize,
-  SvgCalendar,
+  SvgCalendar3,
   SvgHyperlink2,
 } from '../../icons/v2';
 import { useDispatch } from '../../redux';
@@ -521,9 +522,14 @@ function PayeeCell({
         disabled={isPreview}
         onSelect={() =>
           dispatch(
-            pushModal('payee-autocomplete', {
-              onSelect: payeeId => {
-                onUpdate('payee', payeeId);
+            pushModal({
+              modal: {
+                name: 'payee-autocomplete',
+                options: {
+                  onSelect: payeeId => {
+                    onUpdate('payee', payeeId);
+                  },
+                },
               },
             }),
           )
@@ -742,7 +748,7 @@ function PayeeIcons({
           {recurring ? (
             <SvgArrowsSynchronize style={scheduleIconStyle} />
           ) : (
-            <SvgCalendar style={scheduleIconStyle} />
+            <SvgCalendar3 style={scheduleIconStyle} />
           )}
         </Button>
       )}
@@ -858,15 +864,20 @@ const Transaction = memo(function Transaction({
         if (showReconciliationWarning === false) {
           setShowReconciliationWarning(true);
           dispatch(
-            pushModal('confirm-transaction-edit', {
-              onCancel: () => {
-                setShowReconciliationWarning(false);
+            pushModal({
+              modal: {
+                name: 'confirm-transaction-edit',
+                options: {
+                  onCancel: () => {
+                    setShowReconciliationWarning(false);
+                  },
+                  onConfirm: () => {
+                    setShowReconciliationWarning(false);
+                    onUpdateAfterConfirm(name, value);
+                  },
+                  confirmReason: 'editReconciled',
+                },
               },
-              onConfirm: () => {
-                setShowReconciliationWarning(false);
-                onUpdateAfterConfirm(name, value);
-              },
-              confirmReason: 'editReconciled',
             }),
           );
         }
@@ -878,11 +889,16 @@ const Transaction = memo(function Transaction({
     // Allow un-reconciling (unlocking) transactions
     if (name === 'cleared' && transaction.reconciled) {
       dispatch(
-        pushModal('confirm-transaction-edit', {
-          onConfirm: () => {
-            onUpdateAfterConfirm('reconciled', false);
+        pushModal({
+          modal: {
+            name: 'confirm-transaction-edit',
+            options: {
+              onConfirm: () => {
+                onUpdateAfterConfirm('reconciled', false);
+              },
+              confirmReason: 'unlockReconciled',
+            },
           },
-          confirmReason: 'unlockReconciled',
         }),
       );
     }
@@ -1861,6 +1877,7 @@ function TransactionTableInner({
       : trans.error;
 
     const hasSplitError =
+      (trans.is_parent || trans.is_child) &&
       (!expanded || isLastChild(transactions, index)) &&
       error &&
       error.type === 'SplitTransactionError';

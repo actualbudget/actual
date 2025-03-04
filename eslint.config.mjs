@@ -789,7 +789,6 @@ export default [
       'packages/desktop-client/src/components/select/DateSelect.tsx',
       'packages/desktop-client/src/components/sidebar/Tools.tsx',
       'packages/desktop-client/src/components/sort.tsx',
-      'packages/desktop-client/src/components/spreadsheet/useSheetValue.ts',
     ],
 
     rules: {

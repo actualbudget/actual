@@ -15,11 +15,11 @@ async function ensureExists(path) {
 }
 
 export const up = async function () {
-  await ensureExists(config.serverFiles);
-  await ensureExists(config.userFiles);
+  await ensureExists(config.get('serverFiles'));
+  await ensureExists(config.get('userFiles'));
 };
 
 export const down = async function () {
-  await fs.rm(config.serverFiles, { recursive: true, force: true });
-  await fs.rm(config.userFiles, { recursive: true, force: true });
+  await fs.rm(config.get('serverFiles'), { recursive: true, force: true });
+  await fs.rm(config.get('userFiles'), { recursive: true, force: true });
 };

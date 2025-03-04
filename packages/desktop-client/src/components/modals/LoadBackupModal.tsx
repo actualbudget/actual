@@ -7,8 +7,9 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { loadBackup, makeBackup } from 'loot-core/client/actions';
-import { send, listen, unlisten } from 'loot-core/platform/client/fetch';
+import { loadBackup, makeBackup } from 'loot-core/client/budgets/budgetsSlice';
+import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
+import { send, listen } from 'loot-core/platform/client/fetch';
 import { type Backup } from 'loot-core/server/backups';
 
 import { useMetadataPref } from '../../hooks/useMetadataPref';
@@ -42,11 +43,10 @@ function BackupTable({ backups, onSelect }: BackupTableProps) {
   );
 }
 
-type LoadBackupModalProps = {
-  budgetId: string;
-  watchUpdates: boolean;
-  backupDisabled: boolean;
-};
+type LoadBackupModalProps = Extract<
+  ModalType,
+  { name: 'load-backup' }
+>['options'];
 
 export function LoadBackupModal({
   budgetId,
@@ -59,13 +59,14 @@ export function LoadBackupModal({
   const budgetIdToLoad = budgetId ?? prefsBudgetId;
 
   useEffect(() => {
-    send('backups-get', { id: budgetIdToLoad }).then(setBackups);
+    if (budgetIdToLoad) {
+      send('backups-get', { id: budgetIdToLoad }).then(setBackups);
+    }
   }, [budgetIdToLoad]);
 
   useEffect(() => {
     if (watchUpdates) {
-      listen('backups-updated', setBackups);
-      return () => unlisten('backups-updated');
+      return listen('backups-updated', setBackups);
     }
   }, [watchUpdates]);
 
@@ -106,9 +107,16 @@ export function LoadBackupModal({
                   </Block>
                   <Button
                     variant="primary"
-                    onPress={() =>
-                      dispatch(loadBackup(budgetIdToLoad, latestBackup.id))
-                    }
+                    onPress={() => {
+                      if (budgetIdToLoad && latestBackup.id) {
+                        dispatch(
+                          loadBackup({
+                            budgetId: budgetIdToLoad,
+                            backupId: latestBackup.id,
+                          }),
+                        );
+                      }
+                    }}
                   >
                     {t('Revert to original version')}
                   </Button>
@@ -142,7 +150,13 @@ export function LoadBackupModal({
             ) : (
               <BackupTable
                 backups={previousBackups}
-                onSelect={id => dispatch(loadBackup(budgetIdToLoad, id))}
+                onSelect={id => {
+                  if (budgetIdToLoad && id) {
+                    dispatch(
+                      loadBackup({ budgetId: budgetIdToLoad, backupId: id }),
+                    );
+                  }
+                }}
               />
             )}
           </View>

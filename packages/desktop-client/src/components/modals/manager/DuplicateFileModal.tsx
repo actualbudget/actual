@@ -8,13 +8,10 @@ import { InlineField } from '@actual-app/components/inline-field';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
-import {
-  addNotification,
-  duplicateBudget,
-  uniqueBudgetName,
-  validateBudgetName,
-} from 'loot-core/client/actions';
-import { type File } from 'loot-core/types/file';
+import { addNotification } from 'loot-core/client/actions';
+import { duplicateBudget } from 'loot-core/client/budgets/budgetsSlice';
+import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
+import { send } from 'loot-core/platform/client/fetch';
 
 import { useDispatch } from '../../../redux';
 import { theme } from '../../../style';
@@ -26,22 +23,17 @@ import {
   ModalHeader,
 } from '../../common/Modal';
 
-type DuplicateFileProps = {
-  file: File;
-  managePage?: boolean;
-  loadBudget?: 'none' | 'original' | 'copy';
-  onComplete?: (event: {
-    status: 'success' | 'failed' | 'canceled';
-    error?: object;
-  }) => void;
-};
+type DuplicateFileModalProps = Extract<
+  ModalType,
+  { name: 'duplicate-budget' }
+>['options'];
 
 export function DuplicateFileModal({
   file,
   managePage,
   loadBudget = 'none',
   onComplete,
-}: DuplicateFileProps) {
+}: DuplicateFileModalProps) {
   const { t } = useTranslation();
   const fileEndingTranslation = ' - ' + t('copy');
   const [newName, setNewName] = useState(file.name + fileEndingTranslation);
@@ -241,4 +233,15 @@ export function DuplicateFileModal({
       )}
     </Modal>
   );
+}
+
+async function validateBudgetName(name: string): Promise<{
+  valid: boolean;
+  message?: string;
+}> {
+  return send('validate-budget-name', { name });
+}
+
+async function uniqueBudgetName(name: string): Promise<string> {
+  return send('unique-budget-name', { name });
 }

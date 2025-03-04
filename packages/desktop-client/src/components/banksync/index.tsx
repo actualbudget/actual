@@ -4,7 +4,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
-import { pushModal } from 'loot-core/src/client/actions/modals';
+import { pushModal } from 'loot-core/client/modals/modalsSlice';
 import {
   type BankSyncProviders,
   type AccountEntity,
@@ -28,6 +28,7 @@ const useSyncSourceReadable = () => {
   const syncSourceReadable: Record<SyncProviders, string> = {
     goCardless: 'GoCardless',
     simpleFin: 'SimpleFIN',
+    pluggyai: 'Pluggy.ai',
     unlinked: t('Unlinked'),
   };
 
@@ -80,13 +81,25 @@ export function BankSync() {
     switch (action) {
       case 'edit':
         dispatch(
-          pushModal('synced-account-edit', {
-            account,
+          pushModal({
+            modal: {
+              name: 'synced-account-edit',
+              options: {
+                account,
+              },
+            },
           }),
         );
         break;
       case 'link':
-        dispatch(pushModal('add-account', { upgradingAccountId: account.id }));
+        dispatch(
+          pushModal({
+            modal: {
+              name: 'add-account',
+              options: { upgradingAccountId: account.id },
+            },
+          }),
+        );
         break;
       default:
         break;
@@ -115,7 +128,7 @@ export function BankSync() {
         )}
         {Object.entries(groupedAccounts).map(([syncProvider, accounts]) => {
           return (
-            <View key={syncProvider}>
+            <View key={syncProvider} style={{ minHeight: 'initial' }}>
               {Object.keys(groupedAccounts).length > 1 && (
                 <Text
                   style={{ fontWeight: 500, fontSize: 20, margin: '.5em 0' }}

@@ -1,6 +1,8 @@
 // @ts-strict-ignore
 import React from 'react';
 
+import { type CategoryGroupEntity } from 'loot-core/types/models';
+
 import { theme } from '../../style';
 import { Row } from '../table';
 
@@ -8,22 +10,14 @@ import { RenderMonths } from './RenderMonths';
 import { SidebarGroup } from './SidebarGroup';
 
 type IncomeGroupProps = {
-  group: {
-    id: string;
-    hidden: number;
-    categories: object[];
-    is_income: number;
-    name: string;
-    sort_order: number;
-    tombstone: number;
-  };
-  editingCell: { id: string; cell: string } | null;
+  group: CategoryGroupEntity;
+  editingCell: { id: CategoryGroupEntity['id']; cell: string } | null;
   collapsed: boolean;
   MonthComponent: () => JSX.Element;
-  onEditName: (id: string) => void;
-  onSave: (group: object) => Promise<void>;
-  onToggleCollapse: (id: string) => void;
-  onShowNewCategory: (groupId: string) => void;
+  onEditName: (id: CategoryGroupEntity['id']) => void;
+  onSave: (group: CategoryGroupEntity) => Promise<void>;
+  onToggleCollapse: (id: CategoryGroupEntity['id']) => void;
+  onShowNewCategory: (groupId: CategoryGroupEntity['id']) => void;
 };
 
 export function IncomeGroup({

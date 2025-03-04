@@ -258,7 +258,7 @@ handlers['category-delete'] = mutator(async function ({ id, transferId }) {
   return withUndo(async () => {
     let result = {};
     await batchMessages(async () => {
-      const row = await db.first(
+      const row = await db.first<Pick<db.DbCategory, 'is_income'>>(
         'SELECT is_income FROM categories WHERE id = ?',
         [id],
       );
@@ -269,9 +269,10 @@ handlers['category-delete'] = mutator(async function ({ id, transferId }) {
 
       const transfer =
         transferId &&
-        (await db.first('SELECT is_income FROM categories WHERE id = ?', [
-          transferId,
-        ]));
+        (await db.first<Pick<db.DbCategory, 'is_income'>>(
+          'SELECT is_income FROM categories WHERE id = ?',
+          [transferId],
+        ));
 
       if (!row || (transferId && !transfer)) {
         result = { error: 'no-categories' };
@@ -1266,23 +1267,6 @@ handlers['get-openid-config'] = async function () {
   }
 };
 
-handlers['enable-openid'] = async function (loginConfig) {
-  try {
-    const userToken = await asyncStorage.getItem('user-token');
-
-    if (!userToken) {
-      return { error: 'unauthorized' };
-    }
-
-    await post(getServer().BASE_SERVER + '/openid/enable', loginConfig, {
-      'X-ACTUAL-TOKEN': userToken,
-    });
-  } catch (err) {
-    return { error: err.reason || 'network-failure' };
-  }
-  return {};
-};
-
 handlers['enable-password'] = async function (loginConfig) {
   try {
     const userToken = await asyncStorage.getItem('user-token');
@@ -1406,9 +1390,10 @@ async function loadBudget(id: string) {
 
   // This is a bit leaky, but we need to set the initial budget type
   const { value: budgetType = 'rollover' } =
-    (await db.first('SELECT value from preferences WHERE id = ?', [
-      'budgetType',
-    ])) ?? {};
+    (await db.first<Pick<db.DbPreference, 'value'>>(
+      'SELECT value from preferences WHERE id = ?',
+      ['budgetType'],
+    )) ?? {};
   sheet.get().meta().budgetType = budgetType;
   await budget.createAllBudgets();
 

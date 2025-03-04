@@ -19,6 +19,10 @@ import { trackingBudget } from 'loot-core/client/queries';
 import { evalArithmetic } from 'loot-core/shared/arithmetic';
 import * as monthUtils from 'loot-core/shared/months';
 import { integerToCurrency, amountToInteger } from 'loot-core/shared/util';
+import {
+  type CategoryEntity,
+  type CategoryGroupEntity,
+} from 'loot-core/types/models';
 
 import { useUndo } from '../../../hooks/useUndo';
 import { SvgCheveronDown } from '../../../icons/v1';
@@ -134,7 +138,7 @@ export function IncomeHeaderMonth() {
 
 type GroupMonthProps = {
   month: string;
-  group: { id: string; is_income: boolean };
+  group: CategoryGroupEntity;
 };
 export const GroupMonth = memo(function GroupMonth({
   month,
@@ -194,11 +198,11 @@ export const GroupMonth = memo(function GroupMonth({
 
 type CategoryMonthProps = {
   month: string;
-  category: { id: string; name: string; is_income: boolean };
+  category: CategoryEntity;
   editing: boolean;
-  onEdit: (id: string | null, month?: string) => void;
+  onEdit: (id: CategoryEntity['id'] | null, month?: string) => void;
   onBudgetAction: (month: string, action: string, arg: unknown) => void;
-  onShowActivity: (id: string, month: string) => void;
+  onShowActivity: (id: CategoryEntity['id'], month: string) => void;
 };
 export const CategoryMonth = memo(function CategoryMonth({
   month,

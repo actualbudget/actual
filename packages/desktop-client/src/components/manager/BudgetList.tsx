@@ -15,16 +15,16 @@ import { Text } from '@actual-app/components/text';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 
+import { getUserData } from 'loot-core/client/actions';
 import {
   closeAndDownloadBudget,
   closeAndLoadBudget,
   createBudget,
   downloadBudget,
-  getUserData,
   loadAllFiles,
   loadBudget,
-  pushModal,
-} from 'loot-core/client/actions';
+} from 'loot-core/client/budgets/budgetsSlice';
+import { pushModal } from 'loot-core/client/modals/modalsSlice';
 import {
   isElectron,
   isNonProductionEnvironment,
@@ -561,14 +561,14 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
 
     if (!id) {
       if (isRemoteFile) {
-        await dispatch(downloadBudget(file.cloudFileId));
+        await dispatch(downloadBudget({ cloudFileId: file.cloudFileId }));
       } else {
-        await dispatch(loadBudget(file.id));
+        await dispatch(loadBudget({ id: file.id }));
       }
     } else if (!isRemoteFile && file.id !== id) {
-      await dispatch(closeAndLoadBudget(file.id));
+      await dispatch(closeAndLoadBudget({ fileId: file.id }));
     } else if (isRemoteFile) {
-      await dispatch(closeAndDownloadBudget(file.cloudFileId));
+      await dispatch(closeAndDownloadBudget({ cloudFileId: file.cloudFileId }));
     }
   };
 
@@ -592,7 +592,9 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
         <BudgetListHeader
           quickSwitchMode={quickSwitchMode}
           onRefresh={refresh}
-          onOpenSettings={() => dispatch(pushModal('files-settings'))}
+          onOpenSettings={() =>
+            dispatch(pushModal({ modal: { name: 'files-settings' } }))
+          }
         />
       )}
       <BudgetFiles
@@ -601,11 +603,20 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
         quickSwitchMode={quickSwitchMode}
         onSelect={onSelect}
         onDelete={(file: File) =>
-          dispatch(pushModal('delete-budget', { file }))
+          dispatch(
+            pushModal({ modal: { name: 'delete-budget', options: { file } } }),
+          )
         }
         onDuplicate={(file: File) => {
           if (file && 'id' in file) {
-            dispatch(pushModal('duplicate-budget', { file, managePage: true }));
+            dispatch(
+              pushModal({
+                modal: {
+                  name: 'duplicate-budget',
+                  options: { file, managePage: true },
+                },
+              }),
+            );
           } else {
             console.error(
               'Attempted to duplicate a cloud file - only local files are supported. Cloud file:',
@@ -631,7 +642,7 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
               color: theme.pageTextLight,
             }}
             onPress={() => {
-              dispatch(pushModal('import'));
+              dispatch(pushModal({ modal: { name: 'import' } }));
             }}
           >
             <Trans>Import file</Trans>
