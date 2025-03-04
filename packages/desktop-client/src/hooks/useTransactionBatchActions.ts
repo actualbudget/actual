@@ -1,5 +1,6 @@
 import { pushModal } from 'loot-core/client/actions';
 import { runQuery } from 'loot-core/client/query-helpers';
+import { validForTransfer } from 'loot-core/client/transfer';
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
@@ -12,6 +13,7 @@ import {
 } from 'loot-core/shared/transactions';
 import { applyChanges, type Diff } from 'loot-core/shared/util';
 import {
+  type PayeeEntity,
   type AccountEntity,
   type ScheduleEntity,
   type TransactionEntity,
@@ -408,11 +410,59 @@ export function useTransactionBatchActions() {
     }
   };
 
+  const onSetTransfer = async (
+    ids: string[],
+    payees: PayeeEntity[],
+    onSuccess: (ids: string[]) => void,
+  ) => {
+    const onConfirmTransfer = async (ids: string[]) => {
+      const { data: transactions } = await runQuery(
+        q('transactions')
+          .filter({ id: { $oneof: ids } })
+          .select('*'),
+      );
+      const [fromTrans, toTrans] = transactions;
+
+      if (transactions.length === 2 && validForTransfer(fromTrans, toTrans)) {
+        const fromPayee = payees.find(
+          p => p.transfer_acct === fromTrans.account,
+        );
+        const toPayee = payees.find(p => p.transfer_acct === toTrans.account);
+
+        const changes = {
+          updated: [
+            {
+              ...fromTrans,
+              payee: toPayee?.id,
+              transfer_id: toTrans.id,
+            },
+            {
+              ...toTrans,
+              payee: fromPayee?.id,
+              transfer_id: fromTrans.id,
+            },
+          ],
+        };
+
+        await send('transactions-batch-update', changes);
+      }
+
+      onSuccess?.(ids);
+    };
+
+    await checkForReconciledTransactions(
+      ids,
+      'batchEditWithReconciled',
+      onConfirmTransfer,
+    );
+  };
+
   return {
     onBatchEdit,
     onBatchDuplicate,
     onBatchDelete,
     onBatchLinkSchedule,
     onBatchUnlinkSchedule,
+    onSetTransfer,
   };
 }
