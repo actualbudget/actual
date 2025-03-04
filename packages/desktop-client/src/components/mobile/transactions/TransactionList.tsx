@@ -401,7 +401,7 @@ function SelectedTransactionsFloatingActionBar({
             }}
             {...buttonProps}
           >
-            {t('Edit')}
+            <Trans>Edit</Trans>
           </Button>
 
           <Popover
