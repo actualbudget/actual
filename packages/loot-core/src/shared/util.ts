@@ -1,4 +1,7 @@
 // @ts-strict-ignore
+import { formatDistanceToNow } from 'date-fns';
+import * as locales from 'date-fns/locale';
+
 export function last<T>(arr: Array<T>) {
   return arr[arr.length - 1];
 }
@@ -480,4 +483,29 @@ export function sortByKey<T>(arr: T[], key: keyof T): T[] {
     }
     return 0;
   });
+}
+
+// Date utilities
+
+export function tsToRelativeTime(
+  ts: string | null,
+  language: string,
+  options: {
+    capitalize: boolean;
+  } = { capitalize: false },
+): string {
+  if (!ts) return 'Unknown';
+
+  const parsed = new Date(parseInt(ts, 10));
+  const locale =
+    locales[language.replace('-', '') as keyof typeof locales] ??
+    locales['enUS'];
+
+  let distance = formatDistanceToNow(parsed, { addSuffix: true, locale });
+
+  if (options.capitalize) {
+    distance = distance.charAt(0).toUpperCase() + distance.slice(1);
+  }
+
+  return distance;
 }
