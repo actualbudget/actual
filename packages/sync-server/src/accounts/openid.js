@@ -2,29 +2,29 @@ import { generators, Issuer } from 'openid-client';
 import { v4 as uuidv4 } from 'uuid';
 
 import { clearExpiredSessions, getAccountDb } from '../account-db.js';
-import { config as finalConfig } from '../load-config.js';
+import { config } from '../load-config.js';
 import {
   getUserByUsername,
   transferAllFilesFromUser,
 } from '../services/user-service.js';
 import { TOKEN_EXPIRATION_NEVER } from '../util/validate-user.js';
 
-export async function bootstrapOpenId(config) {
-  if (!('issuer' in config)) {
-    return { error: 'missing-issuer' };
+export async function bootstrapOpenId(configParameter) {
+  if (!('issuer' in configParameter) || !('discoveryURL' in configParameter)) {
+    return { error: 'missing-issuer-or-discoveryURL' };
   }
-  if (!('client_id' in config)) {
+  if (!('client_id' in configParameter)) {
     return { error: 'missing-client-id' };
   }
-  if (!('client_secret' in config)) {
+  if (!('client_secret' in configParameter)) {
     return { error: 'missing-client-secret' };
   }
-  if (!('server_hostname' in config)) {
+  if (!('server_hostname' in configParameter)) {
     return { error: 'missing-server-hostname' };
   }
 
   try {
-    await setupOpenIdClient(config);
+    await setupOpenIdClient(configParameter);
   } catch (err) {
     console.error('Error setting up OpenID client:', err);
     return { error: 'configuration-error' };
@@ -37,7 +37,7 @@ export async function bootstrapOpenId(config) {
       accountDb.mutate('UPDATE auth SET active = 0');
       accountDb.mutate(
         "INSERT INTO auth (method, display_name, extra_data, active) VALUES ('openid', 'OpenID', ?, 1)",
-        [JSON.stringify(config)],
+        [JSON.stringify(configParameter)],
       );
     });
   } catch (err) {
@@ -48,23 +48,22 @@ export async function bootstrapOpenId(config) {
   return {};
 }
 
-async function setupOpenIdClient(config) {
-  const issuer =
-    typeof config.issuer === 'string'
-      ? await Issuer.discover(config.issuer)
-      : new Issuer({
-          issuer: config.issuer.name,
-          authorization_endpoint: config.issuer.authorization_endpoint,
-          token_endpoint: config.issuer.token_endpoint,
-          userinfo_endpoint: config.issuer.userinfo_endpoint,
-        });
+async function setupOpenIdClient(configParameter) {
+  const issuer = configParameter.discoveryURL
+    ? await Issuer.discover(configParameter.discoveryURL)
+    : new Issuer({
+        issuer: configParameter.issuer.name,
+        authorization_endpoint: configParameter.issuer.authorization_endpoint,
+        token_endpoint: configParameter.issuer.token_endpoint,
+        userinfo_endpoint: configParameter.issuer.userinfo_endpoint,
+      });
 
   const client = new issuer.Client({
-    client_id: config.client_id,
-    client_secret: config.client_secret,
+    client_id: configParameter.client_id,
+    client_secret: configParameter.client_secret,
     redirect_uri: new URL(
       '/openid/callback',
-      config.server_hostname,
+      configParameter.server_hostname,
     ).toString(),
     validate_id_token: true,
   });
@@ -139,21 +138,21 @@ export async function loginWithOpenIdFinalize(body) {
   }
 
   const accountDb = getAccountDb();
-  let config = accountDb.first(
+  let configFromDb = accountDb.first(
     "SELECT extra_data FROM auth WHERE method = 'openid' AND active = 1",
   );
-  if (!config) {
+  if (!configFromDb) {
     return { error: 'openid-not-configured' };
   }
   try {
-    config = JSON.parse(config['extra_data']);
+    configFromDb = JSON.parse(configFromDb['extra_data']);
   } catch (err) {
     console.error('Error parsing OpenID configuration:', err);
     return { error: 'openid-setup-failed' };
   }
   let client;
   try {
-    client = await setupOpenIdClient(config);
+    client = await setupOpenIdClient(configFromDb);
   } catch (err) {
     console.error('Error setting up OpenID client:', err);
     return { error: 'openid-setup-failed' };
@@ -173,7 +172,7 @@ export async function loginWithOpenIdFinalize(body) {
   try {
     let tokenSet = null;
 
-    if (!config.authMethod || config.authMethod === 'openid') {
+    if (!configFromDb.authMethod || configFromDb.authMethod === 'openid') {
       const params = { code: body.code, state: body.state };
       tokenSet = await client.callback(client.redirect_uris[0], params, {
         code_verifier,
@@ -270,13 +269,13 @@ export async function loginWithOpenIdFinalize(body) {
     const token = uuidv4();
 
     let expiration;
-    if (finalConfig.token_expiration === 'openid-provider') {
+    if (config.get('token_expiration') === 'openid-provider') {
       expiration = tokenSet.expires_at ?? TOKEN_EXPIRATION_NEVER;
-    } else if (finalConfig.token_expiration === 'never') {
+    } else if (config.get('token_expiration') === 'never') {
       expiration = TOKEN_EXPIRATION_NEVER;
-    } else if (typeof finalConfig.token_expiration === 'number') {
+    } else if (typeof config.get('token_expiration') === 'number') {
       expiration =
-        Math.floor(Date.now() / 1000) + finalConfig.token_expiration * 60;
+        Math.floor(Date.now() / 1000) + config.get('token_expiration') * 60;
     } else {
       expiration = Math.floor(Date.now() / 1000) + 10 * 60;
     }

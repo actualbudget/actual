@@ -85,7 +85,7 @@ async function reportNameExists(
   reportId: string,
   newItem: boolean,
 ) {
-  const idForName: { id: string } = await db.first(
+  const idForName = await db.first<Pick<db.DbCustomReport, 'id'>>(
     'SELECT id from custom_reports WHERE tombstone = 0 AND name = ?',
     [name],
   );

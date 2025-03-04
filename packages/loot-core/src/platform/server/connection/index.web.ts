@@ -110,7 +110,7 @@ export const init: T.Init = function (serverChn, handlers) {
   let reconnectAttempts = 0;
 
   const reconnectToClientInterval = setInterval(() => {
-    console.info('Backend: Atempting to connect to client');
+    console.info('Backend: Trying to connect to client');
     serverChannel.postMessage({ type: 'connect' });
     reconnectAttempts++;
     if (reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {

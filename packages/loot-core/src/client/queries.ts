@@ -101,6 +101,7 @@ export function transactionsSearch(
   return currentQuery.filter({
     $or: {
       'payee.name': { $like: `%${search}%` },
+      'payee.transfer_acct.name': { $like: `%${search}%` },
       notes: { $like: `%${search}%` },
       'category.name': { $like: `%${search}%` },
       'account.name': { $like: `%${search}%` },
