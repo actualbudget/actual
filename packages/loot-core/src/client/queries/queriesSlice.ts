@@ -613,12 +613,12 @@ export const applyBudgetAction = createAppAsyncThunk(
         break;
       case 'apply-single-category-template':
         dispatch(
-          addNotification(
-            await send('budget/apply-single-template', {
+          addNotification({
+            notification: await send('budget/apply-single-template', {
               month,
               category: args.category,
             }),
-          ),
+          }),
         );
         break;
       case 'cleanup-goal-template':

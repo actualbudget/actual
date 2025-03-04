@@ -14,10 +14,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { styles } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
 
-import {
-  loadGlobalPrefs,
-  signOut,
-} from 'loot-core/client/actions';
+import { loadGlobalPrefs, signOut } from 'loot-core/client/actions';
 import { setAppState, sync } from 'loot-core/client/app/appSlice';
 import { closeBudget, loadBudget } from 'loot-core/client/budgets/budgetsSlice';
 import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
