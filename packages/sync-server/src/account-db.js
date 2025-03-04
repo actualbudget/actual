@@ -11,7 +11,7 @@ let _accountDb;
 
 export function getAccountDb() {
   if (_accountDb === undefined) {
-    const dbPath = join(config.serverFiles, 'account.sqlite');
+    const dbPath = join(config.get('serverFiles'), 'account.sqlite');
     _accountDb = openDatabase(dbPath);
   }
 
@@ -29,7 +29,9 @@ export function listLoginMethods() {
   const rows = accountDb.all('SELECT method, display_name, active FROM auth');
   return rows
     .filter(f =>
-      rows.length > 1 && config.enforceOpenId ? f.method === 'openid' : true,
+      rows.length > 1 && config.get('enforceOpenId')
+        ? f.method === 'openid'
+        : true,
     )
     .map(r => ({
       method: r.method,
@@ -55,13 +57,13 @@ export function getLoginMethod(req) {
   if (
     typeof req !== 'undefined' &&
     (req.body || { loginMethod: null }).loginMethod &&
-    config.allowedLoginMethods.includes(req.body.loginMethod)
+    config.get('allowedLoginMethods').includes(req.body.loginMethod)
   ) {
     return req.body.loginMethod;
   }
 
-  if (config.loginMethod) {
-    return config.loginMethod;
+  if (config.get('loginMethod')) {
+    return config.get('loginMethod');
   }
 
   const activeMethod = getActiveLoginMethod();
