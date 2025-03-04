@@ -276,7 +276,7 @@ async function linkPluggyAiAccount({
     if (!accRow) {
       throw new Error(`Account with ID ${upgradingId} not found.`);
     }
-        
+
     id = accRow.id;
     await db.update('accounts', {
       id,
