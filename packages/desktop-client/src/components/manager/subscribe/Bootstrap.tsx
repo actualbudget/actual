@@ -7,7 +7,7 @@ import { Paragraph } from '@actual-app/components/paragraph';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
-import { createBudget } from 'loot-core/client/actions/budgets';
+import { createBudget } from 'loot-core/client/budgets/budgetsSlice';
 import { send } from 'loot-core/platform/client/fetch';
 
 import { useNavigate } from '../../../hooks/useNavigate';

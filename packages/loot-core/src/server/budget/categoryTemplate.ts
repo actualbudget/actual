@@ -112,7 +112,7 @@ export class CategoryTemplate {
     const t = this.templates.filter(t => t.priority === priority);
     let available = budgetAvail || 0;
     let toBudget = 0;
-    let first = true; // needed for by templates
+    let byFlag = false;
     let remainder = 0;
     let scheduleFlag = false;
     // switch on template type and calculate the amount for the line
@@ -140,11 +140,13 @@ export class CategoryTemplate {
           break;
         }
         case 'by': {
-          //TODO add the logic to run all of these at once or whatever is needed
-          const ret = this.runBy(t[i], first, remainder);
-          newBudget = ret.ret;
-          remainder = ret.remainder;
-          first = false;
+          // all by's get run at once
+          if (!byFlag) {
+            newBudget = this.runBy();
+          } else {
+            newBudget = 0;
+          }
+          byFlag = true;
           break;
         }
         case 'schedule': {
@@ -569,39 +571,62 @@ export class CategoryTemplate {
     return -Math.round(sum / template.numMonths);
   }
 
-  private runBy(
-    template,
-    first: boolean,
-    remainder: number,
-  ): { ret: number; remainder: number } {
-    let target = 0;
-    let targetMonth = `${template.month}`;
-    let numMonths = monthUtils.differenceInCalendarMonths(
-      targetMonth,
-      this.month,
-    );
-    const repeat = template.annual
-      ? (template.repeat || 1) * 12
-      : template.repeat;
-    while (numMonths < 0 && repeat) {
-      targetMonth = monthUtils.addMonths(targetMonth, repeat);
-      numMonths = monthUtils.differenceInCalendarMonths(
+  private runBy(): number {
+    const byTemplates = this.templates.filter(t => t.type === 'by');
+    const savedInfo = [];
+    let totalNeeded = 0;
+    let shortNumMonths;
+    //find shortest time period
+    for (let i = 0; i < byTemplates.length; i++) {
+      const template = byTemplates[i];
+      let targetMonth = `${template.month}`;
+      const period = template.annual
+        ? (template.repeat || 1) * 12
+        : template.repeat != null
+          ? template.repeat
+          : null;
+      let numMonths = monthUtils.differenceInCalendarMonths(
         targetMonth,
         this.month,
       );
+      while (numMonths < 0 && period) {
+        targetMonth = monthUtils.addMonths(targetMonth, period);
+        numMonths = monthUtils.differenceInCalendarMonths(
+          targetMonth,
+          this.month,
+        );
+      }
+      savedInfo.push({ numMonths, period });
+      if (numMonths < shortNumMonths || !shortNumMonths) {
+        shortNumMonths = numMonths;
+      }
     }
-    if (first) remainder = this.fromLastMonth;
-    remainder = amountToInteger(template.amount) - remainder;
-    if (remainder >= 0) {
-      target = remainder;
-      remainder = 0;
-    } else {
-      target = 0;
-      remainder = Math.abs(remainder);
-    }
-    const ret = numMonths >= 0 ? Math.round(target / (numMonths + 1)) : 0;
-    return { ret, remainder };
-  }
 
-  //private async runSchedule(template_lines) {}
+    // calculate needed funds per template
+    for (let i = 0; i < byTemplates.length; i++) {
+      const template = byTemplates[i];
+      const numMonths = savedInfo[i].numMonths;
+      const period = savedInfo[i].period;
+      let amount;
+      // back interpolate what is needed in the short window
+      if (numMonths > shortNumMonths && period) {
+        amount = Math.round(
+          (amountToInteger(template.amount) / period) *
+            (period - numMonths + shortNumMonths),
+        );
+        // fallback to this.  This matches what the prior math accomplished, just more round about
+      } else if (numMonths > shortNumMonths) {
+        amount = Math.round(
+          (amountToInteger(template.amount) / (numMonths + 1)) *
+            (shortNumMonths + 1),
+        );
+      } else {
+        amount = amountToInteger(template.amount);
+      }
+      totalNeeded += amount;
+    }
+    return Math.round(
+      (totalNeeded - this.fromLastMonth) / (shortNumMonths + 1),
+    );
+  }
 }
