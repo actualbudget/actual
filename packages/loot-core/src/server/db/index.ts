@@ -16,6 +16,7 @@ import * as sqlite from '../../platform/server/sqlite';
 import * as monthUtils from '../../shared/months';
 import { groupById } from '../../shared/util';
 import { CategoryEntity, CategoryGroupEntity } from '../../types/models';
+import { WithRequired } from '../../types/util';
 import {
   schema,
   schemaConfig,
@@ -514,9 +515,11 @@ export async function getAccount(id: DbAccount['id']) {
   return first<DbAccount>(`SELECT * FROM accounts WHERE id = ?`, [id]);
 }
 
-export async function insertPayee(payee) {
+export async function insertPayee(
+  payee: WithRequired<Partial<DbPayee>, 'name'>,
+) {
   payee = payeeModel.validate(payee);
-  let id;
+  let id: DbPayee['id'];
   await batchMessages(async () => {
     id = await insertWithUUID('payees', payee);
     await insert('payee_mapping', { id, targetId: id });
@@ -549,7 +552,7 @@ export async function deleteTransferPayee(payee: Pick<DbPayee, 'id'>) {
   return delete_('payees', payee.id);
 }
 
-export function updatePayee(payee) {
+export function updatePayee(payee: WithRequired<Partial<DbPayee>, 'id'>) {
   payee = payeeModel.validate(payee, { update: true });
   return update('payees', payee);
 }
@@ -594,7 +597,7 @@ export async function mergePayees(
   });
 }
 
-export function getPayees() {
+export function getPayees(): Promise<DbPayee[]> {
   return all(`
     SELECT p.*, COALESCE(a.name, p.name) AS name FROM payees p
     LEFT JOIN accounts a ON (p.transfer_acct = a.id AND a.tombstone = 0)
@@ -603,7 +606,7 @@ export function getPayees() {
   `);
 }
 
-export function getCommonPayees() {
+export function getCommonPayees(): Promise<DbPayee[]> {
   const twelveWeeksAgo = toDateRepr(
     monthUtils.subWeeks(monthUtils.currentDate(), 12),
   );
@@ -645,11 +648,11 @@ const orphanedPayeesQuery = `
 `;
 /* eslint-enable rulesdir/typography */
 
-export function syncGetOrphanedPayees() {
+export function syncGetOrphanedPayees(): Promise<Array<Pick<DbPayee, 'id'>>> {
   return all(orphanedPayeesQuery);
 }
 
-export async function getOrphanedPayees() {
+export async function getOrphanedPayees(): Promise<Array<DbPayee['id']>> {
   const rows = await all(orphanedPayeesQuery);
   return rows.map(row => row.id);
 }
