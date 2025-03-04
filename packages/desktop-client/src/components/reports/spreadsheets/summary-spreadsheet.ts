@@ -49,7 +49,10 @@ export function summarySpreadsheet(
       );
 
       endDay = d.parse(
-        monthUtils.lastDayOfMonth(end),
+        monthUtils.getMonth(end) ===
+          monthUtils.getMonth(monthUtils.currentDay())
+          ? monthUtils.currentDay()
+          : monthUtils.lastDayOfMonth(end),
         'yyyy-MM-dd',
         new Date(),
       );
@@ -197,13 +200,18 @@ function calculatePerMonth(
     amount: monthlyData[d.format(m, 'yyyy-MM')] || 0,
   }));
 
+  const lastMonth = months.at(-1)!;
+  const dayOfMonth = lastMonth.getDate();
+  const daysInMonth = monthUtils.getDay(monthUtils.lastDayOfMonth(lastMonth));
+  const numMonths = months.length - 1 + dayOfMonth / daysInMonth;
+
   const totalAmount = monthsSum.reduce((sum, month) => sum + month.amount, 0);
-  const averageAmountPerMonth = totalAmount / months.length;
+  const averageAmountPerMonth = totalAmount / numMonths;
 
   return {
     total: averageAmountPerMonth / 100,
     dividend: totalAmount / 100,
-    divisor: months.length,
+    divisor: numMonths,
   };
 }
 

@@ -6,7 +6,8 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
-import { loadAllFiles, pushModal } from 'loot-core/client/actions';
+import { pushModal } from 'loot-core/client/actions';
+import { loadAllFiles } from 'loot-core/client/budgets/budgetsSlice';
 
 import { useGlobalPref } from '../../../hooks/useGlobalPref';
 import { SvgPencil1 } from '../../../icons/v2';
