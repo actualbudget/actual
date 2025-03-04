@@ -7,11 +7,8 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
-import {
-  addNotification,
-  closeAndLoadBudget,
-  popModal,
-} from 'loot-core/client/actions';
+import { addNotification, popModal } from 'loot-core/client/actions';
+import { closeAndLoadBudget } from 'loot-core/client/budgets/budgetsSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import { getUserAccessErrors } from 'loot-core/shared/errors';
 import { type Budget } from 'loot-core/types/budget';
@@ -188,7 +185,7 @@ export function TransferOwnership({
                 try {
                   await onSave();
                   await dispatch(
-                    closeAndLoadBudget((currentFile as Budget).id),
+                    closeAndLoadBudget({ fileId: (currentFile as Budget).id }),
                   );
                   close();
                 } catch (error) {

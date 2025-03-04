@@ -1861,6 +1861,7 @@ function TransactionTableInner({
       : trans.error;
 
     const hasSplitError =
+      (trans.is_parent || trans.is_child) &&
       (!expanded || isLastChild(transactions, index)) &&
       error &&
       error.type === 'SplitTransactionError';

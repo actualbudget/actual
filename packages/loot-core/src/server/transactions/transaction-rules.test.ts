@@ -943,11 +943,14 @@ describe('Learning categories', () => {
 
     // Internally, it should still be stored with the internal names
     // so that it's backwards compatible
-    const rawRule = await db.first('SELECT * FROM rules');
-    rawRule.conditions = JSON.parse(rawRule.conditions);
-    rawRule.actions = JSON.parse(rawRule.actions);
-    expect(rawRule.conditions[0].field).toBe('imported_description');
-    expect(rawRule.actions[0].field).toBe('description');
+    const rawRule = await db.first<db.DbRule>('SELECT * FROM rules');
+    const parsedRule = {
+      ...rawRule,
+      conditions: JSON.parse(rawRule.conditions),
+      actions: JSON.parse(rawRule.actions),
+    };
+    expect(parsedRule.conditions[0].field).toBe('imported_description');
+    expect(parsedRule.actions[0].field).toBe('description');
 
     await loadRules();
 
@@ -973,11 +976,14 @@ describe('Learning categories', () => {
     // This rule internally has been stored with the public names.
     // Making this work now allows us to switch to it by default in
     // the future
-    const rawRule = await db.first('SELECT * FROM rules');
-    rawRule.conditions = JSON.parse(rawRule.conditions);
-    rawRule.actions = JSON.parse(rawRule.actions);
-    expect(rawRule.conditions[0].field).toBe('imported_payee');
-    expect(rawRule.actions[0].field).toBe('payee');
+    const rawRule = await db.first<db.DbRule>('SELECT * FROM rules');
+    const parsedRule = {
+      ...rawRule,
+      conditions: JSON.parse(rawRule.conditions),
+      actions: JSON.parse(rawRule.actions),
+    };
+    expect(parsedRule.conditions[0].field).toBe('imported_payee');
+    expect(parsedRule.actions[0].field).toBe('payee');
 
     const [rule] = getRules();
     expect(rule.conditions[0].field).toBe('imported_payee');
