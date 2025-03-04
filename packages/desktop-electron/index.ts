@@ -200,7 +200,7 @@ async function startSyncServer() {
     const globalPrefs = await loadGlobalPrefs();
 
     const syncServerConfig = {
-      port: globalPrefs.ngrokConfig?.port || 5007,
+      port: globalPrefs.syncServerConfig?.port || 5007,
       ACTUAL_SERVER_DATA_DIR: path.resolve(
         process.env.ACTUAL_DATA_DIR!,
         'actual-server',
@@ -303,9 +303,13 @@ async function startSyncServer() {
   }
 }
 
-async function exposeSyncServer(ngrokConfig: GlobalPrefsJson['ngrokConfig']) {
+async function exposeSyncServer(
+  syncServerConfig: GlobalPrefsJson['syncServerConfig'],
+) {
   const hasRequiredConfig =
-    ngrokConfig?.authToken && ngrokConfig?.domain && ngrokConfig?.port;
+    syncServerConfig?.ngrokConfig?.authToken &&
+    syncServerConfig?.ngrokConfig?.domain &&
+    syncServerConfig?.port;
 
   if (!hasRequiredConfig) {
     logMessage(
@@ -318,9 +322,9 @@ async function exposeSyncServer(ngrokConfig: GlobalPrefsJson['ngrokConfig']) {
   try {
     const listener = await ngrok.forward({
       schemes: ['https'],
-      addr: ngrokConfig.port,
-      authtoken: ngrokConfig.authToken,
-      domain: ngrokConfig.domain,
+      addr: syncServerConfig.port,
+      authtoken: syncServerConfig?.ngrokConfig?.authToken,
+      domain: syncServerConfig?.ngrokConfig?.domain,
     });
 
     logMessage(
@@ -475,11 +479,11 @@ app.on('ready', async () => {
 
   const globalPrefs = await loadGlobalPrefs();
 
-  if (globalPrefs.ngrokConfig?.autoStart) {
+  if (globalPrefs.syncServerConfig?.autoStart) {
     // wait for both server and ngrok to start before starting the Actual client to ensure server is available
     await Promise.allSettled([
       startSyncServer(),
-      exposeSyncServer(globalPrefs.ngrokConfig),
+      exposeSyncServer(globalPrefs.syncServerConfig),
     ]);
   }
 

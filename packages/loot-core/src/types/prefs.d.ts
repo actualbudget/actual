@@ -88,12 +88,14 @@ export type GlobalPrefs = Partial<{
   preferredDarkTheme: DarkTheme;
   documentDir: string; // Electron only
   serverSelfSignedCert: string; // Electron only
-  ngrokConfig?: {
+  syncServerConfig?: {
     // Electron only
     autoStart?: boolean;
-    authToken?: string;
     port?: number;
-    domain?: string;
+    ngrokConfig?: {
+      domain?: string;
+      authToken?: string;
+    };
   };
 }>;
 
@@ -115,7 +117,7 @@ export type GlobalPrefsJson = Partial<{
   theme?: GlobalPrefs['theme'];
   'preferred-dark-theme'?: GlobalPrefs['preferredDarkTheme'];
   'server-self-signed-cert'?: GlobalPrefs['serverSelfSignedCert'];
-  ngrokConfig?: GlobalPrefs['ngrokConfig'];
+  syncServerConfig?: GlobalPrefs['syncServerConfig'];
 }>;
 
 export type AuthMethods = 'password' | 'openid';
