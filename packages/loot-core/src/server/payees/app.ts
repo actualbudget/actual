@@ -6,7 +6,7 @@ import { payeeModel } from '../models';
 import { mutator } from '../mutators';
 import { batchMessages } from '../sync';
 import * as rules from '../transactions/transaction-rules';
-import { undoable, withUndo } from '../undo';
+import { undoable } from '../undo';
 
 export type PayeesHandlers = {
   'payee-create': typeof createPayee;
@@ -26,7 +26,15 @@ app.method('common-payees-get', getCommonPayees);
 app.method('payees-get', getPayees);
 app.method('payees-get-orphaned', getOrphanedPayees);
 app.method('payees-get-rule-counts', getPayeeRuleCounts);
-app.method('payees-merge', mutator(mergePayees));
+app.method(
+  'payees-merge',
+  mutator(
+    undoable(mergePayees, args => ({
+      mergeIds: args.mergeIds,
+      targetId: args.targetId,
+    })),
+  ),
+);
 app.method('payees-batch-change', mutator(undoable(batchChangePayees)));
 app.method('payees-check-orphaned', checkOrphanedPayees);
 app.method('payees-get-rules', getPayeeRules);
@@ -69,12 +77,7 @@ async function mergePayees({
   targetId: PayeeEntity['id'];
   mergeIds: Array<PayeeEntity['id']>;
 }) {
-  return withUndo(
-    async () => {
-      await db.mergePayees(targetId, mergeIds);
-    },
-    { targetId, mergeIds },
-  );
+  await db.mergePayees(targetId, mergeIds);
 }
 
 async function batchChangePayees({
