@@ -14,8 +14,8 @@ const projectRoot = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const defaultDataDir = process.env.ACTUAL_DATA_DIR
   ? process.env.ACTUAL_DATA_DIR
   : fs.existsSync('/data')
-  ? '/data'
-  : projectRoot;
+    ? '/data'
+    : projectRoot;
 
 debug(`Project root: '${projectRoot}'`);
 
