@@ -38,7 +38,7 @@ app.get('/needs-bootstrap', (req, res) => {
       loginMethod: getLoginMethod(),
       availableLoginMethods: listLoginMethods(),
       multiuser: getActiveLoginMethod() === 'openid',
-      autoLogin: config.openIdAutoRedirect,
+      autoLogin: config.get('openIdAutoRedirect'),
     },
   });
 });

@@ -68,7 +68,9 @@ describe('Budgets', () => {
 
     // Grab the clock to compare later
     await db.openDatabase('test-budget');
-    const row = await db.first('SELECT * FROM messages_clock');
+    const row = await db.first<db.DbClockMessage>(
+      'SELECT * FROM messages_clock',
+    );
 
     const { error } = await runHandler(handlers['load-budget'], {
       id: 'test-budget',

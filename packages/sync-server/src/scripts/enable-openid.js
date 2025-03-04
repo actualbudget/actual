@@ -21,7 +21,7 @@ if (needsBootstrap()) {
       console.log('OpenID already enabled.');
       process.exit(0);
     }
-    const { error } = (await enableOpenID(config)) || {};
+    const { error } = (await enableOpenID(config.getProperties())) || {};
 
     if (error) {
       console.log('Error enabling openid:', error);

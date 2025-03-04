@@ -16,12 +16,11 @@ import { View } from '@actual-app/components/view';
 
 import {
   addNotification,
-  closeBudget,
-  loadBudget,
   loadGlobalPrefs,
   signOut,
 } from 'loot-core/client/actions';
 import { setAppState, sync } from 'loot-core/client/app/appSlice';
+import { closeBudget, loadBudget } from 'loot-core/client/budgets/budgetsSlice';
 import * as Platform from 'loot-core/client/platform';
 import { SpreadsheetProvider } from 'loot-core/client/SpreadsheetProvider';
 import { init as initConnection, send } from 'loot-core/platform/client/fetch';
@@ -54,6 +53,10 @@ function AppInner() {
   const userData = useSelector(state => state.user.data);
 
   useEffect(() => {
+    setI18NextLanguage(null);
+  }, []);
+
+  useEffect(() => {
     const maybeUpdate = async <T,>(cb?: () => T): Promise<T> => {
       if (global.Actual.isUpdateReadyForDownload()) {
         dispatch(
@@ -67,8 +70,6 @@ function AppInner() {
     };
 
     async function init() {
-      setI18NextLanguage(null);
-
       const socketName = await maybeUpdate(() =>
         global.Actual.getServerSocket(),
       );
@@ -98,7 +99,7 @@ function AppInner() {
       );
       const budgetId = await send('get-last-opened-backup');
       if (budgetId) {
-        await dispatch(loadBudget(budgetId));
+        await dispatch(loadBudget({ id: budgetId }));
 
         // Check to see if this file has been remotely deleted (but
         // don't block on this in case they are offline or something)
@@ -126,9 +127,9 @@ function AppInner() {
     }
 
     initAll().catch(showErrorBoundary);
-    // Removed cloudFileId from dependencies to prevent hard crash when closing budget in Electron
+    // Removed cloudFileId & t from dependencies to prevent hard crash when closing budget in Electron
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dispatch, showErrorBoundary, t]);
+  }, [dispatch, showErrorBoundary]);
 
   useEffect(() => {
     global.Actual.updateAppMenu(budgetId);

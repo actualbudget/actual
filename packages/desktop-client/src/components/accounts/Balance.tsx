@@ -251,6 +251,7 @@ export function Balances({
           }}
         />
       </Button>
+
       {showExtraBalances && <MoreBalances balanceQuery={balanceQuery} />}
 
       {selectedItems.size > 0 && (

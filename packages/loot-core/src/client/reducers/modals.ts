@@ -9,10 +9,14 @@ export const initialState: ModalsState = {
 
 type ModalsAction =
   | Action
-  // Temporary until we migrate to redux toolkit.
+  // TODO. Temporary until we migrate to redux toolkit.
   | {
       type: 'app/setAppState';
       payload: { loadingText: string | null };
+    }
+  // TODO: Temporary until we migrate to redux toolkit.
+  | {
+      type: 'budgets/signOut';
     };
 
 export function update(
@@ -55,7 +59,7 @@ export function update(
         ...state,
         modalStack: idx < 0 ? state.modalStack : state.modalStack.slice(0, idx),
       };
-    // Temporary until we migrate to redux toolkit.
+    // TODO: Temporary until we migrate to redux toolkit.
     case 'app/setAppState':
       if (action.payload.loadingText) {
         return {
@@ -64,7 +68,8 @@ export function update(
         };
       }
       break;
-    case constants.SIGN_OUT:
+    // TODO: Temporary until we migrate to redux toolkit.
+    case 'budgets/signOut':
       return initialState;
     default:
   }
