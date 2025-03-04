@@ -180,14 +180,10 @@ export const PayeeTableRow = memo(
                   onDelete(id);
                   break;
                 case 'favorite':
-                  onUpdate(id, 'favorite', payee.favorite ? 0 : 1);
+                  onUpdate(id, 'favorite', !payee.favorite);
                   break;
                 case 'learn':
-                  onUpdate(
-                    id,
-                    'learn_categories',
-                    payee.learn_categories ? 0 : 1,
-                  );
+                  onUpdate(id, 'learn_categories', !payee.learn_categories);
                   break;
                 case 'view-rules':
                   onViewRules(id);

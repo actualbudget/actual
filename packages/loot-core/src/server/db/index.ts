@@ -16,6 +16,7 @@ import * as sqlite from '../../platform/server/sqlite';
 import * as monthUtils from '../../shared/months';
 import { groupById } from '../../shared/util';
 import { CategoryEntity, CategoryGroupEntity } from '../../types/models';
+import { WithRequired } from '../../types/util';
 import {
   schema,
   schemaConfig,
@@ -514,7 +515,9 @@ export async function getAccount(id: DbAccount['id']) {
   return first<DbAccount>(`SELECT * FROM accounts WHERE id = ?`, [id]);
 }
 
-export async function insertPayee(payee) {
+export async function insertPayee(
+  payee: WithRequired<Partial<DbPayee>, 'name'>,
+) {
   payee = payeeModel.validate(payee);
   let id: DbPayee['id'];
   await batchMessages(async () => {
@@ -549,7 +552,7 @@ export async function deleteTransferPayee(payee: Pick<DbPayee, 'id'>) {
   return delete_('payees', payee.id);
 }
 
-export function updatePayee(payee) {
+export function updatePayee(payee: WithRequired<Partial<DbPayee>, 'id'>) {
   payee = payeeModel.validate(payee, { update: true });
   return update('payees', payee);
 }

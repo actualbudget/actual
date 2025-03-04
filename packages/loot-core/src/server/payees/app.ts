@@ -84,18 +84,26 @@ async function batchChangePayees({
   added,
   deleted,
   updated,
-}: Diff<PayeeEntity>): Promise<void> {
+}: Partial<Diff<PayeeEntity>>): Promise<void> {
   await batchMessages(async () => {
     if (deleted) {
-      await Promise.all(deleted.map(p => db.deletePayee(p)));
+      await Promise.all(
+        deleted.map(p => ({ id: p.id })).map(p => db.deletePayee(p)),
+      );
     }
 
     if (added) {
-      await Promise.all(added.map(p => db.insertPayee(p)));
+      await Promise.all(
+        added.map(p => payeeModel.toDb(p)).map(p => db.insertPayee(p)),
+      );
     }
 
     if (updated) {
-      await Promise.all(updated.map(p => db.updatePayee(p)));
+      await Promise.all(
+        updated
+          .map(p => payeeModel.toDb(p as PayeeEntity, { update: true }))
+          .map(p => db.updatePayee(p)),
+      );
     }
   });
 }
