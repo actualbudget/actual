@@ -221,6 +221,10 @@ export function Login() {
   const loginMethods = useAvailableLoginMethods();
 
   useEffect(() => {
+    setMethod(defaultLoginMethod);
+  }, [defaultLoginMethod]);
+
+  useEffect(() => {
     if (checked && !searchParams.has('error')) {
       (async () => {
         if (method === 'header') {
