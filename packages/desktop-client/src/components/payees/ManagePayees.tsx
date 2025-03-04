@@ -70,7 +70,7 @@ function PayeeTableHeader() {
 type ManagePayeesProps = {
   payees: PayeeEntity[];
   ruleCounts: ComponentProps<typeof PayeeTable>['ruleCounts'];
-  orphanedPayees: PayeeEntity[];
+  orphanedPayees: Array<Pick<PayeeEntity, 'id'>>;
   initialSelectedIds: string[];
   onBatchChange: (diff: Diff<PayeeEntity>) => void;
   onViewRules: ComponentProps<typeof PayeeTable>['onViewRules'];

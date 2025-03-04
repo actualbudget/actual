@@ -1,3 +1,4 @@
+import { Diff } from '../../shared/util';
 import { PayeeEntity, RuleEntity } from '../../types/models';
 import { createApp } from '../app';
 import * as db from '../db';
@@ -25,7 +26,7 @@ app.method('common-payees-get', getCommonPayees);
 app.method('payees-get', getPayees);
 app.method('payees-get-orphaned', getOrphanedPayees);
 app.method('payees-get-rule-counts', getPayeeRuleCounts);
-app.method('payees-merge', mutator(mergePayees));
+app.method('payees-merge', mutator(undoable(mergePayees)));
 app.method('payees-batch-change', mutator(undoable(batchChangePayees)));
 app.method('payees-check-orphaned', checkOrphanedPayees);
 app.method('payees-get-rules', getPayeeRules);
@@ -80,11 +81,7 @@ async function batchChangePayees({
   added,
   deleted,
   updated,
-}: {
-  added?: PayeeEntity[];
-  deleted?: Pick<PayeeEntity, 'id'>[];
-  updated?: PayeeEntity[];
-}): Promise<void> {
+}: Diff<PayeeEntity>): Promise<void> {
   await batchMessages(async () => {
     if (deleted) {
       await Promise.all(deleted.map(p => db.deletePayee(p)));

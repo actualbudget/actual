@@ -27,7 +27,7 @@ export function ManagePayeesWithData({
   const dispatch = useDispatch();
 
   const [ruleCounts, setRuleCounts] = useState({ value: new Map() });
-  const [orphans, setOrphans] = useState<PayeeEntity[]>([]);
+  const [orphans, setOrphans] = useState<Array<Pick<PayeeEntity, 'id'>>>([]);
 
   const refetchOrphanedPayees = useCallback(async () => {
     const orphs = await send('payees-get-orphaned');
@@ -127,7 +127,6 @@ export function ManagePayeesWithData({
       initialSelectedIds={initialSelectedIds}
       onBatchChange={async (changes: Diff<PayeeEntity>) => {
         await send('payees-batch-change', changes);
-        await dispatch(getPayees());
         setOrphans(applyChanges(changes, orphans));
       }}
       onMerge={async ([targetId, ...mergeIds]) => {
