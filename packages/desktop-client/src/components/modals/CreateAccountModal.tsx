@@ -10,7 +10,11 @@ import { Popover } from '@actual-app/components/popover';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
-import { addNotification, pushModal } from 'loot-core/client/actions';
+import { addNotification } from 'loot-core/client/actions';
+import {
+  type Modal as ModalType,
+  pushModal,
+} from 'loot-core/client/modals/modalsSlice';
 import { send } from 'loot-core/platform/client/fetch';
 
 import { useAuth } from '../../auth/AuthProvider';
@@ -29,11 +33,14 @@ import { Link } from '../common/Link';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { useMultiuserEnabled } from '../ServerContext';
 
-type CreateAccountProps = {
-  upgradingAccountId?: string;
-};
+type CreateAccountModalProps = Extract<
+  ModalType,
+  { name: 'add-account' }
+>['options'];
 
-export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
+export function CreateAccountModal({
+  upgradingAccountId,
+}: CreateAccountModalProps) {
   const { t } = useTranslation();
 
   const isPluggyAiEnabled = useFeatureFlag('pluggyAiBankSync');
@@ -108,16 +115,26 @@ export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
       }
 
       dispatch(
-        pushModal('select-linked-accounts', {
-          accounts: newAccounts,
-          syncSource: 'simpleFin',
+        pushModal({
+          modal: {
+            name: 'select-linked-accounts',
+            options: {
+              externalAccounts: newAccounts,
+              syncSource: 'simpleFin',
+            },
+          },
         }),
       );
     } catch (err) {
       console.error(err);
       dispatch(
-        pushModal('simplefin-init', {
-          onSuccess: () => setIsSimpleFinSetupComplete(true),
+        pushModal({
+          modal: {
+            name: 'simplefin-init',
+            options: {
+              onSuccess: () => setIsSimpleFinSetupComplete(true),
+            },
+          },
         }),
       );
     }
@@ -168,9 +185,14 @@ export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
       }
 
       dispatch(
-        pushModal('select-linked-accounts', {
-          accounts: newAccounts,
-          syncSource: 'pluggyai',
+        pushModal({
+          modal: {
+            name: 'select-linked-accounts',
+            options: {
+              externalAccounts: newAccounts,
+              syncSource: 'pluggyai',
+            },
+          },
         }),
       );
     } catch (err) {
@@ -182,8 +204,13 @@ export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
         timeout: 5000,
       });
       dispatch(
-        pushModal('pluggyai-init', {
-          onSuccess: () => setIsPluggyAiSetupComplete(true),
+        pushModal({
+          modal: {
+            name: 'pluggyai-init',
+            options: {
+              onSuccess: () => setIsPluggyAiSetupComplete(true),
+            },
+          },
         }),
       );
     }
@@ -191,24 +218,39 @@ export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
 
   const onGoCardlessInit = () => {
     dispatch(
-      pushModal('gocardless-init', {
-        onSuccess: () => setIsGoCardlessSetupComplete(true),
+      pushModal({
+        modal: {
+          name: 'gocardless-init',
+          options: {
+            onSuccess: () => setIsGoCardlessSetupComplete(true),
+          },
+        },
       }),
     );
   };
 
   const onSimpleFinInit = () => {
     dispatch(
-      pushModal('simplefin-init', {
-        onSuccess: () => setIsSimpleFinSetupComplete(true),
+      pushModal({
+        modal: {
+          name: 'simplefin-init',
+          options: {
+            onSuccess: () => setIsSimpleFinSetupComplete(true),
+          },
+        },
       }),
     );
   };
 
   const onPluggyAiInit = () => {
     dispatch(
-      pushModal('pluggyai-init', {
-        onSuccess: () => setIsPluggyAiSetupComplete(true),
+      pushModal({
+        modal: {
+          name: 'pluggyai-init',
+          options: {
+            onSuccess: () => setIsPluggyAiSetupComplete(true),
+          },
+        },
       }),
     );
   };
@@ -261,7 +303,7 @@ export function CreateAccountModal({ upgradingAccountId }: CreateAccountProps) {
   };
 
   const onCreateLocalAccount = () => {
-    dispatch(pushModal('add-local-account'));
+    dispatch(pushModal({ modal: { name: 'add-local-account' } }));
   };
 
   const { configuredGoCardless } = useGoCardlessStatus();
