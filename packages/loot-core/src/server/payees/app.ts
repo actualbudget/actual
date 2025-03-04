@@ -26,7 +26,7 @@ app.method('common-payees-get', getCommonPayees);
 app.method('payees-get', getPayees);
 app.method('payees-get-orphaned', getOrphanedPayees);
 app.method('payees-get-rule-counts', getPayeeRuleCounts);
-app.method('payees-merge', mutator(undoable(mergePayees)));
+app.method('payees-merge', mutator(mergePayees));
 app.method('payees-batch-change', mutator(undoable(batchChangePayees)));
 app.method('payees-check-orphaned', checkOrphanedPayees);
 app.method('payees-get-rules', getPayeeRules);
