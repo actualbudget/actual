@@ -71,7 +71,7 @@ function updateScheduleConditions(
       return { ...cond, value };
     }
 
-    if (value != null) {
+    if (value != null || field === 'payee') {
       return { op, field, value };
     }
 
