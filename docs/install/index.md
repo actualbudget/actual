@@ -65,6 +65,7 @@ Content contained on external links is not managed or maintained by the Actual B
 :::
 
 - [Google Cloud always free tier](https://github.com/eatonc/actual-gcp)
+- [Google Cloud Run (serverless)](https://github.com/daniefdz/actual-run)
 - [Synology NAS](https://mariushosting.com/how-to-install-actual-on-your-synology-nas/)
 - [Home Assistant](https://github.com/sztupy/hassio-actualbudget/blob/main/README.md)
 - [UnRAID SSL Setup](https://discord.com/channels/937901803608096828/1158941114603155477) - this guide is found at our Discord
