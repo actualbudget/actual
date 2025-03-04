@@ -272,6 +272,11 @@ async function linkPluggyAiAccount({
       'SELECT * FROM accounts WHERE id = ?',
       [upgradingId],
     );
+
+    if (!accRow) {
+      throw new Error(`Account with ID ${upgradingId} not found.`);
+    }
+        
     id = accRow.id;
     await db.update('accounts', {
       id,
