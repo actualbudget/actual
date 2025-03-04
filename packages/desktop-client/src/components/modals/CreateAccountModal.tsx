@@ -186,10 +186,12 @@ export function CreateAccountModal({
 
       dispatch(
         pushModal({
-          name: 'select-linked-accounts',
-          options: {
-            externalAccounts: newAccounts,
-            syncSource: 'pluggyai',
+          modal: {
+            name: 'select-linked-accounts',
+            options: {
+              externalAccounts: newAccounts,
+              syncSource: 'pluggyai',
+            },
           },
         }),
       );
@@ -203,9 +205,11 @@ export function CreateAccountModal({
       });
       dispatch(
         pushModal({
-          name: 'pluggyai-init',
-          options: {
-            onSuccess: () => setIsPluggyAiSetupComplete(true),
+          modal: {
+            name: 'pluggyai-init',
+            options: {
+              onSuccess: () => setIsPluggyAiSetupComplete(true),
+            },
           },
         }),
       );
@@ -241,9 +245,11 @@ export function CreateAccountModal({
   const onPluggyAiInit = () => {
     dispatch(
       pushModal({
-        name: 'pluggyai-init',
-        options: {
-          onSuccess: () => setIsPluggyAiSetupComplete(true),
+        modal: {
+          name: 'pluggyai-init',
+          options: {
+            onSuccess: () => setIsPluggyAiSetupComplete(true),
+          },
         },
       }),
     );
