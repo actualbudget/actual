@@ -1267,23 +1267,6 @@ handlers['get-openid-config'] = async function () {
   }
 };
 
-handlers['enable-openid'] = async function (loginConfig) {
-  try {
-    const userToken = await asyncStorage.getItem('user-token');
-
-    if (!userToken) {
-      return { error: 'unauthorized' };
-    }
-
-    await post(getServer().BASE_SERVER + '/openid/enable', loginConfig, {
-      'X-ACTUAL-TOKEN': userToken,
-    });
-  } catch (err) {
-    return { error: err.reason || 'network-failure' };
-  }
-  return {};
-};
-
 handlers['enable-password'] = async function (loginConfig) {
   try {
     const userToken = await asyncStorage.getItem('user-token');
