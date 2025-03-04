@@ -70,6 +70,7 @@ type PrivacyButtonProps = {
 };
 
 function PrivacyButton({ style }: PrivacyButtonProps) {
+  const { t } = useTranslation();
   const [isPrivacyEnabledPref, setPrivacyEnabledPref] =
     useSyncedPref('isPrivacyEnabled');
   const isPrivacyEnabled = String(isPrivacyEnabledPref) === 'true';
@@ -91,7 +92,9 @@ function PrivacyButton({ style }: PrivacyButtonProps) {
   return (
     <Button
       variant="bare"
-      aria-label={`${isPrivacyEnabled ? 'Disable' : 'Enable'} privacy mode`}
+      aria-label={
+        isPrivacyEnabled ? t('Disable privacy mode') : t('Enable privacy mode')
+      }
       onPress={() => setPrivacyEnabledPref(String(!isPrivacyEnabled))}
       style={style}
     >
