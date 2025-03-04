@@ -1,15 +1,11 @@
-import React, {
-  useState,
-  type ComponentPropsWithoutRef,
-  useEffect,
-  type CSSProperties,
-} from 'react';
+import React, { useState, useEffect, type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
+import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
 import { trackingBudget } from 'loot-core/client/queries';
 import { amountToInteger, integerToAmount } from 'loot-core/shared/util';
 
@@ -25,12 +21,10 @@ import {
 } from '../common/Modal';
 import { FocusableAmountInput } from '../mobile/transactions/FocusableAmountInput';
 
-type TrackingBudgetMenuModalProps = ComponentPropsWithoutRef<
-  typeof BudgetMenu
-> & {
-  categoryId: string;
-  onUpdateBudget: (amount: number) => void;
-};
+type TrackingBudgetMenuModalProps = Omit<
+  Extract<ModalType, { name: 'tracking-budget-menu' }>['options'],
+  'month'
+>;
 
 export function TrackingBudgetMenuModal({
   categoryId,

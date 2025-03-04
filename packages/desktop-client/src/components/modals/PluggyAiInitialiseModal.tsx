@@ -8,6 +8,7 @@ import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
 import { getSecretsError } from 'loot-core/shared/errors';
+import { type Modal as ModalType } from 'loot-core/src/client/modals/modalsSlice';
 import { send } from 'loot-core/src/platform/client/fetch';
 
 import { Error } from '../alerts';
@@ -21,9 +22,10 @@ import {
 } from '../common/Modal';
 import { FormField, FormLabel } from '../forms';
 
-type PluggyAiInitialiseProps = {
-  onSuccess: () => void;
-};
+type PluggyAiInitialiseProps = Extract<
+  ModalType,
+  { name: 'pluggyai-init' }
+>['options'];
 
 export const PluggyAiInitialiseModal = ({
   onSuccess,
