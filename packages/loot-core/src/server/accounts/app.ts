@@ -268,9 +268,10 @@ async function linkPluggyAiAccount({
   );
 
   if (upgradingId) {
-    const accRow = await db.first('SELECT * FROM accounts WHERE id = ?', [
-      upgradingId,
-    ]);
+    const accRow = await db.first<db.DbAccount>(
+      'SELECT * FROM accounts WHERE id = ?',
+      [upgradingId],
+    );
     id = accRow.id;
     await db.update('accounts', {
       id,
