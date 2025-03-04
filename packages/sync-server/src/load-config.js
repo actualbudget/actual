@@ -256,10 +256,10 @@ const configSchema = convict({
 
   userCreationMode: {
     doc: 'Determines how users can be created.',
-    format: ["manual", "login"],
-    default: "manual",
+    format: ['manual', 'login'],
+    default: 'manual',
     env: 'ACTUAL_USER_CREATION_MODE',
-  }
+  },
 });
 
 let configPath = null;
