@@ -39,6 +39,7 @@ import {
 import { useSelector } from '../../../redux';
 import { theme } from '../../../style';
 import { makeAmountFullStyle } from '../../budget/util';
+import { PrivacyFilter } from '../../PrivacyFilter';
 
 import { lookupName, Status } from './TransactionEdit';
 
@@ -278,14 +279,16 @@ export function TransactionListItem({
                 )}
               </View>
               <View style={{ justifyContent: 'center' }}>
-                <Text
-                  style={{
-                    ...textStyle,
-                    ...makeAmountFullStyle(amount),
-                  }}
-                >
-                  {integerToCurrency(amount)}
-                </Text>
+                <PrivacyFilter>
+                  <Text
+                    style={{
+                      ...textStyle,
+                      ...makeAmountFullStyle(amount),
+                    }}
+                  >
+                    {integerToCurrency(amount)}
+                  </Text>
+                </PrivacyFilter>
               </View>
             </View>
           </Button>
