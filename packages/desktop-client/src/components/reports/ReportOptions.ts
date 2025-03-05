@@ -3,10 +3,8 @@ import { t } from 'i18next';
 import * as monthUtils from 'loot-core/shared/months';
 import {
   type CustomReportEntity,
-  type AccountEntity,
   type CategoryEntity,
   type CategoryGroupEntity,
-  type PayeeEntity,
   type sortByOpType,
 } from 'loot-core/types/models';
 
@@ -272,7 +270,7 @@ type UncategorizedId = 'off_budget' | 'transfer' | 'other' | 'all';
 
 export type UncategorizedEntity = Pick<
   CategoryEntity,
-  'id' | 'name' | 'hidden' | 'cat_group'
+  'id' | 'name' | 'hidden'
 > & {
   uncategorized_id?: UncategorizedId;
 };
@@ -320,8 +318,8 @@ export const categoryLists = (categories: {
   const categoryList: UncategorizedEntity[] = [
     ...categoriesToSort.sort((a, b) => {
       //The point of this sorting is to make the graphs match the "budget" page
-      const catGroupA = categories.grouped.find(f => f.id === a.cat_group);
-      const catGroupB = categories.grouped.find(f => f.id === b.cat_group);
+      const catGroupA = categories.grouped.find(f => f.id === a.group);
+      const catGroupB = categories.grouped.find(f => f.id === b.group);
       //initial check that both a and b have a sort_order and category group
       return a.sort_order && b.sort_order && catGroupA && catGroupB
         ? /*sorting by "is_income" because sort_order for this group is
@@ -348,9 +346,9 @@ export const categoryLists = (categories: {
 export const groupBySelections = (
   groupBy: string,
   categoryList: UncategorizedEntity[],
-  categoryGroup: CategoryGroupEntity[],
-  payees: PayeeEntity[],
-  accounts: AccountEntity[],
+  categoryGroup: UncategorizedEntity[],
+  payees: UncategorizedEntity[],
+  accounts: UncategorizedEntity[],
 ): [
   UncategorizedEntity[],
   'category' | 'categoryGroup' | 'payee' | 'account',

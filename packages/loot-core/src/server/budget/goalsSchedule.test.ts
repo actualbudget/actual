@@ -1,3 +1,4 @@
+import { CategoryEntity } from '../../types/models';
 import * as db from '../db';
 import { getRuleForSchedule } from '../schedules/app';
 
@@ -35,7 +36,7 @@ describe('goalsSchedule', () => {
     const last_month_balance = 0;
     const to_budget = 0;
     const errors: string[] = [];
-    const category = { id: '1', name: 'Test Category' };
+    const category = { id: '1', name: 'Test Category' } as CategoryEntity;
 
     (db.first as jest.Mock).mockResolvedValue({ id: 1, completed: 0 });
     (getRuleForSchedule as jest.Mock).mockResolvedValue({
@@ -105,7 +106,7 @@ describe('goalsSchedule', () => {
     const last_month_balance = 12000;
     const to_budget = 0;
     const errors: string[] = [];
-    const category = { id: '1', name: 'Test Category' };
+    const category = { id: '1', name: 'Test Category' } as CategoryEntity;
 
     (db.first as jest.Mock).mockResolvedValue({ id: 1, completed: 0 });
     (getRuleForSchedule as jest.Mock).mockResolvedValue({

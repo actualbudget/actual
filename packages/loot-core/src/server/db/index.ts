@@ -318,7 +318,13 @@ export async function getCategories(
 
 export async function getCategoriesGrouped(
   ids?: Array<DbCategoryGroup['id']>,
-): Promise<Array<DbCategoryGroup & { categories: DbCategory[] }>> {
+): Promise<
+  Array<
+    DbCategoryGroup & {
+      categories: DbCategory[];
+    }
+  >
+> {
   const categoryGroupWhereIn = ids
     ? `cg.id IN (${toSqlQueryParameters(ids)}) AND`
     : '';
@@ -401,7 +407,7 @@ export async function moveCategoryGroup(
 
 export async function deleteCategoryGroup(
   group: Pick<DbCategoryGroup, 'id'>,
-  transferId?: string,
+  transferId?: DbCategory['id'],
 ) {
   const categories = await all<DbCategory>(
     'SELECT * FROM categories WHERE cat_group = ?',
@@ -460,6 +466,9 @@ export async function insertCategory(
       sort_order,
     };
 
+    // Change from cat_group to group because category AQL schema named it group.
+    // const { cat_group: group, ...rest } = category;
+
     const id = await insertWithUUID('categories', category);
     // Create an entry in the mapping table that points it to itself
     await insert('category_mapping', { id, transferId: id });
@@ -475,6 +484,8 @@ export function updateCategory(
   >,
 ) {
   category = categoryModel.validate(category, { update: true });
+  // Change from cat_group to group because category AQL schema named it group.
+  // const { cat_group: group, ...rest } = category;
   return update('categories', category);
 }
 
@@ -512,7 +523,10 @@ export async function deleteCategory(
       [category.id],
     );
     for (const mapping of existingTransfers) {
-      await update('category_mapping', { id: mapping.id, transferId });
+      await update('category_mapping', {
+        id: mapping.id,
+        transferId,
+      });
     }
 
     // Finally, map the category we're about to delete to the new one
