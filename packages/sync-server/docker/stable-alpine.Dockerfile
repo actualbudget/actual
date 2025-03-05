@@ -34,7 +34,7 @@ RUN addgroup -S ${USERNAME} -g ${USER_GID} && adduser -S ${USERNAME} -G ${USERNA
 RUN mkdir /data && chown -R ${USERNAME}:${USERNAME} /data
 
 WORKDIR /app
-ENV NODE_ENV production
+ENV NODE_ENV=production
 COPY --from=base /app/node_modules /app/node_modules
 COPY /packages/sync-server/package.json /packages/sync-server/app.js ./
 COPY /packages/sync-server/src ./src
