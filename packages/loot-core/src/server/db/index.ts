@@ -374,12 +374,12 @@ export async function insertCategoryGroup(group: Partial<DbCategoryGroup>) {
     ...categoryGroupModel.validate(group),
     sort_order,
   };
-  return insertWithSchema('category_groups', group);
+  return insertWithUUID('category_groups', group);
 }
 
 export function updateCategoryGroup(group: Partial<DbCategoryGroup>) {
   group = categoryGroupModel.validate(group, { update: true });
-  return updateWithSchema('category_groups', group);
+  return update('category_groups', group);
 }
 
 export async function moveCategoryGroup(
@@ -392,9 +392,9 @@ export async function moveCategoryGroup(
 
   const { updates, sort_order } = shoveSortOrders(groups, targetId);
   for (const info of updates) {
-    await updateWithSchema('category_groups', info);
+    await update('category_groups', info);
   }
-  await updateWithSchema('category_groups', { id, sort_order });
+  await update('category_groups', { id, sort_order });
 }
 
 export async function deleteCategoryGroup(
@@ -448,7 +448,6 @@ export async function insertCategory(
         categories.length > 0 ? categories[0].id : null,
       );
       for (const info of updates) {
-        // await updateWithSchema('categories', info);
         await update('categories', info);
       }
       sort_order = order;
@@ -458,9 +457,6 @@ export async function insertCategory(
       ...categoryModel.validate(category),
       sort_order,
     };
-
-    // Change from cat_group to group because category AQL schema named it group.
-    // const { cat_group: group, ...rest } = category;
 
     const id = await insertWithUUID('categories', category);
     // Create an entry in the mapping table that points it to itself
@@ -493,9 +489,9 @@ export async function moveCategory(
 
   const { updates, sort_order } = shoveSortOrders(categories, targetId);
   for (const info of updates) {
-    await updateWithSchema('categories', info);
+    await update('categories', info);
   }
-  await updateWithSchema('categories', { id, sort_order, cat_group: groupId });
+  await update('categories', { id, sort_order, cat_group: groupId });
 }
 
 export async function deleteCategory(
@@ -511,14 +507,14 @@ export async function deleteCategory(
       [category.id],
     );
     for (const mapping of existingTransfers) {
-      await updateWithSchema('category_mapping', {
+      await update('category_mapping', {
         id: mapping.id,
         transferId,
       });
     }
 
     // Finally, map the category we're about to delete to the new one
-    await updateWithSchema('category_mapping', { id: category.id, transferId });
+    await update('category_mapping', { id: category.id, transferId });
   }
 
   return delete_('categories', category.id);
