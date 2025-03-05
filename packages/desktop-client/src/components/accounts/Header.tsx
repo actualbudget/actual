@@ -25,7 +25,7 @@ import {
   type TransactionFilterEntity,
 } from 'loot-core/types/models';
 
-import { useGlobalPref } from '../../hooks/useGlobalPref';
+import { useLocale } from '../../hooks/useLocale';
 import { useLocalPref } from '../../hooks/useLocalPref';
 import { useSplitsExpanded } from '../../hooks/useSplitsExpanded';
 import { useSyncServerStatus } from '../../hooks/useSyncServerStatus';
@@ -188,7 +188,6 @@ export function AccountHeader({
   onMakeAsNonSplitTransactions,
 }: AccountHeaderProps) {
   const { t } = useTranslation();
-  const [language] = useGlobalPref('language');
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [reconcileOpen, setReconcileOpen] = useState(false);
@@ -200,6 +199,8 @@ export function AccountHeader({
   const isUsingServer = syncServerStatus !== 'no-server';
   const isServerOffline = syncServerStatus === 'offline';
   const [_, setExpandSplitsPref] = useLocalPref('expand-splits');
+
+  const locale = useLocale();
 
   let canSync = !!(account?.account_id && isUsingServer);
   if (!account) {
@@ -388,7 +389,7 @@ export function AccountHeader({
                 }}
                 content={
                   account?.last_reconciled
-                    ? `${t('Reconciled')} ${tsToRelativeTime(account.last_reconciled, language || 'en-US')}`
+                    ? `${t('Reconciled')} ${tsToRelativeTime(account.last_reconciled, locale)}`
                     : t('Not yet reconciled')
                 }
                 placement="top"
