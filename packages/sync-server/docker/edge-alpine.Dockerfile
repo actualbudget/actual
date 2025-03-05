@@ -7,7 +7,7 @@ COPY yarn.lock package.json .yarnrc.yml tsconfig.json ./
 RUN if [ "$(uname -m)" = "armv7l" ]; then yarn config set taskPoolConcurrency 2; yarn config set networkConcurrency 5; fi
 
 # Copying workspace so @actual-app/web can be built
-COPY bin/package-browser ./bin/package-browser
+COPY ./bin/package-browser ./bin/package-browser
 COPY ./packages/$BUILD_CONTEXT/ ./packages/$BUILD_CONTEXT/
 
 # Building @actual-app/web
@@ -21,8 +21,6 @@ RUN yarn workspaces focus @actual-app/sync-server --production
 RUN rm ./node_modules/@actual-app/web ./node_modules/@actual-app/sync-server
 COPY ./packages/desktop-client/package.json ./node_modules/@actual-app/web/package.json
 COPY ./packages/desktop-client/build ./node_modules/@actual-app/web/build
-
-RUN yarn workspaces focus @actual-app/sync-server --production
 
 RUN if [ "$(uname -m)" = "armv7l" ]; then npm install bcrypt better-sqlite3 --build-from-source; fi
 

@@ -7,7 +7,7 @@ COPY yarn.lock package.json .yarnrc.yml tsconfig.json ./
 RUN if [ "$(uname -m)" = "armv7l" ]; then yarn config set taskPoolConcurrency 2; yarn config set networkConcurrency 5; fi
 
 # Copying workspace so @actual-app/web can be built
-COPY bin/package-browser ./bin/package-browser
+COPY ./bin/package-browser ./bin/package-browser
 COPY ./packages/$BUILD_CONTEXT/ ./packages/$BUILD_CONTEXT/
 
 # Building @actual-app/web
