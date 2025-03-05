@@ -339,7 +339,7 @@ export function listenForSyncEvent(store: AppStore) {
             id: 'login-expired',
             button: {
               title: 'Go to login',
-              action: () => store.dispatch(signOut()),
+              action: () => store.dispatch(signOut(true)),
             },
           };
           break;
