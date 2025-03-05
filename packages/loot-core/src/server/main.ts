@@ -235,8 +235,11 @@ handlers['category-create'] = mutator(async function ({
 handlers['category-update'] = mutator(async function (category) {
   return withUndo(async () => {
     try {
+      // DB column name is cat_group.
+      const { group: cat_group, ...restCategory } = category;
       await db.updateCategory({
-        ...category,
+        ...restCategory,
+        cat_group,
         name: category.name.trim(),
         is_income: category.is_income ? 1 : 0,
         hidden: category.hidden ? 1 : 0,
