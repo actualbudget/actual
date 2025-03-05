@@ -357,7 +357,7 @@ handlers['api/budget-month'] = async function ({ month }) {
   await validateMonth(month);
 
   const { data: groups }: { data: CategoryGroupEntity[] } = await aqlQuery(
-    q('category_group').select('*'),
+    q('category_groups').select('*'),
   );
   const sheetName = monthUtils.sheetForMonth(month);
 
