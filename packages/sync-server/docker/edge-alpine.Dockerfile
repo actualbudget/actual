@@ -1,5 +1,6 @@
 FROM alpine:3.18 AS base
-RUN apk add --no-cache nodejs yarn npm python3 openssl build-base jq curl
+RUN apk add --no-cache nodejs yarn npm python3 openssl build-base
+# jq curl
 WORKDIR /app
 COPY .yarn ./.yarn
 COPY yarn.lock package.json .yarnrc.yml tsconfig.json ./
@@ -12,8 +13,8 @@ COPY ./packages/$BUILD_CONTEXT/ ./packages/$BUILD_CONTEXT/
 
 # Building @actual-app/web
 RUN yarn install
-# RUN yarn build:browser
-RUN ./bin/package-browser
+RUN yarn build:browser
+# RUN ./bin/package-browser
 
 # Installing dependencies in production mode (including the @actual-app/web built above)
 RUN yarn workspaces focus @actual-app/sync-server --production

@@ -1,5 +1,6 @@
 FROM node:18-bookworm AS base
-RUN apt-get update && apt-get install -y openssl jq
+RUN apt-get update && apt-get install -y openssl
+# jq
 WORKDIR /app
 COPY .yarn ./.yarn
 COPY yarn.lock package.json .yarnrc.yml tsconfig.json ./
@@ -12,8 +13,8 @@ COPY ./packages/$BUILD_CONTEXT/ ./packages/$BUILD_CONTEXT/
 
 # Building @actual-app/web
 RUN yarn install
-# RUN yarn build:browser
-RUN ./bin/package-browser
+RUN yarn build:browser
+# RUN ./bin/package-browser
 
 # Installing dependencies in production mode (including the @actual-app/web built above)
 RUN yarn workspaces focus @actual-app/sync-server --production
@@ -21,7 +22,7 @@ RUN yarn workspaces focus @actual-app/sync-server --production
 # Yarn uses symbolic links to reference workspace packages, remove link to @actual-app/web and copy it manually so we don't need the /packages dir
 RUN rm ./node_modules/@actual-app/web ./node_modules/@actual-app/sync-server
 COPY ./packages/desktop-client/package.json ./node_modules/@actual-app/web/package.json
-COPY ./packages/desktop-client ./node_modules/@actual-app/web/build
+COPY ./packages/desktop-client/build ./node_modules/@actual-app/web/build
 
 # RUN mkdir /public
 # COPY artifacts.json /tmp/artifacts.json
