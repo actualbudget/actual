@@ -6,7 +6,7 @@ COPY yarn.lock package.json .yarnrc.yml tsconfig.json ./
 
 # Copying workspace so @actual-app/web can be built
 COPY ./bin/package-browser ./bin/package-browser
-COPY ./packages/$BUILD_CONTEXT/ ./packages/$BUILD_CONTEXT/
+COPY ./packages/ ./packages/
 
 # Building @actual-app/web
 RUN yarn install
