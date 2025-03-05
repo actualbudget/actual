@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -41,7 +41,12 @@ export function SelectLinkedAccountsModal({
   externalAccounts,
   syncSource = undefined,
 }) {
-  externalAccounts.sort((a, b) => a.name.localeCompare(b.name));
+  const sortedExternalAccounts = useMemo(() => {
+    const toSort = [...externalAccounts];
+    toSort.sort((a, b) => a.name.localeCompare(b.name));
+    return toSort;
+  }, [externalAccounts]);
+
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const localAccounts = useAccounts().filter(a => a.closed === 0);
@@ -68,7 +73,7 @@ export function SelectLinkedAccountsModal({
     // Link new accounts
     Object.entries(chosenAccounts).forEach(
       ([chosenExternalAccountId, chosenLocalAccountId]) => {
-        const externalAccount = externalAccounts.find(
+        const externalAccount = sortedExternalAccounts.find(
           account => account.account_id === chosenExternalAccountId,
         );
         const offBudget = chosenLocalAccountId === addOffBudgetAccountOption.id;
@@ -176,7 +181,7 @@ export function SelectLinkedAccountsModal({
             />
 
             <Table
-              items={externalAccounts}
+              items={sortedExternalAccounts}
               style={{ backgroundColor: theme.tableHeaderBackground }}
               getItemKey={index => index}
               renderItem={({ key, item }) => (
