@@ -20,7 +20,7 @@ RUN yarn workspaces focus @actual-app/sync-server --production
 # Yarn uses symbolic links to reference workspace packages, remove link to @actual-app/web and copy it manually so we don't need the /packages dir
 RUN rm ./node_modules/@actual-app/web ./node_modules/@actual-app/sync-server
 COPY ./packages/desktop-client/package.json ./node_modules/@actual-app/web/package.json
-COPY ./packages/desktop-client ./node_modules/@actual-app/web/build
+COPY ./packages/desktop-client/build ./node_modules/@actual-app/web/build
 
 RUN if [ "$(uname -m)" = "armv7l" ]; then npm install bcrypt better-sqlite3 --build-from-source; fi
 
@@ -44,7 +44,7 @@ RUN mkdir /data && chown -R ${USERNAME}:${USERNAME} /data
 WORKDIR /app
 ENV NODE_ENV production
 COPY --from=base /app/node_modules /app/node_modules
-COPY --from=base /public /public
+# COPY --from=base /public /public
 COPY /packages/sync-server/package.json /packages/sync-server/app.js ./
 COPY /packages/sync-server/src ./src
 COPY /packages/sync-server/migrations ./migrations
