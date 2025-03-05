@@ -24,13 +24,13 @@ COPY ./packages/desktop-client/build ./node_modules/@actual-app/web/build
 
 RUN if [ "$(uname -m)" = "armv7l" ]; then npm install bcrypt better-sqlite3 --build-from-source; fi
 
-RUN mkdir /public
-COPY artifacts.json /tmp/artifacts.json
-RUN jq -r '[.artifacts[] | select(.workflow_run.head_branch == "master" and .workflow_run.head_repository_id == .workflow_run.repository_id)][0]' /tmp/artifacts.json > /tmp/latest-build.json
+# RUN mkdir /public
+# COPY artifacts.json /tmp/artifacts.json
+# RUN jq -r '[.artifacts[] | select(.workflow_run.head_branch == "master" and .workflow_run.head_repository_id == .workflow_run.repository_id)][0]' /tmp/artifacts.json > /tmp/latest-build.json
 
-ARG GITHUB_TOKEN
-RUN curl -L -o /tmp/desktop-client.zip --header "Authorization: Bearer ${GITHUB_TOKEN}" $(jq -r '.archive_download_url' /tmp/latest-build.json)
-RUN unzip /tmp/desktop-client.zip -d /public
+# ARG GITHUB_TOKEN
+# RUN curl -L -o /tmp/desktop-client.zip --header "Authorization: Bearer ${GITHUB_TOKEN}" $(jq -r '.archive_download_url' /tmp/latest-build.json)
+# RUN unzip /tmp/desktop-client.zip -d /public
 
 FROM alpine:3.18 AS prod
 RUN apk add --no-cache nodejs tini
@@ -49,6 +49,6 @@ COPY /packages/sync-server/package.json /packages/sync-server/app.js ./
 COPY /packages/sync-server/src ./src
 COPY /packages/sync-server/migrations ./migrations
 ENTRYPOINT ["/sbin/tini","-g",  "--"]
-ENV ACTUAL_WEB_ROOT=/public
+# ENV ACTUAL_WEB_ROOT=/public
 EXPOSE 5006
 CMD ["node", "app.js"]
