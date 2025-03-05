@@ -3,8 +3,10 @@ import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import { send } from '../../platform/client/fetch';
 import { getUploadError } from '../../shared/errors';
 import { type AccountEntity } from '../../types/models';
+import { type AtLeastOne } from '../../types/util';
 import { syncAccounts } from '../accounts/accountsSlice';
-import { loadPrefs, pushModal } from '../actions';
+import { loadPrefs } from '../actions';
+import { pushModal } from '../modals/modalsSlice';
 import { createAppAsyncThunk } from '../redux';
 
 const sliceName = 'app';
@@ -49,15 +51,27 @@ export const resetSync = createAppAsyncThunk(
         error.reason === 'file-has-new-key'
       ) {
         dispatch(
-          pushModal('fix-encryption-key', {
-            onSuccess: () => {
-              // TODO: There won't be a loading indicator for this
-              dispatch(resetSync());
+          pushModal({
+            modal: {
+              name: 'fix-encryption-key',
+              options: {
+                onSuccess: () => {
+                  // TODO: There won't be a loading indicator for this
+                  dispatch(resetSync());
+                },
+              },
             },
           }),
         );
       } else if (error.reason === 'encrypt-failure') {
-        dispatch(pushModal('create-encryption-key', { recreate: true }));
+        dispatch(
+          pushModal({
+            modal: {
+              name: 'create-encryption-key',
+              options: { recreate: true },
+            },
+          }),
+        );
       }
     } else {
       await dispatch(sync());
@@ -117,7 +131,9 @@ export const syncAndDownload = createAppAsyncThunk(
   },
 );
 
-type SetAppStatePayload = Partial<AppState>;
+// Workaround for partial types in actions.
+// https://github.com/reduxjs/redux-toolkit/issues/1423#issuecomment-902680573
+type SetAppStatePayload = AtLeastOne<AppState>;
 
 const appSlice = createSlice({
   name: sliceName,

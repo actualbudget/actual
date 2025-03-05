@@ -15,3 +15,4 @@ export type * from './transaction';
 export type * from './transaction-filter';
 export type * from './user';
 export type * from './bank';
+export type * from './userAccess';

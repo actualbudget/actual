@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Stack } from '@actual-app/components/stack';
 import { styles } from '@actual-app/components/styles';
 
+import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
 import { sheetForMonth } from 'loot-core/shared/months';
 import * as monthUtils from 'loot-core/shared/months';
 
@@ -13,9 +14,10 @@ import { Saved } from '../budget/tracking/budgetsummary/Saved';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { NamespaceContext } from '../spreadsheet/NamespaceContext';
 
-type TrackingBudgetSummaryModalProps = {
-  month: string;
-};
+type TrackingBudgetSummaryModalProps = Extract<
+  ModalType,
+  { name: 'tracking-budget-summary' }
+>['options'];
 
 export function TrackingBudgetSummaryModal({
   month,

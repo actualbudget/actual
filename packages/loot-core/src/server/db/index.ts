@@ -16,6 +16,7 @@ import * as sqlite from '../../platform/server/sqlite';
 import * as monthUtils from '../../shared/months';
 import { groupById } from '../../shared/util';
 import { CategoryEntity, CategoryGroupEntity } from '../../types/models';
+import { WithRequired } from '../../types/util';
 import {
   schema,
   schemaConfig,
@@ -174,12 +175,9 @@ export async function first<T>(sql, params?: (string | number)[]) {
 
 // The underlying sql system is now sync, but we can't update `first` yet
 // without auditing all uses of it
-export function firstSync(sql, params?: (string | number)[]) {
-  const arr = runQuery(sql, params, true);
-  // TODO: In the next phase, we will make this function generic
-  // and pass the type of the return type to `runQuery`.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return arr.length === 0 ? null : (arr[0] as any);
+export function firstSync<T>(sql, params?: (string | number)[]) {
+  const arr = runQuery<T>(sql, params, true);
+  return arr.length === 0 ? null : arr[0];
 }
 
 // This function is marked as async because `runQuery` is no longer
@@ -422,7 +420,7 @@ export async function insertCategory(
     }
 
     if (atEnd) {
-      const lastCat = await first<Pick<DbCategoryGroup, 'sort_order'>>(`
+      const lastCat = await first<Pick<DbCategory, 'sort_order'>>(`
         SELECT sort_order FROM categories WHERE tombstone = 0 ORDER BY sort_order DESC, id DESC LIMIT 1
       `);
       sort_order = (lastCat ? lastCat.sort_order : 0) + SORT_INCREMENT;
@@ -514,9 +512,11 @@ export async function getAccount(id: DbAccount['id']) {
   return first<DbAccount>(`SELECT * FROM accounts WHERE id = ?`, [id]);
 }
 
-export async function insertPayee(payee) {
+export async function insertPayee(
+  payee: WithRequired<Partial<DbPayee>, 'name'>,
+) {
   payee = payeeModel.validate(payee);
-  let id;
+  let id: DbPayee['id'];
   await batchMessages(async () => {
     id = await insertWithUUID('payees', payee);
     await insert('payee_mapping', { id, targetId: id });
@@ -549,7 +549,7 @@ export async function deleteTransferPayee(payee: Pick<DbPayee, 'id'>) {
   return delete_('payees', payee.id);
 }
 
-export function updatePayee(payee) {
+export function updatePayee(payee: WithRequired<Partial<DbPayee>, 'id'>) {
   payee = payeeModel.validate(payee, { update: true });
   return update('payees', payee);
 }
@@ -594,7 +594,7 @@ export async function mergePayees(
   });
 }
 
-export function getPayees() {
+export function getPayees(): Promise<DbPayee[]> {
   return all(`
     SELECT p.*, COALESCE(a.name, p.name) AS name FROM payees p
     LEFT JOIN accounts a ON (p.transfer_acct = a.id AND a.tombstone = 0)
@@ -603,7 +603,7 @@ export function getPayees() {
   `);
 }
 
-export function getCommonPayees() {
+export function getCommonPayees(): Promise<DbPayee[]> {
   const twelveWeeksAgo = toDateRepr(
     monthUtils.subWeeks(monthUtils.currentDate(), 12),
   );
@@ -645,11 +645,11 @@ const orphanedPayeesQuery = `
 `;
 /* eslint-enable rulesdir/typography */
 
-export function syncGetOrphanedPayees() {
+export function syncGetOrphanedPayees(): Promise<Array<Pick<DbPayee, 'id'>>> {
   return all(orphanedPayeesQuery);
 }
 
-export async function getOrphanedPayees() {
+export async function getOrphanedPayees(): Promise<Array<DbPayee['id']>> {
   const rows = await all(orphanedPayeesQuery);
   return rows.map(row => row.id);
 }
