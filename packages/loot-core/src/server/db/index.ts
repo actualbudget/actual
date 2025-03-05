@@ -466,9 +466,6 @@ export async function insertCategory(
       sort_order,
     };
 
-    // Change from cat_group to group because category AQL schema named it group.
-    // const { cat_group: group, ...rest } = category;
-
     const id = await insertWithUUID('categories', category);
     // Create an entry in the mapping table that points it to itself
     await insert('category_mapping', { id, transferId: id });
