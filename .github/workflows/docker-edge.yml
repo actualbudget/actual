@@ -88,5 +88,4 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           build-args: |
             GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
-          cache-from: type=local,src=${{ runner.temp }}/.buildx-cache
-          cache-to: type=local,dest=${{ runner.temp }}/.buildx-cache-new,mode=max
+          no-cache: true
