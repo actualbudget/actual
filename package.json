@@ -30,6 +30,7 @@
     "start:browser": "npm-run-all --parallel 'start:browser-*'",
     "start:browser-backend": "yarn workspace loot-core watch:browser",
     "start:browser-frontend": "yarn workspace @actual-app/web start:browser",
+    "build:server": "./bin/package-browser",
     "build:browser": "./bin/package-browser",
     "build:desktop": "./bin/package-electron",
     "build:api": "yarn workspace @actual-app/api build",
