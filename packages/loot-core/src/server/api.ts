@@ -356,9 +356,9 @@ handlers['api/budget-month'] = async function ({ month }) {
   checkFileOpen();
   await validateMonth(month);
 
-  // TODO: Force cast to CategoryGroupEntity. This should be updated to an AQL query.
-  const groups =
-    (await db.getCategoriesGrouped()) as unknown as CategoryGroupEntity[];
+  const { data: groups }: { data: CategoryGroupEntity[] } = await aqlQuery(
+    q('category_group').select('*'),
+  );
   const sheetName = monthUtils.sheetForMonth(month);
 
   function value(name) {
