@@ -1,12 +1,18 @@
 // @ts-strict-ignore
-import { type HandlerFunctions } from '../types/handlers';
 
-export function sequential<T extends HandlerFunctions>(
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AnyFunction = (...args: any[]) => any;
+
+export function sequential<T extends AnyFunction>(
   fn: T,
 ): (...args: Parameters<T>) => Promise<Awaited<ReturnType<T>>> {
   const sequenceState: {
     running: Promise<Awaited<ReturnType<T>>> | null;
-    queue: Array<{ args: Parameters<T>; resolve; reject }>;
+    queue: Array<{
+      args: Parameters<T>;
+      resolve: (value: Awaited<ReturnType<T>>) => void;
+      reject: (reason?: unknown) => void;
+    }>;
   } = {
     running: null,
     queue: [],
@@ -21,7 +27,11 @@ export function sequential<T extends HandlerFunctions>(
     }
   }
 
-  function run(args: Parameters<T>, resolve, reject) {
+  function run(
+    args: Parameters<T>,
+    resolve: (value: Awaited<ReturnType<T>>) => void,
+    reject: (reason?: unknown) => void,
+  ) {
     sequenceState.running = fn.apply(null, args).then(
       val => {
         pump();
@@ -47,7 +57,7 @@ export function sequential<T extends HandlerFunctions>(
   };
 }
 
-export function once<T extends HandlerFunctions>(
+export function once<T extends AnyFunction>(
   fn: T,
 ): (...args: Parameters<T>) => Promise<Awaited<ReturnType<T>>> | null {
   let promise: Promise<Awaited<ReturnType<T>>> | null = null;
