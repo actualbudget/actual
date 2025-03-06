@@ -370,7 +370,8 @@ async function getCategoryTemplates() {
   const templates = {};
 
   const notes = await db.all<db.DbNote>(
-    `SELECT * FROM notes WHERE lower(note) like '%${TEMPLATE_PREFIX}%'`,
+    `SELECT * FROM notes WHERE lower(note) like ?`,
+    [`%${TEMPLATE_PREFIX}%`]
   );
 
   for (let n = 0; n < notes.length; n++) {
