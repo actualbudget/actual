@@ -20,7 +20,8 @@ RUN yarn workspaces focus @actual-app/sync-server --production
 # Yarn uses symbolic links to reference workspace packages, remove link to @actual-app/web and copy it manually so we don't need the /packages dir
 RUN rm ./node_modules/@actual-app/web ./node_modules/@actual-app/sync-server
 COPY packages/desktop-client/package.json ./node_modules/@actual-app/web/package.json
-COPY ./packages/desktop-client/build ./node_modules/@actual-app/web/build
+# COPY ./packages/desktop-client/build ./node_modules/@actual-app/web/build
+RUN cp -r packages/desktop-client/build ./node_modules/@actual-app/web/build
 
 FROM node:18-bookworm-slim AS prod
 RUN apt-get update && apt-get install tini && apt-get clean -y && rm -rf /var/lib/apt/lists/*
