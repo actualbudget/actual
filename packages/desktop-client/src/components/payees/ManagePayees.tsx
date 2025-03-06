@@ -70,7 +70,7 @@ function PayeeTableHeader() {
 type ManagePayeesProps = {
   payees: PayeeEntity[];
   ruleCounts: ComponentProps<typeof PayeeTable>['ruleCounts'];
-  orphanedPayees: PayeeEntity[];
+  orphanedPayees: Array<Pick<PayeeEntity, 'id'>>;
   initialSelectedIds: string[];
   onBatchChange: (diff: Diff<PayeeEntity>) => void;
   onViewRules: ComponentProps<typeof PayeeTable>['onViewRules'];
@@ -154,16 +154,16 @@ export const ManagePayees = ({
   function onFavorite() {
     const allFavorited = [...selected.items]
       .map(id => payeesById[id].favorite)
-      .every(f => f === 1);
+      .every(f => f);
     if (allFavorited) {
       onBatchChange({
-        updated: [...selected.items].map(id => ({ id, favorite: 0 })),
+        updated: [...selected.items].map(id => ({ id, favorite: false })),
         added: [],
         deleted: [],
       });
     } else {
       onBatchChange({
-        updated: [...selected.items].map(id => ({ id, favorite: 1 })),
+        updated: [...selected.items].map(id => ({ id, favorite: true })),
         added: [],
         deleted: [],
       });
@@ -174,16 +174,22 @@ export const ManagePayees = ({
   function onLearn() {
     const allLearnCategories = [...selected.items]
       .map(id => payeesById[id].learn_categories)
-      .every(f => f === 1);
+      .every(f => f);
     if (allLearnCategories) {
       onBatchChange({
-        updated: [...selected.items].map(id => ({ id, learn_categories: 0 })),
+        updated: [...selected.items].map(id => ({
+          id,
+          learn_categories: false,
+        })),
         added: [],
         deleted: [],
       });
     } else {
       onBatchChange({
-        updated: [...selected.items].map(id => ({ id, learn_categories: 1 })),
+        updated: [...selected.items].map(id => ({
+          id,
+          learn_categories: true,
+        })),
         added: [],
         deleted: [],
       });
