@@ -142,15 +142,16 @@ export function TransactionListItem({
 
   return (
     <ListBoxItem textValue={id} {...props}>
-      {({ isSelected }) => (
+      {itemProps => (
         <PressResponder {...mergeProps(pressProps, longPressProps)}>
           <Button
+            {...itemProps}
             style={{
               userSelect: 'none',
               height: ROW_HEIGHT,
               width: '100%',
               borderRadius: 0,
-              ...(isSelected
+              ...(itemProps.isSelected
                 ? {
                     borderWidth: '0 0 0 4px',
                     borderColor: theme.mobileTransactionSelected,
