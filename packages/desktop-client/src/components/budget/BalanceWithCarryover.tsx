@@ -278,9 +278,13 @@ export function BalanceWithCarryover({
             isGoalTemplatesEnabled &&
             goalValue !== null && (
               <>
-                <View style={{ borderTop: '1px solid ' + theme.tableBorderSeparator ,
-                  width: '160px', margin: '3px 0px',
-                }} />
+                <View
+                  style={{
+                    borderTop: '1px solid ' + theme.tableBorderSeparator,
+                    width: '160px',
+                    margin: '3px 0px',
+                  }}
+                />
                 <View>{GoalStatusDisplay(balanceValue, type)}</View>
               </>
             )}
