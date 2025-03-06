@@ -79,31 +79,28 @@ type TapFieldProps = ComponentPropsWithRef<typeof Button> & {
   textStyle?: CSSProperties;
 };
 
-const defaultButtonStyle: ComponentPropsWithoutRef<typeof Button>['style'] = ({
-  isDisabled,
-  isPressed,
-  isHovered,
-}) =>
-  ({
-    ...valueStyle,
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: theme.tableBackground,
-    ...(isDisabled && {
-      backgroundColor: theme.formInputTextReadOnlySelection,
-    }),
-    ...(isPressed
-      ? {
-          opacity: 0.5,
-          boxShadow: 'none',
-        }
-      : {}),
-    ...(isHovered
-      ? {
-          boxShadow: 'none',
-        }
-      : {}),
-  }) as CSSProperties;
+const defaultTapFieldStyle: ComponentPropsWithoutRef<
+  typeof Button
+>['style'] = ({ isDisabled, isPressed, isHovered }) => ({
+  ...valueStyle,
+  flexDirection: 'row',
+  alignItems: 'center',
+  backgroundColor: theme.tableBackground,
+  ...(isDisabled && {
+    backgroundColor: theme.formInputTextReadOnlySelection,
+  }),
+  ...(isPressed
+    ? {
+        opacity: 0.5,
+        boxShadow: 'none',
+      }
+    : {}),
+  ...(isHovered
+    ? {
+        boxShadow: 'none',
+      }
+    : {}),
+});
 
 export const TapField = forwardRef<HTMLButtonElement, TapFieldProps>(
   ({ value, children, rightContent, style, textStyle, ...props }, ref) => {
@@ -112,7 +109,7 @@ export const TapField = forwardRef<HTMLButtonElement, TapFieldProps>(
         ref={ref}
         bounce={false}
         style={renderProps => ({
-          ...defaultButtonStyle(renderProps),
+          ...defaultTapFieldStyle(renderProps),
           ...(typeof style === 'function' ? style(renderProps) : style),
         })}
         {...props}
