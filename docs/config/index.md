@@ -28,6 +28,23 @@ See the `ACTUAL_DATA_DIR` section above to override the data folder location.
 
 You can’t specify this option in `config.json` since it needs to be used to find the `config.json` in the first place.
 
+## `ACTUAL_UPLOAD_FILE_SYNC_SIZE_LIMIT_MB`
+
+Defines the maximum allowed size for sync files (in MB).  
+
+The default value is `20`.  
+
+## `ACTUAL_UPLOAD_SYNC_ENCRYPTED_FILE_SYNC_SIZE_LIMIT_MB`
+
+Defines the maximum allowed size for encrypted sync files (in MB).  
+
+The default value is `50`.  
+
+## `ACTUAL_UPLOAD_FILE_SIZE_LIMIT_MB`
+
+Defines the general maximum file size limit (in MB) for uploads.  
+
+The default value is `20`.  
 
 ## `https`
 
