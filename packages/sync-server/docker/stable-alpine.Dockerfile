@@ -1,12 +1,12 @@
 FROM alpine:3.18 AS base
 RUN apk add --no-cache nodejs yarn npm python3 openssl build-base
 WORKDIR /app
-COPY .yarn ./.yarn
-COPY yarn.lock package.json .yarnrc.yml tsconfig.json ./
 
 RUN if [ "$(uname -m)" = "armv7l" ]; then yarn config set taskPoolConcurrency 2; yarn config set networkConcurrency 5; fi
 
 # Copying workspace so @actual-app/web can be built
+COPY .yarn ./.yarn
+COPY yarn.lock package.json .yarnrc.yml tsconfig.json ./
 COPY ./bin/package-browser ./bin/package-browser
 COPY ./packages/ ./packages/
 
