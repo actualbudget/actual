@@ -75,6 +75,8 @@ jobs:
 
       # Building outside of the docker image allows us to build once and push to multiple platforms
       # This is faster and avoids yarn memory issues
+      - name: Set up environment
+        uses: ./.github/actions/setup
       - name: Build Web
         run: ./bin/package-browser
 

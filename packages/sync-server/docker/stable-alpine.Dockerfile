@@ -6,13 +6,14 @@ RUN if [ "$(uname -m)" = "armv7l" ]; then yarn config set taskPoolConcurrency 2;
 
 # Copying workspace so @actual-app/web can be built
 COPY .yarn ./.yarn
-COPY yarn.lock package.json .yarnrc.yml tsconfig.json ./
-COPY ./bin/package-browser ./bin/package-browser
+COPY yarn.lock package.json .yarnrc.yml ./
+# COPY yarn.lock package.json .yarnrc.yml tsconfig.json ./
+# COPY ./bin/package-browser ./bin/package-browser
 COPY ./packages/ ./packages/
 
 # Building @actual-app/web
-RUN yarn install
-RUN yarn build:browser
+# RUN yarn install
+# RUN yarn build:browser
 
 # Installing dependencies in production mode (including the @actual-app/web built above)
 RUN yarn workspaces focus @actual-app/sync-server --production
