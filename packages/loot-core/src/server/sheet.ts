@@ -213,7 +213,7 @@ export async function loadUserBudgets(
 
   sheet.startTransaction();
 
-  // Load all the budget amounts and carryover values
+  // Load all the budget amounts, carryover, hidden
   for (const budget of budgets) {
     if (budget.month && budget.category) {
       const sheetName = `budget${budget.month}`;
@@ -225,6 +225,7 @@ export async function loadUserBudgets(
       sheet.set(`${sheetName}!goal-${budget.category}`, budget.goal);
       sheet.set(`${sheetName}!long-goal-${budget.category}`, budget.long_goal);
     }
+    sheet.set(`hidden-${budget.category}`, budget.hidden);
   }
 
   // For zero-based budgets, load the buffered amounts

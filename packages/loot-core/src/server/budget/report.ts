@@ -61,23 +61,27 @@ export async function createCategory(cat, sheetName, prevSheetName) {
 }
 
 export function createCategoryGroup(group, sheetName) {
-  const categories = group.categories.filter(cat => !cat.hidden);
-
   sheet.get().createDynamic(sheetName, 'group-sum-amount-' + group.id, {
     initialValue: 0,
-    dependencies: categories.map(cat => `sum-amount-${cat.id}`),
+    dependencies: group.categories
+      .map(cat => `sum-amount-${cat.id}`)
+      .concat(group.categories.map(cat => `hidden-${cat.id}`)),
     run: sumAmounts,
   });
 
   sheet.get().createDynamic(sheetName, 'group-budget-' + group.id, {
     initialValue: 0,
-    dependencies: categories.map(cat => `budget-${cat.id}`),
+    dependencies: group.categories
+      .map(cat => `budget-${cat.id}`)
+      .concat(group.categories.map(cat => `hidden-${cat.id}`)),
     run: sumAmounts,
   });
 
   sheet.get().createDynamic(sheetName, 'group-leftover-' + group.id, {
     initialValue: 0,
-    dependencies: categories.map(cat => `leftover-${cat.id}`),
+    dependencies: group.categories
+      .map(cat => `leftover-${cat.id}`)
+      .concat(group.categories.map(cat => `hidden-${cat.id}`)),
     run: sumAmounts,
   });
 }
