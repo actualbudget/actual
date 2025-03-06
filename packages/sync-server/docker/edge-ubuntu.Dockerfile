@@ -17,7 +17,8 @@ RUN yarn workspaces focus @actual-app/sync-server --production
 RUN rm ./node_modules/@actual-app/web ./node_modules/@actual-app/sync-server
 COPY packages/desktop-client/package.json ./node_modules/@actual-app/web/package.json
 # COPY doesnt work, so we use cp. It's because the COPY command is trying to use cache
-RUN cp -r packages/desktop-client/build ./node_modules/@actual-app/web/build
+# RUN cp -r packages/desktop-client/build ./node_modules/@actual-app/web/build
+COPY packages/desktop-client/build ./node_modules/@actual-app/web/build
 
 FROM node:18-bookworm-slim AS prod
 RUN apt-get update && apt-get install tini && apt-get clean -y && rm -rf /var/lib/apt/lists/*

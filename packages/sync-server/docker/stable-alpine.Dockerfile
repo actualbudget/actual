@@ -8,6 +8,7 @@ RUN if [ "$(uname -m)" = "armv7l" ]; then yarn config set taskPoolConcurrency 2;
 COPY .yarn ./.yarn
 COPY yarn.lock package.json .yarnrc.yml ./
 COPY packages/desktop-client packages/desktop-client
+COPY packages/sync-server packages/sync-server
 
 # Installing dependencies in production mode (including the @actual-app/web in the workspace)
 RUN yarn workspaces focus @actual-app/sync-server --production
@@ -16,7 +17,8 @@ RUN yarn workspaces focus @actual-app/sync-server --production
 RUN rm ./node_modules/@actual-app/web ./node_modules/@actual-app/sync-server
 COPY packages/desktop-client/package.json ./node_modules/@actual-app/web/package.json
 # COPY doesnt work, so we use cp. It's because the COPY command is trying to use cache
-RUN cp -r packages/desktop-client/build ./node_modules/@actual-app/web/build
+# RUN cp -r packages/desktop-client/build ./node_modules/@actual-app/web/build
+COPY packages/desktop-client/build ./node_modules/@actual-app/web/build
 
 RUN if [ "$(uname -m)" = "armv7l" ]; then npm install bcrypt better-sqlite3 --build-from-source; fi
 
