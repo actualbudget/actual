@@ -142,94 +142,98 @@ export function BalanceWithCarryover({
       }),
     [getBalanceAmountStyle, isDisabled],
   );
-  const GoalStatusDisplay = (balanceValue, type) => {
-    return (
-      <>
-        <span style={{ fontWeight: 'bold' }}>
-          {getDifferenceToGoal(balanceValue) === 0 ? (
-            <span style={{ color: theme.noticeText }}>
-              <Trans>Fully funded</Trans>
-            </span>
-          ) : getDifferenceToGoal(balanceValue) > 0 ? (
-            <span style={{ color: theme.noticeText }}>
-              <Trans>
-                Overfunded (
-                {{
-                  amount: format(
-                    getDifferenceToGoal(balanceValue),
-                    'financial',
-                  ),
-                }}
-                )
-              </Trans>
-            </span>
-          ) : (
-            <span style={{ color: theme.errorText }}>
-              <Trans>
-                Underfunded (
-                {{
-                  amount: format(
-                    getDifferenceToGoal(balanceValue),
-                    'financial',
-                  ),
-                }}
-                )
-              </Trans>
-            </span>
-          )}
-        </span>
-        <GoalTooltipRow>
-          <Trans>
-            <div>Goal Type:</div>
-            <div>
-              {
-                {
-                  type: longGoalValue === 1 ? t('Long') : t('Template'),
-                } as TransObjectLiteral
-              }
-            </div>
-          </Trans>
-        </GoalTooltipRow>
-        <GoalTooltipRow>
-          <Trans>
-            <div>Goal:</div>
-            <div>
-              {
-                {
-                  amount: format(goalValue, 'financial'),
-                } as TransObjectLiteral
-              }
-            </div>
-          </Trans>
-        </GoalTooltipRow>
-        <GoalTooltipRow>
-          {longGoalValue !== 1 ? (
+  const GoalStatusDisplay = useCallback(
+    (balanceValue, type) => {
+      return (
+        <>
+          <span style={{ fontWeight: 'bold' }}>
+            {getDifferenceToGoal(balanceValue) === 0 ? (
+              <span style={{ color: theme.noticeText }}>
+                <Trans>Fully funded</Trans>
+              </span>
+            ) : getDifferenceToGoal(balanceValue) > 0 ? (
+              <span style={{ color: theme.noticeText }}>
+                <Trans>
+                  Overfunded (
+                  {{
+                    amount: format(
+                      getDifferenceToGoal(balanceValue),
+                      'financial',
+                    ),
+                  }}
+                  )
+                </Trans>
+              </span>
+            ) : (
+              <span style={{ color: theme.errorText }}>
+                <Trans>
+                  Underfunded (
+                  {{
+                    amount: format(
+                      getDifferenceToGoal(balanceValue),
+                      'financial',
+                    ),
+                  }}
+                  )
+                </Trans>
+              </span>
+            )}
+          </span>
+          <GoalTooltipRow>
             <Trans>
-              <div>Budgeted:</div>
+              <div>Goal Type:</div>
               <div>
                 {
                   {
-                    amount: format(budgetedValue, 'financial'),
+                    type: longGoalValue === 1 ? t('Long') : t('Template'),
                   } as TransObjectLiteral
                 }
               </div>
             </Trans>
-          ) : (
+          </GoalTooltipRow>
+          <GoalTooltipRow>
             <Trans>
-              <div>Balance:</div>
+              <div>Goal:</div>
               <div>
                 {
                   {
-                    amount: format(balanceValue, type),
+                    amount: format(goalValue, 'financial'),
                   } as TransObjectLiteral
                 }
               </div>
             </Trans>
-          )}
-        </GoalTooltipRow>
-      </>
-    );
-  };
+          </GoalTooltipRow>
+          <GoalTooltipRow>
+            {longGoalValue !== 1 ? (
+              <Trans>
+                <div>Budgeted:</div>
+                <div>
+                  {
+                    {
+                      amount: format(budgetedValue, 'financial'),
+                    } as TransObjectLiteral
+                  }
+                </div>
+              </Trans>
+            ) : (
+              <Trans>
+                <div>Balance:</div>
+                <div>
+                  {
+                    {
+                      amount: format(balanceValue, type),
+                    } as TransObjectLiteral
+                  }
+                </div>
+              </Trans>
+            )}
+          </GoalTooltipRow>
+        </>
+      );
+    },
+    [budgetedValue, format, getDifferenceToGoal, goalValue, longGoalValue, t],
+  );
+
   return (
     <CellValue binding={balance} type="financial" {...props}>
       {({ type, name, value: balanceValue }) => (
@@ -238,7 +242,7 @@ export function BalanceWithCarryover({
             content={
               <View style={{ padding: 10 }}>
                 {GoalStatusDisplay(balanceValue, type)}
-            </View>
+              </View>
             }
             style={{ ...styles.tooltip, borderRadius: '0px 5px 5px 0px' }}
             placement="bottom"
@@ -270,18 +274,18 @@ export function BalanceWithCarryover({
               style={getBalanceAmountStyle(balanceValue)}
             />
           )}
-            {isMobileEnvelopeModal &&
-              isGoalTemplatesEnabled &&
-              goalValue !== null && (
-                <>
-                  <hr
-                    style={{
-                      width: '50%',
-                    }}
-                  ></hr>
-                  <div>{GoalStatusDisplay(balanceValue, type)}</div>
-                </>
-              )}
+          {isMobileEnvelopeModal &&
+            isGoalTemplatesEnabled &&
+            goalValue !== null && (
+              <>
+                <hr
+                  style={{
+                    width: '50%',
+                  }}
+                />
+                <div>{GoalStatusDisplay(balanceValue, type)}</div>
+              </>
+            )}
         </>
       )}
     </CellValue>
