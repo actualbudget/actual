@@ -5,6 +5,7 @@ import { compileQuery, runCompiledQuery, schema, schemaConfig } from '../aql';
 
 import { Graph } from './graph-data-structure';
 import { unresolveName, resolveName } from './util';
+import { sumAmounts } from '../budget/util';
 
 export type Node = {
   name: string;
@@ -151,11 +152,34 @@ export class Spreadsheet {
         node = this.getNode(name);
 
         if (node._run) {
-          const args = node._dependencies.map(dep => {
-            return this.getNode(dep).value;
-          });
-
-          result = node._run(...args);
+          if (node._run === 'sumAmountsShowing') {
+            //find which values are hidden, and exclude the hidden cells
+            let hiddenCats = [];
+            let args = [];
+            for (let i = node._dependencies.length - 1; i >= 0; i--) {
+              // hidden deps are at the end of the list
+              // TODO figure out why the dependency for hidden includes the month name instead of starting with 'hidden'
+              let dep = node._dependencies[i];
+              let depSliced = dep.slice(dep.indexOf('hidden-'));
+              let value = this.getNode(depSliced).value;
+              if (dep.includes('hidden-') && value === 1) {
+                let index = node._dependencies[i].indexOf('-');
+                hiddenCats.push(node._dependencies[i].slice(index + 1));
+              } else {
+                let index = node._dependencies[i].indexOf(`-`);
+                let catID = node._dependencies[i].slice(index + 1);
+                if (!hiddenCats.includes(catID)) {
+                  args.push(this.getNode(dep).value);
+                }
+              }
+            }
+            result = sumAmounts(...args);
+          } else {
+            let args = node._dependencies.map(dep => {
+              return this.getNode(dep).value;
+            });
+            result = node._run(...args);
+          }
 
           if (result instanceof Promise) {
             console.warn(

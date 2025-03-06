@@ -9,6 +9,7 @@ import { DbPreference } from './db';
 import * as Platform from './platform';
 import { Spreadsheet } from './spreadsheet/spreadsheet';
 import { resolveName } from './spreadsheet/util';
+import { Category } from '@actual-app/web/src/components/mobile/budget/Category';
 
 let globalSheet: Spreadsheet;
 let globalOnChange;
@@ -213,7 +214,7 @@ export async function loadUserBudgets(
 
   sheet.startTransaction();
 
-  // Load all the budget amounts, carryover, hidden
+  // Load all the budget amounts, carryover
   for (const budget of budgets) {
     if (budget.month && budget.category) {
       const sheetName = `budget${budget.month}`;
@@ -225,7 +226,6 @@ export async function loadUserBudgets(
       sheet.set(`${sheetName}!goal-${budget.category}`, budget.goal);
       sheet.set(`${sheetName}!long-goal-${budget.category}`, budget.long_goal);
     }
-    sheet.set(`hidden-${budget.category}`, budget.hidden);
   }
 
   // For zero-based budgets, load the buffered amounts
@@ -238,6 +238,11 @@ export async function loadUserBudgets(
   }
 
   sheet.endTransaction();
+
+  const categories = await db.all(`SELECT * FROM categories`);
+  for (const cat of categories) {
+    sheet.set(`__global!hidden-${cat.id}`, cat.hidden);
+  }
 }
 
 export function getCell(sheet: string, name: string) {

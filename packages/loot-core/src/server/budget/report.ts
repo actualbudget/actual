@@ -65,24 +65,24 @@ export function createCategoryGroup(group, sheetName) {
     initialValue: 0,
     dependencies: group.categories
       .map(cat => `sum-amount-${cat.id}`)
-      .concat(group.categories.map(cat => `hidden-${cat.id}`)),
-    run: sumAmounts,
+      .concat(group.categories.map(cat => `__global!hidden-${cat.id}`)),
+    run: 'sumAmountsShowing',
   });
 
   sheet.get().createDynamic(sheetName, 'group-budget-' + group.id, {
     initialValue: 0,
     dependencies: group.categories
       .map(cat => `budget-${cat.id}`)
-      .concat(group.categories.map(cat => `hidden-${cat.id}`)),
-    run: sumAmounts,
+      .concat(group.categories.map(cat => `__global!hidden-${cat.id}`)),
+    run: 'sumAmountsShowing',
   });
 
   sheet.get().createDynamic(sheetName, 'group-leftover-' + group.id, {
     initialValue: 0,
     dependencies: group.categories
       .map(cat => `leftover-${cat.id}`)
-      .concat(group.categories.map(cat => `hidden-${cat.id}`)),
-    run: sumAmounts,
+      .concat(group.categories.map(cat => `__global!hidden-${cat.id}`)),
+    run: 'sumAmountsShowing',
   });
 }
 
