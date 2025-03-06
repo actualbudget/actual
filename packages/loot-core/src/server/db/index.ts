@@ -331,7 +331,7 @@ export async function getCategoriesGrouped(ids?: Array<DbCategoryGroup['id']>) {
 
   const groups = ids
     ? await all<DbCategoryGroup>(categoryGroupQuery, [...ids])
-    : await all<DbCategory>(categoryGroupQuery);
+    : await all<DbCategoryGroup>(categoryGroupQuery);
 
   const categories = ids
     ? await all<DbCategory>(categoryQuery, [...ids])
