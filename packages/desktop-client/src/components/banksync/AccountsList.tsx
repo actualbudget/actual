@@ -4,6 +4,8 @@ import { View } from '@actual-app/components/view';
 
 import { type AccountEntity } from 'loot-core/src/types/models';
 
+import { useLocale } from '../../hooks/useLocale';
+
 import { AccountRow } from './AccountRow';
 
 type AccountsListProps = {
@@ -19,6 +21,8 @@ export function AccountsList({
   onHover,
   onAction,
 }: AccountsListProps) {
+  const locale = useLocale();
+
   if (accounts.length === 0) {
     return null;
   }
@@ -39,6 +43,7 @@ export function AccountsList({
             hovered={hovered}
             onHover={onHover}
             onAction={onAction}
+            locale={locale}
           />
         );
       })}

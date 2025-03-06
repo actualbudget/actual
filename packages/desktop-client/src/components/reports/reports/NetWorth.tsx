@@ -17,6 +17,7 @@ import { type TimeFrame, type NetWorthWidget } from 'loot-core/types/models';
 
 import { useAccounts } from '../../../hooks/useAccounts';
 import { useFilters } from '../../../hooks/useFilters';
+import { useLocale } from '../../../hooks/useLocale';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { useDispatch } from '../../../redux';
@@ -54,6 +55,7 @@ type NetWorthInnerProps = {
 };
 
 function NetWorthInner({ widget }: NetWorthInnerProps) {
+  const locale = useLocale();
   const dispatch = useDispatch();
   const { t } = useTranslation();
 
@@ -80,8 +82,16 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
   const [mode, setMode] = useState(initialMode);
 
   const reportParams = useMemo(
-    () => netWorthSpreadsheet(start, end, accounts, conditions, conditionsOp),
-    [start, end, accounts, conditions, conditionsOp],
+    () =>
+      netWorthSpreadsheet(
+        start,
+        end,
+        accounts,
+        conditions,
+        conditionsOp,
+        locale,
+      ),
+    [start, end, accounts, conditions, conditionsOp, locale],
   );
   const data = useReport('net_worth', reportParams);
   useEffect(() => {
@@ -104,14 +114,14 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
         .rangeInclusive(earliestMonth, monthUtils.currentMonth())
         .map(month => ({
           name: month,
-          pretty: monthUtils.format(month, 'MMMM, yyyy'),
+          pretty: monthUtils.format(month, 'MMMM, yyyy', locale),
         }))
         .reverse();
 
       setAllMonths(allMonths);
     }
     run();
-  }, []);
+  }, [locale]);
 
   function onChangeDates(start: string, end: string, mode: TimeFrame['mode']) {
     setStart(start);
