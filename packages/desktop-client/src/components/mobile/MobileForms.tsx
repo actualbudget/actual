@@ -79,7 +79,11 @@ type TapFieldProps = ComponentPropsWithRef<typeof Button> & {
   textStyle?: CSSProperties;
 };
 
-const defaultButtonStyle = ({ isDisabled, isPressed, isHovered }) =>
+const defaultButtonStyle: ComponentPropsWithoutRef<typeof Button>['style'] = ({
+  isDisabled,
+  isPressed,
+  isHovered,
+}) =>
   ({
     ...valueStyle,
     flexDirection: 'row',
