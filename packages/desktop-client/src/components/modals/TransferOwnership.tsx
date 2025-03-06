@@ -2,9 +2,11 @@ import { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import { Select } from '@actual-app/components/select';
 import { Stack } from '@actual-app/components/stack';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import { addNotification } from 'loot-core/client/actions';
@@ -21,9 +23,7 @@ import { type Handlers } from 'loot-core/types/handlers';
 
 import { useMetadataPref } from '../../hooks/useMetadataPref';
 import { useDispatch, useSelector } from '../../redux';
-import { theme } from '../../style';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
-import { Select } from '../common/Select';
 import { FormField, FormLabel } from '../forms';
 
 type TransferOwnershipProps = Extract<
