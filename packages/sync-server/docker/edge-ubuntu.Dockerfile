@@ -9,6 +9,8 @@ COPY yarn.lock package.json .yarnrc.yml tsconfig.json ./
 COPY bin/package-browser ./bin/package-browser
 COPY packages/ ./packages/
 
+RUN echo $(ls -1 ./bin/)
+
 # Building @actual-app/web
 RUN yarn install
 RUN yarn build:browser
