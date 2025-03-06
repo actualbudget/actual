@@ -24,8 +24,8 @@ RUN rm ./node_modules/@actual-app/web ./node_modules/@actual-app/sync-server
 COPY ./packages/desktop-client/package.json ./node_modules/@actual-app/web/package.json
 RUN echo $(ls -1 ./packages/desktop-client/)
 
-# RUN cp -r ./packages/desktop-client/build ./node_modules/@actual-app/web/build
-COPY ./packages/desktop-client/build ./node_modules/@actual-app/web/build
+RUN cp -r ./packages/desktop-client/build ./node_modules/@actual-app/web/build
+# COPY ./packages/desktop-client/build ./node_modules/@actual-app/web/build
 
 # RUN mkdir /public
 # COPY artifacts.json /tmp/artifacts.json
