@@ -3,7 +3,14 @@ import { Trans, useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 
 import { Button } from '@actual-app/components/button';
+import { SvgEquals } from '@actual-app/components/icons/v1';
+import {
+  SvgCloseParenthesis,
+  SvgOpenParenthesis,
+  SvgSum,
+} from '@actual-app/components/icons/v2';
 import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { parseISO } from 'date-fns';
 
@@ -21,12 +28,7 @@ import {
 import { useFilters } from '../../../hooks/useFilters';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { useSyncedPref } from '../../../hooks/useSyncedPref';
-import { SvgEquals } from '../../../icons/v1';
-import { SvgCloseParenthesis } from '../../../icons/v2/CloseParenthesis';
-import { SvgOpenParenthesis } from '../../../icons/v2/OpenParenthesis';
-import { SvgSum } from '../../../icons/v2/Sum';
 import { useDispatch } from '../../../redux';
-import { theme } from '../../../style';
 import { EditablePageHeaderTitle } from '../../EditablePageHeaderTitle';
 import { AppliedFilters } from '../../filters/AppliedFilters';
 import { FilterButton } from '../../filters/FiltersMenu';
