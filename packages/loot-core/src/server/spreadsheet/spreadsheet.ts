@@ -158,7 +158,6 @@ export class Spreadsheet {
             let args = [];
             for (let i = node._dependencies.length - 1; i >= 0; i--) {
               // hidden deps are at the end of the list
-              // TODO figure out why the dependency for hidden includes the month name instead of starting with 'hidden'
               let dep = node._dependencies[i];
               if (dep.includes('__global!hidden-')) {
                 let value = this.getNode(dep).value;
@@ -167,8 +166,8 @@ export class Spreadsheet {
                   hiddenCats.push(dep.slice(index + 1));
                 }
               } else {
-                let index = dep.indexOf(`-`);
-                let catID = dep.slice(index + 1);
+                let index = dep.search(/[\w]+-[\w]+-[\w]+-[\w]+-[\w]+$/);
+                let catID = dep.slice(index);
                 if (!hiddenCats.includes(catID)) {
                   args.push(this.getNode(dep).value);
                 }
