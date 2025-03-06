@@ -324,12 +324,12 @@ const ChildTransactionEdit = forwardRef(
           <View style={{ flexBasis: '75%' }}>
             <FieldLabel title={t('Payee')} />
             <TapField
-              disabled={
+              isDisabled={
                 editingField &&
                 editingField !== getFieldName(transaction.id, 'payee')
               }
               value={prettyPayee}
-              onClick={() => onEditField(transaction.id, 'payee')}
+              onPress={() => onEditField(transaction.id, 'payee')}
               data-testid={`payee-field-${transaction.id}`}
             />
           </View>
@@ -380,13 +380,13 @@ const ChildTransactionEdit = forwardRef(
               }),
             }}
             value={getCategory(transaction, isOffBudget)}
-            disabled={
+            isDisabled={
               (editingField &&
                 editingField !== getFieldName(transaction.id, 'category')) ||
               isOffBudget ||
               isBudgetTransfer(transaction)
             }
-            onClick={() => onEditField(transaction.id, 'category')}
+            onPress={() => onEditField(transaction.id, 'category')}
             data-testid={`category-field-${transaction.id}`}
           />
         </View>
@@ -853,11 +853,11 @@ const TransactionEditInner = memo(function TransactionEditInner({
               }),
             }}
             value={title}
-            disabled={
+            isDisabled={
               editingField &&
               editingField !== getFieldName(transaction.id, 'payee')
             }
-            onClick={() => onEditFieldInner(transaction.id, 'payee')}
+            onPress={() => onEditFieldInner(transaction.id, 'payee')}
             data-testid="payee-field"
           />
         </View>
@@ -874,13 +874,13 @@ const TransactionEditInner = memo(function TransactionEditInner({
                 }),
               }}
               value={getCategory(transaction, isOffBudget)}
-              disabled={
+              isDisabled={
                 (editingField &&
                   editingField !== getFieldName(transaction.id, 'category')) ||
                 isOffBudget ||
                 isBudgetTransfer(transaction)
               }
-              onClick={() => onEditFieldInner(transaction.id, 'category')}
+              onPress={() => onEditFieldInner(transaction.id, 'category')}
               data-testid="category-field"
             />
           </View>
@@ -945,12 +945,12 @@ const TransactionEditInner = memo(function TransactionEditInner({
         <View>
           <FieldLabel title={t('Account')} />
           <TapField
-            disabled={
+            isDisabled={
               editingField &&
               editingField !== getFieldName(transaction.id, 'account')
             }
             value={account?.name}
-            onClick={() => onEditFieldInner(transaction.id, 'account')}
+            onPress={() => onEditFieldInner(transaction.id, 'account')}
             data-testid="account-field"
           />
         </View>
