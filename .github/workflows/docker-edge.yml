@@ -86,5 +86,8 @@ jobs:
           file: packages/sync-server/docker/edge-${{ matrix.os }}.Dockerfile
           platforms: linux/amd64,linux/arm64,linux/arm/v7${{ matrix.os == 'alpine' && ',linux/arm/v6' || '' }}
           tags: ${{ steps.meta.outputs.tags }}
+          no-cache-filters: build
+          cache-from: type=gha,scope=nocachefilter
+          cache-to: type=gha,scope=nocachefilter,mode=max
           build-args: |
             GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
