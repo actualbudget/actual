@@ -203,7 +203,7 @@ function handleCategoryChange(months, oldValue, newValue) {
 
       addDeps(sheetName, groupId, id);
     });
-  } else if (oldValue && oldValue.hidden != newValue.hidden) {
+  } else if (oldValue && oldValue.hidden !== newValue.hidden) {
     sheet.get().set(`__global!hidden-${newValue.id}`, newValue.hidden);
   } else if (oldValue && oldValue.cat_group !== newValue.cat_group) {
     // The category moved so we need to update the dependencies

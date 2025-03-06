@@ -2,10 +2,10 @@
 import mitt from 'mitt';
 
 import { compileQuery, runCompiledQuery, schema, schemaConfig } from '../aql';
+import { sumAmounts } from '../budget/util';
 
 import { Graph } from './graph-data-structure';
 import { unresolveName, resolveName } from './util';
-import { sumAmounts } from '../budget/util';
 
 export type Node = {
   name: string;
@@ -154,20 +154,20 @@ export class Spreadsheet {
         if (node._run) {
           if (node._run === 'sumAmountsShowing') {
             //find which values are hidden, and exclude the hidden cells
-            let hiddenCats = [];
-            let args = [];
+            const hiddenCats = [];
+            const args = [];
             for (let i = node._dependencies.length - 1; i >= 0; i--) {
               // hidden deps are at the end of the list
-              let dep = node._dependencies[i];
+              const dep = node._dependencies[i];
               if (dep.includes('__global!hidden-')) {
-                let value = this.getNode(dep).value;
+                const value = this.getNode(dep).value;
                 if (value === 1) {
-                  let index = node._dependencies[i].indexOf('-');
+                  const index = node._dependencies[i].indexOf('-');
                   hiddenCats.push(dep.slice(index + 1));
                 }
               } else {
-                let index = dep.search(/[\w]+-[\w]+-[\w]+-[\w]+-[\w]+$/);
-                let catID = dep.slice(index);
+                const index = dep.search(/[\w]+-[\w]+-[\w]+-[\w]+-[\w]+$/);
+                const catID = dep.slice(index);
                 if (!hiddenCats.includes(catID)) {
                   args.push(this.getNode(dep).value);
                 }
@@ -175,7 +175,7 @@ export class Spreadsheet {
             }
             result = sumAmounts(...args);
           } else {
-            let args = node._dependencies.map(dep => {
+            const args = node._dependencies.map(dep => {
               return this.getNode(dep).value;
             });
             result = node._run(...args);

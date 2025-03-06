@@ -9,7 +9,6 @@ import { DbPreference } from './db';
 import * as Platform from './platform';
 import { Spreadsheet } from './spreadsheet/spreadsheet';
 import { resolveName } from './spreadsheet/util';
-import { Category } from '@actual-app/web/src/components/mobile/budget/Category';
 
 let globalSheet: Spreadsheet;
 let globalOnChange;
