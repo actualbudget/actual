@@ -11,8 +11,8 @@ import { setAppState } from '../app/appSlice';
 import { closeModal, pushModal } from '../modals/modalsSlice';
 import { loadGlobalPrefs, loadPrefs } from '../prefs/prefsSlice';
 import { createAppAsyncThunk } from '../redux';
-import { signOut } from '../users/usersSlice';
 import { CLOSE_BUDGET } from '../store';
+import { signOut } from '../users/usersSlice';
 
 const sliceName = 'budgets';
 
