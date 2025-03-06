@@ -6,6 +6,7 @@ WORKDIR /app
 COPY .yarn ./.yarn
 COPY yarn.lock package.json .yarnrc.yml ./
 COPY packages/desktop-client packages/desktop-client
+COPY packages/sync-server packages/sync-server
 
 RUN if [ "$(uname -m)" = "armv7l" ]; then yarn config set taskPoolConcurrency 2; yarn config set networkConcurrency 5; fi
 
