@@ -10,8 +10,9 @@ COPY yarn.lock package.json .yarnrc.yml ./
 COPY packages ./packages
 
 # Installing dependencies in production mode (including the @actual-app/web in the workspace)
-RUN yarn workspaces focus @actual-app/sync-server --production
-RUN if [ "$(uname -m)" = "armv7l" ]; then cd packages/sync-server && npm_config_build_from_source=true yarn add bcrypt better-sqlite3; fi
+# RUN if [ "$(uname -m)" = "armv7l" ]; then npm_config_build_from_source=true yarn add bcrypt better-sqlite3; fi
+# RUN yarn workspaces focus @actual-app/sync-server --production
+RUN if [ "$(uname -m)" = "armv7l" ]; then npm_config_build_from_source=true yarn workspaces focus @actual-app/sync-server --production; else yarn workspaces focus @actual-app/sync-server --production; fi
 
 # Yarn uses symbolic links to reference workspace packages, remove link to @actual-app/web and copy it manually so we don't need the /packages dir
 RUN rm ./node_modules/@actual-app/web ./node_modules/@actual-app/sync-server
