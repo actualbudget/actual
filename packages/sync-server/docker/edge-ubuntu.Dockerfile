@@ -11,8 +11,8 @@ COPY packages/ ./packages/
 
 # Building @actual-app/web
 RUN yarn install
-# RUN yarn build:browser
-RUN ./bin/package-browser
+RUN yarn build:browser
+# RUN ./bin/package-browser
 
 RUN if [ "$(uname -m)" = "armv7l" ]; then yarn config set taskPoolConcurrency 2; yarn config set networkConcurrency 5; fi
 
