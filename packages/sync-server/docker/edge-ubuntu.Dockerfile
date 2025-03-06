@@ -2,20 +2,14 @@ FROM node:18-bookworm AS base
 RUN apt-get update && apt-get install -y openssl
 WORKDIR /app
 
-# Copying workspace so @actual-app/web can be built
+# Copying workspace so @actual-app/web can be installed
 COPY .yarn ./.yarn
 COPY yarn.lock package.json .yarnrc.yml ./
-# COPY yarn.lock package.json .yarnrc.yml tsconfig.json ./
-# COPY bin/package-browser ./bin/package-browser
-COPY packages/ ./packages/
-
-# Building @actual-app/web
-# RUN yarn install
-# RUN yarn build:browser
+COPY packages/desktop-client packages/desktop-client
 
 RUN if [ "$(uname -m)" = "armv7l" ]; then yarn config set taskPoolConcurrency 2; yarn config set networkConcurrency 5; fi
 
-# Installing dependencies in production mode (including the @actual-app/web built above)
+# Installing dependencies in production mode (including the @actual-app/web in the workspace)
 RUN yarn workspaces focus @actual-app/sync-server --production
 
 # Yarn uses symbolic links to reference workspace packages, remove link to @actual-app/web and copy it manually so we don't need the /packages dir

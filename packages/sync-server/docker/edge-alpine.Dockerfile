@@ -1,21 +1,15 @@
 FROM alpine:3.18 AS base
-RUN apk add --no-cache nodejs yarn npm python3 openssl build-base bash git
+RUN apk add --no-cache nodejs yarn npm python3 openssl build-base
 WORKDIR /app
+
+RUN if [ "$(uname -m)" = "armv7l" ]; then yarn config set taskPoolConcurrency 2; yarn config set networkConcurrency 5; fi
 
 # Copying workspace so @actual-app/web can be built
 COPY .yarn ./.yarn
 COPY yarn.lock package.json .yarnrc.yml ./
-# COPY yarn.lock package.json .yarnrc.yml tsconfig.json ./
-# COPY bin/package-browser ./bin/package-browser
-COPY packages/ ./packages/
+COPY packages/desktop-client packages/desktop-client
 
-# Building @actual-app/web
-# RUN yarn install
-# RUN yarn build:browser
-
-RUN if [ "$(uname -m)" = "armv7l" ]; then yarn config set taskPoolConcurrency 2; yarn config set networkConcurrency 5; fi
-
-# Installing dependencies in production mode (including the @actual-app/web built above)
+# Installing dependencies in production mode (including the @actual-app/web in the workspace)
 RUN yarn workspaces focus @actual-app/sync-server --production
 
 # Yarn uses symbolic links to reference workspace packages, remove link to @actual-app/web and copy it manually so we don't need the /packages dir
@@ -23,7 +17,6 @@ RUN rm ./node_modules/@actual-app/web ./node_modules/@actual-app/sync-server
 COPY packages/desktop-client/package.json ./node_modules/@actual-app/web/package.json
 # COPY doesnt work, so we use cp. It's because the COPY command is trying to use cache
 RUN cp -r packages/desktop-client/build ./node_modules/@actual-app/web/build
-
 
 RUN if [ "$(uname -m)" = "armv7l" ]; then npm install bcrypt better-sqlite3 --build-from-source; fi
 
