@@ -7,8 +7,7 @@ RUN if [ "$(uname -m)" = "armv7l" ]; then yarn config set taskPoolConcurrency 2;
 # Copying workspace so @actual-app/web can be installed
 COPY .yarn ./.yarn
 COPY yarn.lock package.json .yarnrc.yml ./
-COPY packages/desktop-client packages/desktop-client
-COPY packages/sync-server packages/sync-server
+COPY packages ./packages
 
 # Installing dependencies in production mode (including the @actual-app/web built above)
 RUN yarn workspaces focus @actual-app/sync-server --production

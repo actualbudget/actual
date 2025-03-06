@@ -5,8 +5,7 @@ WORKDIR /app
 # Copying workspace so @actual-app/web can be installed
 COPY .yarn ./.yarn
 COPY yarn.lock package.json .yarnrc.yml ./
-COPY packages/desktop-client packages/desktop-client
-COPY packages/sync-server packages/sync-server
+COPY packages ./packages/
 
 RUN if [ "$(uname -m)" = "armv7l" ]; then yarn config set taskPoolConcurrency 2; yarn config set networkConcurrency 5; fi
 
