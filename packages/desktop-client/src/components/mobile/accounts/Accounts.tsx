@@ -141,76 +141,79 @@ function AccountListItem({
 
   return (
     <ListBoxItem textValue={account.name} {...props}>
-      <Button
-        onPress={() => onSelect(account)}
-        style={{
-          width: '100%',
-          border: `1px solid ${theme.pillBorder}`,
-          borderRadius: 6,
-          boxShadow: `0 1px 1px ${theme.mobileAccountShadow}`,
-          marginTop: 10,
-        }}
-        data-testid="account-list-item"
-      >
-        <View
+      {itemProps => (
+        <Button
+          {...itemProps}
           style={{
-            flex: 1,
-            margin: '10px 0',
+            width: '100%',
+            border: `1px solid ${theme.pillBorder}`,
+            borderRadius: 6,
+            boxShadow: `0 1px 1px ${theme.mobileAccountShadow}`,
+            marginTop: 10,
           }}
+          data-testid="account-list-item"
+          onPress={() => onSelect(account)}
         >
           <View
             style={{
-              flexDirection: 'row',
-              alignItems: 'center',
+              flex: 1,
+              margin: '10px 0',
             }}
           >
-            {
-              /* TODO: Should bankId be part of the AccountEntity type? */
-              'bankId' in account && account.bankId ? (
-                <View
-                  style={{
-                    backgroundColor: isPending
-                      ? theme.sidebarItemBackgroundPending
-                      : isFailed
-                        ? theme.sidebarItemBackgroundFailed
-                        : theme.sidebarItemBackgroundPositive,
-                    marginRight: '8px',
-                    width: 8,
-                    flexShrink: 0,
-                    height: 8,
-                    borderRadius: 8,
-                    opacity: isConnected ? 1 : 0,
-                  }}
-                />
-              ) : null
-            }
-            <TextOneLine
+            <View
               style={{
-                ...styles.text,
-                fontSize: 17,
-                fontWeight: 600,
-                color: isUpdated ? theme.mobileAccountText : theme.pillText,
-                paddingRight: 30,
+                flexDirection: 'row',
+                alignItems: 'center',
               }}
-              data-testid="account-name"
             >
-              {account.name}
-            </TextOneLine>
+              {
+                /* TODO: Should bankId be part of the AccountEntity type? */
+                'bankId' in account && account.bankId ? (
+                  <View
+                    style={{
+                      backgroundColor: isPending
+                        ? theme.sidebarItemBackgroundPending
+                        : isFailed
+                          ? theme.sidebarItemBackgroundFailed
+                          : theme.sidebarItemBackgroundPositive,
+                      marginRight: '8px',
+                      width: 8,
+                      flexShrink: 0,
+                      height: 8,
+                      borderRadius: 8,
+                      opacity: isConnected ? 1 : 0,
+                    }}
+                  />
+                ) : null
+              }
+              <TextOneLine
+                style={{
+                  ...styles.text,
+                  fontSize: 17,
+                  fontWeight: 600,
+                  color: isUpdated ? theme.mobileAccountText : theme.pillText,
+                  paddingRight: 30,
+                }}
+                data-testid="account-name"
+              >
+                {account.name}
+              </TextOneLine>
+            </View>
           </View>
-        </View>
-        <CellValue binding={getBalanceQuery(account)} type="financial">
-          {props => (
-            <CellValueText<'account', 'balance'>
-              {...props}
-              style={{
-                fontSize: 16,
-                ...makeAmountFullStyle(props.value),
-              }}
-              data-testid="account-balance"
-            />
-          )}
-        </CellValue>
-      </Button>
+          <CellValue binding={getBalanceQuery(account)} type="financial">
+            {props => (
+              <CellValueText<'account', 'balance'>
+                {...props}
+                style={{
+                  fontSize: 16,
+                  ...makeAmountFullStyle(props.value),
+                }}
+                data-testid="account-balance"
+              />
+            )}
+          </CellValue>
+        </Button>
+      )}
     </ListBoxItem>
   );
 }
@@ -333,7 +336,7 @@ function AccountList({
       [...keys].map(
         key =>
           ({
-            'text/plain': accounts.find(account => account.id === key)?.id,
+            'text/plain': key as AccountEntity['id'],
           }) as DragItem,
       ),
     renderDropIndicator: target => {
@@ -398,6 +401,7 @@ function AccountList({
       {account => (
         <AccountListItem
           key={account.id}
+          id={account.id}
           value={account}
           isUpdated={updatedAccounts && updatedAccounts.includes(account.id)}
           isConnected={!!account.bank}
