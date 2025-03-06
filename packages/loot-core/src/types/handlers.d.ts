@@ -1,3 +1,4 @@
+import { BudgetFileHandlers } from 'loot-core/server/budgetfiles/app';
 import type { AccountHandlers } from '../server/accounts/app';
 import type { AdminHandlers } from '../server/admin/types/handlers';
 import type { BudgetHandlers } from '../server/budget/types/handlers';
@@ -30,6 +31,7 @@ export interface Handlers
     AdminHandlers,
     ToolsHandlers,
     AccountHandlers,
-    PayeesHandlers {}
+    PayeesHandlers,
+    BudgetFileHandlers {}
 
 export type HandlerFunctions = Handlers[keyof Handlers];
