@@ -308,7 +308,6 @@ function SingleAutocomplete<T extends Item>({
         if (clearOnSelect) {
           setValue('');
         } else {
-          console.log('onSelect close');
           close();
         }
 
@@ -463,9 +462,6 @@ function SingleAutocomplete<T extends Item>({
                   }
                 },
                 onBlur: e => {
-                  console.log('onBlur', e);
-                  console.log('closeOnBlur', closeOnBlur);
-                  console.log('clearOnBlur', clearOnBlur);
                   // Should this be e.nativeEvent
                   e['preventDownshiftDefault'] = true;
                   inputProps.onBlur?.(e);
