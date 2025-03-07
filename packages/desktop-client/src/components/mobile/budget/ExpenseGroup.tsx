@@ -81,7 +81,7 @@ export function ExpenseGroup({
         month={month}
         onEditCategory={onEditCategory}
         onBudgetAction={onBudgetAction}
-        shouldHideCategory={category => !!category.hidden || group.hidden}
+        shouldHideCategory={category => !!(category.hidden || group.hidden)}
         show3Columns={show3Columns}
         showBudgetedColumn={showBudgetedColumn}
       />
