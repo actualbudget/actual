@@ -1,6 +1,6 @@
 FROM node:18-bookworm AS deps
 
-# Install packages required at build time
+# Install required packages
 RUN apt-get update && apt-get install -y openssl
 
 WORKDIR /app
@@ -20,7 +20,7 @@ COPY packages/sync-server/package.json packages/sync-server/package.json
 # Avoiding memory issues with ARMv7
 RUN if [ "$(uname -m)" = "armv7l" ]; then yarn config set taskPoolConcurrency 2; yarn config set networkConcurrency 5; fi
 
-# Focus the workspaces in production mode (including @actual-app/web you just built)
+# Focus the workspaces in production mode
 RUN yarn workspaces focus @actual-app/sync-server --production
 
 FROM deps AS builder

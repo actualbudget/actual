@@ -1,6 +1,6 @@
 FROM node:18-bookworm as deps
 
-# Install packages required at build time
+# Install required packages
 RUN apt-get update && apt-get install -y openssl
 
 WORKDIR /app

@@ -1,6 +1,6 @@
 FROM alpine:3.18 AS deps
 
-# Install packages required at build time
+# Install required packages
 RUN apk add --no-cache nodejs yarn python3 openssl build-base
 
 WORKDIR /app
@@ -20,7 +20,7 @@ COPY packages/sync-server/package.json packages/sync-server/package.json
 # Avoiding memory issues with ARMv7
 RUN if [ "$(uname -m)" = "armv7l" ]; then yarn config set taskPoolConcurrency 2; yarn config set networkConcurrency 5; fi
 
-# Focus the workspaces in production mode (including @actual-app/web you just built)
+# Focus the workspaces in production mode
 RUN if [ "$(uname -m)" = "armv7l" ]; then npm_config_build_from_source=true yarn workspaces focus @actual-app/sync-server --production; else yarn workspaces focus @actual-app/sync-server --production; fi
 
 FROM deps AS builder
