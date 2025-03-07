@@ -10,11 +10,14 @@ import {
 import { useTranslation, Trans } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import { SvgAdd, SvgSubtract } from '@actual-app/components/icons/v0';
 import { InitialFocus } from '@actual-app/components/initial-focus';
 import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
+import { Select } from '@actual-app/components/select';
 import { Stack } from '@actual-app/components/stack';
 import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import { sendCatch } from 'loot-core/platform/client/fetch';
@@ -28,10 +31,7 @@ import {
 
 import { useDateFormat } from '../../hooks/useDateFormat';
 import { useLocale } from '../../hooks/useLocale';
-import { SvgAdd, SvgSubtract } from '../../icons/v0';
-import { theme } from '../../style';
 import { Input } from '../common/Input';
-import { Select } from '../common/Select';
 import { Checkbox } from '../forms';
 
 import { DateSelect } from './DateSelect';

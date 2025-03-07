@@ -32,6 +32,7 @@
     "./menu": "./src/Menu.tsx",
     "./paragraph": "./src/Paragraph.tsx",
     "./popover": "./src/Popover.tsx",
+    "./select": "./src/Select.tsx",
     "./space-between": "./src/SpaceBetween.tsx",
     "./stack": "./src/Stack.tsx",
     "./styles": "./src/styles.ts",

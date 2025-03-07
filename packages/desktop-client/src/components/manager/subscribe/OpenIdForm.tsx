@@ -4,9 +4,11 @@ import { useLocation, type Location } from 'react-router-dom';
 
 import { ButtonWithLoading } from '@actual-app/components/button';
 import { Menu } from '@actual-app/components/menu';
+import { Select } from '@actual-app/components/select';
 import { Stack } from '@actual-app/components/stack';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
@@ -15,10 +17,8 @@ import { type Handlers } from 'loot-core/types/handlers';
 import { type OpenIdConfig } from 'loot-core/types/models/openid';
 
 import { useDispatch } from '../../../redux';
-import { theme } from '../../../style';
 import { Input } from '../../common/Input';
 import { Link } from '../../common/Link';
-import { Select } from '../../common/Select';
 import { FormField, FormLabel } from '../../forms';
 import { useServerURL } from '../../ServerContext';
 
