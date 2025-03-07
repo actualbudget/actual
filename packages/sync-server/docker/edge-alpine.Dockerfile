@@ -1,23 +1,47 @@
-FROM alpine:3.18 AS base
-RUN apk add --no-cache nodejs yarn npm python3 openssl build-base jq curl
+FROM alpine:3.18 AS deps
+
+# Install required packages
+RUN apk add --no-cache nodejs yarn python3 openssl build-base
+
 WORKDIR /app
+
+# Copy only the files needed for installing dependencies
 COPY .yarn ./.yarn
-COPY yarn.lock packages/sync-server/package.json .yarnrc.yml ./
+COPY yarn.lock package.json .yarnrc.yml ./
+COPY packages/api/package.json packages/api/package.json
+COPY packages/component-library/package.json packages/component-library/package.json
+COPY packages/crdt/package.json packages/crdt/package.json
+COPY packages/desktop-client/package.json packages/desktop-client/package.json
+COPY packages/desktop-electron/package.json packages/desktop-electron/package.json
+COPY packages/eslint-plugin-actual/package.json packages/eslint-plugin-actual/package.json
+COPY packages/loot-core/package.json packages/loot-core/package.json
+COPY packages/sync-server/package.json packages/sync-server/package.json
+
+# Avoiding memory issues with ARMv7
 RUN if [ "$(uname -m)" = "armv7l" ]; then yarn config set taskPoolConcurrency 2; yarn config set networkConcurrency 5; fi
-RUN yarn workspaces focus @actual-app/sync-server --production
-RUN if [ "$(uname -m)" = "armv7l" ]; then npm install bcrypt better-sqlite3 --build-from-source; fi
 
-RUN mkdir /public
-COPY artifacts.json /tmp/artifacts.json
-RUN jq -r '[.artifacts[] | select(.workflow_run.head_branch == "master" and .workflow_run.head_repository_id == .workflow_run.repository_id)][0]' /tmp/artifacts.json > /tmp/latest-build.json
+# Focus the workspaces in production mode
+RUN if [ "$(uname -m)" = "armv7l" ]; then npm_config_build_from_source=true yarn workspaces focus @actual-app/sync-server --production; else yarn workspaces focus @actual-app/sync-server --production; fi
 
-ARG GITHUB_TOKEN
-RUN curl -L -o /tmp/desktop-client.zip --header "Authorization: Bearer ${GITHUB_TOKEN}" $(jq -r '.archive_download_url' /tmp/latest-build.json)
-RUN unzip /tmp/desktop-client.zip -d /public
+FROM deps AS builder
+
+WORKDIR /app
+
+COPY packages/sync-server ./packages/sync-server
+
+# Remove symbolic links for @actual-app/web and @actual-app/sync-server
+RUN rm -rf ./node_modules/@actual-app/web ./node_modules/@actual-app/sync-server
+
+# Copy in the @actual-app/web artifacts manually, so we don't need the entire packages folder
+COPY packages/desktop-client/package.json ./node_modules/@actual-app/web/package.json
+COPY packages/desktop-client/build ./node_modules/@actual-app/web/build
 
 FROM alpine:3.18 AS prod
+
+# Minimal runtime dependencies
 RUN apk add --no-cache nodejs tini
 
+# Create a non-root user
 ARG USERNAME=actual
 ARG USER_UID=1001
 ARG USER_GID=$USER_UID
@@ -25,13 +49,14 @@ RUN addgroup -S ${USERNAME} -g ${USER_GID} && adduser -S ${USERNAME} -G ${USERNA
 RUN mkdir /data && chown -R ${USERNAME}:${USERNAME} /data
 
 WORKDIR /app
-ENV NODE_ENV production
-COPY --from=base /app/node_modules /app/node_modules
-COPY --from=base /public /public
-COPY /packages/sync-server/package.json /packages/sync-server/app.js ./
-COPY /packages/sync-server/src ./src
-COPY /packages/sync-server/migrations ./migrations
+ENV NODE_ENV=production
+
+# Pull in only the necessary artifacts (built node_modules, server files, etc.)
+COPY --from=builder /app/node_modules /app/node_modules
+COPY --from=builder /app/packages/sync-server/package.json /app/packages/sync-server/app.js ./
+COPY --from=builder /app/packages/sync-server/src ./src
+COPY --from=builder /app/packages/sync-server/migrations ./migrations
+
 ENTRYPOINT ["/sbin/tini","-g",  "--"]
-ENV ACTUAL_WEB_ROOT=/public
 EXPOSE 5006
 CMD ["node", "app.js"]

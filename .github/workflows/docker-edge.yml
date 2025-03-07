@@ -73,10 +73,12 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Download artifacts
-        run: ./packages/sync-server/docker/download-artifacts.sh
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # Building outside of the docker image allows us to build once and push to multiple platforms
+      # This is faster and avoids yarn memory issues
+      - name: Set up environment
+        uses: ./.github/actions/setup
+      - name: Build Web
+        run: ./bin/package-browser
 
       - name: Build and push image
         uses: docker/build-push-action@v5
