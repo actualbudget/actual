@@ -7,8 +7,10 @@ import { styles } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
+import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
 import * as monthUtils from 'loot-core/shared/months';
 
+import { useLocale } from '../../hooks/useLocale';
 import { useNotes } from '../../hooks/useNotes';
 import { useUndo } from '../../hooks/useUndo';
 import { SvgCheveronDown, SvgCheveronUp } from '../../icons/v1';
@@ -18,17 +20,17 @@ import { BudgetMonthMenu } from '../budget/envelope/budgetsummary/BudgetMonthMen
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { Notes } from '../Notes';
 
-type EnvelopeBudgetMonthMenuModalProps = {
-  month: string;
-  onBudgetAction: (month: string, action: string, arg?: unknown) => void;
-  onEditNotes: (month: string) => void;
-};
+type EnvelopeBudgetMonthMenuModalProps = Extract<
+  ModalType,
+  { name: 'envelope-budget-month-menu' }
+>['options'];
 
 export function EnvelopeBudgetMonthMenuModal({
   month,
   onBudgetAction,
   onEditNotes,
 }: EnvelopeBudgetMonthMenuModalProps) {
+  const locale = useLocale();
   const originalNotes = useNotes(`budget-${month}`);
   const { showUndoNotification } = useUndo();
 
@@ -57,7 +59,7 @@ export function EnvelopeBudgetMonthMenuModal({
     setShowMore(!showMore);
   };
 
-  const displayMonth = monthUtils.format(month, 'MMMM ‘yy');
+  const displayMonth = monthUtils.format(month, 'MMMM ‘yy', locale);
   const { t } = useTranslation();
 
   return (

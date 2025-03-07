@@ -83,7 +83,7 @@ module.exports = {
           compress: {
             drop_debugger: false,
           },
-          mangle: true,
+          mangle: false,
         },
       }),
     ],

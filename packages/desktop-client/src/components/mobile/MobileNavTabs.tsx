@@ -9,21 +9,21 @@ import { useTranslation } from 'react-i18next';
 import { NavLink } from 'react-router-dom';
 import { useSpring, animated, config } from 'react-spring';
 
-import { styles } from '@actual-app/components/styles';
-import { View } from '@actual-app/components/view';
-import { useDrag } from '@use-gesture/react';
-
 import {
   SvgAdd,
   SvgCog,
   SvgPiggyBank,
+  SvgReports,
   SvgStoreFront,
   SvgTuning,
   SvgWallet,
-} from '../../icons/v1';
-import { SvgReports } from '../../icons/v1/Reports';
-import { SvgCalendar3 } from '../../icons/v2';
-import { theme } from '../../style';
+} from '@actual-app/components/icons/v1';
+import { SvgCalendar3 } from '@actual-app/components/icons/v2';
+import { styles } from '@actual-app/components/styles';
+import { theme } from '@actual-app/components/theme';
+import { View } from '@actual-app/components/view';
+import { useDrag } from '@use-gesture/react';
+
 import { useResponsive } from '../responsive/ResponsiveProvider';
 import { useScrollListener } from '../ScrollProvider';
 

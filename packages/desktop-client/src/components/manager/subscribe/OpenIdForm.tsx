@@ -134,7 +134,7 @@ export function OpenIdForm({
     setLoading(true);
     await onSetOpenId({
       selectedProvider: providerName,
-      issuer: issuer ?? '',
+      discoveryURL: issuer ?? '',
       client_id: clientId ?? '',
       client_secret: clientSecret ?? '',
       server_hostname: serverUrl ?? '',

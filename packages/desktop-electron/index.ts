@@ -554,14 +554,39 @@ ipcMain.handle(
 
       await copy(currentBudgetDirectory, newDirectory, {
         overwrite: true,
+        preserveTimestamps: true,
       });
-      await remove(currentBudgetDirectory);
     } catch (error) {
       logMessage(
         'error',
         `There was an error moving your directory:  ${error}`,
       );
       throw error;
+    }
+
+    try {
+      await promiseRetry(
+        async retry => {
+          try {
+            return await remove(currentBudgetDirectory);
+          } catch (error) {
+            logMessage(
+              'info',
+              `Retrying: Clean up old directory: ${currentBudgetDirectory}`,
+            );
+
+            retry(error);
+          }
+        },
+        { minTimeout: 200, maxTimeout: 500, factor: 1.25 },
+      );
+    } catch (error) {
+      // Fail silently. The move worked, but the old directory wasn't cleaned up - most likely a permission issue.
+      // This call needs to succeed to allow the user to continue using the app with the files in the new location.
+      logMessage(
+        'error',
+        `There was an error removing the old directory: ${error}`,
+      );
     }
   },
 );

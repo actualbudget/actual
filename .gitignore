@@ -53,3 +53,6 @@ bundle.mobile.js.map
 
 # build output
 package.tgz
+
+# Fly.io configuration
+fly.toml

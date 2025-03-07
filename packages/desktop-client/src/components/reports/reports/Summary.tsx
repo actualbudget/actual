@@ -3,7 +3,14 @@ import { Trans, useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 
 import { Button } from '@actual-app/components/button';
+import { SvgEquals } from '@actual-app/components/icons/v1';
+import {
+  SvgCloseParenthesis,
+  SvgOpenParenthesis,
+  SvgSum,
+} from '@actual-app/components/icons/v2';
 import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { parseISO } from 'date-fns';
 
@@ -19,14 +26,10 @@ import {
 } from 'loot-core/types/models';
 
 import { useFilters } from '../../../hooks/useFilters';
+import { useLocale } from '../../../hooks/useLocale';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { useSyncedPref } from '../../../hooks/useSyncedPref';
-import { SvgEquals } from '../../../icons/v1';
-import { SvgCloseParenthesis } from '../../../icons/v2/CloseParenthesis';
-import { SvgOpenParenthesis } from '../../../icons/v2/OpenParenthesis';
-import { SvgSum } from '../../../icons/v2/Sum';
 import { useDispatch } from '../../../redux';
-import { theme } from '../../../style';
 import { EditablePageHeaderTitle } from '../../EditablePageHeaderTitle';
 import { AppliedFilters } from '../../filters/AppliedFilters';
 import { FilterButton } from '../../filters/FiltersMenu';
@@ -65,6 +68,7 @@ type SummaryInnerProps = {
 type FilterObject = ReturnType<typeof useFilters>;
 
 function SummaryInner({ widget }: SummaryInnerProps) {
+  const locale = useLocale();
   const { t } = useTranslation();
   const [initialStart, initialEnd, initialMode] = calculateTimeRange(
     widget?.meta?.timeFrame,
@@ -121,6 +125,7 @@ function SummaryInner({ widget }: SummaryInnerProps) {
         dividendFilters.conditions,
         dividendFilters.conditionsOp,
         content,
+        locale,
       ),
     [
       start,
@@ -128,6 +133,7 @@ function SummaryInner({ widget }: SummaryInnerProps) {
       dividendFilters.conditions,
       dividendFilters.conditionsOp,
       content,
+      locale,
     ],
   );
 
@@ -172,14 +178,14 @@ function SummaryInner({ widget }: SummaryInnerProps) {
         .rangeInclusive(earliestMonth, monthUtils.currentMonth())
         .map(month => ({
           name: month,
-          pretty: monthUtils.format(month, 'MMMM, yyyy'),
+          pretty: monthUtils.format(month, 'MMMM, yyyy', locale),
         }))
         .reverse();
 
       setAllMonths(allMonths);
     }
     run();
-  }, []);
+  }, [locale]);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();

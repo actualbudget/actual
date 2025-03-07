@@ -198,7 +198,8 @@ export function ReportSidebar({
   return (
     <View
       style={{
-        width: 225,
+        minWidth: 225,
+        maxWidth: 250,
         paddingTop: 10,
         paddingRight: 10,
         flexShrink: 0,

@@ -1,4 +1,6 @@
 // @ts-strict-ignore
+import { formatDistanceToNow } from 'date-fns';
+
 export function last<T>(arr: Array<T>) {
   return arr[arr.length - 1];
 }
@@ -45,7 +47,7 @@ export function hasFieldsChanged<T extends object>(
 export type Diff<T extends { id: string }> = {
   added: T[];
   updated: Partial<T>[];
-  deleted: Partial<T>[];
+  deleted: Pick<T, 'id'>[];
 };
 
 export function applyChanges<T extends { id: string }>(
@@ -129,9 +131,9 @@ export function diffItems<T extends { id: string }>(
   const added: T[] = [];
   const updated: Partial<T>[] = [];
 
-  const deleted: Partial<T>[] = items
+  const deleted: Pick<T, 'id'>[] = items
     .filter(item => !newGrouped.has(item.id))
-    .map(item => ({ id: item.id }) as Partial<T>);
+    .map(item => ({ id: item.id }));
 
   newItems.forEach(newItem => {
     const item = grouped.get(newItem.id);
@@ -396,7 +398,7 @@ export function currencyToAmount(currencyAmount: string): Amount | null {
   if (
     !match ||
     (match[0] === getNumberFormat().thousandsSeparator &&
-      match.index + 4 === currencyAmount.length)
+      match.index + 4 <= currencyAmount.length)
   ) {
     fraction = null;
     integer = currencyAmount.replace(/[^\d-]/g, '');
@@ -480,4 +482,26 @@ export function sortByKey<T>(arr: T[], key: keyof T): T[] {
     }
     return 0;
   });
+}
+
+// Date utilities
+
+export function tsToRelativeTime(
+  ts: string | null,
+  locale: Locale,
+  options: {
+    capitalize: boolean;
+  } = { capitalize: false },
+): string {
+  if (!ts) return 'Unknown';
+
+  const parsed = new Date(parseInt(ts, 10));
+
+  let distance = formatDistanceToNow(parsed, { addSuffix: true, locale });
+
+  if (options.capitalize) {
+    distance = distance.charAt(0).toUpperCase() + distance.slice(1);
+  }
+
+  return distance;
 }

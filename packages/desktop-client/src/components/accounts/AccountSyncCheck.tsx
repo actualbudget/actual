@@ -46,6 +46,9 @@ function useErrorMessage() {
       case 'RATE_LIMIT_EXCEEDED':
         return t('Rate limit exceeded for this item. Please try again later.');
 
+      case 'TIMED_OUT':
+        return t('The request timed out. Please try again later.');
+
       case 'INVALID_ACCESS_TOKEN':
         return t(
           'Your SimpleFIN Access Token is no longer valid. Please reset and generate a new token.',

@@ -1,5 +1,6 @@
-import { pushModal } from 'loot-core/client/actions';
+import { pushModal } from 'loot-core/client/modals/modalsSlice';
 import { runQuery } from 'loot-core/client/query-helpers';
+import { validForTransfer } from 'loot-core/client/transfer';
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
@@ -12,6 +13,7 @@ import {
 } from 'loot-core/shared/transactions';
 import { applyChanges, type Diff } from 'loot-core/shared/util';
 import {
+  type PayeeEntity,
   type AccountEntity,
   type ScheduleEntity,
   type TransactionEntity,
@@ -152,16 +154,26 @@ export function useTransactionBatchActions() {
 
     const pushPayeeAutocompleteModal = () => {
       dispatch(
-        pushModal('payee-autocomplete', {
-          onSelect: payeeId => onChange(name, payeeId),
+        pushModal({
+          modal: {
+            name: 'payee-autocomplete',
+            options: {
+              onSelect: payeeId => onChange(name, payeeId),
+            },
+          },
         }),
       );
     };
 
     const pushAccountAutocompleteModal = () => {
       dispatch(
-        pushModal('account-autocomplete', {
-          onSelect: accountId => onChange(name, accountId),
+        pushModal({
+          modal: {
+            name: 'account-autocomplete',
+            options: {
+              onSelect: accountId => onChange(name, accountId),
+            },
+          },
         }),
       );
     };
@@ -172,9 +184,14 @@ export function useTransactionBatchActions() {
       }
 
       dispatch(
-        pushModal('edit-field', {
-          name,
-          onSubmit: (name, value, mode) => onChange(name, value, mode),
+        pushModal({
+          modal: {
+            name: 'edit-field',
+            options: {
+              name,
+              onSubmit: (name, value, mode) => onChange(name, value, mode),
+            },
+          },
         }),
       );
     };
@@ -190,9 +207,14 @@ export function useTransactionBatchActions() {
           t => monthUtils.monthFromDate(t.date) === transactionMonth,
         );
       dispatch(
-        pushModal('category-autocomplete', {
-          month: transactionsHaveSameMonth ? transactionMonth : undefined,
-          onSelect: categoryId => onChange(name, categoryId),
+        pushModal({
+          modal: {
+            name: 'category-autocomplete',
+            options: {
+              month: transactionsHaveSameMonth ? transactionMonth : undefined,
+              onSelect: categoryId => onChange(name, categoryId),
+            },
+          },
         }),
       );
     };
@@ -206,17 +228,22 @@ export function useTransactionBatchActions() {
       const reconciledTransactions = transactions.filter(t => t.reconciled);
       if (reconciledTransactions.length > 0) {
         dispatch(
-          pushModal('confirm-transaction-edit', {
-            onConfirm: () => {
-              if (name === 'payee') {
-                pushPayeeAutocompleteModal();
-              } else if (name === 'account') {
-                pushAccountAutocompleteModal();
-              } else {
-                pushEditField();
-              }
+          pushModal({
+            modal: {
+              name: 'confirm-transaction-edit',
+              options: {
+                onConfirm: () => {
+                  if (name === 'payee') {
+                    pushPayeeAutocompleteModal();
+                  } else if (name === 'account') {
+                    pushAccountAutocompleteModal();
+                  } else {
+                    pushEditField();
+                  }
+                },
+                confirmReason: 'batchEditWithReconciled',
+              },
             },
-            confirmReason: 'batchEditWithReconciled',
           }),
         );
         return;
@@ -280,58 +307,68 @@ export function useTransactionBatchActions() {
   const onBatchDelete = async ({ ids, onSuccess }: BatchDeleteProps) => {
     const onConfirmDelete = (ids: Array<TransactionEntity['id']>) => {
       dispatch(
-        pushModal('confirm-transaction-delete', {
-          message:
-            ids.length > 1
-              ? `Are you sure you want to delete these ${ids.length} transaction${ids.length > 1 ? 's' : ''}?`
-              : undefined,
-          onConfirm: async () => {
-            const { data } = await runQuery(
-              q('transactions')
-                .filter({ id: { $oneof: ids } })
-                .select('*')
-                .options({ splits: 'grouped' }),
-            );
-            let transactions = ungroupTransactions(data as TransactionEntity[]);
+        pushModal({
+          modal: {
+            name: 'confirm-transaction-delete',
+            options: {
+              message:
+                ids.length > 1
+                  ? `Are you sure you want to delete these ${ids.length} transaction${ids.length > 1 ? 's' : ''}?`
+                  : undefined,
+              onConfirm: async () => {
+                const { data } = await runQuery(
+                  q('transactions')
+                    .filter({ id: { $oneof: ids } })
+                    .select('*')
+                    .options({ splits: 'grouped' }),
+                );
+                let transactions = ungroupTransactions(
+                  data as TransactionEntity[],
+                );
 
-            const idSet = new Set(ids);
-            const changes: Diff<TransactionEntity> = {
-              added: [],
-              deleted: [],
-              updated: [],
-            };
+                const idSet = new Set(ids);
+                const changes: Diff<TransactionEntity> = {
+                  added: [],
+                  deleted: [],
+                  updated: [],
+                };
 
-            transactions.forEach(trans => {
-              const parentId = trans.parent_id;
+                transactions.forEach(trans => {
+                  const parentId = trans.parent_id;
 
-              // First, check if we're actually deleting this transaction by
-              // checking `idSet`. Then, we don't need to do anything if it's
-              // a child transaction and the parent is already being deleted
-              if (!idSet.has(trans.id) || (parentId && idSet.has(parentId))) {
-                return;
-              }
+                  // First, check if we're actually deleting this transaction by
+                  // checking `idSet`. Then, we don't need to do anything if it's
+                  // a child transaction and the parent is already being deleted
+                  if (
+                    !idSet.has(trans.id) ||
+                    (parentId && idSet.has(parentId))
+                  ) {
+                    return;
+                  }
 
-              const { diff } = deleteTransaction(transactions, trans.id);
+                  const { diff } = deleteTransaction(transactions, trans.id);
 
-              // TODO: We need to keep an updated list of transactions so
-              // the logic in `updateTransaction`, particularly about
-              // updating split transactions, works. This isn't ideal and we
-              // should figure something else out
-              transactions = applyChanges<TransactionEntity>(
-                diff,
-                transactions,
-              );
+                  // TODO: We need to keep an updated list of transactions so
+                  // the logic in `updateTransaction`, particularly about
+                  // updating split transactions, works. This isn't ideal and we
+                  // should figure something else out
+                  transactions = applyChanges<TransactionEntity>(
+                    diff,
+                    transactions,
+                  );
 
-              changes.deleted = diff.deleted
-                ? changes.deleted.concat(diff.deleted)
-                : diff.deleted;
-              changes.updated = diff.updated
-                ? changes.updated.concat(diff.updated)
-                : diff.updated;
-            });
+                  changes.deleted = diff.deleted
+                    ? changes.deleted.concat(diff.deleted)
+                    : diff.deleted;
+                  changes.updated = diff.updated
+                    ? changes.updated.concat(diff.updated)
+                    : diff.updated;
+                });
 
-            await send('transactions-batch-update', changes);
-            onSuccess?.(ids);
+                await send('transactions-batch-update', changes);
+                onSuccess?.(ids);
+              },
+            },
           },
         }),
       );
@@ -357,13 +394,18 @@ export function useTransactionBatchActions() {
     );
 
     dispatch(
-      pushModal('schedule-link', {
-        transactionIds: ids,
-        getTransaction: (id: TransactionEntity['id']) =>
-          transactions.find((t: TransactionEntity) => t.id === id),
-        accountName: account?.name ?? '',
-        onScheduleLinked: schedule => {
-          onSuccess?.(ids, schedule);
+      pushModal({
+        modal: {
+          name: 'schedule-link',
+          options: {
+            transactionIds: ids,
+            getTransaction: (id: TransactionEntity['id']) =>
+              transactions.find((t: TransactionEntity) => t.id === id),
+            accountName: account?.name ?? '',
+            onScheduleLinked: schedule => {
+              onSuccess?.(ids, schedule);
+            },
+          },
         },
       }),
     );
@@ -396,16 +438,68 @@ export function useTransactionBatchActions() {
     const transactions = ungroupTransactions(data as TransactionEntity[]);
     if (transactions.length > 0) {
       dispatch(
-        pushModal('confirm-transaction-edit', {
-          onConfirm: () => {
-            onConfirm(ids);
+        pushModal({
+          modal: {
+            name: 'confirm-transaction-edit',
+            options: {
+              onConfirm: () => {
+                onConfirm(ids);
+              },
+              confirmReason,
+            },
           },
-          confirmReason,
         }),
       );
     } else {
       onConfirm(ids);
     }
+  };
+
+  const onSetTransfer = async (
+    ids: string[],
+    payees: PayeeEntity[],
+    onSuccess: (ids: string[]) => void,
+  ) => {
+    const onConfirmTransfer = async (ids: string[]) => {
+      const { data: transactions } = await runQuery(
+        q('transactions')
+          .filter({ id: { $oneof: ids } })
+          .select('*'),
+      );
+      const [fromTrans, toTrans] = transactions;
+
+      if (transactions.length === 2 && validForTransfer(fromTrans, toTrans)) {
+        const fromPayee = payees.find(
+          p => p.transfer_acct === fromTrans.account,
+        );
+        const toPayee = payees.find(p => p.transfer_acct === toTrans.account);
+
+        const changes = {
+          updated: [
+            {
+              ...fromTrans,
+              payee: toPayee?.id,
+              transfer_id: toTrans.id,
+            },
+            {
+              ...toTrans,
+              payee: fromPayee?.id,
+              transfer_id: fromTrans.id,
+            },
+          ],
+        };
+
+        await send('transactions-batch-update', changes);
+      }
+
+      onSuccess?.(ids);
+    };
+
+    await checkForReconciledTransactions(
+      ids,
+      'batchEditWithReconciled',
+      onConfirmTransfer,
+    );
   };
 
   return {
@@ -414,5 +508,6 @@ export function useTransactionBatchActions() {
     onBatchDelete,
     onBatchLinkSchedule,
     onBatchUnlinkSchedule,
+    onSetTransfer,
   };
 }

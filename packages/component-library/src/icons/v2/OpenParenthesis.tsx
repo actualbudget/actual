@@ -5,7 +5,7 @@ export const SvgOpenParenthesis = (props: SVGProps<SVGSVGElement>) => (
     {...props}
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 17 56.7"
-    preserveAspectRatio='none'
+    preserveAspectRatio="none"
     style={{
       color: 'inherit',
       ...props.style,

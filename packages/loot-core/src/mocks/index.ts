@@ -22,6 +22,7 @@ export function generateAccount(
     name,
     offbudget: offbudget ? 1 : 0,
     sort_order: 0,
+    last_reconciled: null,
     tombstone: 0,
     closed: 0,
     ...emptySyncFields(),

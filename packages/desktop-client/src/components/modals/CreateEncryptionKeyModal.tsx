@@ -14,6 +14,7 @@ import { css } from '@emotion/css';
 import { loadGlobalPrefs } from 'loot-core/client/actions';
 import { sync } from 'loot-core/client/app/appSlice';
 import { loadAllFiles } from 'loot-core/client/budgets/budgetsSlice';
+import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import { getCreateKeyError } from 'loot-core/shared/errors';
 
@@ -29,14 +30,13 @@ import {
 } from '../common/Modal';
 import { useResponsive } from '../responsive/ResponsiveProvider';
 
-type CreateEncryptionKeyModalProps = {
-  options: {
-    recreate?: boolean;
-  };
-};
+type CreateEncryptionKeyModalProps = Extract<
+  ModalType,
+  { name: 'create-encryption-key' }
+>['options'];
 
 export function CreateEncryptionKeyModal({
-  options = {},
+  recreate,
 }: CreateEncryptionKeyModalProps) {
   const { t } = useTranslation();
   const [password, setPassword] = useState('');
@@ -46,7 +46,7 @@ export function CreateEncryptionKeyModal({
   const { isNarrowWidth } = useResponsive();
   const dispatch = useDispatch();
 
-  const isRecreating = options.recreate;
+  const isRecreating = recreate;
 
   async function onCreateKey(close: () => void) {
     if (password !== '' && !loading) {

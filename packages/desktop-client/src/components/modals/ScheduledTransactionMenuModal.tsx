@@ -11,6 +11,7 @@ import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
 import { useSchedules } from 'loot-core/client/data-hooks/schedules';
+import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
 import { format } from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
 import {
@@ -18,6 +19,7 @@ import {
   extractScheduleConds,
 } from 'loot-core/shared/schedules';
 
+import { useLocale } from '../../hooks/useLocale';
 import { theme } from '../../style';
 import {
   Modal,
@@ -26,7 +28,10 @@ import {
   ModalTitle,
 } from '../common/Modal';
 
-type ScheduledTransactionMenuModalProps = ScheduledTransactionMenuProps;
+type ScheduledTransactionMenuModalProps = Extract<
+  ModalType,
+  { name: 'scheduled-transaction-menu' }
+>['options'];
 
 export function ScheduledTransactionMenuModal({
   transactionId,
@@ -34,6 +39,7 @@ export function ScheduledTransactionMenuModal({
   onPost,
   onComplete,
 }: ScheduledTransactionMenuModalProps) {
+  const locale = useLocale();
   const { t } = useTranslation();
   const defaultMenuItemStyle: CSSProperties = {
     ...styles.mobileMenuItem,
@@ -79,7 +85,7 @@ export function ScheduledTransactionMenuModal({
               {t('Scheduled date')}
             </Text>
             <Text style={{ fontSize: 17, fontWeight: 700 }}>
-              {format(schedule?.next_date || '', 'MMMM dd, yyyy')}
+              {format(schedule?.next_date || '', 'MMMM dd, yyyy', locale)}
             </Text>
           </View>
           <ScheduledTransactionMenu

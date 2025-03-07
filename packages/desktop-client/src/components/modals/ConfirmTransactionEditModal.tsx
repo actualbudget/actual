@@ -7,19 +7,20 @@ import { Button } from '@actual-app/components/button';
 import { InitialFocus } from '@actual-app/components/initial-focus';
 import { View } from '@actual-app/components/view';
 
+import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
+
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 
-type ConfirmTransactionEditProps = {
-  onCancel?: () => void;
-  onConfirm: () => void;
-  confirmReason: string;
-};
+type ConfirmTransactionEditModalProps = Extract<
+  ModalType,
+  { name: 'confirm-transaction-edit' }
+>['options'];
 
 export function ConfirmTransactionEditModal({
   onCancel,
   onConfirm,
   confirmReason,
-}: ConfirmTransactionEditProps) {
+}: ConfirmTransactionEditModalProps) {
   const { t } = useTranslation();
 
   return (

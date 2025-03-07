@@ -9,6 +9,11 @@ import { Popover } from '@actual-app/components/popover';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
+import {
+  type CategoryEntity,
+  type CategoryGroupEntity,
+} from 'loot-core/types/models';
+
 import { useContextMenu } from '../../hooks/useContextMenu';
 import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { SvgExpandArrow } from '../../icons/v0';
@@ -18,27 +23,21 @@ import { NotesButton } from '../NotesButton';
 import { InputCell } from '../table';
 
 type SidebarGroupProps = {
-  group: {
-    id: string;
-    hidden: number;
-    categories: object[];
-    is_income: number;
-    name: string;
-    sort_order: number;
-    tombstone: number;
-  };
+  group: CategoryGroupEntity;
   editing?: boolean;
   collapsed: boolean;
   dragPreview?: boolean;
   innerRef?: ConnectDragSource;
   style?: CSSProperties;
-  onEdit?: (id: string) => void;
-  onSave?: (group: object) => Promise<void>;
-  onDelete?: (id: string) => Promise<void>;
-  onApplyBudgetTemplatesInGroup?: (categories: object[]) => void;
-  onShowNewCategory?: (groupId: string) => void;
+  onEdit?: (id: CategoryGroupEntity['id']) => void;
+  onSave?: (group: CategoryGroupEntity) => Promise<void>;
+  onDelete?: (id: CategoryGroupEntity['id']) => Promise<void>;
+  onApplyBudgetTemplatesInGroup?: (
+    categories: Array<CategoryEntity['id']>,
+  ) => void;
+  onShowNewCategory?: (groupId: CategoryGroupEntity['id']) => void;
   onHideNewGroup?: () => void;
-  onToggleCollapse?: (id: string) => void;
+  onToggleCollapse?: (id: CategoryGroupEntity['id']) => void;
 };
 
 export function SidebarGroup({
@@ -139,9 +138,7 @@ export function SidebarGroup({
                     onSave({ ...group, hidden: !group.hidden });
                   } else if (type === 'apply-multiple-category-template') {
                     onApplyBudgetTemplatesInGroup?.(
-                      group.categories
-                        .filter(c => !c['hidden'])
-                        .map(c => c['id']),
+                      group.categories.filter(c => !c.hidden).map(c => c.id),
                     );
                   }
                   setMenuOpen(false);

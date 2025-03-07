@@ -7,6 +7,7 @@ import { InitialFocus } from '@actual-app/components/initial-focus';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
+import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import { getSecretsError } from 'loot-core/shared/errors';
 
@@ -21,13 +22,14 @@ import {
 } from '../common/Modal';
 import { FormField, FormLabel } from '../forms';
 
-type GoCardlessInitialiseProps = {
-  onSuccess: () => void;
-};
+type GoCardlessInitialiseModalProps = Extract<
+  ModalType,
+  { name: 'gocardless-init' }
+>['options'];
 
 export const GoCardlessInitialiseModal = ({
   onSuccess,
-}: GoCardlessInitialiseProps) => {
+}: GoCardlessInitialiseModalProps) => {
   const { t } = useTranslation();
   const [secretId, setSecretId] = useState('');
   const [secretKey, setSecretKey] = useState('');

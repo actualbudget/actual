@@ -90,13 +90,27 @@ export function CategorySelector({
                 <Text>{t('Show unchecked')}</Text>
               </View>
             ) : (
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                }}
+              >
                 <SvgViewHide
                   width={15}
                   height={15}
                   style={{ marginRight: 5 }}
                 />
-                <Text>{t('Hide unchecked')}</Text>
+                <Text
+                  style={{
+                    maxWidth: 100,
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                  }}
+                >
+                  {t('Hide unchecked')}
+                </Text>
               </View>
             )}
           </View>

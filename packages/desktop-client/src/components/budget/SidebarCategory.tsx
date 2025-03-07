@@ -32,9 +32,9 @@ type SidebarCategoryProps = {
   style?: CSSProperties;
   borderColor?: string;
   isLast?: boolean;
-  onEditName: (id: string) => void;
+  onEditName: (id: CategoryEntity['id']) => void;
   onSave: (category: CategoryEntity) => void;
-  onDelete: (id: string) => Promise<void>;
+  onDelete: (id: CategoryEntity['id']) => Promise<void>;
   onHideNewCategory?: () => void;
 };
 
