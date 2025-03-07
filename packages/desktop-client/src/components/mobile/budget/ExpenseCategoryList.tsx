@@ -474,22 +474,24 @@ function ExpenseCategoryListItem({
   const [budgetType = 'rollover'] = useSyncedPref('budgetType');
 
   const modalBudgetType = budgetType === 'rollover' ? 'envelope' : 'tracking';
+  const balanceMenuModalName = `${modalBudgetType}-balance-menu` as const;
   const dispatch = useDispatch();
   const { showUndoNotification } = useUndo();
   const { list: categories } = useCategories();
   const categoriesById = groupById(categories);
 
   const onCarryover = useCallback(
-    carryover => {
+    (carryover: boolean) => {
+      if (!category) {
+        return;
+      }
       onBudgetAction(month, 'carryover', {
         category: category.id,
         flag: carryover,
       });
-      dispatch(
-        collapseModals({ rootModalName: `${modalBudgetType}-balance-menu` }),
-      );
+      dispatch(collapseModals({ rootModalName: balanceMenuModalName }));
     },
-    [modalBudgetType, category.id, dispatch, month, onBudgetAction],
+    [category, onBudgetAction, month, dispatch, balanceMenuModalName],
   );
 
   const catBalance = useSheetValue<
@@ -497,11 +499,14 @@ function ExpenseCategoryListItem({
     'leftover'
   >(
     budgetType === 'rollover'
-      ? envelopeBudget.catBalance(category.id)
-      : trackingBudget.catBalance(category.id),
+      ? envelopeBudget.catBalance(category?.id)
+      : trackingBudget.catBalance(category?.id),
   );
 
   const onTransfer = useCallback(() => {
+    if (!category) {
+      return;
+    }
     dispatch(
       pushModal({
         modal: {
@@ -510,18 +515,14 @@ function ExpenseCategoryListItem({
             title: category.name,
             categoryId: category.id,
             month,
-            amount: catBalance,
+            amount: catBalance || 0,
             onSubmit: (amount, toCategoryId) => {
               onBudgetAction(month, 'transfer-category', {
                 amount,
                 from: category.id,
                 to: toCategoryId,
               });
-              dispatch(
-                collapseModals({
-                  rootModalName: `${modalBudgetType}-balance-menu`,
-                }),
-              );
+              dispatch(collapseModals({ rootModalName: balanceMenuModalName }));
               showUndoNotification({
                 message: `Transferred ${integerToCurrency(amount)} from ${category.name} to ${categoriesById[toCategoryId].name}.`,
               });
@@ -532,18 +533,20 @@ function ExpenseCategoryListItem({
       }),
     );
   }, [
-    modalBudgetType,
-    catBalance,
-    categoriesById,
-    category.id,
-    category.name,
+    category,
     dispatch,
     month,
+    catBalance,
     onBudgetAction,
+    balanceMenuModalName,
     showUndoNotification,
+    categoriesById,
   ]);
 
   const onCover = useCallback(() => {
+    if (!category) {
+      return;
+    }
     dispatch(
       pushModal({
         modal: {
@@ -557,11 +560,7 @@ function ExpenseCategoryListItem({
                 to: category.id,
                 from: fromCategoryId,
               });
-              dispatch(
-                collapseModals({
-                  rootModalName: `${modalBudgetType}-balance-menu`,
-                }),
-              );
+              dispatch(collapseModals({ rootModalName: balanceMenuModalName }));
               showUndoNotification({
                 message: t(
                   `Covered {{toCategoryName}} overspending from {{fromCategoryName}}.`,
@@ -577,47 +576,67 @@ function ExpenseCategoryListItem({
       }),
     );
   }, [
-    modalBudgetType,
-    categoriesById,
-    category.id,
-    category.name,
+    category,
     dispatch,
     month,
     onBudgetAction,
+    balanceMenuModalName,
     showUndoNotification,
     t,
+    categoriesById,
   ]);
 
   const onOpenBalanceMenu = useCallback(() => {
-    dispatch(
-      pushModal({
-        modal: {
-          name: `${modalBudgetType}-balance-menu`,
-          options: {
-            categoryId: category.id,
-            month,
-            onCarryover,
-            ...(budgetType === 'rollover' && { onTransfer, onCover }),
+    if (!category) {
+      return;
+    }
+    if (balanceMenuModalName === 'envelope-balance-menu') {
+      dispatch(
+        pushModal({
+          modal: {
+            name: balanceMenuModalName,
+            options: {
+              month,
+              categoryId: category.id,
+              onCarryover,
+              onTransfer,
+              onCover,
+            },
           },
-        },
-      }),
-    );
+        }),
+      );
+    } else {
+      dispatch(
+        pushModal({
+          modal: {
+            name: balanceMenuModalName,
+            options: {
+              month,
+              categoryId: category.id,
+              onCarryover,
+            },
+          },
+        }),
+      );
+    }
   }, [
-    modalBudgetType,
-    budgetType,
-    category.id,
+    category,
+    balanceMenuModalName,
     dispatch,
     month,
     onCarryover,
-    onCover,
     onTransfer,
+    onCover,
   ]);
 
   const listItemRef = useRef<HTMLDivElement | null>(null);
   const navigate = useNavigate();
   const onShowActivity = useCallback(() => {
+    if (!category) {
+      return;
+    }
     navigate(`/categories/${category.id}?month=${month}`);
-  }, [category.id, month, navigate]);
+  }, [category, month, navigate]);
 
   if (!category) {
     return null;
