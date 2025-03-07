@@ -2,6 +2,7 @@ import { type ComponentProps, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { Select } from '@actual-app/components/select';
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { View } from '@actual-app/components/view';
@@ -16,7 +17,6 @@ import { type SyncedPrefs } from 'loot-core/types/prefs';
 import { useLocale } from '../../hooks/useLocale';
 import { AppliedFilters } from '../filters/AppliedFilters';
 import { FilterButton } from '../filters/FiltersMenu';
-import { useResponsive } from '../responsive/ResponsiveProvider';
 
 import { getLiveRange } from './getLiveRange';
 import {

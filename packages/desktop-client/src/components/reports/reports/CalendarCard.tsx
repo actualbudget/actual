@@ -12,6 +12,11 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { Block } from '@actual-app/components/block';
 import { Button } from '@actual-app/components/button';
+import { useResponsive } from '@actual-app/components/hooks/useResponsive';
+import {
+  SvgArrowThickDown,
+  SvgArrowThickUp,
+} from '@actual-app/components/icons/v1';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
@@ -27,9 +32,7 @@ import { type SyncedPrefs } from 'loot-core/types/prefs';
 import { useMergedRefs } from '../../../hooks/useMergedRefs';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { useResizeObserver } from '../../../hooks/useResizeObserver';
-import { SvgArrowThickDown, SvgArrowThickUp } from '../../../icons/v1';
 import { PrivacyFilter } from '../../PrivacyFilter';
-import { useResponsive } from '../../responsive/ResponsiveProvider';
 import { chartTheme } from '../chart-theme';
 import { DateRange } from '../DateRange';
 import { CalendarGraph } from '../graphs/CalendarGraph';
