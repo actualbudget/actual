@@ -91,7 +91,7 @@ async function saveGlobalPrefs(prefs: GlobalPrefs) {
   return 'ok';
 }
 
-async function loadGlobalPrefs() {
+async function loadGlobalPrefs(): Promise<GlobalPrefs> {
   const [
     [, floatingSidebar],
     [, maxMonths],
@@ -113,7 +113,7 @@ async function loadGlobalPrefs() {
   ] as const);
   return {
     floatingSidebar: floatingSidebar === 'true',
-    maxMonths: stringToInteger(maxMonths || ''),
+    maxMonths: stringToInteger(maxMonths || '') || undefined,
     documentDir: documentDir || getDefaultDocumentDir(),
     keyId: encryptKey && JSON.parse(encryptKey).id,
     language,
