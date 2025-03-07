@@ -28,6 +28,7 @@
     "./form-error": "./src/FormError.tsx",
     "./initial-focus": "./src/InitialFocus.ts",
     "./inline-field": "./src/InlineField.tsx",
+    "./input": "./src/Input.tsx",
     "./label": "./src/Label.tsx",
     "./menu": "./src/Menu.tsx",
     "./paragraph": "./src/Paragraph.tsx",
