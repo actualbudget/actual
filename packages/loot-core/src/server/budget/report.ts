@@ -63,26 +63,23 @@ export async function createCategory(cat, sheetName, prevSheetName) {
 export function createCategoryGroup(group, sheetName) {
   sheet.get().createDynamic(sheetName, 'group-sum-amount-' + group.id, {
     initialValue: 0,
-    dependencies: group.categories
-      .map(cat => `sum-amount-${cat.id}`)
-      .concat(group.categories.map(cat => `__global!hidden-${cat.id}`)),
-    run: 'sumAmountsShowing',
+    dependencies: group.categories.map(cat => `sum-amount-${cat.id}`),
+    run: sumAmounts,
+    watchDependencies: group.categories.map(cat => cat.id),
   });
 
   sheet.get().createDynamic(sheetName, 'group-budget-' + group.id, {
     initialValue: 0,
-    dependencies: group.categories
-      .map(cat => `budget-${cat.id}`)
-      .concat(group.categories.map(cat => `__global!hidden-${cat.id}`)),
-    run: 'sumAmountsShowing',
+    dependencies: group.categories.map(cat => `budget-${cat.id}`),
+    run: sumAmounts,
+    watchDependencies: group.categories.map(cat => cat.id),
   });
 
   sheet.get().createDynamic(sheetName, 'group-leftover-' + group.id, {
     initialValue: 0,
-    dependencies: group.categories
-      .map(cat => `leftover-${cat.id}`)
-      .concat(group.categories.map(cat => `__global!hidden-${cat.id}`)),
-    run: 'sumAmountsShowing',
+    dependencies: group.categories.map(cat => `leftover-${cat.id}`),
+    run: sumAmounts,
+    watchDependencies: group.categories.map(cat => cat.id),
   });
 }
 

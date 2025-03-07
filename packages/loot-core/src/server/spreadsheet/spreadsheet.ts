@@ -2,7 +2,6 @@
 import mitt from 'mitt';
 
 import { compileQuery, runCompiledQuery, schema, schemaConfig } from '../aql';
-import { sumAmounts } from '../budget/util';
 
 import { Graph } from './graph-data-structure';
 import { unresolveName, resolveName } from './util';
@@ -17,6 +16,7 @@ export type Node = {
   dynamic?: boolean;
   _run?: unknown;
   _dependencies?: string[];
+  _watchDependencies?: string[];
 };
 
 export class Spreadsheet {
@@ -152,34 +152,23 @@ export class Spreadsheet {
         node = this.getNode(name);
 
         if (node._run) {
-          if (node._run === 'sumAmountsShowing') {
-            //find which values are hidden, and exclude the hidden cells
-            const hiddenCats = [];
-            const args = [];
-            for (let i = node._dependencies.length - 1; i >= 0; i--) {
-              // hidden deps are at the end of the list
-              const dep = node._dependencies[i];
-              if (dep.includes('__global!hidden-')) {
-                const value = this.getNode(dep).value;
-                if (value === 1) {
-                  const index = node._dependencies[i].indexOf('-');
-                  hiddenCats.push(dep.slice(index + 1));
-                }
-              } else {
-                const index = dep.search(/[\w]+-[\w]+-[\w]+-[\w]+-[\w]+$/);
-                const catID = dep.slice(index);
-                if (!hiddenCats.includes(catID)) {
-                  args.push(this.getNode(dep).value);
-                }
-              }
-            }
-            result = sumAmounts(...args);
-          } else {
-            const args = node._dependencies.map(dep => {
+          let args = [];
+          args = node._dependencies
+            .filter(
+              f =>
+                node._watchDependencies.length === 0 ||
+                !node._watchDependencies.some(s => {
+                  const returnValue =
+                    f.includes(s) &&
+                    this.getNode(`__global!hidden-${s}`).value === 1;
+                  return returnValue;
+                }),
+            )
+            .map(dep => {
               return this.getNode(dep).value;
             });
-            result = node._run(...args);
-          }
+
+          result = node._run(...args);
 
           if (result instanceof Promise) {
             console.warn(
@@ -401,11 +390,13 @@ export class Spreadsheet {
       run,
       initialValue,
       refresh = false,
+      watchDependencies = [],
     }: {
       dependencies?: string[];
       run?: unknown;
       initialValue: number | boolean;
       refresh?: boolean;
+      watchDependencies?: string[];
     },
   ): void {
     const name = resolveName(sheetName, cellName);
@@ -431,11 +422,19 @@ export class Spreadsheet {
     });
 
     node._dependencies = dependencies;
+    node._watchDependencies = watchDependencies;
 
     // TODO: diff these
     this.graph.removeIncomingEdges(name);
     dependencies.forEach(dep => {
       this.graph.addEdge(dep, name);
+    });
+
+    watchDependencies.forEach(dep => {
+      this.graph.addEdge(
+        resolveName(sheetName, `__global!hidden-${dep}`),
+        name,
+      );
     });
 
     if (node.value == null || refresh) {
@@ -530,6 +529,14 @@ export class Spreadsheet {
       if (
         node.sql &&
         node.sql.state.dependencies.some(dep => tables.has(dep))
+      ) {
+        this._markDirty(node.name);
+      }
+
+      if (
+        tables.has('categories') &&
+        node._watchDependencies?.length > 0 &&
+        node._watchDependencies.some(s => newValues.get('categories').has(s))
       ) {
         this._markDirty(node.name);
       }
