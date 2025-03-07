@@ -4,9 +4,10 @@ import React, {
   type Ref,
 } from 'react';
 
-import { styles, type CSSProperties } from '@actual-app/components/styles';
-import { theme } from '@actual-app/components/theme';
 import { css, cx } from '@emotion/css';
+
+import { styles, type CSSProperties } from './styles';
+import { theme } from './theme';
 
 export const defaultInputStyle = {
   outline: 0,
