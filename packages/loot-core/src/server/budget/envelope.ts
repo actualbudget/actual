@@ -160,9 +160,7 @@ export function createSummary(groups, categories, prevSheetName, sheetName) {
 
   sheet.get().createDynamic(sheetName, 'total-leftover', {
     initialValue: 0,
-    dependencies: groups
-      .filter(group => !group.is_income)
-      .map(group => `group-leftover-${group.id}`),
+    dependencies: ['total-budgeted', 'total-spent'],
     run: sumAmounts,
   });
 }

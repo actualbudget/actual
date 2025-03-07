@@ -63,26 +63,33 @@ function createCategory(cat, sheetName, prevSheetName, start, end) {
 }
 
 function createCategoryGroup(group, sheetName) {
-  sheet.get().createDynamic(sheetName, 'group-sum-amount-' + group.id, {
-    initialValue: 0,
-    dependencies: group.categories.map(cat => `sum-amount-${cat.id}`),
-    run: sumAmounts,
-  });
-
-
-  if (!group.is_income || getBudgetType() !== 'rollover') {
-    sheet.get().createDynamic(sheetName, 'group-budget-' + group.id, {
+  const budgetType = getBudgetType();
+  // different sum amount dependencies
+  if (budgetType === 'rollover' || group.is_income) {
+    sheet.get().createDynamic(sheetName, 'group-sum-amount-' + group.id, {
       initialValue: 0,
-      dependencies: group.categories.map(cat => `budget-${cat.id}`),
+      dependencies: group.categories.map(cat => `sum-amount-${cat.id}`),
       run: sumAmounts,
     });
-
-    sheet.get().createDynamic(sheetName, 'group-leftover-' + group.id, {
+  } else {
+    sheet.get().createDynamic(sheetName, 'group-sum-amount-' + group.id, {
       initialValue: 0,
-      dependencies: group.categories.map(cat => `leftover-${cat.id}`),
+      dependencies: group.categories.map(
+        cat => `spent-with-carryover-${cat.id}`,
+      ),
       run: sumAmounts,
     });
   }
+  sheet.get().createDynamic(sheetName, 'group-budget-' + group.id, {
+    initialValue: 0,
+    dependencies: group.categories.map(cat => `budget-${cat.id}`),
+    run: sumAmounts,
+  });
+  sheet.get().createDynamic(sheetName, 'group-leftover-' + group.id, {
+    initialValue: 0,
+    dependencies: group.categories.map(cat => `leftover-${cat.id}`),
+    run: sumAmounts,
+  });
 }
 
 function handleAccountChange(months, oldValue, newValue) {
@@ -161,14 +168,6 @@ function handleCategoryChange(months, oldValue, newValue) {
       .addDependencies(sheetName, `group-leftover-${groupId}`, [
         `leftover-${catId}`,
       ]);
-
-    if (budgetType !== 'rollover') {
-      sheet
-        .get()
-        .addDependencies(sheetName, `group-sum-spent-with-carryover-${groupId}`, [
-          `spent-with-carryover-${catId}`,
-        ]);
-    }
   }
 
   function removeDeps(sheetName, groupId, catId) {
@@ -187,14 +186,6 @@ function handleCategoryChange(months, oldValue, newValue) {
       .removeDependencies(sheetName, `group-leftover-${groupId}`, [
         `leftover-${catId}`,
       ]);
-
-    if (budgetType !== 'rollover') {
-      sheet
-        .get()
-        .removeDependencies(sheetName, `group-sum-spent-with-carryover-${groupId}`, [
-          `spent-with-carryover-${catId}`,
-        ]);
-    }
   }
 
   if (oldValue && oldValue.tombstone === 0 && newValue.tombstone === 1) {
@@ -274,23 +265,9 @@ function handleCategoryGroupChange(months, oldValue, newValue) {
       ]);
     sheet
       .get()
-      .addDependencies(sheetName, 'total-leftover', [
-        `group-leftover-${groupId}`,
-      ]);
-
-    if (budgetType !== 'rollover') {
-      sheet
-        .get()
-        .addDependencies(sheetName, 'total-spent', [
-          `group-sum-spent-with-carryover-${groupId}`,
-        ]);
-    } else {
-      sheet
-      .get()
       .addDependencies(sheetName, 'total-spent', [
         `group-sum-amount-${groupId}`,
       ]);
-    }
   }
 
   function removeDeps(sheetName, groupId) {
@@ -304,19 +281,6 @@ function handleCategoryGroupChange(months, oldValue, newValue) {
       .removeDependencies(sheetName, 'total-spent', [
         `group-sum-amount-${groupId}`,
       ]);
-    sheet
-      .get()
-      .removeDependencies(sheetName, 'total-leftover', [
-        `group-leftover-${groupId}`,
-      ]);
-
-    if (budgetType !== 'rollover') {
-      sheet
-        .get()
-        .removeDependencies(sheetName, 'total-spent', [
-          `group-sum-spent-with-carryover-${groupId}`,
-        ]);
-    }
   }
 
   if (newValue.tombstone === 1 && oldValue && oldValue.tombstone === 0) {
