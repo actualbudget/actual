@@ -306,7 +306,6 @@ export function updateWithSchema(table, fields) {
 // Data-specific functions. Ideally this would be split up into
 // different files
 
-// TODO: Fix return type. This should returns a DbCategory[].
 export async function getCategories(ids?: Array<DbCategory['id']>) {
   const whereIn = ids ? `c.id IN (${toSqlQueryParameters(ids)}) AND` : '';
   const query = `SELECT c.* FROM categories c WHERE ${whereIn} c.tombstone = 0 ORDER BY c.sort_order, c.id`;
@@ -315,8 +314,9 @@ export async function getCategories(ids?: Array<DbCategory['id']>) {
     : await all<DbCategory>(query);
 }
 
-// TODO: Fix return type. This should returns a [DbCategoryGroup, ...DbCategory].
-export async function getCategoriesGrouped(ids?: Array<DbCategoryGroup['id']>) {
+export async function getCategoriesGrouped(
+  ids?: Array<DbCategoryGroup['id']>,
+): Promise<Array<DbCategoryGroup & { categories: DbCategory[] }>> {
   const categoryGroupWhereIn = ids
     ? `cg.id IN (${toSqlQueryParameters(ids)}) AND`
     : '';
@@ -337,12 +337,10 @@ export async function getCategoriesGrouped(ids?: Array<DbCategoryGroup['id']>) {
     ? await all<DbCategory>(categoryQuery, [...ids])
     : await all<DbCategory>(categoryQuery);
 
-  return groups.map(group => {
-    return {
-      ...group,
-      categories: categories.filter(c => c.cat_group === group.id),
-    };
-  });
+  return groups.map(group => ({
+    ...group,
+    categories: categories.filter(c => c.cat_group === group.id),
+  }));
 }
 
 export async function insertCategoryGroup(group) {
