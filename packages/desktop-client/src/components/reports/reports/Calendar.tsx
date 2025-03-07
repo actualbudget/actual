@@ -17,10 +17,10 @@ import { css } from '@emotion/css';
 import { useDrag } from '@use-gesture/react';
 import { format, parseISO } from 'date-fns';
 
-import { addNotification } from 'loot-core/client/actions';
 import { SchedulesProvider } from 'loot-core/client/data-hooks/schedules';
 import { useTransactions } from 'loot-core/client/data-hooks/transactions';
 import { useWidget } from 'loot-core/client/data-hooks/widget';
+import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 import { q, type Query } from 'loot-core/shared/query';
@@ -330,15 +330,19 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
       });
       dispatch(
         addNotification({
-          type: 'message',
-          message: t('Dashboard widget successfully saved.'),
+          notification: {
+            type: 'message',
+            message: t('Dashboard widget successfully saved.'),
+          },
         }),
       );
     } catch (error) {
       dispatch(
         addNotification({
-          type: 'error',
-          message: t('Failed to save dashboard widget.'),
+          notification: {
+            type: 'error',
+            message: t('Failed to save dashboard widget.'),
+          },
         }),
       );
       console.error('Error saving widget:', error);

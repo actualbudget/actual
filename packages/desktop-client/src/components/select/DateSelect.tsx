@@ -13,7 +13,8 @@ import React, {
 } from 'react';
 
 import { Popover } from '@actual-app/components/popover';
-import { styles } from '@actual-app/components/styles';
+import { styles, type CSSProperties } from '@actual-app/components/styles';
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 import { parse, parseISO, format, subDays, addDays, isValid } from 'date-fns';
@@ -31,7 +32,6 @@ import {
 
 import { useLocale } from '../../hooks/useLocale';
 import { useSyncedPref } from '../../hooks/useSyncedPref';
-import { theme, type CSSProperties } from '../../style';
 import { Input } from '../common/Input';
 
 import DateSelectLeft from './DateSelect.left.png';
@@ -223,7 +223,6 @@ type DateSelectProps = {
   isOpen?: boolean;
   embedded?: boolean;
   dateFormat: string;
-  focused?: boolean;
   openOnFocus?: boolean;
   inputRef?: MutableRefObject<HTMLInputElement>;
   shouldSaveFromKey?: (e: KeyboardEvent<HTMLInputElement>) => boolean;
@@ -240,7 +239,6 @@ export function DateSelect({
   isOpen,
   embedded,
   dateFormat = 'yyyy-MM-dd',
-  focused,
   openOnFocus = true,
   inputRef: originalInputRef,
   shouldSaveFromKey = defaultShouldSaveFromKey,
@@ -391,7 +389,6 @@ export function DateSelect({
     <View {...containerProps}>
       <Input
         id={id}
-        focused={focused}
         {...inputProps}
         inputRef={inputRef}
         value={value}
