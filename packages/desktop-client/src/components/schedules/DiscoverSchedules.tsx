@@ -14,6 +14,7 @@ import { getRecurringDescription } from 'loot-core/shared/schedules';
 import type { DiscoverScheduleEntity } from 'loot-core/types/models';
 
 import { useDateFormat } from '../../hooks/useDateFormat';
+import { useLocale } from '../../hooks/useLocale';
 import {
   useSelected,
   useSelectedDispatch,
@@ -42,11 +43,16 @@ function DiscoverSchedulesTable({
   const selectedItems = useSelectedItems();
   const dispatchSelected = useSelectedDispatch();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
+  const locale = useLocale();
 
   function renderItem({ item }: { item: DiscoverScheduleEntity }) {
     const selected = selectedItems.has(item.id);
     const amountOp = item._conditions.find(c => c.field === 'amount').op;
-    const recurDescription = getRecurringDescription(item.date, dateFormat);
+    const recurDescription = getRecurringDescription(
+      item.date,
+      dateFormat,
+      locale,
+    );
 
     return (
       <Row

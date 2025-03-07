@@ -19,6 +19,7 @@ import {
 } from 'loot-core/types/models';
 
 import { useDateFormat } from '../../../hooks/useDateFormat';
+import { useLocale } from '../../../hooks/useLocale';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { useDispatch } from '../../../redux';
 import { MobilePageHeader, Page } from '../../Page';
@@ -35,6 +36,7 @@ export function CategoryTransactions({
   category,
   month,
 }: CategoryTransactionsProps) {
+  const locale = useLocale();
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -105,7 +107,7 @@ export function CategoryTransactions({
             <View>
               <TextOneLine>{category.name}</TextOneLine>
               <TextOneLine>
-                ({monthUtils.format(month, 'MMMM ‘yy')})
+                ({monthUtils.format(month, 'MMMM ‘yy', locale)})
               </TextOneLine>
             </View>
           }

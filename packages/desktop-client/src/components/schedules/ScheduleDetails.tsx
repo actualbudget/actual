@@ -27,6 +27,7 @@ import {
 } from 'loot-core/types/models';
 
 import { useDateFormat } from '../../hooks/useDateFormat';
+import { useLocale } from '../../hooks/useLocale';
 import { usePayees } from '../../hooks/usePayees';
 import { useSelected, SelectedProvider } from '../../hooks/useSelected';
 import { useDispatch } from '../../redux';
@@ -109,6 +110,7 @@ type ScheduleDetailsProps = Extract<
 >['options'];
 
 export function ScheduleDetails({ id, transaction }: ScheduleDetailsProps) {
+  const locale = useLocale();
   const { t } = useTranslation();
 
   const adding = id == null;
@@ -749,7 +751,7 @@ export function ScheduleDetails({ id, transaction }: ScheduleDetailsProps) {
                   >
                     {state.upcomingDates.map(date => (
                       <View key={date}>
-                        {monthUtils.format(date, `${dateFormat} EEEE`)}
+                        {monthUtils.format(date, `${dateFormat} EEEE`, locale)}
                       </View>
                     ))}
                   </Stack>
