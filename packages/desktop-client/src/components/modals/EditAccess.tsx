@@ -2,29 +2,33 @@ import { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import { Select } from '@actual-app/components/select';
 import { Stack } from '@actual-app/components/stack';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { addNotification, popModal, signOut } from 'loot-core/client/actions';
+import { signOut } from 'loot-core/client/actions';
+import {
+  type Modal as ModalType,
+  popModal,
+} from 'loot-core/client/modals/modalsSlice';
+import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import { getUserAccessErrors } from 'loot-core/shared/errors';
-import { type UserAccessEntity } from 'loot-core/types/models/userAccess';
 
 import { useDispatch } from '../../redux';
-import { theme } from '../../style';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
-import { Select } from '../common/Select';
 import { FormField, FormLabel } from '../forms';
 
-type EditUserAccessProps = {
-  defaultUserAccess: UserAccessEntity;
-  onSave?: (userAccess: UserAccessEntity) => void;
-};
+type EditUserAccessProps = Extract<
+  ModalType,
+  { name: 'edit-access' }
+>['options'];
 
 export function EditUserAccess({
-  defaultUserAccess,
+  access: defaultUserAccess,
   onSave: originalOnSave,
 }: EditUserAccessProps) {
   const { t } = useTranslation();
@@ -65,15 +69,17 @@ export function EditUserAccess({
       if (error === 'token-expired') {
         dispatch(
           addNotification({
-            type: 'error',
-            id: 'login-expired',
-            title: t('Login expired'),
-            sticky: true,
-            message: getUserAccessErrors(error),
-            button: {
-              title: t('Go to login'),
-              action: () => {
-                dispatch(signOut());
+            notification: {
+              type: 'error',
+              id: 'login-expired',
+              title: t('Login expired'),
+              sticky: true,
+              message: getUserAccessErrors(error),
+              button: {
+                title: t('Go to login'),
+                action: () => {
+                  dispatch(signOut());
+                },
               },
             },
           }),

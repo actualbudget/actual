@@ -4,9 +4,11 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@actual-app/components/button';
 import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
+import { Select, type SelectOption } from '@actual-app/components/select';
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 
@@ -20,9 +22,7 @@ import {
 } from 'loot-core/types/models/reports';
 import { type SyncedPrefs } from 'loot-core/types/prefs';
 
-import { theme } from '../../style/theme';
 import { Information } from '../alerts';
-import { Select, type SelectOption } from '../common/Select';
 
 import { CategorySelector } from './CategorySelector';
 import { defaultsList, disabledList } from './disabledList';
@@ -198,7 +198,8 @@ export function ReportSidebar({
   return (
     <View
       style={{
-        width: 225,
+        minWidth: 225,
+        maxWidth: 250,
         paddingTop: 10,
         paddingRight: 10,
         flexShrink: 0,

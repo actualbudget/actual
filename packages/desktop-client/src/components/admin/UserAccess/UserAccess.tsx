@@ -14,7 +14,8 @@ import { Button } from '@actual-app/components/button';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
-import { addNotification, pushModal } from 'loot-core/client/actions';
+import { pushModal } from 'loot-core/client/modals/modalsSlice';
+import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import * as undo from 'loot-core/platform/client/undo';
 import { type Handlers } from 'loot-core/types/handlers';
@@ -43,7 +44,7 @@ function UserAccessContent({
   setLoading,
 }: ManageUserAccessContentProps) {
   const { t } = useTranslation();
-
+  const dispatch = useDispatch();
   const [allAccess, setAllAccess] = useState([]);
   const [page, setPage] = useState(0);
   const [filter, setFilter] = useState('');
@@ -85,13 +86,17 @@ function UserAccessContent({
     };
 
     if ('error' in data) {
-      addNotification({
-        type: 'error',
-        id: 'error',
-        title: t('Error getting available users'),
-        sticky: true,
-        message: data.error,
-      });
+      dispatch(
+        addNotification({
+          notification: {
+            type: 'error',
+            id: 'error',
+            title: t('Error getting available users'),
+            sticky: true,
+            message: data.error,
+          },
+        }),
+      );
       return [];
     }
 
@@ -104,7 +109,7 @@ function UserAccessContent({
 
     setAllAccess(loadedAccess);
     return loadedAccess;
-  }, [cloudFileId, setLoading, t]);
+  }, [cloudFileId, dispatch, setLoading, t]);
 
   const loadOwner = useCallback(async () => {
     const file = (await send('get-user-file-info', cloudFileId as string)) ?? {
@@ -280,8 +285,13 @@ function LockToggle({ style, onToggleSave }: LockToggleProps) {
       aria-label="Menu"
       onPress={() =>
         dispatch(
-          pushModal('transfer-ownership', {
-            onSave: () => onToggleSave(),
+          pushModal({
+            modal: {
+              name: 'transfer-ownership',
+              options: {
+                onSave: () => onToggleSave(),
+              },
+            },
           }),
         )
       }

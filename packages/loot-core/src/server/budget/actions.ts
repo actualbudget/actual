@@ -1,5 +1,7 @@
 // @ts-strict-ignore
 
+import * as asyncStorage from '../../platform/server/asyncStorage';
+import { getLocale } from '../../shared/locale';
 import * as monthUtils from '../../shared/months';
 import { integerToCurrency, safeNumber } from '../../shared/util';
 import * as db from '../db';
@@ -35,12 +37,14 @@ function calcBufferedAmount(
   return buffered + amount;
 }
 
-function getBudgetTable(): string {
+type BudgetTable = 'reflect_budgets' | 'zero_budgets';
+
+function getBudgetTable(): BudgetTable {
   return isReflectBudget() ? 'reflect_budgets' : 'zero_budgets';
 }
 
 export function isReflectBudget(): boolean {
-  const budgetType = db.firstSync(
+  const budgetType = db.firstSync<Pick<db.DbPreference, 'value'>>(
     `SELECT value FROM preferences WHERE id = ?`,
     ['budgetType'],
   );
@@ -91,7 +95,7 @@ export function getBudget({
   month: string;
 }): number {
   const table = getBudgetTable();
-  const existing = db.firstSync(
+  const existing = db.firstSync<db.DbZeroBudget | db.DbReflectBudget>(
     `SELECT * FROM ${table} WHERE month = ? AND category = ?`,
     [dbMonth(month), category],
   );
@@ -110,10 +114,12 @@ export function setBudget({
   amount = safeNumber(typeof amount === 'number' ? amount : 0);
   const table = getBudgetTable();
 
-  const existing = db.firstSync(
-    `SELECT id FROM ${table} WHERE month = ? AND category = ?`,
-    [dbMonth(month), category],
-  );
+  const existing = db.firstSync<
+    Pick<db.DbZeroBudget | db.DbReflectBudget, 'id'>
+  >(`SELECT id FROM ${table} WHERE month = ? AND category = ?`, [
+    dbMonth(month),
+    category,
+  ]);
   if (existing) {
     return db.update(table, { id: existing.id, amount });
   }
@@ -127,10 +133,12 @@ export function setBudget({
 
 export function setGoal({ month, category, goal, long_goal }): Promise<void> {
   const table = getBudgetTable();
-  const existing = db.firstSync(
-    `SELECT id FROM ${table} WHERE month = ? AND category = ?`,
-    [dbMonth(month), category],
-  );
+  const existing = db.firstSync<
+    Pick<db.DbZeroBudget | db.DbReflectBudget, 'id'>
+  >(`SELECT id FROM ${table} WHERE month = ? AND category = ?`, [
+    dbMonth(month),
+    category,
+  ]);
   if (existing) {
     return db.update(table, {
       id: existing.id,
@@ -148,7 +156,7 @@ export function setGoal({ month, category, goal, long_goal }): Promise<void> {
 }
 
 export function setBuffer(month: string, amount: unknown): Promise<void> {
-  const existing = db.firstSync(
+  const existing = db.firstSync<Pick<db.DbZeroBudget, 'id'>>(
     `SELECT id FROM zero_budget_months WHERE id = ?`,
     [month],
   );
@@ -167,10 +175,12 @@ function setCarryover(
   month: string,
   flag: boolean,
 ): Promise<void> {
-  const existing = db.firstSync(
-    `SELECT id FROM ${table} WHERE month = ? AND category = ?`,
-    [month, category],
-  );
+  const existing = db.firstSync<
+    Pick<db.DbZeroBudget | db.DbReflectBudget, 'id'>
+  >(`SELECT id FROM ${table} WHERE month = ? AND category = ?`, [
+    month,
+    category,
+  ]);
   if (existing) {
     return db.update(table, { id: existing.id, carryover: flag ? 1 : 0 });
   }
@@ -547,12 +557,18 @@ async function addMovementNotes({
 
   const monthBudgetNotesId = `budget-${month}`;
   const existingMonthBudgetNotes = addNewLine(
-    db.firstSync(`SELECT n.note FROM notes n WHERE n.id = ?`, [
-      monthBudgetNotesId,
-    ])?.note,
+    db.firstSync<Pick<db.DbNote, 'note'>>(
+      `SELECT n.note FROM notes n WHERE n.id = ?`,
+      [monthBudgetNotesId],
+    )?.note,
   );
 
-  const displayDay = monthUtils.format(monthUtils.currentDate(), 'MMMM dd');
+  const locale = getLocale(await asyncStorage.getItem('language'));
+  const displayDay = monthUtils.format(
+    monthUtils.currentDate(),
+    'MMMM dd',
+    locale,
+  );
   const categories = await db.getCategories(
     [from, to].filter(c => c !== 'to-be-budgeted' && c !== 'overbudgeted'),
   );

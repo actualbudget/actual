@@ -7,8 +7,9 @@ import {
   type AccountEntity,
   type TransactionEntity,
   type SyncServerSimpleFinAccount,
+  type SyncServerPluggyAiAccount,
 } from '../../types/models';
-import { addNotification } from '../actions';
+import { addNotification } from '../notifications/notificationsSlice';
 import {
   getAccounts,
   getPayees,
@@ -130,6 +131,28 @@ export const linkAccountSimpleFin = createAppAsyncThunk(
   },
 );
 
+type LinkAccountPluggyAiPayload = {
+  externalAccount: SyncServerPluggyAiAccount;
+  upgradingId?: AccountEntity['id'];
+  offBudget?: boolean;
+};
+
+export const linkAccountPluggyAi = createAppAsyncThunk(
+  `${sliceName}/linkAccountPluggyAi`,
+  async (
+    { externalAccount, upgradingId, offBudget }: LinkAccountPluggyAiPayload,
+    { dispatch },
+  ) => {
+    await send('pluggyai-accounts-link', {
+      externalAccount,
+      upgradingId,
+      offBudget,
+    });
+    dispatch(getPayees());
+    dispatch(getAccounts());
+  },
+);
+
 function handleSyncResponse(
   accountId: AccountEntity['id'],
   res: SyncResponseWithErrors,
@@ -164,16 +187,20 @@ function handleSyncResponse(
     if ('type' in error && error.type === 'SyncError') {
       dispatch(
         addNotification({
-          type: 'error',
-          message: error.message,
+          notification: {
+            type: 'error',
+            message: error.message,
+          },
         }),
       );
     } else {
       dispatch(
         addNotification({
-          type: 'error',
-          message: error.message,
-          internal: 'internal' in error ? error.internal : undefined,
+          notification: {
+            type: 'error',
+            message: error.message,
+            internal: 'internal' in error ? error.internal : undefined,
+          },
         }),
       );
     }
@@ -298,7 +325,7 @@ export const syncAccounts = createAppAsyncThunk(
 
 type MoveAccountPayload = {
   id: AccountEntity['id'];
-  targetId: AccountEntity['id'];
+  targetId: AccountEntity['id'] | null;
 };
 
 export const moveAccount = createAppAsyncThunk(
@@ -315,6 +342,7 @@ export const actions = {
   ...accountsSlice.actions,
   linkAccount,
   linkAccountSimpleFin,
+  linkAccountPluggyAi,
   moveAccount,
   unlinkAccount,
   syncAccounts,

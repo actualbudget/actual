@@ -11,8 +11,8 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import * as d from 'date-fns';
 
-import { addNotification } from 'loot-core/client/actions';
 import { useWidget } from 'loot-core/client/data-hooks/widget';
+import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 import { integerToCurrency } from 'loot-core/shared/util';
@@ -23,6 +23,7 @@ import {
 } from 'loot-core/types/models';
 
 import { useFilters } from '../../../hooks/useFilters';
+import { useLocale } from '../../../hooks/useLocale';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { useDispatch } from '../../../redux';
@@ -64,6 +65,7 @@ type CashFlowInnerProps = {
 };
 
 function CashFlowInner({ widget }: CashFlowInnerProps) {
+  const locale = useLocale();
   const dispatch = useDispatch();
   const { t } = useTranslation();
 
@@ -104,8 +106,9 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
   });
 
   const params = useMemo(
-    () => cashFlowByDate(start, end, isConcise, conditions, conditionsOp),
-    [start, end, isConcise, conditions, conditionsOp],
+    () =>
+      cashFlowByDate(start, end, isConcise, conditions, conditionsOp, locale),
+    [start, end, isConcise, conditions, conditionsOp, locale],
   );
   const data = useReport('cash_flow', params);
 
@@ -120,14 +123,14 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
         .rangeInclusive(earliestMonth, monthUtils.currentMonth())
         .map(month => ({
           name: month,
-          pretty: monthUtils.format(month, 'MMMM, yyyy'),
+          pretty: monthUtils.format(month, 'MMMM, yyyy', locale),
         }))
         .reverse();
 
       setAllMonths(allMonths);
     }
     run();
-  }, []);
+  }, [locale]);
 
   function onChangeDates(start: string, end: string, mode: TimeFrame['mode']) {
     const numDays = d.differenceInCalendarDays(
@@ -166,8 +169,10 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
     });
     dispatch(
       addNotification({
-        type: 'message',
-        message: t('Dashboard widget successfully saved.'),
+        notification: {
+          type: 'message',
+          message: t('Dashboard widget successfully saved.'),
+        },
       }),
     );
   }

@@ -7,9 +7,10 @@ import { getDownloadError, getSyncError } from '../../shared/errors';
 import { type Budget } from '../../types/budget';
 import { type File } from '../../types/file';
 import { type Handlers } from '../../types/handlers';
-import { closeModal, loadGlobalPrefs, loadPrefs, pushModal } from '../actions';
+import { loadGlobalPrefs, loadPrefs } from '../actions';
 import { setAppState } from '../app/appSlice';
 import * as constants from '../constants';
+import { closeModal, pushModal } from '../modals/modalsSlice';
 import { createAppAsyncThunk } from '../redux';
 
 const sliceName = 'budgets';
@@ -61,7 +62,9 @@ export const loadBudget = createAppAsyncThunk(
     if (error) {
       const message = getSyncError(error, id);
       if (error === 'out-of-sync-migrations') {
-        await dispatch(pushModal('out-of-sync-migrations'));
+        await dispatch(
+          pushModal({ modal: { name: 'out-of-sync-migrations' } }),
+        );
       } else if (error === 'out-of-sync-data') {
         // confirm is not available on iOS
         if (typeof window.confirm !== 'undefined') {
@@ -74,7 +77,9 @@ export const loadBudget = createAppAsyncThunk(
           );
 
           if (showBackups) {
-            await dispatch(pushModal('load-backup', { budgetId: id }));
+            await dispatch(
+              pushModal({ modal: { name: 'load-backup', options: {} } }),
+            );
           }
         } else {
           alert(message + ' ' + t('Make sure the app is up-to-date.'));
@@ -266,9 +271,13 @@ export const uploadBudget = createAppAsyncThunk(
   },
 );
 
+type CloseAndLoadBudgetPayload = {
+  fileId: string;
+};
+
 export const closeAndLoadBudget = createAppAsyncThunk(
   `${sliceName}/closeAndLoadBudget`,
-  async ({ fileId }: { fileId: string }, { dispatch }) => {
+  async ({ fileId }: CloseAndLoadBudgetPayload, { dispatch }) => {
     await dispatch(closeBudget());
     await dispatch(loadBudget({ id: fileId }));
   },
@@ -318,7 +327,9 @@ export const downloadBudget = createAppAsyncThunk(
           },
         };
 
-        await dispatch(pushModal('fix-encryption-key', opts));
+        await dispatch(
+          pushModal({ modal: { name: 'fix-encryption-key', options: opts } }),
+        );
         await dispatch(setAppState({ loadingText: null }));
       } else if (error.reason === 'file-exists') {
         alert(

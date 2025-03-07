@@ -6,14 +6,13 @@ import React, {
   type CSSProperties,
 } from 'react';
 
+import { Button } from '@actual-app/components/button';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
 import { Toggle } from '@actual-app/components/toggle';
-import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
-import { theme } from '../../style';
-import { Button } from '../common/Button';
 import { Input } from '../common/Input';
 
 type FieldLabelProps = {
@@ -77,57 +76,59 @@ InputField.displayName = 'InputField';
 
 type TapFieldProps = ComponentPropsWithRef<typeof Button> & {
   rightContent?: ReactNode;
+  textStyle?: CSSProperties;
 };
 
+const defaultTapFieldStyle: ComponentPropsWithoutRef<
+  typeof Button
+>['style'] = ({ isDisabled, isPressed, isHovered }) => ({
+  ...valueStyle,
+  flexDirection: 'row',
+  alignItems: 'center',
+  backgroundColor: theme.tableBackground,
+  ...(isDisabled && {
+    backgroundColor: theme.formInputTextReadOnlySelection,
+  }),
+  ...(isPressed
+    ? {
+        opacity: 0.5,
+        boxShadow: 'none',
+      }
+    : {}),
+  ...(isHovered
+    ? {
+        boxShadow: 'none',
+      }
+    : {}),
+});
+
 export const TapField = forwardRef<HTMLButtonElement, TapFieldProps>(
-  (
-    {
-      value,
-      children,
-      disabled,
-      rightContent,
-      style,
-      textStyle,
-      onClick,
-      ...props
-    },
-    ref,
-  ) => {
+  ({ value, children, rightContent, style, textStyle, ...props }, ref) => {
     return (
       <Button
-        // @ts-expect-error fix this later
-        as={View}
         ref={ref}
-        onClick={!disabled ? onClick : undefined}
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          ...style,
-          ...valueStyle,
-          backgroundColor: theme.tableBackground,
-          ...(disabled && {
-            backgroundColor: theme.formInputTextReadOnlySelection,
-          }),
-        }}
         bounce={false}
-        activeStyle={{
-          opacity: 0.5,
-          boxShadow: 'none',
-        }}
-        hoveredStyle={{
-          boxShadow: 'none',
-        }}
-        // activeOpacity={0.05}
+        style={renderProps => ({
+          ...defaultTapFieldStyle(renderProps),
+          ...(typeof style === 'function' ? style(renderProps) : style),
+        })}
         {...props}
       >
         {children ? (
           children
         ) : (
-          <Text style={{ flex: 1, userSelect: 'none', ...textStyle }}>
+          <Text
+            style={{
+              flex: 1,
+              userSelect: 'none',
+              textAlign: 'left',
+              ...textStyle,
+            }}
+          >
             {value}
           </Text>
         )}
-        {!disabled && rightContent}
+        {!props.isDisabled && rightContent}
       </Button>
     );
   },

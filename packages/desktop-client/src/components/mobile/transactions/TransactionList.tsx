@@ -10,20 +10,27 @@ import { ListBox, Section, Header, Collection } from 'react-aria-components';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
-import { Menu, type MenuItemObject } from '@actual-app/components/menu';
+import {
+  Menu,
+  type MenuItem,
+  type MenuItemObject,
+} from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
-import { setNotificationInset } from 'loot-core/client/actions';
+import { setNotificationInset } from 'loot-core/client/notifications/notificationsSlice';
+import { validForTransfer } from 'loot-core/client/transfer';
 import * as monthUtils from 'loot-core/shared/months';
 import { isPreviewId } from 'loot-core/shared/transactions';
 import { groupById, integerToCurrency } from 'loot-core/shared/util';
+import { type AccountEntity } from 'loot-core/types/models';
 import { type TransactionEntity } from 'loot-core/types/models/transaction';
 
 import { useAccounts } from '../../../hooks/useAccounts';
 import { useCategories } from '../../../hooks/useCategories';
+import { useLocale } from '../../../hooks/useLocale';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { usePayees } from '../../../hooks/usePayees';
 import {
@@ -72,6 +79,7 @@ type TransactionListProps = {
   onOpenTransaction?: (transaction: TransactionEntity) => void;
   isLoadingMore: boolean;
   onLoadMore: () => void;
+  account?: AccountEntity;
 };
 
 export function TransactionList({
@@ -80,7 +88,9 @@ export function TransactionList({
   onOpenTransaction,
   isLoadingMore,
   onLoadMore,
+  account,
 }: TransactionListProps) {
+  const locale = useLocale();
   const { t } = useTranslation();
   const sections = useMemo(() => {
     // Group by date. We can assume transactions is ordered
@@ -173,7 +183,7 @@ export function TransactionList({
                 zIndex: 10,
               }}
             >
-              {monthUtils.format(section.date, 'MMMM dd, yyyy')}
+              {monthUtils.format(section.date, 'MMMM dd, yyyy', locale)}
             </Header>
             <Collection
               items={section.transactions.filter(
@@ -205,7 +215,10 @@ export function TransactionList({
       )}
 
       {selectedTransactions.size > 0 && (
-        <SelectedTransactionsFloatingActionBar transactions={transactions} />
+        <SelectedTransactionsFloatingActionBar
+          transactions={transactions}
+          showMakeTransfer={!account}
+        />
       )}
     </>
   );
@@ -214,12 +227,15 @@ export function TransactionList({
 type SelectedTransactionsFloatingActionBarProps = {
   transactions: readonly TransactionEntity[];
   style?: CSSProperties;
+  showMakeTransfer: boolean;
 };
 
 function SelectedTransactionsFloatingActionBar({
   transactions,
   style = {},
+  showMakeTransfer,
 }: SelectedTransactionsFloatingActionBarProps) {
+  const { t } = useTranslation();
   const editMenuTriggerRef = useRef(null);
   const [isEditMenuOpen, setIsEditMenuOpen] = useState(false);
   const moreOptionsMenuTriggerRef = useRef(null);
@@ -228,6 +244,7 @@ function SelectedTransactionsFloatingActionBar({
     <T extends string>(item: MenuItemObject<T>) => ({
       ...styles.mobileMenuItem,
       color: theme.mobileHeaderText,
+      ...(item.disabled === true && { color: theme.buttonBareDisabledText }),
       ...(item.name === 'delete' && { color: theme.errorTextMenu }),
     }),
     [],
@@ -268,6 +285,7 @@ function SelectedTransactionsFloatingActionBar({
     onBatchDelete,
     onBatchLinkSchedule,
     onBatchUnlinkSchedule,
+    onSetTransfer,
   } = useTransactionBatchActions();
 
   const navigate = useNavigate();
@@ -282,11 +300,58 @@ function SelectedTransactionsFloatingActionBar({
 
   const dispatch = useDispatch();
   useEffect(() => {
-    dispatch(setNotificationInset({ bottom: NOTIFICATION_BOTTOM_INSET }));
+    dispatch(
+      setNotificationInset({ inset: { bottom: NOTIFICATION_BOTTOM_INSET } }),
+    );
     return () => {
       dispatch(setNotificationInset(null));
     };
   }, [dispatch]);
+
+  const canBeTransfer = useMemo(() => {
+    // only two selected
+    if (selectedTransactionsArray.length !== 2) {
+      return false;
+    }
+    const fromTrans = transactions.find(
+      t => t.id === selectedTransactionsArray[0],
+    );
+    const toTrans = transactions.find(
+      t => t.id === selectedTransactionsArray[1],
+    );
+
+    // previously selected transactions aren't always present in current transaction list
+    if (!fromTrans || !toTrans) {
+      return false;
+    }
+
+    return validForTransfer(fromTrans, toTrans);
+  }, [selectedTransactionsArray, transactions]);
+
+  const moreOptionsMenuItems: MenuItem<string>[] = [
+    {
+      name: 'duplicate',
+      text: t('Duplicate'),
+    },
+    {
+      name: allTransactionsAreLinked ? 'unlink-schedule' : 'link-schedule',
+      text: allTransactionsAreLinked
+        ? t('Unlink schedule')
+        : t('Link schedule'),
+    },
+    {
+      name: 'delete',
+      text: t('Delete'),
+    },
+  ];
+
+  if (showMakeTransfer) {
+    moreOptionsMenuItems.splice(2, 0, {
+      name: 'transfer',
+      text: t('Make transfer'),
+      disabled: !canBeTransfer,
+    });
+  }
 
   return (
     <FloatingActionBar style={style}>
@@ -334,13 +399,13 @@ function SelectedTransactionsFloatingActionBar({
           <Button
             variant="bare"
             ref={editMenuTriggerRef}
-            aria-label="Edit fields"
+            aria-label={t('Edit fields')}
             onPress={() => {
               setIsEditMenuOpen(true);
             }}
             {...buttonProps}
           >
-            Edit
+            <Trans>Edit</Trans>
           </Button>
 
           <Popover
@@ -357,7 +422,7 @@ function SelectedTransactionsFloatingActionBar({
                   name,
                   ids: selectedTransactionsArray,
                   onSuccess: (ids, name, value, mode) => {
-                    let displayValue = value;
+                    let displayValue;
                     switch (name) {
                       case 'account':
                         displayValue =
@@ -417,19 +482,19 @@ function SelectedTransactionsFloatingActionBar({
                 // },
                 {
                   name: 'account',
-                  text: 'Account',
+                  text: t('Account'),
                 },
                 {
                   name: 'payee',
-                  text: 'Payee',
+                  text: t('Payee'),
                 },
                 {
                   name: 'notes',
-                  text: 'Notes',
+                  text: t('Notes'),
                 },
                 {
                   name: 'category',
-                  text: 'Category',
+                  text: t('Category'),
                 },
                 // Add support later on until we have more user friendly amount input modal.
                 // {
@@ -438,7 +503,7 @@ function SelectedTransactionsFloatingActionBar({
                 // },
                 {
                   name: 'cleared',
-                  text: 'Cleared',
+                  text: t('Cleared'),
                 },
               ]}
             />
@@ -447,7 +512,7 @@ function SelectedTransactionsFloatingActionBar({
           <Button
             variant="bare"
             ref={moreOptionsMenuTriggerRef}
-            aria-label="More options"
+            aria-label={t('More options')}
             onPress={() => {
               setIsMoreOptionsMenuOpen(true);
             }}
@@ -475,7 +540,10 @@ function SelectedTransactionsFloatingActionBar({
                     ids: selectedTransactionsArray,
                     onSuccess: ids => {
                       showUndoNotification({
-                        message: `Successfully duplicated ${ids.length} transaction${ids.length > 1 ? 's' : ''}.`,
+                        message: t(
+                          'Successfully duplicated {{count}} transactions.',
+                          { count: ids.length },
+                        ),
                       });
                     },
                   });
@@ -486,7 +554,10 @@ function SelectedTransactionsFloatingActionBar({
                       // TODO: When schedule becomes available in mobile, update undo notification message
                       // with `messageActions` to open the schedule when the schedule name is clicked.
                       showUndoNotification({
-                        message: `Successfully linked ${ids.length} transaction${ids.length > 1 ? 's' : ''} to ${schedule.name}.`,
+                        message: t(
+                          'Successfully linked {{count}} transactions to {{schedule}}.',
+                          { count: ids.length, schedule: schedule.name },
+                        ),
                       });
                     },
                   });
@@ -495,7 +566,10 @@ function SelectedTransactionsFloatingActionBar({
                     ids: selectedTransactionsArray,
                     onSuccess: ids => {
                       showUndoNotification({
-                        message: `Successfully unlinked ${ids.length} transaction${ids.length > 1 ? 's' : ''} from their respective schedules.`,
+                        message: t(
+                          'Successfully unlinked {{count}} transactions from their respective schedules.',
+                          { count: ids.length },
+                        ),
                       });
                     },
                   });
@@ -505,36 +579,28 @@ function SelectedTransactionsFloatingActionBar({
                     onSuccess: ids => {
                       showUndoNotification({
                         type: 'warning',
-                        message: `Successfully deleted ${ids.length} transaction${ids.length > 1 ? 's' : ''}.`,
+                        message: t(
+                          'Successfully deleted {{count}} transactions.',
+                          { count: ids.length },
+                        ),
                       });
                     },
                   });
+                } else if (type === 'transfer') {
+                  onSetTransfer?.(selectedTransactionsArray, payees, ids =>
+                    showUndoNotification({
+                      message: t(
+                        'Successfully marked {{count}} transactions as transfer.',
+                        {
+                          count: ids.length,
+                        },
+                      ),
+                    }),
+                  );
                 }
                 setIsMoreOptionsMenuOpen(false);
               }}
-              items={[
-                {
-                  name: 'duplicate',
-                  text: 'Duplicate',
-                },
-                ...(allTransactionsAreLinked
-                  ? [
-                      {
-                        name: 'unlink-schedule',
-                        text: 'Unlink schedule',
-                      },
-                    ]
-                  : [
-                      {
-                        name: 'link-schedule',
-                        text: 'Link schedule',
-                      },
-                    ]),
-                {
-                  name: 'delete',
-                  text: 'Delete',
-                },
-              ]}
+              items={moreOptionsMenuItems}
             />
           </Popover>
         </View>

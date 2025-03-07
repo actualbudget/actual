@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -7,10 +7,11 @@ import { View } from '@actual-app/components/view';
 
 import {
   linkAccount,
+  linkAccountPluggyAi,
   linkAccountSimpleFin,
   unlinkAccount,
 } from 'loot-core/client/accounts/accountsSlice';
-import { closeModal } from 'loot-core/client/actions';
+import { closeModal } from 'loot-core/client/modals/modalsSlice';
 
 import { useAccounts } from '../../hooks/useAccounts';
 import { useDispatch } from '../../redux';
@@ -36,11 +37,16 @@ function useAddBudgetAccountOptions() {
 }
 
 export function SelectLinkedAccountsModal({
-  requisitionId,
+  requisitionId = undefined,
   externalAccounts,
-  syncSource,
+  syncSource = undefined,
 }) {
-  externalAccounts.sort((a, b) => a.name.localeCompare(b.name));
+  const sortedExternalAccounts = useMemo(() => {
+    const toSort = [...externalAccounts];
+    toSort.sort((a, b) => a.name.localeCompare(b.name));
+    return toSort;
+  }, [externalAccounts]);
+
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const localAccounts = useAccounts().filter(a => a.closed === 0);
@@ -67,7 +73,7 @@ export function SelectLinkedAccountsModal({
     // Link new accounts
     Object.entries(chosenAccounts).forEach(
       ([chosenExternalAccountId, chosenLocalAccountId]) => {
-        const externalAccount = externalAccounts.find(
+        const externalAccount = sortedExternalAccounts.find(
           account => account.account_id === chosenExternalAccountId,
         );
         const offBudget = chosenLocalAccountId === addOffBudgetAccountOption.id;
@@ -82,6 +88,18 @@ export function SelectLinkedAccountsModal({
         if (syncSource === 'simpleFin') {
           dispatch(
             linkAccountSimpleFin({
+              externalAccount,
+              upgradingId:
+                chosenLocalAccountId !== addOnBudgetAccountOption.id &&
+                chosenLocalAccountId !== addOffBudgetAccountOption.id
+                  ? chosenLocalAccountId
+                  : undefined,
+              offBudget,
+            }),
+          );
+        } else if (syncSource === 'pluggyai') {
+          dispatch(
+            linkAccountPluggyAi({
               externalAccount,
               upgradingId:
                 chosenLocalAccountId !== addOnBudgetAccountOption.id &&
@@ -163,7 +181,7 @@ export function SelectLinkedAccountsModal({
             />
 
             <Table
-              items={externalAccounts}
+              items={sortedExternalAccounts}
               style={{ backgroundColor: theme.tableHeaderBackground }}
               getItemKey={index => index}
               renderItem={({ key, item }) => (

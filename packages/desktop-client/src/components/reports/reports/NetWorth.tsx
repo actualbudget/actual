@@ -8,8 +8,8 @@ import { styles } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
 import * as d from 'date-fns';
 
-import { addNotification } from 'loot-core/client/actions';
 import { useWidget } from 'loot-core/client/data-hooks/widget';
+import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 import { integerToCurrency } from 'loot-core/shared/util';
@@ -17,6 +17,7 @@ import { type TimeFrame, type NetWorthWidget } from 'loot-core/types/models';
 
 import { useAccounts } from '../../../hooks/useAccounts';
 import { useFilters } from '../../../hooks/useFilters';
+import { useLocale } from '../../../hooks/useLocale';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { useDispatch } from '../../../redux';
@@ -54,6 +55,7 @@ type NetWorthInnerProps = {
 };
 
 function NetWorthInner({ widget }: NetWorthInnerProps) {
+  const locale = useLocale();
   const dispatch = useDispatch();
   const { t } = useTranslation();
 
@@ -80,8 +82,16 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
   const [mode, setMode] = useState(initialMode);
 
   const reportParams = useMemo(
-    () => netWorthSpreadsheet(start, end, accounts, conditions, conditionsOp),
-    [start, end, accounts, conditions, conditionsOp],
+    () =>
+      netWorthSpreadsheet(
+        start,
+        end,
+        accounts,
+        conditions,
+        conditionsOp,
+        locale,
+      ),
+    [start, end, accounts, conditions, conditionsOp, locale],
   );
   const data = useReport('net_worth', reportParams);
   useEffect(() => {
@@ -104,14 +114,14 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
         .rangeInclusive(earliestMonth, monthUtils.currentMonth())
         .map(month => ({
           name: month,
-          pretty: monthUtils.format(month, 'MMMM, yyyy'),
+          pretty: monthUtils.format(month, 'MMMM, yyyy', locale),
         }))
         .reverse();
 
       setAllMonths(allMonths);
     }
     run();
-  }, []);
+  }, [locale]);
 
   function onChangeDates(start: string, end: string, mode: TimeFrame['mode']) {
     setStart(start);
@@ -139,8 +149,10 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
     });
     dispatch(
       addNotification({
-        type: 'message',
-        message: t('Dashboard widget successfully saved.'),
+        notification: {
+          type: 'message',
+          message: t('Dashboard widget successfully saved.'),
+        },
       }),
     );
   }
