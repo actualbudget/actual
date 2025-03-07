@@ -1,5 +1,5 @@
 FROM alpine:3.18 AS base
-RUN apk add --no-cache nodejs yarn npm python3 openssl build-base
+RUN apk add --no-cache nodejs yarn python3 openssl build-base
 WORKDIR /app
 
 RUN if [ "$(uname -m)" = "armv7l" ]; then yarn config set taskPoolConcurrency 2; yarn config set networkConcurrency 5; fi
@@ -16,7 +16,6 @@ RUN if [ "$(uname -m)" = "armv7l" ]; then npm_config_build_from_source=true yarn
 RUN rm ./node_modules/@actual-app/web ./node_modules/@actual-app/sync-server
 COPY packages/desktop-client/package.json ./node_modules/@actual-app/web/package.json
 COPY packages/desktop-client/build ./node_modules/@actual-app/web/build
-
 
 FROM alpine:3.18 AS prod
 RUN apk add --no-cache nodejs tini
