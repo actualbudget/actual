@@ -2,7 +2,9 @@
 import React, { type ReactNode } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 
+import { Select } from '@actual-app/components/select';
 import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
@@ -11,9 +13,7 @@ import { type SyncedPrefs } from 'loot-core/types/prefs';
 
 import { useDateFormat } from '../../hooks/useDateFormat';
 import { useSyncedPref } from '../../hooks/useSyncedPref';
-import { theme } from '../../style';
 import { tokens } from '../../tokens';
-import { Select } from '../common/Select';
 import { Checkbox } from '../forms';
 import { useSidebar } from '../sidebar/SidebarProvider';
 

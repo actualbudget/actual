@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-const template = ({ imports, interfaces, componentName, props, jsx }, { tpl }) => {
+const tmpl = ({ imports, interfaces, componentName, props, jsx }, { tpl }) => {
   return tpl`
 ${imports};
 
@@ -8,7 +8,7 @@ ${interfaces};
 export const ${componentName} = (${props}) => (
   ${jsx}
 );
-`
-}
+`;
+};
 
-module.exports = template
+module.exports = tmpl;
