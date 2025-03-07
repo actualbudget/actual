@@ -15,7 +15,7 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { AutoTextSize } from 'auto-text-size';
 
-import { collapseModals, pushModal } from 'loot-core/client/actions';
+import { collapseModals, pushModal } from 'loot-core/client/modals/modalsSlice';
 import { envelopeBudget, trackingBudget } from 'loot-core/client/queries';
 import { moveCategory } from 'loot-core/client/queries/queriesSlice';
 import * as monthUtils from 'loot-core/shared/months';
@@ -485,7 +485,9 @@ function ExpenseCategoryListItem({
         category: category.id,
         flag: carryover,
       });
-      dispatch(collapseModals(`${modalBudgetType}-balance-menu`));
+      dispatch(
+        collapseModals({ rootModalName: `${modalBudgetType}-balance-menu` }),
+      );
     },
     [modalBudgetType, category.id, dispatch, month, onBudgetAction],
   );
@@ -501,23 +503,32 @@ function ExpenseCategoryListItem({
 
   const onTransfer = useCallback(() => {
     dispatch(
-      pushModal('transfer', {
-        title: category.name,
-        categoryId: category.id,
-        month,
-        amount: catBalance,
-        onSubmit: (amount, toCategoryId) => {
-          onBudgetAction(month, 'transfer-category', {
-            amount,
-            from: category.id,
-            to: toCategoryId,
-          });
-          dispatch(collapseModals(`${modalBudgetType}-balance-menu`));
-          showUndoNotification({
-            message: `Transferred ${integerToCurrency(amount)} from ${category.name} to ${categoriesById[toCategoryId].name}.`,
-          });
+      pushModal({
+        modal: {
+          name: 'transfer',
+          options: {
+            title: category.name,
+            categoryId: category.id,
+            month,
+            amount: catBalance,
+            onSubmit: (amount, toCategoryId) => {
+              onBudgetAction(month, 'transfer-category', {
+                amount,
+                from: category.id,
+                to: toCategoryId,
+              });
+              dispatch(
+                collapseModals({
+                  rootModalName: `${modalBudgetType}-balance-menu`,
+                }),
+              );
+              showUndoNotification({
+                message: `Transferred ${integerToCurrency(amount)} from ${category.name} to ${categoriesById[toCategoryId].name}.`,
+              });
+            },
+            showToBeBudgeted: true,
+          },
         },
-        showToBeBudgeted: true,
       }),
     );
   }, [
@@ -534,25 +545,34 @@ function ExpenseCategoryListItem({
 
   const onCover = useCallback(() => {
     dispatch(
-      pushModal('cover', {
-        title: category.name,
-        month,
-        categoryId: category.id,
-        onSubmit: fromCategoryId => {
-          onBudgetAction(month, 'cover-overspending', {
-            to: category.id,
-            from: fromCategoryId,
-          });
-          dispatch(collapseModals(`${modalBudgetType}-balance-menu`));
-          showUndoNotification({
-            message: t(
-              `Covered {{toCategoryName}} overspending from {{fromCategoryName}}.`,
-              {
-                toCategoryName: category.name,
-                fromCategoryName: categoriesById[fromCategoryId].name,
-              },
-            ),
-          });
+      pushModal({
+        modal: {
+          name: 'cover',
+          options: {
+            title: category.name,
+            month,
+            categoryId: category.id,
+            onSubmit: fromCategoryId => {
+              onBudgetAction(month, 'cover-overspending', {
+                to: category.id,
+                from: fromCategoryId,
+              });
+              dispatch(
+                collapseModals({
+                  rootModalName: `${modalBudgetType}-balance-menu`,
+                }),
+              );
+              showUndoNotification({
+                message: t(
+                  `Covered {{toCategoryName}} overspending from {{fromCategoryName}}.`,
+                  {
+                    toCategoryName: category.name,
+                    fromCategoryName: categoriesById[fromCategoryId].name,
+                  },
+                ),
+              });
+            },
+          },
         },
       }),
     );
@@ -570,11 +590,16 @@ function ExpenseCategoryListItem({
 
   const onOpenBalanceMenu = useCallback(() => {
     dispatch(
-      pushModal(`${modalBudgetType}-balance-menu`, {
-        categoryId: category.id,
-        month,
-        onCarryover,
-        ...(budgetType === 'rollover' && { onTransfer, onCover }),
+      pushModal({
+        modal: {
+          name: `${modalBudgetType}-balance-menu`,
+          options: {
+            categoryId: category.id,
+            month,
+            onCarryover,
+            ...(budgetType === 'rollover' && { onTransfer, onCover }),
+          },
+        },
       }),
     );
   }, [
