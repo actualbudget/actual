@@ -22,6 +22,7 @@ import { groupById, integerToCurrency } from 'loot-core/shared/util';
 
 import { useCategories } from '../../../hooks/useCategories';
 import { useFeatureFlag } from '../../../hooks/useFeatureFlag';
+import { useLocale } from '../../../hooks/useLocale';
 import { useLocalPref } from '../../../hooks/useLocalPref';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { useNotes } from '../../../hooks/useNotes';
@@ -2042,6 +2043,7 @@ function MonthSelector({
   onPrevMonth,
   onNextMonth,
 }) {
+  const locale = useLocale();
   const { t } = useTranslation();
   const prevEnabled = month > monthBounds.start;
   const nextEnabled = month < monthUtils.subMonths(monthBounds.end, 1);
@@ -2086,7 +2088,7 @@ function MonthSelector({
         data-month={month}
       >
         <Text style={styles.underlinedText}>
-          {monthUtils.format(month, 'MMMM ‘yy')}
+          {monthUtils.format(month, 'MMMM ‘yy', locale)}
         </Text>
       </Button>
       <Button

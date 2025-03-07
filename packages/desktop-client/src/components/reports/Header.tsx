@@ -12,6 +12,7 @@ import {
 } from 'loot-core/types/models';
 import { type SyncedPrefs } from 'loot-core/types/prefs';
 
+import { useLocale } from '../../hooks/useLocale';
 import { Select } from '../common/Select';
 import { AppliedFilters } from '../filters/AppliedFilters';
 import { FilterButton } from '../filters/FiltersMenu';
@@ -67,6 +68,7 @@ export function Header({
   onConditionsOpChange,
   children,
 }: HeaderProps) {
+  const locale = useLocale();
   const { t } = useTranslation();
   const { isNarrowWidth } = useResponsive();
   function convertToMonth(
@@ -123,7 +125,7 @@ export function Header({
                 )
               }
               value={start}
-              defaultLabel={monthUtils.format(start, 'MMMM, yyyy')}
+              defaultLabel={monthUtils.format(start, 'MMMM, yyyy', locale)}
               options={allMonths.map(({ name, pretty }) => [name, pretty])}
             />
             <View>{t('to')}</View>

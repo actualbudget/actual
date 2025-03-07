@@ -10,11 +10,17 @@
     "react-aria-components": "^1.4.1"
   },
   "devDependencies": {
+    "@svgr/cli": "^8.1.0",
     "@types/react": "^18.2.0",
     "react": "18.2.0"
   },
   "exports": {
-    "./icons/*": "./src/icons/*.tsx",
+    "./icons/logo": "./src/icons/logo/index.ts",
+    "./icons/v0": "./src/icons/v0/index.ts",
+    "./icons/v1": "./src/icons/v1/index.ts",
+    "./icons/v2": "./src/icons/v2/index.ts",
+    "./icons/AnimatedLoading": "./src/icons/AnimatedLoading.tsx",
+    "./icons/Loading": "./src/icons/Loading.tsx",
     "./aligned-text": "./src/AlignedText.tsx",
     "./block": "./src/Block.tsx",
     "./button": "./src/Button.tsx",
@@ -36,5 +42,8 @@
     "./toggle": "./src/Toggle.tsx",
     "./tooltip": "./src/Tooltip.tsx",
     "./view": "./src/View.tsx"
+  },
+  "scripts": {
+    "generate:icons": "rm src/icons/*/*.tsx; cd src/icons && svgr --template template.ts --index-template index-template.ts --typescript --expand-props start -d . ."
   }
 }

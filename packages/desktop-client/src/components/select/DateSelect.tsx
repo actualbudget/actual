@@ -29,6 +29,7 @@ import {
   currentDate,
 } from 'loot-core/shared/months';
 
+import { useLocale } from '../../hooks/useLocale';
 import { useSyncedPref } from '../../hooks/useSyncedPref';
 import { theme, type CSSProperties } from '../../style';
 import { Input } from '../common/Input';
@@ -81,6 +82,39 @@ const pickerStyles: CSSProperties = {
   },
 };
 
+type PikadayI18n = {
+  previousMonth: string;
+  nextMonth: string;
+  months: string[];
+  weekdays: string[];
+  weekdaysShort: string[];
+};
+
+function createPikadayLocale(dateFnsLocale: Locale): PikadayI18n {
+  const months = Array.from({ length: 12 }, (_, i) =>
+    format(new Date(2023, i, 1), 'MMMM', { locale: dateFnsLocale }),
+  );
+
+  const weekdays = Array.from({ length: 7 }, (_, i) =>
+    format(new Date(2023, 0, i + 1), 'EEEE', { locale: dateFnsLocale }),
+  );
+
+  const weekdaysShort = Array.from({ length: 7 }, (_, i) =>
+    format(new Date(2023, 0, i + 1), 'EEE', { locale: dateFnsLocale }).slice(
+      0,
+      3,
+    ),
+  );
+
+  return {
+    previousMonth: 'Previous',
+    nextMonth: 'Next',
+    months,
+    weekdays,
+    weekdaysShort,
+  };
+}
+
 type DatePickerProps = {
   value: string;
   firstDayOfWeekIdx: string;
@@ -94,6 +128,7 @@ type DatePickerForwardedRef = {
 };
 const DatePicker = forwardRef<DatePickerForwardedRef, DatePickerProps>(
   ({ value, firstDayOfWeekIdx, dateFormat, onUpdate, onSelect }, ref) => {
+    const locale = useLocale();
     const picker = useRef(null);
     const mountPoint = useRef(null);
 
@@ -132,6 +167,8 @@ const DatePicker = forwardRef<DatePickerForwardedRef, DatePickerProps>(
     );
 
     useLayoutEffect(() => {
+      const pikadayLocale = createPikadayLocale(locale);
+
       picker.current = new Pikaday({
         theme: 'actual-date-picker',
         keyboardInput: false,
@@ -147,6 +184,7 @@ const DatePicker = forwardRef<DatePickerForwardedRef, DatePickerProps>(
           return parse(dateString, dateFormat, new Date());
         },
         onSelect,
+        i18n: pikadayLocale,
       });
 
       mountPoint.current.appendChild(picker.current.el);
