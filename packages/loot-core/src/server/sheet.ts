@@ -238,9 +238,17 @@ export async function loadUserBudgets(
 
   sheet.endTransaction();
 
-  const categories = await db.all(`SELECT * FROM categories`);
+  const categories = await db.all(
+    `SELECT * FROM categories WHERE tombstone = 0`,
+  );
   for (const cat of categories) {
     sheet.set(`__global!hidden-${cat.id}`, cat.hidden);
+  }
+  const groups = await db.all(
+    `SELECT * FROM category_groups where tombsone = 0`,
+  );
+  for (const g of groups) {
+    sheet.set(`__global!hidden-${g.id}`, g.hidden);
   }
 }
 
