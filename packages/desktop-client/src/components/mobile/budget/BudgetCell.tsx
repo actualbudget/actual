@@ -7,7 +7,7 @@ import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 import { AutoTextSize } from 'auto-text-size';
 
-import { pushModal } from 'loot-core/client/actions';
+import { pushModal } from 'loot-core/client/modals/modalsSlice';
 import { integerToCurrency } from 'loot-core/shared/util';
 import { type CategoryEntity } from 'loot-core/types/models';
 
@@ -57,50 +57,54 @@ export function BudgetCell<
     const modalBudgetType = budgetType === 'rollover' ? 'envelope' : 'tracking';
     const categoryBudgetMenuModal = `${modalBudgetType}-budget-menu` as const;
     dispatch(
-      pushModal(categoryBudgetMenuModal, {
-        categoryId: category.id,
-        month,
-        onUpdateBudget: amount => {
-          onBudgetAction(month, 'budget-amount', {
-            category: category.id,
-            amount,
-          });
-          showUndoNotification({
-            message: `${category.name} budget has been updated to ${integerToCurrency(amount)}.`,
-          });
-        },
-        onCopyLastMonthAverage: () => {
-          onBudgetAction(month, 'copy-single-last', {
-            category: category.id,
-          });
-          showUndoNotification({
-            message: `${category.name} budget has been set last to month’s budgeted amount.`,
-          });
-        },
-        onSetMonthsAverage: numberOfMonths => {
-          if (
-            numberOfMonths !== 3 &&
-            numberOfMonths !== 6 &&
-            numberOfMonths !== 12
-          ) {
-            return;
-          }
-
-          onBudgetAction(month, `set-single-${numberOfMonths}-avg`, {
-            category: category.id,
-          });
-          showUndoNotification({
-            message: `${category.name} budget has been set to ${numberOfMonths === 12 ? 'yearly' : `${numberOfMonths} month`} average.`,
-          });
-        },
-        onApplyBudgetTemplate: () => {
-          onBudgetAction(month, 'apply-single-category-template', {
-            category: category.id,
-          });
-          showUndoNotification({
-            message: `${category.name} budget templates have been applied.`,
-            pre: categoryNotes ?? undefined,
-          });
+      pushModal({
+        modal: {
+          name: categoryBudgetMenuModal,
+          options: {
+            categoryId: category.id,
+            month,
+            onUpdateBudget: amount => {
+              onBudgetAction(month, 'budget-amount', {
+                category: category.id,
+                amount,
+              });
+              showUndoNotification({
+                message: `${category.name} budget has been updated to ${integerToCurrency(amount)}.`,
+              });
+            },
+            onCopyLastMonthAverage: () => {
+              onBudgetAction(month, 'copy-single-last', {
+                category: category.id,
+              });
+              showUndoNotification({
+                message: `${category.name} budget has been set last to month’s budgeted amount.`,
+              });
+            },
+            onSetMonthsAverage: numberOfMonths => {
+              if (
+                numberOfMonths !== 3 &&
+                numberOfMonths !== 6 &&
+                numberOfMonths !== 12
+              ) {
+                return;
+              }
+              onBudgetAction(month, `set-single-${numberOfMonths}-avg`, {
+                category: category.id,
+              });
+              showUndoNotification({
+                message: `${category.name} budget has been set to ${numberOfMonths === 12 ? 'yearly' : `${numberOfMonths} month`} average.`,
+              });
+            },
+            onApplyBudgetTemplate: () => {
+              onBudgetAction(month, 'apply-single-category-template', {
+                category: category.id,
+              });
+              showUndoNotification({
+                message: `${category.name} budget templates have been applied.`,
+                pre: categoryNotes ?? undefined,
+              });
+            },
+          },
         },
       }),
     );
