@@ -9,9 +9,13 @@ import React, {
 import { useTranslation } from 'react-i18next';
 
 import { Button, ButtonWithLoading } from '@actual-app/components/button';
+import { useResponsive } from '@actual-app/components/hooks/useResponsive';
+import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
+import { SvgDelete } from '@actual-app/components/icons/v0';
 import { Stack } from '@actual-app/components/stack';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
@@ -20,13 +24,9 @@ import {
   type NotificationWithId,
 } from 'loot-core/client/notifications/notificationsSlice';
 
-import { AnimatedLoading } from '../icons/AnimatedLoading';
-import { SvgDelete } from '../icons/v0';
 import { useSelector, useDispatch } from '../redux';
-import { theme } from '../style';
 
 import { Link } from './common/Link';
-import { useResponsive } from './responsive/ResponsiveProvider';
 
 function compileMessage(
   message: string,

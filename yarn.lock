@@ -47,6 +47,7 @@ __metadata:
     "@types/react": "npm:^18.2.0"
     react: "npm:18.2.0"
     react-aria-components: "npm:^1.4.1"
+    usehooks-ts: "npm:^3.0.1"
   peerDependencies:
     react: ">=18.2"
   languageName: unknown

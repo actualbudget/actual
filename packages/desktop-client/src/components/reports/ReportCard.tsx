@@ -7,6 +7,8 @@ import React, {
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import { useResponsive } from '@actual-app/components/hooks/useResponsive';
+import { SvgDotsHorizontalTriple } from '@actual-app/components/icons/v1';
 import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
 import { theme } from '@actual-app/components/theme';
@@ -15,8 +17,6 @@ import { View } from '@actual-app/components/view';
 import { useContextMenu } from '../../hooks/useContextMenu';
 import { useIsInViewport } from '../../hooks/useIsInViewport';
 import { useNavigate } from '../../hooks/useNavigate';
-import { SvgDotsHorizontalTriple } from '../../icons/v1';
-import { useResponsive } from '../responsive/ResponsiveProvider';
 
 import { NON_DRAGGABLE_AREA_CLASS_NAME } from './constants';
 

@@ -3,9 +3,12 @@ import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { Card } from '@actual-app/components/card';
+import { useResponsive } from '@actual-app/components/hooks/useResponsive';
+import { SvgCalendar, SvgViewShow } from '@actual-app/components/icons/v2';
 import { Label } from '@actual-app/components/label';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 import { AutoTextSize } from 'auto-text-size';
@@ -36,15 +39,12 @@ import {
   SvgArrowThickRight,
   SvgCheveronRight,
 } from '../../../icons/v1';
-import { SvgCalendar, SvgViewShow } from '../../../icons/v2';
 import { useDispatch } from '../../../redux';
-import { theme } from '../../../style';
 import { BalanceWithCarryover } from '../../budget/BalanceWithCarryover';
 import { makeAmountGrey, makeBalanceAmountStyle } from '../../budget/util';
 import { Link } from '../../common/Link';
 import { MobilePageHeader, Page } from '../../Page';
 import { PrivacyFilter } from '../../PrivacyFilter';
-import { useResponsive } from '../../responsive/ResponsiveProvider';
 import { CellValue } from '../../spreadsheet/CellValue';
 import { useFormat } from '../../spreadsheet/useFormat';
 import { useSheetValue } from '../../spreadsheet/useSheetValue';

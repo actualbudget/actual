@@ -2,15 +2,18 @@ import React, { useRef, useState, type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import { useResponsive } from '@actual-app/components/hooks/useResponsive';
+import {
+  SvgMoonStars,
+  SvgSun,
+  SvgSystem,
+} from '@actual-app/components/icons/v2';
 import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
 
 import type { Theme } from 'loot-core/types/prefs';
 
-import { SvgMoonStars, SvgSun, SvgSystem } from '../icons/v2';
 import { themeOptions, useTheme } from '../style';
-
-import { useResponsive } from './responsive/ResponsiveProvider';
 
 type ThemeSelectorProps = {
   style?: CSSProperties;

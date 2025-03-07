@@ -1,12 +1,13 @@
 import { useCallback } from 'react';
 
+import { useResponsive } from '@actual-app/components/hooks/useResponsive';
+
 import {
   addNotification,
   type Notification,
 } from 'loot-core/client/notifications/notificationsSlice';
 import { redo, undo } from 'loot-core/client/undo';
 
-import { useResponsive } from '../components/responsive/ResponsiveProvider';
 import { useDispatch } from '../redux';
 
 type UndoActions = {

@@ -9,8 +9,9 @@ import React, {
   type SetStateAction,
 } from 'react';
 
+import { useResponsive } from '@actual-app/components/hooks/useResponsive';
+
 import { useGlobalPref } from '../../hooks/useGlobalPref';
-import { useResponsive } from '../responsive/ResponsiveProvider';
 
 type SidebarContextValue = {
   hidden: boolean;

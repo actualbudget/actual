@@ -2,6 +2,7 @@ import React, { useState, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Block } from '@actual-app/components/block';
+import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { styles } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
 
@@ -13,7 +14,6 @@ import {
 
 import { useLocale } from '../../../hooks/useLocale';
 import { PrivacyFilter } from '../../PrivacyFilter';
-import { useResponsive } from '../../responsive/ResponsiveProvider';
 import { Change } from '../Change';
 import { DateRange } from '../DateRange';
 import { NetWorthGraph } from '../graphs/NetWorthGraph';

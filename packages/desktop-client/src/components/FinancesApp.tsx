@@ -9,6 +9,8 @@ import {
   useHref,
 } from 'react-router-dom';
 
+import { useResponsive } from '@actual-app/components/hooks/useResponsive';
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import { sync } from 'loot-core/client/app/appSlice';
@@ -22,7 +24,6 @@ import { useLocalPref } from '../hooks/useLocalPref';
 import { useMetaThemeColor } from '../hooks/useMetaThemeColor';
 import { useNavigate } from '../hooks/useNavigate';
 import { useSelector, useDispatch } from '../redux';
-import { theme } from '../style';
 import { getIsOutdated, getLatestVersion } from '../util/versions';
 
 import { UserAccessPage } from './admin/UserAccess/UserAccessPage';
@@ -38,7 +39,6 @@ import { ManagePayeesPage } from './payees/ManagePayeesPage';
 import { Reports } from './reports';
 import { LoadingIndicator } from './reports/LoadingIndicator';
 import { NarrowAlternate, WideComponent } from './responsive';
-import { useResponsive } from './responsive/ResponsiveProvider';
 import { UserDirectoryPage } from './responsive/wide';
 import { ScrollProvider } from './ScrollProvider';
 import { useMultiuserEnabled } from './ServerContext';

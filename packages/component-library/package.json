@@ -7,7 +7,8 @@
   },
   "dependencies": {
     "@emotion/css": "^11.13.4",
-    "react-aria-components": "^1.4.1"
+    "react-aria-components": "^1.4.1",
+    "usehooks-ts": "^3.0.1"
   },
   "devDependencies": {
     "@svgr/cli": "^8.1.0",
@@ -15,6 +16,7 @@
     "react": "18.2.0"
   },
   "exports": {
+    "./hooks/*": "./src/hooks/*.ts",
     "./icons/logo": "./src/icons/logo/index.ts",
     "./icons/v0": "./src/icons/v0/index.ts",
     "./icons/v1": "./src/icons/v1/index.ts",

@@ -1,10 +1,10 @@
 import React from 'react';
 
+import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { View } from '@actual-app/components/view';
 import { useDebounceCallback } from 'usehooks-ts';
 
 import { useGlobalPref } from '../../hooks/useGlobalPref';
-import { useResponsive } from '../responsive/ResponsiveProvider';
 
 import { Sidebar } from './Sidebar';
 import { useSidebar } from './SidebarProvider';

@@ -1,11 +1,12 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { useResponsive } from '@actual-app/components/hooks/useResponsive';
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
 
-import { theme } from '../../style';
 import { AccountAutocomplete } from '../autocomplete/AccountAutocomplete';
 import {
   ModalCloseButton,
@@ -14,7 +15,6 @@ import {
   ModalHeader,
 } from '../common/Modal';
 import { SectionLabel } from '../forms';
-import { useResponsive } from '../responsive/ResponsiveProvider';
 
 type AccountAutocompleteModalProps = Extract<
   ModalType,
