@@ -142,6 +142,8 @@ function handleCategoryMappingChange(months, oldValue, newValue) {
 }
 
 function handleCategoryChange(months, oldValue, newValue) {
+  const budgetType = getBudgetType();
+
   function addDeps(sheetName, groupId, catId) {
     sheet
       .get()
@@ -158,6 +160,14 @@ function handleCategoryChange(months, oldValue, newValue) {
       .addDependencies(sheetName, `group-leftover-${groupId}`, [
         `leftover-${catId}`,
       ]);
+
+    if (budgetType !== 'rollover') {
+      sheet
+        .get()
+        .addDependencies(sheetName, `total-spent`, [
+          `spent-with-carryover-${catId}`,
+        ]);
+    }
   }
 
   function removeDeps(sheetName, groupId, catId) {
@@ -176,9 +186,15 @@ function handleCategoryChange(months, oldValue, newValue) {
       .removeDependencies(sheetName, `group-leftover-${groupId}`, [
         `leftover-${catId}`,
       ]);
-  }
 
-  const budgetType = getBudgetType();
+    if (budgetType !== 'rollover') {
+      sheet
+        .get()
+        .removeDependencies(sheetName, `total-spent`, [
+          `spent-with-carryover-${catId}`,
+        ]);
+    }
+  }
 
   if (oldValue && oldValue.tombstone === 0 && newValue.tombstone === 1) {
     const id = newValue.id;
@@ -226,6 +242,22 @@ function handleCategoryChange(months, oldValue, newValue) {
       const sheetName = monthUtils.sheetForMonth(month);
       removeDeps(sheetName, oldValue.cat_group, id);
       addDeps(sheetName, newValue.cat_group, id);
+    });
+  } else if (
+    oldValue &&
+    oldValue.hidden !== newValue.hidden &&
+    budgetType !== 'rollover'
+  ) {
+    const id = newValue.id;
+    const groupId = newValue.cat_group;
+
+    months.forEach(month => {
+      const sheetName = monthUtils.sheetForMonth(month);
+      if (newValue.hidden) {
+        removeDeps(sheetName, groupId, id);
+      } else {
+        addDeps(sheetName, groupId, id);
+      }
     });
   }
 }
