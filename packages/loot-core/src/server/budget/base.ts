@@ -69,6 +69,7 @@ function createCategoryGroup(group, sheetName) {
     run: sumAmounts,
   });
 
+
   if (!group.is_income || getBudgetType() !== 'rollover') {
     sheet.get().createDynamic(sheetName, 'group-budget-' + group.id, {
       initialValue: 0,
@@ -164,7 +165,7 @@ function handleCategoryChange(months, oldValue, newValue) {
     if (budgetType !== 'rollover') {
       sheet
         .get()
-        .addDependencies(sheetName, `total-spent`, [
+        .addDependencies(sheetName, `group-sum-spent-with-carryover-${groupId}`, [
           `spent-with-carryover-${catId}`,
         ]);
     }
@@ -190,7 +191,7 @@ function handleCategoryChange(months, oldValue, newValue) {
     if (budgetType !== 'rollover') {
       sheet
         .get()
-        .removeDependencies(sheetName, `total-spent`, [
+        .removeDependencies(sheetName, `group-sum-spent-with-carryover-${groupId}`, [
           `spent-with-carryover-${catId}`,
         ]);
     }
@@ -273,14 +274,23 @@ function handleCategoryGroupChange(months, oldValue, newValue) {
       ]);
     sheet
       .get()
-      .addDependencies(sheetName, 'total-spent', [
-        `group-sum-amount-${groupId}`,
-      ]);
-    sheet
-      .get()
       .addDependencies(sheetName, 'total-leftover', [
         `group-leftover-${groupId}`,
       ]);
+
+    if (budgetType !== 'rollover') {
+      sheet
+        .get()
+        .addDependencies(sheetName, 'total-spent', [
+          `group-sum-spent-with-carryover-${groupId}`,
+        ]);
+    } else {
+      sheet
+      .get()
+      .addDependencies(sheetName, 'total-spent', [
+        `group-sum-amount-${groupId}`,
+      ]);
+    }
   }
 
   function removeDeps(sheetName, groupId) {
@@ -299,6 +309,14 @@ function handleCategoryGroupChange(months, oldValue, newValue) {
       .removeDependencies(sheetName, 'total-leftover', [
         `group-leftover-${groupId}`,
       ]);
+
+    if (budgetType !== 'rollover') {
+      sheet
+        .get()
+        .removeDependencies(sheetName, 'total-spent', [
+          `group-sum-spent-with-carryover-${groupId}`,
+        ]);
+    }
   }
 
   if (newValue.tombstone === 1 && oldValue && oldValue.tombstone === 0) {
@@ -331,6 +349,21 @@ function handleCategoryGroupChange(months, oldValue, newValue) {
         addDeps(sheetName, group.id);
       });
     }
+  } else if (
+    oldValue &&
+    oldValue.hidden !== newValue.hidden &&
+    budgetType !== 'rollover'
+  ) {
+    const group = newValue;
+
+    months.forEach(month => {
+      const sheetName = monthUtils.sheetForMonth(month);
+      if (newValue.hidden) {
+        removeDeps(sheetName, group.id);
+      } else {
+        addDeps(sheetName, group.id);
+      }
+    });
   }
 }
 

@@ -75,8 +75,8 @@ export function createSummary(groups, categories, sheetName) {
   sheet.get().createDynamic(sheetName, 'total-spent', {
     initialValue: 0,
     refresh: true,
-    dependencies: expenseCategories.map(
-      cat => `${sheetName}!spent-with-carryover-${cat.id}`,
+    dependencies: groups.filter(group => !group.is_income).map(
+      group => `${sheetName}!group-sum-spent-with-carryover-${group.id}`,
     ),
     run: sumAmounts,
   });
@@ -90,7 +90,7 @@ export function createSummary(groups, categories, sheetName) {
   sheet.get().createDynamic(sheetName, 'total-leftover', {
     initialValue: 0,
     dependencies: ['total-budgeted', 'total-spent'],
-    run: sumAmounts,
+    run: (sumAmounts),
   });
 
   sheet.get().createDynamic(sheetName, 'total-budget-income', {
