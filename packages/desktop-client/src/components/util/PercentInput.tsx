@@ -108,7 +108,6 @@ export function PercentInput({
       inputMode="decimal"
       value={value}
       disabled={disabled}
-      focused={focused}
       style={{ flex: 1, alignItems: 'stretch', ...style }}
       onKeyUp={e => {
         if (e.key === 'Enter') {
