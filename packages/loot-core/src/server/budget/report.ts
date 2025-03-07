@@ -106,6 +106,7 @@ export function createSummary(groups, categories, sheetName) {
       cat => `${sheetName}!spent-with-carryover-${cat.id}`,
     ),
     run: sumAmounts,
+    //watchDependencies: expenseCategories.map(c => c.id),
   });
 
   sheet.get().createDynamic(sheetName, 'total-income', {
