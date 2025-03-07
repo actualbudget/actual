@@ -245,7 +245,7 @@ export async function loadUserBudgets(
     sheet.set(`__global!hidden-${cat.id}`, cat.hidden);
   }
   const groups = await db.all(
-    `SELECT * FROM category_groups where tombsone = 0`,
+    `SELECT * FROM category_groups where tombstone = 0`,
   );
   for (const g of groups) {
     sheet.set(`__global!hidden-${g.id}`, g.hidden);
