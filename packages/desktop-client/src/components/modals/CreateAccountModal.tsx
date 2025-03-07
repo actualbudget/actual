@@ -10,11 +10,11 @@ import { Popover } from '@actual-app/components/popover';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
-import { addNotification } from 'loot-core/client/actions';
 import {
   type Modal as ModalType,
   pushModal,
 } from 'loot-core/client/modals/modalsSlice';
+import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
 import { send } from 'loot-core/platform/client/fetch';
 
 import { useAuth } from '../../auth/AuthProvider';
@@ -198,10 +198,12 @@ export function CreateAccountModal({
     } catch (err) {
       console.error(err);
       addNotification({
-        type: 'error',
-        title: t('Error when trying to contact Pluggy.ai'),
-        message: (err as Error).message,
-        timeout: 5000,
+        notification: {
+          type: 'error',
+          title: t('Error when trying to contact Pluggy.ai'),
+          message: (err as Error).message,
+          timeout: 5000,
+        },
       });
       dispatch(
         pushModal({
