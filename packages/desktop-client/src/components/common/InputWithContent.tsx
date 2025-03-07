@@ -13,6 +13,7 @@ type InputWithContentProps = ComponentProps<typeof Input> & {
   focusStyle?: CSSProperties;
   style?: CSSProperties;
   getStyle?: (focused: boolean) => CSSProperties;
+  focused?: boolean;
 };
 export function InputWithContent({
   leftContent,
@@ -43,7 +44,6 @@ export function InputWithContent({
       {leftContent}
       <Input
         {...props}
-        focused={focused}
         style={{
           width: '100%',
           ...inputStyle,

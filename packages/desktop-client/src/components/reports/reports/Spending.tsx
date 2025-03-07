@@ -14,8 +14,8 @@ import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 import * as d from 'date-fns';
 
-import { addNotification } from 'loot-core/client/actions';
 import { useWidget } from 'loot-core/client/data-hooks/widget';
+import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 import { amountToCurrency } from 'loot-core/shared/util';
@@ -23,6 +23,7 @@ import { type SpendingWidget } from 'loot-core/types/models';
 import { type RuleConditionEntity } from 'loot-core/types/models/rule';
 
 import { useFilters } from '../../../hooks/useFilters';
+import { useLocale } from '../../../hooks/useLocale';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { useDispatch } from '../../../redux';
 import { Select } from '../../common/Select';
@@ -61,6 +62,7 @@ type SpendingInternalProps = {
 };
 
 function SpendingInternal({ widget }: SpendingInternalProps) {
+  const locale = useLocale();
   const dispatch = useDispatch();
   const { t } = useTranslation();
 
@@ -109,14 +111,14 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
         .rangeInclusive(earliestMonth, monthUtils.currentMonth())
         .map(month => ({
           name: month,
-          pretty: monthUtils.format(month, 'MMMM, yyyy'),
+          pretty: monthUtils.format(month, 'MMMM, yyyy', locale),
         }))
         .reverse();
 
       setAllIntervals(allMonths);
     }
     run();
-  }, []);
+  }, [locale]);
 
   const getGraphData = useMemo(
     () =>
@@ -152,8 +154,10 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
     });
     dispatch(
       addNotification({
-        type: 'message',
-        message: t('Dashboard widget successfully saved.'),
+        notification: {
+          type: 'message',
+          message: t('Dashboard widget successfully saved.'),
+        },
       }),
     );
   }
@@ -448,14 +452,14 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                 <View>
                   <LegendItem
                     color={theme.reportsGreen}
-                    label={monthUtils.format(compare, 'MMM, yyyy')}
+                    label={monthUtils.format(compare, 'MMM, yyyy', locale)}
                     style={{ padding: 0, paddingBottom: 10 }}
                   />
                   <LegendItem
                     color={theme.reportsGray}
                     label={
                       reportMode === 'single-month'
-                        ? monthUtils.format(compareTo, 'MMM, yyyy')
+                        ? monthUtils.format(compareTo, 'MMM, yyyy', locale)
                         : reportMode === 'budget'
                           ? t('Budgeted')
                           : t('Average')
@@ -481,12 +485,14 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                                   monthYearFormatted: monthUtils.format(
                                     compare,
                                     'MMM, yyyy',
+                                    locale,
                                   ),
                                 })
                               : t('Spent {{monthYearFormatted}}:', {
                                   monthYearFormatted: monthUtils.format(
                                     compare,
                                     'MMM, yyyy',
+                                    locale,
                                   ),
                                 })}
                             :
@@ -513,12 +519,14 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                                   monthYearFormatted: monthUtils.format(
                                     compare,
                                     'MMM, yyyy',
+                                    locale,
                                   ),
                                 })
                               : t('Spent {{monthYearFormatted}}:', {
                                   monthYearFormatted: monthUtils.format(
                                     compare,
                                     'MMM, yyyy',
+                                    locale,
                                   ),
                                 })}
                           </Block>

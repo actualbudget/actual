@@ -4,16 +4,18 @@ import React, {
   type ReactNode,
   type CSSProperties,
 } from 'react';
+import { useTranslation } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
 import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import { useContextMenu } from '../../hooks/useContextMenu';
 import { useIsInViewport } from '../../hooks/useIsInViewport';
 import { useNavigate } from '../../hooks/useNavigate';
-import { theme } from '../../style';
-import { MenuButton } from '../common/MenuButton';
+import { SvgDotsHorizontalTriple } from '../../icons/v1';
 import { useResponsive } from '../responsive/ResponsiveProvider';
 
 import { NON_DRAGGABLE_AREA_CLASS_NAME } from './constants';
@@ -121,6 +123,8 @@ type LayoutProps = {
 } & Pick<ReportCardProps, 'isEditing' | 'menuItems' | 'onMenuSelect'>;
 
 function Layout({ children, isEditing, menuItems, onMenuSelect }: LayoutProps) {
+  const { t } = useTranslation();
+
   const triggerRef = useRef(null);
   const viewRef = useRef(null);
 
@@ -164,13 +168,21 @@ function Layout({ children, isEditing, menuItems, onMenuSelect }: LayoutProps) {
                 zIndex: 1,
               }}
             >
-              <MenuButton
+              <Button
                 ref={triggerRef}
+                variant="bare"
+                aria-label={t('Menu')}
                 onPress={() => {
                   resetPosition();
                   setMenuOpen(true);
                 }}
-              />
+              >
+                <SvgDotsHorizontalTriple
+                  width={15}
+                  height={15}
+                  style={{ transform: 'rotateZ(90deg)' }}
+                />
+              </Button>
             </View>
           )}
 

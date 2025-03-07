@@ -6,7 +6,6 @@ import { Button } from '@actual-app/components/button';
 import { tsToRelativeTime } from 'loot-core/shared/util';
 import { type AccountEntity } from 'loot-core/src/types/models';
 
-import { useGlobalPref } from '../../hooks/useGlobalPref';
 import { theme } from '../../style';
 import { Row, Cell } from '../table';
 
@@ -15,15 +14,14 @@ type AccountRowProps = {
   hovered: boolean;
   onHover: (id: AccountEntity['id'] | null) => void;
   onAction: (account: AccountEntity, action: 'link' | 'edit') => void;
+  locale: Locale;
 };
 
 export const AccountRow = memo(
-  ({ account, hovered, onHover, onAction }: AccountRowProps) => {
+  ({ account, hovered, onHover, onAction, locale }: AccountRowProps) => {
     const backgroundFocus = hovered;
 
-    const [language = 'en-US'] = useGlobalPref('language');
-
-    const lastSync = tsToRelativeTime(account.last_sync, language, {
+    const lastSync = tsToRelativeTime(account.last_sync, locale, {
       capitalize: true,
     });
 

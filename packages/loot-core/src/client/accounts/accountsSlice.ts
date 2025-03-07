@@ -9,7 +9,7 @@ import {
   type SyncServerSimpleFinAccount,
   type SyncServerPluggyAiAccount,
 } from '../../types/models';
-import { addNotification } from '../actions';
+import { addNotification } from '../notifications/notificationsSlice';
 import {
   getAccounts,
   getPayees,
@@ -187,16 +187,20 @@ function handleSyncResponse(
     if ('type' in error && error.type === 'SyncError') {
       dispatch(
         addNotification({
-          type: 'error',
-          message: error.message,
+          notification: {
+            type: 'error',
+            message: error.message,
+          },
         }),
       );
     } else {
       dispatch(
         addNotification({
-          type: 'error',
-          message: error.message,
-          internal: 'internal' in error ? error.internal : undefined,
+          notification: {
+            type: 'error',
+            message: error.message,
+            internal: 'internal' in error ? error.internal : undefined,
+          },
         }),
       );
     }

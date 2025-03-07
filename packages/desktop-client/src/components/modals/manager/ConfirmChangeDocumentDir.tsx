@@ -6,7 +6,7 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
-import { addNotification } from 'loot-core/client/actions';
+import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
 
 import { useGlobalPref } from '../../../hooks/useGlobalPref';
 import { useDispatch } from '../../../redux';
@@ -76,8 +76,10 @@ export function ConfirmChangeDocumentDirModal({
 
       dispatch(
         addNotification({
-          type: 'message',
-          message: t('Actual’s data directory successfully changed.'),
+          notification: {
+            type: 'message',
+            message: t('Actual’s data directory successfully changed.'),
+          },
         }),
       );
       close();

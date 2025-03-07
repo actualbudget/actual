@@ -7,12 +7,12 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
-import { addNotification } from 'loot-core/client/actions';
 import { closeAndLoadBudget } from 'loot-core/client/budgets/budgetsSlice';
 import {
   type Modal as ModalType,
   popModal,
 } from 'loot-core/client/modals/modalsSlice';
+import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import { getUserAccessErrors } from 'loot-core/shared/errors';
 import { type Budget } from 'loot-core/types/budget';
@@ -57,12 +57,14 @@ export function TransferOwnership({
         } else if ('error' in data) {
           dispatch(
             addNotification({
-              type: 'error',
-              title: t('Error getting users'),
-              message: t(
-                'Failed to complete ownership transfer. Please try again.',
-              ),
-              sticky: true,
+              notification: {
+                type: 'error',
+                title: t('Error getting users'),
+                message: t(
+                  'Failed to complete ownership transfer. Please try again.',
+                ),
+                sticky: true,
+              },
             }),
           );
         } else {
@@ -196,12 +198,14 @@ export function TransferOwnership({
                 } catch (error) {
                   dispatch(
                     addNotification({
-                      type: 'error',
-                      title: t('Failed to transfer ownership'),
-                      message: t(
-                        'Failed to complete ownership transfer. Please try again.',
-                      ),
-                      sticky: true,
+                      notification: {
+                        type: 'error',
+                        title: t('Failed to transfer ownership'),
+                        message: t(
+                          'Failed to complete ownership transfer. Please try again.',
+                        ),
+                        sticky: true,
+                      },
                     }),
                   );
                   setIsTransferring(false);
