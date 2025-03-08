@@ -6,7 +6,8 @@ export type FeatureFlag =
   | 'currency'
   | 'crossoverReport'
   | 'plugins'
-  | 'forceReload';
+  | 'forceReload'
+  | 'budgetTableV2';
 
 /**
  * Cross-device preferences. These sync across devices when they are changed.
