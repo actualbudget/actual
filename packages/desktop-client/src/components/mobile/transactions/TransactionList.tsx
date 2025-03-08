@@ -6,7 +6,12 @@ import React, {
   useState,
   type CSSProperties,
 } from 'react';
-import { ListBox, Section, Header, Collection } from 'react-aria-components';
+import {
+  ListBox,
+  ListBoxSection,
+  Header,
+  Collection,
+} from 'react-aria-components';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -20,7 +25,7 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
-import { setNotificationInset } from 'loot-core/client/actions';
+import { setNotificationInset } from 'loot-core/client/notifications/notificationsSlice';
 import { validForTransfer } from 'loot-core/client/transfer';
 import * as monthUtils from 'loot-core/shared/months';
 import { isPreviewId } from 'loot-core/shared/transactions';
@@ -167,7 +172,7 @@ export function TransactionList({
         items={sections}
       >
         {section => (
-          <Section>
+          <ListBoxSection>
             <Header
               style={{
                 ...styles.smallText,
@@ -200,7 +205,7 @@ export function TransactionList({
                 />
               )}
             </Collection>
-          </Section>
+          </ListBoxSection>
         )}
       </ListBox>
 
@@ -300,7 +305,9 @@ function SelectedTransactionsFloatingActionBar({
 
   const dispatch = useDispatch();
   useEffect(() => {
-    dispatch(setNotificationInset({ bottom: NOTIFICATION_BOTTOM_INSET }));
+    dispatch(
+      setNotificationInset({ inset: { bottom: NOTIFICATION_BOTTOM_INSET } }),
+    );
     return () => {
       dispatch(setNotificationInset(null));
     };

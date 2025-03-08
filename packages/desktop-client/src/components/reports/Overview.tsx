@@ -10,9 +10,12 @@ import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
 import { View } from '@actual-app/components/view';
 
-import { addNotification, removeNotification } from 'loot-core/client/actions';
 import { useDashboard } from 'loot-core/client/data-hooks/dashboard';
 import { useReports } from 'loot-core/client/data-hooks/reports';
+import {
+  addNotification,
+  removeNotification,
+} from 'loot-core/client/notifications/notificationsSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import {
   type CustomReportWidget,
@@ -92,7 +95,7 @@ export function Overview() {
   const layout = baseLayout;
 
   const closeNotifications = () => {
-    dispatch(removeNotification('import'));
+    dispatch(removeNotification({ id: 'import' }));
   };
 
   // Close import notifications when doing "undo" operation
@@ -110,15 +113,17 @@ export function Overview() {
   const onDispatchSucessNotification = (message: string) => {
     dispatch(
       addNotification({
-        id: 'import',
-        type: 'message',
-        sticky: true,
-        timeout: 30_000, // 30s
-        message,
-        messageActions: {
-          undo: () => {
-            closeNotifications();
-            undo();
+        notification: {
+          id: 'import',
+          type: 'message',
+          sticky: true,
+          timeout: 30_000, // 30s
+          message,
+          messageActions: {
+            undo: () => {
+              closeNotifications();
+              undo();
+            },
           },
         },
       }),
@@ -217,10 +222,12 @@ export function Overview() {
     if (!openFileDialog) {
       dispatch(
         addNotification({
-          type: 'error',
-          message: t(
-            'Fatal error occurred: unable to open import file dialog.',
-          ),
+          notification: {
+            type: 'error',
+            message: t(
+              'Fatal error occurred: unable to open import file dialog.',
+            ),
+          },
         }),
       );
       return;
@@ -246,9 +253,11 @@ export function Overview() {
         case 'json-parse-error':
           dispatch(
             addNotification({
-              id: 'import',
-              type: 'error',
-              message: t('Failed parsing the imported JSON.'),
+              notification: {
+                id: 'import',
+                type: 'error',
+                message: t('Failed parsing the imported JSON.'),
+              },
             }),
           );
           break;
@@ -256,9 +265,11 @@ export function Overview() {
         case 'validation-error':
           dispatch(
             addNotification({
-              id: 'import',
-              type: 'error',
-              message: res.message,
+              notification: {
+                id: 'import',
+                type: 'error',
+                message: res.message,
+              },
             }),
           );
           break;
@@ -266,9 +277,11 @@ export function Overview() {
         default:
           dispatch(
             addNotification({
-              id: 'import',
-              type: 'error',
-              message: t('Failed importing the dashboard file.'),
+              notification: {
+                id: 'import',
+                type: 'error',
+                message: t('Failed importing the dashboard file.'),
+              },
             }),
           );
           break;

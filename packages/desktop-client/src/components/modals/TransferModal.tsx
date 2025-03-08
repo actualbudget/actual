@@ -112,11 +112,7 @@ export function TransferModal({
             </View>
 
             <FieldLabel title="To:" />
-            <TapField
-              tabIndex={0}
-              value={toCategory?.name}
-              onClick={openCategoryModal}
-            />
+            <TapField value={toCategory?.name} onPress={openCategoryModal} />
 
             <View
               style={{

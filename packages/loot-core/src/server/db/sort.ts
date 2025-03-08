@@ -15,7 +15,7 @@ function midpoint<T extends { sort_order: number }>(items: T[], to: number) {
 
 export function shoveSortOrders<T extends { id: string; sort_order: number }>(
   items: T[],
-  targetId?: string,
+  targetId: string | null = null,
 ) {
   const to = items.findIndex(item => item.id === targetId);
   const target = items[to];

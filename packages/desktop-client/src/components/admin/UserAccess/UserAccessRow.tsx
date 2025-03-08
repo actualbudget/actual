@@ -4,7 +4,8 @@ import { useTranslation } from 'react-i18next';
 
 import { View } from '@actual-app/components/view';
 
-import { addNotification, signOut } from 'loot-core/client/actions';
+import { signOut } from 'loot-core/client/actions';
+import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import { getUserAccessErrors } from 'loot-core/shared/errors';
 import { type UserAvailable } from 'loot-core/types/models';
@@ -52,12 +53,14 @@ export const UserAccessRow = memo(
         if (someDeletionsFailed) {
           dispatch(
             addNotification({
-              type: 'error',
-              title: t('Access Revocation Incomplete'),
-              message: t(
-                'Some access permissions were not revoked successfully.',
-              ),
-              sticky: true,
+              notification: {
+                type: 'error',
+                title: t('Access Revocation Incomplete'),
+                message: t(
+                  'Some access permissions were not revoked successfully.',
+                ),
+                sticky: true,
+              },
             }),
           );
         }
@@ -69,15 +72,17 @@ export const UserAccessRow = memo(
       if (error === 'token-expired') {
         dispatch(
           addNotification({
-            type: 'error',
-            id: 'login-expired',
-            title: t('Login expired'),
-            sticky: true,
-            message: getUserAccessErrors(error),
-            button: {
-              title: t('Go to login'),
-              action: () => {
-                dispatch(signOut());
+            notification: {
+              type: 'error',
+              id: 'login-expired',
+              title: t('Login expired'),
+              sticky: true,
+              message: getUserAccessErrors(error),
+              button: {
+                title: t('Go to login'),
+                action: () => {
+                  dispatch(signOut());
+                },
               },
             },
           }),
@@ -85,10 +90,12 @@ export const UserAccessRow = memo(
       } else {
         dispatch(
           addNotification({
-            type: 'error',
-            title: t('Something happened while editing access'),
-            sticky: true,
-            message: getUserAccessErrors(error),
+            notification: {
+              type: 'error',
+              title: t('Something happened while editing access'),
+              sticky: true,
+              message: getUserAccessErrors(error),
+            },
           }),
         );
       }

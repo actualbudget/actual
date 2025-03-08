@@ -2,10 +2,22 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import {
+  SvgDelete,
+  SvgAdd,
+  SvgSubtract,
+} from '@actual-app/components/icons/v0';
+import {
+  SvgAlignLeft,
+  SvgCode,
+  SvgInformationOutline,
+} from '@actual-app/components/icons/v1';
 import { Menu } from '@actual-app/components/menu';
+import { Select } from '@actual-app/components/select';
 import { Stack } from '@actual-app/components/stack';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
@@ -39,12 +51,8 @@ import {
 import { useDateFormat } from '../../hooks/useDateFormat';
 import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { useSelected, SelectedProvider } from '../../hooks/useSelected';
-import { SvgDelete, SvgAdd, SvgSubtract } from '../../icons/v0';
-import { SvgAlignLeft, SvgCode, SvgInformationOutline } from '../../icons/v1';
 import { useDispatch } from '../../redux';
-import { theme } from '../../style';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
-import { Select } from '../common/Select';
 import { StatusBadge } from '../schedules/StatusBadge';
 import { SimpleTransactionsTable } from '../transactions/SimpleTransactionsTable';
 import { BetweenAmountInput } from '../util/AmountInput';

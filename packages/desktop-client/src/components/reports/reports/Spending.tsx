@@ -6,6 +6,7 @@ import { AlignedText } from '@actual-app/components/aligned-text';
 import { Block } from '@actual-app/components/block';
 import { Button } from '@actual-app/components/button';
 import { Paragraph } from '@actual-app/components/paragraph';
+import { Select } from '@actual-app/components/select';
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
@@ -14,8 +15,8 @@ import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 import * as d from 'date-fns';
 
-import { addNotification } from 'loot-core/client/actions';
 import { useWidget } from 'loot-core/client/data-hooks/widget';
+import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 import { amountToCurrency } from 'loot-core/shared/util';
@@ -26,7 +27,6 @@ import { useFilters } from '../../../hooks/useFilters';
 import { useLocale } from '../../../hooks/useLocale';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { useDispatch } from '../../../redux';
-import { Select } from '../../common/Select';
 import { EditablePageHeaderTitle } from '../../EditablePageHeaderTitle';
 import { AppliedFilters } from '../../filters/AppliedFilters';
 import { FilterButton } from '../../filters/FiltersMenu';
@@ -154,8 +154,10 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
     });
     dispatch(
       addNotification({
-        type: 'message',
-        message: t('Dashboard widget successfully saved.'),
+        notification: {
+          type: 'message',
+          message: t('Dashboard widget successfully saved.'),
+        },
       }),
     );
   }

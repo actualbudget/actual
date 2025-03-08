@@ -422,7 +422,6 @@ export function ModalTitle({
         textAlign: 'center',
         ...style,
       }}
-      focused={isEditing}
       defaultValue={title}
       onUpdate={_onTitleUpdate}
       onKeyDown={e => {

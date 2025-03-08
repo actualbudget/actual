@@ -694,7 +694,7 @@ export function deleteAccount(account) {
 
 export async function moveAccount(
   id: DbAccount['id'],
-  targetId: DbAccount['id'],
+  targetId: DbAccount['id'] | null,
 ) {
   const account = await first<DbAccount>(
     'SELECT * FROM accounts WHERE id = ?',
