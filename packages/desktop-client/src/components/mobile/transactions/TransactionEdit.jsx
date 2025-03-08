@@ -215,13 +215,14 @@ function Footer({
           >
             {!emptySplitTransaction ? (
               <>
-              <Trans>Add New Split</Trans>{' - '}
-              {integerToCurrency(
-                transaction.amount > 0
-                  ? transaction.error.difference
-                  : -transaction.error.difference,
-              )}
-              {' '}<Trans>left</Trans>
+                <Trans>Add New Split</Trans>
+                {' - '}
+                {integerToCurrency(
+                  transaction.amount > 0
+                    ? transaction.error.difference
+                    : -transaction.error.difference,
+                )}{' '}
+                <Trans>left</Trans>
               </>
             ) : (
               <>
