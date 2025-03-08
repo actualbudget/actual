@@ -4,7 +4,10 @@ export type FeatureFlag =
   | 'actionTemplating'
   | 'formulaMode'
   | 'currency'
-  | 'crossoverReport';
+  | 'crossoverReport'
+  | 'plugins'
+  | 'forceReload'
+  | 'budgetTableV2';
 
 /**
  * Cross-device preferences. These sync across devices when they are changed.
