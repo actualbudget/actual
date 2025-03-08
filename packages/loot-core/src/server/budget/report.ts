@@ -1,8 +1,14 @@
 // @ts-strict-ignore
+import * as monthUtils from '../../shared/months';
 import { safeNumber } from '../../shared/util';
+import * as db from '../db';
 import * as sheet from '../sheet';
 import { resolveName } from '../spreadsheet/util';
 
+import {
+  getBudgetType,
+  createCategory as createCategoryFromBase,
+} from './base';
 import { number, sumAmounts } from './util';
 
 export async function createCategory(cat, sheetName, prevSheetName) {
@@ -109,5 +115,229 @@ export function createSummary(groups, categories, sheetName) {
     run: (income, spent) => {
       return safeNumber(income - -spent);
     },
+  });
+}
+
+export function handleCategoryChange(months, oldValue, newValue) {
+  const budgetType = getBudgetType();
+
+  function addDeps(sheetName, groupId, catId, isIncome = null) {
+    if (getBudgetType() === 'rollover' || isIncome) {
+      sheet
+        .get()
+        .addDependencies(sheetName, `group-sum-amount-${groupId}`, [
+          `sum-amount-${catId}`,
+        ]);
+    } else {
+      sheet
+        .get()
+        .addDependencies(sheetName, `group-sum-amount-${groupId}`, [
+          `spent-with-carryover-${catId}`,
+        ]);
+    }
+    sheet
+      .get()
+      .addDependencies(sheetName, `group-budget-${groupId}`, [
+        `budget-${catId}`,
+      ]);
+    sheet
+      .get()
+      .addDependencies(sheetName, `group-leftover-${groupId}`, [
+        `leftover-${catId}`,
+      ]);
+  }
+
+  function removeDeps(sheetName, groupId, catId, isIncome = null) {
+    if (getBudgetType() === 'rollover' || isIncome) {
+      sheet
+        .get()
+        .removeDependencies(sheetName, `group-sum-amount-${groupId}`, [
+          `sum-amount-${catId}`,
+        ]);
+    } else {
+      sheet
+        .get()
+        .removeDependencies(sheetName, `group-sum-amount-${groupId}`, [
+          `spent-with-carryover-${catId}`,
+        ]);
+    }
+    sheet
+      .get()
+      .removeDependencies(sheetName, `group-budget-${groupId}`, [
+        `budget-${catId}`,
+      ]);
+    sheet
+      .get()
+      .removeDependencies(sheetName, `group-leftover-${groupId}`, [
+        `leftover-${catId}`,
+      ]);
+  }
+
+  if (oldValue && oldValue.tombstone === 0 && newValue.tombstone === 1) {
+    const id = newValue.id;
+    const groupId = newValue.cat_group;
+
+    months.forEach(month => {
+      const sheetName = monthUtils.sheetForMonth(month);
+      removeDeps(sheetName, groupId, id);
+    });
+  } else if (
+    newValue.tombstone === 0 &&
+    (!oldValue || oldValue.tombstone === 1)
+  ) {
+    months.forEach(month => {
+      const prevMonth = monthUtils.prevMonth(month);
+      const prevSheetName = monthUtils.sheetForMonth(prevMonth);
+      const sheetName = monthUtils.sheetForMonth(month);
+      const { start, end } = monthUtils.bounds(month);
+
+      createCategoryFromBase(newValue, sheetName, prevSheetName, start, end);
+
+      const id = newValue.id;
+      const groupId = newValue.cat_group;
+
+      if (getBudgetType() === 'rollover') {
+        sheet
+          .get()
+          .addDependencies(sheetName, 'last-month-overspent', [
+            `${prevSheetName}!leftover-${id}`,
+            `${prevSheetName}!carryover-${id}`,
+          ]);
+      }
+
+      addDeps(sheetName, groupId, id);
+    });
+  } else if (oldValue && oldValue.cat_group !== newValue.cat_group) {
+    // The category moved so we need to update the dependencies
+    const id = newValue.id;
+
+    months.forEach(month => {
+      const sheetName = monthUtils.sheetForMonth(month);
+      removeDeps(sheetName, oldValue.cat_group, id);
+      addDeps(sheetName, newValue.cat_group, id);
+    });
+  } else if (
+    oldValue &&
+    oldValue.hidden !== newValue.hidden &&
+    budgetType !== 'rollover'
+  ) {
+    const id = newValue.id;
+    const groupId = newValue.cat_group;
+
+    months.forEach(month => {
+      const sheetName = monthUtils.sheetForMonth(month);
+      if (newValue.hidden) {
+        removeDeps(sheetName, groupId, id, newValue.is_income);
+      } else {
+        addDeps(sheetName, groupId, id, newValue.is_income);
+      }
+    });
+  }
+}
+
+export function handleCategoryGroupChange(months, oldValue, newValue) {
+  const budgetType = getBudgetType();
+
+  function addDeps(sheetName, groupId) {
+    sheet
+      .get()
+      .addDependencies(sheetName, 'total-budgeted', [
+        `group-budget-${groupId}`,
+      ]);
+    sheet
+      .get()
+      .addDependencies(sheetName, 'total-spent', [
+        `group-sum-amount-${groupId}`,
+      ]);
+  }
+
+  function removeDeps(sheetName, groupId) {
+    sheet
+      .get()
+      .removeDependencies(sheetName, 'total-budgeted', [
+        `group-budget-${groupId}`,
+      ]);
+    sheet
+      .get()
+      .removeDependencies(sheetName, 'total-spent', [
+        `group-sum-amount-${groupId}`,
+      ]);
+  }
+
+  if (newValue.tombstone === 1 && oldValue && oldValue.tombstone === 0) {
+    const id = newValue.id;
+    months.forEach(month => {
+      const sheetName = monthUtils.sheetForMonth(month);
+      removeDeps(sheetName, id);
+    });
+  } else if (
+    newValue.tombstone === 0 &&
+    (!oldValue || oldValue.tombstone === 1)
+  ) {
+    const group = newValue;
+
+    if (!group.is_income || budgetType !== 'rollover') {
+      months.forEach(month => {
+        const sheetName = monthUtils.sheetForMonth(month);
+
+        // Dirty, dirty hack. These functions should not be async, but this is
+        // OK because we're leveraging the sync nature of queries. Ideally we
+        // wouldn't be querying here. But I think we have to. At least for now
+        // we do
+        const categories = db.runQuery(
+          'SELECT * FROM categories WHERE tombstone = 0 AND cat_group = ?',
+          [group.id],
+          true,
+        );
+        createCategoryGroup({ ...group, categories }, sheetName);
+
+        addDeps(sheetName, group.id);
+      });
+    }
+  } else if (
+    oldValue &&
+    oldValue.hidden !== newValue.hidden &&
+    budgetType !== 'rollover'
+  ) {
+    const group = newValue;
+
+    months.forEach(month => {
+      const sheetName = monthUtils.sheetForMonth(month);
+      if (newValue.hidden) {
+        removeDeps(sheetName, group.id);
+      } else {
+        addDeps(sheetName, group.id);
+      }
+    });
+  }
+}
+
+export function createCategoryGroup(group, sheetName) {
+  const budgetType = getBudgetType();
+  // different sum amount dependencies
+  if (budgetType === 'rollover' || group.is_income) {
+    sheet.get().createDynamic(sheetName, 'group-sum-amount-' + group.id, {
+      initialValue: 0,
+      dependencies: group.categories.map(cat => `sum-amount-${cat.id}`),
+      run: sumAmounts,
+    });
+  } else {
+    sheet.get().createDynamic(sheetName, 'group-sum-amount-' + group.id, {
+      initialValue: 0,
+      dependencies: group.categories.map(
+        cat => `spent-with-carryover-${cat.id}`,
+      ),
+      run: sumAmounts,
+    });
+  }
+  sheet.get().createDynamic(sheetName, 'group-budget-' + group.id, {
+    initialValue: 0,
+    dependencies: group.categories.map(cat => `budget-${cat.id}`),
+    run: sumAmounts,
+  });
+  sheet.get().createDynamic(sheetName, 'group-leftover-' + group.id, {
+    initialValue: 0,
+    dependencies: group.categories.map(cat => `leftover-${cat.id}`),
+    run: sumAmounts,
   });
 }
