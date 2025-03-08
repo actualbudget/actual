@@ -51,41 +51,37 @@ function getColorBars(
   const leftBar = new ColorBar();
   const rightBar = new ColorBar();
 
-  if (isLongGoal) {
+  if (budgeted === 0) {
+    // If we have nothing budgeted, don't show a bar for this
+  } else if (isLongGoal) {
     // We have a long-term #goal set. These take visual precedence over a monthly template goal, even if both exist
-    if (balance < 0) {
-      // Standard goal with a non-negative balance
-      const toGoal = -1 * balance + goal;
-      leftBar.width = Math.min(Math.round((goal / toGoal) * 100), 100);
-      rightBar.width = 100 - leftBar.width;
+    const toGoal = goal - balance;
 
-      leftBar.color = ColorDefGoalRemaining;
-      rightBar.color = ColorDefOverBudgetOverSpent;
-
-      leftBar.rawValue = integerToCurrency(toGoal);
-      rightBar.rawValue = integerToCurrency(balance);
-
-      leftBar.category = 'Remaining';
-      rightBar.category = 'Overspent';
+    if (toGoal <= 0) {
+      // If over the goal, consider it complete
+      leftBar.width = 100;
+    } else if (balance < 0) {
+      // If balance is < 0, show no progress
+      leftBar.width = 0;
     } else {
-      // Standard goal with a non-negative balance
-      leftBar.width = Math.min(Math.round((balance / goal) * 100), 100);
-      rightBar.width = 100 - leftBar.width;
-
-      leftBar.color = ColorDefGoalSaved;
-      rightBar.color = ColorDefGoalRemaining;
-
-      leftBar.rawValue = integerToCurrency(balance);
-      rightBar.rawValue = integerToCurrency(goal - balance);
-
-      leftBar.category = 'Saved';
-      rightBar.category = 'Remaining';
+      // Otherwise, standard ratio with a positive balance and a positive amount to reach the goal
+      leftBar.width = bound(Math.round((balance / goal) * 100), 0, 100);
     }
+    rightBar.width = 100 - leftBar.width;
+
+    leftBar.color = ColorDefGoalSaved;
+    rightBar.color = ColorDefGoalRemaining;
+
+    leftBar.rawValue = integerToCurrency(balance);
+    rightBar.rawValue = integerToCurrency(toGoal);
+
+    leftBar.category = 'Saved';
+    rightBar.category = 'Remaining';
   } else if (spent * -1 >= budgeted) {
     // We overspent (or are exactly at budget)
-    const overage = -1 * spent - budgeted;
-    const total = budgeted + overage;
-    leftBar.width = Math.round((budgeted / total) * 100);
+    const overage = budgeted + spent;
+    const total = budgeted + Math.abs(overage);
+    leftBar.width = bound(Math.round((budgeted / total) * 100), 0, 100);
     rightBar.width = 100 - leftBar.width;
 
     leftBar.color = ColorDefOverBudgetSpent;
@@ -98,8 +94,8 @@ function getColorBars(
     rightBar.category = 'Overspent';
   } else {
     // We are under budget
-    const remaining = budgeted - -1 * spent;
-    leftBar.width = Math.round((remaining / budgeted) * 100);
+    const remaining = budgeted + spent;
+    leftBar.width = bound(Math.round((remaining / budgeted) * 100), 0, 100);
     rightBar.width = 100 - leftBar.width;
 
     leftBar.color = ColorDefUnderBudgetRemaining;
@@ -113,6 +109,10 @@ function getColorBars(
   }
 
   return [leftBar, rightBar];
+}
+
+function bound(val: number, min: number, max: number): number {
+  return Math.max(min, Math.min(val, max));
 }
 
 type ProgressBarProps = {
@@ -177,7 +177,7 @@ export function ProgressBar({ month, category }: ProgressBarProps) {
 
   const BAR_HEIGHT = 3;
   const BORDER_RADIUS = 30;
-  const PARTIAL_OPACITY = '0.5';
+  const PARTIAL_OPACITY = '0.4';
   const FULL_OPACITY = '1';
 
   let barOpacity = PARTIAL_OPACITY; // By default, all categories in all months with some activity are partly visible
