@@ -14,10 +14,12 @@ import {
 } from 'loot-core/types/models';
 
 import { useCategories } from '../../hooks/useCategories';
+import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { useLocalPref } from '../../hooks/useLocalPref';
 import { type DropPosition } from '../sort';
 
 import { BudgetCategories } from './BudgetCategories';
+import { BudgetCategories as BudgetCategoriesV2 } from './BudgetCategoriesV2';
 import { BudgetSummaries } from './BudgetSummaries';
 import { BudgetTotals } from './BudgetTotals';
 import { type MonthBounds, MonthsProvider } from './MonthsContext';
@@ -88,6 +90,7 @@ export function BudgetTable(props: BudgetTableProps) {
   const [editing, setEditing] = useState<{ id: string; cell: string } | null>(
     null,
   );
+  const budgetTableV2Enabled = useFeatureFlag('budgetTableV2');
 
   const onEditMonth = (id: string, month: string) => {
     setEditing(id ? { id, cell: month } : null);
@@ -211,15 +214,11 @@ export function BudgetTable(props: BudgetTableProps) {
     setShowHiddenCategoriesPef(!showHiddenCategories);
   };
 
-  const toggleHiddenCategories = () => {
-    onToggleHiddenCategories();
-  };
-
-  const expandAllCategories = () => {
+  const onExpandAllCategories = () => {
     onCollapse([]);
   };
 
-  const collapseAllCategories = () => {
+  const onCollapseAllCategories = () => {
     onCollapse(categoryGroups.map(g => g.id));
   };
 
@@ -266,29 +265,53 @@ export function BudgetTable(props: BudgetTableProps) {
         monthBounds={monthBounds}
         type={type}
       >
-        <BudgetTotals
-          MonthComponent={dataComponents.BudgetTotalsComponent}
-          toggleHiddenCategories={toggleHiddenCategories}
-          expandAllCategories={expandAllCategories}
-          collapseAllCategories={collapseAllCategories}
-        />
-        <View
-          style={{
-            overflowY: 'scroll',
-            overflowAnchor: 'none',
-            flex: 1,
-            paddingLeft: 5,
-            paddingRight: 5,
-          }}
-        >
-          <View
-            style={{
-              flexShrink: 0,
-            }}
-            onKeyDown={onKeyDown}
-          >
-            <BudgetCategories
-              // @ts-expect-error Fix when migrating BudgetCategories to ts
+        {!budgetTableV2Enabled && (
+          <>
+            <BudgetTotals
+              MonthComponent={dataComponents.BudgetTotalsComponent}
+              toggleHiddenCategories={onToggleHiddenCategories}
+              expandAllCategories={onExpandAllCategories}
+              collapseAllCategories={onCollapseAllCategories}
+            />
+            <View
+              style={{
+                overflowY: 'scroll',
+                overflowAnchor: 'none',
+                flex: 1,
+                paddingLeft: 5,
+                paddingRight: 5,
+              }}
+            >
+              <View
+                style={{
+                  flexShrink: 0,
+                }}
+                onKeyDown={onKeyDown}
+              >
+                <BudgetCategories
+                  // @ts-expect-error Fix when migrating BudgetCategories to ts
+                  categoryGroups={categoryGroups}
+                  editingCell={editing}
+                  dataComponents={dataComponents}
+                  onEditMonth={onEditMonth}
+                  onEditName={onEditName}
+                  onSaveCategory={onSaveCategory}
+                  onSaveGroup={onSaveGroup}
+                  onDeleteCategory={onDeleteCategory}
+                  onDeleteGroup={onDeleteGroup}
+                  onReorderCategory={_onReorderCategory}
+                  onReorderGroup={_onReorderGroup}
+                  onBudgetAction={onBudgetAction}
+                  onShowActivity={onShowActivity}
+                  onApplyBudgetTemplatesInGroup={onApplyBudgetTemplatesInGroup}
+                />
+              </View>
+            </View>
+          </>
+        )}
+        {budgetTableV2Enabled && (
+          <View style={{ overflowY: 'auto' }}>
+            <BudgetCategoriesV2
               categoryGroups={categoryGroups}
               editingCell={editing}
               dataComponents={dataComponents}
@@ -303,9 +326,12 @@ export function BudgetTable(props: BudgetTableProps) {
               onBudgetAction={onBudgetAction}
               onShowActivity={onShowActivity}
               onApplyBudgetTemplatesInGroup={onApplyBudgetTemplatesInGroup}
+              onToggleHiddenCategories={onToggleHiddenCategories}
+              onExpandAllCategories={onExpandAllCategories}
+              onCollapseAllCategories={onCollapseAllCategories}
             />
           </View>
-        </View>
+        )}
       </MonthsProvider>
     </View>
   );
