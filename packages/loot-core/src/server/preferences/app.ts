@@ -43,6 +43,10 @@ async function saveSyncedPrefs({
   id: keyof SyncedPrefs;
   value: string | undefined;
 }) {
+  if (!id) {
+    return;
+  }
+
   await db.update('preferences', { id, value });
 }
 
@@ -58,6 +62,10 @@ async function getSyncedPrefs(): Promise<SyncedPrefs> {
 }
 
 async function saveGlobalPrefs(prefs: GlobalPrefs) {
+  if (!prefs) {
+    return 'ok';
+  }
+
   if ('maxMonths' in prefs) {
     await asyncStorage.setItem('max-months', '' + prefs.maxMonths);
   }
@@ -112,7 +120,7 @@ async function loadGlobalPrefs(): Promise<GlobalPrefs> {
   ] as const);
   return {
     floatingSidebar: floatingSidebar === 'true',
-    maxMonths: stringToInteger(maxMonths || '') || undefined,
+    maxMonths: stringToInteger(maxMonths || '') || 1,
     documentDir: documentDir || getDefaultDocumentDir(),
     keyId: encryptKey && JSON.parse(encryptKey).id,
     language,
@@ -133,6 +141,10 @@ async function loadGlobalPrefs(): Promise<GlobalPrefs> {
 }
 
 async function saveMetadataPrefs(prefsToSet: MetadataPrefs) {
+  if (!prefsToSet) {
+    return 'ok';
+  }
+
   const { cloudFileId } = _getMetadataPrefs();
 
   // Need to sync the budget name on the server as well
