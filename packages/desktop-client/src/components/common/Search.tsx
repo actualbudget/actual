@@ -1,13 +1,13 @@
-import { type Ref } from 'react';
+import { useState, type Ref } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import { defaultInputStyle, Input } from '@actual-app/components/input';
+import { type CSSProperties } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
 
 import { SvgRemove, SvgSearchAlternate } from '../../icons/v2';
 import { theme } from '../../style';
-
-import { InputWithContent } from './InputWithContent';
 
 type SearchProps = {
   inputRef?: Ref<HTMLInputElement>;
@@ -16,6 +16,7 @@ type SearchProps = {
   placeholder: string;
   isInModal?: boolean;
   width?: number;
+  inputStyle?: CSSProperties;
 };
 
 export function Search({
@@ -25,69 +26,93 @@ export function Search({
   placeholder,
   isInModal = false,
   width = 250,
+  inputStyle = {},
 }: SearchProps) {
   const { t } = useTranslation();
+
+  const [focused, setFocused] = useState(false);
+
   return (
-    <InputWithContent
-      inputRef={inputRef}
+    <View
       style={{
+        ...defaultInputStyle,
+        padding: 0,
+        flexDirection: 'row',
+        alignItems: 'center',
+
         width,
         flex: '',
         borderColor: isInModal ? undefined : 'transparent',
         backgroundColor: isInModal ? undefined : theme.formInputBackground,
+        ...inputStyle,
+
+        ...(focused && {
+          boxShadow: '0 0 0 1px ' + theme.formInputShadowSelected,
+          ...(isInModal
+            ? {}
+            : { backgroundColor: theme.formInputBackgroundSelected }),
+        }),
       }}
-      focusStyle={
-        isInModal
-          ? undefined
-          : {
-              boxShadow: '0 0 0 1px ' + theme.formInputShadowSelected,
-              backgroundColor: theme.formInputBackgroundSelected,
-            }
-      }
-      leftContent={
-        <SvgSearchAlternate
-          style={{
-            width: 13,
-            height: 13,
-            flexShrink: 0,
-            color: value ? theme.menuItemTextSelected : 'inherit',
-            margin: 5,
-            marginRight: 0,
-          }}
-        />
-      }
-      rightContent={
-        value && (
-          <View title={t('Clear search term')}>
-            <Button
-              variant="bare"
-              style={{ padding: 8 }}
-              onPress={() => onChange('')}
-            >
-              <SvgRemove style={{ width: 8, height: 8 }} />
-            </Button>
-          </View>
-        )
-      }
-      inputStyle={{
-        '::placeholder': {
-          color: theme.formInputTextPlaceholder,
-          transition: 'color .25s',
-        },
-        ':focus': isInModal
-          ? {}
-          : {
-              '::placeholder': {
-                color: theme.formInputTextPlaceholderSelected,
+    >
+      <SvgSearchAlternate
+        style={{
+          width: 13,
+          height: 13,
+          flexShrink: 0,
+          color: value ? theme.menuItemTextSelected : 'inherit',
+          margin: 5,
+          marginRight: 0,
+        }}
+      />
+
+      <Input
+        inputRef={inputRef}
+        value={value}
+        placeholder={placeholder}
+        onKeyDown={e => {
+          if (e.key === 'Escape') onChange('');
+        }}
+        onChangeValue={onChange}
+        style={{
+          width: '100%',
+          '::placeholder': {
+            color: theme.formInputTextPlaceholder,
+            transition: 'color .25s',
+          },
+          ':focus': isInModal
+            ? {}
+            : {
+                '::placeholder': {
+                  color: theme.formInputTextPlaceholderSelected,
+                },
               },
-            },
-      }}
-      value={value}
-      placeholder={placeholder}
-      onKeyDown={e => {
-        if (e.key === 'Escape') onChange('');
-      }}
-      onChangeValue={value => onChange(value)}
-    />
+          flex: 1,
+          '&, &:focus, &:hover': {
+            border: 0,
+            backgroundColor: 'transparent',
+            boxShadow: 'none',
+            color: 'inherit',
+          },
+        }}
+        onFocus={() => {
+          setFocused(true);
+        }}
+        onBlur={() => {
+          setFocused(false);
+        }}
+      />
+
+      {value && (
+        <View title={t('Clear search term')}>
+          <Button
+            variant="bare"
+            style={{ padding: 8 }}
+            onPress={() => onChange('')}
+          >
+            <SvgRemove style={{ width: 8, height: 8 }} />
+          </Button>
+        </View>
+      )}
+    </View>
   );
 }

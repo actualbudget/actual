@@ -3,15 +3,14 @@ import { useTranslation } from 'react-i18next';
 
 import { Label } from '@actual-app/components/label';
 import { styles } from '@actual-app/components/styles';
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import { type AccountEntity } from 'loot-core/types/models';
 import { type TransactionEntity } from 'loot-core/types/models/transaction';
 
 import { SelectedProvider, useSelected } from '../../../hooks/useSelected';
-import { SvgSearchAlternate } from '../../../icons/v2';
-import { theme } from '../../../style';
-import { InputWithContent } from '../../common/InputWithContent';
+import { Search } from '../../common/Search';
 import type { Binding, SheetNames, SheetFields } from '../../spreadsheet';
 import { CellValue, CellValueText } from '../../spreadsheet/CellValue';
 import { useSheetValue } from '../../spreadsheet/useSheetValue';
@@ -40,28 +39,16 @@ function TransactionSearchInput({
         width: '100%',
       }}
     >
-      <InputWithContent
-        leftContent={
-          <SvgSearchAlternate
-            style={{
-              width: 13,
-              height: 13,
-              flexShrink: 0,
-              color: text ? theme.formInputTextHighlight : 'inherit',
-              margin: 5,
-              marginRight: 0,
-            }}
-          />
-        }
+      <Search
         value={text}
-        onChangeValue={text => {
+        onChange={text => {
           setText(text);
           onSearch(text);
         }}
         placeholder={placeholder}
-        style={{
+        inputStyle={{
           backgroundColor: theme.tableBackground,
-          border: `1px solid ${theme.formInputBorder}`,
+          borderColor: theme.formInputBorder,
           flex: 1,
           height: styles.mobileMinHeight,
         }}

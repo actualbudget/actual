@@ -12,6 +12,7 @@ import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { SvgAdd, SvgSubtract } from '@actual-app/components/icons/v1';
+import { defaultInputStyle, Input } from '@actual-app/components/input';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
@@ -20,7 +21,6 @@ import { amountToInteger, appendDecimals } from 'loot-core/shared/util';
 
 import { useMergedRefs } from '../../hooks/useMergedRefs';
 import { useSyncedPref } from '../../hooks/useSyncedPref';
-import { InputWithContent } from '../common/InputWithContent';
 import { useFormat } from '../spreadsheet/useFormat';
 
 type AmountInputProps = {
@@ -60,6 +60,8 @@ export function AmountInput({
   const [symbol, setSymbol] = useState<'+' | '-'>(
     initialValue === 0 ? zeroSign : initialValue > 0 ? '+' : '-',
   );
+
+  const [isFocused, setIsFocused] = useState(focused ?? false);
 
   const initialValueAbsolute = format(Math.abs(initialValue || 0), 'financial');
   const [value, setValue] = useState(initialValueAbsolute);
@@ -115,42 +117,70 @@ export function AmountInput({
   }
 
   return (
-    <InputWithContent
-      id={id}
-      inputRef={mergedRef}
-      inputMode="decimal"
-      leftContent={
-        <Button
-          variant="bare"
-          isDisabled={disabled}
-          aria-label={`Make ${symbol === '-' ? 'positive' : 'negative'}`}
-          style={{ padding: '0 7px' }}
-          onPress={onSwitch}
-          ref={buttonRef}
-        >
-          {symbol === '-' && (
-            <SvgSubtract style={{ width: 8, height: 8, color: 'inherit' }} />
-          )}
-          {symbol === '+' && (
-            <SvgAdd style={{ width: 8, height: 8, color: 'inherit' }} />
-          )}
-        </Button>
-      }
-      value={value}
-      disabled={disabled}
-      style={{ flex: 1, alignItems: 'stretch', ...style }}
-      inputStyle={inputStyle}
-      onKeyUp={e => {
-        if (e.key === 'Enter') {
-          const amount = getAmount();
-          fireUpdate(amount);
-        }
+    <View
+      style={{
+        ...defaultInputStyle,
+        padding: 0,
+        flexDirection: 'row',
+        flex: 1,
+        alignItems: 'stretch',
+        ...style,
+        ...(isFocused && {
+          boxShadow: '0 0 0 1px ' + theme.formInputShadowSelected,
+        }),
       }}
-      onChangeValue={onInputTextChange}
-      onBlur={onInputAmountBlur}
-      onFocus={onFocus}
-      onEnter={onEnter}
-    />
+    >
+      <Button
+        variant="bare"
+        isDisabled={disabled}
+        aria-label={`Make ${symbol === '-' ? 'positive' : 'negative'}`}
+        style={{ padding: '0 7px' }}
+        onPress={onSwitch}
+        ref={buttonRef}
+      >
+        {symbol === '-' && (
+          <SvgSubtract style={{ width: 8, height: 8, color: 'inherit' }} />
+        )}
+        {symbol === '+' && (
+          <SvgAdd style={{ width: 8, height: 8, color: 'inherit' }} />
+        )}
+      </Button>
+
+      <Input
+        id={id}
+        inputRef={mergedRef}
+        inputMode="decimal"
+        value={value}
+        disabled={disabled}
+        style={{
+          width: '100%',
+          ...inputStyle,
+          flex: 1,
+          '&, &:focus, &:hover': {
+            border: 0,
+            backgroundColor: 'transparent',
+            boxShadow: 'none',
+            color: 'inherit',
+          },
+        }}
+        onFocus={e => {
+          setIsFocused(true);
+          onFocus?.(e);
+        }}
+        onBlur={e => {
+          setIsFocused(false);
+          onInputAmountBlur(e);
+        }}
+        onKeyUp={e => {
+          if (e.key === 'Enter') {
+            const amount = getAmount();
+            fireUpdate(amount);
+          }
+        }}
+        onEnter={onEnter}
+        onChangeValue={onInputTextChange}
+      />
+    </View>
   );
 }
 
