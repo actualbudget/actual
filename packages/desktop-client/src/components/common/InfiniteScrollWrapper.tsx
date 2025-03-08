@@ -1,28 +1,22 @@
-// @ts-strict-ignore
-import React, {
-  type ReactNode,
-  type UIEvent,
-  useRef,
-  type CSSProperties,
-} from 'react';
+import React, { useRef, type ReactNode, type UIEvent } from 'react';
 
 import { View } from '@actual-app/components/view';
 
-type SimpleTableProps = {
+type InfiniteScrollWrapperProps = {
   loadMore?: () => void;
-  style?: CSSProperties;
-  onHoverLeave?: () => void;
   children: ReactNode;
 };
 
-export function SimpleTable({
+/**
+ * Wrapper around an infinitely loading list.
+ * Calls the `loadMore` callback when the bottom of the list is reached
+ * by scrolling to the bottom of the list.
+ */
+export function InfiniteScrollWrapper({
   loadMore,
-  style,
-  onHoverLeave,
   children,
-}: SimpleTableProps) {
-  const contentRef = useRef<HTMLDivElement>();
-  const scrollRef = useRef<HTMLDivElement>();
+}: InfiniteScrollWrapperProps) {
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   function onScroll(e: UIEvent<HTMLElement>) {
     if (
@@ -43,7 +37,9 @@ export function SimpleTable({
         flex: 1,
         outline: 'none',
         '& .animated .animated-row': { transition: '.25s transform' },
-        ...style,
+
+        // Hide the last border of the item in the table
+        marginBottom: -1,
       }}
       tabIndex={1}
       data-testid="table"
@@ -53,9 +49,7 @@ export function SimpleTable({
         style={{ maxWidth: '100%', overflow: 'auto' }}
         onScroll={onScroll}
       >
-        <div ref={contentRef} onMouseLeave={onHoverLeave}>
-          {children}
-        </div>
+        {children}
       </View>
     </View>
   );
