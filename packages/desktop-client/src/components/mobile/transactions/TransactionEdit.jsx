@@ -171,7 +171,6 @@ function Footer({
   editingField,
   onEditField,
 }) {
-  
   const [transaction, ...childTransactions] = transactions;
   const emptySplitTransaction = childTransactions.find(t => t.amount === 0);
   const onClickRemainingSplit = () => {
@@ -199,7 +198,6 @@ function Footer({
         borderColor: theme.tableBorder,
       }}
     >
-      
       {transaction.error?.type === 'SplitTransactionError' ? (
         <Button
           variant="primary"
@@ -219,15 +217,14 @@ function Footer({
               <Trans>Add New Split</Trans>
             ) : (
               <>
-                <Trans>Amount left</Trans>: {' '}
+                <Trans>Amount left</Trans>:{' '}
                 {integerToCurrency(
                   transaction.amount > 0
                     ? transaction.error.difference
                     : -transaction.error.difference,
-               )}
+                )}
               </>
-            )
-          }
+            )}
           </Text>
         </Button>
       ) : !transaction.account ? (
