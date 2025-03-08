@@ -258,19 +258,13 @@ function handleCategoryChange(months, oldValue, newValue) {
   ) {
     const id = newValue.id;
     const groupId = newValue.cat_group;
-    //TODO: Make this work
-    const isIncome = db.first(
-      `
-      SELECT is_income from category_groups WHERE id=?`,
-      [groupId],
-    );
 
     months.forEach(month => {
       const sheetName = monthUtils.sheetForMonth(month);
       if (newValue.hidden) {
-        removeDeps(sheetName, groupId, id, isIncome);
+        removeDeps(sheetName, groupId, id, newValue.is_income);
       } else {
-        addDeps(sheetName, groupId, id, isIncome);
+        addDeps(sheetName, groupId, id, newValue.is_income);
       }
     });
   }
