@@ -85,7 +85,7 @@ jobs:
         with:
           context: .
           push: ${{ github.event_name != 'pull_request' }}
-          file: packages/sync-server/docker/stable-${{ matrix.os }}.Dockerfile
+          file: packages/sync-server/docker/${{ matrix.os }}.Dockerfile
           platforms: linux/amd64,linux/arm64,linux/arm/v7${{ matrix.os == 'alpine' && ',linux/arm/v6' || '' }}
           tags: ${{ steps.meta.outputs.tags }}
           build-args: |
