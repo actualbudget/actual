@@ -1,5 +1,6 @@
-import React, { memo, useCallback, useRef } from 'react';
+import React, { memo, useCallback, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useSwipeable } from 'react-swipeable';
 
 import { Button } from '@actual-app/components/button';
 import { Card } from '@actual-app/components/card';
@@ -1701,6 +1702,26 @@ export function BudgetTable({
   const { t } = useTranslation();
   const { width } = useResponsive();
   const show3Cols = width >= 360;
+  const [borderStyles, setBorderStyles] = useState({});
+  const swipeHandlers = useSwipeable({
+    onSwipedLeft: onNextMonth,
+    onSwipedRight: onPrevMonth,
+    onSwiping: e => {
+      setBorderStyles({
+        borderLeft:
+          e.dir === 'Right'
+            ? `1px solid ${theme.budgetHeaderCurrentMonth}`
+            : undefined,
+        borderRight:
+          e.dir === 'Left'
+            ? `1px solid ${theme.tableBorderSelected}`
+            : undefined,
+      });
+    },
+    onSwiped: () => {
+      setBorderStyles({});
+    },
+  });
 
   // let editMode = false; // neuter editMode -- sorry, not rewriting drag-n-drop right now
 
@@ -1774,10 +1795,12 @@ export function BudgetTable({
       />
       <PullToRefresh onRefresh={onRefresh}>
         <View
+          {...swipeHandlers}
           data-testid="budget-table"
           style={{
             backgroundColor: theme.pageBackground,
             paddingBottom: MOBILE_NAV_HEIGHT,
+            ...borderStyles,
           }}
         >
           <UncategorizedButton />
