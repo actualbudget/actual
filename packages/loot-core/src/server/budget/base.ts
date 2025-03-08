@@ -152,8 +152,8 @@ function handleCategoryMappingChange(months, oldValue, newValue) {
 function handleCategoryChange(months, oldValue, newValue) {
   const budgetType = getBudgetType();
 
-  function addDeps(sheetName, groupId, catId) {
-    if (getBudgetType() === 'rollover') {
+  function addDeps(sheetName, groupId, catId, isIncome = null) {
+    if (getBudgetType() === 'rollover' || isIncome) {
       sheet
         .get()
         .addDependencies(sheetName, `group-sum-amount-${groupId}`, [
@@ -178,8 +178,8 @@ function handleCategoryChange(months, oldValue, newValue) {
       ]);
   }
 
-  function removeDeps(sheetName, groupId, catId) {
-    if (getBudgetType() === 'rollover') {
+  function removeDeps(sheetName, groupId, catId, isIncome = null) {
+    if (getBudgetType() === 'rollover' || isIncome) {
       sheet
         .get()
         .removeDependencies(sheetName, `group-sum-amount-${groupId}`, [
@@ -258,13 +258,19 @@ function handleCategoryChange(months, oldValue, newValue) {
   ) {
     const id = newValue.id;
     const groupId = newValue.cat_group;
+    //TODO: Make this work
+    const isIncome = db.first(
+      `
+      SELECT is_income from category_groups WHERE id=?`,
+      [groupId],
+    );
 
     months.forEach(month => {
       const sheetName = monthUtils.sheetForMonth(month);
       if (newValue.hidden) {
-        removeDeps(sheetName, groupId, id);
+        removeDeps(sheetName, groupId, id, isIncome);
       } else {
-        addDeps(sheetName, groupId, id);
+        addDeps(sheetName, groupId, id, isIncome);
       }
     });
   }
