@@ -153,11 +153,19 @@ function handleCategoryChange(months, oldValue, newValue) {
   const budgetType = getBudgetType();
 
   function addDeps(sheetName, groupId, catId) {
-    sheet
-      .get()
-      .addDependencies(sheetName, `group-sum-amount-${groupId}`, [
-        `sum-amount-${catId}`,
-      ]);
+    if (getBudgetType() === 'rollover') {
+      sheet
+        .get()
+        .addDependencies(sheetName, `group-sum-amount-${groupId}`, [
+          `sum-amount-${catId}`,
+        ]);
+    } else {
+      sheet
+        .get()
+        .addDependencies(sheetName, `group-sum-amount-${groupId}`, [
+          `spent-with-carryover-${catId}`,
+        ]);
+    }
     sheet
       .get()
       .addDependencies(sheetName, `group-budget-${groupId}`, [
@@ -171,11 +179,19 @@ function handleCategoryChange(months, oldValue, newValue) {
   }
 
   function removeDeps(sheetName, groupId, catId) {
-    sheet
-      .get()
-      .removeDependencies(sheetName, `group-sum-amount-${groupId}`, [
-        `sum-amount-${catId}`,
-      ]);
+    if (getBudgetType() === 'rollover') {
+      sheet
+        .get()
+        .removeDependencies(sheetName, `group-sum-amount-${groupId}`, [
+          `sum-amount-${catId}`,
+        ]);
+    } else {
+      sheet
+        .get()
+        .removeDependencies(sheetName, `group-sum-amount-${groupId}`, [
+          `spent-with-carryover-${catId}`,
+        ]);
+    }
     sheet
       .get()
       .removeDependencies(sheetName, `group-budget-${groupId}`, [
