@@ -160,38 +160,34 @@ export function ProgressBar({ month, category }: ProgressBarProps) {
   );
 
   useEffect(() => {
-    const setColorBars = async () => {
-      setTimeout(() => {
-        // Don't show visuals for income categories
-        if (category.is_income) {
-          return null;
-        }
-        const [freshLeftBar, freshRightBar] = getColorBars(
-          budgeted,
-          spent,
-          balance,
-          goal,
-          isLongGoal,
-        );
-        setLeftBar(freshLeftBar);
-        setRightBar(freshRightBar);
-      }, 100);
-    };
+    // Don't show visuals for income categories
+    if (category.is_income) {
+      return;
+    }
+    const [freshLeftBar, freshRightBar] = getColorBars(
+      budgeted,
+      spent,
+      balance,
+      goal,
+      isLongGoal,
+    );
+    setLeftBar(freshLeftBar);
+    setRightBar(freshRightBar);
+  }, [category, budgeted, spent, balance, goal, isLongGoal]);
 
-    setColorBars();
-  }, [category, budgeted, spent, balance, goal, isLongGoal, hoveredMonth]);
+  const BAR_HEIGHT = 3;
+  const BORDER_RADIUS = 30;
+  const PARTIAL_OPACITY = '0.5';
+  const FULL_OPACITY = '1';
 
-  const barHeight = 3;
-  const borderRadius = 30;
-
-  let barOpacity = '0.5'; // By default, all categories in all months with some activity are partly visible
+  let barOpacity = PARTIAL_OPACITY; // By default, all categories in all months with some activity are partly visible
   if (isCurrentMonth) {
-    barOpacity = '1'; // By default, categories in the current month are fully visible
+    barOpacity = FULL_OPACITY; // By default, categories in the current month are fully visible
   }
   if (isCurrentMonth && hoveredMonth && hoveredMonth !== month) {
-    barOpacity = '0.5'; // If a non-current month is hovered over, lower visibility for the current month
+    barOpacity = PARTIAL_OPACITY; // If a non-current month is hovered over, lower visibility for the current month
   } else if (hoveredMonth === month) {
-    barOpacity = '1'; // If a non-current month is hovered over, raise that month to fully visible
+    barOpacity = FULL_OPACITY; // If a non-current month is hovered over, raise that month to fully visible
   }
 
   return (
@@ -202,7 +198,7 @@ export function ProgressBar({ month, category }: ProgressBarProps) {
         right: 0,
         bottom: 0,
         marginBottom: 1,
-        width: '50%',
+        width: '100%',
         opacity: barOpacity,
         transition: 'opacity 0.25s',
       }}
@@ -210,14 +206,14 @@ export function ProgressBar({ month, category }: ProgressBarProps) {
       {/* Left side of the bar */}
       <View
         style={{
-          height: barHeight,
+          height: BAR_HEIGHT,
           backgroundColor: leftBar.color,
           width: `${leftBar.width}%`,
           position: 'absolute',
           bottom: 0,
           left: 0,
-          borderTopLeftRadius: borderRadius,
-          borderBottomLeftRadius: borderRadius,
+          borderTopLeftRadius: BORDER_RADIUS,
+          borderBottomLeftRadius: BORDER_RADIUS,
           transition: 'width 0.5s ease-in-out',
         }}
         title={`${t(leftBar.category)}: ${leftBar.rawValue}`}
@@ -225,14 +221,14 @@ export function ProgressBar({ month, category }: ProgressBarProps) {
       {/* Right side of the bar */}
       <View
         style={{
-          height: barHeight,
+          height: BAR_HEIGHT,
           backgroundColor: rightBar.color,
           width: `${rightBar.width}%`,
           position: 'absolute',
           bottom: 0,
           right: 0,
-          borderTopRightRadius: borderRadius,
-          borderBottomRightRadius: borderRadius,
+          borderTopRightRadius: BORDER_RADIUS,
+          borderBottomRightRadius: BORDER_RADIUS,
           transition: 'width 0.5s ease-in-out',
         }}
         title={`${t(rightBar.category)}: ${rightBar.rawValue}`}
