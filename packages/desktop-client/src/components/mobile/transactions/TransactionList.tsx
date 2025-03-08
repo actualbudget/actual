@@ -6,7 +6,12 @@ import React, {
   useState,
   type CSSProperties,
 } from 'react';
-import { ListBox, Section, Header, Collection } from 'react-aria-components';
+import {
+  ListBox,
+  ListBoxSection,
+  Header,
+  Collection,
+} from 'react-aria-components';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -167,7 +172,7 @@ export function TransactionList({
         items={sections}
       >
         {section => (
-          <Section>
+          <ListBoxSection>
             <Header
               style={{
                 ...styles.smallText,
@@ -200,7 +205,7 @@ export function TransactionList({
                 />
               )}
             </Collection>
-          </Section>
+          </ListBoxSection>
         )}
       </ListBox>
 
