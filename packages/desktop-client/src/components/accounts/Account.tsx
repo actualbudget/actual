@@ -92,6 +92,7 @@ import { TransactionList } from '../transactions/TransactionList';
 import { validateAccountName } from '../util/accountValidation';
 
 import { AccountHeader } from './Header';
+import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 
 type ConditionEntity = Partial<RuleConditionEntity> | TransactionFilterEntity;
 
@@ -1995,7 +1996,17 @@ export function Account() {
     [params.id],
   );
 
-  return (
+  const isInvestmentsEnabled = useFeatureFlag('investmentAccounts');
+  const showInvestmentsUi = useMemo(
+    () =>
+      isInvestmentsEnabled &&
+      accounts.find(a => a.id === params.id)?.type === 'investment',
+    [isInvestmentsEnabled, params.id, accounts],
+  );
+
+  return showInvestmentsUi ? (
+    <div>investments</div>
+  ) : (
     <SchedulesProvider query={schedulesQuery}>
       <SplitsExpandedProvider
         initialMode={expandSplits ? 'collapse' : 'expand'}
