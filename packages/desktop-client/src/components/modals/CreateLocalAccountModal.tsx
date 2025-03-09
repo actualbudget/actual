@@ -29,15 +29,21 @@ import {
 } from '../common/Modal';
 import { Checkbox } from '../forms';
 import { validateAccountName } from '../util/accountValidation';
+import { Select } from '@actual-app/components/select';
+import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 
 export function CreateLocalAccountModal() {
   const { t } = useTranslation();
+  const isInvestmentAccountsEnabled = useFeatureFlag('investmentAccounts');
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const accounts = useAccounts.useAccounts();
   const [name, setName] = useState('');
   const [offbudget, setOffbudget] = useState(false);
   const [balance, setBalance] = useState('0');
+  const [accountType, setAccountType] = useState<'investment' | undefined>(
+    undefined,
+  );
 
   const [nameError, setNameError] = useState(null);
   const [balanceError, setBalanceError] = useState(false);
@@ -68,6 +74,7 @@ export function CreateLocalAccountModal() {
         createAccount({
           name,
           balance: toRelaxedNumber(balance),
+          type: accountType,
           offBudget: offbudget,
         }),
       ).unwrap();
@@ -161,6 +168,18 @@ export function CreateLocalAccountModal() {
                 </View>
               </View>
 
+              {isInvestmentAccountsEnabled && (
+                <InlineField label={t('Type')} width="100%">
+                  <Select
+                    value={accountType}
+                    onChange={setAccountType}
+                    options={[
+                      [undefined, t('Default')],
+                      ['investment', t('Investment')],
+                    ]}
+                  />
+                </InlineField>
+              )}
               <InlineField label={t('Balance')} width="100%">
                 <Input
                   name="balance"

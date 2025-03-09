@@ -162,16 +162,18 @@ const queriesSlice = createSlice({
 type CreateAccountPayload = {
   name: AccountEntity['name'];
   balance: AccountEntity['balance_current'];
+  type: AccountEntity['type'];
   offBudget: boolean;
 };
 
 export const createAccount = createAppAsyncThunk(
   `${sliceName}/createAccount`,
-  async ({ name, balance, offBudget }: CreateAccountPayload) => {
+  async ({ name, balance, offBudget, type }: CreateAccountPayload) => {
     const id: AccountEntity['id'] = await send('account-create', {
       name,
       balance,
       offBudget,
+      type,
     });
     return id;
   },

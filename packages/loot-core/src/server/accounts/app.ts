@@ -322,16 +322,19 @@ async function createAccount({
   balance = 0,
   offBudget = false,
   closed = false,
+  type,
 }: {
   name: string;
   balance?: number | undefined;
   offBudget?: boolean | undefined;
   closed?: boolean | undefined;
+  type?: string | undefined;
 }) {
   const id: AccountEntity['id'] = await db.insertAccount({
     name,
     offbudget: offBudget ? 1 : 0,
     closed: closed ? 1 : 0,
+    type,
   });
 
   await db.insertPayee({
