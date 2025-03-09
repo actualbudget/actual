@@ -2,6 +2,8 @@ import React, {
   type ComponentPropsWithoutRef,
   type CSSProperties,
   useCallback,
+  useEffect,
+  useRef,
 } from 'react';
 import { type DragItem } from 'react-aria';
 import {
@@ -134,6 +136,24 @@ function AccountListItem({
   ...props
 }: AccountListItemProps) {
   const { value: account } = props;
+  const buttonRef = useRef<HTMLButtonElement | null>(null);
+
+  useEffect(() => {
+    const currentButtonRef = buttonRef.current;
+    if (!currentButtonRef) {
+      return;
+    }
+
+    currentButtonRef.draggable = true;
+
+    function onDragStart(e: DragEvent) {
+      e.dataTransfer.setData('text/plain', account.id);
+    };
+    currentButtonRef.addEventListener('dragstart', onDragStart);
+    return () => {
+      currentButtonRef.removeEventListener('dragstart', onDragStart)
+    }
+  }, [account]);
 
   if (!account) {
     return null;
@@ -143,6 +163,7 @@ function AccountListItem({
     <ListBoxItem textValue={account.name} {...props}>
       {itemProps => (
         <Button
+          ref={buttonRef}
           {...itemProps}
           style={{
             width: '100%',
