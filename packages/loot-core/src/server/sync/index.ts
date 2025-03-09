@@ -744,11 +744,13 @@ async function _fullSync(
 
       if (rebuiltMerkle.trie.hash === res.merkle.hash) {
         // Rebuilding the merkle worked... but why?
-        const clocks = await db.all('SELECT * FROM messages_clock');
+        const clocks = await db.all<db.DbClockMessage>(
+          'SELECT * FROM messages_clock',
+        );
         if (clocks.length !== 1) {
           console.log('Bad number of clocks:', clocks.length);
         }
-        const hash = deserializeClock(clocks[0]).merkle.hash;
+        const hash = deserializeClock(clocks[0].clock).merkle.hash;
         console.log('Merkle hash in db:', hash);
       }
 

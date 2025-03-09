@@ -125,7 +125,7 @@ async function execTransactionsGrouped(
       ${sql.limit != null ? `LIMIT ${sql.limit}` : ''}
       ${sql.offset != null ? `OFFSET ${sql.offset}` : ''}
     `;
-    rows = await db.all(rowSql, params);
+    rows = await db.all<db.DbViewTransactionInternal>(rowSql, params);
   } else {
     // TODO: phew, what a doozy. write docs why it works this way
     //
@@ -151,7 +151,7 @@ async function execTransactionsGrouped(
       ${sql.offset != null ? `OFFSET ${sql.offset}` : ''}
     `;
 
-    rows = await db.all(rowSql, params);
+    rows = await db.all<db.DbViewTransactionInternal>(rowSql, params);
     matched = new Set(
       [].concat.apply(
         [],
@@ -171,7 +171,11 @@ async function execTransactionsGrouped(
     ${sql.orderBy}
   `;
 
-  const allRows = await db.all(finalSql);
+  const allRows = await db.all<
+    db.DbViewTransactionInternal & {
+      _parent_id: db.DbViewTransactionInternal['parent_id'];
+    }
+  >(finalSql);
 
   // Group the parents and children up
   const { parents, children } = allRows.reduce(

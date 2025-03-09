@@ -24,7 +24,9 @@ beforeEach(async () => {
 });
 
 function getAllTransactions() {
-  return db.all(
+  return db.all<
+    db.DbViewTransactionInternal & { payee_name: db.DbPayee['name'] }
+  >(
     `SELECT t.*, p.name as payee_name
        FROM v_transactions_internal t
        LEFT JOIN payees p ON p.id = t.payee

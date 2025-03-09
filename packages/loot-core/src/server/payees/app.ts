@@ -43,13 +43,13 @@ async function createPayee({ name }: { name: PayeeEntity['name'] }) {
   return db.insertPayee({ name });
 }
 
-// Server must return AQL entities not the raw DB data
 async function getCommonPayees(): Promise<PayeeEntity[]> {
+  // TODO: Update to an AQL query. Server must return AQL entities not the raw DB data.
   return (await db.getCommonPayees()).map(payeeModel.fromDb);
 }
 
-// Server must return AQL entities not the raw DB data
 async function getPayees(): Promise<PayeeEntity[]> {
+  // TODO: Update to an AQL query. Server must return AQL entities not the raw DB data.
   return (await db.getPayees()).map(payeeModel.fromDb);
 }
 

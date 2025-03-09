@@ -5,7 +5,12 @@ import { captureBreadcrumb } from '../platform/exceptions';
 import * as sqlite from '../platform/server/sqlite';
 import { sheetForMonth } from '../shared/months';
 
-import { DbPreference } from './db';
+import {
+  DbPreference,
+  DbReflectBudget,
+  DbZeroBudget,
+  DbZeroBudgetMonth,
+} from './db';
 import * as Platform from './platform';
 import { Spreadsheet } from './spreadsheet/spreadsheet';
 import { resolveName } from './spreadsheet/util';
@@ -205,7 +210,7 @@ export async function loadUserBudgets(
     )) ?? {};
 
   const table = budgetType === 'report' ? 'reflect_budgets' : 'zero_budgets';
-  const budgets = await db.all(`
+  const budgets = await db.all<DbReflectBudget | DbZeroBudget>(`
       SELECT * FROM ${table} b
       LEFT JOIN categories c ON c.id = b.category
       WHERE c.tombstone = 0
@@ -229,7 +234,9 @@ export async function loadUserBudgets(
 
   // For zero-based budgets, load the buffered amounts
   if (budgetType !== 'report') {
-    const budgetMonths = await db.all('SELECT * FROM zero_budget_months');
+    const budgetMonths = await db.all<DbZeroBudgetMonth>(
+      'SELECT * FROM zero_budget_months',
+    );
     for (const budgetMonth of budgetMonths) {
       const sheetName = sheetForMonth(budgetMonth.id);
       sheet.set(`${sheetName}!buffered`, budgetMonth.buffered);
