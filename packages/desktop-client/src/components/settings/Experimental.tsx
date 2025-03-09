@@ -117,6 +117,12 @@ export function ExperimentalFeatures() {
             >
               <Trans>Pluggy.ai Bank Sync (Brazilian banks only)</Trans>
             </FeatureToggle>
+            <FeatureToggle
+              flag="budgetTableV2"
+              feedbackLink="https://github.com/actualbudget/actual/pull/CHANGEME"
+            >
+              <Trans>Rewrite of desktop budget table</Trans>
+            </FeatureToggle>
           </View>
         ) : (
           <Link
