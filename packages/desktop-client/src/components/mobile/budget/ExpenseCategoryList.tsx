@@ -9,10 +9,15 @@ import {
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import {
+  SvgArrowThickRight,
+  SvgCheveronRight,
+} from '@actual-app/components/icons/v1';
 import { type CSSProperties, styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { css } from '@emotion/css';
 import { AutoTextSize } from 'auto-text-size';
 
 import { collapseModals, pushModal } from 'loot-core/client/modals/modalsSlice';
@@ -27,7 +32,6 @@ import { useFeatureFlag } from '../../../hooks/useFeatureFlag';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { useUndo } from '../../../hooks/useUndo';
-import { SvgArrowThickRight, SvgCheveronRight } from '../../../icons/v1';
 import { useDispatch } from '../../../redux';
 import { BalanceWithCarryover } from '../../budget/BalanceWithCarryover';
 import { makeAmountGrey, makeBalanceAmountStyle } from '../../budget/util';
@@ -66,21 +70,24 @@ export function ExpenseCategoryList({
       [...keys].map(
         key =>
           ({
-            'text/plain': categories.find(c => c.id === key)?.id,
+            'text/plain': key as CategoryEntity['id'],
           }) as DragItem,
       ),
     renderDropIndicator: target => {
       return (
         <DropIndicator
           target={target}
-          style={{
-            backgroundColor: theme.tableRowBackgroundHighlight,
-            position: 'absolute',
-            left: 2,
-            right: 2,
-            borderRadius: 3,
-            height: 3,
-          }}
+          className={css({
+            height: 4,
+            backgroundColor: theme.tableBorderSeparator,
+            opacity: 1,
+            transition:
+              'background-color 0.2s ease-in-out, transform 0.2s ease',
+
+            '&[data-drop-target]': {
+              transform: 'scaleX(1.1)',
+            },
+          })}
         />
       );
     },
