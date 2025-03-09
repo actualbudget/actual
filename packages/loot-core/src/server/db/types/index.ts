@@ -175,6 +175,22 @@ export type DbTransaction = {
   type?: string | null;
 };
 
+export type DbHolding = {
+  id: string;
+  acct: DbAccount['id'];
+
+  symbol: string;
+  title?: string;
+  shares: number;
+  purchase_price: number;
+  market_value: number;
+
+  financial_id?: number;
+  raw_synced_data?: string | undefined;
+
+  tombstone: 1 | 0;
+};
+
 export type DbReflectBudget = {
   id: string;
   month: number;
