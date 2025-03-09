@@ -1,9 +1,14 @@
 // @ts-strict-ignore
+
+import { q } from '../../../shared/query';
+import { CategoryEntity, CategoryGroupEntity } from '../../../types/models';
 import * as db from '../../db';
 import { whereIn } from '../../db/util';
 import { isAggregateQuery } from '../compiler';
 import { execQuery } from '../exec';
 import { convertOutputType } from '../schema-helpers';
+
+import { runQuery as aqlQuery } from './run-query';
 
 // Transactions executor
 
@@ -226,6 +231,71 @@ async function execTransactionsBasic(
   return execQuery(queryState, state, s, params, outputTypes);
 }
 
+async function execCategoryGroups(state, query, sql, params, outputTypes) {
+  const tableOptions = query.tableOptions || {};
+  const categoriesOption = tableOptions.categories || 'all';
+
+  if (categoriesOption !== 'none') {
+    return execCategoryGroupsWithCategories(
+      state,
+      query,
+      sql,
+      params,
+      categoriesOption,
+      outputTypes,
+    );
+  }
+  return execCategoryGroupsBasic(state, query, sql, params, outputTypes);
+}
+
+async function execCategoryGroupsWithCategories(
+  state,
+  queryState,
+  sql,
+  params,
+  categoriesOption,
+  outputTypes,
+) {
+  const categoryGroups = (await execCategoryGroupsBasic(
+    state,
+    queryState,
+    sql,
+    params,
+    outputTypes,
+  )) as CategoryGroupEntity[];
+
+  if (categoriesOption === 'none') {
+    return categoryGroups;
+  }
+
+  const { data: categories }: { data: CategoryEntity[] } = await aqlQuery(
+    q('categories')
+      .filter({
+        group: { $oneof: categoryGroups.map(cg => cg.id) },
+      })
+      .select('*'),
+  );
+
+  return categoryGroups.map(group => {
+    const cats = categories.filter(cat => cat.group === group.id);
+    return {
+      ...group,
+      categories: cats,
+    };
+  });
+}
+
+async function execCategoryGroupsBasic(
+  state,
+  queryState,
+  sql,
+  params,
+  outputTypes,
+) {
+  return execQuery(queryState, state, sql, params, outputTypes);
+}
+
 export const schemaExecutors = {
   transactions: execTransactions,
+  category_groups: execCategoryGroups,
 };
