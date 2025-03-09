@@ -7,7 +7,7 @@
   },
   "dependencies": {
     "@emotion/css": "^11.13.4",
-    "react-aria-components": "^1.4.1"
+    "react-aria-components": "^1.7.0"
   },
   "devDependencies": {
     "@svgr/cli": "^8.1.0",
@@ -28,10 +28,12 @@
     "./form-error": "./src/FormError.tsx",
     "./initial-focus": "./src/InitialFocus.ts",
     "./inline-field": "./src/InlineField.tsx",
+    "./input": "./src/Input.tsx",
     "./label": "./src/Label.tsx",
     "./menu": "./src/Menu.tsx",
     "./paragraph": "./src/Paragraph.tsx",
     "./popover": "./src/Popover.tsx",
+    "./select": "./src/Select.tsx",
     "./space-between": "./src/SpaceBetween.tsx",
     "./stack": "./src/Stack.tsx",
     "./styles": "./src/styles.ts",

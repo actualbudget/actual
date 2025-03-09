@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { Select } from '@actual-app/components/select';
+
 import { Input } from '../common/Input';
-import { Select } from '../common/Select';
 
 type CustomUpcomingLengthProps = {
   onChange: (value: string) => void;
