@@ -5,10 +5,7 @@ import * as db from '../db';
 import * as sheet from '../sheet';
 import { resolveName } from '../spreadsheet/util';
 
-import {
-  getBudgetType,
-  createCategory as createCategoryFromBase,
-} from './base';
+import { createCategory as createCategoryFromBase } from './base';
 import { number, sumAmounts } from './util';
 
 export async function createCategory(cat, sheetName, prevSheetName) {
@@ -119,10 +116,8 @@ export function createSummary(groups, categories, sheetName) {
 }
 
 export function handleCategoryChange(months, oldValue, newValue) {
-  const budgetType = getBudgetType();
-
   function addDeps(sheetName, groupId, catId, isIncome = null) {
-    if (getBudgetType() === 'rollover' || isIncome) {
+    if (isIncome) {
       sheet
         .get()
         .addDependencies(sheetName, `group-sum-amount-${groupId}`, [
@@ -148,7 +143,7 @@ export function handleCategoryChange(months, oldValue, newValue) {
   }
 
   function removeDeps(sheetName, groupId, catId, isIncome = null) {
-    if (getBudgetType() === 'rollover' || isIncome) {
+    if (isIncome) {
       sheet
         .get()
         .removeDependencies(sheetName, `group-sum-amount-${groupId}`, [
@@ -196,15 +191,6 @@ export function handleCategoryChange(months, oldValue, newValue) {
       const id = newValue.id;
       const groupId = newValue.cat_group;
 
-      if (getBudgetType() === 'rollover') {
-        sheet
-          .get()
-          .addDependencies(sheetName, 'last-month-overspent', [
-            `${prevSheetName}!leftover-${id}`,
-            `${prevSheetName}!carryover-${id}`,
-          ]);
-      }
-
       addDeps(sheetName, groupId, id);
     });
   } else if (oldValue && oldValue.cat_group !== newValue.cat_group) {
@@ -216,11 +202,7 @@ export function handleCategoryChange(months, oldValue, newValue) {
       removeDeps(sheetName, oldValue.cat_group, id);
       addDeps(sheetName, newValue.cat_group, id);
     });
-  } else if (
-    oldValue &&
-    oldValue.hidden !== newValue.hidden &&
-    budgetType !== 'rollover'
-  ) {
+  } else if (oldValue && oldValue.hidden !== newValue.hidden) {
     const id = newValue.id;
     const groupId = newValue.cat_group;
 
@@ -236,8 +218,6 @@ export function handleCategoryChange(months, oldValue, newValue) {
 }
 
 export function handleCategoryGroupChange(months, oldValue, newValue) {
-  const budgetType = getBudgetType();
-
   function addDeps(sheetName, groupId) {
     sheet
       .get()
@@ -276,29 +256,23 @@ export function handleCategoryGroupChange(months, oldValue, newValue) {
   ) {
     const group = newValue;
 
-    if (!group.is_income || budgetType !== 'rollover') {
-      months.forEach(month => {
-        const sheetName = monthUtils.sheetForMonth(month);
+    months.forEach(month => {
+      const sheetName = monthUtils.sheetForMonth(month);
 
-        // Dirty, dirty hack. These functions should not be async, but this is
-        // OK because we're leveraging the sync nature of queries. Ideally we
-        // wouldn't be querying here. But I think we have to. At least for now
-        // we do
-        const categories = db.runQuery(
-          'SELECT * FROM categories WHERE tombstone = 0 AND cat_group = ?',
-          [group.id],
-          true,
-        );
-        createCategoryGroup({ ...group, categories }, sheetName);
+      // Dirty, dirty hack. These functions should not be async, but this is
+      // OK because we're leveraging the sync nature of queries. Ideally we
+      // wouldn't be querying here. But I think we have to. At least for now
+      // we do
+      const categories = db.runQuery(
+        'SELECT * FROM categories WHERE tombstone = 0 AND cat_group = ?',
+        [group.id],
+        true,
+      );
+      createCategoryGroup({ ...group, categories }, sheetName);
 
-        addDeps(sheetName, group.id);
-      });
-    }
-  } else if (
-    oldValue &&
-    oldValue.hidden !== newValue.hidden &&
-    budgetType !== 'rollover'
-  ) {
+      addDeps(sheetName, group.id);
+    });
+  } else if (oldValue && oldValue.hidden !== newValue.hidden) {
     const group = newValue;
 
     months.forEach(month => {
@@ -313,9 +287,8 @@ export function handleCategoryGroupChange(months, oldValue, newValue) {
 }
 
 export function createCategoryGroup(group, sheetName) {
-  const budgetType = getBudgetType();
   // different sum amount dependencies
-  if (budgetType === 'rollover' || group.is_income) {
+  if (group.is_income) {
     sheet.get().createDynamic(sheetName, 'group-sum-amount-' + group.id, {
       initialValue: 0,
       dependencies: group.categories.map(cat => `sum-amount-${cat.id}`),

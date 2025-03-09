@@ -5,10 +5,7 @@ import * as db from '../db';
 import * as sheet from '../sheet';
 import { resolveName } from '../spreadsheet/util';
 
-import {
-  getBudgetType,
-  createCategory as createCategoryFromBase,
-} from './base';
+import { createCategory as createCategoryFromBase } from './base';
 import { number, sumAmounts, flatten2, unflatten2 } from './util';
 
 function getBlankSheet(months) {
@@ -221,8 +218,6 @@ export function handleCategoryChange(months, oldValue, newValue) {
       ]);
   }
 
-  const budgetType = getBudgetType();
-
   if (oldValue && oldValue.tombstone === 0 && newValue.tombstone === 1) {
     const id = newValue.id;
     const groupId = newValue.cat_group;
@@ -235,9 +230,7 @@ export function handleCategoryChange(months, oldValue, newValue) {
     newValue.tombstone === 0 &&
     (!oldValue || oldValue.tombstone === 1)
   ) {
-    if (budgetType === 'rollover') {
-      createBlankCategory(newValue, months);
-    }
+    createBlankCategory(newValue, months);
 
     months.forEach(month => {
       const prevMonth = monthUtils.prevMonth(month);
@@ -250,14 +243,12 @@ export function handleCategoryChange(months, oldValue, newValue) {
       const id = newValue.id;
       const groupId = newValue.cat_group;
 
-      if (getBudgetType() === 'rollover') {
-        sheet
-          .get()
-          .addDependencies(sheetName, 'last-month-overspent', [
-            `${prevSheetName}!leftover-${id}`,
-            `${prevSheetName}!carryover-${id}`,
-          ]);
-      }
+      sheet
+        .get()
+        .addDependencies(sheetName, 'last-month-overspent', [
+          `${prevSheetName}!leftover-${id}`,
+          `${prevSheetName}!carryover-${id}`,
+        ]);
 
       addDeps(sheetName, groupId, id);
     });
@@ -274,8 +265,6 @@ export function handleCategoryChange(months, oldValue, newValue) {
 }
 
 export function handleCategoryGroupChange(months, oldValue, newValue) {
-  const budgetType = getBudgetType();
-
   function addDeps(sheetName, groupId) {
     sheet
       .get()
@@ -324,7 +313,7 @@ export function handleCategoryGroupChange(months, oldValue, newValue) {
   ) {
     const group = newValue;
 
-    if (!group.is_income || budgetType !== 'rollover') {
+    if (!group.is_income) {
       months.forEach(month => {
         const sheetName = monthUtils.sheetForMonth(month);
 
@@ -352,7 +341,7 @@ export function createCategoryGroup(group, sheetName) {
     run: sumAmounts,
   });
 
-  if (!group.is_income || getBudgetType() !== 'rollover') {
+  if (!group.is_income) {
     sheet.get().createDynamic(sheetName, 'group-budget-' + group.id, {
       initialValue: 0,
       dependencies: group.categories.map(cat => `budget-${cat.id}`),
