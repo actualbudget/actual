@@ -9,6 +9,7 @@ import {
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import { SvgCheveronRight } from '@actual-app/components/icons/v1';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
@@ -21,7 +22,6 @@ import * as monthUtils from 'loot-core/shared/months';
 import { type CategoryEntity } from 'loot-core/types/models';
 
 import { useSyncedPref } from '../../../hooks/useSyncedPref';
-import { SvgCheveronRight } from '../../../icons/v1';
 import { useDispatch } from '../../../redux';
 import { PrivacyFilter } from '../../PrivacyFilter';
 import { CellValue } from '../../spreadsheet/CellValue';
@@ -29,6 +29,7 @@ import { useFormat } from '../../spreadsheet/useFormat';
 
 import { BudgetCell } from './BudgetCell';
 import { getColumnWidth } from './BudgetTable';
+import { groupById } from 'loot-core/shared/util';
 
 type IncomeCategoryListProps = {
   categories: CategoryEntity[];
@@ -51,7 +52,7 @@ export function IncomeCategoryList({
       [...keys].map(
         key =>
           ({
-            'text/plain': categories.find(c => c.id === key)?.id,
+            'text/plain': key as CategoryEntity['id'],
           }) as DragItem,
       ),
     renderDropIndicator: target => {
@@ -60,11 +61,6 @@ export function IncomeCategoryList({
           target={target}
           style={{
             backgroundColor: theme.tableRowBackgroundHighlight,
-            position: 'absolute',
-            left: 2,
-            right: 2,
-            borderRadius: 3,
-            height: 3,
           }}
         />
       );

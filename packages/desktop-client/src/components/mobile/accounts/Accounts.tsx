@@ -345,11 +345,6 @@ function AccountList({
           target={target}
           style={{
             backgroundColor: theme.tableBorderSeparator,
-            position: 'absolute',
-            left: 2,
-            right: 2,
-            borderRadius: 3,
-            height: 3,
           }}
         />
       );
