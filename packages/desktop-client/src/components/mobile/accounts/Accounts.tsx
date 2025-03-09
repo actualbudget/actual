@@ -13,9 +13,11 @@ import {
 import { useTranslation, Trans } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import { SvgAdd, SvgCheveronRight } from '@actual-app/components/icons/v1';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { TextOneLine } from '@actual-app/components/text-one-line';
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
@@ -29,9 +31,7 @@ import { useAccounts } from '../../../hooks/useAccounts';
 import { useFailedAccounts } from '../../../hooks/useFailedAccounts';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { useSyncedPref } from '../../../hooks/useSyncedPref';
-import { SvgAdd, SvgCheveronRight } from '../../../icons/v1';
 import { useDispatch, useSelector } from '../../../redux';
-import { theme } from '../../../style';
 import { makeAmountFullStyle } from '../../budget/util';
 import { MobilePageHeader, Page } from '../../Page';
 import { type Binding, type SheetFields } from '../../spreadsheet';
@@ -343,9 +343,17 @@ function AccountList({
       return (
         <DropIndicator
           target={target}
-          style={{
+          className={css({
+            height: 4,
             backgroundColor: theme.tableBorderSeparator,
-          }}
+            opacity: 1,
+            transition:
+              'background-color 0.2s ease-in-out, transform 0.2s ease',
+
+            '&[data-drop-target]': {
+              transform: 'scaleX(1.1)',
+            },
+          })}
         />
       );
     },

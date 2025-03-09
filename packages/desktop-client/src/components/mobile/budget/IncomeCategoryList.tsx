@@ -14,6 +14,7 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { css } from '@emotion/css';
 import { AutoTextSize } from 'auto-text-size';
 
 import { envelopeBudget, trackingBudget } from 'loot-core/client/queries';
@@ -29,7 +30,6 @@ import { useFormat } from '../../spreadsheet/useFormat';
 
 import { BudgetCell } from './BudgetCell';
 import { getColumnWidth } from './BudgetTable';
-import { groupById } from 'loot-core/shared/util';
 
 type IncomeCategoryListProps = {
   categories: CategoryEntity[];
@@ -59,9 +59,17 @@ export function IncomeCategoryList({
       return (
         <DropIndicator
           target={target}
-          style={{
-            backgroundColor: theme.tableRowBackgroundHighlight,
-          }}
+          className={css({
+            height: 4,
+            backgroundColor: theme.tableBorderSeparator,
+            opacity: 1,
+            transition:
+              'background-color 0.2s ease-in-out, transform 0.2s ease',
+
+            '&[data-drop-target]': {
+              transform: 'scaleX(1.1)',
+            },
+          })}
         />
       );
     },
