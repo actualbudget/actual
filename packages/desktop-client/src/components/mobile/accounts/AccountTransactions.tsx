@@ -61,6 +61,7 @@ export function AccountTransactions({
     | AccountEntity['id']
     | 'onbudget'
     | 'offbudget'
+    | 'closed'
     | 'uncategorized';
   readonly accountName: string;
 }) {
@@ -238,6 +239,7 @@ function TransactionListWithPreviews({
     | AccountEntity['id']
     | 'onbudget'
     | 'offbudget'
+    | 'closed'
     | 'uncategorized';
   readonly accountName: AccountEntity['name'] | string;
 }) {
@@ -391,6 +393,10 @@ function queriesFromAccountId(
     case 'offbudget':
       return {
         balance: queries.offBudgetAccountBalance(),
+      };
+    case 'closed':
+      return {
+        balance: queries.closedAccountBalance(),
       };
     case 'uncategorized':
       return {
