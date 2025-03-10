@@ -35,6 +35,8 @@ function accountNameFromId(id: string | undefined) {
       return 'Off Budget Accounts';
     case 'uncategorized':
       return 'Uncategorized';
+    case 'closed':
+      return 'Closed Accounts';
     default:
       return 'All Accounts';
   }

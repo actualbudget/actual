@@ -237,6 +237,7 @@ type AllAccountListProps = {
   getAccountBalance: (account: AccountEntity) => Binding<'account', 'balance'>;
   getOnBudgetBalance: () => Binding<'account', 'onbudget-accounts-balance'>;
   getOffBudgetBalance: () => Binding<'account', 'offbudget-accounts-balance'>;
+  getClosedAccountsBalance: () => Binding<'account', 'closed-accounts-balance'>;
   onAddAccount: () => void;
   onOpenAccount: (account: AccountEntity) => void;
   onSync: () => Promise<void>;
@@ -247,6 +248,7 @@ function AllAccountList({
   getAccountBalance,
   getOnBudgetBalance,
   getOffBudgetBalance,
+  getClosedAccountsBalance,
   onAddAccount,
   onOpenAccount,
   onSync,
@@ -254,6 +256,7 @@ function AllAccountList({
   const { t } = useTranslation();
   const onBudgetAccounts = accounts.filter(account => account.offbudget === 0);
   const offBudgetAccounts = accounts.filter(account => account.offbudget === 1);
+  const closedAccounts = accounts.filter(account => account.closed === 1);
 
   return (
     <Page
@@ -304,6 +307,20 @@ function AllAccountList({
           <AccountList
             aria-label={t('Off budget accounts')}
             accounts={offBudgetAccounts}
+            getAccountBalance={getAccountBalance}
+            onOpenAccount={onOpenAccount}
+          />
+          {closedAccounts.length > 0 && (
+            <AccountHeader
+              id="closed"
+              name={t('Closed')}
+              amount={getClosedAccountsBalance()}
+              style={{ marginTop: 30 }}
+            />
+          )}
+          <AccountList
+            aria-label={t('Closed accounts')}
+            accounts={closedAccounts}
             getAccountBalance={getAccountBalance}
             onOpenAccount={onOpenAccount}
           />
@@ -445,10 +462,11 @@ export function Accounts() {
         // This key forces the whole table rerender when the number
         // format changes
         key={numberFormat + hideFraction}
-        accounts={accounts.filter(account => !account.closed)}
+        accounts={accounts}
         getAccountBalance={queries.accountBalance}
         getOnBudgetBalance={queries.onBudgetAccountBalance}
         getOffBudgetBalance={queries.offBudgetAccountBalance}
+        getClosedAccountsBalance={queries.closedAccountBalance}
         onAddAccount={onAddAccount}
         onOpenAccount={onOpenAccount}
         onSync={onSync}
