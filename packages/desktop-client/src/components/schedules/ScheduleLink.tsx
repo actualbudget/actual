@@ -3,6 +3,7 @@ import React, { useMemo, useRef, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import { SvgAdd } from '@actual-app/components/icons/v0';
 import { InitialFocus } from '@actual-app/components/initial-focus';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
@@ -15,7 +16,6 @@ import {
 import { send } from 'loot-core/platform/client/fetch';
 import { q } from 'loot-core/shared/query';
 
-import { SvgAdd } from '../../icons/v0';
 import { useDispatch } from '../../redux';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { Search } from '../common/Search';

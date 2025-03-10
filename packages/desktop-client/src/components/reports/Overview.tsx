@@ -10,6 +10,7 @@ import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { SvgDotsHorizontalTriple } from '@actual-app/components/icons/v1';
 import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
+import { breakpoints } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 
 import { useDashboard } from 'loot-core/client/data-hooks/dashboard';
@@ -31,7 +32,6 @@ import { useNavigate } from '../../hooks/useNavigate';
 import { useSyncedPref } from '../../hooks/useSyncedPref';
 import { useUndo } from '../../hooks/useUndo';
 import { useDispatch } from '../../redux';
-import { breakpoints } from '../../tokens';
 import { MOBILE_NAV_HEIGHT } from '../mobile/MobileNavTabs';
 import { MobilePageHeader, Page, PageHeader } from '../Page';
 

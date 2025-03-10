@@ -1,9 +1,8 @@
 import React, { Fragment, type ComponentProps } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-
-import { theme } from '../../style/theme';
 
 import { ItemHeader } from './ItemHeader';
 

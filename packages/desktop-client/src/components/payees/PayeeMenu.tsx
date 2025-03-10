@@ -1,14 +1,14 @@
 import { useTranslation, Trans } from 'react-i18next';
 
+import { SvgDelete, SvgMerge } from '@actual-app/components/icons/v0';
+import { SvgBookmark, SvgLightBulb } from '@actual-app/components/icons/v1';
 import { Menu, type MenuItem } from '@actual-app/components/menu';
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import { type PayeeEntity } from 'loot-core/types/models';
 
 import { useSyncedPref } from '../../hooks/useSyncedPref';
-import { SvgDelete, SvgMerge } from '../../icons/v0';
-import { SvgBookmark, SvgLightBulb } from '../../icons/v1';
-import { theme } from '../../style';
 
 type PayeeMenuProps = {
   payeesById: Record<PayeeEntity['id'], PayeeEntity>;

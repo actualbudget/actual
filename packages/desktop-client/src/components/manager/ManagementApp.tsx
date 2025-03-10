@@ -4,6 +4,7 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { tokens } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 
 import { loggedIn } from 'loot-core/client/actions';
@@ -13,7 +14,6 @@ import { ProtectedRoute } from '../../auth/ProtectedRoute';
 import { Permissions } from '../../auth/types';
 import { useMetaThemeColor } from '../../hooks/useMetaThemeColor';
 import { useSelector, useDispatch } from '../../redux';
-import { tokens } from '../../tokens';
 import {
   BackToFileListButton,
   UserDirectoryPage,

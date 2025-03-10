@@ -3,11 +3,13 @@ import { DialogTrigger } from 'react-aria-components';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button, ButtonWithLoading } from '@actual-app/components/button';
+import { SvgDotsHorizontalTriple } from '@actual-app/components/icons/v1';
 import { InitialFocus } from '@actual-app/components/initial-focus';
 import { Menu } from '@actual-app/components/menu';
 import { Paragraph } from '@actual-app/components/paragraph';
 import { Popover } from '@actual-app/components/popover';
 import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import {
@@ -25,9 +27,7 @@ import { useGoCardlessStatus } from '../../hooks/useGoCardlessStatus';
 import { usePluggyAiStatus } from '../../hooks/usePluggyAiStatus';
 import { useSimpleFinStatus } from '../../hooks/useSimpleFinStatus';
 import { useSyncServerStatus } from '../../hooks/useSyncServerStatus';
-import { SvgDotsHorizontalTriple } from '../../icons/v1';
 import { useDispatch } from '../../redux';
-import { theme } from '../../style';
 import { Warning } from '../alerts';
 import { Link } from '../common/Link';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';

@@ -19,6 +19,9 @@ import AutoSizer from 'react-virtualized-auto-sizer';
 
 import { Button } from '@actual-app/components/button';
 import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
+import { SvgDelete, SvgExpandArrow } from '@actual-app/components/icons/v0';
+import { SvgCheckmark } from '@actual-app/components/icons/v1';
+import { Input } from '@actual-app/components/input';
 import { Menu, type MenuItem } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
 import { type CSSProperties, styles } from '@actual-app/components/styles';
@@ -32,10 +35,7 @@ import {
   useProperFocus,
 } from '../hooks/useProperFocus';
 import { useSelectedItems } from '../hooks/useSelected';
-import { SvgDelete, SvgExpandArrow } from '../icons/v0';
-import { SvgCheckmark } from '../icons/v1';
 
-import { Input } from './common/Input';
 import { FixedSizeList } from './FixedSizeList';
 import {
   ConditionalPrivacyFilter,

@@ -10,10 +10,10 @@ import React, {
 } from 'react';
 import { useDrag, useDrop } from 'react-dnd';
 
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import { useMergedRefs } from '../hooks/useMergedRefs';
-import { theme } from '../style';
 
 export type DragState<T> = {
   state: 'start-preview' | 'start' | 'end';

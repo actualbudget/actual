@@ -1,7 +1,5 @@
 import { useEffect, useState } from 'react';
 
-import { theme as actualTheme } from '@actual-app/components/theme';
-
 import { isNonProductionEnvironment } from 'loot-core/shared/environment';
 import type { DarkTheme, Theme } from 'loot-core/types/prefs';
 
@@ -97,6 +95,3 @@ export function ThemeStyle() {
     .join('\n');
   return <style>{`:root {\n${css}}`}</style>;
 }
-
-/** @deprecated please import this directly from `@actual-app/components/theme` */
-export const theme = actualTheme;

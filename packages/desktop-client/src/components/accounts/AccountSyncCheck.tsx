@@ -3,7 +3,9 @@ import { Trans, useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 
 import { Button } from '@actual-app/components/button';
+import { SvgExclamationOutline } from '@actual-app/components/icons/v1';
 import { Popover } from '@actual-app/components/popover';
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import { unlinkAccount } from 'loot-core/client/accounts/accountsSlice';
@@ -12,9 +14,7 @@ import { type AccountEntity } from 'loot-core/types/models';
 import { authorizeBank } from '../../gocardless';
 import { useAccounts } from '../../hooks/useAccounts';
 import { useFailedAccounts } from '../../hooks/useFailedAccounts';
-import { SvgExclamationOutline } from '../../icons/v1';
 import { useDispatch } from '../../redux';
-import { theme } from '../../style';
 import { Link } from '../common/Link';
 
 function useErrorMessage() {
