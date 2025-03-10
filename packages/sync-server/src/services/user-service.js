@@ -1,5 +1,4 @@
 import { getAccountDb } from '../account-db.js';
-import { config } from '../load-config.js';
 
 export function getUserByUsername(userName) {
   if (!userName || typeof userName !== 'string') {
