@@ -3,9 +3,12 @@ import React, { useRef, useState, useMemo, type CSSProperties } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import { SvgDotsHorizontalTriple } from '@actual-app/components/icons/v1';
+import { SvgCheck } from '@actual-app/components/icons/v2';
 import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
 import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import {
@@ -22,9 +25,6 @@ import { useAccounts } from '../../hooks/useAccounts';
 import { useContextMenu } from '../../hooks/useContextMenu';
 import { useDateFormat } from '../../hooks/useDateFormat';
 import { usePayees } from '../../hooks/usePayees';
-import { SvgDotsHorizontalTriple } from '../../icons/v1';
-import { SvgCheck } from '../../icons/v2';
-import { theme } from '../../style';
 import { PrivacyFilter } from '../PrivacyFilter';
 import { Table, TableHeader, Row, Field, Cell } from '../table';
 import { DisplayId } from '../util/DisplayId';

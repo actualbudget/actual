@@ -3,6 +3,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { useLocation, type Location } from 'react-router-dom';
 
 import { ButtonWithLoading } from '@actual-app/components/button';
+import { Input } from '@actual-app/components/input';
 import { Menu } from '@actual-app/components/menu';
 import { Select } from '@actual-app/components/select';
 import { Stack } from '@actual-app/components/stack';
@@ -17,7 +18,6 @@ import { type Handlers } from 'loot-core/types/handlers';
 import { type OpenIdConfig } from 'loot-core/types/models/openid';
 
 import { useDispatch } from '../../../redux';
-import { Input } from '../../common/Input';
 import { Link } from '../../common/Link';
 import { FormField, FormLabel } from '../../forms';
 import { useServerURL } from '../../ServerContext';

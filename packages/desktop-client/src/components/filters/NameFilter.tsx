@@ -3,11 +3,11 @@ import { Form } from 'react-aria-components';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import { Input } from '@actual-app/components/input';
 import { Stack } from '@actual-app/components/stack';
 import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
 
-import { theme } from '../../style';
-import { Input } from '../common/Input';
 import { FormField, FormLabel } from '../forms';
 
 export function NameFilter({

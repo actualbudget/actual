@@ -3,6 +3,7 @@ import React, { useState, type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
 import { format as formatDate, parseISO } from 'date-fns';
 
 import { getMonthYearFormat } from 'loot-core/shared/months';
@@ -14,7 +15,6 @@ import { useCategories } from '../../hooks/useCategories';
 import { useDateFormat } from '../../hooks/useDateFormat';
 import { useLocale } from '../../hooks/useLocale';
 import { usePayees } from '../../hooks/usePayees';
-import { theme } from '../../style';
 import { Link } from '../common/Link';
 
 type ValueProps<T> = {

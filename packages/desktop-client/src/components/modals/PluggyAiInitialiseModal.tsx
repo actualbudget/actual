@@ -4,6 +4,7 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { ButtonWithLoading } from '@actual-app/components/button';
 import { InitialFocus } from '@actual-app/components/initial-focus';
+import { Input } from '@actual-app/components/input';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
@@ -12,7 +13,6 @@ import { type Modal as ModalType } from 'loot-core/src/client/modals/modalsSlice
 import { send } from 'loot-core/src/platform/client/fetch';
 
 import { Error } from '../alerts';
-import { Input } from '../common/Input';
 import { Link } from '../common/Link';
 import {
   Modal,

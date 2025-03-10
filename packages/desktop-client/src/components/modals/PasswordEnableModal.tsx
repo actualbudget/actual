@@ -4,6 +4,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { Button } from '@actual-app/components/button';
 import { Label } from '@actual-app/components/label';
 import { styles } from '@actual-app/components/styles';
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import { closeBudget } from 'loot-core/client/budgets/budgetsSlice';
@@ -15,7 +16,6 @@ import { send } from 'loot-core/platform/client/fetch';
 import * as asyncStorage from 'loot-core/platform/server/asyncStorage';
 
 import { useDispatch } from '../../redux';
-import { theme } from '../../style';
 import { Error as ErrorAlert } from '../alerts';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { FormField } from '../forms';

@@ -4,6 +4,14 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@actual-app/components/button';
 import { Card } from '@actual-app/components/card';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
+import { SvgLogo } from '@actual-app/components/icons/logo';
+import { SvgExpandArrow } from '@actual-app/components/icons/v0';
+import {
+  SvgArrowThinLeft,
+  SvgArrowThinRight,
+  SvgArrowThickRight,
+  SvgCheveronRight,
+} from '@actual-app/components/icons/v1';
 import { SvgCalendar, SvgViewShow } from '@actual-app/components/icons/v2';
 import { Label } from '@actual-app/components/label';
 import { styles } from '@actual-app/components/styles';
@@ -30,14 +38,6 @@ import { useLocalPref } from '../../../hooks/useLocalPref';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { useUndo } from '../../../hooks/useUndo';
-import { SvgLogo } from '../../../icons/logo';
-import { SvgExpandArrow } from '../../../icons/v0';
-import {
-  SvgArrowThinLeft,
-  SvgArrowThinRight,
-  SvgArrowThickRight,
-  SvgCheveronRight,
-} from '../../../icons/v1';
 import { useDispatch } from '../../../redux';
 import { BalanceWithCarryover } from '../../budget/BalanceWithCarryover';
 import { makeAmountGrey, makeBalanceAmountStyle } from '../../budget/util';
