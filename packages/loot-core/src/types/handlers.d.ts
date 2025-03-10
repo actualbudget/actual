@@ -1,3 +1,4 @@
+import type { HoldingHandlers } from 'loot-core/server/holdings';
 import type { AccountHandlers } from '../server/accounts/app';
 import type { AdminHandlers } from '../server/admin/types/handlers';
 import type { BudgetHandlers } from '../server/budget/types/handlers';
@@ -27,6 +28,7 @@ export interface Handlers
     RulesHandlers,
     SchedulesHandlers,
     TransactionHandlers,
+    HoldingHandlers,
     AdminHandlers,
     ToolsHandlers,
     AccountHandlers,

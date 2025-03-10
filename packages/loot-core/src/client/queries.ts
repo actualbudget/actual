@@ -68,6 +68,17 @@ export function accountFilter(
   return null;
 }
 
+export function holdings(accountId?: AccountEntity['id']) {
+  let query = q('holdings');
+
+  const filter = accountFilter(accountId);
+  if (filter) {
+    query = query.filter(filter);
+  }
+
+  return query;
+}
+
 export function transactions(
   accountId?: AccountEntity['id'] | 'onbudget' | 'offbudget' | 'uncategorized',
 ) {

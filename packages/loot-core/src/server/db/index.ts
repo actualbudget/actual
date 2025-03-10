@@ -756,6 +756,18 @@ export async function deleteTransaction(transaction) {
   return delete_('transactions', transaction.id);
 }
 
+export function insertHolding(holding) {
+  return insertWithSchema('holdings', holding);
+}
+
+export function updateHolding(holding) {
+  return updateWithSchema('holdings', holding);
+}
+
+export function deleteHolding(holding) {
+  return delete_('holdings', holding.id);
+}
+
 function toSqlQueryParameters(params: unknown[]) {
   return params.map(() => '?').join(',');
 }
