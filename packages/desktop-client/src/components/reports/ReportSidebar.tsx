@@ -13,13 +13,13 @@ import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 
 import * as monthUtils from 'loot-core/shared/months';
-import { type CategoryEntity } from 'loot-core/types/models/category';
-import { type CategoryGroupEntity } from 'loot-core/types/models/category-group';
-import { type TimeFrame } from 'loot-core/types/models/dashboard';
 import {
+  type CategoryEntity,
+  type CategoryGroupEntity,
+  type TimeFrame,
   type CustomReportEntity,
   type sortByOpType,
-} from 'loot-core/types/models/reports';
+} from 'loot-core/types/models';
 import { type SyncedPrefs } from 'loot-core/types/prefs';
 
 import { Information } from '../alerts';

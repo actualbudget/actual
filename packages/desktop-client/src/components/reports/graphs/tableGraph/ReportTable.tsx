@@ -14,8 +14,8 @@ import {
   type GroupedEntity,
   type DataEntity,
   type balanceTypeOpType,
-} from 'loot-core/types/models/reports';
-import { type RuleConditionEntity } from 'loot-core/types/models/rule';
+  type RuleConditionEntity,
+} from 'loot-core/types/models';
 
 import { ReportTableHeader } from './ReportTableHeader';
 import { ReportTableList } from './ReportTableList';

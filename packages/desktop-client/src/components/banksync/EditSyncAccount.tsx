@@ -12,11 +12,11 @@ import {
   mappingsFromString,
   mappingsToString,
 } from 'loot-core/server/util/custom-sync-mapping';
-import { q } from 'loot-core/src/shared/query';
+import { q } from 'loot-core/shared/query';
 import {
   type TransactionEntity,
   type AccountEntity,
-} from 'loot-core/src/types/models';
+} from 'loot-core/types/models';
 
 import { useSyncedPref } from '../../hooks/useSyncedPref';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';

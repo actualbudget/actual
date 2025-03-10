@@ -8,8 +8,8 @@ import { amountToCurrency } from 'loot-core/shared/util';
 import {
   type balanceTypeOpType,
   type DataEntity,
-} from 'loot-core/types/models/reports';
-import { type RuleConditionEntity } from 'loot-core/types/models/rule';
+  type RuleConditionEntity,
+} from 'loot-core/types/models';
 
 import { useAccounts } from '../../../hooks/useAccounts';
 import { useCategories } from '../../../hooks/useCategories';

@@ -16,14 +16,14 @@ import { calculateHasWarning } from 'loot-core/client/reports';
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 import { amountToCurrency } from 'loot-core/shared/util';
-import { type CategoryEntity } from 'loot-core/types/models/category';
 import {
+  type CategoryEntity,
   type balanceTypeOpType,
   type sortByOpType,
   type CustomReportEntity,
   type DataEntity,
-} from 'loot-core/types/models/reports';
-import { type RuleConditionEntity } from 'loot-core/types/models/rule';
+  type RuleConditionEntity,
+} from 'loot-core/types/models';
 import { type TransObjectLiteral } from 'loot-core/types/util';
 
 import { useAccounts } from '../../../hooks/useAccounts';

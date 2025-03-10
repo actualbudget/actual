@@ -11,14 +11,12 @@ import {
   type CategoryEntity,
   type RuleConditionEntity,
   type CategoryGroupEntity,
-} from 'loot-core/types/models';
-import {
   type balanceTypeOpType,
   type sortByOpType,
   type DataEntity,
   type GroupedEntity,
   type IntervalEntity,
-} from 'loot-core/types/models/reports';
+} from 'loot-core/types/models';
 import { type SyncedPrefs } from 'loot-core/types/prefs';
 
 import {

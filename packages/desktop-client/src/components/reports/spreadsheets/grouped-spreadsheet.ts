@@ -2,7 +2,7 @@ import { runQuery } from 'loot-core/client/query-helpers';
 import { type useSpreadsheet } from 'loot-core/client/SpreadsheetProvider';
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
-import { type GroupedEntity } from 'loot-core/types/models/reports';
+import { type GroupedEntity } from 'loot-core/types/models';
 
 import {
   categoryLists,

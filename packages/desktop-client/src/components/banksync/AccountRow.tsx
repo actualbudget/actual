@@ -5,7 +5,7 @@ import { Button } from '@actual-app/components/button';
 import { theme } from '@actual-app/components/theme';
 
 import { tsToRelativeTime } from 'loot-core/shared/util';
-import { type AccountEntity } from 'loot-core/src/types/models';
+import { type AccountEntity } from 'loot-core/types/models';
 
 import { Row, Cell } from '../table';
 

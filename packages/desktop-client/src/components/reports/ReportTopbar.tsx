@@ -15,8 +15,10 @@ import { SpaceBetween } from '@actual-app/components/space-between';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { type CustomReportEntity } from 'loot-core/types/models/reports';
-import { type RuleConditionEntity } from 'loot-core/types/models/rule';
+import {
+  type CustomReportEntity,
+  type RuleConditionEntity,
+} from 'loot-core/types/models';
 
 import { FilterButton } from '../filters/FiltersMenu';
 

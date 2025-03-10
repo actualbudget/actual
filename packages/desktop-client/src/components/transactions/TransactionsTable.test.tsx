@@ -12,7 +12,6 @@ import {
   generateAccount,
   generateCategoryGroups,
 } from 'loot-core/mocks';
-import { initServer } from 'loot-core/platform/client/fetch';
 import {
   addSplitTransaction,
   realizeTempTransactions,
@@ -35,7 +34,43 @@ import { TestProvider } from '../../redux/mock';
 
 import { TransactionTable } from './TransactionsTable';
 
-vi.mock('loot-core/platform/client/fetch');
+vi.mock('loot-core/platform/client/fetch', () => ({
+  listen: vi.fn(),
+  send: (name: string, args: { table?: string }) => {
+    switch (name) {
+      case 'query': {
+        switch (args.table) {
+          case 'payees':
+            return Promise.resolve({ data: payees, dependencies: [] });
+          case 'accounts':
+            return Promise.resolve({ data: accounts, dependencies: [] });
+          case 'transactions':
+            return Promise.resolve({
+              data: generateTransactions(5, [6]),
+              dependencies: [],
+            });
+          default:
+            throw new Error(`queried unknown table: ${args.table}`);
+        }
+      }
+
+      case 'getCell': {
+        return Promise.resolve({
+          value: 129_87,
+        });
+      }
+
+      case 'get-categories': {
+        return Promise.resolve({
+          grouped: categoryGroups,
+          list: categories,
+        });
+      }
+    }
+
+    throw new Error('`send` called with no mock server installed for ' + name);
+  },
+}));
 vi.mock('../../hooks/useFeatureFlag', () => ({
   default: vi.fn().mockReturnValue(false),
 }));
@@ -221,34 +256,6 @@ function LiveTransactionTable(props: LiveTransactionTableProps) {
     </TestProvider>
   );
 }
-
-function initBasicServer() {
-  initServer({
-    query: async query => {
-      switch (query.table) {
-        case 'payees':
-          return { data: payees, dependencies: [] };
-        case 'accounts':
-          return { data: accounts, dependencies: [] };
-        case 'transactions':
-          return {
-            data: generateTransactions(5, [6]),
-            dependencies: [],
-          };
-        default:
-          throw new Error(`queried unknown table: ${query.table}`);
-      }
-    },
-    getCell: () => ({
-      value: 129_87,
-    }),
-    'get-categories': () => ({ grouped: categoryGroups, list: categories }),
-  });
-}
-
-beforeEach(() => {
-  initBasicServer();
-});
 
 afterEach(() => {
   global.__resetWorld();

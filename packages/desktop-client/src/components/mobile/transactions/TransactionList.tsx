@@ -34,8 +34,10 @@ import { validForTransfer } from 'loot-core/client/transfer';
 import * as monthUtils from 'loot-core/shared/months';
 import { isPreviewId } from 'loot-core/shared/transactions';
 import { groupById, integerToCurrency } from 'loot-core/shared/util';
-import { type AccountEntity } from 'loot-core/types/models';
-import { type TransactionEntity } from 'loot-core/types/models/transaction';
+import {
+  type AccountEntity,
+  type TransactionEntity,
+} from 'loot-core/types/models';
 
 import { useAccounts } from '../../../hooks/useAccounts';
 import { useCategories } from '../../../hooks/useCategories';

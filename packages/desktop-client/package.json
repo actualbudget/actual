@@ -41,6 +41,7 @@
     "i18next-resources-to-backend": "^1.2.1",
     "inter-ui": "^3.19.3",
     "lodash": "^4.17.21",
+    "loot-core": "workspace:*",
     "mdast-util-newline-to-break": "^2.0.0",
     "memoize-one": "^6.0.0",
     "pikaday": "1.8.2",

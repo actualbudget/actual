@@ -21,8 +21,10 @@ import { addNotification } from 'loot-core/client/notifications/notificationsSli
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 import { amountToCurrency } from 'loot-core/shared/util';
-import { type SpendingWidget } from 'loot-core/types/models';
-import { type RuleConditionEntity } from 'loot-core/types/models/rule';
+import {
+  type SpendingWidget,
+  type RuleConditionEntity,
+} from 'loot-core/types/models';
 
 import { useFilters } from '../../../hooks/useFilters';
 import { useLocale } from '../../../hooks/useLocale';

@@ -15,7 +15,7 @@ import { View } from '@actual-app/components/view';
 import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import { type Handlers } from 'loot-core/types/handlers';
-import { type OpenIdConfig } from 'loot-core/types/models/openid';
+import { type OpenIdConfig } from 'loot-core/types/models';
 
 import { useDispatch } from '../../../redux';
 import { Link } from '../../common/Link';
