@@ -6,9 +6,9 @@ import React, {
 
 import { css, cx } from '@emotion/css';
 
+import { useResponsive } from './hooks/useResponsive';
 import { styles, type CSSProperties } from './styles';
 import { theme } from './theme';
-import { useResponsive } from './hooks/useResponsive';
 
 export const defaultInputStyle = {
   outline: 0,
