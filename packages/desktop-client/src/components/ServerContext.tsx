@@ -9,9 +9,11 @@ import React, {
 
 import { t } from 'i18next';
 
-import { addNotification } from 'loot-core/client/actions';
+import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import { type Handlers } from 'loot-core/types/handlers';
+
+import { useDispatch } from '../redux';
 
 type LoginMethods = {
   method: string;
@@ -92,6 +94,7 @@ export const useAutoLogin = () => useContext(ServerContext).autoLogin;
 export const useSetAutoLogin = () => useContext(ServerContext).setAutoLogin;
 
 export function ServerProvider({ children }: { children: ReactNode }) {
+  const dispatch = useDispatch();
   const [serverURL, setServerURL] = useState('');
   const [version, setVersion] = useState('');
   const [multiuserEnabled, setMultiuserEnabled] = useState(false);
@@ -117,11 +120,15 @@ export function ServerProvider({ children }: { children: ReactNode }) {
       const data: Awaited<ReturnType<Handlers['subscribe-get-login-methods']>> =
         await send('subscribe-get-login-methods');
       if ('error' in data) {
-        addNotification({
-          type: 'error',
-          title: t('Failed to refresh login methods'),
-          message: data.error ?? t('Unknown'),
-        });
+        dispatch(
+          addNotification({
+            notification: {
+              type: 'error',
+              title: t('Failed to refresh login methods'),
+              message: data.error ?? t('Unknown'),
+            },
+          }),
+        );
         setAvailableLoginMethods([]);
       } else if (data.methods) {
         setAvailableLoginMethods(data.methods);
@@ -129,7 +136,7 @@ export function ServerProvider({ children }: { children: ReactNode }) {
         setAvailableLoginMethods([]);
       }
     }
-  }, [serverURL]);
+  }, [dispatch, serverURL]);
 
   useEffect(() => {
     if (serverURL) {

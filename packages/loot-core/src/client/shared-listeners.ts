@@ -3,11 +3,15 @@ import { t } from 'i18next';
 
 import { listen, send } from '../platform/client/fetch';
 
-import { addNotification, loadPrefs, pushModal, signOut } from './actions';
+import { loadPrefs, signOut } from './actions';
 import { resetSync, sync } from './app/appSlice';
 import { closeAndDownloadBudget, uploadBudget } from './budgets/budgetsSlice';
+import { pushModal } from './modals/modalsSlice';
+import {
+  addNotification,
+  type Notification,
+} from './notifications/notificationsSlice';
 import { getAccounts, getCategories, getPayees } from './queries/queriesSlice';
-import type { Notification } from './state-types/notifications';
 import { type AppStore } from './store';
 
 export function listenForSyncEvent(store: AppStore) {
@@ -16,10 +20,12 @@ export function listenForSyncEvent(store: AppStore) {
     if (type === 'unauthorized') {
       store.dispatch(
         addNotification({
-          type: 'warning',
-          message: 'Unable to authenticate with server',
-          sticky: true,
-          id: 'auth-issue',
+          notification: {
+            type: 'warning',
+            message: 'Unable to authenticate with server',
+            sticky: true,
+            id: 'auth-issue',
+          },
         }),
       );
     }
@@ -40,9 +46,11 @@ export function listenForSyncEvent(store: AppStore) {
 
         store.dispatch(
           addNotification({
-            title: t('Syncing has been fixed!'),
-            message: t('Happy budgeting!'),
-            type: 'message',
+            notification: {
+              title: t('Syncing has been fixed!'),
+              message: t('Happy budgeting!'),
+              type: 'message',
+            },
           }),
         );
       }
@@ -139,7 +147,12 @@ export function listenForSyncEvent(store: AppStore) {
                 'Old encryption keys are not migrated. If using encryption, [reset encryption here](#makeKey).',
             ),
             messageActions: {
-              makeKey: () => store.dispatch(pushModal('create-encryption-key')),
+              makeKey: () =>
+                store.dispatch(
+                  pushModal({
+                    modal: { name: 'create-encryption-key', options: {} },
+                  }),
+                ),
             },
             sticky: true,
             id: 'old-file',
@@ -167,7 +180,11 @@ export function listenForSyncEvent(store: AppStore) {
             button: {
               title: t('Reset key'),
               action: () => {
-                store.dispatch(pushModal('create-encryption-key'));
+                store.dispatch(
+                  pushModal({
+                    modal: { name: 'create-encryption-key', options: {} },
+                  }),
+                );
               },
             },
           };
@@ -264,8 +281,13 @@ export function listenForSyncEvent(store: AppStore) {
                 title: t('Create key'),
                 action: () => {
                   store.dispatch(
-                    pushModal('fix-encryption-key', {
-                      onSuccess: () => store.dispatch(sync()),
+                    pushModal({
+                      modal: {
+                        name: 'fix-encryption-key',
+                        options: {
+                          onSuccess: () => store.dispatch(sync()),
+                        },
+                      },
                     }),
                   );
                 },
@@ -283,7 +305,11 @@ export function listenForSyncEvent(store: AppStore) {
               button: {
                 title: t('Reset key'),
                 action: () => {
-                  store.dispatch(pushModal('create-encryption-key'));
+                  store.dispatch(
+                    pushModal({
+                      modal: { name: 'create-encryption-key', options: {} },
+                    }),
+                  );
                 },
               },
             };
@@ -335,7 +361,9 @@ export function listenForSyncEvent(store: AppStore) {
       }
 
       if (notif) {
-        store.dispatch(addNotification({ type: 'error', ...notif }));
+        store.dispatch(
+          addNotification({ notification: { type: 'error', ...notif } }),
+        );
       }
     }
   });

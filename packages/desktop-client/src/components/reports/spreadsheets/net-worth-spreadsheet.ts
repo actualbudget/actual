@@ -27,6 +27,7 @@ export function createSpreadsheet(
   accounts: AccountEntity[],
   conditions: RuleConditionEntity[] = [],
   conditionsOp: 'and' | 'or' = 'and',
+  locale: Locale,
 ) {
   return async (
     spreadsheet: ReturnType<typeof useSpreadsheet>,
@@ -78,7 +79,7 @@ export function createSpreadsheet(
       }),
     );
 
-    setData(recalculate(data, start, end));
+    setData(recalculate(data, start, end, locale));
   };
 }
 
@@ -90,6 +91,7 @@ function recalculate(
   }>,
   start: string,
   end: string,
+  locale: Locale,
 ) {
   const months = monthUtils.rangeInclusive(start, end);
 
@@ -149,13 +151,13 @@ function recalculate(
     endNetWorth = total;
 
     arr.push({
-      x: d.format(x, 'MMM ’yy'),
+      x: d.format(x, 'MMM ’yy', { locale }),
       y: integerToAmount(total),
       assets: integerToCurrency(assets),
       debt: `-${integerToCurrency(debt)}`,
       change: integerToCurrency(change),
       networth: integerToCurrency(total),
-      date: d.format(x, 'MMMM yyyy'),
+      date: d.format(x, 'MMMM yyyy', { locale }),
     });
 
     arr.forEach(item => {

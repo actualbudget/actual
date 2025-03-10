@@ -2,8 +2,10 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button, ButtonWithLoading } from '@actual-app/components/button';
+import { Select } from '@actual-app/components/select';
 import { Stack } from '@actual-app/components/stack';
 import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import deepEqual from 'deep-equal';
 
@@ -19,10 +21,8 @@ import { useCategories } from '../../../hooks/useCategories';
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import { useSyncedPrefs } from '../../../hooks/useSyncedPrefs';
 import { useDispatch } from '../../../redux';
-import { theme } from '../../../style';
 import { Input } from '../../common/Input';
 import { Modal, ModalCloseButton, ModalHeader } from '../../common/Modal';
-import { Select } from '../../common/Select';
 import { SectionLabel } from '../../forms';
 import { TableHeader, TableWithNavigator } from '../../table';
 
@@ -141,7 +141,11 @@ function parseCategoryFields(trans, categories) {
   return match;
 }
 
-export function ImportTransactionsModal({ options }) {
+export function ImportTransactionsModal({
+  filename: originalFileName,
+  accountId,
+  onImported,
+}) {
   const { t } = useTranslation();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const [prefs, savePrefs] = useSyncedPrefs();
@@ -151,7 +155,7 @@ export function ImportTransactionsModal({ options }) {
   const [multiplierAmount, setMultiplierAmount] = useState('');
   const [loadingState, setLoadingState] = useState('parsing');
   const [error, setError] = useState(null);
-  const [filename, setFilename] = useState(options.filename);
+  const [filename, setFilename] = useState(originalFileName);
   const [transactions, setTransactions] = useState([]);
   const [filetype, setFileType] = useState(null);
   const [fieldMappings, setFieldMappings] = useState(null);
@@ -159,7 +163,6 @@ export function ImportTransactionsModal({ options }) {
   const [flipAmount, setFlipAmount] = useState(false);
   const [multiplierEnabled, setMultiplierEnabled] = useState(false);
   const [reconcile, setReconcile] = useState(true);
-  const { accountId, onImported } = options;
 
   // This cannot be set after parsing the file, because changing it
   // requires re-parsing the file. This is different from the other
@@ -420,7 +423,7 @@ export function ImportTransactionsModal({ options }) {
   }
 
   useEffect(() => {
-    const fileType = getFileType(options.filename);
+    const fileType = getFileType(originalFileName);
     const parseOptions = getParseOptions(fileType, {
       delimiter,
       hasHeaderRow,
@@ -428,9 +431,9 @@ export function ImportTransactionsModal({ options }) {
       fallbackMissingPayeeToMemo,
     });
 
-    parse(options.filename, parseOptions);
+    parse(originalFileName, parseOptions);
   }, [
-    options.filename,
+    originalFileName,
     delimiter,
     hasHeaderRow,
     skipLines,

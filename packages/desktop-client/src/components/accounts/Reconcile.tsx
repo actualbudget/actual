@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import { Trans } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import { SvgCheckCircle1 } from '@actual-app/components/icons/v2';
 import { InitialFocus } from '@actual-app/components/initial-focus';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import * as queries from 'loot-core/client/queries';
@@ -13,8 +15,6 @@ import { currencyToInteger } from 'loot-core/shared/util';
 import { type AccountEntity } from 'loot-core/types/models';
 import { type TransObjectLiteral } from 'loot-core/types/util';
 
-import { SvgCheckCircle1 } from '../../icons/v2';
-import { theme } from '../../style';
 import { Input } from '../common/Input';
 import { useFormat } from '../spreadsheet/useFormat';
 import { useSheetValue } from '../spreadsheet/useSheetValue';
@@ -133,11 +133,9 @@ export function ReconcileMenu({
   });
   const format = useFormat();
   const [inputValue, setInputValue] = useState<string | null>(null);
-  const [inputFocused, setInputFocused] = useState(false);
 
   function onSubmit() {
     if (inputValue === '') {
-      setInputFocused(true);
       return;
     }
 
@@ -162,7 +160,6 @@ export function ReconcileMenu({
             defaultValue={format(clearedBalance, 'financial')}
             onChangeValue={setInputValue}
             style={{ margin: '7px 0' }}
-            focused={inputFocused}
             onEnter={onSubmit}
           />
         </InitialFocus>

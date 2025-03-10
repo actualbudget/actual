@@ -6,7 +6,12 @@ import React, {
   useState,
   type CSSProperties,
 } from 'react';
-import { ListBox, Section, Header, Collection } from 'react-aria-components';
+import {
+  ListBox,
+  ListBoxSection,
+  Header,
+  Collection,
+} from 'react-aria-components';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -20,7 +25,7 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
-import { setNotificationInset } from 'loot-core/client/actions';
+import { setNotificationInset } from 'loot-core/client/notifications/notificationsSlice';
 import { validForTransfer } from 'loot-core/client/transfer';
 import * as monthUtils from 'loot-core/shared/months';
 import { isPreviewId } from 'loot-core/shared/transactions';
@@ -30,6 +35,7 @@ import { type TransactionEntity } from 'loot-core/types/models/transaction';
 
 import { useAccounts } from '../../../hooks/useAccounts';
 import { useCategories } from '../../../hooks/useCategories';
+import { useLocale } from '../../../hooks/useLocale';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { usePayees } from '../../../hooks/usePayees';
 import {
@@ -89,6 +95,7 @@ export function TransactionList({
   onLoadMore,
   account,
 }: TransactionListProps) {
+  const locale = useLocale();
   const { t } = useTranslation();
   const sections = useMemo(() => {
     // Group by date. We can assume transactions is ordered
@@ -165,7 +172,7 @@ export function TransactionList({
         items={sections}
       >
         {section => (
-          <Section>
+          <ListBoxSection>
             <Header
               style={{
                 ...styles.smallText,
@@ -181,7 +188,7 @@ export function TransactionList({
                 zIndex: 10,
               }}
             >
-              {monthUtils.format(section.date, 'MMMM dd, yyyy')}
+              {monthUtils.format(section.date, 'MMMM dd, yyyy', locale)}
             </Header>
             <Collection
               items={section.transactions.filter(
@@ -198,7 +205,7 @@ export function TransactionList({
                 />
               )}
             </Collection>
-          </Section>
+          </ListBoxSection>
         )}
       </ListBox>
 
@@ -298,7 +305,9 @@ function SelectedTransactionsFloatingActionBar({
 
   const dispatch = useDispatch();
   useEffect(() => {
-    dispatch(setNotificationInset({ bottom: NOTIFICATION_BOTTOM_INSET }));
+    dispatch(
+      setNotificationInset({ inset: { bottom: NOTIFICATION_BOTTOM_INSET } }),
+    );
     return () => {
       dispatch(setNotificationInset(null));
     };
