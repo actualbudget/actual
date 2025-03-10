@@ -48,7 +48,7 @@
         "flatpak",
         "AppImage"
       ],
-      "artifactName": "${productName}-linux.${ext}"
+      "artifactName": "${productName}-linux-${arch}.${ext}"
     },
     "flatpak": {
       "runtimeVersion": "23.08",
@@ -85,6 +85,8 @@
     "npmRebuild": false
   },
   "dependencies": {
+    "@actual-app/sync-server": "workspace:*",
+    "@ngrok/ngrok": "^1.4.1",
     "better-sqlite3": "^11.7.0",
     "fs-extra": "^11.3.0",
     "promise-retry": "^2.0.1"
