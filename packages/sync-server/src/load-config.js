@@ -257,6 +257,13 @@ const configSchema = convict({
     default: false,
     env: 'ACTUAL_OPENID_ENFORCE',
   },
+
+  openIdAutoRedirect: {
+    doc: 'Automatically redirects to OpenID login provider page.',
+    format: Boolean,
+    default: false,
+    env: 'ACTUAL_OPENID_AUTO_REDIRECT',
+  },
 });
 
 let configPath = null;
