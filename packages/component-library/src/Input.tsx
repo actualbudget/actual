@@ -8,6 +8,7 @@ import { css, cx } from '@emotion/css';
 
 import { styles, type CSSProperties } from './styles';
 import { theme } from './theme';
+import { useResponsive } from './hooks/useResponsive';
 
 export const defaultInputStyle = {
   outline: 0,
@@ -100,4 +101,10 @@ export function BigInput(props: InputProps) {
       }}
     />
   );
+}
+
+export function ResponsiveInput(props: InputProps) {
+  const { isNarrowWidth } = useResponsive();
+
+  return isNarrowWidth ? <BigInput {...props} /> : <Input {...props} />;
 }
