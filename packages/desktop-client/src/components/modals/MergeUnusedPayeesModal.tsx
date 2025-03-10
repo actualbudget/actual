@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@actual-app/components/button';
 import { Paragraph } from '@actual-app/components/paragraph';
 import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import {
@@ -15,7 +16,6 @@ import { type PayeeEntity } from 'loot-core/types/models';
 
 import { usePayees } from '../../hooks/usePayees';
 import { useSelector, useDispatch } from '../../redux';
-import { theme } from '../../style';
 import { Information } from '../alerts';
 import { Modal, ModalButtons } from '../common/Modal';
 

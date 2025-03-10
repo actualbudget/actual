@@ -1,11 +1,5 @@
 import React from 'react';
 
-import { Text } from '@actual-app/components/text';
-import { View } from '@actual-app/components/view';
-
-import { type ScheduleStatusType } from 'loot-core/client/data-hooks/schedules';
-import { titleFirst } from 'loot-core/shared/util';
-
 import {
   SvgAlertTriangle,
   SvgCalendar3,
@@ -15,8 +9,13 @@ import {
   SvgFavoriteStar,
   SvgLockClosed,
   SvgValidationCheck,
-} from '../../icons/v2';
-import { theme } from '../../style';
+} from '@actual-app/components/icons/v2';
+import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
+import { View } from '@actual-app/components/view';
+
+import { type ScheduleStatusType } from 'loot-core/client/data-hooks/schedules';
+import { titleFirst } from 'loot-core/shared/util';
 
 // Consists of Schedule Statuses + Transaction statuses
 type StatusTypes = ScheduleStatusType | 'cleared' | 'pending' | 'reconciled';

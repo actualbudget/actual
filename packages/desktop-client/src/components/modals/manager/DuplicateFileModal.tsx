@@ -5,7 +5,9 @@ import { Button, ButtonWithLoading } from '@actual-app/components/button';
 import { FormError } from '@actual-app/components/form-error';
 import { InitialFocus } from '@actual-app/components/initial-focus';
 import { InlineField } from '@actual-app/components/inline-field';
+import { Input } from '@actual-app/components/input';
 import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import { duplicateBudget } from 'loot-core/client/budgets/budgetsSlice';
@@ -14,8 +16,6 @@ import { addNotification } from 'loot-core/client/notifications/notificationsSli
 import { send } from 'loot-core/platform/client/fetch';
 
 import { useDispatch } from '../../../redux';
-import { theme } from '../../../style';
-import { Input } from '../../common/Input';
 import {
   Modal,
   ModalButtons,

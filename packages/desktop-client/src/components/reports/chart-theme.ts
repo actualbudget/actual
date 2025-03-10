@@ -1,4 +1,4 @@
-import { theme } from '../../style';
+import { theme } from '@actual-app/components/theme';
 
 const colorFades = {
   blueFadeStart: 'rgba(229, 245, 255, 1)',

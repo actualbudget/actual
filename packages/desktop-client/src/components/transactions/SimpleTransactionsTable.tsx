@@ -7,7 +7,9 @@ import React, {
 } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 
+import { SvgArrowsSynchronize } from '@actual-app/components/icons/v2';
 import { styles } from '@actual-app/components/styles';
+import { theme } from '@actual-app/components/theme';
 import {
   format as formatDate,
   isValid as isDateValid,
@@ -22,8 +24,6 @@ import { useAccount } from '../../hooks/useAccount';
 import { useCategory } from '../../hooks/useCategory';
 import { useDateFormat } from '../../hooks/useDateFormat';
 import { useSelectedItems, useSelectedDispatch } from '../../hooks/useSelected';
-import { SvgArrowsSynchronize } from '../../icons/v2';
-import { theme } from '../../style';
 import { Cell, Field, Row, SelectCell, Table } from '../table';
 import { DisplayId } from '../util/DisplayId';
 

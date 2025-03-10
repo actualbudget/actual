@@ -1,6 +1,7 @@
 // @ts-strict-ignore
 import React, { useState, type CSSProperties } from 'react';
 
+import { theme } from '@actual-app/components/theme';
 import { PieChart, Pie, Cell, Sector, ResponsiveContainer } from 'recharts';
 
 import { amountToCurrency } from 'loot-core/shared/util';
@@ -13,7 +14,6 @@ import { type RuleConditionEntity } from 'loot-core/types/models/rule';
 import { useAccounts } from '../../../hooks/useAccounts';
 import { useCategories } from '../../../hooks/useCategories';
 import { useNavigate } from '../../../hooks/useNavigate';
-import { theme } from '../../../style';
 import { PrivacyFilter } from '../../PrivacyFilter';
 import { Container } from '../Container';
 

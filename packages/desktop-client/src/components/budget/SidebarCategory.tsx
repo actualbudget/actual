@@ -3,8 +3,10 @@ import React, { type CSSProperties, type Ref, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import { SvgCheveronDown } from '@actual-app/components/icons/v1';
 import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import {
@@ -14,8 +16,6 @@ import {
 
 import { useContextMenu } from '../../hooks/useContextMenu';
 import { useFeatureFlag } from '../../hooks/useFeatureFlag';
-import { SvgCheveronDown } from '../../icons/v1';
-import { theme } from '../../style';
 import { NotesButton } from '../NotesButton';
 import { InputCell } from '../table';
 

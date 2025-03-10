@@ -8,10 +8,28 @@ import React, {
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import { useResponsive } from '@actual-app/components/hooks/useResponsive';
+import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
+import {
+  SvgCloudCheck,
+  SvgCloudDownload,
+  SvgCog,
+  SvgDotsHorizontalTriple,
+  SvgFileDouble,
+  SvgUser,
+  SvgUserGroup,
+} from '@actual-app/components/icons/v1';
+import {
+  SvgCloudUnknown,
+  SvgKey,
+  SvgRefreshArrow,
+} from '@actual-app/components/icons/v2';
 import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
+import { tokens } from '@actual-app/components/tokens';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 
@@ -39,21 +57,7 @@ import {
 
 import { useInitialMount } from '../../hooks/useInitialMount';
 import { useMetadataPref } from '../../hooks/useMetadataPref';
-import { AnimatedLoading } from '../../icons/AnimatedLoading';
-import {
-  SvgCloudCheck,
-  SvgCloudDownload,
-  SvgCog,
-  SvgDotsHorizontalTriple,
-  SvgFileDouble,
-  SvgUser,
-  SvgUserGroup,
-} from '../../icons/v1';
-import { SvgCloudUnknown, SvgKey, SvgRefreshArrow } from '../../icons/v2';
 import { useSelector, useDispatch } from '../../redux';
-import { theme } from '../../style';
-import { tokens } from '../../tokens';
-import { useResponsive } from '../responsive/ResponsiveProvider';
 import { useMultiuserEnabled } from '../ServerContext';
 
 function getFileDescription(file: File, t: (key: string) => string) {

@@ -2,6 +2,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import { useSchedules } from 'loot-core/client/data-hooks/schedules';
@@ -11,7 +12,6 @@ import { q } from 'loot-core/shared/query';
 import { type ScheduleEntity } from 'loot-core/types/models';
 
 import { useDispatch } from '../../redux';
-import { theme } from '../../style';
 import { Search } from '../common/Search';
 import { Page } from '../Page';
 
