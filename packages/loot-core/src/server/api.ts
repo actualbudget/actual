@@ -34,7 +34,6 @@ import * as cloudStorage from './cloud-storage';
 import { type RemoteFile } from './cloud-storage';
 import * as db from './db';
 import { APIError } from './errors';
-import { categoryGroupModel as serverCategoryGroupModel } from './models';
 import { runMutator } from './mutators';
 import * as prefs from './prefs';
 import * as sheet from './sheet';

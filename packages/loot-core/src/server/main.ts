@@ -15,7 +15,6 @@ import * as sqlite from '../platform/server/sqlite';
 import { q } from '../shared/query';
 import { type Budget } from '../types/budget';
 import { Handlers } from '../types/handlers';
-import { CategoryEntity, CategoryGroupEntity } from '../types/models';
 import { OpenIdConfig } from '../types/models/openid';
 
 import { app as accountsApp } from './accounts/app';
