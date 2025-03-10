@@ -654,4 +654,47 @@ describe('API CRUD operations', () => {
     );
     expect(transactions).toHaveLength(1);
   });
+
+  test('Transactions: import notes are preserved when importing', async () => {
+    const accountId = await api.createAccount({ name: 'test-account' }, 0);
+
+    // Test with notes
+    const transactionsWithNotes = [
+      { date: '2023-11-03', imported_id: '11', amount: 100, notes: 'test note' },
+    ];
+
+    const addResultWithNotes = await api.addTransactions(accountId, transactionsWithNotes, {
+      learnCategories: true,
+      runTransfers: true,
+    });
+    expect(addResultWithNotes).toBe('ok');
+
+    let transactions = await api.getTransactions(
+      accountId,
+      '2023-11-01',
+      '2023-11-30',
+    );
+    expect(transactions[0].notes).toBe('test note');
+
+    // Clear transactions
+    await api.deleteTransaction(transactions[0].id);
+
+    // Test without notes
+    const transactionsWithoutNotes = [
+      { date: '2023-11-03', imported_id: '11', amount: 100, notes: null },
+    ];
+
+    const addResultWithoutNotes = await api.addTransactions(accountId, transactionsWithoutNotes, {
+      learnCategories: true,
+      runTransfers: true,
+    });
+    expect(addResultWithoutNotes).toBe('ok');
+
+    transactions = await api.getTransactions(
+      accountId,
+      '2023-11-01',
+      '2023-11-30',
+    );
+    expect(transactions[0].notes).toBeNull();
+  });
 });

@@ -19,6 +19,7 @@ export type ParseFileOptions = {
   delimiter?: string;
   fallbackMissingPayeeToMemo?: boolean;
   skipLines?: number;
+  importNotes?: boolean;
 };
 
 export async function parseFile(
@@ -33,7 +34,7 @@ export async function parseFile(
 
     switch (ext.toLowerCase()) {
       case '.qif':
-        return parseQIF(filepath);
+        return parseQIF(filepath, options);
       case '.csv':
       case '.tsv':
         return parseCSV(filepath, options);
@@ -41,7 +42,7 @@ export async function parseFile(
       case '.qfx':
         return parseOFX(filepath, options);
       case '.xml':
-        return parseCAMT(filepath);
+        return parseCAMT(filepath, options);
       default:
     }
   }
@@ -88,7 +89,7 @@ async function parseCSV(
   return { errors, transactions: data };
 }
 
-async function parseQIF(filepath: string): Promise<ParseFileResult> {
+async function parseQIF(filepath: string, options: ParseFileOptions = {}): Promise<ParseFileResult> {
   const errors = Array<ParseError>();
   const contents = await fs.readFile(filepath);
 
@@ -111,7 +112,7 @@ async function parseQIF(filepath: string): Promise<ParseFileResult> {
         date: trans.date,
         payee_name: trans.payee,
         imported_payee: trans.payee,
-        notes: trans.memo || null,
+        notes: options.importNotes ? (trans.memo || null) : null,
       }))
       .filter(trans => trans.date != null && trans.amount != null),
   };
@@ -139,7 +140,7 @@ async function parseOFX(
   // If no payee is available try and fallback to memo
   const useMemoFallback = options.fallbackMissingPayeeToMemo;
 
-  return {
+return {
     errors,
     transactions: data.transactions.map(trans => {
       return {
@@ -148,13 +149,13 @@ async function parseOFX(
         date: trans.date,
         payee_name: trans.name || (useMemoFallback ? trans.memo : null),
         imported_payee: trans.name || (useMemoFallback ? trans.memo : null),
-        notes: !!trans.name || !useMemoFallback ? trans.memo || null : null, //memo used for payee
+        notes: options.importNotes ? trans.memo || null : null, //memo used for payee
       };
     }),
   };
 }
 
-async function parseCAMT(filepath: string): Promise<ParseFileResult> {
+async function parseCAMT(filepath: string, options: ParseFileOptions = {}): Promise<ParseFileResult> {
   const errors = Array<ParseError>();
   const contents = await fs.readFile(filepath);
 
@@ -170,5 +171,11 @@ async function parseCAMT(filepath: string): Promise<ParseFileResult> {
     return { errors };
   }
 
-  return { errors, transactions: data };
+  return {
+    errors,
+    transactions: data.map(trans => ({
+      ...trans,
+      notes: options.importNotes ? trans.notes : null
+    }))
+  };
 }
