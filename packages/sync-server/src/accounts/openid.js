@@ -213,19 +213,19 @@ export async function loginWithOpenIdFinalize(body) {
           'SELECT count(*) as countUsersWithUserName FROM users WHERE user_name <> ?',
           [''],
         );
+
+        // Check if user was created by another transaction
+        const existingUser = accountDb.first(
+          'SELECT id FROM users WHERE user_name = ?',
+          [identity],
+        );
+
         if (
-          countUsersWithUserName === 0 ||
-          config.get('userCreationMode') === 'login'
+          !existingUser &&
+          (countUsersWithUserName === 0 ||
+            config.get('userCreationMode') === 'login')
         ) {
           userId = uuidv4();
-          // Check if user was created by another transaction
-          const existingUser = accountDb.first(
-            'SELECT id FROM users WHERE user_name = ?',
-            [identity],
-          );
-          if (existingUser) {
-            throw new Error('user-already-exists');
-          }
           accountDb.mutate(
             'INSERT INTO users (id, user_name, display_name, enabled, owner, role) VALUES (?, ?, ?, 1, ?, ?)',
             [
