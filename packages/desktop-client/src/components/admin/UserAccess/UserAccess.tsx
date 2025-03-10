@@ -22,8 +22,10 @@ import { addNotification } from 'loot-core/client/notifications/notificationsSli
 import { send } from 'loot-core/platform/client/fetch';
 import * as undo from 'loot-core/platform/client/undo';
 import { type Handlers } from 'loot-core/types/handlers';
-import { type UserAvailable } from 'loot-core/types/models';
-import { type UserAccessEntity } from 'loot-core/types/models/userAccess';
+import {
+  type UserAvailable,
+  type UserAccessEntity,
+} from 'loot-core/types/models';
 
 import { useMetadataPref } from '../../../hooks/useMetadataPref';
 import { useDispatch } from '../../../redux';

@@ -176,6 +176,7 @@ __metadata:
     i18next-resources-to-backend: "npm:^1.2.1"
     inter-ui: "npm:^3.19.3"
     lodash: "npm:^4.17.21"
+    loot-core: "workspace:*"
     mdast-util-newline-to-break: "npm:^2.0.0"
     memoize-one: "npm:^6.0.0"
     pikaday: "npm:1.8.2"
@@ -10943,6 +10944,7 @@ __metadata:
     electron: "npm:30.0.6"
     electron-builder: "npm:24.13.3"
     fs-extra: "npm:^11.3.0"
+    loot-core: "workspace:^"
     promise-retry: "npm:^2.0.1"
     typescript: "npm:^5.5.4"
   languageName: unknown
@@ -16898,7 +16900,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"loot-core@workspace:packages/loot-core":
+"loot-core@workspace:*, loot-core@workspace:^, loot-core@workspace:packages/loot-core":
   version: 0.0.0-use.local
   resolution: "loot-core@workspace:packages/loot-core"
   dependencies:

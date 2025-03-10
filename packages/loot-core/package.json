@@ -79,5 +79,56 @@
     "webpack-bundle-analyzer": "^4.10.1",
     "webpack-cli": "^5.1.4",
     "yargs": "^17.6.2"
+  },
+  "exports": {
+    "./client/accounts/*": "./src/client/accounts/*.ts",
+    "./client/actions": "./src/client/actions/index.ts",
+    "./client/app/*": "./src/client/app/*.ts",
+    "./client/budgets/*": "./src/client/budgets/*.ts",
+    "./client/data-hooks/schedules": "./src/client/data-hooks/schedules.tsx",
+    "./client/data-hooks/*": "./src/client/data-hooks/*.ts",
+    "./client/modals/*": "./src/client/modals/*.ts",
+    "./client/notifications/*": "./src/client/notifications/*.ts",
+    "./client/queries/*": "./src/client/queries/*.ts",
+    "./client/reducers": "./src/client/reducers/index.ts",
+    "./client/redux": "./src/client/redux/index.ts",
+    "./client/store": "./src/client/store/index.ts",
+    "./client/store/mock": "./src/client/store/mock.ts",
+    "./client/constants": "./src/client/constants.ts",
+    "./client/platform": {
+      "node": "./src/client/platform.ts",
+      "default": "./src/client/platform.web.ts"
+    },
+    "./client/queries": "./src/client/queries.ts",
+    "./client/query-helpers": "./src/client/query-helpers.ts",
+    "./client/query-hooks": "./src/client/query-hooks.ts",
+    "./client/reports": "./src/client/reports.ts",
+    "./client/shared-listeners": "./src/client/shared-listeners.ts",
+    "./client/SpreadsheetProvider": "./src/client/SpreadsheetProvider.tsx",
+    "./client/transfer": "./src/client/transfer.ts",
+    "./client/undo": "./src/client/undo.ts",
+    "./mocks": "./src/mocks/index.ts",
+    "./platform/client/fetch": {
+      "node": "./src/platform/client/fetch/index.web.ts",
+      "default": "./src/platform/client/fetch/index.browser.ts"
+    },
+    "./platform/client/undo": "./src/platform/client/undo/index.web.ts",
+    "./platform/exceptions": {
+      "node": "./src/platform/exceptions/index.electron.ts",
+      "default": "./src/platform/exceptions/index.browser.ts"
+    },
+    "./platform/server/asyncStorage": "./src/platform/server/asyncStorage/index.web.ts",
+    "./platform/server/connection": "./src/platform/server/connection/index.web.ts",
+    "./platform/server/fetch": "./src/platform/server/fetch/index.web.ts",
+    "./platform/server/fs": "./src/platform/server/fs/index.web.ts",
+    "./platform/server/indexeddb": "./src/platform/server/indexeddb/index.web.ts",
+    "./platform/server/log": "./src/platform/server/log/index.web.ts",
+    "./platform/server/sqlite": "./src/platform/server/sqlite/index.web.ts",
+    "./server/budget/types/*": "./src/server/budget/types/*.d.ts",
+    "./server/*": "./src/server/*.ts",
+    "./shared/*": "./src/shared/*.ts",
+    "./types/models/user": "./src/types/models/user.ts",
+    "./types/models": "./src/types/models/index.d.ts",
+    "./types/*": "./src/types/*.d.ts"
   }
 }

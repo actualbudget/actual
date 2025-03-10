@@ -6,8 +6,10 @@ import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { type AccountEntity } from 'loot-core/types/models';
-import { type TransactionEntity } from 'loot-core/types/models/transaction';
+import {
+  type AccountEntity,
+  type TransactionEntity,
+} from 'loot-core/types/models';
 
 import { SelectedProvider, useSelected } from '../../../hooks/useSelected';
 import { Search } from '../../common/Search';

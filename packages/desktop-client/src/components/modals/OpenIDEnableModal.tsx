@@ -15,7 +15,7 @@ import {
 import { send } from 'loot-core/platform/client/fetch';
 import * as asyncStorage from 'loot-core/platform/server/asyncStorage';
 import { getOpenIdErrors } from 'loot-core/shared/errors';
-import { type OpenIdConfig } from 'loot-core/types/models/openid';
+import { type OpenIdConfig } from 'loot-core/types/models';
 
 import { useDispatch } from '../../redux';
 import { Error } from '../alerts';

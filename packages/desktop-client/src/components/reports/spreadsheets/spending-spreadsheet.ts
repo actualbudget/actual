@@ -7,11 +7,11 @@ import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
 import { integerToAmount } from 'loot-core/shared/util';
-import { type RuleConditionEntity } from 'loot-core/types/models';
 import {
+  type RuleConditionEntity,
   type SpendingMonthEntity,
   type SpendingEntity,
-} from 'loot-core/types/models/reports';
+} from 'loot-core/types/models';
 
 import { makeQuery } from './makeQuery';
 

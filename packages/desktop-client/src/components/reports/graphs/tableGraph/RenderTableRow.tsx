@@ -2,7 +2,7 @@ import React, { type ReactNode, type CSSProperties } from 'react';
 
 import { View } from '@actual-app/components/view';
 
-import { type GroupedEntity } from 'loot-core/types/models/reports';
+import { type GroupedEntity } from 'loot-core/types/models';
 
 import { type renderRowProps } from './ReportTable';
 

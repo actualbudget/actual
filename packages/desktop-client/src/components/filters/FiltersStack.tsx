@@ -3,8 +3,10 @@ import React from 'react';
 import { Stack } from '@actual-app/components/stack';
 import { View } from '@actual-app/components/view';
 
-import { type TransactionFilterEntity } from 'loot-core/types/models';
-import { type RuleConditionEntity } from 'loot-core/types/models/rule';
+import {
+  type TransactionFilterEntity,
+  type RuleConditionEntity,
+} from 'loot-core/types/models';
 
 import { AppliedFilters } from './AppliedFilters';
 import {

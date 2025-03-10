@@ -22,7 +22,7 @@ import {
 import { copy, exists, remove } from 'fs-extra';
 import promiseRetry from 'promise-retry';
 
-import type { GlobalPrefsJson } from '../loot-core/src/types/prefs';
+import type { GlobalPrefsJson } from 'loot-core/types/prefs';
 
 import { getMenu } from './menu';
 import {

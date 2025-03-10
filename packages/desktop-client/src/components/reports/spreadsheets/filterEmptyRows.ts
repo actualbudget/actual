@@ -1,7 +1,7 @@
 import {
   type balanceTypeOpType,
   type GroupedEntity,
-} from 'loot-core/types/models/reports';
+} from 'loot-core/types/models';
 
 export function filterEmptyRows({
   showEmpty,
