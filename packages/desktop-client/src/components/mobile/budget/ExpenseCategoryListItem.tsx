@@ -50,7 +50,6 @@ function ExpenseCategoryName({
     show3Columns,
     isSidebar: true,
   });
-
   return (
     <View
       style={{
@@ -59,13 +58,12 @@ function ExpenseCategoryName({
         alignItems: 'flex-start',
       }}
     >
+      {/* Hidden drag button */}
+      <Button slot="drag" style={{ display: 'none' }} aria-hidden="true" />
       <Button
-        slot="drag"
         variant="bare"
         style={{
           maxWidth: sidebarColumnWidth,
-          // slot="drag" sets pointerEvents to none, so we unset it here.
-          pointerEvents: 'unset',
         }}
         onPress={() => onEdit?.(category.id)}
       >
