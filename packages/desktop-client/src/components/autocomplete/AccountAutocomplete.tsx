@@ -8,16 +8,16 @@ import React, {
 } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { styles } from '@actual-app/components/styles';
 import { TextOneLine } from '@actual-app/components/text-one-line';
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { css, cx } from '@emotion/css';
 
 import { type AccountEntity } from 'loot-core/types/models';
 
 import { useAccounts } from '../../hooks/useAccounts';
-import { theme } from '../../style';
-import { useResponsive } from '../responsive/ResponsiveProvider';
 
 import { Autocomplete } from './Autocomplete';
 import { ItemHeader } from './ItemHeader';
