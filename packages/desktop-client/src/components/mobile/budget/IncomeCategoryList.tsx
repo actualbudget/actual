@@ -60,14 +60,11 @@ export function IncomeCategoryList({
         <DropIndicator
           target={target}
           className={css({
-            height: 4,
-            backgroundColor: theme.tableBorderSeparator,
-            opacity: 1,
-            transition:
-              'background-color 0.2s ease-in-out, transform 0.2s ease',
-
             '&[data-drop-target]': {
-              transform: 'scaleX(1.1)',
+              height: 4,
+              backgroundColor: theme.tableBorderSeparator,
+              opacity: 1,
+              borderRadius: 4,
             },
           })}
         />
