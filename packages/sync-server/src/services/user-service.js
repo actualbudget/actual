@@ -242,7 +242,9 @@ export function deleteUserAccessByFileId(userIds, fileId) {
 }
 
 export function getAllUserAccess(fileId) {
-  const isLoginMode = config.get('userCreationMode') === 'login';
+  //This can't be used here until we can create user invite links:
+  //const isLoginMode = config.get('userCreationMode') === 'login';
+  const isLoginMode = false;
   const joinType = isLoginMode ? 'JOIN' : 'LEFT JOIN';
 
   return getAccountDb().all(
