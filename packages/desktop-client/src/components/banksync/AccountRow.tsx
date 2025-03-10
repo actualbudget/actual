@@ -2,11 +2,11 @@ import React, { memo } from 'react';
 import { Trans } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import { theme } from '@actual-app/components/theme';
 
 import { tsToRelativeTime } from 'loot-core/shared/util';
 import { type AccountEntity } from 'loot-core/src/types/models';
 
-import { theme } from '../../style';
 import { Row, Cell } from '../table';
 
 type AccountRowProps = {

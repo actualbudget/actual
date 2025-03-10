@@ -3,6 +3,7 @@ import { useTranslation, Trans } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import {
@@ -15,7 +16,6 @@ import { closeModal } from 'loot-core/client/modals/modalsSlice';
 
 import { useAccounts } from '../../hooks/useAccounts';
 import { useDispatch } from '../../redux';
-import { theme } from '../../style';
 import { Autocomplete } from '../autocomplete/Autocomplete';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { PrivacyFilter } from '../PrivacyFilter';

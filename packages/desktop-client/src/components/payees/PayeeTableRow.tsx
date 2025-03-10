@@ -2,9 +2,15 @@
 import { memo, useRef, type CSSProperties } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import {
+  SvgArrowThinRight,
+  SvgBookmark,
+  SvgLightBulb,
+} from '@actual-app/components/icons/v1';
 import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
 import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 
 import { type PayeeEntity } from 'loot-core/types/models';
@@ -12,8 +18,6 @@ import { type PayeeEntity } from 'loot-core/types/models';
 import { useContextMenu } from '../../hooks/useContextMenu';
 import { useSelectedDispatch } from '../../hooks/useSelected';
 import { useSyncedPref } from '../../hooks/useSyncedPref';
-import { SvgArrowThinRight, SvgBookmark, SvgLightBulb } from '../../icons/v1';
-import { theme } from '../../style';
 import {
   Cell,
   CellButton,

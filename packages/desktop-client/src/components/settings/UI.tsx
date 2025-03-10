@@ -2,11 +2,12 @@ import React, { useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 
+import { type CSSProperties } from '@actual-app/components/styles';
+import { theme } from '@actual-app/components/theme';
+import { tokens } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
-import { type CSSProperties, theme } from '../../style';
-import { tokens } from '../../tokens';
 import { Link } from '../common/Link';
 
 type SettingProps = {

@@ -7,6 +7,8 @@ import React, {
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import { useResponsive } from '@actual-app/components/hooks/useResponsive';
+import { Input } from '@actual-app/components/input';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { parseISO, format as formatDate, parse as parseDate } from 'date-fns';
@@ -16,10 +18,8 @@ import { currentDay, dayFromDate } from 'loot-core/shared/months';
 import { amountToInteger } from 'loot-core/shared/util';
 
 import { useDateFormat } from '../../hooks/useDateFormat';
-import { Input } from '../common/Input';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { SectionLabel } from '../forms';
-import { useResponsive } from '../responsive/ResponsiveProvider';
 import { DateSelect } from '../select/DateSelect';
 
 const itemStyle: CSSProperties = {

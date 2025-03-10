@@ -8,15 +8,15 @@ import React, {
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import { SvgCustomNotesPaper } from '@actual-app/components/icons/v2';
 import { Popover } from '@actual-app/components/popover';
+import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 
 import { send } from 'loot-core/platform/client/fetch';
 
 import { useNotes } from '../hooks/useNotes';
-import { SvgCustomNotesPaper } from '../icons/v2';
-import { theme } from '../style';
 
 import { Notes } from './Notes';
 

@@ -3,11 +3,13 @@ import React, { memo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import { SvgRightArrow2 } from '@actual-app/components/icons/v0';
 import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
 import { Stack } from '@actual-app/components/stack';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { v4 as uuid } from 'uuid';
 
@@ -16,8 +18,6 @@ import { type RuleEntity } from 'loot-core/types/models';
 
 import { useContextMenu } from '../../hooks/useContextMenu';
 import { useSelectedDispatch } from '../../hooks/useSelected';
-import { SvgRightArrow2 } from '../../icons/v0';
-import { theme } from '../../style';
 import { SelectCell, Row, Field, Cell } from '../table';
 
 import { ActionExpression } from './ActionExpression';
