@@ -108,7 +108,6 @@ function OpenIdLogin({ setError }) {
   }
 
   useEffect(() => {
-    debugger;
     send('owner-created').then(created => setWarnMasterCreation(!created));
   }, []);
 
