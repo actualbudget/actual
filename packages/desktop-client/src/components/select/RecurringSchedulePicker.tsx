@@ -12,6 +12,7 @@ import { useTranslation, Trans } from 'react-i18next';
 import { Button } from '@actual-app/components/button';
 import { SvgAdd, SvgSubtract } from '@actual-app/components/icons/v0';
 import { InitialFocus } from '@actual-app/components/initial-focus';
+import { Input } from '@actual-app/components/input';
 import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
 import { Select } from '@actual-app/components/select';
@@ -31,7 +32,6 @@ import {
 
 import { useDateFormat } from '../../hooks/useDateFormat';
 import { useLocale } from '../../hooks/useLocale';
-import { Input } from '../common/Input';
 import { Checkbox } from '../forms';
 
 import { DateSelect } from './DateSelect';

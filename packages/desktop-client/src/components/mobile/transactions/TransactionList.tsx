@@ -15,6 +15,9 @@ import {
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
+import { SvgDelete } from '@actual-app/components/icons/v0';
+import { SvgDotsHorizontalTriple } from '@actual-app/components/icons/v1';
 import {
   Menu,
   type MenuItem,
@@ -23,6 +26,7 @@ import {
 import { Popover } from '@actual-app/components/popover';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import { setNotificationInset } from 'loot-core/client/notifications/notificationsSlice';
@@ -44,11 +48,7 @@ import {
 } from '../../../hooks/useSelected';
 import { useTransactionBatchActions } from '../../../hooks/useTransactionBatchActions';
 import { useUndo } from '../../../hooks/useUndo';
-import { AnimatedLoading } from '../../../icons/AnimatedLoading';
-import { SvgDelete } from '../../../icons/v0';
-import { SvgDotsHorizontalTriple } from '../../../icons/v1';
 import { useDispatch } from '../../../redux';
-import { theme } from '../../../style';
 import { useScrollListener } from '../../ScrollProvider';
 import { FloatingActionBar } from '../FloatingActionBar';
 

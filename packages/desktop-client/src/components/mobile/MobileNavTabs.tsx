@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next';
 import { NavLink } from 'react-router-dom';
 import { useSpring, animated, config } from 'react-spring';
 
+import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import {
   SvgAdd,
   SvgCog,
@@ -24,7 +25,6 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { useDrag } from '@use-gesture/react';
 
-import { useResponsive } from '../responsive/ResponsiveProvider';
 import { useScrollListener } from '../ScrollProvider';
 
 const COLUMN_COUNT = 3;

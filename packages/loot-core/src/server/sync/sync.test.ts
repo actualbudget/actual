@@ -319,7 +319,7 @@ describe('Sync projections', () => {
       groupId = await db.insertCategoryGroup({ id: 'group1', name: 'group1' });
       await db.insertCategoryGroup({ id: 'group2', name: 'group2' });
       fooId = await db.insertCategory({ name: 'foo', cat_group: 'group1' });
-      await db.moveCategory(fooId, 'group2');
+      await db.moveCategory(fooId, 'group2', null);
     });
 
     await sheet.loadSpreadsheet(db);

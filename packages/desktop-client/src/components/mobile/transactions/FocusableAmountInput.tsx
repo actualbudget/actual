@@ -11,6 +11,7 @@ import React, {
 
 import { Button } from '@actual-app/components/button';
 import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
@@ -22,7 +23,6 @@ import {
 
 import { useMergedRefs } from '../../../hooks/useMergedRefs';
 import { useSyncedPref } from '../../../hooks/useSyncedPref';
-import { theme } from '../../../style';
 import { makeAmountFullStyle } from '../../budget/util';
 
 type AmountInputProps = {

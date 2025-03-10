@@ -2,9 +2,6 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 
-import { View } from '@actual-app/components/view';
-
-import { useSyncServerStatus } from '../../hooks/useSyncServerStatus';
 import {
   SvgCheveronDown,
   SvgCheveronRight,
@@ -14,8 +11,11 @@ import {
   SvgStoreFront,
   SvgTuning,
   SvgWallet,
-} from '../../icons/v1';
-import { SvgCalendar3 } from '../../icons/v2';
+} from '@actual-app/components/icons/v1';
+import { SvgCalendar3 } from '@actual-app/components/icons/v2';
+import { View } from '@actual-app/components/view';
+
+import { useSyncServerStatus } from '../../hooks/useSyncServerStatus';
 
 import { Item } from './Item';
 import { SecondaryItem } from './SecondaryItem';

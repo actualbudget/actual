@@ -3,6 +3,7 @@ import React, { type CSSProperties, useRef, useState } from 'react';
 
 import { AlignedText } from '@actual-app/components/aligned-text';
 import { InitialFocus } from '@actual-app/components/initial-focus';
+import { Input } from '@actual-app/components/input';
 import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
 import { styles } from '@actual-app/components/styles';
@@ -23,7 +24,6 @@ import { type AccountEntity } from 'loot-core/types/models';
 import { useContextMenu } from '../../hooks/useContextMenu';
 import { useNotes } from '../../hooks/useNotes';
 import { useDispatch } from '../../redux';
-import { Input } from '../common/Input';
 import { Link } from '../common/Link';
 import { Notes } from '../Notes';
 import {

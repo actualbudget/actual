@@ -339,7 +339,7 @@ export const deleteCategory = createAppAsyncThunk(
 type MoveCategoryPayload = {
   id: CategoryEntity['id'];
   groupId: CategoryGroupEntity['id'];
-  targetId: CategoryEntity['id'];
+  targetId: CategoryEntity['id'] | null;
 };
 
 export const moveCategory = createAppAsyncThunk(

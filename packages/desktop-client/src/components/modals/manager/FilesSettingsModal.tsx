@@ -2,17 +2,17 @@ import React, { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import { SvgPencil1 } from '@actual-app/components/icons/v2';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import { loadAllFiles } from 'loot-core/client/budgets/budgetsSlice';
 import { pushModal } from 'loot-core/client/modals/modalsSlice';
 
 import { useGlobalPref } from '../../../hooks/useGlobalPref';
-import { SvgPencil1 } from '../../../icons/v2';
 import { useDispatch } from '../../../redux';
-import { theme } from '../../../style';
 import { Modal, ModalCloseButton, ModalHeader } from '../../common/Modal';
 
 function FileLocationSettings() {

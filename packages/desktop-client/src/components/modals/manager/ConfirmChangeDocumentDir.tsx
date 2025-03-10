@@ -4,13 +4,13 @@ import { Trans, useTranslation } from 'react-i18next';
 import { Button, ButtonWithLoading } from '@actual-app/components/button';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
 
 import { useGlobalPref } from '../../../hooks/useGlobalPref';
 import { useDispatch } from '../../../redux';
-import { theme } from '../../../style';
 import { Information } from '../../alerts';
 import { Modal, ModalCloseButton, ModalHeader } from '../../common/Modal';
 import { Checkbox } from '../../forms';
