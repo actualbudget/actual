@@ -16,7 +16,7 @@ import * as monthUtils from '../shared/months';
 import { q } from '../shared/query';
 import { type Budget } from '../types/budget';
 import { Handlers } from '../types/handlers';
-import { CategoryEntity, CategoryGroupEntity } from '../types/models';
+import { CategoryGroupEntity } from '../types/models';
 import { OpenIdConfig } from '../types/models/openid';
 
 import { app as accountsApp } from './accounts/app';
@@ -104,12 +104,11 @@ handlers['redo'] = mutator(function () {
 });
 
 handlers['get-categories'] = async function () {
-  // TODO: Force cast to CategoryGroupEntity and CategoryEntity.
-  // This should be updated to AQL queries. The server should not directly return DB models.
+  const categoryGroups = await handlers['get-category-groups']();
+  const categories = categoryGroups.flatMap(group => group.categories);
   return {
-    grouped:
-      (await db.getCategoriesGrouped()) as unknown as CategoryGroupEntity[],
-    list: (await db.getCategories()) as unknown as CategoryEntity[],
+    grouped: categoryGroups,
+    list: categories,
   };
 };
 
@@ -118,7 +117,7 @@ handlers['get-budget-bounds'] = async function () {
 };
 
 handlers['envelope-budget-month'] = async function ({ month }) {
-  const groups = await db.getCategoriesGrouped();
+  const groups = await handlers['get-category-groups']();
   const sheetName = monthUtils.sheetForMonth(month);
 
   function value(name) {
@@ -170,7 +169,7 @@ handlers['envelope-budget-month'] = async function ({ month }) {
 };
 
 handlers['tracking-budget-month'] = async function ({ month }) {
-  const groups = await db.getCategoriesGrouped();
+  const groups = await handlers['get-category-groups']();
   const sheetName = monthUtils.sheetForMonth(month);
 
   function value(name) {
@@ -236,9 +235,15 @@ handlers['category-create'] = mutator(async function ({
 handlers['category-update'] = mutator(async function (category) {
   return withUndo(async () => {
     try {
+      // DB column name is cat_group.
+      const { group: cat_group, ...restCategory } = category;
       await db.updateCategory({
-        ...category,
+        ...restCategory,
+        cat_group,
         name: category.name.trim(),
+        is_income: category.is_income ? 1 : 0,
+        hidden: category.hidden ? 1 : 0,
+        tombstone: category.tombstone ? 1 : 0,
       });
     } catch (e) {
       if (e.message.toLowerCase().includes('unique constraint')) {
@@ -255,7 +260,6 @@ handlers['category-move'] = mutator(async function ({ id, groupId, targetId }) {
     await batchMessages(async () => {
       await db.moveCategory(id, groupId, targetId);
     });
-    return 'ok';
   });
 });
 
@@ -303,7 +307,9 @@ handlers['category-delete'] = mutator(async function ({ id, transferId }) {
 });
 
 handlers['get-category-groups'] = async function () {
-  return await db.getCategoriesGrouped();
+  const { data: categoryGroups }: { data: CategoryGroupEntity[] } =
+    await aqlQuery(q('category_groups').select('*'));
+  return categoryGroups;
 };
 
 handlers['category-group-create'] = mutator(async function ({
@@ -315,14 +321,20 @@ handlers['category-group-create'] = mutator(async function ({
     return db.insertCategoryGroup({
       name,
       is_income: isIncome ? 1 : 0,
-      hidden,
+      hidden: hidden ? 1 : 0,
     });
   });
 });
 
 handlers['category-group-update'] = mutator(async function (group) {
   return withUndo(async () => {
-    return db.updateCategoryGroup(group);
+    return db.updateCategoryGroup({
+      ...group,
+      name: group.name.trim(),
+      is_income: group.is_income ? 1 : 0,
+      hidden: group.hidden ? 1 : 0,
+      tombstone: group.tombstone ? 1 : 0,
+    });
   });
 });
 
@@ -331,7 +343,6 @@ handlers['category-group-move'] = mutator(async function ({ id, targetId }) {
     await batchMessages(async () => {
       await db.moveCategoryGroup(id, targetId);
     });
-    return 'ok';
   });
 });
 
@@ -345,7 +356,7 @@ handlers['category-group-delete'] = mutator(async function ({
       [id],
     );
 
-    return batchMessages(async () => {
+    await batchMessages(async () => {
       if (transferId) {
         await budget.doTransfer(
           groupCategories.map(c => c.id),
