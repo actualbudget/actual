@@ -96,7 +96,7 @@
     "./client/store/mock": "./src/client/store/mock.ts",
     "./client/constants": "./src/client/constants.ts",
     "./client/platform": {
-      "node": "./src/client/platform.ts",
+      "node": "./src/client/platform.electron.ts",
       "default": "./src/client/platform.web.ts"
     },
     "./client/queries": "./src/client/queries.ts",
