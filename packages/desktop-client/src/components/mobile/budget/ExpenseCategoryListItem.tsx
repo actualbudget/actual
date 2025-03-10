@@ -1,5 +1,5 @@
 import { type ComponentPropsWithoutRef, useCallback } from 'react';
-import { ListBoxItem } from 'react-aria-components';
+import { GridListItem } from 'react-aria-components';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -60,9 +60,12 @@ function ExpenseCategoryName({
       }}
     >
       <Button
+        slot="drag"
         variant="bare"
         style={{
           maxWidth: sidebarColumnWidth,
+          // slot="drag" sets pointerEvents to none, so we unset it here.
+          pointerEvents: 'unset',
         }}
         onPress={() => onEdit?.(category.id)}
       >
@@ -321,7 +324,7 @@ function ExpenseCategoryCells({
 }
 
 type ExpenseCategoryListItemProps = ComponentPropsWithoutRef<
-  typeof ListBoxItem<CategoryEntity>
+  typeof GridListItem<CategoryEntity>
 > & {
   month: string;
   isHidden: boolean;
@@ -515,7 +518,7 @@ export function ExpenseCategoryListItem({
   }
 
   return (
-    <ListBoxItem
+    <GridListItem
       textValue={category.name}
       data-testid="category-row"
       {...props}
@@ -551,6 +554,6 @@ export function ExpenseCategoryListItem({
           onShowActivity={onShowActivity}
         />
       </View>
-    </ListBoxItem>
+    </GridListItem>
   );
 }
