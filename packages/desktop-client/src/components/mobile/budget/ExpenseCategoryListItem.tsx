@@ -70,12 +70,9 @@ function ExpenseCategoryName({
         }}
       />
       <Button
-        slot="drag"
         variant="bare"
         style={{
           maxWidth: sidebarColumnWidth,
-          // slot="drag" sets pointerEvents to none, so we unset it here.
-          pointerEvents: 'unset',
         }}
         onPress={() => onEdit?.(category.id)}
       >
