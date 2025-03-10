@@ -38,6 +38,7 @@ import { FinancesApp } from './FinancesApp';
 import { ManagementApp } from './manager/ManagementApp';
 import { Modals } from './Modals';
 import { ResponsiveProvider } from './responsive/ResponsiveProvider';
+import { useMultiuserEnabled } from './ServerContext';
 import { SidebarProvider } from './sidebar/SidebarProvider';
 import { UpdateNotification } from './UpdateNotification';
 
@@ -48,6 +49,7 @@ function AppInner() {
   const { showBoundary: showErrorBoundary } = useErrorBoundary();
   const dispatch = useDispatch();
   const userData = useSelector(state => state.user.data);
+  const multiuserEnabled = useMultiuserEnabled();
 
   useEffect(() => {
     setI18NextLanguage(null);
@@ -144,13 +146,13 @@ function AppInner() {
             message: t('Login expired, please log in again.'),
             button: {
               title: t('Go to log in'),
-              action: () => dispatch(signOut(true)),
+              action: () => dispatch(signOut(multiuserEnabled)),
             },
           },
         }),
       );
     }
-  }, [dispatch, t, userData?.tokenExpired]);
+  }, [dispatch, t, userData?.tokenExpired, multiuserEnabled]);
 
   return budgetId ? <FinancesApp /> : <ManagementApp />;
 }

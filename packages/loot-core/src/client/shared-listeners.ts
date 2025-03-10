@@ -346,7 +346,7 @@ export function listenForSyncEvent(store: AppStore) {
             id: 'login-expired',
             button: {
               title: 'Go to login',
-              action: () => store.dispatch(signOut(true)),
+              action: () => store.dispatch(signOut(false)), //Treat here as non multiuser since we can't use the hook
             },
           };
           break;

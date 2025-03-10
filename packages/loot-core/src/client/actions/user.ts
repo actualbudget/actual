@@ -42,6 +42,13 @@ export function loggedIn() {
 
 export function signOut(openidEnabled: boolean) {
   return async (dispatch: AppDispatch) => {
+    const cleanUp = () => {
+      dispatch(getUserData());
+      dispatch(loadGlobalPrefs());
+      dispatch(closeBudget());
+      dispatch({ type: constants.SIGN_OUT });
+    };
+
     await send('subscribe-sign-out');
     let redirect_url = null;
     if (openidEnabled && !isElectron()) {
@@ -52,18 +59,13 @@ export function signOut(openidEnabled: boolean) {
 
       redirect_url = ret.redirect_url;
       if (redirect_url) {
+        //TODO: need to adapt this for electron client
         window.location.href = redirect_url;
       } else {
-        dispatch(getUserData());
-        dispatch(loadGlobalPrefs());
-        dispatch(closeBudget());
-        dispatch({ type: constants.SIGN_OUT });
+        cleanUp();
       }
     } else {
-      dispatch(getUserData());
-      dispatch(loadGlobalPrefs());
-      dispatch(closeBudget());
-      dispatch({ type: constants.SIGN_OUT });
+      cleanUp();
     }
   };
 }
