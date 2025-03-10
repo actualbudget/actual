@@ -7,6 +7,7 @@ import { liveQuery, type LiveQuery } from './query-helpers';
 type UseQueryResult<Response> = {
   data: null | ReadonlyArray<Response>;
   isLoading: boolean;
+  refresh: () => void;
   error?: Error;
 };
 
@@ -14,11 +15,12 @@ export function useQuery<Response = unknown>(
   makeQuery: () => Query | null,
   dependencies: DependencyList,
 ): UseQueryResult<Response> {
+  const [refresh, setRefresh] = useState<number>(0);
   // Memo the resulting query. We don't care if the function
   // that creates the query changes, only the resulting query.
   // Safe to ignore the eslint warning here.
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const query = useMemo(makeQuery, dependencies);
+  const query = useMemo(makeQuery, [refresh, ...dependencies]);
 
   const [data, setData] = useState<ReadonlyArray<Response> | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -53,6 +55,7 @@ export function useQuery<Response = unknown>(
   return {
     data,
     isLoading,
+    refresh: () => setRefresh(refresh + 1),
     ...(error && { error }),
   };
 }
