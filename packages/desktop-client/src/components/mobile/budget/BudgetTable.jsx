@@ -3,9 +3,12 @@ import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { Card } from '@actual-app/components/card';
+import { useResponsive } from '@actual-app/components/hooks/useResponsive';
+import { SvgCalendar, SvgViewShow } from '@actual-app/components/icons/v2';
 import { Label } from '@actual-app/components/label';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 import { AutoTextSize } from 'auto-text-size';
@@ -25,7 +28,6 @@ import { useFeatureFlag } from '../../../hooks/useFeatureFlag';
 import { useLocale } from '../../../hooks/useLocale';
 import { useLocalPref } from '../../../hooks/useLocalPref';
 import { useNavigate } from '../../../hooks/useNavigate';
-import { useNotes } from '../../../hooks/useNotes';
 import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { useUndo } from '../../../hooks/useUndo';
 import { SvgLogo } from '../../../icons/logo';
@@ -36,30 +38,33 @@ import {
   SvgArrowThickRight,
   SvgCheveronRight,
 } from '../../../icons/v1';
-import { SvgCalendar, SvgViewShow } from '../../../icons/v2';
 import { useDispatch } from '../../../redux';
-import { theme } from '../../../style';
 import { BalanceWithCarryover } from '../../budget/BalanceWithCarryover';
 import { makeAmountGrey, makeBalanceAmountStyle } from '../../budget/util';
 import { Link } from '../../common/Link';
 import { MobilePageHeader, Page } from '../../Page';
 import { PrivacyFilter } from '../../PrivacyFilter';
-import { useResponsive } from '../../responsive/ResponsiveProvider';
 import { CellValue } from '../../spreadsheet/CellValue';
 import { useFormat } from '../../spreadsheet/useFormat';
 import { useSheetValue } from '../../spreadsheet/useSheetValue';
 import { MOBILE_NAV_HEIGHT } from '../MobileNavTabs';
 import { PullToRefresh } from '../PullToRefresh';
 
+import { BudgetCell } from './BudgetCell';
+import { IncomeGroup } from './IncomeGroup';
 import { ListItem } from './ListItem';
 
-const PILL_STYLE = {
+export const PILL_STYLE = {
   borderRadius: 16,
   color: theme.pillText,
   backgroundColor: theme.pillBackgroundLight,
 };
 
-function getColumnWidth({ show3Cols, isSidebar = false, offset = 0 } = {}) {
+export function getColumnWidth({
+  show3Cols,
+  isSidebar = false,
+  offset = 0,
+} = {}) {
   // If show3Cols = 35vw | 20vw | 20vw | 20vw,
   // Else = 45vw | 25vw | 25vw,
   if (!isSidebar) {
@@ -217,136 +222,6 @@ function Saved({ projected, onPress, show3Cols }) {
         />
       </Button>
     </View>
-  );
-}
-
-function BudgetCell({
-  name,
-  binding,
-  style,
-  category,
-  month,
-  onBudgetAction,
-  children,
-  ...props
-}) {
-  const { t } = useTranslation();
-  const columnWidth = getColumnWidth();
-  const dispatch = useDispatch();
-  const format = useFormat();
-  const { showUndoNotification } = useUndo();
-  const [budgetType = 'rollover'] = useSyncedPref('budgetType');
-  const modalBudgetType = budgetType === 'rollover' ? 'envelope' : 'tracking';
-
-  const categoryBudgetMenuModal = `${modalBudgetType}-budget-menu`;
-  const categoryNotes = useNotes(category.id);
-
-  const onOpenCategoryBudgetMenu = () => {
-    dispatch(
-      pushModal({
-        modal: {
-          name: categoryBudgetMenuModal,
-          options: {
-            categoryId: category.id,
-            month,
-            onUpdateBudget: amount => {
-              onBudgetAction(month, 'budget-amount', {
-                category: category.id,
-                amount,
-              });
-              showUndoNotification({
-                message: `${category.name} budget has been updated to ${integerToCurrency(amount)}.`,
-              });
-            },
-            onCopyLastMonthAverage: () => {
-              onBudgetAction(month, 'copy-single-last', {
-                category: category.id,
-              });
-              showUndoNotification({
-                message: `${category.name} budget has been set last to month’s budgeted amount.`,
-              });
-            },
-            onSetMonthsAverage: numberOfMonths => {
-              if (
-                numberOfMonths !== 3 &&
-                numberOfMonths !== 6 &&
-                numberOfMonths !== 12
-              ) {
-                return;
-              }
-
-              onBudgetAction(month, `set-single-${numberOfMonths}-avg`, {
-                category: category.id,
-              });
-              showUndoNotification({
-                message: `${category.name} budget has been set to ${numberOfMonths === 12 ? 'yearly' : `${numberOfMonths} month`} average.`,
-              });
-            },
-            onApplyBudgetTemplate: () => {
-              onBudgetAction(month, 'apply-single-category-template', {
-                category: category.id,
-              });
-              showUndoNotification({
-                message: `${category.name} budget templates have been applied.`,
-                pre: categoryNotes,
-              });
-            },
-          },
-        },
-      }),
-    );
-  };
-
-  return (
-    <CellValue
-      binding={binding}
-      type="financial"
-      aria-label={t('Budgeted amount for {{categoryName}} category', {
-        categoryName: category.name,
-      })}
-      {...props}
-    >
-      {({ type, name, value }) =>
-        children?.({
-          type,
-          name,
-          value,
-          onPress: onOpenCategoryBudgetMenu,
-        }) || (
-          <Button
-            variant="bare"
-            style={{
-              ...PILL_STYLE,
-              maxWidth: columnWidth,
-              ...makeAmountGrey(value),
-            }}
-            onPress={onOpenCategoryBudgetMenu}
-            aria-label={t('Open budget menu for {{categoryName}} category', {
-              categoryName: category.name,
-            })}
-          >
-            <View>
-              <PrivacyFilter>
-                <AutoTextSize
-                  key={value}
-                  as={Text}
-                  minFontSizePx={6}
-                  maxFontSizePx={12}
-                  mode="oneline"
-                  style={{
-                    maxWidth: columnWidth,
-                    textAlign: 'right',
-                    fontSize: 12,
-                  }}
-                >
-                  {format(value, type)}
-                </AutoTextSize>
-              </PrivacyFilter>
-            </View>
-          </Button>
-        )
-      }
-    </CellValue>
   );
 }
 
@@ -1020,294 +895,6 @@ const ExpenseGroupHeader = memo(function ExpenseGroupHeader({
   // </Droppable>
 });
 
-const IncomeGroupHeader = memo(function IncomeGroupHeader({
-  group,
-  budgeted,
-  balance,
-  onEdit,
-  collapsed,
-  onToggleCollapse,
-  style,
-}) {
-  const listItemRef = useRef();
-  const format = useFormat();
-  const sidebarColumnWidth = getColumnWidth({ isSidebar: true, offset: -13.5 });
-  const columnWidth = getColumnWidth();
-
-  return (
-    <ListItem
-      style={{
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        opacity: !!group.hidden ? 0.5 : undefined,
-        paddingLeft: 0,
-        ...style,
-      }}
-      innerRef={listItemRef}
-      data-testid="category-group-row"
-    >
-      <View
-        style={{
-          flex: 1,
-          flexDirection: 'row',
-          justifyContent: 'flex-start',
-          width: sidebarColumnWidth,
-        }}
-      >
-        <Button
-          variant="bare"
-          className={css({
-            flexShrink: 0,
-            color: theme.pageTextSubdued,
-            '&[data-pressed]': {
-              backgroundColor: 'transparent',
-            },
-          })}
-          onPress={() => onToggleCollapse?.(group.id)}
-        >
-          <SvgExpandArrow
-            width={8}
-            height={8}
-            style={{
-              flexShrink: 0,
-              transition: 'transform .1s',
-              transform: collapsed ? 'rotate(-90deg)' : '',
-            }}
-          />
-        </Button>
-        <Button
-          variant="bare"
-          style={{
-            maxWidth: sidebarColumnWidth,
-          }}
-          onPress={() => onEdit?.(group.id)}
-        >
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'flex-start',
-            }}
-          >
-            <Text
-              style={{
-                ...styles.lineClamp(2),
-                width: sidebarColumnWidth,
-                textAlign: 'left',
-                ...styles.smallText,
-              }}
-              data-testid="category-group-name"
-            >
-              {group.name}
-            </Text>
-            <SvgCheveronRight
-              style={{ flexShrink: 0, color: theme.tableTextSubdued }}
-              width={14}
-              height={14}
-            />
-          </View>
-        </Button>
-      </View>
-      <View
-        style={{
-          flexDirection: 'row',
-          justifyContent: 'flex-end',
-          alignItems: 'center',
-          paddingRight: 5,
-        }}
-      >
-        {budgeted && (
-          <CellValue binding={budgeted} type="financial">
-            {({ type, value }) => (
-              <View>
-                <PrivacyFilter>
-                  <AutoTextSize
-                    key={value}
-                    as={Text}
-                    minFontSizePx={6}
-                    maxFontSizePx={12}
-                    mode="oneline"
-                    style={{
-                      width: columnWidth,
-                      justifyContent: 'center',
-                      alignItems: 'flex-end',
-                      paddingLeft: 5,
-                      textAlign: 'right',
-                      fontSize: 12,
-                      fontWeight: '500',
-                    }}
-                  >
-                    {format(value, type)}
-                  </AutoTextSize>
-                </PrivacyFilter>
-              </View>
-            )}
-          </CellValue>
-        )}
-        <CellValue binding={balance} type="financial">
-          {({ type, value }) => (
-            <View>
-              <PrivacyFilter>
-                <AutoTextSize
-                  key={value}
-                  as={Text}
-                  minFontSizePx={6}
-                  maxFontSizePx={12}
-                  mode="oneline"
-                  style={{
-                    width: columnWidth,
-                    justifyContent: 'center',
-                    alignItems: 'flex-end',
-                    paddingLeft: 5,
-                    textAlign: 'right',
-                    fontSize: 12,
-                    fontWeight: '500',
-                  }}
-                >
-                  {format(value, type)}
-                </AutoTextSize>
-              </PrivacyFilter>
-            </View>
-          )}
-        </CellValue>
-      </View>
-    </ListItem>
-  );
-});
-
-const IncomeCategory = memo(function IncomeCategory({
-  index,
-  category,
-  budgeted,
-  balance,
-  month,
-  style,
-  onEdit,
-  onBudgetAction,
-}) {
-  const { t } = useTranslation();
-  const listItemRef = useRef();
-  const format = useFormat();
-  const sidebarColumnWidth = getColumnWidth({ isSidebar: true, offset: -10 });
-  const columnWidth = getColumnWidth();
-
-  return (
-    <ListItem
-      style={{
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        backgroundColor: 'transparent',
-        borderBottomWidth: 0,
-        borderTopWidth: index > 0 ? 1 : 0,
-        opacity: !!category.hidden ? 0.5 : undefined,
-        ...style,
-      }}
-      data-testid="category-row"
-      innerRef={listItemRef}
-    >
-      <View
-        style={{
-          flex: 1,
-          justifyContent: 'center',
-          alignItems: 'flex-start',
-          width: sidebarColumnWidth,
-        }}
-      >
-        <Button
-          variant="bare"
-          style={{
-            maxWidth: sidebarColumnWidth,
-          }}
-          onPress={() => onEdit?.(category.id)}
-        >
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'flex-start',
-            }}
-          >
-            <Text
-              style={{
-                ...styles.lineClamp(2),
-                width: sidebarColumnWidth,
-                textAlign: 'left',
-                ...styles.smallText,
-              }}
-              data-testid="category-name"
-            >
-              {category.name}
-            </Text>
-            <SvgCheveronRight
-              style={{ flexShrink: 0, color: theme.tableTextSubdued }}
-              width={14}
-              height={14}
-            />
-          </View>
-        </Button>
-      </View>
-      <View
-        style={{
-          flexDirection: 'row',
-          justifyContent: 'flex-end',
-          alignItems: 'center',
-        }}
-      >
-        {budgeted && (
-          <View
-            style={{
-              width: columnWidth,
-              justifyContent: 'center',
-              alignItems: 'flex-end',
-            }}
-          >
-            <BudgetCell
-              binding={budgeted}
-              type="financial"
-              category={category}
-              month={month}
-              onBudgetAction={onBudgetAction}
-            />
-          </View>
-        )}
-        <CellValue
-          binding={balance}
-          type="financial"
-          aria-label={t('Balance for {{categoryName}} category', {
-            categoryName: category.name,
-          })} // Translated aria-label
-        >
-          {({ type, value }) => (
-            <View>
-              <PrivacyFilter>
-                <AutoTextSize
-                  key={value}
-                  as={Text}
-                  minFontSizePx={6}
-                  maxFontSizePx={12}
-                  mode="oneline"
-                  style={{
-                    width: columnWidth,
-                    justifyContent: 'center',
-                    alignItems: 'flex-end',
-                    textAlign: 'right',
-                    fontSize: 12,
-                    paddingRight: 5,
-                  }}
-                >
-                  {format(value, type)}
-                </AutoTextSize>
-              </PrivacyFilter>
-            </View>
-          )}
-        </CellValue>
-      </View>
-    </ListItem>
-  );
-});
-
 const ExpenseGroup = memo(function ExpenseGroup({
   type,
   group,
@@ -1456,101 +1043,6 @@ const ExpenseGroup = memo(function ExpenseGroup({
   );
 });
 
-function IncomeGroup({
-  type,
-  group,
-  month,
-  onAddCategory,
-  showHiddenCategories,
-  editMode,
-  onEditGroup,
-  onEditCategory,
-  onBudgetAction,
-  collapsed,
-  onToggleCollapse,
-}) {
-  const { t } = useTranslation();
-  const columnWidth = getColumnWidth();
-  return (
-    <View>
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'flex-end',
-          marginTop: 50,
-          marginBottom: 5,
-          marginRight: 15,
-        }}
-      >
-        {type === 'report' && (
-          <Label title={t('Budgeted')} style={{ width: columnWidth }} />
-        )}
-        <Label title={t('Received')} style={{ width: columnWidth }} />
-      </View>
-
-      <Card style={{ marginTop: 0 }}>
-        <IncomeGroupHeader
-          group={group}
-          budgeted={
-            type === 'report' ? trackingBudget.groupBudgeted(group.id) : null
-          }
-          balance={
-            type === 'report'
-              ? trackingBudget.groupSumAmount(group.id)
-              : envelopeBudget.groupSumAmount(group.id)
-          }
-          onAddCategory={onAddCategory}
-          editMode={editMode}
-          onEdit={onEditGroup}
-          collapsed={collapsed}
-          onToggleCollapse={onToggleCollapse}
-          style={{
-            backgroundColor: monthUtils.isCurrentMonth(month)
-              ? theme.budgetHeaderCurrentMonth
-              : theme.budgetHeaderOtherMonth,
-          }}
-        />
-
-        {group.categories
-          .filter(
-            category =>
-              !collapsed && (!category.hidden || showHiddenCategories),
-          )
-          .map((category, index) => {
-            return (
-              <IncomeCategory
-                key={category.id}
-                index={index}
-                category={category}
-                month={month}
-                type={type}
-                budgeted={
-                  type === 'report'
-                    ? trackingBudget.catBudgeted(category.id)
-                    : null
-                }
-                balance={
-                  type === 'report'
-                    ? trackingBudget.catSumAmount(category.id)
-                    : envelopeBudget.catSumAmount(category.id)
-                }
-                style={{
-                  backgroundColor: monthUtils.isCurrentMonth(month)
-                    ? theme.budgetCurrentMonth
-                    : theme.budgetOtherMonth,
-                }}
-                editMode={editMode}
-                onEdit={onEditCategory}
-                onBudgetAction={onBudgetAction}
-              />
-            );
-          })}
-      </Card>
-    </View>
-  );
-}
-
 function UncategorizedButton() {
   const count = useSheetValue(uncategorizedCount());
   if (count === null || count <= 0) {
@@ -1655,18 +1147,13 @@ function BudgetGroups({
 
       {incomeGroup && (
         <IncomeGroup
-          type={type}
           group={incomeGroup}
           month={month}
-          onAddCategory={onAddCategory}
-          onSaveCategory={onSaveCategory}
-          onDeleteCategory={onDeleteCategory}
           showHiddenCategories={showHiddenCategories}
-          editMode={editMode}
           onEditGroup={onEditGroup}
           onEditCategory={onEditCategory}
           onBudgetAction={onBudgetAction}
-          collapsed={collapsedGroupIds.includes(incomeGroup.id)}
+          isCollapsed={collapsedGroupIds.includes(incomeGroup.id)}
           onToggleCollapse={onToggleCollapse}
         />
       )}

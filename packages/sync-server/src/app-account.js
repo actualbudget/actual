@@ -30,12 +30,16 @@ export { app as handlers };
 // /login
 
 app.get('/needs-bootstrap', (req, res) => {
+  const availableLoginMethods = listLoginMethods();
   res.send({
     status: 'ok',
     data: {
       bootstrapped: !needsBootstrap(),
-      loginMethod: getLoginMethod(),
-      availableLoginMethods: listLoginMethods(),
+      loginMethod:
+        availableLoginMethods.length === 1
+          ? availableLoginMethods[0].method
+          : getLoginMethod(),
+      availableLoginMethods,
       multiuser: getActiveLoginMethod() === 'openid',
     },
   });

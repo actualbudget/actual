@@ -4,7 +4,9 @@ import { Trans, useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
 
 import { Button, ButtonWithLoading } from '@actual-app/components/button';
+import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
+import { BigInput } from '@actual-app/components/input';
 import { Label } from '@actual-app/components/label';
 import { Select } from '@actual-app/components/select';
 import { styles } from '@actual-app/components/styles';
@@ -19,9 +21,7 @@ import { type OpenIdConfig } from 'loot-core/types/models/openid';
 
 import { useNavigate } from '../../../hooks/useNavigate';
 import { useDispatch } from '../../../redux';
-import { BigInput } from '../../common/Input';
 import { Link } from '../../common/Link';
-import { useResponsive } from '../../responsive/ResponsiveProvider';
 import { useAvailableLoginMethods, useLoginMethod } from '../../ServerContext';
 
 import { useBootstrapped, Title } from './common';
@@ -219,6 +219,10 @@ export function Login() {
   const [error, setError] = useState(null);
   const { checked } = useBootstrapped();
   const loginMethods = useAvailableLoginMethods();
+
+  useEffect(() => {
+    setMethod(defaultLoginMethod);
+  }, [defaultLoginMethod]);
 
   useEffect(() => {
     if (checked && !searchParams.has('error')) {
