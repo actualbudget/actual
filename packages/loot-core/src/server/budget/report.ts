@@ -77,7 +77,7 @@ export function createCategoryGroup(group, sheetName) {
     sheet.get().createDynamic(sheetName, 'group-sum-amount-' + group.id, {
       initialValue: 0,
       dependencies: group.categories
-        .filter(f => !f.hidden)
+        .filter(cat => !cat.hidden)
         .map(cat => `spent-with-carryover-${cat.id}`),
       run: sumAmounts,
     });
@@ -85,14 +85,14 @@ export function createCategoryGroup(group, sheetName) {
   sheet.get().createDynamic(sheetName, 'group-budget-' + group.id, {
     initialValue: 0,
     dependencies: group.categories
-      .filter(f => !f.hidden)
+      .filter(cat => !cat.hidden)
       .map(cat => `budget-${cat.id}`),
     run: sumAmounts,
   });
   sheet.get().createDynamic(sheetName, 'group-leftover-' + group.id, {
     initialValue: 0,
     dependencies: group.categories
-      .filter(f => !f.hidden)
+      .filter(cat => !cat.hidden)
       .map(cat => `leftover-${cat.id}`),
     run: sumAmounts,
   });
