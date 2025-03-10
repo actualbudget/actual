@@ -6,8 +6,8 @@ import { defaultInputStyle, Input } from '@actual-app/components/input';
 import { type CSSProperties } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
 
-import { SvgRemove, SvgSearchAlternate } from '../../icons/v2';
-import { theme } from '../../style';
+import { SvgRemove, SvgSearchAlternate } from '@actual-app/components/icons/v2';
+import { theme } from '@actual-app/components/theme';
 
 type SearchProps = {
   inputRef?: Ref<HTMLInputElement>;
@@ -15,7 +15,8 @@ type SearchProps = {
   onChange: (value: string) => void;
   placeholder: string;
   isInModal?: boolean;
-  width?: number;
+  width?: number | '100%';
+  height?: number;
   inputStyle?: CSSProperties;
 };
 
@@ -26,11 +27,14 @@ export function Search({
   placeholder,
   isInModal = false,
   width = 250,
+  height,
   inputStyle = {},
 }: SearchProps) {
   const { t } = useTranslation();
 
   const [focused, setFocused] = useState(false);
+
+  const clearButtonPadding = ((height ?? 24) - 8) / 2;
 
   return (
     <View
@@ -41,6 +45,7 @@ export function Search({
         alignItems: 'center',
 
         width,
+        height,
         flex: '',
         borderColor: isInModal ? undefined : 'transparent',
         backgroundColor: isInModal ? undefined : theme.formInputBackground,
@@ -106,7 +111,9 @@ export function Search({
         <View title={t('Clear search term')}>
           <Button
             variant="bare"
-            style={{ padding: 8 }}
+            style={{
+              padding: `${clearButtonPadding}px 8px ${clearButtonPadding}px ${clearButtonPadding}px`,
+            }}
             onPress={() => onChange('')}
           >
             <SvgRemove style={{ width: 8, height: 8 }} />

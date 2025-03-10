@@ -46,11 +46,11 @@ function TransactionSearchInput({
           onSearch(text);
         }}
         placeholder={placeholder}
+        width="100%"
+        height={styles.mobileMinHeight}
         inputStyle={{
           backgroundColor: theme.tableBackground,
           borderColor: theme.formInputBorder,
-          flex: 1,
-          height: styles.mobileMinHeight,
         }}
       />
     </View>
