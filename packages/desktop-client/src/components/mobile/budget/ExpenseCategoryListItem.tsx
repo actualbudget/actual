@@ -33,7 +33,7 @@ import { useFormat } from '../../spreadsheet/useFormat';
 import { useSheetValue } from '../../spreadsheet/useSheetValue';
 
 import { BudgetCell } from './BudgetCell';
-import { getColumnWidth, PILL_STYLE } from './BudgetTable';
+import { getColumnWidth, PILL_STYLE, ROW_HEIGHT } from './BudgetTable';
 
 type ExpenseCategoryNameProps = {
   category: CategoryEntity;
@@ -525,7 +525,7 @@ export function ExpenseCategoryListItem({
     >
       <View
         style={{
-          height: 50,
+          height: ROW_HEIGHT,
           borderColor: theme.tableBorder,
           flexDirection: 'row',
           alignItems: 'center',
