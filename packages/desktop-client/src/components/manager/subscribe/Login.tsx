@@ -4,6 +4,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
 
 import { Button, ButtonWithLoading } from '@actual-app/components/button';
+import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
 import { SvgCheveronDown } from '@actual-app/components/icons/v1';
 import { Menu } from '@actual-app/components/menu';
@@ -22,11 +23,11 @@ import { useNavigate } from '../../../hooks/useNavigate';
 import { useDispatch } from '../../../redux';
 import { warningBackground } from '../../../style/themes/dark';
 import { Link } from '../../common/Link';
-import { useResponsive } from '../../responsive/ResponsiveProvider';
 import { useAvailableLoginMethods, useLoginMethod } from '../../ServerContext';
 
 import { useBootstrapped, Title } from './common';
-import { OpenIdForm, ResponsiveInput } from './OpenIdForm';
+import { OpenIdForm } from './OpenIdForm';
+import { ResponsiveInput } from '@actual-app/components/input';
 
 function PasswordLogin({ setError, dispatch }) {
   const [password, setPassword] = useState('');

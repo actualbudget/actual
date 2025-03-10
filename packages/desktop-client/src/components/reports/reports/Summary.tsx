@@ -3,6 +3,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 
 import { Button } from '@actual-app/components/button';
+import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { SvgEquals } from '@actual-app/components/icons/v1';
 import {
   SvgCloseParenthesis,
@@ -38,7 +39,6 @@ import { MobileBackButton } from '../../mobile/MobileBackButton';
 import { FieldSelect } from '../../modals/EditRuleModal';
 import { MobilePageHeader, Page, PageHeader } from '../../Page';
 import { PrivacyFilter } from '../../PrivacyFilter';
-import { useResponsive } from '../../responsive/ResponsiveProvider';
 import { chartTheme } from '../chart-theme';
 import { Header } from '../Header';
 import { LoadingIndicator } from '../LoadingIndicator';

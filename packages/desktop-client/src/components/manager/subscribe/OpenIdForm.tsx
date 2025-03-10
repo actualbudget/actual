@@ -3,7 +3,6 @@ import { Trans, useTranslation } from 'react-i18next';
 import { useLocation, type Location } from 'react-router-dom';
 
 import { ButtonWithLoading } from '@actual-app/components/button';
-import { BigInput, Input, type InputProps } from '@actual-app/components/input';
 import { Menu } from '@actual-app/components/menu';
 import { Select } from '@actual-app/components/select';
 import { Stack } from '@actual-app/components/stack';
@@ -14,11 +13,11 @@ import { View } from '@actual-app/components/view';
 
 import { type OpenIdConfig } from 'loot-core/types/models/openid';
 
-import { useDispatch } from '../../../redux';
 import { Link } from '../../common/Link';
 import { FormField, FormLabel } from '../../forms';
-import { useResponsive } from '../../responsive/ResponsiveProvider';
 import { useServerURL } from '../../ServerContext';
+import { useResponsive } from '@actual-app/components/hooks/useResponsive';
+import { ResponsiveInput } from '@actual-app/components/input';
 
 type OpenIdCallback = (config: OpenIdConfig) => Promise<void>;
 
@@ -433,10 +432,4 @@ function OpenIdProviderSelector({
       />
     </FormField>
   );
-}
-
-export function ResponsiveInput(props: InputProps) {
-  const { isNarrowWidth } = useResponsive();
-
-  return isNarrowWidth ? <BigInput {...props} /> : <Input {...props} />;
 }
