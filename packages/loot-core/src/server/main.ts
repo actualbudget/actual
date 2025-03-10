@@ -66,6 +66,7 @@ import {
 import * as syncMigrations from './sync/migrate';
 import { app as toolsApp } from './tools/app';
 import { app as transactionsApp } from './transactions/app';
+import { app as holdingsApp } from './holdings';
 import * as rules from './transactions/transaction-rules';
 import { clearUndo, undo, redo, withUndo } from './undo';
 import { updateVersion } from './update';
@@ -1420,6 +1421,7 @@ app.combine(
   rulesApp,
   adminApp,
   transactionsApp,
+  holdingsApp,
   accountsApp,
   payeesApp,
 );
