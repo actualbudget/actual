@@ -49,7 +49,7 @@ export function InfiniteScrollWrapper({
         style={{ maxWidth: '100%', overflow: 'auto' }}
         onScroll={onScroll}
       >
-        {children}
+        <div>{children}</div>
       </View>
     </View>
   );
