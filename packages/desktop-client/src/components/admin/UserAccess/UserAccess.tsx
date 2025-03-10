@@ -11,10 +11,14 @@ import React, {
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import { SvgLockOpen } from '@actual-app/components/icons/v1';
+import { SvgLockClosed } from '@actual-app/components/icons/v2';
 import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { addNotification, pushModal } from 'loot-core/client/actions';
+import { pushModal } from 'loot-core/client/modals/modalsSlice';
+import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import * as undo from 'loot-core/platform/client/undo';
 import { type Handlers } from 'loot-core/types/handlers';
@@ -22,13 +26,10 @@ import { type UserAvailable } from 'loot-core/types/models';
 import { type UserAccessEntity } from 'loot-core/types/models/userAccess';
 
 import { useMetadataPref } from '../../../hooks/useMetadataPref';
-import { SvgLockOpen } from '../../../icons/v1';
-import { SvgLockClosed } from '../../../icons/v2';
 import { useDispatch } from '../../../redux';
-import { theme } from '../../../style';
+import { InfiniteScrollWrapper } from '../../common/InfiniteScrollWrapper';
 import { Link } from '../../common/Link';
 import { Search } from '../../common/Search';
-import { SimpleTable } from '../../common/SimpleTable';
 
 import { UserAccessHeader } from './UserAccessHeader';
 import { UserAccessRow } from './UserAccessRow';
@@ -43,7 +44,7 @@ function UserAccessContent({
   setLoading,
 }: ManageUserAccessContentProps) {
   const { t } = useTranslation();
-
+  const dispatch = useDispatch();
   const [allAccess, setAllAccess] = useState([]);
   const [page, setPage] = useState(0);
   const [filter, setFilter] = useState('');
@@ -85,13 +86,17 @@ function UserAccessContent({
     };
 
     if ('error' in data) {
-      addNotification({
-        type: 'error',
-        id: 'error',
-        title: t('Error getting available users'),
-        sticky: true,
-        message: data.error,
-      });
+      dispatch(
+        addNotification({
+          notification: {
+            type: 'error',
+            id: 'error',
+            title: t('Error getting available users'),
+            sticky: true,
+            message: data.error,
+          },
+        }),
+      );
       return [];
     }
 
@@ -104,7 +109,7 @@ function UserAccessContent({
 
     setAllAccess(loadedAccess);
     return loadedAccess;
-  }, [cloudFileId, setLoading, t]);
+  }, [cloudFileId, dispatch, setLoading, t]);
 
   const loadOwner = useCallback(async () => {
     const file = (await send('get-user-file-info', cloudFileId as string)) ?? {
@@ -185,17 +190,13 @@ function UserAccessContent({
       </View>
       <View style={{ flex: 1 }}>
         <UserAccessHeader />
-        <SimpleTable
-          loadMore={loadMore}
-          // Hide the last border of the item in the table
-          style={{ marginBottom: -1 }}
-        >
+        <InfiniteScrollWrapper loadMore={loadMore}>
           <UserAccessList
             accesses={filteredAccesses}
             hoveredAccess={hoveredUserAccess}
             onHover={onHover}
           />
-        </SimpleTable>
+        </InfiniteScrollWrapper>
       </View>
       <View
         style={{
@@ -280,8 +281,13 @@ function LockToggle({ style, onToggleSave }: LockToggleProps) {
       aria-label="Menu"
       onPress={() =>
         dispatch(
-          pushModal('transfer-ownership', {
-            onSave: () => onToggleSave(),
+          pushModal({
+            modal: {
+              name: 'transfer-ownership',
+              options: {
+                onSave: () => onToggleSave(),
+              },
+            },
           }),
         )
       }

@@ -11,6 +11,8 @@ import React, {
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import { SvgAdd, SvgSubtract } from '@actual-app/components/icons/v1';
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import { evalArithmetic } from 'loot-core/shared/arithmetic';
@@ -18,8 +20,6 @@ import { amountToInteger, appendDecimals } from 'loot-core/shared/util';
 
 import { useMergedRefs } from '../../hooks/useMergedRefs';
 import { useSyncedPref } from '../../hooks/useSyncedPref';
-import { SvgAdd, SvgSubtract } from '../../icons/v1';
-import { theme } from '../../style';
 import { InputWithContent } from '../common/InputWithContent';
 import { useFormat } from '../spreadsheet/useFormat';
 
@@ -138,7 +138,6 @@ export function AmountInput({
       }
       value={value}
       disabled={disabled}
-      focused={focused}
       style={{ flex: 1, alignItems: 'stretch', ...style }}
       inputStyle={inputStyle}
       onKeyUp={e => {

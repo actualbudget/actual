@@ -11,6 +11,7 @@ import { css } from '@emotion/css';
 
 import * as monthUtils from 'loot-core/shared/months';
 
+import { useLocale } from '../../../../hooks/useLocale';
 import { useUndo } from '../../../../hooks/useUndo';
 import { SvgDotsHorizontalTriple } from '../../../../icons/v1';
 import { SvgArrowButtonDown1, SvgArrowButtonUp1 } from '../../../../icons/v2';
@@ -28,6 +29,7 @@ type BudgetSummaryProps = {
   month?: string;
 };
 export function BudgetSummary({ month }: BudgetSummaryProps) {
+  const locale = useLocale();
   const { t } = useTranslation();
   const {
     currentMonth,
@@ -52,7 +54,7 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
     ? SvgArrowButtonDown1
     : SvgArrowButtonUp1;
 
-  const displayMonth = monthUtils.format(month, 'MMMM ‘yy');
+  const displayMonth = monthUtils.format(month, 'MMMM ‘yy', locale);
 
   return (
     <View
@@ -121,7 +123,7 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
               textDecorationSkip: 'ink',
             })}
           >
-            {monthUtils.format(month, 'MMMM')}
+            {monthUtils.format(month, 'MMMM', locale)}
           </div>
 
           <View

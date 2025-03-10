@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 
-import { pushModal } from 'loot-core/client/actions';
+import { pushModal } from 'loot-core/client/modals/modalsSlice';
 import {
   getPayees,
   initiallyLoadPayees,
@@ -27,7 +27,7 @@ export function ManagePayeesWithData({
   const dispatch = useDispatch();
 
   const [ruleCounts, setRuleCounts] = useState({ value: new Map() });
-  const [orphans, setOrphans] = useState<PayeeEntity[]>([]);
+  const [orphans, setOrphans] = useState<Array<Pick<PayeeEntity, 'id'>>>([]);
 
   const refetchOrphanedPayees = useCallback(async () => {
     const orphs = await send('payees-get-orphaned');
@@ -90,7 +90,9 @@ export function ManagePayeesWithData({
   }, [dispatch, refetchRuleCounts, refetchOrphanedPayees]);
 
   function onViewRules(id: PayeeEntity['id']) {
-    dispatch(pushModal('manage-rules', { payeeId: id }));
+    dispatch(
+      pushModal({ modal: { name: 'manage-rules', options: { payeeId: id } } }),
+    );
   }
 
   function onCreateRule(id: PayeeEntity['id']) {
@@ -114,7 +116,7 @@ export function ManagePayeesWithData({
         },
       ],
     };
-    dispatch(pushModal('edit-rule', { rule }));
+    dispatch(pushModal({ modal: { name: 'edit-rule', options: { rule } } }));
   }
 
   return (
@@ -125,7 +127,6 @@ export function ManagePayeesWithData({
       initialSelectedIds={initialSelectedIds}
       onBatchChange={async (changes: Diff<PayeeEntity>) => {
         await send('payees-batch-change', changes);
-        await dispatch(getPayees());
         setOrphans(applyChanges(changes, orphans));
       }}
       onMerge={async ([targetId, ...mergeIds]) => {

@@ -10,7 +10,6 @@ import {
   reducer as accountsSliceReducer,
   getInitialState as getInitialAccountsState,
 } from '../accounts/accountsSlice';
-import { addNotification } from '../actions';
 import {
   name as appSliceName,
   reducer as appSliceReducer,
@@ -23,13 +22,22 @@ import {
 } from '../budgets/budgetsSlice';
 import * as constants from '../constants';
 import {
+  name as modalsSliceName,
+  reducer as modalsSliceReducer,
+  getInitialState as getInitialModalsState,
+} from '../modals/modalsSlice';
+import {
+  name as notificationsSliceName,
+  reducer as notificationsSliceReducer,
+  getInitialState as getInitialNotificationsState,
+  addNotification,
+} from '../notifications/notificationsSlice';
+import {
   name as queriesSliceName,
   reducer as queriesSliceReducer,
   getInitialState as getInitialQueriesState,
 } from '../queries/queriesSlice';
 import { reducers } from '../reducers';
-import { initialState as initialModalsState } from '../reducers/modals';
-import { initialState as initialNotificationsState } from '../reducers/notifications';
 import { initialState as initialPrefsState } from '../reducers/prefs';
 import { initialState as initialUserState } from '../reducers/user';
 
@@ -38,6 +46,8 @@ const appReducer = combineReducers({
   [accountsSliceName]: accountsSliceReducer,
   [appSliceName]: appSliceReducer,
   [budgetsSliceName]: budgetsSliceReducer,
+  [modalsSliceName]: modalsSliceReducer,
+  [notificationsSliceName]: notificationsSliceReducer,
   [queriesSliceName]: queriesSliceReducer,
 });
 const rootReducer: typeof appReducer = (state, action) => {
@@ -46,8 +56,8 @@ const rootReducer: typeof appReducer = (state, action) => {
     // blows away everything else
     state = {
       account: getInitialAccountsState(),
-      modals: initialModalsState,
-      notifications: initialNotificationsState,
+      modals: getInitialModalsState(),
+      notifications: getInitialNotificationsState(),
       queries: getInitialQueriesState(),
       budgets: state?.budgets || getInitialBudgetsState(),
       user: state?.user || initialUserState,
@@ -74,9 +84,11 @@ notifyOnRejectedActionsMiddleware.startListening({
     console.error(action.error);
     dispatch(
       addNotification({
-        id: action.type,
-        type: 'error',
-        message: action.error.message || 'An unexpected error occurred.',
+        notification: {
+          id: action.type,
+          type: 'error',
+          message: action.error.message || 'An unexpected error occurred.',
+        },
       }),
     );
   },

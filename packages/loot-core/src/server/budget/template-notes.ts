@@ -1,4 +1,4 @@
-import { Notification } from '../../client/state-types/notifications';
+import { Notification } from '../../client/notifications/notificationsSlice';
 import * as db from '../db';
 
 import { parse } from './goal-template.pegjs';

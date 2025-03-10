@@ -18,18 +18,18 @@ import { t } from 'i18next';
 import { v4 as uuidv4 } from 'uuid';
 
 import { unlinkAccount } from 'loot-core/client/accounts/accountsSlice';
-import {
-  addNotification,
-  openAccountCloseModal,
-  pushModal,
-  replaceModal,
-} from 'loot-core/client/actions';
 import { syncAndDownload } from 'loot-core/client/app/appSlice';
 import { useFilters } from 'loot-core/client/data-hooks/filters';
 import {
   SchedulesProvider,
   accountSchedulesQuery,
 } from 'loot-core/client/data-hooks/schedules';
+import {
+  openAccountCloseModal,
+  pushModal,
+  replaceModal,
+} from 'loot-core/client/modals/modalsSlice';
+import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
 import * as queries from 'loot-core/client/queries';
 import {
   createPayee,
@@ -45,7 +45,6 @@ import {
   type PagedQuery,
 } from 'loot-core/client/query-helpers';
 import { type AppDispatch } from 'loot-core/client/store';
-import { validForTransfer } from 'loot-core/client/transfer';
 import { send, listen } from 'loot-core/platform/client/fetch';
 import * as undo from 'loot-core/platform/client/undo';
 import { type UndoState } from 'loot-core/server/undo';
@@ -308,6 +307,7 @@ type AccountInternalProps = {
   hideFraction: boolean;
   accountsSyncing: string[];
   dispatch: AppDispatch;
+  onSetTransfer: ReturnType<typeof useTransactionBatchActions>['onSetTransfer'];
 };
 type AccountInternalState = {
   search: string;
@@ -655,13 +655,18 @@ class AccountInternal extends PureComponent<
       if (res) {
         if (accountId && res?.length > 0) {
           this.props.dispatch(
-            pushModal('import-transactions', {
-              accountId,
-              filename: res[0],
-              onImported: (didChange: boolean) => {
-                if (didChange) {
-                  this.fetchTransactions();
-                }
+            pushModal({
+              modal: {
+                name: 'import-transactions',
+                options: {
+                  accountId,
+                  filename: res[0],
+                  onImported: (didChange: boolean) => {
+                    if (didChange) {
+                      this.fetchTransactions();
+                    }
+                  },
+                },
               },
             }),
           );
@@ -762,8 +767,10 @@ class AccountInternal extends PureComponent<
       console.error('Error applying rules:', error);
       this.props.dispatch(
         addNotification({
-          type: 'error',
-          message: 'Failed to apply rules to transactions',
+          notification: {
+            type: 'error',
+            message: 'Failed to apply rules to transactions',
+          },
         }),
       );
     } finally {
@@ -823,23 +830,33 @@ class AccountInternal extends PureComponent<
     switch (item) {
       case 'link':
         this.props.dispatch(
-          pushModal('add-account', {
-            upgradingAccountId: accountId,
+          pushModal({
+            modal: {
+              name: 'add-account',
+              options: {
+                upgradingAccountId: accountId,
+              },
+            },
           }),
         );
         break;
       case 'unlink':
         this.props.dispatch(
-          pushModal('confirm-unlink-account', {
-            accountName: account.name,
-            onUnlink: () => {
-              this.props.dispatch(unlinkAccount({ id: accountId }));
+          pushModal({
+            modal: {
+              name: 'confirm-unlink-account',
+              options: {
+                accountName: account.name,
+                onUnlink: () => {
+                  this.props.dispatch(unlinkAccount({ id: accountId }));
+                },
+              },
             },
           }),
         );
         break;
       case 'close':
-        this.props.dispatch(openAccountCloseModal(accountId));
+        this.props.dispatch(openAccountCloseModal({ accountId }));
         break;
       case 'reopen':
         this.props.dispatch(reopenAccount({ id: accountId }));
@@ -1245,11 +1262,16 @@ class AccountInternal extends PureComponent<
     const transactions = ungroupTransactions(data);
     if (transactions.length > 0) {
       this.props.dispatch(
-        pushModal('confirm-transaction-edit', {
-          onConfirm: () => {
-            onConfirm(ids);
+        pushModal({
+          modal: {
+            name: 'confirm-transaction-edit',
+            options: {
+              onConfirm: () => {
+                onConfirm(ids);
+              },
+              confirmReason,
+            },
           },
-          confirmReason,
         }),
       );
     } else {
@@ -1346,53 +1368,17 @@ class AccountInternal extends PureComponent<
       ],
     } satisfies NewRuleEntity;
 
-    this.props.dispatch(pushModal('edit-rule', { rule }));
+    this.props.dispatch(
+      pushModal({ modal: { name: 'edit-rule', options: { rule } } }),
+    );
   };
 
   onSetTransfer = async (ids: string[]) => {
-    const onConfirmTransfer = async (ids: string[]) => {
-      this.setState({ workingHard: true });
-
-      const payees = this.props.payees;
-
-      const { data: transactions } = await runQuery(
-        q('transactions')
-          .filter({ id: { $oneof: ids } })
-          .select('*'),
-      );
-      const [fromTrans, toTrans] = transactions;
-
-      if (transactions.length === 2 && validForTransfer(fromTrans, toTrans)) {
-        const fromPayee = payees.find(
-          p => p.transfer_acct === fromTrans.account,
-        );
-        const toPayee = payees.find(p => p.transfer_acct === toTrans.account);
-
-        const changes = {
-          updated: [
-            {
-              ...fromTrans,
-              payee: toPayee?.id,
-              transfer_id: toTrans.id,
-            },
-            {
-              ...toTrans,
-              payee: fromPayee?.id,
-              transfer_id: fromTrans.id,
-            },
-          ],
-        };
-
-        await send('transactions-batch-update', changes);
-      }
-
-      await this.refetchTransactions();
-    };
-
-    await this.checkForReconciledTransactions(
+    this.setState({ workingHard: true });
+    await this.props.onSetTransfer(
       ids,
-      'batchEditWithReconciled',
-      onConfirmTransfer,
+      this.props.payees,
+      this.refetchTransactions,
     );
   };
 
@@ -1883,7 +1869,11 @@ class AccountInternal extends PureComponent<
                     showEmptyMessage ? (
                       <EmptyMessage
                         onAdd={() =>
-                          this.props.dispatch(replaceModal('add-account'))
+                          this.props.dispatch(
+                            replaceModal({
+                              modal: { name: 'add-account', options: {} },
+                            }),
+                          )
                         }
                       />
                     ) : !loading ? (
@@ -1937,6 +1927,7 @@ type AccountHackProps = Omit<
   | 'onBatchLinkSchedule'
   | 'onBatchUnlinkSchedule'
   | 'onBatchDelete'
+  | 'onSetTransfer'
 >;
 
 function AccountHack(props: AccountHackProps) {
@@ -1948,6 +1939,7 @@ function AccountHack(props: AccountHackProps) {
     onBatchLinkSchedule,
     onBatchUnlinkSchedule,
     onBatchDelete,
+    onSetTransfer,
   } = useTransactionBatchActions();
 
   return (
@@ -1959,6 +1951,7 @@ function AccountHack(props: AccountHackProps) {
       onBatchLinkSchedule={onBatchLinkSchedule}
       onBatchUnlinkSchedule={onBatchUnlinkSchedule}
       onBatchDelete={onBatchDelete}
+      onSetTransfer={onSetTransfer}
       {...props}
     />
   );

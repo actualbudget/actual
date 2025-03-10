@@ -11,7 +11,11 @@ const debug = createDebug('actual:config');
 const debugSensitive = createDebug('actual-sensitive:config');
 
 const projectRoot = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
-const defaultDataDir = fs.existsSync('./data') ? './data' : projectRoot;
+const defaultDataDir = process.env.ACTUAL_DATA_DIR
+  ? process.env.ACTUAL_DATA_DIR
+  : fs.existsSync('/data')
+    ? '/data'
+    : projectRoot;
 
 debug(`Project root: '${projectRoot}'`);
 
@@ -54,14 +58,14 @@ const configSchema = convict({
   dataDir: {
     doc: 'Default data directory.',
     format: String,
-    default: defaultDataDir,
+    default: process.env.NODE_ENV === 'test' ? projectRoot : defaultDataDir,
     env: 'ACTUAL_DATA_DIR',
   },
   port: {
     doc: 'Port to run the server on.',
     format: 'port',
-    default: 5006,
-    env: ['ACTUAL_PORT', 'PORT'],
+    default: process.env.PORT ? process.env.PORT : 5006,
+    env: 'ACTUAL_PORT',
   },
   hostname: {
     doc: 'Server hostname.',
@@ -75,7 +79,7 @@ const configSchema = convict({
     default:
       process.env.NODE_ENV === 'test'
         ? path.join(projectRoot, 'test-server-files')
-        : path.join(projectRoot, 'server-files'),
+        : path.join(defaultDataDir, 'server-files'),
     env: 'ACTUAL_SERVER_FILES',
   },
   userFiles: {
@@ -84,7 +88,7 @@ const configSchema = convict({
     default:
       process.env.NODE_ENV === 'test'
         ? path.join(projectRoot, 'test-user-files')
-        : path.join(projectRoot, 'user-files'),
+        : path.join(defaultDataDir, 'user-files'),
     env: 'ACTUAL_USER_FILES',
   },
   webRoot: {

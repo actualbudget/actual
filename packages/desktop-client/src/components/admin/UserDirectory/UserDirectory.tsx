@@ -13,10 +13,12 @@ import { Trans, useTranslation } from 'react-i18next';
 import { Button } from '@actual-app/components/button';
 import { Stack } from '@actual-app/components/stack';
 import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { addNotification, signOut } from 'loot-core/client/actions';
-import { pushModal } from 'loot-core/client/actions/modals';
+import { signOut } from 'loot-core/client/actions';
+import { pushModal } from 'loot-core/client/modals/modalsSlice';
+import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import * as undo from 'loot-core/platform/client/undo';
 import {
@@ -26,10 +28,9 @@ import {
 
 import { SelectedProvider, useSelected } from '../../../hooks/useSelected';
 import { useDispatch } from '../../../redux';
-import { theme } from '../../../style';
+import { InfiniteScrollWrapper } from '../../common/InfiniteScrollWrapper';
 import { Link } from '../../common/Link';
 import { Search } from '../../common/Search';
-import { SimpleTable } from '../../common/SimpleTable';
 
 import { UserDirectoryHeader } from './UserDirectoryHeader';
 import { UserDirectoryRow } from './UserDirectoryRow';
@@ -123,11 +124,13 @@ function UserDirectoryContent({
     if ('error' in loadedUsers) {
       dispatch(
         addNotification({
-          type: 'error',
-          id: 'error',
-          title: t('Error getting users'),
-          sticky: true,
-          message: getUserDirectoryErrors(loadedUsers.error),
+          notification: {
+            type: 'error',
+            id: 'error',
+            title: t('Error getting users'),
+            sticky: true,
+            message: getUserDirectoryErrors(loadedUsers.error),
+          },
         }),
       );
       setLoading(false);
@@ -166,24 +169,28 @@ function UserDirectoryContent({
       if (error === 'token-expired') {
         dispatch(
           addNotification({
-            type: 'error',
-            id: 'login-expired',
-            title: t('Login expired'),
-            sticky: true,
-            message: getUserDirectoryErrors(error),
-            button: {
-              title: t('Go to login'),
-              action: () => dispatch(signOut()),
+            notification: {
+              type: 'error',
+              id: 'login-expired',
+              title: t('Login expired'),
+              sticky: true,
+              message: getUserDirectoryErrors(error),
+              button: {
+                title: t('Go to login'),
+                action: () => dispatch(signOut()),
+              },
             },
           }),
         );
       } else {
         dispatch(
           addNotification({
-            type: 'error',
-            title: t('Something happened while deleting users'),
-            sticky: true,
-            message: getUserDirectoryErrors(error),
+            notification: {
+              type: 'error',
+              title: t('Something happened while deleting users'),
+              sticky: true,
+              message: getUserDirectoryErrors(error),
+            },
           }),
         );
       }
@@ -204,11 +211,16 @@ function UserDirectoryContent({
   const onEditUser = useCallback(
     user => {
       dispatch(
-        pushModal('edit-user', {
-          user,
-          onSave: async () => {
-            await loadUsers();
-            setLoading(false);
+        pushModal({
+          modal: {
+            name: 'edit-user',
+            options: {
+              user,
+              onSave: async () => {
+                await loadUsers();
+                setLoading(false);
+              },
+            },
           },
         }),
       );
@@ -225,11 +237,16 @@ function UserDirectoryContent({
     };
 
     dispatch(
-      pushModal('edit-user', {
-        user,
-        onSave: async () => {
-          await loadUsers();
-          setLoading(false);
+      pushModal({
+        modal: {
+          name: 'edit-user',
+          options: {
+            user,
+            onSave: async () => {
+              await loadUsers();
+              setLoading(false);
+            },
+          },
         },
       }),
     );
@@ -282,11 +299,7 @@ function UserDirectoryContent({
 
         <View style={{ flex: 1 }}>
           <UserDirectoryHeader />
-          <SimpleTable
-            loadMore={loadMore}
-            // Hide the last border of the item in the table
-            style={{ marginBottom: -1 }}
-          >
+          <InfiniteScrollWrapper loadMore={loadMore}>
             {filteredUsers.length === 0 ? (
               <EmptyMessage text={t('No users')} style={{ marginTop: 15 }} />
             ) : (
@@ -298,7 +311,7 @@ function UserDirectoryContent({
                 onEditUser={onEditUser}
               />
             )}
-          </SimpleTable>
+          </InfiniteScrollWrapper>
         </View>
         <View
           style={{
