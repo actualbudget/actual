@@ -532,7 +532,7 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
     return file.state !== 'remote';
   }
 
-  // Filter out the current file
+  // Filter out the open file
   const files = id
     ? allFiles.filter(file => !isNonRemoteFile(file) || file.id !== id)
     : allFiles;
