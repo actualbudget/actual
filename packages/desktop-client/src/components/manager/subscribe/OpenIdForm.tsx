@@ -3,6 +3,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { useLocation, type Location } from 'react-router-dom';
 
 import { ButtonWithLoading } from '@actual-app/components/button';
+import { BigInput, Input, type InputProps } from '@actual-app/components/input';
 import { Menu } from '@actual-app/components/menu';
 import { Select } from '@actual-app/components/select';
 import { Stack } from '@actual-app/components/stack';
@@ -11,13 +12,9 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
-import { send } from 'loot-core/platform/client/fetch';
-import { type Handlers } from 'loot-core/types/handlers';
 import { type OpenIdConfig } from 'loot-core/types/models/openid';
 
 import { useDispatch } from '../../../redux';
-import { ResponsiveInput } from '../../common/Input';
 import { Link } from '../../common/Link';
 import { FormField, FormLabel } from '../../forms';
 import { useResponsive } from '../../responsive/ResponsiveProvider';
@@ -53,7 +50,7 @@ export function OpenIdForm({
   openIdData,
 }: OpenIdFormProps) {
   const { t } = useTranslation();
-  const dispatch = useDispatch();  const { isNarrowWidth } = useResponsive();
+  const { isNarrowWidth } = useResponsive();
   const [issuer, setIssuer] = useState('');
   const [clientId, setClientId] = useState('');
   const [clientSecret, setClientSecret] = useState('');
@@ -436,4 +433,10 @@ function OpenIdProviderSelector({
       />
     </FormField>
   );
+}
+
+export function ResponsiveInput(props: InputProps) {
+  const { isNarrowWidth } = useResponsive();
+
+  return isNarrowWidth ? <BigInput {...props} /> : <Input {...props} />;
 }

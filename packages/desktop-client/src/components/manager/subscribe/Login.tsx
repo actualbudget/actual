@@ -5,9 +5,9 @@ import { useSearchParams } from 'react-router-dom';
 
 import { Button, ButtonWithLoading } from '@actual-app/components/button';
 import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
+import { SvgCheveronDown } from '@actual-app/components/icons/v1';
 import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
-import { Select } from '@actual-app/components/select';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
@@ -19,16 +19,14 @@ import { isElectron } from 'loot-core/shared/environment';
 import { type OpenIdConfig } from 'loot-core/types/models/openid';
 
 import { useNavigate } from '../../../hooks/useNavigate';
-import { SvgCheveronDown } from '../../../icons/v1';
 import { useDispatch } from '../../../redux';
 import { warningBackground } from '../../../style/themes/dark';
-import { ResponsiveInput } from '../../common/Input';
 import { Link } from '../../common/Link';
 import { useResponsive } from '../../responsive/ResponsiveProvider';
 import { useAvailableLoginMethods, useLoginMethod } from '../../ServerContext';
 
 import { useBootstrapped, Title } from './common';
-import { OpenIdForm } from './OpenIdForm';
+import { OpenIdForm, ResponsiveInput } from './OpenIdForm';
 
 function PasswordLogin({ setError, dispatch }) {
   const [password, setPassword] = useState('');
@@ -110,6 +108,7 @@ function OpenIdLogin({ setError }) {
   }
 
   useEffect(() => {
+    debugger;
     send('owner-created').then(created => setWarnMasterCreation(!created));
   }, []);
 

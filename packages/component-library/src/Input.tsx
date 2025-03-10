@@ -101,9 +101,3 @@ export function BigInput(props: InputProps) {
     />
   );
 }
-
-export function ResponsiveInput(props: InputProps) {
-  const { isNarrowWidth } = useResponsive();
-
-  return isNarrowWidth ? <BigInput {...props} /> : <Input {...props} />;
-}
