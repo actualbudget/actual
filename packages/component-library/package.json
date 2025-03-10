@@ -7,7 +7,7 @@
   },
   "dependencies": {
     "@emotion/css": "^11.13.4",
-    "react-aria-components": "^1.4.1",
+    "react-aria-components": "^1.7.0",
     "usehooks-ts": "^3.0.1"
   },
   "devDependencies": {
