@@ -1,5 +1,5 @@
 import { type DragItem } from 'react-aria';
-import { DropIndicator, ListBox, useDragAndDrop } from 'react-aria-components';
+import { DropIndicator, GridList, useDragAndDrop } from 'react-aria-components';
 import { useTranslation } from 'react-i18next';
 
 import { theme } from '@actual-app/components/theme';
@@ -108,7 +108,7 @@ export function IncomeCategoryList({
   });
 
   return (
-    <ListBox
+    <GridList
       aria-label={t('Income categories')}
       items={categories}
       dragAndDropHooks={dragAndDropHooks}
@@ -122,6 +122,6 @@ export function IncomeCategoryList({
           onBudgetAction={onBudgetAction}
         />
       )}
-    </ListBox>
+    </GridList>
   );
 }
