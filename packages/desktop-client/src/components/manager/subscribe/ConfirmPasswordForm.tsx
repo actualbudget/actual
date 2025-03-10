@@ -95,7 +95,11 @@ export function ConfirmPasswordForm({
   );
 }
 
-export function ConfirmOldPasswordForm({ buttons, onSetPassword }) {
+export function ConfirmOldPasswordForm({
+  buttons,
+  onSetPassword,
+  style = null,
+}) {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -122,6 +126,7 @@ export function ConfirmOldPasswordForm({ buttons, onSetPassword }) {
         flexDirection: 'column',
         alignItems: 'stretch',
         marginTop: 30,
+        ...style,
       }}
     >
       <BigInput
