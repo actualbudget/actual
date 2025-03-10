@@ -52,9 +52,13 @@ import { SelectedTransactionsButton } from '../transactions/SelectedTransactions
 import { type TableRef } from './Account';
 import { Balances } from './Balance';
 import { ReconcilingMessage, ReconcileMenu } from './Reconcile';
+import { useFeatureFlag } from '../../hooks/useFeatureFlag';
+import { SvgChart, SvgList } from '@actual-app/components/icons/v1';
 
 type AccountHeaderProps = {
   tableRef: TableRef;
+  tab: 'transactions' | 'holdings';
+  setTab: (tab: 'transactions' | 'holdings') => void;
   editingName: boolean;
   isNameEditable: boolean;
   workingHard: boolean;
@@ -131,6 +135,8 @@ type AccountHeaderProps = {
 
 export function AccountHeader({
   tableRef,
+  tab,
+  setTab,
   editingName,
   isNameEditable,
   workingHard,
@@ -188,6 +194,19 @@ export function AccountHeader({
   onMakeAsNonSplitTransactions,
 }: AccountHeaderProps) {
   const { t } = useTranslation();
+
+  const isInvestmentsEnabled = useFeatureFlag('investmentAccounts');
+  const canShowHoldings =
+    account?.type === 'investment' && isInvestmentsEnabled;
+  const showHoldings = canShowHoldings && tab === 'holdings';
+  const showTransactions = !showHoldings;
+  function onSetHoldingsTab() {
+    onClearFilters();
+    setTab('holdings');
+  }
+  function onSetTransactionsTab() {
+    setTab('transactions');
+  }
 
   const [reconcileOpen, setReconcileOpen] = useState(false);
   const searchInput = useRef<HTMLInputElement>(null);
@@ -328,7 +347,7 @@ export function AccountHeader({
             </Button>
           )}
 
-          {account && !account.closed && (
+          {account && !account.closed && showTransactions && (
             <Button variant="bare" onPress={onImport}>
               <SvgDownloadThickBottom
                 width={13}
@@ -339,16 +358,33 @@ export function AccountHeader({
             </Button>
           )}
 
-          {!showEmptyMessage && (
+          {!showEmptyMessage && showTransactions && (
             <Button variant="bare" onPress={onAddTransaction}>
               <SvgAdd width={10} height={10} style={{ marginRight: 3 }} />
               <Trans>Add New</Trans>
             </Button>
           )}
-          <View style={{ flexShrink: 0 }}>
-            {/* @ts-expect-error fix me */}
-            <FilterButton onApply={onApplyFilter} />
-          </View>
+
+          {showTransactions && (
+            <View style={{ flexShrink: 0 }}>
+              {/* @ts-expect-error fix me */}
+              <FilterButton onApply={onApplyFilter} />
+            </View>
+          )}
+
+          {showTransactions && canShowHoldings && (
+            <Button variant="bare" onPress={onSetHoldingsTab}>
+              <SvgChart width={10} height={10} style={{ marginRight: 3 }} />
+              <Trans>Holdings</Trans>
+            </Button>
+          )}
+          {showHoldings && (
+            <Button variant="bare" onPress={onSetTransactionsTab}>
+              <SvgList width={10} height={10} style={{ marginRight: 3 }} />
+              <Trans>Transactions</Trans>
+            </Button>
+          )}
+
           <View style={{ flex: 1 }} />
           <Search
             placeholder={t('Search')}
