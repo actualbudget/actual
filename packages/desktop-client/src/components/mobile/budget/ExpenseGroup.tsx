@@ -2,6 +2,8 @@ import { useMemo, useRef } from 'react';
 
 import { Button } from '@actual-app/components/button';
 import { Card } from '@actual-app/components/card';
+import { SvgExpandArrow } from '@actual-app/components/icons/v0';
+import { SvgCheveronRight } from '@actual-app/components/icons/v1';
 import { type CSSProperties, styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
@@ -14,8 +16,6 @@ import * as monthUtils from 'loot-core/shared/months';
 import { type CategoryGroupEntity } from 'loot-core/types/models';
 
 import { useSyncedPref } from '../../../hooks/useSyncedPref';
-import { SvgExpandArrow } from '../../../icons/v0';
-import { SvgCheveronRight } from '../../../icons/v1';
 import { PrivacyFilter } from '../../PrivacyFilter';
 import { CellValue } from '../../spreadsheet/CellValue';
 import { useFormat } from '../../spreadsheet/useFormat';
@@ -140,43 +140,6 @@ function ExpenseGroupHeader({
     </ListItem>
   );
 }
-
-// function ExpenseGroupHeader2({
-//   group,
-//   month,
-//   onEdit,
-//   isCollapsed,
-//   onToggleCollapse,
-//   style,
-// }: ExpenseGroupHeaderProps) {
-//   const listItemRef = useRef<HTMLDivElement | null>(null);
-
-//   return (
-//     <ListItem
-//       style={{
-//         flexDirection: 'row',
-//         justifyContent: 'space-between',
-//         alignItems: 'center',
-//         opacity: !!group.hidden ? 0.5 : undefined,
-//         paddingLeft: 0,
-//         backgroundColor: monthUtils.isCurrentMonth(month)
-//           ? theme.budgetHeaderCurrentMonth
-//           : theme.budgetHeaderOtherMonth,
-//         ...style,
-//       }}
-//       innerRef={listItemRef}
-//       data-testid="category-group-row"
-//     >
-//       <ExpenseGroupName
-//         group={group}
-//         onEdit={onEdit}
-//         isCollapsed={isCollapsed}
-//         onToggleCollapse={onToggleCollapse}
-//       />
-//       <ExpenseGroupCells group={group} />
-//     </ListItem>
-//   );
-// }
 
 type ExpenseGroupNameProps = {
   group: CategoryGroupEntity;
