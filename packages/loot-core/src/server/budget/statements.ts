@@ -28,7 +28,9 @@ export type CategoryWithTemplateNote = {
 export async function getCategoriesWithTemplateNotes(): Promise<
   CategoryWithTemplateNote[]
 > {
-  return await db.all(
+  return await db.all<
+    Pick<db.DbCategory, 'id' | 'name'> & Pick<db.DbNote, 'note'>
+  >(
     `
       SELECT c.id AS id, c.name as name, n.note AS note
       FROM notes n
@@ -41,8 +43,19 @@ export async function getCategoriesWithTemplateNotes(): Promise<
   );
 }
 
-export async function getActiveSchedules(): Promise<DbSchedule[]> {
-  return await db.all(
+export async function getActiveSchedules() {
+  return await db.all<
+    Pick<
+      DbSchedule,
+      | 'id'
+      | 'rule'
+      | 'active'
+      | 'completed'
+      | 'posts_transaction'
+      | 'tombstone'
+      | 'name'
+    >
+  >(
     'SELECT id, rule, active, completed, posts_transaction, tombstone, name from schedules WHERE name NOT NULL AND tombstone = 0',
   );
 }
