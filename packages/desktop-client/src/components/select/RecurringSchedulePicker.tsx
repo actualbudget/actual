@@ -2,6 +2,7 @@ import {
   type CSSProperties,
   type Dispatch,
   useEffect,
+  useMemo,
   useReducer,
   useRef,
   useState,
@@ -9,11 +10,14 @@ import {
 import { useTranslation, Trans } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import { SvgAdd, SvgSubtract } from '@actual-app/components/icons/v0';
 import { InitialFocus } from '@actual-app/components/initial-focus';
 import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
+import { Select } from '@actual-app/components/select';
 import { Stack } from '@actual-app/components/stack';
 import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import { sendCatch } from 'loot-core/platform/client/fetch';
@@ -26,10 +30,8 @@ import {
 } from 'loot-core/types/util';
 
 import { useDateFormat } from '../../hooks/useDateFormat';
-import { SvgAdd, SvgSubtract } from '../../icons/v0';
-import { theme } from '../../style';
+import { useLocale } from '../../hooks/useLocale';
 import { Input } from '../common/Input';
-import { Select } from '../common/Select';
 import { Checkbox } from '../forms';
 
 import { DateSelect } from './DateSelect';
@@ -240,6 +242,7 @@ function SchedulePreview({
 }: {
   previewDates: string[] | string;
 }) {
+  const locale = useLocale();
   const dateFormat = (useDateFormat() || 'MM/dd/yyyy')
     .replace('MM', 'M')
     .replace('dd', 'd');
@@ -254,12 +257,14 @@ function SchedulePreview({
   } else {
     content = (
       <View>
-        <Text style={{ fontWeight: 600 }}>Upcoming dates</Text>
+        <Text style={{ fontWeight: 600 }}>
+          <Trans>Upcoming dates</Trans>
+        </Text>
         <Stack direction="row" spacing={4} style={{ marginTop: 10 }}>
           {previewDates.map((d, idx) => (
             <View key={idx}>
-              <Text>{monthUtils.format(d, dateFormat)}</Text>
-              <Text>{monthUtils.format(d, 'EEEE')}</Text>
+              <Text>{monthUtils.format(d, dateFormat, locale)}</Text>
+              <Text>{monthUtils.format(d, 'EEEE', locale)}</Text>
             </View>
           ))}
         </Stack>
@@ -409,10 +414,10 @@ function RecurringScheduleTooltip({
         config: unparseConfig(config),
         count: 4,
       });
-      setPreviewDates(error ? 'Invalid rule' : data);
+      setPreviewDates(error ? t('Invalid rule') : data);
     }
     run();
-  }, [config]);
+  }, [config, t]);
 
   if (previewDates == null) {
     return null;
@@ -427,7 +432,7 @@ function RecurringScheduleTooltip({
         <InitialFocus>
           <DateSelect
             id="start"
-            inputProps={{ placeholder: 'Start Date' }}
+            inputProps={{ placeholder: t('Start Date') }}
             value={config.start}
             onSelect={value => updateField('start', value)}
             containerProps={{ style: { width: 100 } }}
@@ -437,9 +442,9 @@ function RecurringScheduleTooltip({
         <Select
           id="repeat_end_dropdown"
           options={[
-            ['never', 'indefinitely'],
-            ['after_n_occurrences', 'for'],
-            ['on_date', 'until'],
+            ['never', t('indefinitely')],
+            ['after_n_occurrences', t('for')],
+            ['on_date', t('until')],
           ]}
           value={config.endMode}
           onChange={value => updateField('endMode', value)}
@@ -454,7 +459,11 @@ function RecurringScheduleTooltip({
               onChange={e => updateField('endOccurrences', e.target.value)}
               defaultValue={config.endOccurrences || 1}
             />
-            <Text>occurrence{config.endOccurrences === '1' ? '' : 's'}</Text>
+            {config.endOccurrences === '1' ? (
+              <Trans>ocurrence</Trans>
+            ) : (
+              <Trans>ocurrences</Trans>
+            )}
           </>
         )}
         {config.endMode === 'on_date' && (
@@ -540,8 +549,8 @@ function RecurringScheduleTooltip({
             <Select
               id="solve_dropdown"
               options={[
-                ['before', 'before'],
-                ['after', 'after'],
+                ['before', t('before')],
+                ['after', t('after')],
               ]}
               value={state.config.weekendSolveMode}
               onChange={value => dispatch({ type: 'set-weekend-solve', value })}
@@ -591,11 +600,17 @@ export function RecurringSchedulePicker({
   const triggerRef = useRef(null);
   const [isOpen, setIsOpen] = useState(false);
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
+  const locale = useLocale();
 
   function onSave(config: RecurConfig) {
     onChange(config);
     setIsOpen(false);
   }
+
+  const recurringDescription = useMemo(
+    () => getRecurringDescription(value, dateFormat, locale),
+    [locale, value, dateFormat],
+  );
 
   return (
     <View>
@@ -604,9 +619,7 @@ export function RecurringSchedulePicker({
         style={{ textAlign: 'left', ...buttonStyle }}
         onPress={() => setIsOpen(true)}
       >
-        {value
-          ? getRecurringDescription(value, dateFormat)
-          : t('No recurring date')}
+        {value ? recurringDescription : t('No recurring date')}
       </Button>
 
       <Popover

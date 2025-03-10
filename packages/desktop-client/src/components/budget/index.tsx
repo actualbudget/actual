@@ -5,7 +5,8 @@ import { useTranslation } from 'react-i18next';
 import { styles } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
 
-import { addNotification, pushModal } from 'loot-core/client/actions';
+import { pushModal } from 'loot-core/client/modals/modalsSlice';
+import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
 import {
   applyBudgetAction,
   createCategory,
@@ -147,11 +148,13 @@ function BudgetInner(props: BudgetInnerProps) {
   const categoryNameAlreadyExistsNotification = name => {
     dispatch(
       addNotification({
-        type: 'error',
-        message: t(
-          'Category “{{name}}” already exists in group (it may be hidden)',
-          { name },
-        ),
+        notification: {
+          type: 'error',
+          message: t(
+            'Category “{{name}}” already exists in group (it may be hidden)',
+            { name },
+          ),
+        },
       }),
     );
   };
@@ -191,12 +194,19 @@ function BudgetInner(props: BudgetInnerProps) {
 
     if (mustTransfer) {
       dispatch(
-        pushModal('confirm-category-delete', {
-          category: id,
-          onDelete: transferCategory => {
-            if (id !== transferCategory) {
-              dispatch(deleteCategory({ id, transferId: transferCategory }));
-            }
+        pushModal({
+          modal: {
+            name: 'confirm-category-delete',
+            options: {
+              category: id,
+              onDelete: transferCategory => {
+                if (id !== transferCategory) {
+                  dispatch(
+                    deleteCategory({ id, transferId: transferCategory }),
+                  );
+                }
+              },
+            },
           },
         }),
       );
@@ -226,10 +236,15 @@ function BudgetInner(props: BudgetInnerProps) {
 
     if (mustTransfer) {
       dispatch(
-        pushModal('confirm-category-delete', {
-          group: id,
-          onDelete: transferCategory => {
-            dispatch(deleteGroup({ id, transferId: transferCategory }));
+        pushModal({
+          modal: {
+            name: 'confirm-category-delete',
+            options: {
+              group: id,
+              onDelete: transferCategory => {
+                dispatch(deleteGroup({ id, transferId: transferCategory }));
+              },
+            },
           },
         }),
       );

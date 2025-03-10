@@ -1,0 +1,9 @@
+export { SvgAdd } from './Add';
+export { SvgDelete } from './Delete';
+export { SvgExpandArrow } from './ExpandArrow';
+export { SvgLeftArrow2 } from './LeftArrow2';
+export { SvgMath } from './Math';
+export { SvgRightArrow2 } from './RightArrow2';
+export { SvgSubtract } from './Subtract';
+export { SvgMerge } from './Merge';
+export { SvgSplit } from './Split';

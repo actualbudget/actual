@@ -12,10 +12,11 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@actual-app/components/button';
 import { Stack } from '@actual-app/components/stack';
 import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { pushModal } from 'loot-core/client/actions/modals';
 import { useSchedules } from 'loot-core/client/data-hooks/schedules';
+import { pushModal } from 'loot-core/client/modals/modalsSlice';
 import { initiallyLoadPayees } from 'loot-core/client/queries/queriesSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import * as undo from 'loot-core/platform/client/undo';
@@ -30,11 +31,10 @@ import { useCategories } from '../hooks/useCategories';
 import { usePayees } from '../hooks/usePayees';
 import { useSelected, SelectedProvider } from '../hooks/useSelected';
 import { useDispatch } from '../redux';
-import { theme } from '../style';
 
+import { InfiniteScrollWrapper } from './common/InfiniteScrollWrapper';
 import { Link } from './common/Link';
 import { Search } from './common/Search';
-import { SimpleTable } from './common/SimpleTable';
 import { RulesHeader } from './rules/RulesHeader';
 import { RulesList } from './rules/RulesList';
 
@@ -184,7 +184,7 @@ export function ManageRules({
     }
 
     if (payeeId) {
-      undo.setUndoState('openModal', 'manage-rules');
+      undo.setUndoState('openModal', { name: 'manage-rules', options: {} });
     }
 
     loadData();
@@ -225,11 +225,16 @@ export function ManageRules({
 
   const onEditRule = useCallback(rule => {
     dispatch(
-      pushModal('edit-rule', {
-        rule,
-        onSave: async () => {
-          await loadRules();
-          setLoading(false);
+      pushModal({
+        modal: {
+          name: 'edit-rule',
+          options: {
+            rule,
+            onSave: async () => {
+              await loadRules();
+              setLoading(false);
+            },
+          },
         },
       }),
     );
@@ -258,11 +263,16 @@ export function ManageRules({
     };
 
     dispatch(
-      pushModal('edit-rule', {
-        rule,
-        onSave: async () => {
-          await loadRules();
-          setLoading(false);
+      pushModal({
+        modal: {
+          name: 'edit-rule',
+          options: {
+            rule,
+            onSave: async () => {
+              await loadRules();
+              setLoading(false);
+            },
+          },
         },
       }),
     );
@@ -312,11 +322,7 @@ export function ManageRules({
         </View>
         <View style={{ flex: 1 }}>
           <RulesHeader />
-          <SimpleTable
-            loadMore={loadMore}
-            // Hide the last border of the item in the table
-            style={{ marginBottom: -1 }}
-          >
+          <InfiniteScrollWrapper loadMore={loadMore}>
             {filteredRules.length === 0 ? (
               <EmptyMessage text={t('No rules')} style={{ marginTop: 15 }} />
             ) : (
@@ -329,7 +335,7 @@ export function ManageRules({
                 onDeleteRule={rule => onDeleteRule(rule.id)}
               />
             )}
-          </SimpleTable>
+          </InfiniteScrollWrapper>
         </View>
         <View
           style={{

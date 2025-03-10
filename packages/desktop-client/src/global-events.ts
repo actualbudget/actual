@@ -1,14 +1,16 @@
 // @ts-strict-ignore
+import { loadPrefs } from 'loot-core/client/actions';
+import { setAppState } from 'loot-core/client/app/appSlice';
+import { closeBudgetUI } from 'loot-core/client/budgets/budgetsSlice';
+import {
+  closeModal,
+  pushModal,
+  replaceModal,
+} from 'loot-core/client/modals/modalsSlice';
 import {
   addGenericErrorNotification,
   addNotification,
-  closeModal,
-  loadPrefs,
-  pushModal,
-  replaceModal,
-} from 'loot-core/client/actions';
-import { setAppState } from 'loot-core/client/app/appSlice';
-import { closeBudgetUI } from 'loot-core/client/budgets/budgetsSlice';
+} from 'loot-core/client/notifications/notificationsSlice';
 import {
   getAccounts,
   getCategories,
@@ -29,16 +31,23 @@ export function handleGlobalEvents(store: AppStore) {
     ({ orphanedIds, updatedPayeeIds }) => {
       // Right now, it prompts to merge into the first payee
       store.dispatch(
-        pushModal('merge-unused-payees', {
-          payeeIds: orphanedIds,
-          targetPayeeId: updatedPayeeIds[0],
+        pushModal({
+          modal: {
+            name: 'merge-unused-payees',
+            options: {
+              payeeIds: orphanedIds,
+              targetPayeeId: updatedPayeeIds[0],
+            },
+          },
         }),
       );
     },
   );
 
   const unlistenSchedulesOffline = listen('schedules-offline', () => {
-    store.dispatch(pushModal('schedule-posts-offline-notification'));
+    store.dispatch(
+      pushModal({ modal: { name: 'schedule-posts-offline-notification' } }),
+    );
   });
 
   const unlistenSync = sharedListeners.listenForSyncEvent(store);
@@ -79,9 +88,9 @@ export function handleGlobalEvents(store: AppStore) {
 
           if (
             modalStack.length === 0 ||
-            modalStack[modalStack.length - 1].name !== tagged.openModal
+            modalStack[modalStack.length - 1].name !== tagged.openModal.name
           ) {
-            store.dispatch(replaceModal(tagged.openModal));
+            store.dispatch(replaceModal({ modal: tagged.openModal }));
           }
         } else {
           store.dispatch(closeModal());
@@ -104,13 +113,15 @@ export function handleGlobalEvents(store: AppStore) {
   const unlistenFallbackWriteError = listen('fallback-write-error', () => {
     store.dispatch(
       addNotification({
-        type: 'error',
-        title: 'Unable to save changes',
-        sticky: true,
-        message:
-          'This browser only supports using the app in one tab at a time, ' +
-          'and another tab has opened the app. No changes will be saved ' +
-          'from this tab; please close it and continue working in the other one.',
+        notification: {
+          type: 'error',
+          title: 'Unable to save changes',
+          sticky: true,
+          message:
+            'This browser only supports using the app in one tab at a time, ' +
+            'and another tab has opened the app. No changes will be saved ' +
+            'from this tab; please close it and continue working in the other one.',
+        },
       }),
     );
   });

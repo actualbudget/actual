@@ -8,10 +8,10 @@ import { InlineField } from '@actual-app/components/inline-field';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
-import { addNotification } from 'loot-core/client/actions';
 import { duplicateBudget } from 'loot-core/client/budgets/budgetsSlice';
+import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
+import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
 import { send } from 'loot-core/platform/client/fetch';
-import { type File } from 'loot-core/types/file';
 
 import { useDispatch } from '../../../redux';
 import { theme } from '../../../style';
@@ -23,22 +23,17 @@ import {
   ModalHeader,
 } from '../../common/Modal';
 
-type DuplicateFileProps = {
-  file: File;
-  managePage?: boolean;
-  loadBudget?: 'none' | 'original' | 'copy';
-  onComplete?: (event: {
-    status: 'success' | 'failed' | 'canceled';
-    error?: object;
-  }) => void;
-};
+type DuplicateFileModalProps = Extract<
+  ModalType,
+  { name: 'duplicate-budget' }
+>['options'];
 
 export function DuplicateFileModal({
   file,
   managePage,
   loadBudget = 'none',
   onComplete,
-}: DuplicateFileProps) {
+}: DuplicateFileModalProps) {
   const { t } = useTranslation();
   const fileEndingTranslation = ' - ' + t('copy');
   const [newName, setNewName] = useState(file.name + fileEndingTranslation);
@@ -93,8 +88,10 @@ export function DuplicateFileModal({
         );
         dispatch(
           addNotification({
-            type: 'message',
-            message: t('Duplicate file “{{newName}}” created.', { newName }),
+            notification: {
+              type: 'message',
+              message: t('Duplicate file “{{newName}}” created.', { newName }),
+            },
           }),
         );
         if (onComplete) onComplete({ status: 'success' });
@@ -104,8 +101,10 @@ export function DuplicateFileModal({
         else console.error('Failed to duplicate budget file:', e);
         dispatch(
           addNotification({
-            type: 'error',
-            message: t('Failed to duplicate budget file.'),
+            notification: {
+              type: 'error',
+              message: t('Failed to duplicate budget file.'),
+            },
           }),
         );
       } finally {

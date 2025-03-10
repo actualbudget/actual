@@ -9,6 +9,7 @@ import {
   type SummaryWidget,
 } from 'loot-core/types/models';
 
+import { useLocale } from '../../../hooks/useLocale';
 import { DateRange } from '../DateRange';
 import { LoadingIndicator } from '../LoadingIndicator';
 import { ReportCard } from '../ReportCard';
@@ -33,6 +34,7 @@ export function SummaryCard({
   onMetaChange,
   onRemove,
 }: SummaryCardProps) {
+  const locale = useLocale();
   const { t } = useTranslation();
   const [start, end] = calculateTimeRange(meta?.timeFrame, {
     start: monthUtils.dayFromDate(monthUtils.currentMonth()),
@@ -63,8 +65,9 @@ export function SummaryCard({
         meta?.conditions,
         meta?.conditionsOp,
         content,
+        locale,
       ),
-    [start, end, meta?.conditions, meta?.conditionsOp, content],
+    [start, end, meta?.conditions, meta?.conditionsOp, content, locale],
   );
 
   const data = useReport('summary', params);

@@ -12,7 +12,7 @@ import { TOKEN_EXPIRATION_NEVER } from '../util/validate-user.js';
 import { checkPassword } from './password.js';
 
 export async function bootstrapOpenId(configParameter) {
-  if (!('issuer' in configParameter) || !('discoveryURL' in configParameter)) {
+  if (!('issuer' in configParameter) && !('discoveryURL' in configParameter)) {
     return { error: 'missing-issuer-or-discoveryURL' };
   }
   if (!('client_id' in configParameter)) {
@@ -26,6 +26,13 @@ export async function bootstrapOpenId(configParameter) {
   }
 
   try {
+    //FOR BACKWARD COMPATIBLITY:
+    //If we don't put discoverURL into the issuer, it will break already enabled openid instances
+    if (configParameter.discoveryURL) {
+      configParameter.issuer = configParameter.discoveryURL;
+      delete configParameter.discoveryURL;
+    }
+
     await setupOpenIdClient(configParameter);
   } catch (err) {
     console.error('Error setting up OpenID client:', err);
@@ -51,14 +58,15 @@ export async function bootstrapOpenId(configParameter) {
 }
 
 async function setupOpenIdClient(configParameter) {
-  const issuer = configParameter.discoveryURL
-    ? await Issuer.discover(configParameter.discoveryURL)
-    : new Issuer({
-        issuer: configParameter.issuer.name,
-        authorization_endpoint: configParameter.issuer.authorization_endpoint,
-        token_endpoint: configParameter.issuer.token_endpoint,
-        userinfo_endpoint: configParameter.issuer.userinfo_endpoint,
-      });
+  const issuer =
+    typeof configParameter.issuer === 'string'
+      ? await Issuer.discover(configParameter.issuer)
+      : new Issuer({
+          issuer: configParameter.issuer.name,
+          authorization_endpoint: configParameter.issuer.authorization_endpoint,
+          token_endpoint: configParameter.issuer.token_endpoint,
+          userinfo_endpoint: configParameter.issuer.userinfo_endpoint,
+        });
 
   const client = new issuer.Client({
     client_id: configParameter.client_id,

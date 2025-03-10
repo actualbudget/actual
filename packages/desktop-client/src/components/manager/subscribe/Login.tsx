@@ -4,10 +4,13 @@ import { Trans, useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
 
 import { Button, ButtonWithLoading } from '@actual-app/components/button';
+import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
 import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
+import { Select } from '@actual-app/components/select';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import { loggedIn } from 'loot-core/client/actions/user';
@@ -16,10 +19,8 @@ import { isElectron } from 'loot-core/shared/environment';
 import { type OpenIdConfig } from 'loot-core/types/models/openid';
 
 import { useNavigate } from '../../../hooks/useNavigate';
-import { AnimatedLoading } from '../../../icons/AnimatedLoading';
 import { SvgCheveronDown } from '../../../icons/v1';
 import { useDispatch } from '../../../redux';
-import { theme } from '../../../style';
 import { warningBackground } from '../../../style/themes/dark';
 import { ResponsiveInput } from '../../common/Input';
 import { Link } from '../../common/Link';
@@ -293,6 +294,10 @@ export function Login() {
   const loginMethods = useAvailableLoginMethods();
   const loginMethodRef = useRef<HTMLButtonElement>(null);
   const [loginMethodMenuOpen, setLoginMethodMenuOpen] = useState(false);
+
+  useEffect(() => {
+    setMethod(defaultLoginMethod);
+  }, [defaultLoginMethod]);
 
   useEffect(() => {
     if (checked && !searchParams.has('error')) {

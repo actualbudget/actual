@@ -1,6 +1,5 @@
 // @ts-strict-ignore
 import { formatDistanceToNow } from 'date-fns';
-import * as locales from 'date-fns/locale';
 
 export function last<T>(arr: Array<T>) {
   return arr[arr.length - 1];
@@ -48,7 +47,7 @@ export function hasFieldsChanged<T extends object>(
 export type Diff<T extends { id: string }> = {
   added: T[];
   updated: Partial<T>[];
-  deleted: Partial<T>[];
+  deleted: Pick<T, 'id'>[];
 };
 
 export function applyChanges<T extends { id: string }>(
@@ -132,9 +131,9 @@ export function diffItems<T extends { id: string }>(
   const added: T[] = [];
   const updated: Partial<T>[] = [];
 
-  const deleted: Partial<T>[] = items
+  const deleted: Pick<T, 'id'>[] = items
     .filter(item => !newGrouped.has(item.id))
-    .map(item => ({ id: item.id }) as Partial<T>);
+    .map(item => ({ id: item.id }));
 
   newItems.forEach(newItem => {
     const item = grouped.get(newItem.id);
@@ -489,7 +488,7 @@ export function sortByKey<T>(arr: T[], key: keyof T): T[] {
 
 export function tsToRelativeTime(
   ts: string | null,
-  language: string,
+  locale: Locale,
   options: {
     capitalize: boolean;
   } = { capitalize: false },
@@ -497,9 +496,6 @@ export function tsToRelativeTime(
   if (!ts) return 'Unknown';
 
   const parsed = new Date(parseInt(ts, 10));
-  const locale =
-    locales[language.replace('-', '') as keyof typeof locales] ??
-    locales['enUS'];
 
   let distance = formatDistanceToNow(parsed, { addSuffix: true, locale });
 

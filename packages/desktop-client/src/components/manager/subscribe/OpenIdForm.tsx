@@ -4,17 +4,21 @@ import { useLocation, type Location } from 'react-router-dom';
 
 import { ButtonWithLoading } from '@actual-app/components/button';
 import { Menu } from '@actual-app/components/menu';
+import { Select } from '@actual-app/components/select';
 import { Stack } from '@actual-app/components/stack';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
+import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
+import { send } from 'loot-core/platform/client/fetch';
+import { type Handlers } from 'loot-core/types/handlers';
 import { type OpenIdConfig } from 'loot-core/types/models/openid';
 
-import { theme } from '../../../style';
+import { useDispatch } from '../../../redux';
 import { ResponsiveInput } from '../../common/Input';
 import { Link } from '../../common/Link';
-import { Select } from '../../common/Select';
 import { FormField, FormLabel } from '../../forms';
 import { useResponsive } from '../../responsive/ResponsiveProvider';
 import { useServerURL } from '../../ServerContext';
@@ -49,7 +53,7 @@ export function OpenIdForm({
   openIdData,
 }: OpenIdFormProps) {
   const { t } = useTranslation();
-  const { isNarrowWidth } = useResponsive();
+  const dispatch = useDispatch();  const { isNarrowWidth } = useResponsive();
   const [issuer, setIssuer] = useState('');
   const [clientId, setClientId] = useState('');
   const [clientSecret, setClientSecret] = useState('');
@@ -116,7 +120,7 @@ export function OpenIdForm({
     setLoading(true);
     await onSetOpenId({
       selectedProvider: providerName,
-      issuer: issuer ?? '',
+      discoveryURL: issuer ?? '',
       client_id: clientId ?? '',
       client_secret: clientSecret ?? '',
       server_hostname: serverUrl ?? '',
