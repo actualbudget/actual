@@ -7,6 +7,7 @@ import { Button, ButtonWithLoading } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
 import { SvgCheveronDown } from '@actual-app/components/icons/v1';
+import { ResponsiveInput } from '@actual-app/components/input';
 import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
 import { styles } from '@actual-app/components/styles';
@@ -27,7 +28,6 @@ import { useAvailableLoginMethods, useLoginMethod } from '../../ServerContext';
 
 import { useBootstrapped, Title } from './common';
 import { OpenIdForm } from './OpenIdForm';
-import { ResponsiveInput } from '@actual-app/components/input';
 
 function PasswordLogin({ setError, dispatch }) {
   const [password, setPassword] = useState('');
