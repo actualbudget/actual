@@ -173,7 +173,7 @@ export const createAccount = createAppAsyncThunk(
       name,
       balance,
       offBudget,
-      type,
+      type: type ?? null,
     });
     return id;
   },

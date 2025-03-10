@@ -78,6 +78,7 @@ export const schema = {
   },
   accounts: {
     id: f('id'),
+    type: f('string'),
     name: f('string', { required: true }),
     offbudget: f('boolean'),
     closed: f('boolean'),
