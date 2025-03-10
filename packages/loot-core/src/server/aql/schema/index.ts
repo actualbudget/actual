@@ -57,6 +57,17 @@ export const schema = {
     // subtransactions is a special field added if the table has the
     // `splits: grouped` option
   },
+  holdings: {
+    id: f('id'),
+    account: f('id', { ref: 'accounts', required: true }),
+    symbol: f('string', { required: true }),
+    title: f('string'),
+    shares: f('integer', { default: 0, required: true }),
+    market_value: f('integer', { default: 0, required: true }),
+    purchase_price: f('integer', { default: 0, required: true }),
+    imported_id: f('string'),
+    raw_synced_data: f('string'),
+  },
   payees: {
     id: f('id'),
     name: f('string', { required: true }),

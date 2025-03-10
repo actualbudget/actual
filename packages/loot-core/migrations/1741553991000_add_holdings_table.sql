@@ -1,6 +1,6 @@
 CREATE TABLE holdings (
   id TEXT PRIMARY KEY,
-  acct TEXT,
+  account TEXT,
 
   symbol TEXT,
   title TEXT,
@@ -8,9 +8,9 @@ CREATE TABLE holdings (
   purchase_price INTEGER,
   market_value INTEGER,
 
-  financial_id TEXT,
+  imported_id TEXT,
   raw_synced_data TEXT,
 
   tombstone INTEGER DEFAULT 0,
-  FOREIGN KEY(acct) REFERENCES accounts(id)
+  FOREIGN KEY(account) REFERENCES accounts(id)
 );

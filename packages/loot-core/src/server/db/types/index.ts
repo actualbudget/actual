@@ -177,7 +177,7 @@ export type DbTransaction = {
 
 export type DbHolding = {
   id: string;
-  acct: DbAccount['id'];
+  account: DbAccount['id'];
 
   symbol: string;
   title?: string;
@@ -185,7 +185,7 @@ export type DbHolding = {
   purchase_price: number;
   market_value: number;
 
-  financial_id?: number;
+  imported_id?: number;
   raw_synced_data?: string | undefined;
 
   tombstone: 1 | 0;
