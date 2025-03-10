@@ -222,7 +222,7 @@ handlers['api/download-budget'] = async function ({ syncId, password }) {
 
   // Download the remote file (no need to perform a sync as the file will already be up-to-date)
   const result = await handlers['download-budget']({
-    fileId: remoteBudget.fileId,
+    cloudFileId: remoteBudget.fileId,
   });
   if (result.error) {
     console.log('Full error details', result.error);

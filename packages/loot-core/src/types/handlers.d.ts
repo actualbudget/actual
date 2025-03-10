@@ -1,6 +1,7 @@
 import type { AccountHandlers } from '../server/accounts/app';
 import type { AdminHandlers } from '../server/admin/types/handlers';
 import type { BudgetHandlers } from '../server/budget/types/handlers';
+import type { BudgetFileHandlers } from '../server/budgetfiles/app';
 import type { DashboardHandlers } from '../server/dashboard/types/handlers';
 import type { FiltersHandlers } from '../server/filters/types/handlers';
 import type { NotesHandlers } from '../server/notes/types/handlers';
@@ -30,6 +31,7 @@ export interface Handlers
     AdminHandlers,
     ToolsHandlers,
     AccountHandlers,
-    PayeesHandlers {}
+    PayeesHandlers,
+    BudgetFileHandlers {}
 
 export type HandlerFunctions = Handlers[keyof Handlers];

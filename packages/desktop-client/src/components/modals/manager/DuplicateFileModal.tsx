@@ -75,10 +75,6 @@ export function DuplicateFileModal({
         await dispatch(
           duplicateBudget({
             id: 'id' in file ? file.id : undefined,
-            cloudId:
-              sync === 'cloudSync' && 'cloudFileId' in file
-                ? file.cloudFileId
-                : undefined,
             oldName: file.name,
             newName,
             cloudSync: sync === 'cloudSync',
