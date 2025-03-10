@@ -172,11 +172,11 @@ function Footer({
   onEditField,
 }) {
   const [transaction, ...childTransactions] = transactions;
+  const emptySplitTransaction = childTransactions.find(t => t.amount === 0);
   const onClickRemainingSplit = () => {
     if (childTransactions.length === 0) {
       onSplit(transaction.id);
     } else {
-      const emptySplitTransaction = childTransactions.find(t => t.amount === 0);
       if (!emptySplitTransaction) {
         onAddSplit(transaction.id);
       } else {
@@ -205,6 +205,7 @@ function Footer({
           isDisabled={editingField}
           onPress={onClickRemainingSplit}
         >
+          {}
           <SvgSplit width={17} height={17} />
           <Text
             style={{
@@ -212,11 +213,26 @@ function Footer({
               marginLeft: 6,
             }}
           >
-            Amount left:{' '}
-            {integerToCurrency(
-              transaction.amount > 0
-                ? transaction.error.difference
-                : -transaction.error.difference,
+            {!emptySplitTransaction ? (
+              <>
+                <Trans>Add New Split</Trans>
+                {' - '}
+                {integerToCurrency(
+                  transaction.amount > 0
+                    ? transaction.error.difference
+                    : -transaction.error.difference,
+                )}{' '}
+                <Trans>left</Trans>
+              </>
+            ) : (
+              <>
+                <Trans>Amount left</Trans>:{' '}
+                {integerToCurrency(
+                  transaction.amount > 0
+                    ? transaction.error.difference
+                    : -transaction.error.difference,
+                )}
+              </>
             )}
           </Text>
         </Button>
@@ -268,7 +284,7 @@ function Footer({
               marginLeft: 6,
             }}
           >
-            Save changes
+            <Trans>Save changes</Trans>
           </Text>
         </Button>
       )}
