@@ -463,7 +463,7 @@ export function updateCategory(category) {
 export async function moveCategory(
   id: DbCategory['id'],
   groupId: DbCategoryGroup['id'],
-  targetId?: DbCategory['id'],
+  targetId: DbCategory['id'] | null,
 ) {
   if (!groupId) {
     throw new Error('moveCategory: groupId is required');
