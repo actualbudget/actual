@@ -43,6 +43,10 @@ async function saveSyncedPrefs({
   id: keyof SyncedPrefs;
   value: string | undefined;
 }) {
+  if (!id) {
+    return;
+  }
+
   await db.update('preferences', { id, value });
 }
 
@@ -59,30 +63,34 @@ async function getSyncedPrefs(): Promise<SyncedPrefs> {
 }
 
 async function saveGlobalPrefs(prefs: GlobalPrefs) {
-  if ('maxMonths' in prefs) {
+  if (!prefs) {
+    return 'ok';
+  }
+
+  if (prefs.maxMonths) {
     await asyncStorage.setItem('max-months', '' + prefs.maxMonths);
   }
-  if ('documentDir' in prefs) {
+  if (prefs.documentDir) {
     if (prefs.documentDir && (await fs.exists(prefs.documentDir))) {
       await asyncStorage.setItem('document-dir', prefs.documentDir);
     }
   }
-  if ('floatingSidebar' in prefs) {
+  if (prefs.floatingSidebar) {
     await asyncStorage.setItem('floating-sidebar', '' + prefs.floatingSidebar);
   }
-  if ('language' in prefs) {
+  if (prefs.language) {
     await asyncStorage.setItem('language', prefs.language);
   }
-  if ('theme' in prefs) {
+  if (prefs.theme) {
     await asyncStorage.setItem('theme', prefs.theme);
   }
-  if ('preferredDarkTheme' in prefs) {
+  if (prefs.preferredDarkTheme) {
     await asyncStorage.setItem(
       'preferred-dark-theme',
       prefs.preferredDarkTheme,
     );
   }
-  if ('serverSelfSignedCert' in prefs) {
+  if (prefs.serverSelfSignedCert) {
     await asyncStorage.setItem(
       'server-self-signed-cert',
       prefs.serverSelfSignedCert,
@@ -91,7 +99,7 @@ async function saveGlobalPrefs(prefs: GlobalPrefs) {
   return 'ok';
 }
 
-async function loadGlobalPrefs() {
+async function loadGlobalPrefs(): Promise<GlobalPrefs> {
   const [
     [, floatingSidebar],
     [, maxMonths],
@@ -113,7 +121,7 @@ async function loadGlobalPrefs() {
   ] as const);
   return {
     floatingSidebar: floatingSidebar === 'true',
-    maxMonths: stringToInteger(maxMonths || ''),
+    maxMonths: stringToInteger(maxMonths || '') || 1,
     documentDir: documentDir || getDefaultDocumentDir(),
     keyId: encryptKey && JSON.parse(encryptKey).id,
     language,
@@ -134,6 +142,10 @@ async function loadGlobalPrefs() {
 }
 
 async function saveMetadataPrefs(prefsToSet: MetadataPrefs) {
+  if (!prefsToSet) {
+    return 'ok';
+  }
+
   const { cloudFileId } = _getMetadataPrefs();
 
   // Need to sync the budget name on the server as well

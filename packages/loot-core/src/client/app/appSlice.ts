@@ -5,8 +5,8 @@ import { getUploadError } from '../../shared/errors';
 import { type AccountEntity } from '../../types/models';
 import { type AtLeastOne } from '../../types/util';
 import { syncAccounts } from '../accounts/accountsSlice';
-import { loadPrefs } from '../actions';
 import { pushModal } from '../modals/modalsSlice';
+import { loadPrefs } from '../prefs/prefsSlice';
 import { createAppAsyncThunk } from '../redux';
 
 const sliceName = 'app';
