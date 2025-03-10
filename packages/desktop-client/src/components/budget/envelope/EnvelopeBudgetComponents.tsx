@@ -25,6 +25,7 @@ import {
 } from 'loot-core/types/models';
 
 import { useContextMenu } from '../../../hooks/useContextMenu';
+import { useLocalPref } from '../../../hooks/useLocalPref';
 import { useUndo } from '../../../hooks/useUndo';
 import { type Binding, type SheetFields } from '../../spreadsheet';
 import { CellValue, CellValueText } from '../../spreadsheet/CellValue';
@@ -32,10 +33,12 @@ import { useSheetName } from '../../spreadsheet/useSheetName';
 import { useSheetValue } from '../../spreadsheet/useSheetValue';
 import { Row, Field, SheetCell, type SheetCellProps } from '../../table';
 import { BalanceWithCarryover } from '../BalanceWithCarryover';
+import { ProgressBar } from '../ProgressBar';
 import { makeAmountGrey } from '../util';
 
 import { BalanceMovementMenu } from './BalanceMovementMenu';
 import { BudgetMenu } from './BudgetMenu';
+import { useEnvelopeBudget } from './EnvelopeBudgetContext';
 
 export function useEnvelopeSheetName<
   FieldName extends SheetFields<'envelope-budget'>,
@@ -142,6 +145,7 @@ export const ExpenseGroupMonth = memo(function ExpenseGroupMonth({
   group,
 }: ExpenseGroupMonthProps) {
   const { id } = group;
+  const { setHoveredMonth } = useEnvelopeBudget();
 
   return (
     <View
@@ -152,6 +156,8 @@ export const ExpenseGroupMonth = memo(function ExpenseGroupMonth({
           ? theme.budgetHeaderCurrentMonth
           : theme.budgetHeaderOtherMonth,
       }}
+      onMouseOver={() => setHoveredMonth(month)}
+      onMouseOut={() => setHoveredMonth('')}
     >
       <EnvelopeSheetCell
         name="budgeted"
@@ -232,6 +238,8 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
   };
 
   const { showUndoNotification } = useUndo();
+  const [useProgressBars] = useLocalPref('budget.showProgressBars');
+  const { setHoveredMonth } = useEnvelopeBudget();
 
   return (
     <View
@@ -249,6 +257,8 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
           opacity: 1,
         },
       }}
+      onMouseOver={() => setHoveredMonth(month)}
+      onMouseOut={() => setHoveredMonth('')}
     >
       <View
         ref={budgetMenuTriggerRef}
@@ -385,6 +395,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
             });
           }}
         />
+        {useProgressBars && <ProgressBar month={month} category={category} />}
       </View>
       <Field name="spent" width="flex" style={{ textAlign: 'right' }}>
         <span
