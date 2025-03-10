@@ -46,6 +46,8 @@ import { PullToRefresh } from '../PullToRefresh';
 import { ExpenseGroup } from './ExpenseGroup';
 import { IncomeGroup } from './IncomeGroup';
 
+export const ROW_HEIGHT = 50;
+
 export const PILL_STYLE = {
   borderRadius: 16,
   color: theme.pillText,

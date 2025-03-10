@@ -1,4 +1,4 @@
-import { useMemo, useRef } from 'react';
+import { useMemo } from 'react';
 
 import { Button } from '@actual-app/components/button';
 import { Card } from '@actual-app/components/card';
@@ -108,8 +108,6 @@ function ExpenseGroupHeader({
   isCollapsed,
   onToggleCollapse,
 }: ExpenseGroupHeaderProps) {
-  const listItemRef = useRef<HTMLDivElement | null>(null);
-
   return (
     <ListItem
       style={{
@@ -123,7 +121,6 @@ function ExpenseGroupHeader({
           : theme.budgetHeaderOtherMonth,
       }}
       data-testid="category-group-row"
-      innerRef={listItemRef}
     >
       <ExpenseGroupName
         group={group}
