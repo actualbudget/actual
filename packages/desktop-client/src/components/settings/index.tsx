@@ -10,8 +10,8 @@ import { tokens } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
-import { loadPrefs } from 'loot-core/client/actions';
 import { closeBudget } from 'loot-core/client/budgets/budgetsSlice';
+import { loadPrefs } from 'loot-core/client/prefs/prefsSlice';
 import { listen } from 'loot-core/platform/client/fetch';
 import { isElectron } from 'loot-core/shared/environment';
 
