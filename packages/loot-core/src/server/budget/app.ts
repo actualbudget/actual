@@ -401,7 +401,7 @@ async function deleteCategoryGroup({
   id: CategoryGroupEntity['id'];
   transferId: CategoryGroupEntity['id'];
 }): Promise<void> {
-  const groupCategories = await db.all(
+  const groupCategories = await db.all<Pick<CategoryEntity, 'id'>>(
     'SELECT id FROM categories WHERE cat_group = ? AND tombstone = 0',
     [id],
   );
