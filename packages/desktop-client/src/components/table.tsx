@@ -429,9 +429,9 @@ type CustomCellRenderProps = {
   inputStyle: CSSProperties;
 };
 type CustomCellProps = Omit<ComponentProps<typeof Cell>, 'children'> & {
-  children: (props: CustomCellRenderProps) => ReactNode;
-  onUpdate: (value: string) => void;
-  onBlur: (ev: UIEvent<unknown>) => void;
+  children?: (props: CustomCellRenderProps) => ReactNode;
+  onUpdate?: (value: string) => void;
+  onBlur?: (ev: UIEvent<unknown>) => void;
 };
 export function CustomCell({
   value: defaultValue,
@@ -467,7 +467,7 @@ export function CustomCell({
   return (
     <Cell {...props} value={defaultValue}>
       {() =>
-        children({
+        children?.({
           onBlur: onBlur_,
           onKeyDown,
           onUpdate: val => setValue(val),
@@ -1396,7 +1396,7 @@ export function useTableNavigator<T extends TableItem>(
         if (
           document.hasFocus() &&
           (e.relatedTarget == null ||
-            !containerRef.current.contains(e.relatedTarget) ||
+            !containerRef.current?.contains(e.relatedTarget) ||
             containerRef.current === e.relatedTarget) &&
           prevNumModals === numModals
         ) {
