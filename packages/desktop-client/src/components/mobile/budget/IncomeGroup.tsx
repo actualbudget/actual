@@ -1,4 +1,4 @@
-import { useMemo, useRef } from 'react';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -115,8 +115,6 @@ function IncomeGroupHeader({
   onToggleCollapse,
   style,
 }: IncomeGroupHeaderProps) {
-  const listItemRef = useRef<HTMLDivElement | null>(null);
-
   return (
     <ListItem
       style={{
@@ -130,7 +128,6 @@ function IncomeGroupHeader({
           : theme.budgetHeaderOtherMonth,
         ...style,
       }}
-      innerRef={listItemRef}
       data-testid="category-group-row"
     >
       <IncomeGroupName

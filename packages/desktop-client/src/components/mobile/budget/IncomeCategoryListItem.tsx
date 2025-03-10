@@ -20,7 +20,7 @@ import { CellValue } from '../../spreadsheet/CellValue';
 import { useFormat } from '../../spreadsheet/useFormat';
 
 import { BudgetCell } from './BudgetCell';
-import { getColumnWidth } from './BudgetTable';
+import { getColumnWidth, ROW_HEIGHT } from './BudgetTable';
 
 type IncomeCategoryNameProps = {
   category: CategoryEntity;
@@ -192,14 +192,13 @@ export function IncomeCategoryListItem({
     >
       <View
         style={{
-          height: 50,
+          height: ROW_HEIGHT,
           borderColor: theme.tableBorder,
           flexDirection: 'row',
           alignItems: 'center',
           justifyContent: 'space-between',
           paddingLeft: 5,
           paddingRight: 5,
-          zIndex: 1,
           borderBottomWidth: 1,
           opacity: !!category.hidden ? 0.5 : undefined,
           backgroundColor: monthUtils.isCurrentMonth(month)
