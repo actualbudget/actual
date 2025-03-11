@@ -210,6 +210,7 @@ function Holding({
           focused={editing && focusedField === field.name}
           onExpose={value => onEdit(holding.id, value)}
           onUpdate={value => onUpdate(holding.id, field, value)}
+          privacyFilter={field.type === 'decimal' || field.type === 'currency'}
         />
       ))}
     </Row>
