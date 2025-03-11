@@ -21,8 +21,8 @@ afterAll(() => {
   console.warn = old;
 });
 
-async function getTransactions(accountId) {
-  return db.runQuery(
+async function getTransactions(accountId): Promise<any[]> {
+  return await db.runQuery(
     'SELECT * FROM transactions WHERE acct = ?',
     [accountId],
     true,
