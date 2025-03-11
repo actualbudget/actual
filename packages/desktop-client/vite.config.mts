@@ -79,7 +79,7 @@ export default defineConfig(async ({ mode }) => {
     process.env.REACT_APP_REVIEW_ID = process.env.REVIEW_ID;
   }
 
-  const resolveExtensions = [
+  let resolveExtensions = [
     '.web.js',
     '.web.jsx',
     '.web.ts',
@@ -92,6 +92,16 @@ export default defineConfig(async ({ mode }) => {
     '.tsx',
     '.json',
   ];
+
+  if (env.IS_GENERIC_BROWSER) {
+    resolveExtensions = [
+      '.browser.js',
+      '.browser.jsx',
+      '.browser.ts',
+      '.browser.tsx',
+      ...resolveExtensions,
+    ];
+  }
 
   const browserOpen = env.BROWSER_OPEN ? `//${env.BROWSER_OPEN}` : true;
 

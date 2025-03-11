@@ -35,6 +35,8 @@ import { TestProvider } from '../../redux/mock';
 
 import { TransactionTable } from './TransactionsTable';
 
+console.log(' initServer', String(initServer));
+
 vi.mock('loot-core/platform/client/fetch');
 vi.mock('../../hooks/useFeatureFlag', () => ({
   default: vi.fn().mockReturnValue(false),
@@ -569,7 +571,7 @@ describe('Transactions', () => {
     expect(getTransactions()[2].notes).toBe('another happy note');
   });
 
-  test('dropdown automatically opens and can be filtered', async () => {
+  test.only('dropdown automatically opens and can be filtered', async () => {
     const { container } = renderTransactions();
 
     const categories = categoryGroups.flatMap(group => group.categories);
