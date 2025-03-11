@@ -1113,8 +1113,8 @@ export function ImportTransactionsModal({
 
 function getParseOptions(fileType, options = {}) {
   if (fileType === 'csv') {
-    const { delimiter, hasHeaderRow, skipLines, importNotes } = options;
-    return { delimiter, hasHeaderRow, skipLines, importNotes };
+    const { delimiter, hasHeaderRow, skipLines } = options;
+    return { delimiter, hasHeaderRow, skipLines };
   }
   if (isOfxFile(fileType)) {
     const { fallbackMissingPayeeToMemo, importNotes } = options;
