@@ -118,6 +118,14 @@ export function ExpenseCategoryList({
       aria-label={t('Expense categories')}
       items={categories}
       dragAndDropHooks={dragAndDropHooks}
+      dependencies={[
+        month,
+        onEditCategory,
+        onBudgetAction,
+        shouldHideCategory,
+        show3Columns,
+        showBudgetedColumn,
+      ]}
     >
       {category => (
         <ExpenseCategoryListItem
