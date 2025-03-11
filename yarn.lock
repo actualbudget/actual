@@ -171,6 +171,7 @@ __metadata:
     debounce: "npm:^1.2.1"
     downshift: "npm:7.6.2"
     focus-visible: "npm:^4.1.5"
+    hyperformula: "npm:^3.0.0"
     i18next: "npm:^23.11.5"
     i18next-parser: "npm:^9.0.0"
     i18next-resources-to-backend: "npm:^1.2.1"
@@ -9663,6 +9664,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"chevrotain@npm:^6.5.0":
+  version: 6.5.0
+  resolution: "chevrotain@npm:6.5.0"
+  dependencies:
+    regexp-to-ast: "npm:0.4.0"
+  checksum: 10/e98f7cc12bea6732246a0a2c25028bc076d5ed7dda470403599c595e5eece5d60fe808a7cdb187b938ad3364c308c03f9eb603e2743871c861db497186776efb
+  languageName: node
+  linkType: hard
+
 "chokidar@npm:>=3.0.0 <4.0.0, chokidar@npm:^3.5.3":
   version: 3.5.3
   resolution: "chokidar@npm:3.5.3"
@@ -14145,6 +14155,16 @@ __metadata:
   bin:
     husky: bin.mjs
   checksum: 10/8a9b7cb9dc8494b470b3b47b386e65d579608c6206da80d3cc8b71d10e37947264af3dfe00092368dad9673b51d2a5ee87afb4b2291e77ba9e7ec1ac36e56cd1
+  languageName: node
+  linkType: hard
+
+"hyperformula@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "hyperformula@npm:3.0.0"
+  dependencies:
+    chevrotain: "npm:^6.5.0"
+    tiny-emitter: "npm:^2.1.0"
+  checksum: 10/9e41fc3cdd3922080ad7bf358940527881cf580f43007428d65ac26a1c88490cad0e3786df3685b14b033c825562b4592bc858188f4d288d91a319e32a07f492
   languageName: node
   linkType: hard
 
@@ -20327,6 +20347,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"regexp-to-ast@npm:0.4.0":
+  version: 0.4.0
+  resolution: "regexp-to-ast@npm:0.4.0"
+  checksum: 10/381f57fa4d056056a50d7bc1365ece93434e1eea87bd3d60144ef6fd85bc4875410757908000c06fbe99ef9554c930c9890e695292b8e49756dfc0762890e777
+  languageName: node
+  linkType: hard
+
 "regexp.prototype.flags@npm:^1.5.1, regexp.prototype.flags@npm:^1.5.2":
   version: 1.5.2
   resolution: "regexp.prototype.flags@npm:1.5.2"
@@ -22273,6 +22300,13 @@ __metadata:
   version: 4.0.1
   resolution: "timed-out@npm:4.0.1"
   checksum: 10/d52648e5fc0ebb0cae1633737a1db1b7cb464d5d43d754bd120ddebd8067a1b8f42146c250d8cfb9952183b7b0f341a99fc71b59c52d659218afae293165004f
+  languageName: node
+  linkType: hard
+
+"tiny-emitter@npm:^2.1.0":
+  version: 2.1.0
+  resolution: "tiny-emitter@npm:2.1.0"
+  checksum: 10/75633f4de4f47f43af56aff6162f25b87be7efc6f669fda256658f3c3f4a216f23dc0d13200c6fafaaf1b0c7142f0201352fb06aec0b77f68aea96be898f4516
   languageName: node
   linkType: hard
 

@@ -1,4 +1,4 @@
-import React, { type ReactNode, useEffect } from 'react';
+import React, { type ReactNode, useEffect, useState } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -37,6 +37,9 @@ import { RepairTransactions } from './RepairTransactions';
 import { ResetCache, ResetSync } from './Reset';
 import { ThemeSettings } from './Themes';
 import { AdvancedToggle, Setting } from './UI';
+import FormulaEditor, { FormulaNode } from '../formula/FormulaEditor';
+import { validateFormula } from '../formula/formulaValidator';
+import { FormulaRunner } from '../formula/FormulaRunner';
 
 function About() {
   const version = useServerVersion();
@@ -170,6 +173,8 @@ export function Settings() {
         paddingBottom: MOBILE_NAV_HEIGHT,
       }}
     >
+      <TestFormula />
+
       <View
         data-testid="settings"
         style={{
@@ -217,3 +222,30 @@ export function Settings() {
     </Page>
   );
 }
+
+
+export default function TestFormula() {
+  const [formula, setFormula] = useState<FormulaNode | null>(null)
+    const [errors, setErrors] = useState<string[]>([])
+  
+    // Re-validate whenever 'formula' changes
+    useEffect(() => {
+      setErrors(validateFormula(formula))
+    }, [formula])
+  
+    return (
+      <div className="p-4 space-y-8">
+        <FormulaEditor formula={formula} setFormula={setFormula} />
+  
+        {/* Only render the runner if no validation errors and there's a formula */}
+        {formula && errors.length === 0 ? (
+          <FormulaRunner formula={formula} />
+        ) : (
+          <div className="text-red-500">
+            Formula is invalid or empty. Fix errors above to run.
+          </div>
+        )}
+      </div>
+    )
+  }
+  
