@@ -33,7 +33,7 @@ type IncomeGroupProps = {
   onEditGroup: (id: CategoryGroupEntity['id']) => void;
   onEditCategory: (id: string) => void;
   onBudgetAction: (month: string, action: string, args: unknown) => void;
-  isCollapsed: boolean;
+  isCollapsed: (id: CategoryGroupEntity['id']) => boolean;
   onToggleCollapse: (id: CategoryGroupEntity['id']) => void;
 };
 
@@ -53,12 +53,12 @@ export function IncomeGroup({
 
   const categories = useMemo(
     () =>
-      isCollapsed
+      isCollapsed(group.id)
         ? []
         : (group.categories?.filter(
             category => !category.hidden || showHiddenCategories,
           ) ?? []),
-    [group.categories, isCollapsed, showHiddenCategories],
+    [group.categories, group.id, isCollapsed, showHiddenCategories],
   );
 
   return (
@@ -84,7 +84,7 @@ export function IncomeGroup({
           group={group}
           month={month}
           onEdit={onEditGroup}
-          isCollapsed={isCollapsed}
+          isCollapsed={isCollapsed(group.id)}
           onToggleCollapse={onToggleCollapse}
         />
         <IncomeCategoryList
@@ -143,9 +143,9 @@ function IncomeGroupHeader({
 
 type IncomeGroupNameProps = {
   group: CategoryGroupEntity;
-  onEdit?: (id: CategoryGroupEntity['id']) => void;
+  onEdit: (id: CategoryGroupEntity['id']) => void;
   isCollapsed: boolean;
-  onToggleCollapse?: (id: CategoryGroupEntity['id']) => void;
+  onToggleCollapse: (id: CategoryGroupEntity['id']) => void;
 };
 
 function IncomeGroupName({
@@ -176,7 +176,7 @@ function IncomeGroupName({
             backgroundColor: 'transparent',
           },
         })}
-        onPress={() => onToggleCollapse?.(group.id)}
+        onPress={() => onToggleCollapse(group.id)}
       >
         <SvgExpandArrow
           width={8}
@@ -193,7 +193,7 @@ function IncomeGroupName({
         style={{
           maxWidth: sidebarColumnWidth,
         }}
-        onPress={() => onEdit?.(group.id)}
+        onPress={() => onEdit(group.id)}
       >
         <View
           style={{
