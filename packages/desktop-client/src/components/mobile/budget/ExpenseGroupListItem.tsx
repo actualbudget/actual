@@ -201,6 +201,7 @@ function ExpenseGroupName({
           '&[data-pressed]': {
             backgroundColor: 'transparent',
           },
+          marginLeft: -5,
         })}
         onPress={() => onToggleCollapse(group.id)}
       >
