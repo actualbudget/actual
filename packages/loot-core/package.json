@@ -61,6 +61,7 @@
     "fast-check": "3.15.0",
     "i18next": "^23.11.5",
     "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
     "jsverify": "^0.8.4",
     "memfs": "3.5.3",
     "mockdate": "^3.0.5",
