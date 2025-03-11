@@ -118,7 +118,7 @@
       "default": "./src/platform/exceptions/index.browser.ts"
     },
     "./platform/server/asyncStorage": "./src/platform/server/asyncStorage/index.web.ts",
-    "./platform/server/connection": "./src/platform/server/connection/index.web.ts",
+    "./platform/server/connection": "./src/platform/server/connection/index.ts",
     "./platform/server/fetch": "./src/platform/server/fetch/index.web.ts",
     "./platform/server/fs": "./src/platform/server/fs/index.web.ts",
     "./platform/server/indexeddb": "./src/platform/server/indexeddb/index.web.ts",
