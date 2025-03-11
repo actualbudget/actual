@@ -135,9 +135,10 @@ app.method('must-category-transfer', isCategoryTransferRequired);
 
 // Server must return AQL entities not the raw DB data
 async function getCategories() {
+  const categoryGroups = await getCategoryGroups();
   return {
-    grouped: await getCategoryGroups(),
-    list: (await db.getCategories()).map(categoryModel.fromDb),
+    grouped: categoryGroups,
+    list: categoryGroups.flatMap(g => g.categories ?? []),
   };
 }
 
@@ -358,8 +359,7 @@ async function deleteCategory({
 
 // Server must return AQL entities not the raw DB data
 async function getCategoryGroups() {
-  const categoryGroups = await db.getCategoriesGrouped();
-  return categoryGroups.map(categoryGroupModel.fromDb);
+  return (await db.getCategoriesGrouped()) as unknown as CategoryGroupEntity[];
 }
 
 async function createCategoryGroup({
