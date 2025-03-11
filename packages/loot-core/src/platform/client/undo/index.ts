@@ -1,8 +1,19 @@
 import { v4 as uuidv4 } from 'uuid';
 
-import type * as T from '.';
+import { Modal } from '../../../client/modals/modalsSlice';
+import { UndoState as ServerUndoState } from '../../../server/undo';
 
-type UndoStateWithId = T.UndoState & {
+type UndoState = {
+  url: string | null;
+  openModal: Modal | null;
+  selectedItems: {
+    name: string;
+    items: Set<string>;
+  } | null;
+  undoEvent: ServerUndoState | null;
+};
+
+type UndoStateWithId = UndoState & {
   id?: ReturnType<typeof uuidv4>;
 };
 
@@ -18,26 +29,29 @@ const currentUndoState: UndoStateWithId = {
   undoEvent: null,
 };
 
-export const setUndoState: T.SetUndoState = function (name, value) {
+export const setUndoState = <K extends keyof Omit<UndoState, 'id'>>(
+  name: K,
+  value: UndoState[K],
+) => {
   currentUndoState[name] = value;
   currentUndoState.id = uuidv4();
 };
 
-export const getUndoState: T.GetUndoState = function (name) {
+export const getUndoState = <K extends keyof UndoState>(name: K) => {
   return currentUndoState[name];
 };
 
-export const getTaggedState: T.GetTaggedState = function (id) {
+export const getTaggedState = (id: string) => {
   return UNDO_STATE_MRU.find(state => state.id === id);
 };
 
-export const snapshot: T.Snapshot = function () {
+export const snapshot = () => {
   const tagged = { ...currentUndoState, id: uuidv4() };
   UNDO_STATE_MRU.unshift(tagged);
   UNDO_STATE_MRU = UNDO_STATE_MRU.slice(0, HISTORY_SIZE);
   return tagged.id;
 };
 
-export const gc: T.Gc = function (id) {
+export const gc = (id: string) => {
   UNDO_STATE_MRU = UNDO_STATE_MRU.filter(state => state.id !== id);
 };

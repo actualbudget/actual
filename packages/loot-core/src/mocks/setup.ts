@@ -1,7 +1,7 @@
 // @ts-strict-ignore
 import * as nativeFs from 'fs';
 
-import * as fetchClient from '../platform/client/fetch/index.web';
+import * as fetchClient from '../platform/client/fetch';
 import * as sqlite from '../platform/server/sqlite';
 import * as db from '../server/db';
 import {
@@ -15,6 +15,7 @@ import * as rules from '../server/transactions/transaction-rules';
 import { updateVersion } from '../server/update';
 import { resetTracer, tracer } from '../shared/test-helpers';
 
+jest.mock('../platform/client/fetch');
 jest.mock('../server/post');
 
 // By default, syncing is disabled

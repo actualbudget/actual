@@ -5,7 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { captureException, captureBreadcrumb } from '../../exceptions';
 import * as undo from '../undo';
 
-import type * as T from '.';
+import type * as T from './index.d';
 
 const replyHandlers = new Map();
 const listeners = new Map();
@@ -200,5 +200,9 @@ export const unlisten: T.Unlisten = function (name) {
 };
 
 export const clearServer: T.ClearServer = async function () {
+  //
+};
+
+export const initServer: T.InitServer = async function () {
   //
 };

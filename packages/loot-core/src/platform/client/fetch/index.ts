@@ -1,9 +1,10 @@
 // @ts-strict-ignore
 import { v4 as uuidv4 } from 'uuid';
 
-import * as undo from '../undo/index.web';
+import { type CategoryGroupEntity } from '../../../types/models';
+import * as undo from '../undo';
 
-import type * as T from '.';
+import type * as T from './index.d';
 
 const replyHandlers = new Map();
 const listeners = new Map();
@@ -139,6 +140,9 @@ async function closeSocket(onClose) {
 
   await socketClient.close();
 }
+
+export const initServer: T.InitServer = function () {};
+export const serverPush: T.ServerPush = function () {};
 
 export const clearServer: T.ClearServer = async function () {
   if (socketClient != null) {

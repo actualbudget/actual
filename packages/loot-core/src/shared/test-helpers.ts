@@ -125,7 +125,7 @@ export function execTracer<T>() {
         }
       } else {
         throw new Error(
-          `Event traced “${queue[0].name}” but expected “${name}”`,
+          `Event traced “${queue[0]?.name}” but expected “${name}”`,
         );
       }
     },
