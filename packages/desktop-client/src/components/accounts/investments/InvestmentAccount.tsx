@@ -32,32 +32,75 @@ export type InvestmentAccountProps = {
 };
 
 export function InvestmentAccount({ account }: InvestmentAccountProps) {
+  const [orderBy, onOrderBy] = useOrderBy();
   const holdingsQuery = useQuery<HoldingEntity>(
-    () => holdings(account.id).select('*'),
-    [account],
+    () => holdings(account.id).select('*').orderBy(orderBy),
+    [account, orderBy],
   );
   const holdingsData = (holdingsQuery.data || []) as HoldingEntity[];
 
-  return <InvestmentTable account={account} holdings={holdingsData} />;
+  return (
+    <InvestmentTable
+      account={account}
+      holdings={holdingsData}
+      orderBy={orderBy}
+      onOrderBy={onOrderBy}
+    />
+  );
 }
+
+function useOrderBy(): [
+  { [key: string]: 'asc' | 'desc' },
+  (field: keyof HoldingEntity) => void,
+] {
+  const [orderBy, setOrderBy] = useState<
+    | {
+        field: keyof HoldingEntity;
+        direction: 'asc' | 'desc';
+      }
+    | undefined
+  >(undefined);
+  const orderByObj = {
+    [orderBy?.field ?? 'symbol']: orderBy?.direction ?? 'asc',
+  };
+
+  function onOrderBy(field: keyof HoldingEntity) {
+    if (orderByObj[field] === 'asc') {
+      setOrderBy({ field, direction: 'desc' });
+    } else if (orderByObj[field] === 'desc') {
+      setOrderBy(undefined);
+    } else {
+      setOrderBy({ field, direction: 'asc' });
+    }
+  }
+  return [orderByObj, onOrderBy];
+}
+
+type InvestmentTableField = {
+  name: keyof HoldingEntity;
+  icon: string;
+  type: 'string' | 'decimal' | 'currency';
+};
 
 export type InvestmentTableProps = {
   account: AccountEntity;
   holdings: HoldingEntity[];
+  orderBy: { [key: string]: 'asc' | 'desc' };
+  onOrderBy: (field: keyof HoldingEntity) => void;
 };
 
-type InvestmentTableField = {
-  name: keyof HoldingEntity;
-  type: 'string' | 'decimal' | 'currency';
-};
-
-export function InvestmentTable({ account, holdings }: InvestmentTableProps) {
+export function InvestmentTable({
+  account,
+  holdings,
+  orderBy,
+  onOrderBy,
+}: InvestmentTableProps) {
   const fields: InvestmentTableField[] = [
-    { name: 'symbol', type: 'string' },
-    { name: 'title', type: 'string' },
-    { name: 'shares', type: 'decimal' },
-    { name: 'market_value', type: 'currency' },
-    { name: 'purchase_price', type: 'currency' },
+    { name: 'symbol', icon: 'clickable', type: 'string' },
+    { name: 'title', icon: 'clickable', type: 'string' },
+    { name: 'shares', icon: 'number', type: 'decimal' },
+    { name: 'market_value', icon: 'dollar', type: 'currency' },
+    { name: 'purchase_price', icon: 'dollar', type: 'currency' },
   ];
   const tableNavigator = useTableNavigator(
     holdings,
@@ -130,7 +173,11 @@ export function InvestmentTable({ account, holdings }: InvestmentTableProps) {
           New
         </Button>
       </View>
-      <InvestmentTableHeader fields={fields} />
+      <InvestmentTableHeader
+        fields={fields}
+        orderBy={orderBy}
+        onOrderBy={onOrderBy}
+      />
       {newHolding && (
         <View {...tableNavigator.getNavigatorProps({})}>
           <Holding
@@ -219,9 +266,15 @@ function Holding({
 
 type InvestmentTableHeaderProps = {
   fields: InvestmentTableField[];
+  onOrderBy: (field: keyof HoldingEntity) => void;
+  orderBy: { [key: string]: 'asc' | 'desc' };
 };
 
-function InvestmentTableHeader({ fields }: InvestmentTableHeaderProps) {
+function InvestmentTableHeader({
+  fields,
+  orderBy,
+  onOrderBy,
+}: InvestmentTableHeaderProps) {
   const { t } = useTranslation();
 
   return (
@@ -247,12 +300,12 @@ function InvestmentTableHeader({ fields }: InvestmentTableHeaderProps) {
               .map(p => p[0].toUpperCase() + p.slice(1))
               .join(' '),
           )}
+          icon={orderBy[f.name]}
           width={f.name === 'title' ? 'flex' : 100}
           alignItems="flex"
           marginLeft={-5}
           id={f}
-          icon={'clickable'}
-          onClick={console.log}
+          onClick={() => onOrderBy(f.name)}
         />
       ))}
     </Row>
