@@ -6,7 +6,22 @@ import {
 
 export type BankSyncBalance = GoCardlessBalance;
 export type BankSyncAmount = GoCardlessAmount;
-export type BankSyncTransaction = GoCardlessTransaction;
+export type BankSyncTransaction = {
+  sortOrder: number;
+  date: string;
+  payeeName: string;
+  notes: string;
+  transactedDate?: string;
+  transactionAmount: {
+    amount: string;
+    currency: string;
+  };
+  transactionId: string;
+  postedDate: string;
+  booked: boolean;
+  remittanceInformationUnstructuredArrayString?: string;
+  remittanceInformationStructuredArrayString?: string;
+};
 
 export type BankSyncHolding = {
   holdingId: string;

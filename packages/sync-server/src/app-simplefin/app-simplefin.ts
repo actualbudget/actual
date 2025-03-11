@@ -1,6 +1,9 @@
 import https from 'https';
 
-import express from 'express';
+import express, { Request, Response } from 'express';
+
+import type { BankSyncTransaction } from 'loot-core/src/types/models/bank-sync.js';
+import type { SimpleFinApiAccounts } from 'loot-core/src/types/models/simplefin.js';
 
 import { handleError } from '../app-gocardless/util/handle-error.js';
 import { SecretName, secretsService } from '../services/secrets-service.js';
@@ -13,7 +16,7 @@ app.use(requestLoggerMiddleware);
 
 app.post(
   '/status',
-  handleError(async (req, res) => {
+  handleError(async (_: Request, res: Response) => {
     const token = secretsService.get(SecretName.simplefin_token);
     const configured = token != null && token !== 'Forbidden';
 
@@ -28,7 +31,7 @@ app.post(
 
 app.post(
   '/accounts',
-  handleError(async (req, res) => {
+  handleError(async (_: Request, res: Response) => {
     let accessKey = secretsService.get(SecretName.simplefin_accessKey);
 
     try {
@@ -50,7 +53,13 @@ app.post(
     }
 
     try {
-      const accounts = await getAccounts(accessKey, null, null, null, true);
+      const accounts = await getSimplefinAccounts(
+        accessKey,
+        null,
+        null,
+        null,
+        true,
+      );
 
       res.send({
         status: 'ok',
@@ -67,7 +76,7 @@ app.post(
 
 app.post(
   '/transactions',
-  handleError(async (req, res) => {
+  handleError(async (req: Request, res: Response) => {
     const { accountId, startDate } = req.body;
 
     const accessKey = secretsService.get(SecretName.simplefin_accessKey);
@@ -91,7 +100,7 @@ app.post(
     const earliestStartDate = Array.isArray(startDate)
       ? startDate.reduce((a, b) => (a < b ? a : b))
       : startDate;
-    let results;
+    let results: SimpleFinApiAccounts;
     try {
       results = await getTransactions(
         accessKey,
@@ -137,16 +146,23 @@ app.post(
   }),
 );
 
-function logAccountError(results, accountId, data) {
+function logAccountError(
+  results: SimpleFinApiAccounts,
+  accountId: string,
+  errorData: any,
+) {
   const errors = results.errors[accountId] || [];
-  errors.push(data);
+  errors.push(errorData);
   results.errors[accountId] = errors;
   results.hasError = true;
 }
 
-function getAccountResponse(results, accountId, startDate) {
-  const account =
-    !results?.accounts || results.accounts.find(a => a.id === accountId);
+function getAccountResponse(
+  results: SimpleFinApiAccounts,
+  accountId: string,
+  startDate: Date,
+) {
+  const account = results.accounts.find(a => a.id === accountId);
   if (!account) {
     console.log(
       `The account "${accountId}" was not found. Here were the accounts returned:`,
@@ -196,22 +212,13 @@ function getAccountResponse(results, accountId, startDate) {
     },
   ];
 
-  const all = [];
-  const booked = [];
-  const pending = [];
+  const all: BankSyncTransaction[] = [];
+  const booked: BankSyncTransaction[] = [];
+  const pending: BankSyncTransaction[] = [];
 
   for (const trans of account.transactions) {
-    const newTrans = {};
-
-    let dateToUse = 0;
-
-    if (trans.pending ?? trans.posted === 0) {
-      newTrans.booked = false;
-      dateToUse = trans.transacted_at;
-    } else {
-      newTrans.booked = true;
-      dateToUse = trans.posted;
-    }
+    const isBooked = !(trans.pending ?? trans.posted === 0);
+    let dateToUse = isBooked ? trans.posted : trans.transacted_at;
 
     const transactionDate = new Date(dateToUse * 1000);
 
@@ -219,21 +226,18 @@ function getAccountResponse(results, accountId, startDate) {
       continue;
     }
 
-    newTrans.sortOrder = dateToUse;
-    newTrans.date = getDate(transactionDate);
-    newTrans.payeeName = trans.payee;
-    newTrans.notes = trans.description;
-    newTrans.transactionAmount = { amount: trans.amount, currency: 'USD' };
-    newTrans.transactionId = trans.id;
-    newTrans.valueDate = newTrans.bookingDate;
-
-    if (trans.transacted_at) {
-      newTrans.transactedDate = getDate(new Date(trans.transacted_at * 1000));
-    }
-
-    if (trans.posted) {
-      newTrans.postedDate = getDate(new Date(trans.posted * 1000));
-    }
+    const newTrans = {
+      booked: isBooked,
+      sortOrder: dateToUse,
+      date: getDate(transactionDate),
+      payeeName: trans.payee,
+      notes: trans.description,
+      transactionAmount: { amount: trans.amount, currency: 'USD' },
+      transactionId: trans.id,
+      transactedDate:
+        trans.transacted_at && getDate(new Date(trans.transacted_at * 1000)),
+      postedDate: trans.posted && getDate(new Date(trans.posted * 1000)),
+    } satisfies BankSyncTransaction;
 
     if (newTrans.booked) {
       booked.push(newTrans);
@@ -243,7 +247,8 @@ function getAccountResponse(results, accountId, startDate) {
     all.push(newTrans);
   }
 
-  const sortFunction = (a, b) => b.sortOrder - a.sortOrder;
+  const sortFunction = (a: BankSyncTransaction, b: BankSyncTransaction) =>
+    b.sortOrder - a.sortOrder;
 
   const bookedSorted = booked.sort(sortFunction);
   const pendingSorted = pending.sort(sortFunction);
@@ -276,7 +281,7 @@ function getAccountResponse(results, accountId, startDate) {
   };
 }
 
-function invalidToken(res) {
+function invalidToken(res: Response) {
   res.send({
     status: 'ok',
     data: {
@@ -289,7 +294,7 @@ function invalidToken(res) {
   });
 }
 
-function serverDown(e, res) {
+function serverDown(e: Error, res: Response) {
   console.log(e);
   res.send({
     status: 'ok',
@@ -302,7 +307,7 @@ function serverDown(e, res) {
   });
 }
 
-function parseAccessKey(accessKey) {
+function parseAccessKey(accessKey: string) {
   let scheme = null;
   let rest = null;
   let auth = null;
@@ -324,7 +329,7 @@ function parseAccessKey(accessKey) {
   };
 }
 
-async function getAccessKey(base64Token) {
+async function getAccessKey(base64Token: string): Promise<string> {
   const token = Buffer.from(base64Token, 'base64').toString();
   const options = {
     method: 'POST',
@@ -344,29 +349,34 @@ async function getAccessKey(base64Token) {
   });
 }
 
-async function getTransactions(accessKey, accounts, startDate, endDate) {
+async function getTransactions(
+  accessKey: string,
+  accounts: string[],
+  startDate?: Date,
+  endDate?: Date,
+) {
   const now = new Date();
   startDate = startDate || new Date(now.getFullYear(), now.getMonth(), 1);
   endDate = endDate || new Date(now.getFullYear(), now.getMonth() + 1, 1);
   console.log(`${getDate(startDate)} - ${getDate(endDate)}`);
-  return await getAccounts(accessKey, accounts, startDate, endDate);
+  return await getSimplefinAccounts(accessKey, accounts, startDate, endDate);
 }
 
-function getDate(date) {
+function getDate(date: Date) {
   return date.toISOString().split('T')[0];
 }
 
-function normalizeDate(date) {
+function normalizeDate(date: Date) {
   return (date.valueOf() - date.getTimezoneOffset() * 60 * 1000) / 1000;
 }
 
-async function getAccounts(
-  accessKey,
-  accounts,
-  startDate,
-  endDate,
+async function getSimplefinAccounts(
+  accessKey: string,
+  accounts: string[],
+  startDate?: Date,
+  endDate?: Date,
   noTransactions = false,
-) {
+): Promise<SimpleFinApiAccounts> {
   const sfin = parseAccessKey(accessKey);
   const options = {
     headers: {
@@ -413,8 +423,8 @@ async function getAccounts(
             reject(new Error('Forbidden'));
           } else {
             try {
-              const results = JSON.parse(data);
-              results.sferrors = results.errors;
+              const results = JSON.parse(data) as SimpleFinApiAccounts;
+              results.sferrors = results.errors as string[];
               results.hasError = false;
               results.errors = {};
               resolve(results);
