@@ -162,23 +162,18 @@ test.describe('Accounts', () => {
       await expect(importButton).not.toBeVisible();
     });
 
-    test('import notes checkbox works', async () => {
+    test('import notes checkbox is not shown for CSV files', async () => {
       const fileChooserPromise = page.waitForEvent('filechooser');
       await accountPage.page.getByRole('button', { name: 'Import' }).click();
 
       const fileChooser = await fileChooserPromise;
       await fileChooser.setFiles(join(__dirname, 'data/test.csv'));
 
-      // Find and click the import notes checkbox
+      // Verify the import notes checkbox is not visible for CSV files
       const importNotesCheckbox = page.getByRole('checkbox', {
         name: 'Import notes from file',
       });
-      await expect(importNotesCheckbox).toBeVisible();
-      await expect(importNotesCheckbox).toBeChecked(); // Should be checked by default
-
-      // Uncheck the box
-      await importNotesCheckbox.click();
-      await expect(importNotesCheckbox).not.toBeChecked();
+      await expect(importNotesCheckbox).not.toBeVisible();
 
       // Import the transactions
       const importButton = page.getByRole('button', {

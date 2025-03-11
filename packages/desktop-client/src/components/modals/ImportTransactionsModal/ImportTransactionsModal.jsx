@@ -858,25 +858,27 @@ export function ImportTransactionsModal({
             </CheckboxOption>
           )}
 
-          <CheckboxOption
-            id="import_notes"
-            checked={importNotes}
-            onChange={() => {
-              setImportNotes(!importNotes);
-              parse(
-                filename,
-                getParseOptions(filetype, {
-                  delimiter,
-                  hasHeaderRow,
-                  skipLines,
-                  fallbackMissingPayeeToMemo,
-                  importNotes: !importNotes,
-                }),
-              );
-            }}
-          >
-            {t('Import notes from file')}
-          </CheckboxOption>
+          {filetype !== 'csv' && (
+            <CheckboxOption
+              id="import_notes"
+              checked={importNotes}
+              onChange={() => {
+                setImportNotes(!importNotes);
+                parse(
+                  filename,
+                  getParseOptions(filetype, {
+                    delimiter,
+                    hasHeaderRow,
+                    skipLines,
+                    fallbackMissingPayeeToMemo,
+                    importNotes: !importNotes,
+                  }),
+                );
+              }}
+            >
+              {t('Import notes from file')}
+            </CheckboxOption>
+          )}
 
           {(isOfxFile(filetype) || isCamtFile(filetype)) && (
             <CheckboxOption
