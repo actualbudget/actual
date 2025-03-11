@@ -109,14 +109,11 @@
     "./client/undo": "./src/client/undo.ts",
     "./mocks": "./src/mocks/index.ts",
     "./platform/client/fetch": {
-      "node": "./src/platform/client/fetch/index.ts",
-      "default": "./src/platform/client/fetch/index.browser.ts"
+      "node": "./src/platform/client/fetch/index.electron.ts",
+      "default": "./src/platform/client/fetch/index.ts"
     },
     "./platform/client/undo": "./src/platform/client/undo/index.ts",
-    "./platform/exceptions": {
-      "node": "./src/platform/exceptions/index.electron.ts",
-      "default": "./src/platform/exceptions/index.browser.ts"
-    },
+    "./platform/exceptions": "./src/platform/exceptions/index.ts",
     "./platform/server/asyncStorage": "./src/platform/server/asyncStorage/index.web.ts",
     "./platform/server/connection": "./src/platform/server/connection/index.ts",
     "./platform/server/fetch": "./src/platform/server/fetch/index.web.ts",
