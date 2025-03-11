@@ -205,7 +205,6 @@ function Footer({
           isDisabled={editingField}
           onPress={onClickRemainingSplit}
         >
-          {}
           <SvgSplit width={17} height={17} />
           <Text
             style={{
@@ -214,25 +213,9 @@ function Footer({
             }}
           >
             {!emptySplitTransaction ? (
-              <>
-                <Trans>Add New Split</Trans>
-                {' - '}
-                {integerToCurrency(
-                  transaction.amount > 0
-                    ? transaction.error.difference
-                    : -transaction.error.difference,
-                )}{' '}
-                <Trans>left</Trans>
-              </>
+              <Trans>Add new split - {{ amount : integerToCurrency(transaction.amount > 0 ? transaction.error.difference : -transaction.error.difference)}} left</Trans>
             ) : (
-              <>
-                <Trans>Amount left</Trans>:{' '}
-                {integerToCurrency(
-                  transaction.amount > 0
-                    ? transaction.error.difference
-                    : -transaction.error.difference,
-                )}
-              </>
+              <Trans>Amount left: {{ amount : integerToCurrency(transaction.amount > 0 ? transaction.error.difference : -transaction.error.difference)}}</Trans>
             )}
           </Text>
         </Button>
