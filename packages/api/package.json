@@ -31,10 +31,10 @@
   "devDependencies": {
     "@swc/core": "^1.5.3",
     "@swc/jest": "^0.2.36",
-    "@types/jest": "^27.5.2",
-    "@types/uuid": "^9.0.2",
-    "jest": "^27.5.1",
+    "@types/jest": "^29.5.14",
+    "@types/uuid": "^9.0.8",
+    "jest": "^29.7.0",
     "tsc-alias": "^1.8.8",
-    "typescript": "^5.5.4"
+    "typescript": "^5.8.2"
   }
 }
