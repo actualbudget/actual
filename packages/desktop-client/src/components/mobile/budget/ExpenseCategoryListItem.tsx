@@ -101,7 +101,7 @@ type ExpenseCategoryCellsProps = {
   month: string;
   onBudgetAction: (month: string, action: string, args: unknown) => void;
   show3Columns: boolean;
-  showBudgetedCol: boolean;
+  showBudgetedColumn: boolean;
   onOpenBalanceMenu: () => void;
   onShowActivity: () => void;
 };
@@ -111,7 +111,7 @@ function ExpenseCategoryCells({
   month,
   onBudgetAction,
   show3Columns,
-  showBudgetedCol: showBudgetedColumn,
+  showBudgetedColumn,
   onOpenBalanceMenu,
   onShowActivity,
 }: ExpenseCategoryCellsProps) {
@@ -194,7 +194,6 @@ function ExpenseCategoryCells({
         }}
       >
         <BudgetCell
-          key={`${show3Columns}|${showBudgetedColumn}`}
           binding={budgeted}
           type="financial"
           category={category}
@@ -230,7 +229,7 @@ function ExpenseCategoryCells({
             >
               <PrivacyFilter>
                 <AutoTextSize
-                  key={`${value}|${show3Columns}|${showBudgetedColumn}`}
+                  key={value}
                   as={Text}
                   minFontSizePx={6}
                   maxFontSizePx={12}
@@ -339,7 +338,7 @@ export function ExpenseCategoryListItem({
   onEdit,
   onBudgetAction,
   show3Columns,
-  showBudgetedColumn: showBudgetedCol,
+  showBudgetedColumn,
   ...props
 }: ExpenseCategoryListItemProps) {
   const { value: category } = props;
@@ -547,7 +546,7 @@ export function ExpenseCategoryListItem({
           month={month}
           onBudgetAction={onBudgetAction}
           show3Columns={show3Columns}
-          showBudgetedCol={showBudgetedCol}
+          showBudgetedColumn={showBudgetedColumn}
           onOpenBalanceMenu={onOpenBalanceMenu}
           onShowActivity={onShowActivity}
         />
