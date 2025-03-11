@@ -89,7 +89,10 @@ async function parseCSV(
   return { errors, transactions: data };
 }
 
-async function parseQIF(filepath: string, options: ParseFileOptions = {}): Promise<ParseFileResult> {
+async function parseQIF(
+  filepath: string,
+  options: ParseFileOptions = {},
+): Promise<ParseFileResult> {
   const errors = Array<ParseError>();
   const contents = await fs.readFile(filepath);
 
@@ -112,7 +115,7 @@ async function parseQIF(filepath: string, options: ParseFileOptions = {}): Promi
         date: trans.date,
         payee_name: trans.payee,
         imported_payee: trans.payee,
-        notes: options.importNotes ? (trans.memo || null) : null,
+        notes: options.importNotes ? trans.memo || null : null,
       }))
       .filter(trans => trans.date != null && trans.amount != null),
   };
@@ -140,7 +143,7 @@ async function parseOFX(
   // If no payee is available try and fallback to memo
   const useMemoFallback = options.fallbackMissingPayeeToMemo;
 
-return {
+  return {
     errors,
     transactions: data.transactions.map(trans => {
       return {
@@ -155,7 +158,10 @@ return {
   };
 }
 
-async function parseCAMT(filepath: string, options: ParseFileOptions = {}): Promise<ParseFileResult> {
+async function parseCAMT(
+  filepath: string,
+  options: ParseFileOptions = {},
+): Promise<ParseFileResult> {
   const errors = Array<ParseError>();
   const contents = await fs.readFile(filepath);
 
@@ -175,7 +181,7 @@ async function parseCAMT(filepath: string, options: ParseFileOptions = {}): Prom
     errors,
     transactions: data.map(trans => ({
       ...trans,
-      notes: options.importNotes ? trans.notes : null
-    }))
+      notes: options.importNotes ? trans.notes : null,
+    })),
   };
 }

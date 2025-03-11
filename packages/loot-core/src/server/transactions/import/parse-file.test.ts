@@ -21,7 +21,16 @@ afterAll(() => {
   console.warn = old;
 });
 
-async function getTransactions(accountId): Promise<any[]> {
+type Transaction = {
+  id: string;
+  amount: number;
+  date: string;
+  payee_name: string;
+  imported_payee: string;
+  notes: string | null;
+};
+
+async function getTransactions(accountId: string): Promise<Transaction[]> {
   return await db.runQuery(
     'SELECT * FROM transactions WHERE acct = ?',
     [accountId],
@@ -33,12 +42,14 @@ async function importFileWithRealTime(
   accountId,
   filepath,
   dateFormat?: string,
-  options?: { importNotes: boolean }
+  options?: { importNotes: boolean },
 ) {
   // Emscripten requires a real Date.now!
   global.restoreDateNow();
-  const { errors, transactions: originalTransactions } =
-    await parseFile(filepath, options);
+  const { errors, transactions: originalTransactions } = await parseFile(
+    filepath,
+    options,
+  );
   global.restoreFakeDateNow();
 
   let transactions = originalTransactions;
@@ -68,7 +79,7 @@ describe('File import', () => {
       'one',
       __dirname + '/../../../mocks/files/data.qif',
       'MM/dd/yy',
-      { importNotes: true }
+      { importNotes: true },
     );
     expect(errors.length).toBe(0);
     expect(await getTransactions('one')).toMatchSnapshot();
@@ -82,7 +93,7 @@ describe('File import', () => {
       'one',
       __dirname + '/../../../mocks/files/data.ofx',
       null,
-      { importNotes: true }
+      { importNotes: true },
     );
     expect(errors.length).toBe(0);
     expect(await getTransactions('one')).toMatchSnapshot();
@@ -96,7 +107,7 @@ describe('File import', () => {
       'one',
       __dirname + '/../../../mocks/files/credit-card.ofx',
       null,
-      { importNotes: true }
+      { importNotes: true },
     );
     expect(errors.length).toBe(0);
     expect(await getTransactions('one')).toMatchSnapshot();
@@ -110,7 +121,7 @@ describe('File import', () => {
       'one',
       __dirname + '/../../../mocks/files/data.qfx',
       null,
-      { importNotes: true }
+      { importNotes: true },
     );
     expect(errors.length).toBe(0);
     expect(await getTransactions('one')).toMatchSnapshot();
@@ -125,10 +136,12 @@ describe('File import', () => {
       'one',
       __dirname + '/../../../mocks/files/data.ofx',
       null,
-      { importNotes: true }
+      { importNotes: true },
     );
     expect(errorsWithNotes.length).toBe(0);
-    expect(await getTransactions('one')).toMatchSnapshot('transactions with notes');
+    expect(await getTransactions('one')).toMatchSnapshot(
+      'transactions with notes',
+    );
 
     // Clear transactions
     await db.runQuery('DELETE FROM transactions WHERE acct = ?', ['one']);
@@ -138,7 +151,7 @@ describe('File import', () => {
       'one',
       __dirname + '/../../../mocks/files/data.ofx',
       null,
-      { importNotes: false }
+      { importNotes: false },
     );
     expect(errorsWithoutNotes.length).toBe(0);
     const transactionsWithoutNotes = await getTransactions('one');
@@ -203,7 +216,7 @@ describe('File import', () => {
       'one',
       __dirname + '/../../../mocks/files/camt/camt.053.xml',
       null,
-      { importNotes: true }
+      { importNotes: true },
     );
     expect(errors.length).toBe(0);
     expect(await getTransactions('one')).toMatchSnapshot();

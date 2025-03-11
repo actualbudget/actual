@@ -170,7 +170,9 @@ test.describe('Accounts', () => {
       await fileChooser.setFiles(join(__dirname, 'data/test.csv'));
 
       // Find and click the import notes checkbox
-      const importNotesCheckbox = page.getByRole('checkbox', { name: 'Import notes from file' });
+      const importNotesCheckbox = page.getByRole('checkbox', {
+        name: 'Import notes from file',
+      });
       await expect(importNotesCheckbox).toBeVisible();
       await expect(importNotesCheckbox).toBeChecked(); // Should be checked by default
 
@@ -179,7 +181,9 @@ test.describe('Accounts', () => {
       await expect(importNotesCheckbox).not.toBeChecked();
 
       // Import the transactions
-      const importButton = page.getByRole('button', { name: /Import \d+ transactions/ });
+      const importButton = page.getByRole('button', {
+        name: /Import \d+ transactions/,
+      });
       await importButton.click();
 
       // Verify the transactions were imported

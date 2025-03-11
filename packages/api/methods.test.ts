@@ -660,13 +660,22 @@ describe('API CRUD operations', () => {
 
     // Test with notes
     const transactionsWithNotes = [
-      { date: '2023-11-03', imported_id: '11', amount: 100, notes: 'test note' },
+      {
+        date: '2023-11-03',
+        imported_id: '11',
+        amount: 100,
+        notes: 'test note',
+      },
     ];
 
-    const addResultWithNotes = await api.addTransactions(accountId, transactionsWithNotes, {
-      learnCategories: true,
-      runTransfers: true,
-    });
+    const addResultWithNotes = await api.addTransactions(
+      accountId,
+      transactionsWithNotes,
+      {
+        learnCategories: true,
+        runTransfers: true,
+      },
+    );
     expect(addResultWithNotes).toBe('ok');
 
     let transactions = await api.getTransactions(
@@ -684,10 +693,14 @@ describe('API CRUD operations', () => {
       { date: '2023-11-03', imported_id: '11', amount: 100, notes: null },
     ];
 
-    const addResultWithoutNotes = await api.addTransactions(accountId, transactionsWithoutNotes, {
-      learnCategories: true,
-      runTransfers: true,
-    });
+    const addResultWithoutNotes = await api.addTransactions(
+      accountId,
+      transactionsWithoutNotes,
+      {
+        learnCategories: true,
+        runTransfers: true,
+      },
+    );
     expect(addResultWithoutNotes).toBe('ok');
 
     transactions = await api.getTransactions(
