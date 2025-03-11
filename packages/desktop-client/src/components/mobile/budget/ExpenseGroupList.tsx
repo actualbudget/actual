@@ -11,7 +11,6 @@ import {
   type CategoryGroupEntity,
 } from 'loot-core/types/models';
 
-import { useLocalPref } from '../../../hooks/useLocalPref';
 import { useDispatch } from '../../../redux';
 
 import {
@@ -85,7 +84,7 @@ export function ExpenseGroupList({
           showBudgetedColumn={showBudgetedColumn}
           show3Columns={show3Columns}
           onEdit={() => {}}
-          isCollapsed={true}
+          isCollapsed={() => true}
           onToggleCollapse={() => {}}
         />
       );
