@@ -24,7 +24,7 @@ import { useFormat } from '../../spreadsheet/useFormat';
 import { getColumnWidth, ROW_HEIGHT } from './BudgetTable';
 import { ExpenseCategoryList } from './ExpenseCategoryList';
 
-type ExpenseGroupProps = ComponentPropsWithoutRef<
+type ExpenseGroupListItemProps = ComponentPropsWithoutRef<
   typeof GridListItem<CategoryGroupEntity>
 > & {
   month: string;
@@ -49,18 +49,22 @@ export function ExpenseGroupListItem({
   isCollapsed,
   onToggleCollapse,
   ...props
-}: ExpenseGroupProps) {
+}: ExpenseGroupListItemProps) {
   const { value: group } = props;
 
   const categories = useMemo(
     () =>
       isCollapsed(group.id)
         ? []
-        : (group.categories?.filter(
+        : (group?.categories?.filter(
             category => !category.hidden || showHiddenCategories,
           ) ?? []),
     [group.categories, group.id, isCollapsed, showHiddenCategories],
   );
+
+  if (!group) {
+    return null;
+  }
 
   return (
     <GridListItem textValue={group.name} {...props}>
@@ -105,7 +109,7 @@ type ExpenseGroupHeaderProps = {
   showBudgetedColumn: boolean;
 };
 
-function ExpenseGroupHeader({
+export function ExpenseGroupHeader({
   group,
   month,
   onEdit,

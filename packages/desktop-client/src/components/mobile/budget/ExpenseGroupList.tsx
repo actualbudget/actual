@@ -14,7 +14,10 @@ import {
 import { useLocalPref } from '../../../hooks/useLocalPref';
 import { useDispatch } from '../../../redux';
 
-import { ExpenseGroupListItem } from './ExpenseGroupListItem';
+import {
+  ExpenseGroupHeader,
+  ExpenseGroupListItem,
+} from './ExpenseGroupListItem';
 
 type ExpenseGroupListProps = {
   groups: CategoryGroupEntity[];
@@ -64,6 +67,26 @@ export function ExpenseGroupList({
               borderRadius: 4,
             },
           })}
+        />
+      );
+    },
+    renderDragPreview: items => {
+      const draggedGroupId = items[0]['text/plain'];
+      const group = groups.find(c => c.id === draggedGroupId);
+      if (!group) {
+        throw new Error(
+          `Internal error: category group with ID ${draggedGroupId} not found.`,
+        );
+      }
+      return (
+        <ExpenseGroupHeader
+          group={group}
+          month={month}
+          showBudgetedColumn={showBudgetedColumn}
+          show3Columns={show3Columns}
+          onEdit={() => {}}
+          isCollapsed={true}
+          onToggleCollapse={() => {}}
         />
       );
     },
