@@ -7,13 +7,12 @@ import React, {
 } from 'react';
 
 import { Button } from '@actual-app/components/button';
+import { Input } from '@actual-app/components/input';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { Toggle } from '@actual-app/components/toggle';
 import { css } from '@emotion/css';
-
-import { Input } from '../common/Input';
 
 type FieldLabelProps = {
   title: string;

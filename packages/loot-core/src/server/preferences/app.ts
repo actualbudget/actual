@@ -47,10 +47,9 @@ async function saveSyncedPrefs({
 }
 
 async function getSyncedPrefs(): Promise<SyncedPrefs> {
-  const prefs = (await db.all('SELECT id, value FROM preferences')) as Array<{
-    id: string;
-    value: string;
-  }>;
+  const prefs = await db.all<Pick<db.DbPreference, 'id' | 'value'>>(
+    'SELECT id, value FROM preferences',
+  );
 
   return prefs.reduce<SyncedPrefs>((carry, { value, id }) => {
     carry[id as keyof SyncedPrefs] = value;

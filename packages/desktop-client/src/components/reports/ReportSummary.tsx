@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import * as monthUtils from 'loot-core/shared/months';
@@ -17,7 +18,6 @@ import {
 } from 'loot-core/types/models/reports';
 
 import { useLocale } from '../../hooks/useLocale';
-import { theme } from '../../style';
 import { PrivacyFilter } from '../PrivacyFilter';
 
 import { ReportOptions } from './ReportOptions';

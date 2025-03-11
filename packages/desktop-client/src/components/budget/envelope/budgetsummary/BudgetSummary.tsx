@@ -2,8 +2,14 @@ import React, { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import { SvgDotsHorizontalTriple } from '@actual-app/components/icons/v1';
+import {
+  SvgArrowButtonDown1,
+  SvgArrowButtonUp1,
+} from '@actual-app/components/icons/v2';
 import { Popover } from '@actual-app/components/popover';
 import { styles } from '@actual-app/components/styles';
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
@@ -11,9 +17,6 @@ import * as monthUtils from 'loot-core/shared/months';
 
 import { useLocale } from '../../../../hooks/useLocale';
 import { useUndo } from '../../../../hooks/useUndo';
-import { SvgDotsHorizontalTriple } from '../../../../icons/v1';
-import { SvgArrowButtonDown1, SvgArrowButtonUp1 } from '../../../../icons/v2';
-import { theme } from '../../../../style';
 import { NotesButton } from '../../../NotesButton';
 import { NamespaceContext } from '../../../spreadsheet/NamespaceContext';
 import { useEnvelopeBudget } from '../EnvelopeBudgetContext';

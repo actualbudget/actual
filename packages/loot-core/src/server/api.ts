@@ -17,6 +17,7 @@ import {
 } from '../shared/transactions';
 import { integerToAmount } from '../shared/util';
 import { Handlers } from '../types/handlers';
+import { AccountEntity, CategoryGroupEntity } from '../types/models';
 import { ServerHandlers } from '../types/server-handlers';
 
 import { addTransactions } from './accounts/sync';
@@ -53,7 +54,7 @@ function withMutation<Params extends Array<unknown>, ReturnType>(
         const latestTimestamp = getClock().timestamp.toString();
         const result = await handler(...args);
 
-        const rows = await db.all(
+        const rows = await db.all<Pick<db.DbCrdtMessage, 'dataset'>>(
           'SELECT DISTINCT dataset FROM messages_crdt WHERE timestamp > ?',
           [latestTimestamp],
         );
@@ -355,7 +356,9 @@ handlers['api/budget-month'] = async function ({ month }) {
   checkFileOpen();
   await validateMonth(month);
 
-  const groups = await db.getCategoriesGrouped();
+  // TODO: Force cast to CategoryGroupEntity. This should be updated to an AQL query.
+  const groups =
+    (await db.getCategoriesGrouped()) as unknown as CategoryGroupEntity[];
   const sheetName = monthUtils.sheetForMonth(month);
 
   function value(name) {
@@ -556,7 +559,8 @@ handlers['api/transaction-delete'] = withMutation(async function ({ id }) {
 
 handlers['api/accounts-get'] = async function () {
   checkFileOpen();
-  const accounts = await db.getAccounts();
+  // TODO: Force cast to AccountEntity. This should be updated to an AQL query.
+  const accounts = (await db.getAccounts()) as AccountEntity[];
   return accounts.map(account => accountModel.toExternal(account));
 };
 

@@ -2,8 +2,10 @@ import React, { useMemo } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { useTranslation } from 'react-i18next';
 
+import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
 
 import * as monthUtils from 'loot-core/shared/months';
 import { type AccountEntity } from 'loot-core/types/models/account';
@@ -13,8 +15,6 @@ import { type PayeeEntity } from 'loot-core/types/models/payee';
 import { type CustomReportEntity } from 'loot-core/types/models/reports';
 import { type SyncedPrefs } from 'loot-core/types/prefs';
 
-import { theme } from '../../../style/theme';
-import { useResponsive } from '../../responsive/ResponsiveProvider';
 import { ChooseGraph } from '../ChooseGraph';
 import { getLiveRange } from '../getLiveRange';
 import { LoadingIndicator } from '../LoadingIndicator';

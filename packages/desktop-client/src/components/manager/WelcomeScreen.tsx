@@ -5,13 +5,13 @@ import { Button } from '@actual-app/components/button';
 import { Paragraph } from '@actual-app/components/paragraph';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import { createBudget } from 'loot-core/client/budgets/budgetsSlice';
 import { pushModal } from 'loot-core/client/modals/modalsSlice';
 
 import { useDispatch } from '../../redux';
-import { theme } from '../../style';
 import { Link } from '../common/Link';
 
 export function WelcomeScreen() {

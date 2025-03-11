@@ -1,11 +1,10 @@
 import React, { type CSSProperties } from 'react';
 
 import { Button } from '@actual-app/components/button';
+import { theme } from '@actual-app/components/theme';
 import { css } from '@emotion/css';
 
 import { friendlyOp } from 'loot-core/shared/rules';
-
-import { theme } from '../../style';
 
 type OpButtonProps = {
   op: string;

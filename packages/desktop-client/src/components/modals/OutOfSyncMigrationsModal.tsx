@@ -44,7 +44,7 @@ export function OutOfSyncMigrationsModal() {
                 <Trans>
                   It looks like you&apos;re using an outdated version of the
                   Actual client. Your budget data has been updated by another
-                  client, but this client is still on the old verison. For the
+                  client, but this client is still on the old version. For the
                   best experience, please update Actual to the latest version.
                 </Trans>
               </Paragraph>

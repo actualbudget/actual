@@ -10,11 +10,25 @@ import { useHotkeys } from 'react-hotkeys-hook';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
+import {
+  SvgAdd,
+  SvgDotsHorizontalTriple,
+} from '@actual-app/components/icons/v1';
+import {
+  SvgArrowsExpand3,
+  SvgArrowsShrink3,
+  SvgDownloadThickBottom,
+  SvgLockClosed,
+  SvgPencil1,
+} from '@actual-app/components/icons/v2';
 import { InitialFocus } from '@actual-app/components/initial-focus';
+import { Input } from '@actual-app/components/input';
 import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
 import { Stack } from '@actual-app/components/stack';
 import { styles } from '@actual-app/components/styles';
+import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 
@@ -30,18 +44,7 @@ import { useLocale } from '../../hooks/useLocale';
 import { useLocalPref } from '../../hooks/useLocalPref';
 import { useSplitsExpanded } from '../../hooks/useSplitsExpanded';
 import { useSyncServerStatus } from '../../hooks/useSyncServerStatus';
-import { AnimatedLoading } from '../../icons/AnimatedLoading';
-import { SvgAdd, SvgDotsHorizontalTriple } from '../../icons/v1';
-import {
-  SvgArrowsExpand3,
-  SvgArrowsShrink3,
-  SvgDownloadThickBottom,
-  SvgLockClosed,
-  SvgPencil1,
-} from '../../icons/v2';
-import { theme } from '../../style';
 import { AnimatedRefresh } from '../AnimatedRefresh';
-import { Input } from '../common/Input';
 import { Search } from '../common/Search';
 import { FilterButton } from '../filters/FiltersMenu';
 import { FiltersStack } from '../filters/FiltersStack';

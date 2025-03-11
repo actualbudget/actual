@@ -2,16 +2,16 @@ import React, { useRef, useState, type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import { SvgDelete } from '@actual-app/components/icons/v0';
 import { Popover } from '@actual-app/components/popover';
 import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import { mapField, friendlyOp } from 'loot-core/shared/rules';
 import { integerToCurrency } from 'loot-core/shared/util';
 import { type RuleConditionEntity } from 'loot-core/types/models';
 
-import { SvgDelete } from '../../icons/v0';
-import { theme } from '../../style';
 import { Value } from '../rules/Value';
 
 import { FilterEditor } from './FiltersMenu';

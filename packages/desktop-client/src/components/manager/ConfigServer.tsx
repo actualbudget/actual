@@ -3,7 +3,9 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button, ButtonWithLoading } from '@actual-app/components/button';
+import { BigInput } from '@actual-app/components/input';
 import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import { loggedIn, signOut } from 'loot-core/client/actions';
@@ -16,8 +18,6 @@ import {
 import { useGlobalPref } from '../../hooks/useGlobalPref';
 import { useNavigate } from '../../hooks/useNavigate';
 import { useDispatch } from '../../redux';
-import { theme } from '../../style';
-import { BigInput } from '../common/Input';
 import { Link } from '../common/Link';
 import { useServerURL, useSetServerURL } from '../ServerContext';
 

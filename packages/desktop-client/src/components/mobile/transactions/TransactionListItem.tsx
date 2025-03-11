@@ -7,9 +7,21 @@ import { ListBoxItem } from 'react-aria-components';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import {
+  SvgLeftArrow2,
+  SvgRightArrow2,
+  SvgSplit,
+} from '@actual-app/components/icons/v0';
+import {
+  SvgArrowsSynchronize,
+  SvgCalendar3,
+  SvgCheckCircle1,
+  SvgLockClosed,
+} from '@actual-app/components/icons/v2';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { TextOneLine } from '@actual-app/components/text-one-line';
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import {
   PressResponder,
@@ -29,15 +41,7 @@ import { useAccount } from '../../../hooks/useAccount';
 import { useCategories } from '../../../hooks/useCategories';
 import { useDisplayPayee } from '../../../hooks/useDisplayPayee';
 import { usePayee } from '../../../hooks/usePayee';
-import { SvgLeftArrow2, SvgRightArrow2, SvgSplit } from '../../../icons/v0';
-import {
-  SvgArrowsSynchronize,
-  SvgCalendar3,
-  SvgCheckCircle1,
-  SvgLockClosed,
-} from '../../../icons/v2';
 import { useSelector } from '../../../redux';
-import { theme } from '../../../style';
 import { makeAmountFullStyle } from '../../budget/util';
 
 import { lookupName, Status } from './TransactionEdit';

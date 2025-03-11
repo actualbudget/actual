@@ -1,6 +1,8 @@
 // @ts-strict-ignore
 import React, { useCallback, useEffect, useState } from 'react';
 
+import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import { sync } from 'loot-core/client/app/appSlice';
@@ -24,9 +26,7 @@ import { useCategories } from '../../../hooks/useCategories';
 import { useLocale } from '../../../hooks/useLocale';
 import { useLocalPref } from '../../../hooks/useLocalPref';
 import { useSyncedPref } from '../../../hooks/useSyncedPref';
-import { AnimatedLoading } from '../../../icons/AnimatedLoading';
 import { useDispatch } from '../../../redux';
-import { theme } from '../../../style';
 import { prewarmMonth } from '../../budget/util';
 import { NamespaceContext } from '../../spreadsheet/NamespaceContext';
 import { SyncRefresh } from '../../SyncRefresh';
