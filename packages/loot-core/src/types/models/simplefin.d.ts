@@ -1,6 +1,11 @@
 import { AccountEntity } from './account';
 import { BankSyncResponse } from './bank-sync';
 
+export type SimpleFinTransactionsRequest = {
+  accountId: AccountEntity['id'] | AccountEntity['id'][];
+  startDate: string | string[];
+};
+
 export type SimpleFinApiAccounts = {
   errors: string[] | { [accountId: string]: string };
   accounts: SimpleFinApiAccount[];

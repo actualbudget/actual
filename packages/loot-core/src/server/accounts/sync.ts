@@ -20,6 +20,7 @@ import {
   BankSyncHolding,
   BankSyncResponse,
   SimpleFinBatchSyncResponse,
+  SimpleFinTransactionsRequest,
   TransactionEntity,
 } from '../../types/models';
 import { runQuery } from '../aql';
@@ -200,30 +201,25 @@ async function downloadSimpleFinTransactions(
 
   console.log('Pulling transactions from SimpleFin');
 
-  let res;
-  try {
-    res = await post(
-      getServer().SIMPLEFIN_SERVER + '/transactions',
-      {
-        accountId: acctId,
-        startDate: since,
-      },
-      {
-        'X-ACTUAL-TOKEN': userToken,
-      },
-      // 5 minute timeout for batch sync, one minute for individual accounts
-      Array.isArray(acctId) ? 300000 : 60000,
-    );
-  } catch (error) {
+  const res = await post(
+    getServer().SIMPLEFIN_SERVER + '/transactions',
+    {
+      accountId: acctId,
+      startDate: since,
+    } as SimpleFinTransactionsRequest,
+    {
+      'X-ACTUAL-TOKEN': userToken,
+    },
+    // 5 minute timeout for batch sync, one minute for individual accounts
+    Array.isArray(acctId) ? 300000 : 60000,
+  ).catch(error => {
     console.error('Suspected timeout during bank sync:', error);
     throw BankSyncError('TIMED_OUT', 'TIMED_OUT');
-  }
+  });
 
-  console.log('testing');
   if (Object.keys(res).length === 0) {
     throw BankSyncError('NO_DATA', 'NO_DATA');
   }
-  console.log('testing2');
   if (res.error_code) {
     throw BankSyncError(res.error_type, res.error_code);
   }
