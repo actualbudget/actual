@@ -185,7 +185,7 @@ export type DbHolding = {
   purchase_price: number;
   market_value: number;
 
-  imported_id?: number;
+  imported_id?: string;
   raw_synced_data?: string | undefined;
 
   tombstone: 1 | 0;
