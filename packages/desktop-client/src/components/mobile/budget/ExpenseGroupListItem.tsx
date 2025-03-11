@@ -54,12 +54,12 @@ export function ExpenseGroupListItem({
 
   const categories = useMemo(
     () =>
-      isCollapsed(group.id)
+      !group || isCollapsed(group.id)
         ? []
-        : (group?.categories?.filter(
+        : (group.categories?.filter(
             category => !category.hidden || showHiddenCategories,
           ) ?? []),
-    [group.categories, group.id, isCollapsed, showHiddenCategories],
+    [group, isCollapsed, showHiddenCategories],
   );
 
   if (!group) {
