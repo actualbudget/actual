@@ -1,8 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Account sync reconcile handles transactions with undefined fields 1`] = `
-Array [
-  Object {
+[
+  {
     "account": "one",
     "amount": 0,
     "category": null,
@@ -26,7 +26,7 @@ Array [
     "tombstone": 0,
     "transfer_id": null,
   },
-  Object {
+  {
     "account": "one",
     "amount": 2948,
     "category": null,
