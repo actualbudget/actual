@@ -22,9 +22,8 @@ import { PrivacyFilter } from '../../PrivacyFilter';
 import { CellValue } from '../../spreadsheet/CellValue';
 import { useFormat } from '../../spreadsheet/useFormat';
 
-import { getColumnWidth } from './BudgetTable';
+import { getColumnWidth, ROW_HEIGHT } from './BudgetTable';
 import { IncomeCategoryList } from './IncomeCategoryList';
-import { ListItem } from './ListItem';
 
 type IncomeGroupProps = {
   group: CategoryGroupEntity;
@@ -84,7 +83,7 @@ export function IncomeGroup({
           group={group}
           month={month}
           onEdit={onEditGroup}
-          isCollapsed={isCollapsed(group.id)}
+          isCollapsed={isCollapsed}
           onToggleCollapse={onToggleCollapse}
         />
         <IncomeCategoryList
@@ -102,7 +101,7 @@ type IncomeGroupHeaderProps = {
   group: CategoryGroupEntity;
   month: string;
   onEdit: (id: CategoryGroupEntity['id']) => void;
-  isCollapsed: boolean;
+  isCollapsed: (id: CategoryGroupEntity['id']) => boolean;
   onToggleCollapse: (id: CategoryGroupEntity['id']) => void;
   style?: CSSProperties;
 };
@@ -116,13 +115,17 @@ function IncomeGroupHeader({
   style,
 }: IncomeGroupHeaderProps) {
   return (
-    <ListItem
+    <View
       style={{
+        height: ROW_HEIGHT,
+        borderBottomWidth: 1,
+        borderColor: theme.tableBorder,
         flexDirection: 'row',
-        justifyContent: 'space-between',
         alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingLeft: 5,
+        paddingRight: 5,
         opacity: !!group.hidden ? 0.5 : undefined,
-        paddingLeft: 0,
         backgroundColor: monthUtils.isCurrentMonth(month)
           ? theme.budgetHeaderCurrentMonth
           : theme.budgetHeaderOtherMonth,
@@ -137,14 +140,14 @@ function IncomeGroupHeader({
         onToggleCollapse={onToggleCollapse}
       />
       <IncomeGroupCells group={group} />
-    </ListItem>
+    </View>
   );
 }
 
 type IncomeGroupNameProps = {
   group: CategoryGroupEntity;
   onEdit: (id: CategoryGroupEntity['id']) => void;
-  isCollapsed: boolean;
+  isCollapsed: (id: CategoryGroupEntity['id']) => boolean;
   onToggleCollapse: (id: CategoryGroupEntity['id']) => void;
 };
 
@@ -184,7 +187,7 @@ function IncomeGroupName({
           style={{
             flexShrink: 0,
             transition: 'transform .1s',
-            transform: isCollapsed ? 'rotate(-90deg)' : '',
+            transform: isCollapsed(group.id) ? 'rotate(-90deg)' : '',
           }}
         />
       </Button>
