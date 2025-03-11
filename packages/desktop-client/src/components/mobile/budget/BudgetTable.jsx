@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -266,13 +266,23 @@ function BudgetGroups({
   const [collapsedGroupIds = [], setCollapsedGroupIdsPref] =
     useLocalPref('budget.collapsed');
 
-  const onToggleCollapse = id => {
-    setCollapsedGroupIdsPref(
-      collapsedGroupIds.includes(id)
-        ? collapsedGroupIds.filter(collapsedId => collapsedId !== id)
-        : [...collapsedGroupIds, id],
-    );
-  };
+  const onToggleCollapse = useCallback(
+    id => {
+      setCollapsedGroupIdsPref(
+        collapsedGroupIds.includes(id)
+          ? collapsedGroupIds.filter(collapsedId => collapsedId !== id)
+          : [...collapsedGroupIds, id],
+      );
+    },
+    [collapsedGroupIds, setCollapsedGroupIdsPref],
+  );
+
+  const isCollapsed = useCallback(
+    id => {
+      return collapsedGroupIds.includes(id);
+    },
+    [collapsedGroupIds],
+  );
 
   return (
     <View
@@ -294,7 +304,7 @@ function BudgetGroups({
               onBudgetAction={onBudgetAction}
               show3Columns={show3Columns}
               showHiddenCategories={showHiddenCategories}
-              isCollapsed={collapsedGroupIds.includes(group.id)}
+              isCollapsed={isCollapsed}
               onToggleCollapse={onToggleCollapse}
             />
           );
@@ -308,7 +318,7 @@ function BudgetGroups({
           onEditGroup={onEditGroup}
           onEditCategory={onEditCategory}
           onBudgetAction={onBudgetAction}
-          isCollapsed={collapsedGroupIds.includes(incomeGroup.id)}
+          isCollapsed={isCollapsed}
           onToggleCollapse={onToggleCollapse}
         />
       )}
