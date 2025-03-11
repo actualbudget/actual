@@ -217,9 +217,28 @@ function Footer({
             }}
           >
             {!emptySplitTransaction ? (
-              <Trans>Add new split - {{ amount : integerToCurrency(transaction.amount > 0 ? transaction.error.difference : -transaction.error.difference)}} left</Trans>
+              <Trans>
+                Add new split -{' '}
+                {{
+                  amount: integerToCurrency(
+                    transaction.amount > 0
+                      ? transaction.error.difference
+                      : -transaction.error.difference,
+                  ),
+                }}{' '}
+                left
+              </Trans>
             ) : (
-              <Trans>Amount left: {{ amount : integerToCurrency(transaction.amount > 0 ? transaction.error.difference : -transaction.error.difference)}}</Trans>
+              <Trans>
+                Amount left:{' '}
+                {{
+                  amount: integerToCurrency(
+                    transaction.amount > 0
+                      ? transaction.error.difference
+                      : -transaction.error.difference,
+                  ),
+                }}
+              </Trans>
             )}
           </Text>
         </Button>
