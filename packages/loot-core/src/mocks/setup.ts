@@ -1,7 +1,7 @@
 // @ts-strict-ignore
 import * as nativeFs from 'fs';
 
-import * as fetchClient from '../platform/client/fetch';
+import * as fetchClient from '../platform/client/fetch/index.web';
 import * as sqlite from '../platform/server/sqlite';
 import * as db from '../server/db';
 import {
