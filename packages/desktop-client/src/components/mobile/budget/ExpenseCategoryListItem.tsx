@@ -542,6 +542,7 @@ export function ExpenseCategoryListItem({
           show3Columns={show3Columns}
         />
         <ExpenseCategoryCells
+          key={`${category.id}-${show3Columns}-${showBudgetedColumn}`}
           category={category}
           month={month}
           onBudgetAction={onBudgetAction}

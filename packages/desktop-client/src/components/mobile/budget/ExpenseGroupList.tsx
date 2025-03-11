@@ -5,37 +5,42 @@ import { useTranslation } from 'react-i18next';
 import { theme } from '@actual-app/components/theme';
 import { css } from '@emotion/css';
 
-import { moveCategory } from 'loot-core/client/queries/queriesSlice';
+import { moveCategoryGroup } from 'loot-core/client/queries/queriesSlice';
 import {
-  type CategoryGroupEntity,
   type CategoryEntity,
+  type CategoryGroupEntity,
 } from 'loot-core/types/models';
 
+import { useLocalPref } from '../../../hooks/useLocalPref';
 import { useDispatch } from '../../../redux';
 
-import { ExpenseCategoryListItem } from './ExpenseCategoryListItem';
+import { ExpenseGroupListItem } from './ExpenseGroupListItem';
 
-type ExpenseCategoryListProps = {
-  group: CategoryGroupEntity;
-  categories: CategoryEntity[];
-  shouldHideCategory: (category: CategoryEntity) => boolean;
-  month: string;
-  onEditCategory: (id: string) => void;
-  onBudgetAction: (month: string, action: string, args: unknown) => void;
+type ExpenseGroupListProps = {
+  groups: CategoryGroupEntity[];
   show3Columns: boolean;
   showBudgetedColumn: boolean;
+  month: string;
+  onEditGroup: (id: CategoryGroupEntity['id']) => void;
+  onEditCategory: (id: CategoryEntity['id']) => void;
+  onBudgetAction: (month: string, action: string, args: unknown) => void;
+  showHiddenCategories: boolean;
+  isCollapsed: (id: CategoryGroupEntity['id']) => boolean;
+  onToggleCollapse: (id: CategoryGroupEntity['id']) => void;
 };
 
-export function ExpenseCategoryList({
-  group,
-  categories,
-  month,
-  onEditCategory,
-  onBudgetAction,
+export function ExpenseGroupList({
+  groups,
   show3Columns,
   showBudgetedColumn,
-  shouldHideCategory,
-}: ExpenseCategoryListProps) {
+  month,
+  onEditGroup,
+  onEditCategory,
+  onBudgetAction,
+  showHiddenCategories,
+  isCollapsed,
+  onToggleCollapse,
+}: ExpenseGroupListProps) {
   const { t } = useTranslation();
   const dispatch = useDispatch();
 
@@ -64,48 +69,38 @@ export function ExpenseCategoryList({
     },
     onReorder: e => {
       const [key] = e.keys;
-      const categoryIdToMove = key as CategoryEntity['id'];
-      const categoryToMove = categories.find(c => c.id === categoryIdToMove);
+      const groupIdToMove = key as CategoryGroupEntity['id'];
+      const groupToMove = groups.find(c => c.id === groupIdToMove);
 
-      if (!categoryToMove) {
+      if (!groupToMove) {
         throw new Error(
-          `Internal error: category with ID ${categoryIdToMove} not found.`,
+          `Internal error: category group with ID ${groupIdToMove} not found.`,
         );
       }
 
-      if (!categoryToMove.cat_group) {
-        throw new Error(
-          `Internal error: category ${categoryIdToMove} is not in a group and cannot be moved.`,
-        );
-      }
-
-      const targetCategoryId = e.target.key as CategoryEntity['id'];
+      const targetGroupId = e.target.key as CategoryEntity['id'];
 
       if (e.target.dropPosition === 'before') {
         dispatch(
-          moveCategory({
-            id: categoryToMove.id,
-            groupId: categoryToMove.cat_group,
-            targetId: targetCategoryId,
+          moveCategoryGroup({
+            id: groupToMove.id,
+            targetId: targetGroupId,
           }),
         );
       } else if (e.target.dropPosition === 'after') {
-        const targetCategoryIndex = categories.findIndex(
-          c => c.id === targetCategoryId,
-        );
+        const targetGroupIndex = groups.findIndex(c => c.id === targetGroupId);
 
-        if (targetCategoryIndex === -1) {
+        if (targetGroupIndex === -1) {
           throw new Error(
-            `Internal error: category with ID ${targetCategoryId} not found.`,
+            `Internal error: category group with ID ${targetGroupId} not found.`,
           );
         }
 
-        const nextToTargetCategory = categories[targetCategoryIndex + 1];
+        const nextToTargetCategory = groups[targetGroupIndex + 1];
 
         dispatch(
-          moveCategory({
-            id: categoryToMove.id,
-            groupId: categoryToMove.cat_group,
+          moveCategoryGroup({
+            id: groupToMove.id,
             // Due to the way `moveCategory` works, we use the category next to the
             // actual target category here because `moveCategory` always shoves the
             // category *before* the target category.
@@ -120,30 +115,34 @@ export function ExpenseCategoryList({
 
   return (
     <GridList
-      aria-label={t('{{groupName}} expense group categories', {
-        groupName: group.name,
-      })}
-      items={categories}
-      dragAndDropHooks={dragAndDropHooks}
+      aria-label={t('Expense category groups')}
+      items={groups}
       dependencies={[
         month,
+        onEditGroup,
         onEditCategory,
         onBudgetAction,
-        shouldHideCategory,
         show3Columns,
         showBudgetedColumn,
+        showHiddenCategories,
+        isCollapsed,
+        onToggleCollapse,
       ]}
+      dragAndDropHooks={dragAndDropHooks}
     >
-      {category => (
-        <ExpenseCategoryListItem
-          key={category.id}
-          value={category}
+      {group => (
+        <ExpenseGroupListItem
+          key={group.id}
+          value={group}
           month={month}
-          onEdit={onEditCategory}
+          onEditGroup={onEditGroup}
+          onEditCategory={onEditCategory}
           onBudgetAction={onBudgetAction}
-          isHidden={shouldHideCategory(category)}
-          show3Columns={show3Columns}
           showBudgetedColumn={showBudgetedColumn}
+          show3Columns={show3Columns}
+          showHiddenCategories={showHiddenCategories}
+          isCollapsed={isCollapsed}
+          onToggleCollapse={onToggleCollapse}
         />
       )}
     </GridList>
