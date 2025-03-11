@@ -1,7 +1,6 @@
 // @ts-strict-ignore
 import { v4 as uuidv4 } from 'uuid';
 
-import { type CategoryGroupEntity } from '../../../types/models';
 import * as undo from '../undo';
 
 import type * as T from './index.d';
