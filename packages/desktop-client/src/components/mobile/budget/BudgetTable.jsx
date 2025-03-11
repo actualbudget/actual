@@ -295,7 +295,8 @@ function BudgetGroups({
         .map(group => {
           return (
             <ExpenseGroup
-              key={group.id}
+              // Re-render when columns are toggled.
+              key={`${group.id}|${show3Columns}|${showBudgetedColumn}`}
               group={group}
               showBudgetedColumn={showBudgetedColumn}
               month={month}
