@@ -151,9 +151,8 @@ function Notification({
       if (Math.abs(deltaX) > threshold || velocity > 0.5) {
         // Animate out & remove item after animation
         api.start({
-          x: direction * 300,
+          x: direction * 1000,
           opacity: 0,
-          config: { tension: 200, friction: 20 },
           onRest: onRemove,
         });
         setIsSwiped(true);
