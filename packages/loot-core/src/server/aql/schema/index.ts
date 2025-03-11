@@ -67,6 +67,7 @@ export const schema = {
     purchase_price: f('integer', { default: 0, required: true }),
     imported_id: f('string'),
     raw_synced_data: f('string'),
+    tombstone: f('boolean'),
   },
   payees: {
     id: f('id'),

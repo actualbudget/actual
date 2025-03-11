@@ -13,9 +13,11 @@ import {
   hasFieldsChanged,
   amountToInteger,
   integerToAmount,
+  currencyToInteger,
 } from '../../shared/util';
 import {
   AccountEntity,
+  BankSyncHolding,
   BankSyncResponse,
   SimpleFinBatchSyncResponse,
   TransactionEntity,
@@ -35,6 +37,7 @@ import {
 
 import { getStartingBalancePayee } from './payees';
 import { title } from './title';
+import { HoldingEntity } from 'loot-core/types/models/holding';
 
 function BankSyncError(type: string, code: string, details?: object) {
   return { type: 'BankSyncError', category: type, code, details };
@@ -216,9 +219,11 @@ async function downloadSimpleFinTransactions(
     throw BankSyncError('TIMED_OUT', 'TIMED_OUT');
   }
 
+  console.log('testing');
   if (Object.keys(res).length === 0) {
     throw BankSyncError('NO_DATA', 'NO_DATA');
   }
+  console.log('testing2');
   if (res.error_code) {
     throw BankSyncError(res.error_type, res.error_code);
   }
@@ -236,6 +241,7 @@ async function downloadSimpleFinTransactions(
         transactions: data?.transactions?.all,
         accountBalance: data?.balances,
         startingBalance: data?.startingBalance,
+        holdings: data?.holdings ?? [],
       };
 
       if (error) {
@@ -247,6 +253,7 @@ async function downloadSimpleFinTransactions(
     const singleRes = res as BankSyncResponse;
     retVal = {
       transactions: singleRes.transactions.all,
+      holdings: singleRes.holdings ?? [],
       accountBalance: singleRes.balances,
       startingBalance: singleRes.startingBalance,
     };
@@ -896,7 +903,11 @@ async function processBankSyncDownload(
     });
   }
 
-  const { transactions: originalTransactions, accountBalance } = download;
+  const {
+    transactions: originalTransactions,
+    accountBalance,
+    holdings,
+  } = download;
 
   if (originalTransactions.length === 0) {
     return { added: [], updated: [] };
@@ -907,7 +918,7 @@ async function processBankSyncDownload(
     account: id,
   }));
 
-  return runMutator(async () => {
+  const transactionPromise = runMutator(async () => {
     const result = await reconcileTransactions(
       id,
       transactions,
@@ -919,6 +930,36 @@ async function processBankSyncDownload(
 
     return result;
   });
+  console.log('holdings are as follows', holdings);
+  const holdingPromise = runMutator(async () => {
+    if (acctRow.type !== 'investment') {
+      return;
+    }
+
+    const promises = [] as Promise<unknown>[];
+    for (const holding of holdings) {
+      const h = holding as BankSyncHolding;
+      const p = db.insertHolding({
+        id: uuidv4(),
+        imported_id: h.holdingId,
+        account: id,
+        symbol: h.symbol,
+        title: h.description,
+        shares: currencyToInteger(h.shares),
+        market_value: currencyToInteger(h.currentUnitPrice),
+        purchase_price: currencyToInteger(h.purchasedUnitPrice),
+        tombstone: 0,
+      } as db.DbHolding);
+      promises.push(p);
+    }
+    await Promise.all(promises);
+  });
+
+  const [syncResponse] = await Promise.all([
+    transactionPromise,
+    holdingPromise,
+  ]);
+  return syncResponse;
 }
 
 export async function syncAccount(
@@ -934,6 +975,7 @@ export async function syncAccount(
   const oldestTransaction = await getAccountOldestTransaction(id);
   const newAccount = oldestTransaction == null;
 
+  console.log('before download');
   let download;
   if (acctRow.account_sync_source === 'simpleFin') {
     download = await downloadSimpleFinTransactions(acctId, syncStartDate);
@@ -953,6 +995,7 @@ export async function syncAccount(
       `Unrecognized bank-sync provider: ${acctRow.account_sync_source}`,
     );
   }
+  console.log('after download');
 
   return processBankSyncDownload(download, id, acctRow, newAccount);
 }

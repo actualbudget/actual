@@ -249,6 +249,21 @@ function getAccountResponse(results, accountId, startDate) {
   const pendingSorted = pending.sort(sortFunction);
   const allSorted = all.sort(sortFunction);
 
+  const holdings = account.holdings.map(x => ({
+    holdingId: x.id,
+    symbol: x.symbol,
+    description: x.description,
+    created: getDate(new Date(x.created * 1000)),
+    currency: x.currency,
+    shares: x.shares,
+    purchasedUnitPrice: x.purchase_price,
+    purchasedTotalPrice: x.cost_basis,
+    currentUnitPrice: (
+      parseFloat(x.market_value) / (parseFloat(x.shares) || 1)
+    ).toFixed(2),
+    currentTotalPrice: x.market_value,
+  }));
+
   return {
     balances,
     startingBalance,
@@ -257,6 +272,7 @@ function getAccountResponse(results, accountId, startDate) {
       booked: bookedSorted,
       pending: pendingSorted,
     },
+    holdings,
   };
 }
 
