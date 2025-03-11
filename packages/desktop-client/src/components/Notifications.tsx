@@ -7,6 +7,8 @@ import React, {
   type CSSProperties,
 } from 'react';
 import { useTranslation } from 'react-i18next';
+import { animated, useSpring } from 'react-spring';
+import { useSwipeable } from 'react-swipeable';
 
 import { Button, ButtonWithLoading } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
@@ -132,17 +134,52 @@ function Notification({
     ? { minHeight: styles.mobileMinHeight }
     : {};
 
+  const [isSwiped, setIsSwiped] = useState(false);
+  const [spring, api] = useSpring(() => ({ x: 0, opacity: 1 }));
+
+  const swipeHandlers = useSwipeable({
+    onSwiping: ({ deltaX }) => {
+      if (!isSwiped) {
+        api.start({ x: deltaX });
+      }
+    },
+    onSwiped: ({ velocity, deltaX }) => {
+      // Distance to trigger deletion
+      const threshold = 100;
+      const direction = deltaX > 0 ? 1 : -1;
+
+      if (Math.abs(deltaX) > threshold || velocity > 0.5) {
+        // Animate out & remove item after animation
+        api.start({
+          x: direction * 300,
+          opacity: 0,
+          config: { tension: 200, friction: 20 },
+          onRest: onRemove,
+        });
+        setIsSwiped(true);
+      } else {
+        // Reset position if not swiped far enough
+        api.start({ x: 0 });
+      }
+    },
+    trackMouse: true,
+  });
+
   return (
-    <View
+    <animated.div
       role="alert"
       style={{
+        ...spring,
         marginTop: 10,
         color: positive
           ? theme.noticeText
           : error
             ? theme.errorTextDark
             : theme.warningTextDark,
+        // Prevents scrolling conflicts
+        touchAction: 'none',
       }}
+      {...swipeHandlers}
     >
       <Stack
         align="center"
@@ -237,10 +274,10 @@ function Notification({
         <Button
           variant="bare"
           aria-label={t('Close')}
-          style={{ flexShrink: 0, color: 'currentColor' }}
+          style={{ padding: 10, color: 'currentColor' }}
           onPress={onRemove}
         >
-          <SvgDelete style={{ width: 9, height: 9, color: 'currentColor' }} />
+          <SvgDelete style={{ width: 10, height: 10 }} />
         </Button>
       </Stack>
       {overlayLoading && (
@@ -261,7 +298,7 @@ function Notification({
           />
         </View>
       )}
-    </View>
+    </animated.div>
   );
 }
 
