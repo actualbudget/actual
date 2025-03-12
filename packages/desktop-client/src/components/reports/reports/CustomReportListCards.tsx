@@ -12,7 +12,7 @@ import { addNotification } from 'loot-core/client/notifications/notificationsSli
 import { calculateHasWarning } from 'loot-core/client/reports';
 import { send, sendCatch } from 'loot-core/platform/client/fetch/index';
 import * as monthUtils from 'loot-core/shared/months';
-import { type CustomReportEntity } from 'loot-core/types/models/reports';
+import { type CustomReportEntity } from 'loot-core/types/models';
 
 import { useAccounts } from '../../../hooks/useAccounts';
 import { useCategories } from '../../../hooks/useCategories';

@@ -8,8 +8,10 @@ import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
 import { send, sendCatch } from 'loot-core/platform/client/fetch';
-import { type TransactionFilterEntity } from 'loot-core/types/models';
-import { type RuleConditionEntity } from 'loot-core/types/models/rule';
+import {
+  type TransactionFilterEntity,
+  type RuleConditionEntity,
+} from 'loot-core/types/models';
 
 import { FilterMenu } from './FilterMenu';
 import { NameFilter } from './NameFilter';
