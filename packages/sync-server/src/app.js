@@ -12,7 +12,7 @@ import * as goCardlessApp from './app-gocardless/app-gocardless.js';
 import * as openidApp from './app-openid.js';
 import * as pluggai from './app-pluggyai/app-pluggyai.js';
 import * as secretApp from './app-secrets.js';
-import * as simpleFinApp from './app-simplefin/app-simplefin.js';
+import * as simpleFinApp from './app-simplefin/app-simplefin.ts';
 import * as syncApp from './app-sync.js';
 import { config } from './load-config.js';
 
