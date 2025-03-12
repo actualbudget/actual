@@ -5,7 +5,7 @@
   "description": "actual syncing server",
   "type": "module",
   "scripts": {
-    "start": "node app",
+    "start": "npx tsx app",
     "start-monitor": "nodemon app",
     "lint": "eslint . --max-warnings 0",
     "lint:fix": "eslint . --fix",

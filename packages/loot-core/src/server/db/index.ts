@@ -39,6 +39,7 @@ import {
   DbCategory,
   DbCategoryGroup,
   DbClockMessage,
+  DbHolding,
   DbPayee,
   DbTransaction,
   DbViewTransaction,
@@ -756,15 +757,28 @@ export async function deleteTransaction(transaction) {
   return delete_('transactions', transaction.id);
 }
 
-export function insertHolding(holding) {
+export async function getHoldingByAccountAndImportedId(
+  accountId: DbAccount['id'],
+  importedId: DbHolding['imported_id'],
+): Promise<DbHolding | null> {
+  return selectFirstWithSchema(
+    'holdings',
+    'SELECT * FROM holdings WHERE imported_id = ? AND account= ?',
+    [importedId, accountId],
+  );
+}
+
+export function insertHolding(holding: DbHolding) {
   return insertWithSchema('holdings', holding);
 }
 
-export function updateHolding(holding) {
+export function updateHolding(
+  holding: Partial<DbHolding> & { id: DbHolding['id'] },
+) {
   return updateWithSchema('holdings', holding);
 }
 
-export function deleteHolding(holding) {
+export function deleteHolding(holding: { id: DbHolding['id'] }) {
   return delete_('holdings', holding.id);
 }
 

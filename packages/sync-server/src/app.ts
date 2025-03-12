@@ -12,7 +12,7 @@ import * as goCardlessApp from './app-gocardless/app-gocardless.js';
 import * as openidApp from './app-openid.js';
 import * as pluggai from './app-pluggyai/app-pluggyai.js';
 import * as secretApp from './app-secrets.js';
-import * as simpleFinApp from './app-simplefin/app-simplefin.ts';
+import * as simpleFinApp from './app-simplefin/app-simplefin';
 import * as syncApp from './app-sync.js';
 import { config } from './load-config.js';
 
@@ -87,7 +87,7 @@ if (process.env.NODE_ENV === 'development') {
       target: 'http://localhost:3001',
       changeOrigin: true,
       ws: true,
-      logLevel: 'debug',
+      // logLevel: 'debug', removed in v3 https://github.com/chimurai/http-proxy-middleware/blob/master/recipes/logLevel.md
     }),
   );
 } else {
@@ -99,7 +99,7 @@ if (process.env.NODE_ENV === 'development') {
   );
 }
 
-function parseHTTPSConfig(value) {
+function parseHTTPSConfig(value: string) {
   if (value.startsWith('-----BEGIN')) {
     return value;
   }
@@ -110,15 +110,15 @@ export async function run() {
   if (config.get('https.key') && config.get('https.cert')) {
     const https = await import('node:https');
     const httpsOptions = {
-      ...config.https,
+      ...config.get('https'),
       key: parseHTTPSConfig(config.get('https.key')),
       cert: parseHTTPSConfig(config.get('https.cert')),
     };
     https
       .createServer(httpsOptions, app)
-      .listen(config.get('port'), config.get('hostname'));
+      .listen(config.get('port') as number, config.get('hostname'));
   } else {
-    app.listen(config.get('port'), config.get('hostname'));
+    app.listen(config.get('port') as number, config.get('hostname'));
   }
 
   console.log(

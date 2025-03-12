@@ -844,7 +844,7 @@ async function processBankSyncDownload(
   const useStrictIdChecking = !acctRow.account_sync_source;
 
   if (initialSync) {
-    const { transactions } = download;
+    const { transactions, holdings } = download;
     let balanceToUse = download.startingBalance;
 
     if (acctRow.account_sync_source === 'simpleFin') {
@@ -874,6 +874,10 @@ async function processBankSyncDownload(
         : monthUtils.currentDay();
 
     const payee = await getStartingBalancePayee();
+
+    await Promise.all(
+      holdings.map((holding: BankSyncHolding) => upsertHolding(id, holding)),
+    );
 
     return runMutator(async () => {
       const initialId = await db.insertTransaction({
@@ -932,23 +936,9 @@ async function processBankSyncDownload(
       return;
     }
 
-    const promises = [] as Promise<unknown>[];
-    for (const holding of holdings) {
-      const h = holding as BankSyncHolding;
-      const p = db.insertHolding({
-        id: uuidv4(),
-        imported_id: h.holdingId,
-        account: id,
-        symbol: h.symbol,
-        title: h.description,
-        shares: currencyToInteger(h.shares),
-        market_value: currencyToInteger(h.currentUnitPrice),
-        purchase_price: currencyToInteger(h.purchasedUnitPrice),
-        tombstone: 0,
-      } as db.DbHolding);
-      promises.push(p);
-    }
-    await Promise.all(promises);
+    await Promise.all(
+      holdings.map((holding: BankSyncHolding) => upsertHolding(id, holding)),
+    );
   });
 
   const [syncResponse] = await Promise.all([
@@ -956,6 +946,38 @@ async function processBankSyncDownload(
     holdingPromise,
   ]);
   return syncResponse;
+}
+
+async function upsertHolding(
+  accountId: AccountEntity['id'],
+  h: BankSyncHolding,
+): Promise<unknown> {
+  const existingHolding = await db.getHoldingByAccountAndImportedId(
+    accountId,
+    h.holdingId,
+  );
+  if (existingHolding) {
+    console.log('updating values for', existingHolding.symbol, existingHolding);
+    return db.updateHolding({
+      id: existingHolding.id,
+      shares: currencyToInteger(h.shares),
+      market_value: currencyToInteger(h.currentUnitPrice),
+      purchase_price: currencyToInteger(h.purchasedUnitPrice),
+    });
+  }
+
+  console.log('inserting new values for', existingHolding.symbol);
+  return db.insertHolding({
+    id: uuidv4(),
+    account: accountId,
+    imported_id: h.holdingId,
+    symbol: h.symbol,
+    title: h.description,
+    shares: currencyToInteger(h.shares),
+    market_value: currencyToInteger(h.currentUnitPrice),
+    purchase_price: currencyToInteger(h.purchasedUnitPrice),
+    tombstone: 0,
+  } satisfies db.DbHolding);
 }
 
 export async function syncAccount(
