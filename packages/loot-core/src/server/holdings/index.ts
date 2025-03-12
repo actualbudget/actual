@@ -15,7 +15,7 @@ app.method('holding-update', mutator(updateHolding));
 app.method('holding-delete', mutator(deleteHolding));
 
 async function addHolding(holding: HoldingEntity) {
-  await db.insertHolding(holding);
+  await db.insertHolding({ ...holding, tombstone: 0 });
 }
 
 async function updateHolding(holding: HoldingEntity) {
