@@ -1,0 +1,31 @@
+:root.theme-dark {
+  /* Dark theme variables */
+  --background-default: #0e1a25;
+  --background-float: #172a3d;
+  --background-dip: #000;
+  --fill-float: #172a3d;
+  --fill-float-hover: #1f3951;
+  --fill-ghost: #325576;
+  --fill-ghost-hover: #3c648b;
+  --fill-primary: #9446ed;
+  --fill-primary-hover: #8719e0;
+  --fill-primary-pressed: #7a0ecc;
+  --fill-separator: #3c648b;
+  --foreground-contrast: #eef2f6;
+  --foreground-dim: #cdd9e4;
+  --foreground-disabled: #3c648b;
+  --foreground-match-background: #0e1a25;
+  --foreground-error: #ff9b9a;
+  --foreground-primary: #b990ff;
+  --foreground-primary-contrast: #efe5ff;
+  --foreground-success: #65d6ad;
+  --border-default: #3c648b;
+  --border-hint: #325576;
+  --border-emphasized: #b990ff;
+  --always-dark-fill-float: #172a3d;
+  --always-dark-fill-float-hover: #1f3951;
+  --always-dark-fill-ghost: #325576;
+  --always-dark-fill-separator: #3c648b;
+  --always-dark-foreground-contrast: #f8fafb;
+  --always-dark-foreground-primary: #b990ff;
+}

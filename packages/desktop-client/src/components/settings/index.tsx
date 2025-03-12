@@ -76,23 +76,19 @@ function About() {
           <Trans>Server version: {{ version }}</Trans>
         </Text>
         {isOutdated ? (
-          <Link
-            variant="external"
-            to="https://actualbudget.org/docs/releases"
-            linkColor="purple"
-          >
+          <Link variant="external" to="https://actualbudget.org/docs/releases">
             <Trans>New version available: {{ latestVersion }}</Trans>
           </Link>
         ) : (
-          <Text style={{ color: theme.noticeText, fontWeight: 600 }}>
+          <Text style={{ color: 'var(--foreground-success)', fontWeight: 600 }}>
             <Trans>You’re up to date!</Trans>
           </Text>
         )}
         <Text>
           <Link
+            linkColor="purple"
             variant="external"
             to="https://actualbudget.org/docs/releases"
-            linkColor="purple"
           >
             <Trans>Release Notes</Trans>
           </Link>
@@ -168,6 +164,8 @@ export function Settings() {
       style={{
         marginInline: floatingSidebar && !isNarrowWidth ? 'auto' : 0,
         paddingBottom: MOBILE_NAV_HEIGHT,
+        background: 'var(--background-default)',
+        color: 'var(--foreground-contrast)',
       }}
     >
       <View

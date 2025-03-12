@@ -4,9 +4,7 @@ import { useTranslation, Trans } from 'react-i18next';
 
 import { Select } from '@actual-app/components/select';
 import { Text } from '@actual-app/components/text';
-import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import { css } from '@emotion/css';
 
 import { numberFormats } from 'loot-core/shared/util';
 import { type SyncedPrefs } from 'loot-core/types/prefs';
@@ -78,12 +76,6 @@ export function FormatSettings() {
 
   const { daysOfWeek } = useDaysOfWeek();
 
-  const selectButtonClassName = css({
-    '&[data-hovered]': {
-      backgroundColor: theme.buttonNormalBackgroundHover,
-    },
-  });
-
   return (
     <Setting
       primaryAction={
@@ -110,7 +102,6 @@ export function FormatSettings() {
                 f.value,
                 String(hideFraction) === 'true' ? f.labelNoFraction : f.label,
               ])}
-              className={selectButtonClassName}
             />
 
             <Text style={{ display: 'flex' }}>
@@ -132,7 +123,6 @@ export function FormatSettings() {
               value={dateFormat}
               onChange={format => setDateFormatPref(format)}
               options={dateFormats.map(f => [f.value, f.label])}
-              className={selectButtonClassName}
             />
           </Column>
 
@@ -141,7 +131,6 @@ export function FormatSettings() {
               value={firstDayOfWeekIdx}
               onChange={idx => setFirstDayOfWeekIdxPref(idx)}
               options={daysOfWeek.map(f => [f.value, f.label])}
-              className={selectButtonClassName}
             />
           </Column>
         </View>

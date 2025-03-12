@@ -17,11 +17,11 @@ import { View } from './View';
 const backgroundColor: {
   [key in ButtonVariant | `${ButtonVariant}Disabled`]?: string;
 } = {
-  normal: theme.buttonNormalBackground,
+  normal: 'transparent',
   normalDisabled: theme.buttonNormalDisabledBackground,
   primary: theme.buttonPrimaryBackground,
   primaryDisabled: theme.buttonPrimaryDisabledBackground,
-  bare: theme.buttonBareBackground,
+  bare: 'transparent',
   bareDisabled: theme.buttonBareDisabledBackground,
   menu: theme.buttonMenuBackground,
   menuSelected: theme.buttonMenuSelectedBackground,
@@ -31,9 +31,9 @@ const backgroundColorHover: Record<
   ButtonVariant | `${ButtonVariant}Disabled`,
   CSSProperties['backgroundColor']
 > = {
-  normal: theme.buttonNormalBackgroundHover,
+  normal: 'var(--fill-float-hover)',
   primary: theme.buttonPrimaryBackgroundHover,
-  bare: theme.buttonBareBackgroundHover,
+  bare: 'var(--fill-ghost)',
   menu: theme.buttonMenuBackgroundHover,
   menuSelected: theme.buttonMenuSelectedBackgroundHover,
   normalDisabled: 'transparent',
@@ -48,7 +48,20 @@ const borderColor: {
     | ButtonVariant
     | `${ButtonVariant}Disabled`]?: CSSProperties['borderColor'];
 } = {
-  normal: theme.buttonNormalBorder,
+  normal: 'var(--border-hint)',
+  normalDisabled: theme.buttonNormalDisabledBorder,
+  primary: theme.buttonPrimaryBorder,
+  primaryDisabled: theme.buttonPrimaryDisabledBorder,
+  menu: theme.buttonMenuBorder,
+  menuSelected: theme.buttonMenuSelectedBorder,
+};
+
+const borderColorHover: {
+  [key in
+    | ButtonVariant
+    | `${ButtonVariant}Disabled`]?: CSSProperties['borderColor'];
+} = {
+  normal: 'var(--border-default)',
   normalDisabled: theme.buttonNormalDisabledBorder,
   primary: theme.buttonPrimaryBorder,
   primaryDisabled: theme.buttonPrimaryDisabledBorder,
@@ -59,11 +72,11 @@ const borderColor: {
 const textColor: {
   [key in ButtonVariant | `${ButtonVariant}Disabled`]?: CSSProperties['color'];
 } = {
-  normal: theme.buttonNormalText,
+  normal: 'var(--foreground-contrast)',
   normalDisabled: theme.buttonNormalDisabledText,
   primary: theme.buttonPrimaryText,
   primaryDisabled: theme.buttonPrimaryDisabledText,
-  bare: theme.buttonBareText,
+  bare: 'var(--foreground-contrast)',
   bareDisabled: theme.buttonBareDisabledText,
   menu: theme.buttonMenuText,
   menuSelected: theme.buttonMenuSelectedText,
@@ -72,9 +85,7 @@ const textColor: {
 const textColorHover: {
   [key in ButtonVariant]?: string;
 } = {
-  normal: theme.buttonNormalTextHover,
   primary: theme.buttonPrimaryTextHover,
-  bare: theme.buttonBareTextHover,
   menu: theme.buttonMenuTextHover,
   menuSelected: theme.buttonMenuSelectedTextHover,
 };
@@ -104,6 +115,7 @@ const _getPadding = (variant: ButtonVariant): string => {
 const _getHoveredStyles = (variant: ButtonVariant): CSSProperties => ({
   ...(variant !== 'bare' && styles.shadow),
   backgroundColor: backgroundColorHover[variant],
+  borderColor: borderColorHover[variant],
   color: textColorHover[variant],
   cursor: 'pointer',
 });

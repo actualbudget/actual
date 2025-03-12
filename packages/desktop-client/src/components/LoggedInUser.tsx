@@ -226,7 +226,7 @@ export function LoggedInUser({
         ref={triggerRef}
         variant="bare"
         onPress={() => setMenuOpen(true)}
-        style={{ color: color || 'inherit' }}
+        style={{ color: 'var(-foreground-contrast)' || 'inherit' }}
       >
         {serverMessage()}
       </Button>

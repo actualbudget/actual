@@ -35,7 +35,7 @@ type InternalLinkProps = {
 };
 
 const externalLinkColors = {
-  purple: theme.pageTextPositive,
+  purple: 'var(--foreground-primary)',
   blue: theme.pageTextLink,
   muted: 'inherit',
 };

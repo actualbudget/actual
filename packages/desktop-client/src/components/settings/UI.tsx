@@ -5,7 +5,7 @@ import { useLocation } from 'react-router-dom';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
-import { type CSSProperties, theme } from '../../style';
+import { type CSSProperties } from '../../style';
 import { tokens } from '../../tokens';
 import { Link } from '../common/Link';
 
@@ -20,12 +20,14 @@ export const Setting = ({ primaryAction, style, children }: SettingProps) => {
     <View
       className={css([
         {
-          backgroundColor: theme.pillBackground,
+          backgroundColor: 'var(--background-float)',
           alignSelf: 'flex-start',
           alignItems: 'flex-start',
           padding: 15,
           borderRadius: 4,
-          border: '1px solid ' + theme.pillBorderDark,
+          border: '1px solid ',
+          borderColor: 'var(--border-hint)',
+          color: 'var(--foreground-contrast)',
           width: '100%',
         },
         style,
@@ -87,7 +89,7 @@ export const AdvancedToggle = ({ children }: AdvancedToggleProps) => {
       style={{
         flexShrink: 0,
         alignSelf: 'flex-start',
-        color: theme.pageTextPositive,
+        color: 'var(--foreground-primary)',
         marginBottom: 25,
       }}
     >

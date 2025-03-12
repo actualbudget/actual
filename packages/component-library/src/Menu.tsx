@@ -128,7 +128,12 @@ export function Menu<const NameType = string>({
   return (
     <View
       className={className}
-      style={{ outline: 'none', borderRadius: 4, overflow: 'hidden', ...style }}
+      style={{
+        outline: 'none',
+        borderRadius: 4,
+        overflow: 'hidden',
+        ...style,
+      }}
       tabIndex={1}
       innerRef={elRef}
     >
@@ -145,7 +150,7 @@ export function Menu<const NameType = string>({
             <Text
               key={idx}
               style={{
-                color: theme.menuItemTextHeader,
+                color: 'var(--foreground-contrast)',
                 fontSize: 11,
                 lineHeight: '1em',
                 textTransform: 'uppercase',
@@ -170,12 +175,12 @@ export function Menu<const NameType = string>({
               flexDirection: 'row',
               justifyContent: 'center',
               alignItems: 'center',
-              color: theme.menuItemText,
+              color: 'var(--foreground-contrast)',
               ...(item.disabled && { color: theme.buttonBareDisabledText }),
               ...(!item.disabled &&
                 hoveredIndex === idx && {
-                  backgroundColor: theme.menuItemBackgroundHover,
-                  color: theme.menuItemTextHover,
+                  backgroundColor: 'var(--fill-ghost)',
+                  color: 'var(--foreground-contrast)',
                 }),
               ...(!isLabel(item) && getItemStyle?.(item)),
             }}

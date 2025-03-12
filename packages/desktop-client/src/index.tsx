@@ -7,6 +7,9 @@ import './fonts.scss';
 
 import './i18n';
 
+import './style/themes/dark.css';
+import './style/themes/light.css';
+
 import React from 'react';
 import { Provider } from 'react-redux';
 

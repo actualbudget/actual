@@ -1,20 +1,10 @@
 import React, { type ReactNode } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 
-import { Select } from '@actual-app/components/select';
+import { Button } from '@actual-app/components/button';
 import { Text } from '@actual-app/components/text';
-import { theme as themeStyle } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import { css } from '@emotion/css';
 
-import { type DarkTheme, type Theme } from 'loot-core/types/prefs';
-
-import {
-  themeOptions,
-  useTheme,
-  usePreferredDarkTheme,
-  darkThemeOptions,
-} from '../../style';
 import { tokens } from '../../tokens';
 import { useSidebar } from '../sidebar/SidebarProvider';
 
@@ -39,8 +29,6 @@ function Column({ title, children }: { title: string; children: ReactNode }) {
 export function ThemeSettings() {
   const { t } = useTranslation();
   const sidebar = useSidebar();
-  const [theme, switchTheme] = useTheme();
-  const [darkTheme, switchDarkTheme] = usePreferredDarkTheme();
 
   return (
     <Setting
@@ -59,36 +47,17 @@ export function ThemeSettings() {
             },
           }}
         >
-          <Column title={t('Theme')}>
-            <Select<Theme>
-              onChange={value => {
-                switchTheme(value);
+          <Column title={t('CSS Variable Switch')}>
+            <Button
+              style={{ height: 27.5 }}
+              variant="normal"
+              onPress={() => {
+                document.documentElement.classList.toggle('theme-dark');
               }}
-              value={theme}
-              options={themeOptions}
-              className={css({
-                '&[data-hovered]': {
-                  backgroundColor: themeStyle.buttonNormalBackgroundHover,
-                },
-              })}
-            />
+            >
+              Switch theme
+            </Button>
           </Column>
-          {theme === 'auto' && (
-            <Column title={t('Dark theme')}>
-              <Select<DarkTheme>
-                onChange={value => {
-                  switchDarkTheme(value);
-                }}
-                value={darkTheme}
-                options={darkThemeOptions}
-                className={css({
-                  '&[data-hovered]': {
-                    backgroundColor: themeStyle.buttonNormalBackgroundHover,
-                  },
-                })}
-              />
-            </Column>
-          )}
         </View>
       }
     >

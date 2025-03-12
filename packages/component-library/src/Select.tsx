@@ -51,7 +51,6 @@ export function Select<const Value = string>({
   disabled = false,
   disabledKeys = [],
   style = {},
-  popoverStyle = {},
   className,
 }: SelectProps<Value>) {
   const targetOption = options
@@ -109,7 +108,10 @@ export function Select<const Value = string>({
         placement="bottom start"
         isOpen={isOpen}
         onOpenChange={() => setIsOpen(false)}
-        style={popoverStyle}
+        style={{
+          background: 'var(--background-float)',
+          border: '1px solid var(--border-hint)',
+        }}
       >
         <Menu
           onMenuSelect={item => {
