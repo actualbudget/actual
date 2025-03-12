@@ -94,7 +94,7 @@ export class CategoryTemplate {
     if (!considerBalance) this.fromLastMonth = 0;
     for (let i = 0; i < this.priorities.length; i++) {
       const p = this.priorities[i];
-      toBudget += await this.runTemplatesForPriority(p);
+      toBudget += await this.runTemplatesForPriority(p, 0, 0, true);
     }
     return toBudget;
   }
