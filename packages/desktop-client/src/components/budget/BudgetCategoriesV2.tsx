@@ -2072,7 +2072,7 @@ function ResizableColumn({ children, ...props }: ResizableColumnProps) {
               position: 'absolute',
               right: -6,
               width: 10,
-              backgroundColor: 'transparent',
+              backgroundColor: theme.tableBorder,
               height: '100%',
               touchAction: 'none',
               boxSizing: 'border-box',
