@@ -15,7 +15,7 @@ import {
 import {
   type balanceTypeOpType,
   type DataEntity,
-} from 'loot-core/types/models/reports';
+} from 'loot-core/types/models';
 
 import { useLocale } from '../../hooks/useLocale';
 import { PrivacyFilter } from '../PrivacyFilter';
