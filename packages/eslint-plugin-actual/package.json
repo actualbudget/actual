@@ -11,6 +11,7 @@
     "requireindex": "^1.2.0"
   },
   "devDependencies": {
+    "eslint": "^9.22.0",
     "eslint-plugin-eslint-plugin": "^5.5.1",
     "eslint-plugin-node": "^11.1.0",
     "eslint-vitest-rule-tester": "^0.7.1",

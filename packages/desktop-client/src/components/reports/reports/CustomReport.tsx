@@ -19,10 +19,10 @@ import { amountToCurrency } from 'loot-core/shared/util';
 import {
   type CategoryEntity,
   type balanceTypeOpType,
-  type sortByOpType,
   type CustomReportEntity,
   type DataEntity,
   type RuleConditionEntity,
+  type sortByOpType,
 } from 'loot-core/types/models';
 import { type TransObjectLiteral } from 'loot-core/types/util';
 
