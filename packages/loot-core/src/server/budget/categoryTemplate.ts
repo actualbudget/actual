@@ -89,13 +89,13 @@ export class CategoryTemplate {
   }
 
   // what is the full requested amount this month
-  async runAll(available: number) {
+  async getTotal(considerBalance: boolean = false) {
     let toBudget: number = 0;
+    if (!considerBalance) this.fromLastMonth = 0;
     for (let i = 0; i < this.priorities.length; i++) {
       const p = this.priorities[i];
-      toBudget += await this.runTemplatesForPriority(p, available, available);
+      toBudget += await this.runTemplatesForPriority(p);
     }
-    //TODO does this need to run limits? maybe pass in option to ignore previous balance?
     return toBudget;
   }
 
@@ -103,8 +103,9 @@ export class CategoryTemplate {
   // return: amount budgeted in this priority level
   async runTemplatesForPriority(
     priority: number,
-    budgetAvail: number,
-    availStart: number,
+    budgetAvail: number = 0,
+    availStart: number = 0,
+    preview: boolean = false,
   ): Promise<number> {
     if (!this.priorities.includes(priority)) return 0;
     if (this.limitMet) return 0;
@@ -192,7 +193,7 @@ export class CategoryTemplate {
       }
     }
     // don't overbudget when using a priority
-    if (priority > 0 && available < 0) {
+    if (priority > 0 && available < 0 && !preview) {
       this.fullAmount += toBudget;
       toBudget = Math.max(0, toBudget + available);
       this.toBudgetAmount += toBudget;
@@ -218,9 +219,10 @@ export class CategoryTemplate {
     return toBudget;
   }
 
-  getValues(): { budgeted; goal; longGoal } {
+  getValues(): { fullAmount; budgeted; goal; longGoal } {
     this.runGoal();
     return {
+      fullAmount: this.fullAmount,
       budgeted: this.toBudgetAmount,
       goal: this.goalAmount,
       longGoal: this.isLongGoal,

@@ -15,6 +15,7 @@ type BudgetMonthMenuProps = Omit<
   onCheckTemplates: () => void;
   onApplyBudgetTemplates: () => void;
   onOverwriteWithBudgetTemplates: () => void;
+  onGetFullTemplateAmount: () => void;
   onEndOfMonthCleanup: () => void;
 };
 export function BudgetMonthMenu({
@@ -24,6 +25,7 @@ export function BudgetMonthMenu({
   onCheckTemplates,
   onApplyBudgetTemplates,
   onOverwriteWithBudgetTemplates,
+  onGetFullTemplateAmount,
   onEndOfMonthCleanup,
   ...props
 }: BudgetMonthMenuProps) {
@@ -59,6 +61,9 @@ export function BudgetMonthMenu({
           case 'overwrite-goal-template':
             onOverwriteWithBudgetTemplates();
             break;
+          case 'get-full-template-amount':
+            onGetFullTemplateAmount();
+            break;
           case 'cleanup-goal-template':
             onEndOfMonthCleanup();
             break;
@@ -92,6 +97,10 @@ export function BudgetMonthMenu({
               {
                 name: 'overwrite-goal-template',
                 text: t('Overwrite with budget template'),
+              },
+              {
+                name: 'get-full-template-amount',
+                text: t('See full template amount'),
               },
               {
                 name: 'cleanup-goal-template',
