@@ -29,7 +29,7 @@ import { IncomeTotal } from './IncomeTotal';
 import { Saved } from './Saved';
 
 type BudgetSummaryProps = {
-  month?: string;
+  month: string;
 };
 export function BudgetSummary({ month }: BudgetSummaryProps) {
   const locale = useLocale();
