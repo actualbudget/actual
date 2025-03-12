@@ -7,7 +7,7 @@ export type SimpleFinTransactionsRequest = {
 };
 
 export type SimpleFinApiAccounts = {
-  errors: string[] | { [accountId: string]: string };
+  errors: { [accountId: string]: any[] };
   accounts: SimpleFinApiAccount[];
   sferrors: string[];
   hasError: boolean;

@@ -3,7 +3,10 @@ import https from 'https';
 import express, { Request, Response } from 'express';
 
 import type { BankSyncTransaction } from 'loot-core/src/types/models/bank-sync.js';
-import type { SimpleFinApiAccounts } from 'loot-core/src/types/models/simplefin.js';
+import type {
+  SimpleFinApiAccounts,
+  SimpleFinTransactionsRequest,
+} from 'loot-core/src/types/models/simplefin.js';
 
 import { handleError } from '../app-gocardless/util/handle-error.js';
 import { SecretName, secretsService } from '../services/secrets-service.js';
@@ -77,7 +80,7 @@ app.post(
 app.post(
   '/transactions',
   handleError(async (req: Request, res: Response) => {
-    const { accountId, startDate } = req.body;
+    const { accountId, startDate } = req.body as SimpleFinTransactionsRequest;
 
     const accessKey = secretsService.get(SecretName.simplefin_accessKey);
 
@@ -108,7 +111,7 @@ app.post(
         new Date(earliestStartDate),
       );
     } catch (e) {
-      if (e.message === 'Forbidden') {
+      if (e instanceof Error && e.message === 'Forbidden') {
         invalidToken(res);
       } else {
         serverDown(e, res);
@@ -116,13 +119,13 @@ app.post(
       return;
     }
 
-    let response = {};
-    if (Array.isArray(accountId)) {
+    let response: any;
+    if (Array.isArray(accountId) && Array.isArray(startDate)) {
       for (let i = 0; i < accountId.length; i++) {
         const id = accountId[i];
         response[id] = getAccountResponse(results, id, new Date(startDate[i]));
       }
-    } else {
+    } else if (!Array.isArray(accountId) && !Array.isArray(startDate)) {
       response = getAccountResponse(results, accountId, new Date(startDate));
     }
 
@@ -218,7 +221,7 @@ function getAccountResponse(
 
   for (const trans of account.transactions) {
     const isBooked = !(trans.pending ?? trans.posted === 0);
-    let dateToUse = isBooked ? trans.posted : trans.transacted_at;
+    let dateToUse = (isBooked ? trans.posted : trans.transacted_at)!;
 
     const transactionDate = new Date(dateToUse * 1000);
 
@@ -235,8 +238,11 @@ function getAccountResponse(
       transactionAmount: { amount: trans.amount, currency: 'USD' },
       transactionId: trans.id,
       transactedDate:
-        trans.transacted_at && getDate(new Date(trans.transacted_at * 1000)),
-      postedDate: trans.posted && getDate(new Date(trans.posted * 1000)),
+        (trans.transacted_at &&
+          getDate(new Date(trans.transacted_at * 1000))) ||
+        undefined,
+      postedDate:
+        (trans.posted && getDate(new Date(trans.posted * 1000))) || undefined,
     } satisfies BankSyncTransaction;
 
     if (newTrans.booked) {
@@ -294,7 +300,7 @@ function invalidToken(res: Response) {
   });
 }
 
-function serverDown(e: Error, res: Response) {
+function serverDown(e: any, res: Response) {
   console.log(e);
   res.send({
     status: 'ok',
@@ -372,9 +378,9 @@ function normalizeDate(date: Date) {
 
 async function getSimplefinAccounts(
   accessKey: string,
-  accounts: string[],
-  startDate?: Date,
-  endDate?: Date,
+  accounts: string[] | null,
+  startDate?: Date | null,
+  endDate?: Date | null,
   noTransactions = false,
 ): Promise<SimpleFinApiAccounts> {
   const sfin = parseAccessKey(accessKey);
@@ -385,7 +391,7 @@ async function getSimplefinAccounts(
       ).toString('base64')}`,
     },
   };
-  const params = [];
+  const params: string[] = [];
   if (!noTransactions) {
     if (startDate) {
       params.push(`start-date=${normalizeDate(startDate)}`);
@@ -424,7 +430,7 @@ async function getSimplefinAccounts(
           } else {
             try {
               const results = JSON.parse(data) as SimpleFinApiAccounts;
-              results.sferrors = results.errors as string[];
+              results.sferrors = results.errors as unknown as string[];
               results.hasError = false;
               results.errors = {};
               resolve(results);

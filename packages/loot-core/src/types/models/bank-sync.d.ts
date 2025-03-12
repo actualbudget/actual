@@ -17,7 +17,7 @@ export type BankSyncTransaction = {
     currency: string;
   };
   transactionId: string;
-  postedDate: string;
+  postedDate?: string;
   booked: boolean;
   remittanceInformationUnstructuredArrayString?: string;
   remittanceInformationStructuredArrayString?: string;
