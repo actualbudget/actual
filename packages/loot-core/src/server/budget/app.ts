@@ -28,6 +28,10 @@ app.method(
   mutator(undoable(goalActions.runCheckTemplates)),
 );
 app.method(
+  'budget/get-full-template-amount',
+  mutator(undoable(goalActions.runGetFullAmount)),
+);
+app.method(
   'budget/apply-goal-template',
   mutator(undoable(goalActions.applyTemplate)),
 );
