@@ -61,7 +61,7 @@ export const PILL_STYLE = {
 };
 
 export function getColumnWidth({
-  show3Cols = true,
+  show3Cols = false,
   isSidebar = false,
   offset = 0,
 } = {}) {
