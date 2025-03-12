@@ -95,7 +95,7 @@ __metadata:
     "@types/express": "npm:^5.0.0"
     "@types/express-actuator": "npm:^1.8.3"
     "@types/jest": "npm:^29.5.14"
-    "@types/node": "npm:^17.0.45"
+    "@types/node": "npm:18.19.80"
     "@types/supertest": "npm:^2.0.12"
     "@types/uuid": "npm:^9.0.8"
     bcrypt: "npm:^5.1.1"
@@ -5996,10 +5996,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:^17.0.45":
-  version: 17.0.45
-  resolution: "@types/node@npm:17.0.45"
-  checksum: 10/b45fff7270b5e81be19ef91a66b764a8b21473a97a8d211218a52e3426b79ad48f371819ab9153370756b33ba284e5c875463de4d2cf48a472e9098d7f09e8a2
+"@types/node@npm:18.19.80":
+  version: 18.19.80
+  resolution: "@types/node@npm:18.19.80"
+  dependencies:
+    undici-types: "npm:~5.26.4"
+  checksum: 10/05a54af019aae1fa7d7f8e6475071a7486cb8554f638894b5697ef1cad3b5ac6cbdd5fdfe3d8d70b3af7e56e0245b0033a986c00e1c09e80cb584db06e40c0ba
   languageName: node
   linkType: hard
 

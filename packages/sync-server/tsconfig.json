@@ -12,8 +12,8 @@
     "jsx": "preserve",
     // Check JS files too
     "allowJs": true,
-    "moduleResolution": "node16",
-    "module": "node16",
+    "moduleResolution": "bundler",
+    "module": "es2022",
     "outDir": "build"
   },
   "include": ["src/**/*.js", "types/global.d.ts"],
