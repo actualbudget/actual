@@ -17,11 +17,8 @@ import {
 } from 'loot-core/client/modals/modalsSlice';
 import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
 import { send } from 'loot-core/platform/client/fetch';
-import {
-  type NewUserEntity,
-  PossibleRoles,
-  type UserEntity,
-} from 'loot-core/types/models/user';
+import { PossibleRoles } from 'loot-core/shared/user';
+import { type NewUserEntity, type UserEntity } from 'loot-core/types/models';
 
 import { useDispatch } from '../../redux';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';

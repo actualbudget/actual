@@ -30,8 +30,8 @@ import {
 } from '@react-aria/interactions';
 
 import { useCachedSchedules } from 'loot-core/client/data-hooks/schedules';
-import { isPreviewId } from 'loot-core/src/shared/transactions';
-import { integerToCurrency } from 'loot-core/src/shared/util';
+import { isPreviewId } from 'loot-core/shared/transactions';
+import { integerToCurrency } from 'loot-core/shared/util';
 import {
   type AccountEntity,
   type TransactionEntity,
