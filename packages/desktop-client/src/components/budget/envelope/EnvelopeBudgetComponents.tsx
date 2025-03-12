@@ -34,7 +34,7 @@ import { Row, Field, SheetCell, type SheetCellProps } from '../../table';
 import { BalanceWithCarryover } from '../BalanceWithCarryover';
 import { makeAmountGrey } from '../util';
 
-import { BalanceMovementMenu } from './BalanceMovementMenu';
+import { BalanceMenu } from './BalanceMenu';
 import { BudgetMenu } from './BudgetMenu';
 
 export function useEnvelopeSheetName<
@@ -447,7 +447,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
           isNonModal
           {...balancePosition}
         >
-          <BalanceMovementMenu
+          <BalanceMenu
             categoryId={category.id}
             month={month}
             onBudgetAction={onBudgetAction}

@@ -3,6 +3,8 @@ import React, {
   useMemo,
   useContext,
   type ComponentPropsWithoutRef,
+  useRef,
+  useCallback,
 } from 'react';
 import { usePress } from 'react-aria';
 import {
@@ -21,6 +23,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { Button } from '@actual-app/components/button';
 import { SvgExpandArrow } from '@actual-app/components/icons/v0';
 import {
+  SvgArrowThinRight,
   SvgCheveronDown,
   SvgDotsHorizontalTriple,
 } from '@actual-app/components/icons/v1';
@@ -35,7 +38,11 @@ import { css, cx } from '@emotion/css';
 
 import { envelopeBudget, trackingBudget } from 'loot-core/client/queries';
 import * as monthUtils from 'loot-core/shared/months';
-import { currencyToInteger } from 'loot-core/shared/util';
+import {
+  currencyToAmount,
+  currencyToInteger,
+  type IntegerAmount,
+} from 'loot-core/shared/util';
 import {
   type CategoryEntity,
   type CategoryGroupEntity,
@@ -46,30 +53,44 @@ import { useLocalPref } from '../../hooks/useLocalPref';
 import { useSyncedPref } from '../../hooks/useSyncedPref';
 import { useUndo } from '../../hooks/useUndo';
 import { NotesButton } from '../NotesButton';
+import { type SheetNames } from '../spreadsheet';
 import { CellValue, CellValueText } from '../spreadsheet/CellValue';
 import { NamespaceContext } from '../spreadsheet/NamespaceContext';
 import { useFormat } from '../spreadsheet/useFormat';
+import { useSheetValue } from '../spreadsheet/useSheetValue';
 
+import { BalanceMenu as EnvelopeBalanceMenu } from './envelope/BalanceMenu';
 import { BudgetMenu as EnvelopeBudgetMenu } from './envelope/BudgetMenu';
 import { MonthsContext } from './MonthsContext';
+import { BalanceMenu as TrackingBalanceMenu } from './tracking/BalanceMenu';
 import { BudgetMenu as TrackingBudgetMenu } from './tracking/BudgetMenu';
-import { getScrollbarWidth, separateGroups } from './util';
+import { makeAmountGrey, makeBalanceAmountStyle, separateGroups } from './util';
 
 const ROW_HEIGHT = 30;
 
-const categoryRowStyle: CSSProperties = {
-  height: ROW_HEIGHT,
-  backgroundColor: theme.tableBackground,
-  borderColor: 'red',
-  padding: '0 15px',
+const balanceColumnPaddingStyle: CSSProperties = {
+  paddingRight: 8,
 };
 
-const categoryGroupRowStyle: CSSProperties = {
+const getCategoryRowStyle = (
+  category: CategoryEntity | null = null,
+  categoryGroup: CategoryGroupEntity | null = null,
+): CSSProperties => ({
+  height: ROW_HEIGHT,
+  backgroundColor: theme.tableBackground,
+  padding: '0 15px',
+  opacity: category?.hidden || categoryGroup?.hidden ? 0.5 : 1,
+});
+
+const getCategoryGroupRowStyle = (
+  categoryGroup: CategoryGroupEntity | null = null,
+): CSSProperties => ({
   height: ROW_HEIGHT,
   backgroundColor: theme.tableRowHeaderBackground,
-  borderColor: 'red',
   padding: '0 5px',
-};
+  fontWeight: 600,
+  opacity: categoryGroup?.hidden ? 0.33 : 1,
+});
 
 const headerColumnStyle: CSSProperties = {
   flex: 1,
@@ -135,8 +156,6 @@ type ColumnDefinition = {
 
 export const BudgetCategories = ({
   categoryGroups,
-  editingCell,
-  dataComponents,
   onBudgetAction,
   onShowActivity,
   onEditName,
@@ -329,233 +348,255 @@ export const BudgetCategories = ({
   );
 
   return (
-    <ResizableTableContainer
+    <View
       style={{
-        marginLeft: 2.5,
-        marginRight: 2.5 + getScrollbarWidth(),
+        marginLeft: 4,
+        marginRight: 4,
         marginBottom: 10,
+        // Needed for border radius to work.
+        overflow: 'hidden',
+        borderRadius: 4,
       }}
     >
-      <Table
-        aria-label={t('Budget table')}
+      <ResizableTableContainer
         style={{
-          backgroundColor: theme.tableBackground,
-          borderRadius: 4,
+          height: '100%',
+          overflow: 'auto',
         }}
-        // dragAndDropHooks={dragAndDropHooks}
       >
-        <TableHeader
-          data-testid="budget-totals"
-          style={{
+        <Table
+          aria-label={t('Budget table')}
+          className={css({
             backgroundColor: theme.tableBackground,
-            borderRadius: 4,
-            height: 50,
-            position: 'sticky',
-            top: 0,
-            zIndex: 1,
-          }}
-          columns={columns}
-          dependencies={[
-            onToggleHiddenCategories,
-            onCollapseAllCategories,
-            onExpandAllCategories,
-          ]}
+            borderCollapse: 'collapse',
+            // Add a visible border between category name and the cells.
+            'th:first-child, td:first-child': {
+              borderRight: `1px solid ${theme.tableBorder}`,
+            },
+            // Remove the border on the Add Group button row.
+            'tr[data-add-group-button-row] td:first-child': {
+              border: 'none',
+            },
+            tr: {
+              borderBottom: `1px solid ${theme.tableBorder}`,
+            },
+          })}
+          // dragAndDropHooks={dragAndDropHooks}
         >
-          {column => {
-            switch (column.type) {
-              case 'category':
-                return (
-                  <CategoryColumn
-                    key={column.key}
-                    id={column.key}
-                    month={column.month}
-                    onToggleHiddenCategories={onToggleHiddenCategories}
-                    onCollapseAllCategories={onCollapseAllCategories}
-                    onExpandAllCategories={onExpandAllCategories}
-                  />
-                );
-              case 'budgeted':
-                return (
-                  <BudgetedColumn
-                    key={column.key}
-                    id={column.key}
-                    month={column.month}
-                  />
-                );
-              case 'spent':
-                return (
-                  <SpentColumn
-                    key={column.key}
-                    id={column.key}
-                    month={column.month}
-                  />
-                );
-              case 'balance':
-                return (
-                  <BalanceColumn
-                    key={column.key}
-                    id={column.key}
-                    month={column.month}
-                  />
-                );
-              default:
-                throw new Error(`Unrecognized column type: ${column.type}`);
-            }
-          }}
-        </TableHeader>
-        <TableBody
-          items={items}
-          dependencies={[
-            columns,
-            collapsedGroupIds,
-            onToggleCollapse,
-            onAddCategory,
-            groupOfNewCategory,
-            onHideNewCategoryInput,
-            onHideNewGroupInput,
-            onSaveCategoryAndClose,
-            onSaveGroupAndClose,
-            onAddGroup,
-            onBudgetAction,
-          ]}
-        >
-          {item => {
-            switch (item.type) {
-              case 'expense-group':
-                return (
-                  <ExpenseGroupRow
-                    id={item.id}
-                    columns={columns}
-                    item={item}
-                    isCollapsed={collapsedGroupIds.includes(item.value.id)}
-                    onToggleCollapse={group => onToggleCollapse(group.id)}
-                    onAddCategory={group => onAddCategory(group.id)}
-                    onDelete={group => onDeleteGroup(group.id)}
-                    onToggleVisibilty={group => {
-                      onSaveGroup({
-                        ...group,
-                        hidden: !item.value.hidden,
-                      });
-                    }}
-                    onApplyBudgetTemplatesInGroup={group =>
-                      onApplyBudgetTemplatesInGroup(
-                        group.categories
-                          .filter(cat => !cat.hidden)
-                          .map(cat => cat.id),
-                      )
-                    }
-                  />
-                );
-              case 'expense-category':
-                return (
-                  <ExpenseCategoryRow
-                    id={item.id}
-                    columns={columns}
-                    item={item}
-                    onBudgetAction={onBudgetAction}
-                    onShowActivity={(category, month) =>
-                      onShowActivity(category.id, month)
-                    }
-                    onDeleteCategory={category => onDeleteCategory(category.id)}
-                    onToggleVisibility={category => {
-                      onSaveCategory({
-                        ...category,
-                        hidden: !item.value.hidden,
-                      });
-                    }}
-                  />
-                );
-              case 'income-separator':
-                return (
-                  <AddGroupButtonRow
-                    id="add-group-row"
-                    columns={columns}
-                    onAddGroup={onAddGroup}
-                  />
-                );
-              case 'income-group':
-                return (
-                  <IncomeGroupRow
-                    id={item.id}
-                    columns={columns}
-                    item={item}
-                    isCollapsed={collapsedGroupIds.includes(item.value.id)}
-                    onToggleCollapse={group => onToggleCollapse(group.id)}
-                    onAddCategory={group => onAddCategory(group.id)}
-                    onDelete={group => onDeleteGroup(group.id)}
-                    onToggleVisibilty={() => {
-                      onSaveGroup({
-                        ...item.value,
-                        hidden: !item.value.hidden,
-                      });
-                    }}
-                    onApplyBudgetTemplatesInGroup={group =>
-                      onApplyBudgetTemplatesInGroup(
-                        group.categories
-                          .filter(cat => !cat.hidden)
-                          .map(cat => cat.id),
-                      )
-                    }
-                  />
-                );
-              case 'income-category':
-                return (
-                  <IncomeCategoryRow
-                    id={item.id}
-                    columns={columns}
-                    item={item}
-                    onBudgetAction={onBudgetAction}
-                    onDeleteCategory={category => onDeleteCategory(category)}
-                    onToggleVisibility={category => {
-                      onSaveCategory({
-                        ...category,
-                        hidden: !item.value.hidden,
-                      });
-                    }}
-                  />
-                );
-              case 'new-category':
-                return (
-                  <NewCategoryRow
-                    id="new-category-row"
-                    columns={columns}
-                    onUpdate={name => {
-                      if (name) {
-                        onSaveCategoryAndClose({
-                          id: 'new',
-                          name,
-                          cat_group: groupOfNewCategory,
-                          is_income:
-                            groupOfNewCategory ===
-                            categoryGroups.find(g => g.is_income).id,
+          <TableHeader
+            data-testid="budget-totals"
+            style={{
+              backgroundColor: theme.tableBackground,
+              height: 50,
+              position: 'sticky',
+              top: 0,
+              zIndex: 1,
+            }}
+            columns={columns}
+            dependencies={[
+              onToggleHiddenCategories,
+              onCollapseAllCategories,
+              onExpandAllCategories,
+            ]}
+          >
+            {column => {
+              switch (column.type) {
+                case 'category':
+                  return (
+                    <CategoryColumn
+                      key={column.key}
+                      id={column.key}
+                      month={column.month}
+                      onToggleHiddenCategories={onToggleHiddenCategories}
+                      onCollapseAllCategories={onCollapseAllCategories}
+                      onExpandAllCategories={onExpandAllCategories}
+                    />
+                  );
+                case 'budgeted':
+                  return (
+                    <BudgetedColumn
+                      key={column.key}
+                      id={column.key}
+                      month={column.month}
+                    />
+                  );
+                case 'spent':
+                  return (
+                    <SpentColumn
+                      key={column.key}
+                      id={column.key}
+                      month={column.month}
+                    />
+                  );
+                case 'balance':
+                  return (
+                    <BalanceColumn
+                      key={column.key}
+                      id={column.key}
+                      month={column.month}
+                    />
+                  );
+                default:
+                  throw new Error(`Unrecognized column type: ${column.type}`);
+              }
+            }}
+          </TableHeader>
+          <TableBody
+            items={items}
+            dependencies={[
+              columns,
+              collapsedGroupIds,
+              onToggleCollapse,
+              onAddCategory,
+              groupOfNewCategory,
+              onHideNewCategoryInput,
+              onHideNewGroupInput,
+              onSaveCategoryAndClose,
+              onSaveGroupAndClose,
+              onAddGroup,
+              onBudgetAction,
+            ]}
+          >
+            {item => {
+              switch (item.type) {
+                case 'expense-group':
+                  return (
+                    <ExpenseGroupRow
+                      id={item.id}
+                      columns={columns}
+                      item={item}
+                      isCollapsed={collapsedGroupIds.includes(item.value.id)}
+                      onToggleCollapse={group => onToggleCollapse(group.id)}
+                      onAddCategory={group => onAddCategory(group.id)}
+                      onDelete={group => onDeleteGroup(group.id)}
+                      onToggleVisibilty={group => {
+                        onSaveGroup({
+                          ...group,
+                          hidden: !item.value.hidden,
                         });
-                      } else {
-                        onHideNewCategoryInput();
+                      }}
+                      onApplyBudgetTemplatesInGroup={group =>
+                        onApplyBudgetTemplatesInGroup(
+                          group.categories
+                            .filter(cat => !cat.hidden)
+                            .map(cat => cat.id),
+                        )
                       }
-                    }}
-                  />
-                );
-              case 'new-group':
-                return (
-                  <NewCategoryGroupRow
-                    id="new-category-group-row"
-                    columns={columns}
-                    onUpdate={name => {
-                      if (name) {
-                        onSaveGroupAndClose({ id: 'new', name });
-                      } else {
-                        onHideNewGroupInput();
+                    />
+                  );
+                case 'expense-category':
+                  return (
+                    <ExpenseCategoryRow
+                      id={item.id}
+                      columns={columns}
+                      item={item}
+                      onBudgetAction={onBudgetAction}
+                      onShowActivity={(category, month) =>
+                        onShowActivity(category.id, month)
                       }
-                    }}
-                  />
-                );
-              default:
-                throw new Error(`Unrecognized item: ${JSON.stringify(item)}`);
-            }
-          }}
-        </TableBody>
-      </Table>
-    </ResizableTableContainer>
+                      onDeleteCategory={category =>
+                        onDeleteCategory(category.id)
+                      }
+                      onToggleVisibility={category => {
+                        onSaveCategory({
+                          ...category,
+                          hidden: !item.value.hidden,
+                        });
+                      }}
+                    />
+                  );
+                case 'income-separator':
+                  return (
+                    <AddGroupButtonRow
+                      id="add-group-row"
+                      columns={columns}
+                      onAddGroup={onAddGroup}
+                    />
+                  );
+                case 'income-group':
+                  return (
+                    <IncomeGroupRow
+                      id={item.id}
+                      columns={columns}
+                      item={item}
+                      isCollapsed={collapsedGroupIds.includes(item.value.id)}
+                      onToggleCollapse={group => onToggleCollapse(group.id)}
+                      onAddCategory={group => onAddCategory(group.id)}
+                      onDelete={group => onDeleteGroup(group.id)}
+                      onToggleVisibilty={() => {
+                        onSaveGroup({
+                          ...item.value,
+                          hidden: !item.value.hidden,
+                        });
+                      }}
+                      onApplyBudgetTemplatesInGroup={group =>
+                        onApplyBudgetTemplatesInGroup(
+                          group.categories
+                            .filter(cat => !cat.hidden)
+                            .map(cat => cat.id),
+                        )
+                      }
+                    />
+                  );
+                case 'income-category':
+                  return (
+                    <IncomeCategoryRow
+                      id={item.id}
+                      columns={columns}
+                      item={item}
+                      onBudgetAction={onBudgetAction}
+                      onDeleteCategory={category => onDeleteCategory(category)}
+                      onToggleVisibility={category => {
+                        onSaveCategory({
+                          ...category,
+                          hidden: !item.value.hidden,
+                        });
+                      }}
+                    />
+                  );
+                case 'new-category':
+                  return (
+                    <NewCategoryRow
+                      id="new-category-row"
+                      columns={columns}
+                      onUpdate={name => {
+                        if (name) {
+                          onSaveCategoryAndClose({
+                            id: 'new',
+                            name,
+                            cat_group: groupOfNewCategory,
+                            is_income:
+                              groupOfNewCategory ===
+                              categoryGroups.find(g => g.is_income).id,
+                          });
+                        } else {
+                          onHideNewCategoryInput();
+                        }
+                      }}
+                    />
+                  );
+                case 'new-group':
+                  return (
+                    <NewCategoryGroupRow
+                      id="new-category-group-row"
+                      columns={columns}
+                      onUpdate={name => {
+                        if (name) {
+                          onSaveGroupAndClose({ id: 'new', name });
+                        } else {
+                          onHideNewGroupInput();
+                        }
+                      }}
+                    />
+                  );
+                default:
+                  throw new Error(`Unrecognized item: ${JSON.stringify(item)}`);
+              }
+            }}
+          </TableBody>
+        </Table>
+      </ResizableTableContainer>
+    </View>
   );
 };
 
@@ -573,7 +614,11 @@ function AddGroupButtonRow({
   ...props
 }: AddGroupButtonRowProps) {
   return (
-    <ReactAriaRow style={{ ...categoryRowStyle, ...style }} {...props}>
+    <ReactAriaRow
+      data-add-group-button-row="true"
+      style={{ ...getCategoryRowStyle(), ...style }}
+      {...props}
+    >
       {column =>
         column.type === 'category' ? (
           <ReactAriaCell>
@@ -605,15 +650,17 @@ type NewCategoryRowProps = ComponentPropsWithoutRef<
 
 function NewCategoryRow({ onUpdate, style, ...props }: NewCategoryRowProps) {
   return (
-    <ReactAriaRow style={{ ...categoryRowStyle, ...style }} {...props}>
+    <ReactAriaRow style={{ ...getCategoryRowStyle(), ...style }} {...props}>
       {column =>
         column.type === 'category' ? (
           <ReactAriaCell>
-            <Input
-              autoFocus
-              placeholder="New category name"
-              onUpdate={onUpdate}
-            />
+            <View style={{ flex: 1 }}>
+              <Input
+                autoFocus
+                placeholder="New category name"
+                onUpdate={onUpdate}
+              />
+            </View>
           </ReactAriaCell>
         ) : (
           <ReactAriaCell />
@@ -635,15 +682,20 @@ function NewCategoryGroupRow({
   ...props
 }: NewCategoryGroupRowProps) {
   return (
-    <ReactAriaRow style={{ ...categoryGroupRowStyle, ...style }} {...props}>
+    <ReactAriaRow
+      style={{ ...getCategoryGroupRowStyle(), ...style }}
+      {...props}
+    >
       {column =>
         column.type === 'category' ? (
           <ReactAriaCell>
-            <Input
-              autoFocus
-              placeholder="New category group name"
-              onUpdate={onUpdate}
-            />
+            <View style={{ flex: 1 }}>
+              <Input
+                autoFocus
+                placeholder="New category group name"
+                onUpdate={onUpdate}
+              />
+            </View>
           </ReactAriaCell>
         ) : (
           <ReactAriaCell />
@@ -689,10 +741,12 @@ function CategorySpentCell({
               {...pressProps}
               {...props}
               className={css({
+                ...makeAmountGrey(props.value),
                 '&:hover': {
                   cursor: 'pointer',
                   textDecoration: 'underline',
                 },
+                paddingRight: 5,
               })}
             />
           )}
@@ -707,40 +761,152 @@ type CategoryBalanceCellProps = ComponentPropsWithoutRef<
 > & {
   month: string;
   category: CategoryEntity;
+  onBudgetAction: (month: string, action: string, args: unknown) => void;
 };
 
 function CategoryBalanceCell({
   month,
   category,
+  onBudgetAction,
   style,
   ...props
 }: CategoryBalanceCellProps) {
   const [budgetType = 'rollover'] = useSyncedPref('budgetType');
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const triggerRef = useRef<HTMLSpanElement | null>(null);
+
+  const bindingBudgetType: SheetNames =
+    budgetType === 'rollover' ? 'envelope-budget' : 'tracking-budget';
+
+  const categoryCarryoverBinding =
+    bindingBudgetType === 'envelope-budget'
+      ? envelopeBudget.catCarryover(category.id)
+      : trackingBudget.catCarryover(category.id);
 
   const categoryBalanceBinding =
-    budgetType === 'rollover'
+    bindingBudgetType === 'envelope-budget'
       ? envelopeBudget.catBalance(category.id)
       : trackingBudget.catBalance(category.id);
 
+  const categoryBudgetedBinding =
+    bindingBudgetType === 'envelope-budget'
+      ? envelopeBudget.catBudgeted(category.id)
+      : trackingBudget.catBudgeted(category.id);
+
+  const categoryGoalBinding =
+    bindingBudgetType === 'envelope-budget'
+      ? envelopeBudget.catGoal(category.id)
+      : trackingBudget.catGoal(category.id);
+
+  const categoryLongGoalBinding =
+    bindingBudgetType === 'envelope-budget'
+      ? envelopeBudget.catLongGoal(category.id)
+      : trackingBudget.catLongGoal(category.id);
+
+  const budgetedValue = useSheetValue<
+    typeof bindingBudgetType,
+    typeof categoryBudgetedBinding
+  >(categoryBudgetedBinding);
+
+  const goalValue = useSheetValue<
+    typeof bindingBudgetType,
+    typeof categoryGoalBinding
+  >(categoryGoalBinding);
+
+  const longGoalValue = useSheetValue<
+    typeof bindingBudgetType,
+    typeof categoryLongGoalBinding
+  >(categoryLongGoalBinding);
+
+  const { pressProps } = usePress({
+    onPress: () => setIsMenuOpen(true),
+  });
+
+  const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
+
+  const getBalanceAmountStyle = useCallback(
+    (balanceValue: number) =>
+      makeBalanceAmountStyle(
+        balanceValue,
+        isGoalTemplatesEnabled ? goalValue : null,
+        longGoalValue === 1 ? balanceValue : budgetedValue,
+      ),
+    [budgetedValue, goalValue, isGoalTemplatesEnabled, longGoalValue],
+  );
+
+  // TODO: Refactor balance cell tooltips
   return (
     <ReactAriaCell style={{ textAlign: 'right', ...style }} {...props}>
       <NamespaceContext.Provider value={monthUtils.sheetForMonth(month)}>
-        <CellValue<'envelope-budget', 'leftover'>
+        <CellValue<typeof bindingBudgetType, typeof categoryBalanceBinding>
           type="financial"
           binding={categoryBalanceBinding}
         >
-          {props => (
-            <CellValueText
-              {...props}
-              className={css({
-                '&:hover': {
-                  cursor: 'pointer',
-                  textDecoration: 'underline',
-                },
-              })}
-            />
+          {balanceProps => (
+            <View
+              style={{
+                position: 'relative',
+                display: 'inline-block',
+                ...balanceColumnPaddingStyle,
+              }}
+            >
+              <CellValueText
+                {...pressProps}
+                {...balanceProps}
+                innerRef={triggerRef}
+                className={css({
+                  ...getBalanceAmountStyle(balanceProps.value),
+                  '&:hover': {
+                    cursor: 'pointer',
+                    textDecoration: 'underline',
+                  },
+                })}
+              />
+              <CellValue<
+                typeof bindingBudgetType,
+                typeof categoryCarryoverBinding
+              >
+                binding={categoryCarryoverBinding}
+              >
+                {carryOverProps =>
+                  carryOverProps.value && (
+                    <CarryoverIndicator
+                      style={getBalanceAmountStyle(balanceProps.value)}
+                    />
+                  )
+                }
+              </CellValue>
+            </View>
           )}
         </CellValue>
+        <Popover
+          triggerRef={triggerRef}
+          placement="bottom end"
+          isOpen={isMenuOpen}
+          onOpenChange={() => setIsMenuOpen(false)}
+          style={{ width: 200, margin: 1 }}
+          isNonModal
+        >
+          {budgetType === 'rollover' ? (
+            <EnvelopeBalanceMenu
+              categoryId={category.id}
+              month={month}
+              onBudgetAction={onBudgetAction}
+              onClose={() => setIsMenuOpen(false)}
+            />
+          ) : (
+            <TrackingBalanceMenu
+              categoryId={category.id}
+              onCarryover={carryover => {
+                onBudgetAction(month, 'carryover', {
+                  category: category.id,
+                  flag: carryover,
+                });
+                setIsMenuOpen(false);
+              }}
+            />
+          )}
+        </Popover>
       </NamespaceContext.Provider>
     </ReactAriaCell>
   );
@@ -760,19 +926,30 @@ function CategoryGroupBudgetedCell({
   ...props
 }: CategoryGroupBudgetedCellProps) {
   const [budgetType = 'rollover'] = useSyncedPref('budgetType');
+  const bindingBudgetType: SheetNames =
+    budgetType === 'rollover' ? 'envelope-budget' : 'tracking-budget';
 
   const groupBudgetedBinding =
-    budgetType === 'rollover'
+    bindingBudgetType === 'envelope-budget'
       ? envelopeBudget.groupBudgeted(categoryGroup.id)
       : trackingBudget.groupBudgeted(categoryGroup.id);
 
   return (
     <ReactAriaCell style={{ textAlign: 'right', ...style }} {...props}>
       <NamespaceContext.Provider value={monthUtils.sheetForMonth(month)}>
-        <CellValue<'envelope-budget', 'group-budget'>
+        <CellValue<typeof bindingBudgetType, typeof groupBudgetedBinding>
           type="financial"
           binding={groupBudgetedBinding}
-        />
+        >
+          {props => (
+            <CellValueText
+              {...props}
+              style={{
+                paddingRight: 5,
+              }}
+            />
+          )}
+        </CellValue>
       </NamespaceContext.Provider>
     </ReactAriaCell>
   );
@@ -792,19 +969,30 @@ function CategoryGroupSpentCell({
   ...props
 }: CategoryGroupSpentCellProps) {
   const [budgetType = 'rollover'] = useSyncedPref('budgetType');
+  const bindingBudgetType: SheetNames =
+    budgetType === 'rollover' ? 'envelope-budget' : 'tracking-budget';
 
   const groupSpentBinding =
-    budgetType === 'rollover'
+    bindingBudgetType === 'envelope-budget'
       ? envelopeBudget.groupSumAmount(categoryGroup.id)
       : trackingBudget.groupSumAmount(categoryGroup.id);
 
   return (
     <ReactAriaCell style={{ textAlign: 'right', ...style }} {...props}>
       <NamespaceContext.Provider value={monthUtils.sheetForMonth(month)}>
-        <CellValue<'envelope-budget', 'group-sum-amount'>
+        <CellValue<typeof bindingBudgetType, typeof groupSpentBinding>
           type="financial"
           binding={groupSpentBinding}
-        />
+        >
+          {props => (
+            <CellValueText
+              {...props}
+              style={{
+                paddingRight: 5,
+              }}
+            />
+          )}
+        </CellValue>
       </NamespaceContext.Provider>
     </ReactAriaCell>
   );
@@ -824,19 +1012,30 @@ function CategoryGroupBalanceCell({
   ...props
 }: CategoryGroupBalanceCellProps) {
   const [budgetType = 'rollover'] = useSyncedPref('budgetType');
+  const bindingBudgetType: SheetNames =
+    budgetType === 'rollover' ? 'envelope-budget' : 'tracking-budget';
 
   const groupBalanceBinding =
-    budgetType === 'rollover'
+    bindingBudgetType === 'envelope-budget'
       ? envelopeBudget.groupBalance(categoryGroup.id)
       : trackingBudget.groupBalance(categoryGroup.id);
 
   return (
     <ReactAriaCell style={{ textAlign: 'right', ...style }} {...props}>
       <NamespaceContext.Provider value={monthUtils.sheetForMonth(month)}>
-        <CellValue<'envelope-budget', 'group-leftover'>
+        <CellValue<typeof bindingBudgetType, typeof groupBalanceBinding>
           type="financial"
           binding={groupBalanceBinding}
-        />
+        >
+          {props => (
+            <CellValueText
+              {...props}
+              style={{
+                ...balanceColumnPaddingStyle,
+              }}
+            />
+          )}
+        </CellValue>
       </NamespaceContext.Provider>
     </ReactAriaCell>
   );
@@ -858,6 +1057,19 @@ type ExpenseGroupRowProps = ComponentPropsWithoutRef<
   onApplyBudgetTemplatesInGroup: (categoryGroup: CategoryGroupEntity) => void;
 };
 
+const getHeaderBackgroundStyle = (
+  type: 'category' | 'budgeted' | 'spent' | 'balance',
+  month: string,
+): CSSProperties => {
+  if (type === 'category') {
+    return { backgroundColor: theme.tableRowHeaderBackground };
+  }
+  if (monthUtils.isCurrentMonth(month)) {
+    return { backgroundColor: theme.budgetHeaderCurrentMonth };
+  }
+  return { backgroundColor: theme.budgetHeaderOtherMonth };
+};
+
 function ExpenseGroupRow({
   item,
   isCollapsed,
@@ -872,7 +1084,7 @@ function ExpenseGroupRow({
   return (
     <ReactAriaRow
       style={{
-        ...categoryGroupRowStyle,
+        ...getCategoryGroupRowStyle(item.value),
         ...style,
       }}
       {...props}
@@ -897,6 +1109,7 @@ function ExpenseGroupRow({
               <CategoryGroupBudgetedCell
                 month={column.month}
                 categoryGroup={item.value}
+                style={getHeaderBackgroundStyle(column.type, column.month)}
               />
             );
           case 'spent':
@@ -904,6 +1117,7 @@ function ExpenseGroupRow({
               <CategoryGroupSpentCell
                 month={column.month}
                 categoryGroup={item.value}
+                style={getHeaderBackgroundStyle(column.type, column.month)}
               />
             );
           case 'balance':
@@ -911,6 +1125,7 @@ function ExpenseGroupRow({
               <CategoryGroupBalanceCell
                 month={column.month}
                 categoryGroup={item.value}
+                style={getHeaderBackgroundStyle(column.type, column.month)}
               />
             );
           default:
@@ -920,6 +1135,19 @@ function ExpenseGroupRow({
     </ReactAriaRow>
   );
 }
+
+const getCellBackgroundStyle = (
+  type: 'category' | 'budgeted' | 'spent' | 'balance',
+  month: string,
+): CSSProperties => {
+  if (type === 'category') {
+    return { backgroundColor: theme.tableBackground };
+  }
+  if (monthUtils.isCurrentMonth(month)) {
+    return { backgroundColor: theme.budgetCurrentMonth };
+  }
+  return { backgroundColor: theme.budgetOtherMonth };
+};
 
 type ExpenseCategoryRowProps = ComponentPropsWithoutRef<
   typeof ReactAriaRow<ColumnDefinition>
@@ -948,7 +1176,7 @@ function ExpenseCategoryRow({
   return (
     <ReactAriaRow
       style={{
-        ...categoryRowStyle,
+        ...getCategoryRowStyle(item.value, item.group),
         ...style,
       }}
       {...props}
@@ -971,6 +1199,7 @@ function ExpenseCategoryRow({
                 month={column.month}
                 category={item.value}
                 onBudgetAction={onBudgetAction}
+                style={getCellBackgroundStyle(column.type, column.month)}
               />
             );
           case 'spent':
@@ -979,11 +1208,17 @@ function ExpenseCategoryRow({
                 month={column.month}
                 category={item.value}
                 onShowActivity={onShowActivity}
+                style={getCellBackgroundStyle(column.type, column.month)}
               />
             );
           case 'balance':
             return (
-              <CategoryBalanceCell month={column.month} category={item.value} />
+              <CategoryBalanceCell
+                month={column.month}
+                category={item.value}
+                onBudgetAction={onBudgetAction}
+                style={getCellBackgroundStyle(column.type, column.month)}
+              />
             );
           default:
             throw new Error(`Unrecognized column type: ${column.type}`);
@@ -1025,7 +1260,7 @@ function IncomeGroupRow({
   return budgetType === 'rollover' ? (
     <ReactAriaRow
       style={{
-        ...categoryGroupRowStyle,
+        ...getCategoryGroupRowStyle(item.value),
         ...style,
       }}
       {...props}
@@ -1064,7 +1299,7 @@ function IncomeGroupRow({
   ) : (
     <ReactAriaRow
       style={{
-        ...categoryGroupRowStyle,
+        ...getCategoryGroupRowStyle(item.value),
         ...style,
       }}
       {...props}
@@ -1134,7 +1369,7 @@ function IncomeCategoryRow({
   return budgetType === 'rollover' ? (
     <ReactAriaRow
       style={{
-        ...categoryRowStyle,
+        ...getCategoryRowStyle(item.value),
         ...style,
       }}
       {...props}
@@ -1157,7 +1392,11 @@ function IncomeCategoryRow({
             return <ReactAriaCell />;
           case 'balance':
             return (
-              <CategoryBalanceCell month={column.month} category={item.value} />
+              <CategoryBalanceCell
+                month={column.month}
+                category={item.value}
+                onBudgetAction={onBudgetAction}
+              />
             );
           default:
             throw new Error(`Unrecognized column type: ${column.type}`);
@@ -1167,7 +1406,7 @@ function IncomeCategoryRow({
   ) : (
     <ReactAriaRow
       style={{
-        ...categoryRowStyle,
+        ...getCategoryRowStyle(item.value),
         ...style,
       }}
       {...props}
@@ -1196,7 +1435,11 @@ function IncomeCategoryRow({
             return <ReactAriaCell />;
           case 'balance':
             return (
-              <CategoryBalanceCell month={column.month} category={item.value} />
+              <CategoryBalanceCell
+                month={column.month}
+                category={item.value}
+                onBudgetAction={onBudgetAction}
+              />
             );
           default:
             throw new Error(`Unrecognized column type: ${column.type}`);
@@ -1206,26 +1449,63 @@ function IncomeCategoryRow({
   );
 }
 
-const BudgetedInput = ({ value }: { value: number }) => {
+type BudgetedInputProps = Omit<
+  ComponentPropsWithoutRef<typeof Input>,
+  'value'
+> & {
+  value: IntegerAmount;
+  onUpdateAmount: (newValue: IntegerAmount) => void;
+};
+
+function BudgetedInput({
+  value,
+  onFocus,
+  onChangeValue,
+  onUpdate,
+  onUpdateAmount,
+  ...props
+}: BudgetedInputProps) {
   const format = useFormat();
-  const [currentAmount, setCurrentAmount] = useState<string | null>(null);
+  const [currentFormattedAmount, setCurrentFormattedAmount] = useState<
+    string | null
+  >(null);
 
   return (
     <Input
-      value={currentAmount ?? format(value, 'financial')}
-      onFocus={e => e.target.select()}
-      style={{
-        textAlign: 'right',
+      value={currentFormattedAmount ?? format(value, 'financial')}
+      onFocus={e => {
+        onFocus?.(e);
+        if (!e.defaultPrevented) {
+          e.target.select();
+        }
       }}
+      onEscape={() => setCurrentFormattedAmount(format(value, 'financial'))}
+      className={css({
+        ...makeAmountGrey(
+          currentFormattedAmount
+            ? currencyToAmount(currentFormattedAmount)
+            : value,
+        ),
+        textAlign: 'right',
+        border: '1px solid transparent',
+        '&:hover:not(:focus)': {
+          border: `1px solid ${theme.formInputBorder}`,
+        },
+      })}
       onChangeValue={newValue => {
-        setCurrentAmount(newValue);
+        onChangeValue?.(newValue);
+        setCurrentFormattedAmount(newValue);
       }}
       onUpdate={newValue => {
-        setCurrentAmount(format(currencyToInteger(newValue), 'financial'));
+        onUpdate?.(newValue);
+        const integerAmount = currencyToInteger(newValue);
+        onUpdateAmount?.(integerAmount);
+        setCurrentFormattedAmount(format(integerAmount, 'financial'));
       }}
+      {...props}
     />
   );
-};
+}
 
 type CategoryBudgetedCellProps = ComponentPropsWithoutRef<
   typeof ReactAriaCell
@@ -1244,16 +1524,30 @@ function CategoryBudgetedCell({
   const { t } = useTranslation();
   const [budgetType = 'rollover'] = useSyncedPref('budgetType');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [shouldHideBudgetMenuButton, setShouldHideBudgetMenuButton] =
+    useState(false);
+
+  const bindingBudgetType: SheetNames =
+    budgetType === 'rollover' ? 'envelope-budget' : 'tracking-budget';
 
   const budgetedBinding =
-    budgetType === 'rollover'
+    bindingBudgetType === 'envelope-budget'
       ? envelopeBudget.catBudgeted(category.id)
       : trackingBudget.catBudgeted(category.id);
 
   const BudgetMenuComponent =
-    budgetType === 'rollover' ? EnvelopeBudgetMenu : TrackingBudgetMenu;
+    bindingBudgetType === 'envelope-budget'
+      ? EnvelopeBudgetMenu
+      : TrackingBudgetMenu;
 
   const { showUndoNotification } = useUndo();
+
+  const onUpdateBudget = (amount: IntegerAmount) => {
+    onBudgetAction(month, 'budget-amount', {
+      category: category.id,
+      amount,
+    });
+  };
 
   return (
     <ReactAriaCell {...props}>
@@ -1269,7 +1563,13 @@ function CategoryBudgetedCell({
             <Button
               variant="bare"
               aria-label={t('Budget menu')}
-              className={cx('hover-visible', css({ marginLeft: 5 }))}
+              className={cx(
+                { 'hover-visible': !isMenuOpen },
+                css({
+                  marginLeft: 5,
+                  display: shouldHideBudgetMenuButton ? 'none' : undefined,
+                }),
+              )}
               onPress={() => setIsMenuOpen(true)}
             >
               <SvgCheveronDown width={12} height={12} />
@@ -1323,62 +1623,24 @@ function CategoryBudgetedCell({
               />
             </Popover>
           </DialogTrigger>
-          <View>
-            <CellValue<'envelope-budget' | 'tracking-budget', 'budget'>
+          <View style={{ flex: 1 }}>
+            <CellValue<typeof bindingBudgetType, typeof budgetedBinding>
               type="financial"
               binding={budgetedBinding}
             >
               {({ value: budgetedAmount }) => (
-                <BudgetedInput value={budgetedAmount} />
+                <BudgetedInput
+                  value={budgetedAmount}
+                  onFocus={() => setShouldHideBudgetMenuButton(true)}
+                  onBlur={() => setShouldHideBudgetMenuButton(false)}
+                  style={getCellBackgroundStyle('budgeted', month)}
+                  onUpdateAmount={onUpdateBudget}
+                />
               )}
             </CellValue>
           </View>
         </View>
       </NamespaceContext.Provider>
-      {/* <SheetCell
-        name="budget"
-        // exposed={editing}
-        // focused={editing}
-        width="flex"
-        // onExpose={() => onEdit(category.id, month)}
-        style={{ ...(false ? { zIndex: 100 } : {}), ...styles.tnum }}
-        textAlign="right"
-        valueStyle={{
-          cursor: 'default',
-          margin: 1,
-          padding: '0 4px',
-          borderRadius: 4,
-          ':hover': {
-            boxShadow: 'inset 0 0 0 1px ' + theme.mobileAccountShadow,
-            backgroundColor: theme.tableBackground,
-          },
-        }}
-        valueProps={{
-          binding: envelopeBudget.catBudgeted(item.value?.id),
-          type: 'financial',
-          getValueStyle: makeAmountGrey,
-          formatExpr: expr => {
-            return integerToCurrency(expr);
-          },
-          unformatExpr: expr => {
-            return amountToInteger(evalArithmetic(expr, 0));
-          },
-        }}
-        inputProps={{
-          onBlur: () => {
-            // onEdit(null);
-          },
-          style: {
-            backgroundColor: theme.tableBackground,
-          },
-        }}
-        // onSave={amount => {
-        //   onBudgetAction(month, 'budget-amount', {
-        //     category: category.id,
-        //     amount,
-        //   });
-        // }}
-      /> */}
     </ReactAriaCell>
   );
 }
@@ -1444,7 +1706,10 @@ function CategoryGroupNameCell({
             <DialogTrigger>
               <Button
                 variant="bare"
-                className={cx('hover-visible', css({ marginLeft: 5 }))}
+                className={cx(
+                  { 'hover-visible': !isMenuOpen },
+                  css({ marginLeft: 5 }),
+                )}
                 onPress={() => {
                   // resetPosition();
                   setIsMenuOpen(true);
@@ -1545,7 +1810,10 @@ function CategoryNameCell({
             <DialogTrigger>
               <Button
                 variant="bare"
-                className={cx('hover-visible', css({ marginLeft: 5 }))}
+                className={cx(
+                  { 'hover-visible': !isMenuOpen },
+                  css({ marginLeft: 5 }),
+                )}
                 onPress={() => {
                   // resetPosition();
                   setIsMenuOpen(true);
@@ -1685,9 +1953,11 @@ type BudgetedColumnProps = ComponentPropsWithoutRef<typeof ResizableColumn> & {
 
 function BudgetedColumn({ month, ...props }: BudgetedColumnProps) {
   const [budgetType = 'rollover'] = useSyncedPref('budgetType');
+  const bindingBudgetType: SheetNames =
+    budgetType === 'rollover' ? 'envelope-budget' : 'tracking-budget';
 
   const totalBudgetedBinding =
-    budgetType === 'rollover'
+    bindingBudgetType === 'envelope-budget'
       ? envelopeBudget.totalBudgeted
       : trackingBudget.totalBudgetedExpense;
 
@@ -1698,7 +1968,7 @@ function BudgetedColumn({ month, ...props }: BudgetedColumnProps) {
           <Text style={{ color: theme.tableHeaderText }}>
             <Trans>Budgeted</Trans>
           </Text>
-          <CellValue<'envelope-budget' | 'tracking-budget', 'total-budgeted'>
+          <CellValue<typeof bindingBudgetType, typeof totalBudgetedBinding>
             binding={totalBudgetedBinding}
             type="financial"
           >
@@ -1722,9 +1992,11 @@ type SpentColumnProps = ComponentPropsWithoutRef<typeof ResizableColumn> & {
 
 function SpentColumn({ month, ...props }: SpentColumnProps) {
   const [budgetType = 'rollover'] = useSyncedPref('budgetType');
+  const bindingBudgetStyle: SheetNames =
+    budgetType === 'rollover' ? 'envelope-budget' : 'tracking-budget';
 
   const totalSpentBinding =
-    budgetType === 'rollover'
+    bindingBudgetStyle === 'envelope-budget'
       ? envelopeBudget.totalSpent
       : trackingBudget.totalSpent;
 
@@ -1733,14 +2005,13 @@ function SpentColumn({ month, ...props }: SpentColumnProps) {
       <NamespaceContext.Provider value={monthUtils.sheetForMonth(month)}>
         <View style={headerColumnStyle}>
           <Text style={{ color: theme.tableHeaderText }}>Spent</Text>
-          <CellValue<'envelope-budget' | 'tracking-budget', 'total-spent'>
+          <CellValue<typeof bindingBudgetStyle, typeof totalSpentBinding>
             binding={totalSpentBinding}
             type="financial"
           >
             {props => <CellValueText {...props} style={headerCellStyle} />}
           </CellValue>
         </View>
-        <ColumnResizer />
       </NamespaceContext.Provider>
     </ResizableColumn>
   );
@@ -1752,18 +2023,25 @@ type BalanceColumnProps = ComponentPropsWithoutRef<typeof ResizableColumn> & {
 
 function BalanceColumn({ month, ...props }: BalanceColumnProps) {
   const [budgetType = 'rollover'] = useSyncedPref('budgetType');
+  const bindingBudgetType: SheetNames =
+    budgetType === 'rollover' ? 'envelope-budget' : 'tracking-budget';
 
   const balanceBinding =
-    budgetType === 'rollover'
+    bindingBudgetType === 'envelope-budget'
       ? envelopeBudget.totalBalance
       : trackingBudget.totalLeftover;
 
   return (
     <Column {...props}>
       <NamespaceContext.Provider value={monthUtils.sheetForMonth(month)}>
-        <View style={headerColumnStyle}>
+        <View
+          style={{
+            ...headerColumnStyle,
+            ...balanceColumnPaddingStyle,
+          }}
+        >
           <Text style={{ color: theme.tableHeaderText }}>Balance</Text>
-          <CellValue<'envelope-budget' | 'tracking-budget', 'total-leftover'>
+          <CellValue<typeof bindingBudgetType, typeof balanceBinding>
             binding={balanceBinding}
             type="financial"
           >
@@ -1781,37 +2059,56 @@ function ResizableColumn({ children, ...props }: ResizableColumnProps) {
   return (
     <Column {...props}>
       {renderProps => (
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            position: 'relative',
+          }}
+        >
           {typeof children === 'function' ? children(renderProps) : children}
           <ColumnResizer
-            data-resizable-direction="left"
             className={css({
+              position: 'absolute',
+              right: -6,
               width: 10,
-              backgroundColor: 'grey',
-              height: 20,
-              flex: '0 0 auto',
+              backgroundColor: 'transparent',
+              height: '100%',
               touchAction: 'none',
               boxSizing: 'border-box',
               border: 5,
               borderStyle: 'none solid',
               borderColor: 'transparent',
               backgroundClip: 'content-box',
-
-              '&[data-resizable-direction=both]': {
-                cursor: 'ew-resize',
-              },
-
-              '&[data-resizable-direction=left]': {
-                cursor: 'e-resize',
-              },
-
-              '&[data-resizable-direction=right]': {
-                cursor: 'w-resize',
-              },
+              cursor: 'ew-resize',
             })}
           />
         </View>
       )}
     </Column>
+  );
+}
+
+type CarryoverIndicatorProps = {
+  style?: CSSProperties;
+};
+
+function CarryoverIndicator({ style }: CarryoverIndicatorProps) {
+  return (
+    <View
+      style={{
+        position: 'absolute',
+        right: 0,
+        transform: 'translateY(-50%)',
+        top: '50%',
+        ...style,
+      }}
+    >
+      <SvgArrowThinRight
+        width={style?.width || 7}
+        height={style?.height || 7}
+        style={style}
+      />
+    </View>
   );
 }

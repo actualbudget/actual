@@ -1,13 +1,97 @@
-import React, { type ComponentPropsWithoutRef } from 'react';
+import React, {
+  type ComponentPropsWithoutRef,
+  useCallback,
+  useRef,
+  useState,
+} from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Menu } from '@actual-app/components/menu';
 
 import { envelopeBudget } from 'loot-core/client/queries';
 
+import { CoverMenu } from './CoverMenu';
 import { useEnvelopeSheetValue } from './EnvelopeBudgetComponents';
+import { TransferMenu } from './TransferMenu';
 
-type BalanceMenuProps = Omit<
+type BalanceMenuProps = {
+  categoryId: string;
+  month: string;
+  onBudgetAction: (month: string, action: string, arg?: unknown) => void;
+  onClose?: () => void;
+};
+
+export function BalanceMenu({
+  categoryId,
+  month,
+  onBudgetAction,
+  onClose = () => {},
+}: BalanceMenuProps) {
+  const catBalance =
+    useEnvelopeSheetValue(envelopeBudget.catBalance(categoryId)) ?? 0;
+
+  const [menu, _setMenu] = useState('menu');
+
+  const ref = useRef<HTMLSpanElement>(null);
+  // Keep focus inside the popover on menu change
+  const setMenu = useCallback(
+    (menu: string) => {
+      ref.current?.focus();
+      _setMenu(menu);
+    },
+    [ref],
+  );
+
+  return (
+    <span tabIndex={-1} ref={ref}>
+      {menu === 'menu' && (
+        <BalanceMovementMenu
+          categoryId={categoryId}
+          onCarryover={carryover => {
+            onBudgetAction(month, 'carryover', {
+              category: categoryId,
+              flag: carryover,
+            });
+            onClose();
+          }}
+          onTransfer={() => setMenu('transfer')}
+          onCover={() => setMenu('cover')}
+        />
+      )}
+
+      {menu === 'transfer' && (
+        <TransferMenu
+          categoryId={categoryId}
+          initialAmount={catBalance}
+          showToBeBudgeted={true}
+          onClose={onClose}
+          onSubmit={(amount, toCategoryId) => {
+            onBudgetAction(month, 'transfer-category', {
+              amount,
+              from: categoryId,
+              to: toCategoryId,
+            });
+          }}
+        />
+      )}
+
+      {menu === 'cover' && (
+        <CoverMenu
+          categoryId={categoryId}
+          onClose={onClose}
+          onSubmit={fromCategoryId => {
+            onBudgetAction(month, 'cover-overspending', {
+              to: categoryId,
+              from: fromCategoryId,
+            });
+          }}
+        />
+      )}
+    </span>
+  );
+}
+
+type BalanceMovementMenuProps = Omit<
   ComponentPropsWithoutRef<typeof Menu>,
   'onMenuSelect' | 'items'
 > & {
@@ -17,13 +101,13 @@ type BalanceMenuProps = Omit<
   onCover: () => void;
 };
 
-export function BalanceMenu({
+export function BalanceMovementMenu({
   categoryId,
   onTransfer,
   onCarryover,
   onCover,
   ...props
-}: BalanceMenuProps) {
+}: BalanceMovementMenuProps) {
   const { t } = useTranslation();
 
   const carryover = useEnvelopeSheetValue(
@@ -38,13 +122,13 @@ export function BalanceMenu({
       onMenuSelect={name => {
         switch (name) {
           case 'transfer':
-            onTransfer?.();
+            onTransfer();
             break;
           case 'carryover':
-            onCarryover?.(!carryover);
+            onCarryover(!carryover);
             break;
           case 'cover':
-            onCover?.();
+            onCover();
             break;
           default:
             throw new Error(`Unrecognized menu option: ${name}`);
