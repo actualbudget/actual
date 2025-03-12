@@ -368,17 +368,20 @@ export const BudgetCategories = ({
           aria-label={t('Budget table')}
           className={css({
             backgroundColor: theme.tableBackground,
-            borderCollapse: 'collapse',
+            borderSpacing: 0,
+            'th, td': {
+              borderBottom: `1px solid ${theme.tableBorder}`,
+            },
+            'th:not(:last-child)': {
+              borderRight: `1px solid ${theme.tableBorder}`,
+            },
             // Add a visible border between category name and the cells.
-            'th:first-child, td:first-child': {
+            'td:first-child': {
               borderRight: `1px solid ${theme.tableBorder}`,
             },
             // Remove the border on the Add Group button row.
             'tr[data-add-group-button-row] td:first-child': {
               border: 'none',
-            },
-            tr: {
-              borderBottom: `1px solid ${theme.tableBorder}`,
             },
           })}
           // dragAndDropHooks={dragAndDropHooks}
@@ -394,6 +397,7 @@ export const BudgetCategories = ({
             }}
             columns={columns}
             dependencies={[
+              // Add dependencies here when you pass it in the render function below
               onToggleHiddenCategories,
               onCollapseAllCategories,
               onExpandAllCategories,
@@ -444,6 +448,7 @@ export const BudgetCategories = ({
           <TableBody
             items={items}
             dependencies={[
+              // Add dependencies here when you pass it in the render function below
               columns,
               collapsedGroupIds,
               onToggleCollapse,
@@ -2158,7 +2163,7 @@ function ResizableColumn({ children, ...props }: ResizableColumnProps) {
               position: 'absolute',
               right: -6,
               width: 10,
-              backgroundColor: theme.tableBorder,
+              backgroundColor: 'transparent',
               height: '100%',
               touchAction: 'none',
               boxSizing: 'border-box',
