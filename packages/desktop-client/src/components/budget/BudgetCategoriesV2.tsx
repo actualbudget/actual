@@ -653,7 +653,6 @@ function AddGroupButtonRow({
           <ReactAriaCell>
             <View
               style={{
-                width: 200,
                 alignItems: 'flex-start',
                 justifyContent: 'flex-start',
               }}
@@ -913,7 +912,6 @@ function CategoryBalanceCell({
           placement="bottom end"
           isOpen={isMenuOpen}
           onOpenChange={() => setIsMenuOpen(false)}
-          style={{ width: 200, margin: 1 }}
           isNonModal
         >
           {budgetType === 'rollover' ? (
@@ -1622,7 +1620,6 @@ function CategoryBudgetedCell({
               placement="bottom start"
               isOpen={isMenuOpen}
               onOpenChange={() => setIsMenuOpen(false)}
-              style={{ width: 200 }}
               isNonModal
             >
               <BudgetMenuComponent
@@ -1783,7 +1780,6 @@ function CategoryGroupNameCell({
                     placement="bottom start"
                     isOpen={isMenuOpen}
                     onOpenChange={() => setIsMenuOpen(false)}
-                    style={{ width: 200, margin: 1 }}
                     isNonModal
                   >
                     <Menu
@@ -1913,9 +1909,6 @@ function CategoryNameCell({
                     placement="bottom start"
                     isOpen={isMenuOpen}
                     onOpenChange={() => setIsMenuOpen(false)}
-                    style={{
-                      width: 200,
-                    }}
                     isNonModal
                   >
                     <Menu
