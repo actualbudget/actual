@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button, ButtonWithLoading } from '@actual-app/components/button';
+import { Input } from '@actual-app/components/input';
 import { Select } from '@actual-app/components/select';
 import { Stack } from '@actual-app/components/stack';
 import { Text } from '@actual-app/components/text';
@@ -21,7 +22,6 @@ import { useCategories } from '../../../hooks/useCategories';
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import { useSyncedPrefs } from '../../../hooks/useSyncedPrefs';
 import { useDispatch } from '../../../redux';
-import { Input } from '../../common/Input';
 import { Modal, ModalCloseButton, ModalHeader } from '../../common/Modal';
 import { SectionLabel } from '../../forms';
 import { TableHeader, TableWithNavigator } from '../../table';

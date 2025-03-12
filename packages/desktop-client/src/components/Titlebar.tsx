@@ -4,9 +4,18 @@ import { useTranslation } from 'react-i18next';
 import { Routes, Route, useLocation } from 'react-router-dom';
 
 import { Button } from '@actual-app/components/button';
+import { useResponsive } from '@actual-app/components/hooks/useResponsive';
+import { SvgArrowLeft } from '@actual-app/components/icons/v1';
+import {
+  SvgAlertTriangle,
+  SvgNavigationMenu,
+  SvgViewHide,
+  SvgViewShow,
+} from '@actual-app/components/icons/v2';
 import { SpaceBetween } from '@actual-app/components/space-between';
-import { styles } from '@actual-app/components/styles';
+import { styles, type CSSProperties } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
@@ -23,15 +32,7 @@ import { useGlobalPref } from '../hooks/useGlobalPref';
 import { useMetadataPref } from '../hooks/useMetadataPref';
 import { useNavigate } from '../hooks/useNavigate';
 import { useSyncedPref } from '../hooks/useSyncedPref';
-import { SvgArrowLeft } from '../icons/v1';
-import {
-  SvgAlertTriangle,
-  SvgNavigationMenu,
-  SvgViewHide,
-  SvgViewShow,
-} from '../icons/v2';
 import { useDispatch } from '../redux';
-import { theme, type CSSProperties } from '../style';
 
 import { AccountSyncCheck } from './accounts/AccountSyncCheck';
 import { AnimatedRefresh } from './AnimatedRefresh';
@@ -39,7 +40,6 @@ import { MonthCountSelector } from './budget/MonthCountSelector';
 import { Link } from './common/Link';
 import { HelpMenu } from './HelpMenu';
 import { LoggedInUser } from './LoggedInUser';
-import { useResponsive } from './responsive/ResponsiveProvider';
 import { useServerURL } from './ServerContext';
 import { useSidebar } from './sidebar/SidebarProvider';
 import { useSheetValue } from './spreadsheet/useSheetValue';

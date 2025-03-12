@@ -63,8 +63,14 @@ type BudgetData = {
   amount: number;
 };
 
-function getBudgetData(table: string, month: string): Promise<BudgetData[]> {
-  return db.all(
+function getBudgetData<T extends BudgetTable>(
+  table: T,
+  month: string,
+): Promise<BudgetData[]> {
+  return db.all<
+    (db.DbReflectBudget | db.DbZeroBudget) &
+      Pick<db.DbViewCategory, 'is_income'>
+  >(
     `
     SELECT b.*, c.is_income FROM v_categories c
     LEFT JOIN ${table} b ON b.category = c.id
@@ -235,7 +241,7 @@ export async function copySinglePreviousMonth({
 }
 
 export async function setZero({ month }: { month: string }): Promise<void> {
-  const categories = await db.all(
+  const categories = await db.all<db.DbViewCategory>(
     'SELECT * FROM v_categories WHERE tombstone = 0',
   );
 
@@ -254,7 +260,7 @@ export async function set3MonthAvg({
 }: {
   month: string;
 }): Promise<void> {
-  const categories = await db.all(
+  const categories = await db.all<db.DbViewCategory>(
     'SELECT * FROM v_categories WHERE tombstone = 0',
   );
 
@@ -297,7 +303,7 @@ export async function set12MonthAvg({
 }: {
   month: string;
 }): Promise<void> {
-  const categories = await db.all(
+  const categories = await db.all<db.DbViewCategory>(
     'SELECT * FROM v_categories WHERE tombstone = 0',
   );
 
@@ -316,7 +322,7 @@ export async function set6MonthAvg({
 }: {
   month: string;
 }): Promise<void> {
-  const categories = await db.all(
+  const categories = await db.all<db.DbViewCategory>(
     'SELECT * FROM v_categories WHERE tombstone = 0',
   );
 

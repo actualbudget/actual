@@ -2,10 +2,13 @@ import React, { type ReactNode, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import { SvgExpandArrow } from '@actual-app/components/icons/v0';
 import { InitialFocus } from '@actual-app/components/initial-focus';
+import { Input } from '@actual-app/components/input';
 import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
 import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import { closeBudget } from 'loot-core/client/budgets/budgetsSlice';
@@ -14,10 +17,7 @@ import * as Platform from 'loot-core/client/platform';
 import { useContextMenu } from '../../hooks/useContextMenu';
 import { useMetadataPref } from '../../hooks/useMetadataPref';
 import { useNavigate } from '../../hooks/useNavigate';
-import { SvgExpandArrow } from '../../icons/v0';
 import { useDispatch } from '../../redux';
-import { theme } from '../../style';
-import { Input } from '../common/Input';
 
 type BudgetNameProps = {
   children?: ReactNode;

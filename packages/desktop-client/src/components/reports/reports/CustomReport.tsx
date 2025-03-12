@@ -4,6 +4,7 @@ import { useLocation, useParams } from 'react-router-dom';
 
 import { AlignedText } from '@actual-app/components/aligned-text';
 import { Block } from '@actual-app/components/block';
+import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
@@ -38,7 +39,6 @@ import { AppliedFilters } from '../../filters/AppliedFilters';
 import { MobileBackButton } from '../../mobile/MobileBackButton';
 import { MobilePageHeader, Page, PageHeader } from '../../Page';
 import { PrivacyFilter } from '../../PrivacyFilter';
-import { useResponsive } from '../../responsive/ResponsiveProvider';
 import { ChooseGraph } from '../ChooseGraph';
 import {
   defaultsGraphList,

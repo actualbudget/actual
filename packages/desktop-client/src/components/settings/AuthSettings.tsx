@@ -4,12 +4,12 @@ import { Trans, useTranslation } from 'react-i18next';
 import { Button } from '@actual-app/components/button';
 import { Label } from '@actual-app/components/label';
 import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
 
 import { pushModal } from 'loot-core/client/modals/modalsSlice';
 
 import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { useDispatch } from '../../redux';
-import { theme } from '../../style';
 import { useMultiuserEnabled, useLoginMethod } from '../ServerContext';
 
 import { Setting } from './UI';

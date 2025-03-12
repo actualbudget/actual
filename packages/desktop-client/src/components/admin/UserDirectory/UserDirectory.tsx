@@ -13,6 +13,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { Button } from '@actual-app/components/button';
 import { Stack } from '@actual-app/components/stack';
 import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import { signOut } from 'loot-core/client/actions';
@@ -27,10 +28,9 @@ import {
 
 import { SelectedProvider, useSelected } from '../../../hooks/useSelected';
 import { useDispatch } from '../../../redux';
-import { theme } from '../../../style';
+import { InfiniteScrollWrapper } from '../../common/InfiniteScrollWrapper';
 import { Link } from '../../common/Link';
 import { Search } from '../../common/Search';
-import { SimpleTable } from '../../common/SimpleTable';
 
 import { UserDirectoryHeader } from './UserDirectoryHeader';
 import { UserDirectoryRow } from './UserDirectoryRow';
@@ -299,11 +299,7 @@ function UserDirectoryContent({
 
         <View style={{ flex: 1 }}>
           <UserDirectoryHeader />
-          <SimpleTable
-            loadMore={loadMore}
-            // Hide the last border of the item in the table
-            style={{ marginBottom: -1 }}
-          >
+          <InfiniteScrollWrapper loadMore={loadMore}>
             {filteredUsers.length === 0 ? (
               <EmptyMessage text={t('No users')} style={{ marginTop: 15 }} />
             ) : (
@@ -315,7 +311,7 @@ function UserDirectoryContent({
                 onEditUser={onEditUser}
               />
             )}
-          </SimpleTable>
+          </InfiniteScrollWrapper>
         </View>
         <View
           style={{

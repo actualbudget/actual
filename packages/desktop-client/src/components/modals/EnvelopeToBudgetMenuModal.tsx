@@ -1,10 +1,10 @@
 import React, { type CSSProperties } from 'react';
 
 import { styles } from '@actual-app/components/styles';
+import { theme } from '@actual-app/components/theme';
 
 import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
 
-import { theme } from '../../style';
 import { ToBudgetMenu } from '../budget/envelope/budgetsummary/ToBudgetMenu';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 

@@ -1,3 +1,5 @@
+import { theme } from '@actual-app/components/theme';
+
 import {
   type LegendEntity,
   type IntervalEntity,
@@ -5,7 +7,6 @@ import {
   type balanceTypeOpType,
 } from 'loot-core/types/models/reports';
 
-import { theme } from '../../../style';
 import { getColorScale } from '../chart-theme';
 
 export function calculateLegend(

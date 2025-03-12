@@ -37,7 +37,6 @@ import { FatalError } from './FatalError';
 import { FinancesApp } from './FinancesApp';
 import { ManagementApp } from './manager/ManagementApp';
 import { Modals } from './Modals';
-import { ResponsiveProvider } from './responsive/ResponsiveProvider';
 import { SidebarProvider } from './sidebar/SidebarProvider';
 import { UpdateNotification } from './UpdateNotification';
 
@@ -207,44 +206,40 @@ export function App() {
     <BrowserRouter>
       <ExposeNavigate />
       <HotkeysProvider initiallyActiveScopes={['*']}>
-        <ResponsiveProvider>
-          <SpreadsheetProvider>
-            <SidebarProvider>
-              <BudgetMonthCountProvider>
-                <DndProvider backend={HTML5Backend}>
+        <SpreadsheetProvider>
+          <SidebarProvider>
+            <BudgetMonthCountProvider>
+              <DndProvider backend={HTML5Backend}>
+                <View
+                  data-theme={theme}
+                  style={{
+                    height: '100%',
+                    display: 'flex',
+                    flexDirection: 'column',
+                  }}
+                >
                   <View
-                    data-theme={theme}
+                    key={hiddenScrollbars ? 'hidden-scrollbars' : 'scrollbars'}
                     style={{
-                      height: '100%',
-                      display: 'flex',
-                      flexDirection: 'column',
+                      flexGrow: 1,
+                      overflow: 'hidden',
+                      ...styles.lightScrollbar,
                     }}
                   >
-                    <View
-                      key={
-                        hiddenScrollbars ? 'hidden-scrollbars' : 'scrollbars'
-                      }
-                      style={{
-                        flexGrow: 1,
-                        overflow: 'hidden',
-                        ...styles.lightScrollbar,
-                      }}
-                    >
-                      <ErrorBoundary FallbackComponent={ErrorFallback}>
-                        {process.env.REACT_APP_REVIEW_ID &&
-                          !Platform.isPlaywright && <DevelopmentTopBar />}
-                        <AppInner />
-                      </ErrorBoundary>
-                      <ThemeStyle />
-                      <Modals />
-                      <UpdateNotification />
-                    </View>
+                    <ErrorBoundary FallbackComponent={ErrorFallback}>
+                      {process.env.REACT_APP_REVIEW_ID &&
+                        !Platform.isPlaywright && <DevelopmentTopBar />}
+                      <AppInner />
+                    </ErrorBoundary>
+                    <ThemeStyle />
+                    <Modals />
+                    <UpdateNotification />
                   </View>
-                </DndProvider>
-              </BudgetMonthCountProvider>
-            </SidebarProvider>
-          </SpreadsheetProvider>
-        </ResponsiveProvider>
+                </View>
+              </DndProvider>
+            </BudgetMonthCountProvider>
+          </SidebarProvider>
+        </SpreadsheetProvider>
       </HotkeysProvider>
     </BrowserRouter>
   );

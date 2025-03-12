@@ -557,7 +557,7 @@ export async function reconcileTransactions(
       }
 
       if (existing.is_parent && existing.cleared !== updates.cleared) {
-        const children = await db.all(
+        const children = await db.all<Pick<db.DbViewTransaction, 'id'>>(
           'SELECT id FROM v_transactions WHERE parent_id = ?',
           [existing.id],
         );
@@ -670,7 +670,22 @@ export async function matchTransactions(
       // strictIdChecking has the added behaviour of only matching on transactions with no import ID
       // if the transaction being imported has an import ID.
       if (strictIdChecking) {
-        fuzzyDataset = await db.all(
+        fuzzyDataset = await db.all<
+          Pick<
+            db.DbViewTransaction,
+            | 'id'
+            | 'is_parent'
+            | 'date'
+            | 'imported_id'
+            | 'payee'
+            | 'imported_payee'
+            | 'category'
+            | 'notes'
+            | 'reconciled'
+            | 'cleared'
+            | 'amount'
+          >
+        >(
           `SELECT id, is_parent, date, imported_id, payee, imported_payee, category, notes, reconciled, cleared, amount
           FROM v_transactions
           WHERE
@@ -687,7 +702,22 @@ export async function matchTransactions(
           ],
         );
       } else {
-        fuzzyDataset = await db.all(
+        fuzzyDataset = await db.all<
+          Pick<
+            db.DbViewTransaction,
+            | 'id'
+            | 'is_parent'
+            | 'date'
+            | 'imported_id'
+            | 'payee'
+            | 'imported_payee'
+            | 'category'
+            | 'notes'
+            | 'reconciled'
+            | 'cleared'
+            | 'amount'
+          >
+        >(
           `SELECT id, is_parent, date, imported_id, payee, imported_payee, category, notes, reconciled, cleared, amount
           FROM v_transactions
           WHERE date >= ? AND date <= ? AND amount = ? AND account = ?`,
