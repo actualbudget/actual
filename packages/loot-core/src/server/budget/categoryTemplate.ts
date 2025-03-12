@@ -90,13 +90,12 @@ export class CategoryTemplate {
 
   // what is the full requested amount this month
   async getTotal(considerBalance: boolean = false) {
-    let toBudget: number = 0;
     if (!considerBalance) this.fromLastMonth = 0;
     for (let i = 0; i < this.priorities.length; i++) {
       const p = this.priorities[i];
-      toBudget += await this.runTemplatesForPriority(p, 0, 0, true);
+      await this.runTemplatesForPriority(p, 0, 0, true);
     }
-    return toBudget;
+    return this.toBudgetAmount;
   }
 
   // run all templates in a given priority level
@@ -108,7 +107,7 @@ export class CategoryTemplate {
     preview: boolean = false,
   ): Promise<number> {
     if (!this.priorities.includes(priority)) return 0;
-    if (this.limitMet) return 0;
+    if (this.limitMet && !preview) return 0;
 
     const t = this.templates.filter(t => t.priority === priority);
     let available = budgetAvail || 0;
