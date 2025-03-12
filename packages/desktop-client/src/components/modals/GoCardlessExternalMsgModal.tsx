@@ -3,7 +3,9 @@ import React, { useEffect, useState, useRef } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
 import { Paragraph } from '@actual-app/components/paragraph';
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import {
@@ -17,9 +19,7 @@ import {
 } from 'loot-core/types/models';
 
 import { useGoCardlessStatus } from '../../hooks/useGoCardlessStatus';
-import { AnimatedLoading } from '../../icons/AnimatedLoading';
 import { useDispatch } from '../../redux';
-import { theme } from '../../style';
 import { Error, Warning } from '../alerts';
 import { Autocomplete } from '../autocomplete/Autocomplete';
 import { Link } from '../common/Link';

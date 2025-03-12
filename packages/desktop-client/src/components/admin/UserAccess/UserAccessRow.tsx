@@ -2,6 +2,7 @@
 import React, { memo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import { signOut } from 'loot-core/client/actions';
@@ -12,7 +13,6 @@ import { type UserAvailable } from 'loot-core/types/models';
 
 import { useMetadataPref } from '../../../hooks/useMetadataPref';
 import { useDispatch } from '../../../redux';
-import { theme } from '../../../style';
 import { Checkbox } from '../../forms';
 import { Row, Cell } from '../../table';
 

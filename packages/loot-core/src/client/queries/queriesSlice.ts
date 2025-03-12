@@ -229,7 +229,9 @@ export const updateAccount = createAppAsyncThunk(
 export const getAccounts = createAppAsyncThunk(
   `${sliceName}/getAccounts`,
   async () => {
-    const accounts: AccountEntity[] = await send('accounts-get');
+    // TODO: Force cast to AccountEntity.
+    // Server is currently returning the DB model it should return the entity model instead.
+    const accounts = (await send('accounts-get')) as AccountEntity[];
     return accounts;
   },
 );
@@ -341,7 +343,7 @@ export const deleteCategory = createAppAsyncThunk(
 type MoveCategoryPayload = {
   id: CategoryEntity['id'];
   groupId: CategoryGroupEntity['id'];
-  targetId: CategoryEntity['id'];
+  targetId: CategoryEntity['id'] | null;
 };
 
 export const moveCategory = createAppAsyncThunk(

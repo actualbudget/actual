@@ -2,7 +2,11 @@ import React, { type ReactNode, useEffect } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import { useResponsive } from '@actual-app/components/hooks/useResponsive';
+import { Input } from '@actual-app/components/input';
 import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
+import { tokens } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
@@ -15,14 +19,10 @@ import { useGlobalPref } from '../../hooks/useGlobalPref';
 import { useIsOutdated, useLatestVersion } from '../../hooks/useLatestVersion';
 import { useMetadataPref } from '../../hooks/useMetadataPref';
 import { useDispatch } from '../../redux';
-import { theme } from '../../style';
-import { tokens } from '../../tokens';
-import { Input } from '../common/Input';
 import { Link } from '../common/Link';
 import { FormField, FormLabel } from '../forms';
 import { MOBILE_NAV_HEIGHT } from '../mobile/MobileNavTabs';
 import { Page } from '../Page';
-import { useResponsive } from '../responsive/ResponsiveProvider';
 import { useServerVersion } from '../ServerContext';
 
 import { AuthSettings } from './AuthSettings';

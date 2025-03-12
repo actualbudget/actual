@@ -4,18 +4,19 @@ import { Form } from 'react-aria-components';
 import { useTranslation } from 'react-i18next';
 
 import { Button, ButtonWithLoading } from '@actual-app/components/button';
+import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { InitialFocus } from '@actual-app/components/initial-focus';
+import { Input } from '@actual-app/components/input';
 import { Paragraph } from '@actual-app/components/paragraph';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import { getTestKeyError } from 'loot-core/shared/errors';
 
-import { theme } from '../../style';
-import { Input } from '../common/Input';
 import { Link } from '../common/Link';
 import {
   Modal,
@@ -23,7 +24,6 @@ import {
   ModalCloseButton,
   ModalHeader,
 } from '../common/Modal';
-import { useResponsive } from '../responsive/ResponsiveProvider';
 
 type FixEncryptionKeyModalProps = Extract<
   ModalType,

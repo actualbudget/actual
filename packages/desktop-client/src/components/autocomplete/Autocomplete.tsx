@@ -12,7 +12,9 @@ import React, {
 } from 'react';
 
 import { Button } from '@actual-app/components/button';
+import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { SvgRemove } from '@actual-app/components/icons/v2';
+import { Input } from '@actual-app/components/input';
 import { Popover } from '@actual-app/components/popover';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
@@ -21,9 +23,6 @@ import { css, cx } from '@emotion/css';
 import Downshift, { type StateChangeTypes } from 'downshift';
 
 import { getNormalisedString } from 'loot-core/shared/normalisation';
-
-import { Input } from '../common/Input';
-import { useResponsive } from '../responsive/ResponsiveProvider';
 
 type CommonAutocompleteProps<T extends Item> = {
   focused?: boolean;

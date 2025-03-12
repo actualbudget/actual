@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { Input } from '@actual-app/components/input';
 import { View } from '@actual-app/components/view';
 
 import { useReports } from 'loot-core/client/data-hooks/reports';
@@ -15,7 +16,6 @@ import { CategoryAutocomplete } from '../autocomplete/CategoryAutocomplete';
 import { FilterAutocomplete } from '../autocomplete/FilterAutocomplete';
 import { PayeeAutocomplete } from '../autocomplete/PayeeAutocomplete';
 import { ReportAutocomplete } from '../autocomplete/ReportAutocomplete';
-import { Input } from '../common/Input';
 import { Checkbox } from '../forms';
 import { DateSelect } from '../select/DateSelect';
 import { RecurringSchedulePicker } from '../select/RecurringSchedulePicker';

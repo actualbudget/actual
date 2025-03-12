@@ -11,7 +11,15 @@ import { useParams, useSearchParams } from 'react-router-dom';
 import { useSpring, animated, config } from 'react-spring';
 
 import { Button } from '@actual-app/components/button';
+import { useResponsive } from '@actual-app/components/hooks/useResponsive';
+import {
+  SvgArrowThickDown,
+  SvgArrowThickUp,
+  SvgCheveronDown,
+  SvgCheveronUp,
+} from '@actual-app/components/icons/v1';
 import { styles } from '@actual-app/components/styles';
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 import { useDrag } from '@use-gesture/react';
@@ -45,20 +53,12 @@ import { useResizeObserver } from '../../../hooks/useResizeObserver';
 import { SelectedProviderWithItems } from '../../../hooks/useSelected';
 import { SplitsExpandedProvider } from '../../../hooks/useSplitsExpanded';
 import { useSyncedPref } from '../../../hooks/useSyncedPref';
-import {
-  SvgArrowThickDown,
-  SvgArrowThickUp,
-  SvgCheveronDown,
-  SvgCheveronUp,
-} from '../../../icons/v1';
 import { useDispatch } from '../../../redux';
-import { theme } from '../../../style';
 import { EditablePageHeaderTitle } from '../../EditablePageHeaderTitle';
 import { MobileBackButton } from '../../mobile/MobileBackButton';
 import { TransactionList as TransactionListMobile } from '../../mobile/transactions/TransactionList';
 import { MobilePageHeader, Page, PageHeader } from '../../Page';
 import { PrivacyFilter } from '../../PrivacyFilter';
-import { useResponsive } from '../../responsive/ResponsiveProvider';
 import { TransactionList } from '../../transactions/TransactionList';
 import { chartTheme } from '../chart-theme';
 import { DateRange } from '../DateRange';

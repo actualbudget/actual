@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { Menu } from '@actual-app/components/menu';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import { useSchedules } from 'loot-core/client/data-hooks/schedules';
@@ -20,7 +21,6 @@ import {
 } from 'loot-core/shared/schedules';
 
 import { useLocale } from '../../hooks/useLocale';
-import { theme } from '../../style';
 import {
   Modal,
   ModalCloseButton,

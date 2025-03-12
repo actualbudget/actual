@@ -6,8 +6,11 @@ import { Trans, useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 
 import { Button } from '@actual-app/components/button';
+import { useResponsive } from '@actual-app/components/hooks/useResponsive';
+import { SvgDotsHorizontalTriple } from '@actual-app/components/icons/v1';
 import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
+import { breakpoints } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 
 import { useDashboard } from 'loot-core/client/data-hooks/dashboard';
@@ -28,12 +31,9 @@ import { useAccounts } from '../../hooks/useAccounts';
 import { useNavigate } from '../../hooks/useNavigate';
 import { useSyncedPref } from '../../hooks/useSyncedPref';
 import { useUndo } from '../../hooks/useUndo';
-import { SvgDotsHorizontalTriple } from '../../icons/v1';
 import { useDispatch } from '../../redux';
-import { breakpoints } from '../../tokens';
 import { MOBILE_NAV_HEIGHT } from '../mobile/MobileNavTabs';
 import { MobilePageHeader, Page, PageHeader } from '../Page';
-import { useResponsive } from '../responsive/ResponsiveProvider';
 
 import { NON_DRAGGABLE_AREA_CLASS_NAME } from './constants';
 import { LoadingIndicator } from './LoadingIndicator';
