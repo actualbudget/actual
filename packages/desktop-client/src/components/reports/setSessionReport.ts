@@ -1,4 +1,4 @@
-import { type RuleConditionEntity } from 'loot-core/types/models/rule';
+import { type RuleConditionEntity } from 'loot-core/types/models';
 
 export const setSessionReport = (
   propName: string,
