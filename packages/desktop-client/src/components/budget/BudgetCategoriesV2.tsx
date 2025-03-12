@@ -453,8 +453,15 @@ export const BudgetCategories = ({
               onHideNewGroupInput,
               onSaveCategoryAndClose,
               onSaveGroupAndClose,
-              onAddGroup,
               onBudgetAction,
+              onAddGroup,
+              onSaveGroup,
+              onDeleteGroup,
+              onAddCategory,
+              onSaveCategory,
+              onDeleteCategory,
+              onApplyBudgetTemplatesInGroup,
+              onShowActivity,
             ]}
           >
             {item => {
@@ -468,6 +475,12 @@ export const BudgetCategories = ({
                       isCollapsed={collapsedGroupIds.includes(item.value.id)}
                       onToggleCollapse={group => onToggleCollapse(group.id)}
                       onAddCategory={group => onAddCategory(group.id)}
+                      onRename={(group, newName) =>
+                        onSaveGroup({
+                          ...group,
+                          name: newName,
+                        })
+                      }
                       onDelete={group => onDeleteGroup(group.id)}
                       onToggleVisibilty={group => {
                         onSaveGroup({
@@ -494,9 +507,13 @@ export const BudgetCategories = ({
                       onShowActivity={(category, month) =>
                         onShowActivity(category.id, month)
                       }
-                      onDeleteCategory={category =>
-                        onDeleteCategory(category.id)
+                      onRename={(category, newName) =>
+                        onSaveCategory({
+                          ...category,
+                          name: newName,
+                        })
                       }
+                      onDelete={category => onDeleteCategory(category.id)}
                       onToggleVisibility={category => {
                         onSaveCategory({
                           ...category,
@@ -522,6 +539,12 @@ export const BudgetCategories = ({
                       isCollapsed={collapsedGroupIds.includes(item.value.id)}
                       onToggleCollapse={group => onToggleCollapse(group.id)}
                       onAddCategory={group => onAddCategory(group.id)}
+                      onRename={(group, newName) =>
+                        onSaveGroup({
+                          ...group,
+                          name: newName,
+                        })
+                      }
                       onDelete={group => onDeleteGroup(group.id)}
                       onToggleVisibilty={() => {
                         onSaveGroup({
@@ -545,7 +568,13 @@ export const BudgetCategories = ({
                       columns={columns}
                       item={item}
                       onBudgetAction={onBudgetAction}
-                      onDeleteCategory={category => onDeleteCategory(category)}
+                      onRename={(category, newName) =>
+                        onSaveCategory({
+                          ...category,
+                          name: newName,
+                        })
+                      }
+                      onDelete={category => onDeleteCategory(category)}
                       onToggleVisibility={category => {
                         onSaveCategory({
                           ...category,
@@ -1041,22 +1070,6 @@ function CategoryGroupBalanceCell({
   );
 }
 
-type ExpenseGroupRowProps = ComponentPropsWithoutRef<
-  typeof ReactAriaRow<ColumnDefinition>
-> & {
-  item: {
-    type: 'expense-group';
-    id: `expense-group-${string}`;
-    value: CategoryGroupEntity;
-  };
-  isCollapsed: boolean;
-  onToggleCollapse: (categoryGroup: CategoryGroupEntity) => void;
-  onAddCategory: (categoryGroup: CategoryGroupEntity) => void;
-  onDelete: (categoryGroup: CategoryGroupEntity) => void;
-  onToggleVisibilty: (categoryGroup: CategoryGroupEntity) => void;
-  onApplyBudgetTemplatesInGroup: (categoryGroup: CategoryGroupEntity) => void;
-};
-
 const getHeaderBackgroundStyle = (
   type: 'category' | 'budgeted' | 'spent' | 'balance',
   month: string,
@@ -1070,11 +1083,29 @@ const getHeaderBackgroundStyle = (
   return { backgroundColor: theme.budgetHeaderOtherMonth };
 };
 
+type ExpenseGroupRowProps = ComponentPropsWithoutRef<
+  typeof ReactAriaRow<ColumnDefinition>
+> & {
+  item: {
+    type: 'expense-group';
+    id: `expense-group-${string}`;
+    value: CategoryGroupEntity;
+  };
+  isCollapsed: boolean;
+  onToggleCollapse: (categoryGroup: CategoryGroupEntity) => void;
+  onAddCategory: (categoryGroup: CategoryGroupEntity) => void;
+  onRename: (categoryGroup: CategoryGroupEntity, newName: string) => void;
+  onDelete: (categoryGroup: CategoryGroupEntity) => void;
+  onToggleVisibilty: (categoryGroup: CategoryGroupEntity) => void;
+  onApplyBudgetTemplatesInGroup: (categoryGroup: CategoryGroupEntity) => void;
+};
+
 function ExpenseGroupRow({
   item,
   isCollapsed,
   onToggleCollapse,
   onAddCategory,
+  onRename,
   onDelete,
   onToggleVisibilty,
   onApplyBudgetTemplatesInGroup,
@@ -1099,6 +1130,7 @@ function ExpenseGroupRow({
                 isCollapsed={isCollapsed}
                 onToggleCollapse={onToggleCollapse}
                 onAddCategory={onAddCategory}
+                onRename={onRename}
                 onDelete={onDelete}
                 onToggleVisibilty={onToggleVisibilty}
                 onApplyBudgetTemplatesInGroup={onApplyBudgetTemplatesInGroup}
@@ -1160,7 +1192,8 @@ type ExpenseCategoryRowProps = ComponentPropsWithoutRef<
   };
   onBudgetAction: (month: string, action: string, args: unknown) => void;
   onShowActivity: (category: CategoryEntity, month: string) => void;
-  onDeleteCategory: (category: CategoryEntity) => void;
+  onRename: (category: CategoryEntity, newName: string) => void;
+  onDelete: (category: CategoryEntity) => void;
   onToggleVisibility: (category: CategoryEntity) => void;
 };
 
@@ -1168,7 +1201,8 @@ function ExpenseCategoryRow({
   item,
   onBudgetAction,
   onShowActivity,
-  onDeleteCategory,
+  onRename,
+  onDelete,
   onToggleVisibility,
   style,
   ...props
@@ -1189,7 +1223,8 @@ function ExpenseCategoryRow({
                 month={column.month}
                 category={item.value}
                 categoryGroup={item.group}
-                onDeleteCategory={onDeleteCategory}
+                onRename={onRename}
+                onDelete={onDelete}
                 onToggleVisibility={onToggleVisibility}
               />
             );
@@ -1239,6 +1274,7 @@ type IncomeGroupRowProps = ComponentPropsWithoutRef<
   isCollapsed: boolean;
   onToggleCollapse: (categoryGroup: CategoryGroupEntity) => void;
   onAddCategory: (categoryGroup: CategoryGroupEntity) => void;
+  onRename: (categoryGroup: CategoryGroupEntity, newName: string) => void;
   onDelete: (categoryGroup: CategoryGroupEntity) => void;
   onToggleVisibilty: (categoryGroup: CategoryGroupEntity) => void;
   onApplyBudgetTemplatesInGroup: (categoryGroup: CategoryGroupEntity) => void;
@@ -1249,6 +1285,7 @@ function IncomeGroupRow({
   isCollapsed,
   onToggleCollapse,
   onAddCategory,
+  onRename,
   onDelete,
   onToggleVisibilty,
   onApplyBudgetTemplatesInGroup,
@@ -1275,6 +1312,7 @@ function IncomeGroupRow({
                 isCollapsed={isCollapsed}
                 onToggleCollapse={onToggleCollapse}
                 onAddCategory={onAddCategory}
+                onRename={onRename}
                 onDelete={onDelete}
                 onToggleVisibilty={onToggleVisibilty}
                 onApplyBudgetTemplatesInGroup={onApplyBudgetTemplatesInGroup}
@@ -1314,6 +1352,7 @@ function IncomeGroupRow({
                 isCollapsed={isCollapsed}
                 onToggleCollapse={onToggleCollapse}
                 onAddCategory={onAddCategory}
+                onRename={onRename}
                 onDelete={onDelete}
                 onToggleVisibilty={onToggleVisibilty}
                 onApplyBudgetTemplatesInGroup={onApplyBudgetTemplatesInGroup}
@@ -1353,14 +1392,16 @@ type IncomeCategoryRowProps = ComponentPropsWithoutRef<
     group: CategoryGroupEntity;
   };
   onBudgetAction: (month: string, action: string, args: unknown) => void;
-  onDeleteCategory: (category: CategoryEntity) => void;
+  onRename: (category: CategoryEntity, newName: string) => void;
+  onDelete: (category: CategoryEntity) => void;
   onToggleVisibility: (category: CategoryEntity) => void;
 };
 
 function IncomeCategoryRow({
   item,
   onBudgetAction,
-  onDeleteCategory,
+  onRename,
+  onDelete,
   onToggleVisibility,
   style,
   ...props
@@ -1382,7 +1423,8 @@ function IncomeCategoryRow({
                 month={column.month}
                 category={item.value}
                 categoryGroup={item.group}
-                onDeleteCategory={onDeleteCategory}
+                onRename={onRename}
+                onDelete={onDelete}
                 onToggleVisibility={onToggleVisibility}
               />
             );
@@ -1419,7 +1461,8 @@ function IncomeCategoryRow({
                 month={column.month}
                 category={item.value}
                 categoryGroup={item.group}
-                onDeleteCategory={onDeleteCategory}
+                onRename={onRename}
+                onDelete={onDelete}
                 onToggleVisibility={onToggleVisibility}
               />
             );
@@ -1653,6 +1696,7 @@ type CategoryGroupNameCellProps = ComponentPropsWithoutRef<
   isCollapsed: boolean;
   onToggleCollapse: (categoryGroup: CategoryGroupEntity) => void;
   onAddCategory: (categoryGroup: CategoryGroupEntity) => void;
+  onRename: (categoryGroup: CategoryGroupEntity, newName: string) => void;
   onDelete: (categoryGroup: CategoryGroupEntity) => void;
   onToggleVisibilty: (categoryGroup: CategoryGroupEntity) => void;
   onApplyBudgetTemplatesInGroup: (categoryGroup: CategoryGroupEntity) => void;
@@ -1664,6 +1708,7 @@ function CategoryGroupNameCell({
   isCollapsed,
   onToggleCollapse,
   onAddCategory,
+  onRename,
   onDelete,
   onToggleVisibilty,
   onApplyBudgetTemplatesInGroup,
@@ -1671,6 +1716,7 @@ function CategoryGroupNameCell({
 }: CategoryGroupNameCellProps) {
   const { t } = useTranslation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isRenaming, setIsRenaming] = useState(false);
   const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
 
   return (
@@ -1686,89 +1732,111 @@ function CategoryGroupNameCell({
           })}
         >
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <Button
-                variant="bare"
-                onPress={() => onToggleCollapse(categoryGroup)}
-              >
-                <SvgExpandArrow
-                  width={8}
-                  height={8}
-                  style={{
-                    flexShrink: 0,
-                    transition: 'transform .1s',
-                    transform: isCollapsed ? 'rotate(-90deg)' : '',
-                  }}
-                />
-              </Button>
-              <Text style={{ fontWeight: 600 }}>{categoryGroup.name}</Text>
-            </View>
-            <DialogTrigger>
-              <Button
-                variant="bare"
-                className={cx(
-                  { 'hover-visible': !isMenuOpen },
-                  css({ marginLeft: 5 }),
-                )}
-                onPress={() => {
-                  // resetPosition();
-                  setIsMenuOpen(true);
+            <Button
+              variant="bare"
+              onPress={() => onToggleCollapse(categoryGroup)}
+              isDisabled={isRenaming}
+            >
+              <SvgExpandArrow
+                width={8}
+                height={8}
+                style={{
+                  flexShrink: 0,
+                  transition: 'transform .1s',
+                  transform: isCollapsed ? 'rotate(-90deg)' : '',
                 }}
-              >
-                <SvgCheveronDown width={12} height={12} />
-              </Button>
-
-              <Popover
-                placement="bottom start"
-                isOpen={isMenuOpen}
-                onOpenChange={() => setIsMenuOpen(false)}
-                style={{ width: 200, margin: 1 }}
-                isNonModal
-              >
-                <Menu
-                  onMenuSelect={type => {
-                    if (type === 'rename') {
-                      // onEdit(categoryGroup.id);
-                    } else if (type === 'add-category') {
-                      onAddCategory(categoryGroup);
-                    } else if (type === 'delete') {
-                      onDelete(categoryGroup);
-                    } else if (type === 'toggle-visibility') {
-                      // onSave({ ...categoryGroup, hidden: !categoryGroup.hidden });
-                      onToggleVisibilty(categoryGroup);
-                    } else if (type === 'apply-multiple-category-template') {
-                      onApplyBudgetTemplatesInGroup(categoryGroup);
+              />
+            </Button>
+            {isRenaming ? (
+              <View style={{ flex: 1 }}>
+                <Input
+                  autoFocus
+                  defaultValue={categoryGroup.name}
+                  onBlur={() => setIsRenaming(false)}
+                  onEscape={() => setIsRenaming(false)}
+                  onUpdate={newName => {
+                    if (newName !== categoryGroup.name) {
+                      onRename(categoryGroup, newName);
                     }
-                    setIsMenuOpen(false);
                   }}
-                  items={[
-                    { name: 'add-category', text: t('Add category') },
-                    { name: 'rename', text: t('Rename') },
-                    !categoryGroup.is_income && {
-                      name: 'toggle-visibility',
-                      text: categoryGroup.hidden ? 'Show' : 'Hide',
-                    },
-                    // onDelete && { name: 'delete', text: t('Delete') },
-                    { name: 'delete', text: t('Delete') },
-                    ...(isGoalTemplatesEnabled
-                      ? [
-                          {
-                            name: 'apply-multiple-category-template',
-                            text: t('Apply budget templates'),
-                          },
-                        ]
-                      : []),
-                  ]}
                 />
-              </Popover>
-            </DialogTrigger>
+              </View>
+            ) : (
+              <>
+                <Text style={{ fontWeight: 600 }}>{categoryGroup.name}</Text>
+                <DialogTrigger>
+                  <Button
+                    variant="bare"
+                    className={cx(
+                      { 'hover-visible': !isMenuOpen },
+                      css({ marginLeft: 5 }),
+                    )}
+                    onPress={() => {
+                      // resetPosition();
+                      setIsMenuOpen(true);
+                    }}
+                  >
+                    <SvgCheveronDown width={12} height={12} />
+                  </Button>
+
+                  <Popover
+                    placement="bottom start"
+                    isOpen={isMenuOpen}
+                    onOpenChange={() => setIsMenuOpen(false)}
+                    style={{ width: 200, margin: 1 }}
+                    isNonModal
+                  >
+                    <Menu
+                      onMenuSelect={type => {
+                        if (type === 'rename') {
+                          // onEdit(categoryGroup.id);
+                          setIsRenaming(true);
+                        } else if (type === 'add-category') {
+                          onAddCategory(categoryGroup);
+                        } else if (type === 'delete') {
+                          onDelete(categoryGroup);
+                        } else if (type === 'toggle-visibility') {
+                          // onSave({ ...categoryGroup, hidden: !categoryGroup.hidden });
+                          onToggleVisibilty(categoryGroup);
+                        } else if (
+                          type === 'apply-multiple-category-template'
+                        ) {
+                          onApplyBudgetTemplatesInGroup(categoryGroup);
+                        }
+                        setIsMenuOpen(false);
+                      }}
+                      items={[
+                        { name: 'add-category', text: t('Add category') },
+                        { name: 'rename', text: t('Rename') },
+                        !categoryGroup.is_income && {
+                          name: 'toggle-visibility',
+                          text: categoryGroup.hidden ? 'Show' : 'Hide',
+                        },
+                        // onDelete && { name: 'delete', text: t('Delete') },
+                        { name: 'delete', text: t('Delete') },
+                        ...(isGoalTemplatesEnabled
+                          ? [
+                              {
+                                name: 'apply-multiple-category-template',
+                                text: t('Apply budget templates'),
+                              },
+                            ]
+                          : []),
+                      ]}
+                    />
+                  </Popover>
+                </DialogTrigger>
+              </>
+            )}
           </View>
-          <View>
-            <NotesButton
-              id={categoryGroup.id}
-              defaultColor={theme.pageTextLight}
-            />
-          </View>
+          {!isRenaming && (
+            <View>
+              <NotesButton
+                id={categoryGroup.id}
+                defaultColor={theme.pageTextLight}
+              />
+            </View>
+          )}
         </View>
       </NamespaceContext.Provider>
     </ReactAriaCell>
@@ -1779,7 +1847,8 @@ type CategoryNameCellProps = ComponentPropsWithoutRef<typeof ReactAriaCell> & {
   month: string;
   category: CategoryEntity;
   categoryGroup: CategoryGroupEntity;
-  onDeleteCategory: (category: CategoryEntity) => void;
+  onRename: (category: CategoryEntity, newName: string) => void;
+  onDelete: (category: CategoryEntity) => void;
   onToggleVisibility: (category: CategoryEntity) => void;
 };
 
@@ -1787,12 +1856,15 @@ function CategoryNameCell({
   month,
   category,
   categoryGroup,
-  onDeleteCategory,
+  onRename,
+  onDelete,
   onToggleVisibility,
   ...props
 }: CategoryNameCellProps) {
   const { t } = useTranslation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isRenaming, setIsRenaming] = useState(false);
+
   return (
     <ReactAriaCell {...props}>
       <NamespaceContext.Provider value={monthUtils.sheetForMonth(month)}>
@@ -1805,59 +1877,80 @@ function CategoryNameCell({
             ...hoverVisibleStyle,
           })}
         >
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <Text>{category.name}</Text>
-            <DialogTrigger>
-              <Button
-                variant="bare"
-                className={cx(
-                  { 'hover-visible': !isMenuOpen },
-                  css({ marginLeft: 5 }),
-                )}
-                onPress={() => {
-                  // resetPosition();
-                  setIsMenuOpen(true);
+          {isRenaming ? (
+            <View style={{ flex: 1 }}>
+              <Input
+                defaultValue={category.name}
+                placeholder="Enter category name"
+                onBlur={() => setIsRenaming(false)}
+                onUpdate={newName => {
+                  if (newName !== category.name) {
+                    onRename(category, newName);
+                  }
                 }}
-              >
-                <SvgCheveronDown width={12} height={12} />
-              </Button>
+              />
+            </View>
+          ) : (
+            <>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Text>{category.name}</Text>
+                <DialogTrigger>
+                  <Button
+                    variant="bare"
+                    className={cx(
+                      { 'hover-visible': !isMenuOpen },
+                      css({ marginLeft: 5 }),
+                    )}
+                    onPress={() => {
+                      // resetPosition();
+                      setIsMenuOpen(true);
+                    }}
+                  >
+                    <SvgCheveronDown width={12} height={12} />
+                  </Button>
 
-              <Popover
-                placement="bottom start"
-                isOpen={isMenuOpen}
-                onOpenChange={() => setIsMenuOpen(false)}
-                style={{
-                  width: 200,
-                }}
-                isNonModal
-              >
-                <Menu
-                  onMenuSelect={type => {
-                    if (type === 'rename') {
-                      // onEditName(category.id);
-                    } else if (type === 'delete') {
-                      onDeleteCategory(category);
-                    } else if (type === 'toggle-visibility') {
-                      // onSave({ ...category, hidden: !category.hidden });
-                      onToggleVisibility(category);
-                    }
-                    setIsMenuOpen(false);
-                  }}
-                  items={[
-                    { name: 'rename', text: t('Rename') },
-                    !categoryGroup?.hidden && {
-                      name: 'toggle-visibility',
-                      text: category.hidden ? t('Show') : t('Hide'),
-                    },
-                    { name: 'delete', text: t('Delete') },
-                  ]}
+                  <Popover
+                    placement="bottom start"
+                    isOpen={isMenuOpen}
+                    onOpenChange={() => setIsMenuOpen(false)}
+                    style={{
+                      width: 200,
+                    }}
+                    isNonModal
+                  >
+                    <Menu
+                      onMenuSelect={type => {
+                        if (type === 'rename') {
+                          // onEditName(category.id);
+                          setIsRenaming(true);
+                        } else if (type === 'delete') {
+                          onDelete(category);
+                        } else if (type === 'toggle-visibility') {
+                          // onSave({ ...category, hidden: !category.hidden });
+                          onToggleVisibility(category);
+                        }
+                        setIsMenuOpen(false);
+                      }}
+                      items={[
+                        { name: 'rename', text: t('Rename') },
+                        !categoryGroup?.hidden && {
+                          name: 'toggle-visibility',
+                          text: category.hidden ? t('Show') : t('Hide'),
+                        },
+                        { name: 'delete', text: t('Delete') },
+                      ]}
+                    />
+                  </Popover>
+                </DialogTrigger>
+              </View>
+              <View>
+                <NotesButton
+                  id={category.id}
+                  defaultColor={theme.pageTextLight}
                 />
-              </Popover>
-            </DialogTrigger>
-          </View>
-          <View>
-            <NotesButton id={category.id} defaultColor={theme.pageTextLight} />
-          </View>
+              </View>
+            </>
+          )}
         </View>
       </NamespaceContext.Provider>
     </ReactAriaCell>
