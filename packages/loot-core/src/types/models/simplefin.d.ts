@@ -7,7 +7,7 @@ export type SimpleFinTransactionsRequest = {
 };
 
 export type SimpleFinApiAccounts = {
-  errors: { [accountId: string]: any[] };
+  errors: { [accountId: string]: SimpleFinApiError[] };
   accounts: SimpleFinApiAccount[];
   sferrors: string[];
   hasError: boolean;
@@ -46,6 +46,7 @@ export type SimpleFinApiTransaction = {
   memo: string;
   transacted_at?: number;
   pending?: boolean;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   extra?: any;
 };
 

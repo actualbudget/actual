@@ -1,6 +1,6 @@
-import { HoldingEntity } from 'loot-core/types/models/holding';
-import * as db from '../db';
+import { HoldingEntity } from '../../types/models/holding';
 import { createApp } from '../app';
+import * as db from '../db';
 import { mutator } from '../mutators';
 
 export type HoldingHandlers = {

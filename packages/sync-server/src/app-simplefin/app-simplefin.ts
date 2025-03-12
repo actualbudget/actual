@@ -2,9 +2,14 @@ import https from 'https';
 
 import express, { Request, Response } from 'express';
 
-import type { BankSyncTransaction } from 'loot-core/src/types/models/bank-sync.js';
+import type {
+  BankSyncResponse,
+  BankSyncTransaction,
+} from 'loot-core/src/types/models/bank-sync.js';
 import type {
   SimpleFinApiAccounts,
+  SimpleFinApiError,
+  SimpleFinBatchSyncResponse,
   SimpleFinTransactionsRequest,
 } from 'loot-core/src/types/models/simplefin.js';
 
@@ -119,11 +124,19 @@ app.post(
       return;
     }
 
-    let response: any;
+    let response: BankSyncResponse | SimpleFinBatchSyncResponse | undefined =
+      {};
     if (Array.isArray(accountId) && Array.isArray(startDate)) {
       for (let i = 0; i < accountId.length; i++) {
         const id = accountId[i];
-        response[id] = getAccountResponse(results, id, new Date(startDate[i]));
+        const accountResp = getAccountResponse(
+          results,
+          id,
+          new Date(startDate[i]),
+        );
+        if (accountResp) {
+          response[id] = accountResp;
+        }
       }
     } else if (!Array.isArray(accountId) && !Array.isArray(startDate)) {
       response = getAccountResponse(results, accountId, new Date(startDate));
@@ -152,7 +165,7 @@ app.post(
 function logAccountError(
   results: SimpleFinApiAccounts,
   accountId: string,
-  errorData: any,
+  errorData: SimpleFinApiError,
 ) {
   const errors = results.errors[accountId] || [];
   errors.push(errorData);
@@ -164,7 +177,7 @@ function getAccountResponse(
   results: SimpleFinApiAccounts,
   accountId: string,
   startDate: Date,
-) {
+): BankSyncResponse | undefined {
   const account = results.accounts.find(a => a.id === accountId);
   if (!account) {
     console.log(
@@ -178,7 +191,7 @@ function getAccountResponse(
       error_code: 'ACCOUNT_MISSING',
       reason: `The account "${accountId}" was not found. Try unlinking and relinking the account.`,
     });
-    return;
+    return undefined;
   }
 
   const needsAttention = results.sferrors.find(
@@ -221,7 +234,7 @@ function getAccountResponse(
 
   for (const trans of account.transactions) {
     const isBooked = !(trans.pending ?? trans.posted === 0);
-    let dateToUse = (isBooked ? trans.posted : trans.transacted_at)!;
+    const dateToUse = (isBooked ? trans.posted : trans.transacted_at)!;
 
     const transactionDate = new Date(dateToUse * 1000);
 
@@ -284,7 +297,7 @@ function getAccountResponse(
       pending: pendingSorted,
     },
     holdings,
-  };
+  } as BankSyncResponse;
 }
 
 function invalidToken(res: Response) {
@@ -300,6 +313,7 @@ function invalidToken(res: Response) {
   });
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function serverDown(e: any, res: Response) {
   console.log(e);
   res.send({

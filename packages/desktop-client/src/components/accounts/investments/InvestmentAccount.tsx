@@ -1,6 +1,26 @@
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+
+import { Button } from '@actual-app/components/button';
+import { SvgArrowDown, SvgArrowUp } from '@actual-app/components/icons/v1';
+import { type CSSProperties } from '@actual-app/components/styles';
+import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
+import { View } from '@actual-app/components/view';
+import { v4 as uuidV4 } from 'uuid';
+
 import { holdings } from 'loot-core/client/queries';
 import { useQuery } from 'loot-core/client/query-hooks';
-import { HoldingEntity } from 'loot-core/types/models/holding';
+import { send } from 'loot-core/platform/client/fetch';
+import { evalArithmetic } from 'loot-core/shared/arithmetic';
+import {
+  amountToInteger,
+  currencyToInteger,
+  integerToAmount,
+} from 'loot-core/shared/util';
+import { type AccountEntity } from 'loot-core/types/models';
+import { type HoldingEntity } from 'loot-core/types/models/holding';
+
 import {
   CustomCell,
   InputCell,
@@ -9,23 +29,6 @@ import {
   UnexposedCellContent,
   useTableNavigator,
 } from '../../table';
-import { AccountEntity } from 'loot-core/types/models';
-import { useState } from 'react';
-import { View } from '@actual-app/components/view';
-import { theme } from '@actual-app/components/theme';
-import { Button } from '@actual-app/components/button';
-import { Text } from '@actual-app/components/text';
-import { SvgArrowDown, SvgArrowUp } from '@actual-app/components/icons/v1';
-import { CSSProperties } from '@actual-app/components/styles';
-import { useTranslation } from 'react-i18next';
-import {
-  amountToInteger,
-  currencyToInteger,
-  integerToAmount,
-} from 'loot-core/shared/util';
-import { send } from 'loot-core/platform/client/fetch';
-import { evalArithmetic } from 'loot-core/shared/arithmetic';
-import { v4 as uuidV4 } from 'uuid';
 
 export type InvestmentAccountProps = {
   account: AccountEntity;
@@ -141,7 +144,7 @@ export function InvestmentTable({
   function getUpdateValue(
     field: InvestmentTableField,
     stringValue: string,
-  ): any {
+  ): string {
     if (field.type === 'decimal') {
       return amountToInteger(evalArithmetic(stringValue));
     } else if (field.type === 'currency') {
@@ -312,6 +315,17 @@ function InvestmentTableHeader({
   );
 }
 
+type HeaderCellProps = {
+  value: string;
+  id: string;
+  width: string | number;
+  alignItems: string;
+  marginLeft: number;
+  marginRight: number;
+  icon?: 'asc' | 'desc';
+  onClick: () => void;
+};
+
 function HeaderCell({
   value,
   id,
@@ -321,7 +335,7 @@ function HeaderCell({
   marginRight,
   icon,
   onClick,
-}: any) {
+}: HeaderCellProps) {
   const style = {
     whiteSpace: 'nowrap',
     overflow: 'hidden',

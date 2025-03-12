@@ -7,6 +7,7 @@ import { Button } from '@actual-app/components/button';
 import { FormError } from '@actual-app/components/form-error';
 import { InitialFocus } from '@actual-app/components/initial-focus';
 import { InlineField } from '@actual-app/components/inline-field';
+import { Select } from '@actual-app/components/select';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
@@ -15,6 +16,7 @@ import { createAccount } from 'loot-core/client/queries/queriesSlice';
 import { toRelaxedNumber } from 'loot-core/shared/util';
 
 import * as useAccounts from '../../hooks/useAccounts';
+import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { useNavigate } from '../../hooks/useNavigate';
 import { useDispatch } from '../../redux';
 import { theme } from '../../style';
@@ -29,8 +31,6 @@ import {
 } from '../common/Modal';
 import { Checkbox } from '../forms';
 import { validateAccountName } from '../util/accountValidation';
-import { Select } from '@actual-app/components/select';
-import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 
 export function CreateLocalAccountModal() {
   const { t } = useTranslation();

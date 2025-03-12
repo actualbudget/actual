@@ -38,7 +38,6 @@ import {
 
 import { getStartingBalancePayee } from './payees';
 import { title } from './title';
-import { HoldingEntity } from 'loot-core/types/models/holding';
 
 function BankSyncError(type: string, code: string, details?: object) {
   return { type: 'BankSyncError', category: type, code, details };

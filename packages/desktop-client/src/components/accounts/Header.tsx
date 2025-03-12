@@ -10,6 +10,7 @@ import { useHotkeys } from 'react-hotkeys-hook';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import { SvgChart, SvgList } from '@actual-app/components/icons/v1';
 import { InitialFocus } from '@actual-app/components/initial-focus';
 import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
@@ -26,6 +27,7 @@ import {
   type TransactionFilterEntity,
 } from 'loot-core/types/models';
 
+import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { useLocale } from '../../hooks/useLocale';
 import { useLocalPref } from '../../hooks/useLocalPref';
 import { useSplitsExpanded } from '../../hooks/useSplitsExpanded';
@@ -52,8 +54,6 @@ import { SelectedTransactionsButton } from '../transactions/SelectedTransactions
 import { type TableRef } from './Account';
 import { Balances } from './Balance';
 import { ReconcilingMessage, ReconcileMenu } from './Reconcile';
-import { useFeatureFlag } from '../../hooks/useFeatureFlag';
-import { SvgChart, SvgList } from '@actual-app/components/icons/v1';
 
 type AccountHeaderProps = {
   tableRef: TableRef;

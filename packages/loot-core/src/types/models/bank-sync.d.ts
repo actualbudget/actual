@@ -1,8 +1,4 @@
-import {
-  GoCardlessAmount,
-  GoCardlessBalance,
-  GoCardlessTransaction,
-} from './gocardless';
+import { GoCardlessAmount, GoCardlessBalance } from './gocardless';
 
 export type BankSyncBalance = GoCardlessBalance;
 export type BankSyncAmount = GoCardlessAmount;

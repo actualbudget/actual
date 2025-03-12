@@ -74,6 +74,7 @@ import { useAccounts } from '../../hooks/useAccounts';
 import { useCategories } from '../../hooks/useCategories';
 import { useDateFormat } from '../../hooks/useDateFormat';
 import { useFailedAccounts } from '../../hooks/useFailedAccounts';
+import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { useLocalPref } from '../../hooks/useLocalPref';
 import { usePayees } from '../../hooks/usePayees';
 import {
@@ -93,11 +94,7 @@ import { TransactionList } from '../transactions/TransactionList';
 import { validateAccountName } from '../util/accountValidation';
 
 import { AccountHeader } from './Header';
-import { useFeatureFlag } from '../../hooks/useFeatureFlag';
-import {
-  InvestmentAccount,
-  InvestmentTable,
-} from './investments/InvestmentAccount';
+import { InvestmentAccount } from './investments/InvestmentAccount';
 
 type ConditionEntity = Partial<RuleConditionEntity> | TransactionFilterEntity;
 
