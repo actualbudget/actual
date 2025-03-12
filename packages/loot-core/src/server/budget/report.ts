@@ -65,23 +65,13 @@ export async function createCategory(cat, sheetName, prevSheetName) {
 
 export function createCategoryGroup(group, sheetName) {
   // different sum amount dependencies
-  if (group.is_income) {
-    sheet.get().createDynamic(sheetName, 'group-sum-amount-' + group.id, {
-      initialValue: 0,
-      dependencies: group.categories
-        .filter(f => !f.hidden)
-        .map(cat => `sum-amount-${cat.id}`),
-      run: sumAmounts,
-    });
-  } else {
-    sheet.get().createDynamic(sheetName, 'group-sum-amount-' + group.id, {
-      initialValue: 0,
-      dependencies: group.categories
-        .filter(cat => !cat.hidden)
-        .map(cat => `spent-with-carryover-${cat.id}`),
-      run: sumAmounts,
-    });
-  }
+  sheet.get().createDynamic(sheetName, 'group-sum-amount-' + group.id, {
+    initialValue: 0,
+    dependencies: group.categories
+      .filter(cat => !cat.hidden)
+      .map(cat => `sum-amount-${cat.id}`),
+    run: sumAmounts,
+  });
   sheet.get().createDynamic(sheetName, 'group-budget-' + group.id, {
     initialValue: 0,
     dependencies: group.categories
@@ -125,7 +115,7 @@ export function createSummary(groups, sheetName) {
 
   sheet.get().createDynamic(sheetName, 'total-leftover', {
     initialValue: 0,
-    dependencies: ['total-budgeted', 'total-spent'],
+    dependencies: expenseGroups.map(g => `group-leftover-${g.id}`),
     run: sumAmounts,
   });
 
@@ -153,20 +143,12 @@ export function createSummary(groups, sheetName) {
 }
 
 export function handleCategoryChange(months, oldValue, newValue) {
-  function addDeps(sheetName, groupId, catId, isIncome = null) {
-    if (isIncome) {
-      sheet
-        .get()
-        .addDependencies(sheetName, `group-sum-amount-${groupId}`, [
-          `sum-amount-${catId}`,
-        ]);
-    } else {
-      sheet
-        .get()
-        .addDependencies(sheetName, `group-sum-amount-${groupId}`, [
-          `spent-with-carryover-${catId}`,
-        ]);
-    }
+  function addDeps(sheetName, groupId, catId) {
+    sheet
+      .get()
+      .addDependencies(sheetName, `group-sum-amount-${groupId}`, [
+        `sum-amount-${catId}`,
+      ]);
     sheet
       .get()
       .addDependencies(sheetName, `group-budget-${groupId}`, [
@@ -179,20 +161,12 @@ export function handleCategoryChange(months, oldValue, newValue) {
       ]);
   }
 
-  function removeDeps(sheetName, groupId, catId, isIncome = null) {
-    if (isIncome) {
-      sheet
-        .get()
-        .removeDependencies(sheetName, `group-sum-amount-${groupId}`, [
-          `sum-amount-${catId}`,
-        ]);
-    } else {
-      sheet
-        .get()
-        .removeDependencies(sheetName, `group-sum-amount-${groupId}`, [
-          `spent-with-carryover-${catId}`,
-        ]);
-    }
+  function removeDeps(sheetName, groupId, catId) {
+    sheet
+      .get()
+      .removeDependencies(sheetName, `group-sum-amount-${groupId}`, [
+        `sum-amount-${catId}`,
+      ]);
     sheet
       .get()
       .removeDependencies(sheetName, `group-budget-${groupId}`, [
@@ -246,9 +220,9 @@ export function handleCategoryChange(months, oldValue, newValue) {
     months.forEach(month => {
       const sheetName = monthUtils.sheetForMonth(month);
       if (newValue.hidden) {
-        removeDeps(sheetName, groupId, id, newValue.is_income);
+        removeDeps(sheetName, groupId, id);
       } else {
-        addDeps(sheetName, groupId, id, newValue.is_income);
+        addDeps(sheetName, groupId, id);
       }
     });
   }
@@ -266,6 +240,11 @@ export function handleCategoryGroupChange(months, oldValue, newValue) {
       .addDependencies(sheetName, 'total-spent', [
         `group-sum-amount-${groupId}`,
       ]);
+    sheet
+      .get()
+      .addDependencies(sheetName, 'total-leftover', [
+        `group-leftover-${groupId}`,
+      ]);
   }
 
   function removeDeps(sheetName, groupId) {
@@ -278,6 +257,11 @@ export function handleCategoryGroupChange(months, oldValue, newValue) {
       .get()
       .removeDependencies(sheetName, 'total-spent', [
         `group-sum-amount-${groupId}`,
+      ]);
+    sheet
+      .get()
+      .removeDependencies(sheetName, 'total-leftover', [
+        `group-leftover-${groupId}`,
       ]);
   }
 
