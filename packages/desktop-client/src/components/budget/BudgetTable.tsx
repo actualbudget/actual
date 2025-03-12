@@ -310,27 +310,21 @@ export function BudgetTable(props: BudgetTableProps) {
           </>
         )}
         {budgetTableV2Enabled && (
-          <View style={{ overflowY: 'auto' }}>
-            <BudgetCategoriesV2
-              categoryGroups={categoryGroups}
-              editingCell={editing}
-              dataComponents={dataComponents}
-              onEditMonth={onEditMonth}
-              onEditName={onEditName}
-              onSaveCategory={onSaveCategory}
-              onSaveGroup={onSaveGroup}
-              onDeleteCategory={onDeleteCategory}
-              onDeleteGroup={onDeleteGroup}
-              onReorderCategory={_onReorderCategory}
-              onReorderGroup={_onReorderGroup}
-              onBudgetAction={onBudgetAction}
-              onShowActivity={onShowActivity}
-              onApplyBudgetTemplatesInGroup={onApplyBudgetTemplatesInGroup}
-              onToggleHiddenCategories={onToggleHiddenCategories}
-              onExpandAllCategories={onExpandAllCategories}
-              onCollapseAllCategories={onCollapseAllCategories}
-            />
-          </View>
+          <BudgetCategoriesV2
+            categoryGroups={categoryGroups}
+            onEditMonth={onEditMonth}
+            onEditName={onEditName}
+            onSaveCategory={onSaveCategory}
+            onSaveGroup={onSaveGroup}
+            onDeleteCategory={onDeleteCategory}
+            onDeleteGroup={onDeleteGroup}
+            onBudgetAction={onBudgetAction}
+            onShowActivity={onShowActivity}
+            onApplyBudgetTemplatesInGroup={onApplyBudgetTemplatesInGroup}
+            onToggleHiddenCategories={onToggleHiddenCategories}
+            onExpandAllCategories={onExpandAllCategories}
+            onCollapseAllCategories={onCollapseAllCategories}
+          />
         )}
       </MonthsProvider>
     </View>
