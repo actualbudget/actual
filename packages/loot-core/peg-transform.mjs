@@ -8,10 +8,12 @@ import peg from 'peggy';
 const transform = {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   process(sourceText, sourcePath, _options) {
-    return `module.exports = ${peg.generate(sourceText, {
-      output: 'source-with-inline-map',
-      grammarSource: sourcePath,
-    })}`;
+    return {
+      code: `module.exports = ${peg.generate(sourceText, {
+        output: 'source-with-inline-map',
+        grammarSource: sourcePath,
+      })}`,
+    };
   },
   getCacheKey(sourceText, _sourcePath, options) {
     return crypto

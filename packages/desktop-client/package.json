@@ -24,7 +24,7 @@
     "@types/react-dom": "^18.2.1",
     "@types/react-grid-layout": "^1",
     "@types/react-modal": "^3.16.0",
-    "@types/uuid": "^9.0.2",
+    "@types/uuid": "^9.0.8",
     "@types/webpack-bundle-analyzer": "^4.6.3",
     "@use-gesture/react": "^10.3.0",
     "@vitejs/plugin-basic-ssl": "^1.1.0",
