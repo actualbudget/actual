@@ -42,7 +42,9 @@
     "winston": "^3.14.2"
   },
   "devDependencies": {
+    "@babel/core": "^7.26.10",
     "@babel/preset-typescript": "^7.20.2",
+    "@types/babel__core": "^7",
     "@types/bcrypt": "^5.0.2",
     "@types/better-sqlite3": "^7.6.12",
     "@types/convict": "^6",
