@@ -12,7 +12,7 @@
     "jsx": "preserve",
     // Check JS files too
     "allowJs": true,
-    "moduleResolution": "node16",
+    "moduleResolution": "bundler",
     "module": "node16",
     "outDir": "build"
   },
