@@ -96,14 +96,13 @@ export const Modal = ({
       {...props}
     >
       {/* A container for positioning the modal relative to the visual viewport */}
-      <div
+      <View
         style={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           height: 'var(--visual-viewport-height)',
           overflowY: 'auto',
-          transition: 'height .25s',
         }}
       >
         <ReactAriaModal>
@@ -169,7 +168,7 @@ export const Modal = ({
             </Dialog>
           )}
         </ReactAriaModal>
-      </div>
+      </View>
     </ReactAriaModalOverlay>
   );
 };

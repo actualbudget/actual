@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { memo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -27,9 +27,8 @@ import { TotalsList } from './TotalsList';
 
 type BudgetSummaryProps = {
   month: string;
-  isGoalTemplatesEnabled?: boolean;
 };
-export function BudgetSummary({ month }: BudgetSummaryProps) {
+export const BudgetSummary = memo(({ month }: BudgetSummaryProps) => {
   const locale = useLocale();
   const {
     currentMonth,
@@ -291,4 +290,6 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
       </NamespaceContext.Provider>
     </View>
   );
-}
+});
+
+BudgetSummary.displayName = 'EnvelopeBudgetSummary';

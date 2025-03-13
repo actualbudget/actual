@@ -176,11 +176,11 @@ function Footer({
   onEditField,
 }) {
   const [transaction, ...childTransactions] = transactions;
+  const emptySplitTransaction = childTransactions.find(t => t.amount === 0);
   const onClickRemainingSplit = () => {
     if (childTransactions.length === 0) {
       onSplit(transaction.id);
     } else {
-      const emptySplitTransaction = childTransactions.find(t => t.amount === 0);
       if (!emptySplitTransaction) {
         onAddSplit(transaction.id);
       } else {
@@ -216,11 +216,29 @@ function Footer({
               marginLeft: 6,
             }}
           >
-            Amount left:{' '}
-            {integerToCurrency(
-              transaction.amount > 0
-                ? transaction.error.difference
-                : -transaction.error.difference,
+            {!emptySplitTransaction ? (
+              <Trans>
+                Add new split -{' '}
+                {{
+                  amount: integerToCurrency(
+                    transaction.amount > 0
+                      ? transaction.error.difference
+                      : -transaction.error.difference,
+                  ),
+                }}{' '}
+                left
+              </Trans>
+            ) : (
+              <Trans>
+                Amount left:{' '}
+                {{
+                  amount: integerToCurrency(
+                    transaction.amount > 0
+                      ? transaction.error.difference
+                      : -transaction.error.difference,
+                  ),
+                }}
+              </Trans>
             )}
           </Text>
         </Button>
@@ -272,7 +290,7 @@ function Footer({
               marginLeft: 6,
             }}
           >
-            Save changes
+            <Trans>Save changes</Trans>
           </Text>
         </Button>
       )}
