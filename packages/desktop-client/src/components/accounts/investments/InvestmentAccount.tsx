@@ -144,7 +144,7 @@ export function InvestmentTable({
   function getUpdateValue(
     field: InvestmentTableField,
     stringValue: string,
-  ): string {
+  ): number | string | null {
     if (field.type === 'decimal') {
       return amountToInteger(evalArithmetic(stringValue));
     } else if (field.type === 'currency') {
