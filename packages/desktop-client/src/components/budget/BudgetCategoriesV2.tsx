@@ -6,7 +6,7 @@ import React, {
   useRef,
   useCallback,
 } from 'react';
-import { useFocusable, usePress } from 'react-aria';
+import { useFocusable, useFocusVisible, usePress } from 'react-aria';
 import {
   Column,
   Table,
@@ -1678,6 +1678,8 @@ function CategoryBudgetedCell({
     });
   };
 
+  const { isFocusVisible } = useFocusVisible();
+
   return (
     <ReactAriaCell {...props}>
       <SheetNameProvider name={monthUtils.sheetForMonth(month)}>
@@ -1693,10 +1695,13 @@ function CategoryBudgetedCell({
               variant="bare"
               aria-label={t('Budget menu')}
               className={cx(
-                { 'hover-visible': !isMenuOpen },
+                { 'hover-visible': !isMenuOpen && !isFocusVisible },
                 css({
                   marginLeft: 5,
-                  display: shouldHideBudgetMenuButton ? 'none' : undefined,
+                  display:
+                    shouldHideBudgetMenuButton && !isFocusVisible
+                      ? 'none'
+                      : undefined,
                 }),
               )}
               onPress={() => setIsMenuOpen(true)}
@@ -1803,6 +1808,7 @@ function CategoryGroupNameCell({
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isRenaming, setIsRenaming] = useState(false);
   const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
+  const { isFocusVisible } = useFocusVisible();
 
   return (
     <ReactAriaCell {...props}>
@@ -1853,7 +1859,7 @@ function CategoryGroupNameCell({
                   <Button
                     variant="bare"
                     className={cx(
-                      { 'hover-visible': !isMenuOpen },
+                      { 'hover-visible': !isMenuOpen && !isFocusVisible },
                       css({ marginLeft: 5 }),
                     )}
                     onPress={() => {
@@ -1948,6 +1954,7 @@ function CategoryNameCell({
   const { t } = useTranslation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isRenaming, setIsRenaming] = useState(false);
+  const { isFocusVisible } = useFocusVisible();
 
   return (
     <ReactAriaCell {...props}>
@@ -1982,7 +1989,7 @@ function CategoryNameCell({
                   <Button
                     variant="bare"
                     className={cx(
-                      { 'hover-visible': !isMenuOpen },
+                      { 'hover-visible': !isMenuOpen && !isFocusVisible },
                       css({ marginLeft: 5 }),
                     )}
                     onPress={() => {
