@@ -14,8 +14,7 @@ import { CoverMenu } from './CoverMenu';
 import { useEnvelopeSheetValue } from './EnvelopeBudgetComponents';
 import { TransferMenu } from './TransferMenu';
 
-type BalanceMenuProps = {
-  categoryId: string;
+type BalanceMenuProps = BalanceMovementMenuProps & {
   month: string;
   onBudgetAction: (month: string, action: string, arg?: unknown) => void;
   onClose?: () => void;
@@ -24,8 +23,12 @@ type BalanceMenuProps = {
 export function BalanceMenu({
   categoryId,
   month,
+  onCarryover,
+  onTransfer,
+  onCover,
   onBudgetAction,
   onClose = () => {},
+  ...props
 }: BalanceMenuProps) {
   const catBalance =
     useEnvelopeSheetValue(envelopeBudget.catBalance(categoryId)) ?? 0;
@@ -48,14 +51,34 @@ export function BalanceMenu({
         <BalanceMovementMenu
           categoryId={categoryId}
           onCarryover={carryover => {
+            if (onCarryover) {
+              onCarryover(carryover);
+              return;
+            }
+
             onBudgetAction(month, 'carryover', {
               category: categoryId,
               flag: carryover,
             });
             onClose();
           }}
-          onTransfer={() => setMenu('transfer')}
-          onCover={() => setMenu('cover')}
+          onTransfer={() => {
+            if (onTransfer) {
+              onTransfer();
+              return;
+            }
+
+            setMenu('transfer');
+          }}
+          onCover={() => {
+            if (onCover) {
+              onCover();
+              return;
+            }
+
+            setMenu('cover');
+          }}
+          {...props}
         />
       )}
 
