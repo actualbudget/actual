@@ -11,7 +11,7 @@ import { View } from '@actual-app/components/view';
 import {
   type balanceTypeOpType,
   type IntervalEntity,
-} from 'loot-core/types/models/reports';
+} from 'loot-core/types/models';
 
 import { Row, Cell } from '../../../table';
 import { ReportOptions } from '../../ReportOptions';

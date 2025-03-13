@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { memo, useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { styles } from '@actual-app/components/styles';
@@ -49,7 +49,7 @@ type TrackingReportComponents = {
 };
 
 type EnvelopeBudgetComponents = {
-  SummaryComponent: typeof EnvelopeBudgetSummary;
+  SummaryComponent: typeof envelopeBudget.BudgetSummary;
   ExpenseCategoryComponent: typeof envelopeBudget.ExpenseCategoryMonth;
   ExpenseGroupComponent: typeof envelopeBudget.ExpenseGroupMonth;
   IncomeCategoryComponent: typeof envelopeBudget.IncomeCategoryMonth;
@@ -394,12 +394,6 @@ function BudgetInner(props: BudgetInnerProps) {
   );
 }
 
-const EnvelopeBudgetSummary = memo<{ month: string }>(props => {
-  return <envelopeBudget.BudgetSummary {...props} />;
-});
-
-EnvelopeBudgetSummary.displayName = 'EnvelopeBudgetSummary';
-
 export function Budget() {
   const trackingComponents = useMemo<TrackingReportComponents>(
     () => ({
@@ -416,7 +410,7 @@ export function Budget() {
 
   const envelopeComponents = useMemo<EnvelopeBudgetComponents>(
     () => ({
-      SummaryComponent: EnvelopeBudgetSummary,
+      SummaryComponent: envelopeBudget.BudgetSummary,
       ExpenseCategoryComponent: envelopeBudget.ExpenseCategoryMonth,
       ExpenseGroupComponent: envelopeBudget.ExpenseGroupMonth,
       IncomeCategoryComponent: envelopeBudget.IncomeCategoryMonth,
