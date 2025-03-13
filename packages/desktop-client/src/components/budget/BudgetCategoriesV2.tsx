@@ -381,7 +381,7 @@ export const BudgetCategories = ({
             },
             // Remove the border on the Add Group button row.
             'tr[data-add-group-button-row] td:first-child': {
-              border: 'none',
+              borderRight: 'none',
             },
           })}
           // dragAndDropHooks={dragAndDropHooks}
