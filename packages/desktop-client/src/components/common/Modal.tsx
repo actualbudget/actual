@@ -106,6 +106,12 @@ export const Modal = ({
               ...styles.lightScrollbar,
               // remove focus outline
               outline: 'none',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              height: 'var(--visual-viewport-height)',
+              overflowY: 'auto',
+              transition: 'height .25s',
             })}
           >
             <ModalContentContainer
@@ -118,7 +124,7 @@ export const Modal = ({
                 willChange: 'opacity, transform',
                 maxWidth: '90vw',
                 minWidth: '90vw',
-                maxHeight: '90dvh',
+                maxHeight: 'calc(var(--visual-viewport-height) * 0.9)',
                 minHeight: 0,
                 borderRadius: 6,
                 color: theme.pageText,

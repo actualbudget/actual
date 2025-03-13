@@ -39,7 +39,9 @@ export function AccountAutocompleteModal({
       onClose={onClose}
       containerProps={{
         style: {
-          height: isNarrowWidth ? '85dvh' : 275,
+          height: isNarrowWidth
+            ? 'calc(var(--visual-viewport-height) * 0.85)'
+            : 275,
           backgroundColor: theme.menuAutoCompleteBackground,
         },
       }}
