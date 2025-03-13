@@ -7,6 +7,8 @@ import { View } from '@actual-app/components/view';
 
 import * as monthUtils from 'loot-core/shared/months';
 
+import { useFeatureFlag } from '../../hooks/useFeatureFlag';
+
 import { useBudgetMonthCount } from './BudgetMonthCountContext';
 import { BudgetPageHeader } from './BudgetPageHeader';
 import { BudgetTable } from './BudgetTable';
@@ -71,8 +73,12 @@ const DynamicBudgetTableInner = ({
     onMonthSelect(getValidMonth(month), numMonths);
   }
 
+  // Table V2 uses alt+left/right for month navigation
+  // so that users can use left/right to navigate cells
+  const budgetTableV2Enabled = useFeatureFlag('budgetTableV2');
+
   useHotkeys(
-    'left',
+    budgetTableV2Enabled ? 'alt+left' : 'left',
     () => {
       _onMonthSelect(monthUtils.prevMonth(startMonth));
     },
@@ -83,7 +89,7 @@ const DynamicBudgetTableInner = ({
     [_onMonthSelect, startMonth],
   );
   useHotkeys(
-    'right',
+    budgetTableV2Enabled ? 'alt+right' : 'right',
     () => {
       _onMonthSelect(monthUtils.nextMonth(startMonth));
     },
