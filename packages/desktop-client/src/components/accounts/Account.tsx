@@ -333,6 +333,7 @@ type AccountInternalState = {
   editingName: boolean;
   nameError: string;
   isAdding: boolean;
+  isAddingHolding: boolean;
   modalShowing?: boolean;
   sort: {
     ascDesc: 'asc' | 'desc';
@@ -384,6 +385,7 @@ class AccountInternal extends PureComponent<
       editingName: false,
       nameError: '',
       isAdding: false,
+      isAddingHolding: false,
       sort: null,
       filteredAmount: null,
     };
@@ -785,6 +787,14 @@ class AccountInternal extends PureComponent<
 
   onAddTransaction = () => {
     this.setState({ isAdding: true });
+  };
+
+  onAddHolding = () => {
+    this.setState({ isAddingHolding: true });
+  };
+
+  onResetAddHolding = () => {
+    this.setState({ isAddingHolding: false });
   };
 
   onExposeName = (flag: boolean) => {
@@ -1814,6 +1824,7 @@ class AccountInternal extends PureComponent<
                 onShowTransactions={this.onShowTransactions}
                 onMenuSelect={this.onMenuSelect}
                 onAddTransaction={this.onAddTransaction}
+                onAddHolding={this.onAddHolding}
                 onToggleExtraBalances={this.onToggleExtraBalances}
                 onSaveName={this.onSaveName}
                 saveNameError={this.state.nameError}
@@ -1846,7 +1857,11 @@ class AccountInternal extends PureComponent<
 
               {tab === 'holdings' && account ? (
                 <View style={{ flex: 1 }}>
-                  <InvestmentAccount account={account} />
+                  <InvestmentAccount
+                    account={account}
+                    isAddingHolding={this.state.isAddingHolding}
+                    onResetAddHolding={this.onResetAddHolding}
+                  />
                 </View>
               ) : (
                 <View style={{ flex: 1 }}>

@@ -15,7 +15,7 @@ import {
   SvgAdd,
   SvgChart,
   SvgDotsHorizontalTriple,
-  SvgList
+  SvgList,
 } from '@actual-app/components/icons/v1';
 import {
   SvgArrowsExpand3,
@@ -90,6 +90,7 @@ type AccountHeaderProps = {
   filterConditionsOp: 'and' | 'or';
   onSearch: (newSearch: string) => void;
   onAddTransaction: () => void;
+  onAddHolding: () => void;
   onShowTransactions: ComponentProps<
     typeof SelectedTransactionsButton
   >['onShow'];
@@ -168,6 +169,7 @@ export function AccountHeader({
   filterConditionsOp,
   onSearch,
   onAddTransaction,
+  onAddHolding,
   onShowTransactions,
   onDoneReconciling,
   onCreateReconciliationTransaction,
@@ -380,6 +382,12 @@ export function AccountHeader({
             <Button variant="bare" onPress={onSetHoldingsTab}>
               <SvgChart width={10} height={10} style={{ marginRight: 3 }} />
               <Trans>Holdings</Trans>
+            </Button>
+          )}
+          {!showEmptyMessage && showHoldings && (
+            <Button variant="bare" onPress={onAddHolding}>
+              <SvgAdd width={10} height={10} style={{ marginRight: 3 }} />
+              <Trans>Add Holding</Trans>
             </Button>
           )}
           {showHoldings && (

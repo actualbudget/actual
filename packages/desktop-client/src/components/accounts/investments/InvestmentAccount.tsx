@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -32,9 +32,15 @@ import {
 
 export type InvestmentAccountProps = {
   account: AccountEntity;
+  isAddingHolding: boolean;
+  onResetAddHolding: () => void;
 };
 
-export function InvestmentAccount({ account }: InvestmentAccountProps) {
+export function InvestmentAccount({
+  account,
+  isAddingHolding,
+  onResetAddHolding,
+}: InvestmentAccountProps) {
   const [orderBy, onOrderBy] = useOrderBy();
   const holdingsQuery = useQuery<HoldingEntity>(
     () => holdings(account.id).select('*').orderBy(orderBy),
@@ -45,6 +51,8 @@ export function InvestmentAccount({ account }: InvestmentAccountProps) {
   return (
     <InvestmentTable
       account={account}
+      isAddingHolding={isAddingHolding}
+      onResetAddHolding={onResetAddHolding}
       holdings={holdingsData}
       orderBy={orderBy}
       onOrderBy={onOrderBy}
@@ -90,6 +98,8 @@ export type InvestmentTableProps = {
   holdings: HoldingEntity[];
   orderBy: { [key: string]: 'asc' | 'desc' };
   onOrderBy: (field: keyof HoldingEntity) => void;
+  isAddingHolding: boolean;
+  onResetAddHolding: () => void;
 };
 
 export function InvestmentTable({
@@ -97,6 +107,8 @@ export function InvestmentTable({
   holdings,
   orderBy,
   onOrderBy,
+  isAddingHolding,
+  onResetAddHolding,
 }: InvestmentTableProps) {
   const fields: InvestmentTableField[] = [
     { name: 'symbol', icon: 'clickable', type: 'string' },
@@ -112,6 +124,19 @@ export function InvestmentTable({
   const [newHolding, setNewHolding] = useState<HoldingEntity | undefined>(
     undefined,
   );
+  function clearNewHolding() {
+    onResetAddHolding();
+    setNewHolding(undefined);
+  }
+  useEffect(() => {
+    if (isAddingHolding && newHolding === undefined) {
+      setNewHolding({
+        id: uuidV4(),
+        account: account.id,
+      } as HoldingEntity);
+    }
+  }, [isAddingHolding, account.id, newHolding]);
+
   function onUpdate(
     id: HoldingEntity['id'],
     field: InvestmentTableField,
@@ -155,7 +180,7 @@ export function InvestmentTable({
 
   async function onAdd(holding: HoldingEntity) {
     await send('holding-add', holding);
-    setNewHolding(undefined);
+    clearNewHolding();
   }
 
   return (
@@ -163,20 +188,6 @@ export function InvestmentTable({
       style={{ flex: 1, overflow: 'hidden' }}
       data-testid="transaction-table"
     >
-      <View>
-        <Button
-          variant="primary"
-          onPress={() =>
-            setNewHolding({
-              id: uuidV4(),
-              account: account.id,
-            } as HoldingEntity)
-          }
-          style={{ display: 'flex', flexDirection: 'row' }}
-        >
-          New
-        </Button>
-      </View>
       <InvestmentTableHeader
         fields={fields}
         orderBy={orderBy}
@@ -202,7 +213,7 @@ export function InvestmentTable({
                 padding: 3,
               }}
             >
-              <Button onPress={() => setNewHolding(undefined)}>Cancel</Button>
+              <Button onPress={clearNewHolding}>Cancel</Button>
               <Button variant="primary" onPress={() => onAdd(newHolding)}>
                 Create
               </Button>
