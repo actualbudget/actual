@@ -44,9 +44,7 @@ export function CategoryAutocompleteModal({
       onClose={onClose}
       containerProps={{
         style: {
-          height: isNarrowWidth
-            ? 'calc(var(--visual-viewport-height) * 0.85)'
-            : 275,
+          height: isNarrowWidth ? '85dvh' : 275,
           backgroundColor: theme.menuAutoCompleteBackground,
         },
       }}
