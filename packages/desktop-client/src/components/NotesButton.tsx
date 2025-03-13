@@ -6,6 +6,7 @@ import React, {
   type CSSProperties,
   useCallback,
 } from 'react';
+import { useFocusVisible } from 'react-aria';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -49,6 +50,7 @@ export function NotesButton({
   const [tempNotes, setTempNotes] = useState<string>(note);
   useEffect(() => setTempNotes(note), [note, id]);
 
+  const { isFocusVisible } = useFocusVisible();
   const onOpenChange = useCallback<
     NonNullable<ComponentProps<typeof Popover>['onOpenChange']>
   >(
@@ -86,7 +88,7 @@ export function NotesButton({
               ...(isOpen && { color: theme.buttonNormalText }),
               '&:hover': { opacity: 1 },
             }),
-            !hasNotes && !isOpen && !showPlaceholder ? 'hover-visible' : '',
+            !hasNotes && !isOpen && !isFocusVisible && !showPlaceholder ? 'hover-visible' : '',
           )}
           data-placeholder={showPlaceholder}
           onPress={() => {
