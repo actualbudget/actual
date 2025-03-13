@@ -11,6 +11,7 @@ import {
 } from 'loot-core/client/modals/modalsSlice';
 
 import { useCategories } from '../../hooks/useCategories';
+import { useInitialMount } from '../../hooks/useInitialMount';
 import { useDispatch } from '../../redux';
 import {
   addToBeBudgetedGroup,
@@ -72,6 +73,7 @@ export function CoverModal({
   };
 
   const fromCategory = categories.find(c => c.id === fromCategoryId);
+  const isInitialMount = useInitialMount();
 
   return (
     <Modal name="cover">
@@ -83,7 +85,16 @@ export function CoverModal({
           />
           <View>
             <FieldLabel title={t('Cover from a category:')} />
-            <TapField value={fromCategory?.name} onPress={onCategoryClick} />
+            <TapField
+              value={fromCategory?.name}
+              autoFocus
+              onFocus={() => {
+                if (isInitialMount) {
+                  onCategoryClick();
+                }
+              }}
+              onPress={onCategoryClick}
+            />
           </View>
 
           <View
