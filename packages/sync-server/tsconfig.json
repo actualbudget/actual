@@ -13,7 +13,7 @@
     // Check JS files too
     "allowJs": true,
     "moduleResolution": "bundler",
-    "module": "node16",
+    "module": "es2022",
     "outDir": "build"
   },
   "include": ["src/**/*.js", "src/**/*.ts", "types/global.d.ts"],
