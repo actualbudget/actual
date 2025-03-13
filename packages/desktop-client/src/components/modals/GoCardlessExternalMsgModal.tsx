@@ -189,7 +189,7 @@ export function GoCardlessExternalMsgModal({
             <FormField>
               <FormLabel title={t('Choose your bank:')} htmlFor="bank-field" />
               <Autocomplete
-                focused
+                autoFocus
                 strict
                 highlightFirst
                 suggestions={bankOptions}
