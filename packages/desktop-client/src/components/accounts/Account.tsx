@@ -750,7 +750,7 @@ class AccountInternal extends PureComponent<
           transaction,
         });
         if (res) {
-          ungroupTransaction(res).forEach(x => changedTransactions.push(x));
+          changedTransactions.push(...ungroupTransaction(res));
         }
       }
 
