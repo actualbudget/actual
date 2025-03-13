@@ -784,6 +784,18 @@ function CategorySpentCell({
     onPress: () => onShowActivity(category, month),
   });
 
+  const textRef = useRef<HTMLSpanElement | null>(null);
+  const { focusableProps } = useFocusable(
+    {
+      onKeyUp: e => {
+        if (e.key === 'Enter') {
+          onShowActivity(category, month);
+        }
+      },
+    },
+    textRef,
+  );
+
   return (
     <ReactAriaCell style={{ textAlign: 'right', ...style }} {...props}>
       <SheetNameProvider name={monthUtils.sheetForMonth(month)}>
@@ -793,7 +805,9 @@ function CategorySpentCell({
         >
           {props => (
             <CellValueText
+              innerRef={textRef}
               {...pressProps}
+              {...focusableProps}
               {...props}
               className={css({
                 ...makeAmountGrey(props.value),
@@ -925,10 +939,10 @@ function CategoryBalanceCell({
               }}
             >
               <CellValueText
+                innerRef={triggerRef}
                 {...pressProps}
                 {...focusableProps}
                 {...balanceProps}
-                innerRef={triggerRef}
                 className={css({
                   ...getBalanceAmountStyle(balanceProps.value),
                   '&:hover': {
