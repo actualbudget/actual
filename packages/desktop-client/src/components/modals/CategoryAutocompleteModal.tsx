@@ -86,6 +86,7 @@ export function CategoryAutocompleteModal({
               >
                 <CategoryAutocomplete
                   autoFocus={true}
+                  openOnFocus={true}
                   embedded={true}
                   closeOnBlur={false}
                   showSplitOption={false}
