@@ -24,9 +24,6 @@ import Downshift, { type StateChangeTypes } from 'downshift';
 
 import { getNormalisedString } from 'loot-core/shared/normalisation';
 
-import { useInitialMount } from '../../hooks/useInitialMount';
-import { useMergedRefs } from '../../hooks/useMergedRefs';
-
 type CommonAutocompleteProps<T extends Item> = {
   autoFocus?: boolean;
   embedded?: boolean;
@@ -301,16 +298,6 @@ function SingleAutocomplete<T extends Item>({
 
   const filtered = isChanged ? filteredSuggestions || suggestions : suggestions;
 
-  const inputRef = useRef<HTMLInputElement | null>(null);
-  const mergedInputRef = useMergedRefs(inputRef, inputProps.inputRef);
-  const initialMount = useInitialMount();
-
-  useEffect(() => {
-    if (autoFocus && initialMount) {
-      inputRef.current?.focus();
-    }
-  }, [autoFocus, initialMount]);
-
   return (
     <Downshift
       onSelect={(item, { inputValue }) => {
@@ -465,8 +452,7 @@ function SingleAutocomplete<T extends Item>({
             {renderInput(
               getInputProps({
                 ...inputProps,
-                // autoFocus,
-                inputRef: mergedInputRef,
+                autoFocus,
                 onFocus: e => {
                   inputProps.onFocus?.(e);
 
