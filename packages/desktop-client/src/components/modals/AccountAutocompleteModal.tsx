@@ -78,6 +78,7 @@ export function AccountAutocompleteModal({
             <View style={{ flex: 1 }}>
               <AccountAutocomplete
                 autoFocus={true}
+                openOnFocus={true}
                 embedded={true}
                 closeOnBlur={false}
                 onClose={close}
