@@ -155,6 +155,7 @@ export function InvestmentTable({
 
   async function onAdd(holding: HoldingEntity) {
     await send('holding-add', holding);
+    setNewHolding(undefined);
   }
 
   return (
@@ -181,24 +182,34 @@ export function InvestmentTable({
         orderBy={orderBy}
         onOrderBy={onOrderBy}
       />
-      {newHolding && (
-        <View {...tableNavigator.getNavigatorProps({})}>
-          <Holding
-            fields={fields}
-            holding={newHolding}
-            editing={tableNavigator.editingId === newHolding.id}
-            onEdit={tableNavigator.onEdit}
-            focusedField={tableNavigator.focusedField}
-            onUpdate={onUpdateNew}
-          />
-          <View style={{ display: 'flex', justifyContent: 'end' }}>
-            <Button onPress={() => setNewHolding(undefined)}>Cancel</Button>
-            <Button variant="primary" onPress={() => onAdd(newHolding)}>
-              Create
-            </Button>
+      <View {...tableNavigator.getNavigatorProps({})}>
+        {newHolding && (
+          <View>
+            <Holding
+              fields={fields}
+              holding={newHolding}
+              editing={tableNavigator.editingId === newHolding.id}
+              onEdit={tableNavigator.onEdit}
+              focusedField={tableNavigator.focusedField}
+              onUpdate={onUpdateNew}
+            />
+            <View
+              style={{
+                display: 'flex',
+                justifyContent: 'end',
+                flexDirection: 'row',
+                gap: 3,
+                padding: 3,
+              }}
+            >
+              <Button onPress={() => setNewHolding(undefined)}>Cancel</Button>
+              <Button variant="primary" onPress={() => onAdd(newHolding)}>
+                Create
+              </Button>
+            </View>
           </View>
-        </View>
-      )}
+        )}
+      </View>
       <Table
         navigator={tableNavigator}
         items={holdings}
