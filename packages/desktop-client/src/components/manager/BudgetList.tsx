@@ -532,8 +532,10 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
     return file.state !== 'remote';
   }
 
-  const nonRemoteFiles = allFiles.filter(isNonRemoteFile);
-  const files = id ? nonRemoteFiles.filter(f => f.id !== id) : allFiles;
+  // Filter out the open file
+  const files = id
+    ? allFiles.filter(file => !isNonRemoteFile(file) || file.id !== id)
+    : allFiles;
 
   const [creating, setCreating] = useState(false);
   const { isNarrowWidth } = useResponsive();

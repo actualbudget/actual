@@ -434,7 +434,6 @@ export function AccountHeader({
                 ? t('Collapse split transactions')
                 : t('Expand split transactions')
             }
-            isDisabled={search !== '' || filterConditions.length > 0}
             style={{ padding: 6 }}
             onPress={onToggleSplits}
           >
