@@ -361,7 +361,7 @@ export function PayeeAutocomplete({
         }
         return item.name;
       }}
-      focused={payeeFieldFocused}
+      autoFocus={payeeFieldFocused}
       inputProps={{
         ...inputProps,
         autoCapitalize: 'words',
