@@ -6,7 +6,7 @@ import React, {
   useRef,
   useCallback,
 } from 'react';
-import { useFocusVisible, usePress } from 'react-aria';
+import { useFocusable, useFocusVisible, usePress } from 'react-aria';
 import {
   Column,
   Table,
@@ -762,6 +762,18 @@ function CategorySpentCell({
     onPress: () => onShowActivity(category, month),
   });
 
+  const textRef = useRef<HTMLSpanElement | null>(null);
+  const { focusableProps } = useFocusable(
+    {
+      onKeyUp: e => {
+        if (e.key === 'Enter') {
+          onShowActivity(category, month);
+        }
+      },
+    },
+    textRef,
+  );
+
   return (
     <ReactAriaCell style={{ textAlign: 'right', ...style }} {...props}>
       <NamespaceContext.Provider value={monthUtils.sheetForMonth(month)}>
@@ -771,7 +783,9 @@ function CategorySpentCell({
         >
           {props => (
             <CellValueText
+              innerRef={textRef}
               {...pressProps}
+              {...focusableProps}
               {...props}
               className={css({
                 ...makeAmountGrey(props.value),
@@ -855,6 +869,17 @@ function CategoryBalanceCell({
     onPress: () => setIsMenuOpen(true),
   });
 
+  const { focusableProps } = useFocusable(
+    {
+      onKeyUp: e => {
+        if (e.key === 'Enter') {
+          setIsMenuOpen(true);
+        }
+      },
+    },
+    triggerRef,
+  );
+
   const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
 
   const getBalanceAmountStyle = useCallback(
@@ -884,9 +909,10 @@ function CategoryBalanceCell({
               }}
             >
               <CellValueText
-                {...pressProps}
-                {...balanceProps}
                 innerRef={triggerRef}
+                {...pressProps}
+                {...focusableProps}
+                {...balanceProps}
                 className={css({
                   ...getBalanceAmountStyle(balanceProps.value),
                   '&:hover': {
